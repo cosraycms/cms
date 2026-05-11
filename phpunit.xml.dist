@@ -1,32 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.0/phpunit.xsd"
 	bootstrap="vendor/autoload.php"
 	colors="true"
 	cacheDirectory=".phpunit.cache">
-  <testsuites>
-    <testsuite name="unit">
-      <directory suffix="Test.php">tests/Unit</directory>
-    </testsuite>
-    <testsuite name="integration">
-      <directory suffix="Test.php">tests/Integration</directory>
-    </testsuite>
-    <testsuite name="end2end">
-      <directory suffix="Test.php">tests/End2End</directory>
-    </testsuite>
-  </testsuites>
-  <coverage>
-    <report>
-      <html outputDirectory=".coverage" lowUpperBound="20" highLowerBound="50"/>
-    </report>
-  </coverage>
-  <source>
-    <include>
-      <directory>src</directory>
-    </include>
-    <exclude>
-      <directory suffix=".php">src/Commands</directory>
-    </exclude>
-  </source>
+	<testsuites>
+		<testsuite name="unit">
+			<directory suffix="Test.php">tests/Unit</directory>
+		</testsuite>
+		<testsuite name="integration">
+			<directory suffix="Test.php">tests/Integration</directory>
+		</testsuite>
+		<testsuite name="end2end">
+			<directory suffix="Test.php">tests/End2End</directory>
+		</testsuite>
+	</testsuites>
+	<source>
+		<include>
+			<directory>src</directory>
+		</include>
+		<exclude>
+			<directory suffix=".php">src/Commands</directory>
+		</exclude>
+	</source>
+	<coverage includeUncoveredFiles="true" pathCoverage="true">
+		<report>
+			<html outputDirectory=".coverage/html"/>
+			<text outputFile="php://stdout"/>
+			<php outputFile=".coverage/cover.php"/>
+		</report>
+	</coverage>
 </phpunit>
