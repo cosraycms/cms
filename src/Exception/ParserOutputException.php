@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Exception;
+namespace Celemas\Cms\Exception;
 
-use Duon\Cms\Finder\Input\Token;
+use Celemas\Cms\Finder\Input\Token;
 use Throwable;
 
 class ParserOutputException extends ParserException implements CmsException

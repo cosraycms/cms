@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Context;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Node\Contract\HandlesFormPost;
-use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Serializer;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Node\ViewRenderer;
-use Duon\Cms\Util\Path;
-use Duon\Container\Container;
-use Duon\Core\Exception\HttpBadRequest;
-use Duon\Core\Exception\HttpNotFound;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Response;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Cms\Node\Contract\HandlesFormPost;
+use Celemas\Cms\Node\Factory as NodeFactory;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Serializer;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Node\ViewRenderer;
+use Celemas\Cms\Util\Path;
+use Celemas\Container\Container;
+use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Response;
 use ReflectionMethod;
 
 class Page

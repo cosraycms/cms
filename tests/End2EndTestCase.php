@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests;
+namespace Celemas\Cms\Tests;
 
-use Duon\Cms\Boiler\Error\Handler;
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Plugin;
-use Duon\Core\App;
-use Duon\Core\Factory\Laminas;
-use Duon\Core\Plugin as CorePlugin;
-use Duon\Core\Request;
-use Duon\Router\Router;
+use Celemas\Cms\Boiler\Error\Handler;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Plugin;
+use Celemas\Core\App;
+use Celemas\Core\Factory\Laminas;
+use Celemas\Core\Plugin as CorePlugin;
+use Celemas\Core\Request;
+use Celemas\Router\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
 
@@ -33,7 +33,7 @@ use Psr\Log\NullLogger;
 class End2EndTestCase extends IntegrationTestCase
 {
 	protected App $app;
-	protected ?\Duon\Error\Handler $errorHandler = null;
+	protected ?\Celemas\Error\Handler $errorHandler = null;
 
 	// Disable transactions because the CMS creates its own database connection
 	// which cannot see uncommitted transaction data from the test connection.
@@ -224,7 +224,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$router = new Router();
 		$container = $this->container();
 		$config = $this->config([
-			'db.dsn' => 'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+			'db.dsn' => 'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
 			'path.root' => self::root(),
 			'path.public' => self::root() . '/public',
 			'path.views' => '/tests/Fixtures/templates',
@@ -265,18 +265,18 @@ class End2EndTestCase extends IntegrationTestCase
 	{
 		$plugin = new Plugin($config);
 
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestPage::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestHome::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestBlock::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestWidget::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestDocument::class);
-		$plugin->node(\Duon\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestArticle::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestHome::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestBlock::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestWidget::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestDocument::class);
+		$plugin->node(\Celemas\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
 
 		return $plugin;
 	}
 
-	protected function createErrorHandler(Config $config, Laminas $factory): \Duon\Error\Handler
+	protected function createErrorHandler(Config $config, Laminas $factory): \Celemas\Error\Handler
 	{
 		$logger = new NullLogger();
 		$handler = new Handler($config, $factory, $logger);

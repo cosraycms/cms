@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller\Panel;
+namespace Celemas\Cms\Controller\Panel;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Util\Path;
-use Duon\Core\Exception\HttpNotFound;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Util\Path;
+use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 
 final class Assets extends Panel
 {

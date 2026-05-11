@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Exception;
+namespace Celemas\Cms\Exception;
 
 class RuntimeException extends \RuntimeException implements CmsException {}

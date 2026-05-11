@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Locales;
-use Duon\Cms\Validation\ValidatorFactory;
-use Duon\Core\Exception\HttpBadRequest;
-use Duon\Core\Request;
-use Duon\Quma\Database;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Validation\ValidatorFactory;
+use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Request;
+use Celemas\Quma\Database;
 use Throwable;
 
 class Store

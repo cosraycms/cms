@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Tests\TestCase;
 
-use function Duon\Cms\env;
+use function Celemas\Cms\env;
 
 final class FunctionsEnvTest extends TestCase
 {

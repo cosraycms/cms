@@ -2,37 +2,37 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Config;
-use Duon\Cms\Field\Code;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Field\Grid;
-use Duon\Cms\Field\Image;
-use Duon\Cms\Field\Option;
-use Duon\Cms\Field\Owner;
-use Duon\Cms\Field\Schema\Registry;
-use Duon\Cms\Field\Text;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Cms\Schema\Columns;
-use Duon\Cms\Schema\Description;
-use Duon\Cms\Schema\Hidden;
-use Duon\Cms\Schema\Immutable;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Limit;
-use Duon\Cms\Schema\Options;
-use Duon\Cms\Schema\Required;
-use Duon\Cms\Schema\Rows;
-use Duon\Cms\Schema\Syntax;
-use Duon\Cms\Schema\Translate;
-use Duon\Cms\Schema\TranslateFile;
-use Duon\Cms\Schema\Validate;
-use Duon\Cms\Schema\Width;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithFieldIconAttribute;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\ValueContext;
-use Duon\Core\Request;
+use Celemas\Cms\Config;
+use Celemas\Cms\Field\Code;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Field\Grid;
+use Celemas\Cms\Field\Image;
+use Celemas\Cms\Field\Option;
+use Celemas\Cms\Field\Owner;
+use Celemas\Cms\Field\Schema\Registry;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Schema\Columns;
+use Celemas\Cms\Schema\Description;
+use Celemas\Cms\Schema\Hidden;
+use Celemas\Cms\Schema\Immutable;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Limit;
+use Celemas\Cms\Schema\Options;
+use Celemas\Cms\Schema\Required;
+use Celemas\Cms\Schema\Rows;
+use Celemas\Cms\Schema\Syntax;
+use Celemas\Cms\Schema\Translate;
+use Celemas\Cms\Schema\TranslateFile;
+use Celemas\Cms\Schema\Validate;
+use Celemas\Cms\Schema\Width;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithFieldIconAttribute;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\ValueContext;
+use Celemas\Core\Request;
 
 final class FieldCapabilityPropertiesTest extends TestCase
 {
@@ -274,8 +274,8 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testLimitCapabilityReturnsLimitProperty(): void
 	{
 		$field = new class('image', $this->createOwner(), new ValueContext('image', [])) extends
-			Image implements \Duon\Cms\Field\Capability\Limitable {
-			use \Duon\Cms\Field\Capability\IsLimitable;
+			Image implements \Celemas\Cms\Field\Capability\Limitable {
+			use \Celemas\Cms\Field\Capability\IsLimitable;
 		};
 		$meta = new Limit(5, 2);
 
@@ -309,8 +309,8 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	public function testSyntaxCapabilityReturnsSyntaxesProperty(): void
 	{
 		$field = new class('code', $this->createOwner(), new ValueContext('code', [])) extends
-			Text implements \Duon\Cms\Field\Capability\SyntaxAware {
-			use \Duon\Cms\Field\Capability\IsSyntaxAware;
+			Text implements \Celemas\Cms\Field\Capability\SyntaxAware {
+			use \Celemas\Cms\Field\Capability\IsSyntaxAware;
 		};
 		$meta = new Syntax('php', 'javascript', 'php');
 

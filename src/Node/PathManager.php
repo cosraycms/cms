@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Quma\Database;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Quma\Database;
 
-use function Duon\Cms\nanoid;
+use function Celemas\Cms\nanoid;
 
 class PathManager
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Navigation;
-use Duon\Cms\Tests\Fixtures\Collection\TestArticlesCollection;
-use Duon\Cms\Tests\Fixtures\Collection\TestHierarchyCollection;
-use Duon\Cms\Tests\Fixtures\Collection\TestStaticIconCollection;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Navigation;
+use Celemas\Cms\Tests\Fixtures\Collection\TestArticlesCollection;
+use Celemas\Cms\Tests\Fixtures\Collection\TestHierarchyCollection;
+use Celemas\Cms\Tests\Fixtures\Collection\TestStaticIconCollection;
+use Celemas\Cms\Tests\TestCase;
 
 final class NavigationTest extends TestCase
 {

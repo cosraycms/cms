@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Boiler;
+namespace Celemas\Cms\Tests\Fixtures\Boiler;
 
 class Whitelisted extends WhitelistBase
 {

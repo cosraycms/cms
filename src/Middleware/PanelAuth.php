@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Middleware;
+namespace Celemas\Cms\Middleware;
 
-use Duon\Cms\Auth;
-use Duon\Cms\Config;
-use Duon\Cms\Users;
-use Duon\Core\Factory\Factory;
+use Celemas\Cms\Auth;
+use Celemas\Cms\Config;
+use Celemas\Cms\Users;
+use Celemas\Core\Factory\Factory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;

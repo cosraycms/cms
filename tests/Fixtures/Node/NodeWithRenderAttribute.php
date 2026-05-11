@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\Render;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\Render;
 
 #[Render('template-defined-by-render-attribute')]
 class NodeWithRenderAttribute implements Title

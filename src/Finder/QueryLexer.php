@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\Input\Token;
-use Duon\Cms\Finder\Input\TokenGroup;
-use Duon\Cms\Finder\Input\TokenType;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Finder\Input\Token;
+use Celemas\Cms\Finder\Input\TokenGroup;
+use Celemas\Cms\Finder\Input\TokenType;
 
 final class QueryLexer
 {

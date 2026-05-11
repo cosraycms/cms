@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
+use Celemas\Cms\Exception\RuntimeException;
 use Closure;
-use Duon\Cms\Exception\RuntimeException;
 use Override;
 
 final class Section implements NavigationItem

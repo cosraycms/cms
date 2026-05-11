@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\QueryLexer;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Finder\QueryLexer;
+use Celemas\Cms\Tests\TestCase;
 
 const QUERY_ALL_ELEMENTS =
 	'(true = field1 & builtin1>now&null >=   13 & field2 < "string") |'

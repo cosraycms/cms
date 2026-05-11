@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Context;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Tests\Fixtures\Field\TestCheckbox;
-use Duon\Cms\Tests\Fixtures\Field\TestCode;
-use Duon\Cms\Tests\Fixtures\Field\TestNumber;
-use Duon\Cms\Tests\Fixtures\Field\TestRichText;
-use Duon\Cms\Tests\Fixtures\Field\TestText;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\ValueContext;
+use Celemas\Cms\Context;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Tests\Fixtures\Field\TestCheckbox;
+use Celemas\Cms\Tests\Fixtures\Field\TestCode;
+use Celemas\Cms\Tests\Fixtures\Field\TestNumber;
+use Celemas\Cms\Tests\Fixtures\Field\TestRichText;
+use Celemas\Cms\Tests\Fixtures\Field\TestText;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\ValueContext;
 
 /**
  * @internal
@@ -24,7 +24,7 @@ final class PrimitiveValueTest extends TestCase
 	private function createContext(): Context
 	{
 		$psrRequest = $this->psrRequest();
-		$locales = new \Duon\Cms\Locales();
+		$locales = new \Celemas\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
 
@@ -33,7 +33,7 @@ final class PrimitiveValueTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Duon\Core\Request($psrRequest);
+		$request = new \Celemas\Core\Request($psrRequest);
 
 		return new Context(
 			$this->db(),
@@ -101,7 +101,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('custom-value', $value->custom);
 
 		$this->throws(
-			\Duon\Cms\Exception\NoSuchProperty::class,
+			\Celemas\Cms\Exception\NoSuchProperty::class,
 			"The field 'title' doesn't have the property 'missing'",
 		);
 		$value->missing;
@@ -230,7 +230,7 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('price', ['value' => '12.5']);
 		$field = new TestNumber('price', $owner, $valueContext);
-		$value = new \Duon\Cms\Value\Decimal($owner, $field, $valueContext);
+		$value = new \Celemas\Cms\Value\Decimal($owner, $field, $valueContext);
 		$this->assertSame(12.5, $value->unwrap());
 		$this->assertTrue($value->isset());
 		$this->assertSame('12.5', (string) $value->unwrap());
@@ -262,10 +262,10 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'two.pdf'],
 			],
 		]);
-		$field = new \Duon\Cms\Field\File('attachments', $owner, $valueContext);
+		$field = new \Celemas\Cms\Field\File('attachments', $owner, $valueContext);
 		$value = $field->value();
 
-		$this->assertInstanceOf(\Duon\Cms\Value\Files::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Files::class, $value);
 		$this->assertSame(2, $value->count());
 		$this->assertTrue($value->isset());
 		$this->assertSame(
@@ -273,7 +273,7 @@ final class PrimitiveValueTest extends TestCase
 			(string) $value,
 			'Value unwrap uses locale data, not files.',
 		);
-		$this->assertInstanceOf(\Duon\Cms\Value\File::class, $value->first());
+		$this->assertInstanceOf(\Celemas\Cms\Value\File::class, $value->first());
 
 		$files = [];
 		foreach ($value as $file) {
@@ -287,7 +287,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
+		$field = new \Celemas\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
 					['file' => 'manual.pdf', 'title' => 'Manual'],
@@ -311,7 +311,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
+		$field = new \Celemas\Cms\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
 					['file' => null, 'title' => null],
@@ -335,7 +335,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('attachments', $owner, new ValueContext('attachments', [
+		$field = new \Celemas\Cms\Field\File('attachments', $owner, new ValueContext('attachments', [
 			'files' => [
 				'en' => [
 					['file' => 'spec.pdf', 'title' => 'Spec'],
@@ -350,8 +350,8 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFiles::class, $value);
-		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedFile::class, $value->current());
+		$this->assertInstanceOf(\Celemas\Cms\Value\TranslatedFiles::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\TranslatedFile::class, $value->current());
 		$this->assertSame('Spec', $value->current()->title());
 	}
 
@@ -359,7 +359,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
@@ -367,7 +367,7 @@ final class PrimitiveValueTest extends TestCase
 		$field->limit(1);
 
 		$value = $field->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value);
 
 		$this->assertStringContainsString(
 			'/cms/media/image/node/test-node/hero.jpg',
@@ -381,7 +381,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'file' => 'hero.jpg',
@@ -393,7 +393,7 @@ final class PrimitiveValueTest extends TestCase
 		$field->limit(1);
 
 		$value = $field->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value);
 		$tag = $value->tag(true, 'hero-image');
 
 		$this->assertStringContainsString('class="hero-image"', $tag);
@@ -412,7 +412,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				'en' => [
 					['file' => 'hero.jpg', 'alt' => 'Hero'],
@@ -427,7 +427,7 @@ final class PrimitiveValueTest extends TestCase
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedImage::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\TranslatedImage::class, $value);
 
 		$this->assertTrue($value->isset());
 		$this->assertSame('Hero', $value->alt());
@@ -441,7 +441,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('document', $owner, new ValueContext('document', [
+		$field = new \Celemas\Cms\Field\File('document', $owner, new ValueContext('document', [
 			'files' => [
 				[
 					'file' => 'manual.pdf',
@@ -466,7 +466,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'file' => 'hero.jpg',
@@ -509,10 +509,10 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]);
-		$field = new \Duon\Cms\Field\Picture('hero', $owner, $valueContext);
+		$field = new \Celemas\Cms\Field\Picture('hero', $owner, $valueContext);
 		$field->translate();
 
-		$value = new class($owner, $field, $valueContext) extends \Duon\Cms\Value\Picture {
+		$value = new class($owner, $field, $valueContext) extends \Celemas\Cms\Value\Picture {
 			public function url(bool $bust = true, int $index = 0): string
 			{
 				return "https://cdn.example.com/hero-{$index}.jpg";
@@ -533,7 +533,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Picture('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'en' => [
@@ -570,9 +570,9 @@ final class PrimitiveValueTest extends TestCase
 				['file' => 'clip.mp4', 'title' => 'Clip'],
 			],
 		]);
-		$field = new \Duon\Cms\Field\Video('clip', $owner, $valueContext);
+		$field = new \Celemas\Cms\Field\Video('clip', $owner, $valueContext);
 
-		$value = new class($owner, $field, $valueContext) extends \Duon\Cms\Value\Video {
+		$value = new class($owner, $field, $valueContext) extends \Celemas\Cms\Value\Video {
 			public function url(bool $bust = false): string
 			{
 				return 'http://www.example.com/assets/clip.mp4';
@@ -594,7 +594,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
+		$field = new \Celemas\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
 				'en' => [
 					['file' => 'hero.jpg', 'alt' => 'Hero'],
@@ -609,8 +609,8 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedImages::class, $value);
-		$this->assertInstanceOf(\Duon\Cms\Value\TranslatedImage::class, $value->current());
+		$this->assertInstanceOf(\Celemas\Cms\Value\TranslatedImages::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\TranslatedImage::class, $value->current());
 		$this->assertSame('Hero', $value->current()->alt());
 	}
 
@@ -618,7 +618,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
+		$field = new \Celemas\Cms\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
 			],
@@ -626,7 +626,7 @@ final class PrimitiveValueTest extends TestCase
 		$field->limit(1);
 
 		$value = $field->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value);
 		$value = $value->width(320, true)->quality(80);
 
 		$this->assertStringContainsString('resize=width', $value->publicPath());
@@ -639,7 +639,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
+		$field = new \Celemas\Cms\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
 				['file' => 'one.jpg', 'alt' => ['en' => 'One']],
 				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
@@ -647,12 +647,12 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\Images::class, $value);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Images::class, $value);
 
 		$this->assertSame(2, $value->count());
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->first());
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->current());
-		$this->assertInstanceOf(\Duon\Cms\Value\Image::class, $value->get(1));
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value->first());
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value->current());
+		$this->assertInstanceOf(\Celemas\Cms\Value\Image::class, $value->get(1));
 		$this->assertSame('One', $value->first()->alt());
 		$this->assertSame('Two', $value->get(1)->alt());
 	}
@@ -661,7 +661,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field = new \Celemas\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
 		$field->limit(2);
 
 		$shape = $field->shape();
@@ -690,7 +690,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field = new \Celemas\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
 		$field->limit(3, 2);
 
 		$shape = $field->shape();
@@ -717,7 +717,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
+		$field = new \Celemas\Cms\Field\File('downloads', $owner, new ValueContext('downloads', []));
 		$field->translateFile();
 		$field->limit(1);
 
@@ -755,7 +755,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Option('status', $owner, new ValueContext('status', [
+		$field = new \Celemas\Cms\Field\Option('status', $owner, new ValueContext('status', [
 			'value' => 'draft',
 		]));
 
@@ -769,7 +769,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
+		$field = new \Celemas\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => 'yes',
 		]));
 
@@ -783,7 +783,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
+		$field = new \Celemas\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => '<strong>Yes</strong>',
 		]));
 
@@ -799,7 +799,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
+		$field = new \Celemas\Cms\Field\Radio('choice', $owner, new ValueContext('choice', [
 			'value' => '',
 		]));
 
@@ -815,13 +815,13 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\DateTime('timestamp', $owner, new ValueContext('timestamp', [
+		$field = new \Celemas\Cms\Field\DateTime('timestamp', $owner, new ValueContext('timestamp', [
 			'value' => '2025-01-31 13:45:10',
 			'timezone' => 'UTC',
 		]));
 
 		$value = $field->value();
-		$this->assertSame('2025-01-31 13:45:10', $value->format(\Duon\Cms\Value\DateTime::FORMAT));
+		$this->assertSame('2025-01-31 13:45:10', $value->format(\Celemas\Cms\Value\DateTime::FORMAT));
 		$this->assertSame('2025-01-31 13:45:10', (string) $value);
 		$this->assertTrue($value->isset());
 	}
@@ -830,12 +830,12 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Date('date', $owner, new ValueContext('date', [
+		$field = new \Celemas\Cms\Field\Date('date', $owner, new ValueContext('date', [
 			'value' => '2025-01-31',
 		]));
 
 		$value = $field->value();
-		$this->assertSame('2025-01-31', $value->format(\Duon\Cms\Value\Date::FORMAT));
+		$this->assertSame('2025-01-31', $value->format(\Celemas\Cms\Value\Date::FORMAT));
 		$this->assertSame('2025-01-31', (string) $value);
 		$this->assertTrue($value->isset());
 	}
@@ -844,12 +844,12 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Time('time', $owner, new ValueContext('time', [
+		$field = new \Celemas\Cms\Field\Time('time', $owner, new ValueContext('time', [
 			'value' => '13:45',
 		]));
 
 		$value = $field->value();
-		$this->assertSame('13:45', $value->format(\Duon\Cms\Value\Time::FORMAT));
+		$this->assertSame('13:45', $value->format(\Celemas\Cms\Value\Time::FORMAT));
 		$this->assertSame('13:45', (string) $value);
 		$this->assertTrue($value->isset());
 	}
@@ -858,11 +858,11 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
+		$field = new \Celemas\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
 		$context->request->set('locale', $context->locales()->get('de'));
-		$value = new \Duon\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
+		$value = new \Celemas\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => '<iframe></iframe>', 'de' => null],
 		]));
 
@@ -875,11 +875,11 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
+		$field = new \Celemas\Cms\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
 		$context->request->set('locale', $context->locales()->get('de'));
-		$value = new \Duon\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
+		$value = new \Celemas\Cms\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => null, 'de' => null],
 		]));
 
@@ -892,7 +892,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Duon\Cms\Field\Youtube('video', $owner, new ValueContext('video', [
+		$field = new \Celemas\Cms\Field\Youtube('video', $owner, new ValueContext('video', [
 			'value' => 'abc123',
 			'id' => 'abc123',
 			'aspectRatioX' => 16,

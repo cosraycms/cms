@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler;
+namespace Celemas\Cms\Boiler;
 
 use RuntimeException;
 

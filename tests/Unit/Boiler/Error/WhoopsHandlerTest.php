@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit\Boiler\Error;
+namespace Celemas\Cms\Tests\Unit\Boiler\Error;
 
-use Duon\Cms\Boiler\Error\WhoopsHandler;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Boiler\Error\WhoopsHandler;
+use Celemas\Cms\Tests\TestCase;
 use Exception;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Psr\Http\Message\ResponseInterface;

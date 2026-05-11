@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Tests\Fixtures\Node\TestMatrix;
-use Duon\Cms\Tests\Fixtures\Node\TestNodeWithMatrix;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Tests\Fixtures\Node\TestMatrix;
+use Celemas\Cms\Tests\Fixtures\Node\TestNodeWithMatrix;
+use Celemas\Cms\Tests\TestCase;
 
 class MatrixIntegrationTest extends TestCase
 {
-	private function createContext(): \Duon\Cms\Context
+	private function createContext(): \Celemas\Cms\Context
 	{
 		$psrRequest = $this->psrRequest();
-		$locales = new \Duon\Cms\Locales();
+		$locales = new \Celemas\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
 
@@ -25,9 +25,9 @@ class MatrixIntegrationTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Duon\Core\Request($psrRequest);
+		$request = new \Celemas\Core\Request($psrRequest);
 
-		return new \Duon\Cms\Context(
+		return new \Celemas\Cms\Context(
 			$this->db(),
 			$request,
 			$this->config(),
@@ -39,7 +39,7 @@ class MatrixIntegrationTest extends TestCase
 	public function testMyMatrixIntegration(): void
 	{
 		$context = $this->createContext();
-		$cms = $this->createStub(\Duon\Cms\Cms::class);
+		$cms = $this->createStub(\Celemas\Cms\Cms::class);
 		$nodeFactory = new Factory($this->container(), types: new Types());
 		$hydrator = $nodeFactory->hydrator();
 
@@ -64,9 +64,9 @@ class MatrixIntegrationTest extends TestCase
 
 		// Test that matrix field exists and is accessible
 		$matrixField = $hydrator->getField($node, 'matrix');
-		$this->assertInstanceOf(\Duon\Cms\Field\Matrix::class, $matrixField);
+		$this->assertInstanceOf(\Celemas\Cms\Field\Matrix::class, $matrixField);
 		$matrixValue = $matrixField->value();
-		$this->assertInstanceOf(\Duon\Cms\Value\MatrixValue::class, $matrixValue);
+		$this->assertInstanceOf(\Celemas\Cms\Value\MatrixValue::class, $matrixValue);
 
 		// Test matrix iteration
 		$items = [];
@@ -75,14 +75,14 @@ class MatrixIntegrationTest extends TestCase
 		}
 
 		$this->assertCount(2, $items);
-		$this->assertInstanceOf(\Duon\Cms\Value\MatrixItem::class, $items[0]);
-		$this->assertInstanceOf(\Duon\Cms\Value\MatrixItem::class, $items[1]);
+		$this->assertInstanceOf(\Celemas\Cms\Value\MatrixItem::class, $items[0]);
+		$this->assertInstanceOf(\Celemas\Cms\Value\MatrixItem::class, $items[1]);
 
 		// Test subfield access
 		$firstItem = $matrixValue->first();
 		$this->assertNotNull($firstItem);
 		$this->assertEquals('First Item', $firstItem->title->unwrap());
-		$this->assertInstanceOf(\Duon\Cms\Value\Grid::class, $firstItem->content);
+		$this->assertInstanceOf(\Celemas\Cms\Value\Grid::class, $firstItem->content);
 
 		// Test matrix methods
 		$this->assertEquals(2, $matrixValue->count());
@@ -98,7 +98,7 @@ class MatrixIntegrationTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', []),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', []),
 		);
 
 		// Call value() to initialize subfields
@@ -111,8 +111,8 @@ class MatrixIntegrationTest extends TestCase
 		$subfields = $matrix->getSubfields();
 		$this->assertArrayHasKey('title', $subfields);
 		$this->assertArrayHasKey('content', $subfields);
-		$this->assertInstanceOf(\Duon\Cms\Field\Text::class, $subfields['title']);
-		$this->assertInstanceOf(\Duon\Cms\Field\Grid::class, $subfields['content']);
+		$this->assertInstanceOf(\Celemas\Cms\Field\Text::class, $subfields['title']);
+		$this->assertInstanceOf(\Celemas\Cms\Field\Grid::class, $subfields['content']);
 	}
 
 	public function testMatrixSubfieldTranslateStructure(): void
@@ -124,7 +124,7 @@ class MatrixIntegrationTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', [
+			new \Celemas\Cms\Value\ValueContext('test_matrix', [
 				'type' => 'matrix',
 				'value' => [
 					[

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Middleware;
+namespace Celemas\Cms\Middleware;
 
-use Duon\Cms\Config;
-use Duon\Cms\Users;
-use Duon\Quma\Database;
+use Celemas\Cms\Config;
+use Celemas\Cms\Users;
+use Celemas\Quma\Database;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -22,7 +22,7 @@ class Session implements Middleware
 	public function process(Request $request, Handler $handler): Response
 	{
 		$config = $this->config->session;
-		$session = new \Duon\Cms\Session(
+		$session = new \Celemas\Cms\Session(
 			$config->options,
 			$this->config->app->name,
 			$config->handler,

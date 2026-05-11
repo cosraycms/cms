@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Owner;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Owner;
 use NumberFormatter;
 
 class Decimal extends Value

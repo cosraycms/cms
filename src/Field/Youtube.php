@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Youtube as YoutubeValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Youtube as YoutubeValue;
+use Celemas\Sire\Shape;
 
 class Youtube extends Field implements Capability\Translatable, Capability\Limitable
 {

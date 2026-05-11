@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Field\Schema\Handler;
-use Duon\Cms\Field\Schema\Registry;
-use Duon\Cms\Value\Value;
-use Duon\Cms\Value\ValueContext;
-use Duon\Sire\Shape;
+use Celemas\Cms\Field\Schema\Handler;
+use Celemas\Cms\Field\Schema\Registry;
+use Celemas\Cms\Value\Value;
+use Celemas\Cms\Value\ValueContext;
+use Celemas\Sire\Shape;
 use ReflectionProperty;
 
 abstract class Field implements

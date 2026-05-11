@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Validation\GridItemValidator;
-use Duon\Cms\Validation\Prepare;
-use Duon\Cms\Validation\Shapes;
-use Duon\Cms\Value\Grid as GridValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Validation\GridItemValidator;
+use Celemas\Cms\Validation\Prepare;
+use Celemas\Cms\Validation\Shapes;
+use Celemas\Cms\Value\Grid as GridValue;
+use Celemas\Sire\Shape;
 
 class Grid extends Field implements Capability\Translatable, Capability\Grid\Resizable
 {

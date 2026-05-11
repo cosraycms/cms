@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Decimal as DecimalValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Decimal as DecimalValue;
+use Celemas\Sire\Shape;
 
 class Decimal extends Field
 {

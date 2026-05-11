@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Node\Schema\Handler;
+use Celemas\Cms\Node\Schema\Handler;
 
 class CustomIconHandler extends Handler
 {

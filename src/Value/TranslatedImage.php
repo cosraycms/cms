@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Assets;
+use Celemas\Cms\Assets;
 
 class TranslatedImage extends Image
 {

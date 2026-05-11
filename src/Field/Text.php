@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Text as TextValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Text as TextValue;
+use Celemas\Sire\Shape;
 
 class Text extends Field implements Capability\Translatable
 {

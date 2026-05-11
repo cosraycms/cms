@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller\Panel;
+namespace Celemas\Cms\Controller\Panel;
 
-use Duon\Cms\Config;
-use Duon\Cms\Contract\Icons;
-use Duon\Cms\Navigation;
-use Duon\Container\Container;
-use Duon\Core\Request;
+use Celemas\Cms\Config;
+use Celemas\Cms\Contract\Icons;
+use Celemas\Cms\Navigation;
+use Celemas\Container\Container;
+use Celemas\Core\Request;
 
 abstract class Panel
 {

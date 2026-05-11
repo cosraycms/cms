@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Context;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Field\Text;
-use Duon\Cms\Finder\Nodes;
-use Duon\Cms\Locale;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Value\Value;
-use Duon\Core\Request;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Finder\Nodes;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Value\Value;
+use Celemas\Core\Request;
 
 class Node
 {

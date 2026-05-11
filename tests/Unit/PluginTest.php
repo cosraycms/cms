@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Boiler\Renderer as BoilerRenderer;
-use Duon\Cms\Config;
-use Duon\Cms\Plugin;
-use Duon\Cms\Renderer;
-use Duon\Cms\Tests\Fixtures\StaticRenderer;
-use Duon\Cms\Tests\TestCase;
-use Duon\Core\App;
-use Duon\Router\Router;
+use Celemas\Cms\Boiler\Renderer as BoilerRenderer;
+use Celemas\Cms\Config;
+use Celemas\Cms\Plugin;
+use Celemas\Cms\Renderer;
+use Celemas\Cms\Tests\Fixtures\StaticRenderer;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Core\App;
+use Celemas\Router\Router;
 
 /**
  * @internal

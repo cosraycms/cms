@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Serializer;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Tests\Fixtures\Node\TestDocument;
-use Duon\Cms\Tests\Fixtures\Node\TestMediaDocument;
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Serializer;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Tests\Fixtures\Node\TestDocument;
+use Celemas\Cms\Tests\Fixtures\Node\TestMediaDocument;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 final class FieldPropertiesTest extends IntegrationTestCase
 {
@@ -36,7 +36,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$this->assertArrayHasKey('name', $properties);
 		$this->assertArrayHasKey('type', $properties);
 		$this->assertEquals('title', $properties['name']);
-		$this->assertEquals(\Duon\Cms\Field\Text::class, $properties['type']);
+		$this->assertEquals(\Celemas\Cms\Field\Text::class, $properties['type']);
 	}
 
 	public function testFieldPropertiesCollectsFromMultipleCapabilities(): void

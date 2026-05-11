@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Validation\Prepare;
-use Duon\Cms\Validation\Shapes;
-use Duon\Cms\Value\MatrixValue;
-use Duon\Cms\Value\ValueContext;
-use Duon\Sire\Shape;
+use Celemas\Cms\Validation\Prepare;
+use Celemas\Cms\Validation\Shapes;
+use Celemas\Cms\Value\MatrixValue;
+use Celemas\Cms\Value\ValueContext;
+use Celemas\Sire\Shape;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;

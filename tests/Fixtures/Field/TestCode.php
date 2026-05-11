@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Field;
+namespace Celemas\Cms\Tests\Fixtures\Field;
 
-use Duon\Cms\Field\Code;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Syntax;
-use Duon\Cms\Schema\Translate;
+use Celemas\Cms\Field\Code;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Syntax;
+use Celemas\Cms\Schema\Translate;
 
 #[Label('Test Code')]
 #[Translate]

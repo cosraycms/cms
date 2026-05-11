@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 final class NodeTest extends IntegrationTestCase
 {
@@ -256,7 +256,7 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testPagePathRequiresDefaultLocale(): void
 	{
-		$pathManager = new \Duon\Cms\Node\PathManager();
+		$pathManager = new \Celemas\Cms\Node\PathManager();
 		$context = $this->createContext();
 		$db = $this->testDb;
 		$locales = $context->locales();
@@ -269,7 +269,7 @@ final class NodeTest extends IntegrationTestCase
 		]);
 
 		$this->throws(
-			\Duon\Cms\Exception\RuntimeException::class,
+			\Celemas\Cms\Exception\RuntimeException::class,
 			'Hauptsprache',
 		);
 

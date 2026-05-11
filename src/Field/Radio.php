@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Str;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Str;
+use Celemas\Sire\Shape;
 
 class Radio extends Field
 {

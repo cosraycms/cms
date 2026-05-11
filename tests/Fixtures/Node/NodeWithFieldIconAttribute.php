@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Text;
-use Duon\Cms\Schema\Icon;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Schema\Icon;
 
 class NodeWithFieldIconAttribute
 {

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler\Error;
+namespace Celemas\Cms\Boiler\Error;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Cms\Node\Node;
-use Duon\Core\Exception\HttpError;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Error\Handler as ErrorHandler;
-use Duon\Error\Renderer as ErrorRenderer;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Node\Node;
+use Celemas\Core\Exception\HttpError;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Error\Handler as ErrorHandler;
+use Celemas\Error\Renderer as ErrorRenderer;
 use Psr\Log\LoggerInterface as Logger;
 
 /** @psalm-api */

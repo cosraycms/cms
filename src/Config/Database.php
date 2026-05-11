@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
 final class Database
 {
@@ -16,7 +16,7 @@ final class Database
 	private ?array $optionsCache = null;
 
 	public function __construct(
-		private readonly \Duon\Cms\Config $config,
+		private readonly \Celemas\Cms\Config $config,
 	) {}
 
 	/** @var ?non-empty-string */

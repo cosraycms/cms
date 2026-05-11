@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Celemas\Cms\Field\Capability;
 
 trait IsRequirable
 {

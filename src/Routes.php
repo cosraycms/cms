@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Cms\Controller\Auth;
-use Duon\Cms\Controller\Embed;
-use Duon\Cms\Controller\Media;
-use Duon\Cms\Controller\Nodes;
-use Duon\Cms\Controller\OldPanel;
-use Duon\Cms\Controller\Page;
-use Duon\Cms\Controller\Panel;
-use Duon\Cms\Controller\User;
-use Duon\Cms\Middleware\InitRequest;
-use Duon\Cms\Middleware\PanelAuth;
-use Duon\Cms\Middleware\Session;
-use Duon\Core\App;
-use Duon\Core\Factory\Factory;
-use Duon\Quma\Database;
-use Duon\Router\Group;
-use Duon\Router\Route;
+use Celemas\Cms\Controller\Auth;
+use Celemas\Cms\Controller\Embed;
+use Celemas\Cms\Controller\Media;
+use Celemas\Cms\Controller\Nodes;
+use Celemas\Cms\Controller\OldPanel;
+use Celemas\Cms\Controller\Page;
+use Celemas\Cms\Controller\Panel;
+use Celemas\Cms\Controller\User;
+use Celemas\Cms\Middleware\InitRequest;
+use Celemas\Cms\Middleware\PanelAuth;
+use Celemas\Cms\Middleware\Session;
+use Celemas\Core\App;
+use Celemas\Core\Factory\Factory;
+use Celemas\Quma\Database;
+use Celemas\Router\Group;
+use Celemas\Router\Route;
 
 class Routes
 {

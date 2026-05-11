@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Celemas\Cms\Field\Capability;
 
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Exception\RuntimeException;
 
 trait IsLimitable
 {

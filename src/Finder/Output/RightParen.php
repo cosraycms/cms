@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Output;
+namespace Celemas\Cms\Finder\Output;
 
-use Duon\Cms\Finder\Input\Token;
+use Celemas\Cms\Finder\Input\Token;
 
 class RightParen implements Output
 {

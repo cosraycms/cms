@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Config;
-use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Util\Password;
-use Duon\Core\Exception\HttpBadRequest;
-use Duon\Core\Request;
-use Duon\Quma\Database;
+use Celemas\Cms\Config;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Cms\Util\Password;
+use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Request;
+use Celemas\Quma\Database;
 
 class User
 {

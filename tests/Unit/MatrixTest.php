@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Field\Matrix;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Tests\Fixtures\Field\TestMatrix;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\MatrixValue;
+use Celemas\Cms\Field\Matrix;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Tests\Fixtures\Field\TestMatrix;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\MatrixValue;
 
 class MatrixTest extends TestCase
 {
-	private function createContext(): \Duon\Cms\Context
+	private function createContext(): \Celemas\Cms\Context
 	{
 		$psrRequest = $this->psrRequest();
-		$locales = new \Duon\Cms\Locales();
+		$locales = new \Celemas\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
 
@@ -24,9 +24,9 @@ class MatrixTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Duon\Core\Request($psrRequest);
+		$request = new \Celemas\Core\Request($psrRequest);
 
-		return new \Duon\Cms\Context(
+		return new \Celemas\Cms\Context(
 			$this->db(),
 			$request,
 			$this->config(),
@@ -43,7 +43,7 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', []),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', []),
 		);
 
 		$this->assertInstanceOf(Matrix::class, $matrix);
@@ -61,7 +61,7 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', []),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', []),
 		);
 		$structure = $matrix->structure();
 
@@ -77,11 +77,11 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', []),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', []),
 		);
 		$shape = $matrix->shape();
 
-		$this->assertInstanceOf(\Duon\Sire\Shape::class, $shape);
+		$this->assertInstanceOf(\Celemas\Sire\Shape::class, $shape);
 	}
 
 	public function testMatrixSubfieldsHaveTranslateCapability(): void
@@ -92,7 +92,7 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', []),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', []),
 		);
 		$subfields = $matrix->getSubfields();
 
@@ -130,7 +130,7 @@ class MatrixTest extends TestCase
 		$matrix = new TestMatrix(
 			'test_matrix',
 			$owner,
-			new \Duon\Cms\Value\ValueContext('test_matrix', $storedData),
+			new \Celemas\Cms\Value\ValueContext('test_matrix', $storedData),
 		);
 
 		// Call structure() without arguments - this is how Node::content() calls it

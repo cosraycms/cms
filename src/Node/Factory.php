@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Context;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Field\Schema\Registry as SchemaRegistry;
-use Duon\Cms\Node\Contract\HasInit;
-use Duon\Container\Container;
-use Duon\Core\Factory\Factory as CoreFactory;
-use Duon\Core\Request;
-use Duon\Quma\Database;
-use Duon\Wire\Creator;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Context;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Field\Schema\Registry as SchemaRegistry;
+use Celemas\Cms\Node\Contract\HasInit;
+use Celemas\Container\Container;
+use Celemas\Core\Factory\Factory as CoreFactory;
+use Celemas\Core\Request;
+use Celemas\Quma\Database;
+use Celemas\Wire\Creator;
 use WeakMap;
 
-use function Duon\Cms\nanoid;
+use function Celemas\Cms\nanoid;
 
 class Factory
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Field;
+namespace Celemas\Cms\Tests\Fixtures\Field;
 
-use Duon\Cms\Field\RichText;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Translate;
+use Celemas\Cms\Field\RichText;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Translate;
 
 #[Label('Test RichText')]
 #[Translate]

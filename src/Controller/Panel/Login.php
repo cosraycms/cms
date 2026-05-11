@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller\Panel;
+namespace Celemas\Cms\Controller\Panel;
 
-use Duon\Cms\Auth as CmsAuth;
-use Duon\Cms\Config;
-use Duon\Cms\Validation;
-use Duon\Container\Container;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Auth as CmsAuth;
+use Celemas\Cms\Config;
+use Celemas\Cms\Validation;
+use Celemas\Container\Container;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 
 final class Login extends Panel
 {

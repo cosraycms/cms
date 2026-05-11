@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Assets\Size;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Assets\Size;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Tests\TestCase;
 
 final class SizeTest extends TestCase
 {

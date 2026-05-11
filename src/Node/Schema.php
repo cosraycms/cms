@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Exception\NoSuchProperty;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\Field;
-use Duon\Cms\Node\Schema\Registry;
-use Duon\Cms\Schema\Title;
+use Celemas\Cms\Exception\NoSuchProperty;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Node\Schema\Registry;
+use Celemas\Cms\Schema\Title;
 use ReflectionClass;
 use ReflectionProperty;
 use ReflectionUnionType;

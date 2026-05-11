@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Context;
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\RuntimeException;
 use Iterator;
 
 class Menu implements Iterator

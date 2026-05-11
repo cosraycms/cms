@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Validation;
+namespace Celemas\Cms\Validation;
 
 final class Prepare
 {

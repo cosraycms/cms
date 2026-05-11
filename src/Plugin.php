@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Cms\Boiler\Renderer as BoilerRenderer;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Icons\Iconify;
-use Duon\Cms\Icons\Local;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Types;
-use Duon\Container\Container;
-use Duon\Container\Entry;
-use Duon\Core\App;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Plugin as CorePlugin;
-use Duon\Core\Request;
-use Duon\Quma\Connection;
-use Duon\Quma\Database;
-use Duon\Router\Route;
+use Celemas\Cms\Boiler\Renderer as BoilerRenderer;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Icons\Iconify;
+use Celemas\Cms\Icons\Local;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Types;
+use Celemas\Container\Container;
+use Celemas\Container\Entry;
+use Celemas\Core\App;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Plugin as CorePlugin;
+use Celemas\Core\Request;
+use Celemas\Quma\Connection;
+use Celemas\Quma\Database;
+use Celemas\Router\Route;
 use PDO;
 
 class Plugin implements CorePlugin
 {
-	public const string NODE_TAG = 'duon.cms.node';
+	public const string NODE_TAG = 'celemas.cms.node';
 
 	protected readonly Factory $factory;
 	protected readonly Container $container;
@@ -211,7 +211,7 @@ class Plugin implements CorePlugin
 			return $entry;
 		}
 
-		throw new RuntimeException('Renderers must imlement the `Duon\\Cms\\Renderer` interface');
+		throw new RuntimeException('Renderers must imlement the `Celemas\\Cms\\Renderer` interface');
 	}
 
 	protected function synchronizeNodes(): void

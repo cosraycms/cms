@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Core\Request;
+use Celemas\Core\Request;
 
 class PostQuery implements Query
 {

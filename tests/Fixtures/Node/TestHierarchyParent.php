@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Text;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\Children;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Translate;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\Children;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Translate;
 
 #[Label('Hierarchy Parent')]
 #[Children(TestHierarchyParent::class, TestHierarchyChild::class)]

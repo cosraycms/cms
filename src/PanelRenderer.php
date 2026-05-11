@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Core\Factory\Factory;
-use Duon\Core\Response;
-use Duon\Router\After;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Response;
+use Celemas\Router\After;
 use Override;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Traversable;

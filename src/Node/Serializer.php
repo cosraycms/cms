@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Locales;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Locales;
 use ReflectionMethod;
 
-use function Duon\Cms\nanoid;
+use function Celemas\Cms\nanoid;
 
 class Serializer
 {

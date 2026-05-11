@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Collection;
+namespace Celemas\Cms\Tests\Fixtures\Collection;
 
-use Duon\Cms\Collection;
-use Duon\Cms\Finder\Nodes;
-use Duon\Cms\Tests\Fixtures\Node\TestHierarchyChild;
+use Celemas\Cms\Collection;
+use Celemas\Cms\Finder\Nodes;
+use Celemas\Cms\Tests\Fixtures\Node\TestHierarchyChild;
 
 final class TestHierarchyCollection extends Collection
 {

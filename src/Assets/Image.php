@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Assets;
+namespace Celemas\Cms\Assets;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Util\Path;
-use Duon\Core\Request;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Util\Path;
+use Celemas\Core\Request;
 use Gumlet\ImageResize;
 use Gumlet\ImageResizeException;
 

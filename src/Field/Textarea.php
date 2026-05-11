@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 class Textarea extends Text implements Capability\Translatable
 {

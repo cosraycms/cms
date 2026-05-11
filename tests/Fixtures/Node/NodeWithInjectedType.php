@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Node\Contract\Title as TitleContract;
-use Duon\Cms\Node\Type;
-use Duon\Cms\Schema\Label;
+use Celemas\Cms\Node\Contract\Title as TitleContract;
+use Celemas\Cms\Node\Type;
+use Celemas\Cms\Schema\Label;
 
 #[Label('Type Injected Node')]
 class NodeWithInjectedType implements TitleContract

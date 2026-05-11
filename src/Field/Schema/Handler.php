@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Schema;
+namespace Celemas\Cms\Field\Schema;
 
-use Duon\Cms\Field\Field;
+use Celemas\Cms\Field\Field;
 
 abstract class Handler
 {

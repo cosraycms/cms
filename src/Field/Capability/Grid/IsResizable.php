@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability\Grid;
+namespace Celemas\Cms\Field\Capability\Grid;
 
 use ValueError;
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
 use Dotenv\Dotenv;
 
-use function Duon\Cms\env;
+use function Celemas\Cms\env;
 
 final class Env
 {

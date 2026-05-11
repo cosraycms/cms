@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Context;
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Exception\ParserOutputException;
-use Duon\Cms\Finder\Input\Token;
-use Duon\Cms\Finder\Input\TokenGroup;
-use Duon\Cms\Finder\Input\TokenType;
-use Duon\Cms\Finder\Output\Comparison;
-use Duon\Cms\Finder\Output\Exists;
-use Duon\Cms\Finder\Output\Expression;
-use Duon\Cms\Finder\Output\LeftParen;
-use Duon\Cms\Finder\Output\NullComparison;
-use Duon\Cms\Finder\Output\Operator;
-use Duon\Cms\Finder\Output\RightParen;
-use Duon\Cms\Finder\Output\UrlPath;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Exception\ParserOutputException;
+use Celemas\Cms\Finder\Input\Token;
+use Celemas\Cms\Finder\Input\TokenGroup;
+use Celemas\Cms\Finder\Input\TokenType;
+use Celemas\Cms\Finder\Output\Comparison;
+use Celemas\Cms\Finder\Output\Exists;
+use Celemas\Cms\Finder\Output\Expression;
+use Celemas\Cms\Finder\Output\LeftParen;
+use Celemas\Cms\Finder\Output\NullComparison;
+use Celemas\Cms\Finder\Output\Operator;
+use Celemas\Cms\Finder\Output\RightParen;
+use Celemas\Cms\Finder\Output\UrlPath;
 
 final class QueryParser
 {

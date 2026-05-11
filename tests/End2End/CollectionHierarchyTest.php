@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\End2End;
+namespace Celemas\Cms\Tests\End2End;
 
-use Duon\Cms\Config;
-use Duon\Cms\Plugin;
-use Duon\Cms\Tests\End2EndTestCase;
-use Duon\Cms\Tests\Fixtures\Collection\TestHierarchyCollection;
-use Duon\Cms\Tests\Fixtures\Node\TestHierarchyChild;
-use Duon\Cms\Tests\Fixtures\Node\TestHierarchyParent;
+use Celemas\Cms\Config;
+use Celemas\Cms\Plugin;
+use Celemas\Cms\Tests\End2EndTestCase;
+use Celemas\Cms\Tests\Fixtures\Collection\TestHierarchyCollection;
+use Celemas\Cms\Tests\Fixtures\Node\TestHierarchyChild;
+use Celemas\Cms\Tests\Fixtures\Node\TestHierarchyParent;
 
 final class CollectionHierarchyTest extends End2EndTestCase
 {

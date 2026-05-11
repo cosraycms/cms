@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
 /** @psalm-import-type MimeMap from Types */
 final class Upload
@@ -17,7 +17,7 @@ final class Upload
 	private ?array $videoCache = null;
 
 	public function __construct(
-		private readonly \Duon\Cms\Config $config,
+		private readonly \Celemas\Cms\Config $config,
 	) {}
 
 	/** @var MimeMap */

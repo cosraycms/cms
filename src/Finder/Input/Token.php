@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Input;
+namespace Celemas\Cms\Finder\Input;
 
-use Duon\Cms\Exception\ParserException;
-use Duon\Quma\Database;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Quma\Database;
 
 readonly class Token
 {

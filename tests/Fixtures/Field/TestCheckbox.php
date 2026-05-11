@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Field;
+namespace Celemas\Cms\Tests\Fixtures\Field;
 
-use Duon\Cms\Field\Checkbox;
-use Duon\Cms\Schema\Label;
+use Celemas\Cms\Field\Checkbox;
+use Celemas\Cms\Schema\Label;
 
 #[Label('Test Checkbox')]
 class TestCheckbox extends Checkbox {}

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit\Boiler\Error;
+namespace Celemas\Cms\Tests\Unit\Boiler\Error;
 
-use Duon\Cms\Boiler\Error\Renderer;
-use Duon\Cms\Boiler\Error\RendererFactory;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Boiler\Error\Renderer;
+use Celemas\Cms\Boiler\Error\RendererFactory;
+use Celemas\Cms\Tests\TestCase;
 
 /**
  * @internal

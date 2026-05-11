@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Icons;
+namespace Celemas\Cms\Icons;
 
-use Duon\Cms\Contract;
+use Celemas\Cms\Contract;
 
-use function Duon\Cms\escape;
+use function Celemas\Cms\escape;
 
 final class Local implements Contract\Icons
 {

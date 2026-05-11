@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Exception\NoSuchProperty;
+use Celemas\Cms\Exception\NoSuchProperty;
 
 class Type
 {

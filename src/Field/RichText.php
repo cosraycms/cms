@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\RichText as RichTextValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\RichText as RichTextValue;
+use Celemas\Sire\Shape;
 
 class RichText extends Field implements Capability\Translatable
 {

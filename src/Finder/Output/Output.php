@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Output;
+namespace Celemas\Cms\Finder\Output;
 
 interface Output
 {

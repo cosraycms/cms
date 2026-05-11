@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Core\Exception\OutOfBoundsException;
-use Duon\Core\Exception\ValueError;
+use Celemas\Core\Exception\OutOfBoundsException;
+use Celemas\Core\Exception\ValueError;
 
 /**
- * @psalm-import-type BuiltinConfig from \Duon\Cms\Config\Types
- * @psalm-import-type BuiltinConfigInput from \Duon\Cms\Config\Types
+ * @psalm-import-type BuiltinConfig from \Celemas\Cms\Config\Types
+ * @psalm-import-type BuiltinConfigInput from \Celemas\Cms\Config\Types
  */
 class Config
 {

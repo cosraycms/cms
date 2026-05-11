@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Controller\Panel\Assets;
-use Duon\Cms\Tests\TestCase;
-use Duon\Core\Exception\HttpNotFound;
-use Duon\Core\Request;
+use Celemas\Cms\Controller\Panel\Assets;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Request;
 
 /**
  * @internal

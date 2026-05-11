@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Router\After;
+use Celemas\Router\After;
 
 interface AfterRenderer extends After {}

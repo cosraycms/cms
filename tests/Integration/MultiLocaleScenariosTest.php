@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 /**
  * Tests for multi-locale content fallback and retrieval scenarios.

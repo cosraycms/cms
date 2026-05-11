@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Config;
-use Duon\Cms\Context;
-use Duon\Cms\Field\Owner;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Core\Request;
+use Celemas\Cms\Config;
+use Celemas\Cms\Context;
+use Celemas\Cms\Field\Owner;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Core\Request;
 
 class FieldOwner implements Owner
 {

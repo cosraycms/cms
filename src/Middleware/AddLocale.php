@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Middleware;
+namespace Celemas\Cms\Middleware;
 
-use Duon\Cms\Locales;
+use Celemas\Cms\Locales;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;

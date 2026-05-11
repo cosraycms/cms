@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Core\App;
-use Duon\Core\Factory\Factory;
+use Celemas\Core\App;
+use Celemas\Core\Factory\Factory;
 
 /** @psalm-api */
 final class PanelRenderers

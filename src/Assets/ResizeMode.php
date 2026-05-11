@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Assets;
+namespace Celemas\Cms\Assets;
 
 enum ResizeMode: string
 {

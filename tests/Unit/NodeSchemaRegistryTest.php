@@ -2,45 +2,45 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Schema;
-use Duon\Cms\Node\Schema\ChildrenHandler;
-use Duon\Cms\Node\Schema\DeletableHandler;
-use Duon\Cms\Node\Schema\FieldOrderHandler;
-use Duon\Cms\Node\Schema\HandleHandler;
-use Duon\Cms\Node\Schema\IconHandler;
-use Duon\Cms\Node\Schema\LabelHandler;
-use Duon\Cms\Node\Schema\PermissionHandler;
-use Duon\Cms\Node\Schema\Registry;
-use Duon\Cms\Node\Schema\RenderHandler;
-use Duon\Cms\Node\Schema\RouteHandler;
-use Duon\Cms\Node\Schema\TitleHandler;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Schema\Children;
-use Duon\Cms\Schema\Deletable;
-use Duon\Cms\Schema\FieldOrder;
-use Duon\Cms\Schema\Handle;
-use Duon\Cms\Schema\Icon;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Permission;
-use Duon\Cms\Schema\Render;
-use Duon\Cms\Schema\Route;
-use Duon\Cms\Schema\Title;
-use Duon\Cms\Tests\Fixtures\Node\CustomIcon;
-use Duon\Cms\Tests\Fixtures\Node\CustomIconHandler;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithCustomAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithIconAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
-use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
-use Duon\Cms\Tests\Fixtures\Node\PlainPage;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Node\Schema;
+use Celemas\Cms\Node\Schema\ChildrenHandler;
+use Celemas\Cms\Node\Schema\DeletableHandler;
+use Celemas\Cms\Node\Schema\FieldOrderHandler;
+use Celemas\Cms\Node\Schema\HandleHandler;
+use Celemas\Cms\Node\Schema\IconHandler;
+use Celemas\Cms\Node\Schema\LabelHandler;
+use Celemas\Cms\Node\Schema\PermissionHandler;
+use Celemas\Cms\Node\Schema\Registry;
+use Celemas\Cms\Node\Schema\RenderHandler;
+use Celemas\Cms\Node\Schema\RouteHandler;
+use Celemas\Cms\Node\Schema\TitleHandler;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Schema\Children;
+use Celemas\Cms\Schema\Deletable;
+use Celemas\Cms\Schema\FieldOrder;
+use Celemas\Cms\Schema\Handle;
+use Celemas\Cms\Schema\Icon;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Permission;
+use Celemas\Cms\Schema\Render;
+use Celemas\Cms\Schema\Route;
+use Celemas\Cms\Schema\Title;
+use Celemas\Cms\Tests\Fixtures\Node\CustomIcon;
+use Celemas\Cms\Tests\Fixtures\Node\CustomIconHandler;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithCustomAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithIconAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\PlainBlock;
+use Celemas\Cms\Tests\Fixtures\Node\PlainPage;
+use Celemas\Cms\Tests\TestCase;
 use ValueError;
 
 final class NodeSchemaRegistryTest extends TestCase
@@ -204,7 +204,7 @@ final class NodeSchemaRegistryTest extends TestCase
 
 		$this->throws(
 			RuntimeException::class,
-			"The #[Title] attribute on node 'Duon\\Cms\\Tests\\Fixtures\\Node\\PlainPage' requires a non-empty field name when used on a class.",
+			"The #[Title] attribute on node 'Celemas\\Cms\\Tests\\Fixtures\\Node\\PlainPage' requires a non-empty field name when used on a class.",
 		);
 		$handler->resolve(new Title(), PlainPage::class);
 	}
@@ -332,7 +332,7 @@ final class NodeSchemaRegistryTest extends TestCase
 
 		$this->throws(
 			RuntimeException::class,
-			"The #[Title] attribute on property 'Duon\\Cms\\Tests\\Fixtures\\Node\\NodeWithInvalidPropertyTitleAttribute::heading' requires a field-typed property.",
+			"The #[Title] attribute on property 'Celemas\\Cms\\Tests\\Fixtures\\Node\\NodeWithInvalidPropertyTitleAttribute::heading' requires a field-typed property.",
 		);
 		new Schema(NodeWithInvalidPropertyTitleAttribute::class, $registry);
 	}

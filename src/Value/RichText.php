@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Util\Html as HtmlUtil;
+use Celemas\Cms\Util\Html as HtmlUtil;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class RichText extends Text

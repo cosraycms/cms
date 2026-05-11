@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests;
+namespace Celemas\Cms\Tests;
 
-use Duon\Cms\Config;
-use Duon\Cms\Locales;
-use Duon\Container\Container;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Factory\Laminas;
-use Duon\Core\Request;
+use Celemas\Cms\Config;
+use Celemas\Cms\Locales;
+use Celemas\Container\Container;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Factory\Laminas;
+use Celemas\Core\Request;
 use PDO;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
@@ -108,7 +108,7 @@ class TestCase extends BaseTestCase
 	public function config(array $settings = [], bool $debug = false): Config
 	{
 		return new Config(self::root(), array_merge([
-			'app.name' => 'duon',
+			'app.name' => 'celemas',
 			'app.debug' => $debug,
 		], $settings));
 	}
@@ -138,11 +138,11 @@ class TestCase extends BaseTestCase
 	 * This method creates a database instance but is not meant for actual database operations.
 	 * For real database operations, use IntegrationTestCase instead.
 	 */
-	public function db(): \Duon\Quma\Database
+	public function db(): \Celemas\Quma\Database
 	{
-		return new \Duon\Quma\Database(
-			new \Duon\Quma\Connection(
-				'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+		return new \Celemas\Quma\Database(
+			new \Celemas\Quma\Connection(
+				'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
 				self::root() . '/db/sql',
 			)
 				->migrations(self::root() . '/db/migrations')

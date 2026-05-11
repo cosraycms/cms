@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability;
+namespace Celemas\Cms\Field\Capability;
 
-use Duon\Cms\Schema\FulltextWeight;
+use Celemas\Cms\Schema\FulltextWeight;
 
 interface Searchable
 {

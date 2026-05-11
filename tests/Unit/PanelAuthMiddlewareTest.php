@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Middleware\PanelAuth;
-use Duon\Cms\Session;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\User;
-use Duon\Cms\Users;
-use Duon\Core\Factory\Factory;
-use Duon\Quma\Database;
+use Celemas\Cms\Middleware\PanelAuth;
+use Celemas\Cms\Session;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\User;
+use Celemas\Cms\Users;
+use Celemas\Core\Factory\Factory;
+use Celemas\Quma\Database;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;

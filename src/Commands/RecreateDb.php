@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
-use Duon\Cli\Command;
+use Celemas\Cli\Command;
 use PDO;
 use PDOException;
 

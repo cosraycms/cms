@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Assets\Assets;
-use Duon\Cms\Assets\ResizeMode;
-use Duon\Cms\Assets\Size;
-use Duon\Cms\Config;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Middleware\Permission;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Assets\Assets;
+use Celemas\Cms\Assets\ResizeMode;
+use Celemas\Cms\Assets\Size;
+use Celemas\Cms\Config;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 use Gumlet\ImageResize;
 
 class Media

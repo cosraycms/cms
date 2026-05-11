@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Contract\Icons as IconsContract;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Plugin;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Contract\Icons as IconsContract;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Plugin;
+use Celemas\Cms\Tests\TestCase;
 use ReflectionProperty;
 
 final class PluginIconsTest extends TestCase

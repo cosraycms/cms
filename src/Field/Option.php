@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value;
+use Celemas\Sire\Shape;
 
 class Option extends Field implements Capability\Selectable
 {

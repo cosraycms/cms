@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Context;
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\Output\Comparison;
-use Duon\Cms\Finder\Output\Exists;
-use Duon\Cms\Finder\Output\LeftParen;
-use Duon\Cms\Finder\Output\Operator;
-use Duon\Cms\Finder\Output\RightParen;
-use Duon\Cms\Finder\Output\UrlPath;
-use Duon\Cms\Finder\QueryParser;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Finder\Output\Comparison;
+use Celemas\Cms\Finder\Output\Exists;
+use Celemas\Cms\Finder\Output\LeftParen;
+use Celemas\Cms\Finder\Output\Operator;
+use Celemas\Cms\Finder\Output\RightParen;
+use Celemas\Cms\Finder\Output\UrlPath;
+use Celemas\Cms\Finder\QueryParser;
+use Celemas\Cms\Tests\TestCase;
 
 final class QueryParserTest extends TestCase
 {

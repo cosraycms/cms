@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use function Duon\Cms\escape;
+use function Celemas\Cms\escape;
 
 class Str extends Value
 {

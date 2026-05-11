@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Finder\Menu;
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Finder\Menu;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 /**
  * Integration tests for Menu finder.

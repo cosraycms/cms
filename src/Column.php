@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Node\Node;
 use Closure;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Node\Node;
 
 final class Column
 {

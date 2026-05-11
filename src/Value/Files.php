@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Field\Capability\File\Translatable as FileTranslatable;
-use Duon\Cms\Field\Capability\Translatable;
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Owner;
+use Celemas\Cms\Field\Capability\File\Translatable as FileTranslatable;
+use Celemas\Cms\Field\Capability\Translatable;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Owner;
 use Iterator;
 
 class Files extends Value implements Iterator

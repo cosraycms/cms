@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit\Boiler;
+namespace Celemas\Cms\Tests\Unit\Boiler;
 
-use Duon\Boiler\Exception\LookupException;
-use Duon\Cms\Boiler\Renderer;
-use Duon\Cms\Boiler\RendererException;
-use Duon\Cms\Tests\Fixtures\Boiler\Whitelisted;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Boiler\Exception\LookupException;
+use Celemas\Cms\Boiler\Renderer;
+use Celemas\Cms\Boiler\RendererException;
+use Celemas\Cms\Tests\Fixtures\Boiler\Whitelisted;
+use Celemas\Cms\Tests\TestCase;
 
 /**
  * @internal

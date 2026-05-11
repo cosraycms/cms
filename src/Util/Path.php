@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Util;
+namespace Celemas\Cms\Util;
 
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Exception\RuntimeException;
 
 class Path
 {

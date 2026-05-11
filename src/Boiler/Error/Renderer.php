@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler\Error;
+namespace Celemas\Cms\Boiler\Error;
 
-use Duon\Boiler\Engine;
-use Duon\Core\Exception\HttpError;
-use Duon\Error\Renderer as RendererInterface;
+use Celemas\Boiler\Engine;
+use Celemas\Core\Exception\HttpError;
+use Celemas\Error\Renderer as RendererInterface;
 use Override;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * @psalm-import-type DirsInput from \Duon\Boiler\Engine
+ * @psalm-import-type DirsInput from \Celemas\Boiler\Engine
  */
 final class Renderer implements RendererInterface
 {

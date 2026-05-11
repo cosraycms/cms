@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Schema;
+namespace Celemas\Cms\Field\Schema;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Field\Capability\File\Translatable;
-use Duon\Cms\Field\Field;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Field\Capability\File\Translatable;
+use Celemas\Cms\Field\Field;
 
 class TranslateFileHandler extends Handler
 {

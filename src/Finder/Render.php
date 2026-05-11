@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Context;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Node\ViewRenderer;
-use Duon\Cms\Plugin;
-use Duon\Core\Exception\HttpBadRequest;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Node\ViewRenderer;
+use Celemas\Cms\Plugin;
+use Celemas\Core\Exception\HttpBadRequest;
 use Throwable;
 
 class Render

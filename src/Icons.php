@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Container\Container;
+use Celemas\Container\Container;
 
 final class Icons implements Contract\Icons
 {

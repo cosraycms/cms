@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Time as TimeValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Time as TimeValue;
+use Celemas\Sire\Shape;
 
 class Time extends Field
 {

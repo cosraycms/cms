@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\OrderCompiler;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Finder\OrderCompiler;
+use Celemas\Cms\Tests\TestCase;
 
 const OB = "\n    ";
 

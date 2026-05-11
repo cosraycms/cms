@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Input;
+namespace Celemas\Cms\Finder\Input;
 
 enum TokenGroup
 {

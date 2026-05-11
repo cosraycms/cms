@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Field;
+namespace Celemas\Cms\Tests\Fixtures\Field;
 
-use Duon\Cms\Field\Grid;
-use Duon\Cms\Field\Matrix;
-use Duon\Cms\Field\Text;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Required;
-use Duon\Cms\Schema\Translate;
+use Celemas\Cms\Field\Grid;
+use Celemas\Cms\Field\Matrix;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Required;
+use Celemas\Cms\Schema\Translate;
 
 #[Label('Test Matrix')]
 class TestMatrix extends Matrix

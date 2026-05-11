@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler;
+namespace Celemas\Cms\Boiler;
 
-use Duon\Boiler\Engine;
-use Duon\Cms\Renderer as RendererInterface;
+use Celemas\Boiler\Engine;
+use Celemas\Cms\Renderer as RendererInterface;
 use Override;
 
 /**
  * @psalm-api
  *
- * @psalm-import-type DirsInput from \Duon\Boiler\Engine
+ * @psalm-import-type DirsInput from \Celemas\Boiler\Engine
  */
 class Renderer implements RendererInterface
 {

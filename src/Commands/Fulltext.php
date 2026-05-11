@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
-use Duon\Quma\Commands\Command;
-use Duon\Quma\Database;
+use Celemas\Quma\Commands\Command;
+use Celemas\Quma\Database;
 
 class Fulltext extends Command
 {

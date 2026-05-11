@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Field\Schema\Registry;
-use Duon\Cms\Value\ValueContext;
+use Celemas\Cms\Field\Schema\Registry;
+use Celemas\Cms\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
 use ReflectionUnionType;

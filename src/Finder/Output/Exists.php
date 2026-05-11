@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Output;
+namespace Celemas\Cms\Finder\Output;
 
-use Duon\Cms\Context;
-use Duon\Cms\Exception\ParserOutputException;
-use Duon\Cms\Finder\Input\Token;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\ParserOutputException;
+use Celemas\Cms\Finder\Input\Token;
 
 final readonly class Exists extends Expression implements Output
 {

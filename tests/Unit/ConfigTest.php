@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
+use Celemas\Cms\Config;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Util\Password;
+use Celemas\Core\Exception\ValueError;
 use Dotenv\Exception\ValidationException;
-use Duon\Cms\Config;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Util\Password;
-use Duon\Core\Exception\ValueError;
 
 /**
  * @internal
@@ -82,8 +82,8 @@ final class ConfigTest extends TestCase
 	{
 		$config = new Config(self::root());
 
-		$this->assertSame('duoncms', $config->get('app.name'));
-		$this->assertSame('duoncms', $config->app->name);
+		$this->assertSame('celemascms', $config->get('app.name'));
+		$this->assertSame('celemascms', $config->app->name);
 		$this->assertSame(self::root(), $config->path->root);
 		$this->assertSame(self::root() . '/public', $config->path->public);
 		$this->assertNull($config->app->secret);
@@ -317,7 +317,7 @@ final class ConfigTest extends TestCase
 
 	private function rootWithEnv(string $contents = ''): string
 	{
-		$root = sys_get_temp_dir() . '/duon-cms-config-' . bin2hex(random_bytes(4));
+		$root = sys_get_temp_dir() . '/celemas-cms-config-' . bin2hex(random_bytes(4));
 		mkdir($root);
 		$this->roots[] = $root;
 

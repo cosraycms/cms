@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
 interface Query
 {

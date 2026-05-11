@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Validation;
+namespace Celemas\Cms\Validation;
 
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Locales;
-use Duon\Cms\Node\Factory;
-use Duon\Sire\Shape;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Node\Factory;
+use Celemas\Sire\Shape;
 
 class ValidatorFactory
 {

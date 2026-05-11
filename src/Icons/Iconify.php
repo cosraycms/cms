@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Icons;
+namespace Celemas\Cms\Icons;
 
+use Celemas\Cms\Config;
+use Celemas\Cms\Contract;
 use Closure;
-use Duon\Cms\Config;
-use Duon\Cms\Contract;
 
 final class Iconify implements Contract\Icons
 {

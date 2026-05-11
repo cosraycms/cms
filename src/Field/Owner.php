@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Config;
-use Duon\Cms\Locale;
-use Duon\Cms\Locales;
-use Duon\Core\Request;
+use Celemas\Cms\Config;
+use Celemas\Cms\Locale;
+use Celemas\Cms\Locales;
+use Celemas\Core\Request;
 
 interface Owner
 {

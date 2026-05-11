@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Auth;
-use Duon\Cms\Config;
-use Duon\Cms\Users;
-use Duon\Core\Exception\HttpForbidden;
-use Duon\Core\Exception\HttpUnauthorized;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Auth;
+use Celemas\Cms\Config;
+use Celemas\Cms\Users;
+use Celemas\Core\Exception\HttpForbidden;
+use Celemas\Core\Exception\HttpUnauthorized;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 use SensitiveParameter;
 
 class Embed

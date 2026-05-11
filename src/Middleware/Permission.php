@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Middleware;
+namespace Celemas\Cms\Middleware;
 
 use Attribute;
-use Duon\Cms\Auth;
-use Duon\Cms\Config;
-use Duon\Cms\Users;
-use Duon\Core\Exception\HttpForbidden;
-use Duon\Core\Exception\HttpUnauthorized;
-use Duon\Wire\Call;
+use Celemas\Cms\Auth;
+use Celemas\Cms\Config;
+use Celemas\Cms\Users;
+use Celemas\Core\Exception\HttpForbidden;
+use Celemas\Core\Exception\HttpUnauthorized;
+use Celemas\Wire\Call;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;

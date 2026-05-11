@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Container\Container;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Quma\Database;
+use Celemas\Container\Container;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Quma\Database;
 
 final class Context
 {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler\Error;
+namespace Celemas\Cms\Boiler\Error;
 
-use Duon\Error\DebugHandler;
+use Celemas\Error\DebugHandler;
 use Override;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;

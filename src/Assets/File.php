@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Assets;
+namespace Celemas\Cms\Assets;
 
-use Duon\Cms\Util\Path;
-use Duon\Core\Request;
+use Celemas\Cms\Util\Path;
+use Celemas\Core\Request;
 
 class File
 {

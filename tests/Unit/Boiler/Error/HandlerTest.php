@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit\Boiler\Error;
+namespace Celemas\Cms\Tests\Unit\Boiler\Error;
 
-use Duon\Cms\Boiler\Error\Handler;
-use Duon\Cms\Config;
-use Duon\Cms\Tests\TestCase;
-use Duon\Error\Handler as ErrorHandler;
-use Duon\Error\Renderer as ErrorRenderer;
+use Celemas\Cms\Boiler\Error\Handler;
+use Celemas\Cms\Config;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Error\Handler as ErrorHandler;
+use Celemas\Error\Renderer as ErrorRenderer;
 use Exception;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
@@ -144,7 +144,7 @@ final class HandlerTest extends TestCase
 	private function errorConfig(array $settings = [], bool $debug = false): Config
 	{
 		return new Config(self::root(), array_merge([
-			'app.name' => 'duon',
+			'app.name' => 'celemas',
 			'app.debug' => $debug,
 			'app.env' => 'test',
 			'path.root' => self::root(),

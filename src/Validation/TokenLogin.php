@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Validation;
+namespace Celemas\Cms\Validation;
 
-use Duon\Sire\Contract\Shape as ShapeContract;
-use Duon\Sire\Result;
-use Duon\Sire\Shape;
+use Celemas\Sire\Contract\Shape as ShapeContract;
+use Celemas\Sire\Result;
+use Celemas\Sire\Shape;
 use Override;
 
 final class TokenLogin implements ShapeContract

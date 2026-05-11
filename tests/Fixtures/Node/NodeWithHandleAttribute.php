@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\Handle;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\Handle;
 
 #[Handle('node-with-custom-handle-attribute')]
 class NodeWithHandleAttribute implements Title

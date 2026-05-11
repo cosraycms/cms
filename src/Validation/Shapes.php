@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Validation;
+namespace Celemas\Cms\Validation;
 
-use Duon\Sire\Shape;
+use Celemas\Sire\Shape;
 
 final class Shapes
 {

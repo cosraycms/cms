@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
-use Duon\Cli\Command;
-use Duon\Quma\Connection;
-use Duon\Quma\Database;
+use Celemas\Cli\Command;
+use Celemas\Quma\Connection;
+use Celemas\Quma\Database;
 
 class Superuser extends Command
 {

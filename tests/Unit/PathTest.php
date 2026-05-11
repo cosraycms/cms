@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Util\Path;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Util\Path;
 
 final class PathTest extends TestCase
 {

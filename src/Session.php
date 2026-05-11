@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Session\Session as BaseSession;
+use Celemas\Session\Session as BaseSession;
 use SessionHandlerInterface;
 
 class Session extends BaseSession
@@ -18,7 +18,7 @@ class Session extends BaseSession
 	) {
 		parent::__construct($options, $name, $handler);
 
-		$this->authCookie = $name ? $name . '_auth' : 'duon_auth';
+		$this->authCookie = $name ? $name . '_auth' : 'celemas_auth';
 	}
 
 	public function setUser(int $userId): void

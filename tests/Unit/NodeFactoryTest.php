@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Column;
-use Duon\Cms\Context;
-use Duon\Cms\Exception\NoSuchProperty;
-use Duon\Cms\Locales;
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Serializer;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithInjectedType;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithNumericTitleField;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithTitleMethodWithoutInterface;
-use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
-use Duon\Cms\Tests\Fixtures\Node\PlainPage;
-use Duon\Cms\Tests\Fixtures\Node\PlainPageWithInit;
-use Duon\Cms\Tests\Fixtures\Node\TestPage;
-use Duon\Cms\Tests\TestCase;
-use Duon\Core\Request;
+use Celemas\Cms\Column;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\NoSuchProperty;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Serializer;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithInjectedType;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithNumericTitleField;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithTitleMethodWithoutInterface;
+use Celemas\Cms\Tests\Fixtures\Node\PlainBlock;
+use Celemas\Cms\Tests\Fixtures\Node\PlainPage;
+use Celemas\Cms\Tests\Fixtures\Node\PlainPageWithInit;
+use Celemas\Cms\Tests\Fixtures\Node\TestPage;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Core\Request;
 use stdClass;
 
 /**
@@ -33,7 +33,7 @@ use stdClass;
 final class NodeFactoryTest extends TestCase
 {
 	private Context $context;
-	private \Duon\Cms\Cms $cms;
+	private \Celemas\Cms\Cms $cms;
 	private Factory $factory;
 	private Types $types;
 
@@ -43,7 +43,7 @@ final class NodeFactoryTest extends TestCase
 		$this->types = new Types();
 
 		$this->context = $this->createContext();
-		$this->cms = $this->createStub(\Duon\Cms\Cms::class);
+		$this->cms = $this->createStub(\Celemas\Cms\Cms::class);
 		$this->factory = new Factory($this->container(), types: $this->types);
 	}
 

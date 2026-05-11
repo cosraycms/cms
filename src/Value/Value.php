@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Assets\Assets;
-use Duon\Cms\Exception\NoSuchProperty;
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Owner;
-use Duon\Cms\Locale;
+use Celemas\Cms\Assets\Assets;
+use Celemas\Cms\Exception\NoSuchProperty;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Owner;
+use Celemas\Cms\Locale;
 
 abstract class Value
 {

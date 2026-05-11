@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Schema;
+namespace Celemas\Cms\Schema;
 
 use Attribute;
 use ValueError;

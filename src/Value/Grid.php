@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Assets\ResizeMode;
-use Duon\Cms\Assets\Size;
-use Duon\Cms\Field;
-use Duon\Cms\Field\Capability\Translatable;
-use Duon\Cms\Field\Owner;
-use Duon\Cms\Util\Html as HtmlUtil;
+use Celemas\Cms\Assets\ResizeMode;
+use Celemas\Cms\Assets\Size;
+use Celemas\Cms\Field;
+use Celemas\Cms\Field\Capability\Translatable;
+use Celemas\Cms\Field\Owner;
+use Celemas\Cms\Util\Html as HtmlUtil;
 use Generator;
 use Gumlet\ImageResize;
 

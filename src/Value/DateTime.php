@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Owner;
 use DateTimeImmutable;
 use DateTimeZone;
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Owner;
 use IntlDateFormatter;
 
 class DateTime extends Value

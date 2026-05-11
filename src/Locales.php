@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Middleware\AddLocale;
+use Celemas\Core\App;
+use Celemas\Core\Plugin as CorePlugin;
 use Closure;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Middleware\AddLocale;
-use Duon\Core\App;
-use Duon\Core\Plugin as CorePlugin;
 use Iterator;
 use Psr\Http\Message\ServerRequestInterface as Request;
 

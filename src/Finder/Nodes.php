@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Context;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Plugin;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Plugin;
 use Generator;
 use Iterator;
 

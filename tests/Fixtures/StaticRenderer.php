@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures;
+namespace Celemas\Cms\Tests\Fixtures;
 
-use Duon\Cms\Renderer;
+use Celemas\Cms\Renderer;
 use Override;
 
 final class StaticRenderer implements Renderer

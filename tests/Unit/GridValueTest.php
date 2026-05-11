@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Context;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Tests\Fixtures\Field\TestGrid;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\Grid as GridValue;
-use Duon\Cms\Value\ValueContext;
+use Celemas\Cms\Context;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Tests\Fixtures\Field\TestGrid;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\Grid as GridValue;
+use Celemas\Cms\Value\ValueContext;
 
 /**
  * @internal
@@ -21,7 +21,7 @@ final class GridValueTest extends TestCase
 	private function createContext(): Context
 	{
 		$psrRequest = $this->psrRequest();
-		$locales = new \Duon\Cms\Locales();
+		$locales = new \Celemas\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
 
@@ -30,7 +30,7 @@ final class GridValueTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Duon\Core\Request($psrRequest);
+		$request = new \Celemas\Core\Request($psrRequest);
 
 		return new Context(
 			$this->db(),

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller\Panel;
+namespace Celemas\Cms\Controller\Panel;
 
-use Duon\Cms\Collection as CmsCollection;
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Navigation;
-use Duon\Core\Exception\HttpNotFound;
-use Duon\Core\Request;
-use Duon\Wire\Creator;
+use Celemas\Cms\Collection as CmsCollection;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Navigation;
+use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Request;
+use Celemas\Wire\Creator;
 
 final class Collection extends Panel
 {

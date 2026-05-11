@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller\Panel;
+namespace Celemas\Cms\Controller\Panel;
 
 final class Index extends Panel
 {

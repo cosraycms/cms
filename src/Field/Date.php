@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Value\Date as DateValue;
-use Duon\Sire\Shape;
+use Celemas\Cms\Value\Date as DateValue;
+use Celemas\Sire\Shape;
 
 class Date extends Field
 {

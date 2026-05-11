@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Validation;
+namespace Celemas\Cms\Validation;
 
-use Duon\Sire\Contract\ValidatesEmpty;
-use Duon\Sire\Contract\Validator;
-use Duon\Sire\Contract\Value;
-use Duon\Sire\ValidatorRegistry;
+use Celemas\Sire\Contract\ValidatesEmpty;
+use Celemas\Sire\Contract\Validator;
+use Celemas\Sire\Contract\Value;
+use Celemas\Sire\ValidatorRegistry;
 use Override;
 
 final class Validators

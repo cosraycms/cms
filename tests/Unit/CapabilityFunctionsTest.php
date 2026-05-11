@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Field\Schema\Handler;
-use Duon\Cms\Field\Text;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\ValueContext;
+use Celemas\Cms\Field\Schema\Handler;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\ValueContext;
 
 final class CapabilityFunctionsTest extends TestCase
 {
 	private function createTextField(string $name = 'test'): Text
 	{
-		$context = new \Duon\Cms\Context(
+		$context = new \Celemas\Cms\Context(
 			$this->db(),
 			$this->request(),
 			$this->config(),

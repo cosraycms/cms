@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Contract;
+namespace Celemas\Cms\Node\Contract;
 
-use Duon\Core\Response;
+use Celemas\Core\Response;
 
 interface HandlesFormPost
 {

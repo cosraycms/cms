@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Container\Container;
+use Celemas\Container\Container;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;

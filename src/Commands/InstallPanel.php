@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
+use Celemas\Cli\Command;
+use Celemas\Cms\Config;
 use Composer\InstalledVersions;
-use Duon\Cli\Command;
-use Duon\Cms\Config;
 use PharData;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -25,7 +25,7 @@ class InstallPanel extends Command
 	private string $cmsVersion = 'unknown';
 	private string $panelReleaseTag = 'nightly';
 	private string $panelFileName = 'panel-nightly.tar.gz';
-	private string $panelUrl = 'https://github.com/duoncode/cms/releases/download/nightly/panel-nightly.tar.gz';
+	private string $panelUrl = 'https://github.com/celemas/cms/releases/download/nightly/panel-nightly.tar.gz';
 
 	protected const string DEFAULT_PATH = '/cms';
 
@@ -41,7 +41,7 @@ class InstallPanel extends Command
 	public function run(): int
 	{
 		try {
-			$cmsVersion = InstalledVersions::getPrettyVersion('duon/cms') ?? '';
+			$cmsVersion = InstalledVersions::getPrettyVersion('celemas/cms') ?? '';
 			$this->cmsVersion = $cmsVersion !== '' ? $cmsVersion : 'unknown';
 		} catch (Throwable $e) {
 			$this->error("Failed to determine installed version: {$e->getMessage()}");
@@ -174,7 +174,7 @@ class InstallPanel extends Command
 		$context = stream_context_create([
 			'http' => [
 				'method' => 'GET',
-				'header' => 'User-Agent: Duon-CMS-Installer',
+				'header' => 'User-Agent: Celemas-CMS-Installer',
 				'follow_location' => true,
 			],
 		]);
@@ -202,7 +202,7 @@ class InstallPanel extends Command
 	{
 		$tag = $this->resolvePanelReleaseTag($version);
 		$file = $tag === 'nightly' ? 'panel-nightly.tar.gz' : "panel-{$tag}.tar.gz";
-		$url = "https://github.com/duoncode/cms/releases/download/{$tag}/{$file}";
+		$url = "https://github.com/celemas/cms/releases/download/{$tag}/{$file}";
 
 		$this->panelReleaseTag = $tag;
 		$this->panelFileName = $file;
@@ -284,7 +284,7 @@ class InstallPanel extends Command
 
 	private function versionLabel(): string
 	{
-		return "duon/cms@{$this->cmsVersion} (panel {$this->panelReleaseTag})";
+		return "celemas/cms@{$this->cmsVersion} (panel {$this->panelReleaseTag})";
 	}
 
 	private function removeCwdFromPath($path)

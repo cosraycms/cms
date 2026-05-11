@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Boiler\Error;
+namespace Celemas\Cms\Boiler\Error;
 
-use Duon\Error\Renderer as RendererInterface;
+use Celemas\Error\Renderer as RendererInterface;
 
 /**
- * @psalm-import-type DirsInput from \Duon\Boiler\Engine
+ * @psalm-import-type DirsInput from \Celemas\Boiler\Engine
  */
 final class RendererFactory
 {

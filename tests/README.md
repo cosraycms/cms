@@ -1,6 +1,6 @@
-# Duon CMS Testing Guide
+# Celemas CMS Testing Guide
 
-This guide explains how to set up and run tests for the Duon CMS project.
+This guide explains how to set up and run tests for the Celemas CMS project.
 
 ## Test Architecture
 
@@ -38,7 +38,7 @@ Create a PostgreSQL user for testing:
 
 ```bash
 # Create user with CREATEDB privilege
-sudo -u postgres createuser -d -P duoncms 
+sudo -u postgres createuser -d -P celemascms 
 ```
 
 ### 3. Initialize Test Database
@@ -57,7 +57,7 @@ The `recreate-db` command:
 - Terminates existing connections to the database
 - Drops the database if it exists
 - Creates a fresh database
-- Sets the owner to `duoncms`
+- Sets the owner to `celemascms`
 
 ## Running Tests
 
@@ -180,9 +180,9 @@ Extends `IntegrationTestCase` for end-to-end HTTP tests, provides:
 ```php
 <?php
 
-namespace Duon\Cms\Tests;
+namespace Celemas\Cms\Tests;
 
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Tests\TestCase;
 
 final class PasswordTest extends TestCase
 {
@@ -201,9 +201,9 @@ final class PasswordTest extends TestCase
 ```php
 <?php
 
-namespace Duon\Cms\Tests;
+namespace Celemas\Cms\Tests;
 
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 final class MyIntegrationTest extends IntegrationTestCase
 {
@@ -232,9 +232,9 @@ final class MyIntegrationTest extends IntegrationTestCase
 ```php
 <?php
 
-namespace Duon\Cms\Tests\End2End;
+namespace Celemas\Cms\Tests\End2End;
 
-use Duon\Cms\Tests\End2EndTestCase;
+use Celemas\Cms\Tests\End2EndTestCase;
 
 final class NodeCrudTest extends End2EndTestCase
 {
@@ -370,15 +370,15 @@ RuntimeException: Migrations not applied to test database. Run: ./run migrate --
 
 **Error:**
 ```
-PDOException: SQLSTATE[28000] authentication failed for user "duoncms"
+PDOException: SQLSTATE[28000] authentication failed for user "celemascms"
 ```
 
 **Solution:**
 Ensure the database user exists with the correct password:
 
 ```bash
-sudo -u postgres createuser -d duoncms
-sudo -u postgres psql -c "ALTER USER duoncms WITH PASSWORD 'duoncms';"
+sudo -u postgres createuser -d celemascms
+sudo -u postgres psql -c "ALTER USER celemascms WITH PASSWORD 'celemascms';"
 ```
 
 ### "Permission denied to create database"
@@ -392,7 +392,7 @@ PDOException: permission denied to create database
 Grant CREATEDB privilege to the user:
 
 ```bash
-sudo -u postgres psql -c "ALTER USER duoncms CREATEDB;"
+sudo -u postgres psql -c "ALTER USER celemascms CREATEDB;"
 ```
 
 ### Database Connection Configuration
@@ -400,9 +400,9 @@ sudo -u postgres psql -c "ALTER USER duoncms CREATEDB;"
 Test database credentials are configured in `tests/TestCase.php`:
 
 ```php
-// Database: duoncms
-// User: duoncms
-// Password: duoncms
+// Database: celemascms
+// User: celemascms
+// Password: celemascms
 // Host: localhost
 ```
 
@@ -425,9 +425,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: duoncms
-          POSTGRES_USER: duoncms
-          POSTGRES_PASSWORD: duoncms
+          POSTGRES_DB: celemascms
+          POSTGRES_USER: celemascms
+          POSTGRES_PASSWORD: celemascms
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

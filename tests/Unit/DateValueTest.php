@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Field\Date;
-use Duon\Cms\Node\FieldOwner;
-use Duon\Cms\Tests\TestCase;
-use Duon\Cms\Value\ValueContext;
+use Celemas\Cms\Field\Date;
+use Celemas\Cms\Node\FieldOwner;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Cms\Value\ValueContext;
 use IntlDateFormatter;
 
 final class DateValueTest extends TestCase
 {
-	private function createContext(): \Duon\Cms\Context
+	private function createContext(): \Celemas\Cms\Context
 	{
 		$psrRequest = $this->psrRequest();
-		$locales = new \Duon\Cms\Locales();
+		$locales = new \Celemas\Cms\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
 
 		$psrRequest = $psrRequest
@@ -23,9 +23,9 @@ final class DateValueTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Duon\Core\Request($psrRequest);
+		$request = new \Celemas\Core\Request($psrRequest);
 
-		return new \Duon\Cms\Context(
+		return new \Celemas\Cms\Context(
 			$this->db(),
 			$request,
 			$this->config(),
@@ -34,14 +34,14 @@ final class DateValueTest extends TestCase
 		);
 	}
 
-	private function createOwner(\Duon\Cms\Context $context): FieldOwner
+	private function createOwner(\Celemas\Cms\Context $context): FieldOwner
 	{
 		return new FieldOwner($context, 'test-node');
 	}
 
 	public function testDateValueHasCorrectFormat(): void
 	{
-		$this->assertSame('Y-m-d', \Duon\Cms\Value\Date::FORMAT);
+		$this->assertSame('Y-m-d', \Celemas\Cms\Value\Date::FORMAT);
 	}
 
 	public function testDateValueFormatsToExpectedString(): void
@@ -53,7 +53,7 @@ final class DateValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertSame('2025-01-31', $value->format(\Duon\Cms\Value\Date::FORMAT));
+		$this->assertSame('2025-01-31', $value->format(\Celemas\Cms\Value\Date::FORMAT));
 		$this->assertSame('2025-01-31', (string) $value);
 		$this->assertTrue($value->isset());
 	}

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Field;
+namespace Celemas\Cms\Tests\Fixtures\Field;
 
-use Duon\Cms\Field\Number;
-use Duon\Cms\Schema\Label;
+use Celemas\Cms\Field\Number;
+use Celemas\Cms\Schema\Label;
 
 #[Label('Test Number')]
 class TestNumber extends Number {}

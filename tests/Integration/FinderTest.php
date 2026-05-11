@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Integration;
+namespace Celemas\Cms\Tests\Integration;
 
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Tests\IntegrationTestCase;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Tests\IntegrationTestCase;
 
 final class FinderTest extends IntegrationTestCase
 {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Cms\Util\Time;
+use Celemas\Cms\Util\Time;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use RuntimeException;
 

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Assets;
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Assets;
+use Celemas\Cms\Exception\RuntimeException;
 use Gumlet\ImageResize;
 
-use function Duon\Cms\escape;
+use function Celemas\Cms\escape;
 
 class Image extends File
 {

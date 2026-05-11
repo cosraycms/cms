@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Schema;
+namespace Celemas\Cms\Node\Schema;
 
-use Duon\Cms\Schema\Children;
-use Duon\Cms\Schema\Deletable;
-use Duon\Cms\Schema\FieldOrder;
-use Duon\Cms\Schema\Handle;
-use Duon\Cms\Schema\Icon;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Permission;
-use Duon\Cms\Schema\Render;
-use Duon\Cms\Schema\Route;
-use Duon\Cms\Schema\Title;
+use Celemas\Cms\Schema\Children;
+use Celemas\Cms\Schema\Deletable;
+use Celemas\Cms\Schema\FieldOrder;
+use Celemas\Cms\Schema\Handle;
+use Celemas\Cms\Schema\Icon;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Permission;
+use Celemas\Cms\Schema\Render;
+use Celemas\Cms\Schema\Route;
+use Celemas\Cms\Schema\Title;
 
 class Registry
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Session;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Session;
+use Celemas\Cms\Tests\TestCase;
 
 /**
  * @internal
@@ -49,7 +49,7 @@ final class SessionTest extends TestCase
 		$session = new Session();
 		$session->start();
 
-		$_COOKIE['duon_auth'] = 'token-value';
+		$_COOKIE['celemas_auth'] = 'token-value';
 
 		$this->assertSame('token-value', $session->getAuthToken());
 	}

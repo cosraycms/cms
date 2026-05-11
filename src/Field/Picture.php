@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field;
+namespace Celemas\Cms\Field;
 
-use Duon\Cms\Validation\Prepare;
-use Duon\Cms\Validation\Shapes;
-use Duon\Cms\Value;
-use Duon\Sire\Shape;
+use Celemas\Cms\Validation\Prepare;
+use Celemas\Cms\Validation\Shapes;
+use Celemas\Cms\Value;
+use Celemas\Sire\Shape;
 
 class Picture extends Field implements
 	Capability\Limitable,

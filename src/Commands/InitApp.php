@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
-use Duon\Cli\Command;
+use Celemas\Cli\Command;
 
 class InitApp extends Command
 {
 	protected string $group = 'General';
 	protected string $name = 'init-app';
-	protected string $description = 'Initialize the Duon app';
+	protected string $description = 'Initialize the Celemas app';
 
 	public function run(): int
 	{

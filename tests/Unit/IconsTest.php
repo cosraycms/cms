@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Config;
-use Duon\Cms\Contract\Icons as IconsContract;
-use Duon\Cms\Icons;
-use Duon\Cms\Icons\Iconify;
-use Duon\Cms\Icons\Local;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Config;
+use Celemas\Cms\Contract\Icons as IconsContract;
+use Celemas\Cms\Icons;
+use Celemas\Cms\Icons\Iconify;
+use Celemas\Cms\Icons\Local;
+use Celemas\Cms\Tests\TestCase;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -28,7 +28,7 @@ final class IconsTest extends TestCase
 					$calls++;
 					$this->assertSame('https://api.iconify.design/bi/check.svg', $url);
 					$this->assertSame(5, $timeout);
-					$this->assertSame('duon/cms', $userAgent);
+					$this->assertSame('celemas/cms', $userAgent);
 
 					return '<svg viewBox="0 0 16 16"></svg>';
 				},
@@ -189,7 +189,7 @@ final class IconsTest extends TestCase
 					$calls++;
 					$this->assertSame('https://api.iconify.design/bi/check.svg', $url);
 					$this->assertSame(5, $timeout);
-					$this->assertSame('duon/cms', $userAgent);
+					$this->assertSame('celemas/cms', $userAgent);
 
 					return '<svg data-source="remote"></svg>';
 				},
@@ -219,7 +219,7 @@ final class IconsTest extends TestCase
 						$url,
 					);
 					$this->assertSame(5, $timeout);
-					$this->assertSame('duon/cms', $userAgent);
+					$this->assertSame('celemas/cms', $userAgent);
 
 					return '<svg data-source="remote"></svg>';
 				},
@@ -362,7 +362,7 @@ final class IconsTest extends TestCase
 
 	private function publicDir(): string
 	{
-		$dir = sys_get_temp_dir() . '/duon-cms-icons-' . bin2hex(random_bytes(8));
+		$dir = sys_get_temp_dir() . '/celemas-cms-icons-' . bin2hex(random_bytes(8));
 		mkdir($dir, 0o755, true);
 
 		return $dir;

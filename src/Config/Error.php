@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
-use Duon\Error\Renderer;
+use Celemas\Error\Renderer;
 
 final class Error
 {
 	public function __construct(
-		private readonly \Duon\Cms\Config $config,
+		private readonly \Celemas\Cms\Config $config,
 	) {}
 
 	public bool $enabled {

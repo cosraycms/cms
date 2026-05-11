@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Number;
-use Duon\Cms\Schema\Title;
+use Celemas\Cms\Field\Number;
+use Celemas\Cms\Schema\Title;
 
 #[Title('count')]
 class NodeWithNumericTitleField

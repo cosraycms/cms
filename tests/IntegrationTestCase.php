@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests;
+namespace Celemas\Cms\Tests;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Context;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Plugin;
-use Duon\Container\Container;
-use Duon\Quma\Connection;
-use Duon\Quma\Database;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Context;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Plugin;
+use Celemas\Container\Container;
+use Celemas\Quma\Connection;
+use Celemas\Quma\Database;
 use PDO;
 use RuntimeException;
 
@@ -45,7 +45,7 @@ class IntegrationTestCase extends TestCase
 	{
 		// Create shared connection for migration check
 		self::$sharedConnection = new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+			'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
 			self::root() . '/db/sql',
 		)
 			->migrations(self::root() . '/db/migrations')
@@ -114,7 +114,7 @@ class IntegrationTestCase extends TestCase
 	public function conn(): Connection
 	{
 		return new Connection(
-			'pgsql:host=localhost;dbname=duoncms;user=duoncms;password=duoncms',
+			'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
 			self::root() . '/db/sql',
 		)
 			->migrations(self::root() . '/db/migrations')
@@ -137,43 +137,43 @@ class IntegrationTestCase extends TestCase
 
 		// Register test Node classes for fixture types
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-article', \Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
+			->add('test-article', \Celemas\Cms\Tests\Fixtures\Node\TestArticle::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-home', \Duon\Cms\Tests\Fixtures\Node\TestHome::class);
+			->add('test-home', \Celemas\Cms\Tests\Fixtures\Node\TestHome::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-block', \Duon\Cms\Tests\Fixtures\Node\TestBlock::class);
+			->add('test-block', \Celemas\Cms\Tests\Fixtures\Node\TestBlock::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-widget', \Duon\Cms\Tests\Fixtures\Node\TestWidget::class);
+			->add('test-widget', \Celemas\Cms\Tests\Fixtures\Node\TestWidget::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-document', \Duon\Cms\Tests\Fixtures\Node\TestDocument::class);
+			->add('test-document', \Celemas\Cms\Tests\Fixtures\Node\TestDocument::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('test-media-document', \Duon\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
+			->add('test-media-document', \Celemas\Cms\Tests\Fixtures\Node\TestMediaDocument::class);
 
 		// Register dynamically created test types (reuse TestPage for all page types)
 		$container->tag(Plugin::NODE_TAG)
-			->add('ordered-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('ordered-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('limit-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('limit-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('hidden-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('hidden-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('routing-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('routing-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('nested-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('nested-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('unpublished-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('unpublished-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('create-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('create-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('crud-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('crud-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('update-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('update-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('delete-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('delete-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Plugin::NODE_TAG)
-			->add('renderable-test-page', \Duon\Cms\Tests\Fixtures\Node\TestPage::class);
+			->add('renderable-test-page', \Celemas\Cms\Tests\Fixtures\Node\TestPage::class);
 
 		return $container;
 	}

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Context;
-use Duon\Cms\Exception\ParserOutputException;
-use Duon\Cms\Finder\QueryCompiler;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Context;
+use Celemas\Cms\Exception\ParserOutputException;
+use Celemas\Cms\Finder\QueryCompiler;
+use Celemas\Cms\Tests\TestCase;
 
 final class ComparisonTest extends TestCase
 {

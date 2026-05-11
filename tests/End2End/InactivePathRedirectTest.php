@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\End2End;
+namespace Celemas\Cms\Tests\End2End;
 
-use Duon\Cms\Tests\End2EndTestCase;
+use Celemas\Cms\Tests\End2EndTestCase;
 
 /**
  * @internal

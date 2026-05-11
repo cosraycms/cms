@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Text;
-use Duon\Cms\Field\Textarea;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\DefaultValue;
-use Duon\Cms\Schema\Description;
-use Duon\Cms\Schema\Hidden;
-use Duon\Cms\Schema\Immutable;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Required;
-use Duon\Cms\Schema\Rows;
-use Duon\Cms\Schema\Translate;
-use Duon\Cms\Schema\Validate;
-use Duon\Cms\Schema\Width;
+use Celemas\Cms\Field\Text;
+use Celemas\Cms\Field\Textarea;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\DefaultValue;
+use Celemas\Cms\Schema\Description;
+use Celemas\Cms\Schema\Hidden;
+use Celemas\Cms\Schema\Immutable;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Required;
+use Celemas\Cms\Schema\Rows;
+use Celemas\Cms\Schema\Translate;
+use Celemas\Cms\Schema\Validate;
+use Celemas\Cms\Schema\Width;
 
 #[Label('Test Document')]
 class TestDocument implements Title

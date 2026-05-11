@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Matrix;
-use Duon\Cms\Field\Owner;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Matrix;
+use Celemas\Cms\Field\Owner;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -73,7 +73,7 @@ class MatrixItem extends Value
 			return $this->subfields[$name]->value();
 		}
 
-		throw new \Duon\Cms\Exception\NoSuchProperty("Matrix item doesn't have subfield '{$name}'");
+		throw new \Celemas\Cms\Exception\NoSuchProperty("Matrix item doesn't have subfield '{$name}'");
 	}
 
 	protected function initSubfields(): void

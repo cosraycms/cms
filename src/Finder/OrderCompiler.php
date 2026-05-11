@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder;
+namespace Celemas\Cms\Finder;
 
-use Duon\Cms\Exception\ParserException;
+use Celemas\Cms\Exception\ParserException;
 
 final class OrderCompiler
 {

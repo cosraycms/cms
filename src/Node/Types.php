@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Node\Schema\Registry;
+use Celemas\Cms\Node\Schema\Registry;
 
 class Types
 {

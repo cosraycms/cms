@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
+use Celemas\Cms\Column;
+use Celemas\Cms\Tests\TestCase;
 use Closure;
-use Duon\Cms\Column;
-use Duon\Cms\Tests\TestCase;
 
 final class ColumnTest extends TestCase
 {

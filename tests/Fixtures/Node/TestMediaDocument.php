@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Fixtures\Node;
+namespace Celemas\Cms\Tests\Fixtures\Node;
 
-use Duon\Cms\Field\Grid;
-use Duon\Cms\Field\Image;
-use Duon\Cms\Field\Option;
-use Duon\Cms\Field\Video;
-use Duon\Cms\Node\Contract\Title;
-use Duon\Cms\Schema\Columns;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Options;
-use Duon\Cms\Schema\Translate;
-use Duon\Cms\Schema\TranslateFile;
+use Celemas\Cms\Field\Grid;
+use Celemas\Cms\Field\Image;
+use Celemas\Cms\Field\Option;
+use Celemas\Cms\Field\Video;
+use Celemas\Cms\Node\Contract\Title;
+use Celemas\Cms\Schema\Columns;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Options;
+use Celemas\Cms\Schema\Translate;
+use Celemas\Cms\Schema\TranslateFile;
 
 #[Label('Test Media Document')]
 class TestMediaDocument implements Title

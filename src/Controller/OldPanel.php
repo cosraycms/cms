@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Context;
-use Duon\Cms\Locales;
-use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Navigation;
-use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\PathManager;
-use Duon\Cms\Node\Serializer;
-use Duon\Cms\Node\Store;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Plugin;
-use Duon\Container\Container;
-use Duon\Core\Exception\HttpBadRequest;
-use Duon\Core\Exception\HttpNotFound;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
-use Duon\Wire\Creator;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Context;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Cms\Navigation;
+use Celemas\Cms\Node\Factory as NodeFactory;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\PathManager;
+use Celemas\Cms\Node\Serializer;
+use Celemas\Cms\Node\Store;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Plugin;
+use Celemas\Container\Container;
+use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
+use Celemas\Wire\Creator;
 
 class OldPanel
 {

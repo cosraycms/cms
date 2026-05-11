@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Finder\Nodes;
-use Duon\Cms\Node\Node;
-use Duon\Cms\Node\Types;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Finder\Nodes;
+use Celemas\Cms\Node\Node;
+use Celemas\Cms\Node\Types;
 use Override;
 
 abstract class Collection implements NavigationItem

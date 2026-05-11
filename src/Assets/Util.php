@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Assets;
+namespace Celemas\Cms\Assets;
 
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Exception\RuntimeException;
 
 class Util
 {

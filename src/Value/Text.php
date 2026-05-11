@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Value;
+namespace Celemas\Cms\Value;
 
-use Duon\Cms\Field\Capability\Translatable;
-use Duon\Cms\Field\Field;
-use Duon\Cms\Field\Owner;
+use Celemas\Cms\Field\Capability\Translatable;
+use Celemas\Cms\Field\Field;
+use Celemas\Cms\Field\Owner;
 
-use function Duon\Cms\escape;
+use function Celemas\Cms\escape;
 
 /**
  * @property-read Field&Translatable $field

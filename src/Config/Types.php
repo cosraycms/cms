@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
 /**
  * @psalm-type SessionOptions = array{
@@ -35,7 +35,7 @@ namespace Duon\Cms\Config;
  *     'panel.logo': ?string,
  *
  *     'error.enabled': bool,
- *     'error.renderer': null|class-string<\Duon\Error\Renderer>|\Duon\Error\Renderer,
+ *     'error.renderer': null|class-string<\Celemas\Error\Renderer>|\Celemas\Error\Renderer,
  *     'error.trusted': list<class-string>,
  *     'error.views': null|string|list<string>,
  *     'error.whoops': bool,

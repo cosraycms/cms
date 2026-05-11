@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Schema;
+namespace Celemas\Cms\Node\Schema;
 
-use Duon\Cms\Exception\RuntimeException;
+use Celemas\Cms\Exception\RuntimeException;
 
 class TitleHandler extends Handler
 {

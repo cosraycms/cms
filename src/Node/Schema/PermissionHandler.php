@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Schema;
+namespace Celemas\Cms\Node\Schema;
 
 class PermissionHandler extends Handler
 {

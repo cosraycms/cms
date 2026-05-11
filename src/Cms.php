@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
-use Duon\Cms\Exception\RuntimeException;
-use Duon\Cms\Finder\Menu;
-use Duon\Cms\Finder\Node;
-use Duon\Cms\Finder\Nodes;
-use Duon\Cms\Finder\Render;
-use Duon\Cms\Node\Factory;
-use Duon\Cms\Node\Types;
+use Celemas\Cms\Exception\RuntimeException;
+use Celemas\Cms\Finder\Menu;
+use Celemas\Cms\Finder\Node;
+use Celemas\Cms\Finder\Nodes;
+use Celemas\Cms\Finder\Render;
+use Celemas\Cms\Node\Factory;
+use Celemas\Cms\Node\Types;
 
 /**
  * @property-read Nodes $nodes

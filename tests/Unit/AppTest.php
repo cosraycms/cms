@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\App;
-use Duon\Cms\Config;
-use Duon\Cms\Middleware\Session as SessionMiddleware;
-use Duon\Cms\Plugin;
-use Duon\Cms\Tests\Fixtures\Collection\TestArticlesCollection;
-use Duon\Cms\Tests\Fixtures\StaticRenderer;
-use Duon\Cms\Tests\TestCase;
-use Duon\Core\App as CoreApp;
-use Duon\Core\Exception\ValueError;
-use Duon\Core\Plugin as CorePlugin;
-use Duon\Core\Response as CoreResponse;
-use Duon\Error\Handler as ErrorHandler;
-use Duon\Router\Router;
+use Celemas\Cms\App;
+use Celemas\Cms\Config;
+use Celemas\Cms\Middleware\Session as SessionMiddleware;
+use Celemas\Cms\Plugin;
+use Celemas\Cms\Tests\Fixtures\Collection\TestArticlesCollection;
+use Celemas\Cms\Tests\Fixtures\StaticRenderer;
+use Celemas\Cms\Tests\TestCase;
+use Celemas\Core\App as CoreApp;
+use Celemas\Core\Exception\ValueError;
+use Celemas\Core\Plugin as CorePlugin;
+use Celemas\Core\Response as CoreResponse;
+use Celemas\Error\Handler as ErrorHandler;
+use Celemas\Router\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\AbstractLogger;
 
@@ -136,12 +136,12 @@ final class AppTest extends TestCase
 		$app = $this->app();
 
 		$app->section('Content')->collection(TestArticlesCollection::class);
-		$app->node(\Duon\Cms\Tests\Fixtures\Node\TestArticle::class);
+		$app->node(\Celemas\Cms\Tests\Fixtures\Node\TestArticle::class);
 
 		$this->assertArrayHasKey('test-articles', $app->navigation()->refs());
 		$this->assertSame(
 			'test-article',
-			$app->meta()->get(\Duon\Cms\Tests\Fixtures\Node\TestArticle::class, 'handle'),
+			$app->meta()->get(\Celemas\Cms\Tests\Fixtures\Node\TestArticle::class, 'handle'),
 		);
 	}
 

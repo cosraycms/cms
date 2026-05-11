@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Util;
+namespace Celemas\Cms\Util;
 
 class Strings
 {

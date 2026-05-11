@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Locales;
-use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Node\Factory as NodeFactory;
-use Duon\Cms\Node\Serializer;
-use Duon\Cms\Node\Types;
-use Duon\Container\Container;
-use Duon\Core\Exception\HttpBadRequest;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Locales;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Cms\Node\Factory as NodeFactory;
+use Celemas\Cms\Node\Serializer;
+use Celemas\Cms\Node\Types;
+use Celemas\Container\Container;
+use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 use stdClass;
 
 class Nodes

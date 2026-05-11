@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node\Contract;
+namespace Celemas\Cms\Node\Contract;
 
 interface HasInit
 {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Config;
+namespace Celemas\Cms\Config;
 
-use Duon\Cms\Util\Password;
+use Celemas\Cms\Util\Password;
 
-use function Duon\Cms\env;
+use function Celemas\Cms\env;
 
 final class Defaults
 {
@@ -31,7 +31,7 @@ final class Defaults
 	private static function app(Env $env): array
 	{
 		return [
-			'app.name' => env('APP_NAME', 'duoncms'),
+			'app.name' => env('APP_NAME', 'celemascms'),
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),
@@ -81,7 +81,7 @@ final class Defaults
 			'icons.local.paths' => [],
 			'icons.iconify.base_url' => 'https://api.iconify.design',
 			'icons.iconify.timeout' => 5,
-			'icons.iconify.user_agent' => 'duon/cms',
+			'icons.iconify.user_agent' => 'celemas/cms',
 		];
 	}
 

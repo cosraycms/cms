@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Capability\File;
+namespace Celemas\Cms\Field\Capability\File;
 
 trait IsTranslatable
 {

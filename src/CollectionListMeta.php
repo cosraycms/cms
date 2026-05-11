@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
 final class CollectionListMeta
 {

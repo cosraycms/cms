@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Controller;
+namespace Celemas\Cms\Controller;
 
-use Duon\Cms\Middleware\Permission;
-use Duon\Cms\Validation;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Middleware\Permission;
+use Celemas\Cms\Validation;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 
 class Auth
 {
 	public function __construct(
 		protected readonly Factory $factory,
-		protected readonly \Duon\Cms\Auth $auth,
+		protected readonly \Celemas\Cms\Auth $auth,
 	) {}
 
 	#[Permission('authenticated')]
@@ -120,7 +120,7 @@ class Auth
 
 	protected function unauthorized(Response $response, string $message, string $loginType)
 	{
-		$response->header('WWW-Authenticate', 'Bearer realm="Duon CMS"');
+		$response->header('WWW-Authenticate', 'Bearer realm="Celemas CMS"');
 
 		return $response->json([
 			'error' => $message,

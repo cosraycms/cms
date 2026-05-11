@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Node;
+namespace Celemas\Cms\Node;
 
-use Duon\Cms\Cms;
-use Duon\Cms\Config;
-use Duon\Cms\Field\FieldHydrator;
-use Duon\Cms\Node\Contract\ProvidesRenderContext;
-use Duon\Cms\Renderer;
-use Duon\Container\Container;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Request;
-use Duon\Core\Response;
+use Celemas\Cms\Cms;
+use Celemas\Cms\Config;
+use Celemas\Cms\Field\FieldHydrator;
+use Celemas\Cms\Node\Contract\ProvidesRenderContext;
+use Celemas\Cms\Renderer;
+use Celemas\Container\Container;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Request;
+use Celemas\Core\Response;
 
 class ViewRenderer
 {

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Tests\Unit;
+namespace Celemas\Cms\Tests\Unit;
 
-use Duon\Cms\Exception\NoSuchProperty;
-use Duon\Cms\Node\Schema\Registry;
-use Duon\Cms\Node\Types;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithIconAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithPermissionAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithRenderAttribute;
-use Duon\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
-use Duon\Cms\Tests\Fixtures\Node\PlainBlock;
-use Duon\Cms\Tests\Fixtures\Node\PlainPage;
-use Duon\Cms\Tests\TestCase;
+use Celemas\Cms\Exception\NoSuchProperty;
+use Celemas\Cms\Node\Schema\Registry;
+use Celemas\Cms\Node\Types;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithChildrenAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithHandleAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithIconAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithNameAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithPermissionAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithRenderAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\NodeWithRouteAttribute;
+use Celemas\Cms\Tests\Fixtures\Node\PlainBlock;
+use Celemas\Cms\Tests\Fixtures\Node\PlainPage;
+use Celemas\Cms\Tests\TestCase;
 
 final class TypesTest extends TestCase
 {

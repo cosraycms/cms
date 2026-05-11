@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Finder\Output;
+namespace Celemas\Cms\Finder\Output;
 
-use Duon\Cms\Exception\ParserException;
-use Duon\Cms\Finder\CompilesField;
-use Duon\Cms\Finder\Input\Token;
-use Duon\Cms\Finder\Input\TokenType;
-use Duon\Quma\Database;
+use Celemas\Cms\Exception\ParserException;
+use Celemas\Cms\Finder\CompilesField;
+use Celemas\Cms\Finder\Input\Token;
+use Celemas\Cms\Finder\Input\TokenType;
+use Celemas\Quma\Database;
 
 abstract readonly class Expression
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Commands;
+namespace Celemas\Cms\Commands;
 
-use Duon\Cli\Command;
-use Duon\Cms\Config;
+use Celemas\Cli\Command;
+use Celemas\Cms\Config;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 

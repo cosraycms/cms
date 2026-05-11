@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms;
+namespace Celemas\Cms;
 
 use BadMethodCallException;
+use Celemas\Cms\Boiler\Error\Handler as ErrorHandler;
+use Celemas\Cms\Node\Types;
+use Celemas\Container\Container;
+use Celemas\Container\Entry;
+use Celemas\Core\App as CoreApp;
+use Celemas\Core\Factory\Discovery;
+use Celemas\Core\Factory\Factory;
+use Celemas\Core\Plugin as CorePlugin;
+use Celemas\Router\AddsRoutes;
+use Celemas\Router\After;
+use Celemas\Router\Before;
+use Celemas\Router\Group;
+use Celemas\Router\Route;
+use Celemas\Router\RouteAdder;
+use Celemas\Router\Router;
 use Closure;
-use Duon\Cms\Boiler\Error\Handler as ErrorHandler;
-use Duon\Cms\Node\Types;
-use Duon\Container\Container;
-use Duon\Container\Entry;
-use Duon\Core\App as CoreApp;
-use Duon\Core\Factory\Discovery;
-use Duon\Core\Factory\Factory;
-use Duon\Core\Plugin as CorePlugin;
-use Duon\Router\AddsRoutes;
-use Duon\Router\After;
-use Duon\Router\Before;
-use Duon\Router\Group;
-use Duon\Router\Route;
-use Duon\Router\RouteAdder;
-use Duon\Router\Router;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;

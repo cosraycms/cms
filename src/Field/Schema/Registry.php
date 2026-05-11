@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Duon\Cms\Field\Schema;
+namespace Celemas\Cms\Field\Schema;
 
-use Duon\Cms\Schema\Columns;
-use Duon\Cms\Schema\DefaultValue;
-use Duon\Cms\Schema\Description;
-use Duon\Cms\Schema\Fulltext;
-use Duon\Cms\Schema\Hidden;
-use Duon\Cms\Schema\Icon;
-use Duon\Cms\Schema\Immutable;
-use Duon\Cms\Schema\Label;
-use Duon\Cms\Schema\Limit;
-use Duon\Cms\Schema\Options;
-use Duon\Cms\Schema\Required;
-use Duon\Cms\Schema\Rows;
-use Duon\Cms\Schema\Syntax;
-use Duon\Cms\Schema\Translate;
-use Duon\Cms\Schema\TranslateFile;
-use Duon\Cms\Schema\Validate;
-use Duon\Cms\Schema\Width;
+use Celemas\Cms\Schema\Columns;
+use Celemas\Cms\Schema\DefaultValue;
+use Celemas\Cms\Schema\Description;
+use Celemas\Cms\Schema\Fulltext;
+use Celemas\Cms\Schema\Hidden;
+use Celemas\Cms\Schema\Icon;
+use Celemas\Cms\Schema\Immutable;
+use Celemas\Cms\Schema\Label;
+use Celemas\Cms\Schema\Limit;
+use Celemas\Cms\Schema\Options;
+use Celemas\Cms\Schema\Required;
+use Celemas\Cms\Schema\Rows;
+use Celemas\Cms\Schema\Syntax;
+use Celemas\Cms\Schema\Translate;
+use Celemas\Cms\Schema\TranslateFile;
+use Celemas\Cms\Schema\Validate;
+use Celemas\Cms\Schema\Width;
 
 class Registry
 {
