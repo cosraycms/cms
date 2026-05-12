@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Celemas\Cli\Runner;
+use Celemas\Cms\Commands\RecreateDb;
+use Celemas\Quma\Commands as QumaCommands;
+use Celemas\Quma\Connection;
+
+$connection = new Connection(
+	'pgsql:host=localhost;dbname=celemascms;user=celemascms;password=celemascms',
+	__DIR__ . '/db/sql',
+)
+	->migrations(__DIR__ . '/db/migrations/install')
+	->fetch(PDO::FETCH_ASSOC);
+
+$commands = QumaCommands::get($connection);
+$commands->add(new RecreateDb('celemascms', 'celemascms', 'celemascms'));
+
+$runner = new Runner($commands);
+
+exit($runner->run());
+
+// vim: ft=php
