@@ -60,10 +60,10 @@
 			"./vendor/bin/mago fmt --check",
 			"./vendor/bin/mago lint"
 		],
-		"coverage:test": "php -d xdebug.mode=coverage ./vendor/bin/phpunit --testdox --path-coverage --coverage-text --coverage-php=.coverage/cover.php --coverage-clover=.coverage/coverage.xml --colors=always",
+		"coverage:test": "php -d xdebug.mode=coverage ./vendor/bin/phpunit --testdox --colors=always",
 		"coverage:analyze": "./vendor/bin/coverlyzer .coverage/cover.php",
 		"coverage": [
-			"composer coverage:test",
+			"composer coverage:test -- --path-coverage",
 			"composer coverage:analyze"
 		],
 		"ci": [
