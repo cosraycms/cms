@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace Celemas\Cms\Validation;
 
-use Celemas\Sire\Contract\Shape as ShapeContract;
+use Celemas\Sire\Contract\Validator;
 use Celemas\Sire\Result;
 use Celemas\Sire\Shape;
 use Override;
 
-final class TokenLogin implements ShapeContract
+final class TokenLogin implements Validator
 {
 	private Shape $shape;
 
 	public function __construct()
 	{
 		$this->shape = new Shape();
-		$this->shape->add('token', 'text', 'required', 'maxlen:512')->label(_('One-time token'));
+		$this->shape->add('token', 'string')->rules('required', 'maxlen:512')->label(_('One-time token'));
 	}
 
 	#[Override]
-	public function validate(array $data, int $level = 1): Result
+	public function validate(array $data): Result
 	{
-		return $this->shape->validate($data, $level);
+		return $this->shape->validate($data);
 	}
 }

@@ -56,16 +56,16 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 
 	public function shape(): Shape
 	{
-		$shape = Shapes::create()->title($this->label)->keepUnknown();
-		$shape->add('type', 'text', 'required', 'in:grid');
-		$shape->add('columns', 'int', 'required');
+		$shape = Shapes::create();
+		$shape->add('type', 'string')->rules('required', 'in:grid');
+		$shape->add('columns', 'int')->rules('required');
 
 		$itemShape = new GridItemValidator(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nShape = Shapes::create()->title($this->label)->keepUnknown();
+			$i18nShape = Shapes::create();
 
 			foreach ($locales as $locale) {
 				$innerValidators = [];
@@ -74,18 +74,29 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 					$innerValidators[] = 'required';
 				}
 
-				$i18nShape
-					->add($locale->id, $itemShape, ...$innerValidators)
+				$localeField = $i18nShape
+					->add($locale->id, $itemShape)
+					->rules(...$innerValidators)
 					->prepare(Prepare::nullAsEmpty(...));
+
+				if (!in_array('required', $innerValidators, true)) {
+					$localeField->optional()->nullable();
+				}
 			}
 
-			$shape
-				->add('value', $i18nShape, ...$this->validators)
+			$value = $shape
+				->add('value', $i18nShape)
+				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		} else {
-			$shape
-				->add('value', $itemShape, ...$this->validators)
+			$value = $shape
+				->add('value', $itemShape)
+				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
+		}
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
 		}
 
 		return $shape;

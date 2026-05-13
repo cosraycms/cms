@@ -192,8 +192,8 @@ final class PrimitiveValueTest extends TestCase
 			'value' => 'puts 1',
 		]);
 
-		$this->assertTrue($valid->isValid());
-		$this->assertFalse($invalid->isValid());
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
 	}
 
 	public function testNumberValueCastsNumeric(): void
@@ -682,8 +682,8 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 
-		$this->assertTrue($valid->isValid());
-		$this->assertFalse($invalid->isValid());
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
 	}
 
 	public function testFileShapeRejectsFewerItemsThanLimitMin(): void
@@ -709,8 +709,8 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 
-		$this->assertTrue($valid->isValid());
-		$this->assertFalse($invalid->isValid());
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
 	}
 
 	public function testTranslatedFileShapeAppliesLimitPerLocale(): void
@@ -747,8 +747,8 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 
-		$this->assertTrue($valid->isValid());
-		$this->assertFalse($invalid->isValid());
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
 	}
 
 	public function testOptionValueUsesProvidedValue(): void

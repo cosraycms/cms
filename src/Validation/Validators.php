@@ -4,52 +4,58 @@ declare(strict_types=1);
 
 namespace Celemas\Cms\Validation;
 
+use Celemas\Sire\Contract\Rule;
 use Celemas\Sire\Contract\ValidatesEmpty;
-use Celemas\Sire\Contract\Validator;
+use Celemas\Sire\Contract\Validation as ValidationContract;
 use Celemas\Sire\Contract\Value;
-use Celemas\Sire\ValidatorRegistry;
+use Celemas\Sire\RuleRegistry;
+use Celemas\Sire\Validation;
 use Override;
 
 final class Validators
 {
-	public static function registry(): ValidatorRegistry
+	public static function registry(): RuleRegistry
 	{
-		return ValidatorRegistry::withDefaults()->withMany([
+		return RuleRegistry::withDefaults()->withMany([
 			'minitems' => self::minItems(),
 			'maxitems' => self::maxItems(),
 		]);
 	}
 
-	private static function minItems(): Validator
+	private static function minItems(): Rule
 	{
-		return new class implements ValidatesEmpty {
-			public string $message = 'Has fewer than the minimum number of %4$s items';
+		return new class implements Rule, ValidatesEmpty {
+			public string $message {
+				get => 'Has fewer than the minimum number of {arg1} items';
+			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): bool
+			public function validate(Value $value, string ...$args): ValidationContract
 			{
 				if (!is_array($value->value)) {
-					return false;
+					return Validation::invalid();
 				}
 
-				return count($value->value) >= (int) ($args[0] ?? 0);
+				return Validation::from(count($value->value) >= (int) ($args[0] ?? 0));
 			}
 		};
 	}
 
-	private static function maxItems(): Validator
+	private static function maxItems(): Rule
 	{
-		return new class implements Validator {
-			public string $message = 'Has more than the maximum allowed number of %4$s items';
+		return new class implements Rule {
+			public string $message {
+				get => 'Has more than the maximum allowed number of {arg1} items';
+			}
 
 			#[Override]
-			public function validate(Value $value, string ...$args): bool
+			public function validate(Value $value, string ...$args): ValidationContract
 			{
 				if (!is_array($value->value)) {
-					return false;
+					return Validation::invalid();
 				}
 
-				return count($value->value) <= (int) ($args[0] ?? 0);
+				return Validation::from(count($value->value) <= (int) ($args[0] ?? 0));
 			}
 		};
 	}

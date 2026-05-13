@@ -102,10 +102,10 @@ class Store
 		$shape = $factory->create();
 		$result = $shape->validate($data);
 
-		if (!$result->isValid()) {
+		if (!$result->valid()) {
 			throw new HttpBadRequest($request, payload: [
 				'message' => _('Incomplete or invalid data'),
-				'errors' => $result->errors(),
+				'errors' => $result->issues(),
 			]);
 		}
 

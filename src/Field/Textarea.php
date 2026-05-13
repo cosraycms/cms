@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Celemas\Cms\Field;
 
+use Celemas\Cms\Validation\Shapes;
 use Celemas\Sire\Shape;
 
 class Textarea extends Text implements Capability\Translatable
@@ -17,17 +18,13 @@ class Textarea extends Text implements Capability\Translatable
 
 	public function shape(): Shape
 	{
-		$shape = new Shape()
-			->title($this->label)
-			->keepUnknown();
-		$shape->add('type', 'text', 'required', 'in:textarea');
+		$shape = Shapes::create();
+		$shape->add('type', 'string')->rules('required', 'in:textarea');
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
-			$i18nShape = new Shape()
-				->title($this->label)
-				->keepUnknown();
+			$i18nShape = Shapes::create();
 
 			foreach ($locales as $locale) {
 				$localeValidators = [];
@@ -36,12 +33,20 @@ class Textarea extends Text implements Capability\Translatable
 					$localeValidators[] = 'required';
 				}
 
-				$i18nShape->add($locale->id, 'text', ...$localeValidators);
+				$localeField = $i18nShape->add($locale->id, 'string')->rules(...$localeValidators);
+
+				if (!in_array('required', $localeValidators, true)) {
+					$localeField->optional()->nullable();
+				}
 			}
 
-			$shape->add('value', $i18nShape, ...$this->validators);
+			$value = $shape->add('value', $i18nShape)->rules(...$this->validators);
 		} else {
-			$shape->add('value', 'text', ...$this->validators);
+			$value = $shape->add('value', 'string')->rules(...$this->validators);
+		}
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
 		}
 
 		return $shape;

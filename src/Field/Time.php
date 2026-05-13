@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Celemas\Cms\Field;
 
+use Celemas\Cms\Validation\Shapes;
 use Celemas\Cms\Value\Time as TimeValue;
 use Celemas\Sire\Shape;
 
@@ -21,11 +22,14 @@ class Time extends Field
 
 	public function shape(): Shape
 	{
-		$shape = new Shape()
-			->title($this->label)
-			->keepUnknown();
-		$shape->add('type', 'text', 'required', 'in:time');
-		$shape->add('value', 'text', ...$this->validators);
+		$shape = Shapes::create();
+		$shape->add('type', 'string')->rules('required', 'in:time');
+
+		$value = $shape->add('value', 'string')->rules(...$this->validators);
+
+		if (!$this->isRequired()) {
+			$value->optional()->nullable();
+		}
 
 		return $shape;
 	}

@@ -30,9 +30,10 @@ class Auth
 	{
 		$shape = new Validation\Login();
 		$response = Response::create($this->factory);
-		$result = $shape->validate($request->json());
+		$data = $request->json();
+		$result = $shape->validate($data);
 
-		if ($result->isValid()) {
+		if ($result->valid()) {
 			$values = $result->values();
 			$user = $this->auth->authenticate(
 				$values['login'],
@@ -44,7 +45,7 @@ class Auth
 			if ($user === false) {
 				return $response->json(array_merge(
 					['error' => _('Falscher Benutzername oder Passwort'), 'loginType' => 'panel'],
-					$result->pristineValues(),
+					$data,
 				), 400);
 			}
 
@@ -54,7 +55,7 @@ class Auth
 		$response->json(
 			array_merge(
 				['error' => _('Bitte Benutzernamen und Passwort eingeben'), 'loginType' => 'panel'],
-				$result->pristineValues(),
+				$data,
 			),
 			400,
 		);
@@ -68,7 +69,7 @@ class Auth
 		$response = Response::create($this->factory);
 		$result = $shape->validate($request->json());
 
-		if ($result->isValid()) {
+		if ($result->valid()) {
 			$values = $result->values();
 			$user = $this->auth->authenticateByOneTimeToken(
 				$values['token'],

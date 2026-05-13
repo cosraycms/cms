@@ -43,7 +43,7 @@ final class Login extends Panel
 		$shape = new Validation\Login();
 		$result = $shape->validate($data);
 
-		if (!$result->isValid()) {
+		if (!$result->valid()) {
 			return $this->context([
 				'next' => $this->sanitizedNext($data['next'] ?? ''),
 				'login' => (string) ($data['login'] ?? ''),
