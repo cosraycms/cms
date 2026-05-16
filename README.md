@@ -8,8 +8,10 @@
 [![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](LICENSES/MIT.txt)
 
 > [!WARNING]
-> This project is under active development. Some features are experimental and may change. Documentation is still incomplete.
+> *Thanks for stopping by! This project is in an early, fast-moving stage. The API and data model are still unstable, and documentation is minimal or missing. I'm aware of many of the rough edges, so contributions are probably not worth your time right now.*
 <!-- prettier-ignore-end -->
+
+**Celemas CMS is a PHP content management framework for building structured websites with code-first content models, PostgreSQL-backed storage, and an admin panel for editors.**
 
 ## Bootstrapping
 
