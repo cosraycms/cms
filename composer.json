@@ -23,7 +23,7 @@
 		"celemas/boiler": "^0.4.0",
 		"celemas/core": "dev-main",
 		"celemas/error": "dev-main",
-		"celemas/quma": "dev-main",
+		"celemas/quma": "^0.2.0",
 		"celemas/session": "dev-main",
 		"celemas/sire": "dev-main",
 		"gumlet/php-image-resize": "2.0.*",
