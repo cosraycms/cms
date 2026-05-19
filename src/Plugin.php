@@ -18,6 +18,7 @@ use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Request;
 use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
+use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
 use PDO;
 
@@ -188,7 +189,8 @@ class Plugin implements CorePlugin
 		)
 			->migrations($namespacedMigrations)
 			->fetch(PDO::FETCH_ASSOC)
-			->options($config->options);
+			->options($config->options)
+			->placeholders(Delimiters::comments(), $config->placeholders);
 		$this->db = new Database($this->connection);
 	}
 

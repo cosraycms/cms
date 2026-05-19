@@ -92,6 +92,14 @@ final class Defaults
 			'db.dsn' => env('DATABASE_URL', null),
 			'db.sql' => [],
 			'db.migrations' => [],
+			'db.placeholders' => [
+				'all' => [
+					'cms.prefix' => 'cms_',
+				],
+				'pgsql' => [
+					'cms.prefix' => 'cms.',
+				],
+			],
 			'db.print' => false,
 			'db.options' => [],
 		];

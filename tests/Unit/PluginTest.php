@@ -11,6 +11,8 @@ use Celemas\Cms\Renderer;
 use Celemas\Cms\Tests\Fixtures\StaticRenderer;
 use Celemas\Cms\Tests\TestCase;
 use Celemas\Core\App;
+use Celemas\Quma\Connection;
+use Celemas\Quma\Delimiters;
 use Celemas\Router\Router;
 
 /**
@@ -41,6 +43,16 @@ final class PluginTest extends TestCase
 		$this->assertInstanceOf(Config::class, $app->container()->get(Config::class));
 	}
 
+	public function testLoadConfiguresDatabasePlaceholders(): void
+	{
+		$app = $this->loadPlugin();
+		$connection = $app->container()->get(Connection::class);
+		$placeholders = $connection->config->placeholders;
+
+		$this->assertEquals(Delimiters::comments(), $placeholders?->delimiters());
+		$this->assertSame(['cms.prefix' => 'cms.'], $placeholders?->values());
+	}
+
 	public function testExplicitViewRendererOverridesDefaultViewRenderer(): void
 	{
 		$app = $this->loadPlugin(static function (Plugin $plugin): void {
@@ -55,7 +67,7 @@ final class PluginTest extends TestCase
 	private function loadPlugin(?callable $configure = null, array $settings = []): App
 	{
 		$config = $this->config(array_merge([
-			'db.dsn' => 'sqlite::memory:',
+			'db.dsn' => 'pgsql:dbname=celemas',
 			'path.root' => self::root() . '/tests/Fixtures/Boiler',
 			'path.views' => '/templates',
 		], $settings));

@@ -15,6 +15,7 @@ namespace Celemas\Cms\Config;
  * }
  *
  * @psalm-type MimeMap = array<string, non-empty-list<string>>
+ * @psalm-type DbPlaceholders = array<non-empty-string, array<non-empty-string, string>>
  *
  * @psalm-type BuiltinConfig = array{
  *     'app.name': string,
@@ -48,6 +49,7 @@ namespace Celemas\Cms\Config;
  *     'db.dsn': ?string,
  *     'db.sql': string|list<string>,
  *     'db.migrations': string|list<string>,
+ *     'db.placeholders': DbPlaceholders,
  *     'db.print': bool,
  *     'db.options': array<string, mixed>,
  *
@@ -93,6 +95,7 @@ namespace Celemas\Cms\Config;
  *     'db.dsn'?: null|string,
  *     'db.sql'?: string|list<string>,
  *     'db.migrations'?: string|list<string>,
+ *     'db.placeholders'?: DbPlaceholders,
  *     'db.print'?: bool,
  *     'db.options'?: array<string, mixed>,
  *     'session.enabled'?: bool,

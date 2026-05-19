@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Celemas\Cms\Tests\Unit;
 
 use Celemas\Cms\Config;
+use Celemas\Cms\Exception\RuntimeException;
 use Celemas\Cms\Tests\TestCase;
 use Celemas\Cms\Util\Password;
 use Celemas\Core\Exception\ValueError;
@@ -174,6 +175,87 @@ final class ConfigTest extends TestCase
 		$this->assertSame(0, $config->session->options['cookie_lifetime']);
 		$this->assertSame(3600, $config->session->options['gc_maxlifetime']);
 		$this->assertSame(3600, $config->session->options['cache_expire']);
+	}
+
+	public function testDatabasePlaceholdersAreDeepMerged(): void
+	{
+		$config = new Config(self::root(), [
+			'db.placeholders' => [
+				'all' => [
+					'app.prefix' => 'app_',
+				],
+				'pgsql' => [
+					'app.prefix' => 'app.',
+				],
+			],
+		]);
+
+		$this->assertSame(
+			[
+				'all' => [
+					'cms.prefix' => 'cms_',
+					'app.prefix' => 'app_',
+				],
+				'pgsql' => [
+					'cms.prefix' => 'cms.',
+					'app.prefix' => 'app.',
+				],
+			],
+			$config->db->placeholders,
+		);
+	}
+
+	public function testDatabasePlaceholdersRequireCmsPrefix(): void
+	{
+		$config = new Config(self::root(), [
+			'db.dsn' => 'pgsql:dbname=cms',
+			'db.placeholders' => [],
+		]);
+
+		$this->throws(
+			RuntimeException::class,
+			'Invalid table prefix.',
+		);
+
+		$config->db->placeholders;
+	}
+
+	public function testDatabasePlaceholdersRequireValidCmsPrefix(): void
+	{
+		$config = new Config(self::root(), [
+			'db.dsn' => 'pgsql:dbname=cms',
+			'db.placeholders' => [
+				'pgsql' => [
+					'cms.prefix' => 'cms-',
+				],
+			],
+		]);
+
+		$this->throws(
+			RuntimeException::class,
+			'Invalid table prefix.',
+		);
+
+		$config->db->placeholders;
+	}
+
+	public function testDatabasePlaceholdersAllowDotOnlyForPostgresql(): void
+	{
+		$config = new Config(self::root(), [
+			'db.dsn' => 'mysql:dbname=cms',
+			'db.placeholders' => [
+				'all' => [
+					'cms.prefix' => 'cms.',
+				],
+			],
+		]);
+
+		$this->throws(
+			RuntimeException::class,
+			'Invalid table prefix.',
+		);
+
+		$config->db->placeholders;
 	}
 
 	public function testListSettingsAreConvertedByConfigObjects(): void
