@@ -1,4 +1,4 @@
-INSERT INTO cms.urlpaths (
+INSERT INTO cms.url_paths (
 	node,
 	path,
 	locale,

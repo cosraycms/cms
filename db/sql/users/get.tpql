@@ -3,8 +3,8 @@ SELECT
 	u.uid,
 	u.username,
 	u.email,
-	u.pwhash,
-	u.userrole AS role,
+	u.password,
+	u.rolename AS role,
 	u.active,
 	u.data,
 	COALESCE(c.data->>'name', c.username, c.email) AS creator,
@@ -26,19 +26,19 @@ INNER JOIN
 
 <?php if (isset($token)): ?>
 INNER JOIN
-	cms.authtokens at ON
+	cms.auth_tokens at ON
 		at.usr = u.usr
 <?php endif ?>
 
 <?php if (isset($onetimetoken)): ?>
 INNER JOIN
-	cms.onetimetokens ott ON
+	cms.one_time_tokens ott ON
 		ott.usr = u.usr
 <?php endif ?>
 
 <?php if (isset($sessionhash)) : ?>
 INNER JOIN
-	cms.loginsessions s ON
+	cms.login_sessions s ON
 		s.usr = u.usr
 <?php endif ?>
 
@@ -58,7 +58,7 @@ WHERE
 	u.uid = :uid
 <?php endif ?>
 
-	AND u.userrole != 'system'
+	AND u.rolename != 'system'
 
 <?php if (!isset($deletedAlso) || $deletedAlso === false) : ?>
 	AND u.deleted IS NULL

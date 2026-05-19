@@ -24,7 +24,7 @@ final readonly class UrlPath extends Expression implements Output
 		[$localeClause, $isNegated, $condition] = $this->condition($valueToken, $operator);
 
 		return sprintf(
-			'%sEXISTS (SELECT 1 FROM cms.urlpaths p WHERE p.node = n.node AND p.inactive IS NULL%s AND %s)',
+			'%sEXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL%s AND %s)',
 			$isNegated ? 'NOT ' : '',
 			$localeClause,
 			$condition,

@@ -1,4 +1,4 @@
-UPDATE cms.urlpaths
+UPDATE cms.url_paths
 SET
 	inactive = now(),
 	editor = :editor

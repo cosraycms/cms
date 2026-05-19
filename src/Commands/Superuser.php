@@ -28,7 +28,7 @@ class Superuser extends Command
 		$params['email'] = readline('Email: ');
 		$params['full_name'] = readline('Full Name: ');
 		$params['display_name'] = readline('Display Name: ');
-		$params['pwhash'] = password_hash(
+		$params['password'] = password_hash(
 			readline('Password: '),
 			PASSWORD_ARGON2ID,
 		);

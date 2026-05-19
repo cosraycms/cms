@@ -262,8 +262,8 @@ class IntegrationTestCase extends TestCase
 			'uid' => $uid,
 			'username' => $data['username'] ?? $uid,
 			'email' => $data['email'] ?? $uid . '@example.com',
-			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
-			'userrole' => 'editor',
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'rolename' => 'editor',
 			'active' => true,
 			'data' => ['name' => 'Test User'],
 			'creator' => 1,
@@ -276,8 +276,8 @@ class IntegrationTestCase extends TestCase
 			$data['data'] = json_encode($data['data']);
 		}
 
-		$sql = 'INSERT INTO cms.users (uid, username, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :username, :email, :pwhash, :userrole, :active, :data::jsonb, :creator, :editor)
+		$sql = 'INSERT INTO cms.users (uid, username, email, password, rolename, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :password, :rolename, :active, :data::jsonb, :creator, :editor)
 				RETURNING usr';
 
 		return $this->db()->execute($sql, $data)->one()['usr'];
@@ -292,7 +292,7 @@ class IntegrationTestCase extends TestCase
 	 */
 	protected function createTestPath(int $nodeId, string $path, string $locale = 'en'): void
 	{
-		$sql = 'INSERT INTO cms.urlpaths (node, path, locale, creator, editor)
+		$sql = 'INSERT INTO cms.url_paths (node, path, locale, creator, editor)
 				VALUES (:node, :path, :locale, 1, 1)';
 
 		$this->db()->execute($sql, [

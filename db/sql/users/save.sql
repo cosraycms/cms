@@ -4,6 +4,6 @@ SET
 	username = :username,
 	data = :data,
 	editor = :editor,
-	pwhash = :pwhash
+	password = :password
 WHERE
 	usr = :usr;

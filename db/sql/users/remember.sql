@@ -1,4 +1,4 @@
-INSERT INTO cms.loginsessions
+INSERT INTO cms.login_sessions
 	(hash, usr, expires)
 VALUES
 	(:hash, :user, (:expires)::timestamptz)

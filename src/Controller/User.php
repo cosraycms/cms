@@ -113,7 +113,7 @@ class User
 
 			$pwHash = $passwordUtil->hash($pw);
 		} else {
-			$pwHash = $user['pwhash'];
+			$pwHash = $user['password'];
 		}
 
 		$this->db->users->save([
@@ -121,7 +121,7 @@ class User
 			'email' => $email,
 			'username' => $username,
 			'data' => ['name' => $name],
-			'pwhash' => $pwHash,
+			'password' => $pwHash,
 			'editor' => $usr,
 		])->run();
 

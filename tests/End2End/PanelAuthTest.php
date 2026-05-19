@@ -40,7 +40,7 @@ final class PanelAuthTest extends End2EndTestCase
 			'uid' => 'panel-login-user',
 			'username' => $login,
 			'email' => 'panel-login@example.com',
-			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
 		]);
 		$this->createdUserIds[] = $userId;
 

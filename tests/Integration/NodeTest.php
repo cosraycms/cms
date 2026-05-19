@@ -235,12 +235,12 @@ final class NodeTest extends IntegrationTestCase
 			'uid' => 'integration-test-user',
 			'username' => 'integration-user',
 			'email' => 'integration-user@example.com',
-			'userrole' => 'admin',
+			'rolename' => 'admin',
 			'data' => ['name' => 'Integration User'],
 		]);
 
 		$user = $this->db()->execute(
-			'SELECT uid, username, email, userrole, active, data FROM cms.users WHERE usr = :usr',
+			'SELECT uid, username, email, rolename, active, data FROM cms.users WHERE usr = :usr',
 			['usr' => $userId],
 		)->one();
 
@@ -248,7 +248,7 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertSame('integration-test-user', $user['uid']);
 		$this->assertSame('integration-user', $user['username']);
 		$this->assertSame('integration-user@example.com', $user['email']);
-		$this->assertSame('admin', $user['userrole']);
+		$this->assertSame('admin', $user['rolename']);
 		$this->assertTrue($user['active']);
 		$data = json_decode($user['data'], true);
 		$this->assertSame('Integration User', $data['name'] ?? null);

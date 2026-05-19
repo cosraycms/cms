@@ -81,14 +81,14 @@ class End2EndTestCase extends IntegrationTestCase
 
 		// Delete created one-time tokens
 		foreach ($this->createdOneTimeTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.onetimetokens WHERE token = :token', [
+			$db->execute('DELETE FROM cms.one_time_tokens WHERE token = :token', [
 				'token' => $tokenHash,
 			])->run();
 		}
 
 		// Delete created auth tokens
 		foreach ($this->createdAuthTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.authtokens WHERE token = :token', ['token' => $tokenHash])->run();
+			$db->execute('DELETE FROM cms.auth_tokens WHERE token = :token', ['token' => $tokenHash])->run();
 		}
 
 		// Delete created users
@@ -99,9 +99,9 @@ class End2EndTestCase extends IntegrationTestCase
 		// Delete created paths and nodes in reverse order (children before parents)
 		// Also delete related records that reference the nodes via FKs
 		foreach (array_reverse($this->createdNodeIds) as $nodeId) {
-			$db->execute('DELETE FROM cms.urlpaths WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.fulltext WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodetags WHERE node = :node', ['node' => $nodeId])->run();
+			$db->execute('DELETE FROM cms.url_paths WHERE node = :node', ['node' => $nodeId])->run();
+			$db->execute('DELETE FROM cms.full_text WHERE node = :node', ['node' => $nodeId])->run();
+			$db->execute('DELETE FROM cms.node_tags WHERE node = :node', ['node' => $nodeId])->run();
 			$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $nodeId])->run();
 			$db->execute('DELETE FROM audit.nodes WHERE node = :node', ['node' => $nodeId])->run();
 			$db->execute('DELETE FROM cms.nodes WHERE node = :node', ['node' => $nodeId])->run();
@@ -174,13 +174,13 @@ class End2EndTestCase extends IntegrationTestCase
 		$token = bin2hex(random_bytes(32));
 		$tokenHash = hash('sha256', $token);
 
-		// Create user with correct schema (userrole instead of role)
-		$sql = "INSERT INTO cms.users (uid, email, pwhash, userrole, active, data, creator, editor)
-				VALUES (:uid, :email, :pwhash, :userrole, true, '{}'::jsonb, :creator, :editor)
+		// Create user with correct schema (rolename instead of role)
+		$sql = "INSERT INTO cms.users (uid, email, password, rolename, active, data, creator, editor)
+				VALUES (:uid, :email, :password, :rolename, true, '{}'::jsonb, :creator, :editor)
 				RETURNING usr";
 
 		$systemUser = $db->execute(
-			"SELECT usr FROM cms.users WHERE userrole = 'system' LIMIT 1",
+			"SELECT usr FROM cms.users WHERE rolename = 'system' LIMIT 1",
 		)->one();
 		$this->assertNotEmpty($systemUser);
 		$systemUserId = (int) $systemUser['usr'];
@@ -188,8 +188,8 @@ class End2EndTestCase extends IntegrationTestCase
 		$userId = $db->execute($sql, [
 			'uid' => $uid,
 			'email' => $uid . '@example.com',
-			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
-			'userrole' => $role,
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'rolename' => $role,
 			'creator' => $systemUserId,
 			'editor' => $systemUserId,
 		])->one()['usr'];
@@ -197,7 +197,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->createdUserIds[] = $userId;
 
 		// Create auth token
-		$sql = 'INSERT INTO cms.authtokens (token, usr, creator, editor)
+		$sql = 'INSERT INTO cms.auth_tokens (token, usr, creator, editor)
 				VALUES (:token, :usr, 1, 1)';
 
 		$db->execute($sql, [

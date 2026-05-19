@@ -31,7 +31,7 @@ FROM
 		uc.usr = n.creator
 	INNER JOIN cms.users ue ON
 		ue.usr = n.editor
-	LEFT JOIN cms.urlpaths up ON
+	LEFT JOIN cms.url_paths up ON
 		up.node = n.node
 	LEFT JOIN (
 		SELECT
@@ -39,7 +39,7 @@ FROM
 			sup.path,
 			sup.locale
 		FROM
-			cms.urlpaths sup
+			cms.url_paths sup
 		WHERE
 			sup.inactive IS NULL
 	) sup ON sup.node = n.node

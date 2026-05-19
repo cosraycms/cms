@@ -14,9 +14,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE TABLE cms.userroles (
-	userrole text NOT NULL,
-	CONSTRAINT pk_userroles PRIMARY KEY (userrole)
+CREATE TABLE cms.roles (
+	rolename text NOT NULL,
+	CONSTRAINT pk_roles PRIMARY KEY (rolename)
 );
 
 
@@ -25,8 +25,8 @@ CREATE TABLE cms.users (
 	uid text NOT NULL,
 	username text,
 	email text,
-	pwhash text NOT NULL,
-	userrole text NOT NULL,
+	password text NOT NULL,
+	rolename text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
 	creator bigint NOT NULL,
@@ -36,8 +36,8 @@ CREATE TABLE cms.users (
 	deleted timestamp with time zone,
 	CONSTRAINT pk_users PRIMARY KEY (usr),
 	CONSTRAINT uc_users_uid UNIQUE (uid),
-	CONSTRAINT fk_users_userroles FOREIGN KEY (userrole)
-		REFERENCES cms.userroles (userrole) ON UPDATE CASCADE,
+	CONSTRAINT fk_users_roles FOREIGN KEY (rolename)
+		REFERENCES cms.roles (rolename) ON UPDATE CASCADE,
 	CONSTRAINT fk_users_users_creator FOREIGN KEY (creator)
 		REFERENCES cms.users (usr),
 	CONSTRAINT fk_users_users_editor FOREIGN KEY (editor)
@@ -57,10 +57,10 @@ CREATE FUNCTION cms.process_users_audit()
 	RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO audit.users (
-		usr, username, email, pwhash, userrole, active,
+		usr, username, email, password, rolename, active,
 		data, editor, changed, deleted
 	) VALUES (
-		OLD.usr, OLD.username, OLD.email, OLD.pwhash, OLD.userrole, OLD.active,
+		OLD.usr, OLD.username, OLD.email, OLD.password, OLD.rolename, OLD.active,
 		OLD.data, OLD.editor, OLD.changed, OLD.deleted
 	);
 
@@ -77,46 +77,46 @@ CREATE TRIGGER users_trigger_02_audit AFTER UPDATE
 	cms.process_users_audit();
 
 
-CREATE TABLE cms.authtokens (
+CREATE TABLE cms.auth_tokens (
 	token text NOT NULL,
 	usr bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	creator bigint NOT NULL,
 	editor bigint NOT NULL,
-	CONSTRAINT pk_authtokens PRIMARY KEY (token),
-	CONSTRAINT fk_authtokens_users FOREIGN KEY (usr)
+	CONSTRAINT pk_auth_tokens PRIMARY KEY (token),
+	CONSTRAINT fk_auth_tokens_users FOREIGN KEY (usr)
 		REFERENCES cms.users (usr),
-	CONSTRAINT fk_authtokens_users_creator FOREIGN KEY (creator)
+	CONSTRAINT fk_auth_tokens_users_creator FOREIGN KEY (creator)
 		REFERENCES cms.users (usr),
-	CONSTRAINT fk_authtokens_users_editor FOREIGN KEY (editor)
+	CONSTRAINT fk_auth_tokens_users_editor FOREIGN KEY (editor)
 		REFERENCES cms.users (usr),
-	CONSTRAINT uc_authtokens_usr UNIQUE (usr),
-	CONSTRAINT ck_authtokens_token CHECK (char_length(token) <= 512)
+	CONSTRAINT uc_auth_tokens_usr UNIQUE (usr),
+	CONSTRAINT ck_auth_tokens_token CHECK (char_length(token) <= 512)
 );
-CREATE TRIGGER authtokens_trigger_01_change BEFORE UPDATE ON cms.authtokens
+CREATE TRIGGER auth_tokens_trigger_01_change BEFORE UPDATE ON cms.auth_tokens
 	FOR EACH ROW EXECUTE FUNCTION cms.update_changed_column();
 
 
-CREATE TABLE cms.onetimetokens (
+CREATE TABLE cms.one_time_tokens (
 	token text NOT NULL,
 	usr bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
-	CONSTRAINT pk_onetimetokens PRIMARY KEY (token),
-	CONSTRAINT fk_onetimetokens_users FOREIGN KEY (usr)
+	CONSTRAINT pk_one_time_tokens PRIMARY KEY (token),
+	CONSTRAINT fk_one_time_tokens_users FOREIGN KEY (usr)
 		REFERENCES cms.users (usr),
-	CONSTRAINT ck_ontimetokens_token CHECK (char_length(token) <= 512)
+	CONSTRAINT ck_one_time_tokens_token CHECK (char_length(token) <= 512)
 );
 
 
-CREATE TABLE cms.loginsessions (
+CREATE TABLE cms.login_sessions (
 	hash text NOT NULL,
 	usr bigint NOT NULL,
 	expires timestamp with time zone NOT NULL,
-	CONSTRAINT pk_loginsessions PRIMARY KEY (hash),
-	CONSTRAINT uc_loginsessions_usr UNIQUE (usr),
-	CONSTRAINT fk_loginsessions_users FOREIGN KEY (usr) REFERENCES cms.users(usr),
-	CONSTRAINT ck_loginsessions_hash CHECK (char_length(hash) <= 254)
+	CONSTRAINT pk_login_sessions PRIMARY KEY (hash),
+	CONSTRAINT uc_login_sessions_usr UNIQUE (usr),
+	CONSTRAINT fk_login_sessions_users FOREIGN KEY (usr) REFERENCES cms.users(usr),
+	CONSTRAINT ck_login_sessions_hash CHECK (char_length(hash) <= 254)
 );
 
 
@@ -180,7 +180,7 @@ BEGIN
 		NEW.deleted IS NOT NULL
 		AND (
 			SELECT count(*)
-			FROM cms.menuitems mi
+			FROM cms.menu_items mi
 			WHERE
 				mi.data->>'type' = 'node'
 				AND mi.data->>'node' = OLD.node::text
@@ -202,19 +202,19 @@ CREATE TRIGGER nodes_trigger_03_audit AFTER UPDATE
 	cms.process_nodes_audit();
 
 
-CREATE TABLE cms.fulltext (
+CREATE TABLE cms.full_text (
 	node bigint NOT NULL,
 	locale text NOT NULL,
 	document tsvector NOT NULL,
-	CONSTRAINT pk_fulltext PRIMARY KEY (node, locale),
-	CONSTRAINT fk_fulltext_nodes FOREIGN KEY (node)
+	CONSTRAINT pk_full_text PRIMARY KEY (node, locale),
+	CONSTRAINT fk_full_text_nodes FOREIGN KEY (node)
 		REFERENCES cms.nodes (node),
-	CONSTRAINT ck_fulltext_locale CHECK (char_length(locale) <= 32)
+	CONSTRAINT ck_full_text_locale CHECK (char_length(locale) <= 32)
 );
-CREATE INDEX ix_nodes_tsv ON cms.fulltext USING GIN(document);
+CREATE INDEX ix_nodes_tsv ON cms.full_text USING GIN(document);
 
 
-CREATE TABLE cms.urlpaths (
+CREATE TABLE cms.url_paths (
 	node bigint NOT NULL,
 	path text NOT NULL,
 	locale text NOT NULL,
@@ -222,19 +222,19 @@ CREATE TABLE cms.urlpaths (
 	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
 	inactive timestamp with time zone,
-	CONSTRAINT pk_urlpaths PRIMARY KEY (node, locale, path),
-	CONSTRAINT fk_urlpaths_nodes FOREIGN KEY (node)
+	CONSTRAINT pk_url_paths PRIMARY KEY (node, locale, path),
+	CONSTRAINT fk_url_paths_nodes FOREIGN KEY (node)
 		REFERENCES cms.nodes (node),
-	CONSTRAINT fk_urlpaths_users_creator FOREIGN KEY (creator)
+	CONSTRAINT fk_url_paths_users_creator FOREIGN KEY (creator)
 		REFERENCES cms.users (usr),
-	CONSTRAINT fk_urlpaths_users_editor FOREIGN KEY (editor)
+	CONSTRAINT fk_url_paths_users_editor FOREIGN KEY (editor)
 		REFERENCES cms.users (usr),
-	CONSTRAINT ck_urlpaths_path CHECK (char_length(path) <= 512),
-	CONSTRAINT ck_urlpaths_locale CHECK (char_length(locale) <= 32)
+	CONSTRAINT ck_url_paths_path CHECK (char_length(path) <= 512),
+	CONSTRAINT ck_url_paths_locale CHECK (char_length(locale) <= 32)
 );
-CREATE UNIQUE INDEX ux_urlpaths_path ON cms.urlpaths
+CREATE UNIQUE INDEX ux_url_paths_path ON cms.url_paths
 	USING btree (path);
-CREATE UNIQUE INDEX ux_urlpaths_locale ON cms.urlpaths
+CREATE UNIQUE INDEX ux_url_paths_locale ON cms.url_paths
 	USING btree (node, locale) WHERE (inactive IS NULL);
 
 
@@ -275,19 +275,19 @@ CREATE TABLE cms.menus (
 );
 
 
-CREATE TABLE cms.menuitems (
+CREATE TABLE cms.menu_items (
 	item text NOT NULL,
 	parent text,
 	menu text NOT NULL,
-	displayorder integer NOT NULL,
+	position integer NOT NULL,
 	data jsonb NOT NULL,
-	CONSTRAINT pk_menuitems PRIMARY KEY (item),
-	CONSTRAINT fk_menuitems_menus FOREIGN KEY (menu)
+	CONSTRAINT pk_menu_items PRIMARY KEY (item),
+	CONSTRAINT fk_menu_items_menus FOREIGN KEY (menu)
 		REFERENCES cms.menus (menu) ON UPDATE CASCADE,
-	CONSTRAINT fk_menuitems_menuitems FOREIGN KEY (parent)
-		REFERENCES cms.menuitems (item),
-	CONSTRAINT ck_menuitems_item CHECK (char_length(item) <= 64),
-	CONSTRAINT ck_menuitems_parent CHECK (char_length(parent) <= 64)
+	CONSTRAINT fk_menu_items_menu_items FOREIGN KEY (parent)
+		REFERENCES cms.menu_items (item),
+	CONSTRAINT ck_menu_items_item CHECK (char_length(item) <= 64),
+	CONSTRAINT ck_menu_items_parent CHECK (char_length(parent) <= 64)
 );
 
 
@@ -316,14 +316,14 @@ CREATE TABLE cms.tags (
 );
 
 
-CREATE TABLE cms.nodetags (
+CREATE TABLE cms.node_tags (
 	node bigint NOT NULL,
 	tag bigint NOT NULL,
-	sort integer NOT NULL DEFAULT 0,
-	CONSTRAINT pk_nodetags PRIMARY KEY (node, tag),
-	CONSTRAINT fk_nodetags_nodes FOREIGN KEY (node)
+	position integer NOT NULL DEFAULT 0,
+	CONSTRAINT pk_node_tags PRIMARY KEY (node, tag),
+	CONSTRAINT fk_node_tags_nodes FOREIGN KEY (node)
 		REFERENCES cms.nodes (node),
-	CONSTRAINT fk_nodetags_tags FOREIGN KEY (tag)
+	CONSTRAINT fk_node_tags_tags FOREIGN KEY (tag)
 		REFERENCES cms.tags (tag)
 );
 
@@ -360,8 +360,8 @@ CREATE TABLE audit.users (
 	usr bigint NOT NULL,
 	username text,
 	email text,
-	pwhash text NOT NULL,
-	userrole text NOT NULL,
+	password text NOT NULL,
+	rolename text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
 	editor bigint NOT NULL,

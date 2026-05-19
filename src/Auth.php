@@ -49,7 +49,7 @@ class Auth
 			return false;
 		}
 
-		if (password_verify($password, $user->pwhash)) {
+		if (password_verify($password, $user->password)) {
 			if ($initSession) {
 				$this->login($user->id, $remember);
 			}
@@ -204,7 +204,7 @@ class Auth
 				);
 			}
 		} else {
-			// Remove the user entry from loginsessions table as the user
+			// Remove the user entry from login_sessions table as the user
 			// has not checked "remember me". In that case the session is
 			// only valid as long as the browser is not closed.
 			$token = $session->getAuthToken();

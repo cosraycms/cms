@@ -45,7 +45,7 @@ BEGIN
     ON CONFLICT (uid) DO NOTHING;
 
     -- Add URL path for homepage
-    INSERT INTO cms.urlpaths (node, path, locale, creator, editor)
+    INSERT INTO cms.url_paths (node, path, locale, creator, editor)
     SELECT
         (SELECT node FROM cms.nodes WHERE uid = 'test-homepage'),
         '/',

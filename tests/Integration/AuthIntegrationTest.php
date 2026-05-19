@@ -45,7 +45,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			'uid' => 'auth-test-user',
 			'username' => 'testuser',
 			'email' => 'test@example.com',
-			'pwhash' => password_hash('correct-password', PASSWORD_ARGON2ID),
+			'password' => password_hash('correct-password', PASSWORD_ARGON2ID),
 		]);
 
 		$request = $this->psrRequest();
@@ -62,7 +62,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->createTestUser([
 			'uid' => 'auth-wrong-pass',
 			'email' => 'wrong@example.com',
-			'pwhash' => password_hash('correct-password', PASSWORD_ARGON2ID),
+			'password' => password_hash('correct-password', PASSWORD_ARGON2ID),
 		]);
 
 		$request = $this->psrRequest();
@@ -88,7 +88,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser([
 			'uid' => 'auth-remember-user',
 			'email' => 'remember@example.com',
-			'pwhash' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
 		]);
 
 		$request = $this->psrRequest();
@@ -146,7 +146,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$tokenHash = hash('sha256', $token);
 
 		$this->db()->execute(
-			'INSERT INTO cms.authtokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
+			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
 			['token' => $tokenHash, 'usr' => $userId],
 		)->run();
 
@@ -160,7 +160,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->assertEquals($userId, $user->id);
 
 		// Cleanup
-		$this->db()->execute('DELETE FROM cms.authtokens WHERE token = :token', [
+		$this->db()->execute('DELETE FROM cms.auth_tokens WHERE token = :token', [
 			'token' => $tokenHash,
 		])->run();
 	}
@@ -192,7 +192,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser([
 			'uid' => 'permissions-user',
 			'email' => 'perms@example.com',
-			'userrole' => 'editor',
+			'rolename' => 'editor',
 		]);
 
 		// Create auth token
@@ -200,7 +200,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$tokenHash = hash('sha256', $token);
 
 		$this->db()->execute(
-			'INSERT INTO cms.authtokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
+			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
 			['token' => $tokenHash, 'usr' => $userId],
 		)->run();
 
@@ -214,7 +214,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		// Editor role has specific permissions defined in the database
 
 		// Cleanup
-		$this->db()->execute('DELETE FROM cms.authtokens WHERE token = :token', [
+		$this->db()->execute('DELETE FROM cms.auth_tokens WHERE token = :token', [
 			'token' => $tokenHash,
 		])->run();
 	}
@@ -231,7 +231,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$tokenHash = hash('sha256', $token);
 
 		$this->db()->execute(
-			'INSERT INTO cms.onetimetokens (token, usr) VALUES (:token, :usr)',
+			'INSERT INTO cms.one_time_tokens (token, usr) VALUES (:token, :usr)',
 			['token' => $tokenHash, 'usr' => $userId],
 		)->run();
 
@@ -244,7 +244,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->assertEquals($userId, $user->id);
 
 		// Cleanup
-		$this->db()->execute('DELETE FROM cms.onetimetokens WHERE token = :token', [
+		$this->db()->execute('DELETE FROM cms.one_time_tokens WHERE token = :token', [
 			'token' => $tokenHash,
 		])->run();
 	}
@@ -271,7 +271,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$authTokenHash = hash('sha256', $authToken);
 
 		$this->db()->execute(
-			'INSERT INTO cms.authtokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
+			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
 			['token' => $authTokenHash, 'usr' => $userId],
 		)->run();
 
@@ -286,10 +286,12 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, strlen($oneTimeToken));
 
 		// Cleanup
-		$this->db()->execute('DELETE FROM cms.authtokens WHERE token = :token', [
+		$this->db()->execute('DELETE FROM cms.auth_tokens WHERE token = :token', [
 			'token' => $authTokenHash,
 		])->run();
-		$this->db()->execute('DELETE FROM cms.onetimetokens WHERE usr = :usr', ['usr' => $userId])->run();
+		$this->db()->execute('DELETE FROM cms.one_time_tokens WHERE usr = :usr', [
+			'usr' => $userId,
+		])->run();
 	}
 
 	public function testGetOneTimeTokenReturnsFalseForInvalidAuthToken(): void
@@ -314,7 +316,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$tokenHash = hash('sha256', $token);
 
 		$this->db()->execute(
-			'INSERT INTO cms.onetimetokens (token, usr) VALUES (:token, :usr)',
+			'INSERT INTO cms.one_time_tokens (token, usr) VALUES (:token, :usr)',
 			['token' => $tokenHash, 'usr' => $userId],
 		)->run();
 
@@ -326,7 +328,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 		// Verify token is removed
 		$exists = $this->db()->execute(
-			'SELECT EXISTS(SELECT 1 FROM cms.onetimetokens WHERE token = :token) as exists',
+			'SELECT EXISTS(SELECT 1 FROM cms.one_time_tokens WHERE token = :token) as exists',
 			['token' => $tokenHash],
 		)->one()['exists'];
 

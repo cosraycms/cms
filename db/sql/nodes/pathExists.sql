@@ -1,6 +1,6 @@
 SELECT
 	true
 FROM
-	cms.urlpaths
+	cms.url_paths
 WHERE
 	path = :path;

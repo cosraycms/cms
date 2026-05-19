@@ -36,7 +36,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			[
 				'item' => 'home',
 				'parent' => null,
-				'displayorder' => 1,
+				'position' => 1,
 				'data' => [
 					'type' => 'page',
 					'title' => ['en' => 'Home', 'de' => 'Startseite'],
@@ -46,7 +46,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			[
 				'item' => 'about',
 				'parent' => null,
-				'displayorder' => 2,
+				'position' => 2,
 				'data' => [
 					'type' => 'page',
 					'title' => ['en' => 'About', 'de' => 'Über uns'],
@@ -56,7 +56,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			[
 				'item' => 'about.team',
 				'parent' => 'about',
-				'displayorder' => 1,
+				'position' => 1,
 				'data' => [
 					'type' => 'page',
 					'title' => ['en' => 'Team', 'de' => 'Team'],
@@ -66,7 +66,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			[
 				'item' => 'contact',
 				'parent' => null,
-				'displayorder' => 3,
+				'position' => 3,
 				'data' => [
 					'type' => 'page',
 					'title' => ['en' => 'Contact', 'de' => 'Kontakt'],
@@ -78,12 +78,12 @@ final class MenuFinderTest extends IntegrationTestCase
 
 		foreach ($items as $item) {
 			$this->db()->execute(
-				'INSERT INTO cms.menuitems (item, parent, menu, displayorder, data) VALUES (:item, :parent, :menu, :displayorder, :data::jsonb)',
+				'INSERT INTO cms.menu_items (item, parent, menu, position, data) VALUES (:item, :parent, :menu, :position, :data::jsonb)',
 				[
 					'item' => $item['item'],
 					'parent' => $item['parent'],
 					'menu' => 'test-menu',
-					'displayorder' => $item['displayorder'],
+					'position' => $item['position'],
 					'data' => json_encode($item['data']),
 				],
 			)->run();
@@ -93,7 +93,7 @@ final class MenuFinderTest extends IntegrationTestCase
 	protected function tearDown(): void
 	{
 		// Clean up menu items
-		$this->db()->execute("DELETE FROM cms.menuitems WHERE menu = 'test-menu'")->run();
+		$this->db()->execute("DELETE FROM cms.menu_items WHERE menu = 'test-menu'")->run();
 		$this->db()->execute("DELETE FROM cms.menus WHERE menu = 'test-menu'")->run();
 
 		parent::tearDown();

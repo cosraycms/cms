@@ -10,7 +10,7 @@ class User
 	public readonly string $uid;
 	public readonly string $username;
 	public readonly string $email;
-	public readonly string $pwhash;
+	public readonly string $password;
 	public readonly string $role;
 	public readonly bool $active;
 	public readonly string $created;
@@ -25,7 +25,7 @@ class User
 		$this->uid = $data['uid'];
 		$this->username = $data['username'] ?? '';
 		$this->email = $data['email'];
-		$this->pwhash = $data['pwhash'];
+		$this->password = $data['password'];
 		$this->role = $data['role'];
 		$this->active = $data['active'];
 		$this->created = $data['created'];
@@ -50,10 +50,9 @@ class User
 
 	public function array(): array
 	{
-		return array_filter(
-			$this->data,
-			static fn($key) => $key !== 'pwhash',
-			ARRAY_FILTER_USE_KEY,
-		);
+		$data = $this->data;
+		unset($data['password']);
+
+		return $data;
 	}
 }

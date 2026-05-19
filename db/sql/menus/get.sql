@@ -2,13 +2,13 @@ WITH RECURSIVE nav AS (
    SELECT
 	   menu,
 	   item AS path,
-	   array[displayorder] AS sort,
+	   array[position] AS sort,
 	   1 AS level,
 	   item,
 	   parent,
 	   data
    FROM
-	   cms.menuitems
+	   cms.menu_items
    WHERE
 	   parent IS NULL
 	   AND menu = :menu
@@ -18,13 +18,13 @@ WITH RECURSIVE nav AS (
    SELECT
 	   m.menu,
 	   path || '.' || m.item AS path,
-	   sort || m.displayorder AS sort,
+	   sort || m.position AS sort,
 	   nav.level + 1 AS level,
 	   m.item,
 	   m.parent,
 	   m.data
    FROM
-	   cms.menuitems m
+	   cms.menu_items m
    JOIN
 		   nav ON m.parent = nav.item
 )

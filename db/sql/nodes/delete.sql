@@ -6,7 +6,7 @@ WHERE
 	uid = :uid;
 
 UPDATE
-	cms.urlpaths
+	cms.url_paths
 SET
 	inactive = now(),
 	editor = :editor

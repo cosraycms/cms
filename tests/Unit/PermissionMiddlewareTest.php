@@ -56,7 +56,7 @@ final class PermissionMiddlewareTest extends TestCase
 			'uid' => 'test-editor',
 			'username' => 'test-editor',
 			'email' => 'editor@example.com',
-			'pwhash' => 'hash',
+			'password' => 'hash',
 			'role' => 'editor',
 			'active' => true,
 			'created' => '2024-01-01T00:00:00+00:00',

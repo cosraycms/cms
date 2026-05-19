@@ -185,7 +185,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		$this->createTestPath($nodeId, '/a-propos', 'fr');
 
 		$paths = $this->db()->execute(
-			'SELECT path, locale FROM cms.urlpaths WHERE node = :node',
+			'SELECT path, locale FROM cms.url_paths WHERE node = :node',
 			['node' => $nodeId],
 		)->all();
 

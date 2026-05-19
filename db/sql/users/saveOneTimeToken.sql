@@ -1,4 +1,4 @@
-INSERT INTO cms.onetimetokens (
+INSERT INTO cms.one_time_tokens (
 	token,
 	usr
 ) VALUES (

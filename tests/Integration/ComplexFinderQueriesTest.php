@@ -324,7 +324,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$nodesWithPaths = $this->db()->execute(
 			'SELECT n.uid, u.path, u.locale
 			 FROM cms.nodes n
-			 LEFT JOIN cms.urlpaths u ON n.node = u.node
+			 LEFT JOIN cms.url_paths u ON n.node = u.node
 			 WHERE n.type = :type AND n.published = true',
 			['type' => $typeId],
 		)->all();

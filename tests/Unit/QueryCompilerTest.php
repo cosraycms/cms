@@ -190,19 +190,19 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			"EXISTS (SELECT 1 FROM cms.urlpaths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
+			"EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
 			$compiler->compile("path = '/about'"),
 		);
 		$this->assertSame(
-			"EXISTS (SELECT 1 FROM cms.urlpaths p WHERE p.node = n.node AND p.inactive IS NULL AND p.locale = 'de' AND p.path = '/ueber-uns')",
+			"EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.locale = 'de' AND p.path = '/ueber-uns')",
 			$compiler->compile("path.de = '/ueber-uns'"),
 		);
 		$this->assertSame(
-			"NOT EXISTS (SELECT 1 FROM cms.urlpaths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/hidden')",
+			"NOT EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/hidden')",
 			$compiler->compile("path != '/hidden'"),
 		);
 		$this->assertSame(
-			"EXISTS (SELECT 1 FROM cms.urlpaths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
+			"EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
 			$compiler->compile("'/about' = path"),
 		);
 	}

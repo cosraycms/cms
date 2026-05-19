@@ -1,4 +1,4 @@
-DELETE FROM cms.fulltext ft
+DELETE FROM cms.full_text ft
 WHERE
 	ft.node NOT IN (
 		SELECT
