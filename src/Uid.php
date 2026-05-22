@@ -9,9 +9,8 @@ use InvalidArgumentException;
 final class Uid
 {
 	public const ALPHABET_ALPHANUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	public const ALPHABET_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-	public const ALPHABET_NO_VOWELS = 'bcdfghklmnpqrstvwxyz123456789';
-	public const ALPHABET_NUMERIC = '0123456789';
+	public const ALPHABET_CROCKFORD_BASE_32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+	public const ALPHABET_WORD_SAFE = 'FGHKLMNPRSTVWYZbdfhkmrstvwz23579';
 	public const ALPHABET_URL_SAFE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 	private readonly string $alphabet;
@@ -20,7 +19,7 @@ final class Uid
 	private readonly int $defaultLength;
 
 	public function __construct(
-		string $alphabet = self::ALPHABET_ALPHANUMERIC,
+		string $alphabet = self::ALPHABET_WORD_SAFE,
 		int $defaultLength = 13,
 	) {
 		$size = strlen($alphabet);
