@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Boiler\Renderer as BoilerRenderer;
 use Celemas\Container\Container;
 use Celemas\Container\Entry;
 use Celemas\Core\App;
@@ -15,6 +14,7 @@ use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
+use Cosray\Boiler\Renderer as BoilerRenderer;
 use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;

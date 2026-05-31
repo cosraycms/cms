@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit\Boiler\Error;
 
-use Celemas\Boiler\Error\Renderer;
-use Celemas\Boiler\Error\RendererFactory;
+use Cosray\Boiler\Error\Renderer;
+use Cosray\Boiler\Error\RendererFactory;
 use Cosray\Tests\TestCase;
 
 /**

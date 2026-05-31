@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celemas\Boiler\Error\Handler;
 use Celemas\Core\App;
 use Celemas\Core\Factory\Laminas;
 use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Request;
 use Celemas\Router\Router;
+use Cosray\Boiler\Error\Handler;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Locale;

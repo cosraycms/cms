@@ -126,7 +126,7 @@ Render a node by uid from templates with the neutral cms API:
 
 ## Boiler rendering
 
-`cosray/cms` bundles the Boiler renderer under the existing `Celemas\Boiler` namespace and registers it as the default `view` renderer. You do not need to require `celemas/cms-boiler` separately or register a renderer for the common case.
+`cosray/cms` bundles the Boiler renderer under the `Cosray\Boiler` namespace and registers it as the default `view` renderer. You do not need to require `celemas/cms-boiler` separately or register a renderer for the common case.
 
 By default, views are loaded from `{path.root}{path.views}`. `path.root` is the project root passed to `App::create()`. `path.views` defaults to `/views` and can be overridden in CMS config:
 
@@ -142,7 +142,7 @@ To replace the default renderer or pass custom Boiler arguments, register a `vie
 
 ```php
 use Cosray\App;
-use Celemas\Boiler\Renderer;
+use Cosray\Boiler\Renderer;
 
 $app = App::create(dirname(__DIR__), [
     'app.name' => 'mycms',
@@ -155,7 +155,7 @@ $app->renderer('view', Renderer::class)->args(
 
 `Cosray\App` installs the bundled error handler by default. Error pages use a dedicated Boiler renderer, so replacing the CMS `view` renderer does not affect error rendering. Project templates named `http-error.php` and `http-server-error.php` in `{path.root}{path.views}` override the built-in fallback templates. Set `error.enabled` to `false` if you want to install custom PSR-15 error middleware yourself.
 
-For advanced integrations, the bundled error integration remains available as `Celemas\Boiler\Error\Handler`. Pass a `Cosray\Config`, core factory, and logger when you create it manually.
+For advanced integrations, the bundled error integration remains available as `Cosray\Boiler\Error\Handler`. Pass a `Cosray\Config`, core factory, and logger when you create it manually.
 
 ## Settings
 

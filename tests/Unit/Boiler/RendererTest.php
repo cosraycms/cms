@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit\Boiler;
 
 use Celemas\Boiler\Exception\LookupException;
-use Celemas\Boiler\Renderer;
-use Celemas\Boiler\RendererException;
+use Cosray\Boiler\Renderer;
+use Cosray\Boiler\RendererException;
 use Cosray\Tests\Fixtures\Boiler\Whitelisted;
 use Cosray\Tests\TestCase;
 

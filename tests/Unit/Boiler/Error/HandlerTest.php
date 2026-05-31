@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit\Boiler\Error;
 
-use Celemas\Boiler\Error\Handler;
 use Celemas\Error\Handler as ErrorHandler;
 use Celemas\Error\Renderer as ErrorRenderer;
+use Cosray\Boiler\Error\Handler;
 use Cosray\Config;
 use Cosray\Tests\TestCase;
 use Exception;
