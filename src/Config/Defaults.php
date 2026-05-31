@@ -31,7 +31,7 @@ final class Defaults
 	private static function app(Env $env): array
 	{
 		return [
-			'app.name' => env('APP_NAME', 'celemas'),
+			'app.name' => env('APP_NAME', 'cosray'),
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),

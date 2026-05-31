@@ -83,8 +83,8 @@ final class ConfigTest extends TestCase
 	{
 		$config = new Config(self::root());
 
-		$this->assertSame('celemas', $config->get('app.name'));
-		$this->assertSame('celemas', $config->app->name);
+		$this->assertSame('cosray', $config->get('app.name'));
+		$this->assertSame('cosray', $config->app->name);
 		$this->assertSame(self::root(), $config->path->root);
 		$this->assertSame(self::root() . '/public', $config->path->public);
 		$this->assertNull($config->app->secret);

@@ -126,7 +126,7 @@ class TestCase extends BaseTestCase
 	public function config(array $settings = [], bool $debug = false): Config
 	{
 		return new Config(self::root(), array_merge([
-			'app.name' => 'celemas',
+			'app.name' => 'cosray',
 			'app.debug' => $debug,
 		], $settings));
 	}
