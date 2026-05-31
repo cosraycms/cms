@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Tests\Unit\Boiler\Error;
+namespace Cosray\Tests\Unit\View\Boiler\Error;
 
-use Cosray\Boiler\Error\WhoopsHandler;
 use Cosray\Tests\TestCase;
+use Cosray\View\Boiler\Error\WhoopsHandler;
 use Exception;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Psr\Http\Message\ResponseInterface;

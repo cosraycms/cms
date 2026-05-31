@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Tests\Unit\Boiler\Error;
+namespace Cosray\Tests\Unit\View\Boiler\Error;
 
-use Cosray\Boiler\Error\Renderer;
-use Cosray\Boiler\Error\RendererFactory;
 use Cosray\Tests\TestCase;
+use Cosray\View\Boiler\Error\Renderer;
+use Cosray\View\Boiler\Error\RendererFactory;
 
 /**
  * @internal

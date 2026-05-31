@@ -17,7 +17,7 @@ This release removes the `Node` / `Page` / `Block` / `Document` inheritance hier
 - **Changed** plugin class from `Cosray\Cms` to `Cosray\Plugin`.
 - **Changed** CMS configuration ownership. Regular apps can use the new `Cosray\App` facade; advanced manual bootstraps pass `Cosray\Config` to `new Plugin($config)` instead of passing it to `Celemas\Core\App`. `Cosray\Config` no longer implements the removed core config interfaces.
 - **Changed** `Cosray\Config` construction to `new Config(string $root, array $settings = [])`. App name, debug mode, environment, app secret, public path, frontend sessions, and database DSN now live in `app.name`, `app.debug`, `app.env`, `app.secret`, `path.public`, `session.enabled`, and `db.dsn` settings instead of constructor arguments or public properties. `path.public` defaults to `$root . '/public'`. `app.name` reads `APP_NAME`, falling back to `celemas`. `session.enabled` reads `SITE_SESSION_ENABLED`. `app.secret` reads `APP_SECRET`. `db.dsn` reads `DATABASE_URL`. `app.name` is not validated or normalized.
-- **Changed** `Cosray\Boiler\Error\Handler` to read debug/env/error settings from `Cosray\Config`; its constructor now accepts config, factory, and logger.
+- **Changed** `Cosray\View\Boiler\Error\Handler` to read debug/env/error settings from `Cosray\Config`; its constructor now accepts config, factory, and logger.
 - **Changed** frontend session middleware configuration from `sessionEnabled` constructor arguments on `Cosray\App` and `Cosray\Plugin` to the `session.enabled` setting.
 - **Changed** CMS session options to read `cookie_secure` from `SESSION_COOKIE_SECURE`, `cookie_lifetime` from `SESSION_COOKIE_LIFETIME`, and `gc_maxlifetime` from `SESSION_IDLE_TIMEOUT`.
 - **Changed** `Cosray\App::create()` to accept a root path plus an optional settings array, create `Cosray\Config` internally, and expose the config as public `$app->config`.
@@ -41,7 +41,7 @@ This release removes the `Node` / `Page` / `Block` / `Document` inheritance hier
 - `NodeMeta` caching facade and `Meta` reflection reader for node metadata.
 - `NodeFieldOwner` adapter bridging `FieldOwner` with `Context` and uid.
 - `Plugin::NODE_TAG` constant replacing the old `Node::class` registry tag.
-- Bundled Boiler renderer and error integration under the `Cosray\Boiler` namespace. `cosray/cms` now requires `celemas/boiler` directly, so applications no longer need the separate `celemas/cms-boiler` package.
+- Bundled Boiler renderer and error integration under the `Cosray\View\Boiler` namespace. `cosray/cms` now requires `celemas/boiler` directly, so applications no longer need the separate `celemas/cms-boiler` package.
 - Default Boiler `view` renderer registration using the new `path.views` config key, which defaults to `/views` relative to `path.root`.
 - `Cosray\App` facade for regular CMS applications. It wraps the core app and CMS plugin, forwards the common app and CMS configuration APIs, installs the default error middleware, and adds the CMS catchall route during `run()`.
 - Built-in fallback templates for Boiler error pages plus `error.*` config keys for enabling/disabling the default handler, replacing the error renderer, configuring error views, and toggling Whoops debug pages.

@@ -9,13 +9,13 @@ use Celemas\Core\Factory\Laminas;
 use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Request;
 use Celemas\Router\Router;
-use Cosray\Boiler\Error\Handler;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Node;
 use Cosray\Plugin;
+use Cosray\View\Boiler\Error\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
 

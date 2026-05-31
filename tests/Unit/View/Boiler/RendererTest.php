@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Tests\Unit\Boiler;
+namespace Cosray\Tests\Unit\View\Boiler;
 
 use Celemas\Boiler\Exception\LookupException;
-use Cosray\Boiler\Renderer;
-use Cosray\Boiler\RendererException;
 use Cosray\Tests\Fixtures\Boiler\Whitelisted;
 use Cosray\Tests\TestCase;
+use Cosray\View\Boiler\Renderer;
+use Cosray\View\Boiler\RendererException;
 
 /**
  * @internal

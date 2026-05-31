@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Boiler\Error;
+namespace Cosray\View\Boiler\Error;
 
 use Celemas\Core\Exception\HttpError;
 use Celemas\Core\Factory\Factory;
@@ -153,7 +153,7 @@ final class Handler
 
 	private function builtinViewPath(): string
 	{
-		return dirname(__DIR__, 3) . '/resources/error';
+		return dirname(__DIR__, 4) . '/resources/error';
 	}
 
 	/** @return list<class-string> */

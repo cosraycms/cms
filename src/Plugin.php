@@ -14,12 +14,12 @@ use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
-use Cosray\Boiler\Renderer as BoilerRenderer;
 use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
 
 class Plugin implements CorePlugin

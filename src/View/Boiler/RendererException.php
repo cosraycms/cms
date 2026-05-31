@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Boiler;
+namespace Cosray\View\Boiler;
 
 use RuntimeException;
 

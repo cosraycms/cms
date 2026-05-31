@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Boiler\Error;
+namespace Cosray\View\Boiler\Error;
 
 use Celemas\Error\Renderer as RendererInterface;
 
