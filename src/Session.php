@@ -18,7 +18,7 @@ class Session extends BaseSession
 	) {
 		parent::__construct($options, $name, $handler);
 
-		$this->authCookie = $name ? $name . '_auth' : 'celemas_auth';
+		$this->authCookie = $name ? $name . '_auth' : 'cosray_auth';
 	}
 
 	public function setUser(int $userId): void

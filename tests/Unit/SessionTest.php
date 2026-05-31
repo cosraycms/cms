@@ -49,7 +49,7 @@ final class SessionTest extends TestCase
 		$session = new Session();
 		$session->start();
 
-		$_COOKIE['celemas_auth'] = 'token-value';
+		$_COOKIE['cosray_auth'] = 'token-value';
 
 		$this->assertSame('token-value', $session->getAuthToken());
 	}
