@@ -1,0 +1,160 @@
+name: Build & Release Panel
+
+on:
+  push:
+    branches: ["main"]
+    # Tag filters are glob patterns (not regex). Support stable + prerelease tags.
+    # Examples: 0.1.0, 0.1.0-alpha.1, 0.1.0-beta.1, 0.1.0-rc.1
+    tags:
+      - "[0-9]*.[0-9]*.[0-9]*"
+      - "[0-9]*.[0-9]*.[0-9]*-alpha.*"
+      - "[0-9]*.[0-9]*.[0-9]*-beta.*"
+      - "[0-9]*.[0-9]*.[0-9]*-rc.*"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build/release (e.g. 0.1.0-beta.1)
+        required: true
+        type: string
+
+concurrency:
+  group: panel-release-${{ forgejo.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ci-base
+    env:
+      RELEASES_DIR: /cosray-releases
+    steps:
+      - name: Determine release mode
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$FORGEJO_EVENT_NAME" == "workflow_dispatch" ]]; then
+            MODE="versioned"
+            RELEASE_TAG="$INPUT_TAG"
+          elif [[ "$FORGEJO_REF" == refs/tags/* ]]; then
+            MODE="versioned"
+            RELEASE_TAG="$FORGEJO_REF_NAME"
+          else
+            MODE="nightly"
+            RELEASE_TAG=""
+          fi
+
+          if [[ "$MODE" == "versioned" ]]; then
+            if [[ ! "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9A-Za-z.-]+)?$ ]]; then
+              echo "Invalid release tag: $RELEASE_TAG"
+              exit 1
+            fi
+
+            FILE_NAME="panel-${RELEASE_TAG}.tar.gz"
+          else
+            FILE_NAME="panel-nightly.tar.gz"
+          fi
+
+          echo "MODE=$MODE" >> "$FORGEJO_ENV"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$FORGEJO_ENV"
+          echo "FILE_NAME=$FILE_NAME" >> "$FORGEJO_ENV"
+
+      - name: Checkout repo
+        uses: https://code.forgejo.org/actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Checkout requested tag
+        if: ${{ forgejo.event_name == 'workflow_dispatch' }}
+        run: git checkout --detach "refs/tags/${RELEASE_TAG}"
+
+      - name: Setup pnpm
+        uses: https://code.forgejo.org/pnpm/action-setup@v4
+        with:
+          package_json_file: ui/package.json
+
+      - name: Setup Node
+        uses: https://code.forgejo.org/actions/setup-node@v4
+        with:
+          node-version-file: ui/.nvmrc
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+
+      - name: Install deps
+        working-directory: ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: ui
+        run: pnpm build
+
+      - name: Ensure build output exists
+        run: |
+          if [ ! -d "ui/build" ]; then
+            echo "Expected build output at ui/build not found."
+            exit 1
+          fi
+
+      - name: Create tarball
+        run: |
+          mkdir -p dist
+          cd ui/build && tar -czf "../../dist/${FILE_NAME}" * && cd ../..
+
+      - name: Publish tarball
+        run: |
+          set -euo pipefail
+
+          if [ ! -d "$RELEASES_DIR" ]; then
+            echo "Release directory does not exist: $RELEASES_DIR"
+            exit 1
+          fi
+
+          if [ ! -w "$RELEASES_DIR" ]; then
+            echo "Release directory is not writable: $RELEASES_DIR"
+            exit 1
+          fi
+
+          source="dist/${FILE_NAME}"
+          target="${RELEASES_DIR}/${FILE_NAME}"
+          checksum="${target}.sha256"
+          tmp="$(mktemp "${RELEASES_DIR}/.${FILE_NAME}.XXXXXX")"
+          checksum_tmp="${tmp}.sha256"
+
+          cleanup() {
+            rm -f "$tmp" "$checksum_tmp"
+          }
+          trap cleanup EXIT
+
+          cp "$source" "$tmp"
+          chmod 0644 "$tmp"
+
+          hash="$(sha256sum "$tmp" | awk '{ print $1 }')"
+          printf '%s  %s\n' "$hash" "$FILE_NAME" > "$checksum_tmp"
+          chmod 0644 "$checksum_tmp"
+
+          if [ "$MODE" = "versioned" ] && { [ -e "$target" ] || [ -e "$checksum" ]; }; then
+            echo "Release asset already exists: $target"
+            exit 1
+          fi
+
+          if [ "$MODE" = "versioned" ]; then
+            mv -n "$tmp" "$target"
+            if [ -e "$tmp" ]; then
+              echo "Release asset was created concurrently: $target"
+              exit 1
+            fi
+
+            mv -n "$checksum_tmp" "$checksum"
+            if [ -e "$checksum_tmp" ]; then
+              rm -f "$target"
+              echo "Release checksum was created concurrently: $checksum"
+              exit 1
+            fi
+          else
+            mv -f "$tmp" "$target"
+            mv -f "$checksum_tmp" "$checksum"
+          fi
+
+          trap - EXIT
+          echo "Published https://cosray.dev/releases/${FILE_NAME}"
