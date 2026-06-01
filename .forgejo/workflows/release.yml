@@ -1,25 +1,20 @@
 name: Build & Release Panel
 
 on:
-  push:
-    branches: ["main"]
-    # Tag filters are glob patterns (not regex). Support stable + prerelease tags.
-    # Examples: 0.1.0, 0.1.0-alpha.1, 0.1.0-beta.1, 0.1.0-rc.1
-    tags:
-      - "[0-9]*.[0-9]*.[0-9]*"
-      - "[0-9]*.[0-9]*.[0-9]*-alpha.*"
-      - "[0-9]*.[0-9]*.[0-9]*-beta.*"
-      - "[0-9]*.[0-9]*.[0-9]*-rc.*"
-
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      tag:
-        description: Tag to build/release (e.g. 0.1.0-beta.1)
+      ref:
+        required: true
+        type: string
+      ref_name:
+        required: true
+        type: string
+      sha:
         required: true
         type: string
 
 concurrency:
-  group: panel-release-${{ forgejo.ref }}
+  group: panel-release-${{ inputs.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,52 +24,53 @@ jobs:
       RELEASES_DIR: /cosray-releases
     steps:
       - name: Determine release mode
+        id: release
         env:
-          INPUT_TAG: ${{ inputs.tag }}
+          REF: ${{ inputs.ref }}
+          REF_NAME: ${{ inputs.ref_name }}
         run: |
           set -euo pipefail
 
-          if [[ "$FORGEJO_EVENT_NAME" == "workflow_dispatch" ]]; then
-            MODE="versioned"
-            RELEASE_TAG="$INPUT_TAG"
-          elif [[ "$FORGEJO_REF" == refs/tags/* ]]; then
-            MODE="versioned"
-            RELEASE_TAG="$FORGEJO_REF_NAME"
-          else
-            MODE="nightly"
-            RELEASE_TAG=""
-          fi
-
-          if [[ "$MODE" == "versioned" ]]; then
-            if [[ ! "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9A-Za-z.-]+)?$ ]]; then
-              echo "Invalid release tag: $RELEASE_TAG"
-              exit 1
+          if [[ "$REF" == refs/tags/* ]]; then
+            if [[ ! "$REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9A-Za-z.-]+)?$ ]]; then
+              echo "Skipping non-release tag: $REF_NAME"
+              echo "should_release=false" >> "$FORGEJO_OUTPUT"
+              exit 0
             fi
 
+            MODE="versioned"
+            RELEASE_TAG="$REF_NAME"
             FILE_NAME="panel-${RELEASE_TAG}.tar.gz"
-          else
+          elif [[ "$REF" == "refs/heads/main" ]]; then
+            MODE="nightly"
+            RELEASE_TAG=""
             FILE_NAME="panel-nightly.tar.gz"
+          else
+            echo "Skipping non-release ref: $REF"
+            echo "should_release=false" >> "$FORGEJO_OUTPUT"
+            exit 0
           fi
 
+          echo "should_release=true" >> "$FORGEJO_OUTPUT"
           echo "MODE=$MODE" >> "$FORGEJO_ENV"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$FORGEJO_ENV"
           echo "FILE_NAME=$FILE_NAME" >> "$FORGEJO_ENV"
 
       - name: Checkout repo
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/actions/checkout@v5
         with:
+          ref: ${{ inputs.sha }}
           fetch-depth: 0
 
-      - name: Checkout requested tag
-        if: ${{ forgejo.event_name == 'workflow_dispatch' }}
-        run: git checkout --detach "refs/tags/${RELEASE_TAG}"
-
       - name: Setup pnpm
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/pnpm/action-setup@v4
         with:
           package_json_file: ui/package.json
 
       - name: Setup Node
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/actions/setup-node@v4
         with:
           node-version-file: ui/.nvmrc
@@ -82,14 +78,17 @@ jobs:
           cache-dependency-path: ui/pnpm-lock.yaml
 
       - name: Install deps
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         working-directory: ui
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         working-directory: ui
         run: pnpm build
 
       - name: Ensure build output exists
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           if [ ! -d "ui/build" ]; then
             echo "Expected build output at ui/build not found."
@@ -97,11 +96,13 @@ jobs:
           fi
 
       - name: Create tarball
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           mkdir -p dist
           cd ui/build && tar -czf "../../dist/${FILE_NAME}" * && cd ../..
 
       - name: Publish tarball
+        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           set -euo pipefail
 

@@ -39,7 +39,7 @@ jobs:
       - name: Run Markdown lint checks
         run: composer docs:lint
         env:
-          npm_config_yes: 'true'
+          npm_config_yes: "true"
 
       - name: Initialize database schema
         run: php ./run db:migrations --apply
@@ -55,3 +55,12 @@ jobs:
       - name: Deploy code coverage report
         if: ${{ always() && forgejo.ref == 'refs/heads/main' }}
         run: deploy-code-coverage .coverage
+
+  release:
+    needs: ci
+    if: ${{ forgejo.ref == 'refs/heads/main' || startsWith(forgejo.ref, 'refs/tags/') }}
+    uses: ./.forgejo/workflows/release.yml
+    with:
+      ref: ${{ forgejo.ref }}
+      ref_name: ${{ forgejo.ref_name }}
+      sha: ${{ forgejo.sha }}
