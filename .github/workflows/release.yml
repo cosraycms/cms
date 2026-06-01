@@ -2,7 +2,7 @@ name: Build & Release Panel
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     # Tag filters are glob patterns (not regex). Support stable + prerelease tags.
     # Examples: 0.1.0, 0.1.0-alpha.1, 0.1.0-beta.1, 0.1.0-rc.1
     tags:
@@ -19,7 +19,7 @@ on:
         type: string
 
 permissions:
-  contents: write  # required to create releases & upload assets
+  contents: write # required to create releases & upload assets
 
 concurrency:
   group: panel-release-${{ github.ref }}
@@ -65,18 +65,25 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          package_json_file: ui/package.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ui/.nvmrc
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
 
       - name: Install deps
         working-directory: ui
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         working-directory: ui
-        run: bun run build
+        run: pnpm build
 
       - name: Ensure build output exists
         run: |

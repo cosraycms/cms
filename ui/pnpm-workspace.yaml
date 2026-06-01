@@ -1,0 +1,13 @@
+packages:
+    - .
+
+overrides:
+    cookie: ^0.7.0
+    minimatch: ^10.2.1
+    tinyexec: 1.2.3
+    tinyglobby: 0.2.16
+
+allowBuilds:
+    esbuild: true
+    svelte-preprocess: true
+    unrs-resolver: true
