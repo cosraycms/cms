@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://codeberg.org/cosray/cms/compare/0.1.0-beta.2...HEAD)
+## [Unreleased](https://codeberg.org/cosray/cms/compare/0.1.1...HEAD)
 
 ### Breaking Changes
 
@@ -115,7 +115,7 @@ final class Department implements Title
 }
 ```
 
-## [0.1.0-beta.2](https://codeberg.org/cosray/cms/src/tag/0.1.0-beta.2) (2026-02-01)
+## [0.1.1](https://codeberg.org/cosray/cms/src/tag/0.1.1) (2026-02-01)
 
 Codename: Benjamin
 
@@ -123,6 +123,6 @@ Codename: Benjamin
 - Improved the `install-panel` command output and removed the unnecessary Quma command dependency.
 - Updated the panel release workflow to support prerelease tag patterns and manual (retroactive) runs.
 
-## [0.1.0-beta.1](https://codeberg.org/cosray/cms/src/tag/0.1.0-beta.1) (2026-02-01)
+## [0.1.0](https://codeberg.org/cosray/cms/src/tag/0.1.0) (2026-02-01)
 
 Initial release - Codename: Sabine
