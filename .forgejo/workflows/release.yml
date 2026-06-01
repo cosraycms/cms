@@ -31,10 +31,20 @@ jobs:
         run: |
           set -euo pipefail
 
+          set_output() {
+            local name="$1"
+            local value="$2"
+
+            printf '%s=%s\n' "$name" "$value" >> "$FORGEJO_OUTPUT"
+            if [ -n "${GITHUB_OUTPUT:-}" ] && [ "$GITHUB_OUTPUT" != "$FORGEJO_OUTPUT" ]; then
+              printf '%s=%s\n' "$name" "$value" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
           if [[ "$REF" == refs/tags/* ]]; then
             if [[ ! "$REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9A-Za-z.-]+)?$ ]]; then
               echo "Skipping non-release tag: $REF_NAME"
-              echo "should_release=false" >> "$FORGEJO_OUTPUT"
+              set_output should_release false
               exit 0
             fi
 
@@ -47,11 +57,11 @@ jobs:
             FILE_NAME="panel-nightly.tar.gz"
           else
             echo "Skipping non-release ref: $REF"
-            echo "should_release=false" >> "$FORGEJO_OUTPUT"
+            set_output should_release false
             exit 0
           fi
 
-          echo "should_release=true" >> "$FORGEJO_OUTPUT"
+          set_output should_release true
           echo "MODE=$MODE" >> "$FORGEJO_ENV"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$FORGEJO_ENV"
           echo "FILE_NAME=$FILE_NAME" >> "$FORGEJO_ENV"
