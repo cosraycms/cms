@@ -24,63 +24,41 @@ jobs:
       RELEASES_DIR: /cosray-releases
     steps:
       - name: Determine release mode
-        id: release
         env:
           REF: ${{ inputs.ref }}
           REF_NAME: ${{ inputs.ref_name }}
         run: |
           set -euo pipefail
 
-          set_output() {
-            local name="$1"
-            local value="$2"
-
-            printf '%s=%s\n' "$name" "$value" >> "$FORGEJO_OUTPUT"
-            if [ -n "${GITHUB_OUTPUT:-}" ] && [ "$GITHUB_OUTPUT" != "$FORGEJO_OUTPUT" ]; then
-              printf '%s=%s\n' "$name" "$value" >> "$GITHUB_OUTPUT"
-            fi
-          }
-
           if [[ "$REF" == refs/tags/* ]]; then
-            if [[ ! "$REF_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9A-Za-z.-]+)?$ ]]; then
-              echo "Skipping non-release tag: $REF_NAME"
-              set_output should_release false
-              exit 0
-            fi
-
             MODE="versioned"
             RELEASE_TAG="$REF_NAME"
-            FILE_NAME="panel-${RELEASE_TAG}.tar.gz"
+            FILE_NAME="panel-${RELEASE_TAG//\//-}.tar.gz"
           elif [[ "$REF" == "refs/heads/main" ]]; then
             MODE="nightly"
             RELEASE_TAG=""
             FILE_NAME="panel-nightly.tar.gz"
           else
-            echo "Skipping non-release ref: $REF"
-            set_output should_release false
-            exit 0
+            echo "Unsupported release ref: $REF"
+            exit 1
           fi
 
-          set_output should_release true
           echo "MODE=$MODE" >> "$FORGEJO_ENV"
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$FORGEJO_ENV"
           echo "FILE_NAME=$FILE_NAME" >> "$FORGEJO_ENV"
 
       - name: Checkout repo
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/actions/checkout@v5
         with:
           ref: ${{ inputs.sha }}
           fetch-depth: 0
 
       - name: Setup pnpm
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/pnpm/action-setup@v4
         with:
           package_json_file: ui/package.json
 
       - name: Setup Node
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         uses: https://code.forgejo.org/actions/setup-node@v4
         with:
           node-version-file: ui/.nvmrc
@@ -88,17 +66,14 @@ jobs:
           cache-dependency-path: ui/pnpm-lock.yaml
 
       - name: Install deps
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         working-directory: ui
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         working-directory: ui
         run: pnpm build
 
       - name: Ensure build output exists
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           if [ ! -d "ui/build" ]; then
             echo "Expected build output at ui/build not found."
@@ -106,13 +81,11 @@ jobs:
           fi
 
       - name: Create tarball
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           mkdir -p dist
           cd ui/build && tar -czf "../../dist/${FILE_NAME}" * && cd ../..
 
       - name: Publish tarball
-        if: ${{ steps.release.outputs.should_release == 'true' }}
         run: |
           set -euo pipefail
 
