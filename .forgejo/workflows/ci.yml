@@ -6,6 +6,10 @@ on:
 jobs:
   ci:
     runs-on: ci-base
+    outputs:
+      ref: ${{ steps.release_context.outputs.ref }}
+      ref_name: ${{ steps.release_context.outputs.ref_name }}
+      sha: ${{ steps.release_context.outputs.sha }}
     env:
       COSRAY_DB_HOST: pgsql
       COSRAY_DB_NAME: cosray
@@ -22,6 +26,13 @@ jobs:
           --health-cmd="pg_isready -U cosray -d cosray"
           --health-interval=5s --health-retries=20
     steps:
+      - name: Capture release context
+        id: release_context
+        run: |
+          printf 'ref=%s\n' "$FORGEJO_REF" >> "$FORGEJO_OUTPUT"
+          printf 'ref_name=%s\n' "$FORGEJO_REF_NAME" >> "$FORGEJO_OUTPUT"
+          printf 'sha=%s\n' "$FORGEJO_SHA" >> "$FORGEJO_OUTPUT"
+
       - name: Checkout repo
         uses: https://code.forgejo.org/actions/checkout@v5
 
@@ -58,9 +69,9 @@ jobs:
 
   release:
     needs: ci
-    if: ${{ forgejo.ref == 'refs/heads/main' || startsWith(forgejo.ref, 'refs/tags/') }}
+    if: ${{ needs.ci.outputs.ref == 'refs/heads/main' || startsWith(needs.ci.outputs.ref, 'refs/tags/') }}
     uses: ./.forgejo/workflows/release.yml
     with:
-      ref: ${{ forgejo.ref }}
-      ref_name: ${{ forgejo.ref_name }}
-      sha: ${{ forgejo.sha }}
+      ref: ${{ needs.ci.outputs.ref }}
+      ref_name: ${{ needs.ci.outputs.ref_name }}
+      sha: ${{ needs.ci.outputs.sha }}
