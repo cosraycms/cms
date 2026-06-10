@@ -12,9 +12,6 @@ on:
       sha:
         required: true
         type: string
-    secrets:
-      panel_signing_key:
-        required: true
 
 concurrency:
   group: panel-release-${{ inputs.ref }}
@@ -84,7 +81,7 @@ jobs:
 
       - name: Sign tarball
         env:
-          PANEL_SIGNING_KEY: ${{ secrets.panel_signing_key }}
+          PANEL_SIGNING_KEY: ${{ secrets.PANEL_SIGNING_KEY }}
         run: |
           set -euo pipefail
 
