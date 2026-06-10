@@ -14,6 +14,7 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"devDependencies": {
+		"@codemirror/commands": "^6.10.3",
 		"@codemirror/lang-css": "^6.0.0",
 		"@codemirror/lang-html": "^6.0.0",
 		"@codemirror/lang-javascript": "^6.0.0",
@@ -26,6 +27,7 @@
 		"@codemirror/language": "^6.0.0",
 		"@codemirror/legacy-modes": "^6.0.0",
 		"@codemirror/state": "^6.0.0",
+		"@codemirror/view": "^6.43.0",
 		"@eslint/compat": "^2.0.2",
 		"@eslint/js": "^9.25.1",
 		"@sveltejs/adapter-static": "^3.0.10",
@@ -35,6 +37,7 @@
 		"@types/element-resize-detector": "^1.1.6",
 		"@types/node": "^25.3.0",
 		"@types/sortablejs": "^1.15.9",
+		"codemirror": "^6.0.0",
 		"element-resize-detector": "^1.2.4",
 		"eslint": "^9.25.1",
 		"eslint-config-prettier": "^10.1.8",
@@ -48,7 +51,6 @@
 		"postcss-custom-media": "^12.0.1",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.0",
-		"codemirror": "^6.0.0",
 		"prosemirror-commands": "^1.7.1",
 		"prosemirror-dropcursor": "^1.8.2",
 		"prosemirror-gapcursor": "^1.4.0",
@@ -72,6 +74,11 @@
 		"vitest": "^4.0.18"
 	},
 	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": ">=26.0.0 <27.0.0",
+			"onFail": "download"
+		},
 		"packageManager": {
 			"name": "pnpm",
 			"version": ">=11.0.0 <12.0.0",

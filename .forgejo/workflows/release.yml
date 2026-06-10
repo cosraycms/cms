@@ -59,13 +59,6 @@ jobs:
           version: 11.5.0
           package_json_file: ui/package.json
 
-      - name: Setup Node
-        uses: https://code.forgejo.org/actions/setup-node@v4
-        with:
-          node-version-file: ui/.nvmrc
-          cache: pnpm
-          cache-dependency-path: ui/pnpm-lock.yaml
-
       - name: Install deps
         working-directory: ui
         run: pnpm install --frozen-lockfile

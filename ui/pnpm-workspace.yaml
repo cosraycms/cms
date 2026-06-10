@@ -9,5 +9,6 @@ overrides:
 
 allowBuilds:
     esbuild: true
+    node: true
     svelte-preprocess: true
     unrs-resolver: true
