@@ -12,6 +12,9 @@ on:
       sha:
         required: true
         type: string
+    secrets:
+      panel_signing_key:
+        required: true
 
 concurrency:
   group: panel-release-${{ inputs.ref }}
@@ -79,6 +82,41 @@ jobs:
           mkdir -p dist
           cd ui/build && tar -czf "../../dist/${FILE_NAME}" * && cd ../..
 
+      - name: Sign tarball
+        env:
+          PANEL_SIGNING_KEY: ${{ secrets.panel_signing_key }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PANEL_SIGNING_KEY:-}" ]; then
+            echo "PANEL_SIGNING_KEY secret is not configured"
+            exit 1
+          fi
+
+          EMBEDDED_PUBKEY="$(sed -n "s/.*PANEL_PUBKEY = '\([^']*\)'.*/\1/p" src/Commands/InstallPanel.php)"
+          export EMBEDDED_PUBKEY
+
+          FILE_PATH="dist/${FILE_NAME}" SIG_PATH="dist/${FILE_NAME}.sig" node --input-type=module -e '
+          import { createPrivateKey, createPublicKey, sign } from "node:crypto";
+          import { readFileSync, writeFileSync } from "node:fs";
+
+          const key = createPrivateKey(process.env.PANEL_SIGNING_KEY);
+          const pub = createPublicKey(key)
+            .export({ type: "spki", format: "der" })
+            .subarray(-32)
+            .toString("base64");
+
+          if (pub !== process.env.EMBEDDED_PUBKEY) {
+            console.error("Signing key does not match PANEL_PUBKEY in src/Commands/InstallPanel.php");
+            process.exit(1);
+          }
+
+          const data = readFileSync(process.env.FILE_PATH);
+          writeFileSync(process.env.SIG_PATH, sign(null, data, key).toString("base64") + "\n");
+          '
+
+          echo "Signed dist/${FILE_NAME}"
+
       - name: Publish tarball
         run: |
           set -euo pipefail
@@ -95,23 +133,22 @@ jobs:
 
           source="dist/${FILE_NAME}"
           target="${RELEASES_DIR}/${FILE_NAME}"
-          checksum="${target}.sha256"
+          sig="${target}.sig"
           tmp="$(mktemp "${RELEASES_DIR}/.${FILE_NAME}.XXXXXX")"
-          checksum_tmp="${tmp}.sha256"
+          sig_tmp="${tmp}.sig"
 
           cleanup() {
-            rm -f "$tmp" "$checksum_tmp"
+            rm -f "$tmp" "$sig_tmp"
           }
           trap cleanup EXIT
 
           cp "$source" "$tmp"
           chmod 0644 "$tmp"
 
-          hash="$(sha256sum "$tmp" | awk '{ print $1 }')"
-          printf '%s  %s\n' "$hash" "$FILE_NAME" > "$checksum_tmp"
-          chmod 0644 "$checksum_tmp"
+          cp "${source}.sig" "$sig_tmp"
+          chmod 0644 "$sig_tmp"
 
-          if [ "$MODE" = "versioned" ] && { [ -e "$target" ] || [ -e "$checksum" ]; }; then
+          if [ "$MODE" = "versioned" ] && { [ -e "$target" ] || [ -e "$sig" ]; }; then
             echo "Release asset already exists: $target"
             exit 1
           fi
@@ -123,15 +160,18 @@ jobs:
               exit 1
             fi
 
-            mv -n "$checksum_tmp" "$checksum"
-            if [ -e "$checksum_tmp" ]; then
+            mv -n "$sig_tmp" "$sig"
+            if [ -e "$sig_tmp" ]; then
               rm -f "$target"
-              echo "Release checksum was created concurrently: $checksum"
+              echo "Release signature was created concurrently: $sig"
               exit 1
             fi
           else
             mv -f "$tmp" "$target"
-            mv -f "$checksum_tmp" "$checksum"
+            mv -f "$sig_tmp" "$sig"
+
+            # Remove stale checksum left over from the old .sha256-based flow
+            rm -f "${target}.sha256"
           fi
 
           trap - EXIT

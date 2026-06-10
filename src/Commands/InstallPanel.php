@@ -26,10 +26,13 @@ class InstallPanel extends Command
 	private string $panelReleaseTag = 'nightly';
 	private string $panelFileName = 'panel-nightly.tar.gz';
 	private string $panelUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz';
-	private string $panelChecksumUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz.sha256';
+	private string $panelSignatureUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz.sig';
 
 	protected const string DEFAULT_PATH = '/cms';
 	private const string RELEASE_BASE_URL = 'https://cosray.dev/releases';
+
+	/** Ed25519 public key (base64, raw 32 bytes) matching the CI release signing key */
+	private const string PANEL_PUBKEY = 'AYqozdEV8YlYCgbTVafXab+jvcXAmehXgkv1RLtgDng=';
 
 	public function __construct(
 		private Config $config,
@@ -189,7 +192,7 @@ class InstallPanel extends Command
 			return '';
 		}
 
-		if (!$this->verifyChecksum($tempFile)) {
+		if (!$this->verifySignature($tempFile)) {
 			$this->removeTempFile($tempFile);
 
 			return '';
@@ -220,65 +223,52 @@ class InstallPanel extends Command
 		return file_get_contents($url, false, $context);
 	}
 
-	private function verifyChecksum(string $archivePath): bool
+	private function verifySignature(string $archivePath): bool
 	{
-		$this->info("Verifying {$this->panelFileName} checksum from {$this->panelChecksumUrl}...");
+		$this->info("Verifying {$this->panelFileName} signature from {$this->panelSignatureUrl}...");
 
-		$content = $this->download($this->panelChecksumUrl);
+		$content = $this->download($this->panelSignatureUrl);
 
 		if ($content === false) {
-			$this->error("Failed to download checksum from {$this->panelChecksumUrl}");
+			$this->error("Failed to download signature from {$this->panelSignatureUrl}");
 
 			return false;
 		}
 
-		$expected = $this->expectedChecksum($content);
+		$signature = base64_decode(trim($content), true);
 
-		if ($expected === '') {
-			$this->error("Checksum file does not contain a valid SHA-256 entry for {$this->panelFileName}");
-
-			return false;
-		}
-
-		$actual = hash_file('sha256', $archivePath);
-
-		if ($actual === false) {
-			$this->error("Failed to hash downloaded panel archive: {$archivePath}");
+		if ($signature === false || strlen($signature) !== SODIUM_CRYPTO_SIGN_BYTES) {
+			$this->error('Signature file does not contain a valid Ed25519 signature');
 
 			return false;
 		}
 
-		if (!hash_equals($expected, $actual)) {
-			$this->error("Checksum mismatch for {$this->panelFileName}");
-			$this->error("Expected: {$expected}");
-			$this->error("Actual:   {$actual}");
+		$key = base64_decode(self::PANEL_PUBKEY, true);
+
+		if ($key === false || strlen($key) !== SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
+			$this->error('Embedded panel signing public key is invalid');
 
 			return false;
 		}
 
-		$this->success("Verified {$this->panelFileName} checksum");
+		$archive = file_get_contents($archivePath);
+
+		if ($archive === false) {
+			$this->error("Failed to read downloaded panel archive: {$archivePath}");
+
+			return false;
+		}
+
+		if (!sodium_crypto_sign_verify_detached($signature, $archive, $key)) {
+			$this->error("Signature verification failed for {$this->panelFileName}");
+			$this->error('The archive was not signed by the Cosray release key');
+
+			return false;
+		}
+
+		$this->success("Verified {$this->panelFileName} signature");
 
 		return true;
-	}
-
-	private function expectedChecksum(string $content): string
-	{
-		foreach (preg_split('/\R/', trim($content)) ?: [] as $line) {
-			$parts = preg_split('/\s+/', trim($line), 2);
-
-			if ($parts === false || count($parts) !== 2) {
-				continue;
-			}
-
-			$hash = strtolower($parts[0]);
-			$file = ltrim(trim($parts[1]), '*');
-
-			if ($file === $this->panelFileName && preg_match('/^[a-f0-9]{64}$/', $hash) === 1) {
-				return $hash;
-			}
-		}
-
-		return '';
 	}
 
 	private function preparePanelDownload(string $version): void
@@ -291,7 +281,7 @@ class InstallPanel extends Command
 		$this->panelReleaseTag = $tag;
 		$this->panelFileName = $file;
 		$this->panelUrl = $url;
-		$this->panelChecksumUrl = "{$url}.sha256";
+		$this->panelSignatureUrl = "{$url}.sig";
 	}
 
 	private function resolvePanelReleaseTag(string $version): string

@@ -19,6 +19,7 @@
 		"ext-intl": "*",
 		"ext-curl": "*",
 		"ext-dom": "*",
+		"ext-sodium": "*",
 		"ext-xml": "*",
 		"celemas/boiler": "^0.4.0",
 		"celemas/core": "^0.3.0",
