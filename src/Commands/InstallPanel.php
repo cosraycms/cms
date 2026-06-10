@@ -25,9 +25,11 @@ class InstallPanel extends Command
 	private string $cmsVersion = 'unknown';
 	private string $panelReleaseTag = 'nightly';
 	private string $panelFileName = 'panel-nightly.tar.gz';
-	private string $panelUrl = 'https://github.com/cosray/cms/releases/download/nightly/panel-nightly.tar.gz';
+	private string $panelUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz';
+	private string $panelChecksumUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz.sha256';
 
 	protected const string DEFAULT_PATH = '/cms';
+	private const string RELEASE_BASE_URL = 'https://cosray.dev/releases';
 
 	public function __construct(
 		private Config $config,
@@ -53,7 +55,7 @@ class InstallPanel extends Command
 
 		$this->info('Installing admin panel version: ' . $this->versionLabel());
 
-		$panelArchive = $this->downloadRelease($cmsVersion);
+		$panelArchive = $this->downloadRelease();
 
 		if ($panelArchive === '') {
 			return 1;
@@ -159,7 +161,7 @@ class InstallPanel extends Command
 		}
 	}
 
-	private function downloadRelease(string $version): string
+	private function downloadRelease(): string
 	{
 		$tempFile = tempnam(sys_get_temp_dir(), 'cms_panel_');
 
@@ -171,24 +173,24 @@ class InstallPanel extends Command
 
 		$this->info("Downloading {$this->panelFileName} from {$this->panelUrl}...");
 
-		$context = stream_context_create([
-			'http' => [
-				'method' => 'GET',
-				'header' => 'User-Agent: Cosray-CMS-Installer',
-				'follow_location' => true,
-			],
-		]);
-
-		$content = file_get_contents($this->panelUrl, false, $context);
+		$content = $this->download($this->panelUrl);
 
 		if ($content === false) {
 			$this->error("Failed to download {$this->panelFileName} from {$this->panelUrl}");
+			$this->removeTempFile($tempFile);
 
 			return '';
 		}
 
 		if (file_put_contents($tempFile, $content) === false) {
 			$this->error('Failed to save panel archive to temp file');
+			$this->removeTempFile($tempFile);
+
+			return '';
+		}
+
+		if (!$this->verifyChecksum($tempFile)) {
+			$this->removeTempFile($tempFile);
 
 			return '';
 		}
@@ -198,15 +200,98 @@ class InstallPanel extends Command
 		return $tempFile;
 	}
 
+	private function removeTempFile(string $path): void
+	{
+		if (file_exists($path) && !unlink($path)) {
+			$this->warn("Failed to remove temporary file: {$path}");
+		}
+	}
+
+	private function download(string $url): string|false
+	{
+		$context = stream_context_create([
+			'http' => [
+				'method' => 'GET',
+				'header' => 'User-Agent: Cosray-CMS-Installer',
+				'follow_location' => true,
+			],
+		]);
+
+		return file_get_contents($url, false, $context);
+	}
+
+	private function verifyChecksum(string $archivePath): bool
+	{
+		$this->info("Verifying {$this->panelFileName} checksum from {$this->panelChecksumUrl}...");
+
+		$content = $this->download($this->panelChecksumUrl);
+
+		if ($content === false) {
+			$this->error("Failed to download checksum from {$this->panelChecksumUrl}");
+
+			return false;
+		}
+
+		$expected = $this->expectedChecksum($content);
+
+		if ($expected === '') {
+			$this->error("Checksum file does not contain a valid SHA-256 entry for {$this->panelFileName}");
+
+			return false;
+		}
+
+		$actual = hash_file('sha256', $archivePath);
+
+		if ($actual === false) {
+			$this->error("Failed to hash downloaded panel archive: {$archivePath}");
+
+			return false;
+		}
+
+		if (!hash_equals($expected, $actual)) {
+			$this->error("Checksum mismatch for {$this->panelFileName}");
+			$this->error("Expected: {$expected}");
+			$this->error("Actual:   {$actual}");
+
+			return false;
+		}
+
+		$this->success("Verified {$this->panelFileName} checksum");
+
+		return true;
+	}
+
+	private function expectedChecksum(string $content): string
+	{
+		foreach (preg_split('/\R/', trim($content)) ?: [] as $line) {
+			$parts = preg_split('/\s+/', trim($line), 2);
+
+			if ($parts === false || count($parts) !== 2) {
+				continue;
+			}
+
+			$hash = strtolower($parts[0]);
+			$file = ltrim(trim($parts[1]), '*');
+
+			if ($file === $this->panelFileName && preg_match('/^[a-f0-9]{64}$/', $hash) === 1) {
+				return $hash;
+			}
+		}
+
+		return '';
+	}
+
 	private function preparePanelDownload(string $version): void
 	{
 		$tag = $this->resolvePanelReleaseTag($version);
-		$file = $tag === 'nightly' ? 'panel-nightly.tar.gz' : "panel-{$tag}.tar.gz";
-		$url = "https://github.com/cosray/cms/releases/download/{$tag}/{$file}";
+		$fileTag = str_replace('/', '-', $tag);
+		$file = $tag === 'nightly' ? 'panel-nightly.tar.gz' : "panel-{$fileTag}.tar.gz";
+		$url = self::RELEASE_BASE_URL . "/{$file}";
 
 		$this->panelReleaseTag = $tag;
 		$this->panelFileName = $file;
 		$this->panelUrl = $url;
+		$this->panelChecksumUrl = "{$url}.sha256";
 	}
 
 	private function resolvePanelReleaseTag(string $version): string
