@@ -153,7 +153,7 @@ $app->renderer('view', Renderer::class)->args(
 );
 ```
 
-`Cosray\App` installs the bundled error handler by default. Error pages use a dedicated Boiler renderer, so replacing the CMS `view` renderer does not affect error rendering. Project templates named `http-error.php` and `http-server-error.php` in `{path.root}{path.views}` override the built-in fallback templates. Set `error.enabled` to `false` if you want to install custom PSR-15 error middleware yourself.
+`Cosray\App` installs the bundled error handler by default. Error pages use a dedicated Boiler renderer, so replacing the CMS `view` renderer does not affect error rendering. Project templates named `http-error.php` and `http-server-error.php` in `{path.root}{path.views}` override the built-in fallback templates. Set `error.enabled` to `false` if you want to call `$app->core()->errorHandler(...)` yourself or handle errors in custom middleware.
 
 For advanced integrations, the bundled error integration remains available as `Cosray\View\Boiler\Error\Handler`. Pass a `Cosray\Config`, core factory, and logger when you create it manually.
 

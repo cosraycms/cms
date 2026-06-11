@@ -51,7 +51,7 @@ class App implements RouteAdder
 	protected function addErrorHandler(Container $container, Factory $factory): void
 	{
 		if ($this->config->error->enabled) {
-			$this->core->middleware(
+			$this->core->errorHandler(
 				new ErrorHandler($this->config, $factory, new ContainerLogger($container))->create(),
 			);
 		}

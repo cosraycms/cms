@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\View\Boiler\Error;
 
-use Celemas\Error\Renderer as RendererInterface;
+use Celemas\Core\Error\Renderer as RendererInterface;
 
 /**
  * @psalm-import-type DirsInput from \Celemas\Boiler\Engine

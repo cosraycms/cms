@@ -12,6 +12,12 @@
 	"homepage": "https://cosray.dev",
 	"minimum-stability": "dev",
 	"prefer-stable": true,
+	"repositories": [
+		{
+			"type": "path",
+			"url": "../core"
+		}
+	],
 	"require": {
 		"php": "^8.5",
 		"ext-pgsql": "*",
@@ -22,11 +28,10 @@
 		"ext-sodium": "*",
 		"ext-xml": "*",
 		"celemas/boiler": "^0.4.0",
-		"celemas/core": "^0.3.0",
-		"celemas/error": "dev-main",
+		"celemas/core": "dev-add-error-handler",
 		"celemas/quma": "^0.2.0",
-		"celemas/session": "dev-main",
-		"celemas/sire": "dev-main",
+		"celemas/session": "^0.2.0",
+		"celemas/sire": "^0.4.0",
 		"gumlet/php-image-resize": "2.0.*",
 		"hidehalo/nanoid-php": "^2",
 		"psr/log": "^3.0",
@@ -55,8 +60,8 @@
 	},
 	"scripts": {
 		"test": "@php vendor/bin/phpunit --testdox --no-coverage --colors=always",
-		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md CHANGELOG.md LICENSE.md",
-		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celemas/dev/config/markdownlint.jsonc README.md CHANGELOG.md LICENSE.md",
+		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md CHANGELOG.md",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celemas/dev/config/markdownlint.jsonc README.md CHANGELOG.md",
 		"lint": [
 			"@php vendor/bin/mago fmt --check",
 			"@php vendor/bin/mago lint"

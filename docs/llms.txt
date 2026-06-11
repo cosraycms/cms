@@ -416,7 +416,7 @@ Paths and panel:
 Errors:
 
 - `error.enabled`: `true` (default error middleware in `Cosray\App`)
-- `error.renderer`: `null` (optional `Celemas\Error\Renderer` object or class-string)
+- `error.renderer`: `null` (optional `Celemas\Core\Error\Renderer` object or class-string)
 - `error.trusted`: `[]` (extra trusted classes for Boiler error templates)
 - `error.views`: `null` (defaults to `{path.root}{path.views}` plus built-in fallback templates)
 - `error.whoops`: `true` (uses `filp/whoops` in debug mode when installed)

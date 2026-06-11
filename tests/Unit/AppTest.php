@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celemas\Core\App as CoreApp;
+use Celemas\Core\Error\Handler as ErrorHandler;
 use Celemas\Core\Exception\ValueError;
 use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Response as CoreResponse;
-use Celemas\Error\Handler as ErrorHandler;
 use Celemas\Router\Router;
 use Cosray\App;
 use Cosray\Config;
@@ -50,25 +50,27 @@ final class AppTest extends TestCase
 		App::create('');
 	}
 
-	public function testInstallsErrorMiddlewareByDefault(): void
+	public function testInstallsErrorHandlerByDefault(): void
 	{
 		$app = $this->app(['error.enabled' => true]);
 
 		try {
-			$this->assertInstanceOf(ErrorHandler::class, $app->getMiddleware()[0] ?? null);
+			$this->assertInstanceOf(ErrorHandler::class, $app->core()->errorHandler());
+			$this->assertSame([], $app->getMiddleware());
 		} finally {
 			$this->restoreErrorHandler($app);
 		}
 	}
 
-	public function testErrorMiddlewareCanBeDisabled(): void
+	public function testErrorHandlerCanBeDisabled(): void
 	{
 		$app = $this->app(['error.enabled' => false]);
 
+		$this->assertNull($app->core()->errorHandler());
 		$this->assertSame([], $app->getMiddleware());
 	}
 
-	public function testErrorMiddlewareDoesNotUseViewRenderer(): void
+	public function testErrorHandlerDoesNotUseViewRenderer(): void
 	{
 		$app = $this->app([
 			'error.enabled' => true,
@@ -95,7 +97,7 @@ final class AppTest extends TestCase
 		$this->assertStringNotContainsString('custom:http-server-error', $output);
 	}
 
-	public function testErrorMiddlewareUsesRegisteredLogger(): void
+	public function testErrorHandlerUsesRegisteredLogger(): void
 	{
 		$logger = new class extends AbstractLogger {
 			/** @var list<array{level: mixed, message: string}> */
@@ -223,13 +225,7 @@ final class AppTest extends TestCase
 
 	private function restoreErrorHandler(App $app): void
 	{
-		foreach ($app->getMiddleware() as $middleware) {
-			if (!$middleware instanceof ErrorHandler) {
-				continue;
-			}
-
-			$middleware->restoreHandlers();
-		}
+		$app->core()->errorHandler()?->restoreHandlers();
 	}
 
 	private function app(array $settings = []): App

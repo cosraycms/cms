@@ -36,7 +36,7 @@ namespace Cosray\Config;
  *     'panel.logo': ?string,
  *
  *     'error.enabled': bool,
- *     'error.renderer': null|class-string<\Celemas\Error\Renderer>|\Celemas\Error\Renderer,
+ *     'error.renderer': null|class-string<\Celemas\Core\Error\Renderer>|\Celemas\Core\Error\Renderer,
  *     'error.trusted': list<class-string>,
  *     'error.views': null|string|list<string>,
  *     'error.whoops': bool,

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit\View\Boiler\Error;
 
-use Celemas\Error\Handler as ErrorHandler;
-use Celemas\Error\Renderer as ErrorRenderer;
+use Celemas\Core\Error\Handler as ErrorHandler;
+use Celemas\Core\Error\Renderer as ErrorRenderer;
 use Cosray\Config;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;
@@ -77,7 +77,6 @@ final class HandlerTest extends TestCase
 		$errorHandler = $this->handler($this->errorConfig(debug: true))->create();
 		$reflection = new ReflectionClass($errorHandler);
 		$property = $reflection->getProperty('debug');
-		$property->setAccessible(true);
 
 		$this->assertTrue($property->getValue($errorHandler));
 		$errorHandler->restoreHandlers();
@@ -87,7 +86,7 @@ final class HandlerTest extends TestCase
 	public function testProjectErrorTemplatesOverrideBuiltInFallback(): void
 	{
 		$errorHandler = $this->handler()->create();
-		$response = $errorHandler->getResponse(new Exception('Boom'), null);
+		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertStringContainsString('Server Error', (string) $response->getBody());
 		$errorHandler->restoreHandlers();
@@ -101,7 +100,7 @@ final class HandlerTest extends TestCase
 			'path.views' => '/missing-error-templates',
 		]);
 		$errorHandler = $this->handler($config)->create();
-		$response = $errorHandler->getResponse(new Exception('Boom'), null);
+		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertStringContainsString('Internal Server Error', (string) $response->getBody());
 		$errorHandler->restoreHandlers();
@@ -125,7 +124,7 @@ final class HandlerTest extends TestCase
 		};
 		$config = $this->errorConfig(['error.renderer' => $renderer]);
 		$errorHandler = $this->handler($config)->create();
-		$response = $errorHandler->getResponse(new Exception('Boom'), null);
+		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertSame('custom error', (string) $response->getBody());
 		$errorHandler->restoreHandlers();

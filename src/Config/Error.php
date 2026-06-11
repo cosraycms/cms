@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Config;
 
-use Celemas\Error\Renderer;
+use Celemas\Core\Error\Renderer;
 
 final class Error
 {

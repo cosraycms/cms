@@ -33,7 +33,7 @@ use Psr\Log\NullLogger;
 class End2EndTestCase extends IntegrationTestCase
 {
 	protected App $app;
-	protected ?\Celemas\Error\Handler $errorHandler = null;
+	protected ?\Celemas\Core\Error\Handler $errorHandler = null;
 
 	// Disable transactions because the CMS creates its own database connection
 	// which cannot see uncommitted transaction data from the test connection.
@@ -239,9 +239,9 @@ class End2EndTestCase extends IntegrationTestCase
 
 		$app = new App($factory, $router, $container);
 
-		// Configure error handler middleware
+		// Configure the top-level error handler.
 		$this->errorHandler = $this->createErrorHandler($config, $factory);
-		$app->middleware($this->errorHandler);
+		$app->errorHandler($this->errorHandler);
 
 		// Load locales
 		$app->load($this->createLocales());
@@ -278,8 +278,10 @@ class End2EndTestCase extends IntegrationTestCase
 		return $plugin;
 	}
 
-	protected function createErrorHandler(Config $config, Laminas $factory): \Celemas\Error\Handler
-	{
+	protected function createErrorHandler(
+		Config $config,
+		Laminas $factory,
+	): \Celemas\Core\Error\Handler {
 		$logger = new NullLogger();
 		$handler = new Handler($config, $factory, $logger);
 		$handler->views('tests/Fixtures/templates');

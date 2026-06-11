@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\View\Boiler\Error;
 
 use Celemas\Boiler\Engine;
+use Celemas\Core\Error\Renderer as RendererInterface;
 use Celemas\Core\Exception\HttpError;
-use Celemas\Error\Renderer as RendererInterface;
 use Override;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
