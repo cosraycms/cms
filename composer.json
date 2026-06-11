@@ -12,12 +12,6 @@
 	"homepage": "https://cosray.dev",
 	"minimum-stability": "dev",
 	"prefer-stable": true,
-	"repositories": [
-		{
-			"type": "path",
-			"url": "../core"
-		}
-	],
 	"require": {
 		"php": "^8.5",
 		"ext-pgsql": "*",
@@ -28,7 +22,7 @@
 		"ext-sodium": "*",
 		"ext-xml": "*",
 		"celemas/boiler": "^0.4.0",
-		"celemas/core": "dev-add-error-handler",
+		"celemas/core": "^0.4.0",
 		"celemas/quma": "^0.2.0",
 		"celemas/session": "^0.2.0",
 		"celemas/sire": "^0.4.0",
