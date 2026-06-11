@@ -54,12 +54,8 @@ final class AppTest extends TestCase
 	{
 		$app = $this->app(['error.enabled' => true]);
 
-		try {
-			$this->assertInstanceOf(ErrorHandler::class, $app->core()->errorHandler());
-			$this->assertSame([], $app->getMiddleware());
-		} finally {
-			$this->restoreErrorHandler($app);
-		}
+		$this->assertInstanceOf(ErrorHandler::class, $app->core()->errorHandler());
+		$this->assertSame([], $app->getMiddleware());
 	}
 
 	public function testErrorHandlerCanBeDisabled(): void
@@ -89,7 +85,6 @@ final class AppTest extends TestCase
 			$output = ob_get_contents();
 		} finally {
 			ob_end_clean();
-			$this->restoreErrorHandler($app);
 		}
 
 		$this->assertInstanceOf(ResponseInterface::class, $response);
@@ -127,7 +122,6 @@ final class AppTest extends TestCase
 			$app->run($request);
 		} finally {
 			ob_end_clean();
-			$this->restoreErrorHandler($app);
 		}
 
 		$this->assertNotSame([], $logger->records);
@@ -221,11 +215,6 @@ final class AppTest extends TestCase
 		}
 
 		return false;
-	}
-
-	private function restoreErrorHandler(App $app): void
-	{
-		$app->core()->errorHandler()?->restoreHandlers();
 	}
 
 	private function app(array $settings = []): App

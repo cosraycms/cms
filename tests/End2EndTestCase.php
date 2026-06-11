@@ -33,7 +33,6 @@ use Psr\Log\NullLogger;
 class End2EndTestCase extends IntegrationTestCase
 {
 	protected App $app;
-	protected ?\Celemas\Core\Error\Handler $errorHandler = null;
 
 	// Disable transactions because the CMS creates its own database connection
 	// which cannot see uncommitted transaction data from the test connection.
@@ -62,11 +61,6 @@ class End2EndTestCase extends IntegrationTestCase
 			$_SESSION = [];
 			session_unset();
 			session_destroy();
-		}
-
-		// Restore error handlers to prevent PHPUnit warnings
-		if ($this->errorHandler) {
-			$this->errorHandler->restoreHandlers();
 		}
 
 		parent::tearDown();
@@ -240,8 +234,8 @@ class End2EndTestCase extends IntegrationTestCase
 		$app = new App($factory, $router, $container);
 
 		// Configure the top-level error handler.
-		$this->errorHandler = $this->createErrorHandler($config, $factory);
-		$app->errorHandler($this->errorHandler);
+		$errorHandler = $this->createErrorHandler($config, $factory);
+		$app->errorHandler($errorHandler);
 
 		// Load locales
 		$app->load($this->createLocales());

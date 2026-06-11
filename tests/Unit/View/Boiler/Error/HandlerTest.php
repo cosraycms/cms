@@ -10,7 +10,6 @@ use Cosray\Config;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;
 use Exception;
-use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -39,8 +38,11 @@ final class HandlerTest extends TestCase
 		$handler = $this->handler();
 
 		$result = $handler->trusted([self::class]);
+		$trusted = $this->trustedClasses($handler);
 
 		$this->assertSame($handler, $result);
+		$this->assertContains(Config::class, $trusted);
+		$this->assertContains(self::class, $trusted);
 	}
 
 	public function testTrustedCanReplace(): void
@@ -50,49 +52,47 @@ final class HandlerTest extends TestCase
 		$result = $handler->trusted([self::class], replace: true);
 
 		$this->assertSame($handler, $result);
+		$this->assertSame([self::class], $this->trustedClasses($handler));
 	}
 
-	#[RunInSeparateProcess]
 	public function testCreateReturnsErrorHandler(): void
 	{
 		$errorHandler = $this->handler()->create();
 
 		$this->assertInstanceOf(ErrorHandler::class, $errorHandler);
-		$errorHandler->restoreHandlers();
 	}
 
-	#[RunInSeparateProcess]
-	public function testCreateWithDebugMode(): void
-	{
-		$errorHandler = $this->handler($this->errorConfig(debug: true))->create();
-
-		$this->assertInstanceOf(ErrorHandler::class, $errorHandler);
-		$errorHandler->restoreHandlers();
-	}
-
-	#[RunInSeparateProcess]
 	public function testCreateUsesConfigDebugInsteadOfEnvironment(): void
 	{
+		$hadDebug = array_key_exists('APP_DEBUG', $_ENV);
+		$previousDebug = $_ENV['APP_DEBUG'] ?? null;
 		$_ENV['APP_DEBUG'] = 'false';
-		$errorHandler = $this->handler($this->errorConfig(debug: true))->create();
-		$reflection = new ReflectionClass($errorHandler);
-		$property = $reflection->getProperty('debug');
 
-		$this->assertTrue($property->getValue($errorHandler));
-		$errorHandler->restoreHandlers();
+		try {
+			$errorHandler = $this->handler($this->errorConfig([
+				'error.whoops' => false,
+			], debug: true))->create();
+
+			$this->throws(Exception::class, 'Boom');
+
+			$errorHandler->response(new Exception('Boom'));
+		} finally {
+			if ($hadDebug) {
+				$_ENV['APP_DEBUG'] = $previousDebug;
+			} else {
+				unset($_ENV['APP_DEBUG']);
+			}
+		}
 	}
 
-	#[RunInSeparateProcess]
 	public function testProjectErrorTemplatesOverrideBuiltInFallback(): void
 	{
 		$errorHandler = $this->handler()->create();
 		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertStringContainsString('Server Error', (string) $response->getBody());
-		$errorHandler->restoreHandlers();
 	}
 
-	#[RunInSeparateProcess]
 	public function testBuiltInTemplatesAreFallback(): void
 	{
 		$config = $this->errorConfig([
@@ -103,10 +103,8 @@ final class HandlerTest extends TestCase
 		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertStringContainsString('Internal Server Error', (string) $response->getBody());
-		$errorHandler->restoreHandlers();
 	}
 
-	#[RunInSeparateProcess]
 	public function testCustomRendererCanReplaceDefaultRenderer(): void
 	{
 		$renderer = new class implements ErrorRenderer {
@@ -127,7 +125,6 @@ final class HandlerTest extends TestCase
 		$response = $errorHandler->response(new Exception('Boom'));
 
 		$this->assertSame('custom error', (string) $response->getBody());
-		$errorHandler->restoreHandlers();
 	}
 
 	private function handler(?Config $config = null): Handler
@@ -137,6 +134,15 @@ final class HandlerTest extends TestCase
 			factory: $this->factory(),
 			logger: new NullLogger(),
 		);
+	}
+
+	/** @return list<class-string> */
+	private function trustedClasses(Handler $handler): array
+	{
+		$reflection = new ReflectionClass($handler);
+		$property = $reflection->getProperty('trusted');
+
+		return $property->getValue($handler);
 	}
 
 	/** @param array<string, mixed> $settings */
