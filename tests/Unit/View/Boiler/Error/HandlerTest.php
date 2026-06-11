@@ -75,7 +75,7 @@ final class HandlerTest extends TestCase
 
 			$this->throws(Exception::class, 'Boom');
 
-			$errorHandler->response(new Exception('Boom'));
+			$errorHandler->response(new Exception('Boom'), $this->psrRequest());
 		} finally {
 			if ($hadDebug) {
 				$_ENV['APP_DEBUG'] = $previousDebug;
@@ -88,7 +88,7 @@ final class HandlerTest extends TestCase
 	public function testProjectErrorTemplatesOverrideBuiltInFallback(): void
 	{
 		$errorHandler = $this->handler()->create();
-		$response = $errorHandler->response(new Exception('Boom'));
+		$response = $errorHandler->response(new Exception('Boom'), $this->psrRequest());
 
 		$this->assertStringContainsString('Server Error', (string) $response->getBody());
 	}
@@ -100,7 +100,7 @@ final class HandlerTest extends TestCase
 			'path.views' => '/missing-error-templates',
 		]);
 		$errorHandler = $this->handler($config)->create();
-		$response = $errorHandler->response(new Exception('Boom'));
+		$response = $errorHandler->response(new Exception('Boom'), $this->psrRequest());
 
 		$this->assertStringContainsString('Internal Server Error', (string) $response->getBody());
 	}
@@ -111,7 +111,7 @@ final class HandlerTest extends TestCase
 			public function render(
 				Throwable $exception,
 				ResponseFactory $factory,
-				?Request $request,
+				Request $request,
 				bool $debug,
 			): Response {
 				$response = $factory->createResponse(500);
@@ -122,7 +122,7 @@ final class HandlerTest extends TestCase
 		};
 		$config = $this->errorConfig(['error.renderer' => $renderer]);
 		$errorHandler = $this->handler($config)->create();
-		$response = $errorHandler->response(new Exception('Boom'));
+		$response = $errorHandler->response(new Exception('Boom'), $this->psrRequest());
 
 		$this->assertSame('custom error', (string) $response->getBody());
 	}

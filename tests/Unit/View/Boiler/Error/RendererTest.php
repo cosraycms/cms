@@ -24,7 +24,12 @@ final class RendererTest extends TestCase
 		);
 
 		$exception = new Exception('Something went wrong', 500);
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(500, $response->getStatusCode());
 		$this->assertStringContainsString('Error 500', (string) $response->getBody());
@@ -39,7 +44,12 @@ final class RendererTest extends TestCase
 		);
 
 		$exception = new Exception('Error', 0);
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(500, $response->getStatusCode());
 	}
@@ -52,7 +62,12 @@ final class RendererTest extends TestCase
 		);
 
 		$exception = new Exception('Error', 600);
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(500, $response->getStatusCode());
 	}
@@ -65,7 +80,12 @@ final class RendererTest extends TestCase
 		);
 
 		$exception = new Exception('Not found', 404);
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(404, $response->getStatusCode());
 	}
@@ -80,7 +100,12 @@ final class RendererTest extends TestCase
 		$exception = new HttpBadRequest(message: 'Validation failed');
 		$exception->payload(['errors' => ['field' => 'required']]);
 
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(400, $response->getStatusCode());
 	}
@@ -135,7 +160,12 @@ final class RendererTest extends TestCase
 		);
 
 		$exception = new Exception('Error', 500);
-		$response = $renderer->render($exception, $this->factory()->responseFactory(), null, false);
+		$response = $renderer->render(
+			$exception,
+			$this->factory()->responseFactory(),
+			$this->psrRequest(),
+			false,
+		);
 
 		$this->assertSame(500, $response->getStatusCode());
 	}

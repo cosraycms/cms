@@ -36,7 +36,7 @@ final class Renderer implements RendererInterface
 	public function render(
 		Throwable $exception,
 		ResponseFactory $factory,
-		?Request $request,
+		Request $request,
 		bool $debug,
 	): Response {
 		$payload = null;
@@ -52,7 +52,7 @@ final class Renderer implements RendererInterface
 		$status = $code < 100 || $code > 599 ? 500 : $code;
 		$response = $factory->createResponse($status);
 
-		if ($request && $this->isJsonOnlyRequest($request)) {
+		if ($this->isJsonOnlyRequest($request)) {
 			$response = $response->withHeader('Content-Type', 'application/json');
 			$json = json_encode($payload);
 			$response->getBody()->write($json === false ? '{}' : $json);
