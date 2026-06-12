@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased](https://codeberg.org/cosray/cms/compare/0.1.1...HEAD)
+## [Unreleased](https://codeberg.org/cosray/cms/compare/0.2.0...HEAD)
+
+No notable changes since the last release.
+
+## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 
 ### Breaking Changes
 
