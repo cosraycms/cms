@@ -63,58 +63,70 @@ export interface UploadResponse {
 
 export type UploadType = 'image' | 'file' | 'video';
 
-export interface GridBase {
+export interface BlockBase {
 	type: string;
 	colspan: number;
 	rowspan: number;
 	colstart?: number | null;
-	width?: number | null; // will be added while rendering the grid
+	width?: number | null; // will be added while rendering the blocks
 }
 
-export interface GridText extends GridBase {
+export interface BlockText extends BlockBase {
 	type: 'text';
 	value: string;
 }
 
-export interface GridRichText extends GridBase {
+export interface BlockRichText extends BlockBase {
 	type: 'richtext';
 	value: string;
 }
 
-export interface GridIframe extends GridBase {
+export interface BlockIframe extends BlockBase {
 	type: 'iframe';
 	value: string;
 }
 
-export interface GridImage extends GridBase {
+export interface BlockImage extends BlockBase {
 	type: 'image';
 	files: TranslatedFile[];
 }
 
-export interface GridVideo extends GridBase {
+export interface BlockImages extends BlockBase {
+	type: 'images';
+	files: TranslatedFile[];
+}
+
+export interface BlockVideo extends BlockBase {
 	type: 'video';
 	files: TranslatedFile[];
 }
 
-export interface GridYoutube extends GridBase {
+export interface BlockYoutube extends BlockBase {
 	type: 'youtube';
 	value: string;
 	aspectRatioX: number;
 	aspectRatioY: number;
 }
 
-export type GridType = 'text' | 'richtext' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
+export type BlockType = 'text' | 'richtext' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
 
-export type GridItem = GridText | GridRichText | GridImage | GridYoutube | GridVideo | GridIframe;
+export type BlockItem =
+	| BlockText
+	| BlockRichText
+	| BlockImage
+	| BlockImages
+	| BlockYoutube
+	| BlockVideo
+	| BlockIframe;
 
-export interface LocalizedGridValue {
-	[key: string]: GridItem[];
+export interface LocalizedBlocksValue {
+	[key: string]: BlockItem[];
 }
 
-export interface GridData {
-	type: 'grid';
+export interface BlocksData {
+	type: 'blocks';
 	columns: number;
-	value: GridItem[] | LocalizedGridValue;
+	value: BlockItem[] | LocalizedBlocksValue;
 }
 
 // Matrix field types
@@ -127,7 +139,7 @@ export interface MatrixData {
 	value: MatrixItemData[];
 }
 
-export type Data = TextData | CodeData | FileData | GridData | NumberData | MatrixData;
+export type Data = TextData | CodeData | FileData | BlocksData | NumberData | MatrixData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 

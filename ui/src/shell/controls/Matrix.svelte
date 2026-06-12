@@ -79,8 +79,8 @@
 			'Cosray\\Field\\Picture': () => ({ type: 'picture', files: [] }),
 			'Cosray\\Field\\File': () => ({ type: 'file', files: [] }),
 			'Cosray\\Field\\Video': () => ({ type: 'video', files: [] }),
-			'Cosray\\Field\\Grid': () => ({
-				type: 'grid',
+			'Cosray\\Field\\Blocks': () => ({
+				type: 'blocks',
 				columns: 12,
 				value: isTranslatable ? createTranslatableValue() : [],
 			}),

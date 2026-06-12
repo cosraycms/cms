@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { GridItem } from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlockItem } from '$types/data';
+	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
-	import GridButtonLabel from '$shell/controls/GridButtonLabel.svelte';
+	import BlockButtonLabel from '$shell/controls/BlockButtonLabel.svelte';
 	import IcoExpand from '$shell/icons/IcoExpand.svelte';
 	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';
 	import IcoIndent from '$shell/icons/IcoIndent.svelte';
 	import IcoUnindent from '$shell/icons/IcoUnindent.svelte';
 
 	type Props = {
-		item: GridItem;
-		field: GridField;
+		item: BlockItem;
+		field: BlocksField;
 		dropdown?: boolean;
 	};
 
@@ -66,9 +66,9 @@
 </script>
 
 <div
-	class="cms-grid-size-buttons"
-	class:cms-grid-size-buttons-inline={!dropdown}
-	class:cms-grid-size-buttons-dropdown={dropdown}>
+	class="cms-blocks-size-buttons"
+	class:cms-blocks-size-buttons-inline={!dropdown}
+	class:cms-blocks-size-buttons-dropdown={dropdown}>
 	<button
 		class="width-plus"
 		disabled={widest}
@@ -76,7 +76,7 @@
 		<span class="icon">
 			<IcoExpand />
 		</span>
-		<GridButtonLabel value={item.colspan} />
+		<BlockButtonLabel value={item.colspan} />
 	</button>
 	<button
 		class="width-minus"
@@ -85,40 +85,40 @@
 		<span class="icon">
 			<IcoCollapse />
 		</span>
-		<GridButtonLabel value={item.colspan} />
+		<BlockButtonLabel value={item.colspan} />
 	</button>
 	<button
 		class="indent"
 		disabled={fullyindented}
 		onclick={indent(1)}>
 		<IcoIndent />
-		<GridButtonLabel value={item.colstart} />
+		<BlockButtonLabel value={item.colstart ?? null} />
 	</button>
 	<button
 		class="unindent"
 		disabled={unindented}
 		onclick={indent(-1)}>
 		<IcoUnindent />
-		<GridButtonLabel value={item.colstart} />
+		<BlockButtonLabel value={item.colstart ?? null} />
 	</button>
 	<button
 		class="height-plus"
 		disabled={highest}
 		onclick={height(1)}>
 		<IcoExpand />
-		<GridButtonLabel value={item.rowspan} />
+		<BlockButtonLabel value={item.rowspan} />
 	</button>
 	<button
 		class="height-minus"
 		disabled={onerow}
 		onclick={height(-1)}>
 		<IcoCollapse />
-		<GridButtonLabel value={item.rowspan} />
+		<BlockButtonLabel value={item.rowspan} />
 	</button>
 </div>
 
 <style lang="postcss">
-	.cms-grid-size-buttons {
+	.cms-blocks-size-buttons {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: row;
@@ -127,11 +127,11 @@
 		padding: var(--cms-space-2) 0;
 	}
 
-	.cms-grid-size-buttons-inline {
+	.cms-blocks-size-buttons-inline {
 		justify-content: flex-start;
 	}
 
-	.cms-grid-size-buttons-dropdown {
+	.cms-blocks-size-buttons-dropdown {
 		justify-content: center;
 	}
 

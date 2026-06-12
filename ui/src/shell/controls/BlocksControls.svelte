@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { GridItem } from '$types/data';
-	import type { GridField } from '$types/fields';
-	import GridSizeButtons from '$shell/controls/GridSizeButtons.svelte';
-	import GridCellButtons from '$shell/controls/GridCellButtons.svelte';
+	import type { BlockItem } from '$types/data';
+	import type { BlocksField } from '$types/fields';
+	import BlockSizeButtons from '$shell/controls/BlockSizeButtons.svelte';
+	import BlockCellButtons from '$shell/controls/BlockCellButtons.svelte';
 	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
 	import IcoGear from '$shell/icons/IcoGear.svelte';
 
 	interface Props {
-		data: GridItem[];
-		item: GridItem;
-		field: GridField;
+		data: BlockItem[];
+		item: BlockItem;
+		field: BlocksField;
 		index: number;
 		edit: () => void;
 		add: () => void;
@@ -27,14 +27,14 @@
 	let showDropdown = $state(false);
 </script>
 
-<div class="content-actions cms-grid-controls">
-	{#if item.width < 350}
-		<div class="cms-grid-controls-compact">
-			<div class="cms-grid-buttons cms-grid-buttons-dropdown">
+<div class="content-actions cms-blocks-controls">
+	{#if (item.width ?? 0) < 350}
+		<div class="cms-blocks-controls-compact">
+			<div class="cms-blocks-buttons cms-blocks-buttons-dropdown">
 				<div>
 					<button
 						type="button"
-						class="cms-grid-buttons-toggle"
+						class="cms-blocks-buttons-toggle"
 						onclick={() => (showDropdown = !showDropdown)}>
 						<span class="sr-only">Open options</span>
 						<IcoThreeDots />
@@ -42,21 +42,21 @@
 				</div>
 				{#if showDropdown}
 					<div
-						class="cms-grid-buttons-menu"
+						class="cms-blocks-buttons-menu"
 						role="menu"
 						aria-orientation="vertical"
 						aria-labelledby="menu-button"
 						tabindex="-1">
 						<div
-							class="cms-grid-buttons-menu-content"
+							class="cms-blocks-buttons-menu-content"
 							role="none">
-							<GridCellButtons
+							<BlockCellButtons
 								bind:data
 								bind:item
 								bind:index
 								{add}
 								dropdown />
-							<GridSizeButtons
+							<BlockSizeButtons
 								bind:field
 								bind:item
 								dropdown />
@@ -66,18 +66,18 @@
 			</div>
 		</div>
 	{:else}
-		<div class="cms-grid-buttons cms-grid-buttons-inline">
-			<GridSizeButtons
+		<div class="cms-blocks-buttons cms-blocks-buttons-inline">
+			<BlockSizeButtons
 				bind:field
 				bind:item />
-			<GridCellButtons
+			<BlockCellButtons
 				bind:data
 				bind:item
 				bind:index
 				{add} />
 		</div>
 	{/if}
-	<div class="cms-grid-controls-edit">
+	<div class="cms-blocks-controls-edit">
 		<button
 			class="edit"
 			onclick={edit}>
@@ -92,14 +92,14 @@
 		width: var(--cms-space-4);
 	}
 
-	.cms-grid-controls {
+	.cms-blocks-controls {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: flex-end;
 	}
 
-	.cms-grid-controls-compact {
+	.cms-blocks-controls-compact {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: row;
@@ -110,7 +110,7 @@
 		margin-right: var(--cms-space-3);
 	}
 
-	.cms-grid-controls-edit {
+	.cms-blocks-controls-edit {
 		display: flex;
 		flex: 0 1 auto;
 		flex-direction: row;
@@ -118,19 +118,19 @@
 		justify-content: flex-end;
 	}
 
-	.cms-grid-buttons {
+	.cms-blocks-buttons {
 		opacity: 0;
 		transition: opacity 0.35s ease;
 	}
 
-	.cms-grid-buttons-dropdown {
+	.cms-blocks-buttons-dropdown {
 		position: relative;
 		display: inline-block;
 		text-align: left;
 		opacity: 1;
 	}
 
-	.cms-grid-buttons-inline {
+	.cms-blocks-buttons-inline {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: row;
@@ -138,12 +138,12 @@
 		justify-content: flex-end;
 	}
 
-	.cms-grid-buttons-toggle {
+	.cms-blocks-buttons-toggle {
 		display: flex;
 		align-items: center;
 	}
 
-	.cms-grid-buttons-menu {
+	.cms-blocks-buttons-menu {
 		position: absolute;
 		right: 0;
 		z-index: 10;
@@ -158,22 +158,22 @@
 		border: 1px solid color-mix(in srgb, var(--cms-color-black) 5%, transparent);
 	}
 
-	.cms-grid-buttons-menu-content {
+	.cms-blocks-buttons-menu-content {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		padding: var(--cms-space-1) 0;
 	}
 
-	.cms-grid-buttons:hover {
+	.cms-blocks-buttons:hover {
 		opacity: 1;
 	}
 
-	.cms-grid-buttons :global(button .grid-button-label) {
+	.cms-blocks-buttons :global(button .block-button-label) {
 		opacity: 0;
 	}
 
-	.cms-grid-buttons :global(button:hover .grid-button-label) {
+	.cms-blocks-buttons :global(button:hover .block-button-label) {
 		opacity: 1;
 	}
 

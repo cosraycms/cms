@@ -7,13 +7,13 @@ namespace Cosray\Tests\Integration;
 use Cosray\Tests\IntegrationTestCase;
 
 /**
- * Tests for Grid field persistence with various content types.
+ * Tests for Blocks field persistence with various content types.
  *
  * @internal
  *
  * @coversNothing
  */
-final class GridPersistenceTest extends IntegrationTestCase
+final class BlocksPersistenceTest extends IntegrationTestCase
 {
 	protected function setUp(): void
 	{
@@ -21,13 +21,13 @@ final class GridPersistenceTest extends IntegrationTestCase
 		$this->loadFixtures('basic-types', 'sample-nodes');
 	}
 
-	public function testGridWithTextAndHtmlItems(): void
+	public function testBlocksWithTextAndHtmlItems(): void
 	{
-		$typeId = $this->createTestType('grid-text-html-test');
+		$typeId = $this->createTestType('blocks-text-html-test');
 
-		$gridContent = [
-			'grid' => [
-				'type' => 'grid',
+		$blocksContent = [
+			'blocks' => [
+				'type' => 'blocks',
 				'items' => [
 					[
 						'type' => 'text',
@@ -48,9 +48,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-text-html-node',
+			'uid' => 'blocks-text-html-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -59,18 +59,18 @@ final class GridPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertCount(2, $content['grid']['items']);
-		$this->assertEquals('text', $content['grid']['items'][0]['type']);
-		$this->assertEquals('richtext', $content['grid']['items'][1]['type']);
+		$this->assertCount(2, $content['blocks']['items']);
+		$this->assertEquals('text', $content['blocks']['items'][0]['type']);
+		$this->assertEquals('richtext', $content['blocks']['items'][1]['type']);
 	}
 
-	public function testGridWithImageItems(): void
+	public function testBlocksWithImageItems(): void
 	{
-		$typeId = $this->createTestType('grid-image-test');
+		$typeId = $this->createTestType('blocks-image-test');
 
-		$gridContent = [
+		$blocksContent = [
 			'gallery' => [
-				'type' => 'grid',
+				'type' => 'blocks',
 				'items' => [
 					[
 						'type' => 'image',
@@ -95,9 +95,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-image-node',
+			'uid' => 'blocks-image-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -111,13 +111,13 @@ final class GridPersistenceTest extends IntegrationTestCase
 		$this->assertEquals('photo1.jpg', $content['gallery']['items'][0]['files'][0]['file']);
 	}
 
-	public function testGridWithYoutubeItem(): void
+	public function testBlocksWithYoutubeItem(): void
 	{
-		$typeId = $this->createTestType('grid-youtube-test');
+		$typeId = $this->createTestType('blocks-youtube-test');
 
-		$gridContent = [
+		$blocksContent = [
 			'content' => [
-				'type' => 'grid',
+				'type' => 'blocks',
 				'items' => [
 					[
 						'type' => 'youtube',
@@ -133,9 +133,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-youtube-node',
+			'uid' => 'blocks-youtube-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -149,13 +149,13 @@ final class GridPersistenceTest extends IntegrationTestCase
 		$this->assertEquals(16, $content['content']['items'][0]['aspectRatioX']);
 	}
 
-	public function testGridWithMixedItemTypes(): void
+	public function testBlocksWithMixedItemTypes(): void
 	{
-		$typeId = $this->createTestType('grid-mixed-test');
+		$typeId = $this->createTestType('blocks-mixed-test');
 
-		$gridContent = [
+		$blocksContent = [
 			'mixed' => [
-				'type' => 'grid',
+				'type' => 'blocks',
 				'items' => [
 					['type' => 'text', 'rowspan' => 1, 'colspan' => 4, 'value' => 'Text'],
 					['type' => 'richtext', 'rowspan' => 1, 'colspan' => 4, 'value' => '<p>HTML</p>'],
@@ -173,9 +173,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-mixed-node',
+			'uid' => 'blocks-mixed-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -193,13 +193,13 @@ final class GridPersistenceTest extends IntegrationTestCase
 		$this->assertEquals('youtube', $items[3]['type']);
 	}
 
-	public function testGridWithTranslatableContent(): void
+	public function testBlocksWithTranslatableContent(): void
 	{
-		$typeId = $this->createTestType('grid-translatable-test');
+		$typeId = $this->createTestType('blocks-translatable-test');
 
-		$gridContent = [
-			'grid' => [
-				'type' => 'grid',
+		$blocksContent = [
+			'blocks' => [
+				'type' => 'blocks',
 				'items' => [
 					[
 						'type' => 'text',
@@ -224,9 +224,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-translatable-node',
+			'uid' => 'blocks-translatable-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -235,25 +235,25 @@ final class GridPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertEquals('Deutscher Text', $content['grid']['items'][0]['value']['de']);
-		$this->assertEquals('English text', $content['grid']['items'][0]['value']['en']);
+		$this->assertEquals('Deutscher Text', $content['blocks']['items'][0]['value']['de']);
+		$this->assertEquals('English text', $content['blocks']['items'][0]['value']['en']);
 	}
 
-	public function testEmptyGridStructure(): void
+	public function testEmptyBlocksStructure(): void
 	{
-		$typeId = $this->createTestType('grid-empty-test');
+		$typeId = $this->createTestType('blocks-empty-test');
 
-		$gridContent = [
-			'emptygrid' => [
-				'type' => 'grid',
+		$blocksContent = [
+			'emptyblocks' => [
+				'type' => 'blocks',
 				'items' => [],
 			],
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-empty-node',
+			'uid' => 'blocks-empty-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(
@@ -262,18 +262,18 @@ final class GridPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertIsArray($content['emptygrid']['items']);
-		$this->assertCount(0, $content['emptygrid']['items']);
+		$this->assertIsArray($content['emptyblocks']['items']);
+		$this->assertCount(0, $content['emptyblocks']['items']);
 	}
 
-	public function testGridComplexLayout(): void
+	public function testBlocksComplexLayout(): void
 	{
-		$typeId = $this->createTestType('grid-layout-test');
+		$typeId = $this->createTestType('blocks-layout-test');
 
 		// Create a 12-column layout with various spans
-		$gridContent = [
+		$blocksContent = [
 			'layout' => [
-				'type' => 'grid',
+				'type' => 'blocks',
 				'items' => [
 					[
 						'type' => 'text',
@@ -322,9 +322,9 @@ final class GridPersistenceTest extends IntegrationTestCase
 		];
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'grid-layout-node',
+			'uid' => 'blocks-layout-node',
 			'type' => $typeId,
-			'content' => $gridContent,
+			'content' => $blocksContent,
 		]);
 
 		$node = $this->db()->execute(

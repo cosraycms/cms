@@ -1,37 +1,39 @@
 <script lang="ts">
 	import type {
-		GridItem,
-		GridBase,
-		GridText as GridTextData,
-		GridRichText as GridRichTextData,
-		GridImage as GridImageData,
-		GridYoutube as GridYoutubeData,
-		GridIframe as GridIframeData,
-		GridType,
+		BlockItem,
+		BlockBase,
+		BlockText as BlockTextData,
+		BlockRichText as BlockRichTextData,
+		BlockImage as BlockImageData,
+		BlockImages as BlockImagesData,
+		BlockYoutube as BlockYoutubeData,
+		BlockIframe as BlockIframeData,
+		BlockType,
 	} from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlocksField } from '$types/fields';
 	import type { ModalFunctions } from '$shell/modal';
 
 	import { _ } from '$lib/locale';
 	import resize from '$lib/resize';
 	import { getContext } from 'svelte';
+	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { setDirty } from '$lib/state';
 	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
 	import Button from '$shell/Button.svelte';
 	import ModalAdd from '$shell/modals/ModalAdd.svelte';
-	import GridControls from './GridControls.svelte';
-	import GridImage from './GridImage.svelte';
-	import GridImages from './GridImages.svelte';
-	import GridRichText from './GridRichText.svelte';
-	import GridText from './GridText.svelte';
-	import GridYoutube from './GridYoutube.svelte';
-	import GridIframe from './GridIframe.svelte';
-	import GridVideo from './GridVideo.svelte';
+	import BlocksControls from './BlocksControls.svelte';
+	import BlockImage from './BlockImage.svelte';
+	import BlockImages from './BlockImages.svelte';
+	import BlockRichText from './BlockRichText.svelte';
+	import BlockText from './BlockText.svelte';
+	import BlockYoutube from './BlockYoutube.svelte';
+	import BlockIframe from './BlockIframe.svelte';
+	import BlockVideo from './BlockVideo.svelte';
 
 	type Props = {
-		field: GridField;
-		data: GridItem[];
+		field: BlocksField;
+		data: BlockItem[];
 		node: string;
 		cols?: number;
 	};
@@ -39,14 +41,14 @@
 	let { field, data = $bindable(), node, cols = 12 }: Props = $props();
 	let { open, close } = getContext<ModalFunctions>('modal');
 
-	const controls = {
-		image: GridImage,
-		richtext: GridRichText,
-		text: GridText,
-		youtube: GridYoutube,
-		images: GridImages,
-		video: GridVideo,
-		iframe: GridIframe,
+	const controls: Record<BlockType, Component<any>> = {
+		image: BlockImage,
+		richtext: BlockRichText,
+		text: BlockText,
+		youtube: BlockYoutube,
+		images: BlockImages,
+		video: BlockVideo,
+		iframe: BlockIframe,
 	};
 	const types = [
 		{ id: 'richtext', label: 'Formatierter Text' },
@@ -58,25 +60,27 @@
 		{ id: 'iframe', label: 'Iframe' },
 	];
 
-	function add(index: number | null, before: boolean, type: GridType) {
-		let content: GridBase = {
+	function add(index: number | null, before: boolean, type: BlockType) {
+		let content: BlockBase = {
 			type,
 			colspan: 12,
 			rowspan: 1,
 			colstart: null,
 		};
 		if (type === 'richtext') {
-			(content as GridRichTextData).value = '';
+			(content as BlockRichTextData).value = '';
 		} else if (type === 'text') {
-			(content as GridTextData).value = '';
-		} else if (type === 'image' || type === 'images') {
-			(content as GridImageData).files = [];
+			(content as BlockTextData).value = '';
+		} else if (type === 'image') {
+			(content as BlockImageData).files = [];
+		} else if (type === 'images') {
+			(content as BlockImagesData).files = [];
 		} else if (type === 'youtube') {
-			(content as GridYoutubeData).value = '';
-			(content as GridYoutubeData).aspectRatioX = 16;
-			(content as GridYoutubeData).aspectRatioY = 9;
+			(content as BlockYoutubeData).value = '';
+			(content as BlockYoutubeData).aspectRatioX = 16;
+			(content as BlockYoutubeData).aspectRatioY = 9;
 		} else if (type === 'iframe') {
-			(content as GridIframeData).value = '';
+			(content as BlockIframeData).value = '';
 		}
 
 		if (!data) {
@@ -84,15 +88,15 @@
 		}
 
 		if (index === null) {
-			data.push(content as GridItem);
+			data.push(content as BlockItem);
 		} else {
 			if (before) {
-				data.splice(index, 0, content as GridItem);
+				data.splice(index, 0, content as BlockItem);
 			} else {
 				if (data.length - 1 === index) {
-					data.push(content as GridItem);
+					data.push(content as BlockItem);
 				} else {
-					data.splice(index + 1, 0, content as GridItem);
+					data.splice(index + 1, 0, content as BlockItem);
 				}
 			}
 		}
@@ -103,10 +107,11 @@
 	function openAddModal(index: number | null) {
 		return () => {
 			open(
-				ModalAdd,
+				ModalAdd as Component<any>,
 				{
 					index,
-					add,
+					add: (index: number | null, before: boolean, type: string) =>
+						add(index, before, type as BlockType),
 					close,
 					types,
 				},
@@ -115,15 +120,15 @@
 		};
 	}
 
-	function resizeCell(item: GridItem) {
+	function resizeCell(item: BlockItem) {
 		return (element: HTMLElement) => (item.width = element.clientWidth);
 	}
 
-	function gridStyle(columns: number): string {
+	function blocksStyle(columns: number): string {
 		return `grid-template-columns: repeat(${columns}, minmax(0, 1fr));`;
 	}
 
-	function gridItemStyle(item: GridItem): string {
+	function blockItemStyle(item: BlockItem): string {
 		const column = item.colstart
 			? `${item.colstart} / span ${item.colspan}`
 			: `span ${item.colspan} / span ${item.colspan}`;
@@ -133,14 +138,14 @@
 </script>
 
 <div
-	class="grid-field cms-grid-field"
-	style={gridStyle(cols)}>
+	class="blocks-field cms-blocks-field"
+	style={blocksStyle(cols)}>
 	{#if data && data.length > 0}
 		{#each data as item, index (item)}
 			{@const Control = controls[item.type]}
 			<div
-				class="cms-grid-item"
-				style={gridItemStyle(item)}
+				class="cms-blocks-item"
+				style={blockItemStyle(item)}
 				animate:flip={{ duration: 300 }}
 				use:resize={resizeCell(item)}>
 				<Control
@@ -148,24 +153,24 @@
 					{node}
 					{index}
 					{field}>
-					{#snippet children({ edit })}
-						<GridControls
+					{#snippet children(params: { edit: () => void })}
+						<BlocksControls
 							bind:data
 							{item}
 							{index}
 							{field}
-							{edit}
+							edit={params.edit}
 							add={openAddModal(index)} />
 					{/snippet}
 				</Control>
 			</div>
 		{/each}
 	{:else}
-		<div class="cms-grid-empty">
+		<div class="cms-blocks-empty">
 			<Button
 				class="secondary"
 				onclick={openAddModal(null)}>
-				<span class="cms-grid-empty-icon">
+				<span class="cms-blocks-empty-icon">
 					<IcoCirclePlus />
 				</span>
 				{_('Inhalt hinzfügen')}
@@ -175,7 +180,7 @@
 </div>
 
 <style lang="postcss">
-	.cms-grid-field {
+	.cms-blocks-field {
 		display: grid;
 		gap: var(--cms-space-3);
 		padding: var(--cms-space-3);
@@ -184,7 +189,7 @@
 		background-color: var(--cms-color-neutral-200);
 	}
 
-	.cms-grid-item {
+	.cms-blocks-item {
 		position: relative;
 		display: flex;
 		flex-direction: column;
@@ -194,14 +199,14 @@
 		padding: 0 var(--cms-space-2) var(--cms-space-2);
 	}
 
-	.cms-grid-empty {
+	.cms-blocks-empty {
 		grid-column: 1 / -1;
 		display: flex;
 		justify-content: center;
 		padding: var(--cms-space-4);
 	}
 
-	.cms-grid-empty-icon {
+	.cms-blocks-empty-icon {
 		display: inline-flex;
 		width: 1.25rem;
 		height: 1.25rem;

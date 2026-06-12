@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field\Schema;
 
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Capability\Grid\Resizable;
+use Cosray\Field\Capability\Blocks\Resizable;
 use Cosray\Field\Field;
 
 class ColumnsHandler extends Handler

@@ -11,7 +11,7 @@ use Celemas\Sire\Review;
 use Celemas\Sire\Shape;
 use Override;
 
-final class GridItemValidator implements Validator
+final class BlockItemValidator implements Validator
 {
 	private Shape $shape;
 

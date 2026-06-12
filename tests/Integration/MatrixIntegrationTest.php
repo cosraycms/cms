@@ -51,11 +51,11 @@ class MatrixIntegrationTest extends TestCase
 					'value' => [
 						[
 							'title' => ['type' => 'text', 'value' => ['en' => 'First Item']],
-							'content' => ['type' => 'grid', 'columns' => 12, 'value' => ['en' => []]],
+							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
 						],
 						[
 							'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
-							'content' => ['type' => 'grid', 'columns' => 12, 'value' => ['en' => []]],
+							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
 						],
 					],
 				],
@@ -82,7 +82,7 @@ class MatrixIntegrationTest extends TestCase
 		$firstItem = $matrixValue->first();
 		$this->assertNotNull($firstItem);
 		$this->assertEquals('First Item', $firstItem->title->unwrap());
-		$this->assertInstanceOf(\Cosray\Value\Grid::class, $firstItem->content);
+		$this->assertInstanceOf(\Cosray\Value\Blocks::class, $firstItem->content);
 
 		// Test matrix methods
 		$this->assertEquals(2, $matrixValue->count());
@@ -112,7 +112,7 @@ class MatrixIntegrationTest extends TestCase
 		$this->assertArrayHasKey('title', $subfields);
 		$this->assertArrayHasKey('content', $subfields);
 		$this->assertInstanceOf(\Cosray\Field\Text::class, $subfields['title']);
-		$this->assertInstanceOf(\Cosray\Field\Grid::class, $subfields['content']);
+		$this->assertInstanceOf(\Cosray\Field\Blocks::class, $subfields['content']);
 	}
 
 	public function testMatrixSubfieldTranslateStructure(): void
@@ -129,7 +129,7 @@ class MatrixIntegrationTest extends TestCase
 				'value' => [
 					[
 						'title' => ['type' => 'text', 'value' => ''],
-						'content' => ['type' => 'grid', 'columns' => 12, 'value' => []],
+						'content' => ['type' => 'blocks', 'columns' => 12, 'value' => []],
 					],
 				],
 			]),

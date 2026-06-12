@@ -100,7 +100,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$this->assertEquals('A brief introduction to the document', $properties['description']);
 	}
 
-	public function testGridFieldPropertiesIncludesColumns(): void
+	public function testBlocksFieldPropertiesIncludesColumns(): void
 	{
 		$context = $this->createContext();
 		$finder = $this->createCms();
@@ -112,7 +112,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 			['content' => []],
 		);
 
-		$properties = $this->hydrator->getField($node, 'contentGrid')->properties();
+		$properties = $this->hydrator->getField($node, 'contentBlocks')->properties();
 
 		$this->assertArrayHasKey('columns', $properties);
 		$this->assertEquals(12, $properties['columns']);

@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celemas\Sire\Shape;
-use Cosray\Validation\GridItemValidator;
+use Cosray\Validation\BlockItemValidator;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
-use Cosray\Value\Grid as GridValue;
+use Cosray\Value\Blocks as BlocksValue;
 
-class Grid extends Field implements Capability\Translatable, Capability\Grid\Resizable
+class Blocks extends Field implements Capability\Translatable, Capability\Blocks\Resizable
 {
 	use Capability\IsTranslatable;
-	use Capability\Grid\IsResizable;
+	use Capability\Blocks\IsResizable;
 
 	public function __toString(): string
 	{
-		return 'Grid Field';
+		return 'Blocks Field';
 	}
 
-	public function value(): GridValue
+	public function value(): BlocksValue
 	{
-		return new GridValue($this->owner, $this, $this->valueContext);
+		return new BlocksValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
@@ -31,7 +31,7 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 
 		if (is_array($value)) {
 			return [
-				'type' => 'grid',
+				'type' => 'blocks',
 				'columns' => $this->columns,
 				'minCellWidth' => $this->minCellWidth,
 				'value' => $value,
@@ -39,7 +39,7 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 		}
 
 		$result = [
-			'type' => 'grid',
+			'type' => 'blocks',
 			'columns' => $this->columns,
 			'minCellWidth' => $this->minCellWidth,
 			'value' => [],
@@ -57,10 +57,10 @@ class Grid extends Field implements Capability\Translatable, Capability\Grid\Res
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:grid');
+		$shape->add('type', 'string')->rules('required', 'in:blocks');
 		$shape->add('columns', 'int')->rules('required');
 
-		$itemShape = new GridItemValidator(list: true, title: $this->label, keepUnknown: true);
+		$itemShape = new BlockItemValidator(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();

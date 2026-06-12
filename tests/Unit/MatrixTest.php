@@ -102,7 +102,7 @@ class MatrixTest extends TestCase
 
 		// Check that the structure for an empty item has locale keys
 		$structure = $matrix->structure([
-			['title' => ['type' => 'text', 'value' => ''], 'content' => ['type' => 'grid', 'value' => []]],
+			['title' => ['type' => 'text', 'value' => ''], 'content' => ['type' => 'blocks', 'value' => []]],
 		]);
 
 		$titleValue = $structure['value'][0]['title']['value'];
@@ -122,7 +122,7 @@ class MatrixTest extends TestCase
 			'value' => [
 				[
 					'title' => ['type' => 'text', 'value' => ''],
-					'content' => ['type' => 'grid', 'value' => []],
+					'content' => ['type' => 'blocks', 'value' => []],
 				],
 			],
 		];

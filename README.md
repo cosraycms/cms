@@ -45,7 +45,7 @@ Content types (nodes) are plain PHP classes annotated with attributes. There is 
 ```php
 use Celemas\Core\Request;
 use Cosray\Field\Text;
-use Cosray\Field\Grid;
+use Cosray\Field\Blocks;
 use Cosray\Field\Image;
 use Cosray\Cms;
 use Cosray\Schema\Label;
@@ -66,7 +66,7 @@ final class Department implements Title
     public Text $title;
 
     #[Label('Content'), Translate]
-    public Grid $content;
+    public Blocks $content;
 
     #[Label('Image')]
     public Image $clipart;

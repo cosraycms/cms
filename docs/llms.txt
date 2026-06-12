@@ -222,7 +222,7 @@ Commonly used fields:
 - `Number`, `Decimal`, `Date`, `Time`, `DateTime`
 - `Checkbox`, `Radio`, `Option`
 - `Image`, `File`, `Video`, `Picture`, `Youtube`, `Iframe`
-- `Grid`, `Matrix`
+- `Blocks`, `Matrix`
 
 General value access pattern:
 

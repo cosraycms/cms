@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { GridText } from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlockIframe } from '$types/data';
+	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
 
 	type Props = {
-		field: GridField;
-		item: GridText;
+		field: BlocksField;
+		item: BlockIframe;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};
@@ -20,27 +20,20 @@
 	}
 </script>
 
-<div class="grid-cell-header">
+<div class="block-cell-header">
 	{@render children({ edit: () => (showSettings = !showSettings) })}
 </div>
-<div class="grid-cell-body cms-grid-text-body">
+<div class="block-cell-body">
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
 		<textarea
-			name={field.name + '_' + index}
+			class="iframe"
+			rows="5"
+			id={`${field.name}_${index}`}
+			name={`${field.name}_${index}`}
 			bind:value={item.value}
 			{oninput}>
 		</textarea>
 	{/if}
 </div>
-
-<style lang="postcss">
-	.cms-grid-text-body {
-		flex-grow: 1;
-	}
-
-	textarea {
-		height: 100%;
-	}
-</style>

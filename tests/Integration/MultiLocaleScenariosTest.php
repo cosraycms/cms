@@ -238,24 +238,24 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		);
 	}
 
-	public function testGridWithTranslatableItems(): void
+	public function testBlocksWithTranslatableItems(): void
 	{
-		$typeId = $this->createTestType('locale-grid-test');
+		$typeId = $this->createTestType('locale-blocks-test');
 
 		$nodeId = $this->createTestNode([
-			'uid' => 'locale-grid-node',
+			'uid' => 'locale-blocks-node',
 			'type' => $typeId,
 			'content' => [
-				'grid' => [
-					'type' => 'grid',
+				'blocks' => [
+					'type' => 'blocks',
 					'items' => [
 						[
 							'type' => 'text',
 							'rowspan' => 1,
 							'colspan' => 6,
 							'value' => [
-								'en' => 'English grid text',
-								'de' => 'Deutscher Grid-Text',
+								'en' => 'English blocks text',
+								'de' => 'Deutscher Blocks-Text',
 							],
 						],
 						[
@@ -278,10 +278,10 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$items = $content['grid']['items'];
+		$items = $content['blocks']['items'];
 
-		$this->assertEquals('English grid text', $items[0]['value']['en']);
-		$this->assertEquals('Deutscher Grid-Text', $items[0]['value']['de']);
+		$this->assertEquals('English blocks text', $items[0]['value']['en']);
+		$this->assertEquals('Deutscher Blocks-Text', $items[0]['value']['de']);
 		$this->assertEquals('<p>English HTML</p>', $items[1]['value']['en']);
 		$this->assertEquals('<p>Deutsches HTML</p>', $items[1]['value']['de']);
 	}

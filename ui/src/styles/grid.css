@@ -1,9 +1,9 @@
-.grid-cell-header {
+.block-cell-header {
 	z-index: 2;
 	position: relative;
 }
 
-.grid-cell-body {
+.block-cell-body {
 	z-index: 1;
 	position: relative;
 }

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { GridRichText } from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlockRichText } from '$types/data';
+	import type { BlocksField } from '$types/fields';
 
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {
-		field: GridField;
-		item: GridRichText;
+		field: BlocksField;
+		item: BlockRichText;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};
@@ -17,10 +17,10 @@
 	let showSettings = $state(false);
 </script>
 
-<div class="grid-cell-header">
+<div class="block-cell-header">
 	{@render children({ edit: () => (showSettings = !showSettings) })}
 </div>
-<div class="grid-cell-body">
+<div class="block-cell-body">
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}

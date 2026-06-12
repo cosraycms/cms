@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
-use Cosray\Field\Grid;
+use Cosray\Field\Blocks;
 use Cosray\Field\Image;
 use Cosray\Field\Option;
 use Cosray\Field\Video;
@@ -26,10 +26,10 @@ class TestMediaDocument implements Title
 	#[TranslateFile]
 	public Video $video;
 
-	#[Label('Content Grid')]
+	#[Label('Content Blocks')]
 	#[Columns(12, 2)]
 	#[Translate]
-	public Grid $contentGrid;
+	public Blocks $contentBlocks;
 
 	#[Label('Category')]
 	#[Options(['news', 'blog', 'tutorial'])]

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { GridImage } from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlockVideo } from '$types/data';
+	import type { BlocksField } from '$types/fields';
 
 	import Upload from '$shell/Upload.svelte';
 	import { system } from '$lib/sys';
 
 	type Props = {
-		field: GridField;
-		item: GridImage;
+		field: BlocksField;
+		item: BlockVideo;
 		node: string;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
@@ -20,10 +20,10 @@
 	const SINGLE_LIMIT = { min: 0, max: 1 };
 </script>
 
-<div class="grid-cell-header">
+<div class="block-cell-header">
 	{@render children({ edit: () => (showSettings = !showSettings) })}
 </div>
-<div class="grid-cell-body">
+<div class="block-cell-body">
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}

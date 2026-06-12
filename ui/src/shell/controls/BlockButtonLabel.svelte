@@ -7,13 +7,13 @@
 </script>
 
 {#if value !== null}
-	<span class="grid-button-label">
+	<span class="block-button-label">
 		{value}
 	</span>
 {/if}
 
 <style lang="postcss">
-	span.grid-button-label {
+	span.block-button-label {
 		position: absolute;
 		display: flex;
 		align-items: center;

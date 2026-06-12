@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Field;
 
-use Cosray\Field\Grid;
+use Cosray\Field\Blocks;
 use Cosray\Field\Matrix;
 use Cosray\Field\Text;
 use Cosray\Schema\Label;
@@ -18,5 +18,5 @@ class TestMatrix extends Matrix
 	protected Text $title;
 
 	#[Label('Inhalt'), Translate]
-	protected Grid $content;
+	protected Blocks $content;
 }

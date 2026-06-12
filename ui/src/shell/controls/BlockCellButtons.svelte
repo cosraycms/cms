@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { GridItem } from '$types/data';
+	import type { BlockItem } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
 
 	import { getContext } from 'svelte';
+	import type { Component } from 'svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
 	import IcoArrowDown from '$shell/icons/IcoArrowDown.svelte';
@@ -11,8 +12,8 @@
 	import { setDirty } from '$lib/state';
 
 	type Props = {
-		data: GridItem[];
-		item: GridItem;
+		data: BlockItem[];
+		item: BlockItem;
 		index: number;
 		add: () => void;
 		dropdown?: boolean;
@@ -31,7 +32,7 @@
 
 	async function remove() {
 		open(
-			ModalRemove,
+			ModalRemove as Component<any>,
 			{
 				close,
 				proceed: () => {
@@ -67,9 +68,9 @@
 </script>
 
 <div
-	class="cms-grid-cell-buttons"
-	class:cms-grid-cell-buttons-inline={!dropdown}
-	class:cms-grid-cell-buttons-dropdown={dropdown}>
+	class="cms-block-cell-buttons"
+	class:cms-block-cell-buttons-inline={!dropdown}
+	class:cms-block-cell-buttons-dropdown={dropdown}>
 	<button
 		class="remove"
 		onclick={remove}>
@@ -95,7 +96,7 @@
 </div>
 
 <style lang="postcss">
-	.cms-grid-cell-buttons {
+	.cms-block-cell-buttons {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: row;
@@ -104,12 +105,12 @@
 		padding: var(--cms-space-2) 0;
 	}
 
-	.cms-grid-cell-buttons-inline {
+	.cms-block-cell-buttons-inline {
 		justify-content: flex-end;
 		margin-right: var(--cms-space-3);
 	}
 
-	.cms-grid-cell-buttons-dropdown {
+	.cms-block-cell-buttons-dropdown {
 		justify-content: center;
 	}
 

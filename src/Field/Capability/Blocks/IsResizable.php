@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Field\Capability\Grid;
+namespace Cosray\Field\Capability\Blocks;
 
 use ValueError;
 

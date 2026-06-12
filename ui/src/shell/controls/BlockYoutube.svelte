@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { GridYoutube } from '$types/data';
-	import type { GridField } from '$types/fields';
+	import type { BlockYoutube } from '$types/data';
+	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
 	import { _ } from '$lib/locale';
 	import Setting from '$shell/Setting.svelte';
 
 	type Props = {
-		field: GridField;
-		item: GridYoutube;
+		field: BlocksField;
+		item: BlockYoutube;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};
@@ -30,16 +30,16 @@
 	}
 </script>
 
-<div class="grid-cell-header">
+<div class="block-cell-header">
 	{@render children({ edit: () => (showSettings = !showSettings) })}
 </div>
-<div class="grid-cell-body">
+<div class="block-cell-body">
 	{#if showSettings}
 		<Setting>
 			<label for={field.name + '_' + index + '_ytid'}>
 				{_('Youtube-ID')}
 			</label>
-			<div class="cms-grid-youtube-field-row">
+			<div class="cms-blocks-youtube-field-row">
 				<input
 					id={field.name + '_' + index + '_ytid'}
 					name={field.name + '_' + index + '_ytid'}
@@ -54,7 +54,7 @@
 			<label for={field.name + '_' + index + '_x'}>
 				{_('Seitenverhältnis')}
 			</label>
-			<div class="cms-grid-youtube-ratio-row">
+			<div class="cms-blocks-youtube-ratio-row">
 				<input
 					id={field.name + '_' + index + '_x'}
 					name={field.name + '_' + index + '_x'}
@@ -78,10 +78,10 @@
 	{:else}
 		<div class="youtube-container">
 			<div
-				class="cms-grid-youtube-frame"
+				class="cms-blocks-youtube-frame"
 				style="padding-top: {percent}%">
 				<iframe
-					class="youtube cms-grid-youtube-iframe"
+					class="youtube cms-blocks-youtube-iframe"
 					title="Youtube Video"
 					src="https://www.youtube.com/embed/{item.value}"
 					allowfullscreen>
@@ -92,22 +92,22 @@
 </div>
 
 <style lang="postcss">
-	.cms-grid-youtube-field-row {
+	.cms-blocks-youtube-field-row {
 		margin-top: var(--cms-space-2);
 	}
 
-	.cms-grid-youtube-ratio-row {
+	.cms-blocks-youtube-ratio-row {
 		display: flex;
 		flex-direction: row;
 		gap: var(--cms-space-4);
 		margin-top: var(--cms-space-2);
 	}
 
-	.cms-grid-youtube-frame {
+	.cms-blocks-youtube-frame {
 		position: relative;
 	}
 
-	.cms-grid-youtube-iframe {
+	.cms-blocks-youtube-iframe {
 		position: absolute;
 		top: 0;
 		left: 0;

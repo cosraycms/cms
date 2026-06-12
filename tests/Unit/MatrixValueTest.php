@@ -65,7 +65,7 @@ final class MatrixValueTest extends TestCase
 				[
 					'title' => ['type' => 'text', 'value' => ['en' => 'First Item', 'de' => 'Erstes']],
 					'content' => [
-						'type' => 'grid',
+						'type' => 'blocks',
 						'columns' => 12,
 						'value' => ['en' => [], 'de' => []],
 					],
@@ -73,7 +73,7 @@ final class MatrixValueTest extends TestCase
 				[
 					'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
 					'content' => [
-						'type' => 'grid',
+						'type' => 'blocks',
 						'columns' => 12,
 						'value' => ['en' => [], 'de' => []],
 					],

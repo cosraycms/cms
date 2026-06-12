@@ -6,9 +6,9 @@ namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Request;
 use Cosray\Config;
+use Cosray\Field\Blocks;
 use Cosray\Field\Code;
 use Cosray\Field\FieldHydrator;
-use Cosray\Field\Grid;
 use Cosray\Field\Image;
 use Cosray\Field\Option;
 use Cosray\Field\Owner;
@@ -102,9 +102,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		return new Image($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
-	private function createGridField(string $name = 'grid'): Grid
+	private function createBlocksField(string $name = 'blocks'): Blocks
 	{
-		return new Grid($name, $this->createOwner(), new ValueContext($name, []));
+		return new Blocks($name, $this->createOwner(), new ValueContext($name, []));
 	}
 
 	private function createOptionField(string $name = 'option'): Option
@@ -226,7 +226,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 	public function testColumnsCapabilityReturnsColumnsProperties(): void
 	{
-		$field = $this->createGridField();
+		$field = $this->createBlocksField();
 		$meta = new Columns(12, 2);
 
 		$properties = $this->applyAndGetProperties($meta, $field);

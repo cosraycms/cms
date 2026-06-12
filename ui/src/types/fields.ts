@@ -25,7 +25,7 @@ export interface ImageField extends FileField {
 	translateFile: boolean;
 }
 
-export interface GridField extends SimpleField {
+export interface BlocksField extends SimpleField {
 	columns: number;
 	minCellWidth: number;
 }
@@ -38,4 +38,4 @@ export interface CodeField extends SimpleField {
 	syntaxes?: string[];
 }
 
-export type Field = ImageField | FileField | GridField | MatrixField | CodeField | SimpleField;
+export type Field = ImageField | FileField | BlocksField | MatrixField | CodeField | SimpleField;

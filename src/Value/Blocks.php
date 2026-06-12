@@ -14,13 +14,13 @@ use Generator;
 use Gumlet\ImageResize;
 
 /**
- * @property-read Field\Grid&Translatable $field
+ * @property-read Field\Blocks&Translatable $field
  */
-class Grid extends Value
+class Blocks extends Value
 {
 	protected readonly ?Generator $preparedData;
 
-	public function __construct(Owner $owner, Field\Grid&Translatable $field, ValueContext $context)
+	public function __construct(Owner $owner, Field\Blocks&Translatable $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
 
@@ -75,7 +75,7 @@ class Grid extends Value
 		if ($all && $this->field->isTranslatable()) {
 			foreach ($this->data['value'] ?? [] as $data) {
 				foreach ($data as $value) {
-					$item = new GridItem($value['type'], $value);
+					$item = new BlockItem($value['type'], $value);
 
 					if ($item->type === 'image') {
 						yield new Field\Image(
@@ -188,9 +188,9 @@ class Grid extends Value
 			. $tag
 			. ' class="'
 			. $prefix
-			. '-grid '
+			. '-blocks '
 			. $prefix
-			. '-grid-columns-'
+			. '-blocks-columns-'
 			. $columns
 			. $class
 			. '">';
@@ -221,7 +221,7 @@ class Grid extends Value
 		return count($this->data['value']) > 0;
 	}
 
-	protected function renderValue(string $prefix, GridItem $value, array $args): string
+	protected function renderValue(string $prefix, BlockItem $value, array $args): string
 	{
 		$colspan = $prefix . '-colspan-' . $value->data['colspan'];
 		$rowspan = $prefix . '-rowspan-' . $value->data['rowspan'];
@@ -263,7 +263,7 @@ class Grid extends Value
 		return $out;
 	}
 
-	protected function getValueObject(string $class, GridItem $item): Value
+	protected function getValueObject(string $class, BlockItem $item): Value
 	{
 		return new $class(
 			$this->context->fieldName,
@@ -307,11 +307,11 @@ class Grid extends Value
 			);
 			$url = $resized->url(true);
 
-			$result .= "<div class=\"cms-grid-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
+			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
 		}
 
 		if ($result) {
-			return '<div class="cms-grid-images">' . $result . '</div>';
+			return '<div class="cms-blocks-images">' . $result . '</div>';
 		}
 
 		return '';
@@ -336,7 +336,7 @@ class Grid extends Value
 		}
 
 		foreach ($fields as $field) {
-			yield new GridItem($field['type'], $field);
+			yield new BlockItem($field['type'], $field);
 		}
 	}
 }

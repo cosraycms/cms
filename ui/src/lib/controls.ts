@@ -2,7 +2,7 @@ import Checkbox from '$shell/controls/Checkbox.svelte';
 import Code from '$shell/controls/Code.svelte';
 import Date from '$shell/controls/Date.svelte';
 import File from '$shell/controls/File.svelte';
-import Grid from '$shell/controls/Grid.svelte';
+import Blocks from '$shell/controls/Blocks.svelte';
 import Hidden from '$shell/controls/Hidden.svelte';
 import RichText from '$shell/controls/RichText.svelte';
 import Image from '$shell/controls/Image.svelte';
@@ -19,7 +19,7 @@ export default {
 	'Cosray\\Field\\Code': Code,
 	'Cosray\\Field\\Date': Date,
 	'Cosray\\Field\\File': File,
-	'Cosray\\Field\\Grid': Grid,
+	'Cosray\\Field\\Blocks': Blocks,
 	'Cosray\\Field\\Hidden': Hidden,
 	'Cosray\\Field\\RichText': RichText,
 	'Cosray\\Field\\Image': Image,

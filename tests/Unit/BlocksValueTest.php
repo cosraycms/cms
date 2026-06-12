@@ -6,9 +6,9 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Context;
 use Cosray\Node\FieldOwner;
-use Cosray\Tests\Fixtures\Field\TestGrid;
+use Cosray\Tests\Fixtures\Field\TestBlocks;
 use Cosray\Tests\TestCase;
-use Cosray\Value\Grid as GridValue;
+use Cosray\Value\Blocks as BlocksValue;
 use Cosray\Value\ValueContext;
 
 /**
@@ -16,7 +16,7 @@ use Cosray\Value\ValueContext;
  *
  * @coversNothing
  */
-final class GridValueTest extends TestCase
+final class BlocksValueTest extends TestCase
 {
 	private function createContext(): Context
 	{
@@ -46,18 +46,18 @@ final class GridValueTest extends TestCase
 		return new FieldOwner($context, 'test-node');
 	}
 
-	private function createGridValue(array $data): GridValue
+	private function createBlocksValue(array $data): BlocksValue
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new TestGrid('grid', $owner, new ValueContext('grid', $data));
+		$field = new TestBlocks('blocks', $owner, new ValueContext('blocks', $data));
 
 		return $field->value();
 	}
 
 	public function testUnwrapReturnsColumnsAndPreparedData(): void
 	{
-		$grid = $this->createGridValue([
+		$blocks = $this->createBlocksValue([
 			'columns' => 12,
 			'value' => [
 				'en' => [
@@ -66,14 +66,14 @@ final class GridValueTest extends TestCase
 			],
 		]);
 
-		$unwrapped = $grid->unwrap();
+		$unwrapped = $blocks->unwrap();
 		$this->assertSame(12, $unwrapped['columns']);
 		$this->assertIsIterable($unwrapped['data']);
 	}
 
 	public function testHasImageDetectsImageItems(): void
 	{
-		$grid = $this->createGridValue([
+		$blocks = $this->createBlocksValue([
 			'columns' => 12,
 			'value' => [
 				['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
@@ -81,28 +81,28 @@ final class GridValueTest extends TestCase
 			],
 		]);
 
-		$this->assertTrue($grid->hasImage());
+		$this->assertTrue($blocks->hasImage());
 	}
 
 	public function testExcerptReturnsEmptyWhenNoHtml(): void
 	{
-		$grid = $this->createGridValue([
+		$blocks = $this->createBlocksValue([
 			'columns' => 12,
 			'value' => [
 				['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
 			],
 		]);
 
-		$this->assertSame('', $grid->excerpt());
+		$this->assertSame('', $blocks->excerpt());
 	}
 
 	public function testIssetReturnsFalseForEmptyValue(): void
 	{
-		$grid = $this->createGridValue([
+		$blocks = $this->createBlocksValue([
 			'columns' => 12,
 			'value' => [],
 		]);
 
-		$this->assertFalse($grid->isset());
+		$this->assertFalse($blocks->isset());
 	}
 }

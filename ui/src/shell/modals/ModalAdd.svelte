@@ -4,7 +4,7 @@
 	import Button from '$shell/Button.svelte';
 
 	type Props = {
-		add: (index: number, before: boolean, type: string) => void;
+		add: (index: number | null, before: boolean, type: string) => void;
 		close: () => void;
 		index: number | null;
 		types: { id: string; label: string }[];
@@ -17,7 +17,7 @@
 
 	function addContent(before: boolean) {
 		return () => {
-			if (!disabled) {
+			if (type !== null) {
 				add(index, before, type);
 				close();
 			}
