@@ -7,4 +7,9 @@ namespace Cosray\Schema;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-readonly class Translate {}
+readonly class Translate
+{
+	public function __construct(
+		public TranslateMode $mode = TranslateMode::Symmetric,
+	) {}
+}
