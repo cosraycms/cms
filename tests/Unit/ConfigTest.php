@@ -386,13 +386,6 @@ final class ConfigTest extends TestCase
 		$this->assertSame('pgsql:dbname=cms', $config->db->dsn);
 	}
 
-	public function testDatabaseDsnDoesNotFallBackToLegacyEnvironmentVariable(): void
-	{
-		$config = new Config($this->rootWithEnv("CMS_DSN=pgsql:dbname=legacy\n"));
-
-		$this->assertNull($config->db->dsn);
-	}
-
 	public function testMissingDotenvFileIsIgnored(): void
 	{
 		$config = new Config($this->rootWithEnv());

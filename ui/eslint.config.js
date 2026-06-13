@@ -19,7 +19,7 @@ export default ts.config(
 			globals: {
 				...globals.browser,
 				...globals.node,
-				CMS_BASE_PATH: 'readonly',
+				COSRAY_BASE_PATH: 'readonly',
 			},
 		},
 		rules: {

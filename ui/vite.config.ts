@@ -3,11 +3,11 @@ import path from 'path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
-const oldPanelPath = process.env.CMS_PANEL_PATH ? process.env.CMS_PANEL_PATH : 'cms';
-const devport = process.env.CMS_DEV_PORT ? parseInt(process.env.CMS_DEV_PORT, 10) : 2009;
-const devhost = process.env.CMS_DEV_HOST ? process.env.CMS_DEV_HOST : 'localhost';
-const appport = process.env.CMS_APP_PORT ? parseInt(process.env.CMS_APP_PORT, 10) : 1983;
-const apphost = process.env.CMS_APP_HOST ? process.env.CMS_APP_HOST : 'localhost';
+const oldPanelPath = process.env.COSRAY_PANEL_PATH ? process.env.COSRAY_PANEL_PATH : 'cms';
+const devport = process.env.COSRAY_DEV_PORT ? parseInt(process.env.COSRAY_DEV_PORT, 10) : 2009;
+const devhost = process.env.COSRAY_DEV_HOST ? process.env.COSRAY_DEV_HOST : 'localhost';
+const appport = process.env.COSRAY_APP_PORT ? parseInt(process.env.COSRAY_APP_PORT, 10) : 1983;
+const apphost = process.env.COSRAY_APP_HOST ? process.env.COSRAY_APP_HOST : 'localhost';
 const target = {
 	target: `http://${apphost}:${appport}`,
 	secure: false,

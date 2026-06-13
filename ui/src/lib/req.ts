@@ -22,7 +22,7 @@ type Headers = {
 
 export function getBase() {
 	if (browser) {
-		return window.CMS_BASE_PATH;
+		return window.COSRAY_BASE_PATH;
 	}
 
 	return '/cms/';
