@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Data, EntryData } from '$types/data';
-	import type { EntriesField, Field } from '$types/fields';
+	import type { EntriesField, EntryType } from '$types/fields';
 	import type { Component } from 'svelte';
 
 	import controls from '$lib/controls';
@@ -17,14 +17,16 @@
 	let { field, data = $bindable(), entry = $bindable(), node, index }: Props = $props();
 
 	let collapsed = $state(false);
+	let entryType = $derived(field.entryTypes.find(type => type.type === entry.type));
+	let entryFields = $derived(entryType?.fields ?? []);
 
 	function toggleCollapse() {
 		collapsed = !collapsed;
 	}
 
 	function getEntryTitle(): string {
-		for (const entryField of field.entryFields) {
-			const fieldData = entry[entryField.name] as Data | undefined;
+		for (const entryField of entryFields) {
+			const fieldData = entry.value[entryField.name] as Data | undefined;
 			if (fieldData && 'value' in fieldData) {
 				const value = fieldData.value;
 				if (typeof value === 'string' && value.trim()) {
@@ -44,7 +46,11 @@
 				}
 			}
 		}
-		return `Entry ${index + 1}`;
+		return `${entryTypeLabel(entryType)} ${index + 1}`;
+	}
+
+	function entryTypeLabel(type: EntryType | undefined): string {
+		return type?.label ?? 'Entry';
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,32 +76,36 @@
 
 	{#if !collapsed}
 		<div class="entry-body">
-			{#each field.entryFields as entryField (entryField.name)}
-				{#if !entryField.hidden && entry[entryField.name]}
-					{@const SvelteComponent = controls[entryField.type as keyof typeof controls] as
-						| AnyComponent
-						| undefined}
-					{@const widthStyle = entryField.width
-						? `width: calc(${entryField.width}% - 0.5rem)`
-						: 'width: 100%'}
-					{#if SvelteComponent}
-						<div
-							class="entry-field"
-							style={widthStyle}>
-							<SvelteComponent
-								field={entryField}
-								{node}
-								bind:data={entry[entryField.name]} />
-						</div>
-					{:else}
-						<div
-							class="entry-field entry-field-note"
-							style={widthStyle}>
-							Unknown field type: {entryField.type}
-						</div>
+			{#if entryType}
+				{#each entryFields as entryField (entryField.name)}
+					{#if !entryField.hidden && entry.value[entryField.name]}
+						{@const SvelteComponent = controls[
+							entryField.type as keyof typeof controls
+						] as AnyComponent | undefined}
+						{@const widthStyle = entryField.width
+							? `width: calc(${entryField.width}% - 0.5rem)`
+							: 'width: 100%'}
+						{#if SvelteComponent}
+							<div
+								class="entry-field"
+								style={widthStyle}>
+								<SvelteComponent
+									field={entryField}
+									{node}
+									bind:data={entry.value[entryField.name]} />
+							</div>
+						{:else}
+							<div
+								class="entry-field entry-field-note"
+								style={widthStyle}>
+								Unknown field type: {entryField.type}
+							</div>
+						{/if}
 					{/if}
-				{/if}
-			{/each}
+				{/each}
+			{:else}
+				<div class="entry-field entry-field-note">Unknown entry type: {entry.type}</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -139,22 +149,22 @@
 	}
 
 	.entry-label {
-		color: var(--cms-color-neutral-700);
+		font-weight: 500;
 	}
 
 	.entry-body {
-		padding: 1rem;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: 0.5rem;
+		padding: 0.75rem;
 	}
 
 	.entry-field {
-		flex-shrink: 0;
-		min-width: 0;
+		min-width: 200px;
 	}
 
 	.entry-field-note {
-		color: var(--cms-color-neutral-500);
+		padding: 0.75rem;
+		color: var(--cms-color-danger-700);
 	}
 </style>

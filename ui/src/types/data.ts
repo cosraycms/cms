@@ -131,7 +131,8 @@ export interface BlocksData {
 
 // Entries field types
 export interface EntryData {
-	[fieldName: string]: Data | GenericFieldData;
+	type: string;
+	value: Record<string, Data | GenericFieldData>;
 }
 
 export interface EntriesData {

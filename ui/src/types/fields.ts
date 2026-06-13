@@ -30,8 +30,14 @@ export interface BlocksField extends SimpleField {
 	minCellWidth: number;
 }
 
+export interface EntryType {
+	type: string;
+	label: string;
+	fields: Field[];
+}
+
 export interface EntriesField extends SimpleField {
-	entryFields: Field[];
+	entryTypes: EntryType[];
 }
 
 export interface CodeField extends SimpleField {

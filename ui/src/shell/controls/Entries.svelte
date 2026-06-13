@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { GenericFieldData, EntriesData, EntryData } from '$types/data';
-	import type { Field as FieldType, EntriesField } from '$types/fields';
+	import type { Field as FieldType, EntriesField, EntryType } from '$types/fields';
 
 	import { _ } from '$lib/locale';
 	import { setDirty } from '$lib/state';
@@ -21,11 +21,14 @@
 
 	let { field, data = $bindable(), node }: Props = $props();
 
-	function createEmptyEntry(): EntryData {
-		const entry: EntryData = {};
+	function createEmptyEntry(entryType: EntryType): EntryData {
+		const entry: EntryData = {
+			type: entryType.type,
+			value: {},
+		};
 
-		for (const entryField of field.entryFields) {
-			entry[entryField.name] = createDefaultValue(entryField);
+		for (const entryField of entryType.fields) {
+			entry.value[entryField.name] = createDefaultValue(entryField);
 		}
 
 		return entry;
@@ -120,14 +123,22 @@
 		return { type: 'text', value: isSymmetric ? createTranslatableValue() : '' };
 	}
 
-	function addEntry() {
+	function addEntry(entryType: EntryType) {
 		if (!data.value) {
 			data.value = [];
 		}
 
-		data.value.push(createEmptyEntry());
+		data.value.push(createEmptyEntry(entryType));
 		data.value = data.value;
 		setDirty();
+	}
+
+	function addLabel(entryType: EntryType, first: boolean): string {
+		if (field.entryTypes.length === 1) {
+			return first ? _('Ersten Eintrag hinzufügen') : _('Eintrag hinzufügen');
+		}
+
+		return `${entryType.label} hinzufügen`;
 	}
 </script>
 
@@ -150,25 +161,29 @@
 				{/each}
 			</div>
 			<div class="entries-add">
-				<Button
-					class="secondary"
-					onclick={addEntry}>
-					<span class="cms-button-icon">
-						<IcoCirclePlus />
-					</span>
-					{_('Eintrag hinzufügen')}
-				</Button>
+				{#each field.entryTypes as entryType (entryType.type)}
+					<Button
+						class="secondary"
+						onclick={() => addEntry(entryType)}>
+						<span class="cms-button-icon">
+							<IcoCirclePlus />
+						</span>
+						{addLabel(entryType, false)}
+					</Button>
+				{/each}
 			</div>
 		{:else}
 			<div class="entries-empty">
-				<Button
-					class="secondary"
-					onclick={addEntry}>
-					<span class="cms-button-icon">
-						<IcoCirclePlus />
-					</span>
-					{_('Ersten Eintrag hinzufügen')}
-				</Button>
+				{#each field.entryTypes as entryType (entryType.type)}
+					<Button
+						class="secondary"
+						onclick={() => addEntry(entryType)}>
+						<span class="cms-button-icon">
+							<IcoCirclePlus />
+						</span>
+						{addLabel(entryType, true)}
+					</Button>
+				{/each}
 			</div>
 		{/if}
 	</div>
@@ -192,6 +207,7 @@
 	.entries-add {
 		display: flex;
 		justify-content: center;
+		gap: 0.5rem;
 		margin-top: 0.75rem;
 		padding-top: 0.75rem;
 		border-top: 1px dashed var(--cms-color-neutral-300);
@@ -200,6 +216,7 @@
 	.entries-empty {
 		display: flex;
 		justify-content: center;
+		gap: 0.5rem;
 		padding: 1rem;
 	}
 </style>
