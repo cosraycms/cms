@@ -7,10 +7,10 @@ namespace Cosray\Tests\Unit;
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Node\FieldOwner;
-use Cosray\Tests\Fixtures\Field\TestMatrix;
+use Cosray\Tests\Fixtures\Field\TestEntries;
 use Cosray\Tests\TestCase;
-use Cosray\Value\MatrixItem;
-use Cosray\Value\MatrixValue;
+use Cosray\Value\Entries;
+use Cosray\Value\Entry;
 use Cosray\Value\ValueContext;
 
 /**
@@ -18,7 +18,7 @@ use Cosray\Value\ValueContext;
  *
  * @coversNothing
  */
-final class MatrixValueTest extends TestCase
+final class EntriesValueTest extends TestCase
 {
 	private function createContext(): Context
 	{
@@ -48,19 +48,19 @@ final class MatrixValueTest extends TestCase
 		return new FieldOwner($context, 'test-node');
 	}
 
-	private function createMatrixValue(array $data): MatrixValue
+	private function createEntriesValue(array $data): Entries
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new TestMatrix('matrix', $owner, new ValueContext('matrix', $data));
+		$field = new TestEntries('entries', $owner, new ValueContext('entries', $data));
 
 		return $field->value();
 	}
 
-	private function matrixData(): array
+	private function entriesData(): array
 	{
 		return [
-			'type' => 'matrix',
+			'type' => 'entries',
 			'value' => [
 				[
 					'title' => ['type' => 'text', 'value' => ['en' => 'First Item', 'de' => 'Erstes']],
@@ -82,13 +82,13 @@ final class MatrixValueTest extends TestCase
 		];
 	}
 
-	public function testMatrixValueAccessorsReturnItemsAndValues(): void
+	public function testEntriesValueAccessorsReturnEntriesAndValues(): void
 	{
-		$value = $this->createMatrixValue($this->matrixData());
+		$value = $this->createEntriesValue($this->entriesData());
 
 		$this->assertSame(2, $value->count());
-		$this->assertInstanceOf(MatrixItem::class, $value->first());
-		$this->assertInstanceOf(MatrixItem::class, $value->last());
+		$this->assertInstanceOf(Entry::class, $value->first());
+		$this->assertInstanceOf(Entry::class, $value->last());
 		$this->assertSame('First Item', $value->first()?->title->unwrap());
 		$this->assertSame('Second Item', $value->last()?->title->unwrap());
 		$this->assertSame('Second Item', $value->get(1)?->title->unwrap());
@@ -96,9 +96,9 @@ final class MatrixValueTest extends TestCase
 		$this->assertSame(12, $value->first()?->content->columns());
 	}
 
-	public function testMatrixValueIssetIsFalseWhenEmpty(): void
+	public function testEntriesValueIssetIsFalseWhenEmpty(): void
 	{
-		$value = $this->createMatrixValue(['type' => 'matrix', 'value' => []]);
+		$value = $this->createEntriesValue(['type' => 'entries', 'value' => []]);
 
 		$this->assertFalse($value->isset());
 		$this->assertSame(0, $value->count());
@@ -106,9 +106,9 @@ final class MatrixValueTest extends TestCase
 		$this->assertNull($value->last());
 	}
 
-	public function testMatrixValueJsonMatchesUnwrap(): void
+	public function testEntriesValueJsonMatchesUnwrap(): void
 	{
-		$value = $this->createMatrixValue($this->matrixData());
+		$value = $this->createEntriesValue($this->entriesData());
 		$unwrapped = $value->unwrap();
 
 		$this->assertSame($unwrapped, $value->json());
@@ -117,14 +117,14 @@ final class MatrixValueTest extends TestCase
 		$this->assertArrayHasKey('content', $unwrapped[0]);
 	}
 
-	public function testMatrixItemThrowsOnUnknownSubfield(): void
+	public function testEntryThrowsOnUnknownField(): void
 	{
-		$value = $this->createMatrixValue($this->matrixData());
-		$item = $value->first();
+		$value = $this->createEntriesValue($this->entriesData());
+		$entry = $value->first();
 
-		$this->assertInstanceOf(MatrixItem::class, $item);
-		$this->throws(NoSuchProperty::class, "Matrix item doesn't have subfield 'missing'");
+		$this->assertInstanceOf(Entry::class, $entry);
+		$this->throws(NoSuchProperty::class, "Entry doesn't have field 'missing'");
 
-		$item->missing;
+		$entry->missing;
 	}
 }

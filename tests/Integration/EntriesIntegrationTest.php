@@ -7,11 +7,11 @@ namespace Cosray\Tests\Integration;
 use Cosray\Node\Factory;
 use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
-use Cosray\Tests\Fixtures\Node\TestMatrix;
-use Cosray\Tests\Fixtures\Node\TestNodeWithMatrix;
+use Cosray\Tests\Fixtures\Node\TestEntries;
+use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 use Cosray\Tests\TestCase;
 
-class MatrixIntegrationTest extends TestCase
+class EntriesIntegrationTest extends TestCase
 {
 	private function createContext(): \Cosray\Context
 	{
@@ -36,18 +36,18 @@ class MatrixIntegrationTest extends TestCase
 		);
 	}
 
-	public function testMyMatrixIntegration(): void
+	public function testEntriesIntegration(): void
 	{
 		$context = $this->createContext();
 		$cms = $this->createStub(\Cosray\Cms::class);
 		$nodeFactory = new Factory($this->container(), types: new Types());
 		$hydrator = $nodeFactory->hydrator();
 
-		$node = $nodeFactory->create(TestNodeWithMatrix::class, $context, $cms, [
+		$node = $nodeFactory->create(TestNodeWithEntries::class, $context, $cms, [
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
-				'matrix' => [
-					'type' => 'matrix',
+				'entries' => [
+					'type' => 'entries',
 					'value' => [
 						[
 							'title' => ['type' => 'text', 'value' => ['en' => 'First Item']],
@@ -62,70 +62,64 @@ class MatrixIntegrationTest extends TestCase
 			],
 		]);
 
-		// Test that matrix field exists and is accessible
-		$matrixField = $hydrator->getField($node, 'matrix');
-		$this->assertInstanceOf(\Cosray\Field\Matrix::class, $matrixField);
-		$matrixValue = $matrixField->value();
-		$this->assertInstanceOf(\Cosray\Value\MatrixValue::class, $matrixValue);
+		$entriesField = $hydrator->getField($node, 'entries');
+		$this->assertInstanceOf(\Cosray\Field\Entries::class, $entriesField);
+		$entriesValue = $entriesField->value();
+		$this->assertInstanceOf(\Cosray\Value\Entries::class, $entriesValue);
 
-		// Test matrix iteration
 		$items = [];
-		foreach ($matrixValue as $item) {
+		foreach ($entriesValue as $item) {
 			$items[] = $item;
 		}
 
 		$this->assertCount(2, $items);
-		$this->assertInstanceOf(\Cosray\Value\MatrixItem::class, $items[0]);
-		$this->assertInstanceOf(\Cosray\Value\MatrixItem::class, $items[1]);
+		$this->assertInstanceOf(\Cosray\Value\Entry::class, $items[0]);
+		$this->assertInstanceOf(\Cosray\Value\Entry::class, $items[1]);
 
-		// Test subfield access
-		$firstItem = $matrixValue->first();
+		$firstItem = $entriesValue->first();
 		$this->assertNotNull($firstItem);
 		$this->assertEquals('First Item', $firstItem->title->unwrap());
 		$this->assertInstanceOf(\Cosray\Value\Blocks::class, $firstItem->content);
 
-		// Test matrix methods
-		$this->assertEquals(2, $matrixValue->count());
-		$this->assertEquals('First Item', $matrixValue->first()->title->unwrap());
-		$this->assertEquals('Second Item', $matrixValue->last()->title->unwrap());
+		$this->assertEquals(2, $entriesValue->count());
+		$this->assertEquals('First Item', $entriesValue->first()->title->unwrap());
+		$this->assertEquals('Second Item', $entriesValue->last()->title->unwrap());
 	}
 
-	public function testMyMatrixStructure(): void
+	public function testEntriesStructure(): void
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
 
-		$matrix = new TestMatrix(
-			'test_matrix',
+		$entries = new TestEntries(
+			'test_entries',
 			$owner,
-			new \Cosray\Value\ValueContext('test_matrix', []),
+			new \Cosray\Value\ValueContext('test_entries', []),
 		);
 
-		// Call value() to initialize subfields
-		$matrixValue = $matrix->value();
+		$entries->value();
 
-		$structure = $matrix->structure();
-		$this->assertEquals('matrix', $structure['type']);
+		$structure = $entries->structure();
+		$this->assertEquals('entries', $structure['type']);
 		$this->assertIsArray($structure['value']);
 
-		$subfields = $matrix->getSubfields();
-		$this->assertArrayHasKey('title', $subfields);
-		$this->assertArrayHasKey('content', $subfields);
-		$this->assertInstanceOf(\Cosray\Field\Text::class, $subfields['title']);
-		$this->assertInstanceOf(\Cosray\Field\Blocks::class, $subfields['content']);
+		$entryFields = $entries->entryFields();
+		$this->assertArrayHasKey('title', $entryFields);
+		$this->assertArrayHasKey('content', $entryFields);
+		$this->assertInstanceOf(\Cosray\Field\Text::class, $entryFields['title']);
+		$this->assertInstanceOf(\Cosray\Field\Blocks::class, $entryFields['content']);
 	}
 
-	public function testMatrixSubfieldTranslateStructure(): void
+	public function testEntryFieldTranslateStructure(): void
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
 
-		// Create matrix with one empty item
-		$matrix = new TestMatrix(
-			'test_matrix',
+		$entries = new TestEntries(
+			'test_entries',
 			$owner,
-			new \Cosray\Value\ValueContext('test_matrix', [
-				'type' => 'matrix',
+			new \Cosray\Value\ValueContext('test_entries', [
+				'type' => 'entries',
 				'value' => [
 					[
 						'title' => ['type' => 'text', 'value' => ''],
@@ -135,16 +129,14 @@ class MatrixIntegrationTest extends TestCase
 			]),
 		);
 
-		$structure = $matrix->structure();
+		$structure = $entries->structure();
 
-		// Subfields with #[Translate] should have locale keys in their value
 		$this->assertCount(1, $structure['value']);
 		$titleValue = $structure['value'][0]['title']['value'];
 
-		// Should have locale structure, not empty string
 		$this->assertIsArray(
 			$titleValue,
-			'Translatable subfield should have array value with locale keys',
+			'Translatable entry field should have array value with locale keys',
 		);
 		$this->assertArrayHasKey('en', $titleValue);
 		$this->assertArrayHasKey('de', $titleValue);

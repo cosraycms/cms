@@ -4,28 +4,28 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Field\Entries as EntriesField;
 use Cosray\Field\Field;
-use Cosray\Field\Matrix;
 use Cosray\Field\Owner;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
 
 /**
- * @property-read Matrix $field
+ * @property-read EntriesField $field
  */
-class MatrixItem extends Value
+class Entry extends Value
 {
-	protected array $subfields = [];
+	protected array $fields = [];
 
 	public function __construct(
 		Owner $owner,
-		Matrix $field,
+		EntriesField $field,
 		ValueContext $context,
 	) {
 		parent::__construct($owner, $field, $context);
 
-		$this->initSubfields();
+		$this->initFields();
 	}
 
 	public function __toString(): string
@@ -42,8 +42,8 @@ class MatrixItem extends Value
 	{
 		$result = [];
 
-		foreach ($this->subfields as $name => $subfield) {
-			$result[$name] = $subfield->structure();
+		foreach ($this->fields as $name => $field) {
+			$result[$name] = $field->structure();
 		}
 
 		return $result;
@@ -51,15 +51,15 @@ class MatrixItem extends Value
 
 	public function isset(): bool
 	{
-		return count($this->subfields) > 0;
+		return count($this->fields) > 0;
 	}
 
 	public function render(mixed ...$args): string
 	{
-		$out = '<div class="matrix-item">';
+		$out = '<div class="entry">';
 
-		foreach ($this->subfields as $subfield) {
-			$out .= $subfield->value()->render(...$args);
+		foreach ($this->fields as $field) {
+			$out .= $field->value()->render(...$args);
 		}
 
 		$out .= '</div>';
@@ -69,17 +69,17 @@ class MatrixItem extends Value
 
 	public function __get(string $name): mixed
 	{
-		if (isset($this->subfields[$name])) {
-			return $this->subfields[$name]->value();
+		if (isset($this->fields[$name])) {
+			return $this->fields[$name]->value();
 		}
 
-		throw new \Cosray\Exception\NoSuchProperty("Matrix item doesn't have subfield '{$name}'");
+		throw new \Cosray\Exception\NoSuchProperty("Entry doesn't have field '{$name}'");
 	}
 
-	protected function initSubfields(): void
+	protected function initFields(): void
 	{
-		$matrixClass = $this->field::class;
-		$reflection = new ReflectionClass($matrixClass);
+		$entriesClass = $this->field::class;
+		$reflection = new ReflectionClass($entriesClass);
 
 		foreach ($reflection->getProperties(ReflectionProperty::IS_PROTECTED) as $property) {
 			$type = $property->getType();
@@ -94,17 +94,17 @@ class MatrixItem extends Value
 				continue;
 			}
 
-			$subfieldData = $this->data[$property->getName()] ?? null;
-			$subfieldContext = new ValueContext($property->getName(), $subfieldData);
+			$fieldData = $this->data[$property->getName()] ?? null;
+			$fieldContext = new ValueContext($property->getName(), $fieldData);
 
-			$subfield = new $fieldClass(
+			$field = new $fieldClass(
 				$property->getName(),
 				$this->owner,
-				$subfieldContext,
+				$fieldContext,
 			);
 
-			$subfield->initSchema($property, $this->field->schemaRegistry());
-			$this->subfields[$property->getName()] = $subfield;
+			$field->initSchema($property, $this->field->schemaRegistry());
+			$this->fields[$property->getName()] = $field;
 		}
 	}
 }
