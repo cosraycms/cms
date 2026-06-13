@@ -14,12 +14,5 @@ interface Translatable
 
 	public function translateMode(): ?TranslateMode;
 
-	/** @return list<TranslateMode> */
-	public function supportedTranslateModes(): array;
-
 	public function supportsTranslateMode(TranslateMode $mode): bool;
-
-	public function isSymmetricallyTranslated(): bool;
-
-	public function isAsymmetricallyTranslated(): bool;
 }

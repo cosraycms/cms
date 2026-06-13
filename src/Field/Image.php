@@ -16,7 +16,7 @@ class Image extends Field implements Capability\Translatable, Capability\Limitab
 	use Capability\IsTranslatable;
 
 	/** @return list<TranslateMode> */
-	public function supportedTranslateModes(): array
+	protected function supportedTranslateModes(): array
 	{
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
 	}

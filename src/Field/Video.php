@@ -16,7 +16,7 @@ class Video extends Field implements Capability\Limitable, Capability\Translatab
 	use Capability\IsTranslatable;
 
 	/** @return list<TranslateMode> */
-	public function supportedTranslateModes(): array
+	protected function supportedTranslateModes(): array
 	{
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
 	}
