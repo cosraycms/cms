@@ -38,22 +38,17 @@ trait IsTranslatable
 		return in_array($mode, $this->supportedTranslateModes(), true);
 	}
 
-	public function isSymmetricallyTranslated(): bool
+	protected function isSymmetricallyTranslated(): bool
 	{
 		return $this->translateMode === TranslateMode::Symmetric;
 	}
 
-	public function isAsymmetricallyTranslated(): bool
+	protected function isAsymmetricallyTranslated(): bool
 	{
 		return $this->translateMode === TranslateMode::Asymmetric;
 	}
 
-	public function getTranslate(): bool
-	{
-		return $this->isTranslatable();
-	}
-
-	protected function getTranslatableStructure(string $type, mixed $value = null): array
+	private function getTranslatableStructure(string $type, mixed $value = null): array
 	{
 		$value = $value ?: $this->default;
 
@@ -78,7 +73,7 @@ trait IsTranslatable
 		return $result;
 	}
 
-	protected function getTranslatableFileStructure(string $type, mixed $value = null): array
+	private function getTranslatableFileStructure(string $type, mixed $value = null): array
 	{
 		$value = $value ?: $this->default;
 

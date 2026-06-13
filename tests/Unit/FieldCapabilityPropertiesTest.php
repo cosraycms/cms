@@ -261,8 +261,6 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertTrue($properties['translate']);
 		$this->assertSame('symmetric', $properties['translateMode']);
 		$this->assertSame(TranslateMode::Symmetric, $field->translateMode());
-		$this->assertTrue($field->isSymmetricallyTranslated());
-		$this->assertFalse($field->isAsymmetricallyTranslated());
 	}
 
 	public function testAsymmetricTranslateCapabilitySetsAsymmetricMode(): void
@@ -276,8 +274,6 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertTrue($properties['translate']);
 		$this->assertSame('asymmetric', $properties['translateMode']);
 		$this->assertSame(TranslateMode::Asymmetric, $field->translateMode());
-		$this->assertTrue($field->isAsymmetricallyTranslated());
-		$this->assertFalse($field->isSymmetricallyTranslated());
 	}
 
 	public function testUnsupportedTranslationModeThrows(): void
