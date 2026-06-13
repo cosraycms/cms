@@ -2,7 +2,9 @@
 
 ## [Unreleased](https://codeberg.org/cosray/cms/compare/0.2.0...HEAD)
 
-No notable changes since the last release.
+### Breaking Changes
+
+- Renamed the Matrix field concept to Entries/Entry. Use `Cosray\Field\Entries`, `Cosray\Value\Entries`, and `Cosray\Value\Entry`; stored content now uses `"type": "entries"` and the panel exposes `entryFields` metadata. A migration updates existing `"matrix"` payloads.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 
