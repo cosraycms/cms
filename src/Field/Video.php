@@ -53,14 +53,21 @@ class Video extends Field implements Capability\Limitable, Capability\Translatab
 
 			$i18nShape = Shapes::create();
 			$locales = $this->owner->locales();
+			$defaultLocale = $locales->getDefault()->id;
 
 			foreach ($locales as $locale) {
-				$i18nShape
+				$localeValidators = $limitValidators;
+				$localeField = $i18nShape
 					->add($locale->id, $subShape)
-					->rules(...$limitValidators)
-					->optional()
-					->nullable()
 					->prepare(Prepare::nullAsEmpty(...));
+
+				if ($this->isRequired() && $locale->id === $defaultLocale) {
+					$localeValidators[] = 'required';
+				} else {
+					$localeField->optional()->nullable();
+				}
+
+				$localeField->rules(...$localeValidators);
 			}
 
 			$files = $shape

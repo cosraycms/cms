@@ -754,6 +754,72 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertFalse($invalid->valid());
 	}
 
+	public function testRequiredAsymmetricImageRequiresDefaultLocaleOnly(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', []));
+		$field->required();
+		$field->translate(TranslateMode::Asymmetric);
+
+		$shape = $field->shape();
+
+		$valid = $shape->validate([
+			'type' => 'image',
+			'files' => [
+				'en' => [
+					['file' => 'hero.jpg'],
+				],
+			],
+		]);
+		$invalid = $shape->validate([
+			'type' => 'image',
+			'files' => [
+				'de' => [
+					['file' => 'held.jpg'],
+				],
+			],
+		]);
+
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
+	}
+
+	public function testRequiredAsymmetricBlocksRequiresDefaultLocaleOnly(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Blocks('content', $owner, new ValueContext('content', []));
+		$field->required();
+		$field->translate(TranslateMode::Asymmetric);
+
+		$shape = $field->shape();
+		$block = [
+			'type' => 'text',
+			'rowspan' => 1,
+			'colspan' => 12,
+			'value' => 'Hello',
+		];
+
+		$valid = $shape->validate([
+			'type' => 'blocks',
+			'columns' => 12,
+			'value' => [
+				'en' => [$block],
+			],
+		]);
+		$invalid = $shape->validate([
+			'type' => 'blocks',
+			'columns' => 12,
+			'value' => [
+				'de' => [$block],
+			],
+		]);
+
+		$this->assertTrue($valid->valid());
+		$this->assertFalse($invalid->valid());
+	}
+
 	public function testOptionValueUsesProvidedValue(): void
 	{
 		$context = $this->createContext();
