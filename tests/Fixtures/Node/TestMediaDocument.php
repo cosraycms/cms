@@ -13,22 +13,22 @@ use Cosray\Schema\Columns;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
 use Cosray\Schema\Translate;
-use Cosray\Schema\TranslateFile;
+use Cosray\Schema\TranslateMode;
 
 #[Label('Test Media Document')]
 class TestMediaDocument implements Title
 {
 	#[Label('Gallery')]
-	#[TranslateFile]
+	#[Translate(TranslateMode::Asymmetric)]
 	public Image $gallery;
 
 	#[Label('Video')]
-	#[TranslateFile]
+	#[Translate(TranslateMode::Asymmetric)]
 	public Video $video;
 
 	#[Label('Content Blocks')]
 	#[Columns(12, 2)]
-	#[Translate]
+	#[Translate(TranslateMode::Asymmetric)]
 	public Blocks $contentBlocks;
 
 	#[Label('Category')]

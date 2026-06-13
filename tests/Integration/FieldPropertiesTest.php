@@ -140,8 +140,8 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$this->assertArrayNotHasKey('limit', $properties);
 
-		$this->assertArrayHasKey('translateFile', $properties);
-		$this->assertTrue($properties['translateFile']);
+		$this->assertArrayHasKey('translate', $properties);
+		$this->assertTrue($properties['translate']);
 	}
 
 	public function testOptionFieldPropertiesIncludesOptions(): void

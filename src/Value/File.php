@@ -6,19 +6,18 @@ namespace Cosray\Value;
 
 use Cosray\Assets;
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Capability\File\Translatable as FileTranslatable;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 
 /**
- * @property-read Field&FileTranslatable&Translatable $field
+ * @property-read Field&Translatable $field
  */
 class File extends Value
 {
 	public function __construct(
 		Owner $owner,
-		Field&FileTranslatable&Translatable $field,
+		Field&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {

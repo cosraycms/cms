@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celemas\Sire\Shape;
+use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
 
-class Video extends Field implements
-	Capability\Limitable,
-	Capability\File\Translatable,
-	Capability\Translatable
+class Video extends Field implements Capability\Limitable, Capability\Translatable
 {
 	use Capability\IsLimitable;
-	use Capability\File\IsTranslatable;
 	use Capability\IsTranslatable;
+
+	/** @return list<TranslateMode> */
+	public function supportedTranslateModes(): array
+	{
+		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
+	}
 
 	public function value(): Value\Video
 	{
@@ -43,7 +46,7 @@ class Video extends Field implements
 		$shape->add('type', 'string')->rules('required', 'in:video');
 
 		if ($this->isAsymmetricallyTranslated()) {
-			// File-translatable: separate file arrays per locale
+			// Asymmetric translation: separate file arrays per locale
 			$subShape = Shapes::list();
 			$subShape->add('file', 'string')->optional()->nullable();
 			$subShape->add('title', 'string')->optional()->nullable();
@@ -65,7 +68,7 @@ class Video extends Field implements
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		} elseif ($this->isSymmetricallyTranslated()) {
-			// Text-translatable: shared files but translatable titles
+			// Symmetric translation: shared files but translatable titles
 			$fileShape = Shapes::list();
 			$fileShape->add('file', 'string')->rules('required');
 

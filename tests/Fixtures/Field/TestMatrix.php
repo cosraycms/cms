@@ -10,6 +10,7 @@ use Cosray\Field\Text;
 use Cosray\Schema\Label;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
+use Cosray\Schema\TranslateMode;
 
 #[Label('Test Matrix')]
 class TestMatrix extends Matrix
@@ -17,6 +18,6 @@ class TestMatrix extends Matrix
 	#[Label('Titel'), Required, Translate]
 	protected Text $title;
 
-	#[Label('Inhalt'), Translate]
+	#[Label('Inhalt'), Translate(TranslateMode::Asymmetric)]
 	protected Blocks $content;
 }

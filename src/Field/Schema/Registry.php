@@ -18,7 +18,6 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Translate;
-use Cosray\Schema\TranslateFile;
 use Cosray\Schema\Validate;
 use Cosray\Schema\Width;
 
@@ -45,7 +44,6 @@ class Registry
 		$registry->register(Icon::class, new IconHandler());
 		$registry->register(Description::class, new DescriptionHandler());
 		$registry->register(Translate::class, new TranslateHandler());
-		$registry->register(TranslateFile::class, new TranslateFileHandler());
 		$registry->register(Required::class, new RequiredHandler());
 		$registry->register(Validate::class, new ValidateHandler());
 		$registry->register(DefaultValue::class, new DefaultValueHandler());

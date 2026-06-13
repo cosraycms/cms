@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celemas\Sire\Shape;
+use Cosray\Schema\TranslateMode;
 use Cosray\Validation\BlockValidator;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
@@ -18,6 +19,12 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	public function __toString(): string
 	{
 		return 'Blocks Field';
+	}
+
+	/** @return list<TranslateMode> */
+	public function supportedTranslateModes(): array
+	{
+		return [TranslateMode::Asymmetric];
 	}
 
 	public function value(): BlocksValue
@@ -45,7 +52,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			'value' => [],
 		];
 
-		if ($this->isTranslatable()) {
+		if ($this->isAsymmetricallyTranslated()) {
 			foreach ($this->owner->locales() as $locale) {
 				$result['value'][$locale->id] = [];
 			}
@@ -62,7 +69,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 		$itemShape = new BlockValidator(list: true, title: $this->label, keepUnknown: true);
 
-		if ($this->isTranslatable()) {
+		if ($this->isAsymmetricallyTranslated()) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nShape = Shapes::create();

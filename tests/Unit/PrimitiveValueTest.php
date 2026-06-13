@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Context;
 use Cosray\Node\FieldOwner;
+use Cosray\Schema\TranslateMode;
 use Cosray\Tests\Fixtures\Field\TestCheckbox;
 use Cosray\Tests\Fixtures\Field\TestCode;
 use Cosray\Tests\Fixtures\Field\TestNumber;
@@ -298,7 +299,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->limit(1);
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -322,7 +323,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->limit(1);
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -345,7 +346,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -423,7 +424,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->limit(1);
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -535,14 +536,16 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Picture('hero', $owner, new ValueContext('hero', [
 			'files' => [
-				[
-					'en' => [
+				'en' => [
+					[
 						'file' => 'hero.jpg',
 						'alt' => 'Hero',
 						'title' => 'Hero Image',
 						'link' => '/hero',
 					],
-					'de' => [
+				],
+				'de' => [
+					[
 						'file' => null,
 						'alt' => null,
 						'title' => null,
@@ -551,7 +554,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -604,7 +607,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
@@ -718,7 +721,7 @@ final class PrimitiveValueTest extends TestCase
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\File('downloads', $owner, new ValueContext('downloads', []));
-		$field->translateFile();
+		$field->translate(TranslateMode::Asymmetric);
 		$field->limit(1);
 
 		$shape = $field->shape();

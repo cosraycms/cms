@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Request;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
 use Cosray\Field\Code;
 use Cosray\Field\FieldHydrator;
@@ -27,7 +28,6 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Translate;
-use Cosray\Schema\TranslateFile;
 use Cosray\Schema\TranslateMode;
 use Cosray\Schema\Validate;
 use Cosray\Schema\Width;
@@ -264,15 +264,29 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertFalse($field->isAsymmetricallyTranslated());
 	}
 
-	public function testTranslateFileCapabilityReturnsTranslateFileProperty(): void
+	public function testAsymmetricTranslateCapabilitySetsAsymmetricMode(): void
 	{
 		$field = $this->createImageField();
-		$meta = new TranslateFile();
+		$meta = new Translate(TranslateMode::Asymmetric);
 
 		$properties = $this->applyAndGetProperties($meta, $field);
 
-		$this->assertArrayHasKey('translateFile', $properties);
-		$this->assertTrue($properties['translateFile']);
+		$this->assertArrayHasKey('translate', $properties);
+		$this->assertTrue($properties['translate']);
+		$this->assertSame(TranslateMode::Asymmetric, $field->translateMode());
+		$this->assertTrue($field->isAsymmetricallyTranslated());
+		$this->assertFalse($field->isSymmetricallyTranslated());
+	}
+
+	public function testUnsupportedTranslationModeThrows(): void
+	{
+		$field = $this->createTextField();
+		$meta = new Translate(TranslateMode::Asymmetric);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('does not support asymmetric translation');
+
+		$this->applyAndGetProperties($meta, $field);
 	}
 
 	public function testLimitCapabilityReturnsLimitProperty(): void

@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celemas\Sire\Shape;
+use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
 
-class Picture extends Field implements
-	Capability\Limitable,
-	Capability\File\Translatable,
-	Capability\Translatable
+class Picture extends Field implements Capability\Limitable, Capability\Translatable
 {
 	use Capability\IsLimitable;
-	use Capability\File\IsTranslatable;
 	use Capability\IsTranslatable;
 
-	// TODO: translateFile and multiple
+	/** @return list<TranslateMode> */
+	public function supportedTranslateModes(): array
+	{
+		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
+	}
+
 	public function value(): Value\Picture
 	{
 		if ($this->isAsymmetricallyTranslated()) {
@@ -44,6 +46,10 @@ class Picture extends Field implements
 
 	public function structure(mixed $value = null): array
 	{
+		if ($this->isAsymmetricallyTranslated()) {
+			return $this->getTranslatableFileStructure('picture', $value);
+		}
+
 		return $this->getFileStructure('picture', $value);
 	}
 
@@ -54,7 +60,7 @@ class Picture extends Field implements
 		$shape->add('type', 'string')->rules('required', 'in:picture');
 
 		if ($this->isAsymmetricallyTranslated()) {
-			// File-translatable: separate file arrays per locale
+			// Asymmetric translation: separate file arrays per locale
 			$subShape = Shapes::list();
 			$subShape->add('file', 'string')->optional()->nullable();
 			$subShape->add('title', 'string')->optional()->nullable();
@@ -77,7 +83,7 @@ class Picture extends Field implements
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		} elseif ($this->isSymmetricallyTranslated()) {
-			// Text-translatable: shared files but translatable titles and alt text
+			// Symmetric translation: shared files but translatable titles and alt text
 			$fileShape = Shapes::list();
 			$fileShape->add('file', 'string')->rules('required');
 

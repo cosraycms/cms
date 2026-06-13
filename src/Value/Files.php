@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Field\Capability\File\Translatable as FileTranslatable;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
@@ -16,7 +15,7 @@ class Files extends Value implements Iterator
 
 	public function __construct(
 		Owner $owner,
-		Field&FileTranslatable&Translatable $field,
+		Field&Translatable $field,
 		ValueContext $context,
 		protected int $index = 0,
 	) {
