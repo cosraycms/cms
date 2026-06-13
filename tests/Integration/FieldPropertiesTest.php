@@ -95,6 +95,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);
+		$this->assertSame('symmetric', $properties['translateMode']);
 
 		$this->assertArrayHasKey('description', $properties);
 		$this->assertEquals('A brief introduction to the document', $properties['description']);
@@ -122,6 +123,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);
+		$this->assertSame('asymmetric', $properties['translateMode']);
 	}
 
 	public function testImageFieldPropertiesDoesNotIncludeLimitWithoutSchema(): void
@@ -142,6 +144,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);
+		$this->assertSame('asymmetric', $properties['translateMode']);
 	}
 
 	public function testOptionFieldPropertiesIncludesOptions(): void

@@ -32,7 +32,14 @@ class TranslateHandler extends Handler
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Translatable) {
-			return ['translate' => $field->isTranslatable()];
+			$properties = ['translate' => $field->isTranslatable()];
+			$mode = $field->translateMode();
+
+			if ($mode !== null) {
+				$properties['translateMode'] = $mode->value;
+			}
+
+			return $properties;
 		}
 
 		return [];

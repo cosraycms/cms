@@ -100,6 +100,10 @@ class MatrixTest extends TestCase
 		$titleField = $subfields['title'];
 		$this->assertTrue($titleField->isTranslatable(), 'Title subfield should be translatable');
 
+		$properties = $matrix->properties();
+		$this->assertSame('symmetric', $properties['subfields'][0]['translateMode']);
+		$this->assertSame('asymmetric', $properties['subfields'][1]['translateMode']);
+
 		// Check that the structure for an empty item has locale keys
 		$structure = $matrix->structure([
 			['title' => ['type' => 'text', 'value' => ''], 'content' => ['type' => 'blocks', 'value' => []]],
