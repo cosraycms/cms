@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celemas\Sire\Shape;
-use Cosray\Validation\BlockItemValidator;
+use Cosray\Validation\BlockValidator;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Blocks as BlocksValue;
@@ -60,7 +60,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		$shape->add('type', 'string')->rules('required', 'in:blocks');
 		$shape->add('columns', 'int')->rules('required');
 
-		$itemShape = new BlockItemValidator(list: true, title: $this->label, keepUnknown: true);
+		$itemShape = new BlockValidator(list: true, title: $this->label, keepUnknown: true);
 
 		if ($this->translate) {
 			$locales = $this->owner->locales();

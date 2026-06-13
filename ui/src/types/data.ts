@@ -110,7 +110,7 @@ export interface BlockYoutube extends BlockBase {
 
 export type BlockType = 'text' | 'richtext' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
 
-export type BlockItem =
+export type Block =
 	| BlockText
 	| BlockRichText
 	| BlockImage
@@ -120,13 +120,13 @@ export type BlockItem =
 	| BlockIframe;
 
 export interface LocalizedBlocksValue {
-	[key: string]: BlockItem[];
+	[key: string]: Block[];
 }
 
 export interface BlocksData {
 	type: 'blocks';
 	columns: number;
-	value: BlockItem[] | LocalizedBlocksValue;
+	value: Block[] | LocalizedBlocksValue;
 }
 
 // Matrix field types

@@ -75,7 +75,7 @@ class Blocks extends Value
 		if ($all && $this->field->isTranslatable()) {
 			foreach ($this->data['value'] ?? [] as $data) {
 				foreach ($data as $value) {
-					$item = new BlockItem($value['type'], $value);
+					$item = new Block($value['type'], $value);
 
 					if ($item->type === 'image') {
 						yield new Field\Image(
@@ -221,7 +221,7 @@ class Blocks extends Value
 		return count($this->data['value']) > 0;
 	}
 
-	protected function renderValue(string $prefix, BlockItem $value, array $args): string
+	protected function renderValue(string $prefix, Block $value, array $args): string
 	{
 		$colspan = $prefix . '-colspan-' . $value->data['colspan'];
 		$rowspan = $prefix . '-rowspan-' . $value->data['rowspan'];
@@ -263,7 +263,7 @@ class Blocks extends Value
 		return $out;
 	}
 
-	protected function getValueObject(string $class, BlockItem $item): Value
+	protected function getValueObject(string $class, Block $item): Value
 	{
 		return new $class(
 			$this->context->fieldName,
@@ -336,7 +336,7 @@ class Blocks extends Value
 		}
 
 		foreach ($fields as $field) {
-			yield new BlockItem($field['type'], $field);
+			yield new Block($field['type'], $field);
 		}
 	}
 }

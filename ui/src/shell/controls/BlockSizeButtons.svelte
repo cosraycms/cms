@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BlockItem } from '$types/data';
+	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
@@ -10,7 +10,7 @@
 	import IcoUnindent from '$shell/icons/IcoUnindent.svelte';
 
 	type Props = {
-		item: BlockItem;
+		item: Block;
 		field: BlocksField;
 		dropdown?: boolean;
 	};

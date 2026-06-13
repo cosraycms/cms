@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BlockItem } from '$types/data';
+	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 	import BlockSizeButtons from '$shell/controls/BlockSizeButtons.svelte';
 	import BlockCellButtons from '$shell/controls/BlockCellButtons.svelte';
@@ -7,8 +7,8 @@
 	import IcoGear from '$shell/icons/IcoGear.svelte';
 
 	interface Props {
-		data: BlockItem[];
-		item: BlockItem;
+		data: Block[];
+		item: Block;
 		field: BlocksField;
 		index: number;
 		edit: () => void;

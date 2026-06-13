@@ -3,7 +3,7 @@
 	import Field from '$shell/Field.svelte';
 	import LabelDiv from '$shell/LabelDiv.svelte';
 	import BlocksPanel from './BlocksPanel.svelte';
-	import type { BlockItem, BlocksData } from '$types/data';
+	import type { Block, BlocksData } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	type Props = {
@@ -16,7 +16,7 @@
 
 	let lang = $state(systemLocale($system));
 
-	function blockItems(lang?: string): BlockItem[] {
+	function blocks(lang?: string): Block[] {
 		const value = data.value;
 
 		if (Array.isArray(value)) {
@@ -45,14 +45,14 @@
 				{#each $system.locales as locale}
 					{#if locale.id === lang}
 						<BlocksPanel
-							data={blockItems(lang)}
+							data={blocks(lang)}
 							{field}
 							{node} />
 					{/if}
 				{/each}
 			{:else}
 				<BlocksPanel
-					data={blockItems()}
+					data={blocks()}
 					{field}
 					{node} />
 			{/if}

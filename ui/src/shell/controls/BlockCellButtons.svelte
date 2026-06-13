@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BlockItem } from '$types/data';
+	import type { Block } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
 
 	import { getContext } from 'svelte';
@@ -12,8 +12,8 @@
 	import { setDirty } from '$lib/state';
 
 	type Props = {
-		data: BlockItem[];
-		item: BlockItem;
+		data: Block[];
+		item: Block;
 		index: number;
 		add: () => void;
 		dropdown?: boolean;

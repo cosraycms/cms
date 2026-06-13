@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type {
-		BlockItem,
+		Block,
 		BlockBase,
 		BlockText as BlockTextData,
 		BlockRichText as BlockRichTextData,
@@ -33,7 +33,7 @@
 
 	type Props = {
 		field: BlocksField;
-		data: BlockItem[];
+		data: Block[];
 		node: string;
 		cols?: number;
 	};
@@ -88,15 +88,15 @@
 		}
 
 		if (index === null) {
-			data.push(content as BlockItem);
+			data.push(content as Block);
 		} else {
 			if (before) {
-				data.splice(index, 0, content as BlockItem);
+				data.splice(index, 0, content as Block);
 			} else {
 				if (data.length - 1 === index) {
-					data.push(content as BlockItem);
+					data.push(content as Block);
 				} else {
-					data.splice(index + 1, 0, content as BlockItem);
+					data.splice(index + 1, 0, content as Block);
 				}
 			}
 		}
@@ -120,7 +120,7 @@
 		};
 	}
 
-	function resizeCell(item: BlockItem) {
+	function resizeCell(item: Block) {
 		return (element: HTMLElement) => (item.width = element.clientWidth);
 	}
 
@@ -128,7 +128,7 @@
 		return `grid-template-columns: repeat(${columns}, minmax(0, 1fr));`;
 	}
 
-	function blockItemStyle(item: BlockItem): string {
+	function blockStyle(item: Block): string {
 		const column = item.colstart
 			? `${item.colstart} / span ${item.colspan}`
 			: `span ${item.colspan} / span ${item.colspan}`;
@@ -144,8 +144,8 @@
 		{#each data as item, index (item)}
 			{@const Control = controls[item.type]}
 			<div
-				class="cms-blocks-item"
-				style={blockItemStyle(item)}
+				class="cms-block"
+				style={blockStyle(item)}
 				animate:flip={{ duration: 300 }}
 				use:resize={resizeCell(item)}>
 				<Control
@@ -189,7 +189,7 @@
 		background-color: var(--cms-color-neutral-200);
 	}
 
-	.cms-blocks-item {
+	.cms-block {
 		position: relative;
 		display: flex;
 		flex-direction: column;
