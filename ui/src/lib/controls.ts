@@ -6,7 +6,7 @@ import Blocks from '$shell/controls/Blocks.svelte';
 import Hidden from '$shell/controls/Hidden.svelte';
 import RichText from '$shell/controls/RichText.svelte';
 import Image from '$shell/controls/Image.svelte';
-import Matrix from '$shell/controls/Matrix.svelte';
+import Entries from '$shell/controls/Entries.svelte';
 import Number from '$shell/controls/Number.svelte';
 import Option from '$shell/controls/Option.svelte';
 import Picture from '$shell/controls/Picture.svelte';
@@ -23,7 +23,7 @@ export default {
 	'Cosray\\Field\\Hidden': Hidden,
 	'Cosray\\Field\\RichText': RichText,
 	'Cosray\\Field\\Image': Image,
-	'Cosray\\Field\\Matrix': Matrix,
+	'Cosray\\Field\\Entries': Entries,
 	'Cosray\\Field\\Number': Number,
 	'Cosray\\Field\\Option': Option,
 	'Cosray\\Field\\Picture': Picture,

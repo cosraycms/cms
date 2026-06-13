@@ -129,17 +129,17 @@ export interface BlocksData {
 	value: Block[] | LocalizedBlocksValue;
 }
 
-// Matrix field types
-export interface MatrixItemData {
-	[subfieldName: string]: Data | GenericFieldData;
+// Entries field types
+export interface EntryData {
+	[fieldName: string]: Data | GenericFieldData;
 }
 
-export interface MatrixData {
-	type: 'matrix';
-	value: MatrixItemData[];
+export interface EntriesData {
+	type: 'entries';
+	value: EntryData[];
 }
 
-export type Data = TextData | CodeData | FileData | BlocksData | NumberData | MatrixData;
+export type Data = TextData | CodeData | FileData | BlocksData | NumberData | EntriesData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 

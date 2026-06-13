@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { MatrixItemData } from '$types/data';
+	import type { EntryData } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
+	import type { Component } from 'svelte';
 
 	import { getContext } from 'svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
@@ -12,22 +13,22 @@
 	import { setDirty } from '$lib/state';
 
 	type Props = {
-		data: MatrixItemData[];
-		item: MatrixItemData;
+		data: EntryData[];
+		entry: EntryData;
 		index: number;
 		collapsed: boolean;
 		toggleCollapse: () => void;
 	};
 
-	let { data = $bindable(), item, index, collapsed, toggleCollapse }: Props = $props();
+	let { data = $bindable(), entry, index, collapsed, toggleCollapse }: Props = $props();
 
 	let { open, close } = getContext<ModalFunctions>('modal');
-	let first = $derived(data?.indexOf(item) === 0);
-	let last = $derived(data?.indexOf(item) === data.length - 1);
+	let first = $derived(data?.indexOf(entry) === 0);
+	let last = $derived(data?.indexOf(entry) === data.length - 1);
 
 	async function remove() {
 		open(
-			ModalRemove,
+			ModalRemove as Component,
 			{
 				close,
 				proceed: () => {
@@ -62,7 +63,7 @@
 	}
 </script>
 
-<div class="cms-matrix-controls">
+<div class="cms-entry-controls">
 	<button
 		type="button"
 		class="collapse-btn"
@@ -93,14 +94,14 @@
 	<button
 		type="button"
 		class="remove"
-		title="Remove item"
+		title="Remove entry"
 		onclick={remove}>
 		<IcoTrash />
 	</button>
 </div>
 
 <style lang="postcss">
-	.cms-matrix-controls {
+	.cms-entry-controls {
 		display: flex;
 		flex-direction: row;
 		align-items: center;

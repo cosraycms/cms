@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { GenericFieldData, MatrixData, MatrixItemData } from '$types/data';
-	import type { Field as FieldType, MatrixField } from '$types/fields';
+	import type { GenericFieldData, EntriesData, EntryData } from '$types/data';
+	import type { Field as FieldType, EntriesField } from '$types/fields';
 
 	import { _ } from '$lib/locale';
 	import { setDirty } from '$lib/state';
@@ -11,25 +11,24 @@
 	import LabelDiv from '$shell/LabelDiv.svelte';
 	import Button from '$shell/Button.svelte';
 	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
-	import MatrixItem from './MatrixItem.svelte';
+	import Entry from './Entry.svelte';
 
 	type Props = {
-		field: MatrixField;
-		data: MatrixData;
+		field: EntriesField;
+		data: EntriesData;
 		node: string;
 	};
 
 	let { field, data = $bindable(), node }: Props = $props();
 
-	function createEmptyItem(): MatrixItemData {
-		const item: MatrixItemData = {};
+	function createEmptyEntry(): EntryData {
+		const entry: EntryData = {};
 
-		for (const subfield of field.subfields) {
-			// Create default structure for each subfield based on its type
-			item[subfield.name] = createDefaultValue(subfield);
+		for (const entryField of field.entryFields) {
+			entry[entryField.name] = createDefaultValue(entryField);
 		}
 
-		return item;
+		return entry;
 	}
 
 	function createTranslatableValue(): Record<string, null> {
@@ -54,17 +53,16 @@
 		return value;
 	}
 
-	function createDefaultValue(subfield: FieldType): GenericFieldData {
-		const isAsymmetric = subfield.translateMode === 'asymmetric';
-		const isSymmetric = subfield.translate === true && !isAsymmetric;
+	function createDefaultValue(entryField: FieldType): GenericFieldData {
+		const isAsymmetric = entryField.translateMode === 'asymmetric';
+		const isSymmetric = entryField.translate === true && !isAsymmetric;
 		const codeSyntaxes =
-			'syntaxes' in subfield &&
-			Array.isArray(subfield.syntaxes) &&
-			subfield.syntaxes.length > 0
-				? subfield.syntaxes
+			'syntaxes' in entryField &&
+			Array.isArray(entryField.syntaxes) &&
+			entryField.syntaxes.length > 0
+				? entryField.syntaxes
 				: ['plaintext'];
 
-		// Return appropriate default structure based on field type
 		const typeMap: Record<string, () => GenericFieldData> = {
 			'Cosray\\Field\\Text': () => ({
 				type: 'text',
@@ -108,26 +106,26 @@
 				columns: 12,
 				value: isAsymmetric ? createLocalizedList() : [],
 			}),
+			'Cosray\\Field\\Entries': () => ({ type: 'entries', value: [] }),
 			'Cosray\\Field\\Option': () => ({ type: 'option', value: '' }),
 			'Cosray\\Field\\Iframe': () => ({ type: 'iframe', value: '' }),
 			'Cosray\\Field\\Hidden': () => ({ type: 'hidden', value: '' }),
 		};
 
-		const factory = typeMap[subfield.type];
+		const factory = typeMap[entryField.type];
 		if (factory) {
 			return factory();
 		}
 
-		// Default fallback for unknown types
 		return { type: 'text', value: isSymmetric ? createTranslatableValue() : '' };
 	}
 
-	function addItem() {
+	function addEntry() {
 		if (!data.value) {
 			data.value = [];
 		}
 
-		data.value.push(createEmptyItem());
+		data.value.push(createEmptyEntry());
 		data.value = data.value;
 		setDirty();
 	}
@@ -137,24 +135,24 @@
 	<LabelDiv translate={false}>
 		{field.label}
 	</LabelDiv>
-	<div class="matrix-field">
+	<div class="entries-field">
 		{#if data.value && data.value.length > 0}
-			<div class="matrix-items">
-				{#each data.value as item, index (item)}
+			<div class="entries-items">
+				{#each data.value as entry, index (entry)}
 					<div animate:flip={{ duration: 300 }}>
-						<MatrixItem
+						<Entry
 							{field}
 							bind:data={data.value}
-							bind:item={data.value[index]}
+							bind:entry={data.value[index]}
 							{node}
 							{index} />
 					</div>
 				{/each}
 			</div>
-			<div class="matrix-add">
+			<div class="entries-add">
 				<Button
 					class="secondary"
-					onclick={addItem}>
+					onclick={addEntry}>
 					<span class="cms-button-icon">
 						<IcoCirclePlus />
 					</span>
@@ -162,10 +160,10 @@
 				</Button>
 			</div>
 		{:else}
-			<div class="matrix-empty">
+			<div class="entries-empty">
 				<Button
 					class="secondary"
-					onclick={addItem}>
+					onclick={addEntry}>
 					<span class="cms-button-icon">
 						<IcoCirclePlus />
 					</span>
@@ -177,7 +175,7 @@
 </Field>
 
 <style lang="postcss">
-	.matrix-field {
+	.entries-field {
 		margin-top: 0.5rem;
 		border: 1px solid var(--cms-color-neutral-300);
 		border-radius: 0.375rem;
@@ -185,13 +183,13 @@
 		padding: 0.75rem;
 	}
 
-	.matrix-items {
+	.entries-items {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
 	}
 
-	.matrix-add {
+	.entries-add {
 		display: flex;
 		justify-content: center;
 		margin-top: 0.75rem;
@@ -199,7 +197,7 @@
 		border-top: 1px dashed var(--cms-color-neutral-300);
 	}
 
-	.matrix-empty {
+	.entries-empty {
 		display: flex;
 		justify-content: center;
 		padding: 1rem;

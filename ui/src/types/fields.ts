@@ -30,12 +30,12 @@ export interface BlocksField extends SimpleField {
 	minCellWidth: number;
 }
 
-export interface MatrixField extends SimpleField {
-	subfields: Field[];
+export interface EntriesField extends SimpleField {
+	entryFields: Field[];
 }
 
 export interface CodeField extends SimpleField {
 	syntaxes?: string[];
 }
 
-export type Field = ImageField | FileField | BlocksField | MatrixField | CodeField | SimpleField;
+export type Field = ImageField | FileField | BlocksField | EntriesField | CodeField | SimpleField;
