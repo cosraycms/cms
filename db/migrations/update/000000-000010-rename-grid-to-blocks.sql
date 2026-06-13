@@ -2,12 +2,12 @@
 
 -- This is a mechanical schema update. Disable history/change triggers so the
 -- migration neither bumps changed timestamps nor creates ghost history rows.
-ALTER TABLE cms.nodes DISABLE TRIGGER nodes_trigger_02_change;
-ALTER TABLE cms.nodes DISABLE TRIGGER nodes_trigger_03_history;
-ALTER TABLE cms.drafts DISABLE TRIGGER drafts_trigger_01_history;
+ALTER TABLE /*:cms.prefix:*/nodes DISABLE TRIGGER /*:cms.obj:*/nodes_trigger_02_change;
+ALTER TABLE /*:cms.prefix:*/nodes DISABLE TRIGGER /*:cms.obj:*/nodes_trigger_03_history;
+ALTER TABLE /*:cms.prefix:*/drafts DISABLE TRIGGER /*:cms.obj:*/drafts_trigger_01_history;
 
 -- Update current node content.
-UPDATE cms.nodes
+UPDATE /*:cms.prefix:*/nodes
 SET content = regexp_replace(
 	content::text,
 	'("type"\s*:\s*)"grid"',
@@ -17,7 +17,7 @@ SET content = regexp_replace(
 WHERE content::text ~ '("type"\s*:\s*)"grid"';
 
 -- Update draft content.
-UPDATE cms.drafts
+UPDATE /*:cms.prefix:*/drafts
 SET content = regexp_replace(
 	content::text,
 	'("type"\s*:\s*)"grid"',
@@ -27,7 +27,7 @@ SET content = regexp_replace(
 WHERE content::text ~ '("type"\s*:\s*)"grid"';
 
 -- Update existing history rows in place.
-UPDATE cms.nodes_history
+UPDATE /*:cms.prefix:*/nodes_history
 SET content = regexp_replace(
 	content::text,
 	'("type"\s*:\s*)"grid"',
@@ -36,7 +36,7 @@ SET content = regexp_replace(
 )::jsonb
 WHERE content::text ~ '("type"\s*:\s*)"grid"';
 
-UPDATE cms.drafts_history
+UPDATE /*:cms.prefix:*/drafts_history
 SET content = regexp_replace(
 	content::text,
 	'("type"\s*:\s*)"grid"',
@@ -45,6 +45,6 @@ SET content = regexp_replace(
 )::jsonb
 WHERE content::text ~ '("type"\s*:\s*)"grid"';
 
-ALTER TABLE cms.drafts ENABLE TRIGGER drafts_trigger_01_history;
-ALTER TABLE cms.nodes ENABLE TRIGGER nodes_trigger_03_history;
-ALTER TABLE cms.nodes ENABLE TRIGGER nodes_trigger_02_change;
+ALTER TABLE /*:cms.prefix:*/drafts ENABLE TRIGGER /*:cms.obj:*/drafts_trigger_01_history;
+ALTER TABLE /*:cms.prefix:*/nodes ENABLE TRIGGER /*:cms.obj:*/nodes_trigger_03_history;
+ALTER TABLE /*:cms.prefix:*/nodes ENABLE TRIGGER /*:cms.obj:*/nodes_trigger_02_change;
