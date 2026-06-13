@@ -52,6 +52,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Required;
 use Cosray\Schema\Route;
 use Cosray\Schema\Translate;
+use Cosray\Schema\TranslateMode;
 use Cosray\Node\Contract\Title;
 
 #[Label('Department'), Route('/{title}')]
@@ -65,7 +66,7 @@ final class Department implements Title
     #[Label('Title'), Required, Translate]
     public Text $title;
 
-    #[Label('Content'), Translate]
+    #[Label('Content'), Translate(TranslateMode::Asymmetric)]
     public Blocks $content;
 
     #[Label('Image')]
@@ -77,6 +78,12 @@ final class Department implements Title
     }
 }
 ```
+
+### Field translation modes
+
+`#[Translate]` defaults to symmetric translation. Symmetric media fields share one file list and translate metadata such as `title` and `alt`.
+
+Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varies by locale. `Blocks` currently supports asymmetric translation only. Media fields use asymmetric translation for separate per-locale file lists. Required asymmetric fields require content in the default locale; fallback locales are optional.
 
 ### Derived behavior
 

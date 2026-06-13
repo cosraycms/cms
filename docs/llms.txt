@@ -2,7 +2,7 @@ project: Cosray Content Management Framework (cosray/cms)
 repository: https://github.com/cosray/cms
 canonical_branch: main
 license: MIT (https://github.com/cosray/cms/blob/main/LICENSE.md)
-last_updated: 2026-04-29
+last_updated: 2026-06-13
 contact: https://github.com/cosray/cms/issues
 
 summary:
@@ -156,7 +156,7 @@ Field-level attributes (applied to field properties):
 - `#[Label('...')]`
 - `#[Description('...')]`
 - `#[Translate]`
-- `#[TranslateFile]`
+- `#[Translate(TranslateMode::Asymmetric)]`
 - `#[Required]`
 - `#[Validate('rule', ...)]`
 - `#[DefaultValue(...)]`
@@ -201,6 +201,14 @@ final class ArticlePage implements Title
     }
 }
 ```
+
+Field translation modes:
+
+- `#[Translate]` defaults to symmetric translation.
+- Symmetric media translation shares the file list and translates metadata such as `title` and `alt`.
+- `#[Translate(TranslateMode::Asymmetric)]` stores localized payloads, such as per-locale media file lists or per-locale block arrays.
+- `Blocks` currently supports asymmetric translation only.
+- Required asymmetric fields require the default locale only; fallback locales are optional.
 
 Schema defaults worth knowing:
 
