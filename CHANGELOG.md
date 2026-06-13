@@ -4,7 +4,8 @@
 
 ### Breaking Changes
 
-- Renamed the Matrix field concept to Entries/Entry. Use `Cosray\Field\Entries`, `Cosray\Value\Entries`, and `Cosray\Value\Entry`; stored content now uses `"type": "entries"` and the panel exposes `entryFields` metadata. A migration updates existing `"matrix"` payloads.
+- Renamed the Matrix field concept to Entries/Entry. Use `Cosray\Field\Entries`, `Cosray\Value\Entries`, and `Cosray\Value\Entry`; stored field content now uses `"type": "entries"`.
+- Changed Entries fields to use node-style entry schema classes through `#[Allows(...)]` instead of field inheritance. Stored entry items now use an FQCN `type` plus nested `value`, and the panel exposes `entryTypes` metadata. Existing app data needs an app-specific migration to add the entry FQCN for each Entries field.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 

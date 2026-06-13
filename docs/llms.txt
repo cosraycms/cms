@@ -169,6 +169,7 @@ Field-level attributes (applied to field properties):
 - `#[Limit(int $max, int $min = 0)]`
 - `#[Fulltext(FulltextWeight::A|B|C|D)]`
 - `#[Syntax('php', 'js', ...)]`
+- `#[Allows(Foo::class, Bar::class, ...)]` for `Entries` fields
 - `#[Title]` (property-level; field property only)
 
 Minimal node example:
@@ -238,11 +239,51 @@ General value access pattern:
 - Use `->unwrap()` for raw value.
 - `__toString()` usually gives escaped/rendered output.
 
+Entries fields use plain node-style schema classes and `#[Allows(...)]`. The same schema class can also be registered as a real node.
+
+```php
+use App\Node\Entries\Staff;
+use Cosray\Field\Entries;
+use Cosray\Field\Text;
+use Cosray\Schema\Allows;
+use Cosray\Schema\Label;
+
+#[Label('Staff')]
+final class Staff
+{
+    #[Label('Name')]
+    protected Text $fullName;
+}
+
+final class Department
+{
+    #[Label('Staff'), Allows(Staff::class)]
+    protected Entries $staff;
+}
+```
+
+Stored entry items use an FQCN `type` and nested field `value`:
+
+```json
+{
+    "type": "entries",
+    "value": [
+        {
+            "type": "App\\Node\\Entries\\Staff",
+            "value": {
+                "fullName": { "type": "text", "value": "Jane" }
+            }
+        }
+    ]
+}
+```
+
 Examples:
 
 - `$page->title?->unwrap()`
 - `(string) $page->body`
 - `$page->heroImage?->first()?->url()`
+- `$page->staff?->first()?->fullName?->unwrap()`
 
 5) Querying content at runtime
 
