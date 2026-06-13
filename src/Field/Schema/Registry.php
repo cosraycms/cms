@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field\Schema;
 
+use Cosray\Schema\Allows;
 use Cosray\Schema\Columns;
 use Cosray\Schema\DefaultValue;
 use Cosray\Schema\Description;
@@ -40,6 +41,7 @@ class Registry
 	public static function withDefaults(): self
 	{
 		$registry = new self();
+		$registry->register(Allows::class, new AllowsHandler());
 		$registry->register(Label::class, new LabelHandler());
 		$registry->register(Icon::class, new IconHandler());
 		$registry->register(Description::class, new DescriptionHandler());

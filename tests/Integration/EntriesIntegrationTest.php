@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Field\Entries;
 use Cosray\Node\Factory;
 use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
-use Cosray\Tests\Fixtures\Node\TestEntries;
+use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
+use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 use Cosray\Tests\TestCase;
+use Cosray\Value\ValueContext;
 
 class EntriesIntegrationTest extends TestCase
 {
@@ -50,12 +53,18 @@ class EntriesIntegrationTest extends TestCase
 					'type' => 'entries',
 					'value' => [
 						[
-							'title' => ['type' => 'text', 'value' => ['en' => 'First Item']],
-							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+							'type' => TestEntry::class,
+							'value' => [
+								'title' => ['type' => 'text', 'value' => ['en' => 'First Item']],
+								'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+							],
 						],
 						[
-							'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
-							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+							'type' => TestEntry::class,
+							'value' => [
+								'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
+								'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+							],
 						],
 					],
 				],
@@ -78,6 +87,7 @@ class EntriesIntegrationTest extends TestCase
 
 		$firstItem = $entriesValue->first();
 		$this->assertNotNull($firstItem);
+		$this->assertSame(TestEntry::class, $firstItem->type);
 		$this->assertEquals('First Item', $firstItem->title->unwrap());
 		$this->assertInstanceOf(\Cosray\Value\Blocks::class, $firstItem->content);
 
@@ -90,12 +100,12 @@ class EntriesIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
-
-		$entries = new TestEntries(
+		$entries = new Entries(
 			'test_entries',
 			$owner,
-			new \Cosray\Value\ValueContext('test_entries', []),
+			new ValueContext('test_entries', []),
 		);
+		$entries->allow(TestEntry::class, TestAlternateEntry::class);
 
 		$entries->value();
 
@@ -103,7 +113,7 @@ class EntriesIntegrationTest extends TestCase
 		$this->assertEquals('entries', $structure['type']);
 		$this->assertIsArray($structure['value']);
 
-		$entryFields = $entries->entryFields();
+		$entryFields = $entries->entryFields(TestEntry::class);
 		$this->assertArrayHasKey('title', $entryFields);
 		$this->assertArrayHasKey('content', $entryFields);
 		$this->assertInstanceOf(\Cosray\Field\Text::class, $entryFields['title']);
@@ -114,25 +124,28 @@ class EntriesIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
-
-		$entries = new TestEntries(
+		$entries = new Entries(
 			'test_entries',
 			$owner,
-			new \Cosray\Value\ValueContext('test_entries', [
+			new ValueContext('test_entries', [
 				'type' => 'entries',
 				'value' => [
 					[
-						'title' => ['type' => 'text', 'value' => ''],
-						'content' => ['type' => 'blocks', 'columns' => 12, 'value' => []],
+						'type' => TestEntry::class,
+						'value' => [
+							'title' => ['type' => 'text', 'value' => ''],
+							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => []],
+						],
 					],
 				],
 			]),
 		);
+		$entries->allow(TestEntry::class);
 
 		$structure = $entries->structure();
 
 		$this->assertCount(1, $structure['value']);
-		$titleValue = $structure['value'][0]['title']['value'];
+		$titleValue = $structure['value'][0]['value']['title']['value'];
 
 		$this->assertIsArray(
 			$titleValue,

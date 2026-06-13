@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
+use Cosray\Field\Entries;
 use Cosray\Field\Text;
 use Cosray\Node\Contract\Title;
+use Cosray\Schema\Allows;
 use Cosray\Schema\Label;
 use Cosray\Schema\Required;
 
@@ -16,7 +18,8 @@ class TestNodeWithEntries implements Title
 	protected Text $title;
 
 	#[Label('My Entries Field'), Required]
-	protected TestEntries $entries;
+	#[Allows(TestEntry::class, TestAlternateEntry::class)]
+	protected Entries $entries;
 
 	public function title(): string
 	{

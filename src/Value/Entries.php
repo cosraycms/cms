@@ -13,6 +13,7 @@ use IteratorAggregate;
  */
 class Entries extends Value implements IteratorAggregate
 {
+	/** @var list<Entry> */
 	protected array $entries = [];
 
 	public function __construct(
@@ -102,10 +103,17 @@ class Entries extends Value implements IteratorAggregate
 				continue;
 			}
 
+			$type = $entryData['type'] ?? null;
+
+			if (!is_string($type) || !$this->field->allows($type)) {
+				continue;
+			}
+
 			$this->entries[] = new Entry(
 				$this->owner,
 				$this->field,
 				new ValueContext($this->fieldName, $entryData),
+				$type,
 			);
 		}
 	}

@@ -6,8 +6,10 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
+use Cosray\Field\Entries as EntriesField;
 use Cosray\Node\FieldOwner;
-use Cosray\Tests\Fixtures\Field\TestEntries;
+use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
+use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries;
 use Cosray\Value\Entry;
@@ -52,7 +54,8 @@ final class EntriesValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new TestEntries('entries', $owner, new ValueContext('entries', $data));
+		$field = new EntriesField('entries', $owner, new ValueContext('entries', $data));
+		$field->allow(TestEntry::class, TestAlternateEntry::class);
 
 		return $field->value();
 	}
@@ -63,19 +66,25 @@ final class EntriesValueTest extends TestCase
 			'type' => 'entries',
 			'value' => [
 				[
-					'title' => ['type' => 'text', 'value' => ['en' => 'First Item', 'de' => 'Erstes']],
-					'content' => [
-						'type' => 'blocks',
-						'columns' => 12,
-						'value' => ['en' => [], 'de' => []],
+					'type' => TestEntry::class,
+					'value' => [
+						'title' => ['type' => 'text', 'value' => ['en' => 'First Item', 'de' => 'Erstes']],
+						'content' => [
+							'type' => 'blocks',
+							'columns' => 12,
+							'value' => ['en' => [], 'de' => []],
+						],
 					],
 				],
 				[
-					'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
-					'content' => [
-						'type' => 'blocks',
-						'columns' => 12,
-						'value' => ['en' => [], 'de' => []],
+					'type' => TestEntry::class,
+					'value' => [
+						'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
+						'content' => [
+							'type' => 'blocks',
+							'columns' => 12,
+							'value' => ['en' => [], 'de' => []],
+						],
 					],
 				],
 			],
@@ -89,6 +98,7 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame(2, $value->count());
 		$this->assertInstanceOf(Entry::class, $value->first());
 		$this->assertInstanceOf(Entry::class, $value->last());
+		$this->assertSame(TestEntry::class, $value->first()?->type);
 		$this->assertSame('First Item', $value->first()?->title->unwrap());
 		$this->assertSame('Second Item', $value->last()?->title->unwrap());
 		$this->assertSame('Second Item', $value->get(1)?->title->unwrap());
@@ -113,8 +123,9 @@ final class EntriesValueTest extends TestCase
 
 		$this->assertSame($unwrapped, $value->json());
 		$this->assertCount(2, $unwrapped);
-		$this->assertArrayHasKey('title', $unwrapped[0]);
-		$this->assertArrayHasKey('content', $unwrapped[0]);
+		$this->assertSame(TestEntry::class, $unwrapped[0]['type']);
+		$this->assertArrayHasKey('title', $unwrapped[0]['value']);
+		$this->assertArrayHasKey('content', $unwrapped[0]['value']);
 	}
 
 	public function testEntryThrowsOnUnknownField(): void

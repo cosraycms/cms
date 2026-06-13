@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Entries;
+use Cosray\Field\FieldHydrator;
+use Cosray\Field\Schema\Registry;
+use Cosray\Field\Text;
 use Cosray\Node\FieldOwner;
-use Cosray\Tests\Fixtures\Field\TestEntries;
+use Cosray\Schema\Allows;
+use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
+use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries as EntriesValue;
+use Cosray\Value\ValueContext;
 
 class EntriesTest extends TestCase
 {
@@ -35,16 +42,18 @@ class EntriesTest extends TestCase
 		);
 	}
 
-	private function createEntries(array $data = []): TestEntries
+	private function createEntries(array $data = []): Entries
 	{
 		$context = $this->createContext();
 		$owner = new FieldOwner($context, 'test-node');
-
-		return new TestEntries(
+		$entries = new Entries(
 			'test_entries',
 			$owner,
-			new \Cosray\Value\ValueContext('test_entries', $data),
+			new ValueContext('test_entries', $data),
 		);
+		$entries->allow(TestEntry::class, TestAlternateEntry::class);
+
+		return $entries;
 	}
 
 	public function testEntriesFieldCreation(): void
@@ -53,76 +62,124 @@ class EntriesTest extends TestCase
 
 		$this->assertInstanceOf(Entries::class, $entries);
 		$this->assertInstanceOf(EntriesValue::class, $entries->value());
-		$this->assertIsArray($entries->entryFields());
-		$this->assertArrayHasKey('title', $entries->entryFields());
-		$this->assertArrayHasKey('content', $entries->entryFields());
+		$this->assertSame([TestEntry::class, TestAlternateEntry::class], $entries->allowedEntryTypes());
+		$this->assertArrayHasKey('title', $entries->entryFields(TestEntry::class));
+		$this->assertArrayHasKey('content', $entries->entryFields(TestEntry::class));
 	}
 
-	public function testEntriesStructure(): void
+	public function testEntriesPropertiesExposeEntryTypes(): void
 	{
-		$structure = $this->createEntries()->structure();
+		$properties = $this->createEntries()->properties();
 
-		$this->assertEquals('entries', $structure['type']);
-		$this->assertIsArray($structure['value']);
+		$this->assertSame(Entries::class, $properties['type']);
+		$this->assertSame(TestEntry::class, $properties['entryTypes'][0]['type']);
+		$this->assertSame('Test Entry', $properties['entryTypes'][0]['label']);
+		$this->assertSame('title', $properties['entryTypes'][0]['fields'][0]['name']);
+		$this->assertSame(TestAlternateEntry::class, $properties['entryTypes'][1]['type']);
 	}
 
-	public function testEntriesShapeNormalizesLegacyMatrixType(): void
+	public function testEntriesStructureUsesEntryTypeEnvelope(): void
 	{
-		$result = $this
-			->createEntries()
-			->shape()
-			->validate([
-				'type' => 'matrix',
-				'value' => [],
-			]);
-
-		$this->assertTrue($result->valid());
-		$this->assertSame('entries', $result->values()['type']);
-	}
-
-	public function testEntryFieldsHaveTranslateCapability(): void
-	{
-		$entries = $this->createEntries();
-		$entryFields = $entries->entryFields();
-
-		$titleField = $entryFields['title'];
-		$this->assertTrue($titleField->isTranslatable(), 'Title entry field should be translatable');
-
-		$properties = $entries->properties();
-		$this->assertSame('symmetric', $properties['entryFields'][0]['translateMode']);
-		$this->assertSame('asymmetric', $properties['entryFields'][1]['translateMode']);
-
-		$structure = $entries->structure([
-			['title' => ['type' => 'text', 'value' => ''], 'content' => ['type' => 'blocks', 'value' => []]],
-		]);
-
-		$titleValue = $structure['value'][0]['title']['value'];
-		$this->assertIsArray($titleValue, 'Title value should be array with locale keys');
-		$this->assertArrayHasKey('en', $titleValue);
-		$this->assertArrayHasKey('de', $titleValue);
-	}
-
-	public function testEntriesStructureFromLegacyMatrixValueContext(): void
-	{
-		$entries = $this->createEntries([
-			'type' => 'matrix',
-			'value' => [
-				[
+		$structure = $this->createEntries()->structure([
+			[
+				'type' => TestEntry::class,
+				'value' => [
 					'title' => ['type' => 'text', 'value' => ''],
 					'content' => ['type' => 'blocks', 'value' => []],
 				],
 			],
 		]);
 
-		$structure = $entries->structure();
+		$this->assertEquals('entries', $structure['type']);
+		$this->assertSame(TestEntry::class, $structure['value'][0]['type']);
+		$this->assertArrayHasKey('title', $structure['value'][0]['value']);
+		$this->assertArrayHasKey('content', $structure['value'][0]['value']);
+	}
 
-		$this->assertSame('entries', $structure['type']);
-		$titleValue = $structure['value'][0]['title']['value'];
-		$this->assertIsArray(
-			$titleValue,
-			'Title value should be array with locale keys, got: ' . var_export($titleValue, true),
-		);
+	public function testEntriesShapeAcceptsAllowedEntryTypes(): void
+	{
+		$result = $this
+			->createEntries()
+			->shape()
+			->validate([
+				'type' => 'entries',
+				'value' => [
+					[
+						'type' => TestEntry::class,
+						'value' => [
+							'title' => ['type' => 'text', 'value' => ['en' => 'Title']],
+							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+						],
+					],
+					[
+						'type' => TestAlternateEntry::class,
+						'value' => [
+							'name' => ['type' => 'text', 'value' => 'Other'],
+						],
+					],
+				],
+			]);
+
+		$this->assertTrue($result->valid());
+		$this->assertSame(TestEntry::class, $result->values()['value'][0]['type']);
+		$this->assertSame('Other', $result->values()['value'][1]['value']['name']['value']);
+	}
+
+	public function testEntriesShapeRejectsUnknownEntryTypes(): void
+	{
+		$result = $this
+			->createEntries()
+			->shape()
+			->validate([
+				'type' => 'entries',
+				'value' => [
+					['type' => self::class, 'value' => []],
+				],
+			]);
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($result->has(['value', 0, 'type']));
+	}
+
+	public function testEntryFieldsHaveTranslateCapability(): void
+	{
+		$entries = $this->createEntries();
+		$entryFields = $entries->entryFields(TestEntry::class);
+
+		$titleField = $entryFields['title'];
+		$this->assertTrue($titleField->isTranslatable(), 'Title entry field should be translatable');
+
+		$properties = $entries->properties();
+		$this->assertSame('symmetric', $properties['entryTypes'][0]['fields'][0]['translateMode']);
+		$this->assertSame('asymmetric', $properties['entryTypes'][0]['fields'][1]['translateMode']);
+
+		$structure = $entries->structure([
+			[
+				'type' => TestEntry::class,
+				'value' => [
+					'title' => ['type' => 'text', 'value' => ''],
+					'content' => ['type' => 'blocks', 'value' => []],
+				],
+			],
+		]);
+
+		$titleValue = $structure['value'][0]['value']['title']['value'];
+		$this->assertIsArray($titleValue, 'Title value should be array with locale keys');
 		$this->assertArrayHasKey('en', $titleValue);
 		$this->assertArrayHasKey('de', $titleValue);
+	}
+
+	public function testAllowsRequiresEntriesField(): void
+	{
+		$context = $this->createContext();
+		$owner = new FieldOwner($context, 'test-node');
+		$node = new class {
+			#[Allows(TestEntry::class)]
+			protected Text $title;
+		};
+
+		$this->throws(RuntimeException::class);
+
+		new FieldHydrator(Registry::withDefaults())->hydrate($node, [], $owner);
 	}
 }

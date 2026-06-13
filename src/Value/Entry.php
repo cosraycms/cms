@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace Cosray\Value;
 
 use Cosray\Field;
-use ReflectionClass;
-use ReflectionNamedType;
-use ReflectionProperty;
 
 /**
  * @property-read Field\Entries $field
  */
 class Entry extends Value
 {
+	/** @var array<string, Field\Field> */
 	protected array $fields = [];
 
 	public function __construct(
 		Field\Owner $owner,
 		Field\Entries $field,
 		ValueContext $context,
+		public readonly string $type,
 	) {
 		parent::__construct($owner, $field, $context);
 
@@ -44,7 +43,10 @@ class Entry extends Value
 			$result[$name] = $field->structure();
 		}
 
-		return $result;
+		return [
+			'type' => $this->type,
+			'value' => $result,
+		];
 	}
 
 	public function isset(): bool
@@ -76,33 +78,12 @@ class Entry extends Value
 
 	protected function initFields(): void
 	{
-		$entriesClass = $this->field::class;
-		$reflection = new ReflectionClass($entriesClass);
+		$data = $this->data['value'] ?? [];
 
-		foreach ($reflection->getProperties(ReflectionProperty::IS_PROTECTED) as $property) {
-			$type = $property->getType();
-
-			if (!$type || !$type instanceof ReflectionNamedType) {
-				continue;
-			}
-
-			$fieldClass = $type->getName();
-
-			if (!is_subclass_of($fieldClass, Field\Field::class)) {
-				continue;
-			}
-
-			$fieldData = $this->data[$property->getName()] ?? null;
-			$fieldContext = new ValueContext($property->getName(), $fieldData);
-
-			$field = new $fieldClass(
-				$property->getName(),
-				$this->owner,
-				$fieldContext,
-			);
-
-			$field->initSchema($property, $this->field->schemaRegistry());
-			$this->fields[$property->getName()] = $field;
+		if (!is_array($data)) {
+			$data = [];
 		}
+
+		$this->fields = $this->field->entryFieldsFor($this->type, $data);
 	}
 }

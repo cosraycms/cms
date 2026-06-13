@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celemas\Sire\Review;
 use Celemas\Sire\Shape;
+use Cosray\Exception\RuntimeException;
+use Cosray\Node\Types;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Entries as EntriesValue;
@@ -17,19 +20,20 @@ class Entries extends Field implements Capability\Limitable
 {
 	use Capability\IsLimitable;
 
-	protected array $entryFields = [];
-	protected bool $entryFieldsInitialized = false;
+	/** @var list<class-string> */
+	protected array $allowedEntryTypes = [];
+	protected ?Types $nodeTypes = null;
 
 	public function value(): EntriesValue
 	{
-		$this->initEntryFields();
+		$this->requireAllowedEntryTypes();
 
 		return new EntriesValue($this->owner, $this, $this->valueContext);
 	}
 
 	public function structure(mixed $value = null): array
 	{
-		$this->initEntryFields();
+		$this->requireAllowedEntryTypes();
 		$value ??= $this->valueContext->data['value'] ?? $this->default ?? [];
 
 		if (!is_array($value)) {
@@ -39,31 +43,26 @@ class Entries extends Field implements Capability\Limitable
 		$structures = [];
 
 		foreach ($value as $entryData) {
-			$entryStructure = [];
-
-			foreach ($this->entryFields as $name => $entryField) {
-				$entryFieldData = $entryData[$name] ?? null;
-				$entryFieldValue = is_array($entryFieldData) ? $entryFieldData['value'] ?? null : null;
-				$entryFieldStructure = $entryField->structure($entryFieldValue);
-
-				if (is_array($entryFieldData)) {
-					$entryStructure[$name] = $entryFieldStructure;
-
-					foreach ($entryFieldData as $key => $entryFieldMetaValue) {
-						if ($key === 'type' || $key === 'value') {
-							continue;
-						}
-
-						$entryStructure[$name][$key] = $entryFieldMetaValue;
-					}
-
-					continue;
-				}
-
-				$entryStructure[$name] = $entryFieldStructure;
+			if (!is_array($entryData)) {
+				continue;
 			}
 
-			$structures[] = $entryStructure;
+			$type = $entryData['type'] ?? null;
+
+			if (!is_string($type) || !$this->allows($type)) {
+				continue;
+			}
+
+			$entryValue = $entryData['value'] ?? [];
+
+			if (!is_array($entryValue)) {
+				$entryValue = [];
+			}
+
+			$structures[] = [
+				'type' => $type,
+				'value' => $this->entryStructure($type, $entryValue),
+			];
 		}
 
 		return [
@@ -74,27 +73,26 @@ class Entries extends Field implements Capability\Limitable
 
 	public function shape(): Shape
 	{
-		$this->initEntryFields();
+		$this->requireAllowedEntryTypes();
 
 		$shape = Shapes::create();
 		$shape
 			->add('type', 'string')
-			->prepare(static fn(mixed $value): mixed => $value === 'matrix' ? 'entries' : $value)
 			->rules('required', 'in:entries');
 
-		$entryShape = $this->allowsMultipleItems() ? Shapes::list() : Shapes::create();
-
-		foreach ($this->entryFields as $name => $entryField) {
-			$entryShape
-				->add($name, $entryField->shape())
-				->optional()
-				->nullable()
-				->prepare(Prepare::nullAsEmpty(...));
-		}
+		$itemShape = Shapes::list();
+		$itemShape
+			->add('type', 'string')
+			->rules('required', 'in:' . implode(',', $this->allowedEntryTypes));
+		$itemShape
+			->add('value', Shapes::create())
+			->rules('required')
+			->finalize($this->finalizeEntryValue(...));
+		$itemShape->review($this->reviewEntryValues(...));
 
 		$value = $shape
-			->add('value', $entryShape)
-			->rules(...$this->validators)
+			->add('value', $itemShape)
+			->rules(...$this->limitValidators(), ...$this->validators)
 			->prepare(Prepare::nullAsEmpty(...));
 
 		if (!$this->isRequired()) {
@@ -104,60 +102,281 @@ class Entries extends Field implements Capability\Limitable
 		return $shape;
 	}
 
-	public function entryFields(): array
+	/** @param class-string ...$types */
+	public function allow(string ...$types): static
 	{
-		$this->initEntryFields();
+		if ($types === []) {
+			throw new RuntimeException('Entries fields require at least one allowed entry type');
+		}
 
-		return $this->entryFields;
+		foreach ($types as $type) {
+			if (!class_exists($type)) {
+				throw new RuntimeException("Entries field '{$this->name}' allows unknown entry type '{$type}'");
+			}
+
+			if ($type === self::class || is_subclass_of($type, self::class)) {
+				throw new RuntimeException(
+					"Entries field '{$this->name}' entry type '{$type}' must not extend Entries",
+				);
+			}
+		}
+
+		$this->allowedEntryTypes = array_values(array_unique([
+			...$this->allowedEntryTypes,
+			...$types,
+		]));
+
+		return $this;
+	}
+
+	/** @return list<class-string> */
+	public function allowedEntryTypes(): array
+	{
+		$this->requireAllowedEntryTypes();
+
+		return $this->allowedEntryTypes;
+	}
+
+	/** @return array<string, Field> */
+	public function entryFields(?string $type = null): array
+	{
+		$this->requireAllowedEntryTypes();
+		$type ??= $this->allowedEntryTypes[0];
+
+		return $this->entryFieldsFor($type);
+	}
+
+	/**
+	 * @param class-string $type
+	 * @param array<string, mixed> $data
+	 * @return array<string, Field>
+	 */
+	public function entryFieldsFor(string $type, array $data = []): array
+	{
+		if (!$this->allows($type)) {
+			throw new RuntimeException("Entries field '{$this->name}' does not allow entry type '{$type}'");
+		}
+
+		return $this->orderedFields($type, $this->buildEntryFields($type, $data));
 	}
 
 	public function properties(): array
 	{
-		$this->initEntryFields();
+		$this->requireAllowedEntryTypes();
 
 		$result = parent::properties();
-		// Override type with base Entries class so the UI can find the right component
 		$result['type'] = Entries::class;
-		$result['entryFields'] = [];
+		$result['entryTypes'] = [];
 
-		foreach ($this->entryFields as $entryField) {
-			$result['entryFields'][] = $entryField->properties();
+		foreach ($this->allowedEntryTypes as $type) {
+			$result['entryTypes'][] = [
+				'type' => $type,
+				'label' => $this->nodeTypes()->get($type, 'label'),
+				'fields' => array_values(array_map(
+					static fn(Field $field): array => $field->properties(),
+					$this->entryFieldsFor($type),
+				)),
+			];
 		}
 
 		return $result;
 	}
 
-	protected function initEntryFields(): void
+	public function allows(string $type): bool
 	{
-		if ($this->entryFieldsInitialized) {
-			return;
+		return in_array($type, $this->allowedEntryTypes, true);
+	}
+
+	/**
+	 * @param class-string $type
+	 * @param array<string, mixed> $entryValue
+	 * @return array<string, array>
+	 */
+	protected function entryStructure(string $type, array $entryValue): array
+	{
+		$structure = [];
+
+		foreach ($this->entryFieldsFor($type) as $name => $entryField) {
+			$entryFieldData = $entryValue[$name] ?? null;
+			$entryFieldValue = is_array($entryFieldData) ? $entryFieldData['value'] ?? null : null;
+			$entryFieldStructure = $entryField->structure($entryFieldValue);
+
+			if (is_array($entryFieldData)) {
+				$structure[$name] = $entryFieldStructure;
+
+				foreach ($entryFieldData as $key => $entryFieldMetaValue) {
+					if ($key === 'type' || $key === 'value') {
+						continue;
+					}
+
+					$structure[$name][$key] = $entryFieldMetaValue;
+				}
+
+				continue;
+			}
+
+			$structure[$name] = $entryFieldStructure;
 		}
 
-		$this->entryFieldsInitialized = true;
-		$entriesClass = $this::class;
-		$reflection = new ReflectionClass($entriesClass);
+		return $structure;
+	}
 
-		foreach ($reflection->getProperties(ReflectionProperty::IS_PROTECTED) as $property) {
-			$type = $property->getType();
+	/** @param array<string, mixed> $values */
+	protected function finalizeEntryValue(mixed $value, array $values): mixed
+	{
+		$type = $values['type'] ?? null;
 
-			if (!$type || !$type instanceof ReflectionNamedType) {
+		if (!is_string($type) || !$this->allows($type) || !is_array($value)) {
+			return $value;
+		}
+
+		$result = $this->entryShape($type)->validate($value);
+
+		return $result->valid() ? $result->values() : $value;
+	}
+
+	protected function reviewEntryValues(Review $review): void
+	{
+		foreach ($review->values() as $index => $entryData) {
+			if (!is_array($entryData)) {
 				continue;
 			}
 
-			$fieldClass = $type->getName();
+			$type = $entryData['type'] ?? null;
 
-			if (!is_subclass_of($fieldClass, Field::class)) {
+			if (!is_string($type) || !$this->allows($type)) {
 				continue;
 			}
 
-			$entryField = new $fieldClass(
-				$property->getName(),
+			$value = $entryData['value'] ?? null;
+
+			if (!is_array($value)) {
+				continue;
+			}
+
+			$result = $this->entryShape($type)->validate($value);
+
+			if ($result->valid()) {
+				continue;
+			}
+
+			foreach ($result->issues() as $issue) {
+				$review->addError(
+					[$index, 'value', ...$issue->path],
+					$issue->message,
+					$issue->code,
+					$issue->params,
+				);
+			}
+		}
+	}
+
+	/** @param class-string $type */
+	protected function entryShape(string $type): Shape
+	{
+		$shape = Shapes::create();
+
+		foreach ($this->entryFieldsFor($type) as $name => $entryField) {
+			$shape
+				->add($name, $entryField->shape())
+				->optional()
+				->nullable()
+				->prepare(Prepare::nullAsEmpty(...));
+		}
+
+		return $shape;
+	}
+
+	/**
+	 * @param class-string $type
+	 * @param array<string, mixed> $data
+	 * @return array<string, Field>
+	 */
+	protected function buildEntryFields(string $type, array $data = []): array
+	{
+		$fields = [];
+		$reflection = new ReflectionClass($type);
+
+		foreach ($reflection->getProperties() as $property) {
+			$fieldClass = $this->fieldClass($property);
+
+			if ($fieldClass === null) {
+				continue;
+			}
+
+			$name = $property->getName();
+			$fieldData = $data[$name] ?? [];
+
+			if (!is_array($fieldData)) {
+				$fieldData = [];
+			}
+
+			$field = new $fieldClass(
+				$name,
 				$this->owner,
-				new ValueContext($property->getName(), []),
+				new ValueContext($name, $fieldData),
 			);
 
-			$entryField->initSchema($property, $this->schemaRegistry());
-			$this->entryFields[$property->getName()] = $entryField;
+			$field->initSchema($property, $this->schemaRegistry());
+			$fields[$name] = $field;
 		}
+
+		return $fields;
+	}
+
+	/**
+	 * @param class-string $type
+	 * @param array<string, Field> $fields
+	 * @return array<string, Field>
+	 */
+	protected function orderedFields(string $type, array $fields): array
+	{
+		$order = $this->nodeTypes()->get($type, 'fieldOrder');
+
+		if (!is_array($order)) {
+			return $fields;
+		}
+
+		$ordered = [];
+
+		foreach ($order as $name) {
+			if (!is_string($name) || !isset($fields[$name])) {
+				continue;
+			}
+
+			$ordered[$name] = $fields[$name];
+		}
+
+		return [...$ordered, ...array_diff_key($fields, $ordered)];
+	}
+
+	/** @return class-string<Field>|null */
+	protected function fieldClass(ReflectionProperty $property): ?string
+	{
+		$type = $property->getType();
+
+		if (!$type instanceof ReflectionNamedType) {
+			return null;
+		}
+
+		$fieldClass = $type->getName();
+
+		if (!is_subclass_of($fieldClass, Field::class)) {
+			return null;
+		}
+
+		return $fieldClass;
+	}
+
+	protected function requireAllowedEntryTypes(): void
+	{
+		if ($this->allowedEntryTypes === []) {
+			throw new RuntimeException("Entries field '{$this->name}' requires #[Allows(...)]");
+		}
+	}
+
+	protected function nodeTypes(): Types
+	{
+		return $this->nodeTypes ??= new Types();
 	}
 }
