@@ -25,13 +25,27 @@
 		{field.label}
 	</LabelDiv>
 	<div class="cms-field-content">
-		<Upload
-			type="image"
-			limit={field.limit}
-			path="{$system.prefix}/media/image/node/{node}"
-			name={field.name}
-			translate={field.translateFile ? false : field.translate}
-			bind:assets={data.files} />
+		{#if field.translateMode === 'asymmetric' && !Array.isArray(data.files)}
+			{#each $system.locales as locale (locale.id)}
+				{#if locale.id === lang}
+					<Upload
+						type="image"
+						limit={field.limit}
+						path="{$system.prefix}/media/image/node/{node}"
+						name={field.name}
+						translate={false}
+						bind:assets={data.files[locale.id]} />
+				{/if}
+			{/each}
+		{:else if Array.isArray(data.files)}
+			<Upload
+				type="image"
+				limit={field.limit}
+				path="{$system.prefix}/media/image/node/{node}"
+				name={field.name}
+				translate={field.translate}
+				bind:assets={data.files} />
+		{/if}
 		<!-- As picture tags show only one image, we need only one alt definition
             {#if i === 0}
                 {#if field.translate}

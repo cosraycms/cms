@@ -1,3 +1,5 @@
+export type TranslateMode = 'symmetric' | 'asymmetric';
+
 export interface SimpleField {
 	rows: number | null;
 	width: number | null;
@@ -9,6 +11,7 @@ export interface SimpleField {
 	name: string;
 	type: string;
 	translate: boolean;
+	translateMode?: TranslateMode;
 }
 
 export interface Limit {
@@ -18,12 +21,9 @@ export interface Limit {
 
 export interface FileField extends SimpleField {
 	limit?: Limit;
-	translateFile: boolean;
 }
 
-export interface ImageField extends FileField {
-	translateFile: boolean;
-}
+export interface ImageField extends FileField {}
 
 export interface BlocksField extends SimpleField {
 	columns: number;

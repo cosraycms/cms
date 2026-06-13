@@ -27,7 +27,7 @@
 		{field.label}
 	</LabelDiv>
 	<div class="cms-field-content">
-		{#if field.translateFile}
+		{#if field.translateMode === 'asymmetric' && !Array.isArray(data.files)}
 			{#each $system.locales as locale (locale.id)}
 				{#if locale.id === lang}
 					<Upload
@@ -40,7 +40,7 @@
 						bind:assets={data.files[locale.id]} />
 				{/if}
 			{/each}
-		{:else}
+		{:else if Array.isArray(data.files)}
 			<Upload
 				{type}
 				limit={field.limit}

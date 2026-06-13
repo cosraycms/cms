@@ -43,8 +43,20 @@
 		return value;
 	}
 
+	function createLocalizedList(): Record<string, []> {
+		const sys = get(system);
+		const value: Record<string, []> = {};
+
+		for (const locale of sys.locales) {
+			value[locale.id] = [];
+		}
+
+		return value;
+	}
+
 	function createDefaultValue(subfield: FieldType): GenericFieldData {
-		const isTranslatable = subfield.translate === true;
+		const isAsymmetric = subfield.translateMode === 'asymmetric';
+		const isSymmetric = subfield.translate === true && !isAsymmetric;
 		const codeSyntaxes =
 			'syntaxes' in subfield &&
 			Array.isArray(subfield.syntaxes) &&
@@ -56,33 +68,45 @@
 		const typeMap: Record<string, () => GenericFieldData> = {
 			'Cosray\\Field\\Text': () => ({
 				type: 'text',
-				value: isTranslatable ? createTranslatableValue() : '',
+				value: isSymmetric ? createTranslatableValue() : '',
 			}),
 			'Cosray\\Field\\Textarea': () => ({
 				type: 'text',
-				value: isTranslatable ? createTranslatableValue() : '',
+				value: isSymmetric ? createTranslatableValue() : '',
 			}),
 			'Cosray\\Field\\RichText': () => ({
 				type: 'richtext',
-				value: isTranslatable ? createTranslatableValue() : '',
+				value: isSymmetric ? createTranslatableValue() : '',
 			}),
 			'Cosray\\Field\\Code': () => ({
 				type: 'code',
 				syntax: codeSyntaxes[0],
-				value: isTranslatable ? createTranslatableValue() : '',
+				value: isSymmetric ? createTranslatableValue() : '',
 			}),
 			'Cosray\\Field\\Checkbox': () => ({ type: 'checkbox', value: false }),
 			'Cosray\\Field\\Number': () => ({ type: 'number', value: 0 }),
 			'Cosray\\Field\\Date': () => ({ type: 'date', value: '' }),
 			'Cosray\\Field\\Time': () => ({ type: 'time', value: '' }),
-			'Cosray\\Field\\Image': () => ({ type: 'image', files: [] }),
-			'Cosray\\Field\\Picture': () => ({ type: 'picture', files: [] }),
-			'Cosray\\Field\\File': () => ({ type: 'file', files: [] }),
-			'Cosray\\Field\\Video': () => ({ type: 'video', files: [] }),
+			'Cosray\\Field\\Image': () => ({
+				type: 'image',
+				files: isAsymmetric ? createLocalizedList() : [],
+			}),
+			'Cosray\\Field\\Picture': () => ({
+				type: 'picture',
+				files: isAsymmetric ? createLocalizedList() : [],
+			}),
+			'Cosray\\Field\\File': () => ({
+				type: 'file',
+				files: isAsymmetric ? createLocalizedList() : [],
+			}),
+			'Cosray\\Field\\Video': () => ({
+				type: 'video',
+				files: isAsymmetric ? createLocalizedList() : [],
+			}),
 			'Cosray\\Field\\Blocks': () => ({
 				type: 'blocks',
 				columns: 12,
-				value: isTranslatable ? createTranslatableValue() : [],
+				value: isAsymmetric ? createLocalizedList() : [],
 			}),
 			'Cosray\\Field\\Option': () => ({ type: 'option', value: '' }),
 			'Cosray\\Field\\Iframe': () => ({ type: 'iframe', value: '' }),
@@ -95,7 +119,7 @@
 		}
 
 		// Default fallback for unknown types
-		return { type: 'text', value: isTranslatable ? createTranslatableValue() : '' };
+		return { type: 'text', value: isSymmetric ? createTranslatableValue() : '' };
 	}
 
 	function addItem() {
