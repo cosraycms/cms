@@ -28,6 +28,7 @@ use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Translate;
 use Cosray\Schema\TranslateFile;
+use Cosray\Schema\TranslateMode;
 use Cosray\Schema\Validate;
 use Cosray\Schema\Width;
 use Cosray\Tests\Fixtures\Node\NodeWithFieldIconAttribute;
@@ -258,6 +259,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);
+		$this->assertSame(TranslateMode::Symmetric, $field->translateMode());
+		$this->assertTrue($field->isSymmetricallyTranslated());
+		$this->assertFalse($field->isAsymmetricallyTranslated());
 	}
 
 	public function testTranslateFileCapabilityReturnsTranslateFileProperty(): void

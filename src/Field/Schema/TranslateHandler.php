@@ -13,7 +13,7 @@ class TranslateHandler extends Handler
 	public function apply(object $meta, Field $field): void
 	{
 		if ($field instanceof Translatable) {
-			$field->translate(true);
+			$field->translate($meta->mode);
 
 			return;
 		}

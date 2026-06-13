@@ -45,7 +45,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			'value' => [],
 		];
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			foreach ($this->owner->locales() as $locale) {
 				$result['value'][$locale->id] = [];
 			}
@@ -62,7 +62,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 		$itemShape = new BlockValidator(list: true, title: $this->label, keepUnknown: true);
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nShape = Shapes::create();

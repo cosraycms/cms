@@ -4,25 +4,53 @@ declare(strict_types=1);
 
 namespace Cosray\Field\Capability;
 
+use Cosray\Schema\TranslateMode;
+
 trait IsTranslatable
 {
-	protected bool $translate = false;
+	protected ?TranslateMode $translateMode = null;
 
-	public function translate(bool $translate = true): static
+	public function translate(TranslateMode $mode = TranslateMode::Symmetric): static
 	{
-		$this->translate = $translate;
+		$this->translateMode = $mode;
 
 		return $this;
 	}
 
 	public function isTranslatable(): bool
 	{
-		return $this->translate;
+		return $this->translateMode !== null;
+	}
+
+	public function translateMode(): ?TranslateMode
+	{
+		return $this->translateMode;
+	}
+
+	/** @return list<TranslateMode> */
+	public function supportedTranslateModes(): array
+	{
+		return [TranslateMode::Symmetric];
+	}
+
+	public function supportsTranslateMode(TranslateMode $mode): bool
+	{
+		return in_array($mode, $this->supportedTranslateModes(), true);
+	}
+
+	public function isSymmetricallyTranslated(): bool
+	{
+		return $this->translateMode === TranslateMode::Symmetric;
+	}
+
+	public function isAsymmetricallyTranslated(): bool
+	{
+		return $this->translateMode === TranslateMode::Asymmetric;
 	}
 
 	public function getTranslate(): bool
 	{
-		return $this->translate;
+		return $this->isTranslatable();
 	}
 
 	protected function getTranslatableStructure(string $type, mixed $value = null): array
@@ -37,7 +65,7 @@ trait IsTranslatable
 			return $result;
 		}
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			$result['value'] = [];
 
 			foreach ($this->owner->locales() as $locale) {
@@ -45,6 +73,27 @@ trait IsTranslatable
 			}
 		} else {
 			$result['value'] = null;
+		}
+
+		return $result;
+	}
+
+	protected function getTranslatableFileStructure(string $type, mixed $value = null): array
+	{
+		$value = $value ?: $this->default;
+
+		$result = ['type' => $type];
+
+		if ($value) {
+			$result['files'] = $value;
+
+			return $result;
+		}
+
+		$result['files'] = [];
+
+		foreach ($this->owner->locales() as $locale) {
+			$result['files'][$locale->id] = [];
 		}
 
 		return $result;

@@ -28,7 +28,7 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 		$shape = Shapes::create();
 		$shape->add('type', 'string')->rules('required', 'in:youtube');
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nShape = Shapes::create();

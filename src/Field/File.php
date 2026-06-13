@@ -21,14 +21,14 @@ class File extends Field implements
 	public function value(): Value\File|Value\Files
 	{
 		if ($this->allowsMultipleItems()) {
-			if ($this->translateFile) {
+			if ($this->isAsymmetricallyTranslated()) {
 				return new Value\TranslatedFiles($this->owner, $this, $this->valueContext);
 			}
 
 			return new Value\Files($this->owner, $this, $this->valueContext);
 		}
 
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			return new Value\TranslatedFile($this->owner, $this, $this->valueContext);
 		}
 
@@ -37,7 +37,7 @@ class File extends Field implements
 
 	public function structure(mixed $value = null): array
 	{
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			return $this->getTranslatableFileStructure('file', $value);
 		}
 
@@ -50,7 +50,7 @@ class File extends Field implements
 		$shape = Shapes::create();
 		$shape->add('type', 'string')->rules('required', 'in:file');
 
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			// File-translatable: separate file arrays per locale
 			$subShape = Shapes::list();
 			$subShape->add('file', 'string')->optional()->nullable();
@@ -72,7 +72,7 @@ class File extends Field implements
 				->add('files', $i18nShape)
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
-		} elseif ($this->translate) {
+		} elseif ($this->isSymmetricallyTranslated()) {
 			// Text-translatable: shared files but translatable titles
 			$fileShape = Shapes::list();
 			$fileShape->add('file', 'string')->rules('required');

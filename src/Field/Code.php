@@ -39,7 +39,7 @@ class Code extends Field implements Capability\Translatable, Capability\SyntaxAw
 		$shape->add('type', 'string')->rules('required', 'in:code');
 		$shape->add('syntax', 'string')->rules('required', 'in:' . implode(',', $this->getSyntaxes()));
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nShape = Shapes::create();

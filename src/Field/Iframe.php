@@ -30,7 +30,7 @@ class Iframe extends Field implements Capability\Translatable
 		$shape = Shapes::create();
 		$shape->add('type', 'string')->rules('required', 'in:iframe');
 
-		if ($this->translate) {
+		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
 			$i18nShape = Shapes::create();

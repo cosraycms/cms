@@ -21,7 +21,7 @@ class Picture extends Field implements
 	// TODO: translateFile and multiple
 	public function value(): Value\Picture
 	{
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			return new Value\TranslatedPicture($this->owner, $this, $this->valueContext);
 		}
 
@@ -53,7 +53,7 @@ class Picture extends Field implements
 		$shape = Shapes::create();
 		$shape->add('type', 'string')->rules('required', 'in:picture');
 
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			// File-translatable: separate file arrays per locale
 			$subShape = Shapes::list();
 			$subShape->add('file', 'string')->optional()->nullable();
@@ -76,7 +76,7 @@ class Picture extends Field implements
 				->add('files', $i18nShape)
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
-		} elseif ($this->translate) {
+		} elseif ($this->isSymmetricallyTranslated()) {
 			// Text-translatable: shared files but translatable titles and alt text
 			$fileShape = Shapes::list();
 			$fileShape->add('file', 'string')->rules('required');

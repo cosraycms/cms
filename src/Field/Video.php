@@ -20,7 +20,7 @@ class Video extends Field implements
 
 	public function value(): Value\Video
 	{
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			return new Value\Video($this->owner, $this, $this->valueContext);
 		}
 
@@ -29,7 +29,7 @@ class Video extends Field implements
 
 	public function structure(mixed $value = null): array
 	{
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			return $this->getTranslatableFileStructure('video', $value);
 		}
 
@@ -42,7 +42,7 @@ class Video extends Field implements
 		$shape = Shapes::create();
 		$shape->add('type', 'string')->rules('required', 'in:video');
 
-		if ($this->translateFile) {
+		if ($this->isAsymmetricallyTranslated()) {
 			// File-translatable: separate file arrays per locale
 			$subShape = Shapes::list();
 			$subShape->add('file', 'string')->optional()->nullable();
@@ -64,7 +64,7 @@ class Video extends Field implements
 				->add('files', $i18nShape)
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
-		} elseif ($this->translate) {
+		} elseif ($this->isSymmetricallyTranslated()) {
 			// Text-translatable: shared files but translatable titles
 			$fileShape = Shapes::list();
 			$fileShape->add('file', 'string')->rules('required');
