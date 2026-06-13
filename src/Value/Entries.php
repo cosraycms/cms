@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Field\Entries as EntriesField;
-use Cosray\Field\Owner;
+use Cosray\Field;
 use Generator;
 use IteratorAggregate;
 
 /**
- * @property-read EntriesField $field
+ * @property-read Field\Entries $field
  */
 class Entries extends Value implements IteratorAggregate
 {
 	protected array $entries = [];
 
 	public function __construct(
-		Owner $owner,
-		EntriesField $field,
+		Field\Owner $owner,
+		Field\Entries $field,
 		ValueContext $context,
 	) {
 		parent::__construct($owner, $field, $context);

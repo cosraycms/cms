@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Field\Entries as EntriesField;
-use Cosray\Field\Field;
-use Cosray\Field\Owner;
+use Cosray\Field;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
 
 /**
- * @property-read EntriesField $field
+ * @property-read Field\Entries $field
  */
 class Entry extends Value
 {
 	protected array $fields = [];
 
 	public function __construct(
-		Owner $owner,
-		EntriesField $field,
+		Field\Owner $owner,
+		Field\Entries $field,
 		ValueContext $context,
 	) {
 		parent::__construct($owner, $field, $context);
@@ -90,7 +88,7 @@ class Entry extends Value
 
 			$fieldClass = $type->getName();
 
-			if (!is_subclass_of($fieldClass, Field::class)) {
+			if (!is_subclass_of($fieldClass, Field\Field::class)) {
 				continue;
 			}
 
