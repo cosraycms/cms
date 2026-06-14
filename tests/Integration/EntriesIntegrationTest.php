@@ -12,6 +12,7 @@ use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 use Cosray\Tests\TestCase;
+use Cosray\Uid;
 use Cosray\Value\ValueContext;
 
 class EntriesIntegrationTest extends TestCase
@@ -43,7 +44,11 @@ class EntriesIntegrationTest extends TestCase
 	{
 		$context = $this->createContext();
 		$cms = $this->createStub(\Cosray\Cms::class);
-		$nodeFactory = new Factory($this->container(), types: new Types());
+		$nodeFactory = new Factory(
+			$this->container(),
+			types: new Types(),
+			uid: new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
+		);
 		$hydrator = $nodeFactory->hydrator();
 
 		$node = $nodeFactory->create(TestNodeWithEntries::class, $context, $cms, [

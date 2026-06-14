@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\End2End;
 
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Uid;
 
 /**
  * End-to-end tests for Node CRUD operations through HTTP API.
@@ -177,7 +178,8 @@ final class NodeCrudTest extends End2EndTestCase
 		$payload = $this->assertJsonResponse($response, 201);
 		$this->assertTrue($payload['success'] ?? false);
 		$this->assertIsString($payload['uid'] ?? null);
-		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $payload['uid']);
+		$alphabet = preg_quote(Uid::ALPHABET_LOWERCASE_WORD_SAFE, '/');
+		$this->assertMatchesRegularExpression("/^[{$alphabet}]{13}$/", $payload['uid']);
 
 		$this->trackNodeByUid($payload['uid']);
 
@@ -186,6 +188,37 @@ final class NodeCrudTest extends End2EndTestCase
 			['uid' => $payload['uid']],
 		)->one();
 		$this->assertSame('Generated UID', $stored['title'] ?? null);
+	}
+
+	public function testCreateNodeUsesConfiguredUid(): void
+	{
+		$this->app = $this->createApp([
+			'uid.alphabet' => 'abc',
+			'uid.length' => 8,
+		]);
+		$this->authenticateAs('editor');
+
+		$path = '/test/configured-uid-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/test-page', [
+			'body' => [
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'paths' => [
+					'en' => $path,
+				],
+				'generatedPaths' => [],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Configured UID']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->assertMatchesRegularExpression('/^[abc]{8}$/', $payload['uid'] ?? '');
+
+		$this->trackNodeByUid($payload['uid']);
 	}
 
 	public function testCreateNodePersistsParentUid(): void

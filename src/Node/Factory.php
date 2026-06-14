@@ -29,8 +29,8 @@ class Factory
 	public function __construct(
 		private readonly Container $container,
 		Types $types,
+		private readonly Uid $uid,
 		?SchemaRegistry $schemaRegistry = null,
-		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {
 		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
 		$this->types = $types;
@@ -46,7 +46,7 @@ class Factory
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
 		$serializer = new Serializer($this->hydrator, $this->types, $this->uid);
-		$store = new Store($context->db, new PathManager($this->uid), $this->types, $this->uid);
+		$store = new Store($context->db, new PathManager(), $this->types, $this->uid);
 		$templateRenderer = new ViewRenderer(
 			$this->container,
 			$context->factory,
@@ -153,5 +153,10 @@ class Factory
 	public function hydrator(): FieldHydrator
 	{
 		return $this->hydrator;
+	}
+
+	public function uid(): Uid
+	{
+		return $this->uid;
 	}
 }

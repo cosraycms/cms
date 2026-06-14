@@ -115,8 +115,9 @@ class Page
 		if (method_exists($inner, 'read')) {
 			$data = $inner->read();
 		} else {
-			$hydrator = $cms->nodeFactory()->hydrator();
-			$serializer = new Serializer($hydrator, $this->types);
+			$nodeFactory = $cms->nodeFactory();
+			$hydrator = $nodeFactory->hydrator();
+			$serializer = new Serializer($hydrator, $this->types, $nodeFactory->uid());
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),

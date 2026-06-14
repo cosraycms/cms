@@ -23,6 +23,7 @@ use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Node\PlainPageWithInit;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\TestCase;
+use Cosray\Uid;
 use stdClass;
 
 /**
@@ -36,15 +37,17 @@ final class NodeFactoryTest extends TestCase
 	private \Cosray\Cms $cms;
 	private Factory $factory;
 	private Types $types;
+	private Uid $uid;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
 		$this->types = new Types();
+		$this->uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13);
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Cosray\Cms::class);
-		$this->factory = new Factory($this->container(), types: $this->types);
+		$this->factory = new Factory($this->container(), types: $this->types, uid: $this->uid);
 	}
 
 	private function createContext(): Context
@@ -145,7 +148,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertEquals('My Title', $title);
 	}
@@ -157,7 +160,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
 	}
@@ -176,7 +179,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('Property Title', $title);
 	}
@@ -412,7 +415,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
 		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
@@ -427,7 +430,7 @@ final class NodeFactoryTest extends TestCase
 		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types);
+		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
 		$blueprint = $serializer->blueprint($node, $fieldNames, $locales);
 
 		$this->assertArrayHasKey('uid', $blueprint);

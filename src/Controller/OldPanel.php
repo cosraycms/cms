@@ -186,6 +186,7 @@ class OldPanel
 		$serializer = new Serializer(
 			$factory->hydrator(),
 			$this->types,
+			$factory->uid(),
 		);
 
 		return $serializer->blueprint(
@@ -214,7 +215,7 @@ class OldPanel
 			->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
-		$store = new Store($context->db, new PathManager(), $this->types);
+		$store = new Store($context->db, new PathManager(), $this->types, $cms->nodeFactory()->uid());
 		$result = $store->create($obj, $data, $this->request, $context->locales());
 
 		return new Response(
@@ -236,8 +237,8 @@ class OldPanel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new Serializer($nodeFactory->hydrator(), $this->types);
-		$store = new Store($context->db, new PathManager(), $this->types);
+		$serializer = new Serializer($nodeFactory->hydrator(), $this->types, $nodeFactory->uid());
+		$store = new Store($context->db, new PathManager(), $this->types, $nodeFactory->uid());
 		$method = $this->request->method();
 
 		$result = match ($method) {

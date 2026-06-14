@@ -54,7 +54,7 @@ class Nodes
 
 		$nodeFactory = $cms->nodeFactory();
 		$hydrator = $nodeFactory->hydrator();
-		$serializer = new Serializer($hydrator, $this->types);
+		$serializer = new Serializer($hydrator, $this->types, $nodeFactory->uid());
 		$result = [];
 
 		foreach ($nodes

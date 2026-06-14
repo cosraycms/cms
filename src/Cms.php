@@ -24,7 +24,11 @@ class Cms
 		private readonly Context $context,
 		private readonly Types $types,
 	) {
-		$this->nodeFactory = new Factory($context->container, types: $this->types);
+		$this->nodeFactory = new Factory(
+			$context->container,
+			types: $this->types,
+			uid: $context->config->uid->create(),
+		);
 	}
 
 	public function __get($key): Nodes|Node|Menu

@@ -11,6 +11,7 @@ use Cosray\Node\Types;
 use Cosray\Tests\Fixtures\Node\TestDocument;
 use Cosray\Tests\Fixtures\Node\TestMediaDocument;
 use Cosray\Tests\IntegrationTestCase;
+use Cosray\Uid;
 
 final class FieldPropertiesTest extends IntegrationTestCase
 {
@@ -20,7 +21,11 @@ final class FieldPropertiesTest extends IntegrationTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->nodeFactory = new Factory($this->container(), types: new Types());
+		$this->nodeFactory = new Factory(
+			$this->container(),
+			types: new Types(),
+			uid: new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
+		);
 		$this->hydrator = $this->nodeFactory->hydrator();
 	}
 
@@ -173,7 +178,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$serializer = new Serializer($this->hydrator, new Types());
+		$serializer = new Serializer($this->hydrator, new Types(), $this->nodeFactory->uid());
 		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertIsArray($fields);

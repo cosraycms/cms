@@ -214,22 +214,25 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->defaultAuthToken = $this->createAuthenticatedUser($role);
 	}
 
-	protected function createApp(): App
+	protected function createApp(array $settings = []): App
 	{
 		$factory = new Laminas();
 		$router = new Router();
 		$container = $this->container();
-		$config = $this->config([
-			'db.dsn' => self::testDbDsn(),
-			'path.root' => self::root(),
-			'path.public' => self::root() . '/public',
-			'path.views' => '/tests/Fixtures/templates',
-			'path.uploads' => self::root() . '/public/uploads',
-			'path.api' => '/api',
-			'path.panel' => '/panel',
-			'upload.maxSize' => 10 * 1024 * 1024, // 10MB
-			'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
-		]);
+		$config = $this->config(array_merge(
+			[
+				'db.dsn' => self::testDbDsn(),
+				'path.root' => self::root(),
+				'path.public' => self::root() . '/public',
+				'path.views' => '/tests/Fixtures/templates',
+				'path.uploads' => self::root() . '/public/uploads',
+				'path.api' => '/api',
+				'path.panel' => '/panel',
+				'upload.maxSize' => 10 * 1024 * 1024, // 10MB
+				'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
+			],
+			$settings,
+		));
 
 		$app = new App($factory, $router, $container);
 
