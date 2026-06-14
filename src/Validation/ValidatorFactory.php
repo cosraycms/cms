@@ -21,6 +21,11 @@ class ValidatorFactory
 	) {
 		$this->shape = Shapes::create();
 		$this->shape->add('uid', 'string')->rules('required', 'maxlen:64');
+		$this->shape
+			->add('handle', 'string')
+			->rules('maxlen:64', 'regex:/^(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$/')
+			->optional()
+			->nullable();
 		$this->shape->add('parent', 'string')->rules('maxlen:64')->optional()->nullable();
 		$this->shape->add('published', 'bool')->rules('required');
 		$this->shape->add('locked', 'bool')->empty('missing', 'null')->default(false);

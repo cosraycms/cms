@@ -291,7 +291,8 @@ final class NodeFactoryTest extends TestCase
 	{
 		$data = [
 			'uid' => 'data-1',
-			'handle' => 'plain-page',
+			'handle' => 'plain-handle',
+			'type_handle' => 'plain-page',
 			'content' => ['heading' => ['value' => ['en' => 'Hello']]],
 		];
 
@@ -299,7 +300,7 @@ final class NodeFactoryTest extends TestCase
 		$stored = Factory::dataFor($node);
 
 		$this->assertEquals('data-1', $stored['uid']);
-		$this->assertEquals('plain-page', $stored['handle']);
+		$this->assertEquals('plain-handle', $stored['handle']);
 	}
 
 	public function testFieldNamesForReturnsFieldNames(): void
@@ -317,13 +318,14 @@ final class NodeFactoryTest extends TestCase
 	{
 		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
 			'uid' => 'meta-1',
-			'handle' => 'plain-page',
+			'handle' => 'plain-handle',
+			'type_handle' => 'plain-page',
 			'published' => true,
 			'content' => [],
 		]);
 
 		$this->assertEquals('meta-1', Factory::meta($node, 'uid'));
-		$this->assertEquals('plain-page', Factory::meta($node, 'handle'));
+		$this->assertEquals('plain-handle', Factory::meta($node, 'handle'));
 		$this->assertTrue(Factory::meta($node, 'published'));
 		$this->assertNull(Factory::meta($node, 'nonexistent'));
 	}
@@ -435,10 +437,12 @@ final class NodeFactoryTest extends TestCase
 
 		$this->assertArrayHasKey('uid', $blueprint);
 		$this->assertArrayHasKey('content', $blueprint);
+		$this->assertArrayHasKey('handle', $blueprint);
 		$this->assertArrayHasKey('fields', $blueprint);
 		$this->assertArrayHasKey('type', $blueprint);
 		$this->assertTrue($blueprint['type']['routable']);
 		$this->assertTrue($blueprint['type']['renderable']);
+		$this->assertNull($blueprint['handle']);
 		$this->assertEquals('plain-page', $blueprint['type']['handle']);
 		$this->assertEquals(PlainPage::class, $blueprint['type']['class']);
 		$this->assertArrayHasKey('route', $blueprint);

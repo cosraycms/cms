@@ -3,6 +3,8 @@ SELECT
 FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
+	LEFT JOIN /*:cms.prefix:*/node_handles h ON
+		h.node = n.node
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
 	INNER JOIN /*:cms.prefix:*/users ue ON

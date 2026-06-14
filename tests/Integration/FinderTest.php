@@ -33,6 +33,22 @@ final class FinderTest extends IntegrationTestCase
 		}
 	}
 
+	public function testFinderLoadsNodeHandle(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+		$this->createTestNode([
+			'uid' => 'handled-node-uid',
+			'handle' => 'handled-node',
+			'type' => $typeId,
+		]);
+
+		$node = $this->createCms()->node->byUid('handled-node-uid');
+
+		$this->assertNotNull($node);
+		$this->assertSame('handled-node', $node->meta->handle);
+		$this->assertSame('test-page', $node->meta->type->handle);
+	}
+
 	public function testFinderFiltersPublishedNodes(): void
 	{
 		$finder = $this->createCms();

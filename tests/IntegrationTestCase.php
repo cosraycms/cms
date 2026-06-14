@@ -245,6 +245,8 @@ class IntegrationTestCase extends TestCase
 		];
 
 		$data = array_merge($defaults, $data);
+		$handle = $data['handle'] ?? null;
+		unset($data['handle']);
 
 		// Convert content array to JSON if needed
 		if (is_array($data['content'])) {
@@ -255,7 +257,16 @@ class IntegrationTestCase extends TestCase
 				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
 				RETURNING node';
 
-		return $this->db()->execute($sql, $data)->one()['node'];
+		$nodeId = $this->db()->execute($sql, $data)->one()['node'];
+
+		if (is_string($handle) && trim($handle) !== '') {
+			$this->db()->execute(
+				'INSERT INTO cms.node_handles (node, handle, creator, editor) VALUES (:node, :handle, 1, 1)',
+				['node' => $nodeId, 'handle' => trim($handle)],
+			)->run();
+		}
+
+		return $nodeId;
 	}
 
 	/**

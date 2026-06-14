@@ -37,6 +37,7 @@ class Serializer
 
 		return [
 			'uid' => $rawData['uid'],
+			'handle' => $rawData['handle'] ?? null,
 			'published' => $rawData['published'],
 			'hidden' => $rawData['hidden'],
 			'locked' => $rawData['locked'],
@@ -44,7 +45,7 @@ class Serializer
 			'changed' => $rawData['changed'],
 			'deleted' => $rawData['deleted'],
 			'paths' => $rawData['paths'],
-			'type' => $this->resolveType($class, $rawData['handle']),
+			'type' => $this->resolveType($class, $rawData['type_handle'] ?? null),
 			'editor' => [
 				'uid' => $rawData['editor_uid'],
 				'email' => $rawData['editor_email'],
@@ -87,6 +88,7 @@ class Serializer
 			'title' => _('Neues Dokument:') . ' ' . $schema->label,
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => $this->uid->generate(),
+			'handle' => null,
 			'published' => false,
 			'hidden' => false,
 			'locked' => false,

@@ -65,7 +65,7 @@ class Node
 		$class = $this->context
 			->container
 			->tag(Plugin::NODE_TAG)
-			->entry($data['handle'])
+			->entry($data['type_handle'])
 			->definition();
 
 		if ($this->types->isNode($class)) {

@@ -1,6 +1,7 @@
 SELECT
-	-- n.node,
+	n.node,
 	n.uid,
+	h.handle,
 	np.uid AS parent,
 	n.published,
 	n.hidden,
@@ -9,7 +10,7 @@ SELECT
 	n.changed,
 	n.deleted,
 	n.content,
-	t.handle,
+	t.handle AS type_handle,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,
 	uc.username AS creator_username,
@@ -25,6 +26,8 @@ SELECT
 FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
+	LEFT JOIN /*:cms.prefix:*/node_handles h ON
+		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
 		np.node = n.parent
 	INNER JOIN /*:cms.prefix:*/users uc ON
@@ -47,6 +50,9 @@ WHERE
 	1 = 1
 <?php if (isset($uid)) : ?>
 	AND n.uid = :uid
+<?php endif ?>
+<?php if (isset($handle)) : ?>
+	AND h.handle = :handle
 <?php endif ?>
 <?php if (isset($deleted)) : ?>
 <?php if ($deleted) : ?>
@@ -80,7 +86,8 @@ GROUP BY
 	ue.email,
 	ue.username,
 	ue.data,
-	t.handle
+	t.handle,
+	h.handle
 <?php if (isset($order)) : ?>
 ORDER BY <?= $order ?>
 <?php endif ?>

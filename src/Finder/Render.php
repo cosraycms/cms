@@ -40,7 +40,7 @@ class Render
 		$class = $this->context
 			->container
 			->tag(Plugin::NODE_TAG)
-			->entry($data['handle'])
+			->entry($data['type_handle'])
 			->definition();
 
 		if (!(bool) $this->types->get($class, 'renderable', false)) {

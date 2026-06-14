@@ -33,7 +33,9 @@ class Store
 		Locales $locales,
 		bool $create = false,
 	): array {
+		$data = $this->normalizeSubmittedHandle($data);
 		$data = $this->validate($node, $data, $locales, $request);
+		$data = $this->completeHandle($node, $data);
 
 		if ($data['locked']) {
 			throw new HttpBadRequest($request, payload: ['message' => _('This document is locked')]);
@@ -145,10 +147,13 @@ class Store
 	): void {
 		$parentUid = $this->resolveParentUid($node, $data, $request);
 		$parentId = $this->resolveParentId($parentUid, $request);
+		$handle = $this->resolveHandle($data);
 
 		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $request);
+		$this->persistHandle($nodeId, $handle, $editor, $request);
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
+			$this->ensureRouteHandle($node, $handle, $request);
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -176,7 +181,21 @@ class Store
 		];
 
 		if (!$create) {
-			return (int) $this->db->nodes->save($params)->one()['node'];
+			$nodeId = Factory::meta($node, 'node');
+
+			if (!is_int($nodeId) && !is_string($nodeId)) {
+				throw new RuntimeException(_('Missing node id for update'));
+			}
+
+			return (int) $this->db->nodes->save([
+				'node' => (int) $nodeId,
+				'parent' => $params['parent'],
+				'hidden' => $params['hidden'],
+				'published' => $params['published'],
+				'locked' => $params['locked'],
+				'content' => $params['content'],
+				'editor' => $params['editor'],
+			])->one()['node'];
 		}
 
 		$result = $this->db->nodes->create($params)->first();
@@ -188,6 +207,42 @@ class Store
 		}
 
 		return (int) $result['node'];
+	}
+
+	private function persistHandle(int $nodeId, ?string $handle, int $editor, Request $request): void
+	{
+		if ($handle === null) {
+			$this->db->nodes->deleteHandle(['node' => $nodeId])->run();
+
+			return;
+		}
+
+		$collision = $this->db
+			->nodes
+			->handleUidCollision(['handle' => $handle, 'node' => $nodeId])
+			->first();
+
+		if ($collision) {
+			throw new HttpConflict($request, payload: [
+				'message' => _('A node uid with the same handle already exists: ') . $handle,
+			]);
+		}
+
+		try {
+			$this->db->nodes->saveHandle([
+				'node' => $nodeId,
+				'handle' => $handle,
+				'editor' => $editor,
+			])->run();
+		} catch (Throwable $e) {
+			if ((string) $e->getCode() === '23505') {
+				throw new HttpConflict($request, payload: [
+					'message' => _('A node with the same handle already exists: ') . $handle,
+				]);
+			}
+
+			throw $e;
+		}
 	}
 
 	private function resolveParentUid(object $node, array $data, Request $request): ?string
@@ -235,6 +290,74 @@ class Store
 		}
 
 		return (int) $parent['node'];
+	}
+
+	private function normalizeSubmittedHandle(array $data): array
+	{
+		if (!array_key_exists('handle', $data) || !is_string($data['handle'])) {
+			return $data;
+		}
+
+		$handle = trim($data['handle']);
+		$data['handle'] = $handle === '' ? null : $handle;
+
+		return $data;
+	}
+
+	private function completeHandle(object $node, array $data): array
+	{
+		if (!array_key_exists('handle', $data)) {
+			$data['handle'] = Factory::meta($node, 'handle');
+		}
+
+		$data['handle'] = $this->resolveHandle($data);
+
+		return $data;
+	}
+
+	private function resolveHandle(array $data): ?string
+	{
+		$handle = $data['handle'] ?? null;
+
+		if (!is_string($handle)) {
+			return null;
+		}
+
+		$handle = trim($handle);
+
+		return $handle === '' ? null : $handle;
+	}
+
+	private function ensureRouteHandle(object $node, ?string $handle, Request $request): void
+	{
+		$route = $this->types->get($node::class, 'route');
+
+		if (!$this->routeNeedsHandle($route) || $handle !== null) {
+			return;
+		}
+
+		throw new HttpBadRequest($request, payload: [
+			'message' => _('A handle is required for this node route'),
+		]);
+	}
+
+	private function routeNeedsHandle(mixed $route): bool
+	{
+		if (is_string($route)) {
+			return str_contains($route, '{handle}');
+		}
+
+		if (!is_array($route)) {
+			return false;
+		}
+
+		foreach ($route as $localizedRoute) {
+			if (is_string($localizedRoute) && str_contains($localizedRoute, '{handle}')) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private function ensureTypeExists(string $handle): void

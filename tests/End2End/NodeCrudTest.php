@@ -112,6 +112,39 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame($nodePath, $createdPayload['paths']['en'] ?? null);
 	}
 
+	public function testCreateNodePersistsHandle(): void
+	{
+		$this->authenticateAs('editor');
+
+		$uid = 'handled-create-node-' . uniqid();
+		$handle = 'handled-create-' . uniqid();
+		$nodePath = '/test/' . $uid;
+		$response = $this->makeRequest('POST', '/api/node/test-page', [
+			'body' => [
+				'uid' => $uid,
+				'handle' => $handle,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'paths' => [
+					'en' => $nodePath,
+				],
+				'generatedPaths' => [],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Handled Node']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->trackNodeByUid($uid);
+
+		$created = $this->makeRequest('GET', "/api/node/{$uid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame($handle, $createdPayload['handle'] ?? null);
+	}
+
 	public function testCreateNodeRejectsDuplicateUidWithoutUpdatingExisting(): void
 	{
 		$this->authenticateAs('editor');
@@ -344,6 +377,48 @@ final class NodeCrudTest extends End2EndTestCase
 		$reloaded = $this->makeRequest('GET', "/api/node/{$uid}");
 		$reloadedPayload = $this->assertJsonResponse($reloaded);
 		$this->assertSame('Updated Title', $reloadedPayload['title'] ?? null);
+	}
+
+	public function testUpdateNodeCanRemoveHandle(): void
+	{
+		$this->authenticateAs('editor');
+
+		$typeId = $this->createTestType('update-test-page');
+		$uid = 'update-handle-node-' . uniqid();
+		$nodeId = $this->createTestNode([
+			'uid' => $uid,
+			'handle' => 'removed-handle-' . uniqid(),
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Handled Update']],
+			],
+		]);
+		$this->createTestPath($nodeId, '/test/' . $uid);
+
+		$response = $this->makeRequest('PUT', "/api/node/{$uid}", [
+			'body' => [
+				'uid' => $uid,
+				'handle' => '',
+				'published' => true,
+				'locked' => false,
+				'hidden' => false,
+				'paths' => [
+					'en' => '/test/' . $uid,
+				],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Handled Update']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$this->assertTrue($payload['success'] ?? false);
+
+		$handle = $this->db()->execute(
+			'SELECT handle FROM cms.node_handles WHERE node = :node',
+			['node' => $nodeId],
+		)->first();
+		$this->assertNull($handle);
 	}
 
 	public function testDeleteNode(): void

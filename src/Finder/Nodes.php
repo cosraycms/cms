@@ -224,7 +224,7 @@ final class Nodes implements Iterator
 		$class = $this->context
 			->container
 			->tag(Plugin::NODE_TAG)
-			->entry($page['handle'])
+			->entry($page['type_handle'])
 			->definition();
 
 		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $page);
