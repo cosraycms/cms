@@ -27,7 +27,6 @@
 		"celemas/session": "^0.2.0",
 		"celemas/sire": "^0.4.0",
 		"gumlet/php-image-resize": "2.0.*",
-		"hidehalo/nanoid-php": "^2",
 		"psr/log": "^3.0",
 		"vlucas/phpdotenv": "^5.6"
 	},
