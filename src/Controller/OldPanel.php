@@ -215,7 +215,7 @@ class OldPanel
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);
 
 		$store = new Store($context->db, new PathManager(), $this->types);
-		$result = $store->save($obj, $data, $this->request, $context->locales());
+		$result = $store->create($obj, $data, $this->request, $context->locales());
 
 		return new Response(
 			$factory

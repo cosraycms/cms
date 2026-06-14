@@ -111,6 +111,83 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame($nodePath, $createdPayload['paths']['en'] ?? null);
 	}
 
+	public function testCreateNodeRejectsDuplicateUidWithoutUpdatingExisting(): void
+	{
+		$this->authenticateAs('editor');
+
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$uid = 'duplicate-create-node-' . uniqid();
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Original Title']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/test-page', [
+			'body' => [
+				'uid' => $uid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'paths' => [
+					'en' => '/test/' . $uid,
+				],
+				'generatedPaths' => [],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Changed Title']],
+				],
+			],
+		]);
+
+		$this->assertResponseStatus(409, $response);
+
+		$stored = $this->db()->execute(
+			"SELECT content->'title'->'value'->>'en' AS title FROM cms.nodes WHERE uid = :uid",
+			['uid' => $uid],
+		)->one();
+		$this->assertSame('Original Title', $stored['title'] ?? null);
+	}
+
+	public function testCreateNodeGeneratesMissingUid(): void
+	{
+		$this->authenticateAs('editor');
+
+		$path = '/test/generated-uid-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/test-page', [
+			'body' => [
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'paths' => [
+					'en' => $path,
+				],
+				'generatedPaths' => [],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Generated UID']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->assertIsString($payload['uid'] ?? null);
+		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $payload['uid']);
+
+		$this->trackNodeByUid($payload['uid']);
+
+		$stored = $this->db()->execute(
+			"SELECT content->'title'->'value'->>'en' AS title FROM cms.nodes WHERE uid = :uid",
+			['uid' => $payload['uid']],
+		)->one();
+		$this->assertSame('Generated UID', $stored['title'] ?? null);
+	}
+
 	public function testCreateNodePersistsParentUid(): void
 	{
 		$this->authenticateAs('editor');

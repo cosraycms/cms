@@ -46,7 +46,7 @@ class Factory
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
 		$serializer = new Serializer($this->hydrator, $this->types, $this->uid);
-		$store = new Store($context->db, new PathManager($this->uid), $this->types);
+		$store = new Store($context->db, new PathManager($this->uid), $this->types, $this->uid);
 		$templateRenderer = new ViewRenderer(
 			$this->container,
 			$context->factory,
@@ -73,6 +73,7 @@ class Factory
 		]);
 
 		$uid = $data['uid'] ?? $this->uid->generate();
+		$data['uid'] = $uid;
 		$owner = new FieldOwner($context, $uid);
 		$fieldNames = $this->hydrator->hydrate($node, $data['content'] ?? [], $owner);
 

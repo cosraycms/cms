@@ -5,23 +5,34 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Celemas\Core\Exception\HttpBadRequest;
+use Celemas\Core\Exception\HttpConflict;
+use Celemas\Core\Exception\HttpError;
 use Celemas\Core\Request;
 use Celemas\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
+use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
 use Throwable;
 
 class Store
 {
+	private const int CREATE_UID_ATTEMPTS = 5;
+
 	public function __construct(
 		private readonly Database $db,
 		private readonly PathManager $pathManager,
 		private readonly Types $types,
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
 	) {}
 
-	public function save(object $node, array $data, Request $request, Locales $locales): array
-	{
+	public function save(
+		object $node,
+		array $data,
+		Request $request,
+		Locales $locales,
+		bool $create = false,
+	): array {
 		$data = $this->validate($node, $data, $locales, $request);
 
 		if ($data['locked']) {
@@ -41,13 +52,13 @@ class Store
 		try {
 			$this->db->begin();
 
-			$this->persist($node, $data, $editor, $locales, $request);
+			$this->persist($node, $data, $editor, $locales, $request, $create);
 
 			$this->db->commit();
 		} catch (Throwable $e) {
 			$this->db->rollback();
 
-			if ($e instanceof HttpBadRequest) {
+			if ($e instanceof HttpError) {
 				throw $e;
 			}
 
@@ -66,15 +77,27 @@ class Store
 
 	public function create(object $node, array $data, Request $request, Locales $locales): array
 	{
-		$existing = $this->db->nodes->find(['uid' => $data['uid']])->first();
+		$generatedUid = !array_key_exists('uid', $data);
+		if ($generatedUid) {
+			$data['uid'] = Factory::meta($node, 'uid') ?? $this->uid->generate();
+		}
+		$attempts = $generatedUid ? self::CREATE_UID_ATTEMPTS : 1;
 
-		if ($existing) {
-			throw new HttpBadRequest($request, payload: [
-				'message' => _('A node with the same uid already exists: ') . $data['uid'],
-			]);
+		for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+			if ($generatedUid && $attempt > 1) {
+				$data['uid'] = $this->uid->generate();
+			}
+
+			try {
+				return $this->save($node, $data, $request, $locales, create: true);
+			} catch (HttpConflict $e) {
+				if (!$generatedUid || $attempt === $attempts) {
+					throw $e;
+				}
+			}
 		}
 
-		return $this->save($node, $data, $request, $locales);
+		throw new RuntimeException(_('Could not generate a unique node uid'));
 	}
 
 	public function delete(object $node, Request $request): array
@@ -118,24 +141,30 @@ class Store
 		int $editor,
 		Locales $locales,
 		Request $request,
+		bool $create = false,
 	): void {
 		$parentUid = $this->resolveParentUid($node, $data, $request);
 		$parentId = $this->resolveParentId($parentUid, $request);
 
-		$nodeId = $this->persistNode($node, $data, $editor, $parentId);
+		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $request);
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
 
-	private function persistNode(object $node, array $data, int $editor, ?int $parent): int
-	{
+	private function persistNode(
+		object $node,
+		array $data,
+		int $editor,
+		?int $parent,
+		bool $create,
+		Request $request,
+	): int {
 		$class = $node::class;
 		$handle = (string) $this->types->get($class, 'handle');
 		$this->ensureTypeExists($handle);
-
-		return (int) $this->db->nodes->save([
+		$params = [
 			'uid' => $data['uid'],
 			'parent' => $parent,
 			'hidden' => $data['hidden'],
@@ -144,7 +173,21 @@ class Store
 			'type' => $handle,
 			'content' => json_encode($data['content']),
 			'editor' => $editor,
-		])->one()['node'];
+		];
+
+		if (!$create) {
+			return (int) $this->db->nodes->save($params)->one()['node'];
+		}
+
+		$result = $this->db->nodes->create($params)->first();
+
+		if (!$result) {
+			throw new HttpConflict($request, payload: [
+				'message' => _('A node with the same uid already exists: ') . $data['uid'],
+			]);
+		}
+
+		return (int) $result['node'];
 	}
 
 	private function resolveParentUid(object $node, array $data, Request $request): ?string
