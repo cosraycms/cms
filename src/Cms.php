@@ -76,7 +76,7 @@ class Cms
 	}
 
 	public function render(
-		string $uid,
+		string $id,
 		array $templateContext = [],
 		?bool $deleted = false,
 		?bool $published = true,
@@ -86,7 +86,7 @@ class Cms
 			$this,
 			$this->nodeFactory,
 			$this->types,
-			$uid,
+			$id,
 			$templateContext,
 			$deleted,
 			$published,

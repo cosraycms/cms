@@ -123,13 +123,15 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 | `HandlesFormPost` | `formPost(?array $body): Response` | Frontend form submission handling |
 | `ProvidesRenderContext` | `renderContext(): array` | Extra template variables |
 
-### Rendering by uid
+### Rendering by handle or UID
 
-Render a node by uid from templates with the neutral cms API:
+Render a node by handle from templates with the neutral CMS API:
 
 ```php
-<?= $cms->render('some-node-uid') ?>
+<?= $cms->render('downloads') ?>
 ```
+
+`render()` resolves handles first and falls back to immutable UIDs.
 
 ## Boiler rendering
 

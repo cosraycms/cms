@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Cms;
+use Cosray\Context;
 use Cosray\Node\Factory;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Plugin;
+use Cosray\Renderer;
+use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\IntegrationTestCase;
+use Cosray\View\Boiler\Renderer as BoilerRenderer;
 
 final class FinderTest extends IntegrationTestCase
 {
@@ -47,6 +53,85 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertNotNull($node);
 		$this->assertSame('handled-node', $node->meta->handle);
 		$this->assertSame('test-page', $node->meta->type->handle);
+	}
+
+	public function testFinderFindsNodeByHandle(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+		$this->createTestNode([
+			'uid' => 'by-handle-node-uid',
+			'handle' => 'by-handle-node',
+			'type' => $typeId,
+		]);
+
+		$node = $this->createCms()->node->byHandle('by-handle-node');
+
+		$this->assertNotNull($node);
+		$this->assertSame('by-handle-node-uid', $node->meta->uid);
+		$this->assertSame('by-handle-node', $node->meta->handle);
+	}
+
+	public function testFinderFiltersByNodeHandleBuiltin(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+		$this->createTestNode([
+			'uid' => 'handle-filter-a',
+			'handle' => 'handle-filter-target',
+			'type' => $typeId,
+		]);
+		$this->createTestNode([
+			'uid' => 'handle-filter-b',
+			'handle' => 'handle-filter-other',
+			'type' => $typeId,
+		]);
+
+		$nodes = iterator_to_array(
+			$this
+				->createCms()
+				->nodes()
+				->published(null)
+				->filter("handle = 'handle-filter-target'"),
+		);
+
+		$this->assertCount(1, $nodes);
+		$this->assertSame('handle-filter-a', $nodes[0]->meta->uid);
+	}
+
+	public function testRenderResolvesHandleBeforeUid(): void
+	{
+		$typeId = $this->createTestType('node-with-render-attribute');
+		$this->createTestNode([
+			'uid' => 'render-uid-target',
+			'type' => $typeId,
+		]);
+		$this->createTestNode([
+			'uid' => 'render-handle-target',
+			'handle' => 'render-uid-target',
+			'type' => $typeId,
+		]);
+
+		$container = $this->container();
+		$container->tag(Plugin::NODE_TAG)
+			->add('node-with-render-attribute', NodeWithRenderAttribute::class);
+		$container
+			->tag(Renderer::class)
+			->add('view', BoilerRenderer::class)
+			->args(
+				dirs: self::root() . '/tests/Fixtures/templates',
+				autoescape: false,
+			);
+		$context = new Context(
+			$this->db(),
+			$this->request(),
+			$this->config(['path.views' => '/tests/Fixtures/templates']),
+			$container,
+			$this->factory(),
+		);
+		$cms = new Cms($context, new Types());
+
+		$html = (string) $cms->render('render-uid-target', published: null);
+
+		$this->assertSame('with render:render-handle-target:render-uid-target', trim($html));
 	}
 
 	public function testFinderFiltersPublishedNodes(): void

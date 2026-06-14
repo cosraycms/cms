@@ -54,7 +54,7 @@ final class Nodes implements Iterator
 				fn(string $class): bool => (bool) $this->types->get($class, 'renderable', false),
 			),
 			'type' => 't.handle',
-			'handle' => 't.handle',
+			'handle' => 'h.handle',
 			'uid' => 'n.uid',
 		];
 	}

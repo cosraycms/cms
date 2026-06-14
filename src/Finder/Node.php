@@ -45,6 +45,18 @@ class Node
 		]);
 	}
 
+	public function byHandle(
+		string $handle,
+		?bool $deleted = false,
+		?bool $published = true,
+	): ?NodeWrapper {
+		return $this->get([
+			'handle' => $handle,
+			'published' => $published,
+			'deleted' => $deleted,
+		]);
+	}
+
 	public function get(
 		array $params,
 	): ?NodeWrapper {

@@ -23,7 +23,7 @@ class Render
 		private readonly Cms $cms,
 		private readonly Factory $nodeFactory,
 		private readonly Types $types,
-		string $uid,
+		string $id,
 		private readonly array $templateContext = [],
 		?bool $deleted = false,
 		?bool $published = true,
@@ -32,11 +32,23 @@ class Render
 			->db
 			->nodes
 			->find([
-				'uid' => $uid,
+				'handle' => $id,
+				'published' => $published,
+				'deleted' => $deleted,
+			])
+			->one() ?: $this->context
+			->db
+			->nodes
+			->find([
+				'uid' => $id,
 				'published' => $published,
 				'deleted' => $deleted,
 			])
 			->one();
+
+		if (!$data) {
+			throw new RuntimeException('Renderable node not found: ' . $id);
+		}
 		$class = $this->context
 			->container
 			->tag(Plugin::NODE_TAG)
