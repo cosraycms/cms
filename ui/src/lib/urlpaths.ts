@@ -28,6 +28,16 @@ function transformPath(path: string, node: Node, localeId: string, system: Syste
 	extractParams.map(param => {
 		if (param === 'uid') {
 			path = path.replace('{uid}', node.uid);
+			return;
+		}
+
+		if (param === 'handle') {
+			if (node.handle) {
+				path = path.replace('{handle}', node.handle);
+			} else {
+				error('A handle is required for this URL path.');
+			}
+			return;
 		}
 
 		const value = node.content[param];

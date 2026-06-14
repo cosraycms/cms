@@ -21,9 +21,10 @@ function successToast() {
 function errorToast(data: any) {
 	toast.add({
 		kind: 'error',
-		message: data.description
-			? data.description
-			: _('Fehler beim Speichern des Dokuments aufgetreten!'),
+		message:
+			data?.message ??
+			data?.description ??
+			_('Fehler beim Speichern des Dokuments aufgetreten!'),
 	});
 }
 
@@ -62,16 +63,15 @@ export async function create(node: Node, type: string, documentPath: string) {
 
 		setPristine();
 
-		await goto(`${base}${documentPath}/${node.uid}`, {
+		const result = response.data as Result;
+
+		await goto(`${base}${documentPath}/${result.uid}`, {
 			invalidateAll: true,
 		});
 
-		return response.data as Result;
+		return result;
 	} else {
-		toast.add({
-			kind: 'error',
-			message: _('Fehler beim Erstellen des Dokuments aufgetreten!'),
-		});
+		errorToast(response?.data);
 
 		return response?.data as Result;
 	}

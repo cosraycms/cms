@@ -206,6 +206,7 @@ export interface Editor {
 
 export interface Node {
 	uid: string;
+	handle: string | null;
 	title: string;
 	published: boolean;
 	hidden: boolean;

@@ -44,9 +44,31 @@
 	function oninput() {
 		setDirty();
 	}
+
+	function onHandleInput(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		node.handle = input.value;
+		setDirty();
+	}
 </script>
 
 <div class="cms-settings">
+	<div class="cms-settings-row">
+		<label
+			class="cms-field-label"
+			for="cms-node-handle">
+			{_('Handle')}:
+		</label>
+		<div class="cms-settings-handle-value">
+			<input
+				id="cms-node-handle"
+				type="text"
+				maxlength="64"
+				pattern={'(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?'}
+				value={node.handle ?? ''}
+				oninput={onHandleInput} />
+		</div>
+	</div>
 	{#if node.type.routable}
 		<div class="cms-settings-paths">
 			{#each $system.locales as locale (locale)}
@@ -111,7 +133,12 @@
 		}
 	}
 
+	.cms-settings-handle-value {
+		width: 100%;
+	}
+
 	.cms-settings-paths {
+		margin-top: var(--cms-space-4);
 		margin-bottom: var(--cms-space-8);
 		display: table;
 		width: 100%;
