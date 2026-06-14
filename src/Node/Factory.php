@@ -15,9 +15,8 @@ use Cosray\Context;
 use Cosray\Field\FieldHydrator;
 use Cosray\Field\Schema\Registry as SchemaRegistry;
 use Cosray\Node\Contract\HasInit;
+use Cosray\Uid;
 use WeakMap;
-
-use function Cosray\nanoid;
 
 class Factory
 {
@@ -31,6 +30,7 @@ class Factory
 		private readonly Container $container,
 		Types $types,
 		?SchemaRegistry $schemaRegistry = null,
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
 	) {
 		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
 		$this->types = $types;
@@ -45,8 +45,8 @@ class Factory
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
-		$serializer = new Serializer($this->hydrator, $this->types);
-		$store = new Store($context->db, new PathManager(), $this->types);
+		$serializer = new Serializer($this->hydrator, $this->types, $this->uid);
+		$store = new Store($context->db, new PathManager($this->uid), $this->types);
 		$templateRenderer = new ViewRenderer(
 			$this->container,
 			$context->factory,
@@ -72,7 +72,7 @@ class Factory
 			FieldHydrator::class => $this->hydrator,
 		]);
 
-		$uid = $data['uid'] ?? nanoid();
+		$uid = $data['uid'] ?? $this->uid->generate();
 		$owner = new FieldOwner($context, $uid);
 		$fieldNames = $this->hydrator->hydrate($node, $data['content'] ?? [], $owner);
 

@@ -6,15 +6,15 @@ namespace Cosray\Node;
 
 use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
+use Cosray\Uid;
 use ReflectionMethod;
-
-use function Cosray\nanoid;
 
 class Serializer
 {
 	public function __construct(
 		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array
@@ -86,7 +86,7 @@ class Serializer
 		$result = [
 			'title' => _('Neues Dokument:') . ' ' . $schema->label,
 			'fields' => $this->fields($node, $fieldNames),
-			'uid' => nanoid(),
+			'uid' => $this->uid->generate(),
 			'published' => false,
 			'hidden' => false,
 			'locked' => false,

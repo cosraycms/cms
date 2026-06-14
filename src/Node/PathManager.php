@@ -8,11 +8,14 @@ use Celemas\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locale;
 use Cosray\Locales;
-
-use function Cosray\nanoid;
+use Cosray\Uid;
 
 class PathManager
 {
+	public function __construct(
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
+	) {}
+
 	public function path(array $rawData, ?Locale $locale, Locale $requestLocale): string
 	{
 		$paths = $rawData['paths'];
@@ -111,7 +114,7 @@ class PathManager
 			}
 
 			if ($db->nodes->pathExists(['path' => $path])->first()) {
-				$path = $path . '-' . substr(nanoid(), 0, 5);
+				$path = $path . '-' . $this->uid->generate(5);
 			}
 
 			$db->nodes->savePath([
@@ -159,7 +162,7 @@ class PathManager
 				}
 
 				if ($db->nodes->pathExists(['path' => $newPath])->first()) {
-					$newPath = $newPath . '-' . substr(nanoid(), 0, 5);
+					$newPath = $newPath . '-' . $this->uid->generate(5);
 				}
 
 				$db->nodes->savePath([

@@ -9,6 +9,7 @@ use InvalidArgumentException;
 final class Uid
 {
 	public const ALPHABET_ALPHANUMERIC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	public const ALPHABET_LOWERCASE_WORD_SAFE = '123456789bcdfghklmnpqrstvwxyz';
 	public const ALPHABET_CROCKFORD_BASE_32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 	public const ALPHABET_WORD_SAFE = 'FGHKLMNPRSTVWYZbdfhkmrstvwz23579';
 	public const ALPHABET_URL_SAFE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
