@@ -8,6 +8,7 @@ use Celemas\Core\Exception\ValueError;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
+use Cosray\Uid;
 use Cosray\Util\Password;
 use Dotenv\Exception\ValidationException;
 
@@ -96,10 +97,24 @@ final class ConfigTest extends TestCase
 		$this->assertSame(3600, $config->session->options['cache_expire']);
 		$this->assertNull($config->session->handler);
 		$this->assertNull($config->db->dsn);
+		$this->assertSame(Uid::ALPHABET_LOWERCASE_WORD_SAFE, $config->uid->alphabet);
+		$this->assertSame(13, $config->uid->length);
 		$this->assertSame(Password::DEFAULT_PASSWORD_ENTROPY, $config->password->entropy);
 		$this->assertNull($config->password->algorithm);
 		$this->assertFalse($config->debug());
 		$this->assertSame('', $config->env());
+	}
+
+	public function testUidConfigCreatesGenerator(): void
+	{
+		$config = new Config(self::root(), [
+			'uid.alphabet' => 'ab',
+			'uid.length' => 4,
+		]);
+
+		$this->assertSame('ab', $config->uid->alphabet);
+		$this->assertSame(4, $config->uid->length);
+		$this->assertMatchesRegularExpression('/^[ab]{4}$/', $config->uid->create()->generate());
 	}
 
 	public function testSettingsCanOverrideAppNameDebugAndEnvironment(): void
@@ -352,6 +367,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame($config->path, $config->path);
 		$this->assertSame($config->panel, $config->panel);
 		$this->assertSame($config->session, $config->session);
+		$this->assertSame($config->uid, $config->uid);
 	}
 
 	public function testWithReturnsChangedConfig(): void

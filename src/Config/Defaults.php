@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Config;
 
+use Cosray\Uid as UidGenerator;
 use Cosray\Util\Password;
 
 use function Cosray\env;
@@ -23,6 +24,7 @@ final class Defaults
 			self::session($env),
 			self::media(),
 			self::upload(),
+			self::uid(),
 			self::password(),
 		);
 	}
@@ -148,6 +150,15 @@ final class Defaults
 				'video/ogg' => ['ogg'],
 			],
 			'upload.maxsize' => 10 * 1024 * 1024,
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function uid(): array
+	{
+		return [
+			'uid.alphabet' => UidGenerator::ALPHABET_LOWERCASE_WORD_SAFE,
+			'uid.length' => 13,
 		];
 	}
 

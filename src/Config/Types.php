@@ -64,6 +64,9 @@ namespace Cosray\Config;
  *     'upload.mimetypes.video': MimeMap,
  *     'upload.maxsize': int,
  *
+ *     'uid.alphabet': non-empty-string,
+ *     'uid.length': positive-int,
+ *
  *     'password.entropy': float|int,
  *     'password.algorithm': int|string|null
  * }
@@ -106,6 +109,8 @@ namespace Cosray\Config;
  *     'upload.mimetypes.image'?: MimeMap,
  *     'upload.mimetypes.video'?: MimeMap,
  *     'upload.maxsize'?: int,
+ *     'uid.alphabet'?: non-empty-string,
+ *     'uid.length'?: positive-int,
  *     'password.entropy'?: float|int,
  *     'password.algorithm'?: int|string|null
  * }

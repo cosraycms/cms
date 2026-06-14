@@ -29,6 +29,7 @@ class Config
 	private ?Config\Media $mediaConfig = null;
 	private ?Config\Upload $uploadConfig = null;
 	private ?Config\Password $passwordConfig = null;
+	private ?Config\Uid $uidConfig = null;
 
 	public Config\App $app {
 		get => $this->appConfig ??= new Config\App($this);
@@ -68,6 +69,10 @@ class Config
 
 	public Config\Password $password {
 		get => $this->passwordConfig ??= new Config\Password($this);
+	}
+
+	public Config\Uid $uid {
+		get => $this->uidConfig ??= new Config\Uid($this);
 	}
 
 	/** @param BuiltinConfigInput&array<string, mixed> $settings */
