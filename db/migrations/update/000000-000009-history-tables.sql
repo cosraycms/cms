@@ -1,6 +1,7 @@
-DROP TRIGGER users_trigger_02_audit ON cms.users;
-DROP TRIGGER nodes_trigger_03_audit ON cms.nodes;
-DROP TRIGGER drafts_trigger_01_audit ON cms.drafts;
+DROP TRIGGER IF EXISTS users_trigger_02_audit ON cms.users;
+DROP TRIGGER IF EXISTS users_trigger_03_audit ON cms.users;
+DROP TRIGGER IF EXISTS nodes_trigger_03_audit ON cms.nodes;
+DROP TRIGGER IF EXISTS drafts_trigger_01_audit ON cms.drafts;
 
 ALTER TABLE audit.users RENAME CONSTRAINT pk_users TO pk_users_history;
 ALTER TABLE audit.users RENAME CONSTRAINT fk_audit_users TO fk_users_history_users;
