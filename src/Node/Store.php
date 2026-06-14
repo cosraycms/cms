@@ -23,7 +23,7 @@ class Store
 		private readonly Database $db,
 		private readonly PathManager $pathManager,
 		private readonly Types $types,
-		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {}
 
 	public function save(

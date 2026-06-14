@@ -20,8 +20,8 @@ final class Uid
 	private readonly int $defaultLength;
 
 	public function __construct(
-		string $alphabet = self::ALPHABET_WORD_SAFE,
-		int $defaultLength = 13,
+		string $alphabet,
+		int $defaultLength,
 	) {
 		$size = strlen($alphabet);
 

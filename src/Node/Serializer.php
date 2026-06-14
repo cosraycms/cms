@@ -14,7 +14,7 @@ class Serializer
 	public function __construct(
 		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
-		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array

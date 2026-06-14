@@ -30,7 +30,7 @@ class Factory
 		private readonly Container $container,
 		Types $types,
 		?SchemaRegistry $schemaRegistry = null,
-		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE),
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {
 		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
 		$this->types = $types;
