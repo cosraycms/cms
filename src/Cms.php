@@ -24,10 +24,11 @@ class Cms
 		private readonly Context $context,
 		private readonly Types $types,
 	) {
+		$uid = $context->config->uid;
 		$this->nodeFactory = new Factory(
 			$context->container,
 			types: $this->types,
-			uid: $context->config->uid->create(),
+			uid: new Uid($uid->alphabet, $uid->length),
 		);
 	}
 

@@ -105,7 +105,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame('', $config->env());
 	}
 
-	public function testUidConfigCreatesGenerator(): void
+	public function testUidConfigCanBeOverridden(): void
 	{
 		$config = new Config(self::root(), [
 			'uid.alphabet' => 'ab',
@@ -114,7 +114,6 @@ final class ConfigTest extends TestCase
 
 		$this->assertSame('ab', $config->uid->alphabet);
 		$this->assertSame(4, $config->uid->length);
-		$this->assertMatchesRegularExpression('/^[ab]{4}$/', $config->uid->create()->generate());
 	}
 
 	public function testSettingsCanOverrideAppNameDebugAndEnvironment(): void
