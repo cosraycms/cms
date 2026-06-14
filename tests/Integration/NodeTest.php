@@ -127,6 +127,22 @@ final class NodeTest extends IntegrationTestCase
 		$this->assertEquals('New Subtitle', $contentData['subtitle']['value']['en']);
 	}
 
+	public function testNodeUidCannotBeUpdated(): void
+	{
+		$typeId = $this->createTestType('immutable-uid-test-page');
+		$nodeId = $this->createTestNode([
+			'uid' => 'immutable-uid-node',
+			'type' => $typeId,
+		]);
+
+		$this->expectException(\Throwable::class);
+
+		$this->db()->execute(
+			'UPDATE cms.nodes SET uid = :uid WHERE node = :node',
+			['uid' => 'changed-immutable-uid-node', 'node' => $nodeId],
+		)->run();
+	}
+
 	public function testQueryNodesByType(): void
 	{
 		$typeId = $this->createTestType('query-test-page');

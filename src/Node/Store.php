@@ -35,6 +35,11 @@ class Store
 	): array {
 		$data = $this->normalizeSubmittedHandle($data);
 		$data = $this->validate($node, $data, $locales, $request);
+
+		if (!$create) {
+			$this->assertUidUnchanged($node, $data, $request);
+		}
+
 		$data = $this->completeHandle($node, $data);
 
 		if ($data['locked']) {
@@ -290,6 +295,19 @@ class Store
 		}
 
 		return (int) $parent['node'];
+	}
+
+	private function assertUidUnchanged(object $node, array $data, Request $request): void
+	{
+		$uid = Factory::meta($node, 'uid');
+
+		if (!is_string($uid) || $data['uid'] === $uid) {
+			return;
+		}
+
+		throw new HttpBadRequest($request, payload: [
+			'message' => _('Node uid cannot be changed'),
+		]);
 	}
 
 	private function normalizeSubmittedHandle(array $data): array

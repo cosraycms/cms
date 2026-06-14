@@ -379,6 +379,46 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame('Updated Title', $reloadedPayload['title'] ?? null);
 	}
 
+	public function testUpdateNodeRejectsUidChange(): void
+	{
+		$this->authenticateAs('editor');
+
+		$typeId = $this->createTestType('update-test-page');
+		$uid = 'reject-uid-change-' . uniqid();
+		$nodeId = $this->createTestNode([
+			'uid' => $uid,
+			'type' => $typeId,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Original Title']],
+			],
+		]);
+		$this->createTestPath($nodeId, '/test/' . $uid);
+
+		$response = $this->makeRequest('PUT', "/api/node/{$uid}", [
+			'body' => [
+				'uid' => $uid . '-changed',
+				'published' => true,
+				'locked' => false,
+				'hidden' => false,
+				'paths' => [
+					'en' => '/test/' . $uid,
+				],
+				'content' => [
+					'title' => ['type' => 'text', 'value' => ['en' => 'Changed Title']],
+				],
+			],
+		]);
+
+		$this->assertResponseStatus(400, $response);
+
+		$stored = $this->db()->execute(
+			"SELECT uid, content->'title'->'value'->>'en' AS title FROM cms.nodes WHERE node = :node",
+			['node' => $nodeId],
+		)->one();
+		$this->assertSame($uid, $stored['uid'] ?? null);
+		$this->assertSame('Original Title', $stored['title'] ?? null);
+	}
+
 	public function testUpdateNodeCanRemoveHandle(): void
 	{
 		$this->authenticateAs('editor');
