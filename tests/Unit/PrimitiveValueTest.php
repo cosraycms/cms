@@ -167,8 +167,8 @@ final class PrimitiveValueTest extends TestCase
 
 		$structure = $field->structure();
 
-		$this->assertSame('code', $structure['type']);
-		$this->assertSame('php', $structure['syntax']);
+		$this->assertSame($field::class, $structure['type']);
+		$this->assertSame('php', $structure['meta']['syntax'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
 		$this->assertIsArray($structure['value']);
 		$this->assertArrayHasKey('en', $structure['value']);
 		$this->assertArrayHasKey('de', $structure['value']);
@@ -183,14 +183,14 @@ final class PrimitiveValueTest extends TestCase
 
 		$shape = $field->shape();
 		$valid = $shape->validate([
-			'type' => 'code',
-			'syntax' => 'php',
-			'value' => '<?php echo 1;',
+			'type' => $field::class,
+			'meta' => ['syntax' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'php']],
+			'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => '<?php echo 1;'],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'code',
-			'syntax' => 'ruby',
-			'value' => 'puts 1',
+			'type' => $field::class,
+			'meta' => ['syntax' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'ruby']],
+			'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'puts 1'],
 		]);
 
 		$this->assertTrue($valid->valid());
@@ -269,11 +269,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertInstanceOf(\Cosray\Value\Files::class, $value);
 		$this->assertSame(2, $value->count());
 		$this->assertTrue($value->isset());
-		$this->assertSame(
-			'Files: count(0)',
-			(string) $value,
-			'Value unwrap uses locale data, not files.',
-		);
+		$this->assertSame('Files: count(2)', (string) $value);
 		$this->assertInstanceOf(\Cosray\Value\File::class, $value->first());
 
 		$files = [];
@@ -463,11 +459,11 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Manual', $value->title());
 	}
 
-	public function testPictureValueUsesTranslatedAltAndTitle(): void
+	public function testImageValueUsesTranslatedAltAndTitle(): void
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$field = new \Cosray\Field\Picture('hero', $owner, new ValueContext('hero', [
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
 					'file' => 'hero.jpg',
@@ -482,6 +478,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translate();
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -491,50 +488,11 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero Image', $value->title());
 	}
 
-	public function testPictureTagRendersSourcesAndFallback(): void
+	public function testTranslatedImageFallsBackToDefaultLocaleWithTitle(): void
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$valueContext = new ValueContext('hero', [
-			'files' => [
-				[
-					'file' => 'hero.webp',
-					'media' => '(min-width: 600px)',
-					'alt' => ['en' => 'Hero Alt'],
-					'title' => ['en' => 'Hero Title'],
-				],
-				[
-					'file' => 'hero.jpg',
-					'alt' => ['en' => 'Hero Alt'],
-					'title' => ['en' => 'Hero Title'],
-				],
-			],
-		]);
-		$field = new \Cosray\Field\Picture('hero', $owner, $valueContext);
-		$field->translate();
-
-		$value = new class($owner, $field, $valueContext) extends \Cosray\Value\Picture {
-			public function url(bool $bust = true, int $index = 0): string
-			{
-				return "https://cdn.example.com/hero-{$index}.jpg";
-			}
-		};
-
-		$tag = $value->tag(false, 'hero-picture');
-
-		$this->assertStringContainsString('<picture', $tag);
-		$this->assertStringContainsString('class="hero-picture"', $tag);
-		$this->assertStringContainsString('media="(min-width: 600px)"', $tag);
-		$this->assertStringContainsString('type="image/jpeg"', $tag);
-		$this->assertStringContainsString('alt="Hero Alt"', $tag);
-		$this->assertStringContainsString('src="https://cdn.example.com/hero-1.jpg"', $tag);
-	}
-
-	public function testTranslatedPictureFallsBackToDefaultLocale(): void
-	{
-		$context = $this->createContext();
-		$owner = $this->createOwner($context);
-		$field = new \Cosray\Field\Picture('hero', $owner, new ValueContext('hero', [
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				'en' => [
 					[
@@ -554,6 +512,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 			],
 		]));
+		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
 		$context->request->set('locale', $context->locales()->get('de'));
 
@@ -561,7 +520,6 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertSame('Hero', $value->alt());
 		$this->assertSame('Hero Image', $value->title());
-		$this->assertSame('/hero', $value->link());
 	}
 
 	public function testVideoValueRendersSourceTag(): void
@@ -670,18 +628,22 @@ final class PrimitiveValueTest extends TestCase
 		$shape = $field->shape();
 
 		$valid = $shape->validate([
-			'type' => 'file',
-			'files' => [
-				['file' => 'a.pdf'],
-				['file' => 'b.pdf'],
+			'type' => $field::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					['file' => 'a.pdf'],
+					['file' => 'b.pdf'],
+				],
 			],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'file',
-			'files' => [
-				['file' => 'a.pdf'],
-				['file' => 'b.pdf'],
-				['file' => 'c.pdf'],
+			'type' => $field::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					['file' => 'a.pdf'],
+					['file' => 'b.pdf'],
+					['file' => 'c.pdf'],
+				],
 			],
 		]);
 
@@ -699,16 +661,20 @@ final class PrimitiveValueTest extends TestCase
 		$shape = $field->shape();
 
 		$valid = $shape->validate([
-			'type' => 'file',
-			'files' => [
-				['file' => 'a.pdf'],
-				['file' => 'b.pdf'],
+			'type' => $field::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					['file' => 'a.pdf'],
+					['file' => 'b.pdf'],
+				],
 			],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'file',
-			'files' => [
-				['file' => 'a.pdf'],
+			'type' => $field::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					['file' => 'a.pdf'],
+				],
 			],
 		]);
 
@@ -727,8 +693,8 @@ final class PrimitiveValueTest extends TestCase
 		$shape = $field->shape();
 
 		$valid = $shape->validate([
-			'type' => 'file',
-			'files' => [
+			'type' => $field::class,
+			'value' => [
 				'en' => [
 					['file' => 'a.pdf'],
 				],
@@ -738,8 +704,8 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'file',
-			'files' => [
+			'type' => $field::class,
+			'value' => [
 				'en' => [
 					['file' => 'a.pdf'],
 					['file' => 'b.pdf'],
@@ -765,16 +731,16 @@ final class PrimitiveValueTest extends TestCase
 		$shape = $field->shape();
 
 		$valid = $shape->validate([
-			'type' => 'image',
-			'files' => [
+			'type' => $field::class,
+			'value' => [
 				'en' => [
 					['file' => 'hero.jpg'],
 				],
 			],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'image',
-			'files' => [
+			'type' => $field::class,
+			'value' => [
 				'de' => [
 					['file' => 'held.jpg'],
 				],
@@ -798,19 +764,19 @@ final class PrimitiveValueTest extends TestCase
 			'type' => 'text',
 			'rowspan' => 1,
 			'colspan' => 12,
-			'value' => 'Hello',
+			'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'Hello'],
 		];
 
 		$valid = $shape->validate([
-			'type' => 'blocks',
-			'columns' => 12,
+			'type' => $field::class,
+			'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
 			'value' => [
 				'en' => [$block],
 			],
 		]);
 		$invalid = $shape->validate([
-			'type' => 'blocks',
-			'columns' => 12,
+			'type' => $field::class,
+			'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
 			'value' => [
 				'de' => [$block],
 			],

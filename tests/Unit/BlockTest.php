@@ -16,7 +16,12 @@ final class BlockTest extends TestCase
 {
 	public function testBlockReturnsStyleAndId(): void
 	{
-		$item = new Block('text', ['class' => 'hero', 'id' => 'section']);
+		$item = new Block('text', [
+			'meta' => [
+				'class' => ['zxx' => 'hero'],
+				'id' => ['zxx' => 'section'],
+			],
+		]);
 
 		$this->assertSame('hero', $item->styleClass());
 		$this->assertSame('section', $item->elementId());

@@ -53,22 +53,34 @@ class EntriesIntegrationTest extends TestCase
 
 		$node = $nodeFactory->create(TestNodeWithEntries::class, $context, $cms, [
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
+				'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'Test Node']],
 				'entries' => [
-					'type' => 'entries',
+					'type' => Entries::class,
 					'value' => [
-						[
-							'type' => TestEntry::class,
-							'value' => [
-								'title' => ['type' => 'text', 'value' => ['en' => 'First Item']],
-								'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+						\Cosray\Field\Field::NEUTRAL_LOCALE => [
+							[
+								'uid' => 'entry1',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'First Item']],
+									'content' => [
+										'type' => \Cosray\Field\Blocks::class,
+										'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+										'value' => ['en' => []],
+									],
+								],
 							],
-						],
-						[
-							'type' => TestEntry::class,
-							'value' => [
-								'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
-								'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+							[
+								'uid' => 'entry2',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'Second Item']],
+									'content' => [
+										'type' => \Cosray\Field\Blocks::class,
+										'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+										'value' => ['en' => []],
+									],
+								],
 							],
 						],
 					],
@@ -115,7 +127,7 @@ class EntriesIntegrationTest extends TestCase
 		$entries->value();
 
 		$structure = $entries->structure();
-		$this->assertEquals('entries', $structure['type']);
+		$this->assertEquals(Entries::class, $structure['type']);
 		$this->assertIsArray($structure['value']);
 
 		$entryFields = $entries->entryFields(TestEntry::class);
@@ -133,13 +145,20 @@ class EntriesIntegrationTest extends TestCase
 			'test_entries',
 			$owner,
 			new ValueContext('test_entries', [
-				'type' => 'entries',
+				'type' => Entries::class,
 				'value' => [
-					[
-						'type' => TestEntry::class,
-						'value' => [
-							'title' => ['type' => 'text', 'value' => ''],
-							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => []],
+					\Cosray\Field\Field::NEUTRAL_LOCALE => [
+						[
+							'uid' => 'entry1',
+							'type' => TestEntry::class,
+							'fields' => [
+								'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => '']],
+								'content' => [
+									'type' => \Cosray\Field\Blocks::class,
+									'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+									'value' => ['en' => []],
+								],
+							],
 						],
 					],
 				],
@@ -149,8 +168,9 @@ class EntriesIntegrationTest extends TestCase
 
 		$structure = $entries->structure();
 
-		$this->assertCount(1, $structure['value']);
-		$titleValue = $structure['value'][0]['value']['title']['value'];
+		$this->assertCount(1, $structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
+		$titleValue =
+			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
 
 		$this->assertIsArray(
 			$titleValue,

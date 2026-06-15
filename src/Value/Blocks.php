@@ -230,6 +230,10 @@ class Blocks extends Value
 			return is_array($defaultValue) && count($defaultValue) > 0;
 		}
 
+		if (!isset($this->data['type']) && array_is_list($value)) {
+			return count($value) > 0;
+		}
+
 		$defaultValue = $value[Field\Field::NEUTRAL_LOCALE] ?? [];
 
 		return is_array($defaultValue) && count($defaultValue) > 0;
@@ -345,6 +349,13 @@ class Blocks extends Value
 		if ($this->field->isTranslatable()) {
 			$value = $this->effective($data['value'] ?? []);
 			$fields = is_array($value) ? $value : [];
+		} elseif (
+			!isset($data['type'])
+			&& isset($data['value'])
+			&& is_array($data['value'])
+			&& array_is_list($data['value'])
+		) {
+			$fields = $data['value'];
 		} else {
 			$value = $data['value'][Field\Field::NEUTRAL_LOCALE] ?? [];
 			$fields = is_array($value) ? $value : [];
@@ -364,7 +375,7 @@ class Blocks extends Value
 		$value = $block->data['value'] ?? [];
 
 		if (!is_array($value)) {
-			return '';
+			return is_string($value) || is_numeric($value) ? (string) $value : '';
 		}
 
 		$value = $this->effective($value);
@@ -374,17 +385,17 @@ class Blocks extends Value
 
 	private function mediaFieldData(array $data): array
 	{
-		$data['value'] = [Field\Field::NEUTRAL_LOCALE => $data['value'] ?? []];
+		$data['value'] = [Field\Field::NEUTRAL_LOCALE => $data['value'] ?? $data['files'] ?? []];
 
 		return $data;
 	}
 
 	private function mediaText(array $item, string $key): string
 	{
-		$value = $item['meta'][$key] ?? [];
+		$value = $item['meta'][$key] ?? $item[$key] ?? [];
 
 		if (!is_array($value)) {
-			return '';
+			return is_string($value) || is_numeric($value) ? (string) $value : '';
 		}
 
 		$value = $this->effective($value);

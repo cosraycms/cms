@@ -48,7 +48,7 @@ trait IsTranslatable
 		return $this->translateMode === TranslateMode::Asymmetric;
 	}
 
-	private function getTranslatableStructure(string $type, mixed $value = null): array
+	protected function getTranslatableStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
 
@@ -62,7 +62,7 @@ trait IsTranslatable
 		];
 	}
 
-	private function getTranslatableFileStructure(string $type, mixed $value = null): array
+	protected function getTranslatableFileStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
 
@@ -72,26 +72,22 @@ trait IsTranslatable
 		];
 	}
 
-	private function localeValueMap(mixed $value = null): array
+	protected function localeValueMap(mixed $value = null): array
 	{
-		if (is_array($value)) {
-			return $value;
-		}
-
-		$result = [];
+		$result = is_array($value) ? $value : [];
 
 		foreach ($this->owner->locales() as $locale) {
-			$result[$locale->id] = null;
+			$result[$locale->id] ??= null;
 		}
 
-		if ($value !== null) {
+		if (!is_array($value) && $value !== null) {
 			$result[$this->owner->defaultLocale()->id] = $value;
 		}
 
 		return $result;
 	}
 
-	private function localeListMap(mixed $value = null): array
+	protected function localeListMap(mixed $value = null): array
 	{
 		if (is_array($value) && !$this->isList($value)) {
 			return $value;

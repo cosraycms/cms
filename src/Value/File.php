@@ -83,14 +83,27 @@ class File extends Value
 	{
 		$value = $this->data['value'] ?? [];
 
+		if (
+			!isset($this->data['type'])
+			&& isset($this->data['files'])
+			&& is_array($this->data['files'])
+		) {
+			if (
+				$this->field->translateMode() === TranslateMode::Asymmetric
+				&& !array_is_list($this->data['files'])
+			) {
+				return $this->effectiveFiles($this->data['files']);
+			}
+
+			return $this->data['files'];
+		}
+
 		if (!is_array($value)) {
 			return [];
 		}
 
 		if ($this->field->translateMode() === TranslateMode::Asymmetric) {
-			$files = $this->effective($value);
-
-			return is_array($files) ? $files : [];
+			return $this->effectiveFiles($value);
 		}
 
 		$files = $value[Field::NEUTRAL_LOCALE] ?? [];
@@ -105,6 +118,41 @@ class File extends Value
 		return is_array($item) ? $item : null;
 	}
 
+	/** @param array<string, mixed> $map */
+	protected function effectiveFiles(array $map): array
+	{
+		$locale = $this->locale;
+
+		while ($locale) {
+			$files = $map[$locale->id] ?? null;
+
+			if ($this->hasFile($files)) {
+				return $files;
+			}
+
+			$locale = $locale->fallback();
+		}
+
+		$files = $map[Field::NEUTRAL_LOCALE] ?? null;
+
+		return $this->hasFile($files) ? $files : [];
+	}
+
+	protected function hasFile(mixed $files): bool
+	{
+		if (!is_array($files)) {
+			return false;
+		}
+
+		foreach ($files as $file) {
+			if (is_array($file) && ($file['file'] ?? null)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	protected function getFileName(int $index): string
 	{
 		return (string) ($this->fileItem($index)['file'] ?? '');
@@ -112,10 +160,15 @@ class File extends Value
 
 	protected function textValue(string $key, int $index): string
 	{
-		$value = $this->fileItem($index)['meta'][$key] ?? null;
+		$item = $this->fileItem($index) ?? [];
+		$value = $item['meta'][$key] ?? null;
+
+		if (!is_array($value) && !isset($this->data['type']) && array_key_exists($key, $item)) {
+			$value = $item[$key];
+		}
 
 		if (!is_array($value)) {
-			return '';
+			return is_string($value) || is_numeric($value) ? (string) $value : '';
 		}
 
 		$value = $this->effective($value);

@@ -63,27 +63,34 @@ final class EntriesValueTest extends TestCase
 	private function entriesData(): array
 	{
 		return [
-			'type' => 'entries',
+			'type' => EntriesField::class,
 			'value' => [
-				[
-					'type' => TestEntry::class,
-					'value' => [
-						'title' => ['type' => 'text', 'value' => ['en' => 'First Item', 'de' => 'Erstes']],
-						'content' => [
-							'type' => 'blocks',
-							'columns' => 12,
-							'value' => ['en' => [], 'de' => []],
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					[
+						'uid' => 'entry1',
+						'type' => TestEntry::class,
+						'fields' => [
+							'title' => [
+								'type' => \Cosray\Field\Text::class,
+								'value' => ['en' => 'First Item', 'de' => 'Erstes'],
+							],
+							'content' => [
+								'type' => \Cosray\Field\Blocks::class,
+								'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+								'value' => ['en' => [], 'de' => []],
+							],
 						],
 					],
-				],
-				[
-					'type' => TestEntry::class,
-					'value' => [
-						'title' => ['type' => 'text', 'value' => ['en' => 'Second Item']],
-						'content' => [
-							'type' => 'blocks',
-							'columns' => 12,
-							'value' => ['en' => [], 'de' => []],
+					[
+						'uid' => 'entry2',
+						'type' => TestEntry::class,
+						'fields' => [
+							'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'Second Item']],
+							'content' => [
+								'type' => \Cosray\Field\Blocks::class,
+								'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+								'value' => ['en' => [], 'de' => []],
+							],
 						],
 					],
 				],
@@ -108,7 +115,10 @@ final class EntriesValueTest extends TestCase
 
 	public function testEntriesValueIssetIsFalseWhenEmpty(): void
 	{
-		$value = $this->createEntriesValue(['type' => 'entries', 'value' => []]);
+		$value = $this->createEntriesValue([
+			'type' => EntriesField::class,
+			'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => []],
+		]);
 
 		$this->assertFalse($value->isset());
 		$this->assertSame(0, $value->count());
@@ -124,8 +134,8 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame($unwrapped, $value->json());
 		$this->assertCount(2, $unwrapped);
 		$this->assertSame(TestEntry::class, $unwrapped[0]['type']);
-		$this->assertArrayHasKey('title', $unwrapped[0]['value']);
-		$this->assertArrayHasKey('content', $unwrapped[0]['value']);
+		$this->assertArrayHasKey('title', $unwrapped[0]['fields']);
+		$this->assertArrayHasKey('content', $unwrapped[0]['fields']);
 	}
 
 	public function testEntryThrowsOnUnknownField(): void

@@ -68,7 +68,13 @@ abstract class Value
 
 	protected function value(): mixed
 	{
-		return $this->effective($this->data['value'] ?? []);
+		$value = $this->data['value'] ?? [];
+
+		if (!is_array($value) && !isset($this->data['type'])) {
+			return $value;
+		}
+
+		return is_array($value) ? $this->effective($value) : null;
 	}
 
 	protected function zxx(): mixed
@@ -85,6 +91,10 @@ abstract class Value
 	protected function meta(string $key, mixed $default = null): mixed
 	{
 		$meta = $this->data['meta'][$key] ?? null;
+
+		if (!is_array($meta) && !isset($this->data['type']) && array_key_exists($key, $this->data)) {
+			return $this->data[$key];
+		}
 
 		if (!is_array($meta)) {
 			return $default;

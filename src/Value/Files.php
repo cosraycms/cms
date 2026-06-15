@@ -7,6 +7,7 @@ namespace Cosray\Value;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Cosray\Schema\TranslateMode;
 use Iterator;
 
 class Files extends Value implements Iterator
@@ -85,5 +86,79 @@ class Files extends Value implements Iterator
 	protected function len(): int
 	{
 		return count($this->files());
+	}
+
+	protected function files(): array
+	{
+		$value = $this->data['value'] ?? [];
+
+		if (
+			!isset($this->data['type'])
+			&& isset($this->data['files'])
+			&& is_array($this->data['files'])
+		) {
+			if (
+				$this->field->translateMode() === TranslateMode::Asymmetric
+				&& !array_is_list($this->data['files'])
+			) {
+				return $this->effectiveFiles($this->data['files']);
+			}
+
+			return $this->data['files'];
+		}
+
+		if (!is_array($value)) {
+			return [];
+		}
+
+		if ($this->field->translateMode() === TranslateMode::Asymmetric) {
+			return $this->effectiveFiles($value);
+		}
+
+		$files = $value[Field::NEUTRAL_LOCALE] ?? [];
+
+		return is_array($files) ? $files : [];
+	}
+
+	protected function fileItem(int $index): ?array
+	{
+		$item = $this->files()[$index] ?? null;
+
+		return is_array($item) ? $item : null;
+	}
+
+	/** @param array<string, mixed> $map */
+	protected function effectiveFiles(array $map): array
+	{
+		$locale = $this->locale;
+
+		while ($locale) {
+			$files = $map[$locale->id] ?? null;
+
+			if ($this->hasFile($files)) {
+				return $files;
+			}
+
+			$locale = $locale->fallback();
+		}
+
+		$files = $map[Field::NEUTRAL_LOCALE] ?? null;
+
+		return $this->hasFile($files) ? $files : [];
+	}
+
+	protected function hasFile(mixed $files): bool
+	{
+		if (!is_array($files)) {
+			return false;
+		}
+
+		foreach ($files as $file) {
+			if (is_array($file) && ($file['file'] ?? null)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

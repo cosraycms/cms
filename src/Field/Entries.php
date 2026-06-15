@@ -206,7 +206,7 @@ class Entries extends Field implements Capability\Limitable
 			$entryFieldStructure = $entryField->structure($entryFieldValue);
 
 			if (is_array($entryFieldData)) {
-				$structure[$name] = array_merge($entryFieldStructure, $entryFieldData);
+				$structure[$name] = array_replace_recursive($entryFieldStructure, $entryFieldData);
 				$structure[$name]['type'] = $entryFieldStructure['type'];
 
 				continue;

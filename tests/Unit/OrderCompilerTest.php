@@ -23,7 +23,10 @@ final class OrderCompilerTest extends TestCase
 	{
 		$oc = new OrderCompiler([]);
 
-		$this->assertSame(OB . "n.content->'test'->'value' ASC", $oc->compile('test'));
+		$this->assertSame(
+			OB . "COALESCE(NULLIF(n.content->'test'->'value'->>'zxx', '')) ASC",
+			$oc->compile('test'),
+		);
 	}
 
 	public function testCompileStatementWithBuiltin(): void
@@ -37,14 +40,14 @@ final class OrderCompilerTest extends TestCase
 	{
 		$oc = new OrderCompiler([]);
 
-		$this->assertSame(OB . "n.content->'test'->'lang' ASC", $oc->compile('test.lang'));
-		$this->assertSame(OB . "n.content->'test'->'lang'->'de' ASC", $oc->compile('test.lang.de'));
+		$this->assertSame(OB . "n.content->'test'->'value'->>'lang' ASC", $oc->compile('test.lang'));
+		$this->assertSame(OB . "n.content->'test'->'lang'->>'de' ASC", $oc->compile('test.lang.de'));
 	}
 
 	public function testCompileMixedStatement(): void
 	{
 		$oc = new OrderCompiler(['field' => 'n.field']);
-		$s = OB . "n.field ASC,\n    n.content->'test'->'value' ASC";
+		$s = OB . "n.field ASC,\n    COALESCE(NULLIF(n.content->'test'->'value'->>'zxx', '')) ASC";
 
 		$this->assertSame($s, $oc->compile('field, test'));
 	}
@@ -53,7 +56,10 @@ final class OrderCompilerTest extends TestCase
 	{
 		$oc = new OrderCompiler([]);
 
-		$this->assertSame(OB . "n.content->'test'->'value' DESC", $oc->compile('test desc'));
+		$this->assertSame(
+			OB . "COALESCE(NULLIF(n.content->'test'->'value'->>'zxx', '')) DESC",
+			$oc->compile('test desc'),
+		);
 	}
 
 	public function testChangeDirectionWithBuiltin(): void
@@ -69,8 +75,8 @@ final class OrderCompilerTest extends TestCase
 		$s = ",\n    ";
 		$result =
 			OB
-			. "n.field DESC{$s}n.content->'test'->'value' ASC{$s}"
-			. "uc.column ASC{$s}n.content->'another'->'lang'->'en' DESC";
+			. "n.field DESC{$s}COALESCE(NULLIF(n.content->'test'->'value'->>'zxx', '')) ASC{$s}"
+			. "uc.column ASC{$s}n.content->'another'->'lang'->>'en' DESC";
 
 		$this->assertSame($result, $oc->compile('field DESC, test asc, column, another.lang.en Desc'));
 	}

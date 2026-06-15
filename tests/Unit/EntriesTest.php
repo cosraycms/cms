@@ -82,18 +82,28 @@ class EntriesTest extends TestCase
 	{
 		$structure = $this->createEntries()->structure([
 			[
+				'uid' => 'entry1',
 				'type' => TestEntry::class,
-				'value' => [
-					'title' => ['type' => 'text', 'value' => ''],
-					'content' => ['type' => 'blocks', 'value' => []],
+				'fields' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => '']],
+					'content' => ['type' => \Cosray\Field\Blocks::class, 'value' => ['en' => []]],
 				],
 			],
 		]);
 
-		$this->assertEquals('entries', $structure['type']);
-		$this->assertSame(TestEntry::class, $structure['value'][0]['type']);
-		$this->assertArrayHasKey('title', $structure['value'][0]['value']);
-		$this->assertArrayHasKey('content', $structure['value'][0]['value']);
+		$this->assertEquals(Entries::class, $structure['type']);
+		$this->assertSame(
+			TestEntry::class,
+			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['type'],
+		);
+		$this->assertArrayHasKey(
+			'title',
+			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields'],
+		);
+		$this->assertArrayHasKey(
+			'content',
+			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields'],
+		);
 	}
 
 	public function testEntriesShapeAcceptsAllowedEntryTypes(): void
@@ -102,27 +112,44 @@ class EntriesTest extends TestCase
 			->createEntries()
 			->shape()
 			->validate([
-				'type' => 'entries',
+				'type' => Entries::class,
 				'value' => [
-					[
-						'type' => TestEntry::class,
-						'value' => [
-							'title' => ['type' => 'text', 'value' => ['en' => 'Title']],
-							'content' => ['type' => 'blocks', 'columns' => 12, 'value' => ['en' => []]],
+					\Cosray\Field\Field::NEUTRAL_LOCALE => [
+						[
+							'uid' => 'entry1',
+							'type' => TestEntry::class,
+							'fields' => [
+								'title' => ['type' => Text::class, 'value' => ['en' => 'Title']],
+								'content' => [
+									'type' => \Cosray\Field\Blocks::class,
+									'value' => ['en' => []],
+									'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+								],
+							],
 						],
-					],
-					[
-						'type' => TestAlternateEntry::class,
-						'value' => [
-							'name' => ['type' => 'text', 'value' => 'Other'],
+						[
+							'uid' => 'entry2',
+							'type' => TestAlternateEntry::class,
+							'fields' => [
+								'name' => [
+									'type' => Text::class,
+									'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'Other'],
+								],
+							],
 						],
 					],
 				],
 			]);
 
 		$this->assertTrue($result->valid());
-		$this->assertSame(TestEntry::class, $result->values()['value'][0]['type']);
-		$this->assertSame('Other', $result->values()['value'][1]['value']['name']['value']);
+		$this->assertSame(
+			TestEntry::class,
+			$result->values()['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['type'],
+		);
+		$this->assertSame(
+			'Other',
+			$result->values()['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][1]['fields']['name']['value'][\Cosray\Field\Field::NEUTRAL_LOCALE],
+		);
 	}
 
 	public function testEntriesShapeRejectsUnknownEntryTypes(): void
@@ -131,14 +158,16 @@ class EntriesTest extends TestCase
 			->createEntries()
 			->shape()
 			->validate([
-				'type' => 'entries',
+				'type' => Entries::class,
 				'value' => [
-					['type' => self::class, 'value' => []],
+					\Cosray\Field\Field::NEUTRAL_LOCALE => [
+						['uid' => 'entry1', 'type' => self::class, 'fields' => []],
+					],
 				],
 			]);
 
 		$this->assertFalse($result->valid());
-		$this->assertTrue($result->has(['value', 0, 'type']));
+		$this->assertTrue($result->has(['value', \Cosray\Field\Field::NEUTRAL_LOCALE, 0, 'type']));
 	}
 
 	public function testEntryFieldsHaveTranslateCapability(): void
@@ -155,15 +184,17 @@ class EntriesTest extends TestCase
 
 		$structure = $entries->structure([
 			[
+				'uid' => 'entry1',
 				'type' => TestEntry::class,
-				'value' => [
-					'title' => ['type' => 'text', 'value' => ''],
-					'content' => ['type' => 'blocks', 'value' => []],
+				'fields' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => '']],
+					'content' => ['type' => \Cosray\Field\Blocks::class, 'value' => ['en' => []]],
 				],
 			],
 		]);
 
-		$titleValue = $structure['value'][0]['value']['title']['value'];
+		$titleValue =
+			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
 		$this->assertIsArray($titleValue, 'Title value should be array with locale keys');
 		$this->assertArrayHasKey('en', $titleValue);
 		$this->assertArrayHasKey('de', $titleValue);
