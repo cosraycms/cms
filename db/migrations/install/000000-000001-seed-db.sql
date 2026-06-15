@@ -30,4 +30,13 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000006-standardize-integer-types.sql', now()),
 	('000000-000007-snake-case-identifiers.sql', now()),
 	('000000-000008-cleanup.sql', now()),
-	('000000-000009-history-tables.sql', now());
+	('000000-000009-history-tables.sql', now()),
+	('000000-000010-rename-grid-to-blocks.sql', now()),
+	('000000-000011-rename-matrix-to-entries.sql', now()),
+	('000000-000012-node-handles.sql', now()),
+	('000000-000013-legacy-uids-to-handles[pgsql].php', now()),
+	('000000-000014-immutable-node-uids.sql', now()),
+	('000000-000015-rewrite-node-asset-paths[pgsql].php', now()),
+	('000000-000016-move-node-asset-directories[pgsql].php', now()),
+	('000000-000017-clear-node-content-history.sql', now()),
+	('000000-000018-normalize-node-content-json[pgsql].php', now());
