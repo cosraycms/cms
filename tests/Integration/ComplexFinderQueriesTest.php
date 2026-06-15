@@ -132,7 +132,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$drafts = $this->db()->execute(
 			"SELECT uid FROM cms.nodes
 			 WHERE type = :type
-			 AND content->'status'->>'value' = 'draft'",
+			 AND content->'status'->'value'->>'zxx' = 'draft'",
 			['type' => $typeId],
 		)->all();
 
@@ -290,7 +290,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$newsNodes = $this->db()->execute(
 			"SELECT uid FROM cms.nodes
 			 WHERE type = :type
-			 AND content->'categories'->'value' @> '[\"news\"]'::jsonb",
+			 AND content->'categories'->'value'->'zxx' @> '[\"news\"]'::jsonb",
 			['type' => $typeId],
 		)->all();
 
@@ -300,7 +300,7 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$featuredNodes = $this->db()->execute(
 			"SELECT uid FROM cms.nodes
 			 WHERE type = :type
-			 AND content->'categories'->'value' @> '[\"featured\"]'::jsonb",
+			 AND content->'categories'->'value'->'zxx' @> '[\"featured\"]'::jsonb",
 			['type' => $typeId],
 		)->all();
 

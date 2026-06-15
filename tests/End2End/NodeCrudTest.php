@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Field\Text;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Uid;
 
@@ -46,7 +47,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => 'crud-test-node',
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Test Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Test Node']],
 			],
 		]);
 		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], $nodePath);
@@ -69,7 +70,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => 'crud-test-unauth-node',
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Unauth Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Unauth Node']],
 			],
 		]);
 		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], $nodePath);
@@ -93,7 +94,7 @@ final class NodeCrudTest extends End2EndTestCase
 				'en' => $nodePath,
 			],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'New Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'New Node']],
 			],
 		];
 
@@ -131,7 +132,7 @@ final class NodeCrudTest extends End2EndTestCase
 				],
 				'generatedPaths' => [],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Handled Node']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Handled Node']],
 				],
 			],
 		]);
@@ -159,7 +160,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => (int) $type['type'],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Original Title']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Original Title']],
 			],
 		]);
 
@@ -174,7 +175,7 @@ final class NodeCrudTest extends End2EndTestCase
 				],
 				'generatedPaths' => [],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Changed Title']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Changed Title']],
 				],
 			],
 		]);
@@ -203,7 +204,7 @@ final class NodeCrudTest extends End2EndTestCase
 				],
 				'generatedPaths' => [],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Generated UID']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Generated UID']],
 				],
 			],
 		]);
@@ -242,7 +243,7 @@ final class NodeCrudTest extends End2EndTestCase
 				],
 				'generatedPaths' => [],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Configured UID']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Configured UID']],
 				],
 			],
 		]);
@@ -267,7 +268,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => 'parent-for-child-create',
 			'type' => (int) $type['type'],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Parent Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Parent Node']],
 			],
 		]);
 
@@ -284,7 +285,7 @@ final class NodeCrudTest extends End2EndTestCase
 			],
 			'generatedPaths' => [],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Child Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Child Node']],
 			],
 		];
 
@@ -322,7 +323,7 @@ final class NodeCrudTest extends End2EndTestCase
 			],
 			'generatedPaths' => [],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Child Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Child Node']],
 			],
 		];
 
@@ -348,7 +349,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Original Title']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Original Title']],
 			],
 		]);
 		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], '/test/' . $uid);
@@ -362,7 +363,7 @@ final class NodeCrudTest extends End2EndTestCase
 				'en' => '/test/' . $uid,
 			],
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Updated Title']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Updated Title']],
 			],
 		];
 
@@ -389,7 +390,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Original Title']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Original Title']],
 			],
 		]);
 		$this->createTestPath($nodeId, '/test/' . $uid);
@@ -404,7 +405,7 @@ final class NodeCrudTest extends End2EndTestCase
 					'en' => '/test/' . $uid,
 				],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Changed Title']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Changed Title']],
 				],
 			],
 		]);
@@ -430,7 +431,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'handle' => 'removed-handle-' . uniqid(),
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Handled Update']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Handled Update']],
 			],
 		]);
 		$this->createTestPath($nodeId, '/test/' . $uid);
@@ -446,7 +447,7 @@ final class NodeCrudTest extends End2EndTestCase
 					'en' => '/test/' . $uid,
 				],
 				'content' => [
-					'title' => ['type' => 'text', 'value' => ['en' => 'Handled Update']],
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Handled Update']],
 				],
 			],
 		]);
@@ -471,7 +472,7 @@ final class NodeCrudTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => $typeId,
 			'content' => [
-				'title' => ['type' => 'text', 'value' => ['en' => 'Delete Node']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Delete Node']],
 			],
 		]);
 		$this->createTestPath($this->createdNodeIds[count($this->createdNodeIds) - 1], '/test/' . $uid);

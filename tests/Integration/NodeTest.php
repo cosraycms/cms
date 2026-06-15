@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Field\Code;
 use Cosray\Tests\IntegrationTestCase;
 
 final class NodeTest extends IntegrationTestCase
@@ -70,8 +71,8 @@ final class NodeTest extends IntegrationTestCase
 		$typeId = $this->createTestType('code-test-page');
 		$content = [
 			'code' => [
-				'type' => 'code',
-				'syntax' => 'php',
+				'type' => Code::class,
+				'meta' => ['syntax' => ['zxx' => 'php']],
 				'value' => ['de' => '<?php echo "Hallo";', 'en' => '<?php echo "Hello";'],
 			],
 		];
@@ -88,8 +89,8 @@ final class NodeTest extends IntegrationTestCase
 		)->one();
 
 		$contentData = json_decode($node['content'], true);
-		$this->assertSame('code', $contentData['code']['type']);
-		$this->assertSame('php', $contentData['code']['syntax']);
+		$this->assertSame(Code::class, $contentData['code']['type']);
+		$this->assertSame('php', $contentData['code']['meta']['syntax']['zxx']);
 		$this->assertSame('<?php echo "Hallo";', $contentData['code']['value']['de']);
 		$this->assertSame('<?php echo "Hello";', $contentData['code']['value']['en']);
 	}

@@ -12,6 +12,9 @@ use Cosray\Tests\TestCase;
 
 final class QueryCompilerTest extends TestCase
 {
+	private const string FIELD_JSON = "COALESCE(n.content->'field'->'value'->'en', n.content->'field'->'value'->'zxx')";
+	private const string FIELD_TEXT = "COALESCE(NULLIF(n.content->'field'->'value'->>'en', ''), NULLIF(n.content->'field'->'value'->>'zxx', ''))";
+
 	private Context $context;
 
 	protected function setup(): void
@@ -30,7 +33,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND builtin = 2",
+			$this->jsonPath('$ == 1') . ' AND builtin = 2',
 			$compiler->compile('field=1 & builtin=2'),
 		);
 	}
@@ -63,20 +66,20 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
 		$this->assertSame(
-			"n.content->'field'->>'value' IN ('v1', 'v2', 'v''3', 'v4')",
+			self::FIELD_TEXT . " IN ('v1', 'v2', 'v''3', 'v4')",
 			$compiler->compile("field @ ['v1', 'v2' , 'v\'3''v4' ,]"),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' IN ('1', '2', '3', '4.513')",
+			self::FIELD_TEXT . " IN ('1', '2', '3', '4.513')",
 			$compiler->compile('field @ [1,2 , 3 4.513]'),
 		);
 
 		$this->assertSame(
-			"n.content->'field'->>'value' NOT IN ('v1', 'v2', 'v3', 'v4')",
+			self::FIELD_TEXT . " NOT IN ('v1', 'v2', 'v3', 'v4')",
 			$compiler->compile("field !@ [, 'v1''v2''v3''v4' ,]"),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' NOT IN ('1', '0.0002', '3', '4')",
+			self::FIELD_TEXT . " NOT IN ('1', '0.0002', '3', '4')",
 			$compiler->compile('field !@ [, 1 0.0002 , 3 , ,4 ,]'),
 		);
 	}
@@ -86,7 +89,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'builtin']);
 
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' OR builtin = 2",
+			$this->jsonPath('$ == 1') . ' OR builtin = 2',
 			$compiler->compile('field=1 | builtin=2'),
 		);
 	}
@@ -96,7 +99,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, ['builtin' => 'n.builtin']);
 
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (n.builtin = 2 OR n.builtin = 3)",
+			$this->jsonPath('$ == 1') . ' AND (n.builtin = 2 OR n.builtin = 3)',
 			$compiler->compile('field=1 & (builtin=2|builtin=3)'),
 		);
 	}
@@ -109,7 +112,7 @@ final class QueryCompilerTest extends TestCase
 		]);
 
 		$this->assertSame(
-			"n.content @@ '$.field.value == 1' AND (t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
+			$this->jsonPath('$ == 1') . " AND (t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
 			$compiler->compile("field=1 & (another='test'|(builtin>2 & builtin<5))"),
 		);
 	}
@@ -122,7 +125,9 @@ final class QueryCompilerTest extends TestCase
 		]);
 
 		$this->assertSame(
-			"(n.builtin = 1 OR n.content @@ '$.field.value == 1')"
+			'(n.builtin = 1 OR '
+			. $this->jsonPath('$ == 1')
+			. ')'
 			. ' AND '
 			. "(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
 			$compiler->compile("(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))"),
@@ -172,7 +177,7 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			"n.content @? '$.field.value'",
+			"n.content @? '$.field.value.*'",
 			$compiler->compile('field'),
 		);
 		$this->assertSame(
@@ -205,5 +210,10 @@ final class QueryCompilerTest extends TestCase
 			"EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
 			$compiler->compile("'/about' = path"),
 		);
+	}
+
+	private function jsonPath(string $path): string
+	{
+		return 'jsonb_path_exists(' . self::FIELD_JSON . ', ' . $this->context->db->quote($path) . ')';
 	}
 }

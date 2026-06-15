@@ -11,6 +11,10 @@ use Cosray\Tests\TestCase;
 
 final class ComparisonTest extends TestCase
 {
+	private const string FIELD_JSON = "COALESCE(n.content->'field'->'value'->'en', n.content->'field'->'value'->'zxx')";
+	private const string FIELD_DE_JSON = "n.content->'field'->'value'->'de'";
+	private const string FIELD_TEXT = "COALESCE(NULLIF(n.content->'field'->'value'->>'en', ''), NULLIF(n.content->'field'->'value'->>'zxx', ''))";
+
 	private Context $context;
 
 	protected function setUp(): void
@@ -29,23 +33,23 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == " \"\" \'\' "\'',
+			$this->jsonPath("\$ == \" \\\"\\\" '' \""),
 			$compiler->compile('field = " \"\" \' "'),
 		);
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "\"\"\""\'',
+			$this->jsonPath("\$ == \"\\\"\\\"\\\"\""),
 			$compiler->compile("field = '\"\"\"'"),
 		);
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "test\'\' \" \" "\'',
+			$this->jsonPath("\$ == \"test'' \\\" \\\" \""),
 			$compiler->compile("field = 'test\\' \" \\\" '"),
 		);
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "test\'\' \"\" \"\" \"\" \"\""\'',
-			$compiler->compile('field = \'test\\\' \\"\\" "" "\\" \\""\''),
+			$this->jsonPath('$ == "test\'\' \\\\"\\\\" \\"\\" \\"\\\\" \\\\"\\""'),
+			$compiler->compile('field = \'test\\\' \\\"\\\" "" "\\\" \\\""\''),
 		);
 	}
 
@@ -53,14 +57,14 @@ final class ComparisonTest extends TestCase
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @@ '$.field.value == 13'", $compiler->compile('field = 13'));
+		$this->assertSame($this->jsonPath('$ == 13'), $compiler->compile('field = 13'));
 		$this->assertSame(
-			"n.content @@ '$.field.value.de == 13'",
+			$this->jsonPath('$ == 13', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = 13'),
 		);
-		$this->assertSame("n.content @@ '$.field.value == 13.73'", $compiler->compile('field = 13.73'));
+		$this->assertSame($this->jsonPath('$ == 13.73'), $compiler->compile('field = 13.73'));
 		$this->assertSame(
-			"n.content @@ '$.field.value.de == 13.73'",
+			$this->jsonPath('$ == 13.73', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = 13.73'),
 		);
 	}
@@ -70,27 +74,27 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "string"\'',
+			$this->jsonPath('$ == "string"'),
 			$compiler->compile('field = "string"'),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "string"\'',
+			$this->jsonPath('$ == "string"'),
 			$compiler->compile("field = 'string'"),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "string"\'',
+			$this->jsonPath('$ == "string"'),
 			$compiler->compile('field = /string/'),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value.de == "string"\'',
+			$this->jsonPath('$ == "string"', self::FIELD_DE_JSON),
 			$compiler->compile("field.value.de = 'string'"),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value.de == "string"\'',
+			$this->jsonPath('$ == "string"', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = "string"'),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value.de == "string"\'',
+			$this->jsonPath('$ == "string"', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = /string/'),
 		);
 	}
@@ -99,14 +103,14 @@ final class ComparisonTest extends TestCase
 	{
 		$compiler = new QueryCompiler($this->context, []);
 
-		$this->assertSame("n.content @@ '$.field.value == false'", $compiler->compile('field = false'));
-		$this->assertSame("n.content @@ '$.field.value == true'", $compiler->compile('field = true'));
+		$this->assertSame($this->jsonPath('$ == false'), $compiler->compile('field = false'));
+		$this->assertSame($this->jsonPath('$ == true'), $compiler->compile('field = true'));
 		$this->assertSame(
-			"n.content @@ '$.field.value.de == false'",
+			$this->jsonPath('$ == false', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = false'),
 		);
 		$this->assertSame(
-			"n.content @@ '$.field.value.de == true'",
+			$this->jsonPath('$ == true', self::FIELD_DE_JSON),
 			$compiler->compile('field.value.de = true'),
 		);
 	}
@@ -116,20 +120,20 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			"n.content @? '$.field.value ? (@ like_regex \"^test$\")'",
+			$this->jsonPath('$ ? (@ like_regex "^test$")'),
 			$compiler->compile('field ~ /^test$/'),
 		);
 		$this->assertSame(
-			"n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'",
+			$this->jsonPath('$ ? (@ like_regex "^test$" flag "i")'),
 			$compiler->compile('field ~* /^test$/'),
 		);
 
 		$this->assertSame(
-			"NOT n.content @? '$.field.value ? (@ like_regex \"^test$\")'",
+			'NOT ' . $this->jsonPath('$ ? (@ like_regex "^test$")'),
 			$compiler->compile('field !~ /^test$/'),
 		);
 		$this->assertSame(
-			"NOT n.content @? '$.field.value ? (@ like_regex \"^test$\" flag \"i\")'",
+			'NOT ' . $this->jsonPath('$ ? (@ like_regex "^test$" flag "i")'),
 			$compiler->compile('field !~* /^test$/'),
 		);
 	}
@@ -144,28 +148,28 @@ final class ComparisonTest extends TestCase
 		$this->assertSame("builtin NOT ILIKE '%iunlike'", $compiler->compile('builtin !~~* /%iunlike/'));
 
 		$this->assertSame(
-			"n.content->'field'->>'value' LIKE '%like\"%'",
+			self::FIELD_TEXT . " LIKE '%like\"%'",
 			$compiler->compile('field ~~ "%like\"%"'),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' ILIKE '%ilike%'",
+			self::FIELD_TEXT . " ILIKE '%ilike%'",
 			$compiler->compile('field ~~* /%ilike%/'),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' NOT LIKE '%unlike'",
+			self::FIELD_TEXT . " NOT LIKE '%unlike'",
 			$compiler->compile('field !~~ /%unlike/'),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' NOT ILIKE '%iunlike'",
+			self::FIELD_TEXT . " NOT ILIKE '%iunlike'",
 			$compiler->compile('field !~~* /%iunlike/'),
 		);
 
 		$this->assertSame(
-			"builtin LIKE n.content->'field'->>'value'",
+			'builtin LIKE ' . self::FIELD_TEXT,
 			$compiler->compile('builtin ~~ field'),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' LIKE builtin",
+			self::FIELD_TEXT . ' LIKE builtin',
 			$compiler->compile('field ~~ builtin'),
 		);
 	}
@@ -182,25 +186,26 @@ final class ComparisonTest extends TestCase
 		$this->assertSame('builtin <= 23', $compiler->compile('builtin<=23'));
 
 		$this->assertSame(
-			'n.content @@ \'$.field.value == "string"\'',
+			$this->jsonPath('$ == "string"'),
 			$compiler->compile('field="string"'),
 		);
 		$this->assertSame(
-			'n.content @@ \'$.field.value != "string"\'',
+			$this->jsonPath('$ != "string"'),
 			$compiler->compile('field!="string"'),
 		);
-		$this->assertSame('n.content @@ \'$.field.value > 23\'', $compiler->compile('field>23'));
-		$this->assertSame('n.content @@ \'$.field.value >= 23\'', $compiler->compile('field>=23'));
-		$this->assertSame('n.content @@ \'$.field.value < 23\'', $compiler->compile('field<23'));
-		$this->assertSame('n.content @@ \'$.field.value <= 23\'', $compiler->compile('field<=23'));
+		$this->assertSame($this->jsonPath('$ > 23'), $compiler->compile('field>23'));
+		$this->assertSame($this->jsonPath('$ >= 23'), $compiler->compile('field>=23'));
+		$this->assertSame($this->jsonPath('$ < 23'), $compiler->compile('field<23'));
+		$this->assertSame($this->jsonPath('$ <= 23'), $compiler->compile('field<=23'));
 
-		$this->assertSame("builtin > n.content->'field'->>'value'", $compiler->compile('builtin>field'));
+		$this->assertSame('builtin > ' . self::FIELD_TEXT, $compiler->compile('builtin>field'));
 		$this->assertSame(
-			"n.content->'field'->>'value' <= builtin",
+			self::FIELD_TEXT . ' <= builtin',
 			$compiler->compile('field<=builtin'),
 		);
 		$this->assertSame(
-			"n.content->'field'->>'value' = n.content->'field2'->>'value'",
+			self::FIELD_TEXT
+			. " = COALESCE(NULLIF(n.content->'field2'->'value'->>'en', ''), NULLIF(n.content->'field2'->'value'->>'zxx', ''))",
 			$compiler->compile('field=field2'),
 		);
 	}
@@ -210,7 +215,7 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			"n.content @@ '$.field.value.* == \"test\"'",
+			$this->jsonPath('$[*] == "test"', "jsonb_path_query_array(n.content->'field'->'value', '$.*')"),
 			$compiler->compile('field.* = "test"'),
 		);
 	}
@@ -236,5 +241,10 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$compiler->compile('"string" = 1');
+	}
+
+	private function jsonPath(string $path, string $field = self::FIELD_JSON): string
+	{
+		return 'jsonb_path_exists(' . $field . ', ' . $this->context->db->quote($path) . ')';
 	}
 }
