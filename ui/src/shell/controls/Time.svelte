@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TextData } from '$types/data';
+	import { ZXX, type TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
@@ -30,7 +30,7 @@
 			type="time"
 			required={field.required}
 			disabled={field.immutable}
-			bind:value={data.value}
+			bind:value={data.value[ZXX]}
 			{oninput} />
 	</div>
 </Field>

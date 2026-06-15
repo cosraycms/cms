@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { setDirty } from '$lib/state';
+	import { ZXX } from '$types/data';
 	import Field from '$shell/Field.svelte';
 	import type { BooleanData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
@@ -25,7 +26,7 @@
 				type="checkbox"
 				class="cms-checkbox"
 				disabled={field.immutable}
-				bind:checked={data.value}
+				bind:checked={data.value[ZXX]}
 				{onchange} />
 		</div>
 		<div class="cms-checkbox-content">

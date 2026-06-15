@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
 	import type { Node } from '$types/data';
 	import type { Field } from '$types/fields';
 	import controls from '$lib/controls';
@@ -43,7 +44,9 @@
 					grid-row: {fieldSpan(field.rows, 'row')}">
 				{#if controls[field.type as keyof typeof controls] && node.content[field.name]}
 					{#if shouldAddField(field.name)}
-						{@const SvelteComponent = controls[field.type as keyof typeof controls]}
+						{@const SvelteComponent = controls[
+							field.type as keyof typeof controls
+						] as Component<any, any, any>}
 						<SvelteComponent
 							{field}
 							node={node.uid}

@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { ZXX } from '$types/data';
 	import type { CodeData } from '$types/data';
 	import type { CodeField } from '$types/fields';
 
+	import { ensureLocales, ensureMetaValue, ensureNeutral } from '$lib/content';
 	import { _ } from '$lib/locale';
 	import { setDirty } from '$lib/state';
 	import { system, systemLocale } from '$lib/sys';
@@ -23,35 +25,25 @@
 	);
 
 	$effect(() => {
-		if (field.translate) {
-			if (!data.value || typeof data.value === 'string') {
-				data.value = {};
-			}
-
-			const translated = data.value as Record<string, string>;
-
-			for (const locale of $system.locales) {
-				if (translated[locale.id] === undefined || translated[locale.id] === null) {
-					translated[locale.id] = '';
-				}
-			}
-		} else if (typeof data.value !== 'string') {
-			data.value = '';
-		}
+		data.value = field.translate
+			? ensureLocales(data.value, '')
+			: ensureNeutral(data.value, '');
+		ensureMetaValue(data, 'syntax', syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX);
 	});
 
 	$effect(() => {
+		const syntax = ensureMetaValue(data, 'syntax', syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX);
 		const normalized = normalizeCodeSyntax(
-			data.syntax ?? syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX,
+			(syntax[ZXX] as string | undefined) ?? syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX,
 		);
 
 		if (!syntaxOptions.includes(normalized)) {
-			data.syntax = syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX;
+			syntax[ZXX] = syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX;
 			return;
 		}
 
-		if (data.syntax !== normalized) {
-			data.syntax = normalized;
+		if (syntax[ZXX] !== normalized) {
+			syntax[ZXX] = normalized;
 		}
 	});
 
@@ -76,7 +68,7 @@
 			<select
 				class="cms-select cms-code-control-syntax-select"
 				id={`${field.name}-syntax`}
-				bind:value={data.syntax}
+				bind:value={data.meta.syntax[ZXX]}
 				onchange={onSyntaxChange}>
 				{#each syntaxOptions as syntaxOption}
 					<option value={syntaxOption}>{syntaxOption}</option>
@@ -90,16 +82,16 @@
 					<CodeEditor
 						name={field.name}
 						required={field.required}
-						bind:syntax={data.syntax}
-						bind:value={(data.value as Record<string, string>)[locale.id]} />
+						bind:syntax={data.meta.syntax[ZXX]}
+						bind:value={data.value[locale.id]} />
 				{/if}
 			{/each}
 		{:else}
 			<CodeEditor
 				name={field.name}
 				required={field.required}
-				bind:syntax={data.syntax}
-				bind:value={data.value as string} />
+				bind:syntax={data.meta.syntax[ZXX]}
+				bind:value={data.value[ZXX]} />
 		{/if}
 	</div>
 </Field>

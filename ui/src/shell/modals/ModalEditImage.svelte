@@ -14,19 +14,23 @@
 	};
 
 	let { close, apply, asset = $bindable(), translate, hasAlt }: Props = $props();
+	asset.meta ??= {};
+	asset.meta.title ??= { zxx: '' };
+	asset.meta.alt ??= { zxx: '' };
+	let meta = $derived(asset.meta);
 </script>
 
 <ModalHeader>{_('Bildtitel und Alt-Text')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-edit-image-fields">
 		<Input
-			bind:value={asset.title}
+			bind:value={meta.title}
 			label={_('Titel')}
 			id="edit_image_title"
 			{translate} />
 		{#if hasAlt}
 			<Input
-				bind:value={asset.alt}
+				bind:value={meta.alt}
 				label={_('Alt-Text')}
 				id="edit_image_alt"
 				{translate}

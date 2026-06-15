@@ -2,7 +2,7 @@
 	import type { FileItem, UploadType } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
 	import type { SortableEvent } from 'sortablejs';
-	import { getContext } from 'svelte';
+	import { getContext, type Component } from 'svelte';
 	import Sortable from 'sortablejs';
 	import { onMount } from 'svelte';
 	import Image from '$shell/Image.svelte';
@@ -17,7 +17,7 @@
 		type: UploadType;
 		loading: boolean;
 		path: string;
-		remove: (index: number) => void;
+		remove: (index: number | null) => void;
 	};
 
 	let {
@@ -30,13 +30,17 @@
 		remove,
 	}: Props = $props();
 	let { open, close } = getContext<ModalFunctions>('modal');
-	let sorterElement: HTMLElement = $state();
+	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
 		if (sorterElement) {
 			Sortable.create(sorterElement, {
 				animation: 200,
 				onUpdate: function (event: SortableEvent) {
+					if (event.oldIndex === undefined || event.newIndex === undefined) {
+						return;
+					}
+
 					const tmp = assets[event.oldIndex];
 
 					assets.splice(event.oldIndex, 1);
@@ -53,7 +57,7 @@
 		};
 
 		open(
-			ModalEditImage,
+			ModalEditImage as Component,
 			{
 				asset: assets[index],
 				close,
@@ -111,7 +115,6 @@
 		{path}
 		file={assets[0]}
 		remove={() => remove(null)}
-		edit={() => edit(0, true)}
 		{loading} />
 {:else if assets && assets.length > 0}
 	<File

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TextData } from '$types/data';
+	import { ZXX, type TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
@@ -28,7 +28,7 @@
 			id={field.name}
 			name={field.name}
 			required={field.required}
-			bind:value={data.value}
+			bind:value={data.value[ZXX]}
 			{onchange}>
 			{#each field.options as option}
 				{#if typeof option === 'object'}

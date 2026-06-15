@@ -33,6 +33,6 @@
 			path="{$system.prefix}/media/image/node/{node}"
 			name={field.name + '_' + index}
 			translate={false}
-			bind:assets={item.files} />
+			bind:assets={item.value} />
 	{/if}
 </div>

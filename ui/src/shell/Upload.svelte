@@ -6,7 +6,7 @@
 	import type { Toast } from '$lib/toast';
 	import type { ModalFunctions } from '$shell/modal';
 
-	import { getContext } from 'svelte';
+	import { getContext, type Component } from 'svelte';
 	import { _ } from '$lib/locale';
 	import { system } from '$lib/sys';
 	import { setDirty } from '$lib/state';
@@ -27,7 +27,7 @@
 		required?: boolean;
 		disabled?: boolean;
 		disabledMsg?: string;
-		callback?: () => void | null;
+		callback?: (() => void) | null;
 		inline?: boolean;
 	};
 
@@ -93,7 +93,7 @@
 
 		if (!multiple && result.length > 1) {
 			open(
-				Dialog,
+				Dialog as Component,
 				{
 					title: _('Fehler'),
 					body: _('In diesem Feld ist nur eine einzelne Datei erlaubt.'),
@@ -127,7 +127,7 @@
 
 		if (slotsLeft === 0) {
 			open(
-				Dialog,
+				Dialog as Component,
 				{
 					title: _('Fehler'),
 					body:
@@ -147,7 +147,7 @@
 
 		if (files.length > slotsLeft) {
 			open(
-				Dialog,
+				Dialog as Component,
 				{
 					title: _('Fehler'),
 					body:
@@ -184,13 +184,15 @@
 	}
 
 	function getTitleAltValue() {
+		const result: Record<string, string> = {};
+
 		if (translate) {
-			const result: Record<string, string> = {};
 			$system.locales.map(locale => (result[locale.id] = ''));
-			return result;
+		} else {
+			result.zxx = '';
 		}
 
-		return '';
+		return result;
 	}
 
 	function getError(item: UploadResponse): Toast {
@@ -209,21 +211,27 @@
 			if (files.length > 0) {
 				loading = true;
 
-				let responses = await Promise.all(
-					files.map(async (file: File) => {
-						return upload(file).then(resp => resp.data);
-					}),
-				);
+				let responses = (
+					await Promise.all(
+						files.map(async (file: File) => {
+							return upload(file).then(
+								resp => resp?.data as UploadResponse | undefined,
+							);
+						}),
+					)
+				).filter((item): item is UploadResponse => item !== undefined);
 
 				const value = getTitleAltValue();
 
 				if (multiple) {
-					responses.map((item: UploadResponse) => {
+					responses.map(item => {
 						if (item.ok) {
 							assets.push({
-								alt: value,
-								title: value,
 								file: item.file,
+								meta: {
+									alt: { ...value },
+									title: { ...value },
+								},
 							});
 							assets = [...assets];
 						} else {
@@ -236,9 +244,11 @@
 					if (item.ok) {
 						assets = [
 							{
-								alt: value,
-								title: value,
 								file: item.file,
+								meta: {
+									alt: { ...value },
+									title: { ...value },
+								},
 							},
 						];
 					} else {

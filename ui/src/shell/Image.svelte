@@ -2,7 +2,7 @@
 	import type { FileItem } from '$types/data';
 	import type { ModalFunctions } from '$shell/modal';
 
-	import { getContext } from 'svelte';
+	import { getContext, type Component } from 'svelte';
 	import { system } from '$lib/sys';
 	import { _ } from '$lib/locale';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
@@ -35,14 +35,15 @@
 	let { open, close } = getContext<ModalFunctions>('modal');
 
 	let hover = $state(false);
-	let ext = $derived(image.file.split('.').pop()?.toLowerCase());
-	let orig = $derived(`${path}/${image.file}`);
-	let thumb = $derived(ext === 'svg' ? orig : `${path}/${thumbIt(image.file)}`);
+	let filename = $derived(image.file ?? '');
+	let ext = $derived(filename.split('.').pop()?.toLowerCase());
+	let orig = $derived(`${path}/${filename}`);
+	let thumb = $derived(ext === 'svg' ? orig : `${path}/${thumbIt(filename)}`);
 	let title = $derived(getTitle(image, 'title') || getTitle(image, 'alt'));
 
 	function preview() {
 		open(
-			ImagePreview,
+			ImagePreview as Component,
 			{
 				close,
 				image: orig,
@@ -56,15 +57,15 @@
 	}
 
 	function getTitle(image: FileItem, key: string) {
-		if (image[key]) {
-			if (typeof image[key] === 'string') {
-				return image[key];
-			}
+		const value = image.meta?.[key];
 
-			for (const locale of $system.locales) {
-				if (image[key][locale.id]) {
-					return image[key][locale.id];
-				}
+		if (value?.zxx) {
+			return value.zxx;
+		}
+
+		for (const locale of $system.locales) {
+			if (value?.[locale.id]) {
+				return value[locale.id];
 			}
 		}
 

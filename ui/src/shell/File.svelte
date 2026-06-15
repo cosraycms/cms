@@ -20,15 +20,15 @@
 	let title = $derived(getTitle(asset));
 
 	function getTitle(asset: FileItem) {
-		if (asset.title) {
-			if (typeof asset.title === 'string') {
-				return asset.title;
-			}
+		const value = asset.meta?.title;
 
-			for (const locale of $system.locales) {
-				if (asset.title[locale.id]) {
-					return asset.title[locale.id];
-				}
+		if (value?.zxx) {
+			return value.zxx;
+		}
+
+		for (const locale of $system.locales) {
+			if (value?.[locale.id]) {
+				return value[locale.id];
 			}
 		}
 

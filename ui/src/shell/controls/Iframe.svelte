@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { TextData } from '$types/data';
+	import { ZXX, type TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
+	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { setDirty } from '$lib/state';
 	import { system, systemLocale } from '$lib/sys';
 	import Field from '$shell/Field.svelte';
@@ -14,6 +15,11 @@
 
 	let { field, data = $bindable() }: Props = $props();
 	let lang = $state(systemLocale($system));
+	$effect(() => {
+		data.value = field.translate
+			? ensureLocales(data.value, '')
+			: ensureNeutral(data.value, '');
+	});
 
 	function oninput() {
 		setDirty();
@@ -47,7 +53,7 @@
 				id={field.name}
 				name={field.name}
 				required={field.required}
-				bind:value={data.value}
+				bind:value={data.value[ZXX]}
 				{oninput}>
 			</textarea>
 		{/if}

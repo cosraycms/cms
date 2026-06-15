@@ -3,11 +3,8 @@
 		Block,
 		BlockBase,
 		BlockText as BlockTextData,
-		BlockRichText as BlockRichTextData,
 		BlockImage as BlockImageData,
-		BlockImages as BlockImagesData,
 		BlockYoutube as BlockYoutubeData,
-		BlockIframe as BlockIframeData,
 		BlockType,
 	} from '$types/data';
 	import type { BlocksField } from '$types/fields';
@@ -45,6 +42,12 @@
 		image: BlockImage,
 		richtext: BlockRichText,
 		text: BlockText,
+		h1: BlockText,
+		h2: BlockText,
+		h3: BlockText,
+		h4: BlockText,
+		h5: BlockText,
+		h6: BlockText,
 		youtube: BlockYoutube,
 		images: BlockImages,
 		video: BlockVideo,
@@ -67,20 +70,16 @@
 			rowspan: 1,
 			colstart: null,
 		};
-		if (type === 'richtext') {
-			(content as BlockRichTextData).value = '';
-		} else if (type === 'text') {
-			(content as BlockTextData).value = '';
-		} else if (type === 'image') {
-			(content as BlockImageData).files = [];
-		} else if (type === 'images') {
-			(content as BlockImagesData).files = [];
+		if (['richtext', 'text', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(type)) {
+			(content as BlockTextData).value = { zxx: '' };
+		} else if (type === 'image' || type === 'images' || type === 'video') {
+			(content as BlockImageData).value = [];
 		} else if (type === 'youtube') {
-			(content as BlockYoutubeData).value = '';
-			(content as BlockYoutubeData).aspectRatioX = 16;
-			(content as BlockYoutubeData).aspectRatioY = 9;
-		} else if (type === 'iframe') {
-			(content as BlockIframeData).value = '';
+			(content as BlockYoutubeData).value = { zxx: '' };
+			(content as BlockYoutubeData).meta = {
+				aspectRatioX: { zxx: 16 },
+				aspectRatioY: { zxx: 9 },
+			};
 		}
 
 		if (!data) {

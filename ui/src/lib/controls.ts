@@ -9,10 +9,11 @@ import Image from '$shell/controls/Image.svelte';
 import Entries from '$shell/controls/Entries.svelte';
 import Number from '$shell/controls/Number.svelte';
 import Option from '$shell/controls/Option.svelte';
-import Picture from '$shell/controls/Picture.svelte';
 import Text from '$shell/controls/Text.svelte';
 import Textarea from '$shell/controls/Textarea.svelte';
 import Time from '$shell/controls/Time.svelte';
+import Video from '$shell/controls/Video.svelte';
+import Iframe from '$shell/controls/Iframe.svelte';
 
 export default {
 	'Cosray\\Field\\Checkbox': Checkbox,
@@ -26,8 +27,10 @@ export default {
 	'Cosray\\Field\\Entries': Entries,
 	'Cosray\\Field\\Number': Number,
 	'Cosray\\Field\\Option': Option,
-	'Cosray\\Field\\Picture': Picture,
 	'Cosray\\Field\\Text': Text,
+	'Cosray\\Field\\Youtube': Text,
 	'Cosray\\Field\\Textarea': Textarea,
 	'Cosray\\Field\\Time': Time,
+	'Cosray\\Field\\Video': Video,
+	'Cosray\\Field\\Iframe': Iframe,
 };

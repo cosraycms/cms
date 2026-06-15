@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ZXX } from '$types/data';
 	import { system, systemLocale } from '$lib/sys';
 	import Field from '$shell/Field.svelte';
 	import LabelDiv from '$shell/LabelDiv.svelte';
@@ -19,17 +20,15 @@
 	function blocks(lang?: string): Block[] {
 		const value = data.value;
 
-		if (Array.isArray(value)) {
-			return value;
-		}
+		const key = field.translate ? lang : ZXX;
 
-		if (lang === undefined) {
+		if (key === undefined) {
 			return [];
 		}
 
-		value[lang] ??= [];
+		value[key] ??= [];
 
-		return value[lang];
+		return value[key];
 	}
 </script>
 

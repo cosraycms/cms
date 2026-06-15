@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { BlockRichText } from '$types/data';
+	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {
 		field: BlocksField;
-		item: BlockRichText;
+		item: BlockText;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};
@@ -27,6 +27,6 @@
 		<RichTextEditor
 			required={false}
 			name={field.name + '_' + index}
-			bind:value={item.value} />
+			bind:value={item.value[ZXX]} />
 	{/if}
 </div>

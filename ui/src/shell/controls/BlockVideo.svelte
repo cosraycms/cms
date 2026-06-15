@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { BlockVideo } from '$types/data';
+	import type { BlockImage } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import Upload from '$shell/Upload.svelte';
@@ -8,7 +8,7 @@
 
 	type Props = {
 		field: BlocksField;
-		item: BlockVideo;
+		item: BlockImage;
 		node: string;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
@@ -33,6 +33,6 @@
 			path="{$system.prefix}/media/video/node/{node}"
 			name={field.name + '_' + index}
 			translate={false}
-			bind:assets={item.files} />
+			bind:assets={item.value} />
 	{/if}
 </div>

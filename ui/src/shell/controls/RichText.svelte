@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { system, systemLocale } from '$lib/sys';
 	import Field from '$shell/Field.svelte';
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 	import LabelDiv from '$shell/LabelDiv.svelte';
-	import type { TextData } from '$types/data';
+	import { ZXX, type TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
 	type Props = {
@@ -14,6 +15,11 @@
 	let { field, data = $bindable() }: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	$effect(() => {
+		data.value = field.translate
+			? ensureLocales(data.value, '')
+			: ensureNeutral(data.value, '');
+	});
 </script>
 
 <Field {field}>
@@ -41,7 +47,7 @@
 			<RichTextEditor
 				name={field.name}
 				required={field.required}
-				bind:value={data.value} />
+				bind:value={data.value[ZXX]} />
 		{/if}
 	</div>
 </Field>

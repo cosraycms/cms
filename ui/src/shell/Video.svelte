@@ -14,7 +14,8 @@
 
 	let { path, file, loading, upload, remove, class: classes = '' }: Props = $props();
 
-	let ext = $derived(file.file.split('.').pop()?.toLowerCase());
+	let filename = $derived(file.file ?? '');
+	let ext = $derived(filename.split('.').pop()?.toLowerCase());
 </script>
 
 <div
@@ -29,7 +30,7 @@
 			class="cms-video-player">
 			<track kind="captions" />
 			<source
-				src="{path}/{file.file}"
+				src="{path}/{filename}"
 				type="video/{ext}" />
 		</video>
 		<div class="controls cms-video-controls">

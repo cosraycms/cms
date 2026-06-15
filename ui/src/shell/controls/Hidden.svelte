@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TextData } from '$types/data';
+	import { ZXX, type TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
 	import Field from '$shell/Field.svelte';
@@ -24,6 +24,6 @@
 			name={field.name}
 			type="text"
 			required={field.required}
-			bind:value={data.value} />
+			bind:value={data.value[ZXX]} />
 	</div>
 </Field>

@@ -3,7 +3,7 @@
 	import { system, localesMap } from '$lib/sys';
 
 	type Props = {
-		lang: string;
+		lang: string | null;
 	};
 
 	let { lang = $bindable() }: Props = $props();

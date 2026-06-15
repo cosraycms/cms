@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { BlockYoutube } from '$types/data';
+	import { ZXX, type BlockYoutube } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
@@ -17,11 +17,17 @@
 	let { field, item = $bindable(), index, children }: Props = $props();
 
 	let showSettings = $state(false);
-	let x = $derived(item.aspectRatioX ? item.aspectRatioX : 16);
-	let y = $derived(item.aspectRatioY ? item.aspectRatioY : 9);
+	$effect(() => {
+		item.meta ??= { aspectRatioX: { [ZXX]: 16 }, aspectRatioY: { [ZXX]: 9 } };
+		item.meta.aspectRatioX ??= { [ZXX]: 16 };
+		item.meta.aspectRatioY ??= { [ZXX]: 9 };
+		item.value ??= { [ZXX]: '' };
+	});
+	let x = $derived(item.meta.aspectRatioX[ZXX] ? item.meta.aspectRatioX[ZXX] : 16);
+	let y = $derived(item.meta.aspectRatioY[ZXX] ? item.meta.aspectRatioY[ZXX] : 9);
 	let percent = $derived(parseFloat(((y / x) * 100).toFixed(2)));
 
-	if (!item.value) {
+	if (!item.value?.[ZXX]) {
 		showSettings = true;
 	}
 
@@ -46,7 +52,7 @@
 					type="text"
 					maxlength="20"
 					placeholder={_('Fügen Sie hier die Youtube-ID ein')}
-					bind:value={item.value}
+					bind:value={item.value[ZXX]}
 					{oninput} />
 			</div>
 		</Setting>
@@ -62,7 +68,7 @@
 					max="100"
 					min="1"
 					placeholder={_('Breite')}
-					bind:value={item.aspectRatioX}
+					bind:value={item.meta.aspectRatioX[ZXX]}
 					{oninput} />
 				<input
 					id={field.name + '_' + index + '_y'}
@@ -71,7 +77,7 @@
 					max="100"
 					min="1"
 					placeholder={_('Höhe')}
-					bind:value={item.aspectRatioY}
+					bind:value={item.meta.aspectRatioY[ZXX]}
 					{oninput} />
 			</div>
 		</Setting>
@@ -83,7 +89,7 @@
 				<iframe
 					class="youtube cms-blocks-youtube-iframe"
 					title="Youtube Video"
-					src="https://www.youtube.com/embed/{item.value}"
+					src="https://www.youtube.com/embed/{item.value[ZXX]}"
 					allowfullscreen>
 				</iframe>
 			</div>

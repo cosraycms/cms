@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { system, systemLocale } from '$lib/sys';
+	import { ZXX, type LocaleMap } from '$types/data';
 	import { setDirty } from '$lib/state';
 	import Label from '$shell/Label.svelte';
 
 	type Props = {
-		value: string | Record<string, string>;
+		value: string | LocaleMap<string>;
 		label: string;
 		id: string;
 		required?: boolean;
@@ -22,6 +23,7 @@
 	}: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	let localized = $derived(value as LocaleMap<string>);
 
 	function oninput() {
 		setDirty();
@@ -48,11 +50,11 @@
 						type="text"
 						{required}
 						autocomplete="off"
-						bind:value={value[locale.id]}
+						bind:value={localized[locale.id]}
 						{oninput} />
 				{/if}
 			{/each}
-		{:else}
+		{:else if typeof value === 'string'}
 			<input
 				class="cms-input"
 				{id}
@@ -61,6 +63,16 @@
 				{required}
 				autocomplete="off"
 				bind:value
+				{oninput} />
+		{:else}
+			<input
+				class="cms-input"
+				{id}
+				name={id}
+				type="text"
+				{required}
+				autocomplete="off"
+				bind:value={value[ZXX]}
 				{oninput} />
 		{/if}
 	</div>

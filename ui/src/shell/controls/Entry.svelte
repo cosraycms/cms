@@ -26,12 +26,9 @@
 
 	function getEntryTitle(): string {
 		for (const entryField of entryFields) {
-			const fieldData = entry.value[entryField.name] as Data | undefined;
+			const fieldData = entry.fields[entryField.name] as Data | undefined;
 			if (fieldData && 'value' in fieldData) {
 				const value = fieldData.value;
-				if (typeof value === 'string' && value.trim()) {
-					return value.substring(0, 50) + (value.length > 50 ? '...' : '');
-				}
 				if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
 					const record = value as Record<string, unknown>;
 					for (const locale of Object.keys(record)) {
@@ -78,7 +75,7 @@
 		<div class="entry-body">
 			{#if entryType}
 				{#each entryFields as entryField (entryField.name)}
-					{#if !entryField.hidden && entry.value[entryField.name]}
+					{#if !entryField.hidden && entry.fields[entryField.name]}
 						{@const SvelteComponent = controls[
 							entryField.type as keyof typeof controls
 						] as AnyComponent | undefined}
@@ -92,7 +89,7 @@
 								<SvelteComponent
 									field={entryField}
 									{node}
-									bind:data={entry.value[entryField.name]} />
+									bind:data={entry.fields[entryField.name]} />
 							</div>
 						{:else}
 							<div

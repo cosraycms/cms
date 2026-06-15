@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ensureFiles } from '$lib/content';
 	import { system, systemLocale } from '$lib/sys';
 	import Field from '$shell/Field.svelte';
 	import Upload from '$shell/Upload.svelte';
@@ -10,12 +11,15 @@
 		field: ImageField;
 		data: FileData;
 		node: string;
-		type: 'image' | 'file';
+		type: 'image' | 'file' | 'video';
 	};
 
 	let { field, data = $bindable(), node, type }: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	$effect(() => {
+		data.value = ensureFiles(data.value);
+	});
 </script>
 
 <Field
@@ -27,7 +31,7 @@
 		{field.label}
 	</LabelDiv>
 	<div class="cms-field-content">
-		{#if field.translateMode === 'asymmetric' && !Array.isArray(data.files)}
+		{#if field.translateMode === 'asymmetric'}
 			{#each $system.locales as locale (locale.id)}
 				{#if locale.id === lang}
 					<Upload
@@ -37,10 +41,10 @@
 						required={field.required}
 						name={field.name}
 						translate={false}
-						bind:assets={data.files[locale.id]} />
+						bind:assets={data.value[locale.id]} />
 				{/if}
 			{/each}
-		{:else if Array.isArray(data.files)}
+		{:else}
 			<Upload
 				{type}
 				limit={field.limit}
@@ -48,7 +52,7 @@
 				required={field.required}
 				name={field.name}
 				translate={field.translate}
-				bind:assets={data.files} />
+				bind:assets={data.value.zxx} />
 		{/if}
 	</div>
 </Field>

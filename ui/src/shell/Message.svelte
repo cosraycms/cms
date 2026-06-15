@@ -10,7 +10,7 @@
 		type: any;
 		text?: string;
 		narrow?: boolean;
-		children: Snippet;
+		children?: Snippet;
 	};
 
 	let { type, text = '', narrow = false, children }: Props = $props();
@@ -74,7 +74,7 @@
 				<div class="cms-message-text {getTextToneClass()}">
 					{#if text}
 						{@html text}
-					{:else}
+					{:else if children}
 						{@render children()}
 					{/if}
 				</div>

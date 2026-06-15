@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { GenericFieldData, EntriesData, EntryData } from '$types/data';
+	import { ZXX, type GenericFieldData, type EntriesData, type EntryData } from '$types/data';
 	import type { Field as FieldType, EntriesField, EntryType } from '$types/fields';
 
 	import { _ } from '$lib/locale';
 	import { setDirty } from '$lib/state';
+	import { uid } from '$lib/content';
 	import { system } from '$lib/sys';
 	import { get } from 'svelte/store';
 	import { flip } from 'svelte/animate';
@@ -23,23 +24,24 @@
 
 	function createEmptyEntry(entryType: EntryType): EntryData {
 		const entry: EntryData = {
+			uid: uid(),
 			type: entryType.type,
-			value: {},
+			fields: {},
 		};
 
 		for (const entryField of entryType.fields) {
-			entry.value[entryField.name] = createDefaultValue(entryField);
+			entry.fields[entryField.name] = createDefaultValue(entryField);
 		}
 
 		return entry;
 	}
 
-	function createTranslatableValue(): Record<string, null> {
+	function createTranslatableValue(): Record<string, string> {
 		const sys = get(system);
-		const value: Record<string, null> = {};
+		const value: Record<string, string> = {};
 
 		for (const locale of sys.locales) {
-			value[locale.id] = null;
+			value[locale.id] = '';
 		}
 
 		return value;
@@ -66,53 +68,50 @@
 				? entryField.syntaxes
 				: ['plaintext'];
 
+		const neutral = (value: unknown) => ({ [ZXX]: value });
 		const typeMap: Record<string, () => GenericFieldData> = {
 			'Cosray\\Field\\Text': () => ({
-				type: 'text',
-				value: isSymmetric ? createTranslatableValue() : '',
+				type: entryField.type,
+				value: isSymmetric ? createTranslatableValue() : neutral(''),
 			}),
 			'Cosray\\Field\\Textarea': () => ({
-				type: 'text',
-				value: isSymmetric ? createTranslatableValue() : '',
+				type: entryField.type,
+				value: isSymmetric ? createTranslatableValue() : neutral(''),
 			}),
 			'Cosray\\Field\\RichText': () => ({
-				type: 'richtext',
-				value: isSymmetric ? createTranslatableValue() : '',
+				type: entryField.type,
+				value: isSymmetric ? createTranslatableValue() : neutral(''),
 			}),
 			'Cosray\\Field\\Code': () => ({
-				type: 'code',
-				syntax: codeSyntaxes[0],
-				value: isSymmetric ? createTranslatableValue() : '',
+				type: entryField.type,
+				meta: { syntax: neutral(codeSyntaxes[0]) },
+				value: isSymmetric ? createTranslatableValue() : neutral(''),
 			}),
-			'Cosray\\Field\\Checkbox': () => ({ type: 'checkbox', value: false }),
-			'Cosray\\Field\\Number': () => ({ type: 'number', value: 0 }),
-			'Cosray\\Field\\Date': () => ({ type: 'date', value: '' }),
-			'Cosray\\Field\\Time': () => ({ type: 'time', value: '' }),
+			'Cosray\\Field\\Checkbox': () => ({ type: entryField.type, value: neutral(false) }),
+			'Cosray\\Field\\Number': () => ({ type: entryField.type, value: neutral(0) }),
+			'Cosray\\Field\\Date': () => ({ type: entryField.type, value: neutral('') }),
+			'Cosray\\Field\\Time': () => ({ type: entryField.type, value: neutral('') }),
 			'Cosray\\Field\\Image': () => ({
-				type: 'image',
-				files: isAsymmetric ? createLocalizedList() : [],
-			}),
-			'Cosray\\Field\\Picture': () => ({
-				type: 'picture',
-				files: isAsymmetric ? createLocalizedList() : [],
+				type: entryField.type,
+				value: isAsymmetric ? createLocalizedList() : neutral([]),
 			}),
 			'Cosray\\Field\\File': () => ({
-				type: 'file',
-				files: isAsymmetric ? createLocalizedList() : [],
+				type: entryField.type,
+				value: isAsymmetric ? createLocalizedList() : neutral([]),
 			}),
 			'Cosray\\Field\\Video': () => ({
-				type: 'video',
-				files: isAsymmetric ? createLocalizedList() : [],
+				type: entryField.type,
+				value: isAsymmetric ? createLocalizedList() : neutral([]),
 			}),
 			'Cosray\\Field\\Blocks': () => ({
-				type: 'blocks',
-				columns: 12,
-				value: isAsymmetric ? createLocalizedList() : [],
+				type: entryField.type,
+				meta: { columns: neutral(12), minCellWidth: neutral(2) },
+				value: isAsymmetric ? createLocalizedList() : neutral([]),
 			}),
-			'Cosray\\Field\\Entries': () => ({ type: 'entries', value: [] }),
-			'Cosray\\Field\\Option': () => ({ type: 'option', value: '' }),
-			'Cosray\\Field\\Iframe': () => ({ type: 'iframe', value: '' }),
-			'Cosray\\Field\\Hidden': () => ({ type: 'hidden', value: '' }),
+			'Cosray\\Field\\Entries': () => ({ type: entryField.type, value: neutral([]) }),
+			'Cosray\\Field\\Option': () => ({ type: entryField.type, value: neutral('') }),
+			'Cosray\\Field\\Iframe': () => ({ type: entryField.type, value: neutral('') }),
+			'Cosray\\Field\\Hidden': () => ({ type: entryField.type, value: neutral('') }),
 		};
 
 		const factory = typeMap[entryField.type];
@@ -120,15 +119,16 @@
 			return factory();
 		}
 
-		return { type: 'text', value: isSymmetric ? createTranslatableValue() : '' };
+		return {
+			type: entryField.type,
+			value: isSymmetric ? createTranslatableValue() : { [ZXX]: '' },
+		};
 	}
 
 	function addEntry(entryType: EntryType) {
-		if (!data.value) {
-			data.value = [];
-		}
-
-		data.value.push(createEmptyEntry(entryType));
+		data.value ??= { [ZXX]: [] };
+		data.value[ZXX] ??= [];
+		data.value[ZXX].push(createEmptyEntry(entryType));
 		data.value = data.value;
 		setDirty();
 	}
@@ -147,14 +147,14 @@
 		{field.label}
 	</LabelDiv>
 	<div class="entries-field">
-		{#if data.value && data.value.length > 0}
+		{#if data.value?.[ZXX] && data.value[ZXX].length > 0}
 			<div class="entries-items">
-				{#each data.value as entry, index (entry)}
+				{#each data.value[ZXX] as entry, index (entry.uid)}
 					<div animate:flip={{ duration: 300 }}>
 						<Entry
 							{field}
-							bind:data={data.value}
-							bind:entry={data.value[index]}
+							bind:data={data.value[ZXX]}
+							bind:entry={data.value[ZXX][index]}
 							{node}
 							{index} />
 					</div>

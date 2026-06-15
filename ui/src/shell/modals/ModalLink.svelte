@@ -8,8 +8,16 @@
 	import File from './ModalLinkFile.svelte';
 	import Image from './ModalLinkImage.svelte';
 	import Button from '$shell/Button.svelte';
+	import type { FileItem } from '$types/data';
 
-	let { close, add, value = $bindable(), blank = $bindable() } = $props();
+	type Props = {
+		close: () => void;
+		add: (value: string, blank: boolean) => void;
+		value: string;
+		blank: boolean;
+	};
+
+	let { close, add, value = $bindable(), blank = $bindable() }: Props = $props();
 
 	let currentTab = $state('manually');
 
@@ -24,8 +32,20 @@
 		value = path;
 	}
 
-	function changeTab(tab) {
+	function changeTab(tab: string) {
 		return () => (currentTab = tab);
+	}
+
+	function media(field: string): FileItem[] {
+		const content = $node?.content[field];
+
+		if (!content || !('value' in content)) {
+			return [];
+		}
+
+		const value = content.value.zxx;
+
+		return Array.isArray(value) ? (value as FileItem[]) : [];
 	}
 </script>
 
@@ -63,41 +83,37 @@
 		</div>
 		<div class="files cms-modal-link-files">
 			{#if currentTab === 'images'}
-				{#if $fields}
+				{#if $fields && $node}
 					<div class="cms-modal-link-images-grid">
 						{#each $fields as field (field)}
 							{#if field.type === 'Cosray\\Field\\Image'}
-								{#if $node.content[field.name] && $node.content[field.name].files}
-									{#each $node.content[field.name].files as file}
-										{#if file.file}
-											<Image
-												node={$node.uid}
-												file={file.file}
-												{clickFile}
-												bind:current={value} />
-										{/if}
-									{/each}
-								{/if}
+								{#each media(field.name) as file}
+									{#if file.file}
+										<Image
+											node={$node.uid}
+											file={file.file}
+											{clickFile}
+											bind:current={value} />
+									{/if}
+								{/each}
 							{/if}
 						{/each}
 					</div>
 				{/if}
 			{:else if currentTab === 'files'}
-				{#if $fields}
+				{#if $fields && $node}
 					<div>
 						{#each $fields as field (field)}
 							{#if field.type === 'Cosray\\Field\\File'}
-								{#if $node.content[field.name] && $node.content[field.name].files}
-									{#each $node.content[field.name].files as file}
-										{#if file.file}
-											<File
-												node={$node.uid}
-												file={file.file}
-												{clickFile}
-												bind:current={value} />
-										{/if}
-									{/each}
-								{/if}
+								{#each media(field.name) as file}
+									{#if file.file}
+										<File
+											node={$node.uid}
+											file={file.file}
+											{clickFile}
+											bind:current={value} />
+									{/if}
+								{/each}
 							{/if}
 						{/each}
 					</div>

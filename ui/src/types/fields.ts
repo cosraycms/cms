@@ -12,6 +12,7 @@ export interface SimpleField {
 	type: string;
 	translate: boolean;
 	translateMode?: TranslateMode;
+	options?: Array<string | { value: string; label: string }>;
 }
 
 export interface Limit {

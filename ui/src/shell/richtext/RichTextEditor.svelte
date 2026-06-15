@@ -2,7 +2,7 @@
 	import type { ModalFunctions } from '$shell/modal';
 	import type { EditorState } from 'prosemirror-state';
 
-	import { getContext } from 'svelte';
+	import { getContext, type Component } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 
 	import { setDirty } from '$lib/state';
@@ -239,7 +239,7 @@
 		const target = linkAttrs?.target ?? '';
 
 		open(
-			ModalLink,
+			ModalLink as Component,
 			{
 				add: addLink,
 				close,

@@ -1,5 +1,9 @@
 import type { Field } from '$types/fields';
 
+export const ZXX = 'zxx';
+
+export type LocaleMap<T> = Record<string, T>;
+
 export interface User {
 	uid: string;
 	email: string;
@@ -9,50 +13,52 @@ export interface User {
 	passwordRepeat: string;
 }
 
-export interface FileItem {
-	file?: string;
-	alt?: string | Record<string, string>;
-	title?: string | Record<string, string>;
+export interface Meta {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: LocaleMap<any>;
 }
 
-export interface TranslatedFile {
+export interface FileItem {
+	file?: string;
+	meta?: Meta;
+}
+
+export interface TranslatedFile extends FileItem {
 	file: string;
-	alt?: string;
-	title?: string;
 }
 
 export interface TextData {
-	type: 'text' | 'richtext' | 'hidden' | 'date' | 'time' | 'datetime' | 'option' | 'iframe';
-	value?: string | Record<string, string>;
+	type: string;
+	value: LocaleMap<string>;
+	meta?: Meta;
 }
 
-export interface CodeData {
-	type: 'code';
-	syntax: string;
-	value?: string | Record<string, string>;
+export interface CodeData extends TextData {
+	meta: Meta & { syntax: LocaleMap<string> };
 }
 
 export interface NumberData {
-	type: 'number';
-	value?: number;
+	type: string;
+	value: LocaleMap<number | string | null>;
+	meta?: Meta;
 }
 
 export interface BooleanData {
-	type: 'checkbox';
-	value?: boolean;
+	type: string;
+	value: LocaleMap<boolean | null>;
+	meta?: Meta;
 }
 
 export interface GenericFieldData {
 	type: string;
 	value?: unknown;
-	syntax?: string;
-	files?: FileItem[] | Record<string, TranslatedFile[]>;
-	columns?: number;
+	meta?: Meta;
 }
 
 export interface FileData {
-	type: 'picture' | 'image' | 'video';
-	files: FileItem[] | Record<string, TranslatedFile[]>;
+	type: string;
+	value: LocaleMap<FileItem[]>;
+	meta?: Meta;
 }
 
 export interface UploadResponse {
@@ -68,79 +74,83 @@ export interface BlockBase {
 	colspan: number;
 	rowspan: number;
 	colstart?: number | null;
-	width?: number | null; // will be added while rendering the blocks
+	width?: number | null;
+	meta?: Meta;
 }
 
 export interface BlockText extends BlockBase {
-	type: 'text';
-	value: string;
-}
-
-export interface BlockRichText extends BlockBase {
-	type: 'richtext';
-	value: string;
-}
-
-export interface BlockIframe extends BlockBase {
-	type: 'iframe';
-	value: string;
+	type: 'text' | 'richtext' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'iframe';
+	value: LocaleMap<string>;
 }
 
 export interface BlockImage extends BlockBase {
-	type: 'image';
-	files: TranslatedFile[];
-}
-
-export interface BlockImages extends BlockBase {
-	type: 'images';
-	files: TranslatedFile[];
-}
-
-export interface BlockVideo extends BlockBase {
-	type: 'video';
-	files: TranslatedFile[];
+	type: 'image' | 'images' | 'video';
+	value: TranslatedFile[];
 }
 
 export interface BlockYoutube extends BlockBase {
 	type: 'youtube';
-	value: string;
-	aspectRatioX: number;
-	aspectRatioY: number;
+	value: LocaleMap<string>;
+	meta: Meta & {
+		aspectRatioX: LocaleMap<number>;
+		aspectRatioY: LocaleMap<number>;
+	};
 }
 
-export type BlockType = 'text' | 'richtext' | 'image' | 'youtube' | 'images' | 'video' | 'iframe';
+export type BlockType =
+	| 'text'
+	| 'richtext'
+	| 'h1'
+	| 'h2'
+	| 'h3'
+	| 'h4'
+	| 'h5'
+	| 'h6'
+	| 'image'
+	| 'youtube'
+	| 'images'
+	| 'video'
+	| 'iframe';
 
-export type Block =
-	| BlockText
-	| BlockRichText
-	| BlockImage
-	| BlockImages
-	| BlockYoutube
-	| BlockVideo
-	| BlockIframe;
+export type Block = BlockText | BlockImage | BlockYoutube;
+export type BlockImages = BlockImage;
+export type BlockVideo = BlockImage;
+export type BlockIframe = BlockText;
+export type BlockRichText = BlockText;
 
 export interface LocalizedBlocksValue {
 	[key: string]: Block[];
 }
 
 export interface BlocksData {
-	type: 'blocks';
-	columns: number;
-	value: Block[] | LocalizedBlocksValue;
+	type: string;
+	value: LocalizedBlocksValue;
+	meta: Meta & {
+		columns: LocaleMap<number>;
+		minCellWidth?: LocaleMap<number>;
+	};
 }
 
-// Entries field types
 export interface EntryData {
+	uid: string;
 	type: string;
-	value: Record<string, Data | GenericFieldData>;
+	fields: Record<string, Data | GenericFieldData>;
 }
 
 export interface EntriesData {
-	type: 'entries';
-	value: EntryData[];
+	type: string;
+	value: LocaleMap<EntryData[]>;
+	meta?: Meta;
 }
 
-export type Data = TextData | CodeData | FileData | BlocksData | NumberData | EntriesData;
+export type Data =
+	| TextData
+	| CodeData
+	| FileData
+	| BlocksData
+	| NumberData
+	| BooleanData
+	| EntriesData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 

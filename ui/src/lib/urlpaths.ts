@@ -1,10 +1,10 @@
-import type { Route, Node } from '$types/data';
-import type { System } from '$lib/sys';
+import { ZXX, type LocaleMap, type Route, type Node } from '$types/data';
+import type { Locale, System } from '$lib/sys';
 import { localesMap } from '$lib/sys';
 import { error } from '$lib/state';
 
 export function generatePaths(node: Node, route: Route, system: System) {
-	const paths = {};
+	const paths: Record<string, string> = {};
 
 	[...system.locales].map(locale => {
 		const path = typeof route === 'string' ? route : route[locale.id];
@@ -42,25 +42,11 @@ function transformPath(path: string, node: Node, localeId: string, system: Syste
 
 		const value = node.content[param];
 
-		if (value) {
-			switch (value.type) {
-				case 'number':
-				case 'date':
-				case 'time':
-				case 'option':
-				case 'datetime':
-					if (value.value) {
-						path = path.replace(`{${param}}`, slugify(value.value.toString(), null));
-					}
-					break;
-				case 'text':
-					path = path.replace(
-						`{${param}}`,
-						getTextValue(param, value.value, system, localeId),
-					);
-					break;
-				default:
-					error('Unsupported value type');
+		if (value && 'value' in value) {
+			const text = getTextValue(param, value.value as LocaleMap<unknown>, system, localeId);
+
+			if (text) {
+				path = path.replace(`{${param}}`, text);
 			}
 		}
 	});
@@ -68,31 +54,28 @@ function transformPath(path: string, node: Node, localeId: string, system: Syste
 	return path;
 }
 
-function getTextValue(
-	param: string,
-	value: string | Record<string, string>,
-	system: System,
-	localeId: string,
-) {
+function getTextValue(param: string, value: LocaleMap<unknown>, system: System, localeId: string) {
 	if (!value) {
 		return '{' + param + '}';
 	}
 
-	if (typeof value === 'string') {
-		return slugify(value, system.transliterate);
-	} else {
-		const map = localesMap(system.locales);
-		let locale = map[localeId];
+	const map = localesMap(system.locales);
+	let locale: Locale | undefined = map[localeId];
 
-		while (locale) {
-			const lvalue = value?.[locale.id];
+	while (locale) {
+		const lvalue = value?.[locale.id];
 
-			if (lvalue) {
-				return slugify(lvalue, system.transliterate);
-			}
-
-			locale = map[locale.fallback];
+		if (typeof lvalue === 'string' || typeof lvalue === 'number') {
+			return slugify(String(lvalue), system.transliterate ?? null);
 		}
+
+		locale = locale.fallback ? map[locale.fallback] : undefined;
+	}
+
+	const neutral = value?.[ZXX];
+
+	if (typeof neutral === 'string' || typeof neutral === 'number') {
+		return slugify(String(neutral), system.transliterate ?? null);
 	}
 }
 

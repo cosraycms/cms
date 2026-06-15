@@ -2,7 +2,9 @@
 	import type { TextData } from '$types/data';
 	import type { SimpleField } from '$types/fields';
 
+	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { system, systemLocale } from '$lib/sys';
+	import { ZXX } from '$types/data';
 	import { setDirty } from '$lib/state';
 	import Field from '$shell/Field.svelte';
 	import Label from '$shell/Label.svelte';
@@ -15,6 +17,11 @@
 	let { field, data = $bindable() }: Props = $props();
 
 	let lang = $state(systemLocale($system));
+	$effect(() => {
+		data.value = field.translate
+			? ensureLocales(data.value, '')
+			: ensureNeutral(data.value, '');
+	});
 
 	function oninput() {
 		setDirty();
@@ -51,7 +58,7 @@
 				type="text"
 				required={field.required}
 				disabled={field.immutable}
-				bind:value={data.value}
+				bind:value={data.value[ZXX]}
 				{oninput} />
 		{/if}
 	</div>

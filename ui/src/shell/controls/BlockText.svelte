@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { BlockText } from '$types/data';
+	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import { setDirty } from '$lib/state';
@@ -29,7 +29,7 @@
 	{:else}
 		<textarea
 			name={field.name + '_' + index}
-			bind:value={item.value}
+			bind:value={item.value[ZXX]}
 			{oninput}>
 		</textarea>
 	{/if}
