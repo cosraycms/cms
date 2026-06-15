@@ -23,13 +23,15 @@ class Checkbox extends Field
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:checkbox');
+		$this->addType($shape);
 
-		$value = $shape->add('value', 'bool')->rules(...$this->validators);
+		$value = $shape->add('value', $this->zxxShape('bool', $this->validators));
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$this->addMeta($shape);
 
 		return $shape;
 	}

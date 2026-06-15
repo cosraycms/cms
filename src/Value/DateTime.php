@@ -21,16 +21,15 @@ class DateTime extends Value
 	{
 		parent::__construct($owner, $field, $context);
 
-		if ($this->data['timezone'] ?? null) {
-			$this->timezone = new DateTimeZone($this->data['timezone']);
-		} else {
-			$this->timezone = null;
-		}
+		$timezone = $this->meta('timezone');
+		$this->timezone = is_string($timezone) && $timezone !== '' ? new DateTimeZone($timezone) : null;
 
-		if ($this->data['value'] ?? null) {
+		$value = $this->value();
+
+		if (is_string($value) && $value !== '') {
 			$this->datetime = DateTimeImmutable::createFromFormat(
 				static::FORMAT,
-				$this->data['value'],
+				$value,
 				$this->timezone,
 			);
 		} else {

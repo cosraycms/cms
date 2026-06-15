@@ -40,7 +40,7 @@ class Blocks extends Value
 	public function unwrap(): array
 	{
 		return [
-			'columns' => $this->data['columns'] ?? null,
+			'columns' => $this->columns(),
 			'data' => $this->preparedData,
 		];
 	}
@@ -60,7 +60,7 @@ class Blocks extends Value
 				return new Field\Image(
 					$this->context->fieldName,
 					$this->owner,
-					new ValueContext($this->context->fieldName, $value->data),
+					new ValueContext($this->context->fieldName, $this->mediaFieldData($value->data)),
 				)
 					->limit(1)
 					->value();
@@ -74,14 +74,22 @@ class Blocks extends Value
 	{
 		if ($all && $this->field->isTranslatable()) {
 			foreach ($this->data['value'] ?? [] as $data) {
+				if (!is_array($data)) {
+					continue;
+				}
+
 				foreach ($data as $value) {
-					$item = new Block($value['type'], $value);
+					if (!is_array($value)) {
+						continue;
+					}
+
+					$item = new Block((string) ($value['type'] ?? ''), $value);
 
 					if ($item->type === 'image') {
 						yield new Field\Image(
 							$this->context->fieldName,
 							$this->owner,
-							new ValueContext($this->context->fieldName, $item->data),
+							new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
 						)
 							->limit(1)
 							->value();
@@ -89,7 +97,7 @@ class Blocks extends Value
 						foreach (new Field\Image(
 							$this->context->fieldName,
 							$this->owner,
-							new ValueContext($this->context->fieldName, $item->data),
+							new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
 						)->value() as $image) {
 							yield $image;
 						}
@@ -102,7 +110,7 @@ class Blocks extends Value
 					yield new Field\Image(
 						$this->context->fieldName,
 						$this->owner,
-						new ValueContext($this->context->fieldName, $item->data),
+						new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
 					)
 						->limit(1)
 						->value();
@@ -110,7 +118,7 @@ class Blocks extends Value
 					foreach (new Field\Image(
 						$this->context->fieldName,
 						$this->owner,
-						new ValueContext($this->context->fieldName, $item->data),
+						new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
 					)->value() as $image) {
 						yield $image;
 					}
@@ -153,7 +161,7 @@ class Blocks extends Value
 			$i++;
 
 			if ($i === $index) {
-				return HtmlUtil::excerpt($value->data['value'] ?? '', $words, $allowedTags);
+				return HtmlUtil::excerpt((string) $this->blockValue($value), $words, $allowedTags);
 			}
 		}
 
@@ -162,7 +170,7 @@ class Blocks extends Value
 
 	public function columns(): int
 	{
-		return (int) ($this->data['columns'] ?? 12);
+		return (int) ($this->meta('columns', 12) ?: 12);
 	}
 
 	// Supported args:
@@ -210,15 +218,21 @@ class Blocks extends Value
 			return false;
 		}
 
-		if (!($this->data['value'] ?? null)) {
+		$value = $this->data['value'] ?? null;
+
+		if (!is_array($value)) {
 			return false;
 		}
 
 		if ($this->field->isTranslatable()) {
-			return count($this->data['value'][$this->defaultLocale->id]) > 0;
+			$defaultValue = $value[$this->defaultLocale->id] ?? [];
+
+			return is_array($defaultValue) && count($defaultValue) > 0;
 		}
 
-		return count($this->data['value']) > 0;
+		$defaultValue = $value[Field\Field::NEUTRAL_LOCALE] ?? [];
+
+		return is_array($defaultValue) && count($defaultValue) > 0;
 	}
 
 	protected function renderValue(string $prefix, Block $value, array $args): string
@@ -243,20 +257,24 @@ class Blocks extends Value
 			. ($colstart ? ' ' . $colstart : '')
 			. $class
 			. '">';
+		$blockValue = $this->blockValue($value);
 		$out .= match ($value->type) {
-			'richtext' => $value->data['value'],
-			'text' => $value->data['value'],
-			'h1' => '<h1>' . $value->data['value'] . '</h1>',
-			'h2' => '<h2>' . $value->data['value'] . '</h2>',
-			'h3' => '<h3>' . $value->data['value'] . '</h3>',
-			'h4' => '<h4>' . $value->data['value'] . '</h4>',
-			'h5' => '<h5>' . $value->data['value'] . '</h5>',
-			'h6' => '<h6>' . $value->data['value'] . '</h6>',
-			'iframe' => $value->data['value'],
+			'richtext' => $blockValue,
+			'text' => $blockValue,
+			'h1' => '<h1>' . $blockValue . '</h1>',
+			'h2' => '<h2>' . $blockValue . '</h2>',
+			'h3' => '<h3>' . $blockValue . '</h3>',
+			'h4' => '<h4>' . $blockValue . '</h4>',
+			'h5' => '<h5>' . $blockValue . '</h5>',
+			'h6' => '<h6>' . $blockValue . '</h6>',
+			'iframe' => $blockValue,
 			'image' => $this->renderImage($value->data, $args),
-			'images' => $this->renderImages($value->data, $args),
+			'images' => $this->renderImages($value->data),
 			'youtube' => $this->getValueObject(Field\Youtube::class, $value)->__toString(),
-			'video' => $this->getValueObject(Field\Video::class, $value)->__toString(),
+			'video' => $this->getValueObject(
+				Field\Video::class,
+				new Block($value->type, $this->mediaFieldData($value->data)),
+			)->__toString(),
 		};
 		$out .= '</div>';
 
@@ -274,8 +292,11 @@ class Blocks extends Value
 
 	protected function renderImage(array $data, array $args): string
 	{
-		$file = $data['files'][0]['file'];
-		$title = $data['files'][0]['title'] ?? '';
+		$file = (string) ($data['value'][0]['file'] ?? '');
+		$title = $this->mediaText($data['value'][0] ?? [], 'title') ?: $this->mediaText(
+			$data['value'][0] ?? [],
+			'alt',
+		);
 		$maxWidth = $args['maxImageWidth'] ?? 1440;
 		$path = $this->assetsPath() . $file;
 		$image = $this->getAssets()->image($path);
@@ -294,9 +315,9 @@ class Blocks extends Value
 	{
 		$result = '';
 
-		foreach ($data['files'] as $f) {
-			$file = $f['file'];
-			$title = $f['title'] ?? '';
+		foreach ($data['value'] ?? [] as $f) {
+			$file = (string) ($f['file'] ?? '');
+			$title = $this->mediaText($f, 'title') ?: $this->mediaText($f, 'alt');
 			$path = $this->assetsPath() . $file;
 			$image = $this->getAssets()->image($path);
 			$resized = $image->resize(
@@ -319,24 +340,55 @@ class Blocks extends Value
 
 	protected function prepareData(array $data): Generator
 	{
+		$fields = [];
+
 		if ($this->field->isTranslatable()) {
-			$locale = $this->locale;
-
-			while ($locale) {
-				$fields = $data['value'][$locale->id] ?? null;
-
-				if ($fields && count($fields) > 0) {
-					break;
-				}
-
-				$locale = $locale->fallback();
-			}
+			$value = $this->effective($data['value'] ?? []);
+			$fields = is_array($value) ? $value : [];
 		} else {
-			$fields = $data['value'];
+			$value = $data['value'][Field\Field::NEUTRAL_LOCALE] ?? [];
+			$fields = is_array($value) ? $value : [];
 		}
 
 		foreach ($fields as $field) {
+			if (!is_array($field) || !is_string($field['type'] ?? null)) {
+				continue;
+			}
+
 			yield new Block($field['type'], $field);
 		}
+	}
+
+	private function blockValue(Block $block): string
+	{
+		$value = $block->data['value'] ?? [];
+
+		if (!is_array($value)) {
+			return '';
+		}
+
+		$value = $this->effective($value);
+
+		return is_string($value) || is_numeric($value) ? (string) $value : '';
+	}
+
+	private function mediaFieldData(array $data): array
+	{
+		$data['value'] = [Field\Field::NEUTRAL_LOCALE => $data['value'] ?? []];
+
+		return $data;
+	}
+
+	private function mediaText(array $item, string $key): string
+	{
+		$value = $item['meta'][$key] ?? [];
+
+		if (!is_array($value)) {
+			return '';
+		}
+
+		$value = $this->effective($value);
+
+		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 }

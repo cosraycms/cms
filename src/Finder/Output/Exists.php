@@ -39,7 +39,7 @@ final readonly class Exists extends Expression implements Output
 		}
 
 		if (count($parts) === 1) {
-			return $parts[0] . '.value';
+			return $parts[0] . '.value.*';
 		}
 
 		if (count($parts) === 2 && $parts[1] === '?') {
@@ -55,6 +55,10 @@ final readonly class Exists extends Expression implements Output
 
 		if (count($parts) === 2 && $parts[1] === '*') {
 			return $parts[0] . '.value.*';
+		}
+
+		if (count($parts) === 2) {
+			return $parts[0] . '.value.' . $parts[1];
 		}
 
 		return implode('.', $parts);

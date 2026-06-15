@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
@@ -51,14 +52,10 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 	{
 		$limitValidators = $this->limitValidators();
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:file');
+		$this->addType($shape);
+		$fileShape = $this->fileListShape();
 
 		if ($this->isAsymmetricallyTranslated()) {
-			// Asymmetric translation: separate file arrays per locale
-			$subShape = Shapes::list();
-			$subShape->add('file', 'string')->optional()->nullable();
-			$subShape->add('title', 'string')->optional()->nullable();
-
 			$i18nShape = Shapes::create();
 			$locales = $this->owner->locales();
 			$defaultLocale = $locales->getDefault()->id;
@@ -66,7 +63,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 			foreach ($locales as $locale) {
 				$localeValidators = $limitValidators;
 				$localeField = $i18nShape
-					->add($locale->id, $subShape)
+					->add($locale->id, $fileShape)
 					->prepare(Prepare::nullAsEmpty(...));
 
 				if ($this->isRequired() && $locale->id === $defaultLocale) {
@@ -78,46 +75,32 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 				$localeField->rules(...$localeValidators);
 			}
 
-			$files = $shape
-				->add('files', $i18nShape)
+			$value = $shape
+				->add('value', $i18nShape)
 				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
-		} elseif ($this->isSymmetricallyTranslated()) {
-			// Symmetric translation: shared files but translatable titles
-			$fileShape = Shapes::list();
-			$fileShape->add('file', 'string')->rules('required');
-
-			$locales = $this->owner->locales();
-			$titleShape = Shapes::create();
-
-			foreach ($locales as $locale) {
-				$titleShape->add($locale->id, 'string')->optional()->nullable();
-			}
-
-			$fileShape
-				->add('title', $titleShape)
-				->optional()
-				->nullable()
-				->prepare(Prepare::nullAsEmpty(...));
-			$files = $shape
-				->add('files', $fileShape)
-				->rules(...$limitValidators, ...$this->validators)
-				->prepare(Prepare::nullAsEmpty(...));
 		} else {
-			// Non-translatable
-			$fileShape = Shapes::list();
-			$fileShape->add('file', 'string')->rules('required');
-			$fileShape->add('title', 'string')->optional()->nullable();
-			$files = $shape
-				->add('files', $fileShape)
-				->rules(...$limitValidators, ...$this->validators)
+			$value = $shape
+				->add('value', $this->zxxShape($fileShape, $limitValidators))
+				->rules(...$this->validators)
 				->prepare(Prepare::nullAsEmpty(...));
 		}
 
 		if (!$this->isRequired()) {
-			$files->optional()->nullable();
+			$value->optional()->nullable();
 		}
 
+		$this->addMeta($shape);
+
 		return $shape;
+	}
+
+	protected function fileListShape(): Shape
+	{
+		$fileShape = Shapes::list();
+		$fileShape->add('file', 'string')->rules('required');
+		$fileShape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
+
+		return $fileShape;
 	}
 }

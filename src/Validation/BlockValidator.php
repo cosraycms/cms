@@ -28,10 +28,12 @@ final class BlockValidator implements Validator
 
 		$this->shape
 			->add('type', 'string')
-			->rules('required', 'in:text,richtext,image,youtube,images,video,iframe');
+			->rules('required', 'in:text,richtext,h1,h2,h3,h4,h5,h6,image,youtube,images,video,iframe');
 		$this->shape->add('rowspan', 'int')->rules('required');
 		$this->shape->add('colspan', 'int')->rules('required');
+		$this->shape->add('width', 'int')->optional()->nullable();
 		$this->shape->add('colstart', 'int')->optional()->nullable();
+		$this->shape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
 		$this->shape->review($this->reviewItems(...));
 	}
 
@@ -48,67 +50,11 @@ final class BlockValidator implements Validator
 			$type = is_array($value) ? $value['type'] ?? null : null;
 
 			if ($type === 'image' || $type === 'images' || $type === 'video') {
-				$files = $value['files'] ?? [];
-
-				if (is_array($files) && count($files) > 0) {
-					$fileShape = Shapes::list();
-					$fileShape->add('file', 'string')->rules('required');
-					$fileShape->add('title', 'string')->optional()->nullable();
-					$fileShape->add('alt', 'string')->optional()->nullable();
-
-					if ($fileShape->validate($files)->valid()) {
-						continue;
-					}
-
-					$this->addError(
-						$review,
-						$listIndex,
-						'image',
-						_('Attribute `file` nicht gefüllt.'),
-					);
-
-					continue;
-				}
-
-				$this->addError(
-					$review,
-					$listIndex,
-					'image',
-					_('Bild eingefügt aber nicht hochgeladen.'),
-				);
+				$this->reviewMedia($review, $listIndex, $value);
 			} elseif ($type === 'youtube') {
-				if (!($value['value'] ?? null)) {
-					$this->addError(
-						$review,
-						$listIndex,
-						'value',
-						_('Bitte gültige Youtube-ID eingeben.'),
-					);
-				}
-
-				$aspectRatioX = $value['aspectRatioX'] ?? null;
-
-				if (!$aspectRatioX || !is_numeric($aspectRatioX)) {
-					$this->addError(
-						$review,
-						$listIndex,
-						'aspectRatioX',
-						_('Bitte gültige Zahl eingeben.'),
-					);
-				}
-
-				$aspectRatioY = $value['aspectRatioY'] ?? null;
-
-				if (!$aspectRatioY || !is_numeric($aspectRatioY)) {
-					$this->addError(
-						$review,
-						$listIndex,
-						'aspectRatioY',
-						_('Bitte gültige Zahl eingeben.'),
-					);
-				}
-			} elseif ($type === 'richtext' || $type === 'text') {
-				if (!($value['value'] ?? null)) {
+				$this->reviewYoutube($review, $listIndex, $value);
+			} elseif (in_array($type, ['richtext', 'text', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], true)) {
+				if (!$this->hasZxxValue($value)) {
 					$this->addError(
 						$review,
 						$listIndex,
@@ -117,7 +63,7 @@ final class BlockValidator implements Validator
 					);
 				}
 			} elseif ($type === 'iframe') {
-				if (!($value['value'] ?? null)) {
+				if (!$this->hasZxxValue($value)) {
 					$this->addError(
 						$review,
 						$listIndex,
@@ -127,6 +73,78 @@ final class BlockValidator implements Validator
 				}
 			}
 		}
+	}
+
+	private function reviewMedia(Review $review, ?int $listIndex, mixed $value): void
+	{
+		$files = is_array($value) ? $value['value'] ?? [] : [];
+
+		if (is_array($files) && count($files) > 0) {
+			$fileShape = Shapes::list();
+			$fileShape->add('file', 'string')->rules('required');
+			$fileShape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
+
+			if ($fileShape->validate($files)->valid()) {
+				return;
+			}
+
+			$this->addError(
+				$review,
+				$listIndex,
+				'image',
+				_('Attribute `file` nicht gefüllt.'),
+			);
+
+			return;
+		}
+
+		$this->addError(
+			$review,
+			$listIndex,
+			'image',
+			_('Bild eingefügt aber nicht hochgeladen.'),
+		);
+	}
+
+	private function reviewYoutube(Review $review, ?int $listIndex, mixed $value): void
+	{
+		if (!$this->hasZxxValue($value)) {
+			$this->addError(
+				$review,
+				$listIndex,
+				'value',
+				_('Bitte gültige Youtube-ID eingeben.'),
+			);
+		}
+
+		$aspectRatioX = $value['meta']['aspectRatioX']['zxx'] ?? null;
+
+		if (!$aspectRatioX || !is_numeric($aspectRatioX)) {
+			$this->addError(
+				$review,
+				$listIndex,
+				'aspectRatioX',
+				_('Bitte gültige Zahl eingeben.'),
+			);
+		}
+
+		$aspectRatioY = $value['meta']['aspectRatioY']['zxx'] ?? null;
+
+		if (!$aspectRatioY || !is_numeric($aspectRatioY)) {
+			$this->addError(
+				$review,
+				$listIndex,
+				'aspectRatioY',
+				_('Bitte gültige Zahl eingeben.'),
+			);
+		}
+	}
+
+	private function hasZxxValue(mixed $value): bool
+	{
+		$value = is_array($value) ? $value['value']['zxx'] ?? null : null;
+
+		return $value !== null && $value !== '';
 	}
 
 	private function addError(

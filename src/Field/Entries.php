@@ -34,7 +34,7 @@ class Entries extends Field implements Capability\Limitable
 	public function structure(mixed $value = null): array
 	{
 		$this->requireAllowedEntryTypes();
-		$value ??= $this->valueContext->data['value'] ?? $this->default ?? [];
+		$value ??= $this->valueContext->data['value'][self::NEUTRAL_LOCALE] ?? $this->default ?? [];
 
 		if (!is_array($value)) {
 			$value = [];
@@ -53,21 +53,22 @@ class Entries extends Field implements Capability\Limitable
 				continue;
 			}
 
-			$entryValue = $entryData['value'] ?? [];
+			$entryValue = $entryData['fields'] ?? [];
 
 			if (!is_array($entryValue)) {
 				$entryValue = [];
 			}
 
 			$structures[] = [
+				'uid' => is_string($entryData['uid'] ?? null) ? $entryData['uid'] : null,
 				'type' => $type,
-				'value' => $this->entryStructure($type, $entryValue),
+				'fields' => $this->entryStructure($type, $entryValue),
 			];
 		}
 
 		return [
-			'type' => 'entries',
-			'value' => $structures,
+			'type' => $this::class,
+			'value' => [self::NEUTRAL_LOCALE => $structures],
 		];
 	}
 
@@ -76,28 +77,31 @@ class Entries extends Field implements Capability\Limitable
 		$this->requireAllowedEntryTypes();
 
 		$shape = Shapes::create();
-		$shape
-			->add('type', 'string')
-			->rules('required', 'in:entries');
+		$this->addType($shape);
 
 		$itemShape = Shapes::list();
+		$itemShape
+			->add('uid', 'string')
+			->rules('required');
 		$itemShape
 			->add('type', 'string')
 			->rules('required', 'in:' . implode(',', $this->allowedEntryTypes));
 		$itemShape
-			->add('value', Shapes::create())
+			->add('fields', Shapes::create())
 			->rules('required')
 			->finalize($this->finalizeEntryValue(...));
 		$itemShape->review($this->reviewEntryValues(...));
 
 		$value = $shape
-			->add('value', $itemShape)
-			->rules(...$this->limitValidators(), ...$this->validators)
+			->add('value', $this->zxxShape($itemShape, $this->limitValidators()))
+			->rules(...$this->validators)
 			->prepare(Prepare::nullAsEmpty(...));
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$this->addMeta($shape);
 
 		return $shape;
 	}
@@ -202,15 +206,8 @@ class Entries extends Field implements Capability\Limitable
 			$entryFieldStructure = $entryField->structure($entryFieldValue);
 
 			if (is_array($entryFieldData)) {
-				$structure[$name] = $entryFieldStructure;
-
-				foreach ($entryFieldData as $key => $entryFieldMetaValue) {
-					if ($key === 'type' || $key === 'value') {
-						continue;
-					}
-
-					$structure[$name][$key] = $entryFieldMetaValue;
-				}
+				$structure[$name] = array_merge($entryFieldStructure, $entryFieldData);
+				$structure[$name]['type'] = $entryFieldStructure['type'];
 
 				continue;
 			}
@@ -248,7 +245,7 @@ class Entries extends Field implements Capability\Limitable
 				continue;
 			}
 
-			$value = $entryData['value'] ?? null;
+			$value = $entryData['fields'] ?? null;
 
 			if (!is_array($value)) {
 				continue;
@@ -262,7 +259,7 @@ class Entries extends Field implements Capability\Limitable
 
 			foreach ($result->issues() as $issue) {
 				$review->addError(
-					[$index, 'value', ...$issue->path],
+					[$index, 'fields', ...$issue->path],
 					$issue->message,
 					$issue->code,
 					$issue->params,

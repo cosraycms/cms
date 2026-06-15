@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Finder\Output;
 
 use Celemas\Quma\Database;
+use Cosray\Context;
 use Cosray\Exception\ParserException;
 use Cosray\Finder\CompilesField;
 use Cosray\Finder\Input\Token;
@@ -42,10 +43,15 @@ abstract readonly class Expression
 		Token $token,
 		Database $db,
 		array $builtins,
+		?Context $context = null,
 	): string {
 		return match ($token->type) {
 			TokenType::Boolean => strtolower($token->lexeme),
-			TokenType::Field => $this->compileField($token->lexeme, 'n.content'),
+			TokenType::Field => $this->compileField(
+				$token->lexeme,
+				'n.content',
+				localeIds: $this->localeIds($context),
+			),
 			TokenType::Builtin => $builtins[$token->lexeme],
 			TokenType::Keyword => $this->translateKeyword($token->lexeme),
 			TokenType::Null => 'NULL',
@@ -53,6 +59,23 @@ abstract readonly class Expression
 			TokenType::String => $db->quote($token->lexeme),
 			TokenType::List => $token->lexeme,
 		};
+	}
+
+	private function localeIds(?Context $context): array
+	{
+		if (!$context) {
+			return ['zxx'];
+		}
+
+		$ids = [];
+		$locale = $context->locale();
+
+		while ($locale) {
+			$ids[] = $locale->id;
+			$locale = $locale->fallback();
+		}
+
+		return $ids;
 	}
 
 	protected function translateKeyword(string $keyword): string

@@ -50,47 +50,64 @@ trait IsTranslatable
 
 	private function getTranslatableStructure(string $type, mixed $value = null): array
 	{
-		$value = $value ?: $this->default;
+		unset($type);
 
-		$result = ['type' => $type];
+		$value ??= $this->default;
 
-		if ($value) {
-			$result['value'] = $value;
+		return [
+			'type' => $this::class,
+			'value' => $this->isTranslatable()
+				? $this->localeValueMap($value)
+				: [self::NEUTRAL_LOCALE => $value],
+		];
+	}
 
-			return $result;
+	private function getTranslatableFileStructure(string $type, mixed $value = null): array
+	{
+		unset($type);
+
+		return [
+			'type' => $this::class,
+			'value' => $this->localeListMap($value),
+		];
+	}
+
+	private function localeValueMap(mixed $value = null): array
+	{
+		if (is_array($value)) {
+			return $value;
 		}
 
-		if ($this->isTranslatable()) {
-			$result['value'] = [];
+		$result = [];
 
-			foreach ($this->owner->locales() as $locale) {
-				$result['value'][$locale->id] = null;
-			}
-		} else {
-			$result['value'] = null;
+		foreach ($this->owner->locales() as $locale) {
+			$result[$locale->id] = null;
+		}
+
+		if ($value !== null) {
+			$result[$this->owner->defaultLocale()->id] = $value;
 		}
 
 		return $result;
 	}
 
-	private function getTranslatableFileStructure(string $type, mixed $value = null): array
+	private function localeListMap(mixed $value = null): array
 	{
-		$value = $value ?: $this->default;
-
-		$result = ['type' => $type];
-
-		if ($value) {
-			$result['files'] = $value;
-
-			return $result;
+		if (is_array($value) && !$this->isList($value)) {
+			return $value;
 		}
 
-		$result['files'] = [];
+		$result = [];
 
 		foreach ($this->owner->locales() as $locale) {
-			$result['files'][$locale->id] = [];
+			$result[$locale->id] = [];
 		}
 
 		return $result;
+	}
+
+	private function isList(array $value): bool
+	{
+		return array_is_list($value);
 	}
 }

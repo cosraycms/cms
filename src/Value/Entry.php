@@ -35,6 +35,13 @@ class Entry extends Value
 		return $this->unwrap();
 	}
 
+	public function uid(): ?string
+	{
+		$uid = $this->data['uid'] ?? null;
+
+		return is_string($uid) ? $uid : null;
+	}
+
 	public function unwrap(): array
 	{
 		$result = [];
@@ -44,8 +51,9 @@ class Entry extends Value
 		}
 
 		return [
+			'uid' => $this->uid(),
 			'type' => $this->type,
-			'value' => $result,
+			'fields' => $result,
 		];
 	}
 
@@ -78,7 +86,7 @@ class Entry extends Value
 
 	protected function initFields(): void
 	{
-		$data = $this->data['value'] ?? [];
+		$data = $this->data['fields'] ?? [];
 
 		if (!is_array($data)) {
 			$data = [];

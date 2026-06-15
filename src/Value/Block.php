@@ -13,11 +13,20 @@ class Block
 
 	public function styleClass(): ?string
 	{
-		return $this->data['class'] ?? null;
+		$value = $this->meta('class');
+
+		return is_string($value) && $value !== '' ? $value : null;
 	}
 
 	public function elementId(): ?string
 	{
-		return $this->data['id'] ?? null;
+		$value = $this->meta('id');
+
+		return is_string($value) && $value !== '' ? $value : null;
+	}
+
+	public function meta(string $key): mixed
+	{
+		return $this->data['meta'][$key]['zxx'] ?? null;
 	}
 }

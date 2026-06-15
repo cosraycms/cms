@@ -92,7 +92,7 @@ class Entries extends Value implements IteratorAggregate
 
 	protected function prepareEntries(): void
 	{
-		$data = $this->data['value'] ?? [];
+		$data = $this->data['value'][Field\Field::NEUTRAL_LOCALE] ?? [];
 
 		if (!is_array($data)) {
 			return;

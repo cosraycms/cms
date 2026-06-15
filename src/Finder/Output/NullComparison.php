@@ -38,9 +38,9 @@ final readonly class NullComparison extends Expression implements Output
 	{
 		return sprintf(
 			'%s %s %s',
-			$this->getOperand($this->left, $this->context->db, $this->builtins),
+			$this->getOperand($this->left, $this->context->db, $this->builtins, $this->context),
 			$equal ? 'IS' : 'IS NOT',
-			$this->getOperand($this->right, $this->context->db, $this->builtins),
+			$this->getOperand($this->right, $this->context->db, $this->builtins, $this->context),
 		);
 	}
 }

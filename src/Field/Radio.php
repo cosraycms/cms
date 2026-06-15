@@ -23,13 +23,15 @@ class Radio extends Field
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:radio');
+		$this->addType($shape);
 
-		$value = $shape->add('value', 'string')->rules(...$this->validators);
+		$value = $shape->add('value', $this->zxxShape('string', $this->validators));
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$this->addMeta($shape);
 
 		return $shape;
 	}

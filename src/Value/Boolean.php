@@ -15,8 +15,10 @@ class Boolean extends Value
 	{
 		parent::__construct($owner, $field, $context);
 
-		if (is_bool($this->data['value'] ?? null)) {
-			$this->value = $this->data['value'];
+		$value = $this->value();
+
+		if (is_bool($value)) {
+			$this->value = $value;
 		} else {
 			$this->value = false;
 		}

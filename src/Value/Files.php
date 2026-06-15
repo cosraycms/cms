@@ -44,7 +44,7 @@ class Files extends Value implements Iterator
 
 	public function count(): int
 	{
-		return count($this->data['files']);
+		return count($this->files());
 	}
 
 	public function next(): void
@@ -54,7 +54,7 @@ class Files extends Value implements Iterator
 
 	public function valid(): bool
 	{
-		return isset($this->data['files'][$this->pointer]);
+		return $this->fileItem($this->pointer) !== null;
 	}
 
 	public function get(int $index): File
@@ -69,19 +69,7 @@ class Files extends Value implements Iterator
 
 	public function unwrap(): array
 	{
-		$locale = $this->locale;
-
-		while ($locale) {
-			$value = $this->data[$this->locale->id] ?? null;
-
-			if ($value) {
-				return $value;
-			}
-
-			$locale = $this->locale->fallback();
-		}
-
-		return [];
+		return $this->files();
 	}
 
 	public function json(): mixed
@@ -91,11 +79,11 @@ class Files extends Value implements Iterator
 
 	public function isset(): bool
 	{
-		return isset($this->data['files'][0]) ? true : false;
+		return $this->fileItem(0) !== null;
 	}
 
 	protected function len(): int
 	{
-		return count($this->data['files']);
+		return count($this->files());
 	}
 }

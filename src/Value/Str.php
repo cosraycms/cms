@@ -15,7 +15,9 @@ class Str extends Value
 
 	public function unwrap(): string
 	{
-		return $this->data['value'] ?? '';
+		$value = $this->value();
+
+		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 
 	public function json(): string

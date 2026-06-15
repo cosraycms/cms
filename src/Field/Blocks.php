@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\BlockValidator;
@@ -34,38 +35,30 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	public function structure(mixed $value = null): array
 	{
-		$value = $value ?: $this->default;
+		$value ??= $this->default;
 
 		if (is_array($value)) {
-			return [
-				'type' => 'blocks',
-				'columns' => $this->columns,
-				'minCellWidth' => $this->minCellWidth,
-				'value' => $value,
-			];
+			$valueMap = $this->isAsymmetricallyTranslated()
+				? $value
+				: [self::NEUTRAL_LOCALE => $value];
+		} else {
+			$valueMap = $this->emptyValueMap();
 		}
 
-		$result = [
-			'type' => 'blocks',
-			'columns' => $this->columns,
-			'minCellWidth' => $this->minCellWidth,
-			'value' => [],
+		return [
+			'type' => $this::class,
+			'value' => $valueMap,
+			'meta' => [
+				'columns' => [self::NEUTRAL_LOCALE => $this->columns],
+				'minCellWidth' => [self::NEUTRAL_LOCALE => $this->minCellWidth],
+			],
 		];
-
-		if ($this->isAsymmetricallyTranslated()) {
-			foreach ($this->owner->locales() as $locale) {
-				$result['value'][$locale->id] = [];
-			}
-		}
-
-		return $result;
 	}
 
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:blocks');
-		$shape->add('columns', 'int')->rules('required');
+		$this->addType($shape);
 
 		$itemShape = new BlockValidator(list: true, title: $this->label, keepUnknown: true);
 
@@ -97,8 +90,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 				->prepare(Prepare::nullAsEmpty(...));
 		} else {
 			$value = $shape
-				->add('value', $itemShape)
-				->rules(...$this->validators)
+				->add('value', $this->zxxShape($itemShape, $this->validators))
 				->prepare(Prepare::nullAsEmpty(...));
 		}
 
@@ -106,6 +98,26 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			$value->optional()->nullable();
 		}
 
+		$meta = Shapes::create()->extra(Extra::Allow);
+		$meta->add('columns', $this->zxxShape('int'))->optional()->nullable();
+		$meta->add('minCellWidth', $this->zxxShape('int'))->optional()->nullable();
+		$shape->add('meta', $meta)->optional()->nullable();
+
 		return $shape;
+	}
+
+	private function emptyValueMap(): array
+	{
+		if (!$this->isAsymmetricallyTranslated()) {
+			return [self::NEUTRAL_LOCALE => []];
+		}
+
+		$result = [];
+
+		foreach ($this->owner->locales() as $locale) {
+			$result[$locale->id] = [];
+		}
+
+		return $result;
 	}
 }

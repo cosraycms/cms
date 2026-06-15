@@ -62,15 +62,16 @@ final readonly class Comparison extends Expression implements Output
 			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
 		};
 
-		$left = $this->getField();
+		unset($operator);
+		$left = $this->getJsonFieldExpression();
+		$root = str_ends_with($this->left->lexeme, '.*') ? '$[*]' : '$';
+		$path = $root . ' ' . $jsonOperator . ' ' . $right;
 
 		return sprintf(
-			"%sn.content %s '$.%s %s %s'",
+			'%sjsonb_path_exists(%s, %s)',
 			$negate ? 'NOT ' : '',
-			$operator,
 			$left,
-			$jsonOperator,
-			$right,
+			$this->context->db->quote($path),
 		);
 	}
 
@@ -91,43 +92,53 @@ final readonly class Comparison extends Expression implements Output
 		return sprintf('(@ like_regex %s%s)', $pattern, $case);
 	}
 
-	private function getField(): string
+	private function getJsonFieldExpression(): string
 	{
 		$parts = explode('.', $this->left->lexeme);
 
-		return match (count($parts)) {
-			2 => $this->compileField($parts),
-			1 => $parts[0] . '.value',
-			default => $this->compileAccessor($parts),
-		};
-	}
+		if (count($parts) === 1) {
+			return $this->compileField(
+				$this->left->lexeme,
+				'n.content',
+				asIs: true,
+				localeIds: $this->localeIds(),
+			);
+		}
 
-	private function compileField(array $segments): string
-	{
-		return match ($segments[1]) {
-			'*' => $segments[0] . '.value.*',
-			'?' => $segments[0] . '.value.' . $this->getCurrentLocale(),
-			default => implode('.', $segments),
-		};
-	}
+		if (count($parts) === 2 && $parts[1] === '?') {
+			return "n.content->'{$parts[0]}'->'value'->'{$this->context->localeId()}'";
+		}
 
-	private function compileAccessor(array $segments): string
-	{
-		$accessor = implode('.', $segments);
+		if (count($parts) === 2 && $parts[1] === '*') {
+			return "jsonb_path_query_array(n.content->'{$parts[0]}'->'value', '$.*')";
+		}
 
-		if (str_contains($accessor, '?')) {
+		if (count($parts) > 2 && in_array('?', $parts, true)) {
 			throw new ParserOutputException(
 				$this->left,
 				'The questionmark is allowed after the first dot only.',
 			);
 		}
 
-		return $accessor;
+		return $this->compileField(
+			$this->left->lexeme,
+			'n.content',
+			asIs: true,
+			localeIds: $this->localeIds(),
+		);
 	}
 
-	private function getCurrentLocale(): string
+	private function localeIds(): array
 	{
-		return $this->context->localeId();
+		$ids = [];
+		$locale = $this->context->locale();
+
+		while ($locale) {
+			$ids[] = $locale->id;
+			$locale = $locale->fallback();
+		}
+
+		return $ids;
 	}
 
 	private function getRight(): string
@@ -146,9 +157,9 @@ final readonly class Comparison extends Expression implements Output
 	{
 		return sprintf(
 			'%s %s %s',
-			$this->getOperand($this->left, $this->context->db, $this->builtins),
+			$this->getOperand($this->left, $this->context->db, $this->builtins, $this->context),
 			$this->getOperator($this->operator->type),
-			$this->getOperand($this->right, $this->context->db, $this->builtins),
+			$this->getOperand($this->right, $this->context->db, $this->builtins, $this->context),
 		);
 	}
 

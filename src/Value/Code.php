@@ -15,7 +15,7 @@ class Code extends Text
 {
 	public function syntax(): string
 	{
-		$syntax = $this->data['syntax'] ?? null;
+		$syntax = $this->meta('syntax');
 
 		if (is_string($syntax) && $syntax !== '') {
 			return $syntax;

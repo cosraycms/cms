@@ -8,8 +8,8 @@ class Youtube extends Value
 {
 	public function __toString(): string
 	{
-		$x = (float) $this->data['aspectRatioX'];
-		$y = (float) $this->data['aspectRatioY'];
+		$x = (float) ($this->meta('aspectRatioX', 16) ?: 16);
+		$y = (float) ($this->meta('aspectRatioY', 9) ?: 9);
 		$percent = number_format(($y / $x) * 100, 2, '.', '');
 		$iframeStyle = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%';
 
@@ -22,7 +22,7 @@ class Youtube extends Value
 			. $iframeStyle
 			. '" '
 			. 'src="https://www.youtube.com/embed/'
-			. $this->data['value']
+			. $this->unwrap()
 			. '" allowfullscreen></iframe>'
 			. '</div></div>'
 		);
@@ -30,7 +30,7 @@ class Youtube extends Value
 
 	public function unwrap(): mixed
 	{
-		return $this->data['id'] ?? null;
+		return $this->value();
 	}
 
 	public function json(): mixed
@@ -40,6 +40,6 @@ class Youtube extends Value
 
 	public function isset(): bool
 	{
-		return isset($this->data['id']) ? true : false;
+		return is_string($this->unwrap()) && $this->unwrap() !== '';
 	}
 }

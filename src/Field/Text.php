@@ -25,7 +25,7 @@ class Text extends Field implements Capability\Translatable
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:text');
+		$this->addType($shape);
 
 		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
@@ -48,12 +48,14 @@ class Text extends Field implements Capability\Translatable
 
 			$value = $shape->add('value', $i18nShape)->rules(...$this->validators);
 		} else {
-			$value = $shape->add('value', 'string')->rules(...$this->validators);
+			$value = $shape->add('value', $this->zxxShape('string', $this->validators));
 		}
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$this->addMeta($shape);
 
 		return $shape;
 	}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Finder;
 
+use Cosray\Context;
 use Cosray\Exception\ParserException;
 
 final class OrderCompiler
@@ -12,6 +13,7 @@ final class OrderCompiler
 
 	public function __construct(
 		private readonly array $builtins = [],
+		private readonly ?Context $context = null,
 	) {}
 
 	public function compile(string $statement): string
@@ -33,7 +35,7 @@ final class OrderCompiler
 			$expression = $this->builtins[$fieldName] ?? null;
 
 			if (!$expression) {
-				$expression = $this->compileField($fieldName, 'n.content', asIs: true);
+				$expression = $this->compileField($fieldName, 'n.content', localeIds: $this->localeIds());
 			}
 
 			$expressions[] = $expression . ' ' . $field['direction'];
@@ -44,6 +46,23 @@ final class OrderCompiler
 		}
 
 		return '';
+	}
+
+	private function localeIds(): array
+	{
+		if (!$this->context) {
+			return ['zxx'];
+		}
+
+		$ids = [];
+		$locale = $this->context->locale();
+
+		while ($locale) {
+			$ids[] = $locale->id;
+			$locale = $locale->fallback();
+		}
+
+		return $ids;
 	}
 
 	private function parse(string $statement): array

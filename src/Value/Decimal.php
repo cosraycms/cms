@@ -16,8 +16,10 @@ class Decimal extends Value
 	{
 		parent::__construct($owner, $field, $context);
 
-		if (is_numeric($this->data['value'] ?? null)) {
-			$this->value = floatval($this->data['value']);
+		$value = $this->value();
+
+		if (is_numeric($value)) {
+			$this->value = floatval($value);
 		} else {
 			$this->value = null;
 		}
@@ -29,7 +31,7 @@ class Decimal extends Value
 			return '';
 		}
 
-		return $this->value;
+		return (string) $this->value;
 	}
 
 	public function unwrap(): ?float

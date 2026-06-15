@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
 use Cosray\Field\Schema\Handler;
 use Cosray\Field\Schema\Registry;
+use Cosray\Validation\Shapes;
 use Cosray\Value\Value;
 use Cosray\Value\ValueContext;
 use ReflectionProperty;
@@ -29,6 +31,8 @@ abstract class Field implements
 	use Capability\IsDefaultable;
 	use Capability\IsResizable;
 	use Capability\IsValidatable;
+
+	public const string NEUTRAL_LOCALE = 'zxx';
 
 	public readonly string $type;
 
@@ -99,21 +103,75 @@ abstract class Field implements
 
 	public function getFileStructure(string $type, mixed $value = null): array
 	{
-		if ($value === null) {
-			if ($this->default === null) {
-				$value = [];
-			} else {
-				$value = $this->default;
-			}
-		}
+		unset($type);
 
-		return ['type' => $type, 'files' => $value];
+		return [
+			'type' => $this::class,
+			'value' => $this->listValueMap($value),
+		];
 	}
 
 	public function getSimpleStructure(string $type, mixed $value = null): array
 	{
-		$value = $value ?: $this->default;
+		unset($type);
 
-		return ['type' => $type, 'value' => $value];
+		return [
+			'type' => $this::class,
+			'value' => $this->scalarValueMap($value),
+		];
+	}
+
+	protected function addType(Shape $shape): void
+	{
+		$shape->add('type', 'string')->rules('required', 'in:' . $this::class);
+	}
+
+	protected function addMeta(Shape $shape): void
+	{
+		$shape->add('meta', $this->metaShape())->optional()->nullable();
+	}
+
+	protected function metaShape(): Shape
+	{
+		return Shapes::create()->extra(Extra::Allow);
+	}
+
+	protected function zxxShape(string|Shape $valueShape, array $validators = []): Shape
+	{
+		$shape = Shapes::create();
+		$field = $shape->add(self::NEUTRAL_LOCALE, $valueShape)->rules(...$validators);
+
+		if (!$this->isRequired()) {
+			$field->optional()->nullable();
+		}
+
+		return $shape;
+	}
+
+	protected function scalarValue(mixed $value = null): mixed
+	{
+		return $value ?? $this->default;
+	}
+
+	protected function scalarValueMap(mixed $value = null): array
+	{
+		$value ??= $this->default;
+
+		if (is_array($value) && array_key_exists(self::NEUTRAL_LOCALE, $value)) {
+			return $value;
+		}
+
+		return [self::NEUTRAL_LOCALE => $value];
+	}
+
+	protected function listValueMap(mixed $value = null): array
+	{
+		$value ??= $this->default ?? [];
+
+		if (is_array($value) && array_key_exists(self::NEUTRAL_LOCALE, $value)) {
+			return $value;
+		}
+
+		return [self::NEUTRAL_LOCALE => is_array($value) ? $value : []];
 	}
 }

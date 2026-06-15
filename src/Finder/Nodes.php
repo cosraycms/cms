@@ -149,7 +149,7 @@ final class Nodes implements Iterator
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins);
+		$compiler = new OrderCompiler($this->builtins, $this->context);
 		$this->order = $compiler->compile(implode(',', $order));
 
 		return $this;
@@ -332,7 +332,20 @@ final class Nodes implements Iterator
 			throw new RuntimeException('Invalid field name for search: ' . $field);
 		}
 
-		return $this->compileField($field, 'n.content');
+		return $this->compileField($field, 'n.content', localeIds: $this->localeIds());
+	}
+
+	private function localeIds(): array
+	{
+		$ids = [];
+		$locale = $this->context->locale();
+
+		while ($locale) {
+			$ids[] = $locale->id;
+			$locale = $locale->fallback();
+		}
+
+		return $ids;
 	}
 
 	private function typesCondition(array $types): string

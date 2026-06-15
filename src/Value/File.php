@@ -9,6 +9,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Cosray\Schema\TranslateMode;
 
 /**
  * @property-read Field&Translatable $field
@@ -60,7 +61,7 @@ class File extends Value
 
 	public function unwrap(): ?array
 	{
-		return $this->data['files'][0] ?? null;
+		return $this->fileItem(0);
 	}
 
 	public function json(): mixed
@@ -70,85 +71,57 @@ class File extends Value
 
 	public function count(): int
 	{
-		return count($this->data['files'] ?? []);
+		return count($this->files());
 	}
 
 	public function isset(): bool
 	{
-		return isset($this->data['files'][0]) ? true : false;
+		return $this->fileItem(0) !== null;
+	}
+
+	protected function files(): array
+	{
+		$value = $this->data['value'] ?? [];
+
+		if (!is_array($value)) {
+			return [];
+		}
+
+		if ($this->field->translateMode() === TranslateMode::Asymmetric) {
+			$files = $this->effective($value);
+
+			return is_array($files) ? $files : [];
+		}
+
+		$files = $value[Field::NEUTRAL_LOCALE] ?? [];
+
+		return is_array($files) ? $files : [];
+	}
+
+	protected function fileItem(int $index): ?array
+	{
+		$item = $this->files()[$index] ?? null;
+
+		return is_array($item) ? $item : null;
 	}
 
 	protected function getFileName(int $index): string
 	{
-		return $this->data['files'][$index]['file'];
+		return (string) ($this->fileItem($index)['file'] ?? '');
 	}
 
 	protected function textValue(string $key, int $index): string
 	{
-		if ($this->field->isTranslatable()) {
-			return $this->translated($key, $index);
+		$value = $this->fileItem($index)['meta'][$key] ?? null;
+
+		if (!is_array($value)) {
+			return '';
 		}
 
-		$value = $this->data['files'][$index][$key] ?? '';
+		$value = $this->effective($value);
 
-		if (is_string($value)) {
-			return $value;
-		}
-
-		if (is_array($value)) {
-			return $this->translatedArray($value);
-		}
-
-		if (is_int($value) || is_float($value)) {
+		if (is_string($value) || is_numeric($value)) {
 			return (string) $value;
-		}
-
-		return '';
-	}
-
-	protected function translated(string $key, int $index): string
-	{
-		$locale = $this->locale;
-
-		while ($locale) {
-			$value = $this->data['files'][$index][$key][$locale->id] ?? null;
-
-			if ($value) {
-				return $value;
-			}
-
-			$locale = $locale->fallback();
-		}
-
-		return '';
-	}
-
-	protected function translatedArray(array $value): string
-	{
-		$locale = $this->locale;
-
-		while ($locale) {
-			$translation = $value[$locale->id] ?? null;
-
-			if (is_string($translation) && $translation !== '') {
-				return $translation;
-			}
-
-			if (is_int($translation) || is_float($translation)) {
-				return (string) $translation;
-			}
-
-			$locale = $locale->fallback();
-		}
-
-		foreach ($value as $translation) {
-			if (is_string($translation) && $translation !== '') {
-				return $translation;
-			}
-
-			if (is_int($translation) || is_float($translation)) {
-				return (string) $translation;
-			}
 		}
 
 		return '';

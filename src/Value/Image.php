@@ -195,7 +195,7 @@ class Image extends File
 			$this->owner->config()->path->prefix
 			. '/media/image/'
 			. $this->assetsPath()
-			. $this->data['files'][$index]['file']
+			. $this->getFileName($index)
 			. $this->queryString
 			. ($this->quality ? "&quality={$this->quality}" : '')
 		);
@@ -208,7 +208,7 @@ class Image extends File
 
 	protected function getImage(int $index): Assets\Image
 	{
-		$image = $this->getAssets()->image($this->assetsPath() . $this->data['files'][$index]['file']);
+		$image = $this->getAssets()->image($this->assetsPath() . $this->getFileName($index));
 
 		if ($this->size) {
 			$image = $image->resize($this->size, $this->resizeMode, $this->enlarge, $this->quality);

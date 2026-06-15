@@ -8,9 +8,8 @@ use Celemas\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Code as CodeValue;
 
-class Code extends Field implements Capability\Translatable, Capability\SyntaxAware
+class Code extends Text implements Capability\SyntaxAware
 {
-	use Capability\IsTranslatable;
 	use Capability\IsSyntaxAware;
 
 	public function value(): CodeValue
@@ -20,15 +19,18 @@ class Code extends Field implements Capability\Translatable, Capability\SyntaxAw
 
 	public function structure(mixed $value = null): array
 	{
-		$syntax = $this->valueContext->data['syntax'] ?? $this->getDefaultSyntax();
+		$syntax =
+			$this->valueContext->data['meta']['syntax'][self::NEUTRAL_LOCALE] ?? $this->getDefaultSyntax();
 
 		if (is_array($value) && array_key_exists('value', $value)) {
-			$syntax = is_string($value['syntax'] ?? null) ? $value['syntax'] : $syntax;
+			$syntax = is_string($value['meta']['syntax'][self::NEUTRAL_LOCALE] ?? null)
+				? $value['meta']['syntax'][self::NEUTRAL_LOCALE]
+				: $syntax;
 			$value = $value['value'];
 		}
 
 		$result = $this->getTranslatableStructure('code', $value);
-		$result['syntax'] = $syntax;
+		$result['meta']['syntax'] = [self::NEUTRAL_LOCALE => $syntax];
 
 		return $result;
 	}
@@ -36,8 +38,7 @@ class Code extends Field implements Capability\Translatable, Capability\SyntaxAw
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:code');
-		$shape->add('syntax', 'string')->rules('required', 'in:' . implode(',', $this->getSyntaxes()));
+		$this->addType($shape);
 
 		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
@@ -60,12 +61,16 @@ class Code extends Field implements Capability\Translatable, Capability\SyntaxAw
 
 			$value = $shape->add('value', $i18nShape)->rules(...$this->validators);
 		} else {
-			$value = $shape->add('value', 'string')->rules(...$this->validators);
+			$value = $shape->add('value', $this->zxxShape('string', $this->validators));
 		}
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$meta = Shapes::create();
+		$meta->add('syntax', $this->zxxShape('string', ['in:' . implode(',', $this->getSyntaxes())]));
+		$shape->add('meta', $meta)->optional()->nullable();
 
 		return $shape;
 	}

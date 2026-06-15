@@ -10,7 +10,7 @@ class Images extends Files
 	{
 		$out = '';
 
-		for ($i = 0; $i < count($this->data['files']); $i++) {
+		for ($i = 0; $i < count($this->files()); $i++) {
 			$out .= (string) $this->get($i);
 		}
 

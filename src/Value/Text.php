@@ -36,31 +36,17 @@ class Text extends Value
 			return $this->value;
 		}
 
-		if ($this->field->isTranslatable()) {
-			$locale = $this->locale;
+		$value = $this->value();
 
-			while ($locale) {
-				$value = $this->data['value'][$locale->id] ?? null;
+		if (is_string($value) || is_numeric($value)) {
+			$this->value = (string) $value;
 
-				if ($value) {
-					$this->value = $value;
-
-					return $value;
-				}
-
-				$locale = $locale->fallback();
-			}
-
-			$this->value = '';
-
-			return '';
+			return $this->value;
 		}
 
-		$this->value = isset($this->data['value'])
-			? $this->data['value']
-			: '';
+		$this->value = '';
 
-		return $this->value;
+		return '';
 	}
 
 	public function strip(array|string|null $allowed = null): string

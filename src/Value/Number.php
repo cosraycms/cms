@@ -15,8 +15,10 @@ class Number extends Value
 	{
 		parent::__construct($owner, $field, $context);
 
-		if (is_numeric($this->data['value'] ?? null)) {
-			$this->value = (int) $this->data['value'];
+		$value = $this->value();
+
+		if (is_numeric($value)) {
+			$this->value = (int) $value;
 		} else {
 			$this->value = null;
 		}

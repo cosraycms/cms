@@ -1,0 +1,421 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cosray\Migration;
+
+use Cosray\Field;
+use Cosray\Uid;
+
+final class NodeContentNormalizer
+{
+	private const string ZXX = Field\Field::NEUTRAL_LOCALE;
+
+	/** @var array<string, class-string<Field\Field>> */
+	private const array FIELD_TYPES = [
+		'blocks' => Field\Blocks::class,
+		'checkbox' => Field\Checkbox::class,
+		'code' => Field\Code::class,
+		'date' => Field\Date::class,
+		'datetime' => Field\DateTime::class,
+		'decimal' => Field\Decimal::class,
+		'entries' => Field\Entries::class,
+		'file' => Field\File::class,
+		'grid' => Field\Blocks::class,
+		'html' => Field\RichText::class,
+		'iframe' => Field\Iframe::class,
+		'image' => Field\Image::class,
+		'matrix' => Field\Entries::class,
+		'number' => Field\Number::class,
+		'option' => Field\Option::class,
+		'picture' => Field\Image::class,
+		'radio' => Field\Radio::class,
+		'richtext' => Field\RichText::class,
+		'text' => Field\Text::class,
+		'textarea' => Field\Textarea::class,
+		'time' => Field\Time::class,
+		'video' => Field\Video::class,
+		'youtube' => Field\Youtube::class,
+	];
+
+	/** @var array<class-string<Field\Field>, true> */
+	private const array MEDIA_TYPES = [
+		Field\File::class => true,
+		Field\Image::class => true,
+		Field\Video::class => true,
+	];
+
+	public function __construct(
+		private readonly Uid $uid,
+	) {}
+
+	/** @param array<string, mixed> $content */
+	public function normalize(array $content): array
+	{
+		$result = [];
+
+		foreach ($content as $name => $field) {
+			if (!is_array($field)) {
+				continue;
+			}
+
+			$result[$name] = $this->field($field);
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function field(array $data): array
+	{
+		$type = $this->fieldType($data['type'] ?? null);
+
+		if ($type === Field\Blocks::class) {
+			return $this->blocksField($data, $type);
+		}
+
+		if ($type === Field\Entries::class) {
+			return $this->entriesField($data, $type);
+		}
+
+		if (isset(self::MEDIA_TYPES[$type])) {
+			return $this->mediaField($data, $type, ($data['type'] ?? null) === 'picture');
+		}
+
+		$result = [
+			'type' => $type,
+			'value' => $this->valueMap($data['value'] ?? null),
+		];
+		$meta = $this->fieldMeta($data, ['type', 'value']);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function blocksField(array $data, string $type): array
+	{
+		$value = $data['value'] ?? $data['items'] ?? [];
+		$result = [
+			'type' => $type,
+			'value' => $this->blockValueMap($value),
+		];
+		$meta = $this->fieldMeta($data, ['type', 'value', 'items']);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function entriesField(array $data, string $type): array
+	{
+		$value = $data['value'] ?? [];
+		$result = [
+			'type' => $type,
+			'value' => $this->entryValueMap($value),
+		];
+		$meta = $this->fieldMeta($data, ['type', 'value']);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function mediaField(array $data, string $type, bool $picture): array
+	{
+		$value = $data['value'] ?? $data['files'] ?? [];
+		$result = [
+			'type' => $type,
+			'value' => $this->mediaValueMap($value, $picture),
+		];
+		$meta = $this->fieldMeta($data, ['type', 'value', 'files']);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	private function fieldType(mixed $type): string
+	{
+		if (is_string($type) && isset(self::FIELD_TYPES[$type])) {
+			return self::FIELD_TYPES[$type];
+		}
+
+		if (is_string($type) && is_subclass_of($type, Field\Field::class)) {
+			return $type;
+		}
+
+		return Field\Text::class;
+	}
+
+	private function valueMap(mixed $value): array
+	{
+		if (is_array($value) && $this->isLocaleMap($value)) {
+			return $value;
+		}
+
+		return [self::ZXX => $value];
+	}
+
+	private function blockValueMap(mixed $value): array
+	{
+		if (is_array($value) && $this->isLocaleMap($value)) {
+			$result = [];
+
+			foreach ($value as $locale => $items) {
+				$result[$locale] = $this->blockList($items);
+			}
+
+			return $result;
+		}
+
+		return [self::ZXX => $this->blockList($value)];
+	}
+
+	private function blockList(mixed $items): array
+	{
+		if (!is_array($items)) {
+			return [];
+		}
+
+		$result = [];
+
+		foreach ($items as $item) {
+			if (!is_array($item)) {
+				continue;
+			}
+
+			$result[] = $this->block($item);
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $data */
+	private function block(array $data): array
+	{
+		$type = is_string($data['type'] ?? null) ? $data['type'] : 'text';
+		$result = ['type' => $type];
+
+		foreach (['uid', 'width', 'colspan', 'rowspan', 'colstart'] as $key) {
+			if (!array_key_exists($key, $data)) {
+				continue;
+			}
+
+			$result[$key] = $data[$key];
+		}
+
+		if (in_array($type, ['image', 'images', 'video'], true)) {
+			$value = $data['value'] ?? $data['files'] ?? [];
+			$list = $this->mediaList($value);
+			$result['value'] = $type === 'image' ? array_slice($list, 0, 1) : $list;
+		} elseif ($type === 'youtube') {
+			$result['value'] = $this->valueMap($data['value'] ?? $data['id'] ?? null);
+		} else {
+			$result['value'] = $this->valueMap($data['value'] ?? null);
+		}
+
+		$meta = $this->fieldMeta($data, [
+			'type',
+			'uid',
+			'width',
+			'colspan',
+			'rowspan',
+			'colstart',
+			'value',
+			'files',
+		]);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	private function mediaValueMap(mixed $value, bool $picture): array
+	{
+		if (is_array($value) && $this->isLocaleMap($value)) {
+			$result = [];
+
+			foreach ($value as $locale => $items) {
+				$list = $this->mediaList($items);
+				$result[$locale] = $picture ? $this->selectPicture($list) : $list;
+			}
+
+			return $result;
+		}
+
+		$list = $this->mediaList($value);
+
+		return [self::ZXX => $picture ? $this->selectPicture($list) : $list];
+	}
+
+	private function mediaList(mixed $items): array
+	{
+		if (!is_array($items)) {
+			return [];
+		}
+
+		$result = [];
+
+		foreach ($items as $item) {
+			if (!is_array($item)) {
+				continue;
+			}
+
+			$result[] = $this->mediaItem($item);
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $item */
+	private function mediaItem(array $item): array
+	{
+		$result = ['file' => $item['file'] ?? ''];
+		$meta = $this->fieldMeta($item, ['file']);
+
+		if ($meta !== []) {
+			$result['meta'] = $meta;
+		}
+
+		return $result;
+	}
+
+	private function selectPicture(array $items): array
+	{
+		if ($items === []) {
+			return [];
+		}
+
+		foreach ($items as $item) {
+			$file = is_string($item['file'] ?? null) ? $item['file'] : '';
+
+			if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'webp') {
+				return [$item];
+			}
+		}
+
+		return [$items[0]];
+	}
+
+	private function entryValueMap(mixed $value): array
+	{
+		if (is_array($value) && $this->isLocaleMap($value)) {
+			$result = [];
+
+			foreach ($value as $locale => $entries) {
+				$result[$locale] = $this->entryList($entries);
+			}
+
+			return $result;
+		}
+
+		return [self::ZXX => $this->entryList($value)];
+	}
+
+	private function entryList(mixed $entries): array
+	{
+		if (!is_array($entries)) {
+			return [];
+		}
+
+		$result = [];
+
+		foreach ($entries as $entry) {
+			if (!is_array($entry)) {
+				continue;
+			}
+
+			$result[] = $this->entry($entry);
+		}
+
+		return $result;
+	}
+
+	/** @param array<string, mixed> $entry */
+	private function entry(array $entry): array
+	{
+		$fields = $entry['fields'] ?? $entry['value'] ?? [];
+
+		return [
+			'uid' => is_string($entry['uid'] ?? null) && $entry['uid'] !== ''
+				? $entry['uid']
+				: $this->uid->generate(),
+			'type' => is_string($entry['type'] ?? null) ? $entry['type'] : '',
+			'fields' => is_array($fields) ? $this->normalize($fields) : [],
+		];
+	}
+
+	/** @param list<string> $skip */
+	private function fieldMeta(array $data, array $skip): array
+	{
+		$meta = [];
+
+		if (is_array($data['meta'] ?? null)) {
+			$meta = $this->normalizeMeta($data['meta']);
+		}
+
+		foreach ($data as $key => $value) {
+			if (in_array($key, $skip, true) || $key === 'meta') {
+				continue;
+			}
+
+			$meta[$key] = $this->normalizeMetaLeaf($value);
+		}
+
+		return $meta;
+	}
+
+	private function normalizeMeta(array $meta): array
+	{
+		$result = [];
+
+		foreach ($meta as $key => $value) {
+			$result[$key] = $this->normalizeMetaLeaf($value);
+		}
+
+		return $result;
+	}
+
+	private function normalizeMetaLeaf(mixed $value): array
+	{
+		if (is_array($value) && $this->isLocaleMap($value)) {
+			return $value;
+		}
+
+		return [self::ZXX => $value];
+	}
+
+	private function isLocaleMap(array $value): bool
+	{
+		if ($value === [] || array_is_list($value)) {
+			return false;
+		}
+
+		foreach (array_keys($value) as $key) {
+			if (!is_string($key) || !$this->isLocaleKey($key)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function isLocaleKey(string $key): bool
+	{
+		return $key === self::ZXX || preg_match('/^[a-z]{2}(?:[-_][A-Za-z0-9]{2,8})?$/', $key) === 1;
+	}
+}

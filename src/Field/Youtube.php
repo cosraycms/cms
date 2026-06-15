@@ -20,13 +20,17 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 
 	public function structure(mixed $value = null): array
 	{
-		return $this->getSimpleStructure('youtube', $value);
+		$result = $this->getTranslatableStructure('youtube', $value);
+		$result['meta']['aspectRatioX'] = [self::NEUTRAL_LOCALE => 16];
+		$result['meta']['aspectRatioY'] = [self::NEUTRAL_LOCALE => 9];
+
+		return $result;
 	}
 
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
-		$shape->add('type', 'string')->rules('required', 'in:youtube');
+		$this->addType($shape);
 
 		if ($this->isTranslatable()) {
 			$locales = $this->owner->locales();
@@ -49,12 +53,14 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 
 			$value = $shape->add('value', $i18nShape)->rules(...$this->validators);
 		} else {
-			$value = $shape->add('value', 'string')->rules(...$this->validators);
+			$value = $shape->add('value', $this->zxxShape('string', $this->validators));
 		}
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
 		}
+
+		$this->addMeta($shape);
 
 		return $shape;
 	}
