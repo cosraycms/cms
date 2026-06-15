@@ -129,8 +129,8 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		$content = json_decode($node['content'], true);
 
 		// Each locale has its own file
-		$this->assertEquals('manual-en.pdf', $content['document']['files']['en'][0]['file']);
-		$this->assertEquals('handbuch-de.pdf', $content['document']['files']['de'][0]['file']);
+		$this->assertEquals('manual-en.pdf', $content['document']['value']['en'][0]['file']);
+		$this->assertEquals('handbuch-de.pdf', $content['document']['value']['de'][0]['file']);
 	}
 
 	public function testTranslatableImageAltPerLocale(): void
@@ -163,7 +163,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$alt = $content['hero']['files'][0]['alt'];
+		$alt = $content['hero']['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['meta']['alt'];
 
 		$this->assertEquals('English alt text', $alt['en']);
 		$this->assertEquals('Deutscher Alt-Text', $alt['de']);
@@ -278,7 +278,7 @@ final class MultiLocaleScenariosTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$items = $content['blocks']['items'];
+		$items = $content['blocks']['value'][\Cosray\Field\Field::NEUTRAL_LOCALE];
 
 		$this->assertEquals('English blocks text', $items[0]['value']['en']);
 		$this->assertEquals('Deutscher Blocks-Text', $items[0]['value']['de']);

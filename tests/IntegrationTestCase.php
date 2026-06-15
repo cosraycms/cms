@@ -11,8 +11,10 @@ use Celemas\Quma\Delimiters;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
+use Cosray\Migration\NodeContentNormalizer;
 use Cosray\Node\Types;
 use Cosray\Plugin;
+use Cosray\Uid;
 use PDO;
 use RuntimeException;
 
@@ -32,6 +34,7 @@ class IntegrationTestCase extends TestCase
 	protected static ?Connection $sharedConnection = null;
 	protected ?Database $testDb = null;
 	protected bool $useTransactions = true;
+	private ?NodeContentNormalizer $contentNormalizer = null;
 
 	public static function setUpBeforeClass(): void
 	{
@@ -205,6 +208,8 @@ class IntegrationTestCase extends TestCase
 			$sql = file_get_contents($path);
 			$db->execute($sql)->run();
 		}
+
+		$this->normalizeStoredNodeContent();
 	}
 
 	/**
@@ -221,6 +226,34 @@ class IntegrationTestCase extends TestCase
 		return $this->db()->execute($sql, [
 			'handle' => $handle,
 		])->one()['type'];
+	}
+
+	private function contentNormalizer(): NodeContentNormalizer
+	{
+		return $this->contentNormalizer ??= new NodeContentNormalizer(
+			new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
+		);
+	}
+
+	private function normalizeStoredNodeContent(): void
+	{
+		$nodes = $this->db()->execute('SELECT node, content FROM cms.nodes')->all();
+
+		foreach ($nodes as $node) {
+			$content = json_decode((string) ($node['content'] ?? '{}'), true);
+
+			if (!is_array($content)) {
+				continue;
+			}
+
+			$this->db()->execute(
+				'UPDATE cms.nodes SET content = :content::jsonb WHERE node = :node',
+				[
+					'node' => $node['node'],
+					'content' => json_encode($this->contentNormalizer()->normalize($content)),
+				],
+			)->run();
+		}
 	}
 
 	/**
@@ -250,6 +283,7 @@ class IntegrationTestCase extends TestCase
 
 		// Convert content array to JSON if needed
 		if (is_array($data['content'])) {
+			$data['content'] = $this->contentNormalizer()->normalize($data['content']);
 			$data['content'] = json_encode($data['content']);
 		}
 

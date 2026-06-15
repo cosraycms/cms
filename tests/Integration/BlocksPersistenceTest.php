@@ -15,6 +15,11 @@ use Cosray\Tests\IntegrationTestCase;
  */
 final class BlocksPersistenceTest extends IntegrationTestCase
 {
+	private function items(array $content, string $field): array
+	{
+		return $content[$field]['value'][\Cosray\Field\Field::NEUTRAL_LOCALE] ?? [];
+	}
+
 	protected function setUp(): void
 	{
 		parent::setUp();
@@ -59,9 +64,10 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertCount(2, $content['blocks']['items']);
-		$this->assertEquals('text', $content['blocks']['items'][0]['type']);
-		$this->assertEquals('richtext', $content['blocks']['items'][1]['type']);
+		$items = $this->items($content, 'blocks');
+		$this->assertCount(2, $items);
+		$this->assertEquals('text', $items[0]['type']);
+		$this->assertEquals('richtext', $items[1]['type']);
 	}
 
 	public function testBlocksWithImageItems(): void
@@ -106,9 +112,10 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertCount(2, $content['gallery']['items']);
-		$this->assertEquals('image', $content['gallery']['items'][0]['type']);
-		$this->assertEquals('photo1.jpg', $content['gallery']['items'][0]['files'][0]['file']);
+		$items = $this->items($content, 'gallery');
+		$this->assertCount(2, $items);
+		$this->assertEquals('image', $items[0]['type']);
+		$this->assertEquals('photo1.jpg', $items[0]['value'][0]['file']);
 	}
 
 	public function testBlocksWithYoutubeItem(): void
@@ -144,9 +151,10 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertEquals('youtube', $content['content']['items'][0]['type']);
-		$this->assertEquals('dQw4w9WgXcQ', $content['content']['items'][0]['id']);
-		$this->assertEquals(16, $content['content']['items'][0]['aspectRatioX']);
+		$items = $this->items($content, 'content');
+		$this->assertEquals('youtube', $items[0]['type']);
+		$this->assertEquals('dQw4w9WgXcQ', $items[0]['value'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
+		$this->assertEquals(16, $items[0]['meta']['aspectRatioX'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
 	}
 
 	public function testBlocksWithMixedItemTypes(): void
@@ -184,7 +192,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$items = $content['mixed']['items'];
+		$items = $this->items($content, 'mixed');
 
 		$this->assertCount(4, $items);
 		$this->assertEquals('text', $items[0]['type']);
@@ -235,8 +243,9 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertEquals('Deutscher Text', $content['blocks']['items'][0]['value']['de']);
-		$this->assertEquals('English text', $content['blocks']['items'][0]['value']['en']);
+		$items = $this->items($content, 'blocks');
+		$this->assertEquals('Deutscher Text', $items[0]['value']['de']);
+		$this->assertEquals('English text', $items[0]['value']['en']);
 	}
 
 	public function testEmptyBlocksStructure(): void
@@ -262,8 +271,8 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertIsArray($content['emptyblocks']['items']);
-		$this->assertCount(0, $content['emptyblocks']['items']);
+		$this->assertIsArray($this->items($content, 'emptyblocks'));
+		$this->assertCount(0, $this->items($content, 'emptyblocks'));
 	}
 
 	public function testBlocksComplexLayout(): void
@@ -333,7 +342,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$items = $content['layout']['items'];
+		$items = $this->items($content, 'layout');
 
 		// Verify layout structure
 		$this->assertEquals(12, $items[0]['colspan']);

@@ -15,6 +15,14 @@ use Cosray\Tests\IntegrationTestCase;
  */
 final class FileFieldPersistenceTest extends IntegrationTestCase
 {
+	private function files(
+		array $content,
+		string $field,
+		string $locale = \Cosray\Field\Field::NEUTRAL_LOCALE,
+	): array {
+		return $content[$field]['value'][$locale] ?? [];
+	}
+
 	protected function setUp(): void
 	{
 		parent::setUp();
@@ -46,9 +54,13 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertCount(1, $content['document']['files']);
-		$this->assertEquals('document.pdf', $content['document']['files'][0]['file']);
-		$this->assertEquals('My Document', $content['document']['files'][0]['title']);
+		$files = $this->files($content, 'document');
+		$this->assertCount(1, $files);
+		$this->assertEquals('document.pdf', $files[0]['file']);
+		$this->assertEquals(
+			'My Document',
+			$files[0]['meta']['title'][\Cosray\Field\Field::NEUTRAL_LOCALE],
+		);
 	}
 
 	public function testMultipleFilesField(): void
@@ -78,10 +90,11 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertCount(3, $content['attachments']['files']);
-		$this->assertEquals('file1.pdf', $content['attachments']['files'][0]['file']);
-		$this->assertEquals('file2.docx', $content['attachments']['files'][1]['file']);
-		$this->assertEquals('file3.jpg', $content['attachments']['files'][2]['file']);
+		$files = $this->files($content, 'attachments');
+		$this->assertCount(3, $files);
+		$this->assertEquals('file1.pdf', $files[0]['file']);
+		$this->assertEquals('file2.docx', $files[1]['file']);
+		$this->assertEquals('file3.jpg', $files[2]['file']);
 	}
 
 	public function testImageFieldWithMetadata(): void
@@ -113,10 +126,13 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$image = $content['hero']['files'][0];
+		$image = $this->files($content, 'hero')[0];
 		$this->assertEquals('hero.jpg', $image['file']);
-		$this->assertEquals('Hero Image', $image['title']);
-		$this->assertEquals('A beautiful hero image', $image['alt']);
+		$this->assertEquals('Hero Image', $image['meta']['title'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
+		$this->assertEquals(
+			'A beautiful hero image',
+			$image['meta']['alt'][\Cosray\Field\Field::NEUTRAL_LOCALE],
+		);
 	}
 
 	public function testImageFieldWithTranslatableAlt(): void
@@ -150,7 +166,7 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$alt = $content['gallery']['files'][0]['alt'];
+		$alt = $this->files($content, 'gallery')[0]['meta']['alt'];
 		$this->assertEquals('Deutsche Bildbeschreibung', $alt['de']);
 		$this->assertEquals('English image description', $alt['en']);
 	}
@@ -186,12 +202,12 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$title = $content['download']['files'][0]['title'];
+		$title = $this->files($content, 'download')[0]['meta']['title'];
 		$this->assertEquals('Deutsches Handbuch', $title['de']);
 		$this->assertEquals('English Manual', $title['en']);
 	}
 
-	public function testPictureFieldWithMultipleSources(): void
+	public function testImageFieldKeepsSelectedPictureSource(): void
 	{
 		$typeId = $this->createTestType('picture-multiple-test');
 
@@ -229,11 +245,13 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$files = $content['hero']['files'];
-		$this->assertCount(3, $files);
-		$this->assertEquals('(min-width: 1200px)', $files[0]['media']);
-		$this->assertEquals('(min-width: 768px)', $files[1]['media']);
-		$this->assertArrayNotHasKey('media', $files[2]); // Default has no media query
+		$files = $this->files($content, 'hero');
+		$this->assertCount(1, $files);
+		$this->assertEquals('hero-large.webp', $files[0]['file']);
+		$this->assertEquals(
+			'(min-width: 1200px)',
+			$files[0]['meta']['media'][\Cosray\Field\Field::NEUTRAL_LOCALE],
+		);
 	}
 
 	public function testEmptyFileField(): void
@@ -259,8 +277,8 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertIsArray($content['optional']['files']);
-		$this->assertCount(0, $content['optional']['files']);
+		$this->assertIsArray($this->files($content, 'optional'));
+		$this->assertCount(0, $this->files($content, 'optional'));
 	}
 
 	public function testVideoField(): void
@@ -291,7 +309,11 @@ final class FileFieldPersistenceTest extends IntegrationTestCase
 		)->one();
 
 		$content = json_decode($node['content'], true);
-		$this->assertEquals('teaser.mp4', $content['teaser']['files'][0]['file']);
-		$this->assertEquals('Product Teaser', $content['teaser']['files'][0]['title']);
+		$files = $this->files($content, 'teaser');
+		$this->assertEquals('teaser.mp4', $files[0]['file']);
+		$this->assertEquals(
+			'Product Teaser',
+			$files[0]['meta']['title'][\Cosray\Field\Field::NEUTRAL_LOCALE],
+		);
 	}
 }
