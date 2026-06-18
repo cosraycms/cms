@@ -113,6 +113,173 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame($nodePath, $createdPayload['paths']['en'] ?? null);
 	}
 
+	public function testPreviewNodePathsUsesParentFields(): void
+	{
+		$this->authenticateAs('editor');
+
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$parentUid = 'route-preview-parent-' . uniqid();
+		$childUid = 'route-preview-child-' . uniqid();
+
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Parent Page']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-route-page/paths', [
+			'body' => [
+				'uid' => $childUid,
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Child Page']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$this->assertSame('/prefix/parent-page/child-page', $payload['paths']['en'] ?? null);
+		$this->assertSame('/prefix/parent-page/child-page', $payload['paths']['de'] ?? null);
+	}
+
+	public function testPreviewNodePathsReturnsEmptyPathsForMissingParent(): void
+	{
+		$this->authenticateAs('editor');
+
+		$response = $this->makeRequest('POST', '/api/node/parent-route-page/paths', [
+			'body' => [
+				'uid' => 'route-preview-child',
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Child Page']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 200);
+		$this->assertSame([], $payload['paths'] ?? null);
+	}
+
+	public function testPreviewNodePathsReturnsEmptyPathsForMissingTitle(): void
+	{
+		$this->authenticateAs('editor');
+
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$parentUid = 'route-preview-missing-title-parent-' . uniqid();
+
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Parent Page']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-route-page/paths', [
+			'body' => [
+				'uid' => 'route-preview-missing-title-child',
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => null, 'de' => null]],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 200);
+		$this->assertSame([], $payload['paths'] ?? null);
+	}
+
+	public function testCreateNodeGeneratesRoutePathFromParentFieldsOnServer(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('parent-route-page');
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$parentUid = 'route-save-parent-' . uniqid();
+
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Parent Page']],
+			],
+		]);
+
+		$childUid = 'route-save-child-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/parent-route-page', [
+			'body' => [
+				'uid' => $childUid,
+				'parent' => $parentUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Child Page']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->trackNodeByUid($childUid);
+
+		$created = $this->makeRequest('GET', "/api/node/{$childUid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame('/prefix/parent-page/child-page', $createdPayload['paths']['en'] ?? null);
+		$this->assertSame($parentUid, $createdPayload['parent'] ?? null);
+	}
+
+	public function testCreateNodeRejectsMissingGeneratedRoutePlaceholder(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('parent-route-page');
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		$parentUid = 'route-save-missing-title-parent-' . uniqid();
+
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => (int) $type['type'],
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Parent Page']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-route-page', [
+			'headers' => ['Accept' => 'application/json'],
+			'body' => [
+				'uid' => 'route-save-missing-title-child',
+				'parent' => $parentUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => null, 'de' => null]],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 400);
+		$this->assertSame('Could not resolve route placeholder: {title}', $payload['message'] ?? null);
+	}
+
 	public function testCreateNodePersistsHandle(): void
 	{
 		$this->authenticateAs('editor');

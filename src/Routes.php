@@ -156,6 +156,7 @@ class Routes
 		$api->get('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.get');
 		$api->put('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.update');
 		$api->delete('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.delete');
+		$api->post('/node/{type}/paths', [OldPanel::class, 'nodePaths'], 'node.paths');
 		$api->post('/node/{type}', [OldPanel::class, 'createNode'], 'node.create');
 		$api->get('/blueprint/{type}', [OldPanel::class, 'blueprint'], 'node.blueprint');
 	}

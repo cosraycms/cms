@@ -271,6 +271,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestWidget::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestDocument::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestMediaDocument::class);
+		$plugin->node(\Cosray\Tests\Fixtures\Node\ParentRoutePage::class);
 
 		return $plugin;
 	}

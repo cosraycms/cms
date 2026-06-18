@@ -14,12 +14,14 @@ use Celemas\Wire\Creator;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
+use Cosray\Exception\RoutePath;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\Node;
 use Cosray\Node\PathManager;
+use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
@@ -195,6 +197,32 @@ class OldPanel
 			$context->locales(),
 			$content,
 		);
+	}
+
+	#[Permission('panel')]
+	public function nodePaths(string $type, Context $context): array
+	{
+		if ($this->request->header('Content-Type') !== 'application/json') {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$class = $this->container
+			->tag(Plugin::NODE_TAG)
+			->entry($type)
+			->definition();
+		$generator = new RoutePathGenerator($context->db, $this->types);
+
+		try {
+			$paths = $generator->generate(
+				$class,
+				$this->request->json(),
+				$context->locales(),
+			);
+		} catch (RoutePath) {
+			return ['paths' => (object) []];
+		}
+
+		return ['paths' => $paths];
 	}
 
 	#[Permission('panel')]

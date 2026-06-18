@@ -6,9 +6,8 @@
 	import { getContext } from 'svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { _ } from '$lib/locale';
-	import { system } from '$lib/sys';
 	import { dirty, setPristine } from '$lib/state';
-	import { generatePaths } from '$lib/urlpaths';
+	import { previewRoutePaths, routePathPreviewPayload } from '$lib/urlpaths';
 	import NodeControlBar from '$shell/NodeControlBar.svelte';
 	import Breadcrumbs from '$shell/Breadcrumbs.svelte';
 	import Headline from '$shell/Headline.svelte';
@@ -63,6 +62,7 @@
 
 	let activeTab = $state('content');
 	let showPreview: string | null = $state(null);
+	let pathPreviewRequest = 0;
 	let collectionPath = $derived.by(() => {
 		const params = new URLSearchParams();
 
@@ -102,9 +102,25 @@
 	}
 
 	$effect(() => {
-		if (node.route) {
-			node.generatedPaths = generatePaths(node, node.route, $system);
+		if (!node.route) {
+			return;
 		}
+
+		const request = ++pathPreviewRequest;
+		const type = node.type.handle;
+		const payload = routePathPreviewPayload(node);
+
+		void previewRoutePaths(type, payload)
+			.then(paths => {
+				if (request === pathPreviewRequest) {
+					node.generatedPaths = paths ?? {};
+				}
+			})
+			.catch(() => {
+				if (request === pathPreviewRequest) {
+					node.generatedPaths = {};
+				}
+			});
 	});
 </script>
 

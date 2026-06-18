@@ -2,9 +2,8 @@
 	import type { Node } from '$types/data';
 
 	import { _ } from '$lib/locale';
-	import { system } from '$lib/sys';
 	import { broadcastCancel, dirty } from '$lib/state';
-	import { generatePaths } from '$lib/urlpaths';
+	import { previewRoutePaths, routePathPreviewPayload } from '$lib/urlpaths';
 	import Document from '$shell/Document.svelte';
 	import Pane from '$shell/Pane.svelte';
 	import Tabs from '$shell/Tabs.svelte';
@@ -26,6 +25,7 @@
 	let { node = $bindable(), save, saveAndClose, fields }: Props = $props();
 
 	let activeTab = $state('content');
+	let pathPreviewRequest = 0;
 
 	function changeTab(tab: string) {
 		return () => {
@@ -38,9 +38,25 @@
 	}
 
 	$effect(() => {
-		if (node.route) {
-			node.generatedPaths = generatePaths(node, node.route, $system);
+		if (!node.route) {
+			return;
 		}
+
+		const request = ++pathPreviewRequest;
+		const type = node.type.handle;
+		const payload = routePathPreviewPayload(node);
+
+		void previewRoutePaths(type, payload)
+			.then(paths => {
+				if (request === pathPreviewRequest) {
+					node.generatedPaths = paths ?? {};
+				}
+			})
+			.catch(() => {
+				if (request === pathPreviewRequest) {
+					node.generatedPaths = {};
+				}
+			});
 	});
 </script>
 

@@ -9,6 +9,7 @@ use Celemas\Core\Exception\HttpConflict;
 use Celemas\Core\Exception\HttpError;
 use Celemas\Core\Request;
 use Celemas\Quma\Database;
+use Cosray\Exception\RoutePath;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Uid;
@@ -19,12 +20,17 @@ class Store
 {
 	private const int CREATE_UID_ATTEMPTS = 5;
 
+	private readonly RoutePathGenerator $routePathGenerator;
+
 	public function __construct(
 		private readonly Database $db,
 		private readonly PathManager $pathManager,
 		private readonly Types $types,
 		private readonly Uid $uid,
-	) {}
+		?RoutePathGenerator $routePathGenerator = null,
+	) {
+		$this->routePathGenerator = $routePathGenerator ?? new RoutePathGenerator($db, $types);
+	}
 
 	public function save(
 		object $node,
@@ -159,6 +165,7 @@ class Store
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->ensureRouteHandle($node, $handle, $request);
+			$data = $this->completeGeneratedPaths($node, $data, $locales, $parentId, $request);
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -357,6 +364,48 @@ class Store
 		throw new HttpBadRequest($request, payload: [
 			'message' => _('A handle is required for this node route'),
 		]);
+	}
+
+	private function completeGeneratedPaths(
+		object $node,
+		array $data,
+		Locales $locales,
+		?int $parentId,
+		Request $request,
+	): array {
+		if (!$this->needsGeneratedPaths($data)) {
+			return $data;
+		}
+
+		try {
+			$data['generatedPaths'] = $this->routePathGenerator->generate(
+				$node::class,
+				$data,
+				$locales,
+				$parentId,
+			);
+		} catch (RoutePath $e) {
+			throw new HttpBadRequest(
+				$request,
+				payload: [
+					'message' => $e->getMessage(),
+				],
+				previous: $e,
+			);
+		}
+
+		return $data;
+	}
+
+	private function needsGeneratedPaths(array $data): bool
+	{
+		foreach ($data['paths'] ?? [] as $path) {
+			if (is_string($path) ? trim($path) !== '' : (bool) $path) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private function routeNeedsHandle(mixed $route): bool

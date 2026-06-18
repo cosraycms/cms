@@ -45,6 +45,7 @@ class Serializer
 			'changed' => $rawData['changed'],
 			'deleted' => $rawData['deleted'],
 			'paths' => $rawData['paths'],
+			'parent' => $rawData['parent'] ?? null,
 			'type' => $this->resolveType($class, $rawData['type_handle'] ?? null),
 			'editor' => [
 				'uid' => $rawData['editor_uid'],
