@@ -131,7 +131,7 @@ final class RoutePathGenerator
 						throw $e;
 					}
 
-					return '{' . $matches[1] . '}';
+					return $this->friendlyPlaceholder($matches[1]);
 				}
 			},
 			$template,
@@ -221,6 +221,23 @@ final class RoutePathGenerator
 		}
 
 		return [$selector, $parts];
+	}
+
+	private function friendlyPlaceholder(string $placeholder): string
+	{
+		$selector = trim(explode('|', $placeholder)[0] ?? '');
+
+		if ($selector === 'parent') {
+			return '[parent path]';
+		}
+
+		$label = str_replace(['.', '_', '-'], ' ', $selector);
+		$label = preg_replace('/([A-Z]+)([A-Z][a-z])/', '$1 $2', $label) ?? $label;
+		$label = preg_replace('/([a-z0-9])([A-Z])/', '$1 $2', $label) ?? $label;
+		$label = preg_replace('/\s+/', ' ', $label) ?? $label;
+		$label = strtolower(trim($label));
+
+		return '[' . ($label === '' ? 'value' : $label) . ']';
 	}
 
 	/**

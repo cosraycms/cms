@@ -56,7 +56,21 @@ final class RoutePathGeneratorTest extends TestCase
 		);
 	}
 
-	public function testUnknownRoutePlaceholderTransformerIsKeptInPreviewMode(): void
+	public function testPreviewModeUsesFriendlyMissingPlaceholders(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/stations/{countryCode|lowercase}-{stationId}-{title|underscore}/',
+			[
+				'content' => [],
+			],
+			$this->locales(),
+			strict: false,
+		);
+
+		$this->assertSame('/stations/[country code]-[station id]-[title]/', $paths['en']);
+	}
+
+	public function testUnknownRoutePlaceholderTransformerUsesFriendlyPlaceholderInPreviewMode(): void
 	{
 		$paths = $this->generator()->generateFromRoute(
 			'/stations/{title|unknown}',
@@ -65,7 +79,7 @@ final class RoutePathGeneratorTest extends TestCase
 			strict: false,
 		);
 
-		$this->assertSame('/stations/{title|unknown}', $paths['en']);
+		$this->assertSame('/stations/[title]', $paths['en']);
 	}
 
 	private function generator(): RoutePathGenerator
