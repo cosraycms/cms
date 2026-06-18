@@ -3,7 +3,13 @@
 
 	import { _ } from '$lib/locale';
 	import { broadcastCancel, dirty } from '$lib/state';
-	import { previewRoutePaths, routePathPreviewPayload } from '$lib/urlpaths';
+	import {
+		ROUTE_PATH_PREVIEW_DELAY,
+		hasExplicitRoutePath,
+		previewRoutePaths,
+		routePathPreviewPayload,
+		routePathPreviewSignature,
+	} from '$lib/urlpaths';
 	import Document from '$shell/Document.svelte';
 	import Pane from '$shell/Pane.svelte';
 	import Tabs from '$shell/Tabs.svelte';
@@ -17,7 +23,7 @@
 
 	type Props = {
 		node: Node;
-		save: (published: boolean) => Promise<void>;
+		save: (published: boolean) => Promise<boolean>;
 		saveAndClose: () => Promise<void>;
 		fields: string[];
 	};
@@ -26,6 +32,7 @@
 
 	let activeTab = $state('content');
 	let pathPreviewRequest = 0;
+	let lastPathPreviewSignature = '';
 
 	function changeTab(tab: string) {
 		return () => {
@@ -38,25 +45,39 @@
 	}
 
 	$effect(() => {
-		if (!node.route) {
+		if (fields.length > 0 || !node.route || hasExplicitRoutePath(node)) {
+			pathPreviewRequest += 1;
+			lastPathPreviewSignature = '';
+			node.generatedPaths = {};
+
 			return;
 		}
 
-		const request = ++pathPreviewRequest;
 		const type = node.type.handle;
 		const payload = routePathPreviewPayload(node);
+		const signature = routePathPreviewSignature(type, payload);
 
-		void previewRoutePaths(type, payload)
-			.then(paths => {
-				if (request === pathPreviewRequest) {
-					node.generatedPaths = paths ?? {};
-				}
-			})
-			.catch(() => {
-				if (request === pathPreviewRequest) {
-					node.generatedPaths = {};
-				}
-			});
+		if (signature === lastPathPreviewSignature) {
+			return;
+		}
+
+		lastPathPreviewSignature = signature;
+		const request = ++pathPreviewRequest;
+		const timer = window.setTimeout(() => {
+			void previewRoutePaths(type, payload)
+				.then(paths => {
+					if (request === pathPreviewRequest) {
+						node.generatedPaths = paths ?? {};
+					}
+				})
+				.catch(() => {
+					if (request === pathPreviewRequest) {
+						node.generatedPaths = {};
+					}
+				});
+		}, ROUTE_PATH_PREVIEW_DELAY);
+
+		return () => window.clearTimeout(timer);
 	});
 </script>
 

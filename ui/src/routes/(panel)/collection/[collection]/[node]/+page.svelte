@@ -26,20 +26,24 @@
 	}) as CollectionState;
 	let node = $state(data.node as NodeType);
 
-	async function save(publish: boolean) {
+	async function save(publish: boolean): Promise<boolean> {
 		if (publish) {
 			node.published = true;
 		}
 
 		const result = await saveNode(node.uid, node);
 
-		if (result.success) {
-			const response = await req.get(`node/${result.uid}`, {});
-
-			if (response?.ok) {
-				node = response.data as NodeType;
-			}
+		if (!result?.success) {
+			return false;
 		}
+
+		const response = await req.get(`node/${result.uid}`, {});
+
+		if (response?.ok) {
+			node = response.data as NodeType;
+		}
+
+		return true;
 	}
 </script>
 

@@ -7,7 +7,17 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { _ } from '$lib/locale';
 	import { dirty, setPristine } from '$lib/state';
-	import { previewRoutePaths, routePathPreviewPayload } from '$lib/urlpaths';
+	import { system, systemLocale } from '$lib/sys';
+	import toast from '$lib/toast';
+	import {
+		ROUTE_PATH_PREVIEW_DELAY,
+		effectiveRoutePath,
+		hasExplicitRoutePath,
+		isResolvedRoutePath,
+		previewRoutePaths,
+		routePathPreviewPayload,
+		routePathPreviewSignature,
+	} from '$lib/urlpaths';
 	import NodeControlBar from '$shell/NodeControlBar.svelte';
 	import Breadcrumbs from '$shell/Breadcrumbs.svelte';
 	import Headline from '$shell/Headline.svelte';
@@ -55,7 +65,7 @@
 			sort?: string;
 			dir?: string;
 		};
-		save: (published: boolean) => Promise<void>;
+		save: (published: boolean) => Promise<boolean>;
 	};
 
 	let { node = $bindable(), collection, save }: Props = $props();
@@ -63,6 +73,7 @@
 	let activeTab = $state('content');
 	let showPreview: string | null = $state(null);
 	let pathPreviewRequest = 0;
+	let lastPathPreviewSignature = '';
 	let collectionPath = $derived.by(() => {
 		const params = new URLSearchParams();
 
@@ -97,30 +108,60 @@
 	}
 
 	async function preview() {
-		await save(false);
-		showPreview = node.paths.de;
-	}
+		const saved = await save(false);
 
-	$effect(() => {
-		if (!node.route) {
+		if (!saved) {
 			return;
 		}
 
-		const request = ++pathPreviewRequest;
+		const path = effectiveRoutePath(node, systemLocale($system), $system.defaultLocale);
+
+		if (!path || !isResolvedRoutePath(path)) {
+			toast.add({
+				kind: 'error',
+				message: _('Die Vorschau-URL konnte nicht erzeugt werden.'),
+			});
+
+			return;
+		}
+
+		showPreview = path;
+	}
+
+	$effect(() => {
+		if (!node.route || hasExplicitRoutePath(node)) {
+			pathPreviewRequest += 1;
+			lastPathPreviewSignature = '';
+			node.generatedPaths = {};
+
+			return;
+		}
+
 		const type = node.type.handle;
 		const payload = routePathPreviewPayload(node);
+		const signature = routePathPreviewSignature(type, payload);
 
-		void previewRoutePaths(type, payload)
-			.then(paths => {
-				if (request === pathPreviewRequest) {
-					node.generatedPaths = paths ?? {};
-				}
-			})
-			.catch(() => {
-				if (request === pathPreviewRequest) {
-					node.generatedPaths = {};
-				}
-			});
+		if (signature === lastPathPreviewSignature) {
+			return;
+		}
+
+		lastPathPreviewSignature = signature;
+		const request = ++pathPreviewRequest;
+		const timer = window.setTimeout(() => {
+			void previewRoutePaths(type, payload)
+				.then(paths => {
+					if (request === pathPreviewRequest) {
+						node.generatedPaths = paths ?? {};
+					}
+				})
+				.catch(() => {
+					if (request === pathPreviewRequest) {
+						node.generatedPaths = {};
+					}
+				});
+		}, ROUTE_PATH_PREVIEW_DELAY);
+
+		return () => window.clearTimeout(timer);
 	});
 </script>
 

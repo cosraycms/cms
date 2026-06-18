@@ -12,12 +12,18 @@
 	let { data }: Props = $props();
 	let node = $state(data.node);
 
-	async function save(publish: boolean) {
+	async function save(publish: boolean): Promise<boolean> {
 		if (publish) {
 			node.published = true;
 		}
 
-		create(node, node.type.handle, `embed/${data.token}/node/${data.type}`);
+		const result = await create(
+			node,
+			node.type.handle,
+			`embed/${data.token}/node/${data.type}`,
+		);
+
+		return result?.success === true;
 	}
 
 	async function saveAndClose() {

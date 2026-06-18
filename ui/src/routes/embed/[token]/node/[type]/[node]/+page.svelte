@@ -14,20 +14,24 @@
 	let { data }: Props = $props();
 	let node = $state(data.node);
 
-	async function save(publish: boolean) {
+	async function save(publish: boolean): Promise<boolean> {
 		if (publish) {
 			node.published = true;
 		}
 
 		const result = await saveNode(node.uid, node);
 
-		if (result.success) {
-			const response = await req.get(`node/${result.uid}`);
-
-			if (response?.ok) {
-				node = response.data as Node;
-			}
+		if (!result?.success) {
+			return false;
 		}
+
+		const response = await req.get(`node/${result.uid}`, {});
+
+		if (response?.ok) {
+			node = response.data as Node;
+		}
+
+		return true;
 	}
 
 	async function saveAndClose() {

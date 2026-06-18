@@ -49,7 +49,7 @@
 		return `collection/${collection.slug}?${query}`;
 	}
 
-	async function save(publish: boolean) {
+	async function save(publish: boolean): Promise<boolean> {
 		if (publish) {
 			node.published = true;
 		}
@@ -58,7 +58,9 @@
 			node.parent = parentUid;
 		}
 
-		create(node, node.type.handle, collectionPath());
+		const result = await create(node, node.type.handle, collectionPath());
+
+		return result?.success === true;
 	}
 </script>
 

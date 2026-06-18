@@ -23,7 +23,7 @@
 		const localeId = locale.id;
 
 		while (localLocale !== undefined) {
-			const value = node.paths[locale.id];
+			const value = node.paths[localLocale.id];
 
 			if (value) {
 				return value;

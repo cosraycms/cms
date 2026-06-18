@@ -18,7 +18,7 @@
 		collectionPath: string;
 		deletable: boolean;
 		locked?: boolean;
-		save: (publish: boolean) => void;
+		save: (publish: boolean) => void | Promise<unknown>;
 		preview: (() => void) | null;
 	};
 
