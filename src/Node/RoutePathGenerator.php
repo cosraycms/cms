@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Celemas\Quma\Database;
-use Cosray\Exception\RoutePath;
+use Cosray\Exception\RoutePathError;
 use Cosray\Field\Field;
 use Cosray\Locale;
 use Cosray\Locales;
@@ -118,7 +118,7 @@ final class RoutePathGenerator
 			function (array $matches) use ($data, $locale, &$parent, $parentId, $strict): string {
 				try {
 					return $this->resolve($matches[1], $data, $locale, $parent, $parentId);
-				} catch (RoutePath $e) {
+				} catch (RoutePathError $e) {
 					if ($strict) {
 						throw $e;
 					}
@@ -130,11 +130,11 @@ final class RoutePathGenerator
 		);
 
 		if (!is_string($path)) {
-			throw new RoutePath(_('Could not generate route path'));
+			throw new RoutePathError(_('Could not generate route path'));
 		}
 
 		if ($strict && (str_contains($path, '{') || str_contains($path, '}'))) {
-			throw new RoutePath(_('Invalid route path placeholder syntax'));
+			throw new RoutePathError(_('Invalid route path placeholder syntax'));
 		}
 
 		return $path;
@@ -192,7 +192,7 @@ final class RoutePathGenerator
 			$parentUid = $data['parent'] ?? null;
 
 			if (!is_string($parentUid) || trim($parentUid) === '') {
-				throw new RoutePath(_('A parent is required for this node route'));
+				throw new RoutePathError(_('A parent is required for this node route'));
 			}
 
 			$parent = $this->db
@@ -208,7 +208,7 @@ final class RoutePathGenerator
 		}
 
 		if (!$parent) {
-			throw new RoutePath(_('Parent node not found for route path'));
+			throw new RoutePathError(_('Parent node not found for route path'));
 		}
 
 		$content = $this->decodeContent($parent['content'] ?? '{}');
@@ -245,7 +245,7 @@ final class RoutePathGenerator
 		$value = $content[$field]['value'] ?? null;
 
 		if (!is_array($value)) {
-			throw new RoutePath(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
 		}
 
 		$current = $locale;
@@ -266,13 +266,13 @@ final class RoutePathGenerator
 			return $resolved;
 		}
 
-		throw new RoutePath(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+		throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
 	}
 
 	private function requiredString(mixed $value, string $placeholder): string
 	{
 		if (!is_string($value) || trim($value) === '') {
-			throw new RoutePath(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
 		}
 
 		return $value;
@@ -316,7 +316,7 @@ final class RoutePathGenerator
 		try {
 			$decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
 		} catch (JsonException $e) {
-			throw new RoutePath(_('Could not decode parent content for route path'), previous: $e);
+			throw new RoutePathError(_('Could not decode parent content for route path'), previous: $e);
 		}
 
 		return is_array($decoded) ? $decoded : [];

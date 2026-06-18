@@ -9,7 +9,7 @@ use Celemas\Core\Exception\HttpConflict;
 use Celemas\Core\Exception\HttpError;
 use Celemas\Core\Request;
 use Celemas\Quma\Database;
-use Cosray\Exception\RoutePath;
+use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Uid;
@@ -384,7 +384,7 @@ class Store
 				$locales,
 				$parentId,
 			);
-		} catch (RoutePath $e) {
+		} catch (RoutePathError $e) {
 			throw new HttpBadRequest(
 				$request,
 				payload: [
