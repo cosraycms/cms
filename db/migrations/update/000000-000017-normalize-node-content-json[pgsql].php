@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Quma\Migrations\M000000_000018_NormalizeNodeContentJson;
+namespace Quma\Migrations\M000000_000017_NormalizeNodeContentJson;
 
 use Celemas\Quma\Contract;
 use Celemas\Quma\Environment;
