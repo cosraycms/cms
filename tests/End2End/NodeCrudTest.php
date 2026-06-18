@@ -148,6 +148,38 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame('/prefix/parent-page/child-page', $payload['paths']['de'] ?? null);
 	}
 
+	public function testPreviewNodePathsSupportsTransformedCompositeParentPlaceholders(): void
+	{
+		$this->authenticateAs('editor');
+
+		$parentType = $this->createTestType('route-transform-parent-' . uniqid());
+		$parentUid = 'route-transform-parent-' . uniqid();
+		$childUid = 'route-transform-child-' . uniqid();
+
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'countryCode' => ['type' => Text::class, 'value' => ['en' => 'DE']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/transformed-route-page/paths', [
+			'body' => [
+				'uid' => $childUid,
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$this->assertSame('/stations/de-main-station/central-station', $payload['paths']['en'] ?? null);
+		$this->assertSame('/stations/de-main-station/central-station', $payload['paths']['de'] ?? null);
+	}
+
 	public function testPreviewNodePathsKeepsMissingParentPlaceholder(): void
 	{
 		$this->authenticateAs('editor');
