@@ -409,7 +409,7 @@ class Store
 	private function routeNeedsHandle(mixed $route): bool
 	{
 		if (is_string($route)) {
-			return str_contains($route, '{handle}');
+			return $this->routeContainsHandle($route);
 		}
 
 		if (!is_array($route)) {
@@ -417,12 +417,17 @@ class Store
 		}
 
 		foreach ($route as $localizedRoute) {
-			if (is_string($localizedRoute) && str_contains($localizedRoute, '{handle}')) {
+			if (is_string($localizedRoute) && $this->routeContainsHandle($localizedRoute)) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private function routeContainsHandle(string $route): bool
+	{
+		return preg_match('/\{\s*handle\s*(?:\|\s*[^{}|]+\s*)*\}/', $route) === 1;
 	}
 
 	private function ensureTypeExists(string $handle): void

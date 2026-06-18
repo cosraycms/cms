@@ -151,24 +151,55 @@ final class RoutePathGenerator
 		?array &$parent,
 		?int $parentId,
 	): string {
-		if ($placeholder === 'uid') {
-			return $this->requiredString($data['uid'] ?? null, $placeholder);
+		[$selector, $transformers] = $this->parsePlaceholder($placeholder);
+
+		if ($selector === 'uid') {
+			return $this->requiredSlug($data['uid'] ?? null, $placeholder, $transformers);
 		}
 
-		if ($placeholder === 'handle') {
-			return $this->requiredString($data['handle'] ?? null, $placeholder);
+		if ($selector === 'handle') {
+			return $this->requiredSlug($data['handle'] ?? null, $placeholder, $transformers);
 		}
 
-		if (str_starts_with($placeholder, 'parent.')) {
+		if (str_starts_with($selector, 'parent.')) {
 			$parent ??= $this->parent($data, $parentId);
-			$parentPlaceholder = substr($placeholder, strlen('parent.'));
+			$parentPlaceholder = substr($selector, strlen('parent.'));
 
-			return $this->resolveParent($parentPlaceholder, $parent, $locale, $placeholder);
+			return $this->resolveParent($parentPlaceholder, $parent, $locale, $placeholder, $transformers);
 		}
 
 		$content = $data['content'] ?? [];
 
-		return $this->field(is_array($content) ? $content : [], $placeholder, $locale, $placeholder);
+		return $this->field(
+			is_array($content) ? $content : [],
+			$selector,
+			$locale,
+			$placeholder,
+			$transformers,
+		);
+	}
+
+	/** @return array{0: string, 1: list<string>} */
+	private function parsePlaceholder(string $placeholder): array
+	{
+		$parts = array_map(trim(...), explode('|', $placeholder));
+		$selector = array_shift($parts) ?? '';
+
+		if ($selector === '') {
+			throw new RoutePathError(_('Invalid route path placeholder syntax'));
+		}
+
+		foreach ($parts as $transformer) {
+			if (!in_array(
+				$transformer,
+				['lowercase', 'uppercase', 'titlecase', 'dashes', 'underscore'],
+				true,
+			)) {
+				throw new RoutePathError(sprintf(_('Unknown route path transformer: %s'), $transformer));
+			}
+		}
+
+		return [$selector, $parts];
 	}
 
 	/**
@@ -205,25 +236,39 @@ final class RoutePathGenerator
 
 	/**
 	 * @param array{uid: string, handle: ?string, content: array<string, mixed>} $parent
+	 * @param list<string> $transformers
 	 */
 	private function resolveParent(
 		string $placeholder,
 		array $parent,
 		Locale $locale,
 		string $fullPlaceholder,
+		array $transformers,
 	): string {
 		return match ($placeholder) {
-			'uid' => $this->requiredString($parent['uid'], $fullPlaceholder),
-			'handle' => $this->requiredString($parent['handle'], $fullPlaceholder),
-			default => $this->field($parent['content'], $placeholder, $locale, $fullPlaceholder),
+			'uid' => $this->requiredSlug($parent['uid'], $fullPlaceholder, $transformers),
+			'handle' => $this->requiredSlug($parent['handle'], $fullPlaceholder, $transformers),
+			default => $this->field(
+				$parent['content'],
+				$placeholder,
+				$locale,
+				$fullPlaceholder,
+				$transformers,
+			),
 		};
 	}
 
 	/**
 	 * @param array<string, mixed> $content
+	 * @param list<string> $transformers
 	 */
-	private function field(array $content, string $field, Locale $locale, string $placeholder): string
-	{
+	private function field(
+		array $content,
+		string $field,
+		Locale $locale,
+		string $placeholder,
+		array $transformers,
+	): string {
 		$value = $content[$field]['value'] ?? null;
 
 		if (!is_array($value)) {
@@ -233,7 +278,7 @@ final class RoutePathGenerator
 		$current = $locale;
 
 		while ($current !== null) {
-			$resolved = $this->slugValue($value[$current->id] ?? null);
+			$resolved = $this->slugValue($value[$current->id] ?? null, $transformers);
 
 			if ($resolved !== null) {
 				return $resolved;
@@ -242,7 +287,7 @@ final class RoutePathGenerator
 			$current = $current->fallback();
 		}
 
-		$resolved = $this->slugValue($value[Field::NEUTRAL_LOCALE] ?? null);
+		$resolved = $this->slugValue($value[Field::NEUTRAL_LOCALE] ?? null, $transformers);
 
 		if ($resolved !== null) {
 			return $resolved;
@@ -251,35 +296,86 @@ final class RoutePathGenerator
 		throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
 	}
 
-	private function requiredString(mixed $value, string $placeholder): string
+	/** @param list<string> $transformers */
+	private function requiredSlug(mixed $value, string $placeholder, array $transformers): string
 	{
 		if (!is_string($value) || trim($value) === '') {
 			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
 		}
 
-		return $value;
+		$slug = $this->slugify(
+			$this->transformCase($value, $transformers),
+			$this->separator($transformers),
+		);
+
+		if ($slug === '') {
+			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+		}
+
+		return $slug;
 	}
 
-	private function slugValue(mixed $value): ?string
+	/** @param list<string> $transformers */
+	private function slugValue(mixed $value, array $transformers): ?string
 	{
 		if (!is_string($value) && !is_int($value) && !is_float($value)) {
 			return null;
 		}
 
-		$slug = $this->slugify((string) $value);
+		$slug = $this->slugify(
+			$this->transformCase((string) $value, $transformers),
+			$this->separator($transformers),
+		);
 
 		return $slug === '' ? null : $slug;
 	}
 
-	private function slugify(string $value): string
+	/** @param list<string> $transformers */
+	private function transformCase(string $value, array $transformers): string
 	{
-		$value = trim(preg_replace('/\s+/', '-', $value) ?? '');
-		$value = substr($value, 0, 255);
-		$value = strtolower($value);
-		$value = preg_replace('/[^A-Za-z0-9_-]+/', '', $value) ?? '';
-		$value = preg_replace('/--+/', '-', $value) ?? '';
+		$case = 'lowercase';
 
-		return trim($value, '-');
+		foreach ($transformers as $transformer) {
+			if (!in_array($transformer, ['lowercase', 'uppercase', 'titlecase'], true)) {
+				continue;
+			}
+
+			$case = $transformer;
+		}
+
+		return match ($case) {
+			'uppercase' => strtoupper($value),
+			'titlecase' => ucwords(strtolower($value)),
+			default => strtolower($value),
+		};
+	}
+
+	/** @param list<string> $transformers */
+	private function separator(array $transformers): string
+	{
+		$separator = '-';
+
+		foreach ($transformers as $transformer) {
+			$separator = match ($transformer) {
+				'dashes' => '-',
+				'underscore' => '_',
+				default => $separator,
+			};
+		}
+
+		return $separator;
+	}
+
+	private function slugify(string $value, string $separator): string
+	{
+		$value = trim(preg_replace('/\s+/', $separator, $value) ?? '');
+		$value = substr($value, 0, 255);
+		$value = preg_replace('/[^A-Za-z0-9_-]+/', '', $value) ?? '';
+
+		$quoted = preg_quote($separator, '/');
+		$value = preg_replace("/{$quoted}{$quoted}+/", $separator, $value) ?? '';
+
+		return trim($value, $separator);
 	}
 
 	/**

@@ -1,0 +1,96 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cosray\Tests\Unit;
+
+use Cosray\Exception\RoutePathError;
+use Cosray\Field\Text;
+use Cosray\Locales;
+use Cosray\Node\RoutePathGenerator;
+use Cosray\Node\Types;
+use Cosray\Tests\TestCase;
+
+/**
+ * @internal
+ *
+ * @covers \Cosray\Node\RoutePathGenerator
+ */
+final class RoutePathGeneratorTest extends TestCase
+{
+	public function testRoutePlaceholdersSupportTransformers(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			[
+				'en' => '/stations/{title}/{title|uppercase}/{title|titlecase}/{title|underscore}',
+			],
+			$this->nodeData('central station'),
+			$this->locales(),
+		);
+
+		$this->assertSame(
+			'/stations/central-station/CENTRAL-STATION/Central-Station/central_station',
+			$paths['en'],
+		);
+	}
+
+	public function testRoutePlaceholderTransformersUseLastCaseAndSeparator(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/stations/{title|uppercase|lowercase|underscore|dashes}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/stations/central-station', $paths['en']);
+	}
+
+	public function testUnknownRoutePlaceholderTransformerFailsInStrictMode(): void
+	{
+		$this->throws(RoutePathError::class, 'Unknown route path transformer: unknown');
+
+		$this->generator()->generateFromRoute(
+			'/stations/{title|unknown}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+	}
+
+	public function testUnknownRoutePlaceholderTransformerIsKeptInPreviewMode(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/stations/{title|unknown}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+			strict: false,
+		);
+
+		$this->assertSame('/stations/{title|unknown}', $paths['en']);
+	}
+
+	private function generator(): RoutePathGenerator
+	{
+		return new RoutePathGenerator($this->db(), new Types());
+	}
+
+	private function locales(): Locales
+	{
+		$locales = new Locales();
+		$locales->add('en', title: 'English');
+
+		return $locales;
+	}
+
+	/** @return array<string, mixed> */
+	private function nodeData(string $title): array
+	{
+		return [
+			'content' => [
+				'title' => [
+					'type' => Text::class,
+					'value' => ['en' => $title],
+				],
+			],
+		];
+	}
+}
