@@ -251,6 +251,38 @@ final class ConfigTest extends TestCase
 		$this->assertSame('', $config->db->placeholders['pgsql']['cms.obj']);
 	}
 
+	public function testDatabaseTableUsesConfiguredPrefix(): void
+	{
+		$config = new Config(self::root(), [
+			'db.dsn' => 'pgsql:dbname=cms',
+		]);
+
+		$this->assertSame('cms.nodes', $config->db->table('nodes'));
+
+		$config = new Config(self::root(), [
+			'db.dsn' => 'pgsql:dbname=cms',
+			'db.placeholders' => [
+				'pgsql' => [
+					'cms.prefix' => '',
+				],
+			],
+		]);
+
+		$this->assertSame('url_paths', $config->db->table('url_paths'));
+	}
+
+	public function testDatabaseTableRequiresValidName(): void
+	{
+		$config = new Config(self::root());
+
+		$this->throws(
+			RuntimeException::class,
+			'Invalid table name.',
+		);
+
+		$config->db->table('bad.table');
+	}
+
 	public function testPostgresqlObjectPrefixCanBeOverridden(): void
 	{
 		$config = new Config(self::root(), [

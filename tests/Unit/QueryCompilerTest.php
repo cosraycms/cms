@@ -210,6 +210,27 @@ final class QueryCompilerTest extends TestCase
 			"EXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
 			$compiler->compile("'/about' = path"),
 		);
+
+		$context = new Context(
+			$this->db(),
+			$this->request(),
+			$this->config([
+				'db.dsn' => 'pgsql:dbname=cms',
+				'db.placeholders' => [
+					'pgsql' => [
+						'cms.prefix' => '',
+					],
+				],
+			]),
+			$this->container(),
+			$this->factory(),
+		);
+		$compiler = new QueryCompiler($context, []);
+
+		$this->assertSame(
+			"EXISTS (SELECT 1 FROM url_paths p WHERE p.node = n.node AND p.inactive IS NULL AND p.path = '/about')",
+			$compiler->compile("path = '/about'"),
+		);
 	}
 
 	private function jsonPath(string $path): string

@@ -53,6 +53,15 @@ final class Database
 		get => $this->optionsCache ??= $this->config->get('db.options');
 	}
 
+	public function table(string $name, ?string $driver = null): string
+	{
+		if (preg_match('/^[a-z_][a-z0-9_]*$/', $name) !== 1) {
+			throw new RuntimeException('Invalid table name.');
+		}
+
+		return $this->prefix($driver) . $name;
+	}
+
 	/** @return array<non-empty-string, array<non-empty-string, string>> */
 	private function validatedPlaceholders(): array
 	{
@@ -104,6 +113,21 @@ final class Database
 		$placeholders['pgsql']['cms.obj'] = str_ends_with($prefix, '.') ? '' : $prefix;
 
 		return $placeholders;
+	}
+
+	private function prefix(?string $driver = null): string
+	{
+		$placeholders = $this->placeholders;
+		$driver ??= $this->driver();
+		$prefix = $placeholders[$driver]['cms.prefix'] ?? $placeholders['all']['cms.prefix'] ?? null;
+
+		if (!is_string($prefix)) {
+			throw new RuntimeException('Invalid table prefix.');
+		}
+
+		$this->assertValidPrefix($prefix, $driver);
+
+		return $prefix;
 	}
 
 	private function assertValidPrefix(mixed $prefix, string $driver): void

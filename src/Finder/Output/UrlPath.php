@@ -23,9 +23,13 @@ final readonly class UrlPath extends Expression implements Output
 		[$pathToken, $valueToken, $operator] = $this->normalize();
 		[$localeClause, $isNegated, $condition] = $this->condition($valueToken, $operator);
 
+		// Safe SQL fragment: table() validates the hardcoded identifier and configured prefix.
+		$table = $this->context->config->db->table('url_paths', $this->context->db->getPdoDriver());
+
 		return sprintf(
-			'%sEXISTS (SELECT 1 FROM cms.url_paths p WHERE p.node = n.node AND p.inactive IS NULL%s AND %s)',
+			'%sEXISTS (SELECT 1 FROM %s p WHERE p.node = n.node AND p.inactive IS NULL%s AND %s)',
 			$isNegated ? 'NOT ' : '',
+			$table,
 			$localeClause,
 			$condition,
 		);

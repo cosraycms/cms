@@ -289,10 +289,8 @@ class Store
 		}
 
 		$parent = $this->db
-			->execute(
-				'SELECT node FROM cms.nodes WHERE uid = :uid AND deleted IS NULL LIMIT 1',
-				['uid' => $parentUid],
-			)
+			->nodes
+			->parentIdByUid(['uid' => $parentUid])
 			->first();
 
 		if (!$parent) {

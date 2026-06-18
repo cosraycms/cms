@@ -46,7 +46,7 @@ final class Nodes implements Iterator
 			'locked' => 'n.locked',
 			'published' => 'n.published',
 			'hidden' => 'n.hidden',
-			'parent' => '(SELECT p.uid FROM cms.nodes p WHERE p.node = n.parent)',
+			'parent' => 'np.uid',
 			'routable' => $this->typeFlagExpression(
 				fn(string $class): bool => (bool) $this->types->get($class, 'routable', false),
 			),
@@ -139,9 +139,7 @@ final class Nodes implements Iterator
 
 		$param = 'parent_uid_' . count($this->whereParams);
 
-		$this->addWhere(
-			'n.parent = (SELECT p.node FROM cms.nodes p WHERE p.uid = :' . $param . ')',
-		);
+		$this->addWhere('np.uid = :' . $param);
 		$this->whereParams[$param] = $uid;
 
 		return $this;

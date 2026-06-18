@@ -258,7 +258,7 @@
 											colspan={data.header.length +
 												(data.showChildren ? 1 : 0) +
 												(data.showPublished ? 1 : 0)}>
-											{_('Keine Eintraege gefunden')}
+											{_('Keine Einträge gefunden')}
 										</td>
 									</tr>
 								{/if}
