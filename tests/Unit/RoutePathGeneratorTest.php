@@ -81,6 +81,42 @@ final class RoutePathGeneratorTest extends TestCase
 		);
 	}
 
+	public function testOptionalParentPathIsOmittedWhenMissing(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/pages/{parent?}/{title}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/pages/central-station', $paths['en']);
+	}
+
+	public function testOnlyDirectParentPathCanBeOptional(): void
+	{
+		$this->throws(RoutePathError::class, 'Invalid route path parent syntax');
+
+		$this->generator()->generateFromRoute(
+			'/{parent(2)?}/{title}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+	}
+
+	public function testOptionalParentPathTransformersFailInStrictMode(): void
+	{
+		$this->throws(
+			RoutePathError::class,
+			'Route path transformers are not supported for parent path placeholders',
+		);
+
+		$this->generator()->generateFromRoute(
+			'/{parent?|lowercase}/{title}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+	}
+
 	public function testPreviewModeUsesFriendlyMissingAncestorPlaceholders(): void
 	{
 		$paths = $this->generator()->generateFromRoute(

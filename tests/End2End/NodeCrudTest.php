@@ -263,6 +263,56 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame($expected, $payload['paths']['de'] ?? null);
 	}
 
+	public function testPreviewNodePathsOmitsMissingOptionalParentPath(): void
+	{
+		$this->authenticateAs('editor');
+
+		$response = $this->makeRequest('POST', '/api/node/optional-parent-path-route-page/paths', [
+			'body' => [
+				'uid' => 'route-optional-parent-child-' . uniqid(),
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$this->assertSame('/central-station', $payload['paths']['en'] ?? null);
+		$this->assertSame('/central-station', $payload['paths']['de'] ?? null);
+	}
+
+	public function testPreviewNodePathsUsesOptionalParentPathWhenPresent(): void
+	{
+		$this->authenticateAs('editor');
+
+		$parentType = $this->createTestType('route-optional-parent-path-parent-' . uniqid());
+		$parentUid = 'route-optional-parent-path-parent-' . uniqid();
+		$parentId = $this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$parentPath = '/stations-' . uniqid() . '/';
+		$this->createTestPath($parentId, $parentPath);
+
+		$response = $this->makeRequest('POST', '/api/node/optional-parent-path-route-page/paths', [
+			'body' => [
+				'uid' => 'route-optional-parent-path-child-' . uniqid(),
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$expected = rtrim($parentPath, '/') . '/central-station';
+		$this->assertSame($expected, $payload['paths']['en'] ?? null);
+		$this->assertSame($expected, $payload['paths']['de'] ?? null);
+	}
+
 	public function testPreviewNodePathsUsesParentPathShortcut(): void
 	{
 		$this->authenticateAs('editor');
@@ -448,6 +498,33 @@ final class NodeCrudTest extends End2EndTestCase
 		$createdPayload = $this->assertJsonResponse($created);
 		$this->assertSame('/prefix/parent-page/child-page', $createdPayload['paths']['en'] ?? null);
 		$this->assertSame($parentUid, $createdPayload['parent'] ?? null);
+	}
+
+	public function testCreateNodeGeneratesRoutePathWithoutOptionalParentOnServer(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('optional-parent-path-route-page');
+		$childUid = 'route-save-optional-parent-path-child-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/optional-parent-path-route-page', [
+			'body' => [
+				'uid' => $childUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->trackNodeByUid($childUid);
+
+		$created = $this->makeRequest('GET', "/api/node/{$childUid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame('/central-station', $createdPayload['paths']['en'] ?? null);
 	}
 
 	public function testCreateNodeGeneratesRoutePathFromParentPathOnServer(): void

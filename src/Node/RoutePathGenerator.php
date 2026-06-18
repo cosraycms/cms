@@ -181,11 +181,17 @@ final class RoutePathGenerator
 				));
 			}
 
-			$parent = $this->ancestor($data, $parentId, $parents, $parentSelector['depth']);
-
 			if ($parentSelector['field'] === null) {
 				$usesParentPath = true;
 
+				if ($parentSelector['optional'] && !$this->hasParent($data, $parentId)) {
+					return '';
+				}
+			}
+
+			$parent = $this->ancestor($data, $parentId, $parents, $parentSelector['depth']);
+
+			if ($parentSelector['field'] === null) {
 				return trim($this->parentPath($parent, $locale, $placeholder), '/');
 			}
 
@@ -232,15 +238,24 @@ final class RoutePathGenerator
 		return [$selector, $parts];
 	}
 
-	/** @return ?array{depth: int, field: ?string} */
+	/** @return ?array{depth: int, field: ?string, optional: bool} */
 	private function parentSelector(string $selector): ?array
 	{
 		if (
 			$selector !== 'parent'
 			&& !str_starts_with($selector, 'parent.')
 			&& !str_starts_with($selector, 'parent(')
+			&& !str_starts_with($selector, 'parent?')
 		) {
 			return null;
+		}
+
+		if ($selector === 'parent?') {
+			return [
+				'depth' => 1,
+				'field' => null,
+				'optional' => true,
+			];
 		}
 
 		if (!preg_match('/^parent(?:\(([1-9]\d*)\))?(?:\.(.+))?$/', $selector, $matches)) {
@@ -261,6 +276,7 @@ final class RoutePathGenerator
 		return [
 			'depth' => $depth,
 			'field' => is_string($field) && $field !== '' ? $field : null,
+			'optional' => false,
 		];
 	}
 
@@ -278,6 +294,10 @@ final class RoutePathGenerator
 
 	private function friendlyParentPlaceholder(string $selector): ?string
 	{
+		if ($selector === 'parent?') {
+			return '[parent path]';
+		}
+
 		if (!preg_match('/^parent(?:\((\d+)\))?(?:\.(.+))?$/', $selector, $matches)) {
 			return null;
 		}
@@ -347,6 +367,18 @@ final class RoutePathGenerator
 		}
 
 		return $this->parentByUid(trim($parentUid));
+	}
+
+	/** @param array<string, mixed> $data */
+	private function hasParent(array $data, ?int $parentId): bool
+	{
+		if ($parentId !== null) {
+			return true;
+		}
+
+		$parentUid = $data['parent'] ?? null;
+
+		return is_string($parentUid) && trim($parentUid) !== '';
 	}
 
 	/** @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} */
