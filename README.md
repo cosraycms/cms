@@ -99,12 +99,14 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 | --- | --- |
 | `#[Label('...')]` | Human-readable display name |
 | `#[Handle('...')]` | URL-safe identifier (auto-derived if omitted) |
-| `#[Route('...')]` | URL pattern for routable nodes |
+| `#[Route('...')]` | Route template for routable nodes |
 | `#[Render('...')]` | Template name override |
 | `#[Title('...')]` | Field name to use as title |
 | `#[FieldOrder('...')]` | Admin panel field order |
 | `#[Deletable(false)]` | Prevent deletion in admin panel (default: `true`) |
 | `#[Children(Foo::class, ...)]` | Allowed direct child node types for hierarchy-enabled collection lists |
+
+Route templates can generate URL paths from node fields and hierarchy data.
 
 ### Hierarchy lists in panel
 

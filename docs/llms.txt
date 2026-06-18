@@ -2,7 +2,7 @@ project: Cosray Content Management Framework (cosray/cms)
 repository: https://github.com/cosray/cms
 canonical_branch: main
 license: MIT (https://github.com/cosray/cms/blob/main/LICENSE.md)
-last_updated: 2026-06-13
+last_updated: 2026-06-18
 contact: https://github.com/cosray/cms/issues
 
 summary:
@@ -202,6 +202,83 @@ final class ArticlePage implements Title
     }
 }
 ```
+
+Route templates:
+
+- `#[Route(...)]` makes a node type routable and defines the URL path template.
+- The route value can be one string for all locales or an array keyed by locale id. Missing locale keys do not generate a path for that locale:
+
+```php
+// One template for all locales:
+#[Route('/articles/{title}')]
+
+// Or localized templates:
+#[Route(['en' => '/articles/{title}', 'de' => '/artikel/{title}'])]
+```
+
+- Server-side route generation is the source of truth. See `src/Node/RoutePathGenerator.php`.
+- The panel preview endpoint is `POST /api/node/{type}/paths`; it calls the same server-side generator in lenient preview mode.
+- Save uses strict generation. If submitted URL paths are all empty, Cosray generates paths from the route template. If an explicit URL path is submitted, the explicit path wins.
+- Generated child paths are not cascaded when a parent path changes.
+
+Supported placeholders:
+
+- `{uid}`: current node uid.
+- `{handle}`: current node handle. Routes that reference `{handle}` require a handle.
+- `{fieldName}`: current node field value.
+- `{parent}`: required direct parent active URL path.
+- `{parent?}`: optional direct parent active URL path. It expands to an empty segment when no parent is selected.
+- `{parent.fieldName}`: direct parent field value.
+- `{parent(n)}`: nth parent active URL path, 1-based. `parent(1)` is the direct parent. Max depth is 5.
+- `{parent(n).fieldName}`: nth parent field value.
+
+Parent path placeholders:
+
+- `{parent}`, `{parent?}`, and `{parent(n)}` reuse the ancestor's active URL path. They do not slugify or transform that persisted path.
+- Slash joins are normalized. `/{parent?}/{title}` without a parent becomes `/title`, not `//title`; parent `/products/` plus child `chair` becomes `/products/chair`.
+- Parent paths use the current locale and then the locale fallback chain.
+- If `{parent}` or `{parent(n)}` needs a parent and none exists, strict save fails.
+- If a parent exists but has no active path for the locale or fallback chain, strict save fails.
+- `{parent?}` only makes the parent relation optional. If a parent is selected but the parent path is missing, strict save still fails.
+
+Field placeholders:
+
+- Current-node fields and parent/ancestor fields are slugified.
+- Field values resolve through the current locale, the locale fallback chain, and then the neutral field value.
+- Missing values fail in strict mode.
+
+Transformers:
+
+- Supported transformers are `lowercase`, `uppercase`, `titlecase`, `dashes`, and `underscore`.
+- Chains are allowed: `{title|uppercase|underscore}`.
+- Slugification always runs. The default is lowercase with dashes.
+- If multiple case or separator transformers are present, the last case transformer and last separator transformer win.
+- Transformers work on `{uid}`, `{handle}`, current fields, and parent/ancestor fields.
+- Transformers are not supported on parent path shortcuts: `{parent|lowercase}`, `{parent?|lowercase}`, and `{parent(2)|lowercase}` fail.
+- Unknown transformers fail in strict mode.
+
+Route template examples:
+
+```php
+#[Route('/stations/{countryCode|lowercase}-{stationId}-{title|underscore}')]
+#[Route('/{parent}/{title}')]
+#[Route('/{parent?}/{title}')]
+#[Route('/{parent(2).title}/{parent.countryCode|lowercase}-{title}')]
+#[Route('/{parent(2)}/{parent.countryCode|lowercase}-{title}')]
+```
+
+Unsupported route syntax:
+
+- Optional ancestors such as `{parent(2)?}` are not supported.
+- Optional parent fields such as `{parent?.title}` are not supported.
+- Transformers on parent path shortcuts are not supported.
+
+Preview mode:
+
+- Preview is lenient and keeps editing non-blocking.
+- Unresolved placeholders become editor-friendly labels instead of raw braces.
+- Examples: `{title|underscore}` -> `[title]`, `{countryCode|lowercase}` -> `[country code]`, `{parent.title}` -> `[parent title]`, `{parent(2).title}` -> `[ancestor title]`, `{parent}` -> `[parent path]`, `{parent(2)}` -> `[ancestor path]`.
+- Save remains strict even if preview can show a friendly placeholder.
 
 Field translation modes:
 
