@@ -1,5 +1,6 @@
 SELECT
 	n.node,
+	n.parent,
 	n.uid,
 	h.handle,
 	n.content

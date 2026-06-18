@@ -13,6 +13,8 @@ use JsonException;
 
 final class RoutePathGenerator
 {
+	private const MAX_PARENT_DEPTH = 5;
+
 	public function __construct(
 		private readonly Database $db,
 		private readonly Types $types,
@@ -73,7 +75,7 @@ final class RoutePathGenerator
 			return [];
 		}
 
-		$parent = null;
+		$parents = [];
 		$paths = [];
 
 		foreach ($locales as $locale) {
@@ -83,7 +85,7 @@ final class RoutePathGenerator
 				continue;
 			}
 
-			$paths[$locale->id] = $this->expand($template, $data, $locale, $parent, $parentId, $strict);
+			$paths[$locale->id] = $this->expand($template, $data, $locale, $parents, $parentId, $strict);
 		}
 
 		return $paths;
@@ -103,13 +105,13 @@ final class RoutePathGenerator
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} $parent
+	 * @param array<int, array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}> $parents
 	 */
 	private function expand(
 		string $template,
 		array $data,
 		Locale $locale,
-		?array &$parent,
+		array &$parents,
 		?int $parentId,
 		bool $strict,
 	): string {
@@ -119,13 +121,13 @@ final class RoutePathGenerator
 			function (array $matches) use (
 				$data,
 				$locale,
-				&$parent,
+				&$parents,
 				$parentId,
 				$strict,
 				&$usesParentPath,
 			): string {
 				try {
-					return $this->resolve($matches[1], $data, $locale, $parent, $parentId, $usesParentPath);
+					return $this->resolve($matches[1], $data, $locale, $parents, $parentId, $usesParentPath);
 				} catch (RoutePathError $e) {
 					if ($strict) {
 						throw $e;
@@ -150,13 +152,13 @@ final class RoutePathGenerator
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} $parent
+	 * @param array<int, array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}> $parents
 	 */
 	private function resolve(
 		string $placeholder,
 		array $data,
 		Locale $locale,
-		?array &$parent,
+		array &$parents,
 		?int $parentId,
 		bool &$usesParentPath,
 	): string {
@@ -170,23 +172,30 @@ final class RoutePathGenerator
 			return $this->requiredSlug($data['handle'] ?? null, $placeholder, $transformers);
 		}
 
-		if ($selector === 'parent') {
-			$usesParentPath = true;
+		$parentSelector = $this->parentSelector($selector);
 
-			if ($transformers !== []) {
-				throw new RoutePathError(_('Route path transformers are not supported for {parent}'));
+		if ($parentSelector !== null) {
+			if ($parentSelector['field'] === null && $transformers !== []) {
+				throw new RoutePathError(_(
+					'Route path transformers are not supported for parent path placeholders',
+				));
 			}
 
-			$parent ??= $this->parent($data, $parentId);
+			$parent = $this->ancestor($data, $parentId, $parents, $parentSelector['depth']);
 
-			return trim($this->parentPath($parent, $locale, $placeholder), '/');
-		}
+			if ($parentSelector['field'] === null) {
+				$usesParentPath = true;
 
-		if (str_starts_with($selector, 'parent.')) {
-			$parent ??= $this->parent($data, $parentId);
-			$parentPlaceholder = substr($selector, strlen('parent.'));
+				return trim($this->parentPath($parent, $locale, $placeholder), '/');
+			}
 
-			return $this->resolveParent($parentPlaceholder, $parent, $locale, $placeholder, $transformers);
+			return $this->resolveParent(
+				$parentSelector['field'],
+				$parent,
+				$locale,
+				$placeholder,
+				$transformers,
+			);
 		}
 
 		$content = $data['content'] ?? [];
@@ -223,54 +232,178 @@ final class RoutePathGenerator
 		return [$selector, $parts];
 	}
 
+	/** @return ?array{depth: int, field: ?string} */
+	private function parentSelector(string $selector): ?array
+	{
+		if (
+			$selector !== 'parent'
+			&& !str_starts_with($selector, 'parent.')
+			&& !str_starts_with($selector, 'parent(')
+		) {
+			return null;
+		}
+
+		if (!preg_match('/^parent(?:\(([1-9]\d*)\))?(?:\.(.+))?$/', $selector, $matches)) {
+			throw new RoutePathError(_('Invalid route path parent syntax'));
+		}
+
+		$depth = isset($matches[1]) && $matches[1] !== '' ? (int) $matches[1] : 1;
+
+		if ($depth > self::MAX_PARENT_DEPTH) {
+			throw new RoutePathError(sprintf(
+				_('Route path parent depth cannot exceed %d'),
+				self::MAX_PARENT_DEPTH,
+			));
+		}
+
+		$field = $matches[2] ?? null;
+
+		return [
+			'depth' => $depth,
+			'field' => is_string($field) && $field !== '' ? $field : null,
+		];
+	}
+
 	private function friendlyPlaceholder(string $placeholder): string
 	{
 		$selector = trim(explode('|', $placeholder)[0] ?? '');
+		$parent = $this->friendlyParentPlaceholder($selector);
 
-		if ($selector === 'parent') {
-			return '[parent path]';
+		if ($parent !== null) {
+			return $parent;
 		}
 
-		$label = str_replace(['.', '_', '-'], ' ', $selector);
+		return '[' . $this->friendlyLabel($selector) . ']';
+	}
+
+	private function friendlyParentPlaceholder(string $selector): ?string
+	{
+		if (!preg_match('/^parent(?:\((\d+)\))?(?:\.(.+))?$/', $selector, $matches)) {
+			return null;
+		}
+
+		$depth = isset($matches[1]) && $matches[1] !== '' ? (int) $matches[1] : 1;
+		$prefix = $depth > 1 ? 'ancestor' : 'parent';
+		$field = $matches[2] ?? null;
+
+		if (!is_string($field) || $field === '') {
+			return "[{$prefix} path]";
+		}
+
+		return "[{$prefix} {$this->friendlyLabel($field)}]";
+	}
+
+	private function friendlyLabel(string $selector): string
+	{
+		$label = str_replace(['.', '_', '-', '(', ')'], ' ', $selector);
 		$label = preg_replace('/([A-Z]+)([A-Z][a-z])/', '$1 $2', $label) ?? $label;
 		$label = preg_replace('/([a-z0-9])([A-Z])/', '$1 $2', $label) ?? $label;
 		$label = preg_replace('/\s+/', ' ', $label) ?? $label;
 		$label = strtolower(trim($label));
 
-		return '[' . ($label === '' ? 'value' : $label) . ']';
+		return $label === '' ? 'value' : $label;
 	}
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @return array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}
+	 * @param array<int, array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}> $parents
+	 * @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}
+	 */
+	private function ancestor(array $data, ?int $parentId, array &$parents, int $depth): array
+	{
+		$parents[1] ??= $this->parent($data, $parentId);
+
+		for ($level = 2; $level <= $depth; $level++) {
+			if (isset($parents[$level])) {
+				continue;
+			}
+
+			$node = $parents[$level - 1]['parent'];
+
+			if ($node === null) {
+				throw new RoutePathError(_('Ancestor node not found for route path'));
+			}
+
+			$parents[$level] = $this->parentByNode($node);
+		}
+
+		return $parents[$depth];
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}
 	 */
 	private function parent(array $data, ?int $parentId): array
 	{
 		if ($parentId !== null) {
-			$parent = $this->db->nodes->routeParentByNode(['node' => $parentId])->first();
-		} else {
-			$parentUid = $data['parent'] ?? null;
-
-			if (!is_string($parentUid) || trim($parentUid) === '') {
-				throw new RoutePathError(_('A parent is required for this node route'));
-			}
-
-			$parent = $this->db->nodes->routeParentByUid(['uid' => trim($parentUid)])->first();
+			return $this->parentByNode($parentId);
 		}
+
+		$parentUid = $data['parent'] ?? null;
+
+		if (!is_string($parentUid) || trim($parentUid) === '') {
+			throw new RoutePathError(_('A parent is required for this node route'));
+		}
+
+		return $this->parentByUid(trim($parentUid));
+	}
+
+	/** @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} */
+	private function parentByNode(int $node): array
+	{
+		$parent = $this->db->nodes->routeParentByNode(['node' => $node])->first();
 
 		if (!$parent) {
 			throw new RoutePathError(_('Parent node not found for route path'));
 		}
 
+		return $this->parentRow($parent);
+	}
+
+	/** @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} */
+	private function parentByUid(string $uid): array
+	{
+		$parent = $this->db->nodes->routeParentByUid(['uid' => $uid])->first();
+
+		if (!$parent) {
+			throw new RoutePathError(_('Parent node not found for route path'));
+		}
+
+		return $this->parentRow($parent);
+	}
+
+	/**
+	 * @param array<string, mixed> $parent
+	 * @return array{node: int, parent: ?int, uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}
+	 */
+	private function parentRow(array $parent): array
+	{
 		$content = $this->decodeContent($parent['content'] ?? '{}');
 		$handle = $parent['handle'] ?? null;
+		$node = (int) $parent['node'];
 
 		return [
+			'node' => $node,
+			'parent' => $this->nodeId($parent['parent'] ?? null),
 			'uid' => (string) $parent['uid'],
 			'handle' => is_string($handle) && $handle !== '' ? $handle : null,
 			'content' => $content,
-			'paths' => $this->parentPaths((int) $parent['node']),
+			'paths' => $this->parentPaths($node),
 		];
+	}
+
+	private function nodeId(mixed $node): ?int
+	{
+		if (is_int($node)) {
+			return $node;
+		}
+
+		if (is_string($node) && ctype_digit($node)) {
+			return (int) $node;
+		}
+
+		return null;
 	}
 
 	/**

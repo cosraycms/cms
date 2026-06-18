@@ -56,6 +56,46 @@ final class RoutePathGeneratorTest extends TestCase
 		);
 	}
 
+	public function testParentDepthIsLimitedInStrictMode(): void
+	{
+		$this->throws(RoutePathError::class, 'Route path parent depth cannot exceed 5');
+
+		$this->generator()->generateFromRoute(
+			'/{parent(6).title}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+	}
+
+	public function testParentPathTransformersFailInStrictMode(): void
+	{
+		$this->throws(
+			RoutePathError::class,
+			'Route path transformers are not supported for parent path placeholders',
+		);
+
+		$this->generator()->generateFromRoute(
+			'/{parent(2)|lowercase}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+		);
+	}
+
+	public function testPreviewModeUsesFriendlyMissingAncestorPlaceholders(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/{parent(1)}/{parent(2)}/{parent(1).countryCode|lowercase}/{parent(2).countryCode|lowercase}',
+			$this->nodeData('Central Station'),
+			$this->locales(),
+			strict: false,
+		);
+
+		$this->assertSame(
+			'/[parent path]/[ancestor path]/[parent country code]/[ancestor country code]',
+			$paths['en'],
+		);
+	}
+
 	public function testPreviewModeUsesFriendlyMissingPlaceholders(): void
 	{
 		$paths = $this->generator()->generateFromRoute(

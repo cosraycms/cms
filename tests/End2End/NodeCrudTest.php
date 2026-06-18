@@ -180,6 +180,89 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame('/stations/de-main-station/central-station', $payload['paths']['de'] ?? null);
 	}
 
+	public function testPreviewNodePathsSupportsAncestorFields(): void
+	{
+		$this->authenticateAs('editor');
+
+		$grandparentType = $this->createTestType('route-ancestor-grandparent-' . uniqid());
+		$grandparentUid = 'route-ancestor-grandparent-' . uniqid();
+		$grandparentId = $this->createTestNode([
+			'uid' => $grandparentUid,
+			'type' => $grandparentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$parentType = $this->createTestType('route-ancestor-parent-' . uniqid());
+		$parentUid = 'route-ancestor-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'parent' => $grandparentId,
+			'type' => $parentType,
+			'content' => [
+				'countryCode' => ['type' => Text::class, 'value' => ['en' => 'DE']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/ancestor-field-route-page/paths', [
+			'body' => [
+				'uid' => 'route-ancestor-child-' . uniqid(),
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Platform One']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$this->assertSame('/main-station/de-platform-one', $payload['paths']['en'] ?? null);
+		$this->assertSame('/main-station/de-platform-one', $payload['paths']['de'] ?? null);
+	}
+
+	public function testPreviewNodePathsUsesAncestorPathShortcut(): void
+	{
+		$this->authenticateAs('editor');
+
+		$grandparentType = $this->createTestType('route-ancestor-path-grandparent-' . uniqid());
+		$grandparentUid = 'route-ancestor-path-grandparent-' . uniqid();
+		$grandparentId = $this->createTestNode([
+			'uid' => $grandparentUid,
+			'type' => $grandparentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$grandparentPath = '/stations-' . uniqid() . '/';
+		$this->createTestPath($grandparentId, $grandparentPath);
+		$parentType = $this->createTestType('route-ancestor-path-parent-' . uniqid());
+		$parentUid = 'route-ancestor-path-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'parent' => $grandparentId,
+			'type' => $parentType,
+			'content' => [
+				'countryCode' => ['type' => Text::class, 'value' => ['en' => 'DE']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/ancestor-path-route-page/paths', [
+			'body' => [
+				'uid' => 'route-ancestor-path-child-' . uniqid(),
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Platform One']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$expected = rtrim($grandparentPath, '/') . '/de-platform-one';
+		$this->assertSame($expected, $payload['paths']['en'] ?? null);
+		$this->assertSame($expected, $payload['paths']['de'] ?? null);
+	}
+
 	public function testPreviewNodePathsUsesParentPathShortcut(): void
 	{
 		$this->authenticateAs('editor');
@@ -239,6 +322,36 @@ final class NodeCrudTest extends End2EndTestCase
 		$payload = $this->assertJsonResponse($response, 200);
 		$this->assertSame('/[parent path]/central-station', $payload['paths']['en'] ?? null);
 		$this->assertSame('/[parent path]/central-station', $payload['paths']['de'] ?? null);
+	}
+
+	public function testPreviewNodePathsKeepsMissingAncestorPlaceholder(): void
+	{
+		$this->authenticateAs('editor');
+
+		$parentType = $this->createTestType('route-missing-ancestor-parent-' . uniqid());
+		$parentUid = 'route-missing-ancestor-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'countryCode' => ['type' => Text::class, 'value' => ['en' => 'DE']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/ancestor-field-route-page/paths', [
+			'body' => [
+				'uid' => 'route-missing-ancestor-child-' . uniqid(),
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Platform One']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 200);
+		$this->assertSame('/[ancestor title]/de-platform-one', $payload['paths']['en'] ?? null);
+		$this->assertSame('/[ancestor title]/de-platform-one', $payload['paths']['de'] ?? null);
 	}
 
 	public function testPreviewNodePathsKeepsMissingParentPlaceholder(): void
@@ -376,6 +489,60 @@ final class NodeCrudTest extends End2EndTestCase
 		$createdPayload = $this->assertJsonResponse($created);
 		$this->assertSame(
 			rtrim($parentPath, '/') . '/central-station',
+			$createdPayload['paths']['en'] ?? null,
+		);
+	}
+
+	public function testCreateNodeGeneratesRoutePathFromAncestorPathOnServer(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('ancestor-path-route-page');
+		$grandparentType = $this->createTestType('route-save-ancestor-path-grandparent-' . uniqid());
+		$grandparentUid = 'route-save-ancestor-path-grandparent-' . uniqid();
+		$grandparentId = $this->createTestNode([
+			'uid' => $grandparentUid,
+			'type' => $grandparentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$grandparentPath = '/stations-save-' . uniqid() . '/';
+		$this->createTestPath($grandparentId, $grandparentPath);
+		$parentType = $this->createTestType('route-save-ancestor-path-parent-' . uniqid());
+		$parentUid = 'route-save-ancestor-path-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'parent' => $grandparentId,
+			'type' => $parentType,
+			'content' => [
+				'countryCode' => ['type' => Text::class, 'value' => ['en' => 'DE']],
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+			],
+		]);
+
+		$childUid = 'route-save-ancestor-path-child-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/ancestor-path-route-page', [
+			'body' => [
+				'uid' => $childUid,
+				'parent' => $parentUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Platform One']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->trackNodeByUid($childUid);
+
+		$created = $this->makeRequest('GET', "/api/node/{$childUid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame(
+			rtrim($grandparentPath, '/') . '/de-platform-one',
 			$createdPayload['paths']['en'] ?? null,
 		);
 	}
