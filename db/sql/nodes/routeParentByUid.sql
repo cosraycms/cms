@@ -1,4 +1,5 @@
 SELECT
+	n.node,
 	n.uid,
 	h.handle,
 	n.content

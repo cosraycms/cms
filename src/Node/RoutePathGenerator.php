@@ -103,7 +103,7 @@ final class RoutePathGenerator
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>} $parent
+	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} $parent
 	 */
 	private function expand(
 		string $template,
@@ -113,11 +113,19 @@ final class RoutePathGenerator
 		?int $parentId,
 		bool $strict,
 	): string {
+		$usesParentPath = false;
 		$path = preg_replace_callback(
 			'/\{([^{}]+)\}/',
-			function (array $matches) use ($data, $locale, &$parent, $parentId, $strict): string {
+			function (array $matches) use (
+				$data,
+				$locale,
+				&$parent,
+				$parentId,
+				$strict,
+				&$usesParentPath,
+			): string {
 				try {
-					return $this->resolve($matches[1], $data, $locale, $parent, $parentId);
+					return $this->resolve($matches[1], $data, $locale, $parent, $parentId, $usesParentPath);
 				} catch (RoutePathError $e) {
 					if ($strict) {
 						throw $e;
@@ -137,12 +145,12 @@ final class RoutePathGenerator
 			throw new RoutePathError(_('Invalid route path placeholder syntax'));
 		}
 
-		return $path;
+		return $usesParentPath ? $this->normalizePath($path) : $path;
 	}
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>} $parent
+	 * @param ?array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} $parent
 	 */
 	private function resolve(
 		string $placeholder,
@@ -150,6 +158,7 @@ final class RoutePathGenerator
 		Locale $locale,
 		?array &$parent,
 		?int $parentId,
+		bool &$usesParentPath,
 	): string {
 		[$selector, $transformers] = $this->parsePlaceholder($placeholder);
 
@@ -159,6 +168,18 @@ final class RoutePathGenerator
 
 		if ($selector === 'handle') {
 			return $this->requiredSlug($data['handle'] ?? null, $placeholder, $transformers);
+		}
+
+		if ($selector === 'parent') {
+			$usesParentPath = true;
+
+			if ($transformers !== []) {
+				throw new RoutePathError(_('Route path transformers are not supported for {parent}'));
+			}
+
+			$parent ??= $this->parent($data, $parentId);
+
+			return trim($this->parentPath($parent, $locale, $placeholder), '/');
 		}
 
 		if (str_starts_with($selector, 'parent.')) {
@@ -204,7 +225,7 @@ final class RoutePathGenerator
 
 	/**
 	 * @param array<string, mixed> $data
-	 * @return array{uid: string, handle: ?string, content: array<string, mixed>}
+	 * @return array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>}
 	 */
 	private function parent(array $data, ?int $parentId): array
 	{
@@ -231,11 +252,31 @@ final class RoutePathGenerator
 			'uid' => (string) $parent['uid'],
 			'handle' => is_string($handle) && $handle !== '' ? $handle : null,
 			'content' => $content,
+			'paths' => $this->parentPaths((int) $parent['node']),
 		];
 	}
 
 	/**
-	 * @param array{uid: string, handle: ?string, content: array<string, mixed>} $parent
+	 * @return array<string, string>
+	 */
+	private function parentPaths(int $node): array
+	{
+		$paths = [];
+
+		foreach ($this->db->paths->activeByNode(['node' => $node])->all() as $path) {
+			$locale = $path['locale'] ?? null;
+			$value = $path['path'] ?? null;
+
+			if (is_string($locale) && is_string($value) && trim($value) !== '') {
+				$paths[$locale] = $value;
+			}
+		}
+
+		return $paths;
+	}
+
+	/**
+	 * @param array{uid: string, handle: ?string, content: array<string, mixed>, paths: array<string, string>} $parent
 	 * @param list<string> $transformers
 	 */
 	private function resolveParent(
@@ -256,6 +297,46 @@ final class RoutePathGenerator
 				$transformers,
 			),
 		};
+	}
+
+	/** @param array{paths: array<string, string>} $parent */
+	private function parentPath(array $parent, Locale $locale, string $placeholder): string
+	{
+		$current = $locale;
+
+		while ($current !== null) {
+			$path = $this->pathValue($parent['paths'][$current->id] ?? null);
+
+			if ($path !== null) {
+				return $path;
+			}
+
+			$current = $current->fallback();
+		}
+
+		throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+	}
+
+	private function pathValue(mixed $path): ?string
+	{
+		if (!is_string($path)) {
+			return null;
+		}
+
+		$path = trim($path);
+
+		return $path === '' ? null : $path;
+	}
+
+	private function normalizePath(string $path): string
+	{
+		$path = preg_replace('#/+#', '/', $path) ?? '';
+
+		if ($path === '') {
+			return '/';
+		}
+
+		return str_starts_with($path, '/') ? $path : '/' . $path;
 	}
 
 	/**

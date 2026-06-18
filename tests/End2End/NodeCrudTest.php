@@ -180,6 +180,67 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame('/stations/de-main-station/central-station', $payload['paths']['de'] ?? null);
 	}
 
+	public function testPreviewNodePathsUsesParentPathShortcut(): void
+	{
+		$this->authenticateAs('editor');
+
+		$parentType = $this->createTestType('route-parent-path-parent-' . uniqid());
+		$parentUid = 'route-parent-path-parent-' . uniqid();
+		$parentId = $this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$parentPath = '/stations-' . uniqid() . '/';
+		$this->createTestPath($parentId, $parentPath);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-path-route-page/paths', [
+			'body' => [
+				'uid' => 'route-parent-path-child-' . uniqid(),
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response);
+		$expected = rtrim($parentPath, '/') . '/central-station';
+		$this->assertSame($expected, $payload['paths']['en'] ?? null);
+		$this->assertSame($expected, $payload['paths']['de'] ?? null);
+	}
+
+	public function testPreviewNodePathsKeepsMissingParentPathShortcut(): void
+	{
+		$this->authenticateAs('editor');
+
+		$parentType = $this->createTestType('route-parent-path-missing-parent-' . uniqid());
+		$parentUid = 'route-parent-path-missing-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-path-route-page/paths', [
+			'body' => [
+				'uid' => 'route-parent-path-missing-child',
+				'parent' => $parentUid,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 200);
+		$this->assertSame('/{parent}/central-station', $payload['paths']['en'] ?? null);
+		$this->assertSame('/{parent}/central-station', $payload['paths']['de'] ?? null);
+	}
+
 	public function testPreviewNodePathsKeepsMissingParentPlaceholder(): void
 	{
 		$this->authenticateAs('editor');
@@ -274,6 +335,82 @@ final class NodeCrudTest extends End2EndTestCase
 		$createdPayload = $this->assertJsonResponse($created);
 		$this->assertSame('/prefix/parent-page/child-page', $createdPayload['paths']['en'] ?? null);
 		$this->assertSame($parentUid, $createdPayload['parent'] ?? null);
+	}
+
+	public function testCreateNodeGeneratesRoutePathFromParentPathOnServer(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('parent-path-route-page');
+		$parentType = $this->createTestType('route-save-parent-path-parent-' . uniqid());
+		$parentUid = 'route-save-parent-path-parent-' . uniqid();
+		$parentId = $this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+		$parentPath = '/stations-save-' . uniqid() . '/';
+		$this->createTestPath($parentId, $parentPath);
+
+		$childUid = 'route-save-parent-path-child-' . uniqid();
+		$response = $this->makeRequest('POST', '/api/node/parent-path-route-page', [
+			'body' => [
+				'uid' => $childUid,
+				'parent' => $parentUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 201);
+		$this->assertTrue($payload['success'] ?? false);
+		$this->trackNodeByUid($childUid);
+
+		$created = $this->makeRequest('GET', "/api/node/{$childUid}");
+		$createdPayload = $this->assertJsonResponse($created);
+		$this->assertSame(
+			rtrim($parentPath, '/') . '/central-station',
+			$createdPayload['paths']['en'] ?? null,
+		);
+	}
+
+	public function testCreateNodeRejectsMissingParentPathShortcut(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->createTestType('parent-path-route-page');
+		$parentType = $this->createTestType('route-save-missing-parent-path-parent-' . uniqid());
+		$parentUid = 'route-save-missing-parent-path-parent-' . uniqid();
+		$this->createTestNode([
+			'uid' => $parentUid,
+			'type' => $parentType,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Main Station']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/api/node/parent-path-route-page', [
+			'headers' => ['Accept' => 'application/json'],
+			'body' => [
+				'uid' => 'route-save-missing-parent-path-child',
+				'parent' => $parentUid,
+				'published' => true,
+				'hidden' => false,
+				'locked' => false,
+				'content' => [
+					'title' => ['type' => Text::class, 'value' => ['en' => 'Central Station']],
+				],
+			],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 400);
+		$this->assertSame('Could not resolve route placeholder: {parent}', $payload['message'] ?? null);
 	}
 
 	public function testCreateNodeRejectsMissingGeneratedRoutePlaceholder(): void
