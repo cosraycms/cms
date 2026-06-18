@@ -38,6 +38,26 @@ final class RoutePathGenerator
 	}
 
 	/**
+	 * @param class-string $nodeClass
+	 * @param array<string, mixed> $data
+	 * @return array<string, string>
+	 */
+	public function preview(
+		string $nodeClass,
+		array $data,
+		Locales $locales,
+		?int $parentId = null,
+	): array {
+		return $this->generateFromRoute(
+			$this->types->get($nodeClass, 'route'),
+			$data,
+			$locales,
+			$parentId,
+			strict: false,
+		);
+	}
+
+	/**
 	 * @param array<string, string>|string|mixed $route
 	 * @param array<string, mixed> $data
 	 * @return array<string, string>
@@ -47,6 +67,7 @@ final class RoutePathGenerator
 		array $data,
 		Locales $locales,
 		?int $parentId = null,
+		bool $strict = true,
 	): array {
 		if (!is_string($route) && !is_array($route)) {
 			return [];
@@ -62,7 +83,7 @@ final class RoutePathGenerator
 				continue;
 			}
 
-			$paths[$locale->id] = $this->expand($template, $data, $locale, $parent, $parentId);
+			$paths[$locale->id] = $this->expand($template, $data, $locale, $parent, $parentId, $strict);
 		}
 
 		return $paths;
@@ -90,11 +111,20 @@ final class RoutePathGenerator
 		Locale $locale,
 		?array &$parent,
 		?int $parentId,
+		bool $strict,
 	): string {
 		$path = preg_replace_callback(
 			'/\{([^{}]+)\}/',
-			function (array $matches) use ($data, $locale, &$parent, $parentId): string {
-				return $this->resolve($matches[1], $data, $locale, $parent, $parentId);
+			function (array $matches) use ($data, $locale, &$parent, $parentId, $strict): string {
+				try {
+					return $this->resolve($matches[1], $data, $locale, $parent, $parentId);
+				} catch (RoutePath $e) {
+					if ($strict) {
+						throw $e;
+					}
+
+					return '{' . $matches[1] . '}';
+				}
 			},
 			$template,
 		);
@@ -103,7 +133,7 @@ final class RoutePathGenerator
 			throw new RoutePath(_('Could not generate route path'));
 		}
 
-		if (str_contains($path, '{') || str_contains($path, '}')) {
+		if ($strict && (str_contains($path, '{') || str_contains($path, '}'))) {
 			throw new RoutePath(_('Invalid route path placeholder syntax'));
 		}
 

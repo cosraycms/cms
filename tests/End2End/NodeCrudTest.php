@@ -148,7 +148,7 @@ final class NodeCrudTest extends End2EndTestCase
 		$this->assertSame('/prefix/parent-page/child-page', $payload['paths']['de'] ?? null);
 	}
 
-	public function testPreviewNodePathsReturnsEmptyPathsForMissingParent(): void
+	public function testPreviewNodePathsKeepsMissingParentPlaceholder(): void
 	{
 		$this->authenticateAs('editor');
 
@@ -162,10 +162,11 @@ final class NodeCrudTest extends End2EndTestCase
 		]);
 
 		$payload = $this->assertJsonResponse($response, 200);
-		$this->assertSame([], $payload['paths'] ?? null);
+		$this->assertSame('/prefix/{parent.title}/child-page', $payload['paths']['en'] ?? null);
+		$this->assertSame('/prefix/{parent.title}/child-page', $payload['paths']['de'] ?? null);
 	}
 
-	public function testPreviewNodePathsReturnsEmptyPathsForMissingTitle(): void
+	public function testPreviewNodePathsKeepsMissingFieldPlaceholder(): void
 	{
 		$this->authenticateAs('editor');
 
@@ -195,7 +196,8 @@ final class NodeCrudTest extends End2EndTestCase
 		]);
 
 		$payload = $this->assertJsonResponse($response, 200);
-		$this->assertSame([], $payload['paths'] ?? null);
+		$this->assertSame('/prefix/parent-page/{title}', $payload['paths']['en'] ?? null);
+		$this->assertSame('/prefix/parent-page/{title}', $payload['paths']['de'] ?? null);
 	}
 
 	public function testCreateNodeGeneratesRoutePathFromParentFieldsOnServer(): void

@@ -14,7 +14,6 @@ use Celemas\Wire\Creator;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
-use Cosray\Exception\RoutePath;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\Navigation;
@@ -212,17 +211,13 @@ class OldPanel
 			->definition();
 		$generator = new RoutePathGenerator($context->db, $this->types);
 
-		try {
-			$paths = $generator->generate(
+		return [
+			'paths' => $generator->preview(
 				$class,
 				$this->request->json(),
 				$context->locales(),
-			);
-		} catch (RoutePath) {
-			return ['paths' => (object) []];
-		}
-
-		return ['paths' => $paths];
+			),
+		];
 	}
 
 	#[Permission('panel')]
