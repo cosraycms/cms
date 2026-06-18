@@ -178,16 +178,7 @@ final class RoutePathGenerator
 	private function parent(array $data, ?int $parentId): array
 	{
 		if ($parentId !== null) {
-			$parent = $this->db
-				->execute(
-					'SELECT n.uid, h.handle, n.content
-					FROM cms.nodes n
-					LEFT JOIN cms.node_handles h ON h.node = n.node
-					WHERE n.node = :node AND n.deleted IS NULL
-					LIMIT 1',
-					['node' => $parentId],
-				)
-				->first();
+			$parent = $this->db->nodes->routeParentByNode(['node' => $parentId])->first();
 		} else {
 			$parentUid = $data['parent'] ?? null;
 
@@ -195,16 +186,7 @@ final class RoutePathGenerator
 				throw new RoutePathError(_('A parent is required for this node route'));
 			}
 
-			$parent = $this->db
-				->execute(
-					'SELECT n.uid, h.handle, n.content
-					FROM cms.nodes n
-					LEFT JOIN cms.node_handles h ON h.node = n.node
-					WHERE n.uid = :uid AND n.deleted IS NULL
-					LIMIT 1',
-					['uid' => trim($parentUid)],
-				)
-				->first();
+			$parent = $this->db->nodes->routeParentByUid(['uid' => trim($parentUid)])->first();
 		}
 
 		if (!$parent) {
