@@ -228,7 +228,7 @@ final class RoutePathGenerator
 		foreach ($parts as $transformer) {
 			if (!in_array(
 				$transformer,
-				['lowercase', 'uppercase', 'titlecase', 'dashes', 'underscore'],
+				['lowercase', 'uppercase', 'titlecase', 'keepcase', 'dashes', 'underscore'],
 				true,
 			)) {
 				throw new RoutePathError(sprintf(_('Unknown route path transformer: %s'), $transformer));
@@ -599,7 +599,7 @@ final class RoutePathGenerator
 		$case = 'lowercase';
 
 		foreach ($transformers as $transformer) {
-			if (!in_array($transformer, ['lowercase', 'uppercase', 'titlecase'], true)) {
+			if (!in_array($transformer, ['lowercase', 'uppercase', 'titlecase', 'keepcase'], true)) {
 				continue;
 			}
 
@@ -609,6 +609,7 @@ final class RoutePathGenerator
 		return match ($case) {
 			'uppercase' => strtoupper($value),
 			'titlecase' => ucwords(strtolower($value)),
+			'keepcase' => $value,
 			default => strtolower($value),
 		};
 	}

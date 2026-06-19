@@ -249,9 +249,10 @@ Field placeholders:
 
 Transformers:
 
-- Supported transformers are `lowercase`, `uppercase`, `titlecase`, `dashes`, and `underscore`.
+- Supported transformers are `lowercase`, `uppercase`, `titlecase`, `keepcase`, `dashes`, and `underscore`.
 - Chains are allowed: `{title|uppercase|underscore}`.
 - Slugification always runs. The default is lowercase with dashes.
+- `keepcase` preserves the original letter case before slugification.
 - If multiple case or separator transformers are present, the last case transformer and last separator transformer win.
 - Transformers work on `{uid}`, `{handle}`, current fields, and parent/ancestor fields.
 - Transformers are not supported on parent path shortcuts: `{parent|lowercase}`, `{parent?|lowercase}`, and `{parent(2)|lowercase}` fail.
@@ -261,6 +262,7 @@ Route template examples:
 
 ```php
 #[Route('/stations/{countryCode|lowercase}-{stationId}-{title|underscore}')]
+#[Route('/products/{sku|keepcase}')]
 #[Route('/{parent}/{title}')]
 #[Route('/{parent?}/{title}')]
 #[Route('/{parent(2).title}/{parent.countryCode|lowercase}-{title}')]

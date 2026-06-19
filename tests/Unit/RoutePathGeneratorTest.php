@@ -45,6 +45,17 @@ final class RoutePathGeneratorTest extends TestCase
 		$this->assertSame('/stations/central-station', $paths['en']);
 	}
 
+	public function testRoutePlaceholderKeepcaseTransformerPreservesCase(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/stations/{title|keepcase}/{title|keepcase|underscore}/{title|uppercase|keepcase}/{title|keepcase|lowercase}',
+			$this->nodeData('ICE 728 Aa'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/stations/ICE-728-Aa/ICE_728_Aa/ICE-728-Aa/ice-728-aa', $paths['en']);
+	}
+
 	public function testUnknownRoutePlaceholderTransformerFailsInStrictMode(): void
 	{
 		$this->throws(RoutePathError::class, 'Unknown route path transformer: unknown');
