@@ -60,6 +60,11 @@ abstract class Field implements
 
 	abstract public function shape(): Shape;
 
+	public function data(): array
+	{
+		return $this->valueContext->data;
+	}
+
 	public function isset(): bool
 	{
 		return $this->value()->isset();

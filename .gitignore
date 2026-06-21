@@ -1,6 +1,7 @@
 /.coverage
 /build
 /data/
+/panel/app/components
 /ui/.svelte-kit
 /ui/build/
 /ui/dist/

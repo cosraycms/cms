@@ -49,10 +49,10 @@ abstract class Panel
 		return array_merge(
 			$this->config->panel->theme,
 			[
-				"{$panelPath}/assets/styles/tokens.css",
-				"{$panelPath}/assets/styles/reset.css",
-				"{$panelPath}/assets/styles/app.css",
-				"{$panelPath}/assets/styles/collection.css",
+				$this->asset($panelPath, 'styles/tokens.css'),
+				$this->asset($panelPath, 'styles/reset.css'),
+				$this->asset($panelPath, 'styles/app.css'),
+				$this->asset($panelPath, 'styles/collection.css'),
 			],
 		);
 	}
@@ -60,9 +60,32 @@ abstract class Panel
 	private function scripts(string $panelPath): array
 	{
 		return [
-			"{$panelPath}/assets/app/vendor/htmx.js",
-			"{$panelPath}/assets/app/panel.js",
+			$this->asset($panelPath, 'app/vendor/htmx.js'),
+			$this->asset($panelPath, 'app/panel.js'),
 		];
+	}
+
+	/** @return array{code: string, richtext: string} */
+	protected function componentAssets(): array
+	{
+		return [
+			'code' => $this->asset(self::PANEL_PATH, 'app/components/code.js'),
+			'richtext' => $this->asset(self::PANEL_PATH, 'app/components/richtext.js'),
+		];
+	}
+
+	private function asset(string $panelPath, string $slug): string
+	{
+		$slug = ltrim($slug, '/');
+		$path = $this->panelDir . '/' . $slug;
+		$url = "{$panelPath}/assets/{$slug}";
+		$modified = is_file($path) ? filemtime($path) : false;
+
+		if ($modified === false) {
+			return $url;
+		}
+
+		return $url . '?v=' . hash('xxh32', (string) $modified);
 	}
 
 	private function logo(): ?string

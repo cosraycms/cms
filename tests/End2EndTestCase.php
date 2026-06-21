@@ -351,6 +351,17 @@ class End2EndTestCase extends IntegrationTestCase
 			$psrRequest = $psrRequest->withHeader('Cookie', implode('; ', $cookieHeader));
 		}
 
+		// Add form body
+		if (isset($options['form'])) {
+			$form = $options['form'];
+			$this->assertIsArray($form);
+			$psrRequest = $psrRequest
+				->withParsedBody($form)
+				->withHeader('Content-Type', 'application/x-www-form-urlencoded');
+			$stream = $this->factory()->streamFactory()->createStream(http_build_query($form));
+			$psrRequest = $psrRequest->withBody($stream);
+		}
+
 		// Add body
 		if (isset($options['body'])) {
 			$body = $options['body'];

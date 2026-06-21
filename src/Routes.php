@@ -205,6 +205,22 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('collection'));
+				$panel
+					->get(
+						'/node/{uid:[A-Za-z0-9-_.]{1,64}}',
+						[Panel\Node::class, 'edit'],
+						'node.edit',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('node'));
+				$panel
+					->post(
+						'/node/{uid:[A-Za-z0-9-_.]{1,64}}',
+						[Panel\Node::class, 'save'],
+						'node.save',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('node'));
 			},
 			'cms.panel.',
 		);

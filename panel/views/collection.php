@@ -15,12 +15,13 @@
 					<div class="collection-grid">
 						<?php foreach ($node['columns'] as $index => $column): ?>
 							<?php
+
 							$label = $header[$index] ?? 'Column ' . ((int) $index + 1);
 							$value = $column['value'] ?? '';
 
 							if (($column['date'] ?? false) && is_string($value) && $value !== '') {
 								try {
-									$value = (new DateTimeImmutable($value))->format('d.m.Y H:i');
+									$value = new DateTimeImmutable($value)->format('d.m.Y H:i');
 								} catch (Throwable) {
 									// Keep original value when it cannot be parsed as datetime.
 								}
@@ -54,6 +55,7 @@
 							</div>
 						<?php endforeach ?>
 					</div>
+					<a class="collection-edit" href="<?= $panelPath ?>/node/<?= $node['uid'] ?>" hx-boost="true" hx-target="#main">Edit</a>
 				</li>
 			<?php endforeach ?>
 		</ul>

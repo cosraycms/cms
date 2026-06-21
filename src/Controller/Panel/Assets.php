@@ -36,7 +36,7 @@ final class Assets extends Panel
 
 		$etag = '"' . $etag . '"';
 		$response = Response::create($factory)
-			->header('Cache-Control', 'private, max-age=3600')
+			->header('Cache-Control', $this->cacheControl())
 			->header('ETag', $etag)
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
 		$ifNoneMatch = array_map('trim', explode(',', $request->header('If-None-Match')));
@@ -47,5 +47,14 @@ final class Assets extends Panel
 		}
 
 		return $response->file($file);
+	}
+
+	private function cacheControl(): string
+	{
+		if ($this->config->debug() || str_contains($this->config->env(), 'development')) {
+			return 'no-store';
+		}
+
+		return 'private, max-age=3600';
 	}
 }

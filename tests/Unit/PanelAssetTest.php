@@ -8,6 +8,7 @@ use Celemas\Core\Exception\HttpNotFound;
 use Celemas\Core\Request;
 use Cosray\Controller\Panel\Assets;
 use Cosray\Tests\TestCase;
+use ReflectionProperty;
 
 /**
  * @internal
@@ -55,5 +56,31 @@ final class PanelAssetTest extends TestCase
 		$this->assertSame(['"' . $etag . '"'], $response->getHeader('ETag'));
 		$this->assertNotSame([], $response->getHeader('Last-Modified'));
 		$this->assertSame(file_get_contents($file), (string) $response->getBody());
+	}
+
+	public function testAssetReturnsPanelComponentModule(): void
+	{
+		$panel = new Assets($this->config(), $this->container(), $this->request());
+		$property = new ReflectionProperty($panel, 'panelDir');
+		$property->setValue($panel, self::root() . '/tests/Fixtures/panel');
+
+		$response = $panel->asset($this->request(), $this->factory(), 'app/components/code.js');
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(['text/javascript'], $response->getHeader('Content-Type'));
+	}
+
+	public function testDevelopmentAssetResponsesAreNotCached(): void
+	{
+		$panel = new Assets(
+			$this->config(['app.env' => 'development']),
+			$this->container(),
+			$this->request(),
+		);
+
+		$response = $panel->asset($this->request(), $this->factory(), 'app/panel.js');
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(['no-store'], $response->getHeader('Cache-Control'));
 	}
 }
