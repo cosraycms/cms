@@ -91,7 +91,7 @@ final class Editor extends Panel
 	/** @return array{js: string, css: ?string}|null */
 	private function editorAssets(): ?array
 	{
-		$assetDir = $this->panelDir . '/assets/editor';
+		$assetDir = $this->panelDir . '/editor';
 		$script = $assetDir . '/node-editor.js';
 
 		if (!is_file($script)) {

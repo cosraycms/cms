@@ -1,0 +1,41 @@
+@import '../styles/tokens.css';
+@import '../styles/base.css';
+@import '../styles/util.css';
+@import '../styles/grid.css';
+@import '../styles/button.css';
+@import '../styles/fields.css';
+@import '../styles/code.css';
+@import '../styles/richtext.css';
+@import '../styles/tabs.css';
+@import '../styles/modal.css';
+
+.cosray-node-editor-placeholder {
+	display: grid;
+	place-content: center;
+	gap: var(--cms-space-3);
+	min-height: 24rem;
+	padding: var(--cms-space-8);
+	color: var(--cms-color-neutral-600);
+	font-family: var(--cms-font-sans);
+	text-align: center;
+}
+
+.cosray-node-editor-placeholder .eyebrow {
+	margin: 0;
+	color: var(--cms-color-neutral-400);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.cosray-node-editor-placeholder h2 {
+	margin: 0;
+	color: var(--cms-color-high);
+	font-size: var(--cms-font-size-2xl);
+}
+
+.cosray-node-editor-placeholder p:last-child {
+	max-width: 32rem;
+	margin: 0;
+}

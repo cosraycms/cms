@@ -116,7 +116,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 	private function assertEditorAssetStateIsRendered(string $html): void
 	{
-		if (is_file(dirname(__DIR__, 2) . '/panel/assets/editor/node-editor.js')) {
+		if (is_file(dirname(__DIR__, 2) . '/panel/editor/node-editor.js')) {
 			$this->assertStringContainsString('id="cosray-node-editor"', $html);
 			$this->assertStringContainsString('src="/cp/assets/editor/node-editor.js"', $html);
 			$this->assertStringContainsString('"node":"panel-editor-a"', $html);
