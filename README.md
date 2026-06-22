@@ -181,7 +181,7 @@ $root = dirname(__DIR__);
 $settings = [
     'app.name' => 'mycms',
     'path.public' => "{$root}/public",
-    'path.panel' => '/cms',
+    'path.panel' => '/cp',
     'db.dsn' => env('DATABASE_URL'),
     'db.sql' => ["{$root}/db/sql"],
     'panel.theme' => "{$root}/theme",
@@ -221,7 +221,7 @@ Common built-in settings:
     'path.assets' => '/assets',
     'path.cache' => '/cache',
     'path.views' => '/views',
-    'path.panel' => '/cms',
+    'path.panel' => '/cp',
     'path.api' => null,
 
     'panel.theme' => [],
@@ -249,6 +249,10 @@ Common built-in settings:
     'error.whoops' => true,
 ]
 ```
+
+### Admin panel paths
+
+The new SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`. While the legacy SvelteKit panel exists, it is fixed at `/panel`; `install-panel` installs the CI-built legacy panel assets there and does not read `path.panel`.
 
 ### Admin panel theming
 

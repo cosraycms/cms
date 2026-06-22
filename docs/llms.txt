@@ -450,19 +450,28 @@ Render context keys available to renderers include:
 
 7) Panel/API surface (high-level)
 
-Panel routes (path prefix from config):
+New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 
-- `GET <panelPath>` and `GET <panelPath>/*` panel frontend
-- `GET <panelPath>/boot` panel boot payload
-- `POST <panelPath>/api/login`, `/logout`, `/me`, etc.
-- `GET/POST <panelPath>/api/nodes` search nodes
-- `GET <panelPath>/api/collection/{collection}` list collection rows
+- `GET <panelPath>` panel dashboard
+- `GET <panelPath>/login` login form
+- `POST <panelPath>/login` authenticate
+- `POST <panelPath>/logout` logout
+- `GET <panelPath>/assets/*` built-in panel assets
+- `GET <panelPath>/collection/{collection}` server-rendered collection list
+
+Legacy SvelteKit panel routes are fixed at `/panel` while the old panel exists:
+
+- `GET /panel` and `GET /panel/*` legacy panel frontend
+- `GET /panel/boot` legacy panel boot payload
+- `POST /panel/api/login`, `/logout`, `/me`, etc.
+- `GET/POST /panel/api/nodes` search nodes
+- `GET /panel/api/collection/{collection}` list collection rows
   - hierarchy-enabled collections return roots by default
   - `?parent=<uid>` returns direct children of the given parent uid
   - rows include `hasChildren`, `childBlueprints`, and `parent`
-- `GET/PUT/DELETE <panelPath>/api/node/{uid}` node read/update/delete
-- `POST <panelPath>/api/node/{type}` create node
-- `GET <panelPath>/api/blueprint/{type}` get node blueprint
+- `GET/PUT/DELETE /panel/api/node/{uid}` node read/update/delete
+- `POST /panel/api/node/{type}` create node
+- `GET /panel/api/blueprint/{type}` get node blueprint
 
 Optional public API group:
 
@@ -536,7 +545,7 @@ Paths and panel:
 - `path.assets`: `'/assets'`
 - `path.cache`: `'/cache'`
 - `path.views`: `'/views'` (view directory relative to `path.root`)
-- `path.panel`: `'/cms'`
+- `path.panel`: `'/cp'` (new SSR/HTMX panel path; legacy SvelteKit panel remains fixed at `/panel`)
 - `path.api`: `null`
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
