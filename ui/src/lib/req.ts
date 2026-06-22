@@ -24,7 +24,7 @@ export function getBase() {
 	return panelBase();
 }
 
-function getDefaultOptions(): RequestInit {
+function getDefaultOptions(): RequestInit & { headers: Headers } {
 	const headers: Headers = {
 		'X-Requested-With': 'xmlhttprequest',
 		Accept: 'application/json',
@@ -46,7 +46,7 @@ function getDefaultOptions(): RequestInit {
 	};
 }
 
-function getBodyOptions(method: Method, data?: any) {
+function getBodyOptions(method: Method, data?: any): RequestInit & { headers: Headers } {
 	const options = Object.assign(getDefaultOptions(), { method });
 
 	if (data) {
