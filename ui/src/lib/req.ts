@@ -25,7 +25,7 @@ export function getBase() {
 		return window.COSRAY_BASE_PATH;
 	}
 
-	return '/cms/';
+	return '/panel/';
 }
 
 function getDefaultOptions(): RequestInit {
