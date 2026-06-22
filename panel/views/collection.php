@@ -21,6 +21,19 @@ $sorts = array_values(array_filter(
 	array_map(static fn(mixed $sort): string => trim((string) $sort), $sorts),
 	static fn(string $sort): bool => $sort !== '',
 ));
+$blueprints = $blueprints instanceof Traversable ? iterator_to_array($blueprints) : (array) $blueprints;
+$blueprints = array_values(array_filter(
+	array_map(static function (mixed $blueprint): array {
+		$blueprint = $blueprint instanceof Traversable ? iterator_to_array($blueprint) : (array) $blueprint;
+
+		return [
+			'slug' => trim((string) ($blueprint['slug'] ?? '')),
+			'name' => trim((string) ($blueprint['name'] ?? '')),
+		];
+	}, $blueprints),
+	static fn(array $blueprint): bool => $blueprint['slug'] !== '' && $blueprint['name'] !== '',
+));
+$blueprintSlugs = array_column($blueprints, 'slug');
 $pageCount = $limit > 0 ? max(1, (int) ceil($total / $limit)) : 1;
 $currentPage = $limit > 0 ? min($pageCount, (int) floor($offset / $limit) + 1) : 1;
 $rowCount = count($nodes);
@@ -90,6 +103,42 @@ $editorUrl = static function (string $uid) use (
 
 	$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
 	$path = $panelPath . '/collection/' . rawurlencode((string) $slug) . '/' . rawurlencode($uid);
+
+	return $query === '' ? $path : $path . '?' . $query;
+};
+
+$createUrl = static function (string $type, ?string $parentUid = null) use (
+	$collectionPath,
+	$q,
+	$sort,
+	$dir,
+	$offset,
+	$limit,
+	$parent,
+): string {
+	$params = [
+		'q' => $q,
+		'sort' => $sort,
+		'dir' => $dir,
+		'offset' => $offset,
+		'limit' => $limit,
+		'parent' => $parentUid ?? $parent,
+	];
+	$params = array_filter(
+		$params,
+		static fn(mixed $value): bool => $value !== null && $value !== '',
+	);
+
+	if (($params['offset'] ?? null) === 0) {
+		unset($params['offset']);
+	}
+
+	if (($params['limit'] ?? null) === 50) {
+		unset($params['limit']);
+	}
+
+	$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+	$path = $collectionPath . '/create/' . rawurlencode($type);
 
 	return $query === '' ? $path : $path . '?' . $query;
 };
@@ -217,12 +266,22 @@ $statusBadges = static function (mixed $node) use (
 			<?php endif ?>
 		</form>
 
-		<?php if ($q !== ''): ?>
-			<a class="btn btn-ghost" href="<?= escape($queryUrl([
-			'q' => '',
-			'offset' => '',
-		])) ?>" hx-target="#main">Clear search</a>
-		<?php endif ?>
+		<div class="topbar-actions">
+			<?php if ($q !== ''): ?>
+				<a class="btn btn-ghost" href="<?= escape($queryUrl([
+				'q' => '',
+				'offset' => '',
+			])) ?>" hx-target="#main">Clear search</a>
+			<?php endif ?>
+			<?php foreach ($blueprints as $blueprint): ?>
+				<a
+					class="btn btn-primary"
+					href="<?= escape($createUrl($blueprint['slug'])) ?>"
+					hx-target="#main">
+					New <?= escape($blueprint['name']) ?>
+				</a>
+			<?php endforeach ?>
+		</div>
 	</header>
 
 	<section class="content">
@@ -331,19 +390,49 @@ $statusBadges = static function (mixed $node) use (
 										</div>
 									</td>
 									<?php if ($showChildren): ?>
+										<?php
+
+										$childBlueprints = $node['childBlueprints'] ?? [];
+										$childBlueprints = $childBlueprints instanceof Traversable
+											? iterator_to_array($childBlueprints)
+											: (array) $childBlueprints;
+										$childBlueprints = array_values(array_filter(
+											array_map(static function (mixed $blueprint) use ($blueprintSlugs): array {
+												$blueprint = $blueprint instanceof Traversable
+													? iterator_to_array($blueprint)
+													: (array) $blueprint;
+												$slug = trim((string) ($blueprint['slug'] ?? ''));
+
+												return [
+													'slug' => in_array($slug, $blueprintSlugs, true) ? $slug : '',
+													'name' => trim((string) ($blueprint['name'] ?? '')),
+												];
+											}, $childBlueprints),
+											static fn(array $blueprint): bool => $blueprint['slug'] !== '' && $blueprint['name'] !== '',
+										));
+										?>
 										<td class="collection-cell col-children" data-label="Children">
-											<?php if ((bool) ($node['hasChildren'] ?? false)): ?>
-												<a
-													class="child-link"
-													href="<?= escape($queryUrl(['parent' => (string) $node['uid'], 'offset' => ''])) ?>"
-													hx-target="#main">
-													Open children
-												</a>
-											<?php elseif (count($node['childBlueprints'] ?? []) > 0): ?>
-												<span class="child-muted">Can have children</span>
-											<?php else: ?>
-												<span class="child-muted">—</span>
-											<?php endif ?>
+											<div class="child-actions">
+												<?php if ((bool) ($node['hasChildren'] ?? false)): ?>
+													<a
+														class="child-link"
+														href="<?= escape($queryUrl(['parent' => (string) $node['uid'], 'offset' => ''])) ?>"
+														hx-target="#main">
+														Open children
+													</a>
+												<?php endif ?>
+												<?php foreach ($childBlueprints as $blueprint): ?>
+													<a
+														class="child-link"
+														href="<?= escape($createUrl($blueprint['slug'], (string) $node['uid'])) ?>"
+														hx-target="#main">
+														Add <?= escape($blueprint['name']) ?>
+													</a>
+												<?php endforeach ?>
+												<?php if (!(bool) ($node['hasChildren'] ?? false) && count($childBlueprints) === 0): ?>
+													<span class="child-muted">—</span>
+												<?php endif ?>
+											</div>
 										</td>
 									<?php endif ?>
 								</tr>

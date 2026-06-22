@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Node as NodeType } from '$types/data';
-	import { configureRuntime } from '$lib/runtime';
+	import { configureRuntime, navigate } from '$lib/runtime';
 	import req from '$lib/req';
 	import { save as saveNode } from '$lib/node';
-	import { currentFields, currentNode, dirty, setPristine } from '$lib/state';
+	import {
+		currentFields,
+		currentNode,
+		dirty,
+		error as errorToast,
+		setPristine,
+		success,
+	} from '$lib/state';
 	import { setup } from '$lib/sys';
 	import Modal from '$shell/modal/Modal.svelte';
 	import NodeEditor from '$shell/NodeEditor.svelte';
@@ -85,11 +92,7 @@
 		try {
 			await setup(window.fetch, new URL(window.location.href));
 
-			if (bootstrap.mode !== 'edit' || bootstrap.node === null) {
-				throw new Error('The editor island can only edit existing nodes yet.');
-			}
-
-			const response = await req.get(`node/${bootstrap.node}`, {});
+			const response = bootstrap.mode === 'create' ? await loadBlueprint() : await loadNode();
 
 			if (!response?.ok) {
 				throw new Error('The node could not be loaded.');
@@ -106,6 +109,22 @@
 		}
 	}
 
+	async function loadNode() {
+		if (bootstrap.node === null) {
+			throw new Error('The node uid is missing.');
+		}
+
+		return req.get(`node/${bootstrap.node}`, {});
+	}
+
+	async function loadBlueprint() {
+		if (bootstrap.type === null) {
+			throw new Error('The node type is missing.');
+		}
+
+		return req.get(`blueprint/${bootstrap.type}`, {});
+	}
+
 	async function save(publish: boolean): Promise<boolean> {
 		if (node === null) {
 			return false;
@@ -113,6 +132,14 @@
 
 		if (publish) {
 			node.published = true;
+		}
+
+		return bootstrap.mode === 'create' ? createNode() : saveExistingNode();
+	}
+
+	async function saveExistingNode(): Promise<boolean> {
+		if (node === null) {
+			return false;
 		}
 
 		const result = await saveNode(node.uid, node);
@@ -130,6 +157,73 @@
 		}
 
 		return true;
+	}
+
+	async function createNode(): Promise<boolean> {
+		if (node === null) {
+			return false;
+		}
+
+		if (bootstrap.parent !== null) {
+			node.parent = bootstrap.parent;
+		}
+
+		const response = await req.post(`node/${node.type.handle}`, node);
+
+		if (!response?.ok) {
+			errorToast(
+				response?.data?.message ?? 'Fehler beim Erstellen des Dokuments aufgetreten!',
+			);
+
+			return false;
+		}
+
+		const result = response.data as { success: boolean; uid: string };
+
+		if (!result.success) {
+			errorToast('Fehler beim Erstellen des Dokuments aufgetreten!');
+
+			return false;
+		}
+
+		success('Dokument erfolgreich erstellt!');
+		await navigate(editorUrl(result.uid), { invalidateAll: true });
+
+		return true;
+	}
+
+	function editorUrl(uid: string): string {
+		const params = new URLSearchParams();
+		const collection = bootstrap.collection;
+
+		if (collection.q) {
+			params.set('q', collection.q);
+		}
+
+		if (collection.sort) {
+			params.set('sort', collection.sort);
+		}
+
+		if (collection.dir) {
+			params.set('dir', collection.dir);
+		}
+
+		if (collection.offset && collection.offset > 0) {
+			params.set('offset', String(collection.offset));
+		}
+
+		if (collection.limit && collection.limit !== 50) {
+			params.set('limit', String(collection.limit));
+		}
+
+		if (bootstrap.parent !== null) {
+			params.set('parent', bootstrap.parent);
+		}
+
+		const query = params.toString();
+		const path = `${bootstrap.panelPath}/collection/${collection.slug}/${uid}`;
+
+		return query === '' ? path : `${path}?${query}`;
 	}
 </script>
 

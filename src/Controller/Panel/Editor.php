@@ -11,6 +11,7 @@ use Celemas\Wire\Creator;
 use Cosray\Collection as CmsCollection;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Types;
 
 final class Editor extends Panel
 {
@@ -20,25 +21,41 @@ final class Editor extends Panel
 
 	public function edit(string $collection, string $node): array
 	{
-		$name = $this->collectionName($collection);
+		[$name] = $this->collection($collection);
 		$query = $this->queryState();
 
-		return $this->context([
-			'mode' => 'edit',
-			'name' => $name,
-			'slug' => $collection,
-			'nodeUid' => $node,
-			'type' => null,
-			'parent' => $query['parent'],
-			'queryState' => $query,
-			'legacyApiBase' => self::LEGACY_PANEL_PATH . '/api',
-			'legacyBootUrl' => self::LEGACY_PANEL_PATH . '/boot',
-			'legacyPanelPath' => self::LEGACY_PANEL_PATH,
-			'editorAssets' => $this->editorAssets(),
-		]);
+		return $this->editorContext(
+			mode: 'edit',
+			name: $name,
+			collection: $collection,
+			node: $node,
+			type: null,
+			query: $query,
+		);
 	}
 
-	private function collectionName(string $collection): string
+	public function create(string $collection, string $type): array
+	{
+		[$name, $obj] = $this->collection($collection);
+
+		if (!in_array($type, $this->blueprintHandles($obj), true)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$query = $this->queryState();
+
+		return $this->editorContext(
+			mode: 'create',
+			name: $name,
+			collection: $collection,
+			node: null,
+			type: $type,
+			query: $query,
+		);
+	}
+
+	/** @return array{string, CmsCollection} */
+	private function collection(string $collection): array
 	{
 		try {
 			$ref = $this->navigation()->ref($collection);
@@ -53,7 +70,21 @@ final class Editor extends Panel
 		);
 		assert($obj instanceof CmsCollection, 'The editor route must resolve a collection');
 
-		return $ref->meta->label;
+		return [$ref->meta->label, $obj];
+	}
+
+	/** @return list<string> */
+	private function blueprintHandles(CmsCollection $collection): array
+	{
+		$types = $this->container->get(Types::class);
+		assert($types instanceof Types, 'The node type service must be available');
+		$handles = [];
+
+		foreach ($collection->blueprints() as $blueprint) {
+			$handles[] = (string) $types->get($blueprint, 'handle');
+		}
+
+		return $handles;
 	}
 
 	/**
@@ -86,6 +117,39 @@ final class Editor extends Panel
 			'dir' => $dir,
 			'parent' => $parent === '' ? null : $parent,
 		];
+	}
+
+	/**
+	 * @param array{
+	 *     q: string,
+	 *     offset: int,
+	 *     limit: int,
+	 *     sort: string,
+	 *     dir: string,
+	 *     parent: ?string,
+	 * } $query
+	 */
+	private function editorContext(
+		string $mode,
+		string $name,
+		string $collection,
+		?string $node,
+		?string $type,
+		array $query,
+	): array {
+		return $this->context([
+			'mode' => $mode,
+			'name' => $name,
+			'slug' => $collection,
+			'nodeUid' => $node,
+			'type' => $type,
+			'parent' => $query['parent'],
+			'queryState' => $query,
+			'legacyApiBase' => self::LEGACY_PANEL_PATH . '/api',
+			'legacyBootUrl' => self::LEGACY_PANEL_PATH . '/boot',
+			'legacyPanelPath' => self::LEGACY_PANEL_PATH,
+			'editorAssets' => $this->editorAssets(),
+		]);
 	}
 
 	/** @return array{js: string, css: ?string}|null */

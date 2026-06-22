@@ -62,9 +62,13 @@ $queryUrl = static function (string $path, array $query): string {
 };
 
 $backUrl = $queryUrl($collectionPath, $queryState);
-$legacyUrl = $nodeUid === null
-	? $legacyCollectionPath
-	: $queryUrl($legacyCollectionPath . '/' . rawurlencode($nodeUid), $queryState);
+if ($nodeUid !== null) {
+	$legacyUrl = $queryUrl($legacyCollectionPath . '/' . rawurlencode($nodeUid), $queryState);
+} elseif ($type !== null) {
+	$legacyUrl = $queryUrl($legacyCollectionPath . '/create/' . rawurlencode($type), $queryState);
+} else {
+	$legacyUrl = $legacyCollectionPath;
+}
 $bootstrap = [
 	'mode' => $mode,
 	'collection' => [

@@ -330,6 +330,17 @@ a {
 	background: #f7f8fa;
 }
 
+.btn-primary {
+	border: 1px solid var(--color-accent);
+	background: var(--color-accent);
+	color: #fff;
+}
+
+.btn-primary:hover {
+	background: color-mix(in srgb, var(--color-accent) 88%, #000);
+	border-color: color-mix(in srgb, var(--color-accent) 88%, #000);
+}
+
 .sr-only {
 	position: absolute;
 	width: 1px;

@@ -208,6 +208,14 @@ class Routes
 					->after($renderers->get('collection'));
 				$panel
 					->get(
+						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}',
+						[Panel\Editor::class, 'create'],
+						'editor.create',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor'));
+				$panel
+					->get(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'edit'],
 						'editor',
