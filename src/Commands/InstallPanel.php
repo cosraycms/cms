@@ -17,30 +17,23 @@ class InstallPanel extends Command
 {
 	protected string $group = 'Admin';
 	protected string $name = 'install-panel';
-	protected string $description = 'Installs or upgrades the admin panel frontend app';
-	protected string $prefix;
-	protected string $panelPath;
+	protected string $description = 'Installs or upgrades the legacy Svelte admin panel app';
 	protected string $publicPath;
-	protected string $indexPath;
 	private string $cmsVersion = 'unknown';
 	private string $panelReleaseTag = 'nightly';
 	private string $panelFileName = 'panel-nightly.tar.gz';
 	private string $panelUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz';
 	private string $panelSignatureUrl = 'https://cosray.dev/releases/panel-nightly.tar.gz.sig';
 
-	protected const string DEFAULT_PATH = '/cms';
+	private const string PANEL_PATH = '/panel';
 	private const string RELEASE_BASE_URL = 'https://cosray.dev/releases';
 
 	/** Ed25519 public key (base64, raw 32 bytes) matching the CI release signing key */
 	private const string PANEL_PUBKEY = 'AYqozdEV8YlYCgbTVafXab+jvcXAmehXgkv1RLtgDng=';
 
-	public function __construct(
-		private Config $config,
-	) {
-		$this->prefix = $this->config->path->prefix;
-		$this->panelPath = $this->config->panel->path;
-		$this->publicPath = $this->config->path->public . $this->panelPath;
-		$this->indexPath = $this->publicPath . '/index.html';
+	public function __construct(Config $config)
+	{
+		$this->publicPath = $config->path->public . self::PANEL_PATH;
 	}
 
 	public function run(): int
@@ -70,19 +63,7 @@ class InstallPanel extends Command
 			return 1;
 		}
 
-		if ($this->panelPath !== self::DEFAULT_PATH) {
-			$this->echoln(
-				'Changing panel path from `' . self::DEFAULT_PATH . "` to `{$this->prefix}{$this->panelPath}`:",
-			);
-
-			if ($this->updatePanelPath() !== 0) {
-				$this->error('Panel installed, but path update failed');
-
-				return 1;
-			}
-		}
-
-		$this->success("Panel installed from {$this->panelFileName}");
+		$this->success("Legacy panel installed from {$this->panelFileName}");
 
 		return 0;
 	}
@@ -299,78 +280,8 @@ class InstallPanel extends Command
 		return 'nightly';
 	}
 
-	private function updatePanelPath(): int
-	{
-		$files = $this->findFiles();
-
-		foreach ($files as $file) {
-			$result = $this->replace($file);
-
-			if ($result !== 0) {
-				return $result;
-			}
-		}
-
-		return 0;
-	}
-
-	private function findFiles()
-	{
-		$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->publicPath));
-		$files = [];
-
-		foreach ($iterator as $file) {
-			if (!($file->isFile() && in_array($file->getExtension(), ['js', 'css', 'html'], true))) {
-				continue;
-			}
-
-			$content = file_get_contents($file->getPathname());
-
-			if (str_contains($content, self::DEFAULT_PATH)) {
-				$files[] = $file->getPathname();
-			}
-		}
-
-		return $files;
-	}
-
-	private function replace(string $file): int
-	{
-		if (!file_exists($file)) {
-			$this->error('File does not exist: ' . $this->removeCwdFromPath($file));
-
-			return 1;
-		}
-
-		$content = file_get_contents($file);
-		$updatedContent = str_replace(self::DEFAULT_PATH, $this->prefix . $this->panelPath, $content);
-
-		if ($content === $updatedContent) {
-			$this->warn('No changes were made to the panel path: ' . $this->removeCwdFromPath($file));
-
-			return 0;
-		}
-
-		file_put_contents($file, $updatedContent);
-		$this->success('Panel path updated successfully: ' . $this->removeCwdFromPath($file));
-
-		return 0;
-	}
-
 	private function versionLabel(): string
 	{
 		return "cosray/cms@{$this->cmsVersion} (panel {$this->panelReleaseTag})";
-	}
-
-	private function removeCwdFromPath($path)
-	{
-		$cwd = realpath(getcwd());
-		$absolutePath = realpath($path);
-
-		if ($absolutePath && str_starts_with($absolutePath, $cwd)) {
-			return substr($absolutePath, strlen($cwd) + 1); // +1 to remove the slash
-		}
-
-		return $path;
 	}
 }
