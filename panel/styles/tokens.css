@@ -1,12 +1,31 @@
 :root {
 	--color-canvas: var(--theme-color-canvas, #f3f4f6);
 	--color-surface: var(--theme-color-surface, #ffffff);
-	--color-text: var(--theme-color-text, #111827);
-	--color-muted: var(--theme-color-muted, #6b7280);
-	--color-border: var(--theme-color-border, #e5e7eb);
-	--color-hover: var(--theme-color-hover, #f3f4f6);
-	--color-active: var(--theme-color-active, #e8eefc);
-	--color-active-text: var(--theme-color-active-text, #1d4ed8);
+	--color-rail: var(--theme-color-rail, #fbfbfc);
+	--color-text: var(--theme-color-text, #1c2230);
+	--color-muted: var(--theme-color-muted, #69707f);
+	--color-faint: var(--theme-color-faint, #9aa0ad);
+	--color-border: var(--theme-color-border, #e8eaed);
+	--color-border-strong: var(--theme-color-border-strong, #dde0e5);
+	--color-border-soft: var(--theme-color-border-soft, #eef0f2);
+	--color-hover: var(--theme-color-hover, #f8f9fb);
+	--color-active: var(--theme-color-active, #eaf1fe);
+	--color-active-soft: var(--theme-color-active-soft, #f3f7ff);
+	--color-active-text: var(--theme-color-active-text, #2459d6);
+	--color-accent: var(--theme-color-accent, #2f6df0);
+	--color-accent-strong: var(--theme-color-accent-strong, #2459d6);
+	--color-success: var(--theme-color-success, #15a36a);
+	--color-success-soft: var(--theme-color-success-soft, #e4f5ec);
+	--color-warning: var(--theme-color-warning, #e08a2b);
+	--color-warning-soft: var(--theme-color-warning-soft, #fcf0df);
+	--color-danger: var(--theme-color-danger, #dc4d4d);
+	--color-danger-soft: var(--theme-color-danger-soft, #fbeaea);
+	--shadow-sm: var(--theme-shadow-sm, 0 1px 2px rgb(20 28 46 / 0.06));
+	--shadow-md: var(
+		--theme-shadow-md,
+		0 6px 24px -8px rgb(20 28 46 / 0.18),
+		0 2px 6px rgb(20 28 46 / 0.06)
+	);
 	--font-family: var(
 		--theme-font-family,
 		ui-sans-serif,
@@ -19,15 +38,19 @@
 	--font-size-xs: var(--theme-font-size-xs, 0.75rem);
 	--font-size-sm: var(--theme-font-size-sm, 0.875rem);
 	--font-size-md: var(--theme-font-size-md, 1rem);
+	--font-size-lg: var(--theme-font-size-lg, 1.25rem);
+	--font-size-xl: var(--theme-font-size-xl, 1.5625rem);
 	--space: var(--theme-space, 0.25rem);
+	--space-1: var(--theme-space-1, calc(var(--space) * 1));
 	--space-2: var(--theme-space-2, calc(var(--space) * 2));
 	--space-3: var(--theme-space-3, calc(var(--space) * 3));
 	--space-4: var(--theme-space-4, calc(var(--space) * 4));
 	--space-5: var(--theme-space-5, calc(var(--space) * 5));
 	--space-6: var(--theme-space-6, calc(var(--space) * 6));
-	--space-8: var(--theme-space-8, calc(var(--space) * 7));
-	--radius-sm: var(--theme-radius-sm, 0.5rem);
-	--radius-md: var(--theme-radius-md, 0.75rem);
-	--radius-lg: var(--theme-radius-lg, 1rem);
-	--sidebar-width: var(--theme-sidebar-width, 16rem);
+	--space-8: var(--theme-space-8, calc(var(--space) * 8));
+	--radius-sm: var(--theme-radius-sm, 0.375rem);
+	--radius-md: var(--theme-radius-md, 0.5625rem);
+	--radius-lg: var(--theme-radius-lg, 0.8125rem);
+	--sidebar-width: var(--theme-sidebar-width, 15.5rem);
+	--row-height: var(--theme-row-height, 3.5rem);
 }
