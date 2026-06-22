@@ -28,7 +28,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		return $plugin;
 	}
 
-	public function testPanelCollectionRouteRendersGridListWithoutTable(): void
+	public function testPanelCollectionRouteRendersTableList(): void
 	{
 		$this->createArticle('panel-grid-a', 'Panel Grid A');
 		$this->createArticle('panel-grid-b', 'Panel Grid B');
@@ -36,13 +36,14 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="collection-title">Test articles', $html);
+		$this->assertStringContainsString('id="main" class="page collection-page"', $html);
+		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
 		$this->assertStringContainsString('href="/cp/assets/styles/collection.css"', $html);
 		$this->assertStringContainsString('Panel Grid A', $html);
 		$this->assertStringContainsString('Panel Grid B', $html);
-		$this->assertStringContainsString('class="collection-list"', $html);
-		$this->assertStringContainsString('class="collection-grid"', $html);
-		$this->assertStringNotContainsString('<table', $html);
+		$this->assertStringContainsString('<table class="collection-list">', $html);
+		$this->assertStringContainsString('<th class="col-status">Status</th>', $html);
+		$this->assertStringNotContainsString('class="collection-grid"', $html);
 	}
 
 	public function testPanelCollectionSearchFiltersRows(): void
@@ -80,6 +81,69 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertStringContainsString('Panel Page B', $html);
 	}
 
+	public function testPanelCollectionSortLinksPreserveQueryState(): void
+	{
+		$this->createArticle('panel-sort-a', 'Panel Sort A');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'q' => 'Panel Sort',
+				'sort' => 'changed',
+				'dir' => 'desc',
+				'limit' => '10',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-articles?q=Panel%20Sort&amp;sort=changed&amp;dir=asc&amp;limit=10"',
+			$html,
+		);
+	}
+
+	public function testPanelCollectionPaginationLinksPreserveQueryState(): void
+	{
+		$changed = '2026-01-01 10:00:00+00';
+		$this->createArticle('panel-link-a', 'Panel Link A', $changed);
+		$this->createArticle('panel-link-b', 'Panel Link B', $changed);
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'q' => 'Panel Link',
+				'sort' => 'uid',
+				'dir' => 'asc',
+				'limit' => '1',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-articles?q=Panel%20Link&amp;sort=uid&amp;dir=asc&amp;limit=1&amp;offset=1"',
+			$html,
+		);
+	}
+
+	public function testPanelCollectionClearSearchPreservesQueryState(): void
+	{
+		$this->createArticle('panel-clear-a', 'Panel Clear A');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'q' => 'Panel Clear',
+				'sort' => 'uid',
+				'dir' => 'asc',
+				'limit' => '10',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Clear search', $html);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-articles?sort=uid&amp;dir=asc&amp;limit=10"',
+			$html,
+		);
+	}
+
 	public function testPanelCollectionRejectsInvalidSort(): void
 	{
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
@@ -114,7 +178,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="collection-page"', $html);
+		$this->assertStringContainsString('id="main" class="page collection-page"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="app"', $html);
 	}

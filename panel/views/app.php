@@ -4,8 +4,6 @@
 	<?php $this->insert('component/navigation') ?>
 
 	<main class="main">
-		<div class="page" id="main">
-			<?= $this->body() ?>
-		</div>
+		<?= $this->body() ?>
 	</main>
 </div>
