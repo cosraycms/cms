@@ -227,7 +227,6 @@ class End2EndTestCase extends IntegrationTestCase
 				'path.views' => '/tests/Fixtures/templates',
 				'path.uploads' => self::root() . '/public/uploads',
 				'path.api' => '/api',
-				'path.panel' => '/panel',
 				'upload.maxSize' => 10 * 1024 * 1024, // 10MB
 				'upload.allowedExtensions' => ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
 			],

@@ -88,6 +88,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame('cosray', $config->app->name);
 		$this->assertSame(self::root(), $config->path->root);
 		$this->assertSame(self::root() . '/public', $config->path->public);
+		$this->assertSame('/cp', $config->panel->path);
 		$this->assertNull($config->app->secret);
 		$this->assertSame([], $config->panel->theme);
 		$this->assertFalse($config->session->enabled);

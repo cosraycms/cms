@@ -159,11 +159,6 @@ final class Login extends Panel
 		return $next;
 	}
 
-	private function panelPath(): string
-	{
-		return self::PANEL_PATH;
-	}
-
 	private function message(string $message): ?string
 	{
 		$message = trim($message);

@@ -16,6 +16,8 @@ use SensitiveParameter;
 
 class Embed
 {
+	private const string PANEL_PATH = '/panel';
+
 	public function __construct(
 		protected readonly Request $request,
 		protected readonly Config $config,
@@ -76,7 +78,7 @@ class Embed
 
 	protected function panelBasePath(): string
 	{
-		return rtrim($this->config->path->prefix, '/') . $this->config->panel->path;
+		return self::PANEL_PATH;
 	}
 
 	protected function embedPath(string $type, string $node): string

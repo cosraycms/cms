@@ -50,7 +50,7 @@ final class Defaults
 			'path.assets' => '/assets',
 			'path.cache' => '/cache',
 			'path.views' => '/views',
-			'path.panel' => '/cms',
+			'path.panel' => '/cp',
 			'path.api' => null,
 		];
 	}

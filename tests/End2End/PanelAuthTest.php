@@ -112,6 +112,18 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertSame('/cp/login?next=%2Fcp', $response->getHeaderLine('HX-Redirect'));
 	}
 
+	public function testConfiguredPanelPathAppliesOnlyToNewPanel(): void
+	{
+		$this->app = $this->createApp(['path.panel' => '/admin']);
+
+		$newPanelResponse = $this->makeRequest('GET', '/admin');
+		$legacyBootResponse = $this->makeRequest('GET', '/panel/boot');
+
+		$this->assertResponseStatus(303, $newPanelResponse);
+		$this->assertSame('/admin/login?next=%2Fadmin', $newPanelResponse->getHeaderLine('Location'));
+		$this->assertJsonResponse($legacyBootResponse, 200);
+	}
+
 	public function testUserWithoutPanelPermissionGetsRedirectedToLogin(): void
 	{
 		$token = $this->createAuthenticatedUser('system');

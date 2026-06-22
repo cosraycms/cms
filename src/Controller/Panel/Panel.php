@@ -12,8 +12,6 @@ use Cosray\Navigation;
 
 abstract class Panel
 {
-	protected const string PANEL_PATH = '/cp';
-
 	protected string $panelDir;
 
 	public function __construct(
@@ -26,7 +24,7 @@ abstract class Panel
 
 	protected function context(array $data = []): array
 	{
-		$panelPath = self::PANEL_PATH;
+		$panelPath = $this->panelPath();
 
 		return array_merge([
 			'debug' => $this->config->debug(),
@@ -42,6 +40,11 @@ abstract class Panel
 			'scripts' => $this->scripts($panelPath),
 			'collections' => $this->collections(),
 		], $data);
+	}
+
+	protected function panelPath(): string
+	{
+		return $this->config->panel->path;
 	}
 
 	private function stylesheets(string $panelPath): array

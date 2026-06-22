@@ -23,10 +23,10 @@ use Cosray\Middleware\Session;
 
 class Routes
 {
-	private const string NEW_PANEL_PATH = '/cp';
+	private const string LEGACY_PANEL_PATH = '/panel';
 
 	protected string $panelPath;
-	protected string $panelApiPath;
+	protected string $oldPanelApiPath;
 	protected ?string $apiPath;
 	protected InitRequest $initRequestMiddlware;
 	protected Session $session;
@@ -38,7 +38,7 @@ class Routes
 		protected Factory $factory,
 	) {
 		$this->panelPath = $config->panel->path;
-		$this->panelApiPath = $this->panelPath . '/api';
+		$this->oldPanelApiPath = self::LEGACY_PANEL_PATH . '/api';
 		$this->apiPath = $config->path->api;
 		$this->frontendSession = $config->session->enabled;
 		$this->initRequestMiddlware = new InitRequest($config);
@@ -70,33 +70,34 @@ class Routes
 		// TODO: remove when new panel is finished
 		// OLD PANEL ROUTES
 		$app->get(
-			$this->panelPath . '/boot',
+			self::LEGACY_PANEL_PATH . '/boot',
 			[OldPanel::class, 'boot'],
 			'cms.oldpanel.boot',
 		)->after(new JsonRenderer($this->factory));
 		$app->get(
-			$this->panelPath . '/embed/{token:[A-Za-z0-9]{1,128}}/node/{type:[A-Za-z0-9-_.]{1,64}}/create',
+			self::LEGACY_PANEL_PATH
+			. '/embed/{token:[A-Za-z0-9]{1,128}}/node/{type:[A-Za-z0-9-_.]{1,64}}/create',
 			[Embed::class, 'create'],
 			'cms.panel.embed.create',
 		)->middleware($this->session);
 		$app->get(
-			$this->panelPath
+			self::LEGACY_PANEL_PATH
 			. '/embed/{token:[A-Za-z0-9]{1,128}}/node/{type:[A-Za-z0-9-_.]{1,64}}/{node:[A-Za-z0-9-_.]{1,64}}',
 			[Embed::class, 'node'],
 			'cms.panel.embed.node',
 		)->middleware($this->session);
 		$app->get(
-			$this->panelPath . '/...slug',
+			self::LEGACY_PANEL_PATH . '/...slug',
 			[OldPanel::class, 'catchall'],
 			'cms.oldpanel.catchall',
 		)->middleware($this->session);
 		$app->get(
-			$this->panelPath,
+			self::LEGACY_PANEL_PATH,
 			[OldPanel::class, 'index'],
 			'cms.oldpanel',
 		)->middleware($this->session);
 		$app->get(
-			$this->panelPath . '/',
+			self::LEGACY_PANEL_PATH . '/',
 			[OldPanel::class, 'index'],
 			'cms.oldpanel.slash',
 		)->middleware($this->session);
@@ -164,7 +165,7 @@ class Routes
 	protected function addPanel(App $app): void
 	{
 		$app->group(
-			self::NEW_PANEL_PATH,
+			$this->panelPath,
 			function (Group $panel) use ($app) {
 				$renderers = new PanelRenderers($app);
 				$panelAuth = new PanelAuth(
@@ -213,7 +214,7 @@ class Routes
 	protected function addOldPanelApi(App $app, Session $session): void
 	{
 		$app->group(
-			$this->panelApiPath,
+			$this->oldPanelApiPath,
 			function (Group $api) use ($session) {
 				$api->after(new JsonRenderer($this->factory));
 				$api->middleware($session);

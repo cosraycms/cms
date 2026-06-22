@@ -28,6 +28,7 @@ use Cosray\Plugin;
 
 class OldPanel
 {
+	private const string PANEL_PATH = '/panel';
 	private const int LIMIT_DEFAULT = 50;
 	private const int LIMIT_MAX = 250;
 
@@ -87,7 +88,7 @@ class OldPanel
 
 	public function catchall(Factory $factory, string $slug): Response
 	{
-		$file = $this->publicPath . $this->config->panel->path . '/' . $slug;
+		$file = $this->publicPath . self::PANEL_PATH . '/' . $slug;
 
 		if (is_file($file)) {
 			return Response::create($factory)->file($file);
@@ -339,7 +340,7 @@ class OldPanel
 
 	protected function getPanelIndex(): string
 	{
-		return $this->publicPath . $this->config->panel->path . '/index.html';
+		return $this->publicPath . self::PANEL_PATH . '/index.html';
 	}
 
 	/**
