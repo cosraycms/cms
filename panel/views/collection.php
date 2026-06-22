@@ -57,6 +57,43 @@ $queryUrl = static function (array $overrides = []) use (
 	return $query === '' ? $collectionPath : $collectionPath . '?' . $query;
 };
 
+$editorUrl = static function (string $uid) use (
+	$panelPath,
+	$slug,
+	$q,
+	$sort,
+	$dir,
+	$offset,
+	$limit,
+	$parent,
+): string {
+	$params = [
+		'q' => $q,
+		'sort' => $sort,
+		'dir' => $dir,
+		'offset' => $offset,
+		'limit' => $limit,
+		'parent' => $parent,
+	];
+	$params = array_filter(
+		$params,
+		static fn(mixed $value): bool => $value !== null && $value !== '',
+	);
+
+	if (($params['offset'] ?? null) === 0) {
+		unset($params['offset']);
+	}
+
+	if (($params['limit'] ?? null) === 50) {
+		unset($params['limit']);
+	}
+
+	$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+	$path = $panelPath . '/collection/' . rawurlencode((string) $slug) . '/' . rawurlencode($uid);
+
+	return $query === '' ? $path : $path . '?' . $query;
+};
+
 $displayValue = static function (mixed $value, bool $date = false): string {
 	if ($date && is_string($value) && $value !== '') {
 		try {
@@ -272,7 +309,16 @@ $statusBadges = static function (mixed $node) use (
 										}
 										?>
 										<td class="<?= implode(' ', $classes) ?>" data-label="<?= escape($label) ?>">
-											<span class="collection-value"><?= escape($value) ?></span>
+											<?php if ($index === 0): ?>
+												<a
+													class="collection-value collection-edit-link"
+													href="<?= escape($editorUrl((string) $node['uid'])) ?>"
+													hx-target="#main">
+													<?= escape($value) ?>
+												</a>
+											<?php else: ?>
+												<span class="collection-value"><?= escape($value) ?></span>
+											<?php endif ?>
 										</td>
 									<?php endforeach ?>
 									<td class="collection-cell col-status" data-label="Status">

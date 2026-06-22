@@ -206,6 +206,14 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('collection'));
+				$panel
+					->get(
+						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
+						[Panel\Editor::class, 'edit'],
+						'editor',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor'));
 			},
 			'cms.panel.',
 		);

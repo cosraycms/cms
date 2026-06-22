@@ -56,6 +56,7 @@ abstract class Panel
 				"{$panelPath}/assets/styles/reset.css",
 				"{$panelPath}/assets/styles/app.css",
 				"{$panelPath}/assets/styles/collection.css",
+				"{$panelPath}/assets/styles/editor.css",
 			],
 		);
 	}

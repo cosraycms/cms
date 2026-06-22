@@ -1,0 +1,168 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cosray\Tests\End2End;
+
+use Cosray\Config;
+use Cosray\Plugin;
+use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+
+final class PanelEditorRouteTest extends End2EndTestCase
+{
+	private ?int $articleTypeId = null;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->loadFixtures('basic-types');
+	}
+
+	protected function createPlugin(Config $config): Plugin
+	{
+		$plugin = parent::createPlugin($config);
+		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
+
+		return $plugin;
+	}
+
+	public function testPanelEditorRouteRendersShellForAuthenticatedUsers(): void
+	{
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-a', 'Panel Editor A');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-a', [
+			'query' => [
+				'q' => 'Panel Editor',
+				'offset' => '20',
+				'limit' => '10',
+				'sort' => 'uid',
+				'dir' => 'asc',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('<!DOCTYPE html>', $html);
+		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
+		$this->assertStringContainsString('href="/cp/assets/styles/editor.css"', $html);
+		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-articles?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
+			$html,
+		);
+		$this->assertEditorAssetStateIsRendered($html);
+	}
+
+	public function testBoostedPanelEditorRouteRendersPartial(): void
+	{
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-boosted', 'Panel Editor Boosted');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-boosted', [
+			'headers' => [
+				'HX-Request' => 'true',
+				'HX-Boosted' => 'true',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
+		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
+		$this->assertStringNotContainsString('class="app"', $html);
+	}
+
+	public function testCollectionRowsLinkToPanelEditorRoute(): void
+	{
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-link', 'Panel Editor Link');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'q' => 'Panel Editor',
+				'sort' => 'uid',
+				'dir' => 'asc',
+				'limit' => '10',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-articles/panel-editor-link?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;limit=10"',
+			$html,
+		);
+		$this->assertStringContainsString('class="collection-value collection-edit-link"', $html);
+	}
+
+	public function testPanelEditorRouteReturnsNotFoundForUnknownCollection(): void
+	{
+		$this->authenticateAs('editor');
+
+		$response = $this->makeRequest('GET', '/cp/collection/does-not-exist/panel-editor-a');
+
+		$this->assertResponseStatus(404, $response);
+	}
+
+	public function testPanelEditorRouteRedirectsGuestToLogin(): void
+	{
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-a');
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame(
+			'/cp/login?next=%2Fcp%2Fcollection%2Ftest-articles%2Fpanel-editor-a',
+			$response->getHeaderLine('Location'),
+		);
+	}
+
+	private function assertEditorAssetStateIsRendered(string $html): void
+	{
+		if (is_file(dirname(__DIR__, 2) . '/panel/assets/editor/node-editor.js')) {
+			$this->assertStringContainsString('id="cosray-node-editor"', $html);
+			$this->assertStringContainsString('src="/cp/assets/editor/node-editor.js"', $html);
+			$this->assertStringContainsString('"node":"panel-editor-a"', $html);
+
+			return;
+		}
+
+		$this->assertStringContainsString('Editor bundle missing', $html);
+		$this->assertStringContainsString('cd ui &amp;&amp; pnpm run build:editor', $html);
+		$this->assertStringContainsString(
+			'href="/panel/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
+			$html,
+		);
+	}
+
+	private function createArticle(
+		string $uid,
+		string $title,
+		string $changed = 'now()',
+	): void {
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $this->articleTypeId(),
+			'changed' => $changed,
+			'published' => true,
+			'content' => [
+				'title' => [
+					'type' => 'text',
+					'value' => ['en' => $title],
+				],
+			],
+		]);
+	}
+
+	private function articleTypeId(): int
+	{
+		if ($this->articleTypeId !== null) {
+			return $this->articleTypeId;
+		}
+
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-article'",
+		)->one();
+		$this->assertNotEmpty($type);
+		$this->articleTypeId = (int) $type['type'];
+
+		return $this->articleTypeId;
+	}
+}

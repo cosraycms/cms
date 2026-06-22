@@ -181,6 +181,18 @@ th.is-desc .sort-ind {
 	white-space: nowrap;
 }
 
+.collection-edit-link {
+	color: inherit;
+	font-weight: inherit;
+	text-decoration: none;
+}
+
+.collection-edit-link:hover {
+	color: var(--color-active-text);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
 .col-status,
 .col-children {
 	width: 1%;
