@@ -84,10 +84,15 @@ $bootstrap = [
 	'panelPath' => $panelPath,
 	'backUrl' => $backUrl,
 ];
-$bootstrapJson = json_encode(
-	$bootstrap,
-	JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT,
-);
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+$bootstrapJson = json_encode($bootstrap, $jsonFlags);
+$panelBase = $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/';
+$runtimeJson = json_encode([
+	'base' => $panelBase,
+	'api' => $legacyApiBase,
+	'boot' => $legacyBootUrl,
+	'login' => $panelPath . '/login',
+], $jsonFlags);
 ?>
 
 <div id="main" class="page editor-page">
@@ -107,6 +112,15 @@ $bootstrapJson = json_encode(
 				data-cosray-node-editor>
 			</div>
 			<script id="cosray-node-editor-data" type="application/json"><?= $bootstrapJson ?></script>
+			<script>
+				{
+					const runtime = <?= $runtimeJson ?>;
+					window.COSRAY_BASE_PATH = runtime.base;
+					window.COSRAY_API_BASE = runtime.api;
+					window.COSRAY_BOOT_URL = runtime.boot;
+					window.COSRAY_LOGIN_URL = runtime.login;
+				}
+			</script>
 			<script type="module" src="<?= escape((string) $editorAssets['js']) ?>"></script>
 		<?php else: ?>
 			<div class="editor-fallback">

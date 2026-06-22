@@ -1,9 +1,8 @@
-import { goto } from '$app/navigation';
-import { browser, dev } from '$app/environment';
 import { get as getStore } from 'svelte/store';
 import { system } from '$lib/sys';
+import { apiBase, loginUrl, navigate, panelBase } from '$lib/runtime';
 
-const domain = browser ? `${window.location.protocol}/${window.location.host}` : '';
+const origin = () => (typeof window === 'undefined' ? 'http://localhost' : window.location.origin);
 export const base = getBase();
 
 class Response {
@@ -18,14 +17,11 @@ type Headers = {
 	'X-Requested-With': 'xmlhttprequest';
 	Accept: string;
 	'X-CSRF-Token'?: string;
+	'Content-Type'?: string;
 };
 
 export function getBase() {
-	if (browser) {
-		return window.COSRAY_BASE_PATH;
-	}
-
-	return '/panel/';
+	return panelBase();
 }
 
 function getDefaultOptions(): RequestInit {
@@ -65,15 +61,21 @@ function getBodyOptions(method: Method, data?: any) {
 	return options;
 }
 
+function requestUrl(path: string): URL {
+	if (path.startsWith('/')) {
+		return new URL(path, origin());
+	}
+
+	return new URL(`${apiBase()}/${path}`, origin());
+}
+
 async function fetchit(
 	path: string,
 	params: Record<string, string>,
 	options: RequestInit,
 	fetchFn: typeof window.fetch | null,
 ) {
-	const url = path.startsWith('/')
-		? new URL(path, domain)
-		: new URL(`${base}api/${path}`, domain);
+	const url = requestUrl(path);
 
 	if (fetchFn === null) {
 		fetchFn = window.fetch;
@@ -95,7 +97,7 @@ async function fetchit(
 
 			if (response.status === 401) {
 				if (message?.loginType !== 'token') {
-					goto(`${base}login`);
+					await navigate(loginUrl());
 				}
 
 				return null;
@@ -103,7 +105,11 @@ async function fetchit(
 
 			// The user logged out in another tab and logged in again.
 			// Now the csrf token is invalid.
-			if (response.status === 400 && message.error_message === 'CSRF Error') {
+			if (
+				response.status === 400 &&
+				message.error_message === 'CSRF Error' &&
+				typeof window !== 'undefined'
+			) {
 				window.location.reload();
 			}
 		} catch {
