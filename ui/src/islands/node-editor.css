@@ -9,33 +9,33 @@
 @import '../styles/tabs.css';
 @import '../styles/modal.css';
 
-.cosray-node-editor-placeholder {
+.cosray-node-editor-island {
+	height: 100%;
+	min-height: 0;
+	background: var(--cms-color-neutral-50);
+	color: var(--cms-color-high);
+	font-family: var(--cms-font-sans);
+}
+
+.cosray-node-editor-island .cms-node-shell {
+	height: 100%;
+}
+
+.cosray-node-editor-island .cms-nav-toggle {
+	display: none;
+}
+
+.cosray-node-editor-message {
 	display: grid;
 	place-content: center;
-	gap: var(--cms-space-3);
 	min-height: 24rem;
 	padding: var(--cms-space-8);
 	color: var(--cms-color-neutral-600);
 	font-family: var(--cms-font-sans);
+	font-weight: 600;
 	text-align: center;
 }
 
-.cosray-node-editor-placeholder .eyebrow {
-	margin: 0;
-	color: var(--cms-color-neutral-400);
-	font-size: var(--cms-font-size-xs);
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-}
-
-.cosray-node-editor-placeholder h2 {
-	margin: 0;
-	color: var(--cms-color-high);
-	font-size: var(--cms-font-size-2xl);
-}
-
-.cosray-node-editor-placeholder p:last-child {
-	max-width: 32rem;
-	margin: 0;
+.cosray-node-editor-message.is-error {
+	color: var(--cms-color-danger-700);
 }
