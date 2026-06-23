@@ -1,0 +1,89 @@
+:root {
+	color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	color: var(--cms-color-high);
+	line-height: 1.5;
+	text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin: 0 0 var(--cms-space-4);
+	font-size: inherit;
+	font-weight: 600;
+	line-height: 1.25;
+	color: var(--cms-color-high);
+}
+
+p,
+ul,
+ol {
+	margin: 0 0 var(--cms-space-4);
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+button {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+}
+
+button:not(:disabled) {
+	cursor: pointer;
+}
+
+input,
+select,
+textarea {
+	border: var(--cms-border);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-white);
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: var(--cms-color-neutral-400);
+}
+
+img,
+svg,
+video,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

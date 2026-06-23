@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
@@ -9,7 +8,7 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig({
 	plugins: [
 		svelte({
-			preprocess: vitePreprocess(),
+			preprocess: vitePreprocess({ script: true }),
 		}),
 	],
 	resolve: {
@@ -20,7 +19,7 @@ export default defineConfig({
 		},
 	},
 	build: {
-		outDir: '../panel/editor',
+		outDir: 'editor',
 		emptyOutDir: true,
 		lib: {
 			entry: path.resolve(root, 'src/islands/node-editor.ts'),
@@ -30,7 +29,7 @@ export default defineConfig({
 		},
 		rollupOptions: {
 			output: {
-				assetFileNames: asset =>
+				assetFileNames: (asset) =>
 					asset.name === 'style.css' ? 'node-editor.css' : '[name][extname]',
 				chunkFileNames: '[name].js',
 				entryFileNames: 'node-editor.js',

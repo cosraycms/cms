@@ -1,0 +1,127 @@
+:root {
+	/* Canonical design tokens */
+	--cms-font-sans:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+		'Helvetica Neue', sans-serif;
+
+	--cms-space-0: 0px;
+	--cms-space-px: 1px;
+	--cms-space-0-5: 0.125rem;
+	--cms-space-1: 0.25rem;
+	--cms-space-1-5: 0.375rem;
+	--cms-space-2: 0.5rem;
+	--cms-space-2-5: 0.625rem;
+	--cms-space-3: 0.75rem;
+	--cms-space-3-5: 0.875rem;
+	--cms-space-4: 1rem;
+	--cms-space-5: 1.25rem;
+	--cms-space-6: 1.5rem;
+	--cms-space-7: 1.75rem;
+	--cms-space-8: 2rem;
+	--cms-space-9: 2.25rem;
+	--cms-space-10: 2.5rem;
+	--cms-space-11: 2.75rem;
+	--cms-space-12: 3rem;
+	--cms-space-14: 3.5rem;
+	--cms-space-16: 4rem;
+	--cms-space-20: 5rem;
+	--cms-space-24: 6rem;
+	--cms-space-28: 7rem;
+	--cms-space-32: 8rem;
+	--cms-space-36: 9rem;
+	--cms-space-40: 10rem;
+	--cms-space-44: 11rem;
+	--cms-space-48: 12rem;
+	--cms-space-52: 13rem;
+	--cms-space-56: 14rem;
+	--cms-space-60: 15rem;
+	--cms-space-64: 16rem;
+	--cms-space-72: 18rem;
+	--cms-space-80: 20rem;
+	--cms-space-96: 24rem;
+
+	--cms-size-xs: 20rem;
+	--cms-size-sm: 24rem;
+	--cms-size-md: 28rem;
+	--cms-size-lg: 32rem;
+	--cms-size-xl: 36rem;
+	--cms-size-2xl: 42rem;
+	--cms-size-3xl: 48rem;
+	--cms-size-4xl: 56rem;
+	--cms-size-5xl: 64rem;
+	--cms-size-6xl: 72rem;
+	--cms-size-7xl: 80rem;
+
+	--cms-font-size-xs: 0.75rem;
+	--cms-font-size-sm: 0.875rem;
+	--cms-font-size-base: 1rem;
+	--cms-font-size-lg: 1.125rem;
+	--cms-font-size-xl: 1.25rem;
+	--cms-font-size-2xl: 1.5rem;
+	--cms-font-size-3xl: 2rem;
+
+	--cms-line-height-xs: 1rem;
+	--cms-line-height-sm: 1.25rem;
+	--cms-line-height-base: 1.5rem;
+	--cms-line-height-lg: 1.75rem;
+	--cms-line-height-xl: 1.75rem;
+	--cms-line-height-2xl: 2rem;
+	--cms-line-height-3xl: 2.25rem;
+
+	--cms-radius-sm: 0.125rem;
+	--cms-radius: 0.25rem;
+	--cms-radius-md: 0.375rem;
+	--cms-radius-lg: 0.5rem;
+	--cms-radius-xl: 0.75rem;
+	--cms-radius-2xl: 1rem;
+	--cms-radius-3xl: 1.5rem;
+	--cms-radius-full: 9999px;
+
+	--cms-color-white: #fff;
+	--cms-color-black: #000;
+	--cms-color-neutral-50: #fbfaf9;
+	--cms-color-neutral-100: #f6f5f4;
+	--cms-color-neutral-200: #e8e5e4;
+	--cms-color-neutral-300: #d7d3d1;
+	--cms-color-neutral-400: #a9a29e;
+	--cms-color-neutral-500: #79716c;
+	--cms-color-neutral-600: #58534e;
+	--cms-color-neutral-700: #45403c;
+	--cms-color-neutral-800: #2a2524;
+	--cms-color-neutral-900: #1b1917;
+
+	--cms-color-danger-600: #dc2626;
+	--cms-color-danger-700: #be123c;
+	--cms-color-info-700: #0369a1;
+	--cms-color-success-100: #d1fae5;
+	--cms-color-success-600: #059669;
+	--cms-color-warning-700: #c2410c;
+
+	--cms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+	--cms-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	--cms-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	--cms-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+	--cms-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+	--cms-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+	--cms-shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+	--cms-shadow-none: 0 0 #0000;
+
+	--cms-border-width: 1px;
+	--cms-border-color: var(--cms-color-neutral-300);
+	--cms-border-style: solid;
+	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
+
+	--cms-breakpoint-sm: 640px;
+	--cms-breakpoint-md: 768px;
+	--cms-breakpoint-lg: 1024px;
+	--cms-breakpoint-xl: 1280px;
+	--cms-breakpoint-2xl: 1536px;
+
+	--cms-blur-sm: 4px;
+	--cms-fraction-2-5: 40%;
+
+	--cms-color-high-light: var(--cms-color-neutral-100);
+	--cms-color-high-dull: var(--cms-color-neutral-300);
+	--cms-color-high: var(--cms-color-neutral-900);
+	--cms-color-high-dark: var(--cms-color-black);
+}

@@ -1,0 +1,70 @@
+.cms-code-control-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--cms-space-2);
+	margin-bottom: var(--cms-space-2);
+}
+
+.cms-code-control-syntax-label {
+	font-size: var(--cms-font-size-sm);
+	font-weight: 600;
+	color: var(--cms-color-neutral-700);
+}
+
+.cms-code-control-syntax-select {
+	width: auto;
+	min-width: 9rem;
+}
+
+.cms-code-editor {
+	position: relative;
+	overflow: hidden;
+	border: var(--cms-border);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-neutral-800);
+	box-shadow: var(--cms-shadow-sm);
+}
+
+.cms-code-editor .cm-editor {
+	min-height: 16rem;
+	background-color: var(--cms-color-neutral-800);
+	color: var(--cms-color-neutral-100);
+}
+
+.cms-code-editor .cm-scroller {
+	font-family:
+		'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
+		'Courier New', 'andale mono', 'lucida console', monospace;
+	font-size: 0.875rem;
+	line-height: 1.5;
+}
+
+.cms-code-editor .cm-gutters {
+	border-right: 1px solid color-mix(in srgb, var(--cms-color-neutral-500) 55%, transparent);
+	background-color: color-mix(in srgb, var(--cms-color-neutral-700) 75%, transparent);
+	color: var(--cms-color-neutral-300);
+}
+
+.cms-code-editor .cm-activeLine,
+.cms-code-editor .cm-activeLineGutter {
+	background-color: color-mix(in srgb, var(--cms-color-neutral-600) 35%, transparent);
+}
+
+.cms-code-editor .cm-selectionBackground,
+.cms-code-editor .cm-content ::selection {
+	background-color: color-mix(in srgb, var(--cms-color-info-700) 45%, transparent);
+}
+
+.cms-code-editor .cm-editor.cm-focused {
+	outline: 0;
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--cms-color-info-700) 35%, transparent);
+}
+
+.cms-code-editor-input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}

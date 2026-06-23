@@ -1,8 +1,9 @@
+import { goto } from '$app/navigation';
+import { browser, dev } from '$app/environment';
 import { get as getStore } from 'svelte/store';
 import { system } from '$lib/sys';
-import { apiBase, loginUrl, navigate, panelBase } from '$lib/runtime';
 
-const origin = () => (typeof window === 'undefined' ? 'http://localhost' : window.location.origin);
+const domain = browser ? `${window.location.protocol}/${window.location.host}` : '';
 export const base = getBase();
 
 class Response {
@@ -17,14 +18,17 @@ type Headers = {
 	'X-Requested-With': 'xmlhttprequest';
 	Accept: string;
 	'X-CSRF-Token'?: string;
-	'Content-Type'?: string;
 };
 
 export function getBase() {
-	return panelBase();
+	if (browser) {
+		return window.COSRAY_BASE_PATH;
+	}
+
+	return '/cms/';
 }
 
-function getDefaultOptions(): RequestInit & { headers: Headers } {
+function getDefaultOptions(): RequestInit {
 	const headers: Headers = {
 		'X-Requested-With': 'xmlhttprequest',
 		Accept: 'application/json',
@@ -46,7 +50,7 @@ function getDefaultOptions(): RequestInit & { headers: Headers } {
 	};
 }
 
-function getBodyOptions(method: Method, data?: any): RequestInit & { headers: Headers } {
+function getBodyOptions(method: Method, data?: any) {
 	const options = Object.assign(getDefaultOptions(), { method });
 
 	if (data) {
@@ -61,21 +65,15 @@ function getBodyOptions(method: Method, data?: any): RequestInit & { headers: He
 	return options;
 }
 
-function requestUrl(path: string): URL {
-	if (path.startsWith('/')) {
-		return new URL(path, origin());
-	}
-
-	return new URL(`${apiBase()}/${path}`, origin());
-}
-
 async function fetchit(
 	path: string,
 	params: Record<string, string>,
 	options: RequestInit,
 	fetchFn: typeof window.fetch | null,
 ) {
-	const url = requestUrl(path);
+	const url = path.startsWith('/')
+		? new URL(path, domain)
+		: new URL(`${base}api/${path}`, domain);
 
 	if (fetchFn === null) {
 		fetchFn = window.fetch;
@@ -97,7 +95,7 @@ async function fetchit(
 
 			if (response.status === 401) {
 				if (message?.loginType !== 'token') {
-					await navigate(loginUrl());
+					goto(`${base}login`);
 				}
 
 				return null;
@@ -105,11 +103,7 @@ async function fetchit(
 
 			// The user logged out in another tab and logged in again.
 			// Now the csrf token is invalid.
-			if (
-				response.status === 400 &&
-				message.error_message === 'CSRF Error' &&
-				typeof window !== 'undefined'
-			) {
+			if (response.status === 400 && message.error_message === 'CSRF Error') {
 				window.location.reload();
 			}
 		} catch {

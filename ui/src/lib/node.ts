@@ -1,6 +1,7 @@
 import type { Node } from '$types/data';
+import { base } from '$lib/req';
+import { goto } from '$app/navigation';
 import { _ } from '$lib/locale';
-import { navigate, panelBase } from '$lib/runtime';
 import { setPristine, broadcastOk } from '$lib/state';
 import req from '$lib/req';
 import toast from '$lib/toast';
@@ -64,7 +65,7 @@ export async function create(node: Node, type: string, documentPath: string) {
 
 		const result = response.data as Result;
 
-		await navigate(`${panelBase()}${documentPath}/${result.uid}`, {
+		await goto(`${base}${documentPath}/${result.uid}`, {
 			invalidateAll: true,
 		});
 
@@ -88,7 +89,7 @@ export async function remove(uid: string, collectionPath: string) {
 	const response = await req.del(`node/${uid}`);
 
 	if (response?.ok) {
-		await navigate(`${panelBase()}${collectionPath}`, { invalidateAll: true });
+		await goto(`${base}${collectionPath}`, { invalidateAll: true });
 
 		toast.add({
 			kind: 'success',

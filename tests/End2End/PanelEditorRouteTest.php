@@ -125,7 +125,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		}
 
 		$this->assertStringContainsString('Editor bundle missing', $html);
-		$this->assertStringContainsString('cd ui &amp;&amp; pnpm run build:editor', $html);
+		$this->assertStringContainsString('cd panel &amp;&amp; pnpm run build:editor', $html);
 		$this->assertStringContainsString(
 			'href="/panel/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
 			$html,

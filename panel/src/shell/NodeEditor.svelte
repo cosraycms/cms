@@ -117,7 +117,7 @@
 		const request = ++pathPreviewRequest;
 		const timer = window.setTimeout(() => {
 			void previewRoutePaths(type, payload)
-				.then(paths => {
+				.then((paths) => {
 					if (request === pathPreviewRequest) {
 						node.generatedPaths = paths ?? {};
 					}
@@ -139,37 +139,26 @@
 		{collectionPath}
 		deletable={node.deletable}
 		preview={node.type.routable && node.type.renderable ? preview : null}
-		{save} />
+		{save}
+	/>
 	<Document>
-		<Breadcrumbs
-			href={collectionPath}
-			name={collection.name} />
-		<Headline
-			published={node.published}
-			showPublished={node.type.renderable}>
+		<Breadcrumbs href={collectionPath} name={collection.name} />
+		<Headline published={node.published} showPublished={node.type.renderable}>
 			{@html node.title}
 		</Headline>
 		<Tabs>
-			<button
-				onclick={changeTab('content')}
-				class:active={activeTab === 'content'}
-				class="tab">
+			<button onclick={changeTab('content')} class:active={activeTab === 'content'} class="tab">
 				{_('Inhalt')}
 			</button>
 			{#if node.type.routable || node.type.renderable}
-				<button
-					onclick={changeTab('settings')}
-					class:active={activeTab === 'settings'}
-					class="tab">
+				<button onclick={changeTab('settings')} class:active={activeTab === 'settings'} class="tab">
 					{_('Einstellungen')}
 				</button>
 			{/if}
 		</Tabs>
 		<Pane>
 			{#if activeTab === 'content'}
-				<Content
-					bind:fields={node.fields}
-					bind:node />
+				<Content bind:fields={node.fields} bind:node />
 			{:else}
 				<Settings bind:node />
 			{/if}
@@ -178,15 +167,8 @@
 </div>
 {#if showPreview}
 	<div class="preview">
-		<button
-			onclick={() => (showPreview = null)}
-			class="cms-preview-close">
-			schließen
-		</button>
-		<iframe
-			src="/preview{showPreview}"
-			title="Preview">
-		</iframe>
+		<button onclick={() => (showPreview = null)} class="cms-preview-close"> schließen </button>
+		<iframe src="/preview{showPreview}" title="Preview"> </iframe>
 	</div>
 {/if}
 

@@ -100,7 +100,7 @@ $runtimeJson = json_encode([
 			<div class="editor-fallback">
 				<h2>Editor bundle missing</h2>
 				<p>Build the Svelte editor island before using the new panel editor.</p>
-				<code>cd ui &amp;&amp; pnpm run build:editor</code>
+				<code>cd panel &amp;&amp; pnpm run build:editor</code>
 				<a class="btn btn-ghost" href="<?= escape($legacyUrl) ?>" hx-boost="false">
 					Open legacy editor
 				</a>

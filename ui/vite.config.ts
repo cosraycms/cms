@@ -3,6 +3,7 @@ import path from 'path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
+const oldPanelPath = process.env.COSRAY_PANEL_PATH ? process.env.COSRAY_PANEL_PATH : 'cms';
 const devport = process.env.COSRAY_DEV_PORT ? parseInt(process.env.COSRAY_DEV_PORT, 10) : 2009;
 const devhost = process.env.COSRAY_DEV_HOST ? process.env.COSRAY_DEV_HOST : 'localhost';
 const appport = process.env.COSRAY_APP_PORT ? parseInt(process.env.COSRAY_APP_PORT, 10) : 1983;
@@ -20,8 +21,8 @@ export default defineConfig({
 		strictPort: true,
 		allowedHosts: true, // TODO: Check if this is necessary. Currently active to allow working with OrbStack domains
 		proxy: {
-			'/panel/api': target,
-			'/panel/boot': target,
+			[`/${oldPanelPath}/api`]: target,
+			[`/${oldPanelPath}/boot`]: target,
 			'/assets': target,
 			'/cache': target,
 			'/media': target,

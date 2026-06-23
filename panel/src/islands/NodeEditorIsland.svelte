@@ -175,9 +175,7 @@
 		const response = await req.post(`node/${node.type.handle}`, node);
 
 		if (!response?.ok) {
-			errorToast(
-				response?.data?.message ?? 'Fehler beim Erstellen des Dokuments aufgetreten!',
-			);
+			errorToast(response?.data?.message ?? 'Fehler beim Erstellen des Dokuments aufgetreten!');
 
 			return false;
 		}
@@ -238,10 +236,7 @@
 		{:else if error !== ''}
 			<div class="cosray-node-editor-message is-error">{error}</div>
 		{:else if node !== null}
-			<NodeEditor
-				bind:node
-				collection={bootstrap.collection}
-				{save} />
+			<NodeEditor bind:node collection={bootstrap.collection} {save} />
 		{/if}
 	</div>
 	<Toasts />
