@@ -77,11 +77,15 @@
 		};
 
 		window.addEventListener('beforeunload', unload);
-		document.body.addEventListener('htmx:beforeRequest', htmxGuard);
+		for (const eventName of ['htmx:beforeRequest', 'htmx:before:request']) {
+			document.addEventListener(eventName, htmxGuard);
+		}
 
 		return () => {
 			window.removeEventListener('beforeunload', unload);
-			document.body.removeEventListener('htmx:beforeRequest', htmxGuard);
+			for (const eventName of ['htmx:beforeRequest', 'htmx:before:request']) {
+				document.removeEventListener(eventName, htmxGuard);
+			}
 		};
 	});
 

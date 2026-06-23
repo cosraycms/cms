@@ -54,10 +54,6 @@ window.CosrayNodeEditor = {
 
 mountEditor();
 
-document.body.addEventListener('htmx:afterSwap', event => {
-	const target = event instanceof CustomEvent ? event.detail?.target : null;
-
-	if (target && typeof target.querySelector === 'function') {
-		mountEditor(target as ParentNode);
-	}
-});
+for (const eventName of ['htmx:afterSwap', 'htmx:after:swap']) {
+	document.addEventListener(eventName, () => mountEditor());
+}

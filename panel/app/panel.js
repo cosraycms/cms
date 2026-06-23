@@ -50,11 +50,17 @@
 		}
 	};
 
-	document.addEventListener('keydown', focusSearch);
-	document.body.addEventListener('htmx:afterSwap', event => {
-		if (event.detail?.target?.matches?.(mainSelector)) {
+	const swapTarget = event => event.detail?.target ?? event.detail?.ctx?.target ?? event.target;
+
+	const updateNavigationAfterSwap = event => {
+		if (swapTarget(event)?.matches?.(mainSelector)) {
 			updateNavigation();
 		}
-	});
-	document.body.addEventListener('htmx:pushedIntoHistory', updateNavigation);
+	};
+
+	document.addEventListener('keydown', focusSearch);
+	document.addEventListener('htmx:afterSwap', updateNavigationAfterSwap);
+	document.addEventListener('htmx:after:swap', updateNavigationAfterSwap);
+	document.addEventListener('htmx:pushedIntoHistory', updateNavigation);
+	document.addEventListener('htmx:after:history:update', updateNavigation);
 })();
