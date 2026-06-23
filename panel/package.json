@@ -5,8 +5,8 @@
 	"type": "module",
 	"packageManager": "pnpm@11.5.0",
 	"scripts": {
-		"build": "vite build --config vite.editor.config.ts",
-		"build:editor": "vite build --config vite.editor.config.ts",
+		"build": "vite build",
+		"dev": "vite",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"format": "prettier -w ."
 	},

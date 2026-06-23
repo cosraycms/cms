@@ -24,6 +24,6 @@
 			"$types/*": ["./src/types/*"]
 		}
 	},
-	"include": ["vite.editor.config.ts", "src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte"],
+	"include": ["vite.config.ts", "src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte"],
 	"exclude": ["node_modules/**"]
 }
