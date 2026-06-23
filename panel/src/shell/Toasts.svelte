@@ -61,7 +61,7 @@
 	{/each}
 </div>
 
-<style lang="postcss">
+<style>
 	.toasts {
 		position: fixed;
 		z-index: 50;

@@ -60,7 +60,7 @@
 	{/each}
 </div>
 
-<style lang="postcss">
+<style>
 	.field-grid {
 		display: grid;
 		grid-template-columns: repeat(100, minmax(0, 1fr));

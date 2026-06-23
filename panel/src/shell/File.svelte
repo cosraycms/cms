@@ -65,7 +65,7 @@
 	</div>
 {/if}
 
-<style lang="postcss">
+<style>
 	.cms-file {
 		position: relative;
 		display: flex;

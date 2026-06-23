@@ -93,7 +93,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.entry {
 		background: white;
 		border: 1px solid var(--cms-color-neutral-300);

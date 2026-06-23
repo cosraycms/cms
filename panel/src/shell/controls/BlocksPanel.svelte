@@ -172,7 +172,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-blocks-field {
 		display: grid;
 		gap: var(--cms-space-3);

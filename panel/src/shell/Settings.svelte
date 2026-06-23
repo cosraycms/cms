@@ -118,7 +118,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-settings {
 		padding: var(--cms-space-4);
 	}

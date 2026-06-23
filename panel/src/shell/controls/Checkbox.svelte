@@ -41,7 +41,7 @@
 	</div>
 </Field>
 
-<style lang="postcss">
+<style>
 	.cms-checkbox-wrap {
 		position: relative;
 		display: flex;

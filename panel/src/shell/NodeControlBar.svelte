@@ -78,7 +78,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-node-controls {
 		display: flex;
 		flex-direction: row;

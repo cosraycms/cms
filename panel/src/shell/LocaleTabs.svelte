@@ -27,7 +27,7 @@
 	{/each}
 </span>
 
-<style lang="postcss">
+<style>
 	.locale-tab {
 		display: inline-block;
 		font-size: var(--cms-font-size-sm);

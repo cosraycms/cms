@@ -41,7 +41,7 @@
 {/if}
 {@render children()}
 
-<style lang="postcss">
+<style>
 	.modal-container {
 		background-color: var(--cms-color-white, #fff);
 	}

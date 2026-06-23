@@ -14,7 +14,7 @@
 	</nav>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-tabs {
 		margin-bottom: var(--cms-space-6);
 	}

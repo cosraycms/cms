@@ -44,7 +44,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.video {
 		position: relative;
 		width: 100%;

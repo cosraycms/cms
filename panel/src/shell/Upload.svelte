@@ -294,7 +294,7 @@
 	</div>
 {/if}
 
-<style lang="postcss">
+<style>
 	.upload {
 		display: flex;
 		width: 100%;
@@ -316,7 +316,7 @@
 		}
 	}
 
-	@media (min-width: var(--cms-breakpoint-md)) {
+	@media (min-width: 768px) {
 		.upload {
 			flex-direction: row;
 		}
@@ -389,7 +389,7 @@
 		margin-top: var(--cms-space-1);
 	}
 
-	@media (min-width: var(--cms-breakpoint-md)) {
+	@media (min-width: 768px) {
 		:global(.upload-image .preview) {
 			width: var(--cms-fraction-2-5);
 		}

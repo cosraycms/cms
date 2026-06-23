@@ -106,7 +106,7 @@
 	/>
 {/if}
 
-<style lang="postcss">
+<style>
 	.cms-media-list {
 		display: flex;
 	}

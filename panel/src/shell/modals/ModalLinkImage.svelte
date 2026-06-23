@@ -22,7 +22,7 @@
 	<img src="{path}?resize=fit&w=200&h=200" alt={_('Vorschau')} style="max-height: 90vh" />
 </button>
 
-<style lang="postcss">
+<style>
 	.link-image {
 		display: flex;
 		align-items: center;

@@ -17,7 +17,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-toast-content {
 		text-align: left;
 		color: var(--cms-color-white);

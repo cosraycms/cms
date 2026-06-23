@@ -70,7 +70,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	div button {
 		height: var(--cms-space-4);
 		width: var(--cms-space-4);

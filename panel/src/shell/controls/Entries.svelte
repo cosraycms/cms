@@ -186,7 +186,7 @@
 	</div>
 </Field>
 
-<style lang="postcss">
+<style>
 	.entries-field {
 		margin-top: 0.5rem;
 		border: 1px solid var(--cms-color-neutral-300);

@@ -44,7 +44,7 @@
 	</span>
 </button>
 
-<style lang="postcss">
+<style>
 	.cms-toggle {
 		position: relative;
 		display: inline-flex;

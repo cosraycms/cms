@@ -60,5 +60,3 @@
 	--sidebar-border-right: var(--theme-sidebar-border-right, 0);
 	--content-max-width: var(--theme-content-max-width, 1600px);
 }
-
-border: var(--theme-sidebar-border, 1px solid var(--color-border));

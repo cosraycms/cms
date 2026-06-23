@@ -21,7 +21,7 @@
 	</span>
 </div>
 
-<style lang="postcss">
+<style>
 	.breadcrumbs {
 		margin-top: var(--cms-space-8);
 		margin-bottom: var(--cms-space-4);

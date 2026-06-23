@@ -27,7 +27,7 @@
 	</button>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-modal-link-file-wrap {
 		margin-top: var(--cms-space-2);
 		padding-right: var(--cms-space-4);

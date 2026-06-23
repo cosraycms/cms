@@ -12,7 +12,7 @@
 	</span>
 {/if}
 
-<style lang="postcss">
+<style>
 	span.block-button-label {
 		position: absolute;
 		display: flex;

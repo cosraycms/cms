@@ -30,7 +30,7 @@
 	</div>
 </h1>
 
-<style lang="postcss">
+<style>
 	.cms-headline {
 		display: flex;
 		flex-direction: row;

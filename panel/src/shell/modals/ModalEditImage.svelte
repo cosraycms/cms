@@ -48,7 +48,7 @@
 	</div>
 </ModalFooter>
 
-<style lang="postcss">
+<style>
 	.cms-modal-edit-image-fields {
 		display: flex;
 		flex-direction: column;

@@ -31,7 +31,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-blocks-text-body {
 		flex-grow: 1;
 	}

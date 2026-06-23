@@ -14,7 +14,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-document {
 		flex: 1 1 auto;
 		overflow-y: auto;

@@ -86,7 +86,7 @@
 	</button>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-block-cell-buttons {
 		display: flex;
 		flex: 1 1 auto;

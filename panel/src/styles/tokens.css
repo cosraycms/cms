@@ -111,12 +111,6 @@
 	--cms-border-style: solid;
 	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
 
-	--cms-breakpoint-sm: 640px;
-	--cms-breakpoint-md: 768px;
-	--cms-breakpoint-lg: 1024px;
-	--cms-breakpoint-xl: 1280px;
-	--cms-breakpoint-2xl: 1536px;
-
 	--cms-blur-sm: 4px;
 	--cms-fraction-2-5: 40%;
 

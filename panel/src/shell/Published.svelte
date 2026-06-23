@@ -20,7 +20,7 @@
 	{/if}
 </span>
 
-<style lang="postcss">
+<style>
 	span.cms-published {
 		display: inline-block;
 		border-radius: var(--cms-radius-full);

@@ -22,7 +22,7 @@
 	<Toggle bind:value />
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-toggle-line {
 		display: flex;
 		align-items: center;

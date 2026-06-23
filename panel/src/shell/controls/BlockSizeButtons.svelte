@@ -100,7 +100,7 @@
 	</button>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-blocks-size-buttons {
 		display: flex;
 		flex: 1 1 auto;

@@ -113,7 +113,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.image {
 		position: relative;
 		border: 1px solid var(--cms-color-neutral-300);

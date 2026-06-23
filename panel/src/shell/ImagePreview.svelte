@@ -8,7 +8,7 @@
 	<img src="{image}?resize=width&w=1280" alt={_('Vorschau')} style="max-height: 90vh" />
 </div>
 
-<style lang="postcss">
+<style>
 	.image-preview {
 		display: flex;
 		align-items: center;

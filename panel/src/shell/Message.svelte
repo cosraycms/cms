@@ -77,7 +77,7 @@
 	</div>
 {/if}
 
-<style lang="postcss">
+<style>
 	.cms-message {
 		border-left: 4px solid transparent;
 		padding: var(--cms-space-4);

@@ -99,7 +99,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-blocks-youtube-field-row {
 		margin-top: var(--cms-space-2);
 	}

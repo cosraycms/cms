@@ -7,7 +7,7 @@
 	<IcoBarsCenterLeft />
 </button>
 
-<style lang="postcss">
+<style>
 	button.cms-nav-toggle {
 		position: absolute;
 		left: var(--cms-space-2);

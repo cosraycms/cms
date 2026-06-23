@@ -172,7 +172,7 @@
 	</div>
 {/if}
 
-<style lang="postcss">
+<style>
 	.preview {
 		z-index: 999;
 		background-color: color-mix(in srgb, var(--cms-color-neutral-900) 50%, transparent);

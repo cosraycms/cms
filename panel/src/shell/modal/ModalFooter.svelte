@@ -8,7 +8,7 @@
 	{@render children()}
 </div>
 
-<style lang="postcss">
+<style>
 	.modal-footer {
 		border-color: var(--cms-border-color);
 	}

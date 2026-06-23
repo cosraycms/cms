@@ -87,7 +87,7 @@
 	</button>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-entry-controls {
 		display: flex;
 		flex-direction: row;

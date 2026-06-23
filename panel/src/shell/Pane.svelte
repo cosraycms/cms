@@ -15,7 +15,7 @@
 	</div>
 </div>
 
-<style lang="postcss">
+<style>
 	.cms-pane {
 		flex: 1 1 auto;
 	}

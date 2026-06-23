@@ -146,7 +146,7 @@
 	</div>
 </ModalFooter>
 
-<style lang="postcss">
+<style>
 	.cms-modal-link-body {
 		display: flex;
 		flex-direction: column;

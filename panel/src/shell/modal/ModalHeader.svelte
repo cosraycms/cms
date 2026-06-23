@@ -43,7 +43,7 @@
 	{/if}
 </div>
 
-<style lang="postcss">
+<style>
 	.modal-close-button {
 		color: var(--cms-color-neutral-500);
 
