@@ -21,10 +21,14 @@ $sorts = array_values(array_filter(
 	array_map(static fn(mixed $sort): string => trim((string) $sort), $sorts),
 	static fn(string $sort): bool => $sort !== '',
 ));
-$blueprints = $blueprints instanceof Traversable ? iterator_to_array($blueprints) : (array) $blueprints;
+$blueprints = $blueprints instanceof Traversable
+	? iterator_to_array($blueprints)
+	: (array) $blueprints;
 $blueprints = array_values(array_filter(
 	array_map(static function (mixed $blueprint): array {
-		$blueprint = $blueprint instanceof Traversable ? iterator_to_array($blueprint) : (array) $blueprint;
+		$blueprint = $blueprint instanceof Traversable
+			? iterator_to_array($blueprint)
+			: (array) $blueprint;
 
 		return [
 			'slug' => trim((string) ($blueprint['slug'] ?? '')),
@@ -238,49 +242,51 @@ $statusBadges = static function (mixed $node) use (
 ?>
 
 <div id="main" class="page collection-page">
-	<header class="topbar">
-		<form
-			class="search"
-			method="get"
-			action="<?= escape($collectionPath) ?>"
-			hx-target="#main">
-			<label class="sr-only" for="collection-search">Search <?= escape((string) $name) ?></label>
-			<span class="search-icon" aria-hidden="true">⌕</span>
-			<input
-				id="collection-search"
-				name="q"
-				type="search"
-				value="<?= escape($q) ?>"
-				placeholder="Search entries …" />
-			<?php if ($sort !== ''): ?>
-				<input type="hidden" name="sort" value="<?= escape($sort) ?>" />
-			<?php endif ?>
-			<?php if ($dir !== ''): ?>
-				<input type="hidden" name="dir" value="<?= escape($dir) ?>" />
-			<?php endif ?>
-			<?php if ($limit !== 50): ?>
-				<input type="hidden" name="limit" value="<?= $limit ?>" />
-			<?php endif ?>
-			<?php if ($parent !== null): ?>
-				<input type="hidden" name="parent" value="<?= escape($parent) ?>" />
-			<?php endif ?>
-		</form>
+	<header class="topbar topbar-collection">
+		<div class="content">
+			<form
+				class="search"
+				method="get"
+				action="<?= escape($collectionPath) ?>"
+				hx-target="#main">
+				<label class="sr-only" for="collection-search">Search <?= escape((string) $name) ?></label>
+				<span class="search-icon" aria-hidden="true">⌕</span>
+				<input
+					id="collection-search"
+					name="q"
+					type="search"
+					value="<?= escape($q) ?>"
+					placeholder="Search entries …" />
+				<?php if ($sort !== ''): ?>
+					<input type="hidden" name="sort" value="<?= escape($sort) ?>" />
+				<?php endif ?>
+				<?php if ($dir !== ''): ?>
+					<input type="hidden" name="dir" value="<?= escape($dir) ?>" />
+				<?php endif ?>
+				<?php if ($limit !== 50): ?>
+					<input type="hidden" name="limit" value="<?= $limit ?>" />
+				<?php endif ?>
+				<?php if ($parent !== null): ?>
+					<input type="hidden" name="parent" value="<?= escape($parent) ?>" />
+				<?php endif ?>
+			</form>
 
-		<div class="topbar-actions">
-			<?php if ($q !== ''): ?>
-				<a class="btn btn-ghost" href="<?= escape($queryUrl([
-				'q' => '',
-				'offset' => '',
-			])) ?>" hx-target="#main">Clear search</a>
-			<?php endif ?>
-			<?php foreach ($blueprints as $blueprint): ?>
-				<a
-					class="btn btn-primary"
-					href="<?= escape($createUrl($blueprint['slug'])) ?>"
-					hx-target="#main">
-					New <?= escape($blueprint['name']) ?>
-				</a>
-			<?php endforeach ?>
+			<div class="topbar-actions">
+				<?php if ($q !== ''): ?>
+					<a class="btn btn-ghost" href="<?= escape($queryUrl([
+					'q' => '',
+					'offset' => '',
+				])) ?>" hx-target="#main">Clear search</a>
+				<?php endif ?>
+				<?php foreach ($blueprints as $blueprint): ?>
+					<a
+						class="btn btn-primary"
+						href="<?= escape($createUrl($blueprint['slug'])) ?>"
+						hx-target="#main">
+						New <?= escape($blueprint['name']) ?>
+					</a>
+				<?php endforeach ?>
+			</div>
 		</div>
 	</header>
 
@@ -408,7 +414,10 @@ $statusBadges = static function (mixed $node) use (
 													'name' => trim((string) ($blueprint['name'] ?? '')),
 												];
 											}, $childBlueprints),
-											static fn(array $blueprint): bool => $blueprint['slug'] !== '' && $blueprint['name'] !== '',
+											static fn(array $blueprint): bool => (
+												$blueprint['slug'] !== ''
+												&& $blueprint['name'] !== ''
+											),
 										));
 										?>
 										<td class="collection-cell col-children" data-label="Children">

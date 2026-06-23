@@ -1,7 +1,7 @@
 :root {
 	--color-canvas: var(--theme-color-canvas, #f3f4f6);
 	--color-surface: var(--theme-color-surface, #ffffff);
-	--color-rail: var(--theme-color-rail, #fbfbfc);
+	--color-rail: var(--theme-color-rail, var(--color-canvas));
 	--color-text: var(--theme-color-text, #1c2230);
 	--color-muted: var(--theme-color-muted, #69707f);
 	--color-faint: var(--theme-color-faint, #9aa0ad);
@@ -51,6 +51,14 @@
 	--radius-sm: var(--theme-radius-sm, 0.375rem);
 	--radius-md: var(--theme-radius-md, 0.5625rem);
 	--radius-lg: var(--theme-radius-lg, 0.8125rem);
-	--sidebar-width: var(--theme-sidebar-width, 15.5rem);
 	--row-height: var(--theme-row-height, 3.5rem);
+
+	/* UI-Elements */
+	--topbar-bg: var(--theme-topbar-bg, var(--color-canvas));
+	--sidebar-width: var(--theme-sidebar-width, 15.5rem);
+	--sidebar-header-bg: var(--theme-sidebar-header-bg, var(--topbar-bg));
+	--sidebar-border-right: var(--theme-sidebar-border-right, 0);
+	--content-max-width: var(--theme-content-max-width, 1600px);
 }
+
+border: var(--theme-sidebar-border, 1px solid var(--color-border));

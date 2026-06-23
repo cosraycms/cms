@@ -31,7 +31,7 @@ a {
 	width: var(--sidebar-width);
 	min-width: 0;
 	background: var(--color-rail);
-	border-right: 1px solid var(--color-border);
+	border-right: var(--sidebar-border-right);
 }
 
 .sidebar-header {
@@ -39,7 +39,7 @@ a {
 	align-items: center;
 	height: 4.25rem;
 	padding: 0 var(--space-5);
-	background: var(--color-surface);
+	background: var(--sidebar-header-bg);
 	border-bottom: 1px solid var(--color-border);
 }
 
@@ -218,6 +218,19 @@ a {
 	overflow: hidden;
 }
 
+.content {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+	padding: var(--space-6);
+	width: 100%;
+	max-width: var(--content-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
 .page {
 	display: flex;
 	flex-direction: column;
@@ -227,14 +240,25 @@ a {
 }
 
 .topbar {
-	display: flex;
-	flex: 0 0 4.25rem;
-	align-items: center;
-	gap: var(--space-4);
-	height: 4.25rem;
 	padding: 0 var(--space-6);
-	background: var(--color-surface);
+	background: var(--topbar-bg);
 	border-bottom: 1px solid var(--color-border);
+
+	.content {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: var(--space-4);
+		height: 4.25rem;
+	}
+
+	&.topbar-collection .content {
+		justify-content: space-between;
+	}
+
+	&.topbar-editor .content {
+		justify-content: start;
+	}
 }
 
 .topbar h1 {
@@ -242,15 +266,6 @@ a {
 	font-size: var(--font-size-md);
 	font-weight: 650;
 	letter-spacing: -0.01em;
-}
-
-.content {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
-	min-height: 0;
-	overflow: hidden;
-	padding: var(--space-6);
 }
 
 .page-head {

@@ -15,7 +15,9 @@ $type = trim((string) $type);
 $type = $type === '' ? null : $type;
 $parent = trim((string) $parent);
 $parent = $parent === '' ? null : $parent;
-$queryState = $queryState instanceof Traversable ? iterator_to_array($queryState) : (array) $queryState;
+$queryState = $queryState instanceof Traversable
+	? iterator_to_array($queryState)
+	: (array) $queryState;
 $queryState = [
 	'q' => (string) ($queryState['q'] ?? ''),
 	'sort' => (string) ($queryState['sort'] ?? ''),
@@ -100,9 +102,11 @@ $runtimeJson = json_encode([
 ?>
 
 <div id="main" class="page editor-page">
-	<header class="topbar editor-topbar">
-		<a class="btn btn-ghost" href="<?= escape($backUrl) ?>" hx-target="#main">Back to list</a>
-		<h1><?= escape($name) ?></h1>
+	<header class="topbar topbar-editor">
+		<div class="content">
+			<a class="btn btn-ghost" href="<?= escape($backUrl) ?>" hx-target="#main">Back to list</a>
+			<h1><?= escape($name) ?></h1>
+		</div>
 	</header>
 
 	<section class="content editor-content">
