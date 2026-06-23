@@ -46,6 +46,23 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
 	}
 
+	public function testPanelCollectionFormatsDateColumnsForCurrentLocale(): void
+	{
+		$this->createArticle('panel-date-de', 'Panel Date DE', '2026-01-01 10:00:00+01');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'q' => 'Panel Date DE',
+				'locale' => 'de',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('01.01.2026', $html);
+		$this->assertStringContainsString('10:00', $html);
+		$this->assertStringNotContainsString('2026-01-01 10:00:00+01', $html);
+	}
+
 	public function testPanelCollectionSearchFiltersRows(): void
 	{
 		$this->createArticle('panel-search-needle', 'Panel Search Needle');

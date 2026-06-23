@@ -8,6 +8,7 @@ use Celemas\Container\Container;
 use Celemas\Core\Request;
 use Cosray\Config;
 use Cosray\Contract\Icons;
+use Cosray\Locale;
 use Cosray\Navigation;
 
 abstract class Panel
@@ -25,6 +26,8 @@ abstract class Panel
 	protected function context(array $data = []): array
 	{
 		$panelPath = $this->panelPath();
+		$locale = $this->request->get('locale', null);
+		$localeId = $locale instanceof Locale ? $locale->id : 'en';
 
 		return array_merge([
 			'debug' => $this->config->debug(),
@@ -34,6 +37,7 @@ abstract class Panel
 			'panelPath' => $panelPath,
 			'currentPath' => $this->request->uri()->getPath(),
 			'logo' => $this->logo(),
+			'localeId' => $localeId,
 			'config' => $this->config,
 			'renderIcon' => $this->renderIcon(...),
 			'stylesheets' => $this->stylesheets($panelPath),

@@ -1,5 +1,10 @@
+<?php
+
+use function Cosray\escape;
+
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= escape((string) ($localeId ?? 'en')) ?>">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />

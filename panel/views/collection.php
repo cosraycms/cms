@@ -13,6 +13,7 @@ $limit = (int) $limit;
 $q = (string) $q;
 $sort = (string) $sort;
 $dir = (string) $dir;
+$currentLocale = trim((string) ($localeId ?? '')) ?: 'en';
 $parent = $parent === null ? null : (string) $parent;
 $header = $header instanceof Traversable ? iterator_to_array($header) : (array) $header;
 $nodes = $nodes instanceof Traversable ? iterator_to_array($nodes) : (array) $nodes;
@@ -147,13 +148,45 @@ $createUrl = static function (string $type, ?string $parentUid = null) use (
 	return $query === '' ? $path : $path . '?' . $query;
 };
 
-$displayValue = static function (mixed $value, bool $date = false): string {
-	if ($date && is_string($value) && $value !== '') {
-		try {
-			$value = new DateTimeImmutable($value)->format('d.m.Y H:i');
-		} catch (Throwable) {
-			// Keep original value when it cannot be parsed as datetime.
+$displayValue = static function (mixed $value, bool $date = false) use ($currentLocale): string {
+	if ($date && $value instanceof DateTimeInterface) {
+		$formatter = new IntlDateFormatter(
+			$currentLocale,
+			IntlDateFormatter::MEDIUM,
+			IntlDateFormatter::SHORT,
+			$value->getTimezone(),
+		);
+		$formatted = $formatter->format($value);
+
+		if ($formatted !== false) {
+			return $formatted;
 		}
+	}
+
+	if ($date && (is_scalar($value) || is_object($value) && method_exists($value, '__toString'))) {
+		$original = $value;
+		$value = trim((string) $value);
+
+		if ($value !== '') {
+			try {
+				$datetime = new DateTimeImmutable($value);
+				$formatter = new IntlDateFormatter(
+					$currentLocale,
+					IntlDateFormatter::MEDIUM,
+					IntlDateFormatter::SHORT,
+					$datetime->getTimezone(),
+				);
+				$formatted = $formatter->format($datetime);
+
+				if ($formatted !== false) {
+					return $formatted;
+				}
+			} catch (Throwable) {
+				// Keep original value when it cannot be parsed as datetime.
+			}
+		}
+
+		$value = $original;
 	}
 
 	if (is_bool($value)) {
