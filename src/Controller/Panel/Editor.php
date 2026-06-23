@@ -12,6 +12,8 @@ use Cosray\Collection as CmsCollection;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Types;
+use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionUrls;
 
 final class Editor extends Panel
 {
@@ -87,17 +89,7 @@ final class Editor extends Panel
 		return $handles;
 	}
 
-	/**
-	 * @return array{
-	 *     q: string,
-	 *     offset: int,
-	 *     limit: int,
-	 *     sort: string,
-	 *     dir: string,
-	 *     parent: ?string,
-	 * }
-	 */
-	private function queryState(): array
+	private function queryState(): CollectionQuery
 	{
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
@@ -109,33 +101,23 @@ final class Editor extends Panel
 
 		$parent = $this->stringParam('parent');
 
-		return [
-			'q' => $this->stringParam('q'),
-			'offset' => $offset,
-			'limit' => $limit,
-			'sort' => $this->stringParam('sort'),
-			'dir' => $dir,
-			'parent' => $parent === '' ? null : $parent,
-		];
+		return new CollectionQuery(
+			q: $this->stringParam('q'),
+			sort: $this->stringParam('sort'),
+			dir: $dir,
+			offset: $offset,
+			limit: $limit,
+			parent: $parent === '' ? null : $parent,
+		);
 	}
 
-	/**
-	 * @param array{
-	 *     q: string,
-	 *     offset: int,
-	 *     limit: int,
-	 *     sort: string,
-	 *     dir: string,
-	 *     parent: ?string,
-	 * } $query
-	 */
 	private function editorContext(
 		string $mode,
 		string $name,
 		string $collection,
 		?string $node,
 		?string $type,
-		array $query,
+		CollectionQuery $query,
 	): array {
 		return $this->context([
 			'mode' => $mode,
@@ -143,11 +125,12 @@ final class Editor extends Panel
 			'slug' => $collection,
 			'nodeUid' => $node,
 			'type' => $type,
-			'parent' => $query['parent'],
+			'parent' => $query->parent,
 			'queryState' => $query,
+			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
+			'legacyLinks' => new CollectionUrls(self::LEGACY_PANEL_PATH, $collection, $query),
 			'legacyApiBase' => self::LEGACY_PANEL_PATH . '/api',
 			'legacyBootUrl' => self::LEGACY_PANEL_PATH . '/boot',
-			'legacyPanelPath' => self::LEGACY_PANEL_PATH,
 			'editorAssets' => $this->editorAssets(),
 		]);
 	}

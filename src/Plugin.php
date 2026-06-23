@@ -19,6 +19,9 @@ use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Panel\CollectionPage;
+use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionUrls;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
 
@@ -247,6 +250,7 @@ class Plugin implements CorePlugin
 		$this->renderer('panel', BoilerRenderer::class)->args(
 			dirs: "{$root}/panel/views",
 			autoescape: true,
+			trusted: [CollectionPage::class, CollectionQuery::class, CollectionUrls::class],
 		);
 	}
 

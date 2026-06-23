@@ -60,13 +60,30 @@ final class ColumnTest extends TestCase
 		$this->assertInstanceOf(Column::class, $column);
 	}
 
+	public function testFluentSortSetter(): void
+	{
+		$column = Column::new('Title', 'title')
+			->sort('title');
+
+		$this->assertSame('title', $column->sortKey());
+	}
+
+	public function testEmptySortDisablesSorting(): void
+	{
+		$column = Column::new('Title', 'title')
+			->sort('');
+
+		$this->assertNull($column->sortKey());
+	}
+
 	public function testChainedFluentSetters(): void
 	{
 		$column = Column::new('Title', 'title')
 			->bold(true)
 			->italic(true)
 			->badge(true)
-			->date(true);
+			->date(true)
+			->sort('title');
 
 		$this->assertInstanceOf(Column::class, $column);
 	}

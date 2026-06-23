@@ -26,8 +26,7 @@ abstract class Panel
 	protected function context(array $data = []): array
 	{
 		$panelPath = $this->panelPath();
-		$locale = $this->request->get('locale', null);
-		$localeId = $locale instanceof Locale ? $locale->id : 'en';
+		$localeId = $this->localeId();
 
 		return array_merge([
 			'debug' => $this->config->debug(),
@@ -49,6 +48,13 @@ abstract class Panel
 	protected function panelPath(): string
 	{
 		return $this->config->panel->path;
+	}
+
+	protected function localeId(): string
+	{
+		$locale = $this->request->get('locale', null);
+
+		return $locale instanceof Locale ? $locale->id : 'en';
 	}
 
 	private function stylesheets(string $panelPath): array

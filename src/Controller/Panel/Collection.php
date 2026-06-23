@@ -12,6 +12,9 @@ use Cosray\Collection as CmsCollection;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Types;
+use Cosray\Panel\CollectionPage;
+use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionUrls;
 
 final class Collection extends Panel
 {
@@ -61,24 +64,28 @@ final class Collection extends Panel
 			parent: $parent === '' ? null : $parent,
 		);
 
+		$query = new CollectionQuery(
+			q: $listing['q'],
+			sort: $listing['sort'],
+			dir: $listing['dir'],
+			offset: $listing['offset'],
+			limit: $listing['limit'],
+			parent: $parent === '' ? null : $parent,
+		);
+		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
+
 		return $this->context([
-			'name' => $ref->meta->label,
-			'slug' => $collection,
-			'header' => $obj->header(),
-			'showPublished' => $obj->listMeta->showPublished,
-			'showHidden' => $obj->listMeta->showHidden,
-			'showLocked' => $obj->listMeta->showLocked,
-			'showChildren' => $obj->listMeta->showChildren,
-			'total' => $listing['total'],
-			'offset' => $listing['offset'],
-			'limit' => $listing['limit'],
-			'q' => $listing['q'],
-			'sort' => $listing['sort'],
-			'dir' => $listing['dir'],
-			'sorts' => array_keys($sorts),
-			'parent' => $parent === '' ? null : $parent,
-			'nodes' => $listing['nodes'],
-			'blueprints' => $this->blueprints($obj),
+			'page' => CollectionPage::from(
+				name: $ref->meta->label,
+				urls: $urls,
+				columns: $obj->columns(),
+				sortKeys: array_keys($sorts),
+				blueprints: $this->blueprints($obj),
+				nodes: $listing['nodes'],
+				total: $listing['total'],
+				meta: $obj->listMeta,
+				locale: $this->localeId(),
+			),
 		]);
 	}
 

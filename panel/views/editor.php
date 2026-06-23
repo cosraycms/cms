@@ -13,19 +13,7 @@ $nodeUid = trim((string) $nodeUid);
 $nodeUid = $nodeUid === '' ? null : $nodeUid;
 $type = trim((string) $type);
 $type = $type === '' ? null : $type;
-$parent = trim((string) $parent);
-$parent = $parent === '' ? null : $parent;
-$queryState = $queryState instanceof Traversable
-	? iterator_to_array($queryState)
-	: (array) $queryState;
-$queryState = [
-	'q' => (string) ($queryState['q'] ?? ''),
-	'sort' => (string) ($queryState['sort'] ?? ''),
-	'dir' => (string) ($queryState['dir'] ?? ''),
-	'offset' => (int) (string) ($queryState['offset'] ?? 0),
-	'limit' => (int) (string) ($queryState['limit'] ?? 50),
-	'parent' => $parent,
-];
+$parent = $queryState->parent;
 $editorAssets = $editorAssets instanceof Traversable
 	? iterator_to_array($editorAssets)
 	: (array) $editorAssets;
@@ -38,49 +26,27 @@ $editorAssets = trim((string) ($editorAssets['js'] ?? '')) === ''
 			: (string) $editorAssets['css'],
 	];
 $panelPath = (string) $panelPath;
-$legacyPanelPath = (string) $legacyPanelPath;
 $legacyApiBase = (string) $legacyApiBase;
 $legacyBootUrl = (string) $legacyBootUrl;
-$collectionPath = $panelPath . '/collection/' . rawurlencode($slug);
-$legacyCollectionPath = $legacyPanelPath . '/collection/' . rawurlencode($slug);
 
-$queryUrl = static function (string $path, array $query): string {
-	$params = array_filter(
-		$query,
-		static fn(mixed $value): bool => $value !== null && $value !== '',
-	);
-
-	if (($params['offset'] ?? null) === 0) {
-		unset($params['offset']);
-	}
-
-	if (($params['limit'] ?? null) === 50) {
-		unset($params['limit']);
-	}
-
-	$queryString = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-
-	return $queryString === '' ? $path : $path . '?' . $queryString;
-};
-
-$backUrl = $queryUrl($collectionPath, $queryState);
+$backUrl = $links->back();
 if ($nodeUid !== null) {
-	$legacyUrl = $queryUrl($legacyCollectionPath . '/' . rawurlencode($nodeUid), $queryState);
+	$legacyUrl = $legacyLinks->edit($nodeUid);
 } elseif ($type !== null) {
-	$legacyUrl = $queryUrl($legacyCollectionPath . '/create/' . rawurlencode($type), $queryState);
+	$legacyUrl = $legacyLinks->create($type);
 } else {
-	$legacyUrl = $legacyCollectionPath;
+	$legacyUrl = $legacyLinks->collection();
 }
 $bootstrap = [
 	'mode' => $mode,
 	'collection' => [
 		'name' => $name,
 		'slug' => $slug,
-		'q' => (string) ($queryState['q'] ?? ''),
-		'offset' => (int) ($queryState['offset'] ?? 0),
-		'limit' => (int) ($queryState['limit'] ?? 50),
-		'sort' => (string) ($queryState['sort'] ?? ''),
-		'dir' => (string) ($queryState['dir'] ?? ''),
+		'q' => $queryState->q,
+		'offset' => $queryState->offset,
+		'limit' => $queryState->limit,
+		'sort' => $queryState->sort,
+		'dir' => $queryState->dir,
 	],
 	'node' => $nodeUid,
 	'type' => $type,

@@ -74,11 +74,11 @@ abstract class Collection implements NavigationItem
 	public function columns(): array
 	{
 		return [
-			Column::new('Titel', 'title')->bold(true),
-			Column::new('Seitentyp', 'meta.name'),
-			Column::new('Editor', 'meta.editor'),
-			Column::new('Bearbeitet', 'meta.changed')->date(true),
-			Column::new('Erstellt', 'meta.created')->date(true),
+			Column::new('Titel', 'title')->bold(true)->sort('title'),
+			Column::new('Seitentyp', 'meta.name')->sort('type'),
+			Column::new('Editor', 'meta.editor')->sort('editor'),
+			Column::new('Bearbeitet', 'meta.changed')->date(true)->sort('changed'),
+			Column::new('Erstellt', 'meta.created')->date(true)->sort('created'),
 		];
 	}
 

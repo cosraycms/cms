@@ -13,7 +13,8 @@ final class Column
 	private bool|Closure $bold = false;
 	private bool|Closure $italic = false;
 	private bool|Closure $badge = false;
-	private bool $date = false;
+	private bool|Closure $date = false;
+	private ?string $sort = null;
 	private string|Closure $color = '';
 
 	public function __construct(
@@ -54,6 +55,19 @@ final class Column
 		$this->date = $date;
 
 		return $this;
+	}
+
+	public function sort(?string $sort): self
+	{
+		$sort = trim((string) $sort);
+		$this->sort = $sort === '' ? null : $sort;
+
+		return $this;
+	}
+
+	public function sortKey(): ?string
+	{
+		return $this->sort;
 	}
 
 	public function get(Node $node): array
