@@ -164,7 +164,7 @@
 			<div class="entries-add">
 				{#each field.entryTypes as entryType (entryType.type)}
 					<Button variant="secondary" onclick={() => addEntry(entryType)}>
-						<span class="cms-button-icon">
+						<span class="icon">
 							<IcoCirclePlus />
 						</span>
 						{addLabel(entryType, false)}
@@ -175,7 +175,7 @@
 			<div class="entries-empty">
 				{#each field.entryTypes as entryType (entryType.type)}
 					<Button variant="secondary" onclick={() => addEntry(entryType)}>
-						<span class="cms-button-icon">
+						<span class="icon">
 							<IcoCirclePlus />
 						</span>
 						{addLabel(entryType, true)}

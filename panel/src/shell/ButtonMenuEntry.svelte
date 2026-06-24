@@ -9,6 +9,6 @@
 	let { children, ...attributes }: Props & HTMLButtonAttributes = $props();
 </script>
 
-<button class="cms-button-menu-entry" role="menuitem" tabindex="-1" {...attributes}>
+<button class="entry" role="menuitem" tabindex="-1" {...attributes}>
 	{@render children()}
 </button>

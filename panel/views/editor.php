@@ -60,7 +60,7 @@ $runtimeJson = json_encode([
 <div id="main" class="page editor-page">
 	<header class="topbar topbar-editor">
 		<div class="content">
-			<a class="cms-button cms-button-secondary" href="<?= escape($backUrl) ?>" hx-target="#main">Back to list</a>
+			<a class="cms-button secondary" href="<?= escape($backUrl) ?>" hx-target="#main">Back to list</a>
 			<h1><?= escape($name) ?></h1>
 		</div>
 	</header>
@@ -87,7 +87,7 @@ $runtimeJson = json_encode([
 				<h2>Panel bundle missing</h2>
 				<p>Build the hybrid panel before using the new panel editor.</p>
 				<code>cd panel &amp;&amp; pnpm run build</code>
-				<a class="cms-button cms-button-secondary" href="<?= escape($legacyUrl) ?>" hx-boost="false">
+				<a class="cms-button secondary" href="<?= escape($legacyUrl) ?>" hx-boost="false">
 					Open legacy editor
 				</a>
 			</div>

@@ -25,15 +25,10 @@
 	}: Props & Omit<HTMLButtonAttributes, 'children'> = $props();
 </script>
 
-<button
-	class="cms-button cms-button-{variant} {small ? 'cms-button-small' : ''} {cls}"
-	{type}
-	{...attributes}
-	{disabled}
->
+<button class="cms-button {variant} {small ? 'small' : ''} {cls}" {type} {...attributes} {disabled}>
 	{#if icon}
 		{@const Icon = icon}
-		<span class="cms-button-icon">
+		<span class="icon">
 			<Icon />
 		</span>
 	{/if}
