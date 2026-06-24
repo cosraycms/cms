@@ -23,10 +23,10 @@
 </ModalBody>
 <ModalFooter>
 	<div class="controls">
-		<Button class="danger" onclick={proceed}>
+		<Button variant="danger" onclick={proceed}>
 			{_('Ja, Eintrag löschen')}
 		</Button>
-		<Button class="secondary" onclick={close}>
+		<Button variant="secondary" onclick={close}>
 			{_('Nein, Eintrag nicht löschen')}
 		</Button>
 	</div>

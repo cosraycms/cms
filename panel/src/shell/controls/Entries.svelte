@@ -163,7 +163,7 @@
 			</div>
 			<div class="entries-add">
 				{#each field.entryTypes as entryType (entryType.type)}
-					<Button class="secondary" onclick={() => addEntry(entryType)}>
+					<Button variant="secondary" onclick={() => addEntry(entryType)}>
 						<span class="cms-button-icon">
 							<IcoCirclePlus />
 						</span>
@@ -174,7 +174,7 @@
 		{:else}
 			<div class="entries-empty">
 				{#each field.entryTypes as entryType (entryType.type)}
-					<Button class="secondary" onclick={() => addEntry(entryType)}>
+					<Button variant="secondary" onclick={() => addEntry(entryType)}>
 						<span class="cms-button-icon">
 							<IcoCirclePlus />
 						</span>

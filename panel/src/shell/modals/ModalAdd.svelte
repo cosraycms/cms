@@ -50,14 +50,14 @@
 </ModalBody>
 <ModalFooter>
 	<div class="controls">
-		<Button class="danger" onclick={close}>
+		<Button variant="danger" onclick={close}>
 			{_('Abbrechen')}
 		</Button>
-		<Button class="primary" onclick={addContent(true)} {disabled}>
+		<Button variant="primary" onclick={addContent(true)} {disabled}>
 			{index === null ? _('Einfügen') : _('Davor einfügen')}
 		</Button>
 		{#if index !== null}
-			<Button class="primary" onclick={addContent(false)} {disabled}>
+			<Button variant="primary" onclick={addContent(false)} {disabled}>
 				{_('Danach einfügen')}
 			</Button>
 		{/if}

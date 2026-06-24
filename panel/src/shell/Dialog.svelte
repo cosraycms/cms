@@ -20,7 +20,7 @@
 		{body}
 	</div>
 	<div class="controls">
-		<Button class="secondary" onclick={close}>
+		<Button variant="secondary" onclick={close}>
 			{_('OK')}
 		</Button>
 	</div>

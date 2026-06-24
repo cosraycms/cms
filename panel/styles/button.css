@@ -1,7 +1,4 @@
-.cms-button,
-button.primary,
-button.secondary,
-button.danger {
+.cms-button {
 	--button-bg: var(--button-primary-bg);
 	--button-text: var(--button-primary-text);
 	--button-border: var(--button-primary-border);
@@ -44,32 +41,18 @@ button.danger {
 	flex: 0 0 auto;
 }
 
-.cms-button:focus-visible,
-button.primary:focus-visible,
-button.secondary:focus-visible,
-button.danger:focus-visible {
-	outline: 2px solid transparent;
+.cms-button:focus-visible {
+	outline: 2px solid var(--button-ring);
 	outline-offset: 2px;
 }
 
-.cms-button:hover,
-button.primary:hover,
-button.secondary:hover,
-button.danger:hover {
+.cms-button:hover {
 	border-color: var(--button-hover-border);
 	background-color: var(--button-hover-bg);
 	color: var(--button-hover-text);
 }
 
-.cms-button:focus-visible,
-button.primary:focus-visible,
-button.secondary:focus-visible,
-button.danger:focus-visible {
-	outline-color: var(--button-ring);
-}
-
-.cms-button-primary,
-.primary {
+.cms-button-primary {
 	--button-bg: var(--button-primary-bg);
 	--button-text: var(--button-primary-text);
 	--button-border: var(--button-primary-border);
@@ -79,8 +62,7 @@ button.danger:focus-visible {
 	--button-ring: var(--button-primary-ring);
 }
 
-.cms-button-secondary,
-.secondary {
+.cms-button-secondary {
 	--button-bg: var(--button-secondary-bg);
 	--button-text: var(--button-secondary-text);
 	--button-border: var(--button-secondary-border);
@@ -90,8 +72,7 @@ button.danger:focus-visible {
 	--button-ring: var(--button-secondary-ring);
 }
 
-.cms-button-danger,
-.danger {
+.cms-button-danger {
 	--button-bg: var(--button-danger-bg);
 	--button-text: var(--button-danger-text);
 	--button-border: var(--button-danger-border);

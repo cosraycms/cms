@@ -17,7 +17,7 @@
 	};
 
 	let {
-		class: cls = 'primary',
+		class: cls = '',
 		variant = 'primary',
 		icon = null,
 		label,

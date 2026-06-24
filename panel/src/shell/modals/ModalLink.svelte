@@ -137,10 +137,10 @@
 </ModalBody>
 <ModalFooter>
 	<div class="controls">
-		<Button class="danger" onclick={close}>
+		<Button variant="danger" onclick={close}>
 			{_('Abbrechen')}
 		</Button>
-		<Button class="primary" onclick={clickAdd} disabled={!value}>
+		<Button variant="primary" onclick={clickAdd} disabled={!value}>
 			{_('Link hinzufügen')}
 		</Button>
 	</div>

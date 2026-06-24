@@ -162,7 +162,7 @@
 		{/each}
 	{:else}
 		<div class="cms-blocks-empty">
-			<Button class="secondary" onclick={openAddModal(null)}>
+			<Button variant="secondary" onclick={openAddModal(null)}>
 				<span class="cms-blocks-empty-icon">
 					<IcoCirclePlus />
 				</span>

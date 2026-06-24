@@ -52,17 +52,22 @@
 	<NavToggle />
 	<div class="controls cms-node-controls">
 		{#if deletable && !locked}
-			<Button class="danger" icon={IcoTrash} onclick={remove}>
+			<Button variant="danger" icon={IcoTrash} onclick={remove}>
 				{_('Löschen')}
 			</Button>
 		{/if}
 		{#if preview}
-			<Button class="secondary" icon={IcoEye} onclick={preview}>
+			<Button variant="secondary" icon={IcoEye} onclick={preview}>
 				{_('Vorschau')}
 			</Button>
 		{/if}
 		{#if !locked}
-			<ButtonMenu class="primary" icon={IcoSave} onclick={() => save(false)} label={_('Speichern')}>
+			<ButtonMenu
+				variant="primary"
+				icon={IcoSave}
+				onclick={() => save(false)}
+				label={_('Speichern')}
+			>
 				{#snippet children(closeMenu)}
 					<ButtonMenuEntry
 						onclick={() => {
