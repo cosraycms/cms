@@ -14,7 +14,7 @@
 		height: 100%;
 		min-height: 0;
 		background: var(--editor-bg);
-		color: var(--color-high);
+		color: var(--color-text);
 		font-family: var(--font-sans);
 	}
 

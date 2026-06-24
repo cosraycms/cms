@@ -12,7 +12,7 @@ html,
 body {
 	margin: 0;
 	padding: 0;
-	color: var(--color-high);
+	color: var(--color-text);
 	line-height: 1.5;
 	text-rendering: optimizeLegibility;
 }
@@ -27,7 +27,7 @@ h6 {
 	font-size: inherit;
 	font-weight: 600;
 	line-height: 1.25;
-	color: var(--color-high);
+	color: var(--color-text);
 }
 
 p,
