@@ -33,11 +33,11 @@ if (!$boosted) {
 
 			<div class="topbar-actions">
 				<?php if ($page->clearSearchUrl !== null): ?>
-					<a class="btn btn-ghost" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main">Clear search</a>
+					<a class="cms-button cms-button-secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main">Clear search</a>
 				<?php endif ?>
 				<?php foreach ($page->createLinks as $link): ?>
 					<a
-						class="btn btn-primary"
+						class="cms-button cms-button-primary"
 						href="<?= escape($link['url']) ?>"
 						hx-target="#main">
 						New <?= escape($link['name']) ?>

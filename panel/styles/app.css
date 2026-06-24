@@ -321,45 +321,6 @@ a {
 	color: var(--color-accent-text);
 }
 
-.btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--space-2);
-	height: 2.5rem;
-	padding: 0 var(--space-4);
-	border-radius: var(--radius-md);
-	font-size: var(--font-size-sm);
-	font-weight: 650;
-	text-decoration: none;
-	white-space: nowrap;
-	transition:
-		background 0.12s ease,
-		border-color 0.12s ease,
-		color 0.12s ease;
-}
-
-.btn-ghost {
-	border: 1px solid var(--color-border-strong);
-	background: var(--color-surface);
-	color: var(--color-text);
-}
-
-.btn-ghost:hover {
-	background: var(--color-hover);
-}
-
-.btn-primary {
-	border: 1px solid var(--color-accent);
-	background: var(--color-accent);
-	color: #fff;
-}
-
-.btn-primary:hover {
-	background: var(--color-accent-hover);
-	border-color: var(--color-accent-hover);
-}
-
 .sr-only {
 	position: absolute;
 	width: 1px;

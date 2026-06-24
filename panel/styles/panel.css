@@ -1,5 +1,6 @@
 @import './tokens.css' layer(tokens);
 @import './reset.css' layer(reset);
 @import './app.css' layer(panel);
+@import './button.css' layer(panel);
 @import './collection.css' layer(panel);
 @import './editor.css' layer(panel);
