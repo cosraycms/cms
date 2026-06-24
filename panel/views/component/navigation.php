@@ -1,10 +1,10 @@
-<aside class="sidebar">
-	<header class="sidebar-header">
+<aside class="cms-sidebar">
+	<header class="header">
 		<?php $this->insert('component/logo') ?>
 	</header>
 
-	<nav class="sidebar-nav" aria-label="Panel navigation">
-		<div class="sidebar-scroll">
+	<nav class="navigation" aria-label="Panel navigation">
+		<div class="scroll">
 			<ul class="nav-list level-0">
 				<li class="nav-item">
 					<a
@@ -21,9 +21,9 @@
 		</div>
 	</nav>
 
-	<footer class="sidebar-footer">
+	<footer class="footer">
 		<form method="post" action="<?= $panelPath ?>/logout" hx-boost="false">
-			<button class="sidebar-action" type="submit">Logout</button>
+			<button class="action" type="submit">Logout</button>
 		</form>
 	</footer>
 </aside>

@@ -9,7 +9,7 @@
 }
 
 .nav-link,
-.sidebar-action {
+.cms-sidebar .action {
 	display: flex;
 	align-items: center;
 	gap: var(--space-3);
@@ -32,7 +32,7 @@
 }
 
 .nav-link:hover,
-.sidebar-action:hover {
+.cms-sidebar .action:hover {
 	background: var(--color-hover);
 	color: var(--color-text);
 }
@@ -107,7 +107,7 @@
 }
 
 @media (max-width: 52rem) {
-	.sidebar-scroll > .nav-list {
+	.cms-sidebar .scroll > .nav-list {
 		display: flex;
 		gap: var(--space-2);
 		white-space: nowrap;

@@ -95,9 +95,9 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('class="panel"', $html);
-		$this->assertStringContainsString('class="sidebar"', $html);
+		$this->assertStringContainsString('class="cms-sidebar"', $html);
 		$this->assertStringContainsString('class="main"', $html);
-		$this->assertStringContainsString('class="sidebar-logo"', $html);
+		$this->assertStringContainsString('class="logo"', $html);
 		$this->assertStringContainsString('action="/cp/logout"', $html);
 		$this->assertStringContainsString('Dashboard', $html);
 	}
