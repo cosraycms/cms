@@ -27,8 +27,8 @@
 	}
 
 	&.active {
-		border-bottom-color: var(--color-success);
-		color: var(--color-success-hover);
+		border-bottom-color: var(--color-accent);
+		color: var(--color-accent);
 	}
 
 	svg + span {
