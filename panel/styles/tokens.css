@@ -13,20 +13,21 @@
 		sans-serif
 	);
 
+	--cms-space: var(--theme-space, 0.25rem);
 	--cms-space-0: 0px;
 	--cms-space-px: 1px;
 	--cms-space-0-5: 0.125rem;
-	--cms-space-1: var(--theme-space-1, 0.25rem);
+	--cms-space-1: var(--theme-space-1, calc(var(--cms-space) * 1));
 	--cms-space-1-5: 0.375rem;
-	--cms-space-2: var(--theme-space-2, 0.5rem);
+	--cms-space-2: var(--theme-space-2, calc(var(--cms-space) * 2));
 	--cms-space-2-5: 0.625rem;
-	--cms-space-3: var(--theme-space-3, 0.75rem);
+	--cms-space-3: var(--theme-space-3, calc(var(--cms-space) * 3));
 	--cms-space-3-5: 0.875rem;
-	--cms-space-4: var(--theme-space-4, 1rem);
-	--cms-space-5: var(--theme-space-5, 1.25rem);
-	--cms-space-6: var(--theme-space-6, 1.5rem);
+	--cms-space-4: var(--theme-space-4, calc(var(--cms-space) * 4));
+	--cms-space-5: var(--theme-space-5, calc(var(--cms-space) * 5));
+	--cms-space-6: var(--theme-space-6, calc(var(--cms-space) * 6));
 	--cms-space-7: 1.75rem;
-	--cms-space-8: var(--theme-space-8, 2rem);
+	--cms-space-8: var(--theme-space-8, calc(var(--cms-space) * 8));
 	--cms-space-9: 2.25rem;
 	--cms-space-10: 2.5rem;
 	--cms-space-11: 2.75rem;
