@@ -142,11 +142,12 @@
 	--color-warning-soft: #fcf0df;
 	--color-danger: #dc4d4d;
 	--color-danger-soft: #fbeaea;
-	--panel-row-height: 3.5rem;
-	--panel-topbar-bg: var(--color-canvas);
-	--panel-sidebar-width: 15.5rem;
-	--panel-sidebar-header-bg: var(--panel-topbar-bg);
-	--panel-sidebar-border-right: 0;
-	--panel-content-max-width: 1600px;
-	--panel-editor-bg: var(--color-canvas);
+
+	--row-height: 3.5rem;
+	--topbar-bg: var(--color-canvas);
+	--sidebar-width: 15.5rem;
+	--sidebar-header-bg: var(--topbar-bg);
+	--sidebar-border-right: 0;
+	--content-max-width: 1600px;
+	--editor-bg: var(--color-canvas);
 }

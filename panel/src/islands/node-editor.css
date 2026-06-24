@@ -13,7 +13,7 @@
 	.cosray-node-editor-island {
 		height: 100%;
 		min-height: 0;
-		background: var(--panel-editor-bg);
+		background: var(--editor-bg);
 		color: var(--color-high);
 		font-family: var(--font-sans);
 	}
