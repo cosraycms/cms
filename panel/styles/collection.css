@@ -32,7 +32,7 @@
 	height: 2.5rem;
 	padding: 0 0.875rem 0 2.5rem;
 	border: 1px solid var(--color-border-strong);
-	border-radius: var(--panel-radius-md);
+	border-radius: var(--radius-md);
 	background: #fbfbfc;
 	color: var(--color-text);
 	font-size: var(--font-size-sm);
@@ -60,7 +60,7 @@
 	min-height: 0;
 	overflow: hidden;
 	border: 1px solid var(--color-border);
-	border-radius: var(--panel-radius-lg);
+	border-radius: var(--radius-lg);
 	background: var(--color-surface);
 	box-shadow: var(--panel-shadow-sm);
 }
@@ -264,7 +264,7 @@ th.is-desc .sort-ind {
 	min-height: 1.875rem;
 	padding: 0 var(--space-3);
 	border: 1px solid var(--color-border-strong);
-	border-radius: var(--panel-radius-sm);
+	border-radius: var(--radius-sm);
 	background: var(--color-surface);
 	color: var(--color-active-text);
 	font-size: var(--font-size-xs);
@@ -351,7 +351,7 @@ th.is-desc .sort-ind {
 	height: 2rem;
 	padding: 0 var(--space-3);
 	border: 1px solid var(--color-border-strong);
-	border-radius: var(--panel-radius-sm);
+	border-radius: var(--radius-sm);
 	background: var(--color-surface);
 	color: var(--color-text);
 	font-size: var(--font-size-xs);

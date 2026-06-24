@@ -89,7 +89,7 @@ a {
 	justify-content: center;
 	width: 2.125rem;
 	height: 2.125rem;
-	border-radius: var(--panel-radius-md);
+	border-radius: var(--radius-md);
 	background: linear-gradient(135deg, var(--color-accent), #5b8cf6);
 	box-shadow: var(--panel-shadow-sm);
 	color: #fff;
@@ -121,7 +121,7 @@ a {
 	width: 100%;
 	min-height: 2.375rem;
 	padding: 0.5625rem 0.6875rem;
-	border-radius: var(--panel-radius-sm);
+	border-radius: var(--radius-sm);
 	color: var(--color-muted);
 	font-weight: 550;
 	text-align: left;
@@ -324,7 +324,7 @@ a {
 	gap: var(--space-2);
 	height: 2.5rem;
 	padding: 0 var(--space-4);
-	border-radius: var(--panel-radius-md);
+	border-radius: var(--radius-md);
 	font-size: var(--font-size-sm);
 	font-weight: 650;
 	text-decoration: none;
