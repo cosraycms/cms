@@ -48,7 +48,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'<style>@layer tokens, reset, panel, plugin, theme;</style>',
 			$html,
 		);
-		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
+		$this->assertStringContainsString('id="main" class="page node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertPanelBuildStateIsRendered($html);
@@ -68,7 +68,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
+		$this->assertStringContainsString('id="main" class="page node"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}

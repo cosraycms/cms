@@ -7,7 +7,7 @@ if (!$boosted) {
 }
 ?>
 
-<div id="main" class="page collection-page">
+<div id="main" class="page collection">
 	<header class="topbar topbar-collection">
 		<div class="content">
 			<form
@@ -57,7 +57,9 @@ if (!$boosted) {
 				</nav>
 			<?php endif ?>
 			<h1><?= escape($page->name) ?></h1>
-			<span class="count-pill"><?= $page->total ?> <?= $page->total === 1 ? 'entry' : 'entries' ?></span>
+			<span class="count-pill"><?= $page->total ?> <?= $page->total === 1
+	? 'entry'
+	: 'entries' ?></span>
 		</div>
 
 		<div class="collection-panel">
@@ -117,7 +119,9 @@ if (!$boosted) {
 									<td class="collection-cell col-status" data-label="Status">
 										<div class="status-list">
 											<?php foreach ($row['status'] as $badge): ?>
-												<span class="status status-<?= escape($badge['kind']) ?>"><?= escape($badge['label']) ?></span>
+												<span class="status status-<?= escape($badge['kind']) ?>"><?= escape(
+												$badge['label'],
+											) ?></span>
 											<?php endforeach ?>
 										</div>
 									</td>

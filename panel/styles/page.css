@@ -4,6 +4,20 @@
 	height: 100%;
 	min-width: 0;
 	min-height: 0;
+
+	&.collection .content,
+	&.node .content {
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	&.collection .content {
+		max-width: var(--collection-max-width);
+	}
+
+	&.node .content {
+		max-width: var(--node-max-width);
+	}
 }
 
 .page-head {

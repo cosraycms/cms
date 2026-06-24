@@ -1,4 +1,4 @@
-.collection-page .topbar {
+.page.collection .topbar {
 	justify-content: space-between;
 }
 
@@ -370,7 +370,7 @@ th.is-desc .sort-ind {
 }
 
 @media (max-width: 52rem) {
-	.collection-page .topbar {
+	.page.collection .topbar {
 		align-items: stretch;
 		height: auto;
 		padding-top: var(--space-3);

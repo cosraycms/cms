@@ -55,7 +55,7 @@ $runtimeJson = json_encode([
 ], $jsonFlags);
 ?>
 
-<div id="main" class="page editor-page">
+<div id="main" class="page node">
 	<section class="content editor-content">
 		<?php if ($editorAvailable): ?>
 			<div

@@ -97,14 +97,17 @@
 			flex: 0 0 auto;
 			border-bottom: 1px solid var(--color-border);
 			background: var(--topbar-bg);
-			padding: 0 var(--space-6);
 		}
 
 		.inner {
 			display: flex;
+			width: 100%;
+			max-width: var(--node-max-width);
 			min-height: 4.25rem;
 			align-items: center;
 			gap: var(--space-4);
+			margin: 0 auto;
+			padding: 0 var(--space-6);
 		}
 
 		.trail {
@@ -121,14 +124,11 @@
 		}
 
 		@media (max-width: 52rem) {
-			.cms-node-topbar {
-				padding: var(--space-3) var(--space-4);
-			}
-
 			.inner {
 				min-height: 0;
 				align-items: flex-start;
 				flex-direction: column;
+				padding: var(--space-3) var(--space-4);
 			}
 
 			.actions {
