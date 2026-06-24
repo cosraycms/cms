@@ -73,7 +73,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringNotContainsString('class="app"', $html);
+		$this->assertStringNotContainsString('class="panel"', $html);
 	}
 
 	public function testCollectionRowsLinkToPanelEditorRoute(): void

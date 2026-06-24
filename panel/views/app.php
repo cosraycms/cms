@@ -1,6 +1,6 @@
 <?php $this->layout('base') ?>
 
-<div class="app">
+<div class="panel">
 	<?php $this->insert('component/navigation') ?>
 
 	<main class="main">
