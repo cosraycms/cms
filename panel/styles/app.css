@@ -91,7 +91,7 @@ a {
 	height: 2.125rem;
 	border-radius: var(--radius-md);
 	background: linear-gradient(135deg, var(--color-accent), #5b8cf6);
-	box-shadow: var(--panel-shadow-sm);
+	box-shadow: var(--shadow-sm);
 	color: #fff;
 	font-weight: 700;
 	letter-spacing: -0.03em;
