@@ -1,18 +1,18 @@
-@import '../styles/tokens.css';
-@import '../styles/base.css';
-@import '../styles/util.css';
-@import '../styles/grid.css';
-@import '../styles/button.css';
-@import '../styles/fields.css';
-@import '../styles/code.css';
-@import '../styles/richtext.css';
-@import '../styles/tabs.css';
-@import '../styles/modal.css';
+@import '../../styles/tokens.css';
+@import '../../styles/base.css';
+@import '../../styles/util.css';
+@import '../../styles/grid.css';
+@import '../../styles/button.css';
+@import '../../styles/fields.css';
+@import '../../styles/code.css';
+@import '../../styles/richtext.css';
+@import '../../styles/tabs.css';
+@import '../../styles/modal.css';
 
 .cosray-node-editor-island {
 	height: 100%;
 	min-height: 0;
-	background: var(--editor-bg);
+	background: var(--cms-panel-editor-bg);
 	color: var(--cms-color-high);
 	font-family: var(--cms-font-sans);
 }
