@@ -8,6 +8,7 @@ use Cosray\CollectionListMeta;
 use Cosray\Column;
 use DateTimeImmutable;
 use DateTimeInterface;
+use DateTimeZone;
 use IntlDateFormatter;
 use Stringable;
 use Throwable;
@@ -63,6 +64,7 @@ final class CollectionPage
 		int $total,
 		CollectionListMeta $meta,
 		string $locale,
+		DateTimeZone $timezone,
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -96,7 +98,7 @@ final class CollectionPage
 			searchFields: self::searchFields($query),
 			createLinks: self::createLinks($blueprints, $urls),
 			headers: $headers,
-			rows: self::rows($nodes, $headers, $blueprints, $urls, $meta, $locale),
+			rows: self::rows($nodes, $headers, $blueprints, $urls, $meta, $locale, $timezone),
 			previousUrl: $query->offset > 0
 				? $urls->collection(['offset' => max(0, $query->offset - $query->limit)])
 				: null,
@@ -184,6 +186,7 @@ final class CollectionPage
 		CollectionUrls $urls,
 		CollectionListMeta $meta,
 		string $locale,
+		DateTimeZone $timezone,
 	): array {
 		$rows = [];
 		$blueprintSlugs = array_column($blueprints, 'slug');
@@ -193,7 +196,7 @@ final class CollectionPage
 			$uid = (string) ($node['uid'] ?? '');
 			$rows[] = [
 				'uid' => $uid,
-				'cells' => self::cells($node, $headers, $urls, $locale),
+				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
 				'status' => self::status($node, $meta),
 				'childLinks' => $meta->showChildren
 					? self::childLinks($node, $blueprintSlugs, $urls)
@@ -214,6 +217,7 @@ final class CollectionPage
 		array $headers,
 		CollectionUrls $urls,
 		string $locale,
+		DateTimeZone $timezone,
 	): array {
 		$cells = [];
 		$uid = (string) ($node['uid'] ?? '');
@@ -241,6 +245,7 @@ final class CollectionPage
 					$column['value'] ?? '',
 					(bool) ($column['date'] ?? false),
 					$locale,
+					$timezone,
 				),
 				'class' => implode(' ', $classes),
 				'editUrl' => $index === 0 && $uid !== '' ? $urls->edit($uid) : null,
@@ -428,18 +433,16 @@ final class CollectionPage
 		return $result;
 	}
 
-	private static function displayValue(mixed $value, bool $date, string $locale): string
-	{
+	private static function displayValue(
+		mixed $value,
+		bool $date,
+		string $locale,
+		DateTimeZone $timezone,
+	): string {
 		if ($date && $value instanceof DateTimeInterface) {
-			$formatter = new IntlDateFormatter(
-				$locale,
-				IntlDateFormatter::MEDIUM,
-				IntlDateFormatter::SHORT,
-				$value->getTimezone(),
-			);
-			$formatted = $formatter->format($value);
+			$formatted = self::formatDate($value, $locale, $timezone);
 
-			if ($formatted !== false) {
+			if ($formatted !== null) {
 				return $formatted;
 			}
 		}
@@ -450,16 +453,13 @@ final class CollectionPage
 
 			if ($value !== '') {
 				try {
-					$datetime = new DateTimeImmutable($value);
-					$formatter = new IntlDateFormatter(
+					$formatted = self::formatDate(
+						new DateTimeImmutable($value, $timezone),
 						$locale,
-						IntlDateFormatter::MEDIUM,
-						IntlDateFormatter::SHORT,
-						$datetime->getTimezone(),
+						$timezone,
 					);
-					$formatted = $formatter->format($datetime);
 
-					if ($formatted !== false) {
+					if ($formatted !== null) {
 						return $formatted;
 					}
 				} catch (Throwable) {
@@ -483,6 +483,22 @@ final class CollectionPage
 		}
 
 		return '';
+	}
+
+	private static function formatDate(
+		DateTimeInterface $value,
+		string $locale,
+		DateTimeZone $timezone,
+	): ?string {
+		$formatter = new IntlDateFormatter(
+			$locale,
+			IntlDateFormatter::MEDIUM,
+			IntlDateFormatter::SHORT,
+			$timezone,
+		);
+		$formatted = $formatter->format($value->getTimestamp());
+
+		return $formatted === false ? null : $formatted;
 	}
 
 	/** @return list<mixed> */

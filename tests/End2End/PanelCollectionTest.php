@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Celemas\Core\App;
 use Cosray\Config;
 use Cosray\Plugin;
 use Cosray\Tests\End2EndTestCase;
@@ -12,6 +13,13 @@ use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 final class PanelCollectionTest extends End2EndTestCase
 {
 	private ?int $articleTypeId = null;
+
+	protected function createApp(array $settings = []): App
+	{
+		return parent::createApp(array_merge([
+			'app.timezone' => 'Europe/Berlin',
+		], $settings));
+	}
 
 	protected function setUp(): void
 	{
@@ -46,7 +54,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
 	}
 
-	public function testPanelCollectionFormatsDateColumnsForCurrentLocale(): void
+	public function testPanelCollectionFormatsDateColumnsForConfiguredTimezone(): void
 	{
 		$this->createArticle('panel-date-de', 'Panel Date DE', '2026-01-01 10:00:00+01');
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [

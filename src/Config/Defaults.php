@@ -37,6 +37,7 @@ final class Defaults
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),
+			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 		];
 	}
 

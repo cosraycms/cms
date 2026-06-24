@@ -22,6 +22,7 @@ namespace Cosray\Config;
  *     'app.debug': bool,
  *     'app.env': string,
  *     'app.secret': ?string,
+ *     'app.timezone': string,
  *
  *     'path.root': string,
  *     'path.public': string,
@@ -76,6 +77,7 @@ namespace Cosray\Config;
  *     'app.debug'?: bool,
  *     'app.env'?: string,
  *     'app.secret'?: null|string,
+ *     'app.timezone'?: string,
  *     'path.root'?: string,
  *     'path.public'?: string,
  *     'path.prefix'?: string,

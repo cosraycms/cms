@@ -200,6 +200,7 @@ $name = $app->config->app->name;
 $panel = $app->config->panel->path;
 $theme = $app->config->panel->theme;
 $session = $app->config->session->options;
+$timezone = $app->config->app->timezone;
 
 $nameByKey = $app->config->get('app.name');
 $debug = $app->config->debug();
@@ -214,6 +215,7 @@ Common built-in settings:
     'app.debug' => env('APP_DEBUG', false),
     'app.env' => env('APP_ENV', ''),
     'app.secret' => env('APP_SECRET', null),
+    'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 
     'path.root' => $root,
     'path.public' => $root . '/public',
@@ -249,6 +251,8 @@ Common built-in settings:
     'error.whoops' => true,
 ]
 ```
+
+The admin panel formats database timestamps with `app.timezone`. Use an IANA identifier such as `Europe/Berlin` for local editor times.
 
 ### Admin panel paths
 

@@ -36,6 +36,7 @@ final class ConfigTest extends TestCase
 			'APP_NAME',
 			'APP_REQUIRED',
 			'APP_SECRET',
+			'APP_TIMEZONE',
 			'CMS_DSN',
 			'DATABASE_URL',
 			'SITE_SESSION_ENABLED',
@@ -90,6 +91,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame(self::root() . '/public', $config->path->public);
 		$this->assertSame('/cp', $config->panel->path);
 		$this->assertNull($config->app->secret);
+		$this->assertSame('UTC', $config->app->timezone->getName());
 		$this->assertSame([], $config->panel->theme);
 		$this->assertFalse($config->session->enabled);
 		$this->assertSame(0, $config->session->options['cookie_lifetime']);
@@ -124,6 +126,7 @@ final class ConfigTest extends TestCase
 			'app.debug' => false,
 			'app.env' => 'production',
 			'app.secret' => 'configured-secret',
+			'app.timezone' => 'Europe/Berlin',
 			'session.enabled' => true,
 		]);
 
@@ -131,6 +134,7 @@ final class ConfigTest extends TestCase
 		$this->assertFalse($config->debug());
 		$this->assertSame('production', $config->env());
 		$this->assertSame('configured-secret', $config->app->secret);
+		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
 	}
 
@@ -154,7 +158,7 @@ final class ConfigTest extends TestCase
 	public function testDotenvIsLoadedFromRoot(): void
 	{
 		$root = $this->rootWithEnv(
-			"APP_NAME=test-cms\nAPP_DEBUG=true\nAPP_ENV=testing\nAPP_REQUIRED=present\nAPP_SECRET=test-secret\nSITE_SESSION_ENABLED=true\n",
+			"APP_NAME=test-cms\nAPP_DEBUG=true\nAPP_ENV=testing\nAPP_REQUIRED=present\nAPP_SECRET=test-secret\nAPP_TIMEZONE=Europe/Berlin\nSITE_SESSION_ENABLED=true\n",
 		);
 		$config = new Config($root);
 
@@ -162,6 +166,7 @@ final class ConfigTest extends TestCase
 		$this->assertTrue($config->debug());
 		$this->assertSame('testing', $config->env());
 		$this->assertSame('test-secret', $config->app->secret);
+		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
 		$this->assertSame('present', $_ENV['APP_REQUIRED']);
 	}

@@ -85,6 +85,7 @@ final class Collection extends Panel
 				total: $listing['total'],
 				meta: $obj->listMeta,
 				locale: $this->localeId(),
+				timezone: $this->config->app->timezone,
 			),
 		]);
 	}

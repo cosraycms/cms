@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Config;
 
+use DateTimeZone;
+
 final class App
 {
+	private ?DateTimeZone $timezoneCache = null;
+
 	public function __construct(
 		private readonly \Cosray\Config $config,
 	) {}
@@ -21,6 +25,10 @@ final class App
 
 	public string $env {
 		get => $this->config->get('app.env');
+	}
+
+	public DateTimeZone $timezone {
+		get => $this->timezoneCache ??= new DateTimeZone($this->config->get('app.timezone'));
 	}
 
 	/** @var ?non-empty-string */
