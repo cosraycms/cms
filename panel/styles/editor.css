@@ -23,7 +23,7 @@
 	justify-content: center;
 	gap: var(--space-4);
 	padding: var(--space-8);
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 }
 
 .editor-fallback h2 {

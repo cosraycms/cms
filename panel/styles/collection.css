@@ -21,7 +21,7 @@
 	top: 50%;
 	left: 0.8125rem;
 	transform: translateY(-50%);
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	font-size: 1rem;
 	line-height: 1;
 	pointer-events: none;
@@ -43,7 +43,7 @@
 }
 
 .search input[type='search']::placeholder {
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 }
 
 .search input[type='search']:focus {
@@ -95,7 +95,7 @@
 	padding: 0.8125rem 1rem;
 	border-bottom: 1px solid var(--color-border);
 	background: #fcfcfd;
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	font-size: 0.71875rem;
 	font-weight: 700;
 	letter-spacing: 0.04em;
@@ -105,7 +105,7 @@
 }
 
 .collection-list th.is-sortable:hover {
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 }
 
 .th-inner {
@@ -154,7 +154,7 @@ th.is-desc .sort-ind {
 
 .collection-cell {
 	min-width: 0;
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 	font-size: var(--font-size-sm);
 }
 
@@ -177,7 +177,7 @@ th.is-desc .sort-ind {
 	padding: 0 var(--space-2);
 	border-radius: 999px;
 	background: #eceef2;
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 	font-size: var(--font-size-xs);
 	font-weight: 650;
 }
@@ -278,7 +278,7 @@ th.is-desc .sort-ind {
 }
 
 .child-muted {
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	font-size: var(--font-size-xs);
 	font-weight: 650;
 }
@@ -289,12 +289,12 @@ th.is-desc .sort-ind {
 	gap: var(--space-2);
 	min-height: 18rem;
 	padding: var(--space-8);
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	text-align: center;
 }
 
 .collection-empty strong {
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 	font-size: var(--font-size-base);
 	font-weight: 700;
 }
@@ -302,7 +302,7 @@ th.is-desc .sort-ind {
 .collection-empty p {
 	max-width: 24rem;
 	margin: 0;
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 }
 
 .empty-icon {
@@ -314,7 +314,7 @@ th.is-desc .sort-ind {
 	border: 1px solid var(--color-border);
 	border-radius: 999px;
 	background: #fcfcfd;
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	font-size: 1.5rem;
 }
 
@@ -332,7 +332,7 @@ th.is-desc .sort-ind {
 
 .fcount,
 .page-status {
-	color: var(--color-muted);
+	color: var(--color-text-muted);
 	font-size: var(--font-size-sm);
 	font-weight: 600;
 }
@@ -365,7 +365,7 @@ th.is-desc .sort-ind {
 
 .page-link.is-disabled {
 	background: transparent;
-	color: var(--color-faint);
+	color: var(--color-text-faint);
 	cursor: default;
 }
 
@@ -419,7 +419,7 @@ th.is-desc .sort-ind {
 	}
 
 	.collection-list td::before {
-		color: var(--color-faint);
+		color: var(--color-text-faint);
 		font-size: var(--font-size-xs);
 		font-weight: 700;
 		letter-spacing: 0.04em;

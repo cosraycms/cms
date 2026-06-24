@@ -132,8 +132,8 @@
 	--color-surface: #ffffff;
 	--color-rail: var(--color-canvas);
 	--color-text: #1c2230;
-	--color-muted: #69707f;
-	--color-faint: #9aa0ad;
+	--color-text-muted: #69707f;
+	--color-text-faint: #9aa0ad;
 	--color-border: #e8eaed;
 	--color-border-strong: #dde0e5;
 	--color-border-soft: #eef0f2;
