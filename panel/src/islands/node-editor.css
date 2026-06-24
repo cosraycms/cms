@@ -1,41 +1,43 @@
-@import '../../styles/tokens.css';
-@import '../../styles/base.css';
-@import '../../styles/util.css';
-@import '../../styles/grid.css';
-@import '../../styles/button.css';
-@import '../../styles/fields.css';
-@import '../../styles/code.css';
-@import '../../styles/richtext.css';
-@import '../../styles/tabs.css';
-@import '../../styles/modal.css';
+@import '../../styles/tokens.css' layer(tokens);
+@import '../../styles/base.css' layer(panel);
+@import '../../styles/util.css' layer(panel);
+@import '../../styles/grid.css' layer(panel);
+@import '../../styles/button.css' layer(panel);
+@import '../../styles/fields.css' layer(panel);
+@import '../../styles/code.css' layer(panel);
+@import '../../styles/richtext.css' layer(panel);
+@import '../../styles/tabs.css' layer(panel);
+@import '../../styles/modal.css' layer(panel);
 
-.cosray-node-editor-island {
-	height: 100%;
-	min-height: 0;
-	background: var(--cms-panel-editor-bg);
-	color: var(--cms-color-high);
-	font-family: var(--cms-font-sans);
-}
+@layer panel {
+	.cosray-node-editor-island {
+		height: 100%;
+		min-height: 0;
+		background: var(--cms-panel-editor-bg);
+		color: var(--cms-color-high);
+		font-family: var(--cms-font-sans);
+	}
 
-.cosray-node-editor-island .cms-node-shell {
-	height: 100%;
-}
+	.cosray-node-editor-island .cms-node-shell {
+		height: 100%;
+	}
 
-.cosray-node-editor-island .cms-nav-toggle {
-	display: none;
-}
+	.cosray-node-editor-island .cms-nav-toggle {
+		display: none;
+	}
 
-.cosray-node-editor-message {
-	display: grid;
-	place-content: center;
-	min-height: 24rem;
-	padding: var(--cms-space-8);
-	color: var(--cms-color-neutral-600);
-	font-family: var(--cms-font-sans);
-	font-weight: 600;
-	text-align: center;
-}
+	.cosray-node-editor-message {
+		display: grid;
+		place-content: center;
+		min-height: 24rem;
+		padding: var(--cms-space-8);
+		color: var(--cms-color-neutral-600);
+		font-family: var(--cms-font-sans);
+		font-weight: 600;
+		text-align: center;
+	}
 
-.cosray-node-editor-message.is-error {
-	color: var(--cms-color-danger-700);
+	.cosray-node-editor-message.is-error {
+		color: var(--cms-color-danger-700);
+	}
 }

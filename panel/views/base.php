@@ -9,6 +9,7 @@ use function Cosray\escape;
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Cosray CMS Panel</title>
+	<style>@layer tokens, reset, panel, plugin, theme;</style>
 <?php foreach ($stylesheets as $stylesheet): ?>
 	<link rel="stylesheet" href="<?= escape((string) $stylesheet) ?>">
 <?php endforeach ?>

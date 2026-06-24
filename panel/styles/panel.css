@@ -1,5 +1,5 @@
-@import './tokens.css';
-@import './reset.css';
-@import './app.css';
-@import './collection.css';
-@import './editor.css';
+@import './tokens.css' layer(tokens);
+@import './reset.css' layer(reset);
+@import './app.css' layer(panel);
+@import './collection.css' layer(panel);
+@import './editor.css' layer(panel);

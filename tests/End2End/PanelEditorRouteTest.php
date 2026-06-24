@@ -44,6 +44,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<!DOCTYPE html>', $html);
+		$this->assertStringContainsString(
+			'<style>@layer tokens, reset, panel, plugin, theme;</style>',
+			$html,
+		);
 		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
 		$this->assertPanelBuildStateIsRendered($html);
 		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
