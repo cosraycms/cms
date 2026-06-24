@@ -267,30 +267,74 @@ return [
 ];
 ```
 
-Test database defaults to host `localhost` and database/user/password `cosray`. Override the host with `COSRAY_DB_HOST` when needed.
+## System requirements
+
+Cosray runs as a PHP application backed by PostgreSQL. Node.js and pnpm are only needed when you develop or rebuild the admin panel assets from source.
+
+### Runtime
+
+- PHP `>=8.5 <9.0`.
+- Composer 2 for installing PHP dependencies.
+- PostgreSQL 12 or newer. CI uses PostgreSQL 17; use 17 for new projects unless you have verified another version.
+- PostgreSQL extensions `btree_gist`, `btree_gin`, and `unaccent`. These are supplied by PostgreSQL contrib packages. The migration role must be allowed to create them, or a database administrator must create them before migrations run.
+- PHP extensions required by `composer.json`: `curl`, `dom`, `gd`, `intl`, `pgsql`, `sodium`, and `xml`.
+- Standard PHP extensions used by Composer or transitive packages, including `fileinfo`, `iconv`, `json`, `openssl`, `pdo`, `phar`, `simplexml`, and `xmlwriter`.
+- A web server or PHP application server that can route requests to the public entrypoint.
+
+Run Composer's platform check after installing dependencies to verify the PHP runtime:
+
+```bash
+composer check-platform-reqs
+```
+
+### Debian/Ubuntu packages
+
+Install Composer from your distribution package manager or from the [official Composer download page](https://getcomposer.org/download/). When you install it manually, use the verified installer command from that page.
+
+For PHP 8.5 on Debian/Ubuntu, enable a package repository that provides PHP 8.5 packages, such as `deb.sury.org`, then install the runtime packages:
+
+```bash
+sudo apt update
+sudo apt install -y \
+	ca-certificates curl git unzip postgresql-client \
+	php8.5-cli php8.5-fpm php8.5-common php8.5-curl \
+    php8.5-gd php8.5-intl php8.5-pgsql php8.5-xml
+```
+
+Install PostgreSQL server and matching contrib packages on the database host when you host PostgreSQL yourself. Install Xdebug only when you need coverage reports:
+
+```bash
+sudo apt install php8.5-xdebug
+```
+
+### macOS packages
+
+With Homebrew, install PHP, Composer, and PostgreSQL:
+
+```bash
+brew install php composer postgresql@17
+```
+
+The Homebrew `php` formula includes the PHP extensions listed above. Run `composer check-platform-reqs` if your shell or PHP-FPM uses another PHP build.
+
+If you use a remote or managed PostgreSQL database, the local PostgreSQL server is optional. Start the Homebrew service when you do use the local server:
+
+```bash
+brew services start postgresql@17
+```
+
+### Panel development
+
+The default SSR/Svelte panel in `panel/` requires Node.js `>=20.20.0` and pnpm `>=11 <12` when you build it from source. The legacy SvelteKit panel in `ui/` has its own development requirement of Node.js `>=26 <27` and pnpm `>=11 <12`.
+
+### Local test database
+
+Test commands default to host `localhost` and database/user/password `cosray`. Override the connection with `COSRAY_DB_HOST`, `COSRAY_DB_NAME`, `COSRAY_DB_USER`, and `COSRAY_DB_PASSWORD` when needed.
 
 ```bash
 sudo -u postgres createuser --pwprompt --createdb cosray
 createdb --user cosray --owner cosray cosray
-COSRAY_DB_HOST=<your-hostname> ./run migrate --apply
-```
-
-System Requirements:
-
-```bash
-apt install php8.5 php8.5-pgsql php8.5-gd php8.5-xml php8.5-intl php8.5-curl
-```
-
-For development
-
-```bash
-apt install php8.5 php8.5-xdebug
-```
-
-macOS/homebrew:
-
-```bash
-brew install php php-intl
+php ./run db:migrations --apply
 ```
 
 ## License
