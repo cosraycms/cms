@@ -59,7 +59,7 @@
 		.cms-headline-dirty-indicator {
 			margin-left: var(--space-4);
 			border-radius: var(--radius-full);
-			background-color: var(--color-danger-700);
+			background-color: var(--color-rose-700);
 			padding: var(--space-px) var(--space-2);
 			font-size: var(--font-size-sm);
 			line-height: 1.25rem;

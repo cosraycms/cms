@@ -88,15 +88,15 @@
 		}
 
 		.toast-success {
-			background-color: var(--color-success-600);
+			background-color: var(--color-emerald-600);
 		}
 
 		.toast-error {
-			background-color: var(--color-danger-700);
+			background-color: var(--color-rose-700);
 		}
 
 		.toast-warning {
-			background-color: var(--color-warning-700);
+			background-color: var(--color-orange-700);
 		}
 
 		.cms-toast-close-icon {

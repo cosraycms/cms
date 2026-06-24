@@ -74,13 +74,13 @@
 		}
 
 		:global(.cms-modal-add-type) {
-			border: 1px solid var(--color-info-700);
+			border: 1px solid var(--color-sky-700);
 			background-color: var(--color-white);
-			color: var(--color-info-700);
+			color: var(--color-sky-700);
 		}
 
 		:global(.cms-modal-add-type.is-selected) {
-			background-color: var(--color-info-700);
+			background-color: var(--color-sky-700);
 			color: var(--color-white);
 		}
 	}

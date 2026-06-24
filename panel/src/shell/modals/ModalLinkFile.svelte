@@ -39,24 +39,24 @@
 			width: 100%;
 			align-items: center;
 			gap: var(--space-1-5);
-			border: 1px solid var(--color-success-600);
+			border: 1px solid var(--color-emerald-600);
 			border-radius: var(--radius-md);
 			padding: var(--space-2) var(--space-3);
 			font-size: var(--font-size-sm);
 			font-weight: 600;
-			color: var(--color-success-600);
+			color: var(--color-emerald-600);
 			background: transparent;
 			box-shadow: var(--shadow-sm);
 			cursor: pointer;
 		}
 
 		button.cms-modal-link-file-button:focus-visible {
-			outline: 2px solid var(--color-success-600);
+			outline: 2px solid var(--color-emerald-600);
 			outline-offset: 2px;
 		}
 
 		button.active {
-			background-color: var(--color-success-600);
+			background-color: var(--color-emerald-600);
 			color: var(--color-white);
 		}
 	}

@@ -116,11 +116,11 @@
 		}
 
 		.remove {
-			color: var(--color-warning-700);
+			color: var(--color-orange-700);
 		}
 
 		.add {
-			color: var(--color-info-700);
+			color: var(--color-sky-700);
 		}
 	}
 </style>

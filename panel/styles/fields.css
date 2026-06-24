@@ -92,10 +92,10 @@ input[type='time']:focus,
 input[type='password']:focus,
 textarea:focus,
 select:focus {
-	border-color: var(--color-info-700);
+	border-color: var(--color-sky-700);
 	box-shadow:
-		0 0 0 1px var(--color-info-700) inset,
-		0 0 0 2px color-mix(in srgb, var(--color-info-700) 25%, transparent);
+		0 0 0 1px var(--color-sky-700) inset,
+		0 0 0 2px color-mix(in srgb, var(--color-sky-700) 25%, transparent);
 }
 
 .cms-input[disabled],
@@ -126,7 +126,7 @@ input[type='radio'] {
 	width: 1rem;
 	height: 1rem;
 	border: var(--border);
-	accent-color: var(--color-success-600);
+	accent-color: var(--color-emerald-600);
 }
 
 .cms-checkbox-label {
@@ -136,7 +136,7 @@ input[type='radio'] {
 }
 
 .cms-switch {
-	accent-color: var(--color-success-600);
+	accent-color: var(--color-emerald-600);
 }
 
 .required label.dragdrop,
@@ -148,7 +148,7 @@ input[required],
 select[required],
 textarea[required] {
 	border-left-width: 4px;
-	border-left-color: var(--color-danger-700);
+	border-left-color: var(--color-rose-700);
 	border-left-style: solid;
 }
 
@@ -158,7 +158,7 @@ textarea[required] {
 .cms-input[aria-invalid='true'],
 .cms-select[aria-invalid='true'],
 .cms-textarea[aria-invalid='true'] {
-	border-color: var(--color-danger-700);
+	border-color: var(--color-rose-700);
 }
 
 .cms-field[data-disabled='true'] .cms-input,
@@ -181,7 +181,7 @@ textarea[required] {
 	padding-top: var(--space-1);
 	padding-left: var(--space-px);
 	font-size: var(--font-size-sm);
-	color: var(--color-danger-700);
+	color: var(--color-rose-700);
 }
 
 .setting {

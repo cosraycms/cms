@@ -60,7 +60,7 @@
 		}
 
 		.cms-toggle.is-on {
-			background-color: var(--color-success-600);
+			background-color: var(--color-emerald-600);
 		}
 
 		.cms-toggle-knob {
@@ -101,7 +101,7 @@
 		}
 
 		.cms-toggle-on {
-			color: var(--color-success-600);
+			color: var(--color-emerald-600);
 		}
 
 		.cms-toggle-icon-svg {

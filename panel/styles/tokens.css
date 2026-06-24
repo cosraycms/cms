@@ -96,11 +96,11 @@
 	--color-neutral-800: #2a2524;
 	--color-neutral-900: #1b1917;
 
-	--color-danger-700: #be123c;
-	--color-info-700: #0369a1;
-	--color-success-100: #d1fae5;
-	--color-success-600: #059669;
-	--color-warning-700: #c2410c;
+	--color-rose-700: #be123c;
+	--color-sky-700: #0369a1;
+	--color-emerald-100: #d1fae5;
+	--color-emerald-600: #059669;
+	--color-orange-700: #c2410c;
 
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 	--shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);

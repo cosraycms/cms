@@ -123,7 +123,7 @@
 			cursor: pointer;
 
 			&:hover {
-				color: var(--color-info-700);
+				color: var(--color-sky-700);
 			}
 		}
 
@@ -149,7 +149,7 @@
 
 		.entry-field-note {
 			padding: 0.75rem;
-			color: var(--color-danger-700);
+			color: var(--color-rose-700);
 		}
 	}
 </style>

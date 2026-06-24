@@ -106,7 +106,7 @@
 		}
 
 		.remove {
-			color: var(--color-warning-700);
+			color: var(--color-orange-700);
 		}
 
 		.collapse-btn {

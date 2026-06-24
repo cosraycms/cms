@@ -312,7 +312,7 @@
 
 			&.required .dragdrop {
 				border-left-width: 4px;
-				border-left-color: var(--color-danger-700);
+				border-left-color: var(--color-rose-700);
 				border-left-style: solid;
 			}
 		}
@@ -338,8 +338,8 @@
 		}
 
 		.dragdrop.dragging {
-			border-color: var(--color-info-700);
-			background-color: color-mix(in srgb, var(--color-info-700) 10%, var(--color-neutral-100));
+			border-color: var(--color-sky-700);
+			background-color: color-mix(in srgb, var(--color-sky-700) 10%, var(--color-neutral-100));
 		}
 
 		.upload-drop-label {
@@ -376,7 +376,7 @@
 			margin-bottom: var(--space-2);
 		}
 		:global(.dragdrop > .upload-drop-label u) {
-			color: var(--color-info-700);
+			color: var(--color-sky-700);
 		}
 
 		.dragdrop > div.file-extensions {

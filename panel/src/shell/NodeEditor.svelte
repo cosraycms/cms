@@ -207,14 +207,14 @@
 		.cms-preview-close {
 			border: none;
 			border-radius: var(--radius);
-			background-color: var(--color-danger-700);
+			background-color: var(--color-rose-700);
 			padding: var(--space-1) var(--space-4);
 			color: var(--color-white);
 			cursor: pointer;
 		}
 
 		.cms-preview-close:hover {
-			background-color: color-mix(in srgb, var(--color-danger-700) 86%, black);
+			background-color: color-mix(in srgb, var(--color-rose-700) 86%, black);
 		}
 	}
 </style>

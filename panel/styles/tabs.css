@@ -27,8 +27,8 @@
 	}
 
 	&.active {
-		border-bottom-color: var(--color-success-600);
-		color: color-mix(in srgb, var(--color-success-600) 75%, black);
+		border-bottom-color: var(--color-emerald-600);
+		color: color-mix(in srgb, var(--color-emerald-600) 75%, black);
 	}
 
 	svg + span {

@@ -109,39 +109,39 @@
 		}
 
 		.cms-message-success {
-			background-color: color-mix(in srgb, var(--color-success-100) 85%, white);
-			border-left-color: color-mix(in srgb, var(--color-success-600) 70%, white);
+			background-color: color-mix(in srgb, var(--color-emerald-100) 85%, white);
+			border-left-color: color-mix(in srgb, var(--color-emerald-600) 70%, white);
 		}
 
 		.cms-message-info {
-			background-color: color-mix(in srgb, var(--color-info-700) 8%, white);
-			border-left-color: color-mix(in srgb, var(--color-info-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-sky-700) 8%, white);
+			border-left-color: color-mix(in srgb, var(--color-sky-700) 45%, white);
 		}
 
 		.cms-message-warning {
-			background-color: color-mix(in srgb, var(--color-warning-700) 10%, white);
-			border-left-color: color-mix(in srgb, var(--color-warning-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-orange-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--color-orange-700) 45%, white);
 		}
 
 		.cms-message-error {
-			background-color: color-mix(in srgb, var(--color-danger-700) 10%, white);
-			border-left-color: color-mix(in srgb, var(--color-danger-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-rose-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--color-rose-700) 45%, white);
 		}
 
 		.cms-message-text-success {
-			color: var(--color-success-600);
+			color: var(--color-emerald-600);
 		}
 
 		.cms-message-text-info {
-			color: var(--color-info-700);
+			color: var(--color-sky-700);
 		}
 
 		.cms-message-text-warning {
-			color: var(--color-warning-700);
+			color: var(--color-orange-700);
 		}
 
 		.cms-message-text-error {
-			color: var(--color-danger-700);
+			color: var(--color-rose-700);
 		}
 
 		:global(.message em) {
