@@ -28,7 +28,7 @@
 
 	&.active {
 		border-bottom-color: var(--color-success);
-		color: color-mix(in srgb, var(--color-success) 75%, black);
+		color: var(--color-success-hover);
 	}
 
 	svg + span {

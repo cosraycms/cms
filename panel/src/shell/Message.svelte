@@ -109,23 +109,23 @@
 		}
 
 		.cms-message-success {
-			background-color: color-mix(in srgb, var(--color-success-soft) 85%, white);
-			border-left-color: color-mix(in srgb, var(--color-success) 70%, white);
+			background-color: var(--color-success-surface);
+			border-left-color: var(--color-success);
 		}
 
 		.cms-message-info {
-			background-color: color-mix(in srgb, var(--color-info) 8%, white);
-			border-left-color: color-mix(in srgb, var(--color-info) 45%, white);
+			background-color: var(--color-info-surface);
+			border-left-color: var(--color-info);
 		}
 
 		.cms-message-warning {
-			background-color: color-mix(in srgb, var(--color-warning) 10%, white);
-			border-left-color: color-mix(in srgb, var(--color-warning) 45%, white);
+			background-color: var(--color-warning-surface);
+			border-left-color: var(--color-warning);
 		}
 
 		.cms-message-error {
-			background-color: color-mix(in srgb, var(--color-danger) 10%, white);
-			border-left-color: color-mix(in srgb, var(--color-danger) 45%, white);
+			background-color: var(--color-danger-surface);
+			border-left-color: var(--color-danger);
 		}
 
 		.cms-message-text-success {

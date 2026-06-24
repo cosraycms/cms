@@ -36,7 +36,7 @@
 
 			&.active {
 				border-color: var(--color-success);
-				background-color: var(--color-success-soft);
+				background-color: var(--color-success-surface);
 			}
 		}
 	}

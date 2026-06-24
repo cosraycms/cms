@@ -22,7 +22,7 @@
 	width: 1.5rem;
 	height: 1.5rem;
 	border-radius: var(--radius-full);
-	background-color: color-mix(in srgb, var(--color-danger) 80%, black);
+	background-color: var(--color-danger);
 	color: var(--color-white);
 	display: inline-flex;
 	align-items: center;
@@ -139,8 +139,8 @@
 }
 
 .modal .modal-close.close:hover {
-	border-color: color-mix(in srgb, var(--color-danger) 86%, white);
-	background-color: color-mix(in srgb, var(--color-danger) 86%, white);
+	border-color: var(--color-danger-hover);
+	background-color: var(--color-danger-hover);
 }
 
 .modal .modal-close.close::before,

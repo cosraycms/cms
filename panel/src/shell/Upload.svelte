@@ -339,7 +339,7 @@
 
 		.dragdrop.dragging {
 			border-color: var(--color-info);
-			background-color: color-mix(in srgb, var(--color-info) 10%, var(--color-neutral-100));
+			background-color: var(--color-info-surface);
 		}
 
 		.upload-drop-label {

@@ -124,18 +124,24 @@
 	--color-text-faint: #9aa0ad;
 	--color-border: #e8eaed;
 	--color-border-strong: #dde0e5;
-	--color-hover: #f8f9fb;
-	--color-active: #eaf1fe;
-	--color-active-soft: #f3f7ff;
-	--color-active-text: #2459d6;
-	--color-accent: #2f6df0;
-	--color-info: #0369a1;
+	--color-hover: color-mix(in oklch, var(--color-surface), var(--color-canvas) 70%);
+	--color-accent: #0369a1;
+	--color-accent-hover: color-mix(in oklch, var(--color-accent), black 12%);
+	--color-accent-surface: color-mix(in oklch, var(--color-accent), white 90%);
+	--color-accent-ring: color-mix(in oklch, var(--color-accent), transparent 72%);
+	--color-accent-text: color-mix(in oklch, var(--color-accent), black 12%);
+	--color-info: var(--color-accent);
+	--color-info-hover: color-mix(in oklch, var(--color-info), black 12%);
+	--color-info-surface: color-mix(in oklch, var(--color-info), white 90%);
+	--color-info-ring: color-mix(in oklch, var(--color-info), transparent 72%);
 	--color-success: #059669;
-	--color-success-soft: #d1fae5;
+	--color-success-hover: color-mix(in oklch, var(--color-success), black 12%);
+	--color-success-surface: color-mix(in oklch, var(--color-success), white 88%);
 	--color-warning: #c2410c;
-	--color-warning-soft: #fcf0df;
+	--color-warning-surface: color-mix(in oklch, var(--color-warning), white 88%);
 	--color-danger: #be123c;
-	--color-danger-soft: #fbeaea;
+	--color-danger-hover: color-mix(in oklch, var(--color-danger), black 12%);
+	--color-danger-surface: color-mix(in oklch, var(--color-danger), white 90%);
 
 	/**
 	 * Shell tokens

@@ -95,7 +95,7 @@ select:focus {
 	border-color: var(--color-info);
 	box-shadow:
 		0 0 0 1px var(--color-info) inset,
-		0 0 0 2px color-mix(in srgb, var(--color-info) 25%, transparent);
+		0 0 0 2px var(--color-info-ring);
 }
 
 .cms-input[disabled],

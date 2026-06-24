@@ -214,7 +214,7 @@
 		}
 
 		.cms-preview-close:hover {
-			background-color: color-mix(in srgb, var(--color-danger) 86%, black);
+			background-color: var(--color-danger-hover);
 		}
 	}
 </style>
