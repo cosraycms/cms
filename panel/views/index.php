@@ -3,7 +3,7 @@
 use function Cosray\escape;
 
 if (!$boosted) {
-	$this->layout('app');
+	$this->layout('panel');
 }
 ?>
 
