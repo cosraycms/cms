@@ -26,7 +26,7 @@ function readBootstrap(): EditorBootstrap | null {
 	}
 }
 
-function mountEditor(root: ParentNode = document): void {
+export function mountEditor(root: ParentNode = document): void {
 	const target = root.querySelector('[data-cosray-node-editor]');
 
 	if (!(target instanceof HTMLElement) || target.dataset.cosrayNodeEditorMounted === 'true') {
@@ -51,9 +51,3 @@ function mountEditor(root: ParentNode = document): void {
 window.CosrayNodeEditor = {
 	mount: mountEditor,
 };
-
-mountEditor();
-
-for (const eventName of ['htmx:afterSwap', 'htmx:after:swap']) {
-	document.addEventListener(eventName, () => mountEditor());
-}

@@ -14,26 +14,7 @@ $nodeUid = $nodeUid === '' ? null : $nodeUid;
 $type = trim((string) $type);
 $type = $type === '' ? null : $type;
 $parent = $queryState->parent;
-$editorAssets = $editorAssets instanceof Traversable
-	? iterator_to_array($editorAssets)
-	: (array) $editorAssets;
-$editorScripts = $editorAssets['scripts'] ?? [];
-$editorStylesheets = $editorAssets['stylesheets'] ?? [];
-$editorScripts = $editorScripts instanceof Traversable
-	? iterator_to_array($editorScripts)
-	: (array) $editorScripts;
-$editorStylesheets = $editorStylesheets instanceof Traversable
-	? iterator_to_array($editorStylesheets)
-	: (array) $editorStylesheets;
-$editorScripts = array_values(array_filter(
-	array_map(static fn(mixed $script): string => trim((string) $script), $editorScripts),
-	static fn(string $script): bool => $script !== '',
-));
-$editorStylesheets = array_values(array_filter(
-	array_map(static fn(mixed $stylesheet): string => trim((string) $stylesheet), $editorStylesheets),
-	static fn(string $stylesheet): bool => $stylesheet !== '',
-));
-$hasEditorAssets = $editorScripts !== [];
+$editorAvailable = (bool) $editorAvailable;
 $panelPath = (string) $panelPath;
 $legacyApiBase = (string) $legacyApiBase;
 $legacyBootUrl = (string) $legacyBootUrl;
@@ -85,10 +66,7 @@ $runtimeJson = json_encode([
 	</header>
 
 	<section class="content editor-content">
-		<?php if ($hasEditorAssets): ?>
-			<?php foreach ($editorStylesheets as $stylesheet): ?>
-				<link rel="stylesheet" href="<?= escape($stylesheet) ?>">
-			<?php endforeach ?>
+		<?php if ($editorAvailable): ?>
 			<div
 				id="cosray-node-editor"
 				class="editor-host"
@@ -104,13 +82,10 @@ $runtimeJson = json_encode([
 					window.COSRAY_LOGIN_URL = runtime.login;
 				}
 			</script>
-			<?php foreach ($editorScripts as $script): ?>
-				<script type="module" src="<?= escape($script) ?>"></script>
-			<?php endforeach ?>
 		<?php else: ?>
 			<div class="editor-fallback">
-				<h2>Editor bundle missing</h2>
-				<p>Build the Svelte editor island before using the new panel editor.</p>
+				<h2>Panel bundle missing</h2>
+				<p>Build the hybrid panel before using the new panel editor.</p>
 				<code>cd panel &amp;&amp; pnpm run build</code>
 				<a class="btn btn-ghost" href="<?= escape($legacyUrl) ?>" hx-boost="false">
 					Open legacy editor

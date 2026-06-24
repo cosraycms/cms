@@ -1,0 +1,118 @@
+import '../styles/panel.css';
+
+const mainSelector = '#main';
+const editorSelector = '[data-cosray-node-editor]';
+const cleanups: Array<() => void> = [];
+
+let editor: Promise<typeof import('./islands/node-editor')> | null = null;
+
+const currentPath = () => window.location.pathname.replace(/\/$/, '') || '/';
+
+const linkPath = (link: HTMLAnchorElement) => {
+	try {
+		return new URL(link.href, window.location.href).pathname.replace(/\/$/, '') || '/';
+	} catch {
+		return '';
+	}
+};
+
+const isElement = (value: unknown): value is Element => value instanceof Element;
+const canQuery = (value: unknown): value is ParentNode =>
+	typeof (value as ParentNode | null)?.querySelector === 'function';
+
+function listen<K extends keyof DocumentEventMap>(
+	type: K,
+	listener: (event: DocumentEventMap[K]) => void,
+): void {
+	document.addEventListener(type, listener);
+	cleanups.push(() => document.removeEventListener(type, listener));
+}
+
+function updateNavigation(): void {
+	const path = currentPath();
+
+	document.querySelectorAll('.nav-link[aria-current]').forEach((link) => {
+		link.removeAttribute('aria-current');
+	});
+
+	document.querySelectorAll<HTMLAnchorElement>('.nav-link[href]').forEach((link) => {
+		if (linkPath(link) === path) {
+			link.setAttribute('aria-current', 'page');
+		}
+	});
+}
+
+function focusSearch(event: KeyboardEvent): void {
+	if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) {
+		return;
+	}
+
+	const target = event.target;
+
+	if (
+		target instanceof HTMLInputElement ||
+		target instanceof HTMLTextAreaElement ||
+		target instanceof HTMLSelectElement ||
+		(target instanceof HTMLElement && target.isContentEditable)
+	) {
+		return;
+	}
+
+	const search = document.querySelector('.search input[type="search"]');
+
+	if (search instanceof HTMLInputElement) {
+		event.preventDefault();
+		search.focus();
+		search.select();
+	}
+}
+
+function swapTarget(event: Event): unknown {
+	const detail = (event as CustomEvent).detail as
+		| { target?: unknown; ctx?: { target?: unknown } }
+		| undefined;
+
+	return detail?.target ?? detail?.ctx?.target ?? event.target;
+}
+
+function hasEditor(root: ParentNode): boolean {
+	return (
+		(isElement(root) && root.matches(editorSelector)) || root.querySelector(editorSelector) !== null
+	);
+}
+
+async function mountEditor(root: ParentNode = document): Promise<void> {
+	if (!hasEditor(root)) {
+		return;
+	}
+
+	editor ??= import('./islands/node-editor');
+	(await editor).mountEditor(root);
+}
+
+function updateNavigationAfterSwap(event: Event): void {
+	const target = swapTarget(event);
+
+	if (isElement(target) && target.matches(mainSelector)) {
+		updateNavigation();
+	}
+
+	void mountEditor(canQuery(target) ? target : document);
+}
+
+listen('keydown', focusSearch);
+listen('htmx:afterSwap' as keyof DocumentEventMap, updateNavigationAfterSwap);
+listen('htmx:after:swap' as keyof DocumentEventMap, updateNavigationAfterSwap);
+listen('htmx:pushedIntoHistory' as keyof DocumentEventMap, updateNavigation);
+listen('htmx:after:history:update' as keyof DocumentEventMap, updateNavigation);
+
+updateNavigation();
+void mountEditor();
+
+if (import.meta.hot) {
+	import.meta.hot.dispose(() => {
+		while (cleanups.length > 0) {
+			cleanups.pop()?.();
+		}
+	});
+}

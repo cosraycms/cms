@@ -8,6 +8,7 @@ const devPort = Number.parseInt(process.env.COSRAY_PANEL_DEV_PORT ?? '2001', 10)
 const devHost = process.env.COSRAY_PANEL_DEV_HOST ?? 'localhost';
 
 export default defineConfig({
+	base: './',
 	plugins: [
 		svelte({
 			preprocess: vitePreprocess({ script: true }),
@@ -28,20 +29,16 @@ export default defineConfig({
 		cors: true,
 	},
 	build: {
-		outDir: 'editor',
+		outDir: 'build',
 		emptyOutDir: true,
-		lib: {
-			entry: path.resolve(root, 'src/islands/node-editor.ts'),
-			formats: ['es'],
-			fileName: () => 'node-editor.js',
-			cssFileName: 'node-editor',
-		},
 		rollupOptions: {
+			input: {
+				panel: path.resolve(root, 'src/panel.ts'),
+			},
 			output: {
-				assetFileNames: (asset) =>
-					asset.name === 'style.css' ? 'node-editor.css' : '[name][extname]',
+				assetFileNames: '[name][extname]',
 				chunkFileNames: '[name].js',
-				entryFileNames: 'node-editor.js',
+				entryFileNames: '[name].js',
 			},
 		},
 	},

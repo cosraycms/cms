@@ -11,6 +11,8 @@ use Cosray\Contract\Icons;
 use Cosray\Locale;
 use Cosray\Navigation;
 
+use function Cosray\env;
+
 abstract class Panel
 {
 	protected string $panelDir;
@@ -41,6 +43,7 @@ abstract class Panel
 			'renderIcon' => $this->renderIcon(...),
 			'stylesheets' => $this->stylesheets($panelPath),
 			'scripts' => $this->scripts($panelPath),
+			'moduleScripts' => $this->moduleScripts($panelPath),
 			'collections' => $this->collections(),
 		], $data);
 	}
@@ -59,24 +62,68 @@ abstract class Panel
 
 	private function stylesheets(string $panelPath): array
 	{
-		return array_merge(
-			$this->config->panel->theme,
-			[
-				"{$panelPath}/assets/styles/tokens.css",
-				"{$panelPath}/assets/styles/reset.css",
-				"{$panelPath}/assets/styles/app.css",
-				"{$panelPath}/assets/styles/collection.css",
-				"{$panelPath}/assets/styles/editor.css",
-			],
-		);
+		$stylesheets = $this->config->panel->theme;
+
+		if ($this->config->env() !== 'development' && $this->hasPanelBuild()) {
+			$stylesheets[] = "{$panelPath}/assets/build/panel.css";
+		}
+
+		return $stylesheets;
 	}
 
 	private function scripts(string $panelPath): array
 	{
 		return [
 			"{$panelPath}/assets/app/vendor/htmx.js",
-			"{$panelPath}/assets/app/panel.js",
 		];
+	}
+
+	private function moduleScripts(string $panelPath): array
+	{
+		if ($this->config->env() === 'development') {
+			$origin = $this->panelDevOrigin();
+
+			return [
+				"{$origin}/@vite/client",
+				"{$origin}/src/panel.ts",
+			];
+		}
+
+		return $this->hasPanelBuild() ? ["{$panelPath}/assets/build/panel.js"] : [];
+	}
+
+	protected function hasPanelBuild(): bool
+	{
+		return is_file($this->panelDir . '/build/panel.js');
+	}
+
+	private function panelDevOrigin(): string
+	{
+		$origin = env('COSRAY_PANEL_DEV_ORIGIN', null);
+
+		if (is_string($origin) && trim($origin) !== '') {
+			return rtrim(trim($origin), '/');
+		}
+
+		$scheme = env('COSRAY_PANEL_DEV_SCHEME', 'http');
+		$scheme = is_string($scheme) && in_array($scheme, ['http', 'https'], true) ? $scheme : 'http';
+		$port = env('COSRAY_PANEL_DEV_PORT', '2001');
+		$port = is_scalar($port) && preg_match('/^[0-9]+$/', (string) $port) ? (string) $port : '2001';
+
+		return "{$scheme}://{$this->panelDevHost()}:{$port}";
+	}
+
+	private function panelDevHost(): string
+	{
+		$host = $this->request->uri()->getHost();
+
+		if ($host === '') {
+			$host = $this->request->header('Host');
+		}
+
+		$host = trim(explode(':', $host)[0] ?? '');
+
+		return preg_match('/^[A-Za-z0-9.-]+$/', $host) === 1 ? $host : 'localhost';
 	}
 
 	private function logo(): ?string

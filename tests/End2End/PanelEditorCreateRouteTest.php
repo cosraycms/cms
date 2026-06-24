@@ -117,8 +117,9 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
-		if (is_file(dirname(__DIR__, 2) . '/panel/editor/node-editor.js')) {
+		if (is_file(dirname(__DIR__, 2) . '/panel/build/panel.js')) {
 			$this->assertStringContainsString('id="cosray-node-editor"', $html);
+			$this->assertStringContainsString('src="/cp/assets/build/panel.js"', $html);
 			$this->assertStringContainsString('"mode":"create"', $html);
 			$this->assertStringContainsString('"type":"test-hierarchy-child"', $html);
 			$this->assertStringContainsString('"parent":"panel-create-parent"', $html);
@@ -126,7 +127,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			return;
 		}
 
-		$this->assertStringContainsString('Editor bundle missing', $html);
+		$this->assertStringContainsString('Panel bundle missing', $html);
 		$this->assertStringContainsString(
 			'href="/panel/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent"',
 			$html,

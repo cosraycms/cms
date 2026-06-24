@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 export {}; // ensure this file is a module
 
 declare global {

@@ -15,8 +15,6 @@ use Cosray\Node\Types;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 
-use function Cosray\env;
-
 final class Editor extends Panel
 {
 	private const string LEGACY_PANEL_PATH = '/panel';
@@ -133,74 +131,13 @@ final class Editor extends Panel
 			'legacyLinks' => new CollectionUrls(self::LEGACY_PANEL_PATH, $collection, $query),
 			'legacyApiBase' => self::LEGACY_PANEL_PATH . '/api',
 			'legacyBootUrl' => self::LEGACY_PANEL_PATH . '/boot',
-			'editorAssets' => $this->editorAssets(),
+			'editorAvailable' => $this->editorAvailable(),
 		]);
 	}
 
-	/** @return array{scripts: list<string>, stylesheets: list<string>}|null */
-	private function editorAssets(): ?array
+	private function editorAvailable(): bool
 	{
-		if ($this->config->env() === 'development') {
-			return $this->editorDevAssets();
-		}
-
-		$assetDir = $this->panelDir . '/editor';
-		$script = $assetDir . '/node-editor.js';
-
-		if (!is_file($script)) {
-			return null;
-		}
-
-		$panelPath = $this->panelPath();
-		$css = $assetDir . '/node-editor.css';
-
-		return [
-			'scripts' => ["{$panelPath}/assets/editor/node-editor.js"],
-			'stylesheets' => is_file($css) ? ["{$panelPath}/assets/editor/node-editor.css"] : [],
-		];
-	}
-
-	/** @return array{scripts: list<string>, stylesheets: list<string>} */
-	private function editorDevAssets(): array
-	{
-		$origin = $this->editorDevOrigin();
-
-		return [
-			'scripts' => [
-				"{$origin}/@vite/client",
-				"{$origin}/src/islands/node-editor.ts",
-			],
-			'stylesheets' => [],
-		];
-	}
-
-	private function editorDevOrigin(): string
-	{
-		$origin = env('COSRAY_PANEL_DEV_ORIGIN', null);
-
-		if (is_string($origin) && trim($origin) !== '') {
-			return rtrim(trim($origin), '/');
-		}
-
-		$scheme = env('COSRAY_PANEL_DEV_SCHEME', 'http');
-		$scheme = is_string($scheme) && in_array($scheme, ['http', 'https'], true) ? $scheme : 'http';
-		$port = env('COSRAY_PANEL_DEV_PORT', '2001');
-		$port = is_scalar($port) && preg_match('/^[0-9]+$/', (string) $port) ? (string) $port : '2001';
-
-		return "{$scheme}://{$this->editorDevHost()}:{$port}";
-	}
-
-	private function editorDevHost(): string
-	{
-		$host = $this->request->uri()->getHost();
-
-		if ($host === '') {
-			$host = $this->request->header('Host');
-		}
-
-		$host = trim(explode(':', $host)[0] ?? '');
-
-		return preg_match('/^[A-Za-z0-9.-]+$/', $host) === 1 ? $host : 'localhost';
+		return $this->config->env() === 'development' || $this->hasPanelBuild();
 	}
 
 	private function intParam(
