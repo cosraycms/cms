@@ -53,7 +53,8 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
-		$this->assertStringContainsString('<h1>Test hierarchy</h1>', $html);
+		$this->assertStringNotContainsString('Back to list', $html);
+		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertCreateAssetStateIsRendered($html);
 	}
 
@@ -121,6 +122,8 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			$this->assertStringContainsString('id="cosray-node-editor"', $html);
 			$this->assertStringContainsString('src="/cp/assets/build/panel.js"', $html);
 			$this->assertStringContainsString('"mode":"create"', $html);
+			$this->assertStringContainsString('"name":"Test hierarchy"', $html);
+			$this->assertStringContainsString('"slug":"test-hierarchy"', $html);
 			$this->assertStringContainsString('"type":"test-hierarchy-child"', $html);
 			$this->assertStringContainsString('"parent":"panel-create-parent"', $html);
 

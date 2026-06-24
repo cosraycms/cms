@@ -11,7 +11,7 @@
 	let { href, name }: Props = $props();
 </script>
 
-<div class="breadcrumbs">
+<nav class="cms-breadcrumbs" aria-label="Breadcrumb">
 	<IcoDocumentTree />
 	<IcoChevronRight />
 	<span>
@@ -19,26 +19,41 @@
 			{name}
 		</Link>
 	</span>
-</div>
+</nav>
 
 <style>
 	@layer panel {
-		.breadcrumbs {
-			margin-top: var(--space-8);
-			margin-bottom: var(--space-4);
+		.cms-breadcrumbs {
 			display: flex;
-			flex-direction: row;
+			min-width: 0;
 			align-items: center;
 			gap: var(--space-3);
+			color: var(--color-text-faint);
+			font-size: var(--font-size-sm);
+			font-weight: 600;
+		}
+
+		.cms-breadcrumbs span {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		:global(.cms-breadcrumb-link) {
+			color: var(--color-text-muted);
+			text-decoration: none;
 		}
 
 		:global(.cms-breadcrumb-link:hover) {
+			color: var(--color-accent-text);
 			text-decoration: underline;
 		}
 
-		.breadcrumbs :global(svg) {
+		.cms-breadcrumbs :global(svg) {
 			color: var(--color-neutral-400);
 			display: inline-block;
+			flex: 0 0 auto;
 		}
 	}
 </style>

@@ -14,7 +14,6 @@
 		routePathPreviewSignature,
 	} from '$lib/urlpaths';
 	import NodeControlBar from '$shell/NodeControlBar.svelte';
-	import Breadcrumbs from '$shell/Breadcrumbs.svelte';
 	import Headline from '$shell/Headline.svelte';
 	import Document from '$shell/Document.svelte';
 	import Pane from '$shell/Pane.svelte';
@@ -137,12 +136,12 @@
 	<NodeControlBar
 		bind:uid={node.uid}
 		{collectionPath}
+		collectionName={collection.name}
 		deletable={node.deletable}
 		preview={node.type.routable && node.type.renderable ? preview : null}
 		{save}
 	/>
 	<Document>
-		<Breadcrumbs href={collectionPath} name={collection.name} />
 		<Headline published={node.published} showPublished={node.type.renderable}>
 			{@html node.title}
 		</Headline>
@@ -200,7 +199,8 @@
 
 		.cms-node-shell {
 			display: flex;
-			height: 100vh;
+			height: 100%;
+			min-height: 0;
 			flex-direction: column;
 		}
 

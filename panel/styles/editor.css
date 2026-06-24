@@ -1,16 +1,12 @@
-.editor-page .editor-topbar {
-	justify-content: flex-start;
-}
-
-.editor-page .editor-topbar h1 {
-	margin-left: var(--space-2);
-}
-
 .editor-content {
+	width: 100%;
+	max-width: none;
+	margin: 0;
 	padding: 0;
 }
 
 .editor-host {
+	display: flex;
 	flex: 1;
 	min-height: 0;
 }

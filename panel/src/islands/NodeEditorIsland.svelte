@@ -36,7 +36,6 @@
 		apiBase: string;
 		bootUrl: string;
 		panelPath: string;
-		backUrl: string;
 	};
 
 	type Props = {

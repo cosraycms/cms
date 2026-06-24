@@ -49,12 +49,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString('id="main" class="page editor-page"', $html);
+		$this->assertStringNotContainsString('Back to list', $html);
+		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertPanelBuildStateIsRendered($html);
-		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
-		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
-			$html,
-		);
 		$this->assertEditorAssetStateIsRendered($html);
 	}
 
@@ -140,6 +137,13 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		if ($this->hasPanelBuild()) {
 			$this->assertStringContainsString('id="cosray-node-editor"', $html);
 			$this->assertStringContainsString('"node":"panel-editor-a"', $html);
+			$this->assertStringContainsString('"name":"Test articles"', $html);
+			$this->assertStringContainsString('"slug":"test-articles"', $html);
+			$this->assertStringContainsString('"q":"Panel Editor"', $html);
+			$this->assertStringContainsString('"offset":20', $html);
+			$this->assertStringContainsString('"limit":10', $html);
+			$this->assertStringContainsString('"sort":"uid"', $html);
+			$this->assertStringContainsString('"dir":"asc"', $html);
 			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
 
 			return;

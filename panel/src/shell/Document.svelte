@@ -25,7 +25,7 @@
 			margin: 0 auto;
 			width: 100%;
 			max-width: var(--size-7xl);
-			padding: 0 var(--space-8);
+			padding: var(--space-8) var(--space-8) 0;
 		}
 	}
 </style>

@@ -3,7 +3,7 @@
 
 	import { getContext } from 'svelte';
 	import { _ } from '$lib/locale';
-	import NavToggle from '$shell/NavToggle.svelte';
+	import Breadcrumbs from '$shell/Breadcrumbs.svelte';
 	import Button from '$shell/Button.svelte';
 	import ButtonMenu from '$shell/ButtonMenu.svelte';
 	import ButtonMenuEntry from '$shell/ButtonMenuEntry.svelte';
@@ -16,6 +16,7 @@
 	type Props = {
 		uid: string;
 		collectionPath: string;
+		collectionName: string;
 		deletable: boolean;
 		locked?: boolean;
 		save: (publish: boolean) => void | Promise<unknown>;
@@ -25,6 +26,7 @@
 	let {
 		uid = $bindable(),
 		collectionPath,
+		collectionName,
 		deletable,
 		locked = false,
 		save,
@@ -48,49 +50,91 @@
 	}
 </script>
 
-<div class="headerbar">
-	<NavToggle />
-	<div class="controls cms-node-controls">
-		{#if deletable && !locked}
-			<Button variant="danger" icon={IcoTrash} onclick={remove}>
-				{_('Löschen')}
-			</Button>
-		{/if}
-		{#if preview}
-			<Button variant="secondary" icon={IcoEye} onclick={preview}>
-				{_('Vorschau')}
-			</Button>
-		{/if}
-		{#if !locked}
-			<ButtonMenu
-				variant="primary"
-				icon={IcoSave}
-				onclick={() => save(false)}
-				label={_('Speichern')}
-			>
-				{#snippet children(closeMenu)}
-					<ButtonMenuEntry
-						onclick={() => {
-							save(true);
-							closeMenu();
-						}}
-					>
-						{_('Speichern und veröffentlichen')}
-					</ButtonMenuEntry>
-				{/snippet}
-			</ButtonMenu>
-		{/if}
+<header class="cms-node-topbar">
+	<div class="inner">
+		<div class="trail">
+			<Breadcrumbs href={collectionPath} name={collectionName} />
+		</div>
+		<div class="actions">
+			{#if deletable && !locked}
+				<Button variant="danger" icon={IcoTrash} onclick={remove}>
+					{_('Löschen')}
+				</Button>
+			{/if}
+			{#if preview}
+				<Button variant="secondary" icon={IcoEye} onclick={preview}>
+					{_('Vorschau')}
+				</Button>
+			{/if}
+			{#if !locked}
+				<ButtonMenu
+					variant="primary"
+					icon={IcoSave}
+					onclick={() => save(false)}
+					label={_('Speichern')}
+				>
+					{#snippet children(closeMenu)}
+						<ButtonMenuEntry
+							onclick={() => {
+								save(true);
+								closeMenu();
+							}}
+						>
+							{_('Speichern und veröffentlichen')}
+						</ButtonMenuEntry>
+					{/snippet}
+				</ButtonMenu>
+			{/if}
+		</div>
 	</div>
-</div>
+</header>
 
 <style>
 	@layer panel {
-		.cms-node-controls {
+		.cms-node-topbar {
+			flex: 0 0 auto;
+			border-bottom: 1px solid var(--color-border);
+			background: var(--topbar-bg);
+			padding: 0 var(--space-6);
+		}
+
+		.inner {
 			display: flex;
-			flex-direction: row;
+			min-height: 4.25rem;
+			align-items: center;
+			gap: var(--space-4);
+		}
+
+		.trail {
+			min-width: 0;
+			flex: 1 1 auto;
+		}
+
+		.actions {
+			display: flex;
+			flex: 0 0 auto;
+			align-items: center;
 			justify-content: flex-end;
 			gap: var(--space-4);
-			padding: var(--space-6) var(--space-4);
+		}
+
+		@media (max-width: 52rem) {
+			.cms-node-topbar {
+				padding: var(--space-3) var(--space-4);
+			}
+
+			.inner {
+				min-height: 0;
+				align-items: flex-start;
+				flex-direction: column;
+			}
+
+			.actions {
+				width: 100%;
+				justify-content: flex-start;
+				gap: var(--space-2);
+				flex-wrap: wrap;
+			}
 		}
 	}
 </style>

@@ -19,7 +19,6 @@ $panelPath = (string) $panelPath;
 $legacyApiBase = (string) $legacyApiBase;
 $legacyBootUrl = (string) $legacyBootUrl;
 
-$backUrl = $links->back();
 if ($nodeUid !== null) {
 	$legacyUrl = $legacyLinks->edit($nodeUid);
 } elseif ($type !== null) {
@@ -44,7 +43,6 @@ $bootstrap = [
 	'apiBase' => $legacyApiBase,
 	'bootUrl' => $legacyBootUrl,
 	'panelPath' => $panelPath,
-	'backUrl' => $backUrl,
 ];
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 $bootstrapJson = json_encode($bootstrap, $jsonFlags);
@@ -58,13 +56,6 @@ $runtimeJson = json_encode([
 ?>
 
 <div id="main" class="page editor-page">
-	<header class="topbar topbar-editor">
-		<div class="content">
-			<a class="cms-button secondary" href="<?= escape($backUrl) ?>" hx-target="#main">Back to list</a>
-			<h1><?= escape($name) ?></h1>
-		</div>
-	</header>
-
 	<section class="content editor-content">
 		<?php if ($editorAvailable): ?>
 			<div
