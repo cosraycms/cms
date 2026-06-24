@@ -256,7 +256,7 @@ The new SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`. While t
 
 ### Admin panel theming
 
-You can style the admin panel through `panel.theme` in your CMS config. Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`). The panel links those CSS files and reads theme overrides from `--theme-*` variables that mirror the built-in token names, such as `--theme-color-*`, `--theme-space-*`, `--theme-radius-*`, `--theme-font-*`, and `--theme-sidebar-width`.
+You can style the admin panel through `panel.theme` in your CMS config. Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`). The panel links those CSS files in the `theme` cascade layer, so they can override built-in tokens such as `--color-*`, `--space-*`, `--radius-*`, `--font-*`, and `--panel-sidebar-width`.
 
 ```php
 return [
