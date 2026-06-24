@@ -20,7 +20,7 @@
 			align-items: center;
 			justify-content: center;
 			border-radius: var(--radius-full);
-			background-color: var(--color-rose-700);
+			background-color: var(--color-danger);
 			font-weight: 600;
 			color: var(--color-white);
 			font-size: 9px;

@@ -147,7 +147,7 @@
 			margin-right: var(--space-px);
 			margin-bottom: var(--space-px);
 			border-radius: var(--radius);
-			background-color: var(--color-rose-700);
+			background-color: var(--color-danger);
 			padding: 0 var(--space-1);
 			font-size: var(--font-size-xs);
 			color: var(--color-white);
@@ -207,11 +207,11 @@
 		}
 
 		.overlay-action-danger {
-			color: var(--color-rose-700);
+			color: var(--color-danger);
 		}
 
 		.overlay-action-primary {
-			color: var(--color-sky-700);
+			color: var(--color-info);
 		}
 
 		.ico {

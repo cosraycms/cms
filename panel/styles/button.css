@@ -43,50 +43,50 @@ button.danger:focus-visible {
 
 .cms-button-primary,
 .primary {
-	background-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
+	background-color: color-mix(in srgb, var(--color-success) 72%, black);
 	color: var(--color-white);
 }
 
 .cms-button-primary:hover,
 .primary:hover {
-	background-color: color-mix(in srgb, var(--color-emerald-600) 82%, black);
+	background-color: color-mix(in srgb, var(--color-success) 82%, black);
 }
 
 .cms-button-primary:focus-visible,
 button.primary:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-emerald-600) 72%, black);
+	outline-color: color-mix(in srgb, var(--color-success) 72%, black);
 }
 
 .cms-button-secondary,
 .secondary {
-	background-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
+	background-color: color-mix(in srgb, var(--color-info) 80%, black);
 	color: var(--color-white);
 }
 
 .cms-button-secondary:hover,
 .secondary:hover {
-	background-color: color-mix(in srgb, var(--color-sky-700) 88%, black);
+	background-color: color-mix(in srgb, var(--color-info) 88%, black);
 }
 
 .cms-button-secondary:focus-visible,
 button.secondary:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-sky-700) 80%, black);
+	outline-color: color-mix(in srgb, var(--color-info) 80%, black);
 }
 
 .cms-button-danger,
 .danger {
-	background-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	background-color: color-mix(in srgb, var(--color-danger) 80%, black);
 	color: var(--color-white);
 }
 
 .cms-button-danger:hover,
 .danger:hover {
-	background-color: color-mix(in srgb, var(--color-rose-700) 88%, black);
+	background-color: color-mix(in srgb, var(--color-danger) 88%, black);
 }
 
 .cms-button-danger:focus-visible,
 button.danger:focus-visible {
-	outline-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	outline-color: color-mix(in srgb, var(--color-danger) 80%, black);
 }
 
 .cms-button[disabled],

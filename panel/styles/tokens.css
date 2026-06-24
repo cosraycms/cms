@@ -96,12 +96,6 @@
 	--color-neutral-800: #2a2524;
 	--color-neutral-900: #1b1917;
 
-	--color-rose-700: #be123c;
-	--color-sky-700: #0369a1;
-	--color-emerald-100: #d1fae5;
-	--color-emerald-600: #059669;
-	--color-orange-700: #c2410c;
-
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 	--shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -135,11 +129,12 @@
 	--color-active-soft: #f3f7ff;
 	--color-active-text: #2459d6;
 	--color-accent: #2f6df0;
-	--color-success: #15a36a;
-	--color-success-soft: #e4f5ec;
-	--color-warning: #e08a2b;
+	--color-info: #0369a1;
+	--color-success: #059669;
+	--color-success-soft: #d1fae5;
+	--color-warning: #c2410c;
 	--color-warning-soft: #fcf0df;
-	--color-danger: #dc4d4d;
+	--color-danger: #be123c;
 	--color-danger-soft: #fbeaea;
 
 	/**

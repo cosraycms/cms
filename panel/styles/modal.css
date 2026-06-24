@@ -22,7 +22,7 @@
 	width: 1.5rem;
 	height: 1.5rem;
 	border-radius: var(--radius-full);
-	background-color: color-mix(in srgb, var(--color-rose-700) 80%, black);
+	background-color: color-mix(in srgb, var(--color-danger) 80%, black);
 	color: var(--color-white);
 	display: inline-flex;
 	align-items: center;
@@ -110,7 +110,7 @@
 }
 
 .modal .highlight {
-	color: var(--color-sky-700);
+	color: var(--color-info);
 }
 
 .modal .body {
@@ -130,8 +130,8 @@
 }
 
 .modal .modal-close.close {
-	border: 1px solid var(--color-rose-700);
-	background-color: var(--color-rose-700);
+	border: 1px solid var(--color-danger);
+	background-color: var(--color-danger);
 	color: var(--color-white);
 	box-shadow: none;
 	top: -0.6rem;
@@ -139,8 +139,8 @@
 }
 
 .modal .modal-close.close:hover {
-	border-color: color-mix(in srgb, var(--color-rose-700) 86%, white);
-	background-color: color-mix(in srgb, var(--color-rose-700) 86%, white);
+	border-color: color-mix(in srgb, var(--color-danger) 86%, white);
+	background-color: color-mix(in srgb, var(--color-danger) 86%, white);
 }
 
 .modal .modal-close.close::before,

@@ -111,11 +111,11 @@
 		}
 
 		.cms-file-action-edit {
-			color: var(--color-sky-700);
+			color: var(--color-info);
 		}
 
 		.cms-file-action-remove {
-			color: var(--color-rose-700);
+			color: var(--color-danger);
 		}
 
 		.cms-file-action-icon {

@@ -35,8 +35,8 @@
 			padding: 5px;
 
 			&.active {
-				border-color: var(--color-emerald-600);
-				background-color: var(--color-emerald-100);
+				border-color: var(--color-success);
+				background-color: var(--color-success-soft);
 			}
 		}
 	}

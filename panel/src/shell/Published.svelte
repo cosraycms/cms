@@ -38,7 +38,7 @@
 			}
 
 			&.published {
-				background-color: var(--color-emerald-600);
+				background-color: var(--color-success);
 				color: var(--color-white);
 			}
 		}
