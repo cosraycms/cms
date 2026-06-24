@@ -27,12 +27,12 @@ final class PanelAssetTest extends TestCase
 	public function testAssetReturnsNotModifiedWhenEtagMatches(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
-		$file = self::root() . '/panel/styles/app.css';
+		$file = self::root() . '/panel/styles/panel.css';
 		$etag = md5_file($file);
 		$this->assertNotFalse($etag);
 		$request = new Request($this->psrRequest()->withHeader('If-None-Match', '"' . $etag . '"'));
 
-		$response = $panel->asset($request, $this->factory(), 'styles/app.css');
+		$response = $panel->asset($request, $this->factory(), 'styles/panel.css');
 
 		$this->assertSame(304, $response->getStatusCode());
 		$this->assertSame(['private, max-age=3600'], $response->getHeader('Cache-Control'));
@@ -43,11 +43,11 @@ final class PanelAssetTest extends TestCase
 	public function testAssetReturnsCssFileWithCacheHeaders(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
-		$file = self::root() . '/panel/styles/app.css';
+		$file = self::root() . '/panel/styles/panel.css';
 		$etag = md5_file($file);
 		$this->assertNotFalse($etag);
 
-		$response = $panel->asset($this->request(), $this->factory(), 'styles/app.css');
+		$response = $panel->asset($this->request(), $this->factory(), 'styles/panel.css');
 
 		$this->assertSame(200, $response->getStatusCode());
 		$this->assertSame(['text/css'], $response->getHeader('Content-Type'));

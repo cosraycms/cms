@@ -12,9 +12,20 @@ html,
 body {
 	margin: 0;
 	padding: 0;
+}
+
+body {
+	background: var(--color-canvas);
 	color: var(--color-text);
-	line-height: 1.5;
+	font-family: var(--font-sans);
+	font-size: 0.875rem;
+	line-height: 1.45;
 	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+}
+
+a {
+	color: inherit;
 }
 
 h1,

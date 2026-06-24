@@ -1,0 +1,64 @@
+.page {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+}
+
+.page-head {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: flex-end;
+	gap: var(--space-4);
+	margin-bottom: var(--space-5);
+	flex-wrap: wrap;
+}
+
+.page-head h1 {
+	margin: 0;
+	font-size: var(--font-size-xl);
+	font-weight: 680;
+	letter-spacing: -0.03em;
+	line-height: 1.15;
+}
+
+.count-pill {
+	display: inline-flex;
+	align-items: center;
+	min-height: 1.625rem;
+	padding: 0 var(--space-3);
+	border: 1px solid var(--color-border);
+	border-radius: 999px;
+	background: var(--color-surface);
+	color: var(--color-text-muted);
+	font-size: var(--font-size-xs);
+	font-weight: 600;
+}
+
+.breadcrumb {
+	display: flex;
+	flex: 0 0 100%;
+	align-items: center;
+	gap: var(--space-2);
+	color: var(--color-text-faint);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+}
+
+.breadcrumb a {
+	color: var(--color-text-muted);
+	text-decoration: none;
+}
+
+.breadcrumb a:hover {
+	color: var(--color-accent-text);
+}
+
+@media (max-width: 52rem) {
+	.page {
+		height: auto;
+		min-height: 0;
+		overflow: visible;
+	}
+}
