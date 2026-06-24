@@ -12,7 +12,7 @@
 .cosray-node-editor-island {
 	height: 100%;
 	min-height: 0;
-	background: var(--cms-color-neutral-50);
+	background: var(--editor-bg);
 	color: var(--cms-color-high);
 	font-family: var(--cms-font-sans);
 }

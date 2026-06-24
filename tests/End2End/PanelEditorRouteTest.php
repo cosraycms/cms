@@ -94,6 +94,25 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('class="collection-value collection-edit-link"', $html);
 	}
 
+	public function testPanelEditorRouteUsesViteDevServerInDevelopment(): void
+	{
+		$this->app = $this->createApp(['app.env' => 'development']);
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-dev', 'Panel Editor Dev');
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-dev');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
+		$this->assertStringContainsString(
+			'src="http://localhost:2001/src/islands/node-editor.ts"',
+			$html,
+		);
+		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
+		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
+	}
+
 	public function testPanelEditorRouteReturnsNotFoundForUnknownCollection(): void
 	{
 		$this->authenticateAs('editor');

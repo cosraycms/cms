@@ -4,6 +4,8 @@ import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
+const devPort = Number.parseInt(process.env.COSRAY_PANEL_DEV_PORT ?? '2001', 10);
+const devHost = process.env.COSRAY_PANEL_DEV_HOST ?? 'localhost';
 
 export default defineConfig({
 	plugins: [
@@ -17,6 +19,13 @@ export default defineConfig({
 			$types: path.resolve(root, 'src/types'),
 			$shell: path.resolve(root, 'src/shell'),
 		},
+	},
+	server: {
+		port: Number.isFinite(devPort) ? devPort : 2001,
+		host: devHost,
+		strictPort: true,
+		allowedHosts: true,
+		cors: true,
 	},
 	build: {
 		outDir: 'editor',

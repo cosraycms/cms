@@ -59,4 +59,5 @@
 	--sidebar-header-bg: var(--theme-sidebar-header-bg, var(--topbar-bg));
 	--sidebar-border-right: var(--theme-sidebar-border-right, 0);
 	--content-max-width: var(--theme-content-max-width, 1600px);
+	--editor-bg: var(--theme-editor-bg, var(--color-canvas));
 }
