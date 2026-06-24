@@ -1,11 +1,8 @@
-@import './tokens.css' layer(tokens);
-@import './reset.css' layer(reset);
-@import './base.css' layer(panel);
+@import './common.css';
 @import './shell.css' layer(panel);
 @import './sidebar.css' layer(panel);
 @import './nav.css' layer(panel);
 @import './topbar.css' layer(panel);
 @import './page.css' layer(panel);
-@import './button.css' layer(panel);
 @import './collection.css' layer(panel);
 @import './editor.css' layer(panel);
