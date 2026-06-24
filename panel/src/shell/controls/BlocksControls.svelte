@@ -73,8 +73,8 @@
 <style>
 	@layer panel {
 		div button {
-			height: var(--cms-space-4);
-			width: var(--cms-space-4);
+			height: var(--space-4);
+			width: var(--space-4);
 		}
 
 		.cms-blocks-controls {
@@ -90,9 +90,9 @@
 			flex-direction: row;
 			align-items: center;
 			justify-content: flex-end;
-			gap: var(--cms-space-3);
-			padding: var(--cms-space-2) 0;
-			margin-right: var(--cms-space-3);
+			gap: var(--space-3);
+			padding: var(--space-2) 0;
+			margin-right: var(--space-3);
 		}
 
 		.cms-blocks-controls-edit {
@@ -132,22 +132,22 @@
 			position: absolute;
 			right: 0;
 			z-index: 10;
-			margin-top: var(--cms-space-2);
+			margin-top: var(--space-2);
 			width: 11rem;
 			transform-origin: top right;
-			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-white);
-			padding: 0 var(--cms-space-2);
-			box-shadow: var(--cms-shadow-lg);
+			border-radius: var(--radius-md);
+			background-color: var(--color-white);
+			padding: 0 var(--space-2);
+			box-shadow: var(--shadow-lg);
 			outline: none;
-			border: 1px solid color-mix(in srgb, var(--cms-color-black) 5%, transparent);
+			border: 1px solid color-mix(in srgb, var(--color-black) 5%, transparent);
 		}
 
 		.cms-blocks-buttons-menu-content {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
-			padding: var(--cms-space-1) 0;
+			padding: var(--space-1) 0;
 		}
 
 		.cms-blocks-buttons:hover {

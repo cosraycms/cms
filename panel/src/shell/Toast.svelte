@@ -21,12 +21,12 @@
 	@layer panel {
 		.cms-toast-content {
 			text-align: left;
-			color: var(--cms-color-white);
+			color: var(--color-white);
 		}
 
 		.cms-toast-title {
-			margin-top: var(--cms-space-3);
-			margin-bottom: var(--cms-space-1);
+			margin-top: var(--space-3);
+			margin-bottom: var(--space-1);
 			font-weight: 600;
 		}
 	}

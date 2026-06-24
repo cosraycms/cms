@@ -102,14 +102,14 @@
 <style>
 	@layer panel {
 		.cms-blocks-youtube-field-row {
-			margin-top: var(--cms-space-2);
+			margin-top: var(--space-2);
 		}
 
 		.cms-blocks-youtube-ratio-row {
 			display: flex;
 			flex-direction: row;
-			gap: var(--cms-space-4);
-			margin-top: var(--cms-space-2);
+			gap: var(--space-4);
+			margin-top: var(--space-2);
 		}
 
 		.cms-blocks-youtube-frame {

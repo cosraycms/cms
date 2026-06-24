@@ -24,22 +24,22 @@
 	@layer panel {
 		span.cms-published {
 			display: inline-block;
-			border-radius: var(--cms-radius-full);
-			background-color: var(--cms-color-neutral-300);
-			font-size: var(--cms-font-size-sm);
+			border-radius: var(--radius-full);
+			background-color: var(--color-neutral-300);
+			font-size: var(--font-size-sm);
 			height: 0.4rem;
 			width: 0.4rem;
 
 			&.large {
-				padding: var(--cms-space-px) var(--cms-space-2);
+				padding: var(--space-px) var(--space-2);
 				height: auto;
 				width: auto;
 				line-height: 1.25rem;
 			}
 
 			&.published {
-				background-color: var(--cms-color-success-600);
-				color: var(--cms-color-white);
+				background-color: var(--color-success-600);
+				color: var(--color-white);
 			}
 		}
 	}

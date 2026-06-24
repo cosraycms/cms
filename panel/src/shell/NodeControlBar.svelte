@@ -84,8 +84,8 @@
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-end;
-			gap: var(--cms-space-4);
-			padding: var(--cms-space-6) var(--cms-space-4);
+			gap: var(--space-4);
+			padding: var(--space-6) var(--space-4);
 		}
 	}
 </style>

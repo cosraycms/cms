@@ -24,12 +24,12 @@
 <style>
 	@layer panel {
 		.breadcrumbs {
-			margin-top: var(--cms-space-8);
-			margin-bottom: var(--cms-space-4);
+			margin-top: var(--space-8);
+			margin-bottom: var(--space-4);
 			display: flex;
 			flex-direction: row;
 			align-items: center;
-			gap: var(--cms-space-3);
+			gap: var(--space-3);
 		}
 
 		:global(.cms-breadcrumb-link:hover) {
@@ -37,7 +37,7 @@
 		}
 
 		.breadcrumbs :global(svg) {
-			color: var(--cms-color-neutral-400);
+			color: var(--color-neutral-400);
 			display: inline-block;
 		}
 	}

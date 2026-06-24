@@ -23,12 +23,12 @@
 
 		.cms-pane-card {
 			max-width: 80rem;
-			margin: 0 auto var(--cms-space-12);
-			padding-top: var(--cms-space-2);
-			padding-bottom: var(--cms-space-4);
-			border: 1px solid var(--cms-color-neutral-200);
-			background-color: var(--cms-color-white);
-			box-shadow: var(--cms-shadow);
+			margin: 0 auto var(--space-12);
+			padding-top: var(--space-2);
+			padding-bottom: var(--space-4);
+			border: 1px solid var(--color-neutral-200);
+			background-color: var(--color-white);
+			box-shadow: var(--shadow);
 		}
 	}
 </style>

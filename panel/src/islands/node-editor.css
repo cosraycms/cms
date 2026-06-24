@@ -13,9 +13,9 @@
 	.cosray-node-editor-island {
 		height: 100%;
 		min-height: 0;
-		background: var(--cms-panel-editor-bg);
-		color: var(--cms-color-high);
-		font-family: var(--cms-font-sans);
+		background: var(--panel-editor-bg);
+		color: var(--color-high);
+		font-family: var(--font-sans);
 	}
 
 	.cosray-node-editor-island .cms-node-shell {
@@ -30,14 +30,14 @@
 		display: grid;
 		place-content: center;
 		min-height: 24rem;
-		padding: var(--cms-space-8);
-		color: var(--cms-color-neutral-600);
-		font-family: var(--cms-font-sans);
+		padding: var(--space-8);
+		color: var(--color-neutral-600);
+		font-family: var(--font-sans);
 		font-weight: 600;
 		text-align: center;
 	}
 
 	.cosray-node-editor-message.is-error {
-		color: var(--cms-color-danger-700);
+		color: var(--color-danger-700);
 	}
 }

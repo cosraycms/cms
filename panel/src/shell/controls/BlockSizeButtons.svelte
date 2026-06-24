@@ -107,8 +107,8 @@
 			flex: 1 1 auto;
 			flex-direction: row;
 			align-items: center;
-			gap: var(--cms-space-3);
-			padding: var(--cms-space-2) 0;
+			gap: var(--space-3);
+			padding: var(--space-2) 0;
 		}
 
 		.cms-blocks-size-buttons-inline {
@@ -121,11 +121,11 @@
 
 		div button {
 			position: relative;
-			height: var(--cms-space-4);
-			width: var(--cms-space-4);
+			height: var(--space-4);
+			width: var(--space-4);
 
 			&[disabled] {
-				color: var(--cms-color-neutral-300);
+				color: var(--color-neutral-300);
 			}
 		}
 

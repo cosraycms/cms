@@ -121,18 +121,18 @@
 <style>
 	@layer panel {
 		.cms-settings {
-			padding: var(--cms-space-4);
+			padding: var(--space-4);
 		}
 
 		@media (min-width: 640px) {
 			.cms-settings {
-				padding: var(--cms-space-6);
+				padding: var(--space-6);
 			}
 		}
 
 		@media (min-width: 768px) {
 			.cms-settings {
-				padding: var(--cms-space-8);
+				padding: var(--space-8);
 			}
 		}
 
@@ -141,8 +141,8 @@
 		}
 
 		.cms-settings-paths {
-			margin-top: var(--cms-space-4);
-			margin-bottom: var(--cms-space-8);
+			margin-top: var(--space-4);
+			margin-bottom: var(--space-8);
 			display: table;
 			width: 100%;
 		}
@@ -151,7 +151,7 @@
 			display: table-row;
 
 			& > div {
-				padding: var(--cms-space-2);
+				padding: var(--space-2);
 				display: table-cell;
 			}
 		}
@@ -161,23 +161,23 @@
 		}
 
 		.cms-settings-renderable {
-			max-width: var(--cms-size-3xl);
+			max-width: var(--size-3xl);
 		}
 
 		.cms-settings-section + .cms-settings-section {
-			margin-top: var(--cms-space-4);
+			margin-top: var(--space-4);
 		}
 
 		.cms-settings-row {
 			display: flex;
 			flex-direction: row;
 			align-items: flex-start;
-			gap: var(--cms-space-4);
-			margin-top: var(--cms-space-4);
+			gap: var(--space-4);
+			margin-top: var(--space-4);
 		}
 
 		.cms-settings-value {
-			padding-top: var(--cms-space-px);
+			padding-top: var(--space-px);
 		}
 	}
 </style>

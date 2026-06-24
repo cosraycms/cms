@@ -12,7 +12,7 @@ html,
 body {
 	margin: 0;
 	padding: 0;
-	color: var(--cms-color-high);
+	color: var(--color-high);
 	line-height: 1.5;
 	text-rendering: optimizeLegibility;
 }
@@ -23,17 +23,17 @@ h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 var(--cms-space-4);
+	margin: 0 0 var(--space-4);
 	font-size: inherit;
 	font-weight: 600;
 	line-height: 1.25;
-	color: var(--cms-color-high);
+	color: var(--color-high);
 }
 
 p,
 ul,
 ol {
-	margin: 0 0 var(--cms-space-4);
+	margin: 0 0 var(--space-4);
 }
 
 button,
@@ -58,14 +58,14 @@ button:not(:disabled) {
 input,
 select,
 textarea {
-	border: var(--cms-border);
-	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-white);
+	border: var(--border);
+	border-radius: var(--radius-md);
+	background-color: var(--color-white);
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: var(--cms-color-neutral-400);
+	color: var(--color-neutral-400);
 }
 
 img,

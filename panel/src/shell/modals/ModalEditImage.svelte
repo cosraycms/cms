@@ -53,8 +53,8 @@
 		.cms-modal-edit-image-fields {
 			display: flex;
 			flex-direction: column;
-			gap: var(--cms-space-4);
-			margin-bottom: var(--cms-space-8);
+			gap: var(--space-4);
+			margin-bottom: var(--space-8);
 		}
 	}
 </style>

@@ -28,15 +28,15 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			border-radius: var(--cms-radius);
-			border: 1px solid var(--cms-color-neutral-400);
+			border-radius: var(--radius);
+			border: 1px solid var(--color-neutral-400);
 			width: 190px;
 			height: 190px;
 			padding: 5px;
 
 			&.active {
-				border-color: var(--cms-color-success-600);
-				background-color: var(--cms-color-success-100);
+				border-color: var(--color-success-600);
+				background-color: var(--color-success-100);
 			}
 		}
 	}

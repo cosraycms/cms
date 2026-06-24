@@ -44,7 +44,7 @@
 <style>
 	@layer panel {
 		.modal-container {
-			background-color: var(--cms-color-white, #fff);
+			background-color: var(--color-white, #fff);
 		}
 	}
 </style>

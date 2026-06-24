@@ -11,11 +11,11 @@
 	@layer panel {
 		button.cms-nav-toggle {
 			position: absolute;
-			left: var(--cms-space-2);
+			left: var(--space-2);
 			width: 2.25rem;
 			height: 2.25rem;
-			padding: var(--cms-space-2);
-			background-color: var(--cms-color-white);
+			padding: var(--space-2);
+			background-color: var(--color-white);
 			border: 0;
 			box-shadow: none;
 			cursor: pointer;

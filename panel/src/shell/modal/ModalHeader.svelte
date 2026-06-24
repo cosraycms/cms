@@ -46,7 +46,7 @@
 <style>
 	@layer panel {
 		.modal-close-button {
-			color: var(--cms-color-neutral-500);
+			color: var(--color-neutral-500);
 
 			&:hover {
 				filter: brightness(90%);

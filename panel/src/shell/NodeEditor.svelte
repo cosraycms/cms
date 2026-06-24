@@ -176,7 +176,7 @@
 	@layer panel {
 		.preview {
 			z-index: 999;
-			background-color: color-mix(in srgb, var(--cms-color-neutral-900) 50%, transparent);
+			background-color: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
 			backdrop-filter: blur(0.5rem);
 			position: fixed;
 			top: 0;
@@ -206,15 +206,15 @@
 
 		.cms-preview-close {
 			border: none;
-			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-danger-700);
-			padding: var(--cms-space-1) var(--cms-space-4);
-			color: var(--cms-color-white);
+			border-radius: var(--radius);
+			background-color: var(--color-danger-700);
+			padding: var(--space-1) var(--space-4);
+			color: var(--color-white);
 			cursor: pointer;
 		}
 
 		.cms-preview-close:hover {
-			background-color: color-mix(in srgb, var(--cms-color-danger-700) 86%, black);
+			background-color: color-mix(in srgb, var(--color-danger-700) 86%, black);
 		}
 	}
 </style>

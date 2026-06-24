@@ -51,13 +51,13 @@
 
 		.cms-checkbox-input-wrap {
 			display: flex;
-			height: var(--cms-space-6);
+			height: var(--space-6);
 			align-items: center;
 		}
 
 		.cms-checkbox-content {
-			margin-left: var(--cms-space-3);
-			font-size: var(--cms-font-size-sm);
+			margin-left: var(--space-3);
+			font-size: var(--font-size-sm);
 			line-height: 1.5rem;
 		}
 

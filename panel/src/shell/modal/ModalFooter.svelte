@@ -11,7 +11,7 @@
 <style>
 	@layer panel {
 		.modal-footer {
-			border-color: var(--cms-border-color);
+			border-color: var(--border-color);
 		}
 	}
 </style>

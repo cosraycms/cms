@@ -117,23 +117,23 @@
 	@layer panel {
 		.image {
 			position: relative;
-			border: 1px solid var(--cms-color-neutral-300);
-			background-color: var(--cms-color-neutral-100);
-			padding: var(--cms-space-1);
+			border: 1px solid var(--color-neutral-300);
+			background-color: var(--color-neutral-100);
+			padding: var(--space-1);
 			text-align: center;
 		}
 
 		button.image-title {
 			position: absolute;
-			left: var(--cms-space-1);
-			bottom: var(--cms-space-1);
-			margin-left: var(--cms-space-px);
-			margin-bottom: var(--cms-space-px);
-			padding: 0 var(--cms-space-1);
-			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-white);
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-neutral-600);
+			left: var(--space-1);
+			bottom: var(--space-1);
+			margin-left: var(--space-px);
+			margin-bottom: var(--space-px);
+			padding: 0 var(--space-1);
+			border-radius: var(--radius);
+			background-color: var(--color-white);
+			font-size: var(--font-size-xs);
+			color: var(--color-neutral-600);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -142,15 +142,15 @@
 
 		.image-ext {
 			position: absolute;
-			right: var(--cms-space-1);
-			bottom: var(--cms-space-1);
-			margin-right: var(--cms-space-px);
-			margin-bottom: var(--cms-space-px);
-			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-danger-700);
-			padding: 0 var(--cms-space-1);
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-white);
+			right: var(--space-1);
+			bottom: var(--space-1);
+			margin-right: var(--space-px);
+			margin-bottom: var(--space-px);
+			border-radius: var(--radius);
+			background-color: var(--color-danger-700);
+			padding: 0 var(--space-1);
+			font-size: var(--font-size-xs);
+			color: var(--color-white);
 		}
 
 		.image:hover .overlay,
@@ -181,15 +181,15 @@
 
 		.overlay {
 			position: absolute;
-			top: var(--cms-space-1);
-			right: var(--cms-space-1);
-			bottom: var(--cms-space-1);
-			left: var(--cms-space-1);
+			top: var(--space-1);
+			right: var(--space-1);
+			bottom: var(--space-1);
+			left: var(--space-1);
 			display: flex;
 			flex-direction: row;
 			align-items: center;
 			justify-content: center;
-			gap: var(--cms-space-2);
+			gap: var(--space-2);
 			visibility: hidden;
 			opacity: 0;
 			transition:
@@ -207,11 +207,11 @@
 		}
 
 		.overlay-action-danger {
-			color: var(--cms-color-danger-700);
+			color: var(--color-danger-700);
 		}
 
 		.overlay-action-primary {
-			color: var(--cms-color-info-700);
+			color: var(--color-info-700);
 		}
 
 		.ico {
@@ -231,8 +231,8 @@
 
 		.icobtn {
 			text-align: center;
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-white);
+			font-size: var(--font-size-xs);
+			color: var(--color-white);
 			text-shadow:
 				-1px 0 #000,
 				0 1px #000,

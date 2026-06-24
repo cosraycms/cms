@@ -116,14 +116,14 @@
 			flex-direction: row;
 			flex-wrap: wrap;
 			justify-content: flex-start;
-			gap: var(--cms-space-4);
-			padding: var(--cms-space-4) 0;
+			gap: var(--space-4);
+			padding: var(--space-4) 0;
 		}
 
 		.cms-media-list-files {
-			margin-bottom: var(--cms-space-3);
+			margin-bottom: var(--space-3);
 			flex-direction: column;
-			gap: var(--cms-space-3);
+			gap: var(--space-3);
 		}
 	}
 </style>

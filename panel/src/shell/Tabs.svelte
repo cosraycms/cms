@@ -17,7 +17,7 @@
 <style>
 	@layer panel {
 		.cms-tabs {
-			margin-bottom: var(--cms-space-6);
+			margin-bottom: var(--space-6);
 		}
 	}
 </style>

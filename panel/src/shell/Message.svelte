@@ -81,11 +81,11 @@
 	@layer panel {
 		.cms-message {
 			border-left: 4px solid transparent;
-			padding: var(--cms-space-4);
+			padding: var(--space-4);
 		}
 
 		.cms-message.narrow {
-			padding: var(--cms-space-1) var(--cms-space-2);
+			padding: var(--space-1) var(--space-2);
 		}
 
 		.cms-message-row {
@@ -97,51 +97,51 @@
 		}
 
 		.cms-message-content {
-			margin-left: var(--cms-space-3);
+			margin-left: var(--space-3);
 		}
 
 		.cms-message-content.narrow {
-			margin-left: var(--cms-space-2);
+			margin-left: var(--space-2);
 		}
 
 		.cms-message-text {
-			font-size: var(--cms-font-size-sm);
+			font-size: var(--font-size-sm);
 		}
 
 		.cms-message-success {
-			background-color: color-mix(in srgb, var(--cms-color-success-100) 85%, white);
-			border-left-color: color-mix(in srgb, var(--cms-color-success-600) 70%, white);
+			background-color: color-mix(in srgb, var(--color-success-100) 85%, white);
+			border-left-color: color-mix(in srgb, var(--color-success-600) 70%, white);
 		}
 
 		.cms-message-info {
-			background-color: color-mix(in srgb, var(--cms-color-info-700) 8%, white);
-			border-left-color: color-mix(in srgb, var(--cms-color-info-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-info-700) 8%, white);
+			border-left-color: color-mix(in srgb, var(--color-info-700) 45%, white);
 		}
 
 		.cms-message-warning {
-			background-color: color-mix(in srgb, var(--cms-color-warning-700) 10%, white);
-			border-left-color: color-mix(in srgb, var(--cms-color-warning-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-warning-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--color-warning-700) 45%, white);
 		}
 
 		.cms-message-error {
-			background-color: color-mix(in srgb, var(--cms-color-danger-700) 10%, white);
-			border-left-color: color-mix(in srgb, var(--cms-color-danger-700) 45%, white);
+			background-color: color-mix(in srgb, var(--color-danger-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--color-danger-700) 45%, white);
 		}
 
 		.cms-message-text-success {
-			color: var(--cms-color-success-600);
+			color: var(--color-success-600);
 		}
 
 		.cms-message-text-info {
-			color: var(--cms-color-info-700);
+			color: var(--color-info-700);
 		}
 
 		.cms-message-text-warning {
-			color: var(--cms-color-warning-700);
+			color: var(--color-warning-700);
 		}
 
 		.cms-message-text-error {
-			color: var(--cms-color-danger-700);
+			color: var(--color-danger-700);
 		}
 
 		:global(.message em) {

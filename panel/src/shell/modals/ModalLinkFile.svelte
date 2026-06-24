@@ -30,34 +30,34 @@
 <style>
 	@layer panel {
 		.cms-modal-link-file-wrap {
-			margin-top: var(--cms-space-2);
-			padding-right: var(--cms-space-4);
+			margin-top: var(--space-2);
+			padding-right: var(--space-4);
 		}
 
 		button.cms-modal-link-file-button {
 			display: inline-flex;
 			width: 100%;
 			align-items: center;
-			gap: var(--cms-space-1-5);
-			border: 1px solid var(--cms-color-success-600);
-			border-radius: var(--cms-radius-md);
-			padding: var(--cms-space-2) var(--cms-space-3);
-			font-size: var(--cms-font-size-sm);
+			gap: var(--space-1-5);
+			border: 1px solid var(--color-success-600);
+			border-radius: var(--radius-md);
+			padding: var(--space-2) var(--space-3);
+			font-size: var(--font-size-sm);
 			font-weight: 600;
-			color: var(--cms-color-success-600);
+			color: var(--color-success-600);
 			background: transparent;
-			box-shadow: var(--cms-shadow-sm);
+			box-shadow: var(--shadow-sm);
 			cursor: pointer;
 		}
 
 		button.cms-modal-link-file-button:focus-visible {
-			outline: 2px solid var(--cms-color-success-600);
+			outline: 2px solid var(--color-success-600);
 			outline-offset: 2px;
 		}
 
 		button.active {
-			background-color: var(--cms-color-success-600);
-			color: var(--cms-color-white);
+			background-color: var(--color-success-600);
+			color: var(--color-white);
 		}
 	}
 </style>

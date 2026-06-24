@@ -66,54 +66,54 @@
 		.toasts {
 			position: fixed;
 			z-index: 50;
-			font-size: var(--cms-font-size-sm);
+			font-size: var(--font-size-sm);
 		}
 
 		.toast {
 			position: relative;
 			display: block;
-			margin-bottom: var(--cms-space-2);
-			padding: var(--cms-space-4) var(--cms-space-4) var(--cms-space-5);
+			margin-bottom: var(--space-2);
+			padding: var(--space-4) var(--space-4) var(--space-5);
 			border: none;
 			text-align: left;
 			cursor: pointer;
 		}
 
 		.toast:last-child {
-			margin-bottom: var(--cms-space-4);
+			margin-bottom: var(--space-4);
 		}
 
 		.toast-offset {
-			margin-right: var(--cms-space-4);
+			margin-right: var(--space-4);
 		}
 
 		.toast-success {
-			background-color: var(--cms-color-success-600);
+			background-color: var(--color-success-600);
 		}
 
 		.toast-error {
-			background-color: var(--cms-color-danger-700);
+			background-color: var(--color-danger-700);
 		}
 
 		.toast-warning {
-			background-color: var(--cms-color-warning-700);
+			background-color: var(--color-warning-700);
 		}
 
 		.cms-toast-close-icon {
 			position: absolute;
-			top: var(--cms-space-1);
-			right: var(--cms-space-1);
-			height: var(--cms-space-4);
-			width: var(--cms-space-4);
+			top: var(--space-1);
+			right: var(--space-1);
+			height: var(--space-4);
+			width: var(--space-4);
 			cursor: pointer;
-			border-radius: var(--cms-radius-full);
-			color: var(--cms-color-white);
+			border-radius: var(--radius-full);
+			color: var(--color-white);
 		}
 
 		.pos-bottom {
 			bottom: 0;
 			right: 0;
-			padding-right: var(--cms-space-8);
+			padding-right: var(--space-8);
 		}
 
 		.pos-center {

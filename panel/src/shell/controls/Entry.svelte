@@ -97,7 +97,7 @@
 	@layer panel {
 		.entry {
 			background: white;
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--color-neutral-300);
 			border-radius: 0.375rem;
 			overflow: hidden;
 		}
@@ -108,8 +108,8 @@
 			align-items: center;
 			justify-content: space-between;
 			padding: 0.5rem 0.75rem;
-			background: var(--cms-color-neutral-50);
-			border-bottom: 1px solid var(--cms-color-neutral-200);
+			background: var(--color-neutral-50);
+			border-bottom: 1px solid var(--color-neutral-200);
 		}
 
 		.entry-title {
@@ -123,13 +123,13 @@
 			cursor: pointer;
 
 			&:hover {
-				color: var(--cms-color-info-700);
+				color: var(--color-info-700);
 			}
 		}
 
 		.entry-number {
 			font-weight: 600;
-			color: var(--cms-color-neutral-500);
+			color: var(--color-neutral-500);
 		}
 
 		.entry-label {
@@ -149,7 +149,7 @@
 
 		.entry-field-note {
 			padding: 0.75rem;
-			color: var(--cms-color-danger-700);
+			color: var(--color-danger-700);
 		}
 	}
 </style>

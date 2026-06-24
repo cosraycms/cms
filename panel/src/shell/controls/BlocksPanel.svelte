@@ -176,35 +176,35 @@
 	@layer panel {
 		.cms-blocks-field {
 			display: grid;
-			gap: var(--cms-space-3);
-			padding: var(--cms-space-3);
-			border-radius: var(--cms-radius);
-			border: var(--cms-border);
-			background-color: var(--cms-color-neutral-200);
+			gap: var(--space-3);
+			padding: var(--space-3);
+			border-radius: var(--radius);
+			border: var(--border);
+			background-color: var(--color-neutral-200);
 		}
 
 		.cms-block {
 			position: relative;
 			display: flex;
 			flex-direction: column;
-			border-radius: var(--cms-radius);
-			border: var(--cms-border);
-			background-color: var(--cms-color-white);
-			padding: 0 var(--cms-space-2) var(--cms-space-2);
+			border-radius: var(--radius);
+			border: var(--border);
+			background-color: var(--color-white);
+			padding: 0 var(--space-2) var(--space-2);
 		}
 
 		.cms-blocks-empty {
 			grid-column: 1 / -1;
 			display: flex;
 			justify-content: center;
-			padding: var(--cms-space-4);
+			padding: var(--space-4);
 		}
 
 		.cms-blocks-empty-icon {
 			display: inline-flex;
 			width: 1.25rem;
 			height: 1.25rem;
-			margin-right: var(--cms-space-2);
+			margin-right: var(--space-2);
 		}
 	}
 </style>

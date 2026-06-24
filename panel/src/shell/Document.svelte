@@ -24,8 +24,8 @@
 		.cms-document-inner {
 			margin: 0 auto;
 			width: 100%;
-			max-width: var(--cms-size-7xl);
-			padding: 0 var(--cms-space-8);
+			max-width: var(--size-7xl);
+			padding: 0 var(--space-8);
 		}
 	}
 </style>
