@@ -2,13 +2,23 @@
 button.primary,
 button.secondary,
 button.danger {
+	--button-bg: var(--button-primary-bg);
+	--button-text: var(--button-primary-text);
+	--button-border: var(--button-primary-border);
+	--button-hover-bg: var(--button-primary-hover-bg);
+	--button-hover-text: var(--button-primary-hover-text);
+	--button-hover-border: var(--button-primary-hover-border);
+	--button-ring: var(--button-primary-ring);
+
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: var(--space-2);
 	padding: 0.625rem 0.875rem;
-	border: 0;
+	border: 1px solid var(--button-border);
 	border-radius: var(--radius-md);
+	background-color: var(--button-bg);
+	color: var(--button-text);
 	font-size: var(--font-size-sm);
 	font-weight: 600;
 	line-height: 1.25rem;
@@ -16,6 +26,7 @@ button.danger {
 	box-shadow: var(--shadow-sm);
 	transition:
 		background-color 120ms ease,
+		border-color 120ms ease,
 		color 120ms ease,
 		opacity 120ms ease,
 		transform 120ms ease;
@@ -41,52 +52,53 @@ button.danger:focus-visible {
 	outline-offset: 2px;
 }
 
+.cms-button:hover,
+button.primary:hover,
+button.secondary:hover,
+button.danger:hover {
+	border-color: var(--button-hover-border);
+	background-color: var(--button-hover-bg);
+	color: var(--button-hover-text);
+}
+
+.cms-button:focus-visible,
+button.primary:focus-visible,
+button.secondary:focus-visible,
+button.danger:focus-visible {
+	outline-color: var(--button-ring);
+}
+
 .cms-button-primary,
 .primary {
-	background-color: var(--color-success);
-	color: var(--color-white);
-}
-
-.cms-button-primary:hover,
-.primary:hover {
-	background-color: var(--color-success-hover);
-}
-
-.cms-button-primary:focus-visible,
-button.primary:focus-visible {
-	outline-color: var(--color-success);
+	--button-bg: var(--button-primary-bg);
+	--button-text: var(--button-primary-text);
+	--button-border: var(--button-primary-border);
+	--button-hover-bg: var(--button-primary-hover-bg);
+	--button-hover-text: var(--button-primary-hover-text);
+	--button-hover-border: var(--button-primary-hover-border);
+	--button-ring: var(--button-primary-ring);
 }
 
 .cms-button-secondary,
 .secondary {
-	background-color: var(--color-info);
-	color: var(--color-white);
-}
-
-.cms-button-secondary:hover,
-.secondary:hover {
-	background-color: var(--color-info-hover);
-}
-
-.cms-button-secondary:focus-visible,
-button.secondary:focus-visible {
-	outline-color: var(--color-info);
+	--button-bg: var(--button-secondary-bg);
+	--button-text: var(--button-secondary-text);
+	--button-border: var(--button-secondary-border);
+	--button-hover-bg: var(--button-secondary-hover-bg);
+	--button-hover-text: var(--button-secondary-hover-text);
+	--button-hover-border: var(--button-secondary-hover-border);
+	--button-ring: var(--button-secondary-ring);
 }
 
 .cms-button-danger,
 .danger {
-	background-color: var(--color-danger);
-	color: var(--color-white);
-}
-
-.cms-button-danger:hover,
-.danger:hover {
-	background-color: var(--color-danger-hover);
-}
-
-.cms-button-danger:focus-visible,
-button.danger:focus-visible {
-	outline-color: var(--color-danger);
+	--button-bg: var(--button-danger-bg);
+	--button-text: var(--button-danger-text);
+	--button-border: var(--button-danger-border);
+	--button-hover-bg: var(--button-danger-hover-bg);
+	--button-hover-text: var(--button-danger-hover-text);
+	--button-hover-border: var(--button-danger-hover-border);
+	--button-ring: var(--button-danger-ring);
 }
 
 .cms-button[disabled],
@@ -103,6 +115,7 @@ button[disabled] {
 }
 
 .cms-button.cms-button-menu-main {
+	border-right: 0;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
 	box-shadow: none;
@@ -111,7 +124,7 @@ button[disabled] {
 .cms-button.cms-button-menu-toggle {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
-	border-left: 1px solid rgba(0, 0, 0, 0.15);
+	border-left-color: color-mix(in oklch, var(--button-border), black 14%);
 	padding: 0.625rem;
 	box-shadow: none;
 }

@@ -144,6 +144,33 @@
 	--color-danger-surface: color-mix(in oklch, var(--color-danger), white 90%);
 
 	/**
+	 * Button tokens
+	 */
+	--button-primary-bg: var(--color-accent);
+	--button-primary-text: var(--color-white);
+	--button-primary-border: var(--button-primary-bg);
+	--button-primary-hover-bg: var(--color-accent-hover);
+	--button-primary-hover-text: var(--button-primary-text);
+	--button-primary-hover-border: var(--button-primary-hover-bg);
+	--button-primary-ring: var(--color-accent-ring);
+
+	--button-secondary-bg: var(--color-surface);
+	--button-secondary-text: var(--color-text);
+	--button-secondary-border: var(--color-border-strong);
+	--button-secondary-hover-bg: var(--color-hover);
+	--button-secondary-hover-text: var(--button-secondary-text);
+	--button-secondary-hover-border: var(--button-secondary-border);
+	--button-secondary-ring: var(--color-accent-ring);
+
+	--button-danger-bg: var(--color-danger);
+	--button-danger-text: var(--color-white);
+	--button-danger-border: var(--button-danger-bg);
+	--button-danger-hover-bg: var(--color-danger-hover);
+	--button-danger-hover-text: var(--button-danger-text);
+	--button-danger-hover-border: var(--button-danger-hover-bg);
+	--button-danger-ring: var(--color-danger);
+
+	/**
 	 * Shell tokens
 	 */
 	--row-height: 3.5rem;
