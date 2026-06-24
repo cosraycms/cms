@@ -80,6 +80,9 @@
 	--radius-3xl: 1.5rem;
 	--radius-full: 9999px;
 
+	/**
+	 * Color palette
+	 */
 	--color-white: #fff;
 	--color-black: #000;
 	--color-neutral-50: #fbfaf9;
