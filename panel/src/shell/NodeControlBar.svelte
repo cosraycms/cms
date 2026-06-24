@@ -17,6 +17,7 @@
 		uid: string;
 		collectionPath: string;
 		collectionName: string;
+		swapTarget?: string | null;
 		deletable: boolean;
 		locked?: boolean;
 		save: (publish: boolean) => void | Promise<unknown>;
@@ -27,6 +28,7 @@
 		uid = $bindable(),
 		collectionPath,
 		collectionName,
+		swapTarget = '#main',
 		deletable,
 		locked = false,
 		save,
@@ -53,7 +55,7 @@
 <header class="cms-node-topbar">
 	<div class="inner">
 		<div class="trail">
-			<Breadcrumbs href={collectionPath} name={collectionName} />
+			<Breadcrumbs href={collectionPath} name={collectionName} {swapTarget} />
 		</div>
 		<div class="actions">
 			{#if deletable && !locked}

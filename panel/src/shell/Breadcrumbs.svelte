@@ -6,16 +6,17 @@
 	type Props = {
 		href: string;
 		name: string;
+		swapTarget?: string | null;
 	};
 
-	let { href, name }: Props = $props();
+	let { href, name, swapTarget = null }: Props = $props();
 </script>
 
 <nav class="cms-breadcrumbs" aria-label="Breadcrumb">
 	<IcoDocumentTree />
 	<IcoChevronRight />
 	<span>
-		<Link {href} class="cms-breadcrumb-link">
+		<Link {href} hxTarget={swapTarget} class="cms-breadcrumb-link">
 			{name}
 		</Link>
 	</span>

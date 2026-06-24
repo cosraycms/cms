@@ -33,9 +33,10 @@
 			dir?: string;
 		};
 		save: (published: boolean) => Promise<boolean>;
+		swapTarget?: string | null;
 	};
 
-	let { node = $bindable(), collection, save }: Props = $props();
+	let { node = $bindable(), collection, save, swapTarget = '#main' }: Props = $props();
 
 	let activeTab = $state('content');
 	let showPreview: string | null = $state(null);
@@ -137,6 +138,7 @@
 		bind:uid={node.uid}
 		{collectionPath}
 		collectionName={collection.name}
+		{swapTarget}
 		deletable={node.deletable}
 		preview={node.type.routable && node.type.renderable ? preview : null}
 		{save}
