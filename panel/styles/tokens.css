@@ -1,5 +1,7 @@
 :root {
-	/* Canonical design tokens */
+	/**
+	 * Primitive tokens
+	 */
 	--font-sans:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
@@ -115,12 +117,14 @@
 	--blur-sm: 4px;
 	--fraction-2-5: 40%;
 
+	/**
+	 * Semantic tokens
+	 */
 	--color-high-light: var(--color-neutral-100);
 	--color-high-dull: var(--color-neutral-300);
 	--color-high: var(--color-neutral-900);
 	--color-high-dark: var(--color-black);
 
-	/* Panel shell tokens */
 	--color-canvas: #f3f4f6;
 	--color-surface: #ffffff;
 	--color-rail: var(--color-canvas);
@@ -143,6 +147,9 @@
 	--color-danger: #dc4d4d;
 	--color-danger-soft: #fbeaea;
 
+	/**
+	 * Shell tokens
+	 */
 	--row-height: 3.5rem;
 	--topbar-bg: var(--color-canvas);
 	--sidebar-width: 15.5rem;
