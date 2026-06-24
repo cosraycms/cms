@@ -16,17 +16,19 @@
 </div>
 
 <style>
-	.cms-pane {
-		flex: 1 1 auto;
-	}
+	@layer panel {
+		.cms-pane {
+			flex: 1 1 auto;
+		}
 
-	.cms-pane-card {
-		max-width: 80rem;
-		margin: 0 auto var(--cms-space-12);
-		padding-top: var(--cms-space-2);
-		padding-bottom: var(--cms-space-4);
-		border: 1px solid var(--cms-color-neutral-200);
-		background-color: var(--cms-color-white);
-		box-shadow: var(--cms-shadow);
+		.cms-pane-card {
+			max-width: 80rem;
+			margin: 0 auto var(--cms-space-12);
+			padding-top: var(--cms-space-2);
+			padding-bottom: var(--cms-space-4);
+			border: 1px solid var(--cms-color-neutral-200);
+			background-color: var(--cms-color-white);
+			box-shadow: var(--cms-shadow);
+		}
 	}
 </style>

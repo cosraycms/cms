@@ -9,14 +9,16 @@
 </div>
 
 <style>
-	.image-preview {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+	@layer panel {
+		.image-preview {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
-	img {
-		max-width: 100%;
-		min-width: 40rem;
+		img {
+			max-width: 100%;
+			min-width: 40rem;
+		}
 	}
 </style>

@@ -88,27 +88,29 @@
 </div>
 
 <style>
-	.cms-entry-controls {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: var(--cms-space-2);
-	}
-
-	div button {
-		height: var(--cms-space-4);
-		width: var(--cms-space-4);
-
-		&[disabled] {
-			color: rgb(209 213 219);
+	@layer panel {
+		.cms-entry-controls {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: var(--cms-space-2);
 		}
-	}
 
-	.remove {
-		color: var(--cms-color-warning-700);
-	}
+		div button {
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
 
-	.collapse-btn {
-		color: var(--cms-color-neutral-500);
+			&[disabled] {
+				color: rgb(209 213 219);
+			}
+		}
+
+		.remove {
+			color: var(--cms-color-warning-700);
+		}
+
+		.collapse-btn {
+			color: var(--cms-color-neutral-500);
+		}
 	}
 </style>

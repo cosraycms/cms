@@ -28,21 +28,23 @@
 </span>
 
 <style>
-	.locale-tab {
-		display: inline-block;
-		font-size: var(--cms-font-size-sm);
-		box-shadow: 0;
-		padding: 0 0.5rem;
-		font-weight: normal;
+	@layer panel {
+		.locale-tab {
+			display: inline-block;
+			font-size: var(--cms-font-size-sm);
+			box-shadow: 0;
+			padding: 0 0.5rem;
+			font-weight: normal;
 
-		&.active {
-			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-neutral-200);
-			color: var(--cms-color-black);
+			&.active {
+				border-radius: var(--cms-radius);
+				background-color: var(--cms-color-neutral-200);
+				color: var(--cms-color-black);
+			}
 		}
-	}
 
-	.locale-tabs {
-		flex-shrink: 0;
+		.locale-tabs {
+			flex-shrink: 0;
+		}
 	}
 </style>

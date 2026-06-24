@@ -119,63 +119,65 @@
 </div>
 
 <style>
-	.cms-settings {
-		padding: var(--cms-space-4);
-	}
-
-	@media (min-width: 640px) {
+	@layer panel {
 		.cms-settings {
-			padding: var(--cms-space-6);
+			padding: var(--cms-space-4);
 		}
-	}
 
-	@media (min-width: 768px) {
-		.cms-settings {
-			padding: var(--cms-space-8);
+		@media (min-width: 640px) {
+			.cms-settings {
+				padding: var(--cms-space-6);
+			}
 		}
-	}
 
-	.cms-settings-handle-value {
-		width: 100%;
-	}
-
-	.cms-settings-paths {
-		margin-top: var(--cms-space-4);
-		margin-bottom: var(--cms-space-8);
-		display: table;
-		width: 100%;
-	}
-
-	.cms-settings-path {
-		display: table-row;
-
-		& > div {
-			padding: var(--cms-space-2);
-			display: table-cell;
+		@media (min-width: 768px) {
+			.cms-settings {
+				padding: var(--cms-space-8);
+			}
 		}
-	}
 
-	.cms-settings-path-value {
-		width: 100%;
-	}
+		.cms-settings-handle-value {
+			width: 100%;
+		}
 
-	.cms-settings-renderable {
-		max-width: var(--cms-size-3xl);
-	}
+		.cms-settings-paths {
+			margin-top: var(--cms-space-4);
+			margin-bottom: var(--cms-space-8);
+			display: table;
+			width: 100%;
+		}
 
-	.cms-settings-section + .cms-settings-section {
-		margin-top: var(--cms-space-4);
-	}
+		.cms-settings-path {
+			display: table-row;
 
-	.cms-settings-row {
-		display: flex;
-		flex-direction: row;
-		align-items: flex-start;
-		gap: var(--cms-space-4);
-		margin-top: var(--cms-space-4);
-	}
+			& > div {
+				padding: var(--cms-space-2);
+				display: table-cell;
+			}
+		}
 
-	.cms-settings-value {
-		padding-top: var(--cms-space-px);
+		.cms-settings-path-value {
+			width: 100%;
+		}
+
+		.cms-settings-renderable {
+			max-width: var(--cms-size-3xl);
+		}
+
+		.cms-settings-section + .cms-settings-section {
+			margin-top: var(--cms-space-4);
+		}
+
+		.cms-settings-row {
+			display: flex;
+			flex-direction: row;
+			align-items: flex-start;
+			gap: var(--cms-space-4);
+			margin-top: var(--cms-space-4);
+		}
+
+		.cms-settings-value {
+			padding-top: var(--cms-space-px);
+		}
 	}
 </style>

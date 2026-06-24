@@ -101,38 +101,40 @@
 </div>
 
 <style>
-	.cms-blocks-size-buttons {
-		display: flex;
-		flex: 1 1 auto;
-		flex-direction: row;
-		align-items: center;
-		gap: var(--cms-space-3);
-		padding: var(--cms-space-2) 0;
-	}
-
-	.cms-blocks-size-buttons-inline {
-		justify-content: flex-start;
-	}
-
-	.cms-blocks-size-buttons-dropdown {
-		justify-content: center;
-	}
-
-	div button {
-		position: relative;
-		height: var(--cms-space-4);
-		width: var(--cms-space-4);
-
-		&[disabled] {
-			color: var(--cms-color-neutral-300);
+	@layer panel {
+		.cms-blocks-size-buttons {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: row;
+			align-items: center;
+			gap: var(--cms-space-3);
+			padding: var(--cms-space-2) 0;
 		}
-	}
 
-	.width-minus,
-	.width-plus {
-		span.icon {
-			display: block;
-			transform: rotate(90deg);
+		.cms-blocks-size-buttons-inline {
+			justify-content: flex-start;
+		}
+
+		.cms-blocks-size-buttons-dropdown {
+			justify-content: center;
+		}
+
+		div button {
+			position: relative;
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
+
+			&[disabled] {
+				color: var(--cms-color-neutral-300);
+			}
+		}
+
+		.width-minus,
+		.width-plus {
+			span.icon {
+				display: block;
+				transform: rotate(90deg);
+			}
 		}
 	}
 </style>

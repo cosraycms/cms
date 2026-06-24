@@ -173,46 +173,48 @@
 {/if}
 
 <style>
-	.preview {
-		z-index: 999;
-		background-color: color-mix(in srgb, var(--cms-color-neutral-900) 50%, transparent);
-		backdrop-filter: blur(0.5rem);
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
+	@layer panel {
+		.preview {
+			z-index: 999;
+			background-color: color-mix(in srgb, var(--cms-color-neutral-900) 50%, transparent);
+			backdrop-filter: blur(0.5rem);
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
 
-		button {
-			position: absolute;
-			top: 5px;
-			right: 5px;
+			button {
+				position: absolute;
+				top: 5px;
+				right: 5px;
+			}
+
+			iframe {
+				width: 90vw;
+				height: 90vh;
+				margin-top: 5vh;
+				margin-left: 5vw;
+			}
 		}
 
-		iframe {
-			width: 90vw;
-			height: 90vh;
-			margin-top: 5vh;
-			margin-left: 5vw;
+		.cms-node-shell {
+			display: flex;
+			height: 100vh;
+			flex-direction: column;
 		}
-	}
 
-	.cms-node-shell {
-		display: flex;
-		height: 100vh;
-		flex-direction: column;
-	}
+		.cms-preview-close {
+			border: none;
+			border-radius: var(--cms-radius);
+			background-color: var(--cms-color-danger-700);
+			padding: var(--cms-space-1) var(--cms-space-4);
+			color: var(--cms-color-white);
+			cursor: pointer;
+		}
 
-	.cms-preview-close {
-		border: none;
-		border-radius: var(--cms-radius);
-		background-color: var(--cms-color-danger-700);
-		padding: var(--cms-space-1) var(--cms-space-4);
-		color: var(--cms-color-white);
-		cursor: pointer;
-	}
-
-	.cms-preview-close:hover {
-		background-color: color-mix(in srgb, var(--cms-color-danger-700) 86%, black);
+		.cms-preview-close:hover {
+			background-color: color-mix(in srgb, var(--cms-color-danger-700) 86%, black);
+		}
 	}
 </style>

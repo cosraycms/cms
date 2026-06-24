@@ -44,11 +44,13 @@
 </div>
 
 <style>
-	.modal-close-button {
-		color: var(--cms-color-neutral-500);
+	@layer panel {
+		.modal-close-button {
+			color: var(--cms-color-neutral-500);
 
-		&:hover {
-			filter: brightness(90%);
+			&:hover {
+				filter: brightness(90%);
+			}
 		}
 	}
 </style>

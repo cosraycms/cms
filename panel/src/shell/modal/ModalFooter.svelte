@@ -9,7 +9,9 @@
 </div>
 
 <style>
-	.modal-footer {
-		border-color: var(--cms-border-color);
+	@layer panel {
+		.modal-footer {
+			border-color: var(--cms-border-color);
+		}
 	}
 </style>

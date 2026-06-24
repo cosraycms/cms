@@ -78,74 +78,76 @@
 {/if}
 
 <style>
-	.cms-message {
-		border-left: 4px solid transparent;
-		padding: var(--cms-space-4);
-	}
+	@layer panel {
+		.cms-message {
+			border-left: 4px solid transparent;
+			padding: var(--cms-space-4);
+		}
 
-	.cms-message.narrow {
-		padding: var(--cms-space-1) var(--cms-space-2);
-	}
+		.cms-message.narrow {
+			padding: var(--cms-space-1) var(--cms-space-2);
+		}
 
-	.cms-message-row {
-		display: flex;
-	}
+		.cms-message-row {
+			display: flex;
+		}
 
-	.cms-message-icon {
-		flex-shrink: 0;
-	}
+		.cms-message-icon {
+			flex-shrink: 0;
+		}
 
-	.cms-message-content {
-		margin-left: var(--cms-space-3);
-	}
+		.cms-message-content {
+			margin-left: var(--cms-space-3);
+		}
 
-	.cms-message-content.narrow {
-		margin-left: var(--cms-space-2);
-	}
+		.cms-message-content.narrow {
+			margin-left: var(--cms-space-2);
+		}
 
-	.cms-message-text {
-		font-size: var(--cms-font-size-sm);
-	}
+		.cms-message-text {
+			font-size: var(--cms-font-size-sm);
+		}
 
-	.cms-message-success {
-		background-color: color-mix(in srgb, var(--cms-color-success-100) 85%, white);
-		border-left-color: color-mix(in srgb, var(--cms-color-success-600) 70%, white);
-	}
+		.cms-message-success {
+			background-color: color-mix(in srgb, var(--cms-color-success-100) 85%, white);
+			border-left-color: color-mix(in srgb, var(--cms-color-success-600) 70%, white);
+		}
 
-	.cms-message-info {
-		background-color: color-mix(in srgb, var(--cms-color-info-700) 8%, white);
-		border-left-color: color-mix(in srgb, var(--cms-color-info-700) 45%, white);
-	}
+		.cms-message-info {
+			background-color: color-mix(in srgb, var(--cms-color-info-700) 8%, white);
+			border-left-color: color-mix(in srgb, var(--cms-color-info-700) 45%, white);
+		}
 
-	.cms-message-warning {
-		background-color: color-mix(in srgb, var(--cms-color-warning-700) 10%, white);
-		border-left-color: color-mix(in srgb, var(--cms-color-warning-700) 45%, white);
-	}
+		.cms-message-warning {
+			background-color: color-mix(in srgb, var(--cms-color-warning-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--cms-color-warning-700) 45%, white);
+		}
 
-	.cms-message-error {
-		background-color: color-mix(in srgb, var(--cms-color-danger-700) 10%, white);
-		border-left-color: color-mix(in srgb, var(--cms-color-danger-700) 45%, white);
-	}
+		.cms-message-error {
+			background-color: color-mix(in srgb, var(--cms-color-danger-700) 10%, white);
+			border-left-color: color-mix(in srgb, var(--cms-color-danger-700) 45%, white);
+		}
 
-	.cms-message-text-success {
-		color: var(--cms-color-success-600);
-	}
+		.cms-message-text-success {
+			color: var(--cms-color-success-600);
+		}
 
-	.cms-message-text-info {
-		color: var(--cms-color-info-700);
-	}
+		.cms-message-text-info {
+			color: var(--cms-color-info-700);
+		}
 
-	.cms-message-text-warning {
-		color: var(--cms-color-warning-700);
-	}
+		.cms-message-text-warning {
+			color: var(--cms-color-warning-700);
+		}
 
-	.cms-message-text-error {
-		color: var(--cms-color-danger-700);
-	}
+		.cms-message-text-error {
+			color: var(--cms-color-danger-700);
+		}
 
-	:global(.message em) {
-		white-space: nowrap;
-		font-weight: 600;
-		font-style: italic;
+		:global(.message em) {
+			white-space: nowrap;
+			font-weight: 600;
+			font-style: italic;
+		}
 	}
 </style>

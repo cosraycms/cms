@@ -100,26 +100,28 @@
 </div>
 
 <style>
-	.cms-blocks-youtube-field-row {
-		margin-top: var(--cms-space-2);
-	}
+	@layer panel {
+		.cms-blocks-youtube-field-row {
+			margin-top: var(--cms-space-2);
+		}
 
-	.cms-blocks-youtube-ratio-row {
-		display: flex;
-		flex-direction: row;
-		gap: var(--cms-space-4);
-		margin-top: var(--cms-space-2);
-	}
+		.cms-blocks-youtube-ratio-row {
+			display: flex;
+			flex-direction: row;
+			gap: var(--cms-space-4);
+			margin-top: var(--cms-space-2);
+		}
 
-	.cms-blocks-youtube-frame {
-		position: relative;
-	}
+		.cms-blocks-youtube-frame {
+			position: relative;
+		}
 
-	.cms-blocks-youtube-iframe {
-		position: absolute;
-		top: 0;
-		left: 0;
-		height: 100%;
-		width: 100%;
+		.cms-blocks-youtube-iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+		}
 	}
 </style>

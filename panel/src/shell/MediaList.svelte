@@ -107,21 +107,23 @@
 {/if}
 
 <style>
-	.cms-media-list {
-		display: flex;
-	}
+	@layer panel {
+		.cms-media-list {
+			display: flex;
+		}
 
-	.cms-media-list-images {
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		gap: var(--cms-space-4);
-		padding: var(--cms-space-4) 0;
-	}
+		.cms-media-list-images {
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			gap: var(--cms-space-4);
+			padding: var(--cms-space-4) 0;
+		}
 
-	.cms-media-list-files {
-		margin-bottom: var(--cms-space-3);
-		flex-direction: column;
-		gap: var(--cms-space-3);
+		.cms-media-list-files {
+			margin-bottom: var(--cms-space-3);
+			flex-direction: column;
+			gap: var(--cms-space-3);
+		}
 	}
 </style>

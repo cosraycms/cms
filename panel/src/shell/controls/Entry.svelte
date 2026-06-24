@@ -94,60 +94,62 @@
 </div>
 
 <style>
-	.entry {
-		background: white;
-		border: 1px solid var(--cms-color-neutral-300);
-		border-radius: 0.375rem;
-		overflow: hidden;
-	}
-
-	.entry-header {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.5rem 0.75rem;
-		background: var(--cms-color-neutral-50);
-		border-bottom: 1px solid var(--cms-color-neutral-200);
-	}
-
-	.entry-title {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		gap: 0.5rem;
-		flex-grow: 1;
-		text-align: left;
-		font-size: 0.875rem;
-		cursor: pointer;
-
-		&:hover {
-			color: var(--cms-color-info-700);
+	@layer panel {
+		.entry {
+			background: white;
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: 0.375rem;
+			overflow: hidden;
 		}
-	}
 
-	.entry-number {
-		font-weight: 600;
-		color: var(--cms-color-neutral-500);
-	}
+		.entry-header {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.5rem 0.75rem;
+			background: var(--cms-color-neutral-50);
+			border-bottom: 1px solid var(--cms-color-neutral-200);
+		}
 
-	.entry-label {
-		font-weight: 500;
-	}
+		.entry-title {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: 0.5rem;
+			flex-grow: 1;
+			text-align: left;
+			font-size: 0.875rem;
+			cursor: pointer;
 
-	.entry-body {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		padding: 0.75rem;
-	}
+			&:hover {
+				color: var(--cms-color-info-700);
+			}
+		}
 
-	.entry-field {
-		min-width: 200px;
-	}
+		.entry-number {
+			font-weight: 600;
+			color: var(--cms-color-neutral-500);
+		}
 
-	.entry-field-note {
-		padding: 0.75rem;
-		color: var(--cms-color-danger-700);
+		.entry-label {
+			font-weight: 500;
+		}
+
+		.entry-body {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			padding: 0.75rem;
+		}
+
+		.entry-field {
+			min-width: 200px;
+		}
+
+		.entry-field-note {
+			padding: 0.75rem;
+			color: var(--cms-color-danger-700);
+		}
 	}
 </style>

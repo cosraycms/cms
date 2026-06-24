@@ -79,11 +79,13 @@
 </div>
 
 <style>
-	.cms-node-controls {
-		display: flex;
-		flex-direction: row;
-		justify-content: flex-end;
-		gap: var(--cms-space-4);
-		padding: var(--cms-space-6) var(--cms-space-4);
+	@layer panel {
+		.cms-node-controls {
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-end;
+			gap: var(--cms-space-4);
+			padding: var(--cms-space-6) var(--cms-space-4);
+		}
 	}
 </style>

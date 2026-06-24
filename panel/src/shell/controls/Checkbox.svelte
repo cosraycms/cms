@@ -42,25 +42,27 @@
 </Field>
 
 <style>
-	.cms-checkbox-wrap {
-		position: relative;
-		display: flex;
-		align-items: flex-start;
-	}
+	@layer panel {
+		.cms-checkbox-wrap {
+			position: relative;
+			display: flex;
+			align-items: flex-start;
+		}
 
-	.cms-checkbox-input-wrap {
-		display: flex;
-		height: var(--cms-space-6);
-		align-items: center;
-	}
+		.cms-checkbox-input-wrap {
+			display: flex;
+			height: var(--cms-space-6);
+			align-items: center;
+		}
 
-	.cms-checkbox-content {
-		margin-left: var(--cms-space-3);
-		font-size: var(--cms-font-size-sm);
-		line-height: 1.5rem;
-	}
+		.cms-checkbox-content {
+			margin-left: var(--cms-space-3);
+			font-size: var(--cms-font-size-sm);
+			line-height: 1.5rem;
+		}
 
-	input[type='checkbox'] {
-		border-width: 1.5px;
+		input[type='checkbox'] {
+			border-width: 1.5px;
+		}
 	}
 </style>

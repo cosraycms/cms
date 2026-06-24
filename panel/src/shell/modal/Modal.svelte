@@ -42,7 +42,9 @@
 {@render children()}
 
 <style>
-	.modal-container {
-		background-color: var(--cms-color-white, #fff);
+	@layer panel {
+		.modal-container {
+			background-color: var(--cms-color-white, #fff);
+		}
 	}
 </style>

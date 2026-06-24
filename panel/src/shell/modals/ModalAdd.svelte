@@ -65,21 +65,23 @@
 </ModalFooter>
 
 <style>
-	.cms-modal-add-types {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: var(--cms-space-4);
-		margin-bottom: var(--cms-space-8);
-	}
+	@layer panel {
+		.cms-modal-add-types {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: var(--cms-space-4);
+			margin-bottom: var(--cms-space-8);
+		}
 
-	:global(.cms-modal-add-type) {
-		border: 1px solid var(--cms-color-info-700);
-		background-color: var(--cms-color-white);
-		color: var(--cms-color-info-700);
-	}
+		:global(.cms-modal-add-type) {
+			border: 1px solid var(--cms-color-info-700);
+			background-color: var(--cms-color-white);
+			color: var(--cms-color-info-700);
+		}
 
-	:global(.cms-modal-add-type.is-selected) {
-		background-color: var(--cms-color-info-700);
-		color: var(--cms-color-white);
+		:global(.cms-modal-add-type.is-selected) {
+			background-color: var(--cms-color-info-700);
+			color: var(--cms-color-white);
+		}
 	}
 </style>

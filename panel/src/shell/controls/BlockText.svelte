@@ -32,11 +32,13 @@
 </div>
 
 <style>
-	.cms-blocks-text-body {
-		flex-grow: 1;
-	}
+	@layer panel {
+		.cms-blocks-text-body {
+			flex-grow: 1;
+		}
 
-	textarea {
-		height: 100%;
+		textarea {
+			height: 100%;
+		}
 	}
 </style>

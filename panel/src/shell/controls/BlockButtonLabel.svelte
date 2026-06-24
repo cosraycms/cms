@@ -13,20 +13,22 @@
 {/if}
 
 <style>
-	span.block-button-label {
-		position: absolute;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: var(--cms-radius-full);
-		background-color: var(--cms-color-danger-700);
-		font-weight: 600;
-		color: var(--cms-color-white);
-		font-size: 9px;
-		height: 12px;
-		width: 12px;
-		line-height: 9px;
-		top: -13px;
-		left: 3px;
+	@layer panel {
+		span.block-button-label {
+			position: absolute;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: var(--cms-radius-full);
+			background-color: var(--cms-color-danger-700);
+			font-weight: 600;
+			color: var(--cms-color-white);
+			font-size: 9px;
+			height: 12px;
+			width: 12px;
+			line-height: 9px;
+			top: -13px;
+			left: 3px;
+		}
 	}
 </style>

@@ -61,8 +61,10 @@
 </div>
 
 <style>
-	.field-grid {
-		display: grid;
-		grid-template-columns: repeat(100, minmax(0, 1fr));
+	@layer panel {
+		.field-grid {
+			display: grid;
+			grid-template-columns: repeat(100, minmax(0, 1fr));
+		}
 	}
 </style>

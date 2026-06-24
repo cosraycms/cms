@@ -187,33 +187,35 @@
 </Field>
 
 <style>
-	.entries-field {
-		margin-top: 0.5rem;
-		border: 1px solid var(--cms-color-neutral-300);
-		border-radius: 0.375rem;
-		background: var(--cms-color-neutral-200);
-		padding: 0.75rem;
-	}
+	@layer panel {
+		.entries-field {
+			margin-top: 0.5rem;
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: 0.375rem;
+			background: var(--cms-color-neutral-200);
+			padding: 0.75rem;
+		}
 
-	.entries-items {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
+		.entries-items {
+			display: flex;
+			flex-direction: column;
+			gap: 0.75rem;
+		}
 
-	.entries-add {
-		display: flex;
-		justify-content: center;
-		gap: 0.5rem;
-		margin-top: 0.75rem;
-		padding-top: 0.75rem;
-		border-top: 1px dashed var(--cms-color-neutral-300);
-	}
+		.entries-add {
+			display: flex;
+			justify-content: center;
+			gap: 0.5rem;
+			margin-top: 0.75rem;
+			padding-top: 0.75rem;
+			border-top: 1px dashed var(--cms-color-neutral-300);
+		}
 
-	.entries-empty {
-		display: flex;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 1rem;
+		.entries-empty {
+			display: flex;
+			justify-content: center;
+			gap: 0.5rem;
+			padding: 1rem;
+		}
 	}
 </style>

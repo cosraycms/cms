@@ -295,103 +295,105 @@
 {/if}
 
 <style>
-	.upload {
-		display: flex;
-		width: 100%;
-		height: 100%;
-		flex-direction: column;
-
-		&.upload-inline {
-			margin-top: var(--cms-space-6);
-		}
-
-		&.upload-multiple {
-			flex-direction: column;
-		}
-
-		&.required .dragdrop {
-			border-left-width: 4px;
-			border-left-color: var(--cms-color-danger-700);
-			border-left-style: solid;
-		}
-	}
-
-	@media (min-width: 768px) {
+	@layer panel {
 		.upload {
-			flex-direction: row;
+			display: flex;
+			width: 100%;
+			height: 100%;
+			flex-direction: column;
+
+			&.upload-inline {
+				margin-top: var(--cms-space-6);
+			}
+
+			&.upload-multiple {
+				flex-direction: column;
+			}
+
+			&.required .dragdrop {
+				border-left-width: 4px;
+				border-left-color: var(--cms-color-danger-700);
+				border-left-style: solid;
+			}
 		}
-	}
 
-	.dragdrop {
-		display: flex;
-		flex: 1 1 auto;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		border: 2px dashed var(--cms-color-neutral-300);
-		border-radius: var(--cms-radius-md);
-		background-color: var(--cms-color-neutral-100);
-		padding: var(--cms-space-4) var(--cms-space-2);
-		text-align: center;
-		vertical-align: middle;
-	}
+		@media (min-width: 768px) {
+			.upload {
+				flex-direction: row;
+			}
+		}
 
-	.dragdrop.dragging {
-		border-color: var(--cms-color-info-700);
-		background-color: color-mix(
-			in srgb,
-			var(--cms-color-info-700) 10%,
-			var(--cms-color-neutral-100)
-		);
-	}
+		.dragdrop {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			border: 2px dashed var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-4) var(--cms-space-2);
+			text-align: center;
+			vertical-align: middle;
+		}
 
-	.upload-drop-label {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		gap: var(--cms-space-2);
-		color: var(--cms-color-neutral-600);
-	}
+		.dragdrop.dragging {
+			border-color: var(--cms-color-info-700);
+			background-color: color-mix(
+				in srgb,
+				var(--cms-color-info-700) 10%,
+				var(--cms-color-neutral-100)
+			);
+		}
 
-	.upload-drop-icon {
-		display: inline-block;
-		width: var(--cms-space-6);
-		height: var(--cms-space-6);
-	}
+		.upload-drop-label {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			gap: var(--cms-space-2);
+			color: var(--cms-color-neutral-600);
+		}
 
-	.upload input {
-		position: absolute !important;
-		height: 1px;
-		width: 1px;
-		overflow: hidden;
-		clip: rect(1px 1px 1px 1px);
-		clip: rect(1px, 1px, 1px, 1px);
-		white-space: nowrap;
-	}
+		.upload-drop-icon {
+			display: inline-block;
+			width: var(--cms-space-6);
+			height: var(--cms-space-6);
+		}
 
-	.dragdrop:hover {
-		cursor: pointer;
-	}
+		.upload input {
+			position: absolute !important;
+			height: 1px;
+			width: 1px;
+			overflow: hidden;
+			clip: rect(1px 1px 1px 1px);
+			clip: rect(1px, 1px, 1px, 1px);
+			white-space: nowrap;
+		}
 
-	:global(.dragdrop > .upload-drop-label svg) {
-		display: inline;
-		margin-bottom: var(--cms-space-2);
-	}
-	:global(.dragdrop > .upload-drop-label u) {
-		color: var(--cms-color-info-700);
-	}
+		.dragdrop:hover {
+			cursor: pointer;
+		}
 
-	.dragdrop > div.file-extensions {
-		font-weight: normal;
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-neutral-400);
-		margin-top: var(--cms-space-1);
-	}
+		:global(.dragdrop > .upload-drop-label svg) {
+			display: inline;
+			margin-bottom: var(--cms-space-2);
+		}
+		:global(.dragdrop > .upload-drop-label u) {
+			color: var(--cms-color-info-700);
+		}
 
-	@media (min-width: 768px) {
-		:global(.upload-image .preview) {
-			width: var(--cms-fraction-2-5);
+		.dragdrop > div.file-extensions {
+			font-weight: normal;
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-neutral-400);
+			margin-top: var(--cms-space-1);
+		}
+
+		@media (min-width: 768px) {
+			:global(.upload-image .preview) {
+				width: var(--cms-fraction-2-5);
+			}
 		}
 	}
 </style>

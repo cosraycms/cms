@@ -45,69 +45,71 @@
 </div>
 
 <style>
-	.video {
-		position: relative;
-		width: 100%;
-		border: 1px solid var(--cms-color-neutral-300);
-		background-color: var(--cms-color-neutral-100);
-		padding: var(--cms-space-1);
-		text-align: center;
-	}
-
-	.cms-video-player {
-		width: 100%;
-	}
-
-	.cms-video-controls {
-		margin-top: var(--cms-space-4);
-	}
-
-	.cms-video-remove {
-		color: var(--cms-color-danger-700);
-		border: none;
-		background: transparent;
-		cursor: pointer;
-	}
-
-	.ico {
-		background-color: rgba(255, 255, 255, 0.8);
-		border-radius: 100%;
-		height: 2.5rem;
-		width: 2.5rem;
-		font-size: 1.6rem;
-
-		:global(svg) {
-			height: 1.25rem;
+	@layer panel {
+		.video {
+			position: relative;
+			width: 100%;
+			border: 1px solid var(--cms-color-neutral-300);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-1);
+			text-align: center;
 		}
-	}
 
-	.cms-video-ico {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
+		.cms-video-player {
+			width: 100%;
+		}
 
-	.icobtn {
-		text-align: center;
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-white);
-		text-shadow:
-			-1px 0 #000,
-			0 1px #000,
-			1px 0 #000,
-			0 -1px #000;
-	}
+		.cms-video-controls {
+			margin-top: var(--cms-space-4);
+		}
 
-	.cms-video-ext {
-		position: absolute;
-		right: var(--cms-space-1);
-		bottom: var(--cms-space-1);
-		margin-right: var(--cms-space-px);
-		margin-bottom: var(--cms-space-px);
-		border-radius: var(--cms-radius);
-		background-color: var(--cms-color-danger-700);
-		padding: 0 var(--cms-space-1);
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-white);
+		.cms-video-remove {
+			color: var(--cms-color-danger-700);
+			border: none;
+			background: transparent;
+			cursor: pointer;
+		}
+
+		.ico {
+			background-color: rgba(255, 255, 255, 0.8);
+			border-radius: 100%;
+			height: 2.5rem;
+			width: 2.5rem;
+			font-size: 1.6rem;
+
+			:global(svg) {
+				height: 1.25rem;
+			}
+		}
+
+		.cms-video-ico {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.icobtn {
+			text-align: center;
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-white);
+			text-shadow:
+				-1px 0 #000,
+				0 1px #000,
+				1px 0 #000,
+				0 -1px #000;
+		}
+
+		.cms-video-ext {
+			position: absolute;
+			right: var(--cms-space-1);
+			bottom: var(--cms-space-1);
+			margin-right: var(--cms-space-px);
+			margin-bottom: var(--cms-space-px);
+			border-radius: var(--cms-radius);
+			background-color: var(--cms-color-danger-700);
+			padding: 0 var(--cms-space-1);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-white);
+		}
 	}
 </style>

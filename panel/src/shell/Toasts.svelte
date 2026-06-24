@@ -62,62 +62,64 @@
 </div>
 
 <style>
-	.toasts {
-		position: fixed;
-		z-index: 50;
-		font-size: var(--cms-font-size-sm);
-	}
+	@layer panel {
+		.toasts {
+			position: fixed;
+			z-index: 50;
+			font-size: var(--cms-font-size-sm);
+		}
 
-	.toast {
-		position: relative;
-		display: block;
-		margin-bottom: var(--cms-space-2);
-		padding: var(--cms-space-4) var(--cms-space-4) var(--cms-space-5);
-		border: none;
-		text-align: left;
-		cursor: pointer;
-	}
+		.toast {
+			position: relative;
+			display: block;
+			margin-bottom: var(--cms-space-2);
+			padding: var(--cms-space-4) var(--cms-space-4) var(--cms-space-5);
+			border: none;
+			text-align: left;
+			cursor: pointer;
+		}
 
-	.toast:last-child {
-		margin-bottom: var(--cms-space-4);
-	}
+		.toast:last-child {
+			margin-bottom: var(--cms-space-4);
+		}
 
-	.toast-offset {
-		margin-right: var(--cms-space-4);
-	}
+		.toast-offset {
+			margin-right: var(--cms-space-4);
+		}
 
-	.toast-success {
-		background-color: var(--cms-color-success-600);
-	}
+		.toast-success {
+			background-color: var(--cms-color-success-600);
+		}
 
-	.toast-error {
-		background-color: var(--cms-color-danger-700);
-	}
+		.toast-error {
+			background-color: var(--cms-color-danger-700);
+		}
 
-	.toast-warning {
-		background-color: var(--cms-color-warning-700);
-	}
+		.toast-warning {
+			background-color: var(--cms-color-warning-700);
+		}
 
-	.cms-toast-close-icon {
-		position: absolute;
-		top: var(--cms-space-1);
-		right: var(--cms-space-1);
-		height: var(--cms-space-4);
-		width: var(--cms-space-4);
-		cursor: pointer;
-		border-radius: var(--cms-radius-full);
-		color: var(--cms-color-white);
-	}
+		.cms-toast-close-icon {
+			position: absolute;
+			top: var(--cms-space-1);
+			right: var(--cms-space-1);
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
+			cursor: pointer;
+			border-radius: var(--cms-radius-full);
+			color: var(--cms-color-white);
+		}
 
-	.pos-bottom {
-		bottom: 0;
-		right: 0;
-		padding-right: var(--cms-space-8);
-	}
+		.pos-bottom {
+			bottom: 0;
+			right: 0;
+			padding-right: var(--cms-space-8);
+		}
 
-	.pos-center {
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
+		.pos-center {
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
 	}
 </style>

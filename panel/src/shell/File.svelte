@@ -66,62 +66,64 @@
 {/if}
 
 <style>
-	.cms-file {
-		position: relative;
-		display: flex;
-		width: 100%;
-		flex-direction: row;
-		align-items: center;
-		border: 1px solid var(--cms-color-neutral-300);
-		border-radius: var(--cms-radius-lg);
-		background-color: var(--cms-color-neutral-100);
-		padding: var(--cms-space-2) var(--cms-space-4);
-		text-align: center;
-		color: var(--cms-color-neutral-600);
-	}
+	@layer panel {
+		.cms-file {
+			position: relative;
+			display: flex;
+			width: 100%;
+			flex-direction: row;
+			align-items: center;
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-lg);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-2) var(--cms-space-4);
+			text-align: center;
+			color: var(--cms-color-neutral-600);
+		}
 
-	.cms-file-meta {
-		flex: 1 1 auto;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		padding-left: var(--cms-space-3);
-		text-align: left;
-	}
+		.cms-file-meta {
+			flex: 1 1 auto;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			padding-left: var(--cms-space-3);
+			text-align: left;
+		}
 
-	.cms-file-name {
-		font-weight: 600;
-	}
+		.cms-file-name {
+			font-weight: 600;
+		}
 
-	.cms-file-title {
-		display: inline-block;
-		padding-left: var(--cms-space-4);
-	}
+		.cms-file-title {
+			display: inline-block;
+			padding-left: var(--cms-space-4);
+		}
 
-	.cms-file-download {
-		display: inline-block;
-		padding-left: var(--cms-space-2);
-	}
+		.cms-file-download {
+			display: inline-block;
+			padding-left: var(--cms-space-2);
+		}
 
-	.cms-file-action {
-		border: none;
-		background: transparent;
-		cursor: pointer;
-	}
+		.cms-file-action {
+			border: none;
+			background: transparent;
+			cursor: pointer;
+		}
 
-	.cms-file-action-edit {
-		color: var(--cms-color-info-700);
-	}
+		.cms-file-action-edit {
+			color: var(--cms-color-info-700);
+		}
 
-	.cms-file-action-remove {
-		color: var(--cms-color-danger-700);
-	}
+		.cms-file-action-remove {
+			color: var(--cms-color-danger-700);
+		}
 
-	.cms-file-action-icon {
-		margin-left: var(--cms-space-4);
-		display: flex;
-		height: var(--cms-space-4);
-		width: var(--cms-space-4);
-		align-items: center;
+		.cms-file-action-icon {
+			margin-left: var(--cms-space-4);
+			display: flex;
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
+			align-items: center;
+		}
 	}
 </style>

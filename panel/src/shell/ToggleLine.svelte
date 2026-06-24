@@ -23,27 +23,29 @@
 </div>
 
 <style>
-	.cms-toggle-line {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
+	@layer panel {
+		.cms-toggle-line {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
 
-	.cms-toggle-line-copy {
-		display: flex;
-		flex: 1 1 auto;
-		flex-direction: column;
-	}
+		.cms-toggle-line-copy {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: column;
+		}
 
-	.cms-toggle-line-title {
-		font-size: var(--cms-font-size-sm);
-		line-height: 1.5rem;
-		font-weight: 600;
-		color: var(--cms-color-neutral-900);
-	}
+		.cms-toggle-line-title {
+			font-size: var(--cms-font-size-sm);
+			line-height: 1.5rem;
+			font-weight: 600;
+			color: var(--cms-color-neutral-900);
+		}
 
-	.cms-toggle-line-subtitle {
-		font-size: var(--cms-font-size-sm);
-		color: var(--cms-color-neutral-500);
+		.cms-toggle-line-subtitle {
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-500);
+		}
 	}
 </style>

@@ -114,128 +114,130 @@
 </div>
 
 <style>
-	.image {
-		position: relative;
-		border: 1px solid var(--cms-color-neutral-300);
-		background-color: var(--cms-color-neutral-100);
-		padding: var(--cms-space-1);
-		text-align: center;
-	}
-
-	button.image-title {
-		position: absolute;
-		left: var(--cms-space-1);
-		bottom: var(--cms-space-1);
-		margin-left: var(--cms-space-px);
-		margin-bottom: var(--cms-space-px);
-		padding: 0 var(--cms-space-1);
-		border-radius: var(--cms-radius);
-		background-color: var(--cms-color-white);
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-neutral-600);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		max-width: 8rem;
-	}
-
-	.image-ext {
-		position: absolute;
-		right: var(--cms-space-1);
-		bottom: var(--cms-space-1);
-		margin-right: var(--cms-space-px);
-		margin-bottom: var(--cms-space-px);
-		border-radius: var(--cms-radius);
-		background-color: var(--cms-color-danger-700);
-		padding: 0 var(--cms-space-1);
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-white);
-	}
-
-	.image:hover .overlay,
-	.image.hover .overlay {
-		visibility: visible;
-		opacity: 1;
-	}
-	.image.upload {
-		display: flex;
-		width: 100%;
-		flex-shrink: 1;
-		align-items: center;
-		justify-content: center;
-		max-height: 13rem;
-		min-height: 6rem;
-	}
-	.image.multiple.upload {
-		height: 11.13rem;
-		width: 11.13rem;
-		max-width: 11.13rem;
-		max-height: 11.13rem;
-	}
-
-	img {
-		max-width: 100%;
-		max-height: 100%;
-	}
-
-	.overlay {
-		position: absolute;
-		top: var(--cms-space-1);
-		right: var(--cms-space-1);
-		bottom: var(--cms-space-1);
-		left: var(--cms-space-1);
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: center;
-		gap: var(--cms-space-2);
-		visibility: hidden;
-		opacity: 0;
-		transition:
-			visibility 0.1s,
-			opacity 0.2s linear;
-		background: rgba(0, 0, 0, 0.3);
-	}
-
-	.overlay-action {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-	}
-
-	.overlay-action-danger {
-		color: var(--cms-color-danger-700);
-	}
-
-	.overlay-action-primary {
-		color: var(--cms-color-info-700);
-	}
-
-	.ico {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background-color: rgba(255, 255, 255, 0.8);
-		border-radius: 100%;
-		height: 2.5rem;
-		width: 2.5rem;
-		font-size: 1.6rem;
-
-		:global(svg) {
-			height: 1.25rem;
+	@layer panel {
+		.image {
+			position: relative;
+			border: 1px solid var(--cms-color-neutral-300);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-1);
+			text-align: center;
 		}
-	}
 
-	.icobtn {
-		text-align: center;
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-white);
-		text-shadow:
-			-1px 0 #000,
-			0 1px #000,
-			1px 0 #000,
-			0 -1px #000;
+		button.image-title {
+			position: absolute;
+			left: var(--cms-space-1);
+			bottom: var(--cms-space-1);
+			margin-left: var(--cms-space-px);
+			margin-bottom: var(--cms-space-px);
+			padding: 0 var(--cms-space-1);
+			border-radius: var(--cms-radius);
+			background-color: var(--cms-color-white);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-neutral-600);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 8rem;
+		}
+
+		.image-ext {
+			position: absolute;
+			right: var(--cms-space-1);
+			bottom: var(--cms-space-1);
+			margin-right: var(--cms-space-px);
+			margin-bottom: var(--cms-space-px);
+			border-radius: var(--cms-radius);
+			background-color: var(--cms-color-danger-700);
+			padding: 0 var(--cms-space-1);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-white);
+		}
+
+		.image:hover .overlay,
+		.image.hover .overlay {
+			visibility: visible;
+			opacity: 1;
+		}
+		.image.upload {
+			display: flex;
+			width: 100%;
+			flex-shrink: 1;
+			align-items: center;
+			justify-content: center;
+			max-height: 13rem;
+			min-height: 6rem;
+		}
+		.image.multiple.upload {
+			height: 11.13rem;
+			width: 11.13rem;
+			max-width: 11.13rem;
+			max-height: 11.13rem;
+		}
+
+		img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+		.overlay {
+			position: absolute;
+			top: var(--cms-space-1);
+			right: var(--cms-space-1);
+			bottom: var(--cms-space-1);
+			left: var(--cms-space-1);
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: center;
+			gap: var(--cms-space-2);
+			visibility: hidden;
+			opacity: 0;
+			transition:
+				visibility 0.1s,
+				opacity 0.2s linear;
+			background: rgba(0, 0, 0, 0.3);
+		}
+
+		.overlay-action {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
+
+		.overlay-action-danger {
+			color: var(--cms-color-danger-700);
+		}
+
+		.overlay-action-primary {
+			color: var(--cms-color-info-700);
+		}
+
+		.ico {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: rgba(255, 255, 255, 0.8);
+			border-radius: 100%;
+			height: 2.5rem;
+			width: 2.5rem;
+			font-size: 1.6rem;
+
+			:global(svg) {
+				height: 1.25rem;
+			}
+		}
+
+		.icobtn {
+			text-align: center;
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-white);
+			text-shadow:
+				-1px 0 #000,
+				0 1px #000,
+				1px 0 #000,
+				0 -1px #000;
+		}
 	}
 </style>

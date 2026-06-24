@@ -87,38 +87,40 @@
 </div>
 
 <style>
-	.cms-block-cell-buttons {
-		display: flex;
-		flex: 1 1 auto;
-		flex-direction: row;
-		align-items: center;
-		gap: var(--cms-space-3);
-		padding: var(--cms-space-2) 0;
-	}
-
-	.cms-block-cell-buttons-inline {
-		justify-content: flex-end;
-		margin-right: var(--cms-space-3);
-	}
-
-	.cms-block-cell-buttons-dropdown {
-		justify-content: center;
-	}
-
-	div button {
-		height: var(--cms-space-4);
-		width: var(--cms-space-4);
-
-		&[disabled] {
-			color: rgb(209 213 219);
+	@layer panel {
+		.cms-block-cell-buttons {
+			display: flex;
+			flex: 1 1 auto;
+			flex-direction: row;
+			align-items: center;
+			gap: var(--cms-space-3);
+			padding: var(--cms-space-2) 0;
 		}
-	}
 
-	.remove {
-		color: var(--cms-color-warning-700);
-	}
+		.cms-block-cell-buttons-inline {
+			justify-content: flex-end;
+			margin-right: var(--cms-space-3);
+		}
 
-	.add {
-		color: var(--cms-color-info-700);
+		.cms-block-cell-buttons-dropdown {
+			justify-content: center;
+		}
+
+		div button {
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
+
+			&[disabled] {
+				color: rgb(209 213 219);
+			}
+		}
+
+		.remove {
+			color: var(--cms-color-warning-700);
+		}
+
+		.add {
+			color: var(--cms-color-info-700);
+		}
 	}
 </style>

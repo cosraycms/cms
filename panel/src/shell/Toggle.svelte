@@ -45,66 +45,68 @@
 </button>
 
 <style>
-	.cms-toggle {
-		position: relative;
-		display: inline-flex;
-		width: 2.75rem;
-		height: 1.5rem;
-		flex-shrink: 0;
-		cursor: pointer;
-		border-radius: var(--cms-radius-full);
-		border: 2px solid transparent;
-		background-color: var(--cms-color-neutral-200);
-		transition: background-color 200ms ease-in-out;
-	}
+	@layer panel {
+		.cms-toggle {
+			position: relative;
+			display: inline-flex;
+			width: 2.75rem;
+			height: 1.5rem;
+			flex-shrink: 0;
+			cursor: pointer;
+			border-radius: var(--cms-radius-full);
+			border: 2px solid transparent;
+			background-color: var(--cms-color-neutral-200);
+			transition: background-color 200ms ease-in-out;
+		}
 
-	.cms-toggle.is-on {
-		background-color: var(--cms-color-success-600);
-	}
+		.cms-toggle.is-on {
+			background-color: var(--cms-color-success-600);
+		}
 
-	.cms-toggle-knob {
-		pointer-events: none;
-		position: relative;
-		display: inline-block;
-		width: 1.25rem;
-		height: 1.25rem;
-		transform: translateX(0);
-		border-radius: var(--cms-radius-full);
-		background-color: var(--cms-color-white);
-		box-shadow: var(--cms-shadow);
-		transition: transform 200ms ease-in-out;
-	}
+		.cms-toggle-knob {
+			pointer-events: none;
+			position: relative;
+			display: inline-block;
+			width: 1.25rem;
+			height: 1.25rem;
+			transform: translateX(0);
+			border-radius: var(--cms-radius-full);
+			background-color: var(--cms-color-white);
+			box-shadow: var(--cms-shadow);
+			transition: transform 200ms ease-in-out;
+		}
 
-	.cms-toggle-knob.is-on {
-		transform: translateX(1.25rem);
-	}
+		.cms-toggle-knob.is-on {
+			transform: translateX(1.25rem);
+		}
 
-	.cms-toggle-icon {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		width: 100%;
-		height: 100%;
-		align-items: center;
-		justify-content: center;
-		opacity: 1;
-		transition: opacity 180ms ease-in-out;
-	}
+		.cms-toggle-icon {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			width: 100%;
+			height: 100%;
+			align-items: center;
+			justify-content: center;
+			opacity: 1;
+			transition: opacity 180ms ease-in-out;
+		}
 
-	.cms-toggle-icon.is-hidden {
-		opacity: 0;
-	}
+		.cms-toggle-icon.is-hidden {
+			opacity: 0;
+		}
 
-	.cms-toggle-off {
-		color: var(--cms-color-neutral-400);
-	}
+		.cms-toggle-off {
+			color: var(--cms-color-neutral-400);
+		}
 
-	.cms-toggle-on {
-		color: var(--cms-color-success-600);
-	}
+		.cms-toggle-on {
+			color: var(--cms-color-success-600);
+		}
 
-	.cms-toggle-icon-svg {
-		width: 0.75rem;
-		height: 0.75rem;
+		.cms-toggle-icon-svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
 	}
 </style>

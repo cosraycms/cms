@@ -18,14 +18,16 @@
 </div>
 
 <style>
-	.cms-toast-content {
-		text-align: left;
-		color: var(--cms-color-white);
-	}
+	@layer panel {
+		.cms-toast-content {
+			text-align: left;
+			color: var(--cms-color-white);
+		}
 
-	.cms-toast-title {
-		margin-top: var(--cms-space-3);
-		margin-bottom: var(--cms-space-1);
-		font-weight: 600;
+		.cms-toast-title {
+			margin-top: var(--cms-space-3);
+			margin-bottom: var(--cms-space-1);
+			font-weight: 600;
+		}
 	}
 </style>
