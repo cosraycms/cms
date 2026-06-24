@@ -103,7 +103,7 @@
 			display: flex;
 			width: 100%;
 			max-width: var(--node-max-width);
-			min-height: 4.25rem;
+			min-height: var(--node-topbar-height);
 			align-items: center;
 			gap: var(--space-4);
 			margin: 0 auto;

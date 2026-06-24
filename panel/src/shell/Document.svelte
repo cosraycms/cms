@@ -17,15 +17,14 @@
 <style>
 	@layer panel {
 		.cms-document {
-			flex: 1 1 auto;
-			overflow-y: auto;
+			flex: 1 0 auto;
 		}
 
 		.cms-document-inner {
 			margin: 0 auto;
 			width: 100%;
 			max-width: var(--node-max-width);
-			padding: var(--space-8) var(--space-8) 0;
+			padding: 0 var(--space-8);
 		}
 	}
 </style>

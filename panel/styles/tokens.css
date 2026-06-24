@@ -176,8 +176,9 @@
 	--content-max-width: 85rem;
 	--node-max-width: var(--content-max-width);
 	--collection-max-width: var(--content-max-width);
+	--node-topbar-height: 4.25rem;
 	--row-height: 3.5rem;
-	--topbar-bg: var(--color-canvas);
+	--topbar-bg: var(--color-surface);
 	--sidebar-width: 15.5rem;
 	--sidebar-header-bg: var(--topbar-bg);
 	--sidebar-border-right: 0;

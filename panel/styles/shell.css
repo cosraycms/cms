@@ -11,6 +11,25 @@
 	overflow: hidden;
 }
 
+.panel:has(.page.node) {
+	height: auto;
+	min-height: 100vh;
+	overflow: visible;
+}
+
+.panel:has(.page.node) .cms-sidebar {
+	position: sticky;
+	top: 0;
+	align-self: flex-start;
+	height: 100vh;
+}
+
+.main:has(> .page.node) {
+	height: auto;
+	min-height: 100vh;
+	overflow: visible;
+}
+
 .content {
 	display: flex;
 	flex: 1;
@@ -40,5 +59,12 @@
 	.content {
 		overflow: visible;
 		padding: var(--space-4);
+	}
+
+	.panel:has(.page.node) .cms-sidebar {
+		position: relative;
+		top: auto;
+		align-self: stretch;
+		height: auto;
 	}
 }

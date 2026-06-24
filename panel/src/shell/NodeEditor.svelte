@@ -134,29 +134,39 @@
 </script>
 
 <div class="cms-node-shell">
-	<NodeControlBar
-		bind:uid={node.uid}
-		{collectionPath}
-		collectionName={collection.name}
-		{swapTarget}
-		deletable={node.deletable}
-		preview={node.type.routable && node.type.renderable ? preview : null}
-		{save}
-	/>
+	<div class="cms-node-sticky">
+		<NodeControlBar
+			bind:uid={node.uid}
+			{collectionPath}
+			collectionName={collection.name}
+			{swapTarget}
+			deletable={node.deletable}
+			preview={node.type.routable && node.type.renderable ? preview : null}
+			{save}
+		/>
+		<div class="cms-node-header-frame">
+			<header class="cms-node-header">
+				<Headline published={node.published} showPublished={node.type.renderable}>
+					{@html node.title}
+				</Headline>
+				<Tabs>
+					<button onclick={changeTab('content')} class:active={activeTab === 'content'} class="tab">
+						{_('Inhalt')}
+					</button>
+					{#if node.type.routable || node.type.renderable}
+						<button
+							onclick={changeTab('settings')}
+							class:active={activeTab === 'settings'}
+							class="tab"
+						>
+							{_('Einstellungen')}
+						</button>
+					{/if}
+				</Tabs>
+			</header>
+		</div>
+	</div>
 	<Document>
-		<Headline published={node.published} showPublished={node.type.renderable}>
-			{@html node.title}
-		</Headline>
-		<Tabs>
-			<button onclick={changeTab('content')} class:active={activeTab === 'content'} class="tab">
-				{_('Inhalt')}
-			</button>
-			{#if node.type.routable || node.type.renderable}
-				<button onclick={changeTab('settings')} class:active={activeTab === 'settings'} class="tab">
-					{_('Einstellungen')}
-				</button>
-			{/if}
-		</Tabs>
 		<Pane>
 			{#if activeTab === 'content'}
 				<Content bind:fields={node.fields} bind:node />
@@ -201,9 +211,37 @@
 
 		.cms-node-shell {
 			display: flex;
-			height: 100%;
-			min-height: 0;
+			min-height: 100%;
 			flex-direction: column;
+		}
+
+		.cms-node-sticky {
+			position: sticky;
+			top: 0;
+			z-index: 30;
+			flex: 0 0 auto;
+			background: var(--editor-bg);
+		}
+
+		.cms-node-header-frame {
+			width: 100%;
+			max-width: var(--node-max-width);
+			margin: 0 auto;
+			padding: var(--space-8) var(--space-8) var(--space-6);
+		}
+
+		.cms-node-header :global(.cms-tabs) {
+			margin-bottom: 0;
+		}
+
+		@media (max-width: 52rem) {
+			.cms-node-sticky {
+				position: static;
+			}
+
+			.cms-node-header-frame {
+				padding: var(--space-6) var(--space-4) var(--space-6);
+			}
 		}
 
 		.cms-preview-close {

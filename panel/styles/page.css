@@ -5,18 +5,15 @@
 	min-width: 0;
 	min-height: 0;
 
-	&.collection .content,
-	&.node .content {
+	&.collection .content {
+		max-width: var(--collection-max-width);
 		margin-left: auto;
 		margin-right: auto;
 	}
 
-	&.collection .content {
-		max-width: var(--collection-max-width);
-	}
-
-	&.node .content {
-		max-width: var(--node-max-width);
+	&.node {
+		height: auto;
+		min-height: 100vh;
 	}
 }
 

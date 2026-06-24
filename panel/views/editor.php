@@ -56,7 +56,7 @@ $runtimeJson = json_encode([
 ?>
 
 <div id="main" class="page node">
-	<section class="content editor-content">
+	<section class="editor-content">
 		<?php if ($editorAvailable): ?>
 			<div
 				id="cosray-node-editor"

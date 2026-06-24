@@ -10,8 +10,7 @@
 	.cosray-node-editor-island {
 		display: flex;
 		flex: 1 1 auto;
-		height: 100%;
-		min-height: 0;
+		min-height: 100%;
 		flex-direction: column;
 		background: var(--editor-bg);
 		color: var(--color-text);
