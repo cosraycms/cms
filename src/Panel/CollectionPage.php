@@ -26,6 +26,7 @@ final class CollectionPage
 	 *     uid: string,
 	 *     depth: int,
 	 *     expanded: bool,
+	 *     last: bool,
 	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
@@ -262,6 +263,7 @@ final class CollectionPage
 	 *     uid: string,
 	 *     depth: int,
 	 *     expanded: bool,
+	 *     last: bool,
 	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
@@ -299,6 +301,7 @@ final class CollectionPage
 				'uid' => $uid,
 				'depth' => $tree['depth'],
 				'expanded' => $tree['expanded'],
+				'last' => $tree['last'],
 				'hasChildren' => $hasChildren,
 				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
 				'status' => self::status($node, $meta),
@@ -324,6 +327,7 @@ final class CollectionPage
 	 *     node: array<string, mixed>,
 	 *     depth: int,
 	 *     expanded: bool,
+	 *     last: bool,
 	 *     descendants: list<string>,
 	 * }
 	 */
@@ -336,6 +340,7 @@ final class CollectionPage
 				'node' => $tree,
 				'depth' => 0,
 				'expanded' => false,
+				'last' => false,
 				'descendants' => [],
 			];
 		}
@@ -344,6 +349,7 @@ final class CollectionPage
 			'node' => self::arrayFrom($tree['node']),
 			'depth' => max(0, (int) ($tree['depth'] ?? 0)),
 			'expanded' => (bool) ($tree['expanded'] ?? false),
+			'last' => (bool) ($tree['last'] ?? false),
 			'descendants' => self::strings($tree['descendants'] ?? []),
 		];
 	}

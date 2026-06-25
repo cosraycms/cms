@@ -2,6 +2,16 @@
 
 use function Cosray\escape;
 
+$chevronSvgPath = __DIR__ . '/../icons/chevron.svg';
+$chevronSvg = is_file($chevronSvgPath)
+	? trim((string) file_get_contents($chevronSvgPath))
+	: '';
+$chevronSvg = str_replace(
+	'<svg ',
+	'<svg class="tree-chevron" aria-hidden="true" focusable="false" ',
+	$chevronSvg,
+);
+
 if (!$boosted) {
 	$this->layout('panel');
 }
@@ -147,24 +157,24 @@ if (!$boosted) {
 								<tr
 									class="collection-row<?= $page->treeMode ? ' is-tree-row' : '' ?>"
 									data-uid="<?= escape($row['uid']) ?>"
-									data-depth="<?= (int) $row['depth'] ?>">
+									data-depth="<?= (int) $row['depth'] ?>"
+									data-last="<?= $row['last'] ? 'true' : 'false' ?>"
+									style="--tree-depth: <?= (int) $row['depth'] ?>">
 									<?php foreach ($row['cells'] as $index => $cell): ?>
 										<td class="<?= escape($cell['class']) ?>" data-label="<?= escape($cell['label']) ?>">
 											<?php if ($index === 0 && $page->showChildren): ?>
-												<div
-													class="tree-title<?= $page->treeMode ? '' : ' is-flat' ?>"
-													style="--tree-depth: <?= (int) $row['depth'] ?>">
+												<div class="tree-title<?= $page->treeMode ? '' : ' is-flat' ?>">
 													<?php if ($page->treeMode): ?>
 														<?php if ($row['childrenUrl'] !== null): ?>
 															<a
-																class="tree-toggle"
+																class="tree-toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
 																href="<?= escape($row['childrenUrl']) ?>"
 																hx-target="#main"
 																aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
 																aria-label="<?= $row['expanded'] ? 'Collapse' : 'Expand' ?> children of <?= escape(
 															$cell['value'],
 														) ?>">
-																<?= $row['expanded'] ? '▾' : '▸' ?>
+																<?= $chevronSvg !== '' ? $chevronSvg : ($row['expanded'] ? '⌄' : '›') ?>
 															</a>
 														<?php else: ?>
 															<span class="tree-toggle tree-spacer" aria-hidden="true"></span>

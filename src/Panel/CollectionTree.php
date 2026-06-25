@@ -12,7 +12,7 @@ final class CollectionTree
 	 * @param list<array<string, mixed>> $nodes
 	 * @param list<string> $open
 	 * @param callable(string): list<array<string, mixed>> $children
-	 * @return list<array{node: array<string, mixed>, depth: int, expanded: bool, descendants: list<string>}>
+	 * @return list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, descendants: list<string>}>
 	 */
 	public static function build(array $nodes, array $open, callable $children): array
 	{
@@ -32,7 +32,7 @@ final class CollectionTree
 	 * @param array<string, true> $open
 	 * @param callable(string): list<array<string, mixed>> $children
 	 * @param list<string> $stack
-	 * @return array{0: list<array{node: array<string, mixed>, depth: int, expanded: bool, descendants: list<string>}>, 1: list<string>}
+	 * @return array{0: list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, descendants: list<string>}>, 1: list<string>}
 	 */
 	private static function walk(
 		array $nodes,
@@ -44,7 +44,9 @@ final class CollectionTree
 		$rows = [];
 		$uids = [];
 
-		foreach ($nodes as $node) {
+		$lastIndex = count($nodes) - 1;
+
+		foreach ($nodes as $index => $node) {
 			$node = self::arrayFrom($node);
 			$uid = trim((string) ($node['uid'] ?? ''));
 			$expanded =
@@ -69,6 +71,7 @@ final class CollectionTree
 				'node' => $node,
 				'depth' => $depth,
 				'expanded' => $expanded,
+				'last' => $index === $lastIndex,
 				'descendants' => $descendants,
 			];
 
