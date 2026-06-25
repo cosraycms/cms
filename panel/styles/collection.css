@@ -365,7 +365,7 @@ th.is-desc .sort-ind {
 .tree-title:not(.is-flat)::before {
 	top: 50%;
 	left: calc((var(--tree-depth) * var(--tree-step)) - 0.625rem);
-	width: calc(2.5rem + var(--space-2));
+	width: calc(2.125rem + var(--space-2));
 	height: var(--tree-line-width);
 	transform: translateY(-50%);
 }
@@ -416,6 +416,11 @@ th.is-desc .sort-ind {
 	border-radius: 999px;
 	background: var(--color-accent);
 	box-shadow: 0 0 0 0.1875rem var(--color-accent-ring);
+}
+
+.node-dot.is-published {
+	background: var(--color-success);
+	box-shadow: 0 0 0 0.1875rem var(--color-success-surface);
 }
 
 .tree-label {

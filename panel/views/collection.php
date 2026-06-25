@@ -180,7 +180,9 @@ if (!$boosted) {
 															<span class="tree-toggle tree-spacer" aria-hidden="true"></span>
 														<?php endif ?>
 													<?php endif ?>
-													<span class="node-dot" aria-hidden="true"></span>
+													<span class="node-dot<?= $row['published']
+												? ' is-published'
+												: '' ?>" aria-hidden="true"></span>
 													<?php if ($cell['editUrl'] !== null): ?>
 														<a
 															class="collection-value collection-edit-link tree-label"
