@@ -65,9 +65,41 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString(
+			'href="/cp/collection/test-hierarchy?sort=changed&amp;dir=desc&amp;view=list"',
+			$html,
+		);
+		$this->assertStringContainsString(
 			'href="/cp/collection/test-hierarchy?sort=changed&amp;dir=desc&amp;parent=panel-hierarchy-root"',
 			$html,
 		);
+	}
+
+	public function testHierarchyListViewDoesNotRenderOpenedChildren(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-list-root',
+			type: $this->parentTypeId,
+			title: 'Panel List Root',
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-list-child',
+			type: $this->childTypeId,
+			title: 'Panel List Child',
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+			'query' => [
+				'view' => 'list',
+				'open' => 'panel-list-root',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Panel List Root', $html);
+		$this->assertStringNotContainsString('Panel List Child', $html);
+		$this->assertStringNotContainsString('aria-label="Expand children of Panel List Root"', $html);
 	}
 
 	public function testHierarchyTreeRendersOpenedDirectChildren(): void

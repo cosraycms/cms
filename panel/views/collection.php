@@ -63,6 +63,19 @@ if (!$boosted) {
 	? 'entry'
 	: 'entries' ?></span>
 
+			<?php if (count($page->viewLinks) > 0): ?>
+				<nav class="view-toggle" aria-label="Collection view">
+					<?php foreach ($page->viewLinks as $link): ?>
+						<a
+							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
+							href="<?= escape($link['url']) ?>"
+							hx-target="#main">
+							<?= escape($link['label']) ?>
+						</a>
+					<?php endforeach ?>
+				</nav>
+			<?php endif ?>
+
 			<?php if ($page->query->parent !== null): ?>
 				<div class="parent-context">
 					<div class="parent-summary">

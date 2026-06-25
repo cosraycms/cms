@@ -19,6 +19,7 @@ final class CollectionPage
 	/**
 	 * @param list<array{kind: string, label: string}> $parentStatus
 	 * @param list<array{name: string, value: string}> $searchFields
+	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
 	 * @param list<array{label: string, url: ?string, class: string}> $headers
 	 * @param list<array{
@@ -55,6 +56,7 @@ final class CollectionPage
 		public readonly bool $showChildren,
 		public readonly bool $treeMode,
 		public readonly array $searchFields,
+		public readonly array $viewLinks,
 		public readonly array $createLinks,
 		public readonly array $headers,
 		public readonly array $rows,
@@ -133,6 +135,7 @@ final class CollectionPage
 			showChildren: $meta->showChildren,
 			treeMode: $meta->showChildren && $query->view === 'tree',
 			searchFields: self::searchFields($query),
+			viewLinks: self::viewLinks($meta, $query, $urls),
 			createLinks: self::createLinks($createBlueprints, $urls),
 			headers: $headers,
 			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone),
@@ -182,6 +185,38 @@ final class CollectionPage
 		}
 
 		return $fields;
+	}
+
+	/** @return list<array{label: string, url: string, active: bool}> */
+	private static function viewLinks(
+		CollectionListMeta $meta,
+		CollectionQuery $query,
+		CollectionUrls $urls,
+	): array {
+		if (!$meta->showChildren || $query->parent !== null) {
+			return [];
+		}
+
+		return [
+			[
+				'label' => 'Tree',
+				'url' => $urls->collection([
+					'view' => 'tree',
+					'open' => '',
+					'offset' => '',
+				]),
+				'active' => $query->view === 'tree',
+			],
+			[
+				'label' => 'List',
+				'url' => $urls->collection([
+					'view' => 'list',
+					'open' => '',
+					'offset' => '',
+				]),
+				'active' => $query->view === 'list',
+			],
+		];
 	}
 
 	/**
