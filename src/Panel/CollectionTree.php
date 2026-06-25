@@ -45,8 +45,9 @@ final class CollectionTree
 		$uids = [];
 
 		$lastIndex = count($nodes) - 1;
+		$position = 0;
 
-		foreach ($nodes as $index => $node) {
+		foreach ($nodes as $node) {
 			$node = self::arrayFrom($node);
 			$uid = trim((string) ($node['uid'] ?? ''));
 			$expanded =
@@ -71,9 +72,11 @@ final class CollectionTree
 				'node' => $node,
 				'depth' => $depth,
 				'expanded' => $expanded,
-				'last' => $index === $lastIndex,
+				'last' => $position === $lastIndex,
 				'descendants' => $descendants,
 			];
+
+			$position++;
 
 			if ($uid !== '') {
 				$uids[] = $uid;
