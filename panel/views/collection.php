@@ -94,17 +94,75 @@ if (!$boosted) {
 									</th>
 								<?php endforeach ?>
 								<th class="col-status">Status</th>
-								<?php if ($page->showChildren): ?>
-									<th class="col-children">Children</th>
-								<?php endif ?>
 							</tr>
 						</thead>
 						<tbody>
 							<?php foreach ($page->rows as $row): ?>
-								<tr class="collection-row" data-uid="<?= escape($row['uid']) ?>">
-									<?php foreach ($row['cells'] as $cell): ?>
+								<tr
+									class="collection-row<?= $page->treeMode ? ' is-tree-row' : '' ?>"
+									data-uid="<?= escape($row['uid']) ?>"
+									data-depth="<?= (int) $row['depth'] ?>">
+									<?php foreach ($row['cells'] as $index => $cell): ?>
 										<td class="<?= escape($cell['class']) ?>" data-label="<?= escape($cell['label']) ?>">
-											<?php if ($cell['editUrl'] !== null): ?>
+											<?php if ($index === 0 && $page->showChildren): ?>
+												<div
+													class="tree-title<?= $page->treeMode ? '' : ' is-flat' ?>"
+													style="--tree-depth: <?= (int) $row['depth'] ?>">
+													<?php if ($page->treeMode): ?>
+														<?php if ($row['childrenUrl'] !== null): ?>
+															<a
+																class="tree-toggle"
+																href="<?= escape($row['childrenUrl']) ?>"
+																hx-target="#main"
+																aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
+																aria-label="<?= $row['expanded'] ? 'Collapse' : 'Expand' ?> children of <?= escape(
+															$cell['value'],
+														) ?>">
+																<?= $row['expanded'] ? '▾' : '▸' ?>
+															</a>
+														<?php else: ?>
+															<span class="tree-toggle tree-spacer" aria-hidden="true"></span>
+														<?php endif ?>
+													<?php endif ?>
+													<span class="node-dot" aria-hidden="true"></span>
+													<?php if ($cell['editUrl'] !== null): ?>
+														<a
+															class="collection-value collection-edit-link tree-label"
+															href="<?= escape($cell['editUrl']) ?>"
+															hx-target="#main">
+															<?= escape($cell['value']) ?>
+														</a>
+													<?php else: ?>
+														<span class="collection-value tree-label"><?= escape($cell['value']) ?></span>
+													<?php endif ?>
+													<?php if (
+														$row['focusedChildrenUrl'] !== null
+														|| count($row['childCreateLinks']) > 0
+													): ?>
+														<span class="tree-actions">
+															<?php if ($row['focusedChildrenUrl'] !== null): ?>
+																<a
+																	class="tree-meta"
+																	href="<?= escape($row['focusedChildrenUrl']) ?>"
+																	hx-target="#main">
+																	Children
+																</a>
+															<?php endif ?>
+															<?php foreach ($row['childCreateLinks'] as $link): ?>
+																<a
+																	class="tree-create"
+																	href="<?= escape($link['url']) ?>"
+																	hx-target="#main"
+																	aria-label="Create <?= escape($link['name']) ?> under <?= escape(
+																$cell['value'],
+															) ?>">
+																	+ <?= escape($link['name']) ?>
+																</a>
+															<?php endforeach ?>
+														</span>
+													<?php endif ?>
+												</div>
+											<?php elseif ($cell['editUrl'] !== null): ?>
 												<a
 													class="collection-value collection-edit-link"
 													href="<?= escape($cell['editUrl']) ?>"
@@ -125,23 +183,6 @@ if (!$boosted) {
 											<?php endforeach ?>
 										</div>
 									</td>
-									<?php if ($page->showChildren): ?>
-										<td class="collection-cell col-children" data-label="Children">
-											<div class="child-actions">
-												<?php foreach ($row['childLinks'] as $link): ?>
-													<a
-														class="child-link"
-														href="<?= escape($link['url']) ?>"
-														hx-target="#main">
-														<?= escape($link['label']) ?>
-													</a>
-												<?php endforeach ?>
-												<?php if (count($row['childLinks']) === 0): ?>
-													<span class="child-muted">—</span>
-												<?php endif ?>
-											</div>
-										</td>
-									<?php endif ?>
 								</tr>
 							<?php endforeach ?>
 						</tbody>

@@ -35,7 +35,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		return $plugin;
 	}
 
-	public function testHierarchyCollectionRendersRootRowsWithChildLinks(): void
+	public function testHierarchyCollectionRendersRootRowsWithTreeControls(): void
 	{
 		$rootId = $this->createHierarchyNode(
 			uid: 'panel-hierarchy-root',
@@ -55,11 +55,19 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Panel Hierarchy Root', $html);
 		$this->assertStringNotContainsString('Panel Hierarchy Child', $html);
+		$this->assertStringNotContainsString('class="col-children"', $html);
+		$this->assertStringContainsString(
+			'aria-label="Expand children of Panel Hierarchy Root"',
+			$html,
+		);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-hierarchy?sort=changed&amp;dir=desc&amp;open=panel-hierarchy-root"',
+			$html,
+		);
 		$this->assertStringContainsString(
 			'href="/cp/collection/test-hierarchy?sort=changed&amp;dir=desc&amp;parent=panel-hierarchy-root"',
 			$html,
 		);
-		$this->assertStringContainsString('Open children', $html);
 	}
 
 	public function testHierarchyTreeRendersOpenedDirectChildren(): void
@@ -93,6 +101,59 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertStringContainsString('Panel Tree Root', $html);
 		$this->assertStringContainsString('Panel Tree Child', $html);
 		$this->assertStringNotContainsString('Panel Tree Grandchild', $html);
+		$this->assertStringContainsString(
+			'aria-label="Collapse children of Panel Tree Root"',
+			$html,
+		);
+	}
+
+	public function testHierarchyTreeExpandLinksPreserveQueryState(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-tree-query-root',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Query Root',
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-tree-query-child',
+			type: $this->childTypeId,
+			title: 'Panel Tree Query Child',
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+			'query' => [
+				'q' => 'Query Root',
+				'sort' => 'uid',
+				'dir' => 'asc',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-hierarchy?q=Query%20Root&amp;sort=uid&amp;dir=asc&amp;open=panel-tree-query-root"',
+			$html,
+		);
+	}
+
+	public function testHierarchyTreeDoesNotRenderFakeExpandControls(): void
+	{
+		$this->createHierarchyNode(
+			uid: 'panel-tree-leaf',
+			type: $this->childTypeId,
+			title: 'Panel Tree Leaf',
+		);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Panel Tree Leaf', $html);
+		$this->assertStringNotContainsString(
+			'aria-label="Expand children of Panel Tree Leaf"',
+			$html,
+		);
 	}
 
 	public function testHierarchyTreeRendersOpenedGrandchildren(): void
