@@ -9,7 +9,9 @@ if (!$boosted) {
 
 <div id="main" class="page dashboard-page">
 	<header class="topbar">
-		<h1><?= escape((string) $config->app->name) ?></h1>
+		<div class="inner">
+			<h1><?= escape((string) $config->app->name) ?></h1>
+		</div>
 	</header>
 
 	<section class="content">

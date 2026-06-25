@@ -9,7 +9,7 @@ if (!$boosted) {
 
 <div id="main" class="page collection">
 	<header class="topbar topbar-collection">
-		<div class="content">
+		<div class="inner">
 			<form
 				class="search"
 				method="get"

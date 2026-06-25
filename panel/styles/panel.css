@@ -7,3 +7,4 @@
 @import './page.css' layer(panel);
 @import './collection.css' layer(panel);
 @import './editor.css' layer(panel);
+@import './node-placeholder.css' layer(panel);

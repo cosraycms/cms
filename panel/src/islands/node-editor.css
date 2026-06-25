@@ -5,6 +5,7 @@
 @import '../../styles/richtext.css' layer(panel);
 @import '../../styles/tabs.css' layer(panel);
 @import '../../styles/modal.css' layer(panel);
+@import '../../styles/node-placeholder.css' layer(panel);
 
 @layer panel {
 	.cosray-node-editor-island {

@@ -1,7 +1,3 @@
-.page.collection .topbar {
-	justify-content: space-between;
-}
-
 .topbar-actions {
 	display: flex;
 	align-items: center;
@@ -370,9 +366,9 @@ th.is-desc .sort-ind {
 }
 
 @media (max-width: 52rem) {
-	.page.collection .topbar {
+	.topbar-collection .inner {
+		min-height: 0;
 		align-items: stretch;
-		height: auto;
 		padding-top: var(--space-3);
 		padding-bottom: var(--space-3);
 		flex-direction: column;

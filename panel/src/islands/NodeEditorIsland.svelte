@@ -15,6 +15,7 @@
 	import { setup } from '$lib/sys';
 	import Modal from '$shell/modal/Modal.svelte';
 	import NodeEditor from '$shell/NodeEditor.svelte';
+	import NodeEditorPlaceholder from '$shell/NodeEditorPlaceholder.svelte';
 	import Toasts from '$shell/Toasts.svelte';
 
 	type CollectionState = {
@@ -231,7 +232,7 @@
 <Modal>
 	<div class="cosray-node-editor-island">
 		{#if loading}
-			<div class="cosray-node-editor-message">Loading editor …</div>
+			<NodeEditorPlaceholder collectionName={bootstrap.collection.name} />
 		{:else if error !== ''}
 			<div class="cosray-node-editor-message is-error">{error}</div>
 		{:else if node !== null}

@@ -1,17 +1,20 @@
 .topbar {
-	padding: 0 var(--space-6);
 	background: var(--topbar-bg);
 	border-bottom: 1px solid var(--color-border);
 
-	.content {
+	.inner {
 		display: flex;
-		flex-direction: row;
+		width: 100%;
+		max-width: var(--content-max-width);
+		min-height: var(--node-topbar-height);
 		align-items: center;
 		gap: var(--space-4);
-		height: 4.25rem;
+		margin: 0 auto;
+		padding: 0 var(--space-6);
 	}
 
-	&.topbar-collection .content {
+	&.topbar-collection .inner {
+		max-width: var(--collection-max-width);
 		justify-content: space-between;
 	}
 
@@ -24,7 +27,7 @@
 }
 
 @media (max-width: 52rem) {
-	.topbar {
+	.topbar .inner {
 		padding: 0 var(--space-4);
 	}
 }

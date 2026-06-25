@@ -38,6 +38,7 @@ export function mountEditor(root: ParentNode = document): void {
 		return;
 	}
 
+	target.replaceChildren();
 	mount(NodeEditorIsland, {
 		target,
 		props: {
