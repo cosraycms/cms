@@ -52,6 +52,8 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 					'q' => 'Hierarchy',
 					'sort' => 'uid',
 					'dir' => 'asc',
+					'view' => 'tree',
+					'open' => 'panel-create-parent',
 				],
 			],
 		);
@@ -135,13 +137,15 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			$this->assertStringContainsString('"slug":"test-hierarchy"', $html);
 			$this->assertStringContainsString('"type":"test-hierarchy-child"', $html);
 			$this->assertStringContainsString('"parent":"panel-create-parent"', $html);
+			$this->assertStringContainsString('"view":"tree"', $html);
+			$this->assertStringContainsString('"open":"panel-create-parent"', $html);
 
 			return;
 		}
 
 		$this->assertStringContainsString('Panel bundle missing', $html);
 		$this->assertStringContainsString(
-			'href="/panel/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent"',
+			'href="/panel/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',
 			$html,
 		);
 	}

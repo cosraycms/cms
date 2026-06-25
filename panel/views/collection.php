@@ -35,14 +35,16 @@ if (!$boosted) {
 				<?php if ($page->clearSearchUrl !== null): ?>
 					<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main">Clear search</a>
 				<?php endif ?>
-				<?php foreach ($page->createLinks as $link): ?>
-					<a
-						class="cms-button primary"
-						href="<?= escape($link['url']) ?>"
-						hx-target="#main">
-						New <?= escape($link['name']) ?>
-					</a>
-				<?php endforeach ?>
+				<?php if ($page->query->parent === null): ?>
+					<?php foreach ($page->createLinks as $link): ?>
+						<a
+							class="cms-button primary"
+							href="<?= escape($link['url']) ?>"
+							hx-target="#main">
+							New <?= escape($link['name']) ?>
+						</a>
+					<?php endforeach ?>
+				<?php endif ?>
 			</div>
 		</div>
 	</header>
@@ -60,6 +62,37 @@ if (!$boosted) {
 			<span class="count-pill"><?= $page->total ?> <?= $page->total === 1
 	? 'entry'
 	: 'entries' ?></span>
+
+			<?php if ($page->query->parent !== null): ?>
+				<div class="parent-context">
+					<div class="parent-summary">
+						<?php if ($page->parentType !== null): ?>
+							<span class="type-pill"><?= escape($page->parentType) ?></span>
+						<?php endif ?>
+						<?php foreach ($page->parentStatus as $badge): ?>
+							<span class="status status-<?= escape($badge['kind']) ?>"><?= escape(
+							$badge['label'],
+						) ?></span>
+						<?php endforeach ?>
+					</div>
+					<div class="parent-actions">
+						<?php if ($page->parentEditUrl !== null): ?>
+							<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main">Edit parent</a>
+						<?php endif ?>
+						<?php if ($page->parentTreeUrl !== null): ?>
+							<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main">Show in tree</a>
+						<?php endif ?>
+						<?php foreach ($page->createLinks as $link): ?>
+							<a
+								class="cms-button primary"
+								href="<?= escape($link['url']) ?>"
+								hx-target="#main">
+								New <?= escape($link['name']) ?>
+							</a>
+						<?php endforeach ?>
+					</div>
+				</div>
+			<?php endif ?>
 		</div>
 
 		<div class="collection-panel">

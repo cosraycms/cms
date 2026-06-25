@@ -24,8 +24,8 @@ final class Editor extends Panel
 
 	public function edit(string $collection, string $node): array
 	{
-		[$name] = $this->collection($collection);
-		$query = $this->queryState();
+		[$name, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
 
 		return $this->editorContext(
 			mode: 'edit',
@@ -40,7 +40,7 @@ final class Editor extends Panel
 	public function create(string $collection, string $type): array
 	{
 		[$name, $obj] = $this->collection($collection);
-		$query = $this->queryState();
+		$query = $this->queryState($obj);
 
 		if (!$this->canCreate($obj, $type, $query->parent)) {
 			throw new HttpNotFound($this->request);
@@ -118,7 +118,7 @@ final class Editor extends Panel
 		return $handles;
 	}
 
-	private function queryState(): CollectionQuery
+	private function queryState(CmsCollection $collection): CollectionQuery
 	{
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
@@ -129,6 +129,22 @@ final class Editor extends Panel
 		}
 
 		$parent = $this->stringParam('parent');
+		$parent = $parent === '' ? null : $parent;
+		$view = $this->stringParam('view');
+		$open = $this->openParam('open');
+		$defaultView = $collection->listMeta->showChildren && $parent === null ? 'tree' : 'list';
+
+		if ($view === '') {
+			$view = $defaultView;
+		}
+
+		if (!in_array($view, ['tree', 'list'], true)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		if (!$collection->listMeta->showChildren) {
+			$open = [];
+		}
 
 		return new CollectionQuery(
 			q: $this->stringParam('q'),
@@ -136,7 +152,10 @@ final class Editor extends Panel
 			dir: $dir,
 			offset: $offset,
 			limit: $limit,
-			parent: $parent === '' ? null : $parent,
+			parent: $parent,
+			view: $view,
+			open: $open,
+			defaultView: $defaultView,
 		);
 	}
 
@@ -194,6 +213,28 @@ final class Editor extends Panel
 		}
 
 		return $int;
+	}
+
+	/** @return list<string> */
+	private function openParam(string $key): array
+	{
+		$value = $this->request->param($key, '');
+
+		if (!is_string($value)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$open = [];
+
+		foreach (explode(',', $value) as $uid) {
+			$uid = trim($uid);
+
+			if ($uid !== '' && !in_array($uid, $open, true)) {
+				$open[] = $uid;
+			}
+		}
+
+		return $open;
 	}
 
 	private function stringParam(string $key): string

@@ -27,6 +27,8 @@
 		sort?: string;
 		dir?: string;
 		parent?: string | null;
+		view?: string;
+		open?: string;
 	};
 
 	export type EditorBootstrap = {
@@ -221,6 +223,14 @@
 
 		if (bootstrap.parent !== null) {
 			params.set('parent', bootstrap.parent);
+		}
+
+		if (collection.view) {
+			params.set('view', collection.view);
+		}
+
+		if (collection.open) {
+			params.set('open', collection.open);
 		}
 
 		const query = params.toString();

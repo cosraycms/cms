@@ -37,6 +37,8 @@ $bootstrap = [
 		'sort' => $queryState->sort,
 		'dir' => $queryState->dir,
 		'parent' => $parent,
+		'view' => $queryState->view,
+		'open' => implode(',', $queryState->open),
 	],
 	'node' => $nodeUid,
 	'type' => $type,

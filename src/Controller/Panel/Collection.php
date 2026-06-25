@@ -132,6 +132,10 @@ final class Collection extends Panel
 				locale: $this->localeId(),
 				timezone: $this->config->app->timezone,
 				parentTitle: $parentTitle,
+				parentType: $parentNode === null
+					? null
+					: (string) $parentNode->meta->type->get('label', ''),
+				parentStatus: $parentNode === null ? null : $this->nodeStatus($obj, $parentNode),
 				createBlueprints: $parentNode === null ? null : $obj->childBlueprints($parentNode),
 			),
 		]);
@@ -146,6 +150,37 @@ final class Collection extends Panel
 		}
 
 		return $node;
+	}
+
+	/** @return list<array{kind: string, label: string}> */
+	private function nodeStatus(CmsCollection $collection, Node $node): array
+	{
+		$status = [];
+		$meta = $collection->listMeta;
+
+		if ($meta->showPublished) {
+			$published = (bool) $node->meta->get('published');
+			$status[] = [
+				'kind' => $published ? 'published' : 'draft',
+				'label' => $published ? 'Published' : 'Draft',
+			];
+		}
+
+		if ($meta->showHidden && (bool) $node->meta->get('hidden')) {
+			$status[] = [
+				'kind' => 'hidden',
+				'label' => 'Hidden',
+			];
+		}
+
+		if ($meta->showLocked && (bool) $node->meta->get('locked')) {
+			$status[] = [
+				'kind' => 'locked',
+				'label' => 'Locked',
+			];
+		}
+
+		return $status;
 	}
 
 	/** @return list<array{slug: string, name: string}> */

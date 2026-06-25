@@ -17,6 +17,7 @@ use Traversable;
 final class CollectionPage
 {
 	/**
+	 * @param list<array{kind: string, label: string}> $parentStatus
 	 * @param list<array{name: string, value: string}> $searchFields
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
 	 * @param list<array{label: string, url: ?string, class: string}> $headers
@@ -37,6 +38,10 @@ final class CollectionPage
 		public readonly string $name,
 		public readonly string $title,
 		public readonly ?string $parentTitle,
+		public readonly ?string $parentType,
+		public readonly ?string $parentEditUrl,
+		public readonly ?string $parentTreeUrl,
+		public readonly array $parentStatus,
 		public readonly CollectionUrls $urls,
 		public readonly CollectionQuery $query,
 		public readonly string $path,
@@ -76,6 +81,8 @@ final class CollectionPage
 		string $locale,
 		DateTimeZone $timezone,
 		?string $parentTitle = null,
+		?string $parentType = null,
+		?iterable $parentStatus = null,
 		?iterable $createBlueprints = null,
 	): self {
 		$query = $urls->query;
@@ -85,6 +92,8 @@ final class CollectionPage
 			? $blueprints
 			: self::blueprints($createBlueprints);
 		$parentTitle = self::label($parentTitle);
+		$parentType = self::label($parentType);
+		$parentStatus = self::statusList($parentStatus ?? []);
 		$headers = self::headers($columns, $sortKeys, $urls);
 		$pageCount = $query->limit > 0 ? max(1, (int) ceil($total / $query->limit)) : 1;
 		$currentPage = $query->limit > 0
@@ -98,6 +107,10 @@ final class CollectionPage
 			name: $name,
 			title: $parentTitle ?? $name,
 			parentTitle: $parentTitle,
+			parentType: $parentType,
+			parentEditUrl: $query->parent === null ? null : $urls->edit($query->parent),
+			parentTreeUrl: $query->parent === null ? null : $urls->showInTree($query->parent),
+			parentStatus: $parentStatus,
 			urls: $urls,
 			query: $query,
 			path: $urls->path(),
@@ -425,6 +438,31 @@ final class CollectionPage
 		}
 
 		return $links;
+	}
+
+	/**
+	 * @return list<array{kind: string, label: string}>
+	 */
+	private static function statusList(iterable $status): array
+	{
+		$badges = [];
+
+		foreach ($status as $badge) {
+			$badge = self::arrayFrom($badge);
+			$kind = trim((string) ($badge['kind'] ?? ''));
+			$label = trim((string) ($badge['label'] ?? ''));
+
+			if ($kind === '' || $label === '') {
+				continue;
+			}
+
+			$badges[] = [
+				'kind' => $kind,
+				'label' => $label,
+			];
+		}
+
+		return $badges;
 	}
 
 	/**
