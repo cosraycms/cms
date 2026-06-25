@@ -28,7 +28,6 @@
 
 .nav-link {
 	position: relative;
-	padding-left: calc(0.6875rem + var(--depth, 0) * var(--space-5));
 }
 
 .nav-link:hover,
