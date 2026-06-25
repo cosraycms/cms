@@ -107,7 +107,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
 		$this->assertStringContainsString('src="http://localhost:2001/src/panel.ts"', $html);
-		$this->assertStringNotContainsString('/cp/assets/build/panel.js', $html);
+		$this->assertStringNotContainsString('/cp/build/panel.js', $html);
 		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
 		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
 	}
@@ -150,7 +150,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		}
 
 		$this->assertStringContainsString('Panel bundle missing', $html);
-		$this->assertStringContainsString('cd panel &amp;&amp; pnpm run build', $html);
+		$this->assertStringContainsString('public/cp/build/panel.js', $html);
 		$this->assertStringContainsString(
 			'href="/panel/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
 			$html,
@@ -163,13 +163,16 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			return;
 		}
 
-		$this->assertStringContainsString('href="/cp/assets/build/panel.css"', $html);
-		$this->assertStringContainsString('src="/cp/assets/build/panel.js"', $html);
+		$this->assertStringContainsString('href="/cp/build/panel.css"', $html);
+		$this->assertStringContainsString('src="/cp/build/panel.js"', $html);
 	}
 
 	private function hasPanelBuild(): bool
 	{
-		return is_file(dirname(__DIR__, 2) . '/panel/build/panel.js');
+		return (
+			is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.js')
+			&& is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.css')
+		);
 	}
 
 	private function createArticle(

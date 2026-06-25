@@ -200,6 +200,12 @@ class Routes
 					);
 				$panel
 					->get(
+						'/build/...slug',
+						[Panel\Assets::class, 'build'],
+						'build.asset',
+					);
+				$panel
+					->get(
 						'/collection/{collection}',
 						[Panel\Collection::class, 'collection'],
 						'collection',

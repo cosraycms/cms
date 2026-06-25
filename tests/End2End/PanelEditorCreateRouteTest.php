@@ -118,9 +118,12 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
-		if (is_file(dirname(__DIR__, 2) . '/panel/build/panel.js')) {
+		if (
+			is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.js')
+			&& is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.css')
+		) {
 			$this->assertStringContainsString('id="cosray-node-editor"', $html);
-			$this->assertStringContainsString('src="/cp/assets/build/panel.js"', $html);
+			$this->assertStringContainsString('src="/cp/build/panel.js"', $html);
 			$this->assertStringContainsString('"mode":"create"', $html);
 			$this->assertStringContainsString('"name":"Test hierarchy"', $html);
 			$this->assertStringContainsString('"slug":"test-hierarchy"', $html);

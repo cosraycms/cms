@@ -15,8 +15,18 @@ final class Assets extends Panel
 {
 	public function asset(Request $request, Factory $factory, string $slug): Response
 	{
+		return $this->serve($request, $factory, $this->panelDir, $slug);
+	}
+
+	public function build(Request $request, Factory $factory, string $slug): Response
+	{
+		return $this->serve($request, $factory, $this->publicPanelBuildDir(), $slug);
+	}
+
+	private function serve(Request $request, Factory $factory, string $root, string $slug): Response
+	{
 		try {
-			$file = Path::inside($this->panelDir, $slug, checkIsFile: true);
+			$file = Path::inside($root, $slug, checkIsFile: true);
 		} catch (RuntimeException $e) {
 			throw new HttpNotFound($request, previous: $e);
 		}

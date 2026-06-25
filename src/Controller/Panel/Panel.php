@@ -65,7 +65,7 @@ abstract class Panel
 		$stylesheets = $this->config->panel->theme;
 
 		if ($this->config->env() !== 'development' && $this->hasPanelBuild()) {
-			$stylesheets[] = "{$panelPath}/assets/build/panel.css";
+			$stylesheets[] = "{$panelPath}/build/panel.css";
 		}
 
 		return $stylesheets;
@@ -89,12 +89,27 @@ abstract class Panel
 			];
 		}
 
-		return $this->hasPanelBuild() ? ["{$panelPath}/assets/build/panel.js"] : [];
+		return $this->hasPanelBuild() ? ["{$panelPath}/build/panel.js"] : [];
 	}
 
 	protected function hasPanelBuild(): bool
 	{
-		return is_file($this->panelDir . '/build/panel.js');
+		$build = $this->publicPanelBuildDir();
+
+		return is_file($build . '/panel.js') && is_file($build . '/panel.css');
+	}
+
+	protected function publicPanelBuildDir(): string
+	{
+		return $this->publicPanelDir() . '/build';
+	}
+
+	private function publicPanelDir(): string
+	{
+		$path = trim($this->panelPath(), '/');
+		$public = rtrim($this->config->path->public, '/\\');
+
+		return $path === '' ? $public : "{$public}/{$path}";
 	}
 
 	private function panelDevOrigin(): string

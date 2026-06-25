@@ -76,8 +76,8 @@ $runtimeJson = json_encode([
 		<?php else: ?>
 			<div class="editor-fallback">
 				<h2>Panel bundle missing</h2>
-				<p>Build the hybrid panel before using the new panel editor.</p>
-				<code>cd panel &amp;&amp; pnpm run build</code>
+				<p>Build the hybrid panel and copy the build output to public<?= escape($panelPath) ?>/build.</p>
+				<code>public<?= escape($panelPath) ?>/build/panel.js</code>
 				<a class="cms-button secondary" href="<?= escape($legacyUrl) ?>" hx-boost="false">
 					Open legacy editor
 				</a>

@@ -56,4 +56,87 @@ final class PanelAssetTest extends TestCase
 		$this->assertNotSame([], $response->getHeader('Last-Modified'));
 		$this->assertSame(file_get_contents($file), (string) $response->getBody());
 	}
+
+	public function testBuildAssetReturnsFileFromPublicPanelBuildDirectory(): void
+	{
+		$public = $this->createPublicBuild(['panel.js' => 'console.log("panel");']);
+		$panel = new Assets(
+			$this->config(['path.public' => $public]),
+			$this->container(),
+			$this->request(),
+		);
+
+		try {
+			$response = $panel->build($this->request(), $this->factory(), 'panel.js');
+
+			$this->assertSame(200, $response->getStatusCode());
+			$this->assertSame('console.log("panel");', (string) $response->getBody());
+		} finally {
+			$this->removeDirectory($public);
+		}
+	}
+
+	public function testPanelContextUsesPublicBuildUrls(): void
+	{
+		$public = $this->createPublicBuild([
+			'panel.css' => 'body {}',
+			'panel.js' => 'console.log("panel");',
+		]);
+		$panel = new class(
+			$this->config(['path.public' => $public]),
+			$this->container(),
+			$this->request(),
+		) extends \Cosray\Controller\Panel\Panel {
+			public function data(): array
+			{
+				return $this->context();
+			}
+
+			protected function collections(): array
+			{
+				return [];
+			}
+		};
+
+		try {
+			$context = $panel->data();
+
+			$this->assertContains('/cp/build/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/build/panel.js', $context['moduleScripts']);
+		} finally {
+			$this->removeDirectory($public);
+		}
+	}
+
+	/** @param array<string, string> $files */
+	private function createPublicBuild(array $files): string
+	{
+		$public = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
+		$build = $public . '/cp/build';
+		$this->assertTrue(mkdir($build, 0o775, true));
+
+		foreach ($files as $name => $content) {
+			$this->assertNotFalse(file_put_contents($build . '/' . $name, $content));
+		}
+
+		return $public;
+	}
+
+	private function removeDirectory(string $path): void
+	{
+		if (!is_dir($path)) {
+			return;
+		}
+
+		$files = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+			\RecursiveIteratorIterator::CHILD_FIRST,
+		);
+
+		foreach ($files as $file) {
+			$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+		}
+
+		rmdir($path);
+	}
 }
