@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Cosray\Util\Time;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use RuntimeException;
 
@@ -117,10 +116,14 @@ class Auth
 			$user = $this->users->bySession($hash);
 
 			if ($user && !(strtotime($user->expires) < time())) {
-				$this->login($user->id, false);
+				$this->startSession($user->id);
+				$this->rememberUser($user->id);
 
 				return $user;
 			}
+
+			$this->users->forget($hash);
+			$this->session->forgetRemembered();
 		}
 
 		// Fall back to token auth if session auth failed
@@ -164,14 +167,12 @@ class Auth
 	protected function remember(int $userId): RememberDetails
 	{
 		$token = new Token($this->config->app->secret);
-		$sessionOptions = $this->config->session->options;
-		$cacheExpire = $sessionOptions['cache_expire'];
-		$expires = time() + $cacheExpire;
+		$expires = time() + $this->config->auth->rememberLifetime;
 
 		$remembered = $this->users->remember(
 			$token->hash(),
 			$userId,
-			Time::toIsoDateTime($expires),
+			date(DATE_ATOM, $expires),
 		);
 
 		if ($remembered) {
@@ -183,7 +184,22 @@ class Auth
 
 	protected function login(int $userId, bool $remember): void
 	{
+		$this->startSession($userId);
+
+		if ($remember) {
+			$this->rememberUser($userId);
+		} else {
+			$this->forgetRemembered();
+		}
+	}
+
+	private function startSession(int $userId): void
+	{
 		$session = $this->session;
+
+		if (!$session) {
+			throw new RuntimeException('Cannot initialize auth session without session service');
+		}
 
 		if (!$session->active()) {
 			$session->start();
@@ -193,30 +209,42 @@ class Auth
 		// to mitigate session fixation attack.
 		$session->regenerate();
 		$session->setUser($userId);
+	}
 
-		if ($remember) {
-			$details = $this->remember($userId);
+	private function rememberUser(int $userId): void
+	{
+		if (!$this->session) {
+			throw new RuntimeException('Cannot remember user without session service');
+		}
 
-			if ($details) {
-				$session->remember(
-					$details->token,
-					$details->expires,
-				);
-			}
-		} else {
-			// Remove the user entry from login_sessions table as the user
-			// has not checked "remember me". In that case the session is
-			// only valid as long as the browser is not closed.
-			$token = $session->getAuthToken();
+		$details = $this->remember($userId);
 
-			if ($token !== null) {
-				$this->users->forget($token);
-			}
+		$this->session->remember(
+			$details->token,
+			$details->expires,
+		);
+	}
+
+	private function forgetRemembered(): void
+	{
+		if (!$this->session) {
+			return;
+		}
+
+		$hash = $this->getSessionTokenHash();
+
+		if ($hash !== null) {
+			$this->users->forget($hash);
+			$this->session->forgetRemembered();
 		}
 	}
 
 	protected function getSessionTokenHash(): ?string
 	{
+		if (!$this->session) {
+			return null;
+		}
+
 		$token = $this->session->getAuthToken();
 
 		if ($token) {

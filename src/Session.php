@@ -33,20 +33,24 @@ class Session extends BaseSession
 
 	public function remember(#[\SensitiveParameter] Token $token, int $expires): void
 	{
+		$value = $token->get();
+		$_COOKIE[$this->authCookie] = $value;
+
 		setcookie(
 			$this->authCookie,
-			$token->get(),
-			$expires,
-			'/',
+			$value,
+			$this->rememberCookieOptions($expires),
 		);
 	}
 
 	public function forgetRemembered(): void
 	{
+		unset($_COOKIE[$this->authCookie]);
+
 		setcookie(
 			$this->authCookie,
 			'',
-			time() - (60 * 60 * 24),
+			$this->rememberCookieOptions(time() - (60 * 60 * 24)),
 		);
 	}
 
@@ -63,5 +67,28 @@ class Session extends BaseSession
 	public function lastActivity(): ?int
 	{
 		return $_SESSION['last_activity'] ?? null;
+	}
+
+	/** @return array{expires: int, path: string, domain?: string, secure: bool, httponly: bool, samesite: string, partitioned?: bool} */
+	private function rememberCookieOptions(int $expires): array
+	{
+		$options = [
+			'expires' => $expires,
+			'path' => (string) ($this->options['cookie_path'] ?? '/'),
+			'secure' => (bool) ($this->options['cookie_secure'] ?? true),
+			'httponly' => (bool) ($this->options['cookie_httponly'] ?? true),
+			'samesite' => (string) ($this->options['cookie_samesite'] ?? 'Lax'),
+		];
+
+		$domain = (string) ($this->options['cookie_domain'] ?? '');
+		if ($domain !== '') {
+			$options['domain'] = $domain;
+		}
+
+		if (isset($this->options['cookie_partitioned'])) {
+			$options['partitioned'] = (bool) $this->options['cookie_partitioned'];
+		}
+
+		return $options;
 	}
 }

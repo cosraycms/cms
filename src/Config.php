@@ -20,6 +20,7 @@ class Config
 	private readonly Config\Env $environment;
 
 	private ?Config\App $appConfig = null;
+	private ?Config\Auth $authConfig = null;
 	private ?Config\Path $pathConfig = null;
 	private ?Config\Panel $panelConfig = null;
 	private ?Config\Error $errorConfig = null;
@@ -33,6 +34,10 @@ class Config
 
 	public Config\App $app {
 		get => $this->appConfig ??= new Config\App($this);
+	}
+
+	public Config\Auth $auth {
+		get => $this->authConfig ??= new Config\Auth($this);
 	}
 
 	public Config\Path $path {

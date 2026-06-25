@@ -7,6 +7,7 @@ namespace Cosray\Config;
 /**
  * @psalm-type SessionOptions = array{
  *     cookie_httponly: bool,
+ *     cookie_samesite: string,
  *     cookie_secure: bool,
  *     cookie_lifetime: int,
  *     gc_maxlifetime: int,
@@ -23,6 +24,8 @@ namespace Cosray\Config;
  *     'app.env': string,
  *     'app.secret': ?string,
  *     'app.timezone': string,
+ *
+ *     'auth.remember_lifetime': int,
  *
  *     'path.root': string,
  *     'path.public': string,
@@ -78,6 +81,7 @@ namespace Cosray\Config;
  *     'app.env'?: string,
  *     'app.secret'?: null|string,
  *     'app.timezone'?: string,
+ *     'auth.remember_lifetime'?: int,
  *     'path.root'?: string,
  *     'path.public'?: string,
  *     'path.prefix'?: string,

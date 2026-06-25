@@ -37,6 +37,7 @@ final class Env
 		])->isBoolean();
 
 		$this->dotenv->ifPresent([
+			'AUTH_REMEMBER_LIFETIME',
 			'SESSION_COOKIE_LIFETIME',
 			'SESSION_IDLE_TIMEOUT',
 		])->isInteger();

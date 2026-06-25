@@ -29,8 +29,9 @@ final class PanelAuthTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('<h1>Login</h1>', $html);
+		$this->assertStringContainsString('Sign in to your account', $html);
 		$this->assertStringContainsString('action="/cp/login"', $html);
+		$this->assertStringContainsString('Forgot password?', $html);
 	}
 
 	public function testLoginWithValidCredentialsRedirectsToPanel(): void

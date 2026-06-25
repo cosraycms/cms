@@ -7,6 +7,7 @@ namespace Cosray\Tests\Integration;
 use Cosray\Auth;
 use Cosray\Session;
 use Cosray\Tests\IntegrationTestCase;
+use Cosray\Token;
 use Cosray\Users;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
 
@@ -19,17 +20,33 @@ use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
  */
 final class AuthIntegrationTest extends IntegrationTestCase
 {
+	private const string SECRET = 'test-secret-key-for-testing-only';
+
 	protected function setUp(): void
 	{
 		parent::setUp();
 		$this->loadFixtures('basic-types', 'sample-nodes');
 	}
 
-	private function createAuth(PsrServerRequest $request, ?Session $session = null): Auth
+	protected function tearDown(): void
 	{
-		$config = $this->config([
-			'app.secret' => 'test-secret-key-for-testing-only',
-		]);
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			$_SESSION = [];
+			session_unset();
+			session_destroy();
+		}
+
+		parent::tearDown();
+	}
+
+	private function createAuth(
+		PsrServerRequest $request,
+		?Session $session = null,
+		array $settings = [],
+	): Auth {
+		$config = $this->config(array_merge([
+			'app.secret' => self::SECRET,
+		], $settings));
 
 		return new Auth(
 			$request,
@@ -92,7 +109,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		]);
 
 		$request = $this->psrRequest();
-		$session = new Session(['cache_expire' => 3600], 'test_session');
+		$session = new Session(['use_cookies' => 0], 'test_session');
 		$auth = $this->createAuth($request, $session);
 
 		// Authenticate with remember me and session initialization
@@ -103,6 +120,129 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		// Verify session was created
 		$sessionUserId = $session->authenticatedUserId();
 		$this->assertEquals($userId, $sessionUserId);
+	}
+
+	public function testRememberMeUsesConfiguredLifetime(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'auth-remember-lifetime-user',
+			'email' => 'remember-lifetime@example.com',
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
+		]);
+
+		$request = $this->psrRequest();
+		$session = new Session(['use_cookies' => 0, 'cache_expire' => 1], 'test_session');
+		$auth = $this->createAuth($request, $session, [
+			'auth.remember_lifetime' => 7200,
+		]);
+
+		$user = $auth->authenticate('remember-lifetime@example.com', 'password', true, true);
+
+		$this->assertInstanceOf(\Cosray\User::class, $user);
+
+		$row = $this->db()->execute(
+			'SELECT EXTRACT(EPOCH FROM expires - now()) AS ttl FROM cms.login_sessions WHERE usr = :usr',
+			['usr' => $userId],
+		)->one();
+		$ttl = (float) $row['ttl'];
+
+		$this->assertGreaterThanOrEqual(7195.0, $ttl);
+		$this->assertLessThanOrEqual(7205.0, $ttl);
+	}
+
+	public function testLoginWithoutRememberMeClearsExistingRememberToken(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'auth-no-remember-user',
+			'email' => 'no-remember@example.com',
+			'password' => password_hash('password', PASSWORD_ARGON2ID),
+		]);
+		$token = 'existing-remember-token';
+		$hash = new Token(self::SECRET, $token)->hash();
+		$this->db()->execute(
+			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() + INTERVAL '1 day')",
+			['hash' => $hash, 'usr' => $userId],
+		)->run();
+		$_COOKIE['test_session_auth'] = $token;
+
+		$request = $this->psrRequest();
+		$session = new Session(['use_cookies' => 0], 'test_session');
+		$auth = $this->createAuth($request, $session);
+
+		$user = $auth->authenticate('no-remember@example.com', 'password', false, true);
+
+		$this->assertInstanceOf(\Cosray\User::class, $user);
+		$this->assertArrayNotHasKey('test_session_auth', $_COOKIE);
+		$exists = $this->db()->execute(
+			'SELECT EXISTS(SELECT 1 FROM cms.login_sessions WHERE hash = :hash) as exists',
+			['hash' => $hash],
+		)->one()['exists'];
+		$this->assertFalse($exists);
+	}
+
+	public function testValidRememberCookieRestoresAndRotatesSession(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'auth-restore-remember-user',
+			'email' => 'restore-remember@example.com',
+		]);
+		$token = 'restore-remember-token';
+		$hash = new Token(self::SECRET, $token)->hash();
+		$this->db()->execute(
+			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() + INTERVAL '1 day')",
+			['hash' => $hash, 'usr' => $userId],
+		)->run();
+		$_COOKIE['test_session_auth'] = $token;
+
+		$request = $this->psrRequest();
+		$session = new Session(['use_cookies' => 0], 'test_session');
+		$auth = $this->createAuth($request, $session, [
+			'auth.remember_lifetime' => 7200,
+		]);
+
+		$user = $auth->user();
+
+		$this->assertInstanceOf(\Cosray\User::class, $user);
+		$this->assertSame($userId, $user->id);
+		$this->assertSame($userId, $session->authenticatedUserId());
+		$newToken = $_COOKIE['test_session_auth'] ?? null;
+		$this->assertIsString($newToken);
+		$this->assertNotSame($token, $newToken);
+		$newHash = new Token(self::SECRET, $newToken)->hash();
+		$row = $this->db()->execute(
+			'SELECT hash FROM cms.login_sessions WHERE usr = :usr',
+			['usr' => $userId],
+		)->one();
+		$this->assertSame($newHash, $row['hash']);
+	}
+
+	public function testExpiredRememberCookieIsCleared(): void
+	{
+		$userId = $this->createTestUser([
+			'uid' => 'auth-expired-remember-user',
+			'email' => 'expired-remember@example.com',
+		]);
+		$token = 'expired-remember-token';
+		$hash = new Token(self::SECRET, $token)->hash();
+		$this->db()->execute(
+			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() - INTERVAL '1 day')",
+			['hash' => $hash, 'usr' => $userId],
+		)->run();
+		$_COOKIE['test_session_auth'] = $token;
+
+		$request = $this->psrRequest();
+		$session = new Session(['use_cookies' => 0], 'test_session');
+		$auth = $this->createAuth($request, $session);
+
+		$user = $auth->user();
+
+		$this->assertNull($user);
+		$this->assertArrayNotHasKey('test_session_auth', $_COOKIE);
+		$exists = $this->db()->execute(
+			'SELECT EXISTS(SELECT 1 FROM cms.login_sessions WHERE hash = :hash) as exists',
+			['hash' => $hash],
+		)->one()['exists'];
+		$this->assertFalse($exists);
 	}
 
 	public function testGetAuthTokenFromBearerHeader(): void

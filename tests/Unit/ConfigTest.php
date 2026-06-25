@@ -92,11 +92,13 @@ final class ConfigTest extends TestCase
 		$this->assertSame('/cp', $config->panel->path);
 		$this->assertNull($config->app->secret);
 		$this->assertSame('UTC', $config->app->timezone->getName());
+		$this->assertSame(60 * 60 * 24 * 30, $config->auth->rememberLifetime);
 		$this->assertSame([], $config->panel->theme);
 		$this->assertFalse($config->session->enabled);
 		$this->assertSame(0, $config->session->options['cookie_lifetime']);
+		$this->assertSame('Lax', $config->session->options['cookie_samesite']);
 		$this->assertTrue($config->session->options['cookie_secure']);
-		$this->assertSame(3600, $config->session->options['gc_maxlifetime']);
+		$this->assertSame(60 * 60 * 8, $config->session->options['gc_maxlifetime']);
 		$this->assertSame(3600, $config->session->options['cache_expire']);
 		$this->assertNull($config->session->handler);
 		$this->assertNull($config->db->dsn);
@@ -127,6 +129,7 @@ final class ConfigTest extends TestCase
 			'app.env' => 'production',
 			'app.secret' => 'configured-secret',
 			'app.timezone' => 'Europe/Berlin',
+			'auth.remember_lifetime' => 60 * 60 * 24 * 7,
 			'session.enabled' => true,
 		]);
 
@@ -135,6 +138,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame('production', $config->env());
 		$this->assertSame('configured-secret', $config->app->secret);
 		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
+		$this->assertSame(60 * 60 * 24 * 7, $config->auth->rememberLifetime);
 		$this->assertTrue($config->session->enabled);
 	}
 
@@ -174,9 +178,10 @@ final class ConfigTest extends TestCase
 	public function testSessionOptionsCanBeChangedFromEnvironment(): void
 	{
 		$config = new Config($this->rootWithEnv(
-			"SESSION_COOKIE_SECURE=false\nSESSION_COOKIE_LIFETIME=86400\nSESSION_IDLE_TIMEOUT=7200\n",
+			"AUTH_REMEMBER_LIFETIME=1209600\nSESSION_COOKIE_SECURE=false\nSESSION_COOKIE_LIFETIME=86400\nSESSION_IDLE_TIMEOUT=7200\n",
 		));
 
+		$this->assertSame(1_209_600, $config->auth->rememberLifetime);
 		$this->assertFalse($config->session->options['cookie_secure']);
 		$this->assertSame(86400, $config->session->options['cookie_lifetime']);
 		$this->assertSame(7200, $config->session->options['gc_maxlifetime']);
@@ -191,9 +196,10 @@ final class ConfigTest extends TestCase
 		]);
 
 		$this->assertTrue($config->session->options['cookie_httponly']);
+		$this->assertSame('Lax', $config->session->options['cookie_samesite']);
 		$this->assertFalse($config->session->options['cookie_secure']);
 		$this->assertSame(0, $config->session->options['cookie_lifetime']);
-		$this->assertSame(3600, $config->session->options['gc_maxlifetime']);
+		$this->assertSame(60 * 60 * 8, $config->session->options['gc_maxlifetime']);
 		$this->assertSame(3600, $config->session->options['cache_expire']);
 	}
 
@@ -401,6 +407,7 @@ final class ConfigTest extends TestCase
 		$config = new Config(self::root());
 
 		$this->assertSame($config->app, $config->app);
+		$this->assertSame($config->auth, $config->auth);
 		$this->assertSame($config->path, $config->path);
 		$this->assertSame($config->panel, $config->panel);
 		$this->assertSame($config->session, $config->session);

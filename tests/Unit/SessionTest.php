@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Session;
 use Cosray\Tests\TestCase;
+use Cosray\Token;
 
 /**
  * @internal
@@ -52,5 +53,20 @@ final class SessionTest extends TestCase
 		$_COOKIE['cosray_auth'] = 'token-value';
 
 		$this->assertSame('token-value', $session->getAuthToken());
+	}
+
+	public function testRememberedCookieRoundTrip(): void
+	{
+		$session = new Session(['use_cookies' => 0], 'test-session');
+
+		$session->remember(new Token('secret', 'token-value'), time() + 3600);
+
+		$this->assertSame('token-value', $_COOKIE['test-session_auth']);
+		$this->assertSame('token-value', $session->getAuthToken());
+
+		$session->forgetRemembered();
+
+		$this->assertArrayNotHasKey('test-session_auth', $_COOKIE);
+		$this->assertNull($session->getAuthToken());
 	}
 }

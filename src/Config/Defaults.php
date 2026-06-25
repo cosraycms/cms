@@ -16,6 +16,7 @@ final class Defaults
 	{
 		return array_merge(
 			self::app($env),
+			self::auth($env),
 			self::paths($root),
 			self::panel(),
 			self::error(),
@@ -38,6 +39,14 @@ final class Defaults
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function auth(Env $env): array
+	{
+		return [
+			'auth.remember_lifetime' => $env->int('AUTH_REMEMBER_LIFETIME', 60 * 60 * 24 * 30),
 		];
 	}
 
@@ -115,9 +124,10 @@ final class Defaults
 			'session.enabled' => $env->bool('SITE_SESSION_ENABLED', false),
 			'session.options' => [
 				'cookie_httponly' => true,
+				'cookie_samesite' => 'Lax',
 				'cookie_secure' => $env->bool('SESSION_COOKIE_SECURE', true),
 				'cookie_lifetime' => $env->int('SESSION_COOKIE_LIFETIME', 0),
-				'gc_maxlifetime' => $env->int('SESSION_IDLE_TIMEOUT', 3600),
+				'gc_maxlifetime' => $env->int('SESSION_IDLE_TIMEOUT', 60 * 60 * 8),
 				'cache_expire' => 3600,
 			],
 			'session.handler' => null,
