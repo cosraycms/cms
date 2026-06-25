@@ -53,10 +53,10 @@ if (!$boosted) {
 				<nav class="breadcrumb" aria-label="Breadcrumb">
 					<a href="<?= escape($page->rootUrl) ?>" hx-target="#main"><?= escape($page->name) ?></a>
 					<span aria-hidden="true">/</span>
-					<span><?= escape($page->query->parent) ?></span>
+					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
 				</nav>
 			<?php endif ?>
-			<h1><?= escape($page->name) ?></h1>
+			<h1><?= escape($page->title) ?></h1>
 			<span class="count-pill"><?= $page->total ?> <?= $page->total === 1
 	? 'entry'
 	: 'entries' ?></span>

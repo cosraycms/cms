@@ -26,6 +26,7 @@
 		limit?: number;
 		sort?: string;
 		dir?: string;
+		parent?: string | null;
 	};
 
 	export type EditorBootstrap = {

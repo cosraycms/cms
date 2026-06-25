@@ -91,12 +91,19 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Panel Direct Child', $html);
-		$this->assertStringNotContainsString('Panel Parent Filter', $html);
+		$this->assertStringContainsString('<h1>Panel Parent Filter</h1>', $html);
+		$this->assertStringContainsString('<span>Panel Parent Filter</span>', $html);
+		$this->assertStringNotContainsString('<span>panel-parent-filter</span>', $html);
 		$this->assertStringNotContainsString('Panel Grandchild', $html);
 		$this->assertStringContainsString(
 			'href="/cp/collection/test-hierarchy?sort=changed&amp;dir=desc"',
 			$html,
 		);
+		$this->assertStringContainsString(
+			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc&amp;parent=panel-parent-filter"',
+			$html,
+		);
+		$this->assertStringContainsString('New Hierarchy Child', $html);
 	}
 
 	private function createHierarchyNode(

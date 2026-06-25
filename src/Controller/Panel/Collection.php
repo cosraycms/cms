@@ -11,6 +11,7 @@ use Celemas\Wire\Creator;
 use Cosray\Collection as CmsCollection;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Node;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
@@ -55,13 +56,21 @@ final class Collection extends Panel
 			throw new HttpBadRequest($this->request);
 		}
 
+		$parentUid = $obj->listMeta->showChildren && $parent !== '' ? $parent : null;
+		$parentNode = $parentUid === null ? null : $this->parentNode($obj, $parentUid);
+		$parentTitle = $parentNode?->title();
+
+		if ($parentTitle !== null && trim($parentTitle) === '') {
+			$parentTitle = $parentUid;
+		}
+
 		$listing = $obj->list(
 			offset: $offset,
 			limit: $limit,
 			q: $q,
 			sort: $sort,
 			dir: $dir,
-			parent: $parent === '' ? null : $parent,
+			parent: $parentUid,
 		);
 
 		$query = new CollectionQuery(
@@ -70,7 +79,7 @@ final class Collection extends Panel
 			dir: $listing['dir'],
 			offset: $listing['offset'],
 			limit: $listing['limit'],
-			parent: $parent === '' ? null : $parent,
+			parent: $parentUid,
 		);
 		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
 
@@ -86,8 +95,21 @@ final class Collection extends Panel
 				meta: $obj->listMeta,
 				locale: $this->localeId(),
 				timezone: $this->config->app->timezone,
+				parentTitle: $parentTitle,
+				createBlueprints: $parentNode === null ? null : $obj->childBlueprints($parentNode),
 			),
 		]);
+	}
+
+	private function parentNode(CmsCollection $collection, string $uid): Node
+	{
+		$node = $collection->cms?->node->byUid($uid, published: null);
+
+		if (!$node) {
+			throw new HttpNotFound($this->request);
+		}
+
+		return $node;
 	}
 
 	/** @return list<array{slug: string, name: string}> */

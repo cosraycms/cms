@@ -11,6 +11,7 @@ use Celemas\Wire\Creator;
 use Cosray\Collection as CmsCollection;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Node;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
@@ -39,12 +40,11 @@ final class Editor extends Panel
 	public function create(string $collection, string $type): array
 	{
 		[$name, $obj] = $this->collection($collection);
+		$query = $this->queryState();
 
-		if (!in_array($type, $this->blueprintHandles($obj), true)) {
+		if (!$this->canCreate($obj, $type, $query->parent)) {
 			throw new HttpNotFound($this->request);
 		}
-
-		$query = $this->queryState();
 
 		return $this->editorContext(
 			mode: 'create',
@@ -73,6 +73,35 @@ final class Editor extends Panel
 		assert($obj instanceof CmsCollection, 'The editor route must resolve a collection');
 
 		return [$ref->meta->label, $obj];
+	}
+
+	private function canCreate(CmsCollection $collection, string $type, ?string $parent): bool
+	{
+		if ($parent === null) {
+			return in_array($type, $this->blueprintHandles($collection), true);
+		}
+
+		if (!$collection->listMeta->showChildren) {
+			return false;
+		}
+
+		$childHandles = array_column(
+			$collection->childBlueprints($this->parentNode($collection, $parent)),
+			'slug',
+		);
+
+		return in_array($type, $childHandles, true);
+	}
+
+	private function parentNode(CmsCollection $collection, string $uid): Node
+	{
+		$node = $collection->cms?->node->byUid($uid, published: null);
+
+		if (!$node) {
+			throw new HttpNotFound($this->request);
+		}
+
+		return $node;
 	}
 
 	/** @return list<string> */

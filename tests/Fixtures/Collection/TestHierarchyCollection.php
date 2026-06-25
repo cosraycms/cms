@@ -6,7 +6,7 @@ namespace Cosray\Tests\Fixtures\Collection;
 
 use Cosray\Collection;
 use Cosray\Finder\Nodes;
-use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
+use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
 
 final class TestHierarchyCollection extends Collection
 {
@@ -26,6 +26,6 @@ final class TestHierarchyCollection extends Collection
 	/** @return list<class-string> */
 	public function blueprints(): array
 	{
-		return [TestHierarchyChild::class];
+		return [TestHierarchyParent::class];
 	}
 }

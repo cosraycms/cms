@@ -249,7 +249,8 @@ abstract class Collection implements NavigationItem
 		return $result;
 	}
 
-	private function childBlueprints(Node $node): array
+	/** @return list<array{slug: string, name: string}> */
+	public function childBlueprints(Node $node): array
 	{
 		$children = $node->meta->type->children;
 

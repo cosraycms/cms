@@ -31,6 +31,7 @@
 			limit?: number;
 			sort?: string;
 			dir?: string;
+			parent?: string | null;
 		};
 		save: (published: boolean) => Promise<boolean>;
 		swapTarget?: string | null;
@@ -58,6 +59,10 @@
 
 		if (collection.dir) {
 			params.set('dir', collection.dir);
+		}
+
+		if (collection.parent) {
+			params.set('parent', collection.parent);
 		}
 
 		const query = params.toString();

@@ -29,6 +29,8 @@ final class CollectionPage
 	 */
 	private function __construct(
 		public readonly string $name,
+		public readonly string $title,
+		public readonly ?string $parentTitle,
 		public readonly CollectionUrls $urls,
 		public readonly CollectionQuery $query,
 		public readonly string $path,
@@ -53,6 +55,7 @@ final class CollectionPage
 	 * @param iterable<mixed> $sortKeys
 	 * @param iterable<mixed> $blueprints
 	 * @param iterable<mixed> $nodes
+	 * @param iterable<mixed>|null $createBlueprints
 	 */
 	public static function from(
 		string $name,
@@ -65,10 +68,16 @@ final class CollectionPage
 		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
+		?string $parentTitle = null,
+		?iterable $createBlueprints = null,
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
 		$blueprints = self::blueprints($blueprints);
+		$createBlueprints = $createBlueprints === null
+			? $blueprints
+			: self::blueprints($createBlueprints);
+		$parentTitle = self::label($parentTitle);
 		$headers = self::headers($columns, $sortKeys, $urls);
 		$pageCount = $query->limit > 0 ? max(1, (int) ceil($total / $query->limit)) : 1;
 		$currentPage = $query->limit > 0
@@ -80,6 +89,8 @@ final class CollectionPage
 
 		return new self(
 			name: $name,
+			title: $parentTitle ?? $name,
+			parentTitle: $parentTitle,
 			urls: $urls,
 			query: $query,
 			path: $urls->path(),
@@ -96,9 +107,9 @@ final class CollectionPage
 			rangeEnd: $rangeEnd,
 			showChildren: $meta->showChildren,
 			searchFields: self::searchFields($query),
-			createLinks: self::createLinks($blueprints, $urls),
+			createLinks: self::createLinks($createBlueprints, $urls),
 			headers: $headers,
-			rows: self::rows($nodes, $headers, $blueprints, $urls, $meta, $locale, $timezone),
+			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone),
 			previousUrl: $query->offset > 0
 				? $urls->collection(['offset' => max(0, $query->offset - $query->limit)])
 				: null,
@@ -106,6 +117,13 @@ final class CollectionPage
 				? $urls->collection(['offset' => $query->offset + $query->limit])
 				: null,
 		);
+	}
+
+	private static function label(?string $label): ?string
+	{
+		$label = trim((string) $label);
+
+		return $label === '' ? null : $label;
 	}
 
 	/** @return list<array{name: string, value: string}> */
@@ -170,7 +188,6 @@ final class CollectionPage
 
 	/**
 	 * @param list<array{label: string, url: ?string, class: string}> $headers
-	 * @param list<array{slug: string, name: string}> $blueprints
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
@@ -182,14 +199,12 @@ final class CollectionPage
 	private static function rows(
 		array $nodes,
 		array $headers,
-		array $blueprints,
 		CollectionUrls $urls,
 		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
 	): array {
 		$rows = [];
-		$blueprintSlugs = array_column($blueprints, 'slug');
 
 		foreach ($nodes as $node) {
 			$node = self::arrayFrom($node);
@@ -199,7 +214,7 @@ final class CollectionPage
 				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
 				'status' => self::status($node, $meta),
 				'childLinks' => $meta->showChildren
-					? self::childLinks($node, $blueprintSlugs, $urls)
+					? self::childLinks($node, $urls)
 					: [],
 			];
 		}
@@ -276,12 +291,10 @@ final class CollectionPage
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<string> $blueprintSlugs
 	 * @return list<array{label: string, url: string}>
 	 */
 	private static function childLinks(
 		array $node,
-		array $blueprintSlugs,
 		CollectionUrls $urls,
 	): array {
 		$links = [];
@@ -298,7 +311,7 @@ final class CollectionPage
 			];
 		}
 
-		foreach (self::childBlueprints($node, $blueprintSlugs) as $blueprint) {
+		foreach (self::childBlueprints($node) as $blueprint) {
 			$links[] = [
 				'label' => 'Add ' . $blueprint['name'],
 				'url' => $urls->create($blueprint['slug'], $uid),
@@ -343,10 +356,9 @@ final class CollectionPage
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<string> $allowedSlugs
 	 * @return list<array{slug: string, name: string}>
 	 */
-	private static function childBlueprints(array $node, array $allowedSlugs): array
+	private static function childBlueprints(array $node): array
 	{
 		$blueprints = [];
 
@@ -355,7 +367,7 @@ final class CollectionPage
 			$slug = trim((string) ($blueprint['slug'] ?? ''));
 			$name = trim((string) ($blueprint['name'] ?? ''));
 
-			if ($slug === '' || $name === '' || !in_array($slug, $allowedSlugs, true)) {
+			if ($slug === '' || $name === '') {
 				continue;
 			}
 

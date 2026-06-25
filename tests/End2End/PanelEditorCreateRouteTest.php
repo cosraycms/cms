@@ -37,6 +37,12 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	public function testPanelCreateRouteRendersShellForAllowedType(): void
 	{
+		$this->createHierarchyNode(
+			uid: 'panel-create-parent',
+			type: $this->parentTypeId,
+			title: 'Panel Create Parent',
+		);
+
 		$response = $this->makeRequest(
 			'GET',
 			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
@@ -58,11 +64,11 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertCreateAssetStateIsRendered($html);
 	}
 
-	public function testPanelCreateRouteRejectsInvalidType(): void
+	public function testPanelCreateRouteRejectsChildTypeWithoutParent(): void
 	{
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-parent',
+			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
 		);
 
 		$this->assertResponseStatus(404, $response);
@@ -80,7 +86,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc"',
+			'href="/cp/collection/test-hierarchy/create/test-hierarchy-parent?sort=changed&amp;dir=desc"',
 			$html,
 		);
 		$this->assertStringContainsString(

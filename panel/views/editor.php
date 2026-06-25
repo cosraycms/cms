@@ -36,6 +36,7 @@ $bootstrap = [
 		'limit' => $queryState->limit,
 		'sort' => $queryState->sort,
 		'dir' => $queryState->dir,
+		'parent' => $parent,
 	],
 	'node' => $nodeUid,
 	'type' => $type,
