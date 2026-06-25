@@ -62,6 +62,72 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertStringContainsString('Open children', $html);
 	}
 
+	public function testHierarchyTreeRendersOpenedDirectChildren(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-tree-root',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Root',
+		);
+		$childId = $this->createHierarchyNode(
+			uid: 'panel-tree-child',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Child',
+			parent: $rootId,
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-tree-grandchild',
+			type: $this->childTypeId,
+			title: 'Panel Tree Grandchild',
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+			'query' => [
+				'open' => 'panel-tree-root',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Panel Tree Root', $html);
+		$this->assertStringContainsString('Panel Tree Child', $html);
+		$this->assertStringNotContainsString('Panel Tree Grandchild', $html);
+	}
+
+	public function testHierarchyTreeRendersOpenedGrandchildren(): void
+	{
+		$rootId = $this->createHierarchyNode(
+			uid: 'panel-tree-root-deep',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Root Deep',
+		);
+		$childId = $this->createHierarchyNode(
+			uid: 'panel-tree-child-deep',
+			type: $this->parentTypeId,
+			title: 'Panel Tree Child Deep',
+			parent: $rootId,
+		);
+		$this->createHierarchyNode(
+			uid: 'panel-tree-grandchild-deep',
+			type: $this->childTypeId,
+			title: 'Panel Tree Grandchild Deep',
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+			'query' => [
+				'open' => 'panel-tree-root-deep,panel-tree-child-deep',
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Panel Tree Root Deep', $html);
+		$this->assertStringContainsString('Panel Tree Child Deep', $html);
+		$this->assertStringContainsString('Panel Tree Grandchild Deep', $html);
+	}
+
 	public function testHierarchyCollectionRendersDirectChildrenByParent(): void
 	{
 		$rootId = $this->createHierarchyNode(

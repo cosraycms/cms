@@ -15,6 +15,7 @@ use Cosray\Node\Node;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionTree;
 use Cosray\Panel\CollectionUrls;
 
 final class Collection extends Panel
@@ -100,6 +101,22 @@ final class Collection extends Panel
 			open: $open,
 			defaultView: $defaultView,
 		);
+		$nodes = $listing['nodes'];
+
+		if ($obj->listMeta->showChildren && $view === 'tree') {
+			$nodes = CollectionTree::build(
+				nodes: $nodes,
+				open: $open,
+				children: static fn(string $uid): array => $obj->list(
+					offset: 0,
+					limit: self::LIMIT_MAX,
+					sort: $listing['sort'],
+					dir: $listing['dir'],
+					parent: $uid,
+				)['nodes'],
+			);
+		}
+
 		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		return $this->context([
@@ -109,7 +126,7 @@ final class Collection extends Panel
 				columns: $obj->columns(),
 				sortKeys: array_keys($sorts),
 				blueprints: $this->blueprints($obj),
-				nodes: $listing['nodes'],
+				nodes: $nodes,
 				total: $listing['total'],
 				meta: $obj->listMeta,
 				locale: $this->localeId(),

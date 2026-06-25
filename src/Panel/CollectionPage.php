@@ -22,8 +22,14 @@ final class CollectionPage
 	 * @param list<array{label: string, url: ?string, class: string}> $headers
 	 * @param list<array{
 	 *     uid: string,
+	 *     depth: int,
+	 *     expanded: bool,
+	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
+	 *     childrenUrl: ?string,
+	 *     focusedChildrenUrl: ?string,
+	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
 	 *     childLinks: list<array{label: string, url: string}>,
 	 * }> $rows
 	 */
@@ -42,6 +48,7 @@ final class CollectionPage
 		public readonly int $rangeStart,
 		public readonly int $rangeEnd,
 		public readonly bool $showChildren,
+		public readonly bool $treeMode,
 		public readonly array $searchFields,
 		public readonly array $createLinks,
 		public readonly array $headers,
@@ -111,6 +118,7 @@ final class CollectionPage
 			rangeStart: $rangeStart,
 			rangeEnd: $rangeEnd,
 			showChildren: $meta->showChildren,
+			treeMode: $meta->showChildren && $query->view === 'tree',
 			searchFields: self::searchFields($query),
 			createLinks: self::createLinks($createBlueprints, $urls),
 			headers: $headers,
@@ -204,8 +212,14 @@ final class CollectionPage
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
+	 *     depth: int,
+	 *     expanded: bool,
+	 *     hasChildren: bool,
 	 *     cells: list<array{label: string, value: string, class: string, editUrl: ?string}>,
 	 *     status: list<array{kind: string, label: string}>,
+	 *     childrenUrl: ?string,
+	 *     focusedChildrenUrl: ?string,
+	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
 	 *     childLinks: list<array{label: string, url: string}>,
 	 * }>
 	 */
@@ -220,19 +234,70 @@ final class CollectionPage
 		$rows = [];
 
 		foreach ($nodes as $node) {
-			$node = self::arrayFrom($node);
+			$tree = self::treeNode($node);
+			$node = $tree['node'];
 			$uid = (string) ($node['uid'] ?? '');
+			$hasChildren = (bool) ($node['hasChildren'] ?? false);
+			$childBlueprints = self::childBlueprints($node);
+			$childrenUrl = null;
+
+			if ($meta->showChildren && $hasChildren && $uid !== '') {
+				$childrenUrl = $tree['expanded']
+					? $urls->collapse($uid, $tree['descendants'])
+					: $urls->expand($uid);
+			}
+
 			$rows[] = [
 				'uid' => $uid,
+				'depth' => $tree['depth'],
+				'expanded' => $tree['expanded'],
+				'hasChildren' => $hasChildren,
 				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
 				'status' => self::status($node, $meta),
+				'childrenUrl' => $childrenUrl,
+				'focusedChildrenUrl' =>
+					$meta->showChildren && $uid !== '' && ($hasChildren || $childBlueprints !== [])
+						? $urls->children($uid)
+						: null,
+				'childCreateLinks' => $meta->showChildren
+					? self::childCreateLinks($childBlueprints, $urls, $uid)
+					: [],
 				'childLinks' => $meta->showChildren
-					? self::childLinks($node, $urls)
+					? self::childLinks($node, $urls, $childBlueprints)
 					: [],
 			];
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * @return array{
+	 *     node: array<string, mixed>,
+	 *     depth: int,
+	 *     expanded: bool,
+	 *     descendants: list<string>,
+	 * }
+	 */
+	private static function treeNode(mixed $node): array
+	{
+		$tree = self::arrayFrom($node);
+
+		if (!array_key_exists('node', $tree)) {
+			return [
+				'node' => $tree,
+				'depth' => 0,
+				'expanded' => false,
+				'descendants' => [],
+			];
+		}
+
+		return [
+			'node' => self::arrayFrom($tree['node']),
+			'depth' => max(0, (int) ($tree['depth'] ?? 0)),
+			'expanded' => (bool) ($tree['expanded'] ?? false),
+			'descendants' => self::strings($tree['descendants'] ?? []),
+		];
 	}
 
 	/**
@@ -303,12 +368,40 @@ final class CollectionPage
 	}
 
 	/**
+	 * @param list<array{slug: string, name: string}> $blueprints
+	 * @return list<array{slug: string, name: string, url: string}>
+	 */
+	private static function childCreateLinks(
+		array $blueprints,
+		CollectionUrls $urls,
+		string $uid,
+	): array {
+		$links = [];
+
+		if ($uid === '') {
+			return [];
+		}
+
+		foreach ($blueprints as $blueprint) {
+			$links[] = [
+				'slug' => $blueprint['slug'],
+				'name' => $blueprint['name'],
+				'url' => $urls->create($blueprint['slug'], $uid),
+			];
+		}
+
+		return $links;
+	}
+
+	/**
 	 * @param array<string, mixed> $node
+	 * @param list<array{slug: string, name: string}> $blueprints
 	 * @return list<array{label: string, url: string}>
 	 */
 	private static function childLinks(
 		array $node,
 		CollectionUrls $urls,
+		array $blueprints,
 	): array {
 		$links = [];
 		$uid = (string) ($node['uid'] ?? '');
@@ -320,11 +413,11 @@ final class CollectionPage
 		if ((bool) ($node['hasChildren'] ?? false)) {
 			$links[] = [
 				'label' => 'Open children',
-				'url' => $urls->collection(['parent' => $uid, 'offset' => '']),
+				'url' => $urls->children($uid),
 			];
 		}
 
-		foreach (self::childBlueprints($node) as $blueprint) {
+		foreach ($blueprints as $blueprint) {
 			$links[] = [
 				'label' => 'Add ' . $blueprint['name'],
 				'url' => $urls->create($blueprint['slug'], $uid),
@@ -524,6 +617,22 @@ final class CollectionPage
 		$formatted = $formatter->format($value->getTimestamp());
 
 		return $formatted === false ? null : $formatted;
+	}
+
+	/** @return list<string> */
+	private static function strings(mixed $items): array
+	{
+		$strings = [];
+
+		foreach (self::items(self::arrayFrom($items)) as $item) {
+			$item = trim((string) $item);
+
+			if ($item !== '' && !in_array($item, $strings, true)) {
+				$strings[] = $item;
+			}
+		}
+
+		return $strings;
 	}
 
 	/** @return list<mixed> */
