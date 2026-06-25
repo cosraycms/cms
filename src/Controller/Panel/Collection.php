@@ -45,6 +45,8 @@ final class Collection extends Panel
 		$sort = $this->stringParam('sort');
 		$dir = strtolower($this->stringParam('dir'));
 		$parent = $this->stringParam('parent');
+		$view = $this->stringParam('view');
+		$open = $this->openParam('open');
 
 		if ($dir !== '' && !in_array($dir, ['asc', 'desc'], true)) {
 			throw new HttpBadRequest($this->request);
@@ -57,6 +59,20 @@ final class Collection extends Panel
 		}
 
 		$parentUid = $obj->listMeta->showChildren && $parent !== '' ? $parent : null;
+		$defaultView = $obj->listMeta->showChildren && $parentUid === null ? 'tree' : 'list';
+
+		if ($view === '') {
+			$view = $defaultView;
+		}
+
+		if (!in_array($view, ['tree', 'list'], true)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		if (!$obj->listMeta->showChildren) {
+			$open = [];
+		}
+
 		$parentNode = $parentUid === null ? null : $this->parentNode($obj, $parentUid);
 		$parentTitle = $parentNode?->title();
 
@@ -80,6 +96,9 @@ final class Collection extends Panel
 			offset: $listing['offset'],
 			limit: $listing['limit'],
 			parent: $parentUid,
+			view: $view,
+			open: $open,
+			defaultView: $defaultView,
 		);
 		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
 
@@ -154,6 +173,28 @@ final class Collection extends Panel
 		}
 
 		return $int;
+	}
+
+	/** @return list<string> */
+	private function openParam(string $key): array
+	{
+		$value = $this->request->param($key, '');
+
+		if (!is_string($value)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$open = [];
+
+		foreach (explode(',', $value) as $uid) {
+			$uid = trim($uid);
+
+			if ($uid !== '' && !in_array($uid, $open, true)) {
+				$open[] = $uid;
+			}
+		}
+
+		return $open;
 	}
 
 	private function stringParam(string $key): string

@@ -29,6 +29,61 @@ final class CollectionUrls
 		return $this->url($this->path(), $this->query->editorParams($overrides));
 	}
 
+	public function expand(string $uid): string
+	{
+		$open = $this->query->open;
+
+		if (!in_array($uid, $open, true)) {
+			$open[] = $uid;
+		}
+
+		return $this->collection([
+			'view' => 'tree',
+			'open' => $open,
+		]);
+	}
+
+	/** @param list<string> $descendants */
+	public function collapse(string $uid, array $descendants = []): string
+	{
+		$closed = array_fill_keys(array_merge([$uid], $descendants), true);
+		$open = array_values(array_filter(
+			$this->query->open,
+			static fn(string $openUid): bool => !isset($closed[$openUid]),
+		));
+
+		return $this->collection([
+			'view' => 'tree',
+			'open' => $open,
+		]);
+	}
+
+	public function children(string $uid): string
+	{
+		return $this->collection([
+			'parent' => $uid,
+			'view' => '',
+			'open' => '',
+			'offset' => '',
+		]);
+	}
+
+	public function showInTree(string $uid): string
+	{
+		$open = $this->query->open;
+
+		if (!in_array($uid, $open, true)) {
+			$open[] = $uid;
+		}
+
+		return $this->collection([
+			'parent' => '',
+			'view' => 'tree',
+			'open' => $open,
+			'offset' => '',
+		]);
+	}
+
 	public function edit(string $uid): string
 	{
 		$path = $this->path() . '/' . rawurlencode($uid);

@@ -8,6 +8,7 @@ final class CollectionQuery
 {
 	private const int DEFAULT_LIMIT = 50;
 
+	/** @param list<string> $open */
 	public function __construct(
 		public readonly string $q = '',
 		public readonly string $sort = '',
@@ -15,6 +16,9 @@ final class CollectionQuery
 		public readonly int $offset = 0,
 		public readonly int $limit = self::DEFAULT_LIMIT,
 		public readonly ?string $parent = null,
+		public readonly string $view = 'list',
+		public readonly array $open = [],
+		public readonly string $defaultView = 'list',
 	) {}
 
 	/** @param array<string, mixed> $overrides */
@@ -26,6 +30,8 @@ final class CollectionQuery
 			'dir' => $this->dir,
 			'limit' => $this->limit,
 			'parent' => $this->parent,
+			'view' => $this->view,
+			'open' => $this->open,
 		], $overrides);
 	}
 
@@ -39,6 +45,8 @@ final class CollectionQuery
 			'offset' => $this->offset,
 			'limit' => $this->limit,
 			'parent' => $this->parent,
+			'view' => $this->view,
+			'open' => $this->open,
 		], $overrides);
 	}
 
@@ -50,10 +58,19 @@ final class CollectionQuery
 	private function params(array $params, array $overrides): array
 	{
 		$params = array_merge($params, $overrides);
+
+		if (array_key_exists('open', $params)) {
+			$params['open'] = $this->openParam($params['open']);
+		}
+
 		$params = array_filter(
 			$params,
 			static fn(mixed $value): bool => $value !== null && $value !== '',
 		);
+
+		if (($params['view'] ?? null) === $this->defaultView) {
+			unset($params['view']);
+		}
 
 		if ($this->isInt($params['offset'] ?? null, 0)) {
 			unset($params['offset']);
@@ -64,6 +81,29 @@ final class CollectionQuery
 		}
 
 		return $params;
+	}
+
+	private function openParam(mixed $value): string
+	{
+		if (is_string($value)) {
+			return trim($value);
+		}
+
+		if (!is_array($value)) {
+			return '';
+		}
+
+		$open = [];
+
+		foreach ($value as $uid) {
+			$uid = trim((string) $uid);
+
+			if ($uid !== '' && !in_array($uid, $open, true)) {
+				$open[] = $uid;
+			}
+		}
+
+		return implode(',', $open);
 	}
 
 	private function isInt(mixed $value, int $expected): bool

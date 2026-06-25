@@ -192,6 +192,17 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertResponseStatus(400, $response);
 	}
 
+	public function testPanelCollectionRejectsInvalidView(): void
+	{
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+			'query' => [
+				'view' => 'grid',
+			],
+		]);
+
+		$this->assertResponseStatus(400, $response);
+	}
+
 	public function testBoostedCollectionRequestRendersPartialWithoutLayoutShell(): void
 	{
 		$this->createArticle('panel-grid-boosted', 'Panel Grid Boosted');

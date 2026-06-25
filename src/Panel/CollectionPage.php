@@ -99,7 +99,12 @@ final class CollectionPage
 				: $urls->collection(['q' => '', 'offset' => '']),
 			rootUrl: $query->parent === null
 				? null
-				: $urls->collection(['parent' => '', 'offset' => '']),
+				: $urls->collection([
+					'parent' => '',
+					'offset' => '',
+					'view' => '',
+					'open' => '',
+				]),
 			total: $total,
 			pageCount: $pageCount,
 			currentPage: $currentPage,
@@ -145,6 +150,14 @@ final class CollectionPage
 
 		if ($query->parent !== null) {
 			$fields[] = ['name' => 'parent', 'value' => $query->parent];
+		}
+
+		if ($query->view !== $query->defaultView) {
+			$fields[] = ['name' => 'view', 'value' => $query->view];
+		}
+
+		if ($query->open !== []) {
+			$fields[] = ['name' => 'open', 'value' => implode(',', $query->open)];
 		}
 
 		return $fields;
