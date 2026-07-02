@@ -3,21 +3,17 @@
 
 	import type { FileItem, UploadResponse, UploadType } from '$types/data';
 	import type { Limit } from '$types/fields';
-	import type { Toast } from '$lib/toast';
 
-	import type { Component } from 'svelte';
+	import { mount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 	import { _ } from '$lib/locale';
-	import { system } from '$lib/sys';
-	import { setDirty } from '$lib/state';
-	import toast from '$lib/toast';
-	import req from '$lib/req';
 	import IcoUpload from '$shell/icons/IcoUpload.svelte';
 	import Dialog from '$shell/Dialog.svelte';
 	import Message from '$shell/Message.svelte';
 	import MediaList from '$shell/MediaList.svelte';
 
 	type Props = {
-		path: string;
+		node: string;
 		type: UploadType;
 		name: string;
 		translate: boolean;
@@ -28,10 +24,11 @@
 		disabledMsg?: string;
 		callback?: (() => void) | null;
 		inline?: boolean;
+		notify?: () => void;
 	};
 
 	let {
-		path,
+		node,
 		type,
 		name,
 		translate,
@@ -42,19 +39,30 @@
 		disabledMsg = '',
 		callback = null,
 		inline = false,
+		notify = () => {},
 	}: Props = $props();
 
 	let loading = $state(false);
 	let dragging = $state(false);
-	let allowedExtensions = $derived(
-		type === 'image'
-			? $system.allowedFiles.image.join(', ')
-			: type === 'video'
-				? $system.allowedFiles.video.join(', ')
-				: $system.allowedFiles.file.join(', '),
-	);
+	let path = $derived(`${cosray().system().prefix}/media/${type}/node/${node}`);
+	let allowedExtensions = $derived(cosray().system().allowedFiles[type].join(', '));
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
-	import { close, open } from '$lib/modal';
+
+	function alert(body: string) {
+		const handle = cosray().modal.open((host) => {
+			const app = mount(Dialog, {
+				target: host,
+				props: {
+					title: _('Fehler'),
+					body,
+					type: 'error',
+					close: () => handle.close(),
+				},
+			});
+
+			return () => void unmount(app);
+		});
+	}
 
 	function remove(index: number | null) {
 		if (index === null) {
@@ -63,7 +71,7 @@
 			assets.splice(index, 1);
 			assets = assets;
 		}
-		setDirty();
+		notify();
 	}
 
 	function readItems(items: DataTransferItemList) {
@@ -91,16 +99,8 @@
 		let result = files.length ? [...files] : readItems(items);
 
 		if (!multiple && result.length > 1) {
-			open(
-				Dialog as Component,
-				{
-					title: _('Fehler'),
-					body: _('In diesem Feld ist nur eine einzelne Datei erlaubt.'),
-					type: 'error',
-					close,
-				},
-				{},
-			);
+			alert(_('In diesem Feld ist nur eine einzelne Datei erlaubt.'));
+
 			return [];
 		}
 
@@ -125,32 +125,13 @@
 		const slotsLeft = Math.max(limit.max - (assets?.length ?? 0), 0);
 
 		if (slotsLeft === 0) {
-			open(
-				Dialog as Component,
-				{
-					title: _('Fehler'),
-					body: _('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'),
-					type: 'error',
-					close,
-				},
-				{},
-			);
+			alert(_('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'));
 
 			return [];
 		}
 
 		if (files.length > slotsLeft) {
-			open(
-				Dialog as Component,
-				{
-					title: _('Fehler'),
-					body:
-						_('Es können nur noch') + ' ' + slotsLeft + ' ' + _('Datei(en) hinzugefügt werden.'),
-					type: 'error',
-					close,
-				},
-				{},
-			);
+			alert(_('Es können nur noch') + ' ' + slotsLeft + ' ' + _('Datei(en) hinzugefügt werden.'));
 
 			return files.slice(0, slotsLeft);
 		}
@@ -167,17 +148,16 @@
 	}
 
 	async function upload(file: File) {
-		let formData = new FormData();
-
-		formData.append('file', file);
-		return await req.post(path, formData);
+		return await cosray().upload(type, node, file);
 	}
 
 	function getTitleAltValue() {
 		const result: Record<string, string> = {};
 
 		if (translate) {
-			$system.locales.map((locale) => (result[locale.id] = ''));
+			cosray()
+				.system()
+				.locales.map((locale) => (result[locale.id] = ''));
 		} else {
 			result.zxx = '';
 		}
@@ -185,12 +165,8 @@
 		return result;
 	}
 
-	function getError(item: UploadResponse): Toast {
-		return {
-			kind: 'error',
-			title: _('Datei:') + ' ' + item.file,
-			message: item.error,
-		};
+	function uploadError(item: UploadResponse) {
+		cosray().toast.error(_('Datei:') + ' ' + item.file + ': ' + (item.error ?? ''));
 	}
 
 	function onFile(getFilesFunction: (event: DragEvent | Event) => File[]) {
@@ -201,13 +177,9 @@
 			if (files.length > 0) {
 				loading = true;
 
-				let responses = (
-					await Promise.all(
-						files.map(async (file: File) => {
-							return upload(file).then((resp) => resp?.data as UploadResponse | undefined);
-						}),
-					)
-				).filter((item): item is UploadResponse => item !== undefined);
+				let responses = (await Promise.all(files.map(upload))).filter(
+					(item): item is UploadResponse => item !== undefined,
+				);
 
 				const value = getTitleAltValue();
 
@@ -223,7 +195,7 @@
 							});
 							assets = [...assets];
 						} else {
-							toast.add(getError(item));
+							uploadError(item);
 						}
 					});
 				} else {
@@ -240,7 +212,7 @@
 							},
 						];
 					} else {
-						toast.add(getError(item));
+						uploadError(item);
 					}
 				}
 
@@ -250,7 +222,7 @@
 			}
 
 			loading = false;
-			setDirty();
+			notify();
 		};
 	}
 </script>

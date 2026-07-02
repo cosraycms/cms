@@ -4,18 +4,15 @@ import Date from '$shell/controls/Date.svelte';
 import Datetime from '$shell/controls/Datetime.svelte';
 import Element from '$shell/controls/Element.svelte';
 import Entries from '$shell/controls/Entries.svelte';
-import File from '$shell/controls/File.svelte';
 import Group from '$shell/controls/Group.svelte';
 import Hidden from '$shell/controls/Hidden.svelte';
 import Iframe from '$shell/controls/Iframe.svelte';
-import Image from '$shell/controls/Image.svelte';
 import Number from '$shell/controls/Number.svelte';
 import Option from '$shell/controls/Option.svelte';
 import Repeater from '$shell/controls/Repeater.svelte';
 import Text from '$shell/controls/Text.svelte';
 import Textarea from '$shell/controls/Textarea.svelte';
 import Time from '$shell/controls/Time.svelte';
-import Video from '$shell/controls/Video.svelte';
 
 /**
  * The fixed control vocabulary. Fields reference these by name via
@@ -30,16 +27,13 @@ export default {
 	datetime: Datetime,
 	element: Element,
 	entries: Entries,
-	file: File,
 	group: Group,
 	hidden: Hidden,
 	iframe: Iframe,
-	image: Image,
 	number: Number,
 	option: Option,
 	repeater: Repeater,
 	text: Text,
 	textarea: Textarea,
 	time: Time,
-	video: Video,
 };

@@ -42,6 +42,9 @@ final class Registry
 		$registry = new self();
 		$registry->register('richtext', 'cosray-richtext', 'cosray:richtext');
 		$registry->register('code', 'cosray-code', 'cosray:code');
+		$registry->register('image', 'cosray-image', 'cosray:media');
+		$registry->register('file', 'cosray-file', 'cosray:media');
+		$registry->register('video', 'cosray-video', 'cosray:media');
 
 		return $registry;
 	}

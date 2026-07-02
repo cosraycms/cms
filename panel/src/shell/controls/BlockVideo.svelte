@@ -3,8 +3,8 @@
 	import type { BlockImage } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
+	import { setDirty } from '$lib/state';
 	import Upload from '$shell/Upload.svelte';
-	import { system } from '$lib/sys';
 
 	type Props = {
 		field: BlocksField;
@@ -30,7 +30,8 @@
 		<Upload
 			type="video"
 			limit={SINGLE_LIMIT}
-			path="{$system.prefix}/media/video/node/{node}"
+			{node}
+			notify={setDirty}
 			name={field.name + '_' + index}
 			translate={false}
 			bind:assets={item.value}

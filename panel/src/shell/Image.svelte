@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
 
-	import type { Component } from 'svelte';
-	import { system } from '$lib/sys';
+	import { mount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 	import { _ } from '$lib/locale';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoEye from '$shell/icons/IcoEye.svelte';
@@ -31,8 +31,6 @@
 		class: classes = '',
 	}: Props = $props();
 
-	import { close, open } from '$lib/modal';
-
 	let hover = $state(false);
 	let filename = $derived(image.file ?? '');
 	let ext = $derived(filename.split('.').pop()?.toLowerCase());
@@ -41,14 +39,17 @@
 	let title = $derived(getTitle(image, 'title') || getTitle(image, 'alt'));
 
 	function preview() {
-		open(
-			ImagePreview as Component,
-			{
-				close,
-				image: orig,
-			},
-			{},
-		);
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ImagePreview, {
+				target: host,
+				props: {
+					close: () => handle.close(),
+					image: orig,
+				},
+			});
+
+			return () => void unmount(app);
+		});
 	}
 
 	function thumbIt(image: string) {
@@ -62,7 +63,7 @@
 			return value.zxx;
 		}
 
-		for (const locale of $system.locales) {
+		for (const locale of cosray().system().locales) {
 			if (value?.[locale.id]) {
 				return value[locale.id];
 			}

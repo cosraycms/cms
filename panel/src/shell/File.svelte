@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
 	import { _ } from '$lib/locale';
-	import { system } from '$lib/sys';
+	import { cosray } from '$lib/bridge';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoDownload from '$shell/icons/IcoDownload.svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
@@ -26,7 +26,7 @@
 			return value.zxx;
 		}
 
-		for (const locale of $system.locales) {
+		for (const locale of cosray().system().locales) {
 			if (value?.[locale.id]) {
 				return value[locale.id];
 			}

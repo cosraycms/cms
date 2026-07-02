@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { FileItem, UploadType } from '$types/data';
 	import type { SortableEvent } from 'sortablejs';
-	import type { Component } from 'svelte';
 	import Sortable from 'sortablejs';
-	import { onMount } from 'svelte';
+	import { mount, onMount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 	import Image from '$shell/Image.svelte';
 	import Video from '$shell/Video.svelte';
 	import File from '$shell/File.svelte';
@@ -20,7 +20,6 @@
 	};
 
 	let { assets = $bindable(), multiple, translate, type, loading, path, remove }: Props = $props();
-	import { close, open } from '$lib/modal';
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
@@ -42,22 +41,23 @@
 	}
 
 	function edit(index: number, hasAlt: boolean) {
-		const apply = (asset: FileItem) => {
-			assets[index] = asset;
-			close();
-		};
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalEditImage, {
+				target: host,
+				props: {
+					asset: assets[index],
+					close: () => handle.close(),
+					apply: (asset: FileItem) => {
+						assets[index] = asset;
+						handle.close();
+					},
+					translate,
+					hasAlt,
+				},
+			});
 
-		open(
-			ModalEditImage as Component,
-			{
-				asset: assets[index],
-				close,
-				apply,
-				translate,
-				hasAlt,
-			},
-			{},
-		);
+			return () => void unmount(app);
+		});
 	}
 
 	onMount(createSorter);
