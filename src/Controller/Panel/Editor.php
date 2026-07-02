@@ -9,6 +9,7 @@ use Celemas\Core\Exception\HttpNotFound;
 use Celemas\Core\Request;
 use Celemas\Wire\Creator;
 use Cosray\Collection as CmsCollection;
+use Cosray\Collection\Listing;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Node;
@@ -67,7 +68,7 @@ final class Editor extends Panel
 
 		$creator = new Creator($this->container);
 		$obj = $creator->create(
-			$ref::class,
+			$ref->class,
 			predefinedTypes: [Request::class => $this->request],
 		);
 		assert($obj instanceof CmsCollection, 'The editor route must resolve a collection');
@@ -85,8 +86,11 @@ final class Editor extends Panel
 			return false;
 		}
 
+		$types = $this->container->get(Types::class);
+		assert($types instanceof Types, 'The node type service must be available');
+		$lister = new Listing($collection, $types);
 		$childHandles = array_column(
-			$collection->childBlueprints($this->parentNode($collection, $parent)),
+			$lister->childBlueprints($this->parentNode($collection, $parent)),
 			'slug',
 		);
 

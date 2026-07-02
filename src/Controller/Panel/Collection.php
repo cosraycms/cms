@@ -9,6 +9,7 @@ use Celemas\Core\Exception\HttpNotFound;
 use Celemas\Core\Request;
 use Celemas\Wire\Creator;
 use Cosray\Collection as CmsCollection;
+use Cosray\Collection\Listing;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Node;
@@ -35,10 +36,11 @@ final class Collection extends Panel
 		}
 
 		$obj = $creator->create(
-			$ref::class,
+			$ref->class,
 			predefinedTypes: [Request::class => $this->request],
 		);
 		assert($obj instanceof CmsCollection, 'The collection route must resolve a collection');
+		$lister = new Listing($obj, $this->types());
 
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
@@ -81,7 +83,7 @@ final class Collection extends Panel
 			$parentTitle = $parentUid;
 		}
 
-		$listing = $obj->list(
+		$listing = $lister->list(
 			offset: $offset,
 			limit: $limit,
 			q: $q,
@@ -107,7 +109,7 @@ final class Collection extends Panel
 			$nodes = CollectionTree::build(
 				nodes: $nodes,
 				open: $open,
-				children: static fn(string $uid): array => $obj->list(
+				children: static fn(string $uid): array => $lister->list(
 					offset: 0,
 					limit: self::LIMIT_MAX,
 					sort: $listing['sort'],
@@ -136,7 +138,7 @@ final class Collection extends Panel
 					? null
 					: (string) $parentNode->meta->type->get('label', ''),
 				parentStatus: $parentNode === null ? null : $this->nodeStatus($obj, $parentNode),
-				createBlueprints: $parentNode === null ? null : $obj->childBlueprints($parentNode),
+				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 			),
 		]);
 	}
@@ -183,11 +185,18 @@ final class Collection extends Panel
 		return $status;
 	}
 
-	/** @return list<array{slug: string, name: string}> */
-	private function blueprints(CmsCollection $collection): array
+	private function types(): Types
 	{
 		$types = $this->container->get(Types::class);
 		assert($types instanceof Types, 'The node type service must be available');
+
+		return $types;
+	}
+
+	/** @return list<array{slug: string, name: string}> */
+	private function blueprints(CmsCollection $collection): array
+	{
+		$types = $this->types();
 		$result = [];
 
 		foreach ($collection->blueprints() as $blueprint) {

@@ -13,6 +13,7 @@ use Celemas\Core\Response;
 use Celemas\Wire\Creator;
 use Cosray\Bootstrap;
 use Cosray\Cms;
+use Cosray\Collection\Listing;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Locales;
@@ -109,9 +110,11 @@ class OldPanel
 		$creator = new Creator($this->container);
 		$ref = $this->navigation()->ref($collection);
 		$obj = $creator->create(
-			$ref::class,
+			$ref->class,
 			predefinedTypes: [Request::class => $this->request],
 		);
+		assert($obj instanceof \Cosray\Collection, 'The collection route must resolve a collection');
+		$lister = new Listing($obj, $this->types);
 		$blueprints = [];
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
@@ -130,7 +133,7 @@ class OldPanel
 			throw new HttpBadRequest($this->request);
 		}
 
-		$listing = $obj->list(
+		$listing = $lister->list(
 			offset: $offset,
 			limit: $limit,
 			q: $q,

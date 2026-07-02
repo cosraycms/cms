@@ -6,14 +6,14 @@ namespace Cosray\Tests\Fixtures\Collection;
 
 use Cosray\Collection;
 use Cosray\Finder\Nodes;
+use Cosray\Schema\Handle;
+use Cosray\Schema\Label;
+use Cosray\Schema\Listing;
 use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
 
+#[Label('Test hierarchy'), Handle('test-hierarchy'), Listing(children: true)]
 final class TestHierarchyCollection extends Collection
 {
-	protected static string $name = 'Test hierarchy';
-	protected static string $handle = 'test-hierarchy';
-	protected static bool $showChildren = true;
-
 	public function entries(): Nodes
 	{
 		return $this->cms

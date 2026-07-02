@@ -9,6 +9,8 @@ use Closure;
 use Cosray\Block\Type as BlockType;
 use Cosray\Bootstrap;
 use Cosray\Collection;
+use Cosray\Collection\Ref;
+use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
@@ -43,6 +45,12 @@ final class Registrar
 		$this->bootstrap->nodeSchemas()->register($attribute, $handler);
 	}
 
+	/** @param class-string $attribute */
+	public function collectionSchema(string $attribute, CollectionHandler $handler): void
+	{
+		$this->bootstrap->collectionSchemas()->registry()->register($attribute, $handler);
+	}
+
 	/** @param class-string $class */
 	public function node(string $class): void
 	{
@@ -55,7 +63,7 @@ final class Registrar
 	}
 
 	/** @param class-string<Collection> $class */
-	public function collection(string $class): Collection
+	public function collection(string $class): Ref
 	{
 		return $this->bootstrap->collection($class);
 	}

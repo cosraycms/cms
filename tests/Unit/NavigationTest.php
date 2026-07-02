@@ -83,7 +83,7 @@ final class NavigationTest extends TestCase
 		$this->assertSame('test-articles', $items[1]->slug());
 	}
 
-	public function testLegacyStaticCollectionIconIsNormalizedInMeta(): void
+	public function testCollectionIconAttributeIsNormalizedInMeta(): void
 	{
 		$navigation = new Navigation();
 		$navigation->collection(TestStaticIconCollection::class);

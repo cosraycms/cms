@@ -17,6 +17,9 @@ use Celemas\Router\Route;
 use Closure;
 use Cosray\Block\Registry as BlockRegistry;
 use Cosray\Block\Type as BlockType;
+use Cosray\Collection\Ref as CollectionRef;
+use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
+use Cosray\Collection\Schemas as CollectionSchemas;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
@@ -49,6 +52,7 @@ class Bootstrap implements CorePlugin
 	protected readonly FieldServices $fieldServices;
 	protected readonly FieldIndex $fields;
 	protected readonly BlockRegistry $blocks;
+	protected readonly CollectionSchemas $collectionSchemas;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -87,7 +91,8 @@ class Bootstrap implements CorePlugin
 		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types, $this->blocks);
 		$this->fields = FieldIndex::withDefaults();
 		$this->pluginAssets = new PluginAssets();
-		$this->navigation = new Navigation();
+		$this->collectionSchemas = new CollectionSchemas(CollectionSchemaRegistry::withDefaults());
+		$this->navigation = new Navigation($this->collectionSchemas);
 	}
 
 	public function load(App $app): void
@@ -115,6 +120,8 @@ class Bootstrap implements CorePlugin
 		$this->container->add(FieldServices::class, $this->fieldServices);
 		$this->container->add(FieldIndex::class, $this->fields);
 		$this->container->add(BlockRegistry::class, $this->blocks);
+		$this->container->add(CollectionSchemas::class, $this->collectionSchemas);
+		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
@@ -195,10 +202,10 @@ class Bootstrap implements CorePlugin
 	{
 		$this->container->add(Navigation::class, $this->navigation)->value();
 
-		foreach ($this->navigation->refs() as $name => $collection) {
+		foreach ($this->navigation->refs() as $name => $ref) {
 			$this->container
 				->tag(Collection::class)
-				->add($name, $collection::class);
+				->add($name, $ref->class);
 		}
 
 		foreach ($this->nodes as $name => $node) {
@@ -233,7 +240,7 @@ class Bootstrap implements CorePlugin
 	}
 
 	/** @param class-string<Collection> $class */
-	public function collection(string $class): Collection
+	public function collection(string $class): CollectionRef
 	{
 		return $this->navigation->collection($class);
 	}
@@ -283,6 +290,11 @@ class Bootstrap implements CorePlugin
 	public function fields(): FieldIndex
 	{
 		return $this->fields;
+	}
+
+	public function collectionSchemas(): CollectionSchemas
+	{
+		return $this->collectionSchemas;
 	}
 
 	public function node(string $class): void

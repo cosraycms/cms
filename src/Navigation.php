@@ -5,18 +5,20 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Closure;
+use Cosray\Collection\Ref;
+use Cosray\Collection\Schemas;
 use Cosray\Exception\RuntimeException;
 
 final class Navigation
 {
 	private readonly Section $root;
 
-	/** @var array<string, Collection> */
+	/** @var array<string, Ref> */
 	private array $collections = [];
 
-	public function __construct()
+	public function __construct(?Schemas $schemas = null)
 	{
-		$this->root = new Section('_root', Closure::fromCallable([$this, 'register']));
+		$this->root = new Section('_root', Closure::fromCallable([$this, 'register']), $schemas);
 	}
 
 	public function section(string $label): Section
@@ -25,7 +27,7 @@ final class Navigation
 	}
 
 	/** @param class-string<Collection> $class */
-	public function collection(string $class): Collection
+	public function collection(string $class): Ref
 	{
 		return $this->root->collection($class);
 	}
@@ -42,13 +44,13 @@ final class Navigation
 		return $this->children();
 	}
 
-	/** @return array<string, Collection> */
+	/** @return array<string, Ref> */
 	public function refs(): array
 	{
 		return $this->collections;
 	}
 
-	public function ref(string $handle): Collection
+	public function ref(string $handle): Ref
 	{
 		if (!isset($this->collections[$handle])) {
 			throw new RuntimeException('Unknown collection handle: ' . $handle);
@@ -62,16 +64,13 @@ final class Navigation
 		return $this->serialize($this->items());
 	}
 
-	private function register(Collection $collection): void
+	private function register(Ref $ref): void
 	{
-		$handle = $collection->slug();
-		assert(is_string($handle), 'Collection slugs must be strings');
-
-		if (isset($this->collections[$handle])) {
-			throw new RuntimeException('Duplicate collection handle: ' . $handle);
+		if (isset($this->collections[$ref->handle])) {
+			throw new RuntimeException('Duplicate collection handle: ' . $ref->handle);
 		}
 
-		$this->collections[$handle] = $collection;
+		$this->collections[$ref->handle] = $ref;
 	}
 
 	/**

@@ -6,13 +6,13 @@ namespace Cosray\Tests\Fixtures\Collection;
 
 use Cosray\Collection;
 use Cosray\Finder\Nodes;
+use Cosray\Schema\Handle;
+use Cosray\Schema\Icon;
+use Cosray\Schema\Label;
 
+#[Label('Static icon'), Handle('test-static-icon'), Icon('bi:archive')]
 final class TestStaticIconCollection extends Collection
 {
-	protected static string $name = 'Static icon';
-	protected static string $handle = 'test-static-icon';
-	protected static ?string $icon = 'bi:archive';
-
 	public function entries(): Nodes
 	{
 		return $this->cms

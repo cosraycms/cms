@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Closure;
+use Cosray\Collection\Ref;
+use Cosray\Collection\Schemas;
 use Cosray\Exception\RuntimeException;
 use Override;
 
@@ -17,9 +19,12 @@ final class Section implements NavigationItem
 
 	private readonly ?Closure $onCollection;
 
+	private readonly Schemas $schemas;
+
 	public function __construct(
 		string $label,
 		?Closure $onCollection = null,
+		?Schemas $schemas = null,
 	) {
 		$label = trim($label);
 
@@ -29,6 +34,7 @@ final class Section implements NavigationItem
 
 		$this->meta = new NavMeta($label);
 		$this->onCollection = $onCollection;
+		$this->schemas = $schemas ?? new Schemas();
 	}
 
 	#[Override]
@@ -60,7 +66,7 @@ final class Section implements NavigationItem
 
 	public function section(string $label): self
 	{
-		$section = new self($label, $this->onCollection);
+		$section = new self($label, $this->onCollection, $this->schemas);
 		$this->children[] = $section;
 
 		return $section;
@@ -84,20 +90,24 @@ final class Section implements NavigationItem
 	}
 
 	/** @param class-string<Collection> $class */
-	public function collection(string $class): Collection
+	public function collection(string $class): Ref
 	{
 		if (!is_a($class, Collection::class, true)) {
 			throw new RuntimeException('Collections must extend ' . Collection::class);
 		}
 
-		$collection = new $class();
-		$this->children[] = $collection;
+		$ref = new Ref(
+			$class,
+			$this->schemas->nav($class),
+			(string) $this->schemas->get($class, 'handle'),
+		);
+		$this->children[] = $ref;
 
 		if ($this->onCollection !== null) {
-			($this->onCollection)($collection);
+			($this->onCollection)($ref);
 		}
 
-		return $collection;
+		return $ref;
 	}
 
 	/**
