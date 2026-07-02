@@ -15,6 +15,7 @@ use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
 use Cosray\Field\Services as FieldServices;
 use Cosray\Icons\Iconify;
@@ -40,6 +41,7 @@ class Bootstrap implements CorePlugin
 	protected readonly Types $types;
 	protected readonly FieldSchemas $fieldSchemas;
 	protected readonly FieldServices $fieldServices;
+	protected readonly FieldIndex $fields;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -58,6 +60,7 @@ class Bootstrap implements CorePlugin
 		$this->types = $types ?? new Types();
 		$this->fieldSchemas = FieldSchemas::withDefaults();
 		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types);
+		$this->fields = FieldIndex::withDefaults();
 		$this->navigation = new Navigation();
 	}
 
@@ -82,6 +85,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(NodeSchemas::class, $this->types->registry());
 		$this->container->add(FieldSchemas::class, $this->fieldSchemas);
 		$this->container->add(FieldServices::class, $this->fieldServices);
+		$this->container->add(FieldIndex::class, $this->fields);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
 		$this->routes = new Routes($this->config, $this->db, $this->factory);
@@ -175,6 +179,11 @@ class Bootstrap implements CorePlugin
 	public function fieldServices(): FieldServices
 	{
 		return $this->fieldServices;
+	}
+
+	public function fields(): FieldIndex
+	{
+		return $this->fields;
 	}
 
 	public function node(string $class): void

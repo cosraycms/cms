@@ -11,33 +11,6 @@ final class NodeContentNormalizer
 {
 	private const string ZXX = Field\Field::NEUTRAL_LOCALE;
 
-	/** @var array<string, class-string<Field\Field>> */
-	private const array FIELD_TYPES = [
-		'blocks' => Field\Blocks::class,
-		'checkbox' => Field\Checkbox::class,
-		'code' => Field\Code::class,
-		'date' => Field\Date::class,
-		'datetime' => Field\DateTime::class,
-		'decimal' => Field\Decimal::class,
-		'entries' => Field\Entries::class,
-		'file' => Field\File::class,
-		'grid' => Field\Blocks::class,
-		'html' => Field\RichText::class,
-		'iframe' => Field\Iframe::class,
-		'image' => Field\Image::class,
-		'matrix' => Field\Entries::class,
-		'number' => Field\Number::class,
-		'option' => Field\Option::class,
-		'picture' => Field\Image::class,
-		'radio' => Field\Radio::class,
-		'richtext' => Field\RichText::class,
-		'text' => Field\Text::class,
-		'textarea' => Field\Textarea::class,
-		'time' => Field\Time::class,
-		'video' => Field\Video::class,
-		'youtube' => Field\Youtube::class,
-	];
-
 	/** @var array<class-string<Field\Field>, true> */
 	private const array MEDIA_TYPES = [
 		Field\File::class => true,
@@ -45,9 +18,14 @@ final class NodeContentNormalizer
 		Field\Video::class => true,
 	];
 
+	private readonly Field\Index $index;
+
 	public function __construct(
 		private readonly Uid $uid,
-	) {}
+		?Field\Index $index = null,
+	) {
+		$this->index = $index ?? Field\Index::withDefaults();
+	}
 
 	/** @param array<string, mixed> $content */
 	public function normalize(array $content): array
@@ -148,12 +126,8 @@ final class NodeContentNormalizer
 
 	private function fieldType(mixed $type): string
 	{
-		if (is_string($type) && isset(self::FIELD_TYPES[$type])) {
-			return self::FIELD_TYPES[$type];
-		}
-
-		if (is_string($type) && is_subclass_of($type, Field\Field::class)) {
-			return $type;
+		if (is_string($type)) {
+			return $this->index->resolve($type) ?? Field\Text::class;
 		}
 
 		return Field\Text::class;
