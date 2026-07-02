@@ -3,6 +3,7 @@
 	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
+	import { setDirty } from '$lib/state';
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {
@@ -24,6 +25,11 @@
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
-		<RichTextEditor required={false} name={field.name + '_' + index} bind:value={item.value[ZXX]} />
+		<RichTextEditor
+			required={false}
+			name={field.name + '_' + index}
+			bind:value={item.value[ZXX]}
+			notify={setDirty}
+		/>
 	{/if}
 </div>

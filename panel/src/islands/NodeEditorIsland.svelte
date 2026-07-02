@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Node as NodeType } from '$types/data';
-	import { installBridge } from '$lib/bridge';
+	import { installBridge } from '$lib/bridge-install';
 	import { configureRuntime, navigate } from '$lib/runtime';
 	import req from '$lib/req';
 	import { save as saveNode } from '$lib/node';

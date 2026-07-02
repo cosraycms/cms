@@ -3,17 +3,16 @@ import { fileURLToPath } from 'node:url';
 import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
 
+// Second build pass: cosray's editor controls as custom elements,
+// loaded lazily by the island through the element mechanism.
+
 const root = fileURLToPath(new URL('.', import.meta.url));
-const devPort = Number.parseInt(process.env.COSRAY_PANEL_DEV_PORT ?? '2001', 10);
-const devHost = process.env.COSRAY_PANEL_DEV_HOST ?? 'localhost';
 
 export default defineConfig({
 	base: './',
 	plugins: [
 		svelte({
 			preprocess: vitePreprocess({ script: true }),
-			// Only element wrappers compile as custom elements; they embed
-			// normally compiled components.
 			dynamicCompileOptions({ filename }) {
 				if (filename.includes('/src/elements/')) {
 					return { customElement: true };
@@ -28,24 +27,17 @@ export default defineConfig({
 			$shell: path.resolve(root, 'src/shell'),
 		},
 	},
-	server: {
-		port: Number.isFinite(devPort) ? devPort : 2001,
-		host: devHost,
-		strictPort: true,
-		allowedHosts: true,
-		cors: true,
-	},
 	build: {
 		outDir: 'build',
-		emptyOutDir: true,
+		emptyOutDir: false,
 		rollupOptions: {
 			input: {
-				panel: path.resolve(root, 'src/panel.ts'),
+				richtext: path.resolve(root, 'src/elements/richtext.ts'),
 			},
 			output: {
-				assetFileNames: '[name][extname]',
-				chunkFileNames: '[name].js',
-				entryFileNames: '[name].js',
+				assetFileNames: 'elements/[name][extname]',
+				chunkFileNames: 'elements/chunks/[name]-[hash].js',
+				entryFileNames: 'elements/[name].js',
 			},
 		},
 	},

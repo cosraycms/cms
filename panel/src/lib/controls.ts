@@ -13,7 +13,6 @@ import Image from '$shell/controls/Image.svelte';
 import Number from '$shell/controls/Number.svelte';
 import Option from '$shell/controls/Option.svelte';
 import Repeater from '$shell/controls/Repeater.svelte';
-import RichText from '$shell/controls/RichText.svelte';
 import Text from '$shell/controls/Text.svelte';
 import Textarea from '$shell/controls/Textarea.svelte';
 import Time from '$shell/controls/Time.svelte';
@@ -41,7 +40,6 @@ export default {
 	number: Number,
 	option: Option,
 	repeater: Repeater,
-	richtext: RichText,
 	text: Text,
 	textarea: Textarea,
 	time: Time,

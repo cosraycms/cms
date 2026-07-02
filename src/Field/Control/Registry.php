@@ -39,6 +39,9 @@ final class Registry
 	{
 		// Built-in rich controls move here stage by stage as they are
 		// converted to cosray-shipped custom elements.
-		return new self();
+		$registry = new self();
+		$registry->register('richtext', 'cosray-richtext', 'cosray:richtext');
+
+		return $registry;
 	}
 }

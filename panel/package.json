@@ -5,9 +5,9 @@
 	"type": "module",
 	"packageManager": "pnpm@11.5.0",
 	"scripts": {
-		"build": "vite build",
+		"build": "vite build && vite build -c vite.elements.config.ts",
 		"dev": "vite",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings options_missing_custom_element:ignore",
 		"format": "prettier -w ."
 	},
 	"devDependencies": {

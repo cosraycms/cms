@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { EditorState } from 'prosemirror-state';
 
-	import type { Component } from 'svelte';
-	import { onMount, onDestroy } from 'svelte';
+	import { mount, onDestroy, onMount, unmount } from 'svelte';
 
-	import { setDirty } from '$lib/state';
+	import { cosray } from '$lib/bridge';
 	import { _ } from '$lib/locale';
 	import ModalLink from '$shell/modals/ModalLink.svelte';
 	import createEditor, { type CmsEditor } from './editor';
@@ -77,6 +76,7 @@
 		required?: boolean;
 		toolbar?: 'default' | 'inline';
 		embed?: boolean;
+		notify?: () => void;
 	};
 
 	let {
@@ -86,8 +86,8 @@
 		required = false,
 		toolbar = 'default',
 		embed = false,
+		notify = () => {},
 	}: Props = $props();
-	import { close, open } from '$lib/modal';
 	let ref = $state<HTMLElement>();
 	let bubble = $state<HTMLElement>();
 	let editor = $state<CmsEditor>();
@@ -160,7 +160,7 @@
 			mode: toolbar,
 			bubbleElement: bubble,
 			onUpdate: (html) => {
-				setDirty();
+				notify();
 				value = html;
 			},
 			onStateChange: updateEditorState,
@@ -174,7 +174,7 @@
 	function changeSource(event: KeyboardEvent) {
 		const target = event.target as HTMLTextAreaElement;
 
-		setDirty();
+		notify();
 		editor?.setContent(target.value);
 		value = target.value;
 	}
@@ -237,16 +237,19 @@
 		const href = linkAttrs?.href ?? '';
 		const target = linkAttrs?.target ?? '';
 
-		open(
-			ModalLink as Component,
-			{
-				add: addLink,
-				close,
-				value: href,
-				blank: target === '_blank',
-			},
-			{},
-		);
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalLink, {
+				target: host,
+				props: {
+					add: addLink,
+					close: () => handle.close(),
+					value: href,
+					blank: target === '_blank',
+				},
+			});
+
+			return () => void unmount(app);
+		});
 	}
 </script>
 
