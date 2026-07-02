@@ -41,6 +41,7 @@ final class Registry
 		// converted to cosray-shipped custom elements.
 		$registry = new self();
 		$registry->register('richtext', 'cosray-richtext', 'cosray:richtext');
+		$registry->register('code', 'cosray-code', 'cosray:code');
 
 		return $registry;
 	}

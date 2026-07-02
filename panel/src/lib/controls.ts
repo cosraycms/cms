@@ -1,6 +1,5 @@
 import Blocks from '$shell/controls/Blocks.svelte';
 import Checkbox from '$shell/controls/Checkbox.svelte';
-import Code from '$shell/controls/Code.svelte';
 import Date from '$shell/controls/Date.svelte';
 import Datetime from '$shell/controls/Datetime.svelte';
 import Element from '$shell/controls/Element.svelte';
@@ -27,7 +26,6 @@ import Video from '$shell/controls/Video.svelte';
 export default {
 	blocks: Blocks,
 	checkbox: Checkbox,
-	code: Code,
 	date: Date,
 	datetime: Datetime,
 	element: Element,

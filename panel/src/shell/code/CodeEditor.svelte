@@ -2,7 +2,6 @@
 	import type { Extension } from '@codemirror/state';
 
 	import { onDestroy, onMount } from 'svelte';
-	import { setDirty } from '$lib/state';
 	import { Compartment, EditorState, Annotation } from '@codemirror/state';
 	import { EditorView, keymap, lineNumbers, highlightActiveLineGutter } from '@codemirror/view';
 	import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
@@ -26,6 +25,7 @@
 		syntax?: string;
 		required?: boolean;
 		readonly?: boolean;
+		notify?: () => void;
 	};
 
 	let {
@@ -34,6 +34,7 @@
 		syntax = $bindable(DEFAULT_CODE_SYNTAX),
 		required = false,
 		readonly = false,
+		notify = () => {},
 	}: Props = $props();
 
 	let editorElement = $state<HTMLElement>();
@@ -77,7 +78,7 @@
 				);
 
 				if (!hasExternalUpdate) {
-					setDirty();
+					notify();
 				}
 			}),
 		];

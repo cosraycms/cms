@@ -33,6 +33,7 @@ export default defineConfig({
 		rollupOptions: {
 			input: {
 				richtext: path.resolve(root, 'src/elements/richtext.ts'),
+				code: path.resolve(root, 'src/elements/code.ts'),
 			},
 			output: {
 				assetFileNames: 'elements/[name][extname]',
