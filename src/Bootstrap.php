@@ -27,6 +27,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
+use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
@@ -71,6 +72,8 @@ class Bootstrap implements CorePlugin
 	/** @var list<Closure> */
 	protected array $pluginRoutes = [];
 
+	protected readonly PluginAssets $pluginAssets;
+
 	public function __construct(
 		protected readonly Config $config,
 		?Types $types = null,
@@ -79,6 +82,7 @@ class Bootstrap implements CorePlugin
 		$this->fieldSchemas = FieldSchemas::withDefaults();
 		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types);
 		$this->fields = FieldIndex::withDefaults();
+		$this->pluginAssets = new PluginAssets();
 		$this->navigation = new Navigation();
 	}
 
@@ -106,6 +110,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(FieldSchemas::class, $this->fieldSchemas);
 		$this->container->add(FieldServices::class, $this->fieldServices);
 		$this->container->add(FieldIndex::class, $this->fields);
+		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
 		$this->routes = new Routes($this->config, $this->db, $this->factory, $this->pluginRoutes);
@@ -154,6 +159,11 @@ class Bootstrap implements CorePlugin
 	public function addSql(string $dir): void
 	{
 		$this->pluginSql[] = $dir;
+	}
+
+	public function addAssets(string $id, string $dir): void
+	{
+		$this->pluginAssets->add($id, $dir);
 	}
 
 	/**

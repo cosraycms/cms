@@ -27,6 +27,7 @@ final class TestPlugin implements Plugin
 		$cms->section('Test Plugin')->collection(TestArticlesCollection::class);
 		$cms->migrations(__DIR__ . '/db/migrations');
 		$cms->sql(__DIR__ . '/db/sql');
+		$cms->assets(__DIR__ . '/assets');
 		$cms->register('test-plugin.service', stdClass::class);
 		$cms->routes(static function (App $app): void {
 			$app->get('/test-plugin', [stdClass::class, 'index'], 'test-plugin.route');

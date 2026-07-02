@@ -213,6 +213,12 @@ class Routes
 					);
 				$panel
 					->get(
+						'/vendor/{plugin:[a-z0-9-]{1,64}}/...slug',
+						[Panel\Assets::class, 'vendor'],
+						'vendor.asset',
+					);
+				$panel
+					->get(
 						'/collection/{collection}',
 						[Panel\Collection::class, 'collection'],
 						'collection',

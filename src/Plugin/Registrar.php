@@ -70,6 +70,15 @@ final class Registrar
 	}
 
 	/**
+	 * Serve prebuilt plugin assets from $dir under
+	 * `{panel}/vendor/{pluginId}/...`.
+	 */
+	public function assets(string $dir): void
+	{
+		$this->bootstrap->addAssets($this->id, $dir);
+	}
+
+	/**
 	 * @param non-empty-string $key
 	 * @param class-string|object $value
 	 */

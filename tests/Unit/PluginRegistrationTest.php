@@ -46,6 +46,11 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertInstanceOf(stdClass::class, $container->get('test-plugin.service'));
 
 		$this->assertSame('/test-plugin', $app->router()->url('test-plugin.route'));
+
+		$assets = $container->get(\Cosray\Plugin\Assets::class);
+		$this->assertNotNull($assets->dir('test-plugin'));
+		$this->assertFileExists($assets->dir('test-plugin') . '/controls.js');
+		$this->assertNull($assets->dir('unknown'));
 	}
 
 	public function testPluginRegistersCollection(): void
