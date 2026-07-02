@@ -20,6 +20,11 @@ class Entries extends Field implements Capability\Limitable
 {
 	use Capability\IsLimitable;
 
+	public function control(): Control
+	{
+		return Control::entries();
+	}
+
 	/** @var list<class-string> */
 	protected array $allowedEntryTypes = [];
 

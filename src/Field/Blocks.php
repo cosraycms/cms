@@ -17,6 +17,11 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	use Capability\IsTranslatable;
 	use Capability\Blocks\IsResizable;
 
+	public function control(): Control
+	{
+		return Control::blocks();
+	}
+
 	public function __toString(): string
 	{
 		return 'Blocks Field';

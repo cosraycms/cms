@@ -10,6 +10,11 @@ use Cosray\Value\Decimal as DecimalValue;
 
 class Decimal extends Field
 {
+	public function control(): Control
+	{
+		return Control::number(step: 'any');
+	}
+
 	public function value(): DecimalValue
 	{
 		return new DecimalValue($this->owner, $this, $this->valueContext);

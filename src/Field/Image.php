@@ -9,6 +9,11 @@ use Cosray\Value;
 
 class Image extends File
 {
+	public function control(): Control
+	{
+		return Control::image();
+	}
+
 	/** @return list<TranslateMode> */
 	protected function supportedTranslateModes(): array
 	{

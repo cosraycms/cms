@@ -10,6 +10,11 @@ use Cosray\Value\Time as TimeValue;
 
 class Time extends Field
 {
+	public function control(): Control
+	{
+		return Control::time();
+	}
+
 	public function value(): TimeValue
 	{
 		return new TimeValue($this->owner, $this, $this->valueContext);

@@ -9,6 +9,11 @@ use Cosray\Value;
 
 class Video extends File
 {
+	public function control(): Control
+	{
+		return Control::video();
+	}
+
 	/** @return list<TranslateMode> */
 	protected function supportedTranslateModes(): array
 	{

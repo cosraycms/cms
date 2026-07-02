@@ -10,6 +10,11 @@ use Cosray\Value\Boolean;
 
 class Checkbox extends Field
 {
+	public function control(): Control
+	{
+		return Control::checkbox();
+	}
+
 	public function value(): Boolean
 	{
 		return new Boolean($this->owner, $this, $this->valueContext);

@@ -12,6 +12,11 @@ class Code extends Text implements Capability\SyntaxAware
 {
 	use Capability\IsSyntaxAware;
 
+	public function control(): Control
+	{
+		return Control::code();
+	}
+
 	public function value(): CodeValue
 	{
 		return new CodeValue($this->owner, $this, $this->valueContext);

@@ -8,6 +8,11 @@ use Cosray\Value\RichText as RichTextValue;
 
 class RichText extends Text
 {
+	public function control(): Control
+	{
+		return Control::richtext();
+	}
+
 	public function value(): RichTextValue
 	{
 		return new RichTextValue($this->owner, $this, $this->valueContext);

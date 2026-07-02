@@ -16,6 +16,11 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 	use Capability\IsLimitable;
 	use Capability\IsTranslatable;
 
+	public function control(): Control
+	{
+		return Control::file();
+	}
+
 	/** @return list<TranslateMode> */
 	protected function supportedTranslateModes(): array
 	{

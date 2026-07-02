@@ -12,6 +12,11 @@ class Option extends Field implements Capability\Selectable
 {
 	use Capability\IsSelectable;
 
+	public function control(): Control
+	{
+		return Control::option();
+	}
+
 	protected bool $hasLabel = false;
 
 	public function value(): Value\Option

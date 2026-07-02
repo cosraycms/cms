@@ -10,6 +10,11 @@ use Cosray\Value\Str;
 
 class Radio extends Field
 {
+	public function control(): Control
+	{
+		return Control::option(display: 'radio');
+	}
+
 	public function value(): Str
 	{
 		return new Str($this->owner, $this, $this->valueContext);

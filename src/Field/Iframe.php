@@ -8,6 +8,11 @@ use Cosray\Value\Iframe as IframeValue;
 
 class Iframe extends Text
 {
+	public function control(): Control
+	{
+		return Control::iframe();
+	}
+
 	public function value(): IframeValue
 	{
 		return new IframeValue($this->owner, $this, $this->valueContext);

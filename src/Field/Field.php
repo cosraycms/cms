@@ -91,11 +91,17 @@ abstract class Field implements
 		return $this->services ?? throw new RuntimeException("Field '{$this->name}' is not initialized");
 	}
 
+	public function control(): Control
+	{
+		return Control::text();
+	}
+
 	public function properties(): array
 	{
 		$properties = [
 			'name' => $this->name,
 			'type' => $this::class,
+			'control' => $this->control()->array(),
 		];
 
 		foreach ($this->meta as [$meta, $handler]) {

@@ -10,6 +10,11 @@ use Cosray\Value\DateTime as DateTimeValue;
 
 class DateTime extends Field
 {
+	public function control(): Control
+	{
+		return Control::datetime();
+	}
+
 	public function value(): DateTimeValue
 	{
 		return new DateTimeValue($this->owner, $this, $this->valueContext);

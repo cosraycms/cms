@@ -10,6 +10,11 @@ use Cosray\Value\Number as NumberValue;
 
 class Number extends Field
 {
+	public function control(): Control
+	{
+		return Control::number();
+	}
+
 	public function value(): NumberValue
 	{
 		return new NumberValue($this->owner, $this, $this->valueContext);
