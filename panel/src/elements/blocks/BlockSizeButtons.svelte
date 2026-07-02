@@ -2,7 +2,7 @@
 	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 	import BlockButtonLabel from './BlockButtonLabel.svelte';
 	import IcoExpand from '$shell/icons/IcoExpand.svelte';
 	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';

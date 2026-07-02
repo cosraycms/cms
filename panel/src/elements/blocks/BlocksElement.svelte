@@ -5,7 +5,7 @@
 	import type { BlocksField } from '$types/fields';
 
 	import { ZXX } from '$types/data';
-	import { provideNotify } from './notify';
+	import { provideNotify } from '../notify';
 	import BlocksPanel from './BlocksPanel.svelte';
 
 	type Props = {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { EntryData } from '$types/data';
-	import type { Component } from 'svelte';
+	import { mount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
@@ -8,7 +9,7 @@
 	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';
 	import IcoExpand from '$shell/icons/IcoExpand.svelte';
 	import ModalRemove from '$shell/modals/ModalRemove.svelte';
-	import { setDirty } from '$lib/state';
+	import { useNotify } from '../notify';
 
 	type Props = {
 		data: EntryData[];
@@ -19,25 +20,28 @@
 	};
 
 	let { data = $bindable(), entry, index, collapsed, toggleCollapse }: Props = $props();
+	const notify = useNotify();
 
-	import { close, open } from '$lib/modal';
 	let first = $derived(data?.indexOf(entry) === 0);
 	let last = $derived(data?.indexOf(entry) === data.length - 1);
 
-	async function remove() {
-		open(
-			ModalRemove as Component,
-			{
-				close,
-				proceed: () => {
-					data.splice(index, 1);
-					data = data;
-					setDirty();
-					close();
+	function remove() {
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalRemove, {
+				target: host,
+				props: {
+					close: () => handle.close(),
+					proceed: () => {
+						data.splice(index, 1);
+						data = data;
+						notify();
+						handle.close();
+					},
 				},
-			},
-			{},
-		);
+			});
+
+			return () => void unmount(app);
+		});
 	}
 
 	function up() {
@@ -47,7 +51,7 @@
 
 		data.splice(index - 1, 0, data.splice(index, 1)[0]);
 		data = data;
-		setDirty();
+		notify();
 	}
 
 	function down() {
@@ -57,7 +61,7 @@
 
 		data.splice(index + 1, 0, data.splice(index, 1)[0]);
 		data = data;
-		setDirty();
+		notify();
 	}
 </script>
 

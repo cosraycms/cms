@@ -3,7 +3,7 @@
 	import { ZXX, type BlockYoutube } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 	import { _ } from '$lib/locale';
 	import Setting from '$shell/Setting.svelte';
 

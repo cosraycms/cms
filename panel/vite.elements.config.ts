@@ -38,6 +38,7 @@ export default defineConfig({
 				code: path.resolve(root, 'src/elements/code.ts'),
 				media: path.resolve(root, 'src/elements/media.ts'),
 				blocks: path.resolve(root, 'src/elements/blocks.ts'),
+				entries: path.resolve(root, 'src/elements/entries.ts'),
 			},
 			output: {
 				assetFileNames: 'elements/[name][extname]',

@@ -6,7 +6,7 @@
 	import resize from '$lib/resize';
 	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
 	import Button from '$shell/Button.svelte';
 	import ModalAdd from '$shell/modals/ModalAdd.svelte';

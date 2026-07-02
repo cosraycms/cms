@@ -3,7 +3,7 @@
 	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
 
 	type Props = {

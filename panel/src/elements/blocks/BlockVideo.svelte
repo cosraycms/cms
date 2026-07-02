@@ -3,7 +3,7 @@
 	import type { BlockImage } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 	import Upload from '$shell/Upload.svelte';
 
 	type Props = {

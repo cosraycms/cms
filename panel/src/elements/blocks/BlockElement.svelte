@@ -6,7 +6,7 @@
 
 	import { cosray } from '$lib/bridge';
 	import { loadElement } from '$lib/elements';
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 
 	type Props = {
 		field: BlocksField;

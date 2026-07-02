@@ -3,7 +3,7 @@
 	import type { EntriesField, EntryType } from '$types/fields';
 
 	import { _ } from '$lib/locale';
-	import { setDirty } from '$lib/state';
+	import { useNotify } from '../notify';
 	import { uid } from '$lib/content';
 	import { flip } from 'svelte/animate';
 	import Field from '$shell/Field.svelte';
@@ -19,6 +19,7 @@
 	};
 
 	let { field, data = $bindable(), node }: Props = $props();
+	const notify = useNotify();
 
 	function createEmptyEntry(entryType: EntryType): EntryData {
 		return {
@@ -33,7 +34,7 @@
 		data.value[ZXX] ??= [];
 		data.value[ZXX].push(createEmptyEntry(entryType));
 		data.value = data.value;
-		setDirty();
+		notify();
 	}
 
 	function addLabel(entryType: EntryType, first: boolean): string {

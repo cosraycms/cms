@@ -8,7 +8,7 @@
 	import IcoArrowDown from '$shell/icons/IcoArrowDown.svelte';
 	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
 	import ModalRemove from '$shell/modals/ModalRemove.svelte';
-	import { useNotify } from './notify';
+	import { useNotify } from '../notify';
 
 	type Props = {
 		data: Block[];

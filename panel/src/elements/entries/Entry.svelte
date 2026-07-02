@@ -2,7 +2,7 @@
 	import type { Data, EntryData } from '$types/data';
 	import type { EntriesField, EntryType } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
+	import { useNotify } from '../notify';
 	import Control from '$shell/Control.svelte';
 	import EntryControls from './EntryControls.svelte';
 
@@ -15,6 +15,7 @@
 	};
 
 	let { field, data = $bindable(), entry = $bindable(), node, index }: Props = $props();
+	const notify = useNotify();
 
 	let collapsed = $state(false);
 	let entryType = $derived(field.entryTypes.find((type) => type.type === entry.type));
@@ -70,7 +71,7 @@
 								field={entryField}
 								{node}
 								bind:data={entry.fields[entryField.name]}
-								onchange={setDirty}
+								onchange={notify}
 							/>
 						</div>
 					{/if}

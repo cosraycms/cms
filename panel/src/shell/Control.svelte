@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { EntriesField, Field } from '$types/fields';
+	import type { Field } from '$types/fields';
 
 	import Element from '$shell/controls/Element.svelte';
-	import Entries from '$shell/controls/Entries.svelte';
 	import Group from '$shell/controls/Group.svelte';
 	import Primitive from '$shell/controls/Primitive.svelte';
 	import Repeater from '$shell/controls/Repeater.svelte';
@@ -41,8 +40,6 @@
 	<Group {field} bind:data {onchange} />
 {:else if name === 'repeater'}
 	<Repeater {field} bind:data {onchange} />
-{:else if name === 'entries'}
-	<Entries field={field as EntriesField} bind:data {node} />
 {:else}
 	<div class="cms-control-unknown">
 		Unknown control "{name}" for field "{field.name}" ({field.type})
