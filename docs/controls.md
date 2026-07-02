@@ -33,6 +33,10 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 
 Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
 
+## Block types
+
+Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()` (same vocabulary, plus the block natives `block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`), `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. A block type whose control is `element` renders a plugin web component in the editor — the same contract as below, with `block` (`{type, index}`) assigned additionally.
+
 ## The element escape hatch
 
 A field that needs a custom UI declares:
