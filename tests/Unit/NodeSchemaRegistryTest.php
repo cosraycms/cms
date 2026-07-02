@@ -345,11 +345,11 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertFalse($schema->deletable);
 	}
 
-	public function testSchemaWithoutRegistryUsesDefaults(): void
+	public function testSchemaWithEmptyRegistryUsesDefaults(): void
 	{
-		$schema = new Schema(NodeWithNameAttribute::class);
+		$schema = new Schema(NodeWithNameAttribute::class, new Registry());
 
-		// Without a registry, attributes are not processed by handlers.
+		// With an empty registry, attributes are not processed by handlers.
 		// All properties fall back to defaults derived from the class name.
 		$this->assertEquals('NodeWithNameAttribute', $schema->label);
 		$this->assertEquals('node-with-name-attribute', $schema->handle);

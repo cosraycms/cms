@@ -18,16 +18,13 @@ class Schema
 	/** @var array<string, mixed> */
 	private array $properties;
 
-	private readonly Registry $registry;
-
 	/**
 	 * @param class-string $nodeClass
 	 */
 	public function __construct(
 		private readonly string $nodeClass,
-		?Registry $registry = null,
+		private readonly Registry $registry,
 	) {
-		$this->registry = $registry ?? new Registry();
 		$resolved = $this->resolveAttributes();
 		$this->properties = $this->registry->resolveDefaults($this->nodeClass, $resolved);
 	}

@@ -18,6 +18,11 @@ class Types
 		$this->registry = $registry ?? Registry::withDefaults();
 	}
 
+	public function registry(): Registry
+	{
+		return $this->registry;
+	}
+
 	/**
 	 * @param class-string $class
 	 */
