@@ -1,3 +1,5 @@
+import type { ControlDescriptor } from '$types/controls';
+
 export type TranslateMode = 'symmetric' | 'asymmetric';
 
 export interface SimpleField {
@@ -10,6 +12,7 @@ export interface SimpleField {
 	label: string;
 	name: string;
 	type: string;
+	control: ControlDescriptor;
 	translate: boolean;
 	translateMode?: TranslateMode;
 	options?: Array<string | { value: string; label: string }>;

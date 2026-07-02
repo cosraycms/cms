@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { Data, EntryData } from '$types/data';
 	import type { EntriesField, EntryType } from '$types/fields';
-	import type { Component } from 'svelte';
 
-	import controls from '$lib/controls';
+	import Control from '$shell/Control.svelte';
 	import EntryControls from './EntryControls.svelte';
 
 	type Props = {
@@ -46,9 +45,6 @@
 	function entryTypeLabel(type: EntryType | undefined): string {
 		return type?.label ?? 'Entry';
 	}
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	type AnyComponent = Component<any, any, any>;
 </script>
 
 <div class="entry">
@@ -65,25 +61,12 @@
 			{#if entryType}
 				{#each entryFields as entryField (entryField.name)}
 					{#if !entryField.hidden && entry.fields[entryField.name]}
-						{@const SvelteComponent = controls[entryField.type as keyof typeof controls] as
-							| AnyComponent
-							| undefined}
 						{@const widthStyle = entryField.width
 							? `width: calc(${entryField.width}% - 0.5rem)`
 							: 'width: 100%'}
-						{#if SvelteComponent}
-							<div class="entry-field" style={widthStyle}>
-								<SvelteComponent
-									field={entryField}
-									{node}
-									bind:data={entry.fields[entryField.name]}
-								/>
-							</div>
-						{:else}
-							<div class="entry-field entry-field-note" style={widthStyle}>
-								Unknown field type: {entryField.type}
-							</div>
-						{/if}
+						<div class="entry-field" style={widthStyle}>
+							<Control field={entryField} {node} bind:data={entry.fields[entryField.name]} />
+						</div>
 					{/if}
 				{/each}
 			{:else}

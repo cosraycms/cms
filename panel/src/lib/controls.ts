@@ -1,36 +1,49 @@
+import Blocks from '$shell/controls/Blocks.svelte';
 import Checkbox from '$shell/controls/Checkbox.svelte';
 import Code from '$shell/controls/Code.svelte';
 import Date from '$shell/controls/Date.svelte';
-import File from '$shell/controls/File.svelte';
-import Blocks from '$shell/controls/Blocks.svelte';
-import Hidden from '$shell/controls/Hidden.svelte';
-import RichText from '$shell/controls/RichText.svelte';
-import Image from '$shell/controls/Image.svelte';
+import Datetime from '$shell/controls/Datetime.svelte';
+import Element from '$shell/controls/Element.svelte';
 import Entries from '$shell/controls/Entries.svelte';
+import File from '$shell/controls/File.svelte';
+import Group from '$shell/controls/Group.svelte';
+import Hidden from '$shell/controls/Hidden.svelte';
+import Iframe from '$shell/controls/Iframe.svelte';
+import Image from '$shell/controls/Image.svelte';
 import Number from '$shell/controls/Number.svelte';
 import Option from '$shell/controls/Option.svelte';
+import Repeater from '$shell/controls/Repeater.svelte';
+import RichText from '$shell/controls/RichText.svelte';
 import Text from '$shell/controls/Text.svelte';
 import Textarea from '$shell/controls/Textarea.svelte';
 import Time from '$shell/controls/Time.svelte';
 import Video from '$shell/controls/Video.svelte';
-import Iframe from '$shell/controls/Iframe.svelte';
 
+/**
+ * The fixed control vocabulary. Fields reference these by name via
+ * their server-side control descriptor; the panel has no knowledge of
+ * field type classes. Plugins extend the UI through the `element`
+ * control, not by adding entries here.
+ */
 export default {
-	'Cosray\\Field\\Checkbox': Checkbox,
-	'Cosray\\Field\\Code': Code,
-	'Cosray\\Field\\Date': Date,
-	'Cosray\\Field\\File': File,
-	'Cosray\\Field\\Blocks': Blocks,
-	'Cosray\\Field\\Hidden': Hidden,
-	'Cosray\\Field\\RichText': RichText,
-	'Cosray\\Field\\Image': Image,
-	'Cosray\\Field\\Entries': Entries,
-	'Cosray\\Field\\Number': Number,
-	'Cosray\\Field\\Option': Option,
-	'Cosray\\Field\\Text': Text,
-	'Cosray\\Field\\Youtube': Text,
-	'Cosray\\Field\\Textarea': Textarea,
-	'Cosray\\Field\\Time': Time,
-	'Cosray\\Field\\Video': Video,
-	'Cosray\\Field\\Iframe': Iframe,
+	blocks: Blocks,
+	checkbox: Checkbox,
+	code: Code,
+	date: Date,
+	datetime: Datetime,
+	element: Element,
+	entries: Entries,
+	file: File,
+	group: Group,
+	hidden: Hidden,
+	iframe: Iframe,
+	image: Image,
+	number: Number,
+	option: Option,
+	repeater: Repeater,
+	richtext: RichText,
+	text: Text,
+	textarea: Textarea,
+	time: Time,
+	video: Video,
 };

@@ -13,14 +13,6 @@
 
 	let { field, data = $bindable() }: Props = $props();
 
-	let opts = $derived(
-		(field.control?.props ?? {}) as {
-			step?: number | string;
-			min?: number;
-			max?: number;
-		},
-	);
-
 	function oninput() {
 		setDirty();
 	}
@@ -35,10 +27,7 @@
 			class="cms-input"
 			id={field.name}
 			name={field.name}
-			type="number"
-			step={opts.step}
-			min={opts.min}
-			max={opts.max}
+			type="datetime-local"
 			required={field.required}
 			disabled={field.immutable}
 			bind:value={data.value[ZXX]}
