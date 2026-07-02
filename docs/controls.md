@@ -37,9 +37,9 @@ Limitations (v1): `group` and `repeater` support only primitive sub-controls (`t
 
 Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()` (same vocabulary, plus the block natives `block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`), `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. A block type whose control is `element` renders a plugin web component in the editor — the same contract as below, with `block` (`{type, index}`) assigned additionally.
 
-## The element escape hatch
+## Element controls
 
-A field that needs a custom UI declares:
+Controls beyond the primitive vocabulary are rendered by **custom elements** (web components). A field either uses a one-off element:
 
 ```php
 public function control(): Control
@@ -48,30 +48,73 @@ public function control(): Control
 }
 ```
 
-The module path is `{pluginId}/{file}` relative to the directory the plugin registered via `Registrar::assets()`; it is served from `{panel}/vendor/{pluginId}/{file}` and loaded once via dynamic `import()`. The module must define the custom element at top level:
+or a **named control** registered once and reusable across fields:
+
+```php
+// in the plugin's register():
+$cms->control('acme-map', 'acme-map-picker', 'map.js');
+
+// in any field:
+public function control(): Control
+{
+    return Control::named('acme-map');
+}
+```
+
+Named controls are resolved server-side to element descriptors before serialization; the editor island never sees the name. Later registrations win, so a plugin may replace a built-in editor by registering its name (e.g. `richtext`). Cosray's own rich controls are registered through the same registry and shipped as custom elements — they are the reference implementations.
+
+### Module values
+
+| Form | Served from |
+| --- | --- |
+| `{pluginId}/{file}` | the plugin's asset dir via `{panel}/vendor/{pluginId}/{file}` (`Registrar::control()` prefixes the plugin id automatically) |
+| `cosray:{entry}` | the panel build (`{panel}/build/elements/{entry}.js`, dev server in development). `cosray` is a reserved plugin id. |
+| `https?://...` | used as-is |
+
+Modules load once via dynamic `import()` and must define their custom element at top level:
 
 ```js
 customElements.get('acme-color-picker') ||
     customElements.define('acme-color-picker', class extends HTMLElement { ... });
 ```
 
-Hand-written ES modules are sufficient — no build step required. The contract between the panel and the element:
+Hand-written ES modules are sufficient — no build step required.
 
-- The panel assigns JS **properties** (not attributes) on the element:
+### The element contract
+
+- The host assigns JS **properties** (not attributes) on the element and re-assigns them when they change:
   - `value` — the stored value in the exact shape the field's `structure()` persists (usually a locale map). Treat repeated assignments as idempotent.
+  - `meta` — the field's meta map when the structure has one (e.g. code syntax), else `undefined`.
   - `field` — the full field properties object (`name`, `label`, `required`, `translate`, `options`, ...).
-  - `locale` — the currently active panel locale id.
+  - `node` — the node uid; `''` while creating a node that has not been saved yet.
+  - `locale` — the **currently selected editing locale**. The field wrapper owns the locale tabs; when `field.translate` is true this property changes as the editor switches tabs — render `value[locale]`.
   - `locales` — `{ default: string, all: {id, title}[] }`.
-- The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** in the same shape:
+- The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** (and optionally meta) in the same shape:
 
   ```js
   this.dispatchEvent(
   	new CustomEvent("cosray-change", {
-  		detail: { value },
+  		detail: { value, meta },
   		bubbles: true,
   		composed: true,
   	}),
   );
   ```
 
-- When `field.translate` is true, locale handling is the element's responsibility: keep one value per locale id in the map and use `locale`/`locales` to decide what to show.
+  Dispatch only from user-initiated edits, never in response to a property assignment.
+
+## The window.Cosray bridge
+
+On panel editor pages the island installs `window.Cosray`, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
+
+```ts
+window.Cosray = {
+	version: 1,
+	system(): { locale, defaultLocale, locales, customLocales, prefix, assets, debug, allowedFiles },
+	upload(type: 'image' | 'file' | 'video', node: string, file: File): Promise<{ok, file?, error?}>,
+	modal: { open(render: (host: HTMLElement) => cleanup?, options?): { close() } },
+	toast: { success(message), error(message) },
+};
+```
+
+`upload()` posts to the media endpoint with the session's CSRF token — elements never handle credentials. `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists while an editor is mounted — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.

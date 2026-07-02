@@ -9,9 +9,10 @@
 		node?: string;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		data: any;
+		onchange?: () => void;
 	};
 
-	let { field, node = '', data = $bindable() }: Props = $props();
+	let { field, node = '', data = $bindable(), onchange }: Props = $props();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	type AnyComponent = Component<any, any, any>;
@@ -21,7 +22,7 @@
 </script>
 
 {#if Ctrl}
-	<Ctrl {field} {node} bind:data />
+	<Ctrl {field} {node} bind:data {onchange} />
 {:else}
 	<div class="cms-control-unknown">
 		Unknown control "{name}" for field "{field.name}" ({field.type})

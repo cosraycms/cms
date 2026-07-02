@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Node } from '$types/data';
 	import type { Field } from '$types/fields';
+	import { setDirty } from '$lib/state';
 	import Control from '$shell/Control.svelte';
 
 	type Props = {
@@ -43,7 +44,12 @@
 					grid-row: {fieldSpan(field.rows, 'row')}"
 			>
 				{#if node.content[field.name] && shouldAddField(field.name)}
-					<Control {field} node={node.uid} bind:data={node.content[field.name]} />
+					<Control
+						{field}
+						node={node.uid}
+						bind:data={node.content[field.name]}
+						onchange={setDirty}
+					/>
 				{/if}
 			</div>
 		{/if}

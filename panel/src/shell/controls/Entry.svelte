@@ -2,6 +2,7 @@
 	import type { Data, EntryData } from '$types/data';
 	import type { EntriesField, EntryType } from '$types/fields';
 
+	import { setDirty } from '$lib/state';
 	import Control from '$shell/Control.svelte';
 	import EntryControls from './EntryControls.svelte';
 
@@ -65,7 +66,12 @@
 							? `width: calc(${entryField.width}% - 0.5rem)`
 							: 'width: 100%'}
 						<div class="entry-field" style={widthStyle}>
-							<Control field={entryField} {node} bind:data={entry.fields[entryField.name]} />
+							<Control
+								field={entryField}
+								{node}
+								bind:data={entry.fields[entryField.name]}
+								onchange={setDirty}
+							/>
 						</div>
 					{/if}
 				{/each}
