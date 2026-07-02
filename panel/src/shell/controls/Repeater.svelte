@@ -4,7 +4,6 @@
 
 	import { _ } from '$lib/locale';
 	import { ensureNeutral } from '$lib/content';
-	import { setDirty } from '$lib/state';
 	import { ZXX } from '$types/data';
 	import Button from '$shell/Button.svelte';
 	import Field from '$shell/Field.svelte';
@@ -15,9 +14,10 @@
 		field: SimpleField;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		data: any;
+		onchange?: () => void;
 	};
 
-	let { field, data = $bindable() }: Props = $props();
+	let { field, data = $bindable(), onchange = () => {} }: Props = $props();
 
 	let opts = $derived(
 		field.control.props as {
@@ -34,12 +34,12 @@
 
 	function add() {
 		data.value[ZXX] = [...items, null];
-		setDirty();
+		onchange();
 	}
 
 	function remove(index: number) {
 		data.value[ZXX] = items.filter((_item, i) => i !== index);
-		setDirty();
+		onchange();
 	}
 </script>
 
@@ -55,6 +55,7 @@
 					id={`${field.name}-${index}`}
 					label={`${index + 1}.`}
 					bind:value={data.value[ZXX][index]}
+					{onchange}
 				/>
 				<Button onclick={() => remove(index)}>{_('Entfernen')}</Button>
 			</div>

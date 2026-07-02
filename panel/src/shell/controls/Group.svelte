@@ -12,9 +12,10 @@
 		field: SimpleField;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		data: any;
+		onchange?: () => void;
 	};
 
-	let { field, data = $bindable() }: Props = $props();
+	let { field, data = $bindable(), onchange = () => {} }: Props = $props();
 
 	let fields = $derived((field.control.props.fields as GroupField[]) ?? []);
 
@@ -42,6 +43,7 @@
 						id={`${field.name}-${sub.key}`}
 						label={sub.label ?? sub.key}
 						bind:value={data.value[ZXX][sub.key]}
+						{onchange}
 					/>
 				</div>
 			{/each}

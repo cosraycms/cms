@@ -1,17 +1,16 @@
 <script lang="ts">
 	import type { ControlDescriptor } from '$types/controls';
 
-	import { setDirty } from '$lib/state';
-
 	type Props = {
 		descriptor: ControlDescriptor;
 		id: string;
 		label: string;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		value: any;
+		onchange?: () => void;
 	};
 
-	let { descriptor, id, label, value = $bindable() }: Props = $props();
+	let { descriptor, id, label, value = $bindable(), onchange: notify = () => {} }: Props = $props();
 
 	const INPUT_TYPES: Record<string, string> = {
 		text: 'text',
@@ -30,7 +29,7 @@
 	);
 
 	function onchange() {
-		setDirty();
+		notify();
 	}
 </script>
 

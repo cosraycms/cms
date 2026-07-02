@@ -1,8 +1,12 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
-	import type { Field } from '$types/fields';
+	import type { BlocksField, EntriesField, Field } from '$types/fields';
 
-	import controls from '$lib/controls';
+	import Blocks from '$shell/controls/Blocks.svelte';
+	import Element from '$shell/controls/Element.svelte';
+	import Entries from '$shell/controls/Entries.svelte';
+	import Group from '$shell/controls/Group.svelte';
+	import Primitive from '$shell/controls/Primitive.svelte';
+	import Repeater from '$shell/controls/Repeater.svelte';
 
 	type Props = {
 		field: Field;
@@ -14,15 +18,35 @@
 
 	let { field, node = '', data = $bindable(), onchange }: Props = $props();
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	type AnyComponent = Component<any, any, any>;
+	const PRIMITIVES = [
+		'text',
+		'textarea',
+		'iframe',
+		'number',
+		'checkbox',
+		'option',
+		'date',
+		'time',
+		'datetime',
+		'hidden',
+	];
 
-	let name = $derived(field.control?.name);
-	let Ctrl = $derived(controls[name as keyof typeof controls] as AnyComponent | undefined);
+	let name = $derived(field.control?.name ?? '');
 </script>
 
-{#if Ctrl}
-	<Ctrl {field} {node} bind:data {onchange} />
+{#if PRIMITIVES.includes(name)}
+	<Primitive {field} bind:data {onchange} />
+{:else if name === 'element'}
+	<Element {field} bind:data {node} {onchange} />
+{:else if name === 'group'}
+	<Group {field} bind:data {onchange} />
+{:else if name === 'repeater'}
+	<Repeater {field} bind:data {onchange} />
+{:else if name === 'blocks'}
+	<!-- Island-internal until the containers ship as elements. -->
+	<Blocks field={field as BlocksField} bind:data {node} />
+{:else if name === 'entries'}
+	<Entries field={field as EntriesField} bind:data {node} />
 {:else}
 	<div class="cms-control-unknown">
 		Unknown control "{name}" for field "{field.name}" ({field.type})
