@@ -15,9 +15,12 @@ use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Field\Services as FieldServices;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Node\Node;
+use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
@@ -35,6 +38,8 @@ class Plugin implements CorePlugin
 	protected readonly Connection $connection;
 	protected readonly Routes $routes;
 	protected readonly Types $types;
+	protected readonly FieldSchemas $fieldSchemas;
+	protected readonly FieldServices $fieldServices;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -51,6 +56,8 @@ class Plugin implements CorePlugin
 		?Types $types = null,
 	) {
 		$this->types = $types ?? new Types();
+		$this->fieldSchemas = FieldSchemas::withDefaults();
+		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types);
 		$this->navigation = new Navigation();
 	}
 
@@ -72,6 +79,9 @@ class Plugin implements CorePlugin
 		$this->container->add(Database::class, $this->db);
 		$this->container->add(Factory::class, $this->factory);
 		$this->container->add(Types::class, $this->types);
+		$this->container->add(NodeSchemas::class, $this->types->registry());
+		$this->container->add(FieldSchemas::class, $this->fieldSchemas);
+		$this->container->add(FieldServices::class, $this->fieldServices);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
 		$this->routes = new Routes($this->config, $this->db, $this->factory);
@@ -150,6 +160,21 @@ class Plugin implements CorePlugin
 	public function meta(): Types
 	{
 		return $this->types;
+	}
+
+	public function fieldSchemas(): FieldSchemas
+	{
+		return $this->fieldSchemas;
+	}
+
+	public function nodeSchemas(): NodeSchemas
+	{
+		return $this->types->registry();
+	}
+
+	public function fieldServices(): FieldServices
+	{
+		return $this->fieldServices;
 	}
 
 	public function node(string $class): void
