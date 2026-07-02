@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Cosray\Block\Registry as Blocks;
+use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Schema\Registry;
 use Cosray\Node\Types;
 
@@ -17,13 +18,16 @@ use Cosray\Node\Types;
 final class Services
 {
 	public readonly Blocks $blocks;
+	public readonly Controls $controls;
 
 	public function __construct(
 		public readonly Registry $schemas,
 		public readonly Types $types,
 		?Blocks $blocks = null,
+		?Controls $controls = null,
 	) {
 		$this->blocks = $blocks ?? Blocks::withDefaults();
+		$this->controls = $controls ?? Controls::withDefaults();
 	}
 
 	public static function withDefaults(): self

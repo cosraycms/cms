@@ -55,6 +55,14 @@ final class PluginRegistrationTest extends TestCase
 		$blocks = $container->get(\Cosray\Block\Registry::class);
 		$this->assertTrue($blocks->has('test-notice'));
 		$this->assertSame('element', $blocks->get('test-notice')->control()->array()['name']);
+
+		$controls = $container->get(\Cosray\Field\Control\Registry::class);
+		$this->assertTrue($controls->has('test-money-picker'));
+		// Plugin-relative module paths are prefixed with the plugin id.
+		$this->assertSame(
+			['tag' => 'test-money-picker', 'module' => 'test-plugin/controls.js'],
+			$controls->get('test-money-picker'),
+		);
 	}
 
 	public function testPluginRegistersCollection(): void

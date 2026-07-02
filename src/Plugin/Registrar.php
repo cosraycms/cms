@@ -94,6 +94,18 @@ final class Registrar
 	}
 
 	/**
+	 * Register a named custom control rendered by a custom element.
+	 * Fields (from any plugin or the project) can then use the name in
+	 * their control() definition. Later registrations win, so a plugin
+	 * may replace a built-in editor. The module is served from this
+	 * plugin's asset dir.
+	 */
+	public function control(string $name, string $tag, string $module): void
+	{
+		$this->bootstrap->controls()->register($name, $tag, "{$this->id}/{$module}");
+	}
+
+	/**
 	 * Register $dir as template namespace `{pluginId}:` for the given
 	 * renderer ('panel' or 'view'). Templates are addressed as
 	 * '{pluginId}:template/path'.

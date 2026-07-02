@@ -48,11 +48,12 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	public function properties(): array
 	{
 		$result = parent::properties();
+		$controls = $this->services()->controls;
 		$result['blockTypes'] = array_values(array_map(
 			static fn(Type $type): array => [
 				'id' => $type->id(),
 				'label' => $type->label(),
-				'control' => $type->control()->array(),
+				'control' => $type->control()->resolve($controls)->array(),
 				'init' => $type->init(),
 				'hidden' => $type->hidden(),
 			],

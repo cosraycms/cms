@@ -29,6 +29,7 @@ final class TestPlugin implements Plugin
 		$cms->sql(__DIR__ . '/db/sql');
 		$cms->assets(__DIR__ . '/assets');
 		$cms->blockType(TestNotice::class);
+		$cms->control('test-money-picker', 'test-money-picker', 'controls.js');
 		$cms->templates(__DIR__ . '/views');
 		$cms->panelPage('/test-plugin', [PageController::class, 'index'], 'test-plugin:page', 'index');
 		$cms->css("{$cms->config->panel->path}/vendor/test-plugin/theme.css");

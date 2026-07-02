@@ -175,9 +175,52 @@ final class Control
 		return new self('element', ['tag' => $tag, 'module' => $module]);
 	}
 
+	/**
+	 * A named custom control registered via Registrar::control().
+	 */
+	public static function named(string $name): self
+	{
+		return new self($name);
+	}
+
 	public function prop(string $key, mixed $value): self
 	{
 		return new self($this->name, [...$this->props, $key => $value]);
+	}
+
+	/**
+	 * Resolve named rich controls to their element form. Primitives,
+	 * structural controls and unregistered names pass through; group
+	 * and repeater resolve their nested descriptors.
+	 */
+	public function resolve(Control\Registry $controls): self
+	{
+		if ($this->name === 'group') {
+			$fields = array_map(
+				static fn(array $field): array => [
+					...$field,
+					'control' => $field['control']->resolve($controls),
+				],
+				$this->props['fields'] ?? [],
+			);
+
+			return new self('group', [...$this->props, 'fields' => $fields]);
+		}
+
+		if ($this->name === 'repeater') {
+			return new self('repeater', [
+				...$this->props,
+				'item' => $this->props['item']->resolve($controls),
+			]);
+		}
+
+		if ($this->name === 'element' || !$controls->has($this->name)) {
+			return $this;
+		}
+
+		['tag' => $tag, 'module' => $module] = $controls->get($this->name);
+
+		return new self('element', [...$this->props, 'tag' => $tag, 'module' => $module]);
 	}
 
 	public function array(): array

@@ -97,27 +97,42 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 	private function createTextField(string $name = 'test'): Text
 	{
-		return new Text($name, $this->createOwner(), new ValueContext($name, []));
+		$field = new Text($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
 	}
 
 	private function createImageField(string $name = 'image'): Image
 	{
-		return new Image($name, $this->createOwner(), new ValueContext($name, []));
+		$field = new Image($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
 	}
 
 	private function createBlocksField(string $name = 'blocks'): Blocks
 	{
-		return new Blocks($name, $this->createOwner(), new ValueContext($name, []));
+		$field = new Blocks($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
 	}
 
 	private function createOptionField(string $name = 'option'): Option
 	{
-		return new Option($name, $this->createOwner(), new ValueContext($name, []));
+		$field = new Option($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
 	}
 
 	private function createCodeField(string $name = 'code'): Code
 	{
-		return new Code($name, $this->createOwner(), new ValueContext($name, []));
+		$field = new Code($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
 	}
 
 	private function applyAndGetProperties(object $meta, $field): array

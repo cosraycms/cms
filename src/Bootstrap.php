@@ -21,6 +21,7 @@ use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
 use Cosray\Field\Services as FieldServices;
@@ -53,6 +54,7 @@ class Bootstrap implements CorePlugin
 	protected readonly FieldServices $fieldServices;
 	protected readonly FieldIndex $fields;
 	protected readonly BlockRegistry $blocks;
+	protected readonly Controls $controls;
 	protected readonly CollectionSchemas $collectionSchemas;
 
 	/** @property array<Entry> */
@@ -99,7 +101,13 @@ class Bootstrap implements CorePlugin
 		$this->types = $types ?? new Types();
 		$this->fieldSchemas = FieldSchemas::withDefaults();
 		$this->blocks = BlockRegistry::withDefaults();
-		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types, $this->blocks);
+		$this->controls = Controls::withDefaults();
+		$this->fieldServices = new FieldServices(
+			$this->fieldSchemas,
+			$this->types,
+			$this->blocks,
+			$this->controls,
+		);
 		$this->fields = FieldIndex::withDefaults();
 		$this->pluginAssets = new PluginAssets();
 		$this->panelExtras = new PanelExtras();
@@ -132,6 +140,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(FieldServices::class, $this->fieldServices);
 		$this->container->add(FieldIndex::class, $this->fields);
 		$this->container->add(BlockRegistry::class, $this->blocks);
+		$this->container->add(Controls::class, $this->controls);
 		$this->container->add(CollectionSchemas::class, $this->collectionSchemas);
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
@@ -200,6 +209,11 @@ class Bootstrap implements CorePlugin
 	public function blockType(BlockType $type): void
 	{
 		$this->blocks->register($type);
+	}
+
+	public function controls(): Controls
+	{
+		return $this->controls;
 	}
 
 	public function addTemplates(string $namespace, string $dir, string $renderer): void

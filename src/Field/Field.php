@@ -101,7 +101,7 @@ abstract class Field implements
 		$properties = [
 			'name' => $this->name,
 			'type' => $this::class,
-			'control' => $this->control()->array(),
+			'control' => $this->control()->resolve($this->services()->controls)->array(),
 		];
 
 		foreach ($this->meta as [$meta, $handler]) {

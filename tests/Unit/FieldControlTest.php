@@ -130,9 +130,89 @@ final class FieldControlTest extends TestCase
 		$this->assertSame(['syntaxes' => ['php']], $withSyntax->array()['props']);
 	}
 
+	public function testResolvePassesUnregisteredNamesThrough(): void
+	{
+		$controls = new Control\Registry();
+
+		$this->assertSame(
+			['name' => 'text', 'props' => []],
+			Control::text()->resolve($controls)->array(),
+		);
+		$this->assertSame(
+			['name' => 'acme-map', 'props' => []],
+			Control::named('acme-map')->resolve($controls)->array(),
+		);
+	}
+
+	public function testResolveRegisteredNameToElement(): void
+	{
+		$controls = new Control\Registry();
+		$controls->register('richtext', 'cosray-richtext', 'cosray:richtext');
+
+		$resolved = Control::richtext()->prop('menu', 'full')->resolve($controls)->array();
+
+		$this->assertSame('element', $resolved['name']);
+		$this->assertSame('cosray-richtext', $resolved['props']['tag']);
+		$this->assertSame('cosray:richtext', $resolved['props']['module']);
+		// Original props survive resolution.
+		$this->assertSame('full', $resolved['props']['menu']);
+	}
+
+	public function testResolveKeepsExplicitElements(): void
+	{
+		$controls = new Control\Registry();
+		$controls->register('element', 'nope', 'nope');
+
+		$this->assertSame(
+			['name' => 'element', 'props' => ['tag' => 'acme-color', 'module' => 'acme/c.js']],
+			Control::element('acme-color', 'acme/c.js')->resolve($controls)->array(),
+		);
+	}
+
+	public function testResolveRecursesIntoGroupAndRepeater(): void
+	{
+		$controls = new Control\Registry();
+		$controls->register('richtext', 'cosray-richtext', 'cosray:richtext');
+
+		$group = Control::group([
+			['key' => 'body', 'control' => Control::richtext()],
+			['key' => 'title', 'control' => Control::text()],
+		])->resolve($controls)->array();
+
+		$this->assertSame('element', $group['props']['fields'][0]['control']['name']);
+		$this->assertSame('text', $group['props']['fields'][1]['control']['name']);
+
+		$repeater = Control::repeater(Control::richtext())->resolve($controls)->array();
+
+		$this->assertSame('element', $repeater['props']['item']['name']);
+	}
+
+	public function testLaterRegistrationWins(): void
+	{
+		$controls = new Control\Registry();
+		$controls->register('richtext', 'cosray-richtext', 'cosray:richtext');
+		$controls->register('richtext', 'acme-editor', 'acme/editor.js');
+
+		$resolved = Control::richtext()->resolve($controls)->array();
+
+		$this->assertSame('acme-editor', $resolved['props']['tag']);
+		$this->assertSame('acme/editor.js', $resolved['props']['module']);
+	}
+
+	public function testNamedControl(): void
+	{
+		$this->assertSame(
+			['name' => 'acme-map', 'props' => []],
+			Control::named('acme-map')->array(),
+		);
+	}
+
 	/** @param class-string<Field\Field> $class */
 	private function field(string $class): Field\Field
 	{
-		return new $class('test', $this->createStub(Owner::class), new ValueContext('test', []));
+		$field = new $class('test', $this->createStub(Owner::class), new ValueContext('test', []));
+		$field->init(Field\Services::withDefaults());
+
+		return $field;
 	}
 }
