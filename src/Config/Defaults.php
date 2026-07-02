@@ -39,6 +39,7 @@ final class Defaults
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
+			'plugins' => [],
 		];
 	}
 

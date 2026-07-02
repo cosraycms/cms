@@ -103,6 +103,14 @@ class App implements RouteAdder
 		return $this->bootstrap;
 	}
 
+	/** @param class-string<Plugin\Plugin>|Plugin\Plugin $plugin */
+	public function plugin(string|Plugin\Plugin $plugin): self
+	{
+		$this->bootstrap->plugin($plugin);
+
+		return $this;
+	}
+
 	public function section(string $name): Section
 	{
 		return $this->bootstrap->section($name);

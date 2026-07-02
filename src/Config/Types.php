@@ -25,6 +25,8 @@ namespace Cosray\Config;
  *     'app.secret': ?string,
  *     'app.timezone': string,
  *
+ *     'plugins': list<class-string<\Cosray\Plugin\Plugin>|\Cosray\Plugin\Plugin>,
+ *
  *     'auth.remember_lifetime': int,
  *
  *     'path.root': string,
@@ -81,6 +83,8 @@ namespace Cosray\Config;
  *     'app.env'?: string,
  *     'app.secret'?: null|string,
  *     'app.timezone'?: string,
+ *
+ *     'plugins'?: list<class-string<\Cosray\Plugin\Plugin>|\Cosray\Plugin\Plugin>,
  *     'auth.remember_lifetime'?: int,
  *     'path.root'?: string,
  *     'path.public'?: string,

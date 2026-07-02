@@ -9,6 +9,7 @@ use Celemas\Core\Factory\Factory;
 use Celemas\Quma\Database;
 use Celemas\Router\Group;
 use Celemas\Router\Route;
+use Closure;
 use Cosray\Controller\Auth;
 use Cosray\Controller\Embed;
 use Cosray\Controller\Media;
@@ -32,10 +33,12 @@ class Routes
 	protected Session $session;
 	protected bool $frontendSession;
 
+	/** @param list<Closure(App): void> $pluginRoutes */
 	public function __construct(
 		protected Config $config,
 		protected Database $db,
 		protected Factory $factory,
+		protected array $pluginRoutes = [],
 	) {
 		$this->panelPath = $config->panel->path;
 		$this->oldPanelApiPath = self::LEGACY_PANEL_PATH . '/api';
@@ -104,6 +107,10 @@ class Routes
 		// END OLD PANEL ROUTES
 
 		$this->addPanel($app);
+
+		foreach ($this->pluginRoutes as $addRoutes) {
+			$addRoutes($app);
+		}
 
 		if ($this->frontendSession) {
 			foreach ($sessionIfEnabled as $route) {

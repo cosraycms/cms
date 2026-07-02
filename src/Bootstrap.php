@@ -14,6 +14,7 @@ use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
+use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
@@ -26,6 +27,8 @@ use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
+use Cosray\Plugin\Plugin;
+use Cosray\Plugin\Registrar;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
 
@@ -53,6 +56,21 @@ class Bootstrap implements CorePlugin
 	protected array $customIconProviders = [];
 	protected bool $replaceDefaultIconProviders = false;
 
+	/** @var list<class-string<Plugin>|Plugin> */
+	protected array $plugins = [];
+
+	/** @var array<string, true> */
+	protected array $pluginIds = [];
+
+	/** @var list<string> */
+	protected array $pluginMigrations = [];
+
+	/** @var list<string> */
+	protected array $pluginSql = [];
+
+	/** @var list<Closure> */
+	protected array $pluginRoutes = [];
+
 	public function __construct(
 		protected readonly Config $config,
 		?Types $types = null,
@@ -68,6 +86,8 @@ class Bootstrap implements CorePlugin
 	{
 		$this->factory = $app->factory();
 		$this->container = $app->container();
+
+		$this->loadPlugins();
 
 		$this->addPanelRenderer();
 		$this->addViewRenderer();
@@ -88,8 +108,67 @@ class Bootstrap implements CorePlugin
 		$this->container->add(FieldIndex::class, $this->fields);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
-		$this->routes = new Routes($this->config, $this->db, $this->factory);
+		$this->routes = new Routes($this->config, $this->db, $this->factory, $this->pluginRoutes);
 		$this->routes->add($app);
+	}
+
+	/** @param class-string<Plugin>|Plugin $plugin */
+	public function plugin(string|Plugin $plugin): void
+	{
+		$this->plugins[] = $plugin;
+	}
+
+	protected function loadPlugins(): void
+	{
+		$configured = (array) $this->config->get('plugins', []);
+
+		foreach ([...$configured, ...$this->plugins] as $plugin) {
+			if (is_string($plugin)) {
+				if (!is_a($plugin, Plugin::class, true)) {
+					throw new RuntimeException('Plugins must implement ' . Plugin::class . ": {$plugin}");
+				}
+
+				$plugin = new $plugin();
+			}
+
+			if (!$plugin instanceof Plugin) {
+				throw new RuntimeException('Plugins must implement ' . Plugin::class);
+			}
+
+			$id = $plugin->id();
+
+			if (isset($this->pluginIds[$id])) {
+				throw new RuntimeException("Duplicate plugin id: {$id}");
+			}
+
+			$this->pluginIds[$id] = true;
+			$plugin->register(new Registrar($this, $id, $this->config));
+		}
+	}
+
+	public function addMigrations(string $dir): void
+	{
+		$this->pluginMigrations[] = $dir;
+	}
+
+	public function addSql(string $dir): void
+	{
+		$this->pluginSql[] = $dir;
+	}
+
+	/**
+	 * @param non-empty-string $key
+	 * @param class-string|object $value
+	 */
+	public function addService(string $key, object|string $value): Entry
+	{
+		return $this->container->add($key, $value);
+	}
+
+	/** @param Closure(App): void $routes */
+	public function addRoutes(Closure $routes): void
+	{
+		$this->pluginRoutes[] = $routes;
 	}
 
 	protected function collect(): void
@@ -210,6 +289,7 @@ class Bootstrap implements CorePlugin
 		$sql = array_merge(
 			[$root . '/db/sql'],
 			$config->sql,
+			$this->pluginSql,
 		);
 		$migrationPaths = $config->migrations;
 
@@ -217,6 +297,7 @@ class Bootstrap implements CorePlugin
 		$namespacedMigrations['install'] = [$root . '/db/migrations/install'];
 		$namespacedMigrations['default'] = array_merge(
 			$migrationPaths,
+			$this->pluginMigrations,
 			[$root . '/db/migrations/update'],
 		);
 
