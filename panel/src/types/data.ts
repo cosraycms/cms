@@ -97,21 +97,6 @@ export interface BlockYoutube extends BlockBase {
 	};
 }
 
-export type BlockType =
-	| 'text'
-	| 'richtext'
-	| 'h1'
-	| 'h2'
-	| 'h3'
-	| 'h4'
-	| 'h5'
-	| 'h6'
-	| 'image'
-	| 'youtube'
-	| 'images'
-	| 'video'
-	| 'iframe';
-
 export interface BlockCustom extends BlockBase {
 	type: string;
 	value: unknown;

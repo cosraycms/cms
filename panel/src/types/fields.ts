@@ -23,12 +23,6 @@ export interface Limit {
 	max: number;
 }
 
-export interface FileField extends SimpleField {
-	limit?: Limit;
-}
-
-export interface ImageField extends FileField {}
-
 export interface BlockTypeMeta {
 	id: string;
 	label: string;
@@ -54,8 +48,4 @@ export interface EntriesField extends SimpleField {
 	entryTypes: EntryType[];
 }
 
-export interface CodeField extends SimpleField {
-	syntaxes?: string[];
-}
-
-export type Field = ImageField | FileField | BlocksField | EntriesField | CodeField | SimpleField;
+export type Field = BlocksField | EntriesField | SimpleField;

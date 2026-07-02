@@ -1,6 +1,6 @@
 # Editor control vocabulary
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The panel renders fields through one generic dispatcher; it has no knowledge of field type classes. Plugins that need UI beyond the vocabulary use the `element` control.
+Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor island interprets only **primitive** controls (plain HTML inputs), the structural `group`/`repeater`, and `element`. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element**. The island knows neither field type classes nor built-in control names.
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
@@ -19,23 +19,29 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `time` | `Control::time()` |  | locale map of `HH:MM` |
 | `datetime` | `Control::datetime()` |  | locale map of `YYYY-MM-DDTHH:MM` |
 | `hidden` | `Control::hidden()` |  | locale map of `string` |
-| `code` | `Control::code()` |  | locale map of `string` (syntaxes come from `#[Syntax]`) |
-| `richtext` | `Control::richtext()` |  | locale map of HTML `string` |
 | `iframe` | `Control::iframe()` |  | locale map of `string` |
-| `image` | `Control::image()` |  | locale map of `{file, meta?}[]` |
-| `file` | `Control::file()` |  | locale map of `{file, meta?}[]` |
-| `video` | `Control::video()` |  | locale map of `{file, meta?}[]` |
-| `blocks` | `Control::blocks()` |  | locale map of block list (see Blocks) |
-| `entries` | `Control::entries()` |  | `zxx` map of `{uid, type, fields}[]` |
 | `group` | `Control::group(fields)` | `fields: {key,label?,control}[]` | `zxx` map of object keyed by `key` |
 | `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
 | `element` | `Control::element(tag, module)` | `tag`, `module` | whatever the field's `structure()` defines |
+
+Named rich controls (resolved to elements server-side; cosray's built-ins ship as custom elements under `cosray:` modules):
+
+| Control | Builder | Element | Value shape |
+| --- | --- | --- | --- |
+| `code` | `Control::code()` | `cosray-code` | locale map of `string`, `meta.syntax` (syntaxes from `#[Syntax]`) |
+| `richtext` | `Control::richtext()` | `cosray-richtext` | locale map of HTML `string` |
+| `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]` |
+| `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
+| `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
+| `blocks` | `Control::blocks()` | `cosray-blocks` | locale map of block list (see Blocks) |
+| `entries` | `Control::entries()` | `cosray-entries` | `zxx` map of `{uid, type, fields}[]` |
+| _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
 Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
 
 ## Block types
 
-Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()` (same vocabulary, plus the block natives `block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`), `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. A block type whose control is `element` renders a plugin web component in the editor — the same contract as below, with `block` (`{type, index}`) assigned additionally.
+Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()`, `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. The block natives (`block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`) are rendered internally by the `cosray-blocks` element; a plugin block type uses an `element` control, and its web component gets the contract below with `block` (`{type, index}`) assigned additionally.
 
 ## Element controls
 
