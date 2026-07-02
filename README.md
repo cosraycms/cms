@@ -79,6 +79,26 @@ final class ShopPlugin implements Plugin
 
 Plugins must be constructible without arguments. Custom field types are plain `Cosray\Field\Field` subclasses referenced by class on node properties; string aliases passed to `field()` are only needed for legacy content imports. Plugin migrations run in the shared `default` migration namespace: use timestamped filenames and the `/*:cms.prefix:*/` placeholder in table names (for example `/*:cms.prefix:*/acmeshop_orders`).
 
+### Panel apps
+
+Plugins can ship whole apps that live inside the panel chrome — session, authentication, sidebar and layout come for free:
+
+```php
+public function register(Registrar $cms): void
+{
+    $panel = $cms->config->panel->path;
+
+    $cms->templates(__DIR__ . '/../views');               // namespace 'acme-shop:'
+    $cms->panelPage('/shop/orders', [Controller\Orders::class, 'list'], 'acme-shop:orders', 'orders');
+    $cms->section('Shop')->link('Bestellungen', "{$panel}/shop/orders");
+    $cms->assets(__DIR__ . '/../dist');                   // {panel}/vendor/acme-shop/...
+    $cms->css("{$panel}/vendor/acme-shop/shop.css");
+    $cms->js("{$panel}/vendor/acme-shop/shop.js");
+}
+```
+
+Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('panel')` to render inside the shell. Custom editor UIs (field controls, block types) ship as web components — see `docs/controls.md` for the control vocabulary and the element contract.
+
 ## Defining content types
 
 Content types (nodes) are plain PHP classes annotated with attributes. There is no base class to extend. Dependencies are autowired from the Registry via `celemas/wire`.

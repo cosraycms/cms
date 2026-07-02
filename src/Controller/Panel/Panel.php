@@ -10,6 +10,7 @@ use Cosray\Config;
 use Cosray\Contract\Icons;
 use Cosray\Locale;
 use Cosray\Navigation;
+use Cosray\Panel\Extras;
 
 use function Cosray\env;
 
@@ -68,13 +69,14 @@ abstract class Panel
 			$stylesheets[] = "{$panelPath}/build/panel.css";
 		}
 
-		return $stylesheets;
+		return [...$stylesheets, ...$this->extras()->css()];
 	}
 
 	private function scripts(string $panelPath): array
 	{
 		return [
 			"{$panelPath}/assets/app/vendor/htmx.js",
+			...$this->extras()->scripts(),
 		];
 	}
 
@@ -86,10 +88,21 @@ abstract class Panel
 			return [
 				"{$origin}/@vite/client",
 				"{$origin}/src/panel.ts",
+				...$this->extras()->moduleScripts(),
 			];
 		}
 
-		return $this->hasPanelBuild() ? ["{$panelPath}/build/panel.js"] : [];
+		$scripts = $this->hasPanelBuild() ? ["{$panelPath}/build/panel.js"] : [];
+
+		return [...$scripts, ...$this->extras()->moduleScripts()];
+	}
+
+	private function extras(): Extras
+	{
+		$extras = $this->container->get(Extras::class);
+		assert($extras instanceof Extras, 'The panel extras service must be available');
+
+		return $extras;
 	}
 
 	protected function hasPanelBuild(): bool

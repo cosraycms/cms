@@ -93,6 +93,18 @@ final class Navigation
 				continue;
 			}
 
+			if ($item instanceof NavLink) {
+				$result[] = [
+					'type' => 'link',
+					'url' => $item->url,
+					'name' => $item->meta->label,
+					'meta' => $item->meta->array(),
+					'children' => [],
+				];
+
+				continue;
+			}
+
 			$result[] = [
 				'type' => 'collection',
 				'slug' => $item->slug(),

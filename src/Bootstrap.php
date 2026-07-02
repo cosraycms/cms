@@ -32,6 +32,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
+use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
@@ -80,6 +81,16 @@ class Bootstrap implements CorePlugin
 	protected array $pluginRoutes = [];
 
 	protected readonly PluginAssets $pluginAssets;
+	protected readonly PanelExtras $panelExtras;
+
+	/** @var array<string, array<string, string>> */
+	protected array $pluginTemplates = [
+		'panel' => [],
+		'view' => [],
+	];
+
+	/** @var list<array{pattern: string, endpoint: mixed, template: string, name: string}> */
+	protected array $panelPages = [];
 
 	public function __construct(
 		protected readonly Config $config,
@@ -91,6 +102,7 @@ class Bootstrap implements CorePlugin
 		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types, $this->blocks);
 		$this->fields = FieldIndex::withDefaults();
 		$this->pluginAssets = new PluginAssets();
+		$this->panelExtras = new PanelExtras();
 		$this->collectionSchemas = new CollectionSchemas(CollectionSchemaRegistry::withDefaults());
 		$this->navigation = new Navigation($this->collectionSchemas);
 	}
@@ -123,9 +135,16 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemas::class, $this->collectionSchemas);
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
+		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
-		$this->routes = new Routes($this->config, $this->db, $this->factory, $this->pluginRoutes);
+		$this->routes = new Routes(
+			$this->config,
+			$this->db,
+			$this->factory,
+			$this->pluginRoutes,
+			$this->panelPages,
+		);
 		$this->routes->add($app);
 	}
 
@@ -181,6 +200,34 @@ class Bootstrap implements CorePlugin
 	public function blockType(BlockType $type): void
 	{
 		$this->blocks->register($type);
+	}
+
+	public function addTemplates(string $namespace, string $dir, string $renderer): void
+	{
+		if (!array_key_exists($renderer, $this->pluginTemplates)) {
+			throw new RuntimeException("Unknown template renderer '{$renderer}'. Use 'panel' or 'view'.");
+		}
+
+		$this->pluginTemplates[$renderer][$namespace] = $dir;
+	}
+
+	public function addPanelPage(
+		string $pattern,
+		mixed $endpoint,
+		string $template,
+		string $name,
+	): void {
+		$this->panelPages[] = [
+			'pattern' => $pattern,
+			'endpoint' => $endpoint,
+			'template' => $template,
+			'name' => $name,
+		];
+	}
+
+	public function panelExtras(): PanelExtras
+	{
+		return $this->panelExtras;
 	}
 
 	/**
@@ -395,7 +442,9 @@ class Bootstrap implements CorePlugin
 	{
 		$root = dirname(__DIR__);
 		$this->renderer('panel', BoilerRenderer::class)->args(
-			dirs: "{$root}/panel/views",
+			// The cosray dir must come first: un-namespaced lookups
+			// (e.g. the 'panel' layout) search the dirs in order.
+			dirs: ['cosray' => "{$root}/panel/views", ...$this->pluginTemplates['panel']],
 			autoescape: true,
 			trusted: [CollectionPage::class, CollectionQuery::class, CollectionUrls::class],
 		);
@@ -408,7 +457,7 @@ class Bootstrap implements CorePlugin
 		}
 
 		$this->renderer('view', BoilerRenderer::class)->args(
-			dirs: $this->viewPath(),
+			dirs: ['app' => $this->viewPath(), ...$this->pluginTemplates['view']],
 			autoescape: true,
 			trusted: $this->trustedViewClasses(),
 		);

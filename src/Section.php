@@ -89,6 +89,14 @@ final class Section implements NavigationItem
 		return $this;
 	}
 
+	public function link(string $label, string $url, ?string $activePrefix = null): NavLink
+	{
+		$link = new NavLink($label, $url, $activePrefix);
+		$this->children[] = $link;
+
+		return $link;
+	}
+
 	/** @param class-string<Collection> $class */
 	public function collection(string $class): Ref
 	{

@@ -33,12 +33,16 @@ class Routes
 	protected Session $session;
 	protected bool $frontendSession;
 
-	/** @param list<Closure(App): void> $pluginRoutes */
+	/**
+	 * @param list<Closure(App): void> $pluginRoutes
+	 * @param list<array{pattern: string, endpoint: mixed, template: string, name: string}> $panelPages
+	 */
 	public function __construct(
 		protected Config $config,
 		protected Database $db,
 		protected Factory $factory,
 		protected array $pluginRoutes = [],
+		protected array $panelPages = [],
 	) {
 		$this->panelPath = $config->panel->path;
 		$this->oldPanelApiPath = self::LEGACY_PANEL_PATH . '/api';
@@ -241,6 +245,13 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('editor'));
+
+				foreach ($this->panelPages as $page) {
+					$panel
+						->get($page['pattern'], $page['endpoint'], $page['name'])
+						->middleware($panelAuth)
+						->after($renderers->get($page['template']));
+				}
 			},
 			'cms.panel.',
 		);

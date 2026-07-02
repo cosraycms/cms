@@ -9,7 +9,30 @@ $defaultCollectionIcon = <<<'SVG'
 <ul class="nav-list level-<?= $level ?>">
 <?php foreach ($collections as $item): ?>
 	<li class="nav-item">
-	<?php if ($item->slug() !== null): ?>
+	<?php if ($this->unwrap($item) instanceof \Cosray\NavLink): ?>
+		<?php
+
+		$link = $this->unwrap($item);
+		$iconMeta = $this->unwrap($item->meta->icon);
+		$icon = $iconMeta === null ? $defaultCollectionIcon : $this->unwrap($renderIcon($iconMeta));
+		?>
+		<a
+			class="nav-link"
+			style="--depth: <?= $level ?>"
+			href="<?= $link->url ?>"
+			hx-target="#main"
+			<?= $link->active((string) $this->unwrap($currentPath)) ? 'aria-current="page"' : '' ?>>
+			<span class="nav-label">
+				<?php if ($icon !== ''): ?>
+					<span class="nav-icon" aria-hidden="true"><?= $icon ?></span>
+				<?php endif ?>
+				<span><?= $item->meta->label ?></span>
+			</span>
+			<?php if (trim((string) $item->meta->badge) !== ''): ?>
+				<span class="nav-badge"><?= $item->meta->badge ?></span>
+			<?php endif ?>
+		</a>
+	<?php elseif ($item->slug() !== null): ?>
 		<?php
 
 		$href = $panelPath . '/collection/' . $item->slug();

@@ -29,6 +29,12 @@ final class TestPlugin implements Plugin
 		$cms->sql(__DIR__ . '/db/sql');
 		$cms->assets(__DIR__ . '/assets');
 		$cms->blockType(TestNotice::class);
+		$cms->templates(__DIR__ . '/views');
+		$cms->panelPage('/test-plugin', [PageController::class, 'index'], 'test-plugin:page', 'index');
+		$cms->css("{$cms->config->panel->path}/vendor/test-plugin/theme.css");
+		$cms
+			->section('Test Plugin')
+			->link('Test Page', "{$cms->config->panel->path}/test-plugin");
 		$cms->register('test-plugin.service', stdClass::class);
 		$cms->routes(static function (App $app): void {
 			$app->get('/test-plugin', [stdClass::class, 'index'], 'test-plugin.route');

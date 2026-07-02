@@ -94,6 +94,39 @@ final class Registrar
 	}
 
 	/**
+	 * Register $dir as template namespace `{pluginId}:` for the given
+	 * renderer ('panel' or 'view'). Templates are addressed as
+	 * '{pluginId}:template/path'.
+	 */
+	public function templates(string $dir, string $renderer = 'panel'): void
+	{
+		$this->bootstrap->addTemplates($this->id, $dir, $renderer);
+	}
+
+	/**
+	 * Register a page inside the panel chrome: session, auth and the
+	 * panel renderer are applied like for built-in pages. The endpoint
+	 * controller should extend Cosray\Controller\Panel\Panel and
+	 * return $this->context([...]) so the shell gets its data.
+	 *
+	 * @param mixed $endpoint route endpoint, e.g. [Controller::class, 'method']
+	 */
+	public function panelPage(string $pattern, mixed $endpoint, string $template, string $name): void
+	{
+		$this->bootstrap->addPanelPage($pattern, $endpoint, $template, "{$this->id}.{$name}");
+	}
+
+	public function css(string $url): void
+	{
+		$this->bootstrap->panelExtras()->addCss($url);
+	}
+
+	public function js(string $url, bool $module = true): void
+	{
+		$this->bootstrap->panelExtras()->addJs($url, $module);
+	}
+
+	/**
 	 * @param non-empty-string $key
 	 * @param class-string|object $value
 	 */
