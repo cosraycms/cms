@@ -8,7 +8,7 @@
 @import '../../styles/node-placeholder.css' layer(panel);
 
 @layer panel {
-	.cosray-node-editor-island {
+	.cosray-node-editor {
 		display: flex;
 		flex: 1 1 auto;
 		min-height: 100%;

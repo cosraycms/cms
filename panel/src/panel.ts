@@ -4,7 +4,7 @@ const mainSelector = '#main';
 const editorSelector = '[data-cosray-node-editor]';
 const cleanups: Array<() => void> = [];
 
-let editor: Promise<typeof import('./islands/node-editor')> | null = null;
+let editor: Promise<typeof import('./editor/main')> | null = null;
 
 const currentPath = () => window.location.pathname.replace(/\/$/, '') || '/';
 
@@ -86,7 +86,7 @@ async function mountEditor(root: ParentNode = document): Promise<void> {
 		return;
 	}
 
-	editor ??= import('./islands/node-editor');
+	editor ??= import('./editor/main');
 	(await editor).mountEditor(root);
 }
 

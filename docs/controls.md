@@ -1,6 +1,6 @@
 # Editor control vocabulary
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor island interprets only **primitive** controls (plain HTML inputs), the structural `group`/`repeater`, and `element`. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element**. The island knows neither field type classes nor built-in control names.
+Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor interprets only **primitive** controls (plain HTML inputs), the structural `group`/`repeater`, and `element`. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element**. The editor knows neither field type classes nor built-in control names.
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
@@ -67,7 +67,7 @@ public function control(): Control
 }
 ```
 
-Named controls are resolved server-side to element descriptors before serialization; the editor island never sees the name. Later registrations win, so a plugin may replace a built-in editor by registering its name (e.g. `richtext`). Cosray's own rich controls are registered through the same registry and shipped as custom elements — they are the reference implementations.
+Named controls are resolved server-side to element descriptors before serialization; the editor never sees the name. Later registrations win, so a plugin may replace a built-in editor by registering its name (e.g. `richtext`). Cosray's own rich controls are registered through the same registry and shipped as custom elements — they are the reference implementations.
 
 ### Module values
 
@@ -111,7 +111,7 @@ Hand-written ES modules are sufficient — no build step required.
 
 ## The window.Cosray bridge
 
-On panel editor pages the island installs `window.Cosray`, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
+On panel editor pages the editor installs `window.Cosray`, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
 
 ```ts
 window.Cosray = {

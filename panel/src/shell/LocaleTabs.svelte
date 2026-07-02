@@ -5,7 +5,7 @@
 	type Props = {
 		lang: string | null;
 		// Explicit locale list for use inside element bundles where the
-		// island's system store is not available.
+		// editor's system store is not available.
 		locales?: Locale[];
 	};
 

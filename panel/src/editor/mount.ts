@@ -1,5 +1,5 @@
 import { mount } from 'svelte';
-import NodeEditorIsland, { type EditorBootstrap } from './NodeEditorIsland.svelte';
+import Editor, { type EditorBootstrap } from './Editor.svelte';
 
 declare global {
 	interface Window {
@@ -39,7 +39,7 @@ export function mountEditor(root: ParentNode = document): void {
 	}
 
 	target.replaceChildren();
-	mount(NodeEditorIsland, {
+	mount(Editor, {
 		target,
 		props: {
 			bootstrap,

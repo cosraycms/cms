@@ -20,7 +20,7 @@ export type BridgeSystem = {
 /**
  * The public runtime API for editor controls implemented as custom
  * elements — cosray's own and plugin-shipped ones alike. Installed by
- * the node editor island; only available on panel editor pages.
+ * the node editor; only available on panel editor pages.
  */
 export type CosrayBridge = {
 	version: 1;

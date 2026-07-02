@@ -245,7 +245,7 @@
 </script>
 
 <Modal>
-	<div class="cosray-node-editor-island">
+	<div class="cosray-node-editor">
 		{#if loading}
 			<NodeEditorPlaceholder collectionName={bootstrap.collection.name} />
 		{:else if error !== ''}
