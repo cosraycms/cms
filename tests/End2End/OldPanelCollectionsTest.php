@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Bootstrap;
 use Cosray\Config;
-use Cosray\Plugin;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 
 final class OldPanelCollectionsTest extends End2EndTestCase
 {
-	protected function createPlugin(Config $config): Plugin
+	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = parent::createPlugin($config);
+		$plugin = parent::createBootstrap($config);
 		$content = $plugin->section('Inhalt');
 		$content->collection(TestArticlesCollection::class);
 		$content->section('Unterbereich')->collection(TestHierarchyCollection::class);

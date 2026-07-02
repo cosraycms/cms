@@ -75,7 +75,7 @@ Local test database workflow used in this repo:
 
 2) Minimal integration pattern
 
-Use `Cosray\App` for normal CMS applications. It wraps the core app and CMS plugin, so callers can configure CMS content and run the app through one object.
+Use `Cosray\App` for normal CMS applications. It wraps the core app and CMS bootstrap, so callers can configure CMS content and run the app through one object.
 
 Setup pattern (see tests for real working examples):
 
@@ -84,7 +84,7 @@ Setup pattern (see tests for real working examples):
 3. Create and load `Locales` if the app uses locales.
 4. Register node classes with `App::node(...)` and navigation with `App::section(...)` / `App::collection(...)`.
 5. Optionally set `path.views`, configure `error.*`, or register custom renderers.
-6. Call `App::run(...)`; it loads the CMS plugin internally and adds the CMS catchall route last.
+6. Call `App::run(...)`; it loads the CMS bootstrap internally and adds the CMS catchall route last.
 
 Example pattern:
 
@@ -123,10 +123,10 @@ Important:
 - `Cosray\App` installs default PSR-15 error middleware unless `error.enabled` is false.
 - Error pages use a dedicated Boiler renderer, independent from the CMS `view` renderer.
 - Project `http-error.php` and `http-server-error.php` templates in `{path.root}{path.views}` override built-in fallback templates.
-- `run()` calls `boot()` once, loads the internal CMS plugin, and adds the catchall route after routes and plugins registered through the facade.
+- `run()` calls `boot()` once, loads the internal CMS bootstrap, and adds the catchall route after routes and plugins registered through the facade.
 - Routes include panel endpoints and media endpoints automatically.
 - If `session.enabled` is true, selected frontend routes get session middleware. It defaults to `SITE_SESSION_ENABLED`.
-- The manual `Celemas\Core\App` + `Cosray\Plugin` API remains available for advanced integrations.
+- The manual `Celemas\Core\App` + `Cosray\Bootstrap` API remains available for advanced integrations.
 
 3) Defining node types
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Bootstrap;
 use Cosray\Config;
-use Cosray\Plugin;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 
@@ -19,9 +19,9 @@ final class CollectionPaginationTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 	}
 
-	protected function createPlugin(Config $config): Plugin
+	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = parent::createPlugin($config);
+		$plugin = parent::createBootstrap($config);
 		$plugin->collection(TestArticlesCollection::class);
 
 		return $plugin;

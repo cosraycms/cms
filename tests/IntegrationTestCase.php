@@ -8,13 +8,13 @@ use Celemas\Container\Container;
 use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Migration\NodeContentNormalizer;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 use Cosray\Uid;
 use PDO;
 use RuntimeException;
@@ -148,43 +148,43 @@ class IntegrationTestCase extends TestCase
 		$container = new Container();
 
 		// Register test Node classes for fixture types
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-article', \Cosray\Tests\Fixtures\Node\TestArticle::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-home', \Cosray\Tests\Fixtures\Node\TestHome::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-block', \Cosray\Tests\Fixtures\Node\TestBlock::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-widget', \Cosray\Tests\Fixtures\Node\TestWidget::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-document', \Cosray\Tests\Fixtures\Node\TestDocument::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('test-media-document', \Cosray\Tests\Fixtures\Node\TestMediaDocument::class);
 
 		// Register dynamically created test types (reuse TestPage for all page types)
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('ordered-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('limit-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('hidden-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('routing-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('nested-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('unpublished-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('create-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('crud-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('update-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('delete-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('renderable-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
 
 		return $container;

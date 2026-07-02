@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Cosray\Finder;
 
 use Celemas\Core\Exception\HttpBadRequest;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Node\Factory;
 use Cosray\Node\Node as NodeWrapper;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 
 class Node
 {
@@ -76,7 +76,7 @@ class Node
 		$data['paths'] = json_decode($data['paths'], true);
 		$class = $this->context
 			->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($data['type_handle'])
 			->definition();
 

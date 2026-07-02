@@ -11,6 +11,7 @@ use Celemas\Core\Factory\Factory;
 use Celemas\Core\Request;
 use Celemas\Core\Response;
 use Celemas\Wire\Creator;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
@@ -24,7 +25,6 @@ use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 
 class OldPanel
 {
@@ -180,7 +180,7 @@ class OldPanel
 
 		$factory = $cms->nodeFactory();
 		$class = $this->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($type)
 			->definition();
 		$obj = $factory->blueprint($class, $context, $cms);
@@ -203,7 +203,7 @@ class OldPanel
 		}
 
 		$class = $this->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($type)
 			->definition();
 		$generator = new RoutePathGenerator($context->db, $this->types);
@@ -230,7 +230,7 @@ class OldPanel
 
 		$data = $this->request->json();
 		$class = $this->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($type)
 			->definition();
 		$obj = $cms->nodeFactory()->create($class, $context, $cms, $data);

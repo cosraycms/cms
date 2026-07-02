@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cosray\Finder;
 
 use Celemas\Core\Exception\HttpBadRequest;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\ViewRenderer;
-use Cosray\Plugin;
 use Throwable;
 
 class Render
@@ -51,7 +51,7 @@ class Render
 		}
 		$class = $this->context
 			->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($data['type_handle'])
 			->definition();
 

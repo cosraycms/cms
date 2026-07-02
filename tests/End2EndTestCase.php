@@ -9,12 +9,12 @@ use Celemas\Core\Factory\Laminas;
 use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Request;
 use Celemas\Router\Router;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Node;
-use Cosray\Plugin;
 use Cosray\View\Boiler\Error\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
@@ -243,7 +243,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$app->load($this->createLocales());
 
 		// Load CMS
-		$plugin = $this->createPlugin($config);
+		$plugin = $this->createBootstrap($config);
 		$app->load($plugin);
 		$app->addRoute($plugin->catchallRoute());
 
@@ -259,9 +259,9 @@ class End2EndTestCase extends IntegrationTestCase
 		return $locales;
 	}
 
-	protected function createPlugin(Config $config): Plugin
+	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = new Plugin($config);
+		$plugin = new Bootstrap($config);
 
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestPage::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestArticle::class);

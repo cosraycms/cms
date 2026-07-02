@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\End2End;
 
 use Celemas\Core\App;
+use Cosray\Bootstrap;
 use Cosray\Config;
-use Cosray\Plugin;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 
@@ -28,9 +28,9 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 	}
 
-	protected function createPlugin(Config $config): Plugin
+	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = parent::createPlugin($config);
+		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 
 		return $plugin;

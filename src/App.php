@@ -34,7 +34,7 @@ class App implements RouteAdder
 	use AddsRoutes;
 
 	protected readonly CoreApp $core;
-	protected readonly Plugin $plugin;
+	protected readonly Bootstrap $bootstrap;
 	protected bool $booted = false;
 
 	public function __construct(
@@ -44,7 +44,7 @@ class App implements RouteAdder
 		Container $container,
 	) {
 		$this->core = new CoreApp($factory, $router, $container);
-		$this->plugin = new Plugin($config);
+		$this->bootstrap = new Bootstrap($config);
 		$this->addErrorHandler($container, $factory);
 	}
 
@@ -73,8 +73,8 @@ class App implements RouteAdder
 	public function boot(): self
 	{
 		if (!$this->booted) {
-			$this->core->load($this->plugin);
-			$this->core->addRoute($this->plugin->catchallRoute());
+			$this->core->load($this->bootstrap);
+			$this->core->addRoute($this->bootstrap->catchallRoute());
 			$this->booted = true;
 		}
 
@@ -98,44 +98,44 @@ class App implements RouteAdder
 		return $this->core;
 	}
 
-	public function plugin(): Plugin
+	public function bootstrap(): Bootstrap
 	{
-		return $this->plugin;
+		return $this->bootstrap;
 	}
 
 	public function section(string $name): Section
 	{
-		return $this->plugin->section($name);
+		return $this->bootstrap->section($name);
 	}
 
 	/** @param class-string<Collection> $class */
 	public function collection(string $class): Collection
 	{
-		return $this->plugin->collection($class);
+		return $this->bootstrap->collection($class);
 	}
 
 	/** @param class-string<Contract\Icons>|Contract\Icons $icons */
 	public function icons(string|Contract\Icons $icons, bool $replace = false): self
 	{
-		$this->plugin->icons($icons, $replace);
+		$this->bootstrap->icons($icons, $replace);
 
 		return $this;
 	}
 
 	public function navigation(): Navigation
 	{
-		return $this->plugin->navigation();
+		return $this->bootstrap->navigation();
 	}
 
 	public function meta(): Types
 	{
-		return $this->plugin->meta();
+		return $this->bootstrap->meta();
 	}
 
 	/** @param class-string $class */
 	public function node(string $class): self
 	{
-		$this->plugin->node($class);
+		$this->bootstrap->node($class);
 
 		return $this;
 	}
@@ -143,7 +143,7 @@ class App implements RouteAdder
 	/** @param class-string<Renderer> $class */
 	public function renderer(string $id, string $class): Entry
 	{
-		return $this->plugin->renderer($id, $class);
+		return $this->bootstrap->renderer($id, $class);
 	}
 
 	public function load(CorePlugin $plugin): self
@@ -260,14 +260,14 @@ class App implements RouteAdder
 	public function __call(string $method, array $args): mixed
 	{
 		$coreCallable = is_callable([$this->core, $method]);
-		$pluginCallable = is_callable([$this->plugin, $method]);
+		$bootstrapCallable = is_callable([$this->bootstrap, $method]);
 
-		if ($coreCallable && $pluginCallable) {
+		if ($coreCallable && $bootstrapCallable) {
 			throw new BadMethodCallException("Ambiguous CMS app method: {$method}");
 		}
 
-		if ($pluginCallable) {
-			return $this->plugin->{$method}(...$args);
+		if ($bootstrapCallable) {
+			return $this->bootstrap->{$method}(...$args);
 		}
 
 		if ($coreCallable) {

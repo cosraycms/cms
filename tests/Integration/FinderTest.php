@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Node\Factory;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 use Cosray\Renderer;
 use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\IntegrationTestCase;
@@ -112,7 +112,7 @@ final class FinderTest extends IntegrationTestCase
 		]);
 
 		$container = $this->container();
-		$container->tag(Plugin::NODE_TAG)
+		$container->tag(Bootstrap::NODE_TAG)
 			->add('node-with-render-attribute', NodeWithRenderAttribute::class);
 		$container
 			->tag(Renderer::class)

@@ -8,12 +8,12 @@ use Celemas\Core\App;
 use Celemas\Quma\Connection;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Router;
+use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Schema\Registry as FieldSchemas;
 use Cosray\Field\Services as FieldServices;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 use Cosray\Renderer;
 use Cosray\Tests\Fixtures\StaticRenderer;
 use Cosray\Tests\TestCase;
@@ -24,7 +24,7 @@ use Cosray\View\Boiler\Renderer as BoilerRenderer;
  *
  * @coversNothing
  */
-final class PluginTest extends TestCase
+final class BootstrapTest extends TestCase
 {
 	public function testConfigProvidesDefaultViewsPath(): void
 	{
@@ -33,7 +33,7 @@ final class PluginTest extends TestCase
 
 	public function testLoadRegistersDefaultViewRenderer(): void
 	{
-		$app = $this->loadPlugin();
+		$app = $this->loadBootstrap();
 		$renderer = $app->container()->tag(Renderer::class)->get('view');
 
 		$this->assertInstanceOf(BoilerRenderer::class, $renderer);
@@ -42,14 +42,14 @@ final class PluginTest extends TestCase
 
 	public function testLoadRegistersConfig(): void
 	{
-		$app = $this->loadPlugin();
+		$app = $this->loadBootstrap();
 
 		$this->assertInstanceOf(Config::class, $app->container()->get(Config::class));
 	}
 
 	public function testLoadConfiguresDatabasePlaceholders(): void
 	{
-		$app = $this->loadPlugin();
+		$app = $this->loadBootstrap();
 		$connection = $app->container()->get(Connection::class);
 		$placeholders = $connection->config->placeholders;
 
@@ -59,7 +59,7 @@ final class PluginTest extends TestCase
 
 	public function testExplicitViewRendererOverridesDefaultViewRenderer(): void
 	{
-		$app = $this->loadPlugin(static function (Plugin $plugin): void {
+		$app = $this->loadBootstrap(static function (Bootstrap $plugin): void {
 			$plugin->renderer('view', StaticRenderer::class);
 		});
 		$renderer = $app->container()->tag(Renderer::class)->get('view');
@@ -70,7 +70,7 @@ final class PluginTest extends TestCase
 
 	public function testLoadBindsSchemaRegistriesAndFieldServices(): void
 	{
-		$app = $this->loadPlugin();
+		$app = $this->loadBootstrap();
 		$container = $app->container();
 
 		$services = $container->get(FieldServices::class);
@@ -81,14 +81,14 @@ final class PluginTest extends TestCase
 		$this->assertSame($container->get(NodeSchemas::class), $services->types->registry());
 	}
 
-	private function loadPlugin(?callable $configure = null, array $settings = []): App
+	private function loadBootstrap(?callable $configure = null, array $settings = []): App
 	{
 		$config = $this->config(array_merge([
 			'db.dsn' => 'pgsql:dbname=cosray',
 			'path.root' => self::root() . '/tests/Fixtures/Boiler',
 			'path.views' => '/templates',
 		], $settings));
-		$plugin = new Plugin($config);
+		$plugin = new Bootstrap($config);
 
 		if ($configure) {
 			$configure($plugin);

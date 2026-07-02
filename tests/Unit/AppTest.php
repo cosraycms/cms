@@ -11,9 +11,9 @@ use Celemas\Core\Plugin as CorePlugin;
 use Celemas\Core\Response as CoreResponse;
 use Celemas\Router\Router;
 use Cosray\App;
+use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Middleware\Session as SessionMiddleware;
-use Cosray\Plugin;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\StaticRenderer;
 use Cosray\Tests\TestCase;
@@ -40,7 +40,7 @@ final class AppTest extends TestCase
 		$this->assertSame(self::root(), $app->config->path->root);
 		$this->assertSame(3, $app->config->get('custom.value'));
 		$this->assertInstanceOf(CoreApp::class, $app->core());
-		$this->assertInstanceOf(Plugin::class, $app->plugin());
+		$this->assertInstanceOf(Bootstrap::class, $app->bootstrap());
 	}
 
 	public function testCreateHelperRequiresRoot(): void

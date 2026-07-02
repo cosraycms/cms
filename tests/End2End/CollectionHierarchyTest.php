@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Bootstrap;
 use Cosray\Config;
-use Cosray\Plugin;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
@@ -25,9 +25,9 @@ final class CollectionHierarchyTest extends End2EndTestCase
 		$this->childTypeId = $this->createTestType('test-hierarchy-child');
 	}
 
-	protected function createPlugin(Config $config): Plugin
+	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = parent::createPlugin($config);
+		$plugin = parent::createBootstrap($config);
 		$plugin->node(TestHierarchyParent::class);
 		$plugin->node(TestHierarchyChild::class);
 		$plugin->collection(TestHierarchyCollection::class);

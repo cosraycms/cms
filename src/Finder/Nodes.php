@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Finder;
 
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
-use Cosray\Plugin;
 use Generator;
 use Iterator;
 
@@ -221,7 +221,7 @@ final class Nodes implements Iterator
 		$page['paths'] = json_decode($page['paths'], true);
 		$class = $this->context
 			->container
-			->tag(Plugin::NODE_TAG)
+			->tag(Bootstrap::NODE_TAG)
 			->entry($page['type_handle'])
 			->definition();
 
@@ -368,7 +368,7 @@ final class Nodes implements Iterator
 	private function typeFlagExpression(callable $flag): string
 	{
 		$handles = [];
-		$types = $this->context->container->tag(Plugin::NODE_TAG);
+		$types = $this->context->container->tag(Bootstrap::NODE_TAG);
 
 		foreach ($types->entries() as $handle) {
 			$class = $types->entry($handle)->definition();

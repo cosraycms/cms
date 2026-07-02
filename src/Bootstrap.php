@@ -28,7 +28,7 @@ use Cosray\Panel\CollectionUrls;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
 
-class Plugin implements CorePlugin
+class Bootstrap implements CorePlugin
 {
 	public const string NODE_TAG = 'cosray.cms.node';
 

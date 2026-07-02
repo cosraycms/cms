@@ -15,7 +15,7 @@
 
 ## Bootstrapping
 
-Use `Cosray\App` for regular CMS applications. It creates the config, core app, and CMS plugin internally, installs the default error handler, adds CMS routes, and registers the catchall route when you call `run()`.
+Use `Cosray\App` for regular CMS applications. It creates the config, core app, and CMS bootstrap internally, installs the default error handler, adds CMS routes, and registers the catchall route when you call `run()`.
 
 ```php
 use Cosray\App;
@@ -36,7 +36,7 @@ $app->node(\App\Cms\Node\HomePage::class);
 $app->run();
 ```
 
-The CMS app exposes the common CMS configuration API (`section()`, `collection()`, `node()`, `renderer()`, `icons()`) and the common core app API (`load()`, `middleware()`, `get()`, `post()`, `routes()`, `run()`). Use `core()` or `plugin()` only when you need the lower-level APIs directly.
+The CMS app exposes the common CMS configuration API (`section()`, `collection()`, `node()`, `renderer()`, `icons()`) and the common core app API (`load()`, `middleware()`, `get()`, `post()`, `routes()`, `run()`). Use `core()` or `bootstrap()` only when you need the lower-level APIs directly.
 
 ## Defining content types
 

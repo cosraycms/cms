@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Bootstrap;
 use Cosray\Contract\Icons as IconsContract;
 use Cosray\Exception\RuntimeException;
-use Cosray\Plugin;
 use Cosray\Tests\TestCase;
 use ReflectionProperty;
 
-final class PluginIconsTest extends TestCase
+final class BootstrapIconsTest extends TestCase
 {
 	public function testIconsPrependsProvidersInCustomRegistry(): void
 	{
-		$plugin = new Plugin($this->config());
+		$plugin = new Bootstrap($this->config());
 		$first = $this->provider();
 		$second = $this->provider();
 		$plugin->icons($first);
@@ -28,7 +28,7 @@ final class PluginIconsTest extends TestCase
 
 	public function testIconsReplaceResetsRegistryAndStaysActive(): void
 	{
-		$plugin = new Plugin($this->config());
+		$plugin = new Bootstrap($this->config());
 		$first = $this->provider();
 		$second = $this->provider();
 		$third = $this->provider();
@@ -45,7 +45,7 @@ final class PluginIconsTest extends TestCase
 
 	public function testIconsRejectsInvalidClassString(): void
 	{
-		$plugin = new Plugin($this->config());
+		$plugin = new Bootstrap($this->config());
 		$this->throws(RuntimeException::class, 'Icons providers must implement ' . IconsContract::class);
 		$plugin->icons(self::class);
 	}
@@ -60,14 +60,14 @@ final class PluginIconsTest extends TestCase
 		};
 	}
 
-	private function customProviders(Plugin $plugin): array
+	private function customProviders(Bootstrap $plugin): array
 	{
 		$property = new ReflectionProperty($plugin, 'customIconProviders');
 
 		return $property->getValue($plugin);
 	}
 
-	private function replacesDefaultProviders(Plugin $plugin): bool
+	private function replacesDefaultProviders(Bootstrap $plugin): bool
 	{
 		$property = new ReflectionProperty($plugin, 'replaceDefaultIconProviders');
 
