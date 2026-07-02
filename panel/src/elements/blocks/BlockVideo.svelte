@@ -1,23 +1,24 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { BlockImages } from '$types/data';
+	import type { BlockImage } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
+	import { useNotify } from './notify';
 	import Upload from '$shell/Upload.svelte';
 
 	type Props = {
 		field: BlocksField;
-		item: BlockImages;
+		item: BlockImage;
 		node: string;
 		index: number;
 		children: Snippet<[{ edit: () => void }]>;
 	};
 
 	let { field, item = $bindable(), node, index, children }: Props = $props();
+	const notify = useNotify();
 
 	let showSettings = $state(false);
-	const MULTIPLE_LIMIT = { min: 0, max: -1 };
+	const SINGLE_LIMIT = { min: 0, max: 1 };
 </script>
 
 <div class="block-cell-header">
@@ -28,10 +29,10 @@
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
 		<Upload
-			type="image"
-			limit={MULTIPLE_LIMIT}
+			type="video"
+			limit={SINGLE_LIMIT}
 			{node}
-			notify={setDirty}
+			{notify}
 			name={field.name + '_' + index}
 			translate={false}
 			bind:assets={item.value}

@@ -45,6 +45,7 @@ final class Registry
 		$registry->register('image', 'cosray-image', 'cosray:media');
 		$registry->register('file', 'cosray-file', 'cosray:media');
 		$registry->register('video', 'cosray-video', 'cosray:media');
+		$registry->register('blocks', 'cosray-blocks', 'cosray:blocks');
 
 		return $registry;
 	}

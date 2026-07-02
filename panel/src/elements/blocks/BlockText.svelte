@@ -3,7 +3,7 @@
 	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
+	import { useNotify } from './notify';
 
 	type Props = {
 		field: BlocksField;
@@ -13,10 +13,11 @@
 	};
 
 	let { field, item = $bindable(), index, children }: Props = $props();
+	const notify = useNotify();
 	let showSettings = $state(false);
 
 	function oninput() {
-		setDirty();
+		notify();
 	}
 </script>
 

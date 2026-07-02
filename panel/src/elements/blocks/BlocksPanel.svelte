@@ -6,7 +6,7 @@
 	import resize from '$lib/resize';
 	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
-	import { setDirty } from '$lib/state';
+	import { useNotify } from './notify';
 	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
 	import Button from '$shell/Button.svelte';
 	import ModalAdd from '$shell/modals/ModalAdd.svelte';
@@ -28,7 +28,9 @@
 	};
 
 	let { field, data = $bindable(), node, cols = 12 }: Props = $props();
-	import { close, open } from '$lib/modal';
+	const notify = useNotify();
+	import { mount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 
 	// Block controls dispatch on the control NAME from the server-side
 	// block type descriptor, never on the block type id itself.
@@ -86,21 +88,24 @@
 			}
 		}
 
-		setDirty();
+		notify();
 	}
 
 	function openAddModal(index: number | null) {
 		return () => {
-			open(
-				ModalAdd as Component<any>,
-				{
-					index,
-					add,
-					close,
-					types,
-				},
-				{},
-			);
+			const handle = cosray().modal.open((host) => {
+				const app = mount(ModalAdd, {
+					target: host,
+					props: {
+						index,
+						add,
+						close: () => handle.close(),
+						types,
+					},
+				});
+
+				return () => void unmount(app);
+			});
 		};
 	}
 

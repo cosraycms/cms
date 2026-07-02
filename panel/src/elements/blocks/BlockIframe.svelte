@@ -3,8 +3,7 @@
 	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
-	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
+	import { useNotify } from './notify';
 
 	type Props = {
 		field: BlocksField;
@@ -14,8 +13,12 @@
 	};
 
 	let { field, item = $bindable(), index, children }: Props = $props();
-
+	const notify = useNotify();
 	let showSettings = $state(false);
+
+	function oninput() {
+		notify();
+	}
 </script>
 
 <div class="block-cell-header">
@@ -25,11 +28,14 @@
 	{#if showSettings}
 		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
 	{:else}
-		<RichTextEditor
-			required={false}
-			name={field.name + '_' + index}
+		<textarea
+			class="iframe"
+			rows="5"
+			id={`${field.name}_${index}`}
+			name={`${field.name}_${index}`}
 			bind:value={item.value[ZXX]}
-			notify={setDirty}
-		/>
+			{oninput}
+		>
+		</textarea>
 	{/if}
 </div>

@@ -19,7 +19,11 @@ export function moduleUrl(module: string): string {
 		const entry = module.slice('cosray:'.length);
 
 		if (import.meta.env.DEV) {
-			return new URL(`/src/elements/${entry}.ts`, import.meta.url).href;
+			// Indirection keeps Vite's static new URL() analysis from
+			// emitting the source files as build assets.
+			const source = '/src/elements/' + entry + '.ts';
+
+			return new URL(source, import.meta.url).href;
 		}
 
 		return `${base}build/elements/${entry}.js`;
@@ -38,7 +42,7 @@ export function loadElement(module: string): Promise<unknown> {
 
 	if (!promise) {
 		if (!import.meta.env.DEV && module.startsWith('cosray:')) {
-			ensureCss(module.slice('cosray:'.length));
+			ensureCss();
 		}
 
 		promise = import(/* @vite-ignore */ url);
@@ -48,8 +52,8 @@ export function loadElement(module: string): Promise<unknown> {
 	return promise;
 }
 
-function ensureCss(entry: string): void {
-	const id = `cosray-element-css-${entry}`;
+function ensureCss(): void {
+	const id = 'cosray-elements-css';
 
 	if (document.getElementById(id)) {
 		return;
@@ -58,7 +62,7 @@ function ensureCss(entry: string): void {
 	const link = document.createElement('link');
 	link.id = id;
 	link.rel = 'stylesheet';
-	link.href = `${panelBase()}build/elements/${entry}.css`;
+	link.href = `${panelBase()}build/elements/style.css`;
 	link.onerror = () => link.remove();
 	document.head.append(link);
 }

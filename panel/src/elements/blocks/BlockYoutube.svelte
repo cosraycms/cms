@@ -3,7 +3,7 @@
 	import { ZXX, type BlockYoutube } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
+	import { useNotify } from './notify';
 	import { _ } from '$lib/locale';
 	import Setting from '$shell/Setting.svelte';
 
@@ -15,6 +15,7 @@
 	};
 
 	let { field, item = $bindable(), index, children }: Props = $props();
+	const notify = useNotify();
 
 	let showSettings = $state(false);
 	$effect(() => {
@@ -32,7 +33,7 @@
 	}
 
 	function oninput() {
-		setDirty();
+		notify();
 	}
 </script>
 

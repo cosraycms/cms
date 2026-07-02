@@ -2,8 +2,8 @@
 	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { setDirty } from '$lib/state';
-	import BlockButtonLabel from '$shell/controls/BlockButtonLabel.svelte';
+	import { useNotify } from './notify';
+	import BlockButtonLabel from './BlockButtonLabel.svelte';
 	import IcoExpand from '$shell/icons/IcoExpand.svelte';
 	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';
 	import IcoIndent from '$shell/icons/IcoIndent.svelte';
@@ -16,6 +16,7 @@
 	};
 
 	let { item = $bindable(), field = $bindable(), dropdown = false }: Props = $props();
+	const notify = useNotify();
 	let widest = $derived(item.colspan === field.columns);
 	let narrowest = $derived(item.colspan === field.minCellWidth);
 	let highest = $derived(item.rowspan === field.columns * 2);
@@ -30,14 +31,14 @@
 	function width(val: number) {
 		return () => {
 			item.colspan = item.colspan + val;
-			setDirty();
+			notify();
 		};
 	}
 
 	function height(val: number) {
 		return () => {
 			item.rowspan = item.rowspan + val;
-			setDirty();
+			notify();
 		};
 	}
 
@@ -47,7 +48,7 @@
 
 			if (val > 0 && colstart === null) {
 				item.colstart = 2;
-				setDirty();
+				notify();
 				return;
 			}
 
@@ -60,7 +61,7 @@
 			}
 
 			item.colstart = colstart;
-			setDirty();
+			notify();
 		};
 	}
 </script>

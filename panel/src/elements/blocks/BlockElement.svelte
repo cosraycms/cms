@@ -1,27 +1,12 @@
-<script lang="ts" module>
-	const modules = new Map<string, Promise<unknown>>();
-
-	function load(url: string): Promise<unknown> {
-		let promise = modules.get(url);
-
-		if (!promise) {
-			promise = import(/* @vite-ignore */ url);
-			modules.set(url, promise);
-		}
-
-		return promise;
-	}
-</script>
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { BlockCustom } from '$types/data';
 	import type { ElementProps } from '$types/controls';
 	import type { BlocksField } from '$types/fields';
 
-	import { panelBase } from '$lib/runtime';
-	import { setDirty } from '$lib/state';
-	import { system, systemLocale } from '$lib/sys';
+	import { cosray } from '$lib/bridge';
+	import { loadElement } from '$lib/elements';
+	import { useNotify } from './notify';
 
 	type Props = {
 		field: BlocksField;
@@ -31,6 +16,7 @@
 	};
 
 	let { field, item = $bindable(), index, children }: Props = $props();
+	const notify = useNotify();
 
 	let meta = $derived(field.blockTypes.find((type) => type.id === item.type));
 	let opts = $derived(meta?.control.props as unknown as ElementProps | undefined);
@@ -46,8 +32,7 @@
 			return;
 		}
 
-		const base = panelBase().replace(/\/+$/, '');
-		load(`${base}/vendor/${opts.module}`)
+		loadElement(opts.module)
 			.then(() => (ready = true))
 			.catch((err: unknown) => {
 				error = `Failed to load block module "${opts?.module}": ${String(err)}`;
@@ -57,13 +42,15 @@
 	$effect(() => {
 		if (!host) return;
 
+		const sys = cosray().system();
+
 		host.value = item.value;
 		host.block = { type: item.type, index };
 		host.field = { ...field };
-		host.locale = systemLocale($system);
+		host.locale = sys.locale;
 		host.locales = {
-			default: $system.defaultLocale,
-			all: $system.locales,
+			default: sys.defaultLocale,
+			all: sys.locales,
 		};
 	});
 
@@ -72,7 +59,7 @@
 
 		const onchange = (event: Event) => {
 			item.value = (event as CustomEvent).detail?.value;
-			setDirty();
+			notify();
 		};
 
 		host.addEventListener('cosray-change', onchange);

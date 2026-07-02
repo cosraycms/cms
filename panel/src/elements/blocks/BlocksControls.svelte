@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
-	import BlockSizeButtons from '$shell/controls/BlockSizeButtons.svelte';
-	import BlockCellButtons from '$shell/controls/BlockCellButtons.svelte';
+	import BlockSizeButtons from './BlockSizeButtons.svelte';
+	import BlockCellButtons from './BlockCellButtons.svelte';
 	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
 	import IcoGear from '$shell/icons/IcoGear.svelte';
 

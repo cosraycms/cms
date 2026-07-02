@@ -1,7 +1,6 @@
 <script lang="ts">
-	import type { BlocksField, EntriesField, Field } from '$types/fields';
+	import type { EntriesField, Field } from '$types/fields';
 
-	import Blocks from '$shell/controls/Blocks.svelte';
 	import Element from '$shell/controls/Element.svelte';
 	import Entries from '$shell/controls/Entries.svelte';
 	import Group from '$shell/controls/Group.svelte';
@@ -42,9 +41,6 @@
 	<Group {field} bind:data {onchange} />
 {:else if name === 'repeater'}
 	<Repeater {field} bind:data {onchange} />
-{:else if name === 'blocks'}
-	<!-- Island-internal until the containers ship as elements. -->
-	<Blocks field={field as BlocksField} bind:data {node} />
 {:else if name === 'entries'}
 	<Entries field={field as EntriesField} bind:data {node} />
 {:else}

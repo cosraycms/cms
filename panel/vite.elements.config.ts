@@ -30,11 +30,14 @@ export default defineConfig({
 	build: {
 		outDir: 'build',
 		emptyOutDir: false,
+		// One stylesheet for all elements; the island links it once.
+		cssCodeSplit: false,
 		rollupOptions: {
 			input: {
 				richtext: path.resolve(root, 'src/elements/richtext.ts'),
 				code: path.resolve(root, 'src/elements/code.ts'),
 				media: path.resolve(root, 'src/elements/media.ts'),
+				blocks: path.resolve(root, 'src/elements/blocks.ts'),
 			},
 			output: {
 				assetFileNames: 'elements/[name][extname]',
