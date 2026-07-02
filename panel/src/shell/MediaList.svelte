@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { FileItem, UploadType } from '$types/data';
-	import type { ModalFunctions } from '$shell/modal';
 	import type { SortableEvent } from 'sortablejs';
-	import { getContext, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import Sortable from 'sortablejs';
 	import { onMount } from 'svelte';
 	import Image from '$shell/Image.svelte';
@@ -21,7 +20,7 @@
 	};
 
 	let { assets = $bindable(), multiple, translate, type, loading, path, remove }: Props = $props();
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
-	import type { ModalFunctions } from '$shell/modal';
 
-	import { getContext, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import { system } from '$lib/sys';
 	import { _ } from '$lib/locale';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
@@ -32,7 +31,7 @@
 		class: classes = '',
 	}: Props = $props();
 
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 
 	let hover = $state(false);
 	let filename = $derived(image.file ?? '');

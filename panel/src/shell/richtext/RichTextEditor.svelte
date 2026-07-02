@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { ModalFunctions } from '$shell/modal';
 	import type { EditorState } from 'prosemirror-state';
 
-	import { getContext, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 
 	import { setDirty } from '$lib/state';
@@ -88,7 +87,7 @@
 		toolbar = 'default',
 		embed = false,
 	}: Props = $props();
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 	let ref = $state<HTMLElement>();
 	let bubble = $state<HTMLElement>();
 	let editor = $state<CmsEditor>();

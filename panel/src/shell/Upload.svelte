@@ -4,9 +4,8 @@
 	import type { FileItem, UploadResponse, UploadType } from '$types/data';
 	import type { Limit } from '$types/fields';
 	import type { Toast } from '$lib/toast';
-	import type { ModalFunctions } from '$shell/modal';
 
-	import { getContext, type Component } from 'svelte';
+	import type { Component } from 'svelte';
 	import { _ } from '$lib/locale';
 	import { system } from '$lib/sys';
 	import { setDirty } from '$lib/state';
@@ -55,7 +54,7 @@
 				: $system.allowedFiles.file.join(', '),
 	);
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 
 	function remove(index: number | null) {
 		if (index === null) {

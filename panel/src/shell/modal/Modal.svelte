@@ -1,41 +1,38 @@
 <script lang="ts">
-	import type { Component, Snippet } from 'svelte';
-	import type { ModalOptions } from '.';
+	import type { Snippet } from 'svelte';
 
+	import { close, modal } from '$lib/modal';
 	import IcoTimes from '$shell/icons/IcoTimes.svelte';
 
-	import { setContext } from 'svelte';
-
 	let { children }: { children: Snippet } = $props();
-	let Content: null | Component = $state(null);
-	let componentProps: object = $state({});
-	let css: string = $state('');
-	let options = $state<ModalOptions>({});
 
-	function open(content: Component, attributes: object = {}, opts: ModalOptions = {}) {
-		Content = content;
-		componentProps = attributes;
-		options = opts;
+	function renderInto(host: HTMLElement, render: (host: HTMLElement) => (() => void) | void) {
+		const cleanup = render(host);
+
+		return {
+			destroy() {
+				cleanup?.();
+			},
+		};
 	}
-
-	function close() {
-		Content = null;
-	}
-
-	setContext('modal', { open, close });
 </script>
 
-{#if Content}
+{#if $modal}
 	<div class="modal cms-modal-overlay">
-		<div class="modal-container cms-modal-container" style={css}>
-			{#if !options.hideClose}
+		<div class="modal-container cms-modal-container">
+			{#if !$modal.options.hideClose}
 				<button class="cms-modal-close" onclick={close} aria-label="close">
 					<span>
 						<IcoTimes />
 					</span>
 				</button>
 			{/if}
-			<Content {...componentProps} />
+			{#if $modal.kind === 'component'}
+				{@const Content = $modal.component}
+				<Content {...$modal.props} />
+			{:else}
+				<div class="cms-modal-element" use:renderInto={$modal.render}></div>
+			{/if}
 		</div>
 	</div>
 {/if}

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { Block } from '$types/data';
-	import type { ModalFunctions } from '$shell/modal';
 
-	import { getContext } from 'svelte';
 	import type { Component } from 'svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
@@ -26,7 +24,7 @@
 		add,
 		dropdown = false,
 	}: Props = $props();
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 	let first = $derived(data?.indexOf(item) === 0);
 	let last = $derived(data?.indexOf(item) === data.length - 1);
 

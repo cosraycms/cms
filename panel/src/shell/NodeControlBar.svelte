@@ -1,7 +1,4 @@
 <script lang="ts">
-	import type { ModalFunctions } from '$shell/modal';
-
-	import { getContext } from 'svelte';
 	import { _ } from '$lib/locale';
 	import Breadcrumbs from '$shell/Breadcrumbs.svelte';
 	import Button from '$shell/Button.svelte';
@@ -35,7 +32,7 @@
 		preview,
 	}: Props = $props();
 
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 
 	async function remove() {
 		open(

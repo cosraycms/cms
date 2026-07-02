@@ -1,9 +1,7 @@
 <script lang="ts">
 	import type { EntryData } from '$types/data';
-	import type { ModalFunctions } from '$shell/modal';
 	import type { Component } from 'svelte';
 
-	import { getContext } from 'svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
 	import IcoArrowDown from '$shell/icons/IcoArrowDown.svelte';
@@ -22,7 +20,7 @@
 
 	let { data = $bindable(), entry, index, collapsed, toggleCollapse }: Props = $props();
 
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 	let first = $derived(data?.indexOf(entry) === 0);
 	let last = $derived(data?.indexOf(entry) === data.length - 1);
 

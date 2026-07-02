@@ -1,11 +1,9 @@
 <script lang="ts">
 	import type { Block } from '$types/data';
 	import type { BlocksField, BlockTypeMeta } from '$types/fields';
-	import type { ModalFunctions } from '$shell/modal';
 
 	import { _ } from '$lib/locale';
 	import resize from '$lib/resize';
-	import { getContext } from 'svelte';
 	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { setDirty } from '$lib/state';
@@ -30,7 +28,7 @@
 	};
 
 	let { field, data = $bindable(), node, cols = 12 }: Props = $props();
-	let { open, close } = getContext<ModalFunctions>('modal');
+	import { close, open } from '$lib/modal';
 
 	// Block controls dispatch on the control NAME from the server-side
 	// block type descriptor, never on the block type id itself.
