@@ -184,6 +184,12 @@ class Entries extends Field implements Capability\Limitable
 					static fn(Field $field): array => $field->properties(),
 					$this->entryFieldsFor($type),
 				)),
+				// Initial content for a freshly added entry — the editor
+				// clones this instead of knowing field types.
+				'init' => array_map(
+					static fn(Field $field): array => $field->structure(),
+					$this->entryFieldsFor($type),
+				),
 			];
 		}
 

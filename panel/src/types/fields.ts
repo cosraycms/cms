@@ -47,6 +47,7 @@ export interface EntryType {
 	type: string;
 	label: string;
 	fields: Field[];
+	init: Record<string, unknown>;
 }
 
 export interface EntriesField extends SimpleField {

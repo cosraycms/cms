@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { ZXX, type GenericFieldData, type EntriesData, type EntryData } from '$types/data';
-	import type { Field as FieldType, EntriesField, EntryType } from '$types/fields';
+	import { ZXX, type EntriesData, type EntryData, type GenericFieldData } from '$types/data';
+	import type { EntriesField, EntryType } from '$types/fields';
 
 	import { _ } from '$lib/locale';
 	import { setDirty } from '$lib/state';
 	import { uid } from '$lib/content';
-	import { system } from '$lib/sys';
-	import { get } from 'svelte/store';
 	import { flip } from 'svelte/animate';
 	import Field from '$shell/Field.svelte';
 	import LabelDiv from '$shell/LabelDiv.svelte';
@@ -23,105 +21,10 @@
 	let { field, data = $bindable(), node }: Props = $props();
 
 	function createEmptyEntry(entryType: EntryType): EntryData {
-		const entry: EntryData = {
+		return {
 			uid: uid(),
 			type: entryType.type,
-			fields: {},
-		};
-
-		for (const entryField of entryType.fields) {
-			entry.fields[entryField.name] = createDefaultValue(entryField);
-		}
-
-		return entry;
-	}
-
-	function createTranslatableValue(): Record<string, string> {
-		const sys = get(system);
-		const value: Record<string, string> = {};
-
-		for (const locale of sys.locales) {
-			value[locale.id] = '';
-		}
-
-		return value;
-	}
-
-	function createLocalizedList(): Record<string, []> {
-		const sys = get(system);
-		const value: Record<string, []> = {};
-
-		for (const locale of sys.locales) {
-			value[locale.id] = [];
-		}
-
-		return value;
-	}
-
-	function createDefaultValue(entryField: FieldType): GenericFieldData {
-		const isAsymmetric = entryField.translateMode === 'asymmetric';
-		const isSymmetric = entryField.translate === true && !isAsymmetric;
-		const codeSyntaxes =
-			'syntaxes' in entryField &&
-			Array.isArray(entryField.syntaxes) &&
-			entryField.syntaxes.length > 0
-				? entryField.syntaxes
-				: ['plaintext'];
-
-		const neutral = (value: unknown) => ({ [ZXX]: value });
-		const typeMap: Record<string, () => GenericFieldData> = {
-			'Cosray\\Field\\Text': () => ({
-				type: entryField.type,
-				value: isSymmetric ? createTranslatableValue() : neutral(''),
-			}),
-			'Cosray\\Field\\Textarea': () => ({
-				type: entryField.type,
-				value: isSymmetric ? createTranslatableValue() : neutral(''),
-			}),
-			'Cosray\\Field\\RichText': () => ({
-				type: entryField.type,
-				value: isSymmetric ? createTranslatableValue() : neutral(''),
-			}),
-			'Cosray\\Field\\Code': () => ({
-				type: entryField.type,
-				meta: { syntax: neutral(codeSyntaxes[0]) },
-				value: isSymmetric ? createTranslatableValue() : neutral(''),
-			}),
-			'Cosray\\Field\\Checkbox': () => ({ type: entryField.type, value: neutral(false) }),
-			'Cosray\\Field\\Number': () => ({ type: entryField.type, value: neutral(0) }),
-			'Cosray\\Field\\Date': () => ({ type: entryField.type, value: neutral('') }),
-			'Cosray\\Field\\Time': () => ({ type: entryField.type, value: neutral('') }),
-			'Cosray\\Field\\Image': () => ({
-				type: entryField.type,
-				value: isAsymmetric ? createLocalizedList() : neutral([]),
-			}),
-			'Cosray\\Field\\File': () => ({
-				type: entryField.type,
-				value: isAsymmetric ? createLocalizedList() : neutral([]),
-			}),
-			'Cosray\\Field\\Video': () => ({
-				type: entryField.type,
-				value: isAsymmetric ? createLocalizedList() : neutral([]),
-			}),
-			'Cosray\\Field\\Blocks': () => ({
-				type: entryField.type,
-				meta: { columns: neutral(12), minCellWidth: neutral(2) },
-				value: isAsymmetric ? createLocalizedList() : neutral([]),
-			}),
-			'Cosray\\Field\\Entries': () => ({ type: entryField.type, value: neutral([]) }),
-			'Cosray\\Field\\Option': () => ({ type: entryField.type, value: neutral('') }),
-			'Cosray\\Field\\Iframe': () => ({ type: entryField.type, value: neutral('') }),
-			'Cosray\\Field\\Hidden': () => ({ type: entryField.type, value: neutral('') }),
-		};
-
-		const factory = typeMap[entryField.type];
-		if (factory) {
-			return factory();
-		}
-
-		return {
-			type: entryField.type,
-			value: isSymmetric ? createTranslatableValue() : { [ZXX]: '' },
+			fields: structuredClone(entryType.init) as Record<string, GenericFieldData>,
 		};
 	}
 

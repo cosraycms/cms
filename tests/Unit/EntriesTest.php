@@ -79,6 +79,11 @@ class EntriesTest extends TestCase
 		$this->assertSame('Test Entry', $properties['entryTypes'][0]['label']);
 		$this->assertSame('title', $properties['entryTypes'][0]['fields'][0]['name']);
 		$this->assertSame(TestAlternateEntry::class, $properties['entryTypes'][1]['type']);
+
+		// Initial entry content comes from each field's structure().
+		$init = $properties['entryTypes'][0]['init'];
+		$this->assertSame(Text::class, $init['title']['type']);
+		$this->assertArrayHasKey('value', $init['title']);
 	}
 
 	public function testEntriesStructureUsesEntryTypeEnvelope(): void
