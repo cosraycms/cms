@@ -112,7 +112,13 @@ export type BlockType =
 	| 'video'
 	| 'iframe';
 
-export type Block = BlockText | BlockImage | BlockYoutube;
+export interface BlockCustom extends BlockBase {
+	type: string;
+	value: unknown;
+	meta?: Meta;
+}
+
+export type Block = BlockText | BlockImage | BlockYoutube | BlockCustom;
 export type BlockImages = BlockImage;
 export type BlockVideo = BlockImage;
 export type BlockIframe = BlockText;

@@ -29,9 +29,18 @@ export interface FileField extends SimpleField {
 
 export interface ImageField extends FileField {}
 
+export interface BlockTypeMeta {
+	id: string;
+	label: string;
+	control: ControlDescriptor;
+	init: Record<string, unknown>;
+	hidden: boolean;
+}
+
 export interface BlocksField extends SimpleField {
 	columns: number;
 	minCellWidth: number;
+	blockTypes: BlockTypeMeta[];
 }
 
 export interface EntryType {

@@ -1,13 +1,6 @@
 <script lang="ts">
-	import type {
-		Block,
-		BlockBase,
-		BlockText as BlockTextData,
-		BlockImage as BlockImageData,
-		BlockYoutube as BlockYoutubeData,
-		BlockType,
-	} from '$types/data';
-	import type { BlocksField } from '$types/fields';
+	import type { Block } from '$types/data';
+	import type { BlocksField, BlockTypeMeta } from '$types/fields';
 	import type { ModalFunctions } from '$shell/modal';
 
 	import { _ } from '$lib/locale';
@@ -20,6 +13,7 @@
 	import Button from '$shell/Button.svelte';
 	import ModalAdd from '$shell/modals/ModalAdd.svelte';
 	import BlocksControls from './BlocksControls.svelte';
+	import BlockElement from './BlockElement.svelte';
 	import BlockImage from './BlockImage.svelte';
 	import BlockImages from './BlockImages.svelte';
 	import BlockRichText from './BlockRichText.svelte';
@@ -38,64 +32,58 @@
 	let { field, data = $bindable(), node, cols = 12 }: Props = $props();
 	let { open, close } = getContext<ModalFunctions>('modal');
 
-	const controls: Record<BlockType, Component<any>> = {
-		image: BlockImage,
-		richtext: BlockRichText,
-		text: BlockText,
-		h1: BlockText,
-		h2: BlockText,
-		h3: BlockText,
-		h4: BlockText,
-		h5: BlockText,
-		h6: BlockText,
-		youtube: BlockYoutube,
-		images: BlockImages,
-		video: BlockVideo,
-		iframe: BlockIframe,
+	// Block controls dispatch on the control NAME from the server-side
+	// block type descriptor, never on the block type id itself.
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const controls: Record<string, Component<any>> = {
+		'block-text': BlockText,
+		'block-richtext': BlockRichText,
+		'block-image': BlockImage,
+		'block-images': BlockImages,
+		'block-youtube': BlockYoutube,
+		'block-video': BlockVideo,
+		'block-iframe': BlockIframe,
+		element: BlockElement,
 	};
-	const types = [
-		{ id: 'richtext', label: 'Formatierter Text' },
-		{ id: 'text', label: 'Einfacher Text' },
-		{ id: 'image', label: 'Einzelbild' },
-		{ id: 'youtube', label: 'Youtube-Video' },
-		{ id: 'images', label: 'Mehrere Bilder' },
-		{ id: 'video', label: 'Video' },
-		{ id: 'iframe', label: 'Iframe' },
-	];
 
-	function add(index: number | null, before: boolean, type: BlockType) {
-		let content: BlockBase = {
-			type,
-			colspan: 12,
-			rowspan: 1,
-			colstart: null,
-		};
-		if (['richtext', 'text', 'iframe', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(type)) {
-			(content as BlockTextData).value = { zxx: '' };
-		} else if (type === 'image' || type === 'images' || type === 'video') {
-			(content as BlockImageData).value = [];
-		} else if (type === 'youtube') {
-			(content as BlockYoutubeData).value = { zxx: '' };
-			(content as BlockYoutubeData).meta = {
-				aspectRatioX: { zxx: 16 },
-				aspectRatioY: { zxx: 9 },
-			};
+	let blockTypes = $derived(field.blockTypes ?? []);
+	let types = $derived(
+		blockTypes.filter((type) => !type.hidden).map(({ id, label }) => ({ id, label })),
+	);
+
+	function blockMeta(id: string): BlockTypeMeta | undefined {
+		return blockTypes.find((type) => type.id === id);
+	}
+
+	function blockControl(id: string): Component<any> | undefined {
+		const name = blockMeta(id)?.control.name;
+
+		return name ? controls[name] : undefined;
+	}
+
+	function add(index: number | null, before: boolean, type: string) {
+		const meta = blockMeta(type);
+
+		if (!meta) {
+			return;
 		}
+
+		const content = structuredClone(meta.init) as unknown as Block;
 
 		if (!data) {
 			data = [];
 		}
 
 		if (index === null) {
-			data.push(content as Block);
+			data.push(content);
 		} else {
 			if (before) {
-				data.splice(index, 0, content as Block);
+				data.splice(index, 0, content);
 			} else {
 				if (data.length - 1 === index) {
-					data.push(content as Block);
+					data.push(content);
 				} else {
-					data.splice(index + 1, 0, content as Block);
+					data.splice(index + 1, 0, content);
 				}
 			}
 		}
@@ -109,8 +97,7 @@
 				ModalAdd as Component<any>,
 				{
 					index,
-					add: (index: number | null, before: boolean, type: string) =>
-						add(index, before, type as BlockType),
+					add,
 					close,
 					types,
 				},
@@ -139,25 +126,29 @@
 <div class="blocks-field cms-blocks-field" style={blocksStyle(cols)}>
 	{#if data && data.length > 0}
 		{#each data as item, index (item)}
-			{@const Control = controls[item.type]}
+			{@const Control = blockControl(item.type)}
 			<div
 				class="cms-block"
 				style={blockStyle(item)}
 				animate:flip={{ duration: 300 }}
 				use:resize={resizeCell(item)}
 			>
-				<Control {item} {node} {index} {field}>
-					{#snippet children(params: { edit: () => void })}
-						<BlocksControls
-							bind:data
-							{item}
-							{index}
-							{field}
-							edit={params.edit}
-							add={openAddModal(index)}
-						/>
-					{/snippet}
-				</Control>
+				{#if !Control}
+					<div class="cms-control-unknown">Unknown block type "{item.type}"</div>
+				{:else}
+					<Control {item} {node} {index} {field}>
+						{#snippet children(params: { edit: () => void })}
+							<BlocksControls
+								bind:data
+								{item}
+								{index}
+								{field}
+								edit={params.edit}
+								add={openAddModal(index)}
+							/>
+						{/snippet}
+					</Control>
+				{/if}
 			</div>
 		{/each}
 	{:else}
@@ -205,6 +196,12 @@
 			width: 1.25rem;
 			height: 1.25rem;
 			margin-right: var(--space-2);
+		}
+
+		.cms-control-unknown {
+			padding: 0.75rem;
+			color: var(--color-danger);
+			font-size: 0.875rem;
 		}
 	}
 </style>
