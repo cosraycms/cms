@@ -149,9 +149,33 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 
 Route templates can generate URL paths from node fields and hierarchy data.
 
+## Collections
+
+Collections are configured through class attributes — the same schema mechanism as nodes and fields. Behavior (the query, columns, sorts) stays on methods:
+
+```php
+use Cosray\Collection;
+use Cosray\Finder\Nodes;
+use Cosray\Schema\Handle;
+use Cosray\Schema\Icon;
+use Cosray\Schema\Label;
+use Cosray\Schema\Listing;
+
+#[Label('Aktuelles'), Handle('aktuelles'), Icon('bi:newspaper'), Listing(children: true)]
+final class News extends Collection
+{
+    public function entries(): Nodes
+    {
+        return $this->cms->nodes()->types('news')->published(null);
+    }
+}
+```
+
+Available attributes: `#[Label]`, `#[Handle]`, `#[Icon]`, `#[Badge]`, `#[Permission]`, `#[Hidden]`, `#[Order]`, `#[Listing(published:, locked:, hidden:, children:)]`, `#[Blueprints(...)]`. Handle and label derive from the class name when omitted. Plugins can register additional collection schema attributes via `Registrar::collectionSchema()`.
+
 ### Hierarchy lists in panel
 
-- Set `showChildren` to `true` on a collection to switch its list endpoint to hierarchy mode.
+- Use `#[Listing(children: true)]` on a collection to switch its list endpoint to hierarchy mode.
 - Root requests (`GET /panel/api/collection/{collection}`) return nodes with no parent.
 - Child requests (`GET /panel/api/collection/{collection}?parent=<uid>`) return direct children for that parent uid.
 - Row payload includes `hasChildren`, `childBlueprints`, and `parent`.
