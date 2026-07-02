@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets\ResizeMode;
-use Cosray\Assets\Size;
+use Cosray\Block\RenderContext;
 use Cosray\Field;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Owner;
 use Cosray\Util\Html as HtmlUtil;
 use Generator;
-use Gumlet\ImageResize;
 
 /**
  * @property-read Field\Blocks&Translatable $field
@@ -261,85 +259,16 @@ class Blocks extends Value
 			. ($colstart ? ' ' . $colstart : '')
 			. $class
 			. '">';
-		$blockValue = $this->blockValue($value);
-		$out .= match ($value->type) {
-			'richtext' => $blockValue,
-			'text' => $blockValue,
-			'h1' => '<h1>' . $blockValue . '</h1>',
-			'h2' => '<h2>' . $blockValue . '</h2>',
-			'h3' => '<h3>' . $blockValue . '</h3>',
-			'h4' => '<h4>' . $blockValue . '</h4>',
-			'h5' => '<h5>' . $blockValue . '</h5>',
-			'h6' => '<h6>' . $blockValue . '</h6>',
-			'iframe' => $blockValue,
-			'image' => $this->renderImage($value->data, $args),
-			'images' => $this->renderImages($value->data),
-			'youtube' => $this->getValueObject(Field\Youtube::class, $value)->__toString(),
-			'video' => $this->getValueObject(
-				Field\Video::class,
-				new Block($value->type, $this->mediaFieldData($value->data)),
-			)->__toString(),
-		};
+		$ctx = new RenderContext(
+			$this->owner,
+			$this->context->fieldName,
+			$this->columns(),
+			$args,
+		);
+		$out .= $this->field->services()->blocks->get($value->type)->render($value, $ctx);
 		$out .= '</div>';
 
 		return $out;
-	}
-
-	protected function getValueObject(string $class, Block $item): Value
-	{
-		return new $class(
-			$this->context->fieldName,
-			$this->owner,
-			new ValueContext($this->context->fieldName, $item->data),
-		)->value();
-	}
-
-	protected function renderImage(array $data, array $args): string
-	{
-		$file = (string) ($data['value'][0]['file'] ?? '');
-		$title = $this->mediaText($data['value'][0] ?? [], 'title') ?: $this->mediaText(
-			$data['value'][0] ?? [],
-			'alt',
-		);
-		$maxWidth = $args['maxImageWidth'] ?? 1440;
-		$path = $this->assetsPath() . $file;
-		$image = $this->getAssets()->image($path);
-		$resized = $image->resize(
-			new Size((int) ($maxWidth / $this->columns()) * (int) ($data['colspan'] ?? 12)),
-			ResizeMode::Width,
-			enlarge: false,
-			quality: null,
-		);
-		$url = $resized->url(true);
-
-		return "<img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\">";
-	}
-
-	protected function renderImages(array $data): string
-	{
-		$result = '';
-
-		foreach ($data['value'] ?? [] as $f) {
-			$file = (string) ($f['file'] ?? '');
-			$title = $this->mediaText($f, 'title') ?: $this->mediaText($f, 'alt');
-			$path = $this->assetsPath() . $file;
-			$image = $this->getAssets()->image($path);
-			$resized = $image->resize(
-				new Size(400, 267, cropMode: ImageResize::CROPCENTER),
-				ResizeMode::Crop,
-				enlarge: false,
-				quality: null,
-			);
-			$url = $resized->url(true);
-
-			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
-		}
-
-		if ($result) {
-			return '<div class="cms-blocks-images">' . $result . '</div>';
-		}
-
-		return '';
 	}
 
 	protected function prepareData(array $data): Generator
@@ -388,18 +317,5 @@ class Blocks extends Value
 		$data['value'] = [Field\Field::NEUTRAL_LOCALE => $data['value'] ?? $data['files'] ?? []];
 
 		return $data;
-	}
-
-	private function mediaText(array $item, string $key): string
-	{
-		$value = $item['meta'][$key] ?? $item[$key] ?? [];
-
-		if (!is_array($value)) {
-			return is_string($value) || is_numeric($value) ? (string) $value : '';
-		}
-
-		$value = $this->effective($value);
-
-		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 }

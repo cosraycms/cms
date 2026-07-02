@@ -6,6 +6,7 @@ namespace Cosray\Plugin;
 
 use Celemas\Container\Entry;
 use Closure;
+use Cosray\Block\Type as BlockType;
 use Cosray\Bootstrap;
 use Cosray\Collection;
 use Cosray\Config;
@@ -76,6 +77,12 @@ final class Registrar
 	public function assets(string $dir): void
 	{
 		$this->bootstrap->addAssets($this->id, $dir);
+	}
+
+	/** @param class-string<BlockType>|BlockType $type */
+	public function blockType(string|BlockType $type): void
+	{
+		$this->bootstrap->blockType(is_string($type) ? new $type() : $type);
 	}
 
 	/**

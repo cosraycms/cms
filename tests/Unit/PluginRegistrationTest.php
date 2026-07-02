@@ -51,6 +51,10 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertNotNull($assets->dir('test-plugin'));
 		$this->assertFileExists($assets->dir('test-plugin') . '/controls.js');
 		$this->assertNull($assets->dir('unknown'));
+
+		$blocks = $container->get(\Cosray\Block\Registry::class);
+		$this->assertTrue($blocks->has('test-notice'));
+		$this->assertSame('element', $blocks->get('test-notice')->control()->array()['name']);
 	}
 
 	public function testPluginRegistersCollection(): void

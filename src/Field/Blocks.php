@@ -6,6 +6,7 @@ namespace Cosray\Field;
 
 use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
+use Cosray\Block\Type;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\BlockValidator;
 use Cosray\Validation\Prepare;
@@ -17,9 +18,51 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	use Capability\IsTranslatable;
 	use Capability\Blocks\IsResizable;
 
+	/** @var list<string> */
+	protected array $allowedBlockTypes = [];
+
 	public function control(): Control
 	{
 		return Control::blocks();
+	}
+
+	/**
+	 * Restrict this field to the given block type ids. Without a
+	 * restriction all registered, non-hidden block types are offered.
+	 */
+	public function allow(string ...$ids): static
+	{
+		$this->allowedBlockTypes = array_values(array_unique([
+			...$this->allowedBlockTypes,
+			...$ids,
+		]));
+
+		return $this;
+	}
+
+	public function allows(string $id): bool
+	{
+		return $this->allowedBlockTypes === [] || in_array($id, $this->allowedBlockTypes, true);
+	}
+
+	public function properties(): array
+	{
+		$result = parent::properties();
+		$result['blockTypes'] = array_values(array_map(
+			static fn(Type $type): array => [
+				'id' => $type->id(),
+				'label' => $type->label(),
+				'control' => $type->control()->array(),
+				'init' => $type->init(),
+				'hidden' => $type->hidden(),
+			],
+			array_filter(
+				$this->services()->blocks->all(),
+				fn(Type $type): bool => $this->allows($type->id()),
+			),
+		));
+
+		return $result;
 	}
 
 	public function __toString(): string

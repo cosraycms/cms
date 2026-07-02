@@ -15,6 +15,8 @@ use Celemas\Quma\Database;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Route;
 use Closure;
+use Cosray\Block\Registry as BlockRegistry;
+use Cosray\Block\Type as BlockType;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
@@ -46,6 +48,7 @@ class Bootstrap implements CorePlugin
 	protected readonly FieldSchemas $fieldSchemas;
 	protected readonly FieldServices $fieldServices;
 	protected readonly FieldIndex $fields;
+	protected readonly BlockRegistry $blocks;
 
 	/** @property array<Entry> */
 	protected array $renderers = [];
@@ -80,7 +83,8 @@ class Bootstrap implements CorePlugin
 	) {
 		$this->types = $types ?? new Types();
 		$this->fieldSchemas = FieldSchemas::withDefaults();
-		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types);
+		$this->blocks = BlockRegistry::withDefaults();
+		$this->fieldServices = new FieldServices($this->fieldSchemas, $this->types, $this->blocks);
 		$this->fields = FieldIndex::withDefaults();
 		$this->pluginAssets = new PluginAssets();
 		$this->navigation = new Navigation();
@@ -110,6 +114,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(FieldSchemas::class, $this->fieldSchemas);
 		$this->container->add(FieldServices::class, $this->fieldServices);
 		$this->container->add(FieldIndex::class, $this->fields);
+		$this->container->add(BlockRegistry::class, $this->blocks);
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(Contract\Icons::class, Icons::class);
 
@@ -164,6 +169,11 @@ class Bootstrap implements CorePlugin
 	public function addAssets(string $id, string $dir): void
 	{
 		$this->pluginAssets->add($id, $dir);
+	}
+
+	public function blockType(BlockType $type): void
+	{
+		$this->blocks->register($type);
 	}
 
 	/**

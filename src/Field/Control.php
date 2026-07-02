@@ -114,6 +114,41 @@ final class Control
 		return new self('entries');
 	}
 
+	public static function blockText(): self
+	{
+		return new self('block-text');
+	}
+
+	public static function blockRichtext(): self
+	{
+		return new self('block-richtext');
+	}
+
+	public static function blockImage(): self
+	{
+		return new self('block-image');
+	}
+
+	public static function blockImages(): self
+	{
+		return new self('block-images');
+	}
+
+	public static function blockYoutube(): self
+	{
+		return new self('block-youtube');
+	}
+
+	public static function blockVideo(): self
+	{
+		return new self('block-video');
+	}
+
+	public static function blockIframe(): self
+	{
+		return new self('block-iframe');
+	}
+
 	/** @param list<array{key: string, label?: string, control: self}> $fields */
 	public static function group(array $fields): self
 	{
