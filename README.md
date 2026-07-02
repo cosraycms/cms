@@ -38,6 +38,47 @@ $app->run();
 
 The CMS app exposes the common CMS configuration API (`section()`, `collection()`, `node()`, `renderer()`, `icons()`) and the common core app API (`load()`, `middleware()`, `get()`, `post()`, `routes()`, `run()`). Use `core()` or `bootstrap()` only when you need the lower-level APIs directly.
 
+## Plugins
+
+Runtime plugins are Composer packages (or project classes) implementing `Cosray\Plugin\Plugin`. They are registered explicitly — either in the bootstrap or through the `plugins` config key:
+
+```php
+$app->plugin(\Acme\Shop\ShopPlugin::class);
+
+// or in the settings array:
+'plugins' => [\Acme\Shop\ShopPlugin::class],
+```
+
+A plugin declares a stable id and registers everything through the `Registrar`:
+
+```php
+use Cosray\Plugin\Plugin;
+use Cosray\Plugin\Registrar;
+
+final class ShopPlugin implements Plugin
+{
+    public function id(): string
+    {
+        return 'acme-shop';
+    }
+
+    public function register(Registrar $cms): void
+    {
+        $cms->field(Field\Money::class, 'money');
+        $cms->node(Node\Product::class);
+        $cms->section('Shop')->collection(Collection\Products::class);
+        $cms->migrations(__DIR__ . '/../db/migrations');
+        $cms->sql(__DIR__ . '/../db/sql');
+        $cms->register('acme-shop.gateway', PaymentGateway::class);
+        $cms->routes(static function ($app): void {
+            $app->get('/shop/checkout', [Controller\Checkout::class, 'show'], 'acme-shop.checkout');
+        });
+    }
+}
+```
+
+Plugins must be constructible without arguments. Custom field types are plain `Cosray\Field\Field` subclasses referenced by class on node properties; string aliases passed to `field()` are only needed for legacy content imports. Plugin migrations run in the shared `default` migration namespace: use timestamped filenames and the `/*:cms.prefix:*/` placeholder in table names (for example `/*:cms.prefix:*/acmeshop_orders`).
+
 ## Defining content types
 
 Content types (nodes) are plain PHP classes annotated with attributes. There is no base class to extend. Dependencies are autowired from the Registry via `celemas/wire`.
