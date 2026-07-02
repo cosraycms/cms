@@ -4,13 +4,17 @@
 
 	type Props = {
 		lang: string | null;
+		// Explicit locale list for use inside element bundles where the
+		// island's system store is not available.
+		locales?: Locale[];
 	};
 
-	let { lang = $bindable() }: Props = $props();
+	let { lang = $bindable(), locales: given }: Props = $props();
 	const locales = $derived(
-		$system.customLocales.length > 0
-			? customLocales($system.customLocales, $system.locales)
-			: $system.locales,
+		given ??
+			($system.customLocales.length > 0
+				? customLocales($system.customLocales, $system.locales)
+				: $system.locales),
 	);
 
 	function customLocales(custLocales: string[], locales: Locale[]) {

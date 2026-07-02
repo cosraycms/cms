@@ -1,5 +1,3 @@
-import { get } from 'svelte/store';
-import { system } from '$lib/sys';
 import type { FileItem, LocaleMap, Meta } from '$types/data';
 import { ZXX } from '$types/data';
 
@@ -14,9 +12,13 @@ export function ensureNeutral<T>(value: LocaleMap<T> | undefined, fallback: T): 
 	return value;
 }
 
-export function ensureLocales<T>(value: LocaleMap<T> | undefined, fallback: T): LocaleMap<T> {
+export function ensureLocales<T>(
+	value: LocaleMap<T> | undefined,
+	fallback: T,
+	locales: { id: string }[],
+): LocaleMap<T> {
 	const result = value ?? {};
-	for (const locale of get(system).locales) {
+	for (const locale of locales) {
 		if (!(locale.id in result)) result[locale.id] = fallback;
 	}
 	return result;

@@ -25,7 +25,9 @@
 	);
 
 	$effect(() => {
-		data.value = field.translate ? ensureLocales(data.value, '') : ensureNeutral(data.value, '');
+		data.value = field.translate
+			? ensureLocales(data.value, '', $system.locales)
+			: ensureNeutral(data.value, '');
 		ensureMetaValue(data, 'syntax', syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX);
 	});
 

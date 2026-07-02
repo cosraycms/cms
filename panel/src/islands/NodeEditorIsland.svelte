@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Node as NodeType } from '$types/data';
+	import { installBridge } from '$lib/bridge';
 	import { configureRuntime, navigate } from '$lib/runtime';
 	import req from '$lib/req';
 	import { save as saveNode } from '$lib/node';
@@ -59,6 +60,8 @@
 			loginUrl: `${bootstrap.panelPath}/login`,
 		});
 
+		const uninstallBridge = installBridge();
+
 		void load();
 
 		const unload = (event: BeforeUnloadEvent) => {
@@ -85,6 +88,7 @@
 		}
 
 		return () => {
+			uninstallBridge();
 			window.removeEventListener('beforeunload', unload);
 			for (const eventName of ['htmx:beforeRequest', 'htmx:before:request']) {
 				document.removeEventListener(eventName, htmxGuard);

@@ -18,7 +18,9 @@
 
 	let lang = $state(systemLocale($system));
 	$effect(() => {
-		data.value = field.translate ? ensureLocales(data.value, '') : ensureNeutral(data.value, '');
+		data.value = field.translate
+			? ensureLocales(data.value, '', $system.locales)
+			: ensureNeutral(data.value, '');
 	});
 
 	function oninput() {
