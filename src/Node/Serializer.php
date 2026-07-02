@@ -12,7 +12,6 @@ use ReflectionMethod;
 class Serializer
 {
 	public function __construct(
-		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
 		private readonly Uid $uid,
 	) {}
@@ -22,7 +21,7 @@ class Serializer
 		$content = [];
 
 		foreach ($fieldNames as $fieldName) {
-			$field = $this->hydrator->getField($node, $fieldName);
+			$field = FieldHydrator::getField($node, $fieldName);
 			$structure = $field->structure();
 			$content[$fieldName] = array_merge($structure, $rawData['content'][$fieldName] ?? []);
 			$content[$fieldName]['type'] = $structure['type'];
@@ -74,7 +73,7 @@ class Serializer
 		$paths = [];
 
 		foreach ($fieldNames as $fieldName) {
-			$field = $this->hydrator->getField($node, $fieldName);
+			$field = FieldHydrator::getField($node, $fieldName);
 			$content[$fieldName] = $field->structure($values[$fieldName] ?? null);
 		}
 
@@ -115,7 +114,7 @@ class Serializer
 		$allFields = array_merge($orderedFields, $missingFields);
 
 		foreach ($allFields as $fieldName) {
-			$fields[] = $this->hydrator->getField($node, $fieldName)->properties();
+			$fields[] = FieldHydrator::getField($node, $fieldName)->properties();
 		}
 
 		return $fields;
@@ -139,7 +138,6 @@ class Serializer
 			: new Node(
 				Node::unwrap($node),
 				Factory::fieldNamesFor($node),
-				$this->hydrator,
 				$this->types,
 			);
 

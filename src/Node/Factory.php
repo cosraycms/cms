@@ -45,12 +45,11 @@ class Factory
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
-		$serializer = new Serializer($this->hydrator, $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$store = new Store($context->db, new PathManager(), $this->types, $this->uid);
 		$templateRenderer = new ViewRenderer(
 			$this->container,
 			$context->factory,
-			$this->hydrator,
 			$this->types,
 		);
 
@@ -101,7 +100,6 @@ class Factory
 		return new Node(
 			$node,
 			self::fieldNamesFor($node),
-			$this->hydrator,
 			$this->types,
 			$request,
 			$context,

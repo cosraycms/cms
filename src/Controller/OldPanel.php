@@ -185,11 +185,7 @@ class OldPanel
 			->definition();
 		$obj = $factory->blueprint($class, $context, $cms);
 
-		$serializer = new Serializer(
-			$factory->hydrator(),
-			$this->types,
-			$factory->uid(),
-		);
+		$serializer = new Serializer($this->types, $factory->uid());
 
 		return $serializer->blueprint(
 			$obj,
@@ -261,7 +257,7 @@ class OldPanel
 
 		$node = Node::unwrap($result);
 		$nodeFactory = $cms->nodeFactory();
-		$serializer = new Serializer($nodeFactory->hydrator(), $this->types, $nodeFactory->uid());
+		$serializer = new Serializer($this->types, $nodeFactory->uid());
 		$store = new Store($context->db, new PathManager(), $this->types, $nodeFactory->uid());
 		$method = $this->request->method();
 

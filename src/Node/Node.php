@@ -22,7 +22,6 @@ class Node
 	public function __construct(
 		private readonly object $node,
 		private readonly array $fieldNames,
-		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
 		private readonly ?Request $request = null,
 		private readonly ?Context $context = null,
@@ -83,7 +82,7 @@ class Node
 		$titleField = $this->types->get($inner::class, 'titleField');
 
 		if (is_string($titleField) && $titleField !== '') {
-			$field = $this->hydrator->getField($inner, $titleField);
+			$field = FieldHydrator::getField($inner, $titleField);
 
 			if (!$field instanceof Text) {
 				return '';
@@ -93,7 +92,7 @@ class Node
 		}
 
 		if (in_array('title', $this->fieldNames, true)) {
-			$field = $this->hydrator->getField($inner, 'title');
+			$field = FieldHydrator::getField($inner, 'title');
 
 			if (!$field instanceof Text) {
 				return '';
@@ -126,7 +125,7 @@ class Node
 	public function __get(string $name): ?Value
 	{
 		if (in_array($name, $this->fieldNames, true)) {
-			$field = $this->hydrator->getField($this->node, $name);
+			$field = FieldHydrator::getField($this->node, $name);
 			$value = $field->value();
 
 			if ($value->isset()) {
@@ -146,7 +145,7 @@ class Node
 	public function __isset(string $name): bool
 	{
 		if (in_array($name, $this->fieldNames, true)) {
-			$field = $this->hydrator->getField($this->node, $name);
+			$field = FieldHydrator::getField($this->node, $name);
 
 			return $field->value()->isset();
 		}

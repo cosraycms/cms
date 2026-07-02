@@ -126,8 +126,7 @@ final class Column
 					) ?? $node->meta->get('creator_email')
 				);
 			default:
-				$hydrator = new FieldHydrator();
-				$fieldObj = $hydrator->getField($inner, $field);
+				$fieldObj = FieldHydrator::getField($inner, $field);
 				$value = $fieldObj->value();
 
 				return $value->isset() ? (string) $value : null;

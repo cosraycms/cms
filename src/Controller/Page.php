@@ -96,8 +96,7 @@ class Page
 			return $node->render();
 		}
 
-		$hydrator = $cms->nodeFactory()->hydrator();
-		$renderer = new ViewRenderer($this->container, $this->factory, $hydrator, $this->types);
+		$renderer = new ViewRenderer($this->container, $this->factory, $this->types);
 
 		return $renderer->renderPage(
 			$node,
@@ -116,8 +115,7 @@ class Page
 			$data = $inner->read();
 		} else {
 			$nodeFactory = $cms->nodeFactory();
-			$hydrator = $nodeFactory->hydrator();
-			$serializer = new Serializer($hydrator, $this->types, $nodeFactory->uid());
+			$serializer = new Serializer($this->types, $nodeFactory->uid());
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),

@@ -55,7 +55,7 @@ class FieldHydrator
 		return $fieldNames;
 	}
 
-	public function getField(object $target, string $name): Field
+	public static function getField(object $target, string $name): Field
 	{
 		$rc = new ReflectionClass($target);
 
@@ -65,7 +65,7 @@ class FieldHydrator
 	/**
 	 * @return Field[]
 	 */
-	public function getFields(object $target, array $fieldNames): array
+	public static function getFields(object $target, array $fieldNames): array
 	{
 		$rc = new ReflectionClass($target);
 		$fields = [];

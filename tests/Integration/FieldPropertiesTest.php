@@ -178,7 +178,7 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$node = $this->nodeFactory->create(TestDocument::class, $context, $finder, ['content' => []]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$serializer = new Serializer($this->hydrator, new Types(), $this->nodeFactory->uid());
+		$serializer = new Serializer(new Types(), $this->nodeFactory->uid());
 		$fields = $serializer->fields($node, $fieldNames);
 
 		$this->assertIsArray($fields);

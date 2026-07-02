@@ -11,6 +11,7 @@ use Celemas\Core\Request;
 use Celemas\Core\Response;
 use Cosray\Cms;
 use Cosray\Config;
+use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\Node\Factory as NodeFactory;
@@ -53,8 +54,7 @@ class Nodes
 		}
 
 		$nodeFactory = $cms->nodeFactory();
-		$hydrator = $nodeFactory->hydrator();
-		$serializer = new Serializer($hydrator, $this->types, $nodeFactory->uid());
+		$serializer = new Serializer($this->types, $nodeFactory->uid());
 		$result = [];
 
 		foreach ($nodes
@@ -82,7 +82,7 @@ class Nodes
 				}
 
 				$fieldName = trim($field);
-				$fieldObj = $hydrator->getField($node, $fieldName);
+				$fieldObj = FieldHydrator::getField($node, $fieldName);
 				$value = $fieldObj->value();
 				$n[$field] = $value->isset() ? $value->unwrap() : null;
 			}

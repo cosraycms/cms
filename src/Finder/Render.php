@@ -69,7 +69,6 @@ class Render
 			$renderer = new ViewRenderer(
 				$this->context->container,
 				$this->context->factory,
-				$this->nodeFactory->hydrator(),
 				$this->types,
 			);
 

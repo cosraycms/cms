@@ -148,7 +148,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertEquals('My Title', $title);
 	}
@@ -160,7 +160,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('', $title);
 	}
@@ -179,7 +179,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$title = $serializer->resolveTitle($node);
 		$this->assertSame('Property Title', $title);
 	}
@@ -417,7 +417,7 @@ final class NodeFactoryTest extends TestCase
 			'content' => [],
 		]);
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$fieldNames = Factory::fieldNamesFor($node);
 		$fields = $serializer->fields($node, $fieldNames);
 
@@ -432,7 +432,7 @@ final class NodeFactoryTest extends TestCase
 		$fieldNames = Factory::fieldNamesFor($node);
 		$locales = $this->context->locales();
 
-		$serializer = new Serializer($this->factory->hydrator(), $this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid);
 		$blueprint = $serializer->blueprint($node, $fieldNames, $locales);
 
 		$this->assertArrayHasKey('uid', $blueprint);
@@ -461,7 +461,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertTrue(isset($proxy->heading));
 		$this->assertEquals('Proxy Title', (string) $proxy->heading);
@@ -477,7 +477,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertEquals('Method Test', $proxy->title());
 	}
@@ -491,7 +491,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertEquals('proxy-meta-1', $proxy->meta->uid);
 		$this->assertTrue($proxy->meta->published);
@@ -507,7 +507,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertSame('proxy-meta-2', $proxy->meta('uid'));
 		$this->assertSame('fallback', $proxy->meta('missing', 'fallback'));
@@ -522,7 +522,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertFalse(isset($proxy->meta->missing));
 		$this->assertNull($proxy->meta->get('missing'));
@@ -543,7 +543,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->factory->hydrator(), $this->types);
+		$proxy = new Node($node, $fieldNames, $this->types);
 
 		$this->assertNull($proxy->heading);
 		$this->assertFalse(isset($proxy->heading));

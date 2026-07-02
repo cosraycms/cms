@@ -17,7 +17,6 @@ class ValidatorFactory
 	public function __construct(
 		protected readonly object $node,
 		protected readonly Locales $locales,
-		private readonly FieldHydrator $hydrator = new FieldHydrator(),
 	) {
 		$this->shape = Shapes::create();
 		$this->shape->add('uid', 'string')->rules('required', 'maxlen:64');
@@ -37,7 +36,7 @@ class ValidatorFactory
 		$contentShape = Shapes::create();
 
 		foreach (Factory::fieldNamesFor($this->node) as $fieldName) {
-			$this->add($contentShape, $fieldName, $this->hydrator->getField($this->node, $fieldName));
+			$this->add($contentShape, $fieldName, FieldHydrator::getField($this->node, $fieldName));
 		}
 
 		$this->shape->add('content', $contentShape)->optional()->nullable();

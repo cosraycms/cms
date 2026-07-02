@@ -10,7 +10,6 @@ use Celemas\Core\Request;
 use Celemas\Core\Response;
 use Cosray\Cms;
 use Cosray\Config;
-use Cosray\Field\FieldHydrator;
 use Cosray\Node\Contract\ProvidesRenderContext;
 use Cosray\Renderer;
 
@@ -19,7 +18,6 @@ class ViewRenderer
 	public function __construct(
 		private readonly Container $container,
 		private readonly Factory $factory,
-		private readonly FieldHydrator $hydrator,
 		private readonly Types $types,
 	) {}
 
@@ -38,7 +36,7 @@ class ViewRenderer
 		Config $config,
 		array $context = [],
 	): Response {
-		$proxy = new Node($node, $fieldNames, $this->hydrator, $this->types, $request);
+		$proxy = new Node($node, $fieldNames, $this->types, $request);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -74,7 +72,7 @@ class ViewRenderer
 		Config $config,
 		array $context = [],
 	): string {
-		$proxy = new Node($node, $fieldNames, $this->hydrator, $this->types, $request);
+		$proxy = new Node($node, $fieldNames, $this->types, $request);
 
 		$baseContext = array_merge([
 			'node' => $proxy,
