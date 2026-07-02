@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Cosray\Field\Entries;
+use Cosray\Field\Services;
 use Cosray\Node\Factory;
 use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
@@ -46,8 +47,8 @@ class EntriesIntegrationTest extends TestCase
 		$cms = $this->createStub(\Cosray\Cms::class);
 		$nodeFactory = new Factory(
 			$this->container(),
-			types: new Types(),
-			uid: new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
+			Services::withDefaults(),
+			new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 		);
 		$hydrator = $nodeFactory->hydrator();
 
@@ -122,6 +123,7 @@ class EntriesIntegrationTest extends TestCase
 			$owner,
 			new ValueContext('test_entries', []),
 		);
+		$entries->init(Services::withDefaults());
 		$entries->allow(TestEntry::class, TestAlternateEntry::class);
 
 		$entries->value();
@@ -164,6 +166,7 @@ class EntriesIntegrationTest extends TestCase
 				],
 			]),
 		);
+		$entries->init(Services::withDefaults());
 		$entries->allow(TestEntry::class);
 
 		$structure = $entries->structure();

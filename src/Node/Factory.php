@@ -13,7 +13,7 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\FieldHydrator;
-use Cosray\Field\Schema\Registry as SchemaRegistry;
+use Cosray\Field\Services;
 use Cosray\Node\Contract\HasInit;
 use Cosray\Uid;
 use WeakMap;
@@ -28,12 +28,11 @@ class Factory
 
 	public function __construct(
 		private readonly Container $container,
-		Types $types,
+		private readonly Services $services,
 		private readonly Uid $uid,
-		?SchemaRegistry $schemaRegistry = null,
 	) {
-		$this->hydrator = new FieldHydrator($schemaRegistry ?? SchemaRegistry::withDefaults());
-		$this->types = $types;
+		$this->hydrator = new FieldHydrator($services);
+		$this->types = $services->types;
 		self::$nodeState ??= new WeakMap();
 	}
 
@@ -69,6 +68,7 @@ class Factory
 			Serializer::class => $serializer,
 			Store::class => $store,
 			FieldHydrator::class => $this->hydrator,
+			Services::class => $this->services,
 		]);
 
 		$uid = $data['uid'] ?? $this->uid->generate();

@@ -9,6 +9,10 @@ use Celemas\Quma\Connection;
 use Celemas\Quma\Delimiters;
 use Celemas\Router\Router;
 use Cosray\Config;
+use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Field\Services as FieldServices;
+use Cosray\Node\Schema\Registry as NodeSchemas;
+use Cosray\Node\Types;
 use Cosray\Plugin;
 use Cosray\Renderer;
 use Cosray\Tests\Fixtures\StaticRenderer;
@@ -62,6 +66,19 @@ final class PluginTest extends TestCase
 
 		$this->assertInstanceOf(StaticRenderer::class, $renderer);
 		$this->assertSame('custom:plain', $renderer->render('plain', []));
+	}
+
+	public function testLoadBindsSchemaRegistriesAndFieldServices(): void
+	{
+		$app = $this->loadPlugin();
+		$container = $app->container();
+
+		$services = $container->get(FieldServices::class);
+
+		$this->assertInstanceOf(FieldServices::class, $services);
+		$this->assertSame($container->get(FieldSchemas::class), $services->schemas);
+		$this->assertSame($container->get(Types::class), $services->types);
+		$this->assertSame($container->get(NodeSchemas::class), $services->types->registry());
 	}
 
 	private function loadPlugin(?callable $configure = null, array $settings = []): App

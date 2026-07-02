@@ -14,9 +14,11 @@ use Cosray\Field\Image;
 use Cosray\Field\Option;
 use Cosray\Field\Owner;
 use Cosray\Field\Schema\Registry;
+use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Locale;
 use Cosray\Locales;
+use Cosray\Node\Types;
 use Cosray\Schema\Columns;
 use Cosray\Schema\Description;
 use Cosray\Schema\Hidden;
@@ -141,7 +143,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	{
 		$owner = $this->createOwner();
 		$node = new NodeWithFieldIconAttribute();
-		$hydrator = new FieldHydrator($this->registry);
+		$hydrator = new FieldHydrator(new Services($this->registry, new Types()));
 		$fieldNames = $hydrator->hydrate($node, [], $owner);
 		$field = $hydrator->getField($node, 'title');
 

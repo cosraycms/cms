@@ -6,8 +6,8 @@ namespace Cosray\Field;
 
 use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Schema\Handler;
-use Cosray\Field\Schema\Registry;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Value;
 use Cosray\Value\ValueContext;
@@ -39,7 +39,7 @@ abstract class Field implements
 	/** @var list<array{object, Handler}> */
 	protected array $meta = [];
 
-	protected ?Registry $schemaRegistry = null;
+	protected ?Services $services = null;
 
 	final public function __construct(
 		public readonly string $name,
@@ -65,13 +65,17 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function initSchema(ReflectionProperty $property, Registry $registry): void
+	public function init(Services $services, ?ReflectionProperty $property = null): void
 	{
-		$this->schemaRegistry = $registry;
+		$this->services = $services;
+
+		if ($property === null) {
+			return;
+		}
 
 		foreach ($property->getAttributes() as $attr) {
 			$instance = $attr->newInstance();
-			$handler = $registry->getHandler($instance);
+			$handler = $services->schemas->getHandler($instance);
 
 			if ($handler === null) {
 				continue;
@@ -82,9 +86,9 @@ abstract class Field implements
 		}
 	}
 
-	public function schemaRegistry(): Registry
+	public function services(): Services
 	{
-		return $this->schemaRegistry ??= Registry::withDefaults();
+		return $this->services ?? throw new RuntimeException("Field '{$this->name}' is not initialized");
 	}
 
 	public function properties(): array

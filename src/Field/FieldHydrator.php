@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Cosray\Field\Schema\Registry;
 use Cosray\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
@@ -13,7 +12,7 @@ use ReflectionUnionType;
 class FieldHydrator
 {
 	public function __construct(
-		private readonly Registry $schemaRegistry = new Registry(),
+		private readonly Services $services,
 	) {}
 
 	/**
@@ -77,9 +76,9 @@ class FieldHydrator
 		return $fields;
 	}
 
-	public function schemaRegistry(): Registry
+	public function services(): Services
 	{
-		return $this->schemaRegistry;
+		return $this->services;
 	}
 
 	protected function initField(
@@ -92,7 +91,7 @@ class FieldHydrator
 		$data = $content[$fieldName] ?? [];
 		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $data));
 
-		$field->initSchema($property, $this->schemaRegistry);
+		$field->init($this->services, $property);
 
 		return $field;
 	}

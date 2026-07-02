@@ -11,6 +11,7 @@ use Celemas\Quma\Delimiters;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
+use Cosray\Field\Services;
 use Cosray\Migration\NodeContentNormalizer;
 use Cosray\Node\Types;
 use Cosray\Plugin;
@@ -368,6 +369,6 @@ class IntegrationTestCase extends TestCase
 
 	protected function createCms(): Cms
 	{
-		return new Cms($this->createContext(), new Types());
+		return new Cms($this->createContext(), Services::withDefaults());
 	}
 }

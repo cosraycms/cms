@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Services;
 use Cosray\Finder\Menu;
 use Cosray\Finder\Node;
 use Cosray\Finder\Nodes;
@@ -19,16 +20,18 @@ use Cosray\Node\Types;
 class Cms
 {
 	private readonly Factory $nodeFactory;
+	private readonly Types $types;
 
 	public function __construct(
 		private readonly Context $context,
-		private readonly Types $types,
+		Services $services,
 	) {
 		$uid = $context->config->uid;
+		$this->types = $services->types;
 		$this->nodeFactory = new Factory(
 			$context->container,
-			types: $this->types,
-			uid: new Uid($uid->alphabet, $uid->length),
+			$services,
+			new Uid($uid->alphabet, $uid->length),
 		);
 	}
 

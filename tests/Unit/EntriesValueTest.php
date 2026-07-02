@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field\Entries as EntriesField;
+use Cosray\Field\Services;
 use Cosray\Node\FieldOwner;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
@@ -55,6 +56,7 @@ final class EntriesValueTest extends TestCase
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new EntriesField('entries', $owner, new ValueContext('entries', $data));
+		$field->init(Services::withDefaults());
 		$field->allow(TestEntry::class, TestAlternateEntry::class);
 
 		return $field->value();

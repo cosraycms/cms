@@ -22,7 +22,6 @@ class Entries extends Field implements Capability\Limitable
 
 	/** @var list<class-string> */
 	protected array $allowedEntryTypes = [];
-	protected ?Types $nodeTypes = null;
 
 	public function value(): EntriesValue
 	{
@@ -314,7 +313,7 @@ class Entries extends Field implements Capability\Limitable
 				new ValueContext($name, $fieldData),
 			);
 
-			$field->initSchema($property, $this->schemaRegistry());
+			$field->init($this->services(), $property);
 			$fields[$name] = $field;
 		}
 
@@ -374,6 +373,6 @@ class Entries extends Field implements Capability\Limitable
 
 	protected function nodeTypes(): Types
 	{
-		return $this->nodeTypes ??= new Types();
+		return $this->services()->types;
 	}
 }

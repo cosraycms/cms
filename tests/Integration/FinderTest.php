@@ -6,6 +6,7 @@ namespace Cosray\Tests\Integration;
 
 use Cosray\Cms;
 use Cosray\Context;
+use Cosray\Field\Services;
 use Cosray\Node\Factory;
 use Cosray\Node\Node;
 use Cosray\Node\Types;
@@ -127,7 +128,7 @@ final class FinderTest extends IntegrationTestCase
 			$container,
 			$this->factory(),
 		);
-		$cms = new Cms($context, new Types());
+		$cms = new Cms($context, Services::withDefaults());
 
 		$html = (string) $cms->render('render-uid-target', published: null);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Cosray\Field\FieldHydrator;
+use Cosray\Field\Services;
 use Cosray\Node\Factory;
 use Cosray\Node\Serializer;
 use Cosray\Node\Types;
@@ -23,8 +24,8 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		parent::setUp();
 		$this->nodeFactory = new Factory(
 			$this->container(),
-			types: new Types(),
-			uid: new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
+			Services::withDefaults(),
+			new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 		);
 		$this->hydrator = $this->nodeFactory->hydrator();
 	}

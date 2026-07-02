@@ -8,6 +8,8 @@ use Celemas\Core\Request;
 use Cosray\Column;
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
+use Cosray\Field\Schema\Registry;
+use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\Factory;
 use Cosray\Node\Node;
@@ -47,7 +49,11 @@ final class NodeFactoryTest extends TestCase
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Cosray\Cms::class);
-		$this->factory = new Factory($this->container(), types: $this->types, uid: $this->uid);
+		$this->factory = new Factory(
+			$this->container(),
+			new Services(Registry::withDefaults(), $this->types),
+			$this->uid,
+		);
 	}
 
 	private function createContext(): Context

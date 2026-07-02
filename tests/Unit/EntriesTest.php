@@ -8,8 +8,10 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Entries;
 use Cosray\Field\FieldHydrator;
 use Cosray\Field\Schema\Registry;
+use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Node\FieldOwner;
+use Cosray\Node\Types;
 use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
@@ -51,6 +53,7 @@ class EntriesTest extends TestCase
 			$owner,
 			new ValueContext('test_entries', $data),
 		);
+		$entries->init(Services::withDefaults());
 		$entries->allow(TestEntry::class, TestAlternateEntry::class);
 
 		return $entries;
@@ -211,6 +214,10 @@ class EntriesTest extends TestCase
 
 		$this->throws(RuntimeException::class);
 
-		new FieldHydrator(Registry::withDefaults())->hydrate($node, [], $owner);
+		new FieldHydrator(new Services(Registry::withDefaults(), new Types()))->hydrate(
+			$node,
+			[],
+			$owner,
+		);
 	}
 }
