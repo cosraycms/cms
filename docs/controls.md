@@ -51,6 +51,22 @@ public function control(): Control
 }
 ```
 
+## Field meta
+
+A field's meta map gets an editor UI by overriding `metaControl()` with a `group` whose sub-control keys name the meta entries:
+
+```php
+public function metaControl(): ?Control
+{
+    return Control::group([
+        ['key' => 'cssClass', 'label' => 'CSS class', 'control' => Control::text()],
+        ['key' => 'tone', 'control' => Control::option()->prop('options', ['calm', 'loud'])],
+    ]);
+}
+```
+
+The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
+
 ## Derived inputs
 
 Two declarative helpers for field templates, evaluated on every form edit:

@@ -8,6 +8,7 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 
 final class PanelEditorSaveTest extends End2EndTestCase
 {
@@ -24,8 +25,48 @@ final class PanelEditorSaveTest extends End2EndTestCase
 	{
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
+		$plugin->node(TestConditionalDocument::class);
 
 		return $plugin;
+	}
+
+	public function testMetaSubmissionsPatchTheStoredMetaMap(): void
+	{
+		$conditionalType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-conditional-document'",
+		)->first();
+		$typeId = $conditionalType
+			? (int) $conditionalType['type']
+			: $this->createTestType('test-conditional-document');
+		$this->createTestNode([
+			'uid' => 'panel-save-meta',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'styled' => [
+					'type' => 'text',
+					'value' => ['zxx' => 'Body'],
+					'meta' => ['stashed' => ['zxx' => 'kept']],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-meta', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'content' => [
+					'styled' => [
+						'value' => ['zxx' => 'Body'],
+						'meta' => ['cssClass' => ['zxx' => 'wide']],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$content = $this->nodeContent('panel-save-meta');
+		$this->assertSame('wide', $content['styled']['meta']['cssClass']['zxx']);
+		$this->assertSame('kept', $content['styled']['meta']['stashed']['zxx']);
 	}
 
 	public function testHtmxSaveUpdatesSubmittedFieldsAndKeepsEverythingElse(): void

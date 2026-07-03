@@ -35,6 +35,30 @@ function onClick(event: Event): void {
 			overlay.replaceChildren();
 			overlay.removeAttribute('class');
 		}
+
+		return;
+	}
+
+	const metaOpen = target.closest('[data-meta-open]');
+
+	if (metaOpen) {
+		const dialog = metaOpen.closest('.cms-field')?.querySelector('dialog[data-meta]');
+
+		if (dialog instanceof HTMLDialogElement) {
+			dialog.showModal();
+		}
+
+		return;
+	}
+
+	const metaClose = target.closest('[data-meta-close]');
+
+	if (metaClose) {
+		const dialog = metaClose.closest('dialog[data-meta]');
+
+		if (dialog instanceof HTMLDialogElement) {
+			dialog.close();
+		}
 	}
 }
 

@@ -147,6 +147,55 @@ final class PanelFormPatchTest extends TestCase
 		$this->assertSame(['a', 'c'], $content['tags']['value']['zxx']);
 	}
 
+	public function testMetaControlEntriesPatchTheMetaMap(): void
+	{
+		$metaControl = [
+			'name' => 'group',
+			'props' => [
+				'fields' => [
+					['key' => 'cssClass', 'control' => ['name' => 'text', 'props' => []]],
+					['key' => 'columns', 'control' => ['name' => 'number', 'props' => []]],
+				],
+			],
+		];
+		$patch = new FormPatch([
+			[
+				'name' => 'styled',
+				'type' => 'Text',
+				'control' => ['name' => 'text', 'props' => []],
+				'metaControl' => $metaControl,
+			],
+		]);
+
+		$content = $patch->content(
+			[
+				'styled' => [
+					'type' => 'Text',
+					'value' => ['zxx' => 'Body'],
+					'meta' => [
+						'cssClass' => ['zxx' => 'old'],
+						'stashed' => ['zxx' => 'kept'],
+					],
+				],
+			],
+			[
+				'styled' => [
+					'meta' => [
+						'cssClass' => ['zxx' => 'wide'],
+						'columns' => ['zxx' => '3'],
+						'crafted' => ['zxx' => 'ignored'],
+					],
+				],
+			],
+		);
+
+		$this->assertSame('Body', $content['styled']['value']['zxx']);
+		$this->assertSame('wide', $content['styled']['meta']['cssClass']['zxx']);
+		$this->assertSame(3.0, $content['styled']['meta']['columns']['zxx']);
+		$this->assertSame('kept', $content['styled']['meta']['stashed']['zxx']);
+		$this->assertArrayNotHasKey('crafted', $content['styled']['meta']);
+	}
+
 	public function testJsonSubmissionReplacesValueAndMeta(): void
 	{
 		$patch = new FormPatch([

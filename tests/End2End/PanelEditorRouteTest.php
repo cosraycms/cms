@@ -120,6 +120,12 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'data-when=\'{"field":"title","op":"eq","value":"hero"}\'',
 			$html,
 		);
+
+		// The styled fixture field exposes meta editing through a dialog.
+		$this->assertStringContainsString('data-meta-open', $html);
+		$this->assertStringContainsString('<dialog class="cms-meta-dialog" data-meta>', $html);
+		$this->assertStringContainsString('name="content[styled][meta][cssClass][zxx]"', $html);
+		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
 	}
 
 	public function testNodeApiPayloadCarriesControlDescriptors(): void

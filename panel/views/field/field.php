@@ -31,6 +31,7 @@ $labelFor = $variants ? $inputId($defaultLocale) : $inputId($neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
 $when = $field['when'] ?? null;
+$metaControl = $field['metaControl'] ?? null;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 
@@ -40,6 +41,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<label for="<?= escape($labelFor) ?>" class="cms-field-label">
 		<div><?= escape((string) ($field['label'] ?? $fieldName)) ?></div>
+		<?php if (is_array($metaControl)): ?>
+			<button type="button" class="cms-meta-button" data-meta-open>
+				<?= escape(_('Meta')) ?>
+			</button>
+		<?php endif ?>
 		<?php if ($tabs): ?>
 			<span class="locale-tabs">
 				<?php foreach ($locales as $locale): ?>
@@ -89,5 +95,23 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	</div>
 	<?php if (is_string($description) && $description !== ''): ?>
 		<div class="cms-field-description"><?= escape($description) ?></div>
+	<?php endif ?>
+	<?php if (is_array($metaControl)): ?>
+		<dialog class="cms-meta-dialog" data-meta>
+			<div class="cms-meta-head">
+				<span class="cms-meta-title">
+					<?= escape((string) ($field['label'] ?? $fieldName)) ?> — <?= escape(_('Meta')) ?>
+				</span>
+				<button type="button" class="cms-button" data-meta-close>
+					<?= escape(_('Schließen')) ?>
+				</button>
+			</div>
+			<?php $this->insert('field/meta', [
+				'field' => $field,
+				'control' => $metaControl,
+				'meta' => $data['meta'] ?? null,
+				'id' => "meta-{$fieldName}",
+			]) ?>
+		</dialog>
 	<?php endif ?>
 </div>

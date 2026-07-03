@@ -30,7 +30,12 @@ final class FormPatch
 			}
 
 			$entry = $stored[$name] ?? ['type' => $field['type'] ?? null, 'value' => []];
-			$patched = $this->entry($field['control'] ?? [], $entry, $submitted[$name]);
+			$patched = $this->entry(
+				$field['control'] ?? [],
+				$field['metaControl'] ?? null,
+				$entry,
+				$submitted[$name],
+			);
 
 			if ($patched !== null) {
 				$stored[$name] = $patched;
@@ -40,7 +45,7 @@ final class FormPatch
 		return $stored;
 	}
 
-	private function entry(array $control, array $entry, array $submitted): ?array
+	private function entry(array $control, ?array $metaControl, array $entry, array $submitted): ?array
 	{
 		$json = $submitted['json'] ?? null;
 
@@ -62,21 +67,57 @@ final class FormPatch
 			return $entry;
 		}
 
+		$changed = false;
 		$value = $submitted['value'] ?? null;
 
-		if (!is_array($value)) {
-			return null;
+		if (is_array($value)) {
+			$stored = is_array($entry['value'] ?? null) ? $entry['value'] : [];
+
+			foreach ($value as $locale => $raw) {
+				$stored[$locale] = $this->cast($control, $raw, $stored[$locale] ?? null);
+			}
+
+			$entry['value'] = $stored;
+			$changed = true;
 		}
 
-		$stored = is_array($entry['value'] ?? null) ? $entry['value'] : [];
+		$meta = $submitted['meta'] ?? null;
 
-		foreach ($value as $locale => $raw) {
-			$stored[$locale] = $this->cast($control, $raw, $stored[$locale] ?? null);
+		if (is_array($meta) && is_array($metaControl)) {
+			$entry['meta'] = $this->meta(
+				$metaControl,
+				is_array($entry['meta'] ?? null) ? $entry['meta'] : [],
+				$meta,
+			);
+			$changed = true;
 		}
 
-		$entry['value'] = $stored;
+		return $changed ? $entry : null;
+	}
 
-		return $entry;
+	/**
+	 * Replace the meta entries the metaControl group knows; unknown
+	 * stored meta keys survive.
+	 */
+	private function meta(array $metaControl, array $stored, array $submitted): array
+	{
+		foreach ($metaControl['props']['fields'] ?? [] as $sub) {
+			$key = $sub['key'] ?? null;
+
+			if (!is_string($key) || !is_array($submitted[$key] ?? null)) {
+				continue;
+			}
+
+			$map = is_array($stored[$key] ?? null) ? $stored[$key] : [];
+
+			foreach ($submitted[$key] as $locale => $raw) {
+				$map[$locale] = $this->cast($sub['control'] ?? [], $raw, $map[$locale] ?? null);
+			}
+
+			$stored[$key] = $map;
+		}
+
+		return $stored;
 	}
 
 	private function cast(array $control, mixed $raw, mixed $stored): mixed

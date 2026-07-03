@@ -112,6 +112,16 @@ abstract class Field implements
 		return Control::text();
 	}
 
+	/**
+	 * Describes the editor UI for the field's meta map — a group whose
+	 * sub-control keys name the meta entries. Null means the field has
+	 * no user-editable meta.
+	 */
+	public function metaControl(): ?Control
+	{
+		return null;
+	}
+
 	public function properties(): array
 	{
 		$properties = [
@@ -119,6 +129,12 @@ abstract class Field implements
 			'type' => $this::class,
 			'control' => $this->control()->resolve($this->services()->controls)->array(),
 		];
+
+		$metaControl = $this->metaControl();
+
+		if ($metaControl !== null) {
+			$properties['metaControl'] = $metaControl->resolve($this->services()->controls)->array();
+		}
 
 		foreach ($this->meta as [$meta, $handler]) {
 			$properties = array_merge($properties, $handler->properties($meta, $this));
