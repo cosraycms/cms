@@ -17,8 +17,6 @@ const linkPath = (link: HTMLAnchorElement) => {
 };
 
 const isElement = (value: unknown): value is Element => value instanceof Element;
-const canQuery = (value: unknown): value is ParentNode =>
-	typeof (value as ParentNode | null)?.querySelector === 'function';
 
 function listen<K extends keyof DocumentEventMap>(
 	type: K,
@@ -67,14 +65,6 @@ function focusSearch(event: KeyboardEvent): void {
 	}
 }
 
-function swapTarget(event: Event): unknown {
-	const detail = (event as CustomEvent).detail as
-		| { target?: unknown; ctx?: { target?: unknown } }
-		| undefined;
-
-	return detail?.target ?? detail?.ctx?.target ?? event.target;
-}
-
 function hasEditor(root: ParentNode): boolean {
 	return (
 		(isElement(root) && root.matches(editorSelector)) || root.querySelector(editorSelector) !== null
@@ -90,14 +80,24 @@ async function mountEditor(root: ParentNode = document): Promise<void> {
 	(await editor).mountEditor(root);
 }
 
-function updateNavigationAfterSwap(event: Event): void {
-	const target = swapTarget(event);
+// A boosted navigation swaps a fragment whose root is itself #main into the
+// existing #main, so htmx's innerHTML swap nests the fresh #main inside the
+// previous one, leaving the outer wrapper carrying the last full page's class.
+// Unwrap it so a single #main (with the current page's class) sits directly
+// under .main — the arrangement the layout's scroll rules assume.
+function denestMain(): void {
+	const outer = document.querySelector(mainSelector);
+	const inner = outer?.querySelector(`:scope > ${mainSelector}`);
 
-	if (isElement(target) && target.matches(mainSelector)) {
-		updateNavigation();
+	if (outer && inner) {
+		outer.replaceWith(inner);
 	}
+}
 
-	void mountEditor(canQuery(target) ? target : document);
+function updateNavigationAfterSwap(): void {
+	denestMain();
+	updateNavigation();
+	void mountEditor();
 }
 
 listen('keydown', focusSearch);
