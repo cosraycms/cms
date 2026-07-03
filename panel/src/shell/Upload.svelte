@@ -240,7 +240,7 @@
 		class:upload-multiple={multiple}
 		class:upload-inline={inline}
 	>
-		<MediaList bind:assets {multiple} {type} {path} {remove} {loading} {translate} />
+		<MediaList bind:assets {multiple} {type} {path} {remove} {loading} {translate} {notify} />
 		{#if !assets || limit.max < 1 || assets.length < limit.max}
 			<label
 				class="dragdrop"

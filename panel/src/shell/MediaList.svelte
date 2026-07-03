@@ -17,9 +17,19 @@
 		loading: boolean;
 		path: string;
 		remove: (index: number | null) => void;
+		notify?: () => void;
 	};
 
-	let { assets = $bindable(), multiple, translate, type, loading, path, remove }: Props = $props();
+	let {
+		assets = $bindable(),
+		multiple,
+		translate,
+		type,
+		loading,
+		path,
+		remove,
+		notify = () => {},
+	}: Props = $props();
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
@@ -35,6 +45,10 @@
 
 					assets.splice(event.oldIndex, 1);
 					assets.splice(event.newIndex, 0, tmp);
+					assets = assets;
+					// The element only serializes into the form value when
+					// notified; without this the reorder is lost on save.
+					notify();
 				},
 			});
 		}
@@ -49,6 +63,7 @@
 					close: () => handle.close(),
 					apply: (asset: FileItem) => {
 						assets[index] = asset;
+						notify();
 						handle.close();
 					},
 					translate,
