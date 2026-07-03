@@ -72,7 +72,11 @@ function hasEditor(root: ParentNode): boolean {
 }
 
 async function mountEditor(root: ParentNode = document): Promise<void> {
-	if (!hasEditor(root)) {
+	// Once the editor module has loaded (a node was opened), always hand off so
+	// it can release a previous instance whose host was swapped out — even when
+	// the new page has no editor host. Until then, skip work for hostless pages
+	// so the editor chunk stays unloaded until the first node is opened.
+	if (editor === null && !hasEditor(root)) {
 		return;
 	}
 

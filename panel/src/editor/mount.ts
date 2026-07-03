@@ -1,4 +1,4 @@
-import { mount } from 'svelte';
+import { mount, unmount } from 'svelte';
 import Editor, { type EditorBootstrap } from './Editor.svelte';
 
 declare global {
@@ -7,6 +7,22 @@ declare global {
 			mount: typeof mountEditor;
 		};
 	}
+}
+
+let active: { instance: Record<string, unknown>; host: HTMLElement } | null = null;
+
+// The editor registers document-level beforeunload/htmx guards in onMount and
+// only removes them from onDestroy. A boosted navigation swaps the host out of
+// the DOM but leaves the component (and its guards) alive, so a dirty editor
+// would keep prompting after you have left it. Explicitly unmount the previous
+// instance once its host is gone.
+function releaseActive(): void {
+	if (active === null || active.host.isConnected) {
+		return;
+	}
+
+	void unmount(active.instance);
+	active = null;
 }
 
 function readBootstrap(): EditorBootstrap | null {
@@ -26,6 +42,8 @@ function readBootstrap(): EditorBootstrap | null {
 }
 
 export function mountEditor(root: ParentNode = document): void {
+	releaseActive();
+
 	const target = root.querySelector('[data-cosray-node-editor]');
 
 	if (!(target instanceof HTMLElement) || target.dataset.cosrayNodeEditorMounted === 'true') {
@@ -39,13 +57,14 @@ export function mountEditor(root: ParentNode = document): void {
 	}
 
 	target.replaceChildren();
-	mount(Editor, {
+	const instance = mount(Editor, {
 		target,
 		props: {
 			bootstrap,
 		},
 	});
 	target.dataset.cosrayNodeEditorMounted = 'true';
+	active = { instance, host: target };
 }
 
 window.CosrayNodeEditor = {
