@@ -148,27 +148,20 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 	private function assertEditorAssetStateIsRendered(string $html): void
 	{
-		if ($this->hasPanelBuild()) {
-			$this->assertStringContainsString('id="cosray-node-editor"', $html);
-			$this->assertStringContainsString('"node":"panel-editor-a"', $html);
-			$this->assertStringContainsString('"name":"Test articles"', $html);
-			$this->assertStringContainsString('"slug":"test-articles"', $html);
-			$this->assertStringContainsString('"q":"Panel Editor"', $html);
-			$this->assertStringContainsString('"offset":20', $html);
-			$this->assertStringContainsString('"limit":10', $html);
-			$this->assertStringContainsString('"sort":"uid"', $html);
-			$this->assertStringContainsString('"dir":"asc"', $html);
-			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
-
-			return;
-		}
-
-		$this->assertStringContainsString('Panel bundle missing', $html);
-		$this->assertStringContainsString('public/cp/build/panel.js', $html);
+		// The editor is a server-rendered form regardless of the panel build.
+		$this->assertStringContainsString('class="cms-node-form"', $html);
 		$this->assertStringContainsString(
-			'href="/panel/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
+			'action="/cp/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
 			$html,
 		);
+		$this->assertStringContainsString('name="content[title][value][en]"', $html);
+		$this->assertStringContainsString('value="Panel Editor A"', $html);
+		$this->assertStringContainsString('name="content[content][value][en]"', $html);
+		$this->assertStringContainsString('data-locale="de"', $html);
+		$this->assertStringContainsString('cms-headline-title', $html);
+		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
+		$this->assertStringNotContainsString('cosray-node-editor-data', $html);
+		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}
 
 	private function assertPanelBuildStateIsRendered(string $html): void

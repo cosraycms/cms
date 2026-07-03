@@ -126,28 +126,16 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
-		if (
-			is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.js')
-			&& is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.css')
-		) {
-			$this->assertStringContainsString('id="cosray-node-editor"', $html);
-			$this->assertStringContainsString('src="/cp/build/panel.js"', $html);
-			$this->assertStringContainsString('"mode":"create"', $html);
-			$this->assertStringContainsString('"name":"Test hierarchy"', $html);
-			$this->assertStringContainsString('"slug":"test-hierarchy"', $html);
-			$this->assertStringContainsString('"type":"test-hierarchy-child"', $html);
-			$this->assertStringContainsString('"parent":"panel-create-parent"', $html);
-			$this->assertStringContainsString('"view":"tree"', $html);
-			$this->assertStringContainsString('"open":"panel-create-parent"', $html);
-
-			return;
-		}
-
-		$this->assertStringContainsString('Panel bundle missing', $html);
+		// The editor is a server-rendered form regardless of the panel build.
+		$this->assertStringContainsString('class="cms-node-form"', $html);
 		$this->assertStringContainsString(
-			'href="/panel/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',
+			'action="/cp/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',
 			$html,
 		);
+		$this->assertStringContainsString('name="content[title][value][en]"', $html);
+		$this->assertStringContainsString('cms-headline-title', $html);
+		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
+		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}
 
 	private function createHierarchyNode(

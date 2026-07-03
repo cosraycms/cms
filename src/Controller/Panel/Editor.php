@@ -8,22 +8,26 @@ use Celemas\Core\Exception\HttpBadRequest;
 use Celemas\Core\Exception\HttpNotFound;
 use Celemas\Core\Request;
 use Celemas\Wire\Creator;
+use Cosray\Bootstrap;
+use Cosray\Cms;
 use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
+use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\Node;
+use Cosray\Node\Serializer;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 
 final class Editor extends Panel
 {
-	private const string LEGACY_PANEL_PATH = '/panel';
 	private const int LIMIT_DEFAULT = 50;
 	private const int LIMIT_MAX = 250;
 
-	public function edit(string $collection, string $node): array
+	public function edit(Context $context, Cms $cms, string $collection, string $node): array
 	{
 		[$name, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
@@ -32,13 +36,13 @@ final class Editor extends Panel
 			mode: 'edit',
 			name: $name,
 			collection: $collection,
-			node: $node,
-			type: null,
+			node: $this->nodePayload($cms, $node),
 			query: $query,
+			context: $context,
 		);
 	}
 
-	public function create(string $collection, string $type): array
+	public function create(Context $context, Cms $cms, string $collection, string $type): array
 	{
 		[$name, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
@@ -51,10 +55,41 @@ final class Editor extends Panel
 			mode: 'create',
 			name: $name,
 			collection: $collection,
-			node: null,
-			type: $type,
+			node: $this->blueprintPayload($cms, $context, $type),
 			query: $query,
+			context: $context,
 		);
+	}
+
+	private function nodePayload(Cms $cms, string $uid): array
+	{
+		$result = $cms->node->byUid($uid, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$node = Node::unwrap($result);
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+
+		return $serializer->read(
+			$node,
+			NodeFactory::dataFor($node),
+			NodeFactory::fieldNamesFor($node),
+		);
+	}
+
+	private function blueprintPayload(Cms $cms, Context $context, string $type): array
+	{
+		$class = $this->container
+			->tag(Bootstrap::NODE_TAG)
+			->entry($type)
+			->definition();
+		$factory = $cms->nodeFactory();
+		$node = $factory->blueprint($class, $context, $cms);
+		$serializer = new Serializer($this->types(), $factory->uid());
+
+		return $serializer->blueprint($node, NodeFactory::fieldNamesFor($node), $context->locales());
 	}
 
 	/** @return array{string, CmsCollection} */
@@ -86,9 +121,7 @@ final class Editor extends Panel
 			return false;
 		}
 
-		$types = $this->container->get(Types::class);
-		assert($types instanceof Types, 'The node type service must be available');
-		$lister = new Listing($collection, $types);
+		$lister = new Listing($collection, $this->types());
 		$childHandles = array_column(
 			$lister->childBlueprints($this->parentNode($collection, $parent)),
 			'slug',
@@ -111,8 +144,7 @@ final class Editor extends Panel
 	/** @return list<string> */
 	private function blueprintHandles(CmsCollection $collection): array
 	{
-		$types = $this->container->get(Types::class);
-		assert($types instanceof Types, 'The node type service must be available');
+		$types = $this->types();
 		$handles = [];
 
 		foreach ($collection->blueprints() as $blueprint) {
@@ -120,6 +152,14 @@ final class Editor extends Panel
 		}
 
 		return $handles;
+	}
+
+	private function types(): Types
+	{
+		$types = $this->container->get(Types::class);
+		assert($types instanceof Types, 'The node type service must be available');
+
+		return $types;
 	}
 
 	private function queryState(CmsCollection $collection): CollectionQuery
@@ -167,29 +207,25 @@ final class Editor extends Panel
 		string $mode,
 		string $name,
 		string $collection,
-		?string $node,
-		?string $type,
+		array $node,
 		CollectionQuery $query,
+		Context $context,
 	): array {
+		$locales = array_map(
+			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title],
+			iterator_to_array($context->locales(), false),
+		);
+
 		return $this->context([
 			'mode' => $mode,
 			'name' => $name,
 			'slug' => $collection,
-			'nodeUid' => $node,
-			'type' => $type,
-			'parent' => $query->parent,
+			'node' => $node,
+			'locales' => $locales,
+			'defaultLocale' => $context->locales()->getDefault()->id,
 			'queryState' => $query,
 			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
-			'legacyLinks' => new CollectionUrls(self::LEGACY_PANEL_PATH, $collection, $query),
-			'legacyApiBase' => self::LEGACY_PANEL_PATH . '/api',
-			'legacyBootUrl' => self::LEGACY_PANEL_PATH . '/boot',
-			'editorAvailable' => $this->editorAvailable(),
 		]);
-	}
-
-	private function editorAvailable(): bool
-	{
-		return $this->config->env() === 'development' || $this->hasPanelBuild();
 	}
 
 	private function intParam(

@@ -1,0 +1,223 @@
+/* Node editor page (SSR form) — shell, header, form grid and control
+   chrome. Ported from the former editor island's component styles so the
+   server-rendered markup looks identical. */
+
+.cms-node-shell {
+	display: flex;
+	min-height: 100%;
+	flex: 1 1 auto;
+	flex-direction: column;
+	background: var(--editor-bg);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+}
+
+.cms-node-sticky {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	flex: 0 0 auto;
+	background: var(--editor-bg);
+}
+
+.cms-node-topbar {
+	flex: 0 0 auto;
+	border-bottom: 1px solid var(--color-border);
+	background: var(--topbar-bg);
+}
+
+.cms-node-topbar .inner {
+	display: flex;
+	width: 100%;
+	max-width: var(--node-max-width);
+	min-height: var(--node-topbar-height);
+	align-items: center;
+	gap: var(--space-4);
+	margin: 0 auto;
+	padding: 0 var(--space-6);
+}
+
+.cms-node-topbar .trail {
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.cms-node-topbar .actions {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--space-4);
+}
+
+.cms-node-header-frame {
+	width: 100%;
+	max-width: var(--node-max-width);
+	margin: 0 auto;
+	padding: var(--space-8) var(--space-8) var(--space-6);
+}
+
+.cms-headline {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	margin-bottom: var(--space-6);
+	font-size: var(--font-size-3xl);
+	font-weight: 600;
+	line-height: 36px;
+}
+
+.cms-headline-title {
+	display: flex;
+	align-items: center;
+}
+
+.cms-headline-status {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.cms-document {
+	flex: 1 0 auto;
+}
+
+.cms-document-inner {
+	margin: 0 auto;
+	width: 100%;
+	max-width: var(--node-max-width);
+	padding: 0 var(--space-8);
+}
+
+.cms-pane {
+	flex: 1 1 auto;
+}
+
+.cms-pane-card {
+	max-width: 80rem;
+	margin: 0 auto var(--space-12);
+	padding-top: var(--space-2);
+	padding-bottom: var(--space-4);
+	border: 1px solid var(--color-neutral-200);
+	background-color: var(--color-white);
+	box-shadow: var(--shadow);
+}
+
+.field-grid {
+	display: grid;
+	grid-template-columns: repeat(100, minmax(0, 1fr));
+}
+
+.locale-tabs {
+	flex-shrink: 0;
+}
+
+.locale-tab {
+	display: inline-block;
+	font-size: var(--font-size-sm);
+	padding: 0 0.5rem;
+	font-weight: normal;
+}
+
+.locale-tab.active {
+	border-radius: var(--radius);
+	background-color: var(--color-neutral-200);
+	color: var(--color-black);
+}
+
+.cms-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.cms-radio-option {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.cms-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.cms-group-field {
+	flex: 1 1 12rem;
+}
+
+.cms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.cms-repeater-item {
+	display: flex;
+	align-items: end;
+	gap: 0.5rem;
+}
+
+.cms-repeater-item-control {
+	flex-grow: 1;
+}
+
+.cms-sub-label {
+	display: block;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	margin-bottom: 0.25rem;
+}
+
+.cms-control-unknown,
+.cms-control-element-pending {
+	padding: 0.75rem;
+	border: 1px dashed var(--color-danger);
+	border-radius: 0.375rem;
+	color: var(--color-danger);
+	font-size: 0.875rem;
+}
+
+.cms-control-element-pending {
+	border-color: var(--color-neutral-300);
+	color: var(--color-neutral-600);
+}
+
+.cms-breadcrumb {
+	color: var(--color-neutral-600);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.cms-breadcrumb:hover {
+	color: var(--color-neutral-900);
+}
+
+@media (max-width: 52rem) {
+	.cms-node-sticky {
+		position: static;
+	}
+
+	.cms-node-header-frame {
+		padding: var(--space-6) var(--space-4) var(--space-6);
+	}
+
+	.cms-node-topbar .inner {
+		min-height: 0;
+		align-items: flex-start;
+		flex-direction: column;
+		padding: var(--space-3) var(--space-4);
+	}
+
+	.cms-node-topbar .actions {
+		width: 100%;
+		justify-content: flex-start;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+	}
+}
