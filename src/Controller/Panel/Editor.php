@@ -235,7 +235,7 @@ final class Editor extends Panel
 
 		$nodeObj = Node::unwrap($result);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
-		$pathsUrl = $links->edit($node) . '/paths';
+		$pathsUrl = $links->paths($node);
 
 		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
 			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];

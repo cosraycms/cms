@@ -58,7 +58,7 @@ $span = static function (mixed $value, int $fallback): string {
 							<?php if ($edit && $deletable): ?>
 								<form
 									method="post"
-									action="<?= escape($links->edit($uid)) ?>/delete"
+									action="<?= escape($links->delete($uid)) ?>"
 									hx-confirm="<?= escape(_('Dieses Dokument wirklich löschen?')) ?>">
 									<button class="cms-button danger" type="submit">
 										<?= escape(_('Löschen')) ?>
@@ -160,7 +160,7 @@ $span = static function (mixed $value, int $fallback): string {
 										'defaultLocale' => $defaultLocale,
 										'routable' => $routable,
 										'renderable' => $renderable,
-										'pathsUrl' => $edit ? $links->edit($uid) . '/paths' : null,
+										'pathsUrl' => $edit ? $links->paths($uid) : null,
 									]) ?>
 								</div>
 							</div>

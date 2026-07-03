@@ -91,6 +91,20 @@ final class CollectionUrls
 		return $this->url($path, $this->query->editorParams());
 	}
 
+	/**
+	 * Editor sub-routes carry no query — appending to edit() would land
+	 * the suffix inside its query string.
+	 */
+	public function paths(string $uid): string
+	{
+		return $this->path() . '/' . rawurlencode($uid) . '/paths';
+	}
+
+	public function delete(string $uid): string
+	{
+		return $this->path() . '/' . rawurlencode($uid) . '/delete';
+	}
+
 	public function create(string $type, ?string $parent = null): string
 	{
 		$overrides = [];

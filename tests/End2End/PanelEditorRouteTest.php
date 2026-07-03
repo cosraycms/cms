@@ -238,6 +238,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="Panel Editor A"', $html);
 		$this->assertStringContainsString('name="content[content][value][en]"', $html);
 		$this->assertStringContainsString('data-locale="de"', $html);
+		// Sub-route actions must not inherit the editor query string.
+		$this->assertStringContainsString(
+			'action="/cp/collection/test-articles/panel-editor-a/delete"',
+			$html,
+		);
 		$this->assertStringContainsString('cms-headline-title', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('cosray-node-editor-data', $html);
