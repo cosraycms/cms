@@ -257,6 +257,18 @@
 	align-items: center;
 }
 
+.cms-headline-dirty {
+	display: inline-flex;
+	align-items: center;
+	color: var(--color-danger);
+	font-size: var(--font-size-lg);
+	line-height: 1;
+}
+
+.cms-headline-dirty[hidden] {
+	display: none;
+}
+
 .cms-node-header .cms-tabs {
 	margin-bottom: 0;
 }

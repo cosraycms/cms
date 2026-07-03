@@ -4,11 +4,16 @@
 // page — the failure mode the island version suffered from.
 
 const FORM = '#node-editor-form';
+const INDICATOR = 'editor-dirty';
 
 let dirtyForm: HTMLFormElement | null = null;
 
 function isDirty(): boolean {
 	return dirtyForm !== null && document.contains(dirtyForm);
+}
+
+function indicate(dirty: boolean): void {
+	document.getElementById(INDICATOR)?.toggleAttribute('hidden', !dirty);
 }
 
 function mark(event: Event): void {
@@ -19,6 +24,7 @@ function mark(event: Event): void {
 
 		if (form instanceof HTMLFormElement) {
 			dirtyForm = form;
+			indicate(true);
 		}
 	}
 }
@@ -60,6 +66,7 @@ function settle(): void {
 	if (status?.dataset.saved === 'true') {
 		delete status.dataset.saved;
 		dirtyForm = null;
+		indicate(false);
 	}
 }
 

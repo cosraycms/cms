@@ -94,6 +94,11 @@ $span = static function (mixed $value, int $fallback): string {
 						<h1 class="cms-headline">
 							<span class="cms-headline-title"><?= $node['title'] ?? '' ?></span>
 							<div class="status-bar cms-headline-status">
+								<span
+									id="editor-dirty"
+									class="cms-headline-dirty"
+									title="<?= escape(_('Nicht gespeicherte Änderungen')) ?>"
+									hidden>●</span>
 								<?php if ($renderable): ?>
 									<span class="cms-headline-published">
 										<span
