@@ -23,13 +23,17 @@ class Media
 		protected readonly Config $config,
 	) {}
 
-	/**
-	 * TODO: sanitize filename.
-	 */
 	#[Permission('panel')]
 	public function upload(string $mediatype, string $doctype, string $uid): Response
 	{
 		$response = Response::create($this->factory);
+
+		// The route regex permits dots, so reject any uid that could climb out
+		// of the target directory before it reaches the write path.
+		if (str_contains($uid, '..') || !preg_match('/^[A-Za-z0-9]/', $uid)) {
+			return $response->json(['ok' => false, 'error' => _('Ungültige Upload-Adresse.')], 400);
+		}
+
 		$file = $_FILES['file'] ?? null;
 
 		$result = $this->validateUploadedFile($mediatype, $file);
@@ -106,6 +110,19 @@ class Media
 		return Response::create($this->factory)->file($file->path());
 	}
 
+	/**
+	 * Reduce a client-supplied upload name to a safe on-disk basename:
+	 * strip every directory component (and any `../`), drop control
+	 * characters, and trim leading/trailing dots and spaces.
+	 */
+	public static function safeFilename(string $name): string
+	{
+		$name = basename($name);
+		$name = preg_replace('/[\x00-\x1F\x7F]/', '', $name) ?? '';
+
+		return trim($name, ' .');
+	}
+
 	protected function validateUploadedFile(string $mediatype, ?array $file): array
 	{
 		if (!$file) {
@@ -129,7 +146,16 @@ class Media
 		$fileInfo = finfo_open(FILEINFO_MIME_TYPE);
 		$mimeType = finfo_file($fileInfo, $tmpFile);
 		finfo_close($fileInfo);
-		$fileName = $file['full_path'];
+		$fileName = self::safeFilename((string) ($file['full_path'] ?? $file['name'] ?? ''));
+
+		if ($fileName === '') {
+			return [
+				'ok' => false,
+				'error' => _('Upload fehlgeschlagen. Datei konnte am Server nicht verabeitet werden.'),
+				'file' => _(' Dateiname unbekannt'),
+			];
+		}
+
 		$pathInfo = pathinfo($fileName);
 		$ext = $pathInfo['extension'] ?? null;
 		$allowedExtensions = $mimeTypes[$mimeType] ?? null;
