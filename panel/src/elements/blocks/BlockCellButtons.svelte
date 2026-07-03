@@ -74,16 +74,16 @@
 	class:cms-block-cell-buttons-inline={!dropdown}
 	class:cms-block-cell-buttons-dropdown={dropdown}
 >
-	<button class="remove" onclick={remove}>
+	<button type="button" class="remove" onclick={remove}>
 		<IcoTrash />
 	</button>
-	<button class="up-down" disabled={last} onclick={down}>
+	<button type="button" class="up-down" disabled={last} onclick={down}>
 		<IcoArrowDown />
 	</button>
-	<button class="up-down" disabled={first} onclick={up}>
+	<button type="button" class="up-down" disabled={first} onclick={up}>
 		<IcoArrowUp />
 	</button>
-	<button class="add" onclick={add}>
+	<button type="button" class="add" onclick={add}>
 		<IcoCirclePlus />
 	</button>
 </div>

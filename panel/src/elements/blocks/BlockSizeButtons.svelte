@@ -71,31 +71,31 @@
 	class:cms-blocks-size-buttons-inline={!dropdown}
 	class:cms-blocks-size-buttons-dropdown={dropdown}
 >
-	<button class="width-plus" disabled={widest} onclick={width(1)}>
+	<button type="button" class="width-plus" disabled={widest} onclick={width(1)}>
 		<span class="icon">
 			<IcoExpand />
 		</span>
 		<BlockButtonLabel value={item.colspan} />
 	</button>
-	<button class="width-minus" disabled={narrowest} onclick={width(-1)}>
+	<button type="button" class="width-minus" disabled={narrowest} onclick={width(-1)}>
 		<span class="icon">
 			<IcoCollapse />
 		</span>
 		<BlockButtonLabel value={item.colspan} />
 	</button>
-	<button class="indent" disabled={fullyindented} onclick={indent(1)}>
+	<button type="button" class="indent" disabled={fullyindented} onclick={indent(1)}>
 		<IcoIndent />
 		<BlockButtonLabel value={item.colstart ?? null} />
 	</button>
-	<button class="unindent" disabled={unindented} onclick={indent(-1)}>
+	<button type="button" class="unindent" disabled={unindented} onclick={indent(-1)}>
 		<IcoUnindent />
 		<BlockButtonLabel value={item.colstart ?? null} />
 	</button>
-	<button class="height-plus" disabled={highest} onclick={height(1)}>
+	<button type="button" class="height-plus" disabled={highest} onclick={height(1)}>
 		<IcoExpand />
 		<BlockButtonLabel value={item.rowspan} />
 	</button>
-	<button class="height-minus" disabled={onerow} onclick={height(-1)}>
+	<button type="button" class="height-minus" disabled={onerow} onclick={height(-1)}>
 		<IcoCollapse />
 		<BlockButtonLabel value={item.rowspan} />
 	</button>

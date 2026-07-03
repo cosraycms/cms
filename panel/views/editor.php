@@ -71,7 +71,8 @@ $span = static function (mixed $value, int $fallback): string {
 									type="submit"
 									form="node-editor-form"
 									name="preview"
-									value="1">
+									value="1"
+									data-editor-submit>
 									<?= escape(_('Vorschau')) ?>
 								</button>
 							<?php endif ?>
@@ -80,10 +81,15 @@ $span = static function (mixed $value, int $fallback): string {
 								type="submit"
 								form="node-editor-form"
 								name="publish"
-								value="1">
+								value="1"
+								data-editor-submit>
 								<?= escape(_('Speichern und veröffentlichen')) ?>
 							</button>
-							<button class="cms-button primary" type="submit" form="node-editor-form">
+							<button
+								class="cms-button primary"
+								type="submit"
+								form="node-editor-form"
+								data-editor-submit>
 								<?= escape(_('Speichern')) ?>
 							</button>
 						</div>

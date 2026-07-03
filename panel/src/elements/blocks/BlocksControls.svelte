@@ -64,7 +64,7 @@
 		</div>
 	{/if}
 	<div class="cms-blocks-controls-edit">
-		<button class="edit" onclick={edit}>
+		<button type="button" class="edit" onclick={edit}>
 			<IcoGear />
 		</button>
 	</div>
