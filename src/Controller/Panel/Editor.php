@@ -26,6 +26,7 @@ use Cosray\Node\Types;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
+use Cosray\Panel\System;
 
 final class Editor extends Panel
 {
@@ -291,6 +292,7 @@ final class Editor extends Panel
 			'node' => $node,
 			'locales' => $locales,
 			'defaultLocale' => $context->locales()->getDefault()->id,
+			'system' => new System($this->config, $context->locales())->payload(),
 			'queryState' => $query,
 			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
 		]);

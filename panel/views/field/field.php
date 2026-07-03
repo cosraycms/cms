@@ -10,6 +10,7 @@ $field = (array) $this->unwrap($field);
 $data = (array) ($this->unwrap($data) ?? []);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+$node = (string) ($node ?? '');
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -63,6 +64,9 @@ $required = (bool) ($field['required'] ?? false);
 						'name' => "content[{$fieldName}][value][{$locale['id']}]",
 						'value' => $value[$locale['id']] ?? null,
 						'data' => $data,
+						'node' => $node,
+						'locales' => $locales,
+						'defaultLocale' => $defaultLocale,
 					]) ?>
 				</div>
 			<?php endforeach ?>
@@ -74,6 +78,9 @@ $required = (bool) ($field['required'] ?? false);
 				'name' => "content[{$fieldName}][value][{$neutral}]",
 				'value' => $value[$neutral] ?? null,
 				'data' => $data,
+				'node' => $node,
+				'locales' => $locales,
+				'defaultLocale' => $defaultLocale,
 			]) ?>
 		<?php endif ?>
 	</div>

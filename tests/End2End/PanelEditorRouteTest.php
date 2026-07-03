@@ -55,6 +55,39 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertEditorAssetStateIsRendered($html);
 	}
 
+	public function testElementControlsRenderThroughTheFormHost(): void
+	{
+		$this->authenticateAs('editor');
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$mediaTypeId = $mediaType
+			? (int) $mediaType['type']
+			: $this->createTestType('test-media-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-media',
+			'type' => $mediaTypeId,
+			'published' => true,
+			'content' => [],
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-media');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('<cosray-host', $html);
+		$this->assertStringContainsString('name="content[gallery][json]"', $html);
+		$this->assertStringContainsString('tag="cosray-image"', $html);
+		$this->assertStringContainsString('module="cosray:media"', $html);
+		$this->assertStringContainsString('tag="cosray-blocks"', $html);
+		$this->assertStringContainsString('node="panel-editor-media"', $html);
+		// The embedded system payload replaces the legacy /panel/boot call.
+		$this->assertStringContainsString('id="cosray-system-data"', $html);
+		$this->assertStringContainsString('"allowedFiles"', $html);
+		$this->assertStringNotContainsString('/panel/boot', $html);
+		$this->assertStringNotContainsString('/panel/api', $html);
+	}
+
 	public function testNodeApiPayloadCarriesControlDescriptors(): void
 	{
 		$this->authenticateAs('editor');

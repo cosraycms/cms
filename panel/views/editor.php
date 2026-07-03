@@ -12,6 +12,10 @@ $slug = (string) $slug;
 $node = (array) $this->unwrap($node);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+$system = (array) $this->unwrap($system);
+$panelPath = (string) $panelPath;
+$panelBase = $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/';
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 $fields = $node['fields'] ?? [];
 $content = $node['content'] ?? [];
 $type = $node['type'] ?? [];
@@ -84,6 +88,7 @@ $span = static function (mixed $value, int $fallback): string {
 												'data' => $content[$field['name']] ?? null,
 												'locales' => $locales,
 												'defaultLocale' => $defaultLocale,
+												'node' => $mode === 'create' ? '' : $uid,
 											]) ?>
 										</div>
 									<?php endforeach ?>
@@ -95,4 +100,8 @@ $span = static function (mixed $value, int $fallback): string {
 			</div>
 		</div>
 	</section>
+	<script id="cosray-system-data" type="application/json"><?= json_encode(
+	['panel' => $panelBase, 'system' => $system],
+	$jsonFlags,
+) ?></script>
 </div>
