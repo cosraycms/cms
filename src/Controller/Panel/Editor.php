@@ -20,6 +20,7 @@ use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\Node;
 use Cosray\Node\PathManager;
+use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
@@ -90,13 +91,8 @@ final class Editor extends Panel
 			NodeFactory::fieldNamesFor($nodeObj),
 		);
 
-		$submitted = $this->formData()['content'] ?? [];
-		$patch = new FormPatch($data['fields']);
-		$data['content'] = $patch->content(
-			$data['content'],
-			is_array($submitted) ? $submitted : [],
-		);
-
+		$form = $this->formData();
+		$data = $this->applyForm($data, $form);
 		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 		$htmx = $this->request->hasHeader('HX-Request');
@@ -116,6 +112,9 @@ final class Editor extends Panel
 				'saved' => false,
 				'message' => (string) ($payload['message'] ?? _('Incomplete or invalid data')),
 				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
+				'published' => (bool) ($data['published'] ?? false),
+				'renderable' => (bool) ($data['type']['renderable'] ?? false),
+				'preview' => null,
 			];
 		}
 
@@ -127,7 +126,203 @@ final class Editor extends Panel
 			'saved' => true,
 			'message' => _('Gespeichert'),
 			'errors' => [],
+			'published' => (bool) ($data['published'] ?? false),
+			'renderable' => (bool) ($data['type']['renderable'] ?? false),
+			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($cms, $node) : null,
 		];
+	}
+
+	public function store(
+		Context $context,
+		Cms $cms,
+		Factory $factory,
+		string $collection,
+		string $type,
+	): Response|array {
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+
+		if (!$this->canCreate($obj, $type, $query->parent)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$class = $this->container
+			->tag(Bootstrap::NODE_TAG)
+			->entry($type)
+			->definition();
+		$nodeFactory = $cms->nodeFactory();
+		$nodeObj = $nodeFactory->blueprint($class, $context, $cms);
+		$serializer = new Serializer($this->types(), $nodeFactory->uid());
+		$data = $serializer->blueprint(
+			$nodeObj,
+			NodeFactory::fieldNamesFor($nodeObj),
+			$context->locales(),
+		);
+
+		$form = $this->formData();
+		$patch = new FormPatch($data['fields']);
+		$submitted = $form['content'] ?? [];
+		$data['content'] = $patch->content(
+			$data['content'],
+			is_array($submitted) ? $submitted : [],
+		);
+		$data = $this->applySettings($data, $form);
+
+		if ($query->parent !== null) {
+			$data['parent'] = $query->parent;
+		}
+
+		$store = new Store($context->db, new PathManager(), $this->types(), $nodeFactory->uid());
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+
+		try {
+			$result = $store->create($nodeObj, $data, $this->request, $context->locales());
+		} catch (HttpBadRequest $e) {
+			if (!$this->request->hasHeader('HX-Request')) {
+				return Response::create($factory)->redirect($links->create($type), 303);
+			}
+
+			$payload = is_array($e->payload()) ? $e->payload() : [];
+
+			return [
+				'saved' => false,
+				'message' => (string) ($payload['message'] ?? _('Incomplete or invalid data')),
+				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
+				'published' => (bool) ($data['published'] ?? false),
+				'renderable' => (bool) ($data['type']['renderable'] ?? false),
+				'preview' => null,
+			];
+		}
+
+		// The redirect swaps the fresh edit form in; htmx follows it.
+		return Response::create($factory)->redirect(
+			$links->edit((string) ($result['uid'] ?? $data['uid'])),
+			303,
+		);
+	}
+
+	public function delete(
+		Context $context,
+		Cms $cms,
+		Factory $factory,
+		string $collection,
+		string $node,
+	): Response {
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+		$result = $cms->node->byUid($node, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
+		$store->delete(Node::unwrap($result), $this->request, requireJson: false);
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+
+		return Response::create($factory)->redirect($links->collection(), 303);
+	}
+
+	public function paths(Context $context, Cms $cms, string $collection, string $node): array
+	{
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+		$result = $cms->node->byUid($node, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Node::unwrap($result);
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$pathsUrl = $links->edit($node) . '/paths';
+
+		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
+			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];
+		}
+
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$data = $serializer->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
+		$form = $this->formData();
+		$data = $this->applyForm($data, $form);
+
+		$generator = new RoutePathGenerator($context->db, $this->types());
+		$submitted = is_array($form['paths'] ?? null) ? $form['paths'] : [];
+
+		return [
+			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
+			'submitted' => $submitted,
+			'pathsUrl' => $pathsUrl,
+		];
+	}
+
+	/** Apply the submitted editor form (content patch + settings). */
+	private function applyForm(array $data, array $form): array
+	{
+		$patch = new FormPatch($data['fields']);
+		$submitted = $form['content'] ?? [];
+		$data['content'] = $patch->content(
+			$data['content'],
+			is_array($submitted) ? $submitted : [],
+		);
+
+		return $this->applySettings($data, $form);
+	}
+
+	private function applySettings(array $data, array $form): array
+	{
+		if (array_key_exists('handle', $form)) {
+			$data['handle'] = is_string($form['handle']) ? $form['handle'] : null;
+		}
+
+		if (is_array($form['paths'] ?? null)) {
+			$paths = is_array($data['paths'] ?? null) ? $data['paths'] : [];
+
+			foreach ($form['paths'] as $locale => $path) {
+				if (is_string($locale) && is_string($path)) {
+					$paths[$locale] = $path;
+				}
+			}
+
+			$data['paths'] = $paths;
+		}
+
+		foreach (['published', 'hidden'] as $flag) {
+			if (array_key_exists($flag, $form)) {
+				$data[$flag] = in_array($form[$flag], ['1', 'on', true], true);
+			}
+		}
+
+		if (($form['publish'] ?? null) === '1') {
+			$data['published'] = true;
+		}
+
+		return $data;
+	}
+
+	/** The public path the preview overlay loads after a save. */
+	private function previewPath(Cms $cms, string $uid): ?string
+	{
+		$result = $cms->node->byUid($uid, published: null);
+
+		if (!$result) {
+			return null;
+		}
+
+		$node = Node::unwrap($result);
+		$paths = NodeFactory::dataFor($node)['paths'] ?? [];
+
+		foreach (is_array($paths) ? $paths : [] as $path) {
+			if (is_string($path) && trim($path) !== '') {
+				return $path;
+			}
+		}
+
+		return null;
 	}
 
 	private function nodePayload(Cms $cms, string $uid): array

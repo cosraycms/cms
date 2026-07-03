@@ -138,6 +138,66 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $response);
 	}
 
+	public function testPublishButtonAndSettingsFlagsAreApplied(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-publish',
+			'type' => $this->articleTypeId(),
+			'published' => false,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Unpublished']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-publish', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'publish' => '1',
+				'handle' => 'panel-save-handle',
+				'content' => ['title' => ['value' => ['en' => 'Unpublished']]],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$row = $this->db()->execute(
+			'SELECT published FROM cms.nodes WHERE uid = :uid',
+			['uid' => 'panel-save-publish'],
+		)->one();
+		$this->assertTrue((bool) $row['published']);
+
+		$payload = json_decode(
+			(string) $this->makeRequest('GET', '/panel/api/node/panel-save-publish')->getBody(),
+			true,
+		);
+		$this->assertSame('panel-save-handle', $payload['handle']);
+	}
+
+	public function testDeleteRedirectsToTheCollection(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-delete',
+			'type' => $this->articleTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Doomed']],
+			],
+		]);
+
+		$response = $this->makeRequest(
+			'POST',
+			'/cp/collection/test-articles/panel-save-delete/delete',
+		);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringStartsWith(
+			'/cp/collection/test-articles',
+			$response->getHeaderLine('Location'),
+		);
+
+		$gone = $this->makeRequest('GET', '/cp/collection/test-articles/panel-save-delete');
+		$this->assertResponseStatus(404, $gone);
+	}
+
 	private function nodeContent(string $uid): array
 	{
 		$row = $this->db()->execute(

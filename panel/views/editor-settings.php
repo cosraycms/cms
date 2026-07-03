@@ -1,0 +1,99 @@
+<?php
+
+use function Cosray\escape;
+
+// Settings pane inside the node form: handle, route paths and the
+// published/hidden flags submit with the content fields through the
+// same merge patch.
+
+$node = (array) $this->unwrap($node);
+$locales = (array) $this->unwrap($locales);
+$defaultLocale = (string) $defaultLocale;
+$routable = (bool) $routable;
+$renderable = (bool) $renderable;
+$pathsUrl = $this->unwrap($pathsUrl);
+$paths = is_array($node['paths'] ?? null) ? $node['paths'] : [];
+$handle = $node['handle'] ?? null;
+?>
+<div class="cms-settings">
+	<div class="cms-settings-row">
+		<label class="cms-field-label" for="cms-node-handle">
+			<?= escape(_('Handle')) ?>:
+		</label>
+		<div class="cms-settings-handle-value">
+			<input
+				id="cms-node-handle"
+				type="text"
+				name="handle"
+				maxlength="64"
+				pattern="(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?"
+				value="<?= escape(is_string($handle) ? $handle : '') ?>" />
+		</div>
+	</div>
+	<?php if ($routable): ?>
+		<div class="cms-settings-paths">
+			<?php foreach ($locales as $locale): ?>
+				<div class="cms-settings-path">
+					<div class="cms-field-label"><?= escape($locale['title']) ?>:</div>
+					<div class="cms-settings-path-value">
+						<input
+							type="text"
+							name="paths[<?= escape($locale['id']) ?>]"
+							value="<?= escape((string) ($paths[$locale['id']] ?? '')) ?>" />
+					</div>
+				</div>
+			<?php endforeach ?>
+		</div>
+		<?php if (is_string($pathsUrl)): ?>
+			<div
+				id="generated-paths"
+				class="cms-settings-generated"
+				hx-post="<?= escape($pathsUrl) ?>"
+				hx-trigger="input from:#node-editor-form delay:500ms"
+				hx-include="#node-editor-form"
+				hx-swap="outerHTML"></div>
+		<?php endif ?>
+	<?php endif ?>
+	<?php if ($renderable): ?>
+		<div class="cms-settings-renderable">
+			<div class="cms-settings-section">
+				<label class="cms-toggle-line">
+					<span class="cms-toggle-line-copy">
+						<span class="cms-toggle-line-title"><?= escape(_('Veröffentlicht')) ?></span>
+						<span class="cms-toggle-line-subtitle">
+							<?= escape(_('Legt fest, ob die Seite für alle Besucher erreichbar ist.')) ?>
+						</span>
+					</span>
+					<input type="hidden" name="published" value="" />
+					<input
+						type="checkbox"
+						class="cms-switch"
+						name="published"
+						value="1"
+						<?= $node['published'] ?? false ? 'checked' : '' ?> />
+				</label>
+			</div>
+			<div class="cms-settings-section">
+				<label class="cms-toggle-line">
+					<span class="cms-toggle-line-copy">
+						<span class="cms-toggle-line-title"><?= escape(_('Versteckt')) ?></span>
+						<span class="cms-toggle-line-subtitle">
+							<?= escape(_('Versteckte Seiten werden in Auflistungen ignoriert.')) ?>
+						</span>
+					</span>
+					<input type="hidden" name="hidden" value="" />
+					<input
+						type="checkbox"
+						class="cms-switch"
+						name="hidden"
+						value="1"
+						<?= $node['hidden'] ?? false ? 'checked' : '' ?> />
+				</label>
+			</div>
+			<div class="cms-settings-row">
+				<div class="cms-field-label"><?= escape(_('Internal Document-ID')) ?>:</div>
+				<div class="cms-settings-value"><?= escape((string) ($node['uid'] ?? '')) ?></div>
+			</div>
+		</div>
+	<?php endif ?>
+</div>

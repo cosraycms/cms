@@ -9,6 +9,9 @@ use function Cosray\escape;
 $saved = (bool) $saved;
 $message = (string) $message;
 $errors = (array) $this->unwrap($errors);
+$published = (bool) ($this->unwrap($published ?? null) ?? false);
+$renderable = (bool) ($this->unwrap($renderable ?? null) ?? false);
+$preview = $this->unwrap($preview ?? null);
 
 $flatten = static function (mixed $issues, callable $self): array {
 	if (is_string($issues)) {
@@ -48,3 +51,17 @@ $messages = $flatten($errors, $flatten);
 		</ul>
 	<?php endif ?>
 </div>
+<?php if ($saved && $renderable): ?>
+	<span
+		id="editor-published"
+		class="cms-published large<?= $published ? ' published' : '' ?>"
+		hx-swap-oob="true"><?= escape($published ? _('veröffentlicht') : _('unveröffentlicht')) ?></span>
+<?php endif ?>
+<?php if ($saved && is_string($preview) && $preview !== ''): ?>
+	<div id="editor-preview" class="editor-preview" hx-swap-oob="true">
+		<button type="button" class="cms-preview-close" data-overlay-close>
+			<?= escape(_('schließen')) ?>
+		</button>
+		<iframe src="/preview<?= escape($preview) ?>" title="Preview"></iframe>
+	</div>
+<?php endif ?>

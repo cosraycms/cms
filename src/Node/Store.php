@@ -113,9 +113,9 @@ class Store
 		throw new RuntimeException(_('Could not generate a unique node uid'));
 	}
 
-	public function delete(object $node, Request $request): array
+	public function delete(object $node, Request $request, bool $requireJson = true): array
 	{
-		if ($request->header('Accept') !== 'application/json') {
+		if ($requireJson && $request->header('Accept') !== 'application/json') {
 			throw new HttpBadRequest($request);
 		}
 
