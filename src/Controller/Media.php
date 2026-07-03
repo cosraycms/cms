@@ -13,6 +13,7 @@ use Cosray\Assets\Size;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
+use enshrined\svgSanitize\Sanitizer;
 use Gumlet\ImageResize;
 
 class Media
@@ -50,9 +51,53 @@ class Media
 			mkdir($dir, 0o755, true);
 		}
 
-		move_uploaded_file($file['tmp_name'], "{$dir}/{$result['file']}");
+		$target = "{$dir}/{$result['file']}";
+
+		// SVGs are served inline from the docroot, so a stored `<script>`/`onload`
+		// would run in the site origin. Clean the markup before it ever lands on
+		// disk rather than moving the raw upload into place.
+		if (strtolower(pathinfo($result['file'], PATHINFO_EXTENSION)) === 'svg') {
+			$clean = $this->sanitizeSvg($file['tmp_name']);
+
+			if ($clean === null) {
+				return $response->json(
+					['ok' => false, 'error' => _('Die SVG-Datei konnte nicht sicher verarbeitet werden.')],
+					400,
+				);
+			}
+
+			file_put_contents($target, $clean);
+		} else {
+			move_uploaded_file($file['tmp_name'], $target);
+		}
 
 		return $response->json($result);
+	}
+
+	/**
+	 * Read and sanitize an uploaded SVG. Returns the cleaned markup, or null
+	 * if the file is not a genuine upload, cannot be read, or is rejected.
+	 */
+	private function sanitizeSvg(string $tmpFile): ?string
+	{
+		if (!is_uploaded_file($tmpFile)) {
+			return null;
+		}
+
+		$svg = file_get_contents($tmpFile);
+
+		return $svg === false ? null : self::sanitizeSvgMarkup($svg);
+	}
+
+	/**
+	 * Strip scripts, event handlers and remote references from SVG markup.
+	 * Returns null when the sanitizer rejects the markup as malformed.
+	 */
+	public static function sanitizeSvgMarkup(string $svg): ?string
+	{
+		$clean = new Sanitizer()->sanitize($svg);
+
+		return $clean === false ? null : $clean;
 	}
 
 	public function image(string $slug): Response
