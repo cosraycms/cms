@@ -22,13 +22,19 @@
 
 	let { value = {}, field = { name: 'richtext' }, locale = ZXX, locales }: Props = $props();
 
-	let map: LocaleMap<string> = $state({});
 	let active = $derived(field.translate ? locale : ZXX);
 
-	// Sync from host property assignments; the element owns the map
-	// between assignments.
+	function sync(): LocaleMap<string> {
+		return field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
+	}
+
+	// Synchronous init: the ProseMirror editor reads its content at
+	// mount, before effects run; the effect handles later host
+	// re-assignments (ensure* helpers are identity-stable).
+	let map: LocaleMap<string> = $state(sync());
+
 	$effect(() => {
-		map = field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
+		map = sync();
 	});
 
 	function notify() {

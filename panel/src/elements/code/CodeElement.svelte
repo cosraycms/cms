@@ -26,24 +26,35 @@
 
 	let { value = {}, meta = {}, field = { name: 'code' }, locale = ZXX, locales }: Props = $props();
 
-	let map: LocaleMap<string> = $state({});
-	let metaMap: Meta = $state({});
 	let active = $derived(field.translate ? locale : ZXX);
 	let syntaxOptions = $derived(
 		field.syntaxes && field.syntaxes.length > 0 ? field.syntaxes : [DEFAULT_CODE_SYNTAX],
 	);
 
-	$effect(() => {
-		map = field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
-	});
+	function sync(): LocaleMap<string> {
+		return field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
+	}
 
-	$effect(() => {
+	function syncMeta(): Meta {
 		const fallback = syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX;
 		const result = meta ?? {};
 		result.syntax ??= { [ZXX]: fallback };
 		const normalized = normalizeCodeSyntax((result.syntax[ZXX] as string | undefined) ?? fallback);
 		result.syntax[ZXX] = syntaxOptions.includes(normalized) ? normalized : fallback;
-		metaMap = result;
+		return result;
+	}
+
+	// Synchronous init: CodeMirror reads its content at mount, before
+	// effects run; the effects handle later host re-assignments.
+	let map: LocaleMap<string> = $state(sync());
+	let metaMap: Meta = $state(syncMeta());
+
+	$effect(() => {
+		map = sync();
+	});
+
+	$effect(() => {
+		metaMap = syncMeta();
 	});
 
 	function notify() {

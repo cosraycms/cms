@@ -4,8 +4,6 @@
 	import type { Block, LocaleMap, Meta } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
-	import { untrack } from 'svelte';
-
 	import { ZXX } from '$types/data';
 	import { provideNotify } from '../notify';
 	import BlocksPanel from './BlocksPanel.svelte';
@@ -27,16 +25,22 @@
 		locale = ZXX,
 	}: Props = $props();
 
-	let map: LocaleMap<Block[]> = $state({});
 	let active = $derived(field.translate ? locale : ZXX);
 
-	// Untracked: the effect must not depend on the map it writes, or the
-	// locale-slot default would loop it forever.
+	// The locale-slot default mutates the raw prop object, never the map
+	// state — reading the state the effect writes would loop it forever.
+	function sync(): LocaleMap<Block[]> {
+		const next = value ?? {};
+		next[active] ??= [];
+		return next;
+	}
+
+	// Synchronous init: children mount before effects run; the effect
+	// handles later host re-assignments and locale switches.
+	let map: LocaleMap<Block[]> = $state(sync());
+
 	$effect(() => {
-		map = value ?? {};
-		untrack(() => {
-			map[active] ??= [];
-		});
+		map = sync();
 	});
 
 	provideNotify(() => {

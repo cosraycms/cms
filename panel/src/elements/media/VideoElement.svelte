@@ -16,10 +16,17 @@
 
 	let { value = {}, field = { name: 'video' }, node = '', locale = ZXX }: Props = $props();
 
-	let map: LocaleMap<FileItem[]> = $state({});
+	function sync(): LocaleMap<FileItem[]> {
+		return value ?? {};
+	}
+
+	// Synchronous init: children mount before effects run and would
+	// otherwise start from an empty map; the effect handles later host
+	// re-assignments.
+	let map: LocaleMap<FileItem[]> = $state(sync());
 
 	$effect(() => {
-		map = value ?? {};
+		map = sync();
 	});
 
 	function notify() {

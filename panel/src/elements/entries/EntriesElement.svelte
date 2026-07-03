@@ -4,8 +4,6 @@
 	import type { EntryData, LocaleMap } from '$types/data';
 	import type { EntriesField } from '$types/fields';
 
-	import { untrack } from 'svelte';
-
 	import { ZXX } from '$types/data';
 	import { provideNotify } from '../notify';
 	import Entries from './Entries.svelte';
@@ -19,15 +17,20 @@
 
 	let { value = {}, field = { name: 'entries' }, node = '' }: Props = $props();
 
-	let map: LocaleMap<EntryData[]> = $state({});
+	// The neutral-slot default mutates the raw prop object, never the map
+	// state — reading the state the effect writes would loop it forever.
+	function sync(): LocaleMap<EntryData[]> {
+		const next = value ?? {};
+		next[ZXX] ??= [];
+		return next;
+	}
 
-	// Untracked: the effect must not depend on the map it writes, or the
-	// neutral-slot default would loop it forever.
+	// Synchronous init: children mount before effects run; the effect
+	// handles later host re-assignments.
+	let map: LocaleMap<EntryData[]> = $state(sync());
+
 	$effect(() => {
-		map = value ?? {};
-		untrack(() => {
-			map[ZXX] ??= [];
-		});
+		map = sync();
 	});
 
 	provideNotify(() => {
