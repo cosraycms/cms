@@ -4,6 +4,8 @@
 	import type { Block, LocaleMap, Meta } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
+	import { untrack } from 'svelte';
+
 	import { ZXX } from '$types/data';
 	import { provideNotify } from '../notify';
 	import BlocksPanel from './BlocksPanel.svelte';
@@ -28,9 +30,13 @@
 	let map: LocaleMap<Block[]> = $state({});
 	let active = $derived(field.translate ? locale : ZXX);
 
+	// Untracked: the effect must not depend on the map it writes, or the
+	// locale-slot default would loop it forever.
 	$effect(() => {
 		map = value ?? {};
-		map[active] ??= [];
+		untrack(() => {
+			map[active] ??= [];
+		});
 	});
 
 	provideNotify(() => {

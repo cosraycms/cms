@@ -4,6 +4,8 @@
 	import type { EntryData, LocaleMap } from '$types/data';
 	import type { EntriesField } from '$types/fields';
 
+	import { untrack } from 'svelte';
+
 	import { ZXX } from '$types/data';
 	import { provideNotify } from '../notify';
 	import Entries from './Entries.svelte';
@@ -19,9 +21,13 @@
 
 	let map: LocaleMap<EntryData[]> = $state({});
 
+	// Untracked: the effect must not depend on the map it writes, or the
+	// neutral-slot default would loop it forever.
 	$effect(() => {
 		map = value ?? {};
-		map[ZXX] ??= [];
+		untrack(() => {
+			map[ZXX] ??= [];
+		});
 	});
 
 	provideNotify(() => {
