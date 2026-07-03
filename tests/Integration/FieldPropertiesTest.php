@@ -64,8 +64,8 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		// From Validate capability
 		$this->assertArrayHasKey('validators', $properties);
-		$this->assertContains('minLength:3', $properties['validators']);
-		$this->assertContains('maxLength:100', $properties['validators']);
+		$this->assertContains('minlen:3', $properties['validators']);
+		$this->assertContains('maxlen:100', $properties['validators']);
 	}
 
 	public function testFieldPropertiesHandlesHiddenAndImmutable(): void

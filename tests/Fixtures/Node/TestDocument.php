@@ -23,7 +23,7 @@ class TestDocument implements Title
 {
 	#[Label('Document Title')]
 	#[Required]
-	#[Validate('minLength:3', 'maxLength:100')]
+	#[Validate('minlen:3', 'maxlen:100')]
 	public Text $title;
 
 	#[Label('Introduction')]
