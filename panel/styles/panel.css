@@ -12,3 +12,7 @@
 @import './tabs.css' layer(panel);
 @import './modal.css' layer(panel);
 @import './toast.css' layer(panel);
+@import './util.css' layer(panel);
+@import './grid.css' layer(panel);
+@import './code.css' layer(panel);
+@import './richtext.css' layer(panel);
