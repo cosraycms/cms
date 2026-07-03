@@ -90,27 +90,9 @@ final class Login extends Panel
 		return $this->redirect($factory, $this->panelPath() . '/login');
 	}
 
-	private function formData(): array
+	protected function formData(): array
 	{
-		$data = $this->request->form() ?? [];
-		$contentType = strtolower(trim(explode(';', $this->request->header('Content-Type'))[0]));
-
-		if ($data === [] && $contentType === 'application/json') {
-			$decoded = $this->request->json();
-
-			if (is_array($decoded)) {
-				$data = $decoded;
-			}
-		}
-
-		if ($data === [] && $contentType === 'application/x-www-form-urlencoded') {
-			parse_str((string) $this->request->body(), $parsed);
-
-			if (is_array($parsed)) {
-				$data = $parsed;
-			}
-		}
-
+		$data = parent::formData();
 		$rememberme = $data['rememberme'] ?? false;
 		$data['rememberme'] = in_array($rememberme, [true, 1, '1', 'true', 'on'], true);
 

@@ -6,7 +6,9 @@ namespace Cosray\Controller\Panel;
 
 use Celemas\Core\Exception\HttpBadRequest;
 use Celemas\Core\Exception\HttpNotFound;
+use Celemas\Core\Factory\Factory;
 use Celemas\Core\Request;
+use Celemas\Core\Response;
 use Celemas\Wire\Creator;
 use Cosray\Bootstrap;
 use Cosray\Cms;
@@ -17,10 +19,13 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\Node;
+use Cosray\Node\PathManager;
 use Cosray\Node\Serializer;
+use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
+use Cosray\Panel\FormPatch;
 
 final class Editor extends Panel
 {
@@ -59,6 +64,69 @@ final class Editor extends Panel
 			query: $query,
 			context: $context,
 		);
+	}
+
+	public function save(
+		Context $context,
+		Cms $cms,
+		Factory $factory,
+		string $collection,
+		string $node,
+	): Response|array {
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+		$result = $cms->node->byUid($node, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Node::unwrap($result);
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$data = $serializer->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
+
+		$submitted = $this->formData()['content'] ?? [];
+		$patch = new FormPatch($data['fields']);
+		$data['content'] = $patch->content(
+			$data['content'],
+			is_array($submitted) ? $submitted : [],
+		);
+
+		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$htmx = $this->request->hasHeader('HX-Request');
+
+		try {
+			$store->save($nodeObj, $data, $this->request, $context->locales());
+		} catch (HttpBadRequest $e) {
+			if (!$htmx) {
+				// Non-htmx fallback follows the PRG pattern; errors are
+				// reported through the htmx path the panel always uses.
+				return Response::create($factory)->redirect($links->edit($node), 303);
+			}
+
+			$payload = is_array($e->payload()) ? $e->payload() : [];
+
+			return [
+				'saved' => false,
+				'message' => (string) ($payload['message'] ?? _('Incomplete or invalid data')),
+				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
+			];
+		}
+
+		if (!$htmx) {
+			return Response::create($factory)->redirect($links->edit($node), 303);
+		}
+
+		return [
+			'saved' => true,
+			'message' => _('Gespeichert'),
+			'errors' => [],
+		];
 	}
 
 	private function nodePayload(Cms $cms, string $uid): array

@@ -54,6 +54,31 @@ abstract class Panel
 		return $this->config->panel->path;
 	}
 
+	/**
+	 * Submitted form data with fallbacks for request pipelines that do
+	 * not populate the parsed body (JSON and urlencoded raw bodies).
+	 */
+	protected function formData(): array
+	{
+		$data = $this->request->form() ?? [];
+		$contentType = strtolower(trim(explode(';', $this->request->header('Content-Type'))[0]));
+
+		if ($data === [] && $contentType === 'application/json') {
+			$decoded = $this->request->json();
+
+			if (is_array($decoded)) {
+				$data = $decoded;
+			}
+		}
+
+		if ($data === [] && $contentType === 'application/x-www-form-urlencoded') {
+			parse_str((string) $this->request->body(), $parsed);
+			$data = $parsed;
+		}
+
+		return $data;
+	}
+
 	protected function localeId(): string
 	{
 		$locale = $this->request->get('locale', null);

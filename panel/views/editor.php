@@ -42,7 +42,14 @@ $span = static function (mixed $value, int $fallback): string {
 								<?= escape($name) ?>
 							</a>
 						</div>
-						<div class="actions"></div>
+						<div class="actions">
+							<output id="editor-status" class="editor-status" role="status"></output>
+							<?php if ($mode === 'edit'): ?>
+								<button class="cms-button primary" type="submit" form="node-editor-form">
+									<?= escape(_('Speichern')) ?>
+								</button>
+							<?php endif ?>
+						</div>
 					</div>
 				</header>
 				<div class="cms-node-header-frame">
@@ -57,10 +64,13 @@ $span = static function (mixed $value, int $fallback): string {
 				<div class="cms-document-inner">
 					<div class="cms-pane">
 						<div class="cms-pane-card">
+							<div id="editor-errors" class="editor-errors" hidden></div>
 							<form
+								id="node-editor-form"
 								class="cms-node-form"
 								method="post"
-								action="<?= escape($action) ?>">
+								action="<?= escape($action) ?>"
+								hx-swap="none">
 								<div class="field-grid">
 									<?php foreach ($fields as $field): ?>
 										<?php if ($field['hidden'] ?? false) {

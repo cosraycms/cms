@@ -245,6 +245,14 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('editor'));
+				$panel
+					->post(
+						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
+						[Panel\Editor::class, 'save'],
+						'editor.save',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor-save'));
 
 				foreach ($this->panelPages as $page) {
 					$panel
