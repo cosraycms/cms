@@ -48,7 +48,7 @@ class ValidatorFactory
 	{
 		$shape
 			->add($fieldName, $field->shape())
-			->label($field->getLabel())
+			->label($field->getLabel() ?? $fieldName)
 			->optional()
 			->nullable();
 	}
