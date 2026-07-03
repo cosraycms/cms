@@ -243,6 +243,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'action="/cp/collection/test-articles/panel-editor-a/delete"',
 			$html,
 		);
+		// Native validation cannot handle legitimately hidden controls
+		// (locale variants, panes) — the server validates.
+		$this->assertStringContainsString('novalidate', $html);
 		$this->assertStringContainsString('cms-headline-title', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('cosray-node-editor-data', $html);

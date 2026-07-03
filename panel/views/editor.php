@@ -123,12 +123,17 @@ $span = static function (mixed $value, int $fallback): string {
 			<div class="cms-document">
 				<div class="cms-document-inner">
 					<div id="editor-errors" class="editor-errors" hidden></div>
+					<?php // novalidate: the form legitimately hides controls (locale
+
+					// variants, panes, meta dialogs), which native validation cannot
+					// handle; the server validates and reports out-of-band. ?>
 					<form
 						id="node-editor-form"
 						class="cms-node-form"
 						method="post"
 						action="<?= escape($action) ?>"
-						hx-swap="none">
+						hx-swap="none"
+						novalidate>
 						<div class="cms-pane" data-pane="content">
 							<div class="cms-pane-card">
 								<div class="field-grid">

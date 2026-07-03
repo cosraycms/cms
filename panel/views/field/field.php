@@ -66,8 +66,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					class="cms-locale-variant"
 					data-locale="<?= escape($locale['id']) ?>"
 					<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
+					<?php // Required applies to the default locale only — the same
+
+					// rule the server-side shape validates. ?>
 					<?php $this->insert('field/control', [
-						'field' => $field,
+						'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
 						'control' => $control,
 						'id' => $inputId($locale['id']),
 						'name' => "content[{$fieldName}][value][{$locale['id']}]",
