@@ -8,6 +8,7 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 
 final class PanelEditorRouteTest extends End2EndTestCase
 {
@@ -23,6 +24,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
+		$plugin->node(TestConditionalDocument::class);
 
 		return $plugin;
 	}
@@ -86,6 +88,38 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('"allowedFiles"', $html);
 		$this->assertStringNotContainsString('/panel/boot', $html);
 		$this->assertStringNotContainsString('/panel/api', $html);
+	}
+
+	public function testConditionalFieldsCarryTheirConditionIntoTheMarkup(): void
+	{
+		$this->authenticateAs('editor');
+		$conditionalType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-conditional-document'",
+		)->first();
+		$typeId = $conditionalType
+			? (int) $conditionalType['type']
+			: $this->createTestType('test-conditional-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-when',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'multiDay' => ['type' => 'checkbox', 'value' => ['zxx' => false]],
+			],
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-when');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString(
+			'data-when=\'{"field":"multiDay","op":"truthy","value":null}\'',
+			$html,
+		);
+		$this->assertStringContainsString(
+			'data-when=\'{"field":"title","op":"eq","value":"hero"}\'',
+			$html,
+		);
 	}
 
 	public function testNodeApiPayloadCarriesControlDescriptors(): void

@@ -41,6 +41,9 @@ abstract class Field implements
 
 	protected ?Services $services = null;
 
+	/** The stored data as-is, unaffected by When deactivation. */
+	protected array $raw = [];
+
 	final public function __construct(
 		public readonly string $name,
 		public readonly Owner $owner,
@@ -65,9 +68,13 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
-	public function init(Services $services, ?ReflectionProperty $property = null): void
-	{
+	public function init(
+		Services $services,
+		?ReflectionProperty $property = null,
+		array $raw = [],
+	): void {
 		$this->services = $services;
+		$this->raw = $raw;
 
 		if ($property === null) {
 			return;
@@ -89,6 +96,15 @@ abstract class Field implements
 	public function services(): Services
 	{
 		return $this->services ?? throw new RuntimeException("Field '{$this->name}' is not initialized");
+	}
+
+	/**
+	 * The stored data as-is — the deliberate bypass around When
+	 * deactivation for consumers that need the dormant value.
+	 */
+	public function raw(): array
+	{
+		return $this->raw;
 	}
 
 	public function control(): Control

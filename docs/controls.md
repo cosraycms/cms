@@ -109,6 +109,22 @@ Hand-written ES modules are sufficient — no build step required.
 
   Dispatch only from user-initiated edits, never in response to a property assignment.
 
+## Conditional fields
+
+A field can be tied to a sibling field's value with the `When` schema attribute:
+
+```php
+#[When('multiDay')]                    // truthy
+#[When('layout', 'hero')]              // equality
+#[When('template', in: ['a', 'b'])]    // membership
+#[When('teaser', op: 'empty')]         // explicit operator: truthy, eq, neq, in, empty, notEmpty
+public Date $endDate;
+```
+
+The editor hides an inactive field (its inputs stay in the form, `required` is suspended) and shows it again the moment the condition holds — the stored value is **never** cleared by toggling. On the frontend and API the same condition is enforced at read time: an inactive field presents as empty, without any template code checking the source field. `Field::raw()` deliberately bypasses the enforcement for consumers that need the dormant value.
+
+Limitations (v1): condition sources must be primitive, non-translated fields (checkbox, option, text, number); conditions inside repeaters are not evaluated; combining `#[When]` with `#[Required]` still enforces required on save while the field is inactive.
+
 ## The window.Cosray bridge
 
 On panel editor pages the editor installs `window.Cosray`, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:

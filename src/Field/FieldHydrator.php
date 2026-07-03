@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Cosray\Schema\When;
 use Cosray\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
@@ -89,10 +90,27 @@ class FieldHydrator
 	): Field {
 		$fieldName = $property->getName();
 		$data = $content[$fieldName] ?? [];
-		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $data));
 
-		$field->init($this->services, $property);
+		// A field whose When condition is not met hydrates with empty
+		// data: it presents as empty to every consumer (read-time
+		// enforcement) while the stored value survives untouched and
+		// stays reachable through Field::raw().
+		$active = $this->isActive($property, $content);
+		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $active ? $data : []));
+
+		$field->init($this->services, $property, $data);
 
 		return $field;
+	}
+
+	private function isActive(ReflectionProperty $property, array $content): bool
+	{
+		foreach ($property->getAttributes(When::class) as $attr) {
+			if (!Condition::active($attr->newInstance()->condition(), $content)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

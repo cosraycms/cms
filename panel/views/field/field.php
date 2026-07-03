@@ -30,11 +30,14 @@ $inputId = static fn(string $locale): string => "field-{$fieldName}-{$locale}";
 $labelFor = $variants ? $inputId($defaultLocale) : $inputId($neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
+$when = $field['when'] ?? null;
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 
 <div
 	class="cms-field<?= $required ? ' required' : '' ?>"
-	<?= $required ? 'data-required="true"' : '' ?>>
+	<?= $required ? 'data-required="true"' : '' ?>
+	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<label for="<?= escape($labelFor) ?>" class="cms-field-label">
 		<div><?= escape((string) ($field['label'] ?? $fieldName)) ?></div>
 		<?php if ($tabs): ?>
