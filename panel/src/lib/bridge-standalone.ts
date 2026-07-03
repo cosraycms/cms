@@ -1,5 +1,4 @@
-import type { BridgeSystem, CosrayBridge, UploadResult } from '$lib/bridge';
-import type { ModalOptions } from '$lib/modal';
+import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$lib/bridge';
 
 /**
  * Installs window.Cosray without the editor island: the system payload

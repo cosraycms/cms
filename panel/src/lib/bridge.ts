@@ -1,4 +1,6 @@
-import type { ModalOptions } from '$lib/modal';
+export type ModalOptions = {
+	hideClose?: boolean;
+};
 
 export type UploadResult = {
 	ok: boolean;

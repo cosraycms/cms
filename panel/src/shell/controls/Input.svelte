@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { system, systemLocale } from '$lib/sys';
 	import { ZXX, type LocaleMap } from '$types/data';
-	import { setDirty } from '$lib/state';
 	import Label from '$shell/Label.svelte';
 
 	type Props = {
@@ -24,10 +23,6 @@
 
 	let lang = $state(systemLocale($system));
 	let localized = $derived(value as LocaleMap<string>);
-
-	function oninput() {
-		setDirty();
-	}
 </script>
 
 <div class="cms-field" class:required>
@@ -46,7 +41,6 @@
 						{required}
 						autocomplete="off"
 						bind:value={localized[locale.id]}
-						{oninput}
 					/>
 				{/if}
 			{/each}
@@ -59,7 +53,6 @@
 				{required}
 				autocomplete="off"
 				bind:value
-				{oninput}
 			/>
 		{:else}
 			<input
@@ -70,7 +63,6 @@
 				{required}
 				autocomplete="off"
 				bind:value={value[ZXX]}
-				{oninput}
 			/>
 		{/if}
 	</div>

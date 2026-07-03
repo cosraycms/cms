@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { _ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import { currentNode as node, currentFields as fields } from '$lib/state';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoImage from '$shell/icons/IcoImage.svelte';
 	import IcoLink from '$shell/icons/IcoLink.svelte';
@@ -15,9 +14,25 @@
 		add: (value: string, blank: boolean) => void;
 		value: string;
 		blank: boolean;
+		// Media browsing needs the surrounding node's fields and content;
+		// element controls cannot provide them yet, so the tabs only show
+		// when a caller passes them in.
+		node?: string | null;
+		fields?: { name: string; type: string }[] | null;
+		content?: Record<string, { value?: { zxx?: unknown } }> | null;
 	};
 
-	let { close, add, value = $bindable(), blank = $bindable() }: Props = $props();
+	let {
+		close,
+		add,
+		value = $bindable(),
+		blank = $bindable(),
+		node = null,
+		fields = null,
+		content = null,
+	}: Props = $props();
+
+	let browsable = $derived(node !== null && fields !== null && content !== null);
 
 	let currentTab = $state('manually');
 
@@ -37,13 +52,13 @@
 	}
 
 	function media(field: string): FileItem[] {
-		const content = $node?.content[field];
+		const entry = content?.[field];
 
-		if (!content || !('value' in content)) {
+		if (!entry || !('value' in entry)) {
 			return [];
 		}
 
-		const value = content.value.zxx;
+		const value = entry.value?.zxx;
 
 		return Array.isArray(value) ? (value as FileItem[]) : [];
 	}
@@ -63,26 +78,32 @@
 						<IcoLink />
 						<span>{_('Manueller Link')}</span>
 					</button>
-					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
-						<IcoImage />
-						<span>{_('Bilder')}</span>
-					</button>
-					<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
-						<IcoDocument />
-						<span>{_('Dateien/Dokumente')}</span>
-					</button>
+					{#if browsable}
+						<button
+							class="tab"
+							class:active={currentTab === 'images'}
+							onclick={changeTab('images')}
+						>
+							<IcoImage />
+							<span>{_('Bilder')}</span>
+						</button>
+						<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
+							<IcoDocument />
+							<span>{_('Dateien/Dokumente')}</span>
+						</button>
+					{/if}
 				</nav>
 			</div>
 		</div>
 		<div class="files cms-modal-link-files">
 			{#if currentTab === 'images'}
-				{#if $fields && $node}
+				{#if browsable && fields && node}
 					<div class="cms-modal-link-images-grid">
-						{#each $fields as field (field)}
+						{#each fields as field (field)}
 							{#if field.type === 'Cosray\\Field\\Image'}
 								{#each media(field.name) as file}
 									{#if file.file}
-										<Image node={$node.uid} file={file.file} {clickFile} bind:current={value} />
+										<Image {node} file={file.file} {clickFile} bind:current={value} />
 									{/if}
 								{/each}
 							{/if}
@@ -90,13 +111,13 @@
 					</div>
 				{/if}
 			{:else if currentTab === 'files'}
-				{#if $fields && $node}
+				{#if browsable && fields && node}
 					<div>
-						{#each $fields as field (field)}
+						{#each fields as field (field)}
 							{#if field.type === 'Cosray\\Field\\File'}
 								{#each media(field.name) as file}
 									{#if file.file}
-										<File node={$node.uid} file={file.file} {clickFile} bind:current={value} />
+										<File {node} file={file.file} {clickFile} bind:current={value} />
 									{/if}
 								{/each}
 							{/if}
