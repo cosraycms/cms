@@ -12,6 +12,7 @@ $defaultLocale = (string) $defaultLocale;
 $routable = (bool) $routable;
 $renderable = (bool) $renderable;
 $pathsUrl = $this->unwrap($pathsUrl);
+$generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
 $paths = is_array($node['paths'] ?? null) ? $node['paths'] : [];
 $handle = $node['handle'] ?? null;
 ?>
@@ -23,6 +24,7 @@ $handle = $node['handle'] ?? null;
 		<div class="cms-settings-handle-value">
 			<input
 				id="cms-node-handle"
+				class="js-path-source"
 				type="text"
 				name="handle"
 				maxlength="64"
@@ -37,6 +39,7 @@ $handle = $node['handle'] ?? null;
 					<div class="cms-field-label"><?= escape($locale['title']) ?>:</div>
 					<div class="cms-settings-path-value">
 						<input
+							class="js-path-source"
 							type="text"
 							name="paths[<?= escape($locale['id']) ?>]"
 							value="<?= escape((string) ($paths[$locale['id']] ?? '')) ?>" />
@@ -45,13 +48,11 @@ $handle = $node['handle'] ?? null;
 			<?php endforeach ?>
 		</div>
 		<?php if (is_string($pathsUrl)): ?>
-			<div
-				id="generated-paths"
-				class="cms-settings-generated"
-				hx-post="<?= escape($pathsUrl) ?>"
-				hx-trigger="input from:#node-editor-form delay:500ms"
-				hx-include="#node-editor-form"
-				hx-swap="outerHTML"></div>
+			<?php $this->insert('editor-paths', [
+				'paths' => $generatedPaths,
+				'submitted' => $paths,
+				'pathsUrl' => $pathsUrl,
+			]) ?>
 		<?php endif ?>
 	<?php endif ?>
 	<?php if ($renderable): ?>

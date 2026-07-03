@@ -169,6 +169,38 @@ final class RoutePathGeneratorTest extends TestCase
 		$this->assertSame('/stations/[title]', $paths['en']);
 	}
 
+	public function testReferencedFieldsListsContentFieldsOnly(): void
+	{
+		$generator = $this->generator();
+
+		// Bare names are this node's content fields; uid/handle/parent are not.
+		$this->assertSame(['title'], $generator->referencedFields('/pages/{title}'));
+		$this->assertSame([], $generator->referencedFields('/test/{uid}'));
+		$this->assertSame([], $generator->referencedFields('/x/{handle}'));
+		$this->assertSame(['title'], $generator->referencedFields('/{parent.title}/{title}'));
+		$this->assertSame([], $generator->referencedFields('/{parent(2).countryCode}/{parent}'));
+		$this->assertSame([], $generator->referencedFields('/{parent?}/{parent(1).title}'));
+
+		// Transformers are stripped from the selector.
+		$this->assertSame(['title'], $generator->referencedFields('/stations/{title|lowercase}'));
+
+		// Distinct fields keep first-seen order.
+		$this->assertSame(
+			['countryCode', 'stationId', 'title'],
+			$generator->referencedFields('/{countryCode|lowercase}-{stationId}-{title|underscore}'),
+		);
+
+		// A per-locale map is the union of all templates, de-duplicated.
+		$this->assertSame(
+			['title', 'subtitle'],
+			$generator->referencedFields(['de' => '/de/{title}', 'en' => '/en/{title}/{subtitle}']),
+		);
+
+		// No route / non-string route yields nothing.
+		$this->assertSame([], $generator->referencedFields(null));
+		$this->assertSame([], $generator->referencedFields('/static/path'));
+	}
+
 	private function generator(): RoutePathGenerator
 	{
 		return new RoutePathGenerator($this->db(), new Types());

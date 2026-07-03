@@ -12,6 +12,8 @@ $slug = (string) $slug;
 $node = (array) $this->unwrap($node);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+$generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
+$pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
 $system = (array) $this->unwrap($system);
 $panelPath = (string) $panelPath;
 $panelBase = $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/';
@@ -152,7 +154,12 @@ $span = static function (mixed $value, int $fallback): string {
 										<?php if ($field['hidden'] ?? false) {
 											continue;
 										} ?>
-										<div style="
+										<?php $isPathSource = in_array(
+											(string) ($field['name'] ?? ''),
+											$pathSourceFields,
+											true,
+										); ?>
+										<div<?= $isPathSource ? ' class="js-path-source"' : '' ?> style="
 											grid-column: <?= $span($field['width'] ?? null, 100) ?>;
 											grid-row: <?= $span($field['rows'] ?? null, 1) ?>">
 											<?php $this->insert('field/field', [
@@ -177,6 +184,7 @@ $span = static function (mixed $value, int $fallback): string {
 										'routable' => $routable,
 										'renderable' => $renderable,
 										'pathsUrl' => $edit ? $links->paths($uid) : null,
+										'generatedPaths' => $generatedPaths,
 									]) ?>
 								</div>
 							</div>

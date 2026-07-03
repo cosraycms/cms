@@ -135,6 +135,71 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
 	}
 
+	public function testSettingsPaneScopesPathPreviewToRouteInputs(): void
+	{
+		$this->authenticateAs('editor');
+		$uid = 'panel-editor-page';
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $this->pageTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'A Page']],
+			],
+		]);
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/' . $uid);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+
+		// Handle and path inputs carry the js-path-source hook so the preview
+		// only recomputes when a route-determining input changes.
+		$this->assertStringContainsString('id="cms-node-handle"', $html);
+		$this->assertStringContainsString('class="js-path-source"', $html);
+		$this->assertStringContainsString('name="paths[en]"', $html);
+
+		// The preview trigger is scoped to those inputs, not the whole form,
+		// so editing content fields no longer fires the paths POST.
+		$this->assertStringContainsString('id="generated-paths"', $html);
+		$this->assertStringContainsString('from:.js-path-source', $html);
+		$this->assertStringNotContainsString('from:#node-editor-form', $html);
+
+		// The initial preview renders server-side (route is /test/{uid}).
+		$this->assertStringContainsString('cms-generated-path', $html);
+		$this->assertStringContainsString('/test/' . $uid, $html);
+
+		// The /test/{uid} route references no content field, so no field
+		// wrapper is marked (only the handle input carries js-path-source).
+		$this->assertStringNotContainsString('<div class="js-path-source"', $html);
+	}
+
+	public function testRouteReferencedContentFieldsAreMarkedAsPathSources(): void
+	{
+		$this->authenticateAs('editor');
+		$uid = 'panel-editor-titled';
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $this->createTestType('parent-path-route-page'),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Titled Page']],
+			],
+		]);
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/' . $uid);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+
+		// The route /{parent}/{title} references the title content field, so
+		// its wrapper is marked js-path-source and edits to it live-refresh
+		// the preview; the referenced input stays inside that wrapper.
+		$this->assertStringContainsString('<div class="js-path-source"', $html);
+		$this->assertMatchesRegularExpression(
+			'/<div class="js-path-source".*?name="content\[title\]\[value\]/s',
+			$html,
+		);
+	}
+
 	public function testNodeApiPayloadCarriesControlDescriptors(): void
 	{
 		$this->authenticateAs('editor');
@@ -302,5 +367,15 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->articleTypeId = (int) $type['type'];
 
 		return $this->articleTypeId;
+	}
+
+	private function pageTypeId(): int
+	{
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$this->assertNotEmpty($type);
+
+		return (int) $type['type'];
 	}
 }

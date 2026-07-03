@@ -12,7 +12,7 @@ $submitted = (array) $this->unwrap($submitted);
 	id="generated-paths"
 	class="cms-settings-generated"
 	hx-post="<?= escape((string) $pathsUrl) ?>"
-	hx-trigger="input from:#node-editor-form delay:500ms"
+	hx-trigger="input from:.js-path-source delay:500ms, change from:.js-path-source delay:500ms"
 	hx-include="#node-editor-form"
 	hx-swap="outerHTML">
 	<?php foreach ($paths as $locale => $path): ?>

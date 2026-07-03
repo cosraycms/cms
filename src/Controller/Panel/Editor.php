@@ -38,14 +38,29 @@ final class Editor extends Panel
 	{
 		[$name, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
+		$result = $cms->node->byUid($node, published: null);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Node::unwrap($result);
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$data = $serializer->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
 
 		return $this->editorContext(
 			mode: 'edit',
 			name: $name,
 			collection: $collection,
-			node: $this->nodePayload($cms, $node),
+			node: $data,
 			query: $query,
 			context: $context,
+			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
+			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
 		);
 	}
 
@@ -325,24 +340,6 @@ final class Editor extends Panel
 		return null;
 	}
 
-	private function nodePayload(Cms $cms, string $uid): array
-	{
-		$result = $cms->node->byUid($uid, published: null);
-
-		if (!$result) {
-			throw new HttpNotFound($this->request);
-		}
-
-		$node = Node::unwrap($result);
-		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
-
-		return $serializer->read(
-			$node,
-			NodeFactory::dataFor($node),
-			NodeFactory::fieldNamesFor($node),
-		);
-	}
-
 	private function blueprintPayload(Cms $cms, Context $context, string $type): array
 	{
 		$class = $this->container
@@ -467,6 +464,35 @@ final class Editor extends Panel
 		);
 	}
 
+	/**
+	 * The route paths the current node would generate, previewed in the
+	 * settings pane. Empty for non-routable types and create mode.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, string>
+	 */
+	private function generatedPaths(Context $context, object $node, array $data): array
+	{
+		if (!(bool) $this->types()->get($node::class, 'routable', false)) {
+			return [];
+		}
+
+		return new RoutePathGenerator($context->db, $this->types())
+			->preview($node::class, $data, $context->locales());
+	}
+
+	/**
+	 * The node's own content-field names its route template references, so
+	 * the editor marks exactly those inputs to live-refresh the path preview.
+	 *
+	 * @return list<string>
+	 */
+	private function pathSourceFields(Context $context, object $node): array
+	{
+		return new RoutePathGenerator($context->db, $this->types())
+			->referencedFields($this->types()->get($node::class, 'route'));
+	}
+
 	private function editorContext(
 		string $mode,
 		string $name,
@@ -474,6 +500,8 @@ final class Editor extends Panel
 		array $node,
 		CollectionQuery $query,
 		Context $context,
+		array $generatedPaths = [],
+		array $pathSourceFields = [],
 	): array {
 		$locales = array_map(
 			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title],
@@ -490,6 +518,8 @@ final class Editor extends Panel
 			'system' => new System($this->config, $context->locales())->payload(),
 			'queryState' => $query,
 			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
+			'generatedPaths' => $generatedPaths,
+			'pathSourceFields' => $pathSourceFields,
 		]);
 	}
 

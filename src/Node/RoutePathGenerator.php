@@ -60,6 +60,50 @@ final class RoutePathGenerator
 	}
 
 	/**
+	 * The node's own content-field names a route template references, so the
+	 * editor can live-preview generated paths when exactly those inputs
+	 * change. Excludes uid, handle and the parent family — none of which are
+	 * editable content fields of this node.
+	 *
+	 * @return list<string>
+	 */
+	public function referencedFields(mixed $route): array
+	{
+		$templates = match (true) {
+			is_array($route) => array_values($route),
+			is_string($route) => [$route],
+			default => [],
+		};
+		$fields = [];
+
+		foreach ($templates as $template) {
+			if (!is_string($template) || !preg_match_all('/\{([^{}]+)\}/', $template, $matches)) {
+				continue;
+			}
+
+			foreach ($matches[1] as $inner) {
+				$selector = trim(explode('|', $inner)[0] ?? '');
+
+				if (
+					$selector === ''
+					|| $selector === 'uid'
+					|| $selector === 'handle'
+					|| $selector === 'parent'
+					|| str_starts_with($selector, 'parent.')
+					|| str_starts_with($selector, 'parent(')
+					|| str_starts_with($selector, 'parent?')
+				) {
+					continue;
+				}
+
+				$fields[$selector] = true;
+			}
+		}
+
+		return array_keys($fields);
+	}
+
+	/**
 	 * @param array<string, string>|string|mixed $route
 	 * @param array<string, mixed> $data
 	 * @return array<string, string>
