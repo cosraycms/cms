@@ -159,9 +159,11 @@
 			content: value,
 			mode: toolbar,
 			bubbleElement: bubble,
+			// The bind write must land before notify: the element serializes
+			// the bound map into the cosray-change detail when notified.
 			onUpdate: (html) => {
-				notify();
 				value = html;
+				notify();
 			},
 			onStateChange: updateEditorState,
 		});
@@ -174,9 +176,9 @@
 	function changeSource(event: KeyboardEvent) {
 		const target = event.target as HTMLTextAreaElement;
 
-		notify();
 		editor?.setContent(target.value);
 		value = target.value;
+		notify();
 	}
 
 	function run(command: (state: any, dispatch?: any, view?: any) => boolean) {
