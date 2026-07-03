@@ -1,0 +1,41 @@
+/* Toast stack rendered by the standalone bridge (plain DOM). Ported
+   from the former island's scoped Toasts styles. */
+
+.toasts {
+	position: fixed;
+	z-index: 50;
+	font-size: var(--font-size-sm);
+}
+
+.toasts.pos-bottom {
+	bottom: 0;
+	right: 0;
+	padding-right: var(--space-8);
+}
+
+.toast {
+	position: relative;
+	display: block;
+	margin-bottom: var(--space-2);
+	padding: var(--space-4) var(--space-4) var(--space-5);
+	border: none;
+	text-align: left;
+	cursor: pointer;
+	color: var(--color-white);
+}
+
+.toast:last-child {
+	margin-bottom: var(--space-4);
+}
+
+.toast-success {
+	background-color: var(--color-success);
+}
+
+.toast-error {
+	background-color: var(--color-danger);
+}
+
+.toast-warning {
+	background-color: var(--color-warning);
+}

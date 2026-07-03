@@ -9,4 +9,6 @@
 @import './editor.css' layer(panel);
 @import './fields.css' layer(panel);
 @import './node.css' layer(panel);
+@import './modal.css' layer(panel);
+@import './toast.css' layer(panel);
 @import './node-placeholder.css' layer(panel);

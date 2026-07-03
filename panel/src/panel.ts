@@ -1,10 +1,13 @@
 import '../styles/panel.css';
+import '$lib/host';
+
+import type { BridgeSystem } from '$lib/bridge';
+
+import { installBridge } from '$lib/bridge-standalone';
+import { configureRuntime } from '$lib/runtime';
 
 const mainSelector = '#main';
-const editorSelector = '[data-cosray-node-editor]';
 const cleanups: Array<() => void> = [];
-
-let editor: Promise<typeof import('./editor/main')> | null = null;
 
 const currentPath = () => window.location.pathname.replace(/\/$/, '') || '/';
 
@@ -15,8 +18,6 @@ const linkPath = (link: HTMLAnchorElement) => {
 		return '';
 	}
 };
-
-const isElement = (value: unknown): value is Element => value instanceof Element;
 
 function listen<K extends keyof DocumentEventMap>(
 	type: K,
@@ -65,23 +66,26 @@ function focusSearch(event: KeyboardEvent): void {
 	}
 }
 
-function hasEditor(root: ParentNode): boolean {
-	return (
-		(isElement(root) && root.matches(editorSelector)) || root.querySelector(editorSelector) !== null
-	);
-}
+// Editor pages embed the system payload; it configures the runtime for
+// module resolution and installs the window.Cosray bridge the element
+// controls rely on.
+function bootEditor(): void {
+	const script = document.getElementById('cosray-system-data');
 
-async function mountEditor(root: ParentNode = document): Promise<void> {
-	// Once the editor module has loaded (a node was opened), always hand off so
-	// it can release a previous instance whose host was swapped out — even when
-	// the new page has no editor host. Until then, skip work for hostless pages
-	// so the editor chunk stays unloaded until the first node is opened.
-	if (editor === null && !hasEditor(root)) {
+	if (!(script instanceof HTMLScriptElement)) {
 		return;
 	}
 
-	editor ??= import('./editor/main');
-	(await editor).mountEditor(root);
+	try {
+		const data = JSON.parse(script.textContent ?? '') as {
+			panel: string;
+			system: BridgeSystem;
+		};
+		configureRuntime({ panelBase: data.panel });
+		installBridge(data.system);
+	} catch (error) {
+		console.error('Could not parse the editor system payload.', error);
+	}
 }
 
 // A boosted navigation swaps a fragment whose root is itself #main into the
@@ -98,20 +102,20 @@ function denestMain(): void {
 	}
 }
 
-function updateNavigationAfterSwap(): void {
+function afterSwap(): void {
 	denestMain();
 	updateNavigation();
-	void mountEditor();
+	bootEditor();
 }
 
 listen('keydown', focusSearch);
-listen('htmx:afterSwap' as keyof DocumentEventMap, updateNavigationAfterSwap);
-listen('htmx:after:swap' as keyof DocumentEventMap, updateNavigationAfterSwap);
+listen('htmx:afterSwap' as keyof DocumentEventMap, afterSwap);
+listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 listen('htmx:pushedIntoHistory' as keyof DocumentEventMap, updateNavigation);
 listen('htmx:after:history:update' as keyof DocumentEventMap, updateNavigation);
 
 updateNavigation();
-void mountEditor();
+bootEditor();
 
 if (import.meta.hot) {
 	import.meta.hot.dispose(() => {

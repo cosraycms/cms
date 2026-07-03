@@ -13,6 +13,7 @@
 	width: 100%;
 	max-width: 48rem;
 	border-radius: var(--radius-md);
+	background-color: var(--color-white);
 }
 
 .cms-modal-close {
