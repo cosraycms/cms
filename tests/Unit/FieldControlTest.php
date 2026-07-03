@@ -71,6 +71,17 @@ final class FieldControlTest extends TestCase
 		$this->assertSame(['name' => 'text', 'props' => []], $properties['control']);
 	}
 
+	public function testGroupSubControlsCarryLayoutWidths(): void
+	{
+		$range = Control::group([
+			['key' => 'from', 'control' => Control::date(), 'width' => 50],
+			['key' => 'to', 'control' => Control::date(), 'width' => 50],
+		])->array();
+
+		$this->assertSame(50, $range['props']['fields'][0]['width']);
+		$this->assertSame(50, $range['props']['fields'][1]['width']);
+	}
+
 	public function testStructuralControlsNestDescriptors(): void
 	{
 		$group = Control::group([

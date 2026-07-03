@@ -144,10 +144,24 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.75rem;
+	container-type: inline-size;
 }
 
 .cms-group-field {
 	flex: 1 1 12rem;
+}
+
+/* Sub-controls with a declared width share a row on wide containers
+   (e.g. a date range as two 50% inputs) ... */
+.cms-group-field[data-width] {
+	flex: 1 1 calc(var(--group-width) - 0.75rem);
+}
+
+/* ... and stack at full width when the group gets narrow. */
+@container (max-width: 26rem) {
+	.cms-group-field[data-width] {
+		flex-basis: 100%;
+	}
 }
 
 .cms-repeater {

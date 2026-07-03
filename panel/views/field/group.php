@@ -22,8 +22,12 @@ $subField = ['required' => false, 'immutable' => false];
 
 		$key = (string) ($sub['key'] ?? '');
 		$subId = "{$id}-{$key}";
+		$width = $sub['width'] ?? null;
+		$sized = is_int($width) && $width > 0 && $width <= 100;
 		?>
-		<div class="cms-group-field">
+		<div
+			class="cms-group-field"
+			<?= $sized ? 'data-width style="--group-width: ' . $width . '%"' : '' ?>>
 			<label class="cms-sub-label" for="<?= escape($subId) ?>">
 				<?= escape((string) ($sub['label'] ?? $key)) ?>
 			</label>

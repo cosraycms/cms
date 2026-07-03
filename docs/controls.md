@@ -20,7 +20,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `datetime` | `Control::datetime()` |  | locale map of `YYYY-MM-DDTHH:MM` |
 | `hidden` | `Control::hidden()` |  | locale map of `string` |
 | `iframe` | `Control::iframe()` |  | locale map of `string` |
-| `group` | `Control::group(fields)` | `fields: {key,label?,control}[]` | `zxx` map of object keyed by `key` |
+| `group` | `Control::group(fields)` | `fields: {key,label?,control,width?}[]` | `zxx` map of object keyed by `key` |
 | `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
 | `element` | `Control::element(tag, module)` | `tag`, `module` | whatever the field's `structure()` defines |
 
@@ -38,6 +38,27 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
 Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
+
+A group sub-control may declare a `width` percentage; sized sub-controls share a row and stack at full width when the group container gets narrow (pure CSS, container queries). A date range is two 50% dates:
+
+```php
+public function control(): Control
+{
+    return Control::group([
+        ['key' => 'from', 'label' => 'Von', 'control' => Control::date(), 'width' => 50],
+        ['key' => 'to', 'label' => 'Bis', 'control' => Control::date(), 'width' => 50],
+    ]);
+}
+```
+
+## Derived inputs
+
+Two declarative helpers for field templates, evaluated on every form edit:
+
+- `data-derive="title"` on an input mirrors the named sibling field's value, optionally through `data-derive-transform="slugify"`. The input detaches the moment it is edited manually (or starts detached when its stored value already differs).
+- `<output data-count-of="field-title-zxx">` renders the character count of the referenced input.
+
+Anything richer than cross-field mirroring belongs in an `element` control, not in new behaviors.
 
 ## Block types
 
