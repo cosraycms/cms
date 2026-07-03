@@ -1,6 +1,6 @@
 # Editor control vocabulary
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor interprets only **primitive** controls (plain HTML inputs), the structural `group`/`repeater`, and `element`. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element**. The editor knows neither field type classes nor built-in control names.
+Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater` the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
@@ -164,7 +164,7 @@ Limitations (v1): condition sources must be primitive, non-translated fields (ch
 
 ## The window.Cosray bridge
 
-On panel editor pages the editor installs `window.Cosray`, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
+Panel editor pages install `window.Cosray` from the embedded system payload, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
 
 ```ts
 window.Cosray = {
@@ -176,4 +176,4 @@ window.Cosray = {
 };
 ```
 
-`upload()` posts to the media endpoint with the session's CSRF token — elements never handle credentials. `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists while an editor is mounted — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
+`upload()` posts to the media endpoint with the session's CSRF token — elements never handle credentials. `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
