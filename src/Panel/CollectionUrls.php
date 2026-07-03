@@ -105,6 +105,11 @@ final class CollectionUrls
 		return $this->path() . '/' . rawurlencode($uid) . '/delete';
 	}
 
+	public function createPaths(string $type): string
+	{
+		return $this->path() . '/create/' . rawurlencode($type) . '/paths';
+	}
+
 	public function create(string $type, ?string $parent = null): string
 	{
 		$overrides = [];

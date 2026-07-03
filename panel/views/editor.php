@@ -147,6 +147,13 @@ $span = static function (mixed $value, int $fallback): string {
 						action="<?= escape($action) ?>"
 						hx-swap="none"
 						novalidate>
+						<?php if (!$edit): ?>
+							<?php // A new node carries the blueprint uid so media uploaded
+
+							// before the first save lands under node/<uid>/ and the
+							// stored node adopts the same uid. ?>
+							<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
+						<?php endif ?>
 						<div class="cms-pane" data-pane="content">
 							<div class="cms-pane-card">
 								<div class="field-grid">
@@ -167,7 +174,7 @@ $span = static function (mixed $value, int $fallback): string {
 												'data' => $content[$field['name']] ?? null,
 												'locales' => $locales,
 												'defaultLocale' => $defaultLocale,
-												'node' => $edit ? $uid : '',
+												'node' => $uid,
 											]) ?>
 										</div>
 									<?php endforeach ?>
@@ -183,7 +190,9 @@ $span = static function (mixed $value, int $fallback): string {
 										'defaultLocale' => $defaultLocale,
 										'routable' => $routable,
 										'renderable' => $renderable,
-										'pathsUrl' => $edit ? $links->paths($uid) : null,
+										'pathsUrl' => $edit
+											? $links->paths($uid)
+											: $links->createPaths((string) ($type['handle'] ?? '')),
 										'generatedPaths' => $generatedPaths,
 									]) ?>
 								</div>

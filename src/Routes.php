@@ -247,6 +247,14 @@ class Routes
 					->after($renderers->get('editor-save'));
 				$panel
 					->post(
+						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}/paths',
+						[Panel\Editor::class, 'createPaths'],
+						'editor.create.paths',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('editor-paths'));
+				$panel
+					->post(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/delete',
 						[Panel\Editor::class, 'delete'],
 						'editor.delete',

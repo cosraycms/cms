@@ -8,6 +8,7 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
+use Cosray\Tests\Fixtures\Collection\TestRoutableCollection;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
 use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
 
@@ -23,6 +24,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 		$this->parentTypeId = $this->ensureTestType('test-hierarchy-parent');
 		$this->childTypeId = $this->ensureTestType('test-hierarchy-child');
+		$this->ensureTestType('parent-path-route-page');
 	}
 
 	/**
@@ -61,6 +63,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$plugin->node(TestHierarchyParent::class);
 		$plugin->node(TestHierarchyChild::class);
 		$plugin->collection(TestHierarchyCollection::class);
+		$plugin->collection(TestRoutableCollection::class);
 
 		return $plugin;
 	}
@@ -195,6 +198,109 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$content = json_decode((string) $row['content'], true);
 		$this->assertSame('Stored Child', $content['title']['value']['en']);
 		$this->assertNotNull($row['parent']);
+	}
+
+	public function testCreateRouteCarriesBlueprintUidForPreSaveMedia(): void
+	{
+		$this->createHierarchyNode(
+			uid: 'panel-create-uid-parent',
+			type: $this->parentTypeId,
+			title: 'Panel Create Uid Parent',
+		);
+		$response = $this->makeRequest(
+			'GET',
+			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			['query' => ['parent' => 'panel-create-uid-parent']],
+		);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		// A new node exposes the pre-generated uid so uploads land under
+		// node/<uid>/ before the first save.
+		$this->assertMatchesRegularExpression(
+			'/<input type="hidden" name="uid" value="[A-Za-z0-9._-]{1,64}"/',
+			$html,
+		);
+	}
+
+	public function testCreatePostAdoptsTheSubmittedBlueprintUid(): void
+	{
+		if (!$this->adoptNodeWithChildren('panel-store-uid-parent')) {
+			$this->createHierarchyNode(
+				uid: 'panel-store-uid-parent',
+				type: $this->parentTypeId,
+				title: 'Panel Store Uid Parent',
+			);
+		}
+
+		// Mirror the real flow: the create form pre-generates a uid, the
+		// client uploads to it, then submits it so the saved node adopts it.
+		$get = $this->makeRequest(
+			'GET',
+			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			['query' => ['parent' => 'panel-store-uid-parent']],
+		);
+		preg_match('/name="uid" value="([A-Za-z0-9._-]+)"/', $this->getHtmlResponse($get), $m);
+		$uid = $m[1] ?? '';
+		$this->assertNotSame('', $uid);
+
+		$response = $this->makeRequest(
+			'POST',
+			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			[
+				'query' => ['parent' => 'panel-store-uid-parent'],
+				'body' => [
+					'uid' => $uid,
+					'content' => ['title' => ['value' => ['en' => 'Child With Uid']]],
+				],
+			],
+		);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'/cp/collection/test-hierarchy/' . $uid . '?',
+			$response->getHeaderLine('Location'),
+		);
+		$this->trackNodeByUid($uid);
+		$row = $this->db()->execute(
+			'SELECT uid FROM cms.nodes WHERE uid = :uid',
+			['uid' => $uid],
+		)->one();
+		$this->assertSame($uid, $row['uid']);
+	}
+
+	public function testCreateRouteForRoutableTypeWiresTheLivePreview(): void
+	{
+		$response = $this->makeRequest(
+			'GET',
+			'/cp/collection/test-routable/create/parent-path-route-page',
+		);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		// The preview posts to the blueprint-based create-paths endpoint...
+		$this->assertStringContainsString('id="generated-paths"', $html);
+		$this->assertStringContainsString(
+			'/cp/collection/test-routable/create/parent-path-route-page/paths',
+			$html,
+		);
+		// ...and the {title} field the route references is marked so editing
+		// it refreshes the preview.
+		$this->assertStringContainsString('<div class="js-path-source"', $html);
+	}
+
+	public function testCreatePathsPreviewsFromTheBlueprint(): void
+	{
+		$response = $this->makeRequest(
+			'POST',
+			'/cp/collection/test-routable/create/parent-path-route-page/paths',
+			['body' => ['content' => ['title' => ['value' => ['en' => 'Fresh Title']]]]],
+		);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		// /{parent}/{title} -> the title slug previews (parent is a placeholder).
+		$this->assertStringContainsString('fresh-title', $html);
 	}
 
 	private function assertCreateAssetStateIsRendered(string $html): void

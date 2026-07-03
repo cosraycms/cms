@@ -73,13 +73,17 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
+		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+
 		return $this->editorContext(
 			mode: 'create',
 			name: $name,
 			collection: $collection,
-			node: $this->blueprintPayload($cms, $context, $type),
+			node: $data,
 			query: $query,
 			context: $context,
+			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
+			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
 		);
 	}
 
@@ -161,18 +165,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$class = $this->container
-			->tag(Bootstrap::NODE_TAG)
-			->entry($type)
-			->definition();
-		$nodeFactory = $cms->nodeFactory();
-		$nodeObj = $nodeFactory->blueprint($class, $context, $cms);
-		$serializer = new Serializer($this->types(), $nodeFactory->uid());
-		$data = $serializer->blueprint(
-			$nodeObj,
-			NodeFactory::fieldNamesFor($nodeObj),
-			$context->locales(),
-		);
+		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		$form = $this->formData();
 		$patch = new FormPatch($data['fields']);
@@ -183,11 +176,19 @@ final class Editor extends Panel
 		);
 		$data = $this->applySettings($data, $form);
 
+		$uid = $this->submittedUid($form);
+
+		if ($uid !== null) {
+			// Honour the uid the create form pre-generated so media uploaded
+			// to node/<uid>/ before the first save resolves to the node.
+			$data['uid'] = $uid;
+		}
+
 		if ($query->parent !== null) {
 			$data['parent'] = $query->parent;
 		}
 
-		$store = new Store($context->db, new PathManager(), $this->types(), $nodeFactory->uid());
+		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		try {
@@ -275,6 +276,42 @@ final class Editor extends Panel
 		];
 	}
 
+	/** Route-path preview for a not-yet-saved node, built from its blueprint. */
+	public function createPaths(Context $context, Cms $cms, string $collection, string $type): array
+	{
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+
+		if (!$this->canCreate($obj, $type, $query->parent)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$pathsUrl = $links->createPaths($type);
+		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+
+		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
+			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];
+		}
+
+		$form = $this->formData();
+		$data = $this->applyForm($data, $form);
+		$uid = $this->submittedUid($form);
+
+		if ($uid !== null) {
+			$data['uid'] = $uid;
+		}
+
+		$generator = new RoutePathGenerator($context->db, $this->types());
+		$submitted = is_array($form['paths'] ?? null) ? $form['paths'] : [];
+
+		return [
+			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
+			'submitted' => $submitted,
+			'pathsUrl' => $pathsUrl,
+		];
+	}
+
 	/** Apply the submitted editor form (content patch + settings). */
 	private function applyForm(array $data, array $form): array
 	{
@@ -340,7 +377,12 @@ final class Editor extends Panel
 		return null;
 	}
 
-	private function blueprintPayload(Cms $cms, Context $context, string $type): array
+	/**
+	 * Build a blueprint node object and its serialized create payload.
+	 *
+	 * @return array{0: object, 1: array<string, mixed>}
+	 */
+	private function blueprint(Cms $cms, Context $context, string $type): array
 	{
 		$class = $this->container
 			->tag(Bootstrap::NODE_TAG)
@@ -349,8 +391,24 @@ final class Editor extends Panel
 		$factory = $cms->nodeFactory();
 		$node = $factory->blueprint($class, $context, $cms);
 		$serializer = new Serializer($this->types(), $factory->uid());
+		$data = $serializer->blueprint($node, NodeFactory::fieldNamesFor($node), $context->locales());
 
-		return $serializer->blueprint($node, NodeFactory::fieldNamesFor($node), $context->locales());
+		return [$node, $data];
+	}
+
+	/**
+	 * The uid the create form pre-generated, if it is a well-formed handle;
+	 * used only in create mode so uploads and the saved node share one uid.
+	 */
+	private function submittedUid(array $form): ?string
+	{
+		$uid = $form['uid'] ?? null;
+
+		if (is_string($uid) && preg_match('/^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$/', $uid)) {
+			return $uid;
+		}
+
+		return null;
 	}
 
 	/** @return array{string, CmsCollection} */
