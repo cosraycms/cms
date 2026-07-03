@@ -9,7 +9,7 @@ use function Cosray\escape;
 
 $field = (array) $this->unwrap($field);
 $control = (array) $this->unwrap($control);
-$data = (array) ($this->unwrap($data) ?? []);
+$data = (array) ($this->unwrap($data ?? null) ?? []);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');

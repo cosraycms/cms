@@ -121,6 +121,13 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 
+		// Date/time controls render through the shared input view without
+		// extra attrs — the path the attrs regression hid in.
+		$this->assertStringContainsString('name="content[eventDate][value][zxx]"', $html);
+		$this->assertStringContainsString('type="date"', $html);
+		$this->assertStringContainsString('name="content[eventTime][value][zxx]"', $html);
+		$this->assertStringContainsString('type="time"', $html);
+
 		// The styled fixture field exposes meta editing through a dialog.
 		$this->assertStringContainsString('data-meta-open', $html);
 		$this->assertStringContainsString('<dialog class="cms-meta-dialog" data-meta>', $html);

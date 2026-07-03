@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Cosray\Tests\Fixtures\Node;
 
 use Cosray\Field\Checkbox;
+use Cosray\Field\Date;
 use Cosray\Field\Text;
+use Cosray\Field\Time;
 use Cosray\Node\Contract\Title;
 use Cosray\Schema\Label;
 use Cosray\Schema\When;
@@ -30,6 +32,12 @@ class TestConditionalDocument implements Title
 	#[Label('Layout Hint')]
 	#[When('title', 'hero')]
 	public Text $layoutHint;
+
+	#[Label('Event Date')]
+	public Date $eventDate;
+
+	#[Label('Event Time')]
+	public Time $eventTime;
 
 	public function title(): string
 	{

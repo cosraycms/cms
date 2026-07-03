@@ -6,7 +6,7 @@ use function Cosray\escape;
 // and optional attrs (step, min, max, placeholder).
 
 $field = (array) $this->unwrap($field);
-$attrs = (array) ($this->unwrap($attrs) ?? []);
+$attrs = (array) ($this->unwrap($attrs ?? null) ?? []);
 $value = $this->unwrap($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 ?>
