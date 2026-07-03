@@ -28,8 +28,11 @@ function guard(event: Event): void {
 		return;
 	}
 
-	// The form's own submission (save) must pass.
-	const source = (event as CustomEvent<{ sourceElement?: Element }>).detail?.sourceElement;
+	// htmx dispatches the event on the request's source element; requests
+	// originating inside the form (save, route-path preview) must pass.
+	const detail = (event as CustomEvent<{ ctx?: { sourceElement?: Element } }>).detail;
+	const source =
+		detail?.ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
 	if (source instanceof Element && source.closest(FORM)) {
 		return;
