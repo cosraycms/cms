@@ -33,6 +33,7 @@ $messages = $flatten($errors, $flatten);
 	id="editor-status"
 	class="editor-status <?= $saved ? 'is-success' : 'is-error' ?>"
 	role="status"
+	<?= $saved ? 'data-saved="true"' : '' ?>
 	hx-swap-oob="true"><?= escape($message) ?></output>
 <div
 	id="editor-errors"

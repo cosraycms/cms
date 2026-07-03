@@ -3,6 +3,9 @@ import '$lib/host';
 
 import type { BridgeSystem } from '$lib/bridge';
 
+import { install as installDirty } from './behaviors/dirty';
+import { install as installRepeater } from './behaviors/repeater';
+import { install as installTabs } from './behaviors/tabs';
 import { installBridge } from '$lib/bridge-standalone';
 import { configureRuntime } from '$lib/runtime';
 
@@ -109,6 +112,7 @@ function afterSwap(): void {
 }
 
 listen('keydown', focusSearch);
+cleanups.push(installDirty(), installTabs(), installRepeater());
 listen('htmx:afterSwap' as keyof DocumentEventMap, afterSwap);
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 listen('htmx:pushedIntoHistory' as keyof DocumentEventMap, updateNavigation);
