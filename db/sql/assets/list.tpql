@@ -1,0 +1,37 @@
+SELECT
+	asset,
+	uid,
+	disk,
+	key,
+	filename,
+	mime,
+	bytes,
+	width,
+	height,
+	kind,
+	hash,
+	meta,
+	created,
+	changed
+FROM
+	/*:cms.prefix:*/assets
+WHERE
+	1 = 1
+<?php if (isset($kind)) : ?>
+	AND kind = :kind
+<?php endif ?>
+<?php if (isset($q)) : ?>
+	AND filename ILIKE :q
+<?php endif ?>
+<?php if (isset($uids)) : ?>
+	AND uid IN (SELECT jsonb_array_elements_text(:uids::jsonb))
+<?php endif ?>
+ORDER BY
+	created DESC,
+	asset DESC
+<?php if (isset($limit)) : ?>
+LIMIT :limit
+<?php endif ?>
+<?php if (isset($offset)) : ?>
+OFFSET :offset
+<?php endif ?>;
