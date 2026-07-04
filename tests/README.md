@@ -248,7 +248,7 @@ namespace Cosray\Tests\End2End;
 
 use Cosray\Tests\End2EndTestCase;
 
-final class NodeCrudTest extends End2EndTestCase
+final class NodeSaveTest extends End2EndTestCase
 {
     protected function setUp(): void
     {
@@ -257,37 +257,37 @@ final class NodeCrudTest extends End2EndTestCase
         $this->loadFixtures('basic-types', 'sample-nodes');
     }
 
-    public function testCreateNode(): void
+    public function testSaveNode(): void
     {
-        // Authenticate before making API requests
+        // Authenticate before making panel requests
         $this->authenticateAs('editor');
 
-        // Create a node type
-        $this->createTestType('create-test-page', 'page');
-
-        // Prepare node data with required fields
-        $nodeData = [
-            'uid' => 'my-new-node',
-            'published' => true,
-            'locked' => false,
-            'hidden' => false,
-            'paths' => [
-                'en' => '/my-new-node',  // Required for page nodes
-            ],
+        $type = $this->db()->execute(
+            "SELECT type FROM cms.types WHERE handle = 'test-article'",
+        )->one();
+        $this->createTestNode([
+            'uid' => 'my-node',
+            'type' => (int) $type['type'],
             'content' => [
                 'title' => ['type' => 'text', 'value' => ['en' => 'My Node']],
             ],
-        ];
-
-        // Make HTTP request through the app
-        $response = $this->makeRequest('POST', '/panel/api/node/create-test-page', [
-            'body' => $nodeData,
         ]);
 
-        // Assert response
+        // Make an HTTP request against the panel editor endpoint
+        $response = $this->makeRequest('POST', '/cp/collection/test-articles/my-node', [
+            'headers' => ['HX-Request' => 'true'],
+            'body' => [
+                'publish' => '1',
+                'content' => ['title' => ['value' => ['en' => 'Updated Node']]],
+            ],
+        ]);
+
+        // Assert response and persisted state
         $this->assertResponseOk($response);
-        $data = $this->getJsonResponse($response);
-        $this->assertTrue($data['success']);
+        $row = $this->db()->execute(
+            "SELECT content->'title'->'value'->>'en' AS title FROM cms.nodes WHERE uid = 'my-node'",
+        )->one();
+        $this->assertSame('Updated Node', $row['title']);
     }
 }
 ```

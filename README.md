@@ -196,10 +196,8 @@ Available attributes: `#[Label]`, `#[Handle]`, `#[Icon]`, `#[Badge]`, `#[Permiss
 
 ### Hierarchy lists in panel
 
-- Use `#[Listing(children: true)]` on a collection to switch its list endpoint to hierarchy mode.
-- Root requests (`GET /panel/api/collection/{collection}`) return nodes with no parent.
-- Child requests (`GET /panel/api/collection/{collection}?parent=<uid>`) return direct children for that parent uid.
-- Row payload includes `hasChildren`, `childBlueprints`, and `parent`.
+- Use `#[Listing(children: true)]` on a collection to switch its panel list to hierarchy mode.
+- The collection view renders nodes with no parent as roots; rows with children get tree controls that expand direct children.
 - Child create options are derived from `#[Children(...)]` declarations.
 
 ### Behavioral interfaces
@@ -342,7 +340,7 @@ The admin panel formats database timestamps with `app.timezone`. Use an IANA ide
 
 ### Admin panel paths
 
-The new SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`. While the legacy SvelteKit panel exists, it is fixed at `/panel`; `install-panel` installs the CI-built legacy panel assets there and does not read `path.panel`.
+The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
 
 ### Admin panel theming
 
@@ -415,7 +413,7 @@ brew services start postgresql@17
 
 ### Panel development
 
-The default SSR/Svelte panel in `panel/` requires Node.js `>=20.20.0` and pnpm `>=11 <12` when you build it from source. The legacy SvelteKit panel in `ui/` has its own development requirement of Node.js `>=26 <27` and pnpm `>=11 <12`.
+The SSR/Svelte panel in `panel/` requires Node.js `>=20.20.0` and pnpm `>=11 <12` when you build it from source.
 
 ### Local test database
 
@@ -429,4 +427,4 @@ php ./run db:migrations --apply
 
 ## License
 
-Most project files are licensed under [MPL-2.0](LICENSES/MPL-2.0.txt). Files in `panel/` and `ui/` are licensed under [MIT](LICENSES/MIT.txt). See [REUSE.toml](REUSE.toml) for file-level details.
+Most project files are licensed under [MPL-2.0](LICENSES/MPL-2.0.txt). Files in `panel/` are licensed under [MIT](LICENSES/MIT.txt). See [REUSE.toml](REUSE.toml) for file-level details.

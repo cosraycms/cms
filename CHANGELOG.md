@@ -4,9 +4,11 @@
 
 ### Breaking Changes
 
+- Removed the legacy SvelteKit panel (`ui/`), its `/panel` routes, and the `install-panel` command. Downstream apps must switch to the SSR/HTMX panel (`path.panel`, default `/cp`), drop `@php run install-panel` from their composer scripts, and delete the installed `public/panel/` directory.
+- Removed the JSON API (`/panel/api` and the optional `path.api` mount) including the auth, user, node, and collection endpoints. Frontend content negotiation (page URLs answered with JSON for `Accept: application/json`) is unaffected; custom API routes can be registered via `Bootstrap::addRoutes()`.
 - Renamed the Matrix field concept to Entries/Entry. Use `Cosray\Field\Entries`, `Cosray\Value\Entries`, and `Cosray\Value\Entry`; stored field content now uses `"type": "entries"`.
 - Changed Entries fields to use node-style entry schema classes through `#[Allows(...)]` instead of field inheritance. Stored entry items now use an FQCN `type` plus nested `value`, and the panel exposes `entryTypes` metadata. Existing app data needs an app-specific migration to add the entry FQCN for each Entries field.
-- Split panel paths: `path.panel` now configures the new SSR/HTMX panel and defaults to `/cp`; the legacy SvelteKit panel and old JSON API are fixed at `/panel`.
+- `path.panel` now configures the SSR/HTMX panel path and defaults to `/cp`.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 

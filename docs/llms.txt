@@ -459,24 +459,6 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/assets/*` built-in panel assets
 - `GET <panelPath>/collection/{collection}` server-rendered collection list
 
-Legacy SvelteKit panel routes are fixed at `/panel` while the old panel exists:
-
-- `GET /panel` and `GET /panel/*` legacy panel frontend
-- `GET /panel/boot` legacy panel boot payload
-- `POST /panel/api/login`, `/logout`, `/me`, etc.
-- `GET/POST /panel/api/nodes` search nodes
-- `GET /panel/api/collection/{collection}` list collection rows
-  - hierarchy-enabled collections return roots by default
-  - `?parent=<uid>` returns direct children of the given parent uid
-  - rows include `hasChildren`, `childBlueprints`, and `parent`
-- `GET/PUT/DELETE /panel/api/node/{uid}` node read/update/delete
-- `POST /panel/api/node/{type}` create node
-- `GET /panel/api/blueprint/{type}` get node blueprint
-
-Optional public API group:
-
-- If `path.api` is set, same API endpoints are mounted at that path.
-
 Auth:
 
 - Token auth header: `Authentication: Bearer <token>`
@@ -545,8 +527,7 @@ Paths and panel:
 - `path.assets`: `'/assets'`
 - `path.cache`: `'/cache'`
 - `path.views`: `'/views'` (view directory relative to `path.root`)
-- `path.panel`: `'/cp'` (new SSR/HTMX panel path; legacy SvelteKit panel remains fixed at `/panel`)
-- `path.api`: `null`
+- `path.panel`: `'/cp'` (SSR/HTMX panel path)
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
 
