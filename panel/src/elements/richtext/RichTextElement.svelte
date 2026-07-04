@@ -25,7 +25,9 @@
 	let active = $derived(field.translate ? locale : ZXX);
 
 	function sync(): LocaleMap<string> {
-		return field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
+		return field.translate
+			? ensureLocales(value, '', locales?.all ?? [])
+			: ensureNeutral(value, '');
 	}
 
 	// Synchronous init: the ProseMirror editor reads its content at

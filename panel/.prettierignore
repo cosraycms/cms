@@ -1,0 +1,3 @@
+app/vendor/
+build/
+pnpm-lock.yaml

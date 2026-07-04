@@ -32,7 +32,9 @@
 	);
 
 	function sync(): LocaleMap<string> {
-		return field.translate ? ensureLocales(value, '', locales?.all ?? []) : ensureNeutral(value, '');
+		return field.translate
+			? ensureLocales(value, '', locales?.all ?? [])
+			: ensureNeutral(value, '');
 	}
 
 	function syncMeta(): Meta {

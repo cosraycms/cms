@@ -32,9 +32,7 @@ export function active(condition: Condition, value: string): boolean {
 		case 'neq':
 			return value !== normalize(condition.value);
 		case 'in':
-			return (
-				Array.isArray(condition.value) && condition.value.map(normalize).includes(value)
-			);
+			return Array.isArray(condition.value) && condition.value.map(normalize).includes(value);
 		case 'empty':
 			return value === '';
 		case 'notEmpty':
