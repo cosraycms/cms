@@ -45,10 +45,9 @@ final class Images extends Type
 		$result = '';
 
 		foreach ($block->data['value'] ?? [] as $f) {
-			$file = (string) ($f['file'] ?? '');
+			$asset = $ctx->asset((string) ($f['uid'] ?? ''));
 			$title = $this->mediaText($ctx, $f, 'title') ?: $this->mediaText($ctx, $f, 'alt');
-			$path = $ctx->assetsPath() . $file;
-			$image = $ctx->assets()->image($path);
+			$image = $ctx->assets()->image($asset->key ?? '');
 			$resized = $image->resize(
 				new Size(400, 267, cropMode: ImageResize::CROPCENTER),
 				ResizeMode::Crop,
@@ -56,6 +55,7 @@ final class Images extends Type
 				quality: null,
 			);
 			$url = $resized->url(true);
+			$path = $asset?->mediaPath('image') ?? '';
 
 			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
 		}

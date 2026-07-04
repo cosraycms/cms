@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
+use Cosray\Assets\Repository;
 use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
 use Cosray\Uid;
@@ -14,6 +15,7 @@ class Serializer
 	public function __construct(
 		private readonly Types $types,
 		private readonly Uid $uid,
+		private readonly ?Repository $assets = null,
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array
@@ -128,7 +130,46 @@ class Serializer
 			'title' => $this->resolveTitle($node),
 			'uid' => $rawData['uid'],
 			'fields' => $this->fields($node, $fieldNames),
+			'assets' => $this->assetMap($rawData['content'] ?? null),
 		], $data);
+	}
+
+	/**
+	 * Resolved catalog data for every asset uid the content references.
+	 * Content items stay canonical `{uid, meta?}`; consumers (headless
+	 * JSON readers, the panel editor) resolve uids through this map.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function assetMap(mixed $content): array
+	{
+		if ($this->assets === null || !is_array($content)) {
+			return [];
+		}
+
+		$uids = Repository::collectUids($content);
+		$this->assets->preload($uids);
+		$map = [];
+
+		foreach ($uids as $uid) {
+			$asset = $this->assets->get($uid);
+
+			if (!$asset) {
+				continue;
+			}
+
+			$map[$uid] = [
+				'filename' => $asset->filename,
+				'url' => $asset->mediaPath(),
+				'kind' => $asset->kind,
+				'mime' => $asset->mime,
+				'width' => $asset->width,
+				'height' => $asset->height,
+				'meta' => $asset->meta,
+			];
+		}
+
+		return $map;
 	}
 
 	public function resolveTitle(object $node): string

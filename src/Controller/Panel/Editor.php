@@ -45,7 +45,7 @@ final class Editor extends Panel
 		}
 
 		$nodeObj = Node::unwrap($result);
-		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid(), $context->assets());
 		$data = $serializer->read(
 			$nodeObj,
 			NodeFactory::dataFor($nodeObj),
@@ -103,7 +103,7 @@ final class Editor extends Panel
 		}
 
 		$nodeObj = Node::unwrap($result);
-		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid(), $context->assets());
 		$data = $serializer->read(
 			$nodeObj,
 			NodeFactory::dataFor($nodeObj),
@@ -257,7 +257,7 @@ final class Editor extends Panel
 			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];
 		}
 
-		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid());
+		$serializer = new Serializer($this->types(), $cms->nodeFactory()->uid(), $context->assets());
 		$data = $serializer->read(
 			$nodeObj,
 			NodeFactory::dataFor($nodeObj),

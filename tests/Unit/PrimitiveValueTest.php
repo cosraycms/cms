@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Assets\Asset;
 use Cosray\Context;
 use Cosray\Node\FieldOwner;
 use Cosray\Schema\TranslateMode;
@@ -48,6 +49,25 @@ final class PrimitiveValueTest extends TestCase
 	private function createOwner(Context $context): FieldOwner
 	{
 		return new FieldOwner($context, 'test-node');
+	}
+
+	private function seedAsset(
+		Context $context,
+		string $uid,
+		string $filename,
+		string $kind = 'image',
+		array $meta = [],
+	): void {
+		$ext = pathinfo($filename, PATHINFO_EXTENSION);
+		$context->assets()->add(new Asset(
+			uid: $uid,
+			disk: 'local',
+			key: substr($uid, 0, 2) . "/{$uid}.{$ext}",
+			filename: $filename,
+			kind: $kind,
+			meta: $meta,
+			prefix: '/cms',
+		));
 	}
 
 	public function testTextValueFallsBackToDefaultLocale(): void
@@ -259,8 +279,8 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('attachments', [
 			'files' => [
-				['file' => 'one.pdf'],
-				['file' => 'two.pdf'],
+				['uid' => 'qonepdf123456'],
+				['uid' => 'qtwopdf123456'],
 			],
 		]);
 		$field = new \Cosray\Field\File('attachments', $owner, $valueContext);
@@ -287,10 +307,10 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
-					['file' => 'manual.pdf', 'title' => 'Manual'],
+					['uid' => 'qmanualpdf123', 'title' => 'Manual'],
 				],
 				'de' => [
-					['file' => null, 'title' => null],
+					['uid' => null, 'title' => null],
 				],
 			],
 		]));
@@ -311,10 +331,10 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
 				'en' => [
-					['file' => null, 'title' => null],
+					['uid' => null, 'title' => null],
 				],
 				'de' => [
-					['file' => null, 'title' => null],
+					['uid' => null, 'title' => null],
 				],
 			],
 		]));
@@ -335,10 +355,10 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\File('attachments', $owner, new ValueContext('attachments', [
 			'files' => [
 				'en' => [
-					['file' => 'spec.pdf', 'title' => 'Spec'],
+					['uid' => 'qspecpdf12345', 'title' => 'Spec'],
 				],
 				'de' => [
-					['file' => null, 'title' => null],
+					['uid' => null, 'title' => null],
 				],
 			],
 		]));
@@ -356,9 +376,10 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg');
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
-				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
+				['uid' => 'heroimg123456', 'alt' => ['en' => 'Hero']],
 			],
 		]));
 		$field->limit(1);
@@ -367,7 +388,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
 
 		$this->assertStringContainsString(
-			'/cms/media/image/node/test-node/hero.jpg',
+			'/cms/media/image/heroimg123456/hero.jpg',
 			$value->publicPath(),
 		);
 		$this->assertStringContainsString('http://www.example.com', $value->url());
@@ -378,10 +399,11 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg');
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
-					'file' => 'hero.jpg',
+					'uid' => 'heroimg123456',
 					'alt' => ['en' => 'Hero'],
 					'title' => ['en' => 'Hero Title'],
 				],
@@ -395,12 +417,12 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertStringContainsString('class="hero-image"', $tag);
 		$this->assertStringContainsString(
-			'src="http://www.example.com/cms/media/image/node/test-node/hero.jpg"',
+			'src="http://www.example.com/cms/media/image/heroimg123456/hero.jpg"',
 			$tag,
 		);
 		$this->assertStringContainsString('alt="Hero"', $tag);
 		$this->assertStringContainsString(
-			'data-path-original="/cms/media/image/node/test-node/hero.jpg"',
+			'data-path-original="/cms/media/image/heroimg123456/hero.jpg"',
 			$tag,
 		);
 	}
@@ -409,13 +431,14 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg');
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				'en' => [
-					['file' => 'hero.jpg', 'alt' => 'Hero'],
+					['uid' => 'heroimg123456', 'alt' => 'Hero'],
 				],
 				'de' => [
-					['file' => null, 'alt' => null],
+					['uid' => null, 'alt' => null],
 				],
 			],
 		]));
@@ -429,7 +452,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 		$this->assertSame('Hero', $value->alt());
 		$this->assertStringContainsString(
-			'/cms/media/image/node/test-node/hero.jpg',
+			'/cms/media/image/heroimg123456/hero.jpg',
 			$value->publicPath(),
 		);
 	}
@@ -438,10 +461,11 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'qmanualpdf123', 'manual.pdf', kind: 'file');
 		$field = new \Cosray\Field\File('document', $owner, new ValueContext('document', [
 			'files' => [
 				[
-					'file' => 'manual.pdf',
+					'uid' => 'qmanualpdf123',
 					'title' => [
 						'en' => 'Manual',
 						'de' => null,
@@ -466,7 +490,7 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
 				[
-					'file' => 'hero.jpg',
+					'uid' => 'heroimg123456',
 					'alt' => [
 						'en' => 'Hero',
 						'de' => null,
@@ -488,6 +512,54 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero Image', $value->title());
 	}
 
+	public function testMetaFallsBackToCatalogDefaults(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg', meta: [
+			'alt' => ['en' => 'Catalog Alt'],
+			'title' => ['en' => 'Catalog Title'],
+		]);
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
+			'type' => \Cosray\Field\Image::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					// The upload UI creates empty locale maps; empty per-use
+					// meta must not shadow the catalog default.
+					['uid' => 'heroimg123456', 'meta' => ['alt' => ['en' => '']]],
+				],
+			],
+		]));
+		$field->limit(1);
+
+		$value = $field->value();
+
+		$this->assertSame('Catalog Alt', $value->alt());
+		$this->assertSame('Catalog Title', $value->title());
+	}
+
+	public function testNonEmptyMetaOverridesCatalogDefaults(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg', meta: [
+			'alt' => ['en' => 'Catalog Alt'],
+		]);
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
+			'type' => \Cosray\Field\Image::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					['uid' => 'heroimg123456', 'meta' => ['alt' => ['en' => 'Node Alt']]],
+				],
+			],
+		]));
+		$field->limit(1);
+
+		$value = $field->value();
+
+		$this->assertSame('Node Alt', $value->alt());
+	}
+
 	public function testTranslatedImageFallsBackToDefaultLocaleWithTitle(): void
 	{
 		$context = $this->createContext();
@@ -496,7 +568,7 @@ final class PrimitiveValueTest extends TestCase
 			'files' => [
 				'en' => [
 					[
-						'file' => 'hero.jpg',
+						'uid' => 'heroimg123456',
 						'alt' => 'Hero',
 						'title' => 'Hero Image',
 						'link' => '/hero',
@@ -504,7 +576,7 @@ final class PrimitiveValueTest extends TestCase
 				],
 				'de' => [
 					[
-						'file' => null,
+						'uid' => null,
 						'alt' => null,
 						'title' => null,
 						'link' => null,
@@ -528,7 +600,7 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$valueContext = new ValueContext('clip', [
 			'files' => [
-				['file' => 'clip.mp4', 'title' => 'Clip'],
+				['uid' => 'vclipmp412345', 'title' => 'Clip'],
 			],
 		]);
 		$field = new \Cosray\Field\Video('clip', $owner, $valueContext);
@@ -558,10 +630,10 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
 				'en' => [
-					['file' => 'hero.jpg', 'alt' => 'Hero'],
+					['uid' => 'heroimg123456', 'alt' => 'Hero'],
 				],
 				'de' => [
-					['file' => null, 'alt' => null],
+					['uid' => null, 'alt' => null],
 				],
 			],
 		]));
@@ -581,7 +653,7 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
-				['file' => 'hero.jpg', 'alt' => ['en' => 'Hero']],
+				['uid' => 'heroimg123456', 'alt' => ['en' => 'Hero']],
 			],
 		]));
 		$field->limit(1);
@@ -602,8 +674,8 @@ final class PrimitiveValueTest extends TestCase
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
-				['file' => 'one.jpg', 'alt' => ['en' => 'One']],
-				['file' => 'two.jpg', 'alt' => ['en' => 'Two']],
+				['uid' => 'oneimg1234567', 'alt' => ['en' => 'One']],
+				['uid' => 'twoimg1234567', 'alt' => ['en' => 'Two']],
 			],
 		]));
 
@@ -631,8 +703,8 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				\Cosray\Field\Field::NEUTRAL_LOCALE => [
-					['file' => 'a.pdf'],
-					['file' => 'b.pdf'],
+					['uid' => 'qdocafile1234'],
+					['uid' => 'qdocbfile1234'],
 				],
 			],
 		]);
@@ -640,9 +712,9 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				\Cosray\Field\Field::NEUTRAL_LOCALE => [
-					['file' => 'a.pdf'],
-					['file' => 'b.pdf'],
-					['file' => 'c.pdf'],
+					['uid' => 'qdocafile1234'],
+					['uid' => 'qdocbfile1234'],
+					['uid' => 'qdoccfile1234'],
 				],
 			],
 		]);
@@ -664,8 +736,8 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				\Cosray\Field\Field::NEUTRAL_LOCALE => [
-					['file' => 'a.pdf'],
-					['file' => 'b.pdf'],
+					['uid' => 'qdocafile1234'],
+					['uid' => 'qdocbfile1234'],
 				],
 			],
 		]);
@@ -673,7 +745,7 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				\Cosray\Field\Field::NEUTRAL_LOCALE => [
-					['file' => 'a.pdf'],
+					['uid' => 'qdocafile1234'],
 				],
 			],
 		]);
@@ -696,10 +768,10 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				'en' => [
-					['file' => 'a.pdf'],
+					['uid' => 'qdocafile1234'],
 				],
 				'de' => [
-					['file' => 'b.pdf'],
+					['uid' => 'qdocbfile1234'],
 				],
 			],
 		]);
@@ -707,11 +779,11 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				'en' => [
-					['file' => 'a.pdf'],
-					['file' => 'b.pdf'],
+					['uid' => 'qdocafile1234'],
+					['uid' => 'qdocbfile1234'],
 				],
 				'de' => [
-					['file' => 'c.pdf'],
+					['uid' => 'qdoccfile1234'],
 				],
 			],
 		]);
@@ -734,7 +806,7 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				'en' => [
-					['file' => 'hero.jpg'],
+					['uid' => 'heroimg123456'],
 				],
 			],
 		]);
@@ -742,7 +814,7 @@ final class PrimitiveValueTest extends TestCase
 			'type' => $field::class,
 			'value' => [
 				'de' => [
-					['file' => 'held.jpg'],
+					['uid' => 'heldimg123456'],
 				],
 			],
 		]);

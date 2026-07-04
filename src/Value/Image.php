@@ -189,13 +189,15 @@ class Image extends File
 		return $this->textValue('alt', $this->index);
 	}
 
+	protected function mediaType(): string
+	{
+		return 'image';
+	}
+
 	protected function getMediaPath(int $index): string
 	{
 		return (
-			$this->owner->config()->path->prefix
-			. '/media/image/'
-			. $this->assetsPath()
-			. $this->getFileName($index)
+			$this->mediaPath($index)
 			. $this->queryString
 			. ($this->quality ? "&quality={$this->quality}" : '')
 		);
@@ -208,7 +210,7 @@ class Image extends File
 
 	protected function getImage(int $index): Assets\Image
 	{
-		$image = $this->getAssets()->image($this->assetsPath() . $this->getFileName($index));
+		$image = $this->getAssets()->image($this->asset($index)->key ?? '');
 
 		if ($this->size) {
 			$image = $image->resize($this->size, $this->resizeMode, $this->enlarge, $this->quality);

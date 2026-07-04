@@ -63,13 +63,13 @@ class MenuItem implements Iterator
 
 	public function image(): ?string
 	{
-		$image = $this->data['image'] ?? null;
+		$uid = $this->data['image'] ?? null;
 
-		if (!$image) {
+		if (!$uid || !is_string($uid)) {
 			return null;
 		}
 
-		return sprintf('/assets/menu/%s/%s', $this->item['menu'], $image);
+		return $this->context->assets()->get($uid)?->mediaPath('image');
 	}
 
 	public function class(): ?string

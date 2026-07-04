@@ -44,7 +44,7 @@ class Factory
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
-		$serializer = new Serializer($this->types, $this->uid);
+		$serializer = new Serializer($this->types, $this->uid, $context->assets());
 		$store = new Store($context->db, new PathManager(), $this->types, $this->uid);
 		$templateRenderer = new ViewRenderer(
 			$this->container,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Request;
+use Cosray\Assets\Repository;
 use Cosray\Block\Registry;
 use Cosray\Block\RenderContext;
 use Cosray\Block\Types\Heading;
@@ -140,6 +141,11 @@ final class BlockTypesTest extends TestCase
 			}
 
 			public function config(): Config
+			{
+				throw new RuntimeException('Not available in this test');
+			}
+
+			public function assets(): Repository
 			{
 				throw new RuntimeException('Not available in this test');
 			}

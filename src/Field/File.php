@@ -103,7 +103,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 	protected function fileListShape(): Shape
 	{
 		$fileShape = Shapes::list();
-		$fileShape->add('file', 'string')->rules('required');
+		$fileShape->add('uid', 'string')->rules('required');
 		$fileShape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
 
 		return $fileShape;

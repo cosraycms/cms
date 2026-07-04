@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets;
+use Cosray\Assets\Asset;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
@@ -37,7 +37,10 @@ class File extends Value
 
 	public function url(bool $bust = false): string
 	{
-		if ($url = filter_var($this->getFile($this->index)->url($bust), FILTER_VALIDATE_URL)) {
+		unset($bust);
+		$url = $this->owner->request()->origin() . $this->mediaPath($this->index);
+
+		if ($url = filter_var($url, FILTER_VALIDATE_URL)) {
 			return $url;
 		}
 
@@ -46,7 +49,9 @@ class File extends Value
 
 	public function publicPath(bool $bust = false): string
 	{
-		return filter_var($this->getFile($this->index)->publicPath($bust), FILTER_SANITIZE_URL);
+		unset($bust);
+
+		return filter_var($this->mediaPath($this->index), FILTER_SANITIZE_URL);
 	}
 
 	public function filename(): string
@@ -56,7 +61,7 @@ class File extends Value
 
 	public function mimetype(): string
 	{
-		return mime_content_type($this->getFile($this->index)->path());
+		return $this->asset($this->index)->mime ?? '';
 	}
 
 	public function unwrap(): ?array
@@ -77,6 +82,24 @@ class File extends Value
 	public function isset(): bool
 	{
 		return $this->fileItem(0) !== null;
+	}
+
+	/** The serving route type this value links to. */
+	protected function mediaType(): string
+	{
+		return 'file';
+	}
+
+	protected function mediaPath(int $index): string
+	{
+		return $this->asset($index)?->mediaPath($this->mediaType()) ?? '';
+	}
+
+	protected function asset(int $index): ?Asset
+	{
+		$uid = (string) ($this->fileItem($index)['uid'] ?? '');
+
+		return $uid === '' ? null : $this->owner->assets()->get($uid);
 	}
 
 	protected function files(): array
@@ -145,7 +168,7 @@ class File extends Value
 		}
 
 		foreach ($files as $file) {
-			if (is_array($file) && ($file['file'] ?? null)) {
+			if (is_array($file) && ($file['uid'] ?? null)) {
 				return true;
 			}
 		}
@@ -155,9 +178,13 @@ class File extends Value
 
 	protected function getFileName(int $index): string
 	{
-		return (string) ($this->fileItem($index)['file'] ?? '');
+		return $this->asset($index)->filename ?? '';
 	}
 
+	/**
+	 * Per-use meta wins only when it is non-empty for the effective
+	 * locale; otherwise the asset's catalog default applies.
+	 */
 	protected function textValue(string $key, int $index): string
 	{
 		$item = $this->fileItem($index) ?? [];
@@ -167,6 +194,17 @@ class File extends Value
 			$value = $item[$key];
 		}
 
+		$result = $this->textFrom($value);
+
+		if ($result !== '') {
+			return $result;
+		}
+
+		return $this->textFrom($this->asset($index)?->metaMap($key));
+	}
+
+	protected function textFrom(mixed $value): string
+	{
 		if (!is_array($value)) {
 			return is_string($value) || is_numeric($value) ? (string) $value : '';
 		}
@@ -178,10 +216,5 @@ class File extends Value
 		}
 
 		return '';
-	}
-
-	protected function getFile(int $index): Assets\File
-	{
-		return $this->getAssets()->file($this->assetsPath() . $this->getFileName($index));
 	}
 }

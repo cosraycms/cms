@@ -11,6 +11,8 @@ use Celemas\Quma\Database;
 
 final class Context
 {
+	private ?Assets\Repository $assets = null;
+
 	public function __construct(
 		public readonly Database $db,
 		public readonly Request $request,
@@ -18,6 +20,11 @@ final class Context
 		public readonly Container $container,
 		public readonly Factory $factory,
 	) {}
+
+	public function assets(): Assets\Repository
+	{
+		return $this->assets ??= new Assets\Repository($this->db, $this->config);
+	}
 
 	public function locales(): Locales
 	{

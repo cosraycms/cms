@@ -42,15 +42,14 @@ final class Image extends Type
 	public function render(Block $block, RenderContext $ctx): string
 	{
 		$data = $block->data;
-		$file = (string) ($data['value'][0]['file'] ?? '');
+		$asset = $ctx->asset((string) ($data['value'][0]['uid'] ?? ''));
 		$title = $this->mediaText($ctx, $data['value'][0] ?? [], 'title') ?: $this->mediaText(
 			$ctx,
 			$data['value'][0] ?? [],
 			'alt',
 		);
 		$maxWidth = $ctx->args['maxImageWidth'] ?? 1440;
-		$path = $ctx->assetsPath() . $file;
-		$image = $ctx->assets()->image($path);
+		$image = $ctx->assets()->image($asset->key ?? '');
 		$resized = $image->resize(
 			new Size((int) ($maxWidth / $ctx->columns) * (int) ($data['colspan'] ?? 12)),
 			ResizeMode::Width,
@@ -58,6 +57,7 @@ final class Image extends Type
 			quality: null,
 		);
 		$url = $resized->url(true);
+		$path = $asset?->mediaPath('image') ?? '';
 
 		return "<img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\">";
 	}

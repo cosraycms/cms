@@ -81,7 +81,7 @@ final class BlockValidator implements Validator
 
 		if (is_array($files) && count($files) > 0) {
 			$fileShape = Shapes::list();
-			$fileShape->add('file', 'string')->rules('required');
+			$fileShape->add('uid', 'string')->rules('required');
 			$fileShape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
 
 			if ($fileShape->validate($files)->valid()) {
@@ -92,7 +92,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'image',
-				_('Attribute `file` nicht gefüllt.'),
+				_('Attribute `uid` nicht gefüllt.'),
 			);
 
 			return;

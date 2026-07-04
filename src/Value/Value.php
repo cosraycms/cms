@@ -14,6 +14,7 @@ use Cosray\Locale;
 abstract class Value
 {
 	public readonly string $fieldType;
+	private ?Assets $assets = null;
 	protected readonly Locale $locale;
 	protected readonly Locale $defaultLocale;
 	protected readonly string $fieldName;
@@ -127,19 +128,8 @@ abstract class Value
 		return $value !== null && $value !== '' && $value !== [];
 	}
 
-	protected function assetsPath(): string
-	{
-		return 'node/' . $this->owner->uid() . '/';
-	}
-
 	protected function getAssets(): Assets
 	{
-		static $assets = null;
-
-		if (!$assets) {
-			$assets = new Assets($this->owner->request(), $this->owner->config());
-		}
-
-		return $assets;
+		return $this->assets ??= new Assets($this->owner->request(), $this->owner->config());
 	}
 }

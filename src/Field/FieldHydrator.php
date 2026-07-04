@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Cosray\Assets\Repository;
 use Cosray\Schema\When;
 use Cosray\Value\ValueContext;
 use ReflectionClass;
@@ -24,6 +25,14 @@ class FieldHydrator
 	 */
 	public function hydrate(object $target, array $content, Owner $owner): array
 	{
+		// All referenced assets load in one batch; field/value rendering
+		// afterwards reads from the shared per-request cache.
+		$uids = Repository::collectUids($content);
+
+		if ($uids !== []) {
+			$owner->assets()->preload($uids);
+		}
+
 		$fieldNames = [];
 		$rc = new ReflectionClass($target);
 

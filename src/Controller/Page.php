@@ -57,7 +57,7 @@ class Page
 
 		if ($request->get('isXhr', false)) {
 			if ($request->method() === 'GET') {
-				return $this->jsonRead($page, $cms);
+				return $this->jsonRead($page, $context, $cms);
 			}
 
 			throw new HttpBadRequest();
@@ -107,7 +107,7 @@ class Page
 		);
 	}
 
-	private function jsonRead(object $node, Cms $cms): Response
+	private function jsonRead(object $node, Context $context, Cms $cms): Response
 	{
 		$inner = Node::unwrap($node);
 
@@ -115,7 +115,7 @@ class Page
 			$data = $inner->read();
 		} else {
 			$nodeFactory = $cms->nodeFactory();
-			$serializer = new Serializer($this->types, $nodeFactory->uid());
+			$serializer = new Serializer($this->types, $nodeFactory->uid(), $context->assets());
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),

@@ -154,7 +154,7 @@ class Files extends Value implements Iterator
 		}
 
 		foreach ($files as $file) {
-			if (is_array($file) && ($file['file'] ?? null)) {
+			if (is_array($file) && ($file['uid'] ?? null)) {
 				return true;
 			}
 		}

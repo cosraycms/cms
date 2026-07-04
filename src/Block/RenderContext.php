@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Block;
 
+use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
@@ -94,9 +95,10 @@ final class RenderContext
 		return $this->assets ??= new Assets($this->owner->request(), $this->owner->config());
 	}
 
-	public function assetsPath(): string
+	/** The catalog asset a media item references, if it exists. */
+	public function asset(string $uid): ?Asset
 	{
-		return 'node/' . $this->owner->uid() . '/';
+		return $uid === '' ? null : $this->owner->assets()->get($uid);
 	}
 
 	private function filled(mixed $value): bool

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Request;
+use Cosray\Assets\Repository as AssetRepository;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
@@ -91,6 +92,11 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			public function config(): Config
 			{
 				return $this->config;
+			}
+
+			public function assets(): AssetRepository
+			{
+				throw new RuntimeException('Not available in this test');
 			}
 		};
 	}

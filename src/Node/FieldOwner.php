@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Celemas\Core\Request;
+use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\Owner;
@@ -46,5 +47,10 @@ class FieldOwner implements Owner
 	public function config(): Config
 	{
 		return $this->context->config;
+	}
+
+	public function assets(): Repository
+	{
+		return $this->context->assets();
 	}
 }
