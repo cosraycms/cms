@@ -13,11 +13,15 @@ $data = (array) ($this->unwrap($data ?? null) ?? []);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
+$assets = (array) ($this->unwrap($assets ?? null) ?? []);
 $fieldName = (string) ($field['name'] ?? '');
 
 $props = (array) ($control['props'] ?? []);
 $tag = (string) ($props['tag'] ?? '');
 $module = (string) ($props['module'] ?? '');
+
+// Only the assets this entry references; previews resolve uids from it.
+$uids = \Cosray\Assets\Repository::collectUids($data);
 
 $payload = [
 	'value' => $data['value'] ?? null,
@@ -27,6 +31,7 @@ $payload = [
 		'default' => $defaultLocale,
 		'all' => $locales,
 	],
+	'assets' => (object) array_intersect_key($assets, array_flip($uids)),
 ];
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>

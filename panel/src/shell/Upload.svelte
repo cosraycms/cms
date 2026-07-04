@@ -1,23 +1,26 @@
 <script lang="ts">
 	import { preventDefault } from 'svelte/legacy';
 
-	import type { FileItem, UploadResponse, UploadType } from '$types/data';
+	import type { FileItem, UploadType } from '$types/data';
+	import type { UploadResult } from '$lib/bridge';
 	import type { Limit } from '$types/fields';
+	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
 
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
+	import { registerAsset, useAssets } from '$lib/assets';
 	import { _ } from '$lib/locale';
 	import IcoUpload from '$shell/icons/IcoUpload.svelte';
 	import Dialog from '$shell/Dialog.svelte';
 	import Message from '$shell/Message.svelte';
 	import MediaList from '$shell/MediaList.svelte';
+	import ModalLibrary from '$shell/modals/ModalLibrary.svelte';
 
 	type Props = {
-		node: string;
 		type: UploadType;
 		name: string;
 		translate: boolean;
-		assets: FileItem[];
+		items: FileItem[];
 		limit?: Limit;
 		required?: boolean;
 		disabled?: boolean;
@@ -28,11 +31,10 @@
 	};
 
 	let {
-		node,
 		type,
 		name,
 		translate,
-		assets = $bindable(),
+		items = $bindable(),
 		limit = { max: -1, min: 0 },
 		required = false,
 		disabled = false,
@@ -42,9 +44,10 @@
 		notify = () => {},
 	}: Props = $props();
 
+	const assetStore = useAssets();
+
 	let loading = $state(false);
 	let dragging = $state(false);
-	let path = $derived(`${cosray().system().prefix}/media/${type}/node/${node}`);
 	let allowedExtensions = $derived(cosray().system().allowedFiles[type].join(', '));
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
 
@@ -66,18 +69,18 @@
 
 	function remove(index: number | null) {
 		if (index === null) {
-			assets = [];
+			items = [];
 		} else {
-			assets.splice(index, 1);
-			assets = assets;
+			items.splice(index, 1);
+			items = items;
 		}
 		notify();
 	}
 
-	function readItems(items: DataTransferItemList) {
+	function readItems(list: DataTransferItemList) {
 		let result: File[] = [];
 
-		for (const item of items) {
+		for (const item of list) {
 			if (item.kind === 'file') {
 				const file = item.getAsFile();
 
@@ -95,8 +98,8 @@
 			return [];
 		}
 
-		const { files, items } = event.dataTransfer;
-		let result = files.length ? [...files] : readItems(items);
+		const { files, items: transferItems } = event.dataTransfer;
+		let result = files.length ? [...files] : readItems(transferItems);
 
 		if (!multiple && result.length > 1) {
 			alert(_('In diesem Feld ist nur eine einzelne Datei erlaubt.'));
@@ -122,7 +125,7 @@
 			return files;
 		}
 
-		const slotsLeft = Math.max(limit.max - (assets?.length ?? 0), 0);
+		const slotsLeft = Math.max(limit.max - (items?.length ?? 0), 0);
 
 		if (slotsLeft === 0) {
 			alert(_('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'));
@@ -148,25 +151,37 @@
 	}
 
 	async function upload(file: File) {
-		return await cosray().upload(type, node, file);
+		return await cosray().upload(type, file);
 	}
 
-	function getTitleAltValue() {
-		const result: Record<string, string> = {};
+	function uploadError(item: UploadResult) {
+		cosray().toast.error(_('Datei:') + ' ' + (item.filename ?? '') + ': ' + (item.error ?? ''));
+	}
 
-		if (translate) {
-			cosray()
-				.system()
-				.locales.map((locale) => (result[locale.id] = ''));
-		} else {
-			result.zxx = '';
+	// Fresh items carry only the uid — per-use meta stays absent until
+	// the editor actually fills it, so catalog defaults keep applying.
+	function add(item: UploadResult) {
+		if (!item.ok || !item.uid) {
+			uploadError(item);
+
+			return;
 		}
 
-		return result;
-	}
+		registerAsset(assetStore, item.uid, {
+			filename: item.filename ?? '',
+			url: item.url ?? '',
+			kind: type,
+			mime: item.mime,
+			width: item.width,
+			height: item.height,
+		});
 
-	function uploadError(item: UploadResponse) {
-		cosray().toast.error(_('Datei:') + ' ' + item.file + ': ' + (item.error ?? ''));
+		if (multiple) {
+			items.push({ uid: item.uid });
+			items = [...items];
+		} else {
+			items = [{ uid: item.uid }];
+		}
 	}
 
 	function onFile(getFilesFunction: (event: DragEvent | Event) => File[]) {
@@ -178,45 +193,12 @@
 				loading = true;
 
 				let responses = (await Promise.all(files.map(upload))).filter(
-					(item): item is UploadResponse => item !== undefined,
+					(item): item is UploadResult => item !== undefined,
 				);
 
-				const value = getTitleAltValue();
+				responses.map(add);
 
-				if (multiple) {
-					responses.map((item) => {
-						if (item.ok) {
-							assets.push({
-								file: item.file,
-								meta: {
-									alt: { ...value },
-									title: { ...value },
-								},
-							});
-							assets = [...assets];
-						} else {
-							uploadError(item);
-						}
-					});
-				} else {
-					const item = responses[0] as UploadResponse;
-
-					if (item.ok) {
-						assets = [
-							{
-								file: item.file,
-								meta: {
-									alt: { ...value },
-									title: { ...value },
-								},
-							},
-						];
-					} else {
-						uploadError(item);
-					}
-				}
-
-				if (assets && callback) {
+				if (items && callback) {
 					callback();
 				}
 			}
@@ -224,6 +206,47 @@
 			loading = false;
 			notify();
 		};
+	}
+
+	function pickFromLibrary(item: LibraryItem) {
+		if (multiple && limit.max >= 1 && (items?.length ?? 0) >= limit.max) {
+			alert(_('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'));
+
+			return;
+		}
+
+		registerAsset(assetStore, item.uid, item);
+
+		if (multiple) {
+			items.push({ uid: item.uid });
+			items = [...items];
+		} else {
+			items = [{ uid: item.uid }];
+		}
+
+		notify();
+
+		if (callback) {
+			callback();
+		}
+	}
+
+	function openLibrary() {
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalLibrary, {
+				target: host,
+				props: {
+					kind: type,
+					close: () => handle.close(),
+					pick: (item: LibraryItem) => {
+						pickFromLibrary(item);
+						handle.close();
+					},
+				},
+			});
+
+			return () => void unmount(app);
+		});
 	}
 </script>
 
@@ -240,8 +263,8 @@
 		class:upload-multiple={multiple}
 		class:upload-inline={inline}
 	>
-		<MediaList bind:assets {multiple} {type} {path} {remove} {loading} {translate} {notify} />
-		{#if !assets || limit.max < 1 || assets.length < limit.max}
+		<MediaList bind:items {multiple} {type} {remove} {loading} {translate} {notify} />
+		{#if !items || limit.max < 1 || items.length < limit.max}
 			<label
 				class="dragdrop"
 				class:dragging
@@ -259,6 +282,9 @@
 				<div class="file-extensions">
 					Erlaubte Dateiendungen: {allowedExtensions}
 				</div>
+				<button type="button" class="library-button" onclick={preventDefault(openLibrary)}>
+					{_('Aus Bibliothek wählen')}
+				</button>
 				<input type="file" id={name} {multiple} oninput={onFile(getFilesFromInput)} />
 			</label>
 		{/if}
@@ -355,6 +381,22 @@
 			font-size: var(--font-size-xs);
 			color: var(--color-neutral-400);
 			margin-top: var(--space-1);
+		}
+
+		.library-button {
+			margin-top: var(--space-3);
+			border: 1px solid var(--color-neutral-300);
+			border-radius: var(--radius-md);
+			background-color: var(--color-white);
+			padding: var(--space-1) var(--space-3);
+			font-size: var(--font-size-sm);
+			color: var(--color-neutral-600);
+			cursor: pointer;
+		}
+
+		.library-button:hover {
+			border-color: var(--color-info);
+			color: var(--color-info);
 		}
 
 		@media (min-width: 768px) {

@@ -3,6 +3,7 @@
 
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
+	import { useAssets } from '$lib/assets';
 	import { _ } from '$lib/locale';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoEye from '$shell/icons/IcoEye.svelte';
@@ -10,7 +11,6 @@
 	import ImagePreview from '$shell/ImagePreview.svelte';
 
 	type Props = {
-		path: string;
 		image: FileItem;
 		loading: boolean;
 		upload: boolean;
@@ -20,22 +20,16 @@
 		class?: string;
 	};
 
-	let {
-		path,
-		image,
-		loading,
-		upload,
-		multiple,
-		remove,
-		edit,
-		class: classes = '',
-	}: Props = $props();
+	let { image, loading, upload, multiple, remove, edit, class: classes = '' }: Props = $props();
+
+	const assets = useAssets();
 
 	let hover = $state(false);
-	let filename = $derived(image.file ?? '');
+	let info = $derived($assets[image.uid ?? '']);
+	let filename = $derived(info?.filename ?? '');
 	let ext = $derived(filename.split('.').pop()?.toLowerCase());
-	let orig = $derived(`${path}/${filename}`);
-	let thumb = $derived(ext === 'svg' ? orig : `${path}/${thumbIt(filename)}`);
+	let orig = $derived(info?.url ?? '');
+	let thumb = $derived(ext === 'svg' ? orig : thumbIt(orig));
 	let title = $derived(getTitle(image, 'title') || getTitle(image, 'alt'));
 
 	function preview() {
@@ -52,8 +46,8 @@
 		});
 	}
 
-	function thumbIt(image: string) {
-		return image + '?resize=width&w=400';
+	function thumbIt(url: string) {
+		return url === '' ? url : url + '?resize=width&w=400';
 	}
 
 	function getTitle(image: FileItem, key: string) {

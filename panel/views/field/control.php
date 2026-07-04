@@ -34,4 +34,5 @@ $this->insert($views[$controlName] ?? 'field/unknown', [
 	'node' => $node ?? '',
 	'locales' => $locales ?? [],
 	'defaultLocale' => $defaultLocale ?? '',
+	'assets' => $assets ?? [],
 ]);

@@ -19,13 +19,27 @@ export interface Meta {
 }
 
 export interface FileItem {
-	file?: string;
+	uid?: string;
 	meta?: Meta;
 }
 
 export interface TranslatedFile extends FileItem {
-	file: string;
+	uid: string;
 }
+
+// Resolved catalog data for an asset uid, from the SSR payload, an
+// upload response or the library endpoint.
+export interface AssetInfo {
+	filename: string;
+	url: string;
+	kind: string;
+	mime?: string | null;
+	width?: number | null;
+	height?: number | null;
+	meta?: Meta;
+}
+
+export type AssetMap = Record<string, AssetInfo>;
 
 export interface TextData {
 	type: string;
@@ -63,8 +77,13 @@ export interface FileData {
 
 export interface UploadResponse {
 	ok: boolean;
-	file: string;
 	error: string;
+	uid: string;
+	filename: string;
+	url: string;
+	mime: string | null;
+	width: number | null;
+	height: number | null;
 }
 
 export type UploadType = 'image' | 'file' | 'video';

@@ -39,6 +39,31 @@ export function ensureFiles(value: LocaleMap<FileItem[]> | undefined): LocaleMap
 	return ensureNeutral(value, []);
 }
 
+/**
+ * Drop meta keys whose locale maps hold no actual text, and the meta
+ * member itself when nothing remains. Empty per-use meta must not be
+ * persisted — it would shadow the asset's catalog defaults.
+ */
+export function pruneItemMeta(item: FileItem): FileItem {
+	if (!item.meta) {
+		return item;
+	}
+
+	const meta: Meta = {};
+
+	for (const [key, map] of Object.entries(item.meta)) {
+		if (map && Object.values(map).some((value) => value !== '' && value != null)) {
+			meta[key] = map;
+		}
+	}
+
+	if (Object.keys(meta).length === 0) {
+		return { uid: item.uid };
+	}
+
+	return { ...item, meta };
+}
+
 export function uid(length = 13): string {
 	const alphabet = '123456789bcdfghklmnpqrstvwxyz';
 	const threshold = Math.floor(256 / alphabet.length) * alphabet.length;

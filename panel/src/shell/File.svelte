@@ -2,21 +2,24 @@
 	import type { FileItem } from '$types/data';
 	import { _ } from '$lib/locale';
 	import { cosray } from '$lib/bridge';
+	import { useAssets } from '$lib/assets';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoDownload from '$shell/icons/IcoDownload.svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoPencil from '$shell/icons/IcoPencil.svelte';
 
 	type Props = {
-		path: string;
 		asset: FileItem;
 		remove: () => void;
 		edit: () => void;
 		loading: boolean;
 	};
 
-	let { path, asset, remove, edit, loading }: Props = $props();
+	let { asset, remove, edit, loading }: Props = $props();
 
+	const assets = useAssets();
+
+	let info = $derived($assets[asset.uid ?? '']);
 	let title = $derived(getTitle(asset));
 
 	function getTitle(asset: FileItem) {
@@ -40,14 +43,14 @@
 	<div class="file cms-file">
 		<IcoDocument />
 		<div class="cms-file-meta">
-			<b class="cms-file-name">{asset.file}</b>
+			<b class="cms-file-name">{info?.filename ?? asset.uid}</b>
 			<span class="cms-file-title">{title}</span>
 		</div>
 		{#if loading}
 			<div>Loading ...</div>
 		{/if}
 		<IcoDownload />
-		<a href={`${path}/${asset.file}`} target="_blank" class="cms-file-download">
+		<a href={info?.url ?? ''} target="_blank" class="cms-file-download">
 			{_('Datei herunterladen')}
 		</a>
 

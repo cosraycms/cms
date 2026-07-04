@@ -34,11 +34,10 @@
 	<Upload
 		{type}
 		limit={field.limit}
-		{node}
 		required={field.required ?? false}
 		name={field.name}
 		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
-		bind:assets={value[active]}
+		bind:items={value[active]}
 		{notify}
 	/>
 {/if}

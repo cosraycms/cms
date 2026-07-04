@@ -7,6 +7,8 @@
 
 	type Props = {
 		close: () => void;
+		// The applying caller prunes empty meta before persisting, so the
+		// editing scaffold below never shadows catalog defaults.
 		apply: (asset: FileItem) => void;
 		asset: FileItem;
 		translate: boolean;

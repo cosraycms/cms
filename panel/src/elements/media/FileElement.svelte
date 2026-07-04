@@ -1,9 +1,10 @@
 <svelte:options customElement={{ tag: 'cosray-file', shadow: 'none' }} />
 
 <script lang="ts">
-	import type { FileItem, LocaleMap } from '$types/data';
+	import type { AssetMap, FileItem, LocaleMap } from '$types/data';
 
 	import { ZXX } from '$types/data';
+	import { provideAssets } from '$lib/assets';
 	import MediaControl from './MediaControl.svelte';
 
 	type Props = {
@@ -12,9 +13,24 @@
 		field?: any;
 		node?: string;
 		locale?: string;
+		assets?: AssetMap;
 	};
 
-	let { value = {}, field = { name: 'file' }, node = '', locale = ZXX }: Props = $props();
+	let {
+		value = {},
+		field = { name: 'file' },
+		node = '',
+		locale = ZXX,
+		assets = {},
+	}: Props = $props();
+
+	// The SSR payload seeds the store once; later host re-assignments
+	// merge in through the effect below.
+	const assetStore = provideAssets(() => assets);
+
+	$effect(() => {
+		assetStore.update((map) => ({ ...assets, ...map }));
+	});
 
 	function sync(): LocaleMap<FileItem[]> {
 		return value ?? {};

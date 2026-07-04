@@ -1,38 +1,22 @@
 <script lang="ts">
+	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
+
 	import { _ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoImage from '$shell/icons/IcoImage.svelte';
 	import IcoLink from '$shell/icons/IcoLink.svelte';
-	import File from './ModalLinkFile.svelte';
-	import Image from './ModalLinkImage.svelte';
 	import Button from '$shell/Button.svelte';
-	import type { FileItem } from '$types/data';
+	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
 
 	type Props = {
 		close: () => void;
 		add: (value: string, blank: boolean) => void;
 		value: string;
 		blank: boolean;
-		// Media browsing needs the surrounding node's fields and content;
-		// element controls cannot provide them yet, so the tabs only show
-		// when a caller passes them in.
-		node?: string | null;
-		fields?: { name: string; type: string }[] | null;
-		content?: Record<string, { value?: { zxx?: unknown } }> | null;
 	};
 
-	let {
-		close,
-		add,
-		value = $bindable(),
-		blank = $bindable(),
-		node = null,
-		fields = null,
-		content = null,
-	}: Props = $props();
-
-	let browsable = $derived(node !== null && fields !== null && content !== null);
+	let { close, add, value = $bindable(), blank = $bindable() }: Props = $props();
 
 	let currentTab = $state('manually');
 
@@ -43,24 +27,12 @@
 		}
 	}
 
-	function clickFile(path: string) {
-		value = path;
+	function pick(item: LibraryItem) {
+		value = item.url;
 	}
 
 	function changeTab(tab: string) {
 		return () => (currentTab = tab);
-	}
-
-	function media(field: string): FileItem[] {
-		const entry = content?.[field];
-
-		if (!entry || !('value' in entry)) {
-			return [];
-		}
-
-		const value = entry.value?.zxx;
-
-		return Array.isArray(value) ? (value as FileItem[]) : [];
 	}
 </script>
 
@@ -78,52 +50,26 @@
 						<IcoLink />
 						<span>{_('Manueller Link')}</span>
 					</button>
-					{#if browsable}
-						<button
-							class="tab"
-							class:active={currentTab === 'images'}
-							onclick={changeTab('images')}
-						>
-							<IcoImage />
-							<span>{_('Bilder')}</span>
-						</button>
-						<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
-							<IcoDocument />
-							<span>{_('Dateien/Dokumente')}</span>
-						</button>
-					{/if}
+					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
+						<IcoImage />
+						<span>{_('Bilder')}</span>
+					</button>
+					<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
+						<IcoDocument />
+						<span>{_('Dateien/Dokumente')}</span>
+					</button>
 				</nav>
 			</div>
 		</div>
 		<div class="files cms-modal-link-files">
 			{#if currentTab === 'images'}
-				{#if browsable && fields && node}
-					<div class="cms-modal-link-images-grid">
-						{#each fields as field (field)}
-							{#if field.type === 'Cosray\\Field\\Image'}
-								{#each media(field.name) as file}
-									{#if file.file}
-										<Image {node} file={file.file} {clickFile} bind:current={value} />
-									{/if}
-								{/each}
-							{/if}
-						{/each}
-					</div>
-				{/if}
+				{#key currentTab}
+					<LibraryBrowser kind="image" {pick} selected={value} />
+				{/key}
 			{:else if currentTab === 'files'}
-				{#if browsable && fields && node}
-					<div>
-						{#each fields as field (field)}
-							{#if field.type === 'Cosray\\Field\\File'}
-								{#each media(field.name) as file}
-									{#if file.file}
-										<File {node} file={file.file} {clickFile} bind:current={value} />
-									{/if}
-								{/each}
-							{/if}
-						{/each}
-					</div>
-				{/if}
+				{#key currentTab}
+					<LibraryBrowser {pick} selected={value} />
+				{/key}
 			{:else}
 				<div>
 					<div class="cms-modal-link-manual-hint">
@@ -186,15 +132,8 @@
 		}
 
 		.cms-modal-link-files {
-			max-height: 50vh;
+			max-height: 60vh;
 			overflow-y: auto;
-		}
-
-		.cms-modal-link-images-grid {
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
-			gap: var(--space-2);
 		}
 
 		.cms-modal-link-manual-hint {

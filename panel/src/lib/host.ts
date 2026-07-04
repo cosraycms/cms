@@ -1,3 +1,5 @@
+import type { AssetMap } from '$types/data';
+
 import { loadElement } from '$lib/elements';
 
 type HostPayload = {
@@ -5,6 +7,7 @@ type HostPayload = {
 	meta?: unknown;
 	field?: Record<string, unknown>;
 	locales?: { default: string; all: { id: string; title: string }[] };
+	assets?: AssetMap;
 };
 
 type ContractElement = HTMLElement & Record<string, unknown>;
@@ -93,6 +96,7 @@ export class CosrayHost extends HTMLElement {
 		element.node = this.getAttribute('node') ?? '';
 		element.locale = this.#locale;
 		element.locales = this.#payload.locales;
+		element.assets = this.#payload.assets ?? {};
 
 		this.#element = element;
 		this.append(element);

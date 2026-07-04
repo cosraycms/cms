@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
 	import { _ } from '$lib/locale';
+	import { useAssets } from '$lib/assets';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 
 	type Props = {
-		path: string;
 		file: FileItem;
 		loading: boolean;
 		upload: boolean;
@@ -12,9 +12,12 @@
 		class?: string;
 	};
 
-	let { path, file, loading, upload, remove, class: classes = '' }: Props = $props();
+	let { file, loading, upload, remove, class: classes = '' }: Props = $props();
 
-	let filename = $derived(file.file ?? '');
+	const assets = useAssets();
+
+	let info = $derived($assets[file.uid ?? '']);
+	let filename = $derived(info?.filename ?? '');
 	let ext = $derived(filename.split('.').pop()?.toLowerCase());
 </script>
 
@@ -24,7 +27,7 @@
 	{:else}
 		<video controls class="cms-video-player">
 			<track kind="captions" />
-			<source src="{path}/{filename}" type="video/{ext}" />
+			<source src={info?.url ?? ''} type="video/{ext}" />
 		</video>
 		<div class="controls cms-video-controls">
 			{#if remove}

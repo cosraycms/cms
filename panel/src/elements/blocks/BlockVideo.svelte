@@ -31,11 +31,10 @@
 		<Upload
 			type="video"
 			limit={SINGLE_LIMIT}
-			{node}
 			{notify}
 			name={field.name + '_' + index}
 			translate={false}
-			bind:assets={item.value}
+			bind:items={item.value}
 		/>
 	{/if}
 </div>

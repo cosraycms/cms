@@ -175,6 +175,7 @@ $span = static function (mixed $value, int $fallback): string {
 												'locales' => $locales,
 												'defaultLocale' => $defaultLocale,
 												'node' => $uid,
+												'assets' => $node['assets'] ?? [],
 											]) ?>
 										</div>
 									<?php endforeach ?>

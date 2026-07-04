@@ -120,6 +120,64 @@ class Media
 		]));
 	}
 
+	/**
+	 * Paged asset catalog listing for the panel (library picker, link
+	 * modal). `kind` filters to image or video; a File field accepts
+	 * every kind, so `file` (or no kind) lists everything.
+	 */
+	#[Permission('panel')]
+	public function library(): Response
+	{
+		$params = $this->request->params();
+		$kind = $params['kind'] ?? null;
+		$q = trim((string) ($params['q'] ?? ''));
+		$page = max(1, (int) ($params['page'] ?? 1));
+		$limit = 60;
+		$args = ['limit' => $limit + 1, 'offset' => ($page - 1) * $limit];
+
+		if (in_array($kind, ['image', 'video'], true)) {
+			$args['kind'] = $kind;
+		}
+
+		if ($q !== '') {
+			$args['q'] = '%' . addcslashes($q, '%_\\') . '%';
+		}
+
+		if (isset($params['uids']) && $params['uids'] !== '') {
+			$args['uids'] = explode(',', (string) $params['uids']);
+		}
+
+		$rows = $this->db->assets->list($args)->all();
+		$more = count($rows) > $limit;
+
+		return Response::create($this->factory)->json([
+			'ok' => true,
+			'assets' => array_map($this->libraryItem(...), array_slice($rows, 0, $limit)),
+			'page' => $page,
+			'more' => $more,
+		]);
+	}
+
+	protected function libraryItem(array $row): array
+	{
+		$prefix = $this->config->path->prefix;
+		$uid = (string) $row['uid'];
+		$kind = (string) $row['kind'];
+		$filename = (string) $row['filename'];
+		$url = "{$prefix}/media/{$kind}/{$uid}/" . rawurlencode($filename);
+
+		return [
+			'uid' => $uid,
+			'filename' => $filename,
+			'url' => $url,
+			'thumbUrl' => $kind === 'image' ? "{$url}?resize=width&w=400" : $url,
+			'kind' => $kind,
+			'mime' => $row['mime'] ?? null,
+			'width' => isset($row['width']) ? (int) $row['width'] : null,
+			'height' => isset($row['height']) ? (int) $row['height'] : null,
+		];
+	}
+
 	/** Build the client payload for a catalog row. */
 	protected function uploadResult(array $row): array
 	{

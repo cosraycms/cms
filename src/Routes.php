@@ -58,6 +58,9 @@ class Routes
 			'cms.media.upload',
 		)->middleware($this->session);
 
+		$app->get('/media/library', [Media::class, 'library'], 'cms.media.library')
+			->middleware($this->session);
+
 		$this->addPanel($app);
 
 		foreach ($this->pluginRoutes as $addRoutes) {

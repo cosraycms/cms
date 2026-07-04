@@ -4,8 +4,13 @@ export type ModalOptions = {
 
 export type UploadResult = {
 	ok: boolean;
-	file?: string;
 	error?: string;
+	uid?: string;
+	filename?: string;
+	url?: string;
+	mime?: string | null;
+	width?: number | null;
+	height?: number | null;
 };
 
 export type BridgeSystem = {
@@ -27,7 +32,7 @@ export type BridgeSystem = {
 export type CosrayBridge = {
 	version: 1;
 	system(): BridgeSystem;
-	upload(type: 'image' | 'file' | 'video', node: string, file: File): Promise<UploadResult>;
+	upload(type: 'image' | 'file' | 'video', file: File): Promise<UploadResult>;
 	modal: {
 		open(
 			render: (host: HTMLElement) => (() => void) | void,

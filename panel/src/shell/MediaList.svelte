@@ -4,29 +4,28 @@
 	import Sortable from 'sortablejs';
 	import { mount, onMount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
+	import { pruneItemMeta } from '$lib/content';
 	import Image from '$shell/Image.svelte';
 	import Video from '$shell/Video.svelte';
 	import File from '$shell/File.svelte';
 	import ModalEditImage from '$shell/modals/ModalEditImage.svelte';
 
 	type Props = {
-		assets: FileItem[];
+		items: FileItem[];
 		multiple: boolean;
 		translate: boolean;
 		type: UploadType;
 		loading: boolean;
-		path: string;
 		remove: (index: number | null) => void;
 		notify?: () => void;
 	};
 
 	let {
-		assets = $bindable(),
+		items = $bindable(),
 		multiple,
 		translate,
 		type,
 		loading,
-		path,
 		remove,
 		notify = () => {},
 	}: Props = $props();
@@ -41,11 +40,11 @@
 						return;
 					}
 
-					const tmp = assets[event.oldIndex];
+					const tmp = items[event.oldIndex];
 
-					assets.splice(event.oldIndex, 1);
-					assets.splice(event.newIndex, 0, tmp);
-					assets = assets;
+					items.splice(event.oldIndex, 1);
+					items.splice(event.newIndex, 0, tmp);
+					items = items;
 					// The element only serializes into the form value when
 					// notified; without this the reorder is lost on save.
 					notify();
@@ -59,10 +58,11 @@
 			const app = mount(ModalEditImage, {
 				target: host,
 				props: {
-					asset: assets[index],
+					asset: items[index],
 					close: () => handle.close(),
-					apply: (asset: FileItem) => {
-						assets[index] = asset;
+					apply: (item: FileItem) => {
+						// Empty per-use meta is dropped so catalog defaults apply.
+						items[index] = pruneItemMeta(item);
 						notify();
 						handle.close();
 					},
@@ -80,44 +80,36 @@
 
 {#if multiple && type === 'image'}
 	<div class="multiple-images cms-media-list cms-media-list-images" bind:this={sorterElement}>
-		{#each assets as asset, index (asset)}
+		{#each items as item, index (item)}
 			<Image
 				upload
 				{multiple}
-				{path}
-				image={asset}
+				image={item}
 				remove={() => remove(index)}
 				edit={() => edit(index, true)}
 				{loading}
 			/>
 		{/each}
 	</div>
-{:else if !multiple && type === 'image' && assets && assets.length > 0}
+{:else if !multiple && type === 'image' && items && items.length > 0}
 	<Image
 		upload
-		{path}
 		{multiple}
-		image={assets[0]}
+		image={items[0]}
 		remove={() => remove(null)}
 		edit={() => edit(0, true)}
 		{loading}
 	/>
 {:else if multiple && type === 'file'}
 	<div class="multiple-files cms-media-list cms-media-list-files" bind:this={sorterElement}>
-		{#each assets as asset, index (asset)}
-			<File {path} {loading} {asset} remove={() => remove(index)} edit={() => edit(index, false)} />
+		{#each items as item, index (item)}
+			<File {loading} asset={item} remove={() => remove(index)} edit={() => edit(index, false)} />
 		{/each}
 	</div>
-{:else if !multiple && type === 'video' && assets && assets.length > 0}
-	<Video upload {path} file={assets[0]} remove={() => remove(null)} {loading} />
-{:else if assets && assets.length > 0}
-	<File
-		{path}
-		{loading}
-		asset={assets[0]}
-		remove={() => remove(null)}
-		edit={() => edit(0, false)}
-	/>
+{:else if !multiple && type === 'video' && items && items.length > 0}
+	<Video upload file={items[0]} remove={() => remove(null)} {loading} />
+{:else if items && items.length > 0}
+	<File {loading} asset={items[0]} remove={() => remove(null)} edit={() => edit(0, false)} />
 {/if}
 
 <style>

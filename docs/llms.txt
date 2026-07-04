@@ -496,6 +496,13 @@ Upload endpoint:
 - duplicate content (same hash on the same disk) returns the existing asset
 - response: `{ok, error, uid, filename, mime, width, height, url}`
 
+Listing endpoint (panel permission):
+
+- `GET /media/library` — paged asset catalog listing for the panel
+- params: `kind` (image|video filter; `file` or absent lists everything),
+  `q` (filename search), `page`, `uids` (comma-separated batch lookup)
+- response items: `{uid, filename, url, thumbUrl, kind, mime, width, height}`
+
 Serve endpoints:
 
 - `/media/image/...slug`

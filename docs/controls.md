@@ -132,6 +132,7 @@ Hand-written ES modules are sufficient — no build step required.
   - `node` — the node uid; `''` while creating a node that has not been saved yet.
   - `locale` — the **currently selected editing locale**. The field wrapper owns the locale tabs; when `field.translate` is true this property changes as the editor switches tabs — render `value[locale]`.
   - `locales` — `{ default: string, all: {id, title}[] }`.
+  - `assets` — resolved catalog data for every asset uid the entry references: `{ [uid]: { filename, url, kind, mime?, width?, height?, meta? } }`. Media items in `value` are `{uid, meta?}`; previews resolve uids through this map. Upload responses carry the same data for freshly added assets.
 - The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** (and optionally meta) in the same shape:
 
   ```js
@@ -170,10 +171,10 @@ Panel editor pages install `window.Cosray` from the embedded system payload, a v
 window.Cosray = {
 	version: 1,
 	system(): { locale, defaultLocale, locales, customLocales, prefix, assets, debug, allowedFiles },
-	upload(type: 'image' | 'file' | 'video', node: string, file: File): Promise<{ok, file?, error?}>,
+	upload(type: 'image' | 'file' | 'video', file: File): Promise<{ok, error?, uid?, filename?, url?, mime?, width?, height?}>,
 	modal: { open(render: (host: HTMLElement) => cleanup?, options?): { close() } },
 	toast: { success(message), error(message) },
 };
 ```
 
-`upload()` posts to the media endpoint with the session's CSRF token — elements never handle credentials. `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
+`upload()` posts to the pool endpoint `POST /media/{type}` with the session's CSRF token — elements never handle credentials. It returns the catalog asset (`uid`, `url`, `filename`, ...); store `{uid}` in the field value and keep the rest for previews. `GET /media/library` lists the catalog for reuse pickers (`kind`, `q`, `page` parameters). `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.

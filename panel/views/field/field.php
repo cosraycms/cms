@@ -11,6 +11,7 @@ $data = (array) ($this->unwrap($data ?? null) ?? []);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
+$assets = (array) ($this->unwrap($assets ?? null) ?? []);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -79,6 +80,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						'node' => $node,
 						'locales' => $locales,
 						'defaultLocale' => $defaultLocale,
+						'assets' => $assets,
 					]) ?>
 				</div>
 			<?php endforeach ?>
@@ -93,6 +95,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'node' => $node,
 				'locales' => $locales,
 				'defaultLocale' => $defaultLocale,
+				'assets' => $assets,
 			]) ?>
 		<?php endif ?>
 	</div>

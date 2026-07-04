@@ -17,12 +17,12 @@ export function installBridge(system: BridgeSystem): void {
 			return system;
 		},
 
-		async upload(type, node, file) {
+		async upload(type, file) {
 			const body = new FormData();
 			body.append('file', file);
 
 			try {
-				const response = await fetch(`${system.prefix}/media/${type}/node/${node}`, {
+				const response = await fetch(`${system.prefix}/media/${type}`, {
 					method: 'POST',
 					body,
 					credentials: 'same-origin',

@@ -1,10 +1,11 @@
 <svelte:options customElement={{ tag: 'cosray-blocks', shadow: 'none' }} />
 
 <script lang="ts">
-	import type { Block, LocaleMap, Meta } from '$types/data';
+	import type { AssetMap, Block, LocaleMap, Meta } from '$types/data';
 	import type { BlocksField } from '$types/fields';
 
 	import { ZXX } from '$types/data';
+	import { provideAssets } from '$lib/assets';
 	import { provideNotify } from '../notify';
 	import BlocksPanel from './BlocksPanel.svelte';
 
@@ -15,6 +16,7 @@
 		field?: any;
 		node?: string;
 		locale?: string;
+		assets?: AssetMap;
 	};
 
 	let {
@@ -23,7 +25,16 @@
 		field = { name: 'blocks' },
 		node = '',
 		locale = ZXX,
+		assets = {},
 	}: Props = $props();
+
+	// The SSR payload seeds the store once; later host re-assignments
+	// merge in through the effect below.
+	const assetStore = provideAssets(() => assets);
+
+	$effect(() => {
+		assetStore.update((map) => ({ ...assets, ...map }));
+	});
 
 	let active = $derived(field.translate ? locale : ZXX);
 
