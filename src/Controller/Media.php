@@ -22,6 +22,7 @@ use Cosray\Storage\Storage;
 use Cosray\Uid;
 use Cosray\Users;
 use enshrined\svgSanitize\Sanitizer;
+use finfo;
 use Gumlet\ImageResize;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 use Throwable;
@@ -408,9 +409,7 @@ class Media
 			]);
 		}
 
-		$fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-		$mimeType = (string) finfo_buffer($fileInfo, $contents);
-		finfo_close($fileInfo);
+		$mimeType = (string) new finfo(FILEINFO_MIME_TYPE)->buffer($contents);
 		$allowedExtensions = $mimeTypes[$mimeType] ?? null;
 		$result['mime'] = $mimeType;
 

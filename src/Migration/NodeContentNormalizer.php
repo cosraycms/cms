@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Migration;
 
+use Closure;
 use Cosray\Field;
 use Cosray\Uid;
 
@@ -20,9 +21,18 @@ final class NodeContentNormalizer
 
 	private readonly Field\Index $index;
 
+	/**
+	 * The optional $mediaItem callback takes over media item conversion
+	 * (asset-catalog migration: `{file}` → `{uid}`). Without it the
+	 * output stays byte-identical to migration 017's — downstreams that
+	 * run 017 before the assets migrations depend on that.
+	 *
+	 * @param null|Closure(array<string, mixed>): ?array $mediaItem
+	 */
 	public function __construct(
 		private readonly Uid $uid,
 		?Field\Index $index = null,
+		private readonly ?Closure $mediaItem = null,
 	) {
 		$this->index = $index ?? Field\Index::withDefaults();
 	}
@@ -249,15 +259,23 @@ final class NodeContentNormalizer
 				continue;
 			}
 
-			$result[] = $this->mediaItem($item);
+			$converted = $this->mediaItem($item);
+
+			if ($converted !== null) {
+				$result[] = $converted;
+			}
 		}
 
 		return $result;
 	}
 
 	/** @param array<string, mixed> $item */
-	private function mediaItem(array $item): array
+	private function mediaItem(array $item): ?array
 	{
+		if ($this->mediaItem !== null) {
+			return ($this->mediaItem)($item);
+		}
+
 		$result = ['file' => $item['file'] ?? ''];
 		$meta = $this->fieldMeta($item, ['file']);
 
