@@ -206,11 +206,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		)->one();
 		$this->assertTrue((bool) $row['published']);
 
-		$payload = json_decode(
-			(string) $this->makeRequest('GET', '/panel/api/node/panel-save-publish')->getBody(),
-			true,
-		);
-		$this->assertSame('panel-save-handle', $payload['handle']);
+		$handle = $this->db()->execute(
+			'SELECT h.handle FROM cms.node_handles h
+				JOIN cms.nodes n ON n.node = h.node
+				WHERE n.uid = :uid',
+			['uid' => 'panel-save-publish'],
+		)->one();
+		$this->assertSame('panel-save-handle', $handle['handle'] ?? null);
 	}
 
 	public function testDeleteRedirectsToTheCollection(): void

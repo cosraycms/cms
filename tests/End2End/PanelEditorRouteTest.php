@@ -83,11 +83,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('module="cosray:media"', $html);
 		$this->assertStringContainsString('tag="cosray-blocks"', $html);
 		$this->assertStringContainsString('node="panel-editor-media"', $html);
-		// The embedded system payload replaces the legacy /panel/boot call.
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('"allowedFiles"', $html);
-		$this->assertStringNotContainsString('/panel/boot', $html);
-		$this->assertStringNotContainsString('/panel/api', $html);
 	}
 
 	public function testConditionalFieldsCarryTheirConditionIntoTheMarkup(): void
@@ -198,20 +195,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'/<div class="js-path-source".*?name="content\[title\]\[value\]/s',
 			$html,
 		);
-	}
-
-	public function testNodeApiPayloadCarriesControlDescriptors(): void
-	{
-		$this->authenticateAs('editor');
-		$this->createArticle('panel-editor-api', 'Panel Editor Api');
-		$response = $this->makeRequest('GET', '/panel/api/node/panel-editor-api');
-
-		$this->assertResponseOk($response);
-		$payload = json_decode((string) $response->getBody(), true);
-		$fields = array_column($payload['fields'], null, 'name');
-
-		// Field payloads carry the control descriptor the generic renderer dispatches on.
-		$this->assertSame('text', $fields['title']['control']['name']);
 	}
 
 	public function testBoostedPanelEditorRouteRendersPartial(): void
