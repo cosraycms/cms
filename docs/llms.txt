@@ -501,6 +501,10 @@ Serve endpoints:
 - `/media/image/...slug`
 - `/media/file/...slug`
 - `/media/video/...slug`
+- slug form: `{assetUid}/{name}` — resolution keys on the asset uid alone,
+  the name segment is cosmetic (original filename for SEO/downloads)
+- unknown uids and pre-catalog owner-scoped URLs
+  (`/media/{type}/node|menu/{owner}/{file}`) return `404`
 
 Image resizing query options:
 

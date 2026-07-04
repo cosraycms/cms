@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
+use Celemas\Core\Exception\HttpNotFound;
 use Celemas\Core\Exception\OutOfBoundsException;
 use Celemas\Core\Exception\RuntimeException as CoreRuntimeException;
 use Celemas\Core\Factory\Factory;
@@ -27,6 +28,8 @@ use Throwable;
 
 class Media
 {
+	protected ?Assets $assets = null;
+
 	public function __construct(
 		protected readonly Factory $factory,
 		protected readonly Request $request,
@@ -196,7 +199,7 @@ class Media
 
 	public function image(string $slug): Response
 	{
-		$image = $this->getAssets()->image($slug);
+		$image = $this->getAssets()->image($this->assetKey($slug));
 		$qs = $this->request->params();
 
 		if ($qs['resize'] ?? null) {
@@ -239,14 +242,41 @@ class Media
 
 	public function file(string $slug): Response
 	{
-		$file = $this->getAssets()->file($slug);
+		$file = $this->getAssets()->file($this->assetKey($slug));
+
+		try {
+			$path = $file->path();
+		} catch (RuntimeException $e) {
+			throw new HttpNotFound($this->request, previous: $e);
+		}
+
 		$fileServer = $this->config->media->fileServer;
 
 		if ($fileServer) {
-			return $this->sendFile($fileServer, $file->path());
+			return $this->sendFile($fileServer, $path);
 		}
 
-		return Response::create($this->factory)->file($file->path());
+		return Response::create($this->factory)->file($path);
+	}
+
+	/**
+	 * Resolve a media slug `{assetUid}/{name}` to the asset's pool key.
+	 * Resolution keys on the uid alone; the name segment is cosmetic.
+	 */
+	protected function assetKey(string $slug): string
+	{
+		$uid = explode('/', $slug, 2)[0];
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			throw new HttpNotFound($this->request);
+		}
+
+		if ($row['disk'] !== 'local') {
+			throw new RuntimeException('Asset disk not supported: ' . $row['disk']);
+		}
+
+		return (string) $row['key'];
 	}
 
 	/**
@@ -382,12 +412,6 @@ class Media
 
 	protected function getAssets(): Assets
 	{
-		static $assets = null;
-
-		if (!$assets) {
-			$assets = new Assets($this->request, $this->config);
-		}
-
-		return $assets;
+		return $this->assets ??= new Assets($this->request, $this->config);
 	}
 }
