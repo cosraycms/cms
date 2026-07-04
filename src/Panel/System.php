@@ -10,7 +10,7 @@ use Cosray\Locales;
 /**
  * System payload embedded into panel editor pages. It feeds the
  * standalone window.Cosray bridge (and through it every element
- * control) — the SSR replacement for the legacy /panel/boot endpoint.
+ * control).
  */
 final class System
 {
