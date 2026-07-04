@@ -62,7 +62,6 @@ final class Defaults
 			'path.cache' => '/cache',
 			'path.views' => '/views',
 			'path.panel' => '/cp',
-			'path.api' => null,
 		];
 	}
 

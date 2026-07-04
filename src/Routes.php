@@ -10,13 +10,9 @@ use Celemas\Quma\Database;
 use Celemas\Router\Group;
 use Celemas\Router\Route;
 use Closure;
-use Cosray\Controller\Auth;
 use Cosray\Controller\Media;
-use Cosray\Controller\Nodes;
-use Cosray\Controller\OldPanel;
 use Cosray\Controller\Page;
 use Cosray\Controller\Panel;
-use Cosray\Controller\User;
 use Cosray\Middleware\InitRequest;
 use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\Session;
@@ -24,7 +20,6 @@ use Cosray\Middleware\Session;
 class Routes
 {
 	protected string $panelPath;
-	protected ?string $apiPath;
 	protected InitRequest $initRequestMiddlware;
 	protected Session $session;
 	protected bool $frontendSession;
@@ -41,7 +36,6 @@ class Routes
 		protected array $panelPages = [],
 	) {
 		$this->panelPath = $config->panel->path;
-		$this->apiPath = $config->path->api;
 		$this->frontendSession = $config->session->enabled;
 		$this->initRequestMiddlware = new InitRequest($config);
 		$this->session = new Session($this->config, $this->db);
@@ -63,8 +57,6 @@ class Routes
 			[Media::class, 'upload'],
 			'cms.media.upload',
 		)->middleware($this->session);
-
-		$this->addApi($app);
 
 		$this->addPanel($app);
 
@@ -93,40 +85,6 @@ class Routes
 		}
 
 		return $catchallRoute;
-	}
-
-	protected function addAuth(Group $api): void
-	{
-		$api->get('/me', [Auth::class, 'me'], 'auth.user');
-		$api->post('/login', [Auth::class, 'login'], 'auth.login');
-		$api->post('/token-login', [Auth::class, 'tokenLogin'], 'auth.login.token');
-		$api->post('/invalidate-token', [Auth::class, 'invalidateToken'], 'auth.token.invalidate');
-		$api->get('/login/token', [Auth::class, 'token'], 'auth.token');
-		$api->post('/logout', [Auth::class, 'logout'], 'auth.logout');
-	}
-
-	protected function addUser(Group $api): void
-	{
-		$api->get('/users', [User::class, 'list'], 'users');
-		$api->get('/user/{uid:[A-Za-z0-9-_.]{1,64}}', [User::class, 'get'], 'user.get');
-		$api->post('/user', [User::class, 'create'], 'user.create');
-		$api->put('/user/{uid:[A-Za-z0-9-_.]{1,64}}', [User::class, 'save'], 'user.save');
-		$api->get('/profile', [User::class, 'profile'], 'profile.get');
-		$api->put('/profile', [User::class, 'saveProfile'], 'profile.save');
-	}
-
-	protected function addSystem(Group $api): void
-	{
-		$api->get('/collections', [OldPanel::class, 'collections'], 'collections');
-		$api->get('/collection/{collection}', [OldPanel::class, 'collection'], 'collection');
-		$api->get('/nodes', [Nodes::class, 'get'], 'nodes.search.get');
-		$api->post('/nodes', [Nodes::class, 'get'], 'nodes.search.post');
-		$api->get('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.get');
-		$api->put('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.update');
-		$api->delete('/node/{uid:[A-Za-z0-9-_.]{1,64}}', [OldPanel::class, 'node'], 'node.delete');
-		$api->post('/node/{type}/paths', [OldPanel::class, 'nodePaths'], 'node.paths');
-		$api->post('/node/{type}', [OldPanel::class, 'createNode'], 'node.create');
-		$api->get('/blueprint/{type}', [OldPanel::class, 'blueprint'], 'node.blueprint');
 	}
 
 	protected function addPanel(App $app): void
@@ -251,22 +209,5 @@ class Routes
 			},
 			'cms.panel.',
 		);
-	}
-
-	protected function addApi(App $app): void
-	{
-		if ($this->apiPath !== null) {
-			$app->group(
-				$this->apiPath,
-				function (Group $api) {
-					$api->after(new JsonRenderer($this->factory));
-
-					$this->addAuth($api);
-					$this->addUser($api);
-					$this->addSystem($api);
-				},
-				'cms.api.',
-			);
-		}
 	}
 }

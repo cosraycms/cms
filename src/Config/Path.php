@@ -43,9 +43,4 @@ final class Path
 	public string $panel {
 		get => $this->config->get('path.panel');
 	}
-
-	/** @var ?non-empty-string */
-	public ?string $api {
-		get => $this->config->get('path.api');
-	}
 }

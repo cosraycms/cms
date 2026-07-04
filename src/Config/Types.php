@@ -36,7 +36,6 @@ namespace Cosray\Config;
  *     'path.cache': string,
  *     'path.views': string,
  *     'path.panel': string,
- *     'path.api': ?string,
  *
  *     'panel.theme': null|string|list<string>,
  *     'panel.logo': ?string,
@@ -93,7 +92,6 @@ namespace Cosray\Config;
  *     'path.cache'?: string,
  *     'path.views'?: string,
  *     'path.panel'?: string,
- *     'path.api'?: null|string,
  *     'panel.theme'?: null|string|list<string>,
  *     'panel.logo'?: null|string,
  *     'error.enabled'?: bool,
