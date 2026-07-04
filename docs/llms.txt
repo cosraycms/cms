@@ -489,8 +489,12 @@ Path behavior:
 
 Upload endpoint:
 
-- `POST /media/{mediatype:(image|file|video)}/{doctype:(node|menu)}/{uid}`
+- `POST /media/{mediatype:(image|file|video)}`
 - multipart upload key: `file`
+- uploads land in the global asset pool: a row in the `assets` table plus a
+  sharded file `{uid[:2]}/{uid}.{ext}` below `{path.public}{path.assets}`
+- duplicate content (same hash on the same disk) returns the existing asset
+- response: `{ok, error, uid, filename, mime, width, height, url}`
 
 Serve endpoints:
 

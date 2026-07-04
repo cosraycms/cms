@@ -53,7 +53,7 @@ class Routes
 		];
 
 		$app->post(
-			'/media/{mediatype:(image|file|video)}/{doctype:(node|menu)}/{uid:[A-Za-z0-9-_.]{1,64}}',
+			'/media/{mediatype:(image|file|video)}',
 			[Media::class, 'upload'],
 			'cms.media.upload',
 		)->middleware($this->session);

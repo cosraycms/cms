@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
+use Celemas\Core\Exception\OutOfBoundsException;
+use Celemas\Core\Exception\RuntimeException as CoreRuntimeException;
 use Celemas\Core\Factory\Factory;
 use Celemas\Core\Request;
 use Celemas\Core\Response;
+use Celemas\Quma\Database;
 use Cosray\Assets\Assets;
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Size;
+use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
+use Cosray\Storage\Storage;
+use Cosray\Uid;
+use Cosray\Users;
 use enshrined\svgSanitize\Sanitizer;
 use Gumlet\ImageResize;
+use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
+use Throwable;
 
 class Media
 {
@@ -22,42 +31,29 @@ class Media
 		protected readonly Factory $factory,
 		protected readonly Request $request,
 		protected readonly Config $config,
+		protected readonly Database $db,
 	) {}
 
 	#[Permission('panel')]
-	public function upload(string $mediatype, string $doctype, string $uid): Response
+	public function upload(string $mediatype): Response
 	{
 		$response = Response::create($this->factory);
-
-		// The route regex permits dots, so reject any uid that could climb out
-		// of the target directory before it reaches the write path.
-		if (str_contains($uid, '..') || !preg_match('/^[A-Za-z0-9]/', $uid)) {
-			return $response->json(['ok' => false, 'error' => _('Ungültige Upload-Adresse.')], 400);
-		}
-
-		$file = $_FILES['file'] ?? null;
-
-		$result = $this->validateUploadedFile($mediatype, $file);
+		$file = $this->uploadedFile();
+		$contents =
+			$file !== null && $file->getError() === UPLOAD_ERR_OK
+				? (string) $file->getStream()
+				: '';
+		$result = $this->validateUploadedFile($mediatype, $file, $contents);
 
 		if (!$result['ok']) {
 			return $response->json($result, 400);
 		}
 
-		$public = $this->config->path->public;
-		$assets = $this->config->path->assets;
-		$dir = "{$public}{$assets}/{$doctype}/{$uid}";
-
-		if (!is_dir($dir)) {
-			mkdir($dir, 0o755, true);
-		}
-
-		$target = "{$dir}/{$result['file']}";
-
-		// SVGs are served inline from the docroot, so a stored `<script>`/`onload`
-		// would run in the site origin. Clean the markup before it ever lands on
-		// disk rather than moving the raw upload into place.
+		// SVGs are served inline, so a stored `<script>`/`onload` would run in
+		// the site origin. Clean the markup before it lands in the pool; hash
+		// and byte count are taken from the sanitized bytes.
 		if (strtolower(pathinfo($result['file'], PATHINFO_EXTENSION)) === 'svg') {
-			$clean = $this->sanitizeSvg($file['tmp_name']);
+			$clean = self::sanitizeSvgMarkup($contents);
 
 			if ($clean === null) {
 				return $response->json(
@@ -66,27 +62,125 @@ class Media
 				);
 			}
 
-			file_put_contents($target, $clean);
-		} else {
-			move_uploaded_file($file['tmp_name'], $target);
+			$contents = $clean;
 		}
 
-		return $response->json($result);
+		$storage = new Storage($this->config);
+		$hash = hash('sha256', $contents);
+		$existing = $this->db
+			->assets
+			->byHash([
+				'hash' => $hash,
+				'disk' => $storage->disk,
+			])
+			->first();
+
+		if ($existing) {
+			return $response->json($this->uploadResult($existing));
+		}
+
+		[$width, $height] = $this->imageDimensions($mediatype, $contents);
+		$uidConfig = $this->config->uid;
+		$uid = new Uid($uidConfig->alphabet, $uidConfig->length)->generate();
+		$ext = strtolower(pathinfo($result['file'], PATHINFO_EXTENSION));
+		$key = Storage::key($uid, $ext);
+		$storage->write($key, $contents);
+
+		try {
+			$this->db->assets->create([
+				'uid' => $uid,
+				'disk' => $storage->disk,
+				'key' => $key,
+				'filename' => $result['file'],
+				'mime' => $result['mime'],
+				'bytes' => strlen($contents),
+				'width' => $width,
+				'height' => $height,
+				'kind' => $mediatype,
+				'hash' => $hash,
+				'meta' => '{}',
+				'creator' => $this->userId(),
+			])->one();
+		} catch (Throwable $e) {
+			$storage->delete($key);
+
+			throw $e;
+		}
+
+		return $response->json($this->uploadResult([
+			'uid' => $uid,
+			'filename' => $result['file'],
+			'mime' => $result['mime'],
+			'width' => $width,
+			'height' => $height,
+			'kind' => $mediatype,
+		]));
 	}
 
-	/**
-	 * Read and sanitize an uploaded SVG. Returns the cleaned markup, or null
-	 * if the file is not a genuine upload, cannot be read, or is rejected.
-	 */
-	private function sanitizeSvg(string $tmpFile): ?string
+	/** Build the client payload for a catalog row. */
+	protected function uploadResult(array $row): array
 	{
-		if (!is_uploaded_file($tmpFile)) {
-			return null;
+		$prefix = $this->config->path->prefix;
+		$uid = (string) $row['uid'];
+		$filename = (string) $row['filename'];
+		$kind = (string) $row['kind'];
+
+		return [
+			'ok' => true,
+			'error' => '',
+			'uid' => $uid,
+			'filename' => $filename,
+			'mime' => $row['mime'] ?? null,
+			'width' => isset($row['width']) ? (int) $row['width'] : null,
+			'height' => isset($row['height']) ? (int) $row['height'] : null,
+			'url' => "{$prefix}/media/{$kind}/{$uid}/" . rawurlencode($filename),
+		];
+	}
+
+	/** @return array{0: ?int, 1: ?int} */
+	protected function imageDimensions(string $mediatype, string $contents): array
+	{
+		if ($mediatype !== 'image') {
+			return [null, null];
 		}
 
-		$svg = file_get_contents($tmpFile);
+		// getimagesizefromstring warns on undecodable input (e.g. SVG bytes);
+		// unreadable dimensions are an expected outcome here, not an error.
+		set_error_handler(static fn(): bool => true);
 
-		return $svg === false ? null : self::sanitizeSvgMarkup($svg);
+		try {
+			$info = getimagesizefromstring($contents);
+		} finally {
+			restore_error_handler();
+		}
+
+		return $info === false ? [null, null] : [$info[0], $info[1]];
+	}
+
+	protected function uploadedFile(): ?PsrUploadedFile
+	{
+		try {
+			return $this->request->file('file');
+		} catch (CoreRuntimeException|OutOfBoundsException) {
+			return null;
+		}
+	}
+
+	protected function userId(): int
+	{
+		$auth = new Auth(
+			$this->request->unwrap(),
+			new Users($this->db),
+			$this->config,
+			$this->request->get('session', null),
+		);
+		$user = $auth->user();
+
+		if (!$user) {
+			throw new RuntimeException('Upload requires an authenticated user');
+		}
+
+		return $user->id;
 	}
 
 	/**
@@ -168,8 +262,11 @@ class Media
 		return trim($name, ' .');
 	}
 
-	protected function validateUploadedFile(string $mediatype, ?array $file): array
-	{
+	protected function validateUploadedFile(
+		string $mediatype,
+		?PsrUploadedFile $file,
+		string $contents,
+	): array {
 		if (!$file) {
 			return [
 				'ok' => false,
@@ -186,12 +283,8 @@ class Media
 		};
 		$maxSize = $upload->maxSize;
 
-		$tmpFile = $file['tmp_name'];
-		$fileSize = filesize($tmpFile);
-		$fileInfo = finfo_open(FILEINFO_MIME_TYPE);
-		$mimeType = finfo_file($fileInfo, $tmpFile);
-		finfo_close($fileInfo);
-		$fileName = self::safeFilename((string) ($file['full_path'] ?? $file['name'] ?? ''));
+		$fileSize = $file->getSize() ?? strlen($contents);
+		$fileName = self::safeFilename((string) ($file->getClientFilename() ?? ''));
 
 		if ($fileName === '') {
 			return [
@@ -203,7 +296,6 @@ class Media
 
 		$pathInfo = pathinfo($fileName);
 		$ext = $pathInfo['extension'] ?? null;
-		$allowedExtensions = $mimeTypes[$mimeType] ?? null;
 		$result = [
 			'ok' => true,
 			'file' => $fileName,
@@ -211,7 +303,7 @@ class Media
 			'code' => 0,
 		];
 
-		if (($file['error'] ?? null === UPLOAD_ERR_INI_SIZE) || $fileSize > $maxSize) {
+		if ($file->getError() === UPLOAD_ERR_INI_SIZE || $fileSize > $maxSize) {
 			$size = number_format((float) (($fileSize / 1024) / 1024), 2, '.', '');
 			$allowed = number_format((float) (($maxSize / 1024) / 1024), 2, '.', '');
 
@@ -221,12 +313,18 @@ class Media
 			]);
 		}
 
-		if ($file['error'] ?? null !== UPLOAD_ERR_OK) {
+		if ($file->getError() !== UPLOAD_ERR_OK) {
 			return array_merge($result, [
 				'ok' => false,
 				'error' => _('Der Dateiupload ist aufgrund eines Serverfehlers fehlgeschlagen.'),
 			]);
 		}
+
+		$fileInfo = finfo_open(FILEINFO_MIME_TYPE);
+		$mimeType = (string) finfo_buffer($fileInfo, $contents);
+		finfo_close($fileInfo);
+		$allowedExtensions = $mimeTypes[$mimeType] ?? null;
+		$result['mime'] = $mimeType;
 
 		if (!$allowedExtensions) {
 			return array_merge($result, [

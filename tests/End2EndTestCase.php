@@ -309,6 +309,7 @@ class End2EndTestCase extends IntegrationTestCase
 	 *   - 'body' => string|array - Request body (array will be JSON encoded)
 	 *   - 'query' => array - Query parameters
 	 *   - 'cookies' => array - Cookie values
+	 *   - 'files' => array - PSR-7 UploadedFileInterface instances by field name
 	 *   - 'authToken' => string - Auth token for authentication
 	 * @return ResponseInterface PSR-7 response
 	 */
@@ -347,6 +348,11 @@ class End2EndTestCase extends IntegrationTestCase
 				$cookieHeader[] = "{$name}={$value}";
 			}
 			$psrRequest = $psrRequest->withHeader('Cookie', implode('; ', $cookieHeader));
+		}
+
+		// Add uploaded files
+		if (isset($options['files'])) {
+			$psrRequest = $psrRequest->withUploadedFiles($options['files']);
 		}
 
 		// Add body
