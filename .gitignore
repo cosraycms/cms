@@ -1,13 +1,8 @@
 /.coverage
 /build
 /data/
-/ui/.svelte-kit
-/ui/build/
-/ui/dist/
-/ui/package
 /panel/build/
 /panel/editor/
-/ui/src/locale/
 /vendor/
 *.log
 *.mo

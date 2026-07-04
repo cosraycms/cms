@@ -7,7 +7,7 @@ SPDX-FileCopyrightText = "2022-present Cosray developers and contributors"
 SPDX-License-Identifier = "MPL-2.0"
 
 [[annotations]]
-path = ["panel/**/*.*", "ui/**/*.*"]
+path = ["panel/**/*.*"]
 precedence = "closest"
 SPDX-FileCopyrightText = "2022-present Cosray developers and contributors"
 SPDX-License-Identifier = "MIT"
