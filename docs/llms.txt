@@ -492,38 +492,49 @@ Upload endpoint:
 - `POST /media/{mediatype:(image|file|video)}`
 - multipart upload key: `file`
 - uploads land in the global asset pool: a row in the `assets` table plus a
-  sharded file `{uid[:2]}/{uid}.{ext}` below `{path.public}{path.assets}`
+  file `{uid[:2]}/{uid}/{slug}` below `{path.public}{path.assets}` — one
+  directory per asset, the slug is the lowercased, transliterated original
+  filename (original name is kept in the `filename` column)
 - duplicate content (same hash on the same disk) returns the existing asset
-- response: `{ok, error, uid, filename, mime, width, height, url}`
+- response: `{ok, error, uid, filename, mime, width, height, url, thumbUrl,
+  previewUrl}`
 
 Listing endpoint (panel permission):
 
 - `GET /media/library` — paged asset catalog listing for the panel
 - params: `kind` (image|video filter; `file` or absent lists everything),
   `q` (filename search), `page`, `uids` (comma-separated batch lookup)
-- response items: `{uid, filename, url, thumbUrl, kind, mime, width, height}`
+- response items: `{uid, filename, url, thumbUrl, previewUrl, kind, mime,
+  width, height}`
 
-Serve endpoints:
+Serving:
 
-- `/media/image/...slug`
-- `/media/file/...slug`
-- `/media/video/...slug`
-- slug form: `{assetUid}/{name}` — resolution keys on the asset uid alone,
-  the name segment is cosmetic (original filename for SEO/downloads)
-- unknown uids and pre-catalog owner-scoped URLs
-  (`/media/{type}/node|menu/{owner}/{file}`) return `404`
+- URLs equal file paths below `path.public`, so the web server serves both
+  originals and renditions natively via the standard front-controller
+  rewrite (`try_files $uri /index.php`); PHP is not involved
+- originals: `{path.prefix}{path.assets}/{uid[:2]}/{uid}/{slug}`
+- renditions: `{path.prefix}{path.cache}/{uid[:2]}/{uid}/{stem}-{size}.{ext}`
+- a fallback route on `{path.cache}/...` generates a missing rendition once
+  (atomic write), serves it, and every later request is native again
+- only size names configured in `media.sizes` are generated; unknown names,
+  unknown uids and stale filenames return `404`
+- pre-catalog owner-scoped URLs (`/assets/node|menu/{owner}/{file}`) and the
+  removed `/media/{type}/...` serve routes return `404`
 
-Image resizing query options:
+Named sizes (`media.sizes` config):
 
-- `resize=width&w=...`
-- `resize=height&h=...`
-- `resize=fit&w=...&h=...`
-- `resize=resize&w=...&h=...`
-- `resize=longside&size=...`
-- `resize=shortside&size=...`
-- `resize=crop&w=...&h=...&pos=center`
-- `resize=freecrop&w=...&h=...&x=...&y=...`
-- optional `enlarge=true`, `quality=...`
+- every rendition is a named size; free-form resizing is not exposed
+- one mode key per entry: `width`, `height`, `long-side`, `short-side`
+  (positive int) or `crop`, `fit`, `resize` (`[width, height]`)
+- options: `pos` (crop only: top, center, centre, bottom, left, right,
+  topcenter), `quality` (1-100), `enlarge` (bool)
+- example: `'card' => ['crop' => [600, 400], 'quality' => 80]`
+- built-ins `thumb` (width 400) and `preview` (width 1280) serve the panel
+  and may be overridden per app
+- the whole config is validated on first use in every environment; an
+  invalid entry or unknown size name fails loudly
+- template API: `$image->size('card')` (also `Image` values in loops);
+  SVGs and other non-resizable assets keep their original URL
 
 10) Key configuration settings (defaults)
 
@@ -578,6 +589,8 @@ Uploads and media:
 - `upload.mimetypes.image`: gif, jpeg/jpg/jfif, png, webp, svg
 - `upload.mimetypes.video`: mp4, ogg
 - `media.fileserver`: `null` or `apache` or `nginx`
+- `media.sizes`: `[]` — named rendition sizes (see section 9); built-ins
+  `thumb` and `preview` are always available
 
 11) Known caveats during exploration
 
