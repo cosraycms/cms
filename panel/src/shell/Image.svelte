@@ -29,7 +29,7 @@
 	let filename = $derived(info?.filename ?? '');
 	let ext = $derived(filename.split('.').pop()?.toLowerCase());
 	let orig = $derived(info?.url ?? '');
-	let thumb = $derived(ext === 'svg' ? orig : thumbIt(orig));
+	let thumb = $derived(info?.thumbUrl ?? orig);
 	let title = $derived(getTitle(image, 'title') || getTitle(image, 'alt'));
 
 	function preview() {
@@ -38,16 +38,12 @@
 				target: host,
 				props: {
 					close: () => handle.close(),
-					image: orig,
+					image: info?.previewUrl ?? orig,
 				},
 			});
 
 			return () => void unmount(app);
 		});
-	}
-
-	function thumbIt(url: string) {
-		return url === '' ? url : url + '?resize=width&w=400';
 	}
 
 	function getTitle(image: FileItem, key: string) {
