@@ -133,7 +133,7 @@ class Serializer
 			'uid' => $rawData['uid'],
 			'fields' => $this->fields($node, $fieldNames),
 			'assets' => $this->assetMap($rawData['content'] ?? null),
-			'paths' => $this->pathMap($rawData['content'] ?? null),
+			'nodePaths' => $this->pathMap($rawData['content'] ?? null),
 		], $data);
 	}
 
