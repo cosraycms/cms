@@ -36,6 +36,12 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 
 		$png = base64_decode(self::PNG_BASE64, true);
 		file_put_contents("{$this->root}/public/assets/node/{$this->nodeUid}/pic.png", $png);
+		// NTFS alternate-data-stream artifact: SMB transfers map the
+		// illegal `:` to the private-use character U+F03A.
+		file_put_contents(
+			"{$this->root}/public/assets/node/{$this->nodeUid}/pic.png\u{F03A}Zone.Identifier",
+			'ntfs junk',
+		);
 		file_put_contents("{$this->root}/public/assets/menu/migtest/logo.png", $png);
 		file_put_contents(
 			"{$this->root}/public/cache/node/{$this->nodeUid}/pic-w400.png",
@@ -204,7 +210,19 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		$sharded = "{$this->root}/public/assets/" . substr($picUid, 0, 2) . "/{$picUid}.png";
 		$this->assertFileExists($sharded);
 		$this->assertSame($png, file_get_contents($sharded));
-		$this->assertDirectoryDoesNotExist("{$this->root}/public/assets/node");
+
+		// The unservable NTFS artifact gets no uid and stays in place,
+		// so its owner directory survives the cleanup.
+		$this->assertCount(3, $map);
+		$junk = "pic.png\u{F03A}Zone.Identifier";
+		$this->assertFileExists("{$this->root}/public/assets/node/{$this->nodeUid}/{$junk}");
+		$this->assertSame(
+			[$junk],
+			array_values(array_diff(
+				scandir("{$this->root}/public/assets/node/{$this->nodeUid}") ?: [],
+				['.', '..'],
+			)),
+		);
 		$this->assertDirectoryDoesNotExist("{$this->root}/public/assets/menu");
 		$this->assertDirectoryDoesNotExist("{$this->root}/public/cache/node");
 	}
@@ -242,7 +260,13 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		}
 
 		$env = new Environment(['default' => $this->conn()], []);
-		new $class($config)->run($env);
+		ob_start();
+
+		try {
+			new $class($config)->run($env);
+		} finally {
+			ob_end_clean();
+		}
 	}
 
 	/** @return array<string, string> */

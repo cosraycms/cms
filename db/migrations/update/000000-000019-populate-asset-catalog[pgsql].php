@@ -215,6 +215,17 @@ final class Migration implements Contract\Migration
 	private function mintUids(array $paths): void
 	{
 		foreach ($paths as $path) {
+			// Flysystem refuses paths containing control or private-use
+			// characters (e.g. NTFS `:Zone.Identifier` artifacts carried
+			// in by SMB transfers), and invalid UTF-8 would break the
+			// mapping dump. Such files can never be served from the
+			// pool, so leave them where they are.
+			if (preg_match('#\p{C}#u', $path) !== 0) {
+				echo "  Skipping unservable legacy path: {$path}\n";
+
+				continue;
+			}
+
 			$this->map[$path] ??= $this->uid->generate();
 		}
 	}
