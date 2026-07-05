@@ -2,7 +2,7 @@ project: Cosray Content Management Framework (cosray/cms)
 repository: https://github.com/cosray/cms
 canonical_branch: main
 license: MIT (https://github.com/cosray/cms/blob/main/LICENSE.md)
-last_updated: 2026-06-18
+last_updated: 2026-07-05
 contact: https://github.com/cosray/cms/issues
 
 summary:
@@ -551,7 +551,38 @@ Block image rendering:
 - an asset uid without a catalog row renders nothing (no grid cell);
   non-resizable assets keep their original URL as plain `src`
 
-10) Key configuration settings (defaults)
+10) Richtext storage format
+
+- richtext fields and richtext blocks store a structured document (the
+  cosray richtext format v1), not HTML; full spec: `docs/richtext-format.md`
+- the envelope lives on the field/block object next to `value`:
+  `{type, format: 'cosray-richtext', version: 1, value: {locale: doc|null}}`;
+  a missing `format` marks legacy HTML from before the migration
+- a doc is a node tree `{type, attrs?, text?, marks?, content?}`; nodes:
+  doc, paragraph (class/align), heading (level/align), bulletList,
+  orderedList (start), listItem, blockquote, codeBlock, horizontalRule
+  (class), hardBreak, text, image (uid/meta); marks: bold, code, italic,
+  link (exactly one of href/node/asset, plus target/class), strike,
+  style (class), subscript, superscript, underline
+- saves are writer-strict (`Cosray\Richtext\Validator`): unknown vocabulary
+  is rejected; paragraph classes must be declared in `richtext.classes`,
+  text styles in `richtext.styles` (`'name' => 'Readable label'`,
+  `default` is implicit for classes)
+- storage is canonical (`Cosray\Richtext\Normalizer`): fixed key order,
+  spec defaults omitted, adjacent equal-marked text runs merged, empty
+  documents become `null`; the save path canonicalizes via `Store`
+- rendering (`Cosray\Richtext\Renderer`, used by `Value\RichText` and the
+  richtext block type): resolves `image.uid`/`link.asset` through the asset
+  catalog and `link.node` through `url_paths`; the link rel policy is
+  applied at render time (external `href` links only); readers are
+  tolerant — unknown types degrade and are reported via `notices()`
+- `Cosray\Richtext\Scanner` collects the reference carriers (`image.uid`,
+  `link.asset`, `link.node`) for the serializer asset map and the future
+  reference indexes
+- legacy `format`-less HTML values still render through the sanitizer path
+  until the HTML->JSON migration has run everywhere
+
+11) Key configuration settings (defaults)
 
 App and environment:
 
@@ -606,8 +637,12 @@ Uploads and media:
 - `media.fileserver`: `null` or `apache` or `nginx`
 - `media.sizes`: `[]` — named rendition sizes (see section 9); built-ins
   `thumb` and `preview` are always available
+- `richtext.classes`: `[]` — declared paragraph classes for richtext
+  (`'name' => 'Readable label'`, `default` implicit; see section 10)
+- `richtext.styles`: `[]` — declared text styles for the `style` mark;
+  empty means the mark is unusable
 
-11) Known caveats during exploration
+12) Known caveats during exploration
 
 - Keep expectations conservative and verify behavior against `src/` and tests.
 

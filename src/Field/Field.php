@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celemas\Sire\Contract;
 use Celemas\Sire\Extra;
 use Celemas\Sire\Shape;
 use Cosray\Exception\RuntimeException;
@@ -178,7 +179,7 @@ abstract class Field implements
 		return Shapes::create()->extra(Extra::Allow);
 	}
 
-	protected function zxxShape(string|Shape $valueShape, array $validators = []): Shape
+	protected function zxxShape(string|Contract\Validator $valueShape, array $validators = []): Shape
 	{
 		$shape = Shapes::create();
 		$field = $shape->add(self::NEUTRAL_LOCALE, $valueShape)->rules(...$validators);

@@ -14,6 +14,34 @@ namespace Cosray\Richtext;
  */
 final class Normalizer
 {
+	/**
+	 * Canonicalize every envelope-marked richtext value inside a node
+	 * content array (fields and blocks alike); empty documents become
+	 * null locale entries.
+	 */
+	public function content(array $content): array
+	{
+		foreach ($content as $key => $value) {
+			if (!is_array($value)) {
+				continue;
+			}
+
+			if (($value['format'] ?? null) === Envelope::FORMAT && is_array($value['value'] ?? null)) {
+				foreach ($value['value'] as $locale => $doc) {
+					$value['value'][$locale] = $this->normalize($doc);
+				}
+
+				$content[$key] = $value;
+
+				continue;
+			}
+
+			$content[$key] = $this->content($value);
+		}
+
+		return $content;
+	}
+
 	/** Canonical form of a document; null when it is empty. */
 	public function normalize(mixed $doc): ?array
 	{

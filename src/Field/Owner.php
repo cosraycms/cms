@@ -9,6 +9,7 @@ use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
+use Cosray\Node\UrlPaths;
 
 interface Owner
 {
@@ -25,4 +26,6 @@ interface Owner
 	public function config(): Config;
 
 	public function assets(): Repository;
+
+	public function paths(): UrlPaths;
 }

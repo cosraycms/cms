@@ -12,6 +12,7 @@ use Celemas\Quma\Database;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
+use Cosray\Richtext\Normalizer;
 use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
 use Throwable;
@@ -41,6 +42,12 @@ class Store
 	): array {
 		$data = $this->normalizeSubmittedHandle($data);
 		$data = $this->validate($node, $data, $locales, $request);
+
+		if (is_array($data['content'] ?? null)) {
+			// Richtext documents persist in canonical form (byte-stable
+			// storage for history diffs); empty documents become null.
+			$data['content'] = new Normalizer()->content($data['content']);
+		}
 
 		if (!$create) {
 			$this->assertUidUnchanged($node, $data, $request);

@@ -70,11 +70,18 @@ final class NodeContentNormalizer
 			return $this->mediaField($data, $type, ($data['type'] ?? null) === 'picture');
 		}
 
-		$result = [
-			'type' => $type,
-			'value' => $this->valueMap($data['value'] ?? null),
-		];
-		$meta = $this->fieldMeta($data, ['type', 'value']);
+		$result = ['type' => $type];
+
+		// Structured richtext carries the format envelope next to its
+		// value; the keys pass through untouched (see docs/richtext-format.md).
+		foreach (['format', 'version'] as $key) {
+			if (array_key_exists($key, $data)) {
+				$result[$key] = $data[$key];
+			}
+		}
+
+		$result['value'] = $this->valueMap($data['value'] ?? null);
+		$meta = $this->fieldMeta($data, ['type', 'format', 'version', 'value']);
 
 		if ($meta !== []) {
 			$result['meta'] = $meta;
@@ -192,7 +199,7 @@ final class NodeContentNormalizer
 		$type = is_string($data['type'] ?? null) ? $data['type'] : 'text';
 		$result = ['type' => $type];
 
-		foreach (['uid', 'width', 'colspan', 'rowspan', 'colstart'] as $key) {
+		foreach (['uid', 'width', 'colspan', 'rowspan', 'colstart', 'format', 'version'] as $key) {
 			if (!array_key_exists($key, $data)) {
 				continue;
 			}
@@ -217,6 +224,8 @@ final class NodeContentNormalizer
 			'colspan',
 			'rowspan',
 			'colstart',
+			'format',
+			'version',
 			'value',
 			'files',
 		]);

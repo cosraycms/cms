@@ -9,16 +9,29 @@ use Celemas\Sire\Extra;
 use Celemas\Sire\Result;
 use Celemas\Sire\Review;
 use Celemas\Sire\Shape;
+use Cosray\Richtext\Envelope;
+use Cosray\Richtext\Validator as RichtextValidator;
 use Override;
 
 final class BlockValidator implements Validator
 {
 	private Shape $shape;
+	private readonly RichtextValidator $richtext;
 
-	public function __construct(bool $list = false, bool $keepUnknown = false, ?string $title = null)
-	{
+	/**
+	 * @param array<string, string> $richtextClasses
+	 * @param array<string, string> $richtextStyles
+	 */
+	public function __construct(
+		bool $list = false,
+		bool $keepUnknown = false,
+		?string $title = null,
+		array $richtextClasses = [],
+		array $richtextStyles = [],
+	) {
 		unset($title);
 
+		$this->richtext = new RichtextValidator($richtextClasses, $richtextStyles);
 		$this->shape = $list ? Shape::list() : new Shape();
 		$this->shape->rules(Validators::registry());
 
@@ -53,7 +66,9 @@ final class BlockValidator implements Validator
 				$this->reviewMedia($review, $listIndex, $value);
 			} elseif ($type === 'youtube') {
 				$this->reviewYoutube($review, $listIndex, $value);
-			} elseif (in_array($type, ['richtext', 'text', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], true)) {
+			} elseif ($type === 'richtext') {
+				$this->reviewRichtext($review, $listIndex, $value);
+			} elseif (in_array($type, ['text', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'], true)) {
 				if (!$this->hasZxxValue($value)) {
 					$this->addError(
 						$review,
@@ -72,6 +87,54 @@ final class BlockValidator implements Validator
 					);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Richtext blocks are writer-strict like richtext fields: the
+	 * structured envelope is required, every non-null locale document
+	 * must pass the format validation.
+	 */
+	private function reviewRichtext(Review $review, ?int $listIndex, mixed $value): void
+	{
+		if (!is_array($value) || ($value['format'] ?? null) !== Envelope::FORMAT) {
+			$this->addError(
+				$review,
+				$listIndex,
+				'format',
+				_('Formatierter Text muss im strukturierten Format übertragen werden.'),
+			);
+
+			return;
+		}
+
+		if (($value['version'] ?? null) !== Envelope::VERSION) {
+			$this->addError($review, $listIndex, 'version', _('Unbekannte Formatversion.'));
+
+			return;
+		}
+
+		$hasContent = false;
+
+		foreach (is_array($value['value'] ?? null) ? $value['value'] : [] as $doc) {
+			if ($doc === null) {
+				continue;
+			}
+
+			$hasContent = true;
+
+			foreach ($this->richtext->validate($doc) as $error) {
+				$this->addError($review, $listIndex, 'value', $error);
+			}
+		}
+
+		if (!$hasContent) {
+			$this->addError(
+				$review,
+				$listIndex,
+				'value',
+				_('Bitte Textfeld ausfüllen oder Block löschen.'),
+			);
 		}
 	}
 

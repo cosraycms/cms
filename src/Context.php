@@ -12,6 +12,7 @@ use Celemas\Quma\Database;
 final class Context
 {
 	private ?Assets\Repository $assets = null;
+	private ?Node\UrlPaths $paths = null;
 
 	public function __construct(
 		public readonly Database $db,
@@ -24,6 +25,11 @@ final class Context
 	public function assets(): Assets\Repository
 	{
 		return $this->assets ??= new Assets\Repository($this->db, $this->config);
+	}
+
+	public function paths(): Node\UrlPaths
+	{
+		return $this->paths ??= new Node\UrlPaths($this->db);
 	}
 
 	public function locales(): Locales

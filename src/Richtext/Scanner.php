@@ -25,6 +25,47 @@ final class Scanner
 	}
 
 	/**
+	 * Scan a whole node content array: every envelope-marked richtext
+	 * value (fields and blocks alike) contributes its references.
+	 *
+	 * @return array{assets: list<string>, nodes: list<string>}
+	 */
+	public static function scanContent(mixed $content): array
+	{
+		$assets = [];
+		$nodes = [];
+		self::walkContent(is_array($content) ? $content : [], $assets, $nodes);
+
+		return [
+			'assets' => array_values(array_unique($assets)),
+			'nodes' => array_values(array_unique($nodes)),
+		];
+	}
+
+	/**
+	 * @param list<string> $assets
+	 * @param list<string> $nodes
+	 */
+	private static function walkContent(array $data, array &$assets, array &$nodes): void
+	{
+		if (($data['format'] ?? null) === Envelope::FORMAT && is_array($data['value'] ?? null)) {
+			foreach ($data['value'] as $doc) {
+				if (is_array($doc)) {
+					self::walk($doc, $assets, $nodes);
+				}
+			}
+
+			return;
+		}
+
+		foreach ($data as $value) {
+			if (is_array($value)) {
+				self::walkContent($value, $assets, $nodes);
+			}
+		}
+	}
+
+	/**
 	 * @param list<string> $assets
 	 * @param list<string> $nodes
 	 */

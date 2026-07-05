@@ -20,6 +20,7 @@ use Cosray\Field\Text;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Types;
+use Cosray\Node\UrlPaths;
 use Cosray\Schema\Columns;
 use Cosray\Schema\Description;
 use Cosray\Schema\Hidden;
@@ -95,6 +96,11 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			}
 
 			public function assets(): AssetRepository
+			{
+				throw new RuntimeException('Not available in this test');
+			}
+
+			public function paths(): UrlPaths
 			{
 				throw new RuntimeException('Not available in this test');
 			}

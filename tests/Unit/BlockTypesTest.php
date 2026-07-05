@@ -16,6 +16,7 @@ use Cosray\Field\Owner;
 use Cosray\Field\Services;
 use Cosray\Locale;
 use Cosray\Locales;
+use Cosray\Node\UrlPaths;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Block;
 use Cosray\Value\ValueContext;
@@ -146,6 +147,11 @@ final class BlockTypesTest extends TestCase
 			}
 
 			public function assets(): Repository
+			{
+				throw new RuntimeException('Not available in this test');
+			}
+
+			public function paths(): UrlPaths
 			{
 				throw new RuntimeException('Not available in this test');
 			}

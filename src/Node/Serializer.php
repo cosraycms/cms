@@ -7,6 +7,7 @@ namespace Cosray\Node;
 use Cosray\Assets\Repository;
 use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
+use Cosray\Richtext\Scanner;
 use Cosray\Uid;
 use ReflectionMethod;
 
@@ -147,7 +148,10 @@ class Serializer
 			return [];
 		}
 
-		$uids = Repository::collectUids($content);
+		$uids = array_values(array_unique(array_merge(
+			Repository::collectUids($content),
+			Scanner::scanContent($content)['assets'],
+		)));
 		$this->assets->preload($uids);
 		$map = [];
 

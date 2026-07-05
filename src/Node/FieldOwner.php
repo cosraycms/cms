@@ -53,4 +53,9 @@ class FieldOwner implements Owner
 	{
 		return $this->context->assets();
 	}
+
+	public function paths(): UrlPaths
+	{
+		return $this->context->paths();
+	}
 }

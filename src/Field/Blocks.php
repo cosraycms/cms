@@ -109,7 +109,14 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		$shape = Shapes::create();
 		$this->addType($shape);
 
-		$itemShape = new BlockValidator(list: true, title: $this->label, keepUnknown: true);
+		$richtext = $this->owner->config()->richtext;
+		$itemShape = new BlockValidator(
+			list: true,
+			title: $this->label,
+			keepUnknown: true,
+			richtextClasses: $richtext->classes,
+			richtextStyles: $richtext->styles,
+		);
 
 		if ($this->isAsymmetricallyTranslated()) {
 			$locales = $this->owner->locales();
