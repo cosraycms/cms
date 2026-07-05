@@ -9,15 +9,15 @@ use Laminas\Diactoros\UploadedFile;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
+ * Originals are served natively by the web server (URL == path below
+ * public/), so only the rendition fallback route is PHP territory.
+ *
  * @internal
  *
- * @covers \Cosray\Controller\Media::file
- * @covers \Cosray\Controller\Media::image
+ * @covers \Cosray\Controller\Media::cache
  */
 final class MediaServeTest extends End2EndTestCase
 {
-	private const string PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-
 	private string $publicDir;
 
 	protected function setUp(): void
@@ -26,7 +26,10 @@ final class MediaServeTest extends End2EndTestCase
 		$this->publicDir = sys_get_temp_dir() . '/cosray-serve-' . bin2hex(random_bytes(4));
 		mkdir("{$this->publicDir}/assets", 0o755, true);
 		mkdir("{$this->publicDir}/cache", 0o755, true);
-		$this->app = $this->createApp(['path.public' => $this->publicDir]);
+		$this->app = $this->createApp([
+			'path.public' => $this->publicDir,
+			'media.sizes' => ['square' => ['crop' => [2, 2]]],
+		]);
 		$this->authenticateAs('editor');
 	}
 
@@ -39,84 +42,114 @@ final class MediaServeTest extends End2EndTestCase
 		parent::tearDown();
 	}
 
-	public function testServesUploadedImageByUid(): void
+	public function testUploadedOriginalIsAWebServerFile(): void
 	{
-		$png = base64_decode(self::PNG_BASE64, true);
-		$upload = $this->upload($png, 'e2e-serve-pic.png', 'image/png');
+		$png = $this->png(4, 4);
+		$upload = $this->upload($png, 'e2e-serve-pic.png');
+
+		// No dedicated route serves originals: the URL is the file's path
+		// below public/, so the web server picks it up before PHP. In the
+		// test app the page catchall's static-file fallback stands in.
+		$this->assertFileExists($this->publicDir . $upload['url']);
+		$this->assertSame($png, file_get_contents($this->publicDir . $upload['url']));
 
 		$response = $this->makeRequest('GET', $upload['url']);
-
 		$this->assertResponseOk($response);
 		$this->assertSame($png, (string) $response->getBody());
 	}
 
-	public function testNameSegmentIsCosmetic(): void
+	public function testCacheMissGeneratesConfiguredRendition(): void
 	{
-		$png = base64_decode(self::PNG_BASE64, true);
-		$upload = $this->upload($png, 'e2e-serve-pic.png', 'image/png');
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
+		$shard = substr((string) $upload['uid'], 0, 2);
+		$url = "/cache/{$shard}/{$upload['uid']}/e2e-serve-pic-square.png";
 
-		$response = $this->makeRequest('GET', "/media/image/{$upload['uid']}/anything.png");
-
-		$this->assertResponseOk($response);
-		$this->assertSame($png, (string) $response->getBody());
-	}
-
-	public function testResizeParametersStillApply(): void
-	{
-		$png = base64_decode(self::PNG_BASE64, true);
-		$upload = $this->upload($png, 'e2e-serve-pic.png', 'image/png');
-
-		$response = $this->makeRequest('GET', $upload['url'], [
-			'query' => ['resize' => 'width', 'w' => '1'],
-		]);
+		$response = $this->makeRequest('GET', $url);
 
 		$this->assertResponseOk($response);
 		$info = getimagesizefromstring((string) $response->getBody());
-		$this->assertSame(1, $info[0]);
+		$this->assertSame([2, 2], [$info[0], $info[1]]);
+
+		// The rendition landed on its native URL for later requests.
+		$this->assertFileExists($this->publicDir . $url);
+
+		$again = $this->makeRequest('GET', $url);
+		$this->assertResponseOk($again);
+		$this->assertSame((string) $response->getBody(), (string) $again->getBody());
+	}
+
+	public function testBuiltinSizesAreAlwaysAvailable(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
+
+		$this->assertResponseOk($this->makeRequest('GET', $upload['thumbUrl']));
+	}
+
+	public function testUnknownSizeIs404(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
+		$shard = substr((string) $upload['uid'], 0, 2);
+
+		$this->assertResponseStatus(404, $this->makeRequest(
+			'GET',
+			"/cache/{$shard}/{$upload['uid']}/e2e-serve-pic-w9999.png",
+		));
+	}
+
+	public function testStaleFilenameIs404(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
+		$shard = substr((string) $upload['uid'], 0, 2);
+
+		$this->assertResponseStatus(404, $this->makeRequest(
+			'GET',
+			"/cache/{$shard}/{$upload['uid']}/renamed-square.png",
+		));
 	}
 
 	public function testUnknownUidIs404(): void
 	{
-		$this->assertResponseStatus(
-			404,
-			$this->makeRequest('GET', '/media/image/nosuchuid1234/pic.png'),
-		);
-		$this->assertResponseStatus(
-			404,
-			$this->makeRequest('GET', '/media/file/nosuchuid1234/doc.pdf'),
-		);
+		$this->assertResponseStatus(404, $this->makeRequest(
+			'GET',
+			'/cache/no/nosuchuid1234/pic-square.png',
+		));
 	}
 
-	public function testLegacyOwnerScopedUrlIs404(): void
+	public function testLegacyMediaUrlIs404(): void
 	{
-		// Pre-1a URLs had the form /media/{type}/node/{ownerUid}/{filename};
-		// the "node" segment now parses as an unknown asset uid.
-		$this->assertResponseStatus(
-			404,
-			$this->makeRequest('GET', '/media/image/node/some-node/pic.jpg'),
-		);
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
+
+		$this->assertResponseStatus(404, $this->makeRequest(
+			'GET',
+			"/media/image/{$upload['uid']}/e2e-serve-pic.png",
+		));
 	}
 
-	public function testFileWithMissingPoolEntryIs404(): void
+	public function testMissingPoolFileIs404(): void
 	{
-		$png = base64_decode(self::PNG_BASE64, true);
-		// Files are also served through the file endpoint (e.g. downloads).
-		$upload = $this->upload($png, 'e2e-serve-gone.png', 'image/png');
-		$row = $this->db()->execute(
-			'SELECT key FROM cms.assets WHERE uid = :uid',
-			['uid' => $upload['uid']],
-		)->one();
-		unlink("{$this->publicDir}/assets/{$row['key']}");
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-gone.png');
+		$shard = substr((string) $upload['uid'], 0, 2);
+		unlink($this->publicDir . $upload['url']);
 
-		$response = $this->makeRequest('GET', "/media/file/{$upload['uid']}/gone.png");
-
-		$this->assertResponseStatus(404, $response);
+		$this->assertResponseStatus(404, $this->makeRequest(
+			'GET',
+			"/cache/{$shard}/{$upload['uid']}/e2e-serve-gone-square.png",
+		));
 	}
 
-	private function upload(string $contents, string $filename, string $mediaType): array
+	private function png(int $width, int $height): string
+	{
+		$image = imagecreatetruecolor($width, $height);
+		ob_start();
+		imagepng($image);
+
+		return (string) ob_get_clean();
+	}
+
+	private function upload(string $contents, string $filename): array
 	{
 		$response = $this->makeRequest('POST', '/media/image', [
-			'files' => ['file' => $this->uploadedFile($contents, $filename, $mediaType)],
+			'files' => ['file' => $this->uploadedFile($contents, $filename, 'image/png')],
 		]);
 		$json = $this->getJsonResponse($response);
 		$this->assertTrue($json['ok']);

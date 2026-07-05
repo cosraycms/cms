@@ -76,10 +76,18 @@ final class MediaLibraryTest extends End2EndTestCase
 
 		$this->assertCount(1, $result['assets']);
 		$item = $result['assets'][0];
+		$shard = substr((string) $image['uid'], 0, 2);
 		$this->assertSame($image['uid'], $item['uid']);
 		$this->assertSame('e2e-library-pic.png', $item['filename']);
-		$this->assertSame("/media/image/{$image['uid']}/e2e-library-pic.png", $item['url']);
-		$this->assertSame($item['url'] . '?resize=width&w=400', $item['thumbUrl']);
+		$this->assertSame("/assets/{$shard}/{$image['uid']}/e2e-library-pic.png", $item['url']);
+		$this->assertSame(
+			"/cache/{$shard}/{$image['uid']}/e2e-library-pic-thumb.png",
+			$item['thumbUrl'],
+		);
+		$this->assertSame(
+			"/cache/{$shard}/{$image['uid']}/e2e-library-pic-preview.png",
+			$item['previewUrl'],
+		);
 		$this->assertSame('image', $item['kind']);
 	}
 

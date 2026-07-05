@@ -30,10 +30,29 @@ final class StorageTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testKeyShardsByUidPrefix(): void
+	public function testKeyIsPerAssetDirWithSlug(): void
 	{
-		$this->assertSame('wx/wxk3n7q2m5tbh.jpg', Storage::key('wxk3n7q2m5tbh', 'jpg'));
-		$this->assertSame('wx/wxk3n7q2m5tbh', Storage::key('wxk3n7q2m5tbh', ''));
+		$this->assertSame(
+			'wx/wxk3n7q2m5tbh/logo.jpg',
+			Storage::key('wxk3n7q2m5tbh', 'logo.jpg'),
+		);
+		$this->assertSame(
+			'wx/wxk3n7q2m5tbh/anderung-2.pdf',
+			Storage::key('wxk3n7q2m5tbh', 'Änderung 2.PDF'),
+		);
+	}
+
+	public function testKeyFallsBackToUidStem(): void
+	{
+		// Slug loses the stem entirely → the uid steps in.
+		$this->assertSame(
+			'wx/wxk3n7q2m5tbh/wxk3n7q2m5tbh.pdf',
+			Storage::key('wxk3n7q2m5tbh', '☺.pdf'),
+		);
+		$this->assertSame(
+			'wx/wxk3n7q2m5tbh/wxk3n7q2m5tbh',
+			Storage::key('wxk3n7q2m5tbh', '☺'),
+		);
 	}
 
 	public function testWriteExistsReadMoveDeleteRoundTrip(): void

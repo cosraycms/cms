@@ -174,7 +174,7 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		$this->assertSame('image/png', $pic['mime']);
 		$this->assertSame(hash('sha256', $png), $pic['hash']);
 		$this->assertSame(1, (int) $pic['width']);
-		$this->assertSame(substr($picUid, 0, 2) . "/{$picUid}.png", $pic['key']);
+		$this->assertSame(substr($picUid, 0, 2) . "/{$picUid}/pic.png", $pic['key']);
 
 		$missing = $this->assetRow($missingUid);
 		$this->assertSame('file', $missing['kind']);
@@ -207,7 +207,7 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		)->one();
 		$this->assertSame($logoUid, json_decode((string) $menu['data'], true)['image']);
 
-		$sharded = "{$this->root}/public/assets/" . substr($picUid, 0, 2) . "/{$picUid}.png";
+		$sharded = "{$this->root}/public/assets/" . substr($picUid, 0, 2) . "/{$picUid}/pic.png";
 		$this->assertFileExists($sharded);
 		$this->assertSame($png, file_get_contents($sharded));
 

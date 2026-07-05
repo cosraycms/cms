@@ -11,9 +11,9 @@ use Celemas\Core\Factory\Factory;
 use Celemas\Core\Request;
 use Celemas\Core\Response;
 use Celemas\Quma\Database;
+use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
-use Cosray\Assets\ResizeMode;
-use Cosray\Assets\Size;
+use Cosray\Assets\SizeSpec;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
@@ -23,7 +23,6 @@ use Cosray\Uid;
 use Cosray\Users;
 use enshrined\svgSanitize\Sanitizer;
 use finfo;
-use Gumlet\ImageResize;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 use Throwable;
 
@@ -86,8 +85,7 @@ class Media
 		[$width, $height] = $this->imageDimensions($mediatype, $contents);
 		$uidConfig = $this->config->uid;
 		$uid = new Uid($uidConfig->alphabet, $uidConfig->length)->generate();
-		$ext = strtolower(pathinfo($result['file'], PATHINFO_EXTENSION));
-		$key = Storage::key($uid, $ext);
+		$key = Storage::key($uid, $result['file']);
 		$storage->write($key, $contents);
 
 		try {
@@ -113,6 +111,8 @@ class Media
 
 		return $response->json($this->uploadResult([
 			'uid' => $uid,
+			'disk' => $storage->disk,
+			'key' => $key,
 			'filename' => $result['file'],
 			'mime' => $result['mime'],
 			'width' => $width,
@@ -161,41 +161,37 @@ class Media
 
 	protected function libraryItem(array $row): array
 	{
-		$prefix = $this->config->path->prefix;
-		$uid = (string) $row['uid'];
-		$kind = (string) $row['kind'];
-		$filename = (string) $row['filename'];
-		$url = "{$prefix}/media/{$kind}/{$uid}/" . rawurlencode($filename);
+		$asset = Asset::fromRow($row, $this->config);
 
 		return [
-			'uid' => $uid,
-			'filename' => $filename,
-			'url' => $url,
-			'thumbUrl' => $kind === 'image' ? "{$url}?resize=width&w=400" : $url,
-			'kind' => $kind,
-			'mime' => $row['mime'] ?? null,
-			'width' => isset($row['width']) ? (int) $row['width'] : null,
-			'height' => isset($row['height']) ? (int) $row['height'] : null,
+			'uid' => $asset->uid,
+			'filename' => $asset->filename,
+			'url' => $asset->path(),
+			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
+			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
+			'kind' => $asset->kind,
+			'mime' => $asset->mime,
+			'width' => $asset->width,
+			'height' => $asset->height,
 		];
 	}
 
 	/** Build the client payload for a catalog row. */
 	protected function uploadResult(array $row): array
 	{
-		$prefix = $this->config->path->prefix;
-		$uid = (string) $row['uid'];
-		$filename = (string) $row['filename'];
-		$kind = (string) $row['kind'];
+		$asset = Asset::fromRow($row, $this->config);
 
 		return [
 			'ok' => true,
 			'error' => '',
-			'uid' => $uid,
-			'filename' => $filename,
-			'mime' => $row['mime'] ?? null,
-			'width' => isset($row['width']) ? (int) $row['width'] : null,
-			'height' => isset($row['height']) ? (int) $row['height'] : null,
-			'url' => "{$prefix}/media/{$kind}/{$uid}/" . rawurlencode($filename),
+			'uid' => $asset->uid,
+			'filename' => $asset->filename,
+			'mime' => $asset->mime,
+			'width' => $asset->width,
+			'height' => $asset->height,
+			'url' => $asset->path(),
+			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
+			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
 		];
 	}
 
@@ -256,38 +252,49 @@ class Media
 		return $clean === false ? null : $clean;
 	}
 
-	public function image(string $slug): Response
+	/**
+	 * Fallback for rendition URLs whose file does not exist yet: the web
+	 * server serves `{path.cache}/{shard}/{uid}/{stem}-{size}.{ext}`
+	 * natively once generated, so PHP only ever sees the first request.
+	 * Only sizes configured in `media.sizes` are generated — anything
+	 * else is a 404, which bounds what this route can write to disk.
+	 */
+	public function cache(string $slug): Response
 	{
-		$image = $this->getAssets()->image($this->assetKey($slug));
-		$qs = $this->request->params();
+		$segments = explode('/', $slug);
 
-		if ($qs['resize'] ?? null) {
-			[$size, $mode] = match ($qs['resize']) {
-				ResizeMode::Width->value => [new Size((int) $qs['w']), ResizeMode::Width],
-				ResizeMode::Height->value => [new Size((int) $qs['h']), ResizeMode::Height],
-				ResizeMode::LongSide->value => [new Size((int) $qs['size']), ResizeMode::LongSide],
-				ResizeMode::ShortSide->value => [new Size((int) $qs['size']), ResizeMode::ShortSide],
-				ResizeMode::Fit->value => [new Size((int) $qs['w'], (int) $qs['h']), ResizeMode::Fit],
-				ResizeMode::Resize->value => [new Size((int) $qs['w'], (int) $qs['h']), ResizeMode::Resize],
-				ResizeMode::FreeCrop->value => [new Size((int) $qs['w'], (int) $qs['h'], [
-						'x' => $qs['x'] ? (int) $qs['x'] : false,
-						'y' => $qs['y'] ? (int) $qs['y'] : false,
-					]), ResizeMode::FreeCrop],
-				ResizeMode::Crop->value => [new Size((int) $qs['w'], (int) $qs['h'], match ($qs['pos']) {
-						'top' => ImageResize::CROPTOP,
-						'centre' => ImageResize::CROPCENTRE,
-						'center' => ImageResize::CROPCENTER,
-						'bottom' => ImageResize::CROPBOTTOM,
-						'left' => ImageResize::CROPLEFT,
-						'right' => ImageResize::CROPRIGHT,
-						'topcenter' => ImageResize::CROPTOPCENTER,
-						default => throw new RuntimeException('Crop position not supported: ' . $qs['pos']),
-					}), ResizeMode::Crop],
-				default => throw new RuntimeException('Resize mode not supported: ' . $qs['resize']),
-			};
+		if (count($segments) !== 3) {
+			throw new HttpNotFound($this->request);
+		}
 
-			$quality = $qs['quality'] ?? null ? (int) $qs['quality'] : null;
-			$image->resize($size, $mode, $qs['enlarge'] ?? false, $quality);
+		[$shard, $uid, $file] = $segments;
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row || $row['disk'] !== 'local') {
+			throw new HttpNotFound($this->request);
+		}
+
+		$asset = Asset::fromRow($row, $this->config);
+
+		if (dirname($asset->key) !== "{$shard}/{$uid}" || !$asset->resizable()) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$spec = $this->sizeSpec($asset->key, $file);
+
+		try {
+			$image = $this
+				->getAssets()
+				->image($asset->key)
+				->resize(
+					$spec->size(),
+					$spec->mode,
+					$spec->enlarge,
+					$spec->quality,
+					$spec->name,
+				);
+		} catch (RuntimeException $e) {
+			throw new HttpNotFound($this->request, previous: $e);
 		}
 
 		$fileServer = $this->config->media->fileServer;
@@ -299,43 +306,27 @@ class Media
 		return Response::create($this->factory)->file($image->path());
 	}
 
-	public function file(string $slug): Response
-	{
-		$file = $this->getAssets()->file($this->assetKey($slug));
-
-		try {
-			$path = $file->path();
-		} catch (RuntimeException $e) {
-			throw new HttpNotFound($this->request, previous: $e);
-		}
-
-		$fileServer = $this->config->media->fileServer;
-
-		if ($fileServer) {
-			return $this->sendFile($fileServer, $path);
-		}
-
-		return Response::create($this->factory)->file($path);
-	}
-
 	/**
-	 * Resolve a media slug `{assetUid}/{name}` to the asset's pool key.
-	 * Resolution keys on the uid alone; the name segment is cosmetic.
+	 * Match a requested rendition basename against the asset's key and
+	 * the configured sizes: `{stem}-{size}` with the key's extension.
 	 */
-	protected function assetKey(string $slug): string
+	protected function sizeSpec(string $key, string $file): SizeSpec
 	{
-		$uid = explode('/', $slug, 2)[0];
-		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+		$base = basename($key);
+		$dot = strrpos($base, '.');
+		$stem = $dot === false || $dot === 0 ? $base : substr($base, 0, $dot);
+		$ext = $dot === false || $dot === 0 ? '' : substr($base, $dot);
+		$sizes = $this->config->media->sizes;
 
-		if (!$row) {
-			throw new HttpNotFound($this->request);
+		if (str_starts_with($file, "{$stem}-") && ($ext === '' || str_ends_with($file, $ext))) {
+			$name = substr($file, strlen($stem) + 1, strlen($file) - strlen($stem) - 1 - strlen($ext));
+
+			if ($name !== '' && $sizes->has($name)) {
+				return $sizes->get($name);
+			}
 		}
 
-		if ($row['disk'] !== 'local') {
-			throw new RuntimeException('Asset disk not supported: ' . $row['disk']);
-		}
-
-		return (string) $row['key'];
+		throw new HttpNotFound($this->request);
 	}
 
 	/**

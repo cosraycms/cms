@@ -15,8 +15,9 @@ use RuntimeException;
 /**
  * Fills the asset catalog from the legacy owner-scoped media files,
  * rewrites every `{file}` media item to `{uid}` (nodes, drafts, both
- * history tables, menu items), moves the files into the sharded pool
- * layout and dumps a `legacy path → uid` mapping JSON.
+ * history tables, menu items), moves the files into the per-asset pool
+ * layout `{shard}/{uid}/{slug}` and dumps a `legacy path → uid`
+ * mapping JSON.
  *
  * Every step is idempotent so an interrupted run can be repeated: the
  * mapping file doubles as resume state and is written before any
@@ -270,7 +271,7 @@ final class Migration implements Contract\Migration
 		$row = [
 			'uid' => $uid,
 			'disk' => $this->storage->disk,
-			'key' => Storage::key($uid, $ext),
+			'key' => Storage::key($uid, $filename),
 			'filename' => $filename,
 			'mime' => null,
 			'bytes' => null,
@@ -570,8 +571,7 @@ final class Migration implements Contract\Migration
 				continue;
 			}
 
-			$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-			$key = Storage::key($uid, $ext);
+			$key = Storage::key($uid, basename($path));
 
 			if ($this->storage->exists($key)) {
 				// A previous run already copied it; drop the leftover.

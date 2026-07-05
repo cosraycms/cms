@@ -46,11 +46,16 @@ class Routes
 		$sessionIfEnabled = [
 			$app->get('/', [Page::class, 'catchall'], 'cms.index.get'),
 			$app->post('/', [Page::class, 'catchall'], 'cms.index.post'),
-			$app->get('/media/image/...slug', [Media::class, 'image'], 'cms.media.image'),
-			$app->get('/media/file/...slug', [Media::class, 'file'], 'cms.media.file'),
-			$app->get('/media/video/...slug', [Media::class, 'file'], 'cms.media.video'),
 			$app->get('/preview/...slug', [Page::class, 'preview'], 'cms.preview.catchall'),
 		];
+
+		// Rendition fallback: the web server serves existing cache files
+		// natively; only misses reach PHP and get generated once.
+		$app->get(
+			'/' . trim($this->config->path->cache, '/') . '/...slug',
+			[Media::class, 'cache'],
+			'cms.media.cache',
+		);
 
 		$app->post(
 			'/media/{mediatype:(image|file|video)}',

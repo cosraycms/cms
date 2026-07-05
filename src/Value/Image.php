@@ -4,179 +4,56 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets;
-use Cosray\Exception\RuntimeException;
-use Gumlet\ImageResize;
+use Cosray\Assets\SizeSpec;
 
 use function Cosray\escape;
 
 class Image extends File
 {
-	protected ?Assets\Size $size = null;
-	protected ?Assets\ResizeMode $resizeMode = null;
-	protected bool $enlarge = false;
-	protected bool $lazy = true;
-	protected ?int $quality = null;
-	protected string $queryString = '';
+	protected ?SizeSpec $spec = null;
 
 	public function __toString(): string
 	{
-		return $this->tag(true);
+		return $this->tag();
 	}
 
-	public function tag(bool $bust = true, ?string $class = null): string
+	public function tag(?string $class = null): string
 	{
 		return sprintf(
 			'<img %ssrc="%s" alt="%s" data-path-original="%s">',
 			$class ? sprintf('class="%s" ', escape($class)) : '',
-			$this->url($bust),
+			$this->url(),
 			escape($this->alt() ?: strip_tags($this->title())),
-			$this->publicPath(),
+			$this->asset($this->index)?->path() ?? '',
 		);
 	}
 
-	public function url(bool $bust = false): string
+	/**
+	 * Use a named rendition from the `media.sizes` config. Unknown names
+	 * throw immediately; assets the resize pipeline cannot process (SVG,
+	 * video posters) keep their original URL.
+	 */
+	public function size(string $name): static
 	{
-		if ($this->lazy) {
-			return $this->getMediaUrl($this->index);
+		$new = clone $this;
+		$new->spec = $this->owner->config()->media->sizes->get($name);
+
+		return $new;
+	}
+
+	public function publicPath(): string
+	{
+		$asset = $this->asset($this->index);
+
+		if ($asset === null) {
+			return '';
 		}
 
-		return $this->getImage($this->index)->url($bust);
-	}
-
-	public function publicPath(bool $bust = false): string
-	{
-		if ($this->lazy) {
-			return $this->getMediaPath($this->index);
+		if ($this->spec !== null && $asset->resizable()) {
+			return $asset->sizePath($this->spec->name);
 		}
 
-		return $this->getImage($this->index)->publicPath($bust);
-	}
-
-	public function lazy(): static
-	{
-		$new = clone $this;
-		$new->lazy = true;
-
-		return $new;
-	}
-
-	public function nonlazy(): static
-	{
-		$new = clone $this;
-		$new->lazy = false;
-
-		return $new;
-	}
-
-	public function width(int $width, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($width);
-		$new->resizeMode = Assets\ResizeMode::Width;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=width&w={$width}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function height(int $height, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($height);
-		$new->resizeMode = Assets\ResizeMode::Height;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=height&h={$height}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function longSide(int $size, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($size);
-		$new->resizeMode = Assets\ResizeMode::LongSide;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=longside&size={$size}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function shortSide(int $size, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($size);
-		$new->resizeMode = Assets\ResizeMode::ShortSide;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=shortside&size={$size}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function fit(int $width, int $height, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($width, $height);
-		$new->resizeMode = Assets\ResizeMode::Fit;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=fit&w={$width}&h={$height}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function resize(int $width, int $height, bool $enlarge = false): static
-	{
-		$new = clone $this;
-		$new->size = new Assets\Size($width, $height);
-		$new->resizeMode = Assets\ResizeMode::Resize;
-		$new->enlarge = $enlarge;
-		$new->queryString = "?resize=resize&w={$width}&h={$height}" . ($enlarge ? '&enlarge=true' : '');
-
-		return $new;
-	}
-
-	public function crop(int $width, int $height, string $position = 'center'): static
-	{
-		$pos = match ($position) {
-			'top' => ImageResize::CROPTOP,
-			'centre' => ImageResize::CROPCENTRE,
-			'center' => ImageResize::CROPCENTER,
-			'bottom' => ImageResize::CROPBOTTOM,
-			'left' => ImageResize::CROPLEFT,
-			'right' => ImageResize::CROPRIGHT,
-			'topcenter' => ImageResize::CROPTOPCENTER,
-			default => throw new RuntimeException('Crop position not supported: ' . $position),
-		};
-
-		$new = clone $this;
-		$new->size = new Assets\Size($width, $height, $pos);
-		$new->resizeMode = Assets\ResizeMode::Crop;
-		$new->queryString = "?resize=crop&w={$width}&h={$height}&pos={$position}";
-
-		return $new;
-	}
-
-	public function freecrop(
-		int $width,
-		int $height,
-		int|false $x = false,
-		int|false $y = false,
-	): static {
-		$new = clone $this;
-		$new->size = new Assets\Size($width, $height, ['x' => $x, 'y' => $y]);
-		$new->resizeMode = Assets\ResizeMode::FreeCrop;
-		$new->queryString =
-			"?resize=freecrop&w={$width}&h={$height}" . ($x ? "&x={$x}" : '') . ($y ? "&y={$y}" : '');
-
-		return $new;
-	}
-
-	public function quality(int $quality): static
-	{
-		$new = clone $this;
-		$new->quality = $quality;
-
-		return $new;
+		return $asset->path();
 	}
 
 	public function link(): string
@@ -187,35 +64,5 @@ class Image extends File
 	public function alt(): string
 	{
 		return $this->textValue('alt', $this->index);
-	}
-
-	protected function mediaType(): string
-	{
-		return 'image';
-	}
-
-	protected function getMediaPath(int $index): string
-	{
-		return (
-			$this->mediaPath($index)
-			. $this->queryString
-			. ($this->quality ? "&quality={$this->quality}" : '')
-		);
-	}
-
-	protected function getMediaUrl(int $index): string
-	{
-		return $this->owner->request()->origin() . $this->getMediaPath($index);
-	}
-
-	protected function getImage(int $index): Assets\Image
-	{
-		$image = $this->getAssets()->image($this->asset($index)->key ?? '');
-
-		if ($this->size) {
-			$image = $image->resize($this->size, $this->resizeMode, $this->enlarge, $this->quality);
-		}
-
-		return $image;
 	}
 }

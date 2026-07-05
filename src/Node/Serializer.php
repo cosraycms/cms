@@ -160,7 +160,9 @@ class Serializer
 
 			$map[$uid] = [
 				'filename' => $asset->filename,
-				'url' => $asset->mediaPath(),
+				'url' => $asset->path(),
+				'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
+				'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
 				'kind' => $asset->kind,
 				'mime' => $asset->mime,
 				'width' => $asset->width,

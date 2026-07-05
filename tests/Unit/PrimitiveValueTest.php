@@ -8,6 +8,7 @@ use Cosray\Assets\Asset;
 use Cosray\Context;
 use Cosray\Node\FieldOwner;
 use Cosray\Schema\TranslateMode;
+use Cosray\Storage\Storage;
 use Cosray\Tests\Fixtures\Field\TestCheckbox;
 use Cosray\Tests\Fixtures\Field\TestCode;
 use Cosray\Tests\Fixtures\Field\TestNumber;
@@ -57,16 +58,18 @@ final class PrimitiveValueTest extends TestCase
 		string $filename,
 		string $kind = 'image',
 		array $meta = [],
+		?string $mime = null,
 	): void {
-		$ext = pathinfo($filename, PATHINFO_EXTENSION);
 		$context->assets()->add(new Asset(
 			uid: $uid,
 			disk: 'local',
-			key: substr($uid, 0, 2) . "/{$uid}.{$ext}",
+			key: Storage::key($uid, $filename),
 			filename: $filename,
 			kind: $kind,
+			mime: $mime,
 			meta: $meta,
-			prefix: '/cms',
+			assetsBase: '/cms/assets',
+			cacheBase: '/cms/cache',
 		));
 	}
 
@@ -388,7 +391,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
 
 		$this->assertStringContainsString(
-			'/cms/media/image/heroimg123456/hero.jpg',
+			'/cms/assets/he/heroimg123456/hero.jpg',
 			$value->publicPath(),
 		);
 		$this->assertStringContainsString('http://www.example.com', $value->url());
@@ -413,18 +416,71 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
-		$tag = $value->tag(true, 'hero-image');
+		$tag = $value->tag('hero-image');
 
 		$this->assertStringContainsString('class="hero-image"', $tag);
 		$this->assertStringContainsString(
-			'src="http://www.example.com/cms/media/image/heroimg123456/hero.jpg"',
+			'src="http://www.example.com/cms/assets/he/heroimg123456/hero.jpg"',
 			$tag,
 		);
 		$this->assertStringContainsString('alt="Hero"', $tag);
 		$this->assertStringContainsString(
-			'data-path-original="/cms/media/image/heroimg123456/hero.jpg"',
+			'data-path-original="/cms/assets/he/heroimg123456/hero.jpg"',
 			$tag,
 		);
+	}
+
+	public function testImageValueSizeUsesConfiguredRendition(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg', mime: 'image/jpeg');
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
+			'files' => [['uid' => 'heroimg123456']],
+		]));
+		$field->limit(1);
+
+		$value = $field->value();
+		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
+
+		$this->assertSame(
+			'/cms/cache/he/heroimg123456/hero-thumb.jpg',
+			$value->size('thumb')->publicPath(),
+		);
+		// The unsized value keeps pointing at the original.
+		$this->assertSame('/cms/assets/he/heroimg123456/hero.jpg', $value->publicPath());
+	}
+
+	public function testImageValueSizeKeepsOriginalForUnresizableMime(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'herosvg123456', 'logo.svg', mime: 'image/svg+xml');
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
+			'files' => [['uid' => 'herosvg123456']],
+		]));
+		$field->limit(1);
+
+		$this->assertSame(
+			'/cms/assets/he/herosvg123456/logo.svg',
+			$field->value()->size('thumb')->publicPath(),
+		);
+	}
+
+	public function testImageValueSizeRejectsUnknownName(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg', mime: 'image/jpeg');
+		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
+			'files' => [['uid' => 'heroimg123456']],
+		]));
+		$field->limit(1);
+
+		$this->expectException(\Cosray\Exception\RuntimeException::class);
+		$this->expectExceptionMessage("Unknown media size 'nope'");
+
+		$field->value()->size('nope');
 	}
 
 	public function testTranslatedImageFallsBackToDefaultLocale(): void
@@ -452,7 +508,7 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 		$this->assertSame('Hero', $value->alt());
 		$this->assertStringContainsString(
-			'/cms/media/image/heroimg123456/hero.jpg',
+			'/cms/assets/he/heroimg123456/hero.jpg',
 			$value->publicPath(),
 		);
 	}
@@ -645,27 +701,6 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertInstanceOf(\Cosray\Value\TranslatedImages::class, $value);
 		$this->assertInstanceOf(\Cosray\Value\TranslatedImage::class, $value->current());
 		$this->assertSame('Hero', $value->current()->alt());
-	}
-
-	public function testImageValueResizeAddsQueryString(): void
-	{
-		$context = $this->createContext();
-		$owner = $this->createOwner($context);
-		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
-			'files' => [
-				['uid' => 'heroimg123456', 'alt' => ['en' => 'Hero']],
-			],
-		]));
-		$field->limit(1);
-
-		$value = $field->value();
-		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
-		$value = $value->width(320, true)->quality(80);
-
-		$this->assertStringContainsString('resize=width', $value->publicPath());
-		$this->assertStringContainsString('w=320', $value->publicPath());
-		$this->assertStringContainsString('enlarge=true', $value->publicPath());
-		$this->assertStringContainsString('quality=80', $value->publicPath());
 	}
 
 	public function testImagesValueIteratesOverImages(): void

@@ -54,8 +54,8 @@ final class Images extends Type
 				enlarge: false,
 				quality: null,
 			);
-			$url = $resized->url(true);
-			$path = $asset?->mediaPath('image') ?? '';
+			$url = $resized->url();
+			$path = $asset?->path() ?? '';
 
 			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
 		}

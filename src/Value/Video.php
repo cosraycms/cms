@@ -13,9 +13,4 @@ class Video extends File
 
 		return "<video controls><source src=\"{$url}\" type=\"{$mimetype}\"/></video>";
 	}
-
-	protected function mediaType(): string
-	{
-		return 'video';
-	}
 }

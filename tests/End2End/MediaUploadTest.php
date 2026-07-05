@@ -53,10 +53,14 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertSame('image/png', $json['mime']);
 		$this->assertSame(1, $json['width']);
 		$this->assertSame(1, $json['height']);
-		$this->assertSame("/media/image/{$uid}/e2e-upload-pic.png", $json['url']);
 
 		$shard = substr($uid, 0, 2);
-		$stored = "{$this->publicDir}/assets/{$shard}/{$uid}.png";
+		$this->assertSame("/assets/{$shard}/{$uid}/e2e-upload-pic.png", $json['url']);
+		$this->assertSame("/cache/{$shard}/{$uid}/e2e-upload-pic-thumb.png", $json['thumbUrl']);
+		$this->assertSame("/cache/{$shard}/{$uid}/e2e-upload-pic-preview.png", $json['previewUrl']);
+
+		// The URL is the file's path below public/ — the native serving contract.
+		$stored = $this->publicDir . $json['url'];
 		$this->assertFileExists($stored);
 		$this->assertSame($png, file_get_contents($stored));
 
@@ -65,7 +69,7 @@ final class MediaUploadTest extends End2EndTestCase
 			['uid' => $uid],
 		)->one();
 		$this->assertNotEmpty($row);
-		$this->assertSame("{$shard}/{$uid}.png", $row['key']);
+		$this->assertSame("{$shard}/{$uid}/e2e-upload-pic.png", $row['key']);
 		$this->assertSame('local', $row['disk']);
 		$this->assertSame('image', $row['kind']);
 		$this->assertSame('image/png', $row['mime']);
@@ -111,8 +115,10 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertTrue($json['ok']);
 
 		$uid = (string) $json['uid'];
+		// Non-resizable assets keep their original URL as thumb.
+		$this->assertSame($json['url'], $json['thumbUrl']);
 		$stored = (string) file_get_contents(
-			"{$this->publicDir}/assets/" . substr($uid, 0, 2) . "/{$uid}.svg",
+			"{$this->publicDir}/assets/" . substr($uid, 0, 2) . "/{$uid}/e2e-upload-vec.svg",
 		);
 		$this->assertStringNotContainsString('<script', $stored);
 		$this->assertStringContainsString('<rect', $stored);

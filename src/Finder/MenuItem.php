@@ -69,7 +69,7 @@ class MenuItem implements Iterator
 			return null;
 		}
 
-		return $this->context->assets()->get($uid)?->mediaPath('image');
+		return $this->context->assets()->get($uid)?->path();
 	}
 
 	public function class(): ?string

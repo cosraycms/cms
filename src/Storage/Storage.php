@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Storage;
 
+use Cosray\Assets\Util;
 use Cosray\Config;
 use Cosray\Util\Path;
 use League\Flysystem\Filesystem;
@@ -12,11 +13,12 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 /**
  * Storage seam for the asset pool.
  *
- * Keys are sharded pool paths like `ab/abcdefghij123.jpg`, relative to the
- * disk root. The only disk in phase 1a is `local`, rooted at the public
- * assets directory. path() resolves a key to an absolute local file, which
- * the resize pipeline, Response::file() and X-Sendfile require; a non-local
- * disk will need a temp-download strategy for those before it can exist.
+ * Keys are sharded per-asset paths like `ab/abcdefghij123/logo.png`,
+ * relative to the disk root. The only disk in phase 1a is `local`, rooted
+ * at the public assets directory. path() resolves a key to an absolute
+ * local file, which the resize pipeline, Response::file() and X-Sendfile
+ * require; a non-local disk will need a temp-download strategy for those
+ * before it can exist.
  */
 class Storage
 {
@@ -31,12 +33,20 @@ class Storage
 		$this->filesystem = new Filesystem(new LocalFilesystemAdapter($this->root));
 	}
 
-	/** The sharded pool key for an asset uid: `{uid[:2]}/{uid}.{ext}`. */
-	public static function key(string $uid, string $ext): string
+	/**
+	 * The pool key for an asset: `{uid[:2]}/{uid}/{slug}`. One directory
+	 * per asset, so slugs can never collide. Names whose slug loses its
+	 * stem (e.g. all-CJK filenames) fall back to the uid as stem.
+	 */
+	public static function key(string $uid, string $filename): string
 	{
-		$shard = substr($uid, 0, 2);
+		$slug = Util::slug($filename);
 
-		return $ext === '' ? "{$shard}/{$uid}" : "{$shard}/{$uid}.{$ext}";
+		if ($slug === '' || str_starts_with($slug, '.')) {
+			$slug = $uid . $slug;
+		}
+
+		return substr($uid, 0, 2) . "/{$uid}/{$slug}";
 	}
 
 	public function write(string $key, string $contents): void

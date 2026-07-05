@@ -27,7 +27,7 @@ class File extends Value
 
 	public function __toString(): string
 	{
-		return $this->publicPath(false);
+		return $this->publicPath();
 	}
 
 	public function title(): string
@@ -35,10 +35,9 @@ class File extends Value
 		return $this->textValue('title', $this->index);
 	}
 
-	public function url(bool $bust = false): string
+	public function url(): string
 	{
-		unset($bust);
-		$url = $this->owner->request()->origin() . $this->mediaPath($this->index);
+		$url = $this->owner->request()->origin() . $this->publicPath();
 
 		if ($url = filter_var($url, FILTER_VALIDATE_URL)) {
 			return $url;
@@ -47,11 +46,13 @@ class File extends Value
 		throw new RuntimeException('Invalid file url');
 	}
 
-	public function publicPath(bool $bust = false): string
+	/**
+	 * Root-relative URL of the asset. Equal to the file's path below the
+	 * public directory, so the web server serves it without PHP.
+	 */
+	public function publicPath(): string
 	{
-		unset($bust);
-
-		return filter_var($this->mediaPath($this->index), FILTER_SANITIZE_URL);
+		return $this->asset($this->index)?->path() ?? '';
 	}
 
 	public function filename(): string
@@ -82,17 +83,6 @@ class File extends Value
 	public function isset(): bool
 	{
 		return $this->fileItem(0) !== null;
-	}
-
-	/** The serving route type this value links to. */
-	protected function mediaType(): string
-	{
-		return 'file';
-	}
-
-	protected function mediaPath(int $index): string
-	{
-		return $this->asset($index)?->mediaPath($this->mediaType()) ?? '';
 	}
 
 	protected function asset(int $index): ?Asset

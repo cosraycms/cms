@@ -106,20 +106,6 @@ class Repository
 
 	protected function fromRow(array $row): Asset
 	{
-		$meta = json_decode((string) ($row['meta'] ?? '{}'), true);
-
-		return new Asset(
-			uid: (string) $row['uid'],
-			disk: (string) $row['disk'],
-			key: (string) $row['key'],
-			filename: (string) $row['filename'],
-			kind: (string) $row['kind'],
-			mime: isset($row['mime']) ? (string) $row['mime'] : null,
-			bytes: isset($row['bytes']) ? (int) $row['bytes'] : null,
-			width: isset($row['width']) ? (int) $row['width'] : null,
-			height: isset($row['height']) ? (int) $row['height'] : null,
-			meta: is_array($meta) ? $meta : [],
-			prefix: $this->config->path->prefix,
-		);
+		return Asset::fromRow($row, $this->config);
 	}
 }

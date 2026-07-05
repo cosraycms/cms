@@ -56,8 +56,8 @@ final class Image extends Type
 			enlarge: false,
 			quality: null,
 		);
-		$url = $resized->url(true);
-		$path = $asset?->mediaPath('image') ?? '';
+		$url = $resized->url();
+		$path = $asset?->path() ?? '';
 
 		return "<img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\">";
 	}

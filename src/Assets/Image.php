@@ -69,26 +69,25 @@ class Image
 		};
 	}
 
-	public function resize(Size $size, ResizeMode $mode, bool $enlarge, ?int $quality): static
-	{
+	/**
+	 * Materialize a rendition next to its native URL. With a $name the
+	 * cache file carries the configured size name; otherwise the suffix
+	 * encodes the resize parameters (eager block rendering).
+	 */
+	public function resize(
+		Size $size,
+		ResizeMode $mode,
+		bool $enlarge,
+		?int $quality,
+		?string $name = null,
+	): static {
 		if (!$this->isResizable()) {
 			return $this;
 		}
 
-		$this->cacheFile = $this->getCacheFilePath($size, $mode, $enlarge);
+		$this->cacheFile = $this->getCacheFilePath($size, $mode, $enlarge, $name);
 
-		if (is_file($this->cacheFile)) {
-			$fileMtime = filemtime($this->file);
-			$cacheMtime = filemtime($this->cacheFile);
-
-			if ($fileMtime > $cacheMtime) {
-				$this->createCacheFile($size, $mode, $enlarge, $quality);
-			}
-		} else {
-			if (Util::isAnimatedGif($this->file)) {
-				return $this;
-			}
-
+		if (!is_file($this->cacheFile) || filemtime($this->file) > filemtime($this->cacheFile)) {
 			$this->createCacheFile($size, $mode, $enlarge, $quality);
 		}
 
@@ -111,6 +110,19 @@ class Image
 		bool $enlarge,
 		?int $quality,
 	): void {
+		// Concurrent first requests must never see a half-written file.
+		$tmp = $this->cacheFile . '.tmp' . getmypid();
+
+		// Gumlet keeps only the first frame, so an animated GIF is
+		// materialized as a copy of the original instead.
+		if (Util::isAnimatedGif($this->file)) {
+			if (!copy($this->file, $tmp) || !rename($tmp, $this->cacheFile)) {
+				throw new RuntimeException('Assets error: could not copy animated gif');
+			}
+
+			return;
+		}
+
 		try {
 			$image = match ($mode) {
 				ResizeMode::Width => $this->get()->resizeToWidth($size->firstDimension, $enlarge),
@@ -140,14 +152,22 @@ class Image
 				),
 			};
 
-			$image->save($this->cacheFile, quality: $quality);
+			$image->save($tmp, quality: $quality);
+
+			if (!rename($tmp, $this->cacheFile)) {
+				throw new RuntimeException('Assets error: could not move rendition into place');
+			}
 		} catch (ImageResizeException $e) {
 			throw new RuntimeException('Assets error: ' . $e->getMessage(), $e->getCode(), previous: $e);
 		}
 	}
 
-	protected function getCacheFilePath(Size $size, ResizeMode $mode, bool $enlarge): string
-	{
+	protected function getCacheFilePath(
+		Size $size,
+		ResizeMode $mode,
+		bool $enlarge,
+		?string $name = null,
+	): string {
 		$info = pathinfo($this->relativeFile);
 		$relativeDir = $info['dirname'] ?? null;
 		// pathinfo does not handle multiple dots like .tar.gz well
@@ -166,7 +186,17 @@ class Image
 			}
 		}
 
-		$suffix = '-' . match ($mode) {
+		$suffix = '-' . ($name ?? $this->paramsToken($size, $mode, $enlarge));
+
+		$cacheFile = $cacheDir . '/' . $filenameBasename . $suffix;
+
+		// Add extension
+		return $cacheFile . '.' . $filenameExtension;
+	}
+
+	protected function paramsToken(Size $size, ResizeMode $mode, bool $enlarge): string
+	{
+		$token = match ($mode) {
 			ResizeMode::Width => 'w' . $size->firstDimension,
 			ResizeMode::Fit => $size->firstDimension . 'x' . $size->secondDimension . '-fit',
 			ResizeMode::Crop => $size->firstDimension
@@ -189,12 +219,9 @@ class Image
 		};
 
 		if ($enlarge) {
-			$suffix .= '-enl';
+			$token .= '-enl';
 		}
 
-		$cacheFile = $cacheDir . '/' . $filenameBasename . $suffix;
-
-		// Add extension
-		return $cacheFile . '.' . $filenameExtension;
+		return $token;
 	}
 }
