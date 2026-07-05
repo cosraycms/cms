@@ -139,6 +139,7 @@ final class Defaults
 	{
 		return [
 			'media.fileserver' => null,
+			'media.sizes' => [],
 		];
 	}
 
