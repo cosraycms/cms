@@ -24,6 +24,7 @@ final class Defaults
 			self::database(),
 			self::session($env),
 			self::media(),
+			self::richtext(),
 			self::upload(),
 			self::uid(),
 			self::password(),
@@ -140,6 +141,15 @@ final class Defaults
 		return [
 			'media.fileserver' => null,
 			'media.sizes' => [],
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function richtext(): array
+	{
+		return [
+			'richtext.classes' => [],
+			'richtext.styles' => [],
 		];
 	}
 

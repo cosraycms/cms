@@ -28,6 +28,7 @@ class Config
 	private ?Config\Database $dbConfig = null;
 	private ?Config\Session $sessionConfig = null;
 	private ?Config\Media $mediaConfig = null;
+	private ?Config\Richtext $richtextConfig = null;
 	private ?Config\Upload $uploadConfig = null;
 	private ?Config\Password $passwordConfig = null;
 	private ?Config\Uid $uidConfig = null;
@@ -66,6 +67,10 @@ class Config
 
 	public Config\Media $media {
 		get => $this->mediaConfig ??= new Config\Media($this);
+	}
+
+	public Config\Richtext $richtext {
+		get => $this->richtextConfig ??= new Config\Richtext($this);
 	}
 
 	public Config\Upload $upload {
