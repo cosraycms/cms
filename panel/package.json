@@ -5,7 +5,7 @@
 	"type": "module",
 	"packageManager": "pnpm@11.5.0",
 	"scripts": {
-		"build": "vite build && vite build -c vite.elements.config.ts",
+		"build": "vite build && vite build -c vite.elements.config.ts && vite build -c vite.convert.config.ts",
 		"dev": "vite",
 		"check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings options_missing_custom_element:ignore",
 		"format": "prettier -w ."
@@ -31,6 +31,7 @@
 		"@types/node": "^25.3.0",
 		"@types/sortablejs": "^1.15.9",
 		"element-resize-detector": "^1.2.4",
+		"jsdom": "^25.0.1",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.0",
 		"prosemirror-commands": "^1.7.1",
