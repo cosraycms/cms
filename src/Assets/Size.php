@@ -11,7 +11,7 @@ class Size
 	public function __construct(
 		public readonly int $firstDimension,
 		public readonly ?int $secondDimension = null,
-		public readonly int|array|null $cropMode = null,
+		public readonly ?int $cropMode = null,
 	) {
 		if ($firstDimension < 1) {
 			throw new RuntimeException('Assets error: width must be >= 1');

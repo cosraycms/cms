@@ -175,8 +175,13 @@ class Blocks extends Value
 	//
 	// - prefix: All css classes are prefixed with this value. Default 'cms'
 	// - tag: The tag of the container. Default 'div'
-	// - maxImageWidth: The maximum width of images. Images will be resized according to colspan. Default: 1280
 	// - class: An additional class added to the container
+	// - imageSizes: `media.sizes` names forming the image block's srcset
+	//   ladder. Default ['block-sm', 'block', 'block-lg']
+	// - sizes: Template for the image block's `sizes` attribute; `{pct}`
+	//   is replaced with the block's grid share in percent.
+	//   Default '(min-width: 48rem) {pct}vw, 100vw'
+	// - thumbSize: `media.sizes` name for gallery thumbs. Default 'block-thumb'
 	public function render(mixed ...$args): string
 	{
 		$tag = $args['tag'] ?? 'div';
@@ -239,6 +244,20 @@ class Blocks extends Value
 
 	protected function renderValue(string $prefix, Block $value, array $args): string
 	{
+		$ctx = new RenderContext(
+			$this->owner,
+			$this->context->fieldName,
+			$this->columns(),
+			$args,
+		);
+		$rendered = $this->field->services()->blocks->get($value->type)->render($value, $ctx);
+
+		// An empty render (e.g. an image block whose asset is gone) must
+		// not occupy a grid cell; use `colstart` to position blocks.
+		if ($rendered === '') {
+			return '';
+		}
+
 		$colspan = $prefix . '-colspan-' . $value->data['colspan'];
 		$rowspan = $prefix . '-rowspan-' . $value->data['rowspan'];
 		$colstart = $value->data['colstart'] ?? null
@@ -247,7 +266,7 @@ class Blocks extends Value
 		$styleClass = $value->styleClass();
 		$class = $styleClass ? ' ' . $styleClass : '';
 
-		$out =
+		return (
 			'<div class="'
 			. $prefix
 			. '-'
@@ -258,17 +277,10 @@ class Blocks extends Value
 			. $rowspan
 			. ($colstart ? ' ' . $colstart : '')
 			. $class
-			. '">';
-		$ctx = new RenderContext(
-			$this->owner,
-			$this->context->fieldName,
-			$this->columns(),
-			$args,
+			. '">'
+			. $rendered
+			. '</div>'
 		);
-		$out .= $this->field->services()->blocks->get($value->type)->render($value, $ctx);
-		$out .= '</div>';
-
-		return $out;
 	}
 
 	protected function prepareData(array $data): Generator

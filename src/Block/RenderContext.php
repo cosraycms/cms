@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Block;
 
 use Cosray\Assets\Asset;
-use Cosray\Assets\Assets;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use Cosray\Value\Block;
@@ -17,8 +16,6 @@ use Cosray\Value\ValueContext;
  */
 final class RenderContext
 {
-	private ?Assets $assets = null;
-
 	public function __construct(
 		public readonly Owner $owner,
 		public readonly string $fieldName,
@@ -88,11 +85,6 @@ final class RenderContext
 			$this->owner,
 			new ValueContext($this->fieldName, $data),
 		)->value();
-	}
-
-	public function assets(): Assets
-	{
-		return $this->assets ??= new Assets($this->owner->request(), $this->owner->config());
 	}
 
 	/** The catalog asset a media item references, if it exists. */

@@ -460,6 +460,6 @@ class Media
 
 	protected function getAssets(): Assets
 	{
-		return $this->assets ??= new Assets($this->request, $this->config);
+		return $this->assets ??= new Assets($this->config);
 	}
 }

@@ -529,12 +529,27 @@ Named sizes (`media.sizes` config):
 - options: `pos` (crop only: top, center, centre, bottom, left, right,
   topcenter), `quality` (1-100), `enlarge` (bool)
 - example: `'card' => ['crop' => [600, 400], 'quality' => 80]`
-- built-ins `thumb` (width 400) and `preview` (width 1280) serve the panel
-  and may be overridden per app
+- built-ins (overridable per app by redefining the name): `thumb` (width
+  400) and `preview` (width 1280) for the panel; `block-sm` (width 480),
+  `block` (width 960), `block-lg` (width 1440), `block-thumb` (crop
+  400x267) for block rendering
 - the whole config is validated on first use in every environment; an
   invalid entry or unknown size name fails loudly
 - template API: `$image->size('card')` (also `Image` values in loops);
   SVGs and other non-resizable assets keep their original URL
+
+Block image rendering:
+
+- `image` blocks emit a `srcset` ladder of width-mode named sizes (default
+  `block-sm`/`block`/`block-lg`) plus a `sizes` attribute computed from
+  the block's colspan share; `images` blocks emit one `block-thumb`
+  rendition per item; generation is lazy via the cache fallback route
+- `Blocks::render()` args: `imageSizes` (ladder names; a single entry
+  emits a plain `src` and may use any mode, multiple entries must use the
+  `width` mode), `sizes` (attribute template, `{pct}` = grid share in
+  percent, default `(min-width: 48rem) {pct}vw, 100vw`), `thumbSize`
+- an asset uid without a catalog row renders nothing (no grid cell);
+  non-resizable assets keep their original URL as plain `src`
 
 10) Key configuration settings (defaults)
 

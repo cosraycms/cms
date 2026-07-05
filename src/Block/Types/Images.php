@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Cosray\Block\Types;
 
-use Cosray\Assets\ResizeMode;
-use Cosray\Assets\Size;
 use Cosray\Block\RenderContext;
 use Cosray\Block\Type;
 use Cosray\Field\Control;
 use Cosray\Value\Block;
-use Gumlet\ImageResize;
+
+use function Cosray\escape;
 
 final class Images extends Type
 {
+	private const string THUMB = 'block-thumb';
+
 	public function id(): string
 	{
 		return 'images';
@@ -42,22 +43,25 @@ final class Images extends Type
 
 	public function render(Block $block, RenderContext $ctx): string
 	{
+		$name = (string) ($ctx->args['thumbSize'] ?? self::THUMB);
+		// Validate the name up front — a typo should fail the render,
+		// not silently emit URLs the fallback route will 404.
+		$ctx->owner->config()->media->sizes->get($name);
 		$result = '';
 
 		foreach ($block->data['value'] ?? [] as $f) {
 			$asset = $ctx->asset((string) ($f['uid'] ?? ''));
-			$title = $this->mediaText($ctx, $f, 'title') ?: $this->mediaText($ctx, $f, 'alt');
-			$image = $ctx->assets()->image($asset->key ?? '');
-			$resized = $image->resize(
-				new Size(400, 267, cropMode: ImageResize::CROPCENTER),
-				ResizeMode::Crop,
-				enlarge: false,
-				quality: null,
-			);
-			$url = $resized->url();
-			$path = $asset?->path() ?? '';
 
-			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$title}\" data-path-original=\"{$path}\"></div>";
+			if ($asset === null) {
+				continue;
+			}
+
+			$title = $this->mediaText($ctx, $f, 'title') ?: $this->mediaText($ctx, $f, 'alt');
+			$alt = escape($title);
+			$path = escape($asset->path());
+			$url = $asset->resizable() ? escape($asset->sizePath($name)) : $path;
+
+			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"></div>";
 		}
 
 		if ($result) {

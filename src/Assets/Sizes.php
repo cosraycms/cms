@@ -17,10 +17,14 @@ use Gumlet\ImageResize;
  */
 final class Sizes
 {
-	/** Panel defaults; apps may override them by name. */
+	/** Panel and block defaults; apps may override them by name. */
 	private const array BUILTIN = [
 		'thumb' => ['width' => 400],
 		'preview' => ['width' => 1280],
+		'block-sm' => ['width' => 480],
+		'block' => ['width' => 960],
+		'block-lg' => ['width' => 1440],
+		'block-thumb' => ['crop' => [400, 267]],
 	];
 
 	private const array SINGLE = [

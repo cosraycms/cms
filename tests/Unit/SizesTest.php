@@ -68,6 +68,14 @@ final class SizesTest extends TestCase
 		$this->assertTrue($sizes->has('thumb'));
 		$this->assertTrue($sizes->has('preview'));
 		$this->assertSame(400, $sizes->get('thumb')->first);
+		$this->assertSame(480, $sizes->get('block-sm')->first);
+		$this->assertSame(960, $sizes->get('block')->first);
+		$this->assertSame(1440, $sizes->get('block-lg')->first);
+		$this->assertSame(ResizeMode::Crop, $sizes->get('block-thumb')->mode);
+		$this->assertSame(
+			[400, 267],
+			[$sizes->get('block-thumb')->first, $sizes->get('block-thumb')->second],
+		);
 
 		$custom = new Sizes(['thumb' => ['crop' => [50, 50]]]);
 		$this->assertSame(ResizeMode::Crop, $custom->get('thumb')->mode);

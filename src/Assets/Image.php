@@ -4,30 +4,27 @@ declare(strict_types=1);
 
 namespace Cosray\Assets;
 
-use Celemas\Core\Request;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
 use Gumlet\ImageResize;
 use Gumlet\ImageResizeException;
 
+/**
+ * Materializes renditions for the cache fallback route. Everything else
+ * only builds URLs (`Asset::path()`/`sizePath()`); this is the single
+ * place that touches the resize pipeline.
+ */
 class Image
 {
 	public readonly string $relativeFile;
 	public readonly string $file;
 	protected ?string $cacheFile = null;
-	protected bool $isAnimated = false;
 
 	public function __construct(
-		protected readonly Request $request,
 		protected readonly Assets $assets,
 		string $file,
 	) {
-		try {
-			$this->file = Path::inside($assets->assetsDir, $file, checkIsFile: true);
-		} catch (RuntimeException) {
-			$this->file = Path::inside($assets->assetsDir, 'not-found.jpg', checkIsFile: true);
-		}
-
+		$this->file = Path::inside($assets->assetsDir, $file, checkIsFile: true);
 		$this->isResizable();
 		$this->relativeFile = substr($this->file, strlen($assets->assetsDir));
 	}
@@ -35,27 +32,6 @@ class Image
 	public function path(): string
 	{
 		return $this->cacheFile ?: $this->file;
-	}
-
-	public function publicPath(bool $bust = false): string
-	{
-		$path = implode('/', array_map('rawurlencode', explode('/', str_replace(
-			'\\',
-			'/',
-			$this->path(),
-		))));
-
-		if ($bust) {
-			$buster = hash('xxh32', (string) filemtime($this->file));
-			$path .= '?v=' . $buster;
-		}
-
-		return substr($path, strlen($this->assets->publicDir));
-	}
-
-	public function url(bool $bust = false): string
-	{
-		return $this->request->origin() . $this->publicPath($bust);
 	}
 
 	public function isResizable(): bool
@@ -70,33 +46,27 @@ class Image
 	}
 
 	/**
-	 * Materialize a rendition next to its native URL. With a $name the
-	 * cache file carries the configured size name; otherwise the suffix
-	 * encodes the resize parameters (eager block rendering).
+	 * Materialize the rendition carrying the given size name next to its
+	 * native URL.
 	 */
 	public function resize(
 		Size $size,
 		ResizeMode $mode,
 		bool $enlarge,
 		?int $quality,
-		?string $name = null,
+		string $name,
 	): static {
 		if (!$this->isResizable()) {
 			return $this;
 		}
 
-		$this->cacheFile = $this->getCacheFilePath($size, $mode, $enlarge, $name);
+		$this->cacheFile = $this->getCacheFilePath($name);
 
 		if (!is_file($this->cacheFile) || filemtime($this->file) > filemtime($this->cacheFile)) {
 			$this->createCacheFile($size, $mode, $enlarge, $quality);
 		}
 
 		return $this;
-	}
-
-	public function delete(): bool
-	{
-		return unlink($this->file);
 	}
 
 	public function get(): ImageResize
@@ -139,12 +109,6 @@ class Image
 				ResizeMode::Height => $this->get()->resizeToHeight($size->firstDimension, $enlarge),
 				ResizeMode::LongSide => $this->get()->resizeToLongSide($size->firstDimension, $enlarge),
 				ResizeMode::ShortSide => $this->get()->resizeToShortSide($size->firstDimension, $enlarge),
-				ResizeMode::FreeCrop => $this->get()->freecrop(
-					$size->firstDimension,
-					$size->secondDimension,
-					x: $size->cropMode['x'],
-					y: $size->cropMode['y'],
-				),
 				ResizeMode::Resize => $this->get()->resize(
 					$size->firstDimension,
 					$size->secondDimension,
@@ -162,12 +126,8 @@ class Image
 		}
 	}
 
-	protected function getCacheFilePath(
-		Size $size,
-		ResizeMode $mode,
-		bool $enlarge,
-		?string $name = null,
-	): string {
+	protected function getCacheFilePath(string $name): string
+	{
 		$info = pathinfo($this->relativeFile);
 		$relativeDir = $info['dirname'] ?? null;
 		// pathinfo does not handle multiple dots like .tar.gz well
@@ -186,42 +146,6 @@ class Image
 			}
 		}
 
-		$suffix = '-' . ($name ?? $this->paramsToken($size, $mode, $enlarge));
-
-		$cacheFile = $cacheDir . '/' . $filenameBasename . $suffix;
-
-		// Add extension
-		return $cacheFile . '.' . $filenameExtension;
-	}
-
-	protected function paramsToken(Size $size, ResizeMode $mode, bool $enlarge): string
-	{
-		$token = match ($mode) {
-			ResizeMode::Width => 'w' . $size->firstDimension,
-			ResizeMode::Fit => $size->firstDimension . 'x' . $size->secondDimension . '-fit',
-			ResizeMode::Crop => $size->firstDimension
-				. 'x'
-				. $size->secondDimension
-				. '-crop'
-				. $size->cropMode,
-			ResizeMode::FreeCrop => $size->firstDimension
-				. 'x'
-				. $size->secondDimension
-				. '-crop-x'
-				. $size->cropMode['x']
-				. 'y'
-				. $size->cropMode['y'],
-			ResizeMode::Height => 'h' . $size->firstDimension,
-			ResizeMode::LongSide => 'l' . $size->firstDimension,
-			ResizeMode::ShortSide => 's' . $size->firstDimension,
-			ResizeMode::Resize => $size->firstDimension . 'x' . $size->secondDimension . '-resize',
-			default => throw new RuntimeException('Assets error: resize mode not supported'),
-		};
-
-		if ($enlarge) {
-			$token .= '-enl';
-		}
-
-		return $token;
+		return $cacheDir . '/' . $filenameBasename . '-' . $name . '.' . $filenameExtension;
 	}
 }

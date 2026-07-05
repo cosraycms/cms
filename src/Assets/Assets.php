@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Assets;
 
-use Celemas\Core\Request;
 use Cosray\Config;
 use Cosray\Util\Path;
 
@@ -15,7 +14,6 @@ class Assets
 	public readonly string $cacheDir;
 
 	public function __construct(
-		protected readonly Request $request,
 		protected readonly Config $config,
 	) {
 		$this->publicDir = rtrim(realpath($config->path->public), '\\/');
@@ -26,6 +24,6 @@ class Assets
 
 	public function image(string $path): Image
 	{
-		return new Image($this->request, $this, $path);
+		return new Image($this, $path);
 	}
 }

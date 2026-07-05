@@ -37,15 +37,6 @@ final class SizeTest extends TestCase
 		$this->assertSame(1, $size->cropMode);
 	}
 
-	public function testSizeWithArrayCropMode(): void
-	{
-		$size = new Size(800, 600, ['x' => 100, 'y' => 100]);
-
-		$this->assertSame(800, $size->firstDimension);
-		$this->assertSame(600, $size->secondDimension);
-		$this->assertSame(['x' => 100, 'y' => 100], $size->cropMode);
-	}
-
 	public function testSizeThrowsOnZeroFirstDimension(): void
 	{
 		$this->throws(RuntimeException::class, 'Assets error: width must be >= 1');

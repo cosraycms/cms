@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets\Assets;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field\Field;
 use Cosray\Field\Field as FieldBase;
@@ -14,7 +13,6 @@ use Cosray\Locale;
 abstract class Value
 {
 	public readonly string $fieldType;
-	private ?Assets $assets = null;
 	protected readonly Locale $locale;
 	protected readonly Locale $defaultLocale;
 	protected readonly string $fieldName;
@@ -126,10 +124,5 @@ abstract class Value
 	protected function filled(mixed $value): bool
 	{
 		return $value !== null && $value !== '' && $value !== [];
-	}
-
-	protected function getAssets(): Assets
-	{
-		return $this->assets ??= new Assets($this->owner->request(), $this->owner->config());
 	}
 }
