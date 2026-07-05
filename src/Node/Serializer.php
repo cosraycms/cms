@@ -17,6 +17,7 @@ class Serializer
 		private readonly Types $types,
 		private readonly Uid $uid,
 		private readonly ?Repository $assets = null,
+		private readonly ?UrlPaths $paths = null,
 	) {}
 
 	public function content(object $node, array $rawData, array $fieldNames): array
@@ -132,7 +133,34 @@ class Serializer
 			'uid' => $rawData['uid'],
 			'fields' => $this->fields($node, $fieldNames),
 			'assets' => $this->assetMap($rawData['content'] ?? null),
+			'paths' => $this->pathMap($rawData['content'] ?? null),
 		], $data);
+	}
+
+	/**
+	 * Locale-to-path maps for every node uid the content references
+	 * (richtext `link.node`); consumers resolve internal links through
+	 * this map, mirroring the assets map.
+	 *
+	 * @return array<string, array<string, string>>
+	 */
+	public function pathMap(mixed $content): array
+	{
+		if ($this->paths === null || !is_array($content)) {
+			return [];
+		}
+
+		$map = [];
+
+		foreach (Scanner::scanContent($content)['nodes'] as $uid) {
+			$paths = $this->paths->map($uid);
+
+			if ($paths !== []) {
+				$map[$uid] = $paths;
+			}
+		}
+
+		return $map;
 	}
 
 	/**

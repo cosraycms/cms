@@ -23,9 +23,13 @@ use Cosray\Richtext\Normalizer;
  * install && pnpm run build` in panel/ first). Internal links resolve
  * to `link.node` via url_paths, uid-form asset URLs to `link.asset` /
  * inline `image` nodes via the catalog layout. A report lands in
- * `richtext-migration-report.json` at the project root: undeclared
- * paragraph classes and text styles (add them to `richtext.classes` /
- * `richtext.styles`), unresolved internal links, dropped images.
+ * `richtext-migration-report.json` at the project root.
+ *
+ * Undeclared paragraph classes reset to `default` and undeclared text
+ * styles lose their mark (the text stays), so migrated content always
+ * passes the writer-strict save — declare the classes and styles an
+ * app wants to KEEP in `richtext.classes` / `richtext.styles` BEFORE
+ * running this migration; the report counts what was dropped.
  */
 final class Migration implements Contract\Migration
 {
@@ -66,6 +70,9 @@ final class Migration implements Contract\Migration
 	];
 
 	private string $assetsBase = '/assets';
+
+	/** @var null|array<string, string> Legacy asset path to uid. */
+	private ?array $legacyMap = null;
 
 	public function __construct(
 		private readonly Config $config,
@@ -258,7 +265,12 @@ final class Migration implements Contract\Migration
 				&& $class !== 'default'
 				&& !isset($this->config->richtext->classes[$class])
 			) {
+				// Undeclared classes (Word-paste junk like MsoNormal, or
+				// ladders the app chose not to keep) reset to default so
+				// migrated content always passes the writer-strict save.
+				// Declare wanted classes in richtext.classes BEFORE running.
 				$this->count('undeclaredClasses', $class);
+				$node['attrs']['class'] = 'default';
 			}
 		}
 
@@ -285,7 +297,12 @@ final class Migration implements Contract\Migration
 			}
 
 			if (is_string($class) && !isset($this->config->richtext->styles[$class])) {
+				// Undeclared text styles (Word-paste spans, dropped ladders)
+				// lose the mark, never the text. Declare wanted styles in
+				// richtext.styles BEFORE running.
 				$this->count('undeclaredStyles', $class);
+
+				return null;
 			}
 
 			return $mark;
@@ -312,10 +329,13 @@ final class Migration implements Contract\Migration
 		}
 
 		$path = rawurldecode((string) (parse_url($href, PHP_URL_PATH) ?? ''));
+		// Legacy content links pages with trailing slashes; url_paths
+		// stores them without.
+		$node = $this->pathMap[$path] ?? $this->pathMap[rtrim($path, '/')] ?? null;
 
-		if (isset($this->pathMap[$path])) {
+		if ($node !== null) {
 			unset($mark['attrs']['href']);
-			$mark['attrs']['node'] = $this->pathMap[$path];
+			$mark['attrs']['node'] = $node;
 			$this->report['nodeLinks']++;
 
 			return $mark;
@@ -359,7 +379,11 @@ final class Migration implements Contract\Migration
 		}, $html) ?? $html;
 	}
 
-	/** Extract the asset uid from a uid-form URL below the assets base. */
+	/**
+	 * Extract the asset uid from a uid-form URL below the assets base;
+	 * pre-catalog owner-scoped URLs resolve through the legacy map the
+	 * catalog migration dumped (asset-legacy-map.json).
+	 */
 	private function assetUidFromUrl(string $url): ?string
 	{
 		$path = rawurldecode((string) (parse_url($url, PHP_URL_PATH) ?? ''));
@@ -368,15 +392,26 @@ final class Migration implements Contract\Migration
 			return null;
 		}
 
-		$parts = explode('/', substr($path, strlen($this->assetsBase) + 1));
+		$key = substr($path, strlen($this->assetsBase) + 1);
+		$parts = explode('/', $key);
 
-		if (count($parts) !== 3) {
-			return null;
+		if (count($parts) === 3 && $parts[1] !== '' && str_starts_with($parts[1], $parts[0])) {
+			return $parts[1];
 		}
 
-		[$shard, $uid] = $parts;
+		return $this->legacyMap()[$key] ?? null;
+	}
 
-		return $uid !== '' && str_starts_with($uid, $shard) ? $uid : null;
+	/** @return array<string, string> */
+	private function legacyMap(): array
+	{
+		if ($this->legacyMap === null) {
+			$file = $this->config->get('path.root') . '/asset-legacy-map.json';
+			$map = is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+			$this->legacyMap = is_array($map) ? $map : [];
+		}
+
+		return $this->legacyMap;
 	}
 
 	/** @return array<string, null|array> */

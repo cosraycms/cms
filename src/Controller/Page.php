@@ -115,7 +115,12 @@ class Page
 			$data = $inner->read();
 		} else {
 			$nodeFactory = $cms->nodeFactory();
-			$serializer = new Serializer($this->types, $nodeFactory->uid(), $context->assets());
+			$serializer = new Serializer(
+				$this->types,
+				$nodeFactory->uid(),
+				$context->assets(),
+				$context->paths(),
+			);
 			$data = $serializer->read(
 				$inner,
 				NodeFactory::dataFor($inner),
