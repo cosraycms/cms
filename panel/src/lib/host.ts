@@ -5,9 +5,20 @@ import { loadElement } from '$lib/elements';
 type HostPayload = {
 	value?: unknown;
 	meta?: unknown;
+	// Format envelope of structured richtext values; mirrored into the
+	// form value so writer-strict saves see it even before any edit.
+	format?: string | null;
+	version?: number | null;
 	field?: Record<string, unknown>;
 	locales?: { default: string; all: { id: string; title: string }[] };
 	assets?: AssetMap;
+};
+
+type ChangeDetail = {
+	value?: unknown;
+	meta?: unknown;
+	format?: string;
+	version?: number;
 };
 
 type ContractElement = HTMLElement & Record<string, unknown>;
@@ -39,7 +50,7 @@ export class CosrayHost extends HTMLElement {
 		this.#payload = this.#readPayload();
 		this.#setFormValue();
 		this.addEventListener('cosray-change', (event) => {
-			this.#apply((event as CustomEvent<{ value?: unknown; meta?: unknown }>).detail);
+			this.#apply((event as CustomEvent<ChangeDetail>).detail);
 		});
 		void this.#mount();
 	}
@@ -92,6 +103,10 @@ export class CosrayHost extends HTMLElement {
 			element.meta = this.#payload.meta;
 		}
 
+		if (this.#payload.format != null) {
+			element.format = this.#payload.format;
+		}
+
 		element.field = this.#payload.field;
 		element.node = this.getAttribute('node') ?? '';
 		element.locale = this.#locale;
@@ -102,7 +117,7 @@ export class CosrayHost extends HTMLElement {
 		this.append(element);
 	}
 
-	#apply(detail: { value?: unknown; meta?: unknown } | null): void {
+	#apply(detail: ChangeDetail | null): void {
 		if (!detail) {
 			return;
 		}
@@ -113,14 +128,32 @@ export class CosrayHost extends HTMLElement {
 			this.#payload.meta = detail.meta;
 		}
 
+		if (detail.format !== undefined) {
+			this.#payload.format = detail.format;
+		}
+
+		if (detail.version !== undefined) {
+			this.#payload.version = detail.version;
+		}
+
 		this.#setFormValue();
 	}
 
 	#setFormValue(): void {
-		const value: { value: unknown; meta?: unknown } = { value: this.#payload.value };
+		const value: { value: unknown; meta?: unknown; format?: string; version?: number } = {
+			value: this.#payload.value,
+		};
 
 		if (this.#payload.meta != null) {
 			value.meta = this.#payload.meta;
+		}
+
+		if (this.#payload.format != null) {
+			value.format = this.#payload.format;
+		}
+
+		if (this.#payload.version != null) {
+			value.version = this.#payload.version;
 		}
 
 		this.#internals.setFormValue(JSON.stringify(value));

@@ -26,6 +26,9 @@ $uids = \Cosray\Assets\Repository::collectUids($data);
 $payload = [
 	'value' => $data['value'] ?? null,
 	'meta' => $data['meta'] ?? null,
+	// Structured richtext carries its format envelope next to value.
+	'format' => $data['format'] ?? null,
+	'version' => $data['version'] ?? null,
 	'field' => $field,
 	'locales' => [
 		'default' => $defaultLocale,

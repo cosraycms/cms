@@ -3,10 +3,14 @@
 
 	import { mount, onDestroy, onMount, unmount } from 'svelte';
 
+	import type { AssetInfo } from '$types/data';
+
 	import { cosray } from '$lib/bridge';
 	import { _ } from '$lib/locale';
+	import ModalImage from '$shell/modals/ModalImage.svelte';
 	import ModalLink from '$shell/modals/ModalLink.svelte';
 	import createEditor, { type CmsEditor } from './editor';
+	import { type RichtextDoc } from './format';
 	import { schema } from './schema';
 	import {
 		isMarkActive,
@@ -35,8 +39,9 @@
 		unsetLink,
 		clearMarks,
 		clearNodes,
-		setFontSize,
-		unsetFontSize,
+		setStyle,
+		unsetStyle,
+		insertImage,
 	} from './commands';
 	import { undo, redo } from 'prosemirror-history';
 
@@ -62,6 +67,7 @@
 	import IcoUndo from '$shell/icons/IcoUndo.svelte';
 	import IcoRedo from '$shell/icons/IcoRedo.svelte';
 	import IcoCode from '$shell/icons/IcoCode.svelte';
+	import IcoImage from '$shell/icons/IcoImage.svelte';
 	import IcoLink from '$shell/icons/IcoLink.svelte';
 	import IcoUnlink from '$shell/icons/IcoUnlink.svelte';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
@@ -70,13 +76,21 @@
 	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
 
 	type Props = {
-		value: string;
+		value: RichtextDoc | null;
 		name: string;
 		editSource?: boolean;
 		required?: boolean;
 		toolbar?: 'default' | 'inline';
 		embed?: boolean;
 		notify?: () => void;
+		/** Declared paragraph classes (`richtext.classes`). */
+		classes?: Record<string, string>;
+		/** Declared text styles (`richtext.styles`). */
+		styles?: Record<string, string>;
+		/** Resolve an asset uid to a display URL for inline images. */
+		assetUrl?: (uid: string) => string | null;
+		/** Register an asset picked from the library or uploaded. */
+		onAsset?: (uid: string, info: AssetInfo) => void;
 	};
 
 	let {
@@ -87,6 +101,10 @@
 		toolbar = 'default',
 		embed = false,
 		notify = () => {},
+		classes = {},
+		styles = {},
+		assetUrl = () => null,
+		onAsset = () => {},
 	}: Props = $props();
 	let ref = $state<HTMLElement>();
 	let bubble = $state<HTMLElement>();
@@ -108,25 +126,18 @@
 		superscript: false,
 		blockquote: false,
 		link: false,
-		fontSize: null as string | null,
+		styleClass: null as string | null,
 	});
 	let showSource = $state(false);
+	let sourceHtml = $state('');
 	let showDropdown = $state(false);
-	let showFontSizeDropdown = $state(false);
+	let showStyleDropdown = $state(false);
 	let showCompactToolsDropdown = $state(false);
 
-	const fontSizeOptions = [
-		{ size: 'xs', label: 'XS', paragraphLabel: 'Absatz XS' },
-		{ size: 'sm', label: 'S', paragraphLabel: 'Absatz S' },
-		{ size: 'lg', label: 'L', paragraphLabel: 'Absatz L' },
-		{ size: 'xl', label: 'XL', paragraphLabel: 'Absatz XL' },
-		{ size: '2xl', label: '2XL', paragraphLabel: 'Absatz 2XL' },
-		{ size: '3xl', label: '3XL', paragraphLabel: 'Absatz 3XL' },
-	] as const;
-
-	function getTextSizeClass(size: string): string {
-		return `cms-text-${size}`;
-	}
+	// Config-declared options: both lists are empty unless the app
+	// declares entries — no built-in styling escape hatches.
+	let classOptions = $derived(Object.entries(classes));
+	let styleOptions = $derived(Object.entries(styles));
 
 	function updateEditorState(state: EditorState) {
 		editorState.bold = isMarkActive(state, schema.marks.bold);
@@ -147,8 +158,8 @@
 		editorState.superscript = isMarkActive(state, schema.marks.superscript);
 		editorState.blockquote = isNodeActive(state, schema.nodes.blockquote);
 		editorState.link = isMarkActive(state, schema.marks.link);
-		const fontSizeAttrs = getMarkAttributes(state, schema.marks.fontSize);
-		editorState.fontSize = fontSizeAttrs?.size ?? null;
+		const styleAttrs = getMarkAttributes(state, schema.marks.style);
+		editorState.styleClass = styleAttrs?.class ?? null;
 	}
 
 	onMount(() => {
@@ -159,10 +170,11 @@
 			content: value,
 			mode: toolbar,
 			bubbleElement: bubble,
+			assetUrl,
 			// The bind write must land before notify: the element serializes
 			// the bound map into the cosray-change detail when notified.
-			onUpdate: (html) => {
-				value = html;
+			onUpdate: (doc) => {
+				value = doc;
 				notify();
 			},
 			onStateChange: updateEditorState,
@@ -176,15 +188,15 @@
 	function changeSource(event: KeyboardEvent) {
 		const target = event.target as HTMLTextAreaElement;
 
+		// setContent dispatches a changed transaction, which routes the
+		// parsed document back through onUpdate.
 		editor?.setContent(target.value);
-		value = target.value;
-		notify();
 	}
 
 	function run(command: (state: any, dispatch?: any, view?: any) => boolean) {
 		return () => {
 			showDropdown = false;
-			showFontSizeDropdown = false;
+			showStyleDropdown = false;
 			showCompactToolsDropdown = false;
 			editor?.run(command);
 		};
@@ -194,24 +206,28 @@
 		return () => {
 			editor?.run(command);
 			showDropdown = !showDropdown;
-			showFontSizeDropdown = false;
+			showStyleDropdown = false;
 			showCompactToolsDropdown = false;
 		};
 	}
 
-	function runFontSizeDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
+	function runStyleDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
 		return () => {
 			editor?.run(command);
-			showFontSizeDropdown = false;
+			showStyleDropdown = false;
 			showDropdown = false;
 			showCompactToolsDropdown = false;
 		};
 	}
 
 	function toggleSource() {
+		if (!showSource) {
+			sourceHtml = editor?.getHTML() ?? '';
+		}
+
 		showSource = !showSource;
 		showDropdown = false;
-		showFontSizeDropdown = false;
+		showStyleDropdown = false;
 		showCompactToolsDropdown = false;
 	}
 
@@ -247,6 +263,29 @@
 					close: () => handle.close(),
 					value: href,
 					blank: target === '_blank',
+				},
+			});
+
+			return () => void unmount(app);
+		});
+	}
+
+	function addImage(uid: string, info: AssetInfo) {
+		if (!editor) return;
+		onAsset(uid, info);
+		editor.run(insertImage(uid));
+	}
+
+	function openAddImageModal() {
+		showCompactToolsDropdown = false;
+		if (!editor) return;
+
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalImage, {
+				target: host,
+				props: {
+					add: addImage,
+					close: () => handle.close(),
 				},
 			});
 
@@ -316,7 +355,7 @@
 								aria-haspopup="true"
 								onclick={() => {
 									showDropdown = !showDropdown;
-									showFontSizeDropdown = false;
+									showStyleDropdown = false;
 									showCompactToolsDropdown = false;
 								}}
 							>
@@ -393,17 +432,17 @@
 											{_('Absatz')}
 										</span>
 									</button>
-									{#each fontSizeOptions as option (option.size)}
+									{#each classOptions as [cls, label] (cls)}
 										<button
-											onclick={runDropdown(setParagraphClass(getTextSizeClass(option.size)))}
+											onclick={runDropdown(setParagraphClass(cls))}
 											role="menuitem"
 											tabindex="-1"
 											class="richtext-dropdown-item"
-											class:active={editorState.paragraphClass === getTextSizeClass(option.size)}
+											class:active={editorState.paragraphClass === cls}
 										>
 											<IcoTextHeight />
 											<span class="cms-richtext-dropdown-item-label">
-												{_(option.paragraphLabel)}
+												{label}
 											</span>
 										</button>
 									{/each}
@@ -422,72 +461,74 @@
 							</div>
 						{/if}
 					</div>
-					<div class="cms-richtext-dropdown-wrap">
-						<div class="richtext-dropdown">
-							<button
-								type="button"
-								class="richtext-dropdown-button"
-								aria-expanded={showFontSizeDropdown}
-								aria-haspopup="true"
-								onclick={() => {
-									showFontSizeDropdown = !showFontSizeDropdown;
-									showDropdown = false;
-									showCompactToolsDropdown = false;
-								}}
-							>
-								<IcoFontSize />
-								<svg
-									class="cms-richtext-dropdown-icon"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-									aria-hidden="true"
+					{#if styleOptions.length > 0}
+						<div class="cms-richtext-dropdown-wrap">
+							<div class="richtext-dropdown">
+								<button
+									type="button"
+									class="richtext-dropdown-button"
+									aria-expanded={showStyleDropdown}
+									aria-haspopup="true"
+									onclick={() => {
+										showStyleDropdown = !showStyleDropdown;
+										showDropdown = false;
+										showCompactToolsDropdown = false;
+									}}
 								>
-									<path
-										fill-rule="evenodd"
-										d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-										clip-rule="evenodd"
-									/>
-								</svg>
-							</button>
-						</div>
-						{#if showFontSizeDropdown}
-							<div
-								class="richtext-dropdown-menu"
-								role="menu"
-								aria-orientation="vertical"
-								aria-labelledby="font-size-menu-button"
-								tabindex="-1"
-							>
-								<div class="cms-richtext-dropdown-items" role="none">
-									{#each fontSizeOptions as option (option.size)}
+									<IcoFontSize />
+									<svg
+										class="cms-richtext-dropdown-icon"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+											clip-rule="evenodd"
+										/>
+									</svg>
+								</button>
+							</div>
+							{#if showStyleDropdown}
+								<div
+									class="richtext-dropdown-menu"
+									role="menu"
+									aria-orientation="vertical"
+									aria-labelledby="style-menu-button"
+									tabindex="-1"
+								>
+									<div class="cms-richtext-dropdown-items" role="none">
+										{#each styleOptions as [cls, label] (cls)}
+											<button
+												onclick={runStyleDropdown(setStyle(cls))}
+												role="menuitem"
+												tabindex="-1"
+												class="richtext-dropdown-item"
+												class:active={editorState.styleClass === cls}
+											>
+												<span class="cms-richtext-dropdown-item-label">
+													{label}
+												</span>
+											</button>
+										{/each}
 										<button
-											onclick={runFontSizeDropdown(setFontSize(option.size))}
+											onclick={runStyleDropdown(unsetStyle())}
 											role="menuitem"
 											tabindex="-1"
 											class="richtext-dropdown-item"
-											class:active={editorState.fontSize === option.size}
 										>
+											<IcoRemoveFormat />
 											<span class="cms-richtext-dropdown-item-label">
-												{_(option.label)}
+												{_('Stil entfernen')}
 											</span>
 										</button>
-									{/each}
-									<button
-										onclick={runFontSizeDropdown(unsetFontSize())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoRemoveFormat />
-										<span class="cms-richtext-dropdown-item-label">
-											{_('Größe entfernen')}
-										</span>
-									</button>
+									</div>
 								</div>
-							</div>
-						{/if}
-					</div>
+							{/if}
+						</div>
+					{/if}
 					<div class="cms-richtext-dropdown-wrap cms-richtext-toolbar-compact-actions">
 						<div class="richtext-dropdown">
 							<button
@@ -501,7 +542,7 @@
 								onclick={() => {
 									showCompactToolsDropdown = !showCompactToolsDropdown;
 									showDropdown = false;
-									showFontSizeDropdown = false;
+									showStyleDropdown = false;
 								}}
 							>
 								<IcoThreeDots />
@@ -681,6 +722,17 @@
 											{_('Add link to page')}
 										</span>
 									</button>
+									<button
+										onclick={openAddImageModal}
+										role="menuitem"
+										tabindex="-1"
+										class="richtext-dropdown-item"
+									>
+										<IcoImage />
+										<span class="cms-richtext-dropdown-item-label">
+											{_('Bild einfügen')}
+										</span>
+									</button>
 									{#if editorState.link}
 										<button
 											onclick={run(unsetLink())}
@@ -843,6 +895,13 @@
 						{/if}
 						<button
 							class="richtext-toolbar-btn"
+							title={_('Bild einfügen')}
+							onclick={openAddImageModal}
+						>
+							<IcoImage />
+						</button>
+						<button
+							class="richtext-toolbar-btn"
 							title={_('Add a hard line break')}
 							onclick={run(insertHardBreak())}
 						>
@@ -887,7 +946,12 @@
 		class:hide={showSource}
 	></div>
 	<div class="richtext-source cms-richtext-source cms-richtext-layer-base" class:hide={!showSource}>
-		<textarea onkeyup={changeSource} {name} bind:value class="cms-richtext-source-input">
+		<textarea
+			onkeyup={changeSource}
+			{name}
+			bind:value={sourceHtml}
+			class="cms-richtext-source-input"
+		>
 		</textarea>
 	</div>
 </div>

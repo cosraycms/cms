@@ -71,6 +71,37 @@ final class BlockTypesTest extends TestCase
 		$this->assertSame('fallback', Registry::withDefaults()->get('text')->render($block, $ctx));
 	}
 
+	public function testRichtextBlockRendersStructuredDocuments(): void
+	{
+		$ctx = $this->context();
+		$block = new Block('richtext', [
+			'format' => 'cosray-richtext',
+			'version' => 1,
+			'value' => [
+				'de' => [
+					'type' => 'doc',
+					'content' => [
+						[
+							'type' => 'paragraph',
+							'content' => [
+								['type' => 'text', 'text' => 'fett', 'marks' => [['type' => 'bold']]],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertSame(
+			'<p><strong>fett</strong></p>',
+			Registry::withDefaults()->get('richtext')->render($block, $ctx),
+		);
+
+		$legacy = new Block('richtext', ['value' => ['zxx' => '<p>alt</p>']]);
+
+		$this->assertSame('<p>alt</p>', Registry::withDefaults()->get('richtext')->render($legacy, $ctx));
+	}
+
 	public function testBlocksFieldPropertiesExposeBlockTypes(): void
 	{
 		$field = $this->blocksField();
@@ -78,7 +109,9 @@ final class BlockTypesTest extends TestCase
 
 		$this->assertSame('Formatierter Text', $types['richtext']['label']);
 		$this->assertSame('block-richtext', $types['richtext']['control']['name']);
-		$this->assertSame(['zxx' => ''], $types['richtext']['init']['value']);
+		$this->assertSame(['zxx' => null], $types['richtext']['init']['value']);
+		$this->assertSame('cosray-richtext', $types['richtext']['init']['format']);
+		$this->assertSame(1, $types['richtext']['init']['version']);
 		$this->assertTrue($types['h1']['hidden']);
 		$this->assertSame(['zxx' => 16], $types['youtube']['init']['meta']['aspectRatioX']);
 		$this->assertSame([], $types['image']['init']['value']);
@@ -111,8 +144,9 @@ final class BlockTypesTest extends TestCase
 		$locales->add('en', title: 'English');
 		$locales->add('de', title: 'Deutsch', fallback: 'en');
 
-		return new class($locales) implements Owner {
+		return new class($this->config(), $locales) implements Owner {
 			public function __construct(
+				private readonly Config $config,
 				private readonly Locales $locales,
 			) {}
 
@@ -143,7 +177,7 @@ final class BlockTypesTest extends TestCase
 
 			public function config(): Config
 			{
-				throw new RuntimeException('Not available in this test');
+				return $this->config;
 			}
 
 			public function assets(): Repository

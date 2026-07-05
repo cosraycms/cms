@@ -8,10 +8,19 @@ import { gapCursor } from 'prosemirror-gapcursor';
 import { schema, parser, serializer } from './schema';
 import { buildKeymap, buildInputRules } from './keymap';
 import { bubbleMenu } from './bubble-menu';
+import { docToPm, pmToDoc, type RichtextDoc } from './format';
 
+/**
+ * The internal editor driver seam: components talk documents in the
+ * cosray richtext format plus the commands API — everything
+ * ProseMirror-specific stays behind this module (and schema/format/
+ * commands). A future editor swap replaces the driver, not the
+ * callers.
+ */
 export interface CmsEditor {
 	view: EditorView;
 	run(command: Command): void;
+	getDoc(): RichtextDoc;
 	getHTML(): string;
 	setContent(html: string): void;
 	destroy(): void;
@@ -19,11 +28,13 @@ export interface CmsEditor {
 
 export interface EditorOptions {
 	element: HTMLElement;
-	content: string;
-	onUpdate: (html: string) => void;
+	content: RichtextDoc | null;
+	onUpdate: (doc: RichtextDoc) => void;
 	onStateChange: (state: EditorState) => void;
 	mode: 'default' | 'inline';
 	bubbleElement?: HTMLElement;
+	/** Resolve an asset uid to a display URL for inline images. */
+	assetUrl?: (uid: string) => string | null;
 }
 
 function parseContent(html: string) {
@@ -40,7 +51,7 @@ function serializeContent(state: EditorState): string {
 }
 
 export default function createEditor(options: EditorOptions): CmsEditor {
-	const { element, content, onUpdate, onStateChange, mode, bubbleElement } = options;
+	const { element, content, onUpdate, onStateChange, mode, bubbleElement, assetUrl } = options;
 
 	const plugins: Plugin[] = [
 		buildInputRules(),
@@ -55,22 +66,37 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 		plugins.push(bubbleMenu(bubbleElement));
 	}
 
-	const doc = parseContent(content);
-
 	const state = EditorState.create({
-		doc,
+		doc: docToPm(content),
 		schema,
 		plugins,
 	});
 
 	const view = new EditorView(element, {
 		state,
+		nodeViews: {
+			image(node) {
+				const dom = document.createElement('img');
+				dom.className = 'cms-richtext-image';
+				dom.setAttribute('data-uid', node.attrs.uid);
+				const url = assetUrl?.(node.attrs.uid) ?? null;
+
+				if (url) {
+					dom.src = url;
+				} else {
+					dom.alt = `[${node.attrs.uid}]`;
+					dom.classList.add('cms-richtext-image-missing');
+				}
+
+				return { dom };
+			},
+		},
 		dispatchTransaction(tr) {
 			const newState = view.state.apply(tr);
 			view.updateState(newState);
 			onStateChange(newState);
 			if (tr.docChanged) {
-				onUpdate(serializeContent(newState));
+				onUpdate(pmToDoc(newState.doc));
 			}
 		},
 	});
@@ -83,6 +109,10 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 		run(command: Command) {
 			view.focus();
 			command(view.state, view.dispatch, view);
+		},
+
+		getDoc(): RichtextDoc {
+			return pmToDoc(view.state.doc);
 		},
 
 		getHTML(): string {

@@ -157,6 +157,30 @@ const nodes: Record<string, NodeSpec> = {
 		},
 	},
 
+	image: {
+		inline: true,
+		group: 'inline',
+		draggable: true,
+		attrs: {
+			uid: {},
+			meta: { default: null },
+		},
+		parseDOM: [
+			{
+				tag: 'img[data-uid]',
+				getAttrs(dom) {
+					const uid = (dom as HTMLElement).getAttribute('data-uid');
+					return uid ? { uid, meta: null } : false;
+				},
+			},
+		],
+		toDOM(node) {
+			// Display resolution happens in the image node view; this
+			// carrier form is what clipboard and parse round-trips see.
+			return ['img', { 'data-uid': node.attrs.uid }];
+		},
+	},
+
 	text: {
 		group: 'inline',
 	},
@@ -234,14 +258,39 @@ const marks: Record<string, MarkSpec> = {
 	},
 
 	link: {
+		// Exactly one of href/node/asset carries the target; `rel` is a
+		// render-time policy of the server renderer and never stored.
 		attrs: {
-			href: {},
+			href: { default: null },
+			node: { default: null },
+			asset: { default: null },
 			target: { default: null },
 			class: { default: null },
-			rel: { default: 'noopener noreferrer nofollow' },
 		},
 		inclusive: false,
 		parseDOM: [
+			{
+				tag: 'a[data-node]',
+				getAttrs(dom) {
+					const el = dom as HTMLElement;
+					return {
+						node: el.getAttribute('data-node'),
+						target: el.getAttribute('target') || null,
+						class: el.getAttribute('class') || null,
+					};
+				},
+			},
+			{
+				tag: 'a[data-asset]',
+				getAttrs(dom) {
+					const el = dom as HTMLElement;
+					return {
+						asset: el.getAttribute('data-asset'),
+						target: el.getAttribute('target') || null,
+						class: el.getAttribute('class') || null,
+					};
+				},
+			},
 			{
 				tag: 'a[href]',
 				getAttrs(dom) {
@@ -250,17 +299,24 @@ const marks: Record<string, MarkSpec> = {
 						href: el.getAttribute('href'),
 						target: el.getAttribute('target') || null,
 						class: el.getAttribute('class') || null,
-						rel: el.getAttribute('rel') || 'noopener noreferrer nofollow',
 					};
 				},
 			},
 		],
 		toDOM(mark) {
-			const { href, target, class: cls, rel } = mark.attrs;
-			const attrs: Record<string, string> = { href };
+			const { href, node, asset, target, class: cls } = mark.attrs;
+			const attrs: Record<string, string> = {};
+			if (node) {
+				attrs.href = '#';
+				attrs['data-node'] = node;
+			} else if (asset) {
+				attrs.href = '#';
+				attrs['data-asset'] = asset;
+			} else {
+				attrs.href = href ?? '#';
+			}
 			if (target) attrs.target = target;
 			if (cls) attrs.class = cls;
-			if (rel) attrs.rel = rel;
 			return ['a', attrs, 0];
 		},
 	},
@@ -281,24 +337,24 @@ const marks: Record<string, MarkSpec> = {
 		},
 	},
 
-	fontSize: {
+	// Named character styles ("Text styles"): the class list comes from
+	// the app's `richtext.styles` config; undeclared classes are
+	// rejected on save. Replaces the old fixed fontSize ladder.
+	style: {
 		attrs: {
-			size: { default: 'base' },
+			class: {},
 		},
 		parseDOM: [
 			{
 				tag: 'span[class]',
 				getAttrs(dom) {
-					const el = dom as HTMLElement;
-					const cls = el.getAttribute('class') || '';
-					const match = cls.match(/\bcms-text-(xs|sm|base|lg|xl|2xl|3xl)\b/);
-					if (!match) return false;
-					return { size: match[1] };
+					const cls = (dom as HTMLElement).getAttribute('class') || '';
+					return cls ? { class: cls } : false;
 				},
 			},
 		],
 		toDOM(mark) {
-			return ['span', { class: `cms-text-${mark.attrs.size}` }, 0];
+			return ['span', { class: mark.attrs.class }, 0];
 		},
 	},
 };

@@ -27,6 +27,16 @@ class RichText extends Text
 		return $this->getTranslatableStructure('richtext', $value);
 	}
 
+	public function properties(): array
+	{
+		$richtext = $this->owner->config()->richtext;
+
+		return array_merge(parent::properties(), [
+			'richtextClasses' => (object) $richtext->classes,
+			'richtextStyles' => (object) $richtext->styles,
+		]);
+	}
+
 	/**
 	 * Saves are writer-strict: the panel submits the structured
 	 * envelope (format, version, per-locale documents); legacy HTML

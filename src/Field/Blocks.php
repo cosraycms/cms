@@ -63,6 +63,10 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			),
 		));
 
+		$richtext = $this->owner->config()->richtext;
+		$result['richtextClasses'] = (object) $richtext->classes;
+		$result['richtextStyles'] = (object) $richtext->styles;
+
 		return $result;
 	}
 

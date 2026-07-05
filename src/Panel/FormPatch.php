@@ -64,6 +64,13 @@ final class FormPatch
 				$entry['meta'] = $decoded['meta'];
 			}
 
+			// Format envelope of structured richtext values.
+			foreach (['format', 'version'] as $key) {
+				if (isset($decoded[$key])) {
+					$entry[$key] = $decoded[$key];
+				}
+			}
+
 			return $entry;
 		}
 

@@ -35,6 +35,8 @@ export interface BlocksField extends SimpleField {
 	columns: number;
 	minCellWidth: number;
 	blockTypes: BlockTypeMeta[];
+	richtextClasses?: Record<string, string>;
+	richtextStyles?: Record<string, string>;
 }
 
 export interface EntryType {

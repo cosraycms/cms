@@ -70,10 +70,7 @@ export function setLink(attrs: Attrs): Command {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
 		if (!dispatch) return true;
-		const mark = schema.marks.link.create({
-			...attrs,
-			rel: attrs.rel || 'noopener noreferrer nofollow',
-		});
+		const mark = schema.marks.link.create(attrs);
 		const tr = state.tr.addMark(from, to, mark);
 		dispatch(tr.scrollIntoView());
 		return true;
@@ -182,23 +179,32 @@ export function toggleSuperscript(): Command {
 	return toggleMark(schema.marks.superscript);
 }
 
-export function setFontSize(size: string): Command {
+export function setStyle(cls: string): Command {
 	return (state, dispatch) => {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
 		if (!dispatch) return true;
-		const mark = schema.marks.fontSize.create({ size });
+		const mark = schema.marks.style.create({ class: cls });
 		dispatch(state.tr.addMark(from, to, mark).scrollIntoView());
 		return true;
 	};
 }
 
-export function unsetFontSize(): Command {
+export function unsetStyle(): Command {
 	return (state, dispatch) => {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
 		if (!dispatch) return true;
-		dispatch(state.tr.removeMark(from, to, schema.marks.fontSize).scrollIntoView());
+		dispatch(state.tr.removeMark(from, to, schema.marks.style).scrollIntoView());
+		return true;
+	};
+}
+
+export function insertImage(uid: string): Command {
+	return (state, dispatch) => {
+		if (!dispatch) return true;
+		const node = schema.nodes.image.create({ uid });
+		dispatch(state.tr.replaceSelectionWith(node).scrollIntoView());
 		return true;
 	};
 }

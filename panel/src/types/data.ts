@@ -4,6 +4,25 @@ export const ZXX = 'zxx';
 
 export type LocaleMap<T> = Record<string, T>;
 
+// The cosray richtext storage format (docs/richtext-format.md).
+export interface RichtextMark {
+	type: string;
+	attrs?: Record<string, unknown>;
+}
+
+export interface RichtextNode {
+	type: string;
+	attrs?: Record<string, unknown>;
+	text?: string;
+	marks?: RichtextMark[];
+	content?: RichtextNode[];
+}
+
+export interface RichtextDoc {
+	type: 'doc';
+	content: RichtextNode[];
+}
+
 export interface User {
 	uid: string;
 	email: string;
@@ -102,8 +121,15 @@ export interface BlockBase {
 }
 
 export interface BlockText extends BlockBase {
-	type: 'text' | 'richtext' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'iframe';
+	type: 'text' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'iframe';
 	value: LocaleMap<string>;
+}
+
+export interface BlockRichText extends BlockBase {
+	type: 'richtext';
+	format?: string;
+	version?: number;
+	value: LocaleMap<RichtextDoc | string | null>;
 }
 
 export interface BlockImage extends BlockBase {
@@ -126,11 +152,10 @@ export interface BlockCustom extends BlockBase {
 	meta?: Meta;
 }
 
-export type Block = BlockText | BlockImage | BlockYoutube | BlockCustom;
+export type Block = BlockText | BlockRichText | BlockImage | BlockYoutube | BlockCustom;
 export type BlockImages = BlockImage;
 export type BlockVideo = BlockImage;
 export type BlockIframe = BlockText;
-export type BlockRichText = BlockText;
 
 export interface LocalizedBlocksValue {
 	[key: string]: Block[];
