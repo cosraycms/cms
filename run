@@ -6,6 +6,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Celemas\Cli\Runner;
 use Cosray\Commands\RecreateDb;
+use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Config;
 use Cosray\MigrationFactory;
@@ -37,6 +38,10 @@ $conn = new Connection($dsn, __DIR__ . '/db/sql')
 $commands = QumaCommands::get($conn, migrationFactory: new MigrationFactory($container));
 $commands->add(new RecreateDb($database, $username, $password, $host));
 $commands->add(new References($conn));
+$commands->add(new RecreateSortIndex($conn));
+// `db:titles` (Cosray\Commands\Titles) needs the booted app (node type
+// registry + locales), so it is registered from an app's own commands.php
+// where a Context/Cms are available — the library runner has no app nodes.
 
 $runner = new Runner($commands);
 
