@@ -83,8 +83,10 @@ final class ReferencesTest extends IntegrationTestCase
 			$this->db()->assets->delete(['uid' => 'refint-locked'])->run();
 			$this->fail('Expected a foreign key violation');
 		} catch (PDOException $e) {
-			// Postgres reports ON DELETE RESTRICT as 23001.
-			$this->assertSame('23001', (string) $e->getCode());
+			// Depending on the Postgres version a RESTRICT block reports either
+			// restrict_violation (23001) or foreign_key_violation (23503); the
+			// delete guard accepts both, so the test does too.
+			$this->assertContains((string) $e->getCode(), ['23001', '23503']);
 		}
 	}
 
