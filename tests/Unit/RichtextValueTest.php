@@ -52,7 +52,6 @@ final class RichtextValueTest extends RichtextOwnerTestCase
 		]);
 
 		$this->assertSame('<p><strong>Bold </strong>&amp; plain</p>', (string) $value);
-		$this->assertSame('<p><strong>Bold </strong>&amp; plain</p>', $value->clean());
 		$this->assertNotNull($value->doc());
 		$this->assertTrue($value->isset());
 	}
@@ -71,15 +70,15 @@ final class RichtextValueTest extends RichtextOwnerTestCase
 		$this->assertFalse($value->isset());
 	}
 
-	public function testLegacyHtmlStaysSanitized(): void
+	public function testFormatlessValuesRenderEmpty(): void
 	{
 		$value = $this->value([
 			'type' => RichText::class,
-			'value' => ['en' => '<p>legacy<script>alert(1)</script></p>', 'de' => null],
+			'value' => ['en' => '<p>unmigrated legacy html</p>', 'de' => null],
 		]);
 
 		$this->assertNull($value->doc());
-		$this->assertStringContainsString('legacy', (string) $value);
-		$this->assertStringNotContainsString('<script>', (string) $value);
+		$this->assertSame('', (string) $value);
+		$this->assertFalse($value->isset());
 	}
 }

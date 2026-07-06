@@ -579,8 +579,9 @@ Block image rendering:
 - `Cosray\Richtext\Scanner` collects the reference carriers (`image.uid`,
   `link.asset`, `link.node`) for the serializer asset map and the future
   reference indexes
-- legacy `format`-less HTML values still render through the sanitizer path
-  until the HTML->JSON migration has run everywhere
+- `format`-less values (unmigrated legacy HTML) render EMPTY — migration
+  000000-000020 converts all content and must ship with this code; the
+  `html` marker exists only as the migration's input state
 
 11) Key configuration settings (defaults)
 

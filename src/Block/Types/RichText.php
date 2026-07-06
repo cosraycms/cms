@@ -45,15 +45,16 @@ final class RichText extends Type
 
 	public function render(Block $block, RenderContext $ctx): string
 	{
-		if (Envelope::isStructured($block->data)) {
-			$value = is_array($block->data['value'] ?? null) ? $block->data['value'] : [];
-			$doc = $ctx->effective($value);
-
-			return is_array($doc)
-				? new Renderer(new OwnerResolver($ctx->owner))->render($doc)
-				: '';
+		if (!Envelope::isStructured($block->data)) {
+			// Unmigrated legacy HTML — migration 020 ships with this code.
+			return '';
 		}
 
-		return $ctx->value($block);
+		$value = is_array($block->data['value'] ?? null) ? $block->data['value'] : [];
+		$doc = $ctx->effective($value);
+
+		return is_array($doc)
+			? new Renderer(new OwnerResolver($ctx->owner))->render($doc)
+			: '';
 	}
 }

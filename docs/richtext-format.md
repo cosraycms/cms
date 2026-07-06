@@ -16,7 +16,7 @@ Every richtext field value and every richtext block value is wrapped:
 }
 ```
 
-- `format` — `"cosray-richtext"` or `"html"` (legacy, during the migration window only). Self-describing for headless consumers.
+- `format` — `"cosray-richtext"`. Self-describing for headless consumers. A missing marker means unmigrated legacy HTML: it is never rendered (readers emit nothing) — migration 000000-000020 converts all content and ships with the code that requires it.
 - `version` — integer, applies to `cosray-richtext`. Bumped only on breaking restructures; each bump ships a system update migration (017-style rails).
 - `value` — locale map. One format per field: a save converts all locales atomically. Non-translatable contexts use locale `zxx` (as image fields do).
 - **Empty values**: an empty document is never stored as a doc with one empty paragraph. Canonical form drops empty locales from the map; a field empty in all locales stores `null` in place of the whole envelope.
@@ -116,7 +116,7 @@ With no declared classes (the default) the mark is unusable — no toolbar contr
 
 ## Migration (one-shot, later phase)
 
-HTML → v1 via ProseMirror's own parser (the schema most content was created with) run headless; round-trip diff report (JSON → HTML → normalized diff vs original) flags lossy nodes for review. Legacy `cms-text-*` spans become `style` marks; the report lists the class values each project must declare in `richtext.styles`. Envelope `format` distinguishes migrated from pending content during the window; after the sweep, `"html"` support is removed.
+HTML → v1 via ProseMirror's own parser (the schema most content was created with) run headless; round-trip diff report (JSON → HTML → normalized diff vs original) flags lossy nodes for review. Legacy `cms-text-*` spans become `style` marks; the report lists the class values each project must declare in `richtext.styles`. The `format` marker distinguishes migrated from pending content while the migration runs; rendering legacy HTML was removed once all databases were converted (2026-07-06).
 
 ## Resolved (2026-07-05)
 

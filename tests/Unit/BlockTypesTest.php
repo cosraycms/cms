@@ -97,9 +97,11 @@ final class BlockTypesTest extends TestCase
 			Registry::withDefaults()->get('richtext')->render($block, $ctx),
 		);
 
+		// Unmigrated legacy HTML no longer renders — migration 020 ships
+		// with this code.
 		$legacy = new Block('richtext', ['value' => ['zxx' => '<p>alt</p>']]);
 
-		$this->assertSame('<p>alt</p>', Registry::withDefaults()->get('richtext')->render($legacy, $ctx));
+		$this->assertSame('', Registry::withDefaults()->get('richtext')->render($legacy, $ctx));
 	}
 
 	public function testBlocksFieldPropertiesExposeBlockTypes(): void
