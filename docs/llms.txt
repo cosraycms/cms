@@ -609,6 +609,19 @@ Block image rendering:
   published) when referenced, otherwise removes the catalog row, the
   pool directory, and the rendition cache; the RESTRICT FK backstops
   races (SQLSTATE 23001)
+- `GET /media/{uid}` (panel permission) returns the catalog row, its
+  editable `meta`, and the same `usage` list; `PUT /media/{uid}`
+  persists the editable meta slice via `Cosray\Assets\Meta`: localized
+  `alt`/`title`/`caption` (locale => string, unknown locales dropped),
+  scalar `credit`, and an image `focal {x, y}` clamped to 0..1 — managed
+  keys are replaced, other meta keys carried through, empties dropped
+- media panel page at `/{panel}/media` (`Panel\Media` +
+  `panel/views/media.php`) mounts the `<cosray-media-library>` element:
+  catalog grid (search, image/video filter, upload) with a detail drawer
+  for meta editing (locale tabs, click-to-set focal), the usage list,
+  and delete; a hardcoded sidebar entry links it. Full-page island
+  elements carry a `data-cosray-element` marker that `panel.ts` loads
+  after the system bridge boots
 - removing an asset from a field never deletes the asset; deleting a
   node never blocks on references (backlinks are informational, for the
   panel later)
