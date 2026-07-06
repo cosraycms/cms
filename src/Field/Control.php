@@ -114,6 +114,11 @@ final class Control
 		return new self('entries');
 	}
 
+	public static function reference(): self
+	{
+		return new self('reference');
+	}
+
 	public static function blockText(): self
 	{
 		return new self('block-text');

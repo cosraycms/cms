@@ -47,6 +47,7 @@ final class Registry
 		$registry->register('video', 'cosray-video', 'cosray:media');
 		$registry->register('blocks', 'cosray-blocks', 'cosray:blocks');
 		$registry->register('entries', 'cosray-entries', 'cosray:entries');
+		$registry->register('reference', 'cosray-reference', 'cosray:reference');
 
 		return $registry;
 	}
