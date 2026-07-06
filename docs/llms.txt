@@ -577,13 +577,43 @@ Block image rendering:
   applied at render time (external `href` links only); readers are
   tolerant — unknown types degrade and are reported via `notices()`
 - `Cosray\Richtext\Scanner` collects the reference carriers (`image.uid`,
-  `link.asset`, `link.node`) for the serializer asset map and the future
+  `link.asset`, `link.node`) for the serializer asset map and the
   reference indexes
 - `format`-less values (unmigrated legacy HTML) render EMPTY — migration
   000000-000020 converts all content and must ship with this code; the
   `html` marker exists only as the migration's input state
 
-11) Key configuration settings (defaults)
+11) Reference indexes and asset deletion
+
+- two derived, owner-generic index tables record who points at what:
+  `asset_references (owner_type, owner_uid, asset_uid)` with an
+  `ON DELETE RESTRICT` FK on the asset, and
+  `node_references (owner_type, owner_uid, target_uid)`; owner types
+  today: `node` and `menu` (menu rows only via rebuild — menus have no
+  cosray write path yet)
+- `Cosray\References\Scanner` walks stored content for every carrier:
+  Image/File/Video field items (`{uid}`), image/images/video block
+  items, Entries recursion, plus the richtext carriers via
+  `Richtext\Scanner` (`image.uid`, `link.asset` as assets, `link.node`
+  as node targets); Entries item uids are embedded identity, not refs
+- `Node\Store` syncs on save inside the save transaction (full replace
+  per owner via `References\Sync`; dangling uids are skipped, never a
+  save error); the node delete script drops the owner's rows with the
+  soft-delete
+- everything is derived and rebuildable: `php run db:references` wipes
+  and rescans (live nodes + menu images); migration 000000-000021
+  creates the tables and runs the same population
+- `DELETE /media/{uid}` (panel permission) hard-deletes an asset only
+  when unreferenced: 404 unknown, 409 with a display-ready `usage` list
+  (`References\Usage`: owner type/uid, best-effort title, node type,
+  published) when referenced, otherwise removes the catalog row, the
+  pool directory, and the rendition cache; the RESTRICT FK backstops
+  races (SQLSTATE 23001)
+- removing an asset from a field never deletes the asset; deleting a
+  node never blocks on references (backlinks are informational, for the
+  panel later)
+
+12) Key configuration settings (defaults)
 
 App and environment:
 
@@ -643,7 +673,7 @@ Uploads and media:
 - `richtext.styles`: `[]` — declared text styles for the `style` mark;
   empty means the mark is unusable
 
-12) Known caveats during exploration
+13) Known caveats during exploration
 
 - Keep expectations conservative and verify behavior against `src/` and tests.
 
