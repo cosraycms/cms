@@ -176,6 +176,33 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	/** Restrict the result to the given node uids (order-independent). */
+	public function only(string ...$uids): self
+	{
+		$uids = array_values(array_filter(
+			array_map('trim', $uids),
+			static fn(string $uid): bool => $uid !== '',
+		));
+
+		if ($uids === []) {
+			$this->addWhere('FALSE');
+
+			return $this;
+		}
+
+		$placeholders = [];
+
+		foreach ($uids as $uid) {
+			$param = 'only_uid_' . count($this->whereParams);
+			$this->whereParams[$param] = $uid;
+			$placeholders[] = ':' . $param;
+		}
+
+		$this->addWhere('n.uid IN (' . implode(', ', $placeholders) . ')');
+
+		return $this;
+	}
+
 	/** Exclude specific node uids from the result (e.g. self-reference). */
 	public function exclude(string ...$uids): self
 	{

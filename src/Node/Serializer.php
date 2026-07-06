@@ -117,8 +117,14 @@ class Serializer
 		$missingFields = array_diff($fieldNames, $orderedFields);
 		$allFields = array_merge($orderedFields, $missingFields);
 
+		$ownerType = (string) $this->types->get($node::class, 'handle');
+
 		foreach ($allFields as $fieldName) {
-			$fields[] = FieldHydrator::getField($node, $fieldName)->properties();
+			$properties = FieldHydrator::getField($node, $fieldName)->properties();
+			// The owning node type, so controls that query other nodes (the
+			// reference picker) can scope to this field's schema.
+			$properties['ownerType'] = $ownerType;
+			$fields[] = $properties;
 		}
 
 		return $fields;

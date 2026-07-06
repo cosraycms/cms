@@ -70,6 +70,41 @@ final class Reference extends Panel
 		);
 	}
 
+	/**
+	 * Resolve titles for already-chosen uids so the control can render its
+	 * selected rows. Chosen values render regardless of the pickable set
+	 * (only soft-deleted targets drop out), and the caller's order is kept.
+	 */
+	public function labels(Cms $cms, Factory $factory): Response
+	{
+		$uids = array_values(array_filter(
+			array_map('trim', explode(',', $this->stringParam('uids'))),
+			static fn(string $uid): bool => $uid !== '',
+		));
+
+		if ($uids === []) {
+			return $this->result($factory, [], false);
+		}
+
+		$byUid = [];
+
+		foreach ($cms->nodes()->deleted(false)->published(null)->hidden(null)->only(...$uids) as $node) {
+			$byUid[$node->meta->uid] = $this->item($node);
+		}
+
+		$ordered = [];
+
+		foreach ($uids as $uid) {
+			if (!isset($byUid[$uid])) {
+				continue;
+			}
+
+			$ordered[] = $byUid[$uid];
+		}
+
+		return $this->result($factory, $ordered, false);
+	}
+
 	private function item(Node $node): array
 	{
 		return [

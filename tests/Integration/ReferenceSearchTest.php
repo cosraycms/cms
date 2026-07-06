@@ -99,7 +99,31 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		$this->assertSame([], $this->search(['type' => 'test-reference', 'field' => 'title'])['nodes']);
 	}
 
+	public function testLabelsResolveChosenUidsInOrderAndSkipDeleted(): void
+	{
+		$result = $this->call('labels', ['uids' => 'ref-page,ref-gamma,ref-alpha']);
+		$uids = $this->uids($result);
+
+		// Requested order is preserved and the deleted target is dropped.
+		$this->assertSame(['ref-page', 'ref-alpha'], $uids);
+		$this->assertSame('test-article', $result['nodes'][1]['type']);
+		$this->assertArrayHasKey('title', $result['nodes'][0]);
+	}
+
+	public function testLabelsWithoutUidsIsEmpty(): void
+	{
+		$result = $this->call('labels', ['uids' => '']);
+
+		$this->assertTrue($result['ok']);
+		$this->assertSame([], $result['nodes']);
+	}
+
 	private function search(array $params): array
+	{
+		return $this->call('search', $params);
+	}
+
+	private function call(string $method, array $params): array
 	{
 		$_GET = [];
 		$this->set('GET', $params);
@@ -122,7 +146,7 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		);
 		$cms = new Cms($context, Services::withDefaults());
 		$controller = new ReferenceController($this->config(), $this->container(), $request);
-		$response = $controller->search($cms, $this->factory());
+		$response = $controller->{$method}($cms, $this->factory());
 
 		return json_decode((string) $response->getBody(), true);
 	}
