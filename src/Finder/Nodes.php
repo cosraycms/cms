@@ -108,6 +108,37 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	/**
+	 * Match the materialized title column across every locale. Unlike
+	 * search(..., ['title']) — which reads the title *field* in content —
+	 * this also finds nodes whose title is dynamic (no title field), so
+	 * the reference picker can surface them.
+	 */
+	public function searchTitle(string $query): self
+	{
+		$query = trim($query);
+
+		if ($query === '') {
+			return $this;
+		}
+
+		$terms = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
+
+		if (!is_array($terms) || $terms === []) {
+			return $this;
+		}
+
+		$clauses = array_map(
+			fn(string $term): string => "COALESCE(n.title::text, '') ILIKE "
+			. $this->context->db->quote('%' . $term . '%'),
+			$terms,
+		);
+
+		$this->addWhere(implode(' AND ', $clauses));
+
+		return $this;
+	}
+
 	public function types(string ...$types): self
 	{
 		$this->whereTypes = $this->typesCondition($types);
@@ -141,6 +172,24 @@ final class Nodes implements Iterator
 
 		$this->addWhere('np.uid = :' . $param);
 		$this->whereParams[$param] = $uid;
+
+		return $this;
+	}
+
+	/** Exclude specific node uids from the result (e.g. self-reference). */
+	public function exclude(string ...$uids): self
+	{
+		foreach ($uids as $uid) {
+			$uid = trim($uid);
+
+			if ($uid === '') {
+				continue;
+			}
+
+			$param = 'exclude_uid_' . count($this->whereParams);
+			$this->addWhere('n.uid <> :' . $param);
+			$this->whereParams[$param] = $uid;
+		}
 
 		return $this;
 	}

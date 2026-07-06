@@ -144,6 +144,13 @@ class Routes
 					->after($renderers->get('media'));
 				$panel
 					->get(
+						'/reference/search',
+						[Panel\Reference::class, 'search'],
+						'reference.search',
+					)
+					->middleware($panelAuth);
+				$panel
+					->get(
 						'/assets/...slug',
 						[Panel\Assets::class, 'asset'],
 						'asset',
