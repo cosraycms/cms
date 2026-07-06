@@ -11,6 +11,7 @@ import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
 import { install as installWhen } from './behaviors/when';
 import { installBridge } from '$lib/bridge-standalone';
+import { loadElement } from '$lib/elements';
 import { configureRuntime } from '$lib/runtime';
 
 const mainSelector = '#main';
@@ -95,6 +96,20 @@ function bootEditor(): void {
 	}
 }
 
+// Full-page island elements (e.g. the media library) carry a
+// data-cosray-element marker naming their cosray element bundle. They
+// mount themselves once defined, so we only have to load the bundle.
+// bootEditor runs first, so the runtime base and bridge are ready.
+function bootElements(): void {
+	document.querySelectorAll<HTMLElement>('[data-cosray-element]').forEach((mount) => {
+		const name = mount.dataset.cosrayElement;
+
+		if (name) {
+			void loadElement(`cosray:${name}`);
+		}
+	});
+}
+
 // A boosted navigation swaps a fragment whose root is itself #main into the
 // existing #main, so htmx's innerHTML swap nests the fresh #main inside the
 // previous one, leaving the outer wrapper carrying the last full page's class.
@@ -113,6 +128,7 @@ function afterSwap(): void {
 	denestMain();
 	updateNavigation();
 	bootEditor();
+	bootElements();
 }
 
 listen('keydown', focusSearch);
@@ -132,6 +148,7 @@ listen('htmx:after:history:update' as keyof DocumentEventMap, updateNavigation);
 
 updateNavigation();
 bootEditor();
+bootElements();
 
 if (import.meta.hot) {
 	import.meta.hot.dispose(() => {
