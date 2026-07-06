@@ -15,6 +15,15 @@
 						Dashboard
 					</a>
 				</li>
+				<li class="nav-item">
+					<a
+						class="nav-link"
+						href="<?= $panelPath ?>/media"
+						hx-target="#main"
+						<?= (string) $currentPath === (string) $panelPath . '/media' ? 'aria-current="page"' : '' ?>>
+						Medien
+					</a>
+				</li>
 			</ul>
 
 			<?php $this->insert('component/collections', ['level' => 0]) ?>

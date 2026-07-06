@@ -136,6 +136,14 @@ class Routes
 					->after($renderers->get('index'));
 				$panel
 					->get(
+						'/media',
+						[Panel\Media::class, 'index'],
+						'media',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('media'));
+				$panel
+					->get(
 						'/assets/...slug',
 						[Panel\Assets::class, 'asset'],
 						'asset',
