@@ -12,6 +12,7 @@ use Celemas\Quma\Database;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
+use Cosray\References;
 use Cosray\Richtext\Normalizer;
 use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
@@ -22,6 +23,8 @@ class Store
 	private const int CREATE_UID_ATTEMPTS = 5;
 
 	private readonly RoutePathGenerator $routePathGenerator;
+	private readonly References\Scanner $scanner;
+	private readonly References\Sync $sync;
 
 	public function __construct(
 		private readonly Database $db,
@@ -31,6 +34,8 @@ class Store
 		?RoutePathGenerator $routePathGenerator = null,
 	) {
 		$this->routePathGenerator = $routePathGenerator ?? new RoutePathGenerator($db, $types);
+		$this->scanner = new References\Scanner();
+		$this->sync = new References\Sync($db);
 	}
 
 	public function save(
@@ -169,6 +174,10 @@ class Store
 
 		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $request);
 		$this->persistHandle($nodeId, $handle, $editor, $request);
+
+		// The reference indexes ride in the save transaction: full
+		// replace per owner from the content just written.
+		$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->ensureRouteHandle($node, $handle, $request);
