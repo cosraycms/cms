@@ -13,10 +13,12 @@ use Celemas\Core\Response;
 use Celemas\Quma\Database;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
+use Cosray\Assets\Meta;
 use Cosray\Assets\SizeSpec;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
+use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\References\Usage;
 use Cosray\Storage\Storage;
@@ -39,6 +41,7 @@ class Media
 		protected readonly Request $request,
 		protected readonly Config $config,
 		protected readonly Database $db,
+		protected readonly Locales $locales,
 	) {}
 
 	#[Permission('panel')]
@@ -178,6 +181,85 @@ class Media
 			'width' => $asset->width,
 			'height' => $asset->height,
 		];
+	}
+
+	/**
+	 * Single-asset detail for the media panel: the catalog row plus its
+	 * editable meta and the display-ready usage list (who points at it).
+	 */
+	#[Permission('panel')]
+	public function detail(string $uid): Response
+	{
+		$response = Response::create($this->factory);
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+		}
+
+		return $response->json([
+			'ok' => true,
+			'asset' => $this->detailItem(Asset::fromRow($row, $this->config), $row),
+			'usage' => new Usage($this->db)->forAsset($uid),
+		]);
+	}
+
+	/**
+	 * Persist the editable meta slice (localized alt/title/caption,
+	 * scalar credit, image focal point). The submitted patch replaces
+	 * the managed keys and leaves the rest of the bag untouched.
+	 */
+	#[Permission('panel')]
+	public function updateMeta(string $uid): Response
+	{
+		$response = Response::create($this->factory);
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+		}
+
+		$stored = json_decode((string) ($row['meta'] ?? '{}'), true);
+		$input = $this->request->json();
+		$meta = Meta::apply(
+			is_array($stored) ? $stored : [],
+			is_array($input) ? $input['meta'] ?? $input : [],
+			$this->localeIds(),
+			$row['kind'] === 'image',
+		);
+
+		$this->db->assets->updateMeta(['uid' => $uid, 'meta' => json_encode($meta)])->run();
+
+		return $response->json(['ok' => true, 'meta' => $meta]);
+	}
+
+	protected function detailItem(Asset $asset, array $row): array
+	{
+		return [
+			'uid' => $asset->uid,
+			'filename' => $asset->filename,
+			'kind' => $asset->kind,
+			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
+			'width' => $asset->width,
+			'height' => $asset->height,
+			'url' => $asset->path(),
+			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
+			'created' => isset($row['created']) ? (string) $row['created'] : null,
+			'meta' => $asset->meta,
+		];
+	}
+
+	/** @return list<string> */
+	protected function localeIds(): array
+	{
+		$ids = [];
+
+		foreach ($this->locales as $locale) {
+			$ids[] = $locale->id;
+		}
+
+		return $ids;
 	}
 
 	/**
