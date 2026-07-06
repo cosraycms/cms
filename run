@@ -6,6 +6,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Celemas\Cli\Runner;
 use Cosray\Commands\RecreateDb;
+use Cosray\Commands\References;
 use Cosray\Config;
 use Cosray\MigrationFactory;
 use Celemas\Container\Container;
@@ -35,6 +36,7 @@ $conn = new Connection($dsn, __DIR__ . '/db/sql')
 
 $commands = QumaCommands::get($conn, migrationFactory: new MigrationFactory($container));
 $commands->add(new RecreateDb($database, $username, $password, $host));
+$commands->add(new References($conn));
 
 $runner = new Runner($commands);
 

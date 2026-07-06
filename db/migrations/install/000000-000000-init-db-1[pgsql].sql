@@ -430,3 +430,31 @@ CREATE INDEX /*:cms.obj:*/ix_assets_hash ON /*:cms.prefix:*/assets USING btree (
 CREATE INDEX /*:cms.obj:*/ix_assets_key ON /*:cms.prefix:*/assets USING btree (key);
 CREATE TRIGGER /*:cms.obj:*/assets_trigger_01_change BEFORE UPDATE ON /*:cms.prefix:*/assets
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
+
+
+CREATE TABLE /*:cms.prefix:*/asset_references (
+	owner_type text NOT NULL,
+	owner_uid text NOT NULL,
+	asset_uid text NOT NULL,
+	CONSTRAINT /*:cms.obj:*/pk_asset_references PRIMARY KEY (owner_type, owner_uid, asset_uid),
+	CONSTRAINT /*:cms.obj:*/fk_asset_references_assets FOREIGN KEY (asset_uid)
+		REFERENCES /*:cms.prefix:*/assets (uid) ON DELETE RESTRICT,
+	CONSTRAINT /*:cms.obj:*/ck_asset_references_owner_type CHECK (char_length(owner_type) <= 32),
+	CONSTRAINT /*:cms.obj:*/ck_asset_references_owner_uid CHECK (char_length(owner_uid) <= 64)
+);
+CREATE INDEX /*:cms.obj:*/ix_asset_references_asset
+	ON /*:cms.prefix:*/asset_references USING btree (asset_uid);
+
+
+CREATE TABLE /*:cms.prefix:*/node_references (
+	owner_type text NOT NULL,
+	owner_uid text NOT NULL,
+	target_uid text NOT NULL,
+	CONSTRAINT /*:cms.obj:*/pk_node_references PRIMARY KEY (owner_type, owner_uid, target_uid),
+	CONSTRAINT /*:cms.obj:*/fk_node_references_nodes FOREIGN KEY (target_uid)
+		REFERENCES /*:cms.prefix:*/nodes (uid),
+	CONSTRAINT /*:cms.obj:*/ck_node_references_owner_type CHECK (char_length(owner_type) <= 32),
+	CONSTRAINT /*:cms.obj:*/ck_node_references_owner_uid CHECK (char_length(owner_uid) <= 64)
+);
+CREATE INDEX /*:cms.obj:*/ix_node_references_target
+	ON /*:cms.prefix:*/node_references USING btree (target_uid);
