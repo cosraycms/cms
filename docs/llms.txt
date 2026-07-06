@@ -310,7 +310,7 @@ Commonly used fields:
 - `Number`, `Decimal`, `Date`, `Time`, `DateTime`
 - `Checkbox`, `Radio`, `Option`
 - `Image`, `File`, `Video`, `Picture`, `Youtube`, `Iframe`
-- `Blocks`, `Entries`
+- `Blocks`, `Entries`, `Reference`
 
 General value access pattern:
 
@@ -363,6 +363,36 @@ Examples:
 - `(string) $page->body`
 - `$page->heroImage?->first()?->url()`
 - `$page->staff?->first()?->fullName?->unwrap()`
+
+`Reference` fields point at other nodes. They store a language-neutral,
+ordered `{uid}` list (`value.zxx`), are unbounded by default (`#[Limit(max: 1)]`
+makes a field single). `#[Targets(Beer::class, ...)]` constrains the pickable
+node types and `#[Filter("type = 'beer' & productLine = 'klassiker'")]` narrows
+further with the finder DSL. The `Value` exposes uids (`->uids()`, `->uid()`,
+iterable); resolve to nodes via `$cms->node($uid)`. Targets are tracked as node
+references by `References\Scanner`, so backlinks and delete-guards work.
+
+```php
+use App\Node\Beer;
+use Cosray\Field\Reference;
+use Cosray\Schema\{Filter, Label, Limit, Targets};
+
+final class Brewery
+{
+    #[Label('Flagship'), Limit(max: 1), Targets(Beer::class)]
+    protected Reference $flagship;
+
+    #[Label('Related'), Targets(Beer::class), Filter("productLine = 'klassiker'")]
+    protected Reference $related;
+}
+```
+
+The panel picker is the `<cosray-reference>` custom element; its search box
+calls the panel-only JSON endpoints `GET {panel}/reference/search`
+(`type`, `field`, `q`, `node`) and `GET {panel}/reference/labels` (`uids`),
+served by `Controller\Panel\Reference`. The pickable set is derived server-side
+from the field's own schema: non-deleted, type/filter constrained, any
+publication state, hidden included, the edited node excluded.
 
 5) Querying content at runtime
 
@@ -592,10 +622,11 @@ Block image rendering:
   today: `node` and `menu` (menu rows only via rebuild — menus have no
   cosray write path yet)
 - `Cosray\References\Scanner` walks stored content for every carrier:
-  Image/File/Video field items (`{uid}`), image/images/video block
-  items, Entries recursion, plus the richtext carriers via
-  `Richtext\Scanner` (`image.uid`, `link.asset` as assets, `link.node`
-  as node targets); Entries item uids are embedded identity, not refs
+  Image/File/Video field items (`{uid}`) and image/images/video block
+  items as assets, `Reference` field targets (`{uid}`) as node targets,
+  Entries recursion, plus the richtext carriers via `Richtext\Scanner`
+  (`image.uid`, `link.asset` as assets, `link.node` as node targets);
+  Entries item uids are embedded identity, not refs
 - `Node\Store` syncs on save inside the save transaction (full replace
   per owner via `References\Sync`; dangling uids are skipped, never a
   save error); the node delete script drops the owner's rows with the
