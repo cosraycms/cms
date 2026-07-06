@@ -9,9 +9,10 @@ use Cosray\Richtext;
 
 /**
  * Collects every asset and node uid referenced by stored node content:
- * media field items (`{uid}`), image/images/video block items, and the
- * richtext carriers (`image.uid`, `link.asset`, `link.node`). Blocks
- * and Entries are recursed into. Feeds the reference indexes.
+ * media field items (`{uid}`), image/images/video block items, Reference
+ * field targets, and the richtext carriers (`image.uid`, `link.asset`,
+ * `link.node`). Blocks and Entries are recursed into. Feeds the reference
+ * indexes.
  */
 final class Scanner
 {
@@ -29,17 +30,20 @@ final class Scanner
 		$nodes = [];
 
 		if (is_array($content)) {
-			$this->fields($content, $assets);
+			$this->fields($content, $assets, $nodes);
 			$richtext = Richtext\Scanner::scanContent($content);
 			$assets = [...$assets, ...$richtext['assets']];
-			$nodes = $richtext['nodes'];
+			$nodes = [...$nodes, ...$richtext['nodes']];
 		}
 
 		return ['assets' => $this->unique($assets), 'nodes' => $this->unique($nodes)];
 	}
 
-	/** @param list<string> $assets */
-	private function fields(array $content, array &$assets): void
+	/**
+	 * @param list<string> $assets
+	 * @param list<string> $nodes
+	 */
+	private function fields(array $content, array &$assets, array &$nodes): void
 	{
 		foreach ($content as $field) {
 			if (!is_array($field) || !is_string($field['type'] ?? null)) {
@@ -55,9 +59,11 @@ final class Scanner
 			if (is_a($type, Field\Blocks::class, true)) {
 				$this->blocks($field['value'] ?? null, $assets);
 			} elseif (is_a($type, Field\Entries::class, true)) {
-				$this->entries($field['value'] ?? null, $assets);
+				$this->entries($field['value'] ?? null, $assets, $nodes);
+			} elseif (is_a($type, Field\Reference::class, true)) {
+				$this->collect($field['value'] ?? null, $nodes);
 			} elseif (is_a($type, Field\File::class, true)) {
-				$this->localizedItems($field['value'] ?? null, $assets);
+				$this->collect($field['value'] ?? null, $assets);
 			}
 		}
 	}
@@ -80,8 +86,11 @@ final class Scanner
 		}
 	}
 
-	/** @param list<string> $assets */
-	private function entries(mixed $value, array &$assets): void
+	/**
+	 * @param list<string> $assets
+	 * @param list<string> $nodes
+	 */
+	private function entries(mixed $value, array &$assets, array &$nodes): void
 	{
 		foreach (is_array($value) ? $value : [] as $entries) {
 			foreach (is_array($entries) ? $entries : [] as $entry) {
@@ -89,27 +98,31 @@ final class Scanner
 					continue;
 				}
 
-				$this->fields($entry['fields'], $assets);
+				$this->fields($entry['fields'], $assets, $nodes);
 			}
 		}
 	}
 
-	/** @param list<string> $assets */
-	private function localizedItems(mixed $value, array &$assets): void
+	/**
+	 * Collect uids from a locale-keyed map of `{uid}` lists into $out.
+	 *
+	 * @param list<string> $out
+	 */
+	private function collect(mixed $value, array &$out): void
 	{
 		foreach (is_array($value) ? $value : [] as $items) {
-			$this->items($items, $assets);
+			$this->items($items, $out);
 		}
 	}
 
-	/** @param list<string> $assets */
-	private function items(mixed $items, array &$assets): void
+	/** @param list<string> $out */
+	private function items(mixed $items, array &$out): void
 	{
 		foreach (is_array($items) ? $items : [] as $item) {
 			$uid = is_array($item) ? $item['uid'] ?? null : null;
 
 			if (is_string($uid) && $uid !== '') {
-				$assets[] = $uid;
+				$out[] = $uid;
 			}
 		}
 	}

@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\Image;
+use Cosray\Field\Reference;
 use Cosray\Field\RichText;
 use Cosray\References\Scanner;
 use Cosray\Tests\TestCase;
@@ -100,6 +101,41 @@ final class ReferenceScannerTest extends TestCase
 			$refs['assets'],
 		);
 		$this->assertSame(['node-from-block', 'node-target'], $refs['nodes']);
+	}
+
+	public function testCollectsReferenceFieldTargets(): void
+	{
+		$refs = new Scanner()->scan([
+			'related' => [
+				'type' => Reference::class,
+				'value' => ['zxx' => [['uid' => 'ref-b'], ['uid' => 'ref-a'], ['uid' => '']]],
+			],
+			'hero' => [
+				'type' => Image::class,
+				'value' => ['zxx' => [['uid' => 'img-hero']]],
+			],
+			'staff' => [
+				'type' => Entries::class,
+				'value' => [
+					'zxx' => [
+						[
+							'uid' => 'entry-own-uid',
+							'type' => 'App\Node\Entries\Staff',
+							'fields' => [
+								'author' => [
+									'type' => Reference::class,
+									'value' => ['zxx' => [['uid' => 'ref-nested']]],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		// Reference targets land in nodes; the media field stays an asset.
+		$this->assertSame(['img-hero'], $refs['assets']);
+		$this->assertSame(['ref-a', 'ref-b', 'ref-nested'], $refs['nodes']);
 	}
 
 	public function testEntryUidsAreNotReferences(): void

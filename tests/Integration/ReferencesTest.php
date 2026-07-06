@@ -215,6 +215,36 @@ final class ReferencesTest extends IntegrationTestCase
 		$this->assertGreaterThanOrEqual(1, $result['skipped']);
 	}
 
+	public function testRebuildTracksReferenceFieldTargets(): void
+	{
+		$typeId = $this->createTestType('refint-reffield-type');
+		$this->createTestNode(['uid' => 'refint-reffield-target', 'type' => $typeId]);
+		$this->createTestNode([
+			'uid' => 'refint-reffield-source',
+			'type' => $typeId,
+			'content' => json_encode([
+				'related' => [
+					'type' => \Cosray\Field\Reference::class,
+					'value' => [
+						'zxx' => [
+							['uid' => 'refint-reffield-target'],
+							['uid' => 'refint-reffield-gone'],
+						],
+					],
+				],
+			]),
+		]);
+
+		new Rebuild($this->db())->run();
+
+		// The existing target is tracked; the dangling uid is skipped.
+		$this->assertSame(['refint-reffield-target'], $this->nodeRefs('refint-reffield-source'));
+
+		$usage = new Usage($this->db())->forNode('refint-reffield-target');
+		$this->assertCount(1, $usage);
+		$this->assertSame('refint-reffield-source', $usage[0]['ownerUid']);
+	}
+
 	/** @return list<string> */
 	private function assetRefs(string $ownerUid, string $ownerType = 'node'): array
 	{
