@@ -6,7 +6,8 @@ SET
 	locked = :locked,
 	hidden = :hidden,
 	editor = :editor,
-	content = :content::jsonb
+	content = :content::jsonb,
+	title = :title::jsonb
 WHERE
 	node = :node
 

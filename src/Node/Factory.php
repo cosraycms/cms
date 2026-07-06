@@ -45,7 +45,15 @@ class Factory
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
 		$serializer = new Serializer($this->types, $this->uid, $context->assets());
-		$store = new Store($context->db, new PathManager(), $this->types, $this->uid);
+		$store = new Store(
+			$context->db,
+			new PathManager(),
+			$this->types,
+			$this->uid,
+			factory: $this,
+			cms: $cms,
+			context: $context,
+		);
 		$templateRenderer = new ViewRenderer(
 			$this->container,
 			$context->factory,

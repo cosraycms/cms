@@ -9,11 +9,16 @@ use Celemas\Core\Exception\HttpConflict;
 use Celemas\Core\Exception\HttpError;
 use Celemas\Core\Request;
 use Celemas\Quma\Database;
+use Cosray\Cms;
+use Cosray\Context;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
+use Cosray\Locale;
 use Cosray\Locales;
+use Cosray\Node\Contract\Title as TitleContract;
 use Cosray\References;
 use Cosray\Richtext\Normalizer;
+use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
 use Throwable;
@@ -25,6 +30,7 @@ class Store
 	private readonly RoutePathGenerator $routePathGenerator;
 	private readonly References\Scanner $scanner;
 	private readonly References\Sync $sync;
+	private readonly TitleResolver $titleResolver;
 
 	public function __construct(
 		private readonly Database $db,
@@ -32,10 +38,18 @@ class Store
 		private readonly Types $types,
 		private readonly Uid $uid,
 		?RoutePathGenerator $routePathGenerator = null,
+		// Dynamic (Contract\Title) titles read the node's fields, so they must
+		// be re-hydrated from the content being saved. These stay optional so
+		// a bare Store still works; without them dynamic titles fall back to
+		// the passed node and `db:titles` is the authoritative refresh.
+		private readonly ?Factory $factory = null,
+		private readonly ?Cms $cms = null,
+		private readonly ?Context $context = null,
 	) {
 		$this->routePathGenerator = $routePathGenerator ?? new RoutePathGenerator($db, $types);
 		$this->scanner = new References\Scanner();
 		$this->sync = new References\Sync($db);
+		$this->titleResolver = new TitleResolver($types);
 	}
 
 	public function save(
@@ -172,6 +186,10 @@ class Store
 		$parentId = $this->resolveParentId($parentUid, $request);
 		$handle = $this->resolveHandle($data);
 
+		// Materialize the title alongside the content so both ride one UPDATE
+		// (a single change/history record instead of two).
+		$data['title'] = $this->materializeTitle($node, $data, $request, $locales);
+
 		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $request);
 		$this->persistHandle($nodeId, $handle, $editor, $request);
 
@@ -184,6 +202,76 @@ class Store
 			$data = $this->completeGeneratedPaths($node, $data, $locales, $parentId, $request);
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
+	}
+
+	/**
+	 * The materialized title map for the content being saved. Mirrors
+	 * `Node::title()`'s resolution but yields every locale.
+	 *
+	 * @return array<string, string>
+	 */
+	private function materializeTitle(
+		object $node,
+		array $data,
+		Request $request,
+		Locales $locales,
+	): array {
+		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
+		$descriptor = $this->titleResolver->descriptor($node::class);
+
+		return match ($descriptor['kind']) {
+			TitleResolver::KIND_FIELD => $this->titleResolver->fieldMap($content, $descriptor['field']),
+			TitleResolver::KIND_DYNAMIC => $this->dynamicTitle($node, $data, $request, $locales),
+			default => [],
+		};
+	}
+
+	/**
+	 * Evaluate a dynamic title once per locale against the content being
+	 * saved, restoring the request locale afterwards.
+	 *
+	 * @return array<string, string>
+	 */
+	private function dynamicTitle(object $node, array $data, Request $request, Locales $locales): array
+	{
+		$target = $this->titleEvalNode($node, $data);
+
+		if (!$target instanceof TitleContract) {
+			return [];
+		}
+
+		$original = $request->get('locale', null);
+
+		try {
+			return $this->titleResolver->dynamicMap(
+				static function (Locale $locale) use ($target, $request): string {
+					$request->set('locale', $locale);
+
+					return $target->title();
+				},
+				$locales,
+			);
+		} finally {
+			$request->set('locale', $original);
+		}
+	}
+
+	/**
+	 * A node instance whose fields reflect the content being saved. When the
+	 * factory seam is wired the node is re-hydrated from that content (the
+	 * passed instance still carries the previous version); otherwise the
+	 * passed node is used and `db:titles` remains the authoritative refresh.
+	 */
+	private function titleEvalNode(object $node, array $data): object
+	{
+		if ($this->factory !== null && $this->cms !== null && $this->context !== null) {
+			return $this->factory->create($node::class, $this->context, $this->cms, [
+				'uid' => $data['uid'],
+				'content' => is_array($data['content'] ?? null) ? $data['content'] : [],
+			]);
+		}
+
+		return $node;
 	}
 
 	private function persistNode(
@@ -205,6 +293,7 @@ class Store
 			'locked' => $data['locked'],
 			'type' => $handle,
 			'content' => json_encode($data['content']),
+			'title' => json_encode($data['title'] ?? []),
 			'editor' => $editor,
 		];
 
@@ -222,6 +311,7 @@ class Store
 				'published' => $params['published'],
 				'locked' => $params['locked'],
 				'content' => $params['content'],
+				'title' => $params['title'],
 				'editor' => $params['editor'],
 			])->one()['node'];
 		}

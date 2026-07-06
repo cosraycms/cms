@@ -7,7 +7,8 @@ INSERT INTO /*:cms.prefix:*/nodes (
 	hidden,
 	editor,
 	creator,
-	content
+	content,
+	title
 )
 SELECT
 	:uid,
@@ -18,7 +19,8 @@ SELECT
 	:hidden,
 	:editor,
 	:editor,
-	:content
+	:content,
+	:title
 FROM
 	/*:cms.prefix:*/types t
 WHERE

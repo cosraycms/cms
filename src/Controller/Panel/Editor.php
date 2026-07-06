@@ -122,7 +122,15 @@ final class Editor extends Panel
 
 		$form = $this->formData();
 		$data = $this->applyForm($data, $form);
-		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
+		$store = new Store(
+			$context->db,
+			new PathManager(),
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			factory: $cms->nodeFactory(),
+			cms: $cms,
+			context: $context,
+		);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 		$htmx = $this->request->hasHeader('HX-Request');
 
@@ -198,7 +206,15 @@ final class Editor extends Panel
 			$data['parent'] = $query->parent;
 		}
 
-		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
+		$store = new Store(
+			$context->db,
+			new PathManager(),
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			factory: $cms->nodeFactory(),
+			cms: $cms,
+			context: $context,
+		);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		try {
@@ -242,7 +258,15 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$store = new Store($context->db, new PathManager(), $this->types(), $cms->nodeFactory()->uid());
+		$store = new Store(
+			$context->db,
+			new PathManager(),
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			factory: $cms->nodeFactory(),
+			cms: $cms,
+			context: $context,
+		);
 		$store->delete(Node::unwrap($result), $this->request, requireJson: false);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
