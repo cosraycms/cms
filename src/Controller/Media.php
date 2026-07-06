@@ -18,12 +18,16 @@ use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
+use Cosray\References\Usage;
 use Cosray\Storage\Storage;
 use Cosray\Uid;
 use Cosray\Users;
 use enshrined\svgSanitize\Sanitizer;
 use finfo;
+use PDOException;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Throwable;
 
 class Media
@@ -174,6 +178,72 @@ class Media
 			'width' => $asset->width,
 			'height' => $asset->height,
 		];
+	}
+
+	/**
+	 * Hard delete, unreferenced-only: the usage check answers 409 with
+	 * a display-ready owner list; the RESTRICT FK on `asset_references`
+	 * is the backstop against references appearing mid-request. The
+	 * catalog row goes first — a leftover file is a harmless orphan, a
+	 * dangling row is not.
+	 */
+	#[Permission('panel')]
+	public function delete(string $uid): Response
+	{
+		$response = Response::create($this->factory);
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+		}
+
+		$usage = new Usage($this->db);
+		$owners = $usage->forAsset($uid);
+
+		if ($owners !== []) {
+			return $response->json(['ok' => false, 'usage' => $owners], 409);
+		}
+
+		try {
+			$this->db->assets->delete(['uid' => $uid])->run();
+		} catch (PDOException $e) {
+			// RESTRICT violations report SQLSTATE 23001; plain FK
+			// violations 23503.
+			if (in_array((string) $e->getCode(), ['23001', '23503'], true)) {
+				return $response->json(['ok' => false, 'usage' => $usage->forAsset($uid)], 409);
+			}
+
+			throw $e;
+		}
+
+		if ($row['disk'] === 'local') {
+			new Storage($this->config)->deleteDirectory(dirname((string) $row['key']));
+			$this->purgeRenditions((string) $row['key']);
+		}
+
+		return $response->json(['ok' => true]);
+	}
+
+	/** Removes the rendition cache directory `{cache}/{shard}/{uid}/`. */
+	protected function purgeRenditions(string $key): void
+	{
+		$root = rtrim($this->config->path->public, '\\/') . '/' . trim($this->config->path->cache, '/');
+		$dir = $root . '/' . dirname($key);
+
+		if (!is_dir($dir) || !str_starts_with((string) realpath($dir), (string) realpath($root))) {
+			return;
+		}
+
+		$files = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+			RecursiveIteratorIterator::CHILD_FIRST,
+		);
+
+		foreach ($files as $file) {
+			$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+		}
+
+		rmdir($dir);
 	}
 
 	/** Build the client payload for a catalog row. */

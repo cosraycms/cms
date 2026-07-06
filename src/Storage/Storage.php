@@ -64,6 +64,12 @@ class Storage
 		$this->filesystem->delete($key);
 	}
 
+	/** Removes an asset's whole pool directory (`{shard}/{uid}/`). */
+	public function deleteDirectory(string $path): void
+	{
+		$this->filesystem->deleteDirectory($path);
+	}
+
 	public function exists(string $key): bool
 	{
 		return $this->filesystem->fileExists($key);

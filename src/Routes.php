@@ -66,6 +66,9 @@ class Routes
 		$app->get('/media/library', [Media::class, 'library'], 'cms.media.library')
 			->middleware($this->session);
 
+		$app->delete('/media/{uid}', [Media::class, 'delete'], 'cms.media.delete')
+			->middleware($this->session);
+
 		$this->addPanel($app);
 
 		foreach ($this->pluginRoutes as $addRoutes) {
