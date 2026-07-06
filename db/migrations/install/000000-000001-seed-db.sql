@@ -42,4 +42,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000018-create-assets-table[pgsql].sql', now()),
 	('000000-000019-populate-asset-catalog[pgsql].php', now()),
 	('000000-000020-richtext-html-to-json[pgsql].php', now()),
-	('000000-000021-create-reference-indexes[pgsql].php', now());
+	('000000-000021-create-reference-indexes[pgsql].php', now()),
+	('000000-000022-materialize-node-titles[pgsql].sql', now());

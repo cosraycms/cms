@@ -147,6 +147,10 @@ CREATE TABLE /*:cms.prefix:*/nodes (
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,
 	content jsonb NOT NULL,
+	-- Materialized, query-only copy of the node's title as a locale map
+	-- ({locale: text}, or {zxx: text} when not language-specific). Written
+	-- at save time from the type's title source; `title()` stays authoritative.
+	title jsonb NOT NULL DEFAULT '{}',
 	CONSTRAINT /*:cms.obj:*/pk_nodes PRIMARY KEY (node),
 	CONSTRAINT /*:cms.obj:*/uc_nodes_uid UNIQUE (uid),
 	CONSTRAINT /*:cms.obj:*/fk_nodes_users_creator FOREIGN KEY (creator)
