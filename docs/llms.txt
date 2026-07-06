@@ -626,7 +626,32 @@ Block image rendering:
   node never blocks on references (backlinks are informational, for the
   panel later)
 
-12) Key configuration settings (defaults)
+12) Materialized node titles
+
+- `nodes.title jsonb` is a query-only, denormalized copy of a node's title
+  as a locale map (`{locale: text}`, or `{zxx: text}` when not
+  language-specific). `Node::title()` stays the authoritative, dynamic
+  resolver; the column exists for search, labelling and locale-aware sort
+- written at save time in `Node\Store::persist`, folded into the same
+  UPDATE/INSERT as the content (one change/history record).
+  `Cosray\Title\Resolver` mirrors `title()`'s order: a `Contract\Title`
+  node (evaluated once per locale — identical results collapse to the
+  neutral `zxx` key), else the schema `titleField`, else a `title` text
+  field, else empty. Field titles copy the field's value map verbatim;
+  dynamic titles re-hydrate from the content being saved (the passed node
+  still holds the previous version)
+- locale-aware ordering sorts on the map directly, e.g. `ORDER BY
+  COALESCE(NULLIF(title->>'de',''), NULLIF(title->>'zxx','')) COLLATE
+  "de-x-icu"` (`Cosray\Title\Sort`), backed by one expression index per
+  locale; `php run db:recreate-sort-index` reconciles those indexes
+  against the locale keys present in the data (no app boot needed)
+- `php run db:titles` (`Cosray\Title\Rebuild`) re-materializes every live
+  node's title — the backfill after migration 000000-000022 (which only
+  adds the column) and the recovery tool. It needs the booted app (node
+  type registry + locales), so an app registers it from its own
+  commands.php; the change/history triggers are suspended during the run
+
+13) Key configuration settings (defaults)
 
 App and environment:
 
@@ -686,7 +711,7 @@ Uploads and media:
 - `richtext.styles`: `[]` — declared text styles for the `style` mark;
   empty means the mark is unusable
 
-13) Known caveats during exploration
+14) Known caveats during exploration
 
 - Keep expectations conservative and verify behavior against `src/` and tests.
 
