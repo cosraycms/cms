@@ -421,7 +421,7 @@ brew services start postgresql@17
 
 ### Panel development
 
-The SSR/Svelte panel in `panel/` requires Node.js `>=20.20.0` and pnpm `>=11 <12` when you build it from source. Set `COSRAY_PANEL_DEV=1` to load the panel client assets from the Vite dev server instead of the installed static assets. `COSRAY_PANEL_DEV_ORIGIN` overrides the dev server origin; otherwise Cosray uses the current request host and `COSRAY_PANEL_DEV_PORT` (default `2001`).
+The SSR/Svelte panel in `panel/` requires Node.js `>=22.13.0` and pnpm `>=11 <12` when you build it from source. Set `COSRAY_PANEL_DEV=1` to load the panel client assets from the Vite dev server instead of the installed static assets. `COSRAY_PANEL_DEV_ORIGIN` overrides the dev server origin; otherwise Cosray uses the current request host and `COSRAY_PANEL_DEV_PORT` (default `2001`).
 
 ### Local test database
 
