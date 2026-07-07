@@ -237,21 +237,27 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('class="collection-value collection-edit-link"', $html);
 	}
 
-	public function testPanelEditorRouteUsesViteDevServerInDevelopment(): void
+	public function testPanelEditorRouteUsesViteDevServerWhenPanelDevIsEnabled(): void
 	{
-		$this->app = $this->createApp(['app.env' => 'development']);
-		$this->authenticateAs('editor');
-		$this->createArticle('panel-editor-dev', 'Panel Editor Dev');
+		$_SERVER['COSRAY_PANEL_DEV'] = 'true';
+		$_SERVER['COSRAY_PANEL_DEV_ORIGIN'] = 'http://localhost:2001';
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-dev');
+		try {
+			$this->authenticateAs('editor');
+			$this->createArticle('panel-editor-dev', 'Panel Editor Dev');
 
-		$this->assertResponseOk($response);
-		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
-		$this->assertStringContainsString('src="http://localhost:2001/src/panel.ts"', $html);
-		$this->assertStringNotContainsString('/cp/static/panel.js', $html);
-		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
-		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
+			$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-dev');
+
+			$this->assertResponseOk($response);
+			$html = $this->getHtmlResponse($response);
+			$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
+			$this->assertStringContainsString('src="http://localhost:2001/src/panel.ts"', $html);
+			$this->assertStringNotContainsString('/cp/static/panel.js', $html);
+			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
+			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
+		} finally {
+			unset($_SERVER['COSRAY_PANEL_DEV'], $_SERVER['COSRAY_PANEL_DEV_ORIGIN']);
+		}
 	}
 
 	public function testPanelEditorRouteReturnsNotFoundForUnknownCollection(): void

@@ -707,7 +707,7 @@ Paths and panel:
 - `path.assets`: `'/assets'`
 - `path.cache`: `'/cache'`
 - `path.views`: `'/views'` (view directory relative to `path.root`)
-- `path.panel`: `'/cp'` (SSR/HTMX panel path; installed client assets live below `{path.public}{path.panel}/static`)
+- `path.panel`: `'/cp'` (SSR/HTMX panel path; installed client assets live below `{path.public}{path.panel}/static`; set `COSRAY_PANEL_DEV=1` to use the Vite dev server)
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
 

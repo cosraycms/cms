@@ -16,6 +16,7 @@
 - Changed Entries fields to use node-style entry schema classes through `#[Allows(...)]` instead of field inheritance. Stored entry items now use an FQCN `type` plus nested `value`, and the panel exposes `entryTypes` metadata. Existing app data needs an app-specific migration to add the entry FQCN for each Entries field.
 - `path.panel` now configures the SSR/HTMX panel path and defaults to `/cp`.
 - Changed installed panel client asset URLs from `{path.panel}/build/*` to `{path.panel}/static/*`.
+- Changed the panel Vite dev server switch from `app.env === 'development'` to the explicit `COSRAY_PANEL_DEV=1` environment variable.
 
 ### Added
 

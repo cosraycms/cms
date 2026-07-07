@@ -90,7 +90,7 @@ abstract class Panel
 	{
 		$stylesheets = $this->config->panel->theme;
 
-		if ($this->config->env() !== 'development' && $this->hasPanelStatic()) {
+		if (!$this->panelDev() && $this->hasPanelStatic()) {
 			$stylesheets[] = "{$panelPath}/static/panel.css";
 		}
 
@@ -107,7 +107,7 @@ abstract class Panel
 
 	private function moduleScripts(string $panelPath): array
 	{
-		if ($this->config->env() === 'development') {
+		if ($this->panelDev()) {
 			$origin = $this->panelDevOrigin();
 
 			return [
@@ -148,6 +148,11 @@ abstract class Panel
 		$public = rtrim($this->config->path->public, '/\\');
 
 		return $path === '' ? $public : "{$public}/{$path}";
+	}
+
+	private function panelDev(): bool
+	{
+		return filter_var(env('COSRAY_PANEL_DEV', false), FILTER_VALIDATE_BOOL);
 	}
 
 	private function panelDevOrigin(): string

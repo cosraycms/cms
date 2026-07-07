@@ -83,8 +83,58 @@ final class PanelAssetTest extends TestCase
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
 		]);
-		$panel = new class(
-			$this->config(['path.public' => $public]),
+		$panel = $this->panel(['path.public' => $public]);
+
+		try {
+			$context = $panel->data();
+
+			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
+		} finally {
+			$this->removeDirectory($public);
+		}
+	}
+
+	public function testPanelContextUsesStaticUrlsInDevelopmentEnv(): void
+	{
+		$public = $this->createPublicStatic([
+			'panel.css' => 'body {}',
+			'panel.js' => 'console.log("panel");',
+		]);
+		$panel = $this->panel(['app.env' => 'development', 'path.public' => $public]);
+
+		try {
+			$context = $panel->data();
+
+			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
+			$this->assertNotContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
+		} finally {
+			$this->removeDirectory($public);
+		}
+	}
+
+	public function testPanelContextUsesViteDevServerWhenPanelDevIsEnabled(): void
+	{
+		$_SERVER['COSRAY_PANEL_DEV'] = '1';
+		$_SERVER['COSRAY_PANEL_DEV_ORIGIN'] = 'http://localhost:2001';
+		$panel = $this->panel();
+
+		try {
+			$context = $panel->data();
+
+			$this->assertNotContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
+			$this->assertContains('http://localhost:2001/src/panel.ts', $context['moduleScripts']);
+		} finally {
+			unset($_SERVER['COSRAY_PANEL_DEV'], $_SERVER['COSRAY_PANEL_DEV_ORIGIN']);
+		}
+	}
+
+	private function panel(array $config = []): \Cosray\Controller\Panel\Panel
+	{
+		return new class(
+			$this->config($config),
 			$this->container(),
 			$this->request(),
 		) extends \Cosray\Controller\Panel\Panel {
@@ -98,15 +148,6 @@ final class PanelAssetTest extends TestCase
 				return [];
 			}
 		};
-
-		try {
-			$context = $panel->data();
-
-			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
-			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
-		} finally {
-			$this->removeDirectory($public);
-		}
 	}
 
 	/** @param array<string, string> $files */
