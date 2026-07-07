@@ -236,23 +236,31 @@
 		openAddLinkModal();
 	}
 
-	function addLink(url: string, blank: boolean) {
-		if (url && editor) {
-			editor.run(
-				setLink({
-					href: url,
-					target: blank ? '_blank' : '',
-					class: undefined,
-				}),
-			);
-		}
+	function addLink(target: { href?: string; node?: string; asset?: string }, blank: boolean) {
+		if (!editor) return;
+		const href = target.href ?? '';
+		const node = target.node ?? '';
+		const asset = target.asset ?? '';
+		if (href === '' && node === '' && asset === '') return;
+
+		editor.run(
+			setLink({
+				href: href || null,
+				node: node || null,
+				asset: asset || null,
+				target: blank ? '_blank' : '',
+				class: undefined,
+			}),
+		);
 	}
 
 	function openAddLinkModal() {
 		if (!editor) return;
 		const state = editor.view.state;
 		const linkAttrs = getMarkAttributes(state, schema.marks.link);
-		const href = linkAttrs?.href ?? '';
+		const href = typeof linkAttrs?.href === 'string' ? linkAttrs.href : '';
+		const node = typeof linkAttrs?.node === 'string' ? linkAttrs.node : '';
+		const asset = typeof linkAttrs?.asset === 'string' ? linkAttrs.asset : '';
 		const target = linkAttrs?.target ?? '';
 
 		const handle = cosray().modal.open((host) => {
@@ -261,7 +269,9 @@
 				props: {
 					add: addLink,
 					close: () => handle.close(),
-					value: href,
+					href,
+					node,
+					asset,
 					blank: target === '_blank',
 				},
 			});

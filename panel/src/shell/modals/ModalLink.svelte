@@ -1,34 +1,76 @@
 <script lang="ts">
 	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
+	import type { NodeInfo } from '$shell/NodeSearch.svelte';
 
+	import { untrack } from 'svelte';
 	import { _ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoImage from '$shell/icons/IcoImage.svelte';
 	import IcoLink from '$shell/icons/IcoLink.svelte';
+	import IcoParagraph from '$shell/icons/IcoParagraph.svelte';
 	import Button from '$shell/Button.svelte';
 	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
+	import NodeSearch from '$shell/NodeSearch.svelte';
+
+	// Exactly one of href/node/asset carries the target; the active tab
+	// decides which. Matches the richtext `link` mark's attrs.
+	type LinkTarget = { href?: string; node?: string; asset?: string };
 
 	type Props = {
 		close: () => void;
-		add: (value: string, blank: boolean) => void;
-		value: string;
+		add: (target: LinkTarget, blank: boolean) => void;
+		href?: string;
+		node?: string;
+		asset?: string;
 		blank: boolean;
 	};
 
-	let { close, add, value = $bindable(), blank = $bindable() }: Props = $props();
+	let { close, add, href = '', node = '', asset = '', blank = $bindable() }: Props = $props();
 
-	let currentTab = $state('manually');
+	// Editing an existing link opens on the tab that matches its kind; an
+	// asset link defaults to the files tab, which browses every kind. The
+	// modal is remounted per open, so these props are a one-time seed
+	// (untrack captures the current value without a reactive dependency).
+	let currentTab = $state(
+		untrack(() => (node !== '' ? 'page' : asset !== '' ? 'files' : 'manually')),
+	);
+
+	let url = $state(untrack(() => href));
+	let pickedNode = $state(untrack(() => node));
+	let pickedAsset = $state(untrack(() => asset));
+
+	const canAdd = $derived(
+		currentTab === 'page'
+			? pickedNode !== ''
+			: currentTab === 'images' || currentTab === 'files'
+				? pickedAsset !== ''
+				: url !== '',
+	);
 
 	function clickAdd() {
-		if (value) {
-			add(value, blank);
+		let target: LinkTarget | null = null;
+
+		if (currentTab === 'page') {
+			target = pickedNode !== '' ? { node: pickedNode } : null;
+		} else if (currentTab === 'images' || currentTab === 'files') {
+			target = pickedAsset !== '' ? { asset: pickedAsset } : null;
+		} else {
+			target = url !== '' ? { href: url } : null;
+		}
+
+		if (target) {
+			add(target, blank);
 			close();
 		}
 	}
 
-	function pick(item: LibraryItem) {
-		value = item.url;
+	function pickAsset(item: LibraryItem) {
+		pickedAsset = item.uid;
+	}
+
+	function pickNode(item: NodeInfo) {
+		pickedNode = item.uid;
 	}
 
 	function changeTab(tab: string) {
@@ -50,6 +92,10 @@
 						<IcoLink />
 						<span>{_('Manueller Link')}</span>
 					</button>
+					<button class="tab" class:active={currentTab === 'page'} onclick={changeTab('page')}>
+						<IcoParagraph />
+						<span>{_('Seite')}</span>
+					</button>
 					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
 						<IcoImage />
 						<span>{_('Bilder')}</span>
@@ -62,13 +108,17 @@
 			</div>
 		</div>
 		<div class="files cms-modal-link-files">
-			{#if currentTab === 'images'}
+			{#if currentTab === 'page'}
 				{#key currentTab}
-					<LibraryBrowser kind="image" {pick} selected={value} />
+					<NodeSearch pick={pickNode} selected={pickedNode || null} />
+				{/key}
+			{:else if currentTab === 'images'}
+				{#key currentTab}
+					<LibraryBrowser kind="image" pick={pickAsset} selected={pickedAsset} />
 				{/key}
 			{:else if currentTab === 'files'}
 				{#key currentTab}
-					<LibraryBrowser {pick} selected={value} />
+					<LibraryBrowser pick={pickAsset} selected={pickedAsset} />
 				{/key}
 			{:else}
 				<div>
@@ -76,7 +126,7 @@
 						{_('Bitte eine gültige URL eingeben')}
 					</div>
 					<div class="cms-modal-link-manual-input-wrap">
-						<input class="cms-input" type="text" bind:value />
+						<input class="cms-input" type="text" bind:value={url} />
 					</div>
 				</div>
 			{/if}
@@ -107,7 +157,7 @@
 		<Button variant="danger" onclick={close}>
 			{_('Abbrechen')}
 		</Button>
-		<Button variant="primary" onclick={clickAdd} disabled={!value}>
+		<Button variant="primary" onclick={clickAdd} disabled={!canAdd}>
 			{_('Link hinzufügen')}
 		</Button>
 	</div>
