@@ -70,6 +70,48 @@ final class Reference extends Panel
 	}
 
 	/**
+	 * Unconstrained node search backing the richtext link picker. A prose
+	 * link is not bound to a schema property, so the pickable set is simply
+	 * every non-deleted node (any type, any publication), the current node
+	 * excluded. Kept separate from search() so that method's reflected
+	 * #[Pick] contract (constraints from the field, never the client) stays
+	 * intact.
+	 */
+	public function nodes(Cms $cms, Factory $factory): Response
+	{
+		$q = $this->stringParam('q');
+		$exclude = $this->stringParam('node');
+		$offset = $this->intParam('offset', 0, min: 0);
+		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
+
+		$finder = $cms
+			->nodes()
+			->deleted(false)
+			->published(null)
+			->hidden(null)
+			->order('changed DESC');
+
+		if ($exclude !== '') {
+			$finder->exclude($exclude);
+		}
+
+		if ($q !== '') {
+			$finder->searchTitle($q);
+		}
+
+		$finder->offset($offset)->limit($limit + 1);
+
+		$rows = iterator_to_array($finder, false);
+		$more = count($rows) > $limit;
+
+		return $this->result(
+			$factory,
+			array_map($this->item(...), array_slice($rows, 0, $limit)),
+			$more,
+		);
+	}
+
+	/**
 	 * Resolve titles for already-chosen uids so the control can render its
 	 * selected rows. Chosen values render regardless of the pickable set
 	 * (only soft-deleted targets drop out), and the caller's order is kept.

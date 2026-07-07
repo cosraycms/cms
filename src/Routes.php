@@ -151,6 +151,13 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->get(
+						'/reference/nodes',
+						[Panel\Reference::class, 'nodes'],
+						'reference.nodes',
+					)
+					->middleware($panelAuth);
+				$panel
+					->get(
 						'/reference/labels',
 						[Panel\Reference::class, 'labels'],
 						'reference.labels',
