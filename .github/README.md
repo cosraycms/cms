@@ -1,9 +1,9 @@
 # Cosray CMS
 
 <!-- prettier-ignore-start -->
-[![ci](https://github.com/cosray/cms/actions/workflows/ci.yml/badge.svg)](https://github.com/cosray/cms/actions)
-[![codecov](https://codecov.io/gh/cosray/cms/graph/badge.svg?token=RRSTM2CMOK)](https://codecov.io/gh/cosray/cms)
-[![REUSE status](https://api.reuse.software/badge/github.com/cosray/cms)](https://api.reuse.software/info/github.com/cosray/cms)
+[![ci](https://codeberg.org/cosray/cms/badges/workflows/ci.yml/badge.svg?style=flat&logo=codeberg&logoColor=white&label=ci)](https://codeberg.org/cosray/cms/actions)
+[![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celemas.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celemas.dev/cosray/cms/code)
+[![REUSE status](https://api.reuse.software/badge/codeberg.org/cosray/cms)](https://api.reuse.software/info/codeberg.org/cosray/cms)
 [![License](https://img.shields.io/badge/license-MPL--2.0-blue)](../LICENSES/MPL-2.0.txt)
 [![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](../LICENSES/MIT.txt)
 <!-- prettier-ignore-end -->
@@ -13,6 +13,7 @@
 **Development moved to <https://codeberg.org/cosray/cms>.**
 
 <!-- prettier-ignore-start -->
+
 > [!WARNING]
 > _Thanks for stopping by! This project is in an early, fast-moving stage. The API and data model are still unstable, and documentation is minimal or missing. I'm aware of many of the rough edges, so contributions are probably not worth your time right now._
 <!-- prettier-ignore-end -->
