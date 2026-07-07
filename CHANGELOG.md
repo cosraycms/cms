@@ -10,7 +10,7 @@
 - Changed the `window.Cosray` bridge upload to `upload(type, file)`; it returns the catalog asset (`uid`, `url`, `filename`, ...). Element controls now receive a resolved `assets` uid map alongside `value`, and per-use media meta is only persisted when it is non-empty — empty meta falls back to the asset's catalog defaults.
 - Added a top-level `assets` map to serialized node JSON (frontend content negotiation); headless consumers must resolve media item uids through it instead of reading filenames from the items.
 - Removed `RenderContext::assetsPath()`; block types resolve media through `RenderContext::asset($uid)` and the catalog keys.
-- Removed the legacy SvelteKit panel (`ui/`), its `/panel` routes, and the old `install-panel` command. Downstream apps must switch to the SSR/HTMX panel (`path.panel`, default `/cp`), replace old panel install scripts with the new `vendor/bin/cosray-panel install` flow, and delete the legacy installed `public/panel/` directory when it is no longer the configured panel path.
+- Removed the legacy SvelteKit panel (`ui/`), its `/panel` routes, and the old `install-panel` command. Downstream apps must switch to the SSR/HTMX panel (`path.panel`, default `/cp`), register `Cosray\Commands\InstallPanel` in their app command runner, replace old panel install scripts with `php run panel:install`, and delete the legacy installed `public/panel/` directory when it is no longer the configured panel path.
 - Removed the JSON API (`/panel/api` and the optional `path.api` mount) including the auth, user, node, and collection endpoints. Frontend content negotiation (page URLs answered with JSON for `Accept: application/json`) is unaffected; custom API routes can be registered via `Bootstrap::addRoutes()`.
 - Renamed the Matrix field concept to Entries/Entry. Use `Cosray\Field\Entries`, `Cosray\Value\Entries`, and `Cosray\Value\Entry`; stored field content now uses `"type": "entries"`.
 - Changed Entries fields to use node-style entry schema classes through `#[Allows(...)]` instead of field inheritance. Stored entry items now use an FQCN `type` plus nested `value`, and the panel exposes `entryTypes` metadata. Existing app data needs an app-specific migration to add the entry FQCN for each Entries field.
@@ -19,7 +19,7 @@
 
 ### Added
 
-- Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `panel:install` command exposed through `vendor/bin/cosray-panel install`. The installer writes client assets to `{path.public}{path.panel}/static`.
+- Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `Cosray\Commands\InstallPanel` command. The installer writes client assets to `{path.public}{path.panel}/static`.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 

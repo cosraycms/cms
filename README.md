@@ -344,16 +344,10 @@ The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
 
 ### Admin panel assets
 
-The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. Run the installer after Composer installs or updates Cosray:
+The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. Register `Cosray\Commands\InstallPanel` with the app's command runner and run the installer after Composer installs or updates Cosray:
 
 ```bash
-vendor/bin/cosray-panel install
-```
-
-Apps that register `Cosray\Commands\InstallPanel` with their own `Config` can also run `php run panel:install`. If the app does not register the installer and uses a non-default panel or public path, pass the paths explicitly:
-
-```bash
-vendor/bin/cosray-panel install --panel=/panel --public=public
+php run panel:install
 ```
 
 ### Admin panel theming
