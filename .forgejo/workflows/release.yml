@@ -106,8 +106,26 @@ jobs:
 
       - name: Create tarball
         run: |
+          set -euo pipefail
+
           mkdir -p dist
-          cd panel/static && tar -czf "../../dist/${FILE_NAME}" . && cd ../..
+          (
+            cd panel/static
+            shopt -s dotglob nullglob
+            entries=(*);
+
+            if [ "${#entries[@]}" -eq 0 ]; then
+              echo "Panel static directory is empty"
+              exit 1
+            fi
+
+            tar -czf "../../dist/${FILE_NAME}" "${entries[@]}"
+          )
+
+          if tar -tzf "dist/${FILE_NAME}" | grep -qx '\./'; then
+            echo "Panel archive must not contain a root dot entry"
+            exit 1
+          fi
 
       - name: Sign tarball
         env:
