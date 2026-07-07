@@ -41,7 +41,7 @@ high_value_topics:
 - Parent/child hierarchy metadata with `#[Children(...)]`
 - Behavioral interfaces (Title, HasInit, HandlesFormPost, ProvidesRenderContext)
 - Admin panel theming via panel.theme
-- Root-based Config initialization, Dotenv loading, and Config defaults
+- Root-based Config initialization, environment variable reading, and Config defaults
 - Default error handling and error renderer settings via Config defaults
 - Session and upload settings via Config defaults
 
@@ -115,8 +115,9 @@ $app->run();
 Important:
 
 - `App::create()` creates `Config` internally and exposes it as `$app->config`.
-- `Config` loads `.env` from the root path with `Dotenv::safeLoad()`.
-- `Config::requireEnv(...)` validates required environment variables and may be removed later.
+- `Config` reads recognized environment variables from `$_SERVER`, then `$_ENV`; it does not read the raw process environment (`getenv()`) and does not load a `.env` file. An app that wants `.env` support loads it itself (e.g. via `vlucas/phpdotenv`, whose immutable loader populates `$_SERVER`/`$_ENV`) before constructing `Config`.
+- `Config` validates the boolean vars (`APP_DEBUG`, `SITE_SESSION_ENABLED`, `SESSION_COOKIE_SECURE`) and integer vars (`AUTH_REMEMBER_LIFETIME`, `SESSION_COOKIE_LIFETIME`, `SESSION_IDLE_TIMEOUT`) at construction, throwing `Cosray\Exception\InvalidEnvironment` on malformed values.
+- `Config::requireEnv(...)` asserts required environment variables are present, throwing `Cosray\Exception\InvalidEnvironment` when one is missing.
 - `Config` is immutable after construction. Prefer building the settings array upfront and passing it once to `App::create(...)` or `new Config(...)`; use native booleans and integers in PHP settings.
 - Use `Config::with(...)` sparingly for changed standalone config copies, tests, or small derived configs. Do not recommend long `with()` chains for full app config files.
 - Built-in settings are available by key (`$config->get('path.panel')`) and through typed lazy objects (`$config->panel->path`, `$config->session->options`). The lazy object properties own domain-specific conversion and broad type checks and may cache values safely because `Config` is immutable.
@@ -694,10 +695,10 @@ Block image rendering:
 
 App and environment:
 
-- `app.name`: `env('APP_NAME', 'celemas')` after `.env` has loaded; not validated or normalized, so keep it stable and safe for app-specific identifiers
-- `app.debug`: `env('APP_DEBUG', false)` after `.env` has loaded
-- `app.env`: `env('APP_ENV', '')` after `.env` has loaded
-- `app.secret`: `env('APP_SECRET', null)` after `.env` has loaded
+- `app.name`: `env('APP_NAME', 'celemas')` from `$_SERVER`/`$_ENV`; not validated or normalized, so keep it stable and safe for app-specific identifiers
+- `app.debug`: `env('APP_DEBUG', false)` from `$_SERVER`/`$_ENV`
+- `app.env`: `env('APP_ENV', '')` from `$_SERVER`/`$_ENV`
+- `app.secret`: `env('APP_SECRET', null)` from `$_SERVER`/`$_ENV`
 
 Paths and panel:
 
@@ -721,7 +722,7 @@ Errors:
 
 Database:
 
-- `db.dsn`: `env('DATABASE_URL', null)` after `.env` has loaded
+- `db.dsn`: `env('DATABASE_URL', null)` from `$_SERVER`/`$_ENV`
 - `db.sql`: `[]`
 - `db.migrations`: `[]`
 - `db.options`: `[]`
@@ -729,7 +730,7 @@ Database:
 
 Session:
 
-- `session.enabled`: `env('SITE_SESSION_ENABLED', false)` after `.env` has loaded; adds session middleware to selected frontend routes
+- `session.enabled`: `env('SITE_SESSION_ENABLED', false)` from `$_SERVER`/`$_ENV`; adds session middleware to selected frontend routes
 - `session.options.cookie_httponly`: `true`
 - `session.options.cookie_lifetime`: `(int) env('SESSION_COOKIE_LIFETIME', '0')`
 - `session.options.cookie_secure`: `env('SESSION_COOKIE_SECURE', true)`

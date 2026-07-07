@@ -6,11 +6,11 @@ namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Exception\ValueError;
 use Cosray\Config;
+use Cosray\Exception\InvalidEnvironment;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
 use Cosray\Util\Password;
-use Dotenv\Exception\ValidationException;
 
 /**
  * @internal
@@ -21,9 +21,6 @@ final class ConfigTest extends TestCase
 {
 	/** @var array<string, array{env: bool, envValue: mixed, server: bool, serverValue: mixed, process: bool, processValue: string|null}> */
 	private array $environment = [];
-
-	/** @var list<string> */
-	private array $roots = [];
 
 	protected function setUp(): void
 	{
@@ -37,6 +34,7 @@ final class ConfigTest extends TestCase
 			'APP_REQUIRED',
 			'APP_SECRET',
 			'APP_TIMEZONE',
+			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
 			'DATABASE_URL',
 			'SITE_SESSION_ENABLED',
@@ -48,16 +46,6 @@ final class ConfigTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		foreach ($this->roots as $root) {
-			if (is_file($root . '/.env')) {
-				unlink($root . '/.env');
-			}
-
-			if (is_dir($root)) {
-				rmdir($root);
-			}
-		}
-
 		foreach ($this->environment as $key => $value) {
 			if ($value['env']) {
 				$_ENV[$key] = $value['envValue'];
@@ -159,12 +147,17 @@ final class ConfigTest extends TestCase
 		$this->assertSame('/admin', $config->panel->path);
 	}
 
-	public function testDotenvIsLoadedFromRoot(): void
+	public function testEnvironmentVariablesConfigureApp(): void
 	{
-		$root = $this->rootWithEnv(
-			"APP_NAME=test-cms\nAPP_DEBUG=true\nAPP_ENV=testing\nAPP_REQUIRED=present\nAPP_SECRET=test-secret\nAPP_TIMEZONE=Europe/Berlin\nSITE_SESSION_ENABLED=true\n",
-		);
-		$config = new Config($root);
+		$this->setEnvironment([
+			'APP_NAME' => 'test-cms',
+			'APP_DEBUG' => 'true',
+			'APP_ENV' => 'testing',
+			'APP_SECRET' => 'test-secret',
+			'APP_TIMEZONE' => 'Europe/Berlin',
+			'SITE_SESSION_ENABLED' => 'true',
+		]);
+		$config = new Config(self::root());
 
 		$this->assertSame('test-cms', $config->app->name);
 		$this->assertTrue($config->debug());
@@ -172,14 +165,17 @@ final class ConfigTest extends TestCase
 		$this->assertSame('test-secret', $config->app->secret);
 		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
-		$this->assertSame('present', $_ENV['APP_REQUIRED']);
 	}
 
 	public function testSessionOptionsCanBeChangedFromEnvironment(): void
 	{
-		$config = new Config($this->rootWithEnv(
-			"AUTH_REMEMBER_LIFETIME=1209600\nSESSION_COOKIE_SECURE=false\nSESSION_COOKIE_LIFETIME=86400\nSESSION_IDLE_TIMEOUT=7200\n",
-		));
+		$this->setEnvironment([
+			'AUTH_REMEMBER_LIFETIME' => '1209600',
+			'SESSION_COOKIE_SECURE' => 'false',
+			'SESSION_COOKIE_LIFETIME' => '86400',
+			'SESSION_IDLE_TIMEOUT' => '7200',
+		]);
+		$config = new Config(self::root());
 
 		$this->assertSame(1_209_600, $config->auth->rememberLifetime);
 		$this->assertFalse($config->session->options['cookie_secure']);
@@ -441,21 +437,23 @@ final class ConfigTest extends TestCase
 
 	public function testDatabaseDsnUsesEnvironmentVariable(): void
 	{
-		$config = new Config($this->rootWithEnv("DATABASE_URL=pgsql:dbname=cms\n"));
+		$this->setEnvironment(['DATABASE_URL' => 'pgsql:dbname=cms']);
+		$config = new Config(self::root());
 
 		$this->assertSame('pgsql:dbname=cms', $config->db->dsn);
 	}
 
-	public function testMissingDotenvFileIsIgnored(): void
+	public function testMissingEnvironmentUsesDefaults(): void
 	{
-		$config = new Config($this->rootWithEnv());
+		$config = new Config(self::root());
 
 		$this->assertFalse($config->debug());
 	}
 
 	public function testRequireEnvReturnsConfigWhenVariableExists(): void
 	{
-		$config = new Config($this->rootWithEnv("APP_REQUIRED=present\n"));
+		$this->setEnvironment(['APP_REQUIRED' => 'present']);
+		$config = new Config(self::root());
 
 		$this->assertSame($config, $config->requireEnv('APP_REQUIRED'));
 	}
@@ -463,30 +461,34 @@ final class ConfigTest extends TestCase
 	public function testRequireEnvAcceptsServerEnvironmentVariable(): void
 	{
 		$_SERVER['APP_REQUIRED'] = 'present';
-		$config = new Config($this->rootWithEnv());
+		$config = new Config(self::root());
 
 		$this->assertSame($config, $config->requireEnv('APP_REQUIRED'));
 	}
 
 	public function testInvalidBooleanEnvironmentVariableFails(): void
 	{
-		$this->throws(ValidationException::class);
+		$this->setEnvironment(['SITE_SESSION_ENABLED' => 'maybe']);
 
-		new Config($this->rootWithEnv("SITE_SESSION_ENABLED=maybe\n"));
+		$this->throws(InvalidEnvironment::class);
+
+		new Config(self::root());
 	}
 
 	public function testInvalidIntegerEnvironmentVariableFails(): void
 	{
-		$this->throws(ValidationException::class);
+		$this->setEnvironment(['SESSION_IDLE_TIMEOUT' => 'forever']);
 
-		new Config($this->rootWithEnv("SESSION_IDLE_TIMEOUT=forever\n"));
+		$this->throws(InvalidEnvironment::class);
+
+		new Config(self::root());
 	}
 
 	public function testRequireEnvFailsForMissingVariable(): void
 	{
-		$config = new Config($this->rootWithEnv());
+		$config = new Config(self::root());
 
-		$this->throws(ValidationException::class);
+		$this->throws(InvalidEnvironment::class);
 
 		$config->requireEnv('APP_MISSING');
 	}
@@ -509,16 +511,11 @@ final class ConfigTest extends TestCase
 		}
 	}
 
-	private function rootWithEnv(string $contents = ''): string
+	/** @param array<string, string> $variables */
+	private function setEnvironment(array $variables): void
 	{
-		$root = sys_get_temp_dir() . '/cosray-cms-config-' . bin2hex(random_bytes(4));
-		mkdir($root);
-		$this->roots[] = $root;
-
-		if ($contents !== '') {
-			file_put_contents($root . '/.env', $contents);
+		foreach ($variables as $key => $value) {
+			$_SERVER[$key] = $value;
 		}
-
-		return $root;
 	}
 }

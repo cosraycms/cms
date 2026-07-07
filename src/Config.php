@@ -89,7 +89,7 @@ class Config
 	public function __construct(string $root, array $settings = [])
 	{
 		$this->root = $this->normalizeRoot($root);
-		$this->environment = Config\Env::load($this->root);
+		$this->environment = Config\Env::load();
 		$this->environment->validate();
 		$this->settings = Config\Settings::merge(
 			Config\Defaults::values($this->root, $this->environment),
