@@ -396,7 +396,10 @@ calls the panel-only JSON endpoints `GET {panel}/reference/search`
 (`type`, `field`, `q`, `node`) and `GET {panel}/reference/labels` (`uids`),
 served by `Controller\Panel\Reference`. The pickable set is derived server-side
 from the field's own `#[Pick]` schema: non-deleted, optionally type/where- and
-publication-constrained, the edited node excluded.
+publication-constrained, the edited node excluded. `GET {panel}/reference/nodes`
+(`q`, `node`) is the unconstrained sibling — any non-deleted node, no `#[Pick]`
+gate — backing the richtext link picker, whose page tab links prose to a node
+(`link.node`); its image/file tabs store `link.asset` uids the same way.
 
 5) Querying content at runtime
 
