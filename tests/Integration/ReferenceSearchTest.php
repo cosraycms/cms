@@ -52,7 +52,7 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		)->run();
 	}
 
-	public function testAppliesTargetsSkipsDeletedKeepsUnpublished(): void
+	public function testTypeConstraintSkipsDeletedKeepsUnpublished(): void
 	{
 		$result = $this->search(['type' => 'test-reference', 'field' => 'related']);
 		$uids = $this->uids($result);
@@ -61,7 +61,7 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		$this->assertContains('ref-alpha', $uids, 'published target is pickable');
 		$this->assertContains('ref-beta', $uids, 'unpublished target is still pickable');
 		$this->assertNotContains('ref-gamma', $uids, 'deleted target is excluded');
-		$this->assertNotContains('ref-page', $uids, 'off-type node is excluded by #[Targets]');
+		$this->assertNotContains('ref-page', $uids, 'off-type node is excluded by #[Pick] types');
 
 		foreach ($result['nodes'] as $node) {
 			$this->assertSame('test-article', $node['type']);
@@ -87,6 +87,28 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		$this->assertContains('ref-alpha', $uids);
 		$this->assertNotContains('ref-beta', $uids);
 		$this->assertNotContains('ref-page', $uids);
+	}
+
+	public function testPublishedGateExcludesDrafts(): void
+	{
+		// The `live` field is #[Pick(published: true)].
+		$result = $this->search(['type' => 'test-reference', 'field' => 'live']);
+		$uids = $this->uids($result);
+
+		$this->assertContains('ref-alpha', $uids, 'published node is pickable');
+		$this->assertContains('ref-page', $uids, 'published node of any type is pickable');
+		$this->assertNotContains('ref-beta', $uids, 'the publication gate drops the draft');
+	}
+
+	public function testWhereClauseConstrainsByType(): void
+	{
+		// The `wherePick` field constrains type through the finder DSL.
+		$result = $this->search(['type' => 'test-reference', 'field' => 'wherePick']);
+		$uids = $this->uids($result);
+
+		$this->assertContains('ref-alpha', $uids);
+		$this->assertContains('ref-beta', $uids);
+		$this->assertNotContains('ref-page', $uids, 'the where clause excludes the other type');
 	}
 
 	public function testUnknownTypeOrNonReferenceFieldYieldsEmpty(): void

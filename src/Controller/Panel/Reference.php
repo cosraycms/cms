@@ -10,8 +10,7 @@ use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Field\Reference as ReferenceField;
 use Cosray\Node\Node;
-use Cosray\Schema\Filter;
-use Cosray\Schema\Targets;
+use Cosray\Schema\Pick;
 use ReflectionNamedType;
 use ReflectionProperty;
 
@@ -40,14 +39,14 @@ final class Reference extends Panel
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
 
 		$finder = $cms
-			->nodes((string) ($constraints['filter'] ?? ''))
+			->nodes($constraints['where'])
 			->deleted(false)
-			->published(null)
-			->hidden(null)
+			->published($constraints['published'])
+			->hidden($constraints['hidden'])
 			->order('changed DESC');
 
-		if ($constraints['targets'] !== []) {
-			$finder->types(...$constraints['targets']);
+		if ($constraints['types'] !== []) {
+			$finder->types(...$constraints['types']);
 		}
 
 		if ($exclude !== '') {
@@ -116,11 +115,12 @@ final class Reference extends Panel
 	}
 
 	/**
-	 * Read the reference field's declared pickable-set constraints from
-	 * its property attributes. Null when the type/field is unknown or the
-	 * field is not a Reference — the caller returns an empty result.
+	 * Read the reference field's declared pickable-set constraints from its
+	 * #[Pick] attribute. Null when the type/field is unknown or the field is
+	 * not a Reference — the caller returns an empty result. A Reference field
+	 * without #[Pick] yields the open defaults (any type, any publication).
 	 *
-	 * @return array{targets: list<string>, filter: ?string}|null
+	 * @return array{types: list<string>, where: string, published: ?bool, hidden: ?bool}|null
 	 */
 	private function constraints(string $typeHandle, string $field): ?array
 	{
@@ -140,20 +140,20 @@ final class Reference extends Panel
 			return null;
 		}
 
-		$targets = [];
-		$filter = null;
+		$attributes = $property->getAttributes(Pick::class);
 
-		foreach ($property->getAttributes() as $attr) {
-			$meta = $attr->newInstance();
-
-			if ($meta instanceof Targets) {
-				$targets = $meta->types;
-			} elseif ($meta instanceof Filter) {
-				$filter = $meta->query;
-			}
+		if ($attributes === []) {
+			return ['types' => [], 'where' => '', 'published' => null, 'hidden' => null];
 		}
 
-		return ['targets' => $targets, 'filter' => $filter];
+		$pick = $attributes[0]->newInstance();
+
+		return [
+			'types' => $pick->types,
+			'where' => $pick->where,
+			'published' => $pick->published,
+			'hidden' => $pick->hidden,
+		];
 	}
 
 	/** @return class-string|null */

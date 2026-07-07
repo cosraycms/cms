@@ -12,17 +12,12 @@ use Cosray\Value;
 /**
  * A reference to one or more other nodes, stored language-neutral as an
  * ordered list of `{uid}` items. Unbounded by default; #[Limit(max: 1)]
- * makes it single. #[Targets(...)] and #[Filter("...")] constrain which
- * nodes the picker offers (enforced by the search endpoint).
+ * makes it single. #[Pick(...)] constrains which nodes the picker offers
+ * (enforced by the search endpoint).
  */
-class Reference extends Field implements
-	Capability\Limitable,
-	Capability\Filterable,
-	Capability\Targetable
+class Reference extends Field implements Capability\Limitable
 {
 	use Capability\IsLimitable;
-	use Capability\IsFilterable;
-	use Capability\IsTargetable;
 
 	public function control(): Control
 	{

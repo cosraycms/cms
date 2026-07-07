@@ -6,14 +6,12 @@ namespace Cosray\Tests\Unit;
 
 use Celemas\Core\Request;
 use Cosray\Context;
-use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Field\Reference;
 use Cosray\Field\Services;
-use Cosray\Field\Text;
 use Cosray\Locales;
 use Cosray\Node\FieldOwner;
-use Cosray\Tests\Fixtures\Node\TestArticle;
+use Cosray\Schema\Pick;
 use Cosray\Tests\Fixtures\Node\TestNodeWithReference;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Reference as ReferenceValue;
@@ -59,8 +57,6 @@ class ReferenceTest extends TestCase
 		$this->assertInstanceOf(ReferenceValue::class, $field->value());
 		$this->assertSame(-1, $field->getLimitMax());
 		$this->assertSame('reference', $field->control()->name);
-		$this->assertSame([], $field->targets());
-		$this->assertNull($field->getFilter());
 	}
 
 	public function testStructureWrapsUidsUnderNeutralLocale(): void
@@ -163,31 +159,21 @@ class ReferenceTest extends TestCase
 		$this->assertSame('', (string) $value);
 	}
 
-	public function testTargetsAndFilterAttributesApply(): void
+	public function testPickNormalizesTypesAndKeepsGates(): void
 	{
-		$owner = new FieldOwner($this->createContext(), 'test-node');
-		$field = new Reference('related', $owner, new ValueContext('related', []));
-		$field->init(
-			Services::withDefaults(),
-			new ReflectionProperty(TestNodeWithReference::class, 'related'),
-		);
+		$single = new Pick('beer', where: "productLine = 'klassiker'", published: true);
+		$this->assertSame(['beer'], $single->types);
+		$this->assertSame("productLine = 'klassiker'", $single->where);
+		$this->assertTrue($single->published);
+		$this->assertNull($single->hidden);
 
-		$this->assertSame([TestArticle::class], $field->targets());
-		$this->assertSame("type = 'test-article'", $field->getFilter());
-	}
+		// Array form for several types; blanks dropped and the list re-indexed.
+		$many = new Pick(['beer', '', 'wine'], hidden: false);
+		$this->assertSame(['beer', 'wine'], $many->types);
+		$this->assertSame('', $many->where);
+		$this->assertNull($many->published);
+		$this->assertFalse($many->hidden);
 
-	public function testFilterAttributeRejectsNonFilterableField(): void
-	{
-		$node = new class {
-			#[\Cosray\Schema\Filter("type = 'x'")]
-			protected Text $title;
-		};
-
-		$owner = new FieldOwner($this->createContext(), 'test-node');
-		$field = new Text('title', $owner, new ValueContext('title', []));
-
-		$this->throws(RuntimeException::class);
-
-		$field->init(Services::withDefaults(), new ReflectionProperty($node, 'title'));
+		$this->assertSame([], new Pick()->types);
 	}
 }
