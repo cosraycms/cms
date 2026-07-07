@@ -1,5 +1,5 @@
 import type { Attrs, MarkType, NodeType } from 'prosemirror-model';
-import type { Command } from 'prosemirror-state';
+import type { Command, EditorState } from 'prosemirror-state';
 import { toggleMark } from 'prosemirror-commands';
 import { liftListItem, wrapInList } from 'prosemirror-schema-list';
 import { schema } from './schema';
@@ -65,49 +65,60 @@ export function insertHorizontalRule(): Command {
 	};
 }
 
+// The range a link edit should target: the active selection when there is
+// one, otherwise the full extent of the link mark under a collapsed cursor.
+// Editing a link commonly leaves the cursor inside it with nothing selected,
+// so without this expansion re-picking a target would be a silent no-op.
+function linkRange(state: EditorState): { from: number; to: number } | null {
+	const { from, to, empty } = state.selection;
+	if (!empty) return { from, to };
+
+	const $pos = state.selection.$from;
+	const link = schema.marks.link.isInSet($pos.marks());
+	if (!link) return null;
+
+	const parent = $pos.parent;
+	const parentStart = $pos.start();
+	let start = $pos.pos;
+	let end = $pos.pos;
+
+	// Extend across the adjacent nodes carrying the same link mark.
+	parent.forEach((child, offset) => {
+		if (!link.isInSet(child.marks)) return;
+		const childStart = parentStart + offset;
+		const childEnd = childStart + child.nodeSize;
+		if (childStart <= $pos.pos && childEnd >= $pos.pos) {
+			start = childStart;
+			end = childEnd;
+		}
+	});
+
+	return { from: start, to: end };
+}
+
 export function setLink(attrs: Attrs): Command {
 	return (state, dispatch) => {
-		const { from, to, empty } = state.selection;
-		if (empty) return false;
+		const range = linkRange(state);
+		if (!range) return false;
 		if (!dispatch) return true;
+		const { from, to } = range;
 		const mark = schema.marks.link.create(attrs);
-		const tr = state.tr.addMark(from, to, mark);
-		dispatch(tr.scrollIntoView());
+		// Strip the old link first so switching kind (href/node/asset) never
+		// leaves a stale carrier attr behind.
+		dispatch(
+			state.tr.removeMark(from, to, schema.marks.link).addMark(from, to, mark).scrollIntoView(),
+		);
 		return true;
 	};
 }
 
 export function unsetLink(): Command {
 	return (state, dispatch) => {
+		const range = linkRange(state);
+		if (!range) return false;
 		if (!dispatch) return true;
-		const { from, to, empty } = state.selection;
-		if (empty) {
-			// Expand selection to the full link range
-			const $pos = state.selection.$from;
-			const marks = $pos.marks();
-			const linkMark = schema.marks.link.isInSet(marks);
-			if (!linkMark) return false;
-
-			let start = $pos.pos;
-			let end = $pos.pos;
-			const parent = $pos.parent;
-			const parentStart = $pos.start();
-
-			parent.forEach((child, offset) => {
-				const childStart = parentStart + offset;
-				const childEnd = childStart + child.nodeSize;
-				if (schema.marks.link.isInSet(child.marks)) {
-					if (childStart <= $pos.pos && childEnd >= $pos.pos) {
-						start = childStart;
-						end = childEnd;
-					}
-				}
-			});
-
-			dispatch(state.tr.removeMark(start, end, schema.marks.link).scrollIntoView());
-		} else {
-			dispatch(state.tr.removeMark(from, to, schema.marks.link).scrollIntoView());
-		}
+		const { from, to } = range;
+		dispatch(state.tr.removeMark(from, to, schema.marks.link).scrollIntoView());
 		return true;
 	};
 }
