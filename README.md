@@ -342,6 +342,20 @@ The admin panel formats database timestamps with `app.timezone`. Use an IANA ide
 
 The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
 
+### Admin panel assets
+
+The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. Run the installer after Composer installs or updates Cosray:
+
+```bash
+vendor/bin/cosray-panel install
+```
+
+Apps that register `Cosray\Commands\InstallPanel` with their own `Config` can also run `php run panel:install`. If the app does not register the installer and uses a non-default panel or public path, pass the paths explicitly:
+
+```bash
+vendor/bin/cosray-panel install --panel=/panel --public=public
+```
+
 ### Admin panel theming
 
 You can style the admin panel through `panel.theme` in your CMS config. Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`). The panel links those CSS files in the `theme` cascade layer, so they can override built-in tokens such as `--color-*`, `--space-*`, `--radius-*`, `--font-*`, and `--sidebar-width`.

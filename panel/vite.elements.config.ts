@@ -28,7 +28,7 @@ export default defineConfig({
 		},
 	},
 	build: {
-		outDir: 'build',
+		outDir: 'static',
 		emptyOutDir: false,
 		// One stylesheet for all elements; the island links it once.
 		cssCodeSplit: false,

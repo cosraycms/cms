@@ -7,6 +7,10 @@ on:
 jobs:
   ci:
     runs-on: ci-base
+    outputs:
+      ref: ${{ steps.release_context.outputs.ref }}
+      ref_name: ${{ steps.release_context.outputs.ref_name }}
+      sha: ${{ steps.release_context.outputs.sha }}
     env:
       COSRAY_DB_HOST: pgsql
       COSRAY_DB_NAME: cosray
@@ -23,6 +27,13 @@ jobs:
           --health-cmd="pg_isready -U cosray -d cosray"
           --health-interval=5s --health-retries=20
     steps:
+      - name: Capture release context
+        id: release_context
+        run: |
+          printf 'ref=%s\n' "$FORGEJO_REF" >> "$FORGEJO_OUTPUT"
+          printf 'ref_name=%s\n' "$FORGEJO_REF_NAME" >> "$FORGEJO_OUTPUT"
+          printf 'sha=%s\n' "$FORGEJO_SHA" >> "$FORGEJO_OUTPUT"
+
       - name: Checkout repo
         uses: https://code.forgejo.org/actions/checkout@v5
 
@@ -42,6 +53,24 @@ jobs:
         env:
           npm_config_yes: "true"
 
+      - name: Setup pnpm
+        uses: https://code.forgejo.org/pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          package_json_file: panel/package.json
+
+      - name: Install panel dependencies
+        working-directory: panel
+        run: pnpm install --frozen-lockfile
+
+      - name: Run panel checks
+        working-directory: panel
+        run: pnpm check
+
+      - name: Build panel assets
+        working-directory: panel
+        run: pnpm build
+
       - name: Initialize database schema
         run: php ./run db:migrations --apply
 
@@ -56,3 +85,14 @@ jobs:
       - name: Deploy code coverage report
         if: ${{ always() && forgejo.ref == 'refs/heads/main' }}
         run: deploy-code-coverage .coverage
+
+  release:
+    needs: ci
+    if: ${{ needs.ci.outputs.ref == 'refs/heads/main' || startsWith(needs.ci.outputs.ref, 'refs/tags/') }}
+    uses: ./.forgejo/workflows/release.yml
+    with:
+      ref: ${{ needs.ci.outputs.ref }}
+      ref_name: ${{ needs.ci.outputs.ref_name }}
+      sha: ${{ needs.ci.outputs.sha }}
+    secrets:
+      PANEL_SIGNING_KEY: ${{ secrets.PANEL_SIGNING_KEY }}

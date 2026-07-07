@@ -20,7 +20,7 @@ export default defineConfig({
 	build: {
 		ssr: true,
 		target: 'node20',
-		outDir: 'build/tools',
+		outDir: 'static/tools',
 		emptyOutDir: false,
 		rollupOptions: {
 			input: {

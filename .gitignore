@@ -2,6 +2,7 @@
 /build
 /data/
 /panel/build/
+/panel/static/
 /panel/editor/
 /vendor/
 *.log
@@ -13,3 +14,4 @@ composer.lock
 node_modules
 phpunit.xml
 psalm.xml
+/public/cp/static/

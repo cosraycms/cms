@@ -53,7 +53,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('id="main" class="page node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
-		$this->assertPanelBuildStateIsRendered($html);
+		$this->assertPanelStaticStateIsRendered($html);
 		$this->assertEditorAssetStateIsRendered($html);
 	}
 
@@ -249,7 +249,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
 		$this->assertStringContainsString('src="http://localhost:2001/src/panel.ts"', $html);
-		$this->assertStringNotContainsString('/cp/build/panel.js', $html);
+		$this->assertStringNotContainsString('/cp/static/panel.js', $html);
 		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
 		$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
 	}
@@ -276,7 +276,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 	private function assertEditorAssetStateIsRendered(string $html): void
 	{
-		// The editor is a server-rendered form regardless of the panel build.
+		// The editor is a server-rendered form regardless of the panel static assets.
 		$this->assertStringContainsString('class="cms-node-form"', $html);
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
@@ -300,21 +300,21 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}
 
-	private function assertPanelBuildStateIsRendered(string $html): void
+	private function assertPanelStaticStateIsRendered(string $html): void
 	{
-		if (!$this->hasPanelBuild()) {
+		if (!$this->hasPanelStatic()) {
 			return;
 		}
 
-		$this->assertStringContainsString('href="/cp/build/panel.css"', $html);
-		$this->assertStringContainsString('src="/cp/build/panel.js"', $html);
+		$this->assertStringContainsString('href="/cp/static/panel.css"', $html);
+		$this->assertStringContainsString('src="/cp/static/panel.js"', $html);
 	}
 
-	private function hasPanelBuild(): bool
+	private function hasPanelStatic(): bool
 	{
 		return (
-			is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.js')
-			&& is_file(dirname(__DIR__, 2) . '/public/cp/build/panel.css')
+			is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.js')
+			&& is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.css')
 		);
 	}
 

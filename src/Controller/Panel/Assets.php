@@ -14,7 +14,7 @@ use Cosray\Util\Path;
 
 final class Assets extends Panel
 {
-	private const array VENDOR_EXTENSIONS = [
+	private const array PUBLIC_EXTENSIONS = [
 		'css',
 		'js',
 		'mjs',
@@ -33,9 +33,16 @@ final class Assets extends Panel
 		return $this->serve($request, $factory, $this->panelDir, $slug);
 	}
 
-	public function build(Request $request, Factory $factory, string $slug): Response
+	public function staticAsset(Request $request, Factory $factory, string $slug): Response
 	{
-		return $this->serve($request, $factory, $this->publicPanelBuildDir(), $slug);
+		return $this->serve(
+			$request,
+			$factory,
+			$this->publicPanelStaticDir(),
+			$slug,
+			self::PUBLIC_EXTENSIONS,
+			cacheControl: 'private, no-cache',
+		);
 	}
 
 	public function vendor(Request $request, Factory $factory, string $plugin, string $slug): Response
@@ -46,7 +53,7 @@ final class Assets extends Panel
 			throw new HttpNotFound($request);
 		}
 
-		return $this->serve($request, $factory, $dir, $slug, self::VENDOR_EXTENSIONS);
+		return $this->serve($request, $factory, $dir, $slug, self::PUBLIC_EXTENSIONS);
 	}
 
 	private function serve(
@@ -55,6 +62,7 @@ final class Assets extends Panel
 		string $root,
 		string $slug,
 		array $extensions = ['css', 'js', 'svg'],
+		string $cacheControl = 'private, max-age=3600',
 	): Response {
 		try {
 			$file = Path::inside($root, $slug, checkIsFile: true);
@@ -77,7 +85,7 @@ final class Assets extends Panel
 
 		$etag = '"' . $etag . '"';
 		$response = Response::create($factory)
-			->header('Cache-Control', 'private, max-age=3600')
+			->header('Cache-Control', $cacheControl)
 			->header('ETag', $etag)
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
 		$ifNoneMatch = array_map('trim', explode(',', $request->header('If-None-Match')));

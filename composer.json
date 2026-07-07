@@ -48,6 +48,9 @@
 			"src/Functions.php"
 		]
 	},
+	"bin": [
+		"bin/cosray-panel"
+	],
 	"autoload-dev": {
 		"psr-4": {
 			"Cosray\\Tests\\": "tests"

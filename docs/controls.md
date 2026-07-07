@@ -111,7 +111,7 @@ Named controls are resolved server-side to element descriptors before serializat
 | Form | Served from |
 | --- | --- |
 | `{pluginId}/{file}` | the plugin's asset dir via `{panel}/vendor/{pluginId}/{file}` (`Registrar::control()` prefixes the plugin id automatically) |
-| `cosray:{entry}` | the panel build (`{panel}/build/elements/{entry}.js`, dev server in development). `cosray` is a reserved plugin id. |
+| `cosray:{entry}` | the panel static assets (`{panel}/static/elements/{entry}.js`, dev server in development). `cosray` is a reserved plugin id. |
 | `https?://...` | used as-is |
 
 Modules load once via dynamic `import()` and must define their custom element at top level:

@@ -57,9 +57,9 @@ final class PanelAssetTest extends TestCase
 		$this->assertSame(file_get_contents($file), (string) $response->getBody());
 	}
 
-	public function testBuildAssetReturnsFileFromPublicPanelBuildDirectory(): void
+	public function testStaticAssetReturnsFileFromPublicPanelStaticDirectory(): void
 	{
-		$public = $this->createPublicBuild(['panel.js' => 'console.log("panel");']);
+		$public = $this->createPublicStatic(['panel.js' => 'console.log("panel");']);
 		$panel = new Assets(
 			$this->config(['path.public' => $public]),
 			$this->container(),
@@ -67,18 +67,19 @@ final class PanelAssetTest extends TestCase
 		);
 
 		try {
-			$response = $panel->build($this->request(), $this->factory(), 'panel.js');
+			$response = $panel->staticAsset($this->request(), $this->factory(), 'panel.js');
 
 			$this->assertSame(200, $response->getStatusCode());
+			$this->assertSame(['private, no-cache'], $response->getHeader('Cache-Control'));
 			$this->assertSame('console.log("panel");', (string) $response->getBody());
 		} finally {
 			$this->removeDirectory($public);
 		}
 	}
 
-	public function testPanelContextUsesPublicBuildUrls(): void
+	public function testPanelContextUsesPublicStaticUrls(): void
 	{
-		$public = $this->createPublicBuild([
+		$public = $this->createPublicStatic([
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
 		]);
@@ -101,22 +102,22 @@ final class PanelAssetTest extends TestCase
 		try {
 			$context = $panel->data();
 
-			$this->assertContains('/cp/build/panel.css', $context['stylesheets']);
-			$this->assertContains('/cp/build/panel.js', $context['moduleScripts']);
+			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
 		} finally {
 			$this->removeDirectory($public);
 		}
 	}
 
 	/** @param array<string, string> $files */
-	private function createPublicBuild(array $files): string
+	private function createPublicStatic(array $files): string
 	{
 		$public = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
-		$build = $public . '/cp/build';
-		$this->assertTrue(mkdir($build, 0o775, true));
+		$static = $public . '/cp/static';
+		$this->assertTrue(mkdir($static, 0o775, true));
 
 		foreach ($files as $name => $content) {
-			$this->assertNotFalse(file_put_contents($build . '/' . $name, $content));
+			$this->assertNotFalse(file_put_contents($static . '/' . $name, $content));
 		}
 
 		return $public;

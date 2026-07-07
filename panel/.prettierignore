@@ -1,3 +1,4 @@
 app/vendor/
 build/
+static/
 pnpm-lock.yaml

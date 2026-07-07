@@ -6,8 +6,8 @@ const modules = new Map<string, Promise<unknown>>();
  * Resolve a control module value to a URL.
  *
  * - `cosray:{entry}` — cosray-shipped element ('cosray' is a reserved
- *   plugin id): served from the panel build in production, from the
- *   Vite dev server in development.
+ *   plugin id): served from the panel static assets in production, from
+ *   the Vite dev server in development.
  * - `https?://...` — used as-is.
  * - anything else — `{pluginId}/{file}`, served from the plugin's
  *   asset dir under the panel vendor route.
@@ -26,7 +26,7 @@ export function moduleUrl(module: string): string {
 			return new URL(source, import.meta.url).href;
 		}
 
-		return `${base}build/elements/${entry}.js`;
+		return `${base}static/elements/${entry}.js`;
 	}
 
 	if (/^https?:\/\//.test(module)) {
@@ -62,7 +62,7 @@ function ensureCss(): void {
 	const link = document.createElement('link');
 	link.id = id;
 	link.rel = 'stylesheet';
-	link.href = `${panelBase()}build/elements/style.css`;
+	link.href = `${panelBase()}static/elements/style.css`;
 	link.onerror = () => link.remove();
 	document.head.append(link);
 }

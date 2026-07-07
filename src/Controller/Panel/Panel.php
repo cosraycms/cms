@@ -90,8 +90,8 @@ abstract class Panel
 	{
 		$stylesheets = $this->config->panel->theme;
 
-		if ($this->config->env() !== 'development' && $this->hasPanelBuild()) {
-			$stylesheets[] = "{$panelPath}/build/panel.css";
+		if ($this->config->env() !== 'development' && $this->hasPanelStatic()) {
+			$stylesheets[] = "{$panelPath}/static/panel.css";
 		}
 
 		return [...$stylesheets, ...$this->extras()->css()];
@@ -117,7 +117,7 @@ abstract class Panel
 			];
 		}
 
-		$scripts = $this->hasPanelBuild() ? ["{$panelPath}/build/panel.js"] : [];
+		$scripts = $this->hasPanelStatic() ? ["{$panelPath}/static/panel.js"] : [];
 
 		return [...$scripts, ...$this->extras()->moduleScripts()];
 	}
@@ -130,16 +130,16 @@ abstract class Panel
 		return $extras;
 	}
 
-	protected function hasPanelBuild(): bool
+	protected function hasPanelStatic(): bool
 	{
-		$build = $this->publicPanelBuildDir();
+		$static = $this->publicPanelStaticDir();
 
-		return is_file($build . '/panel.js') && is_file($build . '/panel.css');
+		return is_file($static . '/panel.js') && is_file($static . '/panel.css');
 	}
 
-	protected function publicPanelBuildDir(): string
+	protected function publicPanelStaticDir(): string
 	{
-		return $this->publicPanelDir() . '/build';
+		return $this->publicPanelDir() . '/static';
 	}
 
 	private function publicPanelDir(): string

@@ -305,7 +305,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
-		// The editor is a server-rendered form regardless of the panel build.
+		// The editor is a server-rendered form regardless of the panel static assets.
 		$this->assertStringContainsString('class="cms-node-form"', $html);
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',

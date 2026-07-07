@@ -493,7 +493,8 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/login` login form
 - `POST <panelPath>/login` authenticate
 - `POST <panelPath>/logout` logout
-- `GET <panelPath>/assets/*` built-in panel assets
+- `GET <panelPath>/assets/*` built-in panel package assets
+- `GET <panelPath>/static/*` installed panel client assets
 - `GET <panelPath>/collection/{collection}` server-rendered collection list
 
 Auth:
@@ -706,7 +707,7 @@ Paths and panel:
 - `path.assets`: `'/assets'`
 - `path.cache`: `'/cache'`
 - `path.views`: `'/views'` (view directory relative to `path.root`)
-- `path.panel`: `'/cp'` (SSR/HTMX panel path)
+- `path.panel`: `'/cp'` (SSR/HTMX panel path; installed client assets live below `{path.public}{path.panel}/static`)
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
 

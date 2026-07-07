@@ -1,0 +1,202 @@
+name: Build & Release Panel
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      ref_name:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+
+concurrency:
+  group: panel-release-${{ inputs.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-release:
+    runs-on: ci-base
+    env:
+      RELEASES_DIR: /cosray-releases
+    steps:
+      - name: Determine release mode
+        env:
+          REF: ${{ inputs.ref }}
+          REF_NAME: ${{ inputs.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$REF" == refs/tags/* ]]; then
+            MODE="versioned"
+            RELEASE_TAG="$REF_NAME"
+            FILE_NAME="cosray-panel-${RELEASE_TAG//\//-}.tar.gz"
+          elif [[ "$REF" == "refs/heads/main" ]]; then
+            MODE="nightly"
+            RELEASE_TAG="nightly"
+            FILE_NAME="cosray-panel-nightly.tar.gz"
+          else
+            echo "Unsupported release ref: $REF"
+            exit 1
+          fi
+
+          echo "MODE=$MODE" >> "$FORGEJO_ENV"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$FORGEJO_ENV"
+          echo "FILE_NAME=$FILE_NAME" >> "$FORGEJO_ENV"
+
+      - name: Checkout repo
+        uses: https://code.forgejo.org/actions/checkout@v5
+        with:
+          ref: ${{ inputs.sha }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: https://code.forgejo.org/pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+          package_json_file: panel/package.json
+
+      - name: Install panel dependencies
+        working-directory: panel
+        run: pnpm install --frozen-lockfile
+
+      - name: Check panel
+        working-directory: panel
+        run: pnpm check
+
+      - name: Build panel
+        working-directory: panel
+        run: pnpm build
+
+      - name: Write panel manifest
+        env:
+          REF: ${{ inputs.ref }}
+          SHA: ${{ inputs.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ ! -d "panel/static" ]; then
+            echo "Expected panel static output at panel/static not found."
+            exit 1
+          fi
+
+          if [ ! -f "panel/static/panel.js" ] || [ ! -f "panel/static/panel.css" ]; then
+            echo "Expected panel.js and panel.css in panel/static."
+            exit 1
+          fi
+
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+
+          const manifest = {
+            name: 'cosray-panel',
+            target: 'static',
+            version: process.env.RELEASE_TAG,
+            cms: 'cosray/cms',
+            ref: process.env.REF,
+            sha: process.env.SHA,
+            builtAt: new Date().toISOString(),
+          };
+
+          writeFileSync('panel/static/cosray-panel.json', JSON.stringify(manifest, null, 2) + '\n');
+          NODE
+
+      - name: Create tarball
+        run: |
+          mkdir -p dist
+          cd panel/static && tar -czf "../../dist/${FILE_NAME}" . && cd ../..
+
+      - name: Sign tarball
+        env:
+          PANEL_SIGNING_KEY: ${{ secrets.PANEL_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PANEL_SIGNING_KEY:-}" ]; then
+            echo "PANEL_SIGNING_KEY secret is not configured"
+            exit 1
+          fi
+
+          EMBEDDED_PUBKEY="$(sed -n "s/.*PANEL_PUBKEY = '\([^']*\)'.*/\1/p" src/Commands/InstallPanel.php)"
+          export EMBEDDED_PUBKEY
+
+          FILE_PATH="dist/${FILE_NAME}" SIG_PATH="dist/${FILE_NAME}.sig" node --input-type=module -e '
+          import { createPrivateKey, createPublicKey, sign } from "node:crypto";
+          import { readFileSync, writeFileSync } from "node:fs";
+
+          const key = createPrivateKey(process.env.PANEL_SIGNING_KEY);
+          const pub = createPublicKey(key)
+            .export({ type: "spki", format: "der" })
+            .subarray(-32)
+            .toString("base64");
+
+          if (pub !== process.env.EMBEDDED_PUBKEY) {
+            console.error("Signing key does not match PANEL_PUBKEY in src/Commands/InstallPanel.php");
+            process.exit(1);
+          }
+
+          const data = readFileSync(process.env.FILE_PATH);
+          writeFileSync(process.env.SIG_PATH, sign(null, data, key).toString("base64") + "\n");
+          '
+
+          echo "Signed dist/${FILE_NAME}"
+
+      - name: Publish tarball
+        run: |
+          set -euo pipefail
+
+          if [ ! -d "$RELEASES_DIR" ]; then
+            echo "Release directory does not exist: $RELEASES_DIR"
+            exit 1
+          fi
+
+          if [ ! -w "$RELEASES_DIR" ]; then
+            echo "Release directory is not writable: $RELEASES_DIR"
+            exit 1
+          fi
+
+          source="dist/${FILE_NAME}"
+          target="${RELEASES_DIR}/${FILE_NAME}"
+          sig="${target}.sig"
+          tmp="$(mktemp "${RELEASES_DIR}/.${FILE_NAME}.XXXXXX")"
+          sig_tmp="${tmp}.sig"
+
+          cleanup() {
+            rm -f "$tmp" "$sig_tmp"
+          }
+          trap cleanup EXIT
+
+          cp "$source" "$tmp"
+          chmod 0644 "$tmp"
+
+          cp "${source}.sig" "$sig_tmp"
+          chmod 0644 "$sig_tmp"
+
+          if [ "$MODE" = "versioned" ] && { [ -e "$target" ] || [ -e "$sig" ]; }; then
+            echo "Release asset already exists: $target"
+            exit 1
+          fi
+
+          if [ "$MODE" = "versioned" ]; then
+            mv -n "$tmp" "$target"
+            if [ -e "$tmp" ]; then
+              echo "Release asset was created concurrently: $target"
+              exit 1
+            fi
+
+            mv -n "$sig_tmp" "$sig"
+            if [ -e "$sig_tmp" ]; then
+              rm -f "$target"
+              echo "Release signature was created concurrently: $sig"
+              exit 1
+            fi
+          else
+            mv -f "$tmp" "$target"
+            mv -f "$sig_tmp" "$sig"
+          fi
+
+          trap - EXIT
+          echo "Published https://cosray.dev/releases/${FILE_NAME}"

@@ -171,9 +171,9 @@ class Routes
 					);
 				$panel
 					->get(
-						'/build/...slug',
-						[Panel\Assets::class, 'build'],
-						'build.asset',
+						'/static/...slug',
+						[Panel\Assets::class, 'staticAsset'],
+						'static.asset',
 					);
 				$panel
 					->get(

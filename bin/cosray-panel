@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Celemas\Cli\Commands;
+use Celemas\Cli\Runner;
+use Cosray\Commands\InstallPanel;
+use Cosray\Config;
+
+$autoload = $GLOBALS['_composer_autoload_path'] ?? dirname(__DIR__) . '/vendor/autoload.php';
+
+if (!is_file($autoload)) {
+	fwrite(STDERR, "Could not find Composer autoload.php. Run this command from an installed Composer project.\n");
+	exit(1);
+}
+
+require $autoload;
+
+$root = getcwd();
+
+if ($root === false) {
+	fwrite(STDERR, "Could not resolve the current working directory.\n");
+	exit(1);
+}
+
+$runner = new Runner(new Commands(new InstallPanel(new Config($root))));
+
+exit($runner->run());

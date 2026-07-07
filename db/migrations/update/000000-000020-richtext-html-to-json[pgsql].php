@@ -18,7 +18,7 @@ use Cosray\Richtext\Normalizer;
  * the cosray richtext format (docs/richtext-format.md).
  *
  * The HTML parses through the panel's own editor schema via the
- * bundled node converter (panel/build/tools/richtext-convert.mjs,
+ * bundled node converter (panel/static/tools/richtext-convert.mjs,
  * jsdom + prosemirror-model from panel/node_modules — run `pnpm
  * install && pnpm run build` in panel/ first). Internal links resolve
  * to `link.node` via url_paths, uid-form asset URLs to `link.asset` /
@@ -418,7 +418,7 @@ final class Migration implements Contract\Migration
 	private function convert(): array
 	{
 		$panel = dirname(__DIR__, 3) . '/panel';
-		$script = $panel . '/build/tools/richtext-convert.mjs';
+		$script = $panel . '/static/tools/richtext-convert.mjs';
 
 		if (!is_file($script)) {
 			throw new RuntimeException(
