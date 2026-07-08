@@ -2,6 +2,10 @@
 
 use function Cosray\escape;
 
+$catalog = $messages ?? ['plural' => (string) ($localeId ?? 'en'), 'messages' => []];
+$catalog['messages'] = (object) $catalog['messages'];
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= escape((string) ($localeId ?? 'en')) ?>">
@@ -17,6 +21,8 @@ use function Cosray\escape;
 
 <body hx-boost:inherited="true">
 	<?= $this->body() ?>
+
+	<script id="cosray-messages" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
 <?php foreach ($scripts as $script): ?>
 	<script src="<?= escape((string) $script) ?>"></script>

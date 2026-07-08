@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Middleware;
 
+use Celemas\Verba\Translator;
+use Celemas\Verba\Verba;
 use Cosray\Locales;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -19,12 +21,19 @@ class AddLocale implements Middleware
 	public function process(Request $request, Handler $handler): Response
 	{
 		$locale = $this->locales->negotiate($request);
+		$translator = new Translator($locale->id, $this->locales->catalogs());
+		Verba::activate($translator);
 
-		return $handler->handle(
-			$request
-				->withAttribute('locales', $this->locales)
-				->withAttribute('locale', $locale)
-				->withAttribute('defaultLocale', $this->locales->getDefault()),
-		);
+		try {
+			return $handler->handle(
+				$request
+					->withAttribute('locales', $this->locales)
+					->withAttribute('locale', $locale)
+					->withAttribute('translator', $translator)
+					->withAttribute('defaultLocale', $this->locales->getDefault()),
+			);
+		} finally {
+			Verba::deactivate();
+		}
 	}
 }

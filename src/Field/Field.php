@@ -141,7 +141,50 @@ abstract class Field implements
 			$properties = array_merge($properties, $handler->properties($meta, $this));
 		}
 
+		return $this->localize($properties);
+	}
+
+	/**
+	 * Translate the field's display strings for the active locale at emit time.
+	 * The schema (and thus the raw attribute strings) stays untouched because
+	 * it is cached per class; only the serialized copy is localized.
+	 *
+	 * @param array<string, mixed> $properties
+	 * @return array<string, mixed>
+	 */
+	private function localize(array $properties): array
+	{
+		foreach (['label', 'description'] as $key) {
+			$value = $properties[$key] ?? null;
+
+			if (is_string($value)) {
+				$properties[$key] = __($value);
+			}
+		}
+
+		$options = $properties['options'] ?? null;
+
+		if (is_array($options)) {
+			$properties['options'] = array_map($this->localizeOption(...), $options);
+		}
+
 		return $properties;
+	}
+
+	/**
+	 * Translate a select option's label. Plain string options are left as-is
+	 * (their value doubles as the label and must stay stable); labelled options
+	 * `{value, label}` get their label translated.
+	 */
+	private function localizeOption(mixed $option): mixed
+	{
+		if (!is_array($option)) {
+			return $option;
+		}
+
+		$label = $option['label'] ?? null;
+
+		return is_string($label) ? [...$option, 'label' => __($label)] : $option;
 	}
 
 	public function getFileStructure(string $type, mixed $value = null): array

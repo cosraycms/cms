@@ -17,6 +17,9 @@ class Locales implements Iterator, CorePlugin
 	/** @var array<string, Locale> */
 	protected array $locales = [];
 
+	/** @var array<string, string> App translation domains, mapped to their catalog dir. */
+	protected array $catalogs = [];
+
 	protected ?string $default = null;
 	protected ?Closure $negotiator = null;
 
@@ -24,6 +27,27 @@ class Locales implements Iterator, CorePlugin
 	{
 		$app->middleware(new AddLocale($this));
 		$app->register(self::class, $this);
+	}
+
+	/**
+	 * Register a translation domain and the directory holding its
+	 * `<domain>.<locale>.php` catalog files. Domains registered here are
+	 * searched before Cosray's own catalogs, so an app can shadow any id.
+	 */
+	public function catalog(string $domain, string $dir): void
+	{
+		$this->catalogs = [$domain => $dir] + $this->catalogs;
+	}
+
+	/**
+	 * The domain cascade for the runtime translator: registered app domains
+	 * first, Cosray's bundled catalogs last.
+	 *
+	 * @return array<string, string>
+	 */
+	public function catalogs(): array
+	{
+		return $this->catalogs + ['cosray' => dirname(__DIR__) . '/i18n'];
 	}
 
 	public function add(

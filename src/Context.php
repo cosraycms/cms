@@ -8,6 +8,7 @@ use Celemas\Container\Container;
 use Celemas\Core\Factory\Factory;
 use Celemas\Core\Request;
 use Celemas\Quma\Database;
+use Celemas\Verba\Translator;
 
 final class Context
 {
@@ -45,5 +46,10 @@ final class Context
 	public function localeId(): string
 	{
 		return $this->request->get('locale')->id;
+	}
+
+	public function translator(): Translator
+	{
+		return $this->request->get('translator');
 	}
 }

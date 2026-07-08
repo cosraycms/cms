@@ -15,6 +15,11 @@ use Celemas\Container\Container;
 use Celemas\Quma\Commands as QumaCommands;
 use Celemas\Quma\Connection;
 use Celemas\Quma\Delimiters;
+use Celemas\Verba\Command\StatusCommand;
+use Celemas\Verba\Command\SyncCommand;
+use Celemas\Verba\Tool\Domain;
+use Celemas\Verba\Tool\FrontendScanner;
+use Celemas\Verba\Tool\PhpScanner;
 
 $env = static function (string $key, string $default): string {
 	$value = getenv($key);
@@ -44,6 +49,21 @@ $commands->add(new RecreateSortIndex($conn));
 // `db:titles` (Cosray\Commands\Titles) needs the booted app (node type
 // registry + locales), so it is registered from an app's own commands.php
 // where a Context/Cms are available — the library runner has no app nodes.
+
+// i18n extraction for Cosray's own `cosray` domain. Schema-label extraction
+// needs a booted registry and is registered from an app's commands.php.
+$cosrayI18n = new Domain(
+	name: 'cosray',
+	dir: __DIR__ . '/i18n',
+	locales: ['de', 'en'],
+	scanners: [
+		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views']),
+		new FrontendScanner([__DIR__ . '/panel/src']),
+	],
+	default: true,
+);
+$commands->add(new SyncCommand([$cosrayI18n]));
+$commands->add(new StatusCommand([$cosrayI18n]));
 
 $runner = new Runner($commands);
 

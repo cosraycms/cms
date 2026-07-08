@@ -89,7 +89,7 @@ class Serializer
 		}
 
 		$result = [
-			'title' => _('Neues Dokument:') . ' ' . $schema->label,
+			'title' => _('Neues Dokument:') . ' ' . __((string) $schema->label),
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => $this->uid->generate(),
 			'handle' => null,
@@ -251,12 +251,24 @@ class Serializer
 	{
 		$schema = $this->types->schemaOf($class);
 
-		return array_merge([
+		$type = array_merge([
 			'handle' => $handle ?? $schema->handle,
 			'routable' => $schema->routable,
 			'renderable' => $schema->renderable,
 			'class' => $class,
 		], $schema->properties());
+
+		// The schema is cached per class, so its display strings are raw ids;
+		// translate them for the active locale as they are serialized.
+		foreach (['label', 'badge', 'description'] as $key) {
+			$value = $type[$key] ?? null;
+
+			if (is_string($value)) {
+				$type[$key] = __($value);
+			}
+		}
+
+		return $type;
 	}
 
 	private function resolveDeletable(object $node): bool

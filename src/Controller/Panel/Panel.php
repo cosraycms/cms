@@ -6,6 +6,7 @@ namespace Cosray\Controller\Panel;
 
 use Celemas\Container\Container;
 use Celemas\Core\Request;
+use Celemas\Verba\Verba;
 use Cosray\Config;
 use Cosray\Contract\Icons;
 use Cosray\Locale;
@@ -46,7 +47,22 @@ abstract class Panel
 			'scripts' => $this->scripts($panelPath),
 			'moduleScripts' => $this->moduleScripts($panelPath),
 			'collections' => $this->collections(),
+			'messages' => $this->messages(),
 		], $data);
+	}
+
+	/**
+	 * The Cosray panel catalog for the active locale as the canonical JSON
+	 * payload the panel reads through its `__` lookup. Empty when no
+	 * translator is active (e.g. outside the request pipeline).
+	 *
+	 * @return array{plural: string, messages: array<string, string|list<string>>}
+	 */
+	protected function messages(): array
+	{
+		return (
+			Verba::translator()?->export('cosray') ?? ['plural' => $this->localeId(), 'messages' => []]
+		);
 	}
 
 	protected function panelPath(): string
