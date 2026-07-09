@@ -28,9 +28,9 @@ class Locale
 	}
 
 	/**
-	 * The fallback locale is only used for content translations
-	 * stored in the database. Translations provided by gettext
-	 * e. g. in templates or source code do not work with fallback.
+	 * The fallback locale applies only to content translations stored in the
+	 * database. UI strings translated through verba fall back to the message
+	 * id, not through this locale chain.
 	 */
 	public function fallback(): ?Locale
 	{
