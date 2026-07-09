@@ -85,7 +85,7 @@ final class Navigation
 			if ($item instanceof Section) {
 				$result[] = [
 					'type' => 'section',
-					'name' => $item->meta->label,
+					'name' => __($item->meta->label),
 					'meta' => $item->meta->array(),
 					'children' => $this->serialize($item->children()),
 				];
@@ -97,7 +97,7 @@ final class Navigation
 				$result[] = [
 					'type' => 'link',
 					'url' => $item->url,
-					'name' => $item->meta->label,
+					'name' => __($item->meta->label),
 					'meta' => $item->meta->array(),
 					'children' => [],
 				];
@@ -108,7 +108,7 @@ final class Navigation
 			$result[] = [
 				'type' => 'collection',
 				'slug' => $item->slug(),
-				'name' => $item->meta->label,
+				'name' => __($item->meta->label),
 				'meta' => $item->meta->array(),
 				'children' => [],
 			];

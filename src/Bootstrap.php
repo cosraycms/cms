@@ -369,6 +369,16 @@ class Bootstrap implements CorePlugin
 		$this->nodes[$handle] = $class;
 	}
 
+	/**
+	 * Every registered node type class, in registration order.
+	 *
+	 * @return list<class-string>
+	 */
+	public function nodeClasses(): array
+	{
+		return array_values($this->nodes);
+	}
+
 	/** @return list<string> */
 	protected function localIconPaths(): array
 	{
