@@ -16,7 +16,7 @@ final class TokenLogin implements Validator
 	public function __construct()
 	{
 		$this->shape = new Shape();
-		$this->shape->add('token', 'string')->rules('required', 'maxlen:512')->label(_('One-time token'));
+		$this->shape->add('token', 'string')->rules('required', 'maxlen:512')->label(__('auth:token'));
 	}
 
 	#[Override]

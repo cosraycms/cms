@@ -19,13 +19,16 @@ final class Login implements Validator
 		$this->shape
 			->add('login', 'string')
 			->rules('required', 'maxlen:254')
-			->label(_('Username or email'));
-		$this->shape->add('password', 'string')->rules('required', 'maxlen:512')->label(_('Password'));
+			->label(__('auth:login-label'));
+		$this->shape
+			->add('password', 'string')
+			->rules('required', 'maxlen:512')
+			->label(__('auth:password'));
 		$this->shape
 			->add('rememberme', 'bool')
 			->empty('missing', 'null')
 			->default(false)
-			->label(_('remember me'));
+			->label(__('auth:remember-me'));
 	}
 
 	#[Override]

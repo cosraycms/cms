@@ -54,7 +54,7 @@ $commands->add(new RecreateSortIndex($conn));
 // needs a booted registry and is registered from an app's commands.php.
 $cosrayI18n = new Domain(
 	name: 'cosray',
-	dir: __DIR__ . '/i18n',
+	dir: __DIR__ . '/lang',
 	locales: ['de', 'en'],
 	scanners: [
 		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views']),

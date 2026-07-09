@@ -48,7 +48,7 @@ final class Login extends Panel
 				'next' => $this->sanitizedNext($data['next'] ?? ''),
 				'login' => (string) ($data['login'] ?? ''),
 				'rememberme' => (bool) ($data['rememberme'] ?? false),
-				'message' => $this->message(_('Please provide username and password')),
+				'message' => $this->message(__('auth:missing-credentials')),
 			]);
 		}
 
@@ -65,7 +65,7 @@ final class Login extends Panel
 				'next' => $this->sanitizedNext($data['next'] ?? ''),
 				'login' => (string) ($data['login'] ?? ''),
 				'rememberme' => (bool) ($data['rememberme'] ?? false),
-				'message' => $this->message(_('Invalid username or password')),
+				'message' => $this->message(__('auth:invalid-credentials')),
 			]);
 		}
 
@@ -76,7 +76,7 @@ final class Login extends Panel
 				'next' => $this->sanitizedNext($data['next'] ?? ''),
 				'login' => (string) ($data['login'] ?? ''),
 				'rememberme' => false,
-				'message' => $this->message(_('You are not allowed to access the panel')),
+				'message' => $this->message(__('auth:no-panel-access')),
 			]);
 		}
 
