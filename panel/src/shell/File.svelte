@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { cosray } from '$lib/bridge';
 	import { useAssets } from '$lib/assets';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
@@ -51,7 +51,7 @@
 		{/if}
 		<IcoDownload />
 		<a href={info?.url ?? ''} target="_blank" class="cms-file-download">
-			{_('Datei herunterladen')}
+			{__('media:download')}
 		</a>
 
 		<button onclick={edit} class="cms-file-action cms-file-action-edit">

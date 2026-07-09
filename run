@@ -50,20 +50,28 @@ $commands->add(new RecreateSortIndex($conn));
 // registry + locales), so it is registered from an app's own commands.php
 // where a Context/Cms are available — the library runner has no app nodes.
 
-// i18n extraction for Cosray's own `cosray` domain. Schema-label extraction
-// needs a booted registry and is registered from an app's commands.php.
+// i18n extraction. The `cosray` domain holds backend strings (PHP + Boiler
+// views); the `panel` domain holds the SSR/Svelte panel strings and is the one
+// shipped to the browser as an inline catalog. Both scan disjoint sources, so
+// both claim the bare `__()` calls their own scanner finds. Schema-label
+// extraction needs a booted registry and is registered from an app's commands.
 $cosrayI18n = new Domain(
 	name: 'cosray',
 	dir: __DIR__ . '/lang',
 	locales: ['de', 'en'],
-	scanners: [
-		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views']),
-		new FrontendScanner([__DIR__ . '/panel/src']),
-	],
+	scanners: [new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views'])],
 	default: true,
 );
-$commands->add(new SyncCommand([$cosrayI18n]));
-$commands->add(new StatusCommand([$cosrayI18n]));
+$panelI18n = new Domain(
+	name: 'panel',
+	dir: __DIR__ . '/lang',
+	locales: ['de', 'en'],
+	scanners: [new FrontendScanner([__DIR__ . '/panel/src'])],
+	default: true,
+);
+$i18nDomains = [$cosrayI18n, $panelI18n];
+$commands->add(new SyncCommand($i18nDomains));
+$commands->add(new StatusCommand($i18nDomains));
 
 $runner = new Runner($commands);
 

@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { panelBase } from '$lib/runtime';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 
 	type Props = {
 		pick: (node: NodeInfo) => void;
@@ -93,7 +93,7 @@
 <div class="cms-nodesearch">
 	{#if current}
 		<div class="cms-nodesearch-current">
-			<span class="cms-nodesearch-current-label">{_('Aktuell:')}</span>
+			<span class="cms-nodesearch-current-label">{__('media:current')}</span>
 			<span class="cms-nodesearch-title">{current.title || current.uid}</span>
 			{#if current.typeLabel}
 				<span class="cms-nodesearch-type">{current.typeLabel}</span>
@@ -104,15 +104,15 @@
 	<input
 		class="cms-input"
 		type="search"
-		placeholder={_('Seite suchen …')}
+		placeholder={__('node:search-page')}
 		bind:value={q}
 		oninput={onInput}
 	/>
 
 	{#if failed}
-		<div class="cms-nodesearch-empty">{_('Die Suche ist fehlgeschlagen.')}</div>
+		<div class="cms-nodesearch-empty">{__('search:failed')}</div>
 	{:else if loading}
-		<div class="cms-nodesearch-empty">{_('Loading ...')}</div>
+		<div class="cms-nodesearch-empty">{__('common:loading')}</div>
 	{:else if results.length > 0}
 		<ul class="cms-nodesearch-results">
 			{#each results as node (node.uid)}
@@ -132,7 +132,7 @@
 			{/each}
 		</ul>
 	{:else if searched && q.trim() !== ''}
-		<div class="cms-nodesearch-empty">{_('Keine Treffer.')}</div>
+		<div class="cms-nodesearch-empty">{__('search:no-results')}</div>
 	{/if}
 </div>
 

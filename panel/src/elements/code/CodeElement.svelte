@@ -4,7 +4,7 @@
 	import type { LocaleMap, Meta } from '$types/data';
 
 	import { ensureLocales, ensureNeutral } from '$lib/content';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ZXX } from '$types/data';
 	import CodeEditor from '$shell/code/CodeEditor.svelte';
 	import { DEFAULT_CODE_SYNTAX, normalizeCodeSyntax } from '$shell/code/languages';
@@ -72,7 +72,7 @@
 
 <div class="cms-code-control-toolbar">
 	<label class="cms-code-control-syntax-label" for={`${field.name}-syntax`}>
-		{_('Syntax')}
+		{__('code:syntax')}
 	</label>
 	{#if metaMap.syntax}
 		<select

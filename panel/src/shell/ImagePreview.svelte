@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 
 	let { image } = $props();
 </script>
 
 <div class="image-preview">
-	<img src={image} alt={_('Vorschau')} style="max-height: 90vh" />
+	<img src={image} alt={__('common:preview')} style="max-height: 90vh" />
 </div>
 
 <style>

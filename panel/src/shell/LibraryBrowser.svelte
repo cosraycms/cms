@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { system } from '$lib/sys';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 
 	type Props = {
@@ -81,13 +81,13 @@
 
 <div class="cms-library">
 	<form class="cms-library-search" onsubmit={search}>
-		<input class="cms-input" type="search" placeholder={_('Dateiname suchen …')} bind:value={q} />
-		<button type="submit" class="cms-button">{_('Suchen')}</button>
+		<input class="cms-input" type="search" placeholder={__('media:search-filename')} bind:value={q} />
+		<button type="submit" class="cms-button">{__('common:search')}</button>
 	</form>
 	{#if failed}
-		<div class="cms-library-empty">{_('Die Bibliothek konnte nicht geladen werden.')}</div>
+		<div class="cms-library-empty">{__('media:library-load-failed')}</div>
 	{:else if items.length === 0 && !loading}
-		<div class="cms-library-empty">{_('Keine Dateien gefunden.')}</div>
+		<div class="cms-library-empty">{__('media:no-files')}</div>
 	{:else}
 		<div class="cms-library-grid">
 			{#each items as item (item.uid)}
@@ -118,10 +118,10 @@
 		</div>
 	{/if}
 	{#if loading}
-		<div class="cms-library-loading">{_('Loading ...')}</div>
+		<div class="cms-library-loading">{__('common:loading')}</div>
 	{:else if more}
 		<button type="button" class="cms-button cms-library-more" onclick={() => void load(false)}>
-			{_('Mehr laden')}
+			{__('common:load-more')}
 		</button>
 	{/if}
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import Button from '$shell/Button.svelte';
 
@@ -30,7 +30,7 @@
 </script>
 
 <ModalHeader>
-	{_('Inhaltstyp hinzufügen')}
+	{__('field:add-content-type')}
 </ModalHeader>
 <ModalBody>
 	<div class="cms-modal-add-types">
@@ -51,14 +51,14 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={close}>
-			{_('Abbrechen')}
+			{__('common:cancel')}
 		</Button>
 		<Button variant="primary" onclick={addContent(true)} {disabled}>
-			{index === null ? _('Einfügen') : _('Davor einfügen')}
+			{index === null ? __('common:insert') : __('field:insert-before')}
 		</Button>
 		{#if index !== null}
 			<Button variant="primary" onclick={addContent(false)} {disabled}>
-				{_('Danach einfügen')}
+				{__('field:insert-after')}
 			</Button>
 		{/if}
 	</div>

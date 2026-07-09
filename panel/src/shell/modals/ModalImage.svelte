@@ -3,7 +3,7 @@
 	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
 
 	import { cosray } from '$lib/bridge';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import Button from '$shell/Button.svelte';
 	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
@@ -42,7 +42,7 @@
 		input.value = '';
 
 		if (!result.ok || !result.uid) {
-			cosray().toast.error(result.error ?? _('Upload failed'));
+			cosray().toast.error(result.error ?? __('upload:failed'));
 
 			return;
 		}
@@ -61,7 +61,7 @@
 	}
 </script>
 
-<ModalHeader>{_('Bild einfügen')}</ModalHeader>
+<ModalHeader>{__('image:insert')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-image-body">
 		<div class="cms-modal-image-upload">
@@ -74,10 +74,10 @@
 				disabled={uploading}
 			/>
 			<Button variant="primary" onclick={() => fileInput?.click()} disabled={uploading}>
-				{uploading ? _('Lädt hoch …') : _('Bild hochladen')}
+				{uploading ? __('upload:uploading') : __('image:upload')}
 			</Button>
 			<span class="cms-modal-image-upload-hint">
-				{_('oder aus der Bibliothek wählen:')}
+				{__('upload:or-from-library')}
 			</span>
 		</div>
 		<div class="cms-modal-image-library">
@@ -88,10 +88,10 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={close}>
-			{_('Abbrechen')}
+			{__('common:cancel')}
 		</Button>
 		<Button variant="primary" onclick={clickAdd} disabled={!selected}>
-			{_('Bild einfügen')}
+			{__('image:insert')}
 		</Button>
 	</div>
 </ModalFooter>

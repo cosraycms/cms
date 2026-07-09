@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { ZXX, type LocaleMap } from '$types/data';
 	import { panelBase } from '$lib/runtime';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 
 	type RefItem = { uid: string };
 	type NodeInfo = { uid: string; title: string; type: string; typeLabel: string };
@@ -186,7 +186,7 @@
 						type="button"
 						class="cms-reference-remove"
 						onclick={() => remove(item.uid)}
-						aria-label={_('Entfernen')}
+						aria-label={__('common:remove')}
 					>
 						×
 					</button>
@@ -200,7 +200,7 @@
 			<input
 				class="cms-input"
 				type="search"
-				placeholder={_('Knoten suchen …')}
+				placeholder={__('node:search')}
 				bind:value={q}
 				oninput={onInput}
 				onkeydown={onKeydown}
@@ -228,7 +228,7 @@
 					{/each}
 				</ul>
 			{:else if open && q.trim() !== '' && !loading}
-				<div class="cms-reference-empty">{_('Keine Treffer.')}</div>
+				<div class="cms-reference-empty">{__('search:no-results')}</div>
 			{/if}
 		</div>
 	{/if}

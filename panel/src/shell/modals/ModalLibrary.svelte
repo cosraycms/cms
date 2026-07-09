@@ -2,7 +2,7 @@
 	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
 
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import Button from '$shell/Button.svelte';
 	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
 
@@ -15,14 +15,14 @@
 	let { kind = null, pick, close }: Props = $props();
 </script>
 
-<ModalHeader>{_('Aus Bibliothek wählen')}</ModalHeader>
+<ModalHeader>{__('media:choose-from-library')}</ModalHeader>
 <ModalBody>
 	<LibraryBrowser {kind} {pick} />
 </ModalBody>
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={close}>
-			{_('Abbrechen')}
+			{__('common:cancel')}
 		</Button>
 	</div>
 </ModalFooter>

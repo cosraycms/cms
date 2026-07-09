@@ -24,7 +24,3 @@ export function __(id: string): string {
 
 	return typeof entry === 'string' ? entry : id;
 }
-
-// Transitional alias: components still import `_`; they migrate to `__` in the
-// string-conversion pass.
-export const _ = __;

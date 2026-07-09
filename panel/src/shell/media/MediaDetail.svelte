@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Locale } from '$lib/sys';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import MetaForm, { type Meta } from './MetaForm.svelte';
@@ -183,21 +183,21 @@
 	class="cms-drawer-overlay"
 	role="button"
 	tabindex="-1"
-	aria-label={_('Schließen')}
+	aria-label={__('common:close')}
 	onclick={onClose}
 	onkeydown={(event) => event.key === 'Escape' && onClose()}
 ></div>
 
-<aside class="cms-drawer" aria-label={_('Datei-Details')}>
+<aside class="cms-drawer" aria-label={__('media:file-details')}>
 	{#if loading}
-		<div class="cms-drawer-status">{_('Loading ...')}</div>
+		<div class="cms-drawer-status">{__('common:loading')}</div>
 	{:else if failed || asset === null}
-		<div class="cms-drawer-status">{_('Die Datei konnte nicht geladen werden.')}</div>
-		<button type="button" class="cms-button" onclick={onClose}>{_('Schließen')}</button>
+		<div class="cms-drawer-status">{__('media:file-load-failed')}</div>
+		<button type="button" class="cms-button" onclick={onClose}>{__('common:close')}</button>
 	{:else}
 		<header class="cms-drawer-head">
 			<h2 title={asset.filename}>{asset.filename}</h2>
-			<button type="button" class="cms-drawer-close" aria-label={_('Schließen')} onclick={onClose}
+			<button type="button" class="cms-drawer-close" aria-label={__('common:close')} onclick={onClose}
 				>×</button
 			>
 		</header>
@@ -207,7 +207,7 @@
 				<button
 					type="button"
 					class="cms-drawer-preview focusable"
-					title={_('Klicken, um den Bildfokus zu setzen')}
+					title={__('image:set-focus-hint')}
 					onclick={setFocal}
 				>
 					<img src={asset.previewUrl} alt={asset.filename} />
@@ -226,22 +226,22 @@
 
 			<dl class="cms-drawer-meta">
 				<div>
-					<dt>{_('Typ')}</dt>
+					<dt>{__('common:type')}</dt>
 					<dd>{asset.mime ?? asset.kind}</dd>
 				</div>
 				{#if asset.width && asset.height}
 					<div>
-						<dt>{_('Größe')}</dt>
+						<dt>{__('image:size')}</dt>
 						<dd>{asset.width} × {asset.height} px</dd>
 					</div>
 				{/if}
 				<div>
-					<dt>{_('Dateigröße')}</dt>
+					<dt>{__('media:file-size')}</dt>
 					<dd>{humanSize(asset.bytes)}</dd>
 				</div>
 				<div>
-					<dt>{_('Original')}</dt>
-					<dd><a href={asset.url} target="_blank" rel="noopener">{_('Öffnen')}</a></dd>
+					<dt>{__('image:original')}</dt>
+					<dd><a href={asset.url} target="_blank" rel="noopener">{__('common:open')}</a></dd>
 				</div>
 			</dl>
 
@@ -249,14 +249,14 @@
 				<div class="cms-drawer-focal-controls">
 					<span>
 						{#if meta.focal}
-							{_('Fokus')}: {Math.round(meta.focal.x * 100)}% / {Math.round(meta.focal.y * 100)}%
+							{__('image:focus')}: {Math.round(meta.focal.x * 100)}% / {Math.round(meta.focal.y * 100)}%
 						{:else}
-							{_('Kein Bildfokus gesetzt')}
+							{__('image:no-focus')}
 						{/if}
 					</span>
 					{#if meta.focal}
 						<button type="button" class="cms-button" onclick={clearFocal}
-							>{_('Fokus entfernen')}</button
+							>{__('image:focus-remove')}</button
 						>
 					{/if}
 				</div>
@@ -265,9 +265,9 @@
 			<MetaForm bind:meta {locales} bind:activeLocale {isImage} />
 
 			<section class="cms-drawer-usage">
-				<h3>{_('Verwendung')}</h3>
+				<h3>{__('media:usage')}</h3>
 				{#if usage.length === 0}
-					<p class="cms-drawer-hint">{_('Diese Datei wird nirgendwo verwendet.')}</p>
+					<p class="cms-drawer-hint">{__('media:unused')}</p>
 				{:else}
 					<ul>
 						{#each usage as owner (owner.ownerType + owner.ownerUid)}
@@ -275,7 +275,7 @@
 								<span class="cms-drawer-usage-title">{owner.title || owner.ownerUid}</span>
 								<span class="cms-drawer-usage-kind">
 									{owner.nodeType ?? owner.ownerType}
-									{#if owner.published === false}· {_('Entwurf')}{/if}
+									{#if owner.published === false}· {__('node:draft')}{/if}
 								</span>
 							</li>
 						{/each}
@@ -292,24 +292,24 @@
 				onclick={remove}
 			>
 				<IcoTrash />
-				{_('Löschen')}
+				{__('common:delete')}
 			</button>
 			<div class="cms-drawer-foot-right">
-				{#if saved}<span class="cms-drawer-saved">{_('Gespeichert')}</span>{/if}
+				{#if saved}<span class="cms-drawer-saved">{__('common:saved')}</span>{/if}
 				<button
 					type="button"
 					class="cms-button cms-button-primary"
 					disabled={saving}
 					onclick={save}
 				>
-					{saving ? _('Speichert …') : _('Speichern')}
+					{saving ? __('common:saving') : __('common:save')}
 				</button>
 			</div>
 		</footer>
 
 		{#if blocked !== null}
 			<div class="cms-drawer-blocked">
-				<p>{_('Löschen nicht möglich — die Datei wird noch verwendet:')}</p>
+				<p>{__('media:delete-in-use')}</p>
 				<ul>
 					{#each blocked as owner (owner.ownerType + owner.ownerUid)}
 						<li>{owner.title || owner.ownerUid} ({owner.nodeType ?? owner.ownerType})</li>

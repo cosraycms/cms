@@ -52,16 +52,18 @@ abstract class Panel
 	}
 
 	/**
-	 * The Cosray panel catalog for the active locale as the canonical JSON
-	 * payload the panel reads through its `__` lookup. Empty when no
-	 * translator is active (e.g. outside the request pipeline).
+	 * The `panel` catalog for the active locale as the canonical JSON payload
+	 * the panel reads through its `__` lookup. This domain holds exactly the
+	 * strings the Svelte panel uses (extracted by the FrontendScanner), so the
+	 * browser never receives backend-only messages. Empty when no translator is
+	 * active (e.g. outside the request pipeline).
 	 *
 	 * @return array{plural: string, messages: array<string, string|list<string>>}
 	 */
 	protected function messages(): array
 	{
 		return (
-			Verba::translator()?->export('cosray') ?? ['plural' => $this->localeId(), 'messages' => []]
+			Verba::translator()?->export('panel') ?? ['plural' => $this->localeId(), 'messages' => []]
 		);
 	}
 

@@ -2,7 +2,7 @@
 	import type { ControlDescriptor } from '$types/controls';
 	import type { SimpleField } from '$types/fields';
 
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ensureNeutral } from '$lib/content';
 	import { ZXX } from '$types/data';
 	import Button from '$shell/Button.svelte';
@@ -57,12 +57,12 @@
 					bind:value={data.value[ZXX][index]}
 					{onchange}
 				/>
-				<Button onclick={() => remove(index)}>{_('Entfernen')}</Button>
+				<Button onclick={() => remove(index)}>{__('common:remove')}</Button>
 			</div>
 		{/each}
 		{#if opts.max === undefined || items.length < opts.max}
 			<div>
-				<Button onclick={add}>{_('Hinzufügen')}</Button>
+				<Button onclick={add}>{__('common:add')}</Button>
 			</div>
 		{/if}
 	</div>

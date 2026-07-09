@@ -9,7 +9,7 @@
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { registerAsset, useAssets } from '$lib/assets';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import IcoUpload from '$shell/icons/IcoUpload.svelte';
 	import Dialog from '$shell/Dialog.svelte';
 	import Message from '$shell/Message.svelte';
@@ -56,7 +56,7 @@
 			const app = mount(Dialog, {
 				target: host,
 				props: {
-					title: _('Fehler'),
+					title: __('common:error'),
 					body,
 					type: 'error',
 					close: () => handle.close(),
@@ -102,7 +102,7 @@
 		let result = files.length ? [...files] : readItems(transferItems);
 
 		if (!multiple && result.length > 1) {
-			alert(_('In diesem Feld ist nur eine einzelne Datei erlaubt.'));
+			alert(__('upload:single-only'));
 
 			return [];
 		}
@@ -128,13 +128,13 @@
 		const slotsLeft = Math.max(limit.max - (items?.length ?? 0), 0);
 
 		if (slotsLeft === 0) {
-			alert(_('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'));
+			alert(__('upload:max-files').replace(':max', String(limit.max)));
 
 			return [];
 		}
 
 		if (files.length > slotsLeft) {
-			alert(_('Es können nur noch') + ' ' + slotsLeft + ' ' + _('Datei(en) hinzugefügt werden.'));
+			alert(__('upload:slots-left').replace(':count', String(slotsLeft)));
 
 			return files.slice(0, slotsLeft);
 		}
@@ -155,7 +155,7 @@
 	}
 
 	function uploadError(item: UploadResult) {
-		cosray().toast.error(_('Datei:') + ' ' + (item.filename ?? '') + ': ' + (item.error ?? ''));
+		cosray().toast.error(__('upload:file-label') + ' ' + (item.filename ?? '') + ': ' + (item.error ?? ''));
 	}
 
 	// Fresh items carry only the uid — per-use meta stays absent until
@@ -210,7 +210,7 @@
 
 	function pickFromLibrary(item: LibraryItem) {
 		if (multiple && limit.max >= 1 && (items?.length ?? 0) >= limit.max) {
-			alert(_('In diesem Feld sind maximal') + ' ' + limit.max + ' ' + _('Dateien erlaubt.'));
+			alert(__('upload:max-files').replace(':max', String(limit.max)));
 
 			return;
 		}
@@ -254,7 +254,7 @@
 	{#if disabledMsg}
 		<Message type="warning" text={disabledMsg} />
 	{:else}
-		<Message type="warning" text={_('-warning-save-to-upload-')} />
+		<Message type="warning" text={__('upload:save-first')} />
 	{/if}
 {:else}
 	<div
@@ -276,14 +276,14 @@
 			>
 				<div class="cms-field-label upload-drop-label">
 					<span class="upload-drop-icon"><IcoUpload /></span>
-					{_('Neue Dateien per Drag and Drop hier einfügen oder')}
-					<u>{_('auswählen')}</u>
+					{__('upload:dropzone')}
+					<u>{__('common:select')}</u>
 				</div>
 				<div class="file-extensions">
 					Erlaubte Dateiendungen: {allowedExtensions}
 				</div>
 				<button type="button" class="library-button" onclick={preventDefault(openLibrary)}>
-					{_('Aus Bibliothek wählen')}
+					{__('media:choose-from-library')}
 				</button>
 				<input type="file" id={name} {multiple} oninput={onFile(getFilesFromInput)} />
 			</label>

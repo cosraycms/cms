@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { useAssets } from '$lib/assets';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 
@@ -23,7 +23,7 @@
 
 <div class="video {classes}" class:empty={!file} class:upload>
 	{#if loading}
-		{_('Loading ...')}
+		{__('common:loading')}
 	{:else}
 		<video controls class="cms-video-player">
 			<track kind="captions" />
@@ -35,7 +35,7 @@
 					<span class="ico cms-video-ico">
 						<IcoTrash />
 					</span>
-					<span class="icobtn cms-video-icobtn">{_('Löschen')}</span>
+					<span class="icobtn cms-video-icobtn">{__('common:delete')}</span>
 				</button>
 			{/if}
 		</div>

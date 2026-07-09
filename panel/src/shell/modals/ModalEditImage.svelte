@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import Button from '$shell/Button.svelte';
 	import Input from '$shell/controls/Input.svelte';
 
@@ -22,19 +22,17 @@
 	let meta = $derived(asset.meta);
 </script>
 
-<ModalHeader>{_('Bildtitel und Alt-Text')}</ModalHeader>
+<ModalHeader>{__('image:title-and-alt')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-edit-image-fields">
-		<Input bind:value={meta.title} label={_('Titel')} id="edit_image_title" {translate} />
+		<Input bind:value={meta.title} label={__('common:title')} id="edit_image_title" {translate} />
 		{#if hasAlt}
 			<Input
 				bind:value={meta.alt}
-				label={_('Alt-Text')}
+				label={__('image:alt-text')}
 				id="edit_image_alt"
 				{translate}
-				description={_(
-					'Ein Alt-Text ist eine kurze Bildbeschreibung oder eine sprachliche Übersetzung eines visuellen Inhalts im Internet, die blinden Benutzern von Hilfsmitteln wie Screen- readern anstelle des Bildes vorgelesen wird. Suchmaschinen verwenden diesen Text ebenfalls.',
-				)}
+				description={__('image:alt-text-help')}
 			/>
 		{/if}
 	</div>
@@ -42,10 +40,10 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={close}>
-			{_('Abbrechen')}
+			{__('common:cancel')}
 		</Button>
 		<Button variant="primary" onclick={() => apply(asset)}>
-			{_('Übernehmen')}
+			{__('common:apply')}
 		</Button>
 	</div>
 </ModalFooter>

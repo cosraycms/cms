@@ -47,7 +47,9 @@ class Locales implements Iterator, CorePlugin
 	 */
 	public function catalogs(): array
 	{
-		return $this->catalogs + ['cosray' => dirname(__DIR__) . '/lang'];
+		$dir = dirname(__DIR__) . '/lang';
+
+		return $this->catalogs + ['cosray' => $dir, 'panel' => $dir];
 	}
 
 	public function add(

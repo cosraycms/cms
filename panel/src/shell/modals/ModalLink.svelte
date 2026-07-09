@@ -3,7 +3,7 @@
 	import type { NodeInfo } from '$shell/NodeSearch.svelte';
 
 	import { untrack } from 'svelte';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoImage from '$shell/icons/IcoImage.svelte';
@@ -78,7 +78,7 @@
 	}
 </script>
 
-<ModalHeader>{_('Add link')}</ModalHeader>
+<ModalHeader>{__('richtext:add-link')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-link-body">
 		<div class="tabs">
@@ -90,19 +90,19 @@
 						onclick={changeTab('manually')}
 					>
 						<IcoLink />
-						<span>{_('Manueller Link')}</span>
+						<span>{__('link:manual')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'page'} onclick={changeTab('page')}>
 						<IcoParagraph />
-						<span>{_('Seite')}</span>
+						<span>{__('node:page')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
 						<IcoImage />
-						<span>{_('Bilder')}</span>
+						<span>{__('media:images')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
 						<IcoDocument />
-						<span>{_('Dateien/Dokumente')}</span>
+						<span>{__('media:files-documents')}</span>
 					</button>
 				</nav>
 			</div>
@@ -123,7 +123,7 @@
 			{:else}
 				<div>
 					<div class="cms-modal-link-manual-hint">
-						{_('Bitte eine gültige URL eingeben')}
+						{__('link:invalid-url')}
 					</div>
 					<div class="cms-modal-link-manual-input-wrap">
 						<input class="cms-input" type="text" bind:value={url} />
@@ -146,7 +146,7 @@
 			</div>
 			<div class="cms-modal-link-target-label-wrap">
 				<label for="modallink_target" class="cms-checkbox-label">
-					{_('In neuem Fenster öffnen')}
+					{__('link:open-new-window')}
 				</label>
 			</div>
 		</div>
@@ -155,10 +155,10 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={close}>
-			{_('Abbrechen')}
+			{__('common:cancel')}
 		</Button>
 		<Button variant="primary" onclick={clickAdd} disabled={!canAdd}>
-			{_('Link hinzufügen')}
+			{__('link:add')}
 		</Button>
 	</div>
 </ModalFooter>

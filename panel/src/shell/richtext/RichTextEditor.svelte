@@ -6,7 +6,7 @@
 	import type { AssetInfo } from '$types/data';
 
 	import { cosray } from '$lib/bridge';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import ModalImage from '$shell/modals/ModalImage.svelte';
 	import ModalLink from '$shell/modals/ModalLink.svelte';
 	import createEditor, { type CmsEditor } from './editor';
@@ -351,7 +351,7 @@
 						>
 							<IcoDocument />
 							<span class="cms-richtext-source-label">
-								{_('Show content')}
+								{__('richtext:show-content')}
 							</span>
 						</button>
 					</div>
@@ -369,7 +369,7 @@
 									showCompactToolsDropdown = false;
 								}}
 							>
-								{_('Absatz')}
+								{__('richtext:paragraph')}
 								<svg
 									class="cms-richtext-dropdown-icon"
 									xmlns="http://www.w3.org/2000/svg"
@@ -403,7 +403,7 @@
 									>
 										<IcoH1 />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Überschrift Level 1')}
+											{__('richtext:heading-1')}
 										</span>
 									</button>
 									<button
@@ -415,7 +415,7 @@
 									>
 										<IcoH2 />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Überschrift Level 2')}
+											{__('richtext:heading-2')}
 										</span>
 									</button>
 									<button
@@ -427,7 +427,7 @@
 									>
 										<IcoH3 />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Überschrift Level 3')}
+											{__('richtext:heading-3')}
 										</span>
 									</button>
 									<button
@@ -439,7 +439,7 @@
 									>
 										<IcoParagraph />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Absatz')}
+											{__('richtext:paragraph')}
 										</span>
 									</button>
 									{#each classOptions as [cls, label] (cls)}
@@ -464,7 +464,7 @@
 									>
 										<IcoRemoveFormat />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Format entfernen')}
+											{__('richtext:remove-format')}
 										</span>
 									</button>
 								</div>
@@ -531,7 +531,7 @@
 										>
 											<IcoRemoveFormat />
 											<span class="cms-richtext-dropdown-item-label">
-												{_('Stil entfernen')}
+												{__('richtext:remove-style')}
 											</span>
 										</button>
 									</div>
@@ -545,8 +545,8 @@
 								type="button"
 								id="compact-tools-menu-button"
 								class="richtext-dropdown-button cms-richtext-compact-tools-button"
-								title={_('Formatting tools')}
-								aria-label={_('Formatting tools')}
+								title={__('richtext:formatting-tools')}
+								aria-label={__('richtext:formatting-tools')}
 								aria-expanded={showCompactToolsDropdown}
 								aria-haspopup="true"
 								onclick={() => {
@@ -575,7 +575,7 @@
 									>
 										<IcoAlignLeft />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Text align left')}
+											{__('richtext:align-left')}
 										</span>
 									</button>
 									<button
@@ -587,7 +587,7 @@
 									>
 										<IcoAlignCenter />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Text align center')}
+											{__('richtext:align-center')}
 										</span>
 									</button>
 									<button
@@ -599,7 +599,7 @@
 									>
 										<IcoAlignRight />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Text align right')}
+											{__('richtext:align-right')}
 										</span>
 									</button>
 									<button
@@ -611,7 +611,7 @@
 									>
 										<IcoAlignJustify />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Justify text')}
+											{__('richtext:justify')}
 										</span>
 									</button>
 									<button
@@ -623,7 +623,7 @@
 									>
 										<IcoBold />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Bold text')}
+											{__('richtext:bold')}
 										</span>
 									</button>
 									<button
@@ -635,7 +635,7 @@
 									>
 										<IcoItalic />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Italic text')}
+											{__('richtext:italic')}
 										</span>
 									</button>
 									<button
@@ -647,7 +647,7 @@
 									>
 										<IcoStrikethrough />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Strike through')}
+											{__('richtext:strikethrough')}
 										</span>
 									</button>
 									<button
@@ -659,7 +659,7 @@
 									>
 										<IcoListUl />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Bulleted list')}
+											{__('richtext:bullet-list')}
 										</span>
 									</button>
 									<button
@@ -671,7 +671,7 @@
 									>
 										<IcoListOl />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Numbered list')}
+											{__('richtext:numbered-list')}
 										</span>
 									</button>
 									<button
@@ -683,7 +683,7 @@
 									>
 										<IcoSubscript />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Subscript')}
+											{__('richtext:subscript')}
 										</span>
 									</button>
 									<button
@@ -695,7 +695,7 @@
 									>
 										<IcoSuperscript />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Superscript')}
+											{__('richtext:superscript')}
 										</span>
 									</button>
 									<button
@@ -707,7 +707,7 @@
 									>
 										<IcoBlockQuoteRight />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Block quote')}
+											{__('richtext:blockquote')}
 										</span>
 									</button>
 									<button
@@ -718,7 +718,7 @@
 									>
 										<IcoHorizontalRule />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Horizontal line')}
+											{__('richtext:horizontal-line')}
 										</span>
 									</button>
 									<button
@@ -729,7 +729,7 @@
 									>
 										<IcoLink />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Add link to page')}
+											{__('richtext:add-page-link')}
 										</span>
 									</button>
 									<button
@@ -740,7 +740,7 @@
 									>
 										<IcoImage />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Bild einfügen')}
+											{__('image:insert')}
 										</span>
 									</button>
 									{#if editorState.link}
@@ -752,7 +752,7 @@
 										>
 											<IcoUnlink />
 											<span class="cms-richtext-dropdown-item-label">
-												{_('Remove link')}
+												{__('richtext:remove-link')}
 											</span>
 										</button>
 									{/if}
@@ -764,7 +764,7 @@
 									>
 										<IcoLineBreak />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Add a hard line break')}
+											{__('richtext:hard-break')}
 										</span>
 									</button>
 									<button
@@ -775,7 +775,7 @@
 									>
 										<IcoRemoveFormat />
 										<span class="cms-richtext-dropdown-item-label">
-											{_('Remove formats')}
+											{__('richtext:remove-formats')}
 										</span>
 									</button>
 								</div>
@@ -787,14 +787,14 @@
 					>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Text align left')}
+							title={__('richtext:align-left')}
 							onclick={run(unsetTextAlign())}
 						>
 							<IcoAlignLeft />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Text align center')}
+							title={__('richtext:align-center')}
 							onclick={run(setTextAlign('center'))}
 							class:active={editorState.center}
 						>
@@ -802,7 +802,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Text align right')}
+							title={__('richtext:align-right')}
 							onclick={run(setTextAlign('right'))}
 							class:active={editorState.right}
 						>
@@ -810,7 +810,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Justify text')}
+							title={__('richtext:justify')}
 							onclick={run(setTextAlign('justify'))}
 							class:active={editorState.justify}
 						>
@@ -818,7 +818,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Bold text')}
+							title={__('richtext:bold')}
 							onclick={run(toggleBold())}
 							class:active={editorState.bold}
 						>
@@ -826,7 +826,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Italic text')}
+							title={__('richtext:italic')}
 							onclick={run(toggleItalic())}
 							class:active={editorState.italic}
 						>
@@ -834,7 +834,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Strike through')}
+							title={__('richtext:strikethrough')}
 							onclick={run(toggleStrike())}
 							class:active={editorState.strike}
 						>
@@ -842,7 +842,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Bulleted list')}
+							title={__('richtext:bullet-list')}
 							onclick={run(toggleBulletList())}
 							class:active={editorState.bulletList}
 						>
@@ -850,7 +850,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Numbered list')}
+							title={__('richtext:numbered-list')}
 							onclick={run(toggleOrderedList())}
 							class:active={editorState.orderedList}
 						>
@@ -858,7 +858,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Subscript')}
+							title={__('richtext:subscript')}
 							onclick={run(toggleSubscript())}
 							class:active={editorState.subscript}
 						>
@@ -866,7 +866,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Superscript')}
+							title={__('richtext:superscript')}
 							onclick={run(toggleSuperscript())}
 							class:active={editorState.superscript}
 						>
@@ -874,7 +874,7 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Block quote')}
+							title={__('richtext:blockquote')}
 							onclick={run(toggleBlockquote())}
 							class:active={editorState.blockquote}
 						>
@@ -882,14 +882,14 @@
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Horizontal line')}
+							title={__('richtext:horizontal-line')}
 							onclick={run(insertHorizontalRule())}
 						>
 							<IcoHorizontalRule />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Add link to page')}
+							title={__('richtext:add-page-link')}
 							onclick={openAddLinkModal}
 						>
 							<IcoLink />
@@ -897,7 +897,7 @@
 						{#if editorState.link}
 							<button
 								class="richtext-toolbar-btn"
-								title={_('Remove link')}
+								title={__('richtext:remove-link')}
 								onclick={run(unsetLink())}
 							>
 								<IcoUnlink />
@@ -905,31 +905,31 @@
 						{/if}
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Bild einfügen')}
+							title={__('image:insert')}
 							onclick={openAddImageModal}
 						>
 							<IcoImage />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Add a hard line break')}
+							title={__('richtext:hard-break')}
 							onclick={run(insertHardBreak())}
 						>
 							<IcoLineBreak />
 						</button>
 						<button
 							class="richtext-toolbar-btn"
-							title={_('Remove formats')}
+							title={__('richtext:remove-formats')}
 							onclick={run(clearMarks())}
 						>
 							<IcoRemoveFormat />
 						</button>
 					</div>
 					<div class="richtext-extras">
-						<button class="richtext-toolbar-btn" title={_('Undo last action')} onclick={run(undo)}>
+						<button class="richtext-toolbar-btn" title={__('richtext:undo')} onclick={run(undo)}>
 							<IcoUndo />
 						</button>
-						<button class="richtext-toolbar-btn" title={_('Redo last undo')} onclick={run(redo)}>
+						<button class="richtext-toolbar-btn" title={__('richtext:redo')} onclick={run(redo)}>
 							<IcoRedo />
 						</button>
 						{#if editSource}
@@ -939,7 +939,7 @@
 							>
 								<IcoCode />
 								<span class="cms-richtext-toolbar-source-label">
-									{_('Show source')}
+									{__('richtext:show-source')}
 								</span>
 							</button>
 						{/if}

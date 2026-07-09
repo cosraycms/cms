@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
 	import Button from '$shell/Button.svelte';
 
@@ -12,10 +12,10 @@
 	let { close, proceed, message = null }: Props = $props();
 </script>
 
-<ModalHeader>{_('Dokument löschen')}</ModalHeader>
+<ModalHeader>{__('document:delete')}</ModalHeader>
 <ModalBody>
 	<p>
-		{_('Soll der Eintrag wirklich gelöscht werden?')}
+		{__('field:confirm-delete')}
 	</p>
 	{#if message}
 		<p class="cms-modal-remove-message">{message}</p>
@@ -24,10 +24,10 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={proceed}>
-			{_('Ja, Eintrag löschen')}
+			{__('field:confirm-delete-entry')}
 		</Button>
 		<Button variant="secondary" onclick={close}>
-			{_('Nein, Eintrag nicht löschen')}
+			{__('field:cancel-delete-entry')}
 		</Button>
 	</div>
 </ModalFooter>

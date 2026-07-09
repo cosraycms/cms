@@ -4,7 +4,7 @@
 	import type { BlocksField } from '$types/fields';
 
 	import { useNotify } from '../notify';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import Setting from '$shell/Setting.svelte';
 
 	type Props = {
@@ -44,7 +44,7 @@
 	{#if showSettings}
 		<Setting>
 			<label for={field.name + '_' + index + '_ytid'}>
-				{_('Youtube-ID')}
+				{__('youtube:id-label')}
 			</label>
 			<div class="cms-blocks-youtube-field-row">
 				<input
@@ -52,7 +52,7 @@
 					name={field.name + '_' + index + '_ytid'}
 					type="text"
 					maxlength="20"
-					placeholder={_('Fügen Sie hier die Youtube-ID ein')}
+					placeholder={__('youtube:id-placeholder')}
 					bind:value={item.value[ZXX]}
 					{oninput}
 				/>
@@ -60,7 +60,7 @@
 		</Setting>
 		<Setting>
 			<label for={field.name + '_' + index + '_x'}>
-				{_('Seitenverhältnis')}
+				{__('youtube:aspect-ratio')}
 			</label>
 			<div class="cms-blocks-youtube-ratio-row">
 				<input
@@ -69,7 +69,7 @@
 					type="number"
 					max="100"
 					min="1"
-					placeholder={_('Breite')}
+					placeholder={__('image:width')}
 					bind:value={item.meta.aspectRatioX[ZXX]}
 					{oninput}
 				/>
@@ -79,7 +79,7 @@
 					type="number"
 					max="100"
 					min="1"
-					placeholder={_('Höhe')}
+					placeholder={__('image:height')}
 					bind:value={item.meta.aspectRatioY[ZXX]}
 					{oninput}
 				/>

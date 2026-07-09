@@ -13,7 +13,7 @@
 
 <script lang="ts">
 	import type { Locale } from '$lib/sys';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 
 	type TextKey = 'alt' | 'title' | 'caption';
 
@@ -27,9 +27,9 @@
 	let { meta = $bindable(), locales, activeLocale = $bindable(), isImage }: Props = $props();
 
 	const fields: { key: TextKey; label: string }[] = [
-		{ key: 'alt', label: _('Alternativtext') },
-		{ key: 'title', label: _('Titel') },
-		{ key: 'caption', label: _('Bildunterschrift') },
+		{ key: 'alt', label: __('image:alt-text-long') },
+		{ key: 'title', label: __('common:title') },
+		{ key: 'caption', label: __('image:caption') },
 	];
 
 	// Alt text describes image content; it is not offered for other kinds.
@@ -88,7 +88,7 @@
 	{/each}
 
 	<label class="cms-meta-field">
-		<span>{_('Bildnachweis')}</span>
+		<span>{__('image:credit')}</span>
 		<input
 			class="cms-input"
 			type="text"

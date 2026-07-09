@@ -2,7 +2,7 @@
 	import { ZXX, type EntriesData, type EntryData, type GenericFieldData } from '$types/data';
 	import type { EntriesField, EntryType } from '$types/fields';
 
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import { useNotify } from '../notify';
 	import { uid } from '$lib/content';
 	import { flip } from 'svelte/animate';
@@ -39,7 +39,7 @@
 
 	function addLabel(entryType: EntryType, first: boolean): string {
 		if (field.entryTypes.length === 1) {
-			return first ? _('Ersten Eintrag hinzufügen') : _('Eintrag hinzufügen');
+			return first ? __('field:add-first-entry') : __('field:add-entry');
 		}
 
 		return `${entryType.label} hinzufügen`;

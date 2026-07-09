@@ -2,7 +2,7 @@
 	import type { Block } from '$types/data';
 	import type { BlocksField, BlockTypeMeta } from '$types/fields';
 
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import resize from '$lib/resize';
 	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
@@ -160,7 +160,7 @@
 				<span class="cms-blocks-empty-icon">
 					<IcoCirclePlus />
 				</span>
-				{_('Inhalt hinzfügen')}
+				{__('field:add-content')}
 			</Button>
 		</div>
 	{/if}

@@ -3,7 +3,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { system, ensureSystem } from '$lib/sys';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import IcoDocument from '$shell/icons/IcoDocument.svelte';
 	import IcoUpload from '$shell/icons/IcoUpload.svelte';
 	import MediaDetail from '$shell/media/MediaDetail.svelte';
@@ -146,10 +146,10 @@
 
 				selected = item.uid;
 			} else {
-				uploadError = data.error ?? _('Upload fehlgeschlagen.');
+				uploadError = data.error ?? __('upload:failed');
 			}
 		} catch {
-			uploadError = _('Upload fehlgeschlagen.');
+			uploadError = __('upload:failed');
 		}
 
 		uploading = false;
@@ -167,28 +167,28 @@
 <div class="cms-media">
 	<div class="cms-media-toolbar">
 		<form class="cms-media-search" onsubmit={search}>
-			<input class="cms-input" type="search" placeholder={_('Dateiname suchen …')} bind:value={q} />
-			<button type="submit" class="cms-button">{_('Suchen')}</button>
+			<input class="cms-input" type="search" placeholder={__('media:search-filename')} bind:value={q} />
+			<button type="submit" class="cms-button">{__('common:search')}</button>
 		</form>
 
-		<div class="cms-media-filters" role="group" aria-label={_('Filter')}>
+		<div class="cms-media-filters" role="group" aria-label={__('common:filter')}>
 			<button
 				type="button"
 				class="cms-button"
 				class:active={filter === 'all'}
-				onclick={() => setFilter('all')}>{_('Alle')}</button
+				onclick={() => setFilter('all')}>{__('common:all')}</button
 			>
 			<button
 				type="button"
 				class="cms-button"
 				class:active={filter === 'image'}
-				onclick={() => setFilter('image')}>{_('Bilder')}</button
+				onclick={() => setFilter('image')}>{__('media:images')}</button
 			>
 			<button
 				type="button"
 				class="cms-button"
 				class:active={filter === 'video'}
-				onclick={() => setFilter('video')}>{_('Videos')}</button
+				onclick={() => setFilter('video')}>{__('media:videos')}</button
 			>
 		</div>
 
@@ -200,7 +200,7 @@
 				onclick={() => fileInput?.click()}
 			>
 				<IcoUpload />
-				{uploading ? _('Wird hochgeladen …') : _('Hochladen')}
+				{uploading ? __('upload:in-progress') : __('common:upload')}
 			</button>
 			<input bind:this={fileInput} type="file" hidden onchange={upload} />
 		</div>
@@ -211,9 +211,9 @@
 	{/if}
 
 	{#if failed}
-		<div class="cms-media-empty">{_('Die Bibliothek konnte nicht geladen werden.')}</div>
+		<div class="cms-media-empty">{__('media:library-load-failed')}</div>
 	{:else if items.length === 0 && !loading}
-		<div class="cms-media-empty">{_('Keine Dateien gefunden.')}</div>
+		<div class="cms-media-empty">{__('media:no-files')}</div>
 	{:else}
 		<div class="cms-media-grid">
 			{#each items as item (item.uid)}
@@ -236,10 +236,10 @@
 	{/if}
 
 	{#if loading}
-		<div class="cms-media-loading">{_('Loading ...')}</div>
+		<div class="cms-media-loading">{__('common:loading')}</div>
 	{:else if more}
 		<button type="button" class="cms-button cms-media-more" onclick={() => void load(false)}>
-			{_('Mehr laden')}
+			{__('common:load-more')}
 		</button>
 	{/if}
 </div>

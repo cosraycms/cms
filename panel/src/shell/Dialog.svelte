@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import Button from '$shell/Button.svelte';
 
 	type Props = {
@@ -21,7 +21,7 @@
 	</div>
 	<div class="controls">
 		<Button variant="secondary" onclick={close}>
-			{_('OK')}
+			{__('common:ok')}
 		</Button>
 	</div>
 </div>

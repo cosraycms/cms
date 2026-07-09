@@ -4,7 +4,7 @@
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { useAssets } from '$lib/assets';
-	import { _ } from '$lib/locale';
+	import { __ } from '$lib/locale';
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoEye from '$shell/icons/IcoEye.svelte';
 	import IcoPencil from '$shell/icons/IcoPencil.svelte';
@@ -65,29 +65,29 @@
 
 <div class="image {classes}" class:empty={!image} class:upload class:multiple class:hover>
 	{#if loading}
-		{_('Loading ...')}
+		{__('common:loading')}
 	{:else}
-		<img src={thumb} alt={_('Vorschau')} />
+		<img src={thumb} alt={__('common:preview')} />
 		<div class="overlay">
 			{#if remove}
 				<button class="overlay-action overlay-action-danger" onclick={remove}>
 					<span class="ico">
 						<IcoTrash />
 					</span>
-					<span class="icobtn">{_('Löschen')}</span>
+					<span class="icobtn">{__('common:delete')}</span>
 				</button>
 			{/if}
 			<button class="overlay-action overlay-action-primary" onclick={preview}>
 				<span class="ico">
 					<IcoEye />
 				</span>
-				<span class="icobtn">{_('Vorschau')}</span>
+				<span class="icobtn">{__('common:preview')}</span>
 			</button>
 			<button class="overlay-action overlay-action-primary" onclick={edit}>
 				<span class="ico">
 					<IcoPencil />
 				</span>
-				<span class="icobtn">{_('Titel')}</span>
+				<span class="icobtn">{__('common:title')}</span>
 			</button>
 		</div>
 	{/if}
