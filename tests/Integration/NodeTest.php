@@ -287,7 +287,7 @@ final class NodeTest extends IntegrationTestCase
 
 		$this->throws(
 			\Cosray\Exception\RuntimeException::class,
-			'Hauptsprache',
+			'main language',
 		);
 
 		$pathManager->persist(

@@ -61,9 +61,9 @@ $span = static function (mixed $value, int $fallback): string {
 								<form
 									method="post"
 									action="<?= escape($links->delete($uid)) ?>"
-									hx-confirm="<?= escape(_('Dieses Dokument wirklich löschen?')) ?>">
+									hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
 									<button class="cms-button danger" type="submit">
-										<?= escape(_('Löschen')) ?>
+										<?= escape(__('editor:delete')) ?>
 									</button>
 								</form>
 							<?php endif ?>
@@ -75,7 +75,7 @@ $span = static function (mixed $value, int $fallback): string {
 									name="preview"
 									value="1"
 									data-editor-submit>
-									<?= escape(_('Vorschau')) ?>
+									<?= escape(__('editor:preview')) ?>
 								</button>
 							<?php endif ?>
 							<button
@@ -85,14 +85,14 @@ $span = static function (mixed $value, int $fallback): string {
 								name="publish"
 								value="1"
 								data-editor-submit>
-								<?= escape(_('Speichern und veröffentlichen')) ?>
+								<?= escape(__('editor:save-publish')) ?>
 							</button>
 							<button
 								class="cms-button primary"
 								type="submit"
 								form="node-editor-form"
 								data-editor-submit>
-								<?= escape(_('Speichern')) ?>
+								<?= escape(__('editor:save')) ?>
 							</button>
 						</div>
 					</div>
@@ -105,14 +105,14 @@ $span = static function (mixed $value, int $fallback): string {
 								<span
 									id="editor-dirty"
 									class="cms-headline-dirty"
-									title="<?= escape(_('Nicht gespeicherte Änderungen')) ?>"
+									title="<?= escape(__('editor:unsaved-changes')) ?>"
 									hidden>●</span>
 								<?php if ($renderable): ?>
 									<span class="cms-headline-published">
 										<span
 											id="editor-published"
 											class="cms-published large<?= $published ? ' published' : '' ?>">
-											<?= escape($published ? _('veröffentlicht') : _('unveröffentlicht')) ?>
+											<?= escape($published ? __('editor:published') : __('editor:unpublished')) ?>
 										</span>
 									</span>
 								<?php endif ?>
@@ -122,10 +122,10 @@ $span = static function (mixed $value, int $fallback): string {
 							<div class="tabs cms-tabs">
 								<nav>
 									<button type="button" class="tab active" data-pane-tab="content">
-										<?= escape(_('Inhalt')) ?>
+										<?= escape(__('editor:content')) ?>
 									</button>
 									<button type="button" class="tab" data-pane-tab="settings">
-										<?= escape(_('Einstellungen')) ?>
+										<?= escape(__('editor:settings')) ?>
 									</button>
 								</nav>
 							</div>

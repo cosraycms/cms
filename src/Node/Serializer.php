@@ -89,7 +89,7 @@ class Serializer
 		}
 
 		$result = [
-			'title' => _('Neues Dokument:') . ' ' . __((string) $schema->label),
+			'title' => __('node:new-document') . ' ' . __((string) $schema->label),
 			'fields' => $this->fields($node, $fieldNames),
 			'uid' => $this->uid->generate(),
 			'handle' => null,

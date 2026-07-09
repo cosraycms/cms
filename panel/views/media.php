@@ -15,7 +15,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <div id="main" class="page media-page">
 	<header class="topbar">
 		<div class="inner">
-			<h1><?= escape(_('Medien')) ?></h1>
+			<h1><?= escape(__('media:title')) ?></h1>
 		</div>
 	</header>
 

@@ -140,7 +140,7 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertResponseStatus(400, $response);
 		$json = $this->getJsonResponse($response);
 		$this->assertFalse($json['ok']);
-		$this->assertStringContainsString('nicht erlaubt', (string) $json['error']);
+		$this->assertStringContainsString('not allowed', (string) $json['error']);
 
 		$this->assertEmpty(glob("{$this->publicDir}/assets/*/*"));
 	}
@@ -152,7 +152,7 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertResponseStatus(400, $response);
 		$json = $this->getJsonResponse($response);
 		$this->assertFalse($json['ok']);
-		$this->assertStringContainsString('Upload fehlgeschlagen', (string) $json['error']);
+		$this->assertStringContainsString('Upload failed', (string) $json['error']);
 	}
 
 	public function testUploadRequiresAuthentication(): void

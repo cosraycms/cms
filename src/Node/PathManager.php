@@ -61,8 +61,9 @@ class PathManager
 		$defaultPath = trim($data['paths'][$defaultLocale->id] ?? '');
 
 		if (!$defaultPath) {
-			throw new RuntimeException(_(
-				'Der URL-Pfad für die Hauptsprache {$defaultLocale->title} muss gesetzt sein',
+			throw new RuntimeException(sprintf(
+				'The URL path for the main language "%s" must be set',
+				$defaultLocale->title,
 			));
 		}
 

@@ -19,7 +19,7 @@ $handle = $node['handle'] ?? null;
 <div class="cms-settings">
 	<div class="cms-settings-row">
 		<label class="cms-field-label" for="cms-node-handle">
-			<?= escape(_('Handle')) ?>:
+			<?= escape(__('editor:handle')) ?>:
 		</label>
 		<div class="cms-settings-handle-value">
 			<input
@@ -60,9 +60,9 @@ $handle = $node['handle'] ?? null;
 			<div class="cms-settings-section">
 				<label class="cms-toggle-line">
 					<span class="cms-toggle-line-copy">
-						<span class="cms-toggle-line-title"><?= escape(_('Veröffentlicht')) ?></span>
+						<span class="cms-toggle-line-title"><?= escape(__('editor:published-label')) ?></span>
 						<span class="cms-toggle-line-subtitle">
-							<?= escape(_('Legt fest, ob die Seite für alle Besucher erreichbar ist.')) ?>
+							<?= escape(__('editor:published-help')) ?>
 						</span>
 					</span>
 					<input type="hidden" name="published" value="" />
@@ -77,9 +77,9 @@ $handle = $node['handle'] ?? null;
 			<div class="cms-settings-section">
 				<label class="cms-toggle-line">
 					<span class="cms-toggle-line-copy">
-						<span class="cms-toggle-line-title"><?= escape(_('Versteckt')) ?></span>
+						<span class="cms-toggle-line-title"><?= escape(__('editor:hidden-label')) ?></span>
 						<span class="cms-toggle-line-subtitle">
-							<?= escape(_('Versteckte Seiten werden in Auflistungen ignoriert.')) ?>
+							<?= escape(__('editor:hidden-help')) ?>
 						</span>
 					</span>
 					<input type="hidden" name="hidden" value="" />
@@ -92,7 +92,7 @@ $handle = $node['handle'] ?? null;
 				</label>
 			</div>
 			<div class="cms-settings-row">
-				<div class="cms-field-label"><?= escape(_('Internal Document-ID')) ?>:</div>
+				<div class="cms-field-label"><?= escape(__('editor:internal-id')) ?>:</div>
 				<div class="cms-settings-value"><?= escape((string) ($node['uid'] ?? '')) ?></div>
 			</div>
 		</div>

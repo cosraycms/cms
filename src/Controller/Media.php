@@ -67,7 +67,7 @@ class Media
 
 			if ($clean === null) {
 				return $response->json(
-					['ok' => false, 'error' => _('Die SVG-Datei konnte nicht sicher verarbeitet werden.')],
+					['ok' => false, 'error' => __('media:unsafe-svg')],
 					400,
 				);
 			}
@@ -194,7 +194,7 @@ class Media
 		$row = $this->db->assets->byUid(['uid' => $uid])->first();
 
 		if (!$row) {
-			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
 		}
 
 		return $response->json([
@@ -216,7 +216,7 @@ class Media
 		$row = $this->db->assets->byUid(['uid' => $uid])->first();
 
 		if (!$row) {
-			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
 		}
 
 		$stored = json_decode((string) ($row['meta'] ?? '{}'), true);
@@ -276,7 +276,7 @@ class Media
 		$row = $this->db->assets->byUid(['uid' => $uid])->first();
 
 		if (!$row) {
-			return $response->json(['ok' => false, 'error' => _('Unbekannte Datei')], 404);
+			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
 		}
 
 		$usage = new Usage($this->db);
@@ -502,8 +502,8 @@ class Media
 		if (!$file) {
 			return [
 				'ok' => false,
-				'error' => _('Upload fehlgeschlagen. Datei konnte am Server nicht verabeitet werden.'),
-				'file' => _(' Dateiname unbekannt'),
+				'error' => __('media:upload-failed'),
+				'file' => __('media:unknown-filename'),
 			];
 		}
 		$upload = $this->config->upload;
@@ -521,8 +521,8 @@ class Media
 		if ($fileName === '') {
 			return [
 				'ok' => false,
-				'error' => _('Upload fehlgeschlagen. Datei konnte am Server nicht verabeitet werden.'),
-				'file' => _(' Dateiname unbekannt'),
+				'error' => __('media:upload-failed'),
+				'file' => __('media:unknown-filename'),
 			];
 		}
 
@@ -548,7 +548,7 @@ class Media
 		if ($file->getError() !== UPLOAD_ERR_OK) {
 			return array_merge($result, [
 				'ok' => false,
-				'error' => _('Der Dateiupload ist aufgrund eines Serverfehlers fehlgeschlagen.'),
+				'error' => __('media:upload-server-error'),
 			]);
 		}
 
@@ -559,18 +559,17 @@ class Media
 		if (!$allowedExtensions) {
 			return array_merge($result, [
 				'ok' => false,
-				'error' => _("Der Dateityp ist nicht erlaubt: {$mimeType}."),
+				'error' => __('media:disallowed-type', ['type' => $mimeType]),
 			]);
 		}
 
 		if (!$ext || !in_array(strtolower($ext), $allowedExtensions, true)) {
 			return array_merge($result, [
 				'ok' => false,
-				'error' => _(
-					"Falsche Dateiendung: {$ext}. Für diesen Dateityp sind folgende Endungen erlaubt: "
-					. implode(', ', $allowedExtensions)
-					. '.',
-				),
+				'error' => __('media:wrong-extension', [
+					'ext' => (string) $ext,
+					'allowed' => implode(', ', $allowedExtensions),
+				]),
 			]);
 		}
 

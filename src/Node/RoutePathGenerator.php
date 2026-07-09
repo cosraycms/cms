@@ -184,11 +184,11 @@ final class RoutePathGenerator
 		);
 
 		if (!is_string($path)) {
-			throw new RoutePathError(_('Could not generate route path'));
+			throw new RoutePathError('Could not generate route path');
 		}
 
 		if ($strict && (str_contains($path, '{') || str_contains($path, '}'))) {
-			throw new RoutePathError(_('Invalid route path placeholder syntax'));
+			throw new RoutePathError('Invalid route path placeholder syntax');
 		}
 
 		return $usesParentPath ? $this->normalizePath($path) : $path;
@@ -220,9 +220,9 @@ final class RoutePathGenerator
 
 		if ($parentSelector !== null) {
 			if ($parentSelector['field'] === null && $transformers !== []) {
-				throw new RoutePathError(_(
+				throw new RoutePathError(
 					'Route path transformers are not supported for parent path placeholders',
-				));
+				);
 			}
 
 			if ($parentSelector['field'] === null) {
@@ -266,7 +266,7 @@ final class RoutePathGenerator
 		$selector = array_shift($parts) ?? '';
 
 		if ($selector === '') {
-			throw new RoutePathError(_('Invalid route path placeholder syntax'));
+			throw new RoutePathError('Invalid route path placeholder syntax');
 		}
 
 		foreach ($parts as $transformer) {
@@ -275,7 +275,7 @@ final class RoutePathGenerator
 				['lowercase', 'uppercase', 'titlecase', 'keepcase', 'dashes', 'underscore'],
 				true,
 			)) {
-				throw new RoutePathError(sprintf(_('Unknown route path transformer: %s'), $transformer));
+				throw new RoutePathError(sprintf('Unknown route path transformer: %s', $transformer));
 			}
 		}
 
@@ -303,14 +303,14 @@ final class RoutePathGenerator
 		}
 
 		if (!preg_match('/^parent(?:\(([1-9]\d*)\))?(?:\.(.+))?$/', $selector, $matches)) {
-			throw new RoutePathError(_('Invalid route path parent syntax'));
+			throw new RoutePathError('Invalid route path parent syntax');
 		}
 
 		$depth = isset($matches[1]) && $matches[1] !== '' ? (int) $matches[1] : 1;
 
 		if ($depth > self::MAX_PARENT_DEPTH) {
 			throw new RoutePathError(sprintf(
-				_('Route path parent depth cannot exceed %d'),
+				'Route path parent depth cannot exceed %d',
 				self::MAX_PARENT_DEPTH,
 			));
 		}
@@ -385,7 +385,7 @@ final class RoutePathGenerator
 			$node = $parents[$level - 1]['parent'];
 
 			if ($node === null) {
-				throw new RoutePathError(_('Ancestor node not found for route path'));
+				throw new RoutePathError('Ancestor node not found for route path');
 			}
 
 			$parents[$level] = $this->parentByNode($node);
@@ -407,7 +407,7 @@ final class RoutePathGenerator
 		$parentUid = $data['parent'] ?? null;
 
 		if (!is_string($parentUid) || trim($parentUid) === '') {
-			throw new RoutePathError(_('A parent is required for this node route'));
+			throw new RoutePathError('A parent is required for this node route');
 		}
 
 		return $this->parentByUid(trim($parentUid));
@@ -431,7 +431,7 @@ final class RoutePathGenerator
 		$parent = $this->db->nodes->routeParentByNode(['node' => $node])->first();
 
 		if (!$parent) {
-			throw new RoutePathError(_('Parent node not found for route path'));
+			throw new RoutePathError('Parent node not found for route path');
 		}
 
 		return $this->parentRow($parent);
@@ -443,7 +443,7 @@ final class RoutePathGenerator
 		$parent = $this->db->nodes->routeParentByUid(['uid' => $uid])->first();
 
 		if (!$parent) {
-			throw new RoutePathError(_('Parent node not found for route path'));
+			throw new RoutePathError('Parent node not found for route path');
 		}
 
 		return $this->parentRow($parent);
@@ -540,7 +540,7 @@ final class RoutePathGenerator
 			$current = $current->fallback();
 		}
 
-		throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+		throw new RoutePathError(sprintf('Could not resolve route placeholder: {%s}', $placeholder));
 	}
 
 	private function pathValue(mixed $path): ?string
@@ -579,7 +579,7 @@ final class RoutePathGenerator
 		$value = $content[$field]['value'] ?? null;
 
 		if (!is_array($value)) {
-			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+			throw new RoutePathError(sprintf('Could not resolve route placeholder: {%s}', $placeholder));
 		}
 
 		$current = $locale;
@@ -600,14 +600,14 @@ final class RoutePathGenerator
 			return $resolved;
 		}
 
-		throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+		throw new RoutePathError(sprintf('Could not resolve route placeholder: {%s}', $placeholder));
 	}
 
 	/** @param list<string> $transformers */
 	private function requiredSlug(mixed $value, string $placeholder, array $transformers): string
 	{
 		if (!is_string($value) || trim($value) === '') {
-			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+			throw new RoutePathError(sprintf('Could not resolve route placeholder: {%s}', $placeholder));
 		}
 
 		$slug = $this->slugify(
@@ -616,7 +616,7 @@ final class RoutePathGenerator
 		);
 
 		if ($slug === '') {
-			throw new RoutePathError(sprintf(_('Could not resolve route placeholder: {%s}'), $placeholder));
+			throw new RoutePathError(sprintf('Could not resolve route placeholder: {%s}', $placeholder));
 		}
 
 		return $slug;
@@ -702,7 +702,7 @@ final class RoutePathGenerator
 		try {
 			$decoded = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
 		} catch (JsonException $e) {
-			throw new RoutePathError(_('Could not decode parent content for route path'), previous: $e);
+			throw new RoutePathError('Could not decode parent content for route path', previous: $e);
 		}
 
 		return is_array($decoded) ? $decoded : [];

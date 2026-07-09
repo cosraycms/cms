@@ -147,7 +147,7 @@ final class Editor extends Panel
 
 			return [
 				'saved' => false,
-				'message' => (string) ($payload['message'] ?? _('Incomplete or invalid data')),
+				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
 				'published' => (bool) ($data['published'] ?? false),
 				'renderable' => (bool) ($data['type']['renderable'] ?? false),
@@ -161,7 +161,7 @@ final class Editor extends Panel
 
 		return [
 			'saved' => true,
-			'message' => _('Gespeichert'),
+			'message' => __('editor:saved'),
 			'errors' => [],
 			'published' => (bool) ($data['published'] ?? false),
 			'renderable' => (bool) ($data['type']['renderable'] ?? false),
@@ -228,7 +228,7 @@ final class Editor extends Panel
 
 			return [
 				'saved' => false,
-				'message' => (string) ($payload['message'] ?? _('Incomplete or invalid data')),
+				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
 				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
 				'published' => (bool) ($data['published'] ?? false),
 				'renderable' => (bool) ($data['type']['renderable'] ?? false),

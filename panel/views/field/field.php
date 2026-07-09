@@ -44,7 +44,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div><?= escape((string) ($field['label'] ?? $fieldName)) ?></div>
 		<?php if (is_array($metaControl)): ?>
 			<button type="button" class="cms-meta-button" data-meta-open>
-				<?= escape(_('Meta')) ?>
+				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
 		<?php if ($tabs): ?>
@@ -106,10 +106,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<dialog class="cms-meta-dialog" data-meta>
 			<div class="cms-meta-head">
 				<span class="cms-meta-title">
-					<?= escape((string) ($field['label'] ?? $fieldName)) ?> — <?= escape(_('Meta')) ?>
+					<?= escape((string) ($field['label'] ?? $fieldName)) ?> — <?= escape(__('field:meta')) ?>
 				</span>
 				<button type="button" class="cms-button" data-meta-close>
-					<?= escape(_('Schließen')) ?>
+					<?= escape(__('field:close')) ?>
 				</button>
 			</div>
 			<?php $this->insert('field/meta', [

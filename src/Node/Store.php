@@ -75,7 +75,7 @@ class Store
 		$data = $this->completeHandle($node, $data);
 
 		if ($data['locked']) {
-			throw new HttpBadRequest($request, payload: ['message' => _('This document is locked')]);
+			throw new HttpBadRequest($request, payload: ['message' => __('node:locked')]);
 		}
 
 		try {
@@ -102,7 +102,7 @@ class Store
 			}
 
 			throw new RuntimeException(
-				_('Fehler beim Speichern: ') . $e->getMessage(),
+				'Error while saving: ' . $e->getMessage(),
 				(int) $e->getCode(),
 				previous: $e,
 			);
@@ -136,7 +136,7 @@ class Store
 			}
 		}
 
-		throw new RuntimeException(_('Could not generate a unique node uid'));
+		throw new RuntimeException('Could not generate a unique node uid');
 	}
 
 	public function delete(object $node, Request $request, bool $requireJson = true): array
@@ -166,7 +166,7 @@ class Store
 
 		if (!$result->valid()) {
 			throw new HttpBadRequest($request, payload: [
-				'message' => _('Incomplete or invalid data'),
+				'message' => __('node:invalid-data'),
 				'errors' => $result->issues(),
 			]);
 		}
@@ -301,7 +301,7 @@ class Store
 			$nodeId = Factory::meta($node, 'node');
 
 			if (!is_int($nodeId) && !is_string($nodeId)) {
-				throw new RuntimeException(_('Missing node id for update'));
+				throw new RuntimeException('Missing node id for update');
 			}
 
 			return (int) $this->db->nodes->save([
@@ -320,7 +320,7 @@ class Store
 
 		if (!$result) {
 			throw new HttpConflict($request, payload: [
-				'message' => _('A node with the same uid already exists: ') . $data['uid'],
+				'message' => __('node:duplicate-uid', ['uid' => $data['uid']]),
 			]);
 		}
 
@@ -342,7 +342,7 @@ class Store
 
 		if ($collision) {
 			throw new HttpConflict($request, payload: [
-				'message' => _('A node uid with the same handle already exists: ') . $handle,
+				'message' => __('node:duplicate-handle-uid', ['handle' => $handle]),
 			]);
 		}
 
@@ -355,7 +355,7 @@ class Store
 		} catch (Throwable $e) {
 			if ((string) $e->getCode() === '23505') {
 				throw new HttpConflict($request, payload: [
-					'message' => _('A node with the same handle already exists: ') . $handle,
+					'message' => __('node:duplicate-handle', ['handle' => $handle]),
 				]);
 			}
 
@@ -375,7 +375,7 @@ class Store
 
 		if (!is_string($parentUid)) {
 			throw new HttpBadRequest($request, payload: [
-				'message' => _('Parent must be a uid string'),
+				'message' => __('node:parent-not-string'),
 			]);
 		}
 
@@ -401,7 +401,7 @@ class Store
 
 		if (!$parent) {
 			throw new HttpBadRequest($request, payload: [
-				'message' => _('Invalid parent uid: ') . $parentUid,
+				'message' => __('node:invalid-parent', ['uid' => $parentUid]),
 			]);
 		}
 
@@ -417,7 +417,7 @@ class Store
 		}
 
 		throw new HttpBadRequest($request, payload: [
-			'message' => _('Node uid cannot be changed'),
+			'message' => __('node:uid-immutable'),
 		]);
 	}
 
@@ -466,7 +466,7 @@ class Store
 		}
 
 		throw new HttpBadRequest($request, payload: [
-			'message' => _('A handle is required for this node route'),
+			'message' => __('node:handle-required'),
 		]);
 	}
 

@@ -32,7 +32,7 @@ $row = function (int|string $index, mixed $itemValue) use ($item, $subField, $id
 			]) ?>
 		</div>
 		<button type="button" class="cms-button" data-repeater-remove>
-			<?= escape(_('Entfernen')) ?>
+			<?= escape(__('field:remove')) ?>
 		</button>
 	</div>
 	<?php
@@ -56,7 +56,7 @@ $row = function (int|string $index, mixed $itemValue) use ($item, $subField, $id
 			class="cms-button"
 			data-repeater-add
 			<?= is_int($max) && count($items) >= $max ? 'hidden' : '' ?>>
-			<?= escape(_('Hinzufügen')) ?>
+			<?= escape(__('field:add')) ?>
 		</button>
 	</div>
 </div>

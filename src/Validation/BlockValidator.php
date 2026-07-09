@@ -74,7 +74,7 @@ final class BlockValidator implements Validator
 						$review,
 						$listIndex,
 						'value',
-						_('Bitte Textfeld ausfüllen oder Block löschen.'),
+						__('block:empty-text'),
 					);
 				}
 			} elseif ($type === 'iframe') {
@@ -83,7 +83,7 @@ final class BlockValidator implements Validator
 						$review,
 						$listIndex,
 						'value',
-						_('Bitte Iframe-Feld ausfüllen oder Block löschen.'),
+						__('block:empty-iframe'),
 					);
 				}
 			}
@@ -102,14 +102,14 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'format',
-				_('Formatierter Text muss im strukturierten Format übertragen werden.'),
+				__('block:richtext-format'),
 			);
 
 			return;
 		}
 
 		if (($value['version'] ?? null) !== Envelope::VERSION) {
-			$this->addError($review, $listIndex, 'version', _('Unbekannte Formatversion.'));
+			$this->addError($review, $listIndex, 'version', __('block:unknown-format-version'));
 
 			return;
 		}
@@ -133,7 +133,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'value',
-				_('Bitte Textfeld ausfüllen oder Block löschen.'),
+				__('block:empty-text'),
 			);
 		}
 	}
@@ -155,7 +155,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'image',
-				_('Attribute `uid` nicht gefüllt.'),
+				__('block:missing-uid'),
 			);
 
 			return;
@@ -165,7 +165,7 @@ final class BlockValidator implements Validator
 			$review,
 			$listIndex,
 			'image',
-			_('Bild eingefügt aber nicht hochgeladen.'),
+			__('block:image-not-uploaded'),
 		);
 	}
 
@@ -176,7 +176,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'value',
-				_('Bitte gültige Youtube-ID eingeben.'),
+				__('block:invalid-youtube-id'),
 			);
 		}
 
@@ -187,7 +187,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'aspectRatioX',
-				_('Bitte gültige Zahl eingeben.'),
+				__('block:invalid-number'),
 			);
 		}
 
@@ -198,7 +198,7 @@ final class BlockValidator implements Validator
 				$review,
 				$listIndex,
 				'aspectRatioY',
-				_('Bitte gültige Zahl eingeben.'),
+				__('block:invalid-number'),
 			);
 		}
 	}

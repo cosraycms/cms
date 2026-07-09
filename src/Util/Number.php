@@ -25,6 +25,6 @@ class Number
 			return preg_replace('/\.(?=.*\.)/', '', $value);
 		}
 
-		throw new Exception(_('This is not a valid number'));
+		throw new Exception('This is not a valid number');
 	}
 }
