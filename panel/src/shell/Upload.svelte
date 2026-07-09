@@ -280,7 +280,7 @@
 					<u>{__('common:select')}</u>
 				</div>
 				<div class="file-extensions">
-					Erlaubte Dateiendungen: {allowedExtensions}
+					{__('upload:allowed-extensions')} {allowedExtensions}
 				</div>
 				<button type="button" class="library-button" onclick={preventDefault(openLibrary)}>
 					{__('media:choose-from-library')}

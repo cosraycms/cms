@@ -22,7 +22,7 @@ final class Heading extends Type
 
 	public function label(): string
 	{
-		return "Überschrift {$this->level}";
+		return __('block:heading-level', ['level' => $this->level]);
 	}
 
 	public function control(): Control

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { __ } from '$lib/locale';
 	import type { Snippet } from 'svelte';
 	import type { AssetInfo, RichtextDoc } from '$types/data';
 	import { ZXX, type BlockRichText } from '$types/data';
@@ -57,7 +58,7 @@
 </div>
 <div class="block-cell-body">
 	{#if showSettings}
-		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
+		<div>{__('block:no-settings')}</div>
 	{:else}
 		<RichTextEditor
 			required={false}

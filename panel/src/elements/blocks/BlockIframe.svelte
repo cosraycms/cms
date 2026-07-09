@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { __ } from '$lib/locale';
 	import type { Snippet } from 'svelte';
 	import { ZXX, type BlockText } from '$types/data';
 	import type { BlocksField } from '$types/fields';
@@ -26,7 +27,7 @@
 </div>
 <div class="block-cell-body">
 	{#if showSettings}
-		<div>Keine Einstellungsmöglichkeiten vorhanden</div>
+		<div>{__('block:no-settings')}</div>
 	{:else}
 		<textarea
 			class="iframe"

@@ -541,7 +541,7 @@ class Media
 
 			return array_merge($result, [
 				'ok' => false,
-				'error' => "Die Datei ist zu groß: {$size} MB. Erlaubt sind {$allowed} MB",
+				'error' => __('media:too-large', ['size' => $size, 'allowed' => $allowed]),
 			]);
 		}
 

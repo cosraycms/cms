@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
+		'block:no-settings' => 'No settings available',
 		'code:syntax' => 'Syntax',
 		'common:add' => 'Add',
 		'common:all' => 'All',
@@ -33,6 +34,7 @@ return [
 		'field:add-content-type' => 'Add content type',
 		'field:add-entry' => 'Add entry',
 		'field:add-first-entry' => 'Add first entry',
+		'field:add-typed' => 'Add :label',
 		'field:cancel-delete-entry' => 'No, do not delete entry',
 		'field:confirm-delete' => 'Do you really want to delete this entry?',
 		'field:confirm-delete-entry' => 'Yes, delete entry',
@@ -108,6 +110,7 @@ return [
 		'richtext:undo' => 'Undo last action',
 		'search:failed' => 'The search failed.',
 		'search:no-results' => 'No results.',
+		'upload:allowed-extensions' => 'Allowed file extensions:',
 		'upload:dropzone' => 'Drag and drop new files here or',
 		'upload:failed' => 'Upload failed',
 		'upload:file-label' => 'File:',

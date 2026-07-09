@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
+		'block:no-settings' => 'Keine Einstellungsmöglichkeiten vorhanden',
 		'code:syntax' => 'Syntax',
 		'common:add' => 'Hinzufügen',
 		'common:all' => 'Alle',
@@ -33,6 +34,7 @@ return [
 		'field:add-content-type' => 'Inhaltstyp hinzufügen',
 		'field:add-entry' => 'Eintrag hinzufügen',
 		'field:add-first-entry' => 'Ersten Eintrag hinzufügen',
+		'field:add-typed' => ':label hinzufügen',
 		'field:cancel-delete-entry' => 'Nein, Eintrag nicht löschen',
 		'field:confirm-delete' => 'Soll der Eintrag wirklich gelöscht werden?',
 		'field:confirm-delete-entry' => 'Ja, Eintrag löschen',
@@ -108,6 +110,7 @@ return [
 		'richtext:undo' => 'Rückgängig',
 		'search:failed' => 'Die Suche ist fehlgeschlagen.',
 		'search:no-results' => 'Keine Treffer.',
+		'upload:allowed-extensions' => 'Erlaubte Dateiendungen:',
 		'upload:dropzone' => 'Neue Dateien per Drag and Drop hier einfügen oder',
 		'upload:failed' => 'Upload fehlgeschlagen',
 		'upload:file-label' => 'Datei:',
