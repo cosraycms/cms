@@ -42,7 +42,7 @@
 			return first ? __('field:add-first-entry') : __('field:add-entry');
 		}
 
-		return __('field:add-typed').replace(':label', entryType.label);
+		return __('field:add-typed', { label: entryType.label });
 	}
 </script>
 

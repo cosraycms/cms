@@ -2,8 +2,7 @@
 
 use function Cosray\escape;
 
-$catalog = $messages ?? ['plural' => (string) ($localeId ?? 'en'), 'messages' => []];
-$catalog['messages'] = (object) $catalog['messages'];
+$catalog = $messages ?? ['locale' => (string) ($localeId ?? 'en'), 'domains' => []];
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 ?>
@@ -22,7 +21,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <body hx-boost:inherited="true">
 	<?= $this->body() ?>
 
-	<script id="cosray-messages" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
+	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
 <?php foreach ($scripts as $script): ?>
 	<script src="<?= escape((string) $script) ?>"></script>

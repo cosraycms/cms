@@ -52,17 +52,19 @@ abstract class Panel
 	}
 
 	/**
-	 * The `panel` catalog for the active locale as the canonical JSON payload
-	 * the panel reads through its `__` lookup. This domain holds exactly the
-	 * strings the Svelte panel uses (extracted by the JavascriptScanner), so the
-	 * browser never receives backend-only messages. Empty when no translator is
+	 * The `panel` catalog for the active locale as the payload the panel's
+	 * verba runtime boots from. This domain holds exactly the strings the
+	 * Svelte panel uses (extracted by the JavascriptScanner), so the browser
+	 * never receives backend-only messages. Empty when no translator is
 	 * active (e.g. outside the request pipeline).
 	 *
-	 * @return array{plural: string, messages: array<string, string|list<string>>}
+	 * @return array{locale: string, domains: list<array{domain: string, plural: string, messages: array<string, string|list<string>>}>}
 	 */
 	protected function messages(): array
 	{
-		return Verba::translator()?->export('panel') ?? ['plural' => $this->localeId(), 'messages' => []];
+		return (
+			Verba::translator()?->exportMany(['panel']) ?? ['locale' => $this->localeId(), 'domains' => []]
+		);
 	}
 
 	protected function panelPath(): string

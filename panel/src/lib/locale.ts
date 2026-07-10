@@ -1,26 +1,9 @@
-type Catalog = {
-	plural?: string;
-	messages?: Record<string, string | string[]>;
-};
+import { __, __d, __dn, __n, activate, load } from '@celemas/verba';
 
-function readCatalog(): Record<string, string | string[]> {
-	const el = typeof document === 'undefined' ? null : document.getElementById('cosray-messages');
+const translator = load();
 
-	if (!el?.textContent) {
-		return {};
-	}
-
-	try {
-		return (JSON.parse(el.textContent) as Catalog).messages ?? {};
-	} catch {
-		return {};
-	}
+if (translator) {
+	activate(translator);
 }
 
-const messages = readCatalog();
-
-export function __(id: string): string {
-	const entry = messages[id];
-
-	return typeof entry === 'string' ? entry : id;
-}
+export { __, __d, __dn, __n };

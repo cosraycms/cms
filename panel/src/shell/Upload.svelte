@@ -128,13 +128,13 @@
 		const slotsLeft = Math.max(limit.max - (items?.length ?? 0), 0);
 
 		if (slotsLeft === 0) {
-			alert(__('upload:max-files').replace(':max', String(limit.max)));
+			alert(__('upload:max-files', { max: limit.max }));
 
 			return [];
 		}
 
 		if (files.length > slotsLeft) {
-			alert(__('upload:slots-left').replace(':count', String(slotsLeft)));
+			alert(__('upload:slots-left', { count: slotsLeft }));
 
 			return files.slice(0, slotsLeft);
 		}
@@ -210,7 +210,7 @@
 
 	function pickFromLibrary(item: LibraryItem) {
 		if (multiple && limit.max >= 1 && (items?.length ?? 0) >= limit.max) {
-			alert(__('upload:max-files').replace(':max', String(limit.max)));
+			alert(__('upload:max-files', { max: limit.max }));
 
 			return;
 		}
