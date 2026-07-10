@@ -54,7 +54,7 @@ abstract class Panel
 	/**
 	 * The `panel` catalog for the active locale as the canonical JSON payload
 	 * the panel reads through its `__` lookup. This domain holds exactly the
-	 * strings the Svelte panel uses (extracted by the FrontendScanner), so the
+	 * strings the Svelte panel uses (extracted by the JavascriptScanner), so the
 	 * browser never receives backend-only messages. Empty when no translator is
 	 * active (e.g. outside the request pipeline).
 	 *

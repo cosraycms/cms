@@ -18,7 +18,7 @@ use Celemas\Quma\Delimiters;
 use Celemas\Verba\Command\StatusCommand;
 use Celemas\Verba\Command\SyncCommand;
 use Celemas\Verba\Tool\Domain;
-use Celemas\Verba\Tool\FrontendScanner;
+use Celemas\Verba\Tool\JavascriptScanner;
 use Celemas\Verba\Tool\PhpScanner;
 
 $env = static function (string $key, string $default): string {
@@ -66,7 +66,7 @@ $panelI18n = new Domain(
 	name: 'panel',
 	dir: __DIR__ . '/lang',
 	locales: ['de', 'en'],
-	scanners: [new FrontendScanner([__DIR__ . '/panel/src'])],
+	scanners: [new JavascriptScanner([__DIR__ . '/panel/src'])],
 	default: true,
 );
 $i18nDomains = [$cosrayI18n, $panelI18n];
