@@ -21,7 +21,7 @@ class AddLocale implements Middleware
 	public function process(Request $request, Handler $handler): Response
 	{
 		$locale = $this->locales->negotiate($request);
-		$translator = new Translator($locale->id, $this->locales->catalogs());
+		$translator = new Translator($locale->id, $this->locales->catalogs(), $locale->fallbacks());
 		Verba::activate($translator);
 
 		try {
