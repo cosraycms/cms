@@ -12,12 +12,6 @@
 	"homepage": "https://cosray.dev",
 	"minimum-stability": "dev",
 	"prefer-stable": true,
-	"repositories": [
-		{
-			"type": "path",
-			"url": "../verba"
-		}
-	],
 	"require": {
 		"php": "^8.5",
 		"ext-pgsql": "*",
