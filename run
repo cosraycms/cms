@@ -37,9 +37,16 @@ $config = new Config(__DIR__, ['db.dsn' => $dsn]);
 $container = new Container();
 $container->add($config::class, $config);
 
+// Same namespace layout as Bootstrap::database(): `install` holds the schema
+// snapshot (init + seed, run once on a fresh database via `--namespace
+// install`), `default` the system update migrations. The seed bookkeeps all
+// update migrations, so the default namespace only applies ones added later.
 $conn = new Connection($dsn, __DIR__ . '/db/sql')
 	->placeholders(Delimiters::comments(), $config->db->placeholders)
-	->migrations(__DIR__ . '/db/migrations/install');
+	->migrations([
+		'install' => [__DIR__ . '/db/migrations/install'],
+		'default' => [__DIR__ . '/db/migrations/update'],
+	]);
 
 $commands = QumaCommands::get($conn, migrationFactory: new MigrationFactory($container));
 $commands->add(new InstallPanel($config));

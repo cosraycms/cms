@@ -72,6 +72,9 @@ jobs:
         run: pnpm build
 
       - name: Initialize database schema
+        run: php ./run db:migrations --namespace install --apply
+
+      - name: Apply system update migrations
         run: php ./run db:migrations --apply
 
       - name: Run tests with coverage

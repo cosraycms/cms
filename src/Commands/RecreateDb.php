@@ -53,7 +53,8 @@ class RecreateDb extends Command
 			echo "\n✓ Database '{$this->database}' successfully recreated\n";
 			echo "✓ Owner: {$this->username}\n\n";
 			echo "Next steps:\n";
-			echo "  php run migrations --apply    # Apply migrations to new database\n\n";
+			echo "  php run db:migrations --namespace install --apply    # Initialize the schema\n";
+			echo "  php run db:migrations --apply                        # Apply system updates\n\n";
 
 			return 0;
 		} catch (PDOException $e) {

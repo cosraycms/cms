@@ -430,6 +430,7 @@ Test commands default to host `localhost` and database/user/password `cosray`. O
 ```bash
 sudo -u postgres createuser --pwprompt --createdb cosray
 createdb --user cosray --owner cosray cosray
+php ./run db:migrations --namespace install --apply
 php ./run db:migrations --apply
 ```
 
