@@ -58,10 +58,14 @@ final class PanelCollectionTest extends End2EndTestCase
 	public function testPanelCollectionFormatsDateColumnsForConfiguredTimezone(): void
 	{
 		$this->createArticle('panel-date-de', 'Panel Date DE', '2026-01-01 10:00:00+01');
+		// Date columns follow the panel UI language, negotiated here from the browser.
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Date DE',
 				'locale' => 'de',
+			],
+			'headers' => [
+				'Accept-Language' => 'de',
 			],
 		]);
 

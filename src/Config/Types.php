@@ -39,6 +39,7 @@ namespace Cosray\Config;
  *
  *     'panel.theme': null|string|list<string>,
  *     'panel.logo': ?string,
+ *     'panel.locale': ?string,
  *
  *     'error.enabled': bool,
  *     'error.renderer': null|class-string<\Celemas\Core\Error\Renderer>|\Celemas\Core\Error\Renderer,
@@ -94,6 +95,7 @@ namespace Cosray\Config;
  *     'path.panel'?: string,
  *     'panel.theme'?: null|string|list<string>,
  *     'panel.logo'?: null|string,
+ *     'panel.locale'?: null|string,
  *     'error.enabled'?: bool,
  *     'error.renderer'?: mixed,
  *     'error.trusted'?: list<class-string>,

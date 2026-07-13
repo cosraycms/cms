@@ -15,6 +15,7 @@ use Cosray\Controller\Page;
 use Cosray\Controller\Panel;
 use Cosray\Middleware\InitRequest;
 use Cosray\Middleware\PanelAuth;
+use Cosray\Middleware\PanelLocale;
 use Cosray\Middleware\Session;
 
 class Routes
@@ -115,7 +116,9 @@ class Routes
 					new Users($this->db),
 					$this->factory,
 				);
-				$panel->middleware($this->session);
+				// PanelLocale runs after Session so the user attribute (and
+				// with it the stored panel language preference) is available.
+				$panel->middleware($this->session, new PanelLocale($this->config));
 
 				$panel
 					->get('/login', [Panel\Login::class, 'login'], 'login')
@@ -125,6 +128,9 @@ class Routes
 					->after($renderers->get('login'));
 				$panel
 					->post('/logout', [Panel\Login::class, 'logout'], 'logout')
+					->middleware($panelAuth);
+				$panel
+					->post('/locale', [Panel\Preferences::class, 'locale'], 'locale')
 					->middleware($panelAuth);
 				$panel
 					->get(

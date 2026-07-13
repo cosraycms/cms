@@ -21,6 +21,8 @@
 ### Added
 
 - Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `Cosray\Commands\InstallPanel` command. The installer writes client assets to `{path.public}{path.panel}/static`.
+- Added locale fallback for UI strings: the per-request translator follows each locale's `fallback:` chain (as configured in `Locales::add()`) before falling back to the message id.
+- Added a per-user panel UI language, independent of the content locales. The panel negotiates it per request — user preference (new `users.panel_locale` column, migration `000000-000023`), then config `panel.locale`, then the browser's `Accept-Language`, then English — and offers a language switcher in the panel sidebar (`POST {path.panel}/locale`). Selectable languages are the locales whose `cosray` and `panel` domains both ship a catalog file.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 

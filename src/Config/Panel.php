@@ -28,6 +28,11 @@ final class Panel
 		get => $this->config->get('panel.logo');
 	}
 
+	/** @var ?non-empty-string Default panel UI language; NULL negotiates from the browser. */
+	public ?string $locale {
+		get => $this->config->get('panel.locale');
+	}
+
 	/** @return list<non-empty-string> */
 	private static function strings(mixed $value): array
 	{

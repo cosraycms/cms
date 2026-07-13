@@ -6,6 +6,7 @@ SELECT
 	u.password,
 	u.rolename AS role,
 	u.active,
+	u.panel_locale,
 	u.data,
 	COALESCE(c.data->>'name', c.username, c.email) AS creator,
 	COALESCE(e.data->>'name', e.username, e.email) AS editor,

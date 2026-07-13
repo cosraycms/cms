@@ -22,6 +22,9 @@ CREATE TABLE /*:cms.prefix:*/users (
 	rolename text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
+	-- Panel UI language preference; NULL inherits the negotiated default.
+	-- Validated at the application layer against the selectable panel locales.
+	panel_locale text,
 	creator bigint NOT NULL,
 	editor bigint NOT NULL,
 	created timestamp with time zone NOT NULL DEFAULT now(),
@@ -36,6 +39,8 @@ CREATE TABLE /*:cms.prefix:*/users (
 	CONSTRAINT /*:cms.obj:*/fk_users_users_editor FOREIGN KEY (editor)
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/ck_users_uid CHECK (char_length(uid) <= 64),
+	CONSTRAINT /*:cms.obj:*/ck_users_panel_locale
+		CHECK (panel_locale IS NULL OR char_length(panel_locale) <= 32),
 	CONSTRAINT /*:cms.obj:*/ck_users_username_or_email CHECK (deleted IS NOT NULL OR username IS NOT NULL OR email IS NOT NULL),
 	CONSTRAINT /*:cms.obj:*/ck_users_username CHECK
 		(username IS NULL OR (char_length(username) > 0 AND char_length(username) <= 64)),
@@ -61,10 +66,10 @@ CREATE FUNCTION /*:cms.prefix:*/record_user_history()
 BEGIN
 	INSERT INTO /*:cms.prefix:*/users_history (
 		usr, username, email, password, rolename, active,
-		data, editor, changed, deleted
+		data, panel_locale, editor, changed, deleted
 	) VALUES (
 		OLD.usr, OLD.username, OLD.email, OLD.password, OLD.rolename, OLD.active,
-		OLD.data, OLD.editor, OLD.changed, OLD.deleted
+		OLD.data, OLD.panel_locale, OLD.editor, OLD.changed, OLD.deleted
 	);
 
 	RETURN OLD;
@@ -394,6 +399,7 @@ CREATE TABLE /*:cms.prefix:*/users_history (
 	rolename text NOT NULL,
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
+	panel_locale text,
 	editor bigint NOT NULL,
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	deleted timestamp with time zone,

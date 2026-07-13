@@ -52,6 +52,39 @@ class Locales implements Iterator, CorePlugin
 		return $this->catalogs + ['cosray' => $dir, 'panel' => $dir];
 	}
 
+	/**
+	 * The locale ids selectable as panel UI language: those whose `cosray`
+	 * and `panel` domains both ship a catalog file, in alphabetical order.
+	 * Independent of the content locales registered with {@see self::add()}.
+	 *
+	 * @return list<string>
+	 */
+	public function panelLocales(): array
+	{
+		$catalogs = $this->catalogs();
+
+		return array_values(array_intersect(
+			self::catalogLocales('cosray', $catalogs['cosray']),
+			self::catalogLocales('panel', $catalogs['panel']),
+		));
+	}
+
+	/** @return list<string> */
+	protected static function catalogLocales(string $domain, string $dir): array
+	{
+		$ids = [];
+
+		foreach (glob($dir . '/' . $domain . '.*.php') ?: [] as $file) {
+			$id = substr(basename($file, '.php'), strlen($domain) + 1);
+
+			if (preg_match('/^[A-Za-z0-9_-]+$/', $id) === 1) {
+				$ids[] = $id;
+			}
+		}
+
+		return $ids;
+	}
+
 	public function add(
 		string $id,
 		string $title,

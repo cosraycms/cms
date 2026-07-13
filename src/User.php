@@ -13,6 +13,7 @@ class User
 	public readonly string $password;
 	public readonly string $role;
 	public readonly bool $active;
+	public readonly ?string $panelLocale;
 	public readonly string $created;
 	public readonly string $changed;
 	public readonly ?string $deleted;
@@ -28,6 +29,7 @@ class User
 		$this->password = $data['password'];
 		$this->role = $data['role'];
 		$this->active = $data['active'];
+		$this->panelLocale = $data['panel_locale'] ?? null;
 		$this->created = $data['created'];
 		$this->changed = $data['changed'];
 		$this->deleted = $data['deleted'];

@@ -76,6 +76,14 @@ class Users
 		);
 	}
 
+	public function savePanelLocale(int $userId, ?string $locale): bool
+	{
+		return $this->db->users->savePanelLocale([
+			'usr' => $userId,
+			'locale' => $locale,
+		])->run();
+	}
+
 	public function remember(string $hash, int $userId, string $expires): bool
 	{
 		return $this->db->users->remember([

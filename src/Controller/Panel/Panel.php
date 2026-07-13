@@ -41,6 +41,7 @@ abstract class Panel
 			'currentPath' => $this->request->uri()->getPath(),
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
+			'panelLocales' => $this->panelLocales(),
 			'config' => $this->config,
 			'renderIcon' => $this->renderIcon(...),
 			'stylesheets' => $this->stylesheets($panelPath),
@@ -99,9 +100,35 @@ abstract class Panel
 
 	protected function localeId(): string
 	{
+		$panelLocale = $this->request->get('panelLocale', null);
+
+		if (is_string($panelLocale)) {
+			return $panelLocale;
+		}
+
 		$locale = $this->request->get('locale', null);
 
 		return $locale instanceof Locale ? $locale->id : 'en';
+	}
+
+	/**
+	 * The selectable panel UI languages, mapped to their native names
+	 * (e.g. `['de' => 'Deutsch', 'en' => 'English']`).
+	 *
+	 * @return array<string, string>
+	 */
+	protected function panelLocales(): array
+	{
+		$ids = $this->request->get('panelLocales', []);
+		$titles = [];
+
+		/** @var string $id */
+		foreach (is_array($ids) ? $ids : [] as $id) {
+			$title = \Locale::getDisplayLanguage($id, $id);
+			$titles[$id] = $title === $id ? $id : $title;
+		}
+
+		return $titles;
 	}
 
 	private function stylesheets(string $panelPath): array
