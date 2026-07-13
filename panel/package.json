@@ -11,7 +11,7 @@
 		"format": "prettier -w ."
 	},
 	"devDependencies": {
-		"@celemas/verba": "link:../../verba/js",
+		"@celemas/verba": "^0.1.0",
 		"@codemirror/commands": "^6.10.3",
 		"@codemirror/lang-css": "^6.0.0",
 		"@codemirror/lang-html": "^6.0.0",
