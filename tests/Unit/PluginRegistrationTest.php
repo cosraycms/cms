@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\App;
-use Celemas\Quma\Connection;
-use Celemas\Router\Router;
+use Celema\Core\App;
+use Celema\Quma\Connection;
+use Celema\Router\Router;
 use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;

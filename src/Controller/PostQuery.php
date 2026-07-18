@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
-use Celemas\Core\Request;
+use Celema\Core\Request;
 
 class PostQuery implements Query
 {

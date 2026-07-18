@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Container\Container;
+use Celema\Container\Container;
 
 final class Icons implements Contract\Icons
 {

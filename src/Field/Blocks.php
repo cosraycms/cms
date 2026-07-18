@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celemas\Sire\Extra;
-use Celemas\Sire\Shape;
+use Celema\Sire\Extra;
+use Celema\Sire\Shape;
 use Cosray\Block\Type;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\BlockValidator;

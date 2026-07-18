@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\I18n;
 
-use Celemas\Verba\Tool\Message;
-use Celemas\Verba\Tool\Scanner;
+use Celema\Verba\Tool\Message;
+use Celema\Verba\Tool\Scanner;
 use Cosray\App;
 use Cosray\NavigationItem;
 use Cosray\Schema\Badge;

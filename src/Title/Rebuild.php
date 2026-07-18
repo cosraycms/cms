@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Title;
 
-use Celemas\Core\Request;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Database;
+use Celema\Core\Request;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
@@ -167,10 +167,8 @@ class Rebuild
 	private function toggleTriggers(string $action): void
 	{
 		foreach (self::TRIGGERS as $trigger) {
-			$sql = $this->conn->applyPlaceholders(
-				"ALTER TABLE /*:cms.prefix:*/nodes {$action} TRIGGER /*:cms.obj:*/{$trigger}",
-				__FILE__,
-			);
+			$sql = "ALTER TABLE /*:cms.prefix:*/nodes {$action} TRIGGER /*:cms.obj:*/{$trigger}";
+			$sql = $this->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
 
 			$this->db->execute($sql)->run();
 		}

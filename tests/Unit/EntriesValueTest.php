@@ -35,7 +35,7 @@ final class EntriesValueTest extends TestCase
 			->withAttribute('locale', $locales->get('en'))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
-		$request = new \Celemas\Core\Request($psrRequest);
+		$request = new \Celema\Core\Request($psrRequest);
 
 		return new Context(
 			$this->db(),

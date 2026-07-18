@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Validation;
 
-use Celemas\Sire\Shape;
+use Celema\Sire\Shape;
 use Cosray\Field\Field;
 use Cosray\Field\FieldHydrator;
 use Cosray\Locales;

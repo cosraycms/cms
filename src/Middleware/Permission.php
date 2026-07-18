@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cosray\Middleware;
 
 use Attribute;
-use Celemas\Core\Exception\HttpForbidden;
-use Celemas\Core\Exception\HttpUnauthorized;
-use Celemas\Wire\Call;
+use Celema\Core\Exception\HttpForbidden;
+use Celema\Core\Exception\HttpUnauthorized;
+use Celema\Wire\Call;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Users;

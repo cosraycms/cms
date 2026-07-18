@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Plugin;
 
-use Celemas\Core\App;
+use Celema\Core\App;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;

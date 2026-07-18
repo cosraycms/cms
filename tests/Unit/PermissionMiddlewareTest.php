@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Exception\HttpForbidden;
-use Celemas\Core\Exception\HttpUnauthorized;
-use Celemas\Core\Factory\Factory;
-use Celemas\Quma\Database;
+use Celema\Core\Exception\HttpForbidden;
+use Celema\Core\Exception\HttpUnauthorized;
+use Celema\Core\Factory\Factory;
+use Celema\Quma\Database;
 use Cosray\Middleware\Permission;
 use Cosray\Session;
 use Cosray\Tests\TestCase;

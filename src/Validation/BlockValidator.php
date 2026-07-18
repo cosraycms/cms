@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Validation;
 
-use Celemas\Sire\Contract\Validator;
-use Celemas\Sire\Extra;
-use Celemas\Sire\Result;
-use Celemas\Sire\Review;
-use Celemas\Sire\Shape;
+use Celema\Sire\Contract\Validator;
+use Celema\Sire\Extra;
+use Celema\Sire\Result;
+use Celema\Sire\Review;
+use Celema\Sire\Shape;
 use Cosray\Richtext\Envelope;
 use Cosray\Richtext\Validator as RichtextValidator;
 use Override;

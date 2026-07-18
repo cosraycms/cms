@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Factory\Factory;
-use Celemas\Verba\Translator;
+use Celema\Core\Factory\Factory;
+use Celema\Verba\Translator;
 use Cosray\Locales;
 use Cosray\Middleware\AddLocale;
 use Cosray\Tests\TestCase;

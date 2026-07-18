@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celemas\Core\Request;
+use Celema\Core\Request;
 use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;

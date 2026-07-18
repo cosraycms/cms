@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Finder\Output;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 use Cosray\Context;
 use Cosray\Exception\ParserException;
 use Cosray\Finder\CompilesField;

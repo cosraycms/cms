@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Finder\Input;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 use Cosray\Exception\ParserException;
 
 readonly class Token

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\View\Boiler\Error;
 
-use Celemas\Core\Error\Handler as ErrorHandler;
-use Celemas\Core\Error\Renderer as ErrorRenderer;
-use Celemas\Core\Exception\HttpError;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
+use Celema\Core\Error\Handler as ErrorHandler;
+use Celema\Core\Error\Renderer as ErrorRenderer;
+use Celema\Core\Exception\HttpError;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;

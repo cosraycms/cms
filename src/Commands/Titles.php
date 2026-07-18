@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celemas\Cli\Args;
-use Celemas\Quma\Commands\Command;
-use Celemas\Quma\Connection;
+use Celema\Console\Args;
+use Celema\Quma\Commands\Command;
+use Celema\Quma\Connection;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Locales;

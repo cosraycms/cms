@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\App as CoreApp;
-use Celemas\Core\Error\Handler as ErrorHandler;
-use Celemas\Core\Exception\ValueError;
-use Celemas\Core\Plugin as CorePlugin;
-use Celemas\Core\Response as CoreResponse;
-use Celemas\Router\Router;
+use Celema\Core\App as CoreApp;
+use Celema\Core\Error\Handler as ErrorHandler;
+use Celema\Core\Exception\ValueError;
+use Celema\Core\Plugin as CorePlugin;
+use Celema\Core\Response as CoreResponse;
+use Celema\Router\Router;
 use Cosray\App;
 use Cosray\Bootstrap;
 use Cosray\Config;

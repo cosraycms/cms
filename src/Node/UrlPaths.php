@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 
 /**
  * Resolves node uids to their active URL paths. Used by the richtext

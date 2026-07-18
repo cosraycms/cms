@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celemas\Container\Container;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Database;
-use Celemas\Quma\Delimiters;
+use Celema\Container\Container;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
+use Celema\Quma\Delimiters;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;

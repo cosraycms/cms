@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celemas\Container\Container;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Factory\Laminas;
-use Celemas\Core\Request;
-use Celemas\Quma\Delimiters;
+use Celema\Container\Container;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Factory\Laminas;
+use Celema\Core\Request;
+use Celema\Quma\Delimiters;
 use Cosray\Config;
 use Cosray\Locales;
 use PDO;
@@ -156,12 +156,12 @@ class TestCase extends BaseTestCase
 	 * This method creates a database instance but is not meant for actual database operations.
 	 * For real database operations, use IntegrationTestCase instead.
 	 */
-	public function db(): \Celemas\Quma\Database
+	public function db(): \Celema\Quma\Database
 	{
 		$config = new Config(self::root());
 
-		return new \Celemas\Quma\Database(
-			new \Celemas\Quma\Connection(
+		return new \Celema\Quma\Database(
+			new \Celema\Quma\Connection(
 				self::testDbDsn(),
 				self::root() . '/db/sql',
 			)

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Container\Container;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
-use Celemas\Quma\Database;
-use Celemas\Verba\Translator;
+use Celema\Container\Container;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
+use Celema\Quma\Database;
+use Celema\Verba\Translator;
 
 final class Context
 {

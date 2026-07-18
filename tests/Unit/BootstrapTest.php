@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\App;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Delimiters;
-use Celemas\Router\Router;
+use Celema\Core\App;
+use Celema\Quma\Connection;
+use Celema\Router\Router;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Schema\Registry as FieldSchemas;
@@ -53,8 +52,10 @@ final class BootstrapTest extends TestCase
 		$connection = $app->container()->get(Connection::class);
 		$placeholders = $connection->config->placeholders;
 
-		$this->assertEquals(Delimiters::comments(), $placeholders?->delimiters());
-		$this->assertSame(['cms.prefix' => 'cms.', 'cms.obj' => ''], $placeholders?->values());
+		$this->assertSame(
+			'cms.nodes trigger',
+			$placeholders?->compileSql('/*:cms.prefix:*/nodes /*:cms.obj:*/trigger', __FILE__),
+		);
 	}
 
 	public function testExplicitViewRendererOverridesDefaultViewRenderer(): void

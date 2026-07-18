@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Assets;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 use Cosray\Config;
 
 /**

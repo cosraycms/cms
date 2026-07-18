@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\View\Boiler;
 
-use Celemas\Boiler\Engine;
+use Celema\Boiler\Engine;
 use Cosray\Renderer as RendererInterface;
 use Override;
 
 /**
  * @psalm-api
  *
- * @psalm-import-type DirsInput from \Celemas\Boiler\Engine
+ * @psalm-import-type DirsInput from \Celema\Boiler\Engine
  */
 class Renderer implements RendererInterface
 {

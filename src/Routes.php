@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Core\App;
-use Celemas\Core\Factory\Factory;
-use Celemas\Quma\Database;
-use Celemas\Router\Group;
-use Celemas\Router\Route;
+use Celema\Core\App;
+use Celema\Core\Factory\Factory;
+use Celema\Quma\Database;
+use Celema\Router\Group;
+use Celema\Router\Route;
 use Closure;
 use Cosray\Controller\Media;
 use Cosray\Controller\Page;

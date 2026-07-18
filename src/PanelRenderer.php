@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Response;
-use Celemas\Router\After;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Response;
+use Celema\Router\After;
 use Override;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Traversable;

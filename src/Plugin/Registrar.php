@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Plugin;
 
-use Celemas\Container\Entry;
+use Celema\Container\Entry;
 use Closure;
 use Cosray\Block\Type as BlockType;
 use Cosray\Bootstrap;
@@ -147,7 +147,7 @@ final class Registrar
 		return $this->bootstrap->addService($key, $value);
 	}
 
-	/** @param Closure(\Celemas\Core\App): void $routes */
+	/** @param Closure(\Celema\Core\App): void $routes */
 	public function routes(Closure $routes): void
 	{
 		$this->bootstrap->addRoutes($routes);

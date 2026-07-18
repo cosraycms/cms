@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Container\Container;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Contract\Migration;
-use Celemas\Quma\Contract\MigrationFactory as QumaMigrationFactory;
-use Celemas\Quma\Database;
-use Celemas\Quma\Environment;
+use Celema\Container\Container;
+use Celema\Quma\Connection;
+use Celema\Quma\Contract\Migration;
+use Celema\Quma\Contract\MigrationFactory as QumaMigrationFactory;
+use Celema\Quma\Database;
+use Celema\Quma\Environment;
 use Override;
 use UnexpectedValueException;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Session\Session as BaseSession;
+use Celema\Session\Session as BaseSession;
 use SessionHandlerInterface;
 
 class Session extends BaseSession

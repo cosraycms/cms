@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Quma\Migrations\M000000_000020_RichtextHtmlToJson;
 
-use Celemas\Quma\Contract;
-use Celemas\Quma\Environment;
+use Celema\Quma\Contract;
+use Celema\Quma\Environment;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\RichText;
@@ -537,7 +537,7 @@ final class Migration implements Contract\Migration
 
 	private function sql(Environment $env, string $sql): string
 	{
-		return $env->conn->applyPlaceholders($sql, __FILE__);
+		return $env->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
 	}
 }
 

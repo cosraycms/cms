@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Container\Container;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Environment;
+use Celema\Container\Container;
+use Celema\Quma\Connection;
+use Celema\Quma\Environment;
 use Cosray\MigrationFactory;
 use Cosray\Tests\Fixtures\ContainerMigration;
 use Cosray\Tests\Fixtures\MigrationFactoryDependency;

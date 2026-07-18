@@ -1,4 +1,4 @@
-import { __, __d, __dn, __n, activate, load } from '@celemas/verba';
+import { __, __d, __dn, __n, activate, load } from '@celema/verba';
 
 const translator = load();
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Factory\Factory;
+use Celema\Core\Factory\Factory;
 use Cosray\Middleware\Session as SessionMiddleware;
 use Cosray\Session;
 use Cosray\Tests\TestCase;

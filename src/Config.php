@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Core\Exception\OutOfBoundsException;
-use Celemas\Core\Exception\ValueError;
+use Celema\Core\Exception\OutOfBoundsException;
+use Celema\Core\Exception\ValueError;
 
 /**
  * @psalm-import-type BuiltinConfig from \Cosray\Config\Types

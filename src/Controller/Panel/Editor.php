@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Celemas\Core\Exception\HttpBadRequest;
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
-use Celemas\Core\Response;
-use Celemas\Wire\Creator;
+use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
+use Celema\Core\Response;
+use Celema\Wire\Creator;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection as CmsCollection;

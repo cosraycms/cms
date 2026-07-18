@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Response;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Response;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Field\Reference as ReferenceField;

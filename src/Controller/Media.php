@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Exception\OutOfBoundsException;
-use Celemas\Core\Exception\RuntimeException as CoreRuntimeException;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
-use Celemas\Core\Response;
-use Celemas\Quma\Database;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Exception\OutOfBoundsException;
+use Celema\Core\Exception\RuntimeException as CoreRuntimeException;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
+use Celema\Core\Response;
+use Celema\Quma\Database;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
 use Cosray\Assets\Meta;

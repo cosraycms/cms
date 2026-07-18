@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celemas\Sire\Review;
-use Celemas\Sire\Shape;
+use Celema\Sire\Review;
+use Celema\Sire\Shape;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Types;
 use Cosray\Validation\Prepare;

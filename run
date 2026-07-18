@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Celemas\Cli\Runner;
+use Celema\Console\Runner;
 use Cosray\Commands\InstallPanel;
 use Cosray\Commands\RecreateDb;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Config;
 use Cosray\MigrationFactory;
-use Celemas\Container\Container;
-use Celemas\Quma\Commands as QumaCommands;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Delimiters;
-use Celemas\Verba\Command\StatusCommand;
-use Celemas\Verba\Command\SyncCommand;
-use Celemas\Verba\Tool\Domain;
-use Celemas\Verba\Tool\JavascriptScanner;
-use Celemas\Verba\Tool\PhpScanner;
+use Celema\Container\Container;
+use Celema\Quma\Commands as QumaCommands;
+use Celema\Quma\Connection;
+use Celema\Quma\Delimiters;
+use Celema\Verba\Command\StatusCommand;
+use Celema\Verba\Command\SyncCommand;
+use Celema\Verba\Tool\Domain;
+use Celema\Verba\Tool\JavascriptScanner;
+use Celema\Verba\Tool\PhpScanner;
 
 $env = static function (string $key, string $default): string {
 	$value = getenv($key);

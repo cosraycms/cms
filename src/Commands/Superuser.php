@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celemas\Cli\Args;
-use Celemas\Cli\Command;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Database;
+use Celema\Console\Args;
+use Celema\Console\Command;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
 
 class Superuser extends Command
 {

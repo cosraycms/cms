@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
-use Celemas\Container\Container;
-use Celemas\Core\Exception\HttpBadRequest;
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Response;
+use Celema\Container\Container;
+use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
-use Celemas\Core\App;
+use Celema\Core\App;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Factory\Factory;
-use Celemas\Quma\Database;
+use Celema\Core\Factory\Factory;
+use Celema\Quma\Database;
 use Cosray\Middleware\PanelAuth;
 use Cosray\Session;
 use Cosray\Tests\TestCase;

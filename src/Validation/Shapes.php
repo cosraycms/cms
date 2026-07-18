@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Validation;
 
-use Celemas\Sire\Extra;
-use Celemas\Sire\Shape;
+use Celema\Sire\Extra;
+use Celema\Sire\Shape;
 
 final class Shapes
 {

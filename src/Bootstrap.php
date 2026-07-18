@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Container\Container;
-use Celemas\Container\Entry;
-use Celemas\Core\App;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Plugin as CorePlugin;
-use Celemas\Core\Request;
-use Celemas\Quma\Connection;
-use Celemas\Quma\Database;
-use Celemas\Quma\Delimiters;
-use Celemas\Router\Route;
+use Celema\Container\Container;
+use Celema\Container\Entry;
+use Celema\Core\App;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Plugin as CorePlugin;
+use Celema\Core\Request;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
+use Celema\Quma\Delimiters;
+use Celema\Router\Route;
 use Closure;
 use Cosray\Block\Registry as BlockRegistry;
 use Cosray\Block\Type as BlockType;

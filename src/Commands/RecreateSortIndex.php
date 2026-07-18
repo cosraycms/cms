@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celemas\Cli\Args;
-use Celemas\Quma\Commands\Command;
+use Celema\Console\Args;
+use Celema\Quma\Commands\Command;
 use Cosray\Field\Field;
 use Cosray\Title\Sort;
 
@@ -158,6 +158,6 @@ class RecreateSortIndex extends Command
 
 	private function apply(string $sql): string
 	{
-		return $this->env->conn->applyPlaceholders($sql, __FILE__);
+		return $this->env->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
 	}
 }

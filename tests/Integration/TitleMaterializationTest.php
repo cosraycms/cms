@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celemas\Container\Container;
+use Celema\Container\Container;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Field\Services;

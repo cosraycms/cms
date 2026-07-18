@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit\View\Boiler;
 
-use Celemas\Boiler\Exception\LookupException;
+use Celema\Boiler\Exception\LookupException;
 use Cosray\Tests\Fixtures\Boiler\Whitelisted;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Renderer;

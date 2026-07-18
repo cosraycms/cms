@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit\View\Boiler\Error;
 
-use Celemas\Core\Error\Handler as ErrorHandler;
-use Celemas\Core\Error\Renderer as ErrorRenderer;
+use Celema\Core\Error\Handler as ErrorHandler;
+use Celema\Core\Error\Renderer as ErrorRenderer;
 use Cosray\Config;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;

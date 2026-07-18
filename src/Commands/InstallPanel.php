@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celemas\Cli\Args;
-use Celemas\Cli\Command;
+use Celema\Console\Args;
+use Celema\Console\Command;
 use Composer\InstalledVersions;
 use Cosray\Config;
 use JsonException;

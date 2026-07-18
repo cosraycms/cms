@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celemas\Core\Request;
+use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\FieldHydrator;

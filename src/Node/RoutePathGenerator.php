@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 use Cosray\Exception\RoutePathError;
 use Cosray\Field\Field;
 use Cosray\Locale;

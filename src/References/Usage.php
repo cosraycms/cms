@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\References;
 
-use Celemas\Quma\Database;
+use Celema\Quma\Database;
 
 /**
  * Answers "who points at this?" from the reference indexes, enriched

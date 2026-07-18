@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Celemas\Container\Container;
-use Celemas\Core\Request;
-use Celemas\Verba\Verba;
+use Celema\Container\Container;
+use Celema\Core\Request;
+use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Contract\Icons;
 use Cosray\Locale;

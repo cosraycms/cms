@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Request;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Request;
 use Cosray\Controller\Panel\Assets;
 use Cosray\Tests\TestCase;
 

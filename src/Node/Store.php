@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celemas\Core\Exception\HttpBadRequest;
-use Celemas\Core\Exception\HttpConflict;
-use Celemas\Core\Exception\HttpError;
-use Celemas\Core\Request;
-use Celemas\Quma\Database;
+use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpConflict;
+use Celema\Core\Exception\HttpError;
+use Celema\Core\Request;
+use Celema\Quma\Database;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RoutePathError;

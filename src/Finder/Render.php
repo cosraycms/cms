@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Finder;
 
-use Celemas\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpBadRequest;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;

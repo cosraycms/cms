@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\View\Boiler\Error;
 
-use Celemas\Boiler\Engine;
-use Celemas\Core\Error\Renderer as RendererInterface;
-use Celemas\Core\Exception\HttpError;
+use Celema\Boiler\Engine;
+use Celema\Core\Error\Renderer as RendererInterface;
+use Celema\Core\Exception\HttpError;
 use Override;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * @psalm-import-type DirsInput from \Celemas\Boiler\Engine
+ * @psalm-import-type DirsInput from \Celema\Boiler\Engine
  */
 final class Renderer implements RendererInterface
 {

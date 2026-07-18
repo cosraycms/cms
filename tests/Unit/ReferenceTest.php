@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Request;
+use Celema\Core\Request;
 use Cosray\Context;
 use Cosray\Field\Field;
 use Cosray\Field\Reference;

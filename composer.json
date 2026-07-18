@@ -21,19 +21,19 @@
 		"ext-dom": "*",
 		"ext-sodium": "*",
 		"ext-xml": "*",
-		"celemas/boiler": "^0.5.0",
-		"celemas/core": "^0.4.0",
-		"celemas/quma": "^0.2.0",
-		"celemas/session": "^0.2.0",
-		"celemas/sire": "^0.4.0",
-		"celemas/verba": "^0.2.1",
+		"celema/boiler": "^0.6",
+		"celema/core": "^0.5",
+		"celema/quma": "^0.3",
+		"celema/session": "^0.3",
+		"celema/sire": "^0.5",
+		"celema/verba": "^0.3",
 		"gumlet/php-image-resize": "2.0.*",
 		"psr/log": "^3.0",
 		"enshrined/svg-sanitize": "^0.22.0",
 		"league/flysystem": "^3.35"
 	},
 	"require-dev": {
-		"celemas/dev": "^4.2",
+		"celema/dev": "^5.0",
 		"filp/whoops": "^2.15",
 		"laminas/laminas-diactoros": "^3"
 	},
@@ -56,7 +56,7 @@
 	"scripts": {
 		"test": "@php vendor/bin/phpunit --testdox --no-coverage --colors=always",
 		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md CHANGELOG.md",
-		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celemas/dev/config/markdownlint.jsonc README.md CHANGELOG.md",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celema/dev/config/markdownlint.jsonc README.md CHANGELOG.md",
 		"lint": [
 			"@php vendor/bin/mago fmt --check",
 			"@php vendor/bin/mago lint"

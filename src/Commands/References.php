@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celemas\Cli\Args;
-use Celemas\Quma\Commands\Command;
+use Celema\Console\Args;
+use Celema\Quma\Commands\Command;
 use Cosray\References\Rebuild;
 
 class References extends Command

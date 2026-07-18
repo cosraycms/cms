@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Core\App;
-use Celemas\Core\Factory\Factory;
+use Celema\Core\App;
+use Celema\Core\Factory\Factory;
 
 /** @psalm-api */
 final class PanelRenderers

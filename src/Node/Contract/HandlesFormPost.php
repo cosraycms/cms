@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Node\Contract;
 
-use Celemas\Core\Response;
+use Celema\Core\Response;
 
 interface HandlesFormPost
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Verba\Tool\Message;
+use Celema\Verba\Tool\Message;
 use Cosray\I18n\SchemaScanner;
 use Cosray\Tests\Fixtures\Node\SchemaScanNode;
 use Cosray\Tests\Fixtures\Node\TestDocument;

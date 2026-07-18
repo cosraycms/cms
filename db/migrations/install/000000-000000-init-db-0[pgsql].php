@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Quma\Migrations\M260519_151046_Ddl0;
 
 use Cosray\Config;
-use Celemas\Quma\Contract;
-use Celemas\Quma\Environment;
+use Celema\Quma\Contract;
+use Celema\Quma\Environment;
 
 final class Migration implements Contract\Migration
 {

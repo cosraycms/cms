@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
-use Celemas\Core\Response;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
+use Celema\Core\Response;
 use Cosray\Exception\RuntimeException;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Util\Path;

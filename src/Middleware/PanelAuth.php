@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Middleware;
 
-use Celemas\Core\Factory\Factory;
+use Celema\Core\Factory\Factory;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Users;

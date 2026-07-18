@@ -8,9 +8,9 @@ importers:
 
   .:
     devDependencies:
-      '@celemas/verba':
-        specifier: ^0.2.1
-        version: 0.2.1
+      '@celema/verba':
+        specifier: ^0.3.0
+        version: 0.3.0
       '@codemirror/commands':
         specifier: ^6.10.3
         version: 6.10.3
@@ -134,8 +134,8 @@ packages:
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
-  '@celemas/verba@0.2.1':
-    resolution: {integrity: sha512-aiatqxPTzQ4UfCUYrPpl6x+BZ/jjGWMMUN6A9k7bTqjDHCFGH1KeYNQZ7DN4jEC5Zvg7RVysPl8DzdpBSr7KPA==}
+  '@celema/verba@0.3.0':
+    resolution: {integrity: sha512-xhC0Wyv661uymJw4axiVec7OF4c1r6GaaOINSjq5bFwXS0Xeb0LlwqsGPSkQ1hiFBVHCFUdN8XZVr+w8LrpMLQ==}
 
   '@codemirror/autocomplete@6.20.3':
     resolution: {integrity: sha512-tlosUqb+3BbxCxZdu4tKeRghPFC+QM7q4X5YhKV2eCmPG+1r2F3f4AaSz5sCrFqUtX4Jh20VFTKecl16MgiV9g==}
@@ -1096,7 +1096,7 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@celemas/verba@0.2.1': {}
+  '@celema/verba@0.3.0': {}
 
   '@codemirror/autocomplete@6.20.3':
     dependencies:

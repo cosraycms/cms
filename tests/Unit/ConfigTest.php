@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celemas\Core\Exception\ValueError;
+use Celema\Core\Exception\ValueError;
 use Cosray\Config;
 use Cosray\Exception\InvalidEnvironment;
 use Cosray\Exception\RuntimeException;

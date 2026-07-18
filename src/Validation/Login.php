@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Validation;
 
-use Celemas\Sire\Contract\Validator;
-use Celemas\Sire\Result;
-use Celemas\Sire\Shape;
+use Celema\Sire\Contract\Validator;
+use Celema\Sire\Result;
+use Celema\Sire\Shape;
 use Override;
 
 final class Login implements Validator

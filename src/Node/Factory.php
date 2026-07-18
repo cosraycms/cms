@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celemas\Container\Container;
-use Celemas\Core\Factory\Factory as CoreFactory;
-use Celemas\Core\Request;
-use Celemas\Quma\Database;
-use Celemas\Wire\Creator;
+use Celema\Container\Container;
+use Celema\Core\Factory\Factory as CoreFactory;
+use Celema\Core\Request;
+use Celema\Quma\Database;
+use Celema\Wire\Creator;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;

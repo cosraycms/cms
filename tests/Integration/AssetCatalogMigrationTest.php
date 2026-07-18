@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celemas\Quma\Environment;
+use Celema\Quma\Environment;
 use Cosray\Config;
 use Cosray\Tests\IntegrationTestCase;
 

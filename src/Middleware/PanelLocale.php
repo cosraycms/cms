@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Middleware;
 
-use Celemas\Verba\Translator;
-use Celemas\Verba\Verba;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Locales;
 use Cosray\User;

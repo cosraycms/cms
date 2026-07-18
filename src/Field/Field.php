@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celemas\Sire\Contract;
-use Celemas\Sire\Extra;
-use Celemas\Sire\Shape;
+use Celema\Sire\Contract;
+use Celema\Sire\Extra;
+use Celema\Sire\Shape;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Schema\Handler;
 use Cosray\Validation\Shapes;

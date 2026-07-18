@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Middleware;
 
-use Celemas\Verba\Translator;
-use Celemas\Verba\Verba;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Locales;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

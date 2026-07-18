@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celemas\Container\Container;
-use Celemas\Core\Factory\Factory;
-use Celemas\Core\Request;
-use Celemas\Core\Response;
+use Celema\Container\Container;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Request;
+use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Node\Contract\ProvidesRenderContext;

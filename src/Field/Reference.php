@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celemas\Sire\Shape;
+use Celema\Sire\Shape;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value;

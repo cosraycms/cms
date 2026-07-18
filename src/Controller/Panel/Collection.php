@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Celemas\Core\Exception\HttpBadRequest;
-use Celemas\Core\Exception\HttpNotFound;
-use Celemas\Core\Request;
-use Celemas\Wire\Creator;
+use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Request;
+use Celema\Wire\Creator;
 use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Exception\RuntimeException;

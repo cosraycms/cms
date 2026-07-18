@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray;
 
-use Celemas\Core\App;
-use Celemas\Core\Plugin as CorePlugin;
+use Celema\Core\App;
+use Celema\Core\Plugin as CorePlugin;
 use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\AddLocale;

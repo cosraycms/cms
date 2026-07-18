@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures;
 
-use Celemas\Quma\Connection;
-use Celemas\Quma\Contract\Migration;
-use Celemas\Quma\Database;
-use Celemas\Quma\Environment;
+use Celema\Quma\Connection;
+use Celema\Quma\Contract\Migration;
+use Celema\Quma\Database;
+use Celema\Quma\Environment;
 use Override;
 
 final class ContainerMigration implements Migration

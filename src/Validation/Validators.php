@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Validation;
 
-use Celemas\Sire\Contract\Rule;
-use Celemas\Sire\Contract\ValidatesEmpty;
-use Celemas\Sire\Contract\Validation as ValidationContract;
-use Celemas\Sire\Contract\Value;
-use Celemas\Sire\RuleRegistry;
-use Celemas\Sire\Validation;
+use Celema\Sire\Contract\Rule;
+use Celema\Sire\Contract\ValidatesEmpty;
+use Celema\Sire\Contract\Validation as ValidationContract;
+use Celema\Sire\Contract\Value;
+use Celema\Sire\RuleRegistry;
+use Celema\Sire\Validation;
 use Override;
 
 final class Validators

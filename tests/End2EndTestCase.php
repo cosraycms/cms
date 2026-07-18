@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celemas\Core\App;
-use Celemas\Core\Factory\Laminas;
-use Celemas\Core\Plugin as CorePlugin;
-use Celemas\Core\Request;
-use Celemas\Router\Router;
+use Celema\Core\App;
+use Celema\Core\Factory\Laminas;
+use Celema\Core\Plugin as CorePlugin;
+use Celema\Core\Request;
+use Celema\Router\Router;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;
@@ -282,7 +282,7 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function createErrorHandler(
 		Config $config,
 		Laminas $factory,
-	): \Celemas\Core\Error\Handler {
+	): \Celema\Core\Error\Handler {
 		$logger = new NullLogger();
 		$handler = new Handler($config, $factory, $logger);
 		$handler->views('tests/Fixtures/templates');

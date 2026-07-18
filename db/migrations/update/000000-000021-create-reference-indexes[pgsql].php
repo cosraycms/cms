@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Quma\Migrations\M000000_000021_CreateReferenceIndexes;
 
-use Celemas\Quma\Contract;
-use Celemas\Quma\Environment;
+use Celema\Quma\Contract;
+use Celema\Quma\Environment;
 use Cosray\References\Rebuild;
 
 /**
@@ -46,7 +46,8 @@ final class Migration implements Contract\Migration
 
 	public function run(Environment $env): void
 	{
-		$env->db->execute($env->conn->applyPlaceholders(self::DDL, __FILE__))->run();
+		$sql = $env->conn->config->placeholders?->compileSql(self::DDL, __FILE__) ?? self::DDL;
+		$env->db->execute($sql)->run();
 
 		$result = new Rebuild($env->db)->run();
 
