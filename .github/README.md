@@ -2,7 +2,7 @@
 
 <!-- prettier-ignore-start -->
 [![ci](https://codeberg.org/cosray/cms/badges/workflows/ci.yml/badge.svg?style=flat&logo=codeberg&logoColor=white&label=ci)](https://codeberg.org/cosray/cms/actions)
-[![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celemas.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celemas.dev/cosray/cms/code)
+[![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celema.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celema.dev/cosray/cms/code)
 [![REUSE status](https://api.reuse.software/badge/codeberg.org/cosray/cms)](https://api.reuse.software/info/codeberg.org/cosray/cms)
 [![License](https://img.shields.io/badge/license-MPL--2.0-blue)](../LICENSES/MPL-2.0.txt)
 [![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](../LICENSES/MIT.txt)

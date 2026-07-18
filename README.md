@@ -2,7 +2,7 @@
 
 <!-- prettier-ignore-start -->
 [![ci](https://codeberg.org/cosray/cms/badges/workflows/ci.yml/badge.svg?style=flat&logo=codeberg&logoColor=white&label=ci)](https://codeberg.org/cosray/cms/actions)
-[![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celemas.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celemas.dev/cosray/cms/code)
+[![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celema.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celema.dev/cosray/cms/code)
 [![REUSE status](https://api.reuse.software/badge/codeberg.org/cosray/cms)](https://api.reuse.software/info/codeberg.org/cosray/cms)
 [![License](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSES/MPL-2.0.txt)
 [![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](LICENSES/MIT.txt)
@@ -102,10 +102,10 @@ Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this-
 
 ## Defining content types
 
-Content types (nodes) are plain PHP classes annotated with attributes. There is no base class to extend. Dependencies are autowired from the Registry via `celemas/wire`.
+Content types (nodes) are plain PHP classes annotated with attributes. There is no base class to extend. Dependencies are autowired from the Registry via `celema/wire`.
 
 ```php
-use Celemas\Core\Request;
+use Celema\Core\Request;
 use Cosray\Field\Text;
 use Cosray\Field\Blocks;
 use Cosray\Field\Image;
@@ -221,7 +221,7 @@ Render a node by handle from templates with the neutral CMS API:
 
 ## Boiler rendering
 
-`cosray/cms` bundles the Boiler renderer under the `Cosray\View\Boiler` namespace and registers it as the default `view` renderer. You do not need to require `celemas/cms-boiler` separately or register a renderer for the common case.
+`cosray/cms` bundles the Boiler renderer under the `Cosray\View\Boiler` namespace and registers it as the default `view` renderer. You do not need to require a separate renderer package or register a renderer for the common case.
 
 By default, views are loaded from `{path.root}{path.views}`. `path.root` is the project root passed to `App::create()`. `path.views` defaults to `/views` and can be overridden in CMS config:
 
@@ -295,7 +295,7 @@ Common built-in settings:
 
 ```php
 [
-    'app.name' => env('APP_NAME', 'celemas'),
+    'app.name' => env('APP_NAME', 'cosray'),
     'app.debug' => env('APP_DEBUG', false),
     'app.env' => env('APP_ENV', ''),
     'app.secret' => env('APP_SECRET', null),

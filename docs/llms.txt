@@ -58,7 +58,7 @@ HOW TO USE COSRAY CMS (EXPLORATION REFERENCE)
 - PHP: `^8.5`
 - Required extensions: `pgsql`, `gd`, `intl`, `curl`, `dom`, `xml`
 - Database: PostgreSQL
-- Core dependencies: `celemas/core`, `celemas/quma`, `celemas/session`, `celemas/sire`
+- Core dependencies: `celema/core`, `celema/quma`, `celema/session`, `celema/sire`
 
 Repository-level development commands:
 
@@ -127,7 +127,7 @@ Important:
 - `run()` calls `boot()` once, loads the internal CMS bootstrap, and adds the catchall route after routes and plugins registered through the facade.
 - Routes include panel endpoints and media endpoints automatically.
 - If `session.enabled` is true, selected frontend routes get session middleware. It defaults to `SITE_SESSION_ENABLED`.
-- The manual `Celemas\Core\App` + `Cosray\Bootstrap` API remains available for advanced integrations.
+- The manual `Celema\Core\App` + `Cosray\Bootstrap` API remains available for advanced integrations.
 
 3) Defining node types
 
@@ -695,7 +695,7 @@ Block image rendering:
 
 App and environment:
 
-- `app.name`: `env('APP_NAME', 'celemas')` from `$_SERVER`/`$_ENV`; not validated or normalized, so keep it stable and safe for app-specific identifiers
+- `app.name`: `env('APP_NAME', 'cosray')` from `$_SERVER`/`$_ENV`; not validated or normalized, so keep it stable and safe for app-specific identifiers
 - `app.debug`: `env('APP_DEBUG', false)` from `$_SERVER`/`$_ENV`
 - `app.env`: `env('APP_ENV', '')` from `$_SERVER`/`$_ENV`
 - `app.secret`: `env('APP_SECRET', null)` from `$_SERVER`/`$_ENV`
@@ -715,7 +715,7 @@ Paths and panel:
 Errors:
 
 - `error.enabled`: `true` (default error middleware in `Cosray\App`)
-- `error.renderer`: `null` (optional `Celemas\Core\Error\Renderer` object or class-string)
+- `error.renderer`: `null` (optional `Celema\Core\Error\Renderer` object or class-string)
 - `error.trusted`: `[]` (extra trusted classes for Boiler error templates)
 - `error.views`: `null` (defaults to `{path.root}{path.views}` plus built-in fallback templates)
 - `error.whoops`: `true` (uses `filp/whoops` in debug mode when installed)
