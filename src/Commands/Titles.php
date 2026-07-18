@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Quma\Commands\Command;
 use Celemas\Quma\Connection;
 use Cosray\Cms;
@@ -34,7 +35,7 @@ class Titles extends Command
 		parent::__construct($conn);
 	}
 
-	public function run(): int
+	public function run(Args $args): int
 	{
 		$result = new Rebuild(
 			$this->context,

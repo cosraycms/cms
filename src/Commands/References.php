@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Quma\Commands\Command;
 use Cosray\References\Rebuild;
 
@@ -14,7 +15,7 @@ class References extends Command
 	protected string $name = 'references';
 	protected string $description = 'Rebuilds the derived asset and node reference indexes from content';
 
-	public function run(): int
+	public function run(Args $args): int
 	{
 		$result = new Rebuild($this->env->db)->run();
 

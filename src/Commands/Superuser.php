@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Cli\Command;
 use Celemas\Quma\Connection;
 use Celemas\Quma\Database;
@@ -20,7 +21,7 @@ class Superuser extends Command
 		$this->db = new Database($connection);
 	}
 
-	public function run(): int|string
+	public function run(Args $args): int
 	{
 		$params = [];
 

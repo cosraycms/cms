@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Quma\Commands\Command;
 use Celemas\Quma\Database;
 
@@ -14,7 +15,7 @@ class Fulltext extends Command
 	protected string $name = 'fulltext';
 	protected string $description = 'Updates the fulltext index';
 
-	public function run(): int
+	public function run(Args $args): int
 	{
 		$this->env
 			->db

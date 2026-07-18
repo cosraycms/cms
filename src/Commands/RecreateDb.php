@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Cli\Command;
 use PDO;
 use PDOException;
@@ -22,7 +23,7 @@ class RecreateDb extends Command
 		private string $host = 'localhost',
 	) {}
 
-	public function run(): int|string
+	public function run(Args $args): int
 	{
 		echo "Recreating database '{$this->database}'...\n\n";
 
@@ -53,7 +54,7 @@ class RecreateDb extends Command
 			echo "\n✓ Database '{$this->database}' successfully recreated\n";
 			echo "✓ Owner: {$this->username}\n\n";
 			echo "Next steps:\n";
-			echo "  php run db:migrations --namespace install --apply    # Initialize the schema\n";
+			echo "  php run db:migrations --namespace=install --apply    # Initialize the schema\n";
 			echo "  php run db:migrations --apply                        # Apply system updates\n\n";
 
 			return 0;

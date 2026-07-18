@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Cli\Command;
 use Composer\InstalledVersions;
 use Cosray\Config;
@@ -39,12 +40,12 @@ class InstallPanel extends Command
 		private readonly Config $config,
 	) {}
 
-	public function run(): int
+	public function run(Args $args): int
 	{
-		if ($this->wantsHelp()) {
+		if ($args->has('--help') || $args->has('-h')) {
 			$this->help();
 
-			return 0;
+			return self::SUCCESS;
 		}
 
 		try {
@@ -86,21 +87,21 @@ class InstallPanel extends Command
 	{
 		$this->helpHeader(withOptions: true);
 		$this->helpOption(
-			'--panel=/cp',
+			'--panel',
 			'Override the configured panel path when the command is not registered with the app Config.',
+			value: 'path',
 		);
 		$this->helpOption(
-			'--public=public',
+			'--public',
 			'Override the configured public directory. Relative paths resolve from the current working directory.',
+			value: 'dir',
 		);
 		$this->helpOption(
-			'--release=0.3.0',
+			'--release',
 			'Install a specific panel release tag instead of the installed Composer version. Use nightly for the rolling main build.',
+			value: 'tag',
 		);
-		$this->helpOption(
-			'--base-url=https://cosray.dev/releases',
-			'Override the panel release base URL.',
-		);
+		$this->helpOption('--base-url', 'Override the panel release base URL.', value: 'url');
 	}
 
 	private function downloadRelease(): string
@@ -417,11 +418,6 @@ class InstallPanel extends Command
 		}
 
 		rmdir($path);
-	}
-
-	private function wantsHelp(): bool
-	{
-		return in_array('--help', $this->args(), true) || in_array('-h', $this->args(), true);
 	}
 
 	private function option(string $name): ?string

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
+use Celemas\Cli\Args;
 use Celemas\Quma\Commands\Command;
 use Cosray\Field\Field;
 use Cosray\Title\Sort;
@@ -22,7 +23,7 @@ class RecreateSortIndex extends Command
 	protected string $name = 'recreate-sort-index';
 	protected string $description = 'Rebuilds the per-locale node title sort indexes';
 
-	public function run(): int
+	public function run(Args $args): int
 	{
 		$locales = $this->locales();
 		$existing = $this->existingIndexes();
