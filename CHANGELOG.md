@@ -4,6 +4,8 @@
 
 ### Breaking Changes
 
+- Replaced framework dependencies under `celemas/*` with their `celema/*` successors and moved all integration types from `Celemas\*` to `Celema\*`. Custom application code importing those framework types must update its dependencies and imports.
+- Renamed the panel translation runtime dependency from `@celemas/verba` to `@celema/verba`.
 - Introduced the global asset catalog (phase 1a of the media redesign). Uploads go to the pool endpoint `POST /media/{mediatype}` (replacing the node-scoped upload route), create an `assets` table row, and store the file under the sharded key `{uid[:2]}/{uid}.{ext}` below `{path.public}{path.assets}`; identical content is deduplicated by hash. `GET /media/library` lists the catalog for the panel's reuse picker.
 - Changed stored media items from `{file}` to `{uid, meta?}` and media URLs to the uid form `/media/{type}/{assetUid}/{filename}`. Migration `000000-000019` populates the catalog, rewrites nodes, drafts, both history tables, and menu items, moves all files into the pool layout, and dumps an `asset-legacy-map.json` mapping (`legacy path → uid`) into the project root. Old owner-scoped URLs (`/media/{type}/node|menu/{owner}/{file}` and static `/assets/node|menu/...`) return `404` afterwards; richtext HTML that references them must be fixed manually using the mapping dump.
 - Changed file and video field URLs from web-server-static `/assets/...` paths to PHP-served `/media/...` URLs. Configure `media.fileserver` (X-Sendfile/X-Accel) when large downloads should bypass PHP.
