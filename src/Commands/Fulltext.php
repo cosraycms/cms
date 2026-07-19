@@ -5,23 +5,25 @@ declare(strict_types=1);
 namespace Cosray\Commands;
 
 use Celema\Console\Args;
-use Celema\Quma\Commands\Command;
+use Celema\Console\Command;
+use Celema\Console\Io;
+use Celema\Quma\Connection;
 use Celema\Quma\Database;
 
-class Fulltext extends Command
+#[Command('db:fulltext', 'Updates the fulltext index', group: 'Database')]
+class Fulltext
 {
-	protected string $group = 'Database';
-	protected string $prefix = 'db';
-	protected string $name = 'fulltext';
-	protected string $description = 'Updates the fulltext index';
+	private readonly Database $db;
 
-	public function run(Args $args): int
+	public function __construct(Connection $conn)
 	{
-		$this->env
-			->db
-			->fulltext
-			->clean();
-		$this->update($this->env->db);
+		$this->db = new Database($conn);
+	}
+
+	public function __invoke(Args $args, Io $io): int
+	{
+		$this->db->fulltext->clean();
+		$this->update($this->db);
 
 		return 0;
 	}

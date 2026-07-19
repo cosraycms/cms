@@ -6,6 +6,9 @@ namespace Cosray\Commands;
 
 use Celema\Console\Args;
 use Celema\Console\Command;
+use Celema\Console\Help;
+use Celema\Console\Io;
+use Celema\Console\Opt;
 use Composer\InstalledVersions;
 use Cosray\Config;
 use JsonException;
@@ -15,13 +18,26 @@ use RecursiveIteratorIterator;
 use RuntimeException;
 use Throwable;
 
-class InstallPanel extends Command
+#[Command('panel:install', 'Installs or upgrades the Cosray panel client assets', group: 'Panel')]
+#[Opt(
+	'--panel',
+	'Override the configured panel path when the command is not registered with the app Config.',
+	value: 'path',
+)]
+#[Opt(
+	'--public',
+	'Override the configured public directory. Relative paths resolve from the current working directory.',
+	value: 'dir',
+)]
+#[Opt(
+	'--release',
+	'Install a specific panel release tag instead of the installed Composer version. Use nightly for the rolling main build.',
+	value: 'tag',
+)]
+#[Opt('--base-url', 'Override the panel release base URL.', value: 'url')]
+#[Opt('--help', 'Show this help.', short: '-h')]
+class InstallPanel
 {
-	protected string $group = 'Panel';
-	protected string $prefix = 'panel';
-	protected string $name = 'install';
-	protected string $description = 'Installs or upgrades the Cosray panel client assets';
-
 	/** Ed25519 public key (base64, raw 32 bytes) matching the CI release signing key. */
 	private const string PANEL_PUBKEY = 'AYqozdEV8YlYCgbTVafXab+jvcXAmehXgkv1RLtgDng=';
 	private const string RELEASE_BASE_URL = 'https://cosray.dev/releases';
@@ -36,16 +52,20 @@ class InstallPanel extends Command
 	/** @var array<string, string>|null */
 	private ?array $options = null;
 
+	private Io $io;
+
 	public function __construct(
 		private readonly Config $config,
 	) {}
 
-	public function run(Args $args): int
+	public function __invoke(Args $args, Io $io): int
 	{
-		if ($args->has('--help') || $args->has('-h')) {
-			$this->help();
+		$this->io = $io;
 
-			return self::SUCCESS;
+		if ($args->has('--help') || $args->has('-h')) {
+			new Help($io)->showFor($this);
+
+			return 0;
 		}
 
 		try {
@@ -53,7 +73,7 @@ class InstallPanel extends Command
 				$this->option('release') ?? InstalledVersions::getPrettyVersion('cosray/cms') ?? '';
 			$this->cmsVersion = $cmsVersion !== '' ? $cmsVersion : 'unknown';
 		} catch (Throwable $e) {
-			$this->error("Failed to determine installed version: {$e->getMessage()}");
+			$io->error("Failed to determine installed version: {$e->getMessage()}");
 
 			return 1;
 		}
@@ -62,8 +82,8 @@ class InstallPanel extends Command
 			$this->preparePanelDownload($this->cmsVersion);
 			$target = $this->targetDir();
 
-			$this->info('Installing panel assets: ' . $this->versionLabel());
-			$this->info("Target: {$target}");
+			$this->io->info('Installing panel assets: ' . $this->versionLabel());
+			$this->io->info("Target: {$target}");
 
 			$panelArchive = $this->downloadRelease();
 
@@ -73,42 +93,21 @@ class InstallPanel extends Command
 				$this->removePath($panelArchive);
 			}
 		} catch (Throwable $e) {
-			$this->error($e->getMessage());
+			$this->io->error($e->getMessage());
 
 			return 1;
 		}
 
-		$this->success("Panel assets installed from {$this->panelFileName}");
+		$this->io->success("Panel assets installed from {$this->panelFileName}");
 
 		return 0;
-	}
-
-	public function help(): void
-	{
-		$this->helpHeader(withOptions: true);
-		$this->helpOption(
-			'--panel',
-			'Override the configured panel path when the command is not registered with the app Config.',
-			value: 'path',
-		);
-		$this->helpOption(
-			'--public',
-			'Override the configured public directory. Relative paths resolve from the current working directory.',
-			value: 'dir',
-		);
-		$this->helpOption(
-			'--release',
-			'Install a specific panel release tag instead of the installed Composer version. Use nightly for the rolling main build.',
-			value: 'tag',
-		);
-		$this->helpOption('--base-url', 'Override the panel release base URL.', value: 'url');
 	}
 
 	private function downloadRelease(): string
 	{
 		$tempFile = $this->tempFile('cosray_panel_', '.tar.gz');
 
-		$this->info("Downloading {$this->panelFileName} from {$this->panelUrl}...");
+		$this->io->info("Downloading {$this->panelFileName} from {$this->panelUrl}...");
 
 		$content = $this->download($this->panelUrl);
 
@@ -132,7 +131,7 @@ class InstallPanel extends Command
 			throw $e;
 		}
 
-		$this->success("Downloaded and verified {$this->panelFileName}");
+		$this->io->success("Downloaded and verified {$this->panelFileName}");
 
 		return $tempFile;
 	}
@@ -153,7 +152,9 @@ class InstallPanel extends Command
 
 	private function verifySignature(string $archivePath): void
 	{
-		$this->info("Verifying {$this->panelFileName} signature from {$this->panelSignatureUrl}...");
+		$this->io->info(
+			"Verifying {$this->panelFileName} signature from {$this->panelSignatureUrl}...",
+		);
 
 		$content = $this->download($this->panelSignatureUrl);
 
@@ -302,7 +303,7 @@ class InstallPanel extends Command
 			return $version;
 		}
 
-		$this->warn("Unknown version format `{$version}`, falling back to nightly panel release");
+		$this->io->warn("Unknown version format `{$version}`, falling back to nightly panel release");
 
 		return 'nightly';
 	}
@@ -466,10 +467,13 @@ class InstallPanel extends Command
 	/** @return list<string> */
 	private function args(): array
 	{
+		// Only read argv when this command was actually invoked; option
+		// resolution also runs in contexts with foreign argv (e.g. tests).
 		$argv = $_SERVER['argv'] ?? [];
+		$meta = Command::of($this);
 		$command = strtolower((string) ($argv[1] ?? ''));
 
-		if (!in_array($command, [$this->name, $this->prefix() . ':' . $this->name], true)) {
+		if (!in_array($command, [$meta->name, $meta->full()], true)) {
 			return [];
 		}
 

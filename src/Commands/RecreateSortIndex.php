@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Cosray\Commands;
 
 use Celema\Console\Args;
-use Celema\Quma\Commands\Command;
+use Celema\Console\Command;
+use Celema\Console\Io;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
 use Cosray\Field\Field;
 use Cosray\Title\Sort;
 
@@ -16,14 +19,22 @@ use Cosray\Title\Sort;
  * exists. One collated expression index per locale key backs the locale-aware
  * `ORDER BY` the panel uses.
  */
-class RecreateSortIndex extends Command
+#[Command(
+	'db:recreate-sort-index',
+	'Rebuilds the per-locale node title sort indexes',
+	group: 'Database',
+)]
+class RecreateSortIndex
 {
-	protected string $group = 'Database';
-	protected string $prefix = 'db';
-	protected string $name = 'recreate-sort-index';
-	protected string $description = 'Rebuilds the per-locale node title sort indexes';
+	private readonly Database $db;
 
-	public function run(Args $args): int
+	public function __construct(
+		private readonly Connection $conn,
+	) {
+		$this->db = new Database($conn);
+	}
+
+	public function __invoke(Args $args, Io $io): int
 	{
 		$locales = $this->locales();
 		$existing = $this->existingIndexes();
@@ -81,7 +92,7 @@ class RecreateSortIndex extends Command
 			WHERE title <> '{}'::jsonb
 			SQL;
 
-		$rows = $this->env->db->execute($this->apply($sql))->all();
+		$rows = $this->db->execute($this->apply($sql))->all();
 		$locales = [];
 
 		foreach ($rows as $row) {
@@ -110,7 +121,7 @@ class RecreateSortIndex extends Command
 			WHERE tablename = 'nodes' AND indexname LIKE 'ix_nodes_title_%'
 			SQL;
 
-		$rows = $this->env->db->execute($sql)->all();
+		$rows = $this->db->execute($sql)->all();
 
 		return array_map(static fn(array $row): string => (string) $row['indexname'], $rows);
 	}
@@ -125,12 +136,12 @@ class RecreateSortIndex extends Command
 		$sql =
 			"CREATE INDEX IF NOT EXISTS {$index} " . "ON /*:cms.prefix:*/nodes (({$expression}){$collate})";
 
-		$this->env->db->execute($this->apply($sql))->run();
+		$this->db->execute($this->apply($sql))->run();
 	}
 
 	private function drop(string $index): void
 	{
-		$this->env->db->execute($this->apply("DROP INDEX IF EXISTS /*:cms.prefix:*/{$index}"))->run();
+		$this->db->execute($this->apply("DROP INDEX IF EXISTS /*:cms.prefix:*/{$index}"))->run();
 	}
 
 	/**
@@ -140,8 +151,7 @@ class RecreateSortIndex extends Command
 	private function collation(string $locale): ?string
 	{
 		foreach ([Sort::collation($locale), 'und-x-icu'] as $candidate) {
-			$found = $this->env
-				->db
+			$found = $this->db
 				->execute(
 					'SELECT 1 FROM pg_collation WHERE collname = :name',
 					['name' => $candidate],
@@ -158,6 +168,6 @@ class RecreateSortIndex extends Command
 
 	private function apply(string $sql): string
 	{
-		return $this->env->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
+		return $this->conn->config->placeholders?->compileSql($sql, __FILE__) ?? $sql;
 	}
 }

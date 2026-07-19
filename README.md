@@ -38,6 +38,49 @@ $app->run();
 
 The CMS app exposes the common CMS configuration API (`section()`, `collection()`, `node()`, `renderer()`, `icons()`) and the common core app API (`load()`, `middleware()`, `get()`, `post()`, `routes()`, `run()`). Use `core()` or `bootstrap()` only when you need the lower-level APIs directly.
 
+## Console commands
+
+`Cosray\Console\Commands` bundles the base CLI command set of a Cosray app over the booted `App`: the quma migration commands (`db:add-migration`, `db:create-migrations-table`, `db:migrations`), Cosray's own `db:fulltext`, `db:references`, `db:recreate-sort-index`, `db:titles`, `panel:install`, and `add-superuser`. Commands are registered as lazy factories — nothing is constructed until a command actually runs, so `php run help` stays free of database and app-context setup.
+
+The recommended layout is a two-line `run` script:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/vendor/autoload.php';
+
+exit((require __DIR__ . '/app/console.php')->run());
+```
+
+and an `app/console.php` returning the runner:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Cosray\Console\Commands;
+
+$app = require __DIR__ . '/app.php'; // boots and returns the Cosray\App
+
+$commands = new Commands($app);
+$commands->server(port: 6913, watch: ['src/**/*.php', 'views/**/*.php']);
+$commands->i18n('mysite', locales: ['de', 'en'], scan: ['src', 'views']);
+
+// App-specific commands: anything Celema\Console\Commands accepts.
+$commands->add(new ExportCommand($app->config));
+$commands->add([ImportCommand::class => fn() => new ImportCommand($dsn)]);
+
+return $commands->runner();
+```
+
+- **`server(port:, watch:, routePrefix:)`** registers the builtin dev server (`php run server`) on the app's public directory.
+- **`i18n(name, locales:, scan:, dir:, schema:)`** registers `i18n:sync` and `i18n:status` for one translation domain. It scans the given source directories (relative paths resolve from the app root) plus the app's schema labels, and claims bare `__()` calls as the default domain. Call it once per domain for apps with several catalogs.
+- **`add()`** forwards to [`celema/console`](https://codeberg.org/celema/console)'s `Commands`: instances, class-strings, lazy factories keyed by class-string, and named closures.
+- **`runner(debug:)`** returns the ready `Celema\Console\Runner`; `debug` defaults to the app config's `debug()`.
+
 ## Plugins
 
 Runtime plugins are Composer packages (or project classes) implementing `Cosray\Plugin\Plugin`. They are registered explicitly — either in the bootstrap or through the `plugins` config key:
@@ -344,7 +387,7 @@ The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
 
 ### Admin panel assets
 
-The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. Register `Cosray\Commands\InstallPanel` with the app's command runner and run the installer after Composer installs or updates Cosray:
+The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. The `Cosray\Console\Commands` facade registers the installer as `panel:install`; run it after Composer installs or updates Cosray, e.g. via the `post-install-cmd`/`post-update-cmd` scripts:
 
 ```bash
 php run panel:install

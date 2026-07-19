@@ -6,14 +6,15 @@ namespace Cosray\Commands;
 
 use Celema\Console\Args;
 use Celema\Console\Command;
+use Celema\Console\Io;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
+use Cosray\Uid;
+use Throwable;
 
-class Superuser extends Command
+#[Command('add-superuser', 'Add a superuser')]
+class Superuser
 {
-	protected string $group = 'General';
-	protected string $name = 'add-superuser';
-	protected string $description = 'Add a superuser';
 	protected Database $db;
 
 	public function __construct(Connection $connection)
@@ -21,27 +22,47 @@ class Superuser extends Command
 		$this->db = new Database($connection);
 	}
 
-	public function run(Args $args): int
+	public function __invoke(Args $args, Io $io): int
 	{
-		$params = [];
+		$io->echoln("Create a superuser\n");
+		$email = $io->ask('Email:');
 
-		echo "Create a superuser\n\n";
-		$params['email'] = readline('Email: ');
-		$params['full_name'] = readline('Full Name: ');
-		$params['display_name'] = readline('Display Name: ');
-		$params['password'] = password_hash(
-			readline('Password: '),
-			PASSWORD_ARGON2ID,
-		);
+		if ($email === '') {
+			$io->error('An email address is required. Aborting.');
 
-		$result = $this->db->users->addSuperuser($params);
-
-		if ($result['success']) {
-			echo "\nSuccessfully created superuser: " . $params['email'] . "\n";
-		} else {
-			echo "\nError occured. Please review your data!\n";
-			echo $result['message'] . "\n";
+			return 1;
 		}
+
+		$name = $io->ask('Name:');
+		$password = $io->ask('Password:', hidden: true);
+
+		if ($password === '') {
+			$io->error('A password is required. Aborting.');
+
+			return 1;
+		}
+
+		if (!hash_equals($password, $io->ask('Repeat password:', hidden: true))) {
+			$io->error('The passwords do not match. Aborting.');
+
+			return 1;
+		}
+
+		try {
+			$this->db->users->addSuperuser([
+				'uid' => new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13)->generate(),
+				'email' => $email,
+				'password' => password_hash($password, PASSWORD_ARGON2ID),
+				'data' => json_encode(['name' => $name], JSON_THROW_ON_ERROR),
+			])->run();
+		} catch (Throwable $e) {
+			$io->error('Error occurred. Please review your data!');
+			$io->error($e->getMessage());
+
+			return 1;
+		}
+
+		$io->success("Successfully created superuser: {$email}");
 
 		return 0;
 	}

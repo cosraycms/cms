@@ -22,11 +22,11 @@
 		"ext-sodium": "*",
 		"ext-xml": "*",
 		"celema/boiler": "^0.6",
-		"celema/core": "^0.5",
-		"celema/quma": "^0.3",
+		"celema/core": "dev-main",
+		"celema/quma": "dev-main",
 		"celema/session": "^0.3",
 		"celema/sire": "^0.5",
-		"celema/verba": "^0.3",
+		"celema/verba": "dev-main",
 		"gumlet/php-image-resize": "2.0.*",
 		"psr/log": "^3.0",
 		"enshrined/svg-sanitize": "^0.22.0",
@@ -74,5 +74,34 @@
 			"@license:lint",
 			"@docs:lint"
 		]
-	}
+	},
+	"repositories": [{
+		"name": "core",
+		"type": "path",
+		"url": "../core",
+		"options": {
+			"symlink": true
+		}
+	},{
+		"name": "verba",
+		"type": "path",
+		"url": "../verba",
+		"options": {
+			"symlink": true
+		}
+	},{
+		"name": "quma",
+		"type": "path",
+		"url": "../quma",
+		"options": {
+			"symlink": true
+		}
+	},{
+		"name": "console",
+		"type": "path",
+		"url": "../console",
+		"options": {
+			"symlink": true
+		}
+	}]
 }

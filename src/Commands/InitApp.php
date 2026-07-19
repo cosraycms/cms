@@ -6,14 +6,12 @@ namespace Cosray\Commands;
 
 use Celema\Console\Args;
 use Celema\Console\Command;
+use Celema\Console\Io;
 
-class InitApp extends Command
+#[Command('init-app', 'Initialize the Cosray app')]
+class InitApp
 {
-	protected string $group = 'General';
-	protected string $name = 'init-app';
-	protected string $description = 'Initialize the Cosray app';
-
-	public function run(Args $args): int
+	public function __invoke(Args $args, Io $io): int
 	{
 		return 0;
 	}

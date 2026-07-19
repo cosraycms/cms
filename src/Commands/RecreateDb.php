@@ -6,15 +6,13 @@ namespace Cosray\Commands;
 
 use Celema\Console\Args;
 use Celema\Console\Command;
+use Celema\Console\Io;
 use PDO;
 use PDOException;
 
-class RecreateDb extends Command
+#[Command('recreate-db', 'Drop and recreate the test database', group: 'Database')]
+class RecreateDb
 {
-	protected string $group = 'Database';
-	protected string $name = 'recreate-db';
-	protected string $description = 'Drop and recreate the test database';
-
 	public function __construct(
 		private string $database,
 		private string $username,
@@ -23,7 +21,7 @@ class RecreateDb extends Command
 		private string $host = 'localhost',
 	) {}
 
-	public function run(Args $args): int
+	public function __invoke(Args $args, Io $io): int
 	{
 		echo "Recreating database '{$this->database}'...\n\n";
 

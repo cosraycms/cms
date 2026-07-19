@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- Adopted the attribute-based command API of `celema/console` 0.4: all commands in `Cosray\Commands` are now plain `#[Command]` classes invoked via `__invoke(Args $args, Io $io)`. Commands that extended the removed `Celema\Quma\Commands\Command` base take a `Connection` directly and no longer build a quma `Environment`.
 - Replaced framework dependencies under `celemas/*` with their `celema/*` successors and moved all integration types from `Celemas\*` to `Celema\*`. Custom application code importing those framework types must update its dependencies and imports.
 - Renamed the panel translation runtime dependency from `@celemas/verba` to `@celema/verba`.
 - Introduced the global asset catalog (phase 1a of the media redesign). Uploads go to the pool endpoint `POST /media/{mediatype}` (replacing the node-scoped upload route), create an `assets` table row, and store the file under the sharded key `{uid[:2]}/{uid}.{ext}` below `{path.public}{path.assets}`; identical content is deduplicated by hash. `GET /media/library` lists the catalog for the panel's reuse picker.
@@ -22,9 +23,15 @@
 
 ### Added
 
+- Added the `Cosray\Console\Commands` facade bundling the base CLI command set of a Cosray app (quma migrations, `db:*`, `panel:install`, `add-superuser`, including the previously app-wired `db:titles`) as lazy factories over the booted `App`. `server()` and `i18n()` register the dev server and translation commands per app; `runner()` returns a ready `Celema\Console\Runner` with debug taken from the app config. Application `run` scripts shrink to a thin wrapper around an `app/console.php` that returns `$commands->runner()`.
 - Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `Cosray\Commands\InstallPanel` command. The installer writes client assets to `{path.public}{path.panel}/static`.
+- Declared the `--help`/`-h` option on `panel:install`, required by console's new option validation for commands that intercept the flag themselves.
 - Added locale fallback for UI strings: the per-request translator follows each locale's `fallback:` chain (as configured in `Locales::add()`) before falling back to the message id.
 - Added a per-user panel UI language, independent of the content locales. The panel negotiates it per request — user preference (new `users.panel_locale` column, migration `000000-000023`), then config `panel.locale`, then the browser's `Accept-Language`, then English — and offers a language switcher in the panel sidebar (`POST {path.panel}/locale`). Selectable languages are the locales whose `cosray` and `panel` domains both ship a catalog file.
+
+### Fixed
+
+- Fixed the `add-superuser` command: it referenced a `users/addSuperuser` query script that did not exist, so every run failed after prompting. The new query inserts an active `superuser` role user (owned by the seeded system user) with a generated uid, and the command prompts through the console `Io` — including hidden password input with a repeat check — instead of `readline()`, returns exit code 1 on failure, and is covered by integration tests.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
 

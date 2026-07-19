@@ -5,19 +5,29 @@ declare(strict_types=1);
 namespace Cosray\Commands;
 
 use Celema\Console\Args;
-use Celema\Quma\Commands\Command;
+use Celema\Console\Command;
+use Celema\Console\Io;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
 use Cosray\References\Rebuild;
 
-class References extends Command
+#[Command(
+	'db:references',
+	'Rebuilds the derived asset and node reference indexes from content',
+	group: 'Database',
+)]
+class References
 {
-	protected string $group = 'Database';
-	protected string $prefix = 'db';
-	protected string $name = 'references';
-	protected string $description = 'Rebuilds the derived asset and node reference indexes from content';
+	private readonly Database $db;
 
-	public function run(Args $args): int
+	public function __construct(Connection $conn)
 	{
-		$result = new Rebuild($this->env->db)->run();
+		$this->db = new Database($conn);
+	}
+
+	public function __invoke(Args $args, Io $io): int
+	{
+		$result = new Rebuild($this->db)->run();
 
 		echo
 			"Reference indexes rebuilt: {$result['assets']} asset references, "

@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Commands;
 
 use Celema\Console\Args;
-use Celema\Quma\Commands\Command;
+use Celema\Console\Command;
+use Celema\Console\Io;
 use Celema\Quma\Connection;
 use Cosray\Cms;
 use Cosray\Context;
@@ -18,30 +19,24 @@ use Cosray\Title\Rebuild;
  * (node type registry + locales), so it is constructed with those services —
  * unlike the self-describing `db:references`/`db:fulltext` commands.
  */
-class Titles extends Command
+#[Command('db:titles', 'Rebuilds the materialized node titles from content', group: 'Database')]
+class Titles
 {
-	protected string $group = 'Database';
-	protected string $prefix = 'db';
-	protected string $name = 'titles';
-	protected string $description = 'Rebuilds the materialized node titles from content';
-
 	public function __construct(
-		Connection $conn,
+		private readonly Connection $conn,
 		private readonly Context $context,
 		private readonly Cms $cms,
 		private readonly Locales $locales,
 		private readonly Types $types,
-	) {
-		parent::__construct($conn);
-	}
+	) {}
 
-	public function run(Args $args): int
+	public function __invoke(Args $args, Io $io): int
 	{
 		$result = new Rebuild(
 			$this->context,
 			$this->cms,
 			$this->locales,
-			$this->env->conn,
+			$this->conn,
 			$this->types,
 		)->run();
 
