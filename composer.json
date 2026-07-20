@@ -96,12 +96,5 @@
 		"options": {
 			"symlink": true
 		}
-	},{
-		"name": "console",
-		"type": "path",
-		"url": "../console",
-		"options": {
-			"symlink": true
-		}
 	}]
 }
