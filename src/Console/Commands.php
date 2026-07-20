@@ -9,6 +9,7 @@ use Celema\Console\Runner;
 use Celema\Container\Container;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
+use Celema\Core\Server\FrankenPhp;
 use Celema\Core\Server\Server;
 use Celema\Core\Server\Setup;
 use Celema\Quma\Commands as QumaCommands;
@@ -84,7 +85,7 @@ final class Commands
 	}
 
 	/**
-	 * Registers the builtin dev server under `server`.
+	 * Registers the builtin and FrankenPHP dev servers.
 	 *
 	 * @param list<string>|string $watch
 	 */
@@ -97,6 +98,12 @@ final class Commands
 
 		$this->commands->add([
 			Server::class => static fn(): Server => new Server($public, $port, $routePrefix, $watch),
+			FrankenPhp::class => static fn(): FrankenPhp => new FrankenPhp(
+				$public,
+				$port,
+				$routePrefix,
+				$watch,
+			),
 		]);
 
 		return $this;
