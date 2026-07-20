@@ -23,6 +23,7 @@
 
 ### Added
 
+- Registered Core's FrankenPHP development server alongside the PHP built-in server through `Cosray\Console\Commands::server()`. Configured applications can use `php run frankenphp`, including the existing port, route-prefix, request-log filtering, and BrowserSync watch behavior.
 - Added the `Cosray\Console\Commands` facade bundling the base CLI command set of a Cosray app (quma migrations, `db:*`, `panel:install`, `add-superuser`, including the previously app-wired `db:titles`) as lazy factories over the booted `App`. `server()` and `i18n()` register the dev server and translation commands per app; `runner()` returns a ready `Celema\Console\Runner` with debug taken from the app config. Application `run` scripts shrink to a thin wrapper around an `app/console.php` that returns `$commands->runner()`.
 - Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `Cosray\Commands\InstallPanel` command. The installer writes client assets to `{path.public}{path.panel}/static`.
 - Declared the `--help`/`-h` option on `panel:install`, required by console's new option validation for commands that intercept the flag themselves.

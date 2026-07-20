@@ -76,10 +76,12 @@ $commands->add([ImportCommand::class => fn() => new ImportCommand($dsn)]);
 return $commands->runner();
 ```
 
-- **`server(port:, watch:, routePrefix:)`** registers the builtin dev server (`php run server`) on the app's public directory.
+- **`server(port:, watch:, routePrefix:)`** registers the PHP built-in server (`php run server`) and FrankenPHP (`php run frankenphp`) on the app's public directory.
 - **`i18n(name, locales:, scan:, dir:, schema:)`** registers `i18n:sync` and `i18n:status` for one translation domain. It scans the given source directories (relative paths resolve from the app root) plus the app's schema labels, and claims bare `__()` calls as the default domain. Call it once per domain for apps with several catalogs.
 - **`add()`** forwards to [`celema/console`](https://codeberg.org/celema/console)'s `Commands`: instances, class-strings, lazy factories keyed by class-string, and named closures.
 - **`runner(debug:)`** returns the ready `Celema\Console\Runner`; `debug` defaults to the app config's `debug()`.
+
+The `frankenphp` command requires a `frankenphp` executable in `PATH` and runs it in classic mode. It supports the same configured port and BrowserSync-backed `--watch` patterns as the built-in server. Its `--debug` option enables verbose Caddy logs; FrankenPHP uses its embedded PHP runtime rather than the PHP CLI that starts `run`.
 
 ## Plugins
 
