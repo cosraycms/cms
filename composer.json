@@ -74,27 +74,5 @@
 			"@license:lint",
 			"@docs:lint"
 		]
-	},
-	"repositories": [{
-		"name": "core",
-		"type": "path",
-		"url": "../core",
-		"options": {
-			"symlink": true
-		}
-	},{
-		"name": "verba",
-		"type": "path",
-		"url": "../verba",
-		"options": {
-			"symlink": true
-		}
-	},{
-		"name": "quma",
-		"type": "path",
-		"url": "../quma",
-		"options": {
-			"symlink": true
-		}
-	}]
+	}
 }
