@@ -24,6 +24,7 @@
 		"celema/boiler": "^0.6",
 		"celema/core": "dev-main",
 		"celema/quma": "dev-main",
+		"celema/server": "dev-main",
 		"celema/session": "^0.3",
 		"celema/sire": "^0.5",
 		"celema/verba": "dev-main",
