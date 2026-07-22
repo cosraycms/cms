@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celema\Core\Server\FrankenPhp;
-use Celema\Core\Server\Server;
 use Celema\Router\Router;
+use Celema\Server\FrankenPhp;
+use Celema\Server\Server;
 use Cosray\App;
 use Cosray\Console\Commands;
 use Cosray\Tests\TestCase;
