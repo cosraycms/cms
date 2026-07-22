@@ -24,7 +24,6 @@
 		"celema/boiler": "^0.6",
 		"celema/core": "dev-main",
 		"celema/quma": "dev-main",
-		"celema/server": "dev-main",
 		"celema/session": "^0.3",
 		"celema/sire": "^0.5",
 		"celema/verba": "dev-main",
@@ -35,10 +34,12 @@
 	},
 	"require-dev": {
 		"celema/dev": "^5.0",
+		"celema/server": "dev-main",
 		"filp/whoops": "^2.15",
 		"laminas/laminas-diactoros": "^3"
 	},
 	"suggest": {
+		"celema/server": "Provides the server and frankenphp dev-server commands for local development.",
 		"filp/whoops": "Enables pretty debug error pages in debug mode."
 	},
 	"autoload": {

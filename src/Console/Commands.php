@@ -87,13 +87,22 @@ final class Commands
 	/**
 	 * Registers the builtin and FrankenPHP dev servers.
 	 *
-	 * @param list<string>|string $watch
+	 * The commands are only registered when the optional celema/server
+	 * package is installed, so production installs without dev
+	 * requirements skip them.
+	 *
+	 * @param list<string>|string|null $watch
 	 */
 	public function server(
 		int $port = 1983,
-		array|string $watch = Setup::DEFAULT_WATCH,
+		array|string|null $watch = null,
 		string $routePrefix = '',
 	): self {
+		if (!class_exists(Server::class)) {
+			return $this;
+		}
+
+		$watch ??= Setup::DEFAULT_WATCH;
 		$public = $this->app->config->path->public;
 
 		$this->commands->add([
