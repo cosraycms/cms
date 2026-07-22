@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Tests\End2End;
 
 use Cosray\Tests\End2EndTestCase;
-use Laminas\Diactoros\UploadedFile;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
@@ -164,7 +163,13 @@ final class MediaServeTest extends End2EndTestCase
 	): UploadedFileInterface {
 		$stream = $this->factory()->streamFactory()->createStream($contents);
 
-		return new UploadedFile($stream, strlen($contents), UPLOAD_ERR_OK, $filename, $mediaType);
+		return $this->factory()->uploadedFile(
+			$stream,
+			strlen($contents),
+			UPLOAD_ERR_OK,
+			$filename,
+			$mediaType,
+		);
 	}
 
 	private function removeDir(string $dir): void

@@ -8,8 +8,8 @@ use BadMethodCallException;
 use Celema\Container\Container;
 use Celema\Container\Entry;
 use Celema\Core\App as CoreApp;
-use Celema\Core\Factory\Discovery;
 use Celema\Core\Factory\Factory;
+use Celema\Core\Factory\Nyholm;
 use Celema\Core\Plugin as CorePlugin;
 use Celema\Router\AddsRoutes;
 use Celema\Router\After;
@@ -64,7 +64,7 @@ class App implements RouteAdder
 
 		return new self(
 			$config,
-			Discovery::create(),
+			new Nyholm(),
 			new Router($config->path->prefix),
 			new Container(),
 		);

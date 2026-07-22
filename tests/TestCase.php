@@ -6,7 +6,7 @@ namespace Cosray\Tests;
 
 use Celema\Container\Container;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Factory\Laminas;
+use Celema\Core\Factory\Nyholm;
 use Celema\Core\Request;
 use Celema\Quma\Delimiters;
 use Cosray\Config;
@@ -227,7 +227,7 @@ class TestCase extends BaseTestCase
 
 	public function factory(): Factory
 	{
-		return new Laminas();
+		return new Nyholm();
 	}
 
 	public function fullTrim(string $text): string

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests;
 
 use Celema\Core\App;
-use Celema\Core\Factory\Laminas;
+use Celema\Core\Factory\Nyholm;
 use Celema\Core\Plugin as CorePlugin;
 use Celema\Core\Request;
 use Celema\Router\Router;
@@ -216,7 +216,7 @@ class End2EndTestCase extends IntegrationTestCase
 
 	protected function createApp(array $settings = []): App
 	{
-		$factory = new Laminas();
+		$factory = new Nyholm();
 		$router = new Router();
 		$container = $this->container();
 		$config = $this->config(array_merge(
@@ -281,7 +281,7 @@ class End2EndTestCase extends IntegrationTestCase
 
 	protected function createErrorHandler(
 		Config $config,
-		Laminas $factory,
+		Nyholm $factory,
 	): \Celema\Core\Error\Handler {
 		$logger = new NullLogger();
 		$handler = new Handler($config, $factory, $logger);
