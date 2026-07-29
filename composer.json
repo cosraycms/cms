@@ -74,7 +74,10 @@
 		"ci": [
 			"@lint",
 			"@coverage",
-			"@license:lint",
+			"@license:lint"
+		],
+		"ci:full": [
+			"@ci",
 			"@docs:lint"
 		]
 	}
