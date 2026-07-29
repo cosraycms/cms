@@ -32,6 +32,8 @@
 
 ### Fixed
 
+- Fixed image rendition generation on PHP 8.5. `gumlet/php-image-resize` 2.0.x calls the deprecated `finfo_close()`, which Core's error handler turns into an `ErrorException`, so every rendition request aborted before writing the cache file — leaving empty cache directories and broken images in the panel and on the frontend. The dependency now requires `^3.0`. Applications must run `composer update gumlet/php-image-resize`.
+- Fixed crop renditions ignoring their configured `pos`: the crop position was passed into the `allow_enlarge` parameter, so every crop centered and silently enlarged. Existing crop renditions are only regenerated after the cache files are removed.
 - Fixed the `add-superuser` command: it referenced a `users/addSuperuser` query script that did not exist, so every run failed after prompting. The new query inserts an active `superuser` role user (owned by the seeded system user) with a generated uid, and the command prompts through the console `Io` — including hidden password input with a repeat check — instead of `readline()`, returns exit code 1 on failure, and is covered by integration tests.
 
 ## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)

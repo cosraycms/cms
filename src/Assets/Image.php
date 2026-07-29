@@ -103,8 +103,9 @@ class Image
 				),
 				ResizeMode::Crop => $this->get()->crop(
 					$size->firstDimension,
-					$size->secondDimension,
-					$size->cropMode,
+					$size->secondDimension ?? $size->firstDimension,
+					$enlarge,
+					$size->cropMode ?? ImageResize::CROPCENTER,
 				),
 				ResizeMode::Height => $this->get()->resizeToHeight($size->firstDimension, $enlarge),
 				ResizeMode::LongSide => $this->get()->resizeToLongSide($size->firstDimension, $enlarge),
