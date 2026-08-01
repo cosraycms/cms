@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Node\Contract;
 
-interface HasInit
-{
-	public function init(): void;
-}
+use Cosray\Contract\HasInit as HasInitContract;
+
+interface HasInit extends HasInitContract {}

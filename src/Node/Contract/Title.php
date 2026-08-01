@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Node\Contract;
 
-interface Title
-{
-	public function title(): string;
-}
+use Cosray\Contract\Title as TitleContract;
+
+interface Title extends TitleContract {}
