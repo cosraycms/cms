@@ -111,6 +111,32 @@
 	grid-template-columns: repeat(100, minmax(0, 1fr));
 }
 
+.cms-fieldset {
+	min-width: 0;
+	margin: var(--space-3) 0;
+	padding: var(--space-2) 0 var(--space-3);
+	border: 1px solid var(--color-neutral-200);
+	border-radius: var(--radius-md);
+}
+
+.cms-fieldset-legend {
+	margin-left: var(--space-4);
+	padding: 0 var(--space-2);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-neutral-900);
+}
+
+.cms-fieldset-description {
+	padding: var(--space-2) var(--space-6) 0;
+	font-size: var(--font-size-sm);
+	color: var(--color-neutral-500);
+}
+
+.cms-fieldset-fields {
+	width: 100%;
+}
+
 .locale-tabs {
 	flex-shrink: 0;
 }
@@ -464,6 +490,10 @@
 }
 
 @media (max-width: 52rem) {
+	.cms-fieldset {
+		grid-column: 1 / -1 !important;
+	}
+
 	.cms-node-sticky {
 		position: static;
 	}

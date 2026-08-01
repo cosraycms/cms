@@ -9,6 +9,7 @@ use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 
 final class PanelEditorRouteTest extends End2EndTestCase
 {
@@ -25,6 +26,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->node(TestConditionalDocument::class);
+		$plugin->node(TestEmbeddedDocument::class);
 
 		return $plugin;
 	}
@@ -130,6 +132,42 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('<dialog class="cms-meta-dialog" data-meta>', $html);
 		$this->assertStringContainsString('name="content[styled][meta][cssClass][zxx]"', $html);
 		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
+	}
+
+	public function testEmbeddedFieldsRenderInsideConfiguredFieldset(): void
+	{
+		$this->authenticateAs('editor');
+		$embeddedType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-embedded-document'",
+		)->first();
+		$typeId = $embeddedType
+			? (int) $embeddedType['type']
+			: $this->createTestType('test-embedded-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-fieldset',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Embedded title']],
+				'body' => ['type' => 'text', 'value' => ['zxx' => 'Embedded body']],
+			],
+		]);
+
+		$response = $this->makeRequest(
+			'GET',
+			'/cp/collection/test-articles/panel-editor-fieldset',
+		);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('class="cms-fieldset"', $html);
+		$this->assertStringContainsString('data-fieldset="baseFields"', $html);
+		$this->assertStringContainsString('Document fields</legend>', $html);
+		$this->assertStringContainsString('Reusable document fields', $html);
+		$this->assertStringContainsString('grid-column: span 50 / span 50', $html);
+		$this->assertStringContainsString('name="content[title][value][en]"', $html);
+		$this->assertStringContainsString('name="content[body][value][zxx]"', $html);
+		$this->assertStringNotContainsString('content[baseFields]', $html);
 	}
 
 	public function testSettingsPaneScopesPathPreviewToRouteInputs(): void

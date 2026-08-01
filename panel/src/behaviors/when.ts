@@ -76,6 +76,11 @@ function apply(): void {
 			});
 		}
 	});
+
+	document.querySelectorAll<HTMLFieldSetElement>('.cms-fieldset').forEach((fieldset) => {
+		const fields = Array.from(fieldset.querySelectorAll<HTMLElement>('.cms-field'));
+		fieldset.hidden = fields.length === 0 || fields.every((field) => field.hidden);
+	});
 }
 
 function reapply(event: Event): void {

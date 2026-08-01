@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Assets\Repository;
+use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Richtext\Scanner;
 use Cosray\Uid;
@@ -90,6 +91,7 @@ class Serializer
 		$result = [
 			'title' => __('node:new-document') . ' ' . __((string) $schema->label),
 			'fields' => $this->fields($node, $fieldNames),
+			'fieldsets' => $this->fieldsets($node, $fieldNames),
 			'uid' => $this->uid->generate(),
 			'handle' => null,
 			'published' => false,
@@ -112,13 +114,9 @@ class Serializer
 	public function fields(object $node, array $fieldNames): array
 	{
 		$fields = [];
-		$orderedFields = $this->order($node, $fieldNames);
-		$missingFields = array_diff($fieldNames, $orderedFields);
-		$allFields = array_merge($orderedFields, $missingFields);
-
 		$ownerType = (string) $this->types->get($node::class, 'handle');
 
-		foreach ($allFields as $fieldName) {
+		foreach ($this->orderedNames($node, $fieldNames) as $fieldName) {
 			$properties = Factory::fieldFor($node, $fieldName)->properties();
 			// The owning node type, so controls that query other nodes (the
 			// reference picker) can scope to this field's schema.
@@ -129,6 +127,62 @@ class Serializer
 		return $fields;
 	}
 
+	/** @return list<array{name: string, label: ?string, description: ?string, width: int, fields: list<string>}> */
+	public function fieldsets(object $node, array $fieldNames): array
+	{
+		$ordered = $this->orderedNames($node, $fieldNames);
+		$fieldsets = [];
+
+		foreach (Factory::fieldsetsFor($node) as $fieldset) {
+			$members = array_values(array_filter(
+				$ordered,
+				static fn(string $name): bool => in_array($name, $fieldset->fields, true),
+			));
+
+			if ($members === []) {
+				continue;
+			}
+
+			$positions = [];
+
+			foreach ($members as $member) {
+				$position = array_search($member, $ordered, true);
+
+				if (is_int($position)) {
+					$positions[] = $position;
+				}
+			}
+
+			if ($positions !== range($positions[0], $positions[0] + count($positions) - 1)) {
+				$class = $node::class;
+				throw new RuntimeException(
+					"Field order for '{$class}' splits fieldset '{$fieldset->name}'.",
+				);
+			}
+
+			$visible = array_values(array_filter(
+				$members,
+				static fn(string $name): bool => !(
+					Factory::fieldFor($node, $name)->properties()['hidden'] ?? false
+				),
+			));
+
+			if ($visible === []) {
+				continue;
+			}
+
+			$fieldsets[] = [
+				'name' => $fieldset->name,
+				'label' => $fieldset->label === null ? null : __($fieldset->label),
+				'description' => $fieldset->description === null ? null : __($fieldset->description),
+				'width' => $fieldset->width,
+				'fields' => $visible,
+			];
+		}
+
+		return $fieldsets;
+	}
+
 	public function read(object $node, array $rawData, array $fieldNames): array
 	{
 		$data = $this->data($node, $rawData, $fieldNames);
@@ -137,6 +191,7 @@ class Serializer
 			'title' => $this->resolveTitle($node),
 			'uid' => $rawData['uid'],
 			'fields' => $this->fields($node, $fieldNames),
+			'fieldsets' => $this->fieldsets($node, $fieldNames),
 			'assets' => $this->assetMap($rawData['content'] ?? null),
 			'nodePaths' => $this->pathMap($rawData['content'] ?? null),
 		], $data);
@@ -224,22 +279,34 @@ class Serializer
 		return $proxy->title();
 	}
 
-	/**
-	 * @return string[]
-	 */
-	private function order(object $node, array $fieldNames): array
+	/** @return list<string> */
+	private function orderedNames(object $node, array $fieldNames): array
 	{
-		$metaOrder = $this->types->get($node::class, 'fieldOrder');
+		$order = $this->types->get($node::class, 'fieldOrder');
 
-		if ($metaOrder !== null) {
-			return $metaOrder;
+		if ($order === null && method_exists($node, 'order')) {
+			$order = $node->order();
 		}
 
-		if (method_exists($node, 'order')) {
-			return $node->order();
+		if (!is_array($order)) {
+			return array_values($fieldNames);
 		}
 
-		return $fieldNames;
+		$ordered = [];
+
+		foreach ($order as $name) {
+			if (
+				!is_string($name)
+				|| !in_array($name, $fieldNames, true)
+				|| in_array($name, $ordered, true)
+			) {
+				continue;
+			}
+
+			$ordered[] = $name;
+		}
+
+		return [...$ordered, ...array_values(array_diff($fieldNames, $ordered))];
 	}
 
 	/**

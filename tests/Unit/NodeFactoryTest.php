@@ -29,6 +29,7 @@ use Cosray\Tests\Fixtures\Node\PlainPageWithInit;
 use Cosray\Tests\Fixtures\Node\TestBaseFields;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\Fixtures\Node\TestPage;
+use Cosray\Tests\Fixtures\Node\TestSplitFieldsetDocument;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
 use stdClass;
@@ -194,15 +195,35 @@ final class NodeFactoryTest extends TestCase
 			],
 		];
 		$node = $this->factory->create(TestEmbeddedDocument::class, $this->context, $this->cms, $raw);
-		$content = new Serializer($this->types, $this->uid)->content(
-			$node,
-			$raw,
-			Factory::fieldNamesFor($node),
-		);
+		$serializer = new Serializer($this->types, $this->uid);
+		$fieldNames = Factory::fieldNamesFor($node);
+		$content = $serializer->content($node, $raw, $fieldNames);
+		$fieldsets = $serializer->fieldsets($node, $fieldNames);
 
 		$this->assertSame(['before', 'title', 'body', 'after'], array_keys($content));
 		$this->assertSame(['en' => 'Flat title'], $content['title']['value']);
 		$this->assertArrayNotHasKey('baseFields', $content);
+		$this->assertSame(
+			[
+				[
+					'name' => 'baseFields',
+					'label' => 'Document fields',
+					'description' => 'Reusable document fields',
+					'width' => 50,
+					'fields' => ['title', 'body'],
+				],
+			],
+			$fieldsets,
+		);
+	}
+
+	public function testFieldOrderCannotSplitAFieldset(): void
+	{
+		$node = $this->factory->blueprint(TestSplitFieldsetDocument::class, $this->context, $this->cms);
+		$serializer = new Serializer($this->types, $this->uid);
+		$this->throws(RuntimeException::class, "splits fieldset 'baseFields'");
+
+		$serializer->fieldsets($node, Factory::fieldNamesFor($node));
 	}
 
 	public function testNodeProxyExposesFlatEmbeddedFieldsAndTheEmbeddedObject(): void
@@ -534,6 +555,7 @@ final class NodeFactoryTest extends TestCase
 		$this->assertArrayHasKey('content', $blueprint);
 		$this->assertArrayHasKey('handle', $blueprint);
 		$this->assertArrayHasKey('fields', $blueprint);
+		$this->assertSame([], $blueprint['fieldsets']);
 		$this->assertArrayHasKey('type', $blueprint);
 		$this->assertTrue($blueprint['type']['routable']);
 		$this->assertTrue($blueprint['type']['renderable']);

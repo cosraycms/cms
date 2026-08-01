@@ -20,7 +20,9 @@ $panelBase = $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/';
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 $fields = $node['fields'] ?? [];
+$fieldsets = $node['fieldsets'] ?? [];
 $content = $node['content'] ?? [];
+$assets = $node['assets'] ?? [];
 $type = $node['type'] ?? [];
 $uid = (string) ($node['uid'] ?? '');
 $routable = (bool) ($type['routable'] ?? false);
@@ -42,6 +44,40 @@ $span = static function (mixed $value, int $fallback): string {
 
 	return "span {$value} / span {$value}";
 };
+
+$fieldsByName = [];
+
+foreach ($fields as $field) {
+	if (!is_array($field) || !is_string($field['name'] ?? null)) {
+		continue;
+	}
+
+	$fieldsByName[$field['name']] = $field;
+}
+
+$fieldsetsByFirstField = [];
+$fieldsetMembers = [];
+
+foreach ($fieldsets as $fieldset) {
+	if (!is_array($fieldset)) {
+		continue;
+	}
+
+	$members = array_values(array_filter(
+		(array) ($fieldset['fields'] ?? []),
+		static fn(mixed $name): bool => is_string($name),
+	));
+
+	if ($members === []) {
+		continue;
+	}
+
+	$fieldsetsByFirstField[$members[0]] = $fieldset;
+
+	foreach ($members as $member) {
+		$fieldsetMembers[$member] = true;
+	}
+}
 ?>
 
 <div id="main" class="page node">
@@ -158,26 +194,34 @@ $span = static function (mixed $value, int $fallback): string {
 							<div class="cms-pane-card">
 								<div class="field-grid">
 									<?php foreach ($fields as $field): ?>
-										<?php if ($field['hidden'] ?? false) {
+										<?php if (!is_array($field) || ($field['hidden'] ?? false)) {
 											continue;
 										} ?>
-										<?php $isPathSource = in_array(
-											(string) ($field['name'] ?? ''),
-											$pathSourceFields,
-											true,
-										); ?>
-										<div<?= $isPathSource ? ' class="js-path-source"' : '' ?> style="
-											grid-column: <?= $span($field['width'] ?? null, 100) ?>;
-											grid-row: <?= $span($field['rows'] ?? null, 1) ?>">
-											<?php $this->insert('field/field', [
-												'field' => $field,
-												'data' => $content[$field['name']] ?? null,
+										<?php $fieldName = (string) ($field['name'] ?? ''); ?>
+										<?php if (isset($fieldsetsByFirstField[$fieldName])): ?>
+											<?php $this->insert('field/fieldset', [
+												'fieldset' => $fieldsetsByFirstField[$fieldName],
+												'fieldsByName' => $fieldsByName,
+												'content' => $content,
 												'locales' => $locales,
 												'defaultLocale' => $defaultLocale,
-												'node' => $uid,
-												'assets' => $node['assets'] ?? [],
+												'uid' => $uid,
+												'assets' => $assets,
+												'pathSourceFields' => $pathSourceFields,
+												'span' => $span,
 											]) ?>
-										</div>
+										<?php elseif (!isset($fieldsetMembers[$fieldName])): ?>
+											<?php $this->insert('field/item', [
+												'field' => $field,
+												'content' => $content,
+												'locales' => $locales,
+												'defaultLocale' => $defaultLocale,
+												'uid' => $uid,
+												'assets' => $assets,
+												'pathSourceFields' => $pathSourceFields,
+												'span' => $span,
+											]) ?>
+										<?php endif ?>
 									<?php endforeach ?>
 								</div>
 							</div>
