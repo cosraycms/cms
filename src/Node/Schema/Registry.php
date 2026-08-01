@@ -120,6 +120,7 @@ class Registry
 			'delete' => 'authenticated',
 		]);
 		$this->default('titleField', static fn(string $nodeClass, array $properties): ?string => null);
+		$this->default('titleEmbedded', static fn(string $nodeClass, array $properties): ?string => null);
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default('deletable', static fn(string $nodeClass, array $properties): bool => true);
 		$this->default('children', static fn(string $nodeClass, array $properties): array => []);

@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Exception\RuntimeException;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Types;
+use Cosray\Tests\Fixtures\Node\NodeWithAmbiguousEmbeddedTitles;
 use Cosray\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithEmbeddedTitleField;
+use Cosray\Tests\Fixtures\Node\NodeWithExplicitEmbeddedTitle;
 use Cosray\Tests\Fixtures\Node\NodeWithNumericTitleField;
 use Cosray\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\TestCase;
 use Cosray\Title\Resolver;
@@ -45,6 +50,26 @@ final class TitleResolverTest extends TestCase
 			Resolver::KIND_NONE,
 			$resolver->descriptor(NodeWithNumericTitleField::class)['kind'],
 		);
+
+		$this->assertSame(
+			['kind' => Resolver::KIND_DYNAMIC, 'embedded' => 'baseFields'],
+			$resolver->descriptor(TestEmbeddedDocument::class),
+		);
+		$this->assertSame(
+			['kind' => Resolver::KIND_DYNAMIC, 'embedded' => 'baseFields'],
+			$resolver->descriptor(NodeWithExplicitEmbeddedTitle::class),
+		);
+		$this->assertSame(
+			['kind' => Resolver::KIND_FIELD, 'field' => 'heading'],
+			$resolver->descriptor(NodeWithEmbeddedTitleField::class),
+		);
+	}
+
+	public function testDescriptorRejectsAmbiguousEmbeddedProviders(): void
+	{
+		$this->throws(RuntimeException::class, 'multiple embedded title providers');
+
+		new Resolver(new Types())->descriptor(NodeWithAmbiguousEmbeddedTitles::class);
 	}
 
 	public function testFieldMapKeepsLocalesAndDropsBlanks(): void

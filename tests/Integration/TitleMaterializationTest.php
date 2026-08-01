@@ -11,6 +11,7 @@ use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\Types;
 use Cosray\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\Title\Rebuild;
@@ -27,6 +28,7 @@ final class TitleMaterializationTest extends IntegrationTestCase
 		$container = parent::container();
 		$container->tag(Bootstrap::NODE_TAG)->add('title-field-type', NodeWithClassTitleAttribute::class);
 		$container->tag(Bootstrap::NODE_TAG)->add('title-dynamic-type', TestPage::class);
+		$container->tag(Bootstrap::NODE_TAG)->add('title-embedded-type', TestEmbeddedDocument::class);
 
 		return $container;
 	}
@@ -59,6 +61,25 @@ final class TitleMaterializationTest extends IntegrationTestCase
 		$this->rebuild();
 
 		$this->assertEquals(['en' => 'Hello', 'de' => 'Hallo'], $this->titleOf('title-mat-dyn'));
+	}
+
+	public function testRebuildEvaluatesEmbeddedTitleProviderPerLocale(): void
+	{
+		$type = $this->createTestType('title-embedded-type');
+		$this->createTestNode([
+			'uid' => 'title-mat-embedded',
+			'type' => $type,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Embedded', 'de' => 'Eingebettet']],
+			],
+		]);
+
+		$this->rebuild();
+
+		$this->assertEquals(
+			['en' => 'Embedded', 'de' => 'Eingebettet'],
+			$this->titleOf('title-mat-embedded'),
+		);
 	}
 
 	public function testRebuildCollapsesDynamicTitleToNeutral(): void

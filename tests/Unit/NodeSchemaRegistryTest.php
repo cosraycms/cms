@@ -32,9 +32,13 @@ use Cosray\Tests\Fixtures\Node\CustomIcon;
 use Cosray\Tests\Fixtures\Node\CustomIconHandler;
 use Cosray\Tests\Fixtures\Node\NodeWithChildrenAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithCustomAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithEmbeddedTitleField;
+use Cosray\Tests\Fixtures\Node\NodeWithExplicitEmbeddedTitle;
 use Cosray\Tests\Fixtures\Node\NodeWithHandleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithIconAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithInvalidEmbeddedTitle;
 use Cosray\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithMultipleExplicitTitles;
 use Cosray\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithRouteAttribute;
@@ -332,9 +336,39 @@ final class NodeSchemaRegistryTest extends TestCase
 
 		$this->throws(
 			RuntimeException::class,
-			"The #[Title] attribute on property 'Cosray\\Tests\\Fixtures\\Node\\NodeWithInvalidPropertyTitleAttribute::heading' requires a field-typed property.",
+			"The #[Title] attribute on property 'Cosray\\Tests\\Fixtures\\Node\\NodeWithInvalidPropertyTitleAttribute::heading' requires a field-typed or Embedded-typed property.",
 		);
 		new Schema(NodeWithInvalidPropertyTitleAttribute::class, $registry);
+	}
+
+	public function testSchemaResolvesTitleFromEmbeddedField(): void
+	{
+		$schema = new Schema(NodeWithEmbeddedTitleField::class, Registry::withDefaults());
+
+		$this->assertSame('heading', $schema->titleField);
+		$this->assertNull($schema->titleEmbedded);
+	}
+
+	public function testSchemaSelectsExplicitEmbeddedTitleProvider(): void
+	{
+		$schema = new Schema(NodeWithExplicitEmbeddedTitle::class, Registry::withDefaults());
+
+		$this->assertNull($schema->titleField);
+		$this->assertSame('baseFields', $schema->titleEmbedded);
+	}
+
+	public function testSchemaRejectsExplicitEmbeddedProviderWithoutContract(): void
+	{
+		$this->throws(RuntimeException::class, 'requires its type to implement Cosray\\Contract\\Title');
+
+		new Schema(NodeWithInvalidEmbeddedTitle::class, Registry::withDefaults());
+	}
+
+	public function testSchemaRejectsMultipleExplicitTitleSources(): void
+	{
+		$this->throws(RuntimeException::class, 'declares more than one explicit title source');
+
+		new Schema(NodeWithMultipleExplicitTitles::class, Registry::withDefaults());
 	}
 
 	public function testSchemaDeletableFalse(): void
@@ -431,6 +465,7 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertArrayHasKey('permission', $props);
 		$this->assertArrayHasKey('icon', $props);
 		$this->assertArrayHasKey('titleField', $props);
+		$this->assertArrayHasKey('titleEmbedded', $props);
 		$this->assertArrayHasKey('fieldOrder', $props);
 		$this->assertArrayHasKey('deletable', $props);
 		$this->assertArrayHasKey('children', $props);

@@ -12,7 +12,6 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Contract\Title as TitleContract;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 
@@ -124,7 +123,9 @@ class Rebuild
 			'content' => $content,
 		]);
 
-		if (!$node instanceof TitleContract) {
+		$provider = $this->resolver->provider($node);
+
+		if ($provider === null) {
 			return [];
 		}
 
@@ -133,10 +134,10 @@ class Rebuild
 
 		try {
 			return $this->resolver->dynamicMap(
-				function (Locale $locale) use ($node): string {
+				function (Locale $locale) use ($provider): string {
 					$this->request->set('locale', $locale);
 
-					return $node->title();
+					return $provider->title();
 				},
 				$this->locales,
 			);

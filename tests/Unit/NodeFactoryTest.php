@@ -213,6 +213,7 @@ final class NodeFactoryTest extends TestCase
 		$proxy = $this->factory->proxy($node, $this->context->request);
 
 		$this->assertSame('Proxy embedded title', (string) $proxy->title);
+		$this->assertSame('Proxy embedded title', $proxy->title());
 		$this->assertSame($node->baseFields(), $proxy->baseFields);
 		$this->assertTrue(isset($proxy->title));
 		$this->assertTrue(isset($proxy->baseFields));

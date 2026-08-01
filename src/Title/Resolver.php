@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 namespace Cosray\Title;
 
+use Cosray\Contract\Title as TitleContract;
+use Cosray\Exception\RuntimeException;
+use Cosray\Field\Definitions;
 use Cosray\Field\Field;
 use Cosray\Field\Text;
 use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Contract\Title as TitleContract;
+use Cosray\Node\Factory;
 use Cosray\Node\Types;
-use ReflectionClass;
-use ReflectionNamedType;
 
-/**
- * Turns a node's title into the materialized locale map stored in
- * `nodes.title`. Mirrors `Node::title()`'s resolution order — a
- * `Contract\Title` node, else the schema `titleField`, else a `title`
- * text field — but produces every locale instead of the active one.
- */
+/** Resolves runtime and materialized titles from one shared descriptor. */
 class Resolver
 {
 	public const string KIND_DYNAMIC = 'dynamic';
@@ -30,11 +26,8 @@ class Resolver
 	) {}
 
 	/**
-	 * Classify how a node type derives its title.
-	 *
 	 * @param class-string $class
-	 *
-	 * @return array{kind: string, field?: string}
+	 * @return array{kind: string, field?: string, embedded?: string}
 	 */
 	public function descriptor(string $class): array
 	{
@@ -42,10 +35,36 @@ class Resolver
 			return ['kind' => self::KIND_DYNAMIC];
 		}
 
+		$titleEmbedded = $this->types->get($class, 'titleEmbedded');
+
+		if (is_string($titleEmbedded) && $titleEmbedded !== '') {
+			return ['kind' => self::KIND_DYNAMIC, 'embedded' => $titleEmbedded];
+		}
+
 		$titleField = $this->types->get($class, 'titleField');
 
 		if (is_string($titleField) && $titleField !== '' && $this->isTextField($class, $titleField)) {
 			return ['kind' => self::KIND_FIELD, 'field' => $titleField];
+		}
+
+		$providers = [];
+
+		foreach (Definitions::for($class)->embedded() as $embedded) {
+			if (!is_a($embedded->type, TitleContract::class, true)) {
+				continue;
+			}
+
+			$providers[] = $embedded->name;
+		}
+
+		if (count($providers) > 1) {
+			throw new RuntimeException(
+				"Node '{$class}' has multiple embedded title providers: " . implode(', ', $providers) . '.',
+			);
+		}
+
+		if ($providers !== []) {
+			return ['kind' => self::KIND_DYNAMIC, 'embedded' => $providers[0]];
 		}
 
 		if ($this->isTextField($class, 'title')) {
@@ -55,10 +74,41 @@ class Resolver
 		return ['kind' => self::KIND_NONE];
 	}
 
+	public function resolve(object $node): string
+	{
+		$descriptor = $this->descriptor($node::class);
+
+		if ($descriptor['kind'] === self::KIND_FIELD) {
+			$field = Factory::fieldFor($node, $descriptor['field']);
+
+			return $field instanceof Text ? $field->value()->unwrap() ?? '' : '';
+		}
+
+		return $this->provider($node, $descriptor)?->title() ?? '';
+	}
+
 	/**
-	 * Extract the localized title map from stored content for a field-based
-	 * title. The field value is already a `{locale: text}` map; blank
-	 * entries drop out so unset locales fall back through the read path.
+	 * @param null|array{kind: string, field?: string, embedded?: string} $descriptor
+	 */
+	public function provider(object $node, ?array $descriptor = null): ?TitleContract
+	{
+		$descriptor ??= $this->descriptor($node::class);
+
+		if ($descriptor['kind'] !== self::KIND_DYNAMIC) {
+			return null;
+		}
+
+		if (isset($descriptor['embedded'])) {
+			$embedded = Factory::embeddedFor($node, $descriptor['embedded']);
+
+			return $embedded instanceof TitleContract ? $embedded : null;
+		}
+
+		return $node instanceof TitleContract ? $node : null;
+	}
+
+	/**
+	 * Extract the localized title map from stored content for a field-based title.
 	 *
 	 * @return array<string, string>
 	 */
@@ -88,13 +138,7 @@ class Resolver
 	}
 
 	/**
-	 * Build the localized title map for a dynamic (`Contract\Title`) node by
-	 * evaluating its title once per locale. When every locale yields the same
-	 * string the map collapses to the neutral key, so a non-localized title
-	 * stays a single entry that also covers locales added later.
-	 *
 	 * @param callable(Locale): string $titleFor
-	 *
 	 * @return array<string, string>
 	 */
 	public function dynamicMap(callable $titleFor, Locales $locales): array
@@ -118,23 +162,11 @@ class Resolver
 		return $map;
 	}
 
-	/**
-	 * @param class-string $class
-	 */
+	/** @param class-string $class */
 	private function isTextField(string $class, string $property): bool
 	{
-		if (!property_exists($class, $property)) {
-			return false;
-		}
+		$definition = Definitions::for($class)->field($property);
 
-		$type = new ReflectionClass($class)
-			->getProperty($property)
-			->getType();
-
-		if (!$type instanceof ReflectionNamedType) {
-			return false;
-		}
-
-		return is_a($type->getName(), Text::class, true);
+		return $definition !== null && is_a($definition->type, Text::class, true);
 	}
 }

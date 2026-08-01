@@ -15,7 +15,6 @@ use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Contract\Title as TitleContract;
 use Cosray\References;
 use Cosray\Richtext\Normalizer;
 use Cosray\Title\Resolver as TitleResolver;
@@ -235,8 +234,9 @@ class Store
 	private function dynamicTitle(object $node, array $data, Request $request, Locales $locales): array
 	{
 		$target = $this->titleEvalNode($node, $data);
+		$provider = $this->titleResolver->provider($target);
 
-		if (!$target instanceof TitleContract) {
+		if ($provider === null) {
 			return [];
 		}
 
@@ -244,10 +244,10 @@ class Store
 
 		try {
 			return $this->titleResolver->dynamicMap(
-				static function (Locale $locale) use ($target, $request): string {
+				static function (Locale $locale) use ($provider, $request): string {
 					$request->set('locale', $locale);
 
-					return $target->title();
+					return $provider->title();
 				},
 				$locales,
 			);

@@ -8,10 +8,9 @@ use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Text;
 use Cosray\Finder\Nodes;
 use Cosray\Locale;
-use Cosray\Node\Contract\Title;
+use Cosray\Title\Resolver as TitleResolver;
 use ReflectionClass;
 
 class Node
@@ -72,35 +71,7 @@ class Node
 
 	public function title(): string
 	{
-		$inner = self::unwrap($this->node);
-
-		if ($inner instanceof Title) {
-			return $inner->title();
-		}
-
-		$titleField = $this->types->get($inner::class, 'titleField');
-
-		if (is_string($titleField) && $titleField !== '') {
-			$field = Factory::fieldFor($inner, $titleField);
-
-			if (!$field instanceof Text) {
-				return '';
-			}
-
-			return $field->value()->unwrap() ?? '';
-		}
-
-		if (in_array('title', $this->fieldNames, true)) {
-			$field = Factory::fieldFor($inner, 'title');
-
-			if (!$field instanceof Text) {
-				return '';
-			}
-
-			return $field->value()->unwrap() ?? '';
-		}
-
-		return '';
+		return new TitleResolver($this->types)->resolve(self::unwrap($this->node));
 	}
 
 	public function children(string $query = ''): Nodes

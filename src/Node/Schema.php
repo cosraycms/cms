@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
+use Cosray\Contract\Title as TitleContract;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Field;
+use Cosray\Field\Definitions;
 use Cosray\Node\Schema\Registry;
 use Cosray\Schema\Title;
 use ReflectionClass;
-use ReflectionProperty;
-use ReflectionUnionType;
 
 class Schema
 {
@@ -89,40 +88,87 @@ class Schema
 			}
 		}
 
-		foreach ($reflection->getProperties() as $property) {
-			foreach ($property->getAttributes(Title::class) as $attribute) {
-				$instance = $attribute->newInstance();
-				$handler = $this->registry->getHandler($instance);
+		$definitions = Definitions::for($this->nodeClass);
+		$selections = [];
 
-				if ($handler === null) {
-					continue;
-				}
+		if (array_key_exists('titleField', $resolved)) {
+			$selections[] = ['kind' => 'field', 'name' => $resolved['titleField']];
+		}
 
-				if (!$this->isFieldProperty($property)) {
-					throw new RuntimeException(
-						"The #[Title] attribute on property '{$this->nodeClass}::{$property->getName()}' "
-						. 'requires a field-typed property.',
-					);
-				}
-
-				$resolved = array_merge($resolved, $handler->resolve(
-					new Title($property->getName()),
-					$this->nodeClass,
-				));
+		foreach ($definitions->fields() as $field) {
+			if ($field->property->getAttributes(Title::class) === []) {
+				continue;
 			}
+
+			$selections[] = ['kind' => 'field', 'name' => $field->name];
+		}
+
+		foreach ($definitions->embedded() as $embedded) {
+			if ($embedded->property->getAttributes(Title::class) === []) {
+				continue;
+			}
+
+			if (!is_a($embedded->type, TitleContract::class, true)) {
+				throw new RuntimeException(
+					"The #[Title] attribute on embedded property '{$this->nodeClass}::{$embedded->name}' "
+					. 'requires its type to implement Cosray\\Contract\\Title.',
+				);
+			}
+
+			$selections[] = ['kind' => 'embedded', 'name' => $embedded->name];
+		}
+
+		$this->validatePropertyTitles($reflection, $definitions);
+
+		if (count($selections) > 1) {
+			throw new RuntimeException(
+				"Node '{$this->nodeClass}' declares more than one explicit title source.",
+			);
+		}
+
+		$selection = $selections[0] ?? null;
+
+		if ($selection === null) {
+			return $resolved;
+		}
+
+		if ($selection['kind'] === 'embedded') {
+			$resolved['titleEmbedded'] = $selection['name'];
+
+			return $resolved;
+		}
+
+		$handler = $this->registry->getHandler(new Title());
+
+		if ($handler !== null) {
+			$resolved = array_merge($resolved, $handler->resolve(
+				new Title((string) $selection['name']),
+				$this->nodeClass,
+			));
 		}
 
 		return $resolved;
 	}
 
-	private function isFieldProperty(ReflectionProperty $property): bool
-	{
-		$type = $property->getType();
+	private function validatePropertyTitles(
+		ReflectionClass $reflection,
+		Definitions $definitions,
+	): void {
+		foreach ($reflection->getProperties() as $property) {
+			if ($property->getAttributes(Title::class) === []) {
+				continue;
+			}
 
-		if ($type === null || $type::class === ReflectionUnionType::class) {
-			return false;
+			$field = $definitions->field($property->getName());
+
+			if ($field !== null && $field->embedded === null || $definitions->embed($property->getName())) {
+				continue;
+			}
+
+			throw new RuntimeException(
+				"The #[Title] attribute on property '{$this->nodeClass}::{$property->getName()}' "
+				. 'requires a field-typed or Embedded-typed property.',
+			);
 		}
-
-		return is_subclass_of($type->getName(), Field::class);
 	}
 }
