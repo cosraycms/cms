@@ -14,6 +14,7 @@ use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
 use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries as EntriesValue;
@@ -84,6 +85,30 @@ class EntriesTest extends TestCase
 		$init = $properties['entryTypes'][0]['init'];
 		$this->assertSame(Text::class, $init['title']['type']);
 		$this->assertArrayHasKey('value', $init['title']);
+	}
+
+	public function testEntriesExposeFlattenedEmbeddedFieldsAndFieldsets(): void
+	{
+		$entries = $this->createEntries()->allow(TestEmbeddedEntry::class);
+		$fields = $entries->entryFieldsFor(TestEmbeddedEntry::class);
+		$properties = $entries->properties();
+		$entryType = $properties['entryTypes'][2];
+
+		$this->assertSame(['title', 'body'], array_keys($fields));
+		$this->assertSame(['title', 'body'], array_column($entryType['fields'], 'name'));
+		$this->assertSame(
+			[
+				[
+					'name' => 'baseFields',
+					'label' => 'Entry base fields',
+					'description' => 'Reusable entry fields',
+					'width' => 50,
+					'fields' => ['title', 'body'],
+				],
+			],
+			$entryType['fieldsets'],
+		);
+		$this->assertSame(['title', 'body'], array_keys($entryType['init']));
 	}
 
 	public function testEntriesStructureUsesEntryTypeEnvelope(): void

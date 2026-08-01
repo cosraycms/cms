@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Data, EntryData } from '$types/data';
-	import type { EntriesField, EntryType } from '$types/fields';
+	import type { EntriesField, EntryType, Field, Fieldset } from '$types/fields';
 
 	import { useNotify } from '../notify';
 	import Control from '$shell/Control.svelte';
@@ -20,6 +20,18 @@
 	let collapsed = $state(false);
 	let entryType = $derived(field.entryTypes.find((type) => type.type === entry.type));
 	let entryFields = $derived(entryType?.fields ?? []);
+	let entryFieldsets = $derived(entryType?.fieldsets ?? []);
+	let fieldsByName = $derived(
+		new Map(entryFields.map((entryField) => [entryField.name, entryField])),
+	);
+	let fieldsetsByFirst = $derived(
+		new Map(
+			entryFieldsets
+				.filter((fieldset) => fieldset.fields.length > 0)
+				.map((fieldset) => [fieldset.fields[0], fieldset]),
+		),
+	);
+	let fieldsetMembers = $derived(new Set(entryFieldsets.flatMap((fieldset) => fieldset.fields)));
 
 	function toggleCollapse() {
 		collapsed = !collapsed;
@@ -47,7 +59,28 @@
 	function entryTypeLabel(type: EntryType | undefined): string {
 		return type?.label ?? 'Entry';
 	}
+
+	function widthStyle(width: number | null | undefined): string {
+		return width ? `width: calc(${width}% - 0.5rem)` : 'width: 100%';
+	}
+
+	function descriptionId(fieldset: Fieldset): string {
+		return `entry-${entry.uid}-${fieldset.name}-description`;
+	}
 </script>
+
+{#snippet renderField(entryField: Field)}
+	{#if !entryField.hidden && entry.fields[entryField.name]}
+		<div class="entry-field" style={widthStyle(entryField.width)}>
+			<Control
+				field={entryField}
+				{node}
+				bind:data={entry.fields[entryField.name]}
+				onchange={notify}
+			/>
+		</div>
+	{/if}
+{/snippet}
 
 <div class="entry">
 	<div class="entry-header">
@@ -62,18 +95,32 @@
 		<div class="entry-body">
 			{#if entryType}
 				{#each entryFields as entryField (entryField.name)}
-					{#if !entryField.hidden && entry.fields[entryField.name]}
-						{@const widthStyle = entryField.width
-							? `width: calc(${entryField.width}% - 0.5rem)`
-							: 'width: 100%'}
-						<div class="entry-field" style={widthStyle}>
-							<Control
-								field={entryField}
-								{node}
-								bind:data={entry.fields[entryField.name]}
-								onchange={notify}
-							/>
-						</div>
+					{@const fieldset = fieldsetsByFirst.get(entryField.name)}
+					{#if fieldset}
+						<fieldset
+							class="entry-fieldset"
+							style={widthStyle(fieldset.width)}
+							aria-describedby={fieldset.description ? descriptionId(fieldset) : undefined}
+						>
+							{#if fieldset.label}
+								<legend class="entry-fieldset-legend">{fieldset.label}</legend>
+							{/if}
+							{#if fieldset.description}
+								<div id={descriptionId(fieldset)} class="entry-fieldset-description">
+									{fieldset.description}
+								</div>
+							{/if}
+							<div class="entry-fieldset-fields">
+								{#each fieldset.fields as fieldName (fieldName)}
+									{@const fieldsetField = fieldsByName.get(fieldName)}
+									{#if fieldsetField}
+										{@render renderField(fieldsetField)}
+									{/if}
+								{/each}
+							</div>
+						</fieldset>
+					{:else if !fieldsetMembers.has(entryField.name)}
+						{@render renderField(entryField)}
 					{/if}
 				{/each}
 			{:else}
@@ -131,10 +178,42 @@
 			flex-wrap: wrap;
 			gap: 0.5rem;
 			padding: 0.75rem;
+			container-type: inline-size;
 		}
 
-		.entry-field {
+		.entry-field,
+		.entry-fieldset {
 			min-width: 200px;
+		}
+
+		.entry-fieldset {
+			padding: 0.5rem;
+			border: 1px solid var(--color-neutral-200);
+			border-radius: 0.375rem;
+		}
+
+		.entry-fieldset-legend {
+			padding: 0 0.25rem;
+			font-size: 0.875rem;
+			font-weight: 600;
+		}
+
+		.entry-fieldset-description {
+			padding: 0 0.25rem 0.5rem;
+			font-size: 0.8125rem;
+			color: var(--color-neutral-500);
+		}
+
+		.entry-fieldset-fields {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+
+		@container (max-width: 30rem) {
+			.entry-fieldset {
+				width: 100% !important;
+			}
 		}
 
 		.entry-field-note {

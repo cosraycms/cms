@@ -39,10 +39,19 @@ export interface BlocksField extends SimpleField {
 	richtextStyles?: Record<string, string>;
 }
 
+export interface Fieldset {
+	name: string;
+	label: string | null;
+	description: string | null;
+	width: number;
+	fields: string[];
+}
+
 export interface EntryType {
 	type: string;
 	label: string;
 	fields: Field[];
+	fieldsets: Fieldset[];
 	init: Record<string, unknown>;
 }
 
