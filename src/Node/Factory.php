@@ -12,15 +12,30 @@ use Celema\Wire\Creator;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
+use Cosray\Contract\HasInit;
+use Cosray\Exception\NoSuchField;
+use Cosray\Exception\RuntimeException;
+use Cosray\Field\Definitions;
+use Cosray\Field\EmbeddedDefinition;
+use Cosray\Field\Field;
 use Cosray\Field\FieldHydrator;
+use Cosray\Field\FieldsetDefinition;
 use Cosray\Field\Services;
-use Cosray\Node\Contract\HasInit;
 use Cosray\Uid;
+use ReflectionClass;
+use ReflectionNamedType;
 use WeakMap;
 
 class Factory
 {
-	/** @var WeakMap<object, array{data: array, fieldNames: string[]}> */
+	/**
+	 * @var WeakMap<object, array{
+	 *     data: array,
+	 *     fields: array<string, Field>,
+	 *     embedded: array<string, object>,
+	 *     fieldsets: list<FieldsetDefinition>
+	 * }>
+	 */
 	private static WeakMap $nodeState;
 
 	private readonly FieldHydrator $hydrator;
@@ -62,7 +77,7 @@ class Factory
 
 		$creator = new Creator($this->container);
 		$type = $this->types->typeOf($class);
-		$node = $creator->create($class, predefinedTypes: [
+		$predefinedTypes = [
 			Context::class => $context,
 			Cms::class => $cms,
 			Request::class => $context->request,
@@ -77,21 +92,33 @@ class Factory
 			Store::class => $store,
 			FieldHydrator::class => $this->hydrator,
 			Services::class => $this->services,
-		]);
+		];
+		$node = $creator->create($class, predefinedTypes: $predefinedTypes);
 
 		$uid = $data['uid'] ?? $this->uid->generate();
 		$data['uid'] = $uid;
 		$owner = new FieldOwner($context, $uid);
-		$fieldNames = $this->hydrator->hydrate($node, $data['content'] ?? [], $owner);
+		$hydration = $this->hydrator->hydrateEmbedded(
+			$node,
+			$data['content'] ?? [],
+			$owner,
+			function (EmbeddedDefinition $definition) use ($class, $creator, $predefinedTypes): object {
+				$this->assertFreshEmbedded($definition, $class);
+
+				return $creator->create($definition->type, predefinedTypes: $predefinedTypes);
+			},
+		);
+
+		self::$nodeState[$node] = [
+			'data' => $data,
+			'fields' => $hydration->fields,
+			'embedded' => $hydration->embedded,
+			'fieldsets' => Definitions::for($class)->fieldsets(),
+		];
 
 		if ($node instanceof HasInit) {
 			$node->init();
 		}
-
-		self::$nodeState[$node] = [
-			'data' => $data,
-			'fieldNames' => $fieldNames,
-		];
 
 		return $node;
 	}
@@ -132,12 +159,45 @@ class Factory
 		return self::getNodeState($node)['data'] ?? [];
 	}
 
-	/**
-	 * Get the field names for a node instance.
-	 */
+	/** @return array<string, Field> */
+	public static function fieldsFor(object $node): array
+	{
+		return self::getNodeState($node)['fields'] ?? [];
+	}
+
+	public static function fieldFor(object $node, string $name): Field
+	{
+		$field = self::fieldsFor($node)[$name] ?? null;
+
+		if ($field === null) {
+			$class = $node::class;
+			throw new NoSuchField("Node '{$class}' does not have a hydrated field '{$name}'.");
+		}
+
+		return $field;
+	}
+
+	/** @return list<string> */
 	public static function fieldNamesFor(object $node): array
 	{
-		return self::getNodeState($node)['fieldNames'] ?? [];
+		return array_keys(self::fieldsFor($node));
+	}
+
+	/** @return array<string, object> */
+	public static function embedsFor(object $node): array
+	{
+		return self::getNodeState($node)['embedded'] ?? [];
+	}
+
+	public static function embeddedFor(object $node, string $name): ?object
+	{
+		return self::embedsFor($node)[$name] ?? null;
+	}
+
+	/** @return list<FieldsetDefinition> */
+	public static function fieldsetsFor(object $node): array
+	{
+		return self::getNodeState($node)['fieldsets'] ?? [];
 	}
 
 	private static function getNodeState(object $node): array
@@ -154,6 +214,32 @@ class Factory
 	public static function meta(object $node, string $key): mixed
 	{
 		return self::dataFor($node)[$key] ?? null;
+	}
+
+	/**
+	 * Embedded classes are node-local mutable schema objects, never services.
+	 *
+	 * @param class-string $nodeClass
+	 */
+	private function assertFreshEmbedded(EmbeddedDefinition $definition, string $nodeClass): void
+	{
+		if ($this->container->has($definition->type)) {
+			throw new RuntimeException(
+				"Embedded type '{$definition->type}' must not be registered as a container service.",
+			);
+		}
+
+		$constructor = new ReflectionClass($definition->type)->getConstructor();
+
+		foreach ($constructor?->getParameters() ?? [] as $parameter) {
+			$type = $parameter->getType();
+
+			if ($type instanceof ReflectionNamedType && $type->getName() === $nodeClass) {
+				throw new RuntimeException(
+					"Embedded type '{$definition->type}' must not inject its containing node '{$nodeClass}'.",
+				);
+			}
+		}
 	}
 
 	public function hydrator(): FieldHydrator

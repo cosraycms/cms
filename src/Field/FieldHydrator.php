@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Cosray\Assets\Repository;
+use Cosray\Contract\HasInit;
+use Cosray\Exception\RuntimeException;
 use Cosray\Schema\When;
 use Cosray\Value\ValueContext;
 use ReflectionClass;
 use ReflectionProperty;
-use ReflectionUnionType;
 
 class FieldHydrator
 {
@@ -18,50 +19,90 @@ class FieldHydrator
 	) {}
 
 	/**
-	 * Scan $target for Field-typed properties, instantiate each Field with
-	 * the given FieldOwner and content data, then set them on the target.
+	 * Hydrate direct fields for callers that do not provide embedded object creation.
 	 *
-	 * @return string[] Discovered field names
+	 * @return list<string>
 	 */
 	public function hydrate(object $target, array $content, Owner $owner): array
 	{
-		// All referenced assets load in one batch; field/value rendering
-		// afterwards reads from the shared per-request cache.
+		return array_keys($this->hydrateAll($target, $content, $owner)->fields);
+	}
+
+	/**
+	 * @param callable(EmbeddedDefinition): object $createEmbedded
+	 */
+	public function hydrateEmbedded(
+		object $target,
+		array $content,
+		Owner $owner,
+		callable $createEmbedded,
+	): Hydration {
+		return $this->hydrateAll($target, $content, $owner, $createEmbedded);
+	}
+
+	/**
+	 * @param null|callable(EmbeddedDefinition): object $createEmbedded
+	 */
+	private function hydrateAll(
+		object $target,
+		array $content,
+		Owner $owner,
+		?callable $createEmbedded = null,
+	): Hydration {
 		$uids = Repository::collectUids($content);
 
 		if ($uids !== []) {
 			$owner->assets()->preload($uids);
 		}
 
-		$fieldNames = [];
-		$rc = new ReflectionClass($target);
+		$targetClass = $target::class;
+		$definitions = Definitions::for($targetClass);
+		$embedded = [];
 
-		foreach ($rc->getProperties() as $property) {
-			$name = $property->getName();
-
-			if (!$property->hasType()) {
-				continue;
+		foreach ($definitions->embedded() as $definition) {
+			if ($createEmbedded === null) {
+				throw new RuntimeException(
+					"Hydrating '{$targetClass}' requires an embedded object factory.",
+				);
 			}
 
-			$type = $property->getType();
+			$instance = $createEmbedded($definition);
+			$type = $definition->type;
 
-			if ($type::class === ReflectionUnionType::class) {
-				continue;
+			if (!$instance instanceof $type) {
+				$instanceClass = $instance::class;
+				throw new RuntimeException(
+					"Embedded factory returned '{$instanceClass}' for '{$definition->type}'.",
+				);
 			}
 
-			$typeName = $type->getName();
-
-			if (is_subclass_of($typeName, Field::class)) {
-				if ($property->isInitialized($target)) {
-					continue;
-				}
-
-				$property->setValue($target, $this->initField($property, $typeName, $content, $owner));
-				$fieldNames[] = $name;
-			}
+			$definition->property->setValue($target, $instance);
+			$embedded[$definition->name] = $instance;
 		}
 
-		return $fieldNames;
+		$fields = [];
+
+		foreach ($definitions->fields() as $definition) {
+			$fieldTarget = $definition->embedded === null ? $target : $embedded[$definition->embedded];
+
+			if ($definition->property->isInitialized($fieldTarget)) {
+				continue;
+			}
+
+			$field = $this->initField($definition->property, $definition->type, $content, $owner);
+			$definition->property->setValue($fieldTarget, $field);
+			$fields[$definition->name] = $field;
+		}
+
+		foreach ($embedded as $instance) {
+			if (!$instance instanceof HasInit) {
+				continue;
+			}
+
+			$instance->init();
+		}
+
+		return new Hydration($fields, $embedded);
 	}
 
 	public static function getField(object $target, string $name): Field

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Container\Container;
 use Celema\Core\Request;
 use Cosray\Column;
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Locales;
@@ -15,6 +17,7 @@ use Cosray\Node\Factory;
 use Cosray\Node\Node;
 use Cosray\Node\Serializer;
 use Cosray\Node\Types;
+use Cosray\Tests\Fixtures\FieldDefinition\OwnerAwareNode;
 use Cosray\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithInjectedType;
 use Cosray\Tests\Fixtures\Node\NodeWithNumericTitleField;
@@ -23,6 +26,8 @@ use Cosray\Tests\Fixtures\Node\NodeWithTitleMethodWithoutInterface;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Node\PlainPageWithInit;
+use Cosray\Tests\Fixtures\Node\TestBaseFields;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
@@ -37,6 +42,7 @@ final class NodeFactoryTest extends TestCase
 {
 	private Context $context;
 	private \Cosray\Cms $cms;
+	private Container $container;
 	private Factory $factory;
 	private Types $types;
 	private Uid $uid;
@@ -46,11 +52,12 @@ final class NodeFactoryTest extends TestCase
 		parent::setUp();
 		$this->types = new Types();
 		$this->uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13);
+		$this->container = $this->container();
 
 		$this->context = $this->createContext();
 		$this->cms = $this->createStub(\Cosray\Cms::class);
 		$this->factory = new Factory(
-			$this->container(),
+			$this->container,
 			new Services(Registry::withDefaults(), $this->types),
 			$this->uid,
 		);
@@ -74,7 +81,7 @@ final class NodeFactoryTest extends TestCase
 			$this->db(),
 			$request,
 			$this->config(['path.prefix' => '/cms']),
-			$this->container(),
+			$this->container,
 			$this->factory(),
 		);
 	}
@@ -143,6 +150,50 @@ final class NodeFactoryTest extends TestCase
 		$this->assertContains('heading', $fieldNames);
 		$this->assertContains('body', $fieldNames);
 		$this->assertCount(2, $fieldNames);
+	}
+
+	public function testEmbeddedFieldsAreAutowiredAndHydratedFromFlatContent(): void
+	{
+		$node = $this->factory->create(TestEmbeddedDocument::class, $this->context, $this->cms, [
+			'uid' => 'embedded-1',
+			'content' => [
+				'title' => ['value' => ['en' => 'Embedded title']],
+				'body' => ['value' => 'Embedded body'],
+			],
+		]);
+		$embedded = Factory::embeddedFor($node, 'baseFields');
+
+		$this->assertSame(['before', 'title', 'body', 'after'], Factory::fieldNamesFor($node));
+		$this->assertSame('Embedded title', Factory::fieldFor($node, 'title')->value()->unwrap());
+		$this->assertSame($node->baseFields(), $embedded);
+		$this->assertSame('test-embedded-document', $node->baseFields()->typeHandle());
+		$this->assertTrue($node->baseFields()->initialized);
+		$this->assertTrue($node->initializedAfterEmbed);
+		$this->assertSame(['baseFields' => $embedded], Factory::embedsFor($node));
+		$this->assertSame('baseFields', Factory::fieldsetsFor($node)[0]->name);
+	}
+
+	public function testEmbeddedInstancesAreFreshForEveryNode(): void
+	{
+		$first = $this->factory->blueprint(TestEmbeddedDocument::class, $this->context, $this->cms);
+		$second = $this->factory->blueprint(TestEmbeddedDocument::class, $this->context, $this->cms);
+
+		$this->assertNotSame($first->baseFields(), $second->baseFields());
+	}
+
+	public function testEmbeddedTypeCannotInjectItsContainingNode(): void
+	{
+		$this->throws(RuntimeException::class, 'must not inject its containing node');
+
+		$this->factory->blueprint(OwnerAwareNode::class, $this->context, $this->cms);
+	}
+
+	public function testEmbeddedTypeCannotBeRegisteredAsService(): void
+	{
+		$this->container->add(TestBaseFields::class, TestBaseFields::class);
+		$this->throws(RuntimeException::class, 'must not be registered as a container service');
+
+		$this->factory->blueprint(TestEmbeddedDocument::class, $this->context, $this->cms);
 	}
 
 	public function testPlainPageTitleResolution(): void
