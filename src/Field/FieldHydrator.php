@@ -6,10 +6,10 @@ namespace Cosray\Field;
 
 use Cosray\Assets\Repository;
 use Cosray\Contract\HasInit;
+use Cosray\Exception\NoSuchField;
 use Cosray\Exception\RuntimeException;
 use Cosray\Schema\When;
 use Cosray\Value\ValueContext;
-use ReflectionClass;
 use ReflectionProperty;
 
 class FieldHydrator
@@ -107,21 +107,49 @@ class FieldHydrator
 
 	public static function getField(object $target, string $name): Field
 	{
-		$rc = new ReflectionClass($target);
+		$targetClass = $target::class;
+		$definitions = Definitions::for($targetClass);
+		$definition = $definitions->field($name);
 
-		return $rc->getProperty($name)->getValue($target);
+		if ($definition === null) {
+			throw new NoSuchField("Field '{$name}' is not declared on '{$targetClass}'.");
+		}
+
+		$fieldTarget = $target;
+
+		if ($definition->embedded !== null) {
+			$embed = $definitions->embed($definition->embedded);
+
+			if ($embed === null || !$embed->property->isInitialized($target)) {
+				throw new NoSuchField("Embedded field '{$name}' has not been hydrated.");
+			}
+
+			$value = $embed->property->getValue($target);
+
+			if (!is_object($value)) {
+				throw new NoSuchField("Embedded field '{$name}' has not been hydrated.");
+			}
+
+			$fieldTarget = $value;
+		}
+
+		if (!$definition->property->isInitialized($fieldTarget)) {
+			throw new NoSuchField("Field '{$name}' has not been hydrated.");
+		}
+
+		return $definition->property->getValue($fieldTarget);
 	}
 
 	/**
-	 * @return Field[]
+	 * @param list<string> $fieldNames
+	 * @return array<string, Field>
 	 */
 	public static function getFields(object $target, array $fieldNames): array
 	{
-		$rc = new ReflectionClass($target);
 		$fields = [];
 
 		foreach ($fieldNames as $name) {
-			$fields[$name] = $rc->getProperty($name)->getValue($target);
+			$fields[$name] = self::getField($target, $name);
 		}
 
 		return $fields;

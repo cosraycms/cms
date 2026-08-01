@@ -8,12 +8,11 @@ use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\FieldHydrator;
 use Cosray\Field\Text;
 use Cosray\Finder\Nodes;
 use Cosray\Locale;
 use Cosray\Node\Contract\Title;
-use Cosray\Value\Value;
+use ReflectionClass;
 
 class Node
 {
@@ -82,7 +81,7 @@ class Node
 		$titleField = $this->types->get($inner::class, 'titleField');
 
 		if (is_string($titleField) && $titleField !== '') {
-			$field = FieldHydrator::getField($inner, $titleField);
+			$field = Factory::fieldFor($inner, $titleField);
 
 			if (!$field instanceof Text) {
 				return '';
@@ -92,7 +91,7 @@ class Node
 		}
 
 		if (in_array('title', $this->fieldNames, true)) {
-			$field = FieldHydrator::getField($inner, 'title');
+			$field = Factory::fieldFor($inner, 'title');
 
 			if (!$field instanceof Text) {
 				return '';
@@ -122,35 +121,52 @@ class Node
 		return $children;
 	}
 
-	public function __get(string $name): ?Value
+	public function __get(string $name): mixed
 	{
 		if (in_array($name, $this->fieldNames, true)) {
-			$field = FieldHydrator::getField($this->node, $name);
-			$value = $field->value();
+			$value = Factory::fieldFor($this->node, $name)->value();
 
-			if ($value->isset()) {
-				return $value;
-			}
+			return $value->isset() ? $value : null;
+		}
 
+		$embedded = Factory::embeddedFor($this->node, $name);
+
+		if ($embedded !== null) {
+			return $embedded;
+		}
+
+		if (!property_exists($this->node, $name)) {
 			return null;
 		}
 
-		if (property_exists($this->node, $name)) {
-			return $this->node->{$name};
-		}
+		$property = new ReflectionClass($this->node)->getProperty($name);
 
-		return null;
+		return $property->isPublic() && $property->isInitialized($this->node)
+			? $property->getValue($this->node)
+			: null;
 	}
 
 	public function __isset(string $name): bool
 	{
 		if (in_array($name, $this->fieldNames, true)) {
-			$field = FieldHydrator::getField($this->node, $name);
-
-			return $field->value()->isset();
+			return Factory::fieldFor($this->node, $name)->value()->isset();
 		}
 
-		return isset($this->node->{$name});
+		if (Factory::embeddedFor($this->node, $name) !== null) {
+			return true;
+		}
+
+		if (!property_exists($this->node, $name)) {
+			return false;
+		}
+
+		$property = new ReflectionClass($this->node)->getProperty($name);
+
+		return (
+			$property->isPublic()
+			&& $property->isInitialized($this->node)
+			&& $property->getValue($this->node) !== null
+		);
 	}
 
 	public function __call(string $name, array $args): mixed

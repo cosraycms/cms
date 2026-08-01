@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Assets\Repository;
-use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
 use Cosray\Richtext\Scanner;
 use Cosray\Uid;
@@ -25,7 +24,7 @@ class Serializer
 		$content = [];
 
 		foreach ($fieldNames as $fieldName) {
-			$field = FieldHydrator::getField($node, $fieldName);
+			$field = Factory::fieldFor($node, $fieldName);
 			$structure = $field->structure();
 			$content[$fieldName] = array_merge($structure, $rawData['content'][$fieldName] ?? []);
 			$content[$fieldName]['type'] = $structure['type'];
@@ -77,7 +76,7 @@ class Serializer
 		$paths = [];
 
 		foreach ($fieldNames as $fieldName) {
-			$field = FieldHydrator::getField($node, $fieldName);
+			$field = Factory::fieldFor($node, $fieldName);
 			$content[$fieldName] = $field->structure($values[$fieldName] ?? null);
 		}
 
@@ -120,7 +119,7 @@ class Serializer
 		$ownerType = (string) $this->types->get($node::class, 'handle');
 
 		foreach ($allFields as $fieldName) {
-			$properties = FieldHydrator::getField($node, $fieldName)->properties();
+			$properties = Factory::fieldFor($node, $fieldName)->properties();
 			// The owning node type, so controls that query other nodes (the
 			// reference picker) can scope to this field's schema.
 			$properties['ownerType'] = $ownerType;

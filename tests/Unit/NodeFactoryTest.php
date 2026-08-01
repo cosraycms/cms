@@ -165,6 +165,10 @@ final class NodeFactoryTest extends TestCase
 
 		$this->assertSame(['before', 'title', 'body', 'after'], Factory::fieldNamesFor($node));
 		$this->assertSame('Embedded title', Factory::fieldFor($node, 'title')->value()->unwrap());
+		$this->assertSame(
+			Factory::fieldFor($node, 'title'),
+			$this->factory->hydrator()->getField($node, 'title'),
+		);
 		$this->assertSame($node->baseFields(), $embedded);
 		$this->assertSame('test-embedded-document', $node->baseFields()->typeHandle());
 		$this->assertTrue($node->baseFields()->initialized);
@@ -179,6 +183,39 @@ final class NodeFactoryTest extends TestCase
 		$second = $this->factory->blueprint(TestEmbeddedDocument::class, $this->context, $this->cms);
 
 		$this->assertNotSame($first->baseFields(), $second->baseFields());
+	}
+
+	public function testEmbeddedFieldsSerializeUnderFlatNames(): void
+	{
+		$raw = [
+			'content' => [
+				'title' => ['value' => ['en' => 'Flat title']],
+				'body' => ['value' => 'Flat body'],
+			],
+		];
+		$node = $this->factory->create(TestEmbeddedDocument::class, $this->context, $this->cms, $raw);
+		$content = new Serializer($this->types, $this->uid)->content(
+			$node,
+			$raw,
+			Factory::fieldNamesFor($node),
+		);
+
+		$this->assertSame(['before', 'title', 'body', 'after'], array_keys($content));
+		$this->assertSame(['en' => 'Flat title'], $content['title']['value']);
+		$this->assertArrayNotHasKey('baseFields', $content);
+	}
+
+	public function testNodeProxyExposesFlatEmbeddedFieldsAndTheEmbeddedObject(): void
+	{
+		$node = $this->factory->create(TestEmbeddedDocument::class, $this->context, $this->cms, [
+			'content' => ['title' => ['value' => ['en' => 'Proxy embedded title']]],
+		]);
+		$proxy = $this->factory->proxy($node, $this->context->request);
+
+		$this->assertSame('Proxy embedded title', (string) $proxy->title);
+		$this->assertSame($node->baseFields(), $proxy->baseFields);
+		$this->assertTrue(isset($proxy->title));
+		$this->assertTrue(isset($proxy->baseFields));
 	}
 
 	public function testEmbeddedTypeCannotInjectItsContainingNode(): void

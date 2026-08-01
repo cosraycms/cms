@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Closure;
-use Cosray\Field\FieldHydrator;
+use Cosray\Node\Factory;
 use Cosray\Node\Node;
 
 final class Column
@@ -126,7 +126,7 @@ final class Column
 					) ?? $node->meta->get('creator_email')
 				);
 			default:
-				$fieldObj = FieldHydrator::getField($inner, $field);
+				$fieldObj = Factory::fieldFor($inner, $field);
 				$value = $fieldObj->value();
 
 				return $value->isset() ? (string) $value : null;

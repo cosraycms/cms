@@ -6,7 +6,6 @@ namespace Cosray\Validation;
 
 use Celema\Sire\Shape;
 use Cosray\Field\Field;
-use Cosray\Field\FieldHydrator;
 use Cosray\Locales;
 use Cosray\Node\Factory;
 
@@ -36,7 +35,7 @@ class ValidatorFactory
 		$contentShape = Shapes::create();
 
 		foreach (Factory::fieldNamesFor($this->node) as $fieldName) {
-			$this->add($contentShape, $fieldName, FieldHydrator::getField($this->node, $fieldName));
+			$this->add($contentShape, $fieldName, Factory::fieldFor($this->node, $fieldName));
 		}
 
 		$this->shape->add('content', $contentShape)->optional()->nullable();
