@@ -7,6 +7,7 @@ namespace Cosray\I18n;
 use Celema\Verba\Tool\Message;
 use Celema\Verba\Tool\Scanner;
 use Cosray\App;
+use Cosray\Field\Definitions;
 use Cosray\NavigationItem;
 use Cosray\Schema\Badge;
 use Cosray\Schema\Description;
@@ -93,8 +94,27 @@ final class SchemaScanner implements Scanner
 			$this->add($messages, $attribute->newInstance()->badge, $class);
 		}
 
+		$this->fromProperties($reflection, $messages);
+
+		foreach (Definitions::for($class)->embedded() as $embedded) {
+			$embeddedReflection = new ReflectionClass($embedded->type);
+
+			foreach ($embeddedReflection->getAttributes(Label::class) as $attribute) {
+				$this->add($messages, $attribute->newInstance()->label, $embedded->type);
+			}
+
+			$this->fromProperties($embeddedReflection, $messages);
+		}
+	}
+
+	/**
+	 * @param ReflectionClass<object> $reflection
+	 * @param array<string, Message> $messages
+	 */
+	private function fromProperties(ReflectionClass $reflection, array &$messages): void
+	{
 		foreach ($reflection->getProperties() as $property) {
-			$where = $class . '::$' . $property->getName();
+			$where = $reflection->getName() . '::$' . $property->getName();
 
 			foreach ($property->getAttributes(Label::class) as $attribute) {
 				$this->add($messages, $attribute->newInstance()->label, $where);

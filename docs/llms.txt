@@ -171,14 +171,21 @@ Field-level attributes (applied to field properties):
 - `#[Fulltext(FulltextWeight::A|B|C|D)]`
 - `#[Syntax('php', 'js', ...)]`
 - `#[Allows(Foo::class, Bar::class, ...)]` for `Entries` fields
-- `#[Title]` (property-level; field property only)
+- `#[Title]` (property-level; selects a field or an embedded `Title` provider)
+
+Embedded-property layout attributes:
+
+- `#[Fieldset]` wraps an `Embedded` property's fields in the panel
+- `#[Label('...')]`
+- `#[Description('...')]`
+- `#[Width(int)]`
 
 Minimal node example:
 
 ```php
+use Cosray\Contract\Title;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
-use Cosray\Node\Contract\Title;
 use Cosray\Schema\FieldOrder;
 use Cosray\Schema\Label;
 use Cosray\Schema\Route;
@@ -203,6 +210,47 @@ final class ArticlePage implements Title
     }
 }
 ```
+
+Reusable embedded fields:
+
+```php
+use Cosray\Contract\Embedded;
+use Cosray\Contract\Title;
+use Cosray\Field\Blocks;
+use Cosray\Field\Text;
+use Cosray\Schema\Fieldset;
+use Cosray\Schema\Label;
+use Cosray\Schema\Width;
+
+#[Label('Base fields')]
+final class BaseFields implements Embedded, Title
+{
+    #[Label('Title')]
+    protected Text $title;
+
+    #[Label('Content')]
+    protected Blocks $content;
+
+    public function title(): string
+    {
+        return $this->title->value()->unwrap() ?? '';
+    }
+}
+
+final class ArticlePage
+{
+    #[Fieldset, Label('Article content'), Width(50)]
+    protected BaseFields $baseFields;
+}
+```
+
+Embedding and fieldset layout are separate. A typed property is embedded only when its type implements `Cosray\Contract\Embedded`. Without `#[Fieldset]`, its children render as ordinary fields at the property's declaration position. With `#[Fieldset]`, `Label`, `Description`, and `Width` configure the panel wrapper; `Label` is optional.
+
+The PHP object graph is nested, but persistence and public field names are flat: the example stores `title` and `content`, route placeholders use `{title}`, and the Node proxy exposes `$node->title`. The containing class accesses embedded behavior through `$this->baseFields`; the proxy also exposes the embedded object for public methods. Flat leaf names must be unique across the node. Dotted names, prefixes, recursive embeds, containing-node constructor injection, constructor-promoted embeds, readonly embeds, and shared embedded services are not supported.
+
+Embedded constructors are autowired with the same request-scoped services as their node. Fields are hydrated after construction. Implement `Cosray\Contract\HasInit` when initialization needs field values; embedded hooks run before the outer node hook.
+
+Title precedence is: outer `Cosray\Contract\Title`, one explicit `#[Title]` field or embedded provider, one automatic embedded `Title` provider, a flattened `Text $title`, then no title. Multiple explicit sources or multiple automatic embedded providers are configuration errors. The compatibility interfaces in `Cosray\Node\Contract` extend the generic contracts.
 
 Route templates:
 
@@ -319,7 +367,7 @@ General value access pattern:
 - Use `->unwrap()` for raw value.
 - `__toString()` usually gives escaped/rendered output.
 
-Entries fields use plain node-style schema classes and `#[Allows(...)]`. The same schema class can also be registered as a real node.
+Entries fields use plain node-style schema classes and `#[Allows(...)]`. The same schema class can also be registered as a real node. Entries reuse static embedded leaf declarations and fieldset layout, but do not instantiate embedded objects or run their constructors, methods, or initialization hooks.
 
 ```php
 use App\Node\Entries\Staff;

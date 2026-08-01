@@ -4,6 +4,8 @@ Every field type describes its editor UI as a **control descriptor** returned by
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
+Fields declared by a class implementing `Cosray\Contract\Embedded` use the same descriptors and flat form names as direct fields. An embedded property without `#[Fieldset]` contributes ordinary wrappers at its declaration position. With `#[Fieldset]`, the SSR editor and Entries element group its children in a semantic fieldset; `Label`, `Description`, and `Width` configure the group. Child widths are relative to the fieldset's inner layout. Fieldset metadata is serialized separately from the flat `fields` array, so controls require no fieldset-specific behavior.
+
 ## Value shapes
 
 Field values are persisted as locale maps. The neutral locale key is `zxx`; translatable fields (`#[Translate]`) use real locale ids (`de`, `en`, ...). The table lists the shape of `value` per control name.

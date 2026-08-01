@@ -8,6 +8,7 @@ use Celema\Verba\Tool\Message;
 use Cosray\I18n\SchemaScanner;
 use Cosray\Tests\Fixtures\Node\SchemaScanNode;
 use Cosray\Tests\Fixtures\Node\TestDocument;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\TestCase;
 
 final class SchemaScannerTest extends TestCase
@@ -39,6 +40,24 @@ final class SchemaScannerTest extends TestCase
 				'The day the guest arrives',
 			],
 			$this->ids($scanner->scan()),
+		);
+	}
+
+	public function testExtractsEmbeddedFieldAndFieldsetStrings(): void
+	{
+		$ids = $this->ids(new SchemaScanner([TestEmbeddedDocument::class])->scan());
+
+		$this->assertSame(
+			[
+				'After',
+				'Base fields',
+				'Before',
+				'Document fields',
+				'Embedded body',
+				'Embedded title',
+				'Reusable document fields',
+			],
+			$ids,
 		);
 	}
 

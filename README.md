@@ -151,6 +151,7 @@ Content types (nodes) are plain PHP classes annotated with attributes. There is 
 
 ```php
 use Celema\Core\Request;
+use Cosray\Contract\Title;
 use Cosray\Field\Text;
 use Cosray\Field\Blocks;
 use Cosray\Field\Image;
@@ -160,7 +161,6 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Route;
 use Cosray\Schema\Translate;
 use Cosray\Schema\TranslateMode;
-use Cosray\Node\Contract\Title;
 
 #[Label('Department'), Route('/{title}')]
 final class Department implements Title
@@ -186,6 +186,59 @@ final class Department implements Title
 }
 ```
 
+### Embedded fields and fieldsets
+
+Reusable field declarations live in classes implementing `Cosray\Contract\Embedded`. The node owns a real embedded object, so it can call public behavior on that object, while Cosray keeps the child fields flat in content, forms, routes, validation, and node-proxy access.
+
+```php
+use Cosray\Contract\Embedded;
+use Cosray\Contract\Title;
+use Cosray\Field\Blocks;
+use Cosray\Field\Text;
+use Cosray\Schema\Description;
+use Cosray\Schema\Fieldset;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Schema\Width;
+
+#[Label('Base fields')]
+final class BaseFields implements Embedded, Title
+{
+    #[Label('Title'), Required, Translate]
+    protected Text $title;
+
+    #[Label('Content')]
+    protected Blocks $content;
+
+    public function title(): string
+    {
+        return $this->title->value()->unwrap() ?? '';
+    }
+}
+
+final class Article implements Title
+{
+    #[Fieldset, Label('Content'), Description('General article content'), Width(50)]
+    protected BaseFields $baseFields;
+
+    public function title(): string
+    {
+        return $this->baseFields->title();
+    }
+}
+```
+
+The stored keys are `title` and `content`, never `baseFields.title`. They remain available as `$node->title` and in route placeholders such as `{title}`. The embedded object is available as `$node->baseFields` for its public methods.
+
+Embedding properties determine placement order; child declaration order determines their order within that placement. Without `#[Fieldset]`, children render as ordinary fields. `#[Fieldset]` groups them in the panel; `Label`, `Description`, and `Width` configure that group, and omitting `Label` produces a label-less fieldset.
+
+Embedded constructors are autowired with the node's services. Fields are assigned afterwards; implement `Cosray\Contract\HasInit` for field-dependent initialization. Embedded types are transient and cannot inject their containing node or be registered as shared services. Field names must be unique across the whole node, and recursive embeds are not supported.
+
+An outer `Title` implementation takes precedence. Otherwise, `#[Title]` can select an embedded title provider, one embedded `Title` provider is detected automatically, and ordinary explicit or `title` text fields remain supported. Multiple automatic providers are rejected as ambiguous.
+
+`Entries` schemas reuse embedded field declarations and fieldset layout, but they are static value schemas: they do not instantiate embedded objects or run their constructors, methods, or initialization hooks.
+
 ### Field translation modes
 
 `#[Translate]` defaults to symmetric translation. Symmetric media fields share one file list and translate metadata such as `title` and `alt`.
@@ -210,6 +263,7 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 | `#[Render('...')]` | Template name override |
 | `#[Title('...')]` | Field name to use as title |
 | `#[FieldOrder('...')]` | Admin panel field order |
+| `#[Fieldset]` | Group an embedded property's fields in the panel |
 | `#[Deletable(false)]` | Prevent deletion in admin panel (default: `true`) |
 | `#[Children(Foo::class, ...)]` | Allowed direct child node types for hierarchy-enabled collection lists |
 
@@ -249,7 +303,8 @@ Available attributes: `#[Label]`, `#[Handle]`, `#[Icon]`, `#[Badge]`, `#[Permiss
 
 | Interface | Method | Purpose |
 | --- | --- | --- |
-| `Title` | `title(): string` | Computed title (takes precedence over `#[Title]`) |
+| `Embedded` | — | Reusable class whose fields are flattened into its owner |
+| `Title` | `title(): string` | Computed title provider (takes precedence over implicit fields) |
 | `HasInit` | `init(): void` | Post-hydration initialization hook |
 | `HandlesFormPost` | `formPost(?array $body): Response` | Frontend form submission handling |
 | `ProvidesRenderContext` | `renderContext(): array` | Extra template variables |
