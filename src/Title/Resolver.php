@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Title;
 
 use Cosray\Contract\Title as TitleContract;
-use Cosray\Exception\RuntimeException;
 use Cosray\Field\Definitions;
 use Cosray\Field\Field;
 use Cosray\Field\Text;
@@ -45,26 +44,6 @@ class Resolver
 
 		if (is_string($titleField) && $titleField !== '' && $this->isTextField($class, $titleField)) {
 			return ['kind' => self::KIND_FIELD, 'field' => $titleField];
-		}
-
-		$providers = [];
-
-		foreach (Definitions::for($class)->embedded() as $embedded) {
-			if (!is_a($embedded->type, TitleContract::class, true)) {
-				continue;
-			}
-
-			$providers[] = $embedded->name;
-		}
-
-		if (count($providers) > 1) {
-			throw new RuntimeException(
-				"Node '{$class}' has multiple embedded title providers: " . implode(', ', $providers) . '.',
-			);
-		}
-
-		if ($providers !== []) {
-			return ['kind' => self::KIND_DYNAMIC, 'embedded' => $providers[0]];
 		}
 
 		if ($this->isTextField($class, 'title')) {

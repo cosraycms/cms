@@ -130,7 +130,7 @@ class Schema
 		$selection = $selections[0] ?? null;
 
 		if ($selection === null) {
-			return $resolved;
+			return $this->automaticTitle($resolved, $definitions);
 		}
 
 		if ($selection['kind'] === 'embedded') {
@@ -146,6 +146,46 @@ class Schema
 				new Title((string) $selection['name']),
 				$this->nodeClass,
 			));
+		}
+
+		return $resolved;
+	}
+
+	/**
+	 * Select the automatic embedded title provider when nothing explicit
+	 * is declared. An outer Title implementation wins at resolution time,
+	 * so embedded providers are irrelevant and not validated for it.
+	 *
+	 * @param array<string, mixed> $resolved
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function automaticTitle(array $resolved, Definitions $definitions): array
+	{
+		if (is_a($this->nodeClass, TitleContract::class, true)) {
+			return $resolved;
+		}
+
+		$providers = [];
+
+		foreach ($definitions->embedded() as $embedded) {
+			if (!is_a($embedded->type, TitleContract::class, true)) {
+				continue;
+			}
+
+			$providers[] = $embedded->name;
+		}
+
+		if (count($providers) > 1) {
+			throw new RuntimeException(
+				"Node '{$this->nodeClass}' has multiple embedded title providers: "
+				. implode(', ', $providers)
+				. '.',
+			);
+		}
+
+		if ($providers !== []) {
+			$resolved['titleEmbedded'] = $providers[0];
 		}
 
 		return $resolved;

@@ -30,6 +30,7 @@ use Cosray\Schema\Route;
 use Cosray\Schema\Title;
 use Cosray\Tests\Fixtures\Node\CustomIcon;
 use Cosray\Tests\Fixtures\Node\CustomIconHandler;
+use Cosray\Tests\Fixtures\Node\NodeWithAmbiguousEmbeddedTitles;
 use Cosray\Tests\Fixtures\Node\NodeWithChildrenAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithCustomAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithEmbeddedTitleField;
@@ -43,9 +44,11 @@ use Cosray\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithRepeatedFieldOrder;
 use Cosray\Tests\Fixtures\Node\NodeWithRouteAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithTitleAndAmbiguousEmbeds;
 use Cosray\Tests\Fixtures\Node\NodeWithUnknownFieldOrder;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
+use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\TestCase;
 use ValueError;
 
@@ -371,6 +374,28 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->throws(RuntimeException::class, 'declares more than one explicit title source');
 
 		new Schema(NodeWithMultipleExplicitTitles::class, Registry::withDefaults());
+	}
+
+	public function testSchemaSelectsAutomaticEmbeddedTitleProvider(): void
+	{
+		$schema = new Schema(TestEmbeddedDocument::class, Registry::withDefaults());
+
+		$this->assertNull($schema->titleField);
+		$this->assertSame('baseFields', $schema->titleEmbedded);
+	}
+
+	public function testSchemaRejectsAmbiguousEmbeddedTitleProviders(): void
+	{
+		$this->throws(RuntimeException::class, 'multiple embedded title providers');
+
+		new Schema(NodeWithAmbiguousEmbeddedTitles::class, Registry::withDefaults());
+	}
+
+	public function testOuterTitleSuppressesEmbeddedProviderAmbiguity(): void
+	{
+		$schema = new Schema(NodeWithTitleAndAmbiguousEmbeds::class, Registry::withDefaults());
+
+		$this->assertNull($schema->titleEmbedded);
 	}
 
 	public function testSchemaRejectsUnknownFieldOrderName(): void
