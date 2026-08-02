@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Assets\Repository;
+use Cosray\Exception\RuntimeException;
+use Cosray\Field\Definitions;
 use Cosray\Field\Fieldsets;
 use Cosray\Locales;
 use Cosray\Richtext\Scanner;
@@ -247,15 +249,28 @@ class Serializer
 			return array_values($fieldNames);
 		}
 
+		$class = $node::class;
 		$ordered = [];
 
 		foreach ($order as $name) {
-			if (
-				!is_string($name)
-				|| !in_array($name, $fieldNames, true)
-				|| in_array($name, $ordered, true)
-			) {
+			if (!is_string($name)) {
+				throw new RuntimeException("Field order for '{$class}' must contain field names only.");
+			}
+
+			if (!in_array($name, $fieldNames, true)) {
+				// A defined field outside this serialization subset is
+				// tolerated; a name unknown to the class is a typo.
+				if (Definitions::for($class)->field($name) === null) {
+					throw new RuntimeException(
+						"Field order for '{$class}' references unknown field '{$name}'.",
+					);
+				}
+
 				continue;
+			}
+
+			if (in_array($name, $ordered, true)) {
+				throw new RuntimeException("Field order for '{$class}' repeats field '{$name}'.");
 			}
 
 			$ordered[] = $name;

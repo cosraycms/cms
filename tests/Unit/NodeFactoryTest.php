@@ -20,6 +20,8 @@ use Cosray\Node\Types;
 use Cosray\Tests\Fixtures\FieldDefinition\OwnerAwareNode;
 use Cosray\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithInjectedType;
+use Cosray\Tests\Fixtures\Node\NodeWithInvalidLegacyOrder;
+use Cosray\Tests\Fixtures\Node\NodeWithLegacyOrder;
 use Cosray\Tests\Fixtures\Node\NodeWithNumericTitleField;
 use Cosray\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithTitleMethodWithoutInterface;
@@ -224,6 +226,33 @@ final class NodeFactoryTest extends TestCase
 		$this->throws(RuntimeException::class, "splits fieldset 'baseFields'");
 
 		$serializer->fieldsets($node, Factory::fieldNamesFor($node));
+	}
+
+	public function testLegacyOrderMethodOrdersSerializedFields(): void
+	{
+		$node = $this->factory->blueprint(NodeWithLegacyOrder::class, $this->context, $this->cms);
+		$serializer = new Serializer($this->types, $this->uid);
+		$fields = $serializer->fields($node, Factory::fieldNamesFor($node));
+
+		$this->assertSame(['body', 'heading'], array_column($fields, 'name'));
+	}
+
+	public function testLegacyOrderMethodCannotReferenceUnknownFields(): void
+	{
+		$node = $this->factory->blueprint(NodeWithInvalidLegacyOrder::class, $this->context, $this->cms);
+		$serializer = new Serializer($this->types, $this->uid);
+		$this->throws(RuntimeException::class, "references unknown field 'missing'");
+
+		$serializer->fields($node, Factory::fieldNamesFor($node));
+	}
+
+	public function testFieldOrderToleratesSerializedFieldSubset(): void
+	{
+		$node = $this->factory->blueprint(PlainPage::class, $this->context, $this->cms);
+		$serializer = new Serializer($this->types, $this->uid);
+		$fields = $serializer->fields($node, ['body']);
+
+		$this->assertSame(['body'], array_column($fields, 'name'));
 	}
 
 	public function testNodeProxyExposesFlatEmbeddedFieldsAndTheEmbeddedObject(): void

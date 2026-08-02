@@ -89,6 +89,7 @@ class Schema
 		}
 
 		$definitions = Definitions::for($this->nodeClass);
+		$this->validateFieldOrder($resolved, $definitions);
 		$selections = [];
 
 		if (array_key_exists('titleField', $resolved)) {
@@ -148,6 +149,35 @@ class Schema
 		}
 
 		return $resolved;
+	}
+
+	/** @param array<string, mixed> $resolved */
+	private function validateFieldOrder(array $resolved, Definitions $definitions): void
+	{
+		$order = $resolved['fieldOrder'] ?? null;
+
+		if (!is_array($order)) {
+			return;
+		}
+
+		$seen = [];
+
+		foreach ($order as $name) {
+			if (!is_string($name) || $definitions->field($name) === null) {
+				$given = is_string($name) ? $name : get_debug_type($name);
+				throw new RuntimeException(
+					"The #[FieldOrder] attribute on '{$this->nodeClass}' references unknown field '{$given}'.",
+				);
+			}
+
+			if (in_array($name, $seen, true)) {
+				throw new RuntimeException(
+					"The #[FieldOrder] attribute on '{$this->nodeClass}' repeats field '{$name}'.",
+				);
+			}
+
+			$seen[] = $name;
+		}
 	}
 
 	private function validatePropertyTitles(

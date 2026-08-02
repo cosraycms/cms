@@ -41,7 +41,9 @@ use Cosray\Tests\Fixtures\Node\NodeWithInvalidPropertyTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithMultipleExplicitTitles;
 use Cosray\Tests\Fixtures\Node\NodeWithNameAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithPropertyTitleAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithRepeatedFieldOrder;
 use Cosray\Tests\Fixtures\Node\NodeWithRouteAttribute;
+use Cosray\Tests\Fixtures\Node\NodeWithUnknownFieldOrder;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\TestCase;
@@ -369,6 +371,20 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->throws(RuntimeException::class, 'declares more than one explicit title source');
 
 		new Schema(NodeWithMultipleExplicitTitles::class, Registry::withDefaults());
+	}
+
+	public function testSchemaRejectsUnknownFieldOrderName(): void
+	{
+		$this->throws(RuntimeException::class, "references unknown field 'missing'");
+
+		new Schema(NodeWithUnknownFieldOrder::class, Registry::withDefaults());
+	}
+
+	public function testSchemaRejectsRepeatedFieldOrderName(): void
+	{
+		$this->throws(RuntimeException::class, "repeats field 'heading'");
+
+		new Schema(NodeWithRepeatedFieldOrder::class, Registry::withDefaults());
 	}
 
 	public function testSchemaDeletableFalse(): void
