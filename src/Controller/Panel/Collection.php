@@ -12,8 +12,8 @@ use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
-use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionTree;
@@ -143,7 +143,7 @@ final class Collection extends Panel
 		]);
 	}
 
-	private function parentNode(CmsCollection $collection, string $uid): Node
+	private function parentNode(CmsCollection $collection, string $uid): Wrapper
 	{
 		$node = $collection->cms?->node->byUid($uid, published: null);
 
@@ -155,7 +155,7 @@ final class Collection extends Panel
 	}
 
 	/** @return list<array{kind: string, label: string}> */
-	private function nodeStatus(CmsCollection $collection, Node $node): array
+	private function nodeStatus(CmsCollection $collection, Wrapper $node): array
 	{
 		$status = [];
 		$meta = $collection->listMeta;

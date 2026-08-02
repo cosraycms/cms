@@ -225,10 +225,10 @@ class Serializer
 
 	public function resolveTitle(object $node): string
 	{
-		$proxy = $node instanceof Node
+		$proxy = $node instanceof Wrapper
 			? $node
-			: new Node(
-				Node::unwrap($node),
+			: new Wrapper(
+				Wrapper::unwrap($node),
 				Factory::fieldNamesFor($node),
 				$this->types,
 			);

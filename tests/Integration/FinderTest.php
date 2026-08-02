@@ -9,8 +9,8 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Node\Factory;
-use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Renderer;
 use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\IntegrationTestCase;
@@ -36,7 +36,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertGreaterThan(0, count($nodes));
 
 		foreach ($nodes as $node) {
-			$this->assertEquals('test-article', $this->types->get(Node::unwrap($node)::class, 'handle'));
+			$this->assertEquals('test-article', $this->types->get(Wrapper::unwrap($node)::class, 'handle'));
 		}
 	}
 
@@ -186,7 +186,7 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertNotEmpty($nodes);
 
 		foreach ($nodes as $node) {
-			$this->assertTrue((bool) $this->types->get(Node::unwrap($node)::class, 'routable', false));
+			$this->assertTrue((bool) $this->types->get(Wrapper::unwrap($node)::class, 'routable', false));
 		}
 	}
 
@@ -229,7 +229,7 @@ final class FinderTest extends IntegrationTestCase
 		$typeHandles = [];
 
 		foreach ($nodes as $node) {
-			$typeHandles[] = $this->types->get(Node::unwrap($node)::class, 'handle');
+			$typeHandles[] = $this->types->get(Wrapper::unwrap($node)::class, 'handle');
 		}
 
 		$uniqueTypes = array_unique($typeHandles);

@@ -18,10 +18,10 @@ use Cosray\Contract\HttpPut;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
 use Cosray\Node\Factory as NodeFactory;
-use Cosray\Node\Node;
 use Cosray\Node\Serializer;
 use Cosray\Node\Types;
 use Cosray\Node\ViewRenderer;
+use Cosray\Node\Wrapper;
 use Cosray\Util\Path;
 
 class Page
@@ -92,7 +92,7 @@ class Page
 		$request = $context->request;
 		$method = $request->method();
 		$handler = self::HANDLERS[$method] ?? null;
-		$node = Node::unwrap($page);
+		$node = Wrapper::unwrap($page);
 
 		if ($handler !== null && $node instanceof $handler[0]) {
 			return $node->{$handler[1]}();
@@ -111,7 +111,7 @@ class Page
 
 	private function renderPage(object $page, Context $context, Cms $cms): Response
 	{
-		$node = Node::unwrap($page);
+		$node = Wrapper::unwrap($page);
 		$renderer = new ViewRenderer($this->container, $this->factory, $this->types);
 
 		return $renderer->renderPage(
@@ -125,7 +125,7 @@ class Page
 
 	private function jsonRead(object $node, Context $context, Cms $cms): Response
 	{
-		$inner = Node::unwrap($node);
+		$inner = Wrapper::unwrap($node);
 
 		if (method_exists($inner, 'read')) {
 			$data = $inner->read();

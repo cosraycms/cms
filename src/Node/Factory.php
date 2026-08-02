@@ -131,8 +131,8 @@ class Factory
 		Request $request,
 		?Context $context = null,
 		?Cms $cms = null,
-	): Node {
-		return new Node(
+	): Wrapper {
+		return new Wrapper(
 			$node,
 			self::fieldNamesFor($node),
 			$this->types,
@@ -203,7 +203,7 @@ class Factory
 	private static function getNodeState(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();
-		$node = Node::unwrap($node);
+		$node = Wrapper::unwrap($node);
 
 		return self::$nodeState[$node] ?? [];
 	}

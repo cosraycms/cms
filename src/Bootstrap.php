@@ -28,9 +28,9 @@ use Cosray\Field\Services as FieldServices;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
 use Cosray\Icons\Provider as IconProvider;
-use Cosray\Node\Node;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
@@ -516,7 +516,7 @@ class Bootstrap implements CorePlugin
 	protected function trustedViewClasses(): array
 	{
 		return [
-			Node::class,
+			Wrapper::class,
 			Cms::class,
 			Locales::class,
 			Locale::class,

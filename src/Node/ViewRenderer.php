@@ -24,7 +24,7 @@ class ViewRenderer
 	/**
 	 * Render a page node to an HTML response.
 	 *
-	 * The node is wrapped in a Node and passed to the template as
+	 * The node is wrapped in a Wrapper and passed to the template as
 	 * '$page'. If the node implements ProvidesRenderContext, its
 	 * extra context is merged in.
 	 */
@@ -36,7 +36,7 @@ class ViewRenderer
 		Config $config,
 		array $context = [],
 	): Response {
-		$proxy = new Node($node, $fieldNames, $this->types, $request);
+		$proxy = new Wrapper($node, $fieldNames, $this->types, $request);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -61,7 +61,7 @@ class ViewRenderer
 	/**
 	 * Render a node to an HTML string.
 	 *
-	 * The node is wrapped in a Node and passed to the template as
+	 * The node is wrapped in a Wrapper and passed to the template as
 	 * '$node'.
 	 */
 	public function renderNode(
@@ -72,7 +72,7 @@ class ViewRenderer
 		Config $config,
 		array $context = [],
 	): string {
-		$proxy = new Node($node, $fieldNames, $this->types, $request);
+		$proxy = new Wrapper($node, $fieldNames, $this->types, $request);
 
 		$baseContext = array_merge([
 			'node' => $proxy,

@@ -14,7 +14,7 @@ use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Node;
+use Cosray\Node\Wrapper;
 use Psr\Log\LoggerInterface as Logger;
 
 /** @psalm-api */
@@ -25,7 +25,7 @@ final class Handler
 
 	/** @var list<class-string> */
 	private array $trusted = [
-		Node::class,
+		Wrapper::class,
 		Cms::class,
 		Locales::class,
 		Locale::class,

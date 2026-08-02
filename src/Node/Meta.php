@@ -16,7 +16,7 @@ class Meta
 		object $node,
 		private readonly Types $types,
 	) {
-		$this->node = Node::unwrap($node);
+		$this->node = Wrapper::unwrap($node);
 		$this->uid = (string) (Factory::meta($this->node, 'uid') ?? '');
 		$this->type = $this->types->typeOf($this->node::class);
 	}

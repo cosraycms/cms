@@ -477,7 +477,7 @@ $latest = $cms->nodes()
     ->limit(10);
 
 foreach ($latest as $node) {
-    // $node is Cosray\Node\Node wrapper
+    // $node is a Cosray\Node\Wrapper
     $title = $node->title();
     $path = $node->path();
 }

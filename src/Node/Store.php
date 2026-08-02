@@ -205,7 +205,7 @@ class Store
 
 	/**
 	 * The materialized title map for the content being saved. Mirrors
-	 * `Node::title()`'s resolution but yields every locale.
+	 * `Wrapper::title()`'s resolution but yields every locale.
 	 *
 	 * @return array<string, string>
 	 */

@@ -6,7 +6,7 @@ namespace Cosray;
 
 use Closure;
 use Cosray\Node\Factory;
-use Cosray\Node\Node;
+use Cosray\Node\Wrapper;
 
 final class Column
 {
@@ -70,7 +70,7 @@ final class Column
 		return $this->sort;
 	}
 
-	public function get(Node $node): array
+	public function get(Wrapper $node): array
 	{
 		return [
 			'value' => is_string($this->field)
@@ -84,9 +84,9 @@ final class Column
 		];
 	}
 
-	private function getValue(Node $node, string $field): mixed
+	private function getValue(Wrapper $node, string $field): mixed
 	{
-		$inner = Node::unwrap($node);
+		$inner = Wrapper::unwrap($node);
 
 		switch ($field) {
 			case 'title':

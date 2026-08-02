@@ -9,7 +9,7 @@ use Celema\Core\Response;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Field\Reference as ReferenceField;
-use Cosray\Node\Node;
+use Cosray\Node\Wrapper;
 use Cosray\Schema\Pick;
 use ReflectionNamedType;
 use ReflectionProperty;
@@ -146,7 +146,7 @@ final class Reference extends Panel
 		return $this->result($factory, $ordered, false);
 	}
 
-	private function item(Node $node): array
+	private function item(Wrapper $node): array
 	{
 		return [
 			'uid' => $node->meta->uid,

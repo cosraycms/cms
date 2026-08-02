@@ -18,12 +18,12 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
-use Cosray\Node\Node;
 use Cosray\Node\PathManager;
 use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
@@ -44,7 +44,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$nodeObj = Node::unwrap($result);
+		$nodeObj = Wrapper::unwrap($result);
 		$serializer = new Serializer(
 			$this->types(),
 			$cms->nodeFactory()->uid(),
@@ -107,7 +107,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$nodeObj = Node::unwrap($result);
+		$nodeObj = Wrapper::unwrap($result);
 		$serializer = new Serializer(
 			$this->types(),
 			$cms->nodeFactory()->uid(),
@@ -267,7 +267,7 @@ final class Editor extends Panel
 			cms: $cms,
 			context: $context,
 		);
-		$store->delete(Node::unwrap($result), $this->request, requireJson: false);
+		$store->delete(Wrapper::unwrap($result), $this->request, requireJson: false);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		return Response::create($factory)->redirect($links->collection(), 303);
@@ -283,7 +283,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
-		$nodeObj = Node::unwrap($result);
+		$nodeObj = Wrapper::unwrap($result);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 		$pathsUrl = $links->paths($node);
 
@@ -404,7 +404,7 @@ final class Editor extends Panel
 			return null;
 		}
 
-		$node = Node::unwrap($result);
+		$node = Wrapper::unwrap($result);
 		$paths = NodeFactory::dataFor($node)['paths'] ?? [];
 
 		foreach (is_array($paths) ? $paths : [] as $path) {
@@ -488,7 +488,7 @@ final class Editor extends Panel
 		return in_array($type, $childHandles, true);
 	}
 
-	private function parentNode(CmsCollection $collection, string $uid): Node
+	private function parentNode(CmsCollection $collection, string $uid): Wrapper
 	{
 		$node = $collection->cms?->node->byUid($uid, published: null);
 

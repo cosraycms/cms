@@ -9,8 +9,8 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
-use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Generator;
 use Iterator;
 
@@ -283,7 +283,7 @@ final class Nodes implements Iterator
 		$this->result->rewind();
 	}
 
-	public function current(): Node
+	public function current(): Wrapper
 	{
 		if (!isset($this->result)) {
 			$this->fetchResult();

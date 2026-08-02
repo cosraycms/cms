@@ -6,8 +6,8 @@ namespace Cosray\Collection;
 
 use Cosray\Collection;
 use Cosray\Exception\RuntimeException;
-use Cosray\Node\Node;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 
 /**
  * List, row and hierarchy logic for collection pages.
@@ -67,7 +67,7 @@ final class Listing
 	}
 
 	/** @return list<array{slug: string, name: string}> */
-	public function childBlueprints(Node $node): array
+	public function childBlueprints(Wrapper $node): array
 	{
 		$children = $node->meta->type->children;
 
@@ -96,7 +96,7 @@ final class Listing
 	}
 
 	/**
-	 * @param list<Node> $nodes
+	 * @param list<Wrapper> $nodes
 	 */
 	private function rows(array $nodes): array
 	{
@@ -112,7 +112,7 @@ final class Listing
 		return $result;
 	}
 
-	private function row(Node $node, bool $hasChildren): array
+	private function row(Wrapper $node, bool $hasChildren): array
 	{
 		$columns = [];
 		$parent = $node->meta->get('parent');
@@ -142,7 +142,7 @@ final class Listing
 	}
 
 	/**
-	 * @param list<Node> $nodes
+	 * @param list<Wrapper> $nodes
 	 * @return array<string, bool>
 	 */
 	private function hasChildrenMap(array $nodes): array

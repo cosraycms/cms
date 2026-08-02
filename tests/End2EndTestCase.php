@@ -14,7 +14,7 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Node;
+use Cosray\Node\Wrapper;
 use Cosray\View\Boiler\Error\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
@@ -288,7 +288,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$handler->views('tests/Fixtures/templates');
 
 		$handler->trusted([
-			Node::class,
+			Wrapper::class,
 			Cms::class,
 			Locales::class,
 			Locale::class,

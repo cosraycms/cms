@@ -13,7 +13,7 @@ use Cosray\Locale;
 use Cosray\Title\Resolver as TitleResolver;
 use ReflectionClass;
 
-class Node
+class Wrapper
 {
 	public readonly Meta $meta;
 
@@ -56,7 +56,7 @@ class Node
 	}
 
 	/**
-	 * Return the inner node if the given object is a Node wrapper,
+	 * Return the inner node if the given object is a Wrapper,
 	 * otherwise return the object unchanged.
 	 */
 	public static function unwrap(object $object): object

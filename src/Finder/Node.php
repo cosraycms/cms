@@ -9,8 +9,8 @@ use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Node\Factory;
-use Cosray\Node\Node as NodeWrapper;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 
 class Node
 {
@@ -25,7 +25,7 @@ class Node
 		string $path,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?NodeWrapper {
+	): ?Wrapper {
 		return $this->get([
 			'path' => $path,
 			'published' => $published,
@@ -37,7 +37,7 @@ class Node
 		string $uid,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?NodeWrapper {
+	): ?Wrapper {
 		return $this->get([
 			'uid' => $uid,
 			'published' => $published,
@@ -49,7 +49,7 @@ class Node
 		string $handle,
 		?bool $deleted = false,
 		?bool $published = true,
-	): ?NodeWrapper {
+	): ?Wrapper {
 		return $this->get([
 			'handle' => $handle,
 			'published' => $published,
@@ -59,7 +59,7 @@ class Node
 
 	public function get(
 		array $params,
-	): ?NodeWrapper {
+	): ?Wrapper {
 		$data = $this->context
 			->db
 			->nodes

@@ -14,9 +14,9 @@ use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\Factory;
-use Cosray\Node\Node;
 use Cosray\Node\Serializer;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Tests\Fixtures\FieldDefinition\OwnerAwareNode;
 use Cosray\Tests\Fixtures\Node\NodeWithClassTitleAttribute;
 use Cosray\Tests\Fixtures\Node\NodeWithInjectedType;
@@ -613,7 +613,7 @@ final class NodeFactoryTest extends TestCase
 		$this->assertFalse($blueprint['published']);
 	}
 
-	// -- Node wrapper with plain objects --------------------------------------
+	// -- Wrapper wrapper with plain objects --------------------------------------
 
 	public function testNodeFieldAccess(): void
 	{
@@ -625,7 +625,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertTrue(isset($proxy->heading));
 		$this->assertEquals('Proxy Title', (string) $proxy->heading);
@@ -641,7 +641,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertEquals('Method Test', $proxy->title());
 	}
@@ -655,7 +655,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertEquals('proxy-meta-1', $proxy->meta->uid);
 		$this->assertTrue($proxy->meta->published);
@@ -671,7 +671,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertSame('proxy-meta-2', $proxy->meta('uid'));
 		$this->assertSame('fallback', $proxy->meta('missing', 'fallback'));
@@ -686,7 +686,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertFalse(isset($proxy->meta->missing));
 		$this->assertNull($proxy->meta->get('missing'));
@@ -707,7 +707,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$fieldNames = Factory::fieldNamesFor($node);
-		$proxy = new Node($node, $fieldNames, $this->types);
+		$proxy = new Wrapper($node, $fieldNames, $this->types);
 
 		$this->assertNull($proxy->heading);
 		$this->assertFalse(isset($proxy->heading));
