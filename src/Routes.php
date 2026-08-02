@@ -47,6 +47,8 @@ class Routes
 		$sessionIfEnabled = [
 			$app->get('/', [Page::class, 'catchall'], 'cms.index.get'),
 			$app->post('/', [Page::class, 'catchall'], 'cms.index.post'),
+			$app->put('/', [Page::class, 'catchall'], 'cms.index.put'),
+			$app->delete('/', [Page::class, 'catchall'], 'cms.index.delete'),
 			$app->get('/preview/...slug', [Page::class, 'preview'], 'cms.preview.catchall'),
 		];
 
@@ -92,7 +94,7 @@ class Routes
 	public function catchallRoute(): Route
 	{
 		$catchallRoute = Route::map(
-			['GET', 'POST'],
+			['GET', 'POST', 'PUT', 'DELETE'],
 			'/...slug',
 			[Page::class, 'catchall'],
 			'cms.catchall',

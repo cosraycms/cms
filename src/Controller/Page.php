@@ -11,7 +11,10 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Context;
-use Cosray\Contract\HandlesFormPost;
+use Cosray\Contract\HttpDelete;
+use Cosray\Contract\HttpGet;
+use Cosray\Contract\HttpPost;
+use Cosray\Contract\HttpPut;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
 use Cosray\Node\Factory as NodeFactory;
@@ -20,10 +23,22 @@ use Cosray\Node\Serializer;
 use Cosray\Node\Types;
 use Cosray\Node\ViewRenderer;
 use Cosray\Util\Path;
-use ReflectionMethod;
 
 class Page
 {
+	/**
+	 * Request method to the node interface that answers it, and the method
+	 * to call. A node implementing one takes over that request completely.
+	 *
+	 * @var array<string, array{class-string, string}>
+	 */
+	private const array HANDLERS = [
+		'GET' => [HttpGet::class, 'httpGet'],
+		'POST' => [HttpPost::class, 'httpPost'],
+		'PUT' => [HttpPut::class, 'httpPut'],
+		'DELETE' => [HttpDelete::class, 'httpDelete'],
+	];
+
 	public function __construct(
 		protected readonly Factory $factory,
 		protected readonly Container $container,
@@ -55,15 +70,7 @@ class Page
 			}
 		}
 
-		if ($request->get('isXhr', false)) {
-			if ($request->method() === 'GET') {
-				return $this->jsonRead($page, $context, $cms);
-			}
-
-			throw new HttpBadRequest();
-		}
-
-		return $this->dispatch($page, $context, $cms, $request->method(), $request->form());
+		return $this->dispatch($page, $context, $cms);
 	}
 
 	#[Permission('panel')]
@@ -71,31 +78,40 @@ class Page
 	{
 		$page = $cms->node->byPath('/' . $slug);
 
-		return $this->renderPage($page, $context, $cms);
+		if (!$page) {
+			throw new HttpNotFound($context->request);
+		}
+
+		// Preview goes through the same dispatch as the public path, so a
+		// node that answers GET itself is previewed the way it is served.
+		return $this->dispatch($page, $context, $cms);
 	}
 
-	private function dispatch(
-		object $page,
-		Context $context,
-		Cms $cms,
-		string $method,
-		?array $formBody,
-	): Response {
-		return match ($method) {
-			'GET' => $this->renderPage($page, $context, $cms),
-			'POST' => $this->handleFormPost($page, $formBody),
-			default => throw new HttpBadRequest(),
-		};
+	private function dispatch(object $page, Context $context, Cms $cms): Response
+	{
+		$request = $context->request;
+		$method = $request->method();
+		$handler = self::HANDLERS[$method] ?? null;
+		$node = Node::unwrap($page);
+
+		if ($handler !== null && $node instanceof $handler[0]) {
+			return $node->{$handler[1]}();
+		}
+
+		if ($method !== 'GET') {
+			throw new HttpBadRequest();
+		}
+
+		if ($request->get('isXhr', false)) {
+			return $this->jsonRead($page, $context, $cms);
+		}
+
+		return $this->renderPage($page, $context, $cms);
 	}
 
 	private function renderPage(object $page, Context $context, Cms $cms): Response
 	{
 		$node = Node::unwrap($page);
-
-		if (is_callable([$node, 'render'])) {
-			return $node->render();
-		}
-
 		$renderer = new ViewRenderer($this->container, $this->factory, $this->types);
 
 		return $renderer->renderPage(
@@ -138,23 +154,6 @@ class Page
 				->response()
 				->withHeader('Content-Type', 'application/json'),
 		)->body($content);
-	}
-
-	private function handleFormPost(object $node, ?array $formBody): Response
-	{
-		$inner = Node::unwrap($node);
-
-		if ($inner instanceof HandlesFormPost) {
-			return $inner->formPost($formBody);
-		}
-
-		if (method_exists($inner, 'formPost')) {
-			$method = new ReflectionMethod($inner, 'formPost');
-
-			return $method->invoke($inner, $formBody);
-		}
-
-		throw new HttpBadRequest();
 	}
 
 	protected function redirectIfExists(Context $context, string $path): void

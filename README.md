@@ -308,8 +308,35 @@ All of them live in `Cosray\Contract`.
 | `Embedded` | — | embedded classes | Reusable class whose fields are flattened into its owner |
 | `Title` | `title(): string` | nodes, embedded | Computed title provider (takes precedence over implicit fields) |
 | `Init` | `init(): void` | nodes, embedded | Post-hydration initialization hook |
-| `HandlesFormPost` | `formPost(?array $body): Response` | nodes | Frontend form submission handling |
+| `HttpGet` | `httpGet(): Response` | nodes | Answers GET on the node's public path, replacing the default render |
+| `HttpPost` | `httpPost(): Response` | nodes | Answers POST (form submissions) |
+| `HttpPut` | `httpPut(): Response` | nodes | Answers PUT |
+| `HttpDelete` | `httpDelete(): Response` | nodes | Answers DELETE |
 | `ProvidesRenderContext` | `renderContext(): array` | nodes | Extra template variables |
+
+The `Http*` interfaces answer requests to the node's own public path — the frontend catchall, and for GET the panel preview route as well. A node implementing one takes over that method entirely: Cosray dispatches to it before its own handling, so the node also owns content negotiation for that request. Methods without a hook keep the defaults: GET renders the node's view (or returns its JSON for `Accept: application/json`), everything else answers `400`.
+
+They take no arguments — read the submitted body through the autowired `Celema\Core\Request`. PHP only fills the parsed body for form-encoded POST, so use `Cosray\Util\Form::body()` when a PUT or a JSON payload has to be read:
+
+```php
+use Cosray\Contract\HttpPost;
+use Cosray\Util\Form;
+
+class ContactPage implements HttpPost
+{
+    public function __construct(
+        private readonly Request $request,
+        private readonly Factory $factory,
+    ) {}
+
+    public function httpPost(): Response
+    {
+        $body = Form::body($this->request);
+
+        return Response::create($this->factory)->html($this->confirmation($body));
+    }
+}
+```
 
 ### Rendering by handle or UID
 

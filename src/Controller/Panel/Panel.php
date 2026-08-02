@@ -12,6 +12,7 @@ use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
 use Cosray\Navigation;
 use Cosray\Panel\Extras;
+use Cosray\Util\Form;
 
 use function Cosray\env;
 
@@ -79,23 +80,7 @@ abstract class Panel
 	 */
 	protected function formData(): array
 	{
-		$data = $this->request->form() ?? [];
-		$contentType = strtolower(trim(explode(';', $this->request->header('Content-Type'))[0]));
-
-		if ($data === [] && $contentType === 'application/json') {
-			$decoded = $this->request->json();
-
-			if (is_array($decoded)) {
-				$data = $decoded;
-			}
-		}
-
-		if ($data === [] && $contentType === 'application/x-www-form-urlencoded') {
-			parse_str((string) $this->request->body(), $parsed);
-			$data = $parsed;
-		}
-
-		return $data;
+		return Form::body($this->request);
 	}
 
 	protected function localeId(): string

@@ -39,7 +39,7 @@ high_value_topics:
 - Defining content types (nodes) with PHP attributes
 - Route, render, and metadata attributes
 - Parent/child hierarchy metadata with `#[Children(...)]`
-- Behavioral interfaces in `Cosray\Contract` (Title, Init, HandlesFormPost, ProvidesRenderContext)
+- Behavioral interfaces in `Cosray\Contract` (Title, Init, HttpGet, HttpPost, HttpPut, HttpDelete, ProvidesRenderContext)
 - Admin panel theming via panel.theme
 - Root-based Config initialization, environment variable reading, and Config defaults
 - Default error handling and error renderer settings via Config defaults
@@ -522,10 +522,10 @@ Examples:
 6) Rendering model
 
 - Page routing resolves node by URL path and renders template output.
-- For GET requests with `Accept: application/json`, page route can return JSON read output.
-- For POST on routed page, node can handle form posts via:
-  - implementing `HandlesFormPost`, or
-  - exposing `formPost(?array $body)` method.
+- A node answers a method on its own path by implementing `Cosray\Contract\HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete`; the hook runs before the CMS defaults and takes over content negotiation for that request.
+- Without a hook: GET renders the view, GET with `Accept: application/json` returns the JSON read output, any other method answers 400.
+- The hooks take no arguments. Read the body through the autowired `Celema\Core\Request`, or `Cosray\Util\Form::body($request)` for PUT and JSON payloads.
+- `/preview/...slug` dispatches the same way, so `HttpGet` also drives the panel preview.
 
 Render context keys available to renderers include:
 
