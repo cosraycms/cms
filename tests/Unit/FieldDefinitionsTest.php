@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Definitions;
+use Cosray\Tests\Fixtures\FieldDefinition\AbstractEmbedNode;
 use Cosray\Tests\Fixtures\FieldDefinition\ClassLabelFieldsetNode;
 use Cosray\Tests\Fixtures\FieldDefinition\DuplicateFieldNode;
 use Cosray\Tests\Fixtures\FieldDefinition\EmptyEmbedNode;
@@ -21,6 +22,7 @@ use Cosray\Tests\Fixtures\FieldDefinition\PromotedEmbedNode;
 use Cosray\Tests\Fixtures\FieldDefinition\ReadonlyEmbedNode;
 use Cosray\Tests\Fixtures\FieldDefinition\StaticEmbedNode;
 use Cosray\Tests\Fixtures\FieldDefinition\UnionEmbedNode;
+use Cosray\Tests\Fixtures\FieldDefinition\UnionNestedEmbedNode;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Node\TestBaseFields;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
@@ -155,6 +157,20 @@ final class FieldDefinitionsTest extends TestCase
 		$this->throws(RuntimeException::class, 'does not declare any fields');
 
 		Definitions::for(EmptyEmbedNode::class);
+	}
+
+	public function testAbstractEmbeddedTypeIsRejected(): void
+	{
+		$this->throws(RuntimeException::class, 'must be instantiable');
+
+		Definitions::for(AbstractEmbedNode::class);
+	}
+
+	public function testUnionNestedEmbedIsRejected(): void
+	{
+		$this->throws(RuntimeException::class, 'contains unsupported nested embed');
+
+		Definitions::for(UnionNestedEmbedNode::class);
 	}
 
 	public function testFieldsetRequiresEmbeddedProperty(): void

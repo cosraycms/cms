@@ -31,6 +31,7 @@ use Cosray\Tests\Fixtures\Node\PlainPageWithInit;
 use Cosray\Tests\Fixtures\Node\TestBaseFields;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
 use Cosray\Tests\Fixtures\Node\TestPage;
+use Cosray\Tests\Fixtures\Node\TestReorderedFieldsetDocument;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetDocument;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
@@ -226,6 +227,23 @@ final class NodeFactoryTest extends TestCase
 		$this->throws(RuntimeException::class, "splits fieldset 'baseFields'");
 
 		$serializer->fieldsets($node, Factory::fieldNamesFor($node));
+	}
+
+	public function testFieldOrderMayMoveAWholeFieldset(): void
+	{
+		$node = $this->factory->blueprint(
+			TestReorderedFieldsetDocument::class,
+			$this->context,
+			$this->cms,
+		);
+		$serializer = new Serializer($this->types, $this->uid);
+		$fieldNames = Factory::fieldNamesFor($node);
+
+		$this->assertSame(
+			['after', 'title', 'body', 'before'],
+			array_column($serializer->fields($node, $fieldNames), 'name'),
+		);
+		$this->assertSame(['title', 'body'], $serializer->fieldsets($node, $fieldNames)[0]['fields']);
 	}
 
 	public function testLegacyOrderMethodOrdersSerializedFields(): void

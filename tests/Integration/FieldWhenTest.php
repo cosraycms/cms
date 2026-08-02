@@ -12,6 +12,7 @@ use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\Factory;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
+use Cosray\Tests\Fixtures\Node\TestConditionalEmbeddedDocument;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\Uid;
 
@@ -117,6 +118,54 @@ final class FieldWhenTest extends IntegrationTestCase
 		$this->assertSame(
 			['field' => 'multiDay', 'op' => 'truthy', 'value' => null],
 			$properties['when'],
+		);
+	}
+
+	public function testWhenInsideAnEmbedReadsFlatSiblingContent(): void
+	{
+		$node = $this->embeddedDocument([
+			'extended' => ['type' => 'checkbox', 'value' => ['zxx' => false]],
+			'details' => ['type' => 'text', 'value' => ['zxx' => 'kept-dormant']],
+		]);
+		$details = $this->hydrator->getField($node, 'details');
+
+		$this->assertFalse($details->isset());
+		$this->assertSame('kept-dormant', $details->raw()['value']['zxx']);
+
+		$node = $this->embeddedDocument([
+			'extended' => ['type' => 'checkbox', 'value' => ['zxx' => true]],
+			'details' => ['type' => 'text', 'value' => ['zxx' => 'visible']],
+		]);
+
+		$this->assertSame('visible', (string) $this->hydrator->getField($node, 'details'));
+	}
+
+	public function testWhenInsideAnEmbedReadsDirectNodeContent(): void
+	{
+		$node = $this->embeddedDocument([
+			'mode' => ['type' => 'text', 'value' => ['zxx' => 'full']],
+			'extra' => ['type' => 'text', 'value' => ['zxx' => 'shown']],
+		]);
+
+		$this->assertSame('shown', (string) $this->hydrator->getField($node, 'extra'));
+
+		$node = $this->embeddedDocument([
+			'mode' => ['type' => 'text', 'value' => ['zxx' => 'compact']],
+			'extra' => ['type' => 'text', 'value' => ['zxx' => 'ignored']],
+		]);
+
+		$this->assertFalse($this->hydrator->getField($node, 'extra')->isset());
+	}
+
+	private function embeddedDocument(array $content): object
+	{
+		$context = $this->context();
+
+		return $this->nodeFactory->create(
+			TestConditionalEmbeddedDocument::class,
+			$context,
+			new Cms($context, Services::withDefaults()),
+			['content' => $content],
 		);
 	}
 }
