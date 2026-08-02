@@ -357,49 +357,12 @@ class Entries extends Field implements Capability\Limitable
 	 */
 	protected function entryFieldsets(string $type, array $fields): array
 	{
-		$result = [];
-		$ordered = array_keys($fields);
-
-		foreach (Definitions::for($type)->fieldsets() as $fieldset) {
-			$members = array_values(array_filter(
-				$ordered,
-				static fn(string $name): bool => in_array($name, $fieldset->fields, true),
-			));
-
-			if ($members === []) {
-				continue;
-			}
-
-			$positions = array_map(
-				static fn(string $name): int => (int) array_search($name, $ordered, true),
-				$members,
-			);
-
-			if ($positions !== range($positions[0], $positions[0] + count($positions) - 1)) {
-				throw new RuntimeException(
-					"Field order for entry type '{$type}' splits fieldset '{$fieldset->name}'.",
-				);
-			}
-
-			$visible = array_values(array_filter(
-				$members,
-				static fn(string $name): bool => !($fields[$name]->properties()['hidden'] ?? false),
-			));
-
-			if ($visible === []) {
-				continue;
-			}
-
-			$result[] = [
-				'name' => $fieldset->name,
-				'label' => $fieldset->label === null ? null : __($fieldset->label),
-				'description' => $fieldset->description === null ? null : __($fieldset->description),
-				'width' => $fieldset->width,
-				'fields' => $visible,
-			];
-		}
-
-		return $result;
+		return Fieldsets::serialize(
+			Definitions::for($type)->fieldsets(),
+			array_keys($fields),
+			$fields,
+			$type,
+		);
 	}
 
 	protected function requireAllowedEntryTypes(): void

@@ -16,6 +16,7 @@ use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestSplitFieldsetEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries as EntriesValue;
 use Cosray\Value\ValueContext;
@@ -109,6 +110,14 @@ class EntriesTest extends TestCase
 			$entryType['fieldsets'],
 		);
 		$this->assertSame(['title', 'body'], array_keys($entryType['init']));
+	}
+
+	public function testEntryFieldOrderCannotSplitAFieldset(): void
+	{
+		$entries = $this->createEntries()->allow(TestSplitFieldsetEntry::class);
+		$this->throws(RuntimeException::class, "splits fieldset 'baseFields'");
+
+		$entries->properties();
 	}
 
 	public function testEntriesStructureUsesEntryTypeEnvelope(): void

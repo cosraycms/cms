@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Assets\Repository;
-use Cosray\Exception\RuntimeException;
+use Cosray\Field\Fieldsets;
 use Cosray\Locales;
 use Cosray\Richtext\Scanner;
 use Cosray\Uid;
@@ -130,57 +130,12 @@ class Serializer
 	/** @return list<array{name: string, label: ?string, description: ?string, width: int, fields: list<string>}> */
 	public function fieldsets(object $node, array $fieldNames): array
 	{
-		$ordered = $this->orderedNames($node, $fieldNames);
-		$fieldsets = [];
-
-		foreach (Factory::fieldsetsFor($node) as $fieldset) {
-			$members = array_values(array_filter(
-				$ordered,
-				static fn(string $name): bool => in_array($name, $fieldset->fields, true),
-			));
-
-			if ($members === []) {
-				continue;
-			}
-
-			$positions = [];
-
-			foreach ($members as $member) {
-				$position = array_search($member, $ordered, true);
-
-				if (is_int($position)) {
-					$positions[] = $position;
-				}
-			}
-
-			if ($positions !== range($positions[0], $positions[0] + count($positions) - 1)) {
-				$class = $node::class;
-				throw new RuntimeException(
-					"Field order for '{$class}' splits fieldset '{$fieldset->name}'.",
-				);
-			}
-
-			$visible = array_values(array_filter(
-				$members,
-				static fn(string $name): bool => !(
-					Factory::fieldFor($node, $name)->properties()['hidden'] ?? false
-				),
-			));
-
-			if ($visible === []) {
-				continue;
-			}
-
-			$fieldsets[] = [
-				'name' => $fieldset->name,
-				'label' => $fieldset->label === null ? null : __($fieldset->label),
-				'description' => $fieldset->description === null ? null : __($fieldset->description),
-				'width' => $fieldset->width,
-				'fields' => $visible,
-			];
-		}
-
-		return $fieldsets;
+		return Fieldsets::serialize(
+			Factory::fieldsetsFor($node),
+			$this->orderedNames($node, $fieldNames),
+			Factory::fieldsFor($node),
+			$node::class,
+		);
 	}
 
 	public function read(object $node, array $rawData, array $fieldNames): array
