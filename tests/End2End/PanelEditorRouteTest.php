@@ -89,6 +89,37 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('"allowedFiles"', $html);
 	}
 
+	public function testSidebarKeepsTheCollectionCurrentWhileANodeIsOpen(): void
+	{
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-current', 'Panel Editor Current');
+
+		$collection = $this->navLink(
+			$this->getHtmlResponse(
+				$this->makeRequest('GET', '/cp/collection/test-articles'),
+			),
+			'/cp/collection/test-articles',
+		);
+		$this->assertStringContainsString('aria-current="page"', $collection);
+
+		$node = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-current'),
+		);
+		$link = $this->navLink($node, '/cp/collection/test-articles');
+
+		// The node lives below the collection URL, so the entry stays marked;
+		// the prefix lets the panel script apply the same rule after a swap.
+		$this->assertStringContainsString(
+			'data-nav-prefix="/cp/collection/test-articles/"',
+			$link,
+		);
+		$this->assertStringContainsString('aria-current="page"', $link);
+		$this->assertStringNotContainsString(
+			'aria-current="page"',
+			$this->navLink($node, '/cp'),
+		);
+	}
+
 	public function testConditionalFieldsCarryTheirConditionIntoTheMarkup(): void
 	{
 		$this->authenticateAs('editor');
@@ -360,6 +391,19 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.js')
 			&& is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.css')
 		);
+	}
+
+	/** The opening tag of the sidebar link pointing at `$href`. */
+	private function navLink(string $html, string $href): string
+	{
+		$found = preg_match(
+			'/<a[^>]*class="nav-link"[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
+			$html,
+			$matches,
+		);
+		$this->assertSame(1, $found, "No sidebar link for {$href}");
+
+		return $matches[0];
 	}
 
 	private function createArticle(

@@ -35,6 +35,15 @@ function listen<K extends keyof DocumentEventMap>(
 	cleanups.push(() => document.removeEventListener(type, listener));
 }
 
+// Mirrors the server-side rule in component/collections.php: an entry is
+// current for its own URL and, when it declares a prefix, for everything
+// below it — a collection stays marked while a node under it is open.
+function navCurrent(link: HTMLAnchorElement, path: string): boolean {
+	const prefix = link.dataset.navPrefix;
+
+	return linkPath(link) === path || (prefix !== undefined && path.startsWith(prefix));
+}
+
 function updateNavigation(): void {
 	const path = currentPath();
 
@@ -43,7 +52,7 @@ function updateNavigation(): void {
 	});
 
 	document.querySelectorAll<HTMLAnchorElement>('.nav-link[href]').forEach((link) => {
-		if (linkPath(link) === path) {
+		if (navCurrent(link, path)) {
 			link.setAttribute('aria-current', 'page');
 		}
 	});

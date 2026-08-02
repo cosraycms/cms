@@ -1,5 +1,7 @@
 <?php
 
+use function Cosray\escape;
+
 $defaultCollectionIcon = <<<'SVG'
 	<svg class="nav-icon-default" viewBox="0 0 16 16" fill="currentColor" focusable="false"><path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11Zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7ZM0 6a1.5 1.5 0 0 1 1.5-1.5h13A1.5 1.5 0 0 1 16 6v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13V6Zm1.5-.5A.5.5 0 0 0 1 6v7a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5V6a.5.5 0 0 0-.5-.5h-13Z" /></svg>
 	SVG;
@@ -21,6 +23,7 @@ $defaultCollectionIcon = <<<'SVG'
 			style="--depth: <?= $level ?>"
 			href="<?= $link->url ?>"
 			hx-target="#main"
+			<?= $link->activePrefix === null ? '' : 'data-nav-prefix="' . escape($link->activePrefix) . '"' ?>
 			<?= $link->active((string) $this->unwrap($currentPath)) ? 'aria-current="page"' : '' ?>>
 			<span class="nav-label">
 				<?php if ($icon !== ''): ?>
@@ -36,6 +39,10 @@ $defaultCollectionIcon = <<<'SVG'
 		<?php
 
 		$href = $panelPath . '/collection/' . $item->slug();
+		// Node, create, and paths URLs all live below the collection URL, so
+		// the entry stays marked while the user works inside the collection.
+		$prefix = $href . '/';
+		$active = (string) $currentPath === $href || str_starts_with((string) $currentPath, $prefix);
 		$iconMeta = $this->unwrap($item->meta->icon);
 		$icon = $iconMeta === null ? $defaultCollectionIcon : $this->unwrap($renderIcon($iconMeta));
 		?>
@@ -44,7 +51,8 @@ $defaultCollectionIcon = <<<'SVG'
 			style="--depth: <?= $level ?>"
 			href="<?= $href ?>"
 			hx-target="#main"
-			<?= (string) $currentPath === $href ? 'aria-current="page"' : '' ?>>
+			data-nav-prefix="<?= escape($prefix) ?>"
+			<?= $active ? 'aria-current="page"' : '' ?>>
 			<span class="nav-label">
 				<?php if ($icon !== ''): ?>
 					<span class="nav-icon" aria-hidden="true"><?= $icon ?></span>
