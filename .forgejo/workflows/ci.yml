@@ -54,7 +54,6 @@ jobs:
       - name: Setup pnpm
         uses: https://code.forgejo.org/pnpm/action-setup@v4
         with:
-          version: 11.10.0
           package_json_file: panel/package.json
 
       - name: Install panel dependencies
