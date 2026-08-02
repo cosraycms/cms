@@ -87,7 +87,10 @@ foreach ($fieldsets as $fieldset) {
 				<header class="cms-node-topbar">
 					<div class="inner">
 						<div class="trail">
-							<a class="cms-breadcrumb" href="<?= escape($links->back()) ?>">
+							<a
+								class="cms-breadcrumb"
+								href="<?= escape($links->back()) ?>"
+								hx-target="#main">
 								<?= escape($name) ?>
 							</a>
 						</div>
@@ -97,6 +100,7 @@ foreach ($fieldsets as $fieldset) {
 								<form
 									method="post"
 									action="<?= escape($links->delete($uid)) ?>"
+									hx-target="#main"
 									hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
 									<button class="cms-button danger" type="submit">
 										<?= escape(__('editor:delete')) ?>
