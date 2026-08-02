@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- Renamed the frontend controller from `Cosray\Controller\Page` to `Cosray\Controller\Node`; it serves nodes at their public path, and nothing in the model is a page. Route names are unchanged.
 - Renamed the template-facing node wrapper from `Cosray\Node\Node` to `Cosray\Node\Wrapper`. Code calling `Node::unwrap()` or type-hinting the wrapper must use `Wrapper`; templates are unaffected because they receive the object, not the class name.
 - Replaced `Cosray\Contract\HandlesFormPost` with one interface per HTTP method: `Cosray\Contract\HttpGet`, `HttpPost`, `HttpPut`, and `HttpDelete`. The methods (`httpGet()`, `httpPost()`, …) take no arguments — read the body from the autowired `Celema\Core\Request`, or through the new `Cosray\Util\Form::body()` for PUT and JSON payloads, which PHP does not parse into the request body. `formPost(?array $body)` implementations become `httpPost()` with `$body = Form::body($this->request)`.
 - Frontend routing accepts PUT and DELETE on page paths, and node hooks now run before Cosray's own handling: a POST to a page with `Accept: application/json` reaches `httpPost()` instead of answering `400`, and a node implementing `HttpGet` also answers JSON-negotiated GETs. Methods without a hook are unchanged.

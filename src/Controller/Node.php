@@ -24,7 +24,7 @@ use Cosray\Node\ViewRenderer;
 use Cosray\Node\Wrapper;
 use Cosray\Util\Path;
 
-class Page
+class Node
 {
 	/**
 	 * Request method to the node interface that answers it, and the method

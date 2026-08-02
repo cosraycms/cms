@@ -11,7 +11,7 @@ use Celema\Router\Group;
 use Celema\Router\Route;
 use Closure;
 use Cosray\Controller\Media;
-use Cosray\Controller\Page;
+use Cosray\Controller\Node;
 use Cosray\Controller\Panel;
 use Cosray\Middleware\InitRequest;
 use Cosray\Middleware\PanelAuth;
@@ -45,11 +45,11 @@ class Routes
 	public function add(App $app): void
 	{
 		$sessionIfEnabled = [
-			$app->get('/', [Page::class, 'catchall'], 'cms.index.get'),
-			$app->post('/', [Page::class, 'catchall'], 'cms.index.post'),
-			$app->put('/', [Page::class, 'catchall'], 'cms.index.put'),
-			$app->delete('/', [Page::class, 'catchall'], 'cms.index.delete'),
-			$app->get('/preview/...slug', [Page::class, 'preview'], 'cms.preview.catchall'),
+			$app->get('/', [Node::class, 'catchall'], 'cms.index.get'),
+			$app->post('/', [Node::class, 'catchall'], 'cms.index.post'),
+			$app->put('/', [Node::class, 'catchall'], 'cms.index.put'),
+			$app->delete('/', [Node::class, 'catchall'], 'cms.index.delete'),
+			$app->get('/preview/...slug', [Node::class, 'preview'], 'cms.preview.catchall'),
 		];
 
 		// Rendition fallback: the web server serves existing cache files
@@ -96,7 +96,7 @@ class Routes
 		$catchallRoute = Route::map(
 			['GET', 'POST', 'PUT', 'DELETE'],
 			'/...slug',
-			[Page::class, 'catchall'],
+			[Node::class, 'catchall'],
 			'cms.catchall',
 		)->middleware($this->initRequestMiddlware);
 
