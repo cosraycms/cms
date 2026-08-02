@@ -36,7 +36,7 @@ class Render
 				'published' => $published,
 				'deleted' => $deleted,
 			])
-			->one() ?: $this->context
+			->first() ?: $this->context
 			->db
 			->nodes
 			->find([
@@ -44,7 +44,7 @@ class Render
 				'published' => $published,
 				'deleted' => $deleted,
 			])
-			->one();
+			->first();
 
 		if (!$data) {
 			throw new RuntimeException('Renderable node not found: ' . $id);

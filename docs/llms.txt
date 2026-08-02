@@ -39,7 +39,7 @@ high_value_topics:
 - Defining content types (nodes) with PHP attributes
 - Route, render, and metadata attributes
 - Parent/child hierarchy metadata with `#[Children(...)]`
-- Behavioral interfaces in `Cosray\Contract` (Title, Init, HttpGet, HttpPost, HttpPut, HttpDelete, ProvidesRenderContext)
+- Behavioral interfaces in `Cosray\Contract` (Title, Init, HttpGet, HttpPost, HttpPut, HttpDelete, ViewContext)
 - Admin panel theming via panel.theme
 - Root-based Config initialization, environment variable reading, and Config defaults
 - Default error handling and error renderer settings via Config defaults
@@ -532,7 +532,7 @@ Render context keys available to renderers include:
 - `page` or `node` (wrapper)
 - `cms`, `locale`, `locales`, `request`, `container`, `debug`, `env`
 
-`ProvidesRenderContext` can inject additional template context.
+`ViewContext` can inject additional template context. `viewContext(Wrapper $node)` receives the same wrapper the template gets, and runs for pages and for embedded `$cms->render()` output alike, so view preparation can live on the node instead of at the top of the template.
 
 7) Panel/API surface (high-level)
 

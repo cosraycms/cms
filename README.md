@@ -312,7 +312,7 @@ All of them live in `Cosray\Contract`.
 | `HttpPost` | `httpPost(): Response` | nodes | Answers POST (form submissions) |
 | `HttpPut` | `httpPut(): Response` | nodes | Answers PUT |
 | `HttpDelete` | `httpDelete(): Response` | nodes | Answers DELETE |
-| `ProvidesRenderContext` | `renderContext(): array` | nodes | Extra template variables |
+| `ViewContext` | `viewContext(Wrapper $node): array` | nodes | Extra template variables |
 
 The `Http*` interfaces answer requests to the node's own public path — the frontend catchall, and for GET the panel preview route as well. A node implementing one takes over that method entirely: Cosray dispatches to it before its own handling, so the node also owns content negotiation for that request. Methods without a hook keep the defaults: GET renders the node's view (or returns its JSON for `Accept: application/json`), everything else answers `400`.
 

@@ -10,7 +10,7 @@ use Celema\Core\Request;
 use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Config;
-use Cosray\Contract\ProvidesRenderContext;
+use Cosray\Contract\ViewContext;
 use Cosray\Renderer;
 
 class ViewRenderer
@@ -25,8 +25,8 @@ class ViewRenderer
 	 * Render a page node to an HTML response.
 	 *
 	 * The node is wrapped in a Wrapper and passed to the template as
-	 * '$page'. If the node implements ProvidesRenderContext, its
-	 * extra context is merged in.
+	 * '$page'. If the node implements ViewContext, its extra context is
+	 * merged in.
 	 */
 	public function renderPage(
 		object $node,
@@ -49,11 +49,11 @@ class ViewRenderer
 			'env' => $config->env(),
 		];
 
-		if ($node instanceof ProvidesRenderContext) {
-			$baseContext = array_merge($baseContext, $node->renderContext());
-		}
-
-		$baseContext = array_merge($baseContext, $context);
+		$baseContext = array_merge(
+			$baseContext,
+			$this->viewContext($node, $proxy),
+			$context,
+		);
 
 		return $this->doRender($node, $baseContext);
 	}
@@ -62,7 +62,9 @@ class ViewRenderer
 	 * Render a node to an HTML string.
 	 *
 	 * The node is wrapped in a Wrapper and passed to the template as
-	 * '$node'.
+	 * '$node'. If the node implements ViewContext, its extra context is
+	 * merged in — an embedded node prepares its view the same way a page
+	 * does.
 	 */
 	public function renderNode(
 		object $node,
@@ -74,16 +76,20 @@ class ViewRenderer
 	): string {
 		$proxy = new Wrapper($node, $fieldNames, $this->types, $request);
 
-		$baseContext = array_merge([
-			'node' => $proxy,
-			'cms' => $cms,
-			'locale' => $request->get('locale'),
-			'locales' => $request->get('locales'),
-			'request' => $request,
-			'container' => $this->container,
-			'debug' => $config->debug(),
-			'env' => $config->env(),
-		], $context);
+		$baseContext = array_merge(
+			[
+				'node' => $proxy,
+				'cms' => $cms,
+				'locale' => $request->get('locale'),
+				'locales' => $request->get('locales'),
+				'request' => $request,
+				'container' => $this->container,
+				'debug' => $config->debug(),
+				'env' => $config->env(),
+			],
+			$this->viewContext($node, $proxy),
+			$context,
+		);
 
 		[$type, $id] = $this->resolveRenderer($node);
 		$renderer = $this->container->tag(Renderer::class)->get($type);
@@ -99,6 +105,12 @@ class ViewRenderer
 	public function resolveRenderer(object $node): array
 	{
 		return ['view', $this->types->schemaOf($node::class)->renderer];
+	}
+
+	/** @return array<string, mixed> */
+	private function viewContext(object $node, Wrapper $proxy): array
+	{
+		return $node instanceof ViewContext ? $node->viewContext($proxy) : [];
 	}
 
 	private function doRender(object $node, array $context): Response

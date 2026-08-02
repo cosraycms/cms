@@ -4,6 +4,8 @@
 
 ### Breaking Changes
 
+- Renamed `Cosray\Contract\ProvidesRenderContext` to `Cosray\Contract\ViewContext` and `renderContext(): array` to `viewContext(Wrapper $node): array`. The hook receives the same wrapper the template gets — `$node->meta`, `$node->path()`, `$node->children()` and field values are all available — so template preparation can move onto the node. It now also runs for embedded renders (`$cms->render()`), not just for pages.
+- Fixed `$cms->render()` by uid: the handle lookup used `one()`, which throws on an empty result, so the uid fallback was unreachable and a uid raised `UnexpectedResultCount` instead of rendering. An unknown id now raises the intended "Renderable node not found".
 - Renamed the frontend controller from `Cosray\Controller\Page` to `Cosray\Controller\Node`; it serves nodes at their public path, and nothing in the model is a page. Route names are unchanged.
 - Renamed the template-facing node wrapper from `Cosray\Node\Node` to `Cosray\Node\Wrapper`. Code calling `Node::unwrap()` or type-hinting the wrapper must use `Wrapper`; templates are unaffected because they receive the object, not the class name.
 - Replaced `Cosray\Contract\HandlesFormPost` with one interface per HTTP method: `Cosray\Contract\HttpGet`, `HttpPost`, `HttpPut`, and `HttpDelete`. The methods (`httpGet()`, `httpPost()`, …) take no arguments — read the body from the autowired `Celema\Core\Request`, or through the new `Cosray\Util\Form::body()` for PUT and JSON payloads, which PHP does not parse into the request body. `formPost(?array $body)` implementations become `httpPost()` with `$body = Form::body($this->request)`.
