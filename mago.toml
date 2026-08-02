@@ -34,6 +34,7 @@ no-global = { exclude = ["tests"] }
 no-isset = { enabled = false }
 no-shorthand-ternary = { enabled = false }
 no-literal-password = { exclude = ["tests"] }
+prefer-early-continue = { enabled = false }
 readable-literal = { min-digits = 7 }
 strict-types = { exclude = ["tests/Fixtures"] }
 tagged-todo = { enabled = false }
