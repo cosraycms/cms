@@ -19,6 +19,7 @@ use Celema\Router\Route;
 use Celema\Router\RouteAdder;
 use Celema\Router\Router;
 use Closure;
+use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Types;
 use Cosray\View\Boiler\Error\Handler as ErrorHandler;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -122,8 +123,8 @@ class App implements RouteAdder
 		return $this->bootstrap->collection($class);
 	}
 
-	/** @param class-string<Contract\Icons>|Contract\Icons $icons */
-	public function icons(string|Contract\Icons $icons, bool $replace = false): self
+	/** @param class-string<IconProvider>|IconProvider $icons */
+	public function icons(string|IconProvider $icons, bool $replace = false): self
 	{
 		$this->bootstrap->icons($icons, $replace);
 

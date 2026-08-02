@@ -6,9 +6,8 @@ namespace Cosray\Icons;
 
 use Closure;
 use Cosray\Config;
-use Cosray\Contract;
 
-final class Iconify implements Contract\Icons
+final class Iconify implements Provider
 {
 	/** @var Closure(string, int, string): ?string */
 	private readonly Closure $fetch;

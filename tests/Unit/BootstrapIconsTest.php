@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Bootstrap;
-use Cosray\Contract\Icons as IconsContract;
 use Cosray\Exception\RuntimeException;
+use Cosray\Icons\Provider;
 use Cosray\Tests\TestCase;
 use ReflectionProperty;
 
@@ -46,13 +46,13 @@ final class BootstrapIconsTest extends TestCase
 	public function testIconsRejectsInvalidClassString(): void
 	{
 		$plugin = new Bootstrap($this->config());
-		$this->throws(RuntimeException::class, 'Icons providers must implement ' . IconsContract::class);
+		$this->throws(RuntimeException::class, 'Icon providers must implement ' . Provider::class);
 		$plugin->icons(self::class);
 	}
 
-	private function provider(): IconsContract
+	private function provider(): Provider
 	{
-		return new class implements IconsContract {
+		return new class implements Provider {
 			public function icon(string $id, array $args = []): string
 			{
 				return '';

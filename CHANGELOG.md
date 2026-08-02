@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- Moved the icon provider interface from `Cosray\Contract\Icons` to `Cosray\Icons\Provider`. `Cosray\Contract` now holds behavioral interfaces only; the container tag and binding use `Cosray\Icons\Provider::class`.
 - Collapsed the behavioral interfaces into a single `Cosray\Contract` namespace and renamed `HasInit` to `Init`. `Cosray\Node\Contract` is gone: `HandlesFormPost` and `ProvidesRenderContext` moved up, and the `Title`/`HasInit` compatibility interfaces were removed. Update imports to `Cosray\Contract\{Embedded, Init, Title, HandlesFormPost, ProvidesRenderContext}`. `Title` and `Init` were never node-only — both also apply to embedded classes, which is why the node-scoped namespace went away.
 - Adopted the attribute-based command API of `celema/console` 0.4: all commands in `Cosray\Commands` are now plain `#[Command]` classes invoked via `__invoke(Args $args, Io $io)`. Commands that extended the removed `Celema\Quma\Commands\Command` base take a `Connection` directly and no longer build a quma `Environment`.
 - Replaced framework dependencies under `celemas/*` with their `celema/*` successors and moved all integration types from `Celemas\*` to `Celema\*`. Custom application code importing those framework types must update its dependencies and imports.

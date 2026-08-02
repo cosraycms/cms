@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Celema\Container\Container;
+use Cosray\Icons\Provider;
 
-final class Icons implements Contract\Icons
+final class Icons implements Provider
 {
 	/** @var array<string, string> */
 	private array $cache = [];
@@ -48,15 +49,15 @@ final class Icons implements Contract\Icons
 		return $this->cache[$key] = $this->failed('icon not found: ' . $id);
 	}
 
-	/** @return iterable<Contract\Icons> */
+	/** @return iterable<Provider> */
 	private function providers(): iterable
 	{
-		$tag = $this->container->tag(Contract\Icons::class);
+		$tag = $this->container->tag(Provider::class);
 
 		foreach ($tag->entries() as $id) {
 			$provider = $tag->get($id);
 
-			if ($provider instanceof Contract\Icons) {
+			if ($provider instanceof Provider) {
 				yield $provider;
 			}
 		}

@@ -27,6 +27,7 @@ use Cosray\Field\Schema\Registry as FieldSchemas;
 use Cosray\Field\Services as FieldServices;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
+use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Node;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
@@ -63,7 +64,7 @@ class Bootstrap implements CorePlugin
 	protected readonly Navigation $navigation;
 	protected array $nodes = [];
 
-	/** @var list<class-string<Contract\Icons>|Contract\Icons> */
+	/** @var list<class-string<IconProvider>|IconProvider> */
 	protected array $customIconProviders = [];
 	protected bool $replaceDefaultIconProviders = false;
 
@@ -145,7 +146,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
-		$this->container->add(Contract\Icons::class, Icons::class);
+		$this->container->add(IconProvider::class, Icons::class);
 
 		$this->routes = new Routes(
 			$this->config,
@@ -290,7 +291,7 @@ class Bootstrap implements CorePlugin
 
 		foreach ($providers as $index => $provider) {
 			$this->container
-				->tag(Contract\Icons::class)
+				->tag(IconProvider::class)
 				->add(sprintf('icons.%d', $index), $provider);
 		}
 	}
@@ -307,12 +308,12 @@ class Bootstrap implements CorePlugin
 	}
 
 	/**
-	 * @param class-string<Contract\Icons>|Contract\Icons $icons
+	 * @param class-string<IconProvider>|IconProvider $icons
 	 */
-	public function icons(string|Contract\Icons $icons, bool $replace = false): void
+	public function icons(string|IconProvider $icons, bool $replace = false): void
 	{
-		if (is_string($icons) && !is_a($icons, Contract\Icons::class, true)) {
-			throw new RuntimeException('Icons providers must implement ' . Contract\Icons::class);
+		if (is_string($icons) && !is_a($icons, IconProvider::class, true)) {
+			throw new RuntimeException('Icon providers must implement ' . IconProvider::class);
 		}
 
 		if ($replace) {

@@ -8,7 +8,7 @@ use Celema\Container\Container;
 use Celema\Core\Request;
 use Celema\Verba\Verba;
 use Cosray\Config;
-use Cosray\Contract\Icons;
+use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
 use Cosray\Navigation;
 use Cosray\Panel\Extras;
@@ -263,9 +263,9 @@ abstract class Panel
 			return '';
 		}
 
-		$service = $this->container->get(Icons::class);
+		$service = $this->container->get(IconProvider::class);
 
-		if (!$service instanceof Icons) {
+		if (!$service instanceof IconProvider) {
 			return '';
 		}
 

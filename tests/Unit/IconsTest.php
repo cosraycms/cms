@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Config;
-use Cosray\Contract\Icons as IconsContract;
 use Cosray\Icons;
 use Cosray\Icons\Iconify;
 use Cosray\Icons\Local;
+use Cosray\Icons\Provider;
 use Cosray\Tests\TestCase;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -347,8 +347,8 @@ final class IconsTest extends TestCase
 		$paths = $config->icons->localPaths;
 		$container = $this->container();
 		$container->add(Config::class, $config);
-		$container->tag(IconsContract::class)->add('local', new Local(is_array($paths) ? $paths : []));
-		$container->tag(IconsContract::class)->add('iconify', new Iconify($config, $fetch));
+		$container->tag(Provider::class)->add('local', new Local(is_array($paths) ? $paths : []));
+		$container->tag(Provider::class)->add('iconify', new Iconify($config, $fetch));
 
 		return new Icons($container, $config);
 	}

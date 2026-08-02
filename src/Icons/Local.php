@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Icons;
 
-use Cosray\Contract;
-
 use function Cosray\escape;
 
-final class Local implements Contract\Icons
+final class Local implements Provider
 {
 	/** @var list<string> */
 	private array $paths;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Contract;
+namespace Cosray\Icons;
 
-interface Icons
+interface Provider
 {
 	public function icon(
 		string $id,
