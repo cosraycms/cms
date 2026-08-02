@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
-use Cosray\Node\Contract\Title as TitleContract;
+use Cosray\Contract\Title as TitleContract;
 use Cosray\Node\Type;
 use Cosray\Schema\Label;
 

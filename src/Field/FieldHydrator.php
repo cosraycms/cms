@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Cosray\Assets\Repository;
-use Cosray\Contract\HasInit;
+use Cosray\Contract\Init;
 use Cosray\Exception\NoSuchField;
 use Cosray\Exception\RuntimeException;
 use Cosray\Schema\When;
@@ -95,7 +95,7 @@ class FieldHydrator
 		}
 
 		foreach ($embedded as $instance) {
-			if (!$instance instanceof HasInit) {
+			if (!$instance instanceof Init) {
 				continue;
 			}
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Node\Contract;
+namespace Cosray\Contract;
 
 use Celema\Core\Response;
 

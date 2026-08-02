@@ -12,7 +12,7 @@ use Celema\Wire\Creator;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
-use Cosray\Contract\HasInit;
+use Cosray\Contract\Init;
 use Cosray\Exception\NoSuchField;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Definitions;
@@ -116,7 +116,7 @@ class Factory
 			'fieldsets' => Definitions::for($class)->fieldsets(),
 		];
 
-		if ($node instanceof HasInit) {
+		if ($node instanceof Init) {
 			$node->init();
 		}
 

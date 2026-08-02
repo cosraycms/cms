@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
+use Cosray\Contract\Title;
 use Cosray\Field\Checkbox;
 use Cosray\Field\Date;
 use Cosray\Field\Text;
 use Cosray\Field\Time;
-use Cosray\Node\Contract\Title;
 use Cosray\Schema\Label;
 use Cosray\Schema\When;
 use Cosray\Tests\Fixtures\Field\TestStyledText;

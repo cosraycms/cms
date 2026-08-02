@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
+use Cosray\Contract\Title;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
-use Cosray\Node\Contract\Title;
 use Cosray\Schema\DefaultValue;
 use Cosray\Schema\Description;
 use Cosray\Schema\Hidden;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Contract;
 
-interface HasInit
+interface Init
 {
 	public function init(): void;
 }

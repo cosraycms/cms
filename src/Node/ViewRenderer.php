@@ -10,7 +10,7 @@ use Celema\Core\Request;
 use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Config;
-use Cosray\Node\Contract\ProvidesRenderContext;
+use Cosray\Contract\ProvidesRenderContext;
 use Cosray\Renderer;
 
 class ViewRenderer

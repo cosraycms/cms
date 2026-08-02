@@ -500,9 +500,9 @@ final class NodeFactoryTest extends TestCase
 		$this->assertEmpty(Factory::fieldNamesFor($unknown));
 	}
 
-	// -- HasInit callback -----------------------------------------------------
+	// -- Init callback --------------------------------------------------------
 
-	public function testHasInitIsCalledForPlainObject(): void
+	public function testInitIsCalledForPlainObject(): void
 	{
 		$node = $this->factory->create(PlainPageWithInit::class, $this->context, $this->cms, [
 			'uid' => 'init-1',

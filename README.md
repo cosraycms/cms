@@ -233,7 +233,7 @@ The stored keys are `title` and `content`, never `baseFields.title`. They remain
 
 Embedding properties determine placement order; child declaration order determines their order within that placement. Without `#[Fieldset]`, children render as ordinary fields. `#[Fieldset]` groups them in the panel; `Label`, `Description`, and `Width` configure that group, and omitting `Label` produces a label-less fieldset.
 
-Embedded constructors are autowired with the node's services. Fields are assigned afterwards; implement `Cosray\Contract\HasInit` for field-dependent initialization. Embedded types are transient and cannot inject their containing node or be registered as shared services. Field names must be unique across the whole node, and recursive embeds are not supported.
+Embedded constructors are autowired with the node's services. Fields are assigned afterwards; implement `Cosray\Contract\Init` for field-dependent initialization. Embedded types are transient and cannot inject their containing node or be registered as shared services. Field names must be unique across the whole node, and recursive embeds are not supported.
 
 An outer `Title` implementation takes precedence. Otherwise, `#[Title]` can select an embedded title provider, one embedded `Title` provider is detected automatically, and ordinary explicit or `title` text fields remain supported. Multiple automatic providers are rejected as ambiguous.
 
@@ -301,13 +301,15 @@ Available attributes: `#[Label]`, `#[Handle]`, `#[Icon]`, `#[Badge]`, `#[Permiss
 
 ### Behavioral interfaces
 
-| Interface | Method | Purpose |
-| --- | --- | --- |
-| `Embedded` | — | Reusable class whose fields are flattened into its owner |
-| `Title` | `title(): string` | Computed title provider (takes precedence over implicit fields) |
-| `HasInit` | `init(): void` | Post-hydration initialization hook |
-| `HandlesFormPost` | `formPost(?array $body): Response` | Frontend form submission handling |
-| `ProvidesRenderContext` | `renderContext(): array` | Extra template variables |
+All of them live in `Cosray\Contract`.
+
+| Interface | Method | Applies to | Purpose |
+| --- | --- | --- | --- |
+| `Embedded` | — | embedded classes | Reusable class whose fields are flattened into its owner |
+| `Title` | `title(): string` | nodes, embedded | Computed title provider (takes precedence over implicit fields) |
+| `Init` | `init(): void` | nodes, embedded | Post-hydration initialization hook |
+| `HandlesFormPost` | `formPost(?array $body): Response` | nodes | Frontend form submission handling |
+| `ProvidesRenderContext` | `renderContext(): array` | nodes | Extra template variables |
 
 ### Rendering by handle or UID
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Fixtures\Node;
 
 use Cosray\Contract\Embedded;
-use Cosray\Contract\HasInit;
+use Cosray\Contract\Init;
 use Cosray\Contract\Title;
 use Cosray\Field\Text;
 use Cosray\Node\Type;
@@ -13,7 +13,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Translate;
 
 #[Label('Base fields')]
-final class TestBaseFields implements Embedded, HasInit, Title
+final class TestBaseFields implements Embedded, Init, Title
 {
 	#[Label('Embedded title')]
 	#[Translate]
