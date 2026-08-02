@@ -316,6 +316,12 @@ class Bootstrap implements CorePlugin
 			throw new RuntimeException('Icon providers must implement ' . IconProvider::class);
 		}
 
+		// Icons is the composite the container resolves for the port; as a
+		// provider it would ask itself for the icon.
+		if ($icons === Icons::class || $icons instanceof Icons) {
+			throw new RuntimeException(Icons::class . ' cannot be registered as an icon provider');
+		}
+
 		if ($replace) {
 			$this->customIconProviders = [];
 			$this->replaceDefaultIconProviders = true;

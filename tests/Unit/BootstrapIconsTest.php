@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
+use Cosray\Icons;
 use Cosray\Icons\Provider;
 use Cosray\Tests\TestCase;
 use ReflectionProperty;
@@ -48,6 +49,16 @@ final class BootstrapIconsTest extends TestCase
 		$plugin = new Bootstrap($this->config());
 		$this->throws(RuntimeException::class, 'Icon providers must implement ' . Provider::class);
 		$plugin->icons(self::class);
+	}
+
+	public function testIconsRejectsTheCompositeItself(): void
+	{
+		$plugin = new Bootstrap($this->config());
+		$this->throws(
+			RuntimeException::class,
+			Icons::class . ' cannot be registered as an icon provider',
+		);
+		$plugin->icons(Icons::class);
 	}
 
 	private function provider(): Provider

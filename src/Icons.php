@@ -33,10 +33,6 @@ final class Icons implements Provider
 		}
 
 		foreach ($this->providers() as $provider) {
-			if ($provider === $this) {
-				continue;
-			}
-
 			$svg = $provider->icon($id, $args);
 
 			if ($svg === '') {
