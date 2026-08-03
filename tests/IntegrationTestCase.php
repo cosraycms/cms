@@ -14,7 +14,6 @@ use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Migration\NodeContentNormalizer;
-use Cosray\Node\Types;
 use Cosray\Uid;
 use PDO;
 use RuntimeException;

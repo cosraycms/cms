@@ -8,7 +8,6 @@ use Celema\Core\Request;
 use Cosray\Assets\Repository;
 use Cosray\Block\Registry;
 use Cosray\Block\RenderContext;
-use Cosray\Block\Types\Heading;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;

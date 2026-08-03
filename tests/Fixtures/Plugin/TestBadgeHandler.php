@@ -13,7 +13,10 @@ final class TestBadgeHandler extends Handler
 
 	public function properties(object $meta, Field $field): array
 	{
-		assert($meta instanceof TestBadge);
+		assert(
+			$meta instanceof TestBadge,
+			'The registry only routes TestBadge attributes to this handler',
+		);
 
 		return ['badge' => $meta->badge];
 	}

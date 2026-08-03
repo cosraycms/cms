@@ -36,6 +36,7 @@ no-shorthand-ternary = { enabled = false }
 no-literal-password = { exclude = ["tests"] }
 prefer-early-continue = { enabled = false }
 readable-literal = { min-digits = 7 }
+single-class-per-file = { exclude = ["tests"] }
 strict-types = { exclude = ["tests/Fixtures"] }
 tagged-todo = { enabled = false }
 too-many-methods = { enabled = false }

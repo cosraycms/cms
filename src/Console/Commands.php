@@ -176,7 +176,7 @@ final class Commands
 	private function conn(): Connection
 	{
 		$conn = $this->container()->get(Connection::class);
-		assert($conn instanceof Connection);
+		assert($conn instanceof Connection, 'The database connection must be available');
 
 		return $conn;
 	}
@@ -194,15 +194,15 @@ final class Commands
 	{
 		$container = $this->container();
 		$factory = $container->get(Factory::class);
-		assert($factory instanceof Factory);
+		assert($factory instanceof Factory, 'The core factory must be available');
 		$db = $container->get(Database::class);
-		assert($db instanceof Database);
+		assert($db instanceof Database, 'The database must be available');
 		$services = $container->get(Services::class);
-		assert($services instanceof Services);
+		assert($services instanceof Services, 'The field services must be available');
 		$locales = $container->get(Locales::class);
-		assert($locales instanceof Locales);
+		assert($locales instanceof Locales, 'The locales service must be available');
 		$types = $container->get(Types::class);
-		assert($types instanceof Types);
+		assert($types instanceof Types, 'The node type service must be available');
 
 		$context = new Context(
 			$db,

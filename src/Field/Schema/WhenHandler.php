@@ -17,7 +17,7 @@ class WhenHandler extends Handler
 
 	public function properties(object $meta, Field $field): array
 	{
-		assert($meta instanceof When);
+		assert($meta instanceof When, 'The registry only routes When attributes to this handler');
 
 		return ['when' => $meta->condition()];
 	}
