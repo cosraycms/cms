@@ -77,6 +77,18 @@ class Factory
 
 		$creator = new Creator($this->container);
 		$type = $this->types->typeOf($class);
+
+		// The node's own view has to know the node, which does not exist yet.
+		// A lazy proxy closes over the variable and materializes on first use,
+		// by which time the node is built.
+		$node = null;
+		$view = new ReflectionClass(View::class)->newLazyProxy(
+			// By reference: an arrow function would capture the null.
+			static function () use (&$node, $templateRenderer, $cms, $context): View {
+				return new View($node, $templateRenderer, $cms, $context);
+			},
+		);
+
 		$predefinedTypes = [
 			Context::class => $context,
 			Cms::class => $cms,
@@ -88,6 +100,7 @@ class Factory
 			self::class => $this,
 			Type::class => $type,
 			ViewRenderer::class => $templateRenderer,
+			View::class => $view,
 			Serializer::class => $serializer,
 			Store::class => $store,
 			FieldHydrator::class => $this->hydrator,

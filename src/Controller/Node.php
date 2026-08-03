@@ -118,8 +118,7 @@ class Node
 			$node,
 			NodeFactory::fieldNamesFor($node),
 			$cms,
-			$context->request,
-			$context->config,
+			$context,
 		);
 	}
 

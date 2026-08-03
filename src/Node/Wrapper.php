@@ -77,7 +77,10 @@ class Wrapper
 	public function children(string $query = ''): Nodes
 	{
 		if ($this->context === null || $this->cms === null || $this->nodeFactory === null) {
-			throw new RuntimeException('children() is only available on finder-backed node proxies');
+			// Finders and the view renderer pass the cms and context, so every
+			// wrapper reaching a template or a node can do this. Only the
+			// title-resolution proxy in Serializer is built without them.
+			throw new RuntimeException('This node proxy was built without cms access');
 		}
 
 		$children = new Nodes($this->context, $this->cms, $this->nodeFactory, $this->types)

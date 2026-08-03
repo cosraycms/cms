@@ -76,8 +76,7 @@ class Render
 				$this->node,
 				Factory::fieldNamesFor($this->node),
 				$this->cms,
-				$this->context->request,
-				$this->context->config,
+				$this->context,
 				$this->templateContext,
 			);
 		} catch (Throwable $e) {

@@ -6,10 +6,9 @@ namespace Cosray\Node;
 
 use Celema\Container\Container;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
 use Celema\Core\Response;
 use Cosray\Cms;
-use Cosray\Config;
+use Cosray\Context;
 use Cosray\Contract\ViewContext;
 use Cosray\Renderer;
 
@@ -32,11 +31,11 @@ class ViewRenderer
 		object $node,
 		array $fieldNames,
 		Cms $cms,
-		Request $request,
-		Config $config,
-		array $context = [],
+		Context $context,
+		array $extra = [],
 	): Response {
-		$proxy = new Wrapper($node, $fieldNames, $this->types, $request);
+		$request = $context->request;
+		$proxy = $this->proxy($node, $fieldNames, $cms, $context);
 
 		$baseContext = [
 			'page' => $proxy,
@@ -45,14 +44,14 @@ class ViewRenderer
 			'locales' => $request->get('locales'),
 			'request' => $request,
 			'container' => $this->container,
-			'debug' => $config->debug(),
-			'env' => $config->env(),
+			'debug' => $context->config->debug(),
+			'env' => $context->config->env(),
 		];
 
 		$baseContext = array_merge(
 			$baseContext,
 			$this->viewContext($node, $proxy),
-			$context,
+			$extra,
 		);
 
 		return $this->doRender($node, $baseContext);
@@ -70,11 +69,11 @@ class ViewRenderer
 		object $node,
 		array $fieldNames,
 		Cms $cms,
-		Request $request,
-		Config $config,
-		array $context = [],
+		Context $context,
+		array $extra = [],
 	): string {
-		$proxy = new Wrapper($node, $fieldNames, $this->types, $request);
+		$request = $context->request;
+		$proxy = $this->proxy($node, $fieldNames, $cms, $context);
 
 		$baseContext = array_merge(
 			[
@@ -84,11 +83,11 @@ class ViewRenderer
 				'locales' => $request->get('locales'),
 				'request' => $request,
 				'container' => $this->container,
-				'debug' => $config->debug(),
-				'env' => $config->env(),
+				'debug' => $context->config->debug(),
+				'env' => $context->config->env(),
 			],
 			$this->viewContext($node, $proxy),
-			$context,
+			$extra,
 		);
 
 		[$type, $id] = $this->resolveRenderer($node);
@@ -105,6 +104,23 @@ class ViewRenderer
 	public function resolveRenderer(object $node): array
 	{
 		return ['view', $this->types->schemaOf($node::class)->renderer];
+	}
+
+	/**
+	 * A fully equipped proxy: built through the node factory with the cms
+	 * and context, so `children()` works on the object the template gets.
+	 */
+	private function proxy(object $node, array $fieldNames, Cms $cms, Context $context): Wrapper
+	{
+		return new Wrapper(
+			$node,
+			$fieldNames,
+			$this->types,
+			$context->request,
+			$context,
+			$cms,
+			$cms->nodeFactory(),
+		);
 	}
 
 	/** @return array<string, mixed> */

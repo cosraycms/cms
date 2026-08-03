@@ -333,10 +333,30 @@ class ContactPage implements HttpPost
     {
         $body = Form::body($this->request);
 
-        return Response::create($this->factory)->html($this->confirmation($body));
+        return $this->view->render(['error' => $this->validate($body)]);
     }
 }
 ```
+
+### Rendering a node's own view
+
+Nodes are autowired with `Cosray\Node\View`, bound to the node itself. It renders the node's template and returns the response, so a handler can answer with its own page plus a message or the submitted values:
+
+```php
+public function __construct(
+    private readonly Request $request,
+    private readonly View $view,
+) {}
+
+public function httpPost(): Response
+{
+    return $this->view->render(['error' => __('Please confirm.')]);
+}
+```
+
+`render()` returns a `Response`; `html()` returns the rendered page as a string for nodes that build their own response. The context passed here wins over `ViewContext::viewContext()`, so a node declares defaults in the hook and overrides them per request at the call site.
+
+The wrapper a template receives is fully equipped: `$page->children()`, `path()` and `meta` work the same as on a node fetched through `$cms->node`.
 
 ### Rendering by handle or UID
 

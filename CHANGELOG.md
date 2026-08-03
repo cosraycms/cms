@@ -4,6 +4,8 @@
 
 ### Breaking Changes
 
+- Added `Cosray\Node\View`, a node-bound view service in the autowired set. `$this->view->render([...])` renders the node's own template and returns the response (`html()` for the string), replacing hand-rolled `ViewRenderer::renderPage($this, Factory::fieldNamesFor($this), ...)` helpers in application nodes.
+- `ViewRenderer::renderPage()` and `renderNode()` take a `Cosray\Context` in place of the separate `Request` and `Config` arguments, and the wrapper they hand to templates is now built through the node factory. `$page->children()` works in any template; it previously threw unless the wrapper came from a finder.
 - Renamed `Cosray\Contract\ProvidesRenderContext` to `Cosray\Contract\ViewContext` and `renderContext(): array` to `viewContext(Wrapper $node): array`. The hook receives the same wrapper the template gets — `$node->meta`, `$node->path()`, `$node->children()` and field values are all available — so template preparation can move onto the node. It now also runs for embedded renders (`$cms->render()`), not just for pages.
 - Fixed `$cms->render()` by uid: the handle lookup used `one()`, which throws on an empty result, so the uid fallback was unreachable and a uid raised `UnexpectedResultCount` instead of rendering. An unknown id now raises the intended "Renderable node not found".
 - Renamed the frontend controller from `Cosray\Controller\Page` to `Cosray\Controller\Node`; it serves nodes at their public path, and nothing in the model is a page. Route names are unchanged.
