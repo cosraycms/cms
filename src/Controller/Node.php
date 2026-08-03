@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Controller;
 
-use Celema\Container\Container;
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
@@ -20,7 +19,7 @@ use Cosray\Middleware\Permission;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\Serializer;
 use Cosray\Node\Types;
-use Cosray\Node\ViewRenderer;
+use Cosray\Node\View;
 use Cosray\Node\Wrapper;
 use Cosray\Util\Path;
 
@@ -41,7 +40,6 @@ class Node
 
 	public function __construct(
 		protected readonly Factory $factory,
-		protected readonly Container $container,
 		protected readonly Types $types,
 	) {}
 
@@ -106,20 +104,7 @@ class Node
 			return $this->jsonRead($page, $context, $cms);
 		}
 
-		return $this->renderPage($page, $context, $cms);
-	}
-
-	private function renderPage(object $page, Context $context, Cms $cms): Response
-	{
-		$node = Wrapper::unwrap($page);
-		$renderer = new ViewRenderer($this->container, $this->factory, $this->types);
-
-		return $renderer->renderPage(
-			$node,
-			NodeFactory::fieldNamesFor($node),
-			$cms,
-			$context,
-		);
+		return new View($node, $cms, $context, $this->types)->render();
 	}
 
 	private function jsonRead(object $node, Context $context, Cms $cms): Response

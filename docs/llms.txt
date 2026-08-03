@@ -408,10 +408,10 @@ Stored entry items use an FQCN `type` and nested field `value`:
 
 Examples:
 
-- `$page->title?->unwrap()`
-- `(string) $page->body`
-- `$page->heroImage?->first()?->url()`
-- `$page->staff?->first()?->fullName?->unwrap()`
+- `$node->title?->unwrap()`
+- `(string) $node->body`
+- `$node->heroImage?->first()?->url()`
+- `$node->staff?->first()?->fullName?->unwrap()`
 
 `Reference` fields point at other nodes. They store a language-neutral,
 ordered `{uid}` list (`value.zxx`), unbounded by default (`#[Limit(max: 1)]`

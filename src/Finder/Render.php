@@ -11,7 +11,7 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
-use Cosray\Node\ViewRenderer;
+use Cosray\Node\View;
 use Throwable;
 
 class Render
@@ -66,19 +66,8 @@ class Render
 	public function __toString(): string
 	{
 		try {
-			$renderer = new ViewRenderer(
-				$this->context->container,
-				$this->context->factory,
-				$this->types,
-			);
-
-			return $renderer->renderNode(
-				$this->node,
-				Factory::fieldNamesFor($this->node),
-				$this->cms,
-				$this->context,
-				$this->templateContext,
-			);
+			return new View($this->node, $this->cms, $this->context, $this->types)
+				->output($this->templateContext);
 		} catch (Throwable $e) {
 			if ($this->context->config->debug()) {
 				throw $e;

@@ -354,9 +354,9 @@ public function httpPost(): Response
 }
 ```
 
-`render()` returns a `Response`; `html()` returns the rendered page as a string for nodes that build their own response. The context passed here wins over `ViewContext::viewContext()`, so a node declares defaults in the hook and overrides them per request at the call site.
+`render()` returns a `Response`; `output()` returns the rendered template as a string, for nodes that build their own response. The context passed here wins over `ViewContext::viewContext()`, so a node declares defaults in the hook and overrides them per request at the call site.
 
-The wrapper a template receives is fully equipped: `$page->children()`, `path()` and `meta` work the same as on a node fetched through `$cms->node`.
+Templates receive the node as `$node`, whether they render a served page or a node embedded through `$cms->render()`. The wrapper is fully equipped: `$node->children()`, `path()` and `meta` work the same as on a node fetched through `$cms->node`.
 
 ### Rendering by handle or UID
 

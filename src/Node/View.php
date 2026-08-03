@@ -7,9 +7,11 @@ namespace Cosray\Node;
 use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Context;
+use Cosray\Contract\ViewContext;
+use Cosray\Renderer;
 
 /**
- * A node's own view, bound to the node the factory built it for.
+ * A node's own view, bound to the node it renders.
  *
  * Nodes inject it to render themselves — typically from an `Http*` handler
  * that answers with the page plus a message or the submitted values:
@@ -28,30 +30,70 @@ final class View
 {
 	public function __construct(
 		private readonly object $node,
-		private readonly ViewRenderer $renderer,
 		private readonly Cms $cms,
 		private readonly Context $context,
+		private readonly Types $types,
 	) {}
 
 	/** @param array<string, mixed> $context */
 	public function render(array $context = []): Response
 	{
-		return $this->renderer->renderPage(
-			$this->node,
-			Factory::fieldNamesFor($this->node),
-			$this->cms,
-			$this->context,
-			$context,
-		);
+		return new Response(
+			$this->context
+				->factory
+				->response()
+				->withHeader('Content-Type', 'text/html; charset=utf-8'),
+		)->body($this->output($context));
 	}
 
 	/**
-	 * The rendered page as a string, for nodes that build their own response.
+	 * The rendered template as a string, for nodes that build their own
+	 * response and for nodes rendered into another node's template.
 	 *
 	 * @param array<string, mixed> $context
 	 */
-	public function html(array $context = []): string
+	public function output(array $context = []): string
 	{
-		return (string) $this->render($context)->getBody();
+		return $this->context
+			->container
+			->tag(Renderer::class)
+			->get('view')
+			->render(
+				$this->types->schemaOf($this->node::class)->renderer,
+				$this->templateContext($context),
+			);
+	}
+
+	/**
+	 * @param  array<string, mixed> $extra
+	 * @return array<string, mixed>
+	 */
+	private function templateContext(array $extra): array
+	{
+		$request = $this->context->request;
+		$proxy = new Wrapper(
+			$this->node,
+			Factory::fieldNamesFor($this->node),
+			$this->types,
+			$request,
+			$this->context,
+			$this->cms,
+			$this->cms->nodeFactory(),
+		);
+
+		return array_merge(
+			[
+				'node' => $proxy,
+				'cms' => $this->cms,
+				'locale' => $request->get('locale'),
+				'locales' => $request->get('locales'),
+				'request' => $request,
+				'container' => $this->context->container,
+				'debug' => $this->context->config->debug(),
+				'env' => $this->context->config->env(),
+			],
+			$this->node instanceof ViewContext ? $this->node->viewContext($proxy) : [],
+			$extra,
+		);
 	}
 }
