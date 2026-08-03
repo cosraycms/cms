@@ -7,7 +7,7 @@ namespace Cosray\Contract;
 use Celema\Core\Response;
 
 /**
- * Replaces the default page render for this node.
+ * Replaces the default view render for this node.
  *
  * Cosray dispatches to it before its own handling of GET, so the node
  * also owns content negotiation for this method. Read the request body

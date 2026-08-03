@@ -521,7 +521,7 @@ Examples:
 
 6) Rendering model
 
-- Page routing resolves node by URL path and renders template output.
+- Frontend routing resolves node by URL path and renders template output.
 - A node answers a method on its own path by implementing `Cosray\Contract\HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete`; the hook runs before the CMS defaults and takes over content negotiation for that request.
 - Without a hook: GET renders the view, GET with `Accept: application/json` returns the JSON read output, any other method answers 400.
 - The hooks take no arguments. Read the body through the autowired `Celema\Core\Request`, or `Cosray\Util\Form::body($request)` for PUT and JSON payloads.
@@ -529,10 +529,10 @@ Examples:
 
 Render context keys available to renderers include:
 
-- `page` or `node` (wrapper)
+- `node` (wrapper)
 - `cms`, `locale`, `locales`, `request`, `container`, `debug`, `env`
 
-`ViewContext` can inject additional template context. `viewContext(Wrapper $node)` receives the same wrapper the template gets, and runs for pages and for embedded `$cms->render()` output alike, so view preparation can live on the node instead of at the top of the template.
+`ViewContext` can inject additional template context. `viewContext(Wrapper $node)` receives the same wrapper the template gets, and runs for served nodes and for embedded `$cms->render()` output alike, so view preparation can live on the node instead of at the top of the template.
 
 7) Panel/API surface (high-level)
 

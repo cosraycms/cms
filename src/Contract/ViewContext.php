@@ -11,11 +11,11 @@ interface ViewContext
 	/**
 	 * Extra template variables for this node's view.
 	 *
-	 * Runs whenever the node is rendered — as a page and when it is
-	 * embedded through `$cms->render()`. The wrapper is the same object the
-	 * template receives, so view preparation can move here unchanged.
+	 * Runs whenever the node is rendered — at its own url path and when it
+	 * is embedded through `$cms->render()`. The wrapper is the same object
+	 * the template receives, so view preparation can move here unchanged.
 	 *
-	 * Returned keys are merged over the base context (`page`/`node`, `cms`,
+	 * Returned keys are merged over the base context (`node`, `cms`,
 	 * `locale`, `request`, ...), so reusing one of those names replaces it.
 	 *
 	 * @return array<string, mixed>

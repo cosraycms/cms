@@ -340,7 +340,7 @@ class ContactPage implements HttpPost
 
 ### Rendering a node's own view
 
-Nodes are autowired with `Cosray\Node\View`, bound to the node itself. It renders the node's template and returns the response, so a handler can answer with its own page plus a message or the submitted values:
+Nodes are autowired with `Cosray\Node\View`, bound to the node itself. It renders the node's template and returns the response, so a handler can answer with the node itself plus a message or the submitted values:
 
 ```php
 public function __construct(
@@ -356,7 +356,7 @@ public function httpPost(): Response
 
 `render()` returns a `Response`; `output()` returns the rendered template as a string, for nodes that build their own response. The context passed here wins over `ViewContext::viewContext()`, so a node declares defaults in the hook and overrides them per request at the call site.
 
-Templates receive the node as `$node`, whether they render a served page or a node embedded through `$cms->render()`. The wrapper is fully equipped: `$node->children()`, `path()` and `meta` work the same as on a node fetched through `$cms->node`.
+Templates receive the node as `$node`, whether it is served at its own url path or embedded through `$cms->render()`. The wrapper is fully equipped: `$node->children()`, `path()` and `meta` work the same as on a node fetched through `$cms->node`.
 
 ### Rendering by handle or UID
 

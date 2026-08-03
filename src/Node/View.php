@@ -14,7 +14,7 @@ use Cosray\Renderer;
  * A node's own view, bound to the node it renders.
  *
  * Nodes inject it to render themselves — typically from an `Http*` handler
- * that answers with the page plus a message or the submitted values:
+ * that answers with the node plus a message or the submitted values:
  *
  * ```php
  * public function httpPost(): Response

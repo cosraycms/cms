@@ -423,7 +423,7 @@ class Bootstrap implements CorePlugin
 	}
 
 	/**
-	 * Catchall for page url paths.
+	 * Catchall for node url paths.
 	 *
 	 * Should be the last one
 	 */
