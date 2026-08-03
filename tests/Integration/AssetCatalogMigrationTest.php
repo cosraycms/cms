@@ -120,6 +120,8 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 				VALUES (:item, null, 'migtest', 1, :data::jsonb)",
 			[
 				'item' => "migtest-{$this->nodeUid}",
+				// Pre-migration data: the linked type was still called 'page'
+				// when the asset catalog migration ran.
 				'data' => json_encode(['type' => 'page', 'image' => 'logo.png']),
 			],
 		)->run();

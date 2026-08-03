@@ -38,7 +38,7 @@ final class MenuFinderTest extends IntegrationTestCase
 				'parent' => null,
 				'position' => 1,
 				'data' => [
-					'type' => 'page',
+					'type' => 'node',
 					'title' => ['en' => 'Home', 'de' => 'Startseite'],
 					'path' => ['en' => '/', 'de' => '/de/'],
 				],
@@ -48,7 +48,7 @@ final class MenuFinderTest extends IntegrationTestCase
 				'parent' => null,
 				'position' => 2,
 				'data' => [
-					'type' => 'page',
+					'type' => 'node',
 					'title' => ['en' => 'About', 'de' => 'Über uns'],
 					'path' => ['en' => '/about', 'de' => '/ueber-uns'],
 				],
@@ -58,7 +58,7 @@ final class MenuFinderTest extends IntegrationTestCase
 				'parent' => 'about',
 				'position' => 1,
 				'data' => [
-					'type' => 'page',
+					'type' => 'node',
 					'title' => ['en' => 'Team', 'de' => 'Team'],
 					'path' => ['en' => '/about/team', 'de' => '/ueber-uns/team'],
 				],
@@ -68,7 +68,7 @@ final class MenuFinderTest extends IntegrationTestCase
 				'parent' => null,
 				'position' => 3,
 				'data' => [
-					'type' => 'page',
+					'type' => 'node',
 					'title' => ['en' => 'Contact', 'de' => 'Kontakt'],
 					'path' => ['en' => '/contact', 'de' => '/kontakt'],
 					'class' => 'contact-link',
@@ -141,7 +141,7 @@ final class MenuFinderTest extends IntegrationTestCase
 
 		$this->assertEquals('Home', $home->title());
 		$this->assertEquals('/', $home->path());
-		$this->assertEquals('page', $home->type());
+		$this->assertEquals('node', $home->type());
 		$this->assertEquals(1, $home->level());
 		$this->assertFalse($home->hasChildren());
 	}

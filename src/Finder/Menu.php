@@ -85,7 +85,7 @@ class Menu implements Iterator
 			);
 
 			$content = match ($item->type()) {
-				'page' => sprintf('<a href="%s">%s</a>', $item->path(), $content),
+				'node' => sprintf('<a href="%s">%s</a>', $item->path(), $content),
 				default => $content,
 			};
 
