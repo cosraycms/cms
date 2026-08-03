@@ -70,6 +70,10 @@ final class Commands
 			RecreateSortIndex::class => fn(): RecreateSortIndex => new RecreateSortIndex($this->conn()),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
 			InstallPanel::class => fn(): InstallPanel => new InstallPanel($this->app->config),
+			// Every sibling is `fn(): X => new X(...)`, which has no first-class
+			// callable form. `$this->titles(...)` is equivalent but would break
+			// the symmetry of the map.
+			// @mago-expect lint:prefer-first-class-callable
 			Titles::class => fn(): Titles => $this->titles(),
 		]);
 	}
