@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- Renamed the `edit-pages` role permission to `edit-nodes`. Permissions are derived from the role in code, not stored, so no migration is needed — but an app calling `$user->hasPermission('edit-pages')` must be updated.
 - Renamed the linked menu item type from `page` to `node`, and the menu item's node reference key from `page` to `node`. Migration `000000-000024` rewrites both inside `menu_items.data`. `$menu->html()` output is unchanged; application code branching on `$item->type()` must compare against `'node'`.
 - Replaced `Cosray\Node\ViewRenderer` with `Cosray\Node\View`, a node-bound view service in the autowired set. `$this->view->render([...])` renders the node's own template and returns a `Response`; `output()` returns the rendered template as a string. This drops the hand-rolled `ViewRenderer::renderPage($this, Factory::fieldNamesFor($this), ...)` helpers from application nodes, and the `renderPage()`/`renderNode()` pair, which differed in both return type and template variable, is gone. `Cosray\Controller\Node` no longer takes a `Container`.
 - Templates receive the node as `$node`, for a served page as well as for a node embedded through `$cms->render()`. The page-only `$page` binding is gone and must be renamed in every template. The wrapper is now built through the node factory too, so `$node->children()` works in any template; it previously threw unless the wrapper came from a finder.
