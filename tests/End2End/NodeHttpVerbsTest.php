@@ -20,14 +20,14 @@ use Cosray\Tests\Fixtures\Node\HttpVerbsPage;
  *
  * @coversNothing
  */
-final class PageHttpVerbsTest extends End2EndTestCase
+final class NodeHttpVerbsTest extends End2EndTestCase
 {
 	protected function setUp(): void
 	{
 		parent::setUp();
 
 		$this->loadFixtures('basic-types');
-		$this->createHandlerPage();
+		$this->createHandlerNode();
 	}
 
 	protected function createBootstrap(Config $config): Bootstrap
@@ -124,7 +124,7 @@ final class PageHttpVerbsTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $this->makeRequest('GET', '/preview/no-such-page'));
 	}
 
-	private function createHandlerPage(): void
+	private function createHandlerNode(): void
 	{
 		$typeId = $this->createTestType('http-verbs-page');
 		$nodeId = $this->createTestNode([
