@@ -289,19 +289,19 @@ final class Nodes implements Iterator
 			$this->fetchResult();
 		}
 
-		$page = $this->result->current();
+		$row = $this->result->current();
 
-		$page['content'] = json_decode($page['content'], true);
-		$page['editor_data'] = json_decode($page['editor_data'], true);
-		$page['creator_data'] = json_decode($page['creator_data'], true);
-		$page['paths'] = json_decode($page['paths'], true);
+		$row['content'] = json_decode($row['content'], true);
+		$row['editor_data'] = json_decode($row['editor_data'], true);
+		$row['creator_data'] = json_decode($row['creator_data'], true);
+		$row['paths'] = json_decode($row['paths'], true);
 		$class = $this->context
 			->container
 			->tag(Bootstrap::NODE_TAG)
-			->entry($page['type_handle'])
+			->entry($row['type_handle'])
 			->definition();
 
-		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $page);
+		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $row);
 
 		return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
 	}

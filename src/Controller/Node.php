@@ -54,9 +54,9 @@ class Node
 			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path);
 		}
 
-		$page = $cms->node->byPath($path === '' ? '/' : $path);
+		$node = $cms->node->byPath($path === '' ? '/' : $path);
 
-		if (!$page) {
+		if (!$node) {
 			try {
 				$path = Path::inside($config->path->public, $path);
 
@@ -68,32 +68,32 @@ class Node
 			}
 		}
 
-		return $this->dispatch($page, $context, $cms);
+		return $this->dispatch($node, $context, $cms);
 	}
 
 	#[Permission('panel')]
 	public function preview(Context $context, Cms $cms, string $slug): Response
 	{
-		$page = $cms->node->byPath('/' . $slug);
+		$node = $cms->node->byPath('/' . $slug);
 
-		if (!$page) {
+		if (!$node) {
 			throw new HttpNotFound($context->request);
 		}
 
 		// Preview goes through the same dispatch as the public path, so a
 		// node that answers GET itself is previewed the way it is served.
-		return $this->dispatch($page, $context, $cms);
+		return $this->dispatch($node, $context, $cms);
 	}
 
-	private function dispatch(object $page, Context $context, Cms $cms): Response
+	private function dispatch(object $node, Context $context, Cms $cms): Response
 	{
 		$request = $context->request;
 		$method = $request->method();
 		$handler = self::HANDLERS[$method] ?? null;
-		$node = Wrapper::unwrap($page);
+		$inner = Wrapper::unwrap($node);
 
-		if ($handler !== null && $node instanceof $handler[0]) {
-			return $node->{$handler[1]}();
+		if ($handler !== null && $inner instanceof $handler[0]) {
+			return $inner->{$handler[1]}();
 		}
 
 		if ($method !== 'GET') {
@@ -101,10 +101,10 @@ class Node
 		}
 
 		if ($request->get('isXhr', false)) {
-			return $this->jsonRead($page, $context, $cms);
+			return $this->jsonRead($node, $context, $cms);
 		}
 
-		return new View($node, $cms, $context, $this->types)->render();
+		return new View($inner, $cms, $context, $this->types)->render();
 	}
 
 	private function jsonRead(object $node, Context $context, Cms $cms): Response
