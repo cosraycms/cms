@@ -160,6 +160,11 @@ export class CosrayHost extends HTMLElement {
 	}
 }
 
-if (!customElements.get('cosray-host')) {
-	customElements.define('cosray-host', CosrayHost);
+// Defining the element upgrades every host already in the document
+// synchronously, and each upgrade resolves its module against the runtime
+// panel base — so the caller has to configure the runtime first.
+export function installHost(): void {
+	if (!customElements.get('cosray-host')) {
+		customElements.define('cosray-host', CosrayHost);
+	}
 }

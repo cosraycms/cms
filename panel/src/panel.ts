@@ -1,5 +1,4 @@
 import '../styles/panel.css';
-import '$lib/host';
 
 import type { BridgeSystem } from '$lib/bridge';
 
@@ -12,6 +11,7 @@ import { install as installTabs } from './behaviors/tabs';
 import { install as installWhen } from './behaviors/when';
 import { installBridge } from '$lib/bridge-standalone';
 import { loadElement } from '$lib/elements';
+import { installHost } from '$lib/host';
 import { configureRuntime } from '$lib/runtime';
 
 const mainSelector = '#main';
@@ -156,7 +156,12 @@ listen('htmx:pushedIntoHistory' as keyof DocumentEventMap, updateNavigation);
 listen('htmx:after:history:update' as keyof DocumentEventMap, updateNavigation);
 
 updateNavigation();
+// bootEditor first: defining cosray-host upgrades the hosts already parsed
+// into the page, and each upgrade resolves its module against the panel base
+// the payload carries. Defining earlier resolves against the default base and
+// every control on a first page load fails to load.
 bootEditor();
+installHost();
 bootElements();
 
 if (import.meta.hot) {
