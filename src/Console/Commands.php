@@ -7,11 +7,8 @@ namespace Cosray\Console;
 use Celema\Console\Commands as BaseCommands;
 use Celema\Console\Runner;
 use Celema\Container\Container;
-use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
 use Celema\Quma\Commands as QumaCommands;
 use Celema\Quma\Connection;
-use Celema\Quma\Database;
 use Celema\Server\FrankenPhp;
 use Celema\Server\Server;
 use Celema\Server\Setup;
@@ -21,19 +18,14 @@ use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Closure;
 use Cosray\App;
-use Cosray\Cms;
 use Cosray\Commands\Fulltext;
 use Cosray\Commands\InstallPanel;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
-use Cosray\Context;
-use Cosray\Field\Services;
 use Cosray\I18n\SchemaScanner;
-use Cosray\Locales;
 use Cosray\MigrationFactory;
-use Cosray\Node\Types;
 
 /**
  * The base CLI command set of a Cosray application.
@@ -54,10 +46,12 @@ use Cosray\Node\Types;
 final class Commands
 {
 	private readonly BaseCommands $commands;
+	private ?Runtime $runtime = null;
 
 	public function __construct(
 		private readonly App $app,
 	) {
+		$app->boot();
 		$container = $app->container();
 
 		$this->commands = QumaCommands::get(
@@ -70,11 +64,7 @@ final class Commands
 			RecreateSortIndex::class => fn(): RecreateSortIndex => new RecreateSortIndex($this->conn()),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
 			InstallPanel::class => fn(): InstallPanel => new InstallPanel($this->app->config),
-			// Every sibling is `fn(): X => new X(...)`, which has no first-class
-			// callable form. `$this->titles(...)` is equivalent but would break
-			// the symmetry of the map.
-			// @mago-expect lint:prefer-first-class-callable
-			Titles::class => fn(): Titles => $this->titles(),
+			Titles::class => fn(): Titles => $this->resolve(Titles::class),
 		]);
 	}
 
@@ -83,6 +73,16 @@ final class Commands
 		string $description = '',
 		?Closure $command = null,
 	): self {
+		if (is_string($commands)) {
+			$this->commands->add([$commands => fn(): object => $this->resolve($commands)]);
+
+			return $this;
+		}
+
+		if (is_array($commands)) {
+			$commands = $this->withAutowiredClasses($commands);
+		}
+
 		$this->commands->add($commands, $description, $command);
 
 		return $this;
@@ -190,38 +190,26 @@ final class Commands
 		return $this->app->container();
 	}
 
-	/**
-	 * Builds the `db:titles` command, which needs the booted app context
-	 * (node type registry and locales).
-	 */
-	private function titles(): Titles
+	/** @param class-string $class */
+	private function resolve(string $class): object
 	{
-		$container = $this->container();
-		$factory = $container->get(Factory::class);
-		assert($factory instanceof Factory, 'The core factory must be available');
-		$db = $container->get(Database::class);
-		assert($db instanceof Database, 'The database must be available');
-		$services = $container->get(Services::class);
-		assert($services instanceof Services, 'The field services must be available');
-		$locales = $container->get(Locales::class);
-		assert($locales instanceof Locales, 'The locales service must be available');
-		$types = $container->get(Types::class);
-		assert($types instanceof Types, 'The node type service must be available');
+		return ($this->runtime ??= new Runtime($this->app))->get($class);
+	}
 
-		$context = new Context(
-			$db,
-			new Request($factory->serverRequest()),
-			$this->app->config,
-			$container,
-			$factory,
-		);
+	private function withAutowiredClasses(array $commands): array
+	{
+		$result = [];
 
-		return new Titles(
-			$this->conn(),
-			$context,
-			new Cms($context, $services),
-			$locales,
-			$types,
-		);
+		foreach ($commands as $key => $command) {
+			if (is_int($key) && is_string($command)) {
+				$result[$command] = fn(): object => $this->resolve($command);
+
+				continue;
+			}
+
+			$result[$key] = $command;
+		}
+
+		return $result;
 	}
 }
