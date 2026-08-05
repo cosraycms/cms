@@ -130,6 +130,7 @@ class Bootstrap implements CorePlugin
 		$this->database();
 
 		$this->container->add($this->container::class, $this->container);
+		$this->container->add(self::class, $this);
 		$this->container->add(Config::class, $this->config);
 		$this->container->add($this->config::class, $this->config);
 		$this->container->add(Connection::class, $this->connection);

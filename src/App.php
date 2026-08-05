@@ -46,6 +46,7 @@ class App implements RouteAdder
 	) {
 		$this->core = new CoreApp($factory, $router, $container);
 		$this->bootstrap = new Bootstrap($config);
+		$container->add(self::class, $this);
 		$this->addErrorHandler($container, $factory);
 	}
 

@@ -41,6 +41,7 @@ final class AppTest extends TestCase
 		$this->assertSame(3, $app->config->get('custom.value'));
 		$this->assertInstanceOf(CoreApp::class, $app->core());
 		$this->assertInstanceOf(Bootstrap::class, $app->bootstrap());
+		$this->assertSame($app, $app->container()->get(App::class));
 	}
 
 	public function testCreateHelperRequiresRoot(): void
@@ -153,6 +154,7 @@ final class AppTest extends TestCase
 		);
 
 		$this->assertSame($app->config(), $app->container()->get(Config::class));
+		$this->assertSame($app->bootstrap(), $app->container()->get(Bootstrap::class));
 		$this->assertSame('cms.catchall', $match->route()->name());
 	}
 

@@ -35,6 +35,7 @@ final class CommandsTest extends TestCase
 
 		$this->assertInstanceOf(ScopedCommand::class, $command);
 		$this->assertInstanceOf(Cms::class, $command->cms);
+		$this->assertSame($app, $command->app);
 		$this->assertNull($command->context->request);
 		$this->assertSame('en', $command->context->localeId());
 	}
@@ -89,6 +90,7 @@ final class ScopedCommand
 	public function __construct(
 		public readonly Context $context,
 		public readonly Cms $cms,
+		public readonly App $app,
 	) {}
 }
 
