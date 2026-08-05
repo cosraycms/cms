@@ -17,6 +17,7 @@ use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Actor;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
 use Cosray\Node\RoutePathGenerator;
@@ -28,6 +29,7 @@ use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
 use Cosray\Panel\System;
+use Throwable;
 
 final class Editor extends Panel
 {
@@ -135,7 +137,7 @@ final class Editor extends Panel
 		$htmx = $this->request->hasHeader('HX-Request');
 
 		try {
-			$store->save($nodeObj, $data, $this->request, $context->locales());
+			$store->save($nodeObj, $data, $context->locales(), $this->actor());
 		} catch (HttpBadRequest $e) {
 			if (!$htmx) {
 				// Non-htmx fallback follows the PRG pattern; errors are
@@ -218,7 +220,7 @@ final class Editor extends Panel
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		try {
-			$result = $store->create($nodeObj, $data, $this->request, $context->locales());
+			$result = $store->create($nodeObj, $data, $context->locales(), $this->actor());
 		} catch (HttpBadRequest $e) {
 			if (!$this->request->hasHeader('HX-Request')) {
 				return Response::create($factory)->redirect($links->create($type), 303);
@@ -267,7 +269,7 @@ final class Editor extends Panel
 			cms: $cms,
 			context: $context,
 		);
-		$store->delete(Wrapper::unwrap($result), $this->request, requireJson: false);
+		$store->delete(Wrapper::unwrap($result), $this->actor());
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		return Response::create($factory)->redirect($links->collection(), 303);
@@ -510,6 +512,17 @@ final class Editor extends Panel
 		}
 
 		return $handles;
+	}
+
+	private function actor(): Actor
+	{
+		try {
+			$id = $this->request->get('session')->authenticatedUserId();
+		} catch (Throwable) {
+			$id = null;
+		}
+
+		return $id ? new Actor((int) $id) : Actor::system();
 	}
 
 	private function types(): Types

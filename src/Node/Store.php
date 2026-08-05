@@ -7,7 +7,6 @@ namespace Cosray\Node;
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpError;
-use Celema\Core\Request;
 use Celema\Quma\Database;
 use Cosray\Cms;
 use Cosray\Context;
@@ -54,12 +53,12 @@ class Store
 	public function save(
 		object $node,
 		array $data,
-		Request $request,
 		Locales $locales,
+		Actor $actor,
 		bool $create = false,
 	): array {
 		$data = $this->normalizeSubmittedHandle($data);
-		$data = $this->validate($node, $data, $locales, $request);
+		$data = $this->validate($node, $data, $locales);
 
 		if (is_array($data['content'] ?? null)) {
 			// Richtext documents persist in canonical form (byte-stable
@@ -68,33 +67,31 @@ class Store
 		}
 
 		if (!$create) {
-			$this->assertUidUnchanged($node, $data, $request);
+			$this->assertUidUnchanged($node, $data);
 		}
 
 		$data = $this->completeHandle($node, $data);
 
 		if ($data['locked']) {
-			throw new HttpBadRequest($request, payload: ['message' => __('node:locked')]);
+			throw new HttpBadRequest(payload: ['message' => __('node:locked')]);
 		}
 
-		try {
-			$editor = $request->get('session')->authenticatedUserId();
+		$ownsTransaction = !$this->db->getConn()->inTransaction();
 
-			if (!$editor) {
-				$editor = 1;
+		try {
+			if ($ownsTransaction) {
+				$this->db->begin();
 			}
-		} catch (Throwable) {
-			$editor = 1;
-		}
 
-		try {
-			$this->db->begin();
+			$this->persist($node, $data, $actor->id, $locales, $create);
 
-			$this->persist($node, $data, $editor, $locales, $request, $create);
-
-			$this->db->commit();
+			if ($ownsTransaction) {
+				$this->db->commit();
+			}
 		} catch (Throwable $e) {
-			$this->db->rollback();
+			if ($ownsTransaction) {
+				$this->db->rollback();
+			}
 
 			if ($e instanceof HttpError) {
 				throw $e;
@@ -113,7 +110,7 @@ class Store
 		];
 	}
 
-	public function create(object $node, array $data, Request $request, Locales $locales): array
+	public function create(object $node, array $data, Locales $locales, Actor $actor): array
 	{
 		$generatedUid = !array_key_exists('uid', $data);
 		if ($generatedUid) {
@@ -127,7 +124,7 @@ class Store
 			}
 
 			try {
-				return $this->save($node, $data, $request, $locales, create: true);
+				return $this->save($node, $data, $locales, $actor, create: true);
 			} catch (HttpConflict $e) {
 				if (!$generatedUid || $attempt === $attempts) {
 					throw $e;
@@ -138,17 +135,13 @@ class Store
 		throw new RuntimeException('Could not generate a unique node uid');
 	}
 
-	public function delete(object $node, Request $request, bool $requireJson = true): array
+	public function delete(object $node, Actor $actor): array
 	{
-		if ($requireJson && $request->header('Accept') !== 'application/json') {
-			throw new HttpBadRequest($request);
-		}
-
 		$uid = Factory::meta($node, 'uid');
 
 		$this->db->nodes->delete([
 			'uid' => $uid,
-			'editor' => $request->get('session')->authenticatedUserId(),
+			'editor' => $actor->id,
 		])->run();
 
 		return [
@@ -157,14 +150,14 @@ class Store
 		];
 	}
 
-	public function validate(object $node, array $data, Locales $locales, Request $request): array
+	public function validate(object $node, array $data, Locales $locales): array
 	{
 		$factory = new ValidatorFactory($node, $locales);
 		$shape = $factory->create();
 		$result = $shape->validate($data);
 
 		if (!$result->valid()) {
-			throw new HttpBadRequest($request, payload: [
+			throw new HttpBadRequest(payload: [
 				'message' => __('node:invalid-data'),
 				'errors' => $result->issues(),
 			]);
@@ -178,27 +171,26 @@ class Store
 		array $data,
 		int $editor,
 		Locales $locales,
-		Request $request,
 		bool $create = false,
 	): void {
-		$parentUid = $this->resolveParentUid($node, $data, $request);
-		$parentId = $this->resolveParentId($parentUid, $request);
+		$parentUid = $this->resolveParentUid($node, $data);
+		$parentId = $this->resolveParentId($parentUid);
 		$handle = $this->resolveHandle($data);
 
 		// Materialize the title alongside the content so both ride one UPDATE
 		// (a single change/history record instead of two).
-		$data['title'] = $this->materializeTitle($node, $data, $request, $locales);
+		$data['title'] = $this->materializeTitle($node, $data, $locales);
 
-		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $request);
-		$this->persistHandle($nodeId, $handle, $editor, $request);
+		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create);
+		$this->persistHandle($nodeId, $handle, $editor);
 
 		// The reference indexes ride in the save transaction: full
 		// replace per owner from the content just written.
 		$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
-			$this->ensureRouteHandle($node, $handle, $request);
-			$data = $this->completeGeneratedPaths($node, $data, $locales, $parentId, $request);
+			$this->ensureRouteHandle($node, $handle);
+			$data = $this->completeGeneratedPaths($node, $data, $locales, $parentId);
 			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
 	}
@@ -212,7 +204,6 @@ class Store
 	private function materializeTitle(
 		object $node,
 		array $data,
-		Request $request,
 		Locales $locales,
 	): array {
 		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
@@ -220,7 +211,7 @@ class Store
 
 		return match ($descriptor['kind']) {
 			TitleResolver::KIND_FIELD => $this->titleResolver->fieldMap($content, $descriptor['field']),
-			TitleResolver::KIND_DYNAMIC => $this->dynamicTitle($node, $data, $request, $locales),
+			TitleResolver::KIND_DYNAMIC => $this->dynamicTitle($node, $data, $locales),
 			default => [],
 		};
 	}
@@ -231,7 +222,7 @@ class Store
 	 *
 	 * @return array<string, string>
 	 */
-	private function dynamicTitle(object $node, array $data, Request $request, Locales $locales): array
+	private function dynamicTitle(object $node, array $data, Locales $locales): array
 	{
 		$target = $this->titleEvalNode($node, $data);
 		$provider = $this->titleResolver->provider($target);
@@ -240,20 +231,20 @@ class Store
 			return [];
 		}
 
-		$original = $request->get('locale', null);
-
-		try {
+		if ($this->context === null) {
 			return $this->titleResolver->dynamicMap(
-				static function (Locale $locale) use ($provider, $request): string {
-					$request->set('locale', $locale);
-
-					return $provider->title();
-				},
+				static fn(Locale $locale): string => $provider->title(),
 				$locales,
 			);
-		} finally {
-			$request->set('locale', $original);
 		}
+
+		return $this->titleResolver->dynamicMap(
+			fn(Locale $locale): string => $this->context->withLocale(
+				$locale,
+				$provider->title(...),
+			),
+			$locales,
+		);
 	}
 
 	/**
@@ -280,7 +271,6 @@ class Store
 		int $editor,
 		?int $parent,
 		bool $create,
-		Request $request,
 	): int {
 		$class = $node::class;
 		$handle = (string) $this->types->get($class, 'handle');
@@ -319,7 +309,7 @@ class Store
 		$result = $this->db->nodes->create($params)->first();
 
 		if (!$result) {
-			throw new HttpConflict($request, payload: [
+			throw new HttpConflict(payload: [
 				'message' => __('node:duplicate-uid', ['uid' => $data['uid']]),
 			]);
 		}
@@ -327,7 +317,7 @@ class Store
 		return (int) $result['node'];
 	}
 
-	private function persistHandle(int $nodeId, ?string $handle, int $editor, Request $request): void
+	private function persistHandle(int $nodeId, ?string $handle, int $editor): void
 	{
 		if ($handle === null) {
 			$this->db->nodes->deleteHandle(['node' => $nodeId])->run();
@@ -341,7 +331,7 @@ class Store
 			->first();
 
 		if ($collision) {
-			throw new HttpConflict($request, payload: [
+			throw new HttpConflict(payload: [
 				'message' => __('node:duplicate-handle-uid', ['handle' => $handle]),
 			]);
 		}
@@ -354,7 +344,7 @@ class Store
 			])->run();
 		} catch (Throwable $e) {
 			if ((string) $e->getCode() === '23505') {
-				throw new HttpConflict($request, payload: [
+				throw new HttpConflict(payload: [
 					'message' => __('node:duplicate-handle', ['handle' => $handle]),
 				]);
 			}
@@ -363,7 +353,7 @@ class Store
 		}
 	}
 
-	private function resolveParentUid(object $node, array $data, Request $request): ?string
+	private function resolveParentUid(object $node, array $data): ?string
 	{
 		$parentUid = array_key_exists('parent', $data)
 			? $data['parent']
@@ -374,7 +364,7 @@ class Store
 		}
 
 		if (!is_string($parentUid)) {
-			throw new HttpBadRequest($request, payload: [
+			throw new HttpBadRequest(payload: [
 				'message' => __('node:parent-not-string'),
 			]);
 		}
@@ -388,7 +378,7 @@ class Store
 		return $parentUid;
 	}
 
-	private function resolveParentId(?string $parentUid, Request $request): ?int
+	private function resolveParentId(?string $parentUid): ?int
 	{
 		if ($parentUid === null) {
 			return null;
@@ -400,7 +390,7 @@ class Store
 			->first();
 
 		if (!$parent) {
-			throw new HttpBadRequest($request, payload: [
+			throw new HttpBadRequest(payload: [
 				'message' => __('node:invalid-parent', ['uid' => $parentUid]),
 			]);
 		}
@@ -408,7 +398,7 @@ class Store
 		return (int) $parent['node'];
 	}
 
-	private function assertUidUnchanged(object $node, array $data, Request $request): void
+	private function assertUidUnchanged(object $node, array $data): void
 	{
 		$uid = Factory::meta($node, 'uid');
 
@@ -416,7 +406,7 @@ class Store
 			return;
 		}
 
-		throw new HttpBadRequest($request, payload: [
+		throw new HttpBadRequest(payload: [
 			'message' => __('node:uid-immutable'),
 		]);
 	}
@@ -457,7 +447,7 @@ class Store
 		return $handle === '' ? null : $handle;
 	}
 
-	private function ensureRouteHandle(object $node, ?string $handle, Request $request): void
+	private function ensureRouteHandle(object $node, ?string $handle): void
 	{
 		$route = $this->types->get($node::class, 'route');
 
@@ -465,7 +455,7 @@ class Store
 			return;
 		}
 
-		throw new HttpBadRequest($request, payload: [
+		throw new HttpBadRequest(payload: [
 			'message' => __('node:handle-required'),
 		]);
 	}
@@ -475,7 +465,6 @@ class Store
 		array $data,
 		Locales $locales,
 		?int $parentId,
-		Request $request,
 	): array {
 		if (!$this->needsGeneratedPaths($data)) {
 			return $data;
@@ -490,7 +479,6 @@ class Store
 			);
 		} catch (RoutePathError $e) {
 			throw new HttpBadRequest(
-				$request,
 				payload: [
 					'message' => $e->getMessage(),
 				],

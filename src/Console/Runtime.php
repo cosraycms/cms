@@ -14,6 +14,7 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Locales;
+use Cosray\Node\Writer;
 use UnexpectedValueException;
 
 /**
@@ -32,6 +33,7 @@ final class Runtime
 		$this->container = $app->container()->scope();
 		$this->container->add(Context::class, self::context(...))->scoped();
 		$this->container->add(Cms::class)->scoped();
+		$this->container->add(Writer::class)->scoped();
 		$context = $this->container->get(Context::class);
 		assert($context instanceof Context, 'The console context must be available');
 		$this->previousTranslator = Verba::translator();
