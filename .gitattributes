@@ -1,4 +1,5 @@
 * text=lf
+/resources/migration/* -diff -whitespace
 
 /.* export-ignore
 /*.toml export-ignore

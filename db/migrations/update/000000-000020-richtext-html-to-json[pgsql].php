@@ -7,8 +7,8 @@ namespace Quma\Migrations\M000000_000020_RichtextHtmlToJson;
 use Celema\Quma\Contract;
 use Celema\Quma\Environment;
 use Cosray\Config;
-use Cosray\Exception\RuntimeException;
 use Cosray\Field\RichText;
+use Cosray\Migration\LegacyRichtextHtmlConverter;
 use Cosray\Richtext\Envelope;
 use Cosray\Richtext\Normalizer;
 
@@ -18,9 +18,7 @@ use Cosray\Richtext\Normalizer;
  * the cosray richtext format (docs/richtext-format.md).
  *
  * The HTML parses through the panel's own editor schema via the
- * bundled node converter (panel/static/tools/richtext-convert.mjs,
- * jsdom + prosemirror-model from panel/node_modules — run `pnpm
- * install && pnpm run build` in panel/ first). Internal links resolve
+ * Composer-packaged legacy converter. Internal links resolve
  * to `link.node` via url_paths, uid-form asset URLs to `link.asset` /
  * inline `image` nodes via the catalog layout. A report lands in
  * `richtext-migration-report.json` at the project root.
@@ -76,6 +74,7 @@ final class Migration implements Contract\Migration
 
 	public function __construct(
 		private readonly Config $config,
+		private readonly LegacyRichtextHtmlConverter $converter,
 	) {}
 
 	public function run(Environment $env): void
@@ -417,69 +416,7 @@ final class Migration implements Contract\Migration
 	/** @return array<string, null|array> */
 	private function convert(): array
 	{
-		$panel = dirname(__DIR__, 3) . '/panel';
-		$script = $panel . '/static/tools/richtext-convert.mjs';
-
-		if (!is_file($script)) {
-			throw new RuntimeException(
-				"Richtext converter missing at {$script} — run `pnpm install && pnpm run build` in panel/ first.",
-			);
-		}
-
-		$in = tempnam(sys_get_temp_dir(), 'richtext-in-');
-		$out = tempnam(sys_get_temp_dir(), 'richtext-out-');
-
-		try {
-			$handle = fopen($in, 'w');
-
-			foreach ($this->units as $id => $html) {
-				fwrite($handle, json_encode(['id' => $id, 'html' => $html], JSON_THROW_ON_ERROR) . "\n");
-			}
-
-			fclose($handle);
-
-			$process = proc_open(
-				['node', $script],
-				[0 => ['file', $in, 'r'], 1 => ['file', $out, 'w'], 2 => ['pipe', 'w']],
-				$pipes,
-				$panel,
-			);
-
-			if (!is_resource($process)) {
-				throw new RuntimeException('Could not start the richtext converter (is node installed?).');
-			}
-
-			$stderr = stream_get_contents($pipes[2]);
-			fclose($pipes[2]);
-			$status = proc_close($process);
-
-			if ($status !== 0) {
-				throw new RuntimeException("Richtext converter failed (exit {$status}): {$stderr}");
-			}
-
-			$docs = [];
-
-			foreach (file($out, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-				$result = json_decode($line, true);
-
-				if (!is_array($result) || !is_string($result['id'] ?? null)) {
-					continue;
-				}
-
-				if (isset($result['error'])) {
-					$this->report['errors'][] = "{$result['id']}: {$result['error']}";
-
-					continue;
-				}
-
-				$docs[$result['id']] = is_array($result['doc'] ?? null) ? $result['doc'] : null;
-			}
-
-			return $docs;
-		} finally {
-			@unlink($in);
-			@unlink($out);
-		}
+		return $this->converter->convert($this->units);
 	}
 
 	private function count(string $bucket, string $key): void

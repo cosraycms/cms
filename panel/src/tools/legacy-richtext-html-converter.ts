@@ -6,8 +6,8 @@ import { pmToDoc } from '$shell/richtext/format';
 import { parser } from '$shell/richtext/schema';
 
 /**
- * Headless HTML-to-richtext converter for the one-shot content
- * migration: parses legacy HTML through the panel's own editor schema
+ * Migration-only HTML-to-richtext converter for legacy content.
+ * Parses HTML through the panel's own editor schema
  * (the schema most content was created with), so the migration output
  * is identical to what the editor itself would produce.
  *
