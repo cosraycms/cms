@@ -98,6 +98,20 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertSame('handle-filter-a', $nodes[0]->meta->uid);
 	}
 
+	public function testFinderFiltersByFieldEquality(): void
+	{
+		$nodes = iterator_to_array(
+			$this
+				->createCms()
+				->nodes()
+				->published(null)
+				->filter("title = 'Test Article 1'"),
+		);
+
+		$this->assertCount(1, $nodes);
+		$this->assertSame('test-article-1', $nodes[0]->meta->uid);
+	}
+
 	public function testRenderResolvesHandleBeforeUid(): void
 	{
 		$typeId = $this->createTestType('node-with-render-attribute');

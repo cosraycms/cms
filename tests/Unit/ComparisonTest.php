@@ -120,20 +120,20 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			$this->jsonPath('$ ? (@ like_regex "^test$")'),
+			$this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@?'),
 			$compiler->compile('field ~ /^test$/'),
 		);
 		$this->assertSame(
-			$this->jsonPath('$ ? (@ like_regex "^test$" flag "i")'),
+			$this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@?'),
 			$compiler->compile('field ~* /^test$/'),
 		);
 
 		$this->assertSame(
-			'NOT ' . $this->jsonPath('$ ? (@ like_regex "^test$")'),
+			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@?') . ')',
 			$compiler->compile('field !~ /^test$/'),
 		);
 		$this->assertSame(
-			'NOT ' . $this->jsonPath('$ ? (@ like_regex "^test$" flag "i")'),
+			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@?') . ')',
 			$compiler->compile('field !~* /^test$/'),
 		);
 	}
@@ -243,8 +243,11 @@ final class ComparisonTest extends TestCase
 		$compiler->compile('"string" = 1');
 	}
 
-	private function jsonPath(string $path, string $field = self::FIELD_JSON): string
-	{
-		return 'jsonb_path_exists(' . $field . ', ' . $this->context->db->quote($path) . ')';
+	private function jsonPath(
+		string $path,
+		string $field = self::FIELD_JSON,
+		string $operator = '@@',
+	): string {
+		return $field . ' ' . $operator . ' ' . $this->context->db->quote($path);
 	}
 }

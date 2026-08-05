@@ -235,6 +235,6 @@ final class QueryCompilerTest extends TestCase
 
 	private function jsonPath(string $path): string
 	{
-		return 'jsonb_path_exists(' . self::FIELD_JSON . ', ' . $this->context->db->quote($path) . ')';
+		return self::FIELD_JSON . ' @@ ' . $this->context->db->quote($path);
 	}
 }

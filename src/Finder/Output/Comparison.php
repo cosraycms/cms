@@ -62,17 +62,17 @@ final readonly class Comparison extends Expression implements Output
 			default => ['@@', $this->operator->lexeme, $this->getRight(), false],
 		};
 
-		unset($operator);
 		$left = $this->getJsonFieldExpression();
 		$root = str_ends_with($this->left->lexeme, '.*') ? '$[*]' : '$';
 		$path = $root . ' ' . $jsonOperator . ' ' . $right;
-
-		return sprintf(
-			'%sjsonb_path_exists(%s, %s)',
-			$negate ? 'NOT ' : '',
+		$expression = sprintf(
+			'%s %s %s',
 			$left,
+			$operator,
 			$this->context->db->quote($path),
 		);
+
+		return $negate ? "NOT ({$expression})" : $expression;
 	}
 
 	private function getRegex(bool $ignoreCase): string
