@@ -40,7 +40,7 @@ The CMS app exposes the common CMS configuration API (`section()`, `collection()
 
 ## Console commands
 
-`Cosray\Console\Commands` bundles the base CLI command set of a Cosray app over the booted `App`: the quma migration commands (`db:add-migration`, `db:create-migrations-table`, `db:migrations`), Cosray's own `db:fulltext`, `db:references`, `db:recreate-sort-index`, `db:titles`, `panel:install`, and `add-superuser`. Commands are registered as lazy factories — nothing is constructed until a command actually runs, so `php run help` stays free of database and app-context setup.
+`Cosray\Console\Commands` boots the configured `App` and bundles its base CLI command set: the quma migration commands (`db:add-migration`, `db:create-migrations-table`, `db:migrations`), Cosray's own `db:fulltext`, `db:references`, `db:recreate-sort-index`, `db:titles`, `panel:install`, and `add-superuser`. Commands are registered as lazy factories — nothing is constructed until a command actually runs, so `php run help` stays free of database and app-context setup.
 
 The recommended layout is a two-line `run` script:
 
@@ -63,25 +63,51 @@ declare(strict_types=1);
 
 use Cosray\Console\Commands;
 
-$app = require __DIR__ . '/app.php'; // boots and returns the Cosray\App
+$app = require __DIR__ . '/app.php'; // returns the configured Cosray\App
 
 $commands = new Commands($app);
 $commands->server(port: 6913, watch: ['src/**/*.php', 'views/**/*.php']);
 $commands->i18n('mysite', locales: ['de', 'en'], scan: ['src', 'views']);
 
-// App-specific commands: anything Celema\Console\Commands accepts.
-$commands->add(new ExportCommand($app->config));
-$commands->add([ImportCommand::class => fn() => new ImportCommand($dsn)]);
+// App-specific commands are lazily autowired from the CMS console scope.
+$commands->add(ImportCommand::class);
+
+// Explicit factories remain available for scalar or unusual arguments.
+$commands->add([ExportCommand::class => fn() => new ExportCommand($target)]);
 
 return $commands->runner();
 ```
 
 - **`server(port:, watch:, routePrefix:)`** registers the PHP built-in server (`php run server`) and FrankenPHP (`php run frankenphp`) on the app's public directory.
 - **`i18n(name, locales:, scan:, dir:, schema:)`** registers `i18n:sync` and `i18n:status` for one translation domain. It scans the given source directories (relative paths resolve from the app root) plus the app's schema labels, and claims bare `__()` calls as the default domain. Call it once per domain for apps with several catalogs.
-- **`add()`** forwards to [`celema/console`](https://codeberg.org/celema/console)'s `Commands`: instances, class-strings, lazy factories keyed by class-string, and named closures.
+- **`add()`** accepts instances, class-strings, and lazy factories keyed by class-string. Class-strings are lazily autowired from one request-free console scope, so commands can inject `Cms`, `Context`, `Config`, `Database`, `Locales`, `Types`, and `Cosray\Node\Writer` directly. Explicit factories remain available when scalar arguments need application-specific configuration.
 - **`runner(debug:)`** returns the ready `Celema\Console\Runner`; `debug` defaults to the app config's `debug()`.
 
 The `frankenphp` command requires a `frankenphp` executable in `PATH` and runs it in classic mode. It supports the same configured port and BrowserSync-backed `--watch` patterns as the built-in server. Its `--debug` option enables verbose Caddy logs; FrankenPHP uses its embedded PHP runtime rather than the PHP CLI that starts `run`.
+
+Console commands run with the default content locale and an active Verba translator, but without an HTTP request or session. A command that injects `Celema\Core\Request` therefore fails at resolution instead of receiving a synthetic request. Use `Context::withLocale()` for a locale-specific callback; Cosray's title materialization and node writer do this automatically where needed.
+
+### Creating content from commands
+
+`Cosray\Node\Writer` hides node factory, blueprint serializer, and store coordination. Build a draft from field values, apply node-level settings, then create it. The default actor is the seeded system user; pass an explicit `Cosray\Node\Actor` when another audit identity owns the change.
+
+```php
+use Cosray\Node\Actor;
+use Cosray\Node\Writer;
+
+$draft = $writer
+    ->draft(Alert::class, [
+        'value' => '31.4',
+        'readingTime' => '2026-08-05 12:00:00',
+    ])
+    ->uid('alert-stable-id')
+    ->published()
+    ->fieldMeta('readingTime', 'timezone', ['zxx' => 'UTC']);
+
+$writer->create($draft, new Actor($editorId));
+```
+
+The lower-level `Node\Store` is also request-neutral: callers pass `Locales` and an explicit `Actor`; HTTP controllers remain responsible for deriving that actor from their authenticated session.
 
 ## Plugins
 

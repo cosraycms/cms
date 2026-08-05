@@ -4,6 +4,7 @@
 
 ### Breaking Changes
 
+- Made node persistence request-neutral. `Cosray\Node\Store::save()` and `create()` now take `Locales` plus an explicit `Cosray\Node\Actor`; `delete()` takes an `Actor`. Request/session lookup moved to the panel controller. `Field\Owner::request()` became `origin()`, and `Node\Factory::proxy()` now takes the CMS `Context` instead of a request. Custom low-level store, owner, or proxy integrations must update.
 - Renamed the `edit-pages` role permission to `edit-nodes`. Permissions are derived from the role in code, not stored, so no migration is needed — but an app calling `$user->hasPermission('edit-pages')` must be updated.
 - Renamed the linked menu item type from `page` to `node`, and the menu item's node reference key from `page` to `node`. Migration `000000-000024` rewrites both inside `menu_items.data`. `$menu->html()` output is unchanged; application code branching on `$item->type()` must compare against `'node'`.
 - Replaced `Cosray\Node\ViewRenderer` with `Cosray\Node\View`, a node-bound view service in the autowired set. `$this->view->render([...])` renders the node's own template and returns a `Response`; `output()` returns the rendered template as a string. This drops the hand-rolled `ViewRenderer::renderPage($this, Factory::fieldNamesFor($this), ...)` helpers from application nodes, and the `renderPage()`/`renderNode()` pair, which differed in both return type and template variable, is gone. `Cosray\Controller\Node` no longer takes a `Container`.
@@ -37,6 +38,8 @@
 
 ### Added
 
+- Added lazy DI for application console command class-strings. `Cosray\Console\Commands::add(MyCommand::class)` boots the app and resolves the command from one scoped container with `Cms`, a request-free `Context`, the default content locale, and an active Verba translator. Explicit keyed factories remain supported for scalar arguments. Cosray's own `db:titles` command now uses the same runtime and no longer constructs a synthetic server request.
+- Added `Cosray\Node\Writer`, `Draft`, and `Actor` for creating CMS nodes from commands without coordinating `Node\Factory`, `Serializer`, and `Store` manually. Writer drafts expose uid, publication, visibility, parent, and field-metadata settings; writes default to the seeded system actor and can receive another explicit actor.
 - Registered Core's FrankenPHP development server alongside the PHP built-in server through `Cosray\Console\Commands::server()`. Configured applications can use `php run frankenphp`, including the existing port, route-prefix, request-log filtering, and BrowserSync watch behavior.
 - Added the `Cosray\Console\Commands` facade bundling the base CLI command set of a Cosray app (quma migrations, `db:*`, `panel:install`, `add-superuser`, including the previously app-wired `db:titles`) as lazy factories over the booted `App`. `server()` and `i18n()` register the dev server and translation commands per app; `runner()` returns a ready `Celema\Console\Runner` with debug taken from the app config. Application `run` scripts shrink to a thin wrapper around an `app/console.php` that returns `$commands->runner()`.
 - Added signed panel asset releases (`cosray-panel-{version}.tar.gz` / `cosray-panel-nightly.tar.gz`) and the `Cosray\Commands\InstallPanel` command. The installer writes client assets to `{path.public}{path.panel}/static`.

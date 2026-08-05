@@ -30,14 +30,15 @@ use Cosray\MigrationFactory;
 /**
  * The base CLI command set of a Cosray application.
  *
- * Bundles the quma migration commands and Cosray's own commands as lazy
- * factories over the booted app. `server()` and `i18n()` register the
- * per-app dev server and translation commands; `add()` accepts anything
- * `Celema\Console\Commands` accepts.
+ * Boots the app and bundles the quma migration commands and Cosray's own
+ * commands as lazy factories. `server()` and `i18n()` register the per-app
+ * dev server and translation commands; application command class-strings
+ * are lazily autowired from one request-free console scope.
  *
  *     $commands = new Commands($app);
  *     $commands->server(port: 6913, watch: ['src/**\/*.php']);
  *     $commands->i18n('mysite', locales: ['de', 'en']);
+ *     $commands->add(ImportCommand::class);
  *
  *     return $commands->runner();
  *
