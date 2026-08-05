@@ -304,7 +304,7 @@ final class Nodes implements Iterator
 
 		$node = $this->nodeFactory->create($class, $this->context, $this->cms, $row);
 
-		return $this->nodeFactory->proxy($node, $this->context->request, $this->context, $this->cms);
+		return $this->nodeFactory->proxy($node, $this->context, $this->cms);
 	}
 
 	public function key(): int

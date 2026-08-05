@@ -45,7 +45,7 @@ class Node
 
 	public function catchall(Context $context, Cms $cms): Response
 	{
-		$request = $context->request;
+		$request = $context->httpRequest();
 		$config = $context->config;
 		$path = $request->uri()->getPath();
 		$prefix = $config->path->prefix;
@@ -77,7 +77,7 @@ class Node
 		$node = $cms->node->byPath('/' . $slug);
 
 		if (!$node) {
-			throw new HttpNotFound($context->request);
+			throw new HttpNotFound($context->httpRequest());
 		}
 
 		// Preview goes through the same dispatch as the public path, so a
@@ -87,7 +87,7 @@ class Node
 
 	private function dispatch(object $node, Context $context, Cms $cms): Response
 	{
-		$request = $context->request;
+		$request = $context->httpRequest();
 		$method = $request->method();
 		$handler = self::HANDLERS[$method] ?? null;
 		$inner = Wrapper::unwrap($node);
@@ -153,7 +153,7 @@ class Node
 				array_map(static fn($p) => $p['path'], $paths),
 			);
 
-			$locale = $context->request->get('locale');
+			$locale = $context->locale();
 
 			while ($locale) {
 				$path = $pathsByLocale[$locale->id] ?? null;

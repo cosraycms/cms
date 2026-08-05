@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celema\Core\Request;
 use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Locale;
@@ -21,7 +20,7 @@ interface Owner
 
 	public function locales(): Locales;
 
-	public function request(): Request;
+	public function origin(): string;
 
 	public function config(): Config;
 

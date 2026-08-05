@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celema\Core\Request;
 use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Context;
@@ -31,7 +30,7 @@ class FieldOwner implements Owner
 
 	public function defaultLocale(): Locale
 	{
-		return $this->context->request->get('defaultLocale');
+		return $this->context->defaultLocale();
 	}
 
 	public function locales(): Locales
@@ -39,9 +38,9 @@ class FieldOwner implements Owner
 		return $this->context->locales();
 	}
 
-	public function request(): Request
+	public function origin(): string
 	{
-		return $this->context->request;
+		return $this->context->origin();
 	}
 
 	public function config(): Config

@@ -87,7 +87,6 @@ class Factory
 		$predefinedTypes = [
 			Context::class => $context,
 			Cms::class => $cms,
-			Request::class => $context->request,
 			Config::class => $context->config,
 			Database::class => $context->db,
 			Container::class => $context->container,
@@ -100,6 +99,11 @@ class Factory
 			FieldHydrator::class => $this->hydrator,
 			Services::class => $this->services,
 		];
+
+		if ($context->request !== null) {
+			$predefinedTypes[Request::class] = $context->request;
+		}
+
 		$node = $creator->create($class, predefinedTypes: $predefinedTypes);
 
 		$uid = $data['uid'] ?? $this->uid->generate();
@@ -135,7 +139,6 @@ class Factory
 	 */
 	public function proxy(
 		object $node,
-		Request $request,
 		?Context $context = null,
 		?Cms $cms = null,
 	): Wrapper {
@@ -143,7 +146,6 @@ class Factory
 			$node,
 			self::fieldNamesFor($node),
 			$this->types,
-			$request,
 			$context,
 			$cms,
 			$this,

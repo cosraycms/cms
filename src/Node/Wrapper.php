@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
-use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
@@ -21,7 +20,6 @@ class Wrapper
 		private readonly object $node,
 		private readonly array $fieldNames,
 		private readonly Types $types,
-		private readonly ?Request $request = null,
 		private readonly ?Context $context = null,
 		private readonly ?Cms $cms = null,
 		private readonly ?Factory $nodeFactory = null,
@@ -40,8 +38,8 @@ class Wrapper
 		$data = Factory::dataFor($this->node);
 		$paths = $data['paths'] ?? [];
 
-		if (!$locale && $this->request) {
-			$locale = $this->request->get('locale');
+		if (!$locale && $this->context) {
+			$locale = $this->context->locale();
 		}
 
 		while ($locale) {
@@ -94,8 +92,8 @@ class Wrapper
 			return $this->title();
 		}
 
-		if (!$locale && $this->request) {
-			$locale = $this->request->get('locale');
+		if (!$locale && $this->context) {
+			$locale = $this->context->locale();
 		}
 
 		return new TitleResolver($this->types)->stored($map, $locale) ?? $this->title();

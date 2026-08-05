@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Title;
 
-use Celema\Core\Request;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Cosray\Bootstrap;
@@ -27,7 +26,6 @@ class Rebuild
 	private const array TRIGGERS = ['nodes_trigger_02_change', 'nodes_trigger_03_history'];
 
 	private readonly Database $db;
-	private readonly Request $request;
 	private readonly Factory $factory;
 	private readonly Resolver $resolver;
 
@@ -39,7 +37,6 @@ class Rebuild
 		Types $types,
 	) {
 		$this->db = $context->db;
-		$this->request = $context->request;
 		$this->factory = $cms->nodeFactory();
 		$this->resolver = new Resolver($types);
 	}
@@ -50,11 +47,6 @@ class Rebuild
 	public function run(): array
 	{
 		$classes = $this->nodeClasses();
-
-		// Field hydration reads these from the request; a CLI request may not
-		// carry them, and the per-locale eval overwrites `locale` anyway.
-		$this->request->set('locales', $this->locales);
-		$this->request->set('defaultLocale', $this->locales->getDefault());
 
 		$this->toggleTriggers('DISABLE');
 
@@ -130,20 +122,14 @@ class Rebuild
 		}
 
 		$dynamic++;
-		$original = $this->request->get('locale', null);
 
-		try {
-			return $this->resolver->dynamicMap(
-				function (Locale $locale) use ($provider): string {
-					$this->request->set('locale', $locale);
-
-					return $provider->title();
-				},
-				$this->locales,
-			);
-		} finally {
-			$this->request->set('locale', $original);
-		}
+		return $this->resolver->dynamicMap(
+			fn(Locale $locale): string => $this->context->withLocale(
+				$locale,
+				$provider->title(...),
+			),
+			$this->locales,
+		);
 	}
 
 	/**

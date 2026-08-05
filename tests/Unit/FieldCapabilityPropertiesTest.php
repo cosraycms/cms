@@ -85,9 +85,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 				return $this->locales;
 			}
 
-			public function request(): Request
+			public function origin(): string
 			{
-				return $this->request;
+				return $this->request->origin();
 			}
 
 			public function config(): Config

@@ -82,7 +82,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->translate();
 
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('Hello', $value->unwrap());
@@ -99,7 +99,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->translate();
 
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('', $value->unwrap());
@@ -170,7 +170,7 @@ final class PrimitiveValueTest extends TestCase
 		$field->translate();
 		$field->syntaxes(['php', 'javascript']);
 
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('<?php echo 1;', $value->unwrap());
@@ -333,7 +333,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -357,7 +357,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -380,7 +380,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -514,7 +514,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 		$this->assertInstanceOf(\Cosray\Value\TranslatedImage::class, $value);
@@ -545,7 +545,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate();
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -574,7 +574,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate();
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -656,7 +656,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -708,7 +708,7 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->translate(TranslateMode::Asymmetric);
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -1017,7 +1017,7 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = new \Cosray\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => '<iframe></iframe>', 'de' => null],
 		]));
@@ -1034,7 +1034,7 @@ final class PrimitiveValueTest extends TestCase
 		$field = new \Cosray\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
-		$context->request->set('locale', $context->locales()->get('de'));
+		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = new \Cosray\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => null, 'de' => null],
 		]));

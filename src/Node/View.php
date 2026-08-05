@@ -70,12 +70,11 @@ final class View
 	 */
 	private function templateContext(array $extra): array
 	{
-		$request = $this->context->request;
+		$request = $this->context->httpRequest();
 		$proxy = new Wrapper(
 			$this->node,
 			Factory::fieldNamesFor($this->node),
 			$this->types,
-			$request,
 			$this->context,
 			$this->cms,
 			$this->cms->nodeFactory(),
@@ -85,8 +84,8 @@ final class View
 			[
 				'node' => $proxy,
 				'cms' => $this->cms,
-				'locale' => $request->get('locale'),
-				'locales' => $request->get('locales'),
+				'locale' => $this->context->locale(),
+				'locales' => $this->context->locales(),
 				'request' => $request,
 				'container' => $this->context->container,
 				'debug' => $this->context->config->debug(),

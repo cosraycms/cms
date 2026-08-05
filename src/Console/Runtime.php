@@ -6,9 +6,12 @@ namespace Cosray\Console;
 
 use Celema\Container\Container;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
+use Celema\Quma\Database;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\App;
 use Cosray\Cms;
+use Cosray\Config;
 use Cosray\Context;
 use Cosray\Locales;
 use UnexpectedValueException;
@@ -21,14 +24,27 @@ use UnexpectedValueException;
 final class Runtime
 {
 	private readonly Container $container;
+	private readonly ?Translator $previousTranslator;
 
 	public function __construct(App $app)
 	{
 		$app->boot();
 		$this->container = $app->container()->scope();
-		$this->container->add(Request::class, self::request(...))->scoped();
-		$this->container->add(Context::class)->scoped();
+		$this->container->add(Context::class, self::context(...))->scoped();
 		$this->container->add(Cms::class)->scoped();
+		$context = $this->container->get(Context::class);
+		assert($context instanceof Context, 'The console context must be available');
+		$this->previousTranslator = Verba::translator();
+		Verba::activate($context->translator());
+	}
+
+	public function __destruct()
+	{
+		if ($this->previousTranslator !== null) {
+			Verba::activate($this->previousTranslator);
+		} else {
+			Verba::deactivate();
+		}
 	}
 
 	/** @param class-string $class */
@@ -43,13 +59,13 @@ final class Runtime
 		return $command;
 	}
 
-	private static function request(Factory $factory, Locales $locales): Request
-	{
-		$request = new Request($factory->serverRequest());
-		$request->set('locales', $locales);
-		$request->set('defaultLocale', $locales->getDefault());
-		$request->set('locale', $locales->getDefault());
-
-		return $request;
+	private static function context(
+		Database $db,
+		Config $config,
+		Container $container,
+		Factory $factory,
+		Locales $locales,
+	): Context {
+		return Context::console($db, $config, $container, $factory, $locales);
 	}
 }

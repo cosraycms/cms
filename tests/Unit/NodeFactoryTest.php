@@ -278,7 +278,7 @@ final class NodeFactoryTest extends TestCase
 		$node = $this->factory->create(TestEmbeddedDocument::class, $this->context, $this->cms, [
 			'content' => ['title' => ['value' => ['en' => 'Proxy embedded title']]],
 		]);
-		$proxy = $this->factory->proxy($node, $this->context->request);
+		$proxy = $this->factory->proxy($node, $this->context);
 
 		$this->assertSame('Proxy embedded title', (string) $proxy->title);
 		$this->assertSame('Proxy embedded title', $proxy->title());
@@ -356,7 +356,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$proxy = $this->factory->proxy($node, $this->context->request);
+		$proxy = $this->factory->proxy($node, $this->context);
 
 		$this->assertSame('Node Class Title', $proxy->title());
 	}
@@ -375,7 +375,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		);
 
-		$proxy = $this->factory->proxy($node, $this->context->request);
+		$proxy = $this->factory->proxy($node, $this->context);
 
 		$this->assertSame('Node Property Title', $proxy->title());
 	}
@@ -394,7 +394,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		);
 
-		$proxy = $this->factory->proxy($node, $this->context->request);
+		$proxy = $this->factory->proxy($node, $this->context);
 
 		$this->assertSame('Property fallback title', $proxy->title());
 	}
@@ -408,7 +408,7 @@ final class NodeFactoryTest extends TestCase
 			],
 		]);
 
-		$proxy = $this->factory->proxy($node, $this->context->request);
+		$proxy = $this->factory->proxy($node, $this->context);
 
 		$this->assertSame('', $proxy->title());
 	}
@@ -423,7 +423,7 @@ final class NodeFactoryTest extends TestCase
 		]);
 
 		$column = Column::new('Title', 'title');
-		$row = $column->get($this->factory->proxy($node, $this->context->request));
+		$row = $column->get($this->factory->proxy($node, $this->context));
 
 		$this->assertSame('Class Attribute Title', $row['value']);
 	}
@@ -443,7 +443,7 @@ final class NodeFactoryTest extends TestCase
 		);
 
 		$column = Column::new('Title', 'title');
-		$row = $column->get($this->factory->proxy($node, $this->context->request));
+		$row = $column->get($this->factory->proxy($node, $this->context));
 
 		$this->assertSame('Property Attribute Title', $row['value']);
 	}

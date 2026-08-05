@@ -37,7 +37,7 @@ class File extends Value
 
 	public function url(): string
 	{
-		$url = $this->owner->request()->origin() . $this->publicPath();
+		$url = $this->owner->origin() . $this->publicPath();
 
 		if ($url = filter_var($url, FILTER_VALIDATE_URL)) {
 			return $url;

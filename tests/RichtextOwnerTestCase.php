@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Tests;
 
-use Celema\Core\Request;
 use Cosray\Assets\Repository;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
@@ -55,9 +54,9 @@ abstract class RichtextOwnerTestCase extends TestCase
 				return $this->locales;
 			}
 
-			public function request(): Request
+			public function origin(): string
 			{
-				throw new RuntimeException('Not available in this test');
+				return '';
 			}
 
 			public function config(): Config

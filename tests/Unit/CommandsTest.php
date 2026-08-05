@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celema\Console\Command;
-use Celema\Core\Request;
 use Celema\Router\Router;
 use Celema\Server\FrankenPhp;
 use Celema\Server\Server;
@@ -36,7 +35,7 @@ final class CommandsTest extends TestCase
 
 		$this->assertInstanceOf(ScopedCommand::class, $command);
 		$this->assertInstanceOf(Cms::class, $command->cms);
-		$this->assertSame($command->request, $command->context->request);
+		$this->assertNull($command->context->request);
 		$this->assertSame('en', $command->context->localeId());
 	}
 
@@ -90,7 +89,6 @@ final class ScopedCommand
 	public function __construct(
 		public readonly Context $context,
 		public readonly Cms $cms,
-		public readonly Request $request,
 	) {}
 }
 
