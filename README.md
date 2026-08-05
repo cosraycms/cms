@@ -109,6 +109,23 @@ $writer->create($draft, new Actor($editorId));
 
 The lower-level `Node\Store` is also request-neutral: callers pass `Locales` and an explicit `Actor`; HTTP controllers remain responsible for deriving that actor from their authenticated session.
 
+### Importing legacy rich text
+
+> [!WARNING] `LegacyRichtextHtmlConverter` is a migration-only compatibility utility. Use it for one-shot imports of HTML written before Cosray's structured rich-text format, then remove the importing code. It is not a request-time HTML conversion API.
+
+The converter ships as a self-contained Composer resource and requires a `node` executable, but no panel checkout, panel installation, or downstream npm dependencies. It parses HTML through the panel editor's schema and returns documents keyed by the supplied unit ids. Normalize and validate the documents before persistence when the surrounding migration does not already do so.
+
+```php
+use Cosray\Migration\LegacyRichtextHtmlConverter;
+use Cosray\Richtext\Normalizer;
+
+$documents = new LegacyRichtextHtmlConverter()->convert([
+    'intro:de' => '<p>Alter <strong>Inhalt</strong></p>',
+]);
+
+$document = new Normalizer()->normalize($documents['intro:de']);
+```
+
 ## Plugins
 
 Runtime plugins are Composer packages (or project classes) implementing `Cosray\Plugin\Plugin`. They are registered explicitly — either in the bootstrap or through the `plugins` config key:

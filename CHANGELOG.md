@@ -38,6 +38,7 @@
 
 ### Added
 
+- Added the migration-only `Cosray\Migration\LegacyRichtextHtmlConverter` for downstream imports of pre-structured-richtext HTML. Its self-contained Node artifact ships with the Composer package, so callers no longer depend on ignored panel build output, installed public panel assets, or `panel/node_modules`.
 - Added lazy DI for application console command class-strings. `Cosray\Console\Commands::add(MyCommand::class)` boots the app and resolves the command from one scoped container with `Cms`, a request-free `Context`, the default content locale, and an active Verba translator. Explicit keyed factories remain supported for scalar arguments. Cosray's own `db:titles` command now uses the same runtime and no longer constructs a synthetic server request.
 - Added `Cosray\Node\Writer`, `Draft`, and `Actor` for creating CMS nodes from commands without coordinating `Node\Factory`, `Serializer`, and `Store` manually. Writer drafts expose uid, publication, visibility, parent, and field-metadata settings; writes default to the seeded system actor and can receive another explicit actor.
 - Registered Core's FrankenPHP development server alongside the PHP built-in server through `Cosray\Console\Commands::server()`. Configured applications can use `php run frankenphp`, including the existing port, route-prefix, request-log filtering, and BrowserSync watch behavior.
