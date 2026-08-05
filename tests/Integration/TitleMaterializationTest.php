@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Celema\Container\Container;
+use Celema\Core\Request;
 use Cosray\Bootstrap;
 use Cosray\Cms;
+use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\Types;
@@ -114,6 +116,97 @@ final class TitleMaterializationTest extends IntegrationTestCase
 
 		$this->assertSame($before, $this->changedOf('title-mat-quiet'));
 		$this->assertSame($history, $this->historyCount('title-mat-quiet'));
+	}
+
+	public function testLabelReadsTheMaterializedTitle(): void
+	{
+		$type = $this->createTestType('title-dynamic-type');
+		$this->createTestNode([
+			'uid' => 'title-label-stored',
+			'type' => $type,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
+		]);
+		$this->storeTitle('title-label-stored', ['en' => 'Stored']);
+
+		$node = $this->cmsFor('en')->node->byUid('title-label-stored');
+
+		$this->assertNotNull($node);
+		// Labelling reads the column; title() keeps resolving live.
+		$this->assertSame('Stored', $node->label());
+		$this->assertSame('Live', $node->title());
+	}
+
+	public function testLabelFallsBackToLiveResolution(): void
+	{
+		$type = $this->createTestType('title-dynamic-type');
+		$this->createTestNode([
+			'uid' => 'title-label-empty',
+			'type' => $type,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
+		]);
+
+		// Nothing materialized the title yet, so the map is still empty.
+		$node = $this->cmsFor('en')->node->byUid('title-label-empty');
+
+		$this->assertNotNull($node);
+		$this->assertSame('Live', $node->label());
+	}
+
+	public function testLabelFollowsTheRequestLocale(): void
+	{
+		$type = $this->createTestType('title-dynamic-type');
+		$this->createTestNode([
+			'uid' => 'title-label-locales',
+			'type' => $type,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
+		]);
+		$this->storeTitle('title-label-locales', ['en' => 'Hello', 'de' => 'Hallo']);
+
+		$this->assertSame('Hallo', $this->cmsFor('de')->node->byUid('title-label-locales')?->label());
+		$this->assertSame('Hello', $this->cmsFor('en')->node->byUid('title-label-locales')?->label());
+	}
+
+	public function testLabelWalksTheLocaleFallbackChain(): void
+	{
+		$type = $this->createTestType('title-dynamic-type');
+		$this->createTestNode([
+			'uid' => 'title-label-fallback',
+			'type' => $type,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
+		]);
+		$this->storeTitle('title-label-fallback', ['en' => 'Hello']);
+
+		// 'Live' would mean it gave up on the column and resolved the node again.
+		$this->assertSame('Hello', $this->cmsFor('de')->node->byUid('title-label-fallback')?->label());
+	}
+
+	private function cmsFor(string $localeId): Cms
+	{
+		$request = new Request($this->psrRequest($localeId));
+		$locales = $request->get('locales');
+		assert($locales instanceof Locales, 'The psr request fixture carries the locales');
+		// Live title resolution reads the default locale off the request, which
+		// the psr request fixture does not carry.
+		$request->set('defaultLocale', $locales->getDefault());
+
+		$context = new Context(
+			$this->db(),
+			$request,
+			$this->config(),
+			$this->container(),
+			$this->factory(),
+		);
+
+		return new Cms($context, Services::withDefaults());
+	}
+
+	/** @param array<string, string> $map */
+	private function storeTitle(string $uid, array $map): void
+	{
+		$this->db()->execute(
+			'UPDATE cms.nodes SET title = :title::jsonb WHERE uid = :uid',
+			['uid' => $uid, 'title' => json_encode($map)],
+		)->run();
 	}
 
 	private function rebuild(): array

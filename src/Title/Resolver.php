@@ -67,6 +67,31 @@ class Resolver
 	}
 
 	/**
+	 * Pick the title for a locale out of a materialized title map, walking the
+	 * locale fallback chain and then the neutral key. Mirrors how a translated
+	 * field value resolves in {@see \Cosray\Value\Value::effective()}.
+	 *
+	 * Null when the map holds nothing usable for that chain, which is the
+	 * caller's signal to fall back to live resolution.
+	 *
+	 * @param array<string, mixed> $map
+	 */
+	public function stored(array $map, ?Locale $locale): ?string
+	{
+		while ($locale) {
+			$title = $this->text($map, $locale->id);
+
+			if ($title !== null) {
+				return $title;
+			}
+
+			$locale = $locale->fallback();
+		}
+
+		return $this->text($map, Field::NEUTRAL_LOCALE);
+	}
+
+	/**
 	 * @param null|array{kind: string, field?: string, embedded?: string} $descriptor
 	 */
 	public function provider(object $node, ?array $descriptor = null): ?TitleContract
@@ -139,6 +164,14 @@ class Resolver
 		}
 
 		return $map;
+	}
+
+	/** @param array<string, mixed> $map */
+	private function text(array $map, string $key): ?string
+	{
+		$title = $map[$key] ?? null;
+
+		return is_string($title) && trim($title) !== '' ? $title : null;
 	}
 
 	/** @param class-string $class */

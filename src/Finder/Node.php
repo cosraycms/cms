@@ -71,6 +71,7 @@ class Node
 		}
 
 		$data['content'] = json_decode($data['content'], true);
+		$data['title'] = json_decode($data['title'], true);
 		$data['editor_data'] = json_decode($data['editor_data'], true);
 		$data['creator_data'] = json_decode($data['creator_data'], true);
 		$data['paths'] = json_decode($data['paths'], true);

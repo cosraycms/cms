@@ -10,6 +10,7 @@ SELECT
 	n.changed,
 	n.deleted,
 	n.content,
+	n.title,
 	t.handle AS type_handle,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,

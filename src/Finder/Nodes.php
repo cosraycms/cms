@@ -292,6 +292,7 @@ final class Nodes implements Iterator
 		$row = $this->result->current();
 
 		$row['content'] = json_decode($row['content'], true);
+		$row['title'] = json_decode($row['title'], true);
 		$row['editor_data'] = json_decode($row['editor_data'], true);
 		$row['creator_data'] = json_decode($row['creator_data'], true);
 		$row['paths'] = json_decode($row['paths'], true);

@@ -74,6 +74,33 @@ class Wrapper
 		return new TitleResolver($this->types)->resolve(self::unwrap($this->node));
 	}
 
+	/**
+	 * The node's title for listings, pickers and other labelling, read from the
+	 * materialized title column instead of resolving it again per node.
+	 *
+	 * Falls back to title() when the stored map has nothing for the active
+	 * locale chain: a node saved before the column existed, or a locale added
+	 * since the last `db:titles` rebuild.
+	 *
+	 * A dynamic title composed from *other* nodes can be stale here — the map
+	 * is rewritten when the node itself is saved, not when its sources change.
+	 * Use title() where that matters; rendering still resolves live.
+	 */
+	public function label(?Locale $locale = null): string
+	{
+		$map = Factory::dataFor($this->node)['title'] ?? null;
+
+		if (!is_array($map)) {
+			return $this->title();
+		}
+
+		if (!$locale && $this->request) {
+			$locale = $this->request->get('locale');
+		}
+
+		return new TitleResolver($this->types)->stored($map, $locale) ?? $this->title();
+	}
+
 	public function children(string $query = ''): Nodes
 	{
 		if ($this->context === null || $this->cms === null || $this->nodeFactory === null) {

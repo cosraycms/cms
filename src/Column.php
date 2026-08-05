@@ -90,7 +90,7 @@ final class Column
 
 		switch ($field) {
 			case 'title':
-				return $node->title();
+				return $node->label();
 			case 'meta.name':
 				return $node->meta->name;
 			case 'meta.uid':

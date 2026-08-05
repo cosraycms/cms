@@ -150,7 +150,7 @@ final class Reference extends Panel
 	{
 		return [
 			'uid' => $node->meta->uid,
-			'title' => $node->title(),
+			'title' => $node->label(),
 			'type' => (string) $node->meta->type->get('handle', ''),
 			'typeLabel' => (string) $node->meta->type->get('label', ''),
 		];
