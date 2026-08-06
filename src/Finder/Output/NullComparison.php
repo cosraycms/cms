@@ -21,6 +21,17 @@ final readonly class NullComparison extends Expression implements Output
 
 	public function get(): string
 	{
+		// Both compile to a subquery rather than to an operand, so there is
+		// nothing to put on the left of `IS NULL`.
+		foreach ([$this->left, $this->right] as $token) {
+			if ($token->type === TokenType::Path || $token->type === TokenType::Reference) {
+				throw new ParserOutputException(
+					$token,
+					'Path and reference expressions cannot be compared to null.',
+				);
+			}
+		}
+
 		switch ($this->operator->type) {
 			case TokenType::Equal:
 				return $this->getSqlExpression(true);
