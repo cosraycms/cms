@@ -9,12 +9,18 @@ use Cosray\Exception\ParserException;
 
 readonly class Token
 {
+	/**
+	 * @param list<string> $items The unquoted members of a list token, for
+	 *                            outputs that cannot use the SQL tuple in
+	 *                            `$lexeme` because they build their own literals.
+	 */
 	public function __construct(
 		public TokenGroup $group,
 		public TokenType $type,
 		public int $position,
 		public string $lexeme,
 		private ?int $length = null,
+		public array $items = [],
 	) {}
 
 	/** @param array<Token> $list */
@@ -26,7 +32,14 @@ readonly class Token
 		int $length,
 		Database $db,
 	): self {
-		return new self($group, $type, $position, self::transformList($list, $db), $length);
+		return new self(
+			$group,
+			$type,
+			$position,
+			self::transformList($list, $db),
+			$length,
+			array_values(array_map(static fn(Token $item): string => $item->lexeme, $list)),
+		);
 	}
 
 	public function len(): int

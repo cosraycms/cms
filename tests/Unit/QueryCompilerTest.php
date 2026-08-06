@@ -233,8 +233,122 @@ final class QueryCompilerTest extends TestCase
 		);
 	}
 
+	public function testReferenceQuery(): void
+	{
+		$compiler = new QueryCompiler($this->context, []);
+
+		$this->assertSame(
+			$this->nodeReference("= 'rule-a'"),
+			$compiler->compile("references = 'rule-a'"),
+		);
+		$this->assertSame(
+			'NOT (' . $this->nodeReference("= 'rule-a'") . ')',
+			$compiler->compile("references != 'rule-a'"),
+		);
+		$this->assertSame(
+			$this->nodeReference("IN ('rule-a', 'rule-b')"),
+			$compiler->compile("references @ ['rule-a', 'rule-b']"),
+		);
+		$this->assertSame(
+			'NOT (' . $this->nodeReference("IN ('rule-a', 'rule-b')") . ')',
+			$compiler->compile("references !@ ['rule-a', 'rule-b']"),
+		);
+		$this->assertSame(
+			$this->nodeReference("= 'rule-a'"),
+			$compiler->compile("'rule-a' = references"),
+		);
+	}
+
+	public function testFieldScopedReferenceQuery(): void
+	{
+		$compiler = new QueryCompiler($this->context, []);
+
+		$this->assertSame(
+			$this->contains('alertRule', 'rule-a'),
+			$compiler->compile("references.alertRule = 'rule-a'"),
+		);
+		$this->assertSame(
+			'NOT (' . $this->contains('alertRule', 'rule-a') . ')',
+			$compiler->compile("references.alertRule != 'rule-a'"),
+		);
+		$this->assertSame(
+			'('
+			. $this->contains('alertRule', 'rule-a')
+			. ' OR '
+			. $this->contains('alertRule', 'rule-b')
+			. ')',
+			$compiler->compile("references.alertRule @ ['rule-a', 'rule-b']"),
+		);
+	}
+
+	public function testReferenceQueryWithUnsupportedOperator(): void
+	{
+		$this->throws(
+			ParserOutputException::class,
+			'Reference expressions support the =, !=, @ and !@ operators only.',
+		);
+
+		new QueryCompiler($this->context, [])->compile("references ~~ 'rule-%'");
+	}
+
+	public function testReferenceQueryWithInvalidSelector(): void
+	{
+		$this->throws(
+			ParserOutputException::class,
+			'Invalid reference selector. Use references or references.<field>.',
+		);
+
+		new QueryCompiler($this->context, [])->compile("references.alertRule.uid = 'rule-a'");
+	}
+
+	public function testReferenceQueryWithNonLiteralValue(): void
+	{
+		$this->throws(
+			ParserOutputException::class,
+			'Reference comparisons only support uid literals.',
+		);
+
+		new QueryCompiler($this->context, [])->compile('references = someField');
+	}
+
+	public function testReferenceQueryWithEmptyList(): void
+	{
+		$this->throws(
+			ParserOutputException::class,
+			'Reference comparisons need at least one uid.',
+		);
+
+		new QueryCompiler($this->context, [])->compile('references @ []');
+	}
+
+	public function testReferenceQueryAgainstNull(): void
+	{
+		$this->throws(
+			ParserOutputException::class,
+			'Path and reference expressions cannot be compared to null.',
+		);
+
+		new QueryCompiler($this->context, [])->compile('references = null');
+	}
+
 	private function jsonPath(string $path): string
 	{
 		return self::FIELD_JSON . ' @@ ' . $this->context->db->quote($path);
+	}
+
+	private function nodeReference(string $targets): string
+	{
+		return (
+			'EXISTS (SELECT 1 FROM cms.node_references r '
+			. "WHERE r.owner_type = 'node' AND r.owner_uid = n.uid AND r.target_uid {$targets})"
+		);
+	}
+
+	private function contains(string $field, string $uid): string
+	{
+		return 'n.content @> '
+		. $this->context->db->quote(
+			'{"' . $field . '":{"value":{"zxx":[{"uid":"' . $uid . '"}]}}}',
+		);
 	}
 }

@@ -507,6 +507,7 @@ Filter/query syntax supports (non-exhaustive):
 - pattern: `~`, `~*`, `!~`, `!~*`, `~~`, `~~*`, `!~~`, `!~~*`
 - existence: `field` (exists)
 - path: `path`, `path.?`, `path.*`, `path.<locale>`
+- references: `references`, `references.<field>` (`=`, `!=`, `@`, `!@` only)
 
 Examples:
 
@@ -518,6 +519,19 @@ Examples:
 - `title.? ~* 'hello'`
 - `path = '/about'`
 - `path.de = '/ueber-uns'`
+- `references = 'some-node-uid'`
+- `references.alertRule @ ['rule-a','rule-b']`
+
+`path` and `references` are reserved words: a content field of either name
+cannot be addressed in a filter.
+
+`references = '<uid>'` matches nodes pointing at that target anywhere in their
+content, read from the `node_references` index, so richtext links count too.
+`references.<field> = '<uid>'` asks the same question of one `Reference` field
+and compiles to a jsonb containment test on `content`, which uses the content
+GIN index. A plain field comparison cannot do this: a `Reference` stores an
+ordered `{uid}` list under `value.zxx`, so `field = '<uid>'` compares the list
+against a string and never matches.
 
 6) Rendering model
 

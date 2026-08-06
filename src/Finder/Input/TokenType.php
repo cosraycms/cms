@@ -42,6 +42,7 @@ enum TokenType
 	case Keyword;
 	case Null;
 	case Number;
+	case Reference;
 	case String;
 	case List;
 }

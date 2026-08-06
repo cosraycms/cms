@@ -14,6 +14,7 @@ use Cosray\Finder\Output\Comparison;
 use Cosray\Finder\Output\Exists;
 use Cosray\Finder\Output\Expression;
 use Cosray\Finder\Output\LeftParen;
+use Cosray\Finder\Output\NodeReference;
 use Cosray\Finder\Output\NullComparison;
 use Cosray\Finder\Output\Operator;
 use Cosray\Finder\Output\RightParen;
@@ -202,6 +203,10 @@ final class QueryParser
 
 		if ($left->type === TokenType::Path || $right->type === TokenType::Path) {
 			return new UrlPath($left, $operator, $right, $this->context);
+		}
+
+		if ($left->type === TokenType::Reference || $right->type === TokenType::Reference) {
+			return new NodeReference($left, $operator, $right, $this->context);
 		}
 
 		return new Comparison($left, $operator, $right, $this->context, $this->builtins);

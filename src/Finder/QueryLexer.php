@@ -346,6 +346,10 @@ final class QueryLexer
 					return TokenType::Path;
 				}
 
+				if ($lexeme === 'references' || str_starts_with($lexeme, 'references.')) {
+					return TokenType::Reference;
+				}
+
 				if (in_array($lexeme, $this->builtins, true)) {
 					return TokenType::Builtin;
 				}
