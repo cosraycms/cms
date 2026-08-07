@@ -5,12 +5,7 @@
 	import { Compartment, EditorState, Annotation } from '@codemirror/state';
 	import { EditorView, keymap, lineNumbers, highlightActiveLineGutter } from '@codemirror/view';
 	import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-	import {
-		foldGutter,
-		foldKeymap,
-		syntaxHighlighting,
-		defaultHighlightStyle,
-	} from '@codemirror/language';
+	import { foldGutter, foldKeymap } from '@codemirror/language';
 	import { indentOnInput, bracketMatching } from '@codemirror/language';
 	import { drawSelection, highlightActiveLine, rectangularSelection } from '@codemirror/view';
 	import {
@@ -18,6 +13,7 @@
 		loadCodeLanguageExtension,
 		normalizeCodeSyntax,
 	} from '$shell/code/languages';
+	import { cosrayCodeTheme } from '$shell/code/theme';
 
 	type Props = {
 		name: string;
@@ -58,7 +54,7 @@
 			rectangularSelection(),
 			highlightActiveLine(),
 			foldGutter(),
-			syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+			cosrayCodeTheme,
 			keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
 			languageCompartment.of(languageExtension),
 			readOnlyCompartment.of(EditorState.readOnly.of(readonly)),
