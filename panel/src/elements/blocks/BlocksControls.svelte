@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Block } from '$types/data';
 	import type { BlocksField } from '$types/fields';
+	import { __ } from '$lib/locale';
 	import BlockSizeButtons from './BlockSizeButtons.svelte';
 	import BlockCellButtons from './BlockCellButtons.svelte';
 	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
@@ -37,7 +38,7 @@
 						class="cms-blocks-buttons-toggle"
 						onclick={() => (showDropdown = !showDropdown)}
 					>
-						<span class="sr-only">Open options</span>
+						<span class="sr-only">{__('common:open-options')}</span>
 						<IcoThreeDots />
 					</button>
 				</div>

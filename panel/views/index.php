@@ -16,7 +16,7 @@ if (!$boosted) {
 
 	<section class="content">
 		<div class="page-head">
-			<h1>Dashboard</h1>
+			<h1><?= escape(__('nav:dashboard')) ?></h1>
 		</div>
 	</section>
 </div>

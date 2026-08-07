@@ -13,7 +13,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Cosray CMS Panel</title>
+	<title><?= escape(__('panel:title')) ?></title>
 	<style>@layer tokens, reset, panel, plugin, theme;</style>
 <?php foreach ($stylesheets as $stylesheet): ?>
 	<link rel="stylesheet" href="<?= escape((string) $stylesheet) ?>">

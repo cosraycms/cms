@@ -19,7 +19,7 @@ final class Youtube extends Type
 
 	public function label(): string
 	{
-		return 'Youtube-Video';
+		return __('block:youtube');
 	}
 
 	public function control(): Control

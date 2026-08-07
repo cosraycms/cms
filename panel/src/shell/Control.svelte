@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Field } from '$types/fields';
 
+	import { __ } from '$lib/locale';
 	import Element from '$shell/controls/Element.svelte';
 	import Group from '$shell/controls/Group.svelte';
 	import Primitive from '$shell/controls/Primitive.svelte';
@@ -42,7 +43,7 @@
 	<Repeater {field} bind:data {onchange} />
 {:else}
 	<div class="cms-control-unknown">
-		Unknown control "{name}" for field "{field.name}" ({field.type})
+		{__('field:unknown-control', { control: name, field: field.name, type: field.type })}
 	</div>
 {/if}
 

@@ -8,7 +8,7 @@ use function Cosray\escape;
 		<?php $this->insert('component/logo') ?>
 	</header>
 
-	<nav class="navigation" aria-label="Panel navigation">
+	<nav class="navigation" aria-label="<?= escape(__('panel:navigation')) ?>">
 		<div class="scroll">
 			<ul class="nav-list level-0">
 				<li class="nav-item">

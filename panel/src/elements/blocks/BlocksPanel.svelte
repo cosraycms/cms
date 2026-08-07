@@ -137,7 +137,9 @@
 				use:resize={resizeCell(item)}
 			>
 				{#if !Control}
-					<div class="cms-control-unknown">Unknown block type "{item.type}"</div>
+					<div class="cms-control-unknown">
+						{__('block:unknown-type', { type: item.type })}
+					</div>
 				{:else}
 					<Control {item} {node} {index} {field}>
 						{#snippet children(params: { edit: () => void })}

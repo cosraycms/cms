@@ -1,5 +1,7 @@
 import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$lib/bridge';
 
+import { __ } from '$lib/locale';
+
 /**
  * Installs window.Cosray without the editor island: the system payload
  * comes SSR-embedded from the page, modal chrome and toasts are plain
@@ -34,7 +36,7 @@ export function installBridge(system: BridgeSystem): void {
 
 				return (await response.json()) as UploadResult;
 			} catch {
-				return { ok: false, error: 'Upload failed' };
+				return { ok: false, error: __('upload:failed') };
 			}
 		},
 
@@ -75,7 +77,7 @@ function openModal(
 		const button = document.createElement('button');
 		button.type = 'button';
 		button.className = 'cms-modal-close';
-		button.setAttribute('aria-label', 'close');
+		button.setAttribute('aria-label', __('common:close'));
 		button.textContent = '×';
 		button.addEventListener('click', close);
 		container.append(button);

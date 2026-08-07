@@ -19,7 +19,7 @@ final class Video extends Type
 
 	public function label(): string
 	{
-		return 'Video';
+		return __('block:video');
 	}
 
 	public function control(): Control

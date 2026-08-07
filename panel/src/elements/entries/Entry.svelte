@@ -3,6 +3,7 @@
 	import type { EntriesField, EntryType, Field, Fieldset } from '$types/fields';
 
 	import { useNotify } from '../notify';
+	import { __ } from '$lib/locale';
 	import Control from '$shell/Control.svelte';
 	import EntryControls from './EntryControls.svelte';
 
@@ -57,7 +58,7 @@
 	}
 
 	function entryTypeLabel(type: EntryType | undefined): string {
-		return type?.label ?? 'Entry';
+		return type?.label ?? __('field:entry');
 	}
 
 	function widthStyle(width: number | null | undefined): string {
@@ -124,7 +125,9 @@
 					{/if}
 				{/each}
 			{:else}
-				<div class="entry-field entry-field-note">Unknown entry type: {entry.type}</div>
+				<div class="entry-field entry-field-note">
+					{__('field:unknown-entry-type', { type: entry.type })}
+				</div>
 			{/if}
 		</div>
 	{/if}

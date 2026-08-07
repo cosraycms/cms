@@ -8,12 +8,12 @@ $this->layout('base');
 <main id="main" class="login-page">
 	<header class="login-header">
 		<?php if ($logo !== null): ?>
-			<img class="login-logo" src="<?= escape((string) $logo) ?>" alt="Panel Logo" />
+			<img class="login-logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
 		<?php endif ?>
-		<h1 class="login-title">Sign in to your account</h1>
+		<h1 class="login-title"><?= escape(__('auth:sign-in-title')) ?></h1>
 	</header>
 
-	<section class="login-card" aria-label="Sign in">
+	<section class="login-card" aria-label="<?= escape(__('auth:sign-in')) ?>">
 		<form class="login-form" method="post" action="<?= escape($panelPath) ?>/login" hx-boost="false">
 			<input type="hidden" name="next" value="<?= escape($next) ?>" />
 
@@ -22,7 +22,7 @@ $this->layout('base');
 			<?php endif ?>
 
 			<div class="login-field">
-				<label class="login-label" for="login">Username or email</label>
+				<label class="login-label" for="login"><?= escape(__('auth:login-label')) ?></label>
 				<input
 					class="login-input"
 					id="login"
@@ -34,7 +34,7 @@ $this->layout('base');
 			</div>
 
 			<div class="login-field">
-				<label class="login-label" for="password">Password</label>
+				<label class="login-label" for="password"><?= escape(__('auth:password')) ?></label>
 				<input
 					class="login-input"
 					id="password"
@@ -53,13 +53,13 @@ $this->layout('base');
 						name="rememberme"
 						value="1"
 						<?= $rememberme ? 'checked' : '' ?> />
-					Remember me
+					<?= escape(__('auth:remember-me')) ?>
 				</label>
 
-				<a class="login-forgot" href="#" hx-boost="false" onclick="event.preventDefault();">Forgot password?</a>
+				<a class="login-forgot" href="#" hx-boost="false" onclick="event.preventDefault();"><?= escape(__('auth:forgot-password')) ?></a>
 			</div>
 
-			<button class="cms-button primary login-submit" type="submit">Sign in</button>
+			<button class="cms-button primary login-submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
 		</form>
 	</section>
 </main>
