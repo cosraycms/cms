@@ -167,7 +167,12 @@
 <div class="cms-media">
 	<div class="cms-media-toolbar">
 		<form class="cms-media-search" onsubmit={search}>
-			<input class="cms-input" type="search" placeholder={__('media:search-filename')} bind:value={q} />
+			<input
+				class="cms-input"
+				type="search"
+				placeholder={__('media:search-filename')}
+				bind:value={q}
+			/>
 			<button type="submit" class="cms-button">{__('common:search')}</button>
 		</form>
 
@@ -176,18 +181,21 @@
 				type="button"
 				class="cms-button"
 				class:active={filter === 'all'}
+				class:secondary={filter !== 'all'}
 				onclick={() => setFilter('all')}>{__('common:all')}</button
 			>
 			<button
 				type="button"
 				class="cms-button"
 				class:active={filter === 'image'}
+				class:secondary={filter !== 'image'}
 				onclick={() => setFilter('image')}>{__('media:images')}</button
 			>
 			<button
 				type="button"
 				class="cms-button"
 				class:active={filter === 'video'}
+				class:secondary={filter !== 'video'}
 				onclick={() => setFilter('video')}>{__('media:videos')}</button
 			>
 		</div>
@@ -284,11 +292,6 @@
 		.cms-media-filters {
 			display: flex;
 			gap: var(--space-1);
-		}
-
-		.cms-media-filters .active {
-			border-color: var(--color-info);
-			color: var(--color-info);
 		}
 
 		.cms-media-upload button {
