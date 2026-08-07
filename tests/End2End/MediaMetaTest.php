@@ -30,14 +30,11 @@ final class MediaMetaTest extends End2EndTestCase
 
 	protected function tearDown(): void
 	{
-		$this->db()->execute(
-			"DELETE FROM cms.asset_references WHERE owner_uid LIKE 'e2e-meta-%'",
-		)->run();
-		$this->db()->execute(
-			"DELETE FROM cms.assets WHERE filename LIKE 'e2e-meta-%'",
-		)->run();
-		$this->removeDir($this->publicDir);
-		parent::tearDown();
+		try {
+			$this->removeDir($this->publicDir);
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	public function testDetailReturnsAssetMetaAndUsage(): void

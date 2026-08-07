@@ -14,9 +14,9 @@ The test suite combines three types of tests:
 
 1. **No Mocks in Integration Tests**: Integration tests use real database connections and actual data
 2. **Transaction Isolation for Integration Tests**: Each integration test runs in a transaction that's rolled back after completion
-3. **No Transactions for E2E Tests**: E2E tests disable transactions because the CMS creates separate database connections that cannot see uncommitted transaction data
+3. **Transaction Isolation for E2E Tests**: E2E tests share the application's database instance with the test harness so HTTP writes roll back with the test
 4. **Fixture-Based**: Tests use SQL fixtures and helper methods for consistent test data
-5. **Hybrid Setup**: Database schema is initialized once per test run, then transactions provide isolation for integration tests
+5. **Shared Setup**: Database schema is initialized once per test run, then transactions provide isolation for database tests
 
 ## Prerequisites
 
@@ -325,22 +325,16 @@ This ensures:
 - ✅ Tests can run in any order
 - ✅ Fast execution (no database recreation)
 
-### End-to-End Tests - No Transactions
+### End-to-End Tests - Transaction Isolation
 
-E2E tests **disable transactions** because the CMS creates separate database connections:
+E2E tests adopt the database instance created by the in-process application and start the test transaction on that instance:
 
-1. **Test begins** → NO transaction (disabled in `End2EndTestCase`)
-2. **Application runs** → Creates its own DB connection, inserts data
-3. **Test completes** → Explicit cleanup: deletes created test data
-4. **Next test begins** → Clean database state
+1. **Application starts** → Bootstrap creates and registers its database
+2. **Test begins** → The test harness starts a transaction on that database
+3. **HTTP requests run** → Application and test helpers share the transaction
+4. **Test completes** → The transaction rolls back
 
-The cleanup process handles foreign key constraints by deleting in proper order:
-
-1. Delete FK-referenced records (history records, fulltext index, etc.)
-2. Delete the main records
-3. Delete created types
-
-This prevents FK constraint violations during cleanup.
+PostgreSQL also rolls back the open transaction if an interrupted test process disconnects, so a crashed run does not leave types, nodes, users, or assets behind.
 
 ### When to Recreate the Database
 
@@ -495,7 +489,7 @@ jobs:
 - ✅ Load fixtures in `setUp()` when needed across all test methods
 - ✅ Use descriptive test names (`testFinderReturnsNodesOfSpecificType`, `testCreateNodeReturns201`)
 - ✅ Follow Arrange-Act-Assert pattern
-- ✅ Clean up is automatic (via transactions for integration, via explicit cleanup for E2E)
+- ✅ Database cleanup is automatic through transaction rollbacks
 - ✅ For E2E tests: Call `$this->authenticateAs('editor')` before making API requests
 - ✅ For page nodes: Include `paths` data with URL paths for required locales
 - ✅ For page nodes: Include all required schema fields (`uid`, `published`, `locked`, `hidden`)

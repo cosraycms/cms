@@ -8,6 +8,8 @@ use Celema\Core\App;
 use Celema\Core\Factory\Nyholm;
 use Celema\Core\Plugin as CorePlugin;
 use Celema\Core\Request;
+use Celema\Quma\Connection;
+use Celema\Quma\Database;
 use Celema\Router\Router;
 use Cosray\Bootstrap;
 use Cosray\Cms;
@@ -15,6 +17,7 @@ use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Wrapper;
+use Cosray\Tests\Fixtures\TransactionalBootstrap;
 use Cosray\View\Boiler\Error\Handler;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
@@ -34,127 +37,32 @@ class End2EndTestCase extends IntegrationTestCase
 {
 	protected App $app;
 
-	// Disable transactions because the CMS creates its own database connection
-	// which cannot see uncommitted transaction data from the test connection.
+	// Bootstrap creates the application database before the test transaction starts.
 	protected bool $useTransactions = false;
-
-	// Track created test data for cleanup
-	protected array $createdNodeIds = [];
-	protected array $createdTypeHandles = [];
-	protected array $createdUserIds = [];
-	protected array $createdAuthTokens = [];
-	protected array $createdOneTimeTokens = [];
+	protected ?Connection $testConnection = null;
 	protected ?string $defaultAuthToken = null;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
 		$this->app = $this->createApp();
+		$this->testConnection = $this->app->container()->get(Connection::class);
+		$this->testDb = $this->app->container()->get(Database::class);
+		$this->testDb->begin();
+		$this->useTransactions = true;
 	}
 
 	protected function tearDown(): void
 	{
-		// Clean up test data created during the test
-		$this->cleanupTestData();
-
-		if (session_status() === PHP_SESSION_ACTIVE) {
-			$_SESSION = [];
-			session_unset();
-			session_destroy();
+		try {
+			if (session_status() === PHP_SESSION_ACTIVE) {
+				$_SESSION = [];
+				session_unset();
+				session_destroy();
+			}
+		} finally {
+			parent::tearDown();
 		}
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Clean up dynamically created test data.
-	 */
-	protected function cleanupTestData(): void
-	{
-		$db = $this->db();
-
-		// Delete created one-time tokens
-		foreach ($this->createdOneTimeTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.one_time_tokens WHERE token = :token', [
-				'token' => $tokenHash,
-			])->run();
-		}
-
-		// Delete created auth tokens
-		foreach ($this->createdAuthTokens as $tokenHash) {
-			$db->execute('DELETE FROM cms.auth_tokens WHERE token = :token', ['token' => $tokenHash])->run();
-		}
-
-		// Delete created users
-		foreach ($this->createdUserIds as $userId) {
-			$db->execute('DELETE FROM cms.users_history WHERE usr = :usr', ['usr' => $userId])->run();
-			$db->execute('DELETE FROM cms.users WHERE usr = :usr', ['usr' => $userId])->run();
-		}
-
-		// Delete created paths and nodes in reverse order (children before parents)
-		// Also delete related records that reference the nodes via FKs
-		foreach (array_reverse($this->createdNodeIds) as $nodeId) {
-			$db->execute('DELETE FROM cms.url_paths WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.full_text WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.node_tags WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.drafts_history WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodes_history WHERE node = :node', ['node' => $nodeId])->run();
-			$db->execute('DELETE FROM cms.nodes WHERE node = :node', ['node' => $nodeId])->run();
-		}
-
-		// Delete created types
-		foreach ($this->createdTypeHandles as $handle) {
-			$db->execute('DELETE FROM cms.types WHERE handle = :handle', ['handle' => $handle])->run();
-		}
-
-		$this->createdNodeIds = [];
-		$this->createdTypeHandles = [];
-		$this->createdUserIds = [];
-		$this->createdAuthTokens = [];
-		$this->createdOneTimeTokens = [];
-		$this->defaultAuthToken = null;
-	}
-
-	/**
-	 * Track a node created via HTTP API by uid.
-	 */
-	protected function trackNodeByUid(string $uid): int
-	{
-		$node = $this->db()->execute(
-			'SELECT node FROM cms.nodes WHERE uid = :uid',
-			['uid' => $uid],
-		)->one();
-		$this->assertNotEmpty($node);
-		$nodeId = (int) $node['node'];
-
-		if (!in_array($nodeId, $this->createdNodeIds, true)) {
-			$this->createdNodeIds[] = $nodeId;
-		}
-
-		return $nodeId;
-	}
-
-	/**
-	 * @override Track created types for cleanup
-	 */
-	protected function createTestType(string $handle): int
-	{
-		$typeId = parent::createTestType($handle);
-		$this->createdTypeHandles[] = $handle;
-
-		return $typeId;
-	}
-
-	/**
-	 * @override Track created nodes for cleanup
-	 */
-	protected function createTestNode(array $data): int
-	{
-		$nodeId = parent::createTestNode($data);
-		$this->createdNodeIds[] = $nodeId;
-
-		return $nodeId;
 	}
 
 	/**
@@ -190,8 +98,6 @@ class End2EndTestCase extends IntegrationTestCase
 			'editor' => $systemUserId,
 		])->one()['usr'];
 
-		$this->createdUserIds[] = $userId;
-
 		// Create auth token
 		$sql = 'INSERT INTO cms.auth_tokens (token, usr, creator, editor)
 				VALUES (:token, :usr, 1, 1)';
@@ -200,8 +106,6 @@ class End2EndTestCase extends IntegrationTestCase
 			'token' => $tokenHash,
 			'usr' => $userId,
 		])->run();
-
-		$this->createdAuthTokens[] = $tokenHash;
 
 		return $token;
 	}
@@ -260,7 +164,11 @@ class End2EndTestCase extends IntegrationTestCase
 
 	protected function createBootstrap(Config $config): Bootstrap
 	{
-		$plugin = new Bootstrap($config);
+		$plugin = new TransactionalBootstrap(
+			$config,
+			$this->testConnection,
+			$this->testDb,
+		);
 
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestPage::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestArticle::class);

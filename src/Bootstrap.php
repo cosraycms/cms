@@ -395,6 +395,12 @@ class Bootstrap implements CorePlugin
 
 	protected function database(): void
 	{
+		$this->connection = $this->createConnection();
+		$this->db = $this->createDatabase($this->connection);
+	}
+
+	protected function createConnection(): Connection
+	{
 		$root = dirname(__DIR__);
 		$config = $this->config->db;
 		$sql = array_merge(
@@ -412,7 +418,7 @@ class Bootstrap implements CorePlugin
 			[$root . '/db/migrations/update'],
 		);
 
-		$this->connection = new Connection(
+		return new Connection(
 			$config->dsn,
 			$sql,
 		)
@@ -420,7 +426,11 @@ class Bootstrap implements CorePlugin
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)
 			->placeholders(Delimiters::comments(), $config->placeholders);
-		$this->db = new Database($this->connection);
+	}
+
+	protected function createDatabase(Connection $connection): Database
+	{
+		return new Database($connection);
 	}
 
 	/**

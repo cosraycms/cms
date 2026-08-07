@@ -28,20 +28,6 @@ final class ReferenceSyncTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 	}
 
-	protected function tearDown(): void
-	{
-		foreach (['asset_references', 'node_references'] as $table) {
-			$this->db()->execute(
-				"DELETE FROM cms.{$table} WHERE owner_uid LIKE 'e2e-refsync-%'",
-			)->run();
-		}
-
-		$this->db()->execute(
-			"DELETE FROM cms.assets WHERE uid LIKE 'e2e-refsync-%'",
-		)->run();
-		parent::tearDown();
-	}
-
 	protected function createBootstrap(Config $config): Bootstrap
 	{
 		$plugin = parent::createBootstrap($config);
