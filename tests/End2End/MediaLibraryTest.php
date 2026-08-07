@@ -29,11 +29,11 @@ final class MediaLibraryTest extends End2EndTestCase
 
 	protected function tearDown(): void
 	{
-		$this->db()->execute(
-			"DELETE FROM cms.assets WHERE filename LIKE 'e2e-library-%'",
-		)->run();
-		$this->removeDir($this->publicDir);
-		parent::tearDown();
+		try {
+			$this->removeDir($this->publicDir);
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	public function testListsUploadedAssetsWithKindFilter(): void

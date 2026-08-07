@@ -27,14 +27,13 @@ final class InactivePathRedirectTest extends End2EndTestCase
 		$typeHandle = 'inactive-path-page-' . uniqid();
 		$typeId = $this->createTestType($typeHandle);
 		$uid = 'inactive-path-node-' . uniqid();
-		$this->createTestNode([
+		$nodeId = $this->createTestNode([
 			'uid' => $uid,
 			'type' => $typeId,
 			'content' => [
 				'title' => ['type' => 'text', 'value' => ['en' => 'Inactive Path Node']],
 			],
 		]);
-		$nodeId = $this->createdNodeIds[count($this->createdNodeIds) - 1];
 		$initialPath = '/test/inactive-path-initial-' . uniqid();
 		$updatedPath = '/test/inactive-path-updated-' . uniqid();
 		$this->createTestPath($nodeId, $initialPath);

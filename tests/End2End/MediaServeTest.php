@@ -34,11 +34,11 @@ final class MediaServeTest extends End2EndTestCase
 
 	protected function tearDown(): void
 	{
-		$this->db()->execute(
-			"DELETE FROM cms.assets WHERE filename LIKE 'e2e-serve-%'",
-		)->run();
-		$this->removeDir($this->publicDir);
-		parent::tearDown();
+		try {
+			$this->removeDir($this->publicDir);
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	public function testUploadedOriginalIsAWebServerFile(): void

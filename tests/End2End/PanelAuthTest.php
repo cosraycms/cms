@@ -37,13 +37,12 @@ final class PanelAuthTest extends End2EndTestCase
 	public function testLoginWithValidCredentialsRedirectsToPanel(): void
 	{
 		$login = 'panel-login-user';
-		$userId = $this->createTestUser([
+		$this->createTestUser([
 			'uid' => 'panel-login-user',
 			'username' => $login,
 			'email' => 'panel-login@example.com',
 			'password' => password_hash('password', PASSWORD_ARGON2ID),
 		]);
-		$this->createdUserIds[] = $userId;
 
 		$response = $this->makeRequest('POST', '/cp/login', [
 			'body' => [

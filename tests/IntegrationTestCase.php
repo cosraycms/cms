@@ -110,13 +110,14 @@ class IntegrationTestCase extends TestCase
 
 	protected function tearDown(): void
 	{
-		// Rollback transaction if this test used them
-		if ($this->useTransactions && $this->testDb !== null) {
-			$this->testDb->rollback();
+		try {
+			if ($this->useTransactions && $this->testDb !== null) {
+				$this->testDb->rollback();
+			}
+		} finally {
 			$this->testDb = null;
+			parent::tearDown();
 		}
-
-		parent::tearDown();
 	}
 
 	public function conn(): Connection
