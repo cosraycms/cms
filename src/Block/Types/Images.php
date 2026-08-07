@@ -22,7 +22,7 @@ final class Images extends Type
 
 	public function label(): string
 	{
-		return 'Mehrere Bilder';
+		return __('block:images');
 	}
 
 	public function control(): Control

@@ -18,7 +18,7 @@ final class Iframe extends Type
 
 	public function label(): string
 	{
-		return 'Iframe';
+		return __('block:iframe');
 	}
 
 	public function control(): Control

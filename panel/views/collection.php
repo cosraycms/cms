@@ -25,14 +25,16 @@ if (!$boosted) {
 				method="get"
 				action="<?= escape($page->path) ?>"
 				hx-target="#main">
-				<label class="sr-only" for="collection-search">Search <?= escape($page->name) ?></label>
+				<label class="sr-only" for="collection-search"><?= escape(
+					__('collection:search', ['name' => $page->name]),
+				) ?></label>
 				<span class="search-icon" aria-hidden="true">⌕</span>
 				<input
 					id="collection-search"
 					name="q"
 					type="search"
 					value="<?= escape($page->query->q) ?>"
-					placeholder="Search entries …" />
+					placeholder="<?= escape(__('collection:search-placeholder')) ?>" />
 				<?php foreach ($page->searchFields as $field): ?>
 					<input
 						type="hidden"
@@ -43,7 +45,9 @@ if (!$boosted) {
 
 			<div class="topbar-actions">
 				<?php if ($page->clearSearchUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main">Clear search</a>
+					<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main"><?= escape(
+						__('collection:clear-search'),
+					) ?></a>
 				<?php endif ?>
 				<?php if ($page->query->parent === null): ?>
 					<?php foreach ($page->createLinks as $link): ?>
@@ -51,7 +55,7 @@ if (!$boosted) {
 							class="cms-button primary"
 							href="<?= escape($link['url']) ?>"
 							hx-target="#main">
-							New <?= escape($link['name']) ?>
+							<?= escape(__('collection:new', ['name' => $link['name']])) ?>
 						</a>
 					<?php endforeach ?>
 				<?php endif ?>
@@ -62,19 +66,21 @@ if (!$boosted) {
 	<section class="content">
 		<div class="page-head">
 			<?php if ($page->rootUrl !== null): ?>
-				<nav class="breadcrumb" aria-label="Breadcrumb">
+				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 					<a href="<?= escape($page->rootUrl) ?>" hx-target="#main"><?= escape($page->name) ?></a>
 					<span aria-hidden="true">/</span>
 					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
 				</nav>
 			<?php endif ?>
 			<h1><?= escape($page->title) ?></h1>
-			<span class="count-pill"><?= $page->total ?> <?= $page->total === 1
-	? 'entry'
-	: 'entries' ?></span>
+			<span class="count-pill"><?= escape(__n(
+				'collection:entry-count',
+				'collection:entry-count-plural',
+				$page->total,
+			)) ?></span>
 
 			<?php if (count($page->viewLinks) > 0): ?>
-				<nav class="view-toggle" aria-label="Collection view">
+				<nav class="view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
 					<?php foreach ($page->viewLinks as $link): ?>
 						<a
 							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
@@ -100,17 +106,21 @@ if (!$boosted) {
 					</div>
 					<div class="parent-actions">
 						<?php if ($page->parentEditUrl !== null): ?>
-							<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main">Edit parent</a>
+							<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main"><?= escape(
+								__('collection:edit-parent'),
+							) ?></a>
 						<?php endif ?>
 						<?php if ($page->parentTreeUrl !== null): ?>
-							<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main">Show in tree</a>
+							<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main"><?= escape(
+								__('collection:show-in-tree'),
+							) ?></a>
 						<?php endif ?>
 						<?php foreach ($page->createLinks as $link): ?>
 							<a
 								class="cms-button primary"
 								href="<?= escape($link['url']) ?>"
 								hx-target="#main">
-								New <?= escape($link['name']) ?>
+								<?= escape(__('collection:new', ['name' => $link['name']])) ?>
 							</a>
 						<?php endforeach ?>
 					</div>
@@ -122,11 +132,11 @@ if (!$boosted) {
 			<?php if (count($page->rows) === 0): ?>
 				<div class="collection-empty">
 					<div class="empty-icon" aria-hidden="true">⌁</div>
-					<strong>No entries found.</strong>
+					<strong><?= escape(__('collection:empty')) ?></strong>
 					<?php if ($page->query->q !== ''): ?>
-						<p>Try a different search or clear the current filter.</p>
+						<p><?= escape(__('collection:empty-filter-help')) ?></p>
 					<?php else: ?>
-						<p>This collection does not contain entries yet.</p>
+						<p><?= escape(__('collection:empty-help')) ?></p>
 					<?php endif ?>
 				</div>
 			<?php else: ?>
@@ -149,7 +159,7 @@ if (!$boosted) {
 										<?php endif ?>
 									</th>
 								<?php endforeach ?>
-								<th class="col-status">Status</th>
+								<th class="col-status"><?= escape(__('collection:status')) ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -171,9 +181,9 @@ if (!$boosted) {
 																href="<?= escape($row['childrenUrl']) ?>"
 																hx-target="#main"
 																aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
-																aria-label="<?= $row['expanded'] ? 'Collapse' : 'Expand' ?> children of <?= escape(
-															$cell['value'],
-														) ?>">
+																aria-label="<?= escape($row['expanded']
+																	? __('collection:collapse-children', ['name' => $cell['value']])
+																	: __('collection:expand-children', ['name' => $cell['value']])) ?>">
 																<?= $chevronSvg !== '' ? $chevronSvg : ($row['expanded'] ? '⌄' : '›') ?>
 															</a>
 														<?php else: ?>
@@ -203,7 +213,7 @@ if (!$boosted) {
 																	class="tree-meta"
 																	href="<?= escape($row['focusedChildrenUrl']) ?>"
 																	hx-target="#main">
-																	Children
+																	<?= escape(__('collection:children')) ?>
 																</a>
 															<?php endif ?>
 															<?php foreach ($row['childCreateLinks'] as $link): ?>
@@ -211,9 +221,10 @@ if (!$boosted) {
 																	class="tree-create"
 																	href="<?= escape($link['url']) ?>"
 																	hx-target="#main"
-																	aria-label="Create <?= escape($link['name']) ?> under <?= escape(
-																$cell['value'],
-															) ?>">
+																	aria-label="<?= escape(__('collection:create-under', [
+																		'type' => $link['name'],
+																		'name' => $cell['value'],
+																	])) ?>">
 																	+ <?= escape($link['name']) ?>
 																</a>
 															<?php endforeach ?>
@@ -232,7 +243,7 @@ if (!$boosted) {
 											<?php endif ?>
 										</td>
 									<?php endforeach ?>
-									<td class="collection-cell col-status" data-label="Status">
+									<td class="collection-cell col-status" data-label="<?= escape(__('collection:status')) ?>">
 										<div class="status-list">
 											<?php foreach ($row['status'] as $badge): ?>
 												<span class="status status-<?= escape($badge['kind']) ?>"><?= escape(
@@ -249,20 +260,31 @@ if (!$boosted) {
 			<?php endif ?>
 
 			<footer class="list-foot">
-				<span class="fcount">Showing <?= $page->rangeStart ?>–<?= $page->rangeEnd ?> of <?= $page->total ?></span>
-				<nav class="pagination" aria-label="Pagination">
+				<span class="fcount"><?= escape(__('collection:showing', [
+					'start' => $page->rangeStart,
+					'end' => $page->rangeEnd,
+					'total' => $page->total,
+				])) ?></span>
+				<nav class="pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
 					<?php if ($page->previousUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->previousUrl) ?>" hx-target="#main">Previous</a>
+						<a class="page-link" href="<?= escape($page->previousUrl) ?>" hx-target="#main"><?= escape(
+							__('collection:previous'),
+						) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled">Previous</span>
+						<span class="page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
 					<?php endif ?>
 
-					<span class="page-status">Page <?= $page->currentPage ?> of <?= $page->pageCount ?></span>
+					<span class="page-status"><?= escape(__('collection:page', [
+						'page' => $page->currentPage,
+						'pages' => $page->pageCount,
+					])) ?></span>
 
 					<?php if ($page->nextUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->nextUrl) ?>" hx-target="#main">Next</a>
+						<a class="page-link" href="<?= escape($page->nextUrl) ?>" hx-target="#main"><?= escape(
+							__('collection:next'),
+						) ?></a>
 					<?php else: ?>
-						<span class="page-link is-disabled">Next</span>
+						<span class="page-link is-disabled"><?= escape(__('collection:next')) ?></span>
 					<?php endif ?>
 				</nav>
 			</footer>

@@ -47,7 +47,7 @@
 			<span class="cms-file-title">{title}</span>
 		</div>
 		{#if loading}
-			<div>Loading ...</div>
+			<div>{__('common:loading')}</div>
 		{/if}
 		<IcoDownload />
 		<a href={info?.url ?? ''} target="_blank" class="cms-file-download">

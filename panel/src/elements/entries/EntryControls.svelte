@@ -2,6 +2,7 @@
 	import type { EntryData } from '$types/data';
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
+	import { __ } from '$lib/locale';
 
 	import IcoTrash from '$shell/icons/IcoTrash.svelte';
 	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
@@ -69,7 +70,7 @@
 	<button
 		type="button"
 		class="collapse-btn"
-		title={collapsed ? 'Expand' : 'Collapse'}
+		title={collapsed ? __('common:expand') : __('common:collapse')}
 		onclick={toggleCollapse}
 	>
 		{#if collapsed}
@@ -78,13 +79,19 @@
 			<IcoCollapse />
 		{/if}
 	</button>
-	<button type="button" class="up-down" disabled={first} title="Move up" onclick={up}>
+	<button type="button" class="up-down" disabled={first} title={__('common:move-up')} onclick={up}>
 		<IcoArrowUp />
 	</button>
-	<button type="button" class="up-down" disabled={last} title="Move down" onclick={down}>
+	<button
+		type="button"
+		class="up-down"
+		disabled={last}
+		title={__('common:move-down')}
+		onclick={down}
+	>
 		<IcoArrowDown />
 	</button>
-	<button type="button" class="remove" title="Remove entry" onclick={remove}>
+	<button type="button" class="remove" title={__('field:remove-entry')} onclick={remove}>
 		<IcoTrash />
 	</button>
 </div>

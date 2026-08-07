@@ -32,6 +32,20 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertStringContainsString('Sign in to your account', $html);
 		$this->assertStringContainsString('action="/cp/login"', $html);
 		$this->assertStringContainsString('Forgot password?', $html);
+		$this->assertStringContainsString('"code:syntax":"Syntax"', $html);
+	}
+
+	public function testLoginPageUsesNegotiatedLanguage(): void
+	{
+		$response = $this->makeRequest('GET', '/cp/login', [
+			'headers' => ['Accept-Language' => 'de'],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('<html lang="de">', $html);
+		$this->assertStringContainsString('Bei Ihrem Konto anmelden', $html);
+		$this->assertStringContainsString('Passwort vergessen?', $html);
 	}
 
 	public function testLoginWithValidCredentialsRedirectsToPanel(): void

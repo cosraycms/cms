@@ -62,6 +62,6 @@ $messages = $flatten($errors, $flatten);
 		<button type="button" class="cms-preview-close" data-overlay-close>
 			<?= escape(__('editor:close')) ?>
 		</button>
-		<iframe src="/preview<?= escape($preview) ?>" title="Preview"></iframe>
+		<iframe src="/preview<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>
 	</div>
 <?php endif ?>

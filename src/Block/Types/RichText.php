@@ -22,7 +22,7 @@ final class RichText extends Type
 
 	public function label(): string
 	{
-		return 'Formatierter Text';
+		return __('block:richtext');
 	}
 
 	public function control(): Control

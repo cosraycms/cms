@@ -18,7 +18,7 @@ final class Text extends Type
 
 	public function label(): string
 	{
-		return 'Einfacher Text';
+		return __('block:text');
 	}
 
 	public function control(): Control

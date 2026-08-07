@@ -26,7 +26,7 @@ final class Validators
 	{
 		return new class implements Rule, ValidatesEmpty {
 			public string $message {
-				get => 'Has fewer than the minimum number of {arg1} items';
+				get => __('validation:min-items');
 			}
 
 			#[Override]
@@ -45,7 +45,7 @@ final class Validators
 	{
 		return new class implements Rule {
 			public string $message {
-				get => 'Has more than the maximum allowed number of {arg1} items';
+				get => __('validation:max-items');
 			}
 
 			#[Override]

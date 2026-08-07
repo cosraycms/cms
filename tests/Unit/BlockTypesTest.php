@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Assets\Repository;
 use Cosray\Block\Registry;
 use Cosray\Block\RenderContext;
@@ -104,8 +106,7 @@ final class BlockTypesTest extends TestCase
 
 	public function testBlocksFieldPropertiesExposeBlockTypes(): void
 	{
-		$field = $this->blocksField();
-		$types = array_column($field->properties()['blockTypes'], null, 'id');
+		$types = $this->translatedBlockTypes('de');
 
 		$this->assertSame('Formatierter Text', $types['richtext']['label']);
 		$this->assertSame('block-richtext', $types['richtext']['control']['name']);
@@ -123,6 +124,17 @@ final class BlockTypesTest extends TestCase
 		$ids = array_column($field->properties()['blockTypes'], 'id');
 
 		$this->assertSame(['richtext', 'text'], $ids);
+	}
+
+	private function translatedBlockTypes(string $locale): array
+	{
+		Verba::activate(new Translator($locale, ['cosray' => self::root() . '/lang']));
+
+		try {
+			return array_column($this->blocksField()->properties()['blockTypes'], null, 'id');
+		} finally {
+			Verba::deactivate();
+		}
 	}
 
 	private function blocksField(): Blocks

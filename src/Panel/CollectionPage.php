@@ -201,7 +201,7 @@ final class CollectionPage
 
 		return [
 			[
-				'label' => 'Tree',
+				'label' => __('collection:tree'),
 				'url' => $urls->collection([
 					'view' => 'tree',
 					'open' => '',
@@ -210,7 +210,7 @@ final class CollectionPage
 				'active' => $query->view === 'tree',
 			],
 			[
-				'label' => 'List',
+				'label' => __('collection:list'),
 				'url' => $urls->collection([
 					'view' => 'list',
 					'open' => '',
@@ -374,7 +374,9 @@ final class CollectionPage
 
 		foreach (self::items(self::arrayFrom($node['columns'] ?? [])) as $index => $column) {
 			$column = self::arrayFrom($column);
-			$label = $headers[$index]['label'] ?? 'Column ' . ((int) $index + 1);
+			$label = $headers[$index]['label'] ?? __('collection:column', [
+				'number' => (int) $index + 1,
+			]);
 			$classes = ['collection-cell'];
 
 			if ((bool) ($column['bold'] ?? false)) {
@@ -416,7 +418,7 @@ final class CollectionPage
 		foreach ($blueprints as $blueprint) {
 			$links[] = [
 				'slug' => $blueprint['slug'],
-				'name' => $blueprint['name'],
+				'name' => __($blueprint['name']),
 				'url' => $urls->create($blueprint['slug']),
 			];
 		}
@@ -442,7 +444,7 @@ final class CollectionPage
 		foreach ($blueprints as $blueprint) {
 			$links[] = [
 				'slug' => $blueprint['slug'],
-				'name' => $blueprint['name'],
+				'name' => __($blueprint['name']),
 				'url' => $urls->create($blueprint['slug'], $uid),
 			];
 		}
@@ -469,14 +471,14 @@ final class CollectionPage
 
 		if ((bool) ($node['hasChildren'] ?? false)) {
 			$links[] = [
-				'label' => 'Open children',
+				'label' => __('collection:open-children'),
 				'url' => $urls->children($uid),
 			];
 		}
 
 		foreach ($blueprints as $blueprint) {
 			$links[] = [
-				'label' => 'Add ' . $blueprint['name'],
+				'label' => __('collection:add', ['name' => __($blueprint['name'])]),
 				'url' => $urls->create($blueprint['slug'], $uid),
 			];
 		}
@@ -521,21 +523,21 @@ final class CollectionPage
 			$published = (bool) ($node['published'] ?? false);
 			$badges[] = [
 				'kind' => $published ? 'published' : 'draft',
-				'label' => $published ? 'Published' : 'Draft',
+				'label' => $published ? __('status:published') : __('status:draft'),
 			];
 		}
 
 		if ($meta->showHidden && (bool) ($node['hidden'] ?? false)) {
 			$badges[] = [
 				'kind' => 'hidden',
-				'label' => 'Hidden',
+				'label' => __('status:hidden'),
 			];
 		}
 
 		if ($meta->showLocked && (bool) ($node['locked'] ?? false)) {
 			$badges[] = [
 				'kind' => 'locked',
-				'label' => 'Locked',
+				'label' => __('status:locked'),
 			];
 		}
 
@@ -671,7 +673,7 @@ final class CollectionPage
 		}
 
 		if (is_bool($value)) {
-			return $value ? 'Yes' : 'No';
+			return $value ? __('common:yes') : __('common:no');
 		}
 
 		if (is_scalar($value)) {

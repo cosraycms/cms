@@ -83,7 +83,7 @@
 	<div class="cms-modal-link-body">
 		<div class="tabs">
 			<div class="cms-modal-link-tabs-frame">
-				<nav class="cms-modal-link-tabs-nav" aria-label="Tabs">
+				<nav class="cms-modal-link-tabs-nav" aria-label={__('common:tabs')}>
 					<button
 						class="tab"
 						class:active={currentTab === 'manually'}

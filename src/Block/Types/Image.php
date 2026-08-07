@@ -26,7 +26,7 @@ final class Image extends Type
 
 	public function label(): string
 	{
-		return 'Einzelbild';
+		return __('block:image');
 	}
 
 	public function control(): Control

@@ -90,7 +90,7 @@
 			<div class="cms-blocks-youtube-frame" style="padding-top: {percent}%">
 				<iframe
 					class="youtube cms-blocks-youtube-iframe"
-					title="Youtube Video"
+					title={__('youtube:video-title')}
 					src="https://www.youtube.com/embed/{item.value[ZXX]}"
 					allowfullscreen
 				>

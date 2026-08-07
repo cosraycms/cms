@@ -123,7 +123,7 @@ final class Collection extends Panel
 
 		return $this->context([
 			'page' => CollectionPage::from(
-				name: $ref->meta->label,
+				name: __($ref->meta->label),
 				urls: $urls,
 				columns: $obj->columns(),
 				sortKeys: array_keys($sorts),
@@ -136,7 +136,7 @@ final class Collection extends Panel
 				parentTitle: $parentTitle,
 				parentType: $parentNode === null
 					? null
-					: (string) $parentNode->meta->type->get('label', ''),
+					: __((string) $parentNode->meta->type->get('label', '')),
 				parentStatus: $parentNode === null ? null : $this->nodeStatus($obj, $parentNode),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 			),
@@ -164,21 +164,21 @@ final class Collection extends Panel
 			$published = (bool) $node->meta->get('published');
 			$status[] = [
 				'kind' => $published ? 'published' : 'draft',
-				'label' => $published ? 'Published' : 'Draft',
+				'label' => $published ? __('status:published') : __('status:draft'),
 			];
 		}
 
 		if ($meta->showHidden && (bool) $node->meta->get('hidden')) {
 			$status[] = [
 				'kind' => 'hidden',
-				'label' => 'Hidden',
+				'label' => __('status:hidden'),
 			];
 		}
 
 		if ($meta->showLocked && (bool) $node->meta->get('locked')) {
 			$status[] = [
 				'kind' => 'locked',
-				'label' => 'Locked',
+				'label' => __('status:locked'),
 			];
 		}
 

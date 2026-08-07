@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { loadElement } from '$lib/elements';
+	import { __ } from '$lib/locale';
 
 	type Props = {
 		tag: string;
@@ -21,7 +22,7 @@
 		loadElement(module)
 			.then(() => (ready = true))
 			.catch((err: unknown) => {
-				error = `Failed to load control module "${module}": ${String(err)}`;
+				error = __('field:control-load-failed', { module, error: String(err) });
 			});
 	});
 
