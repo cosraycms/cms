@@ -28,16 +28,19 @@ final class ReferenceLinkSearchTest extends IntegrationTestCase
 
 		$article = $this->typeId('test-article');
 		$page = $this->typeId('test-page');
+		$unknown = $this->typeId('unregistered-reference-target');
 
 		$this->createTestNode(['uid' => 'ref-alpha', 'type' => $article, 'published' => true]);
 		$this->createTestNode(['uid' => 'ref-beta', 'type' => $article, 'published' => false]);
 		$this->createTestNode(['uid' => 'ref-gamma', 'type' => $article, 'published' => true]);
 		$this->createTestNode(['uid' => 'ref-page', 'type' => $page, 'published' => true]);
+		$this->createTestNode(['uid' => 'ref-unknown', 'type' => $unknown, 'published' => true]);
 
 		$this->setTitle('ref-alpha', ['en' => 'Alpha Article']);
 		$this->setTitle('ref-beta', ['en' => 'Beta Article']);
 		$this->setTitle('ref-gamma', ['en' => 'Gamma Article']);
 		$this->setTitle('ref-page', ['en' => 'Some Page']);
+		$this->setTitle('ref-unknown', ['en' => 'Unknown Type']);
 
 		$this->db()->execute(
 			"UPDATE cms.nodes SET deleted = now() WHERE uid = 'ref-gamma'",
@@ -54,6 +57,7 @@ final class ReferenceLinkSearchTest extends IntegrationTestCase
 		$this->assertContains('ref-beta', $uids, 'unpublished node is still pickable');
 		$this->assertContains('ref-page', $uids, 'a link accepts any node type');
 		$this->assertNotContains('ref-gamma', $uids, 'deleted node is excluded');
+		$this->assertNotContains('ref-unknown', $uids, 'unregistered types cannot be hydrated');
 	}
 
 	public function testExcludesTheCurrentNode(): void
