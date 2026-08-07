@@ -33,6 +33,9 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		// The system payload carries the locales the meta form's tabs need.
 		$this->assertStringContainsString('"defaultLocale":"en"', $html);
+		// Browser-rendered controls boot with the panel catalog.
+		$this->assertStringContainsString('id="verba-catalog"', $html);
+		$this->assertStringContainsString('"common:cancel":"Cancel"', $html);
 		// The sidebar gains a Media entry.
 		$this->assertStringContainsString('href="/cp/media"', $html);
 	}
