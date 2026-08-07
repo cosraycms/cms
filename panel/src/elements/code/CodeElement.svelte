@@ -70,11 +70,11 @@
 	}
 </script>
 
-<div class="cms-code-control-toolbar">
-	<label class="cms-code-control-syntax-label" for={`${field.name}-syntax`}>
-		{__('code:syntax')}
-	</label>
-	{#if metaMap.syntax}
+{#if syntaxOptions.length > 1 && metaMap.syntax}
+	<div class="cms-code-control-toolbar">
+		<label class="cms-code-control-syntax-label" for={`${field.name}-syntax`}>
+			{__('code:syntax')}
+		</label>
 		<select
 			class="cms-select cms-code-control-syntax-select"
 			id={`${field.name}-syntax`}
@@ -85,8 +85,8 @@
 				<option value={syntaxOption}>{syntaxOption}</option>
 			{/each}
 		</select>
-	{/if}
-</div>
+	</div>
+{/if}
 
 {#if metaMap.syntax}
 	{#key active}
