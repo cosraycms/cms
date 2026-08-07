@@ -52,6 +52,7 @@
 
 ### Fixed
 
+- Fixed browser-rendered panel controls showing untranslated message ids. The nested Verba catalog was still wrapped by the template renderer when JSON-encoded, producing an empty object instead of the panel messages.
 - Fixed image rendition generation on PHP 8.5. `gumlet/php-image-resize` 2.0.x calls the deprecated `finfo_close()`, which Core's error handler turns into an `ErrorException`, so every rendition request aborted before writing the cache file — leaving empty cache directories and broken images in the panel and on the frontend. The dependency now requires `^3.0`. Applications must run `composer update gumlet/php-image-resize`.
 - Fixed crop renditions ignoring their configured `pos`: the crop position was passed into the `allow_enlarge` parameter, so every crop centered and silently enlarged. Existing crop renditions are only regenerated after the cache files are removed.
 - Fixed every element control failing to load on a first editor page load when `path.panel` is not the default. Importing the `cosray-host` module defined the custom element, which synchronously upgraded the hosts already in the document — each resolving its module URL against the runtime panel base before the embedded system payload had configured it. The panel now defines the host after reading that payload, so `Could not load the editor control module "cosray:…"` no longer fires and the `window.Cosray` bridge is installed before any control mounts.
