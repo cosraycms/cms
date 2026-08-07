@@ -36,16 +36,19 @@ final class ReferenceSearchTest extends IntegrationTestCase
 
 		$article = $this->typeId('test-article');
 		$page = $this->typeId('test-page');
+		$unknown = $this->typeId('unregistered-reference-target');
 
 		$this->createTestNode(['uid' => 'ref-alpha', 'type' => $article, 'published' => true]);
 		$this->createTestNode(['uid' => 'ref-beta', 'type' => $article, 'published' => false]);
 		$this->createTestNode(['uid' => 'ref-gamma', 'type' => $article, 'published' => true]);
 		$this->createTestNode(['uid' => 'ref-page', 'type' => $page, 'published' => true]);
+		$this->createTestNode(['uid' => 'ref-unknown', 'type' => $unknown, 'published' => true]);
 
 		$this->setTitle('ref-alpha', ['en' => 'Alpha Article']);
 		$this->setTitle('ref-beta', ['en' => 'Beta Article']);
 		$this->setTitle('ref-gamma', ['en' => 'Gamma Article']);
 		$this->setTitle('ref-page', ['en' => 'Some Page']);
+		$this->setTitle('ref-unknown', ['en' => 'Unknown Type']);
 
 		$this->db()->execute(
 			"UPDATE cms.nodes SET deleted = now() WHERE uid = 'ref-gamma'",
@@ -76,7 +79,8 @@ final class ReferenceSearchTest extends IntegrationTestCase
 
 		$this->assertNotContains('ref-alpha', $uids, 'self-reference is excluded');
 		$this->assertContains('ref-beta', $uids);
-		$this->assertContains('ref-page', $uids, 'an unconstrained field picks any type');
+		$this->assertContains('ref-page', $uids, 'an unconstrained field picks any registered type');
+		$this->assertNotContains('ref-unknown', $uids, 'unregistered types cannot be hydrated');
 	}
 
 	public function testSearchMatchesTheMaterializedTitleColumn(): void
@@ -123,10 +127,10 @@ final class ReferenceSearchTest extends IntegrationTestCase
 
 	public function testLabelsResolveChosenUidsInOrderAndSkipDeleted(): void
 	{
-		$result = $this->call('labels', ['uids' => 'ref-page,ref-gamma,ref-alpha']);
+		$result = $this->call('labels', ['uids' => 'ref-page,ref-unknown,ref-gamma,ref-alpha']);
 		$uids = $this->uids($result);
 
-		// Requested order is preserved and the deleted target is dropped.
+		// Requested order is preserved; deleted and unregistered targets are dropped.
 		$this->assertSame(['ref-page', 'ref-alpha'], $uids);
 		$this->assertSame('test-article', $result['nodes'][1]['type']);
 		$this->assertArrayHasKey('title', $result['nodes'][0]);

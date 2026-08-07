@@ -18,7 +18,8 @@ use ReflectionProperty;
  * JSON node search backing the reference picker. The pickable set is
  * derived server-side from the reference field's own schema (never from
  * the client): non-deleted, optionally type/filter constrained, any
- * publication state, hidden included, current node excluded.
+ * publication state, hidden included, current node excluded. Rows whose
+ * node type is no longer registered are omitted because they cannot be hydrated.
  */
 final class Reference extends Panel
 {
@@ -38,16 +39,19 @@ final class Reference extends Panel
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
 
+		$types = $this->registeredTypes($constraints['types']);
+
+		if ($types === []) {
+			return $this->result($factory, [], false);
+		}
+
 		$finder = $cms
 			->nodes($constraints['where'])
 			->deleted(false)
 			->published($constraints['published'])
 			->hidden($constraints['hidden'])
+			->types(...$types)
 			->order('changed DESC');
-
-		if ($constraints['types'] !== []) {
-			$finder->types(...$constraints['types']);
-		}
 
 		if ($exclude !== '') {
 			$finder->exclude($exclude);
@@ -72,7 +76,7 @@ final class Reference extends Panel
 	/**
 	 * Unconstrained node search backing the richtext link picker. A prose
 	 * link is not bound to a schema property, so the pickable set is simply
-	 * every non-deleted node (any type, any publication), the current node
+	 * every non-deleted node (any registered type, any publication), the current node
 	 * excluded. Kept separate from search() so that method's reflected
 	 * #[Pick] contract (constraints from the field, never the client) stays
 	 * intact.
@@ -84,11 +88,18 @@ final class Reference extends Panel
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
 
+		$types = $this->registeredTypes();
+
+		if ($types === []) {
+			return $this->result($factory, [], false);
+		}
+
 		$finder = $cms
 			->nodes()
 			->deleted(false)
 			->published(null)
 			->hidden(null)
+			->types(...$types)
 			->order('changed DESC');
 
 		if ($exclude !== '') {
@@ -113,8 +124,9 @@ final class Reference extends Panel
 
 	/**
 	 * Resolve titles for already-chosen uids so the control can render its
-	 * selected rows. Chosen values render regardless of the pickable set
-	 * (only soft-deleted targets drop out), and the caller's order is kept.
+	 * selected rows. Chosen values render regardless of the pickable set;
+	 * soft-deleted targets and unregistered node types drop out, and the
+	 * caller's order is kept.
 	 */
 	public function labels(Cms $cms, Factory $factory): Response
 	{
@@ -127,9 +139,21 @@ final class Reference extends Panel
 			return $this->result($factory, [], false);
 		}
 
+		$types = $this->registeredTypes();
+
+		if ($types === []) {
+			return $this->result($factory, [], false);
+		}
+
 		$byUid = [];
 
-		foreach ($cms->nodes()->deleted(false)->published(null)->hidden(null)->only(...$uids) as $node) {
+		foreach ($cms
+			->nodes()
+			->deleted(false)
+			->published(null)
+			->hidden(null)
+			->types(...$types)
+			->only(...$uids) as $node) {
 			$byUid[$node->meta->uid] = $this->item($node);
 		}
 
@@ -196,6 +220,39 @@ final class Reference extends Panel
 			'published' => $pick->published,
 			'hidden' => $pick->hidden,
 		];
+	}
+
+	/**
+	 * Limit picker queries to registered node types. Database rows can outlive
+	 * a removed type, but the finder cannot hydrate them without its class.
+	 *
+	 * @param list<string> $requested Class names or handles from #[Pick].
+	 * @return list<string>
+	 */
+	private function registeredTypes(array $requested = []): array
+	{
+		$tag = $this->container->tag(Bootstrap::NODE_TAG);
+		$handles = [];
+
+		foreach ($tag->entries() as $handle) {
+			$class = $tag->entry($handle)->definition();
+
+			if (!is_string($class) || !class_exists($class)) {
+				continue;
+			}
+
+			if (
+				$requested !== []
+				&& !in_array($class, $requested, true)
+				&& !in_array($handle, $requested, true)
+			) {
+				continue;
+			}
+
+			$handles[] = $handle;
+		}
+
+		return $handles;
 	}
 
 	/** @return class-string|null */
