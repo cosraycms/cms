@@ -57,11 +57,11 @@ final class PanelAssetTest extends TestCase
 		$this->assertSame(file_get_contents($file), (string) $response->getBody());
 	}
 
-	public function testStaticAssetReturnsFileFromPublicPanelStaticDirectory(): void
+	public function testStaticAssetReturnsFileFromPanelAssetsDirectory(): void
 	{
-		$public = $this->createPublicStatic(['panel.js' => 'console.log("panel");']);
+		$static = $this->createPanelAssets(['panel.js' => 'console.log("panel");']);
 		$panel = new Assets(
-			$this->config(['path.public' => $public]),
+			$this->config(['path.panelAssets' => $static]),
 			$this->container(),
 			$this->request(),
 		);
@@ -73,17 +73,17 @@ final class PanelAssetTest extends TestCase
 			$this->assertSame(['private, no-cache'], $response->getHeader('Cache-Control'));
 			$this->assertSame('console.log("panel");', (string) $response->getBody());
 		} finally {
-			$this->removeDirectory($public);
+			$this->removeDirectory($static);
 		}
 	}
 
-	public function testPanelContextUsesPublicStaticUrls(): void
+	public function testPanelContextUsesStaticUrls(): void
 	{
-		$public = $this->createPublicStatic([
+		$static = $this->createPanelAssets([
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
 		]);
-		$panel = $this->panel(['path.public' => $public]);
+		$panel = $this->panel(['path.panelAssets' => $static]);
 
 		try {
 			$context = $panel->data();
@@ -91,17 +91,17 @@ final class PanelAssetTest extends TestCase
 			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
 			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
 		} finally {
-			$this->removeDirectory($public);
+			$this->removeDirectory($static);
 		}
 	}
 
 	public function testPanelContextUsesStaticUrlsInDevelopmentEnv(): void
 	{
-		$public = $this->createPublicStatic([
+		$static = $this->createPanelAssets([
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
 		]);
-		$panel = $this->panel(['app.env' => 'development', 'path.public' => $public]);
+		$panel = $this->panel(['app.env' => 'development', 'path.panelAssets' => $static]);
 
 		try {
 			$context = $panel->data();
@@ -110,7 +110,7 @@ final class PanelAssetTest extends TestCase
 			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
 			$this->assertNotContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
 		} finally {
-			$this->removeDirectory($public);
+			$this->removeDirectory($static);
 		}
 	}
 
@@ -151,17 +151,16 @@ final class PanelAssetTest extends TestCase
 	}
 
 	/** @param array<string, string> $files */
-	private function createPublicStatic(array $files): string
+	private function createPanelAssets(array $files): string
 	{
-		$public = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
-		$static = $public . '/cp/static';
+		$static = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
 		$this->assertTrue(mkdir($static, 0o775, true));
 
 		foreach ($files as $name => $content) {
 			$this->assertNotFalse(file_put_contents($static . '/' . $name, $content));
 		}
 
-		return $public;
+		return $static;
 	}
 
 	private function removeDirectory(string $path): void

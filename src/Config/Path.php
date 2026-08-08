@@ -43,4 +43,9 @@ final class Path
 	public string $panel {
 		get => $this->config->get('path.panel');
 	}
+
+	/** @var non-empty-string Directory holding the built panel client. */
+	public string $panelAssets {
+		get => $this->config->get('path.panelAssets');
+	}
 }

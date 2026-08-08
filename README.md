@@ -536,10 +536,20 @@ The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
 
 ### Admin panel assets
 
-The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `{path.public}{path.panel}/static`. The `Cosray\Console\Commands` facade registers the installer as `panel:install`; run it after Composer installs or updates Cosray, e.g. via the `post-install-cmd`/`post-update-cmd` scripts:
+The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `path.panelAssets`, which defaults to `{path.root}/panel/static`. The `Cosray\Console\Commands` facade registers the installer as `panel:install`; run it after Composer installs or updates Cosray, e.g. via the `post-install-cmd`/`post-update-cmd` scripts:
 
 ```bash
 php run panel:install
+```
+
+That directory sits outside `path.public` on purpose. The panel serves its own client through the `{path.panel}/static/...` route with ETag revalidation, so the files never have to be reachable by the web server. Keeping them out also keeps the public directory free of a `{path.panel}` directory, which web servers configured with a `try_files $uri $uri/ ...` style fallback would otherwise serve — or refuse to serve — instead of routing the request to the panel.
+
+Point `path.panelAssets` inside `path.public` if you would rather have the web server deliver the assets directly. Choose a directory that does not collide with `path.panel` or with your frontend build output:
+
+```php
+return [
+	'path.panelAssets' => $root . '/public/panel-assets',
+];
 ```
 
 ### Admin panel theming
