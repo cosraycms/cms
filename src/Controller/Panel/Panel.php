@@ -162,22 +162,14 @@ abstract class Panel
 
 	protected function hasPanelStatic(): bool
 	{
-		$static = $this->publicPanelStaticDir();
+		$static = $this->panelAssetsDir();
 
 		return is_file($static . '/panel.js') && is_file($static . '/panel.css');
 	}
 
-	protected function publicPanelStaticDir(): string
+	protected function panelAssetsDir(): string
 	{
-		return $this->publicPanelDir() . '/static';
-	}
-
-	private function publicPanelDir(): string
-	{
-		$path = trim($this->panelPath(), '/');
-		$public = rtrim($this->config->path->public, '/\\');
-
-		return $path === '' ? $public : "{$public}/{$path}";
+		return rtrim($this->config->path->panelAssets, '/\\');
 	}
 
 	private function panelDev(): bool

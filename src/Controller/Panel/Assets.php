@@ -38,7 +38,7 @@ final class Assets extends Panel
 		return $this->serve(
 			$request,
 			$factory,
-			$this->publicPanelStaticDir(),
+			$this->panelAssetsDir(),
 			$slug,
 			self::PUBLIC_EXTENSIONS,
 			cacheControl: 'private, no-cache',

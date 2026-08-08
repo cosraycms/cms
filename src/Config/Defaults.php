@@ -63,6 +63,11 @@ final class Defaults
 			'path.cache' => '/cache',
 			'path.views' => '/views',
 			'path.panel' => '/cp',
+			// The built panel client, served by the panel's own static route
+			// rather than by the web server. Keeping it out of the public
+			// directory means nothing occupies `{path.panel}` on disk, which
+			// would otherwise shadow the panel route itself.
+			'path.panelAssets' => $root . '/panel/static',
 		];
 	}
 

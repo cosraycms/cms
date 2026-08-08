@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Console\BufferedIo;
 use Cosray\Commands\InstallPanel;
 use Cosray\Tests\TestCase;
 use ReflectionMethod;
@@ -11,24 +12,23 @@ use ReflectionProperty;
 
 final class InstallPanelTest extends TestCase
 {
-	public function testInstallPathUsesConfiguredPanelPath(): void
+	public function testInstallPathUsesConfiguredPanelAssetsPath(): void
 	{
 		$command = new InstallPanel($this->config([
-			'path.public' => '/var/www/public',
-			'path.panel' => '/admin',
+			'path.panelAssets' => '/var/www/panel/static',
 		]));
 
-		$this->assertSame('/var/www/public/admin/static', $this->invoke($command, 'targetDir'));
+		$this->assertSame('/var/www/panel/static', $this->invoke($command, 'targetDir'));
 	}
 
-	public function testOptionsOverrideInstallPath(): void
+	public function testOptionOverridesInstallPath(): void
 	{
-		$_SERVER['argv'] = ['cosray-panel', 'install', '--public=public_html', '--panel=panel'];
+		$_SERVER['argv'] = ['cosray-panel', 'install', '--target=build/panel'];
 		$command = new InstallPanel($this->config());
 		$cwd = getcwd();
 		$this->assertIsString($cwd);
 
-		$this->assertSame($cwd . '/public_html/panel/static', $this->invoke($command, 'targetDir'));
+		$this->assertSame($cwd . '/build/panel', $this->invoke($command, 'targetDir'));
 	}
 
 	public function testVersionedReleaseUsesCosrayPanelArtifactName(): void
@@ -53,6 +53,61 @@ final class InstallPanelTest extends TestCase
 
 		$this->assertSame('nightly', $this->property($command, 'panelReleaseTag'));
 		$this->assertSame('cosray-panel-nightly.tar.gz', $this->property($command, 'panelFileName'));
+	}
+
+	public function testWarnsAboutStaleAssetsLeftAtThePanelPath(): void
+	{
+		$public = $this->createLegacyPanelDir();
+		$command = new InstallPanel($this->config([
+			'path.public' => $public,
+			'path.panel' => '/cp',
+			'path.panelAssets' => $public . '/../panel/static',
+		]));
+		$io = new BufferedIo();
+		new ReflectionProperty($command, 'io')->setValue($command, $io);
+
+		try {
+			$this->invoke($command, 'warnAboutLegacyDir');
+
+			$this->assertStringContainsString("{$public}/cp/static", $io->errorOutput());
+		} finally {
+			$this->removeDirectory($public);
+		}
+	}
+
+	public function testStaysQuietWhenNoStaleAssetsRemain(): void
+	{
+		$command = new InstallPanel($this->config([
+			'path.public' => sys_get_temp_dir() . '/cosray-missing-' . bin2hex(random_bytes(8)),
+		]));
+		$io = new BufferedIo();
+		new ReflectionProperty($command, 'io')->setValue($command, $io);
+
+		$this->invoke($command, 'warnAboutLegacyDir');
+
+		$this->assertSame('', $io->errorOutput());
+	}
+
+	private function createLegacyPanelDir(): string
+	{
+		$public = sys_get_temp_dir() . '/cosray-legacy-' . bin2hex(random_bytes(8));
+		$this->assertTrue(mkdir($public . '/cp/static', 0o775, true));
+
+		return $public;
+	}
+
+	private function removeDirectory(string $path): void
+	{
+		$files = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+			\RecursiveIteratorIterator::CHILD_FIRST,
+		);
+
+		foreach ($files as $file) {
+			$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+		}
+
+		rmdir($path);
 	}
 
 	/** @param mixed ...$args */

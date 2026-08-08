@@ -20,13 +20,8 @@ use Throwable;
 
 #[Command('panel:install', 'Installs or upgrades the Cosray panel client assets', group: 'Panel')]
 #[Opt(
-	'--panel',
-	'Override the configured panel path when the command is not registered with the app Config.',
-	value: 'path',
-)]
-#[Opt(
-	'--public',
-	'Override the configured public directory. Relative paths resolve from the current working directory.',
+	'--target',
+	'Override the configured panel asset directory. Relative paths resolve from the current working directory.',
 	value: 'dir',
 )]
 #[Opt(
@@ -99,8 +94,34 @@ class InstallPanel
 		}
 
 		$this->io->success("Panel assets installed from {$this->panelFileName}");
+		$this->warnAboutLegacyDir();
 
 		return 0;
+	}
+
+	/**
+	 * Installs before this directory moved out of the public tree left a copy
+	 * behind. It keeps a directory at the panel path, which is the collision
+	 * the move was meant to remove, and the web server serves those stale
+	 * assets in preference to the freshly installed ones.
+	 */
+	private function warnAboutLegacyDir(): void
+	{
+		$panel = trim($this->config->panel->path, '/');
+		$public = rtrim($this->config->path->public, '/\\');
+
+		if ($panel === '') {
+			return;
+		}
+
+		$legacy = "{$public}/{$panel}";
+
+		if (!is_dir($legacy . '/static') || $legacy === $this->targetDir()) {
+			return;
+		}
+
+		$this->io->warn("Stale panel assets remain at {$legacy}/static and shadow this install.");
+		$this->io->warn("Remove {$legacy} once nothing else in it is served.");
 	}
 
 	private function downloadRelease(): string
@@ -310,32 +331,7 @@ class InstallPanel
 
 	private function targetDir(): string
 	{
-		return $this->publicPanelDir() . '/static';
-	}
-
-	private function publicPanelDir(): string
-	{
-		$path = trim($this->panelPath(), '/');
-		$public = rtrim($this->publicPath(), '/\\');
-
-		return $path === '' ? $public : "{$public}/{$path}";
-	}
-
-	private function panelPath(): string
-	{
-		$panel = $this->option('panel') ?? $this->config->panel->path;
-		$panel = trim($panel);
-
-		if ($panel === '' || $panel === '/') {
-			return '';
-		}
-
-		return str_starts_with($panel, '/') ? $panel : "/{$panel}";
-	}
-
-	private function publicPath(): string
-	{
-		return $this->absolutePath($this->option('public') ?? $this->config->path->public);
+		return $this->absolutePath($this->option('target') ?? $this->config->path->panelAssets);
 	}
 
 	private function releaseBaseUrl(): string
@@ -448,7 +444,7 @@ class InstallPanel
 
 			[$name, $value] = explode('=', substr($arg, 2), 2);
 
-			if (!in_array($name, ['panel', 'public', 'release', 'base-url'], true)) {
+			if (!in_array($name, ['target', 'release', 'base-url'], true)) {
 				throw new RuntimeException("Unknown panel install option: --{$name}");
 			}
 
