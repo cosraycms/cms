@@ -21,12 +21,13 @@ final class RoutingTest extends End2EndTestCase
 	{
 		parent::setUp();
 
-		// Load test data fixtures
-		$this->loadFixtures('basic-types', 'sample-nodes');
+		$this->loadFixtures('basic-types');
 	}
 
 	public function testHomepageResolution(): void
 	{
+		$this->loadFixtures('sample-nodes');
+
 		$response = $this->makeRequest('GET', '/');
 
 		$this->assertResponseOk($response);
@@ -93,6 +94,22 @@ final class RoutingTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $response);
 	}
 
+	public function test404ForPublicDirectoriesWithoutMatchingNode(): void
+	{
+		$publicDir = sys_get_temp_dir() . '/cosray-routing-' . bin2hex(random_bytes(4));
+		mkdir("{$publicDir}/assets", 0o755, true);
+		$this->app = $this->createApp(['path.public' => $publicDir]);
+
+		try {
+			foreach (['/', '/assets'] as $path) {
+				$this->assertResponseStatus(404, $this->makeRequest('GET', $path));
+			}
+		} finally {
+			rmdir("{$publicDir}/assets");
+			rmdir($publicDir);
+		}
+	}
+
 	public function test404ForNonExistentNode(): void
 	{
 		$response = $this->makeRequest('GET', '/node/99999999');
@@ -126,6 +143,8 @@ final class RoutingTest extends End2EndTestCase
 
 	public function testResponseHeaders(): void
 	{
+		$this->loadFixtures('sample-nodes');
+
 		$response = $this->makeRequest('GET', '/');
 
 		$this->assertResponseHasHeader('Content-Type', $response);

@@ -58,7 +58,7 @@ class Node
 
 		if (!$node) {
 			try {
-				$path = Path::inside($config->path->public, $path);
+				$path = Path::inside($config->path->public, $path, checkIsFile: true);
 
 				return Response::create($this->factory)->file($path);
 			} catch (RuntimeException $e) {

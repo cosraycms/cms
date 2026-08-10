@@ -53,6 +53,7 @@
 
 ### Fixed
 
+- Fixed the frontend catchall crashing when an unrouted request resolved to a directory under `path.public`, including `/` before a Home node exists. These requests now return `404`.
 - Fixed browser-rendered panel controls showing untranslated message ids. The nested Verba catalog was still wrapped by the template renderer when JSON-encoded, producing an empty object instead of the panel messages.
 - Fixed reference and rich-text link searches crashing when the database still contains nodes whose types are no longer registered. Picker queries now omit those unhydratable rows.
 - Fixed interrupted end-to-end test runs leaving database rows that break later runs. The application and test harness now share a transaction that PostgreSQL rolls back on teardown or disconnect.
