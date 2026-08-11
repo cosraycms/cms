@@ -48,6 +48,38 @@ final class RichtextFieldTest extends RichtextOwnerTestCase
 		];
 	}
 
+	public function testStructureSatisfiesItsOwnShape(): void
+	{
+		$field = $this->field();
+
+		// Without this the only way to create a node with a richtext field is
+		// to stamp the envelope on behind the blueprint's back.
+		$this->assertTrue($field->shape()->validate($field->structure())->valid());
+		$this->assertTrue(
+			$field
+				->shape()
+				->validate($field->structure(['de' => self::doc('Hallo')]))
+				->valid(),
+		);
+	}
+
+	public function testStructureCarriesTheEnvelope(): void
+	{
+		$structure = $this->field()->structure(['de' => self::doc('Hallo')]);
+
+		$this->assertSame(Envelope::FORMAT, $structure['format']);
+		$this->assertSame(Envelope::VERSION, $structure['version']);
+		$this->assertSame(self::doc('Hallo'), $structure['value']['de']);
+	}
+
+	public function testStructureUnwrapsAWholeFieldStructure(): void
+	{
+		$structure = $this->field()->structure($this->envelope(de: self::doc('Hallo')));
+
+		$this->assertSame(self::doc('Hallo'), $structure['value']['de']);
+		$this->assertArrayNotHasKey('value', $structure['value']);
+	}
+
 	public function testShapeAcceptsTheStructuredEnvelope(): void
 	{
 		$result = $this

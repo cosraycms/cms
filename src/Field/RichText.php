@@ -24,7 +24,15 @@ class RichText extends Text
 
 	public function structure(mixed $value = null): array
 	{
-		return $this->getTranslatableStructure('richtext', $value);
+		if (is_array($value) && array_key_exists('value', $value)) {
+			$value = $value['value'];
+		}
+
+		$result = $this->getTranslatableStructure('richtext', $value);
+		$result['format'] = Envelope::FORMAT;
+		$result['version'] = Envelope::VERSION;
+
+		return $result;
 	}
 
 	public function properties(): array
