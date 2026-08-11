@@ -56,9 +56,15 @@ class MenuItem implements Iterator
 		return $this->translated('title');
 	}
 
+	/**
+	 * Node items linked by uid follow their node's current path; the
+	 * snapshot in `data` covers legacy rows and vanished nodes.
+	 */
 	public function path(): string
 	{
-		return $this->translated('path');
+		$resolved = $this->localized($this->nodePaths());
+
+		return $resolved !== '' ? $resolved : $this->translated('path');
 	}
 
 	public function image(): ?string
@@ -101,10 +107,19 @@ class MenuItem implements Iterator
 
 	protected function translated(string $key): string
 	{
+		return $this->localized($this->data[$key] ?? null);
+	}
+
+	protected function localized(mixed $map): string
+	{
+		if (!is_array($map)) {
+			return '';
+		}
+
 		$locale = $this->context->locale();
 
 		while ($locale) {
-			$value = $this->data[$key][$locale->id] ?? null;
+			$value = $map[$locale->id] ?? null;
 
 			if ($value) {
 				return $value;
@@ -114,5 +129,19 @@ class MenuItem implements Iterator
 		}
 
 		return '';
+	}
+
+	/** @return ?array<string, string> */
+	private function nodePaths(): ?array
+	{
+		$paths = $this->item['node_paths'] ?? null;
+
+		if (!is_string($paths)) {
+			return null;
+		}
+
+		$decoded = json_decode($paths, true);
+
+		return is_array($decoded) ? $decoded : null;
 	}
 }

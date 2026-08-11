@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Cms;
+use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Services;
 use Cosray\Finder\Menu;
+use Cosray\Locales;
 use Cosray\Menus;
+use Cosray\Node\Writer;
+use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\IntegrationTestCase;
 
 /**
@@ -185,6 +191,65 @@ final class MenusWriterTest extends IntegrationTestCase
 
 		$this->assertEqualsCanonicalizing([$root, $other], $left);
 		$this->assertNotContains($grandchild, $left);
+	}
+
+	public function testNodeItemFollowsTheNodesCurrentPath(): void
+	{
+		$locales = new Locales();
+		$locales->add('en', title: 'English');
+		$context = Context::console(
+			$this->db(),
+			$this->config(),
+			$this->container(),
+			$this->factory(),
+			$locales,
+		);
+		$services = Services::withDefaults();
+		$writer = new Writer($context, new Cms($context, $services), $services->types);
+		$writer->create(
+			$writer
+				->draft(PlainPage::class, ['heading' => 'Target'])
+				->uid('menu-node-target')
+				->path('en', '/target-current'),
+		);
+
+		$menus = $this->menus();
+		$menus->create('writer-resolve', 'Resolve');
+		$linked = $menus->add('writer-resolve', [
+			'type' => 'node',
+			'node' => 'menu-node-target',
+			'title' => ['en' => 'Target'],
+			'path' => ['en' => '/stale-snapshot'],
+		]);
+		$legacy = $menus->add('writer-resolve', [
+			'type' => 'node',
+			'node' => 0,
+			'title' => ['en' => 'Legacy'],
+			'path' => ['en' => '/legacy-snapshot'],
+		]);
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-resolve'));
+
+		// The uid-linked item follows the node; the numeric legacy stub
+		// keeps its snapshot.
+		$this->assertSame('/target-current', $items[$linked]->path());
+		$this->assertSame('/legacy-snapshot', $items[$legacy]->path());
+	}
+
+	public function testNodeItemFallsBackToSnapshotWhenTheNodeIsGone(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-gone', 'Gone');
+		$item = $menus->add('writer-gone', [
+			'type' => 'node',
+			'node' => 'never-existed-uid',
+			'title' => ['en' => 'Gone'],
+			'path' => ['en' => '/snapshot'],
+		]);
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-gone'));
+
+		$this->assertSame('/snapshot', $items[$item]->path());
 	}
 
 	public function testDeleteRemovesMenuAndItems(): void

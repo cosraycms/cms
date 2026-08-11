@@ -35,7 +35,21 @@ SELECT
 	path,
 	parent,
 	level,
-	data
+	data,
+	-- Node items that store the linked node's uid resolve their target's
+	-- current localized paths at read time; legacy rows carry a numeric
+	-- stub instead and fall back to the snapshot in `data`.
+	CASE WHEN nav.data->>'type' = 'node' AND jsonb_typeof(nav.data->'node') = 'string' THEN (
+		SELECT
+			jsonb_object_agg(up.locale, up.path)
+		FROM
+			/*:cms.prefix:*/url_paths up
+		JOIN
+			/*:cms.prefix:*/nodes n ON n.node = up.node
+		WHERE
+			n.uid = nav.data->>'node'
+			AND up.inactive IS NULL
+	) END AS node_paths
 FROM
 	nav
 ORDER BY
