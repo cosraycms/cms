@@ -99,6 +99,20 @@ final class MenuFinderTest extends IntegrationTestCase
 		parent::tearDown();
 	}
 
+	private function insertItem(string $item, array $data, int $position = 10): void
+	{
+		$this->db()->execute(
+			'INSERT INTO cms.menu_items (item, parent, menu, position, data)
+			VALUES (:item, NULL, :menu, :position, :data::jsonb)',
+			[
+				'item' => $item,
+				'menu' => 'test-menu',
+				'position' => $position,
+				'data' => json_encode($data),
+			],
+		)->run();
+	}
+
 	public function testMenuCreation(): void
 	{
 		$context = $this->createContext();
@@ -196,6 +210,96 @@ final class MenuFinderTest extends IntegrationTestCase
 		$this->assertStringContainsString('Home', $html);
 		$this->assertStringContainsString('href="/"', $html);
 		$this->assertStringContainsString('contact-link', $html);
+	}
+
+	public function testWrapperKeepsTheCallerClass(): void
+	{
+		// The wrapper class used to be clobbered by the last item's class.
+		$html = new Menu($this->createContext(), 'test-menu')->html('main-menu', 'nav');
+
+		$this->assertStringContainsString('<nav class="main-menu">', $html);
+		$this->assertStringNotContainsString('<nav class="contact-link">', $html);
+	}
+
+	public function testUrlItemRendersAnchorWithTargetAndRel(): void
+	{
+		$this->insertItem('external', [
+			'type' => 'url',
+			'title' => ['en' => 'Partner'],
+			'path' => ['en' => 'https://example.com/partner'],
+			'target' => '_blank',
+		]);
+
+		$html = new Menu($this->createContext(), 'test-menu')->html();
+
+		$this->assertStringContainsString(
+			'<a href="https://example.com/partner" target="_blank" rel="noopener">',
+			$html,
+		);
+	}
+
+	public function testAssetItemLinksTheFile(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, kind, creator)
+			VALUES ('menuasset1', 'local', 'me/menuasset1/prospekt.pdf', 'prospekt.pdf', 'file', 1)",
+		)->run();
+		$this->insertItem('brochure', [
+			'type' => 'asset',
+			'asset' => 'menuasset1',
+			'title' => ['en' => 'Brochure'],
+		]);
+
+		$menu = new Menu($this->createContext(), 'test-menu');
+		$items = iterator_to_array($menu);
+
+		$this->assertStringEndsWith('me/menuasset1/prospekt.pdf', (string) $items['brochure']->href());
+		$this->assertStringContainsString('me/menuasset1/prospekt.pdf', $menu->html());
+	}
+
+	public function testAssetItemWithoutResolvableAssetStaysUnlinked(): void
+	{
+		$this->insertItem('lost', [
+			'type' => 'asset',
+			'asset' => 'never-was',
+			'title' => ['en' => 'Lost file'],
+		]);
+
+		$menu = new Menu($this->createContext(), 'test-menu');
+		$items = iterator_to_array($menu);
+
+		$this->assertNull($items['lost']->href());
+		$this->assertStringContainsString('<span>Lost file</span>', $menu->html());
+	}
+
+	public function testUnknownTypeRendersUnlinkedLabel(): void
+	{
+		$this->insertItem('label', [
+			'type' => 'heading',
+			'title' => ['en' => 'Section'],
+		]);
+
+		$menu = new Menu($this->createContext(), 'test-menu');
+		$items = iterator_to_array($menu);
+
+		$this->assertNull($items['label']->href());
+		$this->assertStringContainsString('<span>Section</span>', $menu->html());
+	}
+
+	public function testEscapesTitlesHrefsAndClasses(): void
+	{
+		$this->insertItem('sneaky', [
+			'type' => 'url',
+			'title' => ['en' => 'Evil <script>alert(1)</script>'],
+			'path' => ['en' => '/x?a=1&b="2"'],
+			'class' => '"><script>',
+		]);
+
+		$html = new Menu($this->createContext(), 'test-menu')->html();
+
+		$this->assertStringNotContainsString('<script>', $html);
+		$this->assertStringContainsString('Evil &lt;script&gt;', $html);
+		$this->assertStringContainsString('href="/x?a=1&amp;b=&quot;2&quot;"', $html);
 	}
 
 	public function testMenuItemWithoutImageReturnsNull(): void

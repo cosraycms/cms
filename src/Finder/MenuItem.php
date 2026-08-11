@@ -67,6 +67,26 @@ class MenuItem implements Iterator
 		return $resolved !== '' ? $resolved : $this->translated('path');
 	}
 
+	/**
+	 * The link target for anchored item types, null for plain labels:
+	 * `node` and `url` items link their path, `asset` items their file.
+	 */
+	public function href(): ?string
+	{
+		return match ($this->type()) {
+			'node', 'url' => $this->path() ?: null,
+			'asset' => $this->assetPath(),
+			default => null,
+		};
+	}
+
+	public function target(): ?string
+	{
+		$target = $this->data['target'] ?? null;
+
+		return is_string($target) && $target !== '' ? $target : null;
+	}
+
 	public function image(): ?string
 	{
 		$uid = $this->data['image'] ?? null;
@@ -129,6 +149,17 @@ class MenuItem implements Iterator
 		}
 
 		return '';
+	}
+
+	private function assetPath(): ?string
+	{
+		$uid = $this->data['asset'] ?? null;
+
+		if (!$uid || !is_string($uid)) {
+			return null;
+		}
+
+		return $this->context->assets()->get($uid)?->path();
 	}
 
 	/** @return ?array<string, string> */

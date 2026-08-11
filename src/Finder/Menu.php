@@ -62,13 +62,18 @@ class Menu implements Iterator
 		string $tag = 'nav',
 	): string {
 		$out = '';
+		$level = 1;
 
 		foreach ($items as $item) {
-			$class = $item->class();
+			$level = $item->level();
+			$itemClass = $item->class();
 			$image = $item->image() ?: '';
 
 			if ($image) {
-				$image = sprintf('<div class="nav-image"><img src="%s" alt="Navigation Icon"/></div>', $image);
+				$image = sprintf(
+					'<div class="nav-image"><img src="%s" alt="Navigation Icon"/></div>',
+					$this->escape($image),
+				);
 			}
 
 			$submenu = $this->compileHtml($item->children(), tag: '');
@@ -80,40 +85,66 @@ class Menu implements Iterator
 			$content = sprintf(
 				'%s<div class="nav-label"><span>%s</span></div>%s',
 				$image,
-				$item->title(),
+				$this->escape($item->title()),
 				$submenu,
 			);
+			$href = $item->href();
 
-			$content = match ($item->type()) {
-				'node' => sprintf('<a href="%s">%s</a>', $item->path(), $content),
-				default => $content,
-			};
+			if ($href !== null) {
+				$content = sprintf('<a%s>%s</a>', $this->anchorAttributes($item, $href), $content);
+			}
 
 			$out .= sprintf(
 				'<li class="nav-level-%s%s%s">%s</li>',
-				(string) $item->level(),
+				(string) $level,
 				$item->hasChildren() ? ' nav-has-children' : '',
-				$class ? ' ' . $class : '',
+				$itemClass ? ' ' . $this->escape($itemClass) : '',
 				$content,
 			);
 		}
 
-		if ($out) {
-			$class = $class ? sprintf(' class="%s"', $class) : '';
-
-			return $tag
-				? sprintf(
-					'<%s%s><ul class="nav-level-%s">%s</ul></%s>',
-					$tag,
-					$class,
-					$item->level(),
-					$out,
-					$tag,
-				)
-				: sprintf('<ul%s class="nav-level-%s">%s</ul>', $class, $item->level(), $out);
+		if ($out === '') {
+			return '';
 		}
 
-		return '';
+		if ($tag) {
+			return sprintf(
+				'<%s%s><ul class="nav-level-%s">%s</ul></%s>',
+				$tag,
+				$class ? sprintf(' class="%s"', $this->escape($class)) : '',
+				$level,
+				$out,
+				$tag,
+			);
+		}
+
+		return sprintf(
+			'<ul class="%snav-level-%s">%s</ul>',
+			$class ? $this->escape($class) . ' ' : '',
+			$level,
+			$out,
+		);
+	}
+
+	protected function anchorAttributes(MenuItem $item, string $href): string
+	{
+		$attributes = sprintf(' href="%s"', $this->escape($href));
+		$target = $item->target();
+
+		if ($target !== null) {
+			$attributes .= sprintf(' target="%s"', $this->escape($target));
+
+			if ($target === '_blank') {
+				$attributes .= ' rel="noopener"';
+			}
+		}
+
+		return $attributes;
+	}
+
+	protected function escape(string $value): string
+	{
+		return htmlspecialchars($value, ENT_QUOTES);
 	}
 
 	/**
