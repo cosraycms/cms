@@ -159,9 +159,10 @@ final class MenuFinderTest extends IntegrationTestCase
 		$this->assertEquals('About', $about->title());
 		$this->assertTrue($about->hasChildren());
 
-		// Check child items - the tree structure creates them
+		// Exactly one child: an item id containing a dot (as 'about.team'
+		// here) used to be duplicated by the path-splitting tree builder.
 		$children = iterator_to_array($about->children());
-		$this->assertGreaterThanOrEqual(1, count($children));
+		$this->assertCount(1, $children);
 		$this->assertEquals('Team', $children[0]->title());
 		$this->assertEquals('/about/team', $children[0]->path());
 		$this->assertEquals(2, $children[0]->level());

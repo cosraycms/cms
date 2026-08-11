@@ -116,21 +116,28 @@ class Menu implements Iterator
 		return '';
 	}
 
+	/**
+	 * Nests the sorted rows by their parent column. Splitting the CTE's
+	 * dotted path would duplicate items whose ids contain a dot.
+	 */
 	protected function makeTree(array $items): array
+	{
+		$grouped = [];
+
+		foreach ($items as $item) {
+			$grouped[$item['parent'] ?? ''][$item['item']] = $item;
+		}
+
+		return $this->branch($grouped, '');
+	}
+
+	private function branch(array $grouped, string $parent): array
 	{
 		$tree = [];
 
-		foreach ($items as $item) {
-			$arr = &$tree;
-
-			foreach (explode('.', $item['path']) as $segment) {
-				if (isset($arr[$segment])) {
-					$arr = &$arr[$segment]['children'];
-				} else {
-					$arr[$segment] = $item;
-					$arr[$segment]['children'] = [];
-				}
-			}
+		foreach ($grouped[$parent] ?? [] as $id => $item) {
+			$item['children'] = $this->branch($grouped, $id);
+			$tree[$id] = $item;
 		}
 
 		return $tree;
