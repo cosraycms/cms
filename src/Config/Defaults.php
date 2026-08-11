@@ -168,15 +168,17 @@ final class Defaults
 				'application/pdf' => ['pdf'],
 			],
 			'upload.mimetypes.image' => [
+				'image/avif' => ['avif'],
 				'image/gif' => ['gif'],
-				'image/jpeg' => ['jpeg', 'jpg', 'jfif'],
+				'image/jpeg' => ['jpeg', 'jpg', 'jpe', 'jfif'],
 				'image/png' => ['png'],
-				'image/webp' => ['webp'],
 				'image/svg+xml' => ['svg'],
+				'image/webp' => ['webp'],
 			],
 			'upload.mimetypes.video' => [
-				'video/mp4' => ['mp4'],
-				'video/ogg' => ['ogg'],
+				'video/mp4' => ['mp4', 'm4v'],
+				'video/ogg' => ['ogv', 'ogg'],
+				'video/webm' => ['webm'],
 			],
 			'upload.maxsize' => 10 * 1024 * 1024,
 		];

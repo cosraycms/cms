@@ -90,6 +90,26 @@ final class ConfigTest extends TestCase
 		$this->assertSame(3600, $config->session->options['cache_expire']);
 		$this->assertNull($config->session->handler);
 		$this->assertNull($config->db->dsn);
+		$this->assertSame(['application/pdf' => ['pdf']], $config->upload->file);
+		$this->assertSame(
+			[
+				'image/avif' => ['avif'],
+				'image/gif' => ['gif'],
+				'image/jpeg' => ['jpeg', 'jpg', 'jpe', 'jfif'],
+				'image/png' => ['png'],
+				'image/svg+xml' => ['svg'],
+				'image/webp' => ['webp'],
+			],
+			$config->upload->image,
+		);
+		$this->assertSame(
+			[
+				'video/mp4' => ['mp4', 'm4v'],
+				'video/ogg' => ['ogv', 'ogg'],
+				'video/webm' => ['webm'],
+			],
+			$config->upload->video,
+		);
 		$this->assertSame(Uid::ALPHABET_LOWERCASE_WORD_SAFE, $config->uid->alphabet);
 		$this->assertSame(13, $config->uid->length);
 		$this->assertSame(Password::DEFAULT_PASSWORD_ENTROPY, $config->password->entropy);

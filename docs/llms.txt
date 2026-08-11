@@ -834,8 +834,8 @@ Uploads and media:
 
 - `upload.maxsize`: `10 * 1024 * 1024`
 - `upload.mimetypes.file`: default allows pdf
-- `upload.mimetypes.image`: gif, jpeg/jpg/jfif, png, webp, svg
-- `upload.mimetypes.video`: mp4, ogg
+- `upload.mimetypes.image`: avif, gif, jpeg/jpg/jpe/jfif, png, svg, webp
+- `upload.mimetypes.video`: mp4/m4v, ogv/ogg, webm
 - `media.fileserver`: `null` or `apache` or `nginx`
 - `media.sizes`: `[]` — named rendition sizes (see section 9); built-ins
   `thumb` and `preview` are always available
