@@ -301,7 +301,11 @@ Transformers:
 - Supported transformers are `lowercase`, `uppercase`, `titlecase`, `keepcase`, `dashes`, and `underscore`.
 - Chains are allowed: `{title|uppercase|underscore}`.
 - Slugification always runs. The default is lowercase with dashes.
-- `keepcase` preserves the original letter case before slugification.
+- Before case conversion, values are folded to ASCII through ICU. Content fields use the locale that supplied the resolved value, including a fallback locale. Neutral values, `uid`, `handle`, and locales without a specific ICU transform use `Any-Latin; Latin-ASCII`.
+- Locale-specific rules preserve expected spelling where ICU provides them: German `Gebühren` becomes `gebuehren`, while Swedish `Malmö` becomes `malmo`.
+- Characters without an ICU ASCII mapping are removed during folding. Symbols that ICU can spell out are removed before folding so those spellings cannot enter the path.
+- `keepcase` preserves the folded value's letter case.
+- Values are truncated to 255 bytes after folding and case conversion, before the final ASCII filter.
 - If multiple case or separator transformers are present, the last case transformer and last separator transformer win.
 - Transformers work on `{uid}`, `{handle}`, current fields, and parent/ancestor fields.
 - Transformers are not supported on parent path shortcuts: `{parent|lowercase}`, `{parent?|lowercase}`, and `{parent(2)|lowercase}` fail.

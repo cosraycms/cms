@@ -201,27 +201,152 @@ final class RoutePathGeneratorTest extends TestCase
 		$this->assertSame([], $generator->referencedFields('/static/path'));
 	}
 
+	public function testTransliteratesWithTheRulesOfTheValueLanguage(): void
+	{
+		foreach ([
+			'Gebühren' => '/gebuehren',
+			'Häufig gestellte Fragen' => '/haeufig-gestellte-fragen',
+			'Instrumentenbörse' => '/instrumentenboerse',
+			'Übungsräume' => '/uebungsraeume',
+			'Größe' => '/groesse',
+		] as $title => $expected) {
+			$paths = $this->generator()->generateFromRoute(
+				'/{title}',
+				$this->nodeData($title, 'de'),
+				$this->locales('de'),
+			);
+
+			$this->assertSame($expected, $paths['de']);
+		}
+
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Malmö', 'sv'),
+			$this->locales('sv'),
+		);
+
+		$this->assertSame('/malmo', $paths['sv']);
+	}
+
+	public function testFallsBackToThePlainLatinFoldForLanguagesWithoutRules(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Gebühren', 'zxx'),
+			$this->locales('zxx'),
+		);
+
+		$this->assertSame('/gebuhren', $paths['zxx']);
+	}
+
+	public function testUsesTheLanguageOfFallbackContent(): void
+	{
+		$locales = new Locales();
+		$locales->add('de', title: 'German');
+		$locales->add('sv', title: 'Swedish', fallback: 'de');
+
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Gebühren', 'de'),
+			$locales,
+		);
+
+		$this->assertSame('/gebuehren', $paths['sv']);
+	}
+
+	public function testTransliteratesOtherScriptsAndDiacritics(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Café Édouard'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/cafe-edouard', $paths['en']);
+
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Москва'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/moskva', $paths['en']);
+	}
+
+	public function testDropsStandaloneSymbolsInsteadOfSpellingThemOut(): void
+	{
+		// Latin-ASCII can render registered and copyright signs as "(R)" and "(C)".
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('gesunde Musikschule® © Bamberg'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/gesunde-musikschule-bamberg', $paths['en']);
+
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('Cosray™ CMS'),
+			$this->locales(),
+		);
+
+		$this->assertSame('/cosray-cms', $paths['en']);
+	}
+
+	public function testTransliterationPrecedesCaseTransformers(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/{title|uppercase}/{title|titlecase}',
+			$this->nodeData('Gebühren', 'de'),
+			$this->locales('de'),
+		);
+
+		$this->assertSame('/GEBUEHREN/Gebuehren', $paths['de']);
+	}
+
+	public function testRemovesUnmappedCharactersBeforeTruncating(): void
+	{
+		$paths = $this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData(str_repeat('a', 254) . "\u{E000}b"),
+			$this->locales(),
+		);
+
+		$this->assertSame('/' . str_repeat('a', 254) . 'b', $paths['en']);
+	}
+
+	public function testStillRejectsATitleWithoutTransliterableCharacters(): void
+	{
+		$this->throws(RoutePathError::class, 'Could not resolve route placeholder: {title}');
+
+		$this->generator()->generateFromRoute(
+			'/{title}',
+			$this->nodeData('☺'),
+			$this->locales(),
+		);
+	}
+
 	private function generator(): RoutePathGenerator
 	{
 		return new RoutePathGenerator($this->db(), new Types());
 	}
 
-	private function locales(): Locales
+	private function locales(string $id = 'en'): Locales
 	{
 		$locales = new Locales();
-		$locales->add('en', title: 'English');
+		$locales->add($id, title: $id);
 
 		return $locales;
 	}
 
 	/** @return array<string, mixed> */
-	private function nodeData(string $title): array
+	private function nodeData(string $title, string $locale = 'en'): array
 	{
 		return [
 			'content' => [
 				'title' => [
 					'type' => Text::class,
-					'value' => ['en' => $title],
+					'value' => [$locale => $title],
 				],
 			],
 		];

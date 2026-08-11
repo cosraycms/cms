@@ -53,6 +53,7 @@
 
 ### Fixed
 
+- Fixed generated route paths dropping non-ASCII letters that ICU can transliterate: a `{title}` of "Gebühren" produced `/gebhren`. Values are now folded to ASCII through ICU, using the transform of the language the value is written in — CLDR's `de-ASCII` gives German its digraphs (`/gebuehren`), while a language without its own rules uses the plain `Any-Latin; Latin-ASCII` fold (Swedish "Malmö" stays `/malmo`). Characters without an ICU ASCII mapping are removed during the fold. Standalone symbols such as `®`, `©`, and `™` are dropped before folding so ICU spellings such as `(R)` and `(C)` cannot enter the path. The fold runs before the case transformers, so `uppercase`, `titlecase` and the byte-based truncation operate on ASCII. Only newly generated paths change; a node's stored path is kept on save and is never regenerated.
 - Fixed the frontend catchall crashing when an unrouted request resolved to a directory under `path.public`, including `/` before a Home node exists. These requests now return `404`.
 - Fixed browser-rendered panel controls showing untranslated message ids. The nested Verba catalog was still wrapped by the template renderer when JSON-encoded, producing an empty object instead of the panel messages.
 - Fixed reference and rich-text link searches crashing when the database still contains nodes whose types are no longer registered. Picker queries now omit those unhydratable rows.

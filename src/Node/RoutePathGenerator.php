@@ -10,10 +10,18 @@ use Cosray\Field\Field;
 use Cosray\Locale;
 use Cosray\Locales;
 use JsonException;
+use Locale as IcuLocale;
+use Normalizer;
+use Transliterator;
 
 final class RoutePathGenerator
 {
 	private const MAX_PARENT_DEPTH = 5;
+
+	private const LATIN_FOLD = 'Any-Latin; Latin-ASCII';
+
+	/** @var array<string, ?Transliterator> Keyed by language subtag. */
+	private array $transliterators = [];
 
 	public function __construct(
 		private readonly Database $db,
@@ -585,7 +593,9 @@ final class RoutePathGenerator
 		$current = $locale;
 
 		while ($current !== null) {
-			$resolved = $this->slugValue($value[$current->id] ?? null, $transformers);
+			// The fallback chain can hand back another locale's text; the
+			// transform follows the text, not the path being generated.
+			$resolved = $this->slugValue($value[$current->id] ?? null, $transformers, $current->id);
 
 			if ($resolved !== null) {
 				return $resolved;
@@ -594,7 +604,7 @@ final class RoutePathGenerator
 			$current = $current->fallback();
 		}
 
-		$resolved = $this->slugValue($value[Field::NEUTRAL_LOCALE] ?? null, $transformers);
+		$resolved = $this->slugValue($value[Field::NEUTRAL_LOCALE] ?? null, $transformers, null);
 
 		if ($resolved !== null) {
 			return $resolved;
@@ -611,7 +621,7 @@ final class RoutePathGenerator
 		}
 
 		$slug = $this->slugify(
-			$this->transformCase($value, $transformers),
+			$this->transformCase($this->toAscii($value, null), $transformers),
 			$this->separator($transformers),
 		);
 
@@ -623,14 +633,14 @@ final class RoutePathGenerator
 	}
 
 	/** @param list<string> $transformers */
-	private function slugValue(mixed $value, array $transformers): ?string
+	private function slugValue(mixed $value, array $transformers, ?string $locale): ?string
 	{
 		if (!is_string($value) && !is_int($value) && !is_float($value)) {
 			return null;
 		}
 
 		$slug = $this->slugify(
-			$this->transformCase((string) $value, $transformers),
+			$this->transformCase($this->toAscii((string) $value, $locale), $transformers),
 			$this->separator($transformers),
 		);
 
@@ -672,6 +682,40 @@ final class RoutePathGenerator
 		}
 
 		return $separator;
+	}
+
+	/** Fold with the value's locale before byte-oriented case conversion and truncation. */
+	private function toAscii(string $value, ?string $locale): string
+	{
+		$value = Normalizer::normalize($value, Normalizer::FORM_C) ?: $value;
+		// Latin-ASCII can spell symbols such as ® and © out as "(R)" and "(C)",
+		// whose letters would survive the filter below and land in the path.
+		$value = preg_replace('/[\p{So}\p{Sk}]/u', '', $value) ?? $value;
+		$folded = $this->transliterator($locale)?->transliterate($value);
+		$folded = is_string($folded) ? $folded : $value;
+
+		return preg_replace('/[^\x00-\x7F]+/', '', $folded) ?? $folded;
+	}
+
+	private function transliterator(?string $locale): ?Transliterator
+	{
+		// An empty id would resolve to ICU's default locale rather than to no
+		// language at all, so it has to short-circuit alongside null.
+		$language =
+			$locale === null || $locale === ''
+				? ''
+				: (string) IcuLocale::getPrimaryLanguage($locale);
+
+		if (!array_key_exists($language, $this->transliterators)) {
+			// Valid language tags do not necessarily have a locale-specific ASCII transform.
+			$this->transliterators[$language] = (
+				$language === ''
+					? null
+					: Transliterator::create($language . '-ASCII; ' . self::LATIN_FOLD)
+			) ?? Transliterator::create(self::LATIN_FOLD);
+		}
+
+		return $this->transliterators[$language];
 	}
 
 	private function slugify(string $value, string $separator): string
