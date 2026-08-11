@@ -4,47 +4,47 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Cosray\Controller\Media;
+use Cosray\Assets\Ingest;
 use Cosray\Tests\TestCase;
 
 /**
  * @internal
  *
- * @covers \Cosray\Controller\Media::safeFilename
+ * @covers \Cosray\Assets\Ingest::safeFilename
  */
-final class MediaFilenameTest extends TestCase
+final class IngestFilenameTest extends TestCase
 {
 	public function testStripsTraversalToBasename(): void
 	{
-		$this->assertSame('passwd.jpg', Media::safeFilename('../../etc/passwd.jpg'));
+		$this->assertSame('passwd.jpg', Ingest::safeFilename('../../etc/passwd.jpg'));
 	}
 
 	public function testStripsNestedDirectoryComponents(): void
 	{
-		$this->assertSame('pic.png', Media::safeFilename('sub/dir/pic.png'));
+		$this->assertSame('pic.png', Ingest::safeFilename('sub/dir/pic.png'));
 	}
 
 	public function testPreservesOrdinaryNameWithSpacesAndCase(): void
 	{
-		$this->assertSame('My Foto.JPG', Media::safeFilename('My Foto.JPG'));
+		$this->assertSame('My Foto.JPG', Ingest::safeFilename('My Foto.JPG'));
 	}
 
 	public function testStripsControlCharactersAndNullBytes(): void
 	{
-		$this->assertSame('evil.png', Media::safeFilename("ev\x00il\x1f.png"));
+		$this->assertSame('evil.png', Ingest::safeFilename("ev\x00il\x1f.png"));
 	}
 
 	public function testRejectsPureTraversalToEmptyString(): void
 	{
-		$this->assertSame('', Media::safeFilename('..'));
-		$this->assertSame('', Media::safeFilename('.'));
-		$this->assertSame('', Media::safeFilename('../../'));
+		$this->assertSame('', Ingest::safeFilename('..'));
+		$this->assertSame('', Ingest::safeFilename('.'));
+		$this->assertSame('', Ingest::safeFilename('../../'));
 	}
 
 	public function testTrimsLeadingDotSoDotfilesLoseTheirExtension(): void
 	{
 		// A leading dot is stripped, so `.htaccess` becomes `htaccess`, which
 		// then has no extension and is rejected by the upload allowlist.
-		$this->assertSame('htaccess', Media::safeFilename('.htaccess'));
+		$this->assertSame('htaccess', Ingest::safeFilename('.htaccess'));
 	}
 }

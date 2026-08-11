@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Cosray\Controller\Media;
+use Cosray\Assets\Ingest;
 use Cosray\Tests\TestCase;
 
 /**
  * @internal
  *
- * @covers \Cosray\Controller\Media::sanitizeSvgMarkup
+ * @covers \Cosray\Assets\Ingest::sanitizeSvgMarkup
  */
-final class MediaSvgSanitizeTest extends TestCase
+final class IngestSvgSanitizeTest extends TestCase
 {
 	public function testStripsScriptElement(): void
 	{
-		$clean = Media::sanitizeSvgMarkup(
+		$clean = Ingest::sanitizeSvgMarkup(
 			'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect width="1" height="1"/></svg>',
 		);
 
@@ -27,7 +27,7 @@ final class MediaSvgSanitizeTest extends TestCase
 
 	public function testStripsEventHandlerAttribute(): void
 	{
-		$clean = Media::sanitizeSvgMarkup(
+		$clean = Ingest::sanitizeSvgMarkup(
 			'<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><rect width="1" height="1"/></svg>',
 		);
 
@@ -37,7 +37,7 @@ final class MediaSvgSanitizeTest extends TestCase
 
 	public function testPreservesBenignSvg(): void
 	{
-		$clean = Media::sanitizeSvgMarkup(
+		$clean = Ingest::sanitizeSvgMarkup(
 			'<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"/></svg>',
 		);
 
@@ -48,6 +48,6 @@ final class MediaSvgSanitizeTest extends TestCase
 
 	public function testRejectsMalformedMarkupAsNull(): void
 	{
-		$this->assertNull(Media::sanitizeSvgMarkup('<<< this is not valid svg'));
+		$this->assertNull(Ingest::sanitizeSvgMarkup('<<< this is not valid svg'));
 	}
 }

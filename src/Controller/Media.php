@@ -11,26 +11,25 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Quma\Database;
+use Cosray\Actor;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
+use Cosray\Assets\Ingest;
 use Cosray\Assets\Meta;
 use Cosray\Assets\SizeSpec;
 use Cosray\Auth;
 use Cosray\Config;
+use Cosray\Exception\IngestError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\References\Usage;
 use Cosray\Storage\Storage;
-use Cosray\Uid;
 use Cosray\Users;
-use enshrined\svgSanitize\Sanitizer;
-use finfo;
 use PDOException;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use Throwable;
 
 class Media
 {
@@ -49,83 +48,66 @@ class Media
 	{
 		$response = Response::create($this->factory);
 		$file = $this->uploadedFile();
-		$contents =
-			$file !== null && $file->getError() === UPLOAD_ERR_OK
-				? (string) $file->getStream()
-				: '';
-		$result = $this->validateUploadedFile($mediatype, $file, $contents);
+		$filename = $file !== null
+			? Ingest::safeFilename((string) ($file->getClientFilename() ?? ''))
+			: '';
 
-		if (!$result['ok']) {
-			return $response->json($result, 400);
+		if ($file === null || $filename === '') {
+			return $response->json([
+				'ok' => false,
+				'error' => __('media:upload-failed'),
+				'file' => __('media:unknown-filename'),
+			], 400);
 		}
 
-		// SVGs are served inline, so a stored `<script>`/`onload` would run in
-		// the site origin. Clean the markup before it lands in the pool; hash
-		// and byte count are taken from the sanitized bytes.
-		if (strtolower(pathinfo($result['file'], PATHINFO_EXTENSION)) === 'svg') {
-			$clean = self::sanitizeSvgMarkup($contents);
+		$error = $file->getError();
+		$contents = $error === UPLOAD_ERR_OK ? (string) $file->getStream() : '';
+		$fileSize = $file->getSize() ?? strlen($contents);
+		$maxSize = $this->config->upload->maxSize;
 
-			if ($clean === null) {
-				return $response->json(
-					['ok' => false, 'error' => __('media:unsafe-svg')],
-					400,
-				);
-			}
-
-			$contents = $clean;
+		// PHP truncates oversized uploads before the stream reaches us, so
+		// this limit check must run on the transport size, not the bytes.
+		if ($error === UPLOAD_ERR_INI_SIZE || $fileSize > $maxSize) {
+			return $this->ingestFailure($response, IngestError::tooLarge($fileSize, $maxSize), $filename);
 		}
 
-		$storage = new Storage($this->config);
-		$hash = hash('sha256', $contents);
-		$existing = $this->db
-			->assets
-			->byHash([
-				'hash' => $hash,
-				'disk' => $storage->disk,
-			])
-			->first();
-
-		if ($existing) {
-			return $response->json($this->uploadResult($existing));
+		if ($error !== UPLOAD_ERR_OK) {
+			return $response->json([
+				'ok' => false,
+				'file' => $filename,
+				'error' => __('media:upload-server-error'),
+				'code' => 0,
+			], 400);
 		}
-
-		[$width, $height] = $this->imageDimensions($mediatype, $contents);
-		$uidConfig = $this->config->uid;
-		$uid = new Uid($uidConfig->alphabet, $uidConfig->length)->generate();
-		$key = Storage::key($uid, $result['file']);
-		$storage->write($key, $contents);
 
 		try {
-			$this->db->assets->create([
-				'uid' => $uid,
-				'disk' => $storage->disk,
-				'key' => $key,
-				'filename' => $result['file'],
-				'mime' => $result['mime'],
-				'bytes' => strlen($contents),
-				'width' => $width,
-				'height' => $height,
-				'kind' => $mediatype,
-				'hash' => $hash,
-				'meta' => '{}',
-				'creator' => $this->userId(),
-			])->one();
-		} catch (Throwable $e) {
-			$storage->delete($key);
-
-			throw $e;
+			$result = new Ingest($this->config, $this->db)->ingest(
+				$contents,
+				$filename,
+				$mediatype,
+				new Actor($this->userId()),
+			);
+		} catch (IngestError $e) {
+			return $this->ingestFailure($response, $e, $filename);
 		}
 
-		return $response->json($this->uploadResult([
-			'uid' => $uid,
-			'disk' => $storage->disk,
-			'key' => $key,
-			'filename' => $result['file'],
-			'mime' => $result['mime'],
-			'width' => $width,
-			'height' => $height,
-			'kind' => $mediatype,
-		]));
+		return $response->json($this->uploadResult($result->row));
+	}
+
+	protected function ingestFailure(Response $response, IngestError $e, string $filename): Response
+	{
+		$payload = [
+			'ok' => false,
+			'file' => $filename,
+			'error' => __($e->key, $e->params),
+			'code' => 0,
+		];
+
+		if ($e->mime !== null) {
+			$payload['mime'] = $e->mime;
+		}
+
+		return $response->json($payload, 400);
 	}
 
 	/**
@@ -347,26 +329,6 @@ class Media
 		];
 	}
 
-	/** @return array{0: ?int, 1: ?int} */
-	protected function imageDimensions(string $mediatype, string $contents): array
-	{
-		if ($mediatype !== 'image') {
-			return [null, null];
-		}
-
-		// getimagesizefromstring warns on undecodable input (e.g. SVG bytes);
-		// unreadable dimensions are an expected outcome here, not an error.
-		set_error_handler(static fn(): bool => true);
-
-		try {
-			$info = getimagesizefromstring($contents);
-		} finally {
-			restore_error_handler();
-		}
-
-		return $info === false ? [null, null] : [$info[0], $info[1]];
-	}
-
 	protected function uploadedFile(): ?PsrUploadedFile
 	{
 		try {
@@ -391,17 +353,6 @@ class Media
 		}
 
 		return $user->id;
-	}
-
-	/**
-	 * Strip scripts, event handlers and remote references from SVG markup.
-	 * Returns null when the sanitizer rejects the markup as malformed.
-	 */
-	public static function sanitizeSvgMarkup(string $svg): ?string
-	{
-		$clean = new Sanitizer()->sanitize($svg);
-
-		return $clean === false ? null : $clean;
 	}
 
 	/**
@@ -479,101 +430,6 @@ class Media
 		}
 
 		throw new HttpNotFound($this->request);
-	}
-
-	/**
-	 * Reduce a client-supplied upload name to a safe on-disk basename:
-	 * strip every directory component (and any `../`), drop control
-	 * characters, and trim leading/trailing dots and spaces.
-	 */
-	public static function safeFilename(string $name): string
-	{
-		$name = basename($name);
-		$name = preg_replace('/[\x00-\x1F\x7F]/', '', $name) ?? '';
-
-		return trim($name, ' .');
-	}
-
-	protected function validateUploadedFile(
-		string $mediatype,
-		?PsrUploadedFile $file,
-		string $contents,
-	): array {
-		if (!$file) {
-			return [
-				'ok' => false,
-				'error' => __('media:upload-failed'),
-				'file' => __('media:unknown-filename'),
-			];
-		}
-		$upload = $this->config->upload;
-		$mimeTypes = match ($mediatype) {
-			'file' => $upload->file,
-			'image' => $upload->image,
-			'video' => $upload->video,
-			default => throw new RuntimeException('Media type not supported: ' . $mediatype),
-		};
-		$maxSize = $upload->maxSize;
-
-		$fileSize = $file->getSize() ?? strlen($contents);
-		$fileName = self::safeFilename((string) ($file->getClientFilename() ?? ''));
-
-		if ($fileName === '') {
-			return [
-				'ok' => false,
-				'error' => __('media:upload-failed'),
-				'file' => __('media:unknown-filename'),
-			];
-		}
-
-		$pathInfo = pathinfo($fileName);
-		$ext = $pathInfo['extension'] ?? null;
-		$result = [
-			'ok' => true,
-			'file' => $fileName,
-			'error' => '',
-			'code' => 0,
-		];
-
-		if ($file->getError() === UPLOAD_ERR_INI_SIZE || $fileSize > $maxSize) {
-			$size = number_format((float) (($fileSize / 1024) / 1024), 2, '.', '');
-			$allowed = number_format((float) (($maxSize / 1024) / 1024), 2, '.', '');
-
-			return array_merge($result, [
-				'ok' => false,
-				'error' => __('media:too-large', ['size' => $size, 'allowed' => $allowed]),
-			]);
-		}
-
-		if ($file->getError() !== UPLOAD_ERR_OK) {
-			return array_merge($result, [
-				'ok' => false,
-				'error' => __('media:upload-server-error'),
-			]);
-		}
-
-		$mimeType = (string) new finfo(FILEINFO_MIME_TYPE)->buffer($contents);
-		$allowedExtensions = $mimeTypes[$mimeType] ?? null;
-		$result['mime'] = $mimeType;
-
-		if (!$allowedExtensions) {
-			return array_merge($result, [
-				'ok' => false,
-				'error' => __('media:disallowed-type', ['type' => $mimeType]),
-			]);
-		}
-
-		if (!$ext || !in_array(strtolower($ext), $allowedExtensions, true)) {
-			return array_merge($result, [
-				'ok' => false,
-				'error' => __('media:wrong-extension', [
-					'ext' => (string) $ext,
-					'allowed' => implode(', ', $allowedExtensions),
-				]),
-			]);
-		}
-
-		return $result;
 	}
 
 	protected function sendFile(string $fileServer, string $file): Response
