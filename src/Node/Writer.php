@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
+use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;

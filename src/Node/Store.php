@@ -8,6 +8,7 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpError;
 use Celema\Quma\Database;
+use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RoutePathError;

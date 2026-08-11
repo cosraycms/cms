@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Locales;
-use Cosray\Node\Actor;
 use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
