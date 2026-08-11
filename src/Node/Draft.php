@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Exception\NoSuchField;
+use ValueError;
 
 final class Draft
 {
@@ -37,6 +38,27 @@ final class Draft
 	public function parent(?string $uid): self
 	{
 		$this->data['parent'] = $uid;
+
+		return $this;
+	}
+
+	/**
+	 * Sets an explicit URL path for one locale instead of the one
+	 * generated from the route, e.g. to preserve a legacy URL.
+	 */
+	public function path(string $locale, string $path): self
+	{
+		$path = trim($path);
+
+		if ($path === '') {
+			throw new ValueError('A node path must not be empty');
+		}
+
+		if (!str_starts_with($path, '/')) {
+			$path = '/' . $path;
+		}
+
+		$this->data['paths'][$locale] = $path;
 
 		return $this;
 	}

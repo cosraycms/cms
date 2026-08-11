@@ -206,7 +206,7 @@ class Locales implements Iterator, CorePlugin
 		return $default;
 	}
 
-	protected function exists(string $id): bool
+	public function exists(string $id): bool
 	{
 		return array_key_exists($id, $this->locales);
 	}
