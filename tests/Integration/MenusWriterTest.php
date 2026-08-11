@@ -36,6 +36,28 @@ final class MenusWriterTest extends IntegrationTestCase
 		];
 	}
 
+	private function insertAsset(string $uid): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, kind, creator)
+			VALUES (:uid, 'local', :key, 'f.pdf', 'file', 1)",
+			['uid' => $uid, 'key' => substr($uid, 0, 2) . "/{$uid}/f.pdf"],
+		)->run();
+	}
+
+	/** @return list<string> */
+	private function assetRefs(string $item): array
+	{
+		return array_column(
+			$this->db()->execute(
+				"SELECT asset_uid FROM cms.asset_references
+				WHERE owner_type = 'menu' AND owner_uid = :item ORDER BY asset_uid",
+				['item' => $item],
+			)->all(),
+			'asset_uid',
+		);
+	}
+
 	public function testCreatesMenuWithNestedItemsAndFinderRendersThem(): void
 	{
 		$menus = $this->menus();
@@ -252,14 +274,51 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertSame('/snapshot', $items[$item]->path());
 	}
 
+	public function testItemAssetsEnterAndLeaveTheReferenceIndex(): void
+	{
+		$this->insertAsset('writer-ref-file');
+		$menus = $this->menus();
+		$menus->create('writer-refs', 'Refs');
+		$item = $menus->add('writer-refs', [
+			'type' => 'asset',
+			'asset' => 'writer-ref-file',
+			'title' => ['en' => 'File'],
+		]);
+
+		$this->assertSame(['writer-ref-file'], $this->assetRefs($item));
+
+		// Re-linking the item elsewhere releases the asset again.
+		$menus->updateItem($item, $this->itemData('Plain', '/plain'));
+		$this->assertSame([], $this->assetRefs($item));
+
+		$menus->updateItem($item, [
+			'type' => 'asset',
+			'asset' => 'writer-ref-file',
+			'title' => ['en' => 'File'],
+		]);
+		$menus->remove($item);
+		$this->assertSame([], $this->assetRefs($item));
+	}
+
 	public function testDeleteRemovesMenuAndItems(): void
 	{
+		$this->insertAsset('writer-del-file');
 		$menus = $this->menus();
 		$menus->create('writer-delete', 'Delete');
 		$root = $menus->add('writer-delete', $this->itemData('Root', '/'));
-		$menus->add('writer-delete', $this->itemData('Child', '/c'), parent: $root);
+		$child = $menus->add(
+			'writer-delete',
+			[
+				'type' => 'asset',
+				'asset' => 'writer-del-file',
+				'title' => ['en' => 'File'],
+			],
+			parent: $root,
+		);
 
 		$menus->delete('writer-delete');
+
+		$this->assertSame([], $this->assetRefs($child));
 
 		$this->assertNull(
 			$this->db()->execute(

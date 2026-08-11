@@ -6,6 +6,7 @@ namespace Cosray;
 
 use Celema\Quma\Database;
 use Cosray\Exception\RuntimeException;
+use Cosray\References\Sync;
 
 /**
  * Write API for menus and their item trees. Reading and rendering stay
@@ -21,10 +22,14 @@ use Cosray\Exception\RuntimeException;
  */
 final class Menus
 {
+	private readonly Sync $sync;
+
 	public function __construct(
 		private readonly Database $db,
 		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
-	) {}
+	) {
+		$this->sync = new Sync($db);
+	}
 
 	public function create(string $menu, string $description): void
 	{
@@ -39,7 +44,10 @@ final class Menus
 	/** Deletes the menu including all of its items. */
 	public function delete(string $menu): void
 	{
-		$this->db->menus->deleteItems(['menu' => $menu])->run();
+		foreach ($this->db->menus->deleteItems(['menu' => $menu])->all() as $row) {
+			$this->sync->remove('menu', (string) $row['item']);
+		}
+
 		$this->db->menus->delete(['menu' => $menu])->run();
 	}
 
@@ -80,6 +88,7 @@ final class Menus
 			'position' => $this->nextPosition($menu, $parent),
 			'data' => json_encode($data),
 		])->run();
+		$this->syncReferences($item, $data);
 
 		return $item;
 	}
@@ -92,6 +101,7 @@ final class Menus
 
 		$this->itemRow($item);
 		$this->db->menus->updateItem(['item' => $item, 'data' => json_encode($data)])->run();
+		$this->syncReferences($item, $data);
 	}
 
 	/**
@@ -135,7 +145,30 @@ final class Menus
 	public function remove(string $item): void
 	{
 		$this->itemRow($item);
-		$this->db->menus->deleteItemTree(['item' => $item])->run();
+
+		foreach ($this->db->menus->deleteItemTree(['item' => $item])->all() as $row) {
+			$this->sync->remove('menu', (string) $row['item']);
+		}
+	}
+
+	/**
+	 * Keeps the derived asset reference index in step with the item's
+	 * `image` icon and `asset` link target, mirroring what the rebuild
+	 * derives from stored menu rows.
+	 */
+	private function syncReferences(string $item, array $data): void
+	{
+		$assets = [];
+
+		foreach (['image', 'asset'] as $key) {
+			$uid = $data[$key] ?? null;
+
+			if (is_string($uid) && $uid !== '') {
+				$assets[] = $uid;
+			}
+		}
+
+		$this->sync->replace('menu', $item, ['assets' => $assets, 'nodes' => []]);
 	}
 
 	private function itemRow(string $item): array

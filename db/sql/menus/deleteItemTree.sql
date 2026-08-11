@@ -17,4 +17,5 @@ WITH RECURSIVE tree AS (
 )
 DELETE FROM /*:cms.prefix:*/menu_items
 WHERE
-	item IN (SELECT item FROM tree);
+	item IN (SELECT item FROM tree)
+RETURNING item;

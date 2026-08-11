@@ -9,9 +9,9 @@ use Cosray\Field;
 
 /**
  * Rebuilds both reference indexes from scratch: wipe, then rescan all
- * live nodes and every menu item image. Everything in the indexes is
- * derived, so a rebuild is always safe; it is the recovery path after
- * restores, imports, or content migrations.
+ * live nodes and every menu item asset (image icons and asset links).
+ * Everything in the indexes is derived, so a rebuild is always safe; it
+ * is the recovery path after restores, imports, or content migrations.
  */
 final class Rebuild
 {
@@ -47,13 +47,19 @@ final class Rebuild
 			$scanned += count($refs['assets']) + count($refs['nodes']);
 		}
 
-		foreach ($this->db->references->menuImages()->lazy() as $row) {
-			$this->sync->replace('menu', (string) $row['item'], [
-				'assets' => [(string) $row['uid']],
+		$menuAssets = [];
+
+		foreach ($this->db->references->menuAssets()->lazy() as $row) {
+			$menuAssets[(string) $row['item']][] = (string) $row['uid'];
+		}
+
+		foreach ($menuAssets as $item => $uids) {
+			$this->sync->replace('menu', (string) $item, [
+				'assets' => $uids,
 				'nodes' => [],
 			]);
 			$owners++;
-			$scanned++;
+			$scanned += count($uids);
 		}
 
 		$counts = $this->db->references->counts()->one();

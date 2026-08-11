@@ -199,6 +199,16 @@ final class ReferencesTest extends IntegrationTestCase
 			['uid' => 'refint-rb-deleted'],
 		)->run();
 		$this->insertMenuItem('refint-rb-menu', 'refint-rb-b', ['de' => 'Menü']);
+		$this->db()->execute(
+			"INSERT INTO cms.menu_items (item, menu, position, data)
+			VALUES ('refint-rb-asset-item', 'refint-menu', 2, :data::jsonb)",
+			['data' => json_encode([
+				'type' => 'asset',
+				'asset' => 'refint-rb-a',
+				'image' => 'refint-rb-b',
+				'title' => ['de' => 'Datei'],
+			])],
+		)->run();
 
 		$result = new Rebuild($this->db())->run();
 
@@ -209,6 +219,11 @@ final class ReferencesTest extends IntegrationTestCase
 		$this->assertSame(
 			['refint-rb-b'],
 			$this->assetRefs('refint-rb-menu', 'menu'),
+		);
+		// An asset menu item holds its link target and its icon.
+		$this->assertSame(
+			['refint-rb-a', 'refint-rb-b'],
+			$this->assetRefs('refint-rb-asset-item', 'menu'),
 		);
 		$this->assertGreaterThanOrEqual(2, $result['assets']);
 		$this->assertGreaterThanOrEqual(1, $result['nodes']);
