@@ -52,7 +52,10 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 					component tokens are what a project overrides in <code>@layer theme</code>.
 				</p>
 				<?php foreach ($tokenGroups as $group): ?>
-					<h3><?= escape((string) $group['title']) ?></h3>
+					<details class="group"<?= $group['open'] ? ' open' : '' ?>>
+						<summary><?= escape((string) $group['title']) ?> <span class="count"><?= count(
+	(array) $group['tokens'],
+) ?></span></summary>
 					<div class="tokens">
 						<?php foreach ((array) $group['tokens'] as $token): ?>
 							<?php $name = (string) $token['name']; ?>
@@ -69,6 +72,7 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 							</div>
 						<?php endforeach ?>
 					</div>
+					</details>
 				<?php endforeach ?>
 			</section>
 

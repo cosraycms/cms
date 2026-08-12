@@ -260,6 +260,8 @@
 	display: inline-block;
 	border-radius: var(--cms-radius-full);
 	background-color: var(--cms-color-selected);
+	/* Inherited text lands on a filled pill; state it so both themes read. */
+	color: var(--cms-color-text-muted);
 	font-size: var(--cms-font-size-sm);
 	height: 0.4rem;
 	width: 0.4rem;

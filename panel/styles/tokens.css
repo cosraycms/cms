@@ -180,10 +180,11 @@
 	--cms-color-text-subtle: var(--cms-color-neutral-500);
 	--cms-color-text-faint: var(--cms-color-neutral-400);
 
-	/**
-	 * Text placed on a filled status or accent surface — toasts, badges, the
-	 * danger button. Those fills lighten in the dark theme, so the text on
-	 * them has to darken with them; a fixed white would vanish.
+	/*
+	 * Text on a filled status or accent surface — toasts, badges, the danger
+	 * button. Those fills lighten in the dark theme, so their text has to
+	 * darken with them; a fixed white would vanish. Note, not a section
+	 * heading: `/**` blocks in this file name a group.
 	 */
 	--cms-color-text-on-fill: var(--cms-color-neutral-50);
 

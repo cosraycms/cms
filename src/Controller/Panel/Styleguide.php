@@ -32,7 +32,7 @@ final class Styleguide extends Panel
 	 * page cannot drift from the stylesheet it documents. Only the light
 	 * `:root` block is read; the dark block redeclares the same names.
 	 *
-	 * @return list<array{title: string, tokens: list<array{name: string, value: string, swatch: bool}>}>
+	 * @return list<array{title: string, open: bool, tokens: list<array{name: string, value: string, swatch: bool}>}>
 	 */
 	private function tokenGroups(): array
 	{
@@ -48,6 +48,7 @@ final class Styleguide extends Panel
 		$comment = [];
 		$inRoot = false;
 		$inComment = false;
+		$inNote = false;
 
 		foreach (preg_split('/\R/', (string) file_get_contents($path)) ?: [] as $line) {
 			$line = trim($line);
@@ -60,6 +61,14 @@ final class Styleguide extends Panel
 
 			if ($line === '}') {
 				break;
+			}
+
+			// A `/**` block names a group; a plain `/*` block is a note about
+			// the token below it and carries no heading.
+			if ($inNote || str_starts_with($line, '/*') && !str_starts_with($line, '/**')) {
+				$inNote = !str_ends_with($line, '*/');
+
+				continue;
 			}
 
 			if ($inComment || str_starts_with($line, '/**')) {
@@ -100,9 +109,12 @@ final class Styleguide extends Panel
 			];
 		}
 
+		// Primitives are the longest and least consulted group — 55 spacing
+		// steps ahead of everything worth looking up — so they start collapsed.
 		return array_map(
 			static fn(string $title, array $tokens): array => [
 				'title' => $title,
+				'open' => !str_starts_with($title, 'Primitives'),
 				'tokens' => $tokens,
 			],
 			array_keys($groups),
