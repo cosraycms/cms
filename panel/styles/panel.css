@@ -7,9 +7,9 @@
 @import './cms-collection.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);
-@import './editor.css' layer(panel);
 @import './fields.css' layer(panel);
-@import './node.css' layer(panel);
+@import './cms-node.css' layer(panel);
+@import './cms-inspector.css' layer(panel);
 @import './tabs.css' layer(panel);
 @import './modal.css' layer(panel);
 @import './toast.css' layer(panel);

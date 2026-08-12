@@ -28,6 +28,9 @@ $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
+// The inspector carries the settings a node only has when it is addressable or
+// rendered; without either there is nothing to put in it and the editor runs
+// single-column.
 $showSettings = $routable || $renderable;
 $edit = $mode === 'edit';
 $action = $edit
@@ -79,178 +82,146 @@ foreach ($fieldsets as $fieldset) {
 }
 ?>
 
-<div id="main" class="page node">
-	<section class="editor-content">
-		<div class="cms-node-shell">
-			<div class="cms-node-sticky">
-				<header class="cms-node-topbar">
-					<div class="inner">
-						<div class="trail">
-							<a
-								class="cms-breadcrumb"
-								href="<?= escape($links->back()) ?>"
-								hx-target="#main">
-								<?= escape($name) ?>
-							</a>
-						</div>
-						<div class="actions">
-							<output id="editor-status" class="editor-status" role="status"></output>
-							<?php if ($edit && $deletable): ?>
-								<form
-									method="post"
-									action="<?= escape($links->delete($uid)) ?>"
-									hx-target="#main"
-									hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
-									<button class="cms-button danger" type="submit">
-										<?= escape(__('editor:delete')) ?>
-									</button>
-								</form>
-							<?php endif ?>
-							<?php if ($edit && $routable && $renderable): ?>
-								<button
-									class="cms-button secondary"
-									type="submit"
-									form="node-editor-form"
-									name="preview"
-									value="1"
-									data-editor-submit>
-									<?= escape(__('editor:preview')) ?>
-								</button>
-							<?php endif ?>
-							<button
-								class="cms-button secondary"
-								type="submit"
-								form="node-editor-form"
-								name="publish"
-								value="1"
-								data-editor-submit>
-								<?= escape(__('editor:save-publish')) ?>
-							</button>
-							<button
-								class="cms-button primary"
-								type="submit"
-								form="node-editor-form"
-								data-editor-submit>
-								<?= escape(__('editor:save')) ?>
-							</button>
-						</div>
-					</div>
-				</header>
-				<div class="cms-node-header-frame">
-					<header class="cms-node-header">
-						<h1 class="cms-headline">
-							<span class="cms-headline-title"><?= $node['title'] ?? '' ?></span>
-							<div class="status-bar cms-headline-status">
-								<span
-									id="editor-dirty"
-									class="cms-headline-dirty"
-									title="<?= escape(__('editor:unsaved-changes')) ?>"
-									hidden>●</span>
-								<?php if ($renderable): ?>
-									<span class="cms-headline-published">
-										<span
-											id="editor-published"
-											class="cms-published large<?= $published ? ' published' : '' ?>">
-											<?= escape($published ? __('editor:published') : __('editor:unpublished')) ?>
-										</span>
-									</span>
-								<?php endif ?>
-							</div>
-						</h1>
-						<?php if ($showSettings): ?>
-							<div class="tabs cms-tabs">
-								<nav>
-									<button type="button" class="tab active" data-pane-tab="content">
-										<?= escape(__('editor:content')) ?>
-									</button>
-									<button type="button" class="tab" data-pane-tab="settings">
-										<?= escape(__('editor:settings')) ?>
-									</button>
-								</nav>
-							</div>
-						<?php endif ?>
-					</header>
-				</div>
+<div id="main" class="page cms-node">
+	<header class="head">
+		<div class="titles">
+			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+				<a href="<?= escape($links->back()) ?>" hx-target="#main"><?= escape($name) ?></a>
+			</nav>
+			<div class="line">
+				<h1><?= $node['title'] ?? '' ?></h1>
+				<?php if ($renderable): ?>
+					<span
+						id="editor-published"
+						class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>">
+						<?= escape($published ? __('editor:published') : __('editor:unpublished')) ?>
+					</span>
+				<?php endif ?>
+				<span
+					id="editor-dirty"
+					class="dirty"
+					title="<?= escape(__('editor:unsaved-changes')) ?>"
+					hidden>●</span>
 			</div>
-			<div class="cms-document">
-				<div class="cms-document-inner">
-					<div id="editor-errors" class="editor-errors" hidden></div>
-					<?php // novalidate: the form legitimately hides controls (locale
+		</div>
 
-					// variants, panes, meta dialogs), which native validation cannot
-					// handle; the server validates and reports out-of-band. ?>
-					<form
-						id="node-editor-form"
-						class="cms-node-form"
-						method="post"
-						action="<?= escape($action) ?>"
-						hx-swap="none"
-						novalidate>
-						<?php if (!$edit): ?>
-							<?php // A new node carries the blueprint uid so media uploaded
+		<div class="actions">
+			<output id="editor-status" class="status" role="status"></output>
+			<?php if ($edit && $deletable): ?>
+				<?php // Its own form: the editor form wraps the panes, and forms
 
-							// before the first save lands under node/<uid>/ and the
-							// stored node adopts the same uid. ?>
-							<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
-						<?php endif ?>
-						<div class="cms-pane" data-pane="content">
-							<div class="cms-pane-card">
-								<div class="field-grid">
-									<?php foreach ($fields as $field): ?>
-										<?php if (!is_array($field) || ($field['hidden'] ?? false)) {
-											continue;
-										} ?>
-										<?php $fieldName = (string) ($field['name'] ?? ''); ?>
-										<?php if (isset($fieldsetsByFirstField[$fieldName])): ?>
-											<?php $this->insert('field/fieldset', [
-												'fieldset' => $fieldsetsByFirstField[$fieldName],
-												'fieldsByName' => $fieldsByName,
-												'content' => $content,
-												'locales' => $locales,
-												'defaultLocale' => $defaultLocale,
-												'uid' => $uid,
-												'assets' => $assets,
-												'pathSourceFields' => $pathSourceFields,
-												'span' => $span,
-											]) ?>
-										<?php elseif (!isset($fieldsetMembers[$fieldName])): ?>
-											<?php $this->insert('field/item', [
-												'field' => $field,
-												'content' => $content,
-												'locales' => $locales,
-												'defaultLocale' => $defaultLocale,
-												'uid' => $uid,
-												'assets' => $assets,
-												'pathSourceFields' => $pathSourceFields,
-												'span' => $span,
-											]) ?>
-										<?php endif ?>
-									<?php endforeach ?>
-								</div>
-							</div>
-						</div>
-						<?php if ($showSettings): ?>
-							<div class="cms-pane" data-pane="settings" hidden>
-								<div class="cms-pane-card">
-									<?php $this->insert('editor-settings', [
-										'node' => $node,
-										'locales' => $locales,
-										'defaultLocale' => $defaultLocale,
-										'routable' => $routable,
-										'renderable' => $renderable,
-										'pathsUrl' => $edit
-											? $links->paths($uid)
-											: $links->createPaths((string) ($type['handle'] ?? '')),
-										'generatedPaths' => $generatedPaths,
-									]) ?>
-								</div>
-							</div>
-						<?php endif ?>
-					</form>
+				// cannot nest. ?>
+				<form
+					method="post"
+					action="<?= escape($links->delete($uid)) ?>"
+					hx-target="#main"
+					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
+					<button class="cms-button danger" type="submit">
+						<?= escape(__('editor:delete')) ?>
+					</button>
+				</form>
+			<?php endif ?>
+			<?php if ($edit && $routable && $renderable): ?>
+				<button
+					class="cms-button secondary"
+					type="submit"
+					form="node-editor-form"
+					name="preview"
+					value="1"
+					data-editor-submit>
+					<?= escape(__('editor:preview')) ?>
+				</button>
+			<?php endif ?>
+			<button
+				class="cms-button secondary"
+				type="submit"
+				form="node-editor-form"
+				name="publish"
+				value="1"
+				data-editor-submit>
+				<?= escape(__('editor:save-publish')) ?>
+			</button>
+			<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+				<?= escape(__('editor:save')) ?>
+			</button>
+		</div>
+	</header>
+
+	<?php // The form wraps both panes: the inspector's controls submit with the
+
+	// content fields through the same merge patch, so they have to be inside it.
+	// novalidate because the form legitimately hides controls (locale variants,
+	// meta dialogs) that native validation cannot handle; the server validates
+	// and reports out of band. ?>
+	<form
+		id="node-editor-form"
+		class="panes"
+		method="post"
+		action="<?= escape($action) ?>"
+		hx-swap="none"
+		novalidate>
+		<div class="pane">
+			<div class="inner">
+				<div id="editor-errors" class="errors" hidden></div>
+				<?php if (!$edit): ?>
+					<?php // A new node carries the blueprint uid so media uploaded
+
+					// before the first save lands under node/<uid>/ and the stored
+					// node adopts the same uid. ?>
+					<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
+				<?php endif ?>
+				<div class="card">
+					<div class="field-grid">
+						<?php foreach ($fields as $field): ?>
+							<?php if (!is_array($field) || ($field['hidden'] ?? false)) {
+								continue;
+							} ?>
+							<?php $fieldName = (string) ($field['name'] ?? ''); ?>
+							<?php if (isset($fieldsetsByFirstField[$fieldName])): ?>
+								<?php $this->insert('field/fieldset', [
+									'fieldset' => $fieldsetsByFirstField[$fieldName],
+									'fieldsByName' => $fieldsByName,
+									'content' => $content,
+									'locales' => $locales,
+									'defaultLocale' => $defaultLocale,
+									'uid' => $uid,
+									'assets' => $assets,
+									'pathSourceFields' => $pathSourceFields,
+									'span' => $span,
+								]) ?>
+							<?php elseif (!isset($fieldsetMembers[$fieldName])): ?>
+								<?php $this->insert('field/item', [
+									'field' => $field,
+									'content' => $content,
+									'locales' => $locales,
+									'defaultLocale' => $defaultLocale,
+									'uid' => $uid,
+									'assets' => $assets,
+									'pathSourceFields' => $pathSourceFields,
+									'span' => $span,
+								]) ?>
+							<?php endif ?>
+						<?php endforeach ?>
+					</div>
 				</div>
 			</div>
 		</div>
-	</section>
+
+		<?php if ($showSettings): ?>
+			<?php $this->insert('node/inspector', [
+				'node' => $node,
+				'locales' => $locales,
+				'defaultLocale' => $defaultLocale,
+				'routable' => $routable,
+				'renderable' => $renderable,
+				'pathsUrl' => $edit
+					? $links->paths($uid)
+					: $links->createPaths((string) ($type['handle'] ?? '')),
+				'generatedPaths' => $generatedPaths,
+			]) ?>
+		<?php endif ?>
+	</form>
+
 	<div id="editor-preview" hidden></div>
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
 	['panel' => $panelBase, 'system' => $system],

@@ -63,7 +63,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page node"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertCreateAssetStateIsRendered($html);
@@ -268,13 +268,16 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
 		// The editor is a server-rendered form regardless of the panel static assets.
-		$this->assertStringContainsString('class="cms-node-form"', $html);
+		$this->assertStringContainsString('id="node-editor-form"', $html);
+		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
-		$this->assertStringContainsString('cms-headline-title', $html);
+		// The title lives in the header beside the status pill, outside the
+		// scrolling panes.
+		$this->assertStringContainsString('<div class="line">', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}

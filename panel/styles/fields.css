@@ -198,3 +198,201 @@ textarea.iframe,
 	background-color: var(--cms-color-neutral-700);
 	color: var(--cms-color-neutral-100);
 }
+
+/* Moved from node.css with the editor port; ported with the fields. */
+
+.field-grid {
+	display: grid;
+	grid-template-columns: repeat(100, minmax(0, 1fr));
+}
+
+.cms-fieldset {
+	min-width: 0;
+	margin: var(--cms-space-3) 0;
+	padding: var(--cms-space-2) 0 var(--cms-space-3);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+}
+
+.cms-fieldset-legend {
+	margin-left: var(--cms-space-4);
+	padding: 0 var(--cms-space-2);
+	font-size: var(--cms-font-size-sm);
+	font-weight: 600;
+	color: var(--cms-color-text);
+}
+
+.cms-fieldset-description {
+	padding: var(--cms-space-2) var(--cms-space-6) 0;
+	font-size: var(--cms-font-size-sm);
+	color: var(--cms-color-text-subtle);
+}
+
+.cms-fieldset-fields {
+	width: 100%;
+}
+
+.locale-tabs {
+	flex-shrink: 0;
+}
+
+.locale-tab {
+	display: inline-block;
+	font-size: var(--cms-font-size-sm);
+	padding: 0 0.5rem;
+	font-weight: normal;
+}
+
+.locale-tab.active {
+	border-radius: var(--cms-radius);
+	background-color: var(--cms-color-selected);
+	color: var(--cms-color-text);
+}
+
+.cms-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.cms-radio-option {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.cms-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	container-type: inline-size;
+}
+
+.cms-group-field {
+	flex: 1 1 12rem;
+}
+
+/* Sub-controls with a declared width share a row on wide containers
+   (e.g. a date range as two 50% inputs) ... */
+.cms-group-field[data-width] {
+	flex: 1 1 calc(var(--group-width) - 0.75rem);
+}
+
+/* ... and stack at full width when the group gets narrow. */
+@container (max-width: 26rem) {
+	.cms-group-field[data-width] {
+		flex-basis: 100%;
+	}
+}
+
+.cms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.cms-repeater-item {
+	display: flex;
+	align-items: end;
+	gap: 0.5rem;
+}
+
+.cms-repeater-item-control {
+	flex-grow: 1;
+}
+
+.cms-sub-label {
+	display: block;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	margin-bottom: 0.25rem;
+}
+
+.cms-control-unknown,
+.cms-control-element-pending {
+	padding: 0.75rem;
+	border: 1px dashed var(--cms-color-danger);
+	border-radius: 0.375rem;
+	color: var(--cms-color-danger);
+	font-size: 0.875rem;
+}
+
+.cms-control-element-pending {
+	border-color: var(--cms-color-border-strong);
+	color: var(--cms-color-text-muted);
+}
+
+.cms-meta-button {
+	margin-left: var(--cms-space-2);
+	padding: 0 var(--cms-space-2);
+	border: var(--cms-border);
+	border-radius: var(--cms-radius);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text-muted);
+	font-size: var(--cms-font-size-sm);
+	font-weight: 500;
+	line-height: 1.25rem;
+	cursor: pointer;
+}
+
+.cms-meta-button:hover {
+	color: var(--cms-color-text);
+	border-color: var(--cms-color-border-strong);
+}
+
+.cms-meta-dialog {
+	min-width: min(28rem, 90vw);
+	padding: var(--cms-space-6);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	box-shadow: var(--cms-shadow);
+}
+
+.cms-meta-dialog::backdrop {
+	background-color: rgb(0 0 0 / 20%);
+}
+
+.cms-meta-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-4);
+	margin-bottom: var(--cms-space-4);
+}
+
+.cms-meta-title {
+	font-size: var(--cms-font-size-sm);
+	font-weight: 600;
+}
+
+.cms-meta-field + .cms-meta-field {
+	margin-top: var(--cms-space-3);
+}
+
+@media (max-width: 52rem) {
+	.cms-fieldset {
+		grid-column: 1 / -1 !important;
+	}
+
+	.cms-node-sticky {
+		position: static;
+	}
+
+	.cms-node-header-frame {
+		padding: var(--cms-space-6) var(--cms-space-4) var(--cms-space-6);
+	}
+
+	.cms-node-topbar .inner {
+		min-height: 0;
+		align-items: flex-start;
+		flex-direction: column;
+		padding: var(--cms-space-3) var(--cms-space-4);
+	}
+
+	.cms-node-topbar .actions {
+		width: 100%;
+		justify-content: flex-start;
+		gap: var(--cms-space-2);
+		flex-wrap: wrap;
+	}
+}

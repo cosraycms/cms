@@ -1,0 +1,133 @@
+/*
+ * Settings rail beside the field pane.
+ *
+ * Scrolls independently of the form — the reason the settings could not stay a
+ * tab. Route paths are the width-sensitive part: a multilingual node stacks one
+ * full URL per locale in a rail this narrow, so they take the full width with
+ * their locale as a label above rather than beside.
+ */
+
+.cms-inspector {
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 var(--cms-inspector-width);
+	width: var(--cms-inspector-width);
+	min-width: 0;
+	border-left: 1px solid var(--cms-color-border);
+	background: var(--cms-color-surface);
+
+	& .scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-5);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .section {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+
+		& + .section {
+			margin-top: var(--cms-space-6);
+			padding-top: var(--cms-space-6);
+			border-top: 1px solid var(--cms-color-border-soft);
+		}
+	}
+
+	& .field {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1-5);
+		min-width: 0;
+	}
+
+	& .label {
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 650;
+	}
+
+	& input[type='text'] {
+		width: 100%;
+		min-width: 0;
+		padding: var(--cms-space-2) var(--cms-space-2-5);
+		font-size: var(--cms-font-size-sm);
+
+		&:focus {
+			border-color: var(--cms-color-focus);
+			outline: none;
+			box-shadow: var(--cms-focus-ring);
+		}
+	}
+
+	& .value {
+		overflow-wrap: anywhere;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+
+	& .toggle {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--cms-space-3);
+		cursor: pointer;
+	}
+
+	& .copy {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-width: 0;
+
+		& .title {
+			color: var(--cms-color-text);
+			font-size: var(--cms-font-size-sm);
+			font-weight: 650;
+		}
+
+		& .help {
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+			line-height: 1.4;
+		}
+	}
+}
+
+/* The generated route paths, swapped in by their own request. */
+.cms-settings-generated {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-1);
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-xs);
+
+	& code {
+		overflow-wrap: anywhere;
+	}
+}
+
+.cms-generated-path-locale {
+	font-weight: 650;
+}
+
+/*
+ * Stacked above the fields, not below: the publish toggle at the foot of a long
+ * form is the same problem the pinned header was there to solve.
+ */
+@media (max-width: 52rem) {
+	.cms-inspector {
+		flex-basis: auto;
+		width: 100%;
+		order: -1;
+		border-left: 0;
+		border-bottom: 1px solid var(--cms-color-border);
+
+		& .scroll {
+			padding: var(--cms-space-4);
+			overflow: visible;
+		}
+	}
+}

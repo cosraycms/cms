@@ -34,13 +34,13 @@ $messages = $flatten($errors, $flatten);
 ?>
 <output
 	id="editor-status"
-	class="editor-status <?= $saved ? 'is-success' : 'is-error' ?>"
+	class="status <?= $saved ? 'is-success' : 'is-error' ?>"
 	role="status"
 	<?= $saved ? 'data-saved="true"' : '' ?>
 	hx-swap-oob="true"><?= escape($message) ?></output>
 <div
 	id="editor-errors"
-	class="editor-errors"
+	class="errors"
 	hx-swap-oob="true"
 	<?= $saved || $messages === [] ? 'hidden' : '' ?>>
 	<?php if (!$saved && $messages !== []): ?>
@@ -54,12 +54,12 @@ $messages = $flatten($errors, $flatten);
 <?php if ($saved && $renderable): ?>
 	<span
 		id="editor-published"
-		class="cms-published large<?= $published ? ' published' : '' ?>"
+		class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>"
 		hx-swap-oob="true"><?= escape($published ? __('editor:published') : __('editor:unpublished')) ?></span>
 <?php endif ?>
 <?php if ($saved && is_string($preview) && $preview !== ''): ?>
-	<div id="editor-preview" class="editor-preview" hx-swap-oob="true">
-		<button type="button" class="cms-preview-close" data-overlay-close>
+	<div id="editor-preview" class="preview" hx-swap-oob="true">
+		<button type="button" class="close" data-overlay-close>
 			<?= escape(__('editor:close')) ?>
 		</button>
 		<iframe src="/preview<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>

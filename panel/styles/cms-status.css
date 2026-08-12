@@ -33,6 +33,12 @@
 		color: var(--cms-color-warning-text);
 	}
 
+	&.is-unpublished {
+		border-color: var(--cms-color-border);
+		background: var(--cms-color-selected);
+		color: var(--cms-color-text-muted);
+	}
+
 	&.is-locked {
 		border-color: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
 		background: var(--cms-color-danger-surface);

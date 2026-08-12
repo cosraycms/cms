@@ -52,7 +52,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'<style>@layer tokens, reset, panel, plugin, theme;</style>',
 			$html,
 		);
-		$this->assertStringContainsString('id="main" class="page node"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertPanelStaticStateIsRendered($html);
@@ -279,7 +279,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page node"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}
@@ -352,7 +352,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	private function assertEditorAssetStateIsRendered(string $html): void
 	{
 		// The editor is a server-rendered form regardless of the panel static assets.
-		$this->assertStringContainsString('class="cms-node-form"', $html);
+		// The form wraps both panes, so the inspector's settings submit with the
+		// content fields.
+		$this->assertStringContainsString('id="node-editor-form"', $html);
+		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-articles/panel-editor-a?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;offset=20&amp;limit=10"',
 			$html,
@@ -369,7 +372,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// Native validation cannot handle legitimately hidden controls
 		// (locale variants, panes) — the server validates.
 		$this->assertStringContainsString('novalidate', $html);
-		$this->assertStringContainsString('cms-headline-title', $html);
+		// The title lives in the header beside the status pill, outside the
+		// scrolling panes.
+		$this->assertStringContainsString('<div class="line">', $html);
 		$this->assertStringNotContainsString('id="cosray-node-editor"', $html);
 		$this->assertStringNotContainsString('cosray-node-editor-data', $html);
 		$this->assertStringNotContainsString('Panel bundle missing', $html);

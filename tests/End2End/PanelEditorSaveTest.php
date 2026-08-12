@@ -98,6 +98,11 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertStringContainsString('id="editor-status"', $html);
 		$this->assertStringContainsString('is-success', $html);
 		$this->assertStringContainsString('hx-swap-oob="true"', $html);
+		// The out-of-band response replaces these by id, so its classes have to
+		// stay the ones the editor styles — otherwise a save silently strips the
+		// styling off the element it swaps.
+		$this->assertStringContainsString('class="status is-success"', $html);
+		$this->assertStringContainsString('class="errors"', $html);
 
 		$content = $this->nodeContent('panel-save-a');
 		$this->assertSame('New Title', $content['title']['value']['en']);
@@ -163,6 +168,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('is-error', $html);
 		$this->assertStringContainsString('id="editor-errors"', $html);
+		$this->assertStringContainsString('class="status is-error"', $html);
 		$this->assertSame(
 			'Valid Title',
 			$this->nodeContent('panel-save-invalid')['title']['value']['zxx'],
