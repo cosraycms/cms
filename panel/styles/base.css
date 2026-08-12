@@ -67,12 +67,12 @@ select,
 textarea {
 	border: var(--cms-border);
 	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-white);
+	background-color: var(--cms-color-surface);
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: var(--cms-color-neutral-400);
+	color: var(--cms-color-text-faint);
 }
 
 img,

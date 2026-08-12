@@ -181,6 +181,13 @@
 	--cms-color-text-faint: var(--cms-color-neutral-400);
 
 	/**
+	 * Text placed on a filled status or accent surface — toasts, badges, the
+	 * danger button. Those fills lighten in the dark theme, so the text on
+	 * them has to darken with them; a fixed white would vanish.
+	 */
+	--cms-color-text-on-fill: var(--cms-color-neutral-50);
+
+	/**
 	 * Semantic — edges
 	 */
 	--cms-color-border: var(--cms-color-neutral-200);
@@ -315,7 +322,7 @@
 	--cms-button-secondary-ring: var(--cms-color-accent-ring);
 
 	--cms-button-danger-bg: var(--cms-color-danger);
-	--cms-button-danger-text: var(--cms-color-white);
+	--cms-button-danger-text: var(--cms-color-text-on-fill);
 	--cms-button-danger-border: var(--cms-button-danger-bg);
 	--cms-button-danger-hover-bg: var(--cms-color-danger-hover);
 	--cms-button-danger-hover-text: var(--cms-button-danger-text);
@@ -358,6 +365,7 @@
 	--cms-color-text-muted: var(--cms-color-neutral-300);
 	--cms-color-text-subtle: var(--cms-color-neutral-400);
 	--cms-color-text-faint: var(--cms-color-neutral-500);
+	--cms-color-text-on-fill: var(--cms-color-neutral-900);
 
 	--cms-color-border: #282d36;
 	--cms-color-border-soft: #22262e;
@@ -386,6 +394,5 @@
 	--cms-color-danger-text: var(--cms-color-danger);
 	--cms-color-info-text: var(--cms-color-info);
 
-	--cms-button-danger-text: var(--cms-color-neutral-900);
 	--cms-button-secondary-bg: var(--cms-color-surface-raised);
 }

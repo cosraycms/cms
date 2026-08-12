@@ -21,7 +21,7 @@
 	border: none;
 	text-align: left;
 	cursor: pointer;
-	color: var(--cms-color-white);
+	color: var(--cms-color-text-on-fill);
 }
 
 .toast:last-child {

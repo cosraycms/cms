@@ -1,5 +1,5 @@
 .tabs {
-	border-bottom: 1px solid var(--cms-color-neutral-200);
+	border-bottom: 1px solid var(--cms-color-border);
 
 	nav {
 		display: flex;
@@ -13,7 +13,7 @@
 	align-items: center;
 	padding: var(--cms-space-4) var(--cms-space-1);
 	border-bottom: 2px solid transparent;
-	color: var(--cms-color-neutral-500);
+	color: var(--cms-color-text-subtle);
 	font-size: var(--cms-font-size-sm);
 	font-weight: 600;
 	white-space: nowrap;
@@ -22,8 +22,8 @@
 		border-color 120ms ease;
 
 	&:hover {
-		border-bottom-color: var(--cms-color-neutral-300);
-		color: var(--cms-color-neutral-700);
+		border-bottom-color: var(--cms-color-border-strong);
+		color: var(--cms-color-text-muted);
 	}
 
 	&.active {

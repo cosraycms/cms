@@ -93,9 +93,26 @@
 		white-space: nowrap;
 	}
 
-	& textarea {
+	/*
+	 * The editor card centres itself with auto inline margins, which cancels
+	 * flex stretch and leaves it shrink-wrapped in the sampler's column.
+	 */
+	& .cms-pane-card {
 		width: 100%;
-		max-width: 32rem;
-		padding: var(--cms-space-2);
+	}
+
+	/* Panel inputs stretch to their field wrapper; the sampler has none. */
+	& .row {
+		& input:not([type='checkbox']),
+		& select {
+			width: auto;
+			min-width: 12rem;
+			padding: var(--cms-space-2);
+		}
+
+		& textarea {
+			width: 24rem;
+			padding: var(--cms-space-2);
+		}
 	}
 }

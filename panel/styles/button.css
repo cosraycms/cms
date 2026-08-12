@@ -117,9 +117,9 @@
 		width: 16rem;
 		transform-origin: top right;
 		border-radius: var(--cms-radius-md);
-		background-color: var(--cms-color-white);
+		background-color: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-lg);
-		border: 1px solid color-mix(in srgb, var(--cms-color-neutral-900) 6%, transparent);
+		border: 1px solid var(--cms-color-border);
 	}
 
 	.list {
@@ -132,10 +132,10 @@
 		padding: 0.5rem var(--cms-space-4);
 		font-size: var(--cms-font-size-sm);
 		text-align: left;
-		color: var(--cms-color-neutral-700);
+		color: var(--cms-color-text-muted);
 	}
 
 	.entry:hover {
-		background-color: var(--cms-color-neutral-100);
+		background-color: var(--cms-color-hover);
 	}
 }

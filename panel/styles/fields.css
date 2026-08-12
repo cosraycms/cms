@@ -26,7 +26,7 @@ label {
 	font-size: var(--cms-font-size-sm);
 	font-weight: 600;
 	line-height: 1.5rem;
-	color: var(--cms-color-neutral-900);
+	color: var(--cms-color-text);
 }
 
 .cms-field-label div,
@@ -65,8 +65,8 @@ select {
 	border: var(--cms-border);
 	border-radius: var(--cms-radius-md);
 	padding: 0.375rem 0.75rem;
-	color: var(--cms-color-neutral-900);
-	background-color: var(--cms-color-white);
+	color: var(--cms-color-text);
+	background-color: var(--cms-color-surface);
 	box-shadow: var(--cms-shadow-sm);
 	outline: none;
 	transition:
@@ -79,7 +79,7 @@ select {
 .cms-textarea::placeholder,
 input::placeholder,
 textarea::placeholder {
-	color: var(--cms-color-neutral-300);
+	color: var(--cms-color-text-faint);
 }
 
 .cms-input:focus,
@@ -104,8 +104,8 @@ select:focus {
 input[disabled],
 textarea[disabled],
 select[disabled] {
-	color: var(--cms-color-neutral-600);
-	background-color: var(--cms-color-neutral-100);
+	color: var(--cms-color-text-subtle);
+	background-color: var(--cms-color-surface-sunken);
 	border-style: dashed;
 	cursor: not-allowed;
 }
@@ -132,7 +132,7 @@ input[type='radio'] {
 .cms-checkbox-label {
 	font-size: var(--cms-font-size-sm);
 	line-height: 1.5rem;
-	color: var(--cms-color-neutral-900);
+	color: var(--cms-color-text);
 }
 
 .cms-switch {
@@ -164,8 +164,8 @@ textarea[required] {
 .cms-field[data-disabled='true'] .cms-input,
 .cms-field[data-disabled='true'] .cms-select,
 .cms-field[data-disabled='true'] .cms-textarea {
-	color: var(--cms-color-neutral-600);
-	background-color: var(--cms-color-neutral-100);
+	color: var(--cms-color-text-subtle);
+	background-color: var(--cms-color-surface-sunken);
 	border-style: dashed;
 }
 
@@ -174,7 +174,7 @@ textarea[required] {
 	padding-top: var(--cms-space-1);
 	padding-left: var(--cms-space-px);
 	font-size: var(--cms-font-size-sm);
-	color: var(--cms-color-neutral-400);
+	color: var(--cms-color-text-faint);
 }
 
 .cms-field-error {

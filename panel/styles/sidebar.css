@@ -70,7 +70,7 @@
 				color-mix(in oklch, var(--cms-color-accent), var(--cms-color-white) 25%)
 			);
 			box-shadow: var(--cms-shadow-sm);
-			color: var(--cms-color-white);
+			color: var(--cms-color-text-on-fill);
 			font-weight: 700;
 			letter-spacing: -0.03em;
 		}

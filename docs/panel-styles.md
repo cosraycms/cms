@@ -44,7 +44,9 @@ Downstream projects override semantic and component tokens. Primitives are inter
 }
 ```
 
-Two rules make the palette work:
+Three rules make the palette work:
+
+- **Components reference semantic tokens, never primitives.** `--cms-color-white` and `--cms-color-neutral-900` do not flip — that is the point of a primitive. A component that reaches for one is pinned to the light theme even though it contains no raw hex. Use `--cms-color-surface` and `--cms-color-text`. The exceptions are values that genuinely must not flip: a scrim that stays dark in both themes, or an iframe showing site content rather than panel chrome.
 
 - **Pairs flip together.** `--cms-color-primary` and `--cms-color-primary-text` are one decision. Overriding the background alone produces an unreadable button in one of the two themes.
 - **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas.

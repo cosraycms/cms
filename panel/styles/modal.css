@@ -13,7 +13,7 @@
 	width: 100%;
 	max-width: 48rem;
 	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-white);
+	background-color: var(--cms-color-surface);
 }
 
 .cms-modal-close {
@@ -24,7 +24,7 @@
 	height: 1.5rem;
 	border-radius: var(--cms-radius-full);
 	background-color: var(--cms-color-danger);
-	color: var(--cms-color-white);
+	color: var(--cms-color-text-on-fill);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -133,7 +133,7 @@
 .modal .modal-close.close {
 	border: 1px solid var(--cms-color-danger);
 	background-color: var(--cms-color-danger);
-	color: var(--cms-color-white);
+	color: var(--cms-color-text-on-fill);
 	box-shadow: none;
 	top: -0.6rem;
 	right: -0.6rem;
@@ -146,5 +146,5 @@
 
 .modal .modal-close.close::before,
 .modal .modal-close.close::after {
-	background-color: var(--cms-color-white);
+	background-color: var(--cms-color-text-on-fill);
 }
