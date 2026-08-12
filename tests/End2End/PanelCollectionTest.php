@@ -44,14 +44,17 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page collection"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-collection"', $html);
 		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
 		$this->assertStringContainsString('class="icon-default"', $html);
 		$this->assertStringNotContainsString('href="/cp/assets/styles/collection.css"', $html);
 		$this->assertStringContainsString('Panel Grid A', $html);
 		$this->assertStringContainsString('Panel Grid B', $html);
-		$this->assertStringContainsString('<table class="collection-list">', $html);
-		$this->assertStringContainsString('<th class="col-status">Status</th>', $html);
+		$this->assertStringContainsString('class="cms-list" role="table"', $html);
+		$this->assertStringContainsString(
+			'<th class="col-status" role="columnheader">Status</th>',
+			$html,
+		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
 	}
 
@@ -219,7 +222,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page collection"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-collection"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}

@@ -24,6 +24,7 @@ final class Styleguide extends Panel
 			'defaultLocale' => 'en',
 			'fields' => $this->fields(),
 			'content' => $this->content(),
+			'rows' => $this->rows(),
 		]);
 	}
 
@@ -173,6 +174,69 @@ final class Styleguide extends Panel
 				'label' => 'A label long enough to find out what happens when it does not fit',
 				'control' => ['name' => 'text', 'props' => []],
 			],
+		];
+	}
+
+	/**
+	 * Listing rows in the shape `collection/row` expects, covering the states a
+	 * real collection rarely shows all at once: tree depth, a collapsed branch,
+	 * the last child of a branch, and each status.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function rows(): array
+	{
+		$row = static fn(array $overrides): array => array_merge([
+			'uid' => 'styleguide',
+			'depth' => 0,
+			'last' => false,
+			'expanded' => false,
+			'published' => true,
+			'childrenUrl' => null,
+			'focusedChildrenUrl' => null,
+			'childCreateLinks' => [],
+			'status' => [['kind' => 'published', 'label' => 'Published']],
+			'cells' => [],
+		], $overrides);
+
+		$cells = static fn(string $title, string $type, string $changed): array => [
+			['class' => 'is-bold', 'label' => 'Title', 'value' => $title, 'editUrl' => '#'],
+			['class' => '', 'label' => 'Type', 'value' => $type, 'editUrl' => null],
+			['class' => '', 'label' => 'Modified', 'value' => $changed, 'editUrl' => null],
+		];
+
+		return [
+			$row([
+				'expanded' => true,
+				'childrenUrl' => '#',
+				'focusedChildrenUrl' => '#',
+				'childCreateLinks' => [['url' => '#', 'name' => 'Page']],
+				'cells' => $cells('Brauerei', 'Page', 'Aug 11, 2026, 10:25 PM'),
+			]),
+			$row([
+				'depth' => 1,
+				'childrenUrl' => '#',
+				'status' => [['kind' => 'draft', 'label' => 'Draft']],
+				'published' => false,
+				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
+			]),
+			$row([
+				'depth' => 2,
+				'last' => true,
+				'status' => [['kind' => 'hidden', 'label' => 'Hidden']],
+				'published' => false,
+				'cells' => $cells(
+					'A title long enough that it has to be cut off somewhere',
+					'Page',
+					'Aug 11, 2026, 10:25 PM',
+				),
+			]),
+			$row([
+				'depth' => 1,
+				'last' => true,
+				'status' => [['kind' => 'locked', 'label' => 'Locked']],
+				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
+			]),
 		];
 	}
 

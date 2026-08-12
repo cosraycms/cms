@@ -108,8 +108,9 @@ The rules:
 2. **Element selectors are fine inside a block.** We own the markup. `& thead th` beats inventing a class for every node. Reach for a class when the thing varies, carries state, or JavaScript looks it up.
 3. **States are `is-` / `has-`, attached with `&`** — `.is-active`, `.is-open`, `.has-children`. Never written as standalone selectors.
 4. **Two structural levels, maximum.** Chain `&` for states rather than descending further. Deep nesting inflates specificity and makes overrides inside the panel layer painful.
-5. **One block per file**, named after the block.
-6. **Variation goes through a local custom property on the block**, not through extra selectors. `--columns` above is the pattern: adding a column later is a value change, not a rewrite. Block-local properties stay unprefixed — they are scoped to one component and are not part of the theming contract.
+5. **Blocks that host other blocks need distinctive part names.** A page-level block wraps whatever screens put inside it, so a part called `.row` or `.item` there will also match the rows of a list nested within — plain nesting scopes a part to its block's subtree, not to the block itself. Name such parts for what they are in that block (`.sample`, `.pane`), or scope them with `@scope`.
+6. **One block per file**, named after the block.
+7. **Variation goes through a local custom property on the block**, not through extra selectors. `--columns` above is the pattern: adding a column later is a value change, not a rewrite. Watch the cascade when a view sets one inline — an inline custom property outranks every stylesheet, so a media query has to override the property it feeds rather than the custom property. Block-local properties stay unprefixed — they are scoped to one component and are not part of the theming contract.
 
 ### Blocks that nest into themselves
 

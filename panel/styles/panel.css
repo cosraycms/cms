@@ -4,7 +4,9 @@
 @import './cms-sidebar.css' layer(panel);
 @import './topbar.css' layer(panel);
 @import './page.css' layer(panel);
-@import './collection.css' layer(panel);
+@import './cms-collection.css' layer(panel);
+@import './cms-list.css' layer(panel);
+@import './cms-status.css' layer(panel);
 @import './editor.css' layer(panel);
 @import './fields.css' layer(panel);
 @import './node.css' layer(panel);

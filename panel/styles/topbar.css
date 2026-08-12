@@ -13,11 +13,6 @@
 		padding: 0 var(--cms-space-6);
 	}
 
-	&.topbar-collection .inner {
-		max-width: var(--cms-collection-max-width);
-		justify-content: space-between;
-	}
-
 	h1 {
 		margin: 0;
 		font-size: var(--cms-font-size-base);

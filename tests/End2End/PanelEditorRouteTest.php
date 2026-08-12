@@ -303,7 +303,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'href="/cp/collection/test-articles/panel-editor-link?q=Panel%20Editor&amp;sort=uid&amp;dir=asc&amp;limit=10"',
 			$html,
 		);
-		$this->assertStringContainsString('class="collection-value collection-edit-link"', $html);
+		$this->assertStringContainsString('class="value link"', $html);
 	}
 
 	public function testPanelEditorRouteUsesViteDevServerWhenPanelDevIsEnabled(): void

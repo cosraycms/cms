@@ -1,0 +1,41 @@
+/* Shared status vocabulary: the listing, the parent context, and the media and
+   dashboard screens once they land. */
+
+.cms-status {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	padding: 0.125rem var(--cms-space-2-5);
+	border: 1px solid transparent;
+	border-radius: var(--cms-radius-full);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 600;
+	white-space: nowrap;
+
+	&::before {
+		width: 0.375rem;
+		height: 0.375rem;
+		border-radius: var(--cms-radius-full);
+		background: currentcolor;
+		content: '';
+	}
+
+	&.is-published {
+		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
+		background: var(--cms-color-success-surface);
+		color: var(--cms-color-success-text);
+	}
+
+	&.is-draft,
+	&.is-hidden {
+		border-color: color-mix(in oklch, var(--cms-color-warning), transparent 70%);
+		background: var(--cms-color-warning-surface);
+		color: var(--cms-color-warning-text);
+	}
+
+	&.is-locked {
+		border-color: color-mix(in oklch, var(--cms-color-danger), transparent 70%);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
+	}
+}

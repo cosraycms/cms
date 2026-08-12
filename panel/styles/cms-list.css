@@ -1,0 +1,325 @@
+/*
+ * Tabular markup, grid layout.
+ *
+ * The table element stays because the listing is genuinely tabular — sortable
+ * columns, keyboard and screen-reader behaviour — but grid gives per-column
+ * sizing, tree indentation without colspan tricks, and a single template swap
+ * for the card layout on narrow screens. Changing `display` drops the implicit
+ * table roles, so the markup states them.
+ *
+ * Column count lives in `--columns`, set per collection. Selection and row
+ * action columns arrive as extra tracks there, not as a second layout.
+ */
+
+.cms-list {
+	display: grid;
+	grid-template-columns: var(--columns);
+	width: 100%;
+	font-size: var(--cms-font-size-sm);
+
+	& thead,
+	& tbody {
+		display: contents;
+	}
+
+	& tr {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+	}
+
+	& th {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		padding: var(--cms-space-3) var(--cms-space-4);
+		border-bottom: 1px solid var(--cms-color-border);
+		background: var(--cms-color-surface-sunken);
+		color: var(--cms-color-text-subtle);
+		font-size: 0.625rem;
+		font-weight: 600;
+		letter-spacing: 0.09em;
+		text-align: left;
+		text-transform: uppercase;
+		white-space: nowrap;
+
+		& .inner {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--cms-space-1);
+			color: inherit;
+			text-decoration: none;
+		}
+
+		& a.inner:hover {
+			color: var(--cms-color-text);
+		}
+
+		& .sort {
+			color: var(--cms-color-text-faint);
+		}
+
+		&:not(.is-sorted) .sort {
+			visibility: hidden;
+		}
+
+		&.is-sorted-desc .sort {
+			display: inline-block;
+			transform: rotate(180deg);
+		}
+	}
+
+	& .row {
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+
+		&.is-tree:not([data-depth='0']) {
+			background: var(--cms-color-surface-sunken);
+
+			&:hover {
+				background: var(--cms-color-hover);
+			}
+		}
+	}
+
+	& .cell {
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		min-height: var(--cms-row-height);
+		padding: var(--cms-space-2) var(--cms-space-4);
+		border-bottom: 1px solid var(--cms-color-border-soft);
+		color: var(--cms-color-text-muted);
+
+		&.is-bold .value {
+			color: var(--cms-color-text);
+			font-weight: 650;
+		}
+
+		&.is-italic .value {
+			font-style: italic;
+		}
+
+		&.col-status {
+			justify-content: flex-start;
+		}
+	}
+
+	& .value {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& a.value {
+		color: var(--cms-color-text);
+		font-weight: 650;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	& .status-list {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		flex-wrap: wrap;
+	}
+
+	/*
+	 * Tree rows.
+	 *
+	 * Indentation and the guide come off --tree-depth on the row, so nesting
+	 * costs one custom property instead of a wrapper per level.
+	 */
+	& .title {
+		--step: 1.375rem;
+
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+		padding-left: calc(var(--tree-depth, 0) * var(--step));
+
+		&.is-flat {
+			padding-left: 0;
+		}
+
+		/*
+		 * Dotted guide beside the row's own level — one gradient on the title
+		 * rather than a positioned element per level of depth.
+		 */
+		&:not(.is-flat)::before {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: calc((var(--tree-depth, 0) - 0.5) * var(--step));
+			width: 1px;
+			background-image: repeating-linear-gradient(
+				to bottom,
+				var(--cms-color-border-strong) 0 2px,
+				transparent 2px 4px
+			);
+			content: '';
+			pointer-events: none;
+		}
+	}
+
+	& .row[data-depth='0'] .title::before {
+		display: none;
+	}
+
+	& .toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.375rem;
+		height: 1.375rem;
+		flex-shrink: 0;
+		border-radius: var(--cms-radius);
+		color: var(--cms-color-text-subtle);
+		text-decoration: none;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--cms-color-selected);
+			color: var(--cms-color-text);
+		}
+
+		&.is-spacer {
+			pointer-events: none;
+		}
+
+		& .chevron {
+			width: 0.625rem;
+			height: 0.625rem;
+			transition: transform 0.16s ease;
+		}
+
+		&.is-open .chevron {
+			transform: rotate(90deg);
+		}
+	}
+
+	& .dot {
+		width: 0.4375rem;
+		height: 0.4375rem;
+		flex-shrink: 0;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-border-strong);
+
+		&.is-published {
+			background: var(--cms-color-success);
+		}
+	}
+
+	/* Revealed on hover, but keyboard and touch need them reachable too. */
+	& .row-actions {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		flex-shrink: 0;
+		opacity: 0;
+		transition: opacity 0.12s ease;
+	}
+
+	& .row:hover .row-actions,
+	& .row:focus-within .row-actions {
+		opacity: 1;
+	}
+
+	& .chip {
+		display: inline-flex;
+		align-items: center;
+		height: 1.375rem;
+		padding: 0 var(--cms-space-2);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		text-decoration: none;
+		white-space: nowrap;
+
+		&.is-create {
+			border-color: transparent;
+			background: var(--cms-color-accent-surface);
+			color: var(--cms-color-accent-text);
+		}
+
+		&:hover,
+		&:focus-visible {
+			border-color: var(--cms-color-accent);
+			color: var(--cms-color-accent-text);
+		}
+	}
+}
+
+@media (pointer: coarse) {
+	.cms-list .row-actions {
+		opacity: 1;
+	}
+}
+
+/* One template swap turns every row into a label/value card. */
+@media (max-width: 52rem) {
+	.cms-list {
+		/*
+		 * Overrides the property, not --columns: the collection sets that one
+		 * inline, and an inline custom property outranks any stylesheet.
+		 */
+		grid-template-columns: minmax(5rem, 30%) minmax(0, 1fr);
+
+		& thead {
+			display: none;
+		}
+
+		& tr {
+			padding: var(--cms-space-2) 0;
+			border-bottom: 1px solid var(--cms-color-border);
+		}
+
+		& .cell {
+			display: grid;
+			grid-column: 1 / -1;
+			grid-template-columns: subgrid;
+			gap: var(--cms-space-3);
+			min-height: 0;
+			padding: var(--cms-space-1) var(--cms-space-4);
+			border-bottom: 0;
+
+			&::before {
+				color: var(--cms-color-text-faint);
+				font-size: var(--cms-font-size-xs);
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+				content: attr(data-label);
+			}
+		}
+
+		& .value {
+			white-space: normal;
+		}
+
+		& .title {
+			padding-left: 0;
+			flex-wrap: wrap;
+
+			&::before {
+				display: none;
+			}
+		}
+
+		& .row-actions {
+			width: 100%;
+			opacity: 1;
+			flex-wrap: wrap;
+		}
+	}
+}

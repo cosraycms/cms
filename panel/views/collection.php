@@ -8,18 +8,83 @@ $chevronSvg = is_file($chevronSvgPath)
 	: '';
 $chevronSvg = str_replace(
 	'<svg ',
-	'<svg class="tree-chevron" aria-hidden="true" focusable="false" ',
+	'<svg class="chevron" aria-hidden="true" focusable="false" ',
 	$chevronSvg,
 );
 
 if (!$boosted) {
 	$this->layout('panel');
 }
+
+// The title column takes the slack; the rest share what is left and the status
+// column sizes to its badges. Selection and row actions are not built yet, and
+// they arrive as extra tracks here rather than as a different layout.
+// The title column absorbs the slack; the rest size to their content so dates
+// and types are not clipped into ellipses. Selection and row action columns
+// arrive as extra tracks here, not as a different layout.
+$columns = 'minmax(12rem, 2fr)'
+	. str_repeat(' minmax(5rem, auto)', max(count($page->headers) - 1, 0))
+	. ' minmax(5rem, auto)';
 ?>
 
-<div id="main" class="page collection">
-	<header class="topbar topbar-collection">
-		<div class="inner">
+<div id="main" class="page cms-collection">
+	<header class="head">
+		<div class="titles">
+			<?php if ($page->rootUrl !== null): ?>
+				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<a href="<?= escape($page->rootUrl) ?>" hx-target="#main"><?= escape($page->name) ?></a>
+					<span aria-hidden="true">/</span>
+					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
+				</nav>
+			<?php endif ?>
+			<div class="line">
+				<h1><?= escape($page->title) ?></h1>
+				<span class="count-pill"><?= escape(__n(
+					'collection:entry-count',
+					'collection:entry-count-plural',
+					$page->total,
+				)) ?></span>
+			</div>
+		</div>
+
+		<div class="actions">
+			<?php if (count($page->viewLinks) > 0): ?>
+				<nav class="view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
+					<?php foreach ($page->viewLinks as $link): ?>
+						<a
+							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
+							href="<?= escape($link['url']) ?>"
+							hx-target="#main">
+							<?= escape($link['label']) ?>
+						</a>
+					<?php endforeach ?>
+				</nav>
+			<?php endif ?>
+			<?php if ($page->query->parent !== null): ?>
+				<?php if ($page->parentEditUrl !== null): ?>
+					<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main"><?= escape(
+						__('collection:edit-parent'),
+					) ?></a>
+				<?php endif ?>
+				<?php if ($page->parentTreeUrl !== null): ?>
+					<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main"><?= escape(
+						__('collection:show-in-tree'),
+					) ?></a>
+				<?php endif ?>
+			<?php endif ?>
+			<?php foreach ($page->createLinks as $link): ?>
+				<a
+					class="cms-button primary"
+					href="<?= escape($link['url']) ?>"
+					hx-target="#main">
+					<?= escape(__('collection:new', ['name' => $link['name']])) ?>
+				</a>
+			<?php endforeach ?>
+		</div>
+	</header>
+
+	<div class="body">
+		<div class="toolbar">
 			<form
 				class="search"
 				method="get"
@@ -28,7 +93,7 @@ if (!$boosted) {
 				<label class="sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
-				<span class="search-icon" aria-hidden="true">⌕</span>
+				<span class="icon" aria-hidden="true">⌕</span>
 				<input
 					id="collection-search"
 					name="q"
@@ -43,95 +108,30 @@ if (!$boosted) {
 				<?php endforeach ?>
 			</form>
 
-			<div class="topbar-actions">
-				<?php if ($page->clearSearchUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main"><?= escape(
-						__('collection:clear-search'),
-					) ?></a>
-				<?php endif ?>
-				<?php if ($page->query->parent === null): ?>
-					<?php foreach ($page->createLinks as $link): ?>
-						<a
-							class="cms-button primary"
-							href="<?= escape($link['url']) ?>"
-							hx-target="#main">
-							<?= escape(__('collection:new', ['name' => $link['name']])) ?>
-						</a>
-					<?php endforeach ?>
-				<?php endif ?>
-			</div>
-		</div>
-	</header>
-
-	<section class="content">
-		<div class="page-head">
-			<?php if ($page->rootUrl !== null): ?>
-				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-					<a href="<?= escape($page->rootUrl) ?>" hx-target="#main"><?= escape($page->name) ?></a>
-					<span aria-hidden="true">/</span>
-					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
-				</nav>
-			<?php endif ?>
-			<h1><?= escape($page->title) ?></h1>
-			<span class="count-pill"><?= escape(__n(
-				'collection:entry-count',
-				'collection:entry-count-plural',
-				$page->total,
-			)) ?></span>
-
-			<?php if (count($page->viewLinks) > 0): ?>
-				<nav class="view-toggle" aria-label="<?= escape(__('collection:view')) ?>">
-					<?php foreach ($page->viewLinks as $link): ?>
-						<a
-							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
-							href="<?= escape($link['url']) ?>"
-							hx-target="#main">
-							<?= escape($link['label']) ?>
-						</a>
-					<?php endforeach ?>
-				</nav>
+			<?php if ($page->clearSearchUrl !== null): ?>
+				<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main"><?= escape(
+					__('collection:clear-search'),
+				) ?></a>
 			<?php endif ?>
 
 			<?php if ($page->query->parent !== null): ?>
 				<div class="parent-context">
-					<div class="parent-summary">
-						<?php if ($page->parentType !== null): ?>
-							<span class="type-pill"><?= escape($page->parentType) ?></span>
-						<?php endif ?>
-						<?php foreach ($page->parentStatus as $badge): ?>
-							<span class="status status-<?= escape($badge['kind']) ?>"><?= escape(
-							$badge['label'],
-						) ?></span>
-						<?php endforeach ?>
-					</div>
-					<div class="parent-actions">
-						<?php if ($page->parentEditUrl !== null): ?>
-							<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main"><?= escape(
-								__('collection:edit-parent'),
-							) ?></a>
-						<?php endif ?>
-						<?php if ($page->parentTreeUrl !== null): ?>
-							<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main"><?= escape(
-								__('collection:show-in-tree'),
-							) ?></a>
-						<?php endif ?>
-						<?php foreach ($page->createLinks as $link): ?>
-							<a
-								class="cms-button primary"
-								href="<?= escape($link['url']) ?>"
-								hx-target="#main">
-								<?= escape(__('collection:new', ['name' => $link['name']])) ?>
-							</a>
-						<?php endforeach ?>
-					</div>
+					<?php if ($page->parentType !== null): ?>
+						<span class="type-pill"><?= escape($page->parentType) ?></span>
+					<?php endif ?>
+					<?php foreach ($page->parentStatus as $badge): ?>
+						<span class="cms-status is-<?= escape($badge['kind']) ?>"><?= escape(
+						$badge['label'],
+					) ?></span>
+					<?php endforeach ?>
 				</div>
 			<?php endif ?>
 		</div>
 
-		<div class="collection-panel">
+		<div class="card">
 			<?php if (count($page->rows) === 0): ?>
-				<div class="collection-empty">
-					<div class="empty-icon" aria-hidden="true">⌁</div>
+				<div class="empty">
+					<div class="icon" aria-hidden="true">⌁</div>
 					<strong><?= escape(__('collection:empty')) ?></strong>
 					<?php if ($page->query->q !== ''): ?>
 						<p><?= escape(__('collection:empty-filter-help')) ?></p>
@@ -140,127 +140,47 @@ if (!$boosted) {
 					<?php endif ?>
 				</div>
 			<?php else: ?>
-				<div class="tablewrap">
-					<table class="collection-list">
-						<thead>
-							<tr>
+				<div class="scroll">
+					<?php // Laid out as a grid, so the implicit table roles are gone and
+
+					// have to be spelled out for assistive technology. ?>
+					<table class="cms-list" role="table" style="--columns: <?= escape($columns) ?>">
+						<thead role="rowgroup">
+							<tr role="row">
 								<?php foreach ($page->headers as $header): ?>
-									<th class="<?= escape($header['class']) ?>">
+									<th class="<?= escape($header['class']) ?>" role="columnheader">
 										<?php if ($header['url'] === null): ?>
-											<span class="th-inner"><?= escape($header['label']) ?></span>
+											<span class="inner"><?= escape($header['label']) ?></span>
 										<?php else: ?>
 											<a
-												class="th-inner"
+												class="inner"
 												href="<?= escape($header['url']) ?>"
 												hx-target="#main">
 												<?= escape($header['label']) ?>
-												<span class="sort-ind" aria-hidden="true">⌃</span>
+												<span class="sort" aria-hidden="true">⌃</span>
 											</a>
 										<?php endif ?>
 									</th>
 								<?php endforeach ?>
-								<th class="col-status"><?= escape(__('collection:status')) ?></th>
+								<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody role="rowgroup">
 							<?php foreach ($page->rows as $row): ?>
-								<tr
-									class="collection-row<?= $page->treeMode ? ' is-tree-row' : '' ?>"
-									data-uid="<?= escape($row['uid']) ?>"
-									data-depth="<?= (int) $row['depth'] ?>"
-									data-last="<?= $row['last'] ? 'true' : 'false' ?>"
-									style="--tree-depth: <?= (int) $row['depth'] ?>">
-									<?php foreach ($row['cells'] as $index => $cell): ?>
-										<td class="<?= escape($cell['class']) ?>" data-label="<?= escape($cell['label']) ?>">
-											<?php if ($index === 0 && $page->showChildren): ?>
-												<div class="tree-title<?= $page->treeMode ? '' : ' is-flat' ?>">
-													<?php if ($page->treeMode): ?>
-														<?php if ($row['childrenUrl'] !== null): ?>
-															<a
-																class="tree-toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
-																href="<?= escape($row['childrenUrl']) ?>"
-																hx-target="#main"
-																aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
-																aria-label="<?= escape($row['expanded']
-																	? __('collection:collapse-children', ['name' => $cell['value']])
-																	: __('collection:expand-children', ['name' => $cell['value']])) ?>">
-																<?= $chevronSvg !== '' ? $chevronSvg : ($row['expanded'] ? '⌄' : '›') ?>
-															</a>
-														<?php else: ?>
-															<span class="tree-toggle tree-spacer" aria-hidden="true"></span>
-														<?php endif ?>
-													<?php endif ?>
-													<span class="node-dot<?= $row['published']
-												? ' is-published'
-												: '' ?>" aria-hidden="true"></span>
-													<?php if ($cell['editUrl'] !== null): ?>
-														<a
-															class="collection-value collection-edit-link tree-label"
-															href="<?= escape($cell['editUrl']) ?>"
-															hx-target="#main">
-															<?= escape($cell['value']) ?>
-														</a>
-													<?php else: ?>
-														<span class="collection-value tree-label"><?= escape($cell['value']) ?></span>
-													<?php endif ?>
-													<?php if (
-														$row['focusedChildrenUrl'] !== null
-														|| count($row['childCreateLinks']) > 0
-													): ?>
-														<span class="tree-actions">
-															<?php if ($row['focusedChildrenUrl'] !== null): ?>
-																<a
-																	class="tree-meta"
-																	href="<?= escape($row['focusedChildrenUrl']) ?>"
-																	hx-target="#main">
-																	<?= escape(__('collection:children')) ?>
-																</a>
-															<?php endif ?>
-															<?php foreach ($row['childCreateLinks'] as $link): ?>
-																<a
-																	class="tree-create"
-																	href="<?= escape($link['url']) ?>"
-																	hx-target="#main"
-																	aria-label="<?= escape(__('collection:create-under', [
-																		'type' => $link['name'],
-																		'name' => $cell['value'],
-																	])) ?>">
-																	+ <?= escape($link['name']) ?>
-																</a>
-															<?php endforeach ?>
-														</span>
-													<?php endif ?>
-												</div>
-											<?php elseif ($cell['editUrl'] !== null): ?>
-												<a
-													class="collection-value collection-edit-link"
-													href="<?= escape($cell['editUrl']) ?>"
-													hx-target="#main">
-													<?= escape($cell['value']) ?>
-												</a>
-											<?php else: ?>
-												<span class="collection-value"><?= escape($cell['value']) ?></span>
-											<?php endif ?>
-										</td>
-									<?php endforeach ?>
-									<td class="collection-cell col-status" data-label="<?= escape(__('collection:status')) ?>">
-										<div class="status-list">
-											<?php foreach ($row['status'] as $badge): ?>
-												<span class="status status-<?= escape($badge['kind']) ?>"><?= escape(
-												$badge['label'],
-											) ?></span>
-											<?php endforeach ?>
-										</div>
-									</td>
-								</tr>
+								<?php $this->insert('collection/row', [
+									'row' => $row,
+									'treeMode' => $page->treeMode,
+									'showChildren' => $page->showChildren,
+									'chevronSvg' => $chevronSvg,
+								]) ?>
 							<?php endforeach ?>
 						</tbody>
 					</table>
 				</div>
 			<?php endif ?>
 
-			<footer class="list-foot">
-				<span class="fcount"><?= escape(__('collection:showing', [
+			<footer class="foot">
+				<span class="range"><?= escape(__('collection:showing', [
 					'start' => $page->rangeStart,
 					'end' => $page->rangeEnd,
 					'total' => $page->total,
@@ -274,7 +194,7 @@ if (!$boosted) {
 						<span class="page-link is-disabled"><?= escape(__('collection:previous')) ?></span>
 					<?php endif ?>
 
-					<span class="page-status"><?= escape(__('collection:page', [
+					<span class="pages"><?= escape(__('collection:page', [
 						'page' => $page->currentPage,
 						'pages' => $page->pageCount,
 					])) ?></span>
@@ -289,5 +209,5 @@ if (!$boosted) {
 				</nav>
 			</footer>
 		</div>
-	</section>
+	</div>
 </div>

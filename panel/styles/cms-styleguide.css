@@ -53,7 +53,7 @@
 		font-size: var(--cms-font-size-xs);
 	}
 
-	& .row {
+	& .sample {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -113,7 +113,7 @@
 	}
 
 	/* Panel inputs stretch to their field wrapper; the sampler has none. */
-	& .row {
+	& .sample {
 		& input:not([type='checkbox']),
 		& select {
 			width: auto;

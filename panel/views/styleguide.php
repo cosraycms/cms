@@ -27,6 +27,16 @@ $span = static function (mixed $value, int $fallback): string {
 };
 
 $statuses = ['published', 'draft', 'hidden', 'locked'];
+$rows = (array) $this->unwrap($rows);
+
+$chevronSvgPath = __DIR__ . '/../icons/chevron.svg';
+$chevronSvg = is_file($chevronSvgPath)
+	? str_replace(
+		'<svg ',
+		'<svg class="chevron" aria-hidden="true" focusable="false" ',
+		trim((string) file_get_contents($chevronSvgPath)),
+	)
+	: '';
 ?>
 
 <div id="main" class="page cms-styleguide">
@@ -78,13 +88,13 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 
 			<section class="section">
 				<h2>Buttons</h2>
-				<div class="row">
+				<div class="sample">
 					<button type="button" class="cms-button primary">Save</button>
 					<button type="button" class="cms-button secondary">Preview</button>
 					<button type="button" class="cms-button danger">Delete</button>
 					<a class="cms-button secondary" href="#">Link</a>
 				</div>
-				<div class="row">
+				<div class="sample">
 					<button type="button" class="cms-button primary" disabled>Save</button>
 					<button type="button" class="cms-button secondary" disabled>Preview</button>
 					<button type="button" class="cms-button danger" disabled>Delete</button>
@@ -93,14 +103,13 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 
 			<section class="section">
 				<h2>Pills and status</h2>
-				<div class="row">
+				<div class="sample">
 					<span class="count-pill">24 entries</span>
-					<span class="type-pill">Article</span>
 					<?php foreach ($statuses as $status): ?>
-						<span class="status status-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
+						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>
 				</div>
-				<div class="row">
+				<div class="sample">
 					<span class="cms-published large published">Published</span>
 					<span class="cms-published large">Unpublished</span>
 				</div>
@@ -108,7 +117,7 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 
 			<section class="section">
 				<h2>Controls</h2>
-				<div class="row">
+				<div class="sample">
 					<input type="text" value="Sudhaus" />
 					<input type="text" placeholder="Placeholder" />
 					<input type="text" value="Disabled" disabled />
@@ -116,9 +125,9 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 						<option>News</option>
 						<option>Event</option>
 					</select>
-					<label class="row"><input type="checkbox" checked /> Checkbox</label>
+					<label class="sample"><input type="checkbox" checked /> Checkbox</label>
 				</div>
-				<div class="row">
+				<div class="sample">
 					<textarea rows="2">Zweisprachige Betreuung für Kinder von 10 Monaten bis 3 Jahren.</textarea>
 				</div>
 			</section>
@@ -148,12 +157,52 @@ $statuses = ['published', 'draft', 'hidden', 'locked'];
 			</section>
 
 			<section class="section">
+				<h2>Listing</h2>
+				<p class="note">
+					Rendered through <code>panel/views/collection/row.php</code>, the same partial
+					the collection uses. Tree depth, the guide, hover actions and every status
+					badge in one place — a real collection rarely shows them together.
+				</p>
+				<div class="cms-collection">
+					<div class="card">
+						<div class="scroll">
+							<table
+								class="cms-list"
+								role="table"
+								style="--columns: minmax(12rem, 2fr) minmax(5rem, auto) minmax(5rem, auto) minmax(5rem, auto)">
+								<thead role="rowgroup">
+									<tr role="row">
+										<th role="columnheader"><span class="inner">Title</span></th>
+										<th role="columnheader"><span class="inner">Type</span></th>
+										<th role="columnheader"><span class="inner">Modified</span></th>
+										<th class="col-status" role="columnheader">Status</th>
+									</tr>
+								</thead>
+								<tbody role="rowgroup">
+									<?php foreach ($rows as $row): ?>
+										<?php $this->insert('collection/row', [
+											'row' => $row,
+											'treeMode' => true,
+											'showChildren' => true,
+											'chevronSvg' => $chevronSvg,
+										]) ?>
+									<?php endforeach ?>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
 				<h2>Empty state</h2>
-				<div class="collection-panel">
-					<div class="collection-empty">
-						<div class="empty-icon" aria-hidden="true">⌁</div>
-						<strong>No entries yet</strong>
-						<p>Create the first entry to get started.</p>
+				<div class="cms-collection">
+					<div class="card">
+						<div class="empty">
+							<div class="icon" aria-hidden="true">⌁</div>
+							<strong>No entries yet</strong>
+							<p>Create the first entry to get started.</p>
+						</div>
 					</div>
 				</div>
 			</section>

@@ -4,12 +4,6 @@
 	height: 100%;
 	min-width: 0;
 	min-height: 0;
-
-	&.collection .content {
-		max-width: var(--cms-collection-max-width);
-		margin-left: auto;
-		margin-right: auto;
-	}
 }
 
 .content {
