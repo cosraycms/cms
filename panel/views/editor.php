@@ -15,8 +15,7 @@ $defaultLocale = (string) $defaultLocale;
 $generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
 $pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
 $system = (array) $this->unwrap($system);
-$panelPath = (string) $panelPath;
-$panelBase = $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/';
+$panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 $fields = $node['fields'] ?? [];

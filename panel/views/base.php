@@ -25,6 +25,16 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
+	<?php // Element control modules resolve against this base. It has to be set
+
+	// before the panel module runs: a boosted navigation upgrades the custom
+	// elements in the swapped markup as they are inserted, which is before any
+	// swap handler could read the editor payload. ?>
+	<script>window.COSRAY_BASE_PATH = <?= json_encode(
+		(string) $panelBase,
+		$jsonFlags,
+	) ?>;</script>
+
 <?php foreach ($scripts as $script): ?>
 	<script src="<?= escape((string) $script) ?>"></script>
 <?php endforeach ?>

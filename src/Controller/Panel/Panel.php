@@ -39,6 +39,7 @@ abstract class Panel
 			'boosted' => $this->request->hasHeader('HX-Boosted'),
 			'htmx' => $this->request->hasHeader('HX-Request'),
 			'panelPath' => $panelPath,
+			'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
 			'currentPath' => $this->request->uri()->getPath(),
 			'logo' => $this->logo(),
 			'localeId' => $localeId,

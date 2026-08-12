@@ -141,6 +141,27 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertSame('/admin/login?next=%2Fadmin', $response->getHeaderLine('Location'));
 	}
 
+	/**
+	 * Element control modules resolve against this base. A boosted navigation
+	 * upgrades the custom elements in the swapped markup while inserting them,
+	 * before any swap handler could read the editor payload, so the base has to
+	 * be in the document from the start or the modules resolve against the
+	 * built-in default and 404 on every panel not mounted at /panel.
+	 */
+	public function testDocumentCarriesThePanelBaseForElementModules(): void
+	{
+		$this->app = $this->createApp(['path.panel' => '/admin']);
+		$token = $this->createAuthenticatedUser('editor');
+
+		$response = $this->makeRequest('GET', '/admin', ['authToken' => $token]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'window.COSRAY_BASE_PATH = "/admin/";',
+			$this->getHtmlResponse($response),
+		);
+	}
+
 	public function testUserWithoutPanelPermissionGetsRedirectedToLogin(): void
 	{
 		$token = $this->createAuthenticatedUser('system');
