@@ -4,13 +4,14 @@ use function Cosray\escape;
 
 // One listing row. Shared by the collection and the styleguide so the sampler
 // shows the real thing rather than a copy that drifts.
-// Receives: row, treeMode, showChildren, chevronSvg.
+// Receives: row, treeMode, showChildren, chevronSvg, hasRowActions.
 
 $row = (array) $this->unwrap($row);
 $treeMode = (bool) $treeMode;
 $showChildren = (bool) $showChildren;
 // unwrap, not cast: the markup has to reach the page as markup.
 $chevronSvg = (string) $this->unwrap($chevronSvg);
+$hasRowActions = (bool) ($hasRowActions ?? false);
 ?>
 <tr
 	class="row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -50,33 +51,6 @@ $chevronSvg = (string) $this->unwrap($chevronSvg);
 					<?php else: ?>
 						<span class="value"><?= escape((string) $cell['value']) ?></span>
 					<?php endif ?>
-					<?php if (
-						$row['focusedChildrenUrl'] !== null
-						|| count((array) $row['childCreateLinks']) > 0
-					): ?>
-						<span class="row-actions">
-							<?php if ($row['focusedChildrenUrl'] !== null): ?>
-								<a
-									class="chip"
-									href="<?= escape((string) $row['focusedChildrenUrl']) ?>"
-									hx-target="#main">
-									<?= escape(__('collection:children')) ?>
-								</a>
-							<?php endif ?>
-							<?php foreach ((array) $row['childCreateLinks'] as $link): ?>
-								<a
-									class="chip is-create"
-									href="<?= escape((string) $link['url']) ?>"
-									hx-target="#main"
-									aria-label="<?= escape(__('collection:create-under', [
-										'type' => $link['name'],
-										'name' => $cell['value'],
-									])) ?>">
-									+ <?= escape((string) $link['name']) ?>
-								</a>
-							<?php endforeach ?>
-						</span>
-					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
 				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>" hx-target="#main">
@@ -96,4 +70,30 @@ $chevronSvg = (string) $this->unwrap($chevronSvg);
 			<?php endforeach ?>
 		</div>
 	</td>
+	<?php if ($hasRowActions): ?>
+		<td class="cell col-actions" role="cell">
+			<span class="row-actions">
+				<?php if ($row['focusedChildrenUrl'] !== null): ?>
+					<a
+						class="chip"
+						href="<?= escape((string) $row['focusedChildrenUrl']) ?>"
+						hx-target="#main">
+						<?= escape(__('collection:children')) ?>
+					</a>
+				<?php endif ?>
+				<?php foreach ((array) $row['childCreateLinks'] as $link): ?>
+					<a
+						class="chip is-create"
+						href="<?= escape((string) $link['url']) ?>"
+						hx-target="#main"
+						aria-label="<?= escape(__('collection:create-under', [
+							'type' => $link['name'],
+							'name' => (string) $row['cells'][0]['value'],
+						])) ?>">
+						+ <?= escape((string) $link['name']) ?>
+					</a>
+				<?php endforeach ?>
+			</span>
+		</td>
+	<?php endif ?>
 </tr>

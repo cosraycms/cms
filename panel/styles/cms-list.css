@@ -217,12 +217,17 @@
 		}
 	}
 
-	/* Revealed on hover, but keyboard and touch need them reachable too. */
+	& .col-actions {
+		justify-content: flex-end;
+		padding-left: 0;
+		white-space: nowrap;
+	}
+
+	/* Revealed on hover; keyboard and touch reach them too. */
 	& .row-actions {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-2);
-		flex-shrink: 0;
 		opacity: 0;
 		transition: opacity 0.12s ease;
 	}
@@ -260,6 +265,7 @@
 	}
 }
 
+/* Nothing hovers on touch. */
 @media (pointer: coarse) {
 	.cms-list .row-actions {
 		opacity: 1;
@@ -317,9 +323,17 @@
 		}
 
 		& .row-actions {
-			width: 100%;
 			opacity: 1;
 			flex-wrap: wrap;
+		}
+
+		& .col-actions {
+			justify-content: flex-start;
+			padding-left: var(--cms-space-4);
+
+			&::before {
+				content: none;
+			}
 		}
 	}
 }

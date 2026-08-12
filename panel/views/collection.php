@@ -16,15 +16,25 @@ if (!$boosted) {
 	$this->layout('panel');
 }
 
-// The title column takes the slack; the rest share what is left and the status
-// column sizes to its badges. Selection and row actions are not built yet, and
-// they arrive as extra tracks here rather than as a different layout.
-// The title column absorbs the slack; the rest size to their content so dates
-// and types are not clipped into ellipses. Selection and row action columns
-// arrive as extra tracks here, not as a different layout.
+// Status and row actions size to their content: both hold pills of a width the
+// translation decides, and a floor guessed here would clip them in some locale.
+// The metadata columns take what is left and ellipse, the title absorbs the
+// slack. Row actions get a track only when a row has any, otherwise the column
+// would be dead padding.
+$hasRowActions = false;
+
+foreach ($page->rows as $row) {
+	if ($row['focusedChildrenUrl'] !== null || count($row['childCreateLinks']) > 0) {
+		$hasRowActions = true;
+
+		break;
+	}
+}
+
 $columns = 'minmax(12rem, 2fr)'
-	. str_repeat(' minmax(5rem, auto)', max(count($page->headers) - 1, 0))
-	. ' minmax(5rem, auto)';
+	. str_repeat(' minmax(4rem, auto)', max(count($page->headers) - 1, 0))
+	. ' max-content'
+	. ($hasRowActions ? ' max-content' : '');
 ?>
 
 <div id="main" class="page cms-collection">
@@ -163,6 +173,9 @@ $columns = 'minmax(12rem, 2fr)'
 									</th>
 								<?php endforeach ?>
 								<th class="col-status" role="columnheader"><?= escape(__('collection:status')) ?></th>
+								<?php if ($hasRowActions): ?>
+									<th class="col-actions" role="columnheader"></th>
+								<?php endif ?>
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
@@ -172,6 +185,7 @@ $columns = 'minmax(12rem, 2fr)'
 									'treeMode' => $page->treeMode,
 									'showChildren' => $page->showChildren,
 									'chevronSvg' => $chevronSvg,
+									'hasRowActions' => $hasRowActions,
 								]) ?>
 							<?php endforeach ?>
 						</tbody>
