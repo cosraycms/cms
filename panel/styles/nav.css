@@ -83,7 +83,7 @@
 	margin-left: auto;
 	padding: 0 var(--cms-space-2);
 	border-radius: 999px;
-	background: #eceef2;
+	background: var(--cms-color-selected);
 	color: var(--cms-color-text-muted);
 	font-size: var(--cms-font-size-xs);
 	font-weight: 600;

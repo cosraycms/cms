@@ -358,7 +358,7 @@
 		}
 
 		.cms-drawer-head h2 {
-			font-size: var(--font-size-md);
+			font-size: var(--cms-font-size-base);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -510,7 +510,7 @@
 
 		.cms-drawer-blocked {
 			padding: var(--cms-space-3) var(--cms-space-4);
-			background-color: var(--color-warning-bg, #fdf3d7);
+			background-color: var(--cms-color-warning-surface);
 			border-top: 1px solid var(--cms-color-neutral-200);
 			font-size: var(--cms-font-size-sm);
 		}

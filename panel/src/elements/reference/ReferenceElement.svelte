@@ -257,7 +257,7 @@
 		padding: 0.35rem 0.5rem;
 		border: 1px solid var(--cms-color-border, #d0d0d0);
 		border-radius: 0.25rem;
-		background: var(--cms-surface, #fff);
+		background: var(--cms-color-surface);
 	}
 
 	.cms-reference-title {
@@ -298,7 +298,7 @@
 		overflow-y: auto;
 		border: 1px solid var(--cms-color-border, #d0d0d0);
 		border-radius: 0.25rem;
-		background: var(--cms-surface, #fff);
+		background: var(--cms-color-surface);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 	}
 
@@ -316,7 +316,7 @@
 
 	.cms-reference-result.is-active,
 	.cms-reference-result:hover {
-		background: var(--cms-hover, #eef2ff);
+		background: var(--cms-color-hover);
 	}
 
 	.cms-reference-empty {

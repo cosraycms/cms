@@ -67,10 +67,10 @@
 			background: linear-gradient(
 				135deg,
 				var(--cms-color-accent),
-				color-mix(in oklch, var(--cms-color-accent), white 25%)
+				color-mix(in oklch, var(--cms-color-accent), var(--cms-color-white) 25%)
 			);
 			box-shadow: var(--cms-shadow-sm);
-			color: #fff;
+			color: var(--cms-color-white);
 			font-weight: 700;
 			letter-spacing: -0.03em;
 		}

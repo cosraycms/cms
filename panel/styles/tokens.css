@@ -1,11 +1,52 @@
+/**
+ * Panel design tokens.
+ *
+ * Three tiers:
+ *
+ * 1. Primitives — raw values. Panel-internal, no meaning attached.
+ * 2. Semantic — the public theming contract. Downstream projects override
+ *    these from `@layer theme`, which outranks the panel layer, so a plain
+ *    redeclaration wins without specificity tricks.
+ * 3. Component — dimensions and colour sets owned by one component.
+ *
+ * Raw colour values belong in this file and nowhere else: every one of them
+ * has to flip for the dark theme, and a hex buried in a component stylesheet
+ * is a hole in that flip.
+ */
+
 :root {
+	color-scheme: light;
+
 	/**
-	 * Primitive tokens
+	 * Primitives — typography
+	 *
+	 * The redesign specifies Inter Tight. Adopting it means self-hosting the
+	 * files (a Google Fonts request from the panel would ship visitor IPs to
+	 * a third party), which is its own change.
 	 */
 	--cms-font-sans:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
 
+	--cms-font-size-xs: 0.75rem;
+	--cms-font-size-sm: 0.875rem;
+	--cms-font-size-base: 1rem;
+	--cms-font-size-lg: 1.125rem;
+	--cms-font-size-xl: 1.25rem;
+	--cms-font-size-2xl: 1.5rem;
+	--cms-font-size-3xl: 2rem;
+
+	--cms-line-height-xs: 1rem;
+	--cms-line-height-sm: 1.25rem;
+	--cms-line-height-base: 1.5rem;
+	--cms-line-height-lg: 1.75rem;
+	--cms-line-height-xl: 1.75rem;
+	--cms-line-height-2xl: 2rem;
+	--cms-line-height-3xl: 2.25rem;
+
+	/**
+	 * Primitives — space and size
+	 */
 	--cms-space: 0.25rem;
 	--cms-space-0: 0px;
 	--cms-space-px: 1px;
@@ -55,22 +96,6 @@
 	--cms-size-6xl: 72rem;
 	--cms-size-7xl: 80rem;
 
-	--cms-font-size-xs: 0.75rem;
-	--cms-font-size-sm: 0.875rem;
-	--cms-font-size-base: 1rem;
-	--cms-font-size-lg: 1.125rem;
-	--cms-font-size-xl: 1.25rem;
-	--cms-font-size-2xl: 1.5rem;
-	--cms-font-size-3xl: 2rem;
-
-	--cms-line-height-xs: 1rem;
-	--cms-line-height-sm: 1.25rem;
-	--cms-line-height-base: 1.5rem;
-	--cms-line-height-lg: 1.75rem;
-	--cms-line-height-xl: 1.75rem;
-	--cms-line-height-2xl: 2rem;
-	--cms-line-height-3xl: 2.25rem;
-
 	--cms-radius-sm: 0.125rem;
 	--cms-radius: 0.25rem;
 	--cms-radius-md: 0.375rem;
@@ -81,21 +106,43 @@
 	--cms-radius-full: 9999px;
 
 	/**
-	 * Color palette
+	 * Primitives — neutral ramp
+	 *
+	 * Cool greys. The ramp does not flip for the dark theme; dark surfaces are
+	 * their own set of values (see the dark block), because inverting a light
+	 * ramp gives washed-out, flat darks.
 	 */
 	--cms-color-white: #fff;
 	--cms-color-black: #000;
-	--cms-color-neutral-50: #fbfaf9;
-	--cms-color-neutral-100: #f6f5f4;
-	--cms-color-neutral-200: #e8e5e4;
-	--cms-color-neutral-300: #d7d3d1;
-	--cms-color-neutral-400: #a9a29e;
-	--cms-color-neutral-500: #79716c;
-	--cms-color-neutral-600: #58534e;
-	--cms-color-neutral-700: #45403c;
-	--cms-color-neutral-800: #2a2524;
-	--cms-color-neutral-900: #1b1917;
+	--cms-color-neutral-50: #f9fafb;
+	--cms-color-neutral-100: #f3f4f6;
+	--cms-color-neutral-200: #e5e7eb;
+	--cms-color-neutral-300: #d1d5db;
+	--cms-color-neutral-400: #9ca3af;
+	--cms-color-neutral-500: #6b7280;
+	--cms-color-neutral-600: #4b5563;
+	--cms-color-neutral-700: #374151;
+	--cms-color-neutral-800: #1f2937;
+	--cms-color-neutral-900: #111827;
 
+	/**
+	 * Primitives — hues
+	 *
+	 * Two steps per hue: a dark one that carries light-theme text and fills,
+	 * and a light one for the same job on dark surfaces.
+	 */
+	--cms-color-blue-400: #38bdf8;
+	--cms-color-blue-700: #0369a1;
+	--cms-color-green-400: #34d399;
+	--cms-color-green-600: #059669;
+	--cms-color-orange-400: #fb923c;
+	--cms-color-orange-700: #c2410c;
+	--cms-color-rose-400: #fb7185;
+	--cms-color-rose-700: #be123c;
+
+	/**
+	 * Primitives — depth and edges
+	 */
 	--cms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 	--cms-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 	--cms-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -106,50 +153,155 @@
 	--cms-shadow-none: 0 0 #0000;
 
 	--cms-border-width: 1px;
-	--cms-border-color: var(--cms-color-neutral-300);
 	--cms-border-style: solid;
-	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
 
 	--cms-blur-sm: 4px;
 	--cms-fraction-2-5: 40%;
 
 	/**
-	 * Semantic tokens
+	 * Semantic — surfaces
+	 *
+	 * canvas   the ground the shell sits on
+	 * surface  the shell itself: sidebars, topbars, menus
+	 * sunken   recessed regions inside the shell (listing area, field pane)
+	 * raised   cards sitting on a sunken region
 	 */
-	--cms-color-canvas: #f3f4f6;
-	--cms-color-surface: #ffffff;
+	--cms-color-canvas: var(--cms-color-neutral-100);
+	--cms-color-surface: var(--cms-color-white);
+	--cms-color-surface-sunken: #f5f6f8;
+	--cms-color-surface-raised: var(--cms-color-white);
 	--cms-color-rail: var(--cms-color-canvas);
-	--cms-color-text: #1c2230;
-	--cms-color-text-muted: #69707f;
-	--cms-color-text-faint: #9aa0ad;
-	--cms-color-border: #e8eaed;
-	--cms-color-border-strong: #dde0e5;
-	--cms-color-hover: color-mix(in oklch, var(--cms-color-surface), var(--cms-color-canvas) 70%);
-	--cms-color-accent: #0369a1;
-	--cms-color-accent-hover: color-mix(in oklch, var(--cms-color-accent), black 12%);
-	--cms-color-accent-surface: color-mix(in oklch, var(--cms-color-accent), white 90%);
-	--cms-color-accent-ring: color-mix(in oklch, var(--cms-color-accent), transparent 72%);
-	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), black 12%);
-	--cms-color-info: var(--cms-color-accent);
-	--cms-color-info-hover: color-mix(in oklch, var(--cms-color-info), black 12%);
-	--cms-color-info-surface: color-mix(in oklch, var(--cms-color-info), white 90%);
-	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
-	--cms-color-success: #059669;
-	--cms-color-success-hover: color-mix(in oklch, var(--cms-color-success), black 12%);
-	--cms-color-success-surface: color-mix(in oklch, var(--cms-color-success), white 88%);
-	--cms-color-warning: #c2410c;
-	--cms-color-warning-surface: color-mix(in oklch, var(--cms-color-warning), white 88%);
-	--cms-color-danger: #be123c;
-	--cms-color-danger-hover: color-mix(in oklch, var(--cms-color-danger), black 12%);
-	--cms-color-danger-surface: color-mix(in oklch, var(--cms-color-danger), white 90%);
 
 	/**
-	 * Button tokens
+	 * Semantic — text
 	 */
-	--cms-button-primary-bg: var(--cms-color-accent);
-	--cms-button-primary-text: var(--cms-color-white);
+	--cms-color-text: var(--cms-color-neutral-900);
+	--cms-color-text-muted: var(--cms-color-neutral-600);
+	--cms-color-text-subtle: var(--cms-color-neutral-500);
+	--cms-color-text-faint: var(--cms-color-neutral-400);
+
+	/**
+	 * Semantic — edges
+	 */
+	--cms-color-border: var(--cms-color-neutral-200);
+	--cms-color-border-soft: #eef0f3;
+	--cms-color-border-strong: var(--cms-color-neutral-300);
+	--cms-border-color: var(--cms-color-border);
+	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
+
+	/**
+	 * Semantic — interaction
+	 */
+	--cms-color-hover: var(--cms-color-neutral-100);
+	--cms-color-selected: #e8eaee;
+
+	/**
+	 * Semantic — primary
+	 *
+	 * Monochrome by design: the panel chrome stays neutral so a project's own
+	 * colour can be the accent without fighting it. The pair flips together in
+	 * the dark theme, otherwise primary buttons disappear into the page.
+	 */
+	--cms-color-primary: var(--cms-color-neutral-900);
+	--cms-color-primary-text: var(--cms-color-neutral-50);
+	--cms-color-primary-hover: var(--cms-color-neutral-700);
+
+	/**
+	 * Semantic — accent
+	 *
+	 * Links, focus, selection markers, active navigation. This is the token
+	 * downstream projects are expected to tint.
+	 */
+	--cms-color-accent: var(--cms-color-blue-700);
+	--cms-color-accent-hover: color-mix(
+		in oklch,
+		var(--cms-color-accent),
+		var(--cms-color-black) 12%
+	);
+	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), var(--cms-color-black) 12%);
+	--cms-color-accent-surface: color-mix(
+		in oklch,
+		var(--cms-color-accent),
+		var(--cms-color-surface) 90%
+	);
+	--cms-color-accent-ring: color-mix(in oklch, var(--cms-color-accent), transparent 72%);
+
+	/**
+	 * Semantic — focus
+	 *
+	 * Accent-based, never neutral: a near-black ring on a near-black primary
+	 * button is invisible.
+	 */
+	--cms-color-focus: var(--cms-color-accent);
+	--cms-focus-ring-width: 3px;
+	--cms-focus-ring: 0 0 0 var(--cms-focus-ring-width)
+		color-mix(in oklch, var(--cms-color-focus), transparent 72%);
+
+	/**
+	 * Semantic — status
+	 *
+	 * Surfaces mix against `--cms-color-surface` rather than white so they stay
+	 * legible after the dark flip.
+	 */
+	--cms-color-info: var(--cms-color-accent);
+	--cms-color-info-hover: color-mix(in oklch, var(--cms-color-info), var(--cms-color-black) 12%);
+	--cms-color-info-text: color-mix(in oklch, var(--cms-color-info), var(--cms-color-black) 12%);
+	--cms-color-info-surface: color-mix(
+		in oklch,
+		var(--cms-color-info),
+		var(--cms-color-surface) 90%
+	);
+	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
+
+	--cms-color-success: var(--cms-color-green-600);
+	--cms-color-success-hover: color-mix(
+		in oklch,
+		var(--cms-color-success),
+		var(--cms-color-black) 12%
+	);
+	--cms-color-success-text: color-mix(
+		in oklch,
+		var(--cms-color-success),
+		var(--cms-color-black) 12%
+	);
+	--cms-color-success-surface: color-mix(
+		in oklch,
+		var(--cms-color-success),
+		var(--cms-color-surface) 88%
+	);
+
+	--cms-color-warning: var(--cms-color-orange-700);
+	--cms-color-warning-text: color-mix(
+		in oklch,
+		var(--cms-color-warning),
+		var(--cms-color-black) 12%
+	);
+	--cms-color-warning-surface: color-mix(
+		in oklch,
+		var(--cms-color-warning),
+		var(--cms-color-surface) 88%
+	);
+
+	--cms-color-danger: var(--cms-color-rose-700);
+	--cms-color-danger-hover: color-mix(
+		in oklch,
+		var(--cms-color-danger),
+		var(--cms-color-black) 12%
+	);
+	--cms-color-danger-text: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-black) 12%);
+	--cms-color-danger-surface: color-mix(
+		in oklch,
+		var(--cms-color-danger),
+		var(--cms-color-surface) 90%
+	);
+
+	/**
+	 * Component — buttons
+	 */
+	--cms-button-primary-bg: var(--cms-color-primary);
+	--cms-button-primary-text: var(--cms-color-primary-text);
 	--cms-button-primary-border: var(--cms-button-primary-bg);
-	--cms-button-primary-hover-bg: var(--cms-color-accent-hover);
+	--cms-button-primary-hover-bg: var(--cms-color-primary-hover);
 	--cms-button-primary-hover-text: var(--cms-button-primary-text);
 	--cms-button-primary-hover-border: var(--cms-button-primary-hover-bg);
 	--cms-button-primary-ring: var(--cms-color-accent-ring);
@@ -171,7 +323,7 @@
 	--cms-button-danger-ring: var(--cms-color-danger);
 
 	/**
-	 * Shell tokens
+	 * Component — shell
 	 */
 	--cms-content-max-width: 85rem;
 	--cms-node-max-width: var(--cms-content-max-width);
@@ -182,5 +334,58 @@
 	--cms-sidebar-width: 15.5rem;
 	--cms-sidebar-header-bg: var(--cms-topbar-bg);
 	--cms-sidebar-border-right: 0;
+	--cms-inspector-width: 23.75rem;
 	--cms-editor-bg: var(--cms-color-canvas);
+	--cms-tile-min: 11rem;
+}
+
+/**
+ * Dark theme.
+ *
+ * Opt-in only for now. The `prefers-color-scheme` switch lands once every
+ * screen has been ported and checked — turning it on earlier would hand a
+ * half-dark panel to everyone whose system is set to dark.
+ */
+:root[data-theme='dark'] {
+	color-scheme: dark;
+
+	--cms-color-canvas: #0f1115;
+	--cms-color-surface: #171a20;
+	--cms-color-surface-sunken: #13161b;
+	--cms-color-surface-raised: #1c2027;
+
+	--cms-color-text: var(--cms-color-neutral-100);
+	--cms-color-text-muted: var(--cms-color-neutral-300);
+	--cms-color-text-subtle: var(--cms-color-neutral-400);
+	--cms-color-text-faint: var(--cms-color-neutral-500);
+
+	--cms-color-border: #282d36;
+	--cms-color-border-soft: #22262e;
+	--cms-color-border-strong: #333a45;
+
+	--cms-color-hover: #20242c;
+	--cms-color-selected: #272c35;
+
+	--cms-color-primary: var(--cms-color-neutral-50);
+	--cms-color-primary-text: var(--cms-color-neutral-900);
+	--cms-color-primary-hover: var(--cms-color-neutral-200);
+
+	--cms-color-accent: var(--cms-color-blue-400);
+	--cms-color-accent-hover: color-mix(
+		in oklch,
+		var(--cms-color-accent),
+		var(--cms-color-white) 15%
+	);
+	--cms-color-accent-text: var(--cms-color-accent);
+
+	--cms-color-success: var(--cms-color-green-400);
+	--cms-color-success-text: var(--cms-color-success);
+	--cms-color-warning: var(--cms-color-orange-400);
+	--cms-color-warning-text: var(--cms-color-warning);
+	--cms-color-danger: var(--cms-color-rose-400);
+	--cms-color-danger-text: var(--cms-color-danger);
+	--cms-color-info-text: var(--cms-color-info);
+
+	--cms-button-danger-text: var(--cms-color-neutral-900);
+	--cms-button-secondary-bg: var(--cms-color-surface-raised);
 }
