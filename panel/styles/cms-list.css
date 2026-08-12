@@ -31,7 +31,7 @@
 	& th {
 		position: sticky;
 		top: 0;
-		z-index: 1;
+		z-index: 2;
 		padding: var(--cms-space-3) var(--cms-space-4);
 		border-bottom: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface-sunken);
@@ -69,18 +69,45 @@
 		}
 	}
 
+	/*
+	 * The row colour lives in a property, not on the row: the pinned first
+	 * column is its own stacking context and has to paint the same colour, or
+	 * the cells scrolling under it show through.
+	 */
 	& .row {
+		--row-bg: var(--cms-color-surface);
+
+		background: var(--row-bg);
+
 		&:hover {
-			background: var(--cms-color-hover);
+			--row-bg: var(--cms-color-hover);
 		}
 
 		&.is-tree:not([data-depth='0']) {
-			background: var(--cms-color-surface-sunken);
+			--row-bg: var(--cms-color-surface-sunken);
 
 			&:hover {
-				background: var(--cms-color-hover);
+				--row-bg: var(--cms-color-hover);
 			}
 		}
+	}
+
+	/*
+	 * With many columns the list scrolls sideways rather than squeezing every
+	 * column past legibility; the title stays pinned so a row never loses the
+	 * name that identifies it. Harmless when nothing overflows — the cell sits
+	 * at its natural position.
+	 */
+	& .cell:first-child {
+		position: sticky;
+		left: 0;
+		z-index: 1;
+		background: var(--row-bg);
+	}
+
+	& th:first-child {
+		left: 0;
+		z-index: 3;
 	}
 
 	& .cell {
@@ -265,6 +292,25 @@
 	}
 }
 
+@supports (animation-timeline: scroll(inline nearest)) {
+	.cms-list .cell:first-child,
+	.cms-list th:first-child {
+		animation: cms-list-pinned linear both;
+		animation-timeline: scroll(inline nearest);
+		animation-range: 0 2rem;
+	}
+
+	@keyframes cms-list-pinned {
+		from {
+			box-shadow: none;
+		}
+
+		to {
+			box-shadow: 1px 0 0 var(--cms-color-border-soft);
+		}
+	}
+}
+
 /* Nothing hovers on touch. */
 @media (pointer: coarse) {
 	.cms-list .row-actions {
@@ -288,6 +334,11 @@
 		& tr {
 			padding: var(--cms-space-2) 0;
 			border-bottom: 1px solid var(--cms-color-border);
+		}
+
+		& .cell:first-child {
+			position: static;
+			box-shadow: none;
 		}
 
 		& .cell {

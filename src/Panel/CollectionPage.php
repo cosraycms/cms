@@ -21,7 +21,7 @@ final class CollectionPage
 	 * @param list<array{name: string, value: string}> $searchFields
 	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
-	 * @param list<array{label: string, url: ?string, class: string}> $headers
+	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
 	 * @param list<array{
 	 *     uid: string,
 	 *     depth: int,
@@ -224,7 +224,7 @@ final class CollectionPage
 	/**
 	 * @param iterable<Column> $columns
 	 * @param iterable<mixed> $sortKeys
-	 * @return list<array{label: string, url: ?string, class: string}>
+	 * @return list<array{label: string, url: ?string, class: string, kind: string}>
 	 */
 	private static function headers(
 		iterable $columns,
@@ -251,6 +251,7 @@ final class CollectionPage
 					? null
 					: $urls->collection(['sort' => $sort, 'dir' => $nextDir, 'offset' => '']),
 				'class' => $class,
+				'kind' => $column->kind(),
 			];
 		}
 
@@ -258,7 +259,7 @@ final class CollectionPage
 	}
 
 	/**
-	 * @param list<array{label: string, url: ?string, class: string}> $headers
+	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
 	 * @param list<mixed> $nodes
 	 * @return list<array{
 	 *     uid: string,
@@ -359,7 +360,7 @@ final class CollectionPage
 
 	/**
 	 * @param array<string, mixed> $node
-	 * @param list<array{label: string, url: ?string, class: string}> $headers
+	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
 	 * @return list<array{label: string, value: string, class: string, editUrl: ?string}>
 	 */
 	private static function cells(

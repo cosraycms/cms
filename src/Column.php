@@ -70,6 +70,25 @@ final class Column
 		return $this->sort;
 	}
 
+	/**
+	 * What the column holds, for the listing to size its track by. A date needs
+	 * room a number does not, and a badge sizes to its own text. Flags resolved
+	 * per node cannot be answered for the column as a whole, so they count as
+	 * text — the safe assumption, since text is what shrinks gracefully.
+	 */
+	public function kind(): string
+	{
+		if ($this->date === true) {
+			return 'date';
+		}
+
+		if ($this->badge === true) {
+			return 'badge';
+		}
+
+		return 'text';
+	}
+
 	public function get(Wrapper $node): array
 	{
 		return [

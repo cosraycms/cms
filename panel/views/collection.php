@@ -16,11 +16,19 @@ if (!$boosted) {
 	$this->layout('panel');
 }
 
-// Status and row actions size to their content: both hold pills of a width the
-// translation decides, and a floor guessed here would clip them in some locale.
-// The metadata columns take what is left and ellipse, the title absorbs the
-// slack. Row actions get a track only when a row has any, otherwise the column
-// would be dead padding.
+// Track sizing per column kind. A shared floor treats a timestamp and a
+// single-digit sort order alike, which leaves dates truncated while numbers sit
+// in space they never use. Status, badges and row actions size to their content
+// instead of a guessed floor: they hold pills whose width the translation
+// decides. The title absorbs the slack, and when the floors no longer fit the
+// list scrolls sideways with the title column pinned rather than squeezing
+// every column past legibility.
+$track = static fn(string $kind): string => match ($kind) {
+	'date' => ' minmax(9rem, auto)',
+	'badge' => ' max-content',
+	default => ' minmax(7rem, auto)',
+};
+
 $hasRowActions = false;
 
 foreach ($page->rows as $row) {
@@ -31,10 +39,13 @@ foreach ($page->rows as $row) {
 	}
 }
 
-$columns = 'minmax(12rem, 2fr)'
-	. str_repeat(' minmax(4rem, auto)', max(count($page->headers) - 1, 0))
-	. ' max-content'
-	. ($hasRowActions ? ' max-content' : '');
+$columns = 'minmax(12rem, 2fr)';
+
+foreach (array_slice((array) $this->unwrap($page->headers), 1) as $header) {
+	$columns .= $track((string) ($header['kind'] ?? 'text'));
+}
+
+$columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 ?>
 
 <div id="main" class="page cms-collection">
