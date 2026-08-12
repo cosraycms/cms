@@ -93,9 +93,9 @@
 
 		.cms-control-unknown {
 			padding: 0.5rem;
-			border: 1px dashed var(--color-danger);
+			border: 1px dashed var(--cms-color-danger);
 			border-radius: 0.375rem;
-			color: var(--color-danger);
+			color: var(--cms-color-danger);
 			font-size: 0.8125rem;
 		}
 	}

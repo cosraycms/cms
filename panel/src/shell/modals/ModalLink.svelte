@@ -168,17 +168,17 @@
 		.cms-modal-link-body {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-4);
+			gap: var(--cms-space-4);
 		}
 
 		.cms-modal-link-tabs-frame {
-			border-bottom: 1px solid var(--color-neutral-200);
+			border-bottom: 1px solid var(--cms-color-neutral-200);
 		}
 
 		.cms-modal-link-tabs-nav {
 			display: flex;
 			flex-wrap: wrap;
-			gap: var(--space-2);
+			gap: var(--cms-space-2);
 		}
 
 		.cms-modal-link-files {
@@ -187,15 +187,15 @@
 		}
 
 		.cms-modal-link-manual-hint {
-			margin-top: var(--space-4);
+			margin-top: var(--cms-space-4);
 		}
 
 		.cms-modal-link-manual-input-wrap {
-			margin-top: var(--space-4);
+			margin-top: var(--cms-space-4);
 		}
 
 		.cms-modal-link-target-wrap {
-			margin-top: var(--space-4);
+			margin-top: var(--cms-space-4);
 		}
 
 		.cms-modal-link-target-row {
@@ -206,13 +206,13 @@
 
 		.cms-modal-link-target-input-wrap {
 			display: flex;
-			height: var(--space-6);
+			height: var(--cms-space-6);
 			align-items: center;
 		}
 
 		.cms-modal-link-target-label-wrap {
-			margin-left: var(--space-3);
-			font-size: var(--font-size-sm);
+			margin-left: var(--cms-space-3);
+			font-size: var(--cms-font-size-sm);
 			line-height: 1.5rem;
 		}
 	}

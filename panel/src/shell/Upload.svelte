@@ -155,7 +155,9 @@
 	}
 
 	function uploadError(item: UploadResult) {
-		cosray().toast.error(__('upload:file-label') + ' ' + (item.filename ?? '') + ': ' + (item.error ?? ''));
+		cosray().toast.error(
+			__('upload:file-label') + ' ' + (item.filename ?? '') + ': ' + (item.error ?? ''),
+		);
 	}
 
 	// Fresh items carry only the uid — per-use meta stays absent until
@@ -280,7 +282,8 @@
 					<u>{__('common:select')}</u>
 				</div>
 				<div class="file-extensions">
-					{__('upload:allowed-extensions')} {allowedExtensions}
+					{__('upload:allowed-extensions')}
+					{allowedExtensions}
 				</div>
 				<button type="button" class="library-button" onclick={preventDefault(openLibrary)}>
 					{__('media:choose-from-library')}
@@ -300,7 +303,7 @@
 			flex-direction: column;
 
 			&.upload-inline {
-				margin-top: var(--space-6);
+				margin-top: var(--cms-space-6);
 			}
 
 			&.upload-multiple {
@@ -309,7 +312,7 @@
 
 			&.required .dragdrop {
 				border-left-width: 4px;
-				border-left-color: var(--color-danger);
+				border-left-color: var(--cms-color-danger);
 				border-left-style: solid;
 			}
 		}
@@ -326,17 +329,17 @@
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-			border: 2px dashed var(--color-neutral-300);
-			border-radius: var(--radius-md);
-			background-color: var(--color-neutral-100);
-			padding: var(--space-4) var(--space-2);
+			border: 2px dashed var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-4) var(--cms-space-2);
 			text-align: center;
 			vertical-align: middle;
 		}
 
 		.dragdrop.dragging {
-			border-color: var(--color-info);
-			background-color: var(--color-info-surface);
+			border-color: var(--cms-color-info);
+			background-color: var(--cms-color-info-surface);
 		}
 
 		.upload-drop-label {
@@ -344,14 +347,14 @@
 			flex-direction: row;
 			align-items: center;
 			justify-content: center;
-			gap: var(--space-2);
-			color: var(--color-neutral-600);
+			gap: var(--cms-space-2);
+			color: var(--cms-color-neutral-600);
 		}
 
 		.upload-drop-icon {
 			display: inline-block;
-			width: var(--space-6);
-			height: var(--space-6);
+			width: var(--cms-space-6);
+			height: var(--cms-space-6);
 		}
 
 		.upload input {
@@ -370,38 +373,38 @@
 
 		:global(.dragdrop > .upload-drop-label svg) {
 			display: inline;
-			margin-bottom: var(--space-2);
+			margin-bottom: var(--cms-space-2);
 		}
 		:global(.dragdrop > .upload-drop-label u) {
-			color: var(--color-info);
+			color: var(--cms-color-info);
 		}
 
 		.dragdrop > div.file-extensions {
 			font-weight: normal;
-			font-size: var(--font-size-xs);
-			color: var(--color-neutral-400);
-			margin-top: var(--space-1);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-neutral-400);
+			margin-top: var(--cms-space-1);
 		}
 
 		.library-button {
-			margin-top: var(--space-3);
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius-md);
-			background-color: var(--color-white);
-			padding: var(--space-1) var(--space-3);
-			font-size: var(--font-size-sm);
-			color: var(--color-neutral-600);
+			margin-top: var(--cms-space-3);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-white);
+			padding: var(--cms-space-1) var(--cms-space-3);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-600);
 			cursor: pointer;
 		}
 
 		.library-button:hover {
-			border-color: var(--color-info);
-			color: var(--color-info);
+			border-color: var(--cms-color-info);
+			color: var(--cms-color-info);
 		}
 
 		@media (min-width: 768px) {
 			:global(.upload-image .preview) {
-				width: var(--fraction-2-5);
+				width: var(--cms-fraction-2-5);
 			}
 		}
 	}

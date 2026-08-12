@@ -101,13 +101,13 @@
 		.cms-modal-image-body {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-4);
+			gap: var(--cms-space-4);
 		}
 
 		.cms-modal-image-upload {
 			display: flex;
 			align-items: center;
-			gap: var(--space-3);
+			gap: var(--cms-space-3);
 		}
 
 		.cms-modal-image-upload-input {
@@ -115,8 +115,8 @@
 		}
 
 		.cms-modal-image-upload-hint {
-			font-size: var(--font-size-sm);
-			color: var(--color-neutral-500);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-500);
 		}
 
 		.cms-modal-image-library {

@@ -81,7 +81,12 @@
 
 <div class="cms-library">
 	<form class="cms-library-search" onsubmit={search}>
-		<input class="cms-input" type="search" placeholder={__('media:search-filename')} bind:value={q} />
+		<input
+			class="cms-input"
+			type="search"
+			placeholder={__('media:search-filename')}
+			bind:value={q}
+		/>
 		<button type="submit" class="cms-button">{__('common:search')}</button>
 	</form>
 	{#if failed}
@@ -131,13 +136,13 @@
 		.cms-library {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-4);
+			gap: var(--cms-space-4);
 			min-width: min(48rem, 80vw);
 		}
 
 		.cms-library-search {
 			display: flex;
-			gap: var(--space-2);
+			gap: var(--cms-space-2);
 		}
 
 		.cms-library-search input {
@@ -148,7 +153,7 @@
 			display: flex;
 			flex-direction: row;
 			flex-wrap: wrap;
-			gap: var(--space-3);
+			gap: var(--cms-space-3);
 			max-height: 50vh;
 			overflow-y: auto;
 			align-content: flex-start;
@@ -162,10 +167,10 @@
 			height: 9rem;
 			align-items: center;
 			justify-content: center;
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius-md);
-			background-color: var(--color-neutral-100);
-			padding: var(--space-1);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-1);
 			cursor: pointer;
 			overflow: hidden;
 		}
@@ -180,30 +185,30 @@
 			width: 100%;
 			flex-direction: row;
 			align-items: center;
-			gap: var(--space-2);
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius-md);
-			background-color: var(--color-neutral-100);
-			padding: var(--space-2) var(--space-3);
+			gap: var(--cms-space-2);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-2) var(--cms-space-3);
 			cursor: pointer;
 			text-align: left;
 		}
 
 		.cms-library-image.active,
 		.cms-library-file.active {
-			border-color: var(--color-info);
-			outline: 2px solid var(--color-info);
+			border-color: var(--cms-color-info);
+			outline: 2px solid var(--cms-color-info);
 		}
 
 		.cms-library-image .cms-library-name {
 			position: absolute;
-			left: var(--space-1);
-			right: var(--space-1);
-			bottom: var(--space-1);
-			border-radius: var(--radius);
+			left: var(--cms-space-1);
+			right: var(--cms-space-1);
+			bottom: var(--cms-space-1);
+			border-radius: var(--cms-radius);
 			background-color: rgba(255, 255, 255, 0.85);
-			font-size: var(--font-size-xs);
-			color: var(--color-neutral-600);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-neutral-600);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -217,8 +222,8 @@
 
 		.cms-library-empty,
 		.cms-library-loading {
-			color: var(--color-neutral-600);
-			padding: var(--space-4) 0;
+			color: var(--cms-color-neutral-600);
+			padding: var(--cms-space-4) 0;
 		}
 
 		.cms-library-more {

@@ -141,29 +141,29 @@
 		.cms-nodesearch {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-3);
+			gap: var(--cms-space-3);
 			min-width: min(48rem, 80vw);
 		}
 
 		.cms-nodesearch-current {
 			display: flex;
 			align-items: center;
-			gap: var(--space-2);
-			padding: var(--space-2) var(--space-3);
-			border: 1px solid var(--color-info);
-			border-radius: var(--radius-md);
-			background-color: var(--color-neutral-100);
+			gap: var(--cms-space-2);
+			padding: var(--cms-space-2) var(--cms-space-3);
+			border: 1px solid var(--cms-color-info);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
 		}
 
 		.cms-nodesearch-current-label {
-			font-size: var(--font-size-sm);
-			color: var(--color-neutral-600);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-600);
 		}
 
 		.cms-nodesearch-results {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-1);
+			gap: var(--cms-space-1);
 			margin: 0;
 			padding: 0;
 			list-style: none;
@@ -174,20 +174,20 @@
 		.cms-nodesearch-result {
 			display: flex;
 			align-items: center;
-			gap: var(--space-2);
+			gap: var(--cms-space-2);
 			width: 100%;
-			padding: var(--space-2) var(--space-3);
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius-md);
-			background-color: var(--color-neutral-100);
+			padding: var(--cms-space-2) var(--cms-space-3);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-md);
+			background-color: var(--cms-color-neutral-100);
 			text-align: left;
 			cursor: pointer;
 		}
 
 		.cms-nodesearch-result:hover,
 		.cms-nodesearch-result.active {
-			border-color: var(--color-info);
-			outline: 2px solid var(--color-info);
+			border-color: var(--cms-color-info);
+			outline: 2px solid var(--cms-color-info);
 		}
 
 		.cms-nodesearch-title {
@@ -199,13 +199,13 @@
 		}
 
 		.cms-nodesearch-type {
-			font-size: var(--font-size-sm);
-			color: var(--color-neutral-600);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-600);
 		}
 
 		.cms-nodesearch-empty {
-			color: var(--color-neutral-600);
-			padding: var(--space-2) 0;
+			color: var(--cms-color-neutral-600);
+			padding: var(--cms-space-2) 0;
 		}
 	}
 </style>

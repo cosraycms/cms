@@ -197,8 +197,11 @@
 	{:else}
 		<header class="cms-drawer-head">
 			<h2 title={asset.filename}>{asset.filename}</h2>
-			<button type="button" class="cms-drawer-close" aria-label={__('common:close')} onclick={onClose}
-				>×</button
+			<button
+				type="button"
+				class="cms-drawer-close"
+				aria-label={__('common:close')}
+				onclick={onClose}>×</button
 			>
 		</header>
 
@@ -249,7 +252,9 @@
 				<div class="cms-drawer-focal-controls">
 					<span>
 						{#if meta.focal}
-							{__('image:focus')}: {Math.round(meta.focal.x * 100)}% / {Math.round(meta.focal.y * 100)}%
+							{__('image:focus')}: {Math.round(meta.focal.x * 100)}% / {Math.round(
+								meta.focal.y * 100,
+							)}%
 						{:else}
 							{__('image:no-focus')}
 						{/if}
@@ -337,8 +342,8 @@
 			width: min(28rem, 100vw);
 			display: flex;
 			flex-direction: column;
-			background-color: var(--color-neutral-50, #fff);
-			border-left: 1px solid var(--color-neutral-300);
+			background-color: var(--cms-color-neutral-50, #fff);
+			border-left: 1px solid var(--cms-color-neutral-300);
 			box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
 			z-index: 41;
 		}
@@ -347,9 +352,9 @@
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			gap: var(--space-2);
-			padding: var(--space-4);
-			border-bottom: 1px solid var(--color-neutral-200);
+			gap: var(--cms-space-2);
+			padding: var(--cms-space-4);
+			border-bottom: 1px solid var(--cms-color-neutral-200);
 		}
 
 		.cms-drawer-head h2 {
@@ -365,16 +370,16 @@
 			font-size: 1.5rem;
 			line-height: 1;
 			cursor: pointer;
-			color: var(--color-neutral-500);
+			color: var(--cms-color-neutral-500);
 		}
 
 		.cms-drawer-body {
 			flex: 1 1 auto;
 			overflow-y: auto;
-			padding: var(--space-4);
+			padding: var(--cms-space-4);
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-4);
+			gap: var(--cms-space-4);
 		}
 
 		.cms-drawer-preview {
@@ -387,8 +392,8 @@
 			max-height: 16rem;
 			padding: 0;
 			border: 0;
-			background-color: var(--color-neutral-100);
-			border-radius: var(--radius-md);
+			background-color: var(--cms-color-neutral-100);
+			border-radius: var(--cms-radius-md);
 			overflow: hidden;
 		}
 
@@ -404,7 +409,7 @@
 
 		.cms-drawer-preview-icon {
 			font-size: 3rem;
-			color: var(--color-neutral-500);
+			color: var(--cms-color-neutral-500);
 		}
 
 		.cms-drawer-focal {
@@ -413,7 +418,7 @@
 			height: 0.85rem;
 			border: 2px solid #fff;
 			border-radius: 50%;
-			background-color: var(--color-info);
+			background-color: var(--cms-color-info);
 			box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
 			transform: translate(-50%, -50%);
 			pointer-events: none;
@@ -422,97 +427,97 @@
 		.cms-drawer-meta {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-1);
-			font-size: var(--font-size-sm);
+			gap: var(--cms-space-1);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-drawer-meta > div {
 			display: flex;
 			justify-content: space-between;
-			gap: var(--space-2);
+			gap: var(--cms-space-2);
 		}
 
 		.cms-drawer-meta dt {
-			color: var(--color-neutral-500);
+			color: var(--cms-color-neutral-500);
 		}
 
 		.cms-drawer-focal-controls {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			gap: var(--space-2);
-			font-size: var(--font-size-sm);
-			color: var(--color-neutral-600);
+			gap: var(--cms-space-2);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-neutral-600);
 		}
 
 		.cms-drawer-usage h3 {
-			font-size: var(--font-size-sm);
-			margin-bottom: var(--space-2);
+			font-size: var(--cms-font-size-sm);
+			margin-bottom: var(--cms-space-2);
 		}
 
 		.cms-drawer-usage ul {
 			list-style: none;
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-1);
+			gap: var(--cms-space-1);
 		}
 
 		.cms-drawer-usage li {
 			display: flex;
 			justify-content: space-between;
-			gap: var(--space-2);
-			font-size: var(--font-size-sm);
-			padding: var(--space-1) 0;
-			border-bottom: 1px solid var(--color-neutral-100);
+			gap: var(--cms-space-2);
+			font-size: var(--cms-font-size-sm);
+			padding: var(--cms-space-1) 0;
+			border-bottom: 1px solid var(--cms-color-neutral-100);
 		}
 
 		.cms-drawer-usage-kind {
-			color: var(--color-neutral-500);
+			color: var(--cms-color-neutral-500);
 			white-space: nowrap;
 		}
 
 		.cms-drawer-hint {
-			color: var(--color-neutral-500);
-			font-size: var(--font-size-sm);
+			color: var(--cms-color-neutral-500);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-drawer-foot {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			gap: var(--space-2);
-			padding: var(--space-4);
-			border-top: 1px solid var(--color-neutral-200);
+			gap: var(--cms-space-2);
+			padding: var(--cms-space-4);
+			border-top: 1px solid var(--cms-color-neutral-200);
 		}
 
 		.cms-drawer-foot-right {
 			display: flex;
 			align-items: center;
-			gap: var(--space-3);
+			gap: var(--cms-space-3);
 		}
 
 		.cms-drawer-delete {
 			display: inline-flex;
 			align-items: center;
-			gap: var(--space-2);
-			color: var(--color-danger, #b00020);
+			gap: var(--cms-space-2);
+			color: var(--cms-color-danger, #b00020);
 		}
 
 		.cms-drawer-saved {
-			color: var(--color-success, #178a3a);
-			font-size: var(--font-size-sm);
+			color: var(--cms-color-success, #178a3a);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-drawer-blocked {
-			padding: var(--space-3) var(--space-4);
+			padding: var(--cms-space-3) var(--cms-space-4);
 			background-color: var(--color-warning-bg, #fdf3d7);
-			border-top: 1px solid var(--color-neutral-200);
-			font-size: var(--font-size-sm);
+			border-top: 1px solid var(--cms-color-neutral-200);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-drawer-blocked ul {
-			margin-top: var(--space-1);
-			padding-left: var(--space-4);
+			margin-top: var(--cms-space-1);
+			padding-left: var(--cms-space-4);
 			list-style: disc;
 		}
 	}

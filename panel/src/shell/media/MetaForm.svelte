@@ -103,37 +103,37 @@
 		.cms-meta-form {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-3);
+			gap: var(--cms-space-3);
 		}
 
 		.cms-meta-locales {
 			display: flex;
-			gap: var(--space-1);
+			gap: var(--cms-space-1);
 		}
 
 		.cms-meta-locale {
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius);
-			background-color: var(--color-neutral-100);
-			padding: var(--space-1) var(--space-2);
-			font-size: var(--font-size-xs);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-1) var(--cms-space-2);
+			font-size: var(--cms-font-size-xs);
 			cursor: pointer;
 		}
 
 		.cms-meta-locale.active {
-			border-color: var(--color-info);
-			color: var(--color-info);
+			border-color: var(--cms-color-info);
+			color: var(--cms-color-info);
 		}
 
 		.cms-meta-field {
 			display: flex;
 			flex-direction: column;
-			gap: var(--space-1);
-			font-size: var(--font-size-sm);
+			gap: var(--cms-space-1);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-meta-field > span {
-			color: var(--color-neutral-600);
+			color: var(--cms-color-neutral-600);
 		}
 	}
 </style>

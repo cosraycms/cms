@@ -15,9 +15,9 @@ body {
 }
 
 body {
-	background: var(--color-canvas);
-	color: var(--color-text);
-	font-family: var(--font-sans);
+	background: var(--cms-color-canvas);
+	color: var(--cms-color-text);
+	font-family: var(--cms-font-sans);
 	font-size: 0.875rem;
 	line-height: 1.45;
 	text-rendering: optimizeLegibility;
@@ -34,17 +34,17 @@ h3,
 h4,
 h5,
 h6 {
-	margin: 0 0 var(--space-4);
+	margin: 0 0 var(--cms-space-4);
 	font-size: inherit;
 	font-weight: 600;
 	line-height: 1.25;
-	color: var(--color-text);
+	color: var(--cms-color-text);
 }
 
 p,
 ul,
 ol {
-	margin: 0 0 var(--space-4);
+	margin: 0 0 var(--cms-space-4);
 }
 
 button,
@@ -69,14 +69,14 @@ button:not(:disabled) {
 input,
 select,
 textarea {
-	border: var(--border);
-	border-radius: var(--radius-md);
-	background-color: var(--color-white);
+	border: var(--cms-border);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-white);
 }
 
 input::placeholder,
 textarea::placeholder {
-	color: var(--color-neutral-400);
+	color: var(--cms-color-neutral-400);
 }
 
 img,

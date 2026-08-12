@@ -12,19 +12,19 @@
 	position: relative;
 	width: 100%;
 	max-width: 48rem;
-	border-radius: var(--radius-md);
-	background-color: var(--color-white);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-white);
 }
 
 .cms-modal-close {
 	position: absolute;
-	top: calc(var(--space-2) * -1);
-	right: calc(var(--space-2) * -1);
+	top: calc(var(--cms-space-2) * -1);
+	right: calc(var(--cms-space-2) * -1);
 	width: 1.5rem;
 	height: 1.5rem;
-	border-radius: var(--radius-full);
-	background-color: var(--color-danger);
-	color: var(--color-white);
+	border-radius: var(--cms-radius-full);
+	background-color: var(--cms-color-danger);
+	color: var(--cms-color-white);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -34,14 +34,14 @@
 .cms-modal-header,
 .cms-modal-body,
 .cms-modal-footer {
-	padding: var(--space-4);
+	padding: var(--cms-space-4);
 }
 
 @media (min-width: 768px) {
 	.cms-modal-header,
 	.cms-modal-body,
 	.cms-modal-footer {
-		padding: var(--space-8);
+		padding: var(--cms-space-8);
 	}
 }
 
@@ -49,15 +49,15 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	border-bottom: var(--border);
-	border-top-left-radius: var(--radius-md);
-	border-top-right-radius: var(--radius-md);
-	gap: var(--space-3);
+	border-bottom: var(--cms-border);
+	border-top-left-radius: var(--cms-radius-md);
+	border-top-right-radius: var(--cms-radius-md);
+	gap: var(--cms-space-3);
 }
 
 .cms-modal-header-title {
 	margin: 0;
-	font-size: var(--font-size-xl);
+	font-size: var(--cms-font-size-xl);
 	font-weight: 600;
 	line-height: 1.5;
 }
@@ -69,9 +69,9 @@
 	justify-content: center;
 	width: 2rem;
 	height: 2rem;
-	border-radius: var(--radius-lg);
+	border-radius: var(--cms-radius-lg);
 	background: transparent;
-	font-size: var(--font-size-sm);
+	font-size: var(--cms-font-size-sm);
 }
 
 .cms-modal-header-close-icon {
@@ -82,13 +82,13 @@
 .cms-modal-body {
 	display: flex;
 	flex-direction: column;
-	gap: var(--space-4);
+	gap: var(--cms-space-4);
 }
 
 .cms-modal-footer {
-	border-top: var(--border);
-	border-bottom-left-radius: var(--radius-md);
-	border-bottom-right-radius: var(--radius-md);
+	border-top: var(--cms-border);
+	border-bottom-left-radius: var(--cms-radius-md);
+	border-bottom-right-radius: var(--cms-radius-md);
 }
 
 .modal {
@@ -96,14 +96,14 @@
 }
 
 .modal h2 {
-	margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0;
-	padding: var(--space-4) var(--space-6);
-	font-size: var(--font-size-lg);
-	border-bottom: var(--border);
+	margin: calc(var(--cms-space-4) * -1) calc(var(--cms-space-4) * -1) 0;
+	padding: var(--cms-space-4) var(--cms-space-6);
+	font-size: var(--cms-font-size-lg);
+	border-bottom: var(--cms-border);
 }
 
 .modal p {
-	margin-bottom: var(--space-6);
+	margin-bottom: var(--cms-space-6);
 }
 
 .modal p:last-child {
@@ -111,40 +111,40 @@
 }
 
 .modal .highlight {
-	color: var(--color-info);
+	color: var(--cms-color-info);
 }
 
 .modal .body {
-	margin-left: calc(var(--space-4) * -1);
-	margin-right: calc(var(--space-4) * -1);
-	padding: var(--space-6);
-	border-bottom: var(--border);
+	margin-left: calc(var(--cms-space-4) * -1);
+	margin-right: calc(var(--cms-space-4) * -1);
+	padding: var(--cms-space-6);
+	border-bottom: var(--cms-border);
 }
 
 .modal .controls {
-	margin-left: calc(var(--space-4) * -1);
-	margin-right: calc(var(--space-4) * -1);
-	padding: var(--space-6) var(--space-6) 0;
+	margin-left: calc(var(--cms-space-4) * -1);
+	margin-right: calc(var(--cms-space-4) * -1);
+	padding: var(--cms-space-6) var(--cms-space-6) 0;
 	display: flex;
 	justify-content: flex-end;
-	gap: var(--space-2);
+	gap: var(--cms-space-2);
 }
 
 .modal .modal-close.close {
-	border: 1px solid var(--color-danger);
-	background-color: var(--color-danger);
-	color: var(--color-white);
+	border: 1px solid var(--cms-color-danger);
+	background-color: var(--cms-color-danger);
+	color: var(--cms-color-white);
 	box-shadow: none;
 	top: -0.6rem;
 	right: -0.6rem;
 }
 
 .modal .modal-close.close:hover {
-	border-color: var(--color-danger-hover);
-	background-color: var(--color-danger-hover);
+	border-color: var(--cms-color-danger-hover);
+	background-color: var(--cms-color-danger-hover);
 }
 
 .modal .modal-close.close::before,
 .modal .modal-close.close::after {
-	background-color: var(--color-white);
+	background-color: var(--cms-color-white);
 }

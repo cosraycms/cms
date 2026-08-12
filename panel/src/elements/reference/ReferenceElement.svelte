@@ -255,7 +255,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.35rem 0.5rem;
-		border: 1px solid var(--cms-border, #d0d0d0);
+		border: 1px solid var(--cms-color-border, #d0d0d0);
 		border-radius: 0.25rem;
 		background: var(--cms-surface, #fff);
 	}
@@ -296,7 +296,7 @@
 		list-style: none;
 		max-height: 16rem;
 		overflow-y: auto;
-		border: 1px solid var(--cms-border, #d0d0d0);
+		border: 1px solid var(--cms-color-border, #d0d0d0);
 		border-radius: 0.25rem;
 		background: var(--cms-surface, #fff);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);

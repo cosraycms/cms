@@ -81,11 +81,11 @@
 	@layer panel {
 		.cms-message {
 			border-left: 4px solid transparent;
-			padding: var(--space-4);
+			padding: var(--cms-space-4);
 		}
 
 		.cms-message.narrow {
-			padding: var(--space-1) var(--space-2);
+			padding: var(--cms-space-1) var(--cms-space-2);
 		}
 
 		.cms-message-row {
@@ -97,51 +97,51 @@
 		}
 
 		.cms-message-content {
-			margin-left: var(--space-3);
+			margin-left: var(--cms-space-3);
 		}
 
 		.cms-message-content.narrow {
-			margin-left: var(--space-2);
+			margin-left: var(--cms-space-2);
 		}
 
 		.cms-message-text {
-			font-size: var(--font-size-sm);
+			font-size: var(--cms-font-size-sm);
 		}
 
 		.cms-message-success {
-			background-color: var(--color-success-surface);
-			border-left-color: var(--color-success);
+			background-color: var(--cms-color-success-surface);
+			border-left-color: var(--cms-color-success);
 		}
 
 		.cms-message-info {
-			background-color: var(--color-info-surface);
-			border-left-color: var(--color-info);
+			background-color: var(--cms-color-info-surface);
+			border-left-color: var(--cms-color-info);
 		}
 
 		.cms-message-warning {
-			background-color: var(--color-warning-surface);
-			border-left-color: var(--color-warning);
+			background-color: var(--cms-color-warning-surface);
+			border-left-color: var(--cms-color-warning);
 		}
 
 		.cms-message-error {
-			background-color: var(--color-danger-surface);
-			border-left-color: var(--color-danger);
+			background-color: var(--cms-color-danger-surface);
+			border-left-color: var(--cms-color-danger);
 		}
 
 		.cms-message-text-success {
-			color: var(--color-success);
+			color: var(--cms-color-success);
 		}
 
 		.cms-message-text-info {
-			color: var(--color-info);
+			color: var(--cms-color-info);
 		}
 
 		.cms-message-text-warning {
-			color: var(--color-warning);
+			color: var(--cms-color-warning);
 		}
 
 		.cms-message-text-error {
-			color: var(--color-danger);
+			color: var(--cms-color-danger);
 		}
 
 		:global(.message em) {

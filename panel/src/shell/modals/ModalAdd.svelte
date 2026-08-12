@@ -69,19 +69,19 @@
 		.cms-modal-add-types {
 			display: grid;
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: var(--space-4);
-			margin-bottom: var(--space-8);
+			gap: var(--cms-space-4);
+			margin-bottom: var(--cms-space-8);
 		}
 
 		:global(.cms-modal-add-type) {
-			border: 1px solid var(--color-info);
-			background-color: var(--color-white);
-			color: var(--color-info);
+			border: 1px solid var(--cms-color-info);
+			background-color: var(--cms-color-white);
+			color: var(--cms-color-info);
 		}
 
 		:global(.cms-modal-add-type.is-selected) {
-			background-color: var(--color-info);
-			color: var(--color-white);
+			background-color: var(--cms-color-info);
+			color: var(--cms-color-white);
 		}
 	}
 </style>

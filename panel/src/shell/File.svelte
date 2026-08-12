@@ -76,12 +76,12 @@
 			width: 100%;
 			flex-direction: row;
 			align-items: center;
-			border: 1px solid var(--color-neutral-300);
-			border-radius: var(--radius-lg);
-			background-color: var(--color-neutral-100);
-			padding: var(--space-2) var(--space-4);
+			border: 1px solid var(--cms-color-neutral-300);
+			border-radius: var(--cms-radius-lg);
+			background-color: var(--cms-color-neutral-100);
+			padding: var(--cms-space-2) var(--cms-space-4);
 			text-align: center;
-			color: var(--color-neutral-600);
+			color: var(--cms-color-neutral-600);
 		}
 
 		.cms-file-meta {
@@ -89,7 +89,7 @@
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
-			padding-left: var(--space-3);
+			padding-left: var(--cms-space-3);
 			text-align: left;
 		}
 
@@ -99,12 +99,12 @@
 
 		.cms-file-title {
 			display: inline-block;
-			padding-left: var(--space-4);
+			padding-left: var(--cms-space-4);
 		}
 
 		.cms-file-download {
 			display: inline-block;
-			padding-left: var(--space-2);
+			padding-left: var(--cms-space-2);
 		}
 
 		.cms-file-action {
@@ -114,18 +114,18 @@
 		}
 
 		.cms-file-action-edit {
-			color: var(--color-info);
+			color: var(--cms-color-info);
 		}
 
 		.cms-file-action-remove {
-			color: var(--color-danger);
+			color: var(--cms-color-danger);
 		}
 
 		.cms-file-action-icon {
-			margin-left: var(--space-4);
+			margin-left: var(--cms-space-4);
 			display: flex;
-			height: var(--space-4);
-			width: var(--space-4);
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
 			align-items: center;
 		}
 	}

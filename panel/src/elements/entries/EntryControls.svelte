@@ -102,12 +102,12 @@
 			display: flex;
 			flex-direction: row;
 			align-items: center;
-			gap: var(--space-2);
+			gap: var(--cms-space-2);
 		}
 
 		div button {
-			height: var(--space-4);
-			width: var(--space-4);
+			height: var(--cms-space-4);
+			width: var(--cms-space-4);
 
 			&[disabled] {
 				color: rgb(209 213 219);
@@ -115,11 +115,11 @@
 		}
 
 		.remove {
-			color: var(--color-warning);
+			color: var(--cms-color-warning);
 		}
 
 		.collapse-btn {
-			color: var(--color-neutral-500);
+			color: var(--cms-color-neutral-500);
 		}
 	}
 </style>

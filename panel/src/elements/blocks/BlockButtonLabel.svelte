@@ -19,10 +19,10 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			border-radius: var(--radius-full);
-			background-color: var(--color-danger);
+			border-radius: var(--cms-radius-full);
+			background-color: var(--cms-color-danger);
 			font-weight: 600;
-			color: var(--color-white);
+			color: var(--cms-color-white);
 			font-size: 9px;
 			height: 12px;
 			width: 12px;
