@@ -333,9 +333,13 @@
 	/**
 	 * Component — shell
 	 */
-	--cms-content-max-width: 85rem;
-	--cms-node-max-width: var(--cms-content-max-width);
-	--cms-collection-max-width: var(--cms-content-max-width);
+	/*
+	 * The shell caps the shell. The editor caps its own column separately: a
+	 * field form is bounded by what is comfortable to fill in, not by how much
+	 * screen the panel was given, so widening one must not stretch the other.
+	 */
+	--cms-content-max-width: 120rem;
+	--cms-node-max-width: 85rem;
 	--cms-node-topbar-height: 4.25rem;
 	--cms-row-height: 3.5rem;
 	--cms-topbar-bg: var(--cms-color-surface);
