@@ -142,6 +142,18 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('index'));
+
+				if ($this->config->debug()) {
+					$panel
+						->get(
+							'/styleguide',
+							[Panel\Styleguide::class, 'index'],
+							'styleguide',
+						)
+						->middleware($panelAuth)
+						->after($renderers->get('styleguide'));
+				}
+
 				$panel
 					->get(
 						'/media',

@@ -16,3 +16,4 @@
 @import './grid.css' layer(panel);
 @import './code.css' layer(panel);
 @import './richtext.css' layer(panel);
+@import './cms-styleguide.css' layer(panel);

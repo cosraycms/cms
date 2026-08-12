@@ -123,6 +123,19 @@ Fields inside repeater fields, nodes inside a tree. Plain nesting cannot stop an
 
 Use it only where a block genuinely contains itself. Nesting handles everything else.
 
+## Styleguide
+
+`/<panel-path>/styleguide` renders every component against the current stylesheets — tokens, buttons, pills, status, form controls, fields, empty states — plus a theme toggle. It is registered only when `app.debug` is on, and sits behind the same authentication as the rest of the panel.
+
+It exists because the states that break quietly are the ones real content rarely produces: empty, disabled, error, a title long enough to truncate, a node with four locale paths in the inspector. Checking those, and checking dark, should not mean hunting for content that happens to trigger them.
+
+Two rules keep it honest:
+
+- **Render partials, never copies.** Fields come from `panel/views/field/*` with fixture data. A styleguide with its own copy of the markup drifts, and a stale styleguide is worse than none. Where a screen has no extractable partial yet, its section is inline and marked, and it is replaced when that screen is ported.
+- **Read tokens from the stylesheet.** The token tables are parsed out of `tokens.css` at request time, so the palette cannot drift from what is documented.
+
+Adding a component means adding it here too.
+
 ## Migration
 
 The panel is mid-redesign. Older stylesheets still use unprefixed class names and a flatter structure. They are converted per screen, not in one sweep: the old file is deleted when its screen lands. Both conventions coexist inside the `panel` layer until then.
