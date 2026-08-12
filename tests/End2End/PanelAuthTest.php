@@ -108,11 +108,16 @@ final class PanelAuthTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="panel"', $html);
-		$this->assertStringContainsString('class="cms-sidebar"', $html);
+		$this->assertStringContainsString('class="cms-shell"', $html);
+		$this->assertStringContainsString('class="cms-masthead"', $html);
 		$this->assertStringContainsString('class="main"', $html);
+		// The rail carries collections, and this app registers none, so it is
+		// left out rather than rendered empty.
+		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
 		$this->assertStringContainsString('class="logo"', $html);
 		$this->assertStringContainsString('action="/cp/logout"', $html);
+		// Dashboard and media are areas in the masthead, not rail entries.
+		$this->assertStringContainsString('class="areas"', $html);
 		$this->assertStringContainsString('Dashboard', $html);
 	}
 

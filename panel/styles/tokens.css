@@ -170,7 +170,7 @@
 	--cms-color-surface: var(--cms-color-white);
 	--cms-color-surface-sunken: #f5f6f8;
 	--cms-color-surface-raised: var(--cms-color-white);
-	--cms-color-rail: var(--cms-color-canvas);
+	--cms-color-rail: var(--cms-color-surface);
 
 	/**
 	 * Semantic — text

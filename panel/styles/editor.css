@@ -1,8 +1,15 @@
 .editor-content {
 	display: flex;
-	flex: 1 0 auto;
+	flex: 1 1 auto;
 	width: 100%;
-	min-height: 100vh;
-	overflow: visible;
+	min-height: 0;
+	overflow: hidden;
 	padding: 0;
+}
+
+@media (max-width: 52rem) {
+	.editor-content {
+		min-height: 100dvh;
+		overflow: visible;
+	}
 }

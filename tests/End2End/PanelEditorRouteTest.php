@@ -393,15 +393,19 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 	}
 
-	/** The opening tag of the sidebar link pointing at `$href`. */
+	/**
+	 * The opening tag of the navigation link pointing at `$href`. Keys on
+	 * `data-nav`, the marker the panel script uses, so it finds both masthead
+	 * areas and rail entries.
+	 */
 	private function navLink(string $html, string $href): string
 	{
 		$found = preg_match(
-			'/<a[^>]*class="nav-link"[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
+			'/<a[^>]*data-nav[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
 			$html,
 			$matches,
 		);
-		$this->assertSame(1, $found, "No sidebar link for {$href}");
+		$this->assertSame(1, $found, "No navigation link for {$href}");
 
 		return $matches[0];
 	}

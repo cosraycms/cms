@@ -1,9 +1,13 @@
 <?php $this->layout('base') ?>
 
-<div class="panel">
-	<?php $this->insert('component/navigation') ?>
+<div class="cms-shell">
+	<?php $this->insert('component/masthead') ?>
 
-	<main class="main">
-		<?= $this->body() ?>
-	</main>
+	<div class="frame">
+		<?php $this->insert('component/navigation') ?>
+
+		<main class="main">
+			<?= $this->body() ?>
+		</main>
+	</div>
 </div>

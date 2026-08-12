@@ -1,0 +1,157 @@
+.cms-sidebar {
+	display: flex;
+	flex: 0 0 var(--cms-sidebar-width);
+	flex-direction: column;
+	width: var(--cms-sidebar-width);
+	min-width: 0;
+	border-right: 1px solid var(--cms-color-border-soft);
+	background: var(--cms-color-rail);
+
+	& .scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-5) var(--cms-space-3);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .item + .item {
+		margin-top: var(--cms-space-px);
+	}
+
+	& .link {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		width: 100%;
+		min-height: 2.25rem;
+		padding: 0.4375rem 0.625rem;
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 550;
+		text-align: left;
+		text-decoration: none;
+		transition:
+			background 0.12s ease,
+			color 0.12s ease;
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&[aria-current='page'] {
+			background: var(--cms-color-selected);
+			color: var(--cms-color-text);
+			font-weight: 650;
+		}
+
+		/* Accent marker: the chrome stays neutral, the project's colour marks. */
+		&[aria-current='page']::before {
+			position: absolute;
+			top: 0.4375rem;
+			bottom: 0.4375rem;
+			left: calc(-1 * var(--cms-space-3));
+			width: 0.1875rem;
+			border-radius: 0 999px 999px 0;
+			background: var(--cms-color-accent);
+			content: '';
+		}
+	}
+
+	& .label {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+
+		& > span:last-child {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+
+	& .icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 0.875rem;
+		height: 0.875rem;
+		flex-shrink: 0;
+		opacity: 0.55;
+
+		& svg {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	& .badge {
+		margin-left: auto;
+		flex-shrink: 0;
+		color: var(--cms-color-text-faint);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+	}
+
+	& .section {
+		margin-top: var(--cms-space-5);
+	}
+
+	& .title {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		padding: 0 0.625rem var(--cms-space-2);
+		padding-left: calc(0.625rem + var(--depth, 0) * var(--cms-space-5));
+		color: var(--cms-color-text-faint);
+		font-size: 0.625rem;
+		font-weight: 600;
+		letter-spacing: 0.11em;
+		text-transform: uppercase;
+	}
+}
+
+/* Stacked above the content, the rail scrolls sideways instead of filling it. */
+@media (max-width: 52rem) {
+	.cms-sidebar {
+		flex-basis: auto;
+		width: 100%;
+		height: auto;
+		border-right: 0;
+		border-bottom: 1px solid var(--cms-color-border);
+
+		& .scroll {
+			padding: var(--cms-space-3);
+			overflow-x: auto;
+		}
+
+		& .list {
+			display: flex;
+			gap: var(--cms-space-2);
+			white-space: nowrap;
+		}
+
+		& .link[aria-current='page']::before {
+			display: none;
+		}
+
+		& .section {
+			margin-top: 0;
+		}
+
+		& .title {
+			display: none;
+		}
+	}
+}

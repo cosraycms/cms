@@ -10,11 +10,17 @@
 		margin-left: auto;
 		margin-right: auto;
 	}
+}
 
-	&.node {
-		height: auto;
-		min-height: 100vh;
-	}
+.content {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	width: 100%;
+	min-height: 0;
+	margin-inline: auto;
+	padding: var(--cms-space-6);
+	overflow: hidden;
 }
 
 .page-head {
@@ -70,6 +76,11 @@
 	.page {
 		height: auto;
 		min-height: 0;
+		overflow: visible;
+	}
+
+	.content {
+		padding: var(--cms-space-4);
 		overflow: visible;
 	}
 }

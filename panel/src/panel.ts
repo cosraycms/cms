@@ -47,11 +47,11 @@ function navCurrent(link: HTMLAnchorElement, path: string): boolean {
 function updateNavigation(): void {
 	const path = currentPath();
 
-	document.querySelectorAll('.nav-link[aria-current]').forEach((link) => {
+	document.querySelectorAll('[data-nav][aria-current]').forEach((link) => {
 		link.removeAttribute('aria-current');
 	});
 
-	document.querySelectorAll<HTMLAnchorElement>('.nav-link[href]').forEach((link) => {
+	document.querySelectorAll<HTMLAnchorElement>('[data-nav][href]').forEach((link) => {
 		if (navCurrent(link, path)) {
 			link.setAttribute('aria-current', 'page');
 		}
