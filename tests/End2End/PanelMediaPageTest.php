@@ -25,7 +25,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page media-page"', $html);
+		$this->assertStringContainsString('id="main" class="page cms-media"', $html);
 		$this->assertStringContainsString(
 			'<cosray-media-library data-cosray-element="media-library">',
 			$html,

@@ -40,8 +40,7 @@ $chevronSvg = is_file($chevronSvgPath)
 ?>
 
 <div id="main" class="page cms-styleguide">
-	<header class="topbar">
-		<div class="inner">
+	<header class="head">
 			<h1>Styleguide</h1>
 			<button
 				type="button"
@@ -49,10 +48,9 @@ $chevronSvg = is_file($chevronSvgPath)
 				onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
 				Toggle theme
 			</button>
-		</div>
 	</header>
 
-	<section class="content">
+	<section class="body">
 		<div class="sections">
 			<section class="section">
 				<h2>Tokens</h2>
@@ -104,7 +102,7 @@ $chevronSvg = is_file($chevronSvgPath)
 			<section class="section">
 				<h2>Pills and status</h2>
 				<div class="sample">
-					<span class="count-pill">24 entries</span>
+					<span class="cms-count">24 entries</span>
 					<?php foreach ($statuses as $status): ?>
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>

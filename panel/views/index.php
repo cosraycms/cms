@@ -7,16 +7,10 @@ if (!$boosted) {
 }
 ?>
 
-<div id="main" class="page dashboard-page">
-	<header class="topbar">
-		<div class="inner">
-			<h1><?= escape((string) $config->app->name) ?></h1>
-		</div>
+<div id="main" class="page cms-dashboard">
+	<header class="head">
+		<h1><?= escape(__('nav:dashboard')) ?></h1>
 	</header>
 
-	<section class="content">
-		<div class="page-head">
-			<h1><?= escape(__('nav:dashboard')) ?></h1>
-		</div>
-	</section>
+	<section class="body"></section>
 </div>

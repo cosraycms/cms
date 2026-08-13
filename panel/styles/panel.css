@@ -2,8 +2,7 @@
 @import './cms-login.css' layer(panel);
 @import './cms-shell.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);
-@import './topbar.css' layer(panel);
-@import './page.css' layer(panel);
+@import './cms-media.css' layer(panel);
 @import './cms-collection.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);

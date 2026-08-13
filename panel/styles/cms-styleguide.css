@@ -1,4 +1,34 @@
 .cms-styleguide {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+
+	& .head {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-4);
+		flex: 0 0 auto;
+		padding: var(--cms-space-3) var(--cms-space-6);
+		border-bottom: 1px solid var(--cms-color-border);
+	}
+
+	& h1 {
+		margin: 0;
+		font-size: var(--cms-font-size-xl);
+		font-weight: 680;
+		letter-spacing: -0.03em;
+	}
+
+	& .body {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-6);
+		overflow: hidden;
+	}
+
 	& .sections {
 		display: flex;
 		flex: 1;

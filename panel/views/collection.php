@@ -60,7 +60,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php endif ?>
 			<div class="line">
 				<h1><?= escape($page->title) ?></h1>
-				<span class="count-pill"><?= escape(__n(
+				<span class="cms-count"><?= escape(__n(
 					'collection:entry-count',
 					'collection:entry-count-plural',
 					$page->total,

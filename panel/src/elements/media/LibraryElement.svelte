@@ -302,7 +302,7 @@
 
 		.cms-media-grid {
 			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+			grid-template-columns: repeat(auto-fill, minmax(var(--cms-tile-min, 9rem), 1fr));
 			gap: var(--cms-space-3);
 		}
 

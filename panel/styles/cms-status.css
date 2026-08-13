@@ -45,3 +45,18 @@
 		color: var(--cms-color-danger-text);
 	}
 }
+
+/* Neutral counter beside a title: entries in a collection, files in a folder. */
+.cms-count {
+	display: inline-flex;
+	align-items: center;
+	min-height: 1.625rem;
+	padding: 0 var(--cms-space-3);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text-muted);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}

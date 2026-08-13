@@ -1,0 +1,55 @@
+/*
+ * Media screen chrome: a head like every other screen, and a recessed body the
+ * library element fills. The library itself is a custom element, so its own
+ * layout lives in its shadow root and only inherits the tokens from here.
+ */
+
+.cms-media,
+.cms-dashboard {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+
+	& .head {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-4);
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		padding: var(--cms-space-3) var(--cms-space-6);
+		border-bottom: 1px solid var(--cms-color-border);
+	}
+
+	& h1 {
+		margin: 0;
+		font-size: var(--cms-font-size-xl);
+		font-weight: 680;
+		letter-spacing: -0.03em;
+	}
+
+	& .body {
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-6);
+		background: var(--cms-color-surface-sunken);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+}
+
+@media (max-width: 52rem) {
+	.cms-media,
+	.cms-dashboard {
+		overflow: visible;
+
+		& .head,
+		& .body {
+			padding-inline: var(--cms-space-4);
+		}
+
+		& .body {
+			overflow: visible;
+		}
+	}
+}
