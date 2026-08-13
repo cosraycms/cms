@@ -67,6 +67,23 @@ The panel follows the operating system. There is no dark block: both themes live
 
 `data-theme="light"` or `data-theme="dark"` on `<html>` forces a theme, and because the palette resolves through `light-dark()` the attribute only has to set `color-scheme`. Nothing sets it today except the styleguide's toggle; it is the hook a per-user theme preference would use.
 
+#### Allowing only one theme
+
+A project that does not want a dark panel declares the scheme it allows:
+
+```css
+/* project stylesheet listed under panel.theme */
+@layer theme {
+	:root {
+		color-scheme: light;
+	}
+}
+```
+
+This is the same declaration a component stylesheet must not make, and it is fine here for the reason it is dangerous there: it is a whole-panel switch, and `:root` in a project theme is the one place that is the intent. `dark` gives the mirror case.
+
+Note what it overrules. `theme` is the highest layer and layer order beats specificity, so this plain `:root` also outranks the panel's `:root[data-theme='dark']` — the styleguide toggle stops responding, and a per-user theme preference would be overruled too. It bans a theme rather than changing the default, which is usually what is wanted, but it settles the question above the editor's head.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.
