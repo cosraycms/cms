@@ -554,7 +554,7 @@ return [
 
 ### Admin panel theming
 
-You can style the admin panel through `panel.theme` in your CMS config. Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`). The panel links those CSS files in the `theme` cascade layer, so they can override built-in tokens such as `--color-*`, `--space-*`, `--radius-*`, `--font-*`, and `--sidebar-width`.
+You can style the admin panel through `panel.theme` in your CMS config. Set it to a single stylesheet path (`string`) or multiple stylesheet paths (`string[]`). The panel links those CSS files in the `theme` cascade layer, so they can override public semantic and component tokens such as `--cms-color-accent`, `--cms-color-primary`, and `--cms-sidebar-width`. All public panel tokens use the `--cms-` prefix; primitive palette, spacing, radius, and font tokens are internal. See [Panel styles](docs/panel-styles.md) for the complete theming contract.
 
 ```php
 return [
