@@ -51,7 +51,7 @@
 		&[aria-current='page'] {
 			background: var(--cms-color-selected);
 			color: var(--cms-color-text);
-			font-weight: 600;
+			font-weight: 500;
 		}
 
 		&[aria-current='page']::before {
