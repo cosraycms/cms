@@ -9,6 +9,7 @@ use Celema\Sire\Extra;
 use Celema\Sire\Shape;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Schema\Handler;
+use Cosray\Locale;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Value;
 use Cosray\Value\ValueContext;
@@ -222,10 +223,33 @@ abstract class Field implements
 		return Shapes::create()->extra(Extra::Allow);
 	}
 
+	/**
+	 * The name a validation message calls this field by.
+	 *
+	 * Rules run on the entry inside the value map, one level below the field
+	 * itself, and sire labels an issue with the key it validated. Left alone
+	 * that makes a failing title report "zxx must be at least 3 characters" —
+	 * the locale key, which means nothing to an editor. The locale is named
+	 * only when the site has more than one to tell apart.
+	 */
+	protected function valueLabel(?Locale $locale = null): string
+	{
+		$label = __($this->getLabel() ?? $this->name);
+
+		if ($locale === null || count($this->owner->locales()) < 2) {
+			return $label;
+		}
+
+		return $label . ' (' . $locale->title . ')';
+	}
+
 	protected function zxxShape(string|Contract\Validator $valueShape, array $validators = []): Shape
 	{
 		$shape = Shapes::create();
-		$field = $shape->add(self::NEUTRAL_LOCALE, $valueShape)->rules(...$validators);
+		$field = $shape
+			->add(self::NEUTRAL_LOCALE, $valueShape)
+			->label($this->valueLabel())
+			->rules(...$validators);
 
 		if (!$this->isRequired()) {
 			$field->optional()->nullable();

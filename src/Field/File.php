@@ -69,6 +69,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 				$localeValidators = $limitValidators;
 				$localeField = $i18nShape
 					->add($locale->id, $fileShape)
+					->label($this->valueLabel($locale))
 					->prepare(Prepare::nullAsEmpty(...));
 
 				if ($this->isRequired() && $locale->id === $defaultLocale) {

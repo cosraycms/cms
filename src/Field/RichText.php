@@ -78,7 +78,10 @@ class RichText extends Text
 					$localeValidators[] = 'required';
 				}
 
-				$localeField = $i18nShape->add($locale->id, $doc)->rules(...$localeValidators);
+				$localeField = $i18nShape
+					->add($locale->id, $doc)
+					->label($this->valueLabel($locale))
+					->rules(...$localeValidators);
 
 				if (!in_array('required', $localeValidators, true)) {
 					$localeField->optional()->nullable();

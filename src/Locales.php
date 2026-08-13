@@ -9,10 +9,11 @@ use Celema\Core\Plugin as CorePlugin;
 use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\AddLocale;
+use Countable;
 use Iterator;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class Locales implements Iterator, CorePlugin
+class Locales implements Iterator, Countable, CorePlugin
 {
 	/** @var array<string, Locale> */
 	protected array $locales = [];
@@ -104,6 +105,15 @@ class Locales implements Iterator, CorePlugin
 	public function get(string $id): Locale
 	{
 		return $this->locales[$id];
+	}
+
+	/**
+	 * Counting must not move the cursor: callers ask how many locales there
+	 * are from inside a `foreach` over the same object.
+	 */
+	public function count(): int
+	{
+		return count($this->locales);
 	}
 
 	public function rewind(): void

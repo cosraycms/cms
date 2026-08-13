@@ -136,6 +136,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 				$localeField = $i18nShape
 					->add($locale->id, $itemShape)
+					->label($this->valueLabel($locale))
 					->rules(...$innerValidators)
 					->prepare(Prepare::nullAsEmpty(...));
 

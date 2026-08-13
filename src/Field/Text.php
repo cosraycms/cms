@@ -39,7 +39,10 @@ class Text extends Field implements Capability\Translatable
 					$localeValidators[] = 'required';
 				}
 
-				$localeField = $i18nShape->add($locale->id, 'string')->rules(...$localeValidators);
+				$localeField = $i18nShape
+					->add($locale->id, 'string')
+					->label($this->valueLabel($locale))
+					->rules(...$localeValidators);
 
 				if (!in_array('required', $localeValidators, true)) {
 					$localeField->optional()->nullable();
