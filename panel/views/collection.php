@@ -16,13 +16,9 @@ if (!$boosted) {
 	$this->layout('panel');
 }
 
-// Track sizing per column kind. A shared floor treats a timestamp and a
-// single-digit sort order alike, which leaves dates truncated while numbers sit
-// in space they never use. Status, badges and row actions size to their content
-// instead of a guessed floor: they hold pills whose width the translation
-// decides. The title absorbs the slack, and when the floors no longer fit the
-// list scrolls sideways with the title column pinned rather than squeezing
-// every column past legibility.
+// Track sizing per column kind. Badges and row actions size to their content
+// because the translation decides a pill's width; the title absorbs the slack,
+// and past the sum of the floors the list scrolls sideways.
 $track = static fn(string $kind): string => match ($kind) {
 	'date' => ' minmax(9rem, auto)',
 	'badge' => ' max-content',

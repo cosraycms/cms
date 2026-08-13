@@ -1,10 +1,6 @@
 /*
- * Settings rail beside the field pane.
- *
- * Scrolls independently of the form — the reason the settings could not stay a
- * tab. Route paths are the width-sensitive part: a multilingual node stacks one
- * full URL per locale in a rail this narrow, so they take the full width with
- * their locale as a label above rather than beside.
+ * A multilingual node stacks one full URL per locale in a rail this narrow, so
+ * route paths take the full width with their locale labelled above, not beside.
  */
 
 .cms-inspector {
@@ -96,7 +92,6 @@
 	}
 }
 
-/* The generated route paths, swapped in by their own request. */
 .cms-settings-generated {
 	display: flex;
 	flex-direction: column;
@@ -113,10 +108,7 @@
 	font-weight: 500;
 }
 
-/*
- * Stacked above the fields, not below: the publish toggle at the foot of a long
- * form is the same problem the pinned header was there to solve.
- */
+/* Above the fields, not below: a publish toggle under a long form is unreachable. */
 @media (max-width: 52rem) {
 	.cms-inspector {
 		flex-basis: auto;

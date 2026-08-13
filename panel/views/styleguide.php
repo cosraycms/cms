@@ -44,9 +44,8 @@ $chevronSvg = is_file($chevronSvgPath)
 			<h1>Styleguide</h1>
 			<?php
 
-			// Reads the effective theme rather than the attribute: without one the
-			// panel follows the system, and the first click has to flip what is
-			// actually on screen.
+			// Reads the effective theme, not the attribute: without one the panel
+			// follows the system.
 			?>
 			<button
 				type="button"

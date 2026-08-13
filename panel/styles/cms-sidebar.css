@@ -54,7 +54,6 @@
 			font-weight: 600;
 		}
 
-		/* Accent marker: the chrome stays neutral, the project's colour marks. */
 		&[aria-current='page']::before {
 			position: absolute;
 			top: 0.4375rem;
@@ -122,7 +121,6 @@
 	}
 }
 
-/* Stacked above the content, the rail scrolls sideways instead of filling it. */
 @media (max-width: 52rem) {
 	.cms-sidebar {
 		flex-basis: auto;

@@ -1,8 +1,5 @@
-/*
- * Media screen chrome: a head like every other screen, and a recessed body the
- * library element fills. The library itself is a custom element, so its own
- * layout lives in its shadow root and only inherits the tokens from here.
- */
+/* The library is a custom element: its layout lives in its shadow root and
+   only the tokens reach it from here. */
 
 .cms-media,
 .cms-dashboard {

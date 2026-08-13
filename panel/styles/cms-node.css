@@ -1,10 +1,5 @@
-/*
- * Node editor.
- *
- * Header, then two panes that scroll independently. The header sits outside
- * the scroll regions, so the save actions stay in view however long the form
- * is — the whole reason the editor moved onto the shell's scroll model.
- */
+/* The header sits outside the scroll regions, so the save actions stay in view
+   however long the form is. */
 
 .cms-node {
 	display: flex;
@@ -95,7 +90,6 @@
 		}
 	}
 
-	/* One child today when the node has no settings, two when it has. */
 	& .panes {
 		display: flex;
 		align-items: stretch;

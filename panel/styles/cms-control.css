@@ -1,10 +1,3 @@
-/*
- * Form controls.
- *
- * Their own vocabulary rather than parts of a field: the inspector, the media
- * screens and the modals use the same controls away from any field wrapper.
- */
-
 .cms-input,
 .cms-textarea,
 .cms-select {
@@ -38,7 +31,6 @@
 		cursor: not-allowed;
 	}
 
-	/* A wrong value is stated on the control, not only in the error summary. */
 	&[aria-invalid='true'] {
 		border-color: var(--cms-color-danger);
 	}
@@ -110,7 +102,6 @@
 	font-size: var(--cms-font-size-sm);
 }
 
-/* Sub-controls of a group or repeater: a date range as two inputs, say. */
 .cms-group {
 	display: flex;
 	flex-wrap: wrap;
@@ -127,7 +118,6 @@
 	flex: 1 1 calc(var(--group-width) - var(--cms-space-3));
 }
 
-/* Declared widths share a row while there is room, then stack. */
 @container (max-width: 26rem) {
 	.cms-group-field[data-width] {
 		flex-basis: 100%;
@@ -173,10 +163,7 @@
 	color: var(--cms-color-text-muted);
 }
 
-/*
- * Raw markup reads as code, so it is inverted on purpose in both themes — the
- * same call as the code editor and the richtext source box.
- */
+/* Inverted on purpose in both themes, like the code editor. */
 .cms-textarea.iframe {
 	background-color: var(--cms-color-neutral-700);
 	color: var(--cms-color-neutral-100);

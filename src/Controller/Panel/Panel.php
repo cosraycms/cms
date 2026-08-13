@@ -21,15 +21,9 @@ use function Cosray\env;
 abstract class Panel
 {
 	/**
-	 * Which masthead area this screen belongs to.
-	 *
-	 * The masthead marks the matching entry current and the collection rail
-	 * renders only for `content`, so a screen states where it lives instead of
-	 * the views inferring it from a URL the panel's mount point can change.
-	 *
-	 * Content is the default because a project's own panel pages put their
-	 * entry in that rail: they belong to the area whether or not they know
-	 * this constant exists. The screens standing on their own opt out.
+	 * Which masthead area this screen belongs to. The rail renders only for
+	 * `content`, which is the default because a project's own panel pages put
+	 * their entry in that rail without knowing this constant exists.
 	 */
 	protected const string AREA = 'content';
 
@@ -246,9 +240,8 @@ abstract class Panel
 	}
 
 	/**
-	 * Where the masthead's content entry goes: the first entry of the rail it
-	 * opens, in the rail's own order. Null when a project defines no
-	 * collections at all, which is also when the rail itself stays away.
+	 * Where the masthead's content entry goes: the first entry of the rail, in
+	 * the rail's own order. Null when a project defines no collections.
 	 */
 	private function contentUrl(): ?string
 	{

@@ -1,10 +1,4 @@
-/*
- * Modal chrome.
- *
- * Built in plain DOM by the standalone bridge and filled by whichever component
- * the caller mounts, so the shared parts live here and each modal's own layout
- * stays inside its component.
- */
+/* These class names are built in plain DOM by lib/bridge-standalone.ts. */
 
 .cms-modal {
 	position: fixed;
@@ -89,7 +83,6 @@
 	}
 }
 
-/* A message with an acknowledgement, mounted into the modal container. */
 .cms-dialog {
 	display: flex;
 	flex-direction: column;

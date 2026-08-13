@@ -1,4 +1,4 @@
-/* Toast stack, built in plain DOM by the standalone bridge. */
+/* These class names are built in plain DOM by lib/bridge-standalone.ts. */
 
 .cms-toasts {
 	position: fixed;

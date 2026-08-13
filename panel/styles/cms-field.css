@@ -1,11 +1,4 @@
 /*
- * Fields: the grid they sit on, the wrapper around each one, and fieldsets.
- *
- * The controls themselves are their own vocabulary (cms-control.css) because
- * the inspector and the media screens use them too, away from any field.
- */
-
-/*
  * A hundred columns so a field can declare any width as a span. Row gap only:
  * a column gap would be applied ninety-nine times and push the grid far past
  * its container. The gutter between side-by-side fields comes from their own
@@ -39,7 +32,6 @@
 		}
 	}
 
-	/* Required is a property of the field, marked once on its label. */
 	&.required > .label > div::after {
 		margin-left: var(--cms-space-1);
 		color: var(--cms-color-danger);
@@ -141,7 +133,6 @@
 	}
 }
 
-/* Field-level metadata (alt text, captions) behind a dialog. */
 .cms-meta {
 	min-width: min(28rem, 90vw);
 	padding: var(--cms-space-6);

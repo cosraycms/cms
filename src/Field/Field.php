@@ -227,10 +227,8 @@ abstract class Field implements
 	 * The name a validation message calls this field by.
 	 *
 	 * Rules run on the entry inside the value map, one level below the field
-	 * itself, and sire labels an issue with the key it validated. Left alone
-	 * that makes a failing title report "zxx must be at least 3 characters" —
-	 * the locale key, which means nothing to an editor. The locale is named
-	 * only when the site has more than one to tell apart.
+	 * itself, and sire labels an issue with the key it validated — without
+	 * this a failing title reports "zxx must be at least 3 characters".
 	 */
 	protected function valueLabel(?Locale $locale = null): string
 	{

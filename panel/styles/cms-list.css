@@ -1,14 +1,6 @@
 /*
- * Tabular markup, grid layout.
- *
- * The table element stays because the listing is genuinely tabular — sortable
- * columns, keyboard and screen-reader behaviour — but grid gives per-column
- * sizing, tree indentation without colspan tricks, and a single template swap
- * for the card layout on narrow screens. Changing `display` drops the implicit
- * table roles, so the markup states them.
- *
- * Column count lives in `--columns`, set per collection. Selection and row
- * action columns arrive as extra tracks there, not as a second layout.
+ * Changing `display` on table markup drops the implicit table roles, so the
+ * markup states them. Column tracks live in `--columns`, set per collection.
  */
 
 .cms-list {
@@ -156,12 +148,7 @@
 		flex-wrap: wrap;
 	}
 
-	/*
-	 * Tree rows.
-	 *
-	 * Indentation and the guide come off --tree-depth on the row, so nesting
-	 * costs one custom property instead of a wrapper per level.
-	 */
+	/* Indentation and the guide come off --tree-depth on the row. */
 	& .title {
 		--step: 1.375rem;
 
@@ -176,10 +163,6 @@
 			padding-left: 0;
 		}
 
-		/*
-		 * Dotted guide beside the row's own level — one gradient on the title
-		 * rather than a positioned element per level of depth.
-		 */
 		&:not(.is-flat)::before {
 			position: absolute;
 			top: 0;
@@ -250,7 +233,6 @@
 		white-space: nowrap;
 	}
 
-	/* Revealed on hover; keyboard and touch reach them too. */
 	& .row-actions {
 		display: inline-flex;
 		align-items: center;
@@ -318,7 +300,6 @@
 	}
 }
 
-/* One template swap turns every row into a label/value card. */
 @media (max-width: 52rem) {
 	.cms-list {
 		/*

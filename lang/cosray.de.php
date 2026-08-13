@@ -122,8 +122,7 @@ return [
 	],
 	// The scanner only sees literal `__()` arguments. The media ids above are
 	// literals in IngestError, translated later through `__($e->key)`, so a
-	// sync reports them obsolete every time; they are not. Only the entry
-	// below really is: the editor's settings tab became the inspector rail.
+	// sync reports them obsolete every time; they are not.
 	'obsolete' => [
 		'editor:content' => 'Inhalt',
 	],

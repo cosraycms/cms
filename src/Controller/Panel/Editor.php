@@ -355,12 +355,8 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * The messages behind a rejected save.
-	 *
-	 * Validation reports sire issues — path, code, message — because that is
-	 * what a field-keyed error UI will need. The editor has no such UI yet and
-	 * lists the messages, so the objects are reduced here rather than in the
-	 * view, which would otherwise drop them silently for not being strings.
+	 * The messages behind a rejected save. Validation reports sire issue
+	 * objects; the view renders strings.
 	 *
 	 * @param array<string, mixed> $payload
 	 * @return list<string>

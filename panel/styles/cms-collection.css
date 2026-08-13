@@ -66,7 +66,6 @@
 		flex-wrap: wrap;
 	}
 
-	/* Recessed region holding the toolbar and the card, per the redesign. */
 	& .body {
 		display: flex;
 		flex-direction: column;
@@ -78,10 +77,6 @@
 		overflow: hidden;
 	}
 
-	/*
-	 * Wrapping flex with nothing sized to it, so the filter control and the
-	 * scope chip drop in later without touching the layout.
-	 */
 	& .toolbar {
 		display: flex;
 		align-items: center;
@@ -307,7 +302,6 @@
 			overflow: visible;
 		}
 
-		/* Actions wrap under the title rather than stacking in a narrow column. */
 		& .actions {
 			justify-content: flex-start;
 			width: 100%;

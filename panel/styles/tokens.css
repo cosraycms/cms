@@ -13,38 +13,25 @@
  * has to flip for the dark theme, and a hex buried in a component stylesheet
  * is a hole in that flip.
  *
- * Both themes live in the one `:root` block. A token that differs carries
- * `light-dark(light, dark)`, so the two values sit on the same line and a
- * token cannot be changed in one theme and forgotten in the other.
+ * Both themes live in the one `:root` block: a token that differs carries
+ * `light-dark(light, dark)`.
  */
 
 :root {
 	/*
-	 * Follows the operating system. `light-dark()` resolves against the used
-	 * colour scheme, so this declaration is what actually selects the theme —
-	 * and it hands scrollbars, form controls and the canvas the matching
-	 * defaults at the same time. Forcing one theme is a `data-theme`
-	 * attribute; see the bottom of this file.
+	 * `light-dark()` resolves against the used colour scheme, so this
+	 * declaration selects the theme and hands native controls the matching
+	 * defaults at once.
 	 */
 	color-scheme: light dark;
 
 	/**
 	 * Primitives — typography
 	 *
-	 * The redesign specifies Inter Tight. Adopting it means self-hosting the
-	 * files (a Google Fonts request from the panel would ship visitor IPs to
-	 * a third party), which is its own change.
-	 *
-	 * `system-ui` leads because it reaches the variable cut of the platform
-	 * font where there is one — SF, Segoe UI Variable — and those are the only
-	 * families with a full weight range that cost no download.
-	 *
-	 * Which is why the panel uses 400, 500, 600 and 700 and nothing between.
-	 * Static families carry a handful of real faces, and CSS resolves a weight
-	 * above 500 by searching *upward* first: 650 lands on Bold wherever Segoe
-	 * UI is static, so an in-between value reads heavier on Windows than it
-	 * does here. Below 500 the search prefers lighter, so 300 degrading to
-	 * regular is safe.
+	 * Use 400, 500, 600 and 700 and nothing between. A static family carries a
+	 * handful of real faces, and CSS resolves a weight above 500 by searching
+	 * *upward* first, so 650 lands on Bold wherever Segoe UI is static. Below
+	 * 500 the search prefers lighter, which makes 300 safe to ask for.
 	 */
 	--cms-font-sans:
 		ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu,
@@ -389,10 +376,9 @@
 /**
  * Forcing a theme.
  *
- * Without the attribute the panel follows the operating system. `data-theme`
- * pins it, and because every token resolves through `light-dark()` the whole
- * palette turns on this one declaration. It is the hook a future per-user
- * theme preference would set.
+ * Without the attribute the panel follows the operating system. Because every
+ * token resolves through `light-dark()`, the whole palette turns on this one
+ * declaration.
  */
 :root[data-theme='light'] {
 	color-scheme: light;

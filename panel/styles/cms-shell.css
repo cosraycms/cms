@@ -1,10 +1,7 @@
 /*
  * The shell is exactly one viewport tall and never scrolls; the regions inside
- * it do. That keeps the masthead and every page's actions in view instead of
- * leaving a save button somewhere below the fold.
- *
- * Below the breakpoint it hands scrolling back to the document: nested
- * scrollers and an on-screen keyboard do not get along.
+ * it do. Below the breakpoint it hands scrolling back to the document, because
+ * nested scrollers and an on-screen keyboard do not get along.
  */
 
 .cms-shell {
