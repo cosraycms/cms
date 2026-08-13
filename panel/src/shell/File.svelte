@@ -94,7 +94,7 @@
 		}
 
 		.cms-file-name {
-			font-weight: 600;
+			font-weight: 500;
 		}
 
 		.cms-file-title {

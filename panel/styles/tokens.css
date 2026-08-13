@@ -34,10 +34,21 @@
 	 * The redesign specifies Inter Tight. Adopting it means self-hosting the
 	 * files (a Google Fonts request from the panel would ship visitor IPs to
 	 * a third party), which is its own change.
+	 *
+	 * `system-ui` leads because it reaches the variable cut of the platform
+	 * font where there is one — SF, Segoe UI Variable — and those are the only
+	 * families with a full weight range that cost no download.
+	 *
+	 * Which is why the panel uses 400, 500, 600 and 700 and nothing between.
+	 * Static families carry a handful of real faces, and CSS resolves a weight
+	 * above 500 by searching *upward* first: 650 lands on Bold wherever Segoe
+	 * UI is static, so an in-between value reads heavier on Windows than it
+	 * does here. Below 500 the search prefers lighter, so 300 degrading to
+	 * regular is safe.
 	 */
 	--cms-font-sans:
-		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
-		'Helvetica Neue', sans-serif;
+		ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu,
+		Cantarell, 'Helvetica Neue', sans-serif;
 
 	--cms-font-size-xs: 0.75rem;
 	--cms-font-size-sm: 0.875rem;

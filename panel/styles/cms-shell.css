@@ -107,7 +107,7 @@
 		border-radius: var(--cms-radius-md);
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
-		font-weight: 550;
+		font-weight: 500;
 		white-space: nowrap;
 		text-decoration: none;
 		transition:
@@ -140,7 +140,7 @@
 		border-radius: var(--cms-radius-md);
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
-		font-weight: 550;
+		font-weight: 500;
 
 		&:hover {
 			background: var(--cms-color-surface);

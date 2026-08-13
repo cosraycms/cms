@@ -65,7 +65,7 @@
 	& .title {
 		margin: 0;
 		font-size: var(--cms-font-size-base);
-		font-weight: 650;
+		font-weight: 600;
 	}
 
 	& .body {
@@ -99,7 +99,7 @@
 	& h2 {
 		margin: 0;
 		font-size: var(--cms-font-size-base);
-		font-weight: 650;
+		font-weight: 600;
 	}
 
 	& .body {

@@ -156,7 +156,7 @@
 	margin-bottom: var(--cms-space-1);
 	color: var(--cms-color-text-muted);
 	font-size: var(--cms-font-size-xs);
-	font-weight: 600;
+	font-weight: 500;
 }
 
 .cms-control-unknown,

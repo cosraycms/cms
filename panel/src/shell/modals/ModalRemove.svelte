@@ -36,7 +36,7 @@
 	@layer panel {
 		.cms-modal-remove-message {
 			margin-top: var(--cms-space-6);
-			font-weight: 600;
+			font-weight: 500;
 		}
 	}
 </style>

@@ -17,7 +17,7 @@
 	background-color: var(--button-bg);
 	color: var(--button-text);
 	font-size: var(--cms-font-size-sm);
-	font-weight: 600;
+	font-weight: 500;
 	line-height: 1.25rem;
 	text-decoration: none;
 	box-shadow: var(--cms-shadow-sm);

@@ -168,7 +168,7 @@
 		}
 
 		.entry-number {
-			font-weight: 600;
+			font-weight: 500;
 			color: var(--cms-color-text-subtle);
 		}
 

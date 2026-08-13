@@ -46,7 +46,7 @@
 	& .label {
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-xs);
-		font-weight: 650;
+		font-weight: 500;
 	}
 
 	& input[type='text'] {
@@ -85,7 +85,7 @@
 		& .title {
 			color: var(--cms-color-text);
 			font-size: var(--cms-font-size-sm);
-			font-weight: 650;
+			font-weight: 500;
 		}
 
 		& .help {
@@ -110,7 +110,7 @@
 }
 
 .cms-generated-path-locale {
-	font-weight: 650;
+	font-weight: 500;
 }
 
 /*

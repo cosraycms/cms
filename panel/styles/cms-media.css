@@ -24,7 +24,7 @@
 	& h1 {
 		margin: 0;
 		font-size: var(--cms-font-size-xl);
-		font-weight: 680;
+		font-weight: 600;
 		letter-spacing: -0.03em;
 	}
 

@@ -195,7 +195,7 @@
 		background-color: var(--cms-color-surface);
 		padding: var(--cms-space-2) var(--cms-space-4);
 		font-size: var(--cms-font-size-sm);
-		font-weight: 600;
+		font-weight: 500;
 		color: var(--cms-color-text-muted);
 		outline: none;
 	}

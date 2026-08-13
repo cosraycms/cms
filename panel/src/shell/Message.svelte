@@ -146,7 +146,7 @@
 
 		:global(.message em) {
 			white-space: nowrap;
-			font-weight: 600;
+			font-weight: 500;
 			font-style: italic;
 		}
 	}
