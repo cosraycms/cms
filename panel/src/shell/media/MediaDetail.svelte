@@ -342,7 +342,7 @@
 			width: min(28rem, 100vw);
 			display: flex;
 			flex-direction: column;
-			background-color: var(--cms-color-neutral-50, #fff);
+			background-color: var(--cms-color-surface);
 			border-left: 1px solid var(--cms-color-border-strong);
 			box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
 			z-index: 41;
@@ -416,6 +416,7 @@
 			position: absolute;
 			width: 0.85rem;
 			height: 0.85rem;
+			/* Sits on arbitrary media: a white ring inside a dark one, both themes. */
 			border: 2px solid #fff;
 			border-radius: 50%;
 			background-color: var(--cms-color-info);

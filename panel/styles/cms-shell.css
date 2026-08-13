@@ -71,6 +71,7 @@
 			width: 2.125rem;
 			height: 2.125rem;
 			border-radius: var(--cms-radius-md);
+			/* A highlight stays a highlight: this one lifts in both themes. */
 			background: linear-gradient(
 				135deg,
 				var(--cms-color-accent),

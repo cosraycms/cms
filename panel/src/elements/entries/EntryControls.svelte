@@ -110,7 +110,7 @@
 			width: var(--cms-space-4);
 
 			&[disabled] {
-				color: rgb(209 213 219);
+				color: var(--cms-color-text-faint);
 			}
 		}
 

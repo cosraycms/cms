@@ -136,7 +136,7 @@
 <style>
 	@layer panel {
 		.entry {
-			background: white;
+			background: var(--cms-color-surface-raised);
 			border: 1px solid var(--cms-color-border-strong);
 			border-radius: 0.375rem;
 			overflow: hidden;

@@ -343,7 +343,8 @@
 			right: var(--cms-space-1);
 			bottom: var(--cms-space-1);
 			border-radius: var(--cms-radius);
-			background-color: rgba(255, 255, 255, 0.85);
+			/* A plate over the thumbnail: translucent, but still panel chrome. */
+			background-color: color-mix(in srgb, var(--cms-color-surface) 85%, transparent);
 			padding: 0 var(--cms-space-1);
 			font-size: var(--cms-font-size-xs);
 			color: var(--cms-color-text-muted);
