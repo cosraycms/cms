@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Cosray\Exception;
 
 /**
- * A rejected asset ingest. The message is plain English for CLI callers;
- * `key` and `params` let HTTP callers render the translated panel message.
+ * A rejected asset ingest. The exception message is plain English for CLI
+ * callers and logs; `userMessage` is the translated one an HTTP caller returns.
  */
 class IngestError extends RuntimeException
 {
 	public function __construct(
 		string $message,
-		public readonly string $key,
-		public readonly array $params = [],
+		public readonly string $userMessage,
 		public readonly ?string $mime = null,
 	) {
 		parent::__construct($message);
@@ -21,7 +20,7 @@ class IngestError extends RuntimeException
 
 	public static function unknownFilename(): self
 	{
-		return new self('No usable filename', 'media:upload-failed');
+		return new self('No usable filename', __('media:upload-failed'));
 	}
 
 	public static function tooLarge(int $bytes, int $maxSize): self
@@ -31,8 +30,7 @@ class IngestError extends RuntimeException
 
 		return new self(
 			"File too large: {$size} MiB ({$allowed} MiB allowed)",
-			'media:too-large',
-			['size' => $size, 'allowed' => $allowed],
+			__('media:too-large', ['size' => $size, 'allowed' => $allowed]),
 		);
 	}
 
@@ -40,8 +38,7 @@ class IngestError extends RuntimeException
 	{
 		return new self(
 			"File type not allowed: {$mime}",
-			'media:disallowed-type',
-			['type' => $mime],
+			__('media:disallowed-type', ['type' => $mime]),
 			$mime,
 		);
 	}
@@ -52,14 +49,13 @@ class IngestError extends RuntimeException
 
 		return new self(
 			"File extension '{$ext}' not allowed for {$mime} (allowed: {$list})",
-			'media:wrong-extension',
-			['ext' => (string) $ext, 'allowed' => $list],
+			__('media:wrong-extension', ['ext' => (string) $ext, 'allowed' => $list]),
 			$mime,
 		);
 	}
 
 	public static function unsafeSvg(): self
 	{
-		return new self('SVG markup rejected by the sanitizer', 'media:unsafe-svg');
+		return new self('SVG markup rejected by the sanitizer', __('media:unsafe-svg'));
 	}
 }

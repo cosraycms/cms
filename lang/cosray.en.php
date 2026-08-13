@@ -120,9 +120,6 @@ return [
 		'validation:max-items' => 'Has more than the maximum allowed number of {arg1} items',
 		'validation:min-items' => 'Has fewer than the minimum number of {arg1} items',
 	],
-	// The scanner only sees literal `__()` arguments. The media ids above are
-	// literals in IngestError, translated later through `__($e->key)`, so a
-	// sync reports them obsolete every time; they are not.
 	'obsolete' => [
 		'editor:content' => 'Content',
 	],

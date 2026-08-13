@@ -99,7 +99,7 @@ class Media
 		$payload = [
 			'ok' => false,
 			'file' => $filename,
-			'error' => __($e->key, $e->params),
+			'error' => $e->userMessage,
 			'code' => 0,
 		];
 

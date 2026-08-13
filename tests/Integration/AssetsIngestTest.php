@@ -144,15 +144,17 @@ final class AssetsIngestTest extends IntegrationTestCase
 		$this->ingest()->ingest($this->pngBytes(), 'tiny.png', 'audio');
 	}
 
-	public function testErrorCarriesTranslationKeyAndParams(): void
+	public function testErrorCarriesBothAudiencesMessages(): void
 	{
 		try {
 			$this->ingest()->ingest('plain text', 'note.png', 'image');
 			$this->fail('Expected IngestError');
 		} catch (IngestError $e) {
-			$this->assertSame('media:disallowed-type', $e->key);
-			$this->assertSame(['type' => 'text/plain'], $e->params);
+			$this->assertSame('File type not allowed: text/plain', $e->getMessage());
 			$this->assertSame('text/plain', $e->mime);
+			// No translator is active outside a request, where verba falls back
+			// to the id. The rendered message is covered through the HTTP path.
+			$this->assertSame('media:disallowed-type', $e->userMessage);
 		}
 	}
 

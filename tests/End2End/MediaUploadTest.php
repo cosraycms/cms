@@ -139,7 +139,8 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertResponseStatus(400, $response);
 		$json = $this->getJsonResponse($response);
 		$this->assertFalse($json['ok']);
-		$this->assertStringContainsString('not allowed', (string) $json['error']);
+		// Translated and interpolated: the id would carry neither.
+		$this->assertSame('The file type is not allowed: text/plain.', (string) $json['error']);
 
 		$this->assertEmpty(glob("{$this->publicDir}/assets/*/*"));
 	}
