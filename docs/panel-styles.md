@@ -49,7 +49,9 @@ Three rules make the palette work:
 - **Components reference semantic tokens, never primitives.** `--cms-color-white` and `--cms-color-neutral-900` do not flip — that is the point of a primitive. A component that reaches for one is pinned to the light theme even though it contains no raw hex. Use `--cms-color-surface` and `--cms-color-text`. The exceptions are values that genuinely must not flip: a scrim that stays dark in both themes, or an iframe showing site content rather than panel chrome.
 
 - **Pairs flip together.** `--cms-color-primary` and `--cms-color-primary-text` are one decision. Overriding the background alone produces an unreadable button in one of the two themes.
-- **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas.
+- **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas. The same holds for the direction a variant moves in: mix toward `--cms-color-shade`, which is black on light and white on dark, so a hover darkens on one theme and lightens on the other instead of sinking into the surface.
+
+An override is a plain value and applies to both themes. A project that wants two, and it usually does not, writes `light-dark()` itself.
 
 ### Colour roles
 
@@ -59,9 +61,11 @@ Accent covers links, focus rings, selection and active navigation, and is the to
 
 ### Dark theme
 
-Dark lives under `:root[data-theme='dark']` and is opt-in. The `prefers-color-scheme` switch lands once every screen is ported and checked — enabling it earlier would hand a half-dark panel to everyone whose system is set to dark.
+The panel follows the operating system. There is no dark block: both themes live in the one `:root` block, and a token that differs carries `light-dark(light, dark)` so its two values sit on the same line and cannot be changed in one theme and forgotten in the other.
 
-`color-scheme` is declared in `tokens.css` alongside the palette so native controls, scrollbars and form widgets follow. Do not redeclare it from a component stylesheet: the `panel` layer outranks `tokens` and would pin the whole panel to one scheme.
+`color-scheme: light dark` in `tokens.css` is what selects between them — `light-dark()` resolves against the used colour scheme — and it hands native controls, scrollbars and the canvas the matching defaults at the same time. Do not redeclare `color-scheme` from a component stylesheet: the `panel` layer outranks `tokens`, so a stray declaration pins every token below it to one theme. That is a whole-panel switch wearing the costume of a local one.
+
+`data-theme="light"` or `data-theme="dark"` on `<html>` forces a theme, and because the palette resolves through `light-dark()` the attribute only has to set `color-scheme`. Nothing sets it today except the styleguide's toggle; it is the hook a per-user theme preference would use.
 
 ## Class names
 

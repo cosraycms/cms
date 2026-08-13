@@ -12,10 +12,21 @@
  * Raw colour values belong in this file and nowhere else: every one of them
  * has to flip for the dark theme, and a hex buried in a component stylesheet
  * is a hole in that flip.
+ *
+ * Both themes live in the one `:root` block. A token that differs carries
+ * `light-dark(light, dark)`, so the two values sit on the same line and a
+ * token cannot be changed in one theme and forgotten in the other.
  */
 
 :root {
-	color-scheme: light;
+	/*
+	 * Follows the operating system. `light-dark()` resolves against the used
+	 * colour scheme, so this declaration is what actually selects the theme —
+	 * and it hands scrollbars, form controls and the canvas the matching
+	 * defaults at the same time. Forcing one theme is a `data-theme`
+	 * attribute; see the bottom of this file.
+	 */
+	color-scheme: light dark;
 
 	/**
 	 * Primitives — typography
@@ -108,8 +119,9 @@
 	/**
 	 * Primitives — neutral ramp
 	 *
-	 * Cool greys. The ramp does not flip for the dark theme; dark surfaces are
-	 * their own set of values (see the dark block), because inverting a light
+	 * Cool greys. Primitives never flip — that is what makes them primitives.
+	 * The ramp carries the dark theme's text, but not its surfaces: those are
+	 * their own values on the semantic tokens below, because inverting a light
 	 * ramp gives washed-out, flat darks.
 	 */
 	--cms-color-white: #fff;
@@ -166,19 +178,19 @@
 	 * sunken   recessed regions inside the shell (listing area, field pane)
 	 * raised   cards sitting on a sunken region
 	 */
-	--cms-color-canvas: var(--cms-color-neutral-100);
-	--cms-color-surface: var(--cms-color-white);
-	--cms-color-surface-sunken: #f5f6f8;
-	--cms-color-surface-raised: var(--cms-color-white);
+	--cms-color-canvas: light-dark(var(--cms-color-neutral-100), #0f1115);
+	--cms-color-surface: light-dark(var(--cms-color-white), #171a20);
+	--cms-color-surface-sunken: light-dark(#f5f6f8, #13161b);
+	--cms-color-surface-raised: light-dark(var(--cms-color-white), #1c2027);
 	--cms-color-rail: var(--cms-color-surface);
 
 	/**
 	 * Semantic — text
 	 */
-	--cms-color-text: var(--cms-color-neutral-900);
-	--cms-color-text-muted: var(--cms-color-neutral-600);
-	--cms-color-text-subtle: var(--cms-color-neutral-500);
-	--cms-color-text-faint: var(--cms-color-neutral-400);
+	--cms-color-text: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-100));
+	--cms-color-text-muted: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
+	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
+	--cms-color-text-faint: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-500));
 
 	/*
 	 * Text on a filled status or accent surface — toasts, badges, the danger
@@ -186,22 +198,29 @@
 	 * darken with them; a fixed white would vanish. Note, not a section
 	 * heading: `/**` blocks in this file name a group.
 	 */
-	--cms-color-text-on-fill: var(--cms-color-neutral-50);
+	--cms-color-text-on-fill: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
 
 	/**
 	 * Semantic — edges
 	 */
-	--cms-color-border: var(--cms-color-neutral-200);
-	--cms-color-border-soft: #eef0f3;
-	--cms-color-border-strong: var(--cms-color-neutral-300);
+	--cms-color-border: light-dark(var(--cms-color-neutral-200), #282d36);
+	--cms-color-border-soft: light-dark(#eef0f3, #22262e);
+	--cms-color-border-strong: light-dark(var(--cms-color-neutral-300), #333a45);
 	--cms-border-color: var(--cms-color-border);
 	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
 
 	/**
 	 * Semantic — interaction
 	 */
-	--cms-color-hover: var(--cms-color-neutral-100);
-	--cms-color-selected: #e8eaee;
+	--cms-color-hover: light-dark(var(--cms-color-neutral-100), #20242c);
+	--cms-color-selected: light-dark(#e8eaee, #272c35);
+
+	/*
+	 * The direction a hover or text variant moves in: toward black on a light
+	 * canvas, toward white on a dark one. Mixing toward a fixed black sinks
+	 * dark-theme hovers into the surface they sit on.
+	 */
+	--cms-color-shade: light-dark(var(--cms-color-black), var(--cms-color-white));
 
 	/**
 	 * Semantic — primary
@@ -210,9 +229,9 @@
 	 * colour can be the accent without fighting it. The pair flips together in
 	 * the dark theme, otherwise primary buttons disappear into the page.
 	 */
-	--cms-color-primary: var(--cms-color-neutral-900);
-	--cms-color-primary-text: var(--cms-color-neutral-50);
-	--cms-color-primary-hover: var(--cms-color-neutral-700);
+	--cms-color-primary: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-50));
+	--cms-color-primary-text: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
+	--cms-color-primary-hover: light-dark(var(--cms-color-neutral-700), var(--cms-color-neutral-200));
 
 	/**
 	 * Semantic — accent
@@ -220,13 +239,13 @@
 	 * Links, focus, selection markers, active navigation. This is the token
 	 * downstream projects are expected to tint.
 	 */
-	--cms-color-accent: var(--cms-color-blue-700);
+	--cms-color-accent: light-dark(var(--cms-color-blue-700), var(--cms-color-blue-400));
 	--cms-color-accent-hover: color-mix(
 		in oklch,
 		var(--cms-color-accent),
-		var(--cms-color-black) 12%
+		var(--cms-color-shade) 12%
 	);
-	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), var(--cms-color-black) 12%);
+	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), var(--cms-color-shade) 12%);
 	--cms-color-accent-surface: color-mix(
 		in oklch,
 		var(--cms-color-accent),
@@ -248,12 +267,13 @@
 	/**
 	 * Semantic — status
 	 *
-	 * Surfaces mix against `--cms-color-surface` rather than white so they stay
-	 * legible after the dark flip.
+	 * Surfaces mix against `--cms-color-surface` rather than white, and text
+	 * and hover states against `--cms-color-shade` rather than black, so all
+	 * of them follow the theme instead of pinning themselves to the light one.
 	 */
 	--cms-color-info: var(--cms-color-accent);
-	--cms-color-info-hover: color-mix(in oklch, var(--cms-color-info), var(--cms-color-black) 12%);
-	--cms-color-info-text: color-mix(in oklch, var(--cms-color-info), var(--cms-color-black) 12%);
+	--cms-color-info-hover: color-mix(in oklch, var(--cms-color-info), var(--cms-color-shade) 12%);
+	--cms-color-info-text: color-mix(in oklch, var(--cms-color-info), var(--cms-color-shade) 12%);
 	--cms-color-info-surface: color-mix(
 		in oklch,
 		var(--cms-color-info),
@@ -261,16 +281,16 @@
 	);
 	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
 
-	--cms-color-success: var(--cms-color-green-600);
+	--cms-color-success: light-dark(var(--cms-color-green-600), var(--cms-color-green-400));
 	--cms-color-success-hover: color-mix(
 		in oklch,
 		var(--cms-color-success),
-		var(--cms-color-black) 12%
+		var(--cms-color-shade) 12%
 	);
 	--cms-color-success-text: color-mix(
 		in oklch,
 		var(--cms-color-success),
-		var(--cms-color-black) 12%
+		var(--cms-color-shade) 12%
 	);
 	--cms-color-success-surface: color-mix(
 		in oklch,
@@ -278,11 +298,11 @@
 		var(--cms-color-surface) 88%
 	);
 
-	--cms-color-warning: var(--cms-color-orange-700);
+	--cms-color-warning: light-dark(var(--cms-color-orange-700), var(--cms-color-orange-400));
 	--cms-color-warning-text: color-mix(
 		in oklch,
 		var(--cms-color-warning),
-		var(--cms-color-black) 12%
+		var(--cms-color-shade) 12%
 	);
 	--cms-color-warning-surface: color-mix(
 		in oklch,
@@ -290,13 +310,13 @@
 		var(--cms-color-surface) 88%
 	);
 
-	--cms-color-danger: var(--cms-color-rose-700);
+	--cms-color-danger: light-dark(var(--cms-color-rose-700), var(--cms-color-rose-400));
 	--cms-color-danger-hover: color-mix(
 		in oklch,
 		var(--cms-color-danger),
-		var(--cms-color-black) 12%
+		var(--cms-color-shade) 12%
 	);
-	--cms-color-danger-text: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-black) 12%);
+	--cms-color-danger-text: color-mix(in oklch, var(--cms-color-danger), var(--cms-color-shade) 12%);
 	--cms-color-danger-surface: color-mix(
 		in oklch,
 		var(--cms-color-danger),
@@ -314,7 +334,11 @@
 	--cms-button-primary-hover-border: var(--cms-button-primary-hover-bg);
 	--cms-button-primary-ring: var(--cms-color-accent-ring);
 
-	--cms-button-secondary-bg: var(--cms-color-surface);
+	/*
+	 * Raised, not plain surface: identical to it on light, and the step that
+	 * keeps a secondary button readable against a dark one.
+	 */
+	--cms-button-secondary-bg: var(--cms-color-surface-raised);
 	--cms-button-secondary-text: var(--cms-color-text);
 	--cms-button-secondary-border: var(--cms-color-border-strong);
 	--cms-button-secondary-hover-bg: var(--cms-color-hover);
@@ -352,52 +376,17 @@
 }
 
 /**
- * Dark theme.
+ * Forcing a theme.
  *
- * Opt-in only for now. The `prefers-color-scheme` switch lands once every
- * screen has been ported and checked — turning it on earlier would hand a
- * half-dark panel to everyone whose system is set to dark.
+ * Without the attribute the panel follows the operating system. `data-theme`
+ * pins it, and because every token resolves through `light-dark()` the whole
+ * palette turns on this one declaration. It is the hook a future per-user
+ * theme preference would set.
  */
+:root[data-theme='light'] {
+	color-scheme: light;
+}
+
 :root[data-theme='dark'] {
 	color-scheme: dark;
-
-	--cms-color-canvas: #0f1115;
-	--cms-color-surface: #171a20;
-	--cms-color-surface-sunken: #13161b;
-	--cms-color-surface-raised: #1c2027;
-
-	--cms-color-text: var(--cms-color-neutral-100);
-	--cms-color-text-muted: var(--cms-color-neutral-300);
-	--cms-color-text-subtle: var(--cms-color-neutral-400);
-	--cms-color-text-faint: var(--cms-color-neutral-500);
-	--cms-color-text-on-fill: var(--cms-color-neutral-900);
-
-	--cms-color-border: #282d36;
-	--cms-color-border-soft: #22262e;
-	--cms-color-border-strong: #333a45;
-
-	--cms-color-hover: #20242c;
-	--cms-color-selected: #272c35;
-
-	--cms-color-primary: var(--cms-color-neutral-50);
-	--cms-color-primary-text: var(--cms-color-neutral-900);
-	--cms-color-primary-hover: var(--cms-color-neutral-200);
-
-	--cms-color-accent: var(--cms-color-blue-400);
-	--cms-color-accent-hover: color-mix(
-		in oklch,
-		var(--cms-color-accent),
-		var(--cms-color-white) 15%
-	);
-	--cms-color-accent-text: var(--cms-color-accent);
-
-	--cms-color-success: var(--cms-color-green-400);
-	--cms-color-success-text: var(--cms-color-success);
-	--cms-color-warning: var(--cms-color-orange-400);
-	--cms-color-warning-text: var(--cms-color-warning);
-	--cms-color-danger: var(--cms-color-rose-400);
-	--cms-color-danger-text: var(--cms-color-danger);
-	--cms-color-info-text: var(--cms-color-info);
-
-	--cms-button-secondary-bg: var(--cms-color-surface-raised);
 }

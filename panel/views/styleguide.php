@@ -42,10 +42,15 @@ $chevronSvg = is_file($chevronSvgPath)
 <div id="main" class="page cms-styleguide">
 	<header class="head">
 			<h1>Styleguide</h1>
+			<?php
+   // Reads the effective theme rather than the attribute: without one the
+   // panel follows the system, and the first click has to flip what is
+   // actually on screen.
+   ?>
 			<button
 				type="button"
 				class="cms-button secondary"
-				onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+				onclick="const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = dark ? 'light' : 'dark'">
 				Toggle theme
 			</button>
 	</header>
@@ -76,7 +81,9 @@ $chevronSvg = is_file($chevronSvgPath)
 									<span class="swatch is-empty"></span>
 								<?php endif ?>
 								<code class="name"><?= escape($name) ?></code>
-								<code class="value"><?= escape((string) $token['value']) ?></code>
+								<code class="value" title="<?= escape(
+             	(string) $token['value'],
+             ) ?>"><?= escape((string) $token['value']) ?></code>
 							</div>
 						<?php endforeach ?>
 					</div>

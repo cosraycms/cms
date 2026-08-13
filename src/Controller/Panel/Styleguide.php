@@ -30,8 +30,9 @@ final class Styleguide extends Panel
 
 	/**
 	 * Token groups read out of `tokens.css` rather than listed here, so the
-	 * page cannot drift from the stylesheet it documents. Only the light
-	 * `:root` block is read; the dark block redeclares the same names.
+	 * page cannot drift from the stylesheet it documents. Only the `:root`
+	 * block is read — the rules after it force a theme, they declare no
+	 * tokens.
 	 *
 	 * @return list<array{title: string, open: bool, tokens: list<array{name: string, value: string, swatch: bool}>}>
 	 */
