@@ -81,9 +81,31 @@ final class PanelAreasTest extends End2EndTestCase
 		);
 	}
 
-	private function html(string $path): string
+	/**
+	 * The switcher has to mark the language it is showing. Unmarked, a browser
+	 * displays the first option, so the panel claims a language it is not in —
+	 * and picking that one fires no change event, which leaves it unreachable.
+	 */
+	public function testTheLanguageSwitcherMarksTheActiveLocale(): void
 	{
-		$response = $this->makeRequest('GET', $path);
+		$german = $this->html('/cp', 'de');
+		$this->assertStringContainsString('<option value="de" selected>Deutsch</option>', $german);
+		$this->assertStringContainsString('<option value="en">English</option>', $german);
+		$this->assertStringContainsString('<html lang="de">', $german);
+
+		$english = $this->html('/cp', 'en');
+		$this->assertStringContainsString('<option value="en" selected>English</option>', $english);
+		$this->assertStringContainsString('<option value="de">Deutsch</option>', $english);
+		$this->assertStringContainsString('<html lang="en">', $english);
+	}
+
+	private function html(string $path, ?string $language = null): string
+	{
+		$response = $this->makeRequest(
+			'GET',
+			$path,
+			$language === null ? [] : ['headers' => ['Accept-Language' => $language]],
+		);
 		$this->assertResponseOk($response);
 
 		return $this->getHtmlResponse($response);

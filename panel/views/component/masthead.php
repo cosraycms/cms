@@ -8,6 +8,10 @@ use function Cosray\escape;
 
 $currentArea = (string) ($area ?? '');
 $contentUrl = $this->unwrap($contentUrl ?? null);
+// Cast before comparing: the template receives strings wrapped in a proxy, and
+// `===` against one is false however equal the values are.
+$localeId = (string) ($localeId ?? 'en');
+$panelLocales = (array) ($this->unwrap($panelLocales ?? null) ?? []);
 
 $areas = [['area' => 'dashboard', 'url' => (string) $panelPath, 'label' => __('nav:dashboard')]];
 
@@ -49,7 +53,7 @@ $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' 
 	</nav>
 
 	<div class="account">
-		<?php if (count($panelLocales ?? []) > 1): ?>
+		<?php if (count($panelLocales) > 1): ?>
 			<form class="panel-locale" method="post" action="<?= $panelPath ?>/locale" hx-boost="false">
 				<label>
 					<span class="sr-only"><?= escape(__('nav:language')) ?></span>
