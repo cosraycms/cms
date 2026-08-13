@@ -3,10 +3,13 @@
 use function Cosray\escape;
 
 // The rail carries collections only; dashboard and media moved up to the
-// masthead. With no collections there is nothing to put in it, and the frame
-// runs single-column rather than showing an empty rail.
+// masthead and bring their own screens. It therefore belongs to the content
+// area alone — on the others the frame runs single-column rather than offering
+// navigation that leads out of the area you are in.
+//
+// With no collections there is nothing to put in it either.
 
-if (count($collections) === 0) {
+if ((string) ($area ?? '') !== 'content' || count($collections) === 0) {
 	return;
 }
 ?>

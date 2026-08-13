@@ -6,7 +6,8 @@ use function Cosray\escape;
 <a
 	class="logo"
 	href="<?= $panelPath ?>"
-	hx-target="#main"
+	<?php // Leads to the dashboard, so it leaves the area: see the masthead.?>
+	hx-boost="false"
 	aria-label="<?= escape(__('nav:dashboard')) ?>">
 	<?php if ($logo !== null): ?>
 		<img class="image" src="<?= $logo ?>" alt="<?= escape(__('panel:logo')) ?>" />

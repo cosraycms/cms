@@ -36,8 +36,12 @@ final class PanelMediaPageTest extends End2EndTestCase
 		// Browser-rendered controls boot with the panel catalog.
 		$this->assertStringContainsString('id="verba-catalog"', $html);
 		$this->assertStringContainsString('"common:cancel":"Cancel"', $html);
-		// The sidebar gains a Media entry.
+		// The masthead carries the media area.
 		$this->assertStringContainsString('href="/cp/media"', $html);
+		// This panel defines no collections, so the content entry has nowhere
+		// to lead and stays away — the same condition that hides the rail.
+		$this->assertStringNotContainsString('>Content<', $html);
+		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
 	}
 
 	public function testMediaPageRequiresAuthentication(): void

@@ -65,7 +65,6 @@ return [
 		'common:no' => 'No',
 		'common:yes' => 'Yes',
 		'editor:close' => 'close',
-		'editor:content' => 'Content',
 		'editor:delete' => 'Delete',
 		'editor:delete-confirm' => 'Really delete this document?',
 		'editor:handle' => 'Handle',
@@ -96,6 +95,7 @@ return [
 		'media:upload-failed' => 'Upload failed. The file could not be processed on the server.',
 		'media:upload-server-error' => 'The file upload failed due to a server error.',
 		'media:wrong-extension' => 'Wrong file extension: :ext. The following extensions are allowed for this file type: :allowed.',
+		'nav:content' => 'Content',
 		'nav:dashboard' => 'Dashboard',
 		'nav:language' => 'Language',
 		'nav:logout' => 'Log out',
@@ -119,5 +119,12 @@ return [
 		'status:published' => 'Published',
 		'validation:max-items' => 'Has more than the maximum allowed number of {arg1} items',
 		'validation:min-items' => 'Has fewer than the minimum number of {arg1} items',
+	],
+	// The scanner only sees literal `__()` arguments. The media ids above are
+	// literals in IngestError, translated later through `__($e->key)`, so a
+	// sync reports them obsolete every time; they are not. Only the entry
+	// below really is: the editor's settings tab became the inspector rail.
+	'obsolete' => [
+		'editor:content' => 'Content',
 	],
 ];

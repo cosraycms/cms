@@ -65,7 +65,6 @@ return [
 		'common:no' => 'Nein',
 		'common:yes' => 'Ja',
 		'editor:close' => 'schließen',
-		'editor:content' => 'Inhalt',
 		'editor:delete' => 'Löschen',
 		'editor:delete-confirm' => 'Dieses Dokument wirklich löschen?',
 		'editor:handle' => 'Handle',
@@ -96,6 +95,7 @@ return [
 		'media:upload-failed' => 'Upload fehlgeschlagen. Datei konnte am Server nicht verarbeitet werden.',
 		'media:upload-server-error' => 'Der Dateiupload ist aufgrund eines Serverfehlers fehlgeschlagen.',
 		'media:wrong-extension' => 'Falsche Dateiendung: :ext. Für diesen Dateityp sind folgende Endungen erlaubt: :allowed.',
+		'nav:content' => 'Inhalte',
 		'nav:dashboard' => 'Dashboard',
 		'nav:language' => 'Sprache',
 		'nav:logout' => 'Abmelden',
@@ -119,5 +119,12 @@ return [
 		'status:published' => 'Veröffentlicht',
 		'validation:max-items' => 'Enthält mehr als die maximal erlaubten {arg1} Einträge',
 		'validation:min-items' => 'Enthält weniger als die mindestens erforderlichen {arg1} Einträge',
+	],
+	// The scanner only sees literal `__()` arguments. The media ids above are
+	// literals in IngestError, translated later through `__($e->key)`, so a
+	// sync reports them obsolete every time; they are not. Only the entry
+	// below really is: the editor's settings tab became the inspector rail.
+	'obsolete' => [
+		'editor:content' => 'Inhalt',
 	],
 ];

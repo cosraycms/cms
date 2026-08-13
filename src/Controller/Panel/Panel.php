@@ -11,6 +11,8 @@ use Cosray\Config;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
 use Cosray\Navigation;
+use Cosray\NavigationItem;
+use Cosray\NavLink;
 use Cosray\Panel\Extras;
 use Cosray\Util\Form;
 
@@ -18,6 +20,19 @@ use function Cosray\env;
 
 abstract class Panel
 {
+	/**
+	 * Which masthead area this screen belongs to.
+	 *
+	 * The masthead marks the matching entry current and the collection rail
+	 * renders only for `content`, so a screen states where it lives instead of
+	 * the views inferring it from a URL the panel's mount point can change.
+	 *
+	 * Content is the default because a project's own panel pages put their
+	 * entry in that rail: they belong to the area whether or not they know
+	 * this constant exists. The screens standing on their own opt out.
+	 */
+	protected const string AREA = 'content';
+
 	protected string $panelDir;
 
 	public function __construct(
@@ -41,6 +56,8 @@ abstract class Panel
 			'panelPath' => $panelPath,
 			'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
 			'currentPath' => $this->request->uri()->getPath(),
+			'area' => static::AREA,
+			'contentUrl' => $this->contentUrl(),
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
 			'panelLocales' => $this->panelLocales(),
@@ -226,6 +243,40 @@ abstract class Panel
 		$navigation = $this->container->get(Navigation::class);
 
 		return $navigation->items();
+	}
+
+	/**
+	 * Where the masthead's content entry goes: the first entry of the rail it
+	 * opens, in the rail's own order. Null when a project defines no
+	 * collections at all, which is also when the rail itself stays away.
+	 */
+	private function contentUrl(): ?string
+	{
+		return $this->firstUrl($this->collections());
+	}
+
+	/** @param list<NavigationItem> $items */
+	private function firstUrl(array $items): ?string
+	{
+		foreach ($items as $item) {
+			if ($item instanceof NavLink) {
+				return $item->url;
+			}
+
+			$slug = $item->slug();
+
+			if ($slug !== null) {
+				return $this->panelPath() . '/collection/' . $slug;
+			}
+
+			$url = $this->firstUrl($item->children());
+
+			if ($url !== null) {
+				return $url;
+			}
+		}
+
+		return null;
 	}
 
 	/** @param array{id: string, args?: array<array-key, mixed>}|null $icon */

@@ -9,6 +9,8 @@ use Cosray\Panel\System;
 
 final class Media extends Panel
 {
+	protected const string AREA = 'media';
+
 	public function index(): array
 	{
 		$locales = $this->container->get(Locales::class);

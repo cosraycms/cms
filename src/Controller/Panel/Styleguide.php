@@ -13,6 +13,8 @@ namespace Cosray\Controller\Panel;
  */
 final class Styleguide extends Panel
 {
+	protected const string AREA = 'styleguide';
+
 	public function index(): array
 	{
 		return $this->context([

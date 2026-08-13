@@ -3,26 +3,59 @@
 use function Cosray\escape;
 
 // Three regions: brand, the top-level areas, and the account controls. The
-// design puts more in each of them than exists today — an area per section,
-// an avatar menu — so the regions are the structure, not their contents.
+// design puts more in each of them than exists today — an avatar menu — so the
+// regions are the structure, not their contents.
+//
+// An area is current when the screen says so, not when the URL matches: every
+// collection and every node editor belongs to content, and they share no path
+// with each other beyond the panel mount point.
 
-$areas = [
-	['url' => (string) $panelPath, 'label' => __('nav:dashboard')],
-	['url' => (string) $panelPath . '/media', 'label' => __('nav:media')],
-];
+$currentArea = (string) ($area ?? '');
+$contentUrl = $this->unwrap($contentUrl ?? null);
+
+$areas = [['area' => 'dashboard', 'url' => (string) $panelPath, 'label' => __('nav:dashboard')]];
+
+// Without collections there is nowhere for the entry to lead, which is the
+// same condition that keeps the rail itself away.
+//
+// The prefix is for after a boosted swap, when the panel script re-marks the
+// nav from the URL alone and cannot ask which area rendered: every collection
+// and node lives under it. A project's own panel pages do not, so theirs stays
+// marked on load and loses the mark until the next full render.
+if (is_string($contentUrl)) {
+	$areas[] = [
+		'area' => 'content',
+		'url' => $contentUrl,
+		'prefix' => (string) $panelPath . '/collection/',
+		'label' => __('nav:content'),
+	];
+}
+
+$areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media')];
 ?>
 <header class="cms-masthead">
 	<?php $this->insert('component/logo') ?>
 
 	<nav class="areas" aria-label="<?= escape(__('panel:navigation')) ?>">
-		<?php foreach ($areas as $area): ?>
+		<?php
+
+		// Area switches load the page rather than boosting it: the collection
+		// rail belongs to content alone, and it sits outside `#main`, so
+		// leaving an area changes more of the shell than a swap can carry.
+		// Navigation inside an area stays boosted — there the rail is a
+		// constant.
+		?>
+		<?php foreach ($areas as $entry): ?>
 			<a
 				class="area"
 				data-nav
-				href="<?= escape($area['url']) ?>"
-				hx-target="#main"
-				<?= (string) $currentPath === $area['url'] ? 'aria-current="page"' : '' ?>>
-				<?= escape($area['label']) ?>
+				href="<?= escape($entry['url']) ?>"
+				hx-boost="false"
+				<?= isset($entry['prefix'])
+    	? 'data-nav-prefix="' . escape((string) $entry['prefix']) . '"'
+    	: '' ?>
+				<?= $entry['area'] === $currentArea ? 'aria-current="page"' : '' ?>>
+				<?= escape($entry['label']) ?>
 			</a>
 		<?php endforeach ?>
 	</nav>

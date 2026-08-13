@@ -116,7 +116,14 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('aria-current="page"', $link);
 		$this->assertStringNotContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/cp'),
+			$this->navLink($node, '/cp', 'area'),
+		);
+
+		// The editor belongs to content, so the masthead says so while the
+		// node is open — the rail entry alone is not the whole answer.
+		$this->assertStringContainsString(
+			'aria-current="page"',
+			$this->navLink($node, '/cp/collection/test-articles', 'area'),
 		);
 	}
 
@@ -399,18 +406,22 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	}
 
 	/**
-	 * The opening tag of the navigation link pointing at `$href`. Keys on
-	 * `data-nav`, the marker the panel script uses, so it finds both masthead
-	 * areas and rail entries.
+	 * The opening tag of the navigation link pointing at `$href`. The class
+	 * picks the region: the masthead's content area and the rail entry for the
+	 * first collection share an href, so `data-nav` alone is ambiguous.
 	 */
-	private function navLink(string $html, string $href): string
+	private function navLink(string $html, string $href, string $class = 'link'): string
 	{
 		$found = preg_match(
-			'/<a[^>]*data-nav[^>]*href="' . preg_quote($href, '/') . '"[^>]*>/',
+			'/<a\s[^>]*class="'
+			. preg_quote($class, '/')
+			. '"[^>]*href="'
+			. preg_quote($href, '/')
+			. '"[^>]*>/',
 			$html,
 			$matches,
 		);
-		$this->assertSame(1, $found, "No navigation link for {$href}");
+		$this->assertSame(1, $found, "No {$class} navigation link for {$href}");
 
 		return $matches[0];
 	}
