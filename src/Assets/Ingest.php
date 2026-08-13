@@ -82,7 +82,6 @@ final class Ingest
 			'bytes' => strlen($contents),
 			'width' => $width,
 			'height' => $height,
-			'kind' => $mediatype,
 			'hash' => $hash,
 			'meta' => $meta === [] ? '{}' : json_encode($meta),
 			'creator' => ($actor ?? Actor::system())->id,

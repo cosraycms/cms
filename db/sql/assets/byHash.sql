@@ -8,7 +8,6 @@ SELECT
 	bytes,
 	width,
 	height,
-	kind,
 	hash,
 	meta,
 	created,

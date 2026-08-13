@@ -8,7 +8,6 @@ SELECT
 	bytes,
 	width,
 	height,
-	kind,
 	hash,
 	meta,
 	created,
@@ -17,8 +16,8 @@ FROM
 	/*:cms.prefix:*/assets
 WHERE
 	1 = 1
-<?php if (isset($kind)) : ?>
-	AND kind = :kind
+<?php if (isset($mime)) : ?>
+	AND mime LIKE :mime
 <?php endif ?>
 <?php if (isset($q)) : ?>
 	AND filename ILIKE :q

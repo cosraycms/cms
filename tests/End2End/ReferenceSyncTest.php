@@ -39,8 +39,8 @@ final class ReferenceSyncTest extends End2EndTestCase
 	public function testPanelSaveSyncsReferenceRows(): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.assets (uid, disk, key, filename, kind, creator)
-			VALUES ('e2e-refsync-img', 'local', 'e2/e2e-refsync-img/pic.png', 'pic.png', 'image', 1)",
+			"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+			VALUES ('e2e-refsync-img', 'local', 'e2/e2e-refsync-img/pic.png', 'pic.png', 1)",
 		)->run();
 
 		$mediaType = $this->db()->execute(

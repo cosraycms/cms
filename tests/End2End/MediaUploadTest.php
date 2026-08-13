@@ -70,7 +70,6 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertNotEmpty($row);
 		$this->assertSame("{$shard}/{$uid}/e2e-upload-pic.png", $row['key']);
 		$this->assertSame('local', $row['disk']);
-		$this->assertSame('image', $row['kind']);
 		$this->assertSame('image/png', $row['mime']);
 		$this->assertSame(strlen($png), (int) $row['bytes']);
 		$this->assertSame(hash('sha256', $png), $row['hash']);

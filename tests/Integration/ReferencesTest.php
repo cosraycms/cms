@@ -289,8 +289,8 @@ final class ReferencesTest extends IntegrationTestCase
 	private function insertAsset(string $uid): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.assets (uid, disk, key, filename, kind, creator)
-			VALUES (:uid, 'local', :key, 'test.png', 'image', 1)",
+			"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+			VALUES (:uid, 'local', :key, 'test.png', 1)",
 			['uid' => $uid, 'key' => substr($uid, 0, 2) . "/{$uid}/test.png"],
 		)->run();
 	}

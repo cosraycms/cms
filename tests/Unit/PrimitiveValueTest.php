@@ -56,7 +56,6 @@ final class PrimitiveValueTest extends TestCase
 		Context $context,
 		string $uid,
 		string $filename,
-		string $kind = 'image',
 		array $meta = [],
 		?string $mime = null,
 	): void {
@@ -65,7 +64,6 @@ final class PrimitiveValueTest extends TestCase
 			disk: 'local',
 			key: Storage::key($uid, $filename),
 			filename: $filename,
-			kind: $kind,
 			mime: $mime,
 			meta: $meta,
 			assetsBase: '/cms/assets',
@@ -531,7 +529,7 @@ final class PrimitiveValueTest extends TestCase
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
-		$this->seedAsset($context, 'qmanualpdf123', 'manual.pdf', kind: 'file');
+		$this->seedAsset($context, 'qmanualpdf123', 'manual.pdf');
 		$field = new \Cosray\Field\File('document', $owner, new ValueContext('document', [
 			'files' => [
 				[

@@ -125,8 +125,9 @@ class Media
 		$limit = 60;
 		$args = ['limit' => $limit + 1, 'offset' => ($page - 1) * $limit];
 
+		// The prefixes `Asset::classify()` reduces to a kind, read backwards.
 		if (in_array($kind, ['image', 'video'], true)) {
-			$args['kind'] = $kind;
+			$args['mime'] = $kind . '/%';
 		}
 
 		if ($q !== '') {
@@ -207,7 +208,7 @@ class Media
 			is_array($stored) ? $stored : [],
 			is_array($input) ? $input['meta'] ?? $input : [],
 			$this->localeIds(),
-			$row['kind'] === 'image',
+			Asset::fromRow($row, $this->config)->kind === 'image',
 		);
 
 		$this->db->assets->updateMeta(['uid' => $uid, 'meta' => json_encode($meta)])->run();

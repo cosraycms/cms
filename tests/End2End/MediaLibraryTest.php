@@ -64,6 +64,32 @@ final class MediaLibraryTest extends End2EndTestCase
 		$this->assertContains($file['uid'], $fileUids);
 	}
 
+	/**
+	 * Projects routinely allow image mimes on the File field. Those uploads
+	 * belong in the image filter: the kind follows the bytes, not the route
+	 * that catalogued them.
+	 */
+	public function testAnImageUploadedThroughTheFileRouteIsStillAnImage(): void
+	{
+		$this->app = $this->createApp([
+			'path.public' => $this->publicDir,
+			'upload.mimetypes.file' => [
+				'application/pdf' => ['pdf'],
+				'image/png' => ['png'],
+			],
+		]);
+		$this->authenticateAs('editor');
+
+		$png = base64_decode(self::PNG_BASE64, true);
+		$asset = $this->upload('file', $png, 'e2e-library-logo.png', 'image/png');
+
+		$images = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['kind' => 'image'],
+		]));
+
+		$this->assertContains($asset['uid'], array_column($images['assets'], 'uid'));
+	}
+
 	public function testListItemsCarryUrlsAndThumbs(): void
 	{
 		$png = base64_decode(self::PNG_BASE64, true);

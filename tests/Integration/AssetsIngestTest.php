@@ -59,13 +59,12 @@ final class AssetsIngestTest extends IntegrationTestCase
 		$this->assertTrue($result->created);
 
 		$row = $this->db()->execute(
-			'SELECT filename, mime, kind, width, height, creator, meta FROM cms.assets WHERE uid = :uid',
+			'SELECT filename, mime, width, height, creator, meta FROM cms.assets WHERE uid = :uid',
 			['uid' => $result->uid()],
 		)->one();
 
 		$this->assertSame('tiny.png', $row['filename']);
 		$this->assertSame('image/png', $row['mime']);
-		$this->assertSame('image', $row['kind']);
 		$this->assertSame(3, $row['width']);
 		$this->assertSame(2, $row['height']);
 		$this->assertSame(1, (int) $row['creator']);

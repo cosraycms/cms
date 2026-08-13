@@ -7,7 +7,6 @@ INSERT INTO /*:cms.prefix:*/assets (
 	bytes,
 	width,
 	height,
-	kind,
 	hash,
 	meta,
 	creator
@@ -20,7 +19,6 @@ INSERT INTO /*:cms.prefix:*/assets (
 	:bytes,
 	:width,
 	:height,
-	:kind,
 	:hash,
 	:meta,
 	:creator

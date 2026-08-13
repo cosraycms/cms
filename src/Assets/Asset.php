@@ -11,12 +11,19 @@ final class Asset
 {
 	private const array RESIZABLE = ['image/gif', 'image/jpeg', 'image/png', 'image/webp'];
 
+	/**
+	 * Coarse classification for pickers and tiles. `list.tpql` filters on
+	 * the same mime prefixes, so the two have to move together.
+	 */
+	public string $kind {
+		get => self::classify($this->mime);
+	}
+
 	public function __construct(
 		public readonly string $uid,
 		public readonly string $disk,
 		public readonly string $key,
 		public readonly string $filename,
-		public readonly string $kind,
 		public readonly ?string $mime = null,
 		public readonly ?int $bytes = null,
 		public readonly ?int $width = null,
@@ -36,7 +43,6 @@ final class Asset
 			disk: (string) $row['disk'],
 			key: (string) $row['key'],
 			filename: (string) $row['filename'],
-			kind: (string) $row['kind'],
 			mime: isset($row['mime']) ? (string) $row['mime'] : null,
 			bytes: isset($row['bytes']) ? (int) $row['bytes'] : null,
 			width: isset($row['width']) ? (int) $row['width'] : null,
@@ -78,6 +84,23 @@ final class Asset
 	public function resizable(): bool
 	{
 		return in_array($this->mime, self::RESIZABLE, true);
+	}
+
+	/**
+	 * A mime type reduced to the vocabulary the panel filters on. Audio,
+	 * documents and an unreadable type all land on `file`.
+	 */
+	public static function classify(?string $mime): string
+	{
+		if ($mime === null) {
+			return 'file';
+		}
+
+		return match (true) {
+			str_starts_with($mime, 'image/') => 'image',
+			str_starts_with($mime, 'video/') => 'video',
+			default => 'file',
+		};
 	}
 
 	/** Locale map for a catalog meta key, or null when absent. */

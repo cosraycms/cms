@@ -241,8 +241,8 @@ final class MenuFinderTest extends IntegrationTestCase
 	public function testAssetItemLinksTheFile(): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.assets (uid, disk, key, filename, kind, creator)
-			VALUES ('menuasset1', 'local', 'me/menuasset1/prospekt.pdf', 'prospekt.pdf', 'file', 1)",
+			"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+			VALUES ('menuasset1', 'local', 'me/menuasset1/prospekt.pdf', 'prospekt.pdf', 1)",
 		)->run();
 		$this->insertItem('brochure', [
 			'type' => 'asset',

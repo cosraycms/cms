@@ -70,7 +70,6 @@ final class BlocksValueTest extends TestCase
 			disk: 'local',
 			key: Storage::key($uid, $filename),
 			filename: $filename,
-			kind: 'image',
 			mime: $mime,
 			assetsBase: '/cms/assets',
 			cacheBase: '/cms/cache',

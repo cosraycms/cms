@@ -172,14 +172,12 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		$png = base64_decode(self::PNG_BASE64, true);
 		$pic = $this->assetRow($picUid);
 		$this->assertSame('pic.png', $pic['filename']);
-		$this->assertSame('image', $pic['kind']);
 		$this->assertSame('image/png', $pic['mime']);
 		$this->assertSame(hash('sha256', $png), $pic['hash']);
 		$this->assertSame(1, (int) $pic['width']);
 		$this->assertSame(substr($picUid, 0, 2) . "/{$picUid}/pic.png", $pic['key']);
 
 		$missing = $this->assetRow($missingUid);
-		$this->assertSame('file', $missing['kind']);
 		$this->assertNull($missing['hash']);
 		$this->assertNull($missing['mime']);
 
@@ -264,10 +262,16 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 		$env = new Environment(['default' => $this->conn()], []);
 		ob_start();
 
+		// Migration 19 inserts `kind`, which the schema snapshot no longer
+		// creates, so the column has to be there for the length of the run.
+		$db = $this->db();
+		$db->execute('ALTER TABLE cms.assets ADD COLUMN IF NOT EXISTS kind text')->run();
+
 		try {
 			new $class($config)->run($env);
 		} finally {
 			ob_end_clean();
+			$db->execute('ALTER TABLE cms.assets DROP COLUMN IF EXISTS kind')->run();
 		}
 	}
 

@@ -419,7 +419,6 @@ CREATE TABLE /*:cms.prefix:*/assets (
 	bytes bigint,
 	width integer,
 	height integer,
-	kind text NOT NULL,
 	hash text,
 	meta jsonb NOT NULL DEFAULT '{}'::jsonb,
 	creator bigint NOT NULL,
@@ -433,8 +432,7 @@ CREATE TABLE /*:cms.prefix:*/assets (
 	CONSTRAINT /*:cms.obj:*/ck_assets_uid CHECK (
 		-- Asset uids become URL segments and storage keys, so keep them path-safe and block "..".
 		uid ~ '^(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$'
-	),
-	CONSTRAINT /*:cms.obj:*/ck_assets_kind CHECK (kind IN ('image', 'file', 'video'))
+	)
 );
 CREATE INDEX /*:cms.obj:*/ix_assets_hash ON /*:cms.prefix:*/assets USING btree (hash);
 CREATE INDEX /*:cms.obj:*/ix_assets_key ON /*:cms.prefix:*/assets USING btree (key);
