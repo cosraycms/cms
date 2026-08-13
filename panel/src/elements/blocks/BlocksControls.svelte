@@ -137,11 +137,11 @@
 			width: 11rem;
 			transform-origin: top right;
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-white);
+			background-color: var(--cms-color-surface);
 			padding: 0 var(--cms-space-2);
 			box-shadow: var(--cms-shadow-lg);
 			outline: none;
-			border: 1px solid color-mix(in srgb, var(--cms-color-black) 5%, transparent);
+			border: 1px solid var(--cms-color-border);
 		}
 
 		.cms-blocks-buttons-menu-content {

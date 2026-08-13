@@ -22,7 +22,7 @@
 			border-radius: var(--cms-radius-full);
 			background-color: var(--cms-color-danger);
 			font-weight: 600;
-			color: var(--cms-color-white);
+			color: var(--cms-color-text-on-fill);
 			font-size: 9px;
 			height: 12px;
 			width: 12px;

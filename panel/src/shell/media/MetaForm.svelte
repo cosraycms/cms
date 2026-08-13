@@ -112,9 +112,9 @@
 		}
 
 		.cms-meta-locale {
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-1) var(--cms-space-2);
 			font-size: var(--cms-font-size-xs);
 			cursor: pointer;
@@ -133,7 +133,7 @@
 		}
 
 		.cms-meta-field > span {
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 	}
 </style>

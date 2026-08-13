@@ -329,9 +329,9 @@
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-			border: 2px dashed var(--cms-color-neutral-300);
+			border: 2px dashed var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-4) var(--cms-space-2);
 			text-align: center;
 			vertical-align: middle;
@@ -348,7 +348,7 @@
 			align-items: center;
 			justify-content: center;
 			gap: var(--cms-space-2);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 
 		.upload-drop-icon {
@@ -382,18 +382,18 @@
 		.dragdrop > div.file-extensions {
 			font-weight: normal;
 			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-neutral-400);
+			color: var(--cms-color-text-faint);
 			margin-top: var(--cms-space-1);
 		}
 
 		.library-button {
 			margin-top: var(--cms-space-3);
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-white);
+			background-color: var(--cms-color-surface);
 			padding: var(--cms-space-1) var(--cms-space-3);
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 			cursor: pointer;
 		}
 

@@ -75,13 +75,13 @@
 
 		:global(.cms-modal-add-type) {
 			border: 1px solid var(--cms-color-info);
-			background-color: var(--cms-color-white);
+			background-color: var(--cms-color-surface);
 			color: var(--cms-color-info);
 		}
 
 		:global(.cms-modal-add-type.is-selected) {
 			background-color: var(--cms-color-info);
-			color: var(--cms-color-white);
+			color: var(--cms-color-text-on-fill);
 		}
 	}
 </style>

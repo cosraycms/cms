@@ -172,7 +172,7 @@
 		}
 
 		.cms-modal-link-tabs-frame {
-			border-bottom: 1px solid var(--cms-color-neutral-200);
+			border-bottom: 1px solid var(--cms-color-border);
 		}
 
 		.cms-modal-link-tabs-nav {

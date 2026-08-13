@@ -42,8 +42,8 @@
 
 			&.active {
 				border-radius: var(--cms-radius);
-				background-color: var(--cms-color-neutral-200);
-				color: var(--cms-color-black);
+				background-color: var(--cms-color-selected);
+				color: var(--cms-color-text);
 			}
 		}
 

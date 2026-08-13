@@ -167,9 +167,9 @@
 			height: 9rem;
 			align-items: center;
 			justify-content: center;
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-1);
 			cursor: pointer;
 			overflow: hidden;
@@ -186,9 +186,9 @@
 			flex-direction: row;
 			align-items: center;
 			gap: var(--cms-space-2);
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-2) var(--cms-space-3);
 			cursor: pointer;
 			text-align: left;
@@ -208,7 +208,7 @@
 			border-radius: var(--cms-radius);
 			background-color: rgba(255, 255, 255, 0.85);
 			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -222,7 +222,7 @@
 
 		.cms-library-empty,
 		.cms-library-loading {
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 			padding: var(--cms-space-4) 0;
 		}
 

@@ -343,7 +343,7 @@
 			display: flex;
 			flex-direction: column;
 			background-color: var(--cms-color-neutral-50, #fff);
-			border-left: 1px solid var(--cms-color-neutral-300);
+			border-left: 1px solid var(--cms-color-border-strong);
 			box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
 			z-index: 41;
 		}
@@ -354,7 +354,7 @@
 			justify-content: space-between;
 			gap: var(--cms-space-2);
 			padding: var(--cms-space-4);
-			border-bottom: 1px solid var(--cms-color-neutral-200);
+			border-bottom: 1px solid var(--cms-color-border);
 		}
 
 		.cms-drawer-head h2 {
@@ -370,7 +370,7 @@
 			font-size: 1.5rem;
 			line-height: 1;
 			cursor: pointer;
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.cms-drawer-body {
@@ -392,7 +392,7 @@
 			max-height: 16rem;
 			padding: 0;
 			border: 0;
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			border-radius: var(--cms-radius-md);
 			overflow: hidden;
 		}
@@ -409,7 +409,7 @@
 
 		.cms-drawer-preview-icon {
 			font-size: 3rem;
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.cms-drawer-focal {
@@ -438,7 +438,7 @@
 		}
 
 		.cms-drawer-meta dt {
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.cms-drawer-focal-controls {
@@ -447,7 +447,7 @@
 			justify-content: space-between;
 			gap: var(--cms-space-2);
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 
 		.cms-drawer-usage h3 {
@@ -468,16 +468,16 @@
 			gap: var(--cms-space-2);
 			font-size: var(--cms-font-size-sm);
 			padding: var(--cms-space-1) 0;
-			border-bottom: 1px solid var(--cms-color-neutral-100);
+			border-bottom: 1px solid var(--cms-color-border-soft);
 		}
 
 		.cms-drawer-usage-kind {
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 			white-space: nowrap;
 		}
 
 		.cms-drawer-hint {
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 			font-size: var(--cms-font-size-sm);
 		}
 
@@ -487,7 +487,7 @@
 			justify-content: space-between;
 			gap: var(--cms-space-2);
 			padding: var(--cms-space-4);
-			border-top: 1px solid var(--cms-color-neutral-200);
+			border-top: 1px solid var(--cms-color-border);
 		}
 
 		.cms-drawer-foot-right {
@@ -511,7 +511,7 @@
 		.cms-drawer-blocked {
 			padding: var(--cms-space-3) var(--cms-space-4);
 			background-color: var(--cms-color-warning-surface);
-			border-top: 1px solid var(--cms-color-neutral-200);
+			border-top: 1px solid var(--cms-color-border);
 			font-size: var(--cms-font-size-sm);
 		}
 

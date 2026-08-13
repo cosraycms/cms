@@ -126,7 +126,7 @@
 			width: var(--cms-space-4);
 
 			&[disabled] {
-				color: var(--cms-color-neutral-300);
+				color: var(--cms-color-text-faint);
 			}
 		}
 

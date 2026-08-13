@@ -107,8 +107,8 @@
 	@layer panel {
 		.image {
 			position: relative;
-			border: 1px solid var(--cms-color-neutral-300);
-			background-color: var(--cms-color-neutral-100);
+			border: 1px solid var(--cms-color-border-strong);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-1);
 			text-align: center;
 		}
@@ -121,9 +121,9 @@
 			margin-bottom: var(--cms-space-px);
 			padding: 0 var(--cms-space-1);
 			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-white);
+			background-color: var(--cms-color-surface);
 			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -140,7 +140,7 @@
 			background-color: var(--cms-color-danger);
 			padding: 0 var(--cms-space-1);
 			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-white);
+			color: var(--cms-color-text-on-fill);
 		}
 
 		.image:hover .overlay,
@@ -222,6 +222,7 @@
 		.icobtn {
 			text-align: center;
 			font-size: var(--cms-font-size-xs);
+			/* Sits on arbitrary media with a dark outline: stays white in both themes. */
 			color: var(--cms-color-white);
 			text-shadow:
 				-1px 0 #000,

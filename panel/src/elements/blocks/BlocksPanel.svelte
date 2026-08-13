@@ -176,7 +176,7 @@
 			padding: var(--cms-space-3);
 			border-radius: var(--cms-radius);
 			border: var(--cms-border);
-			background-color: var(--cms-color-neutral-200);
+			background-color: var(--cms-color-surface-sunken);
 		}
 
 		.cms-block {
@@ -185,7 +185,7 @@
 			flex-direction: column;
 			border-radius: var(--cms-radius);
 			border: var(--cms-border);
-			background-color: var(--cms-color-white);
+			background-color: var(--cms-color-surface-raised);
 			padding: 0 var(--cms-space-2) var(--cms-space-2);
 		}
 

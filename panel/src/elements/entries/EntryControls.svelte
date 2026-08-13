@@ -119,7 +119,7 @@
 		}
 
 		.collapse-btn {
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 	}
 </style>

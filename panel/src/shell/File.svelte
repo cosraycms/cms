@@ -76,12 +76,12 @@
 			width: 100%;
 			flex-direction: row;
 			align-items: center;
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-lg);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-2) var(--cms-space-4);
 			text-align: center;
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 
 		.cms-file-meta {

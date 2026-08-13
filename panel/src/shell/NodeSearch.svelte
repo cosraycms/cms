@@ -152,12 +152,12 @@
 			padding: var(--cms-space-2) var(--cms-space-3);
 			border: 1px solid var(--cms-color-info);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 		}
 
 		.cms-nodesearch-current-label {
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 
 		.cms-nodesearch-results {
@@ -177,9 +177,9 @@
 			gap: var(--cms-space-2);
 			width: 100%;
 			padding: var(--cms-space-2) var(--cms-space-3);
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-neutral-100);
+			background-color: var(--cms-color-surface-sunken);
 			text-align: left;
 			cursor: pointer;
 		}
@@ -200,11 +200,11 @@
 
 		.cms-nodesearch-type {
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 		}
 
 		.cms-nodesearch-empty {
-			color: var(--cms-color-neutral-600);
+			color: var(--cms-color-text-muted);
 			padding: var(--cms-space-2) 0;
 		}
 	}

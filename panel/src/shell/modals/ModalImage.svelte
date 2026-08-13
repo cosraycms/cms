@@ -116,7 +116,7 @@
 
 		.cms-modal-image-upload-hint {
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.cms-modal-image-library {

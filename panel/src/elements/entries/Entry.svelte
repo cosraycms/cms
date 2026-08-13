@@ -137,7 +137,7 @@
 	@layer panel {
 		.entry {
 			background: white;
-			border: 1px solid var(--cms-color-neutral-300);
+			border: 1px solid var(--cms-color-border-strong);
 			border-radius: 0.375rem;
 			overflow: hidden;
 		}
@@ -148,8 +148,8 @@
 			align-items: center;
 			justify-content: space-between;
 			padding: 0.5rem 0.75rem;
-			background: var(--cms-color-neutral-50);
-			border-bottom: 1px solid var(--cms-color-neutral-200);
+			background: var(--cms-color-surface-sunken);
+			border-bottom: 1px solid var(--cms-color-border);
 		}
 
 		.entry-title {
@@ -169,7 +169,7 @@
 
 		.entry-number {
 			font-weight: 600;
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.entry-label {
@@ -191,7 +191,7 @@
 
 		.entry-fieldset {
 			padding: 0.5rem;
-			border: 1px solid var(--cms-color-neutral-200);
+			border: 1px solid var(--cms-color-border);
 			border-radius: 0.375rem;
 		}
 
@@ -204,7 +204,7 @@
 		.entry-fieldset-description {
 			padding: 0 0.25rem 0.5rem;
 			font-size: 0.8125rem;
-			color: var(--cms-color-neutral-500);
+			color: var(--cms-color-text-subtle);
 		}
 
 		.entry-fieldset-fields {
