@@ -95,7 +95,7 @@ function openModal(
 const TIMEOUTS = { success: 3000, error: 30000 };
 
 function toast(kind: 'success' | 'error', message: string): void {
-	let stack = document.querySelector('.toasts.pos-bottom');
+	let stack = document.querySelector('.cms-toasts');
 
 	if (!stack) {
 		stack = document.createElement('div');
