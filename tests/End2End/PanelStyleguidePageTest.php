@@ -35,6 +35,8 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('class="cms-button primary"', $html);
 		$this->assertStringContainsString('class="cms-field required"', $html);
 		$this->assertStringContainsString('data-locale-tab="de"', $html);
+		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);
+		$this->assertStringContainsString('class="chip is-create"', $html);
 	}
 
 	public function testStyleguideIsAbsentWithoutDebug(): void

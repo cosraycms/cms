@@ -43,10 +43,11 @@ $chevronSvg = is_file($chevronSvgPath)
 	<header class="head">
 			<h1>Styleguide</h1>
 			<?php
-   // Reads the effective theme rather than the attribute: without one the
-   // panel follows the system, and the first click has to flip what is
-   // actually on screen.
-   ?>
+
+			// Reads the effective theme rather than the attribute: without one the
+			// panel follows the system, and the first click has to flip what is
+			// actually on screen.
+			?>
 			<button
 				type="button"
 				class="cms-button secondary"
@@ -67,8 +68,8 @@ $chevronSvg = is_file($chevronSvgPath)
 				<?php foreach ($tokenGroups as $group): ?>
 					<details class="group"<?= $group['open'] ? ' open' : '' ?>>
 						<summary><?= escape((string) $group['title']) ?> <span class="count"><?= count(
-	(array) $group['tokens'],
-) ?></span></summary>
+					(array) $group['tokens'],
+				) ?></span></summary>
 					<div class="tokens">
 						<?php foreach ((array) $group['tokens'] as $token): ?>
 							<?php $name = (string) $token['name']; ?>
@@ -82,8 +83,8 @@ $chevronSvg = is_file($chevronSvgPath)
 								<?php endif ?>
 								<code class="name"><?= escape($name) ?></code>
 								<code class="value" title="<?= escape(
-             	(string) $token['value'],
-             ) ?>"><?= escape((string) $token['value']) ?></code>
+							(string) $token['value'],
+						) ?>"><?= escape((string) $token['value']) ?></code>
 							</div>
 						<?php endforeach ?>
 					</div>
@@ -181,13 +182,14 @@ $chevronSvg = is_file($chevronSvgPath)
 							<table
 								class="cms-list"
 								role="table"
-								style="--columns: minmax(12rem, 2fr) minmax(5rem, auto) minmax(5rem, auto) minmax(5rem, auto)">
+								style="--columns: minmax(12rem, 2fr) minmax(5rem, auto) minmax(5rem, auto) max-content max-content">
 								<thead role="rowgroup">
 									<tr role="row">
 										<th role="columnheader"><span class="inner">Title</span></th>
 										<th role="columnheader"><span class="inner">Type</span></th>
 										<th role="columnheader"><span class="inner">Modified</span></th>
 										<th class="col-status" role="columnheader">Status</th>
+										<th class="col-actions" role="columnheader"></th>
 									</tr>
 								</thead>
 								<tbody role="rowgroup">
@@ -197,6 +199,7 @@ $chevronSvg = is_file($chevronSvgPath)
 											'treeMode' => true,
 											'showChildren' => true,
 											'chevronSvg' => $chevronSvg,
+											'hasRowActions' => true,
 										]) ?>
 									<?php endforeach ?>
 								</tbody>
