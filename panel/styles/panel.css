@@ -1,5 +1,5 @@
 @import './common.css';
-@import './login.css' layer(panel);
+@import './cms-login.css' layer(panel);
 @import './cms-shell.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);
 @import './topbar.css' layer(panel);

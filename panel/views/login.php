@@ -5,26 +5,26 @@ use function Cosray\escape;
 $this->layout('base');
 
 ?>
-<main id="main" class="login-page">
-	<header class="login-header">
+<main id="main" class="cms-login">
+	<header class="head">
 		<?php if ($logo !== null): ?>
-			<img class="login-logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
+			<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
 		<?php endif ?>
-		<h1 class="login-title"><?= escape(__('auth:sign-in-title')) ?></h1>
+		<h1><?= escape(__('auth:sign-in-title')) ?></h1>
 	</header>
 
-	<section class="login-card" aria-label="<?= escape(__('auth:sign-in')) ?>">
-		<form class="login-form" method="post" action="<?= escape($panelPath) ?>/login" hx-boost="false">
+	<section class="card" aria-label="<?= escape(__('auth:sign-in')) ?>">
+		<form method="post" action="<?= escape($panelPath) ?>/login" hx-boost="false">
 			<input type="hidden" name="next" value="<?= escape($next) ?>" />
 
 			<?php if ($message !== null): ?>
-				<p class="login-message" role="alert"><?= escape($message) ?></p>
+				<p class="message" role="alert"><?= escape($message) ?></p>
 			<?php endif ?>
 
-			<div class="login-field">
-				<label class="login-label" for="login"><?= escape(__('auth:login-label')) ?></label>
+			<div class="field">
+				<label for="login"><?= escape(__('auth:login-label')) ?></label>
 				<input
-					class="login-input"
+					class="cms-input"
 					id="login"
 					name="login"
 					type="text"
@@ -33,10 +33,10 @@ $this->layout('base');
 					required />
 			</div>
 
-			<div class="login-field">
-				<label class="login-label" for="password"><?= escape(__('auth:password')) ?></label>
+			<div class="field">
+				<label for="password"><?= escape(__('auth:password')) ?></label>
 				<input
-					class="login-input"
+					class="cms-input"
 					id="password"
 					name="password"
 					type="password"
@@ -44,10 +44,10 @@ $this->layout('base');
 					required />
 			</div>
 
-			<div class="login-options">
-				<label class="login-remember" for="rememberme">
+			<div class="options">
+				<label class="remember" for="rememberme">
 					<input
-						class="login-checkbox"
+						class="cms-checkbox"
 						id="rememberme"
 						type="checkbox"
 						name="rememberme"
@@ -56,10 +56,10 @@ $this->layout('base');
 					<?= escape(__('auth:remember-me')) ?>
 				</label>
 
-				<a class="login-forgot" href="#" hx-boost="false" onclick="event.preventDefault();"><?= escape(__('auth:forgot-password')) ?></a>
+				<a class="forgot" href="#" hx-boost="false" onclick="event.preventDefault();"><?= escape(__('auth:forgot-password')) ?></a>
 			</div>
 
-			<button class="cms-button primary login-submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
+			<button class="cms-button primary submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>
 		</form>
 	</section>
 </main>
