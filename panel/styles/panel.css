@@ -12,8 +12,8 @@
 @import './cms-node.css' layer(panel);
 @import './cms-inspector.css' layer(panel);
 @import './tabs.css' layer(panel);
-@import './modal.css' layer(panel);
-@import './toast.css' layer(panel);
+@import './cms-modal.css' layer(panel);
+@import './cms-toast.css' layer(panel);
 @import './util.css' layer(panel);
 @import './grid.css' layer(panel);
 @import './code.css' layer(panel);

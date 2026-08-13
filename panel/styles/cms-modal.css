@@ -1,0 +1,120 @@
+/*
+ * Modal chrome.
+ *
+ * Built in plain DOM by the standalone bridge and filled by whichever component
+ * the caller mounts, so the shared parts live here and each modal's own layout
+ * stays inside its component.
+ */
+
+.cms-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--cms-space-4);
+	background-color: color-mix(in srgb, var(--cms-color-neutral-900) 45%, transparent);
+	backdrop-filter: blur(var(--cms-blur-sm));
+
+	& .container {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		max-width: 48rem;
+		max-height: 90dvh;
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		background-color: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-xl);
+		overflow: hidden;
+	}
+
+	& .close {
+		position: absolute;
+		top: var(--cms-space-3);
+		right: var(--cms-space-3);
+		z-index: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: var(--cms-radius-full);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-lg);
+		line-height: 1;
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-4);
+		flex: 0 0 auto;
+		padding: var(--cms-space-4) var(--cms-space-6);
+		border-bottom: 1px solid var(--cms-color-border);
+	}
+
+	& .title {
+		margin: 0;
+		font-size: var(--cms-font-size-base);
+		font-weight: 650;
+	}
+
+	& .body {
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-6);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		padding: var(--cms-space-4) var(--cms-space-6);
+		border-top: 1px solid var(--cms-color-border);
+		background: var(--cms-color-surface-sunken);
+	}
+}
+
+/* A message with an acknowledgement, mounted into the modal container. */
+.cms-dialog {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+	padding: var(--cms-space-6);
+
+	& h2 {
+		margin: 0;
+		font-size: var(--cms-font-size-base);
+		font-weight: 650;
+	}
+
+	& .body {
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		line-height: 1.5;
+	}
+
+	& .controls {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+	}
+
+	&.error .body {
+		color: var(--cms-color-danger-text);
+	}
+}

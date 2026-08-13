@@ -12,7 +12,7 @@
 	let { title = null, body, type = 'info', close }: Props = $props();
 </script>
 
-<div class="modal {type}">
+<div class="cms-dialog {type}">
 	{#if title}
 		<h2>{title}</h2>
 	{/if}

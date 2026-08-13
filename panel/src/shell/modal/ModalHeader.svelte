@@ -14,19 +14,19 @@
 	} = $props();
 </script>
 
-<div class="modal-header cms-modal-header {classes}">
-	<h3 class="modal-header-title cms-modal-header-title">
+<div class="modal-header header {classes}">
+	<h3 class="modal-header-title title">
 		{@render children()}
 	</h3>
 	{#if close}
 		<button
 			type="button"
-			class="modal-close-button cms-modal-header-close"
+			class="modal-close-button close-button"
 			data-modal-hide="default-modal"
 			onclick={close}
 		>
 			<svg
-				class="cms-modal-header-close-icon"
+				class="close-icon"
 				aria-hidden="true"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"

@@ -62,9 +62,9 @@ function openModal(
 	options: ModalOptions = {},
 ): { close(): void } {
 	const overlay = document.createElement('div');
-	overlay.className = 'modal cms-modal-overlay';
+	overlay.className = 'cms-modal';
 	const container = document.createElement('div');
-	container.className = 'modal-container cms-modal-container';
+	container.className = 'container';
 	overlay.append(container);
 
 	let cleanup: (() => void) | void = undefined;
@@ -76,7 +76,7 @@ function openModal(
 	if (!options.hideClose) {
 		const button = document.createElement('button');
 		button.type = 'button';
-		button.className = 'cms-modal-close';
+		button.className = 'close';
 		button.setAttribute('aria-label', __('common:close'));
 		button.textContent = '×';
 		button.addEventListener('click', close);
@@ -84,7 +84,7 @@ function openModal(
 	}
 
 	const host = document.createElement('div');
-	host.className = 'cms-modal-element';
+	host.className = 'element';
 	container.append(host);
 	document.body.append(overlay);
 	cleanup = render(host);
@@ -99,13 +99,13 @@ function toast(kind: 'success' | 'error', message: string): void {
 
 	if (!stack) {
 		stack = document.createElement('div');
-		stack.className = 'toasts pos-bottom';
+		stack.className = 'cms-toasts';
 		document.body.append(stack);
 	}
 
 	const item = document.createElement('button');
 	item.type = 'button';
-	item.className = `toast toast-${kind}`;
+	item.className = `toast is-${kind}`;
 	const content = document.createElement('div');
 	content.className = 'cms-toast-content';
 	content.textContent = message;

@@ -1,0 +1,42 @@
+/* Toast stack, built in plain DOM by the standalone bridge. */
+
+.cms-toasts {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	z-index: 200;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: var(--cms-space-2);
+	padding: var(--cms-space-4);
+
+	& .toast {
+		display: block;
+		max-width: min(24rem, 90vw);
+		padding: var(--cms-space-3) var(--cms-space-4);
+		border-radius: var(--cms-radius-md);
+		box-shadow: var(--cms-shadow-lg);
+		color: var(--cms-color-text-on-fill);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 550;
+		text-align: left;
+		cursor: pointer;
+
+		&.is-success {
+			background-color: var(--cms-color-success);
+		}
+
+		&.is-error {
+			background-color: var(--cms-color-danger);
+		}
+
+		&.is-warning {
+			background-color: var(--cms-color-warning);
+		}
+
+		&.is-info {
+			background-color: var(--cms-color-info);
+		}
+	}
+}
