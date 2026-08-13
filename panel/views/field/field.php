@@ -40,19 +40,19 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	class="cms-field<?= $required ? ' required' : '' ?>"
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
-	<label for="<?= escape($labelFor) ?>" class="cms-field-label">
+	<label for="<?= escape($labelFor) ?>" class="label">
 		<div><?= escape((string) ($field['label'] ?? $fieldName)) ?></div>
 		<?php if (is_array($metaControl)): ?>
-			<button type="button" class="cms-meta-button" data-meta-open>
+			<button type="button" class="meta-button" data-meta-open>
 				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
 		<?php if ($tabs): ?>
-			<span class="locale-tabs">
+			<span class="locales">
 				<?php foreach ($locales as $locale): ?>
 					<button
 						type="button"
-						class="locale-tab<?= $locale['id'] === $defaultLocale ? ' active' : '' ?>"
+						class="tab<?= $locale['id'] === $defaultLocale ? ' active' : '' ?>"
 						data-locale-tab="<?= escape($locale['id']) ?>">
 						<?= escape(strtoupper($locale['id'])) ?>
 					</button>
@@ -60,11 +60,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			</span>
 		<?php endif ?>
 	</label>
-	<div class="cms-field-control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
+	<div class="control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
 		<?php if ($variants): ?>
 			<?php foreach ($locales as $locale): ?>
 				<div
-					class="cms-locale-variant"
+					class="variant"
 					data-locale="<?= escape($locale['id']) ?>"
 					<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
 					<?php // Required applies to the default locale only — the same
@@ -100,12 +100,12 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<?php endif ?>
 	</div>
 	<?php if (is_string($description) && $description !== ''): ?>
-		<div class="cms-field-description"><?= escape($description) ?></div>
+		<div class="description"><?= escape($description) ?></div>
 	<?php endif ?>
 	<?php if (is_array($metaControl)): ?>
-		<dialog class="cms-meta-dialog" data-meta>
-			<div class="cms-meta-head">
-				<span class="cms-meta-title">
+		<dialog class="cms-meta" data-meta>
+			<div class="head">
+				<span class="title">
 					<?= escape((string) ($field['label'] ?? $fieldName)) ?> — <?= escape(__('field:meta')) ?>
 				</span>
 				<button type="button" class="cms-button" data-meta-close>

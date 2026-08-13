@@ -1,0 +1,186 @@
+/*
+ * Form controls.
+ *
+ * Their own vocabulary rather than parts of a field: the inspector, the media
+ * screens and the modals use the same controls away from any field wrapper.
+ */
+
+.cms-input,
+.cms-textarea,
+.cms-select {
+	width: 100%;
+	min-width: 0;
+	padding: var(--cms-space-2) var(--cms-space-2-5);
+	border: 1px solid var(--cms-color-border-strong);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-surface);
+	color: var(--cms-color-text);
+	font-family: inherit;
+	font-size: var(--cms-font-size-sm);
+	line-height: 1.5rem;
+	transition:
+		border-color 0.12s ease,
+		box-shadow 0.12s ease;
+
+	&::placeholder {
+		color: var(--cms-color-text-faint);
+	}
+
+	&:focus {
+		border-color: var(--cms-color-focus);
+		outline: none;
+		box-shadow: var(--cms-focus-ring);
+	}
+
+	&[disabled] {
+		background-color: var(--cms-color-surface-sunken);
+		color: var(--cms-color-text-subtle);
+		cursor: not-allowed;
+	}
+
+	/* A wrong value is stated on the control, not only in the error summary. */
+	&[aria-invalid='true'] {
+		border-color: var(--cms-color-danger);
+	}
+}
+
+.cms-textarea {
+	resize: vertical;
+	line-height: 1.55;
+}
+
+.cms-input[type='number'],
+.cms-input[type='date'],
+.cms-input[type='time'],
+.cms-input[type='datetime-local'] {
+	width: auto;
+	min-width: 10rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.cms-field[data-invalid='true'] {
+	& .cms-input,
+	& .cms-select,
+	& .cms-textarea {
+		border-color: var(--cms-color-danger);
+	}
+}
+
+.cms-field[data-disabled='true'] {
+	& .cms-input,
+	& .cms-select,
+	& .cms-textarea {
+		background-color: var(--cms-color-surface-sunken);
+		color: var(--cms-color-text-subtle);
+	}
+}
+
+.cms-checkbox,
+.cms-radio,
+.cms-switch {
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+	accent-color: var(--cms-color-accent);
+	cursor: pointer;
+
+	&:focus-visible {
+		outline: none;
+		box-shadow: var(--cms-focus-ring);
+	}
+}
+
+.cms-checkbox-label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-radio-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+}
+
+.cms-radio-option {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	font-size: var(--cms-font-size-sm);
+}
+
+/* Sub-controls of a group or repeater: a date range as two inputs, say. */
+.cms-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--cms-space-3);
+	container-type: inline-size;
+}
+
+.cms-group-field {
+	flex: 1 1 12rem;
+	min-width: 0;
+}
+
+.cms-group-field[data-width] {
+	flex: 1 1 calc(var(--group-width) - var(--cms-space-3));
+}
+
+/* Declared widths share a row while there is room, then stack. */
+@container (max-width: 26rem) {
+	.cms-group-field[data-width] {
+		flex-basis: 100%;
+	}
+}
+
+.cms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+}
+
+.cms-repeater-item {
+	display: flex;
+	align-items: flex-end;
+	gap: var(--cms-space-2);
+}
+
+.cms-repeater-item-control {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.cms-sub-label {
+	display: block;
+	margin-bottom: var(--cms-space-1);
+	color: var(--cms-color-text-muted);
+	font-size: var(--cms-font-size-xs);
+	font-weight: 600;
+}
+
+.cms-control-unknown,
+.cms-control-element-pending {
+	padding: var(--cms-space-3);
+	border: 1px dashed var(--cms-color-danger);
+	border-radius: var(--cms-radius-md);
+	color: var(--cms-color-danger-text);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-control-element-pending {
+	border-color: var(--cms-color-border-strong);
+	color: var(--cms-color-text-muted);
+}
+
+/*
+ * Raw markup reads as code, so it is inverted on purpose in both themes — the
+ * same call as the code editor and the richtext source box.
+ */
+.cms-textarea.iframe {
+	background-color: var(--cms-color-neutral-700);
+	color: var(--cms-color-neutral-100);
+	font-family:
+		'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
+		'Courier New', 'andale mono', 'lucida console', monospace;
+}

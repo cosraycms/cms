@@ -110,8 +110,8 @@ $chevronSvg = is_file($chevronSvgPath)
 					<?php endforeach ?>
 				</div>
 				<div class="sample">
-					<span class="cms-published large published">Published</span>
-					<span class="cms-published large">Unpublished</span>
+					<span class="cms-status is-published">Published</span>
+					<span class="cms-status is-unpublished">Unpublished</span>
 				</div>
 			</section>
 
@@ -138,20 +138,27 @@ $chevronSvg = is_file($chevronSvgPath)
 					Rendered through <code>panel/views/field/*</code> with fixture data — the same
 					partials the editor uses, so these cannot fall out of step with it.
 				</p>
-				<div class="cms-pane-card">
-					<div class="field-grid">
-						<?php foreach ($fields as $field): ?>
-							<?php $this->insert('field/item', [
-								'field' => $field,
-								'content' => $content,
-								'locales' => $locales,
-								'defaultLocale' => $defaultLocale,
-								'uid' => 'styleguide',
-								'assets' => [],
-								'pathSourceFields' => [],
-								'span' => $span,
-							]) ?>
-						<?php endforeach ?>
+				<?php // Mirrors the editor: .inner is where its width cap lives, so
+
+				// the sampler shows fields at the width they actually get. ?>
+				<div class="cms-node">
+					<div class="inner">
+						<div class="card">
+							<div class="cms-fields">
+								<?php foreach ($fields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $content,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => [],
+										'pathSourceFields' => [],
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>

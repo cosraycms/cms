@@ -160,7 +160,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		// The styled fixture field exposes meta editing through a dialog.
 		$this->assertStringContainsString('data-meta-open', $html);
-		$this->assertStringContainsString('<dialog class="cms-meta-dialog" data-meta>', $html);
+		$this->assertStringContainsString('<dialog class="cms-meta" data-meta>', $html);
 		$this->assertStringContainsString('name="content[styled][meta][cssClass][zxx]"', $html);
 		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
 	}

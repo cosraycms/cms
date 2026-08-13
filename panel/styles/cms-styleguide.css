@@ -104,14 +104,6 @@
 		white-space: nowrap;
 	}
 
-	/*
-	 * The editor card centres itself with auto inline margins, which cancels
-	 * flex stretch and leaves it shrink-wrapped in the sampler's column.
-	 */
-	& .cms-pane-card {
-		width: 100%;
-	}
-
 	/* Panel inputs stretch to their field wrapper; the sampler has none. */
 	& .sample {
 		& input:not([type='checkbox']),

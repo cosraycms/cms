@@ -24,14 +24,14 @@ $descriptionId = "fieldset-{$name}-description";
 		: '' ?>
 	style="grid-column: <?= $span($fieldset['width'] ?? null, 100) ?>">
 	<?php if (is_string($label) && $label !== ''): ?>
-		<legend class="cms-fieldset-legend"><?= escape($label) ?></legend>
+		<legend class="legend"><?= escape($label) ?></legend>
 	<?php endif ?>
 	<?php if (is_string($description) && $description !== ''): ?>
-		<div id="<?= escape($descriptionId) ?>" class="cms-fieldset-description">
+		<div id="<?= escape($descriptionId) ?>" class="description">
 			<?= escape($description) ?>
 		</div>
 	<?php endif ?>
-	<div class="field-grid cms-fieldset-fields">
+	<div class="cms-fields fields">
 		<?php foreach ((array) ($fieldset['fields'] ?? []) as $fieldName): ?>
 			<?php if (!is_string($fieldName) || !isset($fieldsByName[$fieldName])) {
 				continue;

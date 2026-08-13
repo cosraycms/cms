@@ -10,7 +10,7 @@ function activate(event: Event): void {
 		return;
 	}
 
-	const tab = target.closest('.locale-tab[data-locale-tab]');
+	const tab = target.closest('[data-locale-tab]');
 
 	if (!(tab instanceof HTMLElement)) {
 		return;
@@ -23,11 +23,11 @@ function activate(event: Event): void {
 		return;
 	}
 
-	field.querySelectorAll('.locale-tab[data-locale-tab]').forEach((other) => {
+	field.querySelectorAll('[data-locale-tab]').forEach((other) => {
 		other.classList.toggle('active', other === tab);
 	});
 
-	field.querySelectorAll<HTMLElement>('.cms-locale-variant[data-locale]').forEach((variant) => {
+	field.querySelectorAll<HTMLElement>('.variant[data-locale]').forEach((variant) => {
 		variant.hidden = variant.dataset.locale !== locale;
 	});
 

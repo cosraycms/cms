@@ -171,7 +171,7 @@ foreach ($fieldsets as $fieldset) {
 					<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
 				<?php endif ?>
 				<div class="card">
-					<div class="field-grid">
+					<div class="cms-fields">
 						<?php foreach ($fields as $field): ?>
 							<?php if (!is_array($field) || ($field['hidden'] ?? false)) {
 								continue;
