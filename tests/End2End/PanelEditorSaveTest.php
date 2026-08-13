@@ -169,6 +169,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertStringContainsString('is-error', $html);
 		$this->assertStringContainsString('id="editor-errors"', $html);
 		$this->assertStringContainsString('class="status is-error"', $html);
+		// The box is worth nothing if it arrives empty or hidden, which is
+		// what asserting on its id alone let through.
+		$this->assertDoesNotMatchRegularExpression('/id="editor-errors"[^>]*hidden/', $html);
+		$this->assertStringContainsString(
+			'<li>Document Title must be at least 3 characters</li>',
+			$html,
+		);
 		$this->assertSame(
 			'Valid Title',
 			$this->nodeContent('panel-save-invalid')['title']['value']['zxx'],

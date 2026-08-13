@@ -13,24 +13,9 @@ $published = (bool) ($this->unwrap($published ?? null) ?? false);
 $renderable = (bool) ($this->unwrap($renderable ?? null) ?? false);
 $preview = $this->unwrap($preview ?? null);
 
-$flatten = static function (mixed $issues, callable $self): array {
-	if (is_string($issues)) {
-		return [$issues];
-	}
-
-	if (!is_array($issues)) {
-		return [];
-	}
-
-	$messages = [];
-
-	foreach ($issues as $issue) {
-		$messages = [...$messages, ...$self($issue, $self)];
-	}
-
-	return $messages;
-};
-$messages = $flatten($errors, $flatten);
+// The controller reduces validation issues to messages; anything else is
+// not renderable and must not be swallowed quietly by walking into it.
+$messages = array_values(array_filter($errors, is_string(...)));
 ?>
 <output
 	id="editor-status"

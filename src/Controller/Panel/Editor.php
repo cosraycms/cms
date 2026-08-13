@@ -9,6 +9,7 @@ use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
+use Celema\Sire\Issue;
 use Celema\Wire\Creator;
 use Cosray\Actor;
 use Cosray\Bootstrap;
@@ -150,7 +151,7 @@ final class Editor extends Panel
 			return [
 				'saved' => false,
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
-				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
+				'errors' => $this->issues($payload),
 				'published' => (bool) ($data['published'] ?? false),
 				'renderable' => (bool) ($data['type']['renderable'] ?? false),
 				'preview' => null,
@@ -231,7 +232,7 @@ final class Editor extends Panel
 			return [
 				'saved' => false,
 				'message' => (string) ($payload['message'] ?? __('node:invalid-data')),
-				'errors' => is_array($payload['errors'] ?? null) ? $payload['errors'] : [],
+				'errors' => $this->issues($payload),
 				'published' => (bool) ($data['published'] ?? false),
 				'renderable' => (bool) ($data['type']['renderable'] ?? false),
 				'preview' => null,
@@ -351,6 +352,31 @@ final class Editor extends Panel
 			'submitted' => $submitted,
 			'pathsUrl' => $pathsUrl,
 		];
+	}
+
+	/**
+	 * The messages behind a rejected save.
+	 *
+	 * Validation reports sire issues — path, code, message — because that is
+	 * what a field-keyed error UI will need. The editor has no such UI yet and
+	 * lists the messages, so the objects are reduced here rather than in the
+	 * view, which would otherwise drop them silently for not being strings.
+	 *
+	 * @param array<string, mixed> $payload
+	 * @return list<string>
+	 */
+	private function issues(array $payload): array
+	{
+		$issues = $payload['errors'] ?? null;
+
+		if (!is_array($issues)) {
+			return [];
+		}
+
+		return array_values(array_map(
+			static fn(Issue $issue): string => $issue->message,
+			array_filter($issues, static fn(mixed $issue): bool => $issue instanceof Issue),
+		));
 	}
 
 	/** Apply the submitted editor form (content patch + settings). */
