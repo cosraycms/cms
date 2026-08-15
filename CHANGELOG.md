@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased](https://codeberg.org/cosray/cms/compare/0.2.0...HEAD)
+## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
 ### Breaking Changes
 
@@ -71,7 +71,7 @@
 - Fixed every element control failing to load on a first editor page load when `path.panel` is not the default. Importing the `cosray-host` module defined the custom element, which synchronously upgraded the hosts already in the document — each resolving its module URL against the runtime panel base before the embedded system payload had configured it. The panel now defines the host after reading that payload, so `Could not load the editor control module "cosray:…"` no longer fires and the `window.Cosray` bridge is installed before any control mounts.
 - Fixed the `add-superuser` command: it referenced a `users/addSuperuser` query script that did not exist, so every run failed after prompting. The new query inserts an active `superuser` role user (owned by the seeded system user) with a generated uid, and the command prompts through the console `Io` — including hidden password input with a repeat check — instead of `readline()`, returns exit code 1 on failure, and is covered by integration tests.
 
-## [0.2.0](https://codeberg.org/cosray/cms/src/tag/0.2.0) (2026-06-02)
+## [0.2.0](https://codefloe.com/cosray/cms/src/tag/0.2.0) (2026-06-02)
 
 ### Breaking Changes
 
@@ -187,7 +187,7 @@ final class Department implements Title
 }
 ```
 
-## [0.1.1](https://codeberg.org/cosray/cms/src/tag/0.1.1) (2026-02-01)
+## [0.1.1](https://codefloe.com/cosray/cms/src/tag/0.1.1) (2026-02-01)
 
 Codename: Benjamin
 
@@ -195,6 +195,6 @@ Codename: Benjamin
 - Improved the `install-panel` command output and removed the unnecessary Quma command dependency.
 - Updated the panel release workflow to support prerelease tag patterns and manual (retroactive) runs.
 
-## [0.1.0](https://codeberg.org/cosray/cms/src/tag/0.1.0) (2026-02-01)
+## [0.1.0](https://codefloe.com/cosray/cms/src/tag/0.1.0) (2026-02-01)
 
 Initial release - Codename: Sabine
