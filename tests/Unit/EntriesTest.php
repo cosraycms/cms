@@ -235,8 +235,7 @@ class EntriesTest extends TestCase
 			],
 		]);
 
-		$titleValue =
-			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
+		$titleValue = $structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
 		$this->assertIsArray($titleValue, 'Title value should be array with locale keys');
 		$this->assertArrayHasKey('en', $titleValue);
 		$this->assertArrayHasKey('de', $titleValue);

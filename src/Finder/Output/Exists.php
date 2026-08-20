@@ -23,9 +23,9 @@ final readonly class Exists extends Expression implements Output
 		}
 
 		return 'n.content @? '
-		. $this->context->db->quote(
-			'$.' . $this->fieldPath($this->token->lexeme),
-		);
+			. $this->context->db->quote(
+				'$.' . $this->fieldPath($this->token->lexeme),
+			);
 	}
 
 	private function fieldPath(string $field): string

@@ -161,8 +161,8 @@ final class BlocksValueTest extends TestCase
 		);
 		$this->assertStringContainsString(
 			'srcset="/cms/cache/bl/blockimg12345/sun-sea-block-sm.jpg 480w, '
-			. '/cms/cache/bl/blockimg12345/sun-sea-block.jpg 960w, '
-			. '/cms/cache/bl/blockimg12345/sun-sea-block-lg.jpg 1440w"',
+				. '/cms/cache/bl/blockimg12345/sun-sea-block.jpg 960w, '
+				. '/cms/cache/bl/blockimg12345/sun-sea-block-lg.jpg 1440w"',
 			$html,
 		);
 		$this->assertStringContainsString('sizes="(min-width: 48rem) 50vw, 100vw"', $html);

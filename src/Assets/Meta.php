@@ -91,9 +91,9 @@ final class Meta
 	{
 		if (
 			!is_array($value)
-			|| !isset($value['x'], $value['y'])
-			|| !is_numeric($value['x'])
-			|| !is_numeric($value['y'])
+				|| !isset($value['x'], $value['y'])
+				|| !is_numeric($value['x'])
+				|| !is_numeric($value['y'])
 		) {
 			return null;
 		}

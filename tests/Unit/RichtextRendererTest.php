@@ -100,12 +100,12 @@ final class RichtextRendererTest extends TestCase
 
 		$this->assertSame(
 			'<p class="intro" style="text-align: center">Auf &amp; davon</p>'
-			. '<h2>Titel</h2>'
-			. '<ol start="3"><li><p>Drei</p></li></ol>'
-			. '<blockquote><p>Zitat</p></blockquote>'
-			. '<pre><code>&lt;?php echo 1;</code></pre>'
-			. '<hr class="fancy">'
-			. '<p>Zeile<br>zwei</p>',
+				. '<h2>Titel</h2>'
+				. '<ol start="3"><li><p>Drei</p></li></ol>'
+				. '<blockquote><p>Zitat</p></blockquote>'
+				. '<pre><code>&lt;?php echo 1;</code></pre>'
+				. '<hr class="fancy">'
+				. '<p>Zeile<br>zwei</p>',
 			$html,
 		);
 		$this->assertSame([], $renderer->notices());
@@ -155,13 +155,13 @@ final class RichtextRendererTest extends TestCase
 
 		$this->assertSame(
 			'<p>'
-			. '<a href="https://x.de?a=1&amp;b=2" target="_blank" rel="noopener noreferrer nofollow"><strong>extern</strong></a>'
-			. '<a href="/de/ueber-uns" class="button">intern</a>'
-			. '<a href="/assets/cd/doc1/paper.pdf">Datei</a>'
-			. '<span class="cms-text-xl"><em>groß</em></span>'
-			. '<sub>H2O</sub>'
-			. '<code>x</code>'
-			. '</p>',
+				. '<a href="https://x.de?a=1&amp;b=2" target="_blank" rel="noopener noreferrer nofollow"><strong>extern</strong></a>'
+				. '<a href="/de/ueber-uns" class="button">intern</a>'
+				. '<a href="/assets/cd/doc1/paper.pdf">Datei</a>'
+				. '<span class="cms-text-xl"><em>groß</em></span>'
+				. '<sub>H2O</sub>'
+				. '<code>x</code>'
+				. '</p>',
 			$html,
 		);
 	}
@@ -187,9 +187,9 @@ final class RichtextRendererTest extends TestCase
 
 		$this->assertSame(
 			'<p>'
-			. '<img src="/cache/ab/img1/photo-block.jpg" alt="Ein Foto">'
-			. '<img src="/cache/ab/img1/photo-block.jpg" alt="Anders" title="Titel">'
-			. '</p>',
+				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Ein Foto">'
+				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Anders" title="Titel">'
+				. '</p>',
 			$html,
 		);
 	}

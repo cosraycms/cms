@@ -63,9 +63,7 @@ class RecreateDb
 				echo "Make sure the user '{$this->username}' exists and has the correct password.\n";
 				echo "You may need to create the user first:\n";
 				echo "  sudo -u postgres createuser --createdb {$this->username}\n";
-				echo
-					"  sudo -u postgres psql -c \"ALTER USER {$this->username} WITH PASSWORD '<password>';\"\n\n"
-				;
+				echo "  sudo -u postgres psql -c \"ALTER USER {$this->username} WITH PASSWORD '<password>';\"\n\n";
 			} elseif (str_contains($e->getMessage(), 'permission denied')) {
 				echo "The user '{$this->username}' needs CREATEDB privileges:\n";
 				echo "  sudo -u postgres psql -c \"ALTER USER {$this->username} CREATEDB;\"\n\n";

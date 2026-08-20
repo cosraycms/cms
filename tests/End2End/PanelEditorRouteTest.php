@@ -401,7 +401,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		return (
 			is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.js')
-			&& is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.css')
+				&& is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.css')
 		);
 	}
 
@@ -414,10 +414,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		$found = preg_match(
 			'/<a\s[^>]*class="'
-			. preg_quote($class, '/')
-			. '"[^>]*href="'
-			. preg_quote($href, '/')
-			. '"[^>]*>/',
+				. preg_quote($class, '/')
+				. '"[^>]*href="'
+				. preg_quote($href, '/')
+				. '"[^>]*>/',
 			$html,
 			$matches,
 		);

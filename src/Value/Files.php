@@ -94,12 +94,12 @@ class Files extends Value implements Iterator
 
 		if (
 			!isset($this->data['type'])
-			&& isset($this->data['files'])
-			&& is_array($this->data['files'])
+				&& isset($this->data['files'])
+				&& is_array($this->data['files'])
 		) {
 			if (
 				$this->field->translateMode() === TranslateMode::Asymmetric
-				&& !array_is_list($this->data['files'])
+					&& !array_is_list($this->data['files'])
 			) {
 				return $this->effectiveFiles($this->data['files']);
 			}

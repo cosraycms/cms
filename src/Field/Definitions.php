@@ -228,9 +228,9 @@ final class Definitions
 				if ($property->getAttributes($attribute) !== []) {
 					throw new RuntimeException(
 						"Layout attribute '{$attribute}' on inline embed "
-						. "'{$property
-							->getDeclaringClass()
-							->getName()}::\${$property->getName()}' requires #[Fieldset].",
+							. "'{$property
+								->getDeclaringClass()
+								->getName()}::\${$property->getName()}' requires #[Fieldset].",
 					);
 				}
 			}
@@ -328,8 +328,8 @@ final class Definitions
 		foreach ($type->getTypes() as $part) {
 			if (
 				$part instanceof ReflectionNamedType
-				&& !$part->isBuiltin()
-				&& self::isEmbedded($part->getName())
+					&& !$part->isBuiltin()
+					&& self::isEmbedded($part->getName())
 			) {
 				return true;
 			}

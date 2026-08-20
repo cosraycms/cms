@@ -268,18 +268,18 @@ class Blocks extends Value
 
 		return (
 			'<div class="'
-			. $prefix
-			. '-'
-			. $value->type
-			. ' '
-			. $colspan
-			. ' '
-			. $rowspan
-			. ($colstart ? ' ' . $colstart : '')
-			. $class
-			. '">'
-			. $rendered
-			. '</div>'
+				. $prefix
+				. '-'
+				. $value->type
+				. ' '
+				. $colspan
+				. ' '
+				. $rowspan
+				. ($colstart ? ' ' . $colstart : '')
+				. $class
+				. '">'
+				. $rendered
+				. '</div>'
 		);
 	}
 
@@ -292,9 +292,9 @@ class Blocks extends Value
 			$fields = is_array($value) ? $value : [];
 		} elseif (
 			!isset($data['type'])
-			&& isset($data['value'])
-			&& is_array($data['value'])
-			&& array_is_list($data['value'])
+				&& isset($data['value'])
+				&& is_array($data['value'])
+				&& array_is_list($data['value'])
 		) {
 			$fields = $data['value'];
 		} else {

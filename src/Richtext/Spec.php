@@ -84,9 +84,9 @@ final class Spec
 	{
 		return (
 			$type === 'doc'
-			|| $type === 'listItem'
-			|| in_array($type, self::BLOCKS, true)
-			|| in_array($type, self::INLINE, true)
+				|| $type === 'listItem'
+				|| in_array($type, self::BLOCKS, true)
+				|| in_array($type, self::INLINE, true)
 		);
 	}
 

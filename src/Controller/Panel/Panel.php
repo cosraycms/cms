@@ -76,9 +76,7 @@ abstract class Panel
 	 */
 	protected function messages(): array
 	{
-		return (
-			Verba::translator()?->exportMany(['panel']) ?? ['locale' => $this->localeId(), 'domains' => []]
-		);
+		return Verba::translator()?->exportMany(['panel']) ?? ['locale' => $this->localeId(), 'domains' => []];
 	}
 
 	protected function panelPath(): string

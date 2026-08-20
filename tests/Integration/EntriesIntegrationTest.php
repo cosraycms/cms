@@ -74,7 +74,10 @@ class EntriesIntegrationTest extends TestCase
 								'uid' => 'entry2',
 								'type' => TestEntry::class,
 								'fields' => [
-									'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'Second Item']],
+									'title' => [
+										'type' => \Cosray\Field\Text::class,
+										'value' => ['en' => 'Second Item'],
+									],
 									'content' => [
 										'type' => \Cosray\Field\Blocks::class,
 										'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
@@ -171,8 +174,7 @@ class EntriesIntegrationTest extends TestCase
 		$structure = $entries->structure();
 
 		$this->assertCount(1, $structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
-		$titleValue =
-			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
+		$titleValue = $structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields']['title']['value'];
 
 		$this->assertIsArray(
 			$titleValue,

@@ -24,8 +24,7 @@ class Code extends Text implements Capability\SyntaxAware
 
 	public function structure(mixed $value = null): array
 	{
-		$syntax =
-			$this->valueContext->data['meta']['syntax'][self::NEUTRAL_LOCALE] ?? $this->getDefaultSyntax();
+		$syntax = $this->valueContext->data['meta']['syntax'][self::NEUTRAL_LOCALE] ?? $this->getDefaultSyntax();
 
 		if (is_array($value) && array_key_exists('value', $value)) {
 			$syntax = is_string($value['meta']['syntax'][self::NEUTRAL_LOCALE] ?? null)

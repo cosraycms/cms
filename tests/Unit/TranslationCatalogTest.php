@@ -58,8 +58,8 @@ final class TranslationCatalogTest extends TestCase
 
 		return (
 			is_array($value)
-			&& $value !== []
-			&& array_all($value, static fn(mixed $form): bool => is_string($form) && $form !== '')
+				&& $value !== []
+				&& array_all($value, static fn(mixed $form): bool => is_string($form) && $form !== '')
 		);
 	}
 }

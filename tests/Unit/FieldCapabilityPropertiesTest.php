@@ -318,8 +318,8 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 	public function testLimitCapabilityReturnsLimitProperty(): void
 	{
-		$field = new class('image', $this->createOwner(), new ValueContext('image', [])) extends
-			Image implements \Cosray\Field\Capability\Limitable {
+		$field = new class('image', $this->createOwner(), new ValueContext('image', [])) extends Image implements
+			\Cosray\Field\Capability\Limitable {
 			use \Cosray\Field\Capability\IsLimitable;
 		};
 		$meta = new Limit(5, 2);
@@ -353,8 +353,8 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 	public function testSyntaxCapabilityReturnsSyntaxesProperty(): void
 	{
-		$field = new class('code', $this->createOwner(), new ValueContext('code', [])) extends
-			Text implements \Cosray\Field\Capability\SyntaxAware {
+		$field = new class('code', $this->createOwner(), new ValueContext('code', [])) extends Text implements
+			\Cosray\Field\Capability\SyntaxAware {
 			use \Cosray\Field\Capability\IsSyntaxAware;
 		};
 		$meta = new Syntax('php', 'javascript', 'php');

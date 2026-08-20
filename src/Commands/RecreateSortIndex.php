@@ -133,8 +133,7 @@ class RecreateSortIndex
 		$collate = $collation !== null ? " COLLATE \"{$collation}\"" : '';
 		$index = Sort::indexName($locale);
 
-		$sql =
-			"CREATE INDEX IF NOT EXISTS {$index} " . "ON /*:cms.prefix:*/nodes (({$expression}){$collate})";
+		$sql = "CREATE INDEX IF NOT EXISTS {$index} " . "ON /*:cms.prefix:*/nodes (({$expression}){$collate})";
 
 		$this->db->execute($this->apply($sql))->run();
 	}

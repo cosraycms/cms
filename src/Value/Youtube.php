@@ -15,16 +15,16 @@ class Youtube extends Value
 
 		return (
 			'<div class="youtube-container">'
-			. '<div style="position: relative; padding-top: '
-			. $percent
-			. '%">'
-			. '<iframe class="youtube" style="'
-			. $iframeStyle
-			. '" '
-			. 'src="https://www.youtube.com/embed/'
-			. $this->unwrap()
-			. '" allowfullscreen></iframe>'
-			. '</div></div>'
+				. '<div style="position: relative; padding-top: '
+				. $percent
+				. '%">'
+				. '<iframe class="youtube" style="'
+				. $iframeStyle
+				. '" '
+				. 'src="https://www.youtube.com/embed/'
+				. $this->unwrap()
+				. '" allowfullscreen></iframe>'
+				. '</div></div>'
 		);
 	}
 

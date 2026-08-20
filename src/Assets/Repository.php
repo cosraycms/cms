@@ -35,8 +35,8 @@ class Repository
 		$walk = static function (array $data) use (&$walk, &$uids): void {
 			if (
 				is_string($data['uid'] ?? null)
-				&& $data['uid'] !== ''
-				&& array_diff(array_keys($data), ['uid', 'meta']) === []
+					&& $data['uid'] !== ''
+					&& array_diff(array_keys($data), ['uid', 'meta']) === []
 			) {
 				$uids[$data['uid']] = true;
 

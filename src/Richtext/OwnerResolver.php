@@ -44,8 +44,8 @@ final class OwnerResolver implements Resolver
 		while ($locale) {
 			if (
 				($map[$locale->id] ?? null) !== null
-				&& $map[$locale->id] !== ''
-				&& $map[$locale->id] !== []
+					&& $map[$locale->id] !== ''
+					&& $map[$locale->id] !== []
 			) {
 				return $map[$locale->id];
 			}

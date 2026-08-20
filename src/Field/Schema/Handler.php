@@ -20,7 +20,7 @@ abstract class Handler
 
 		return (
 			"The field \"{$field->name}\" (type: {$fieldType}) of node {$nodeType} "
-			. "cannot be used with the capability {$capabilityClass}"
+				. "cannot be used with the capability {$capabilityClass}"
 		);
 	}
 }

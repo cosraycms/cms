@@ -112,7 +112,7 @@ class Schema
 			if (!is_a($embedded->type, TitleContract::class, true)) {
 				throw new RuntimeException(
 					"The #[Title] attribute on embedded property '{$this->nodeClass}::{$embedded->name}' "
-					. 'requires its type to implement Cosray\\Contract\\Title.',
+						. 'requires its type to implement Cosray\\Contract\\Title.',
 				);
 			}
 
@@ -179,8 +179,8 @@ class Schema
 		if (count($providers) > 1) {
 			throw new RuntimeException(
 				"Node '{$this->nodeClass}' has multiple embedded title providers: "
-				. implode(', ', $providers)
-				. '.',
+					. implode(', ', $providers)
+					. '.',
 			);
 		}
 
@@ -237,7 +237,7 @@ class Schema
 
 			throw new RuntimeException(
 				"The #[Title] attribute on property '{$this->nodeClass}::{$property->getName()}' "
-				. 'requires a field-typed or Embedded-typed property.',
+					. 'requires a field-typed or Embedded-typed property.',
 			);
 		}
 	}

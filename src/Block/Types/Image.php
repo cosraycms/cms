@@ -81,7 +81,7 @@ final class Image extends Type
 
 		return (
 			"<img src=\"{$src}\" srcset=\"{$srcset}\" sizes=\"{$sizes}\""
-			. " alt=\"{$alt}\" data-path-original=\"{$path}\">"
+				. " alt=\"{$alt}\" data-path-original=\"{$path}\">"
 		);
 	}
 

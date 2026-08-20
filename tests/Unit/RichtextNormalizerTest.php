@@ -50,7 +50,10 @@ final class RichtextNormalizerTest extends TestCase
 						'content' => [
 							[
 								'type' => 'listItem',
-								'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Eins']]]],
+								'content' => [[
+									'type' => 'paragraph',
+									'content' => [['type' => 'text', 'text' => 'Eins']],
+								]],
 							],
 						],
 					],

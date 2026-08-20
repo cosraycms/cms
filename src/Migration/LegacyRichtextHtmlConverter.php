@@ -13,8 +13,7 @@ use JsonException;
  */
 final class LegacyRichtextHtmlConverter
 {
-	private const string SCRIPT =
-		__DIR__ . '/../../resources/migration/legacy-richtext-html-converter.mjs';
+	private const string SCRIPT = __DIR__ . '/../../resources/migration/legacy-richtext-html-converter.mjs';
 
 	/**
 	 * @param array<string, string> $units

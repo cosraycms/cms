@@ -126,10 +126,10 @@ final class QueryCompilerTest extends TestCase
 
 		$this->assertSame(
 			'(n.builtin = 1 OR '
-			. $this->jsonPath('$ == 1')
-			. ')'
-			. ' AND '
-			. "(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
+				. $this->jsonPath('$ == 1')
+				. ')'
+				. ' AND '
+				. "(t.another = 'test' OR (n.builtin > 2 AND n.builtin < 5))",
 			$compiler->compile("(builtin = 1 | field=1) & (another='test'|(builtin>2 & builtin<5))"),
 		);
 	}
@@ -273,10 +273,10 @@ final class QueryCompilerTest extends TestCase
 		);
 		$this->assertSame(
 			'('
-			. $this->contains('alertRule', 'rule-a')
-			. ' OR '
-			. $this->contains('alertRule', 'rule-b')
-			. ')',
+				. $this->contains('alertRule', 'rule-a')
+				. ' OR '
+				. $this->contains('alertRule', 'rule-b')
+				. ')',
 			$compiler->compile("references.alertRule @ ['rule-a', 'rule-b']"),
 		);
 	}
@@ -340,15 +340,15 @@ final class QueryCompilerTest extends TestCase
 	{
 		return (
 			'EXISTS (SELECT 1 FROM cms.node_references r '
-			. "WHERE r.owner_type = 'node' AND r.owner_uid = n.uid AND r.target_uid {$targets})"
+				. "WHERE r.owner_type = 'node' AND r.owner_uid = n.uid AND r.target_uid {$targets})"
 		);
 	}
 
 	private function contains(string $field, string $uid): string
 	{
 		return 'n.content @> '
-		. $this->context->db->quote(
-			'{"' . $field . '":{"value":{"zxx":[{"uid":"' . $uid . '"}]}}}',
-		);
+			. $this->context->db->quote(
+				'{"' . $field . '":{"value":{"zxx":[{"uid":"' . $uid . '"}]}}}',
+			);
 	}
 }

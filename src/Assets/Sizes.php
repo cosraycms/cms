@@ -90,11 +90,11 @@ final class Sizes
 			throw $this->error(
 				$name,
 				'exactly one mode key required ('
-				. implode(
-					', ',
-					array_keys(self::SINGLE + self::PAIR),
-				)
-				. ')',
+					. implode(
+						', ',
+						array_keys(self::SINGLE + self::PAIR),
+					)
+					. ')',
 			);
 		}
 
@@ -134,12 +134,12 @@ final class Sizes
 
 		if (
 			!is_array($value)
-			|| !array_is_list($value)
-			|| count($value) !== 2
-			|| !is_int($value[0])
-			|| !is_int($value[1])
-			|| $value[0] < 1
-			|| $value[1] < 1
+				|| !array_is_list($value)
+				|| count($value) !== 2
+				|| !is_int($value[0])
+				|| !is_int($value[1])
+				|| $value[0] < 1
+				|| $value[1] < 1
 		) {
 			throw $this->error($name, "`{$modeKey}` must be `[width, height]` with positive ints");
 		}

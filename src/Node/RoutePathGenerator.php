@@ -94,12 +94,12 @@ final class RoutePathGenerator
 
 				if (
 					$selector === ''
-					|| $selector === 'uid'
-					|| $selector === 'handle'
-					|| $selector === 'parent'
-					|| str_starts_with($selector, 'parent.')
-					|| str_starts_with($selector, 'parent(')
-					|| str_starts_with($selector, 'parent?')
+						|| $selector === 'uid'
+						|| $selector === 'handle'
+						|| $selector === 'parent'
+						|| str_starts_with($selector, 'parent.')
+						|| str_starts_with($selector, 'parent(')
+						|| str_starts_with($selector, 'parent?')
 				) {
 					continue;
 				}
@@ -170,14 +170,7 @@ final class RoutePathGenerator
 		$usesParentPath = false;
 		$path = preg_replace_callback(
 			'/\{([^{}]+)\}/',
-			function (array $matches) use (
-				$data,
-				$locale,
-				&$parents,
-				$parentId,
-				$strict,
-				&$usesParentPath,
-			): string {
+			function (array $matches) use ($data, $locale, &$parents, $parentId, $strict, &$usesParentPath): string {
 				try {
 					return $this->resolve($matches[1], $data, $locale, $parents, $parentId, $usesParentPath);
 				} catch (RoutePathError $e) {
@@ -295,9 +288,9 @@ final class RoutePathGenerator
 	{
 		if (
 			$selector !== 'parent'
-			&& !str_starts_with($selector, 'parent.')
-			&& !str_starts_with($selector, 'parent(')
-			&& !str_starts_with($selector, 'parent?')
+				&& !str_starts_with($selector, 'parent.')
+				&& !str_starts_with($selector, 'parent(')
+				&& !str_starts_with($selector, 'parent?')
 		) {
 			return null;
 		}
@@ -712,7 +705,8 @@ final class RoutePathGenerator
 				$language === ''
 					? null
 					: Transliterator::create($language . '-ASCII; ' . self::LATIN_FOLD)
-			) ?? Transliterator::create(self::LATIN_FOLD);
+			)
+				?? Transliterator::create(self::LATIN_FOLD);
 		}
 
 		return $this->transliterators[$language];

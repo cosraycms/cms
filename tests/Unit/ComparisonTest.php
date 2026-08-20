@@ -205,7 +205,7 @@ final class ComparisonTest extends TestCase
 		);
 		$this->assertSame(
 			self::FIELD_TEXT
-			. " = COALESCE(NULLIF(n.content->'field2'->'value'->>'en', ''), NULLIF(n.content->'field2'->'value'->>'zxx', ''))",
+				. " = COALESCE(NULLIF(n.content->'field2'->'value'->>'en', ''), NULLIF(n.content->'field2'->'value'->>'zxx', ''))",
 			$compiler->compile('field=field2'),
 		);
 	}

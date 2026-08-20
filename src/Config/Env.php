@@ -81,7 +81,7 @@ final class Env
 
 		return (
 			is_string($value)
-			&& in_array(strtolower($value), ['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], true)
+				&& in_array(strtolower($value), ['1', '0', 'true', 'false', 'on', 'off', 'yes', 'no'], true)
 		);
 	}
 

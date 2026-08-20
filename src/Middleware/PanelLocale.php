@@ -70,8 +70,8 @@ class PanelLocale implements Middleware
 
 		if (
 			$user instanceof User
-			&& $user->panelLocale !== null
-			&& in_array($user->panelLocale, $available, true)
+				&& $user->panelLocale !== null
+				&& in_array($user->panelLocale, $available, true)
 		) {
 			return $user->panelLocale;
 		}
@@ -84,7 +84,7 @@ class PanelLocale implements Middleware
 
 		return (
 			$this->fromBrowser($request, $available)
-			?? (in_array('en', $available, true) ? 'en' : $available[0])
+				?? (in_array('en', $available, true) ? 'en' : $available[0])
 		);
 	}
 
@@ -163,9 +163,7 @@ class PanelLocale implements Middleware
 
 		usort(
 			$accepted,
-			static fn(array $a, array $b) => (
-				$b['quality'] <=> $a['quality'] ?: $a['position'] <=> $b['position']
-			),
+			static fn(array $a, array $b) => $b['quality'] <=> $a['quality'] ?: $a['position'] <=> $b['position'],
 		);
 
 		return array_column($accepted, 'tag');

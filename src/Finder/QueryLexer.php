@@ -116,8 +116,8 @@ final class QueryLexer
 				} else {
 					$this->error(
 						"Invalid operator '!'. "
-						. "It can only be used in combination with '=' "
-						. "and '~', i. e. '!=' and '!~'",
+							. "It can only be used in combination with '=' "
+							. "and '~', i. e. '!=' and '!~'",
 					);
 				}
 				break;
@@ -365,10 +365,10 @@ final class QueryLexer
 	{
 		throw new ParserException(
 			"Parse error at position {$this->start}. {$msg}\n\n"
-			. "Query: `{$this->query}`\n"
-			. str_repeat(' ', $this->start + 8)
-			. str_repeat('^', $this->current - $this->start)
-			. "\n\n",
+				. "Query: `{$this->query}`\n"
+				. str_repeat(' ', $this->start + 8)
+				. str_repeat('^', $this->current - $this->start)
+				. "\n\n",
 		);
 	}
 }

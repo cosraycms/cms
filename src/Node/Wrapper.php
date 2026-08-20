@@ -163,8 +163,8 @@ class Wrapper
 
 		return (
 			$property->isPublic()
-			&& $property->isInitialized($this->node)
-			&& $property->getValue($this->node) !== null
+				&& $property->isInitialized($this->node)
+				&& $property->getValue($this->node) !== null
 		);
 	}
 

@@ -103,9 +103,7 @@ class Registry
 		$this->default('icon', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default(
 			'renderer',
-			static fn(string $nodeClass, array $properties): string => (string) (
-				$properties['handle'] ?? ''
-			),
+			static fn(string $nodeClass, array $properties): string => (string) ($properties['handle'] ?? ''),
 		);
 		$this->default('route', static fn(string $nodeClass, array $properties): string => '');
 		$this->default('routable', static fn(string $nodeClass, array $properties): bool => false);
