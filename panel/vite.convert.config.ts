@@ -2,9 +2,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 
-// Third build pass: the legacy HTML-to-richtext migration helper.
-// Its checked-in output ships with the Composer package and must run
-// without the panel checkout or node_modules.
+// The legacy HTML-to-richtext migration helper. Built on demand, not as
+// part of `pnpm run build`: its output is committed in the sibling
+// cosray/legacy-richtext-converter repository and must run without the
+// panel checkout or node_modules.
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
@@ -50,7 +51,7 @@ export default defineConfig({
 		ssr: true,
 		target: 'node20',
 		minify: 'esbuild',
-		outDir: '../resources/migration',
+		outDir: '../../legacy-richtext-converter/resources',
 		emptyOutDir: true,
 		license: {
 			fileName: 'THIRD-PARTY-NOTICES.md',
@@ -65,7 +66,7 @@ export default defineConfig({
 			output: {
 				entryFileNames: 'legacy-richtext-html-converter.mjs',
 				banner:
-					'/*! Generated migration-only compatibility artifact. Rebuild with `pnpm run build` in panel/; do not edit. */',
+					'/*! Generated migration-only compatibility artifact. Rebuild with `pnpm run build:converter` in panel/; do not edit. */',
 			},
 		},
 	},

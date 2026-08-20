@@ -111,15 +111,15 @@ The lower-level `Node\Store` is also request-neutral: callers pass `Locales` and
 
 ### Importing legacy rich text
 
-> [!WARNING] `LegacyRichtextHtmlConverter` is a migration-only compatibility utility. Use it for one-shot imports of HTML written before Cosray's structured rich-text format, then remove the importing code. It is not a request-time HTML conversion API.
+> [!WARNING] `Cosray\LegacyRichtext\Converter` is a migration-only compatibility utility. Use it for one-shot imports of HTML written before Cosray's structured rich-text format, then remove the importing code. It is not a request-time HTML conversion API.
 
-The converter ships as a self-contained Composer resource and requires a `node` executable, but no panel checkout, panel installation, or downstream npm dependencies. It parses HTML through the panel editor's schema and returns documents keyed by the supplied unit ids. Normalize and validate the documents before persistence when the surrounding migration does not already do so.
+The converter lives in the transitional [`cosray/legacy-richtext-converter`](https://github.com/cosraycms/legacy-richtext-converter) package, required here because update migration `000000-000020` needs it. It requires a `node` executable, but no panel checkout, panel installation, or downstream npm dependencies. It parses HTML through the panel editor's schema and returns documents keyed by the supplied unit ids. Normalize and validate the documents before persistence when the surrounding migration does not already do so. The package is dropped once every downstream production database has run that migration.
 
 ```php
-use Cosray\Migration\LegacyRichtextHtmlConverter;
+use Cosray\LegacyRichtext\Converter;
 use Cosray\Richtext\Normalizer;
 
-$documents = new LegacyRichtextHtmlConverter()->convert([
+$documents = new Converter()->convert([
     'intro:de' => '<p>Alter <strong>Inhalt</strong></p>',
 ]);
 

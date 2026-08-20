@@ -8,7 +8,7 @@ use Celema\Quma\Contract;
 use Celema\Quma\Environment;
 use Cosray\Config;
 use Cosray\Field\RichText;
-use Cosray\Migration\LegacyRichtextHtmlConverter;
+use Cosray\LegacyRichtext\Converter;
 use Cosray\Richtext\Envelope;
 use Cosray\Richtext\Normalizer;
 
@@ -74,7 +74,7 @@ final class Migration implements Contract\Migration
 
 	public function __construct(
 		private readonly Config $config,
-		private readonly LegacyRichtextHtmlConverter $converter,
+		private readonly Converter $converter,
 	) {}
 
 	public function run(Environment $env): void
