@@ -186,7 +186,7 @@ public function register(Registrar $cms): void
 }
 ```
 
-Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('panel')` to render inside the shell. Custom editor UIs (field controls, block types) ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Cosray's own rich controls (richtext, code, media, blocks, entries) are built the same way and serve as reference implementations under `panel/src/elements/`. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel.
+Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('layer/main')` and renders its own fragment, which the layer templates wrap according to what htmx asked for. Custom editor UIs (field controls, block types) ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Cosray's own rich controls (richtext, code, media, blocks, entries) are built the same way and serve as reference implementations under `panel/src/elements/`. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel.
 
 ## Defining content types
 
