@@ -73,12 +73,9 @@ final class PanelAreasTest extends End2EndTestCase
 			$html,
 		);
 
-		// Boosted navigation re-marks the nav from the URL alone, so the entry
-		// carries the prefix that covers the area it stands for.
-		$this->assertStringContainsString(
-			'data-nav-prefix="/cp/collection/"',
-			$this->area($html, '/cp/collection/test-articles'),
-		);
+		// Switching areas replaces everything below the masthead, so the whole
+		// nav swaps the frame rather than the content region.
+		$this->assertStringContainsString('hx-target:inherited="#frame"', $html);
 	}
 
 	/**

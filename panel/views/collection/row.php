@@ -32,7 +32,6 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 							<a
 								class="toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
 								href="<?= escape((string) $row['childrenUrl']) ?>"
-								hx-target="#main"
 								aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
 								aria-label="<?= escape($row['expanded']
 									? __('collection:collapse-children', ['name' => $cell['value']])
@@ -45,7 +44,7 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 					<?php endif ?>
 					<span class="dot<?= $row['published'] ? ' is-published' : '' ?>" aria-hidden="true"></span>
 					<?php if ($cell['editUrl'] !== null): ?>
-						<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>" hx-target="#main">
+						<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
 							<?= escape((string) $cell['value']) ?>
 						</a>
 					<?php else: ?>
@@ -53,7 +52,7 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
-				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>" hx-target="#main">
+				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>
 			<?php else: ?>
@@ -76,8 +75,7 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 				<?php if ($row['focusedChildrenUrl'] !== null): ?>
 					<a
 						class="chip"
-						href="<?= escape((string) $row['focusedChildrenUrl']) ?>"
-						hx-target="#main">
+						href="<?= escape((string) $row['focusedChildrenUrl']) ?>">
 						<?= escape(__('collection:children')) ?>
 					</a>
 				<?php endif ?>
@@ -85,7 +83,6 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 					<a
 						class="chip is-create"
 						href="<?= escape((string) $link['url']) ?>"
-						hx-target="#main"
 						aria-label="<?= escape(__('collection:create-under', [
 							'type' => $link['name'],
 							'name' => (string) $row['cells'][0]['value'],

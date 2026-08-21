@@ -20,11 +20,8 @@ $defaultCollectionIcon = <<<'SVG'
 		?>
 		<a
 			class="link"
-			data-nav
 			style="--depth: <?= $level ?>"
 			href="<?= $link->url ?>"
-			hx-target="#main"
-			<?= $link->activePrefix === null ? '' : 'data-nav-prefix="' . escape($link->activePrefix) . '"' ?>
 			<?= $link->active((string) $this->unwrap($currentPath)) ? 'aria-current="page"' : '' ?>>
 			<span class="label">
 				<?php if ($icon !== ''): ?>
@@ -49,11 +46,8 @@ $defaultCollectionIcon = <<<'SVG'
 		?>
 		<a
 			class="link"
-			data-nav
 			style="--depth: <?= $level ?>"
 			href="<?= $href ?>"
-			hx-target="#main"
-			data-nav-prefix="<?= escape($prefix) ?>"
 			<?= $active ? 'aria-current="page"' : '' ?>>
 			<span class="label">
 				<?php if ($icon !== ''): ?>

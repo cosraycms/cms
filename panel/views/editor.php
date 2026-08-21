@@ -2,9 +2,7 @@
 
 use function Cosray\escape;
 
-if (!$boosted) {
-	$this->layout('panel');
-}
+$this->layout('layer/main');
 
 $mode = (string) $mode;
 $name = (string) $name;
@@ -82,11 +80,11 @@ foreach ($fieldsets as $fieldset) {
 }
 ?>
 
-<div id="main" class="page cms-node">
+<div class="page cms-node">
 	<header class="head">
 		<div class="titles">
 			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<a href="<?= escape($links->back()) ?>" hx-target="#main"><?= escape($name) ?></a>
+				<a href="<?= escape($links->back()) ?>"><?= escape($name) ?></a>
 			</nav>
 			<div class="line">
 				<h1><?= $node['title'] ?? '' ?></h1>
@@ -114,7 +112,6 @@ foreach ($fieldsets as $fieldset) {
 				<form
 					method="post"
 					action="<?= escape($links->delete($uid)) ?>"
-					hx-target="#main"
 					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
 					<button class="cms-button danger" type="submit">
 						<?= escape(__('editor:delete')) ?>

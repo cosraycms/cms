@@ -2,12 +2,13 @@
 
 use function Cosray\escape;
 
-if ((string) ($area ?? '') !== 'content' || count($collections) === 0) {
+if (!$rail) {
 	return;
 }
+
 ?>
-<aside class="cms-sidebar">
+<aside class="cms-sidebar" hx-target:inherited="#main">
 	<nav class="scroll" aria-label="<?= escape(__('panel:navigation')) ?>">
-		<?php $this->insert('component/collections', ['level' => 0]) ?>
+		<?php $this->insert('component/collection-nav') ?>
 	</nav>
 </aside>

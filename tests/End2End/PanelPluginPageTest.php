@@ -33,7 +33,7 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringContainsString('id="main" class="page test-plugin-page"', $html);
+		$this->assertStringContainsString('class="page test-plugin-page"', $html);
 		$this->assertStringContainsString('<h1>Test Plugin Page</h1>', $html);
 		// The plugin's nav link renders in the sidebar with the section label.
 		$this->assertStringContainsString('Test Plugin', $html);

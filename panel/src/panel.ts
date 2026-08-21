@@ -14,18 +14,7 @@ import { loadElement } from '$lib/elements';
 import { installHost } from '$lib/host';
 import { configureRuntime } from '$lib/runtime';
 
-const mainSelector = '#main';
 const cleanups: Array<() => void> = [];
-
-const currentPath = () => window.location.pathname.replace(/\/$/, '') || '/';
-
-const linkPath = (link: HTMLAnchorElement) => {
-	try {
-		return new URL(link.href, window.location.href).pathname.replace(/\/$/, '') || '/';
-	} catch {
-		return '';
-	}
-};
 
 function listen<K extends keyof DocumentEventMap>(
 	type: K,
@@ -33,29 +22,6 @@ function listen<K extends keyof DocumentEventMap>(
 ): void {
 	document.addEventListener(type, listener);
 	cleanups.push(() => document.removeEventListener(type, listener));
-}
-
-// Mirrors the server-side rule in component/collections.php: an entry is
-// current for its own URL and, when it declares a prefix, for everything
-// below it — a collection stays marked while a node under it is open.
-function navCurrent(link: HTMLAnchorElement, path: string): boolean {
-	const prefix = link.dataset.navPrefix;
-
-	return linkPath(link) === path || (prefix !== undefined && path.startsWith(prefix));
-}
-
-function updateNavigation(): void {
-	const path = currentPath();
-
-	document.querySelectorAll('[data-nav][aria-current]').forEach((link) => {
-		link.removeAttribute('aria-current');
-	});
-
-	document.querySelectorAll<HTMLAnchorElement>('[data-nav][href]').forEach((link) => {
-		if (navCurrent(link, path)) {
-			link.setAttribute('aria-current', 'page');
-		}
-	});
 }
 
 function focusSearch(event: KeyboardEvent): void {
@@ -119,23 +85,7 @@ function bootElements(): void {
 	});
 }
 
-// A boosted navigation swaps a fragment whose root is itself #main into the
-// existing #main, so htmx's innerHTML swap nests the fresh #main inside the
-// previous one, leaving the outer wrapper carrying the last full page's class.
-// Unwrap it so a single #main (with the current page's class) sits directly
-// under .main — the arrangement the layout's scroll rules assume.
-function denestMain(): void {
-	const outer = document.querySelector(mainSelector);
-	const inner = outer?.querySelector(`:scope > ${mainSelector}`);
-
-	if (outer && inner) {
-		outer.replaceWith(inner);
-	}
-}
-
 function afterSwap(): void {
-	denestMain();
-	updateNavigation();
 	bootEditor();
 	bootElements();
 }
@@ -150,12 +100,8 @@ cleanups.push(
 	installDerive(),
 	installSubmit(),
 );
-listen('htmx:afterSwap' as keyof DocumentEventMap, afterSwap);
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
-listen('htmx:pushedIntoHistory' as keyof DocumentEventMap, updateNavigation);
-listen('htmx:after:history:update' as keyof DocumentEventMap, updateNavigation);
 
-updateNavigation();
 // bootEditor first: defining cosray-host upgrades the hosts already parsed
 // into the page, and each upgrade resolves its module against the panel base
 // the payload carries. Defining earlier resolves against the default base and

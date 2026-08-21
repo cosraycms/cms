@@ -63,7 +63,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
+		$this->assertStringContainsString('class="page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertCreateAssetStateIsRendered($html);

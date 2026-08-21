@@ -2,6 +2,8 @@
 
 use function Cosray\escape;
 
+$this->layout('layer/main');
+
 $chevronSvgPath = __DIR__ . '/../icons/chevron.svg';
 $chevronSvg = is_file($chevronSvgPath)
 	? trim((string) file_get_contents($chevronSvgPath))
@@ -11,10 +13,6 @@ $chevronSvg = str_replace(
 	'<svg class="chevron" aria-hidden="true" focusable="false" ',
 	$chevronSvg,
 );
-
-if (!$boosted) {
-	$this->layout('panel');
-}
 
 // Track sizing per column kind. Badges and row actions size to their content
 // because the translation decides a pill's width; the title absorbs the slack,
@@ -44,12 +42,12 @@ foreach (array_slice((array) $this->unwrap($page->headers), 1) as $header) {
 $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 ?>
 
-<div id="main" class="page cms-collection">
+<div class="page cms-collection">
 	<header class="head">
 		<div class="titles">
 			<?php if ($page->rootUrl !== null): ?>
 				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-					<a href="<?= escape($page->rootUrl) ?>" hx-target="#main"><?= escape($page->name) ?></a>
+					<a href="<?= escape($page->rootUrl) ?>"><?= escape($page->name) ?></a>
 					<span aria-hidden="true">/</span>
 					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
 				</nav>
@@ -70,8 +68,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?php foreach ($page->viewLinks as $link): ?>
 						<a
 							class="view-toggle-link<?= $link['active'] ? ' is-active' : '' ?>"
-							href="<?= escape($link['url']) ?>"
-							hx-target="#main">
+							href="<?= escape($link['url']) ?>">
 							<?= escape($link['label']) ?>
 						</a>
 					<?php endforeach ?>
@@ -79,12 +76,12 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php endif ?>
 			<?php if ($page->query->parent !== null): ?>
 				<?php if ($page->parentEditUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>" hx-target="#main"><?= escape(
+					<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>"><?= escape(
 						__('collection:edit-parent'),
 					) ?></a>
 				<?php endif ?>
 				<?php if ($page->parentTreeUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>" hx-target="#main"><?= escape(
+					<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>"><?= escape(
 						__('collection:show-in-tree'),
 					) ?></a>
 				<?php endif ?>
@@ -92,8 +89,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php foreach ($page->createLinks as $link): ?>
 				<a
 					class="cms-button primary"
-					href="<?= escape($link['url']) ?>"
-					hx-target="#main">
+					href="<?= escape($link['url']) ?>">
 					<?= escape(__('collection:new', ['name' => $link['name']])) ?>
 				</a>
 			<?php endforeach ?>
@@ -105,8 +101,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<form
 				class="search"
 				method="get"
-				action="<?= escape($page->path) ?>"
-				hx-target="#main">
+				action="<?= escape($page->path) ?>">
 				<label class="sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
@@ -126,7 +121,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</form>
 
 			<?php if ($page->clearSearchUrl !== null): ?>
-				<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>" hx-target="#main"><?= escape(
+				<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>"><?= escape(
 					__('collection:clear-search'),
 				) ?></a>
 			<?php endif ?>
@@ -171,8 +166,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 										<?php else: ?>
 											<a
 												class="inner"
-												href="<?= escape($header['url']) ?>"
-												hx-target="#main">
+												href="<?= escape($header['url']) ?>">
 												<?= escape($header['label']) ?>
 												<span class="sort" aria-hidden="true">⌃</span>
 											</a>
@@ -208,7 +202,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				])) ?></span>
 				<nav class="pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
 					<?php if ($page->previousUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->previousUrl) ?>" hx-target="#main"><?= escape(
+						<a class="page-link" href="<?= escape($page->previousUrl) ?>"><?= escape(
 							__('collection:previous'),
 						) ?></a>
 					<?php else: ?>
@@ -221,7 +215,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					])) ?></span>
 
 					<?php if ($page->nextUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->nextUrl) ?>" hx-target="#main"><?= escape(
+						<a class="page-link" href="<?= escape($page->nextUrl) ?>"><?= escape(
 							__('collection:next'),
 						) ?></a>
 					<?php else: ?>

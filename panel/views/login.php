@@ -2,7 +2,7 @@
 
 use function Cosray\escape;
 
-$this->layout('base');
+$this->layout('layer/document');
 
 ?>
 <main id="main" class="cms-login">

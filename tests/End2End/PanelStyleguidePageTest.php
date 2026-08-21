@@ -27,7 +27,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page cms-styleguide"', $html);
+		$this->assertStringContainsString('class="page cms-styleguide"', $html);
 		// Tokens are read from tokens.css, not listed in the view.
 		$this->assertStringContainsString('--cms-color-primary', $html);
 		$this->assertStringContainsString('background: var(--cms-color-canvas)', $html);

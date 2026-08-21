@@ -52,7 +52,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'<style>@layer tokens, reset, panel, plugin, theme;</style>',
 			$html,
 		);
-		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
+		$this->assertStringContainsString('class="page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
 		$this->assertPanelStaticStateIsRendered($html);
@@ -107,12 +107,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		$link = $this->navLink($node, '/cp/collection/test-articles');
 
-		// The node lives below the collection URL, so the entry stays marked;
-		// the prefix lets the panel script apply the same rule after a swap.
-		$this->assertStringContainsString(
-			'data-nav-prefix="/cp/collection/test-articles/"',
-			$link,
-		);
+		// The node lives below the collection URL, so the entry stays marked.
 		$this->assertStringContainsString('aria-current="page"', $link);
 		$this->assertStringNotContainsString(
 			'aria-current="page"',
@@ -286,7 +281,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="main" class="page cms-node"', $html);
+		$this->assertStringContainsString('class="page cms-node"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('class="panel"', $html);
 	}
@@ -408,7 +403,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	/**
 	 * The opening tag of the navigation link pointing at `$href`. The class
 	 * picks the region: the masthead's content area and the rail entry for the
-	 * first collection share an href, so `data-nav` alone is ambiguous.
+	 * first collection share an href, so the href alone is ambiguous.
 	 */
 	private function navLink(string $html, string $href, string $class = 'link'): string
 	{

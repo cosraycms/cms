@@ -5,9 +5,7 @@ use function Cosray\escape;
 // Development page: strings stay untranslated on purpose, the panel
 // catalogs carry what editors see.
 
-if (!$boosted) {
-	$this->layout('panel');
-}
+$this->layout('layer/main');
 
 $tokenGroups = (array) $this->unwrap($tokenGroups);
 $fields = (array) $this->unwrap($fields);
@@ -39,7 +37,7 @@ $chevronSvg = is_file($chevronSvgPath)
 	: '';
 ?>
 
-<div id="main" class="page cms-styleguide">
+<div class="page cms-styleguide">
 	<header class="head">
 			<h1>Styleguide</h1>
 			<?php

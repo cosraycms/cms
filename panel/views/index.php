@@ -2,12 +2,10 @@
 
 use function Cosray\escape;
 
-if (!$boosted) {
-	$this->layout('panel');
-}
+$this->layout('layer/main');
 ?>
 
-<div id="main" class="page cms-dashboard">
+<div class="page cms-dashboard">
 	<header class="head">
 		<h1><?= escape(__('nav:dashboard')) ?></h1>
 	</header>

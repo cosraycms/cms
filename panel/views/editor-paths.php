@@ -14,6 +14,8 @@ $submitted = (array) $this->unwrap($submitted);
 	hx-post="<?= escape((string) $pathsUrl) ?>"
 	hx-trigger="input from:.js-path-source delay:500ms, change from:.js-path-source delay:500ms"
 	hx-include="#node-editor-form"
+	<?php // Swaps itself, so it has to opt out of the target the content region inherits.?>
+	hx-target="this"
 	hx-swap="outerHTML">
 	<?php foreach ($paths as $locale => $path): ?>
 		<?php if (

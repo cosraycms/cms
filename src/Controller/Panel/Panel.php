@@ -41,17 +41,17 @@ abstract class Panel
 	{
 		$panelPath = $this->panelPath();
 		$localeId = $this->localeId();
+		$collections = $this->collections();
 
 		return array_merge([
 			'debug' => $this->config->debug(),
 			'env' => $this->config->env(),
-			'boosted' => $this->request->hasHeader('HX-Boosted'),
-			'htmx' => $this->request->hasHeader('HX-Request'),
+			'layer' => $this->layer(),
 			'panelPath' => $panelPath,
 			'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
 			'currentPath' => $this->request->uri()->getPath(),
 			'area' => static::AREA,
-			'contentUrl' => $this->contentUrl(),
+			'contentUrl' => $this->firstUrl($collections),
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
 			'panelLocales' => $this->panelLocales(),
@@ -60,9 +60,34 @@ abstract class Panel
 			'stylesheets' => $this->stylesheets($panelPath),
 			'scripts' => $this->scripts($panelPath),
 			'moduleScripts' => $this->moduleScripts($panelPath),
-			'collections' => $this->collections(),
+			'collections' => $collections,
+			'rail' => static::AREA === 'content' && $collections !== [],
 			'messages' => $this->messages(),
 		], $data);
+	}
+
+	/**
+	 * How much of the panel a response renders. htmx names the element it is
+	 * about to swap, and that boundary is where the layer templates stop: the
+	 * content region for navigation inside an area, the frame for an area
+	 * switch, the whole body for a history restore, the document otherwise.
+	 */
+	protected function layer(): string
+	{
+		if (!$this->request->hasHeader('HX-Request')) {
+			return 'document';
+		}
+
+		// A history restore swaps the body itself, which htmx flags as full.
+		if ($this->request->header('HX-Request-Type') === 'full') {
+			return 'shell';
+		}
+
+		// The target reads `<tag>#<id>`; only the id names a panel region.
+		$target = $this->request->header('HX-Target');
+		$hash = strrpos($target, '#');
+
+		return $hash !== false && substr($target, $hash + 1) === 'frame' ? 'frame' : 'main';
 	}
 
 	/**
@@ -240,13 +265,9 @@ abstract class Panel
 	/**
 	 * Where the masthead's content entry goes: the first entry of the rail, in
 	 * the rail's own order. Null when a project defines no collections.
+	 *
+	 * @param list<NavigationItem> $items
 	 */
-	private function contentUrl(): ?string
-	{
-		return $this->firstUrl($this->collections());
-	}
-
-	/** @param list<NavigationItem> $items */
 	private function firstUrl(array $items): ?string
 	{
 		foreach ($items as $item) {

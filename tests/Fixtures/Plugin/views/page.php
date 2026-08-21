@@ -1,11 +1,9 @@
 <?php
 
-if (!$boosted) {
-	$this->layout('panel');
-}
+$this->layout('layer/main');
 ?>
 
-<div id="main" class="page test-plugin-page">
+<div class="page test-plugin-page">
 	<section class="content">
 		<div class="page-head">
 			<h1><?= $title ?></h1>
