@@ -588,7 +588,7 @@ Panel responses are rendered in layers, and htmx picks the layer by naming the r
 
 - `main` — the content region alone (`HX-Target: main#main`), for navigation inside an area
 - `frame` — the rail and the content region (`HX-Target: div#frame`), for an area switch from the masthead
-- `shell` — everything inside `<body>` (`HX-History-Restore-Request`), for a back/forward restore; it carries no script tags, because htmx executes the scripts it inserts
+- `shell` — the masthead and the frame, which is the element htmx marks with `hx-history-elt` (`HX-History-Restore-Request`), for a back/forward restore; it carries no script tags, because the scripts sit outside it and htmx executes the scripts it inserts
 - `document` — the whole page, for a plain request
 
 A panel page view therefore calls `$this->layout('layer/main')` unconditionally and renders only its own fragment; the layer templates add whatever wraps it. The fragment root must not carry `id="main"` — that id belongs to the persistent `<main>` the layers render. Panel pages that projects and plugins register follow the same contract.

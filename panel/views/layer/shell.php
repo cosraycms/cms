@@ -1,7 +1,8 @@
 <?php
 
-// Everything inside <body>: the masthead and the frame below it. htmx restores
-// history by swapping the body, so this is where such a request stops.
+// The masthead and the frame below it. Marked as the history element, so a
+// back or forward restore swaps this and leaves the scripts around it alone;
+// that is where such a request stops.
 
 $layer = (string) $layer;
 
@@ -10,11 +11,8 @@ if ($layer !== 'shell') {
 }
 
 ?>
-<div class="cms-shell">
+<div class="cms-shell" hx-history-elt>
 	<?php $this->insert('component/masthead') ?>
 
 	<?= $this->body() ?>
 </div>
-<?php if ($layer === 'shell'): ?>
-	<?php $this->insert('component/catalog') ?>
-<?php endif ?>

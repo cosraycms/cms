@@ -2,6 +2,9 @@
 
 use function Cosray\escape;
 
+$catalog = (array) $this->unwrap(
+	$messages ?? ['locale' => (string) ($localeId ?? 'en'), 'domains' => []],
+);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 ?>
@@ -20,7 +23,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <body hx-boost:inherited="true">
 	<?= $this->body() ?>
 
-	<?php $this->insert('component/catalog') ?>
+	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
 	<?php // Element control modules resolve against this base. It has to be set
 

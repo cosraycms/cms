@@ -44,6 +44,7 @@ final class PanelLayersTest extends End2EndTestCase
 		$this->assertStringContainsString('id="frame"', $html);
 		$this->assertStringContainsString('class="page cms-collection"', $html);
 		$this->assertStringContainsString('id="verba-catalog"', $html);
+		$this->assertStringContainsString('hx-history-elt', $html);
 	}
 
 	public function testNavigatingInsideAnAreaRendersTheContentRegionAlone(): void
@@ -98,29 +99,26 @@ final class PanelLayersTest extends End2EndTestCase
 	}
 
 	/**
-	 * htmx restores history by swapping the body. Nothing in that response may
-	 * re-run: the panel scripts are already loaded, and htmx executes the
-	 * scripts it inserts.
+	 * htmx restores history by swapping the element marked `hx-history-elt`,
+	 * which is the shell. The scripts sit outside it and stay untouched, and
+	 * nothing in the response may re-run: htmx executes the scripts it inserts.
 	 *
 	 * A restore carries this one header and none of the others, so it cannot be
 	 * recognised by the target or the request type.
 	 */
-	public function testAHistoryRestoreRendersTheBodyWithoutTheScripts(): void
+	public function testAHistoryRestoreRendersTheShellAlone(): void
 	{
 		$html = $this->layerHtml(['HX-History-Restore-Request' => 'true']);
 
+		$this->assertStringContainsString('hx-history-elt', $html);
 		$this->assertStringContainsString('class="cms-masthead"', $html);
 		$this->assertStringContainsString('id="frame"', $html);
 		$this->assertStringContainsString('class="page cms-collection"', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertStringNotContainsString('<script src=', $html);
-
-		// Element bundles read the catalog when they first run, which can be
-		// after a restore replaced the body.
-		$this->assertStringContainsString('id="verba-catalog"', $html);
 	}
 
-	public function testARequestAimedAtTheBodyRendersTheBody(): void
+	public function testARequestAimedAtTheBodyRendersTheShell(): void
 	{
 		$html = $this->layerHtml([
 			'HX-Request' => 'true',
