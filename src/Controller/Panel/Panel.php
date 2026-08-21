@@ -74,11 +74,17 @@ abstract class Panel
 	 */
 	protected function layer(): string
 	{
+		// A restore swaps the body. It has to come first: htmx sends this header
+		// alone, without the ones every other request carries.
+		if ($this->request->hasHeader('HX-History-Restore-Request')) {
+			return 'shell';
+		}
+
 		if (!$this->request->hasHeader('HX-Request')) {
 			return 'document';
 		}
 
-		// A history restore swaps the body itself, which htmx flags as full.
+		// Anything else aimed at the body, which htmx flags as a full render.
 		if ($this->request->header('HX-Request-Type') === 'full') {
 			return 'shell';
 		}

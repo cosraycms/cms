@@ -101,14 +101,13 @@ final class PanelLayersTest extends End2EndTestCase
 	 * htmx restores history by swapping the body. Nothing in that response may
 	 * re-run: the panel scripts are already loaded, and htmx executes the
 	 * scripts it inserts.
+	 *
+	 * A restore carries this one header and none of the others, so it cannot be
+	 * recognised by the target or the request type.
 	 */
 	public function testAHistoryRestoreRendersTheBodyWithoutTheScripts(): void
 	{
-		$html = $this->layerHtml([
-			'HX-Request' => 'true',
-			'HX-Request-Type' => 'full',
-			'HX-Target' => 'body',
-		]);
+		$html = $this->layerHtml(['HX-History-Restore-Request' => 'true']);
 
 		$this->assertStringContainsString('class="cms-masthead"', $html);
 		$this->assertStringContainsString('id="frame"', $html);
@@ -119,6 +118,18 @@ final class PanelLayersTest extends End2EndTestCase
 		// Element bundles read the catalog when they first run, which can be
 		// after a restore replaced the body.
 		$this->assertStringContainsString('id="verba-catalog"', $html);
+	}
+
+	public function testARequestAimedAtTheBodyRendersTheBody(): void
+	{
+		$html = $this->layerHtml([
+			'HX-Request' => 'true',
+			'HX-Request-Type' => 'full',
+			'HX-Target' => 'body',
+		]);
+
+		$this->assertStringContainsString('class="cms-masthead"', $html);
+		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 	}
 
 	/** @param array<string, string> $headers */
