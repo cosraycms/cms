@@ -38,6 +38,10 @@
 - Changed installed panel client asset URLs from `{path.panel}/build/*` to `{path.panel}/static/*`.
 - Changed the panel Vite dev server switch from `app.env === 'development'` to the explicit `COSRAY_PANEL_DEV=1` environment variable.
 
+### Changed
+
+- Relicensed Cosray from MPL-2.0 to MIT. The `celema/*` libraries the CMS builds on and the `cosray-app` skeleton are all MIT, so the framework stack is now uniformly permissive. Panel files were already MIT and are unaffected. Bundled third-party files keep their own licenses; see [REUSE.toml](REUSE.toml). Previously released versions remain available under MPL-2.0.
+
 ### Added
 
 - Added `references` to the finder query DSL, so nodes can be filtered by what they point at. `references = '<uid>'` asks whether the node references that target anywhere in its content and reads the `node_references` index, which also covers richtext links; `references.<field> = '<uid>'` narrows the question to one `Reference` field and compiles to a jsonb containment test that stays on the content GIN index. Both accept `!=`, `@`, and `!@`. This closes a real gap: a `Reference` stores an ordered `{uid}` list under `value.zxx`, and no field expression could reach into it — `alertRule = 'uid'` compared the whole list against a string and always missed. Note that `references` joins `path` as a reserved word in the DSL; a content field of that name is no longer addressable in a filter.

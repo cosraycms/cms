@@ -4,8 +4,7 @@
 [![ci](https://codefloe.com/cosray/cms/badges/workflows/ci.yml/badge.svg?style=flat&logo=forgejo&logoColor=white&label=ci)](https://codefloe.com/cosray/cms/actions)
 [![code coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fcov.celema.dev%2Fcosray%2Fcms%2Fcode%2Fbadge.json)](https://cov.celema.dev/cosray/cms/code)
 [![REUSE status](https://api.reuse.software/badge/codefloe.com/cosray/cms)](https://api.reuse.software/info/codefloe.com/cosray/cms)
-[![License](https://img.shields.io/badge/license-MPL--2.0-blue)](LICENSES/MPL-2.0.txt)
-[![Panel License](https://img.shields.io/badge/panel_license-MIT-blue)](LICENSES/MIT.txt)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSES/MIT.txt)
 
 > [!WARNING]
 > _Thanks for stopping by! This project is in an early, fast-moving stage. The API and data model are still unstable, and documentation is minimal or missing. I'm aware of many of the rough edges, so contributions are probably not worth your time right now._
@@ -638,4 +637,4 @@ php ./run db:migrations --apply
 
 ## License
 
-Most project files are licensed under [MPL-2.0](LICENSES/MPL-2.0.txt). Files in `panel/` are licensed under [MIT](LICENSES/MIT.txt). See [REUSE.toml](REUSE.toml) for file-level details.
+Cosray is licensed under [MIT](LICENSES/MIT.txt). Bundled third-party files retain their respective licenses; see [REUSE.toml](REUSE.toml) for file-level details.

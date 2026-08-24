@@ -1,7 +1,7 @@
 project: Cosray Content Management Framework (cosray/cms)
 repository: https://github.com/cosray/cms
 canonical_branch: main
-license: MIT (https://github.com/cosray/cms/blob/main/LICENSE.md)
+license: MIT (https://codefloe.com/cosray/cms/src/branch/main/LICENSE.txt)
 last_updated: 2026-07-05
 contact: https://github.com/cosray/cms/issues
 

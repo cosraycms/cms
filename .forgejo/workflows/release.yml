@@ -97,11 +97,29 @@ jobs:
             cms: 'cosray/cms',
             ref: process.env.REF,
             sha: process.env.SHA,
+            license: 'MIT',
             builtAt: new Date().toISOString(),
           };
 
           writeFileSync('panel/static/cosray-panel.json', JSON.stringify(manifest, null, 2) + '\n');
           NODE
+
+      - name: Add license notices
+        run: |
+          set -euo pipefail
+
+          cp LICENSE.txt panel/static/LICENSE.txt
+          cp -R LICENSES panel/static/LICENSES
+          cat > panel/static/FONT-AWESOME-NOTICE.txt <<'EOF'
+          Font Awesome Free 6.4.0
+          Copyright 2023 Fonticons, Inc.
+          https://fontawesome.com
+
+          The Link, Text Height, and Unlink icons were adapted for Svelte.
+          They are licensed under the Creative Commons Attribution 4.0
+          International license:
+          https://creativecommons.org/licenses/by/4.0/
+          EOF
 
       - name: Create tarball
         run: |
