@@ -82,10 +82,12 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f "panel/static/panel.js" ] || [ ! -f "panel/static/panel.css" ]; then
-            echo "Expected panel.js and panel.css in panel/static."
-            exit 1
-          fi
+          for asset in panel.js panel.css htmx.js; do
+            if [ ! -f "panel/static/${asset}" ]; then
+              echo "Expected ${asset} in panel/static."
+              exit 1
+            fi
+          done
 
           node --input-type=module <<'NODE'
           import { writeFileSync } from 'node:fs';

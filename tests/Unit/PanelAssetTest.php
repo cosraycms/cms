@@ -82,6 +82,7 @@ final class PanelAssetTest extends TestCase
 		$static = $this->createPanelAssets([
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
+			'htmx.js' => 'var htmx = {};',
 		]);
 		$panel = $this->panel(['path.panelAssets' => $static]);
 
@@ -89,7 +90,27 @@ final class PanelAssetTest extends TestCase
 			$context = $panel->data();
 
 			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/static/htmx.js', $context['scripts']);
 			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
+		} finally {
+			$this->removeDirectory($static);
+		}
+	}
+
+	public function testPanelContextOmitsIncompleteStaticInstall(): void
+	{
+		$static = $this->createPanelAssets([
+			'panel.css' => 'body {}',
+			'panel.js' => 'console.log("panel");',
+		]);
+		$panel = $this->panel(['path.panelAssets' => $static]);
+
+		try {
+			$context = $panel->data();
+
+			$this->assertNotContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertNotContains('/cp/static/htmx.js', $context['scripts']);
+			$this->assertNotContains('/cp/static/panel.js', $context['moduleScripts']);
 		} finally {
 			$this->removeDirectory($static);
 		}
@@ -100,6 +121,7 @@ final class PanelAssetTest extends TestCase
 		$static = $this->createPanelAssets([
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
+			'htmx.js' => 'var htmx = {};',
 		]);
 		$panel = $this->panel(['app.env' => 'development', 'path.panelAssets' => $static]);
 
@@ -107,6 +129,7 @@ final class PanelAssetTest extends TestCase
 			$context = $panel->data();
 
 			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains('/cp/static/htmx.js', $context['scripts']);
 			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
 			$this->assertNotContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
 		} finally {
@@ -124,6 +147,10 @@ final class PanelAssetTest extends TestCase
 			$context = $panel->data();
 
 			$this->assertNotContains('/cp/static/panel.css', $context['stylesheets']);
+			$this->assertContains(
+				'http://localhost:2001/node_modules/htmx.org/dist/htmx.min.js',
+				$context['scripts'],
+			);
 			$this->assertContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
 			$this->assertContains('http://localhost:2001/src/panel.ts', $context['moduleScripts']);
 		} finally {

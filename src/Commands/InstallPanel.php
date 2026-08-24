@@ -240,7 +240,7 @@ class InstallPanel
 
 	private function validatePanel(string $dir): void
 	{
-		foreach ([self::MANIFEST, 'panel.css', 'panel.js'] as $file) {
+		foreach ([self::MANIFEST, 'panel.css', 'panel.js', 'htmx.js'] as $file) {
 			if (!is_file("{$dir}/{$file}")) {
 				throw new RuntimeException("Panel archive is missing {$file}");
 			}

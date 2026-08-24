@@ -170,10 +170,14 @@ abstract class Panel
 
 	private function scripts(string $panelPath): array
 	{
-		return [
-			"{$panelPath}/assets/app/vendor/htmx.js",
-			...$this->extras()->scripts(),
-		];
+		if ($this->panelDev()) {
+			$origin = $this->panelDevOrigin();
+			$scripts = ["{$origin}/node_modules/htmx.org/dist/htmx.min.js"];
+		} else {
+			$scripts = $this->hasPanelStatic() ? ["{$panelPath}/static/htmx.js"] : [];
+		}
+
+		return [...$scripts, ...$this->extras()->scripts()];
 	}
 
 	private function moduleScripts(string $panelPath): array
@@ -205,7 +209,11 @@ abstract class Panel
 	{
 		$static = $this->panelAssetsDir();
 
-		return is_file($static . '/panel.js') && is_file($static . '/panel.css');
+		return (
+			is_file($static . '/panel.js')
+				&& is_file($static . '/panel.css')
+				&& is_file($static . '/htmx.js')
+		);
 	}
 
 	protected function panelAssetsDir(): string

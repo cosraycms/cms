@@ -55,6 +55,23 @@ final class InstallPanelTest extends TestCase
 		$this->assertSame('cosray-panel-nightly.tar.gz', $this->property($command, 'panelFileName'));
 	}
 
+	public function testPanelValidationRequiresHtmxAsset(): void
+	{
+		$dir = $this->createPanelDir([
+			'cosray-panel.json' => '{}',
+			'panel.css' => 'body {}',
+			'panel.js' => 'console.log("panel");',
+		]);
+		$command = new InstallPanel($this->config());
+
+		try {
+			$this->throws(\RuntimeException::class, 'Panel archive is missing htmx.js');
+			$this->invoke($command, 'validatePanel', $dir);
+		} finally {
+			$this->removeDirectory($dir);
+		}
+	}
+
 	public function testWarnsAboutStaleAssetsLeftAtThePanelPath(): void
 	{
 		$public = $this->createLegacyPanelDir();
@@ -94,6 +111,19 @@ final class InstallPanelTest extends TestCase
 		$this->assertTrue(mkdir($public . '/cp/static', 0o775, true));
 
 		return $public;
+	}
+
+	/** @param array<string, string> $files */
+	private function createPanelDir(array $files): string
+	{
+		$dir = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
+		$this->assertTrue(mkdir($dir, 0o775, true));
+
+		foreach ($files as $name => $content) {
+			$this->assertNotFalse(file_put_contents("{$dir}/{$name}", $content));
+		}
+
+		return $dir;
 	}
 
 	private function removeDirectory(string $path): void

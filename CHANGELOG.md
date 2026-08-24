@@ -40,6 +40,7 @@
 
 ### Changed
 
+- Moved htmx from tracked panel source into the signed panel asset artifact. The panel build now restores the exact version through pnpm and includes `htmx.js`; applications must re-run `php run panel:install` after updating.
 - Relicensed Cosray from MPL-2.0 to MIT. The `celema/*` libraries the CMS builds on and the `cosray-app` skeleton are all MIT, so the framework stack is now uniformly permissive. Panel files were already MIT and are unaffected. Bundled third-party files keep their own licenses; see [REUSE.toml](REUSE.toml). Previously released versions remain available under MPL-2.0.
 
 ### Added
