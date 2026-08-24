@@ -11,3 +11,19 @@ path = ["panel/**/*.*"]
 precedence = "closest"
 SPDX-FileCopyrightText = "2022-present Cosray developers and contributors"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = ["panel/app/vendor/htmx.js"]
+precedence = "override"
+SPDX-FileCopyrightText = "NONE"
+SPDX-License-Identifier = "0BSD"
+
+[[annotations]]
+path = [
+    "panel/src/shell/icons/IcoLink.svelte",
+    "panel/src/shell/icons/IcoTextHeight.svelte",
+    "panel/src/shell/icons/IcoUnlink.svelte",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2023 Fonticons, Inc."
+SPDX-License-Identifier = "CC-BY-4.0"

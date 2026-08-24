@@ -30,6 +30,9 @@ export default defineConfig({
 	build: {
 		outDir: 'static',
 		emptyOutDir: false,
+		license: {
+			fileName: 'ELEMENTS-THIRD-PARTY-NOTICES.md',
+		},
 		// One stylesheet for all elements; the island links it once.
 		cssCodeSplit: false,
 		rollupOptions: {

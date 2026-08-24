@@ -38,6 +38,9 @@ export default defineConfig({
 	build: {
 		outDir: 'static',
 		emptyOutDir: true,
+		license: {
+			fileName: 'PANEL-THIRD-PARTY-NOTICES.md',
+		},
 		rollupOptions: {
 			input: {
 				panel: path.resolve(root, 'src/panel.ts'),
