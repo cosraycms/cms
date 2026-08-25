@@ -26,7 +26,6 @@
 	}
 
 	& .link {
-		position: relative;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);
@@ -52,17 +51,6 @@
 			background: var(--cms-color-selected);
 			color: var(--cms-color-text);
 			font-weight: 500;
-		}
-
-		&[aria-current='page']::before {
-			position: absolute;
-			top: 0.4375rem;
-			bottom: 0.4375rem;
-			left: calc(-1 * var(--cms-space-3));
-			width: 0.1875rem;
-			border-radius: 0 999px 999px 0;
-			background: var(--cms-color-accent);
-			content: '';
 		}
 	}
 
@@ -138,10 +126,6 @@
 			display: flex;
 			gap: var(--cms-space-2);
 			white-space: nowrap;
-		}
-
-		& .link[aria-current='page']::before {
-			display: none;
 		}
 
 		& .section {
