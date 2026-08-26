@@ -244,4 +244,187 @@ final class PanelFormPatchTest extends TestCase
 			$this->assertEquals($case['patched'], $content['body'], "contract case: {$case['name']}");
 		}
 	}
+
+	private function entriesPatch(): FormPatch
+	{
+		return new FormPatch([
+			[
+				'name' => 'sections',
+				'type' => 'Entries',
+				'control' => [
+					'name' => 'entries',
+					'props' => [
+						'entryTypes' => [
+							[
+								'type' => 'App\Node\Quote',
+								'fields' => [
+									[
+										'name' => 'text',
+										'type' => 'Text',
+										'control' => ['name' => 'text', 'props' => []],
+									],
+									[
+										'name' => 'famous',
+										'type' => 'Checkbox',
+										'control' => ['name' => 'checkbox', 'props' => []],
+									],
+								],
+							],
+							[
+								'type' => 'App\Node\Person',
+								'fields' => [
+									[
+										'name' => 'bio',
+										'type' => 'RichText',
+										'control' => ['name' => 'element', 'props' => []],
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+	}
+
+	private function entriesContent(array $rows): array
+	{
+		return ['sections' => ['type' => 'Entries', 'value' => ['zxx' => $rows]]];
+	}
+
+	public function testEntriesPatchRowsByUidAndKeepUnknownKeys(): void
+	{
+		$stored = $this->entriesContent([
+			[
+				'uid' => 'r1',
+				'type' => 'App\Node\Quote',
+				'note' => 'row-kept',
+				'fields' => [
+					'text' => ['type' => 'Text', 'value' => ['zxx' => 'Old A'], 'stashed' => 'kept'],
+					'ghost' => ['type' => 'Unknown', 'value' => ['zxx' => 'g']],
+				],
+			],
+			[
+				'uid' => 'r2',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['type' => 'Text', 'value' => ['zxx' => 'Old B']]],
+			],
+			[
+				'uid' => 'r3',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['type' => 'Text', 'value' => ['zxx' => 'Removed']]],
+			],
+		]);
+		$submitted = $this->entriesContent([
+			[
+				'uid' => 'r2',
+				'type' => 'App\Node\Quote',
+				'fields' => [
+					'text' => ['value' => ['zxx' => 'New B']],
+					'famous' => ['value' => ['zxx' => '1']],
+				],
+			],
+			[
+				'uid' => 'r1',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['value' => ['zxx' => 'New A']]],
+			],
+		]);
+
+		$rows = $this->entriesPatch()->content($stored, $submitted)['sections']['value']['zxx'];
+
+		$this->assertCount(2, $rows);
+		$this->assertSame('r2', $rows[0]['uid']);
+		$this->assertSame('New B', $rows[0]['fields']['text']['value']['zxx']);
+		$this->assertTrue($rows[0]['fields']['famous']['value']['zxx']);
+		$this->assertSame('r1', $rows[1]['uid']);
+		$this->assertSame('New A', $rows[1]['fields']['text']['value']['zxx']);
+		$this->assertSame('kept', $rows[1]['fields']['text']['stashed']);
+		$this->assertSame('g', $rows[1]['fields']['ghost']['value']['zxx']);
+		$this->assertSame('row-kept', $rows[1]['note']);
+	}
+
+	public function testEntriesBackfillMissingUid(): void
+	{
+		$submitted = $this->entriesContent([
+			[
+				'uid' => '',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['value' => ['zxx' => 'Fresh']]],
+			],
+		]);
+
+		$rows = $this->entriesPatch()->content([], $submitted)['sections']['value']['zxx'];
+
+		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $rows[0]['uid']);
+		$this->assertSame('Fresh', $rows[0]['fields']['text']['value']['zxx']);
+	}
+
+	public function testEntriesDropUnknownTypesAndNormalizeGaps(): void
+	{
+		$submitted = $this->entriesContent([
+			0 => [
+				'uid' => 'a',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['value' => ['zxx' => 'A']]],
+			],
+			2 => ['uid' => 'evil', 'type' => 'Acme\Evil', 'fields' => []],
+			3 => 'not-a-row',
+			4 => [
+				'uid' => 'b',
+				'type' => 'App\Node\Quote',
+				'fields' => ['text' => ['value' => ['zxx' => 'B']]],
+			],
+		]);
+
+		$rows = $this->entriesPatch()->content([], $submitted)['sections']['value']['zxx'];
+
+		$this->assertSame(['a', 'b'], array_column($rows, 'uid'));
+		$this->assertSame([0, 1], array_keys($rows));
+	}
+
+	public function testEntriesElementLeafInsideRow(): void
+	{
+		$submitted = $this->entriesContent([
+			[
+				'uid' => 'p1',
+				'type' => 'App\Node\Person',
+				'fields' => ['bio' => ['json' => '{"value":{"zxx":"<p>Bio</p>"},"meta":{"tone":"soft"}}']],
+			],
+		]);
+
+		$rows = $this->entriesPatch()->content([], $submitted)['sections']['value']['zxx'];
+
+		$this->assertSame('RichText', $rows[0]['fields']['bio']['type']);
+		$this->assertSame('<p>Bio</p>', $rows[0]['fields']['bio']['value']['zxx']);
+		$this->assertSame(['tone' => 'soft'], $rows[0]['fields']['bio']['meta']);
+	}
+
+	public function testEntriesTypeChangeIgnoresStaleStoredRow(): void
+	{
+		$stored = $this->entriesContent([
+			[
+				'uid' => 'r1',
+				'type' => 'App\Node\Quote',
+				'note' => 'stale',
+				'fields' => ['text' => ['type' => 'Text', 'value' => ['zxx' => 'Old']]],
+			],
+		]);
+		$submitted = $this->entriesContent([
+			[
+				'uid' => 'r1',
+				'type' => 'App\Node\Person',
+				'fields' => ['bio' => ['json' => '{"value":{"zxx":"<p>Bio</p>"}}']],
+			],
+		]);
+
+		$rows = $this->entriesPatch()->content($stored, $submitted)['sections']['value']['zxx'];
+
+		$this->assertSame(
+			['uid', 'type', 'fields'],
+			array_keys($rows[0]),
+		);
+		$this->assertSame('App\Node\Person', $rows[0]['type']);
+		$this->assertSame(['bio'], array_keys($rows[0]['fields']));
+	}
 }

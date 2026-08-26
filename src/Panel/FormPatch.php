@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Panel;
 
+use Cosray\Uid;
+
 /**
  * Patches stored node content with submitted editor form data.
  *
@@ -18,6 +20,7 @@ final class FormPatch
 	/** @param list<array> $fields field property payloads incl. control descriptors */
 	public function __construct(
 		private readonly array $fields,
+		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {}
 
 	public function content(array $stored, array $submitted): array
@@ -161,10 +164,101 @@ final class FormPatch
 			);
 		}
 
+		if ($name === 'entries') {
+			return $this->entries(
+				$props,
+				is_array($raw) ? array_values($raw) : [],
+				is_array($stored) ? $stored : [],
+			);
+		}
+
 		return match ($name) {
 			'checkbox' => $raw === '1' || $raw === 'on' || $raw === true,
 			'number' => is_numeric($raw) ? (float) $raw : null,
 			default => is_scalar($raw) ? (string) $raw : null,
 		};
+	}
+
+	/**
+	 * Entry rows are replaced wholesale like a repeater, but each row's
+	 * fields are patched like a group: rows are matched to their stored
+	 * counterpart by uid, so unknown keys survive edits and reorders.
+	 */
+	private function entries(array $props, array $rows, array $stored): array
+	{
+		$types = [];
+
+		foreach ($props['entryTypes'] ?? [] as $entryType) {
+			if (is_array($entryType) && is_string($entryType['type'] ?? null)) {
+				$types[$entryType['type']] = $entryType;
+			}
+		}
+
+		$byUid = [];
+
+		foreach ($stored as $storedRow) {
+			$uid = is_array($storedRow) ? $storedRow['uid'] ?? null : null;
+
+			if (is_string($uid) && $uid !== '') {
+				$byUid[$uid] = $storedRow;
+			}
+		}
+
+		$result = [];
+
+		foreach ($rows as $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+
+			$type = $row['type'] ?? null;
+
+			if (!is_string($type) || !isset($types[$type])) {
+				continue;
+			}
+
+			$uid = $row['uid'] ?? null;
+
+			if (!is_string($uid) || $uid === '') {
+				// The client fills fresh uids on stamped rows; this is the
+				// safety net for rows arriving without one.
+				$uid = $this->uid->generate();
+			}
+
+			$storedRow = $byUid[$uid] ?? [];
+
+			if (($storedRow['type'] ?? null) !== $type) {
+				$storedRow = [];
+			}
+
+			$fields = is_array($storedRow['fields'] ?? null) ? $storedRow['fields'] : [];
+			$submitted = is_array($row['fields'] ?? null) ? $row['fields'] : [];
+
+			foreach ($types[$type]['fields'] ?? [] as $sub) {
+				$subName = $sub['name'] ?? null;
+
+				if (!is_string($subName) || !is_array($submitted[$subName] ?? null)) {
+					continue;
+				}
+
+				$entry = is_array($fields[$subName] ?? null)
+					? $fields[$subName]
+					: ['type' => $sub['type'] ?? null, 'value' => []];
+				$patched = $this->entry(
+					is_array($sub['control'] ?? null) ? $sub['control'] : [],
+					is_array($sub['metaControl'] ?? null) ? $sub['metaControl'] : null,
+					$entry,
+					$submitted[$subName],
+				);
+
+				if ($patched !== null) {
+					$fields[$subName] = $patched;
+				}
+			}
+
+			$result[] = [...$storedRow, 'uid' => $uid, 'type' => $type, 'fields' => $fields];
+		}
+
+		return $result;
 	}
 }
