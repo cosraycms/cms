@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Field;
 use Cosray\Field\Control;
 use Cosray\Field\Owner;
+use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\ValueContext;
 
@@ -38,12 +39,19 @@ final class FieldControlTest extends TestCase
 			Field\File::class => 'file',
 			Field\Video::class => 'video',
 			Field\Blocks::class => 'blocks',
-			Field\Entries::class => 'entries',
 		];
 
 		foreach ($expected as $class => $name) {
 			$this->assertSame($name, $this->field($class)->control()->array()['name'], $class);
 		}
+
+		// Entries builds its per-type field tables in the descriptor, so
+		// it needs allowed entry types before it has a control.
+		$entries = new Field\Entries('test', $this->createStub(Owner::class), new ValueContext('test', []));
+		$entries->init(Field\Services::withDefaults());
+		$entries->allow(TestAlternateEntry::class);
+
+		$this->assertSame('entries', $entries->control()->array()['name']);
 	}
 
 	public function testControlPropsSerialize(): void

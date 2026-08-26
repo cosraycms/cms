@@ -8,7 +8,8 @@ namespace Cosray\Field\Control;
  * Maps named rich controls to the custom element that renders them.
  *
  * Registered names serialize as element descriptors, so the editor
- * island only ever interprets primitives, group/repeater and element.
+ * only ever interprets primitives, the structural controls (group,
+ * repeater, entries) and element.
  * Later registrations win — a plugin may replace a built-in editor.
  */
 final class Registry
@@ -46,7 +47,6 @@ final class Registry
 		$registry->register('file', 'cosray-file', 'cosray:media');
 		$registry->register('video', 'cosray-video', 'cosray:media');
 		$registry->register('blocks', 'cosray-blocks', 'cosray:blocks');
-		$registry->register('entries', 'cosray-entries', 'cosray:entries');
 		$registry->register('reference', 'cosray-reference', 'cosray:reference');
 
 		return $registry;

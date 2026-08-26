@@ -19,7 +19,19 @@ class Entries extends Field implements Capability\Limitable
 
 	public function control(): Control
 	{
-		return Control::entries();
+		$this->requireAllowedEntryTypes();
+
+		$control = Control::entries()->prop('entryTypes', $this->entryTypeProperties());
+
+		if ($this->limitMin > 0) {
+			$control = $control->prop('min', $this->limitMin);
+		}
+
+		if ($this->limitMax >= 1) {
+			$control = $control->prop('max', $this->limitMax);
+		}
+
+		return $control;
 	}
 
 	/** @var list<class-string> */
@@ -167,15 +179,26 @@ class Entries extends Field implements Capability\Limitable
 
 	public function properties(): array
 	{
-		$this->requireAllowedEntryTypes();
-
 		$result = parent::properties();
 		$result['type'] = Entries::class;
-		$result['entryTypes'] = [];
+
+		return $result;
+	}
+
+	/**
+	 * Per-type field tables carried in the control descriptor: the
+	 * editor views render entry rows and templates from them, and the
+	 * form patch casts submitted rows against them.
+	 *
+	 * @return list<array>
+	 */
+	protected function entryTypeProperties(): array
+	{
+		$result = [];
 
 		foreach ($this->allowedEntryTypes as $type) {
 			$fields = $this->entryFieldsFor($type);
-			$result['entryTypes'][] = [
+			$result[] = [
 				'type' => $type,
 				'label' => $this->nodeTypes()->get($type, 'label'),
 				'fields' => array_values(array_map(
@@ -183,12 +206,6 @@ class Entries extends Field implements Capability\Limitable
 					$fields,
 				)),
 				'fieldsets' => $this->entryFieldsets($type, $fields),
-				// Initial content for a freshly added entry — the editor
-				// clones this instead of knowing field types.
-				'init' => array_map(
-					static fn(Field $field): array => $field->structure(),
-					$fields,
-				),
 			];
 		}
 
@@ -311,6 +328,12 @@ class Entries extends Field implements Capability\Limitable
 			}
 
 			$fieldClass = $definition->type;
+
+			if (is_a($fieldClass, self::class, true)) {
+				throw new RuntimeException(
+					"Entries field '{$this->name}' cannot contain nested entries field '{$name}' in entry type '{$type}'",
+				);
+			}
 			$field = new $fieldClass(
 				$name,
 				$this->owner,

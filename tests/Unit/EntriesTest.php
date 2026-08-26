@@ -16,6 +16,7 @@ use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestNestedEntriesEntry;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries as EntriesValue;
@@ -72,20 +73,36 @@ class EntriesTest extends TestCase
 		$this->assertArrayHasKey('content', $entries->entryFields(TestEntry::class));
 	}
 
-	public function testEntriesPropertiesExposeEntryTypes(): void
+	public function testEntriesControlCarriesEntryTypes(): void
 	{
 		$properties = $this->createEntries()->properties();
+		$entryTypes = $properties['control']['props']['entryTypes'];
 
 		$this->assertSame(Entries::class, $properties['type']);
-		$this->assertSame(TestEntry::class, $properties['entryTypes'][0]['type']);
-		$this->assertSame('Test Entry', $properties['entryTypes'][0]['label']);
-		$this->assertSame('title', $properties['entryTypes'][0]['fields'][0]['name']);
-		$this->assertSame(TestAlternateEntry::class, $properties['entryTypes'][1]['type']);
+		$this->assertSame('entries', $properties['control']['name']);
+		$this->assertSame(TestEntry::class, $entryTypes[0]['type']);
+		$this->assertSame('Test Entry', $entryTypes[0]['label']);
+		$this->assertSame('title', $entryTypes[0]['fields'][0]['name']);
+		$this->assertSame(TestAlternateEntry::class, $entryTypes[1]['type']);
 
-		// Initial entry content comes from each field's structure().
-		$init = $properties['entryTypes'][0]['init'];
-		$this->assertSame(Text::class, $init['title']['type']);
-		$this->assertArrayHasKey('value', $init['title']);
+		// Rich sub-fields arrive resolved to their element form.
+		$this->assertSame('element', $entryTypes[0]['fields'][1]['control']['name']);
+	}
+
+	public function testEntriesControlCarriesLimits(): void
+	{
+		$control = $this->createEntries()->limit(4, min: 1)->control()->array();
+
+		$this->assertSame(1, $control['props']['min']);
+		$this->assertSame(4, $control['props']['max']);
+	}
+
+	public function testEntriesRejectNestedEntriesFields(): void
+	{
+		$entries = $this->createEntries()->allow(TestNestedEntriesEntry::class);
+		$this->throws(RuntimeException::class, 'cannot contain nested entries field');
+
+		$entries->properties();
 	}
 
 	public function testEntriesExposeFlattenedEmbeddedFieldsAndFieldsets(): void
@@ -93,7 +110,7 @@ class EntriesTest extends TestCase
 		$entries = $this->createEntries()->allow(TestEmbeddedEntry::class);
 		$fields = $entries->entryFieldsFor(TestEmbeddedEntry::class);
 		$properties = $entries->properties();
-		$entryType = $properties['entryTypes'][2];
+		$entryType = $properties['control']['props']['entryTypes'][2];
 
 		$this->assertSame(['title', 'body'], array_keys($fields));
 		$this->assertSame(['title', 'body'], array_column($entryType['fields'], 'name'));
@@ -109,7 +126,6 @@ class EntriesTest extends TestCase
 			],
 			$entryType['fieldsets'],
 		);
-		$this->assertSame(['title', 'body'], array_keys($entryType['init']));
 	}
 
 	public function testEntryFieldOrderCannotSplitAFieldset(): void
@@ -221,8 +237,9 @@ class EntriesTest extends TestCase
 		$this->assertTrue($titleField->isTranslatable(), 'Title entry field should be translatable');
 
 		$properties = $entries->properties();
-		$this->assertSame('symmetric', $properties['entryTypes'][0]['fields'][0]['translateMode']);
-		$this->assertSame('asymmetric', $properties['entryTypes'][0]['fields'][1]['translateMode']);
+		$entryTypes = $properties['control']['props']['entryTypes'];
+		$this->assertSame('symmetric', $entryTypes[0]['fields'][0]['translateMode']);
+		$this->assertSame('asymmetric', $entryTypes[0]['fields'][1]['translateMode']);
 
 		$structure = $entries->structure([
 			[
