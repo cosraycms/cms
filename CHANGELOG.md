@@ -41,6 +41,7 @@
 
 ### Changed
 
+- The editor form submits as one nested JSON body instead of a urlencoded POST. The panel re-encodes the collected form data at submit time using the exact `parse_str()` bracket-name semantics (pinned by the shared `contract/form-names.json` fixture), so the server receives the identical tree on either transport and PHP's `max_input_vars` no longer bounds how much content a node can carry. Native urlencoded submits remain accepted.
 - Moved htmx from tracked panel source into the signed panel asset artifact. The panel build now restores the exact version through pnpm and includes `htmx.js`; applications must re-run `php run panel:install` after updating.
 - Relicensed Cosray from MPL-2.0 to MIT. The `celema/*` libraries the CMS builds on and the `cosray-app` skeleton are all MIT, so the framework stack is now uniformly permissive. Panel files were already MIT and are unaffected. Bundled third-party files keep their own licenses; see [REUSE.toml](REUSE.toml). Previously released versions remain available under MPL-2.0.
 
@@ -65,6 +66,7 @@
 
 ### Fixed
 
+- Editor saves refuse truncated submissions instead of persisting them. A form-encoded POST past PHP's `max_input_vars` is silently cut short, and since entries rows are replaced wholesale on save, saving it would silently delete content. The editor form now renders a sentinel input as its last control; save and store reject any submission that arrives without it — htmx submits get the error box, plain submits fail with `400`.
 - Fixed `Finder\Menu` duplicating menu items whose id contains a dot: the tree builder split the recursive query's synthetic dotted path, so an id like `about.team` under parent `about` was inserted twice. The tree is now built from the parent column directly.
 - Fixed `$menu->html($class)` clobbering the caller's wrapper class with the last item's per-item class, and reading the loop variable after the iteration for the closing list markup.
 - Menu HTML now escapes titles, hrefs, and item classes. With literal-href `url` items, unescaped interpolation would have been an injection surface; previously only trusted panel-authored node items were rendered.

@@ -614,6 +614,13 @@ Typical JSON payload for create/update includes:
 - `paths` (locale => path) for routable nodes
 - `generatedPaths` (fallback when explicit `paths` are empty)
 
+Editor transport: the panel editor posts its form as one nested JSON body
+(bracket form names parsed with parse_str() semantics; the shared cases live
+in contract/form-names.json), so max_input_vars cannot truncate large forms;
+urlencoded fallback bodies are accepted too. Editor save/store additionally
+require the sentinel `_complete: "1"` (rendered as the form's last control)
+and refuse submissions without it instead of saving a truncated form.
+
 Hierarchy save behavior:
 
 - Invalid `parent` uid is rejected with `400` validation error.

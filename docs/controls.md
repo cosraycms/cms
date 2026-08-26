@@ -89,6 +89,17 @@ public function metaControl(): ?Control
 
 The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
 
+## Save transport
+
+The editor is one plain HTML form; every control participates through its form name — primitives directly, element controls through their host's `[json]` leaf. At submit time the panel re-encodes the collected form data into a single nested JSON body (`Content-Type: application/json`): the bracket names are parsed client-side with the exact `parse_str()` semantics pinned in `contract/form-names.json`, so the server receives the identical tree either way. This lifts PHP's `max_input_vars` cap off the editor — a content-heavy node (entries rows × sub-fields × locales) would otherwise exceed the default of 1000 input keys and be **silently truncated**, and since entries rows are replaced wholesale on save, truncation would delete content.
+
+Two safeguards back this up:
+
+- The form renders a sentinel input (`_complete`) as its last control. A submission that lost its tail — a form-encoded POST past `max_input_vars`, a mangled body — is refused with an error instead of being saved, on both transports.
+- The native urlencoded submit remains supported server-side and stays covered by the same sentinel guard.
+
+Plugins are unaffected: element controls keep submitting through their host's form value, and neither the name scheme nor the value shapes change with the transport.
+
 ## Block types
 
 Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()`, `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. The block natives (`block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`) are rendered internally by the `cosray-blocks` element; a plugin block type uses an `element` control, and its web component gets the contract below with `block` (`{type, index}`) assigned additionally.
