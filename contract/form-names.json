@@ -1,0 +1,117 @@
+{
+	"description": "Bracket form-name parsing. The panel's JSON transport encoder (panel/src/lib/form-json.ts) must build exactly the tree PHP's parse_str() builds from the same urlencoded pairs, so both save transports produce identical form data. Entries are [name, value] pairs in submission order; values are always strings. Only well-formed names are covered: top-level names must not contain dots, spaces or brackets outside [...] groups — PHP mangles those.",
+	"cases": [
+		{
+			"name": "flat scalar",
+			"entries": [["handle", "news"]],
+			"tree": { "handle": "news" }
+		},
+		{
+			"name": "nested locale value",
+			"entries": [["content[title][value][zxx]", "Hello"]],
+			"tree": { "content": { "title": { "value": { "zxx": "Hello" } } } }
+		},
+		{
+			"name": "entries row sub-field",
+			"entries": [
+				["content[partners][value][zxx][3][fields][name][value][de]", "Freistaat Bayern"]
+			],
+			"tree": {
+				"content": {
+					"partners": {
+						"value": {
+							"zxx": {
+								"3": {
+									"fields": { "name": { "value": { "de": "Freistaat Bayern" } } }
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "siblings keep submission order",
+			"entries": [
+				["content[a][value][zxx]", "1"],
+				["content[b][value][zxx]", "2"],
+				["handle", "page"]
+			],
+			"tree": {
+				"content": { "a": { "value": { "zxx": "1" } }, "b": { "value": { "zxx": "2" } } },
+				"handle": "page"
+			}
+		},
+		{
+			"name": "duplicate name last wins",
+			"entries": [
+				["a", "1"],
+				["a", "2"]
+			],
+			"tree": { "a": "2" }
+		},
+		{
+			"name": "hidden-input checkbox pair last wins",
+			"entries": [
+				["published", ""],
+				["published", "1"]
+			],
+			"tree": { "published": "1" }
+		},
+		{
+			"name": "empty brackets append",
+			"entries": [
+				["a[]", "1"],
+				["a[]", "2"]
+			],
+			"tree": { "a": { "0": "1", "1": "2" } }
+		},
+		{
+			"name": "append continues after explicit index",
+			"entries": [
+				["a[5]", "x"],
+				["a[]", "y"]
+			],
+			"tree": { "a": { "5": "x", "6": "y" } }
+		},
+		{
+			"name": "empty segment mid-path appends per pair",
+			"entries": [
+				["a[][b]", "1"],
+				["a[][b]", "2"]
+			],
+			"tree": { "a": { "0": { "b": "1" }, "1": { "b": "2" } } }
+		},
+		{
+			"name": "scalar replaced by deeper assignment",
+			"entries": [
+				["a", "1"],
+				["a[b]", "2"]
+			],
+			"tree": { "a": { "b": "2" } }
+		},
+		{
+			"name": "array replaced by scalar assignment",
+			"entries": [
+				["a[b]", "1"],
+				["a", "2"]
+			],
+			"tree": { "a": "2" }
+		},
+		{
+			"name": "numeric segments become numeric keys",
+			"entries": [["paths[0]", "/start"]],
+			"tree": { "paths": { "0": "/start" } }
+		},
+		{
+			"name": "empty value survives",
+			"entries": [["content[title][value][zxx]", ""]],
+			"tree": { "content": { "title": { "value": { "zxx": "" } } } }
+		},
+		{
+			"name": "unicode and reserved characters survive",
+			"entries": [["content[title][value][de]", "Grüße & »Zeichen« = 100%"]],
+			"tree": { "content": { "title": { "value": { "de": "Grüße & »Zeichen« = 100%" } } } }
+		}
+	]
+}

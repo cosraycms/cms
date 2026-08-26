@@ -12,6 +12,14 @@ Consumed by `tests/Unit/FieldConditionTest.php` and `panel/tests/contract/condit
 
 Conditions are currently top-level only on both sides. When scoped conditions inside entries are designed, their semantics land here first.
 
+## `form-names.json` — bracket form-name parsing
+
+Two implementations of one semantics: PHP's `parse_str()` is the reference that parses the native urlencoded fallback, and `panel/src/lib/form-json.ts` re-encodes the same submitted pairs into the nested JSON body the editor's JSON save transport posts. Both must hand the server the identical tree, or the two transports would save different content.
+
+Each case: `entries` is the submitted `[name, value]` pairs in order, `tree` the expected parse result. Only well-formed bracket names are covered — top-level names must not contain dots, spaces or brackets outside `[...]` groups, because `parse_str()` mangles those; the panel never generates such names.
+
+Consumed by `tests/Unit/FormNameContractTest.php` and `panel/tests/contract/form-names.test.ts`.
+
 ## `form-leaf.json` — the element `[json]` form leaf
 
 A producer/consumer pipe, not two evaluators: `panel/src/lib/host.ts` serializes an element's live state into one JSON string submitted under the field's `[json]` key, and `src/Panel/FormPatch.php` merges that leaf back into stored content. The leaf in the middle is the shared artifact.
