@@ -7,6 +7,8 @@
 // into inert template content, so structural controls nested inside a
 // row keep renumbering against the right base after their row moved.
 
+import { uid } from '$lib/content';
+
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 type Renaming = {
@@ -95,10 +97,12 @@ function add(container: HTMLElement, type: string | null): void {
 	const clone = template.content.cloneNode(true) as DocumentFragment;
 
 	// Fresh rows need a stable identity before their first save; the
-	// server backfills missing uids as a safety net.
+	// server backfills missing uids as a safety net. uid() rather than
+	// crypto.randomUUID(): dev servers on http://*.local are not secure
+	// contexts, and it matches the server's uid format.
 	clone.querySelectorAll<HTMLInputElement>('[data-repeater-uid]').forEach((input) => {
 		if (input.value === '') {
-			input.value = crypto.randomUUID();
+			input.value = uid();
 		}
 	});
 

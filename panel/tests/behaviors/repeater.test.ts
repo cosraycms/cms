@@ -252,7 +252,7 @@ describe('repeater behavior', () => {
 		);
 
 		expect(uids).toHaveLength(2);
-		expect(uids[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f-]{27}$/);
+		expect(uids[0]).toMatch(/^[123456789bcdfghklmnpqrstvwxyz]{13}$/);
 		expect(uids[0]).not.toBe(uids[1]);
 		expect(
 			container
