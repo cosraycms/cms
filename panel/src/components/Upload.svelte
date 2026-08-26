@@ -324,6 +324,11 @@
 		}
 
 		.dragdrop {
+			/* Containing block for the visually hidden file input below —
+			   without it the absolute input escapes the editor's scroll
+			   pane, grows the document, and label focus scrolls the page
+			   away. */
+			position: relative;
 			display: flex;
 			flex: 1 1 auto;
 			flex-direction: column;
