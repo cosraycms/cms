@@ -22,6 +22,7 @@ $views = [
 	'element' => 'field/element',
 	'group' => 'field/group',
 	'repeater' => 'field/repeater',
+	'entries' => 'field/entries',
 ];
 
 $this->insert($views[$controlName] ?? 'field/unknown', [
@@ -29,6 +30,7 @@ $this->insert($views[$controlName] ?? 'field/unknown', [
 	'control' => $control,
 	'id' => $id,
 	'name' => $name,
+	'nameRoot' => $nameRoot ?? null,
 	'value' => $value ?? null,
 	'data' => $data ?? null,
 	'node' => $node ?? '',

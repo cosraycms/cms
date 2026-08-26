@@ -290,6 +290,27 @@ describe('repeater behavior', () => {
 		expect(names(nested as HTMLElement)).toEqual([`${NAME}[0][items][0]`, `${NAME}[0][items][1]`]);
 	});
 
+	it('collapses and expands a row body', () => {
+		const container = repeater([
+			`<div data-repeater-row>
+				<button type="button" data-repeater-collapse aria-expanded="true">Title</button>
+				<div data-repeater-body><input name="${NAME}[0]" value="a"></div>
+			</div>`,
+		]);
+		const toggle = container.querySelector<HTMLElement>('[data-repeater-collapse]');
+		const body = container.querySelector<HTMLElement>('[data-repeater-body]');
+
+		toggle?.click();
+
+		expect(body?.hidden).toBe(true);
+		expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+
+		toggle?.click();
+
+		expect(body?.hidden).toBe(false);
+		expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+	});
+
 	it('leaves nested add buttons alone when the outer repeater is full', () => {
 		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
 		const container = repeater([], { max: 1, template });

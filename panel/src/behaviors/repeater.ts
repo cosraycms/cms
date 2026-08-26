@@ -158,6 +158,21 @@ function onClick(event: Event): void {
 		return;
 	}
 
+	const collapse = target.closest('[data-repeater-collapse]');
+
+	if (collapse) {
+		const body = collapse
+			.closest('[data-repeater-row]')
+			?.querySelector(':scope > [data-repeater-body]');
+
+		if (body instanceof HTMLElement) {
+			const hidden = body.toggleAttribute('hidden');
+			collapse.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+		}
+
+		return;
+	}
+
 	const adder = target.closest('[data-repeater-add]');
 	const container = adder?.closest<HTMLElement>('[data-repeater]');
 

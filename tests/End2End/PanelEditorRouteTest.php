@@ -10,6 +10,8 @@ use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
+use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 
 final class PanelEditorRouteTest extends End2EndTestCase
 {
@@ -27,8 +29,69 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->node(TestConditionalDocument::class);
 		$plugin->node(TestEmbeddedDocument::class);
+		$plugin->node(TestNodeWithEntries::class);
 
 		return $plugin;
+	}
+
+	public function testEntriesRenderAsServerRenderedTypedRepeater(): void
+	{
+		$this->authenticateAs('editor');
+		$entriesType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-node-with-entries'",
+		)->first();
+		$typeId = $entriesType
+			? (int) $entriesType['type']
+			: $this->createTestType('test-node-with-entries');
+		$this->createTestNode([
+			'uid' => 'panel-editor-entries',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['zxx' => 'With entries']],
+				'entries' => [
+					'type' => \Cosray\Field\Entries::class,
+					'value' => [
+						'zxx' => [
+							[
+								'uid' => 'entry-a',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => [
+										'type' => \Cosray\Field\Text::class,
+										'value' => ['en' => 'First entry'],
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-entries');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+
+		$base = 'content[entries][value][zxx]';
+		$this->assertStringContainsString('class="cms-entries"', $html);
+		$this->assertStringContainsString('data-name="' . $base . '"', $html);
+		$this->assertStringContainsString('name="' . $base . '[0][uid]"', $html);
+		$this->assertStringContainsString('value="entry-a"', $html);
+		// Sub-fields render through the regular wrapper at the row's root.
+		$this->assertStringContainsString('name="' . $base . '[0][fields][title][value][en]"', $html);
+		// Element controls inside rows go through the form host at a deep name.
+		$this->assertStringContainsString('name="' . $base . '[0][fields][content][json]"', $html);
+		// The server renders the entry title from the first text value.
+		$this->assertStringContainsString('First entry', $html);
+		// One inert template per allowed type with the stamp placeholder.
+		$this->assertStringContainsString(
+			'data-repeater-template="' . TestEntry::class . '"',
+			$html,
+		);
+		$this->assertStringContainsString('name="' . $base . '[__i__][uid]"', $html);
+		$this->assertStringContainsString('data-repeater-add="' . TestEntry::class . '"', $html);
 	}
 
 	public function testPanelEditorRouteRendersShellForAuthenticatedUsers(): void

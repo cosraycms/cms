@@ -8,7 +8,10 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
+use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 
 final class PanelEditorSaveTest extends End2EndTestCase
 {
@@ -26,8 +29,90 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->node(TestConditionalDocument::class);
+		$plugin->node(TestNodeWithEntries::class);
 
 		return $plugin;
+	}
+
+	public function testEntriesSubmissionsPatchRowsByUid(): void
+	{
+		$entriesType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-node-with-entries'",
+		)->first();
+		$typeId = $entriesType
+			? (int) $entriesType['type']
+			: $this->createTestType('test-node-with-entries');
+		$this->createTestNode([
+			'uid' => 'panel-save-entries',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['zxx' => 'With entries']],
+				'entries' => [
+					'type' => \Cosray\Field\Entries::class,
+					'value' => [
+						'zxx' => [
+							[
+								'uid' => 'entry-a',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => [
+										'type' => \Cosray\Field\Text::class,
+										'value' => ['en' => 'Old title'],
+									],
+									'content' => [
+										'type' => \Cosray\Field\Blocks::class,
+										'value' => ['en' => []],
+										'stashed' => 'kept',
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-entries', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'content' => [
+					'title' => ['value' => ['zxx' => 'With entries']],
+					'entries' => [
+						'value' => [
+							'zxx' => [
+								[
+									'uid' => '',
+									'type' => TestAlternateEntry::class,
+									'fields' => ['name' => ['value' => ['zxx' => 'Fresh']]],
+								],
+								[
+									'uid' => 'entry-a',
+									'type' => TestEntry::class,
+									'fields' => ['title' => ['value' => ['en' => 'New title']]],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$rows = $this->nodeContent('panel-save-entries')['entries']['value']['zxx'];
+
+		$this->assertCount(2, $rows);
+		// The stamped row moved first and got a server-backfilled uid.
+		$this->assertSame(TestAlternateEntry::class, $rows[0]['type']);
+		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $rows[0]['uid']);
+		$this->assertSame('Fresh', $rows[0]['fields']['name']['value']['zxx']);
+		// The stored row was patched by uid; unsubmitted sub-fields
+		// survive. (Unknown keys inside a row's field entries do not —
+		// storing validates rows via finalizeEntryValue, which keeps only
+		// declared keys. Same behavior as the island path.)
+		$this->assertSame('entry-a', $rows[1]['uid']);
+		$this->assertSame('New title', $rows[1]['fields']['title']['value']['en']);
+		$this->assertSame(['en' => []], $rows[1]['fields']['content']['value']);
 	}
 
 	public function testMetaSubmissionsPatchTheStoredMetaMap(): void

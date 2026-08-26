@@ -14,6 +14,7 @@ $meta = is_array($meta) ? $meta : [];
 $id = (string) $id;
 
 $fieldName = (string) ($field['name'] ?? '');
+$nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
 $subs = (array) ((($control['props'] ?? []))['fields'] ?? []);
 $subField = ['required' => false, 'immutable' => false];
 ?>
@@ -32,7 +33,7 @@ $subField = ['required' => false, 'immutable' => false];
 				'field' => $subField,
 				'control' => (array) ($sub['control'] ?? []),
 				'id' => $subId,
-				'name' => "content[{$fieldName}][meta][{$key}][zxx]",
+				'name' => "{$nameRoot}[meta][{$key}][zxx]",
 				'value' => is_array($meta[$key] ?? null) ? $meta[$key]['zxx'] ?? null : null,
 				'data' => null,
 			]) ?>

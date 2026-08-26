@@ -16,6 +16,11 @@ $assets = (array) ($this->unwrap($assets ?? null) ?? []);
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
 $fieldName = (string) ($field['name'] ?? '');
+
+// Entries rows re-enter this wrapper with a deeper root; top-level
+// fields keep the default derivation from the field name.
+$nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
+$idRoot = (string) ($idRoot ?? "field-{$fieldName}");
 $value = $data['value'] ?? [];
 $value = is_array($value) ? $value : [];
 
@@ -27,7 +32,7 @@ $variants = $translate && in_array($controlName, $localized, true);
 $tabs = $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
-$inputId = static fn(string $locale): string => "field-{$fieldName}-{$locale}";
+$inputId = static fn(string $locale): string => "{$idRoot}-{$locale}";
 $labelFor = $variants ? $inputId($defaultLocale) : $inputId($neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
@@ -74,7 +79,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
 						'control' => $control,
 						'id' => $inputId($locale['id']),
-						'name' => "content[{$fieldName}][value][{$locale['id']}]",
+						'name' => "{$nameRoot}[value][{$locale['id']}]",
+						'nameRoot' => $nameRoot,
 						'value' => $value[$locale['id']] ?? null,
 						'data' => $data,
 						'node' => $node,
@@ -89,7 +95,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'field' => $field,
 				'control' => $control,
 				'id' => $inputId($neutral),
-				'name' => "content[{$fieldName}][value][{$neutral}]",
+				'name' => "{$nameRoot}[value][{$neutral}]",
+				'nameRoot' => $nameRoot,
 				'value' => $value[$neutral] ?? null,
 				'data' => $data,
 				'node' => $node,
@@ -116,7 +123,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'field' => $field,
 				'control' => $metaControl,
 				'meta' => $data['meta'] ?? null,
-				'id' => "meta-{$fieldName}",
+				'id' => "{$idRoot}-meta",
+				'nameRoot' => $nameRoot,
 			]) ?>
 		</dialog>
 	<?php endif ?>
