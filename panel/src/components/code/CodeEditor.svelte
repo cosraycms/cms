@@ -12,8 +12,8 @@
 		DEFAULT_CODE_SYNTAX,
 		loadCodeLanguageExtension,
 		normalizeCodeSyntax,
-	} from '$shell/code/languages';
-	import { cosrayCodeTheme } from '$shell/code/theme';
+	} from '$components/code/languages';
+	import { cosrayCodeTheme } from '$components/code/theme';
 
 	type Props = {
 		name: string;

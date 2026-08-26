@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 	import { system } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$shell/icons/IcoDocument.svelte';
+	import IcoDocument from '$components/icons/IcoDocument.svelte';
 
 	type Props = {
 		// image and video restrict the listing; a file context accepts

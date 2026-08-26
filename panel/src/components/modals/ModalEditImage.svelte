@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { FileItem } from '$types/data';
-	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
+	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';
-	import Button from '$shell/Button.svelte';
-	import Input from '$shell/controls/Input.svelte';
+	import Button from '$components/Button.svelte';
+	import Input from '$components/controls/Input.svelte';
 
 	type Props = {
 		close: () => void;

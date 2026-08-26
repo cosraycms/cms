@@ -2,7 +2,7 @@
 	import type { FileItem, LocaleMap, UploadType } from '$types/data';
 
 	import { ZXX } from '$types/data';
-	import Upload from '$shell/Upload.svelte';
+	import Upload from '$components/Upload.svelte';
 
 	type FieldInfo = {
 		name: string;

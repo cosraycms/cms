@@ -4,8 +4,8 @@
 	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { system, systemLocale } from '$lib/sys';
 	import { ZXX } from '$types/data';
-	import Field from '$shell/Field.svelte';
-	import Label from '$shell/Label.svelte';
+	import Field from '$components/Field.svelte';
+	import Label from '$components/Label.svelte';
 
 	type Props = {
 		field: FieldType;

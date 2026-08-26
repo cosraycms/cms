@@ -6,8 +6,8 @@
 	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { __ } from '$lib/locale';
 	import { ZXX } from '$types/data';
-	import CodeEditor from '$shell/code/CodeEditor.svelte';
-	import { DEFAULT_CODE_SYNTAX, normalizeCodeSyntax } from '$shell/code/languages';
+	import CodeEditor from '$components/code/CodeEditor.svelte';
+	import { DEFAULT_CODE_SYNTAX, normalizeCodeSyntax } from '$components/code/languages';
 
 	type FieldInfo = {
 		name: string;

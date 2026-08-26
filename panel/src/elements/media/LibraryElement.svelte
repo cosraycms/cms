@@ -4,9 +4,9 @@
 	import { onMount } from 'svelte';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$shell/icons/IcoDocument.svelte';
-	import IcoUpload from '$shell/icons/IcoUpload.svelte';
-	import MediaDetail from '$shell/media/MediaDetail.svelte';
+	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import MediaDetail from '$components/media/MediaDetail.svelte';
 
 	type Item = {
 		uid: string;

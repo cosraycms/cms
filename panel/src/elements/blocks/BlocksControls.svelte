@@ -4,8 +4,8 @@
 	import { __ } from '$lib/locale';
 	import BlockSizeButtons from './BlockSizeButtons.svelte';
 	import BlockCellButtons from './BlockCellButtons.svelte';
-	import IcoThreeDots from '$shell/icons/IcoThreeDots.svelte';
-	import IcoGear from '$shell/icons/IcoGear.svelte';
+	import IcoThreeDots from '$components/icons/IcoThreeDots.svelte';
+	import IcoGear from '$components/icons/IcoGear.svelte';
 
 	interface Props {
 		data: Block[];

@@ -5,10 +5,10 @@
 	import { cosray } from '$lib/bridge';
 	import { useAssets } from '$lib/assets';
 	import { __ } from '$lib/locale';
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
-	import IcoEye from '$shell/icons/IcoEye.svelte';
-	import IcoPencil from '$shell/icons/IcoPencil.svelte';
-	import ImagePreview from '$shell/ImagePreview.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import IcoEye from '$components/icons/IcoEye.svelte';
+	import IcoPencil from '$components/icons/IcoPencil.svelte';
+	import ImagePreview from '$components/ImagePreview.svelte';
 
 	type Props = {
 		image: FileItem;

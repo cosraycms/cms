@@ -4,7 +4,7 @@
 
 	import { useNotify } from '../notify';
 	import { __ } from '$lib/locale';
-	import Control from '$shell/Control.svelte';
+	import Control from '$components/Control.svelte';
 	import EntryControls from './EntryControls.svelte';
 
 	type Props = {

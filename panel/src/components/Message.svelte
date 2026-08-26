@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	import IcoOctagonTimes from '$shell/icons/IcoOctagonTimes.svelte';
-	import IcoShieldCheck from '$shell/icons/IcoShieldCheck.svelte';
-	import IcoCircleInfo from '$shell/icons/IcoCircleInfo.svelte';
-	import IcoTriangleExclamation from '$shell/icons/IcoTriangleExclamation.svelte';
+	import IcoOctagonTimes from '$components/icons/IcoOctagonTimes.svelte';
+	import IcoShieldCheck from '$components/icons/IcoShieldCheck.svelte';
+	import IcoCircleInfo from '$components/icons/IcoCircleInfo.svelte';
+	import IcoTriangleExclamation from '$components/icons/IcoTriangleExclamation.svelte';
 
 	type Props = {
 		type: any;

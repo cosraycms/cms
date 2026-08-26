@@ -4,17 +4,17 @@
 	import type { FileItem, UploadType } from '$types/data';
 	import type { UploadResult } from '$lib/bridge';
 	import type { Limit } from '$types/fields';
-	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
 
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { registerAsset, useAssets } from '$lib/assets';
 	import { __ } from '$lib/locale';
-	import IcoUpload from '$shell/icons/IcoUpload.svelte';
-	import Dialog from '$shell/Dialog.svelte';
-	import Message from '$shell/Message.svelte';
-	import MediaList from '$shell/MediaList.svelte';
-	import ModalLibrary from '$shell/modals/ModalLibrary.svelte';
+	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import Dialog from '$components/Dialog.svelte';
+	import Message from '$components/Message.svelte';
+	import MediaList from '$components/MediaList.svelte';
+	import ModalLibrary from '$components/modals/ModalLibrary.svelte';
 
 	type Props = {
 		type: UploadType;

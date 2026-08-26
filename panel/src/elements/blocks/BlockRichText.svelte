@@ -6,9 +6,9 @@
 	import type { BlocksField } from '$types/fields';
 
 	import { registerAsset, useAssets } from '$lib/assets';
-	import { FORMAT, VERSION, htmlToDoc } from '$shell/richtext/format';
+	import { FORMAT, VERSION, htmlToDoc } from '$components/richtext/format';
 	import { useNotify } from '../notify';
-	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
+	import RichTextEditor from '$components/richtext/RichTextEditor.svelte';
 
 	type Props = {
 		field: BlocksField;

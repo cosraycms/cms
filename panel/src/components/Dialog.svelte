@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { __ } from '$lib/locale';
-	import Button from '$shell/Button.svelte';
+	import Button from '$components/Button.svelte';
 
 	type Props = {
 		title?: any;

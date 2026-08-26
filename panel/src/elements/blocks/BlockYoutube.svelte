@@ -5,7 +5,7 @@
 
 	import { useNotify } from '../notify';
 	import { __ } from '$lib/locale';
-	import Setting from '$shell/Setting.svelte';
+	import Setting from '$components/Setting.svelte';
 
 	type Props = {
 		field: BlocksField;

@@ -2,8 +2,8 @@ import { createInterface } from 'node:readline';
 
 import { JSDOM } from 'jsdom';
 
-import { pmToDoc } from '$shell/richtext/format';
-import { parser } from '$shell/richtext/schema';
+import { pmToDoc } from '$components/richtext/format';
+import { parser } from '$components/richtext/schema';
 
 /**
  * Migration-only HTML-to-richtext converter for legacy content.

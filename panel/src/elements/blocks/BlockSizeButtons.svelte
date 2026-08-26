@@ -4,10 +4,10 @@
 
 	import { useNotify } from '../notify';
 	import BlockButtonLabel from './BlockButtonLabel.svelte';
-	import IcoExpand from '$shell/icons/IcoExpand.svelte';
-	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';
-	import IcoIndent from '$shell/icons/IcoIndent.svelte';
-	import IcoUnindent from '$shell/icons/IcoUnindent.svelte';
+	import IcoExpand from '$components/icons/IcoExpand.svelte';
+	import IcoCollapse from '$components/icons/IcoCollapse.svelte';
+	import IcoIndent from '$components/icons/IcoIndent.svelte';
+	import IcoUnindent from '$components/icons/IcoUnindent.svelte';
 
 	type Props = {
 		item: Block;

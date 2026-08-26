@@ -3,10 +3,10 @@
 	import { __ } from '$lib/locale';
 	import { cosray } from '$lib/bridge';
 	import { useAssets } from '$lib/assets';
-	import IcoDocument from '$shell/icons/IcoDocument.svelte';
-	import IcoDownload from '$shell/icons/IcoDownload.svelte';
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
-	import IcoPencil from '$shell/icons/IcoPencil.svelte';
+	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import IcoDownload from '$components/icons/IcoDownload.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import IcoPencil from '$components/icons/IcoPencil.svelte';
 
 	type Props = {
 		asset: FileItem;

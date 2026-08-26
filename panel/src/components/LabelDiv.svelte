@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	import LocaleTabs from '$shell/LocaleTabs.svelte';
+	import LocaleTabs from '$components/LocaleTabs.svelte';
 
 	type Props = {
 		translate?: boolean;

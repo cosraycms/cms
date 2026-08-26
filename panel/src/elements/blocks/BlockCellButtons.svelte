@@ -3,11 +3,11 @@
 
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
-	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
-	import IcoArrowDown from '$shell/icons/IcoArrowDown.svelte';
-	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
-	import ModalRemove from '$shell/modals/ModalRemove.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import IcoArrowUp from '$components/icons/IcoArrowUp.svelte';
+	import IcoArrowDown from '$components/icons/IcoArrowDown.svelte';
+	import IcoCirclePlus from '$components/icons/IcoCirclePlus.svelte';
+	import ModalRemove from '$components/modals/ModalRemove.svelte';
 	import { useNotify } from '../notify';
 
 	type Props = {

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
 
-	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
+	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';
-	import Button from '$shell/Button.svelte';
-	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
+	import Button from '$components/Button.svelte';
+	import LibraryBrowser from '$components/LibraryBrowser.svelte';
 
 	type Props = {
 		kind?: 'image' | 'video' | 'file' | null;

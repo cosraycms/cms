@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { system, systemLocale } from '$lib/sys';
 	import { ZXX, type LocaleMap } from '$types/data';
-	import Label from '$shell/Label.svelte';
+	import Label from '$components/Label.svelte';
 
 	type Props = {
 		value: string | LocaleMap<string>;

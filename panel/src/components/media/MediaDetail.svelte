@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Locale } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$shell/icons/IcoDocument.svelte';
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
+	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
 	import MetaForm, { type Meta } from './MetaForm.svelte';
 
 	type Owner = {

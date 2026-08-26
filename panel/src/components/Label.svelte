@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { Locale } from '$lib/sys';
 
-	import LocaleTabs from '$shell/LocaleTabs.svelte';
+	import LocaleTabs from '$components/LocaleTabs.svelte';
 
 	type Props = {
 		of: string;

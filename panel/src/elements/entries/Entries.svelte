@@ -6,10 +6,10 @@
 	import { useNotify } from '../notify';
 	import { uid } from '$lib/content';
 	import { flip } from 'svelte/animate';
-	import Field from '$shell/Field.svelte';
-	import LabelDiv from '$shell/LabelDiv.svelte';
-	import Button from '$shell/Button.svelte';
-	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
+	import Field from '$components/Field.svelte';
+	import LabelDiv from '$components/LabelDiv.svelte';
+	import Button from '$components/Button.svelte';
+	import IcoCirclePlus from '$components/icons/IcoCirclePlus.svelte';
 	import Entry from './Entry.svelte';
 
 	type Props = {

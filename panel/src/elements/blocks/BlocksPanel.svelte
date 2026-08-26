@@ -7,9 +7,9 @@
 	import type { Component } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { useNotify } from '../notify';
-	import IcoCirclePlus from '$shell/icons/IcoCirclePlus.svelte';
-	import Button from '$shell/Button.svelte';
-	import ModalAdd from '$shell/modals/ModalAdd.svelte';
+	import IcoCirclePlus from '$components/icons/IcoCirclePlus.svelte';
+	import Button from '$components/Button.svelte';
+	import ModalAdd from '$components/modals/ModalAdd.svelte';
 	import BlocksControls from './BlocksControls.svelte';
 	import BlockElement from './BlockElement.svelte';
 	import BlockImage from './BlockImage.svelte';

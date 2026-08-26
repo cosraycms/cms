@@ -8,9 +8,9 @@ SPDX-License-Identifier = "MIT"
 
 [[annotations]]
 path = [
-    "panel/src/shell/icons/IcoLink.svelte",
-    "panel/src/shell/icons/IcoTextHeight.svelte",
-    "panel/src/shell/icons/IcoUnlink.svelte",
+    "panel/src/components/icons/IcoLink.svelte",
+    "panel/src/components/icons/IcoTextHeight.svelte",
+    "panel/src/components/icons/IcoUnlink.svelte",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2023 Fonticons, Inc."

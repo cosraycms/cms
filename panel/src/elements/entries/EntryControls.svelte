@@ -4,12 +4,12 @@
 	import { cosray } from '$lib/bridge';
 	import { __ } from '$lib/locale';
 
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
-	import IcoArrowUp from '$shell/icons/IcoArrowUp.svelte';
-	import IcoArrowDown from '$shell/icons/IcoArrowDown.svelte';
-	import IcoCollapse from '$shell/icons/IcoCollapse.svelte';
-	import IcoExpand from '$shell/icons/IcoExpand.svelte';
-	import ModalRemove from '$shell/modals/ModalRemove.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import IcoArrowUp from '$components/icons/IcoArrowUp.svelte';
+	import IcoArrowDown from '$components/icons/IcoArrowDown.svelte';
+	import IcoCollapse from '$components/icons/IcoCollapse.svelte';
+	import IcoExpand from '$components/icons/IcoExpand.svelte';
+	import ModalRemove from '$components/modals/ModalRemove.svelte';
 	import { useNotify } from '../notify';
 
 	type Props = {

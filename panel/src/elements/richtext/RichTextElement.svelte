@@ -10,8 +10,8 @@
 		htmlToDoc,
 		type RichtextDoc,
 		type RichtextValue,
-	} from '$shell/richtext/format';
-	import RichTextEditor from '$shell/richtext/RichTextEditor.svelte';
+	} from '$components/richtext/format';
+	import RichTextEditor from '$components/richtext/RichTextEditor.svelte';
 
 	type FieldInfo = {
 		name: string;

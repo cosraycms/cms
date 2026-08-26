@@ -2,10 +2,10 @@
 	import type { Field } from '$types/fields';
 
 	import { __ } from '$lib/locale';
-	import Element from '$shell/controls/Element.svelte';
-	import Group from '$shell/controls/Group.svelte';
-	import Primitive from '$shell/controls/Primitive.svelte';
-	import Repeater from '$shell/controls/Repeater.svelte';
+	import Element from '$components/controls/Element.svelte';
+	import Group from '$components/controls/Group.svelte';
+	import Primitive from '$components/controls/Primitive.svelte';
+	import Repeater from '$components/controls/Repeater.svelte';
 
 	type Props = {
 		field: Field;

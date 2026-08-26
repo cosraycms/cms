@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { __ } from '$lib/locale';
-	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import Button from '$shell/Button.svelte';
+	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
+	import Button from '$components/Button.svelte';
 
 	type Props = {
 		close: any;

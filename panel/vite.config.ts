@@ -37,7 +37,7 @@ export default defineConfig({
 		alias: {
 			$lib: path.resolve(root, 'src/lib'),
 			$types: path.resolve(root, 'src/types'),
-			$shell: path.resolve(root, 'src/shell'),
+			$components: path.resolve(root, 'src/components'),
 		},
 	},
 	server: {

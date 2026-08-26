@@ -2,7 +2,7 @@
 	import type { FileItem } from '$types/data';
 	import { __ } from '$lib/locale';
 	import { useAssets } from '$lib/assets';
-	import IcoTrash from '$shell/icons/IcoTrash.svelte';
+	import IcoTrash from '$components/icons/IcoTrash.svelte';
 
 	type Props = {
 		file: FileItem;

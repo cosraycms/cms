@@ -5,9 +5,9 @@
 	import { __ } from '$lib/locale';
 	import { ensureNeutral } from '$lib/content';
 	import { ZXX } from '$types/data';
-	import Button from '$shell/Button.svelte';
-	import Field from '$shell/Field.svelte';
-	import Label from '$shell/Label.svelte';
+	import Button from '$components/Button.svelte';
+	import Field from '$components/Field.svelte';
+	import Label from '$components/Label.svelte';
 	import SubControl from './SubControl.svelte';
 
 	type Props = {

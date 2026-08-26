@@ -3,9 +3,9 @@
 	import type { SimpleField } from '$types/fields';
 
 	import { system, systemLocale } from '$lib/sys';
-	import ElementHost from '$shell/ElementHost.svelte';
-	import Field from '$shell/Field.svelte';
-	import Label from '$shell/Label.svelte';
+	import ElementHost from '$components/ElementHost.svelte';
+	import Field from '$components/Field.svelte';
+	import Label from '$components/Label.svelte';
 
 	type Props = {
 		field: SimpleField;

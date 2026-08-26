@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
-	import type { NodeInfo } from '$shell/NodeSearch.svelte';
+	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
+	import type { NodeInfo } from '$components/NodeSearch.svelte';
 
 	import { untrack } from 'svelte';
 	import { __ } from '$lib/locale';
-	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import IcoDocument from '$shell/icons/IcoDocument.svelte';
-	import IcoImage from '$shell/icons/IcoImage.svelte';
-	import IcoLink from '$shell/icons/IcoLink.svelte';
-	import IcoParagraph from '$shell/icons/IcoParagraph.svelte';
-	import Button from '$shell/Button.svelte';
-	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
-	import NodeSearch from '$shell/NodeSearch.svelte';
+	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
+	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import IcoImage from '$components/icons/IcoImage.svelte';
+	import IcoLink from '$components/icons/IcoLink.svelte';
+	import IcoParagraph from '$components/icons/IcoParagraph.svelte';
+	import Button from '$components/Button.svelte';
+	import LibraryBrowser from '$components/LibraryBrowser.svelte';
+	import NodeSearch from '$components/NodeSearch.svelte';
 
 	// Exactly one of href/node/asset carries the target; the active tab
 	// decides which. Matches the richtext `link` mark's attrs.

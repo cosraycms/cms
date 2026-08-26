@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { AssetInfo } from '$types/data';
-	import type { LibraryItem } from '$shell/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
 
 	import { cosray } from '$lib/bridge';
 	import { __ } from '$lib/locale';
-	import { ModalHeader, ModalBody, ModalFooter } from '$shell/modal';
-	import Button from '$shell/Button.svelte';
-	import LibraryBrowser from '$shell/LibraryBrowser.svelte';
+	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
+	import Button from '$components/Button.svelte';
+	import LibraryBrowser from '$components/LibraryBrowser.svelte';
 
 	type Props = {
 		close: () => void;

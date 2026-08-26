@@ -5,7 +5,7 @@
 	import type { BlocksField } from '$types/fields';
 
 	import { useNotify } from '../notify';
-	import Upload from '$shell/Upload.svelte';
+	import Upload from '$components/Upload.svelte';
 
 	type Props = {
 		field: BlocksField;

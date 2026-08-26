@@ -5,10 +5,10 @@
 	import { mount, onMount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
-	import Image from '$shell/Image.svelte';
-	import Video from '$shell/Video.svelte';
-	import File from '$shell/File.svelte';
-	import ModalEditImage from '$shell/modals/ModalEditImage.svelte';
+	import Image from '$components/Image.svelte';
+	import Video from '$components/Video.svelte';
+	import File from '$components/File.svelte';
+	import ModalEditImage from '$components/modals/ModalEditImage.svelte';
 
 	type Props = {
 		items: FileItem[];
