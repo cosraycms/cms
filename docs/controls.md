@@ -69,15 +69,6 @@ public function metaControl(): ?Control
 
 The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
 
-## Derived inputs
-
-Two declarative helpers for field templates, evaluated on every form edit:
-
-- `data-derive="title"` on an input mirrors the named sibling field's value, optionally through `data-derive-transform="slugify"`. The input detaches the moment it is edited manually (or starts detached when its stored value already differs).
-- `<output data-count-of="field-title-zxx">` renders the character count of the referenced input.
-
-Anything richer than cross-field mirroring belongs in an `element` control, not in new behaviors.
-
 ## Block types
 
 Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()`, `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. The block natives (`block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`) are rendered internally by the `cosray-blocks` element; a plugin block type uses an `element` control, and its web component gets the contract below with `block` (`{type, index}`) assigned additionally.
