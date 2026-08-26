@@ -64,6 +64,10 @@ jobs:
         working-directory: panel
         run: pnpm check
 
+      - name: Run panel tests
+        working-directory: panel
+        run: pnpm test
+
       - name: Build panel assets
         working-directory: panel
         run: pnpm build
