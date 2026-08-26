@@ -24,6 +24,13 @@
 			"$types/*": ["./src/types/*"]
 		}
 	},
-	"include": ["vite.config.ts", "src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte"],
+	"include": [
+		"vite.config.ts",
+		"vitest.config.ts",
+		"src/**/*.d.ts",
+		"src/**/*.ts",
+		"src/**/*.svelte",
+		"tests/**/*.ts"
+	],
 	"exclude": ["node_modules/**"]
 }

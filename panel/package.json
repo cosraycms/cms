@@ -10,7 +10,8 @@
 		"build:converter": "vite build -c vite.convert.config.ts",
 		"dev": "vite",
 		"check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings options_missing_custom_element:ignore",
-		"format": "prettier -w ."
+		"format": "prettier -w .",
+		"test": "vitest run"
 	},
 	"devDependencies": {
 		"@celema/verba": "^0.3.0",
@@ -54,7 +55,8 @@
 		"svelte": "^5.56.3",
 		"svelte-check": "^4.6.0",
 		"typescript": "^5.9.3",
-		"vite": "^7.3.5"
+		"vite": "^7.3.5",
+		"vitest": "^4.1.11"
 	},
 	"engines": {
 		"node": ">=22.13.0",
