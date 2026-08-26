@@ -70,8 +70,8 @@ class PanelLocale implements Middleware
 
 		if (
 			$user instanceof User
-				&& $user->panelLocale !== null
-				&& in_array($user->panelLocale, $available, true)
+			&& $user->panelLocale !== null
+			&& in_array($user->panelLocale, $available, true)
 		) {
 			return $user->panelLocale;
 		}

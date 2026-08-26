@@ -94,12 +94,12 @@ final class RoutePathGenerator
 
 				if (
 					$selector === ''
-						|| $selector === 'uid'
-						|| $selector === 'handle'
-						|| $selector === 'parent'
-						|| str_starts_with($selector, 'parent.')
-						|| str_starts_with($selector, 'parent(')
-						|| str_starts_with($selector, 'parent?')
+					|| $selector === 'uid'
+					|| $selector === 'handle'
+					|| $selector === 'parent'
+					|| str_starts_with($selector, 'parent.')
+					|| str_starts_with($selector, 'parent(')
+					|| str_starts_with($selector, 'parent?')
 				) {
 					continue;
 				}
@@ -288,9 +288,9 @@ final class RoutePathGenerator
 	{
 		if (
 			$selector !== 'parent'
-				&& !str_starts_with($selector, 'parent.')
-				&& !str_starts_with($selector, 'parent(')
-				&& !str_starts_with($selector, 'parent?')
+			&& !str_starts_with($selector, 'parent.')
+			&& !str_starts_with($selector, 'parent(')
+			&& !str_starts_with($selector, 'parent?')
 		) {
 			return null;
 		}

@@ -201,7 +201,7 @@ final class Reference extends Panel
 
 		if (
 			!$propType instanceof ReflectionNamedType
-				|| !is_a($propType->getName(), ReferenceField::class, true)
+			|| !is_a($propType->getName(), ReferenceField::class, true)
 		) {
 			return null;
 		}
@@ -243,8 +243,8 @@ final class Reference extends Panel
 
 			if (
 				$requested !== []
-					&& !in_array($class, $requested, true)
-					&& !in_array($handle, $requested, true)
+				&& !in_array($class, $requested, true)
+				&& !in_array($handle, $requested, true)
 			) {
 				continue;
 			}

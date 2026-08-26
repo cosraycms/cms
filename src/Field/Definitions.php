@@ -328,8 +328,8 @@ final class Definitions
 		foreach ($type->getTypes() as $part) {
 			if (
 				$part instanceof ReflectionNamedType
-					&& !$part->isBuiltin()
-					&& self::isEmbedded($part->getName())
+				&& !$part->isBuiltin()
+				&& self::isEmbedded($part->getName())
 			) {
 				return true;
 			}

@@ -16,7 +16,7 @@ class InitRequest implements Middleware
 		// See if it's a JSON request
 		if (
 			isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-				&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+			&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
 		) {
 			$request = $request->withAttribute('isXhr', true);
 		} else {

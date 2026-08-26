@@ -292,9 +292,9 @@ class Blocks extends Value
 			$fields = is_array($value) ? $value : [];
 		} elseif (
 			!isset($data['type'])
-				&& isset($data['value'])
-				&& is_array($data['value'])
-				&& array_is_list($data['value'])
+			&& isset($data['value'])
+			&& is_array($data['value'])
+			&& array_is_list($data['value'])
 		) {
 			$fields = $data['value'];
 		} else {

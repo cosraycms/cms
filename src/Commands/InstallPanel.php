@@ -262,7 +262,7 @@ class InstallPanel
 
 		if (
 			($manifest['name'] ?? null) !== 'cosray-panel'
-				|| ($manifest['target'] ?? null) !== 'static'
+			|| ($manifest['target'] ?? null) !== 'static'
 		) {
 			throw new RuntimeException(
 				'Panel archive manifest does not describe Cosray static panel assets',
@@ -312,9 +312,9 @@ class InstallPanel
 	{
 		if (
 			$version === ''
-				|| $version === 'nightly'
-				|| $version === 'dev-main'
-				|| str_starts_with($version, 'dev-')
+			|| $version === 'nightly'
+			|| $version === 'dev-main'
+			|| str_starts_with($version, 'dev-')
 		) {
 			return 'nightly';
 		}

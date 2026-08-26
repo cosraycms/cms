@@ -203,9 +203,9 @@ final class Normalizer
 
 			if (
 				$last !== null
-					&& $node['type'] === 'text'
-					&& $last['type'] === 'text'
-					&& ($node['marks'] ?? []) === ($last['marks'] ?? [])
+				&& $node['type'] === 'text'
+				&& $last['type'] === 'text'
+				&& ($node['marks'] ?? []) === ($last['marks'] ?? [])
 			) {
 				$result[count($result) - 1]['text'] = $last['text'] . $node['text'];
 

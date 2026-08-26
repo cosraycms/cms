@@ -157,8 +157,8 @@ final class QueryParser
 		// Consume the whole condition if valid
 		if (
 			($this->pos + 2) <= $this->length
-				&& $this->tokens[$this->pos + 1]->group === TokenGroup::Operator
-				&& $this->tokens[$this->pos + 2]->group === TokenGroup::Operand
+			&& $this->tokens[$this->pos + 1]->group === TokenGroup::Operator
+			&& $this->tokens[$this->pos + 2]->group === TokenGroup::Operand
 		) {
 			// A Regular key value comparision
 			return $this->getComparisonCondition($token);
@@ -167,7 +167,7 @@ final class QueryParser
 		if (
 			($this->pos + 2) <= $this->length
 			&& $this->tokens[$this->pos + 1]->group === TokenGroup::BooleanOperator
-				|| count($this->tokens) === ($this->pos + 1)
+			|| count($this->tokens) === ($this->pos + 1)
 		) {
 			// Key exists query
 			return $this->getExistsCondition($token);
@@ -175,7 +175,7 @@ final class QueryParser
 
 		if (
 			$this->tokens[$this->pos + 1]->group === TokenGroup::Operator
-				&& $this->tokens[$this->pos + 2]->group === TokenGroup::Operator
+			&& $this->tokens[$this->pos + 2]->group === TokenGroup::Operator
 		) {
 			$this->error($token, 'Multiple operators. Maybe you used == instead of =.');
 		}
