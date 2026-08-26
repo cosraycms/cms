@@ -1,10 +1,10 @@
 # Editor control vocabulary
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater` the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
+Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater`/`entries` controls the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
-Fields declared by a class implementing `Cosray\Contract\Embedded` use the same descriptors and flat form names as direct fields. An embedded property without `#[Fieldset]` contributes ordinary wrappers at its declaration position. With `#[Fieldset]`, the SSR editor and Entries element group its children in a semantic fieldset; `Label`, `Description`, and `Width` configure the group. Child widths are relative to the fieldset's inner layout. Fieldset metadata is serialized separately from the flat `fields` array, so controls require no fieldset-specific behavior.
+Fields declared by a class implementing `Cosray\Contract\Embedded` use the same descriptors and flat form names as direct fields. An embedded property without `#[Fieldset]` contributes ordinary wrappers at its declaration position. With `#[Fieldset]`, the editor groups its children in a semantic fieldset — at the top level and inside entry rows alike; `Label`, `Description`, and `Width` configure the group. Child widths are relative to the fieldset's inner layout. Fieldset metadata is serialized separately from the flat `fields` array, so controls require no fieldset-specific behavior.
 
 ## Value shapes
 
@@ -24,6 +24,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `iframe` | `Control::iframe()` |  | locale map of `string` |
 | `group` | `Control::group(fields)` | `fields: {key,label?,control,width?}[]` | `zxx` map of object keyed by `key` |
 | `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
+| `entries` | `Control::entries()` | `entryTypes` (built from `#[Allows]`), `min?`, `max?` | `zxx` map of `{uid, type, fields}[]` |
 | `element` | `Control::element(tag, module)` | `tag`, `module` | whatever the field's `structure()` defines |
 
 Named rich controls (resolved to elements server-side; cosray's built-ins ship as custom elements under `cosray:` modules):
@@ -36,7 +37,6 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
 | `blocks` | `Control::blocks()` | `cosray-blocks` | locale map of block list (see Blocks) |
-| `entries` | `Control::entries()` | `cosray-entries` | `zxx` map of `{uid, type, fields}[]` |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
 Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
@@ -52,6 +52,26 @@ public function control(): Control
     ]);
 }
 ```
+
+## Entries
+
+An `Entries` field renders server-side as a **typed repeater**: each stored row is a group of regular field wrappers, built from the row type's field table in the descriptor's `entryTypes` props. Everything a top-level field has works inside a row the same way — labels, locale tabs, descriptions, meta dialogs, fieldsets — because rows reuse the same wrapper views, just at a deeper form name:
+
+```text
+content[f][value][zxx][i][uid]                       hidden row identity
+content[f][value][zxx][i][type]                      hidden row type (FQCN)
+content[f][value][zxx][i][fields][sub][value][lo]    primitive sub-field, per locale
+content[f][value][zxx][i][fields][sub][json]         element sub-field (cosray-host leaf)
+content[f][value][zxx][i][fields][sub][meta][k][lo]  sub-field meta dialog
+```
+
+Adding, removing, reordering and collapsing rows happens entirely client-side: the editor page carries one inert `<template>` per allowed entry type, the add button stamps a copy into the form, and renumbering keeps names dense. Element controls inside a stamped row upgrade and load on insertion like any other. No server round trip is involved until save.
+
+Row **uids** exist for patch matching: the client fills a fresh row's uid on stamping (13-char lowercase word-safe format; the server backfills any row arriving without one). Entry uids are internal identifiers — deliberately fixed-format, not governed by the `uid.*` config that shapes node and asset uids.
+
+**Saving** replaces the row list wholesale — order is submission order, missing rows are deleted, rows of types the field does not allow are dropped. Each surviving row is matched to its stored counterpart **by uid** and its sub-fields are patched individually, exactly like top-level fields (element leaves via `[json]`, primitives per locale, meta per key). One boundary to know: at the top level, unknown keys in stored content survive a save untouched; **inside entry rows they do not** — storing validates each row's fields and keeps only declared keys. The supported places for extra data inside entries are declared fields and declared meta.
+
+Limitations (v1): `#[When]` conditions are not emitted for sub-fields inside entries (a condition would otherwise evaluate against a same-named top-level field); an entry type must not contain another `Entries` field (rejected at boot); the row title in the header is rendered from the first non-empty text value at load time and refreshes on the next full load, not while typing.
 
 ## Field meta
 
@@ -154,7 +174,7 @@ public Date $endDate;
 
 The editor hides an inactive field (its inputs stay in the form, `required` is suspended) and shows it again the moment the condition holds — the stored value is **never** cleared by toggling. On the frontend and API the same condition is enforced at read time: an inactive field presents as empty, without any template code checking the source field. `Field::raw()` deliberately bypasses the enforcement for consumers that need the dormant value.
 
-Limitations (v1): condition sources must be primitive, non-translated fields (checkbox, option, text, number); conditions inside repeaters are not evaluated; combining `#[When]` with `#[Required]` still enforces required on save while the field is inactive.
+Limitations (v1): condition sources must be primitive, non-translated fields (checkbox, option, text, number); conditions are not emitted for sub-fields inside repeaters or entries; combining `#[When]` with `#[Required]` still enforces required on save while the field is inactive.
 
 ## The window.Cosray bridge
 

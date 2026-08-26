@@ -394,19 +394,22 @@ final class Department
 }
 ```
 
-Stored entry items use an FQCN `type` and nested field `value`:
+Stored entry rows carry a `uid`, an FQCN `type`, and their sub-field entries under `fields`; the row list lives under the neutral locale:
 
 ```json
 {
     "type": "entries",
-    "value": [
-        {
-            "type": "App\\Node\\Entries\\Staff",
-            "value": {
-                "fullName": { "type": "text", "value": "Jane" }
+    "value": {
+        "zxx": [
+            {
+                "uid": "kf8smrl3dlf2n",
+                "type": "App\\Node\\Entries\\Staff",
+                "fields": {
+                    "fullName": { "type": "text", "value": { "zxx": "Jane" } }
+                }
             }
-        }
-    ]
+        ]
+    }
 }
 ```
 
