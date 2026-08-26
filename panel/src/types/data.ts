@@ -84,12 +84,6 @@ export interface BooleanData {
 	meta?: Meta;
 }
 
-export interface GenericFieldData {
-	type: string;
-	value?: unknown;
-	meta?: Meta;
-}
-
 export interface FileData {
 	type: string;
 	value: LocaleMap<FileItem[]>;
@@ -170,26 +164,7 @@ export interface BlocksData {
 	};
 }
 
-export interface EntryData {
-	uid: string;
-	type: string;
-	fields: Record<string, Data | GenericFieldData>;
-}
-
-export interface EntriesData {
-	type: string;
-	value: LocaleMap<EntryData[]>;
-	meta?: Meta;
-}
-
-export type Data =
-	| TextData
-	| CodeData
-	| FileData
-	| BlocksData
-	| NumberData
-	| BooleanData
-	| EntriesData;
+export type Data = TextData | CodeData | FileData | BlocksData | NumberData | BooleanData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 

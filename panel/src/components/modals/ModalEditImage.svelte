@@ -3,7 +3,7 @@
 	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';
 	import Button from '$components/Button.svelte';
-	import Input from '$components/controls/Input.svelte';
+	import Input from '$components/Input.svelte';
 
 	type Props = {
 		close: () => void;
