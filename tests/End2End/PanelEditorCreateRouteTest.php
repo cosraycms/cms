@@ -141,6 +141,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			[
 				'query' => ['parent' => 'panel-store-parent'],
 				'body' => [
+					'_complete' => '1',
 					'content' => [
 						'title' => ['value' => ['en' => 'Stored Child']],
 					],
@@ -213,6 +214,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			[
 				'query' => ['parent' => 'panel-store-uid-parent'],
 				'body' => [
+					'_complete' => '1',
 					'uid' => $uid,
 					'content' => ['title' => ['value' => ['en' => 'Child With Uid']]],
 				],

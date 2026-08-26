@@ -72,6 +72,7 @@ return [
 		'editor:handle' => 'Handle',
 		'editor:hidden-help' => 'Versteckte Seiten werden in Auflistungen ignoriert.',
 		'editor:hidden-label' => 'Versteckt',
+		'editor:incomplete-form' => 'Das übermittelte Formular kam unvollständig an, es wurde nichts gespeichert. Tritt dies wiederholt auf, kürzt möglicherweise das PHP-Limit max_input_vars das Formular.',
 		'editor:internal-id' => 'Interne Dokument-ID',
 		'editor:preview' => 'Vorschau',
 		'editor:published' => 'veröffentlicht',

@@ -150,12 +150,15 @@ foreach ($fieldsets as $fieldset) {
 	// novalidate because the form legitimately hides controls (locale variants,
 	// meta dialogs) that native validation cannot handle; the server validates
 	// and reports out of band. ?>
+	<?php // data-json-form: the transport behavior re-encodes the submit as one
+	// nested JSON body, so PHP's max_input_vars cannot truncate large forms. ?>
 	<form
 		id="node-editor-form"
 		class="panes"
 		method="post"
 		action="<?= escape($action) ?>"
 		hx-swap="none"
+		data-json-form
 		novalidate>
 		<div class="pane">
 			<div class="inner">
@@ -217,6 +220,11 @@ foreach ($fieldsets as $fieldset) {
 				'generatedPaths' => $generatedPaths,
 			]) ?>
 		<?php endif ?>
+
+		<?php // Truncation sentinel — the last control in the form. A submit cut
+		// short (a form-encoded POST past max_input_vars loses its tail) is
+		// missing it, and the server refuses to save such submissions. ?>
+		<input type="hidden" name="_complete" value="1" />
 	</form>
 
 	<div id="editor-preview" hidden></div>

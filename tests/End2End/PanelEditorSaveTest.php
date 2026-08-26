@@ -76,6 +76,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-entries', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
+				'_complete' => '1',
 				'content' => [
 					'title' => ['value' => ['zxx' => 'With entries']],
 					'entries' => [
@@ -139,6 +140,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-meta', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
+				'_complete' => '1',
 				'content' => [
 					'styled' => [
 						'value' => ['zxx' => 'Body'],
@@ -172,6 +174,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-a', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
+				'_complete' => '1',
 				'content' => [
 					'title' => ['value' => ['en' => 'New Title', 'de' => 'Neuer Titel']],
 				],
@@ -209,6 +212,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-plain', [
 			'body' => [
+				'_complete' => '1',
 				'content' => ['title' => ['value' => ['en' => 'Plain Updated']]],
 			],
 		]);
@@ -244,6 +248,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-invalid', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
+				'_complete' => '1',
 				// Violates the fixture's minLength:3 rule on the required title.
 				'content' => ['title' => ['value' => ['zxx' => 'ab']]],
 			],
@@ -271,10 +276,127 @@ final class PanelEditorSaveTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/does-not-exist', [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => ['content' => []],
+			'body' => ['_complete' => '1', 'content' => []],
 		]);
 
 		$this->assertResponseStatus(404, $response);
+	}
+
+	public function testUrlencodedFallbackSavesLikeTheJsonTransport(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-urlencoded',
+			'type' => $this->articleTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Encoded']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-urlencoded', [
+			'headers' => [
+				'HX-Request' => 'true',
+				'Content-Type' => 'application/x-www-form-urlencoded',
+			],
+			'body' => http_build_query([
+				'content' => ['title' => ['value' => ['en' => 'Encoded Updated']]],
+				'_complete' => '1',
+			]),
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertSame(
+			'Encoded Updated',
+			$this->nodeContent('panel-save-urlencoded')['title']['value']['en'],
+		);
+	}
+
+	public function testTruncatedSubmissionIsRefusedWithoutSaving(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-truncated',
+			'type' => $this->articleTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Kept']],
+			],
+		]);
+
+		// A POST truncated by max_input_vars loses its tail — including the
+		// sentinel the editor form renders as its last control.
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-truncated', [
+			'headers' => [
+				'HX-Request' => 'true',
+				'Content-Type' => 'application/x-www-form-urlencoded',
+			],
+			'body' => http_build_query([
+				'content' => ['title' => ['value' => ['en' => 'Lost Update']]],
+			]),
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('class="status is-error"', $html);
+		$this->assertStringContainsString('max_input_vars', $html);
+		$this->assertSame(
+			'Kept',
+			$this->nodeContent('panel-save-truncated')['title']['value']['en'],
+		);
+	}
+
+	public function testTruncatedNonHtmxSubmissionFailsHard(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-truncated-plain',
+			'type' => $this->articleTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Kept']],
+			],
+		]);
+
+		// Without htmx there is no error box to render into; a silent PRG
+		// redirect would hide the data loss, so the save fails hard instead.
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-truncated-plain', [
+			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+			'body' => http_build_query([
+				'content' => ['title' => ['value' => ['en' => 'Lost Update']]],
+			]),
+		]);
+
+		$this->assertResponseStatus(400, $response);
+		$this->assertSame(
+			'Kept',
+			$this->nodeContent('panel-save-truncated-plain')['title']['value']['en'],
+		);
+	}
+
+	public function testJsonSubmissionWithoutSentinelIsRefused(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-nosentinel',
+			'type' => $this->articleTypeId(),
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'Kept']],
+			],
+		]);
+
+		// The guard is transport-independent: a JSON body that lost the
+		// sentinel (mangled or hand-built) is refused the same way.
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-nosentinel', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'content' => ['title' => ['value' => ['en' => 'Lost Update']]],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString('class="status is-error"', $this->getHtmlResponse($response));
+		$this->assertSame(
+			'Kept',
+			$this->nodeContent('panel-save-nosentinel')['title']['value']['en'],
+		);
 	}
 
 	public function testPublishButtonAndSettingsFlagsAreApplied(): void
@@ -291,6 +413,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-publish', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
+				'_complete' => '1',
 				'publish' => '1',
 				'handle' => 'panel-save-handle',
 				'content' => ['title' => ['value' => ['en' => 'Unpublished']]],

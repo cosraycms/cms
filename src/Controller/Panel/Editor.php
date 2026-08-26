@@ -124,6 +124,11 @@ final class Editor extends Panel
 		);
 
 		$form = $this->formData();
+
+		if (!$this->complete($form)) {
+			return $this->refuseIncomplete($data);
+		}
+
 		$data = $this->applyForm($data, $form);
 		$store = new Store(
 			$context->db,
@@ -189,6 +194,11 @@ final class Editor extends Panel
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		$form = $this->formData();
+
+		if (!$this->complete($form)) {
+			return $this->refuseIncomplete($data);
+		}
+
 		$patch = new FormPatch($data['fields']);
 		$submitted = $form['content'] ?? [];
 		$data['content'] = $patch->content(
@@ -351,6 +361,40 @@ final class Editor extends Panel
 			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
 			'submitted' => $submitted,
 			'pathsUrl' => $pathsUrl,
+		];
+	}
+
+	/**
+	 * The editor form renders a sentinel input as its LAST control; a
+	 * submission without it lost its tail — typically a form-encoded POST
+	 * silently truncated by PHP's max_input_vars, or a mangled JSON body.
+	 */
+	private function complete(array $form): bool
+	{
+		return ($form['_complete'] ?? null) === '1';
+	}
+
+	/**
+	 * Saving an incomplete submission would silently delete the missing
+	 * fields (entries rows are replaced wholesale), so this is a hard
+	 * stop, not a validation issue.
+	 */
+	private function refuseIncomplete(array $data): array
+	{
+		if (!$this->request->hasHeader('HX-Request')) {
+			throw new HttpBadRequest(
+				$this->request,
+				payload: ['message' => __('editor:incomplete-form')],
+			);
+		}
+
+		return [
+			'saved' => false,
+			'message' => __('editor:incomplete-form'),
+			'errors' => [],
+			'published' => (bool) ($data['published'] ?? false),
+			'renderable' => (bool) ($data['type']['renderable'] ?? false),
+			'preview' => null,
 		];
 	}
 

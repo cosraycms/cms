@@ -71,7 +71,7 @@ final class PanelSaveTitleTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest('POST', "/cp/collection/test-articles/{$uid}", [
 			'headers' => ['HX-Request' => 'true'],
-			'body' => ['content' => ['title' => ['value' => ['en' => $title]]]],
+			'body' => ['_complete' => '1', 'content' => ['title' => ['value' => ['en' => $title]]]],
 		]);
 
 		$this->assertResponseOk($response);

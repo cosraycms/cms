@@ -72,6 +72,7 @@ return [
 		'editor:handle' => 'Handle',
 		'editor:hidden-help' => 'Hidden pages are ignored in listings.',
 		'editor:hidden-label' => 'Hidden',
+		'editor:incomplete-form' => 'The submitted form arrived incomplete and nothing was saved. If this keeps happening, the server\'s PHP max_input_vars limit may be truncating the form.',
 		'editor:internal-id' => 'Internal document ID',
 		'editor:preview' => 'Preview',
 		'editor:published' => 'published',
