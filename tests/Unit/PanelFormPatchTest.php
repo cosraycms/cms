@@ -224,4 +224,24 @@ final class PanelFormPatchTest extends TestCase
 
 		$this->assertSame('<p>Old</p>', $content['body']['value']['zxx']);
 	}
+
+	public function testContractFixtures(): void
+	{
+		$fixtures = json_decode(
+			(string) file_get_contents(__DIR__ . '/../../contract/form-leaf.json'),
+			true,
+		);
+		$this->assertNotEmpty($fixtures['cases']);
+
+		$patch = new FormPatch([
+			['name' => 'body', 'type' => 'RichText', 'control' => ['name' => 'element', 'props' => []]],
+		]);
+
+		foreach ($fixtures['cases'] as $case) {
+			$leaf = $case['leafRaw'] ?? json_encode($case['leaf']);
+			$content = $patch->content(['body' => $case['stored']], ['body' => ['json' => $leaf]]);
+
+			$this->assertEquals($case['patched'], $content['body'], "contract case: {$case['name']}");
+		}
+	}
 }

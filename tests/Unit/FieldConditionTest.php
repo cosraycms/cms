@@ -80,4 +80,26 @@ final class FieldConditionTest extends TestCase
 			$this->content(''),
 		));
 	}
+
+	public function testContractFixtures(): void
+	{
+		$fixtures = json_decode(
+			(string) file_get_contents(__DIR__ . '/../../contract/conditions.json'),
+			true,
+		);
+		$this->assertNotEmpty($fixtures['cases']);
+
+		foreach ($fixtures['cases'] as $case) {
+			$field = $case['condition']['field'];
+			$content = array_key_exists('stored', $case)
+				? [$field => ['type' => 'x', 'value' => ['zxx' => $case['stored']]]]
+				: [];
+
+			$this->assertSame(
+				$case['active'],
+				Condition::active($case['condition'], $content),
+				"contract case: {$case['name']}",
+			);
+		}
+	}
 }

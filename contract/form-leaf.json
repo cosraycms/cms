@@ -1,0 +1,50 @@
+{
+	"cases": [
+		{
+			"name": "value and meta replace wholesale; unknown entry keys survive",
+			"stored": { "type": "RichText", "value": { "zxx": "<p>Old</p>" }, "stashed": "kept" },
+			"leaf": { "value": { "zxx": "<p>New</p>" }, "meta": { "tone": "loud" } },
+			"patched": {
+				"type": "RichText",
+				"value": { "zxx": "<p>New</p>" },
+				"stashed": "kept",
+				"meta": { "tone": "loud" }
+			}
+		},
+		{
+			"name": "leaf without meta leaves stored meta untouched",
+			"stored": { "type": "RichText", "value": { "zxx": "Old" }, "meta": { "x": 1 } },
+			"leaf": { "value": { "zxx": "New" } },
+			"patched": { "type": "RichText", "value": { "zxx": "New" }, "meta": { "x": 1 } }
+		},
+		{
+			"name": "format envelope of structured richtext rides next to value",
+			"stored": { "type": "RichText", "value": { "zxx": "Old" } },
+			"leaf": { "value": { "zxx": "New" }, "format": "prosemirror", "version": 1 },
+			"patched": {
+				"type": "RichText",
+				"value": { "zxx": "New" },
+				"format": "prosemirror",
+				"version": 1
+			}
+		},
+		{
+			"name": "explicit null value clears the stored value",
+			"stored": { "type": "RichText", "value": { "zxx": "Old" } },
+			"leaf": { "value": null },
+			"patched": { "type": "RichText", "value": null }
+		},
+		{
+			"name": "malformed JSON leaves the entry untouched",
+			"stored": { "type": "RichText", "value": { "zxx": "Old" } },
+			"leafRaw": "{broken",
+			"patched": { "type": "RichText", "value": { "zxx": "Old" } }
+		},
+		{
+			"name": "non-object JSON leaves the entry untouched",
+			"stored": { "type": "RichText", "value": { "zxx": "Old" } },
+			"leafRaw": "42",
+			"patched": { "type": "RichText", "value": { "zxx": "Old" } }
+		}
+	]
+}

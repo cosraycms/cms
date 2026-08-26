@@ -1,0 +1,170 @@
+{
+	"cases": [
+		{
+			"name": "truthy on checked checkbox",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"stored": true,
+			"form": "1",
+			"active": true
+		},
+		{
+			"name": "truthy on non-empty string",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"stored": "yes",
+			"form": "yes",
+			"active": true
+		},
+		{
+			"name": "truthy on unchecked checkbox",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"stored": false,
+			"form": "",
+			"active": false
+		},
+		{
+			"name": "truthy on empty string",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"stored": "",
+			"form": "",
+			"active": false
+		},
+		{
+			"name": "truthy on zero string",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"stored": "0",
+			"form": "0",
+			"active": false
+		},
+		{
+			"name": "truthy on missing field",
+			"condition": { "field": "flag", "op": "truthy", "value": null },
+			"form": "",
+			"active": false
+		},
+		{
+			"name": "eq matches string",
+			"condition": { "field": "flag", "op": "eq", "value": "hero" },
+			"stored": "hero",
+			"form": "hero",
+			"active": true
+		},
+		{
+			"name": "eq rejects other string",
+			"condition": { "field": "flag", "op": "eq", "value": "hero" },
+			"stored": "plain",
+			"form": "plain",
+			"active": false
+		},
+		{
+			"name": "eq bool condition matches stored bool",
+			"condition": { "field": "flag", "op": "eq", "value": true },
+			"stored": true,
+			"form": "1",
+			"active": true
+		},
+		{
+			"name": "eq bool condition matches its form representation",
+			"condition": { "field": "flag", "op": "eq", "value": true },
+			"stored": "1",
+			"form": "1",
+			"active": true
+		},
+		{
+			"name": "eq numeric condition matches via string normalization",
+			"condition": { "field": "flag", "op": "eq", "value": 5 },
+			"stored": 5,
+			"form": "5",
+			"active": true
+		},
+		{
+			"name": "eq null condition value matches empty",
+			"condition": { "field": "flag", "op": "eq", "value": null },
+			"stored": "",
+			"form": "",
+			"active": true
+		},
+		{
+			"name": "neq accepts different value",
+			"condition": { "field": "flag", "op": "neq", "value": "a" },
+			"stored": "b",
+			"form": "b",
+			"active": true
+		},
+		{
+			"name": "neq rejects same value",
+			"condition": { "field": "flag", "op": "neq", "value": "a" },
+			"stored": "a",
+			"form": "a",
+			"active": false
+		},
+		{
+			"name": "in accepts member",
+			"condition": { "field": "flag", "op": "in", "value": ["a", "b"] },
+			"stored": "b",
+			"form": "b",
+			"active": true
+		},
+		{
+			"name": "in rejects non-member",
+			"condition": { "field": "flag", "op": "in", "value": ["a", "b"] },
+			"stored": "c",
+			"form": "c",
+			"active": false
+		},
+		{
+			"name": "in normalizes numeric members",
+			"condition": { "field": "flag", "op": "in", "value": [1, 2] },
+			"stored": "2",
+			"form": "2",
+			"active": true
+		},
+		{
+			"name": "in with non-array condition value never matches",
+			"condition": { "field": "flag", "op": "in", "value": "a" },
+			"stored": "a",
+			"form": "a",
+			"active": false
+		},
+		{
+			"name": "empty on empty string",
+			"condition": { "field": "flag", "op": "empty", "value": null },
+			"stored": "",
+			"form": "",
+			"active": true
+		},
+		{
+			"name": "empty on missing field",
+			"condition": { "field": "flag", "op": "empty", "value": null },
+			"form": "",
+			"active": true
+		},
+		{
+			"name": "empty on value",
+			"condition": { "field": "flag", "op": "empty", "value": null },
+			"stored": "x",
+			"form": "x",
+			"active": false
+		},
+		{
+			"name": "notEmpty on value",
+			"condition": { "field": "flag", "op": "notEmpty", "value": null },
+			"stored": "x",
+			"form": "x",
+			"active": true
+		},
+		{
+			"name": "notEmpty on empty string",
+			"condition": { "field": "flag", "op": "notEmpty", "value": null },
+			"stored": "",
+			"form": "",
+			"active": false
+		},
+		{
+			"name": "unknown operator keeps the field active",
+			"condition": { "field": "flag", "op": "bogus", "value": null },
+			"stored": "",
+			"form": "",
+			"active": true
+		}
+	]
+}
