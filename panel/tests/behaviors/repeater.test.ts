@@ -1,6 +1,6 @@
 // Contract-level tests against hand-built DOM mirroring what
 // panel/views/field/repeater.php renders — deliberately not snapshots of
-// that view, so the coming entries refactor can generalize the behavior
+// that view, so the entries refactor can generalize the behavior
 // without rewriting these.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -21,24 +21,25 @@ afterEach(() => {
 	document.body.innerHTML = '';
 });
 
-function row(index: string, value = ''): string {
+function row(index: string, value = '', extra = ''): string {
 	const label = /^\d+$/.test(index) ? `${Number(index) + 1}.` : '';
 
 	return `<div data-repeater-row>
 		<label for="${ID}-${index}" data-repeater-label>${label}</label>
 		<input id="${ID}-${index}" name="${NAME}[${index}]" value="${value}">
+		${extra}
 		<button type="button" data-repeater-remove>Remove</button>
 	</div>`;
 }
 
-function repeater(rows: string[], max?: number): HTMLElement {
+function repeater(rows: string[], options: { max?: number; template?: string } = {}): HTMLElement {
 	document.body.innerHTML = `<div
 		data-repeater
 		data-name="${NAME}"
 		data-id="${ID}"
-		${max === undefined ? '' : `data-max="${max}"`}>
+		${options.max === undefined ? '' : `data-max="${options.max}"`}>
 		${rows.join('')}
-		<template data-repeater-template>${row('__i__')}</template>
+		${options.template ?? `<template data-repeater-template>${row('__i__')}</template>`}
 		<div data-repeater-footer>
 			<button type="button" data-repeater-add>Add</button>
 		</div>
@@ -51,6 +52,29 @@ function repeater(rows: string[], max?: number): HTMLElement {
 	}
 
 	return container;
+}
+
+function nestedRow(outerIndex: string, value: string): string {
+	const base = `${NAME}[${outerIndex}][items]`;
+	const id = `${ID}-${outerIndex}-items`;
+
+	return `<div data-repeater-row>
+		<input id="${ID}-${outerIndex}" name="${NAME}[${outerIndex}]" value="${value}">
+		<div data-repeater data-name="${base}" data-id="${id}">
+			<div data-repeater-row>
+				<input id="${id}-0" name="${base}[0]" value="x">
+			</div>
+			<template data-repeater-template>
+				<div data-repeater-row>
+					<input id="${id}-__i__" name="${base}[__i__]" value="">
+				</div>
+			</template>
+			<div data-repeater-footer>
+				<button type="button" data-repeater-add>Add nested</button>
+			</div>
+		</div>
+		<button type="button" data-repeater-remove>Remove</button>
+	</div>`;
 }
 
 function names(container: HTMLElement): string[] {
@@ -108,7 +132,7 @@ describe('repeater behavior', () => {
 	});
 
 	it('hides the add button at max rows and reveals it after a remove', () => {
-		const container = repeater([row('0', 'a')], 2);
+		const container = repeater([row('0', 'a')], { max: 2 });
 		const add = container.querySelector<HTMLElement>('[data-repeater-add]');
 
 		click(container, '[data-repeater-add]');
@@ -121,48 +145,165 @@ describe('repeater behavior', () => {
 		expect(add?.hidden).toBe(false);
 	});
 
-	it('renumbers input names inside nested containers', () => {
-		const container = repeater([
-			row('0', 'a'),
-			`<div data-repeater-row>
-				<input id="${ID}-1" name="${NAME}[1]" value="b">
-				<div data-repeater data-name="${NAME}[1][items]" data-id="${ID}-1-items">
-					<div data-repeater-row>
-						<input id="${ID}-1-items-0" name="${NAME}[1][items][0]" value="x">
-					</div>
-				</div>
-				<button type="button" data-repeater-remove>Remove</button>
-			</div>`,
+	it('moves a row up and renumbers', () => {
+		const container = repeater([row('0', 'a'), row('1', 'b'), row('2', 'c')]);
+		const second = container.querySelectorAll<HTMLElement>('[data-repeater-row]')[1];
+
+		second?.insertAdjacentHTML(
+			'beforeend',
+			'<button type="button" data-repeater-move="up">Up</button>',
+		);
+		click(container, '[data-repeater-move="up"]');
+
+		expect(names(container)).toEqual([`${NAME}[0]`, `${NAME}[1]`, `${NAME}[2]`]);
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'b',
+			'a',
+			'c',
 		]);
-
-		container.querySelectorAll<HTMLElement>('[data-repeater-remove]')[0]?.click();
-
-		expect(names(container)).toEqual([`${NAME}[0]`, `${NAME}[0][items][0]`]);
 	});
 
-	// Known limitation the entries refactor must fix: renumbering rewrites
-	// name/id/for on descendants but not the data-name/data-id a nested
-	// structural container navigates by, so the nested repeater renumbers
-	// against a stale base after its parent row moves. Marked `fails` so
-	// it flips loudly when the fix lands.
-	it.fails('renumbers the data-name of nested containers', () => {
-		const container = repeater([
-			row('0', 'a'),
-			`<div data-repeater-row>
-				<input id="${ID}-1" name="${NAME}[1]" value="b">
-				<div data-repeater data-name="${NAME}[1][items]" data-id="${ID}-1-items">
-					<div data-repeater-row>
-						<input id="${ID}-1-items-0" name="${NAME}[1][items][0]" value="x">
-					</div>
-				</div>
-				<button type="button" data-repeater-remove>Remove</button>
-			</div>`,
+	it('moves a row down and renumbers', () => {
+		const container = repeater([row('0', 'a'), row('1', 'b')]);
+		const first = container.querySelectorAll<HTMLElement>('[data-repeater-row]')[0];
+
+		first?.insertAdjacentHTML(
+			'beforeend',
+			'<button type="button" data-repeater-move="down">Down</button>',
+		);
+		click(container, '[data-repeater-move="down"]');
+
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'b',
+			'a',
 		]);
+	});
+
+	it('ignores a move past the edge and stays silent', () => {
+		const container = repeater([row('0', 'a'), row('1', 'b')]);
+		const first = container.querySelectorAll<HTMLElement>('[data-repeater-row]')[0];
+
+		first?.insertAdjacentHTML(
+			'beforeend',
+			'<button type="button" data-repeater-move="up">Up</button>',
+		);
+
+		let changes = 0;
+		const count = (): void => {
+			changes += 1;
+		};
+
+		document.addEventListener('change', count);
+		click(container, '[data-repeater-move="up"]');
+		document.removeEventListener('change', count);
+
+		expect(changes).toBe(0);
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'a',
+			'b',
+		]);
+	});
+
+	it('stamps the template matching a typed add button', () => {
+		const template = `
+			<template data-repeater-template="App\\Node\\Quote">
+				${row('__i__', 'quote')}
+			</template>
+			<template data-repeater-template="App\\Node\\Person">
+				${row('__i__', 'person')}
+			</template>`;
+
+		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
+			${template}
+			<div data-repeater-footer>
+				<button type="button" data-repeater-add="App\\Node\\Person">Add person</button>
+			</div>
+		</div>`;
+
+		const container = document.querySelector<HTMLElement>('[data-repeater]');
+
+		if (!container) {
+			throw new Error('container missing');
+		}
+
+		click(container, '[data-repeater-add]');
+
+		const stamped = container.querySelector('[data-repeater-row] input');
+
+		expect(stamped?.getAttribute('value')).toBe('person');
+		expect(stamped?.getAttribute('name')).toBe(`${NAME}[0]`);
+	});
+
+	it('fills a fresh uid into stamped rows', () => {
+		const template = `<template data-repeater-template>
+			<div data-repeater-row>
+				<input type="hidden" data-repeater-uid name="${NAME}[__i__][uid]" value="">
+				<input id="${ID}-__i__" name="${NAME}[__i__][title]" value="">
+			</div>
+		</template>`;
+		const container = repeater([], { template });
+
+		click(container, '[data-repeater-add]');
+		click(container, '[data-repeater-add]');
+
+		const uids = Array.from(
+			container.querySelectorAll<HTMLInputElement>('[data-repeater-uid]'),
+			(input) => input.value,
+		);
+
+		expect(uids).toHaveLength(2);
+		expect(uids[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f-]{27}$/);
+		expect(uids[0]).not.toBe(uids[1]);
+		expect(
+			container
+				.querySelector('template')
+				?.content.querySelector('[data-repeater-uid]')
+				?.getAttribute('value'),
+		).toBe('');
+	});
+
+	it('renumbers the data-name and data-id of nested containers', () => {
+		const container = repeater([row('0', 'a'), nestedRow('1', 'b')]);
 
 		container.querySelectorAll<HTMLElement>('[data-repeater-remove]')[0]?.click();
 
 		const nested = container.querySelector<HTMLElement>('[data-repeater] [data-repeater]');
 
 		expect(nested?.dataset.name).toBe(`${NAME}[0][items]`);
+		expect(nested?.dataset.id).toBe(`${ID}-0-items`);
+	});
+
+	it('renumbers nested template content along with the row', () => {
+		const container = repeater([row('0', 'a'), nestedRow('1', 'b')]);
+
+		container.querySelectorAll<HTMLElement>('[data-repeater-remove]')[0]?.click();
+
+		const nested = container.querySelector<HTMLElement>('[data-repeater] [data-repeater]');
+		const templateInput = nested?.querySelector('template')?.content.querySelector('input');
+
+		expect(templateInput?.name).toBe(`${NAME}[0][items][__i__]`);
+
+		// End to end: the nested repeater must stamp correct names after
+		// its row moved to a new index.
+		nested?.querySelector<HTMLElement>('[data-repeater-add]')?.click();
+
+		expect(names(nested as HTMLElement)).toEqual([`${NAME}[0][items][0]`, `${NAME}[0][items][1]`]);
+	});
+
+	it('leaves nested add buttons alone when the outer repeater is full', () => {
+		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
+		const container = repeater([], { max: 1, template });
+
+		click(container, ':scope > [data-repeater-footer] [data-repeater-add]');
+
+		const outerAdd = container.querySelector<HTMLElement>(
+			':scope > [data-repeater-footer] [data-repeater-add]',
+		);
+		const nestedAdd = container.querySelector<HTMLElement>(
+			'[data-repeater] [data-repeater] [data-repeater-add]',
+		);
+
+		expect(outerAdd?.hidden).toBe(true);
+		expect(nestedAdd?.hidden).toBe(false);
 	});
 });
