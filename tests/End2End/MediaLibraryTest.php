@@ -47,6 +47,7 @@ final class MediaLibraryTest extends End2EndTestCase
 		$uids = array_column($all['assets'], 'uid');
 		$this->assertContains($image['uid'], $uids);
 		$this->assertContains($file['uid'], $uids);
+		$this->assertSame(2, $all['total']);
 
 		$images = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
 			'query' => ['kind' => 'image'],
@@ -54,6 +55,7 @@ final class MediaLibraryTest extends End2EndTestCase
 		$imageUids = array_column($images['assets'], 'uid');
 		$this->assertContains($image['uid'], $imageUids);
 		$this->assertNotContains($file['uid'], $imageUids);
+		$this->assertSame(1, $images['total']);
 
 		// A File field accepts every kind, so `file` must not filter.
 		$files = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
@@ -126,6 +128,7 @@ final class MediaLibraryTest extends End2EndTestCase
 		]));
 
 		$this->assertSame([], $missed['assets']);
+		$this->assertSame(0, $missed['total']);
 	}
 
 	public function testLibraryRequiresAuthentication(): void

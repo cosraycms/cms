@@ -44,13 +44,13 @@ describe('library fetch', () => {
 
 	it('returns the page and sends the panel request headers', async () => {
 		const fetchMock = vi.fn().mockResolvedValue({
-			json: () => Promise.resolve({ ok: true, assets: [item], page: 2, more: true }),
+			json: () => Promise.resolve({ ok: true, assets: [item], page: 2, more: true, total: 61 }),
 		});
 		vi.stubGlobal('fetch', fetchMock);
 
 		const result = await fetchLibrary('/panel', { kind: 'image', page: 2 });
 
-		expect(result).toEqual({ items: [item], page: 2, more: true });
+		expect(result).toEqual({ items: [item], page: 2, more: true, total: 61 });
 		expect(fetchMock).toHaveBeenCalledWith('/panel/media/library?kind=image&page=2', {
 			credentials: 'same-origin',
 			headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },

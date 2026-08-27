@@ -146,6 +146,8 @@ class Media
 			'assets' => array_map($this->libraryItem(...), array_slice($rows, 0, $limit)),
 			'page' => $page,
 			'more' => $more,
+			// 0 when paging past the end: the window count needs a row to ride on.
+			'total' => $rows === [] ? 0 : (int) $rows[0]['total'],
 		]);
 	}
 

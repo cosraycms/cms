@@ -11,7 +11,9 @@ SELECT
 	hash,
 	meta,
 	created,
-	changed
+	changed,
+	-- Windowed before LIMIT applies: every row carries the full match count.
+	count(*) OVER () AS total
 FROM
 	/*:cms.prefix:*/assets
 WHERE

@@ -21,6 +21,8 @@ export type LibraryPage = {
 	items: LibraryItem[];
 	page: number;
 	more: boolean;
+	// Full match count across all pages; 0 when paging past the end.
+	total: number;
 };
 
 export function libraryParams(query: LibraryQuery): URLSearchParams {
@@ -56,13 +58,14 @@ export async function fetchLibrary(
 			assets: LibraryItem[];
 			page: number;
 			more: boolean;
+			total: number;
 		};
 
 		if (!data.ok) {
 			return null;
 		}
 
-		return { items: data.assets, page: data.page, more: data.more };
+		return { items: data.assets, page: data.page, more: data.more, total: data.total ?? 0 };
 	} catch {
 		return null;
 	}
