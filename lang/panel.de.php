@@ -94,6 +94,7 @@ return [
 		'media:no-files' => 'Keine Dateien gefunden.',
 		'media:search-filename' => 'Dateiname suchen …',
 		'media:select-hint' => 'Datei auswählen, um Details anzuzeigen.',
+		'media:title' => 'Medien',
 		'media:unused' => 'Diese Datei wird nirgendwo verwendet.',
 		'media:uploaded' => 'Hochgeladen',
 		'media:usage' => 'Verwendung',

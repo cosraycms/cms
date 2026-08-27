@@ -655,10 +655,15 @@ Upload endpoint:
 Listing endpoint (panel permission):
 
 - `GET /media/library` — paged asset catalog listing for the panel
-- params: `kind` (image|video filter; `file` or absent lists everything),
-  `q` (filename search), `page`, `uids` (comma-separated batch lookup)
-- response items: `{uid, filename, url, thumbUrl, previewUrl, kind, mime,
-  width, height}`
+- params: `kind` (comma-separated set from the filter vocabulary
+  image|video|audio|document, which splits the catalog kind `file` in
+  two; `file` or absent lists everything), `q` (filename search),
+  `since` (ISO created cutoff; invalid input is ignored), `page`,
+  `uids` (comma-separated batch lookup)
+- response: items `{uid, filename, url, thumbUrl, previewUrl, kind,
+  mime, bytes, width, height}`, `total` (full match count), and
+  `counts` (per-filter-kind totals honoring `q`/`since` but not `kind`,
+  for filter UIs)
 
 Serving:
 
@@ -770,12 +775,16 @@ Block image rendering:
   scalar `credit`, and an image `focal {x, y}` clamped to 0..1 — managed
   keys are replaced, other meta keys carried through, empties dropped
 - media panel page at `/{panel}/media` (`Panel\Media` +
-  `panel/views/media.php`) mounts the `<cosray-media-library>` element:
-  catalog grid (search, image/video filter, upload) with a detail drawer
-  for meta editing (locale tabs, click-to-set focal), the usage list,
-  and delete; a hardcoded sidebar entry links it. Full-page island
-  elements carry a `data-cosray-element` marker that `panel.ts` loads
-  after the system bridge boots
+  `panel/views/media.php`) mounts the `<cosray-media-library>` element,
+  a three-pane workspace: filter rail (kind checkboxes with counts,
+  upload-date ranges, reset), searchable tile grid with multi-file and
+  drag-and-drop upload, and a persistent inspector for meta editing
+  (locale tabs, click-to-set focal), the usage list, and delete. Kind
+  set, committed search, date range, and selected file mirror into the
+  query string (`kind`, `q`, `range`, `file`) via
+  `history.replaceState`, so the screen state deep-links. Full-page
+  island elements carry a `data-cosray-element` marker that `panel.ts`
+  loads after the system bridge boots
 - removing an asset from a field never deletes the asset; deleting a
   node never blocks on references (backlinks are informational, for the
   panel later)
