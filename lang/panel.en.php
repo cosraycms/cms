@@ -80,6 +80,7 @@ return [
 		'media:date-any' => 'Any time',
 		'media:date-year' => 'This year',
 		'media:documents' => 'Documents',
+		'media:drop-to-upload' => 'Drop files to upload',
 		'media:current' => 'Current:',
 		'media:delete-in-use' => 'Cannot delete — the file is still in use:',
 		'media:download' => 'Download file',

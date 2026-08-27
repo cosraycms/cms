@@ -80,6 +80,7 @@ return [
 		'media:date-any' => 'Jederzeit',
 		'media:date-year' => 'Dieses Jahr',
 		'media:documents' => 'Dokumente',
+		'media:drop-to-upload' => 'Dateien zum Hochladen ablegen',
 		'media:current' => 'Aktuell:',
 		'media:delete-in-use' => 'Löschen nicht möglich — die Datei wird noch verwendet:',
 		'media:download' => 'Datei herunterladen',

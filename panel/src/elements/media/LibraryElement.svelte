@@ -50,7 +50,13 @@
 	let failed = $state(false);
 	let selected: string | null = $state(null);
 	let uploading = $state(false);
-	let uploadError = $state('');
+	let uploadErrors: { file: string; error: string }[] = $state([]);
+	let uploadDone = $state(0);
+	let uploadTotal = $state(0);
+	let dragging = $state(false);
+	// Children fire their own enter/leave pairs, so a plain boolean would
+	// flicker; the overlay shows while the depth is above zero.
+	let dragDepth = 0;
 	let fileInput: HTMLInputElement | undefined = $state();
 
 	const prefix = $derived($system.prefix);
@@ -128,16 +134,7 @@
 		return 'file';
 	}
 
-	async function upload(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-
-		if (!file) {
-			return;
-		}
-
-		uploading = true;
-		uploadError = '';
+	async function uploadOne(file: File): Promise<LibraryItem | string> {
 		const body = new FormData();
 		body.set('file', file);
 
@@ -162,34 +159,99 @@
 				height?: number | null;
 			};
 
-			if (data.ok) {
-				const item: LibraryItem = {
-					uid: data.uid,
-					filename: data.filename,
-					url: data.url,
-					thumbUrl: data.thumbUrl ?? data.url,
-					kind: data.kind ?? uploadKind(file.type),
-					mime: data.mime ?? null,
-					bytes: data.bytes ?? null,
-					width: data.width ?? null,
-					height: data.height ?? null,
-				};
+			if (!data.ok) {
+				return data.error ?? __('upload:failed');
+			}
 
-				if (!items.some((existing) => existing.uid === item.uid)) {
-					items = [item, ...items];
+			return {
+				uid: data.uid,
+				filename: data.filename,
+				url: data.url,
+				thumbUrl: data.thumbUrl ?? data.url,
+				kind: data.kind ?? uploadKind(file.type),
+				mime: data.mime ?? null,
+				bytes: data.bytes ?? null,
+				width: data.width ?? null,
+				height: data.height ?? null,
+			};
+		} catch {
+			return __('upload:failed');
+		}
+	}
+
+	async function uploadFiles(files: File[]) {
+		if (files.length === 0 || uploading) {
+			return;
+		}
+
+		uploading = true;
+		uploadErrors = [];
+		uploadDone = 0;
+		uploadTotal = files.length;
+		let lastAdded: string | null = null;
+
+		for (const file of files) {
+			const result = await uploadOne(file);
+
+			if (typeof result === 'string') {
+				uploadErrors = [...uploadErrors, { file: file.name, error: result }];
+			} else {
+				if (!items.some((existing) => existing.uid === result.uid)) {
+					items = [result, ...items];
 					total += 1;
 				}
 
-				selected = item.uid;
-			} else {
-				uploadError = data.error ?? __('upload:failed');
+				lastAdded = result.uid;
 			}
-		} catch {
-			uploadError = __('upload:failed');
+
+			uploadDone += 1;
+		}
+
+		if (lastAdded !== null) {
+			selected = lastAdded;
 		}
 
 		uploading = false;
+	}
+
+	function upload(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		void uploadFiles([...(input.files ?? [])]);
 		input.value = '';
+	}
+
+	function hasFiles(event: DragEvent): boolean {
+		return event.dataTransfer?.types.includes('Files') ?? false;
+	}
+
+	function dragEnter(event: DragEvent) {
+		if (hasFiles(event)) {
+			event.preventDefault();
+			dragDepth += 1;
+			dragging = true;
+		}
+	}
+
+	function dragOver(event: DragEvent) {
+		if (hasFiles(event)) {
+			event.preventDefault();
+		}
+	}
+
+	function dragLeave() {
+		dragDepth = Math.max(0, dragDepth - 1);
+		dragging = dragDepth > 0;
+	}
+
+	function drop(event: DragEvent) {
+		if (!hasFiles(event)) {
+			return;
+		}
+
+		event.preventDefault();
+		dragDepth = 0;
+		dragging = false;
+		void uploadFiles([...(event.dataTransfer?.files ?? [])]);
 	}
 
 	function onDeleted(uid: string) {
@@ -256,7 +318,15 @@
 		</fieldset>
 	</aside>
 
-	<section class="cms-media-pane">
+	<section
+		class="cms-media-pane"
+		class:dragging
+		aria-label={__('media:title')}
+		ondragenter={dragEnter}
+		ondragover={dragOver}
+		ondragleave={dragLeave}
+		ondrop={drop}
+	>
 		<div class="cms-media-toolbar">
 			<form class="cms-media-search" onsubmit={search}>
 				<input
@@ -279,13 +349,28 @@
 				>
 					<IcoUpload />
 					{uploading ? __('upload:in-progress') : __('common:upload')}
+					{#if uploading && uploadTotal > 1}
+						<span class="cms-media-upload-progress">{uploadDone}/{uploadTotal}</span>
+					{/if}
 				</button>
-				<input bind:this={fileInput} type="file" hidden onchange={upload} />
+				<input bind:this={fileInput} type="file" multiple hidden onchange={upload} />
 			</div>
 		</div>
 
-		{#if uploadError !== ''}
-			<div class="cms-media-error">{uploadError}</div>
+		{#if uploadErrors.length > 0}
+			<div class="cms-media-error">
+				<ul>
+					{#each uploadErrors as failure (failure.file + failure.error)}
+						<li>{failure.file}: {failure.error}</li>
+					{/each}
+				</ul>
+				<button
+					type="button"
+					class="cms-media-error-dismiss"
+					aria-label={__('common:close')}
+					onclick={() => (uploadErrors = [])}>×</button
+				>
+			</div>
 		{/if}
 
 		<div class="cms-media-scroll">
@@ -305,6 +390,15 @@
 				</button>
 			{/if}
 		</div>
+
+		{#if dragging}
+			<div class="cms-media-drop" aria-hidden="true">
+				<span>
+					<IcoUpload />
+					{__('media:drop-to-upload')}
+				</span>
+			</div>
+		{/if}
 	</section>
 
 	<aside class="cms-media-inspector" aria-label={__('media:file-details')}>
@@ -413,6 +507,7 @@
 		}
 
 		.cms-media-pane {
+			position: relative;
 			display: flex;
 			flex-direction: column;
 			min-height: 0;
@@ -421,6 +516,26 @@
 			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
 			overflow: hidden;
+		}
+
+		.cms-media-drop {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: var(--cms-radius-md);
+			background-color: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
+			box-shadow: inset 0 0 0 2px var(--cms-color-info);
+			pointer-events: none;
+			z-index: 1;
+		}
+
+		.cms-media-drop span {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--cms-space-2);
+			font-weight: 600;
 		}
 
 		.cms-media-toolbar {
@@ -453,6 +568,10 @@
 			display: inline-flex;
 			align-items: center;
 			gap: var(--cms-space-2);
+		}
+
+		.cms-media-upload-progress {
+			font-variant-numeric: tabular-nums;
 		}
 
 		.cms-media-scroll {
@@ -491,9 +610,31 @@
 		}
 
 		.cms-media-error {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
 			color: var(--cms-color-danger, #b00020);
 			padding: var(--cms-space-2) var(--cms-space-3);
 			border-bottom: 1px solid var(--cms-color-border);
+			font-size: var(--cms-font-size-sm);
+		}
+
+		.cms-media-error ul {
+			list-style: none;
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-1);
+		}
+
+		.cms-media-error-dismiss {
+			border: 0;
+			background: none;
+			cursor: pointer;
+			color: inherit;
+			font-size: var(--cms-font-size-base);
+			line-height: 1;
+			padding: 0;
 		}
 
 		.cms-media-more {
