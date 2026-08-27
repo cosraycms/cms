@@ -181,11 +181,11 @@ class Bootstrap implements CorePlugin
 				if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
 					throw new RuntimeException(
 						"Plugin {$plugin} must be constructible without arguments. Read options"
-						. " from the app config instead — the Registrar's option() reads the"
-						. " plugin's '{id}.{option}' keys — or register a pre-built instance:"
-						. ' $app->plugin(new '
-						. $plugin
-						. '(...)).',
+							. " from the app config instead — the Registrar's option() reads the"
+							. " plugin's '{id}.{option}' keys — or register a pre-built instance:"
+							. ' $app->plugin(new '
+							. $plugin
+							. '(...)).',
 					);
 				}
 
