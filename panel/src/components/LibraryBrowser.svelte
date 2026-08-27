@@ -5,7 +5,7 @@
 	import { fetchLibrary } from '$lib/library';
 	import { system } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import AssetGrid from '$components/media/AssetGrid.svelte';
 
 	type Props = {
 		// image and video restrict the listing; a file context accepts
@@ -64,31 +64,7 @@
 		<div class="cms-library-empty">{__('media:no-files')}</div>
 	{:else}
 		<div class="cms-library-grid">
-			{#each items as item (item.uid)}
-				{#if item.kind === 'image'}
-					<button
-						type="button"
-						class="cms-library-image"
-						class:active={selected !== null && (selected === item.uid || selected === item.url)}
-						title={item.filename}
-						onclick={() => pick(item)}
-					>
-						<img src={item.thumbUrl} alt={item.filename} loading="lazy" />
-						<span class="cms-library-name">{item.filename}</span>
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="cms-library-file"
-						class:active={selected !== null && (selected === item.uid || selected === item.url)}
-						title={item.filename}
-						onclick={() => pick(item)}
-					>
-						<IcoDocument />
-						<span class="cms-library-name">{item.filename}</span>
-					</button>
-				{/if}
-			{/each}
+			<AssetGrid {items} {selected} {pick} />
 		</div>
 	{/if}
 	{#if loading}
@@ -119,75 +95,8 @@
 		}
 
 		.cms-library-grid {
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
-			gap: var(--cms-space-3);
 			max-height: 50vh;
 			overflow-y: auto;
-			align-content: flex-start;
-		}
-
-		.cms-library-image {
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			width: 9rem;
-			height: 9rem;
-			align-items: center;
-			justify-content: center;
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-surface-sunken);
-			padding: var(--cms-space-1);
-			cursor: pointer;
-			overflow: hidden;
-		}
-
-		.cms-library-image img {
-			max-width: 100%;
-			max-height: 100%;
-		}
-
-		.cms-library-file {
-			display: flex;
-			width: 100%;
-			flex-direction: row;
-			align-items: center;
-			gap: var(--cms-space-2);
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-surface-sunken);
-			padding: var(--cms-space-2) var(--cms-space-3);
-			cursor: pointer;
-			text-align: left;
-		}
-
-		.cms-library-image.active,
-		.cms-library-file.active {
-			border-color: var(--cms-color-info);
-			outline: 2px solid var(--cms-color-info);
-		}
-
-		.cms-library-image .cms-library-name {
-			position: absolute;
-			left: var(--cms-space-1);
-			right: var(--cms-space-1);
-			bottom: var(--cms-space-1);
-			border-radius: var(--cms-radius);
-			/* A plate over the thumbnail: translucent, but still panel chrome. */
-			background-color: color-mix(in srgb, var(--cms-color-surface) 85%, transparent);
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-text-muted);
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-
-		.cms-library-file .cms-library-name {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
 		}
 
 		.cms-library-empty,
