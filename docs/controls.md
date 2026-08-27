@@ -100,6 +100,20 @@ Two safeguards back this up:
 
 Plugins are unaffected: element controls keep submitting through their host's form value, and neither the name scheme nor the value shapes change with the transport.
 
+## Validation errors
+
+The editor form is never re-rendered after a failed save (client state stays the source of truth). Instead the save response swaps the error summary out-of-band, and each issue carries the sire data path of the failing value:
+
+```html
+<button type="button" data-error-path='["content","title","value","de"]'>
+	Title (Deutsch) is required
+</button>
+```
+
+Because form names mirror the data structure, the `errors` behavior resolves that path to its control — exact name first, then shrinking prefixes, which is how an issue pointing inside an element control's value finds the host's `[json]` leaf. It then marks the field: `data-invalid="true"` on the `.cms-field` wrapper, `aria-invalid` + `aria-describedby` on native controls, an inline `.cms-field-error` message below the control, an error badge on the locale tab of a hidden variant, and on the meta button for issues inside the meta dialog. Summary items are jump links: they reveal the target (switch the locale tab, expand collapsed entries rows, open the meta dialog) and focus it. Editing a field clears its marks; the summary stays until the next save.
+
+Theming hooks: `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error` on tabs and meta buttons, all in `@layer panel`. Element controls receive field-level marking only — the wrapper is marked, but the panel does not reach inside a host to point at a specific locale or sub-value; an element wanting finer error display can style itself when its host's field wrapper carries `data-invalid`.
+
 ## Block types
 
 Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()`, `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. The block natives (`block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`) are rendered internally by the `cosray-blocks` element; a plugin block type uses an `element` control, and its web component gets the contract below with `block` (`{type, index}`) assigned additionally.
