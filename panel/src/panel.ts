@@ -4,6 +4,7 @@ import type { BridgeSystem } from '$lib/bridge';
 
 import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
+import { install as installErrors } from './behaviors/errors';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
@@ -99,6 +100,7 @@ cleanups.push(
 	installWhen(),
 	installSubmit(),
 	installTransport(),
+	installErrors(),
 );
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 

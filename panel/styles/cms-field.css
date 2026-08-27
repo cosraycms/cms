@@ -85,6 +85,10 @@
 			box-shadow: var(--cms-shadow-sm);
 			color: var(--cms-color-text);
 		}
+
+		&.has-error {
+			color: var(--cms-color-danger);
+		}
 	}
 
 	& .meta-button {
@@ -101,11 +105,25 @@
 			border-color: var(--cms-color-border-strong);
 			color: var(--cms-color-text);
 		}
+
+		&.has-error {
+			border-color: var(--cms-color-danger);
+			color: var(--cms-color-danger);
+		}
 	}
 
 	&[data-disabled='true'] .label {
 		color: var(--cms-color-text-subtle);
 	}
+}
+
+/* Inline validation message painted below the control by errors.ts;
+   also used standalone for inspector fields outside .cms-field. */
+.cms-field-error {
+	margin: 0;
+	color: var(--cms-color-danger-text);
+	font-size: var(--cms-font-size-xs);
+	line-height: 1.45;
 }
 
 .cms-fieldset {

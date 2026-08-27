@@ -134,6 +134,19 @@
 			padding-left: var(--cms-space-4);
 		}
 
+		/* Issue jump targets rendered as links, not buttons. */
+		& button {
+			padding: 0;
+			border: 0;
+			background: none;
+			color: inherit;
+			font: inherit;
+			text-align: left;
+			text-decoration: underline;
+			text-underline-offset: 0.15em;
+			cursor: pointer;
+		}
+
 		&[hidden] {
 			display: none;
 		}
