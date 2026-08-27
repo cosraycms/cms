@@ -4,7 +4,7 @@
 	import type { FileItem, UploadType } from '$types/data';
 	import type { UploadResult } from '$lib/bridge';
 	import type { Limit } from '$types/fields';
-	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$lib/library';
 
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';

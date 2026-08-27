@@ -1,11 +1,8 @@
-<script lang="ts" module>
-	import type { AssetInfo } from '$types/data';
-
-	export type LibraryItem = AssetInfo & { uid: string; thumbUrl: string };
-</script>
-
 <script lang="ts">
+	import type { LibraryItem } from '$lib/library';
+
 	import { onMount } from 'svelte';
+	import { fetchLibrary } from '$lib/library';
 	import { system } from '$lib/sys';
 	import { __ } from '$lib/locale';
 	import IcoDocument from '$components/icons/IcoDocument.svelte';
@@ -30,42 +27,14 @@
 	async function load(reset: boolean) {
 		loading = true;
 		failed = false;
-		const params = new URLSearchParams();
+		const result = await fetchLibrary($system.prefix, { kind, q, page: reset ? 1 : page + 1 });
 
-		if (kind === 'image' || kind === 'video') {
-			params.set('kind', kind);
-		}
-
-		if (q.trim() !== '') {
-			params.set('q', q.trim());
-		}
-
-		params.set('page', String(reset ? 1 : page + 1));
-
-		try {
-			const response = await fetch(`${$system.prefix}/media/library?${params.toString()}`, {
-				credentials: 'same-origin',
-				headers: {
-					Accept: 'application/json',
-					'X-Requested-With': 'xmlhttprequest',
-				},
-			});
-			const data = (await response.json()) as {
-				ok: boolean;
-				assets: LibraryItem[];
-				page: number;
-				more: boolean;
-			};
-
-			if (data.ok) {
-				items = reset ? data.assets : [...items, ...data.assets];
-				page = data.page;
-				more = data.more;
-			} else {
-				failed = true;
-			}
-		} catch {
+		if (result === null) {
 			failed = true;
+		} else {
+			items = reset ? result.items : [...items, ...result.items];
+			page = result.page;
+			more = result.more;
 		}
 
 		loading = false;

@@ -1,20 +1,15 @@
 <svelte:options customElement={{ tag: 'cosray-media-library', shadow: 'none' }} />
 
 <script lang="ts">
+	import type { LibraryItem } from '$lib/library';
+
 	import { onMount } from 'svelte';
+	import { fetchLibrary } from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
 	import IcoDocument from '$components/icons/IcoDocument.svelte';
 	import IcoUpload from '$components/icons/IcoUpload.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
-
-	type Item = {
-		uid: string;
-		filename: string;
-		url: string;
-		thumbUrl: string;
-		kind: string;
-	};
 
 	type Filter = 'all' | 'image' | 'video';
 
@@ -22,7 +17,7 @@
 
 	let q = $state('');
 	let filter: Filter = $state('all');
-	let items: Item[] = $state([]);
+	let items: LibraryItem[] = $state([]);
 	let page = $state(1);
 	let more = $state(false);
 	let loading = $state(false);
@@ -39,39 +34,18 @@
 	async function load(reset: boolean) {
 		loading = true;
 		failed = false;
-		const params = new URLSearchParams();
+		const result = await fetchLibrary(prefix, {
+			kind: filter === 'all' ? null : filter,
+			q,
+			page: reset ? 1 : page + 1,
+		});
 
-		if (filter !== 'all') {
-			params.set('kind', filter);
-		}
-
-		if (q.trim() !== '') {
-			params.set('q', q.trim());
-		}
-
-		params.set('page', String(reset ? 1 : page + 1));
-
-		try {
-			const response = await fetch(`${prefix}/media/library?${params.toString()}`, {
-				credentials: 'same-origin',
-				headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
-			});
-			const data = (await response.json()) as {
-				ok: boolean;
-				assets: Item[];
-				page: number;
-				more: boolean;
-			};
-
-			if (data.ok) {
-				items = reset ? data.assets : [...items, ...data.assets];
-				page = data.page;
-				more = data.more;
-			} else {
-				failed = true;
-			}
-		} catch {
+		if (result === null) {
 			failed = true;
+		} else {
+			items = reset ? result.items : [...items, ...result.items];
+			page = result.page;
+			more = result.more;
 		}
 
 		loading = false;
@@ -132,7 +106,7 @@
 			};
 
 			if (data.ok) {
-				const item: Item = {
+				const item: LibraryItem = {
 					uid: data.uid,
 					filename: data.filename,
 					url: data.url,

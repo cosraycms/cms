@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$lib/library';
 
 	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';

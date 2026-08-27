@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$lib/library';
 	import type { NodeInfo } from '$components/NodeSearch.svelte';
 
 	import { untrack } from 'svelte';

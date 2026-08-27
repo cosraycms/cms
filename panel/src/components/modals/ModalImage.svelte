@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { AssetInfo } from '$types/data';
-	import type { LibraryItem } from '$components/LibraryBrowser.svelte';
+	import type { LibraryItem } from '$lib/library';
 
 	import { cosray } from '$lib/bridge';
 	import { __ } from '$lib/locale';
