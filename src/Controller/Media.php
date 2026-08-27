@@ -163,6 +163,7 @@ class Media
 			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
 			'kind' => $asset->kind,
 			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
 			'width' => $asset->width,
 			'height' => $asset->height,
 		];
@@ -323,7 +324,9 @@ class Media
 			'error' => '',
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
+			'kind' => $asset->kind,
 			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
 			'width' => $asset->width,
 			'height' => $asset->height,
 			'url' => $asset->path(),

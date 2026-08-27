@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Locale } from '$lib/sys';
+	import { humanSize } from '$lib/library';
 	import { __ } from '$lib/locale';
 	import IcoDocument from '$components/icons/IcoDocument.svelte';
 	import IcoTrash from '$components/icons/IcoTrash.svelte';
@@ -124,7 +125,7 @@
 				onDeleted();
 			}
 		} catch {
-			// keep the drawer open on a transport error.
+			// keep the detail open on a transport error.
 		}
 
 		deleting = false;
@@ -154,23 +155,6 @@
 		return Math.round(n * 1000) / 1000;
 	}
 
-	function humanSize(bytes: number | null): string {
-		if (bytes === null) {
-			return '—';
-		}
-
-		const units = ['B', 'KB', 'MB', 'GB'];
-		let size = bytes;
-		let unit = 0;
-
-		while (size >= 1024 && unit < units.length - 1) {
-			size /= 1024;
-			unit++;
-		}
-
-		return `${unit === 0 ? size : size.toFixed(1)} ${units[unit]}`;
-	}
-
 	$effect(() => {
 		// Reset to the default locale tab and (re)load whenever the
 		// selected asset changes.
@@ -179,55 +163,46 @@
 	});
 </script>
 
-<div
-	class="cms-drawer-overlay"
-	role="button"
-	tabindex="-1"
-	aria-label={__('common:close')}
-	onclick={onClose}
-	onkeydown={(event) => event.key === 'Escape' && onClose()}
-></div>
-
-<aside class="cms-drawer" aria-label={__('media:file-details')}>
+<div class="cms-detail">
 	{#if loading}
-		<div class="cms-drawer-status">{__('common:loading')}</div>
+		<div class="cms-detail-status">{__('common:loading')}</div>
 	{:else if failed || asset === null}
-		<div class="cms-drawer-status">{__('media:file-load-failed')}</div>
+		<div class="cms-detail-status">{__('media:file-load-failed')}</div>
 		<button type="button" class="cms-button" onclick={onClose}>{__('common:close')}</button>
 	{:else}
-		<header class="cms-drawer-head">
+		<header class="cms-detail-head">
 			<h2 title={asset.filename}>{asset.filename}</h2>
 			<button
 				type="button"
-				class="cms-drawer-close"
+				class="cms-detail-close"
 				aria-label={__('common:close')}
 				onclick={onClose}>×</button
 			>
 		</header>
 
-		<div class="cms-drawer-body">
+		<div class="cms-detail-body">
 			{#if asset.kind === 'image'}
 				<button
 					type="button"
-					class="cms-drawer-preview focusable"
+					class="cms-detail-preview focusable"
 					title={__('image:set-focus-hint')}
 					onclick={setFocal}
 				>
 					<img src={asset.previewUrl} alt={asset.filename} />
 					{#if meta.focal}
 						<span
-							class="cms-drawer-focal"
+							class="cms-detail-focal"
 							style="left: {meta.focal.x * 100}%; top: {meta.focal.y * 100}%"
 						></span>
 					{/if}
 				</button>
 			{:else}
-				<div class="cms-drawer-preview">
-					<span class="cms-drawer-preview-icon"><IcoDocument /></span>
+				<div class="cms-detail-preview">
+					<span class="cms-detail-preview-icon"><IcoDocument /></span>
 				</div>
 			{/if}
 
-			<dl class="cms-drawer-meta">
+			<dl class="cms-detail-meta">
 				<div>
 					<dt>{__('common:type')}</dt>
 					<dd>{asset.mime ?? asset.kind}</dd>
@@ -240,7 +215,7 @@
 				{/if}
 				<div>
 					<dt>{__('media:file-size')}</dt>
-					<dd>{humanSize(asset.bytes)}</dd>
+					<dd>{asset.bytes === null ? '—' : humanSize(asset.bytes)}</dd>
 				</div>
 				<div>
 					<dt>{__('image:original')}</dt>
@@ -249,7 +224,7 @@
 			</dl>
 
 			{#if isImage}
-				<div class="cms-drawer-focal-controls">
+				<div class="cms-detail-focal-controls">
 					<span>
 						{#if meta.focal}
 							{__('image:focus')}: {Math.round(meta.focal.x * 100)}% / {Math.round(
@@ -269,16 +244,16 @@
 
 			<MetaForm bind:meta {locales} bind:activeLocale {isImage} />
 
-			<section class="cms-drawer-usage">
+			<section class="cms-detail-usage">
 				<h3>{__('media:usage')}</h3>
 				{#if usage.length === 0}
-					<p class="cms-drawer-hint">{__('media:unused')}</p>
+					<p class="cms-detail-hint">{__('media:unused')}</p>
 				{:else}
 					<ul>
 						{#each usage as owner (owner.ownerType + owner.ownerUid)}
 							<li>
-								<span class="cms-drawer-usage-title">{owner.title || owner.ownerUid}</span>
-								<span class="cms-drawer-usage-kind">
+								<span class="cms-detail-usage-title">{owner.title || owner.ownerUid}</span>
+								<span class="cms-detail-usage-kind">
 									{owner.nodeType ?? owner.ownerType}
 									{#if owner.published === false}· {__('node:draft')}{/if}
 								</span>
@@ -289,18 +264,18 @@
 			</section>
 		</div>
 
-		<footer class="cms-drawer-foot">
+		<footer class="cms-detail-foot">
 			<button
 				type="button"
-				class="cms-button cms-drawer-delete"
+				class="cms-button cms-detail-delete"
 				disabled={deleting}
 				onclick={remove}
 			>
 				<IcoTrash />
 				{__('common:delete')}
 			</button>
-			<div class="cms-drawer-foot-right">
-				{#if saved}<span class="cms-drawer-saved">{__('common:saved')}</span>{/if}
+			<div class="cms-detail-foot-right">
+				{#if saved}<span class="cms-detail-saved">{__('common:saved')}</span>{/if}
 				<button
 					type="button"
 					class="cms-button cms-button-primary"
@@ -313,7 +288,7 @@
 		</footer>
 
 		{#if blocked !== null}
-			<div class="cms-drawer-blocked">
+			<div class="cms-detail-blocked">
 				<p>{__('media:delete-in-use')}</p>
 				<ul>
 					{#each blocked as owner (owner.ownerType + owner.ownerUid)}
@@ -323,32 +298,22 @@
 			</div>
 		{/if}
 	{/if}
-</aside>
+</div>
 
 <style>
 	@layer panel {
-		.cms-drawer-overlay {
-			position: fixed;
-			inset: 0;
-			background-color: rgba(0, 0, 0, 0.35);
-			z-index: 40;
-		}
-
-		.cms-drawer {
-			position: fixed;
-			top: 0;
-			right: 0;
-			bottom: 0;
-			width: min(28rem, 100vw);
+		.cms-detail {
+			flex: 1 1 auto;
+			min-height: 0;
 			display: flex;
 			flex-direction: column;
 			background-color: var(--cms-color-surface);
-			border-left: 1px solid var(--cms-color-border-strong);
-			box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
-			z-index: 41;
+			border: 1px solid var(--cms-color-border-strong);
+			border-radius: var(--cms-radius-md);
+			overflow: hidden;
 		}
 
-		.cms-drawer-head {
+		.cms-detail-head {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -357,14 +322,14 @@
 			border-bottom: 1px solid var(--cms-color-border);
 		}
 
-		.cms-drawer-head h2 {
+		.cms-detail-head h2 {
 			font-size: var(--cms-font-size-base);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
 
-		.cms-drawer-close {
+		.cms-detail-close {
 			border: 0;
 			background: none;
 			font-size: 1.5rem;
@@ -373,8 +338,9 @@
 			color: var(--cms-color-text-subtle);
 		}
 
-		.cms-drawer-body {
+		.cms-detail-body {
 			flex: 1 1 auto;
+			min-height: 0;
 			overflow-y: auto;
 			padding: var(--cms-space-4);
 			display: flex;
@@ -382,7 +348,7 @@
 			gap: var(--cms-space-4);
 		}
 
-		.cms-drawer-preview {
+		.cms-detail-preview {
 			position: relative;
 			display: flex;
 			align-items: center;
@@ -397,22 +363,22 @@
 			overflow: hidden;
 		}
 
-		.cms-drawer-preview.focusable {
+		.cms-detail-preview.focusable {
 			cursor: crosshair;
 		}
 
-		.cms-drawer-preview img {
+		.cms-detail-preview img {
 			max-width: 100%;
 			max-height: 16rem;
 			object-fit: contain;
 		}
 
-		.cms-drawer-preview-icon {
+		.cms-detail-preview-icon {
 			font-size: 3rem;
 			color: var(--cms-color-text-subtle);
 		}
 
-		.cms-drawer-focal {
+		.cms-detail-focal {
 			position: absolute;
 			width: 0.85rem;
 			height: 0.85rem;
@@ -425,24 +391,24 @@
 			pointer-events: none;
 		}
 
-		.cms-drawer-meta {
+		.cms-detail-meta {
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-1);
 			font-size: var(--cms-font-size-sm);
 		}
 
-		.cms-drawer-meta > div {
+		.cms-detail-meta > div {
 			display: flex;
 			justify-content: space-between;
 			gap: var(--cms-space-2);
 		}
 
-		.cms-drawer-meta dt {
+		.cms-detail-meta dt {
 			color: var(--cms-color-text-subtle);
 		}
 
-		.cms-drawer-focal-controls {
+		.cms-detail-focal-controls {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -451,19 +417,19 @@
 			color: var(--cms-color-text-muted);
 		}
 
-		.cms-drawer-usage h3 {
+		.cms-detail-usage h3 {
 			font-size: var(--cms-font-size-sm);
 			margin-bottom: var(--cms-space-2);
 		}
 
-		.cms-drawer-usage ul {
+		.cms-detail-usage ul {
 			list-style: none;
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-1);
 		}
 
-		.cms-drawer-usage li {
+		.cms-detail-usage li {
 			display: flex;
 			justify-content: space-between;
 			gap: var(--cms-space-2);
@@ -472,17 +438,17 @@
 			border-bottom: 1px solid var(--cms-color-border-soft);
 		}
 
-		.cms-drawer-usage-kind {
+		.cms-detail-usage-kind {
 			color: var(--cms-color-text-subtle);
 			white-space: nowrap;
 		}
 
-		.cms-drawer-hint {
+		.cms-detail-hint {
 			color: var(--cms-color-text-subtle);
 			font-size: var(--cms-font-size-sm);
 		}
 
-		.cms-drawer-foot {
+		.cms-detail-foot {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -491,32 +457,32 @@
 			border-top: 1px solid var(--cms-color-border);
 		}
 
-		.cms-drawer-foot-right {
+		.cms-detail-foot-right {
 			display: flex;
 			align-items: center;
 			gap: var(--cms-space-3);
 		}
 
-		.cms-drawer-delete {
+		.cms-detail-delete {
 			display: inline-flex;
 			align-items: center;
 			gap: var(--cms-space-2);
 			color: var(--cms-color-danger, #b00020);
 		}
 
-		.cms-drawer-saved {
+		.cms-detail-saved {
 			color: var(--cms-color-success, #178a3a);
 			font-size: var(--cms-font-size-sm);
 		}
 
-		.cms-drawer-blocked {
+		.cms-detail-blocked {
 			padding: var(--cms-space-3) var(--cms-space-4);
 			background-color: var(--cms-color-warning-surface);
 			border-top: 1px solid var(--cms-color-border);
 			font-size: var(--cms-font-size-sm);
 		}
 
-		.cms-drawer-blocked ul {
+		.cms-detail-blocked ul {
 			margin-top: var(--cms-space-1);
 			padding-left: var(--cms-space-4);
 			list-style: disc;

@@ -7,8 +7,8 @@
 	import { fetchLibrary } from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
 	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import AssetGrid from '$components/media/AssetGrid.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
 
 	type Filter = 'all' | 'image' | 'video';
@@ -20,6 +20,7 @@
 	let items: LibraryItem[] = $state([]);
 	let page = $state(1);
 	let more = $state(false);
+	let total = $state(0);
 	let loading = $state(false);
 	let failed = $state(false);
 	let selected: string | null = $state(null);
@@ -46,6 +47,12 @@
 			items = reset ? result.items : [...items, ...result.items];
 			page = result.page;
 			more = result.more;
+
+			// A page past the end reports 0; only a page with rows (or a
+			// fresh listing) knows the real count.
+			if (reset || result.items.length > 0) {
+				total = result.total;
+			}
 		}
 
 		loading = false;
@@ -103,6 +110,10 @@
 				url: string;
 				thumbUrl?: string;
 				kind?: string;
+				mime?: string | null;
+				bytes?: number | null;
+				width?: number | null;
+				height?: number | null;
 			};
 
 			if (data.ok) {
@@ -112,10 +123,15 @@
 					url: data.url,
 					thumbUrl: data.thumbUrl ?? data.url,
 					kind: data.kind ?? uploadKind(file.type),
+					mime: data.mime ?? null,
+					bytes: data.bytes ?? null,
+					width: data.width ?? null,
+					height: data.height ?? null,
 				};
 
 				if (!items.some((existing) => existing.uid === item.uid)) {
 					items = [item, ...items];
+					total += 1;
 				}
 
 				selected = item.uid;
@@ -132,140 +148,189 @@
 
 	function onDeleted(uid: string) {
 		items = items.filter((item) => item.uid !== uid);
+		total = Math.max(0, total - 1);
 		selected = null;
 	}
 
 	onMount(() => void load(true));
 </script>
 
-<div class="cms-media">
-	<div class="cms-media-toolbar">
-		<form class="cms-media-search" onsubmit={search}>
-			<input
-				class="cms-input"
-				type="search"
-				placeholder={__('media:search-filename')}
-				bind:value={q}
-			/>
-			<button type="submit" class="cms-button">{__('common:search')}</button>
-		</form>
-
-		<div class="cms-media-filters" role="group" aria-label={__('common:filter')}>
-			<button
-				type="button"
-				class="cms-button"
-				class:active={filter === 'all'}
-				class:secondary={filter !== 'all'}
-				onclick={() => setFilter('all')}>{__('common:all')}</button
-			>
-			<button
-				type="button"
-				class="cms-button"
-				class:active={filter === 'image'}
-				class:secondary={filter !== 'image'}
-				onclick={() => setFilter('image')}>{__('media:images')}</button
-			>
-			<button
-				type="button"
-				class="cms-button"
-				class:active={filter === 'video'}
-				class:secondary={filter !== 'video'}
-				onclick={() => setFilter('video')}>{__('media:videos')}</button
-			>
-		</div>
-
-		<div class="cms-media-upload">
-			<button
-				type="button"
-				class="cms-button cms-button-primary"
-				disabled={uploading}
-				onclick={() => fileInput?.click()}
-			>
-				<IcoUpload />
-				{uploading ? __('upload:in-progress') : __('common:upload')}
+<div class="cms-media-workspace">
+	<aside class="cms-media-rail" aria-label={__('common:filter')}>
+		<div class="cms-media-rail-title">{__('common:filter')}</div>
+		<div class="cms-media-kinds" role="group" aria-label={__('common:filter')}>
+			<button type="button" class:active={filter === 'all'} onclick={() => setFilter('all')}>
+				{__('common:all')}
 			</button>
-			<input bind:this={fileInput} type="file" hidden onchange={upload} />
+			<button type="button" class:active={filter === 'image'} onclick={() => setFilter('image')}>
+				{__('media:images')}
+			</button>
+			<button type="button" class:active={filter === 'video'} onclick={() => setFilter('video')}>
+				{__('media:videos')}
+			</button>
 		</div>
-	</div>
+	</aside>
 
-	{#if uploadError !== ''}
-		<div class="cms-media-error">{uploadError}</div>
-	{/if}
+	<section class="cms-media-pane">
+		<div class="cms-media-toolbar">
+			<form class="cms-media-search" onsubmit={search}>
+				<input
+					class="cms-input"
+					type="search"
+					placeholder={__('media:search-filename')}
+					bind:value={q}
+				/>
+				<button type="submit" class="cms-button">{__('common:search')}</button>
+			</form>
 
-	{#if failed}
-		<div class="cms-media-empty">{__('media:library-load-failed')}</div>
-	{:else if items.length === 0 && !loading}
-		<div class="cms-media-empty">{__('media:no-files')}</div>
-	{:else}
-		<div class="cms-media-grid">
-			{#each items as item (item.uid)}
+			<span class="cms-media-count">{__('media:file-count', { count: total })}</span>
+
+			<div class="cms-media-upload">
 				<button
 					type="button"
-					class="cms-media-tile"
-					class:active={selected === item.uid}
-					title={item.filename}
-					onclick={() => (selected = item.uid)}
+					class="cms-button cms-button-primary"
+					disabled={uploading}
+					onclick={() => fileInput?.click()}
 				>
-					{#if item.kind === 'image'}
-						<img src={item.thumbUrl} alt={item.filename} loading="lazy" />
-					{:else}
-						<span class="cms-media-tile-icon"><IcoDocument /></span>
-					{/if}
-					<span class="cms-media-tile-name">{item.filename}</span>
+					<IcoUpload />
+					{uploading ? __('upload:in-progress') : __('common:upload')}
 				</button>
-			{/each}
+				<input bind:this={fileInput} type="file" hidden onchange={upload} />
+			</div>
 		</div>
-	{/if}
 
-	{#if loading}
-		<div class="cms-media-loading">{__('common:loading')}</div>
-	{:else if more}
-		<button type="button" class="cms-button cms-media-more" onclick={() => void load(false)}>
-			{__('common:load-more')}
-		</button>
-	{/if}
+		{#if uploadError !== ''}
+			<div class="cms-media-error">{uploadError}</div>
+		{/if}
+
+		<div class="cms-media-scroll">
+			{#if failed}
+				<div class="cms-media-empty">{__('media:library-load-failed')}</div>
+			{:else if items.length === 0 && !loading}
+				<div class="cms-media-empty">{__('media:no-files')}</div>
+			{:else}
+				<AssetGrid {items} {selected} pick={(item) => (selected = item.uid)} />
+			{/if}
+
+			{#if loading}
+				<div class="cms-media-loading">{__('common:loading')}</div>
+			{:else if more}
+				<button type="button" class="cms-button cms-media-more" onclick={() => void load(false)}>
+					{__('common:load-more')}
+				</button>
+			{/if}
+		</div>
+	</section>
+
+	<aside class="cms-media-inspector" aria-label={__('media:file-details')}>
+		{#if selected !== null}
+			<MediaDetail
+				uid={selected}
+				{prefix}
+				{locales}
+				{defaultLocale}
+				onClose={() => (selected = null)}
+				onDeleted={() => onDeleted(selected!)}
+			/>
+		{:else}
+			<div class="cms-media-inspector-empty">{__('media:select-hint')}</div>
+		{/if}
+	</aside>
 </div>
-
-{#if selected !== null}
-	<MediaDetail
-		uid={selected}
-		{prefix}
-		{locales}
-		{defaultLocale}
-		onClose={() => (selected = null)}
-		onDeleted={() => onDeleted(selected!)}
-	/>
-{/if}
 
 <style>
 	@layer panel {
-		.cms-media {
+		.cms-media-workspace {
+			flex: 1 1 auto;
+			min-height: 0;
+			display: grid;
+			grid-template-columns: 11rem minmax(0, 1fr) minmax(18rem, 22rem);
+			gap: var(--cms-space-4);
+			align-items: stretch;
+		}
+
+		.cms-media-rail {
+			min-height: 0;
+			overflow-y: auto;
 			display: flex;
 			flex-direction: column;
-			gap: var(--cms-space-4);
+			gap: var(--cms-space-3);
+		}
+
+		.cms-media-rail-title {
+			font-size: var(--cms-font-size-xs);
+			font-weight: 600;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--cms-color-text-subtle);
+		}
+
+		.cms-media-kinds {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-1);
+		}
+
+		.cms-media-kinds button {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
+			border: 0;
+			background: none;
+			text-align: left;
+			cursor: pointer;
+			padding: var(--cms-space-1) var(--cms-space-2);
+			border-radius: var(--cms-radius);
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-text-muted);
+		}
+
+		.cms-media-kinds button:hover {
+			background-color: var(--cms-color-surface);
+		}
+
+		.cms-media-kinds button.active {
+			background-color: var(--cms-color-surface);
+			color: var(--cms-color-text);
+			font-weight: 600;
+		}
+
+		.cms-media-pane {
+			display: flex;
+			flex-direction: column;
+			min-height: 0;
+			min-width: 0;
+			background-color: var(--cms-color-surface);
+			border: 1px solid var(--cms-color-border-strong);
+			border-radius: var(--cms-radius-md);
+			overflow: hidden;
 		}
 
 		.cms-media-toolbar {
 			display: flex;
 			flex-wrap: wrap;
-			gap: var(--cms-space-3);
 			align-items: center;
-			justify-content: space-between;
+			gap: var(--cms-space-3);
+			padding: var(--cms-space-3);
+			border-bottom: 1px solid var(--cms-color-border);
 		}
 
 		.cms-media-search {
 			display: flex;
 			gap: var(--cms-space-2);
-			flex: 1 1 16rem;
+			flex: 1 1 14rem;
 		}
 
 		.cms-media-search input {
 			flex: 1 1 auto;
 		}
 
-		.cms-media-filters {
-			display: flex;
-			gap: var(--cms-space-1);
+		.cms-media-count {
+			font-size: var(--cms-font-size-sm);
+			color: var(--cms-color-text-muted);
+			font-variant-numeric: tabular-nums;
+			white-space: nowrap;
 		}
 
 		.cms-media-upload button {
@@ -274,57 +339,33 @@
 			gap: var(--cms-space-2);
 		}
 
-		.cms-media-grid {
-			display: grid;
-			grid-template-columns: repeat(auto-fill, minmax(var(--cms-tile-min, 9rem), 1fr));
+		.cms-media-scroll {
+			flex: 1 1 auto;
+			min-height: 0;
+			overflow-y: auto;
+			padding: var(--cms-space-3);
+			display: flex;
+			flex-direction: column;
 			gap: var(--cms-space-3);
 		}
 
-		.cms-media-tile {
-			position: relative;
+		.cms-media-inspector {
+			min-height: 0;
 			display: flex;
 			flex-direction: column;
+		}
+
+		.cms-media-inspector-empty {
+			flex: 1 1 auto;
+			display: flex;
 			align-items: center;
 			justify-content: center;
-			aspect-ratio: 1;
-			border: 1px solid var(--cms-color-border-strong);
+			padding: var(--cms-space-4);
+			border: 1px dashed var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-surface-sunken);
-			padding: var(--cms-space-1);
-			cursor: pointer;
-			overflow: hidden;
-		}
-
-		.cms-media-tile img {
-			max-width: 100%;
-			max-height: 100%;
-			object-fit: contain;
-		}
-
-		.cms-media-tile-icon {
-			font-size: 2rem;
 			color: var(--cms-color-text-subtle);
-		}
-
-		.cms-media-tile.active {
-			border-color: var(--cms-color-info);
-			outline: 2px solid var(--cms-color-info);
-		}
-
-		.cms-media-tile-name {
-			position: absolute;
-			left: var(--cms-space-1);
-			right: var(--cms-space-1);
-			bottom: var(--cms-space-1);
-			border-radius: var(--cms-radius);
-			/* A plate over the thumbnail: translucent, but still panel chrome. */
-			background-color: color-mix(in srgb, var(--cms-color-surface) 85%, transparent);
-			padding: 0 var(--cms-space-1);
-			font-size: var(--cms-font-size-xs);
-			color: var(--cms-color-text-muted);
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
+			font-size: var(--cms-font-size-sm);
+			text-align: center;
 		}
 
 		.cms-media-empty,
@@ -335,10 +376,36 @@
 
 		.cms-media-error {
 			color: var(--cms-color-danger, #b00020);
+			padding: var(--cms-space-2) var(--cms-space-3);
+			border-bottom: 1px solid var(--cms-color-border);
 		}
 
 		.cms-media-more {
 			align-self: center;
+		}
+
+		/* Stacked: panes stop scrolling internally, the page scrolls. */
+		@media (max-width: 72rem) {
+			.cms-media-workspace {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.cms-media-rail,
+			.cms-media-scroll {
+				overflow: visible;
+			}
+
+			.cms-media-kinds {
+				flex-direction: row;
+				flex-wrap: wrap;
+			}
+
+			.cms-media-rail,
+			.cms-media-pane,
+			.cms-media-inspector {
+				min-height: auto;
+			}
 		}
 	}
 </style>

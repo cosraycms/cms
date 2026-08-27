@@ -55,6 +55,7 @@ export interface AssetInfo {
 	previewUrl?: string;
 	kind: string;
 	mime?: string | null;
+	bytes?: number | null;
 	width?: number | null;
 	height?: number | null;
 	meta?: Meta;

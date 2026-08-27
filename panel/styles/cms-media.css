@@ -1,5 +1,17 @@
-/* The library is a custom element: its layout lives in its shadow root and
-   only the tokens reach it from here. */
+/* The library is a custom element rendering into light DOM; the page only
+   provides the bounded flex chain its panes scroll inside. */
+
+.cms-media .body {
+	display: flex;
+	flex-direction: column;
+}
+
+.cms-media cosray-media-library {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
 
 .cms-media,
 .cms-dashboard {
