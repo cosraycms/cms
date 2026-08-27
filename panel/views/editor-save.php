@@ -13,9 +13,14 @@ $published = (bool) ($this->unwrap($published ?? null) ?? false);
 $renderable = (bool) ($this->unwrap($renderable ?? null) ?? false);
 $preview = $this->unwrap($preview ?? null);
 
-// The controller reduces validation issues to messages; anything else is
-// not renderable and must not be swallowed quietly by walking into it.
-$messages = array_values(array_filter($errors, is_string(...)));
+// The controller reduces validation issues to message + path; anything
+// else is not renderable and must not be swallowed quietly by walking
+// into it.
+$issues = array_values(array_filter(
+	$errors,
+	static fn(mixed $issue): bool => is_array($issue) && is_string($issue['message'] ?? null),
+));
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 <output
 	id="editor-status"
@@ -26,12 +31,25 @@ $messages = array_values(array_filter($errors, is_string(...)));
 <div
 	id="editor-errors"
 	class="errors"
+	tabindex="-1"
 	hx-swap-oob="true"
-	<?= $saved || $messages === [] ? 'hidden' : '' ?>>
-	<?php if (!$saved && $messages !== []): ?>
+	<?= $saved || $issues === [] ? 'hidden' : '' ?>>
+	<?php if (!$saved && $issues !== []): ?>
 		<ul>
-			<?php foreach ($messages as $error): ?>
-				<li><?= escape($error) ?></li>
+			<?php foreach ($issues as $issue): ?>
+				<?php $path = $issue['path'] ?? null; ?>
+				<li>
+					<?php if (is_array($path) && $path !== []): ?>
+						<?php // Single-quoted like data-when: JSON_HEX_APOS keeps the
+
+						// JSON safe inside the attribute without double-escaping. ?>
+						<button type="button" data-error-path='<?= json_encode($path, $jsonFlags) ?>'>
+							<?= escape($issue['message']) ?>
+						</button>
+					<?php else: ?>
+						<?= escape($issue['message']) ?>
+					<?php endif ?>
+				</li>
 			<?php endforeach ?>
 		</ul>
 	<?php endif ?>

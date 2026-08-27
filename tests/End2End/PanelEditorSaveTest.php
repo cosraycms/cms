@@ -262,13 +262,89 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		// The box is worth nothing if it arrives empty or hidden, which is
 		// what asserting on its id alone let through.
 		$this->assertDoesNotMatchRegularExpression('/id="editor-errors"[^>]*hidden/', $html);
+		// Each issue is a jump target: the message plus the data path the
+		// client resolves to the offending control.
 		$this->assertStringContainsString(
-			'<li>Document Title must be at least 3 characters</li>',
+			'data-error-path=\'["content","title","value","zxx"]\'',
 			$html,
 		);
+		$this->assertStringContainsString('Document Title must be at least 3 characters', $html);
 		$this->assertSame(
 			'Valid Title',
 			$this->nodeContent('panel-save-invalid')['title']['value']['zxx'],
+		);
+	}
+
+	public function testValidationErrorsInsideEntriesCarryTheRowPath(): void
+	{
+		$entriesType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-node-with-entries'",
+		)->first();
+		$typeId = $entriesType
+			? (int) $entriesType['type']
+			: $this->createTestType('test-node-with-entries');
+		$this->createTestNode([
+			'uid' => 'panel-save-entries-invalid',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['zxx' => 'With entries']],
+				'entries' => [
+					'type' => \Cosray\Field\Entries::class,
+					'value' => [
+						'zxx' => [
+							[
+								'uid' => 'entry-a',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => [
+										'type' => \Cosray\Field\Text::class,
+										'value' => ['en' => 'Valid'],
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-entries-invalid', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'title' => ['value' => ['zxx' => 'With entries']],
+					'entries' => [
+						'value' => [
+							'zxx' => [
+								[
+									'uid' => 'entry-a',
+									'type' => TestEntry::class,
+									// Empties the required title of the default locale.
+									'fields' => ['title' => ['value' => ['en' => '']]],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('class="status is-error"', $html);
+		// The row index rides in the path, so the client can point at the
+		// control inside the right server-rendered entries row.
+		$this->assertStringContainsString(
+			'data-error-path=\'["content","entries","value","zxx",0,"fields","title","value","en"]\'',
+			$html,
+		);
+		$this->assertSame(
+			'Valid',
+			$this->nodeContent(
+				'panel-save-entries-invalid',
+			)['entries']['value']['zxx'][0]['fields']['title']['value']['en'],
 		);
 	}
 

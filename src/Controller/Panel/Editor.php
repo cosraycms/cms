@@ -399,11 +399,12 @@ final class Editor extends Panel
 	}
 
 	/**
-	 * The messages behind a rejected save. Validation reports sire issue
-	 * objects; the view renders strings.
+	 * The issues behind a rejected save, reduced to what the error box
+	 * renders: the message plus the data path locating the field — the
+	 * client resolves the path to the matching form control.
 	 *
 	 * @param array<string, mixed> $payload
-	 * @return list<string>
+	 * @return list<array{message: string, path: list<string|int>}>
 	 */
 	private function issues(array $payload): array
 	{
@@ -414,7 +415,10 @@ final class Editor extends Panel
 		}
 
 		return array_values(array_map(
-			static fn(Issue $issue): string => $issue->message,
+			static fn(Issue $issue): array => [
+				'message' => $issue->message,
+				'path' => $issue->path,
+			],
 			array_filter($issues, static fn(mixed $issue): bool => $issue instanceof Issue),
 		));
 	}
