@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchLibrary, libraryParams } from '../../src/lib/library';
+import {
+	fetchLibrary,
+	humanSize,
+	libraryParams,
+	readMediaState,
+	writeMediaState,
+} from '../../src/lib/library';
 
 afterEach(() => {
 	vi.unstubAllGlobals();
@@ -79,5 +85,54 @@ describe('library fetch', () => {
 		);
 
 		expect(await fetchLibrary('/panel', {})).toBeNull();
+	});
+});
+
+describe('media screen state', () => {
+	it('reads state from the query string', () => {
+		expect(readMediaState('?kind=image&q=logo&file=abc123')).toEqual({
+			kind: 'image',
+			q: 'logo',
+			file: 'abc123',
+		});
+	});
+
+	it('defaults an empty or foreign query string', () => {
+		expect(readMediaState('')).toEqual({ kind: 'all', q: '', file: null });
+		expect(readMediaState('?kind=nonsense&foo=1')).toEqual({ kind: 'all', q: '', file: null });
+	});
+
+	it('writes state into the href and drops defaults', () => {
+		const href = 'https://example.test/cp/media?kind=video&q=old&file=gone';
+
+		expect(writeMediaState(href, { kind: 'all', q: '  ', file: null })).toBe(
+			'https://example.test/cp/media',
+		);
+		expect(
+			writeMediaState('https://example.test/cp/media', { kind: 'image', q: ' logo ', file: 'abc' }),
+		).toBe('https://example.test/cp/media?kind=image&q=logo&file=abc');
+	});
+
+	it('leaves foreign params untouched', () => {
+		expect(
+			writeMediaState('https://example.test/cp/media?foo=1', { kind: 'video', q: '', file: null }),
+		).toBe('https://example.test/cp/media?foo=1&kind=video');
+	});
+
+	it('round-trips through read and write', () => {
+		const state = { kind: 'image' as const, q: 'beer', file: 'a1b2' };
+		const href = writeMediaState('https://example.test/cp/media', state);
+
+		expect(readMediaState(new URL(href).search)).toEqual(state);
+	});
+});
+
+describe('human size', () => {
+	it('formats bytes with growing units', () => {
+		expect(humanSize(0)).toBe('0 B');
+		expect(humanSize(512)).toBe('512 B');
+		expect(humanSize(2048)).toBe('2.0 KB');
+		expect(humanSize(5 * 1024 * 1024)).toBe('5.0 MB');
+		expect(humanSize(3.4 * 1024 * 1024 * 1024)).toBe('3.4 GB');
 	});
 });

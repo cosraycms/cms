@@ -25,6 +25,40 @@ export type LibraryPage = {
 	total: number;
 };
 
+/**
+ * The media screen's deep-linkable state, mirrored into the query string
+ * via history.replaceState: filter, committed search, selected file.
+ */
+export type MediaScreenState = {
+	kind: 'all' | 'image' | 'video';
+	q: string;
+	file: string | null;
+};
+
+export function readMediaState(search: string): MediaScreenState {
+	const params = new URLSearchParams(search);
+	const kind = params.get('kind');
+
+	return {
+		kind: kind === 'image' || kind === 'video' ? kind : 'all',
+		q: params.get('q') ?? '',
+		file: params.get('file'),
+	};
+}
+
+/** The href with the state written in; foreign params survive untouched. */
+export function writeMediaState(href: string, state: MediaScreenState): string {
+	const url = new URL(href);
+	const params = url.searchParams;
+	const q = state.q.trim();
+
+	state.kind === 'all' ? params.delete('kind') : params.set('kind', state.kind);
+	q === '' ? params.delete('q') : params.set('q', q);
+	state.file === null ? params.delete('file') : params.set('file', state.file);
+
+	return url.toString();
+}
+
 export function humanSize(bytes: number): string {
 	const units = ['B', 'KB', 'MB', 'GB'];
 	let size = bytes;

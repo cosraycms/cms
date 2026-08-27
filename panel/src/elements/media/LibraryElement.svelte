@@ -4,7 +4,7 @@
 	import type { LibraryItem } from '$lib/library';
 
 	import { onMount } from 'svelte';
-	import { fetchLibrary } from '$lib/library';
+	import { fetchLibrary, readMediaState, writeMediaState } from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
 	import IcoUpload from '$components/icons/IcoUpload.svelte';
@@ -16,6 +16,9 @@
 	ensureSystem();
 
 	let q = $state('');
+	// The last search actually applied to the listing; the URL mirrors
+	// this, never the live input value.
+	let committed = $state('');
 	let filter: Filter = $state('all');
 	let items: LibraryItem[] = $state([]);
 	let page = $state(1);
@@ -35,6 +38,11 @@
 	async function load(reset: boolean) {
 		loading = true;
 		failed = false;
+
+		if (reset) {
+			committed = q.trim();
+		}
+
 		const result = await fetchLibrary(prefix, {
 			kind: filter === 'all' ? null : filter,
 			q,
@@ -152,7 +160,23 @@
 		selected = null;
 	}
 
-	onMount(() => void load(true));
+	onMount(() => {
+		const state = readMediaState(location.search);
+		filter = state.kind;
+		q = state.q;
+		selected = state.file;
+		void load(true);
+	});
+
+	$effect(() => {
+		// Mirror filter, committed search and selection into the query
+		// string so the screen state survives reload and travels in links.
+		const next = writeMediaState(location.href, { kind: filter, q: committed, file: selected });
+
+		if (next !== location.href) {
+			history.replaceState(history.state, '', next);
+		}
+	});
 </script>
 
 <div class="cms-media-workspace">
