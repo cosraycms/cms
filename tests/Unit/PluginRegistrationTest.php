@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use ArrayObject;
 use Celema\Core\App;
 use Celema\Quma\Connection;
 use Celema\Router\Router;
@@ -11,11 +12,14 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Plugin\Plugin;
+use Cosray\Plugin\Registrar;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Field\TestMoney;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Plugin\TestBadge;
 use Cosray\Tests\Fixtures\Plugin\TestBadgeHandler;
+use Cosray\Tests\Fixtures\Plugin\TestParameterizedPlugin;
 use Cosray\Tests\Fixtures\Plugin\TestPlugin;
 use Cosray\Tests\TestCase;
 use stdClass;
@@ -133,6 +137,89 @@ final class PluginRegistrationTest extends TestCase
 		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
 			$bootstrap->plugin(stdClass::class);
 		});
+	}
+
+	public function testOptionReadsTheNamespacedConfigKey(): void
+	{
+		$seen = new ArrayObject();
+
+		$this->loadBootstrap(
+			static function (Bootstrap $bootstrap) use ($seen): void {
+				$bootstrap->plugin(new class($seen) implements Plugin {
+					public function __construct(
+						private readonly ArrayObject $seen,
+					) {}
+
+					public function id(): string
+					{
+						return 'acme-shop';
+					}
+
+					public function register(Registrar $cms): void
+					{
+						$this->seen['configured'] = $cms->option('currency', 'EUR');
+						$this->seen['defaulted'] = $cms->option('locale', 'de');
+						$this->seen['absent'] = $cms->option('absent');
+					}
+				});
+			},
+			['acme-shop.currency' => 'USD'],
+		);
+
+		$this->assertSame('USD', $seen['configured']);
+		$this->assertSame('de', $seen['defaulted']);
+		$this->assertNull($seen['absent']);
+	}
+
+	public function testDashlessPluginIdThrows(): void
+	{
+		$this->throws(RuntimeException::class, "Invalid plugin id 'shop'");
+
+		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(new class implements Plugin {
+				public function id(): string
+				{
+					return 'shop';
+				}
+
+				public function register(Registrar $cms): void {}
+			});
+		});
+	}
+
+	public function testMalformedPluginIdThrows(): void
+	{
+		$this->throws(RuntimeException::class, "Invalid plugin id 'Acme-Shop'");
+
+		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(new class implements Plugin {
+				public function id(): string
+				{
+					return 'Acme-Shop';
+				}
+
+				public function register(Registrar $cms): void {}
+			});
+		});
+	}
+
+	public function testConstructorParametersFailWithGuidance(): void
+	{
+		$this->throws(RuntimeException::class, 'must be constructible without arguments');
+
+		$this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(TestParameterizedPlugin::class);
+		});
+	}
+
+	public function testParameterizedPluginLoadsAsPrebuiltInstance(): void
+	{
+		$app = $this->loadBootstrap(static function (Bootstrap $bootstrap): void {
+			$bootstrap->plugin(new TestParameterizedPlugin('CHF'));
+		});
+
+		$service = $app->container()->get('test-parameterized.currency');
+		$this->assertSame('CHF', $service->currency);
 	}
 
 	private function loadBootstrap(?callable $configure = null, array $settings = []): App

@@ -40,6 +40,7 @@ use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
+use ReflectionClass;
 
 class Bootstrap implements CorePlugin
 {
@@ -175,6 +176,19 @@ class Bootstrap implements CorePlugin
 					throw new RuntimeException('Plugins must implement ' . Plugin::class . ": {$plugin}");
 				}
 
+				$constructor = new ReflectionClass($plugin)->getConstructor();
+
+				if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
+					throw new RuntimeException(
+						"Plugin {$plugin} must be constructible without arguments. Read options"
+						. " from the app config instead — the Registrar's option() reads the"
+						. " plugin's '{id}.{option}' keys — or register a pre-built instance:"
+						. ' $app->plugin(new '
+						. $plugin
+						. '(...)).',
+					);
+				}
+
 				$plugin = new $plugin();
 			}
 
@@ -183,6 +197,19 @@ class Bootstrap implements CorePlugin
 			}
 
 			$id = $plugin->id();
+
+			// Like custom element names, plugin ids need a dash: dashless
+			// names stay reserved for cosray's own config keys, so the
+			// plugin's '{id}.{option}' config namespace can never collide.
+			if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)+$/', $id)) {
+				throw new RuntimeException(
+					"Invalid plugin id '{$id}' ("
+						. $plugin::class
+						. '): ids consist of'
+						. ' lowercase letters, digits and dashes, and must contain at least'
+						. " one dash, e.g. 'acme-shop'.",
+				);
+			}
 
 			if (isset($this->pluginIds[$id])) {
 				throw new RuntimeException("Duplicate plugin id: {$id}");

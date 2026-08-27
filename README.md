@@ -165,7 +165,30 @@ final class ShopPlugin implements Plugin
 }
 ```
 
-Plugins must be constructible without arguments. Custom field types are plain `Cosray\Field\Field` subclasses referenced by class on node properties; string aliases passed to `field()` are only needed for legacy content imports. Plugin migrations run in the shared `default` migration namespace: use timestamped filenames and the `/*:cms.prefix:*/` placeholder in table names (for example `/*:cms.prefix:*/acmeshop_orders`).
+Plugins must be constructible without arguments — a plugin class with required constructor parameters is rejected at boot with guidance; register a pre-built instance (`$app->plugin(new ShopPlugin(...))`) when construction genuinely needs arguments. Custom field types are plain `Cosray\Field\Field` subclasses referenced by class on node properties; string aliases passed to `field()` are only needed for legacy content imports. Plugin migrations run in the shared `default` migration namespace: use timestamped filenames and the `/*:cms.prefix:*/` placeholder in table names (for example `/*:cms.prefix:*/acmeshop_orders`).
+
+Plugin ids consist of lowercase letters, digits and dashes and must contain at least one dash (`acme-shop`, not `shop`) — the same rule as custom element names, for the same reason: dashless names stay reserved for cosray's own configuration keys, so a plugin's config namespace can never collide with a future built-in setting.
+
+### Configuration
+
+Plugins work with zero configuration. Optional behavior comes from the app's settings, namespaced by the plugin id — flat dot keys exactly like cosray's own:
+
+```php
+// boot/config.php
+'acme-shop.currency' => 'USD',
+'acme-shop.stripe' => ['publicKey' => '...'],
+```
+
+The `Registrar` reads them with an inline default, so defaults live in the plugin, not in every app:
+
+```php
+public function register(Registrar $cms): void
+{
+    $currency = $cms->option('currency', 'EUR'); // reads 'acme-shop.currency'
+}
+```
+
+Outside `register()` — in controllers, fields, services — read the same namespaced keys from the container's `Cosray\Config`.
 
 ### Panel apps
 

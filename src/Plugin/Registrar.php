@@ -27,6 +27,17 @@ final class Registrar
 		public readonly Config $config,
 	) {}
 
+	/**
+	 * An app-config option from this plugin's namespace: option('currency')
+	 * reads the '{plugin-id}.currency' settings key. Returns $default when
+	 * the app configures nothing — a plugin must work with zero
+	 * configuration, so defaults live at the read site, not in the app.
+	 */
+	public function option(string $key, mixed $default = null): mixed
+	{
+		return $this->config->get("{$this->id}.{$key}", $default);
+	}
+
 	/** @param class-string<\Cosray\Field\Field> $class */
 	public function field(string $class, string ...$aliases): void
 	{
