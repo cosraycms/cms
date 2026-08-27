@@ -3,15 +3,35 @@
 <script lang="ts">
 	import type { LibraryItem } from '$lib/library';
 
+	import type { MediaRange } from '$lib/library';
+
 	import { onMount } from 'svelte';
-	import { fetchLibrary, readMediaState, writeMediaState } from '$lib/library';
+	import {
+		FILTER_KINDS,
+		fetchLibrary,
+		readMediaState,
+		sinceFor,
+		writeMediaState,
+	} from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
 	import IcoUpload from '$components/icons/IcoUpload.svelte';
 	import AssetGrid from '$components/media/AssetGrid.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
 
-	type Filter = 'all' | 'image' | 'video';
+	const KIND_LABELS: Record<string, string> = {
+		image: 'media:images',
+		video: 'media:videos',
+		audio: 'media:audio',
+		document: 'media:documents',
+	};
+
+	const RANGES: { value: MediaRange; label: string }[] = [
+		{ value: '', label: 'media:date-any' },
+		{ value: '7d', label: 'media:date-7d' },
+		{ value: '30d', label: 'media:date-30d' },
+		{ value: 'year', label: 'media:date-year' },
+	];
 
 	ensureSystem();
 
@@ -19,7 +39,9 @@
 	// The last search actually applied to the listing; the URL mirrors
 	// this, never the live input value.
 	let committed = $state('');
-	let filter: Filter = $state('all');
+	let kinds: string[] = $state([]);
+	let range: MediaRange = $state('');
+	let counts: Record<string, number> = $state({});
 	let items: LibraryItem[] = $state([]);
 	let page = $state(1);
 	let more = $state(false);
@@ -44,8 +66,9 @@
 		}
 
 		const result = await fetchLibrary(prefix, {
-			kind: filter === 'all' ? null : filter,
+			kind: kinds,
 			q,
+			since: sinceFor(range),
 			page: reset ? 1 : page + 1,
 		});
 
@@ -55,6 +78,7 @@
 			items = reset ? result.items : [...items, ...result.items];
 			page = result.page;
 			more = result.more;
+			counts = result.counts;
 
 			// A page past the end reports 0; only a page with rows (or a
 			// fresh listing) knows the real count.
@@ -71,11 +95,25 @@
 		void load(true);
 	}
 
-	function setFilter(next: Filter) {
-		if (filter !== next) {
-			filter = next;
+	function toggleKind(kind: string) {
+		kinds = kinds.includes(kind) ? kinds.filter((entry) => entry !== kind) : [...kinds, kind];
+		void load(true);
+	}
+
+	function setRange(next: MediaRange) {
+		if (range !== next) {
+			range = next;
 			void load(true);
 		}
+	}
+
+	const filtered = $derived(kinds.length > 0 || range !== '' || committed !== '');
+
+	function reset() {
+		kinds = [];
+		range = '';
+		q = '';
+		void load(true);
 	}
 
 	function uploadKind(type: string): string {
@@ -162,16 +200,17 @@
 
 	onMount(() => {
 		const state = readMediaState(location.search);
-		filter = state.kind;
+		kinds = state.kinds;
 		q = state.q;
+		range = state.range;
 		selected = state.file;
 		void load(true);
 	});
 
 	$effect(() => {
-		// Mirror filter, committed search and selection into the query
+		// Mirror filters, committed search and selection into the query
 		// string so the screen state survives reload and travels in links.
-		const next = writeMediaState(location.href, { kind: filter, q: committed, file: selected });
+		const next = writeMediaState(location.href, { kinds, q: committed, range, file: selected });
 
 		if (next !== location.href) {
 			history.replaceState(history.state, '', next);
@@ -181,18 +220,40 @@
 
 <div class="cms-media-workspace">
 	<aside class="cms-media-rail" aria-label={__('common:filter')}>
-		<div class="cms-media-rail-title">{__('common:filter')}</div>
-		<div class="cms-media-kinds" role="group" aria-label={__('common:filter')}>
-			<button type="button" class:active={filter === 'all'} onclick={() => setFilter('all')}>
-				{__('common:all')}
-			</button>
-			<button type="button" class:active={filter === 'image'} onclick={() => setFilter('image')}>
-				{__('media:images')}
-			</button>
-			<button type="button" class:active={filter === 'video'} onclick={() => setFilter('video')}>
-				{__('media:videos')}
-			</button>
+		<div class="cms-media-rail-head">
+			<span class="cms-media-rail-title">{__('common:filter')}</span>
+			{#if filtered}
+				<button type="button" class="cms-media-reset" onclick={reset}>
+					{__('common:reset')}
+				</button>
+			{/if}
 		</div>
+
+		<fieldset class="cms-media-rail-group">
+			<legend class="cms-media-rail-title">{__('common:type')}</legend>
+			{#each FILTER_KINDS as kind (kind)}
+				<label class="cms-media-check">
+					<input type="checkbox" checked={kinds.includes(kind)} onchange={() => toggleKind(kind)} />
+					<span class="cms-media-check-label">{__(KIND_LABELS[kind])}</span>
+					<span class="cms-media-check-count">{counts[kind] ?? 0}</span>
+				</label>
+			{/each}
+		</fieldset>
+
+		<fieldset class="cms-media-rail-group">
+			<legend class="cms-media-rail-title">{__('media:uploaded')}</legend>
+			{#each RANGES as entry (entry.value)}
+				<label class="cms-media-check">
+					<input
+						type="radio"
+						name="cms-media-range"
+						checked={range === entry.value}
+						onchange={() => setRange(entry.value)}
+					/>
+					<span class="cms-media-check-label">{__(entry.label)}</span>
+				</label>
+			{/each}
+		</fieldset>
 	</aside>
 
 	<section class="cms-media-pane">
@@ -281,6 +342,13 @@
 			gap: var(--cms-space-3);
 		}
 
+		.cms-media-rail-head {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: var(--cms-space-2);
+		}
+
 		.cms-media-rail-title {
 			font-size: var(--cms-font-size-xs);
 			font-weight: 600;
@@ -289,35 +357,59 @@
 			color: var(--cms-color-text-subtle);
 		}
 
-		.cms-media-kinds {
-			display: flex;
-			flex-direction: column;
-			gap: var(--cms-space-1);
-		}
-
-		.cms-media-kinds button {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: var(--cms-space-2);
+		.cms-media-reset {
 			border: 0;
 			background: none;
-			text-align: left;
+			padding: 0;
 			cursor: pointer;
-			padding: var(--cms-space-1) var(--cms-space-2);
-			border-radius: var(--cms-radius);
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-text-muted);
+			text-decoration: underline;
+			text-underline-offset: 0.2em;
+		}
+
+		.cms-media-reset:hover {
+			color: var(--cms-color-text);
+		}
+
+		.cms-media-rail-group {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-2);
+			border: 0;
+			padding: 0;
+			margin: 0;
+		}
+
+		.cms-media-rail-group legend {
+			padding: 0;
+			margin-bottom: var(--cms-space-1);
+		}
+
+		.cms-media-check {
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-2);
 			font-size: var(--cms-font-size-sm);
 			color: var(--cms-color-text-muted);
+			cursor: pointer;
 		}
 
-		.cms-media-kinds button:hover {
-			background-color: var(--cms-color-surface);
+		.cms-media-check input {
+			accent-color: var(--cms-color-text);
 		}
 
-		.cms-media-kinds button.active {
-			background-color: var(--cms-color-surface);
-			color: var(--cms-color-text);
-			font-weight: 600;
+		.cms-media-check-label {
+			flex: 1 1 auto;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.cms-media-check-count {
+			font-size: var(--cms-font-size-xs);
+			color: var(--cms-color-text-subtle);
+			font-variant-numeric: tabular-nums;
 		}
 
 		.cms-media-pane {
@@ -420,9 +512,15 @@
 				overflow: visible;
 			}
 
-			.cms-media-kinds {
+			.cms-media-rail {
 				flex-direction: row;
 				flex-wrap: wrap;
+				align-items: flex-start;
+				column-gap: var(--cms-space-6);
+			}
+
+			.cms-media-rail-head {
+				flex-basis: 100%;
 			}
 
 			.cms-media-rail,

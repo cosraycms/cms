@@ -9,12 +9,21 @@ import type { AssetInfo } from '$types/data';
 
 export type LibraryItem = AssetInfo & { uid: string; thumbUrl: string };
 
+/**
+ * The filter vocabulary the library endpoint accepts: it splits the
+ * catalog kind `file` into audio and document.
+ */
+export const FILTER_KINDS = ['image', 'video', 'audio', 'document'] as const;
+
 export type LibraryQuery = {
-	// Restricts the listing to one kind; null (and 'file' — a File field
-	// accepts every kind) browses the whole pool.
-	kind?: string | null;
+	// Restricts the listing to one kind or a set of filter kinds; null
+	// (and 'file' — a File field accepts every kind) browses the whole
+	// pool.
+	kind?: string | string[] | null;
 	q?: string;
 	page?: number;
+	// ISO created-timestamp cutoff.
+	since?: string | null;
 };
 
 export type LibraryPage = {
@@ -23,25 +32,38 @@ export type LibraryPage = {
 	more: boolean;
 	// Full match count across all pages; 0 when paging past the end.
 	total: number;
+	// Per-filter-kind totals honoring q and since, but not kind.
+	counts: Record<string, number>;
 };
+
+export type MediaRange = '' | '7d' | '30d' | 'year';
 
 /**
  * The media screen's deep-linkable state, mirrored into the query string
- * via history.replaceState: filter, committed search, selected file.
+ * via history.replaceState: kind set, committed search, upload-date
+ * range, selected file. The range travels as a token, not a timestamp,
+ * so a shared link keeps meaning "the last 7 days".
  */
 export type MediaScreenState = {
-	kind: 'all' | 'image' | 'video';
+	kinds: string[];
 	q: string;
+	range: MediaRange;
 	file: string | null;
 };
 
 export function readMediaState(search: string): MediaScreenState {
 	const params = new URLSearchParams(search);
-	const kind = params.get('kind');
+	const kinds = (params.get('kind') ?? '')
+		.split(',')
+		.filter((kind): kind is (typeof FILTER_KINDS)[number] =>
+			(FILTER_KINDS as readonly string[]).includes(kind),
+		);
+	const range = params.get('range');
 
 	return {
-		kind: kind === 'image' || kind === 'video' ? kind : 'all',
+		kinds: [...new Set(kinds)],
 		q: params.get('q') ?? '',
+		range: range === '7d' || range === '30d' || range === 'year' ? range : '',
 		file: params.get('file'),
 	};
 }
@@ -52,11 +74,26 @@ export function writeMediaState(href: string, state: MediaScreenState): string {
 	const params = url.searchParams;
 	const q = state.q.trim();
 
-	state.kind === 'all' ? params.delete('kind') : params.set('kind', state.kind);
+	state.kinds.length === 0 ? params.delete('kind') : params.set('kind', state.kinds.join(','));
 	q === '' ? params.delete('q') : params.set('q', q);
+	state.range === '' ? params.delete('range') : params.set('range', state.range);
 	state.file === null ? params.delete('file') : params.set('file', state.file);
 
 	return url.toString();
+}
+
+/** The created-timestamp cutoff a range token stands for right now. */
+export function sinceFor(range: MediaRange, now: Date = new Date()): string | null {
+	switch (range) {
+		case '7d':
+			return new Date(now.getTime() - 7 * 86_400_000).toISOString();
+		case '30d':
+			return new Date(now.getTime() - 30 * 86_400_000).toISOString();
+		case 'year':
+			return new Date(now.getFullYear(), 0, 1).toISOString();
+		default:
+			return null;
+	}
 }
 
 export function humanSize(bytes: number): string {
@@ -74,7 +111,8 @@ export function humanSize(bytes: number): string {
 
 export function libraryParams(query: LibraryQuery): URLSearchParams {
 	const params = new URLSearchParams();
-	const kind = query.kind ?? null;
+	const raw = query.kind ?? null;
+	const kind = Array.isArray(raw) ? raw.filter((entry) => entry !== '').join(',') : raw;
 	const q = (query.q ?? '').trim();
 
 	if (kind !== null && kind !== '' && kind !== 'file') {
@@ -83,6 +121,10 @@ export function libraryParams(query: LibraryQuery): URLSearchParams {
 
 	if (q !== '') {
 		params.set('q', q);
+	}
+
+	if (typeof query.since === 'string' && query.since !== '') {
+		params.set('since', query.since);
 	}
 
 	params.set('page', String(query.page ?? 1));
@@ -106,13 +148,20 @@ export async function fetchLibrary(
 			page: number;
 			more: boolean;
 			total: number;
+			counts: Record<string, number>;
 		};
 
 		if (!data.ok) {
 			return null;
 		}
 
-		return { items: data.assets, page: data.page, more: data.more, total: data.total ?? 0 };
+		return {
+			items: data.assets,
+			page: data.page,
+			more: data.more,
+			total: data.total ?? 0,
+			counts: data.counts ?? {},
+		};
 	} catch {
 		return null;
 	}

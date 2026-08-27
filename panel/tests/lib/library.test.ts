@@ -4,6 +4,7 @@ import {
 	humanSize,
 	libraryParams,
 	readMediaState,
+	sinceFor,
 	writeMediaState,
 } from '../../src/lib/library';
 
@@ -37,6 +38,20 @@ describe('library params', () => {
 			'kind=video&q=tour&page=3',
 		);
 	});
+
+	it('joins a kind set into a comma list', () => {
+		expect(libraryParams({ kind: ['image', 'audio'] }).toString()).toBe(
+			'kind=image%2Caudio&page=1',
+		);
+		expect(libraryParams({ kind: [] }).toString()).toBe('page=1');
+	});
+
+	it('passes a created cutoff through', () => {
+		expect(libraryParams({ since: '2026-08-20T00:00:00.000Z' }).toString()).toBe(
+			'since=2026-08-20T00%3A00%3A00.000Z&page=1',
+		);
+		expect(libraryParams({ since: null }).toString()).toBe('page=1');
+	});
 });
 
 describe('library fetch', () => {
@@ -49,14 +64,16 @@ describe('library fetch', () => {
 	};
 
 	it('returns the page and sends the panel request headers', async () => {
+		const counts = { image: 61, video: 2, audio: 0, document: 5 };
 		const fetchMock = vi.fn().mockResolvedValue({
-			json: () => Promise.resolve({ ok: true, assets: [item], page: 2, more: true, total: 61 }),
+			json: () =>
+				Promise.resolve({ ok: true, assets: [item], page: 2, more: true, total: 61, counts }),
 		});
 		vi.stubGlobal('fetch', fetchMock);
 
 		const result = await fetchLibrary('/panel', { kind: 'image', page: 2 });
 
-		expect(result).toEqual({ items: [item], page: 2, more: true, total: 61 });
+		expect(result).toEqual({ items: [item], page: 2, more: true, total: 61, counts });
 		expect(fetchMock).toHaveBeenCalledWith('/panel/media/library?kind=image&page=2', {
 			credentials: 'same-origin',
 			headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
@@ -90,40 +107,77 @@ describe('library fetch', () => {
 
 describe('media screen state', () => {
 	it('reads state from the query string', () => {
-		expect(readMediaState('?kind=image&q=logo&file=abc123')).toEqual({
-			kind: 'image',
+		expect(readMediaState('?kind=image,audio&q=logo&range=7d&file=abc123')).toEqual({
+			kinds: ['image', 'audio'],
 			q: 'logo',
+			range: '7d',
 			file: 'abc123',
 		});
 	});
 
 	it('defaults an empty or foreign query string', () => {
-		expect(readMediaState('')).toEqual({ kind: 'all', q: '', file: null });
-		expect(readMediaState('?kind=nonsense&foo=1')).toEqual({ kind: 'all', q: '', file: null });
+		expect(readMediaState('')).toEqual({ kinds: [], q: '', range: '', file: null });
+		expect(readMediaState('?kind=nonsense,image,image&range=8w&foo=1')).toEqual({
+			kinds: ['image'],
+			q: '',
+			range: '',
+			file: null,
+		});
 	});
 
 	it('writes state into the href and drops defaults', () => {
-		const href = 'https://example.test/cp/media?kind=video&q=old&file=gone';
+		const href = 'https://example.test/cp/media?kind=video&q=old&range=7d&file=gone';
 
-		expect(writeMediaState(href, { kind: 'all', q: '  ', file: null })).toBe(
+		expect(writeMediaState(href, { kinds: [], q: '  ', range: '', file: null })).toBe(
 			'https://example.test/cp/media',
 		);
 		expect(
-			writeMediaState('https://example.test/cp/media', { kind: 'image', q: ' logo ', file: 'abc' }),
-		).toBe('https://example.test/cp/media?kind=image&q=logo&file=abc');
+			writeMediaState('https://example.test/cp/media', {
+				kinds: ['image', 'audio'],
+				q: ' logo ',
+				range: 'year',
+				file: 'abc',
+			}),
+		).toBe('https://example.test/cp/media?kind=image%2Caudio&q=logo&range=year&file=abc');
 	});
 
 	it('leaves foreign params untouched', () => {
 		expect(
-			writeMediaState('https://example.test/cp/media?foo=1', { kind: 'video', q: '', file: null }),
+			writeMediaState('https://example.test/cp/media?foo=1', {
+				kinds: ['video'],
+				q: '',
+				range: '',
+				file: null,
+			}),
 		).toBe('https://example.test/cp/media?foo=1&kind=video');
 	});
 
 	it('round-trips through read and write', () => {
-		const state = { kind: 'image' as const, q: 'beer', file: 'a1b2' };
+		const state = { kinds: ['image', 'document'], q: 'beer', range: '30d' as const, file: 'a1b2' };
 		const href = writeMediaState('https://example.test/cp/media', state);
 
 		expect(readMediaState(new URL(href).search)).toEqual(state);
+	});
+});
+
+describe('range cutoffs', () => {
+	const now = new Date('2026-08-27T12:00:00.000Z');
+
+	it('computes the cutoff a range token stands for', () => {
+		expect(sinceFor('7d', now)).toBe('2026-08-20T12:00:00.000Z');
+		expect(sinceFor('30d', now)).toBe('2026-07-28T12:00:00.000Z');
+	});
+
+	it('anchors the year range to the local January first', () => {
+		const cutoff = new Date(sinceFor('year', now)!);
+
+		expect(cutoff.getFullYear()).toBe(2026);
+		expect(cutoff.getMonth()).toBe(0);
+		expect(cutoff.getDate()).toBe(1);
+	});
+
+	it('means no cutoff for the empty range', () => {
+		expect(sinceFor('', now)).toBeNull();
 	});
 });
 
