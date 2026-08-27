@@ -1,0 +1,22 @@
+SELECT
+	-- Filter vocabulary: splits classify()'s `file` into audio/document.
+	-- Keep the prefixes in sync with Asset::classify() and list.tpql.
+	CASE
+		WHEN mime LIKE 'image/%' THEN 'image'
+		WHEN mime LIKE 'video/%' THEN 'video'
+		WHEN mime LIKE 'audio/%' THEN 'audio'
+		ELSE 'document'
+	END AS kind,
+	count(*) AS total
+FROM
+	/*:cms.prefix:*/assets
+WHERE
+	1 = 1
+<?php if (isset($q)) : ?>
+	AND filename ILIKE :q
+<?php endif ?>
+<?php if (isset($since)) : ?>
+	AND created >= :since
+<?php endif ?>
+GROUP BY
+	1;

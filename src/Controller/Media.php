@@ -111,27 +111,44 @@ class Media
 	}
 
 	/**
-	 * Paged asset catalog listing for the panel (library picker, link
-	 * modal). `kind` filters to image or video; a File field accepts
-	 * every kind, so `file` (or no kind) lists everything.
+	 * Paged asset catalog listing for the panel (media screen, library
+	 * picker, link modal). `kind` takes a comma-separated set from the
+	 * filter vocabulary image/video/audio/document — which splits the
+	 * catalog kind `file` in two; `file` itself (a File field accepts
+	 * every kind) and no kind list everything. `q` matches the filename,
+	 * `since` cuts on the created timestamp. `counts` reports per-kind
+	 * totals honoring `q` and `since` but not `kind`, so a filter UI can
+	 * show what selecting each kind would yield.
 	 */
 	#[Permission('panel')]
 	public function library(): Response
 	{
 		$params = $this->request->params();
-		$kind = $params['kind'] ?? null;
 		$q = trim((string) ($params['q'] ?? ''));
 		$page = max(1, (int) ($params['page'] ?? 1));
 		$limit = 60;
 		$args = ['limit' => $limit + 1, 'offset' => ($page - 1) * $limit];
+		// The null seed keeps the args named and non-empty when no filter
+		// applies — Quma templates refuse empty argument lists — and
+		// isset() in the template still skips the clause.
+		$countArgs = ['q' => null];
 
-		// The prefixes `Asset::classify()` reduces to a kind, read backwards.
-		if (in_array($kind, ['image', 'video'], true)) {
-			$args['mime'] = $kind . '/%';
+		$kinds = $this->filterKinds((string) ($params['kind'] ?? ''));
+
+		if ($kinds !== []) {
+			$args['kinds'] = json_encode($kinds);
 		}
 
 		if ($q !== '') {
 			$args['q'] = '%' . addcslashes($q, '%_\\') . '%';
+			$countArgs['q'] = $args['q'];
+		}
+
+		$since = $this->since($params['since'] ?? null);
+
+		if ($since !== null) {
+			$args['since'] = $since;
+			$countArgs['since'] = $since;
 		}
 
 		if (isset($params['uids']) && $params['uids'] !== '') {
@@ -140,6 +157,11 @@ class Media
 
 		$rows = $this->db->assets->list($args)->all();
 		$more = count($rows) > $limit;
+		$counts = ['image' => 0, 'video' => 0, 'audio' => 0, 'document' => 0];
+
+		foreach ($this->db->assets->counts($countArgs)->all() as $row) {
+			$counts[(string) $row['kind']] = (int) $row['total'];
+		}
 
 		return Response::create($this->factory)->json([
 			'ok' => true,
@@ -148,7 +170,30 @@ class Media
 			'more' => $more,
 			// 0 when paging past the end: the window count needs a row to ride on.
 			'total' => $rows === [] ? 0 : (int) $rows[0]['total'],
+			'counts' => $counts,
 		]);
+	}
+
+	/** @return list<string> */
+	protected function filterKinds(string $kind): array
+	{
+		$valid = ['image', 'video', 'audio', 'document'];
+		$requested = array_values(array_intersect($valid, array_map(trim(...), explode(',', $kind))));
+
+		// All four match everything; skipping the clause keeps the plan flat.
+		return count($requested) === count($valid) ? [] : $requested;
+	}
+
+	/** A created-timestamp cutoff, normalized; invalid input means none. */
+	protected function since(mixed $value): ?string
+	{
+		if (!is_string($value) || trim($value) === '') {
+			return null;
+		}
+
+		$time = strtotime($value);
+
+		return $time === false ? null : date(DATE_ATOM, $time);
 	}
 
 	protected function libraryItem(array $row): array

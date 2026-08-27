@@ -18,11 +18,23 @@ FROM
 	/*:cms.prefix:*/assets
 WHERE
 	1 = 1
-<?php if (isset($mime)) : ?>
-	AND mime LIKE :mime
+<?php if (isset($kinds)) : ?>
+	-- Filter vocabulary: splits classify()'s `file` into audio/document.
+	-- Keep the prefixes in sync with Asset::classify() and counts.tpql.
+	AND (
+		CASE
+			WHEN mime LIKE 'image/%' THEN 'image'
+			WHEN mime LIKE 'video/%' THEN 'video'
+			WHEN mime LIKE 'audio/%' THEN 'audio'
+			ELSE 'document'
+		END
+	) IN (SELECT jsonb_array_elements_text(:kinds::jsonb))
 <?php endif ?>
 <?php if (isset($q)) : ?>
 	AND filename ILIKE :q
+<?php endif ?>
+<?php if (isset($since)) : ?>
+	AND created >= :since
 <?php endif ?>
 <?php if (isset($uids)) : ?>
 	AND uid IN (SELECT jsonb_array_elements_text(:uids::jsonb))

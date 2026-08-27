@@ -131,11 +131,99 @@ final class MediaLibraryTest extends End2EndTestCase
 		$this->assertSame(0, $missed['total']);
 	}
 
+	public function testKindFilterVocabularySplitsFileIntoAudioAndDocument(): void
+	{
+		$image = $this->insertAsset('vocab-pic.png', 'image/png');
+		$video = $this->insertAsset('vocab-clip.mp4', 'video/mp4');
+		$audio = $this->insertAsset('vocab-song.mp3', 'audio/mpeg');
+		$document = $this->insertAsset('vocab-doc.pdf', 'application/pdf');
+		$unknown = $this->insertAsset('vocab-blob.bin', null);
+
+		$audios = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['kind' => 'audio'],
+		]));
+		$this->assertSame([$audio], array_column($audios['assets'], 'uid'));
+
+		// Unreadable mimes land on document, mirroring classify()'s fallback.
+		$documents = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['kind' => 'document'],
+		]));
+		$documentUids = array_column($documents['assets'], 'uid');
+		$this->assertContains($document, $documentUids);
+		$this->assertContains($unknown, $documentUids);
+		$this->assertNotContains($audio, $documentUids);
+
+		$mixed = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['kind' => 'image,audio'],
+		]));
+		$mixedUids = array_column($mixed['assets'], 'uid');
+		$this->assertContains($image, $mixedUids);
+		$this->assertContains($audio, $mixedUids);
+		$this->assertNotContains($video, $mixedUids);
+		$this->assertSame(2, $mixed['total']);
+
+		// Counts honor q/since but never the kind filter itself.
+		$this->assertSame(
+			['image' => 1, 'video' => 1, 'audio' => 1, 'document' => 2],
+			$mixed['counts'],
+		);
+	}
+
+	public function testSinceCutsOnTheCreatedTimestamp(): void
+	{
+		$old = $this->insertAsset('since-old.png', 'image/png', '2020-06-01T12:00:00+00:00');
+		$fresh = $this->insertAsset('since-new.png', 'image/png');
+
+		$result = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['since' => '2021-01-01T00:00:00+00:00'],
+		]));
+
+		$uids = array_column($result['assets'], 'uid');
+		$this->assertContains($fresh, $uids);
+		$this->assertNotContains($old, $uids);
+		$this->assertSame(1, $result['total']);
+		$this->assertSame(1, $result['counts']['image']);
+
+		// Invalid input means no cutoff rather than an error.
+		$loose = $this->getJsonResponse($this->makeRequest('GET', '/media/library', [
+			'query' => ['since' => 'not-a-date'],
+		]));
+		$this->assertSame(2, $loose['total']);
+	}
+
 	public function testLibraryRequiresAuthentication(): void
 	{
 		$response = $this->makeRequest('GET', '/media/library', ['authToken' => '']);
 
 		$this->assertResponseStatus(401, $response);
+	}
+
+	/**
+	 * Insert a catalog row directly: the kind filters classify by mime
+	 * prefix in SQL, so pinning them must not depend on what libmagic
+	 * detects for handcrafted upload bytes.
+	 */
+	private function insertAsset(string $filename, ?string $mime, ?string $created = null): string
+	{
+		$uid = bin2hex(random_bytes(8));
+		$db = $this->db();
+		$system = $db->execute("SELECT usr FROM cms.users WHERE rolename = 'system' LIMIT 1")->one();
+		$this->assertNotEmpty($system);
+
+		$db->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, mime, bytes, meta, creator, created)
+			VALUES (:uid, 'local', :key, :filename, :mime, 1, '{}'::jsonb, :creator, :created)",
+			[
+				'uid' => $uid,
+				'key' => "test/{$uid}/{$filename}",
+				'filename' => $filename,
+				'mime' => $mime,
+				'creator' => (int) $system['usr'],
+				'created' => $created ?? date(DATE_ATOM),
+			],
+		)->run();
+
+		return $uid;
 	}
 
 	private function upload(string $type, string $contents, string $filename, string $mime): array
