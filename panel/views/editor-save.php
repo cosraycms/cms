@@ -4,7 +4,9 @@ use function Cosray\escape;
 
 // Out-of-band response for editor form submissions: the form itself is
 // never re-rendered (the client state is the source of truth); only the
-// status chip and the error box are swapped by id.
+// status chip and the error box are swapped by id. The ids and payload
+// keys are the internal save-response contract — see "Save response" in
+// docs/controls.md before changing either side.
 
 $saved = (bool) $saved;
 $message = (string) $message;

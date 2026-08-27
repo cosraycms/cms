@@ -139,11 +139,21 @@ final class Registrar
 		$this->bootstrap->addPanelPage($pattern, $endpoint, $template, "{$this->id}.{$name}");
 	}
 
+	/**
+	 * A stylesheet loaded on every panel page. App-wide chrome styling
+	 * only — field controls load their assets lazily via element
+	 * descriptors.
+	 */
 	public function css(string $url): void
 	{
 		$this->bootstrap->panelExtras()->addCss($url);
 	}
 
+	/**
+	 * A script loaded once per full panel document and NOT re-run across
+	 * htmx navigations: write delegated, idempotent listeners — see
+	 * "Panel scripts across navigation" in the README.
+	 */
 	public function js(string $url, bool $module = true): void
 	{
 		$this->bootstrap->panelExtras()->addJs($url, $module);

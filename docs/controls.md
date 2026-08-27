@@ -100,6 +100,12 @@ Two safeguards back this up:
 
 Plugins are unaffected: element controls keep submitting through their host's form value, and neither the name scheme nor the value shapes change with the transport.
 
+## Save response
+
+A save answers with out-of-band swaps only — the form itself is never re-rendered. The response fragment (`panel/views/editor-save.php`) targets four fixed ids: `#editor-status` (the status chip; `data-saved` on it is what stands the unsaved-changes guard down), `#editor-errors` (the validation summary, next section), `#editor-published` (the published badge, on successful saves of renderable nodes) and `#editor-preview` (the preview overlay, when the save requested one). The controller feeds the fragment a fixed payload: `saved`, `message`, `errors` (message + path pairs), `published`, `renderable`, `preview`.
+
+These ids and keys are an **internal contract**, pinned by the e2e save tests. It is deliberately closed to plugins; a sanctioned way for plugin actions to ride the save round trip is part of the future action-slot design.
+
 ## Validation errors
 
 The editor form is never re-rendered after a failed save (client state stays the source of truth). Instead the save response swaps the error summary out-of-band, and each issue carries the sire data path of the failing value:

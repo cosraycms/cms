@@ -210,6 +210,16 @@ public function register(Registrar $cms): void
 
 Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('layer/main')` and renders its own fragment, which the layer templates wrap according to what htmx asked for. Custom editor UIs (field controls, block types) ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Cosray's own rich controls (richtext, code, media, blocks, entries) are built the same way and serve as reference implementations under `panel/src/elements/`. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel.
 
+### Panel scripts across navigation
+
+Panel navigation is htmx region swaps. Scripts registered via `Registrar::js()` load once per full document render and are **not** re-executed when the user navigates inside the panel; the history-restore layer carries no script tags at all. Plugin scripts must therefore work like the panel's own behaviors:
+
+- Install delegated, document-level listeners keyed on data attributes — never decorate the DOM at load time, because that DOM will be swapped away and replaced without the script running again.
+- Be idempotent: guard against double registration.
+- Treat panel markup as private: only the attributes and contracts documented in `docs/controls.md` are API; everything else may change without notice.
+
+Interactive UI beyond what delegated listeners can express belongs in a custom element (a field control, a block type, or a mount inside your own panel page) — elements upgrade wherever their markup lands, swapped-in fragments included.
+
 ## Defining content types
 
 Content types (nodes) are plain PHP classes annotated with attributes. There is no base class to extend. Dependencies are autowired from the Registry via `celema/wire`.
