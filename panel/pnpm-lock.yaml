@@ -78,8 +78,8 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4
       htmx.org:
-        specifier: 4.0.0-beta6
-        version: 4.0.0-beta6
+        specifier: 4.0.0
+        version: 4.0.0
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
@@ -844,8 +844,8 @@ packages:
     resolution: {integrity: sha512-Y22oTqIU4uuPgEemfz7NDJz6OeKf12Lsu+QC+s3BVpda64lTiMYCyGwg5ki4vFxkMwQdeZDl2adZoqUgdFuTgQ==}
     engines: {node: '>=18'}
 
-  htmx.org@4.0.0-beta6:
-    resolution: {integrity: sha512-se3PisNRdv7g988rKSOqsM6y/nB+7HOI8RrJYoRuK01nY1+uDBFLgdQEzLVXITLlXblvyOBZOu30hDu69keSfw==}
+  htmx.org@4.0.0:
+    resolution: {integrity: sha512-T/171FUY93Kdfp8t+DnHdk45QvKRiBhVhhrwSzrXgUi4pHKvhp77dUA/qg8FAjsFWPIHNbmUuIdCrcVHuiZWng==}
     hasBin: true
 
   http-proxy-agent@7.0.2:
@@ -1891,7 +1891,7 @@ snapshots:
     dependencies:
       whatwg-encoding: 3.1.1
 
-  htmx.org@4.0.0-beta6: {}
+  htmx.org@4.0.0: {}
 
   http-proxy-agent@7.0.2:
     dependencies:
