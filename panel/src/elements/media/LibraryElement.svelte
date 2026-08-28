@@ -101,6 +101,16 @@
 		void load(true);
 	}
 
+	function edited(event: Event) {
+		// Emptying the field — the native clear button included — shows the
+		// full listing again without an explicit submit.
+		q = (event.currentTarget as HTMLInputElement).value;
+
+		if (q.trim() === '' && committed !== '') {
+			void load(true);
+		}
+	}
+
 	function toggleKind(kind: string) {
 		kinds = kinds.includes(kind) ? kinds.filter((entry) => entry !== kind) : [...kinds, kind];
 		void load(true);
@@ -333,7 +343,8 @@
 					class="cms-input"
 					type="search"
 					placeholder={__('media:search-filename')}
-					bind:value={q}
+					value={q}
+					oninput={edited}
 				/>
 				<button type="submit" class="cms-button">{__('common:search')}</button>
 			</form>
