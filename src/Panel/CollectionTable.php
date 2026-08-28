@@ -12,10 +12,11 @@ use DateTimeZone;
 use IntlDateFormatter;
 use Stringable;
 use Throwable;
-use Traversable;
 
 final class CollectionTable
 {
+	use NormalizesInput;
+
 	/**
 	 * @param list<array{label: string, url: ?string, class: string, kind: string}> $headers
 	 * @param list<array{
@@ -495,25 +496,5 @@ final class CollectionTable
 		}
 
 		return $strings;
-	}
-
-	/** @return list<mixed> */
-	private static function items(iterable $items): array
-	{
-		if ($items instanceof Traversable) {
-			return array_values(iterator_to_array($items, false));
-		}
-
-		return array_values($items);
-	}
-
-	/** @return array<array-key, mixed> */
-	private static function arrayFrom(mixed $value): array
-	{
-		if ($value instanceof Traversable) {
-			return iterator_to_array($value);
-		}
-
-		return is_array($value) ? $value : [];
 	}
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Panel;
 
-use Traversable;
-
 final class CollectionParent
 {
+	use NormalizesInput;
+
 	/** @param list<array{kind: string, label: string}> $status */
 	private function __construct(
 		public readonly string $uid,
@@ -47,13 +47,6 @@ final class CollectionParent
 		);
 	}
 
-	private static function label(?string $label): ?string
-	{
-		$label = trim((string) $label);
-
-		return $label === '' ? null : $label;
-	}
-
 	/** @return list<array{kind: string, label: string}> */
 	private static function status(iterable $status): array
 	{
@@ -75,15 +68,5 @@ final class CollectionParent
 		}
 
 		return $badges;
-	}
-
-	/** @return array<array-key, mixed> */
-	private static function arrayFrom(mixed $value): array
-	{
-		if ($value instanceof Traversable) {
-			return iterator_to_array($value);
-		}
-
-		return is_array($value) ? $value : [];
 	}
 }
