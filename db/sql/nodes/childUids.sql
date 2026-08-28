@@ -1,5 +1,6 @@
 SELECT
-	c.uid
+	c.uid,
+	c.locked
 FROM
 	/*:cms.prefix:*/nodes c
 	JOIN /*:cms.prefix:*/nodes p ON c.parent = p.node

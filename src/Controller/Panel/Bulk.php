@@ -44,6 +44,7 @@ final class Bulk extends Panel
 		}
 
 		$published = $state === 'published';
+		$withChildren = ($form['children'] ?? null) === '1';
 		[$nodes, $missing] = $this->selection($obj, $form);
 		$editor = $this->actor()->id;
 		$changed = 0;
@@ -53,27 +54,54 @@ final class Bulk extends Panel
 			$context,
 			$nodes,
 			$published,
+			$withChildren,
 			$editor,
 			&$changed,
 			&$skippedLocked,
 		): void {
+			$processed = [];
+
 			foreach ($nodes as $uid => $node) {
-				if ($node->meta->locked) {
-					$skippedLocked++;
+				$queue = [['uid' => $uid, 'locked' => (bool) $node->meta->locked]];
 
-					continue;
+				while ($queue !== []) {
+					$entry = array_shift($queue);
+
+					// Overlapping selections and subtrees flip a node once.
+					if (in_array($entry['uid'], $processed, true)) {
+						continue;
+					}
+
+					$processed[] = $entry['uid'];
+
+					if ($entry['locked']) {
+						// Locked guards only the node itself; the walk goes
+						// on below it.
+						$skippedLocked++;
+					} else {
+						$context
+							->db
+							->nodes
+							->setPublished([
+								'uid' => $entry['uid'],
+								'published' => $published,
+								'editor' => $editor,
+							])
+							->run();
+						$changed++;
+					}
+
+					if (!$withChildren) {
+						continue;
+					}
+
+					foreach ($context->db->nodes->childUids(['uid' => $entry['uid']])->all() as $row) {
+						$queue[] = [
+							'uid' => (string) $row['uid'],
+							'locked' => (bool) $row['locked'],
+						];
+					}
 				}
-
-				$context
-					->db
-					->nodes
-					->setPublished([
-						'uid' => $uid,
-						'published' => $published,
-						'editor' => $editor,
-					])
-					->run();
-				$changed++;
 			}
 		});
 

@@ -52,6 +52,9 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertStringContainsString('name="nodes[]"', $html);
 		$this->assertStringContainsString('value="bulk-markup-root"', $html);
 		$this->assertStringContainsString('data-bulk-dialog="delete"', $html);
+		$this->assertStringContainsString('data-bulk-dialog="publish"', $html);
+		$this->assertStringContainsString('data-bulk-dialog="draft"', $html);
+		$this->assertStringContainsString('data-bulk-open="publish"', $html);
 		$this->assertStringContainsString('data-bulk-confirm', $html);
 		$this->assertStringContainsString(
 			'formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&amp;dir=desc"',
@@ -130,6 +133,137 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			$response->getHeaderLine('Location'),
 		);
 		$this->assertFalse($this->nodeFlag('bulk-draft-a', 'published'));
+	}
+
+	public function testBulkPublishWithChildrenFlipsTheSubtree(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-pub-tree-root', title: 'Pub Root', published: false);
+		$childId = $this->createNode(
+			uid: 'bulk-pub-tree-child',
+			title: 'Pub Child',
+			published: false,
+			parent: $rootId,
+		);
+		$this->createNode(
+			uid: 'bulk-pub-tree-grandchild',
+			title: 'Pub Grandchild',
+			type: $this->childTypeId,
+			published: false,
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+			'body' => [
+				'nodes' => ['bulk-pub-tree-root'],
+				'state' => 'published',
+				'children' => '1',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('published:3'),
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertTrue($this->nodeFlag('bulk-pub-tree-root', 'published'));
+		$this->assertTrue($this->nodeFlag('bulk-pub-tree-child', 'published'));
+		$this->assertTrue($this->nodeFlag('bulk-pub-tree-grandchild', 'published'));
+	}
+
+	public function testBulkPublishCountsOverlappingSubtreeMembersOnce(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-pub-lap-root', title: 'Lap Root', published: false);
+		$childId = $this->createNode(
+			uid: 'bulk-pub-lap-child',
+			title: 'Lap Child',
+			published: false,
+			parent: $rootId,
+		);
+		$this->createNode(
+			uid: 'bulk-pub-lap-grandchild',
+			title: 'Lap Grandchild',
+			type: $this->childTypeId,
+			published: false,
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+			'body' => [
+				'nodes' => ['bulk-pub-lap-root', 'bulk-pub-lap-child'],
+				'state' => 'published',
+				'children' => '1',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('published:3'),
+			$response->getHeaderLine('Location'),
+		);
+	}
+
+	public function testBulkPublishWalksPastLockedDescendants(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-pub-lock-root', title: 'Lock Root', published: false);
+		$childId = $this->createNode(
+			uid: 'bulk-pub-lock-child',
+			title: 'Lock Child',
+			published: false,
+			locked: true,
+			parent: $rootId,
+		);
+		$this->createNode(
+			uid: 'bulk-pub-lock-grandchild',
+			title: 'Lock Grandchild',
+			type: $this->childTypeId,
+			published: false,
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+			'body' => [
+				'nodes' => ['bulk-pub-lock-root'],
+				'state' => 'published',
+				'children' => '1',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('published:2,skipped-locked:1'),
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertTrue($this->nodeFlag('bulk-pub-lock-root', 'published'));
+		$this->assertFalse($this->nodeFlag('bulk-pub-lock-child', 'published'));
+		$this->assertTrue($this->nodeFlag('bulk-pub-lock-grandchild', 'published'));
+	}
+
+	public function testBulkUnpublishWithChildrenFlipsTheSubtree(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-draft-tree-root', title: 'Draft Root', published: true);
+		$this->createNode(
+			uid: 'bulk-draft-tree-child',
+			title: 'Draft Child',
+			type: $this->childTypeId,
+			published: true,
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+			'body' => [
+				'nodes' => ['bulk-draft-tree-root'],
+				'state' => 'draft',
+				'children' => '1',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('drafted:2'),
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertFalse($this->nodeFlag('bulk-draft-tree-root', 'published'));
+		$this->assertFalse($this->nodeFlag('bulk-draft-tree-child', 'published'));
 	}
 
 	public function testBulkPublishRejectsInvalidState(): void

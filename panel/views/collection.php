@@ -167,22 +167,10 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				</div>
 				<div class="actions">
 					<?php if ($page->bulk['showPublished']): ?>
-						<button
-							type="submit"
-							class="action"
-							form="collection-bulk"
-							formaction="<?= escape($page->bulk['publishUrl']) ?>"
-							name="state"
-							value="published">
+						<button type="button" class="action" data-bulk-open="publish">
 							<?= escape(__('bulk:publish')) ?>
 						</button>
-						<button
-							type="submit"
-							class="action"
-							form="collection-bulk"
-							formaction="<?= escape($page->bulk['publishUrl']) ?>"
-							name="state"
-							value="draft">
+						<button type="button" class="action" data-bulk-open="draft">
 							<?= escape(__('bulk:unpublish')) ?>
 						</button>
 					<?php endif ?>
@@ -348,5 +336,63 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				</button>
 			</footer>
 		</dialog>
+
+		<?php if ($page->bulk['showPublished']): ?>
+			<dialog class="cms-confirm" data-bulk-dialog="publish">
+				<h2><?= escape(__('bulk:publish')) ?></h2>
+				<p
+					class="question"
+					data-bulk-question
+					data-label-one="<?= escape(__('bulk:confirm-publish')) ?>"
+					data-label-many="<?= escape(__('bulk:confirm-publish-plural')) ?>"></p>
+				<label class="children" data-bulk-children hidden>
+					<input type="checkbox" name="children" value="1" form="collection-bulk" />
+					<span><?= escape(__('bulk:publish-children')) ?></span>
+				</label>
+				<footer>
+					<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+						__('bulk:cancel'),
+					) ?></button>
+					<button
+						type="submit"
+						class="cms-button primary"
+						form="collection-bulk"
+						formaction="<?= escape($page->bulk['publishUrl']) ?>"
+						name="state"
+						value="published"
+						data-bulk-confirm>
+						<?= escape(__('bulk:publish')) ?>
+					</button>
+				</footer>
+			</dialog>
+
+			<dialog class="cms-confirm" data-bulk-dialog="draft">
+				<h2><?= escape(__('bulk:unpublish')) ?></h2>
+				<p
+					class="question"
+					data-bulk-question
+					data-label-one="<?= escape(__('bulk:confirm-unpublish')) ?>"
+					data-label-many="<?= escape(__('bulk:confirm-unpublish-plural')) ?>"></p>
+				<label class="children" data-bulk-children hidden>
+					<input type="checkbox" name="children" value="1" form="collection-bulk" />
+					<span><?= escape(__('bulk:unpublish-children')) ?></span>
+				</label>
+				<footer>
+					<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+						__('bulk:cancel'),
+					) ?></button>
+					<button
+						type="submit"
+						class="cms-button primary"
+						form="collection-bulk"
+						formaction="<?= escape($page->bulk['publishUrl']) ?>"
+						name="state"
+						value="draft"
+						data-bulk-confirm>
+						<?= escape(__('bulk:unpublish')) ?>
+					</button>
+				</footer>
+			</dialog>
+		<?php endif ?>
 	<?php endif ?>
 </div>
