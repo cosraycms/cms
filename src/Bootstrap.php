@@ -32,7 +32,10 @@ use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
+use Cosray\Panel\CollectionPager;
+use Cosray\Panel\CollectionParent;
 use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionSearch;
 use Cosray\Panel\CollectionTable;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\Extras as PanelExtras;
@@ -518,7 +521,10 @@ class Bootstrap implements CorePlugin
 			autoescape: true,
 			trusted: [
 				CollectionPage::class,
+				CollectionPager::class,
+				CollectionParent::class,
 				CollectionQuery::class,
+				CollectionSearch::class,
 				CollectionTable::class,
 				CollectionUrls::class,
 			],

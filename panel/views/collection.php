@@ -45,11 +45,11 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 <div class="page cms-collection">
 	<header class="head">
 		<div class="titles">
-			<?php if ($page->rootUrl !== null): ?>
+			<?php if ($page->parent !== null): ?>
 				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-					<a href="<?= escape($page->rootUrl) ?>"><?= escape($page->name) ?></a>
+					<a href="<?= escape($page->parent->rootUrl) ?>"><?= escape($page->name) ?></a>
 					<span aria-hidden="true">/</span>
-					<span><?= escape($page->parentTitle ?? $page->query->parent) ?></span>
+					<span><?= escape($page->parent->title ?? $page->parent->uid) ?></span>
 				</nav>
 			<?php endif ?>
 			<div class="line">
@@ -57,7 +57,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<span class="cms-count"><?= escape(__n(
 					'collection:entry-count',
 					'collection:entry-count-plural',
-					$page->total,
+					$page->pager->total,
 				)) ?></span>
 			</div>
 		</div>
@@ -74,17 +74,13 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?php endforeach ?>
 				</nav>
 			<?php endif ?>
-			<?php if ($page->query->parent !== null): ?>
-				<?php if ($page->parentEditUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->parentEditUrl) ?>"><?= escape(
-						__('collection:edit-parent'),
-					) ?></a>
-				<?php endif ?>
-				<?php if ($page->parentTreeUrl !== null): ?>
-					<a class="cms-button secondary" href="<?= escape($page->parentTreeUrl) ?>"><?= escape(
-						__('collection:show-in-tree'),
-					) ?></a>
-				<?php endif ?>
+			<?php if ($page->parent !== null): ?>
+				<a class="cms-button secondary" href="<?= escape($page->parent->editUrl) ?>"><?= escape(
+					__('collection:edit-parent'),
+				) ?></a>
+				<a class="cms-button secondary" href="<?= escape($page->parent->treeUrl) ?>"><?= escape(
+					__('collection:show-in-tree'),
+				) ?></a>
 			<?php endif ?>
 			<?php foreach ($page->createLinks as $link): ?>
 				<a
@@ -101,7 +97,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<form
 				class="search"
 				method="get"
-				action="<?= escape($page->path) ?>">
+				action="<?= escape($page->search->action) ?>">
 				<label class="sr-only" for="collection-search"><?= escape(
 					__('collection:search', ['name' => $page->name]),
 				) ?></label>
@@ -110,9 +106,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					id="collection-search"
 					name="q"
 					type="search"
-					value="<?= escape($page->query->q) ?>"
+					value="<?= escape($page->search->value) ?>"
 					placeholder="<?= escape(__('collection:search-placeholder')) ?>" />
-				<?php foreach ($page->searchFields as $field): ?>
+				<?php foreach ($page->search->fields as $field): ?>
 					<input
 						type="hidden"
 						name="<?= escape($field['name']) ?>"
@@ -120,18 +116,18 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<?php endforeach ?>
 			</form>
 
-			<?php if ($page->clearSearchUrl !== null): ?>
-				<a class="cms-button secondary" href="<?= escape($page->clearSearchUrl) ?>"><?= escape(
+			<?php if ($page->search->clearUrl !== null): ?>
+				<a class="cms-button secondary" href="<?= escape($page->search->clearUrl) ?>"><?= escape(
 					__('collection:clear-search'),
 				) ?></a>
 			<?php endif ?>
 
-			<?php if ($page->query->parent !== null): ?>
+			<?php if ($page->parent !== null): ?>
 				<div class="parent-context">
-					<?php if ($page->parentType !== null): ?>
-						<span class="type-pill"><?= escape($page->parentType) ?></span>
+					<?php if ($page->parent->type !== null): ?>
+						<span class="type-pill"><?= escape($page->parent->type) ?></span>
 					<?php endif ?>
-					<?php foreach ($page->parentStatus as $badge): ?>
+					<?php foreach ($page->parent->status as $badge): ?>
 						<span class="cms-status is-<?= escape($badge['kind']) ?>"><?= escape(
 						$badge['label'],
 					) ?></span>
@@ -145,7 +141,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<div class="empty">
 					<div class="icon" aria-hidden="true">⌁</div>
 					<strong><?= escape(__('collection:empty')) ?></strong>
-					<?php if ($page->query->q !== ''): ?>
+					<?php if ($page->search->value !== ''): ?>
 						<p><?= escape(__('collection:empty-filter-help')) ?></p>
 					<?php else: ?>
 						<p><?= escape(__('collection:empty-help')) ?></p>
@@ -196,13 +192,13 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 
 			<footer class="foot">
 				<span class="range"><?= escape(__('collection:showing', [
-					'start' => $page->rangeStart,
-					'end' => $page->rangeEnd,
-					'total' => $page->total,
+					'start' => $page->pager->rangeStart,
+					'end' => $page->pager->rangeEnd,
+					'total' => $page->pager->total,
 				])) ?></span>
 				<nav class="pagination" aria-label="<?= escape(__('collection:pagination')) ?>">
-					<?php if ($page->previousUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->previousUrl) ?>"><?= escape(
+					<?php if ($page->pager->previousUrl !== null): ?>
+						<a class="page-link" href="<?= escape($page->pager->previousUrl) ?>"><?= escape(
 							__('collection:previous'),
 						) ?></a>
 					<?php else: ?>
@@ -210,12 +206,12 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?php endif ?>
 
 					<span class="pages"><?= escape(__('collection:page', [
-						'page' => $page->currentPage,
-						'pages' => $page->pageCount,
+						'page' => $page->pager->currentPage,
+						'pages' => $page->pager->pageCount,
 					])) ?></span>
 
-					<?php if ($page->nextUrl !== null): ?>
-						<a class="page-link" href="<?= escape($page->nextUrl) ?>"><?= escape(
+					<?php if ($page->pager->nextUrl !== null): ?>
+						<a class="page-link" href="<?= escape($page->pager->nextUrl) ?>"><?= escape(
 							__('collection:next'),
 						) ?></a>
 					<?php else: ?>
