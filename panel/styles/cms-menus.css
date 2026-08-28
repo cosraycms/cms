@@ -269,6 +269,34 @@
 		border-top: 1px solid var(--cms-color-border-strong);
 	}
 
+	/* An empty child list is invisible until a drag starts; then every
+	   card offers it as a drop zone for nesting. */
+	& .menu-children.no-children {
+		margin-top: 0;
+
+		&::before {
+			display: none;
+		}
+	}
+
+	& .tree.is-dragging .menu-children {
+		min-height: 1rem;
+	}
+
+	& .tree.is-dragging .menu-children.no-children {
+		margin-top: var(--cms-space-1);
+		border: 1px dashed var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-md);
+	}
+
+	& .sortable-ghost {
+		opacity: 0.5;
+	}
+
+	& .sortable-drag .menu-card {
+		box-shadow: var(--cms-shadow-md, 0 4px 12px rgb(0 0 0 / 0.12));
+	}
+
 	& .menu-node {
 		position: relative;
 	}

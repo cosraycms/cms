@@ -57,6 +57,16 @@ $urls = (array) $this->unwrap($urls);
 						<p><?= escape(__('menu:tree-empty-help')) ?></p>
 					</div>
 				<?php else: ?>
+					<?php // The drag behavior posts drops through this form, so
+					// a move rides the boosted pipeline like every other action. ?>
+					<form
+						id="menu-drag"
+						method="post"
+						hidden
+						data-menu-drag-action="<?= escape($urls['tree']) ?>/item/__item__/move">
+						<input type="hidden" name="parent" value="" />
+						<input type="hidden" name="index" value="" />
+					</form>
 					<ul class="menu-tree" data-menu-list data-parent="">
 						<?php foreach ($tree as $row): ?>
 							<?php $this->insert('menu/node', [

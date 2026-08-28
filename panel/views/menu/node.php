@@ -83,15 +83,18 @@ $confirm = $descendants === 0
 			</div>
 		</details>
 	</div>
-	<?php if (count($children) > 0): ?>
-		<ul class="menu-children" data-menu-list data-parent="<?= escape($id) ?>">
-			<?php foreach ($children as $child): ?>
-				<?php $this->insert('menu/node', [
-					'row' => $child,
-					'treeUrl' => $treeUrl,
-					'selected' => $selected,
-				]) ?>
-			<?php endforeach ?>
-		</ul>
-	<?php endif ?>
+	<?php // Rendered even without children: every card owns a drop zone
+	// for the drag behavior, marked `no-children` while it is empty. ?>
+	<ul
+		class="menu-children<?= count($children) === 0 ? ' no-children' : '' ?>"
+		data-menu-list
+		data-parent="<?= escape($id) ?>">
+		<?php foreach ($children as $child): ?>
+			<?php $this->insert('menu/node', [
+				'row' => $child,
+				'treeUrl' => $treeUrl,
+				'selected' => $selected,
+			]) ?>
+		<?php endforeach ?>
+	</ul>
 </li>

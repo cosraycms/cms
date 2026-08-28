@@ -158,7 +158,9 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		$root = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu?add='));
 		$this->assertStringContainsString('action="/cp/menus/tree-menu/item/create"', $root);
-		$this->assertStringNotContainsString('name="parent"', $root);
+		// Only the drag form carries a parent input (empty); the pane's
+		// create form preselects none.
+		$this->assertStringNotContainsString('name="parent" value="add-parent"', $root);
 
 		$below = $this->getHtmlResponse(
 			$this->makeRequest('GET', '/cp/menus/tree-menu?add=add-parent'),

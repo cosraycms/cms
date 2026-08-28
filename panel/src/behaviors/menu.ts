@@ -1,13 +1,96 @@
-// Menus area behavior: tree collapse, the item form's type sections,
-// and the search pickers for nodes and assets. Document-level delegated
-// listeners, so htmx swaps cannot orphan them. The pickers talk to the
-// JSON search endpoints the element carries in `data-menu-picker-url`;
-// without JavaScript the hidden uid input simply keeps its value.
+// Menus area behavior: tree collapse, drag-and-drop reordering, the
+// item form's type sections, and the search pickers for nodes and
+// assets. Everything event-driven is a document-level delegated
+// listener, so htmx swaps cannot orphan it; the Sortable instances are
+// re-scanned after every swap instead. The pickers talk to the JSON
+// search endpoints the element carries in `data-menu-picker-url`;
+// without JavaScript the hidden uid input simply keeps its value and
+// the kebab's move buttons stay the reorder path.
+
+import type { SortableEvent } from 'sortablejs';
 
 type PickerItem = { uid: string; label: string; sub: string };
 
 const timers = new WeakMap<HTMLInputElement, ReturnType<typeof setTimeout>>();
 const aborters = new WeakMap<HTMLInputElement, AbortController>();
+const enhanced = new WeakSet<Element>();
+
+function tree(): Element | null {
+	return document.querySelector('.cms-menu-tree .tree');
+}
+
+async function initDrag(): Promise<void> {
+	const lists = [...document.querySelectorAll<HTMLElement>('[data-menu-list]')].filter(
+		(list) => !enhanced.has(list),
+	);
+
+	if (lists.length === 0) {
+		return;
+	}
+
+	// Loaded on demand, so only menu screens pay for the library.
+	const { default: Sortable } = await import('sortablejs');
+
+	for (const list of lists) {
+		if (enhanced.has(list)) {
+			continue;
+		}
+
+		enhanced.add(list);
+		new Sortable(list, {
+			group: 'cms-menu',
+			handle: '[data-menu-grip]',
+			animation: 150,
+			fallbackOnBody: true,
+			swapThreshold: 0.65,
+			onStart: () => tree()?.classList.add('is-dragging'),
+			onEnd: (event: SortableEvent) => {
+				tree()?.classList.remove('is-dragging');
+				submitMove(event.item, event.to, event.from, event.newIndex ?? 0, event.oldIndex ?? 0);
+			},
+		});
+	}
+}
+
+/**
+ * Posts a drop through the server-rendered `#menu-drag` form, so the
+ * move rides the same boosted pipeline as every other tree action and
+ * the response re-renders the tree (or rejects the move with a
+ * notice). Exported for the behavior tests; `onEnd` delegates here.
+ */
+export function submitMove(
+	item: HTMLElement,
+	to: HTMLElement,
+	from: HTMLElement,
+	newIndex: number,
+	oldIndex: number,
+): void {
+	if (to === from && newIndex === oldIndex) {
+		return;
+	}
+
+	const uid = item.dataset.uid ?? '';
+	const form = document.querySelector<HTMLFormElement>('#menu-drag');
+	const template = form?.dataset.menuDragAction ?? '';
+
+	if (!form || uid === '' || template === '') {
+		return;
+	}
+
+	form.action = template.replace('__item__', encodeURIComponent(uid));
+	const parent = form.elements.namedItem('parent');
+	const index = form.elements.namedItem('index');
+
+	if (parent instanceof HTMLInputElement) {
+		parent.value = to.dataset.parent ?? '';
+	}
+
+	if (index instanceof HTMLInputElement) {
+		index.value = String(newIndex);
+	}
+
+	form.requestSubmit();
+}
 
 function collapse(target: Element): boolean {
 	const toggle = target.closest('[data-menu-collapse]');
@@ -236,15 +319,22 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 export function install(): () => void {
+	const rescan = (): void => {
+		void initDrag();
+	};
+
 	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onChange);
 	document.addEventListener('keydown', onKeydown);
+	document.addEventListener('htmx:after:swap', rescan);
+	rescan();
 
 	return () => {
 		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onChange);
 		document.removeEventListener('keydown', onKeydown);
+		document.removeEventListener('htmx:after:swap', rescan);
 	};
 }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { install } from '../../src/behaviors/menu';
+import { install, submitMove } from '../../src/behaviors/menu';
 
 let uninstall: (() => void) | null = null;
 
@@ -10,12 +10,17 @@ function click(el: Element): void {
 beforeEach(() => {
 	vi.useFakeTimers();
 	document.body.innerHTML = `
-		<ul class="menu-tree">
+		<form id="menu-drag" method="post" hidden
+			data-menu-drag-action="/cp/menus/main/item/__item__/move">
+			<input type="hidden" name="parent" value="" />
+			<input type="hidden" name="index" value="" />
+		</form>
+		<ul class="menu-tree" data-menu-list data-parent="">
 			<li class="menu-node" data-uid="parent">
 				<div class="menu-card">
 					<button type="button" data-menu-collapse aria-expanded="true"></button>
 				</div>
-				<ul class="menu-children"><li class="menu-node" data-uid="child"></li></ul>
+				<ul class="menu-children" data-menu-list data-parent="parent"><li class="menu-node" data-uid="child"></li></ul>
 			</li>
 		</ul>
 		<form>
@@ -57,6 +62,36 @@ describe('tree collapse', () => {
 		click(toggle);
 		expect(node.classList.contains('is-collapsed')).toBe(false);
 		expect(toggle.getAttribute('aria-expanded')).toBe('true');
+	});
+});
+
+describe('drag submit', () => {
+	it('fills the drag form from the drop and submits it', () => {
+		const form = document.querySelector<HTMLFormElement>('#menu-drag')!;
+		form.requestSubmit = vi.fn();
+
+		const item = document.querySelector<HTMLElement>('.menu-node[data-uid="child"]')!;
+		const to = document.querySelector<HTMLElement>('[data-menu-list][data-parent=""]')!;
+		const from = document.querySelector<HTMLElement>('[data-menu-list][data-parent="parent"]')!;
+
+		submitMove(item, to, from, 1, 0);
+
+		expect(form.action).toContain('/cp/menus/main/item/child/move');
+		expect((form.elements.namedItem('parent') as HTMLInputElement).value).toBe('');
+		expect((form.elements.namedItem('index') as HTMLInputElement).value).toBe('1');
+		expect(form.requestSubmit).toHaveBeenCalledOnce();
+	});
+
+	it('ignores a drop back onto the same slot', () => {
+		const form = document.querySelector<HTMLFormElement>('#menu-drag')!;
+		form.requestSubmit = vi.fn();
+
+		const item = document.querySelector<HTMLElement>('.menu-node[data-uid="child"]')!;
+		const list = document.querySelector<HTMLElement>('[data-menu-list][data-parent="parent"]')!;
+
+		submitMove(item, list, list, 0, 0);
+
+		expect(form.requestSubmit).not.toHaveBeenCalled();
 	});
 });
 
