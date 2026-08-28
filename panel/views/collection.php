@@ -186,6 +186,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 							<?= escape(__('bulk:unpublish')) ?>
 						</button>
 					<?php endif ?>
+					<button type="button" class="action" data-bulk-open="duplicate">
+						<?= escape(__('bulk:duplicate')) ?>
+					</button>
 					<button type="button" class="action" data-bulk-open="delete">
 						<?= escape(__('bulk:delete')) ?>
 					</button>
@@ -314,6 +317,34 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					formaction="<?= escape($page->bulk['deleteUrl']) ?>"
 					data-bulk-confirm>
 					<?= escape(__('bulk:delete')) ?>
+				</button>
+			</footer>
+		</dialog>
+
+		<dialog class="cms-confirm" data-bulk-dialog="duplicate">
+			<h2><?= escape(__('bulk:duplicate')) ?></h2>
+			<p
+				class="question"
+				data-bulk-question
+				data-label-one="<?= escape(__('bulk:confirm-duplicate')) ?>"
+				data-label-many="<?= escape(__('bulk:confirm-duplicate-plural')) ?>"></p>
+			<?php // No data-bulk-gate: duplicating a parent without its children
+			// is a legitimate copy, so the checkbox is a plain option. ?>
+			<label class="children" data-bulk-children hidden>
+				<input type="checkbox" name="children" value="1" form="collection-bulk" />
+				<span><?= escape(__('bulk:duplicate-children')) ?></span>
+			</label>
+			<footer>
+				<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+					__('bulk:cancel'),
+				) ?></button>
+				<button
+					type="submit"
+					class="cms-button primary"
+					form="collection-bulk"
+					formaction="<?= escape($page->bulk['duplicateUrl']) ?>"
+					data-bulk-confirm>
+					<?= escape(__('bulk:duplicate')) ?>
 				</button>
 			</footer>
 		</dialog>

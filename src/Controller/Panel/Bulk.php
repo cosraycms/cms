@@ -17,6 +17,7 @@ use Cosray\Collection as CmsCollection;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
+use Cosray\Node\Duplicator;
 use Cosray\Node\PathManager;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
@@ -151,6 +152,71 @@ final class Bulk extends Panel
 			'skipped-locked' => $skippedLocked,
 			'skipped' => $skipped,
 		]);
+	}
+
+	public function duplicate(Context $context, Cms $cms, Factory $factory, string $collection): Response
+	{
+		$obj = $this->collection($collection);
+		$form = $this->formData();
+		$withChildren = ($form['children'] ?? null) === '1';
+		[$nodes, $missing] = $this->selection($obj, $form);
+		$duplicator = new Duplicator($context, $cms, $this->types());
+		$actor = $this->actor();
+		$duplicated = 0;
+
+		$this->transaction($context, function () use (
+			$cms,
+			$duplicator,
+			$actor,
+			$nodes,
+			$withChildren,
+			&$duplicated,
+		): void {
+			foreach ($nodes as $node) {
+				// The subtree copy of a selected ancestor covers this node.
+				if ($withChildren && $this->coveredBySelection($cms, $node, $nodes)) {
+					continue;
+				}
+
+				$result = $duplicator->duplicate($node, $actor, $withChildren);
+				$duplicated += count($result['created']);
+			}
+		});
+
+		return $this->redirect($factory, $collection, [
+			'duplicated' => $duplicated,
+			'skipped' => $missing,
+		]);
+	}
+
+	/**
+	 * Whether one of the node's ancestors is part of the selection. The
+	 * chain may run through unselected nodes, so it walks the stored
+	 * parents rather than just the selection.
+	 *
+	 * @param array<string, Wrapper> $selection
+	 */
+	private function coveredBySelection(Cms $cms, Wrapper $node, array $selection): bool
+	{
+		$seen = [];
+		$parent = $node->meta->get('parent');
+
+		while (is_string($parent) && $parent !== '' && !in_array($parent, $seen, true)) {
+			if (isset($selection[$parent])) {
+				return true;
+			}
+
+			$seen[] = $parent;
+			$ancestor = $cms->node->byUid($parent, published: null);
+
+			if (!$ancestor) {
+				break;
+			}
+
+			$parent = $ancestor->meta->get('parent');
+		}
+
+		return false;
 	}
 
 	private function transaction(Context $context, callable $work): void

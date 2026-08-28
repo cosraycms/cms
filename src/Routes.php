@@ -251,6 +251,13 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
+						'/collection/{collection}/bulk/duplicate',
+						[Panel\Bulk::class, 'duplicate'],
+						'collection.bulk.duplicate',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/delete',
 						[Panel\Editor::class, 'delete'],
 						'editor.delete',

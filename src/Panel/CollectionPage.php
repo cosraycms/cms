@@ -15,7 +15,7 @@ final class CollectionPage
 	/**
 	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
-	 * @param array{publishUrl: string, deleteUrl: string, showPublished: bool} $bulk
+	 * @param array{publishUrl: string, deleteUrl: string, duplicateUrl: string, showPublished: bool} $bulk
 	 */
 	private function __construct(
 		public readonly string $name,
@@ -85,6 +85,7 @@ final class CollectionPage
 			bulk: [
 				'publishUrl' => $urls->bulk('publish'),
 				'deleteUrl' => $urls->bulk('delete'),
+				'duplicateUrl' => $urls->bulk('duplicate'),
 				'showPublished' => $meta->showPublished,
 			],
 		);

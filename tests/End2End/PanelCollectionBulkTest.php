@@ -8,6 +8,7 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
+use Cosray\Tests\Fixtures\Collection\TestRoutableHierarchyCollection;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
 use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
 
@@ -31,6 +32,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$plugin->node(TestHierarchyParent::class);
 		$plugin->node(TestHierarchyChild::class);
 		$plugin->collection(TestHierarchyCollection::class);
+		$plugin->collection(TestRoutableHierarchyCollection::class);
 
 		return $plugin;
 	}
@@ -363,6 +365,250 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $response);
 	}
 
+	public function testListingRendersDuplicateDialog(): void
+	{
+		$this->createNode(uid: 'bulk-dup-markup', title: 'Dup Markup');
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('data-bulk-dialog="duplicate"', $html);
+		$this->assertStringContainsString('data-bulk-open="duplicate"', $html);
+		$this->assertStringContainsString(
+			'formaction="/cp/collection/test-hierarchy/bulk/duplicate?sort=changed&amp;dir=desc"',
+			$html,
+		);
+		$this->assertStringContainsString('data-bulk-children data-bulk-gate', $html);
+	}
+
+	public function testBulkDuplicateCreatesAnUnlockedDraftCopy(): void
+	{
+		$this->createNode(
+			uid: 'bulk-dup-source',
+			title: 'Dup Source',
+			published: true,
+			locked: true,
+			handle: 'bulk-dup-source-handle',
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+			'body' => ['nodes' => ['bulk-dup-source']],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('duplicated:1'),
+			$response->getHeaderLine('Location'),
+		);
+
+		$copy = $this->db()->execute(
+			"SELECT n.uid, n.published, n.locked, n.parent, n.content::text AS content,
+				(SELECT s.content::text FROM cms.nodes s WHERE s.uid = 'bulk-dup-source') AS source
+			FROM cms.nodes n
+			WHERE n.type = :type AND n.uid <> 'bulk-dup-source'",
+			['type' => $this->parentTypeId],
+		)->one();
+
+		$this->assertNotSame('bulk-dup-source', $copy['uid']);
+		$this->assertFalse((bool) $copy['published']);
+		$this->assertFalse((bool) $copy['locked']);
+		$this->assertNull($copy['parent']);
+		$this->assertSame($copy['source'], $copy['content']);
+		$handles = $this->db()->execute(
+			"SELECT count(*) AS count FROM cms.node_handles WHERE handle LIKE 'bulk-dup-source%'",
+		)->one();
+		$this->assertSame(1, (int) $handles['count']);
+	}
+
+	public function testBulkDuplicateWithChildrenRemapsTheSubtree(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-dup-root', title: 'Dup Root');
+		$childId = $this->createNode(uid: 'bulk-dup-child', title: 'Dup Child', parent: $rootId);
+		$this->createNode(
+			uid: 'bulk-dup-grandchild',
+			title: 'Dup Grandchild',
+			type: $this->childTypeId,
+			parent: $childId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+			'body' => ['nodes' => ['bulk-dup-root'], 'children' => '1'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('duplicated:3'),
+			$response->getHeaderLine('Location'),
+		);
+
+		$rootCopy = $this->db()->execute(
+			"SELECT node FROM cms.nodes
+			WHERE type = :type AND parent IS NULL AND uid <> 'bulk-dup-root'",
+			['type' => $this->parentTypeId],
+		)->one();
+		$childCopy = $this->db()->execute(
+			'SELECT node, published FROM cms.nodes WHERE parent = :parent',
+			['parent' => $rootCopy['node']],
+		)->one();
+		$grandchildCopy = $this->db()->execute(
+			'SELECT uid FROM cms.nodes WHERE parent = :parent',
+			['parent' => $childCopy['node']],
+		)->one();
+
+		$this->assertFalse((bool) $childCopy['published']);
+		$this->assertNotSame('bulk-dup-grandchild', $grandchildCopy['uid']);
+	}
+
+	public function testBulkDuplicateSkipsDescendantsOfSelectedAncestors(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-dup-cov-root', title: 'Cov Root');
+		$childId = $this->createNode(uid: 'bulk-dup-cov-child', title: 'Cov Child', parent: $rootId);
+		$this->createNode(
+			uid: 'bulk-dup-cov-grandchild',
+			title: 'Cov Grandchild',
+			type: $this->childTypeId,
+			parent: $childId,
+		);
+
+		// Grandchild's chain to the selected root runs through an unselected
+		// node; the subtree copy of the root must still cover it.
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+			'body' => [
+				'nodes' => ['bulk-dup-cov-root', 'bulk-dup-cov-grandchild'],
+				'children' => '1',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('duplicated:3'),
+			$response->getHeaderLine('Location'),
+		);
+	}
+
+	public function testBulkDuplicateWithoutChildrenCopiesOnlyTheNode(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-dup-flat-root', title: 'Flat Root');
+		$this->createNode(
+			uid: 'bulk-dup-flat-child',
+			title: 'Flat Child',
+			type: $this->childTypeId,
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+			'body' => ['nodes' => ['bulk-dup-flat-root']],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('duplicated:1'),
+			$response->getHeaderLine('Location'),
+		);
+
+		$copy = $this->db()->execute(
+			"SELECT node FROM cms.nodes
+			WHERE type = :type AND parent IS NULL AND uid <> 'bulk-dup-flat-root'",
+			['type' => $this->parentTypeId],
+		)->one();
+		$children = $this->db()->execute(
+			'SELECT count(*) AS count FROM cms.nodes WHERE parent = :parent',
+			['parent' => $copy['node']],
+		)->one();
+
+		$this->assertSame(0, (int) $children['count']);
+	}
+
+	public function testBulkDuplicateSkipsUnknownNodes(): void
+	{
+		$this->createNode(uid: 'bulk-dup-known', title: 'Dup Known');
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+			'body' => ['nodes' => ['bulk-dup-known', 'bulk-dup-unknown']],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('duplicated:1,skipped:1'),
+			$response->getHeaderLine('Location'),
+		);
+	}
+
+	public function testBulkDuplicateGeneratesSuffixedPathsForRoutableCopies(): void
+	{
+		$routableType = $this->createTestType('optional-parent-path-route-page');
+		$this->createNode(uid: 'bulk-dup-route', title: 'Route Source', type: $routableType);
+
+		// Twice: the first copy generates the base path (the raw-SQL source
+		// has none), the second collides with the first and gets suffixed.
+		foreach ([1, 2] as $round) {
+			$response = $this->makeRequest(
+				'POST',
+				'/cp/collection/test-routable-hierarchy/bulk/duplicate',
+				['body' => ['nodes' => ['bulk-dup-route']]],
+			);
+			$this->assertResponseStatus(303, $response, "duplication round {$round}");
+		}
+
+		$paths = array_column(
+			$this->db()->execute(
+				"SELECT p.path FROM cms.url_paths p
+				JOIN cms.nodes n ON n.node = p.node
+				WHERE n.type = :type AND n.uid <> 'bulk-dup-route' AND p.locale = 'en'
+				ORDER BY p.created",
+				['type' => $routableType],
+			)->all(),
+			'path',
+		);
+
+		$this->assertCount(2, $paths);
+		$this->assertNotSame($paths[0], $paths[1]);
+		$this->assertStringStartsWith($paths[0] . '-', $paths[1]);
+	}
+
+	public function testBulkDuplicateComposesChildPathsUnderTheCopiedParent(): void
+	{
+		$routableType = $this->createTestType('optional-parent-path-route-page');
+		$rootId = $this->createNode(
+			uid: 'bulk-dup-route-root',
+			title: 'Route Root',
+			type: $routableType,
+		);
+		$this->createNode(
+			uid: 'bulk-dup-route-child',
+			title: 'Route Child',
+			type: $routableType,
+			parent: $rootId,
+		);
+
+		$response = $this->makeRequest(
+			'POST',
+			'/cp/collection/test-routable-hierarchy/bulk/duplicate',
+			['body' => ['nodes' => ['bulk-dup-route-root'], 'children' => '1']],
+		);
+
+		$this->assertResponseStatus(303, $response);
+
+		$rootCopy = $this->db()->execute(
+			"SELECT n.node, p.path FROM cms.nodes n
+			JOIN cms.url_paths p ON p.node = n.node AND p.locale = 'en'
+			WHERE n.type = :type AND n.parent IS NULL AND n.uid <> 'bulk-dup-route-root'",
+			['type' => $routableType],
+		)->one();
+		$childCopy = $this->db()->execute(
+			"SELECT p.path FROM cms.nodes n
+			JOIN cms.url_paths p ON p.node = n.node AND p.locale = 'en'
+			WHERE n.parent = :parent",
+			['parent' => $rootCopy['node']],
+		)->one();
+
+		$this->assertStringStartsWith(
+			rtrim((string) $rootCopy['path'], '/') . '/',
+			(string) $childCopy['path'],
+		);
+	}
+
 	public function testNoticeParamRendersBannerAndIgnoresGarbage(): void
 	{
 		$this->createNode(uid: 'bulk-notice-a', title: 'Notice A');
@@ -407,6 +653,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		?int $parent = null,
 		bool $published = true,
 		bool $locked = false,
+		?string $handle = null,
 	): int {
 		$data = [
 			'uid' => $uid,
@@ -423,6 +670,10 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		if ($parent !== null) {
 			$data['parent'] = $parent;
+		}
+
+		if ($handle !== null) {
+			$data['handle'] = $handle;
 		}
 
 		return $this->createTestNode($data);
