@@ -38,6 +38,7 @@ use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionSearch;
 use Cosray\Panel\CollectionTable;
 use Cosray\Panel\CollectionUrls;
+use Cosray\Panel\Dashboard as PanelDashboard;
 use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Plugin;
@@ -62,8 +63,13 @@ class Bootstrap implements CorePlugin
 	protected readonly BlockRegistry $blocks;
 	protected readonly Controls $controls;
 	protected readonly CollectionSchemas $collectionSchemas;
+	protected readonly PanelDashboard $dashboardCards;
 
-	/** @property array<Entry> */
+	public PanelDashboard $dashboard {
+		get => $this->dashboardCards;
+	}
+
+	/** @var array<Entry> */
 	protected array $renderers = [];
 
 	protected readonly Navigation $navigation;
@@ -119,6 +125,7 @@ class Bootstrap implements CorePlugin
 		$this->panelExtras = new PanelExtras();
 		$this->collectionSchemas = new CollectionSchemas(CollectionSchemaRegistry::withDefaults());
 		$this->navigation = new Navigation($this->collectionSchemas);
+		$this->dashboardCards = PanelDashboard::withDefaults();
 	}
 
 	public function load(App $app): void
@@ -150,6 +157,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(Controls::class, $this->controls);
 		$this->container->add(CollectionSchemas::class, $this->collectionSchemas);
 		$this->container->add(CollectionSchemaRegistry::class, $this->collectionSchemas->registry());
+		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(IconProvider::class, Icons::class);

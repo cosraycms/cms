@@ -12,6 +12,7 @@ use Cosray\Collection;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
+use Cosray\Contract\DashboardCard;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
 use Cosray\Section;
@@ -77,6 +78,12 @@ final class Registrar
 	public function collection(string $class): Ref
 	{
 		return $this->bootstrap->collection($class);
+	}
+
+	/** @param class-string<DashboardCard>|DashboardCard $card */
+	public function dashboardCard(string|DashboardCard $card): void
+	{
+		$this->bootstrap->dashboard->add($card);
 	}
 
 	public function migrations(string $dir): void

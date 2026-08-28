@@ -19,8 +19,7 @@
 	min-height: 0;
 }
 
-.cms-media,
-.cms-dashboard {
+.cms-media {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
@@ -54,8 +53,7 @@
 }
 
 @media (max-width: 52rem) {
-	.cms-media,
-	.cms-dashboard {
+	.cms-media {
 		overflow: visible;
 
 		& .head,

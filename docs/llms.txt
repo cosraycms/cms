@@ -587,6 +587,8 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/static/*` installed panel client assets
 - `GET <panelPath>/collection/{collection}` server-rendered collection list
 
+The dashboard has an ordered card registry exposed as the `$app->dashboard` property. Cosray registers entries, drafts, and media cards by default; applications call `$app->dashboard->add(CardProvider::class)` or `replace(...)`, and plugins call `Registrar::dashboardCard()`. Providers implement `Cosray\Contract\DashboardCard` and return a nullable `Cosray\Panel\Dashboard\Card` DTO (`label`, `value`, optional `note` and `url`). Class-string providers are autowired per dashboard request; `null` omits the card. Integer values are locale-formatted, while strings are display-ready. The optional `url` is panel-internal.
+
 Panel responses are rendered in layers, and htmx picks the layer by naming the region it is about to swap. `Panel::layer()` reads the request headers:
 
 - `main` — the content region alone (`HX-Target: main#main`), for navigation inside an area

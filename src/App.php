@@ -21,6 +21,7 @@ use Celema\Router\Router;
 use Closure;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Types;
+use Cosray\Panel\Dashboard;
 use Cosray\View\Boiler\Error\Handler as ErrorHandler;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -130,6 +131,10 @@ class App implements RouteAdder
 		$this->bootstrap->icons($icons, $replace);
 
 		return $this;
+	}
+
+	public Dashboard $dashboard {
+		get => $this->bootstrap->dashboard;
 	}
 
 	public function navigation(): Navigation

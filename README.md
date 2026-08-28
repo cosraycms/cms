@@ -190,6 +190,47 @@ public function register(Registrar $cms): void
 
 Outside `register()` — in controllers, fields, services — read the same namespaced keys from the container's `Cosray\Config`.
 
+### Dashboard cards
+
+The dashboard starts with Cosray's entries, drafts, and media cards. Applications can append an autowired card provider through the dashboard property:
+
+```php
+$app->dashboard->add(\App\Panel\OpenForms::class);
+```
+
+A card implements `Cosray\Contract\DashboardCard` and returns a `Cosray\Panel\Dashboard\Card` DTO. Providers registered by class name are constructed per dashboard request, so they may inject services such as `Database`, `Config`, or `Context`. Returning `null` omits the card for that request.
+
+```php
+use Celema\Quma\Database;
+use Cosray\Contract\DashboardCard;
+use Cosray\Panel\Dashboard\Card;
+
+final class OpenForms implements DashboardCard
+{
+    public function __construct(private readonly Database $db) {}
+
+    public function card(): ?Card
+    {
+        $stats = $this->db->forms->dashboard()->one();
+
+        return new Card(
+            label: __('Open forms'),
+            value: (int) $stats['open'],
+            note: __(':count unanswered', ['count' => (int) $stats['unanswered']]),
+        );
+    }
+}
+```
+
+Card labels and notes are plain text. Integer values are formatted for the active panel locale; string values are displayed unchanged. `note` and the panel-internal `url` are optional. Registration order is display order. An application can select and reorder the complete list with `$app->dashboard->replace(...)`. Plugins append without replacing application choices:
+
+```php
+public function register(Registrar $cms): void
+{
+    $cms->dashboardCard(OpenOrders::class);
+}
+```
+
 ### Panel apps
 
 Plugins can ship whole apps that live inside the panel chrome — session, authentication, sidebar and layout come for free:

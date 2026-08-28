@@ -3,6 +3,7 @@
 @import './cms-shell.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);
 @import './cms-media.css' layer(panel);
+@import './cms-dashboard.css' layer(panel);
 @import './cms-collection.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);

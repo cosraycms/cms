@@ -12,6 +12,7 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Panel\Dashboard;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
@@ -19,6 +20,7 @@ use Cosray\Tests\Fixtures\Field\TestMoney;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Plugin\TestBadge;
 use Cosray\Tests\Fixtures\Plugin\TestBadgeHandler;
+use Cosray\Tests\Fixtures\Plugin\TestDashboardCard;
 use Cosray\Tests\Fixtures\Plugin\TestParameterizedPlugin;
 use Cosray\Tests\Fixtures\Plugin\TestPlugin;
 use Cosray\Tests\TestCase;
@@ -67,6 +69,9 @@ final class PluginRegistrationTest extends TestCase
 			['tag' => 'test-money-picker', 'module' => 'test-plugin/controls.js'],
 			$controls->get('test-money-picker'),
 		);
+
+		$dashboard = $container->get(Dashboard::class);
+		$this->assertContains(TestDashboardCard::class, $dashboard->cards());
 	}
 
 	public function testPluginRegistersCollection(): void
