@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Controller\Panel;
 
 use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
@@ -262,7 +263,7 @@ final class Editor extends Panel
 		Factory $factory,
 		string $collection,
 		string $node,
-	): Response {
+	): Response|array {
 		[, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
 		$result = $cms->node->byUid($node, published: null);
@@ -271,6 +272,7 @@ final class Editor extends Panel
 			throw new HttpNotFound($this->request);
 		}
 
+		$nodeObj = Wrapper::unwrap($result);
 		$store = new Store(
 			$context->db,
 			new PathManager(),
@@ -280,7 +282,24 @@ final class Editor extends Panel
 			cms: $cms,
 			context: $context,
 		);
-		$store->delete(Wrapper::unwrap($result), $this->actor());
+
+		try {
+			$store->delete($nodeObj, $this->actor());
+		} catch (HttpConflict $e) {
+			// Rendered through the editor-save view: the refusal lands in
+			// the status chip, the form stays as it is.
+			$payload = is_array($e->payload()) ? $e->payload() : [];
+
+			return [
+				'saved' => false,
+				'message' => (string) ($payload['message'] ?? __('node:has-children')),
+				'errors' => [],
+				'published' => (bool) $result->meta->get('published'),
+				'renderable' => (bool) $this->types()->get($nodeObj::class, 'renderable', false),
+				'preview' => null,
+			];
+		}
+
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		return Response::create($factory)->redirect($links->collection(), 303);

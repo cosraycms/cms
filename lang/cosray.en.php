@@ -113,6 +113,7 @@ return [
 		'node:duplicate-handle-uid' => 'A node uid with the same handle already exists: :handle',
 		'node:duplicate-uid' => 'A node with the same uid already exists: :uid',
 		'node:handle-required' => 'A handle is required for this node route',
+		'node:has-children' => 'The entry has child entries; delete them first.',
 		'node:invalid-data' => 'Incomplete or invalid data',
 		'node:invalid-parent' => 'Invalid parent uid: :uid',
 		'node:locked' => 'This document is locked',

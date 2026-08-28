@@ -109,9 +109,13 @@ foreach ($fieldsets as $fieldset) {
 				<?php // Its own form: the editor form wraps the panes, and forms
 
 				// cannot nest. ?>
+				<?php // hx-swap="none" like the editor form: success is a 303 htmx
+				// follows into the collection, a refusal returns only the
+				// out-of-band status chip. ?>
 				<form
 					method="post"
 					action="<?= escape($links->delete($uid)) ?>"
+					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
 					<button class="cms-button danger" type="submit">
 						<?= escape(__('editor:delete')) ?>

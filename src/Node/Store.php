@@ -136,19 +136,87 @@ class Store
 		throw new RuntimeException('Could not generate a unique node uid');
 	}
 
-	public function delete(object $node, Actor $actor): array
+	/** @return array{success: true, error: false, deleted: list<string>} */
+	public function delete(object $node, Actor $actor, bool $withChildren = false): array
 	{
-		$uid = Factory::meta($node, 'uid');
+		$uid = (string) Factory::meta($node, 'uid');
 
-		$this->db->nodes->delete([
-			'uid' => $uid,
-			'editor' => $actor->id,
-		])->run();
+		if (!$withChildren && $this->childUids($uid) !== []) {
+			throw new HttpConflict(payload: ['message' => __('node:has-children')]);
+		}
+
+		$uids = $withChildren ? $this->subtreeUids($uid) : [$uid];
+		$ownsTransaction = !$this->db->getConn()->inTransaction();
+
+		try {
+			if ($ownsTransaction) {
+				$this->db->begin();
+			}
+
+			foreach ($uids as $deleteUid) {
+				$this->db->nodes->delete([
+					'uid' => $deleteUid,
+					'editor' => $actor->id,
+				])->run();
+			}
+
+			if ($ownsTransaction) {
+				$this->db->commit();
+			}
+		} catch (Throwable $e) {
+			if ($ownsTransaction) {
+				$this->db->rollback();
+			}
+
+			throw new RuntimeException(
+				'Error while deleting: ' . $e->getMessage(),
+				(int) $e->getCode(),
+				previous: $e,
+			);
+		}
 
 		return [
 			'success' => true,
 			'error' => false,
+			'deleted' => $uids,
 		];
+	}
+
+	/**
+	 * The node and all its non-deleted descendants, children before
+	 * parents so a partial failure never leaves a reachable orphan.
+	 *
+	 * @return list<string>
+	 */
+	private function subtreeUids(string $uid): array
+	{
+		$uids = [$uid];
+		$queue = [$uid];
+
+		while ($queue !== []) {
+			$current = array_shift($queue);
+
+			foreach ($this->childUids($current) as $child) {
+				// A parent cycle would loop forever; unseen uids only.
+				if (in_array($child, $uids, true)) {
+					continue;
+				}
+
+				$uids[] = $child;
+				$queue[] = $child;
+			}
+		}
+
+		return array_reverse($uids);
+	}
+
+	/** @return list<string> */
+	private function childUids(string $uid): array
+	{
+		return array_map(
+			static fn(array $row): string => (string) $row['uid'],
+			$this->db->nodes->childUids(['uid' => $uid])->all(),
+		);
 	}
 
 	public function validate(object $node, array $data, Locales $locales): array

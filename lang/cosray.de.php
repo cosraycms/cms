@@ -113,6 +113,7 @@ return [
 		'node:duplicate-handle-uid' => 'Es existiert bereits eine Knoten-uid mit demselben Handle: :handle',
 		'node:duplicate-uid' => 'Es existiert bereits ein Knoten mit derselben uid: :uid',
 		'node:handle-required' => 'Für diese Knoten-Route ist ein Handle erforderlich',
+		'node:has-children' => 'Der Eintrag hat Untereinträge; bitte zuerst diese löschen.',
 		'node:invalid-data' => 'Unvollständige oder ungültige Daten',
 		'node:invalid-parent' => 'Ungültige Eltern-uid: :uid',
 		'node:locked' => 'Dieses Dokument ist gesperrt',
