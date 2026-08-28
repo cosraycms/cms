@@ -14,12 +14,14 @@ $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $help = $this->unwrap($help ?? null);
 $section = $this->unwrap($section ?? null);
+$sectionHide = $this->unwrap($sectionHide ?? null);
 $sectionHidden = (bool) ($sectionHidden ?? false);
 $multi = count($locales) > 1;
 ?>
 <div
 	class="cms-field<?= is_string($error) ? ' has-error' : '' ?>"
 	<?= is_string($section) ? 'data-menu-section="' . escape($section) . '"' : '' ?>
+	<?= is_string($sectionHide) ? 'data-menu-section-hide="' . escape($sectionHide) . '"' : '' ?>
 	<?= $sectionHidden ? 'hidden' : '' ?>>
 	<label class="label" for="<?= escape($id) ?>-<?= escape($defaultLocale) ?>">
 		<div><?= escape($label) ?></div>

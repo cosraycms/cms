@@ -361,6 +361,61 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 	}
 
+	public function testCreatesAndDisplaysAChildrenItem(): void
+	{
+		$this->createTestNode([
+			'uid' => 'menu-children-root',
+			'type' => $this->nodeTypeId,
+			'published' => true,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Products']]],
+		]);
+
+		$rejected = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'children', 'node' => 'never-was'],
+		]);
+		$this->assertResponseOk($rejected);
+		$this->assertStringContainsString(
+			'Pick an existing page.',
+			$this->getHtmlResponse($rejected),
+		);
+
+		$accepted = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => [
+				'type' => 'children',
+				'node' => 'menu-children-root',
+				'levels' => '2',
+				'order' => 'created desc',
+				// Hidden sections still submit; the payload must drop them.
+				'title' => ['en' => 'Ignored'],
+				'class' => 'ignored',
+			],
+		]);
+		$this->assertResponseStatus(303, $accepted);
+
+		$item = $this->order()[0];
+		$this->assertEquals(
+			[
+				'type' => 'children',
+				'node' => 'menu-children-root',
+				'levels' => 2,
+				'order' => 'created desc',
+			],
+			$this->itemData($item),
+		);
+
+		// The editor tree names the source node and stays unexpanded.
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$this->assertStringContainsString('Children of &quot;Products&quot;', $html);
+
+		// Editing prefills the configuration.
+		$pane = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?item=' . $item),
+		);
+		$this->assertStringContainsString('name="levels"', $pane);
+		$this->assertMatchesRegularExpression('/name="levels"[^>]*value="2"/s', $pane);
+		$this->assertStringContainsString('<option value="created desc" selected>', $pane);
+	}
+
 	public function testLegacyNodeStubKeepsItsSnapshotInTheTree(): void
 	{
 		$this->createItem('legacy-stub', null, 1, [

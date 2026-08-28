@@ -75,7 +75,7 @@ class Cms
 
 	public function menu(string $menu): Menu
 	{
-		return new Menu($this->context, $menu);
+		return new Menu($this->context, $menu, $this);
 	}
 
 	public function render(

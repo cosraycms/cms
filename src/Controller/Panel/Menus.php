@@ -14,6 +14,7 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Finder\Menu as FinderMenu;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
 
@@ -258,7 +259,9 @@ final class Menus extends Panel
 			'menu' => $menu,
 			'description' => (string) $row['description'],
 			'itemCount' => (int) $row['items'],
-			'tree' => $this->branch($cms->menu($menu)),
+			// Unexpanded: the editor shows `children` items as stored,
+			// not what they resolve into.
+			'tree' => $this->branch(new FinderMenu($context, $menu, expand: false), $cms),
 			'pane' => $pane,
 			'notice' => $this->treeNotice(),
 			'urls' => [
@@ -361,16 +364,27 @@ final class Menus extends Panel
 	 *
 	 * @return list<array<string, mixed>>
 	 */
-	private function branch(iterable $items): array
+	private function branch(iterable $items, Cms $cms): array
 	{
 		$rows = [];
 
 		foreach ($items as $entry) {
-			$children = $this->branch($entry->children());
+			$children = $this->branch($entry->children(), $cms);
+			$title = $entry->title();
+
+			if ($entry->type() === 'children') {
+				$node = $entry->node();
+				$title = __('menu:children-of', [
+					'title' => $node === null
+						? ''
+						: $cms->node->byUid($node, published: null)?->label() ?? $node,
+				]);
+			}
+
 			$rows[] = [
 				'id' => $entry->id(),
 				'type' => $entry->type(),
-				'title' => $entry->title(),
+				'title' => $title,
 				'href' => $entry->href(),
 				'children' => $children,
 				'descendants' =>
@@ -405,6 +419,26 @@ final class Menus extends Panel
 		}
 
 		$data = ['type' => $type];
+
+		// A `children` item is pure configuration: the linked node, the
+		// depth, and the order — no label of its own.
+		if ($type === 'children') {
+			if (
+				$values['node'] === ''
+				|| $cms->node->byUid($values['node'], published: null) === null
+			) {
+				$errors['node'] = __('menu:error-item-node');
+			} else {
+				$data['node'] = $values['node'];
+			}
+
+			$data['levels'] = min(5, max(1, (int) $values['levels']));
+			$data['order'] = in_array($values['order'], FinderMenu::CHILD_ORDERS, true)
+				? $values['order']
+				: 'title';
+
+			return [$data, $errors];
+		}
 
 		if ($values['title'] !== []) {
 			$data['title'] = $values['title'];
@@ -486,6 +520,8 @@ final class Menus extends Panel
 			'target' => ($body['target'] ?? '') === '_blank',
 			'class' => trim((string) ($body['class'] ?? '')),
 			'image' => trim((string) ($body['image'] ?? '')),
+			'levels' => (int) ($body['levels'] ?? 1),
+			'order' => trim((string) ($body['order'] ?? '')),
 		];
 	}
 
@@ -508,6 +544,8 @@ final class Menus extends Panel
 			'target' => ($data['target'] ?? '') === '_blank',
 			'class' => is_string($data['class'] ?? null) ? $data['class'] : '',
 			'image' => is_string($data['image'] ?? null) ? $data['image'] : '',
+			'levels' => max(1, (int) ($data['levels'] ?? 1)),
+			'order' => is_string($data['order'] ?? null) ? $data['order'] : '',
 		];
 	}
 

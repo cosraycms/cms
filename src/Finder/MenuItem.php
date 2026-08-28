@@ -52,6 +52,14 @@ class MenuItem implements Iterator
 		return (string) $this->item['item'];
 	}
 
+	/** The linked node uid of `node` and `children` items, null otherwise. */
+	public function node(): ?string
+	{
+		$uid = $this->data['node'] ?? null;
+
+		return is_string($uid) && $uid !== '' ? $uid : null;
+	}
+
 	public function type(): string
 	{
 		return $this->data['type'];

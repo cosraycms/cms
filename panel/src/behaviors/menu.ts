@@ -246,10 +246,20 @@ function onChange(event: Event): void {
 
 	const form = select.closest('form');
 
-	form?.querySelectorAll<HTMLElement>('[data-menu-section]').forEach((section) => {
-		const types = (section.dataset.menuSection ?? '').split(' ');
-		section.hidden = !types.includes(select.value);
-	});
+	form
+		?.querySelectorAll<HTMLElement>('[data-menu-section], [data-menu-section-hide]')
+		.forEach((section) => {
+			const show = section.dataset.menuSection;
+
+			if (typeof show === 'string' && show !== '') {
+				section.hidden = !show.split(' ').includes(select.value);
+
+				return;
+			}
+
+			const hide = section.dataset.menuSectionHide ?? '';
+			section.hidden = hide.split(' ').includes(select.value);
+		});
 }
 
 function pick(option: HTMLElement): void {

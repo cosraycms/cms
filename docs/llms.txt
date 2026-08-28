@@ -480,6 +480,14 @@ Menus:
   `asset` (asset uid, links the file's current path); any other type
   renders as an unlinked label; per-locale maps resolve through the
   locale fallback chain with the neutral `zxx` key as the last resort
+- the dynamic `children` type (`node` uid, `levels` int ≥ 1, `order`
+  of `title`/`created`/`created desc`/`changed desc`) expands at read
+  time into the linked node's published, visible children, synthesized
+  as node entries with resolved titles and paths — rot-free, at the
+  cost of node queries per `children` item and level per render. The
+  panel edits it as stored: `new Finder\Menu($context, $menu, expand:
+  false)` skips expansion, and expansion needs the `Cms` entry point
+  `Cms::menu()` passes along
 - `node` items storing the linked node's uid under `data.node` follow
   the node's current localized path at read time; the per-locale `path`
   snapshot in the item data is the fallback for legacy rows (numeric

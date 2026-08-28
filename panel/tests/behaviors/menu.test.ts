@@ -28,10 +28,12 @@ beforeEach(() => {
 				<option value="node" selected>node</option>
 				<option value="url">url</option>
 				<option value="label">label</option>
+				<option value="children">children</option>
 			</select>
-			<div id="node-section" data-menu-section="node"></div>
+			<div id="node-section" data-menu-section="node children"></div>
 			<div id="url-section" data-menu-section="url" hidden></div>
 			<div id="target-section" data-menu-section="node url asset"></div>
+			<div id="title-section" data-menu-section-hide="children"></div>
 			<div class="control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/cp/reference/nodes?limit=8">
 				<input type="hidden" name="node" value="old-uid" data-menu-picker-value />
 				<input type="text" data-menu-picker-search value="Old title" />
@@ -111,6 +113,23 @@ describe('type sections', () => {
 
 		expect(document.getElementById('url-section')!.hidden).toBe(true);
 		expect(document.getElementById('target-section')!.hidden).toBe(true);
+	});
+
+	it('hide-lists conceal their sections for the named types only', () => {
+		const select = document.querySelector<HTMLSelectElement>('[data-menu-type]')!;
+
+		select.value = 'children';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+
+		// The node picker serves node and children items alike.
+		expect(document.getElementById('node-section')!.hidden).toBe(false);
+		expect(document.getElementById('title-section')!.hidden).toBe(true);
+
+		select.value = 'url';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(document.getElementById('node-section')!.hidden).toBe(true);
+		expect(document.getElementById('title-section')!.hidden).toBe(false);
 	});
 });
 

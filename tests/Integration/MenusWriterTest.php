@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Container\Container;
+use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
@@ -300,8 +302,13 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertNotContains($grandchild, $left);
 	}
 
-	private function writeNode(string $uid, string $heading, string $path): void
-	{
+	private function writeNode(
+		string $uid,
+		string $heading,
+		string $path,
+		?string $parent = null,
+		bool $published = true,
+	): void {
 		$locales = new Locales();
 		$locales->add('en', title: 'English');
 		$context = Context::console(
@@ -317,8 +324,22 @@ final class MenusWriterTest extends IntegrationTestCase
 			$writer
 				->draft(PlainPage::class, ['heading' => $heading])
 				->uid($uid)
+				->parent($parent)
+				->published($published)
 				->path('en', $path),
 		);
+	}
+
+	/**
+	 * Hydrating written nodes resolves their class by type handle through
+	 * the container, so the fixture type joins the pre-registered set.
+	 */
+	public function container(): Container
+	{
+		$container = parent::container();
+		$container->tag(Bootstrap::NODE_TAG)->add('plain-page', PlainPage::class);
+
+		return $container;
 	}
 
 	public function testNodeItemFollowsTheNodesCurrentPath(): void
@@ -368,6 +389,97 @@ final class MenusWriterTest extends IntegrationTestCase
 
 		$this->assertSame('Fresh Title', $items[$inherits]->title());
 		$this->assertSame('Custom', $items[$overrides]->title());
+	}
+
+	public function testChildrenItemExpandsIntoTheNodesChildren(): void
+	{
+		$this->writeNode('menu-kids-root', 'Kids Root', '/kids');
+		$this->writeNode('menu-kids-beta', 'Beta', '/kids/beta', parent: 'menu-kids-root');
+		$this->writeNode('menu-kids-alpha', 'Alpha', '/kids/alpha', parent: 'menu-kids-root');
+		$this->writeNode('menu-kids-draft', 'Draft', '/kids/draft', parent: 'menu-kids-root', published: false);
+
+		$menus = $this->menus();
+		$menus->create('writer-children', 'Children');
+		$before = $menus->add('writer-children', $this->itemData('Before', '/before'));
+		$menus->add('writer-children', ['type' => 'children', 'node' => 'menu-kids-root']);
+
+		$menu = $this->createCms()->menu('writer-children');
+		$items = iterator_to_array($menu);
+
+		// Expanded in place: the static item first, then the published
+		// children ordered by title; the draft stays out.
+		$this->assertSame(
+			[$before, 'children:menu-kids-alpha', 'children:menu-kids-beta'],
+			array_keys($items),
+		);
+		$this->assertSame('Alpha', $items['children:menu-kids-alpha']->title());
+		$this->assertSame('/kids/alpha', $items['children:menu-kids-alpha']->path());
+		$this->assertSame(1, $items['children:menu-kids-alpha']->level());
+
+		$html = $menu->html();
+		$this->assertStringContainsString('<a href="/kids/alpha">', $html);
+		$this->assertStringNotContainsString('Draft', $html);
+	}
+
+	public function testChildrenItemDescendsTheConfiguredLevels(): void
+	{
+		$this->writeNode('menu-deep-root', 'Deep Root', '/deep');
+		$this->writeNode('menu-deep-child', 'Child', '/deep/child', parent: 'menu-deep-root');
+		$this->writeNode('menu-deep-grand', 'Grand', '/deep/child/grand', parent: 'menu-deep-child');
+
+		$menus = $this->menus();
+		$menus->create('writer-levels', 'Levels');
+		$menus->add('writer-levels', [
+			'type' => 'children',
+			'node' => 'menu-deep-root',
+			'levels' => 2,
+		]);
+
+		$items = iterator_to_array($this->createCms()->menu('writer-levels'));
+		$child = $items['children:menu-deep-child'];
+		$grand = iterator_to_array($child->children());
+
+		$this->assertTrue($child->hasChildren());
+		$this->assertCount(1, $grand);
+		$this->assertSame('Grand', $grand[0]->title());
+		$this->assertSame(2, $grand[0]->level());
+
+		// The default depth of one stops above the grandchild.
+		$menus->create('writer-levels-flat', 'Flat');
+		$menus->add('writer-levels-flat', [
+			'type' => 'children',
+			'node' => 'menu-deep-root',
+		]);
+		$flat = iterator_to_array($this->createCms()->menu('writer-levels-flat'));
+		$this->assertFalse($flat['children:menu-deep-child']->hasChildren());
+	}
+
+	public function testUnexpandedMenuKeepsChildrenItemsAsStored(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-children-raw', 'Raw');
+		$item = $menus->add('writer-children-raw', [
+			'type' => 'children',
+			'node' => 'some-node-uid',
+		]);
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-children-raw', expand: false));
+
+		$this->assertArrayHasKey($item, $items);
+		$this->assertSame('children', $items[$item]->type());
+		$this->assertSame('some-node-uid', $items[$item]->node());
+	}
+
+	public function testChildrenItemWithoutACmsExpandsToNothing(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-children-bare', 'Bare');
+		$menus->add('writer-children-bare', ['type' => 'children', 'node' => 'whatever']);
+		$kept = $menus->add('writer-children-bare', $this->itemData('Kept', '/kept'));
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-children-bare'));
+
+		$this->assertSame([$kept], array_keys($items));
 	}
 
 	public function testNodeItemFallsBackToSnapshotWhenTheNodeIsGone(): void

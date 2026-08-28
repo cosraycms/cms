@@ -21,12 +21,19 @@ $defaultLocale = (string) $pane['defaultLocale'];
 $searchUrls = (array) $pane['searchUrls'];
 
 $type = (string) $values['type'];
-$types = ['node', 'url', 'asset', 'label'];
+$types = ['node', 'url', 'asset', 'label', 'children'];
 $typeLabels = [
 	'node' => __('menu:type-node'),
 	'url' => __('menu:type-url'),
 	'asset' => __('menu:type-asset'),
 	'label' => __('menu:type-label'),
+	'children' => __('menu:type-children'),
+];
+$orders = [
+	'title' => __('menu:order-title'),
+	'created' => __('menu:order-created'),
+	'created desc' => __('menu:order-created-desc'),
+	'changed desc' => __('menu:order-changed-desc'),
 ];
 $section = static fn(string $names): bool => !in_array($type, explode(' ', $names), true);
 ?>
@@ -69,12 +76,14 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			'locales' => $locales,
 			'defaultLocale' => $defaultLocale,
 			'help' => $type === 'node' ? __('menu:item-title-inherit-help') : null,
+			'sectionHide' => 'children',
+			'sectionHidden' => $type === 'children',
 		]) ?>
 
 		<div
 			class="cms-field<?= isset($errors['node']) ? ' has-error' : '' ?>"
-			data-menu-section="node"
-			<?= $section('node') ? 'hidden' : '' ?>>
+			data-menu-section="node children"
+			<?= $section('node children') ? 'hidden' : '' ?>>
 			<label class="label" for="menu-item-node"><div><?= escape(__('menu:item-node')) ?></div></label>
 			<div
 				class="control menu-picker"
@@ -99,6 +108,34 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?php if (isset($errors['node'])): ?>
 				<p class="error"><?= escape((string) $errors['node']) ?></p>
 			<?php endif ?>
+		</div>
+
+		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
+			<label class="label" for="menu-item-levels"><div><?= escape(__('menu:item-levels')) ?></div></label>
+			<div class="control">
+				<input
+					class="cms-input"
+					id="menu-item-levels"
+					name="levels"
+					type="number"
+					min="1"
+					max="5"
+					value="<?= escape((string) $values['levels']) ?>" />
+			</div>
+			<p class="help"><?= escape(__('menu:children-help')) ?></p>
+		</div>
+
+		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
+			<label class="label" for="menu-item-order"><div><?= escape(__('menu:item-order')) ?></div></label>
+			<div class="control">
+				<select class="cms-input" id="menu-item-order" name="order">
+					<?php foreach ($orders as $value => $label): ?>
+						<option value="<?= escape($value) ?>"<?= $value === $values['order'] ? ' selected' : '' ?>><?= escape(
+							$label,
+						) ?></option>
+					<?php endforeach ?>
+				</select>
+			</div>
 		</div>
 
 		<?php $this->insert('menu/localized', [
@@ -158,7 +195,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			</label>
 		</div>
 
-		<div class="cms-field<?= isset($errors['image']) ? ' has-error' : '' ?>">
+		<div
+			class="cms-field<?= isset($errors['image']) ? ' has-error' : '' ?>"
+			data-menu-section-hide="children"
+			<?= $type === 'children' ? 'hidden' : '' ?>>
 			<label class="label" for="menu-item-image"><div><?= escape(__('menu:item-image')) ?></div></label>
 			<div
 				class="control menu-picker"
@@ -185,7 +225,10 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?php endif ?>
 		</div>
 
-		<div class="cms-field<?= isset($errors['class']) ? ' has-error' : '' ?>">
+		<div
+			class="cms-field<?= isset($errors['class']) ? ' has-error' : '' ?>"
+			data-menu-section-hide="children"
+			<?= $type === 'children' ? 'hidden' : '' ?>>
 			<label class="label" for="menu-item-class"><div><?= escape(__('menu:item-class')) ?></div></label>
 			<div class="control">
 				<input

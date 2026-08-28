@@ -21,6 +21,7 @@ $typeLabel = match ((string) $row['type']) {
 	'url' => __('menu:type-url'),
 	'asset' => __('menu:type-asset'),
 	'label' => __('menu:type-label'),
+	'children' => __('menu:type-children'),
 	default => (string) $row['type'],
 };
 
