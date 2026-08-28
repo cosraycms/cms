@@ -161,7 +161,9 @@ class Bootstrap implements CorePlugin
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(IconProvider::class, Icons::class);
-		$this->container->add(Menus::class);
+		// A constructed instance: the argument resolver would otherwise try
+		// to build the defaulted Uid parameter and fail on its string args.
+		$this->container->add(Menus::class, new Menus($this->db));
 
 		$this->routes = new Routes(
 			$this->config,

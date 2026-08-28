@@ -14,6 +14,7 @@ use Cosray\Navigation;
 use Cosray\NavigationItem;
 use Cosray\NavLink;
 use Cosray\Panel\Extras;
+use Cosray\User;
 use Cosray\Util\Form;
 
 use function Cosray\env;
@@ -52,6 +53,7 @@ abstract class Panel
 			'currentPath' => $this->request->uri()->getPath(),
 			'area' => static::AREA,
 			'contentUrl' => $this->firstUrl($collections),
+			'menusUrl' => $this->menusUrl($panelPath),
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
 			'panelLocales' => $this->panelLocales(),
@@ -300,6 +302,22 @@ abstract class Panel
 			if ($url !== null) {
 				return $url;
 			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The masthead's menus entry, null for users without the permission.
+	 * Cosmetic gating only — the menu routes enforce `edit-menus`
+	 * themselves through the permission middleware.
+	 */
+	private function menusUrl(string $panelPath): ?string
+	{
+		$user = $this->request->get('user', null);
+
+		if ($user instanceof User && $user->hasPermission('edit-menus')) {
+			return $panelPath . '/menus';
 		}
 
 		return null;

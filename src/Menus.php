@@ -42,6 +42,19 @@ final class Menus
 		$this->db->menus->update(['menu' => $menu, 'description' => $description])->run();
 	}
 
+	/**
+	 * Renames the menu's handle; the items follow through the FK cascade.
+	 * Templates referencing the old handle must be updated by the caller.
+	 */
+	public function rename(string $menu, string $to): void
+	{
+		if (!$this->db->menus->exists(['menu' => $menu])->first()) {
+			throw new RuntimeException("Menu '{$menu}' does not exist");
+		}
+
+		$this->db->menus->rename(['menu' => $menu, 'to' => $to])->run();
+	}
+
 	/** Deletes the menu including all of its items. */
 	public function delete(string $menu): void
 	{

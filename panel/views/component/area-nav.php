@@ -18,6 +18,12 @@ if (is_string($contentUrl)) {
 
 $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media')];
 
+$menusUrl = $this->unwrap($menusUrl ?? null);
+
+if (is_string($menusUrl)) {
+	$areas[] = ['area' => 'menus', 'url' => $menusUrl, 'label' => __('nav:menus')];
+}
+
 ?>
 <nav
 	id="area-nav"

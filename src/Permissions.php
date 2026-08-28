@@ -16,6 +16,7 @@ class Permissions
 			'edit-users',
 			'edit-nodes',
 			'edit-blocks',
+			'edit-menus',
 			'authenticated',
 		],
 		'admin' => [
@@ -25,6 +26,7 @@ class Permissions
 			'edit-users',
 			'edit-nodes',
 			'edit-blocks',
+			'edit-menus',
 			'authenticated',
 		],
 		'editor' => [

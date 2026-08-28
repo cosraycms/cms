@@ -111,6 +111,28 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertSame(1, $positions[$child]);
 	}
 
+	public function testRenameMovesTheHandleWithItsItems(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-rename', 'Rename');
+		$item = $menus->add('writer-rename', $this->itemData('Home', '/'));
+
+		$menus->rename('writer-rename', 'writer-renamed');
+
+		$this->assertSame(
+			[$item],
+			array_keys(iterator_to_array(new Menu($this->createContext(), 'writer-renamed'))),
+		);
+		$this->throws(RuntimeException::class, 'Menu not found');
+		new Menu($this->createContext(), 'writer-rename');
+	}
+
+	public function testRenameRequiresExistingMenu(): void
+	{
+		$this->throws(RuntimeException::class, "Menu 'writer-ghost' does not exist");
+		$this->menus()->rename('writer-ghost', 'writer-other');
+	}
+
 	public function testAddRequiresExistingMenu(): void
 	{
 		$this->throws(RuntimeException::class, "Menu 'missing-menu' does not exist");

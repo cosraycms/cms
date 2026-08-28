@@ -164,6 +164,56 @@ class Routes
 					->after($renderers->get('media'));
 				$panel
 					->get(
+						'/menus',
+						[Panel\Menus::class, 'index'],
+						'menus',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menus'));
+				// Before the {menu} routes: the literal segment wins over a
+				// menu handle of the same name, and the handle validation
+				// reserves it.
+				$panel
+					->get(
+						'/menus/create',
+						[Panel\Menus::class, 'create'],
+						'menus.create',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu-form'));
+				$panel
+					->post(
+						'/menus/create',
+						[Panel\Menus::class, 'store'],
+						'menus.store',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu-form'));
+				$panel
+					->get(
+						'/menus/{menu:[a-z0-9-]{1,32}}/edit',
+						[Panel\Menus::class, 'edit'],
+						'menu.edit',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu-form'));
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/edit',
+						[Panel\Menus::class, 'update'],
+						'menu.update',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu-form'));
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/delete',
+						[Panel\Menus::class, 'delete'],
+						'menu.delete',
+					)
+					->middleware($panelAuth);
+				$panel
+					->get(
 						'/reference/search',
 						[Panel\Reference::class, 'search'],
 						'reference.search',

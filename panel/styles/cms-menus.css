@@ -1,0 +1,197 @@
+/* The menus area: listing, menu form, and (Phase 2) the item tree with its
+   editing side pane. Chrome mirrors the collection screen's head/body/card
+   chain so the area reads as part of the same panel. */
+
+.cms-menus {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+
+	& .head {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-4);
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		padding: var(--cms-space-3) var(--cms-space-6);
+		border-bottom: 1px solid var(--cms-color-border);
+	}
+
+	& .line {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		min-width: 0;
+		flex-wrap: wrap;
+
+		& h1 {
+			margin: 0;
+			font-size: var(--cms-font-size-xl);
+			font-weight: 600;
+			letter-spacing: -0.03em;
+		}
+	}
+
+	& .actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+		margin-left: auto;
+		flex-wrap: wrap;
+	}
+
+	& .body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-3);
+		flex: 1 1 auto;
+		min-height: 0;
+		padding: var(--cms-space-4) var(--cms-space-6) 0;
+		background: var(--cms-color-surface-sunken);
+		overflow: hidden;
+	}
+
+	& .cms-notice {
+		flex: 0 0 auto;
+		padding: var(--cms-space-2-5) var(--cms-space-4);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+
+		& p {
+			margin: 0;
+		}
+
+		& p + p {
+			margin-top: var(--cms-space-1);
+		}
+
+		&.is-error {
+			border-color: var(--cms-color-danger);
+			color: var(--cms-color-danger-text);
+		}
+	}
+
+	& .card {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+		border: 1px solid var(--cms-color-border);
+		border-bottom: 0;
+		border-radius: var(--cms-radius-lg) var(--cms-radius-lg) 0 0;
+		background: var(--cms-color-surface);
+		overflow: hidden;
+	}
+
+	& .scroll {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .empty {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-10) var(--cms-space-6);
+		color: var(--cms-color-text-muted);
+		text-align: center;
+
+		& .icon {
+			font-size: var(--cms-font-size-xl);
+		}
+
+		& p {
+			margin: 0;
+			font-size: var(--cms-font-size-sm);
+		}
+	}
+
+	& .cms-list .handle {
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		text-decoration: none;
+
+		&:hover {
+			color: var(--cms-color-accent-text);
+		}
+	}
+
+	& .col-actions {
+		& form {
+			display: inline;
+		}
+
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+	}
+
+	/* The menu form sits in a bounded card rather than running full width. */
+	& .form-card {
+		flex: 0 1 auto;
+		max-width: 36rem;
+		padding: var(--cms-space-6);
+		border-bottom: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		overflow: visible;
+
+		& form {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-4);
+		}
+
+		& .field {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-1-5);
+
+			& label {
+				color: var(--cms-color-text);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 500;
+			}
+		}
+
+		& .help {
+			margin: 0;
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+
+			&.warning {
+				color: var(--cms-color-danger-text);
+			}
+		}
+
+		& .form-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: var(--cms-space-2);
+		}
+	}
+}
+
+@media (max-width: 52rem) {
+	.cms-menus {
+		overflow: visible;
+
+		& .head,
+		& .body {
+			padding-inline: var(--cms-space-4);
+		}
+
+		& .body {
+			overflow: visible;
+		}
+	}
+}

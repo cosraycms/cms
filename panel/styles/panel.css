@@ -5,6 +5,7 @@
 @import './cms-media.css' layer(panel);
 @import './cms-dashboard.css' layer(panel);
 @import './cms-collection.css' layer(panel);
+@import './cms-menus.css' layer(panel);
 @import './cms-list.css' layer(panel);
 @import './cms-status.css' layer(panel);
 @import './cms-field.css' layer(panel);
