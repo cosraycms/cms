@@ -210,6 +210,7 @@ return [
 		'menu:pane-empty' => 'Select an item to edit it, or add a new one.',
 		'menu:picker-assets' => 'Search files …',
 		'menu:picker-nodes' => 'Search pages …',
+		'menu:preview' => 'Preview',
 		'menu:rename-warning' => 'Renaming the handle breaks templates that still fetch the old one.',
 		'menu:save' => 'Save',
 		'menu:tree-empty' => 'This menu has no items yet.',

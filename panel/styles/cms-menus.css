@@ -476,6 +476,54 @@
 		}
 	}
 
+	& .preview {
+		margin-top: var(--cms-space-4);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+
+		& summary {
+			padding: var(--cms-space-2) var(--cms-space-3);
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-sm);
+			font-weight: 500;
+			cursor: pointer;
+		}
+
+		& .preview-body {
+			padding: var(--cms-space-1) var(--cms-space-4) var(--cms-space-4);
+			font-size: var(--cms-font-size-sm);
+
+			& ul {
+				margin: 0;
+				padding-left: var(--cms-space-5);
+				list-style: disc;
+			}
+
+			& li {
+				margin: var(--cms-space-1) 0;
+			}
+
+			& a {
+				color: var(--cms-color-accent-text);
+			}
+
+			& .nav-label {
+				display: inline;
+			}
+
+			& .nav-image {
+				display: inline-block;
+				margin-right: var(--cms-space-1);
+				vertical-align: middle;
+
+				& img {
+					max-height: 1.25rem;
+				}
+			}
+		}
+	}
+
 	& .pane {
 		position: sticky;
 		top: 0;

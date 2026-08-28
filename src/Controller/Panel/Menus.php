@@ -260,8 +260,10 @@ final class Menus extends Panel
 			'description' => (string) $row['description'],
 			'itemCount' => (int) $row['items'],
 			// Unexpanded: the editor shows `children` items as stored,
-			// not what they resolve into.
+			// not what they resolve into. The preview beneath renders the
+			// expanded menu as the frontend would emit it.
 			'tree' => $this->branch(new FinderMenu($context, $menu, expand: false), $cms),
+			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
 			'notice' => $this->treeNotice(),
 			'urls' => [

@@ -431,6 +431,22 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertStringContainsString('/legacy-path', $html);
 	}
 
+	public function testPreviewRendersTheMenuAsTheFrontendWould(): void
+	{
+		$this->createItem('preview-item', null, 1, [
+			'type' => 'url',
+			'title' => ['en' => 'Preview Me'],
+			'path' => ['en' => '/preview-me'],
+		]);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+
+		$this->assertStringContainsString('<details class="preview">', $html);
+		$this->assertStringContainsString('hx-boost="false"', $html);
+		$this->assertStringContainsString('<ul class="nav-level-1">', $html);
+		$this->assertStringContainsString('<a href="/preview-me">', $html);
+	}
+
 	public function testEditorsAreForbidden(): void
 	{
 		$this->authenticateAs('editor');

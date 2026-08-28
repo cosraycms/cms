@@ -210,6 +210,7 @@ return [
 		'menu:pane-empty' => 'Wähle einen Eintrag zum Bearbeiten oder lege einen neuen an.',
 		'menu:picker-assets' => 'Dateien suchen …',
 		'menu:picker-nodes' => 'Seiten suchen …',
+		'menu:preview' => 'Vorschau',
 		'menu:rename-warning' => 'Das Umbenennen des Handles bricht Templates, die noch das alte laden.',
 		'menu:save' => 'Speichern',
 		'menu:tree-empty' => 'Dieses Menü hat noch keine Einträge.',

@@ -8,6 +8,7 @@ $menu = (string) $menu;
 $description = (string) $description;
 $itemCount = (int) $itemCount;
 $tree = (array) $this->unwrap($tree);
+$preview = (string) $this->unwrap($preview);
 $pane = $this->unwrap($pane);
 $notice = $this->unwrap($notice ?? null);
 $urls = (array) $this->unwrap($urls);
@@ -76,6 +77,17 @@ $urls = (array) $this->unwrap($urls);
 							]) ?>
 						<?php endforeach ?>
 					</ul>
+				<?php endif ?>
+
+				<?php if ($preview !== ''): ?>
+					<details class="preview">
+						<summary><?= escape(__('menu:preview')) ?></summary>
+						<?php // hx-boost off: preview links leave the panel for
+						// the real pages instead of swapping them into #main. ?>
+						<div class="preview-body" hx-boost="false">
+							<?= $preview ?>
+						</div>
+					</details>
 				<?php endif ?>
 			</div>
 
