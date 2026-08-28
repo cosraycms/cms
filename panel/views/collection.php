@@ -296,7 +296,10 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				data-bulk-question
 				data-label-one="<?= escape(__('bulk:confirm-delete')) ?>"
 				data-label-many="<?= escape(__('bulk:confirm-delete-plural')) ?>"></p>
-			<label class="children" data-bulk-children hidden>
+			<?php // data-bulk-gate: deleting a parent without this opt-in would
+			// only be skipped server-side, so the confirm button stays locked
+			// until the box is ticked. ?>
+			<label class="children" data-bulk-children data-bulk-gate hidden>
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />
 				<span><?= escape(__('bulk:delete-children')) ?></span>
 			</label>

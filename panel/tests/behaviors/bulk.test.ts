@@ -24,6 +24,7 @@ beforeEach(() => {
 				data-label-many=":count entries selected"></output>
 			<button type="button" data-bulk-clear>Clear</button>
 			<button type="button" data-bulk-open="delete">Delete</button>
+			<button type="button" data-bulk-open="duplicate">Duplicate</button>
 		</div>
 		<table>
 			<thead>
@@ -50,11 +51,22 @@ beforeEach(() => {
 				data-bulk-question
 				data-label-one="Delete the selected entry?"
 				data-label-many="Delete the :count selected entries?"></p>
-			<label data-bulk-children hidden>
+			<label data-bulk-children data-bulk-gate hidden>
 				<input type="checkbox" name="children" value="1" />
 			</label>
 			<button type="button" data-bulk-close>Cancel</button>
 			<button type="submit" data-bulk-confirm>Delete</button>
+		</dialog>
+		<dialog data-bulk-dialog="duplicate">
+			<p
+				data-bulk-question
+				data-label-one="Duplicate the selected entry?"
+				data-label-many="Duplicate the :count selected entries?"></p>
+			<label data-bulk-children hidden>
+				<input type="checkbox" name="children" value="1" />
+			</label>
+			<button type="button" data-bulk-close>Cancel</button>
+			<button type="submit" data-bulk-confirm>Duplicate</button>
 		</dialog>
 	`;
 	uninstall = install();
@@ -203,6 +215,24 @@ describe('bulk selection', () => {
 		children.click();
 
 		expect(confirm.disabled).toBe(true);
+	});
+
+	it('never locks the confirm button of an ungated dialog', () => {
+		box('a').click();
+		query('[data-bulk-open="duplicate"]').click();
+
+		const dialog = query<HTMLDialogElement>('dialog[data-bulk-dialog="duplicate"]');
+		const children = dialog.querySelector<HTMLElement>('[data-bulk-children]');
+		const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
+		const checkbox = dialog.querySelector<HTMLInputElement>('[data-bulk-children] input');
+
+		expect(children?.hidden).toBe(false);
+		expect(confirm?.disabled).toBe(false);
+
+		checkbox?.click();
+		checkbox?.click();
+
+		expect(confirm?.disabled).toBe(false);
 	});
 
 	it('locks the confirm button again when the dialog reopens', () => {

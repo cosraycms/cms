@@ -95,9 +95,11 @@ function openDialog(name: string): void {
 	const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
 
 	if (confirm) {
-		// A selection containing children commits to the subtree option
-		// before the destructive button unlocks.
-		confirm.disabled = children !== null && !children.hidden;
+		// A children row marked data-bulk-gate commits the selection to the
+		// subtree option before the destructive button unlocks; a row
+		// without the marker is a plain option and never locks the button.
+		confirm.disabled =
+			children !== null && !children.hidden && children.hasAttribute('data-bulk-gate');
 	}
 
 	dialog.showModal();
@@ -110,7 +112,7 @@ function onChange(event: Event): void {
 		return;
 	}
 
-	if (target.matches('[data-bulk-children] input')) {
+	if (target.matches('[data-bulk-children][data-bulk-gate] input')) {
 		const confirm = target
 			.closest('dialog')
 			?.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
