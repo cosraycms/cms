@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\Node;
 
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Field;
+use Cosray\Title\Resolver as TitleResolver;
 use Throwable;
 
 /**
@@ -20,12 +24,17 @@ final class Duplicator
 	private readonly Factory $factory;
 	private readonly Serializer $serializer;
 	private readonly Store $store;
+	private readonly TitleResolver $titles;
+
+	/** @var array<string, string> Copy marker per content locale, lazily translated. */
+	private array $markers = [];
 
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,
 		Types $types,
 	) {
+		$this->titles = new TitleResolver($types);
 		$this->factory = $cms->nodeFactory();
 		$this->serializer = new Serializer($types, $this->factory->uid());
 		$this->store = new Store(
@@ -59,11 +68,13 @@ final class Duplicator
 
 			$parent = $node->meta->get('parent');
 			$copied = [$node->meta->uid];
-			$queue = [[$node, is_string($parent) && trim($parent) !== '' ? $parent : null]];
+			// Only the subtree root gets the copy marker: it is the entry
+			// the user looks for in the listing afterwards.
+			$queue = [[$node, is_string($parent) && trim($parent) !== '' ? $parent : null, true]];
 
 			while ($queue !== []) {
-				[$current, $parentUid] = array_shift($queue);
-				$copyUid = $this->copy($current, $parentUid, $actor);
+				[$current, $parentUid, $mark] = array_shift($queue);
+				$copyUid = $this->copy($current, $parentUid, $actor, $mark);
 				$created[] = $copyUid;
 
 				if (!$withChildren) {
@@ -80,7 +91,7 @@ final class Duplicator
 
 					if ($child) {
 						$copied[] = $childUid;
-						$queue[] = [$child, $copyUid];
+						$queue[] = [$child, $copyUid, false];
 					}
 				}
 			}
@@ -106,7 +117,7 @@ final class Duplicator
 		];
 	}
 
-	private function copy(Wrapper $wrapper, ?string $parentUid, Actor $actor): string
+	private function copy(Wrapper $wrapper, ?string $parentUid, Actor $actor, bool $mark): string
 	{
 		$source = Wrapper::unwrap($wrapper);
 		$data = $this->serializer->read(
@@ -128,6 +139,10 @@ final class Duplicator
 		// PathManager suffixes any collision with the source's paths.
 		$data['paths'] = $this->emptyPaths();
 
+		if ($mark && is_array($data['content'] ?? null)) {
+			$data['content'] = $this->markCopy($source::class, $data['content']);
+		}
+
 		// A blueprint object instead of the source node: the store falls
 		// back to node meta for absent data keys (uid, parent, handle),
 		// and the source's must not leak into the copy.
@@ -135,6 +150,66 @@ final class Duplicator
 		$result = $this->store->create($blueprint, $data, $this->context->locales(), $actor);
 
 		return $result['uid'];
+	}
+
+	/**
+	 * Appends the localized copy marker to every non-empty locale value of
+	 * the title field, so the copy is identifiable in the listing.
+	 * Types without a writable title field stay unmarked.
+	 *
+	 * @param class-string $class
+	 * @param array<string, mixed> $content
+	 * @return array<string, mixed>
+	 */
+	private function markCopy(string $class, array $content): array
+	{
+		$field = $this->titles->writableField($class);
+		$value = $field === null ? null : $content[$field]['value'] ?? null;
+
+		if ($field === null || !is_array($value)) {
+			return $content;
+		}
+
+		foreach ($value as $locale => $text) {
+			if (!is_string($text) || trim($text) === '') {
+				continue;
+			}
+
+			$content[$field]['value'][$locale] = $text . ' ' . $this->marker((string) $locale);
+		}
+
+		return $content;
+	}
+
+	/**
+	 * The copy marker translated into a content locale (the default locale
+	 * for the neutral key), resolved through a briefly activated
+	 * per-locale translator so the scanner sees the message id.
+	 */
+	private function marker(string $localeId): string
+	{
+		if (array_key_exists($localeId, $this->markers)) {
+			return $this->markers[$localeId];
+		}
+
+		$locales = $this->context->locales();
+		$locale = $localeId === Field::NEUTRAL_LOCALE || !$locales->exists($localeId)
+			? $locales->getDefault()
+			: $locales->get($localeId);
+		$previous = Verba::translator();
+		Verba::activate(new Translator($locale->id, $locales->catalogs(), $locale->fallbacks()));
+
+		try {
+			$marker = __('node:copy-suffix');
+		} finally {
+			if ($previous) {
+				Verba::activate($previous);
+			} else {
+				Verba::deactivate();
+			}
+		}
+
+		return $this->markers[$localeId] = $marker;
 	}
 
 	/** @return list<string> */

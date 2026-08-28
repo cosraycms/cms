@@ -384,13 +384,19 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 	public function testBulkDuplicateCreatesAnUnlockedDraftCopy(): void
 	{
-		$this->createNode(
-			uid: 'bulk-dup-source',
-			title: 'Dup Source',
-			published: true,
-			locked: true,
-			handle: 'bulk-dup-source-handle',
-		);
+		$this->createTestNode([
+			'uid' => 'bulk-dup-source',
+			'type' => $this->parentTypeId,
+			'published' => true,
+			'locked' => true,
+			'handle' => 'bulk-dup-source-handle',
+			'content' => [
+				'title' => [
+					'type' => 'text',
+					'value' => ['en' => 'Dup Source', 'de' => 'Dup Quelle'],
+				],
+			],
+		]);
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
 			'body' => ['nodes' => ['bulk-dup-source']],
@@ -403,8 +409,9 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		);
 
 		$copy = $this->db()->execute(
-			"SELECT n.uid, n.published, n.locked, n.parent, n.content::text AS content,
-				(SELECT s.content::text FROM cms.nodes s WHERE s.uid = 'bulk-dup-source') AS source
+			"SELECT n.uid, n.published, n.locked, n.parent,
+				n.content->'title'->'value'->>'en' AS title_en,
+				n.content->'title'->'value'->>'de' AS title_de
 			FROM cms.nodes n
 			WHERE n.type = :type AND n.uid <> 'bulk-dup-source'",
 			['type' => $this->parentTypeId],
@@ -414,7 +421,8 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertFalse((bool) $copy['published']);
 		$this->assertFalse((bool) $copy['locked']);
 		$this->assertNull($copy['parent']);
-		$this->assertSame($copy['source'], $copy['content']);
+		$this->assertSame('Dup Source (Copy)', $copy['title_en']);
+		$this->assertSame('Dup Quelle (Kopie)', $copy['title_de']);
 		$handles = $this->db()->execute(
 			"SELECT count(*) AS count FROM cms.node_handles WHERE handle LIKE 'bulk-dup-source%'",
 		)->one();
@@ -448,7 +456,9 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			['type' => $this->parentTypeId],
 		)->one();
 		$childCopy = $this->db()->execute(
-			'SELECT node, published FROM cms.nodes WHERE parent = :parent',
+			"SELECT node, published,
+				content->'title'->'value'->>'en' AS title
+			FROM cms.nodes WHERE parent = :parent",
 			['parent' => $rootCopy['node']],
 		)->one();
 		$grandchildCopy = $this->db()->execute(
@@ -457,6 +467,8 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		)->one();
 
 		$this->assertFalse((bool) $childCopy['published']);
+		// Only the subtree root carries the copy marker.
+		$this->assertSame('Dup Child', $childCopy['title']);
 		$this->assertNotSame('bulk-dup-grandchild', $grandchildCopy['uid']);
 	}
 

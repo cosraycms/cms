@@ -53,6 +53,25 @@ class Resolver
 		return ['kind' => self::KIND_NONE];
 	}
 
+	/**
+	 * The writable Text field behind the title: the descriptor's field for
+	 * a field-kind title, or the conventional `title` field for a dynamic
+	 * one — the common `implements Title` idiom computes over exactly that
+	 * field. Null when neither exists.
+	 *
+	 * @param class-string $class
+	 */
+	public function writableField(string $class): ?string
+	{
+		$descriptor = $this->descriptor($class);
+
+		if ($descriptor['kind'] === self::KIND_FIELD) {
+			return $descriptor['field'];
+		}
+
+		return $this->isTextField($class, 'title') ? 'title' : null;
+	}
+
 	public function resolve(object $node): string
 	{
 		$descriptor = $this->descriptor($node::class);

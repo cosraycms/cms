@@ -132,6 +132,7 @@ return [
 		'nav:language' => 'Language',
 		'nav:logout' => 'Log out',
 		'nav:media' => 'Media',
+		'node:copy-suffix' => '(Copy)',
 		'node:duplicate-handle' => 'A node with the same handle already exists: :handle',
 		'node:duplicate-handle-uid' => 'A node uid with the same handle already exists: :handle',
 		'node:duplicate-uid' => 'A node with the same uid already exists: :uid',

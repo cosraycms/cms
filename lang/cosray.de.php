@@ -132,6 +132,7 @@ return [
 		'nav:language' => 'Sprache',
 		'nav:logout' => 'Abmelden',
 		'nav:media' => 'Medien',
+		'node:copy-suffix' => '(Kopie)',
 		'node:duplicate-handle' => 'Es existiert bereits ein Knoten mit demselben Handle: :handle',
 		'node:duplicate-handle-uid' => 'Es existiert bereits eine Knoten-uid mit demselben Handle: :handle',
 		'node:duplicate-uid' => 'Es existiert bereits ein Knoten mit derselben uid: :uid',
