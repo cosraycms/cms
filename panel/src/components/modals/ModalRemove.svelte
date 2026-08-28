@@ -7,15 +7,27 @@
 		close: any;
 		proceed: any;
 		message?: any;
+		title?: string;
+		question?: string;
+		confirm?: string;
+		cancel?: string;
 	};
 
-	let { close, proceed, message = null }: Props = $props();
+	let {
+		close,
+		proceed,
+		message = null,
+		title = __('document:delete'),
+		question = __('field:confirm-delete'),
+		confirm = __('field:confirm-delete-entry'),
+		cancel = __('field:cancel-delete-entry'),
+	}: Props = $props();
 </script>
 
-<ModalHeader>{__('document:delete')}</ModalHeader>
+<ModalHeader>{title}</ModalHeader>
 <ModalBody>
 	<p>
-		{__('field:confirm-delete')}
+		{question}
 	</p>
 	{#if message}
 		<p class="cms-modal-remove-message">{message}</p>
@@ -24,10 +36,10 @@
 <ModalFooter>
 	<div class="controls">
 		<Button variant="danger" onclick={proceed}>
-			{__('field:confirm-delete-entry')}
+			{confirm}
 		</Button>
 		<Button variant="secondary" onclick={close}>
-			{__('field:cancel-delete-entry')}
+			{cancel}
 		</Button>
 	</div>
 </ModalFooter>

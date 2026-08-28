@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { Locale } from '$lib/sys';
+	import { mount, unmount } from 'svelte';
+	import { cosray } from '$lib/bridge';
 	import { humanSize } from '$lib/library';
 	import { __ } from '$lib/locale';
 	import IcoDocument from '$components/icons/IcoDocument.svelte';
 	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import ModalRemove from '$components/modals/ModalRemove.svelte';
 	import MetaForm, { type Meta } from './MetaForm.svelte';
 
 	type Owner = {
@@ -105,6 +108,28 @@
 		}
 
 		saving = false;
+	}
+
+	function confirmRemove() {
+		const handle = cosray().modal.open((host) => {
+			const app = mount(ModalRemove, {
+				target: host,
+				props: {
+					close: () => handle.close(),
+					proceed: () => {
+						handle.close();
+						void remove();
+					},
+					message: asset?.filename ?? null,
+					title: __('media:delete'),
+					question: __('media:confirm-delete'),
+					confirm: __('media:confirm-delete-file'),
+					cancel: __('media:cancel-delete-file'),
+				},
+			});
+
+			return () => void unmount(app);
+		});
 	}
 
 	async function remove() {
@@ -269,7 +294,7 @@
 				type="button"
 				class="cms-button cms-detail-delete"
 				disabled={deleting}
-				onclick={remove}
+				onclick={confirmRemove}
 			>
 				<IcoTrash />
 				{__('common:delete')}
