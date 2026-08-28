@@ -107,6 +107,11 @@
 	   light theme, inverted in the dark one. */
 	& .bulk-bar {
 		display: flex;
+
+		/* display: flex outranks the UA rule behind the hidden attribute. */
+		&[hidden] {
+			display: none;
+		}
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--cms-space-3);
@@ -395,6 +400,11 @@
 		gap: var(--cms-space-2);
 		margin-top: var(--cms-space-3);
 		font-size: var(--cms-font-size-sm);
+
+		/* display: flex outranks the UA rule behind the hidden attribute. */
+		&[hidden] {
+			display: none;
+		}
 	}
 
 	& footer {
