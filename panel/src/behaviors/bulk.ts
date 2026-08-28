@@ -5,6 +5,27 @@
 // only; the selection deliberately resets with every htmx swap
 // (per-page selection).
 
+// The bulk redirect carries its outcome summary in a `notice` query
+// param the server renders as a banner once. The param leaves the
+// address bar right after, so a refresh or a copied link does not
+// repeat a stale message.
+function stripNotice(): void {
+	const url = new URL(window.location.href);
+
+	if (!url.searchParams.has('notice')) {
+		return;
+	}
+
+	url.searchParams.delete('notice');
+	history.replaceState(history.state, '', url);
+}
+
+// htmx writes the swapped-in URL to history after the swap event, so
+// the strip has to run behind it.
+function onSwap(): void {
+	setTimeout(stripNotice, 0);
+}
+
 function boxes(): HTMLInputElement[] {
 	return Array.from(document.querySelectorAll<HTMLInputElement>('input[data-bulk-check]'));
 }
@@ -127,9 +148,12 @@ function onClick(event: Event): void {
 export function install(): () => void {
 	document.addEventListener('change', onChange);
 	document.addEventListener('click', onClick);
+	document.addEventListener('htmx:after:swap', onSwap);
+	stripNotice();
 
 	return () => {
 		document.removeEventListener('change', onChange);
 		document.removeEventListener('click', onClick);
+		document.removeEventListener('htmx:after:swap', onSwap);
 	};
 }

@@ -179,6 +179,22 @@ describe('bulk selection', () => {
 		expect(query('[data-bulk-children]').hidden).toBe(false);
 	});
 
+	it('drops the notice param at install time', () => {
+		uninstall?.();
+		history.replaceState(null, '', '/cp/collection/x?q=foo&notice=deleted:1');
+		uninstall = install();
+
+		expect(window.location.search).toBe('?q=foo');
+	});
+
+	it('drops the notice param after a swap settles', async () => {
+		history.replaceState(null, '', '/cp/collection/x?notice=deleted:1');
+		document.dispatchEvent(new Event('htmx:after:swap'));
+		await new Promise((resolve) => setTimeout(resolve, 1));
+
+		expect(window.location.search).toBe('');
+	});
+
 	it('resets the children checkbox every time the dialog opens', () => {
 		box('a').click();
 		query('[data-bulk-open]').click();
