@@ -1,6 +1,12 @@
 /* The library is a custom element rendering into light DOM; the page only
    provides the bounded flex chain its panes scroll inside. */
 
+.cms-media {
+	/* Claim the whole main region: without this the page sizes to its
+	   content and the workspace shrinks when a search returns few rows. */
+	flex: 1 1 auto;
+}
+
 .cms-media .body {
 	display: flex;
 	flex-direction: column;
