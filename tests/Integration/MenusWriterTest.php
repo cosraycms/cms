@@ -164,6 +164,69 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertTrue($items[$first]->hasChildren());
 	}
 
+	public function testPlacePutsTheItemAtItsIndexAndRenumbersTheGroup(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-place', 'Place');
+		$a = $menus->add('writer-place', $this->itemData('A', '/a'));
+		$b = $menus->add('writer-place', $this->itemData('B', '/b'));
+		$c = $menus->add('writer-place', $this->itemData('C', '/c'));
+
+		$menus->place($c, null, 0);
+
+		$this->assertSame(
+			[$c, $a, $b],
+			array_keys(iterator_to_array(new Menu($this->createContext(), 'writer-place'))),
+		);
+		$this->assertSame(
+			[1, 2, 3],
+			array_column(
+				$this->db()->execute(
+					"SELECT position FROM cms.menu_items
+					WHERE menu = 'writer-place' ORDER BY position",
+				)->all(),
+				'position',
+			),
+		);
+
+		// An index past the end clamps to the last slot.
+		$menus->place($c, null, 99);
+		$this->assertSame(
+			[$a, $b, $c],
+			array_keys(iterator_to_array(new Menu($this->createContext(), 'writer-place'))),
+		);
+	}
+
+	public function testPlaceReparentsAtTheGivenIndex(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-place-nest', 'Place nested');
+		$parent = $menus->add('writer-place-nest', $this->itemData('Parent', '/p'));
+		$menus->add('writer-place-nest', $this->itemData('X', '/x'), parent: $parent);
+		$menus->add('writer-place-nest', $this->itemData('Y', '/y'), parent: $parent);
+		$moved = $menus->add('writer-place-nest', $this->itemData('Moved', '/m'));
+
+		$menus->place($moved, $parent, 1);
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-place-nest'));
+		$children = array_map(
+			static fn($child) => $child->title(),
+			iterator_to_array($items[$parent]->children()),
+		);
+		$this->assertSame(['X', 'Moved', 'Y'], $children);
+	}
+
+	public function testPlaceRejectsCycles(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-place-cycle', 'Place cycle');
+		$parent = $menus->add('writer-place-cycle', $this->itemData('Parent', '/p'));
+		$child = $menus->add('writer-place-cycle', $this->itemData('Child', '/c'), parent: $parent);
+
+		$this->throws(RuntimeException::class, 'below its own descendant');
+		$menus->place($parent, $child, 0);
+	}
+
 	public function testMoveRejectsCycles(): void
 	{
 		$menus = $this->menus();
@@ -215,7 +278,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertNotContains($grandchild, $left);
 	}
 
-	public function testNodeItemFollowsTheNodesCurrentPath(): void
+	private function writeNode(string $uid, string $heading, string $path): void
 	{
 		$locales = new Locales();
 		$locales->add('en', title: 'English');
@@ -230,10 +293,15 @@ final class MenusWriterTest extends IntegrationTestCase
 		$writer = new Writer($context, new Cms($context, $services), $services->types);
 		$writer->create(
 			$writer
-				->draft(PlainPage::class, ['heading' => 'Target'])
-				->uid('menu-node-target')
-				->path('en', '/target-current'),
+				->draft(PlainPage::class, ['heading' => $heading])
+				->uid($uid)
+				->path('en', $path),
 		);
+	}
+
+	public function testNodeItemFollowsTheNodesCurrentPath(): void
+	{
+		$this->writeNode('menu-node-target', 'Target', '/target-current');
 
 		$menus = $this->menus();
 		$menus->create('writer-resolve', 'Resolve');
@@ -256,6 +324,28 @@ final class MenusWriterTest extends IntegrationTestCase
 		// keeps its snapshot.
 		$this->assertSame('/target-current', $items[$linked]->path());
 		$this->assertSame('/legacy-snapshot', $items[$legacy]->path());
+	}
+
+	public function testNodeItemWithoutTitleInheritsTheNodesTitle(): void
+	{
+		$this->writeNode('menu-title-source', 'Fresh Title', '/title-source');
+
+		$menus = $this->menus();
+		$menus->create('writer-title', 'Title');
+		$inherits = $menus->add('writer-title', [
+			'type' => 'node',
+			'node' => 'menu-title-source',
+		]);
+		$overrides = $menus->add('writer-title', [
+			'type' => 'node',
+			'node' => 'menu-title-source',
+			'title' => ['en' => 'Custom'],
+		]);
+
+		$items = iterator_to_array(new Menu($this->createContext(), 'writer-title'));
+
+		$this->assertSame('Fresh Title', $items[$inherits]->title());
+		$this->assertSame('Custom', $items[$overrides]->title());
 	}
 
 	public function testNodeItemFallsBackToSnapshotWhenTheNodeIsGone(): void

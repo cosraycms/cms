@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Finder;
 
 use Cosray\Context;
+use Cosray\Field\Field;
 use Generator;
 use Iterator;
 
@@ -51,9 +52,15 @@ class MenuItem implements Iterator
 		return $this->data['type'];
 	}
 
+	/**
+	 * Node items linked by uid inherit their node's current title when
+	 * no title is stored; a stored title always overrides.
+	 */
 	public function title(): string
 	{
-		return $this->translated('title');
+		$title = $this->translated('title');
+
+		return $title !== '' ? $title : $this->localized($this->joined('node_title'));
 	}
 
 	/**
@@ -62,7 +69,7 @@ class MenuItem implements Iterator
 	 */
 	public function path(): string
 	{
-		$resolved = $this->localized($this->nodePaths());
+		$resolved = $this->localized($this->joined('node_paths'));
 
 		return $resolved !== '' ? $resolved : $this->translated('path');
 	}
@@ -148,7 +155,9 @@ class MenuItem implements Iterator
 			$locale = $locale->fallback();
 		}
 
-		return '';
+		// A language-neutral value applies when no locale in the chain
+		// matches, mirroring the finder's field compilation.
+		return $map[Field::NEUTRAL_LOCALE] ?? '';
 	}
 
 	private function assetPath(): ?string
@@ -162,16 +171,20 @@ class MenuItem implements Iterator
 		return $this->context->assets()->get($uid)?->path();
 	}
 
-	/** @return ?array<string, string> */
-	private function nodePaths(): ?array
+	/**
+	 * A locale map the read query joined onto the row as jsonb, decoded.
+	 *
+	 * @return ?array<string, string>
+	 */
+	private function joined(string $key): ?array
 	{
-		$paths = $this->item['node_paths'] ?? null;
+		$value = $this->item[$key] ?? null;
 
-		if (!is_string($paths)) {
+		if (!is_string($value)) {
 			return null;
 		}
 
-		$decoded = json_decode($paths, true);
+		$decoded = json_decode($value, true);
 
 		return is_array($decoded) ? $decoded : null;
 	}

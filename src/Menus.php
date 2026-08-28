@@ -7,6 +7,7 @@ namespace Cosray;
 use Celema\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\References\Sync;
+use Throwable;
 
 /**
  * Write API for menus and their item trees. Reading and rendering stay
@@ -112,33 +113,58 @@ final class Menus
 	public function move(string $item, ?string $parent, ?int $position = null): void
 	{
 		$row = $this->itemRow($item);
-
-		if ($parent !== null) {
-			$parentRow = $this->itemRow($parent);
-
-			if ($parentRow['menu'] !== $row['menu']) {
-				throw new RuntimeException(
-					"Parent item '{$parent}' belongs to another menu",
-				);
-			}
-
-			$ancestors = array_column(
-				$this->db->menus->ancestors(['item' => $parent])->all(),
-				'item',
-			);
-
-			if (in_array($item, $ancestors, true)) {
-				throw new RuntimeException(
-					"Cannot move '{$item}' below its own descendant '{$parent}'",
-				);
-			}
-		}
+		$this->assertParent($item, (string) $row['menu'], $parent);
 
 		$this->db->menus->moveItem([
 			'item' => $item,
 			'parent' => $parent,
 			'position' => $position ?? $this->nextPosition((string) $row['menu'], $parent),
 		])->run();
+	}
+
+	/**
+	 * Moves the item below `parent` (or to the root) to the zero-based
+	 * `index` among its new siblings and renumbers the whole group 1..n,
+	 * giving drag ordering exact semantics on top of `move()`'s looser
+	 * sort keys. An out-of-range index clamps to the group's ends.
+	 */
+	public function place(string $item, ?string $parent, int $index): void
+	{
+		$row = $this->itemRow($item);
+		$this->assertParent($item, (string) $row['menu'], $parent);
+
+		$siblings = array_column(
+			$this->db->menus->siblings(['menu' => $row['menu'], 'parent' => $parent])->all(),
+			'item',
+		);
+		$siblings = array_values(array_diff($siblings, [$item]));
+		array_splice($siblings, max(0, min($index, count($siblings))), 0, [$item]);
+
+		$owns = !$this->db->getConn()->inTransaction();
+
+		if ($owns) {
+			$this->db->begin();
+		}
+
+		try {
+			foreach ($siblings as $offset => $sibling) {
+				$this->db->menus->moveItem([
+					'item' => $sibling,
+					'parent' => $parent,
+					'position' => $offset + 1,
+				])->run();
+			}
+
+			if ($owns) {
+				$this->db->commit();
+			}
+		} catch (Throwable $e) {
+			if ($owns) {
+				$this->db->rollback();
+			}
+
+			throw $e;
+		}
 	}
 
 	/** Deletes the item including all of its descendants. */
@@ -169,6 +195,30 @@ final class Menus
 		}
 
 		$this->sync->replace('menu', $item, ['assets' => $assets, 'nodes' => []]);
+	}
+
+	private function assertParent(string $item, string $menu, ?string $parent): void
+	{
+		if ($parent === null) {
+			return;
+		}
+
+		if ($this->itemRow($parent)['menu'] !== $menu) {
+			throw new RuntimeException(
+				"Parent item '{$parent}' belongs to another menu",
+			);
+		}
+
+		$ancestors = array_column(
+			$this->db->menus->ancestors(['item' => $parent])->all(),
+			'item',
+		);
+
+		if (in_array($item, $ancestors, true)) {
+			throw new RuntimeException(
+				"Cannot move '{$item}' below its own descendant '{$parent}'",
+			);
+		}
 	}
 
 	private function itemRow(string $item): array

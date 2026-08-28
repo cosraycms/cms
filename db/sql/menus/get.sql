@@ -49,7 +49,18 @@ SELECT
 		WHERE
 			n.uid = nav.data->>'node'
 			AND up.inactive IS NULL
-	) END AS node_paths
+	) END AS node_paths,
+	-- Node items without a stored title inherit the node's materialized
+	-- title map; deleted nodes leave it null so the snapshot wins.
+	CASE WHEN nav.data->>'type' = 'node' AND jsonb_typeof(nav.data->'node') = 'string' THEN (
+		SELECT
+			n.title
+		FROM
+			/*:cms.prefix:*/nodes n
+		WHERE
+			n.uid = nav.data->>'node'
+			AND n.deleted IS NULL
+	) END AS node_title
 FROM
 	nav
 ORDER BY

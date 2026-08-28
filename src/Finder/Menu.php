@@ -21,7 +21,12 @@ class Menu implements Iterator
 			$context->db->menus->get(['menu' => $menu])->all(),
 		);
 
-		if (count($this->items) === 0) {
+		// An existing menu without items iterates nothing and renders as
+		// an empty string; only an unknown menu is an error.
+		if (
+			count($this->items) === 0
+			&& !$context->db->menus->exists(['menu' => $menu])->first()
+		) {
 			throw new RuntimeException('Menu not found');
 		}
 	}

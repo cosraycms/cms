@@ -129,6 +129,18 @@ final class MenuFinderTest extends IntegrationTestCase
 		new Menu($context, 'non-existent-menu');
 	}
 
+	public function testEmptyMenuIteratesNothingAndRendersNothing(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.menus (menu, description) VALUES ('test-menu-empty', 'Empty')",
+		)->run();
+
+		$menu = new Menu($this->createContext(), 'test-menu-empty');
+
+		$this->assertSame([], iterator_to_array($menu));
+		$this->assertSame('', $menu->html('main-menu'));
+	}
+
 	public function testMenuIterationReturnsMenuItems(): void
 	{
 		$context = $this->createContext();

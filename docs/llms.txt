@@ -471,22 +471,28 @@ gate — backing the richtext link picker, whose page tab links prose to a node
 Menus:
 
 - `$cms->menu('main')` returns `Finder\Menu`; `$menu->html($class, $tag)`
-  renders nested `<ul>` markup with titles, hrefs, and classes escaped
+  renders nested `<ul>` markup with titles, hrefs, and classes escaped;
+  an existing menu without items iterates nothing and renders as an
+  empty string — only an unknown menu handle raises
 - menu item `data` is a `type`-discriminated jsonb payload; anchored
   types: `node` (page link), `url` (literal per-locale href under the
   `path` key, optional `target`, `_blank` adds `rel="noopener"`), and
   `asset` (asset uid, links the file's current path); any other type
-  renders as an unlinked label
+  renders as an unlinked label; per-locale maps resolve through the
+  locale fallback chain with the neutral `zxx` key as the last resort
 - `node` items storing the linked node's uid under `data.node` follow
   the node's current localized path at read time; the per-locale `path`
   snapshot in the item data is the fallback for legacy rows (numeric
-  stubs) and vanished nodes
+  stubs) and vanished nodes. Items without a stored `title` inherit the
+  node's materialized title the same way; a stored title overrides
 - `Cosray\Menus` is the write API: `create`/`update`/`delete` for menus,
-  `add`/`updateItem`/`move`/`remove` for items; item ids are generated
-  uids (dots rejected), parents must belong to the same menu, positions
-  append per sibling group, moves reject cycles, removals delete the
-  subtree, and every write syncs the item's `image`/`asset` uids into
-  `asset_references`
+  `add`/`updateItem`/`move`/`place`/`remove` for items; item ids are
+  generated uids (dots rejected), parents must belong to the same menu,
+  positions append per sibling group, moves reject cycles, removals
+  delete the subtree, and every write syncs the item's `image`/`asset`
+  uids into `asset_references`. `place($item, $parent, $index)` pins an
+  exact zero-based index and renumbers the sibling group, where `move`
+  keeps loose sort-key positions
 
 Node wrapper hierarchy helper:
 

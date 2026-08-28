@@ -161,6 +161,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
 		$this->container->add(IconProvider::class, Icons::class);
+		$this->container->add(Menus::class);
 
 		$this->routes = new Routes(
 			$this->config,
