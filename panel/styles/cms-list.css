@@ -4,6 +4,8 @@
  */
 
 .cms-list {
+	--cms-list-select-width: 2.5rem;
+
 	display: grid;
 	grid-template-columns: var(--columns);
 	width: 100%;
@@ -123,6 +125,29 @@
 		&.col-status {
 			justify-content: flex-start;
 		}
+	}
+
+	/*
+	 * The selection column joins the pinned title: the checkbox pins at the
+	 * left edge (as first child) and the title cell moves its pin right by
+	 * the fixed column width, so a sideways scroll hides neither.
+	 */
+	& .col-select {
+		justify-content: center;
+		padding-inline: var(--cms-space-2);
+	}
+
+	& .cell.col-select + .cell {
+		position: sticky;
+		left: var(--cms-list-select-width);
+		z-index: 1;
+		background: var(--row-bg);
+	}
+
+	& th.col-select + th {
+		position: sticky;
+		left: var(--cms-list-select-width);
+		z-index: 3;
 	}
 
 	& .value {
@@ -276,7 +301,9 @@
 
 @supports (animation-timeline: scroll(inline nearest)) {
 	.cms-list .cell:first-child,
-	.cms-list th:first-child {
+	.cms-list th:first-child,
+	.cms-list .cell.col-select + .cell,
+	.cms-list th.col-select + th {
 		animation: cms-list-pinned linear both;
 		animation-timeline: scroll(inline nearest);
 		animation-range: 0 2rem;
@@ -320,6 +347,19 @@
 		& .cell:first-child {
 			position: static;
 			box-shadow: none;
+		}
+
+		& .cell.col-select + .cell {
+			position: static;
+			box-shadow: none;
+		}
+
+		& .col-select {
+			display: flex;
+
+			&::before {
+				display: none;
+			}
 		}
 
 		& .cell {

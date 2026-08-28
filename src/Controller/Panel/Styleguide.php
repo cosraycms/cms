@@ -195,6 +195,7 @@ final class Styleguide extends Panel
 			'last' => false,
 			'expanded' => false,
 			'published' => true,
+			'hasChildren' => false,
 			'childrenUrl' => null,
 			'focusedChildrenUrl' => null,
 			'childCreateLinks' => [],
@@ -211,6 +212,7 @@ final class Styleguide extends Panel
 		return [
 			$row([
 				'expanded' => true,
+				'hasChildren' => true,
 				'childrenUrl' => '#',
 				'focusedChildrenUrl' => '#',
 				'childCreateLinks' => [['url' => '#', 'name' => 'Page']],

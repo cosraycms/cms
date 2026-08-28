@@ -4,7 +4,7 @@ use function Cosray\escape;
 
 // One listing row. Shared by the collection and the styleguide so the sampler
 // shows the real thing rather than a copy that drifts.
-// Receives: row, treeMode, showChildren, chevronSvg, hasRowActions.
+// Receives: row, treeMode, showChildren, chevronSvg, hasRowActions, bulk.
 
 $row = (array) $this->unwrap($row);
 $treeMode = (bool) $treeMode;
@@ -12,6 +12,7 @@ $showChildren = (bool) $showChildren;
 // unwrap, not cast: the markup has to reach the page as markup.
 $chevronSvg = (string) $this->unwrap($chevronSvg);
 $hasRowActions = (bool) ($hasRowActions ?? false);
+$bulk = (bool) ($bulk ?? false);
 ?>
 <tr
 	class="row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -20,6 +21,20 @@ $hasRowActions = (bool) ($hasRowActions ?? false);
 	data-depth="<?= (int) $row['depth'] ?>"
 	data-last="<?= $row['last'] ? 'true' : 'false' ?>"
 	style="--tree-depth: <?= (int) $row['depth'] ?>">
+	<?php if ($bulk): ?>
+		<td class="cell col-select" role="cell">
+			<input
+				type="checkbox"
+				name="nodes[]"
+				value="<?= escape((string) $row['uid']) ?>"
+				form="collection-bulk"
+				data-bulk-check
+				<?= ($row['hasChildren'] ?? false) ? 'data-has-children' : '' ?>
+				aria-label="<?= escape(__('bulk:select-row', [
+					'name' => (string) ($row['cells'][0]['value'] ?? $row['uid']),
+				])) ?>" />
+		</td>
+	<?php endif ?>
 	<?php foreach ((array) $row['cells'] as $index => $cell): ?>
 		<td
 			class="cell <?= escape((string) $cell['class']) ?>"

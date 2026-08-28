@@ -15,6 +15,7 @@ final class CollectionPage
 	/**
 	 * @param list<array{label: string, url: string, active: bool}> $viewLinks
 	 * @param list<array{slug: string, name: string, url: string}> $createLinks
+	 * @param array{publishUrl: string, deleteUrl: string, showPublished: bool} $bulk
 	 */
 	private function __construct(
 		public readonly string $name,
@@ -25,6 +26,7 @@ final class CollectionPage
 		public readonly array $createLinks,
 		public readonly CollectionTable $table,
 		public readonly CollectionPager $pager,
+		public readonly array $bulk,
 	) {}
 
 	/**
@@ -80,6 +82,11 @@ final class CollectionPage
 				timezone: $timezone,
 			),
 			pager: CollectionPager::from($total, count($nodes), $urls),
+			bulk: [
+				'publishUrl' => $urls->bulk('publish'),
+				'deleteUrl' => $urls->bulk('delete'),
+				'showPublished' => $meta->showPublished,
+			],
 		);
 	}
 

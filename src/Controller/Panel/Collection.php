@@ -122,6 +122,7 @@ final class Collection extends Panel
 		$urls = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		return $this->context([
+			'notice' => $this->notice(),
 			'page' => CollectionPage::from(
 				name: __($ref->meta->label),
 				urls: $urls,
@@ -141,6 +142,74 @@ final class Collection extends Panel
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 			),
 		]);
+	}
+
+	/**
+	 * The bulk-action result summary from the redirect's `notice` param
+	 * (`key:count` pairs), reduced to display strings. Display-only, so
+	 * unknown or malformed parts are dropped rather than rejected.
+	 *
+	 * @return list<string>
+	 */
+	private function notice(): array
+	{
+		$value = $this->request->param('notice', '');
+
+		if (!is_string($value) || trim($value) === '') {
+			return [];
+		}
+
+		// Literal ids so the i18n scanner sees every key.
+		$keys = [
+			'deleted' => static fn(int $n): string => __n(
+				'bulk:notice-deleted',
+				'bulk:notice-deleted-plural',
+				$n,
+			),
+			'published' => static fn(int $n): string => __n(
+				'bulk:notice-published',
+				'bulk:notice-published-plural',
+				$n,
+			),
+			'drafted' => static fn(int $n): string => __n(
+				'bulk:notice-drafted',
+				'bulk:notice-drafted-plural',
+				$n,
+			),
+			'duplicated' => static fn(int $n): string => __n(
+				'bulk:notice-duplicated',
+				'bulk:notice-duplicated-plural',
+				$n,
+			),
+			'skipped-children' => static fn(int $n): string => __n(
+				'bulk:notice-skipped-children',
+				'bulk:notice-skipped-children-plural',
+				$n,
+			),
+			'skipped-locked' => static fn(int $n): string => __n(
+				'bulk:notice-skipped-locked',
+				'bulk:notice-skipped-locked-plural',
+				$n,
+			),
+			'skipped' => static fn(int $n): string => __n(
+				'bulk:notice-skipped',
+				'bulk:notice-skipped-plural',
+				$n,
+			),
+		];
+		$messages = [];
+
+		foreach (explode(',', $value) as $part) {
+			[$key, $count] = array_pad(explode(':', $part, 2), 2, '');
+
+			if (!isset($keys[$key]) || !preg_match('/^[1-9][0-9]{0,5}$/', $count)) {
+				continue;
+			}
+
+			$messages[] = $keys[$key]((int) $count);
+		}
+
+		return $messages;
 	}
 
 	private function parentNode(CmsCollection $collection, string $uid): Wrapper

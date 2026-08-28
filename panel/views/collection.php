@@ -33,7 +33,10 @@ foreach ($page->table->rows as $row) {
 	}
 }
 
-$columns = 'minmax(12rem, 2fr)';
+$bulk = count($page->table->rows) > 0;
+$notice = (array) $this->unwrap($notice ?? []);
+
+$columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr)';
 
 foreach (array_slice((array) $this->unwrap($page->table->headers), 1) as $header) {
 	$columns .= $track((string) ($header['kind'] ?? 'text'));
@@ -93,6 +96,14 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 	</header>
 
 	<div class="body">
+		<?php if (count($notice) > 0): ?>
+			<div class="cms-notice" role="status">
+				<?php foreach ($notice as $message): ?>
+					<p><?= escape((string) $message) ?></p>
+				<?php endforeach ?>
+			</div>
+		<?php endif ?>
+
 		<div class="toolbar">
 			<form
 				class="search"
@@ -136,6 +147,52 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php endif ?>
 		</div>
 
+		<?php if ($bulk): ?>
+			<?php // The form element stays empty: checkboxes and action buttons
+			// associate through form="collection-bulk" so the bar, the table
+			// and the dialogs need no shared wrapper. Submit buttons carry
+			// their endpoint as formaction; without one a submit has nowhere
+			// valid to go, which is the intended dead end. ?>
+			<form id="collection-bulk" method="post" hidden></form>
+			<div class="bulk-bar" data-bulk-bar hidden>
+				<div class="info">
+					<output
+						class="count"
+						data-bulk-count
+						data-label-one="<?= escape(__('bulk:selected')) ?>"
+						data-label-many="<?= escape(__('bulk:selected-plural')) ?>"></output>
+					<button type="button" class="clear" data-bulk-clear><?= escape(
+						__('bulk:clear'),
+					) ?></button>
+				</div>
+				<div class="actions">
+					<?php if ($page->bulk['showPublished']): ?>
+						<button
+							type="submit"
+							class="action"
+							form="collection-bulk"
+							formaction="<?= escape($page->bulk['publishUrl']) ?>"
+							name="state"
+							value="published">
+							<?= escape(__('bulk:publish')) ?>
+						</button>
+						<button
+							type="submit"
+							class="action"
+							form="collection-bulk"
+							formaction="<?= escape($page->bulk['publishUrl']) ?>"
+							name="state"
+							value="draft">
+							<?= escape(__('bulk:unpublish')) ?>
+						</button>
+					<?php endif ?>
+					<button type="button" class="action" data-bulk-open="delete">
+						<?= escape(__('bulk:delete')) ?>
+					</button>
+				</div>
+			</div>
+		<?php endif ?>
+
 		<div class="card">
 			<?php if (count($page->table->rows) === 0): ?>
 				<div class="empty">
@@ -155,6 +212,14 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<table class="cms-list" role="table" style="--columns: <?= escape($columns) ?>">
 						<thead role="rowgroup">
 							<tr role="row">
+								<?php if ($bulk): ?>
+									<th class="col-select" role="columnheader">
+										<input
+											type="checkbox"
+											data-bulk-all
+											aria-label="<?= escape(__('bulk:select-all')) ?>" />
+									</th>
+								<?php endif ?>
 								<?php foreach ($page->table->headers as $header): ?>
 									<th class="<?= escape($header['class']) ?>" role="columnheader">
 										<?php if ($header['url'] === null): ?>
@@ -183,6 +248,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 									'showChildren' => $page->table->showChildren,
 									'chevronSvg' => $chevronSvg,
 									'hasRowActions' => $hasRowActions,
+									'bulk' => $bulk,
 								]) ?>
 							<?php endforeach ?>
 						</tbody>
@@ -221,4 +287,31 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</footer>
 		</div>
 	</div>
+
+	<?php if ($bulk): ?>
+		<dialog class="cms-confirm" data-bulk-dialog="delete">
+			<h2><?= escape(__('bulk:delete')) ?></h2>
+			<p
+				class="question"
+				data-bulk-question
+				data-label-one="<?= escape(__('bulk:confirm-delete')) ?>"
+				data-label-many="<?= escape(__('bulk:confirm-delete-plural')) ?>"></p>
+			<label class="children" data-bulk-children hidden>
+				<input type="checkbox" name="children" value="1" form="collection-bulk" />
+				<span><?= escape(__('bulk:delete-children')) ?></span>
+			</label>
+			<footer>
+				<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+					__('bulk:cancel'),
+				) ?></button>
+				<button
+					type="submit"
+					class="cms-button danger"
+					form="collection-bulk"
+					formaction="<?= escape($page->bulk['deleteUrl']) ?>">
+					<?= escape(__('bulk:delete')) ?>
+				</button>
+			</footer>
+		</dialog>
+	<?php endif ?>
 </div>

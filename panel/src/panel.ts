@@ -2,6 +2,7 @@ import '../styles/panel.css';
 
 import type { BridgeSystem } from '$lib/bridge';
 
+import { install as installBulk } from './behaviors/bulk';
 import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
 import { install as installErrors } from './behaviors/errors';
@@ -101,6 +102,7 @@ cleanups.push(
 	installSubmit(),
 	installTransport(),
 	installErrors(),
+	installBulk(),
 );
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 

@@ -85,6 +85,88 @@
 		flex-wrap: wrap;
 	}
 
+	& .cms-notice {
+		flex: 0 0 auto;
+		padding: var(--cms-space-2-5) var(--cms-space-4);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+
+		& p {
+			margin: 0;
+		}
+
+		& p + p {
+			margin-top: var(--cms-space-1);
+		}
+	}
+
+	/* The selection bar paints like the primary button: a dark strip in the
+	   light theme, inverted in the dark one. */
+	& .bulk-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-3);
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		padding: var(--cms-space-2) var(--cms-space-4);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-primary);
+		color: var(--cms-color-primary-text);
+
+		& .info {
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-3);
+		}
+
+		& .count {
+			font-size: var(--cms-font-size-sm);
+			font-weight: 600;
+		}
+
+		& .clear {
+			padding: 0;
+			border: 0;
+			background: none;
+			color: color-mix(in srgb, var(--cms-color-primary-text) 75%, transparent);
+			font-size: var(--cms-font-size-xs);
+			text-decoration: underline;
+			cursor: pointer;
+
+			&:hover,
+			&:focus-visible {
+				color: var(--cms-color-primary-text);
+			}
+		}
+
+		& .actions {
+			gap: var(--cms-space-2);
+		}
+
+		& .action {
+			display: inline-flex;
+			align-items: center;
+			min-height: 1.875rem;
+			padding: 0 var(--cms-space-3);
+			border: 1px solid color-mix(in srgb, var(--cms-color-primary-text) 30%, transparent);
+			border-radius: var(--cms-radius-md);
+			background: color-mix(in srgb, var(--cms-color-primary-text) 12%, transparent);
+			color: var(--cms-color-primary-text);
+			font-size: var(--cms-font-size-xs);
+			font-weight: 500;
+			cursor: pointer;
+
+			&:hover,
+			&:focus-visible {
+				background: color-mix(in srgb, var(--cms-color-primary-text) 22%, transparent);
+			}
+		}
+	}
+
 	& .search {
 		position: relative;
 		flex: 1 1 18rem;
@@ -278,6 +360,48 @@
 			color: var(--cms-color-text-faint);
 			font-size: 1.5rem;
 		}
+	}
+}
+
+.cms-confirm {
+	min-width: min(24rem, 90vw);
+	max-width: 28rem;
+	padding: var(--cms-space-6);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text);
+	box-shadow: var(--cms-shadow-lg);
+
+	&::backdrop {
+		background-color: color-mix(in srgb, var(--cms-color-neutral-900) 40%, transparent);
+	}
+
+	& h2 {
+		margin: 0 0 var(--cms-space-3);
+		font-size: var(--cms-font-size-base);
+		font-weight: 600;
+	}
+
+	& .question {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .children {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-3);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-5);
 	}
 }
 

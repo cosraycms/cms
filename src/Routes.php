@@ -233,6 +233,22 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('editor-paths'));
+				// Before the {node} routes: like `create`, the `bulk` segment
+				// wins over a node uid of the same name.
+				$panel
+					->post(
+						'/collection/{collection}/bulk/publish',
+						[Panel\Bulk::class, 'publish'],
+						'collection.bulk.publish',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
+						'/collection/{collection}/bulk/delete',
+						[Panel\Bulk::class, 'delete'],
+						'collection.bulk.delete',
+					)
+					->middleware($panelAuth);
 				$panel
 					->post(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/delete',

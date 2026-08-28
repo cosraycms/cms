@@ -105,6 +105,17 @@ final class CollectionUrls
 		return $this->path() . '/' . rawurlencode($uid) . '/delete';
 	}
 
+	/**
+	 * Bulk-action endpoint, carrying the full listing query (offset
+	 * included) so the response can redirect back to the same view.
+	 */
+	public function bulk(string $action): string
+	{
+		$path = $this->path() . '/bulk/' . rawurlencode($action);
+
+		return $this->url($path, $this->query->editorParams());
+	}
+
 	public function createPaths(string $type): string
 	{
 		return $this->path() . '/create/' . rawurlencode($type) . '/paths';
