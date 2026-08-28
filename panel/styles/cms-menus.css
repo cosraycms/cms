@@ -181,6 +181,388 @@
 	}
 }
 
+/* The item tree with its editing side pane. Cards float on the sunken
+   canvas, connected by the tree lines; the pane sits sticky beside it. */
+
+.cms-menu-tree {
+	& .breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-faint);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 500;
+
+		& a {
+			color: var(--cms-color-text-muted);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--cms-color-accent-text);
+			}
+		}
+	}
+
+	& .titles {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1);
+		min-width: 0;
+	}
+
+	& .workspace {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 24rem;
+		gap: var(--cms-space-4);
+		flex: 1 1 auto;
+		min-height: 0;
+		align-items: start;
+	}
+
+	& .tree {
+		min-height: 0;
+		height: 100%;
+		padding-bottom: var(--cms-space-6);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .tree > .empty {
+		border: 1px dashed var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-lg);
+		background: var(--cms-color-surface);
+	}
+
+	& .menu-tree,
+	& .menu-children {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-2);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	& .menu-children {
+		position: relative;
+		margin-top: var(--cms-space-2);
+		padding-left: var(--cms-space-8);
+
+		/* The vertical rail … */
+		&::before {
+			content: '';
+			position: absolute;
+			top: calc(-1 * var(--cms-space-2));
+			bottom: 1.25rem;
+			left: var(--cms-space-4);
+			border-left: 1px solid var(--cms-color-border-strong);
+		}
+	}
+
+	/* … and one tick per child card. */
+	& .menu-children > .menu-node::before {
+		content: '';
+		position: absolute;
+		top: 1.25rem;
+		left: calc(-1 * var(--cms-space-4));
+		width: var(--cms-space-4);
+		border-top: 1px solid var(--cms-color-border-strong);
+	}
+
+	& .menu-node {
+		position: relative;
+	}
+
+	& .menu-node.is-collapsed > .menu-children {
+		display: none;
+	}
+
+	& .menu-node.is-collapsed > .menu-card .collapse::before {
+		content: '+';
+	}
+
+	& .menu-card {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-2) var(--cms-space-3);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-sm, none);
+
+		&.is-selected {
+			border-color: var(--cms-color-accent);
+			outline: 1px solid var(--cms-color-accent);
+		}
+
+		& .collapse {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.25rem;
+			height: 1.25rem;
+			padding: 0;
+			border: 1px solid var(--cms-color-border-strong);
+			border-radius: 50%;
+			background: var(--cms-color-surface);
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+			line-height: 1;
+			cursor: pointer;
+
+			&::before {
+				content: '−';
+			}
+
+			&:hover {
+				background: var(--cms-color-hover);
+			}
+		}
+
+		& .grip {
+			color: var(--cms-color-text-faint);
+			font-size: var(--cms-font-size-sm);
+			cursor: grab;
+			user-select: none;
+
+			&::before {
+				content: '⠿';
+			}
+		}
+
+		& .text {
+			display: flex;
+			flex-direction: column;
+			flex: 1 1 auto;
+			min-width: 0;
+			color: inherit;
+			text-decoration: none;
+
+			& strong {
+				overflow: hidden;
+				color: var(--cms-color-text);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 600;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			& small {
+				overflow: hidden;
+				color: var(--cms-color-text-muted);
+				font-size: var(--cms-font-size-xs);
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			&:hover strong {
+				color: var(--cms-color-accent-text);
+			}
+		}
+	}
+
+	& .kebab {
+		position: relative;
+
+		& summary {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.75rem;
+			height: 1.75rem;
+			border-radius: var(--cms-radius-md);
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+			list-style: none;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+
+			&::before {
+				content: '⋮';
+				font-size: var(--cms-font-size-base);
+				font-weight: 700;
+			}
+
+			&:hover {
+				background: var(--cms-color-hover);
+			}
+		}
+
+		&[open] summary {
+			background: var(--cms-color-hover);
+		}
+
+		& .kebab-menu {
+			position: absolute;
+			z-index: 5;
+			top: 100%;
+			right: 0;
+			display: flex;
+			flex-direction: column;
+			min-width: 10rem;
+			margin-top: var(--cms-space-1);
+			padding: var(--cms-space-1);
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-surface);
+			box-shadow: var(--cms-shadow-md, 0 4px 12px rgb(0 0 0 / 0.12));
+
+			& a,
+			& button {
+				display: block;
+				width: 100%;
+				padding: var(--cms-space-1-5) var(--cms-space-2-5);
+				border: 0;
+				border-radius: var(--cms-radius-sm);
+				background: none;
+				color: var(--cms-color-text);
+				font-size: var(--cms-font-size-sm);
+				text-align: left;
+				text-decoration: none;
+				cursor: pointer;
+
+				&:hover {
+					background: var(--cms-color-hover);
+				}
+
+				&:disabled {
+					color: var(--cms-color-text-faint);
+					cursor: default;
+
+					&:hover {
+						background: none;
+					}
+				}
+
+				&.danger {
+					color: var(--cms-color-danger-text);
+				}
+			}
+
+			& form {
+				display: block;
+			}
+		}
+	}
+
+	& .pane {
+		position: sticky;
+		top: 0;
+		max-height: 100%;
+		padding: var(--cms-space-4);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		background: var(--cms-color-surface);
+		overflow-y: auto;
+
+		& .pane-empty {
+			padding: var(--cms-space-6) var(--cms-space-2);
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-sm);
+			text-align: center;
+
+			& p {
+				margin: 0;
+			}
+		}
+
+		& h2 {
+			margin: 0 0 var(--cms-space-1);
+			font-size: var(--cms-font-size-lg);
+			font-weight: 600;
+		}
+
+		& .pane-hint {
+			margin: 0 0 var(--cms-space-2);
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& form {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-3);
+		}
+
+		& .error {
+			margin: var(--cms-space-1) 0 0;
+			color: var(--cms-color-danger-text);
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& .help {
+			margin: var(--cms-space-1) 0 0;
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& .target {
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-2);
+			color: var(--cms-color-text);
+			font-size: var(--cms-font-size-sm);
+		}
+
+		& .form-actions {
+			display: flex;
+			justify-content: flex-end;
+			gap: var(--cms-space-2);
+		}
+	}
+
+	& .menu-picker {
+		position: relative;
+
+		& .menu-picker-results {
+			position: absolute;
+			z-index: 6;
+			top: 100%;
+			right: 0;
+			left: 0;
+			display: flex;
+			flex-direction: column;
+			margin-top: var(--cms-space-1);
+			padding: var(--cms-space-1);
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-surface);
+			box-shadow: var(--cms-shadow-md, 0 4px 12px rgb(0 0 0 / 0.12));
+			max-height: 16rem;
+			overflow-y: auto;
+
+			& button {
+				display: flex;
+				flex-direction: column;
+				padding: var(--cms-space-1-5) var(--cms-space-2-5);
+				border: 0;
+				border-radius: var(--cms-radius-sm);
+				background: none;
+				text-align: left;
+				cursor: pointer;
+
+				& strong {
+					color: var(--cms-color-text);
+					font-size: var(--cms-font-size-sm);
+					font-weight: 500;
+				}
+
+				& small {
+					color: var(--cms-color-text-muted);
+					font-size: var(--cms-font-size-xs);
+				}
+
+				&:hover {
+					background: var(--cms-color-hover);
+				}
+			}
+		}
+	}
+}
+
 @media (max-width: 52rem) {
 	.cms-menus {
 		overflow: visible;
@@ -192,6 +574,22 @@
 
 		& .body {
 			overflow: visible;
+		}
+	}
+
+	.cms-menu-tree {
+		& .workspace {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		& .tree {
+			height: auto;
+			overflow: visible;
+		}
+
+		& .pane {
+			position: static;
+			max-height: none;
 		}
 	}
 }

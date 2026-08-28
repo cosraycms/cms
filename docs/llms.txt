@@ -595,6 +595,12 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/menus` menu listing; `GET|POST .../menus/create`,
   `GET|POST .../menus/{menu}/edit`, `POST .../menus/{menu}/delete` manage
   menus — all behind the `edit-menus` permission (superuser and admin)
+- `GET <panelPath>/menus/{menu}` renders the item tree with its editing
+  side pane; the pane state is URL-driven (`?item=` edits, `?add=` or
+  `?add={uid}` creates). Item writes: `POST .../item/create`,
+  `POST .../item/{item}` (update), `POST .../item/{item}/move`
+  (`direction=up|down`, or `parent` + `index` for exact drag placement),
+  `POST .../item/{item}/delete` (subtree)
 
 The dashboard has an ordered card registry exposed as the `$app->dashboard` property. Cosray registers entries, drafts, and media cards by default; applications call `$app->dashboard->add(CardProvider::class)` or `replace(...)`, and plugins call `Registrar::dashboardCard()`. Providers implement `Cosray\Contract\DashboardCard` and return a nullable `Cosray\Panel\Dashboard\Card` DTO (`label`, `value`, optional `note` and `url`). Class-string providers are autowired per dashboard request; `null` omits the card. Integer values are locale-formatted, while strings are display-ready. The optional `url` is panel-internal.
 

@@ -47,6 +47,11 @@ class MenuItem implements Iterator
 		return key($this->children) !== null;
 	}
 
+	public function id(): string
+	{
+		return (string) $this->item['item'];
+	}
+
 	public function type(): string
 	{
 		return $this->data['type'];

@@ -214,6 +214,46 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->get(
+						'/menus/{menu:[a-z0-9-]{1,32}}',
+						[Panel\Menus::class, 'menu'],
+						'menu',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu'));
+				// Before the {item} route: the literal segment wins, and item
+				// ids are generated uids that never collide with it.
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/item/create',
+						[Panel\Menus::class, 'storeItem'],
+						'menu.item.store',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu'));
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/item/{item:[A-Za-z0-9_-]{1,64}}/move',
+						[Panel\Menus::class, 'moveItem'],
+						'menu.item.move',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/item/{item:[A-Za-z0-9_-]{1,64}}/delete',
+						[Panel\Menus::class, 'deleteItem'],
+						'menu.item.delete',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
+						'/menus/{menu:[a-z0-9-]{1,32}}/item/{item:[A-Za-z0-9_-]{1,64}}',
+						[Panel\Menus::class, 'updateItem'],
+						'menu.item.update',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('menu'));
+				$panel
+					->get(
 						'/reference/search',
 						[Panel\Reference::class, 'search'],
 						'reference.search',

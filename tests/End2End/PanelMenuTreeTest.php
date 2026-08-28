@@ -1,0 +1,386 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cosray\Tests\End2End;
+
+use Cosray\Bootstrap;
+use Cosray\Config;
+use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
+
+/**
+ * The menu item tree screen with its editing side pane: selection and
+ * creation via URL state, item CRUD, and reordering.
+ *
+ * @internal
+ *
+ * @coversNothing
+ */
+final class PanelMenuTreeTest extends End2EndTestCase
+{
+	private int $nodeTypeId;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+		$this->authenticateAs('admin');
+		$this->nodeTypeId = $this->createTestType('test-hierarchy-parent');
+		$this->db()->execute(
+			"INSERT INTO cms.menus (menu, description) VALUES ('tree-menu', 'Tree menu')",
+		)->run();
+	}
+
+	protected function createBootstrap(Config $config): Bootstrap
+	{
+		$plugin = parent::createBootstrap($config);
+		$plugin->node(TestHierarchyParent::class);
+
+		return $plugin;
+	}
+
+	private function createItem(
+		string $item,
+		?string $parent = null,
+		int $position = 1,
+		?array $data = null,
+	): void {
+		$this->db()->execute(
+			'INSERT INTO cms.menu_items (item, parent, menu, position, data)
+			VALUES (:item, :parent, :menu, :position, :data::jsonb)',
+			[
+				'item' => $item,
+				'parent' => $parent,
+				'menu' => 'tree-menu',
+				'position' => $position,
+				'data' => json_encode(
+					$data ?? [
+						'type' => 'url',
+						'title' => ['en' => 'Item ' . $item],
+						'path' => ['en' => '/' . $item],
+					],
+				),
+			],
+		)->run();
+	}
+
+	private function insertAsset(string $uid): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+			VALUES (:uid, 'local', :key, 'file.pdf', 1)",
+			['uid' => $uid, 'key' => substr($uid, 0, 2) . "/{$uid}/file.pdf"],
+		)->run();
+	}
+
+	/** @return list<string> item ids of one sibling group in stored order */
+	private function order(?string $parent = null): array
+	{
+		return array_column(
+			$this->db()->execute(
+				"SELECT item FROM cms.menu_items
+				WHERE menu = 'tree-menu' AND parent IS NOT DISTINCT FROM :parent
+				ORDER BY position, item",
+				['parent' => $parent],
+			)->all(),
+			'item',
+		);
+	}
+
+	private function itemData(string $item): array
+	{
+		return json_decode(
+			(string) $this->db()->execute(
+				'SELECT data FROM cms.menu_items WHERE item = :item',
+				['item' => $item],
+			)->one()['data'],
+			true,
+		);
+	}
+
+	public function testTreeRendersNestedCardsWithActions(): void
+	{
+		$this->createItem('root-a');
+		$this->createItem('child-a', 'root-a');
+		$this->createItem('grandchild-a', 'child-a');
+		$this->createItem('root-b', position: 2);
+
+		$response = $this->makeRequest('GET', '/cp/menus/tree-menu');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('data-uid="root-a"', $html);
+		$this->assertStringContainsString('class="menu-children"', $html);
+		$this->assertStringContainsString('Item grandchild-a', $html);
+		$this->assertStringContainsString('?item=root-a', $html);
+		$this->assertStringContainsString('?add=root-a', $html);
+		$this->assertStringContainsString('/cp/menus/tree-menu/item/root-a/move', $html);
+		// The delete confirm counts the whole subtree below the item.
+		$this->assertStringContainsString(
+			'and its 2 child items',
+			$html,
+		);
+		$this->assertStringContainsString('Delete &quot;Item root-b&quot;?', $html);
+	}
+
+	public function testSelectingAnItemFillsThePane(): void
+	{
+		$this->createItem('selected-item', null, 1, [
+			'type' => 'url',
+			'title' => ['en' => 'Selected'],
+			'path' => ['en' => '/selected'],
+			'class' => 'promoted',
+			'target' => '_blank',
+		]);
+
+		$html = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?item=selected-item'),
+		);
+
+		$this->assertStringContainsString('is-selected', $html);
+		$this->assertStringContainsString(
+			'action="/cp/menus/tree-menu/item/selected-item"',
+			$html,
+		);
+		$this->assertStringContainsString('value="Selected"', $html);
+		$this->assertStringContainsString('value="/selected"', $html);
+		$this->assertStringContainsString('value="promoted"', $html);
+		$this->assertStringContainsString('checked', $html);
+	}
+
+	public function testAddPaneForRootAndBelowAParent(): void
+	{
+		$this->createItem('add-parent', null, 1, [
+			'type' => 'url',
+			'title' => ['en' => 'The Parent'],
+			'path' => ['en' => '/parent'],
+		]);
+
+		$root = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu?add='));
+		$this->assertStringContainsString('action="/cp/menus/tree-menu/item/create"', $root);
+		$this->assertStringNotContainsString('name="parent"', $root);
+
+		$below = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?add=add-parent'),
+		);
+		$this->assertStringContainsString('name="parent" value="add-parent"', $below);
+		$this->assertStringContainsString('Below &quot;The Parent&quot;', $below);
+	}
+
+	public function testCreatesUrlItemsAppended(): void
+	{
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'url', 'title' => ['en' => 'First'], 'path' => ['en' => '/first']],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$location = $response->getHeaderLine('Location');
+		$this->assertStringContainsString('/cp/menus/tree-menu?item=', $location);
+		$this->assertStringContainsString('notice=item-created', $location);
+
+		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'url', 'title' => ['en' => 'Second'], 'path' => ['en' => '/second']],
+		]);
+
+		$order = $this->order();
+		$this->assertCount(2, $order);
+		$this->assertSame('First', $this->itemData($order[0])['title']['en']);
+		$this->assertSame('Second', $this->itemData($order[1])['title']['en']);
+	}
+
+	public function testCreatesNodeItemAndRequiresAnExistingNode(): void
+	{
+		$rejected = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'node', 'node' => 'never-was'],
+		]);
+		$this->assertResponseOk($rejected);
+		$this->assertStringContainsString(
+			'Pick an existing page.',
+			$this->getHtmlResponse($rejected),
+		);
+		$this->assertSame([], $this->order());
+
+		$this->createTestNode([
+			'uid' => 'menu-tree-target',
+			'type' => $this->nodeTypeId,
+			'published' => true,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Target']]],
+		]);
+
+		$accepted = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'node', 'node' => 'menu-tree-target'],
+		]);
+		$this->assertResponseStatus(303, $accepted);
+
+		$data = $this->itemData($this->order()[0]);
+		$this->assertSame('node', $data['type']);
+		$this->assertSame('menu-tree-target', $data['node']);
+		$this->assertArrayNotHasKey('title', $data);
+	}
+
+	public function testUpdateRewritesTheItemPayload(): void
+	{
+		$this->createItem('rewrite-me');
+		$this->insertAsset('menu-tree-icon');
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/rewrite-me', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'Renamed'],
+				'path' => ['en' => 'https://example.com/'],
+				'target' => '_blank',
+				'class' => 'external',
+				'image' => 'menu-tree-icon',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString('notice=item-saved', $response->getHeaderLine('Location'));
+		// jsonb storage reorders keys, so compare order-insensitively.
+		$this->assertEquals(
+			[
+				'type' => 'url',
+				'title' => ['en' => 'Renamed'],
+				'path' => ['en' => 'https://example.com/'],
+				'target' => '_blank',
+				'class' => 'external',
+				'image' => 'menu-tree-icon',
+			],
+			$this->itemData('rewrite-me'),
+		);
+	}
+
+	public function testRejectsMalformedUrls(): void
+	{
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'url', 'title' => ['en' => 'Evil'], 'path' => ['en' => 'javascript:alert(1)']],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'URLs must start with',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertSame([], $this->order());
+	}
+
+	public function testMovesUpAndDown(): void
+	{
+		$this->createItem('move-a', position: 1);
+		$this->createItem('move-b', position: 2);
+		$this->createItem('move-c', position: 3);
+
+		$up = $this->makeRequest('POST', '/cp/menus/tree-menu/item/move-c/move', [
+			'body' => ['direction' => 'up'],
+		]);
+		$this->assertResponseStatus(303, $up);
+		$this->assertSame(['move-a', 'move-c', 'move-b'], $this->order());
+
+		$down = $this->makeRequest('POST', '/cp/menus/tree-menu/item/move-a/move', [
+			'body' => ['direction' => 'down'],
+		]);
+		$this->assertResponseStatus(303, $down);
+		$this->assertSame(['move-c', 'move-a', 'move-b'], $this->order());
+	}
+
+	public function testMoveWithIndexReparents(): void
+	{
+		$this->createItem('drag-parent', position: 1);
+		$this->createItem('drag-x', 'drag-parent', 1);
+		$this->createItem('drag-y', 'drag-parent', 2);
+		$this->createItem('drag-moved', position: 2);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/drag-moved/move', [
+			'body' => ['parent' => 'drag-parent', 'index' => 1],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame(['drag-x', 'drag-moved', 'drag-y'], $this->order('drag-parent'));
+		$this->assertSame(['drag-parent'], $this->order());
+	}
+
+	public function testMoveIntoTheOwnSubtreeIsRejected(): void
+	{
+		$this->createItem('cycle-parent');
+		$this->createItem('cycle-child', 'cycle-parent');
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/cycle-parent/move', [
+			'body' => ['parent' => 'cycle-child', 'index' => 0],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=move-rejected',
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertSame(['cycle-child'], $this->order('cycle-parent'));
+	}
+
+	public function testDeleteRemovesTheSubtree(): void
+	{
+		$this->createItem('doom-root');
+		$this->createItem('doom-child', 'doom-root');
+		$this->createItem('doom-grandchild', 'doom-child');
+		$this->createItem('doom-other', position: 2);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/doom-root/delete');
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=item-deleted',
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertSame(['doom-other'], $this->order());
+	}
+
+	public function testItemsFromAnotherMenuAnswer404(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.menus (menu, description) VALUES ('other-menu', 'Other')",
+		)->run();
+		$this->db()->execute(
+			"INSERT INTO cms.menu_items (item, parent, menu, position, data)
+			VALUES ('foreign-item', NULL, 'other-menu', 1, '{\"type\": \"label\", \"title\": {\"en\": \"X\"}}'::jsonb)",
+		)->run();
+
+		$this->assertResponseStatus(
+			404,
+			$this->makeRequest('GET', '/cp/menus/tree-menu?item=foreign-item'),
+		);
+		$this->assertResponseStatus(
+			404,
+			$this->makeRequest('POST', '/cp/menus/tree-menu/item/foreign-item/delete'),
+		);
+		$this->assertResponseStatus(
+			404,
+			$this->makeRequest('POST', '/cp/menus/tree-menu/item/foreign-item/move', [
+				'body' => ['direction' => 'up'],
+			]),
+		);
+	}
+
+	public function testLegacyNodeStubKeepsItsSnapshotInTheTree(): void
+	{
+		$this->createItem('legacy-stub', null, 1, [
+			'type' => 'node',
+			'node' => 0,
+			'title' => ['en' => 'Legacy Snapshot'],
+			'path' => ['en' => '/legacy-path'],
+		]);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+
+		$this->assertStringContainsString('Legacy Snapshot', $html);
+		$this->assertStringContainsString('/legacy-path', $html);
+	}
+
+	public function testEditorsAreForbidden(): void
+	{
+		$this->authenticateAs('editor');
+
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => ['type' => 'label', 'title' => ['en' => 'Nope']],
+		]));
+	}
+}

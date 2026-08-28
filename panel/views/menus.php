@@ -72,7 +72,7 @@ $confirm = static function (array $menu): string {
 							<?php foreach ($menus as $menu): ?>
 								<tr role="row">
 									<td role="cell">
-										<a class="handle" href="<?= escape($menu['editUrl']) ?>"><?= escape(
+										<a class="handle" href="<?= escape($menu['treeUrl']) ?>"><?= escape(
 											$menu['menu'],
 										) ?></a>
 									</td>

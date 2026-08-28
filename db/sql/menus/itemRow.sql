@@ -2,7 +2,8 @@ SELECT
 	item,
 	parent,
 	menu,
-	position
+	position,
+	data
 FROM
 	/*:cms.prefix:*/menu_items
 WHERE
