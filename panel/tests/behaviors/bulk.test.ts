@@ -54,6 +54,7 @@ beforeEach(() => {
 				<input type="checkbox" name="children" value="1" />
 			</label>
 			<button type="button" data-bulk-close>Cancel</button>
+			<button type="submit" data-bulk-confirm>Delete</button>
 		</dialog>
 	`;
 	uninstall = install();
@@ -177,6 +178,41 @@ describe('bulk selection', () => {
 		query('[data-bulk-open]').click();
 
 		expect(query('[data-bulk-children]').hidden).toBe(false);
+	});
+
+	it('keeps the confirm button enabled for a selection without children', () => {
+		box('b').click();
+		query('[data-bulk-open]').click();
+
+		expect(query<HTMLButtonElement>('[data-bulk-confirm]').disabled).toBe(false);
+	});
+
+	it('locks the confirm button behind the children opt-in', () => {
+		box('a').click();
+		query('[data-bulk-open]').click();
+
+		const confirm = query<HTMLButtonElement>('[data-bulk-confirm]');
+		const children = query<HTMLInputElement>('[data-bulk-children] input');
+
+		expect(confirm.disabled).toBe(true);
+
+		children.click();
+
+		expect(confirm.disabled).toBe(false);
+
+		children.click();
+
+		expect(confirm.disabled).toBe(true);
+	});
+
+	it('locks the confirm button again when the dialog reopens', () => {
+		box('a').click();
+		query('[data-bulk-open]').click();
+		query<HTMLInputElement>('[data-bulk-children] input').click();
+		query('[data-bulk-close]').click();
+		query('[data-bulk-open]').click();
+
+		expect(query<HTMLButtonElement>('[data-bulk-confirm]').disabled).toBe(true);
 	});
 
 	it('drops the notice param at install time', () => {

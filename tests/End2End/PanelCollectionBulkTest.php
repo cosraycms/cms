@@ -50,6 +50,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertStringContainsString('name="nodes[]"', $html);
 		$this->assertStringContainsString('value="bulk-markup-root"', $html);
 		$this->assertStringContainsString('data-bulk-dialog="delete"', $html);
+		$this->assertStringContainsString('data-bulk-confirm', $html);
 		$this->assertStringContainsString(
 			'formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&amp;dir=desc"',
 			$html,

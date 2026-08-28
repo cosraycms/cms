@@ -92,6 +92,14 @@ function openDialog(name: string): void {
 		}
 	}
 
+	const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
+
+	if (confirm) {
+		// A selection containing children commits to the subtree option
+		// before the destructive button unlocks.
+		confirm.disabled = children !== null && !children.hidden;
+	}
+
 	dialog.showModal();
 }
 
@@ -99,6 +107,18 @@ function onChange(event: Event): void {
 	const target = event.target;
 
 	if (!(target instanceof HTMLInputElement)) {
+		return;
+	}
+
+	if (target.matches('[data-bulk-children] input')) {
+		const confirm = target
+			.closest('dialog')
+			?.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
+
+		if (confirm) {
+			confirm.disabled = !target.checked;
+		}
+
 		return;
 	}
 

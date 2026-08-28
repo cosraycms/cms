@@ -308,7 +308,8 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					type="submit"
 					class="cms-button danger"
 					form="collection-bulk"
-					formaction="<?= escape($page->bulk['deleteUrl']) ?>">
+					formaction="<?= escape($page->bulk['deleteUrl']) ?>"
+					data-bulk-confirm>
 					<?= escape(__('bulk:delete')) ?>
 				</button>
 			</footer>
