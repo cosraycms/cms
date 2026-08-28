@@ -33,6 +33,7 @@ use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
 use Cosray\Panel\CollectionQuery;
+use Cosray\Panel\CollectionTable;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
@@ -515,7 +516,12 @@ class Bootstrap implements CorePlugin
 			// (e.g. the 'panel' layout) search the dirs in order.
 			dirs: ['cosray' => "{$root}/panel/views", ...$this->pluginTemplates['panel']],
 			autoescape: true,
-			trusted: [CollectionPage::class, CollectionQuery::class, CollectionUrls::class],
+			trusted: [
+				CollectionPage::class,
+				CollectionQuery::class,
+				CollectionTable::class,
+				CollectionUrls::class,
+			],
 		);
 	}
 

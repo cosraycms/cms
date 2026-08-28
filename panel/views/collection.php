@@ -25,7 +25,7 @@ $track = static fn(string $kind): string => match ($kind) {
 
 $hasRowActions = false;
 
-foreach ($page->rows as $row) {
+foreach ($page->table->rows as $row) {
 	if ($row['focusedChildrenUrl'] !== null || count($row['childCreateLinks']) > 0) {
 		$hasRowActions = true;
 
@@ -35,7 +35,7 @@ foreach ($page->rows as $row) {
 
 $columns = 'minmax(12rem, 2fr)';
 
-foreach (array_slice((array) $this->unwrap($page->headers), 1) as $header) {
+foreach (array_slice((array) $this->unwrap($page->table->headers), 1) as $header) {
 	$columns .= $track((string) ($header['kind'] ?? 'text'));
 }
 
@@ -141,7 +141,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 		</div>
 
 		<div class="card">
-			<?php if (count($page->rows) === 0): ?>
+			<?php if (count($page->table->rows) === 0): ?>
 				<div class="empty">
 					<div class="icon" aria-hidden="true">⌁</div>
 					<strong><?= escape(__('collection:empty')) ?></strong>
@@ -159,7 +159,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<table class="cms-list" role="table" style="--columns: <?= escape($columns) ?>">
 						<thead role="rowgroup">
 							<tr role="row">
-								<?php foreach ($page->headers as $header): ?>
+								<?php foreach ($page->table->headers as $header): ?>
 									<th class="<?= escape($header['class']) ?>" role="columnheader">
 										<?php if ($header['url'] === null): ?>
 											<span class="inner"><?= escape($header['label']) ?></span>
@@ -180,11 +180,11 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
-							<?php foreach ($page->rows as $row): ?>
+							<?php foreach ($page->table->rows as $row): ?>
 								<?php $this->insert('collection/row', [
 									'row' => $row,
-									'treeMode' => $page->treeMode,
-									'showChildren' => $page->showChildren,
+									'treeMode' => $page->table->treeMode,
+									'showChildren' => $page->table->showChildren,
 									'chevronSvg' => $chevronSvg,
 									'hasRowActions' => $hasRowActions,
 								]) ?>
