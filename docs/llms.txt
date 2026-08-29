@@ -600,7 +600,9 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/assets/*` built-in panel package assets
 - `GET <panelPath>/static/*` installed panel client assets
 - `GET <panelPath>/collection/{collection}` server-rendered collection list
-- `GET <panelPath>/menus` menu listing; `GET|POST .../menus/create`,
+- `GET <panelPath>/menus` opens the first menu (303); it renders an empty
+  state only when the project has no menu. The area has no listing screen:
+  the rail lists the menus. `GET|POST .../menus/create`,
   `GET|POST .../menus/{menu}/edit`, `POST .../menus/{menu}/delete` manage
   menus — all behind the `edit-menus` permission (superuser and admin)
 - `GET <panelPath>/menus/{menu}` renders the item tree with its editing
@@ -621,7 +623,7 @@ Panel responses are rendered in layers, and htmx picks the layer by naming the r
 
 A panel page view therefore calls `$this->layout('layer/main')` unconditionally and renders only its own fragment; the layer templates add whatever wraps it. The fragment root must not carry `id="main"` — that id belongs to the persistent `<main>` the layers render. Panel pages that projects and plugins register follow the same contract.
 
-Links inherit their target from the region they sit in (`hx-target:inherited`), so a link only names a target when it needs a different one. Chrome outside the swapped region patches its own active mark through an out-of-band swap: the rail (`#collection-nav`) during a `main` swap, the masthead nav (`#area-nav`) during a `frame` swap.
+Links inherit their target from the region they sit in (`hx-target:inherited`), so a link only names a target when it needs a different one. Chrome outside the swapped region patches its own active mark through an out-of-band swap: the rail (`#collection-nav` in the content area, `#menu-nav` in the menus area) during a `main` swap, the masthead nav (`#area-nav`) during a `frame` swap.
 
 Auth:
 

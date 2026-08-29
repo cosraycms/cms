@@ -10,6 +10,8 @@ $action = (string) $action;
 $backUrl = (string) $backUrl;
 $handle = (string) $handle;
 $description = (string) $description;
+$deleteUrl = $this->unwrap($deleteUrl);
+$confirm = $this->unwrap($confirm);
 ?>
 
 <div class="page cms-menus">
@@ -69,6 +71,19 @@ $description = (string) $description;
 					) ?></button>
 				</footer>
 			</form>
+
+			<?php if ($mode === 'edit' && is_string($deleteUrl)): ?>
+				<?php // Its own form: a form cannot nest inside another. ?>
+				<form
+					class="form-danger"
+					method="post"
+					action="<?= escape($deleteUrl) ?>"
+					hx-confirm="<?= escape((string) $confirm) ?>">
+					<button type="submit" class="cms-button danger"><?= escape(
+						__('menu:delete'),
+					) ?></button>
+				</form>
+			<?php endif ?>
 		</div>
 	</div>
 </div>

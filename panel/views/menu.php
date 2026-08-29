@@ -17,11 +17,6 @@ $urls = (array) $this->unwrap($urls);
 <div class="page cms-menus cms-menu-tree">
 	<header class="head">
 		<div class="titles">
-			<nav class="breadcrumb" aria-label="<?= escape(__('menu:breadcrumb')) ?>">
-				<a href="<?= escape($urls['menus']) ?>"><?= escape(__('menu:menus')) ?></a>
-				<span aria-hidden="true">/</span>
-				<span><?= escape($menu) ?></span>
-			</nav>
 			<div class="line">
 				<h1><?= escape($description) ?></h1>
 				<span class="cms-count"><?= escape(__n(

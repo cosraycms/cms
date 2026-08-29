@@ -42,6 +42,7 @@
 
 ### Changed
 
+- Moved the menus into the panel rail, the way collections sit there. `<panelPath>/menus` no longer renders a listing screen: it redirects to the first menu, and only a project without menus stops at an empty state. The rail lists every menu with its item count, marks the open one while its tree or its edit form is on screen, and holds the create action; creating or renaming a menu now lands in that menu instead of the listing, and deleting one moved onto its edit form.
 - `Finder\Nodes::order('title')` orders by the materialized node title for the request locale (neutral-key fallback) — the expression behind the per-locale sort indexes — instead of by a content field named `title`. Types whose title field has another name, or a computed title, previously sorted on NULL and came back in arbitrary row order; a type whose `title` content field feeds its materialized title sorts as before.
 - The panel auth middleware attaches the resolved user to the request's `user` attribute, so token-authenticated panel requests carry the user for chrome gating and the stored panel-language preference, which previously only session requests saw.
 - An existing menu without items now iterates nothing and renders as an empty string; `Finder\Menu` raises "Menu not found" only for an unknown menu handle. Sites that wrapped `$cms->menu()` in try/catch to survive not-yet-filled menus can drop the guard.

@@ -19,9 +19,9 @@ use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
 
 /**
- * The menus area: the listing with menu properties, and per menu the
- * item tree with its editing side pane. Every pane interaction is a
- * URL — selection is `?item=`, creation `?add=` — so the whole screen
+ * The menus area: the rail lists the menus, and per menu the item tree
+ * with its editing side pane. Every pane interaction is a URL —
+ * selection is `?item=`, creation `?add=` — so the whole screen
  * re-renders as one `main` swap and stays deep-linkable.
  */
 final class Menus extends Panel
@@ -35,6 +35,9 @@ final class Menus extends Panel
 	/** Handles that would shadow a literal route segment. */
 	private const array RESERVED_HANDLES = ['create'];
 
+	/** @var ?list<array{menu: string, description: string, items: int, url: string}> */
+	private ?array $menuRows = null;
+
 	public function __construct(
 		Config $config,
 		Container $container,
@@ -45,29 +48,42 @@ final class Menus extends Panel
 		parent::__construct($config, $container, $request);
 	}
 
-	#[Permission('edit-menus')]
-	public function index(): array
+	/**
+	 * Every screen in the area renders the rail, so its menus ride the
+	 * shared context. The rail replaces a listing screen: `rail` is what
+	 * the base class leaves off outside the content area.
+	 */
+	protected function context(array $data = []): array
 	{
-		$menus = [];
+		$menus = $this->menuRows();
 
-		foreach ($this->db->menus->list()->all() as $row) {
-			$menu = (string) $row['menu'];
+		return parent::context(array_merge([
+			'menuNav' => $menus,
+			'menuCreateUrl' => $this->base() . '/create',
+			'rail' => $menus !== [],
+		], $data));
+	}
 
-			$menus[] = [
-				'menu' => $menu,
-				'description' => (string) $row['description'],
-				'items' => (int) $row['items'],
-				'treeUrl' => $this->url($menu),
-				'editUrl' => $this->url($menu, '/edit'),
-				'deleteUrl' => $this->url($menu, '/delete'),
-			];
+	/**
+	 * The area's entry point. With menus around, the rail is the listing
+	 * and this opens the first one; only an empty project stops here.
+	 */
+	#[Permission('edit-menus')]
+	public function index(Factory $factory): array|Response
+	{
+		$menus = $this->menuRows();
+
+		if ($menus !== []) {
+			$notice = $this->request->param('notice', '');
+
+			return $this->redirectToMenu(
+				$factory,
+				$menus[0]['menu'],
+				is_string($notice) && $notice !== '' ? ['notice' => $notice] : [],
+			);
 		}
 
-		return $this->context([
-			'menus' => $menus,
-			'createUrl' => $this->base() . '/create',
-			'notice' => $this->notice(),
-		]);
+		return $this->context(['notice' => $this->notice()]);
 	}
 
 	#[Permission('edit-menus')]
@@ -88,7 +104,7 @@ final class Menus extends Panel
 
 		$this->menus->create($handle, $description);
 
-		return $this->redirect($factory, 'created');
+		return $this->redirectToMenu($factory, $handle, ['notice' => 'created']);
 	}
 
 	#[Permission('edit-menus')]
@@ -116,7 +132,7 @@ final class Menus extends Panel
 			$this->menus->rename($menu, $handle);
 		}
 
-		return $this->redirect($factory, 'updated');
+		return $this->redirectToMenu($factory, $handle, ['notice' => 'updated']);
 	}
 
 	#[Permission('edit-menus')]
@@ -265,9 +281,8 @@ final class Menus extends Panel
 			'tree' => $this->branch(new FinderMenu($context, $menu, expand: false), $cms),
 			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
-			'notice' => $this->treeNotice(),
+			'notice' => $this->notice(),
 			'urls' => [
-				'menus' => $this->base(),
 				'tree' => $this->url($menu),
 				'edit' => $this->url($menu, '/edit'),
 				'add' => $this->url($menu) . '?add=',
@@ -617,11 +632,24 @@ final class Menus extends Panel
 			'action' => $current === null
 				? $this->base() . '/create'
 				: $this->url($current, '/edit'),
-			'backUrl' => $this->base(),
+			'backUrl' => $current === null ? $this->base() : $this->url($current),
+			'deleteUrl' => $current === null ? null : $this->url($current, '/delete'),
+			'confirm' => $current === null ? null : $this->deleteConfirm($current),
 			'handle' => $handle,
 			'description' => $description,
 			'errors' => $errors,
 		]);
+	}
+
+	private function deleteConfirm(string $menu): string
+	{
+		$items = (int) $this->row($menu)['items'];
+
+		if ($items === 0) {
+			return __('menu:confirm-delete-empty', ['menu' => $menu]);
+		}
+
+		return __n('menu:confirm-delete', 'menu:confirm-delete-plural', $items, ['menu' => $menu]);
 	}
 
 	/** @return array<string, string> */
@@ -664,13 +692,6 @@ final class Menus extends Panel
 			'created' => __('menu:notice-created'),
 			'updated' => __('menu:notice-updated'),
 			'deleted' => __('menu:notice-deleted'),
-			default => null,
-		};
-	}
-
-	private function treeNotice(): ?string
-	{
-		return match ($this->request->param('notice', '')) {
 			'item-created' => __('menu:notice-item-created'),
 			'item-saved' => __('menu:notice-item-saved'),
 			'item-deleted' => __('menu:notice-item-deleted'),
@@ -698,9 +719,37 @@ final class Menus extends Panel
 		);
 	}
 
+	/**
+	 * The menus as the rail renders them. Cached because the rail rides
+	 * every context in the area and the entry point reads it too.
+	 *
+	 * @return list<array{menu: string, description: string, items: int, url: string}>
+	 */
+	private function menuRows(): array
+	{
+		if ($this->menuRows !== null) {
+			return $this->menuRows;
+		}
+
+		$rows = [];
+
+		foreach ($this->db->menus->list()->all() as $row) {
+			$menu = (string) $row['menu'];
+
+			$rows[] = [
+				'menu' => $menu,
+				'description' => (string) $row['description'],
+				'items' => (int) $row['items'],
+				'url' => $this->url($menu),
+			];
+		}
+
+		return $this->menuRows = $rows;
+	}
+
 	private function row(string $menu): array
 	{
-		foreach ($this->db->menus->list()->all() as $row) {
+		foreach ($this->menuRows() as $row) {
 			if ($row['menu'] === $menu) {
 				return $row;
 			}

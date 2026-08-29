@@ -7,7 +7,7 @@ namespace Cosray\Tests\End2End;
 use Cosray\Tests\End2EndTestCase;
 
 /**
- * The menus area: listing, menu create/edit/delete, and its permission.
+ * The menus area: the rail, menu create/edit/delete, and its permission.
  *
  * @internal
  *
@@ -74,44 +74,94 @@ final class PanelMenusTest extends End2EndTestCase
 		]));
 	}
 
-	public function testListingShowsMenusWithCountsAndActions(): void
+	public function testTheAreaOpensTheFirstMenu(): void
 	{
 		$this->createMenu('main-nav', 'Main navigation');
-		$this->createItem('main-nav', 'menu-e2e-one', 1);
-		$this->createItem('main-nav', 'menu-e2e-two', 2);
+		$this->createMenu('zzz-last', 'Last');
 
 		$response = $this->makeRequest('GET', '/cp/menus');
 
-		$this->assertResponseOk($response);
-		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('main-nav', $html);
-		$this->assertStringContainsString('Main navigation', $html);
-		$this->assertStringContainsString('2 items', $html);
-		$this->assertStringContainsString('href="/cp/menus/main-nav/edit"', $html);
-		$this->assertStringContainsString('action="/cp/menus/main-nav/delete"', $html);
-		// The delete confirm names the menu and its item count.
-		$this->assertStringContainsString('It contains 2 items.', $html);
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame('/cp/menus/main-nav', $response->getHeaderLine('Location'));
 	}
 
-	public function testEmptyListingRendersTheEmptyState(): void
+	public function testTheAreaCarriesANoticeIntoTheFirstMenu(): void
+	{
+		$this->createMenu('main-nav', 'Main navigation');
+
+		$response = $this->makeRequest('GET', '/cp/menus?notice=deleted');
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame('/cp/menus/main-nav?notice=deleted', $response->getHeaderLine('Location'));
+		$this->assertStringContainsString(
+			'Menu deleted.',
+			$this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav?notice=deleted')),
+		);
+	}
+
+	public function testTheRailListsTheMenusAndMarksTheOpenOne(): void
+	{
+		$this->createMenu('main-nav', 'Main navigation');
+		$this->createMenu('footer', 'Footer links');
+		$this->createItem('main-nav', 'menu-e2e-one', 1);
+		$this->createItem('main-nav', 'menu-e2e-two', 2);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav'));
+
+		$this->assertStringContainsString('id="menu-nav"', $html);
+		$this->assertStringContainsString('href="/cp/menus/footer"', $html);
+		$this->assertStringContainsString('href="/cp/menus/create"', $html);
+		// The open menu is marked, and its item count rides along as the badge.
+		$this->assertMatchesRegularExpression(
+			'/href="\/cp\/menus\/main-nav"[^>]*aria-current="page"/s',
+			$html,
+		);
+		$this->assertStringContainsString('<span class="badge">2</span>', $html);
+	}
+
+	public function testTheRailMarksTheOpenMenuWhileEditingIt(): void
+	{
+		$this->createMenu('main-nav', 'Main navigation');
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav/edit'));
+
+		$this->assertMatchesRegularExpression(
+			'/href="\/cp\/menus\/main-nav"[^>]*aria-current="page"/s',
+			$html,
+		);
+	}
+
+	public function testAnEmptyAreaRendersTheEmptyStateWithoutARail(): void
 	{
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus'));
 
 		$this->assertStringContainsString('No menus yet.', $html);
+		$this->assertStringNotContainsString('id="menu-nav"', $html);
 	}
 
-	public function testCreateStoresAndRedirectsWithNotice(): void
+	public function testTheCreateFormRenders(): void
+	{
+		$response = $this->makeRequest('GET', '/cp/menus/create');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('action="/cp/menus/create"', $html);
+		// Nothing to delete yet.
+		$this->assertStringNotContainsString('form-danger', $html);
+	}
+
+	public function testCreateStoresAndOpensTheNewMenu(): void
 	{
 		$response = $this->makeRequest('POST', '/cp/menus/create', [
 			'body' => ['menu' => 'footer', 'description' => 'Footer links'],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus?notice=created', $response->getHeaderLine('Location'));
+		$this->assertSame('/cp/menus/footer?notice=created', $response->getHeaderLine('Location'));
 		$this->assertSame(['footer'], $this->menuHandles());
 
-		$listing = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus?notice=created'));
-		$this->assertStringContainsString('Menu created.', $listing);
+		$tree = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/footer?notice=created'));
+		$this->assertStringContainsString('Menu created.', $tree);
 	}
 
 	public function testCreateRejectsInvalidReservedAndTakenHandles(): void
@@ -171,6 +221,19 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('value="head"', $html);
 		$this->assertStringContainsString('value="Header links"', $html);
 		$this->assertStringContainsString('Renaming the handle breaks templates', $html);
+		// Delete lives on the edit form now that the listing screen is gone.
+		$this->assertStringContainsString('action="/cp/menus/head/delete"', $html);
+	}
+
+	public function testTheEditFormConfirmNamesTheItemCount(): void
+	{
+		$this->createMenu('stocked', 'Stocked');
+		$this->createItem('stocked', 'menu-e2e-stocked-one', 1);
+		$this->createItem('stocked', 'menu-e2e-stocked-two', 2);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/stocked/edit'));
+
+		$this->assertStringContainsString('It contains 2 items.', $html);
 	}
 
 	public function testUpdateRenamesTheHandleAndItsItemsFollow(): void
@@ -183,6 +246,7 @@ final class PanelMenusTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseStatus(303, $response);
+		$this->assertSame('/cp/menus/new-name?notice=updated', $response->getHeaderLine('Location'));
 		$this->assertSame(['new-name'], $this->menuHandles());
 		$this->assertSame(
 			'new-name',

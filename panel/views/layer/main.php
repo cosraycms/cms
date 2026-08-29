@@ -12,5 +12,5 @@ if ($layer !== 'main') {
 ?>
 <?= $this->body() ?>
 <?php if ($layer === 'main'): ?>
-	<?php $this->insert('component/collection-nav', ['oob' => true]) ?>
+	<?php $this->insert('component/rail-nav', ['oob' => true]) ?>
 <?php endif ?>

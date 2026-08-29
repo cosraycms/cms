@@ -178,6 +178,14 @@
 			justify-content: flex-end;
 			gap: var(--cms-space-2);
 		}
+
+		& .form-danger {
+			/* The card lays its forms out as a stretching column. */
+			align-items: flex-start;
+			margin-top: var(--cms-space-5);
+			padding-top: var(--cms-space-5);
+			border-top: 1px solid var(--cms-color-border);
+		}
 	}
 }
 
@@ -185,24 +193,6 @@
    canvas, connected by the tree lines; the pane sits sticky beside it. */
 
 .cms-menu-tree {
-	& .breadcrumb {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		color: var(--cms-color-text-faint);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 500;
-
-		& a {
-			color: var(--cms-color-text-muted);
-			text-decoration: none;
-
-			&:hover {
-				color: var(--cms-color-accent-text);
-			}
-		}
-	}
-
 	& .titles {
 		display: flex;
 		flex-direction: column;

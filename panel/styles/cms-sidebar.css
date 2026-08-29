@@ -91,6 +91,29 @@
 		font-weight: 500;
 	}
 
+	& .create {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-3);
+		padding: 0.4375rem 0.625rem;
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-faint);
+		font-size: var(--cms-font-size-sm);
+		text-decoration: none;
+
+		&::before {
+			content: '+';
+			font-size: var(--cms-font-size-base);
+			line-height: 1;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+	}
+
 	& .section {
 		margin-top: var(--cms-space-5);
 	}
@@ -125,6 +148,17 @@
 		& .list {
 			display: flex;
 			gap: var(--cms-space-2);
+			white-space: nowrap;
+		}
+
+		& #menu-nav {
+			display: flex;
+			align-items: center;
+			gap: var(--cms-space-2);
+		}
+
+		& .create {
+			margin-top: 0;
 			white-space: nowrap;
 		}
 

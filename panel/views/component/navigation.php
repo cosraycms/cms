@@ -9,6 +9,6 @@ if (!$rail) {
 ?>
 <aside class="cms-sidebar" hx-target:inherited="#main">
 	<nav class="scroll" aria-label="<?= escape(__('panel:navigation')) ?>">
-		<?php $this->insert('component/collection-nav') ?>
+		<?php $this->insert('component/rail-nav') ?>
 	</nav>
 </aside>
