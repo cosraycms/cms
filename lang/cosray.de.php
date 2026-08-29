@@ -171,6 +171,7 @@ return [
 		'menu:error-item-type' => 'Dieser Eintragstyp ist ungültig.',
 		'menu:handle' => 'Handle',
 		'menu:handle-help' => 'Templates laden das Menü über dieses Handle.',
+		'menu:handle-locked' => 'Nur Superuser können das Handle ändern.',
 		'menu:item-actions' => 'Aktionen',
 		'menu:item-asset' => 'Verknüpfte Datei',
 		'menu:item-below' => 'Unterhalb von „:title“',

@@ -38,5 +38,9 @@ $currentPath = (string) $this->unwrap($currentPath);
 		<?php endforeach ?>
 	</ul>
 
-	<a class="create" href="<?= escape((string) $menuCreateUrl) ?>"><?= escape(__('menu:new')) ?></a>
+	<?php if ($manages): ?>
+		<a class="create" href="<?= escape((string) $menuCreateUrl) ?>"><?= escape(
+			__('menu:new'),
+		) ?></a>
+	<?php endif ?>
 </div>

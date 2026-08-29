@@ -17,6 +17,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Menu as FinderMenu;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
+use Cosray\User;
 
 /**
  * The menus area: the rail lists the menus, and per menu the item tree
@@ -60,8 +61,21 @@ final class Menus extends Panel
 		return parent::context(array_merge([
 			'menuNav' => $menus,
 			'menuCreateUrl' => $this->base() . '/create',
+			'manages' => $this->manages(),
 			'rail' => $menus !== [],
 		], $data));
+	}
+
+	/**
+	 * Whether the user may add, rename, or remove menus. A menu's handle is
+	 * what templates fetch it by, so changing the set of menus edits the
+	 * site's markup contract, not its content.
+	 */
+	private function manages(): bool
+	{
+		$user = $this->request->get('user', null);
+
+		return $user instanceof User && $user->hasPermission('manage-menus');
 	}
 
 	/**
@@ -86,13 +100,13 @@ final class Menus extends Panel
 		return $this->context(['notice' => $this->notice()]);
 	}
 
-	#[Permission('edit-menus')]
+	#[Permission('manage-menus')]
 	public function create(): array
 	{
 		return $this->form('', '', []);
 	}
 
-	#[Permission('edit-menus')]
+	#[Permission('manage-menus')]
 	public function store(Factory $factory): array|Response
 	{
 		[$handle, $description] = $this->submitted();
@@ -116,6 +130,13 @@ final class Menus extends Panel
 	): array|Response {
 		$this->row($menu);
 		[$handle, $description] = $this->submitted();
+
+		// The field is disabled without the permission, so nothing legitimate
+		// posts a handle here; ignore whatever does.
+		if (!$this->manages()) {
+			$handle = $menu;
+		}
+
 		$errors = $this->validate($handle, $description, $menu);
 
 		if ($errors !== []) {
@@ -135,7 +156,7 @@ final class Menus extends Panel
 		return $this->redirectToMenu($factory, $handle, ['notice' => 'updated']);
 	}
 
-	#[Permission('edit-menus')]
+	#[Permission('manage-menus')]
 	public function delete(Factory $factory, string $menu): Response
 	{
 		$this->row($menu);

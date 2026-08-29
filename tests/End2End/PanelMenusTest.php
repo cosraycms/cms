@@ -7,7 +7,8 @@ namespace Cosray\Tests\End2End;
 use Cosray\Tests\End2EndTestCase;
 
 /**
- * The menus area: the rail, menu create/edit/delete, and its permission.
+ * The menus area: the rail, menu create/edit/delete, and its permissions.
+ * Superusers manage the set of menus; admins edit what is inside them.
  *
  * @internal
  *
@@ -18,7 +19,7 @@ final class PanelMenusTest extends End2EndTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		$this->authenticateAs('admin');
+		$this->authenticateAs('superuser');
 	}
 
 	private function createMenu(string $handle, string $description): void
@@ -72,6 +73,55 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
 			'body' => ['menu' => 'sneaky', 'description' => 'Nope'],
 		]));
+	}
+
+	public function testAdminsCannotAddOrRemoveMenus(): void
+	{
+		$this->createMenu('head', 'Header links');
+		$this->authenticateAs('admin');
+
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus/create'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
+			'body' => ['menu' => 'extra', 'description' => 'Extra'],
+		]));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/head/delete'));
+		$this->assertSame(['head'], $this->menuHandles());
+	}
+
+	public function testAdminsSeeTheMenuWithoutItsLifecycleControls(): void
+	{
+		$this->createMenu('head', 'Header links');
+		$this->authenticateAs('admin');
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/head'));
+
+		// The handle is chrome, the description stays editable.
+		$this->assertMatchesRegularExpression('/id="menu-handle"[^>]*disabled/s', $html);
+		$this->assertStringContainsString('Only superusers can change the handle.', $html);
+		$this->assertStringNotContainsString('/cp/menus/head/delete', $html);
+		$this->assertStringNotContainsString('href="/cp/menus/create"', $html);
+		$this->assertStringContainsString('id="menu-description"', $html);
+	}
+
+	public function testAdminsCannotRenameAMenuThroughTheBody(): void
+	{
+		$this->createMenu('head', 'Header links');
+		$this->authenticateAs('admin');
+
+		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
+			'body' => ['menu' => 'renamed', 'description' => 'New description'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame('/cp/menus/head?notice=updated', $response->getHeaderLine('Location'));
+		// The description saved, the handle did not move.
+		$this->assertSame(['head'], $this->menuHandles());
+		$this->assertSame(
+			'New description',
+			$this->db()->execute(
+				"SELECT description FROM cms.menus WHERE menu = 'head'",
+			)->one()['description'],
+		);
 	}
 
 	public function testTheAreaOpensTheFirstMenu(): void
@@ -212,6 +262,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('Renaming the handle breaks templates', $html);
 		// Delete sits in the same bar; there is no edit screen behind a button.
 		$this->assertStringContainsString('action="/cp/menus/head/delete"', $html);
+		$this->assertStringNotContainsString('disabled', $html);
 	}
 
 	public function testTheDeleteConfirmNamesTheItemCount(): void

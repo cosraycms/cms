@@ -171,6 +171,7 @@ return [
 		'menu:error-item-type' => 'This item type is not valid.',
 		'menu:handle' => 'Handle',
 		'menu:handle-help' => 'Templates fetch the menu by this handle.',
+		'menu:handle-locked' => 'Only superusers can change the handle.',
 		'menu:item-actions' => 'Item actions',
 		'menu:item-asset' => 'Linked file',
 		'menu:item-below' => 'Below ":title"',

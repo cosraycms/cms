@@ -12,6 +12,10 @@ $urls = (array) $this->unwrap($urls);
 $errors = (array) $props['errors'];
 $handle = (string) $props['handle'];
 $description = (string) $props['description'];
+
+// Without the permission the handle is read-only chrome: the field is
+// disabled, so it never reaches the body, and the write ignores it anyway.
+$manages = (bool) $manages;
 ?>
 <div class="menu-props">
 	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
@@ -26,6 +30,7 @@ $description = (string) $props['description'];
 					required
 					pattern="[a-z0-9-]{1,32}"
 					value="<?= escape($handle) ?>"
+					<?= $manages ? '' : 'disabled' ?>
 					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 		</div>
@@ -50,18 +55,20 @@ $description = (string) $props['description'];
 		<button type="submit" class="cms-button secondary"><?= escape(__('menu:save')) ?></button>
 	</form>
 
-	<form
-		method="post"
-		action="<?= escape((string) $urls['delete']) ?>"
-		hx-confirm="<?= escape((string) $props['confirm']) ?>">
-		<button type="submit" class="cms-button danger"><?= escape(__('menu:delete')) ?></button>
-	</form>
+	<?php if ($manages): ?>
+		<form
+			method="post"
+			action="<?= escape((string) $urls['delete']) ?>"
+			hx-confirm="<?= escape((string) $props['confirm']) ?>">
+			<button type="submit" class="cms-button danger"><?= escape(__('menu:delete')) ?></button>
+		</form>
+	<?php endif ?>
 
 	<?php foreach ($errors as $error): ?>
 		<p class="error"><?= escape((string) $error) ?></p>
 	<?php endforeach ?>
 
 	<p class="help"><?= escape(__('menu:handle-help')) ?> <?= escape(
-		__('menu:rename-warning'),
+		$manages ? __('menu:rename-warning') : __('menu:handle-locked'),
 	) ?></p>
 </div>

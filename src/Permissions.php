@@ -17,6 +17,7 @@ class Permissions
 			'edit-nodes',
 			'edit-blocks',
 			'edit-menus',
+			'manage-menus',
 			'authenticated',
 		],
 		'admin' => [

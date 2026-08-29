@@ -18,11 +18,13 @@ $createUrl = (string) $menuCreateUrl;
 			<h1><?= escape(__('menu:menus')) ?></h1>
 		</div>
 
-		<div class="actions">
-			<a class="cms-button primary" href="<?= escape($createUrl) ?>"><?= escape(
-				__('menu:new'),
-			) ?></a>
-		</div>
+		<?php if ($manages): ?>
+			<div class="actions">
+				<a class="cms-button primary" href="<?= escape($createUrl) ?>"><?= escape(
+					__('menu:new'),
+				) ?></a>
+			</div>
+		<?php endif ?>
 	</header>
 
 	<div class="body">
@@ -36,7 +38,9 @@ $createUrl = (string) $menuCreateUrl;
 			<div class="empty">
 				<div class="icon" aria-hidden="true">☰</div>
 				<strong><?= escape(__('menu:empty')) ?></strong>
-				<p><?= escape(__('menu:empty-help')) ?></p>
+				<?php if ($manages): ?>
+					<p><?= escape(__('menu:empty-help')) ?></p>
+				<?php endif ?>
 			</div>
 		</div>
 	</div>
