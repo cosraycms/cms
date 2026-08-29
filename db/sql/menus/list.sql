@@ -10,4 +10,5 @@ GROUP BY
 	m.menu,
 	m.description
 ORDER BY
+	m.description,
 	m.menu;

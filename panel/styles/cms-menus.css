@@ -196,7 +196,7 @@
 	   lines the buttons up with the inputs across two separate forms. */
 	& .menu-props {
 		display: grid;
-		grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) max-content max-content;
+		grid-template-columns: minmax(0, 1fr) minmax(8rem, 14rem) max-content max-content;
 		gap: var(--cms-space-2) var(--cms-space-3);
 		align-items: end;
 		flex: 0 0 auto;

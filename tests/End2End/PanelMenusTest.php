@@ -124,15 +124,15 @@ final class PanelMenusTest extends End2EndTestCase
 		);
 	}
 
-	public function testTheAreaOpensTheFirstMenu(): void
+	public function testTheAreaOpensTheFirstMenuByDescription(): void
 	{
-		$this->createMenu('main-nav', 'Main navigation');
-		$this->createMenu('zzz-last', 'Last');
+		$this->createMenu('aaa-handle', 'Second by description');
+		$this->createMenu('zzz-handle', 'First by description');
 
 		$response = $this->makeRequest('GET', '/cp/menus');
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/main-nav', $response->getHeaderLine('Location'));
+		$this->assertSame('/cp/menus/zzz-handle', $response->getHeaderLine('Location'));
 	}
 
 	public function testTheAreaCarriesANoticeIntoTheFirstMenu(): void
@@ -161,6 +161,10 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('id="menu-nav"', $html);
 		$this->assertStringContainsString('href="/cp/menus/footer"', $html);
 		$this->assertStringContainsString('href="/cp/menus/create"', $html);
+		// The rail reads as menu names; hovering spells out the truncated ones
+		// and names the handle behind them.
+		$this->assertStringContainsString('<span>Main navigation</span>', $html);
+		$this->assertStringContainsString('title="Main navigation · main-nav"', $html);
 		// The open menu is marked, and its item count rides along as the badge.
 		$this->assertMatchesRegularExpression(
 			'/href="\/cp\/menus\/main-nav"[^>]*aria-current="page"/s',

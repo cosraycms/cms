@@ -19,22 +19,6 @@ $manages = (bool) $manages;
 ?>
 <div class="menu-props">
 	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
-		<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
-			<label class="label" for="menu-handle"><div><?= escape(__('menu:handle')) ?></div></label>
-			<div class="control">
-				<input
-					class="cms-input"
-					id="menu-handle"
-					name="menu"
-					type="text"
-					required
-					pattern="[a-z0-9-]{1,32}"
-					value="<?= escape($handle) ?>"
-					<?= $manages ? '' : 'disabled' ?>
-					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
-			</div>
-		</div>
-
 		<div class="cms-field<?= isset($errors['description']) ? ' has-error' : '' ?>">
 			<label class="label" for="menu-description"><div><?= escape(
 				__('menu:description'),
@@ -49,6 +33,22 @@ $manages = (bool) $manages;
 					maxlength="128"
 					value="<?= escape($description) ?>"
 					<?= isset($errors['description']) ? 'aria-invalid="true"' : '' ?> />
+			</div>
+		</div>
+
+		<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
+			<label class="label" for="menu-handle"><div><?= escape(__('menu:handle')) ?></div></label>
+			<div class="control">
+				<input
+					class="cms-input"
+					id="menu-handle"
+					name="menu"
+					type="text"
+					required
+					pattern="[a-z0-9-]{1,32}"
+					value="<?= escape($handle) ?>"
+					<?= $manages ? '' : 'disabled' ?>
+					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
 		</div>
 

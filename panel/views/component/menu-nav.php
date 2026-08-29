@@ -29,9 +29,11 @@ $currentPath = (string) $this->unwrap($currentPath);
 				<a
 					class="link"
 					href="<?= escape($url) ?>"
-					title="<?= escape((string) $entry['description']) ?>"
+					title="<?= escape((string) $entry['description']) ?> · <?= escape(
+						(string) $entry['menu'],
+					) ?>"
 					<?= $active ? 'aria-current="page"' : '' ?>>
-					<span class="label"><span><?= escape((string) $entry['menu']) ?></span></span>
+					<span class="label"><span><?= escape((string) $entry['description']) ?></span></span>
 					<span class="badge"><?= escape((string) $entry['items']) ?></span>
 				</a>
 			</li>
