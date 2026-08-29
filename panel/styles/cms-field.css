@@ -10,6 +10,13 @@
 	row-gap: var(--cms-space-5);
 }
 
+/* display: flex outranks the UA rule behind the hidden attribute, which
+   conditional visibility (when-conditions, the menu form's type sections)
+   relies on. */
+.cms-field[hidden] {
+	display: none;
+}
+
 .cms-field {
 	display: flex;
 	flex-direction: column;

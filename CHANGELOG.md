@@ -89,6 +89,8 @@
 
 ### Fixed
 
+- The `hidden` attribute now actually hides a field wrapper: `.cms-field`'s `display: flex` outranked the user-agent rule, so conditionally hidden fields — the menu form's type sections, `when`-condition fields — stayed visible. Found live in the kundmueller panel.
+
 - Editor saves refuse truncated submissions instead of persisting them. A form-encoded POST past PHP's `max_input_vars` is silently cut short, and since entries rows are replaced wholesale on save, saving it would silently delete content. The editor form now renders a sentinel input as its last control; save and store reject any submission that arrives without it — htmx submits get the error box, plain submits fail with `400`.
 - Fixed `Finder\Menu` duplicating menu items whose id contains a dot: the tree builder split the recursive query's synthetic dotted path, so an id like `about.team` under parent `about` was inserted twice. The tree is now built from the parent column directly.
 - Fixed `$menu->html($class)` clobbering the caller's wrapper class with the last item's per-item class, and reading the loop variable after the iteration for the closing list markup.
