@@ -119,18 +119,6 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('<span class="badge">2</span>', $html);
 	}
 
-	public function testTheRailMarksTheOpenMenuWhileEditingIt(): void
-	{
-		$this->createMenu('main-nav', 'Main navigation');
-
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav/edit'));
-
-		$this->assertMatchesRegularExpression(
-			'/href="\/cp\/menus\/main-nav"[^>]*aria-current="page"/s',
-			$html,
-		);
-	}
-
 	public function testAnEmptyAreaRendersTheEmptyStateWithoutARail(): void
 	{
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus'));
@@ -147,7 +135,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('action="/cp/menus/create"', $html);
 		// Nothing to delete yet.
-		$this->assertStringNotContainsString('form-danger', $html);
+		$this->assertStringNotContainsString('/delete"', $html);
 	}
 
 	public function testCreateStoresAndOpensTheNewMenu(): void
@@ -210,30 +198,56 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertSame([], $this->menuHandles());
 	}
 
-	public function testEditFormShowsTheMenuAndTheRenameWarning(): void
+	public function testTheTreeScreenCarriesTheMenuFieldsAndItsDelete(): void
 	{
 		$this->createMenu('head', 'Header links');
 
-		$response = $this->makeRequest('GET', '/cp/menus/head/edit');
+		$response = $this->makeRequest('GET', '/cp/menus/head');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('action="/cp/menus/head/edit"', $html);
 		$this->assertStringContainsString('value="head"', $html);
 		$this->assertStringContainsString('value="Header links"', $html);
 		$this->assertStringContainsString('Renaming the handle breaks templates', $html);
-		// Delete lives on the edit form now that the listing screen is gone.
+		// Delete sits in the same bar; there is no edit screen behind a button.
 		$this->assertStringContainsString('action="/cp/menus/head/delete"', $html);
 	}
 
-	public function testTheEditFormConfirmNamesTheItemCount(): void
+	public function testTheDeleteConfirmNamesTheItemCount(): void
 	{
 		$this->createMenu('stocked', 'Stocked');
 		$this->createItem('stocked', 'menu-e2e-stocked-one', 1);
 		$this->createItem('stocked', 'menu-e2e-stocked-two', 2);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/stocked/edit'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/stocked'));
 
 		$this->assertStringContainsString('It contains 2 items.', $html);
+	}
+
+	public function testTheEditScreenIsGone(): void
+	{
+		$this->createMenu('head', 'Header links');
+
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/menus/head/edit'));
+	}
+
+	public function testARejectedHandleComesBackOnTheTreeScreen(): void
+	{
+		$this->createMenu('head', 'Header links');
+		$this->createMenu('taken', 'Taken');
+
+		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
+			'body' => ['menu' => 'taken', 'description' => 'Header links'],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('A menu with this handle already exists.', $html);
+		// The tree is still on screen, and the field keeps what was typed.
+		$this->assertStringContainsString('class="menu-props"', $html);
+		$this->assertStringContainsString('value="taken"', $html);
+		$this->assertSame(['head', 'taken'], $this->menuHandles());
 	}
 
 	public function testUpdateRenamesTheHandleAndItsItemsFollow(): void
@@ -281,7 +295,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testUnknownMenuAnswers404(): void
 	{
-		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/menus/ghost/edit'));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/menus/ghost'));
 		$this->assertResponseStatus(404, $this->makeRequest('POST', '/cp/menus/ghost/delete'));
 	}
 }

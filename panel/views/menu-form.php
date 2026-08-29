@@ -2,22 +2,21 @@
 
 use function Cosray\escape;
 
+// Creating a menu. An existing menu is edited inline on its tree screen.
+
 $this->layout('layer/main');
 
 $errors = (array) $this->unwrap($errors);
-$mode = (string) $mode;
 $action = (string) $action;
 $backUrl = (string) $backUrl;
 $handle = (string) $handle;
 $description = (string) $description;
-$deleteUrl = $this->unwrap($deleteUrl);
-$confirm = $this->unwrap($confirm);
 ?>
 
 <div class="page cms-menus">
 	<header class="head">
 		<div class="line">
-			<h1><?= escape($mode === 'create' ? __('menu:create-title') : __('menu:edit-title')) ?></h1>
+			<h1><?= escape(__('menu:create-title')) ?></h1>
 		</div>
 	</header>
 
@@ -44,9 +43,6 @@ $confirm = $this->unwrap($confirm);
 						value="<?= escape($handle) ?>"
 						<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 					<p class="help"><?= escape(__('menu:handle-help')) ?></p>
-					<?php if ($mode === 'edit'): ?>
-						<p class="help warning"><?= escape(__('menu:rename-warning')) ?></p>
-					<?php endif ?>
 				</div>
 
 				<div class="field">
@@ -67,23 +63,10 @@ $confirm = $this->unwrap($confirm);
 						__('menu:cancel'),
 					) ?></a>
 					<button type="submit" class="cms-button primary"><?= escape(
-						$mode === 'create' ? __('menu:create') : __('menu:save'),
+						__('menu:create'),
 					) ?></button>
 				</footer>
 			</form>
-
-			<?php if ($mode === 'edit' && is_string($deleteUrl)): ?>
-				<?php // Its own form: a form cannot nest inside another. ?>
-				<form
-					class="form-danger"
-					method="post"
-					action="<?= escape($deleteUrl) ?>"
-					hx-confirm="<?= escape((string) $confirm) ?>">
-					<button type="submit" class="cms-button danger"><?= escape(
-						__('menu:delete'),
-					) ?></button>
-				</form>
-			<?php endif ?>
 		</div>
 	</div>
 </div>

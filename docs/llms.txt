@@ -602,11 +602,14 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 - `GET <panelPath>/collection/{collection}` server-rendered collection list
 - `GET <panelPath>/menus` opens the first menu (303); it renders an empty
   state only when the project has no menu. The area has no listing screen:
-  the rail lists the menus. `GET|POST .../menus/create`,
-  `GET|POST .../menus/{menu}/edit`, `POST .../menus/{menu}/delete` manage
-  menus — all behind the `edit-menus` permission (superuser and admin)
-- `GET <panelPath>/menus/{menu}` renders the item tree with its editing
-  side pane; the pane state is URL-driven (`?item=` edits, `?add=` or
+  the rail lists the menus. `GET|POST .../menus/create` creates one;
+  `POST .../menus/{menu}/edit` (handle, description) and
+  `POST .../menus/{menu}/delete` are the writes behind the menu's own
+  fields, which sit inline on its tree screen — there is no edit screen, and
+  a rejected handle answers with the tree screen carrying the error. All
+  behind the `edit-menus` permission (superuser and admin)
+- `GET <panelPath>/menus/{menu}` renders the menu's fields, the item tree,
+  and the tree's editing side pane; the pane state is URL-driven (`?item=` edits, `?add=` or
   `?add={uid}` creates). Item writes: `POST .../item/create`,
   `POST .../item/{item}` (update), `POST .../item/{item}/move`
   (`direction=up|down`, or `parent` + `index` for exact drag placement),

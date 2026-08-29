@@ -89,7 +89,7 @@ final class Menus extends Panel
 	#[Permission('edit-menus')]
 	public function create(): array
 	{
-		return $this->form('', '', null, []);
+		return $this->form('', '', []);
 	}
 
 	#[Permission('edit-menus')]
@@ -99,7 +99,7 @@ final class Menus extends Panel
 		$errors = $this->validate($handle, $description, null);
 
 		if ($errors !== []) {
-			return $this->form($handle, $description, null, $errors);
+			return $this->form($handle, $description, $errors);
 		}
 
 		$this->menus->create($handle, $description);
@@ -108,22 +108,22 @@ final class Menus extends Panel
 	}
 
 	#[Permission('edit-menus')]
-	public function edit(string $menu): array
-	{
-		$row = $this->row($menu);
-
-		return $this->form($menu, (string) $row['description'], $menu, []);
-	}
-
-	#[Permission('edit-menus')]
-	public function update(Factory $factory, string $menu): array|Response
-	{
+	public function update(
+		Cms $cms,
+		Context $context,
+		Factory $factory,
+		string $menu,
+	): array|Response {
 		$this->row($menu);
 		[$handle, $description] = $this->submitted();
 		$errors = $this->validate($handle, $description, $menu);
 
 		if ($errors !== []) {
-			return $this->form($handle, $description, $menu, $errors);
+			return $this->treeContext($cms, $context, $menu, null, [
+				'handle' => $handle,
+				'description' => $description,
+				'errors' => $errors,
+			]);
 		}
 
 		$this->menus->update($menu, $description);
@@ -267,14 +267,34 @@ final class Menus extends Panel
 		return $this->redirectToMenu($factory, $menu, ['notice' => 'item-deleted']);
 	}
 
-	private function treeContext(Cms $cms, Context $context, string $menu, ?array $pane): array
-	{
+	/**
+	 * @param ?array{handle: string, description: string, errors: array<string, string>} $props
+	 *   the submitted menu fields when a save came back with errors, the
+	 *   stored ones otherwise
+	 */
+	private function treeContext(
+		Cms $cms,
+		Context $context,
+		string $menu,
+		?array $pane,
+		?array $props = null,
+	): array {
 		$row = $this->row($menu);
 
 		return $this->context([
 			'menu' => $menu,
 			'description' => (string) $row['description'],
 			'itemCount' => (int) $row['items'],
+			'props' => [
+				...(
+					$props ?? [
+						'handle' => $menu,
+						'description' => (string) $row['description'],
+						'errors' => [],
+					]
+				),
+				'confirm' => $this->deleteConfirm($menu),
+			],
 			// Unexpanded: the editor shows `children` items as stored,
 			// not what they resolve into. The preview beneath renders the
 			// expanded menu as the frontend would emit it.
@@ -285,6 +305,7 @@ final class Menus extends Panel
 			'urls' => [
 				'tree' => $this->url($menu),
 				'edit' => $this->url($menu, '/edit'),
+				'delete' => $this->url($menu, '/delete'),
 				'add' => $this->url($menu) . '?add=',
 			],
 		]);
@@ -620,21 +641,17 @@ final class Menus extends Panel
 		return $titles === [] ? $item : (string) reset($titles);
 	}
 
-	/** @param array<string, string> $errors */
-	private function form(
-		string $handle,
-		string $description,
-		?string $current,
-		array $errors,
-	): array {
+	/**
+	 * The create screen. Editing a menu happens inline on its tree screen,
+	 * so this is the only standalone menu form left.
+	 *
+	 * @param array<string, string> $errors
+	 */
+	private function form(string $handle, string $description, array $errors): array
+	{
 		return $this->context([
-			'mode' => $current === null ? 'create' : 'edit',
-			'action' => $current === null
-				? $this->base() . '/create'
-				: $this->url($current, '/edit'),
-			'backUrl' => $current === null ? $this->base() : $this->url($current),
-			'deleteUrl' => $current === null ? null : $this->url($current, '/delete'),
-			'confirm' => $current === null ? null : $this->deleteConfirm($current),
+			'action' => $this->base() . '/create',
+			'backUrl' => $this->base(),
 			'handle' => $handle,
 			'description' => $description,
 			'errors' => $errors,

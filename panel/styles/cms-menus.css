@@ -178,14 +178,6 @@
 			justify-content: flex-end;
 			gap: var(--cms-space-2);
 		}
-
-		& .form-danger {
-			/* The card lays its forms out as a stretching column. */
-			align-items: flex-start;
-			margin-top: var(--cms-space-5);
-			padding-top: var(--cms-space-5);
-			border-top: 1px solid var(--cms-color-border);
-		}
 	}
 }
 
@@ -198,6 +190,44 @@
 		flex-direction: column;
 		gap: var(--cms-space-1);
 		min-width: 0;
+	}
+
+	/* The forms lay their controls out as cells of this grid, which is what
+	   lines the buttons up with the inputs across two separate forms. */
+	& .menu-props {
+		display: grid;
+		grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr) max-content max-content;
+		gap: var(--cms-space-2) var(--cms-space-3);
+		align-items: end;
+		flex: 0 0 auto;
+
+		& form {
+			display: contents;
+		}
+
+		& .cms-field {
+			padding-inline: 0;
+		}
+
+		/* Keep the destructive button off the save button's elbow. */
+		& .danger {
+			margin-left: var(--cms-space-5);
+		}
+
+		& .error,
+		& .help {
+			grid-column: 1 / -1;
+			margin: 0;
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& .error {
+			color: var(--cms-color-danger-text);
+		}
+
+		& .help {
+			color: var(--cms-color-text-muted);
+		}
 	}
 
 	& .workspace {
@@ -649,6 +679,11 @@
 	}
 
 	.cms-menu-tree {
+		& .menu-props {
+			grid-template-columns: minmax(0, 1fr);
+			align-items: stretch;
+		}
+
 		& .workspace {
 			grid-template-columns: minmax(0, 1fr);
 		}

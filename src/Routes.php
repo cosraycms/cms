@@ -189,14 +189,8 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('menu-form'));
-				$panel
-					->get(
-						'/menus/{menu:[a-z0-9-]{1,32}}/edit',
-						[Panel\Menus::class, 'edit'],
-						'menu.edit',
-					)
-					->middleware($panelAuth)
-					->after($renderers->get('menu-form'));
+				// The menu's own fields live on its tree screen, so this only
+				// takes the write and answers with that screen.
 				$panel
 					->post(
 						'/menus/{menu:[a-z0-9-]{1,32}}/edit',
@@ -204,7 +198,7 @@ class Routes
 						'menu.update',
 					)
 					->middleware($panelAuth)
-					->after($renderers->get('menu-form'));
+					->after($renderers->get('menu'));
 				$panel
 					->post(
 						'/menus/{menu:[a-z0-9-]{1,32}}/delete',

@@ -28,9 +28,6 @@ $urls = (array) $this->unwrap($urls);
 		</div>
 
 		<div class="actions">
-			<a class="cms-button secondary" href="<?= escape($urls['edit']) ?>"><?= escape(
-				__('menu:edit-title'),
-			) ?></a>
 			<a class="cms-button primary" href="<?= escape($urls['add']) ?>"><?= escape(
 				__('menu:add-item'),
 			) ?></a>
@@ -38,6 +35,8 @@ $urls = (array) $this->unwrap($urls);
 	</header>
 
 	<div class="body">
+		<?php $this->insert('menu/properties') ?>
+
 		<?php if (is_string($notice)): ?>
 			<div class="cms-notice" role="status">
 				<p><?= escape($notice) ?></p>

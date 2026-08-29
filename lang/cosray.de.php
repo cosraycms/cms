@@ -155,7 +155,6 @@ return [
 		'menu:create-title' => 'Neues Menü',
 		'menu:delete' => 'Löschen',
 		'menu:description' => 'Beschreibung',
-		'menu:edit-title' => 'Menü bearbeiten',
 		'menu:empty' => 'Noch keine Menüs.',
 		'menu:empty-help' => 'Lege ein Menü an, um der Website eine bearbeitbare Navigation zu geben.',
 		'menu:error-description' => 'Eine Beschreibung ist erforderlich, höchstens 128 Zeichen.',

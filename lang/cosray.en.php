@@ -155,7 +155,6 @@ return [
 		'menu:create-title' => 'New menu',
 		'menu:delete' => 'Delete',
 		'menu:description' => 'Description',
-		'menu:edit-title' => 'Edit menu',
 		'menu:empty' => 'No menus yet.',
 		'menu:empty-help' => 'Create a menu to give the site an editable navigation.',
 		'menu:error-description' => 'A description is required, at most 128 characters.',
