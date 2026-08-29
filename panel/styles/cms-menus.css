@@ -192,14 +192,17 @@
 		min-width: 0;
 	}
 
-	/* The forms lay their controls out as cells of this grid, which is what
-	   lines the buttons up with the inputs across two separate forms. */
+	/* The menu's own fields belong to the tree, not to the item pane beside
+	   it, so the bar stops where the pane column begins. The forms lay their
+	   controls out as cells of this grid, which is what lines the buttons up
+	   with the inputs across two separate forms. */
 	& .menu-props {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(8rem, 14rem) max-content max-content;
 		gap: var(--cms-space-2) var(--cms-space-3);
-		align-items: end;
+		align-items: start;
 		flex: 0 0 auto;
+		margin-right: calc(var(--menu-pane-width) + var(--cms-space-4));
 
 		& form {
 			display: contents;
@@ -209,30 +212,42 @@
 			padding-inline: 0;
 		}
 
+		/* Every cell starts at the top, so a field growing an error message
+		   leaves the rest of the row where it is. The buttons drop past the
+		   labels to meet the inputs: one label line plus the field's gap. */
+		& .cms-button {
+			margin-top: calc(1.25rem + var(--cms-space-2));
+		}
+
 		/* Keep the destructive button off the save button's elbow. */
 		& .danger {
 			margin-left: var(--cms-space-5);
 		}
 
-		& .error,
-		& .help {
-			grid-column: 1 / -1;
+		& .error {
 			margin: 0;
+			color: var(--cms-color-danger-text);
 			font-size: var(--cms-font-size-xs);
 		}
 
-		& .error {
-			color: var(--cms-color-danger-text);
-		}
-
-		& .help {
+		/* Under the handle, which is what it is about. The columns it spans
+		   are all intrinsic, so it has to be kept out of their sizing or a
+		   long sentence widens the buttons instead of wrapping. */
+		& > .help {
+			grid-column: 2 / -1;
+			width: 0;
+			min-width: 100%;
+			margin: 0;
 			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
 		}
 	}
 
+	--menu-pane-width: 24rem;
+
 	& .workspace {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 24rem;
+		grid-template-columns: minmax(0, 1fr) var(--menu-pane-width);
 		gap: var(--cms-space-4);
 		flex: 1 1 auto;
 		min-height: 0;
@@ -564,6 +579,10 @@
 		overflow-y: auto;
 
 		& .pane-empty {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: var(--cms-space-4);
 			padding: var(--cms-space-6) var(--cms-space-2);
 			color: var(--cms-color-text-muted);
 			font-size: var(--cms-font-size-sm);
@@ -691,6 +710,15 @@
 		& .menu-props {
 			grid-template-columns: minmax(0, 1fr);
 			align-items: stretch;
+			margin-right: 0;
+
+			& .cms-button {
+				margin-top: 0;
+			}
+
+			& > .help {
+				grid-column: 1;
+			}
 		}
 
 		& .workspace {

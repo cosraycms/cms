@@ -34,6 +34,9 @@ $manages = (bool) $manages;
 					value="<?= escape($description) ?>"
 					<?= isset($errors['description']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
+			<?php if (isset($errors['description'])): ?>
+				<p class="error"><?= escape((string) $errors['description']) ?></p>
+			<?php endif ?>
 		</div>
 
 		<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
@@ -50,6 +53,9 @@ $manages = (bool) $manages;
 					<?= $manages ? '' : 'disabled' ?>
 					<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
 			</div>
+			<?php if (isset($errors['menu'])): ?>
+				<p class="error"><?= escape((string) $errors['menu']) ?></p>
+			<?php endif ?>
 		</div>
 
 		<button type="submit" class="cms-button secondary"><?= escape(__('menu:save')) ?></button>
@@ -63,10 +69,6 @@ $manages = (bool) $manages;
 			<button type="submit" class="cms-button danger"><?= escape(__('menu:delete')) ?></button>
 		</form>
 	<?php endif ?>
-
-	<?php foreach ($errors as $error): ?>
-		<p class="error"><?= escape((string) $error) ?></p>
-	<?php endforeach ?>
 
 	<p class="help"><?= escape(__('menu:handle-help')) ?> <?= escape(
 		$manages ? __('menu:rename-warning') : __('menu:handle-locked'),

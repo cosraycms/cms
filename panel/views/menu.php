@@ -26,12 +26,6 @@ $urls = (array) $this->unwrap($urls);
 				)) ?></span>
 			</div>
 		</div>
-
-		<div class="actions">
-			<a class="cms-button primary" href="<?= escape($urls['add']) ?>"><?= escape(
-				__('menu:add-item'),
-			) ?></a>
-		</div>
 	</header>
 
 	<div class="body">
@@ -91,6 +85,9 @@ $urls = (array) $this->unwrap($urls);
 				<?php else: ?>
 					<div class="pane-empty">
 						<p><?= escape(__('menu:pane-empty')) ?></p>
+						<a class="cms-button primary" href="<?= escape($urls['add']) ?>"><?= escape(
+							__('menu:add-item'),
+						) ?></a>
 					</div>
 				<?php endif ?>
 			</aside>
