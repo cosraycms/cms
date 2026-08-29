@@ -13,6 +13,8 @@ $id = (string) $id;
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $help = $this->unwrap($help ?? null);
+$helpSection = $this->unwrap($helpSection ?? null);
+$helpHidden = (bool) ($helpHidden ?? false);
 $section = $this->unwrap($section ?? null);
 $sectionHide = $this->unwrap($sectionHide ?? null);
 $sectionHidden = (bool) ($sectionHidden ?? false);
@@ -55,7 +57,10 @@ $multi = count($locales) > 1;
 		<?php endforeach ?>
 	</div>
 	<?php if (is_string($help)): ?>
-		<p class="help"><?= escape($help) ?></p>
+		<p
+			class="help"
+			<?= is_string($helpSection) ? 'data-menu-section="' . escape($helpSection) . '"' : '' ?>
+			<?= $helpHidden ? 'hidden' : '' ?>><?= escape($help) ?></p>
 	<?php endif ?>
 	<?php if (is_string($error)): ?>
 		<p class="error"><?= escape($error) ?></p>

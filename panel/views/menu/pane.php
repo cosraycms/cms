@@ -75,7 +75,9 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			'id' => 'menu-item-title',
 			'locales' => $locales,
 			'defaultLocale' => $defaultLocale,
-			'help' => $type === 'node' ? __('menu:item-title-inherit-help') : null,
+			'help' => __('menu:item-title-inherit-help'),
+			'helpSection' => 'node',
+			'helpHidden' => $type !== 'node',
 			'sectionHide' => 'children',
 			'sectionHidden' => $type === 'children',
 		]) ?>
