@@ -264,28 +264,41 @@
 	}
 
 	& .menu-children {
+		/* The rail stays under the parent card's edge, so a wider indent
+		   lengthens the ticks rather than pushing the line along with the
+		   cards. Both are read by the child nodes that draw them. */
+		--menu-indent: var(--cms-space-12);
+		--menu-tick: calc(var(--cms-space-12) - var(--cms-space-4));
+
 		position: relative;
 		margin-top: var(--cms-space-2);
-		padding-left: var(--cms-space-8);
-
-		/* The vertical rail … */
-		&::before {
-			content: '';
-			position: absolute;
-			top: calc(-1 * var(--cms-space-2));
-			bottom: 1.25rem;
-			left: var(--cms-space-4);
-			border-left: 1px solid var(--cms-color-border-strong);
-		}
+		padding-left: var(--menu-indent);
 	}
 
-	/* … and one tick per child card. */
+	/* The rail is drawn per child rather than once down the list: only the
+	   children know where the last tick is, and a last child with a tall
+	   subtree of its own would otherwise leave the line hanging below it. */
+	& .menu-children > .menu-node::after {
+		content: '';
+		position: absolute;
+		top: calc(-1 * var(--cms-space-2));
+		bottom: 0;
+		left: calc(-1 * var(--menu-tick));
+		border-left: 1px solid var(--cms-color-border-strong);
+	}
+
+	& .menu-children > .menu-node:last-child::after {
+		bottom: auto;
+		height: calc(var(--cms-space-2) + 1.25rem);
+	}
+
+	/* One tick per child card, from the rail to the card. */
 	& .menu-children > .menu-node::before {
 		content: '';
 		position: absolute;
 		top: 1.25rem;
-		left: calc(-1 * var(--cms-space-4));
-		width: var(--cms-space-4);
+		left: calc(-1 * var(--menu-tick));
+		width: var(--menu-tick);
 		border-top: 1px solid var(--cms-color-border-strong);
 	}
 
@@ -293,10 +306,6 @@
 	   card offers it as a drop zone for nesting. */
 	& .menu-children.no-children {
 		margin-top: 0;
-
-		&::before {
-			display: none;
-		}
 	}
 
 	& .tree.is-dragging .menu-children {
