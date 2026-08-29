@@ -600,6 +600,11 @@
 			right: 0;
 			left: 0;
 			display: flex;
+
+			/* display: flex outranks the UA rule behind the hidden attribute. */
+			&[hidden] {
+				display: none;
+			}
 			flex-direction: column;
 			margin-top: var(--cms-space-1);
 			padding: var(--cms-space-1);
