@@ -245,7 +245,8 @@ class Menu implements Iterator
 		$locale = $this->context->locale()->id;
 		$rows = [];
 
-		foreach ($this->cms->nodes()->childrenOf($uid)->order($order) as $node) {
+		// The uid tie-break keeps equal sort keys deterministic.
+		foreach ($this->cms->nodes()->childrenOf($uid)->order($order, 'id') as $node) {
 			$childUid = (string) $node->meta->uid;
 			$key = 'children:' . $childUid;
 

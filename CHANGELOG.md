@@ -42,6 +42,7 @@
 
 ### Changed
 
+- `Finder\Nodes::order('title')` orders by the materialized node title for the request locale (neutral-key fallback) — the expression behind the per-locale sort indexes — instead of by a content field named `title`. Types whose title field has another name, or a computed title, previously sorted on NULL and came back in arbitrary row order; a type whose `title` content field feeds its materialized title sorts as before.
 - The panel auth middleware attaches the resolved user to the request's `user` attribute, so token-authenticated panel requests carry the user for chrome gating and the stored panel-language preference, which previously only session requests saw.
 - An existing menu without items now iterates nothing and renders as an empty string; `Finder\Menu` raises "Menu not found" only for an unknown menu handle. Sites that wrapped `$cms->menu()` in try/catch to survive not-yet-filled menus can drop the guard.
 - Menu item locale maps (`title`, `path`) resolve through the locale fallback chain with the language-neutral `zxx` key as the last resort, matching the finder's field compilation.

@@ -8,9 +8,11 @@ use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Field;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
+use Cosray\Title\Sort;
 use Generator;
 use Iterator;
 
@@ -223,10 +225,27 @@ final class Nodes implements Iterator
 
 	public function order(string ...$order): self
 	{
-		$compiler = new OrderCompiler($this->builtins, $this->context);
+		// `title` orders by the materialized node title for the request
+		// locale (neutral key as fallback) — the expression Title\Sort
+		// keeps in step with the per-locale sort indexes — not by a
+		// content field of that name, which a type's schema may not have.
+		$compiler = new OrderCompiler(
+			$this->builtins + ['title' => $this->titleSort()],
+			$this->context,
+		);
 		$this->order = $compiler->compile(implode(',', $order));
 
 		return $this;
+	}
+
+	private function titleSort(): string
+	{
+		$locale = $this->context->locale()->id;
+
+		return Sort::expression(
+			Sort::valid($locale) ? $locale : Field::NEUTRAL_LOCALE,
+			'n.title',
+		);
 	}
 
 	public function limit(int $limit): self
