@@ -27,7 +27,7 @@
 
 	& .link {
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: var(--cms-space-3);
 		width: 100%;
 		min-height: 2.25rem;
@@ -56,14 +56,12 @@
 
 	& .label {
 		display: inline-flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: var(--cms-space-2);
 		min-width: 0;
 
 		& > span:last-child {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
+			overflow-wrap: anywhere;
 		}
 	}
 
@@ -73,6 +71,8 @@
 		justify-content: center;
 		width: 0.875rem;
 		height: 0.875rem;
+		/* Centred on the first line of the label, not on a wrapped block. */
+		margin-top: 0.1875rem;
 		flex-shrink: 0;
 		opacity: 0.55;
 
@@ -85,6 +85,7 @@
 	& .badge {
 		margin-left: auto;
 		flex-shrink: 0;
+		line-height: 1.25rem;
 		color: var(--cms-color-text-faint);
 		font-size: var(--cms-font-size-xs);
 		font-variant-numeric: tabular-nums;

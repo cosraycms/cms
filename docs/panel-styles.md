@@ -39,7 +39,7 @@ Downstream projects override semantic and component tokens. Primitives are inter
 @layer theme {
 	:root {
 		--cms-color-accent: #1f3f72;
-		--cms-sidebar-width: 18rem;
+		--cms-sidebar-width: 20rem;
 	}
 }
 ```
