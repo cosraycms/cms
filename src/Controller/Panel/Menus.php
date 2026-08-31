@@ -10,6 +10,7 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Quma\Database;
+use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
@@ -122,7 +123,7 @@ final class Menus extends Panel
 			return $this->form($context, $handle, $description, $maxDepth, $errors);
 		}
 
-		$this->menus->create($handle, $description, $maxDepth);
+		$this->menus->create($handle, $description, $maxDepth, $this->actor());
 
 		return $this->redirectToMenu($factory, $handle, ['notice' => 'created']);
 	}
@@ -147,7 +148,7 @@ final class Menus extends Panel
 
 		if ($errors === []) {
 			try {
-				$this->menus->update($menu, $description, $maxDepth);
+				$this->menus->update($menu, $description, $maxDepth, $this->actor());
 			} catch (RuntimeException) {
 				// The tree is already deeper than the limit being set.
 				$errors['maxDepth'] = __('menu:error-max-depth-shallow');
@@ -217,7 +218,13 @@ final class Menus extends Panel
 			));
 		}
 
-		$item = $this->menus->add($menu, $data, $parent, hidden: $values['hidden']);
+		$item = $this->menus->add(
+			$menu,
+			$data,
+			$parent,
+			hidden: $values['hidden'],
+			actor: $this->actor(),
+		);
 
 		return $this->redirectToMenu($factory, $menu, [
 			'item' => $item,
@@ -250,7 +257,7 @@ final class Menus extends Panel
 			));
 		}
 
-		$this->menus->updateItem($item, $data, $values['hidden']);
+		$this->menus->updateItem($item, $data, $values['hidden'], $this->actor());
 
 		return $this->redirectToMenu($factory, $menu, [
 			'item' => $item,
@@ -833,6 +840,18 @@ final class Menus extends Panel
 		}
 
 		return $this->menuRows = $rows;
+	}
+
+	/**
+	 * The signed-in user as the writer of a change, system when unknown. Read
+	 * from the request's `user` attribute rather than the session, so it holds
+	 * for token-authenticated requests too — the same source `manages()` uses.
+	 */
+	private function actor(): Actor
+	{
+		$user = $this->request->get('user', null);
+
+		return $user instanceof User ? new Actor($user->id) : Actor::system();
 	}
 
 	/** The content locale of the request, `zxx` when there is none. */

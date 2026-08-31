@@ -310,11 +310,24 @@ CREATE TABLE /*:cms.prefix:*/menus (
 	-- constraint, enforced by `Cosray\Menus` on every write — a template may
 	-- still render fewer levels than the menu allows.
 	max_depth integer,
+	created timestamp with time zone NOT NULL DEFAULT now(),
+	changed timestamp with time zone NOT NULL DEFAULT now(),
+	-- Defaulted to the system user, unlike on `nodes` and `assets`: menus are
+	-- routinely seeded by raw INSERTs in site migrations.
+	creator bigint NOT NULL DEFAULT 1,
+	editor bigint NOT NULL DEFAULT 1,
 	CONSTRAINT /*:cms.obj:*/pk_menus PRIMARY KEY (menu),
+	CONSTRAINT /*:cms.obj:*/fk_menus_users_creator FOREIGN KEY (creator)
+		REFERENCES /*:cms.prefix:*/users (usr),
+	CONSTRAINT /*:cms.obj:*/fk_menus_users_editor FOREIGN KEY (editor)
+		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/ck_menus_menu CHECK (char_length(menu) <= 32),
 	CONSTRAINT /*:cms.obj:*/ck_menus_max_depth
 		CHECK (max_depth IS NULL OR max_depth BETWEEN 1 AND 10)
 );
+CREATE TRIGGER /*:cms.obj:*/menus_trigger_01_change BEFORE UPDATE
+	ON /*:cms.prefix:*/menus
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 
 
 CREATE TABLE /*:cms.prefix:*/menu_items (
@@ -326,6 +339,10 @@ CREATE TABLE /*:cms.prefix:*/menu_items (
 	-- is asked for them; the panel editor asks, the frontend does not.
 	hidden boolean NOT NULL DEFAULT false,
 	data jsonb NOT NULL,
+	created timestamp with time zone NOT NULL DEFAULT now(),
+	changed timestamp with time zone NOT NULL DEFAULT now(),
+	creator bigint NOT NULL DEFAULT 1,
+	editor bigint NOT NULL DEFAULT 1,
 	CONSTRAINT /*:cms.obj:*/pk_menu_items PRIMARY KEY (item),
 	CONSTRAINT /*:cms.obj:*/uc_menu_items_item_menu UNIQUE (item, menu),
 	CONSTRAINT /*:cms.obj:*/fk_menu_items_menus FOREIGN KEY (menu)
@@ -334,10 +351,17 @@ CREATE TABLE /*:cms.prefix:*/menu_items (
 	CONSTRAINT /*:cms.obj:*/fk_menu_items_menu_items FOREIGN KEY (parent, menu)
 		REFERENCES /*:cms.prefix:*/menu_items (item, menu),
 	CONSTRAINT /*:cms.obj:*/ck_menu_items_item CHECK (char_length(item) <= 64),
+	CONSTRAINT /*:cms.obj:*/fk_menu_items_users_creator FOREIGN KEY (creator)
+		REFERENCES /*:cms.prefix:*/users (usr),
+	CONSTRAINT /*:cms.obj:*/fk_menu_items_users_editor FOREIGN KEY (editor)
+		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/ck_menu_items_parent CHECK (char_length(parent) <= 64)
 );
 CREATE INDEX /*:cms.obj:*/ix_menu_items_tree
 	ON /*:cms.prefix:*/menu_items USING btree (menu, parent, position);
+CREATE TRIGGER /*:cms.obj:*/menu_items_trigger_01_change BEFORE UPDATE
+	ON /*:cms.prefix:*/menu_items
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 
 
 CREATE TABLE /*:cms.prefix:*/topics (

@@ -1,9 +1,13 @@
 INSERT INTO /*:cms.prefix:*/menus (
 	menu,
 	description,
-	max_depth
+	max_depth,
+	creator,
+	editor
 ) VALUES (
 	:menu,
 	:description,
-	:maxDepth
+	:maxDepth,
+	:creator,
+	:editor
 );

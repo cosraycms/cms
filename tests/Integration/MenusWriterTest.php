@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Celema\Container\Container;
+use Cosray\Actor;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
@@ -46,6 +47,38 @@ final class MenusWriterTest extends IntegrationTestCase
 			VALUES (:uid, 'local', :key, 'f.pdf', 1)",
 			['uid' => $uid, 'key' => substr($uid, 0, 2) . "/{$uid}/f.pdf"],
 		)->run();
+	}
+
+	private function insertUser(string $name): int
+	{
+		return (int) $this->db()->execute(
+			"INSERT INTO cms.users
+			(uid, username, email, password, rolename, active, data, creator, editor)
+			VALUES (:uid, :name, :email, 'x', 'editor', true, '{}'::jsonb, 1, 1)
+			RETURNING usr",
+			['uid' => $name, 'name' => $name, 'email' => $name . '@example.test'],
+		)->one()['usr'];
+	}
+
+	/** @return array{creator: int, editor: int, created: string, changed: string} */
+	private function auditRow(string $menu, ?string $item = null): array
+	{
+		$row = $item === null
+			? $this->db()->execute(
+				'SELECT creator, editor, created, changed FROM cms.menus WHERE menu = :menu',
+				['menu' => $menu],
+			)->one()
+			: $this->db()->execute(
+				'SELECT creator, editor, created, changed FROM cms.menu_items WHERE item = :item',
+				['item' => $item],
+			)->one();
+
+		return [
+			'creator' => (int) $row['creator'],
+			'editor' => (int) $row['editor'],
+			'created' => (string) $row['created'],
+			'changed' => (string) $row['changed'],
+		];
 	}
 
 	/** @return list<string> */
@@ -167,6 +200,44 @@ final class MenusWriterTest extends IntegrationTestCase
 
 		$this->throws(RuntimeException::class, 'belongs to another menu');
 		$menus->add('writer-menu-b', $this->itemData('B', '/b'), parent: $parent);
+	}
+
+	public function testWritesRecordTheirActor(): void
+	{
+		$editor = $this->insertUser('writer-audit-editor');
+		$menus = $this->menus();
+		$menus->create('writer-audit', ['zxx' => 'Audit'], actor: new Actor($editor));
+		$item = $menus->add('writer-audit', $this->itemData('X', '/x'), actor: new Actor($editor));
+
+		$before = $this->auditRow('writer-audit');
+		$this->assertSame($editor, $before['creator']);
+		$this->assertSame($editor, $before['editor']);
+		$this->assertNotSame('', $before['created']);
+
+		// A later edit by someone else keeps the creator and moves the editor.
+		$menus->update('writer-audit', ['zxx' => 'Audit'], actor: new Actor(1));
+		$menus->updateItem($item, $this->itemData('Y', '/y'), actor: new Actor(1));
+
+		$after = $this->auditRow('writer-audit');
+		$this->assertSame($editor, $after['creator']);
+		$this->assertSame(1, $after['editor']);
+		// `changed` cannot be asserted to advance here: the shared trigger uses
+		// `now()`, which is the transaction's start time, and these tests run
+		// inside one.
+		$this->assertNotSame('', $after['changed']);
+
+		$itemRow = $this->auditRow('writer-audit', $item);
+		$this->assertSame($editor, $itemRow['creator']);
+		$this->assertSame(1, $itemRow['editor']);
+	}
+
+	public function testAWriteWithoutAnActorIsTheSystemUser(): void
+	{
+		// The path every site migration and import takes.
+		$menus = $this->menus();
+		$menus->create('writer-system', ['zxx' => 'System']);
+
+		$this->assertSame(1, $this->auditRow('writer-system')['creator']);
 	}
 
 	public function testTheDatabaseRefusesACrossMenuParentOnItsOwn(): void

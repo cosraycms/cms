@@ -50,4 +50,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000026-localize-menu-description[pgsql].sql', now()),
 	('000000-000027-menu-max-depth.sql', now()),
 	('000000-000028-menu-item-visibility.sql', now()),
-	('000000-000029-menu-item-parent-integrity.sql', now());
+	('000000-000029-menu-item-parent-integrity.sql', now()),
+	('000000-000030-menu-timestamps.sql', now());

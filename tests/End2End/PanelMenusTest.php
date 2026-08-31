@@ -235,6 +235,25 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertNull($this->storedMaxDepth('deep'));
 	}
 
+	public function testASaveRecordsTheSignedInUserAsEditor(): void
+	{
+		$this->createMenu('audited', 'Audited');
+
+		$this->makeRequest('POST', '/cp/menus/audited/edit', [
+			'body' => ['menu' => 'audited', 'description' => ['en' => 'Audited']],
+		]);
+
+		// The signed-in user, not the system fallback the write API defaults to.
+		$this->assertSame(
+			'superuser',
+			$this->db()->execute(
+				"SELECT u.rolename FROM cms.menus m
+				JOIN cms.users u ON u.usr = m.editor
+				WHERE m.menu = 'audited'",
+			)->one()['rolename'],
+		);
+	}
+
 	public function testAMenuWithoutAnyDescriptionStillRenders(): void
 	{
 		// The panel rejects an empty description, but a site migration can

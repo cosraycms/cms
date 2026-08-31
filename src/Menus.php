@@ -35,13 +35,22 @@ final class Menus
 	/**
 	 * @param array<string, string> $description the description per locale
 	 * @param ?int $maxDepth how deep the tree may be built, null for unlimited
+	 * @param ?Actor $actor who is writing; the system user when nothing says
 	 */
-	public function create(string $menu, array $description, ?int $maxDepth = null): void
-	{
+	public function create(
+		string $menu,
+		array $description,
+		?int $maxDepth = null,
+		?Actor $actor = null,
+	): void {
+		$usr = ($actor ?? Actor::system())->id;
+
 		$this->db->menus->create([
 			'menu' => $menu,
 			'description' => json_encode($description),
 			'maxDepth' => $maxDepth,
+			'creator' => $usr,
+			'editor' => $usr,
 		])->run();
 	}
 
@@ -49,8 +58,12 @@ final class Menus
 	 * @param array<string, string> $description the description per locale
 	 * @param ?int $maxDepth how deep the tree may be built, null for unlimited
 	 */
-	public function update(string $menu, array $description, ?int $maxDepth = null): void
-	{
+	public function update(
+		string $menu,
+		array $description,
+		?int $maxDepth = null,
+		?Actor $actor = null,
+	): void {
 		// A limit shallower than the tree would be inert: nothing rejects the
 		// levels that already exist, so refuse it instead of pretending.
 		$height = (int) $this->db->menus->menuHeight(['menu' => $menu])->one()['height'];
@@ -65,6 +78,7 @@ final class Menus
 			'menu' => $menu,
 			'description' => json_encode($description),
 			'maxDepth' => $maxDepth,
+			'editor' => ($actor ?? Actor::system())->id,
 		])->run();
 	}
 
@@ -101,6 +115,7 @@ final class Menus
 		?string $parent = null,
 		?string $item = null,
 		bool $hidden = false,
+		?Actor $actor = null,
 	): string {
 		if (!is_string($data['type'] ?? null) || $data['type'] === '') {
 			throw new RuntimeException('A menu item needs a type');
@@ -124,6 +139,7 @@ final class Menus
 		$this->assertDepth($menu, $parent, 1);
 
 		$item ??= $this->uid->generate();
+		$usr = ($actor ?? Actor::system())->id;
 
 		$this->db->menus->createItem([
 			'item' => $item,
@@ -132,14 +148,20 @@ final class Menus
 			'position' => $this->nextPosition($menu, $parent),
 			'hidden' => $hidden,
 			'data' => json_encode($data),
+			'creator' => $usr,
+			'editor' => $usr,
 		])->run();
 		$this->syncReferences($item, $data);
 
 		return $item;
 	}
 
-	public function updateItem(string $item, array $data, bool $hidden = false): void
-	{
+	public function updateItem(
+		string $item,
+		array $data,
+		bool $hidden = false,
+		?Actor $actor = null,
+	): void {
 		if (!is_string($data['type'] ?? null) || $data['type'] === '') {
 			throw new RuntimeException('A menu item needs a type');
 		}
@@ -149,6 +171,7 @@ final class Menus
 			'item' => $item,
 			'hidden' => $hidden,
 			'data' => json_encode($data),
+			'editor' => ($actor ?? Actor::system())->id,
 		])->run();
 		$this->syncReferences($item, $data);
 	}

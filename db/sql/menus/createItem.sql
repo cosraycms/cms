@@ -4,12 +4,16 @@ INSERT INTO /*:cms.prefix:*/menu_items (
 	menu,
 	position,
 	hidden,
-	data
+	data,
+	creator,
+	editor
 ) VALUES (
 	:item,
 	:parent,
 	:menu,
 	:position,
 	:hidden,
-	:data
+	:data,
+	:creator,
+	:editor
 );
