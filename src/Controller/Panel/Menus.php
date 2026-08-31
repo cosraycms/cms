@@ -269,6 +269,8 @@ final class Menus extends Panel
 	public function moveItem(Factory $factory, string $menu, string $item): Response
 	{
 		$row = $this->itemRowFor($menu, $item);
+		$from = $row['parent'] === null ? null : (string) $row['parent'];
+		$fromIndex = (int) array_search($item, $this->siblingIds($menu, $from), true);
 
 		try {
 			[$parent, $index] = $this->moveTarget($menu, $item, $row);
@@ -280,7 +282,15 @@ final class Menus extends Panel
 			]);
 		}
 
-		return $this->redirectToMenu($factory, $menu, ['item' => $item]);
+		// Where it came from, so the notice can offer to put it back. The item
+		// has left that group, so splicing it in at the same index restores
+		// exactly the previous order.
+		return $this->redirectToMenu($factory, $menu, [
+			'item' => $item,
+			'notice' => 'item-moved',
+			'undoParent' => (string) $from,
+			'undoIndex' => (string) $fromIndex,
+		]);
 	}
 
 	/**
@@ -407,7 +417,8 @@ final class Menus extends Panel
 			),
 			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
-			'notice' => $this->notice(),
+			'notice' => $this->notice($menu),
+			'undo' => $this->undoMove($menu),
 			'urls' => [
 				'tree' => $this->url($menu),
 				'edit' => $this->url($menu, '/edit'),
@@ -837,10 +848,19 @@ final class Menus extends Panel
 		];
 	}
 
-	private function notice(): ?string
+	private function notice(?string $menu = null): ?string
 	{
+		$notice = $this->request->param('notice', '');
+		$item = $this->request->param('item', '');
+
+		// The only notice that names its subject; the tree screen has already
+		// validated the item, so the lookup is safe here.
+		if ($notice === 'item-moved' && $menu !== null && is_string($item) && $item !== '') {
+			return __('menu:notice-item-moved', ['title' => $this->itemTitle($menu, $item)]);
+		}
+
 		// Literal ids so the i18n scanner sees every key.
-		return match ($this->request->param('notice', '')) {
+		return match ($notice) {
 			'created' => __('menu:notice-created'),
 			'updated' => __('menu:notice-updated'),
 			'deleted' => __('menu:notice-deleted'),
@@ -850,6 +870,35 @@ final class Menus extends Panel
 			'move-rejected' => __('menu:notice-move-rejected'),
 			default => null,
 		};
+	}
+
+	/**
+	 * The move that puts the last one back, when the redirect carried one.
+	 * Both halves must be present: the root group posts an empty parent, so
+	 * the index alone cannot say whether an undo was offered.
+	 *
+	 * @return ?array{action: string, parent: string, index: int}
+	 */
+	private function undoMove(string $menu): ?array
+	{
+		$item = $this->request->param('item', '');
+		$index = $this->request->param('undoIndex', '');
+
+		if (
+			$this->request->param('notice', '') !== 'item-moved'
+			|| !is_string($item)
+			|| $item === ''
+			|| !is_string($index)
+			|| $index === ''
+		) {
+			return null;
+		}
+
+		return [
+			'action' => $this->url($menu, '/item/' . rawurlencode($item) . '/move'),
+			'parent' => (string) $this->request->param('undoParent', ''),
+			'index' => (int) $index,
+		];
 	}
 
 	private function redirect(Factory $factory, string $notice): Response

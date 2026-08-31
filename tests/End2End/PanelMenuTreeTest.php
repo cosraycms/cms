@@ -350,6 +350,56 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertSame([], $this->order('out-parent'));
 	}
 
+	public function testAMoveOffersToPutTheItemBack(): void
+	{
+		$this->createItem('undo-parent', null, 1);
+		$this->createItem('undo-a', 'undo-parent', 1);
+		$this->createItem('undo-b', 'undo-parent', 2);
+
+		$moved = $this->makeRequest('POST', '/cp/menus/tree-menu/item/undo-b/move', [
+			'body' => ['direction' => 'out'],
+		]);
+
+		$location = $moved->getHeaderLine('Location');
+		$this->assertStringContainsString('notice=item-moved', $location);
+		$this->assertStringContainsString('undoParent=undo-parent', $location);
+		$this->assertStringContainsString('undoIndex=1', $location);
+		$this->assertSame(['undo-parent', 'undo-b'], $this->order());
+
+		// The tree renders the offer as a form posting the old position back.
+		// Matched on the button's class: the panel's embedded message catalog
+		// carries an unrelated "Undo" of its own.
+		$html = $this->getHtmlResponse($this->makeRequest('GET', $location));
+		$this->assertStringContainsString('class="undo"', $html);
+		$this->assertStringContainsString('“Item undo-b” moved.', $html);
+		$this->assertMatchesRegularExpression('/name="index" value="1"/', $html);
+
+		$undone = $this->makeRequest('POST', '/cp/menus/tree-menu/item/undo-b/move', [
+			'body' => ['parent' => 'undo-parent', 'index' => '1'],
+		]);
+
+		$this->assertResponseStatus(303, $undone);
+		$this->assertSame(['undo-parent'], $this->order());
+		$this->assertSame(['undo-a', 'undo-b'], $this->order('undo-parent'));
+	}
+
+	public function testARejectedMoveOffersNoUndo(): void
+	{
+		$this->createItem('reject-root');
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/reject-root/move', [
+			'body' => ['direction' => 'out'],
+		]);
+
+		$location = $response->getHeaderLine('Location');
+		$this->assertStringContainsString('notice=move-rejected', $location);
+		$this->assertStringNotContainsString('undoIndex', $location);
+		$this->assertStringNotContainsString(
+			'class="undo"',
+			$this->getHtmlResponse($this->makeRequest('GET', $location)),
+		);
+	}
+
 	public function testTheTreeDisablesUndefinedMoves(): void
 	{
 		$this->createItem('edge-first', null, 1);

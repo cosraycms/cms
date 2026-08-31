@@ -11,6 +11,7 @@ $tree = (array) $this->unwrap($tree);
 $preview = (string) $this->unwrap($preview);
 $pane = $this->unwrap($pane);
 $notice = $this->unwrap($notice ?? null);
+$undo = $this->unwrap($undo ?? null);
 $urls = (array) $this->unwrap($urls);
 ?>
 
@@ -34,6 +35,17 @@ $urls = (array) $this->unwrap($urls);
 		<?php if (is_string($notice)): ?>
 			<div class="cms-notice" role="status">
 				<p><?= escape($notice) ?></p>
+				<?php if (is_array($undo)): ?>
+					<form method="post" action="<?= escape((string) $undo['action']) ?>">
+						<input type="hidden" name="parent" value="<?= escape(
+							(string) $undo['parent'],
+						) ?>" />
+						<input type="hidden" name="index" value="<?= escape(
+							(string) $undo['index'],
+						) ?>" />
+						<button type="submit" class="undo"><?= escape(__('menu:undo')) ?></button>
+					</form>
+				<?php endif ?>
 			</div>
 		<?php endif ?>
 
