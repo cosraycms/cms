@@ -318,6 +318,43 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertSame(['cycle-child'], $this->order('cycle-parent'));
 	}
 
+	public function testHidingAnItemKeepsItInTheEditorAndOutOfThePreview(): void
+	{
+		$this->createItem('vis-item');
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/vis-item', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'Seasonal'],
+				'path' => ['en' => '/seasonal'],
+				'hidden' => '1',
+			],
+		]);
+		$this->assertResponseStatus(303, $response);
+
+		$html = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?item=vis-item'),
+		);
+		// The tree still shows it, marked; the preview below renders the menu
+		// as the frontend would and must not.
+		$this->assertStringContainsString('is-hidden', $html);
+		$this->assertStringNotContainsString('href="/seasonal"', $html);
+		$this->assertMatchesRegularExpression('/name="hidden"[^>]*checked/s', $html);
+
+		$shown = $this->makeRequest('POST', '/cp/menus/tree-menu/item/vis-item', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'Seasonal'],
+				'path' => ['en' => '/seasonal'],
+			],
+		]);
+		$this->assertResponseStatus(303, $shown);
+		$this->assertStringContainsString(
+			'href="/seasonal"',
+			$this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu')),
+		);
+	}
+
 	public function testAMovePastTheMaxDepthIsRejected(): void
 	{
 		$this->db()->execute(

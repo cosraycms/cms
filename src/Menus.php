@@ -100,6 +100,7 @@ final class Menus
 		array $data,
 		?string $parent = null,
 		?string $item = null,
+		bool $hidden = false,
 	): string {
 		if (!is_string($data['type'] ?? null) || $data['type'] === '') {
 			throw new RuntimeException('A menu item needs a type');
@@ -129,6 +130,7 @@ final class Menus
 			'parent' => $parent,
 			'menu' => $menu,
 			'position' => $this->nextPosition($menu, $parent),
+			'hidden' => $hidden,
 			'data' => json_encode($data),
 		])->run();
 		$this->syncReferences($item, $data);
@@ -136,14 +138,18 @@ final class Menus
 		return $item;
 	}
 
-	public function updateItem(string $item, array $data): void
+	public function updateItem(string $item, array $data, bool $hidden = false): void
 	{
 		if (!is_string($data['type'] ?? null) || $data['type'] === '') {
 			throw new RuntimeException('A menu item needs a type');
 		}
 
 		$this->itemRow($item);
-		$this->db->menus->updateItem(['item' => $item, 'data' => json_encode($data)])->run();
+		$this->db->menus->updateItem([
+			'item' => $item,
+			'hidden' => $hidden,
+			'data' => json_encode($data),
+		])->run();
 		$this->syncReferences($item, $data);
 	}
 

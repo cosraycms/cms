@@ -217,7 +217,7 @@ final class Menus extends Panel
 			));
 		}
 
-		$item = $this->menus->add($menu, $data, $parent);
+		$item = $this->menus->add($menu, $data, $parent, hidden: $values['hidden']);
 
 		return $this->redirectToMenu($factory, $menu, [
 			'item' => $item,
@@ -250,7 +250,7 @@ final class Menus extends Panel
 			));
 		}
 
-		$this->menus->updateItem($item, $data);
+		$this->menus->updateItem($item, $data, $values['hidden']);
 
 		return $this->redirectToMenu($factory, $menu, [
 			'item' => $item,
@@ -336,7 +336,10 @@ final class Menus extends Panel
 			// Unexpanded: the editor shows `children` items as stored,
 			// not what they resolve into. The preview beneath renders the
 			// expanded menu as the frontend would emit it.
-			'tree' => $this->branch(new FinderMenu($context, $menu, expand: false), $cms),
+			'tree' => $this->branch(
+				new FinderMenu($context, $menu, expand: false, hidden: true),
+				$cms,
+			),
 			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
 			'notice' => $this->notice(),
@@ -358,18 +361,13 @@ final class Menus extends Panel
 		$item = $this->request->param('item', null);
 
 		if (is_string($item) && $item !== '') {
-			$data = json_decode((string) $this->itemRowFor($menu, $item)['data'], true);
+			$row = $this->itemRowFor($menu, $item);
+			$data = json_decode((string) $row['data'], true);
+			$values = $this->valuesFromData(is_array($data) ? $data : []);
+			// `hidden` is a column, not part of the `data` payload.
+			$values['hidden'] = (bool) $row['hidden'];
 
-			return $this->paneContext(
-				$cms,
-				$context,
-				$menu,
-				'edit',
-				$item,
-				null,
-				$this->valuesFromData(is_array($data) ? $data : []),
-				[],
-			);
+			return $this->paneContext($cms, $context, $menu, 'edit', $item, null, $values, []);
 		}
 
 		$add = $this->request->param('add', null);
@@ -461,6 +459,7 @@ final class Menus extends Panel
 				'id' => $entry->id(),
 				'type' => $entry->type(),
 				'title' => $title,
+				'hidden' => $entry->hidden(),
 				'href' => $entry->href(),
 				'children' => $children,
 				'descendants' =>
@@ -598,6 +597,7 @@ final class Menus extends Panel
 			'image' => trim((string) ($body['image'] ?? '')),
 			'levels' => (int) ($body['levels'] ?? 1),
 			'order' => trim((string) ($body['order'] ?? '')),
+			'hidden' => ($body['hidden'] ?? '') === '1',
 		];
 	}
 
@@ -622,6 +622,7 @@ final class Menus extends Panel
 			'image' => is_string($data['image'] ?? null) ? $data['image'] : '',
 			'levels' => max(1, (int) ($data['levels'] ?? 1)),
 			'order' => is_string($data['order'] ?? null) ? $data['order'] : '',
+			'hidden' => false,
 		];
 	}
 

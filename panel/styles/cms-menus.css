@@ -342,6 +342,16 @@
 		position: relative;
 	}
 
+	/* A hidden item is still fully editable, only visibly not part of the
+	   site — its subtree is hidden with it, so the whole branch recedes. */
+	& .menu-card.is-hidden {
+		opacity: 0.55;
+
+		& .text strong {
+			text-decoration: line-through;
+		}
+	}
+
 	& .menu-node.is-collapsed > .menu-children {
 		display: none;
 	}

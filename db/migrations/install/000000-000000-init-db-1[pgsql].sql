@@ -322,6 +322,9 @@ CREATE TABLE /*:cms.prefix:*/menu_items (
 	parent text,
 	menu text NOT NULL,
 	position integer NOT NULL,
+	-- Hidden items and their subtrees are skipped by `Finder\Menu` unless it
+	-- is asked for them; the panel editor asks, the frontend does not.
+	hidden boolean NOT NULL DEFAULT false,
 	data jsonb NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_menu_items PRIMARY KEY (item),
 	CONSTRAINT /*:cms.obj:*/fk_menu_items_menus FOREIGN KEY (menu)

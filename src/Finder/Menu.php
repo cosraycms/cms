@@ -22,16 +22,29 @@ class Menu implements Iterator
 	 * read time; the panel editor turns it off to show the items as
 	 * stored. Expansion needs the `$cms` finder entry point — without
 	 * one, `children` items render as nothing.
+	 *
+	 * `$hidden` includes hidden items; the panel editor asks for them so
+	 * it can show what the site does not.
 	 */
 	public function __construct(
 		protected readonly Context $context,
 		string $menu,
 		protected readonly ?Cms $cms = null,
 		bool $expand = true,
+		bool $hidden = false,
 	) {
-		$this->items = $this->makeTree(
-			$context->db->menus->get(['menu' => $menu])->all(),
-		);
+		$rows = $context->db->menus->get(['menu' => $menu])->all();
+
+		if (!$hidden) {
+			// Dropping the row is enough to drop its subtree: `makeTree` nests
+			// by parent, so children of a hidden item find no group to join.
+			$rows = array_values(array_filter(
+				$rows,
+				static fn(array $row): bool => !$row['hidden'],
+			));
+		}
+
+		$this->items = $this->makeTree($rows);
 
 		// An existing menu without items iterates nothing and renders as
 		// an empty string; only an unknown menu is an error.

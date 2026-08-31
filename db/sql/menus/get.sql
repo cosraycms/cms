@@ -6,6 +6,7 @@ WITH RECURSIVE nav AS (
 	   1 AS level,
 	   item,
 	   parent,
+	   hidden,
 	   data
    FROM
 	   /*:cms.prefix:*/menu_items
@@ -22,6 +23,7 @@ WITH RECURSIVE nav AS (
 	   nav.level + 1 AS level,
 	   m.item,
 	   m.parent,
+	   m.hidden,
 	   m.data
    FROM
 	   /*:cms.prefix:*/menu_items m
@@ -35,6 +37,7 @@ SELECT
 	path,
 	parent,
 	level,
+	hidden,
 	data,
 	-- Node items that store the linked node's uid resolve their target's
 	-- current localized paths at read time; legacy rows carry a numeric

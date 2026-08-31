@@ -14,6 +14,7 @@ $title = (string) $row['title'] !== '' ? (string) $row['title'] : __('menu:untit
 $href = $row['href'] ?? null;
 $children = (array) $row['children'];
 $descendants = (int) $row['descendants'];
+$hidden = (bool) $row['hidden'];
 
 // Literal ids so the i18n scanner sees every key.
 $typeLabel = match ((string) $row['type']) {
@@ -35,7 +36,10 @@ $confirm = $descendants === 0
 	);
 ?>
 <li class="menu-node" data-uid="<?= escape($id) ?>">
-	<div class="menu-card<?= $id === $selected ? ' is-selected' : '' ?>">
+	<div
+		class="menu-card<?= $id === $selected ? ' is-selected' : '' ?><?= $hidden
+	? ' is-hidden'
+	: '' ?>">
 		<?php if (count($children) > 0): ?>
 			<button
 				type="button"
@@ -48,9 +52,9 @@ $confirm = $descendants === 0
 		<a class="text" href="<?= escape($treeUrl) ?>?item=<?= escape(rawurlencode($id)) ?>">
 			<strong><?= escape($title) ?></strong>
 			<small>
-				<?= escape($typeLabel) ?><?= is_string($href) && $href !== ''
-	? ' · ' . escape($href)
-	: '' ?>
+				<?= $hidden ? escape(__('menu:item-hidden-mark')) . ' · ' : '' ?><?= escape(
+	$typeLabel,
+) ?><?= is_string($href) && $href !== '' ? ' · ' . escape($href) : '' ?>
 			</small>
 		</a>
 		<details class="kebab">

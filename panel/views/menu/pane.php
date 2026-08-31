@@ -197,6 +197,19 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			</label>
 		</div>
 
+		<div class="cms-field">
+			<label class="target">
+				<input
+					class="cms-checkbox"
+					type="checkbox"
+					name="hidden"
+					value="1"
+					<?= $values['hidden'] ? 'checked' : '' ?> />
+				<span><?= escape(__('menu:item-hidden')) ?></span>
+			</label>
+			<p class="help"><?= escape(__('menu:item-hidden-help')) ?></p>
+		</div>
+
 		<div
 			class="cms-field<?= isset($errors['image']) ? ' has-error' : '' ?>"
 			data-menu-section-hide="children"

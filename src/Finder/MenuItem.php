@@ -52,6 +52,12 @@ class MenuItem implements Iterator
 		return (string) $this->item['item'];
 	}
 
+	/** Whether the item is kept out of the site; only the panel sees these. */
+	public function hidden(): bool
+	{
+		return (bool) ($this->item['hidden'] ?? false);
+	}
+
 	/** The linked node uid of `node` and `children` items, null otherwise. */
 	public function node(): ?string
 	{

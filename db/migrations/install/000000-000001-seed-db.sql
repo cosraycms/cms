@@ -48,4 +48,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000024-menu-item-node-vocabulary[pgsql].sql', now()),
 	('000000-000025-drop-asset-kind.sql', now()),
 	('000000-000026-localize-menu-description[pgsql].sql', now()),
-	('000000-000027-menu-max-depth.sql', now());
+	('000000-000027-menu-max-depth.sql', now()),
+	('000000-000028-menu-item-visibility.sql', now());

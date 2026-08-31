@@ -3,6 +3,7 @@ SELECT
 	parent,
 	menu,
 	position,
+	hidden,
 	data
 FROM
 	/*:cms.prefix:*/menu_items

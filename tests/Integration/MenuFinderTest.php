@@ -141,6 +141,33 @@ final class MenuFinderTest extends IntegrationTestCase
 		$this->assertSame('', $menu->html('main-menu'));
 	}
 
+	public function testHiddenItemsTakeTheirSubtreeOutOfTheMenu(): void
+	{
+		$this->db()->execute(
+			"UPDATE cms.menu_items SET hidden = true WHERE item = 'about'",
+		)->run();
+		$context = $this->createContext();
+
+		$visible = new Menu($context, 'test-menu');
+		$this->assertNotContains('about', array_keys(iterator_to_array($visible)));
+		// The child rode along; nothing was orphaned to the root.
+		$this->assertNotContains('about.team', array_keys(iterator_to_array($visible)));
+		$this->assertStringNotContainsString('/about', $visible->html());
+
+		$all = new Menu($context, 'test-menu', hidden: true);
+		$items = iterator_to_array($all);
+		$this->assertArrayHasKey('about', $items);
+		$this->assertTrue($items['about']->hidden());
+		$this->assertFalse($items['home']->hidden());
+		$this->assertSame(
+			['about.team'],
+			array_map(
+				static fn($child) => $child->id(),
+				iterator_to_array($items['about']->children()),
+			),
+		);
+	}
+
 	public function testMenuIterationReturnsMenuItems(): void
 	{
 		$context = $this->createContext();
