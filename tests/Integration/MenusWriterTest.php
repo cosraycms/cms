@@ -16,6 +16,7 @@ use Cosray\Menus;
 use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\IntegrationTestCase;
+use PDOException;
 
 /**
  * @internal
@@ -166,6 +167,28 @@ final class MenusWriterTest extends IntegrationTestCase
 
 		$this->throws(RuntimeException::class, 'belongs to another menu');
 		$menus->add('writer-menu-b', $this->itemData('B', '/b'), parent: $parent);
+	}
+
+	public function testTheDatabaseRefusesACrossMenuParentOnItsOwn(): void
+	{
+		// The write API guards this, so the constraint is what covers raw SQL:
+		// imports, site migrations, and anything else bypassing `Menus`.
+		$menus = $this->menus();
+		$menus->create('writer-fk-a', ['zxx' => 'A']);
+		$menus->create('writer-fk-b', ['zxx' => 'B']);
+		$parent = $menus->add('writer-fk-a', $this->itemData('A', '/a'));
+
+		$this->throws(PDOException::class);
+		$this->db()->execute(
+			'INSERT INTO cms.menu_items (item, parent, menu, position, data)
+			VALUES (:item, :parent, :menu, 1, :data::jsonb)',
+			[
+				'item' => 'writer-fk-orphan',
+				'parent' => $parent,
+				'menu' => 'writer-fk-b',
+				'data' => json_encode($this->itemData('B', '/b')),
+			],
+		)->run();
 	}
 
 	public function testMoveReordersAndReparents(): void

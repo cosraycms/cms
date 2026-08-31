@@ -327,13 +327,17 @@ CREATE TABLE /*:cms.prefix:*/menu_items (
 	hidden boolean NOT NULL DEFAULT false,
 	data jsonb NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_menu_items PRIMARY KEY (item),
+	CONSTRAINT /*:cms.obj:*/uc_menu_items_item_menu UNIQUE (item, menu),
 	CONSTRAINT /*:cms.obj:*/fk_menu_items_menus FOREIGN KEY (menu)
 		REFERENCES /*:cms.prefix:*/menus (menu) ON UPDATE CASCADE,
-	CONSTRAINT /*:cms.obj:*/fk_menu_items_menu_items FOREIGN KEY (parent)
-		REFERENCES /*:cms.prefix:*/menu_items (item),
+	-- Composite, so a parent from another menu cannot be referenced at all.
+	CONSTRAINT /*:cms.obj:*/fk_menu_items_menu_items FOREIGN KEY (parent, menu)
+		REFERENCES /*:cms.prefix:*/menu_items (item, menu),
 	CONSTRAINT /*:cms.obj:*/ck_menu_items_item CHECK (char_length(item) <= 64),
 	CONSTRAINT /*:cms.obj:*/ck_menu_items_parent CHECK (char_length(parent) <= 64)
 );
+CREATE INDEX /*:cms.obj:*/ix_menu_items_tree
+	ON /*:cms.prefix:*/menu_items USING btree (menu, parent, position);
 
 
 CREATE TABLE /*:cms.prefix:*/topics (
