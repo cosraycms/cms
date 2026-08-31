@@ -1,5 +1,6 @@
 UPDATE /*:cms.prefix:*/menus
 SET
-	description = :description
+	description = :description,
+	max_depth = :maxDepth
 WHERE
 	menu = :menu;

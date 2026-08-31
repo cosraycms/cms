@@ -4,6 +4,7 @@
 SELECT
 	m.menu,
 	m.description,
+	m.max_depth AS "maxDepth",
 	count(i.item) AS items
 FROM
 	/*:cms.prefix:*/menus m
@@ -11,7 +12,8 @@ LEFT JOIN
 	/*:cms.prefix:*/menu_items i ON i.menu = m.menu
 GROUP BY
 	m.menu,
-	m.description
+	m.description,
+	m.max_depth
 ORDER BY
 <?php if (isset($order)) : ?>
 	<?= $order ?>,

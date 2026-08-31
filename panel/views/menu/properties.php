@@ -14,6 +14,7 @@ $handle = (string) $props['handle'];
 $description = (array) $props['description'];
 $locales = (array) $props['locales'];
 $defaultLocale = (string) $props['defaultLocale'];
+$maxDepth = $props['maxDepth'] === null ? null : (int) $props['maxDepth'];
 
 // Without the permission the handle is read-only chrome: the field is
 // disabled, so it never reaches the body, and the write ignores it anyway.
@@ -30,6 +31,27 @@ $manages = (bool) $manages;
 			'locales' => $locales,
 			'defaultLocale' => $defaultLocale,
 		]) ?>
+
+		<div class="cms-field<?= isset($errors['maxDepth']) ? ' has-error' : '' ?>">
+			<label class="label" for="menu-max-depth"><div><?= escape(
+				__('menu:max-depth'),
+			) ?></div></label>
+			<div class="control">
+				<input
+					class="cms-input"
+					id="menu-max-depth"
+					name="maxDepth"
+					type="number"
+					min="1"
+					max="10"
+					placeholder="∞"
+					value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
+					<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
+			</div>
+			<?php if (isset($errors['maxDepth'])): ?>
+				<p class="error"><?= escape((string) $errors['maxDepth']) ?></p>
+			<?php endif ?>
+		</div>
 
 		<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
 			<label class="label" for="menu-handle"><div><?= escape(__('menu:handle')) ?></div></label>

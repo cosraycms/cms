@@ -306,8 +306,14 @@ CREATE TABLE /*:cms.prefix:*/menus (
 	-- like every other label in the schema. Per-variant length is validated in
 	-- the panel, not here.
 	description jsonb NOT NULL,
+	-- How deep the tree may be built; NULL is unlimited. An authoring
+	-- constraint, enforced by `Cosray\Menus` on every write — a template may
+	-- still render fewer levels than the menu allows.
+	max_depth integer,
 	CONSTRAINT /*:cms.obj:*/pk_menus PRIMARY KEY (menu),
-	CONSTRAINT /*:cms.obj:*/ck_menus_menu CHECK (char_length(menu) <= 32)
+	CONSTRAINT /*:cms.obj:*/ck_menus_menu CHECK (char_length(menu) <= 32),
+	CONSTRAINT /*:cms.obj:*/ck_menus_max_depth
+		CHECK (max_depth IS NULL OR max_depth BETWEEN 1 AND 10)
 );
 
 

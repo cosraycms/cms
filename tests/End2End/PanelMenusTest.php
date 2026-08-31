@@ -42,18 +42,33 @@ final class PanelMenusTest extends End2EndTestCase
 		);
 	}
 
-	private function createItem(string $menu, string $item, int $position = 1): void
-	{
+	private function createItem(
+		string $menu,
+		string $item,
+		int $position = 1,
+		?string $parent = null,
+	): void {
 		$this->db()->execute(
 			'INSERT INTO cms.menu_items (item, parent, menu, position, data)
-			VALUES (:item, NULL, :menu, :position, :data::jsonb)',
+			VALUES (:item, :parent, :menu, :position, :data::jsonb)',
 			[
 				'item' => $item,
+				'parent' => $parent,
 				'menu' => $menu,
 				'position' => $position,
 				'data' => json_encode(['type' => 'url', 'title' => ['en' => $item], 'path' => ['en' => '/x']]),
 			],
 		)->run();
+	}
+
+	private function storedMaxDepth(string $handle): ?int
+	{
+		$value = $this->db()->execute(
+			'SELECT max_depth FROM cms.menus WHERE menu = :menu',
+			['menu' => $handle],
+		)->one()['max_depth'];
+
+		return $value === null ? null : (int) $value;
 	}
 
 	private function menuHandles(): array
@@ -163,6 +178,61 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('name="description[en]"', $html);
 		$this->assertStringContainsString('name="description[de]"', $html);
 		$this->assertStringContainsString('value="Hauptnavigation"', $html);
+	}
+
+	public function testTheMaxDepthRoundTripsThroughTheForm(): void
+	{
+		$this->createMenu('deep', 'Deep menu');
+
+		$saved = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '2'],
+		]);
+		$this->assertResponseStatus(303, $saved);
+		$this->assertSame(2, $this->storedMaxDepth('deep'));
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/deep'));
+		$this->assertMatchesRegularExpression('/id="menu-max-depth"[^>]*value="2"/s', $html);
+
+		// An empty field is the unlimited case, not a zero.
+		$cleared = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => ''],
+		]);
+		$this->assertResponseStatus(303, $cleared);
+		$this->assertNull($this->storedMaxDepth('deep'));
+	}
+
+	public function testAnOutOfRangeMaxDepthComesBackWithItsError(): void
+	{
+		$this->createMenu('deep', 'Deep menu');
+
+		$response = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '99'],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'The maximum depth must be between 1 and 10.',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertNull($this->storedMaxDepth('deep'));
+	}
+
+	public function testALimitShallowerThanTheTreeIsRefused(): void
+	{
+		$this->createMenu('deep', 'Deep menu');
+		$this->createItem('deep', 'menu-e2e-parent');
+		$this->createItem('deep', 'menu-e2e-child', 1, 'menu-e2e-parent');
+
+		$response = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '1'],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'The tree is already deeper than this limit.',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertNull($this->storedMaxDepth('deep'));
 	}
 
 	public function testAMenuWithoutAnyDescriptionStillRenders(): void

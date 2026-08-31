@@ -251,6 +251,62 @@ final class MenusWriterTest extends IntegrationTestCase
 		$menus->place($parent, $child, 0);
 	}
 
+	public function testAddRejectsAnItemPastTheMaxDepth(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-depth-add', ['zxx' => 'Depth'], 2);
+		$parent = $menus->add('writer-depth-add', $this->itemData('Parent', '/p'));
+		$child = $menus->add('writer-depth-add', $this->itemData('Child', '/c'), parent: $parent);
+
+		$this->throws(RuntimeException::class, 'allows only 2 levels');
+		$menus->add('writer-depth-add', $this->itemData('Deep', '/d'), parent: $child);
+	}
+
+	public function testAMoveIsMeasuredByTheWholeSubtreesHeight(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-depth-move', ['zxx' => 'Depth move'], 2);
+		$host = $menus->add('writer-depth-move', $this->itemData('Host', '/h'));
+		$branch = $menus->add('writer-depth-move', $this->itemData('Branch', '/b'));
+		$menus->add('writer-depth-move', $this->itemData('Leaf', '/l'), parent: $branch);
+
+		// The branch itself would land on level 2, but it carries a child that
+		// would end up on level 3.
+		$this->throws(RuntimeException::class, 'allows only 2 levels');
+		$menus->place($branch, $host, 0);
+	}
+
+	public function testAnUnlimitedMenuTakesAnyDepth(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-depth-free', ['zxx' => 'No limit']);
+		$parent = $menus->add('writer-depth-free', $this->itemData('One', '/1'));
+		$child = $menus->add('writer-depth-free', $this->itemData('Two', '/2'), parent: $parent);
+		$grand = $menus->add('writer-depth-free', $this->itemData('Three', '/3'), parent: $child);
+
+		$this->assertSame(
+			'writer-depth-free',
+			$this->db()->execute(
+				'SELECT menu FROM cms.menu_items WHERE item = :item',
+				['item' => $grand],
+			)->one()['menu'],
+		);
+	}
+
+	public function testTheLimitCannotBeSetBelowTheExistingTree(): void
+	{
+		$menus = $this->menus();
+		$menus->create('writer-depth-late', ['zxx' => 'Late limit']);
+		$parent = $menus->add('writer-depth-late', $this->itemData('Parent', '/p'));
+		$menus->add('writer-depth-late', $this->itemData('Child', '/c'), parent: $parent);
+
+		// Two levels is fine, one would leave the limit inert.
+		$menus->update('writer-depth-late', ['zxx' => 'Late limit'], 2);
+
+		$this->throws(RuntimeException::class, 'is 2 levels deep and cannot be limited to 1');
+		$menus->update('writer-depth-late', ['zxx' => 'Late limit'], 1);
+	}
+
 	public function testMoveRejectsCycles(): void
 	{
 		$menus = $this->menus();

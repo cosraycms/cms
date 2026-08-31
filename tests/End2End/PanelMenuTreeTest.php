@@ -318,6 +318,28 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertSame(['cycle-child'], $this->order('cycle-parent'));
 	}
 
+	public function testAMovePastTheMaxDepthIsRejected(): void
+	{
+		$this->db()->execute(
+			"UPDATE cms.menus SET max_depth = 2 WHERE menu = 'tree-menu'",
+		)->run();
+		$this->createItem('depth-host');
+		$this->createItem('depth-branch');
+		$this->createItem('depth-leaf', 'depth-branch');
+
+		// The branch would land on level 2, but its leaf on level 3.
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/depth-branch/move', [
+			'body' => ['parent' => 'depth-host', 'index' => 0],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=move-rejected',
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertSame([], $this->order('depth-host'));
+	}
+
 	public function testDeleteRemovesTheSubtree(): void
 	{
 		$this->createItem('doom-root');

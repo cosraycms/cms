@@ -39,7 +39,10 @@ final class Menus extends Panel
 	/** Handles that would shadow a literal route segment. */
 	private const array RESERVED_HANDLES = ['create'];
 
-	/** @var ?list<array{menu: string, description: array<string, string>, label: string, items: int, url: string}> */
+	/** Mirrors the `ck_menus_max_depth` database constraint. */
+	private const int MAX_DEPTH_LIMIT = 10;
+
+	/** @var ?list<array{menu: string, description: array<string, string>, label: string, maxDepth: ?int, items: int, url: string}> */
 	private ?array $menuRows = null;
 
 	public function __construct(
@@ -106,20 +109,20 @@ final class Menus extends Panel
 	#[Permission('manage-menus')]
 	public function create(Context $context): array
 	{
-		return $this->form($context, '', [], []);
+		return $this->form($context, '', [], null, []);
 	}
 
 	#[Permission('manage-menus')]
 	public function store(Context $context, Factory $factory): array|Response
 	{
-		[$handle, $description] = $this->submitted($context);
-		$errors = $this->validate($handle, $description, null);
+		[$handle, $description, $maxDepth] = $this->submitted($context);
+		$errors = $this->validate($handle, $description, $maxDepth, null);
 
 		if ($errors !== []) {
-			return $this->form($context, $handle, $description, $errors);
+			return $this->form($context, $handle, $description, $maxDepth, $errors);
 		}
 
-		$this->menus->create($handle, $description);
+		$this->menus->create($handle, $description, $maxDepth);
 
 		return $this->redirectToMenu($factory, $handle, ['notice' => 'created']);
 	}
@@ -132,7 +135,7 @@ final class Menus extends Panel
 		string $menu,
 	): array|Response {
 		$this->row($menu);
-		[$handle, $description] = $this->submitted($context);
+		[$handle, $description, $maxDepth] = $this->submitted($context);
 
 		// The field is disabled without the permission, so nothing legitimate
 		// posts a handle here; ignore whatever does.
@@ -140,17 +143,25 @@ final class Menus extends Panel
 			$handle = $menu;
 		}
 
-		$errors = $this->validate($handle, $description, $menu);
+		$errors = $this->validate($handle, $description, $maxDepth, $menu);
+
+		if ($errors === []) {
+			try {
+				$this->menus->update($menu, $description, $maxDepth);
+			} catch (RuntimeException) {
+				// The tree is already deeper than the limit being set.
+				$errors['maxDepth'] = __('menu:error-max-depth-shallow');
+			}
+		}
 
 		if ($errors !== []) {
 			return $this->treeContext($cms, $context, $menu, null, [
 				'handle' => $handle,
 				'description' => $description,
+				'maxDepth' => $maxDepth,
 				'errors' => $errors,
 			]);
 		}
-
-		$this->menus->update($menu, $description);
 
 		if ($handle !== $menu) {
 			$this->menus->rename($menu, $handle);
@@ -292,7 +303,7 @@ final class Menus extends Panel
 	}
 
 	/**
-	 * @param ?array{handle: string, description: array<string, string>, errors: array<string, string>} $props
+	 * @param ?array{handle: string, description: array<string, string>, maxDepth: ?int, errors: array<string, string>} $props
 	 *   the submitted menu fields when a save came back with errors, the
 	 *   stored ones otherwise
 	 */
@@ -314,6 +325,7 @@ final class Menus extends Panel
 					$props ?? [
 						'handle' => $menu,
 						'description' => $row['description'],
+						'maxDepth' => $row['maxDepth'],
 						'errors' => [],
 					]
 				),
@@ -678,6 +690,7 @@ final class Menus extends Panel
 		Context $context,
 		string $handle,
 		array $description,
+		?int $maxDepth,
 		array $errors,
 	): array {
 		return $this->context([
@@ -685,6 +698,7 @@ final class Menus extends Panel
 			'backUrl' => $this->base(),
 			'handle' => $handle,
 			'description' => $description,
+			'maxDepth' => $maxDepth,
 			'errors' => $errors,
 			'locales' => $this->localeList($context),
 			'defaultLocale' => $context->locales()->getDefault()->id,
@@ -706,8 +720,12 @@ final class Menus extends Panel
 	 * @param array<string, string> $description
 	 * @return array<string, string>
 	 */
-	private function validate(string $handle, array $description, ?string $current): array
-	{
+	private function validate(
+		string $handle,
+		array $description,
+		?int $maxDepth,
+		?string $current,
+	): array {
 		$errors = [];
 
 		if (preg_match(self::HANDLE_PATTERN, $handle) !== 1) {
@@ -726,18 +744,26 @@ final class Menus extends Panel
 			$errors['description'] = __('menu:error-description');
 		}
 
+		if ($maxDepth !== null && ($maxDepth < 1 || $maxDepth > self::MAX_DEPTH_LIMIT)) {
+			$errors['maxDepth'] = __('menu:error-max-depth');
+		}
+
 		return $errors;
 	}
 
-	/** @return array{0: string, 1: array<string, string>} */
+	/** @return array{0: string, 1: array<string, string>, 2: ?int} */
 	private function submitted(Context $context): array
 	{
 		$data = $this->formData();
 		$handle = $data['menu'] ?? null;
+		$depth = is_string($data['maxDepth'] ?? null) ? trim($data['maxDepth']) : '';
 
 		return [
 			is_string($handle) ? trim($handle) : '',
 			$this->localeMap($context, $data['description'] ?? null),
+			// An empty field means unlimited; anything unparsable falls to 0,
+			// which `validate()` then rejects rather than silently dropping.
+			$depth === '' ? null : (int) $depth,
 		];
 	}
 
@@ -781,7 +807,7 @@ final class Menus extends Panel
 	 * carry the description both as the stored map, for the edit form,
 	 * and resolved to `label` for display.
 	 *
-	 * @return list<array{menu: string, description: array<string, string>, label: string, items: int, url: string}>
+	 * @return list<array{menu: string, description: array<string, string>, label: string, maxDepth: ?int, items: int, url: string}>
 	 */
 	private function menuRows(): array
 	{
@@ -799,6 +825,7 @@ final class Menus extends Panel
 				'menu' => $menu,
 				'description' => $description,
 				'label' => $this->label($description),
+				'maxDepth' => $row['maxDepth'] === null ? null : (int) $row['maxDepth'],
 				'items' => (int) $row['items'],
 				'url' => $this->url($menu),
 			];

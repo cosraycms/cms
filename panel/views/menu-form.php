@@ -13,6 +13,8 @@ $handle = (string) $handle;
 $description = (array) $this->unwrap($description);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+$maxDepth = $this->unwrap($maxDepth);
+$maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 ?>
 
 <div class="page cms-menus">
@@ -60,6 +62,28 @@ $defaultLocale = (string) $defaultLocale;
 					'locales' => $locales,
 					'defaultLocale' => $defaultLocale,
 				]) ?>
+
+				<div class="cms-field<?= isset($errors['maxDepth']) ? ' has-error' : '' ?>">
+					<label class="label" for="menu-max-depth"><div><?= escape(
+						__('menu:max-depth'),
+					) ?></div></label>
+					<div class="control">
+						<input
+							class="cms-input"
+							id="menu-max-depth"
+							name="maxDepth"
+							type="number"
+							min="1"
+							max="10"
+							placeholder="∞"
+							value="<?= escape($maxDepth === null ? '' : (string) $maxDepth) ?>"
+							<?= isset($errors['maxDepth']) ? 'aria-invalid="true"' : '' ?> />
+					</div>
+					<p class="help"><?= escape(__('menu:max-depth-help')) ?></p>
+					<?php if (isset($errors['maxDepth'])): ?>
+						<p class="error"><?= escape((string) $errors['maxDepth']) ?></p>
+					<?php endif ?>
+				</div>
 
 				<footer class="form-actions">
 					<a class="cms-button secondary" href="<?= escape($backUrl) ?>"><?= escape(

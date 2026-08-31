@@ -32,21 +32,39 @@ final class Menus
 		$this->sync = new Sync($db);
 	}
 
-	/** @param array<string, string> $description the description per locale */
-	public function create(string $menu, array $description): void
+	/**
+	 * @param array<string, string> $description the description per locale
+	 * @param ?int $maxDepth how deep the tree may be built, null for unlimited
+	 */
+	public function create(string $menu, array $description, ?int $maxDepth = null): void
 	{
 		$this->db->menus->create([
 			'menu' => $menu,
 			'description' => json_encode($description),
+			'maxDepth' => $maxDepth,
 		])->run();
 	}
 
-	/** @param array<string, string> $description the description per locale */
-	public function update(string $menu, array $description): void
+	/**
+	 * @param array<string, string> $description the description per locale
+	 * @param ?int $maxDepth how deep the tree may be built, null for unlimited
+	 */
+	public function update(string $menu, array $description, ?int $maxDepth = null): void
 	{
+		// A limit shallower than the tree would be inert: nothing rejects the
+		// levels that already exist, so refuse it instead of pretending.
+		$height = (int) $this->db->menus->menuHeight(['menu' => $menu])->one()['height'];
+
+		if ($maxDepth !== null && $height > $maxDepth) {
+			throw new RuntimeException(
+				"Menu '{$menu}' is {$height} levels deep and cannot be limited to {$maxDepth}",
+			);
+		}
+
 		$this->db->menus->update([
 			'menu' => $menu,
 			'description' => json_encode($description),
+			'maxDepth' => $maxDepth,
 		])->run();
 	}
 
@@ -101,6 +119,9 @@ final class Menus
 			throw new RuntimeException('A menu item id must not contain a dot');
 		}
 
+		// A fresh item has no children yet, so it adds exactly one level.
+		$this->assertDepth($menu, $parent, 1);
+
 		$item ??= $this->uid->generate();
 
 		$this->db->menus->createItem([
@@ -134,7 +155,7 @@ final class Menus
 	public function move(string $item, ?string $parent, ?int $position = null): void
 	{
 		$row = $this->itemRow($item);
-		$this->assertParent($item, (string) $row['menu'], $parent);
+		$this->assertMove($item, (string) $row['menu'], $parent);
 
 		$this->db->menus->moveItem([
 			'item' => $item,
@@ -152,7 +173,7 @@ final class Menus
 	public function place(string $item, ?string $parent, int $index): void
 	{
 		$row = $this->itemRow($item);
-		$this->assertParent($item, (string) $row['menu'], $parent);
+		$this->assertMove($item, (string) $row['menu'], $parent);
 
 		$siblings = array_column(
 			$this->db->menus->siblings(['menu' => $row['menu'], 'parent' => $parent])->all(),
@@ -218,28 +239,65 @@ final class Menus
 		$this->sync->replace('menu', $item, ['assets' => $assets, 'nodes' => []]);
 	}
 
-	private function assertParent(string $item, string $menu, ?string $parent): void
+	/**
+	 * Every precondition a move has to satisfy: the target parent belongs to
+	 * the same menu, the move does not create a cycle, and the item's whole
+	 * subtree still fits within the menu's `max_depth`.
+	 */
+	private function assertMove(string $item, string $menu, ?string $parent): void
 	{
-		if ($parent === null) {
+		if ($parent !== null) {
+			if ($this->itemRow($parent)['menu'] !== $menu) {
+				throw new RuntimeException(
+					"Parent item '{$parent}' belongs to another menu",
+				);
+			}
+
+			$ancestors = array_column(
+				$this->db->menus->ancestors(['item' => $parent])->all(),
+				'item',
+			);
+
+			if (in_array($item, $ancestors, true)) {
+				throw new RuntimeException(
+					"Cannot move '{$item}' below its own descendant '{$parent}'",
+				);
+			}
+		}
+
+		// A move carries the item's descendants along, so the subtree's height
+		// decides whether it fits — not the item alone.
+		$this->assertDepth($menu, $parent, $this->itemHeight($item));
+	}
+
+	/**
+	 * Rejects placing a subtree `$height` levels tall below `$parent` when
+	 * that would push its deepest node past the menu's `max_depth`.
+	 */
+	private function assertDepth(string $menu, ?string $parent, int $height): void
+	{
+		$max = $this->db->menus->maxDepth(['menu' => $menu])->one()['maxDepth'];
+
+		if ($max === null) {
 			return;
 		}
 
-		if ($this->itemRow($parent)['menu'] !== $menu) {
+		// `ancestors` returns the parent plus everything above it, which is
+		// exactly the level the parent sits on; the root is level 0.
+		$depth = $parent === null
+			? 0
+			: count($this->db->menus->ancestors(['item' => $parent])->all());
+
+		if (($depth + $height) > (int) $max) {
 			throw new RuntimeException(
-				"Parent item '{$parent}' belongs to another menu",
+				"Menu '{$menu}' allows only {$max} levels",
 			);
 		}
+	}
 
-		$ancestors = array_column(
-			$this->db->menus->ancestors(['item' => $parent])->all(),
-			'item',
-		);
-
-		if (in_array($item, $ancestors, true)) {
-			throw new RuntimeException(
-				"Cannot move '{$item}' below its own descendant '{$parent}'",
-			);
-		}
+	private function itemHeight(string $item): int
+	{
+		return (int) $this->db->menus->itemHeight(['item' => $item])->one()['height'];
 	}
 
 	private function itemRow(string $item): array
