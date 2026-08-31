@@ -7,6 +7,7 @@ import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
 import { install as installErrors } from './behaviors/errors';
 import { install as installMenu } from './behaviors/menu';
+import { install as installMenuTree } from './behaviors/menu-tree';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
@@ -105,6 +106,7 @@ cleanups.push(
 	installErrors(),
 	installBulk(),
 	installMenu(),
+	installMenuTree(),
 );
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 

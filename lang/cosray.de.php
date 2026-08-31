@@ -146,7 +146,6 @@ return [
 		'menu:cancel' => 'Abbrechen',
 		'menu:children-help' => 'Die Unterseiten der verknüpften Seite erscheinen hier automatisch.',
 		'menu:children-of' => 'Unterseiten von „:title“',
-		'menu:collapse' => 'Untereinträge von :title umschalten',
 		'menu:confirm-delete' => ['Menü „:menu“ löschen? Es enthält :count Eintrag.', 'Menü „:menu“ löschen? Es enthält :count Einträge.'],
 		'menu:confirm-delete-empty' => 'Menü „:menu“ löschen?',
 		'menu:confirm-item-delete' => '„:title“ löschen?',

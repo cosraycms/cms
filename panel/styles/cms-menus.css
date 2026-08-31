@@ -340,6 +340,19 @@
 
 	& .menu-node {
 		position: relative;
+		outline: none;
+	}
+
+	/* The row is the focusable thing, but the card is what reads as a row,
+	   so the ring goes there. `:focus-visible` on the row would not reach
+	   the card, hence the descendant selector on plain focus. */
+	& .menu-node:focus > .menu-card {
+		outline: 2px solid var(--cms-color-accent);
+		outline-offset: 1px;
+	}
+
+	& .menu-tree:focus {
+		outline: none;
 	}
 
 	/* The notice keeps its undo action on the same line as its message: a

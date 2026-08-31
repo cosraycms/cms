@@ -146,7 +146,6 @@ return [
 		'menu:cancel' => 'Cancel',
 		'menu:children-help' => 'The children of the linked page render here automatically.',
 		'menu:children-of' => 'Children of ":title"',
-		'menu:collapse' => 'Toggle children of :title',
 		'menu:confirm-delete' => ['Delete menu ":menu"? It contains :count item.', 'Delete menu ":menu"? It contains :count items.'],
 		'menu:confirm-delete-empty' => 'Delete menu ":menu"?',
 		'menu:confirm-item-delete' => 'Delete ":title"?',

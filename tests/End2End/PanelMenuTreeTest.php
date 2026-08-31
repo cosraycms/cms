@@ -350,6 +350,30 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertSame([], $this->order('out-parent'));
 	}
 
+	public function testTheTreeRendersAsAnAriaTree(): void
+	{
+		$this->createItem('aria-parent', null, 1);
+		$this->createItem('aria-child', 'aria-parent', 1);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+
+		$this->assertStringContainsString('role="tree"', $html);
+		$this->assertStringContainsString('data-menu-tree="tree-menu"', $html);
+		$this->assertStringContainsString('role="group"', $html);
+		// A row with children announces its state and its depth.
+		$this->assertMatchesRegularExpression(
+			'/aria-level="1"\s+aria-expanded="true"[\s\S]{0,200}?data-uid="aria-parent"/',
+			$html,
+		);
+		// A leaf claims no expanded state.
+		$this->assertMatchesRegularExpression(
+			'/aria-level="2"\s+tabindex="-1"[\s\S]{0,200}?data-uid="aria-child"/',
+			$html,
+		);
+		// The card's own controls leave the tab order; the row is the stop.
+		$this->assertMatchesRegularExpression('/<a\s+class="text"\s+tabindex="-1"/', $html);
+	}
+
 	public function testAMoveOffersToPutTheItemBack(): void
 	{
 		$this->createItem('undo-parent', null, 1);

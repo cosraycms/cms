@@ -16,6 +16,8 @@ $children = (array) $row['children'];
 $descendants = (int) $row['descendants'];
 $hidden = (bool) $row['hidden'];
 $nested = (bool) $row['nested'];
+$level = (int) $row['level'];
+$hasChildren = count($children) > 0;
 
 // Literal ids so the i18n scanner sees every key.
 $typeLabel = match ((string) $row['type']) {
@@ -36,21 +38,32 @@ $confirm = $descendants === 0
 		['title' => $title],
 	);
 ?>
-<li class="menu-node" data-uid="<?= escape($id) ?>">
+<li
+	class="menu-node"
+	role="treeitem"
+	aria-level="<?= escape((string) $level) ?>"
+	<?= $hasChildren ? 'aria-expanded="true"' : '' ?>
+	tabindex="-1"
+	data-uid="<?= escape($id) ?>">
 	<div
 		class="menu-card<?= $id === $selected ? ' is-selected' : '' ?><?= $hidden
 	? ' is-hidden'
 	: '' ?>">
-		<?php if (count($children) > 0): ?>
+		<?php // The row owns `aria-expanded`, so the toggle is a pointer
+		// affordance only; the arrow keys drive it for everyone else. ?>
+		<?php if ($hasChildren): ?>
 			<button
 				type="button"
 				class="collapse"
-				data-menu-collapse
-				aria-expanded="true"
-				aria-label="<?= escape(__('menu:collapse', ['title' => $title])) ?>"></button>
+				tabindex="-1"
+				aria-hidden="true"
+				data-menu-collapse></button>
 		<?php endif ?>
 		<span class="grip" data-menu-grip aria-hidden="true"></span>
-		<a class="text" href="<?= escape($treeUrl) ?>?item=<?= escape(rawurlencode($id)) ?>">
+		<a
+			class="text"
+			tabindex="-1"
+			href="<?= escape($treeUrl) ?>?item=<?= escape(rawurlencode($id)) ?>">
 			<strong><?= escape($title) ?></strong>
 			<small>
 				<?= $hidden ? escape(__('menu:item-hidden-mark')) . ' · ' : '' ?><?= escape(
@@ -59,7 +72,9 @@ $confirm = $descendants === 0
 			</small>
 		</a>
 		<details class="kebab">
-			<summary aria-label="<?= escape(__('menu:item-actions')) ?>"></summary>
+			<summary tabindex="-1" aria-label="<?= escape(
+				__('menu:item-actions'),
+			) ?>"></summary>
 			<div class="kebab-menu">
 				<a href="<?= escape($treeUrl) ?>?add=<?= escape(rawurlencode($id)) ?>"><?= escape(
 					__('menu:add-child'),
@@ -110,7 +125,8 @@ $confirm = $descendants === 0
 	<?php // Rendered even without children: every card owns a drop zone
 	// for the drag behavior, marked `no-children` while it is empty. ?>
 	<ul
-		class="menu-children<?= count($children) === 0 ? ' no-children' : '' ?>"
+		class="menu-children<?= $hasChildren ? '' : ' no-children' ?>"
+		role="<?= $hasChildren ? 'group' : 'presentation' ?>"
 		data-menu-list
 		data-parent="<?= escape($id) ?>">
 		<?php foreach ($children as $child): ?>

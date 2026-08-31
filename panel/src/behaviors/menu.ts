@@ -1,6 +1,9 @@
-// Menus area behavior: tree collapse, drag-and-drop reordering, the
-// item form's type sections, and the search pickers for nodes and
-// assets. Everything event-driven is a document-level delegated
+// Menus area behavior: drag-and-drop reordering, the item form's type
+// sections, and the search pickers for nodes and assets. The tree's own
+// focus and collapse model lives in `menu-tree`, because a roving
+// tabindex has nothing to do with a search box.
+//
+// Everything event-driven is a document-level delegated
 // listener, so htmx swaps cannot orphan it; the Sortable instances are
 // re-scanned after every swap instead. The pickers talk to the JSON
 // search endpoints the element carries in `data-menu-picker-url`;
@@ -90,25 +93,6 @@ export function submitMove(
 	}
 
 	form.requestSubmit();
-}
-
-function collapse(target: Element): boolean {
-	const toggle = target.closest('[data-menu-collapse]');
-
-	if (!(toggle instanceof HTMLElement)) {
-		return false;
-	}
-
-	const node = toggle.closest('.menu-node');
-
-	if (!node) {
-		return false;
-	}
-
-	const collapsed = node.classList.toggle('is-collapsed');
-	toggle.setAttribute('aria-expanded', String(!collapsed));
-
-	return true;
 }
 
 function picker(el: Element): HTMLElement | null {
@@ -292,10 +276,6 @@ function onClick(event: Event): void {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
-		return;
-	}
-
-	if (collapse(target)) {
 		return;
 	}
 

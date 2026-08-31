@@ -68,7 +68,17 @@ $urls = (array) $this->unwrap($urls);
 						<input type="hidden" name="parent" value="" />
 						<input type="hidden" name="index" value="" />
 					</form>
-					<ul class="menu-tree" data-menu-list data-parent="">
+					<?php // ARIA `tree`: the list is one tab stop, exactly one row
+					// carries tabindex 0, and the behavior moves it. That is
+					// what frees Tab and Shift+Tab for indenting. ?>
+					<ul
+						class="menu-tree"
+						role="tree"
+						tabindex="-1"
+						aria-label="<?= escape($description) ?>"
+						data-menu-tree="<?= escape($menu) ?>"
+						data-menu-list
+						data-parent="">
 						<?php foreach ($tree as $row): ?>
 							<?php $this->insert('menu/node', [
 								'row' => $row,

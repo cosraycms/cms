@@ -52,21 +52,6 @@ afterEach(() => {
 	vi.useRealTimers();
 });
 
-describe('tree collapse', () => {
-	it('toggles the children and the aria state', () => {
-		const node = document.querySelector('.menu-node[data-uid="parent"]')!;
-		const toggle = node.querySelector('[data-menu-collapse]')!;
-
-		click(toggle);
-		expect(node.classList.contains('is-collapsed')).toBe(true);
-		expect(toggle.getAttribute('aria-expanded')).toBe('false');
-
-		click(toggle);
-		expect(node.classList.contains('is-collapsed')).toBe(false);
-		expect(toggle.getAttribute('aria-expanded')).toBe('true');
-	});
-});
-
 describe('drag submit', () => {
 	it('fills the drag form from the drop and submits it', () => {
 		const form = document.querySelector<HTMLFormElement>('#menu-drag')!;
