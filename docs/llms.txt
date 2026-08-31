@@ -495,12 +495,32 @@ Menus:
   node's materialized title the same way; a stored title overrides
 - `Cosray\Menus` is the write API: `create`/`update`/`delete` for menus,
   `add`/`updateItem`/`move`/`place`/`remove` for items; item ids are
-  generated uids (dots rejected), parents must belong to the same menu,
-  positions append per sibling group, moves reject cycles, removals
-  delete the subtree, and every write syncs the item's `image`/`asset`
-  uids into `asset_references`. `place($item, $parent, $index)` pins an
-  exact zero-based index and renumbers the sibling group, where `move`
-  keeps loose sort-key positions
+  generated uids (dots rejected), parents must belong to the same menu
+  (a composite FK enforces it in the database too), positions append per
+  sibling group, moves reject cycles, removals delete the subtree, and
+  every write syncs the item's `image`/`asset` uids into
+  `asset_references` and its linked node into `node_references`.
+  `place($item, $parent, $index)` pins an exact zero-based index and
+  renumbers the sibling group, where `move` keeps loose sort-key
+  positions
+- `menus.description` is a jsonb locale map (`{locale: text}`, or
+  `{zxx: text}` when not language-specific), like `nodes.title` and
+  `topics.name`. `Menus::create()`/`update()` take that map; the panel
+  edits it with locale tabs and orders the menu list by it through
+  `Title\Sort::expression()`
+- `menus.max_depth` caps how deep the tree may be built (NULL is
+  unlimited, the default). An authoring constraint, not a rendering one
+  — a template may still output fewer levels. `Menus` enforces it on
+  `add`, `move` and `place`, measuring the moved item's whole subtree
+  height, and refuses a limit shallower than the tree already is
+- `menu_items.hidden` takes an item out of the site without deleting
+  it. `Finder\Menu` skips hidden rows before nesting, so a hidden parent
+  takes its subtree with it; `new Finder\Menu($context, $menu, hidden:
+  true)` includes them, which is what the panel editor does
+- both menu tables carry `created`/`changed`/`creator`/`editor`. Every
+  write method takes an optional `?Actor` and falls back to
+  `Actor::system()`, so migrations and imports record the system user
+  rather than nothing. There is no menu history table
 
 Node wrapper hierarchy helper:
 
