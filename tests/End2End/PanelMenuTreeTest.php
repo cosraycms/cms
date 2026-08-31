@@ -318,6 +318,98 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertSame(['cycle-child'], $this->order('cycle-parent'));
 	}
 
+	public function testIndentMakesTheItemAChildOfTheSiblingAboveIt(): void
+	{
+		$this->createItem('ind-first', null, 1);
+		$this->createItem('ind-child', 'ind-first', 1);
+		$this->createItem('ind-second', null, 2);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/ind-second/move', [
+			'body' => ['direction' => 'in'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame(['ind-first'], $this->order());
+		// Appended after the children the new parent already had.
+		$this->assertSame(['ind-child', 'ind-second'], $this->order('ind-first'));
+	}
+
+	public function testOutdentLiftsTheItemNextToItsFormerParent(): void
+	{
+		$this->createItem('out-parent', null, 1);
+		$this->createItem('out-child', 'out-parent', 1);
+		$this->createItem('out-after', null, 2);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/out-child/move', [
+			'body' => ['direction' => 'out'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		// Right after the parent it came from, ahead of what followed it.
+		$this->assertSame(['out-parent', 'out-child', 'out-after'], $this->order());
+		$this->assertSame([], $this->order('out-parent'));
+	}
+
+	public function testTheTreeDisablesUndefinedMoves(): void
+	{
+		$this->createItem('edge-first', null, 1);
+		$this->createItem('edge-child', 'edge-first', 1);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+
+		// A first root item can neither move up nor indent, and has no parent
+		// to outdent from; its child can do both but not move among siblings.
+		$this->assertMatchesRegularExpression(
+			'/value="in"[^>]*\/>\s*<button type="submit" disabled>/s',
+			$html,
+		);
+		$this->assertMatchesRegularExpression(
+			'/value="out"[^>]*\/>\s*<button type="submit" disabled>/s',
+			$html,
+		);
+		$this->assertStringContainsString('Indent', $html);
+		$this->assertStringContainsString('Outdent', $html);
+	}
+
+	public function testAnUndefinedMoveIsRejectedRatherThanGuessed(): void
+	{
+		$this->createItem('lone-root');
+
+		foreach (['in', 'out'] as $direction) {
+			$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/lone-root/move', [
+				'body' => ['direction' => $direction],
+			]);
+
+			$this->assertResponseStatus(303, $response);
+			$this->assertStringContainsString(
+				'notice=move-rejected',
+				$response->getHeaderLine('Location'),
+			);
+		}
+
+		$this->assertSame(['lone-root'], $this->order());
+	}
+
+	public function testIndentingPastTheMaxDepthIsRejected(): void
+	{
+		$this->db()->execute(
+			"UPDATE cms.menus SET max_depth = 1 WHERE menu = 'tree-menu'",
+		)->run();
+		$this->createItem('flat-first', null, 1);
+		$this->createItem('flat-second', null, 2);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/flat-second/move', [
+			'body' => ['direction' => 'in'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=move-rejected',
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertSame(['flat-first', 'flat-second'], $this->order());
+	}
+
 	public function testHidingAnItemKeepsItInTheEditorAndOutOfThePreview(): void
 	{
 		$this->createItem('vis-item');

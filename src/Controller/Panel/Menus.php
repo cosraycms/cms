@@ -269,27 +269,10 @@ final class Menus extends Panel
 	public function moveItem(Factory $factory, string $menu, string $item): Response
 	{
 		$row = $this->itemRowFor($menu, $item);
-		$body = $this->formData();
 
 		try {
-			if (isset($body['index'])) {
-				// The drag contract: an explicit target group and index.
-				$parent = trim((string) ($body['parent'] ?? ''));
-				$this->menus->place(
-					$item,
-					$parent === '' ? null : $parent,
-					max(0, (int) $body['index']),
-				);
-			} else {
-				$parent = $row['parent'] === null ? null : (string) $row['parent'];
-				$siblings = array_column(
-					$this->db->menus->siblings(['menu' => $menu, 'parent' => $parent])->all(),
-					'item',
-				);
-				$index = (int) array_search($item, $siblings, true);
-				$offset = ($body['direction'] ?? '') === 'up' ? -1 : 1;
-				$this->menus->place($item, $parent, max(0, $index + $offset));
-			}
+			[$parent, $index] = $this->moveTarget($menu, $item, $row);
+			$this->menus->place($item, $parent, $index);
 		} catch (RuntimeException) {
 			return $this->redirectToMenu($factory, $menu, [
 				'item' => $item,
@@ -298,6 +281,81 @@ final class Menus extends Panel
 		}
 
 		return $this->redirectToMenu($factory, $menu, ['item' => $item]);
+	}
+
+	/**
+	 * The sibling group and index a move asks for: the drag contract states
+	 * both outright, a direction derives them from where the item sits now.
+	 *
+	 * @param array<string, mixed> $row
+	 * @return array{0: ?string, 1: int}
+	 */
+	private function moveTarget(string $menu, string $item, array $row): array
+	{
+		$body = $this->formData();
+
+		if (isset($body['index'])) {
+			$parent = trim((string) ($body['parent'] ?? ''));
+
+			return [$parent === '' ? null : $parent, max(0, (int) $body['index'])];
+		}
+
+		$parent = $row['parent'] === null ? null : (string) $row['parent'];
+		$siblings = $this->siblingIds($menu, $parent);
+		$index = (int) array_search($item, $siblings, true);
+
+		return match ($body['direction'] ?? '') {
+			'in' => $this->indentTarget($menu, $siblings, $index),
+			'out' => $this->outdentTarget($menu, $parent),
+			'up' => [$parent, max(0, $index - 1)],
+			default => [$parent, $index + 1],
+		};
+	}
+
+	/**
+	 * Indenting appends the item to the sibling directly above it, which is
+	 * the only reading that keeps the operation reversible by outdenting.
+	 *
+	 * @param list<string> $siblings
+	 * @return array{0: ?string, 1: int}
+	 */
+	private function indentTarget(string $menu, array $siblings, int $index): array
+	{
+		if ($index === 0) {
+			throw new RuntimeException('The first item of a group has nothing to indent into');
+		}
+
+		$parent = $siblings[$index - 1];
+
+		return [$parent, count($this->siblingIds($menu, $parent))];
+	}
+
+	/**
+	 * Outdenting lands the item right after its former parent, so the branch
+	 * it came from stays above it.
+	 *
+	 * @return array{0: ?string, 1: int}
+	 */
+	private function outdentTarget(string $menu, ?string $parent): array
+	{
+		if ($parent === null) {
+			throw new RuntimeException('A root item cannot be outdented');
+		}
+
+		$grandparent = $this->itemRowFor($menu, $parent)['parent'];
+		$grandparent = $grandparent === null ? null : (string) $grandparent;
+		$siblings = $this->siblingIds($menu, $grandparent);
+
+		return [$grandparent, (int) array_search($parent, $siblings, true) + 1];
+	}
+
+	/** @return list<string> */
+	private function siblingIds(string $menu, ?string $parent): array
+	{
+		return array_column(
+			$this->db->menus->siblings(['menu' => $menu, 'parent' => $parent])->all(),
+			'item',
+		);
 	}
 
 	#[Permission('edit-menus')]
@@ -468,12 +526,16 @@ final class Menus extends Panel
 				'title' => $title,
 				'hidden' => $entry->hidden(),
 				'href' => $entry->href(),
+				'level' => $entry->level(),
 				'children' => $children,
 				'descendants' =>
 					count($children)
 						+ (int) array_sum(array_column($children, 'descendants')),
+				// Whether a move in each direction is defined at all; the tree
+				// renders the impossible ones as disabled buttons.
 				'first' => false,
 				'last' => false,
+				'nested' => $entry->level() > 1,
 			];
 		}
 

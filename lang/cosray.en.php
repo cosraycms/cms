@@ -197,6 +197,8 @@ return [
 		'menu:item-type' => 'Type',
 		'menu:menus' => 'Menus',
 		'menu:move-down' => 'Move down',
+		'menu:move-in' => 'Indent',
+		'menu:move-out' => 'Outdent',
 		'menu:move-up' => 'Move up',
 		'menu:new' => 'New menu',
 		'menu:notice-created' => 'Menu created.',

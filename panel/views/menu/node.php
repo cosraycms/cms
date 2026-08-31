@@ -15,6 +15,7 @@ $href = $row['href'] ?? null;
 $children = (array) $row['children'];
 $descendants = (int) $row['descendants'];
 $hidden = (bool) $row['hidden'];
+$nested = (bool) $row['nested'];
 
 // Literal ids so the i18n scanner sees every key.
 $typeLabel = match ((string) $row['type']) {
@@ -77,6 +78,24 @@ $confirm = $descendants === 0
 					<input type="hidden" name="direction" value="down" />
 					<button type="submit"<?= $row['last'] ? ' disabled' : '' ?>><?= escape(
 						__('menu:move-down'),
+					) ?></button>
+				</form>
+				<?php // Indenting needs a sibling above to become a child of;
+				// outdenting needs a parent to be lifted out of. ?>
+				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
+					rawurlencode($id),
+				) ?>/move">
+					<input type="hidden" name="direction" value="in" />
+					<button type="submit"<?= $row['first'] ? ' disabled' : '' ?>><?= escape(
+						__('menu:move-in'),
+					) ?></button>
+				</form>
+				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
+					rawurlencode($id),
+				) ?>/move">
+					<input type="hidden" name="direction" value="out" />
+					<button type="submit"<?= $nested ? '' : ' disabled' ?>><?= escape(
+						__('menu:move-out'),
 					) ?></button>
 				</form>
 				<form
