@@ -3,11 +3,12 @@ SELECT
 	r.owner_uid AS "ownerUid",
 	t.handle AS "nodeType",
 	n.published,
-	n.content -> 'title' -> 'value' AS title
+	COALESCE(n.content -> 'title' -> 'value', m.data -> 'title') AS title
 FROM
 	/*:cms.prefix:*/node_references r
 	LEFT JOIN /*:cms.prefix:*/nodes n ON r.owner_type = 'node' AND n.uid = r.owner_uid
 	LEFT JOIN /*:cms.prefix:*/types t ON t.type = n.type
+	LEFT JOIN /*:cms.prefix:*/menu_items m ON r.owner_type = 'menu' AND m.item = r.owner_uid
 WHERE
 	r.target_uid = :uid
 ORDER BY

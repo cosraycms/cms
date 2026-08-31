@@ -249,9 +249,10 @@ final class Menus
 	}
 
 	/**
-	 * Keeps the derived asset reference index in step with the item's
-	 * `image` icon and `asset` link target, mirroring what the rebuild
-	 * derives from stored menu rows.
+	 * Keeps the derived reference indexes in step with the item: its `image`
+	 * icon and `asset` link target on the asset side, its linked node on the
+	 * node side. Mirrors what the rebuild derives from stored menu rows, so
+	 * "where is this used?" answers for menus too.
 	 */
 	private function syncReferences(string $item, array $data): void
 	{
@@ -265,7 +266,12 @@ final class Menus
 			}
 		}
 
-		$this->sync->replace('menu', $item, ['assets' => $assets, 'nodes' => []]);
+		// `node` and `children` items both store the target's uid; legacy rows
+		// carry a numeric stub there, which the index has no use for.
+		$node = $data['node'] ?? null;
+		$nodes = is_string($node) && $node !== '' ? [$node] : [];
+
+		$this->sync->replace('menu', $item, ['assets' => $assets, 'nodes' => $nodes]);
 	}
 
 	/**

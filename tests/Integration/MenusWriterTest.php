@@ -82,6 +82,19 @@ final class MenusWriterTest extends IntegrationTestCase
 	}
 
 	/** @return list<string> */
+	private function nodeRefs(string $item): array
+	{
+		return array_column(
+			$this->db()->execute(
+				"SELECT target_uid FROM cms.node_references
+				WHERE owner_type = 'menu' AND owner_uid = :item ORDER BY target_uid",
+				['item' => $item],
+			)->all(),
+			'target_uid',
+		);
+	}
+
+	/** @return list<string> */
 	private function assetRefs(string $item): array
 	{
 		return array_column(
@@ -672,6 +685,32 @@ final class MenusWriterTest extends IntegrationTestCase
 		]);
 		$menus->remove($item);
 		$this->assertSame([], $this->assetRefs($item));
+	}
+
+	public function testLinkedNodesEnterAndLeaveTheReferenceIndex(): void
+	{
+		$this->writeNode('writer-ref-node', 'Target', '/ref-target');
+		$menus = $this->menus();
+		$menus->create('writer-node-refs', ['zxx' => 'Node refs']);
+		$item = $menus->add('writer-node-refs', [
+			'type' => 'node',
+			'node' => 'writer-ref-node',
+			'title' => ['en' => 'Linked'],
+		]);
+
+		$this->assertSame(['writer-ref-node'], $this->nodeRefs($item));
+
+		// Retargeting to a plain URL releases the node again.
+		$menus->updateItem($item, ['type' => 'url', 'path' => ['en' => '/plain']]);
+		$this->assertSame([], $this->nodeRefs($item));
+
+		// A uid nothing resolves to is skipped rather than tripping the FK.
+		$menus->updateItem($item, ['type' => 'node', 'node' => 'writer-ref-vanished']);
+		$this->assertSame([], $this->nodeRefs($item));
+
+		$menus->updateItem($item, ['type' => 'node', 'node' => 'writer-ref-node']);
+		$menus->remove($item);
+		$this->assertSame([], $this->nodeRefs($item));
 	}
 
 	public function testDeleteRemovesMenuAndItems(): void

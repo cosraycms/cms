@@ -147,6 +147,26 @@ final class ReferencesTest extends IntegrationTestCase
 		$this->assertSame('Quelle', $usage[0]['title']);
 	}
 
+	public function testUsageForNodeNamesItsMenuOwners(): void
+	{
+		$typeId = $this->createTestType('refint-menuback-type');
+		$this->createTestNode(['uid' => 'refint-menuback-target', 'type' => $typeId]);
+		$this->insertAsset('refint-menuback-asset');
+		$this->insertMenuItem('refint-menuback-item', 'refint-menuback-asset', ['de' => 'Im Menü']);
+
+		new Sync($this->db())->replace('menu', 'refint-menuback-item', [
+			'assets' => [],
+			'nodes' => ['refint-menuback-target'],
+		]);
+
+		$usage = new Usage($this->db())->forNode('refint-menuback-target');
+
+		$this->assertCount(1, $usage);
+		$this->assertSame('menu', $usage[0]['ownerType']);
+		// Without the menu join the row would come back with an empty label.
+		$this->assertSame('Im Menü', $usage[0]['title']);
+	}
+
 	public function testRebuildScansNodesAndMenus(): void
 	{
 		$this->insertAsset('refint-rb-a');
@@ -209,6 +229,23 @@ final class ReferencesTest extends IntegrationTestCase
 				'title' => ['de' => 'Datei'],
 			])],
 		)->run();
+		// A node item with an icon: both indexes hold it, from one owner row.
+		$this->db()->execute(
+			"INSERT INTO cms.menu_items (item, menu, position, data)
+			VALUES ('refint-rb-node-item', 'refint-menu', 3, :data::jsonb)",
+			['data' => json_encode([
+				'type' => 'node',
+				'node' => 'refint-rb-target',
+				'image' => 'refint-rb-a',
+				'title' => ['de' => 'Seite'],
+			])],
+		)->run();
+		// A legacy row: `node` is a numeric stub, not a uid.
+		$this->db()->execute(
+			"INSERT INTO cms.menu_items (item, menu, position, data)
+			VALUES ('refint-rb-legacy-item', 'refint-menu', 4, :data::jsonb)",
+			['data' => json_encode(['type' => 'node', 'node' => 0, 'title' => ['de' => 'Alt']])],
+		)->run();
 
 		$result = new Rebuild($this->db())->run();
 
@@ -225,6 +262,12 @@ final class ReferencesTest extends IntegrationTestCase
 			['refint-rb-a', 'refint-rb-b'],
 			$this->assetRefs('refint-rb-asset-item', 'menu'),
 		);
+		// The node item keeps both its icon and its link target — merging the
+		// two rebuild sources must not let one overwrite the other.
+		$this->assertSame(['refint-rb-a'], $this->assetRefs('refint-rb-node-item', 'menu'));
+		$this->assertSame(['refint-rb-target'], $this->nodeRefs('refint-rb-node-item', 'menu'));
+		// The legacy stub is not a uid and stays out of the index.
+		$this->assertSame([], $this->nodeRefs('refint-rb-legacy-item', 'menu'));
 		$this->assertGreaterThanOrEqual(2, $result['assets']);
 		$this->assertGreaterThanOrEqual(1, $result['nodes']);
 		$this->assertGreaterThanOrEqual(1, $result['skipped']);
