@@ -27,7 +27,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->authenticateAs('admin');
 		$this->nodeTypeId = $this->createTestType('test-hierarchy-parent');
 		$this->db()->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('tree-menu', 'Tree menu')",
+			"INSERT INTO cms.menus (menu, description) VALUES ('tree-menu', '{\"zxx\": \"Tree menu\"}')",
 		)->run();
 	}
 
@@ -338,7 +338,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 	public function testItemsFromAnotherMenuAnswer404(): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('other-menu', 'Other')",
+			"INSERT INTO cms.menus (menu, description) VALUES ('other-menu', '{\"zxx\": \"Other\"}')",
 		)->run();
 		$this->db()->execute(
 			"INSERT INTO cms.menu_items (item, parent, menu, position, data)

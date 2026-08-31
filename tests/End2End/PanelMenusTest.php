@@ -22,12 +22,24 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->authenticateAs('superuser');
 	}
 
-	private function createMenu(string $handle, string $description): void
+	private function createMenu(string $handle, string $description, string $locale = 'en'): void
 	{
 		$this->db()->execute(
-			'INSERT INTO cms.menus (menu, description) VALUES (:menu, :description)',
-			['menu' => $handle, 'description' => $description],
+			'INSERT INTO cms.menus (menu, description) VALUES (:menu, :description::jsonb)',
+			['menu' => $handle, 'description' => json_encode([$locale => $description])],
 		)->run();
+	}
+
+	/** @return array<string, string> */
+	private function storedDescription(string $handle): array
+	{
+		return json_decode(
+			(string) $this->db()->execute(
+				'SELECT description FROM cms.menus WHERE menu = :menu',
+				['menu' => $handle],
+			)->one()['description'],
+			true,
+		);
 	}
 
 	private function createItem(string $menu, string $item, int $position = 1): void
@@ -71,7 +83,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus'));
 		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'sneaky', 'description' => 'Nope'],
+			'body' => ['menu' => 'sneaky', 'description' => ['en' => 'Nope']],
 		]));
 	}
 
@@ -82,7 +94,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus/create'));
 		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'extra', 'description' => 'Extra'],
+			'body' => ['menu' => 'extra', 'description' => ['en' => 'Extra']],
 		]));
 		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/head/delete'));
 		$this->assertSame(['head'], $this->menuHandles());
@@ -100,7 +112,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('Only superusers can change the handle.', $html);
 		$this->assertStringNotContainsString('/cp/menus/head/delete', $html);
 		$this->assertStringNotContainsString('href="/cp/menus/create"', $html);
-		$this->assertStringContainsString('id="menu-description"', $html);
+		$this->assertStringContainsString('name="description[en]"', $html);
 	}
 
 	public function testAdminsCannotRenameAMenuThroughTheBody(): void
@@ -109,19 +121,14 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->authenticateAs('admin');
 
 		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
-			'body' => ['menu' => 'renamed', 'description' => 'New description'],
+			'body' => ['menu' => 'renamed', 'description' => ['en' => 'New description']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame('/cp/menus/head?notice=updated', $response->getHeaderLine('Location'));
 		// The description saved, the handle did not move.
 		$this->assertSame(['head'], $this->menuHandles());
-		$this->assertSame(
-			'New description',
-			$this->db()->execute(
-				"SELECT description FROM cms.menus WHERE menu = 'head'",
-			)->one()['description'],
-		);
+		$this->assertSame(['en' => 'New description'], $this->storedDescription('head'));
 	}
 
 	public function testTheAreaOpensTheFirstMenuByDescription(): void
@@ -133,6 +140,59 @@ final class PanelMenusTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame('/cp/menus/zzz-handle', $response->getHeaderLine('Location'));
+	}
+
+	public function testDescriptionsAreStoredPerLocale(): void
+	{
+		$response = $this->makeRequest('POST', '/cp/menus/create', [
+			'body' => [
+				'menu' => 'multi',
+				'description' => ['en' => 'Main navigation', 'de' => 'Hauptnavigation', 'fr' => 'Ignored'],
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		// Unconfigured locales drop out; the configured ones are kept as sent.
+		// jsonb normalizes key order, so the comparison must not depend on it.
+		$this->assertEquals(
+			['en' => 'Main navigation', 'de' => 'Hauptnavigation'],
+			$this->storedDescription('multi'),
+		);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/multi'));
+		$this->assertStringContainsString('name="description[en]"', $html);
+		$this->assertStringContainsString('name="description[de]"', $html);
+		$this->assertStringContainsString('value="Hauptnavigation"', $html);
+	}
+
+	public function testAMenuWithoutAnyDescriptionStillRenders(): void
+	{
+		// The panel rejects an empty description, but a site migration can
+		// write one; the rail must fall back to a blank label, not break.
+		$this->db()->execute(
+			"INSERT INTO cms.menus (menu, description) VALUES ('nameless', '{}'::jsonb)",
+		)->run();
+
+		$response = $this->makeRequest('GET', '/cp/menus/nameless');
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'title=" · nameless"',
+			$this->getHtmlResponse($response),
+		);
+	}
+
+	public function testTheRailNamesAMenuThatMissesTheRequestLocale(): void
+	{
+		// Written by a site migration, so the name sits under the neutral key.
+		$this->createMenu('neutral', 'Neutral name', 'zxx');
+		// Named in a configured locale that is not the one being served.
+		$this->createMenu('german', 'Nur deutsch', 'de');
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/neutral'));
+
+		$this->assertStringContainsString('<span>Neutral name</span>', $html);
+		$this->assertStringContainsString('<span>Nur deutsch</span>', $html);
 	}
 
 	public function testTheAreaCarriesANoticeIntoTheFirstMenu(): void
@@ -195,7 +255,7 @@ final class PanelMenusTest extends End2EndTestCase
 	public function testCreateStoresAndOpensTheNewMenu(): void
 	{
 		$response = $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'footer', 'description' => 'Footer links'],
+			'body' => ['menu' => 'footer', 'description' => ['en' => 'Footer links']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
@@ -211,7 +271,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('taken', 'Taken');
 
 		$invalid = $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'Not A Handle', 'description' => 'X'],
+			'body' => ['menu' => 'Not A Handle', 'description' => ['en' => 'X']],
 		]);
 		$this->assertResponseOk($invalid);
 		$this->assertStringContainsString(
@@ -220,7 +280,7 @@ final class PanelMenusTest extends End2EndTestCase
 		);
 
 		$reserved = $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'create', 'description' => 'X'],
+			'body' => ['menu' => 'create', 'description' => ['en' => 'X']],
 		]);
 		$this->assertStringContainsString(
 			'This handle is reserved.',
@@ -228,7 +288,7 @@ final class PanelMenusTest extends End2EndTestCase
 		);
 
 		$taken = $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'taken', 'description' => 'X'],
+			'body' => ['menu' => 'taken', 'description' => ['en' => 'X']],
 		]);
 		$this->assertStringContainsString(
 			'A menu with this handle already exists.',
@@ -241,7 +301,7 @@ final class PanelMenusTest extends End2EndTestCase
 	public function testCreateRequiresADescription(): void
 	{
 		$response = $this->makeRequest('POST', '/cp/menus/create', [
-			'body' => ['menu' => 'undescribed', 'description' => '  '],
+			'body' => ['menu' => 'undescribed', 'description' => ['en' => '  ']],
 		]);
 
 		$this->assertResponseOk($response);
@@ -293,7 +353,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('taken', 'Taken');
 
 		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
-			'body' => ['menu' => 'taken', 'description' => 'Header links'],
+			'body' => ['menu' => 'taken', 'description' => ['en' => 'Header links']],
 		]);
 
 		$this->assertResponseOk($response);
@@ -311,7 +371,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createItem('old-name', 'menu-e2e-follow');
 
 		$response = $this->makeRequest('POST', '/cp/menus/old-name/edit', [
-			'body' => ['menu' => 'new-name', 'description' => 'New description'],
+			'body' => ['menu' => 'new-name', 'description' => ['en' => 'New description']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
@@ -323,12 +383,7 @@ final class PanelMenusTest extends End2EndTestCase
 				"SELECT menu FROM cms.menu_items WHERE item = 'menu-e2e-follow'",
 			)->one()['menu'],
 		);
-		$this->assertSame(
-			'New description',
-			$this->db()->execute(
-				"SELECT description FROM cms.menus WHERE menu = 'new-name'",
-			)->one()['description'],
-		);
+		$this->assertSame(['en' => 'New description'], $this->storedDescription('new-name'));
 	}
 
 	public function testDeleteRemovesTheMenuWithItsItems(): void

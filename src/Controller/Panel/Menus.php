@@ -14,9 +14,12 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Field;
 use Cosray\Finder\Menu as FinderMenu;
+use Cosray\Locale;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
+use Cosray\Title\Sort;
 use Cosray\User;
 
 /**
@@ -36,7 +39,7 @@ final class Menus extends Panel
 	/** Handles that would shadow a literal route segment. */
 	private const array RESERVED_HANDLES = ['create'];
 
-	/** @var ?list<array{menu: string, description: string, items: int, url: string}> */
+	/** @var ?list<array{menu: string, description: array<string, string>, label: string, items: int, url: string}> */
 	private ?array $menuRows = null;
 
 	public function __construct(
@@ -101,19 +104,19 @@ final class Menus extends Panel
 	}
 
 	#[Permission('manage-menus')]
-	public function create(): array
+	public function create(Context $context): array
 	{
-		return $this->form('', '', []);
+		return $this->form($context, '', [], []);
 	}
 
 	#[Permission('manage-menus')]
-	public function store(Factory $factory): array|Response
+	public function store(Context $context, Factory $factory): array|Response
 	{
-		[$handle, $description] = $this->submitted();
+		[$handle, $description] = $this->submitted($context);
 		$errors = $this->validate($handle, $description, null);
 
 		if ($errors !== []) {
-			return $this->form($handle, $description, $errors);
+			return $this->form($context, $handle, $description, $errors);
 		}
 
 		$this->menus->create($handle, $description);
@@ -129,7 +132,7 @@ final class Menus extends Panel
 		string $menu,
 	): array|Response {
 		$this->row($menu);
-		[$handle, $description] = $this->submitted();
+		[$handle, $description] = $this->submitted($context);
 
 		// The field is disabled without the permission, so nothing legitimate
 		// posts a handle here; ignore whatever does.
@@ -289,7 +292,7 @@ final class Menus extends Panel
 	}
 
 	/**
-	 * @param ?array{handle: string, description: string, errors: array<string, string>} $props
+	 * @param ?array{handle: string, description: array<string, string>, errors: array<string, string>} $props
 	 *   the submitted menu fields when a save came back with errors, the
 	 *   stored ones otherwise
 	 */
@@ -304,17 +307,19 @@ final class Menus extends Panel
 
 		return $this->context([
 			'menu' => $menu,
-			'description' => (string) $row['description'],
+			'description' => $row['label'],
 			'itemCount' => (int) $row['items'],
 			'props' => [
 				...(
 					$props ?? [
 						'handle' => $menu,
-						'description' => (string) $row['description'],
+						'description' => $row['description'],
 						'errors' => [],
 					]
 				),
 				'confirm' => $this->deleteConfirm($menu),
+				'locales' => $this->localeList($context),
+				'defaultLocale' => $context->locales()->getDefault()->id,
 			],
 			// Unexpanded: the editor shows `children` items as stored,
 			// not what they resolve into. The preview beneath renders the
@@ -666,16 +671,23 @@ final class Menus extends Panel
 	 * The create screen. Editing a menu happens inline on its tree screen,
 	 * so this is the only standalone menu form left.
 	 *
+	 * @param array<string, string> $description
 	 * @param array<string, string> $errors
 	 */
-	private function form(string $handle, string $description, array $errors): array
-	{
+	private function form(
+		Context $context,
+		string $handle,
+		array $description,
+		array $errors,
+	): array {
 		return $this->context([
 			'action' => $this->base() . '/create',
 			'backUrl' => $this->base(),
 			'handle' => $handle,
 			'description' => $description,
 			'errors' => $errors,
+			'locales' => $this->localeList($context),
+			'defaultLocale' => $context->locales()->getDefault()->id,
 		]);
 	}
 
@@ -690,8 +702,11 @@ final class Menus extends Panel
 		return __n('menu:confirm-delete', 'menu:confirm-delete-plural', $items, ['menu' => $menu]);
 	}
 
-	/** @return array<string, string> */
-	private function validate(string $handle, string $description, ?string $current): array
+	/**
+	 * @param array<string, string> $description
+	 * @return array<string, string>
+	 */
+	private function validate(string $handle, array $description, ?string $current): array
 	{
 		$errors = [];
 
@@ -703,23 +718,26 @@ final class Menus extends Panel
 			$errors['menu'] = __('menu:error-handle-taken');
 		}
 
-		if (trim($description) === '' || mb_strlen($description) > 128) {
+		// `localeMap()` has already dropped blanks, so an empty map means
+		// the menu carries no name in any configured locale.
+		$tooLong = array_filter($description, static fn(string $text): bool => mb_strlen($text) > 128);
+
+		if ($description === [] || $tooLong !== []) {
 			$errors['description'] = __('menu:error-description');
 		}
 
 		return $errors;
 	}
 
-	/** @return array{0: string, 1: string} */
-	private function submitted(): array
+	/** @return array{0: string, 1: array<string, string>} */
+	private function submitted(Context $context): array
 	{
 		$data = $this->formData();
 		$handle = $data['menu'] ?? null;
-		$description = $data['description'] ?? null;
 
 		return [
 			is_string($handle) ? trim($handle) : '',
-			is_string($description) ? trim($description) : '',
+			$this->localeMap($context, $data['description'] ?? null),
 		];
 	}
 
@@ -759,9 +777,11 @@ final class Menus extends Panel
 
 	/**
 	 * The menus as the rail renders them. Cached because the rail rides
-	 * every context in the area and the entry point reads it too.
+	 * every context in the area and the entry point reads it too. Rows
+	 * carry the description both as the stored map, for the edit form,
+	 * and resolved to `label` for display.
 	 *
-	 * @return list<array{menu: string, description: string, items: int, url: string}>
+	 * @return list<array{menu: string, description: array<string, string>, label: string, items: int, url: string}>
 	 */
 	private function menuRows(): array
 	{
@@ -771,18 +791,78 @@ final class Menus extends Panel
 
 		$rows = [];
 
-		foreach ($this->db->menus->list()->all() as $row) {
+		foreach ($this->db->menus->list(['order' => $this->descriptionSort()])->all() as $row) {
 			$menu = (string) $row['menu'];
+			$description = $this->storedMap($row['description']);
 
 			$rows[] = [
 				'menu' => $menu,
-				'description' => (string) $row['description'],
+				'description' => $description,
+				'label' => $this->label($description),
 				'items' => (int) $row['items'],
 				'url' => $this->url($menu),
 			];
 		}
 
 		return $this->menuRows = $rows;
+	}
+
+	/** The content locale of the request, `zxx` when there is none. */
+	private function contentLocale(): string
+	{
+		$locale = $this->request->get('locale', null);
+		$id = $locale instanceof Locale ? $locale->id : Field::NEUTRAL_LOCALE;
+
+		return Sort::valid($id) ? $id : Field::NEUTRAL_LOCALE;
+	}
+
+	/** Orders the menu list by its description in the request locale. */
+	private function descriptionSort(): string
+	{
+		return Sort::expression($this->contentLocale(), 'm.description');
+	}
+
+	/**
+	 * A stored jsonb locale map as a string map.
+	 *
+	 * @return array<string, string>
+	 */
+	private function storedMap(mixed $value): array
+	{
+		$decoded = is_string($value) ? json_decode($value, true) : $value;
+		$map = [];
+
+		foreach (is_array($decoded) ? $decoded : [] as $locale => $text) {
+			if (is_string($locale) && is_string($text)) {
+				$map[$locale] = $text;
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * The description for display: the request locale, then the neutral
+	 * key, then any stored variant — a menu named in one language only
+	 * must still be identifiable in the rail.
+	 *
+	 * @param array<string, string> $description
+	 */
+	private function label(array $description): string
+	{
+		foreach ([$this->contentLocale(), Field::NEUTRAL_LOCALE] as $locale) {
+			if (($description[$locale] ?? '') !== '') {
+				return $description[$locale];
+			}
+		}
+
+		foreach ($description as $text) {
+			if ($text !== '') {
+				return $text;
+			}
+		}
+
+		return '';
 	}
 
 	private function row(string $menu): array

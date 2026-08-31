@@ -299,7 +299,7 @@ final class ReferencesTest extends IntegrationTestCase
 	private function insertMenuItem(string $item, string $assetUid, array $title): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('refint-menu', 'Test menu')
+			"INSERT INTO cms.menus (menu, description) VALUES ('refint-menu', '{\"zxx\": \"Test menu\"}')
 			ON CONFLICT DO NOTHING",
 		)->run();
 		$this->db()->execute(

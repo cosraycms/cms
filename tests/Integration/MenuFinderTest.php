@@ -28,7 +28,7 @@ final class MenuFinderTest extends IntegrationTestCase
 	{
 		// Create a test menu
 		$this->db()->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('test-menu', 'Test Menu')",
+			"INSERT INTO cms.menus (menu, description) VALUES ('test-menu', '{\"zxx\": \"Test Menu\"}')",
 		)->run();
 
 		// Create menu items
@@ -132,7 +132,7 @@ final class MenuFinderTest extends IntegrationTestCase
 	public function testEmptyMenuIteratesNothingAndRendersNothing(): void
 	{
 		$this->db()->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('test-menu-empty', 'Empty')",
+			"INSERT INTO cms.menus (menu, description) VALUES ('test-menu-empty', '{\"zxx\": \"Empty\"}')",
 		)->run();
 
 		$menu = new Menu($this->createContext(), 'test-menu-empty');

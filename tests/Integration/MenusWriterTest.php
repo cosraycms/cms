@@ -63,7 +63,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testCreatesMenuWithNestedItemsAndFinderRendersThem(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-menu', 'Write API test menu');
+		$menus->create('writer-menu', ['zxx' => 'Write API test menu']);
 
 		$home = $menus->add('writer-menu', $this->itemData('Home', '/'));
 		$about = $menus->add('writer-menu', $this->itemData('About', '/about'));
@@ -94,7 +94,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testPositionsIncrementPerSiblingGroup(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-positions', 'Positions');
+		$menus->create('writer-positions', ['zxx' => 'Positions']);
 
 		$first = $menus->add('writer-positions', $this->itemData('First', '/a'));
 		$second = $menus->add('writer-positions', $this->itemData('Second', '/b'));
@@ -116,7 +116,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testRenameMovesTheHandleWithItsItems(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-rename', 'Rename');
+		$menus->create('writer-rename', ['zxx' => 'Rename']);
 		$item = $menus->add('writer-rename', $this->itemData('Home', '/'));
 
 		$menus->rename('writer-rename', 'writer-renamed');
@@ -143,7 +143,7 @@ final class MenusWriterTest extends IntegrationTestCase
 
 	public function testAddRequiresType(): void
 	{
-		$this->menus()->create('writer-untyped', 'Untyped');
+		$this->menus()->create('writer-untyped', ['zxx' => 'Untyped']);
 
 		$this->throws(RuntimeException::class, 'A menu item needs a type');
 		$this->menus()->add('writer-untyped', ['title' => ['en' => 'X']]);
@@ -151,7 +151,7 @@ final class MenusWriterTest extends IntegrationTestCase
 
 	public function testAddRejectsDottedItemId(): void
 	{
-		$this->menus()->create('writer-dotted', 'Dotted');
+		$this->menus()->create('writer-dotted', ['zxx' => 'Dotted']);
 
 		$this->throws(RuntimeException::class, 'must not contain a dot');
 		$this->menus()->add('writer-dotted', $this->itemData('X', '/x'), item: 'about.team');
@@ -160,8 +160,8 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testAddRejectsParentFromAnotherMenu(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-menu-a', 'A');
-		$menus->create('writer-menu-b', 'B');
+		$menus->create('writer-menu-a', ['zxx' => 'A']);
+		$menus->create('writer-menu-b', ['zxx' => 'B']);
 		$parent = $menus->add('writer-menu-a', $this->itemData('A', '/a'));
 
 		$this->throws(RuntimeException::class, 'belongs to another menu');
@@ -171,7 +171,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testMoveReordersAndReparents(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-move', 'Move');
+		$menus->create('writer-move', ['zxx' => 'Move']);
 		$first = $menus->add('writer-move', $this->itemData('First', '/a'));
 		$second = $menus->add('writer-move', $this->itemData('Second', '/b'));
 
@@ -191,7 +191,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testPlacePutsTheItemAtItsIndexAndRenumbersTheGroup(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-place', 'Place');
+		$menus->create('writer-place', ['zxx' => 'Place']);
 		$a = $menus->add('writer-place', $this->itemData('A', '/a'));
 		$b = $menus->add('writer-place', $this->itemData('B', '/b'));
 		$c = $menus->add('writer-place', $this->itemData('C', '/c'));
@@ -224,7 +224,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testPlaceReparentsAtTheGivenIndex(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-place-nest', 'Place nested');
+		$menus->create('writer-place-nest', ['zxx' => 'Place nested']);
 		$parent = $menus->add('writer-place-nest', $this->itemData('Parent', '/p'));
 		$menus->add('writer-place-nest', $this->itemData('X', '/x'), parent: $parent);
 		$menus->add('writer-place-nest', $this->itemData('Y', '/y'), parent: $parent);
@@ -243,7 +243,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testPlaceRejectsCycles(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-place-cycle', 'Place cycle');
+		$menus->create('writer-place-cycle', ['zxx' => 'Place cycle']);
 		$parent = $menus->add('writer-place-cycle', $this->itemData('Parent', '/p'));
 		$child = $menus->add('writer-place-cycle', $this->itemData('Child', '/c'), parent: $parent);
 
@@ -254,7 +254,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testMoveRejectsCycles(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-cycle', 'Cycle');
+		$menus->create('writer-cycle', ['zxx' => 'Cycle']);
 		$parent = $menus->add('writer-cycle', $this->itemData('Parent', '/p'));
 		$child = $menus->add('writer-cycle', $this->itemData('Child', '/c'), parent: $parent);
 
@@ -265,7 +265,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testUpdateItemReplacesData(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-update', 'Update');
+		$menus->create('writer-update', ['zxx' => 'Update']);
 		$item = $menus->add('writer-update', $this->itemData('Old', '/old'));
 
 		$menus->updateItem($item, $this->itemData('New', '/new'));
@@ -283,7 +283,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testRemoveDeletesTheSubtree(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-remove', 'Remove');
+		$menus->create('writer-remove', ['zxx' => 'Remove']);
 		$root = $menus->add('writer-remove', $this->itemData('Root', '/'));
 		$child = $menus->add('writer-remove', $this->itemData('Child', '/c'), parent: $root);
 		$grandchild = $menus->add('writer-remove', $this->itemData('Grandchild', '/g'), parent: $child);
@@ -347,7 +347,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->writeNode('menu-node-target', 'Target', '/target-current');
 
 		$menus = $this->menus();
-		$menus->create('writer-resolve', 'Resolve');
+		$menus->create('writer-resolve', ['zxx' => 'Resolve']);
 		$linked = $menus->add('writer-resolve', [
 			'type' => 'node',
 			'node' => 'menu-node-target',
@@ -374,7 +374,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->writeNode('menu-title-source', 'Fresh Title', '/title-source');
 
 		$menus = $this->menus();
-		$menus->create('writer-title', 'Title');
+		$menus->create('writer-title', ['zxx' => 'Title']);
 		$inherits = $menus->add('writer-title', [
 			'type' => 'node',
 			'node' => 'menu-title-source',
@@ -399,7 +399,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->writeNode('menu-kids-draft', 'Draft', '/kids/draft', parent: 'menu-kids-root', published: false);
 
 		$menus = $this->menus();
-		$menus->create('writer-children', 'Children');
+		$menus->create('writer-children', ['zxx' => 'Children']);
 		$before = $menus->add('writer-children', $this->itemData('Before', '/before'));
 		$menus->add('writer-children', ['type' => 'children', 'node' => 'menu-kids-root']);
 
@@ -428,7 +428,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->writeNode('menu-deep-grand', 'Grand', '/deep/child/grand', parent: 'menu-deep-child');
 
 		$menus = $this->menus();
-		$menus->create('writer-levels', 'Levels');
+		$menus->create('writer-levels', ['zxx' => 'Levels']);
 		$menus->add('writer-levels', [
 			'type' => 'children',
 			'node' => 'menu-deep-root',
@@ -445,7 +445,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertSame(2, $grand[0]->level());
 
 		// The default depth of one stops above the grandchild.
-		$menus->create('writer-levels-flat', 'Flat');
+		$menus->create('writer-levels-flat', ['zxx' => 'Flat']);
 		$menus->add('writer-levels-flat', [
 			'type' => 'children',
 			'node' => 'menu-deep-root',
@@ -457,7 +457,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testUnexpandedMenuKeepsChildrenItemsAsStored(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-children-raw', 'Raw');
+		$menus->create('writer-children-raw', ['zxx' => 'Raw']);
 		$item = $menus->add('writer-children-raw', [
 			'type' => 'children',
 			'node' => 'some-node-uid',
@@ -473,7 +473,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testChildrenItemWithoutACmsExpandsToNothing(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-children-bare', 'Bare');
+		$menus->create('writer-children-bare', ['zxx' => 'Bare']);
 		$menus->add('writer-children-bare', ['type' => 'children', 'node' => 'whatever']);
 		$kept = $menus->add('writer-children-bare', $this->itemData('Kept', '/kept'));
 
@@ -485,7 +485,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	public function testNodeItemFallsBackToSnapshotWhenTheNodeIsGone(): void
 	{
 		$menus = $this->menus();
-		$menus->create('writer-gone', 'Gone');
+		$menus->create('writer-gone', ['zxx' => 'Gone']);
 		$item = $menus->add('writer-gone', [
 			'type' => 'node',
 			'node' => 'never-existed-uid',
@@ -502,7 +502,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	{
 		$this->insertAsset('writer-ref-file');
 		$menus = $this->menus();
-		$menus->create('writer-refs', 'Refs');
+		$menus->create('writer-refs', ['zxx' => 'Refs']);
 		$item = $menus->add('writer-refs', [
 			'type' => 'asset',
 			'asset' => 'writer-ref-file',
@@ -528,7 +528,7 @@ final class MenusWriterTest extends IntegrationTestCase
 	{
 		$this->insertAsset('writer-del-file');
 		$menus = $this->menus();
-		$menus->create('writer-delete', 'Delete');
+		$menus->create('writer-delete', ['zxx' => 'Delete']);
 		$root = $menus->add('writer-delete', $this->itemData('Root', '/'));
 		$child = $menus->add(
 			'writer-delete',

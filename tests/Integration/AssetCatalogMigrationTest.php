@@ -112,7 +112,7 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 			],
 		)->run();
 		$db->execute(
-			"INSERT INTO cms.menus (menu, description) VALUES ('migtest', 'Migration test')
+			"INSERT INTO cms.menus (menu, description) VALUES ('migtest', '{\"zxx\": \"Migration test\"}')
 				ON CONFLICT (menu) DO NOTHING",
 		)->run();
 		$db->execute(

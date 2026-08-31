@@ -10,7 +10,9 @@ $errors = (array) $this->unwrap($errors);
 $action = (string) $action;
 $backUrl = (string) $backUrl;
 $handle = (string) $handle;
-$description = (string) $description;
+$description = (array) $this->unwrap($description);
+$locales = (array) $this->unwrap($locales);
+$defaultLocale = (string) $defaultLocale;
 ?>
 
 <div class="page cms-menus">
@@ -31,32 +33,33 @@ $description = (string) $description;
 					</div>
 				<?php endif ?>
 
-				<div class="field">
-					<label for="menu-handle"><?= escape(__('menu:handle')) ?></label>
-					<input
-						class="cms-input"
-						id="menu-handle"
-						name="menu"
-						type="text"
-						required
-						pattern="[a-z0-9-]{1,32}"
-						value="<?= escape($handle) ?>"
-						<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
+				<div class="cms-field<?= isset($errors['menu']) ? ' has-error' : '' ?>">
+					<label class="label" for="menu-handle"><div><?= escape(
+						__('menu:handle'),
+					) ?></div></label>
+					<div class="control">
+						<input
+							class="cms-input"
+							id="menu-handle"
+							name="menu"
+							type="text"
+							required
+							pattern="[a-z0-9-]{1,32}"
+							value="<?= escape($handle) ?>"
+							<?= isset($errors['menu']) ? 'aria-invalid="true"' : '' ?> />
+					</div>
 					<p class="help"><?= escape(__('menu:handle-help')) ?></p>
 				</div>
 
-				<div class="field">
-					<label for="menu-description"><?= escape(__('menu:description')) ?></label>
-					<input
-						class="cms-input"
-						id="menu-description"
-						name="description"
-						type="text"
-						required
-						maxlength="128"
-						value="<?= escape($description) ?>"
-						<?= isset($errors['description']) ? 'aria-invalid="true"' : '' ?> />
-				</div>
+				<?php $this->insert('menu/localized', [
+					'name' => 'description',
+					'label' => __('menu:description'),
+					'values' => $description,
+					'error' => $errors['description'] ?? null,
+					'id' => 'menu-description',
+					'locales' => $locales,
+					'defaultLocale' => $defaultLocale,
+				]) ?>
 
 				<footer class="form-actions">
 					<a class="cms-button secondary" href="<?= escape($backUrl) ?>"><?= escape(

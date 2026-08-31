@@ -151,16 +151,8 @@
 			gap: var(--cms-space-4);
 		}
 
-		& .field {
-			display: flex;
-			flex-direction: column;
-			gap: var(--cms-space-1-5);
-
-			& label {
-				color: var(--cms-color-text);
-				font-size: var(--cms-font-size-sm);
-				font-weight: 500;
-			}
+		& .cms-field {
+			padding-inline: 0;
 		}
 
 		& .help {

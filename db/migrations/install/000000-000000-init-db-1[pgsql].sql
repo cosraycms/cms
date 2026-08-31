@@ -302,10 +302,12 @@ CREATE TRIGGER /*:cms.obj:*/drafts_trigger_01_history AFTER UPDATE
 
 CREATE TABLE /*:cms.prefix:*/menus (
 	menu text NOT NULL,
-	description text NOT NULL,
+	-- Locale map ({locale: text}, or {zxx: text} when not language-specific),
+	-- like every other label in the schema. Per-variant length is validated in
+	-- the panel, not here.
+	description jsonb NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_menus PRIMARY KEY (menu),
-	CONSTRAINT /*:cms.obj:*/ck_menus_menu CHECK (char_length(menu) <= 32),
-	CONSTRAINT /*:cms.obj:*/ck_menus_description CHECK (char_length(description) <= 128)
+	CONSTRAINT /*:cms.obj:*/ck_menus_menu CHECK (char_length(menu) <= 32)
 );
 
 

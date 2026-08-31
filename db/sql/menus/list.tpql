@@ -1,0 +1,19 @@
+-- `order` is the SQL expression that sorts by the localized description;
+-- the caller builds it through Title\Sort, so the request locale and its
+-- neutral fallback decide the order. The handle breaks ties.
+SELECT
+	m.menu,
+	m.description,
+	count(i.item) AS items
+FROM
+	/*:cms.prefix:*/menus m
+LEFT JOIN
+	/*:cms.prefix:*/menu_items i ON i.menu = m.menu
+GROUP BY
+	m.menu,
+	m.description
+ORDER BY
+<?php if (isset($order)) : ?>
+	<?= $order ?>,
+<?php endif ?>
+	m.menu;

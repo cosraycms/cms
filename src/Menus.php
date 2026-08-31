@@ -32,14 +32,22 @@ final class Menus
 		$this->sync = new Sync($db);
 	}
 
-	public function create(string $menu, string $description): void
+	/** @param array<string, string> $description the description per locale */
+	public function create(string $menu, array $description): void
 	{
-		$this->db->menus->create(['menu' => $menu, 'description' => $description])->run();
+		$this->db->menus->create([
+			'menu' => $menu,
+			'description' => json_encode($description),
+		])->run();
 	}
 
-	public function update(string $menu, string $description): void
+	/** @param array<string, string> $description the description per locale */
+	public function update(string $menu, array $description): void
 	{
-		$this->db->menus->update(['menu' => $menu, 'description' => $description])->run();
+		$this->db->menus->update([
+			'menu' => $menu,
+			'description' => json_encode($description),
+		])->run();
 	}
 
 	/**
