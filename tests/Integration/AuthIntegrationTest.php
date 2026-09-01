@@ -477,14 +477,11 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 	public function testLogoutWithoutSessionDoesNothing(): void
 	{
+		$this->expectNotToPerformAssertions();
 		$request = $this->psrRequest();
 		$auth = $this->createAuth($request, null);
 
-		// Should not throw, just return early
 		$auth->logout();
-
-		// No assertions needed - just verifying no exception
-		$this->assertTrue(true);
 	}
 
 	public function testUserViaSessionId(): void

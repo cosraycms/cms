@@ -24,13 +24,16 @@ use Throwable;
  */
 final class HandlerTest extends TestCase
 {
-	public function testViewsMethodReturnsInstance(): void
+	public function testViewsMethodSelectsCustomTemplates(): void
 	{
-		$handler = $this->handler();
+		$config = $this->errorConfig(['path.views' => '/missing-error-templates']);
+		$response = $this
+			->handler($config)
+			->views('tests/Fixtures/Boiler/templates')
+			->create()
+			->response(new Exception('Boom'), $this->psrRequest());
 
-		$result = $handler->views('tests/Fixtures/Boiler/templates');
-
-		$this->assertSame($handler, $result);
+		$this->assertStringContainsString('<h1>Server Error</h1>', (string) $response->getBody());
 	}
 
 	public function testTrustedMergesByDefault(): void
