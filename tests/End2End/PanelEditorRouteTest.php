@@ -301,6 +301,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// The /test/{uid} route references no content field, so no field
 		// wrapper is marked (only the handle input carries js-path-source).
 		$this->assertStringNotContainsString('<div class="js-path-source"', $html);
+
+		// The inspector lists the node's fact rows for an existing node.
+		$this->assertStringContainsString('class="facts"', $html);
+		$this->assertStringContainsString('<dt>Created</dt>', $html);
+		$this->assertStringContainsString('<code>' . $uid . '</code>', $html);
 	}
 
 	public function testRouteReferencedContentFieldsAreMarkedAsPathSources(): void
