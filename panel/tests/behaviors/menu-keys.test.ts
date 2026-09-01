@@ -148,8 +148,8 @@ describe('moves', () => {
 	it('binds the two axes to separate key pairs', () => {
 		row('second').focus();
 
-		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
-		press('ArrowRight', { altKey: true, code: 'ArrowRight' });
+		press('ArrowUp', { ctrlKey: true, shiftKey: true, code: 'ArrowUp' });
+		press('ArrowRight', { metaKey: true, shiftKey: true, code: 'ArrowRight' });
 		// macOS composes Option+l into `¬`, so only the physical key is left
 		// to recognise the binding by.
 		press('¬', { altKey: true, code: 'KeyL' });
@@ -157,22 +157,27 @@ describe('moves', () => {
 		expect(submitted).toEqual(['second:up', 'second:in', 'second:in']);
 	});
 
-	it('outdents with Alt+left and with Alt+h', () => {
+	it('outdents with the arrow and with the vim spelling', () => {
 		row('child').focus();
 
-		press('ArrowLeft', { altKey: true, code: 'ArrowLeft' });
+		press('ArrowLeft', { ctrlKey: true, shiftKey: true, code: 'ArrowLeft' });
 		press('˙', { altKey: true, code: 'KeyH' });
 
 		expect(submitted).toEqual(['child:out', 'child:out']);
 	});
 
-	it('leaves Tab to the browser', () => {
+	it.each([
+		['Tab', {}],
+		['ArrowLeft', { altKey: true, code: 'ArrowLeft' }],
+		['ArrowRight', { altKey: true, code: 'ArrowRight' }],
+	])('leaves %s to the browser', (key, init) => {
 		row('child').focus();
 
 		const event = new KeyboardEvent('keydown', {
-			key: 'Tab',
+			key,
 			bubbles: true,
 			cancelable: true,
+			...init,
 		});
 		row('child').dispatchEvent(event);
 
@@ -196,9 +201,9 @@ describe('moves', () => {
 		row('parent').focus();
 
 		// The first root row: nothing above it, nothing to climb out of.
-		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
-		press('ArrowRight', { altKey: true, code: 'ArrowRight' });
-		press('ArrowLeft', { altKey: true, code: 'ArrowLeft' });
+		press('ArrowUp', { ctrlKey: true, shiftKey: true, code: 'ArrowUp' });
+		press('ArrowRight', { ctrlKey: true, shiftKey: true, code: 'ArrowRight' });
+		press('ArrowLeft', { ctrlKey: true, shiftKey: true, code: 'ArrowLeft' });
 
 		expect(submitted).toEqual([]);
 	});
@@ -249,11 +254,13 @@ describe('scope', () => {
 		expect(document.activeElement).toBe(field);
 	});
 
-	it('leaves modified shortcuts to the browser', () => {
+	it('leaves the browser its own accelerators', () => {
 		row('second').focus();
 
+		// Accel without Shift is never ours: Cmd+R, Ctrl+T and friends.
 		press('ArrowUp', { metaKey: true, code: 'ArrowUp' });
 		press('j', { ctrlKey: true, code: 'KeyJ' });
+		press('r', { metaKey: true, code: 'KeyR' });
 
 		expect(submitted).toEqual([]);
 		expect(document.activeElement).toBe(row('second'));

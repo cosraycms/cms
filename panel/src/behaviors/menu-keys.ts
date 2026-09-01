@@ -112,7 +112,7 @@ function openKebab(row: HTMLElement): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
-	if (typing(event.target) || event.metaKey || event.ctrlKey) {
+	if (typing(event.target)) {
 		return;
 	}
 
@@ -129,7 +129,16 @@ function onKeydown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const handled = event.altKey ? withAlt(row, event.code) : plain(root, row, event);
+	const accel = event.metaKey || event.ctrlKey;
+	let handled = false;
+
+	if (accel && event.shiftKey) {
+		handled = moveBy(row, event.code, ARROW_MOVES);
+	} else if (event.altKey && !accel) {
+		handled = moveBy(row, event.code, VIM_MOVES);
+	} else if (!accel && !event.altKey) {
+		handled = plain(root, row, event);
+	}
 
 	if (handled) {
 		event.preventDefault();
@@ -137,33 +146,42 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 /**
- * Alt moves the thing: vertically among its siblings, horizontally through
- * the levels. Alt+left is browser-back on Windows and Linux, which the
- * preventDefault below suppresses — it is not a reserved shortcut, and
- * outside the tree it keeps navigating as it should.
+ * Moving the focused item. Both spellings do the same four things — the
+ * arrows for everyone, the vim letters for the fingers that expect them —
+ * and each is modified so that it collides with nothing the browser owns.
+ *
+ * `Alt` deliberately does not carry the arrows: Alt+left and Alt+right are
+ * back and forward on Windows and Linux, and an essential default is not
+ * ours to reinterpret, however recoverable the accident would be. The
+ * arrows take `Ctrl+Shift` / `Cmd+Shift` instead, which is what Notion,
+ * Miro and Webflow reach for. Both are accepted rather than sniffing the
+ * platform, since neither means anything else outside a text field.
  *
  * Matched on `code`, not `key`: macOS composes Option with a letter into
  * another character entirely — Option+h is `˙`, Option+l is `¬` — so the
  * letter never arrives. The physical key is the same one on QWERTY and
  * QWERTZ, which is what these bindings mean anyway.
  */
-function withAlt(row: HTMLElement, code: string): boolean {
-	const direction: Record<string, Direction> = {
-		ArrowUp: 'up',
-		KeyK: 'up',
-		ArrowDown: 'down',
-		KeyJ: 'down',
-		ArrowRight: 'in',
-		KeyL: 'in',
-		ArrowLeft: 'out',
-		KeyH: 'out',
-	};
+const ARROW_MOVES: Record<string, Direction> = {
+	ArrowUp: 'up',
+	ArrowDown: 'down',
+	ArrowRight: 'in',
+	ArrowLeft: 'out',
+};
 
-	if (!(code in direction)) {
+const VIM_MOVES: Record<string, Direction> = {
+	KeyK: 'up',
+	KeyJ: 'down',
+	KeyL: 'in',
+	KeyH: 'out',
+};
+
+function moveBy(row: HTMLElement, code: string, map: Record<string, Direction>): boolean {
+	if (!(code in map)) {
 		return false;
 	}
 
-	move(row, direction[code]);
+	move(row, map[code]);
 
 	return true;
 }

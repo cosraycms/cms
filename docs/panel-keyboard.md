@@ -10,7 +10,11 @@ This file is that vocabulary. It is prose, not a framework — there is no keyma
 
 **Arrows move the focus. `j` `k` `h` `l` shadow them.** Never the reverse, never a third meaning. Vertical is `↑`/`↓` and `k`/`j`; horizontal is `←`/`→` and `h`/`l`, where horizontal means folding and unfolding a branch or stepping in and out of it.
 
-**`Alt` plus a direction moves the thing, not the focus.** Vertically among its siblings, horizontally through the levels. The two axes stay on separate key pairs: nothing that reorders may change nesting, and nothing that changes nesting may reorder. Conflating them into one gesture is what makes drag and drop unreliable for trees, and it does not get better on a keyboard.
+**A modifier plus a direction moves the thing, not the focus.** Vertically among its siblings, horizontally through the levels. The two axes stay on separate key pairs: nothing that reorders may change nesting, and nothing that changes nesting may reorder. Conflating them into one gesture is what makes drag and drop unreliable for trees, and it does not get better on a keyboard.
+
+Both spellings of a direction get a modifier of their own. The arrows take `Ctrl+Shift` or `Cmd+Shift`, which is what Notion, Miro and Webflow use; both are accepted rather than sniffing the platform, since neither means anything outside a text field. The vim letters take `Alt`.
+
+**An essential browser default is never reinterpreted.** `Alt+←` and `Alt+→` are back and forward on Windows and Linux, so they carry nothing here, even though `preventDefault()` would suppress them and the worst accident — an item outdented by mistake — is visible and one click from undone. Reachability is not the test. `Cmd+T`, `Cmd+N`, `Cmd+W` are the same category, and a shortcut layer that treats them as available is a layer people learn to distrust.
 
 **`Tab` is never rebound.** Outliners indent with `Tab`, but they can: their rows are text fields, where `Tab` has no competing meaning. Ours are focusable elements in a document, so `Tab` still means "next control" — and a user who opens a row's action menu and reaches for `Tab` to walk it would instead reshape the tree. The ARIA `tree` pattern does not ask for `Tab` either; it describes navigation and selection, and says nothing about restructuring.
 
@@ -47,13 +51,13 @@ The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to 
 | `Enter` / `e` | open the item in the side pane |
 | `o` / `O` | insert a sibling below / above |
 | `.` | open the row's action menu |
-| `Alt+→` `Alt+←` / `Alt+l` `Alt+h` | indent / outdent |
-| `Alt+↓` `Alt+↑` / `Alt+j` `Alt+k` | move down / up among siblings |
+| `Ctrl/Cmd+Shift+→` `←` / `Alt+l` `Alt+h` | indent / outdent |
+| `Ctrl/Cmd+Shift+↓` `↑` / `Alt+j` `Alt+k` | move down / up among siblings |
 | `Escape` | leave the tree |
 
-`Alt+←` is browser-back on Windows and Linux. It is not a reserved shortcut, so `preventDefault()` suppresses it while the tree has focus, and everywhere else it keeps navigating as it should.
+Adding a child has no key: `o`, then `Ctrl/Cmd+Shift+→`. It stays in the row's action menu for the mouse.
 
-Adding a child has no key: `o`, then `Alt+→`. It stays in the row's action menu for the mouse.
+One collision is still open and deliberately left alone for now: on Windows and Linux, `Alt` plus a letter reaches the browser's menu bar — `Alt+h` opens Help in Firefox. The vim spellings are the fallback, not the discoverable path, so it is worth watching rather than fixing blind.
 
 ## Open decisions
 
