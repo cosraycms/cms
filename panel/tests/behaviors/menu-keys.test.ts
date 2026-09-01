@@ -34,6 +34,9 @@ function kebab(uid: string, disabled: string[]): string {
 
 beforeEach(() => {
 	localStorage.clear();
+	// Most of what this file covers is the vim layer, so it is on by default
+	// here; the layer's own block turns it back off.
+	localStorage.setItem('cosray:vim-keys', 'on');
 	submitted = [];
 	document.body.innerHTML = `
 		<ul class="menu-tree" role="tree" tabindex="-1" data-menu-tree="main">
@@ -239,6 +242,45 @@ describe('moves', () => {
 		press('.');
 
 		expect(row('second').querySelector<HTMLDetailsElement>('.kebab')!.open).toBe(true);
+	});
+});
+
+describe('the vim layer', () => {
+	beforeEach(() => {
+		localStorage.removeItem('cosray:vim-keys');
+	});
+
+	it('leaves every unmodified letter alone when it is off', () => {
+		row('parent').focus();
+
+		for (const key of ['j', 'k', 'h', 'l', 'e', 'o', 'O']) {
+			press(key);
+		}
+
+		expect(submitted).toEqual([]);
+		expect(document.activeElement).toBe(row('parent'));
+	});
+
+	it('gives up Alt as a modifier when it is off', () => {
+		row('second').focus();
+
+		press('˚', { altKey: true, code: 'KeyK' });
+
+		expect(submitted).toEqual([]);
+	});
+
+	it('keeps the base layer, which is the ARIA pattern', () => {
+		row('parent').focus();
+
+		press('ArrowDown');
+		expect(document.activeElement).toBe(row('child'));
+
+		row('second').focus();
+		press('ArrowUp', { ctrlKey: true, shiftKey: true, code: 'ArrowUp' });
+		expect(submitted).toEqual(['second:up']);
+
+		press('Escape');
+		expect(document.activeElement).toBe(document.querySelector('.menu-tree'));
 	});
 });
 

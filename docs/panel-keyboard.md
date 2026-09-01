@@ -10,6 +10,8 @@ This file is that vocabulary. It is prose, not a framework — there is no keyma
 
 **Arrows move the focus. `j` `k` `h` `l` shadow them.** Never the reverse, never a third meaning. Vertical is `↑`/`↓` and `k`/`j`; horizontal is `←`/`→` and `h`/`l`, where horizontal means folding and unfolding a branch or stepping in and out of it.
 
+**The unmodified letters are a layer, and it is off by default.** Type-ahead — a letter jumping to the next entry that starts with it, which the ARIA patterns expect — needs every printable key, so a letter cannot belong to both it and a command. Everything spelled with a bare letter therefore sits behind one setting, together with `Alt` as a modifier. What is left without it is exactly the ARIA pattern's own keys, which is what someone who has not read this file expects.
+
 **A modifier plus a direction moves the thing, not the focus.** Vertically among its siblings, horizontally through the levels. The two axes stay on separate key pairs: nothing that reorders may change nesting, and nothing that changes nesting may reorder. Conflating them into one gesture is what makes drag and drop unreliable for trees, and it does not get better on a keyboard.
 
 Both spellings of a direction get a modifier of their own. The arrows take `Ctrl+Shift` or `Cmd+Shift`, which is what Notion, Miro and Webflow use; both are accepted rather than sniffing the platform, since neither means anything outside a text field. The vim letters take `Alt`.
@@ -42,22 +44,46 @@ The two halves disagree only on layouts that move `h` `j` `k` `l` away from thei
 
 The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to these rules and is the reference implementation.
 
+Always on:
+
 | Key | Action |
 | --- | --- |
-| `↑` `↓` / `k` `j` | previous / next visible row |
-| `←` / `h` | collapse, or move to the parent when already collapsed |
-| `→` / `l` | expand, or move to the first child when already expanded |
+| `↑` `↓` | previous / next visible row |
+| `←` | collapse, or move to the parent when already collapsed |
+| `→` | expand, or move to the first child when already expanded |
 | `Home` `End` | first / last visible row |
-| `Enter` / `e` | open the item in the side pane |
-| `o` / `O` | insert a sibling below / above |
+| `Enter` | open the item in the side pane |
 | `.` | open the row's action menu |
-| `Ctrl/Cmd+Shift+→` `←` / `Alt+l` `Alt+h` | indent / outdent |
-| `Ctrl/Cmd+Shift+↓` `↑` / `Alt+j` `Alt+k` | move down / up among siblings |
+| `Ctrl/Cmd+Shift+→` `←` | indent / outdent |
+| `Ctrl/Cmd+Shift+↓` `↑` | move down / up among siblings |
 | `Escape` | leave the tree |
 
-Adding a child has no key: `o`, then `Ctrl/Cmd+Shift+→`. It stays in the row's action menu for the mouse.
+Behind the vim setting:
 
-One collision is still open and deliberately left alone for now: on Windows and Linux, `Alt` plus a letter reaches the browser's menu bar — `Alt+h` opens Help in Firefox. The vim spellings are the fallback, not the discoverable path, so it is worth watching rather than fixing blind.
+| Key             | Action                         |
+| --------------- | ------------------------------ |
+| `k` `j`         | previous / next visible row    |
+| `h` `l`         | fold / unfold, as `←` and `→`  |
+| `e`             | open the item, as `Enter`      |
+| `o` / `O`       | insert a sibling below / above |
+| `Alt+l` `Alt+h` | indent / outdent               |
+| `Alt+j` `Alt+k` | move down / up among siblings  |
+
+Adding a child has no key: `o`, then an indent. It stays in the row's action menu for the mouse.
+
+## Turning the vim layer on
+
+There is no interface for it, on purpose. One browser, one line:
+
+```js
+localStorage.setItem("cosray:vim-keys", "on");
+```
+
+The key is panel-wide, not per screen — the second screen with vim bindings shares this one. It lives in `localStorage`, so it is per browser rather than per user; if that ever needs to change, it moves to the user profile the way `users.panel_locale` did, which is an additive change and not a reason to build for it now.
+
+The setting is read on every keystroke, so it takes effect without a reload.
+
+One collision inside the layer is known and left alone: on Windows and Linux, `Alt` plus a letter reaches the browser's menu bar — `Alt+h` opens Help in Firefox. It is now borne only by people who asked for the layer, which is what made it tolerable.
 
 ## Open decisions
 

@@ -23,6 +23,34 @@ import {
 
 type Direction = 'up' | 'down' | 'in' | 'out';
 
+/**
+ * The vim layer is off unless a browser opts into it. What it really gates
+ * is who owns the unmodified letters: type-ahead, which the ARIA patterns
+ * expect of a tree, needs every printable key, so a letter cannot belong to
+ * both. Without the layer the tree keeps exactly the pattern's own keys.
+ *
+ * Per keystroke rather than cached: at typing speed the read costs nothing,
+ * and a setting with no interface should take effect the moment it is set.
+ */
+const VIM_SETTING = 'cosray:vim-keys';
+
+function vim(): boolean {
+	try {
+		return localStorage.getItem(VIM_SETTING) === 'on';
+	} catch {
+		return false;
+	}
+}
+
+/** The vim spellings fold onto the keys the base layer already handles. */
+const VIM_KEYS: Record<string, string> = {
+	j: 'ArrowDown',
+	k: 'ArrowUp',
+	h: 'ArrowLeft',
+	l: 'ArrowRight',
+	e: 'Enter',
+};
+
 function typing(target: EventTarget | null): boolean {
 	return (
 		target instanceof HTMLInputElement ||
@@ -135,7 +163,7 @@ function onKeydown(event: KeyboardEvent): void {
 	if (accel && event.shiftKey) {
 		handled = moveBy(row, event.code, ARROW_MOVES);
 	} else if (event.altKey && !accel) {
-		handled = moveBy(row, event.code, VIM_MOVES);
+		handled = vim() && moveBy(row, event.code, VIM_MOVES);
 	} else if (!accel && !event.altKey) {
 		handled = plain(root, row, event);
 	}
@@ -187,26 +215,24 @@ function moveBy(row: HTMLElement, code: string, map: Record<string, Direction>):
 }
 
 function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boolean {
+	const letters = vim();
+	const key = letters ? (VIM_KEYS[event.key] ?? event.key) : event.key;
 	const visible = visibleRows(root);
 
-	switch (event.key) {
+	switch (key) {
 		case 'ArrowUp':
-		case 'k':
 			step(root, row, -1);
 
 			return true;
 		case 'ArrowDown':
-		case 'j':
 			step(root, row, 1);
 
 			return true;
 		case 'ArrowLeft':
-		case 'h':
 			fold(root, row);
 
 			return true;
 		case 'ArrowRight':
-		case 'l':
 			unfold(root, row);
 
 			return true;
@@ -219,19 +245,20 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 
 			return true;
 		case 'Enter':
-		case 'e':
 			activate(row);
 
 			return true;
-		// `o` and `O` open a line below and above, exactly as in a vim buffer.
-		// A child is `o` followed by Alt+right, the way an outliner does it,
-		// so no key has to mean "but nested".
+		// `o` and `O` open a line below and above, exactly as in a vim buffer,
+		// and have no equivalent in the base layer to fold onto. A child is
+		// `o` followed by an indent, the way an outliner does it, so no key
+		// has to mean "but nested".
 		case 'o':
-			add(row, 'after');
-
-			return true;
 		case 'O':
-			add(row, 'before');
+			if (!letters) {
+				return false;
+			}
+
+			add(row, key === 'o' ? 'after' : 'before');
 
 			return true;
 		case '.':
