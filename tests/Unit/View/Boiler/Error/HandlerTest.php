@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit\View\Boiler\Error;
 
 use Celema\Core\Error\Handler as ErrorHandler;
 use Celema\Core\Error\Renderer as ErrorRenderer;
+use Celema\Core\Exception\HttpNotFound;
 use Cosray\Config;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;
@@ -13,6 +14,7 @@ use Exception;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;
 use ReflectionClass;
 use Throwable;
@@ -108,34 +110,51 @@ final class HandlerTest extends TestCase
 		$this->assertStringContainsString('Internal Server Error', (string) $response->getBody());
 	}
 
-	public function testCustomRendererCanReplaceDefaultRenderer(): void
+	public function testCustomRendererCanReplaceDefaultRenderers(): void
 	{
-		$renderer = new class implements ErrorRenderer {
-			public function render(
-				Throwable $exception,
-				ResponseFactory $factory,
-				Request $request,
-				bool $debug,
-			): Response {
-				$response = $factory->createResponse(500);
-				$response->getBody()->write('custom error');
-
-				return $response;
-			}
-		};
-		$config = $this->errorConfig(['error.renderer' => $renderer]);
+		$config = $this->errorConfig(['error.renderer' => new HandlerRenderer()]);
 		$errorHandler = $this->handler($config)->create();
-		$response = $errorHandler->response(new Exception('Boom'), $this->psrRequest());
+
+		$this->assertSame(
+			'custom error',
+			(string) $errorHandler->response(new Exception('Boom'), $this->psrRequest())->getBody(),
+		);
+		$this->assertSame(
+			'custom error',
+			(string) $errorHandler->response(new HttpNotFound(), $this->psrRequest())->getBody(),
+		);
+	}
+
+	public function testCustomRendererCanBeConfiguredByClassName(): void
+	{
+		$config = $this->errorConfig(['error.renderer' => HandlerRenderer::class]);
+		$response = $this
+			->handler($config)
+			->create()
+			->response(new Exception('Boom'), $this->psrRequest());
 
 		$this->assertSame('custom error', (string) $response->getBody());
 	}
 
-	private function handler(?Config $config = null): Handler
+	public function testCustomRendererTreatsHttpErrorsAsMatched(): void
+	{
+		$logger = $this->createMock(Logger::class);
+		$logger->expects($this->never())->method('alert');
+		$config = $this->errorConfig(['error.renderer' => new HandlerRenderer()]);
+		$response = $this
+			->handler($config, $logger)
+			->create()
+			->response(new HttpNotFound(), $this->psrRequest());
+
+		$this->assertSame('custom error', (string) $response->getBody());
+	}
+
+	private function handler(?Config $config = null, ?Logger $logger = null): Handler
 	{
 		return new Handler(
 			config: $config ?? $this->errorConfig(),
 			factory: $this->factory(),
-			logger: new NullLogger(),
+			logger: $logger ?? new NullLogger(),
 		);
 	}
 
@@ -158,5 +177,20 @@ final class HandlerTest extends TestCase
 			'path.root' => self::root(),
 			'path.views' => '/tests/Fixtures/Boiler/templates',
 		], $settings));
+	}
+}
+
+final class HandlerRenderer implements ErrorRenderer
+{
+	public function render(
+		Throwable $exception,
+		ResponseFactory $factory,
+		Request $request,
+		bool $debug,
+	): Response {
+		$response = $factory->createResponse(500);
+		$response->getBody()->write('custom error');
+
+		return $response;
 	}
 }

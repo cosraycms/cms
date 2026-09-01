@@ -44,7 +44,7 @@ final class ColumnTest extends TestCase
 	public function testFluentSortSetter(): void
 	{
 		$column = Column::new('Title', 'title')
-			->sort('title');
+			->sort(' title ');
 
 		$this->assertSame('title', $column->sortKey());
 	}
