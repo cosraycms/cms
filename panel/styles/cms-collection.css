@@ -79,7 +79,7 @@
 	& .toolbar {
 		display: flex;
 		align-items: center;
-		background-color: var(--cms-color-surface-sunken);
+		background-color: var(--cms-color-surface);
 		padding: var(--cms-space-4) var(--cms-space-6);
 		gap: var(--cms-space-3);
 		flex: 0 0 auto;
@@ -194,7 +194,7 @@
 			height: 2.375rem;
 			padding: 0 var(--cms-space-4) 0 var(--cms-space-8);
 			border: 1px solid var(--cms-color-border);
-			border-radius: var(--cms-radius-full);
+			border-radius: var(--cms-radius-md);
 			background: var(--cms-color-surface);
 			color: var(--cms-color-text);
 			font-size: var(--cms-font-size-sm);

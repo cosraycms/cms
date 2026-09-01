@@ -49,6 +49,7 @@
 
 		&[aria-current='page'] {
 			background: var(--cms-color-selected);
+			box-shadow: inset 0 0 0 1px var(--cms-color-border);
 			color: var(--cms-color-text);
 			font-weight: 500;
 		}
