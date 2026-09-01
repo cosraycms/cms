@@ -140,8 +140,9 @@
 	 * the fixed column width, so a sideways scroll hides neither.
 	 */
 	& .col-select {
-		justify-content: center;
-		padding-inline: var(--cms-space-2);
+		justify-content: flex-start;
+		padding-right: 0;
+		padding-left: var(--cms-space-6);
 	}
 
 	& .cell.col-select + .cell {
@@ -155,6 +156,11 @@
 		position: sticky;
 		left: var(--cms-list-select-width);
 		z-index: 3;
+	}
+
+	& th:last-child,
+	& .cell:last-child {
+		padding-right: var(--cms-space-6);
 	}
 
 	& .value {
