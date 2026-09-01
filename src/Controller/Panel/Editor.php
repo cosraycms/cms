@@ -31,6 +31,8 @@ use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
 use Cosray\Panel\System;
+use DateTimeImmutable;
+use IntlDateFormatter;
 use Throwable;
 
 final class Editor extends Panel
@@ -70,6 +72,7 @@ final class Editor extends Panel
 			context: $context,
 			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
+			meta: $this->nodeMeta($data),
 		);
 	}
 
@@ -701,6 +704,7 @@ final class Editor extends Panel
 		Context $context,
 		array $generatedPaths = [],
 		array $pathSourceFields = [],
+		array $meta = [],
 	): array {
 		$locales = array_map(
 			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title],
@@ -719,7 +723,74 @@ final class Editor extends Panel
 			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,
+			'meta' => $meta,
 		]);
+	}
+
+	/**
+	 * The inspector's fact rows: creation date in the panel locale and the
+	 * last editor's display name. Only an existing node has either.
+	 *
+	 * @return array{created: ?string, editor: ?string}
+	 */
+	private function nodeMeta(array $data): array
+	{
+		return [
+			'created' => $this->displayDate($data['created'] ?? null),
+			'editor' => $this->userLabel($data['editor'] ?? null),
+		];
+	}
+
+	private function displayDate(mixed $value): ?string
+	{
+		if (!is_string($value) || trim($value) === '') {
+			return null;
+		}
+
+		$timezone = $this->config->app->timezone;
+
+		try {
+			$date = new DateTimeImmutable($value, $timezone);
+		} catch (Throwable) {
+			return null;
+		}
+
+		$formatter = new IntlDateFormatter(
+			$this->localeId(),
+			IntlDateFormatter::MEDIUM,
+			IntlDateFormatter::NONE,
+			$timezone,
+		);
+		$formatted = $formatter->format($date->getTimestamp());
+
+		return $formatted === false ? null : $formatted;
+	}
+
+	private function userLabel(mixed $user): ?string
+	{
+		if (!is_array($user)) {
+			return null;
+		}
+
+		$data = $user['data'] ?? null;
+
+		if (is_string($data)) {
+			$data = json_decode($data, true);
+		}
+
+		$candidates = [
+			is_array($data) ? $data['name'] ?? null : null,
+			$user['username'] ?? null,
+			$user['email'] ?? null,
+		];
+
+		foreach ($candidates as $candidate) {
+			if (is_string($candidate) && trim($candidate) !== '') {
+				return $candidate;
+			}
+		}
+
+		return null;
 	}
 
 	private function intParam(

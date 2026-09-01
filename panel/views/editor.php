@@ -12,6 +12,7 @@ $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
 $pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
+$meta = (array) ($this->unwrap($meta ?? null) ?? []);
 $system = (array) $this->unwrap($system);
 $panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -246,6 +247,7 @@ foreach ($fields as $field) {
 					? $links->paths($uid)
 					: $links->createPaths((string) ($type['handle'] ?? '')),
 				'generatedPaths' => $generatedPaths,
+				'meta' => $meta,
 			]) ?>
 		<?php endif ?>
 

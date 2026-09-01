@@ -13,10 +13,22 @@ $routable = (bool) $routable;
 $renderable = (bool) $renderable;
 $pathsUrl = $this->unwrap($pathsUrl);
 $generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
+$meta = (array) ($this->unwrap($meta ?? null) ?? []);
 $paths = is_array($node['paths'] ?? null) ? $node['paths'] : [];
 $handle = $node['handle'] ?? null;
+
+$typeLabel = $node['type']['label'] ?? null;
+$created = $meta['created'] ?? null;
+$editorName = $meta['editor'] ?? null;
+$showType = is_string($typeLabel) && $typeLabel !== '';
+$showCreated = is_string($created) && $created !== '';
+$showEditor = is_string($editorName) && $editorName !== '';
+$showMeta = $showType || $renderable || $showCreated || $showEditor;
 ?>
 <aside class="cms-inspector" aria-label="<?= escape(__('editor:settings')) ?>">
+	<div class="head">
+		<span class="title"><?= escape(__('editor:settings')) ?></span>
+	</div>
 	<div class="scroll">
 		<?php if ($renderable): ?>
 			<section class="section">
@@ -52,6 +64,7 @@ $handle = $node['handle'] ?? null;
 
 		<?php if ($routable): ?>
 			<section class="section">
+				<h2 class="heading"><?= escape(__('editor:paths')) ?></h2>
 				<?php // Long values in a narrow rail: the inputs take the full width
 
 				// and the generated suggestions sit under them rather than beside. ?>
@@ -91,13 +104,29 @@ $handle = $node['handle'] ?? null;
 					pattern="(?!.*[.][.])[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?"
 					value="<?= escape(is_string($handle) ? $handle : '') ?>" />
 			</div>
-
-			<?php if ($renderable): ?>
-				<div class="field">
-					<span class="label"><?= escape(__('editor:internal-id')) ?></span>
-					<code class="value"><?= escape((string) ($node['uid'] ?? '')) ?></code>
-				</div>
-			<?php endif ?>
 		</section>
+
+		<?php if ($showMeta): ?>
+			<section class="section">
+				<dl class="facts">
+					<?php if ($showType): ?>
+						<dt><?= escape(__('editor:type')) ?></dt>
+						<dd><?= escape($typeLabel) ?></dd>
+					<?php endif ?>
+					<?php if ($renderable): ?>
+						<dt><?= escape(__('editor:internal-id')) ?></dt>
+						<dd><code><?= escape((string) ($node['uid'] ?? '')) ?></code></dd>
+					<?php endif ?>
+					<?php if ($showCreated): ?>
+						<dt><?= escape(__('editor:created')) ?></dt>
+						<dd><?= escape($created) ?></dd>
+					<?php endif ?>
+					<?php if ($showEditor): ?>
+						<dt><?= escape(__('editor:edited-by')) ?></dt>
+						<dd><?= escape($editorName) ?></dd>
+					<?php endif ?>
+				</dl>
+			</section>
+		<?php endif ?>
 	</div>
 </aside>

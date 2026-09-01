@@ -28,6 +28,7 @@ final class Styleguide extends Panel
 			'fieldset' => $this->fieldset(),
 			'content' => $this->content(),
 			'rows' => $this->rows(),
+			'inspector' => $this->inspector(),
 		]);
 	}
 
@@ -195,6 +196,37 @@ final class Styleguide extends Panel
 			'label' => 'Basics',
 			'description' => 'Title and teaser are shown in listings, search results and when the page is shared.',
 			'fields' => ['title', 'teaser'],
+		];
+	}
+
+	/**
+	 * Everything `node/inspector` needs, in the shape the editor passes it:
+	 * toggles, route paths per locale, the handle and the fact rows of an
+	 * existing node.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function inspector(): array
+	{
+		return [
+			'node' => [
+				'uid' => 'node-4f21c8',
+				'handle' => 'sudhaus',
+				'published' => true,
+				'hidden' => false,
+				'paths' => ['en' => '/en/brewery/brewhouse', 'de' => '/brauerei/sudhaus'],
+				'type' => ['label' => 'Page'],
+			],
+			'locales' => [
+				['id' => 'en', 'title' => 'English'],
+				['id' => 'de', 'title' => 'Deutsch'],
+			],
+			'defaultLocale' => 'en',
+			'routable' => true,
+			'renderable' => true,
+			'pathsUrl' => null,
+			'generatedPaths' => [],
+			'meta' => ['created' => 'Aug 11, 2026', 'editor' => 'M. Keller'],
 		];
 	}
 

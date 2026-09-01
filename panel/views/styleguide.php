@@ -200,6 +200,15 @@ $chevronSvg = is_file($chevronSvgPath)
 			</section>
 
 			<section class="section">
+				<h2>Inspector</h2>
+				<p class="note">
+					Rendered through <code>panel/views/node/inspector.php</code> — toggles, route
+					paths, handle and the fact rows of an existing node.
+				</p>
+				<?php $this->insert('node/inspector', (array) $this->unwrap($inspector)) ?>
+			</section>
+
+			<section class="section">
 				<h2>Listing</h2>
 				<p class="note">
 					Rendered through <code>panel/views/collection/row.php</code>, the same partial
