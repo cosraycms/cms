@@ -89,6 +89,12 @@ $urls = (array) $this->unwrap($urls);
 					</ul>
 				<?php endif ?>
 
+				<?php // Adding at the root belongs to the tree, not to the pane:
+				// it has to stay reachable while an item is being edited. ?>
+				<a class="add" href="<?= escape($urls['add']) ?>"><?= escape(
+					__('menu:add-item'),
+				) ?></a>
+
 				<?php if ($preview !== ''): ?>
 					<details class="preview">
 						<summary><?= escape(__('menu:preview')) ?></summary>
@@ -107,9 +113,6 @@ $urls = (array) $this->unwrap($urls);
 				<?php else: ?>
 					<div class="pane-empty">
 						<p><?= escape(__('menu:pane-empty')) ?></p>
-						<a class="cms-button primary" href="<?= escape($urls['add']) ?>"><?= escape(
-							__('menu:add-item'),
-						) ?></a>
 					</div>
 				<?php endif ?>
 			</aside>

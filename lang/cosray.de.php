@@ -212,7 +212,7 @@ return [
 		'menu:order-created' => 'Älteste zuerst',
 		'menu:order-created-desc' => 'Neueste zuerst',
 		'menu:order-title' => 'Nach Titel',
-		'menu:pane-empty' => 'Wähle einen Eintrag zum Bearbeiten oder lege einen neuen an.',
+		'menu:pane-empty' => 'Wähle einen Eintrag zum Bearbeiten.',
 		'menu:picker-assets' => 'Dateien suchen …',
 		'menu:picker-nodes' => 'Seiten suchen …',
 		'menu:preview' => 'Vorschau',

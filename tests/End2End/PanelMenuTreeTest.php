@@ -148,6 +148,23 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertStringContainsString('checked', $html);
 	}
 
+	public function testTheRootAddActionStaysReachableWhileEditing(): void
+	{
+		$this->createItem('busy-item');
+
+		foreach (['', '?item=busy-item', '?add=busy-item'] as $state) {
+			$html = $this->getHtmlResponse(
+				$this->makeRequest('GET', '/cp/menus/tree-menu' . $state),
+			);
+
+			$this->assertMatchesRegularExpression(
+				'/<a class="add" href="\/cp\/menus\/tree-menu\?add="/',
+				$html,
+				"missing on {$state}",
+			);
+		}
+	}
+
 	public function testAddPaneForRootAndBelowAParent(): void
 	{
 		$this->createItem('add-parent', null, 1, [

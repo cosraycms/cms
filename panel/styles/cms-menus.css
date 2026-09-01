@@ -259,6 +259,30 @@
 		overscroll-behavior: contain;
 	}
 
+	/* Sits where the item it creates will appear: after the last root card,
+	   in the tree column rather than the pane, so editing an item does not
+	   take the action away. */
+	& .tree > .add {
+		display: block;
+		margin-top: var(--cms-space-2);
+		padding: var(--cms-space-2) var(--cms-space-3);
+		border: 1px dashed var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		text-decoration: none;
+
+		&::before {
+			content: '+ ';
+		}
+
+		&:hover {
+			border-color: var(--cms-color-accent);
+			background: var(--cms-color-hover);
+			color: var(--cms-color-accent-text);
+		}
+	}
+
 	& .tree > .empty {
 		border: 1px dashed var(--cms-color-border-strong);
 		border-radius: var(--cms-radius-lg);

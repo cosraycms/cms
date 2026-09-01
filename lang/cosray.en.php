@@ -212,7 +212,7 @@ return [
 		'menu:order-created' => 'Oldest first',
 		'menu:order-created-desc' => 'Newest first',
 		'menu:order-title' => 'By title',
-		'menu:pane-empty' => 'Select an item to edit it, or add a new one.',
+		'menu:pane-empty' => 'Select an item to edit it.',
 		'menu:picker-assets' => 'Search files …',
 		'menu:picker-nodes' => 'Search pages …',
 		'menu:preview' => 'Preview',
