@@ -109,7 +109,7 @@
 
 	& .inner {
 		width: 100%;
-		max-width: var(--cms-node-max-width);
+		max-width: var(--cms-editor-width);
 		margin-inline: auto;
 	}
 

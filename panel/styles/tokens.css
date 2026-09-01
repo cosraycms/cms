@@ -365,15 +365,13 @@
 	 * screen the panel was given, so widening one must not stretch the other.
 	 */
 	--cms-content-max-width: 120rem;
-	--cms-node-max-width: 85rem;
-	--cms-node-topbar-height: 4.25rem;
+	--cms-editor-width: 55rem;
 	--cms-row-height: 3.5rem;
 	--cms-topbar-bg: var(--cms-color-surface);
 	--cms-sidebar-width: 18rem;
 	--cms-sidebar-header-bg: var(--cms-topbar-bg);
 	--cms-sidebar-border-right: 0;
 	--cms-inspector-width: 23.75rem;
-	--cms-editor-bg: var(--cms-color-canvas);
 	--cms-tile-min: 11rem;
 }
 
