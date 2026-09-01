@@ -69,17 +69,18 @@
 	& .body {
 		display: flex;
 		flex-direction: column;
-		gap: var(--cms-space-3);
 		flex: 1 1 auto;
 		min-height: 0;
-		padding: var(--cms-space-4) var(--cms-space-6) 0;
-		background: var(--cms-color-surface-sunken);
+		padding: 0;
+		background: var(--cms-color-surface);
 		overflow: hidden;
 	}
 
 	& .toolbar {
 		display: flex;
 		align-items: center;
+		background-color: var(--cms-color-surface-sunken);
+		padding: var(--cms-space-4) var(--cms-space-6);
 		gap: var(--cms-space-3);
 		flex: 0 0 auto;
 		flex-wrap: wrap;
@@ -259,16 +260,14 @@
 		}
 	}
 
-	/* The card keeps its own bottom edge off-screen: the listing runs to the
-	   bottom of the frame rather than floating above a strip of canvas. */
-	& .card {
+	/* The listing keeps its own bottom edge off-screen: it runs to the bottom
+	   of the frame rather than floating above a strip of canvas. */
+	& .listing {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
 		min-height: 0;
-		border: 1px solid var(--cms-color-border);
-		border-bottom: 0;
-		border-radius: var(--cms-radius-lg) var(--cms-radius-lg) 0 0;
+		border-top: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface);
 		overflow: hidden;
 	}
@@ -289,6 +288,7 @@
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-4);
 		border-top: 1px solid var(--cms-color-border);
+		border-bottom: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface-sunken);
 	}
 
@@ -426,10 +426,6 @@
 
 		& .body {
 			overflow: visible;
-		}
-
-		& .card {
-			border-radius: var(--cms-radius-lg);
 		}
 
 		& .scroll {

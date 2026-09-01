@@ -140,8 +140,8 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?php endif ?>
 					<?php foreach ($page->parent->status as $badge): ?>
 						<span class="cms-status is-<?= escape($badge['kind']) ?>"><?= escape(
-						$badge['label'],
-					) ?></span>
+							$badge['label'],
+						) ?></span>
 					<?php endforeach ?>
 				</div>
 			<?php endif ?>
@@ -149,6 +149,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 
 		<?php if ($bulk): ?>
 			<?php // The form element stays empty: checkboxes and action buttons
+
 			// associate through form="collection-bulk" so the bar, the table
 			// and the dialogs need no shared wrapper. Submit buttons carry
 			// their endpoint as formaction; without one a submit has nowhere
@@ -184,7 +185,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</div>
 		<?php endif ?>
 
-		<div class="card">
+		<div class="listing">
 			<?php if (count($page->table->rows) === 0): ?>
 				<div class="empty">
 					<div class="icon" aria-hidden="true">⌁</div>
@@ -288,6 +289,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				data-label-one="<?= escape(__('bulk:confirm-delete')) ?>"
 				data-label-many="<?= escape(__('bulk:confirm-delete-plural')) ?>"></p>
 			<?php // data-bulk-gate: deleting a parent without this opt-in would
+
 			// only be skipped server-side, so the confirm button stays locked
 			// until the box is ticked. ?>
 			<label class="children" data-bulk-children data-bulk-gate hidden>
@@ -317,6 +319,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				data-label-one="<?= escape(__('bulk:confirm-duplicate')) ?>"
 				data-label-many="<?= escape(__('bulk:confirm-duplicate-plural')) ?>"></p>
 			<?php // No data-bulk-gate: duplicating a parent without its children
+
 			// is a legitimate copy, so the checkbox is a plain option. ?>
 			<label class="children" data-bulk-children hidden>
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />

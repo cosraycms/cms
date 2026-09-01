@@ -65,8 +65,8 @@ $chevronSvg = is_file($chevronSvgPath)
 				<?php foreach ($tokenGroups as $group): ?>
 					<details class="group"<?= $group['open'] ? ' open' : '' ?>>
 						<summary><?= escape((string) $group['title']) ?> <span class="count"><?= count(
-					(array) $group['tokens'],
-				) ?></span></summary>
+							(array) $group['tokens'],
+						) ?></span></summary>
 					<div class="tokens">
 						<?php foreach ((array) $group['tokens'] as $token): ?>
 							<?php $name = (string) $token['name']; ?>
@@ -80,8 +80,8 @@ $chevronSvg = is_file($chevronSvgPath)
 								<?php endif ?>
 								<code class="name"><?= escape($name) ?></code>
 								<code class="value" title="<?= escape(
-							(string) $token['value'],
-						) ?>"><?= escape((string) $token['value']) ?></code>
+									(string) $token['value'],
+								) ?>"><?= escape((string) $token['value']) ?></code>
 							</div>
 						<?php endforeach ?>
 					</div>
@@ -174,7 +174,7 @@ $chevronSvg = is_file($chevronSvgPath)
 					badge in one place — a real collection rarely shows them together.
 				</p>
 				<div class="cms-collection">
-					<div class="card">
+					<div class="listing">
 						<div class="scroll">
 							<table
 								class="cms-list"
@@ -213,7 +213,7 @@ $chevronSvg = is_file($chevronSvgPath)
 			<section class="section">
 				<h2>Empty state</h2>
 				<div class="cms-collection">
-					<div class="card">
+					<div class="listing">
 						<div class="empty">
 							<div class="icon" aria-hidden="true">⌁</div>
 							<strong>No entries yet</strong>

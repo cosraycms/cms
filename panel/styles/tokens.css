@@ -145,7 +145,7 @@
 	 * Primitives — depth and edges
 	 */
 	--cms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-	--cms-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+	--cms-shadow: rgba(17, 24, 39, 0.08) 0px 1px 3px, rgba(17, 24, 39, 0.05) 0px 0px 14px;
 	--cms-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 	--cms-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 	--cms-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
@@ -182,7 +182,7 @@
 	 */
 	--cms-color-canvas: light-dark(var(--cms-color-neutral-100), #0f1115);
 	--cms-color-surface: light-dark(var(--cms-color-white), #171a20);
-	--cms-color-surface-sunken: light-dark(#f5f6f8, #13161b);
+	--cms-color-surface-sunken: light-dark(var(--cms-color-neutral-50), #13161b);
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), #1c2027);
 	--cms-color-rail: var(--cms-color-surface);
 
