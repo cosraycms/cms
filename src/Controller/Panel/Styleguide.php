@@ -25,6 +25,7 @@ final class Styleguide extends Panel
 			],
 			'defaultLocale' => 'en',
 			'fields' => $this->fields(),
+			'fieldset' => $this->fieldset(),
 			'content' => $this->content(),
 			'rows' => $this->rows(),
 		]);
@@ -177,6 +178,23 @@ final class Styleguide extends Panel
 				'label' => 'A label long enough to find out what happens when it does not fit',
 				'control' => ['name' => 'text', 'props' => []],
 			],
+		];
+	}
+
+	/**
+	 * A fieldset descriptor in the shape the editor passes to `field/fieldset`;
+	 * its members come out of `fields()`, the rest render as a loose run below
+	 * it — the two section forms the editor sheet knows.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function fieldset(): array
+	{
+		return [
+			'name' => 'basics',
+			'label' => 'Basics',
+			'description' => 'Title and teaser are shown in listings, search results and when the page is shared.',
+			'fields' => ['title', 'teaser'],
 		];
 	}
 

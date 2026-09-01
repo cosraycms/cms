@@ -9,9 +9,23 @@ $this->layout('layer/main');
 
 $tokenGroups = (array) $this->unwrap($tokenGroups);
 $fields = (array) $this->unwrap($fields);
+$fieldset = (array) $this->unwrap($fieldset);
 $content = (array) $this->unwrap($content);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+
+$fieldsByName = [];
+
+foreach ($fields as $field) {
+	if (is_array($field) && is_string($field['name'] ?? null)) {
+		$fieldsByName[$field['name']] = $field;
+	}
+}
+
+$fieldsetMembers = array_flip(array_filter(
+	(array) ($fieldset['fields'] ?? []),
+	'is_string',
+));
 
 // Mirrors editor.php: field/item places each field on the form grid.
 $span = static function (mixed $value, int $fallback): string {
@@ -146,9 +160,23 @@ $chevronSvg = is_file($chevronSvgPath)
 				// the sampler shows fields at the width they actually get. ?>
 				<div class="cms-node">
 					<div class="inner">
-						<div class="card">
+						<div class="sheet">
+							<?php $this->insert('field/fieldset', [
+								'fieldset' => $fieldset,
+								'fieldsByName' => $fieldsByName,
+								'content' => $content,
+								'locales' => $locales,
+								'defaultLocale' => $defaultLocale,
+								'uid' => 'styleguide',
+								'assets' => [],
+								'pathSourceFields' => [],
+								'span' => $span,
+							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($fields as $field): ?>
+									<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
+										continue;
+									} ?>
 									<?php $this->insert('field/item', [
 										'field' => $field,
 										'content' => $content,

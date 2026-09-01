@@ -78,6 +78,32 @@ foreach ($fieldsets as $fieldset) {
 		$fieldsetMembers[$member] = true;
 	}
 }
+
+// The pane renders a stack of sections: each fieldset is one, and every run
+// of fields between fieldsets forms an anonymous one, so dividers can sit
+// between sections without wrapping single fields.
+$sections = [];
+$run = null;
+
+foreach ($fields as $field) {
+	if (!is_array($field) || ($field['hidden'] ?? false)) {
+		continue;
+	}
+
+	$fieldName = (string) ($field['name'] ?? '');
+
+	if (isset($fieldsetsByFirstField[$fieldName])) {
+		$sections[] = ['fieldset' => $fieldsetsByFirstField[$fieldName]];
+		$run = null;
+	} elseif (!isset($fieldsetMembers[$fieldName])) {
+		if ($run === null) {
+			$sections[] = ['fields' => []];
+			$run = array_key_last($sections);
+		}
+
+		$sections[$run]['fields'][] = $field;
+	}
+}
 ?>
 
 <div class="page cms-node">
@@ -174,39 +200,37 @@ foreach ($fieldsets as $fieldset) {
 					// node adopts the same uid. ?>
 					<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
 				<?php endif ?>
-				<div class="card">
-					<div class="cms-fields">
-						<?php foreach ($fields as $field): ?>
-							<?php if (!is_array($field) || ($field['hidden'] ?? false)) {
-								continue;
-							} ?>
-							<?php $fieldName = (string) ($field['name'] ?? ''); ?>
-							<?php if (isset($fieldsetsByFirstField[$fieldName])): ?>
-								<?php $this->insert('field/fieldset', [
-									'fieldset' => $fieldsetsByFirstField[$fieldName],
-									'fieldsByName' => $fieldsByName,
-									'content' => $content,
-									'locales' => $locales,
-									'defaultLocale' => $defaultLocale,
-									'uid' => $uid,
-									'assets' => $assets,
-									'pathSourceFields' => $pathSourceFields,
-									'span' => $span,
-								]) ?>
-							<?php elseif (!isset($fieldsetMembers[$fieldName])): ?>
-								<?php $this->insert('field/item', [
-									'field' => $field,
-									'content' => $content,
-									'locales' => $locales,
-									'defaultLocale' => $defaultLocale,
-									'uid' => $uid,
-									'assets' => $assets,
-									'pathSourceFields' => $pathSourceFields,
-									'span' => $span,
-								]) ?>
-							<?php endif ?>
-						<?php endforeach ?>
-					</div>
+				<div class="sheet">
+					<?php foreach ($sections as $section): ?>
+						<?php if (isset($section['fieldset'])): ?>
+							<?php $this->insert('field/fieldset', [
+								'fieldset' => $section['fieldset'],
+								'fieldsByName' => $fieldsByName,
+								'content' => $content,
+								'locales' => $locales,
+								'defaultLocale' => $defaultLocale,
+								'uid' => $uid,
+								'assets' => $assets,
+								'pathSourceFields' => $pathSourceFields,
+								'span' => $span,
+							]) ?>
+						<?php else: ?>
+							<div class="cms-fields">
+								<?php foreach ($section['fields'] as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $content,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => $uid,
+										'assets' => $assets,
+										'pathSourceFields' => $pathSourceFields,
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						<?php endif ?>
+					<?php endforeach ?>
 				</div>
 			</div>
 		</div>

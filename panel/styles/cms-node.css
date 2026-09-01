@@ -113,11 +113,17 @@
 		margin-inline: auto;
 	}
 
-	& .card {
-		padding: var(--cms-space-6);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-lg);
-		background: var(--cms-color-surface-raised);
+	/* The form is a stack of open sections on the sunken pane — fieldsets and
+	   anonymous runs of loose fields — with a hairline between neighbours. */
+	& .sheet {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-7);
+
+		& > * + * {
+			padding-top: var(--cms-space-7);
+			border-top: 1px solid var(--cms-color-border-soft);
+		}
 	}
 
 	& .errors {
@@ -208,10 +214,6 @@
 		& .pane {
 			padding: var(--cms-space-4);
 			overflow: visible;
-		}
-
-		& .card {
-			padding: var(--cms-space-4);
 		}
 
 		& .actions {

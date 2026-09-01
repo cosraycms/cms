@@ -260,7 +260,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('data-fieldset="baseFields"', $html);
 		$this->assertStringContainsString('Document fields</legend>', $html);
 		$this->assertStringContainsString('Reusable document fields', $html);
-		$this->assertStringContainsString('grid-column: span 50 / span 50', $html);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
 		$this->assertStringContainsString('name="content[body][value][zxx]"', $html);
 		$this->assertStringNotContainsString('content[baseFields]', $html);

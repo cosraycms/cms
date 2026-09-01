@@ -28,9 +28,9 @@
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-sm);
-		font-weight: 500;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
 		line-height: 1.25rem;
 
 		& > div {
@@ -133,28 +133,33 @@
 	line-height: 1.45;
 }
 
+/* An open section on the pane, not a box: the heading and the hairline
+   between sections carry the grouping. */
 .cms-fieldset {
 	min-width: 0;
-	margin: var(--cms-space-2) 0;
-	padding: var(--cms-space-4);
-	border: 1px solid var(--cms-color-border);
-	border-radius: var(--cms-radius-md);
+	margin: 0;
+	padding: 0;
+	border: 0;
 
 	& .legend {
-		padding: 0 var(--cms-space-2);
+		padding: 0;
 		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-sm);
+		font-size: var(--cms-font-size-base);
 		font-weight: 600;
+		letter-spacing: -0.012em;
 	}
 
 	& .description {
-		padding: var(--cms-space-2) var(--cms-space-2) 0;
+		max-width: 62ch;
+		padding: var(--cms-space-1) 0 0;
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
+		line-height: 1.5;
 	}
 
 	& .fields {
 		width: 100%;
+		margin-top: var(--cms-space-4);
 	}
 }
 
@@ -191,10 +196,6 @@
 
 @media (max-width: 52rem) {
 	.cms-fields > * {
-		grid-column: 1 / -1 !important;
-	}
-
-	.cms-fieldset {
 		grid-column: 1 / -1 !important;
 	}
 }

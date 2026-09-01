@@ -21,8 +21,7 @@ $descriptionId = "fieldset-{$name}-description";
 	data-fieldset="<?= escape($name) ?>"
 	<?= is_string($description) && $description !== ''
 		? 'aria-describedby="' . escape($descriptionId) . '"'
-		: '' ?>
-	style="grid-column: <?= $span($fieldset['width'] ?? null, 100) ?>">
+		: '' ?>>
 	<?php if (is_string($label) && $label !== ''): ?>
 		<legend class="legend"><?= escape($label) ?></legend>
 	<?php endif ?>
