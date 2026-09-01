@@ -213,7 +213,7 @@ describe('moves', () => {
 
 	it.each(['Enter', 'e'])('opens the item with %s', (key) => {
 		const link = row('parent').querySelector<HTMLAnchorElement>('a.text')!;
-		const clicked = vi.fn();
+		const clicked = vi.fn((event: Event) => event.preventDefault());
 		link.addEventListener('click', clicked);
 		row('parent').focus();
 
