@@ -113,6 +113,8 @@ return [
 		'editor:hidden-label' => 'Hidden',
 		'editor:incomplete-form' => 'The submitted form arrived incomplete and nothing was saved. If this keeps happening, the server\'s PHP max_input_vars limit may be truncating the form.',
 		'editor:internal-id' => 'Document ID',
+		'editor:mode-create' => 'New',
+		'editor:mode-edit' => 'Edit',
 		'editor:paths' => 'Paths',
 		'editor:preview' => 'Preview',
 		'editor:published' => 'published',

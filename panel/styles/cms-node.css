@@ -28,6 +28,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
+		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-xs);
 		font-weight: 500;
 
@@ -38,6 +39,10 @@
 			&:hover {
 				color: var(--cms-color-accent-text);
 			}
+		}
+
+		& .sep {
+			color: var(--cms-color-text-faint);
 		}
 	}
 

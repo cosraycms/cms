@@ -112,6 +112,8 @@ foreach ($fields as $field) {
 		<div class="titles">
 			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 				<a href="<?= escape($links->back()) ?>"><?= escape($name) ?></a>
+				<span class="sep" aria-hidden="true">/</span>
+				<span><?= escape($edit ? __('editor:mode-edit') : __('editor:mode-create')) ?></span>
 			</nav>
 			<div class="line">
 				<h1><?= $node['title'] ?? '' ?></h1>

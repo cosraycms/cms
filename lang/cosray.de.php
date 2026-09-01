@@ -113,6 +113,8 @@ return [
 		'editor:hidden-label' => 'Versteckt',
 		'editor:incomplete-form' => 'Das übermittelte Formular kam unvollständig an, es wurde nichts gespeichert. Tritt dies wiederholt auf, kürzt möglicherweise das PHP-Limit max_input_vars das Formular.',
 		'editor:internal-id' => 'Dokument-ID',
+		'editor:mode-create' => 'Neu',
+		'editor:mode-edit' => 'Bearbeiten',
 		'editor:paths' => 'Pfade',
 		'editor:preview' => 'Vorschau',
 		'editor:published' => 'veröffentlicht',
