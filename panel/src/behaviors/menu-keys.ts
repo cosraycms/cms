@@ -124,29 +124,36 @@ function onKeydown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const handled = event.altKey ? withAlt(row, event.key) : plain(root, row, event);
+	const handled = event.altKey ? withAlt(row, event.code) : plain(root, row, event);
 
 	if (handled) {
 		event.preventDefault();
 	}
 }
 
-/** Alt reorders among siblings and changes the level; never both at once. */
-function withAlt(row: HTMLElement, key: string): boolean {
+/**
+ * Alt reorders among siblings and changes the level; never both at once.
+ *
+ * Matched on `code`, not `key`: macOS composes Option with a letter into
+ * another character entirely — Option+h is `˙`, Option+l is `¬` — so the
+ * letter never arrives. The physical key is the same one on QWERTY and
+ * QWERTZ, which is what these bindings mean anyway.
+ */
+function withAlt(row: HTMLElement, code: string): boolean {
 	const direction: Record<string, Direction> = {
 		ArrowUp: 'up',
-		k: 'up',
+		KeyK: 'up',
 		ArrowDown: 'down',
-		j: 'down',
-		l: 'in',
-		h: 'out',
+		KeyJ: 'down',
+		KeyL: 'in',
+		KeyH: 'out',
 	};
 
-	if (!(key in direction)) {
+	if (!(code in direction)) {
 		return false;
 	}
 
-	move(row, direction[key]);
+	move(row, direction[code]);
 
 	return true;
 }

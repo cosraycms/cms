@@ -145,9 +145,11 @@ describe('moves', () => {
 	it('binds the two axes to separate key pairs', () => {
 		row('second').focus();
 
-		press('ArrowUp', { altKey: true });
+		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
 		press('Tab');
-		press('l', { altKey: true });
+		// macOS composes Option+l into `¬`, so only the physical key is left
+		// to recognise the binding by.
+		press('¬', { altKey: true, code: 'KeyL' });
 
 		expect(submitted).toEqual(['second:up', 'second:in', 'second:in']);
 	});
@@ -156,16 +158,28 @@ describe('moves', () => {
 		row('child').focus();
 
 		press('Tab', { shiftKey: true });
-		press('h', { altKey: true });
+		press('˙', { altKey: true, code: 'KeyH' });
 
 		expect(submitted).toEqual(['child:out', 'child:out']);
+	});
+
+	it('reorders with Alt and the vim pair on either platform', () => {
+		// Windows and Linux deliver the letter, macOS the composed character;
+		// only the physical key is common to both.
+		row('parent').focus();
+		press('j', { altKey: true, code: 'KeyJ' });
+
+		row('second').focus();
+		press('˚', { altKey: true, code: 'KeyK' });
+
+		expect(submitted).toEqual(['parent:down', 'second:up']);
 	});
 
 	it('does nothing where the kebab says the move is undefined', () => {
 		row('parent').focus();
 
 		// The first root row: nothing above it, nothing to climb out of.
-		press('ArrowUp', { altKey: true });
+		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
 		press('Tab');
 		press('Tab', { shiftKey: true });
 
@@ -207,8 +221,8 @@ describe('scope', () => {
 	it('leaves modified shortcuts to the browser', () => {
 		row('second').focus();
 
-		press('ArrowUp', { metaKey: true });
-		press('j', { ctrlKey: true });
+		press('ArrowUp', { metaKey: true, code: 'ArrowUp' });
+		press('j', { ctrlKey: true, code: 'KeyJ' });
 
 		expect(submitted).toEqual([]);
 		expect(document.activeElement).toBe(row('second'));
