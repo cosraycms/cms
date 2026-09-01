@@ -30,6 +30,8 @@
 	}
 
 	& th {
+		display: flex;
+		align-items: center;
 		padding: var(--cms-space-3) var(--cms-space-4);
 		border-bottom: 1px solid #e5e6e7;
 		background: var(--cms-color-surface-sunken);
