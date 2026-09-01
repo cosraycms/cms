@@ -149,7 +149,7 @@ describe('moves', () => {
 		row('second').focus();
 
 		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
-		press('Tab');
+		press('ArrowRight', { altKey: true, code: 'ArrowRight' });
 		// macOS composes Option+l into `¬`, so only the physical key is left
 		// to recognise the binding by.
 		press('¬', { altKey: true, code: 'KeyL' });
@@ -157,13 +157,27 @@ describe('moves', () => {
 		expect(submitted).toEqual(['second:up', 'second:in', 'second:in']);
 	});
 
-	it('outdents with Shift+Tab and with Alt+h', () => {
+	it('outdents with Alt+left and with Alt+h', () => {
 		row('child').focus();
 
-		press('Tab', { shiftKey: true });
+		press('ArrowLeft', { altKey: true, code: 'ArrowLeft' });
 		press('˙', { altKey: true, code: 'KeyH' });
 
 		expect(submitted).toEqual(['child:out', 'child:out']);
+	});
+
+	it('leaves Tab to the browser', () => {
+		row('child').focus();
+
+		const event = new KeyboardEvent('keydown', {
+			key: 'Tab',
+			bubbles: true,
+			cancelable: true,
+		});
+		row('child').dispatchEvent(event);
+
+		expect(submitted).toEqual([]);
+		expect(event.defaultPrevented).toBe(false);
 	});
 
 	it('reorders with Alt and the vim pair on either platform', () => {
@@ -183,13 +197,13 @@ describe('moves', () => {
 
 		// The first root row: nothing above it, nothing to climb out of.
 		press('ArrowUp', { altKey: true, code: 'ArrowUp' });
-		press('Tab');
-		press('Tab', { shiftKey: true });
+		press('ArrowRight', { altKey: true, code: 'ArrowRight' });
+		press('ArrowLeft', { altKey: true, code: 'ArrowLeft' });
 
 		expect(submitted).toEqual([]);
 	});
 
-	it.each(['Enter', 'o'])('opens the item with %s', (key) => {
+	it.each(['Enter', 'e'])('opens the item with %s', (key) => {
 		const link = row('parent').querySelector<HTMLAnchorElement>('a.text')!;
 		const clicked = vi.fn();
 		link.addEventListener('click', clicked);
@@ -201,9 +215,8 @@ describe('moves', () => {
 	});
 
 	it.each([
-		['a', 'after'],
+		['o', 'after'],
 		['O', 'before'],
-		['A', 'child'],
 	])("follows the kebab's %s link to the create pane", (key, kind) => {
 		const link = row('second').querySelector<HTMLAnchorElement>(`[data-menu-add="${kind}"]`)!;
 		const clicked = vi.fn((event: Event) => event.preventDefault());
@@ -230,7 +243,7 @@ describe('scope', () => {
 		field.focus();
 
 		press('j');
-		press('Tab');
+		press('o');
 
 		expect(submitted).toEqual([]);
 		expect(document.activeElement).toBe(field);

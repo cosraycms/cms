@@ -10,17 +10,19 @@ This file is that vocabulary. It is prose, not a framework — there is no keyma
 
 **Arrows move the focus. `j` `k` `h` `l` shadow them.** Never the reverse, never a third meaning. Vertical is `↑`/`↓` and `k`/`j`; horizontal is `←`/`→` and `h`/`l`, where horizontal means folding and unfolding a branch or stepping in and out of it.
 
-**`Alt` plus a direction moves the thing, not the focus.** The two axes stay on separate key pairs: nothing that reorders may change nesting, and nothing that changes nesting may reorder. Conflating them into one gesture is what makes drag and drop unreliable for trees, and it does not get better on a keyboard.
+**`Alt` plus a direction moves the thing, not the focus.** Vertically among its siblings, horizontally through the levels. The two axes stay on separate key pairs: nothing that reorders may change nesting, and nothing that changes nesting may reorder. Conflating them into one gesture is what makes drag and drop unreliable for trees, and it does not get better on a keyboard.
 
-**`Enter` or `o` opens the focused thing. `Escape` leaves the innermost layer.** In a structure that means giving up the focus; in a dialog it means closing it. One rule, applied at whatever depth the user is.
+**`Tab` is never rebound.** Outliners indent with `Tab`, but they can: their rows are text fields, where `Tab` has no competing meaning. Ours are focusable elements in a document, so `Tab` still means "next control" — and a user who opens a row's action menu and reaches for `Tab` to walk it would instead reshape the tree. The ARIA `tree` pattern does not ask for `Tab` either; it describes navigation and selection, and says nothing about restructuring.
 
-**`a` creates a sibling below, `O` above, `A` a child.** The file-tree convention — `o` opens, `a` adds — from NERDTree, oil and neo-tree, which is the context a panel tree resembles, not the vim buffer where `o` opens a line. `O` is the one borrowing from the buffer, reading as "open above", which is why `A` is not `a`'s opposite. That seam is deliberate: each key follows the convention its own action comes from.
+**`Enter` or `e` opens the focused thing for editing. `Escape` leaves the innermost layer.** In a structure that means giving up the focus; in a dialog it means closing it. One rule, applied at whatever depth the user is.
+
+**`o` creates below, `O` above.** Exactly the vim buffer's "open a line". Nothing creates a child directly: that is `o` followed by `Alt+→`, the way an outliner does it, so no key has to mean "but nested" and every letter keeps one meaning.
 
 **`.` opens the focused row's action menu.** Whatever that screen calls its kebab.
 
 **`/` focuses the screen's search.** Global, and older than the rest of this list.
 
-**Every binding is inert inside a text field.** An `input`, `textarea`, `select`, or anything `contenteditable` keeps its own keys, including `j`, `o` and `a`.
+**Every binding is inert inside a text field.** An `input`, `textarea`, `select`, or anything `contenteditable` keeps its own keys, including `j`, `o` and `e`.
 
 **A key only ever drives an affordance that already exists.** Every binding here finds a server-rendered link or form and activates it, so the disabled state is the legality check and the screen keeps working without JavaScript. Build the action first, bind the key second — never the reverse.
 
@@ -42,16 +44,16 @@ The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to 
 | `←` / `h` | collapse, or move to the parent when already collapsed |
 | `→` / `l` | expand, or move to the first child when already expanded |
 | `Home` `End` | first / last visible row |
-| `Enter` / `o` | open the item in the side pane |
-| `a` / `O` | insert a sibling below / above |
-| `A` | add a child |
+| `Enter` / `e` | open the item in the side pane |
+| `o` / `O` | insert a sibling below / above |
 | `.` | open the row's action menu |
-| `Tab` / `Shift+Tab` | indent / outdent |
-| `Alt+l` / `Alt+h` | indent / outdent |
+| `Alt+→` `Alt+←` / `Alt+l` `Alt+h` | indent / outdent |
 | `Alt+↓` `Alt+↑` / `Alt+j` `Alt+k` | move down / up among siblings |
 | `Escape` | leave the tree |
 
-`Alt+←` and `Alt+→` are deliberately unbound: they are browser-back and browser-forward on Windows and Linux.
+`Alt+←` is browser-back on Windows and Linux. It is not a reserved shortcut, so `preventDefault()` suppresses it while the tree has focus, and everywhere else it keeps navigating as it should.
+
+Adding a child has no key: `o`, then `Alt+→`. It stays in the row's action menu for the mouse.
 
 ## Open decisions
 

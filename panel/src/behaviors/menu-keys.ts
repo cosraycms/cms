@@ -98,7 +98,7 @@ function activate(row: HTMLElement): void {
 }
 
 /** Opens the create pane the row's kebab already links to. */
-function add(row: HTMLElement, kind: 'before' | 'after' | 'child'): void {
+function add(row: HTMLElement, kind: 'before' | 'after'): void {
 	row.querySelector<HTMLAnchorElement>(`.kebab a[data-menu-add="${kind}"]`)?.click();
 }
 
@@ -137,7 +137,10 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 /**
- * Alt reorders among siblings and changes the level; never both at once.
+ * Alt moves the thing: vertically among its siblings, horizontally through
+ * the levels. Alt+left is browser-back on Windows and Linux, which the
+ * preventDefault below suppresses — it is not a reserved shortcut, and
+ * outside the tree it keeps navigating as it should.
  *
  * Matched on `code`, not `key`: macOS composes Option with a letter into
  * another character entirely — Option+h is `˙`, Option+l is `¬` — so the
@@ -150,7 +153,9 @@ function withAlt(row: HTMLElement, code: string): boolean {
 		KeyK: 'up',
 		ArrowDown: 'down',
 		KeyJ: 'down',
+		ArrowRight: 'in',
 		KeyL: 'in',
+		ArrowLeft: 'out',
 		KeyH: 'out',
 	};
 
@@ -167,10 +172,6 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 	const visible = visibleRows(root);
 
 	switch (event.key) {
-		case 'Tab':
-			move(row, event.shiftKey ? 'out' : 'in');
-
-			return true;
 		case 'ArrowUp':
 		case 'k':
 			step(root, row, -1);
@@ -200,24 +201,19 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 
 			return true;
 		case 'Enter':
-		case 'o':
+		case 'e':
 			activate(row);
 
 			return true;
-		// `a` adds a sibling and `A` a child, the file-tree plugins' convention
-		// where `o` opens and `a` creates. `O` inserts above, reading as vim's
-		// "open above" — so `A` is not `a`'s opposite, which is the one seam
-		// between the two conventions.
-		case 'a':
+		// `o` and `O` open a line below and above, exactly as in a vim buffer.
+		// A child is `o` followed by Alt+right, the way an outliner does it,
+		// so no key has to mean "but nested".
+		case 'o':
 			add(row, 'after');
 
 			return true;
 		case 'O':
 			add(row, 'before');
-
-			return true;
-		case 'A':
-			add(row, 'child');
 
 			return true;
 		case '.':
