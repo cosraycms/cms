@@ -22,10 +22,14 @@
 		grid-template-columns: subgrid;
 	}
 
-	& th {
+	/* A sticky cell cannot move beyond its one-row containing block. */
+	& thead tr {
 		position: sticky;
 		top: 0;
 		z-index: 2;
+	}
+
+	& th {
 		padding: var(--cms-space-3) var(--cms-space-4);
 		border-bottom: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface-sunken);
@@ -100,6 +104,7 @@
 	}
 
 	& th:first-child {
+		position: sticky;
 		left: 0;
 		z-index: 3;
 	}
