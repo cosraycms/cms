@@ -145,6 +145,10 @@
 		padding-left: var(--cms-space-6);
 	}
 
+	& input[type='checkbox'] {
+		margin: 0;
+	}
+
 	& .cell.col-select + .cell {
 		position: sticky;
 		left: var(--cms-list-select-width);
