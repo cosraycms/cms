@@ -46,7 +46,7 @@
 	width: 100%;
 	max-width: var(--cms-content-max-width);
 	margin-inline: auto;
-	padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
+	padding: var(--cms-space-3) var(--cms-space-6) var(--cms-space-4);
 
 	& .logo {
 		display: flex;
@@ -161,6 +161,10 @@
 		border-top: 0;
 		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
 		box-shadow: var(--cms-shadow);
+	}
+
+	.cms-masthead {
+		padding-inline: var(--cms-space-1);
 	}
 }
 
