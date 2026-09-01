@@ -195,6 +195,7 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 
 			return true;
 		case 'Enter':
+		case 'o':
 			activate(row);
 
 			return true;

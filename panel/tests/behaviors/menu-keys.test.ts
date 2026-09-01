@@ -186,13 +186,13 @@ describe('moves', () => {
 		expect(submitted).toEqual([]);
 	});
 
-	it('opens the item with Enter', () => {
+	it.each(['Enter', 'o'])('opens the item with %s', (key) => {
 		const link = row('parent').querySelector<HTMLAnchorElement>('a.text')!;
 		const clicked = vi.fn();
 		link.addEventListener('click', clicked);
 		row('parent').focus();
 
-		press('Enter');
+		press(key);
 
 		expect(clicked).toHaveBeenCalled();
 	});
