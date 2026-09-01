@@ -27,7 +27,7 @@ Layer order beats specificity, so a downstream project restyles the panel by red
 Three tiers:
 
 1. **Primitives** — raw values with no meaning attached: `--cms-color-neutral-300`, `--cms-space-4`, `--cms-radius-md`, `--cms-shadow-sm`. Panel-internal. Projects should not depend on them.
-2. **Semantic** — what a value is _for_: `--cms-color-surface`, `--cms-color-text-muted`, `--cms-color-primary`, `--cms-color-danger-surface`. This tier is the public theming contract.
+2. **Semantic** — what a value is _for_: `--cms-font-family`, `--cms-color-surface`, `--cms-color-text-muted`, `--cms-color-primary`, `--cms-color-danger-surface`. This tier is the public theming contract.
 3. **Component** — owned by one component: `--cms-button-primary-bg`, `--cms-sidebar-width`, `--cms-inspector-width`.
 
 ### The theming contract
@@ -52,6 +52,28 @@ Three rules make the palette work:
 - **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas. The same holds for the direction a variant moves in: mix toward `--cms-color-shade`, which is black on light and white on dark, so a hover darkens on one theme and lightens on the other instead of sinking into the surface.
 
 An override is a plain value and applies to both themes. A project that wants two, and it usually does not, writes `light-dark()` itself.
+
+### Typography
+
+`--cms-font-family` is the public panel font-family token. Self-host a project's font files, declare their faces outside the layer, and override the family inside it:
+
+```css
+@font-face {
+	font-family: "Example Sans";
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url("/fonts/example-sans.woff2") format("woff2-variations");
+}
+
+@layer theme {
+	:root {
+		--cms-font-family: "Example Sans", ui-sans-serif, system-ui, sans-serif;
+	}
+}
+```
+
+Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract.
 
 ### Colour roles
 

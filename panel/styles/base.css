@@ -13,7 +13,7 @@ body {
 body {
 	background: var(--cms-color-canvas);
 	color: var(--cms-color-text);
-	font-family: var(--cms-font-sans);
+	font-family: var(--cms-font-family);
 	font-size: 0.875rem;
 	line-height: 1.45;
 	text-rendering: optimizeLegibility;
