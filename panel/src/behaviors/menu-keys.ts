@@ -98,7 +98,7 @@ function activate(row: HTMLElement): void {
 }
 
 /** Opens the create pane the row's kebab already links to. */
-function add(row: HTMLElement, kind: 'after' | 'child'): void {
+function add(row: HTMLElement, kind: 'before' | 'after' | 'child'): void {
 	row.querySelector<HTMLAnchorElement>(`.kebab a[data-menu-add="${kind}"]`)?.click();
 }
 
@@ -204,10 +204,16 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 			activate(row);
 
 			return true;
-		// `a` adds a sibling, `A` a child — the file-tree plugins' convention,
-		// where `o` opens and `a` creates.
+		// `a` adds a sibling and `A` a child, the file-tree plugins' convention
+		// where `o` opens and `a` creates. `O` inserts above, reading as vim's
+		// "open above" — so `A` is not `a`'s opposite, which is the one seam
+		// between the two conventions.
 		case 'a':
 			add(row, 'after');
+
+			return true;
+		case 'O':
+			add(row, 'before');
 
 			return true;
 		case 'A':

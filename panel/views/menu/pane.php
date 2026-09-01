@@ -12,7 +12,7 @@ $pane = (array) $this->unwrap($pane);
 $mode = (string) $pane['mode'];
 $action = (string) $pane['action'];
 $parent = $pane['parent'] ?? null;
-$after = $pane['after'] ?? null;
+$anchor = $pane['anchor'] ?? null;
 $parentTitle = $pane['parentTitle'] ?? null;
 $values = (array) $pane['values'];
 $errors = (array) $pane['errors'];
@@ -48,10 +48,13 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		<?php if ($parent !== null): ?>
 			<input type="hidden" name="parent" value="<?= escape((string) $parent) ?>" />
 		<?php endif ?>
-		<?php // The sibling the new item is inserted behind; without it the
-		// item appends to the end of the group, which is the root add. ?>
-		<?php if ($after !== null): ?>
-			<input type="hidden" name="after" value="<?= escape((string) $after) ?>" />
+		<?php // The sibling the new item is inserted next to, and on which
+		// side; without it the item appends to the end of its group. ?>
+		<?php if (is_array($anchor)): ?>
+			<input
+				type="hidden"
+				name="<?= escape((string) $anchor['side']) ?>"
+				value="<?= escape((string) $anchor['item']) ?>" />
 		<?php endif ?>
 
 		<div class="cms-field<?= isset($errors['type']) ? ' has-error' : '' ?>">

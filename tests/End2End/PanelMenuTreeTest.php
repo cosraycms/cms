@@ -158,7 +158,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$pane = $this->getHtmlResponse(
 			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-a'),
 		);
-		$this->assertStringContainsString('name="after" value="ins-a"', $pane);
+		$this->assertMatchesRegularExpression('/name="after"\s+value="ins-a"/', $pane);
 		// A root anchor means no parent; the drag form's own empty one aside.
 		$this->assertStringNotContainsString('name="parent" value="ins-', $pane);
 
@@ -175,6 +175,31 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$order = $this->order();
 		$this->assertSame(['ins-a', $order[1], 'ins-b', 'ins-c'], $order);
 		$this->assertSame('Inserted', $this->itemData($order[1])['title']['en']);
+	}
+
+	public function testInsertingAboveASiblingLandsItThere(): void
+	{
+		$this->createItem('above-a', null, 1);
+		$this->createItem('above-b', null, 2);
+
+		$pane = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?before=above-a'),
+		);
+		$this->assertMatchesRegularExpression('/name="before"\s+value="above-a"/', $pane);
+
+		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'First now'],
+				'path' => ['en' => '/first-now'],
+				'before' => 'above-a',
+			],
+		]);
+
+		// The one thing the root add cannot do: a new first item.
+		$order = $this->order();
+		$this->assertSame([$order[0], 'above-a', 'above-b'], $order);
+		$this->assertSame('First now', $this->itemData($order[0])['title']['en']);
 	}
 
 	public function testInsertingBelowAChildStaysInThatGroup(): void

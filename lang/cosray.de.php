@@ -142,6 +142,7 @@ return [
 		'media:upload-server-error' => 'Der Dateiupload ist aufgrund eines Serverfehlers fehlgeschlagen.',
 		'media:wrong-extension' => 'Falsche Dateiendung: :ext. Für diesen Dateityp sind folgende Endungen erlaubt: :allowed.',
 		'menu:add-after' => 'Darunter einfügen',
+		'menu:add-before' => 'Darüber einfügen',
 		'menu:add-child' => 'Untereintrag hinzufügen',
 		'menu:add-item' => 'Eintrag hinzufügen',
 		'menu:cancel' => 'Abbrechen',

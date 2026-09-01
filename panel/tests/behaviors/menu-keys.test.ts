@@ -18,6 +18,7 @@ function press(key: string, init: KeyboardEventInit = {}): void {
 /** The kebab as the tree renders it: one form per direction. */
 function kebab(uid: string, disabled: string[]): string {
 	return `<details class="kebab"><summary tabindex="-1"></summary><div class="kebab-menu">
+		<a data-menu-add="before" href="/cp/menus/main?before=${uid}"></a>
 		<a data-menu-add="after" href="/cp/menus/main?after=${uid}"></a>
 		<a data-menu-add="child" href="/cp/menus/main?add=${uid}"></a>
 		${['up', 'down', 'in', 'out']
@@ -201,6 +202,7 @@ describe('moves', () => {
 
 	it.each([
 		['a', 'after'],
+		['O', 'before'],
 		['A', 'child'],
 	])("follows the kebab's %s link to the create pane", (key, kind) => {
 		const link = row('second').querySelector<HTMLAnchorElement>(`[data-menu-add="${kind}"]`)!;

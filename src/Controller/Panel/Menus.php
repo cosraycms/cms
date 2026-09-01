@@ -197,15 +197,10 @@ final class Menus extends Panel
 		$body = $this->formData();
 		$parent = trim((string) ($body['parent'] ?? ''));
 		$parent = $parent === '' ? null : $parent;
-		$after = trim((string) ($body['after'] ?? ''));
-		$after = $after === '' ? null : $after;
+		$anchor = $this->submittedAnchor($menu, $body);
 
 		if ($parent !== null) {
 			$this->itemRowFor($menu, $parent);
-		}
-
-		if ($after !== null) {
-			$this->itemRowFor($menu, $after);
 		}
 
 		$values = $this->valuesFromBody($context, $body);
@@ -221,7 +216,7 @@ final class Menus extends Panel
 				$parent,
 				$values,
 				$errors,
-				$after,
+				$anchor,
 			));
 		}
 
@@ -233,12 +228,12 @@ final class Menus extends Panel
 			actor: $this->actor(),
 		);
 
-		if ($after !== null) {
-			// `add()` appended it, so the anchor sits at the same index in the
-			// group with and without the new item: splicing it in one past the
-			// anchor lands it directly behind.
+		if ($anchor !== null) {
+			// `add()` appended it, so the anchor sits at the same index with and
+			// without the new item — `place()` removes it before splicing.
 			$siblings = $this->siblingIds($menu, $parent);
-			$this->menus->place($item, $parent, (int) array_search($after, $siblings, true) + 1);
+			$index = (int) array_search($anchor['item'], $siblings, true);
+			$this->menus->place($item, $parent, $anchor['side'] === 'after' ? $index + 1 : $index);
 		}
 
 		return $this->redirectToMenu($factory, $menu, [
@@ -374,6 +369,28 @@ final class Menus extends Panel
 		return [$grandparent, (int) array_search($parent, $siblings, true) + 1];
 	}
 
+	/**
+	 * The anchor a create form was opened against, once its item is known to
+	 * belong to this menu.
+	 *
+	 * @param array<string, mixed> $body
+	 * @return ?array{side: string, item: string}
+	 */
+	private function submittedAnchor(string $menu, array $body): ?array
+	{
+		foreach (['before', 'after'] as $side) {
+			$item = trim((string) ($body[$side] ?? ''));
+
+			if ($item !== '') {
+				$this->itemRowFor($menu, $item);
+
+				return ['side' => $side, 'item' => $item];
+			}
+		}
+
+		return null;
+	}
+
 	/** @return list<string> */
 	private function siblingIds(string $menu, ?string $parent): array
 	{
@@ -461,11 +478,15 @@ final class Menus extends Panel
 			return $this->paneContext($cms, $context, $menu, 'edit', $item, null, $values, []);
 		}
 
-		$after = $this->request->param('after', null);
+		foreach (['before', 'after'] as $side) {
+			$anchor = $this->request->param($side, null);
 
-		if (is_string($after) && $after !== '') {
-			// A sibling of the anchor: same group, placed right behind it.
-			$row = $this->itemRowFor($menu, $after);
+			if (!is_string($anchor) || $anchor === '') {
+				continue;
+			}
+
+			// A sibling of the anchor: its group, on the named side of it.
+			$row = $this->itemRowFor($menu, $anchor);
 
 			return $this->paneContext(
 				$cms,
@@ -476,7 +497,7 @@ final class Menus extends Panel
 				$row['parent'] === null ? null : (string) $row['parent'],
 				$this->valuesFromData([]),
 				[],
-				$after,
+				['side' => $side, 'item' => $anchor],
 			);
 		}
 
@@ -514,7 +535,7 @@ final class Menus extends Panel
 		?string $parent,
 		array $values,
 		array $errors,
-		?string $after = null,
+		?array $anchor = null,
 	): array {
 		$values['nodeLabel'] = $values['node'] === ''
 			? ''
@@ -529,7 +550,7 @@ final class Menus extends Panel
 				? $this->url($menu, '/item/create')
 				: $this->url($menu, '/item/' . rawurlencode((string) $item)),
 			'parent' => $parent,
-			'after' => $after,
+			'anchor' => $anchor,
 			'parentTitle' => $parent === null ? null : $this->itemTitle($menu, $parent),
 			'values' => $values,
 			'errors' => $errors,

@@ -14,7 +14,7 @@ This file is that vocabulary. It is prose, not a framework — there is no keyma
 
 **`Enter` or `o` opens the focused thing. `Escape` leaves the innermost layer.** In a structure that means giving up the focus; in a dialog it means closing it. One rule, applied at whatever depth the user is.
 
-**`a` creates a sibling, `A` a child.** The file-tree convention — `o` opens, `a` adds — from NERDTree, oil and neo-tree, which is the context a panel tree resembles, not the vim buffer where `o` opens a line.
+**`a` creates a sibling below, `O` above, `A` a child.** The file-tree convention — `o` opens, `a` adds — from NERDTree, oil and neo-tree, which is the context a panel tree resembles, not the vim buffer where `o` opens a line. `O` is the one borrowing from the buffer, reading as "open above", which is why `A` is not `a`'s opposite. That seam is deliberate: each key follows the convention its own action comes from.
 
 **`.` opens the focused row's action menu.** Whatever that screen calls its kebab.
 
@@ -43,7 +43,8 @@ The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to 
 | `→` / `l` | expand, or move to the first child when already expanded |
 | `Home` `End` | first / last visible row |
 | `Enter` / `o` | open the item in the side pane |
-| `a` / `A` | insert a sibling below / add a child |
+| `a` / `O` | insert a sibling below / above |
+| `A` | add a child |
 | `.` | open the row's action menu |
 | `Tab` / `Shift+Tab` | indent / outdent |
 | `Alt+l` / `Alt+h` | indent / outdent |

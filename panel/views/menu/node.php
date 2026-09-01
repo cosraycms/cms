@@ -77,6 +77,11 @@ $confirm = $descendants === 0
 			) ?>"></summary>
 			<div class="kebab-menu">
 				<a
+					data-menu-add="before"
+					href="<?= escape($treeUrl) ?>?before=<?= escape(rawurlencode($id)) ?>"><?= escape(
+					__('menu:add-before'),
+				) ?></a>
+				<a
 					data-menu-add="after"
 					href="<?= escape($treeUrl) ?>?after=<?= escape(rawurlencode($id)) ?>"><?= escape(
 					__('menu:add-after'),
