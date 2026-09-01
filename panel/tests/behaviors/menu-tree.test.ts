@@ -19,6 +19,7 @@ function markup(selected = ''): string {
 		</div>`;
 
 	return `
+		<button id="outside" type="button"></button>
 		<ul class="menu-tree" role="tree" tabindex="-1" data-menu-tree="main">
 			<li class="menu-node" role="treeitem" aria-level="1" aria-expanded="true"
 				tabindex="-1" data-uid="parent">
@@ -116,5 +117,29 @@ describe('roving tabindex', () => {
 		document.dispatchEvent(new Event('htmx:after:swap'));
 
 		expect(document.activeElement).toBe(row('second'));
+	});
+
+	it('survives the focused row being torn out by the swap', () => {
+		row('parent').focus();
+
+		// What a move does to the row it was triggered from: removed, with no
+		// element to hand the focus to. That must not read as leaving the tree,
+		// or a second move in a row would be impossible.
+		row('parent').dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+		document.body.innerHTML = markup('second');
+		document.dispatchEvent(new Event('htmx:after:swap'));
+
+		expect(document.activeElement).toBe(row('second'));
+	});
+
+	it('lets go once the user works outside the tree', () => {
+		row('parent').focus();
+		document.querySelector('#outside')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+		document.body.innerHTML = markup('second');
+		document.dispatchEvent(new Event('htmx:after:swap'));
+
+		expect(document.activeElement).not.toBe(row('second'));
+		expect(row('second').tabIndex).toBe(0);
 	});
 });

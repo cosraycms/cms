@@ -344,11 +344,12 @@
 	}
 
 	/* The row is the focusable thing, but the card is what reads as a row,
-	   so the ring goes there. `:focus-visible` on the row would not reach
-	   the card, hence the descendant selector on plain focus. */
+	   so the ring goes there. Inset: the tree scrolls, and an outline drawn
+	   outside the card is clipped at the container's edge. The selected card
+	   carries a background instead, so the two never read as the same thing. */
 	& .menu-node:focus > .menu-card {
 		outline: 2px solid var(--cms-color-accent);
-		outline-offset: 1px;
+		outline-offset: -2px;
 	}
 
 	& .menu-tree:focus {
@@ -402,9 +403,9 @@
 		background: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-sm, none);
 
+		/* Which item the pane is editing — a state, not a focus position. */
 		&.is-selected {
-			border-color: var(--cms-color-accent);
-			outline: 1px solid var(--cms-color-accent);
+			background: var(--cms-color-selected);
 		}
 
 		& .collapse {

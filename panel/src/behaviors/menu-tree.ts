@@ -121,8 +121,10 @@ export function restore(): void {
 		setCollapsed(row, ids.has(row.dataset.uid ?? ''));
 	}
 
-	const selected = root.querySelector<HTMLElement>('.menu-card.is-selected')?.closest('li');
-	const target = selected instanceof HTMLElement ? selected : visibleRows(root)[0];
+	const selected = root
+		.querySelector<HTMLElement>('.menu-card.is-selected')
+		?.closest<HTMLElement>('[role="treeitem"]');
+	const target = selected ?? visibleRows(root)[0];
 
 	if (target) {
 		focusRow(root, target, held);
@@ -156,21 +158,18 @@ export function toggle(root: HTMLElement, row: HTMLElement, value: boolean): voi
 	persist(root);
 }
 
-function onFocusIn(event: FocusEvent): void {
+/**
+ * Whether the tree still owns the focus. Deliberately not driven by
+ * `focusout`: a move replaces the screen, and a focused row being removed
+ * looks exactly like the user leaving — which would drop the focus every
+ * time and make consecutive moves impossible.
+ */
+function onLeaveOrEnter(event: Event): void {
 	const root = tree();
 	const target = event.target;
 
-	if (root && target instanceof Node && root.contains(target)) {
-		held = true;
-	}
-}
-
-function onFocusOut(event: FocusEvent): void {
-	const root = tree();
-	const next = event.relatedTarget;
-
-	if (root && (!(next instanceof Node) || !root.contains(next))) {
-		held = false;
+	if (root) {
+		held = target instanceof Node && root.contains(target);
 	}
 }
 
@@ -189,15 +188,16 @@ export function install(): () => void {
 	};
 
 	document.addEventListener('click', onClick);
-	document.addEventListener('focusin', onFocusIn);
-	document.addEventListener('focusout', onFocusOut);
+	// Both, because a click does not focus a link in every browser.
+	document.addEventListener('focusin', onLeaveOrEnter);
+	document.addEventListener('click', onLeaveOrEnter);
 	document.addEventListener('htmx:after:swap', restore);
 	restore();
 
 	return () => {
 		document.removeEventListener('click', onClick);
-		document.removeEventListener('focusin', onFocusIn);
-		document.removeEventListener('focusout', onFocusOut);
+		document.removeEventListener('focusin', onLeaveOrEnter);
+		document.removeEventListener('click', onLeaveOrEnter);
 		document.removeEventListener('htmx:after:swap', restore);
 	};
 }
