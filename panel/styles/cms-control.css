@@ -68,8 +68,7 @@
 }
 
 .cms-checkbox,
-.cms-radio,
-.cms-switch {
+.cms-radio {
 	width: 1rem;
 	height: 1rem;
 	flex-shrink: 0;
@@ -79,6 +78,52 @@
 	&:focus-visible {
 		outline: none;
 		box-shadow: var(--cms-focus-ring);
+	}
+}
+
+/* A checkbox wearing a track and thumb. The thumb pairs with the track it
+   sits on — primary/primary-text when on — so both flip together. */
+.cms-switch {
+	appearance: none;
+	width: 2.375rem;
+	height: 1.375rem;
+	flex-shrink: 0;
+	margin: 0;
+	padding: 0.1875rem;
+	border: 0;
+	border-radius: var(--cms-radius-full);
+	background: var(--cms-color-border-strong);
+	cursor: pointer;
+	transition: background-color 120ms ease;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 1rem;
+		height: 1rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface-raised);
+		box-shadow: var(--cms-shadow-sm);
+		transition: translate 120ms ease;
+	}
+
+	&:checked {
+		background: var(--cms-color-primary);
+
+		&::before {
+			background: var(--cms-color-primary-text);
+			translate: 1rem 0;
+		}
+	}
+
+	&:focus-visible {
+		outline: none;
+		box-shadow: var(--cms-focus-ring);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: default;
 	}
 }
 

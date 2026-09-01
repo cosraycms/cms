@@ -145,6 +145,11 @@ $chevronSvg = is_file($chevronSvgPath)
 					<label class="sample"><input type="checkbox" checked /> Checkbox</label>
 				</div>
 				<div class="sample">
+					<label class="sample"><input type="checkbox" class="cms-switch" checked /> Switch on</label>
+					<label class="sample"><input type="checkbox" class="cms-switch" /> Switch off</label>
+					<label class="sample"><input type="checkbox" class="cms-switch" checked disabled /> Disabled</label>
+				</div>
+				<div class="sample">
 					<textarea rows="2">Zweisprachige Betreuung für Kinder von 10 Monaten bis 3 Jahren.</textarea>
 				</div>
 			</section>
