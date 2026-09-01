@@ -86,29 +86,28 @@ final class PanelDashboardTest extends End2EndTestCase
 		$entryTotal = $entries + 8;
 		$draftTotal = (int) $drafts['total'] + 5;
 		$recentDrafts = (int) $drafts['recent'] + 4;
-		$this->assertMatchesRegularExpression(
-			'/<span class="label">Entries<\/span>\s*<strong class="value">'
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Entries"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
 				. $entryTotal
-				. '<\/strong>\s*<span class="note">across 1 collection<\/span>/',
+				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="across 1 collection"]]',
 			$html,
 		);
-		$this->assertMatchesRegularExpression(
-			'/<span class="label">Drafts<\/span>\s*<strong class="value">'
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Drafts"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
 				. $draftTotal
-				. '<\/strong>\s*<span class="note">'
+				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="'
 				. $recentDrafts
-				. ' since last week<\/span>/',
+				. ' since last week"]]',
 			$html,
 		);
-		$this->assertMatchesRegularExpression(
-			'/<span class="label">Media files<\/span>\s*<strong class="value">2<\/strong>\s*<span class="note">3\.0 KB used<\/span>/',
+		$this->assertHtmlNodeExists(
+			'//a[@href="/cp/media" and @hx-target="#frame" and contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Media files"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="2"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="3.0 KB used"]]',
 			$html,
 		);
-		$this->assertStringContainsString('<a class="card" href="/cp/media" hx-target="#frame">', $html);
-		$this->assertMatchesRegularExpression(
-			'/<span class="label">Custom total<\/span>\s*<strong class="value">'
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Custom total"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
 				. $entryTotal
-				. ' total<\/strong>/',
+				. ' total"]]',
 			$html,
 		);
 
@@ -128,7 +127,10 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->assertStringContainsString('<span class="type">Test Page</span>', $html);
 		$this->assertStringContainsString('<span class="status sr-only">Draft</span>', $html);
 		$this->assertStringContainsString('<span class="status sr-only">Published</span>', $html);
-		$this->assertMatchesRegularExpression('/<time class="changed" datetime="[^"]+">[^<]+<\/time>/', $html);
+		$this->assertHtmlNodeExists(
+			'//time[contains(concat(" ", normalize-space(@class), " "), " changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
+			$html,
+		);
 	}
 
 	public function testDashboardShowsTheRecentEmptyState(): void

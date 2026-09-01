@@ -137,15 +137,18 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			$this->makeRequest('GET', '/cp/menus/tree-menu?item=selected-item'),
 		);
 
-		$this->assertStringContainsString('is-selected', $html);
-		$this->assertStringContainsString(
-			'action="/cp/menus/tree-menu/item/selected-item"',
+		$this->assertHtmlNodeExists(
+			'//li[@role="treeitem" and @data-uid="selected-item"]/div[contains(concat(" ", normalize-space(@class), " "), " is-selected ")]',
 			$html,
 		);
-		$this->assertStringContainsString('value="Selected"', $html);
-		$this->assertStringContainsString('value="/selected"', $html);
-		$this->assertStringContainsString('value="promoted"', $html);
-		$this->assertStringContainsString('checked', $html);
+		$form = '//form[@action="/cp/menus/tree-menu/item/selected-item"]';
+		$this->assertHtmlNodeExists("{$form}//input[@name=\"title[en]\" and @value=\"Selected\"]", $html);
+		$this->assertHtmlNodeExists("{$form}//input[@name=\"path[en]\" and @value=\"/selected\"]", $html);
+		$this->assertHtmlNodeExists("{$form}//input[@name=\"class\" and @value=\"promoted\"]", $html);
+		$this->assertHtmlNodeExists(
+			"{$form}//input[@type=\"checkbox\" and @name=\"target\" and @value=\"_blank\" and @checked]",
+			$html,
+		);
 	}
 
 	public function testInsertingBelowASiblingLandsItThere(): void
@@ -158,9 +161,15 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$pane = $this->getHtmlResponse(
 			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-a'),
 		);
-		$this->assertMatchesRegularExpression('/name="after"\s+value="ins-a"/', $pane);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="after" and @value="ins-a"]',
+			$pane,
+		);
 		// A root anchor means no parent; the drag form's own empty one aside.
-		$this->assertStringNotContainsString('name="parent" value="ins-', $pane);
+		$this->assertHtmlNodeMissing(
+			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="parent" and starts-with(@value, "ins-")]',
+			$pane,
+		);
 
 		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
 			'body' => [
@@ -185,7 +194,10 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$pane = $this->getHtmlResponse(
 			$this->makeRequest('GET', '/cp/menus/tree-menu?before=above-a'),
 		);
-		$this->assertMatchesRegularExpression('/name="before"\s+value="above-a"/', $pane);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="before" and @value="above-a"]',
+			$pane,
+		);
 
 		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
 			'body' => [
@@ -211,7 +223,10 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-child'),
 		);
 		// The anchor's group, not the anchor itself, is the new parent.
-		$this->assertStringContainsString('name="parent" value="ins-parent"', $pane);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="parent" and @value="ins-parent"]',
+			$pane,
+		);
 
 		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
 			'body' => [
@@ -254,10 +269,9 @@ final class PanelMenuTreeTest extends End2EndTestCase
 				$this->makeRequest('GET', '/cp/menus/tree-menu' . $state),
 			);
 
-			$this->assertMatchesRegularExpression(
-				'/<a class="add" href="\/cp\/menus\/tree-menu\?add="/',
+			$this->assertHtmlNodeExists(
+				'//a[@href="/cp/menus/tree-menu?add=" and contains(concat(" ", normalize-space(@class), " "), " add ")]',
 				$html,
-				"missing on {$state}",
 			);
 		}
 	}
@@ -471,21 +485,23 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
 
-		$this->assertStringContainsString('role="tree"', $html);
-		$this->assertStringContainsString('data-menu-tree="tree-menu"', $html);
-		$this->assertStringContainsString('role="group"', $html);
+		$this->assertHtmlNodeExists('//*[@role="tree" and @data-menu-tree="tree-menu"]', $html);
+		$this->assertHtmlNodeExists('//li[@role="treeitem"]/*[@role="group"]', $html);
 		// A row with children announces its state and its depth.
-		$this->assertMatchesRegularExpression(
-			'/aria-level="1"\s+aria-expanded="true"[\s\S]{0,200}?data-uid="aria-parent"/',
+		$this->assertHtmlNodeExists(
+			'//li[@role="treeitem" and @data-uid="aria-parent" and @aria-level="1" and @aria-expanded="true"]',
 			$html,
 		);
 		// A leaf claims no expanded state.
-		$this->assertMatchesRegularExpression(
-			'/aria-level="2"\s+tabindex="-1"[\s\S]{0,200}?data-uid="aria-child"/',
+		$this->assertHtmlNodeExists(
+			'//li[@role="treeitem" and @data-uid="aria-child" and @aria-level="2" and @tabindex="-1" and not(@aria-expanded)]',
 			$html,
 		);
 		// The card's own controls leave the tab order; the row is the stop.
-		$this->assertMatchesRegularExpression('/<a\s+class="text"\s+tabindex="-1"/', $html);
+		$this->assertHtmlNodeExists(
+			'//li[@role="treeitem"]//a[contains(concat(" ", normalize-space(@class), " "), " text ") and @tabindex="-1"]',
+			$html,
+		);
 	}
 
 	public function testAMoveOffersToPutTheItemBack(): void
@@ -508,9 +524,11 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		// Matched on the button's class: the panel's embedded message catalog
 		// carries an unrelated "Undo" of its own.
 		$html = $this->getHtmlResponse($this->makeRequest('GET', $location));
-		$this->assertStringContainsString('class="undo"', $html);
+		$this->assertHtmlNodeExists(
+			'//form[.//button[contains(concat(" ", normalize-space(@class), " "), " undo ")]]//input[@name="index" and @value="1"]',
+			$html,
+		);
 		$this->assertStringContainsString('“Item undo-b” moved.', $html);
-		$this->assertMatchesRegularExpression('/name="index" value="1"/', $html);
 
 		$undone = $this->makeRequest('POST', '/cp/menus/tree-menu/item/undo-b/move', [
 			'body' => ['parent' => 'undo-parent', 'index' => '1'],
@@ -532,8 +550,8 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$location = $response->getHeaderLine('Location');
 		$this->assertStringContainsString('notice=move-rejected', $location);
 		$this->assertStringNotContainsString('undoIndex', $location);
-		$this->assertStringNotContainsString(
-			'class="undo"',
+		$this->assertHtmlNodeMissing(
+			'//button[contains(concat(" ", normalize-space(@class), " "), " undo ")]',
 			$this->getHtmlResponse($this->makeRequest('GET', $location)),
 		);
 	}
@@ -547,12 +565,12 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		// A first root item can neither move up nor indent, and has no parent
 		// to outdent from; its child can do both but not move among siblings.
-		$this->assertMatchesRegularExpression(
-			'/value="in"[^>]*\/>\s*<button type="submit" disabled>/s',
+		$this->assertHtmlNodeExists(
+			'//li[@data-uid="edge-first"]//form[input[@name="direction" and @value="in"]]/button[@type="submit" and @disabled]',
 			$html,
 		);
-		$this->assertMatchesRegularExpression(
-			'/value="out"[^>]*\/>\s*<button type="submit" disabled>/s',
+		$this->assertHtmlNodeExists(
+			'//li[@data-uid="edge-first"]//form[input[@name="direction" and @value="out"]]/button[@type="submit" and @disabled]',
 			$html,
 		);
 		$this->assertStringContainsString('Indent', $html);
@@ -617,9 +635,15 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 		// The tree still shows it, marked; the preview below renders the menu
 		// as the frontend would and must not.
-		$this->assertStringContainsString('is-hidden', $html);
-		$this->assertStringNotContainsString('href="/seasonal"', $html);
-		$this->assertMatchesRegularExpression('/name="hidden"[^>]*checked/s', $html);
+		$this->assertHtmlNodeExists(
+			'//li[@role="treeitem" and @data-uid="vis-item"]/div[contains(concat(" ", normalize-space(@class), " "), " is-hidden ")]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing('//a[@href="/seasonal"]', $html);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/tree-menu/item/vis-item"]//input[@name="hidden" and @checked]',
+			$html,
+		);
 
 		$shown = $this->makeRequest('POST', '/cp/menus/tree-menu/item/vis-item', [
 			'body' => [
@@ -750,9 +774,8 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$pane = $this->getHtmlResponse(
 			$this->makeRequest('GET', '/cp/menus/tree-menu?item=' . $item),
 		);
-		$this->assertStringContainsString('name="levels"', $pane);
-		$this->assertMatchesRegularExpression('/name="levels"[^>]*value="2"/s', $pane);
-		$this->assertStringContainsString('<option value="created desc" selected>', $pane);
+		$this->assertHtmlNodeExists('//input[@name="levels" and @value="2"]', $pane);
+		$this->assertHtmlNodeExists('//option[@value="created desc" and @selected]', $pane);
 	}
 
 	public function testLegacyNodeStubKeepsItsSnapshotInTheTree(): void

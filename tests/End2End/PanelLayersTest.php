@@ -40,11 +40,17 @@ final class PanelLayersTest extends End2EndTestCase
 		$html = $this->layerHtml();
 
 		$this->assertStringContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringContainsString('class="cms-masthead"', $html);
-		$this->assertStringContainsString('id="frame"', $html);
-		$this->assertStringContainsString('class="page cms-collection"', $html);
-		$this->assertStringContainsString('id="verba-catalog"', $html);
-		$this->assertStringContainsString('hx-history-elt', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@id="verba-catalog"]', $html);
+		$this->assertHtmlNodeExists('//*[@hx-history-elt]', $html);
 	}
 
 	public function testNavigatingInsideAnAreaRendersTheContentRegionAlone(): void
@@ -55,10 +61,19 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'main#main',
 		]);
 
-		$this->assertStringContainsString('class="page cms-collection"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			$html,
+		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringNotContainsString('class="cms-masthead"', $html);
-		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
+		$this->assertHtmlNodeMissing(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-sidebar ")]',
+			$html,
+		);
 	}
 
 	/**
@@ -73,9 +88,9 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'main#main',
 		]);
 
-		$this->assertStringContainsString('id="collection-nav" hx-swap-oob="true"', $html);
-		$this->assertMatchesRegularExpression(
-			'/<a\s[^>]*href="\/cp\/collection\/test-articles"[^>]*aria-current="page"/',
+		$this->assertHtmlNodeExists('//*[@id="collection-nav" and @hx-swap-oob="true"]', $html);
+		$this->assertHtmlNodeExists(
+			'//a[@href="/cp/collection/test-articles" and @aria-current="page"]',
 			$html,
 		);
 	}
@@ -88,14 +103,16 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'div#frame',
 		]);
 
-		$this->assertStringContainsString('id="frame"', $html);
-		$this->assertStringContainsString('class="cms-sidebar"', $html);
+		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
+		$this->assertHtmlNodeExists('//*[contains(concat(" ", normalize-space(@class), " "), " cms-sidebar ")]', $html);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringNotContainsString('class="cms-masthead"', $html);
+		$this->assertHtmlNodeMissing(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
+			$html,
+		);
 
 		// The masthead is not part of the swap, so its own mark comes along.
-		$this->assertStringContainsString('id="area-nav"', $html);
-		$this->assertStringContainsString('hx-swap-oob="true"', $html);
+		$this->assertHtmlNodeExists('//*[@id="area-nav" and @hx-swap-oob="true"]', $html);
 	}
 
 	/**
@@ -110,12 +127,18 @@ final class PanelLayersTest extends End2EndTestCase
 	{
 		$html = $this->layerHtml(['HX-History-Restore-Request' => 'true']);
 
-		$this->assertStringContainsString('hx-history-elt', $html);
-		$this->assertStringContainsString('class="cms-masthead"', $html);
-		$this->assertStringContainsString('id="frame"', $html);
-		$this->assertStringContainsString('class="page cms-collection"', $html);
+		$this->assertHtmlNodeExists('//*[@hx-history-elt]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " page ") and contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			$html,
+		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
-		$this->assertStringNotContainsString('<script src=', $html);
+		$this->assertHtmlNodeMissing('//script[@src]', $html);
 	}
 
 	public function testARequestAimedAtTheBodyRendersTheShell(): void
@@ -126,7 +149,10 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'body',
 		]);
 
-		$this->assertStringContainsString('class="cms-masthead"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
+			$html,
+		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 	}
 

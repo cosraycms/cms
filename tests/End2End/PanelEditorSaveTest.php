@@ -183,14 +183,17 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('id="editor-status"', $html);
-		$this->assertStringContainsString('is-success', $html);
-		$this->assertStringContainsString('hx-swap-oob="true"', $html);
 		// The out-of-band response replaces these by id, so its classes have to
 		// stay the ones the editor styles — otherwise a save silently strips the
 		// styling off the element it swaps.
-		$this->assertStringContainsString('class="status is-success"', $html);
-		$this->assertStringContainsString('class="errors"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and @hx-swap-oob="true" and contains(concat(" ", normalize-space(@class), " "), " status ") and contains(concat(" ", normalize-space(@class), " "), " is-success ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-errors" and contains(concat(" ", normalize-space(@class), " "), " errors ")]',
+			$html,
+		);
 
 		$content = $this->nodeContent('panel-save-a');
 		$this->assertSame('New Title', $content['title']['value']['en']);
@@ -256,12 +259,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('is-error', $html);
-		$this->assertStringContainsString('id="editor-errors"', $html);
-		$this->assertStringContainsString('class="status is-error"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " status ") and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$html,
+		);
 		// The box is worth nothing if it arrives empty or hidden, which is
 		// what asserting on its id alone let through.
-		$this->assertDoesNotMatchRegularExpression('/id="editor-errors"[^>]*hidden/', $html);
+		$this->assertHtmlNodeExists('//*[@id="editor-errors" and not(@hidden)]', $html);
 		// Each issue is a jump target: the message plus the data path the
 		// client resolves to the offending control.
 		$this->assertStringContainsString(
@@ -333,7 +337,10 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="status is-error"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$html,
+		);
 		// The row index rides in the path, so the client can point at the
 		// control inside the right server-rendered entries row.
 		$this->assertStringContainsString(
@@ -412,7 +419,10 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('class="status is-error"', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$html,
+		);
 		$this->assertStringContainsString('max_input_vars', $html);
 		$this->assertSame(
 			'Kept',
@@ -468,7 +478,10 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		]);
 
 		$this->assertResponseOk($response);
-		$this->assertStringContainsString('class="status is-error"', $this->getHtmlResponse($response));
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$this->getHtmlResponse($response),
+		);
 		$this->assertSame(
 			'Kept',
 			$this->nodeContent('panel-save-nosentinel')['title']['value']['en'],

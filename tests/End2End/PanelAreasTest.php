@@ -67,9 +67,13 @@ final class PanelAreasTest extends End2EndTestCase
 	{
 		$html = $this->html('/cp');
 
-		$this->assertSame(3, substr_count($html, 'class="area"'));
-		$this->assertMatchesRegularExpression(
-			'/<a\s[^>]*class="area"[^>]*href="\/cp\/collection\/test-articles"[^>]*>\s*Content\s*<\/a>/',
+		$this->assertHtmlNodeCount(
+			3,
+			'//a[contains(concat(" ", normalize-space(@class), " "), " area ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//a[@href="/cp/collection/test-articles" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
 			$html,
 		);
 

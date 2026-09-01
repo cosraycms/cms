@@ -183,8 +183,8 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		// A new node exposes the pre-generated uid so uploads land under
 		// node/<uid>/ before the first save.
-		$this->assertMatchesRegularExpression(
-			'/<input type="hidden" name="uid" value="[A-Za-z0-9._-]{1,64}"/',
+		$this->assertHtmlNodeExists(
+			'//input[@type="hidden" and @name="uid" and string-length(@value) >= 1 and string-length(@value) <= 64 and translate(@value, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-", "") = ""]',
 			$html,
 		);
 	}

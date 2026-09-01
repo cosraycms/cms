@@ -82,14 +82,14 @@ final class PanelMenusTest extends End2EndTestCase
 	public function testTheMenusAreaAppearsForAdminsOnly(): void
 	{
 		$admin = $this->getHtmlResponse($this->makeRequest('GET', '/cp'));
-		$this->assertMatchesRegularExpression(
-			'/<a\s[^>]*class="area"[^>]*href="\/cp\/menus"[^>]*>\s*Menus\s*<\/a>/',
+		$this->assertHtmlNodeExists(
+			'//a[@href="/cp/menus" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Menus"]',
 			$admin,
 		);
 
 		$this->authenticateAs('editor');
 		$editor = $this->getHtmlResponse($this->makeRequest('GET', '/cp'));
-		$this->assertStringNotContainsString('href="/cp/menus"', $editor);
+		$this->assertHtmlNodeMissing('//a[@href="/cp/menus"]', $editor);
 	}
 
 	public function testEditorsAreForbidden(): void
@@ -123,7 +123,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/head'));
 
 		// The handle is chrome, the description stays editable.
-		$this->assertMatchesRegularExpression('/id="menu-handle"[^>]*disabled/s', $html);
+		$this->assertHtmlNodeExists('//input[@id="menu-handle" and @disabled]', $html);
 		$this->assertStringContainsString('Only superusers can change the handle.', $html);
 		$this->assertStringNotContainsString('/cp/menus/head/delete', $html);
 		$this->assertStringNotContainsString('href="/cp/menus/create"', $html);
@@ -191,7 +191,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertSame(2, $this->storedMaxDepth('deep'));
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/deep'));
-		$this->assertMatchesRegularExpression('/id="menu-max-depth"[^>]*value="2"/s', $html);
+		$this->assertHtmlNodeExists('//input[@id="menu-max-depth" and @value="2"]', $html);
 
 		// An empty field is the unlimited case, not a zero.
 		$cleared = $this->makeRequest('POST', '/cp/menus/deep/edit', [
@@ -315,8 +315,8 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('<span>Main navigation</span>', $html);
 		$this->assertStringContainsString('title="Main navigation · main-nav"', $html);
 		// The open menu is marked, and its item count rides along as the badge.
-		$this->assertMatchesRegularExpression(
-			'/href="\/cp\/menus\/main-nav"[^>]*aria-current="page"/s',
+		$this->assertHtmlNodeExists(
+			'//a[@href="/cp/menus/main-nav" and @aria-current="page"]',
 			$html,
 		);
 		$this->assertStringContainsString('<span class="badge">2</span>', $html);
@@ -409,13 +409,20 @@ final class PanelMenusTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('action="/cp/menus/head/edit"', $html);
-		$this->assertStringContainsString('value="head"', $html);
-		$this->assertStringContainsString('value="Header links"', $html);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/head/edit"]//input[@id="menu-handle" and @value="head" and not(@disabled)]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/head/edit"]//input[@name="description[en]" and @value="Header links"]',
+			$html,
+		);
 		$this->assertStringContainsString('Renaming the handle breaks templates', $html);
 		// Delete sits in the same bar; there is no edit screen behind a button.
-		$this->assertStringContainsString('action="/cp/menus/head/delete"', $html);
-		$this->assertStringNotContainsString('disabled', $html);
+		$this->assertHtmlNodeExists(
+			'//form[@action="/cp/menus/head/delete"]//button[@type="submit"]',
+			$html,
+		);
 	}
 
 	public function testTheDeleteConfirmNamesTheItemCount(): void

@@ -11,6 +11,8 @@ use Celema\Core\Request;
 use Celema\Quma\Delimiters;
 use Cosray\Config;
 use Cosray\Locales;
+use DOMDocument;
+use DOMXPath;
 use PDO;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Http\Message\ServerRequestInterface as PsrServerRequest;
@@ -243,5 +245,53 @@ class TestCase extends BaseTestCase
 				),
 			),
 		);
+	}
+
+	protected function assertHtmlNodeExists(string $expression, string $html): void
+	{
+		$this->assertGreaterThan(
+			0,
+			$this->htmlNodeCount($expression, $html),
+			"No HTML node matches XPath: {$expression}",
+		);
+	}
+
+	protected function assertHtmlNodeMissing(string $expression, string $html): void
+	{
+		$this->assertHtmlNodeCount(0, $expression, $html);
+	}
+
+	protected function assertHtmlNodeCount(int $expected, string $expression, string $html): void
+	{
+		$this->assertSame(
+			$expected,
+			$this->htmlNodeCount($expression, $html),
+			"Unexpected number of HTML nodes matching XPath: {$expression}",
+		);
+	}
+
+	private function htmlNodeCount(string $expression, string $html): int
+	{
+		$document = new DOMDocument();
+		$previous = libxml_use_internal_errors(true);
+
+		try {
+			$loaded = $document->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
+		} finally {
+			libxml_clear_errors();
+			libxml_use_internal_errors($previous);
+		}
+
+		if (!$loaded) {
+			$this->fail('Could not parse HTML response.');
+		}
+
+		$nodes = new DOMXPath($document)->query($expression);
+
+		if ($nodes === false) {
+			$this->fail("Invalid XPath expression: {$expression}");
+		}
+
+		return $nodes->length;
 	}
 }

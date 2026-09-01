@@ -45,23 +45,23 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('<form id="collection-bulk" method="post" hidden>', $html);
-		$this->assertStringContainsString('data-bulk-bar', $html);
-		$this->assertStringContainsString('data-bulk-all', $html);
-		$this->assertStringContainsString('data-bulk-check', $html);
-		$this->assertStringContainsString('name="nodes[]"', $html);
-		$this->assertStringContainsString('value="bulk-markup-root"', $html);
-		$this->assertStringContainsString('data-bulk-dialog="delete"', $html);
-		$this->assertStringContainsString('data-bulk-dialog="publish"', $html);
-		$this->assertStringContainsString('data-bulk-dialog="draft"', $html);
-		$this->assertStringContainsString('data-bulk-open="publish"', $html);
-		$this->assertStringContainsString('data-bulk-confirm', $html);
-		$this->assertStringContainsString(
-			'formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&amp;dir=desc"',
+		$this->assertHtmlNodeExists('//form[@id="collection-bulk" and @method="post" and @hidden]', $html);
+		$this->assertHtmlNodeExists('//*[@data-bulk-bar and @hidden]', $html);
+		$this->assertHtmlNodeExists('//input[@type="checkbox" and @data-bulk-all]', $html);
+		$this->assertHtmlNodeExists(
+			'//input[@type="checkbox" and @data-bulk-check and @name="nodes[]" and @value="bulk-markup-root" and @form="collection-bulk"]',
 			$html,
 		);
-		$this->assertStringContainsString(
-			'formaction="/cp/collection/test-hierarchy/bulk/delete?sort=changed&amp;dir=desc"',
+		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="delete"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="publish"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="draft"]', $html);
+		$this->assertHtmlNodeExists('//button[@type="button" and @data-bulk-open="publish"]', $html);
+		$this->assertHtmlNodeExists(
+			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&dir=desc"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/delete?sort=changed&dir=desc"]',
 			$html,
 		);
 	}
@@ -72,8 +72,8 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringNotContainsString('data-bulk-bar', $html);
-		$this->assertStringNotContainsString('id="collection-bulk"', $html);
+		$this->assertHtmlNodeMissing('//*[@data-bulk-bar]', $html);
+		$this->assertHtmlNodeMissing('//form[@id="collection-bulk"]', $html);
 	}
 
 	public function testRowWithChildrenMarksItsCheckbox(): void
@@ -89,7 +89,10 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
-		$this->assertStringContainsString('data-has-children', $this->getHtmlResponse($response));
+		$this->assertHtmlNodeExists(
+			'//input[@data-bulk-check and @value="bulk-parent-mark" and @data-has-children]',
+			$this->getHtmlResponse($response),
+		);
 	}
 
 	public function testBulkPublishSkipsLockedAndReportsSummary(): void

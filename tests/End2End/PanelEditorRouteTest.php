@@ -324,9 +324,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// The route /{parent}/{title} references the title content field, so
 		// its wrapper is marked js-path-source and edits to it live-refresh
 		// the preview; the referenced input stays inside that wrapper.
-		$this->assertStringContainsString('<div class="js-path-source"', $html);
-		$this->assertMatchesRegularExpression(
-			'/<div class="js-path-source".*?name="content\[title\]\[value\]/s',
+		$this->assertHtmlNodeExists(
+			'//div[contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]//input[starts-with(@name, "content[title][value]")]',
 			$html,
 		);
 	}
@@ -440,7 +439,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		// Native validation cannot handle legitimately hidden controls
 		// (locale variants, panes) — the server validates.
-		$this->assertStringContainsString('novalidate', $html);
+		$this->assertHtmlNodeExists('//form[@id="node-editor-form" and @novalidate]', $html);
 		// The title lives in the header beside the status pill, outside the
 		// scrolling panes.
 		$this->assertStringContainsString('<div class="line">', $html);
