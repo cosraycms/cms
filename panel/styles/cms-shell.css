@@ -8,7 +8,7 @@
 	display: flex;
 	flex-direction: column;
 	height: 100dvh;
-	padding-inline: clamp(0.625rem, 1.6vw, 1.5rem);
+	padding-inline: 0;
 	overflow: hidden;
 	background: var(--cms-color-canvas);
 
@@ -20,9 +20,10 @@
 		max-width: var(--cms-content-max-width);
 		min-height: 0;
 		margin-inline: auto;
-		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+		border-top: 1px solid var(--cms-color-border);
+		border-radius: 0;
 		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow);
+		box-shadow: none;
 		overflow: hidden;
 	}
 
@@ -154,16 +155,23 @@
 	}
 }
 
+/* Auto margins provide gutters once the default frame reaches its 120rem cap. */
+@media (width > 120rem) {
+	.cms-shell .frame {
+		border-top: 0;
+		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+		box-shadow: var(--cms-shadow);
+	}
+}
+
 @media (max-width: 52rem) {
 	.cms-shell {
 		height: auto;
 		min-height: 100dvh;
-		padding-inline: 0;
 		overflow: visible;
 
 		& .frame {
 			flex-direction: column;
-			border-radius: 0;
 		}
 
 		& .main {
