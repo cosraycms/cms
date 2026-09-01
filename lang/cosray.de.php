@@ -141,6 +141,7 @@ return [
 		'media:upload-failed' => 'Upload fehlgeschlagen. Datei konnte am Server nicht verarbeitet werden.',
 		'media:upload-server-error' => 'Der Dateiupload ist aufgrund eines Serverfehlers fehlgeschlagen.',
 		'media:wrong-extension' => 'Falsche Dateiendung: :ext. Für diesen Dateityp sind folgende Endungen erlaubt: :allowed.',
+		'menu:add-after' => 'Darunter einfügen',
 		'menu:add-child' => 'Untereintrag hinzufügen',
 		'menu:add-item' => 'Eintrag hinzufügen',
 		'menu:cancel' => 'Abbrechen',

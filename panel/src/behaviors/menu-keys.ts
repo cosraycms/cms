@@ -97,6 +97,11 @@ function activate(row: HTMLElement): void {
 	row.querySelector<HTMLAnchorElement>('a.text')?.click();
 }
 
+/** Opens the create pane the row's kebab already links to. */
+function add(row: HTMLElement, kind: 'after' | 'child'): void {
+	row.querySelector<HTMLAnchorElement>(`.kebab a[data-menu-add="${kind}"]`)?.click();
+}
+
 function openKebab(row: HTMLElement): void {
 	const kebab = row.querySelector<HTMLDetailsElement>(':scope > .menu-card > .kebab');
 
@@ -197,6 +202,16 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 		case 'Enter':
 		case 'o':
 			activate(row);
+
+			return true;
+		// `a` adds a sibling, `A` a child — the file-tree plugins' convention,
+		// where `o` opens and `a` creates.
+		case 'a':
+			add(row, 'after');
+
+			return true;
+		case 'A':
+			add(row, 'child');
 
 			return true;
 		case '.':

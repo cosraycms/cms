@@ -18,6 +18,8 @@ function press(key: string, init: KeyboardEventInit = {}): void {
 /** The kebab as the tree renders it: one form per direction. */
 function kebab(uid: string, disabled: string[]): string {
 	return `<details class="kebab"><summary tabindex="-1"></summary><div class="kebab-menu">
+		<a data-menu-add="after" href="/cp/menus/main?after=${uid}"></a>
+		<a data-menu-add="child" href="/cp/menus/main?add=${uid}"></a>
 		${['up', 'down', 'in', 'out']
 			.map(
 				(direction) => `<form method="post" action="/cp/menus/main/item/${uid}/move">
@@ -191,6 +193,20 @@ describe('moves', () => {
 		const clicked = vi.fn();
 		link.addEventListener('click', clicked);
 		row('parent').focus();
+
+		press(key);
+
+		expect(clicked).toHaveBeenCalled();
+	});
+
+	it.each([
+		['a', 'after'],
+		['A', 'child'],
+	])("follows the kebab's %s link to the create pane", (key, kind) => {
+		const link = row('second').querySelector<HTMLAnchorElement>(`[data-menu-add="${kind}"]`)!;
+		const clicked = vi.fn((event: Event) => event.preventDefault());
+		link.addEventListener('click', clicked);
+		row('second').focus();
 
 		press(key);
 

@@ -14,11 +14,15 @@ This file is that vocabulary. It is prose, not a framework — there is no keyma
 
 **`Enter` or `o` opens the focused thing. `Escape` leaves the innermost layer.** In a structure that means giving up the focus; in a dialog it means closing it. One rule, applied at whatever depth the user is.
 
+**`a` creates a sibling, `A` a child.** The file-tree convention — `o` opens, `a` adds — from NERDTree, oil and neo-tree, which is the context a panel tree resembles, not the vim buffer where `o` opens a line.
+
 **`.` opens the focused row's action menu.** Whatever that screen calls its kebab.
 
 **`/` focuses the screen's search.** Global, and older than the rest of this list.
 
-**Every binding is inert inside a text field.** An `input`, `textarea`, `select`, or anything `contenteditable` keeps its own keys, including `j` and `o`.
+**Every binding is inert inside a text field.** An `input`, `textarea`, `select`, or anything `contenteditable` keeps its own keys, including `j`, `o` and `a`.
+
+**A key only ever drives an affordance that already exists.** Every binding here finds a server-rendered link or form and activates it, so the disabled state is the legality check and the screen keeps working without JavaScript. Build the action first, bind the key second — never the reverse.
 
 ## Modified keys match on `code`, unmodified keys on `key`
 
@@ -39,6 +43,7 @@ The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to 
 | `→` / `l` | expand, or move to the first child when already expanded |
 | `Home` `End` | first / last visible row |
 | `Enter` / `o` | open the item in the side pane |
+| `a` / `A` | insert a sibling below / add a child |
 | `.` | open the row's action menu |
 | `Tab` / `Shift+Tab` | indent / outdent |
 | `Alt+l` / `Alt+h` | indent / outdent |

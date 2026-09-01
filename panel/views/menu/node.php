@@ -76,7 +76,14 @@ $confirm = $descendants === 0
 				__('menu:item-actions'),
 			) ?>"></summary>
 			<div class="kebab-menu">
-				<a href="<?= escape($treeUrl) ?>?add=<?= escape(rawurlencode($id)) ?>"><?= escape(
+				<a
+					data-menu-add="after"
+					href="<?= escape($treeUrl) ?>?after=<?= escape(rawurlencode($id)) ?>"><?= escape(
+					__('menu:add-after'),
+				) ?></a>
+				<a
+					data-menu-add="child"
+					href="<?= escape($treeUrl) ?>?add=<?= escape(rawurlencode($id)) ?>"><?= escape(
 					__('menu:add-child'),
 				) ?></a>
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(

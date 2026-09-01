@@ -197,9 +197,15 @@ final class Menus extends Panel
 		$body = $this->formData();
 		$parent = trim((string) ($body['parent'] ?? ''));
 		$parent = $parent === '' ? null : $parent;
+		$after = trim((string) ($body['after'] ?? ''));
+		$after = $after === '' ? null : $after;
 
 		if ($parent !== null) {
 			$this->itemRowFor($menu, $parent);
+		}
+
+		if ($after !== null) {
+			$this->itemRowFor($menu, $after);
 		}
 
 		$values = $this->valuesFromBody($context, $body);
@@ -215,6 +221,7 @@ final class Menus extends Panel
 				$parent,
 				$values,
 				$errors,
+				$after,
 			));
 		}
 
@@ -225,6 +232,14 @@ final class Menus extends Panel
 			hidden: $values['hidden'],
 			actor: $this->actor(),
 		);
+
+		if ($after !== null) {
+			// `add()` appended it, so the anchor sits at the same index in the
+			// group with and without the new item: splicing it in one past the
+			// anchor lands it directly behind.
+			$siblings = $this->siblingIds($menu, $parent);
+			$this->menus->place($item, $parent, (int) array_search($after, $siblings, true) + 1);
+		}
 
 		return $this->redirectToMenu($factory, $menu, [
 			'item' => $item,
@@ -446,6 +461,25 @@ final class Menus extends Panel
 			return $this->paneContext($cms, $context, $menu, 'edit', $item, null, $values, []);
 		}
 
+		$after = $this->request->param('after', null);
+
+		if (is_string($after) && $after !== '') {
+			// A sibling of the anchor: same group, placed right behind it.
+			$row = $this->itemRowFor($menu, $after);
+
+			return $this->paneContext(
+				$cms,
+				$context,
+				$menu,
+				'create',
+				null,
+				$row['parent'] === null ? null : (string) $row['parent'],
+				$this->valuesFromData([]),
+				[],
+				$after,
+			);
+		}
+
 		$add = $this->request->param('add', null);
 
 		if (is_string($add)) {
@@ -480,6 +514,7 @@ final class Menus extends Panel
 		?string $parent,
 		array $values,
 		array $errors,
+		?string $after = null,
 	): array {
 		$values['nodeLabel'] = $values['node'] === ''
 			? ''
@@ -494,6 +529,7 @@ final class Menus extends Panel
 				? $this->url($menu, '/item/create')
 				: $this->url($menu, '/item/' . rawurlencode((string) $item)),
 			'parent' => $parent,
+			'after' => $after,
 			'parentTitle' => $parent === null ? null : $this->itemTitle($menu, $parent),
 			'values' => $values,
 			'errors' => $errors,

@@ -148,6 +148,78 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertStringContainsString('checked', $html);
 	}
 
+	public function testInsertingBelowASiblingLandsItThere(): void
+	{
+		$this->createItem('ins-a', null, 1);
+		$this->createItem('ins-b', null, 2);
+		$this->createItem('ins-c', null, 3);
+
+		// The kebab link carries the anchor into the create pane.
+		$pane = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-a'),
+		);
+		$this->assertStringContainsString('name="after" value="ins-a"', $pane);
+		// A root anchor means no parent; the drag form's own empty one aside.
+		$this->assertStringNotContainsString('name="parent" value="ins-', $pane);
+
+		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'Inserted'],
+				'path' => ['en' => '/inserted'],
+				'after' => 'ins-a',
+			],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$order = $this->order();
+		$this->assertSame(['ins-a', $order[1], 'ins-b', 'ins-c'], $order);
+		$this->assertSame('Inserted', $this->itemData($order[1])['title']['en']);
+	}
+
+	public function testInsertingBelowAChildStaysInThatGroup(): void
+	{
+		$this->createItem('ins-parent', null, 1);
+		$this->createItem('ins-child', 'ins-parent', 1);
+
+		$pane = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-child'),
+		);
+		// The anchor's group, not the anchor itself, is the new parent.
+		$this->assertStringContainsString('name="parent" value="ins-parent"', $pane);
+
+		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+			'body' => [
+				'type' => 'url',
+				'title' => ['en' => 'Sibling'],
+				'path' => ['en' => '/sibling'],
+				'parent' => 'ins-parent',
+				'after' => 'ins-child',
+			],
+		]);
+
+		$this->assertSame(['ins-parent'], $this->order());
+		$children = $this->order('ins-parent');
+		$this->assertCount(2, $children);
+		$this->assertSame('ins-child', $children[0]);
+	}
+
+	public function testInsertingBelowAnItemOfAnotherMenuIs404(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.menus (menu, description) VALUES ('other-anchor', '{\"zxx\": \"Other\"}')",
+		)->run();
+		$this->db()->execute(
+			"INSERT INTO cms.menu_items (item, menu, position, data)
+			VALUES ('foreign-anchor', 'other-anchor', 1, '{\"type\": \"label\"}'::jsonb)",
+		)->run();
+
+		$this->assertResponseStatus(
+			404,
+			$this->makeRequest('GET', '/cp/menus/tree-menu?after=foreign-anchor'),
+		);
+	}
+
 	public function testTheRootAddActionStaysReachableWhileEditing(): void
 	{
 		$this->createItem('busy-item');

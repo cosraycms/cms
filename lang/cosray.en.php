@@ -141,6 +141,7 @@ return [
 		'media:upload-failed' => 'Upload failed. The file could not be processed on the server.',
 		'media:upload-server-error' => 'The file upload failed due to a server error.',
 		'media:wrong-extension' => 'Wrong file extension: :ext. The following extensions are allowed for this file type: :allowed.',
+		'menu:add-after' => 'Insert below',
 		'menu:add-child' => 'Add child',
 		'menu:add-item' => 'Add item',
 		'menu:cancel' => 'Cancel',
