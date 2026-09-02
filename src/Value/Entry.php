@@ -32,7 +32,7 @@ class Entry extends Value
 
 	public function json(): array
 	{
-		return $this->unwrap();
+		return $this->fieldValues(static fn(Value $value): mixed => $value->json());
 	}
 
 	public function uid(): ?string
@@ -44,10 +44,22 @@ class Entry extends Value
 
 	public function unwrap(): array
 	{
+		return $this->fieldValues(static fn(Value $value): mixed => $value->unwrap());
+	}
+
+	/**
+	 * Entry fields resolve through the value layer, like `render()` does —
+	 * `structure()` is the editor's storage shape and belongs to the serializer.
+	 *
+	 * @param callable(Value): mixed $resolve
+	 * @return array{uid: ?string, type: string, fields: array<string, mixed>}
+	 */
+	private function fieldValues(callable $resolve): array
+	{
 		$result = [];
 
 		foreach ($this->fields as $name => $field) {
-			$result[$name] = $field->structure();
+			$result[$name] = $resolve($field->value());
 		}
 
 		return [

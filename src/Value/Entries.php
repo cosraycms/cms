@@ -33,18 +33,12 @@ class Entries extends Value implements IteratorAggregate
 
 	public function json(): array
 	{
-		return $this->unwrap();
+		return array_map(static fn(Entry $entry): array => $entry->json(), $this->entries);
 	}
 
 	public function unwrap(): array
 	{
-		$result = [];
-
-		foreach ($this->entries as $entry) {
-			$result[] = $entry->unwrap();
-		}
-
-		return $result;
+		return array_map(static fn(Entry $entry): array => $entry->unwrap(), $this->entries);
 	}
 
 	public function getIterator(): Generator

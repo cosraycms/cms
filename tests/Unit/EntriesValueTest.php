@@ -11,6 +11,7 @@ use Cosray\Field\Services;
 use Cosray\Node\FieldOwner;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestOptionEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries;
 use Cosray\Value\Entry;
@@ -51,13 +52,13 @@ final class EntriesValueTest extends TestCase
 		return new FieldOwner($context, 'test-node');
 	}
 
-	private function createEntriesValue(array $data): Entries
+	private function createEntriesValue(array $data, string ...$allowed): Entries
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new EntriesField('entries', $owner, new ValueContext('entries', $data));
 		$field->init(Services::withDefaults());
-		$field->allow(TestEntry::class, TestAlternateEntry::class);
+		$field->allow(...$allowed === [] ? [TestEntry::class, TestAlternateEntry::class] : $allowed);
 
 		return $field->value();
 	}
@@ -128,16 +129,55 @@ final class EntriesValueTest extends TestCase
 		$this->assertNull($value->last());
 	}
 
-	public function testEntriesValueJsonMatchesUnwrap(): void
+	public function testEntriesValueUnwrapResolvesFieldValues(): void
 	{
-		$value = $this->createEntriesValue($this->entriesData());
-		$unwrapped = $value->unwrap();
+		$unwrapped = $this->createEntriesValue($this->entriesData())->unwrap();
 
-		$this->assertSame($unwrapped, $value->json());
 		$this->assertCount(2, $unwrapped);
+		$this->assertSame('entry1', $unwrapped[0]['uid']);
 		$this->assertSame(TestEntry::class, $unwrapped[0]['type']);
-		$this->assertArrayHasKey('title', $unwrapped[0]['fields']);
-		$this->assertArrayHasKey('content', $unwrapped[0]['fields']);
+		$this->assertSame('First Item', $unwrapped[0]['fields']['title']);
+		$this->assertSame('Second Item', $unwrapped[1]['fields']['title']);
+		$this->assertSame(12, $unwrapped[0]['fields']['content']['columns']);
+	}
+
+	public function testEntriesValueJsonResolvesFieldValues(): void
+	{
+		$json = $this->createEntriesValue($this->entriesData())->json();
+
+		$this->assertCount(2, $json);
+		$this->assertSame('entry1', $json[0]['uid']);
+		$this->assertSame('First Item', $json[0]['fields']['title']);
+		$this->assertSame('Second Item', $json[1]['fields']['title']);
+	}
+
+	/** `json()` keeps a field's stored envelope where `unwrap()` resolves it. */
+	public function testEntriesValueJsonAndUnwrapDifferPerFieldType(): void
+	{
+		$data = [
+			'type' => EntriesField::class,
+			'value' => [
+				\Cosray\Field\Field::NEUTRAL_LOCALE => [
+					[
+						'uid' => 'entry1',
+						'type' => TestOptionEntry::class,
+						'fields' => [
+							'size' => [
+								'type' => \Cosray\Field\Option::class,
+								'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'large'],
+							],
+						],
+					],
+				],
+			],
+		];
+		$value = $this->createEntriesValue($data, TestOptionEntry::class);
+
+		$this->assertSame('large', $value->unwrap()[0]['fields']['size']);
+		$this->assertSame(
+			['type' => \Cosray\Field\Option::class, 'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'large']],
+			$value->json()[0]['fields']['size'],
+		);
 	}
 
 	public function testEntryThrowsOnUnknownField(): void
