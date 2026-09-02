@@ -37,6 +37,14 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('data-locale-tab="de"', $html);
 		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);
 		$this->assertStringContainsString('class="chip is-create"', $html);
+		// Two richtext samples: the default toolbar and a #[Tools]-trimmed one,
+		// each an element host carrying its tools list in the field payload.
+		$this->assertStringContainsString('tag="cosray-richtext"', $html);
+		$this->assertStringContainsString(
+			'"tools":["undo","redo","bold","italic","strike","h2","h3","bullet-list","ordered-list","link"]',
+			$html,
+		);
+		$this->assertStringContainsString('"tools":["bold","italic","link","source"]', $html);
 	}
 
 	public function testStyleguideIsAbsentWithoutDebug(): void

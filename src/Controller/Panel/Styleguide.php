@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
+use Cosray\Field\Control;
+use Cosray\Field\Control\Registry as Controls;
+use Cosray\Richtext\Envelope;
+use Cosray\Schema\Tool;
+
 /**
  * Renders every panel component against the current stylesheets, so rare
  * states (empty, error, disabled, truncating, both themes) can be checked
@@ -15,7 +20,7 @@ final class Styleguide extends Panel
 {
 	protected const string AREA = 'styleguide';
 
-	public function index(): array
+	public function index(Controls $controls): array
 	{
 		return $this->context([
 			'tokenGroups' => $this->tokenGroups(),
@@ -29,6 +34,8 @@ final class Styleguide extends Panel
 			'content' => $this->content(),
 			'rows' => $this->rows(),
 			'inspector' => $this->inspector(),
+			'richtextFields' => $this->richtextFields($controls),
+			'richtextContent' => $this->richtextContent(),
 		]);
 	}
 
@@ -196,6 +203,67 @@ final class Styleguide extends Panel
 			'label' => 'Basics',
 			'description' => 'Title and teaser are shown in listings, search results and when the page is shared.',
 			'fields' => ['title', 'teaser'],
+		];
+	}
+
+	/**
+	 * Two richtext descriptors: the built-in default toolbar and a field
+	 * trimmed the way `#[Tools]` would.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function richtextFields(Controls $controls): array
+	{
+		$control = Control::richtext()->resolve($controls)->array();
+
+		return [
+			[
+				'name' => 'rtDefault',
+				'label' => 'Richtext — default tools',
+				'control' => $control,
+				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::defaults()),
+				'richtextClasses' => (object) [],
+				'richtextStyles' => (object) [],
+			],
+			[
+				'name' => 'rtTrimmed',
+				'label' => 'Richtext — #[Tools(Bold, Italic, Link, Source)]',
+				'control' => $control,
+				'tools' => ['bold', 'italic', 'link', 'source'],
+				'richtextClasses' => (object) [],
+				'richtextStyles' => (object) [],
+			],
+		];
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function richtextContent(): array
+	{
+		$doc = static fn(string $heading, string $text): array => [
+			'type' => 'doc',
+			'content' => [
+				[
+					'type' => 'heading',
+					'attrs' => ['level' => 2],
+					'content' => [['type' => 'text', 'text' => $heading]],
+				],
+				['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]],
+			],
+		];
+
+		return [
+			'rtDefault' => [
+				'value' => ['zxx' => $doc('Sudhaus', 'Die neue Maischepfanne wird im Herbst eingebaut.')],
+				'format' => Envelope::FORMAT,
+				'version' => Envelope::VERSION,
+			],
+			'rtTrimmed' => [
+				'value' => ['zxx' => $doc('Presse', 'Nur Fett, Kursiv, Link und die Quelltextansicht.')],
+				'format' => Envelope::FORMAT,
+				'version' => Envelope::VERSION,
+			],
 		];
 	}
 

@@ -11,6 +11,8 @@ $tokenGroups = (array) $this->unwrap($tokenGroups);
 $fields = (array) $this->unwrap($fields);
 $fieldset = (array) $this->unwrap($fieldset);
 $content = (array) $this->unwrap($content);
+$richtextFields = (array) $this->unwrap($richtextFields);
+$richtextContent = (array) $this->unwrap($richtextContent);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 
@@ -185,6 +187,34 @@ $chevronSvg = is_file($chevronSvgPath)
 									<?php $this->insert('field/item', [
 										'field' => $field,
 										'content' => $content,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => [],
+										'pathSourceFields' => [],
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<h2>Richtext</h2>
+				<p class="note">
+					The default toolbar, and a field trimmed the way <code>#[Tools]</code> trims it —
+					including the source view, which only the second field enables.
+				</p>
+				<div class="cms-node">
+					<div class="inner">
+						<div class="sheet">
+							<div class="cms-fields">
+								<?php foreach ($richtextFields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $richtextContent,
 										'locales' => $locales,
 										'defaultLocale' => $defaultLocale,
 										'uid' => 'styleguide',
