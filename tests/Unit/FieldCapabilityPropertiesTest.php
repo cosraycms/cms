@@ -401,6 +401,33 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertSame(['bold', 'italic'], $field->properties()['tools']);
 	}
 
+	public function testToolsAttributeExtendsAPresetList(): void
+	{
+		$field = $this->createRichTextField();
+		// Attribute arguments forbid unpacking, so presets pass as lists
+		// next to single cases; duplicates across both collapse.
+		$meta = new Tools(Tool::DEFAULT, Tool::Align, Tool::Bold);
+
+		$this->registry->getHandler($meta)->apply($meta, $field);
+
+		$this->assertSame(
+			['undo', 'redo', 'bold', 'italic', 'strike', 'h2', 'h3', 'bullet-list', 'ordered-list', 'link', 'align'],
+			$field->properties()['tools'],
+		);
+	}
+
+	public function testToolsListsRejectAnythingButToolCases(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('may only contain Tool cases');
+		new Tools([Tool::Bold, 'italic']);
+	}
+
+	public function testToolPresetAllPinsTheCaseList(): void
+	{
+		$this->assertSame(Tool::cases(), Tool::ALL);
+	}
+
 	public function testRichTextToolsFallBackToProjectConfig(): void
 	{
 		$field = $this->createRichTextField(settings: [

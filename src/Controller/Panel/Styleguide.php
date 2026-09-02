@@ -221,7 +221,7 @@ final class Styleguide extends Panel
 				'name' => 'rtDefault',
 				'label' => 'Richtext — default tools',
 				'control' => $control,
-				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::defaults()),
+				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
 				'richtextClasses' => (object) [],
 				'richtextStyles' => (object) [],
 			],

@@ -33,7 +33,7 @@ trait IsToolsAware
 	 */
 	public function getTools(): array
 	{
-		$tools = $this->tools ?: $this->owner->config()->richtext->tools ?: Tool::defaults();
+		$tools = $this->tools ?: $this->owner->config()->richtext->tools ?: Tool::DEFAULT;
 
 		return array_map(static fn(Tool $tool): string => $tool->value, $tools);
 	}

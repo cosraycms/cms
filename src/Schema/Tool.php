@@ -34,23 +34,49 @@ enum Tool: string
 
 	/**
 	 * The built-in toolbar: what editors get unless a field's `#[Tools]`
-	 * or the project's `richtext.tools` asks for more.
-	 *
-	 * @return list<Tool>
+	 * or the project's `richtext.tools` asks for more. A constant, not a
+	 * method, so it can seed an attribute: `#[Tools(Tool::DEFAULT, Tool::Align)]`.
 	 */
-	public static function defaults(): array
-	{
-		return [
-			self::Undo,
-			self::Redo,
-			self::Bold,
-			self::Italic,
-			self::Strike,
-			self::H2,
-			self::H3,
-			self::BulletList,
-			self::OrderedList,
-			self::Link,
-		];
-	}
+	public const array DEFAULT = [
+		self::Undo,
+		self::Redo,
+		self::Bold,
+		self::Italic,
+		self::Strike,
+		self::H2,
+		self::H3,
+		self::BulletList,
+		self::OrderedList,
+		self::Link,
+	];
+
+	/** A bare trio for teaser-sized fields. */
+	public const array MINIMAL = [self::Bold, self::Italic, self::Link];
+
+	/**
+	 * Every tool there is. Spelled out because a constant cannot call
+	 * `cases()`; a test pins it to the case list.
+	 */
+	public const array ALL = [
+		self::Undo,
+		self::Redo,
+		self::H1,
+		self::H2,
+		self::H3,
+		self::Bold,
+		self::Italic,
+		self::Strike,
+		self::Sub,
+		self::Sup,
+		self::Align,
+		self::BulletList,
+		self::OrderedList,
+		self::Blockquote,
+		self::Hr,
+		self::Link,
+		self::Image,
+		self::Br,
+		self::Clear,
+		self::Source,
+	];
 }

@@ -41,18 +41,24 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 
 ### Richtext toolbar
 
-The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else the built-in default (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order.
+The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else `Tool::DEFAULT` (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order, duplicates collapse.
+
+Attribute arguments mix single cases with lists (PHP forbids unpacking there), so the preset constants on the enum — `Tool::DEFAULT`, `Tool::MINIMAL` (bold, italic, link), `Tool::ALL` — seed a set without re-listing it:
 
 ```php
 use Cosray\Schema\Tool;
 use Cosray\Schema\Tools;
 
-#[Tools(Tool::Bold, Tool::Italic, Tool::Link, Tool::Source)]
+#[Tools(Tool::DEFAULT, Tool::Align, Tool::Source)]  // the default plus two
 public RichText $body;
+
+#[Tools(Tool::MINIMAL)]
+public RichText $teaser;
 ```
 
 ```php
-// Project-wide, in app settings; the attribute still wins per field.
+// Project-wide, in app settings, as Tool cases or their string values;
+// the attribute still wins per field.
 'richtext.tools' => ['undo', 'redo', 'bold', 'italic', 'link'],
 ```
 
