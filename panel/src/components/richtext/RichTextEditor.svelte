@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { EditorState } from 'prosemirror-state';
 
-	import { mount, onDestroy, onMount, unmount } from 'svelte';
+	import { type Component, mount, onDestroy, onMount, unmount } from 'svelte';
 
 	import type { AssetInfo } from '$types/data';
 
@@ -75,14 +75,30 @@
 	import IcoFontSize from '$components/icons/IcoFontSize.svelte';
 	import IcoThreeDots from '$components/icons/IcoThreeDots.svelte';
 
+	// Mirrors Cosray\Schema\Tool::defaults() — the set an editor gets when
+	// neither the field nor the project configures one.
+	const defaultTools = [
+		'undo',
+		'redo',
+		'bold',
+		'italic',
+		'strike',
+		'h2',
+		'h3',
+		'bullet-list',
+		'ordered-list',
+		'link',
+	];
+
 	type Props = {
 		value: RichtextDoc | null;
 		name: string;
-		editSource?: boolean;
 		required?: boolean;
 		toolbar?: 'default' | 'inline';
 		embed?: boolean;
 		notify?: () => void;
+		/** Toolbar tool set (`#[Tools]` / `richtext.tools`). */
+		tools?: string[];
 		/** Declared paragraph classes (`richtext.classes`). */
 		classes?: Record<string, string>;
 		/** Declared text styles (`richtext.styles`). */
@@ -96,11 +112,11 @@
 	let {
 		value = $bindable(),
 		name,
-		editSource = true,
 		required = false,
 		toolbar = 'default',
 		embed = false,
 		notify = () => {},
+		tools = defaultTools,
 		classes = {},
 		styles = {},
 		assetUrl = () => null,
@@ -231,11 +247,6 @@
 		showCompactToolsDropdown = false;
 	}
 
-	function openAddLinkModalCompact() {
-		showCompactToolsDropdown = false;
-		openAddLinkModal();
-	}
-
 	function addLink(target: { href?: string; node?: string; asset?: string }, blank: boolean) {
 		if (!editor) return;
 		const href = target.href ?? '';
@@ -302,6 +313,206 @@
 			return () => void unmount(app);
 		});
 	}
+
+	function toggleHeading(level: 1 | 2 | 3) {
+		return () => {
+			const active =
+				level === 1
+					? editorState.heading1
+					: level === 2
+						? editorState.heading2
+						: editorState.heading3;
+
+			run(active ? setParagraph() : setHeading(level))();
+		};
+	}
+
+	function openLinkModalClosed() {
+		showCompactToolsDropdown = false;
+		openAddLinkModal();
+	}
+
+	type ToolSpec = {
+		key: string;
+		tool: string;
+		icon: Component;
+		label: string;
+		onclick: () => void;
+		isActive?: () => boolean;
+		isVisible?: () => boolean;
+	};
+
+	// The full vocabulary in canonical order; `tools` picks the subset, so a
+	// configured list is a set, not a layout.
+	const toolbarSpecs: ToolSpec[] = [
+		{ key: 'undo', tool: 'undo', icon: IcoUndo, label: __('richtext:undo'), onclick: run(undo) },
+		{ key: 'redo', tool: 'redo', icon: IcoRedo, label: __('richtext:redo'), onclick: run(redo) },
+		{
+			key: 'bold',
+			tool: 'bold',
+			icon: IcoBold,
+			label: __('richtext:bold'),
+			onclick: run(toggleBold()),
+			isActive: () => editorState.bold,
+		},
+		{
+			key: 'italic',
+			tool: 'italic',
+			icon: IcoItalic,
+			label: __('richtext:italic'),
+			onclick: run(toggleItalic()),
+			isActive: () => editorState.italic,
+		},
+		{
+			key: 'strike',
+			tool: 'strike',
+			icon: IcoStrikethrough,
+			label: __('richtext:strikethrough'),
+			onclick: run(toggleStrike()),
+			isActive: () => editorState.strike,
+		},
+		{
+			key: 'h1',
+			tool: 'h1',
+			icon: IcoH1,
+			label: __('richtext:heading-1'),
+			onclick: toggleHeading(1),
+			isActive: () => editorState.heading1,
+		},
+		{
+			key: 'h2',
+			tool: 'h2',
+			icon: IcoH2,
+			label: __('richtext:heading-2'),
+			onclick: toggleHeading(2),
+			isActive: () => editorState.heading2,
+		},
+		{
+			key: 'h3',
+			tool: 'h3',
+			icon: IcoH3,
+			label: __('richtext:heading-3'),
+			onclick: toggleHeading(3),
+			isActive: () => editorState.heading3,
+		},
+		{
+			key: 'sub',
+			tool: 'sub',
+			icon: IcoSubscript,
+			label: __('richtext:subscript'),
+			onclick: run(toggleSubscript()),
+			isActive: () => editorState.subscript,
+		},
+		{
+			key: 'sup',
+			tool: 'sup',
+			icon: IcoSuperscript,
+			label: __('richtext:superscript'),
+			onclick: run(toggleSuperscript()),
+			isActive: () => editorState.superscript,
+		},
+		{
+			key: 'align-left',
+			tool: 'align',
+			icon: IcoAlignLeft,
+			label: __('richtext:align-left'),
+			onclick: run(unsetTextAlign()),
+		},
+		{
+			key: 'align-center',
+			tool: 'align',
+			icon: IcoAlignCenter,
+			label: __('richtext:align-center'),
+			onclick: run(setTextAlign('center')),
+			isActive: () => editorState.center,
+		},
+		{
+			key: 'align-right',
+			tool: 'align',
+			icon: IcoAlignRight,
+			label: __('richtext:align-right'),
+			onclick: run(setTextAlign('right')),
+			isActive: () => editorState.right,
+		},
+		{
+			key: 'align-justify',
+			tool: 'align',
+			icon: IcoAlignJustify,
+			label: __('richtext:justify'),
+			onclick: run(setTextAlign('justify')),
+			isActive: () => editorState.justify,
+		},
+		{
+			key: 'bullet-list',
+			tool: 'bullet-list',
+			icon: IcoListUl,
+			label: __('richtext:bullet-list'),
+			onclick: run(toggleBulletList()),
+			isActive: () => editorState.bulletList,
+		},
+		{
+			key: 'ordered-list',
+			tool: 'ordered-list',
+			icon: IcoListOl,
+			label: __('richtext:numbered-list'),
+			onclick: run(toggleOrderedList()),
+			isActive: () => editorState.orderedList,
+		},
+		{
+			key: 'blockquote',
+			tool: 'blockquote',
+			icon: IcoBlockQuoteRight,
+			label: __('richtext:blockquote'),
+			onclick: run(toggleBlockquote()),
+			isActive: () => editorState.blockquote,
+		},
+		{
+			key: 'hr',
+			tool: 'hr',
+			icon: IcoHorizontalRule,
+			label: __('richtext:horizontal-line'),
+			onclick: run(insertHorizontalRule()),
+		},
+		{
+			key: 'link',
+			tool: 'link',
+			icon: IcoLink,
+			label: __('richtext:add-page-link'),
+			onclick: openLinkModalClosed,
+		},
+		{
+			key: 'unlink',
+			tool: 'link',
+			icon: IcoUnlink,
+			label: __('richtext:remove-link'),
+			onclick: run(unsetLink()),
+			isVisible: () => editorState.link,
+		},
+		{
+			key: 'image',
+			tool: 'image',
+			icon: IcoImage,
+			label: __('image:insert'),
+			onclick: openAddImageModal,
+		},
+		{
+			key: 'br',
+			tool: 'br',
+			icon: IcoLineBreak,
+			label: __('richtext:hard-break'),
+			onclick: run(insertHardBreak()),
+		},
+		{
+			key: 'clear',
+			tool: 'clear',
+			icon: IcoRemoveFormat,
+			label: __('richtext:remove-formats'),
+			onclick: run(clearMarks()),
+		},
+	];
+
+	let enabled = $derived(new Set(tools));
+	let activeSpecs = $derived(toolbarSpecs.filter((spec) => enabled.has(spec.tool)));
 </script>
 
 {#if toolbar === 'inline'}
@@ -356,121 +567,90 @@
 						</button>
 					</div>
 				{:else}
-					<div class="cms-richtext-dropdown-wrap">
-						<div class="richtext-dropdown">
-							<button
-								type="button"
-								class="richtext-dropdown-button"
-								aria-expanded="true"
-								aria-haspopup="true"
-								onclick={() => {
-									showDropdown = !showDropdown;
-									showStyleDropdown = false;
-									showCompactToolsDropdown = false;
-								}}
-							>
-								{__('richtext:paragraph')}
-								<svg
-									class="cms-richtext-dropdown-icon"
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-									aria-hidden="true"
+					{#if classOptions.length > 0}
+						<div class="cms-richtext-dropdown-wrap">
+							<div class="richtext-dropdown">
+								<button
+									type="button"
+									class="richtext-dropdown-button"
+									aria-expanded={showDropdown}
+									aria-haspopup="true"
+									onclick={() => {
+										showDropdown = !showDropdown;
+										showStyleDropdown = false;
+										showCompactToolsDropdown = false;
+									}}
 								>
-									<path
-										fill-rule="evenodd"
-										d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-										clip-rule="evenodd"
-									/>
-								</svg>
-							</button>
-						</div>
-						{#if showDropdown}
-							<div
-								class="richtext-dropdown-menu"
-								role="menu"
-								aria-orientation="vertical"
-								aria-labelledby="menu-button"
-								tabindex="-1"
-							>
-								<div class="cms-richtext-dropdown-items" role="none">
-									<button
-										onclick={runDropdown(setHeading(1))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.heading1}
+									{__('richtext:paragraph')}
+									<svg
+										class="cms-richtext-dropdown-icon"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										aria-hidden="true"
 									>
-										<IcoH1 />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:heading-1')}
-										</span>
-									</button>
-									<button
-										onclick={runDropdown(setHeading(2))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.heading2}
-									>
-										<IcoH2 />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:heading-2')}
-										</span>
-									</button>
-									<button
-										onclick={runDropdown(setHeading(3))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.heading3}
-									>
-										<IcoH3 />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:heading-3')}
-										</span>
-									</button>
-									<button
-										onclick={runDropdown(setParagraph())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.paragraphClass === 'default'}
-									>
-										<IcoParagraph />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:paragraph')}
-										</span>
-									</button>
-									{#each classOptions as [cls, label] (cls)}
+										<path
+											fill-rule="evenodd"
+											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+											clip-rule="evenodd"
+										/>
+									</svg>
+								</button>
+							</div>
+							{#if showDropdown}
+								<div
+									class="richtext-dropdown-menu"
+									role="menu"
+									aria-orientation="vertical"
+									aria-labelledby="menu-button"
+									tabindex="-1"
+								>
+									<div class="cms-richtext-dropdown-items" role="none">
 										<button
-											onclick={runDropdown(setParagraphClass(cls))}
+											type="button"
+											onclick={runDropdown(setParagraph())}
 											role="menuitem"
 											tabindex="-1"
 											class="richtext-dropdown-item"
-											class:active={editorState.paragraphClass === cls}
+											class:active={editorState.paragraphClass === 'default'}
 										>
-											<IcoTextHeight />
+											<IcoParagraph />
 											<span class="cms-richtext-dropdown-item-label">
-												{label}
+												{__('richtext:paragraph')}
 											</span>
 										</button>
-									{/each}
-									<button
-										onclick={runDropdown(clearNodes())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoRemoveFormat />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:remove-format')}
-										</span>
-									</button>
+										{#each classOptions as [cls, label] (cls)}
+											<button
+												type="button"
+												onclick={runDropdown(setParagraphClass(cls))}
+												role="menuitem"
+												tabindex="-1"
+												class="richtext-dropdown-item"
+												class:active={editorState.paragraphClass === cls}
+											>
+												<IcoTextHeight />
+												<span class="cms-richtext-dropdown-item-label">
+													{label}
+												</span>
+											</button>
+										{/each}
+										<button
+											type="button"
+											onclick={runDropdown(clearNodes())}
+											role="menuitem"
+											tabindex="-1"
+											class="richtext-dropdown-item"
+										>
+											<IcoRemoveFormat />
+											<span class="cms-richtext-dropdown-item-label">
+												{__('richtext:remove-format')}
+											</span>
+										</button>
+									</div>
 								</div>
-							</div>
-						{/if}
-					</div>
+							{/if}
+						</div>
+					{/if}
 					{#if styleOptions.length > 0}
 						<div class="cms-richtext-dropdown-wrap">
 							<div class="richtext-dropdown">
@@ -567,217 +747,24 @@
 								tabindex="-1"
 							>
 								<div class="cms-richtext-dropdown-items" role="none">
-									<button
-										onclick={run(unsetTextAlign())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoAlignLeft />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:align-left')}
-										</span>
-									</button>
-									<button
-										onclick={run(setTextAlign('center'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.center}
-									>
-										<IcoAlignCenter />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:align-center')}
-										</span>
-									</button>
-									<button
-										onclick={run(setTextAlign('right'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.right}
-									>
-										<IcoAlignRight />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:align-right')}
-										</span>
-									</button>
-									<button
-										onclick={run(setTextAlign('justify'))}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.justify}
-									>
-										<IcoAlignJustify />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:justify')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleBold())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.bold}
-									>
-										<IcoBold />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:bold')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleItalic())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.italic}
-									>
-										<IcoItalic />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:italic')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleStrike())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.strike}
-									>
-										<IcoStrikethrough />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:strikethrough')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleBulletList())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.bulletList}
-									>
-										<IcoListUl />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:bullet-list')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleOrderedList())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.orderedList}
-									>
-										<IcoListOl />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:numbered-list')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleSubscript())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.subscript}
-									>
-										<IcoSubscript />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:subscript')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleSuperscript())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.superscript}
-									>
-										<IcoSuperscript />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:superscript')}
-										</span>
-									</button>
-									<button
-										onclick={run(toggleBlockquote())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-										class:active={editorState.blockquote}
-									>
-										<IcoBlockQuoteRight />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:blockquote')}
-										</span>
-									</button>
-									<button
-										onclick={run(insertHorizontalRule())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoHorizontalRule />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:horizontal-line')}
-										</span>
-									</button>
-									<button
-										onclick={openAddLinkModalCompact}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoLink />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:add-page-link')}
-										</span>
-									</button>
-									<button
-										onclick={openAddImageModal}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoImage />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('image:insert')}
-										</span>
-									</button>
-									{#if editorState.link}
-										<button
-											onclick={run(unsetLink())}
-											role="menuitem"
-											tabindex="-1"
-											class="richtext-dropdown-item"
-										>
-											<IcoUnlink />
-											<span class="cms-richtext-dropdown-item-label">
-												{__('richtext:remove-link')}
-											</span>
-										</button>
-									{/if}
-									<button
-										onclick={run(insertHardBreak())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoLineBreak />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:hard-break')}
-										</span>
-									</button>
-									<button
-										onclick={run(clearMarks())}
-										role="menuitem"
-										tabindex="-1"
-										class="richtext-dropdown-item"
-									>
-										<IcoRemoveFormat />
-										<span class="cms-richtext-dropdown-item-label">
-											{__('richtext:remove-formats')}
-										</span>
-									</button>
+									{#each activeSpecs as spec (spec.key)}
+										{#if spec.isVisible?.() ?? true}
+											{@const Icon = spec.icon}
+											<button
+												type="button"
+												onclick={spec.onclick}
+												role="menuitem"
+												tabindex="-1"
+												class="richtext-dropdown-item"
+												class:active={spec.isActive?.() ?? false}
+											>
+												<Icon />
+												<span class="cms-richtext-dropdown-item-label">
+													{spec.label}
+												</span>
+											</button>
+										{/if}
+									{/each}
 								</div>
 							</div>
 						{/if}
@@ -785,155 +772,25 @@
 					<div
 						class="richtext-toolbar-btns cms-richtext-toolbar-btns-grow cms-richtext-toolbar-main-actions"
 					>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:align-left')}
-							onclick={run(unsetTextAlign())}
-						>
-							<IcoAlignLeft />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:align-center')}
-							onclick={run(setTextAlign('center'))}
-							class:active={editorState.center}
-						>
-							<IcoAlignCenter />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:align-right')}
-							onclick={run(setTextAlign('right'))}
-							class:active={editorState.right}
-						>
-							<IcoAlignRight />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:justify')}
-							onclick={run(setTextAlign('justify'))}
-							class:active={editorState.justify}
-						>
-							<IcoAlignJustify />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:bold')}
-							onclick={run(toggleBold())}
-							class:active={editorState.bold}
-						>
-							<IcoBold />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:italic')}
-							onclick={run(toggleItalic())}
-							class:active={editorState.italic}
-						>
-							<IcoItalic />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:strikethrough')}
-							onclick={run(toggleStrike())}
-							class:active={editorState.strike}
-						>
-							<IcoStrikethrough />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:bullet-list')}
-							onclick={run(toggleBulletList())}
-							class:active={editorState.bulletList}
-						>
-							<IcoListUl />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:numbered-list')}
-							onclick={run(toggleOrderedList())}
-							class:active={editorState.orderedList}
-						>
-							<IcoListOl />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:subscript')}
-							onclick={run(toggleSubscript())}
-							class:active={editorState.subscript}
-						>
-							<IcoSubscript />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:superscript')}
-							onclick={run(toggleSuperscript())}
-							class:active={editorState.superscript}
-						>
-							<IcoSuperscript />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:blockquote')}
-							onclick={run(toggleBlockquote())}
-							class:active={editorState.blockquote}
-						>
-							<IcoBlockQuoteRight />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:horizontal-line')}
-							onclick={run(insertHorizontalRule())}
-						>
-							<IcoHorizontalRule />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:add-page-link')}
-							onclick={openAddLinkModal}
-						>
-							<IcoLink />
-						</button>
-						{#if editorState.link}
-							<button
-								class="richtext-toolbar-btn"
-								title={__('richtext:remove-link')}
-								onclick={run(unsetLink())}
-							>
-								<IcoUnlink />
-							</button>
-						{/if}
-						<button
-							class="richtext-toolbar-btn"
-							title={__('image:insert')}
-							onclick={openAddImageModal}
-						>
-							<IcoImage />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:hard-break')}
-							onclick={run(insertHardBreak())}
-						>
-							<IcoLineBreak />
-						</button>
-						<button
-							class="richtext-toolbar-btn"
-							title={__('richtext:remove-formats')}
-							onclick={run(clearMarks())}
-						>
-							<IcoRemoveFormat />
-						</button>
+						{#each activeSpecs as spec (spec.key)}
+							{#if spec.isVisible?.() ?? true}
+								{@const Icon = spec.icon}
+								<button
+									type="button"
+									class="richtext-toolbar-btn"
+									title={spec.label}
+									onclick={spec.onclick}
+									class:active={spec.isActive?.() ?? false}
+								>
+									<Icon />
+								</button>
+							{/if}
+						{/each}
 					</div>
-					<div class="richtext-extras">
-						<button class="richtext-toolbar-btn" title={__('richtext:undo')} onclick={run(undo)}>
-							<IcoUndo />
-						</button>
-						<button class="richtext-toolbar-btn" title={__('richtext:redo')} onclick={run(redo)}>
-							<IcoRedo />
-						</button>
-						{#if editSource}
+					{#if enabled.has('source')}
+						<div class="richtext-extras">
 							<button
+								type="button"
 								onclick={toggleSource}
 								class="richtext-source-btn cms-richtext-source-btn-offset"
 							>
@@ -942,8 +799,8 @@
 									{__('richtext:show-source')}
 								</span>
 							</button>
-						{/if}
-					</div>
+						</div>
+					{/if}
 				{/if}
 			</div>
 		{/if}

@@ -17,6 +17,7 @@
 		name: string;
 		required?: boolean;
 		translate?: boolean;
+		tools?: string[];
 		richtextClasses?: Record<string, string>;
 		richtextStyles?: Record<string, string>;
 	};
@@ -111,6 +112,7 @@
 	<RichTextEditor
 		name={field.name}
 		required={field.required ?? false}
+		tools={field.tools}
 		classes={field.richtextClasses ?? {}}
 		styles={field.richtextStyles ?? {}}
 		{assetUrl}
