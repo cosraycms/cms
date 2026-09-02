@@ -258,15 +258,19 @@
 				gap: var(--cms-space-2-5);
 			}
 
+			/* Square, bordered, the image contained inside a small inset: every
+			   tile keeps one silhouette, and badges or cut-outs are never cropped. */
 			& .tile {
 				position: relative;
-				aspect-ratio: 4 / 3;
+				aspect-ratio: 1;
+				padding: var(--cms-space-1-5);
+				border: 1px solid var(--cms-color-border);
 				border-radius: var(--cms-radius-md);
-				background: var(--cms-color-surface-sunken);
-				overflow: hidden;
+				background: var(--cms-color-surface);
 
 				&.is-selected {
-					box-shadow: 0 0 0 2px var(--cms-color-info);
+					border-color: var(--cms-color-info);
+					box-shadow: 0 0 0 2px var(--cms-color-info-ring);
 				}
 
 				&:hover .discard,
@@ -277,8 +281,9 @@
 			}
 
 			& .pick {
-				display: grid;
-				place-items: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 				width: 100%;
 				height: 100%;
 				padding: 0;
@@ -287,12 +292,9 @@
 				cursor: pointer;
 
 				& img {
-					position: absolute;
-					inset: 0;
-					width: 100%;
-					height: 100%;
-					/* Badges and cut-outs must stay whole; the plate fills the rest. */
-					object-fit: contain;
+					max-width: 100%;
+					max-height: 100%;
+					border-radius: var(--cms-radius);
 				}
 			}
 
@@ -366,11 +368,13 @@
 			}
 
 			& .mini {
-				width: 2.125rem;
-				height: 1.625rem;
+				width: 2rem;
+				height: 2rem;
 				flex-shrink: 0;
+				padding: var(--cms-space-0-5);
+				border: 1px solid var(--cms-color-border);
 				border-radius: var(--cms-radius);
-				background: var(--cms-color-border);
+				background: var(--cms-color-surface);
 				object-fit: contain;
 			}
 
