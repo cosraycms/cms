@@ -93,7 +93,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		if (is_array($value)) {
 			$valueMap = $this->isAsymmetricallyTranslated()
 				? $value
-				: [self::NEUTRAL_LOCALE => $value];
+				: $this->scalarValueMap($value);
 		} else {
 			$valueMap = $this->emptyValueMap();
 		}

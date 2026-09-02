@@ -94,6 +94,8 @@
 
 ### Fixed
 
+- Fixed opening the editor for a node whose `Entries` rows carry a non-translated rich-text or blocks field, which failed with `Error: Recursion detected`. Those fields re-wrapped an already-canonical `zxx` envelope while the editor structure was built, and the recursive merge that followed tripped PHP's recursion guard. Stored content was valid throughout and is untouched.
+
 - The `hidden` attribute now actually hides a field wrapper: `.cms-field`'s `display: flex` outranked the user-agent rule, so conditionally hidden fields — the menu form's type sections, `when`-condition fields — stayed visible. Found live in the kundmueller panel.
 
 - Editor saves refuse truncated submissions instead of persisting them. A form-encoded POST past PHP's `max_input_vars` is silently cut short, and since entries rows are replaced wholesale on save, saving it would silently delete content. The editor form now renders a sentinel input as its last control; save and store reject any submission that arrives without it — htmx submits get the error box, plain submits fail with `400`.

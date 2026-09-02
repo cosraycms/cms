@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\FieldHydrator;
+use Cosray\Field\RichText;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
+use Cosray\Richtext\Envelope;
 use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
+use Cosray\Tests\Fixtures\Node\TestBlocksEntry;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestNestedEntriesEntry;
+use Cosray\Tests\Fixtures\Node\TestRichTextEntry;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Entries as EntriesValue;
@@ -161,6 +166,71 @@ class EntriesTest extends TestCase
 		$this->assertArrayHasKey(
 			'content',
 			$structure['value'][\Cosray\Field\Field::NEUTRAL_LOCALE][0]['fields'],
+		);
+	}
+
+	public function testEntriesStructureNormalizesNestedRichTextEnvelope(): void
+	{
+		$document = [
+			'type' => 'doc',
+			'content' => [
+				[
+					'type' => 'paragraph',
+					'content' => [['type' => 'text', 'text' => 'Schedule']],
+				],
+			],
+		];
+		$structure = $this
+			->createEntries()
+			->allow(TestRichTextEntry::class)
+			->structure([
+				[
+					'uid' => 'entry1',
+					'type' => TestRichTextEntry::class,
+					'fields' => [
+						'content' => [
+							'type' => RichText::class,
+							'value' => [RichText::NEUTRAL_LOCALE => $document],
+							'format' => Envelope::FORMAT,
+							'version' => Envelope::VERSION,
+						],
+					],
+				],
+			]);
+
+		$this->assertSame(
+			[
+				'type' => RichText::class,
+				'value' => [RichText::NEUTRAL_LOCALE => $document],
+				'format' => Envelope::FORMAT,
+				'version' => Envelope::VERSION,
+			],
+			$structure['value'][Entries::NEUTRAL_LOCALE][0]['fields']['content'],
+		);
+	}
+
+	public function testEntriesStructureNormalizesNestedBlocksEnvelope(): void
+	{
+		$blocks = [['type' => 'text', 'value' => ['content' => 'Opening hours']]];
+		$structure = $this
+			->createEntries()
+			->allow(TestBlocksEntry::class)
+			->structure([
+				[
+					'uid' => 'entry1',
+					'type' => TestBlocksEntry::class,
+					'fields' => [
+						'body' => [
+							'type' => Blocks::class,
+							'value' => [Blocks::NEUTRAL_LOCALE => $blocks],
+						],
+					],
+				],
+			]);
+
+		$this->assertSame(
+			[Blocks::NEUTRAL_LOCALE => $blocks],
+			$structure['value'][Entries::NEUTRAL_LOCALE][0]['fields']['body']['value'],
 		);
 	}
 

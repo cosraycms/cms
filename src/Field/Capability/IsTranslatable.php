@@ -58,7 +58,7 @@ trait IsTranslatable
 			'type' => $this::class,
 			'value' => $this->isTranslatable()
 				? $this->localeValueMap($value)
-				: [self::NEUTRAL_LOCALE => $value],
+				: $this->scalarValueMap($value),
 		];
 	}
 
