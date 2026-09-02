@@ -6,6 +6,9 @@
 // data-name/data-id bases of nested repeater containers and recurses
 // into inert template content, so structural controls nested inside a
 // row keep renumbering against the right base after their row moved.
+// Rows sit directly in the container, or in a [data-repeater-list]
+// child when the container also carries chrome around them (entries:
+// a count line, the footer); the count line follows the row count.
 
 import { uid } from '$lib/content';
 
@@ -43,12 +46,16 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 	});
 }
 
+function list(container: HTMLElement): HTMLElement {
+	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
+}
+
 function renumber(container: HTMLElement): void {
 	const nameBase = container.dataset.name ?? '';
 	const idBase = container.dataset.id ?? '';
 	const namePattern = new RegExp(`^${escapeRegex(nameBase)}\\[(?:\\d+|__i__)\\]`);
 	const idPattern = new RegExp(`^${escapeRegex(idBase)}-(?:\\d+|__i__)`);
-	const rows = container.querySelectorAll<HTMLElement>(':scope > [data-repeater-row]');
+	const rows = list(container).querySelectorAll<HTMLElement>(':scope > [data-repeater-row]');
 
 	rows.forEach((row, index) => {
 		rewrite(row, {
@@ -64,6 +71,13 @@ function renumber(container: HTMLElement): void {
 			label.textContent = `${index + 1}.`;
 		}
 	});
+
+	const count = container.querySelector<HTMLElement>(':scope > [data-repeater-count]');
+
+	if (count) {
+		const template = rows.length === 1 ? count.dataset.one : count.dataset.many;
+		count.textContent = (template ?? '').replace(':count', String(rows.length));
+	}
 
 	const max = Number(container.dataset.max ?? '');
 	const full = Number.isFinite(max) && max > 0 && rows.length >= max;
@@ -88,9 +102,11 @@ function add(container: HTMLElement, type: string | null): void {
 		type === null
 			? templates[0]
 			: templates.find((el) => el.getAttribute('data-repeater-template') === type);
-	const anchor = container.querySelector(':scope > [data-repeater-footer]');
+	const rows = list(container);
+	const anchor =
+		rows === container ? container.querySelector(':scope > [data-repeater-footer]') : null;
 
-	if (!template || !anchor) {
+	if (!template || (rows === container && !anchor)) {
 		return;
 	}
 
@@ -106,7 +122,12 @@ function add(container: HTMLElement, type: string | null): void {
 		}
 	});
 
-	anchor.before(clone);
+	if (anchor) {
+		anchor.before(clone);
+	} else {
+		rows.append(clone);
+	}
+
 	changed(container);
 }
 

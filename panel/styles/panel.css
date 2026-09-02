@@ -10,6 +10,7 @@
 @import './cms-status.css' layer(panel);
 @import './cms-field.css' layer(panel);
 @import './cms-control.css' layer(panel);
+@import './cms-entries.css' layer(panel);
 @import './cms-node.css' layer(panel);
 @import './cms-inspector.css' layer(panel);
 @import './tabs.css' layer(panel);

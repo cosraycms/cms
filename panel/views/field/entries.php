@@ -1,12 +1,16 @@
 <?php
 
+use Cosray\Panel\EntrySummary;
+
 use function Cosray\escape;
 
 // Server-rendered entries: a typed repeater whose rows are groups of
 // regular field wrappers. Add/remove/move/renumber is wired by the
 // repeater behavior; one inert template per allowed entry type stamps
-// fresh rows entirely client-side. Receives the neutral-locale row list
-// in $value and the renumber base (content[f][value][zxx]) in $name.
+// fresh rows entirely client-side. Stored rows render collapsed to a
+// summary line and open their form beneath it; stamped rows open
+// expanded. Receives the neutral-locale row list in $value and the
+// renumber base (content[f][value][zxx]) in $name.
 
 $field = (array) $this->unwrap($field);
 $control = (array) $this->unwrap($control);
@@ -26,25 +30,6 @@ foreach ((array) ($props['entryTypes'] ?? []) as $entryType) {
 		$entryTypes[$entryType['type']] = $entryType;
 	}
 }
-
-$title = static function (array $entryType, array $fieldsData): string {
-	foreach ((array) ($entryType['fields'] ?? []) as $sub) {
-		$subName = $sub['name'] ?? null;
-		$subValue = is_string($subName) ? $fieldsData[$subName]['value'] ?? null : null;
-
-		if (!is_array($subValue)) {
-			continue;
-		}
-
-		foreach ($subValue as $localized) {
-			if (is_string($localized) && trim($localized) !== '') {
-				return mb_strlen($localized) > 50 ? mb_substr($localized, 0, 50) . '…' : $localized;
-			}
-		}
-	}
-
-	return (string) ($entryType['label'] ?? __('field:entry'));
-};
 
 $span = static function (mixed $width): string {
 	$width = is_int($width) && $width > 0 && $width <= 100 ? $width : 100;
@@ -79,17 +64,33 @@ $renderField = function (array $sub, array $fieldsData, string $rowName, string 
 	<?php
 };
 
+$grip = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
+	. '<path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 '
+	. '1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 '
+	. '1 1-2 0 1 1 0 0 1 2 0zM7 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 '
+	. '14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
+$plus = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
+	. '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'
+	. '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 '
+	. '0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>';
+
 $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	$name,
 	$id,
-	$title,
 	$span,
 	$renderField,
+	$assets,
+	$defaultLocale,
+	$grip,
 ): void {
 	$rowName = "{$name}[{$index}]";
 	$rowId = "{$id}-{$index}";
 	$uid = is_string($rowData['uid'] ?? null) ? $rowData['uid'] : '';
 	$fieldsData = is_array($rowData['fields'] ?? null) ? $rowData['fields'] : [];
+	$label = (string) ($entryType['label'] ?? __('field:entry'));
+	$summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
+	// Stored rows start collapsed; a stamped row is empty and wants input.
+	$open = $rowData === null;
 	$subs = array_values(array_filter(
 		(array) ($entryType['fields'] ?? []),
 		static fn(mixed $sub): bool => is_array($sub) && !($sub['hidden'] ?? false),
@@ -121,35 +122,48 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 		$subsByName[(string) ($sub['name'] ?? '')] = $sub;
 	}
 	?>
-	<div class="cms-entry" data-repeater-row>
-		<div class="head">
-			<button type="button" class="title" data-repeater-collapse aria-expanded="true">
-				<span class="number" data-repeater-label>
-					<?= is_int($index) ? $index + 1 . '.' : '' ?>
-				</span>
-				<span class="text">
-					<?= escape($rowData === null
-						? (string) ($entryType['label'] ?? __('field:entry'))
-						: $title($entryType, $fieldsData)) ?>
+	<div class="entry" data-repeater-row>
+		<div class="summary">
+			<span class="grip" data-repeater-grip title="<?= escape(__('field:drag-entry')) ?>">
+				<?= $grip ?>
+			</span>
+			<button
+				type="button"
+				class="opener"
+				data-repeater-collapse
+				aria-expanded="<?= $open ? 'true' : 'false' ?>"
+				aria-controls="<?= escape("{$rowId}-form") ?>">
+				<?php if ($summary->hasImage): ?>
+					<span class="thumb">
+						<?php if ($summary->thumb !== null): ?>
+							<img src="<?= escape($summary->thumb) ?>" alt="" />
+						<?php endif ?>
+					</span>
+				<?php endif ?>
+				<span class="texts">
+					<span
+						class="primary"
+						data-repeater-title
+						data-fallback="<?= escape($label) ?>"><?= escape($summary->primary ?? $label) ?></span>
+					<span class="secondary" data-repeater-subtitle><?= escape(
+						(string) $summary->secondary,
+					) ?></span>
 				</span>
 			</button>
-			<span class="controls">
-				<button
-					type="button"
-					class="cms-button"
-					data-repeater-move="up"
-					aria-label="<?= escape(__('common:move-up')) ?>">↑</button>
-				<button
-					type="button"
-					class="cms-button"
-					data-repeater-move="down"
-					aria-label="<?= escape(__('common:move-down')) ?>">↓</button>
-				<button
-					type="button"
-					class="cms-button"
-					data-repeater-remove
-					aria-label="<?= escape(__('field:remove-entry')) ?>">×</button>
-			</span>
+			<details class="kebab" data-repeater-menu>
+				<summary aria-label="<?= escape(__('field:entry-actions')) ?>"></summary>
+				<div class="kebab-menu">
+					<button type="button" data-repeater-move="up">
+						<?= escape(__('common:move-up')) ?>
+					</button>
+					<button type="button" data-repeater-move="down">
+						<?= escape(__('common:move-down')) ?>
+					</button>
+					<button type="button" data-repeater-remove>
+						<?= escape(__('field:remove-entry')) ?>
+					</button>
+				</div>
+			</details>
 		</div>
 		<input
 			type="hidden"
@@ -160,7 +174,11 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 			type="hidden"
 			name="<?= escape("{$rowName}[type]") ?>"
 			value="<?= escape((string) $entryType['type']) ?>" />
-		<div class="body cms-fields" data-repeater-body>
+		<div
+			class="form cms-fields"
+			id="<?= escape("{$rowId}-form") ?>"
+			data-repeater-body
+			<?= $open ? '' : 'hidden' ?>>
 			<?php foreach ($subs as $sub): ?>
 				<?php $subName = (string) ($sub['name'] ?? ''); ?>
 				<?php if (isset($fieldsetsByFirst[$subName])): ?>
@@ -197,7 +215,8 @@ $addLabel = static function (array $entryType, bool $empty) use ($entryTypes): s
 	return __('field:add-typed', ['label' => (string) ($entryType['label'] ?? __('field:entry'))]);
 };
 
-$full = is_int($max) && $max > 0 && count($rows) >= $max;
+$count = count($rows);
+$full = is_int($max) && $max > 0 && $count >= $max;
 ?>
 <div
 	class="cms-entries"
@@ -205,37 +224,47 @@ $full = is_int($max) && $max > 0 && count($rows) >= $max;
 	data-name="<?= escape($name) ?>"
 	data-id="<?= escape($id) ?>"
 	<?= is_int($max) ? 'data-max="' . $max . '"' : '' ?>>
-	<?php foreach ($rows as $index => $rowData) {
-		if (!is_array($rowData)) {
-			continue;
-		}
+	<div
+		class="tally"
+		data-repeater-count
+		data-one="<?= escape(__('field:entry-count')) ?>"
+		data-many="<?= escape(__('field:entry-count-plural')) ?>"><?= escape(
+			__($count === 1 ? 'field:entry-count' : 'field:entry-count-plural', ['count' => $count]),
+		) ?></div>
+	<div class="rows" data-repeater-list>
+		<?php foreach ($rows as $index => $rowData) {
+			if (!is_array($rowData)) {
+				continue;
+			}
 
-		$type = $rowData['type'] ?? null;
+			$type = $rowData['type'] ?? null;
 
-		if (!is_string($type) || !isset($entryTypes[$type])) {
-			// Rendered without inputs: rows of types no longer allowed
-			// cannot be edited and are dropped on the next save.
-			echo '<div class="cms-control-unknown">';
-			echo escape(__('field:unknown-entry-type', ['type' => (string) $type]));
-			echo '</div>';
+			if (!is_string($type) || !isset($entryTypes[$type])) {
+				// Rendered without inputs: rows of types no longer allowed
+				// cannot be edited and are dropped on the next save.
+				echo '<div class="cms-control-unknown">';
+				echo escape(__('field:unknown-entry-type', ['type' => (string) $type]));
+				echo '</div>';
 
-			continue;
-		}
+				continue;
+			}
 
-		$row($index, $rowData, $entryTypes[$type]);
-	} ?>
+			$row($index, $rowData, $entryTypes[$type]);
+		} ?>
+	</div>
 	<?php foreach ($entryTypes as $entryType): ?>
 		<template data-repeater-template="<?= escape((string) $entryType['type']) ?>">
 			<?php $row('__i__', null, $entryType) ?>
 		</template>
 	<?php endforeach ?>
-	<div class="foot" data-repeater-footer>
+	<div class="adders" data-repeater-footer>
 		<?php foreach ($entryTypes as $entryType): ?>
 			<button
 				type="button"
-				class="cms-button"
+				class="adder"
 				data-repeater-add="<?= escape((string) $entryType['type']) ?>"
 				<?= $full ? 'hidden' : '' ?>>
+				<?= $plus ?>
 				<?= escape($addLabel($entryType, $rows === [])) ?>
 			</button>
 		<?php endforeach ?>

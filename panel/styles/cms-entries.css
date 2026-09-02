@@ -1,0 +1,240 @@
+/*
+ * Entries: one bordered card that reads as a single field. A count line,
+ * hairline-separated rows that collapse to a summary (grip, thumb, two
+ * lines of text, kebab) and open their form beneath it, and a dashed
+ * full-width add button per allowed type. Part names are deliberately
+ * unlike those of the field and node blocks around it, which would
+ * otherwise style them.
+ */
+.cms-entries {
+	--entries-x: var(--cms-space-4);
+
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface);
+
+	& .tally {
+		padding: var(--cms-space-2) var(--entries-x);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .entry {
+		border-top: 1px solid var(--cms-color-border-soft);
+
+		&.sortable-ghost {
+			opacity: 0.4;
+		}
+
+		&.sortable-chosen > .summary {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .cms-control-unknown {
+		margin: var(--cms-space-2) var(--entries-x);
+	}
+
+	& .summary {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-3) var(--entries-x);
+
+		&:hover {
+			background: var(--cms-color-hover);
+		}
+	}
+
+	& .grip {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		color: var(--cms-color-text-faint);
+		cursor: grab;
+		touch-action: none;
+	}
+
+	& .opener {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: center;
+		gap: var(--cms-space-3);
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: 2px solid var(--cms-color-info);
+			outline-offset: 2px;
+			border-radius: var(--cms-radius-sm);
+		}
+	}
+
+	& .thumb {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		overflow: hidden;
+		border: 1px solid var(--cms-color-border-soft);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface-sunken);
+
+		& img {
+			max-width: 100%;
+			max-height: 100%;
+			object-fit: contain;
+		}
+	}
+
+	& .texts {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
+	& .primary {
+		overflow: hidden;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .secondary {
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+
+		&:empty {
+			display: none;
+		}
+	}
+
+	& .kebab {
+		position: relative;
+		flex-shrink: 0;
+
+		& summary {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.625rem;
+			height: 1.625rem;
+			border-radius: var(--cms-radius-sm);
+			color: var(--cms-color-text-subtle);
+			cursor: pointer;
+			list-style: none;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+
+			&::before {
+				content: '⋮';
+				font-size: var(--cms-font-size-base);
+				font-weight: 700;
+			}
+
+			&:hover {
+				background: var(--cms-color-surface-sunken);
+				color: var(--cms-color-text);
+			}
+		}
+
+		&[open] summary {
+			background: var(--cms-color-surface-sunken);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& .kebab-menu {
+		position: absolute;
+		z-index: 5;
+		top: 100%;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		min-width: 12rem;
+		margin-top: var(--cms-space-1);
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-md);
+
+		& button {
+			display: block;
+			width: 100%;
+			padding: var(--cms-space-1-5) var(--cms-space-2-5);
+			border: 0;
+			border-radius: var(--cms-radius-sm);
+			background: none;
+			color: var(--cms-color-text);
+			font: inherit;
+			font-size: var(--cms-font-size-sm);
+			text-align: left;
+			cursor: pointer;
+
+			&:hover {
+				background: var(--cms-color-hover);
+			}
+		}
+	}
+
+	& .form {
+		padding: var(--cms-space-4) var(--entries-x) var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border-soft);
+		background: var(--cms-color-surface-sunken);
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .adders {
+		display: flex;
+	}
+
+	& .adder {
+		display: flex;
+		flex: 1 1 0;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-3);
+		border: 0;
+		border-top: 1px dashed var(--cms-color-border);
+		background: none;
+		color: var(--cms-color-text-subtle);
+		font: inherit;
+		font-size: var(--cms-font-size-sm);
+		font-weight: 500;
+		cursor: pointer;
+
+		& + .adder {
+			border-left: 1px dashed var(--cms-color-border);
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+}

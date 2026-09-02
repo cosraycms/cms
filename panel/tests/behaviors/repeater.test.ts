@@ -311,6 +311,41 @@ describe('repeater behavior', () => {
 		expect(toggle?.getAttribute('aria-expanded')).toBe('true');
 	});
 
+	it('stamps into the row list and keeps the count line in step', () => {
+		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
+			<div data-repeater-count data-one=":count entry" data-many=":count entries">1 entry</div>
+			<div data-repeater-list>${row('0', 'a')}</div>
+			<template data-repeater-template>${row('__i__')}</template>
+			<div data-repeater-footer>
+				<button type="button" data-repeater-add>Add</button>
+			</div>
+		</div>`;
+
+		const container = document.querySelector<HTMLElement>('[data-repeater]');
+		const list = container?.querySelector('[data-repeater-list]');
+		const count = container?.querySelector('[data-repeater-count]');
+
+		if (!container) {
+			throw new Error('container missing');
+		}
+
+		click(container, '[data-repeater-add]');
+
+		expect(list?.querySelectorAll(':scope > [data-repeater-row]')).toHaveLength(2);
+		expect(list?.lastElementChild?.querySelector('input')?.name).toBe(`${NAME}[1]`);
+		expect(count?.textContent).toBe('2 entries');
+
+		click(container, '[data-repeater-remove]');
+		click(container, '[data-repeater-remove]');
+
+		expect(count?.textContent).toBe('0 entries');
+
+		click(container, '[data-repeater-add]');
+
+		expect(count?.textContent).toBe('1 entry');
+		expect(names(container)).toEqual([`${NAME}[0]`]);
+	});
+
 	it('leaves nested add buttons alone when the outer repeater is full', () => {
 		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
 		const container = repeater([], { max: 1, template });
