@@ -296,7 +296,10 @@
 		font-size: var(--cms-font-size-sm);
 	}
 
-	@container (max-width: 64rem) {
+	/* The breakpoint is sized to the trimmed default toolbar inside the 55rem
+	   editing column, not to the viewport: below it the strip gives way to
+	   the overflow menu; a maximal tool set above it scrolls horizontally. */
+	@container (max-width: 36rem) {
 		.richtext-dropdown-button {
 			padding-left: var(--cms-space-3);
 			padding-right: var(--cms-space-3);
