@@ -40,6 +40,9 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// Two richtext samples: the default toolbar and a #[Tools]-trimmed one,
 		// each an element host carrying its tools list in the field payload.
 		$this->assertStringContainsString('tag="cosray-richtext"', $html);
+		$this->assertStringContainsString('tag="cosray-image"', $html);
+		$this->assertStringContainsString('"sg-gallery-14"', $html);
+		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString(
 			'"tools":["undo","redo","bold","italic","strike","h2","h3","bullet-list","ordered-list","link"]',
 			$html,

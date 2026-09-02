@@ -13,6 +13,12 @@ $fieldset = (array) $this->unwrap($fieldset);
 $content = (array) $this->unwrap($content);
 $richtextFields = (array) $this->unwrap($richtextFields);
 $richtextContent = (array) $this->unwrap($richtextContent);
+$mediaFields = (array) $this->unwrap($mediaFields);
+$mediaContent = (array) $this->unwrap($mediaContent);
+$mediaAssets = (array) $this->unwrap($mediaAssets);
+$system = $this->unwrap($system);
+$panelBase = (string) $panelBase;
+$jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 
@@ -230,6 +236,35 @@ $chevronSvg = is_file($chevronSvgPath)
 			</section>
 
 			<section class="section">
+				<h2>Media</h2>
+				<p class="note">
+					The image control in both shapes — a single image card and a gallery —
+					filled and empty. Fixture assets are inline SVG plates; uploads and the
+					library picker are live.
+				</p>
+				<div class="cms-node">
+					<div class="inner">
+						<div class="sheet">
+							<div class="cms-fields">
+								<?php foreach ($mediaFields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $mediaContent,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => $mediaAssets,
+										'pathSourceFields' => [],
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
 				<h2>Inspector</h2>
 				<p class="note">
 					Rendered through <code>panel/views/node/inspector.php</code> — toggles, route
@@ -296,4 +331,9 @@ $chevronSvg = is_file($chevronSvgPath)
 			</section>
 		</div>
 	</section>
+	<?php // Installs the editor bridge the media samples upload through. ?>
+	<script id="cosray-system-data" type="application/json"><?= json_encode(
+	['panel' => $panelBase, 'system' => $system],
+	$jsonFlags,
+) ?></script>
 </div>

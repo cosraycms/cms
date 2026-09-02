@@ -6,6 +6,8 @@ namespace Cosray\Controller\Panel;
 
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
+use Cosray\Locales;
+use Cosray\Panel\System;
 use Cosray\Richtext\Envelope;
 use Cosray\Schema\Tool;
 
@@ -19,9 +21,13 @@ use Cosray\Schema\Tool;
 final class Styleguide extends Panel
 {
 	protected const string AREA = 'styleguide';
+	private const int GALLERY_SIZE = 14;
 
 	public function index(Controls $controls): array
 	{
+		$locales = $this->container->get(Locales::class);
+		assert($locales instanceof Locales, 'The locales service must be available');
+
 		return $this->context([
 			'tokenGroups' => $this->tokenGroups(),
 			'locales' => [
@@ -36,6 +42,12 @@ final class Styleguide extends Panel
 			'inspector' => $this->inspector(),
 			'richtextFields' => $this->richtextFields($controls),
 			'richtextContent' => $this->richtextContent(),
+			'mediaFields' => $this->mediaFields($controls),
+			'mediaContent' => $this->mediaContent(),
+			'mediaAssets' => $this->mediaAssets(),
+			// Media controls need the editor bridge for uploads and the
+			// library picker; the payload is the one the editor embeds.
+			'system' => new System($this->config, $locales)->payload(),
 		]);
 	}
 
@@ -234,6 +246,129 @@ final class Styleguide extends Panel
 				'richtextStyles' => (object) [],
 			],
 		];
+	}
+
+	/**
+	 * Image descriptors in both shapes the control takes: a single image
+	 * and a gallery, each once filled and once empty.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function mediaFields(Controls $controls): array
+	{
+		$control = Control::image()->resolve($controls)->array();
+		$single = ['min' => 0, 'max' => 1];
+		$many = ['min' => 0, 'max' => -1];
+
+		return [
+			[
+				'name' => 'cover',
+				'label' => 'Cover image',
+				'control' => $control,
+				'limit' => $single,
+				'translate' => true,
+				'description' => 'Alt text and title are edited in place; the thumbnail opens the preview.',
+			],
+			[
+				'name' => 'coverEmpty',
+				'label' => 'Cover image — empty, required',
+				'control' => $control,
+				'limit' => $single,
+				'required' => true,
+			],
+			[
+				'name' => 'gallery',
+				'label' => 'Gallery',
+				'control' => $control,
+				'limit' => $many,
+				'description' => 'Selecting a tile opens the drawer; tiles reorder by drag.',
+			],
+			[
+				'name' => 'galleryEmpty',
+				'label' => 'Gallery — empty',
+				'control' => $control,
+				'limit' => $many,
+			],
+		];
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function mediaContent(): array
+	{
+		$gallery = [];
+
+		for ($i = 1; $i <= self::GALLERY_SIZE; $i++) {
+			$gallery[] = ['uid' => self::galleryUid($i)];
+		}
+
+		$gallery[2]['meta'] = ['alt' => ['zxx' => 'Bottling line at full speed']];
+
+		return [
+			'cover' => [
+				'value' => [
+					'zxx' => [[
+						'uid' => 'sg-cover',
+						'meta' => ['alt' => [
+							'en' => 'Copper kettles in the brewhouse',
+							'de' => 'Kupferkessel im Sudhaus',
+						]],
+					]],
+				],
+			],
+			'coverEmpty' => ['value' => ['zxx' => []]],
+			'gallery' => ['value' => ['zxx' => $gallery]],
+			'galleryEmpty' => ['value' => ['zxx' => []]],
+		];
+	}
+
+	private static function galleryUid(int $i): string
+	{
+		return sprintf('sg-gallery-%02d', $i);
+	}
+
+	/**
+	 * Catalog rows for the fixture uids. The thumbnails are inline SVG
+	 * plates in shifting hues, so the samples need no files on disk.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function mediaAssets(): array
+	{
+		$plate = static function (int $hue, string $filename, int $width, int $height, int $bytes): array {
+			$svg = sprintf(
+				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 3">'
+					. '<rect width="4" height="3" fill="hsl(%d, 35%%, 62%%)"/></svg>',
+				$hue,
+			);
+			$url = 'data:image/svg+xml,' . rawurlencode($svg);
+
+			return [
+				'filename' => $filename,
+				'url' => $url,
+				'thumbUrl' => $url,
+				'kind' => 'image',
+				'mime' => 'image/jpeg',
+				'width' => $width,
+				'height' => $height,
+				'bytes' => $bytes,
+			];
+		};
+
+		$assets = ['sg-cover' => $plate(28, 'sudhaus-kupferkessel.jpg', 2400, 1600, 862208)];
+
+		for ($i = 1; $i <= self::GALLERY_SIZE; $i++) {
+			$assets[self::galleryUid($i)] = $plate(
+				($i * 47) % 360,
+				sprintf('brauerei-rundgang-%02d.jpg', $i),
+				1800,
+				1200,
+				300000 + ($i * 41213),
+			);
+		}
+
+		return $assets;
 	}
 
 	/**
