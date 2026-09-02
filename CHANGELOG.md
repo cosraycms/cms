@@ -96,6 +96,8 @@
 
 ### Fixed
 
+- Fixed a blocks field throwing `Cannot traverse an already closed generator` when it was read twice. `Value\Blocks` built its block list once as a generator and shared it between `render()`, `image()`, `hasImage()`, `excerpt()`, `images()` and `unwrap()`, so the second reader found it exhausted — a template holding the field in a variable (`$blocks = $node->content;`) and calling two of them crashed. Each reader now gets its own iterator. `unwrap()` and `json()` return the blocks as a list instead of the generator, so they can be counted, indexed and JSON-encoded; `json_encode` previously turned the generator into `{}`.
+
 - Fixed opening the editor for a node whose `Entries` rows carry a non-translated rich-text or blocks field, which failed with `Error: Recursion detected`. Those fields re-wrapped an already-canonical `zxx` envelope while the editor structure was built, and the recursive merge that followed tripped PHP's recursion guard. Stored content was valid throughout and is untouched.
 
 - The `hidden` attribute now actually hides a field wrapper: `.cms-field`'s `display: flex` outranked the user-agent rule, so conditionally hidden fields — the menu form's type sections, `when`-condition fields — stayed visible. Found live in the kundmueller panel.

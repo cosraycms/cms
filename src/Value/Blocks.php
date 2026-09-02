@@ -16,13 +16,9 @@ use Generator;
  */
 class Blocks extends Value
 {
-	protected readonly ?Generator $preparedData;
-
 	public function __construct(Owner $owner, Field\Blocks&Translatable $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
-
-		$this->preparedData = $this->prepareData($this->data);
 	}
 
 	public function __toString(): string
@@ -39,7 +35,7 @@ class Blocks extends Value
 	{
 		return [
 			'columns' => $this->columns(),
-			'data' => $this->preparedData,
+			'data' => iterator_to_array($this->blocks()),
 		];
 	}
 
@@ -47,7 +43,7 @@ class Blocks extends Value
 	{
 		$i = 0;
 
-		foreach ($this->preparedData as $value) {
+		foreach ($this->blocks() as $value) {
 			if ($value->type !== 'image') {
 				continue;
 			}
@@ -103,7 +99,7 @@ class Blocks extends Value
 				}
 			}
 		} else {
-			foreach ($this->preparedData as $item) {
+			foreach ($this->blocks() as $item) {
 				if ($item->type === 'image') {
 					yield new Field\Image(
 						$this->context->fieldName,
@@ -129,7 +125,7 @@ class Blocks extends Value
 	{
 		$i = 0;
 
-		foreach ($this->preparedData as $value) {
+		foreach ($this->blocks() as $value) {
 			if ($value->type !== 'image') {
 				continue;
 			}
@@ -151,7 +147,7 @@ class Blocks extends Value
 	): string {
 		$i = 0;
 
-		foreach ($this->preparedData as $value) {
+		foreach ($this->blocks() as $value) {
 			if ($value->type !== 'richtext') {
 				continue;
 			}
@@ -206,7 +202,7 @@ class Blocks extends Value
 			. $class
 			. '">';
 
-		foreach ($this->preparedData as $value) {
+		foreach ($this->blocks() as $value) {
 			$out .= $this->renderValue($prefix, $value, $args);
 		}
 
@@ -217,10 +213,6 @@ class Blocks extends Value
 
 	public function isset(): bool
 	{
-		if ($this->preparedData === null) {
-			return false;
-		}
-
 		$value = $this->data['value'] ?? null;
 
 		if (!is_array($value)) {
@@ -283,8 +275,13 @@ class Blocks extends Value
 		);
 	}
 
-	protected function prepareData(array $data): Generator
+	/**
+	 * A fresh iterator per call: the blocks of a field are read by several
+	 * methods, and a shared generator would be exhausted after the first.
+	 */
+	protected function blocks(): Generator
 	{
+		$data = $this->data;
 		$fields = [];
 
 		if ($this->field->isTranslatable()) {

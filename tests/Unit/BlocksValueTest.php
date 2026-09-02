@@ -12,6 +12,7 @@ use Cosray\Node\FieldOwner;
 use Cosray\Storage\Storage;
 use Cosray\Tests\Fixtures\Field\TestBlocks;
 use Cosray\Tests\TestCase;
+use Cosray\Value\Block;
 use Cosray\Value\Blocks as BlocksValue;
 use Cosray\Value\ValueContext;
 
@@ -96,20 +97,52 @@ final class BlocksValueTest extends TestCase
 		]);
 	}
 
-	public function testUnwrapReturnsColumnsAndPreparedData(): void
+	public function testUnwrapReturnsColumnsAndBlocks(): void
 	{
 		$blocks = $this->createBlocksValue([
 			'columns' => 12,
 			'value' => [
-				'en' => [
-					['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
-				],
+				['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
 			],
 		]);
 
 		$unwrapped = $blocks->unwrap();
 		$this->assertSame(12, $unwrapped['columns']);
-		$this->assertIsIterable($unwrapped['data']);
+		$this->assertCount(1, $unwrapped['data']);
+		$this->assertInstanceOf(Block::class, $unwrapped['data'][0]);
+		$this->assertSame('text', $unwrapped['data'][0]->type);
+	}
+
+	public function testJsonEncodesTheBlocks(): void
+	{
+		$blocks = $this->createBlocksValue([
+			'columns' => 12,
+			'value' => [
+				['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
+			],
+		]);
+
+		$encoded = json_decode(json_encode($blocks->json(), JSON_THROW_ON_ERROR), true);
+
+		$this->assertSame(12, $encoded['columns']);
+		$this->assertSame('text', $encoded['data'][0]['type']);
+		$this->assertSame('Hello', $encoded['data'][0]['data']['value']);
+	}
+
+	/** Reading blocks twice used to throw: all readers shared one generator. */
+	public function testBlocksCanBeReadMoreThanOnce(): void
+	{
+		$blocks = $this->createBlocksValue([
+			'columns' => 12,
+			'value' => [
+				['type' => 'text', 'value' => 'Hello', 'colspan' => 12, 'rowspan' => 1],
+			],
+		]);
+
+		$this->assertSame($blocks->render(), $blocks->render());
+		$this->assertFalse($blocks->hasImage());
+		$this->assertStringContainsString('Hello', $blocks->render());
+		$this->assertCount(1, $blocks->unwrap()['data']);
 	}
 
 	public function testHasImageDetectsImageItems(): void
