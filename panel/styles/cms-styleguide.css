@@ -45,7 +45,9 @@
 		gap: var(--cms-space-4);
 	}
 
-	& h2 {
+	/* Scoped to the block's own section headings: samples nest real editor
+	   content, and a bare h2 selector reaches the headings inside it. */
+	& .section > h2 {
 		margin: 0;
 		padding-bottom: var(--cms-space-2);
 		border-bottom: 1px solid var(--cms-color-border);
