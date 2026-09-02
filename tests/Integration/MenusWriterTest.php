@@ -172,7 +172,7 @@ final class MenusWriterTest extends IntegrationTestCase
 			[$item],
 			array_keys(iterator_to_array(new Menu($this->createContext(), 'writer-renamed'))),
 		);
-		$this->throws(RuntimeException::class, 'Menu not found');
+		$this->throws(RuntimeException::class, "Menu 'writer-rename' not found");
 		new Menu($this->createContext(), 'writer-rename');
 	}
 

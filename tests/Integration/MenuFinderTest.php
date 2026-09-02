@@ -125,7 +125,7 @@ final class MenuFinderTest extends IntegrationTestCase
 	{
 		$context = $this->createContext();
 
-		$this->throws(RuntimeException::class, 'Menu not found');
+		$this->throws(RuntimeException::class, "Menu 'non-existent-menu' not found");
 		new Menu($context, 'non-existent-menu');
 	}
 

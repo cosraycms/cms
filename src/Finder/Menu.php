@@ -52,7 +52,7 @@ class Menu implements Iterator
 			count($this->items) === 0
 			&& !$context->db->menus->exists(['menu' => $menu])->first()
 		) {
-			throw new RuntimeException('Menu not found');
+			throw new RuntimeException("Menu '{$menu}' not found");
 		}
 
 		if ($expand) {
