@@ -6,6 +6,9 @@ namespace Cosray\Controller\Panel;
 
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
+use Cosray\Field\Image;
+use Cosray\Field\Text;
+use Cosray\Field\Textarea;
 use Cosray\Locales;
 use Cosray\Panel\System;
 use Cosray\Richtext\Envelope;
@@ -45,6 +48,8 @@ final class Styleguide extends Panel
 			'mediaFields' => $this->mediaFields($controls),
 			'mediaContent' => $this->mediaContent(),
 			'mediaAssets' => $this->mediaAssets(),
+			'entriesFields' => $this->entriesFields($controls),
+			'entriesContent' => $this->entriesContent(),
 			// Media controls need the editor bridge for uploads and the
 			// library picker; the payload is the one the editor embeds.
 			'system' => new System($this->config, $locales)->payload(),
@@ -289,6 +294,114 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $many,
 			],
+		];
+	}
+
+	/**
+	 * Entries descriptors: a field allowing two entry types — one with an
+	 * image, so rows carry a thumb — and a single-type field with no rows.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function entriesFields(Controls $controls): array
+	{
+		$image = Control::image()->resolve($controls)->array();
+		$text = static fn(string $name, string $label, int $width = 100): array => [
+			'name' => $name,
+			'label' => $label,
+			'type' => Text::class,
+			'control' => ['name' => 'text', 'props' => []],
+			'width' => $width,
+		];
+		$person = [
+			'type' => 'App\\Styleguide\\Person',
+			'label' => 'Person',
+			'fields' => [
+				[
+					'name' => 'photo',
+					'label' => 'Photo',
+					'type' => Image::class,
+					'control' => $image,
+					'limit' => ['min' => 0, 'max' => 1],
+					'width' => 34,
+				],
+				$text('name', 'Name', 66) + ['required' => true],
+				$text('role', 'Role', 66),
+			],
+			'fieldsets' => [],
+		];
+		$quote = [
+			'type' => 'App\\Styleguide\\Quote',
+			'label' => 'Quote',
+			'fields' => [
+				[
+					'name' => 'text',
+					'label' => 'Quote',
+					'type' => Textarea::class,
+					'control' => ['name' => 'textarea', 'props' => []],
+				],
+				$text('author', 'Author'),
+			],
+			'fieldsets' => [],
+		];
+
+		return [
+			[
+				'name' => 'team',
+				'label' => 'Team',
+				'control' => [
+					'name' => 'entries',
+					'props' => ['entryTypes' => [$person, $quote], 'min' => 0],
+				],
+				'description' => 'Rows collapse to a summary; the summary follows the form while typing.',
+			],
+			[
+				'name' => 'teamEmpty',
+				'label' => 'Team — empty, one type',
+				'control' => [
+					'name' => 'entries',
+					'props' => ['entryTypes' => [$person], 'min' => 0, 'max' => 3],
+				],
+			],
+		];
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function entriesContent(): array
+	{
+		$person = static fn(string $uid, ?string $photo, string $name, string $role): array => [
+			'uid' => $uid,
+			'type' => 'App\\Styleguide\\Person',
+			'fields' => [
+				'photo' => ['value' => ['zxx' => $photo === null ? [] : [['uid' => $photo]]]],
+				'name' => ['value' => ['zxx' => $name]],
+				'role' => ['value' => ['zxx' => $role]],
+			],
+		];
+
+		return [
+			'team' => [
+				'value' => [
+					'zxx' => [
+						$person('sg-person-1', 'sg-cover', 'Anja Reinhardt', 'Head brewer'),
+						$person('sg-person-2', null, 'Sofia Mendes', ''),
+						[
+							'uid' => 'sg-quote-1',
+							'type' => 'App\\Styleguide\\Quote',
+							'fields' => [
+								'text' => ['value' => ['zxx' => str_repeat(
+									'A quote long enough to be cut short in the summary line. ',
+									3,
+								)]],
+								'author' => ['value' => ['zxx' => 'Anonymous']],
+							],
+						],
+					],
+				],
+			],
+			'teamEmpty' => ['value' => ['zxx' => []]],
 		];
 	}
 

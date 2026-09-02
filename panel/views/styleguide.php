@@ -16,6 +16,8 @@ $richtextContent = (array) $this->unwrap($richtextContent);
 $mediaFields = (array) $this->unwrap($mediaFields);
 $mediaContent = (array) $this->unwrap($mediaContent);
 $mediaAssets = (array) $this->unwrap($mediaAssets);
+$entriesFields = (array) $this->unwrap($entriesFields);
+$entriesContent = (array) $this->unwrap($entriesContent);
 $system = $this->unwrap($system);
 $panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -250,6 +252,35 @@ $chevronSvg = is_file($chevronSvgPath)
 									<?php $this->insert('field/item', [
 										'field' => $field,
 										'content' => $mediaContent,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => $mediaAssets,
+										'pathSourceFields' => [],
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<h2>Entries</h2>
+				<p class="note">
+					A typed repeater: stored rows collapse to a summary line — thumb, primary and
+					secondary text from the first fields with content — and open their form beneath
+					it; rows reorder by their grip. Two entry types give two add buttons.
+				</p>
+				<div class="cms-node">
+					<div class="inner">
+						<div class="sheet">
+							<div class="cms-fields">
+								<?php foreach ($entriesFields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $entriesContent,
 										'locales' => $locales,
 										'defaultLocale' => $defaultLocale,
 										'uid' => 'styleguide',
