@@ -9,6 +9,10 @@
 // Rows sit directly in the container, or in a [data-repeater-list]
 // child when the container also carries chrome around them (entries:
 // a count line, the footer); the count line follows the row count.
+// A row's summary line mirrors its first text-like inputs while the
+// editor types, so the header stays truthful with the form open; the
+// row's kebab (a <details>) closes after an action and on any click
+// outside it.
 
 import { uid } from '$lib/content';
 
@@ -155,12 +159,58 @@ function move(mover: Element): void {
 	changed(container);
 }
 
+const TEXT_LIKE = 'input[type="text"], input[type="number"], textarea';
+
+function summarize(row: HTMLElement): void {
+	const title = row.querySelector<HTMLElement>('[data-repeater-title]');
+	const subtitle = row.querySelector<HTMLElement>('[data-repeater-subtitle]');
+	const body = row.querySelector<HTMLElement>(':scope > [data-repeater-body]');
+
+	if (!title || !body) {
+		return;
+	}
+
+	// Own inputs only: a nested repeater's rows and the meta dialogs are
+	// not part of the summary, matching the server-side rule.
+	const texts = Array.from(body.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(TEXT_LIKE))
+		.filter((input) => input.closest('[data-repeater-row]') === row && !input.closest('dialog'))
+		.map((input) => input.value.trim())
+		.filter((value) => value !== '');
+
+	title.textContent = texts[0] ?? title.dataset.fallback ?? '';
+
+	if (subtitle) {
+		subtitle.textContent = texts[1] ?? '';
+	}
+}
+
+function onInput(event: Event): void {
+	const target = event.target;
+	const row = target instanceof Element ? target.closest<HTMLElement>('[data-repeater-row]') : null;
+
+	if (row && target instanceof Element && target.matches(TEXT_LIKE)) {
+		summarize(row);
+	}
+}
+
+function closeMenus(except: Element | null): void {
+	document
+		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
+		.forEach((menu) => {
+			if (menu !== except) {
+				menu.open = false;
+			}
+		});
+}
+
 function onClick(event: Event): void {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
+
+	closeMenus(target.closest('details[data-repeater-menu]'));
 
 	const remove = target.closest('[data-repeater-remove]');
 
@@ -178,6 +228,7 @@ function onClick(event: Event): void {
 	const mover = target.closest('[data-repeater-move]');
 
 	if (mover) {
+		closeMenus(null);
 		move(mover);
 
 		return;
@@ -209,8 +260,10 @@ function onClick(event: Event): void {
 
 export function install(): () => void {
 	document.addEventListener('click', onClick);
+	document.addEventListener('input', onInput);
 
 	return () => {
 		document.removeEventListener('click', onClick);
+		document.removeEventListener('input', onInput);
 	};
 }

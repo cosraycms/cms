@@ -346,6 +346,81 @@ describe('repeater behavior', () => {
 		expect(names(container)).toEqual([`${NAME}[0]`]);
 	});
 
+	it('mirrors the first text-like inputs into the row summary while typing', () => {
+		const container = repeater([
+			`<div data-repeater-row>
+				<button type="button" data-repeater-collapse aria-expanded="true">
+					<span data-repeater-title data-fallback="Person">Person</span>
+					<span data-repeater-subtitle></span>
+				</button>
+				<div data-repeater-body>
+					<input type="hidden" name="${NAME}[0][uid]" value="u">
+					<input type="text" name="${NAME}[0][fields][name][value][de]" value="">
+					<textarea name="${NAME}[0][fields][role][value][de]"></textarea>
+					<dialog><input type="text" name="${NAME}[0][meta][x][zxx]" value="meta"></dialog>
+					<div data-repeater data-name="${NAME}[0][tags]" data-id="${ID}-0-tags">
+						<div data-repeater-row><input type="text" name="${NAME}[0][tags][0]" value="tag"></div>
+					</div>
+				</div>
+			</div>`,
+		]);
+		const title = container.querySelector('[data-repeater-title]');
+		const subtitle = container.querySelector('[data-repeater-subtitle]');
+		const name = container.querySelector<HTMLInputElement>('input[type="text"]');
+		const role = container.querySelector<HTMLTextAreaElement>('textarea');
+		const type = (input: HTMLInputElement | HTMLTextAreaElement | null, value: string): void => {
+			if (input) {
+				input.value = value;
+				input.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		};
+
+		type(role, 'Erzieherin');
+
+		expect(title?.textContent).toBe('Erzieherin');
+		expect(subtitle?.textContent).toBe('');
+
+		type(name, ' Sofia Mendes ');
+
+		expect(title?.textContent).toBe('Sofia Mendes');
+		expect(subtitle?.textContent).toBe('Erzieherin');
+
+		type(name, '');
+		type(role, '');
+
+		expect(title?.textContent).toBe('Person');
+		expect(subtitle?.textContent).toBe('');
+	});
+
+	it('closes a row menu after an action and on a click outside it', () => {
+		const menu = `<details data-repeater-menu open>
+			<summary>Actions</summary>
+			<button type="button" data-repeater-move="down">Down</button>
+		</details>`;
+		const container = repeater([row('0', 'a', menu), row('1', 'b', menu)]);
+		const menus = container.querySelectorAll<HTMLDetailsElement>('details');
+
+		click(container, '[data-repeater-move="down"]');
+
+		expect(menus[0]?.open).toBe(false);
+		expect(menus[1]?.open).toBe(false);
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'b',
+			'a',
+		]);
+
+		// Opening one menu closes the other; the summary itself toggles natively.
+		menus[0]?.setAttribute('open', '');
+		menus[1]?.querySelector('summary')?.click();
+
+		expect(menus[0]?.open).toBe(false);
+		expect(menus[1]?.open).toBe(true);
+
+		document.body.click();
+
+		expect(menus[1]?.open).toBe(false);
+	});
+
 	it('leaves nested add buttons alone when the outer repeater is full', () => {
 		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
 		const container = repeater([], { max: 1, template });
