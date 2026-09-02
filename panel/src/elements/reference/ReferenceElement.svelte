@@ -160,8 +160,6 @@
 			return;
 		}
 
-		// Show rows immediately with the uid as a placeholder label, then
-		// swap in resolved titles once the labels endpoint answers.
 		items = uids.map((uid) => ({ uid, title: uid, type: '', typeLabel: '' }));
 
 		void query('reference/labels', new URLSearchParams({ uids: uids.join(',') }))

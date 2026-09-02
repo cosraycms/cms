@@ -81,7 +81,6 @@
 
 		const uid = selected;
 
-		// Resolve the current target's title for display when editing.
 		void fetchNodes('reference/labels', new URLSearchParams({ uids: uid }))
 			.then((nodes) => {
 				current = nodes[0] ?? { uid, title: uid, type: '', typeLabel: '' };

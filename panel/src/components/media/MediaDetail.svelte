@@ -181,8 +181,6 @@
 	}
 
 	$effect(() => {
-		// Reset to the default locale tab and (re)load whenever the
-		// selected asset changes.
 		activeLocale = defaultLocale;
 		void loadDetail(uid);
 	});

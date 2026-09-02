@@ -395,7 +395,6 @@
 
 <style>
 	@layer panel {
-		/* The image card: one bordered surface that is also the drop target. */
 		.cms-media-field {
 			display: flex;
 			flex-direction: column;

@@ -33,7 +33,6 @@ export function getMarkAttributes(state: EditorState, type: MarkType): Attrs | n
 export function isNodeActive(state: EditorState, type: NodeType, attrs?: Attrs): boolean {
 	const { $from, to } = state.selection;
 
-	// Walk up from the selection anchor to find a matching ancestor
 	for (let depth = $from.depth; depth >= 0; depth--) {
 		const node = $from.node(depth);
 		if (node.type === type) {
@@ -42,7 +41,6 @@ export function isNodeActive(state: EditorState, type: NodeType, attrs?: Attrs):
 		}
 	}
 
-	// For node selections, also check the selected node itself
 	if (state.selection instanceof NodeSelection) {
 		const node = state.selection.node;
 		if (node.type === type) {

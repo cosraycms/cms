@@ -81,8 +81,7 @@
 	}
 }
 
-/* A checkbox wearing a track and thumb. The thumb pairs with the track it
-   sits on — primary/primary-text when on — so both flip together. */
+/* Paired fill/text tokens keep the track and thumb in sync across themes. */
 .cms-switch {
 	appearance: none;
 	width: 2.375rem;

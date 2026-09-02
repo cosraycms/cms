@@ -133,8 +133,6 @@
 	line-height: 1.45;
 }
 
-/* An open section on the pane, not a box: the heading and the hairline
-   between sections carry the grouping. */
 .cms-fieldset {
 	min-width: 0;
 	margin: 0;

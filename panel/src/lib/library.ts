@@ -109,7 +109,6 @@ export function humanSize(bytes: number): string {
 	return `${unit === 0 ? size : size.toFixed(1)} ${units[unit]}`;
 }
 
-/** Upper-cased file extension, empty when the name has none. */
 export function extension(filename: string): string {
 	const dot = filename.lastIndexOf('.');
 

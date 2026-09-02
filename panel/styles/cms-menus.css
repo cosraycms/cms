@@ -1,7 +1,3 @@
-/* The menus area: listing, menu form, and (Phase 2) the item tree with its
-   editing side pane. Chrome mirrors the collection screen's head/body/card
-   chain so the area reads as part of the same panel. */
-
 .cms-menus {
 	display: flex;
 	flex-direction: column;
@@ -136,7 +132,6 @@
 		gap: var(--cms-space-2);
 	}
 
-	/* The menu form sits in a bounded card rather than running full width. */
 	& .form-card {
 		flex: 0 1 auto;
 		max-width: 36rem;
@@ -172,9 +167,6 @@
 		}
 	}
 }
-
-/* The item tree with its editing side pane. Cards float on the sunken
-   canvas, connected by the tree lines; the pane sits sticky beside it. */
 
 .cms-menu-tree {
 	& .titles {
@@ -328,7 +320,6 @@
 		height: calc(var(--cms-space-2) + 1.25rem);
 	}
 
-	/* One tick per child card, from the rail to the card. */
 	& .menu-children > .menu-node::before {
 		content: '';
 		position: absolute;

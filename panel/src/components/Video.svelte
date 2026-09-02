@@ -74,7 +74,6 @@
 		}
 
 		.ico {
-			/* Carries a status-coloured icon, so the disc has to flip with it. */
 			background-color: color-mix(in srgb, var(--cms-color-surface) 80%, transparent);
 			border-radius: 100%;
 			height: 2.5rem;

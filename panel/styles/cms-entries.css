@@ -1,11 +1,4 @@
-/*
- * Entries: one bordered card that reads as a single field. A count line,
- * hairline-separated rows that collapse to a summary (grip, thumb, two
- * lines of text, kebab) and open their form beneath it, and a dashed
- * full-width add button per allowed type. Part names are deliberately
- * unlike those of the field and node blocks around it, which would
- * otherwise style them.
- */
+/* Part names avoid collisions with the surrounding field and node styles. */
 .cms-entries {
 	--entries-x: var(--cms-space-4);
 

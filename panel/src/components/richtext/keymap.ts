@@ -70,15 +70,12 @@ export function buildKeymap(): Plugin {
 export function buildInputRules(): Plugin {
 	return inputRules({
 		rules: [
-			// Headings: # , ## , ###
 			headingRule(1),
 			headingRule(2),
 			headingRule(3),
 
-			// Bullet list: - or *
 			wrappingInputRule(/^\s*([-*])\s$/, schema.nodes.bulletList),
 
-			// Ordered list: 1.
 			wrappingInputRule(
 				/^\s*(\d+)\.\s$/,
 				schema.nodes.orderedList,
@@ -86,13 +83,8 @@ export function buildInputRules(): Plugin {
 				(match, node) => node.childCount + node.attrs.start === +match[1],
 			),
 
-			// Blockquote: >
 			wrappingInputRule(/^\s*>\s$/, schema.nodes.blockquote),
-
-			// Code block: ```
 			textblockTypeInputRule(/^```$/, schema.nodes.codeBlock),
-
-			// Horizontal rule: ---
 			horizontalRuleInputRule(),
 		],
 	});

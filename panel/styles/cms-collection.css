@@ -104,8 +104,6 @@
 		}
 	}
 
-	/* The selection bar paints like the primary button: a dark strip in the
-	   light theme, inverted in the dark one. */
 	& .bulk-bar {
 		display: flex;
 
@@ -260,8 +258,6 @@
 		}
 	}
 
-	/* The listing keeps its own bottom edge off-screen: it runs to the bottom
-	   of the frame rather than floating above a strip of canvas. */
 	& .listing {
 		display: flex;
 		flex-direction: column;

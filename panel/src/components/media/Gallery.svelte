@@ -258,8 +258,6 @@
 				gap: var(--cms-space-3);
 			}
 
-			/* Square, bordered, the image contained inside a small inset: every
-			   tile keeps one silhouette, and badges or cut-outs are never cropped. */
 			& .tile {
 				position: relative;
 				aspect-ratio: 1;

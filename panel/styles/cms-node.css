@@ -118,8 +118,6 @@
 		margin-inline: auto;
 	}
 
-	/* The form is a stack of open sections on the sunken pane — fieldsets and
-	   anonymous runs of loose fields — with a hairline between neighbours. */
 	& .sheet {
 		display: flex;
 		flex-direction: column;
@@ -163,7 +161,6 @@
 		}
 	}
 
-	/* Fixed over the viewport, so the scrim stays dark in both themes. */
 	& .preview {
 		position: fixed;
 		top: 0;

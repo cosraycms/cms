@@ -25,7 +25,6 @@ export type RichtextEnvelope = {
 
 type Json = Record<string, unknown>;
 
-/** Build the live ProseMirror document for a stored doc (or an empty one). */
 export function docToPm(doc: RichtextDoc | null): PmNode {
 	if (!doc || doc.type !== 'doc') {
 		return emptyPm();
@@ -40,12 +39,10 @@ export function docToPm(doc: RichtextDoc | null): PmNode {
 	}
 }
 
-/** The stored form of a live ProseMirror document. */
 export function pmToDoc(pm: PmNode): RichtextDoc {
 	return fromPmJson(pm.toJSON() as Json) as unknown as RichtextDoc;
 }
 
-/** Parse legacy HTML through the editor schema into the stored format. */
 export function htmlToDoc(html: string): RichtextDoc | null {
 	if (html.trim() === '') {
 		return null;

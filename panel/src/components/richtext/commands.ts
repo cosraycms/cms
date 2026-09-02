@@ -82,7 +82,6 @@ function linkRange(state: EditorState): { from: number; to: number } | null {
 	let start = $pos.pos;
 	let end = $pos.pos;
 
-	// Extend across the adjacent nodes carrying the same link mark.
 	parent.forEach((child, offset) => {
 		if (!link.isInSet(child.marks)) return;
 		const childStart = parentStart + offset;
@@ -247,7 +246,6 @@ export function toggleBlockquote(): Command {
 
 		for (let depth = $from.depth; depth >= 0; depth--) {
 			if ($from.node(depth).type === blockquote) {
-				// Already in a blockquote: lift out
 				if (!dispatch) return true;
 				const range = $from.blockRange(state.selection.$to);
 				if (!range) return false;
@@ -257,7 +255,6 @@ export function toggleBlockquote(): Command {
 			}
 		}
 
-		// Not in a blockquote: wrap
 		const range = state.selection.$from.blockRange(state.selection.$to);
 		if (!range) return false;
 		if (!dispatch) return true;
