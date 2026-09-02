@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Config;
 
+use Cosray\Schema\Tool;
+
 final class Richtext
 {
 	public function __construct(
@@ -28,5 +30,19 @@ final class Richtext
 	 */
 	public array $styles {
 		get => (array) $this->config->get('richtext.styles');
+	}
+
+	/**
+	 * Project-wide toolbar, as `Tool` cases or their string values.
+	 * Empty by default — fields fall back to the built-in set; a field's
+	 * own `#[Tools]` overrides this list.
+	 *
+	 * @var list<Tool>
+	 */
+	public array $tools {
+		get => array_values(array_map(
+			static fn(mixed $tool): Tool => $tool instanceof Tool ? $tool : Tool::from((string) $tool),
+			(array) $this->config->get('richtext.tools'),
+		));
 	}
 }

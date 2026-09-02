@@ -157,6 +157,7 @@ final class Defaults
 		return [
 			'richtext.classes' => [],
 			'richtext.styles' => [],
+			'richtext.tools' => [],
 		];
 	}
 

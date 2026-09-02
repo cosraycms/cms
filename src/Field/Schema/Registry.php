@@ -18,6 +18,7 @@ use Cosray\Schema\Options;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
+use Cosray\Schema\Tools;
 use Cosray\Schema\Translate;
 use Cosray\Schema\Validate;
 use Cosray\Schema\When;
@@ -59,6 +60,7 @@ class Registry
 		$registry->register(Limit::class, new LimitHandler());
 		$registry->register(Fulltext::class, new FulltextHandler());
 		$registry->register(Syntax::class, new SyntaxHandler());
+		$registry->register(Tools::class, new ToolsHandler());
 		$registry->register(When::class, new WhenHandler());
 
 		return $registry;

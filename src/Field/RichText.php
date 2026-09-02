@@ -10,8 +10,10 @@ use Cosray\Validation\RichtextDoc;
 use Cosray\Validation\Shapes;
 use Cosray\Value\RichText as RichTextValue;
 
-class RichText extends Text
+class RichText extends Text implements Capability\ToolsAware
 {
+	use Capability\IsToolsAware;
+
 	public function control(): Control
 	{
 		return Control::richtext();
@@ -42,6 +44,7 @@ class RichText extends Text
 		return array_merge(parent::properties(), [
 			'richtextClasses' => (object) $richtext->classes,
 			'richtextStyles' => (object) $richtext->styles,
+			'tools' => $this->getTools(),
 		]);
 	}
 

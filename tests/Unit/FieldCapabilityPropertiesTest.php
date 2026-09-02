@@ -14,6 +14,7 @@ use Cosray\Field\FieldHydrator;
 use Cosray\Field\Image;
 use Cosray\Field\Option;
 use Cosray\Field\Owner;
+use Cosray\Field\RichText;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
@@ -31,6 +32,8 @@ use Cosray\Schema\Options;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
+use Cosray\Schema\Tool;
+use Cosray\Schema\Tools;
 use Cosray\Schema\Translate;
 use Cosray\Schema\TranslateMode;
 use Cosray\Schema\Validate;
@@ -38,6 +41,7 @@ use Cosray\Schema\Width;
 use Cosray\Tests\Fixtures\Node\NodeWithFieldIconAttribute;
 use Cosray\Tests\TestCase;
 use Cosray\Value\ValueContext;
+use ValueError;
 
 final class FieldCapabilityPropertiesTest extends TestCase
 {
@@ -49,9 +53,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->registry = Registry::withDefaults();
 	}
 
-	private function createOwner(): Owner
+	private function createOwner(array $settings = []): Owner
 	{
-		$config = $this->config();
+		$config = $this->config($settings);
 		$request = $this->request();
 		$locales = new Locales();
 		$locales->add('en', 'English');
@@ -142,6 +146,14 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createCodeField(string $name = 'code'): Code
 	{
 		$field = new Code($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
+	}
+
+	private function createRichTextField(string $name = 'body', array $settings = []): RichText
+	{
+		$field = new RichText($name, $this->createOwner($settings), new ValueContext($name, []));
 		$field->init(Services::withDefaults());
 
 		return $field;
@@ -363,6 +375,71 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('syntaxes', $properties);
 		$this->assertEquals(['php', 'javascript'], $properties['syntaxes']);
+	}
+
+	public function testRichTextPropertiesExposeDefaultTools(): void
+	{
+		$field = $this->createRichTextField();
+
+		$properties = $field->properties();
+
+		$this->assertSame(
+			['undo', 'redo', 'bold', 'italic', 'strike', 'h2', 'h3', 'bullet-list', 'ordered-list', 'link'],
+			$properties['tools'],
+		);
+	}
+
+	public function testToolsAttributeReplacesTheDefaultSetDeduplicated(): void
+	{
+		$field = $this->createRichTextField();
+		$meta = new Tools(Tool::Bold, Tool::Italic, Tool::Bold);
+
+		$handler = $this->registry->getHandler($meta);
+		$handler->apply($meta, $field);
+
+		$this->assertSame([], $handler->properties($meta, $field));
+		$this->assertSame(['bold', 'italic'], $field->properties()['tools']);
+	}
+
+	public function testRichTextToolsFallBackToProjectConfig(): void
+	{
+		$field = $this->createRichTextField(settings: [
+			'richtext.tools' => ['bold', Tool::Link],
+		]);
+
+		$this->assertSame(['bold', 'link'], $field->properties()['tools']);
+	}
+
+	public function testToolsAttributeOverridesProjectConfig(): void
+	{
+		$field = $this->createRichTextField(settings: [
+			'richtext.tools' => ['bold', 'link'],
+		]);
+		$meta = new Tools(Tool::Source);
+
+		$this->registry->getHandler($meta)->apply($meta, $field);
+
+		$this->assertSame(['source'], $field->properties()['tools']);
+	}
+
+	public function testUnknownConfiguredToolIsRejected(): void
+	{
+		$field = $this->createRichTextField(settings: [
+			'richtext.tools' => ['bold', 'sparkle'],
+		]);
+
+		$this->expectException(ValueError::class);
+		$field->properties();
+	}
+
+	public function testToolsHandlerRejectsFieldsWithoutTheCapability(): void
+	{
+		$field = $this->createTextField();
+		$meta = new Tools(Tool::Bold);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot be used with the capability');
+		$this->registry->getHandler($meta)->apply($meta, $field);
 	}
 
 	public function testCodeFieldPropertiesAlwaysExposeDefaultSyntaxes(): void

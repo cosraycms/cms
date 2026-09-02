@@ -32,12 +32,31 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | Control | Builder | Element | Value shape |
 | --- | --- | --- | --- |
 | `code` | `Control::code()` | `cosray-code` | locale map of `string`, `meta.syntax` (syntaxes from `#[Syntax]`) |
-| `richtext` | `Control::richtext()` | `cosray-richtext` | locale map of HTML `string` |
+| `richtext` | `Control::richtext()` | `cosray-richtext` | locale map of richtext documents; `field.tools` (toolbar set from `#[Tools]` / `richtext.tools`) |
 | `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]` |
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
 | `blocks` | `Control::blocks()` | `cosray-blocks` | locale map of block list (see Blocks) |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
+
+### Richtext toolbar
+
+The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else the built-in default (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order.
+
+```php
+use Cosray\Schema\Tool;
+use Cosray\Schema\Tools;
+
+#[Tools(Tool::Bold, Tool::Italic, Tool::Link, Tool::Source)]
+public RichText $body;
+```
+
+```php
+// Project-wide, in app settings; the attribute still wins per field.
+'richtext.tools' => ['undo', 'redo', 'bold', 'italic', 'link'],
+```
+
+The paragraph-class and text-style dropdowns are not tools: they appear exactly when the project declares `richtext.classes` / `richtext.styles`, as before.
 
 Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
 
