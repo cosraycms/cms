@@ -164,7 +164,9 @@ function move(mover: Element): void {
 	changed(container);
 }
 
-const TEXT_LIKE = 'input[type="text"], input[type="number"], textarea';
+// Named inputs only: element controls (the image card's alt text, say)
+// keep unnamed inputs of their own in the row, which are not fields.
+const TEXT_LIKE = 'input[type="text"][name], input[type="number"][name], textarea[name]';
 
 function summarize(row: HTMLElement): void {
 	const title = row.querySelector<HTMLElement>('[data-repeater-title]');
@@ -175,7 +177,7 @@ function summarize(row: HTMLElement): void {
 		return;
 	}
 
-	// Own inputs only: a nested repeater's rows and the meta dialogs are
+	// Own fields only: a nested repeater's rows and the meta dialogs are
 	// not part of the summary, matching the server-side rule.
 	const texts = Array.from(body.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(TEXT_LIKE))
 		.filter((input) => input.closest('[data-repeater-row]') === row && !input.closest('dialog'))

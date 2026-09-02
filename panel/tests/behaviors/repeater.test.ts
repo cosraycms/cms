@@ -360,6 +360,7 @@ describe('repeater behavior', () => {
 				</button>
 				<div data-repeater-body>
 					<input type="hidden" name="${NAME}[0][uid]" value="u">
+					<input type="text" value="alt text of an element control">
 					<input type="text" name="${NAME}[0][fields][name][value][de]" value="">
 					<textarea name="${NAME}[0][fields][role][value][de]"></textarea>
 					<dialog><input type="text" name="${NAME}[0][meta][x][zxx]" value="meta"></dialog>
@@ -371,7 +372,7 @@ describe('repeater behavior', () => {
 		]);
 		const title = container.querySelector('[data-repeater-title]');
 		const subtitle = container.querySelector('[data-repeater-subtitle]');
-		const name = container.querySelector<HTMLInputElement>('input[type="text"]');
+		const name = container.querySelector<HTMLInputElement>('input[type="text"][name]');
 		const role = container.querySelector<HTMLTextAreaElement>('textarea');
 		const type = (input: HTMLInputElement | HTMLTextAreaElement | null, value: string): void => {
 			if (input) {
