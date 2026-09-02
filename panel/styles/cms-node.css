@@ -114,7 +114,7 @@
 
 	& .inner {
 		width: 100%;
-		max-width: var(--cms-editor-width);
+		max-width: var(--cms-editor-max-width);
 		margin-inline: auto;
 	}
 

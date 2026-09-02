@@ -365,7 +365,7 @@
 	 * screen the panel was given, so widening one must not stretch the other.
 	 */
 	--cms-content-max-width: 120rem;
-	--cms-editor-width: 55rem;
+	--cms-editor-max-width: 70rem;
 	--cms-row-height: 3.5rem;
 	--cms-topbar-bg: var(--cms-color-surface);
 	--cms-sidebar-width: 18rem;
