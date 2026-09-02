@@ -15,6 +15,8 @@
 	import Message from '$components/Message.svelte';
 	import MediaList from '$components/MediaList.svelte';
 	import ModalLibrary from '$components/modals/ModalLibrary.svelte';
+	import Gallery from '$components/media/Gallery.svelte';
+	import ImageCard from '$components/media/ImageCard.svelte';
 
 	type Props = {
 		type: UploadType;
@@ -48,8 +50,11 @@
 
 	let loading = $state(false);
 	let dragging = $state(false);
-	let allowedExtensions = $derived(cosray().system().allowedFiles[type].join(', '));
+	let picker: HTMLInputElement | undefined = $state();
+	let allowedFiles = $derived(cosray().system().allowedFiles[type]);
+	let allowedExtensions = $derived(allowedFiles.join(', '));
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
+	let open = $derived(!items || limit.max < 1 || items.length < limit.max);
 
 	function alert(body: string) {
 		const handle = cosray().modal.open((host) => {
@@ -147,7 +152,49 @@
 	}
 
 	function stopDragging() {
+		dragDepth = 0;
 		dragging = false;
+	}
+
+	// The card's children fire their own enter/leave pairs, so the
+	// overlay stays up until the pointer has left every one of them.
+	let dragDepth = 0;
+
+	function carriesFiles(event: DragEvent): boolean {
+		return event.dataTransfer?.types.includes('Files') ?? false;
+	}
+
+	function dragEnter(event: DragEvent) {
+		if (carriesFiles(event)) {
+			event.preventDefault();
+			dragDepth += 1;
+			dragging = true;
+		}
+	}
+
+	function dragOver(event: DragEvent) {
+		if (carriesFiles(event)) {
+			event.preventDefault();
+		}
+	}
+
+	function dragLeave() {
+		dragDepth = Math.max(0, dragDepth - 1);
+		dragging = dragDepth > 0;
+	}
+
+	function drop(event: DragEvent) {
+		event.preventDefault();
+		void onFile(getFilesFromDrop)(event);
+	}
+
+	function openPicker() {
+		picker?.click();
+	}
+
+	function replace(item: FileItem) {
+		items = [item];
+		notify();
 	}
 
 	async function upload(file: File) {
@@ -258,6 +305,60 @@
 	{:else}
 		<Message type="warning" text={__('upload:save-first')} />
 	{/if}
+{:else if type === 'image'}
+	<div class="cms-media-field" class:required class:is-dragging={dragging}>
+		<div
+			class="card"
+			role="group"
+			ondragenter={dragEnter}
+			ondragover={dragOver}
+			ondragleave={dragLeave}
+			ondrop={drop}
+		>
+			{#if multiple}
+				<Gallery
+					bind:items
+					{loading}
+					{translate}
+					{open}
+					{notify}
+					remove={(index) => remove(index)}
+					upload={openPicker}
+					library={openLibrary}
+				/>
+			{:else}
+				<ImageCard
+					item={items?.[0] ?? null}
+					{loading}
+					{translate}
+					allowed="{__('upload:allowed-extensions')} {allowedExtensions}"
+					update={replace}
+					remove={() => remove(null)}
+					upload={openPicker}
+					library={openLibrary}
+				/>
+			{/if}
+			{#if dragging}
+				<div class="drop" aria-hidden="true">
+					<span>
+						<IcoUpload />
+						{multiple ? __('upload:drop-to-add') : __('upload:drop-to-replace')}
+					</span>
+				</div>
+			{/if}
+			<input
+				bind:this={picker}
+				type="file"
+				id={name}
+				{multiple}
+				accept={allowedFiles.map((suffix) => '.' + suffix).join(',')}
+				oninput={onFile(getFilesFromInput)}
+			/>
+		</div>
+		{#if multiple}
+			<div class="allowed">{__('upload:allowed-extensions')} {allowedExtensions}</div>
+		{/if}
+	</div>
 {:else}
 	<div
 		class="upload upload-{type}"
@@ -266,11 +367,9 @@
 		class:upload-inline={inline}
 	>
 		<MediaList bind:items {multiple} {type} {remove} {loading} {translate} {notify} />
-		{#if !items || limit.max < 1 || items.length < limit.max}
+		{#if open}
 			<label
 				class="dragdrop"
-				class:dragging
-				class:image={type === 'image'}
 				for={name}
 				ondrop={preventDefault(onFile(getFilesFromDrop))}
 				ondragover={preventDefault(startDragging)}
@@ -296,6 +395,70 @@
 
 <style>
 	@layer panel {
+		/* The image card: one bordered surface that is also the drop target. */
+		.cms-media-field {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-2);
+			width: 100%;
+
+			& .card {
+				position: relative;
+				border: 1px solid var(--cms-color-border-strong);
+				border-radius: var(--cms-radius-md);
+				background: var(--cms-color-surface);
+			}
+
+			&.required .card {
+				border-left: 4px solid var(--cms-color-warning);
+			}
+
+			&.is-dragging .card {
+				border-color: var(--cms-color-info);
+			}
+
+			& .drop {
+				position: absolute;
+				inset: 0;
+				z-index: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: inherit;
+				background: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
+				box-shadow: inset 0 0 0 2px var(--cms-color-info);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 600;
+				pointer-events: none;
+
+				& span {
+					display: inline-flex;
+					align-items: center;
+					gap: var(--cms-space-2);
+				}
+
+				& :global(svg) {
+					width: var(--cms-space-4);
+					height: var(--cms-space-4);
+				}
+			}
+
+			& .allowed {
+				font-size: var(--cms-font-size-xs);
+				line-height: 1.5;
+				color: var(--cms-color-text-faint);
+			}
+
+			& input[type='file'] {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				overflow: hidden;
+				clip: rect(1px, 1px, 1px, 1px);
+				white-space: nowrap;
+			}
+		}
+
 		.upload {
 			display: flex;
 			width: 100%;
@@ -405,12 +568,6 @@
 		.library-button:hover {
 			border-color: var(--cms-color-info);
 			color: var(--cms-color-info);
-		}
-
-		@media (min-width: 768px) {
-			:global(.upload-image .preview) {
-				width: var(--cms-fraction-2-5);
-			}
 		}
 	}
 </style>

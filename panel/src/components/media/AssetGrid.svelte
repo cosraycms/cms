@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LibraryItem } from '$lib/library';
 
-	import { humanSize } from '$lib/library';
+	import { assetLine, extension } from '$lib/library';
 
 	type Props = {
 		items: LibraryItem[];
@@ -15,32 +15,6 @@
 
 	function active(item: LibraryItem): boolean {
 		return selected !== null && (selected === item.uid || selected === item.url);
-	}
-
-	function ext(filename: string): string {
-		const dot = filename.lastIndexOf('.');
-
-		return dot === -1 ? '' : filename.slice(dot + 1, dot + 6).toUpperCase();
-	}
-
-	function metaLine(item: LibraryItem): string {
-		const parts: string[] = [];
-
-		if (item.width && item.height) {
-			parts.push(`${item.width} × ${item.height}`);
-		} else {
-			const suffix = ext(item.filename);
-
-			if (suffix !== '') {
-				parts.push(suffix);
-			}
-		}
-
-		if (typeof item.bytes === 'number') {
-			parts.push(humanSize(item.bytes));
-		}
-
-		return parts.join(' · ');
 	}
 </script>
 
@@ -57,12 +31,12 @@
 				{#if item.kind === 'image'}
 					<img src={item.thumbUrl} alt="" loading="lazy" />
 				{:else}
-					<span class="cms-asset-ext">{ext(item.filename) || item.kind}</span>
+					<span class="cms-asset-ext">{extension(item.filename) || item.kind}</span>
 				{/if}
 			</span>
 			<span class="cms-asset-name">{item.filename}</span>
-			{#if metaLine(item) !== ''}
-				<span class="cms-asset-line">{metaLine(item)}</span>
+			{#if assetLine(item) !== ''}
+				<span class="cms-asset-line">{assetLine(item)}</span>
 			{/if}
 		</button>
 	{/each}

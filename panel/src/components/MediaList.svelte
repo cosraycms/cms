@@ -5,7 +5,6 @@
 	import { mount, onMount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
-	import Image from '$components/Image.svelte';
 	import Video from '$components/Video.svelte';
 	import File from '$components/File.svelte';
 	import ModalEditImage from '$components/modals/ModalEditImage.svelte';
@@ -78,29 +77,7 @@
 	onMount(createSorter);
 </script>
 
-{#if multiple && type === 'image'}
-	<div class="multiple-images cms-media-list cms-media-list-images" bind:this={sorterElement}>
-		{#each items as item, index (item)}
-			<Image
-				upload
-				{multiple}
-				image={item}
-				remove={() => remove(index)}
-				edit={() => edit(index, true)}
-				{loading}
-			/>
-		{/each}
-	</div>
-{:else if !multiple && type === 'image' && items && items.length > 0}
-	<Image
-		upload
-		{multiple}
-		image={items[0]}
-		remove={() => remove(null)}
-		edit={() => edit(0, true)}
-		{loading}
-	/>
-{:else if multiple && type === 'file'}
+{#if multiple && type === 'file'}
 	<div class="multiple-files cms-media-list cms-media-list-files" bind:this={sorterElement}>
 		{#each items as item, index (item)}
 			<File {loading} asset={item} remove={() => remove(index)} edit={() => edit(index, false)} />
@@ -116,14 +93,6 @@
 	@layer panel {
 		.cms-media-list {
 			display: flex;
-		}
-
-		.cms-media-list-images {
-			flex-direction: row;
-			flex-wrap: wrap;
-			justify-content: flex-start;
-			gap: var(--cms-space-4);
-			padding: var(--cms-space-4) 0;
 		}
 
 		.cms-media-list-files {

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+	assetLine,
+	extension,
 	fetchLibrary,
 	humanSize,
 	libraryParams,
@@ -188,5 +190,28 @@ describe('human size', () => {
 		expect(humanSize(2048)).toBe('2.0 KB');
 		expect(humanSize(5 * 1024 * 1024)).toBe('5.0 MB');
 		expect(humanSize(3.4 * 1024 * 1024 * 1024)).toBe('3.4 GB');
+	});
+});
+
+describe('asset fact line', () => {
+	it('reads the extension off the file name', () => {
+		expect(extension('flyer.PDF')).toBe('PDF');
+		expect(extension('archive.tar.gz')).toBe('GZ');
+		expect(extension('README')).toBe('');
+	});
+
+	it('lists pixel dimensions and size for an image', () => {
+		expect(assetLine({ filename: 'a.jpg', width: 2400, height: 1600, bytes: 862208 })).toBe(
+			'2400 × 1600 px · 842.0 KB',
+		);
+	});
+
+	it('falls back to the extension when dimensions are unknown', () => {
+		expect(assetLine({ filename: 'notes.pdf', bytes: 12 })).toBe('PDF · 12 B');
+		expect(assetLine({ filename: 'notes.pdf', width: null, height: null })).toBe('PDF');
+	});
+
+	it('is empty when nothing is known', () => {
+		expect(assetLine({ filename: 'blob' })).toBe('');
 	});
 });

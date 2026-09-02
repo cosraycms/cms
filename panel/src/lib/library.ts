@@ -109,6 +109,39 @@ export function humanSize(bytes: number): string {
 	return `${unit === 0 ? size : size.toFixed(1)} ${units[unit]}`;
 }
 
+/** Upper-cased file extension, empty when the name has none. */
+export function extension(filename: string): string {
+	const dot = filename.lastIndexOf('.');
+
+	return dot === -1 ? '' : filename.slice(dot + 1, dot + 6).toUpperCase();
+}
+
+/**
+ * The one-line fact row under an asset name: pixel dimensions when
+ * known, otherwise the extension, then the size — "2400 × 1600 px · 842 KB".
+ */
+export function assetLine(
+	info: Pick<AssetInfo, 'filename' | 'width' | 'height' | 'bytes'>,
+): string {
+	const parts: string[] = [];
+
+	if (info.width && info.height) {
+		parts.push(`${info.width} × ${info.height} px`);
+	} else {
+		const suffix = extension(info.filename);
+
+		if (suffix !== '') {
+			parts.push(suffix);
+		}
+	}
+
+	if (typeof info.bytes === 'number') {
+		parts.push(humanSize(info.bytes));
+	}
+
+	return parts.join(' · ');
+}
+
 export function libraryParams(query: LibraryQuery): URLSearchParams {
 	const params = new URLSearchParams();
 	const raw = query.kind ?? null;
