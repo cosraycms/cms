@@ -44,6 +44,8 @@ final class EntrySummaryTest extends TestCase
 		$this->assertSame('Gruppenleitung', $summary->secondary);
 		$this->assertSame('/media/img-1/thumb.jpg', $summary->thumb);
 		$this->assertTrue($summary->hasImage);
+		$this->assertSame('name', $summary->primaryField);
+		$this->assertSame('role', $summary->secondaryField);
 	}
 
 	#[Test]
@@ -64,7 +66,9 @@ final class EntrySummaryTest extends TestCase
 		);
 
 		$this->assertSame('42', $summary->primary);
+		$this->assertSame('c', $summary->primaryField);
 		$this->assertNull($summary->secondary);
+		$this->assertNull($summary->secondaryField);
 		$this->assertNull($summary->thumb);
 		$this->assertFalse($summary->hasImage);
 	}

@@ -9,8 +9,12 @@
 // Rows sit directly in the container, or in a [data-repeater-list]
 // child when the container also carries chrome around them (entries:
 // a count line, the footer); the count line follows the row count.
-// A row's summary line mirrors its first text-like inputs while the
-// editor types, so the header stays truthful with the form open; the
+// A row's summary lines name the sub-field each was rendered from; while
+// the editor types into that sub-field, only that line follows, so a
+// line drawn from something the client cannot read (richtext) stays as
+// the server rendered it. The header thus stays truthful with the form
+// open, and stamped rows, whose lines name nothing yet, take the first
+// two text-like fields the editor fills in declaration order. The
 // row's kebab (a <details>) closes after an action and on any click
 // outside it. Row lists reorder by drag on their grips through Sortable,
 // loaded on demand so only screens with such a list pay for it.
@@ -168,35 +172,94 @@ function move(mover: Element): void {
 // keep unnamed inputs of their own in the row, which are not fields.
 const TEXT_LIKE = 'input[type="text"][name], input[type="number"][name], textarea[name]';
 
-function summarize(row: HTMLElement): void {
-	const title = row.querySelector<HTMLElement>('[data-repeater-title]');
-	const subtitle = row.querySelector<HTMLElement>('[data-repeater-subtitle]');
-	const body = row.querySelector<HTMLElement>(':scope > [data-repeater-body]');
+function fieldOf(input: Element): string | null {
+	return /\[fields\]\[([^\]]+)\]/.exec(input.getAttribute('name') ?? '')?.[1] ?? null;
+}
 
-	if (!title || !body) {
-		return;
-	}
+/** The row's own text-like inputs, keyed by sub-field, in form order. */
+function fields(row: HTMLElement): Map<string, Array<HTMLInputElement | HTMLTextAreaElement>> {
+	const body = row.querySelector<HTMLElement>(':scope > [data-repeater-body]');
+	const result = new Map<string, Array<HTMLInputElement | HTMLTextAreaElement>>();
 
 	// Own fields only: a nested repeater's rows and the meta dialogs are
 	// not part of the summary, matching the server-side rule.
-	const texts = Array.from(body.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(TEXT_LIKE))
-		.filter((input) => input.closest('[data-repeater-row]') === row && !input.closest('dialog'))
-		.map((input) => input.value.trim())
-		.filter((value) => value !== '');
+	body?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(TEXT_LIKE).forEach((input) => {
+		const field = fieldOf(input);
 
-	title.textContent = texts[0] ?? title.dataset.fallback ?? '';
+		if (
+			field !== null &&
+			input.closest('[data-repeater-row]') === row &&
+			!input.closest('dialog')
+		) {
+			result.set(field, [...(result.get(field) ?? []), input]);
+		}
+	});
 
-	if (subtitle) {
-		subtitle.textContent = texts[1] ?? '';
+	return result;
+}
+
+function value(inputs: Array<HTMLInputElement | HTMLTextAreaElement> | undefined): string {
+	return inputs?.map((input) => input.value.trim()).find((text) => text !== '') ?? '';
+}
+
+function summarize(row: HTMLElement, changed: string): void {
+	const title = row.querySelector<HTMLElement>('[data-repeater-title]');
+	const subtitle = row.querySelector<HTMLElement>('[data-repeater-subtitle]');
+
+	if (!title) {
+		return;
 	}
+
+	const own = fields(row);
+	const lines = [title, subtitle].filter((line): line is HTMLElement => line !== null);
+	const attribute = (line: HTMLElement): string =>
+		line === title ? 'data-repeater-title' : 'data-repeater-subtitle';
+	const sources = lines.map((line) => line.getAttribute(attribute(line)) ?? '');
+
+	// A line without a source claims the first text-like field with
+	// content that no other line shows yet.
+	lines.forEach((line, index) => {
+		if (sources[index] !== '') {
+			return;
+		}
+
+		for (const [field, inputs] of own) {
+			if (!sources.includes(field) && value(inputs) !== '') {
+				sources[index] = field;
+				line.setAttribute(attribute(line), field);
+
+				break;
+			}
+		}
+	});
+
+	lines.forEach((line, index) => {
+		if (sources[index] !== changed) {
+			return;
+		}
+
+		const text = value(own.get(changed));
+
+		if (line === title) {
+			line.textContent = text !== '' ? text : (line.dataset.fallback ?? '');
+		} else {
+			line.textContent = text;
+		}
+	});
 }
 
 function onInput(event: Event): void {
 	const target = event.target;
-	const row = target instanceof Element ? target.closest<HTMLElement>('[data-repeater-row]') : null;
 
-	if (row && target instanceof Element && target.matches(TEXT_LIKE)) {
-		summarize(row);
+	if (!(target instanceof Element) || !target.matches(TEXT_LIKE)) {
+		return;
+	}
+
+	const row = target.closest<HTMLElement>('[data-repeater-row]');
+	const field = fieldOf(target);
+
+	if (row && field !== null) {
+		summarize(row, field);
 	}
 }
 

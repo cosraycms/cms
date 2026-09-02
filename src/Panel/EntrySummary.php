@@ -21,11 +21,17 @@ final class EntrySummary
 {
 	private const int LENGTH = 60;
 
+	/**
+	 * @param ?string $primaryField name of the sub-field behind `primary`
+	 * @param ?string $secondaryField name of the sub-field behind `secondary`
+	 */
 	public function __construct(
 		public readonly ?string $primary,
 		public readonly ?string $secondary,
 		public readonly ?string $thumb,
 		public readonly bool $hasImage,
+		public readonly ?string $primaryField = null,
+		public readonly ?string $secondaryField = null,
 	) {}
 
 	/**
@@ -66,11 +72,18 @@ final class EntrySummary
 			$text = self::text($value, $locale, is_a($type, RichText::class, true));
 
 			if ($text !== null) {
-				$texts[] = $text;
+				$texts[] = [$sub['name'], $text];
 			}
 		}
 
-		return new self($texts[0] ?? null, $texts[1] ?? null, $thumb, $hasImage);
+		return new self(
+			$texts[0][1] ?? null,
+			$texts[1][1] ?? null,
+			$thumb,
+			$hasImage,
+			$texts[0][0] ?? null,
+			$texts[1][0] ?? null,
+		);
 	}
 
 	private static function textLike(string $type): bool

@@ -351,51 +351,85 @@ describe('repeater behavior', () => {
 		expect(names(container)).toEqual([`${NAME}[0]`]);
 	});
 
-	it('mirrors the first text-like inputs into the row summary while typing', () => {
-		const container = repeater([
-			`<div data-repeater-row>
-				<button type="button" data-repeater-collapse aria-expanded="true">
-					<span data-repeater-title data-fallback="Person">Person</span>
-					<span data-repeater-subtitle></span>
-				</button>
-				<div data-repeater-body>
-					<input type="hidden" name="${NAME}[0][uid]" value="u">
-					<input type="text" value="alt text of an element control">
-					<input type="text" name="${NAME}[0][fields][name][value][de]" value="">
-					<textarea name="${NAME}[0][fields][role][value][de]"></textarea>
-					<dialog><input type="text" name="${NAME}[0][meta][x][zxx]" value="meta"></dialog>
-					<div data-repeater data-name="${NAME}[0][tags]" data-id="${ID}-0-tags">
-						<div data-repeater-row><input type="text" name="${NAME}[0][tags][0]" value="tag"></div>
-					</div>
+	function summaryRow(title: string, subtitle: string): string {
+		return `<div data-repeater-row>
+			<button type="button" data-repeater-collapse aria-expanded="true">
+				<span data-repeater-title="${title}" data-fallback="Person">Person</span>
+				<span data-repeater-subtitle="${subtitle}"></span>
+			</button>
+			<div data-repeater-body>
+				<input type="hidden" name="${NAME}[0][uid]" value="u">
+				<input type="text" value="alt text of an element control">
+				<input type="text" name="${NAME}[0][fields][name][value][de]" value="">
+				<input type="text" name="${NAME}[0][fields][name][value][en]" value="" hidden>
+				<textarea name="${NAME}[0][fields][role][value][zxx]"></textarea>
+				<dialog><input type="text" name="${NAME}[0][meta][x][zxx]" value="meta"></dialog>
+				<div data-repeater data-name="${NAME}[0][tags]" data-id="${ID}-0-tags">
+					<div data-repeater-row><input type="text" name="${NAME}[0][tags][0][fields][tag][value][zxx]" value="tag"></div>
 				</div>
-			</div>`,
-		]);
-		const title = container.querySelector('[data-repeater-title]');
-		const subtitle = container.querySelector('[data-repeater-subtitle]');
-		const name = container.querySelector<HTMLInputElement>('input[type="text"][name]');
-		const role = container.querySelector<HTMLTextAreaElement>('textarea');
-		const type = (input: HTMLInputElement | HTMLTextAreaElement | null, value: string): void => {
-			if (input) {
-				input.value = value;
-				input.dispatchEvent(new Event('input', { bubbles: true }));
-			}
-		};
+			</div>
+		</div>`;
+	}
 
-		type(role, 'Erzieherin');
+	function type(input: Element | null, text: string): void {
+		if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
+			input.value = text;
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+	}
 
-		expect(title?.textContent).toBe('Erzieherin');
-		expect(subtitle?.textContent).toBe('');
+	it('refreshes only the summary line drawn from the changed sub-field', () => {
+		const container = repeater([summaryRow('role', 'description')]);
+		const title = container.querySelector<HTMLElement>('[data-repeater-title]');
+		const subtitle = container.querySelector<HTMLElement>('[data-repeater-subtitle]');
 
-		type(name, ' Sofia Mendes ');
+		if (title && subtitle) {
+			title.textContent = 'Erzieherin';
+			subtitle.textContent = 'Rendered from richtext';
+		}
 
-		expect(title?.textContent).toBe('Sofia Mendes');
-		expect(subtitle?.textContent).toBe('Erzieherin');
+		type(container.querySelector('textarea'), 'Leitung');
 
-		type(name, '');
-		type(role, '');
+		expect(title?.textContent).toBe('Leitung');
+		expect(subtitle?.textContent).toBe('Rendered from richtext');
+
+		type(container.querySelector('input[name$="[name][value][de]"]'), 'Sofia');
+
+		expect(title?.textContent).toBe('Leitung');
+		expect(subtitle?.textContent).toBe('Rendered from richtext');
+
+		type(container.querySelector('textarea'), '  ');
 
 		expect(title?.textContent).toBe('Person');
+	});
+
+	it('lets a stamped row claim its lines from the first fields typed into', () => {
+		const container = repeater([summaryRow('', '')]);
+		const title = container.querySelector<HTMLElement>('[data-repeater-title]');
+		const subtitle = container.querySelector<HTMLElement>('[data-repeater-subtitle]');
+
+		type(container.querySelector('input[name$="[name][value][en]"]'), 'Only in English');
+
+		expect(title?.textContent).toBe('Only in English');
+		expect(title?.getAttribute('data-repeater-title')).toBe('name');
 		expect(subtitle?.textContent).toBe('');
+
+		type(container.querySelector('textarea'), 'Erzieherin');
+
+		expect(subtitle?.textContent).toBe('Erzieherin');
+		expect(subtitle?.getAttribute('data-repeater-subtitle')).toBe('role');
+
+		type(container.querySelector('input[name$="[name][value][en]"]'), '');
+
+		expect(title?.textContent).toBe('Person');
+		expect(subtitle?.textContent).toBe('Erzieherin');
+
+		// Unnamed, nested and meta inputs never feed a line.
+		type(container.querySelector('input[name$="[tag][value][zxx]"]'), 'changed');
+		type(container.querySelector('dialog input'), 'changed');
+
+		expect(title?.textContent).toBe('Person');
+		expect(subtitle?.textContent).toBe('Erzieherin');
 	});
 
 	it('closes a row menu after an action and on a click outside it', () => {

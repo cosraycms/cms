@@ -141,13 +141,18 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 					</span>
 				<?php endif ?>
 				<span class="texts">
+					<?php // Each line names the sub-field it came from, so the
+
+					// behavior refreshes only that line while its input changes. ?>
 					<span
 						class="primary"
-						data-repeater-title
+						data-repeater-title="<?= escape((string) $summary->primaryField) ?>"
 						data-fallback="<?= escape($label) ?>"><?= escape($summary->primary ?? $label) ?></span>
-					<span class="secondary" data-repeater-subtitle><?= escape(
-						(string) $summary->secondary,
-					) ?></span>
+					<span
+						class="secondary"
+						data-repeater-subtitle="<?= escape((string) $summary->secondaryField) ?>"><?= escape(
+							(string) $summary->secondary,
+						) ?></span>
 				</span>
 			</button>
 			<details class="kebab" data-repeater-menu>
