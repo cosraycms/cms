@@ -3,8 +3,12 @@
 // that view, so the entries refactor can generalize the behavior
 // without rewriting these.
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/repeater';
+
+const sortable = vi.hoisted(() => vi.fn());
+
+vi.mock('sortablejs', () => ({ default: sortable }));
 
 const NAME = 'content[tags][value][zxx]';
 const ID = 'field-tags';
@@ -19,6 +23,7 @@ afterEach(() => {
 	uninstall?.();
 	uninstall = null;
 	document.body.innerHTML = '';
+	sortable.mockClear();
 });
 
 function row(index: string, value = '', extra = ''): string {
@@ -419,6 +424,61 @@ describe('repeater behavior', () => {
 		document.body.click();
 
 		expect(menus[1]?.open).toBe(false);
+	});
+
+	it('reorders a row list by drag and enhances each list once', async () => {
+		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
+			<div data-repeater-list>${row('0', 'a')}${row('1', 'b')}</div>
+			<div data-repeater-footer></div>
+		</div>`;
+
+		const container = document.querySelector<HTMLElement>('[data-repeater]');
+		const list = container?.querySelector<HTMLElement>('[data-repeater-list]');
+
+		if (!container || !list) {
+			throw new Error('container missing');
+		}
+
+		document.dispatchEvent(new Event('htmx:after:swap'));
+		await vi.waitFor(() => expect(sortable).toHaveBeenCalledTimes(1));
+		document.dispatchEvent(new Event('htmx:after:swap'));
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(sortable).toHaveBeenCalledTimes(1);
+
+		const [target, options] = sortable.mock.calls[0] as [
+			HTMLElement,
+			{
+				handle: string;
+				draggable: string;
+				onEnd: (event: { oldIndex?: number; newIndex?: number }) => void;
+			},
+		];
+
+		expect(target).toBe(list);
+		expect(options.handle).toBe('[data-repeater-grip]');
+		expect(options.draggable).toBe('[data-repeater-row]');
+
+		let changes = 0;
+		const count = (): void => {
+			changes += 1;
+		};
+
+		document.addEventListener('change', count);
+
+		// Sortable has already moved the node when onEnd fires.
+		const rows = list.querySelectorAll<HTMLElement>('[data-repeater-row]');
+		rows[1]?.after(rows[0] as HTMLElement);
+		options.onEnd({ oldIndex: 0, newIndex: 1 });
+		options.onEnd({ oldIndex: 1, newIndex: 1 });
+		document.removeEventListener('change', count);
+
+		expect(changes).toBe(1);
+		expect(names(container)).toEqual([`${NAME}[0]`, `${NAME}[1]`]);
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'b',
+			'a',
+		]);
 	});
 
 	it('leaves nested add buttons alone when the outer repeater is full', () => {

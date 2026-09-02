@@ -12,9 +12,14 @@
 // A row's summary line mirrors its first text-like inputs while the
 // editor types, so the header stays truthful with the form open; the
 // row's kebab (a <details>) closes after an action and on any click
-// outside it.
+// outside it. Row lists reorder by drag on their grips through Sortable,
+// loaded on demand so only screens with such a list pay for it.
+
+import type { SortableEvent } from 'sortablejs';
 
 import { uid } from '$lib/content';
+
+const enhanced = new WeakSet<HTMLElement>();
 
 const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -258,12 +263,52 @@ function onClick(event: Event): void {
 	}
 }
 
+async function initDrag(): Promise<void> {
+	const lists = [...document.querySelectorAll<HTMLElement>('[data-repeater-list]')].filter(
+		(list) => !enhanced.has(list),
+	);
+
+	if (lists.length === 0) {
+		return;
+	}
+
+	const { default: Sortable } = await import('sortablejs');
+
+	for (const list of lists) {
+		if (enhanced.has(list)) {
+			continue;
+		}
+
+		enhanced.add(list);
+		new Sortable(list, {
+			handle: '[data-repeater-grip]',
+			draggable: '[data-repeater-row]',
+			animation: 150,
+			fallbackOnBody: true,
+			onEnd: (event: SortableEvent) => {
+				const container = list.closest<HTMLElement>('[data-repeater]');
+
+				if (container && event.oldIndex !== event.newIndex) {
+					changed(container);
+				}
+			},
+		});
+	}
+}
+
 export function install(): () => void {
+	const rescan = (): void => {
+		void initDrag();
+	};
+
 	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
+	document.addEventListener('htmx:after:swap', rescan);
+	rescan();
 
 	return () => {
 		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
+		document.removeEventListener('htmx:after:swap', rescan);
 	};
 }
