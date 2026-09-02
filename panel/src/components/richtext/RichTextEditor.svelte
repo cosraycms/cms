@@ -813,12 +813,10 @@
 		class:hide={showSource}
 	></div>
 	<div class="richtext-source cms-richtext-source cms-richtext-layer-base" class:hide={!showSource}>
-		<textarea
-			onkeyup={changeSource}
-			{name}
-			bind:value={sourceHtml}
-			class="cms-richtext-source-input"
-		>
+		<!-- No name: the host carries the value into the form. A named
+		     textarea would submit a bare key that, for a sub-field called
+		     "content" inside entries, wipes the whole content tree. -->
+		<textarea onkeyup={changeSource} bind:value={sourceHtml} class="cms-richtext-source-input">
 		</textarea>
 	</div>
 </div>
