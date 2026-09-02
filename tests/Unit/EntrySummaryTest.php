@@ -173,6 +173,32 @@ final class EntrySummaryTest extends TestCase
 		$this->assertTrue($summary->hasImage);
 	}
 
+	#[Test]
+	public function malformedDataIsIgnored(): void
+	{
+		$summary = EntrySummary::of(
+			[
+				'fields' => [
+					'not a field',
+					['name' => 'photo', 'type' => Image::class],
+					['name' => 'text', 'type' => RichText::class],
+				],
+			],
+			[
+				'photo' => ['value' => ['zxx' => 'not a list']],
+				'text' => [
+					'value' => ['zxx' => ['type' => 'doc', 'content' => ['stray', ['type' => 'text', 'text' => 'ok']]]],
+				],
+			],
+			self::ASSETS,
+			'de',
+		);
+
+		$this->assertNull($summary->thumb);
+		$this->assertTrue($summary->hasImage);
+		$this->assertSame('ok', $summary->primary);
+	}
+
 	/**
 	 * @param list<array{name: string, type: string}> $fields
 	 * @return array<string, mixed>
