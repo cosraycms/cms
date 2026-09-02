@@ -254,8 +254,8 @@
 
 			& .tiles {
 				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-				gap: var(--cms-space-2-5);
+				grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+				gap: var(--cms-space-3);
 			}
 
 			/* Square, bordered, the image contained inside a small inset: every
@@ -263,7 +263,7 @@
 			& .tile {
 				position: relative;
 				aspect-ratio: 1;
-				padding: var(--cms-space-1-5);
+				padding: var(--cms-space-1);
 				border: 1px solid var(--cms-color-border);
 				border-radius: var(--cms-radius-md);
 				background: var(--cms-color-surface);
