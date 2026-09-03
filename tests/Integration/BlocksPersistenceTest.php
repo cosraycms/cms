@@ -4,10 +4,24 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Core\Exception\HttpBadRequest;
+use Cosray\Actor;
+use Cosray\Block\Types;
+use Cosray\Cms;
+use Cosray\Context;
+use Cosray\Field\Field;
+use Cosray\Field\Services;
+use Cosray\Locales;
+use Cosray\Node\PathManager;
+use Cosray\Node\Store;
+use Cosray\Node\Writer;
+use Cosray\Tests\Fixtures\Node\TestMediaDocument;
 use Cosray\Tests\IntegrationTestCase;
+use Cosray\Value\Blocks;
 
 /**
- * Tests for Blocks field persistence with various content types.
+ * Blocks persist through the store in the typed-row shape and come back
+ * through the finder as block values.
  *
  * @internal
  *
@@ -15,341 +29,159 @@ use Cosray\Tests\IntegrationTestCase;
  */
 final class BlocksPersistenceTest extends IntegrationTestCase
 {
-	private function items(array $content, string $field): array
-	{
-		return $content[$field]['value'][\Cosray\Field\Field::NEUTRAL_LOCALE] ?? [];
-	}
-
 	protected function setUp(): void
 	{
 		parent::setUp();
 		$this->loadFixtures('basic-types', 'sample-nodes');
 	}
 
-	public function testBlocksWithTextAndHtmlItems(): void
+	private Context $context;
+	private Cms $cms;
+
+	private function writer(): Writer
 	{
-		$typeId = $this->createTestType('blocks-text-html-test');
+		$locales = new Locales();
+		$locales->add('en', title: 'English', domains: ['www.example.com']);
+		$locales->add('de', title: 'Deutsch', domains: ['www.example.de'], fallback: 'en');
+		$this->context = Context::console(
+			$this->db(),
+			$this->config(),
+			$this->container(),
+			$this->factory(),
+			$locales,
+		);
+		$services = Services::withDefaults();
+		$this->cms = new Cms($this->context, $services);
 
-		$blocksContent = [
-			'blocks' => [
-				'type' => 'blocks',
-				'items' => [
-					[
-						'type' => 'text',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'colstart' => 1,
-						'value' => 'First text block',
-					],
-					[
-						'type' => 'richtext',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'colstart' => 7,
-						'value' => '<p>HTML paragraph</p>',
-					],
-				],
-			],
-		];
-
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-text-html-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
-
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
-
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'blocks');
-		$this->assertCount(2, $items);
-		$this->assertEquals('text', $items[0]['type']);
-		$this->assertEquals('richtext', $items[1]['type']);
+		return new Writer($this->context, $this->cms, $services->types);
 	}
 
-	public function testBlocksWithImageItems(): void
+	private function textRow(string $uid, string $text, array $layout): array
 	{
-		$typeId = $this->createTestType('blocks-image-test');
-
-		$blocksContent = [
-			'gallery' => [
-				'type' => 'blocks',
-				'items' => [
-					[
-						'type' => 'image',
-						'rowspan' => 2,
-						'colspan' => 4,
-						'colstart' => 1,
-						'files' => [
-							['file' => 'photo1.jpg', 'title' => 'Photo 1', 'alt' => 'First photo'],
-						],
-					],
-					[
-						'type' => 'image',
-						'rowspan' => 2,
-						'colspan' => 4,
-						'colstart' => 5,
-						'files' => [
-							['file' => 'photo2.jpg', 'title' => 'Photo 2', 'alt' => 'Second photo'],
-						],
-					],
-				],
+		return [
+			'uid' => $uid,
+			'type' => Types\Text::class,
+			'layout' => $layout,
+			'fields' => [
+				'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
 			],
 		];
-
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-image-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
-
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
-
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'gallery');
-		$this->assertCount(2, $items);
-		$this->assertEquals('image', $items[0]['type']);
-		$this->assertEquals('photo1.jpg', $items[0]['value'][0]['file']);
 	}
 
-	public function testBlocksWithYoutubeItem(): void
+	private function headingRow(string $uid, string $text, string $level): array
 	{
-		$typeId = $this->createTestType('blocks-youtube-test');
-
-		$blocksContent = [
-			'content' => [
-				'type' => 'blocks',
-				'items' => [
-					[
-						'type' => 'youtube',
-						'rowspan' => 1,
-						'colspan' => 12,
-						'colstart' => 1,
-						'id' => 'dQw4w9WgXcQ',
-						'aspectRatioX' => 16,
-						'aspectRatioY' => 9,
-					],
-				],
+		return [
+			'uid' => $uid,
+			'type' => Types\Heading::class,
+			'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+			'fields' => [
+				'text' => ['type' => \Cosray\Field\Text::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
+				'level' => ['type' => \Cosray\Field\Option::class, 'value' => [Field::NEUTRAL_LOCALE => $level]],
 			],
+			'meta' => ['class' => [Field::NEUTRAL_LOCALE => 'lead']],
 		];
-
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-youtube-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
-
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
-
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'content');
-		$this->assertEquals('youtube', $items[0]['type']);
-		$this->assertEquals('dQw4w9WgXcQ', $items[0]['value'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
-		$this->assertEquals(16, $items[0]['meta']['aspectRatioX'][\Cosray\Field\Field::NEUTRAL_LOCALE]);
 	}
 
-	public function testBlocksWithMixedItemTypes(): void
+	private function storedContent(string $uid): array
 	{
-		$typeId = $this->createTestType('blocks-mixed-test');
+		$row = $this->db()->execute('SELECT content FROM cms.nodes WHERE uid = :uid', ['uid' => $uid])->one();
 
-		$blocksContent = [
-			'mixed' => [
-				'type' => 'blocks',
-				'items' => [
-					['type' => 'text', 'rowspan' => 1, 'colspan' => 4, 'value' => 'Text'],
-					['type' => 'richtext', 'rowspan' => 1, 'colspan' => 4, 'value' => '<p>HTML</p>'],
-					['type' => 'image', 'rowspan' => 1, 'colspan' => 4, 'files' => [['file' => 'img.jpg']]],
-					[
-						'type' => 'youtube',
-						'rowspan' => 1,
-						'colspan' => 12,
-						'id' => 'abc123',
-						'aspectRatioX' => 16,
-						'aspectRatioY' => 9,
-					],
-				],
-			],
-		];
-
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-mixed-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
-
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
-
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'mixed');
-
-		$this->assertCount(4, $items);
-		$this->assertEquals('text', $items[0]['type']);
-		$this->assertEquals('richtext', $items[1]['type']);
-		$this->assertEquals('image', $items[2]['type']);
-		$this->assertEquals('youtube', $items[3]['type']);
+		return json_decode((string) $row['content'], true);
 	}
 
-	public function testBlocksWithTranslatableContent(): void
+	public function testPerLocaleListsRoundTripThroughTheStore(): void
 	{
-		$typeId = $this->createTestType('blocks-translatable-test');
-
-		$blocksContent = [
-			'blocks' => [
-				'type' => 'blocks',
-				'items' => [
-					[
-						'type' => 'text',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'value' => [
-							'de' => 'Deutscher Text',
-							'en' => 'English text',
-						],
+		$writer = $this->writer();
+		$draft = $writer
+			->draft(TestMediaDocument::class, [
+				'contentBlocks' => [
+					'en' => [
+						$this->headingRow('blockhead0001', 'Opening hours', '3'),
+						$this->textRow('blocktext0001', "Mon-Fri\n9-17", ['span' => 6, 'rows' => 1, 'indent' => 0]),
+						$this->textRow('blocktext0002', 'Sat 9-12', ['span' => 4, 'rows' => 2, 'indent' => 2]),
 					],
-					[
-						'type' => 'richtext',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'value' => [
-							'de' => '<p>Deutscher HTML</p>',
-							'en' => '<p>English HTML</p>',
-						],
+					'de' => [
+						$this->textRow('blocktext0003', 'Mo-Fr 9-17', ['span' => 12, 'rows' => 1, 'indent' => 0]),
 					],
 				],
-			],
-		];
+			])
+			->uid('blocks-persist-node')
+			->published();
 
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-translatable-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
+		$writer->create($draft);
 
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
+		$stored = $this->storedContent('blocks-persist-node')['contentBlocks'];
+		$this->assertSame(\Cosray\Field\Blocks::class, $stored['type']);
+		$this->assertEqualsCanonicalizing(['en', 'de'], array_keys($stored['value']));
+		$this->assertSame(
+			['blockhead0001', 'blocktext0001', 'blocktext0002'],
+			array_column($stored['value']['en'], 'uid'),
+		);
+		$this->assertEquals(['span' => 4, 'rows' => 2, 'indent' => 2], $stored['value']['en'][2]['layout']);
+		$this->assertSame(['class' => ['zxx' => 'lead']], $stored['value']['en'][0]['meta']);
+		$this->assertSame(['zxx' => '3'], $stored['value']['en'][0]['fields']['level']['value']);
+		$this->assertArrayNotHasKey('meta', $stored);
 
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'blocks');
-		$this->assertEquals('Deutscher Text', $items[0]['value']['de']);
-		$this->assertEquals('English text', $items[0]['value']['en']);
+		$node = $this->createCms()->node->byUid('blocks-persist-node');
+		$blocks = $node->contentBlocks;
+
+		$this->assertInstanceOf(Blocks::class, $blocks);
+		$this->assertSame(3, $blocks->count());
+		$this->assertSame(12, $blocks->columns());
+		$this->assertSame('heading', $blocks->first()?->handle());
+
+		$html = $blocks->render();
+		$this->assertStringContainsString('data-columns="12"', $html);
+		$this->assertStringContainsString('<div class="cms-block lead" data-type="heading"', $html);
+		$this->assertStringContainsString('<h3>Opening hours</h3>', $html);
+		$this->assertStringContainsString('data-span="4" data-rows="2" data-indent="2"', $html);
+		$this->assertStringContainsString("Mon-Fri<br />\n9-17", $html);
+		$this->assertStringNotContainsString('Mo-Fr', $html);
 	}
 
-	public function testEmptyBlocksStructure(): void
+	/**
+	 * The writer's blueprint clamps layouts like every reader, so the
+	 * rejection is exercised on the store with the raw data.
+	 */
+	public function testTheStoreRejectsRowsOutsideTheGrid(): void
 	{
-		$typeId = $this->createTestType('blocks-empty-test');
-
-		$blocksContent = [
-			'emptyblocks' => [
-				'type' => 'blocks',
-				'items' => [],
-			],
-		];
-
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-empty-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
-
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
-
-		$content = json_decode($node['content'], true);
-		$this->assertIsArray($this->items($content, 'emptyblocks'));
-		$this->assertCount(0, $this->items($content, 'emptyblocks'));
-	}
-
-	public function testBlocksComplexLayout(): void
-	{
-		$typeId = $this->createTestType('blocks-layout-test');
-
-		// Create a 12-column layout with various spans
-		$blocksContent = [
-			'layout' => [
-				'type' => 'blocks',
-				'items' => [
-					[
-						'type' => 'text',
-						'rowspan' => 1,
-						'colspan' => 12,
-						'colstart' => 1,
-						'value' => 'Full width header',
-					],
-					[
-						'type' => 'richtext',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'colstart' => 1,
-						'value' => '<p>Left column</p>',
-					],
-					[
-						'type' => 'richtext',
-						'rowspan' => 1,
-						'colspan' => 6,
-						'colstart' => 7,
-						'value' => '<p>Right column</p>',
-					],
-					[
-						'type' => 'image',
-						'rowspan' => 1,
-						'colspan' => 4,
-						'colstart' => 1,
-						'files' => [['file' => '1.jpg']],
-					],
-					[
-						'type' => 'image',
-						'rowspan' => 1,
-						'colspan' => 4,
-						'colstart' => 5,
-						'files' => [['file' => '2.jpg']],
-					],
-					[
-						'type' => 'image',
-						'rowspan' => 1,
-						'colspan' => 4,
-						'colstart' => 9,
-						'files' => [['file' => '3.jpg']],
-					],
+		$writer = $this->writer();
+		$draft = $writer
+			->draft(TestMediaDocument::class, [
+				'contentBlocks' => [
+					'en' => [$this->textRow('blocktext0009', 'Wide', ['span' => 6, 'rows' => 1, 'indent' => 6])],
 				],
-			],
-		];
+			])
+			->uid('blocks-invalid-node');
+		$data = $draft->data();
+		$data['content']['contentBlocks']['value']['en'][0]['layout']['indent'] = 8;
+		$factory = $this->cms->nodeFactory();
+		$store = new Store(
+			$this->context->db,
+			new PathManager(),
+			$factory->hydrator()->services()->types,
+			$factory->uid(),
+			factory: $factory,
+			cms: $this->cms,
+			context: $this->context,
+		);
 
-		$nodeId = $this->createTestNode([
-			'uid' => 'blocks-layout-node',
-			'type' => $typeId,
-			'content' => $blocksContent,
-		]);
+		try {
+			$store->create($draft->node, $data, $this->context->locales(), Actor::system());
+			$this->fail('An indent beyond the grid must be rejected');
+		} catch (HttpBadRequest $e) {
+			$paths = array_map(
+				static fn(array $issue): string => implode('.', $issue['path']),
+				json_decode(json_encode($e->payload()['errors']), true),
+			);
 
-		$node = $this->db()->execute(
-			'SELECT content FROM cms.nodes WHERE node = :id',
-			['id' => $nodeId],
-		)->one();
+			$this->assertContains('content.contentBlocks.value.en.0.layout.indent', $paths);
+		}
 
-		$content = json_decode($node['content'], true);
-		$items = $this->items($content, 'layout');
-
-		// Verify layout structure
-		$this->assertEquals(12, $items[0]['colspan']);
-		$this->assertEquals(1, $items[0]['colstart']);
-		$this->assertEquals(6, $items[1]['colspan']);
-		$this->assertEquals(1, $items[1]['colstart']);
-		$this->assertEquals(6, $items[2]['colspan']);
-		$this->assertEquals(7, $items[2]['colstart']);
+		$this->assertNull(
+			$this->db()->execute('SELECT node FROM cms.nodes WHERE uid = :uid', [
+				'uid' => 'blocks-invalid-node',
+			])->first(),
+		);
 	}
 }

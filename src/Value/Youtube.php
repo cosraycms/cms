@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use function Cosray\escape;
+
 class Youtube extends Value
 {
 	public function __toString(): string
@@ -22,7 +24,7 @@ class Youtube extends Value
 				. $iframeStyle
 				. '" '
 				. 'src="https://www.youtube.com/embed/'
-				. $this->unwrap()
+				. escape((string) $this->unwrap())
 				. '" allowfullscreen></iframe>'
 				. '</div></div>'
 		);

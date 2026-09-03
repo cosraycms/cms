@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
-use Cosray\Field\Blocks;
+use Cosray\Field\Image;
 use Cosray\Field\Text;
 use Cosray\Schema\Label;
 use Cosray\Schema\Required;
@@ -18,5 +18,5 @@ class TestEntry
 	protected Text $title;
 
 	#[Label('Inhalt'), Translate(TranslateMode::Asymmetric)]
-	protected Blocks $content;
+	protected Image $content;
 }

@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Field;
 use Cosray\Field\Control;
 use Cosray\Field\Owner;
+use Cosray\Tests\Fixtures\Block\QuoteBlock;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\ValueContext;
@@ -38,7 +39,6 @@ final class FieldControlTest extends TestCase
 			Field\Image::class => 'image',
 			Field\File::class => 'file',
 			Field\Video::class => 'video',
-			Field\Blocks::class => 'blocks',
 		];
 
 		foreach ($expected as $class => $name) {
@@ -52,6 +52,12 @@ final class FieldControlTest extends TestCase
 		$entries->allow(TestAlternateEntry::class);
 
 		$this->assertSame('entries', $entries->control()->array()['name']);
+
+		$blocks = new Field\Blocks('test', $this->createStub(Owner::class), new ValueContext('test', []));
+		$blocks->init(Field\Services::withDefaults());
+		$blocks->allow(QuoteBlock::class);
+
+		$this->assertSame('blocks', $blocks->control()->array()['name']);
 	}
 
 	public function testControlPropsSerialize(): void

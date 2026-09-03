@@ -7,59 +7,36 @@ namespace Cosray\Block\Types;
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\SizeSpec;
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
+use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Field;
+use Cosray\Schema\Label;
+use Cosray\Schema\Limit;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Value\Block as BlockValue;
 
 use function Cosray\escape;
 
-final class Image extends Type
+#[Label('block:image')]
+final class Image implements Block
 {
 	private const array LADDER = ['block-sm', 'block', 'block-lg'];
 	private const string SIZES = '(min-width: 48rem) {pct}vw, 100vw';
 
-	public function id(): string
-	{
-		return 'image';
-	}
+	#[Label('block:image'), Required, Limit(1), Translate]
+	protected Field\Image $image;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return __('block:image');
-	}
-
-	public function control(): Control
-	{
-		return Control::blockImage();
-	}
-
-	public function init(): array
-	{
-		return [
-			'type' => $this->id(),
-			'colspan' => 12,
-			'rowspan' => 1,
-			'colstart' => null,
-			'value' => [],
-		];
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		$data = $block->data;
-		$asset = $ctx->asset((string) ($data['value'][0]['uid'] ?? ''));
+		$image = $block->image;
+		$asset = $ctx->asset((string) ($image->unwrap()['uid'] ?? ''));
 
 		if ($asset === null) {
 			return '';
 		}
 
-		$title = $this->mediaText($ctx, $data['value'][0] ?? [], 'title') ?: $this->mediaText(
-			$ctx,
-			$data['value'][0] ?? [],
-			'alt',
-		);
-		$alt = escape($title);
+		$alt = escape($image->alt() ?: strip_tags($image->title()));
 		$path = escape($asset->path());
 
 		if (!$asset->resizable()) {
@@ -77,7 +54,7 @@ final class Image extends Type
 			static fn(SizeSpec $spec) => $asset->sizePath($spec->name) . " {$spec->first}w",
 			$specs,
 		)));
-		$sizes = escape($this->sizes($ctx, (int) ($data['colspan'] ?? 12)));
+		$sizes = escape($this->sizes($ctx, $block->layout()->span));
 
 		return (
 			"<img src=\"{$src}\" srcset=\"{$srcset}\" sizes=\"{$sizes}\""
@@ -119,24 +96,11 @@ final class Image extends Type
 		return $specs;
 	}
 
-	private function sizes(RenderContext $ctx, int $colspan): string
+	private function sizes(RenderContext $ctx, int $span): string
 	{
 		$template = (string) ($ctx->args['sizes'] ?? self::SIZES);
-		$pct = (int) round(($colspan / max($ctx->columns, 1)) * 100);
+		$pct = (int) round(($span / max($ctx->columns, 1)) * 100);
 
 		return str_replace('{pct}', (string) $pct, $template);
-	}
-
-	private function mediaText(RenderContext $ctx, array $item, string $key): string
-	{
-		$value = $item['meta'][$key] ?? $item[$key] ?? [];
-
-		if (!is_array($value)) {
-			return is_string($value) || is_numeric($value) ? (string) $value : '';
-		}
-
-		$value = $ctx->effective($value);
-
-		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 }

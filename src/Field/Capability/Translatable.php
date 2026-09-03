@@ -8,7 +8,8 @@ use Cosray\Schema\TranslateMode;
 
 interface Translatable
 {
-	public function translate(TranslateMode $mode = TranslateMode::Symmetric): static;
+	/** Null resets the field to untranslated. */
+	public function translate(?TranslateMode $mode = TranslateMode::Symmetric): static;
 
 	public function isTranslatable(): bool;
 

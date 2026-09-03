@@ -10,7 +10,7 @@ trait IsTranslatable
 {
 	protected ?TranslateMode $translateMode = null;
 
-	public function translate(TranslateMode $mode = TranslateMode::Symmetric): static
+	public function translate(?TranslateMode $mode = TranslateMode::Symmetric): static
 	{
 		$this->translateMode = $mode;
 

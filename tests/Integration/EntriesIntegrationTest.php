@@ -64,8 +64,7 @@ class EntriesIntegrationTest extends TestCase
 								'fields' => [
 									'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'First Item']],
 									'content' => [
-										'type' => \Cosray\Field\Blocks::class,
-										'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+										'type' => \Cosray\Field\Image::class,
 										'value' => ['en' => []],
 									],
 								],
@@ -79,8 +78,7 @@ class EntriesIntegrationTest extends TestCase
 										'value' => ['en' => 'Second Item'],
 									],
 									'content' => [
-										'type' => \Cosray\Field\Blocks::class,
-										'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+										'type' => \Cosray\Field\Image::class,
 										'value' => ['en' => []],
 									],
 								],
@@ -109,7 +107,7 @@ class EntriesIntegrationTest extends TestCase
 		$this->assertNotNull($firstItem);
 		$this->assertSame(TestEntry::class, $firstItem->type);
 		$this->assertEquals('First Item', $firstItem->title->unwrap());
-		$this->assertInstanceOf(\Cosray\Value\Blocks::class, $firstItem->content);
+		$this->assertInstanceOf(\Cosray\Value\TranslatedImages::class, $firstItem->content);
 
 		$this->assertEquals(2, $entriesValue->count());
 		$this->assertEquals('First Item', $entriesValue->first()->title->unwrap());
@@ -138,7 +136,7 @@ class EntriesIntegrationTest extends TestCase
 		$this->assertArrayHasKey('title', $entryFields);
 		$this->assertArrayHasKey('content', $entryFields);
 		$this->assertInstanceOf(\Cosray\Field\Text::class, $entryFields['title']);
-		$this->assertInstanceOf(\Cosray\Field\Blocks::class, $entryFields['content']);
+		$this->assertInstanceOf(\Cosray\Field\Image::class, $entryFields['content']);
 	}
 
 	public function testEntryFieldTranslateStructure(): void
@@ -158,8 +156,7 @@ class EntriesIntegrationTest extends TestCase
 							'fields' => [
 								'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => '']],
 								'content' => [
-									'type' => \Cosray\Field\Blocks::class,
-									'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+									'type' => \Cosray\Field\Image::class,
 									'value' => ['en' => []],
 								],
 							],

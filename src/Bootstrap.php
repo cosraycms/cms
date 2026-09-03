@@ -16,10 +16,10 @@ use Celema\Quma\Delimiters;
 use Celema\Router\Route;
 use Closure;
 use Cosray\Block\Registry as BlockRegistry;
-use Cosray\Block\Type as BlockType;
 use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
+use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Index as FieldIndex;
@@ -132,6 +132,7 @@ class Bootstrap implements CorePlugin
 	{
 		$this->factory = $app->factory();
 		$this->container = $app->container();
+		$this->blocks->useContainer($this->container);
 
 		$this->loadPlugins();
 
@@ -250,9 +251,10 @@ class Bootstrap implements CorePlugin
 		$this->pluginAssets->add($id, $dir);
 	}
 
-	public function blockType(BlockType $type): void
+	/** @param class-string<Block> $class */
+	public function blockType(string $class): void
 	{
-		$this->blocks->register($type);
+		$this->blocks->register($class);
 	}
 
 	public function controls(): Controls

@@ -59,8 +59,7 @@ final class PluginRegistrationTest extends TestCase
 		$this->assertNull($assets->dir('unknown'));
 
 		$blocks = $container->get(\Cosray\Block\Registry::class);
-		$this->assertTrue($blocks->has('test-notice'));
-		$this->assertSame('element', $blocks->get('test-notice')->control()->array()['name']);
+		$this->assertTrue($blocks->has(\Cosray\Tests\Fixtures\Plugin\TestNotice::class));
 
 		$controls = $container->get(\Cosray\Field\Control\Registry::class);
 		$this->assertTrue($controls->has('test-money-picker'));

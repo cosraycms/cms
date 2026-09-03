@@ -5,29 +5,21 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Value\Block as BlockValue;
 
-final class Text extends Type
+#[Label('block:text')]
+final class Text implements Block
 {
-	public function id(): string
-	{
-		return 'text';
-	}
+	#[Label('block:text'), Required, Translate]
+	protected Field\Textarea $text;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return __('block:text');
-	}
-
-	public function control(): Control
-	{
-		return Control::blockText();
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		return $ctx->value($block);
+		return nl2br((string) $block->text);
 	}
 }

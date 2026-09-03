@@ -9,10 +9,9 @@ use Cosray\Richtext;
 
 /**
  * Collects every asset and node uid referenced by stored node content:
- * media field items (`{uid}`), image/images/video block items, Reference
- * field targets, and the richtext carriers (`image.uid`, `link.asset`,
- * `link.node`). Blocks and Entries are recursed into. Feeds the reference
- * indexes.
+ * media field items (`{uid}`), Reference field targets, and the richtext
+ * carriers (`image.uid`, `link.asset`, `link.node`). The rows of Blocks
+ * and Entries fields are recursed into. Feeds the reference indexes.
  */
 final class Scanner
 {
@@ -56,10 +55,8 @@ final class Scanner
 				continue;
 			}
 
-			if (is_a($type, Field\Blocks::class, true)) {
-				$this->blocks($field['value'] ?? null, $assets);
-			} elseif (is_a($type, Field\Entries::class, true)) {
-				$this->entries($field['value'] ?? null, $assets, $nodes);
+			if (is_a($type, Field\Blocks::class, true) || is_a($type, Field\Entries::class, true)) {
+				$this->rows($field['value'] ?? null, $assets, $nodes);
 			} elseif (is_a($type, Field\Reference::class, true)) {
 				$this->collect($field['value'] ?? null, $nodes);
 			} elseif (is_a($type, Field\File::class, true)) {
@@ -68,37 +65,21 @@ final class Scanner
 		}
 	}
 
-	/** @param list<string> $assets */
-	private function blocks(mixed $value, array &$assets): void
-	{
-		foreach (is_array($value) ? $value : [] as $blocks) {
-			foreach (is_array($blocks) ? $blocks : [] as $block) {
-				if (!is_array($block)) {
-					continue;
-				}
-
-				// Richtext blocks carry the format envelope and are
-				// covered by the richtext scan.
-				if (in_array($block['type'] ?? null, ['image', 'images', 'video'], true)) {
-					$this->items($block['value'] ?? null, $assets);
-				}
-			}
-		}
-	}
-
 	/**
+	 * Typed rows carry their sub-fields under `fields`, per locale list.
+	 *
 	 * @param list<string> $assets
 	 * @param list<string> $nodes
 	 */
-	private function entries(mixed $value, array &$assets, array &$nodes): void
+	private function rows(mixed $value, array &$assets, array &$nodes): void
 	{
-		foreach (is_array($value) ? $value : [] as $entries) {
-			foreach (is_array($entries) ? $entries : [] as $entry) {
-				if (!is_array($entry) || !is_array($entry['fields'] ?? null)) {
+		foreach (is_array($value) ? $value : [] as $rows) {
+			foreach (is_array($rows) ? $rows : [] as $row) {
+				if (!is_array($row) || !is_array($row['fields'] ?? null)) {
 					continue;
 				}
 
-				$this->fields($entry['fields'], $assets, $nodes);
+				$this->fields($row['fields'], $assets, $nodes);
 			}
 		}
 	}

@@ -5,20 +5,29 @@ declare(strict_types=1);
 namespace Cosray\Value;
 
 use Cosray\Block\RenderContext;
+use Cosray\Block\Types;
 use Cosray\Field;
-use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Owner;
-use Cosray\Util\Html as HtmlUtil;
+use Cosray\Schema\Responsive;
+use Cosray\Schema\TranslateMode;
 use Generator;
+use IteratorAggregate;
+
+use function Cosray\escape;
 
 /**
- * @property-read Field\Blocks&Translatable $field
+ * @property-read Field\Blocks $field
  */
-class Blocks extends Value
+class Blocks extends Value implements IteratorAggregate
 {
-	public function __construct(Owner $owner, Field\Blocks&Translatable $field, ValueContext $context)
+	/** @var list<Block> */
+	protected array $blocks = [];
+
+	public function __construct(Owner $owner, Field\Blocks $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
+
+		$this->blocks = $this->rows($this->list());
 	}
 
 	public function __toString(): string
@@ -28,92 +37,100 @@ class Blocks extends Value
 
 	public function json(): array
 	{
-		return $this->unwrap();
+		return [
+			'columns' => $this->columns(),
+			'blocks' => array_map(static fn(Block $block): array => $block->json(), $this->blocks),
+		];
 	}
 
 	public function unwrap(): array
 	{
 		return [
 			'columns' => $this->columns(),
-			'data' => iterator_to_array($this->blocks()),
+			'blocks' => array_map(static fn(Block $block): array => $block->unwrap(), $this->blocks),
 		];
 	}
 
+	public function getIterator(): Generator
+	{
+		foreach ($this->blocks as $block) {
+			yield $block;
+		}
+	}
+
+	public function count(): int
+	{
+		return count($this->blocks);
+	}
+
+	public function first(): ?Block
+	{
+		return $this->blocks[0] ?? null;
+	}
+
+	public function last(): ?Block
+	{
+		return $this->blocks[count($this->blocks) - 1] ?? null;
+	}
+
+	public function get(int $index): ?Block
+	{
+		return $this->blocks[$index] ?? null;
+	}
+
+	public function isset(): bool
+	{
+		return count($this->blocks) > 0;
+	}
+
+	public function columns(): int
+	{
+		return $this->field->getColumns();
+	}
+
+	public function responsive(): Responsive
+	{
+		return $this->field->getResponsive();
+	}
+
+	/** The n-th image block's image. */
 	public function image(int $index = 1): ?Image
 	{
 		$i = 0;
 
-		foreach ($this->blocks() as $value) {
-			if ($value->type !== 'image') {
+		foreach ($this->blocks as $block) {
+			if ($block->type !== Types\Image::class) {
 				continue;
 			}
 
-			$i++;
+			if (++$i === $index) {
+				$image = $block->image;
 
-			if ($i === $index) {
-				return new Field\Image(
-					$this->context->fieldName,
-					$this->owner,
-					new ValueContext($this->context->fieldName, $this->mediaFieldData($value->data)),
-				)
-					->limit(1)
-					->value();
+				return $image instanceof Image ? $image : null;
 			}
 		}
 
 		return null;
 	}
 
+	/**
+	 * Every image of the image and images blocks. With `$all` a field
+	 * translated per locale yields the images of every locale's list.
+	 */
 	public function images(bool $all = false): Generator
 	{
-		if ($all && $this->field->isTranslatable()) {
-			foreach ($this->data['value'] ?? [] as $data) {
-				if (!is_array($data)) {
-					continue;
-				}
+		$lists = $all && $this->perLocale() ? $this->lists() : [$this->blocks];
 
-				foreach ($data as $value) {
-					if (!is_array($value)) {
-						continue;
+		foreach ($lists as $blocks) {
+			foreach ($blocks as $block) {
+				if ($block->type === Types\Image::class) {
+					$image = $block->image;
+
+					if ($image instanceof Image) {
+						yield $image;
 					}
-
-					$item = new Block((string) ($value['type'] ?? ''), $value);
-
-					if ($item->type === 'image') {
-						yield new Field\Image(
-							$this->context->fieldName,
-							$this->owner,
-							new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
-						)
-							->limit(1)
-							->value();
-					} elseif ($item->type === 'images') {
-						foreach (new Field\Image(
-							$this->context->fieldName,
-							$this->owner,
-							new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
-						)->value() as $image) {
-							yield $image;
-						}
-					}
-				}
-			}
-		} else {
-			foreach ($this->blocks() as $item) {
-				if ($item->type === 'image') {
-					yield new Field\Image(
-						$this->context->fieldName,
-						$this->owner,
-						new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
-					)
-						->limit(1)
-						->value();
-				} elseif ($item->type === 'images') {
-					foreach (new Field\Image(
-						$this->context->fieldName,
-						$this->owner,
-						new ValueContext($this->context->fieldName, $this->mediaFieldData($item->data)),
-					)->value() as $image) {
+				} elseif ($block->type === Types\Images::class) {
+					foreach ($block->images as $image) {
 						yield $image;
 					}
 				}
@@ -123,23 +140,10 @@ class Blocks extends Value
 
 	public function hasImage(int $index = 1): bool
 	{
-		$i = 0;
-
-		foreach ($this->blocks() as $value) {
-			if ($value->type !== 'image') {
-				continue;
-			}
-
-			$i++;
-
-			if ($i === $index) {
-				return true;
-			}
-		}
-
-		return false;
+		return $this->image($index) !== null;
 	}
 
+	/** The n-th richtext block's excerpt. */
 	public function excerpt(
 		int $words = 30,
 		string $allowedTags = '',
@@ -147,29 +151,25 @@ class Blocks extends Value
 	): string {
 		$i = 0;
 
-		foreach ($this->blocks() as $value) {
-			if ($value->type !== 'richtext') {
+		foreach ($this->blocks as $block) {
+			if ($block->type !== Types\RichText::class) {
 				continue;
 			}
 
-			$i++;
+			if (++$i === $index) {
+				$text = $block->text;
 
-			if ($i === $index) {
-				return HtmlUtil::excerpt((string) $this->blockValue($value), $words, $allowedTags);
+				return $text instanceof RichText ? $text->excerpt($words, $allowedTags) : '';
 			}
 		}
 
 		return '';
 	}
 
-	public function columns(): int
-	{
-		return (int) ($this->meta('columns', 12) ?: 12);
-	}
-
 	// Supported args:
 	//
-	// - prefix: All css classes are prefixed with this value. Default 'cms'
+	// - prefix: All generated css classes are prefixed with this value.
+	//   Default 'cms'
 	// - tag: The tag of the container. Default 'div'
 	// - class: An additional class added to the container
 	// - imageSizes: `media.sizes` names forming the image block's srcset
@@ -180,151 +180,84 @@ class Blocks extends Value
 	// - thumbSize: `media.sizes` name for gallery thumbs. Default 'block-thumb'
 	public function render(mixed ...$args): string
 	{
-		$tag = $args['tag'] ?? 'div';
-		$args['tag'] = $tag;
-		$prefix = $args['prefix'] ?? 'cms';
-		$args['prefix'] = $prefix;
-		$class = $args['class'] ?? '';
-		$class = $class !== '' ? ' ' . $class : '';
-		$args['class'] = $class;
-
 		$columns = $this->columns();
-
+		$ctx = new RenderContext($this->owner, $this->fieldName, $columns, $args);
+		$class = $ctx->prefix() . '-blocks' . ($ctx->class() !== '' ? ' ' . $ctx->class() : '');
 		$out =
 			'<'
-			. $tag
+			. $ctx->tag()
 			. ' class="'
-			. $prefix
-			. '-blocks '
-			. $prefix
-			. '-blocks-columns-'
-			. $columns
-			. $class
-			. '">';
+			. escape($class)
+			. "\" data-columns=\"{$columns}\" data-responsive=\""
+			. escape($this->responsive()->value)
+			. "\" style=\"--columns: {$columns}\">";
+		$registry = $this->field->services()->blocks;
+		$types = [];
 
-		foreach ($this->blocks() as $value) {
-			$out .= $this->renderValue($prefix, $value, $args);
+		foreach ($this->blocks as $block) {
+			$types[$block->type] ??= $registry->create($block->type, $this->owner);
+			$out .= $block->renderWith($ctx, $types[$block->type]);
 		}
 
-		$out .= '</' . $tag . '>';
-
-		return $out;
+		return $out . '</' . $ctx->tag() . '>';
 	}
 
-	public function isset(): bool
+	private function perLocale(): bool
+	{
+		return $this->field->translateMode() === TranslateMode::Asymmetric;
+	}
+
+	/**
+	 * The stored list for the effective locale (per-locale lists, along
+	 * the fallback chain) or the shared list.
+	 */
+	private function list(): array
 	{
 		$value = $this->data['value'] ?? null;
 
 		if (!is_array($value)) {
-			return false;
+			return [];
 		}
 
-		if ($this->field->isTranslatable()) {
-			$defaultValue = $value[$this->defaultLocale->id] ?? [];
+		$list = $this->perLocale() ? $this->effective($value) : $value[Field\Field::NEUTRAL_LOCALE] ?? [];
 
-			return is_array($defaultValue) && count($defaultValue) > 0;
-		}
-
-		if (!isset($this->data['type']) && array_is_list($value)) {
-			return count($value) > 0;
-		}
-
-		$defaultValue = $value[Field\Field::NEUTRAL_LOCALE] ?? [];
-
-		return is_array($defaultValue) && count($defaultValue) > 0;
+		return is_array($list) ? $list : [];
 	}
 
-	protected function renderValue(string $prefix, Block $value, array $args): string
+	/** @return list<list<Block>> every stored list, one per locale */
+	private function lists(): array
 	{
-		$ctx = new RenderContext(
-			$this->owner,
-			$this->context->fieldName,
-			$this->columns(),
-			$args,
-		);
-		$rendered = $this->field->services()->blocks->get($value->type)->render($value, $ctx);
+		$value = $this->data['value'] ?? null;
+		$lists = [];
 
-		// An empty render (e.g. an image block whose asset is gone) must
-		// not occupy a grid cell; use `colstart` to position blocks.
-		if ($rendered === '') {
-			return '';
+		foreach (is_array($value) ? $value : [] as $list) {
+			if (is_array($list)) {
+				$lists[] = $this->rows($list);
+			}
 		}
 
-		$colspan = $prefix . '-colspan-' . $value->data['colspan'];
-		$rowspan = $prefix . '-rowspan-' . $value->data['rowspan'];
-		$colstart = $value->data['colstart'] ?? null
-			? $prefix . '-colstart-' . $value->data['colstart']
-			: null;
-		$styleClass = $value->styleClass();
-		$class = $styleClass ? ' ' . $styleClass : '';
-
-		return (
-			'<div class="'
-				. $prefix
-				. '-'
-				. $value->type
-				. ' '
-				. $colspan
-				. ' '
-				. $rowspan
-				. ($colstart ? ' ' . $colstart : '')
-				. $class
-				. '">'
-				. $rendered
-				. '</div>'
-		);
+		return $lists;
 	}
 
-	/**
-	 * A fresh iterator per call: the blocks of a field are read by several
-	 * methods, and a shared generator would be exhausted after the first.
-	 */
-	protected function blocks(): Generator
+	/** @return list<Block> */
+	private function rows(array $list): array
 	{
-		$data = $this->data;
-		$fields = [];
+		$rows = [];
 
-		if ($this->field->isTranslatable()) {
-			$value = $this->effective($data['value'] ?? []);
-			$fields = is_array($value) ? $value : [];
-		} elseif (
-			!isset($data['type'])
-			&& isset($data['value'])
-			&& is_array($data['value'])
-			&& array_is_list($data['value'])
-		) {
-			$fields = $data['value'];
-		} else {
-			$value = $data['value'][Field\Field::NEUTRAL_LOCALE] ?? [];
-			$fields = is_array($value) ? $value : [];
-		}
-
-		foreach ($fields as $field) {
-			if (!is_array($field) || !is_string($field['type'] ?? null)) {
+		foreach ($list as $row) {
+			if (!is_array($row)) {
 				continue;
 			}
 
-			yield new Block($field['type'], $field);
-		}
-	}
+			$type = $row['type'] ?? null;
 
-	private function blockValue(Block $block): string
-	{
-		$value = $block->data['value'] ?? [];
+			if (!is_string($type) || !$this->field->allows($type)) {
+				continue;
+			}
 
-		if (!is_array($value)) {
-			return is_string($value) || is_numeric($value) ? (string) $value : '';
+			$rows[] = new Block($this->owner, $this->field, new ValueContext($this->fieldName, $row), $type);
 		}
 
-		$value = $this->effective($value);
-
-		return is_string($value) || is_numeric($value) ? (string) $value : '';
-	}
-
-	private function mediaFieldData(array $data): array
-	{
-		$data['value'] = [Field\Field::NEUTRAL_LOCALE => $data['value'] ?? $data['files'] ?? []];
-
-		return $data;
+		return $rows;
 	}
 }

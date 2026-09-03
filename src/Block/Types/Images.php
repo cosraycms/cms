@@ -5,82 +5,48 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Value\Block as BlockValue;
 
 use function Cosray\escape;
 
-final class Images extends Type
+#[Label('block:images')]
+final class Images implements Block
 {
 	private const string THUMB = 'block-thumb';
 
-	public function id(): string
-	{
-		return 'images';
-	}
+	#[Label('block:images'), Required, Translate]
+	protected Field\Image $images;
 
-	public function label(): string
-	{
-		return __('block:images');
-	}
-
-	public function control(): Control
-	{
-		return Control::blockImages();
-	}
-
-	public function init(): array
-	{
-		return [
-			'type' => $this->id(),
-			'colspan' => 12,
-			'rowspan' => 1,
-			'colstart' => null,
-			'value' => [],
-		];
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		$name = (string) ($ctx->args['thumbSize'] ?? self::THUMB);
 		// Validate the name up front — a typo should fail the render,
 		// not silently emit URLs the fallback route will 404.
 		$ctx->owner->config()->media->sizes->get($name);
+		$prefix = $ctx->prefix();
+		$images = $block->images;
 		$result = '';
 
-		foreach ($block->data['value'] ?? [] as $f) {
-			$asset = $ctx->asset((string) ($f['uid'] ?? ''));
+		foreach ($images->unwrap() as $index => $item) {
+			$asset = $ctx->asset((string) ($item['uid'] ?? ''));
 
 			if ($asset === null) {
 				continue;
 			}
 
-			$title = $this->mediaText($ctx, $f, 'title') ?: $this->mediaText($ctx, $f, 'alt');
-			$alt = escape($title);
+			$image = $images->get($index);
+			$alt = escape($image->alt() ?: strip_tags($image->title()));
 			$path = escape($asset->path());
 			$url = $asset->resizable() ? escape($asset->sizePath($name)) : $path;
 
-			$result .= "<div class=\"cms-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"></div>";
+			$result .= "<div class=\"{$prefix}-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"></div>";
 		}
 
-		if ($result) {
-			return '<div class="cms-blocks-images">' . $result . '</div>';
-		}
-
-		return '';
-	}
-
-	private function mediaText(RenderContext $ctx, array $item, string $key): string
-	{
-		$value = $item['meta'][$key] ?? $item[$key] ?? [];
-
-		if (!is_array($value)) {
-			return is_string($value) || is_numeric($value) ? (string) $value : '';
-		}
-
-		$value = $ctx->effective($value);
-
-		return is_string($value) || is_numeric($value) ? (string) $value : '';
+		return $result === '' ? '' : "<div class=\"{$prefix}-blocks-images\">{$result}</div>";
 	}
 }

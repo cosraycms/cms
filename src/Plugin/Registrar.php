@@ -6,12 +6,12 @@ namespace Cosray\Plugin;
 
 use Celema\Container\Entry;
 use Closure;
-use Cosray\Block\Type as BlockType;
 use Cosray\Bootstrap;
 use Cosray\Collection;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
+use Cosray\Contract\Block;
 use Cosray\Contract\DashboardCard;
 use Cosray\Field\Schema\Handler as FieldHandler;
 use Cosray\Node\Schema\Handler as NodeHandler;
@@ -105,10 +105,14 @@ final class Registrar
 		$this->bootstrap->addAssets($this->id, $dir);
 	}
 
-	/** @param class-string<BlockType>|BlockType $type */
-	public function blockType(string|BlockType $type): void
+	/**
+	 * Add a block type to the default offer list of Blocks fields.
+	 *
+	 * @param class-string<Block> $class
+	 */
+	public function blockType(string $class): void
 	{
-		$this->bootstrap->blockType(is_string($type) ? new $type() : $type);
+		$this->bootstrap->blockType($class);
 	}
 
 	/**

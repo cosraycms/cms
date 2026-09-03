@@ -61,7 +61,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 										'value' => ['en' => 'Old title'],
 									],
 									'content' => [
-										'type' => \Cosray\Field\Blocks::class,
+										'type' => \Cosray\Field\Image::class,
 										'value' => ['en' => []],
 										'stashed' => 'kept',
 									],

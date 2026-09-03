@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Celema\Sire\Review;
 use Celema\Sire\Shape;
 use Cosray\Exception\RuntimeException;
-use Cosray\Node\Types;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Entries as EntriesValue;
-use Cosray\Value\ValueContext;
 
 class Entries extends Field implements Capability\Limitable
 {
 	use Capability\IsLimitable;
+	use RowTypes;
+
+	/** @var list<class-string> */
+	protected array $allowedEntryTypes = [];
 
 	public function control(): Control
 	{
 		$this->requireAllowedEntryTypes();
 
-		$control = Control::entries()->prop('entryTypes', $this->entryTypeProperties());
+		$control = Control::entries()->prop('entryTypes', array_map(
+			$this->rowTypeProperties(...),
+			$this->allowedEntryTypes,
+		));
 
 		if ($this->limitMin > 0) {
 			$control = $control->prop('min', $this->limitMin);
@@ -33,9 +37,6 @@ class Entries extends Field implements Capability\Limitable
 
 		return $control;
 	}
-
-	/** @var list<class-string> */
-	protected array $allowedEntryTypes = [];
 
 	public function value(): EntriesValue
 	{
@@ -75,7 +76,7 @@ class Entries extends Field implements Capability\Limitable
 			$structures[] = [
 				'uid' => is_string($entryData['uid'] ?? null) ? $entryData['uid'] : null,
 				'type' => $type,
-				'fields' => $this->entryStructure($type, $entryValue),
+				'fields' => $this->rowStructure($type, $entryValue),
 			];
 		}
 
@@ -102,8 +103,8 @@ class Entries extends Field implements Capability\Limitable
 		$itemShape
 			->add('fields', Shapes::create())
 			->rules('required')
-			->finalize($this->finalizeEntryValue(...));
-		$itemShape->review($this->reviewEntryValues(...));
+			->finalize($this->finalizeRowFields(...));
+		$itemShape->review($this->reviewRowFields(...));
 
 		$value = $shape
 			->add('value', $this->zxxShape($itemShape, $this->limitValidators()))
@@ -160,7 +161,7 @@ class Entries extends Field implements Capability\Limitable
 		$this->requireAllowedEntryTypes();
 		$type ??= $this->allowedEntryTypes[0];
 
-		return $this->entryFieldsFor($type);
+		return $this->rowFieldsFor($type);
 	}
 
 	/**
@@ -170,11 +171,7 @@ class Entries extends Field implements Capability\Limitable
 	 */
 	public function entryFieldsFor(string $type, array $data = []): array
 	{
-		if (!$this->allows($type)) {
-			throw new RuntimeException("Entries field '{$this->name}' does not allow entry type '{$type}'");
-		}
-
-		return $this->orderedFields($type, $this->buildEntryFields($type, $data));
+		return $this->rowFieldsFor($type, $data);
 	}
 
 	public function properties(): array
@@ -185,207 +182,31 @@ class Entries extends Field implements Capability\Limitable
 		return $result;
 	}
 
-	/**
-	 * Per-type field tables carried in the control descriptor: the
-	 * editor views render entry rows and templates from them, and the
-	 * form patch casts submitted rows against them.
-	 *
-	 * @return list<array>
-	 */
-	protected function entryTypeProperties(): array
-	{
-		$result = [];
-
-		foreach ($this->allowedEntryTypes as $type) {
-			$fields = $this->entryFieldsFor($type);
-			$result[] = [
-				'type' => $type,
-				'label' => $this->nodeTypes()->get($type, 'label'),
-				'fields' => array_values(array_map(
-					static fn(Field $field): array => $field->properties(),
-					$fields,
-				)),
-				'fieldsets' => $this->entryFieldsets($type, $fields),
-			];
-		}
-
-		return $result;
-	}
-
 	public function allows(string $type): bool
 	{
 		return in_array($type, $this->allowedEntryTypes, true);
 	}
 
-	/**
-	 * @param class-string $type
-	 * @param array<string, mixed> $entryValue
-	 * @return array<string, array>
-	 */
-	protected function entryStructure(string $type, array $entryValue): array
+	protected function rowKind(): string
 	{
-		$structure = [];
-
-		foreach ($this->entryFieldsFor($type) as $name => $entryField) {
-			$entryFieldData = $entryValue[$name] ?? null;
-			$entryFieldValue = is_array($entryFieldData) ? $entryFieldData['value'] ?? null : null;
-			$entryFieldStructure = $entryField->structure($entryFieldValue);
-
-			if (is_array($entryFieldData)) {
-				$structure[$name] = array_replace_recursive($entryFieldStructure, $entryFieldData);
-				$structure[$name]['type'] = $entryFieldStructure['type'];
-
-				continue;
-			}
-
-			$structure[$name] = $entryFieldStructure;
-		}
-
-		return $structure;
-	}
-
-	/** @param array<string, mixed> $values */
-	protected function finalizeEntryValue(mixed $value, array $values): mixed
-	{
-		$type = $values['type'] ?? null;
-
-		if (!is_string($type) || !$this->allows($type) || !is_array($value)) {
-			return $value;
-		}
-
-		$result = $this->entryShape($type)->validate($value);
-
-		return $result->valid() ? $result->values() : $value;
-	}
-
-	protected function reviewEntryValues(Review $review): void
-	{
-		foreach ($review->values() as $index => $entryData) {
-			if (!is_array($entryData)) {
-				continue;
-			}
-
-			$type = $entryData['type'] ?? null;
-
-			if (!is_string($type) || !$this->allows($type)) {
-				continue;
-			}
-
-			$value = $entryData['fields'] ?? null;
-
-			if (!is_array($value)) {
-				continue;
-			}
-
-			$result = $this->entryShape($type)->validate($value);
-
-			if ($result->valid()) {
-				continue;
-			}
-
-			foreach ($result->issues() as $issue) {
-				$review->addError(
-					[$index, 'fields', ...$issue->path],
-					$issue->message,
-					$issue->code,
-					$issue->params,
-				);
-			}
-		}
-	}
-
-	/** @param class-string $type */
-	protected function entryShape(string $type): Shape
-	{
-		$shape = Shapes::create();
-
-		foreach ($this->entryFieldsFor($type) as $name => $entryField) {
-			$shape
-				->add($name, $entryField->shape())
-				->optional()
-				->nullable()
-				->prepare(Prepare::nullAsEmpty(...));
-		}
-
-		return $shape;
+		return 'entry';
 	}
 
 	/**
-	 * @param class-string $type
-	 * @param array<string, mixed> $data
-	 * @return array<string, Field>
+	 * Nested typed repeaters are rejected: rows renumber against one
+	 * `[data-repeater]` base, so a repeater inside a row cannot be
+	 * renumbered yet.
 	 */
-	protected function buildEntryFields(string $type, array $data = []): array
+	protected function assertRowField(string $type, Definition $definition): void
 	{
-		$fields = [];
-
-		foreach (Definitions::for($type)->fields() as $definition) {
-			$name = $definition->name;
-			$fieldData = $data[$name] ?? [];
-
-			if (!is_array($fieldData)) {
-				$fieldData = [];
-			}
-
-			$fieldClass = $definition->type;
-
-			if (is_a($fieldClass, self::class, true)) {
+		foreach ([self::class => 'entries', Blocks::class => 'blocks'] as $class => $kind) {
+			if (is_a($definition->type, $class, true)) {
 				throw new RuntimeException(
-					"Entries field '{$this->name}' cannot contain nested entries field '{$name}' in entry type '{$type}'",
+					"Entries field '{$this->name}' cannot contain nested {$kind} field"
+						. " '{$definition->name}' in entry type '{$type}'",
 				);
 			}
-			$field = new $fieldClass(
-				$name,
-				$this->owner,
-				new ValueContext($name, $fieldData),
-			);
-
-			$field->init($this->services(), $definition->property);
-			$fields[$name] = $field;
 		}
-
-		return $fields;
-	}
-
-	/**
-	 * @param class-string $type
-	 * @param array<string, Field> $fields
-	 * @return array<string, Field>
-	 */
-	protected function orderedFields(string $type, array $fields): array
-	{
-		$order = $this->nodeTypes()->get($type, 'fieldOrder');
-
-		if (!is_array($order)) {
-			return $fields;
-		}
-
-		$ordered = [];
-
-		foreach ($order as $name) {
-			if (!is_string($name) || !isset($fields[$name])) {
-				continue;
-			}
-
-			$ordered[$name] = $fields[$name];
-		}
-
-		return [...$ordered, ...array_diff_key($fields, $ordered)];
-	}
-
-	/**
-	 * @param class-string $type
-	 * @param array<string, Field> $fields
-	 * @return list<array{name: string, label: ?string, description: ?string, width: int, fields: list<string>}>
-	 */
-	protected function entryFieldsets(string $type, array $fields): array
-	{
-		return Fieldsets::serialize(
-			Definitions::for($type)->fieldsets(),
-			array_keys($fields),
-			$fields,
-			$type,
-		);
 	}
 
 	protected function requireAllowedEntryTypes(): void
@@ -393,10 +214,5 @@ class Entries extends Field implements Capability\Limitable
 		if ($this->allowedEntryTypes === []) {
 			throw new RuntimeException("Entries field '{$this->name}' requires #[Allows(...)]");
 		}
-	}
-
-	protected function nodeTypes(): Types
-	{
-		return $this->services()->types;
 	}
 }

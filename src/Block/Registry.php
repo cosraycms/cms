@@ -4,53 +4,96 @@ declare(strict_types=1);
 
 namespace Cosray\Block;
 
+use Celema\Wire\Creator;
+use Cosray\Config;
+use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Owner;
+use Psr\Container\ContainerInterface as Container;
 
+/**
+ * The default offer list of block types — what a Blocks field without
+ * `#[Allows]` offers — and the factory building type instances for a
+ * render.
+ */
 final class Registry
 {
-	/** @var array<string, Type> */
+	/** @var list<class-string<Block>> */
 	private array $types = [];
 
-	public function register(Type $type): void
+	private ?Container $container = null;
+
+	/** @param class-string<Block> $class */
+	public function register(string $class): void
 	{
-		$this->types[$type->id()] = $type;
+		self::assertBlock($class);
+
+		if (!in_array($class, $this->types, true)) {
+			$this->types[] = $class;
+		}
 	}
 
-	public function has(string $id): bool
+	/** @param class-string $class */
+	public function has(string $class): bool
 	{
-		return isset($this->types[$id]);
+		return in_array($class, $this->types, true);
 	}
 
-	public function get(string $id): Type
-	{
-		return (
-			$this->types[$id] ?? throw new RuntimeException(
-				"Unknown block type '{$id}'. Register it via Registrar::blockType() if it comes from a plugin.",
-			)
-		);
-	}
-
-	/** @return list<Type> */
+	/** @return list<class-string<Block>> */
 	public function all(): array
 	{
-		return array_values($this->types);
+		return $this->types;
+	}
+
+	/** Block type constructors are autowired from this container. */
+	public function useContainer(Container $container): void
+	{
+		$this->container = $container;
+	}
+
+	/**
+	 * A fresh instance with autowired constructor arguments, like an
+	 * embedded class: block types are node-local helpers, never container
+	 * services, and never receive a node.
+	 *
+	 * @param class-string<Block> $class
+	 */
+	public function create(string $class, Owner $owner): Block
+	{
+		self::assertBlock($class);
+
+		if ($this->container?->has($class)) {
+			throw new RuntimeException("Block type '{$class}' must not be registered as a container service.");
+		}
+
+		$instance = new Creator($this->container)->create($class, predefinedTypes: [
+			Owner::class => $owner,
+			Config::class => $owner->config(),
+		]);
+		assert($instance instanceof Block, 'The creator returns the requested class');
+
+		return $instance;
 	}
 
 	public static function withDefaults(): self
 	{
 		$registry = new self();
-		$registry->register(new Types\RichText());
-		$registry->register(new Types\Text());
-		$registry->register(new Types\Image());
-		$registry->register(new Types\Youtube());
-		$registry->register(new Types\Images());
-		$registry->register(new Types\Video());
-		$registry->register(new Types\Iframe());
-
-		foreach (range(1, 6) as $level) {
-			$registry->register(new Types\Heading($level));
-		}
+		$registry->register(Types\RichText::class);
+		$registry->register(Types\Text::class);
+		$registry->register(Types\Heading::class);
+		$registry->register(Types\Image::class);
+		$registry->register(Types\Images::class);
+		$registry->register(Types\Video::class);
+		$registry->register(Types\Youtube::class);
+		$registry->register(Types\Iframe::class);
 
 		return $registry;
+	}
+
+	private static function assertBlock(string $class): void
+	{
+		if (!class_exists($class) || !is_a($class, Block::class, true)) {
+			throw new RuntimeException('Block types must implement ' . Block::class . ": {$class}");
+		}
 	}
 }

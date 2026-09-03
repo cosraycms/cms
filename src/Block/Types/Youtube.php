@@ -5,45 +5,22 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
+use Cosray\Contract\Block;
 use Cosray\Field;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Value\Block as BlockValue;
 
-final class Youtube extends Type
+#[Label('block:youtube')]
+final class Youtube implements Block
 {
-	public function id(): string
-	{
-		return 'youtube';
-	}
+	#[Label('block:youtube'), Required]
+	protected Field\Youtube $video;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return __('block:youtube');
-	}
+		$video = $block->video;
 
-	public function control(): Control
-	{
-		return Control::blockYoutube();
-	}
-
-	public function init(): array
-	{
-		return [
-			'type' => $this->id(),
-			'colspan' => 12,
-			'rowspan' => 1,
-			'colstart' => null,
-			'value' => [Field\Field::NEUTRAL_LOCALE => ''],
-			'meta' => [
-				'aspectRatioX' => [Field\Field::NEUTRAL_LOCALE => 16],
-				'aspectRatioY' => [Field\Field::NEUTRAL_LOCALE => 9],
-			],
-		];
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		return $ctx->valueObject(Field\Youtube::class, $block->data)->__toString();
+		return $video->isset() ? (string) $video : '';
 	}
 }

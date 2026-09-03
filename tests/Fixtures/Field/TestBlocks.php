@@ -11,6 +11,6 @@ use Cosray\Schema\Translate;
 use Cosray\Schema\TranslateMode;
 
 #[Label('Test Blocks')]
-#[Columns(12, 4)]
+#[Columns(12, min: 2)]
 #[Translate(TranslateMode::Asymmetric)]
 class TestBlocks extends Blocks {}

@@ -13,7 +13,7 @@ class ColumnsHandler extends Handler
 	public function apply(object $meta, Field $field): void
 	{
 		if ($field instanceof Resizable) {
-			$field->columns($meta->columns, $meta->minCellWidth);
+			$field->columns($meta->columns, $meta->min, $meta->responsive);
 
 			return;
 		}
@@ -26,7 +26,8 @@ class ColumnsHandler extends Handler
 		if ($field instanceof Resizable) {
 			return [
 				'columns' => $field->getColumns(),
-				'minCellWidth' => $field->getMinCellWidth(),
+				'min' => $field->getMin(),
+				'responsive' => $field->getResponsive()->value,
 			];
 		}
 

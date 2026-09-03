@@ -124,8 +124,9 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$this->assertArrayHasKey('columns', $properties);
 		$this->assertEquals(12, $properties['columns']);
 
-		$this->assertArrayHasKey('minCellWidth', $properties);
-		$this->assertEquals(2, $properties['minCellWidth']);
+		$this->assertArrayHasKey('min', $properties);
+		$this->assertEquals(2, $properties['min']);
+		$this->assertSame('stack', $properties['responsive']);
 
 		$this->assertArrayHasKey('translate', $properties);
 		$this->assertTrue($properties['translate']);

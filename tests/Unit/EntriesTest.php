@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Exception\RuntimeException;
-use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\FieldHydrator;
+use Cosray\Field\Image;
 use Cosray\Field\RichText;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
@@ -110,6 +110,14 @@ class EntriesTest extends TestCase
 		$entries->properties();
 	}
 
+	public function testEntriesRejectNestedBlocksFields(): void
+	{
+		$entries = $this->createEntries()->allow(TestBlocksEntry::class);
+		$this->throws(RuntimeException::class, "cannot contain nested blocks field 'body' in entry type");
+
+		$entries->properties();
+	}
+
 	public function testEntriesExposeFlattenedEmbeddedFieldsAndFieldsets(): void
 	{
 		$entries = $this->createEntries()->allow(TestEmbeddedEntry::class);
@@ -149,7 +157,7 @@ class EntriesTest extends TestCase
 				'type' => TestEntry::class,
 				'fields' => [
 					'title' => ['type' => Text::class, 'value' => ['en' => '']],
-					'content' => ['type' => \Cosray\Field\Blocks::class, 'value' => ['en' => []]],
+					'content' => ['type' => Image::class, 'value' => ['en' => []]],
 				],
 			],
 		]);
@@ -209,31 +217,6 @@ class EntriesTest extends TestCase
 		);
 	}
 
-	public function testEntriesStructureNormalizesNestedBlocksEnvelope(): void
-	{
-		$blocks = [['type' => 'text', 'value' => ['content' => 'Opening hours']]];
-		$structure = $this
-			->createEntries()
-			->allow(TestBlocksEntry::class)
-			->structure([
-				[
-					'uid' => 'entry1',
-					'type' => TestBlocksEntry::class,
-					'fields' => [
-						'body' => [
-							'type' => Blocks::class,
-							'value' => [Blocks::NEUTRAL_LOCALE => $blocks],
-						],
-					],
-				],
-			]);
-
-		$this->assertSame(
-			[Blocks::NEUTRAL_LOCALE => $blocks],
-			$structure['value'][Entries::NEUTRAL_LOCALE][0]['fields']['body']['value'],
-		);
-	}
-
 	public function testEntriesShapeAcceptsAllowedEntryTypes(): void
 	{
 		$result = $this
@@ -248,11 +231,7 @@ class EntriesTest extends TestCase
 							'type' => TestEntry::class,
 							'fields' => [
 								'title' => ['type' => Text::class, 'value' => ['en' => 'Title']],
-								'content' => [
-									'type' => \Cosray\Field\Blocks::class,
-									'value' => ['en' => []],
-									'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
-								],
+								'content' => ['type' => Image::class, 'value' => ['en' => []]],
 							],
 						],
 						[
@@ -317,7 +296,7 @@ class EntriesTest extends TestCase
 				'type' => TestEntry::class,
 				'fields' => [
 					'title' => ['type' => Text::class, 'value' => ['en' => '']],
-					'content' => ['type' => \Cosray\Field\Blocks::class, 'value' => ['en' => []]],
+					'content' => ['type' => Image::class, 'value' => ['en' => []]],
 				],
 			],
 		]);

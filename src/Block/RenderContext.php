@@ -5,43 +5,51 @@ declare(strict_types=1);
 namespace Cosray\Block;
 
 use Cosray\Assets\Asset;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
-use Cosray\Value\Block;
-use Cosray\Value\Value;
-use Cosray\Value\ValueContext;
 
 /**
- * What a block type needs to render itself on the frontend site.
+ * What a block type needs to render itself on the frontend site, plus
+ * the render arguments (`tag`, `prefix`, `class`, and whatever the
+ * types read, like `imageSizes`) validated once per render.
  */
 final class RenderContext
 {
+	private const string NAME = '/^[a-z][a-z0-9-]*$/i';
+
+	private readonly string $tag;
+	private readonly string $prefix;
+	private readonly string $class;
+
 	public function __construct(
 		public readonly Owner $owner,
 		public readonly string $fieldName,
 		public readonly int $columns,
 		public readonly array $args,
-	) {}
-
-	public function prefix(): string
-	{
-		return (string) ($this->args['prefix'] ?? 'cms');
+	) {
+		$this->tag = $this->name('tag', 'div');
+		$this->prefix = $this->name('prefix', 'cms');
+		$class = $args['class'] ?? '';
+		$this->class = is_string($class) ? trim($class) : '';
 	}
 
-	/**
-	 * The block's effective scalar value for the current locale.
-	 */
-	public function value(Block $block): string
+	/** The container element's tag. */
+	public function tag(): string
 	{
-		$value = $block->data['value'] ?? [];
+		return $this->tag;
+	}
 
-		if (!is_array($value)) {
-			return is_string($value) || is_numeric($value) ? (string) $value : '';
-		}
+	/** Every generated class name starts with this. */
+	public function prefix(): string
+	{
+		return $this->prefix;
+	}
 
-		$value = $this->effective($value);
-
-		return is_string($value) || is_numeric($value) ? (string) $value : '';
+	/** The extra container class from the `class` argument, unescaped. */
+	public function class(): string
+	{
+		return $this->class;
 	}
 
 	/**
@@ -66,31 +74,23 @@ final class RenderContext
 		return null;
 	}
 
-	/**
-	 * Block data reshaped so media field classes can consume it.
-	 */
-	public function media(Block $block): array
-	{
-		$data = $block->data;
-		$data['value'] = [Field::NEUTRAL_LOCALE => $data['value'] ?? $data['files'] ?? []];
-
-		return $data;
-	}
-
-	/** @param class-string<Field> $class */
-	public function valueObject(string $class, array $data): Value
-	{
-		return new $class(
-			$this->fieldName,
-			$this->owner,
-			new ValueContext($this->fieldName, $data),
-		)->value();
-	}
-
 	/** The catalog asset a media item references, if it exists. */
 	public function asset(string $uid): ?Asset
 	{
 		return $uid === '' ? null : $this->owner->assets()->get($uid);
+	}
+
+	private function name(string $key, string $default): string
+	{
+		$value = $this->args[$key] ?? $default;
+
+		if (!is_string($value) || !preg_match(self::NAME, $value)) {
+			throw new RuntimeException(
+				"Blocks error: `{$key}` must be a plain name (letters, digits and dashes, starting with a letter)",
+			);
+		}
+
+		return $value;
 	}
 
 	private function filled(mixed $value): bool

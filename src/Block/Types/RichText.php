@@ -5,56 +5,22 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Field\Field;
-use Cosray\Richtext\Envelope;
-use Cosray\Richtext\OwnerResolver;
-use Cosray\Richtext\Renderer;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field;
+use Cosray\Schema\Handle;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Value\Block as BlockValue;
 
-final class RichText extends Type
+#[Label('block:richtext'), Handle('richtext')]
+final class RichText implements Block
 {
-	public function id(): string
+	#[Label('block:richtext'), Required, Translate]
+	protected Field\RichText $text;
+
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return 'richtext';
-	}
-
-	public function label(): string
-	{
-		return __('block:richtext');
-	}
-
-	public function control(): Control
-	{
-		return Control::blockRichtext();
-	}
-
-	public function init(): array
-	{
-		return [
-			'type' => $this->id(),
-			'colspan' => 12,
-			'rowspan' => 1,
-			'colstart' => null,
-			'format' => Envelope::FORMAT,
-			'version' => Envelope::VERSION,
-			'value' => [Field::NEUTRAL_LOCALE => null],
-		];
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		if (!Envelope::isStructured($block->data)) {
-			// Unmigrated legacy HTML — migration 020 ships with this code.
-			return '';
-		}
-
-		$value = is_array($block->data['value'] ?? null) ? $block->data['value'] : [];
-		$doc = $ctx->effective($value);
-
-		return is_array($doc)
-			? new Renderer(new OwnerResolver($ctx->owner))->render($doc)
-			: '';
+		return (string) $block->text;
 	}
 }

@@ -5,29 +5,20 @@ declare(strict_types=1);
 namespace Cosray\Tests\Fixtures\Plugin;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field\Textarea;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Value\Block as BlockValue;
 
-final class TestNotice extends Type
+#[Label('Notice')]
+final class TestNotice implements Block
 {
-	public function id(): string
-	{
-		return 'test-notice';
-	}
+	#[Label('Notice'), Required]
+	protected Textarea $text;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return 'Notice';
-	}
-
-	public function control(): Control
-	{
-		return Control::element('test-notice', 'test-plugin/controls.js');
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		return '<aside class="notice">' . $ctx->value($block) . '</aside>';
+		return '<aside class="notice">' . $block->text . '</aside>';
 	}
 }

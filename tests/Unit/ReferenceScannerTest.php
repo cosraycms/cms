@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Block\Types;
 use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\Image;
@@ -49,21 +50,39 @@ final class ReferenceScannerTest extends TestCase
 			'blocks' => [
 				'type' => Blocks::class,
 				'value' => [
-					'zxx' => [
-						['type' => 'image', 'value' => [['uid' => 'img-block']]],
-						['type' => 'images', 'value' => [['uid' => 'img-dup'], ['uid' => 'img-gallery']]],
-						['type' => 'video', 'value' => [['uid' => 'vid-block']]],
-						[
-							'type' => 'richtext',
-							'format' => 'cosray-richtext',
-							'version' => 1,
-							'value' => ['zxx' => $this->doc([
-								$this->paragraph([
-									$this->text('Link', [['type' => 'link', 'attrs' => ['node' => 'node-from-block']]]),
-								]),
-							])],
-						],
-						['type' => 'text', 'value' => ['zxx' => 'plain']],
+					'en' => [
+						$this->block(Types\Image::class, [
+							'image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => 'img-block']]]],
+						]),
+						$this->block(Types\Images::class, [
+							'images' => [
+								'type' => Image::class,
+								'value' => ['zxx' => [['uid' => 'img-dup'], ['uid' => 'img-gallery']]],
+							],
+						]),
+					],
+					'de' => [
+						$this->block(Types\Video::class, [
+							'video' => ['type' => 'video', 'value' => ['zxx' => [['uid' => 'vid-block']]]],
+						]),
+						$this->block(Types\RichText::class, [
+							'text' => [
+								'type' => RichText::class,
+								'format' => 'cosray-richtext',
+								'version' => 1,
+								'value' => ['zxx' => $this->doc([
+									$this->paragraph([
+										$this->text('Link', [[
+											'type' => 'link',
+											'attrs' => ['node' => 'node-from-block'],
+										]]),
+									]),
+								])],
+							],
+						]),
+						$this->block(Types\Text::class, [
+							'text' => ['type' => 'textarea', 'value' => ['zxx' => 'plain']],
+						]),
 					],
 				],
 			],
@@ -175,7 +194,7 @@ final class ReferenceScannerTest extends TestCase
 			],
 			'blocks' => [
 				'type' => Blocks::class,
-				'value' => ['zxx' => ['not-a-block', ['type' => 'image', 'value' => 'nope']]],
+				'value' => ['zxx' => ['not-a-block', ['type' => Types\Image::class, 'fields' => 'nope']]],
 			],
 		]);
 
@@ -188,6 +207,16 @@ final class ReferenceScannerTest extends TestCase
 		$this->assertSame(['assets' => [], 'nodes' => []], new Scanner()->scan([]));
 		$this->assertSame(['assets' => [], 'nodes' => []], new Scanner()->scan(null));
 		$this->assertSame(['assets' => [], 'nodes' => []], new Scanner()->scan('html'));
+	}
+
+	private function block(string $type, array $fields): array
+	{
+		return [
+			'uid' => 'block-own-uid',
+			'type' => $type,
+			'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+			'fields' => $fields,
+		];
 	}
 
 	private function doc(array $content): array

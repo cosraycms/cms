@@ -65,25 +65,31 @@ final class ReferenceSyncTest extends End2EndTestCase
 				'contentBlocks' => [
 					'type' => Blocks::class,
 					'value' => [
-						'zxx' => [[
-							'type' => 'richtext',
-							'colspan' => 12,
-							'format' => 'cosray-richtext',
-							'version' => 1,
-							'value' => [
-								'zxx' => [
-									'type' => 'doc',
-									'content' => [[
-										'type' => 'paragraph',
-										'content' => [[
-											'type' => 'text',
-											'text' => 'Interner Link',
-											'marks' => [[
-												'type' => 'link',
-												'attrs' => ['node' => 'e2e-refsync-target'],
+						'en' => [[
+							'uid' => 'refsyncblock1',
+							'type' => \Cosray\Block\Types\RichText::class,
+							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+							'fields' => [
+								'text' => [
+									'type' => \Cosray\Field\RichText::class,
+									'format' => 'cosray-richtext',
+									'version' => 1,
+									'value' => [
+										'zxx' => [
+											'type' => 'doc',
+											'content' => [[
+												'type' => 'paragraph',
+												'content' => [[
+													'type' => 'text',
+													'text' => 'Interner Link',
+													'marks' => [[
+														'type' => 'link',
+														'attrs' => ['node' => 'e2e-refsync-target'],
+													]],
+												]],
 											]],
-										]],
-									]],
+										],
+									],
 								],
 							],
 						]],

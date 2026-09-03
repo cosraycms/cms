@@ -5,40 +5,33 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field;
+use Cosray\Schema\DefaultValue;
+use Cosray\Schema\Label;
+use Cosray\Schema\Options;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Schema\Validate;
+use Cosray\Value\Block as BlockValue;
 
-final class Heading extends Type
+#[Label('block:heading')]
+final class Heading implements Block
 {
-	public function __construct(
-		private readonly int $level,
-	) {}
+	public const int DEFAULT_LEVEL = 2;
 
-	public function id(): string
+	#[Label('block:heading-text'), Required, Translate]
+	protected Field\Text $text;
+
+	// The option shape alone accepts any string, hence the rule.
+	#[Label('block:heading-level'), Options(['1', '2', '3', '4', '5', '6'])]
+	#[DefaultValue('2'), Validate('in:1,2,3,4,5,6')]
+	protected Field\Option $level;
+
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return "h{$this->level}";
-	}
+		$level = max(1, min(6, (int) $block->level->unwrap() ?: self::DEFAULT_LEVEL));
 
-	public function label(): string
-	{
-		return __('block:heading-level', ['level' => $this->level]);
-	}
-
-	public function control(): Control
-	{
-		return Control::blockText();
-	}
-
-	public function hidden(): bool
-	{
-		return true;
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		$value = $ctx->value($block);
-
-		return "<h{$this->level}>{$value}</h{$this->level}>";
+		return "<h{$level}>{$block->text}</h{$level}>";
 	}
 }

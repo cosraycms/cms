@@ -875,27 +875,31 @@ final class PrimitiveValueTest extends TestCase
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Blocks('content', $owner, new ValueContext('content', []));
+		$field->init(\Cosray\Field\Services::withDefaults());
 		$field->required();
 		$field->translate(TranslateMode::Asymmetric);
 
 		$shape = $field->shape();
 		$block = [
-			'type' => 'text',
-			'rowspan' => 1,
-			'colspan' => 12,
-			'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'Hello'],
+			'uid' => 'block1',
+			'type' => \Cosray\Block\Types\Text::class,
+			'layout' => ['span' => 1, 'rows' => 1, 'indent' => 0],
+			'fields' => [
+				'text' => [
+					'type' => \Cosray\Field\Textarea::class,
+					'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'Hello'],
+				],
+			],
 		];
 
 		$valid = $shape->validate([
 			'type' => $field::class,
-			'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
 			'value' => [
 				'en' => [$block],
 			],
 		]);
 		$invalid = $shape->validate([
 			'type' => $field::class,
-			'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
 			'value' => [
 				'de' => [$block],
 			],
@@ -1008,6 +1012,65 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 	}
 
+	public function testYoutubeStructureAndMetaControlCarryTheAspectRatio(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Youtube('video', $this->createOwner($context), new ValueContext('video', []));
+		$structure = $field->structure('dQw4w9WgXcQ');
+		$meta = $field->metaControl()?->array();
+
+		$this->assertSame(['zxx' => 'dQw4w9WgXcQ'], $structure['value']);
+		$this->assertSame(['zxx' => 16], $structure['meta']['aspectRatioX']);
+		$this->assertSame(['zxx' => 9], $structure['meta']['aspectRatioY']);
+		$this->assertSame('group', $meta['name']);
+		$this->assertSame(['aspectRatioX', 'aspectRatioY'], array_column($meta['props']['fields'], 'key'));
+		$this->assertSame('number', $meta['props']['fields'][0]['control']['name']);
+	}
+
+	public function testYoutubeShapeValidatesTheId(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Youtube('video', $this->createOwner($context), new ValueContext('video', []));
+		$shape = $field->shape();
+
+		$this->assertTrue($shape->validate(['type' => $field::class, 'value' => ['zxx' => 'dQw4w9-WgX_c']])->valid());
+		$this->assertTrue($shape->validate(['type' => $field::class, 'value' => ['zxx' => 'abc" onload="x']])->has([
+			'value',
+			'zxx',
+		]));
+		$this->assertTrue($shape->validate(['type' => $field::class, 'value' => ['zxx' => 'https://youtu.be/x']])->has([
+			'value',
+			'zxx',
+		]));
+
+		$field->translate();
+		$field->required();
+		$translated = $field->shape();
+
+		$this->assertTrue(
+			$translated->validate(['type' => $field::class, 'value' => ['en' => 'dQw4w9WgXcQ', 'de' => null]])->valid(),
+		);
+		$this->assertTrue($translated->validate([
+			'type' => $field::class,
+			'value' => ['en' => 'ok', 'de' => 'bad id!'],
+		])->has(['value', 'de']));
+		$this->assertTrue($translated->validate(['type' => $field::class, 'value' => ['de' => 'ok']])->has([
+			'value',
+			'en',
+		]));
+	}
+
+	public function testIframeStructureCarriesTheFrameSize(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Iframe('embed', $this->createOwner($context), new ValueContext('embed', []));
+		$structure = $field->structure('<iframe></iframe>');
+
+		$this->assertSame(['zxx' => '<iframe></iframe>'], $structure['value']);
+		$this->assertSame(['zxx' => '100%'], $structure['meta']['iframeWidth']);
+		$this->assertSame(['zxx' => '75%'], $structure['meta']['iframeHeight']);
+	}
+
 	public function testIframeValueFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext();
@@ -1021,7 +1084,8 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$this->assertSame('<iframe></iframe>', $value->unwrap());
-		$this->assertSame('&lt;iframe&gt;&lt;/iframe&gt;', (string) $value);
+		// Iframe values are trusted embed code and render raw.
+		$this->assertSame('<iframe></iframe>', (string) $value);
 		$this->assertTrue($value->isset());
 	}
 

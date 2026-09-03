@@ -78,8 +78,7 @@ final class EntriesValueTest extends TestCase
 								'value' => ['en' => 'First Item', 'de' => 'Erstes'],
 							],
 							'content' => [
-								'type' => \Cosray\Field\Blocks::class,
-								'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+								'type' => \Cosray\Field\Image::class,
 								'value' => ['en' => [], 'de' => []],
 							],
 						],
@@ -90,8 +89,7 @@ final class EntriesValueTest extends TestCase
 						'fields' => [
 							'title' => ['type' => \Cosray\Field\Text::class, 'value' => ['en' => 'Second Item']],
 							'content' => [
-								'type' => \Cosray\Field\Blocks::class,
-								'meta' => ['columns' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 12]],
+								'type' => \Cosray\Field\Image::class,
 								'value' => ['en' => [], 'de' => []],
 							],
 						],
@@ -113,7 +111,7 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame('Second Item', $value->last()?->title->unwrap());
 		$this->assertSame('Second Item', $value->get(1)?->title->unwrap());
 		$this->assertNull($value->get(2));
-		$this->assertSame(12, $value->first()?->content->columns());
+		$this->assertFalse($value->first()?->content->isset());
 	}
 
 	public function testEntriesValueIssetIsFalseWhenEmpty(): void
@@ -138,7 +136,7 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame(TestEntry::class, $unwrapped[0]['type']);
 		$this->assertSame('First Item', $unwrapped[0]['fields']['title']);
 		$this->assertSame('Second Item', $unwrapped[1]['fields']['title']);
-		$this->assertSame(12, $unwrapped[0]['fields']['content']['columns']);
+		$this->assertSame([], $unwrapped[0]['fields']['content']);
 	}
 
 	public function testEntriesValueJsonResolvesFieldValues(): void

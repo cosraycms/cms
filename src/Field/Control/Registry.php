@@ -9,7 +9,7 @@ namespace Cosray\Field\Control;
  *
  * Registered names serialize as element descriptors, so the editor
  * only ever interprets primitives, the structural controls (group,
- * repeater, entries) and element.
+ * repeater, entries, blocks) and element.
  * Later registrations win — a plugin may replace a built-in editor.
  */
 final class Registry
@@ -46,7 +46,6 @@ final class Registry
 		$registry->register('image', 'cosray-image', 'cosray:media');
 		$registry->register('file', 'cosray-file', 'cosray:media');
 		$registry->register('video', 'cosray-video', 'cosray:media');
-		$registry->register('blocks', 'cosray-blocks', 'cosray:blocks');
 		$registry->register('reference', 'cosray-reference', 'cosray:reference');
 
 		return $registry;

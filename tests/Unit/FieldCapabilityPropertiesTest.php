@@ -273,10 +273,9 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$properties = $this->applyAndGetProperties($meta, $field);
 
-		$this->assertArrayHasKey('columns', $properties);
-		$this->assertArrayHasKey('minCellWidth', $properties);
-		$this->assertEquals(12, $properties['columns']);
-		$this->assertEquals(2, $properties['minCellWidth']);
+		$this->assertSame(12, $properties['columns']);
+		$this->assertSame(2, $properties['min']);
+		$this->assertSame('stack', $properties['responsive']);
 	}
 
 	public function testOptionsCapabilityReturnsOptionsProperty(): void

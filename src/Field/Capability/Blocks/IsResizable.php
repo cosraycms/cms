@@ -4,25 +4,28 @@ declare(strict_types=1);
 
 namespace Cosray\Field\Capability\Blocks;
 
+use Cosray\Schema\Responsive;
 use ValueError;
 
 trait IsResizable
 {
-	protected int $columns = 12;
-	protected int $minCellWidth = 1;
+	protected int $columns = 1;
+	protected int $min = 1;
+	protected Responsive $responsive = Responsive::Stack;
 
-	public function columns(int $columns, int $minCellWidth = 1): static
+	public function columns(int $columns, int $min = 1, Responsive $responsive = Responsive::Stack): static
 	{
 		if ($columns < 1 || $columns > 25) {
 			throw new ValueError('The value of $columns must be >= 1 and <= 25');
 		}
 
-		if ($minCellWidth < 1 || $minCellWidth > $columns) {
-			throw new ValueError('The value of $minCellWidth must be >= 1 and <= ' . (string) $columns);
+		if ($min < 1 || $min > $columns) {
+			throw new ValueError('The value of $min must be >= 1 and <= ' . (string) $columns);
 		}
 
 		$this->columns = $columns;
-		$this->minCellWidth = $minCellWidth;
+		$this->min = $min;
+		$this->responsive = $responsive;
 
 		return $this;
 	}
@@ -32,8 +35,13 @@ trait IsResizable
 		return $this->columns;
 	}
 
-	public function getMinCellWidth(): int
+	public function getMin(): int
 	{
-		return $this->minCellWidth;
+		return $this->min;
+	}
+
+	public function getResponsive(): Responsive
+	{
+		return $this->responsive;
 	}
 }

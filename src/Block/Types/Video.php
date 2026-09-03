@@ -5,41 +5,28 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
+use Cosray\Contract\Block;
 use Cosray\Field;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Schema\Label;
+use Cosray\Schema\Limit;
+use Cosray\Schema\Required;
+use Cosray\Schema\Translate;
+use Cosray\Value\Block as BlockValue;
 
-final class Video extends Type
+#[Label('block:video')]
+final class Video implements Block
 {
-	public function id(): string
-	{
-		return 'video';
-	}
+	#[Label('block:video'), Required, Limit(1), Translate]
+	protected Field\Video $video;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return __('block:video');
-	}
+		$video = $block->video;
 
-	public function control(): Control
-	{
-		return Control::blockVideo();
-	}
+		if ($ctx->asset((string) ($video->unwrap()['uid'] ?? '')) === null) {
+			return '';
+		}
 
-	public function init(): array
-	{
-		return [
-			'type' => $this->id(),
-			'colspan' => 12,
-			'rowspan' => 1,
-			'colstart' => null,
-			'value' => [],
-		];
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		return $ctx->valueObject(Field\Video::class, $ctx->media($block))->__toString();
+		return (string) $video;
 	}
 }

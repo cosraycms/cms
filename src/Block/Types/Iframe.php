@@ -5,29 +5,21 @@ declare(strict_types=1);
 namespace Cosray\Block\Types;
 
 use Cosray\Block\RenderContext;
-use Cosray\Block\Type;
-use Cosray\Field\Control;
-use Cosray\Value\Block;
+use Cosray\Contract\Block;
+use Cosray\Field;
+use Cosray\Schema\Label;
+use Cosray\Schema\Required;
+use Cosray\Value\Block as BlockValue;
 
-final class Iframe extends Type
+/** The one block whose output is trusted editor input: embed code, raw. */
+#[Label('block:iframe')]
+final class Iframe implements Block
 {
-	public function id(): string
-	{
-		return 'iframe';
-	}
+	#[Label('block:iframe'), Required]
+	protected Field\Iframe $code;
 
-	public function label(): string
+	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		return __('block:iframe');
-	}
-
-	public function control(): Control
-	{
-		return Control::blockIframe();
-	}
-
-	public function render(Block $block, RenderContext $ctx): string
-	{
-		return $ctx->value($block);
+		return (string) $block->code;
 	}
 }
