@@ -70,7 +70,7 @@ $cms->blockType(App\Block\Quote::class);
 
 ## Built-in block types
 
-`Cosray\Block\Types\*`, one field each:
+`Cosray\Block\*`, one field each:
 
 | Class | Handle | Field | Renders |
 | --- | --- | --- | --- |
@@ -103,7 +103,7 @@ final class ArticlePage
 {
     #[Label('Content')]
     #[Columns(12, min: 2, responsive: Responsive::Stack)]
-    #[Allows(Quote::class, Cosray\Block\Types\RichText::class)]
+    #[Allows(Quote::class, Cosray\Block\RichText::class)]
     #[Tools(Tool::MINIMAL)]
     #[Translate]
     protected Blocks $content;
@@ -143,7 +143,7 @@ Symmetric is the mode to reach for when the locales share a layout and only the 
         "zxx": [
             {
                 "uid": "k3v9p2mq7x1zd",
-                "type": "Cosray\\Block\\Types\\Image",
+                "type": "Cosray\\Block\\Image",
                 "layout": { "span": 6, "rows": 1, "indent": 0 },
                 "fields": {
                     "image": {
@@ -353,7 +353,7 @@ Migration `000000-000031` converts stored blocks to the typed-row shape in `node
 What it does per block:
 
 - `colspan`, `rowspan` and `colstart` become `layout.span`, `layout.rows` and `layout.indent` (an offset, so `colstart: 3` is `indent: 2`); `width` and the field's `columns`/`minCellWidth` meta are dropped.
-- The block type ids become classes: the legacy `html` id and `richtext` map to `Types\RichText`, `h1`–`h6` to one `Types\Heading` with the level as its option, and the media, YouTube and iframe blocks to their type with the value moved into the type's field.
+- The block type ids become classes: the legacy `html` id and `richtext` map to `Cosray\Block\RichText`, `h1`–`h6` to one `Cosray\Block\Heading` with the level as its option, and the media, YouTube and iframe blocks to their type with the value moved into the type's field.
 - The YouTube aspect ratio moves out of the block meta into the `Youtube` field's meta; `class` and `id` stay block meta; other meta keys are kept and reported.
 - Blocks without a `uid` get one.
 - Layouts are **copied, not clamped** — the field's schema is unknown at migration time, and readers clamp anyway.

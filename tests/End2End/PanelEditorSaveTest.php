@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Blocks;
@@ -145,7 +145,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'en' => [
 								[
 									'uid' => '',
-									'type' => Types\Heading::class,
+									'type' => Builtin\Heading::class,
 									'layout' => ['span' => '12', 'rows' => '1', 'indent' => '0'],
 									'fields' => [
 										'text' => ['value' => ['zxx' => 'Fresh heading']],
@@ -154,7 +154,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								],
 								[
 									'uid' => 'block-a',
-									'type' => Types\Text::class,
+									'type' => Builtin\Text::class,
 									// Out of range: a twelve-column span with an indent left
 									// over from a narrower one is clamped, not rejected.
 									'layout' => ['span' => '14', 'rows' => '1', 'indent' => '2'],
@@ -172,7 +172,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$value = $this->nodeContent('panel-save-blocks')['contentBlocks']['value'];
 
 		$this->assertCount(2, $value['en']);
-		$this->assertSame(Types\Heading::class, $value['en'][0]['type']);
+		$this->assertSame(Builtin\Heading::class, $value['en'][0]['type']);
 		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $value['en'][0]['uid']);
 		$this->assertSame('3', $value['en'][0]['fields']['level']['value']['zxx']);
 		$this->assertSame('block-a', $value['en'][1]['uid']);
@@ -730,7 +730,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Types\Text::class,
+			'type' => Builtin\Text::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text], 'stashed' => 'kept']],
 		];

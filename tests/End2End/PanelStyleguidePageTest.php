@@ -46,7 +46,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('data-name="content[grid][value][de]"', $html);
 		$this->assertStringContainsString('style="--span: 6; --rows: 1; --indent: 3"', $html);
 		$this->assertStringContainsString('name="content[grid][value][en][0][layout][rows]"', $html);
-		$this->assertStringContainsString('data-repeater-add="Cosray\\Block\\Types\\Heading"', $html);
+		$this->assertStringContainsString('data-repeater-add="Cosray\\Block\\Heading"', $html);
 		$this->assertStringContainsString('name="content[story][value][zxx][1][fields][text][json]"', $html);
 		// Two richtext samples: the default toolbar and a #[Tools]-trimmed one,
 		// each an element host carrying its tools list in the field payload.

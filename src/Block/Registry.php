@@ -78,14 +78,14 @@ final class Registry
 	public static function withDefaults(): self
 	{
 		$registry = new self();
-		$registry->register(Types\RichText::class);
-		$registry->register(Types\Text::class);
-		$registry->register(Types\Heading::class);
-		$registry->register(Types\Image::class);
-		$registry->register(Types\Images::class);
-		$registry->register(Types\Video::class);
-		$registry->register(Types\Youtube::class);
-		$registry->register(Types\Iframe::class);
+		$registry->register(RichText::class);
+		$registry->register(Text::class);
+		$registry->register(Heading::class);
+		$registry->register(Image::class);
+		$registry->register(Images::class);
+		$registry->register(Video::class);
+		$registry->register(Youtube::class);
+		$registry->register(Iframe::class);
 
 		return $registry;
 	}

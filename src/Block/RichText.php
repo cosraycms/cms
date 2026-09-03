@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Block\Types;
+namespace Cosray\Block;
 
-use Cosray\Block\RenderContext;
 use Cosray\Contract\Block;
 use Cosray\Field;
 use Cosray\Schema\Handle;

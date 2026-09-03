@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Block as Builtin;
 use Cosray\Block\Layout;
-use Cosray\Block\Types;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field;
 use Cosray\Field\Blocks;
@@ -92,8 +92,8 @@ final class BlockTest extends RichtextOwnerTestCase
 		return new Block(
 			$owner,
 			$field,
-			new ValueContext('content', [...$data, 'type' => Types\Text::class]),
-			Types\Text::class,
+			new ValueContext('content', [...$data, 'type' => Builtin\Text::class]),
+			Builtin\Text::class,
 		);
 	}
 }

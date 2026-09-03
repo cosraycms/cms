@@ -6,8 +6,8 @@ namespace Cosray\Tests\Unit;
 
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
+use Cosray\Block as Builtin;
 use Cosray\Block\Registry;
-use Cosray\Block\Types;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
@@ -74,7 +74,7 @@ final class BlocksTest extends TestCase
 	{
 		$row = [
 			'uid' => $uid,
-			'type' => Types\Text::class,
+			'type' => Builtin\Text::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => ['type' => Textarea::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
@@ -94,9 +94,9 @@ final class BlocksTest extends TestCase
 
 		$this->assertInstanceOf(BlocksValue::class, $blocks->value());
 		$this->assertSame(Registry::withDefaults()->all(), $blocks->allowedBlockTypes());
-		$this->assertSame(['text', 'level'], array_keys($blocks->blockFields(Types\Heading::class)));
+		$this->assertSame(['text', 'level'], array_keys($blocks->blockFields(Builtin\Heading::class)));
 		$this->assertSame(['text'], array_keys($blocks->blockFields()));
-		$this->assertTrue($blocks->allows(Types\Image::class));
+		$this->assertTrue($blocks->allows(Builtin\Image::class));
 		$this->assertFalse($blocks->allows(QuoteBlock::class));
 	}
 
@@ -118,14 +118,14 @@ final class BlocksTest extends TestCase
 		$this->assertSame(12, $control['props']['columns']);
 		$this->assertSame(2, $control['props']['min']);
 		$this->assertSame('stack', $control['props']['responsive']);
-		$this->assertSame('richtext', $types[Types\RichText::class]['handle']);
-		$this->assertSame('Formatierter Text', $types[Types\RichText::class]['label']);
-		$this->assertSame('heading', $types[Types\Heading::class]['handle']);
-		$this->assertSame('Überschrift', $types[Types\Heading::class]['label']);
-		$this->assertSame(['text', 'level'], array_column($types[Types\Heading::class]['fields'], 'name'));
-		$this->assertSame([], $types[Types\Heading::class]['fieldsets']);
+		$this->assertSame('richtext', $types[Builtin\RichText::class]['handle']);
+		$this->assertSame('Formatierter Text', $types[Builtin\RichText::class]['label']);
+		$this->assertSame('heading', $types[Builtin\Heading::class]['handle']);
+		$this->assertSame('Überschrift', $types[Builtin\Heading::class]['label']);
+		$this->assertSame(['text', 'level'], array_column($types[Builtin\Heading::class]['fields'], 'name'));
+		$this->assertSame([], $types[Builtin\Heading::class]['fieldsets']);
 		// Rich sub-fields arrive resolved to their element form.
-		$this->assertSame('element', $types[Types\RichText::class]['fields'][0]['control']['name']);
+		$this->assertSame('element', $types[Builtin\RichText::class]['fields'][0]['control']['name']);
 		$this->assertArrayNotHasKey('richtextClasses', $properties);
 	}
 
@@ -185,12 +185,12 @@ final class BlocksTest extends TestCase
 
 	public function testAllowRestrictsTheOfferedTypes(): void
 	{
-		$blocks = $this->createBlocks()->allow(QuoteBlock::class, Types\Text::class);
+		$blocks = $this->createBlocks()->allow(QuoteBlock::class, Builtin\Text::class);
 		$types = array_column($blocks->control()->array()['props']['blockTypes'], 'handle', 'type');
 
-		$this->assertSame([QuoteBlock::class => 'quote-block', Types\Text::class => 'text'], $types);
+		$this->assertSame([QuoteBlock::class => 'quote-block', Builtin\Text::class => 'text'], $types);
 		$this->assertTrue($blocks->allows(QuoteBlock::class));
-		$this->assertFalse($blocks->allows(Types\Image::class));
+		$this->assertFalse($blocks->allows(Builtin\Image::class));
 		$this->assertSame(['text', 'source'], array_keys($blocks->blockFields(QuoteBlock::class)));
 	}
 
@@ -214,7 +214,7 @@ final class BlocksTest extends TestCase
 
 		$this
 			->createBlocks()
-			->allow(Types\Text::class)
+			->allow(Builtin\Text::class)
 			->blockFieldsFor(QuoteBlock::class);
 	}
 
@@ -245,7 +245,7 @@ final class BlocksTest extends TestCase
 		$structure = $this->createBlocks()->structure([
 			$this->textRow('b1', 'Hello', ['span' => 20, 'rows' => 0, 'indent' => 5], ['class' => ['zxx' => 'wide']]),
 			['uid' => 'b2', 'type' => 'legacy', 'colspan' => 12],
-			['uid' => 'b3', 'type' => Types\Heading::class, 'fields' => []],
+			['uid' => 'b3', 'type' => Builtin\Heading::class, 'fields' => []],
 		]);
 		$rows = $structure['value'][Field::NEUTRAL_LOCALE];
 
@@ -305,7 +305,7 @@ final class BlocksTest extends TestCase
 			->structure([
 				[
 					'uid' => 'b1',
-					'type' => Types\Text::class,
+					'type' => Builtin\Text::class,
 					'fields' => ['text' => ['type' => Textarea::class, 'value' => ['en' => 'Hello']]],
 				],
 			]);
@@ -319,24 +319,24 @@ final class BlocksTest extends TestCase
 		$symmetric = $this
 			->createBlocks()
 			->translate()
-			->allow(NoteBlock::class, Types\Text::class);
+			->allow(NoteBlock::class, Builtin\Text::class);
 		$asymmetric = $this
 			->createBlocks()
 			->translate(TranslateMode::Asymmetric)
-			->allow(NoteBlock::class, Types\Text::class);
-		$untranslated = $this->createBlocks()->allow(NoteBlock::class, Types\Text::class);
+			->allow(NoteBlock::class, Builtin\Text::class);
+		$untranslated = $this->createBlocks()->allow(NoteBlock::class, Builtin\Text::class);
 
 		$this->assertSame(
 			TranslateMode::Symmetric,
-			$symmetric->blockFields(Types\Text::class)['text']->translateMode(),
+			$symmetric->blockFields(Builtin\Text::class)['text']->translateMode(),
 		);
 		$this->assertSame(
 			TranslateMode::Asymmetric,
 			$symmetric->blockFields(NoteBlock::class)['cover']->translateMode(),
 		);
-		$this->assertNull($asymmetric->blockFields(Types\Text::class)['text']->translateMode());
+		$this->assertNull($asymmetric->blockFields(Builtin\Text::class)['text']->translateMode());
 		$this->assertNull($asymmetric->blockFields(NoteBlock::class)['cover']->translateMode());
-		$this->assertNull($untranslated->blockFields(Types\Text::class)['text']->translateMode());
+		$this->assertNull($untranslated->blockFields(Builtin\Text::class)['text']->translateMode());
 
 		$properties = $untranslated->control()->array()['props']['blockTypes'][1]['fields'][0];
 		$this->assertFalse($properties['translate']);
@@ -357,10 +357,10 @@ final class BlocksTest extends TestCase
 
 	public function testToolsFeedRichtextSubFieldsWithoutTheirOwn(): void
 	{
-		$blocks = $this->createBlocks()->allow(NoteBlock::class, Types\RichText::class);
+		$blocks = $this->createBlocks()->allow(NoteBlock::class, Builtin\RichText::class);
 		$blocks->tools(Tool::H1, Tool::Bold);
 		$note = $blocks->blockFields(NoteBlock::class);
-		$richtext = $blocks->blockFields(Types\RichText::class)['text'];
+		$richtext = $blocks->blockFields(Builtin\RichText::class)['text'];
 
 		$this->assertInstanceOf(RichText::class, $richtext);
 		$this->assertSame(['h1', 'bold'], $richtext->getTools());
@@ -391,7 +391,7 @@ final class BlocksTest extends TestCase
 						),
 						[
 							'uid' => 'b2',
-							'type' => Types\Heading::class,
+							'type' => Builtin\Heading::class,
 							'layout' => ['span' => 2, 'rows' => 6, 'indent' => 0],
 							'fields' => [
 								'text' => ['type' => Text::class, 'value' => ['zxx' => 'Title']],
@@ -425,7 +425,7 @@ final class BlocksTest extends TestCase
 							'fields' => [],
 						],
 						[
-							'type' => Types\Text::class,
+							'type' => Builtin\Text::class,
 							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
 							'fields' => [],
 						],
@@ -447,7 +447,7 @@ final class BlocksTest extends TestCase
 		$this->assertFalse(
 			$shape
 				->validate($rows([
-					['uid' => 'b1', 'type' => Types\Text::class, 'layout' => 'junk', 'fields' => 'junk'],
+					['uid' => 'b1', 'type' => Builtin\Text::class, 'layout' => 'junk', 'fields' => 'junk'],
 				]))
 				->valid(),
 		);
@@ -527,7 +527,7 @@ final class BlocksTest extends TestCase
 					Field::NEUTRAL_LOCALE => [
 						[
 							'uid' => 'b1',
-							'type' => Types\Text::class,
+							'type' => Builtin\Text::class,
 							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
 							'fields' => [
 								'text' => ['type' => Textarea::class, 'value' => ['en' => 'Hello', 'de' => null]],
@@ -555,7 +555,7 @@ final class BlocksTest extends TestCase
 					Field::NEUTRAL_LOCALE => [
 						[
 							'uid' => 'b1',
-							'type' => Types\Image::class,
+							'type' => Builtin\Image::class,
 							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
 							'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['meta' => []]]]]],
 						],

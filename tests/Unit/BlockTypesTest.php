@@ -7,9 +7,9 @@ namespace Cosray\Tests\Unit;
 use Celema\Container\Container;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
+use Cosray\Block as Builtin;
 use Cosray\Block\Registry;
 use Cosray\Block\RenderContext;
-use Cosray\Block\Types;
 use Cosray\Contract\Block as BlockType;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field;
@@ -36,14 +36,14 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 	{
 		$this->assertSame(
 			[
-				Types\RichText::class,
-				Types\Text::class,
-				Types\Heading::class,
-				Types\Image::class,
-				Types\Images::class,
-				Types\Video::class,
-				Types\Youtube::class,
-				Types\Iframe::class,
+				Builtin\RichText::class,
+				Builtin\Text::class,
+				Builtin\Heading::class,
+				Builtin\Image::class,
+				Builtin\Images::class,
+				Builtin\Video::class,
+				Builtin\Youtube::class,
+				Builtin\Iframe::class,
 			],
 			Registry::withDefaults()->all(),
 		);
@@ -106,14 +106,14 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 
 		$this->assertSame(
 			[
-				Types\RichText::class => 'richtext',
-				Types\Text::class => 'text',
-				Types\Heading::class => 'heading',
-				Types\Image::class => 'image',
-				Types\Images::class => 'images',
-				Types\Video::class => 'video',
-				Types\Youtube::class => 'youtube',
-				Types\Iframe::class => 'iframe',
+				Builtin\RichText::class => 'richtext',
+				Builtin\Text::class => 'text',
+				Builtin\Heading::class => 'heading',
+				Builtin\Image::class => 'image',
+				Builtin\Images::class => 'images',
+				Builtin\Video::class => 'video',
+				Builtin\Youtube::class => 'youtube',
+				Builtin\Iframe::class => 'iframe',
 				QuoteBlock::class => 'quote-block',
 				ServiceBlock::class => 'service-block',
 				NoteBlock::class => 'note',
@@ -151,7 +151,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 	{
 		$this->assertSame(
 			"a &lt;b&gt;<br />\nc",
-			$this->render(Types\Text::class, [
+			$this->render(Builtin\Text::class, [
 				'text' => ['type' => Field\Textarea::class, 'value' => ['zxx' => "a <b>\nc"]],
 			]),
 		);
@@ -163,7 +163,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$field = $this->field($owner)->translate();
 
 		$this->assertSame('fallback', $this->render(
-			Types\Text::class,
+			Builtin\Text::class,
 			[
 				'text' => ['type' => Field\Textarea::class, 'value' => ['de' => '', 'en' => 'fallback']],
 			],
@@ -173,7 +173,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 
 	public function testHeadingRendersTheLevel(): void
 	{
-		$heading = fn(?string $level): string => $this->render(Types\Heading::class, [
+		$heading = fn(?string $level): string => $this->render(Builtin\Heading::class, [
 			'text' => ['type' => Field\Text::class, 'value' => ['zxx' => 'Hi <there>']],
 			'level' => ['type' => Field\Option::class, 'value' => ['zxx' => $level]],
 		]);
@@ -196,7 +196,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 			],
 		];
 
-		$this->assertSame('<p><strong>fett</strong></p>', $this->render(Types\RichText::class, [
+		$this->assertSame('<p><strong>fett</strong></p>', $this->render(Builtin\RichText::class, [
 			'text' => [
 				'type' => Field\RichText::class,
 				'format' => Envelope::FORMAT,
@@ -205,14 +205,14 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 			],
 		]));
 		// Unmigrated legacy HTML does not render.
-		$this->assertSame('', $this->render(Types\RichText::class, [
+		$this->assertSame('', $this->render(Builtin\RichText::class, [
 			'text' => ['type' => Field\RichText::class, 'value' => ['zxx' => '<p>alt</p>']],
 		]));
 	}
 
 	public function testYoutubeRendersTheEmbed(): void
 	{
-		$html = $this->render(Types\Youtube::class, [
+		$html = $this->render(Builtin\Youtube::class, [
 			'video' => [
 				'type' => Field\Youtube::class,
 				'value' => ['zxx' => 'dQw4w9WgXcQ'],
@@ -222,7 +222,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 
 		$this->assertStringContainsString('src="https://www.youtube.com/embed/dQw4w9WgXcQ"', $html);
 		$this->assertStringContainsString('padding-top: 75.00%', $html);
-		$this->assertSame('', $this->render(Types\Youtube::class, [
+		$this->assertSame('', $this->render(Builtin\Youtube::class, [
 			'video' => ['type' => Field\Youtube::class, 'value' => ['zxx' => '']],
 		]));
 	}
@@ -231,7 +231,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 	{
 		$code = '<iframe src="https://example.com/embed"></iframe>';
 
-		$this->assertSame($code, $this->render(Types\Iframe::class, [
+		$this->assertSame($code, $this->render(Builtin\Iframe::class, [
 			'code' => ['type' => Field\Iframe::class, 'value' => ['zxx' => $code]],
 		]));
 	}

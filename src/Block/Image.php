@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Block\Types;
+namespace Cosray\Block;
 
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\SizeSpec;
-use Cosray\Block\RenderContext;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field;

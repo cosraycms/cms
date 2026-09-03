@@ -882,7 +882,7 @@ final class PrimitiveValueTest extends TestCase
 		$shape = $field->shape();
 		$block = [
 			'uid' => 'block1',
-			'type' => \Cosray\Block\Types\Text::class,
+			'type' => \Cosray\Block\Text::class,
 			'layout' => ['span' => 1, 'rows' => 1, 'indent' => 0],
 			'fields' => [
 				'text' => [

@@ -6,7 +6,7 @@ namespace Cosray\Tests\Integration;
 
 use Celema\Core\Exception\HttpBadRequest;
 use Cosray\Actor;
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\Field;
@@ -60,7 +60,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Types\Text::class,
+			'type' => Builtin\Text::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
@@ -72,7 +72,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Types\Heading::class,
+			'type' => Builtin\Heading::class,
 			'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
 			'fields' => [
 				'text' => ['type' => \Cosray\Field\Text::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],

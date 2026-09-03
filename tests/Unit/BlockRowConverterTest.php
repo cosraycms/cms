@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Field;
 use Cosray\Migration\BlockRowConverter;
 use Cosray\Tests\Fixtures\Field\TestBlocks;
@@ -44,7 +44,7 @@ final class BlockRowConverterTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'rich000000001',
-				'type' => Types\RichText::class,
+				'type' => Builtin\RichText::class,
 				'layout' => ['span' => 8, 'rows' => 1, 'indent' => 2],
 				'fields' => [
 					'text' => [
@@ -60,7 +60,7 @@ final class BlockRowConverterTest extends TestCase
 		);
 
 		// The legacy `html` id.
-		$this->assertSame(Types\RichText::class, $de[1]['type']);
+		$this->assertSame(Builtin\RichText::class, $de[1]['type']);
 		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $de[1]['layout']);
 		$this->assertSame('cosray-richtext', $de[1]['fields']['text']['format']);
 		$this->assertArrayNotHasKey('meta', $de[1]);
@@ -69,7 +69,7 @@ final class BlockRowConverterTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'text000000001',
-				'type' => Types\Text::class,
+				'type' => Builtin\Text::class,
 				'layout' => ['span' => 6, 'rows' => 2, 'indent' => 0],
 				'fields' => [
 					'text' => ['type' => Field\Textarea::class, 'value' => ['zxx' => "Mo-Fr\n9-17"]],
@@ -79,7 +79,7 @@ final class BlockRowConverterTest extends TestCase
 		);
 
 		// Headings become the one heading type with a string level.
-		$this->assertSame(Types\Heading::class, $de[3]['type']);
+		$this->assertSame(Builtin\Heading::class, $de[3]['type']);
 		$this->assertSame(
 			[
 				'text' => ['type' => Field\Text::class, 'value' => ['zxx' => 'Öffnungszeiten']],
@@ -89,7 +89,7 @@ final class BlockRowConverterTest extends TestCase
 		);
 
 		// Media lists move under the neutral locale of the media field.
-		$this->assertSame(Types\Image::class, $de[4]['type']);
+		$this->assertSame(Builtin\Image::class, $de[4]['type']);
 		$this->assertSame(['span' => 4, 'rows' => 2, 'indent' => 0], $de[4]['layout']);
 		$this->assertSame(
 			[
@@ -100,13 +100,13 @@ final class BlockRowConverterTest extends TestCase
 			],
 			$de[4]['fields'],
 		);
-		$this->assertSame(Types\Images::class, $de[5]['type']);
+		$this->assertSame(Builtin\Images::class, $de[5]['type']);
 		$this->assertSame(
 			['asset00000002', 'asset00000003'],
 			array_column($de[5]['fields']['images']['value']['zxx'], 'uid'),
 		);
 		// The single-video field holds one item; the surplus is dropped and reported.
-		$this->assertSame(Types\Video::class, $de[6]['type']);
+		$this->assertSame(Builtin\Video::class, $de[6]['type']);
 		$this->assertSame(
 			['video' => ['type' => Field\Video::class, 'value' => ['zxx' => [['uid' => 'asset00000004']]]]],
 			$de[6]['fields'],
@@ -116,7 +116,7 @@ final class BlockRowConverterTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'yout000000001',
-				'type' => Types\Youtube::class,
+				'type' => Builtin\Youtube::class,
 				'layout' => ['span' => 6, 'rows' => 1, 'indent' => 6],
 				'fields' => [
 					'video' => [
@@ -131,7 +131,7 @@ final class BlockRowConverterTest extends TestCase
 		);
 
 		// A missing uid is generated, empty meta pruned, other meta kept.
-		$this->assertSame(Types\Iframe::class, $de[8]['type']);
+		$this->assertSame(Builtin\Iframe::class, $de[8]['type']);
 		$this->assertMatchesRegularExpression(self::UID_PATTERN, $de[8]['uid']);
 		$this->assertSame(
 			[
@@ -169,7 +169,7 @@ final class BlockRowConverterTest extends TestCase
 
 		// Blocks fields are found at any depth.
 		$nested = $content['items']['value']['zxx'][0]['fields']['body']['value']['zxx'][0];
-		$this->assertSame(Types\Heading::class, $nested['type']);
+		$this->assertSame(Builtin\Heading::class, $nested['type']);
 		$this->assertSame(['zxx' => '4'], $nested['fields']['level']['value']);
 
 		$this->assertSame(
@@ -263,7 +263,7 @@ final class BlockRowConverterTest extends TestCase
 
 		$this->assertSame('App\Gone', $field['type']);
 		$this->assertArrayNotHasKey('meta', $field);
-		$this->assertSame(Types\Text::class, $field['value']['de'][0]['type']);
+		$this->assertSame(Builtin\Text::class, $field['value']['de'][0]['type']);
 		$this->assertSame(['span' => 3, 'rows' => 1, 'indent' => 0], $field['value']['de'][0]['layout']);
 		$this->assertNull($field['value']['en']);
 		$this->assertSame(['App\Gone' => 1], $converter->report()['unresolvedFieldTypes']);

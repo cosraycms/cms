@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Assets\Asset;
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
@@ -89,7 +89,7 @@ final class BlocksValueTest extends TestCase
 		$value = is_array($text) ? $text : [Field::NEUTRAL_LOCALE => $text];
 
 		return $this->row(
-			Types\Text::class,
+			Builtin\Text::class,
 			[
 				'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => $value],
 			],
@@ -102,7 +102,7 @@ final class BlocksValueTest extends TestCase
 	private function image(array $item, int $span = 6, string $uid = 'b1'): array
 	{
 		return $this->row(
-			Types\Image::class,
+			Builtin\Image::class,
 			[
 				'image' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => [$item]]],
 			],
@@ -114,7 +114,7 @@ final class BlocksValueTest extends TestCase
 	private function images(array $items, string $uid = 'b1'): array
 	{
 		return $this->row(
-			Types\Images::class,
+			Builtin\Images::class,
 			[
 				'images' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => $items]],
 			],
@@ -126,7 +126,7 @@ final class BlocksValueTest extends TestCase
 	private function richtext(string $text, string $uid = 'b1'): array
 	{
 		return $this->row(
-			Types\RichText::class,
+			Builtin\RichText::class,
 			[
 				'text' => [
 					'type' => \Cosray\Field\RichText::class,
@@ -233,7 +233,7 @@ final class BlocksValueTest extends TestCase
 	{
 		$blocks = $this->createBlocksValue([
 			$this->row(
-				Types\Youtube::class,
+				Builtin\Youtube::class,
 				[
 					'video' => ['type' => \Cosray\Field\Youtube::class, 'value' => ['zxx' => 'abc" onload="alert(1)']],
 				],
@@ -288,7 +288,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('Two', $blocks->last()?->text->unwrap());
 		$this->assertSame('b2', $blocks->get(1)?->uid());
 		$this->assertNull($blocks->get(2));
-		$this->assertSame(Types\Text::class, $blocks->first()?->type);
+		$this->assertSame(Builtin\Text::class, $blocks->first()?->type);
 		$this->assertSame('text', $blocks->first()?->handle());
 		$this->assertSame(4, $blocks->first()?->layout()->span);
 	}
@@ -304,7 +304,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'b1',
-				'type' => Types\Text::class,
+				'type' => Builtin\Text::class,
 				'handle' => 'text',
 				'layout' => ['span' => 6, 'rows' => 1, 'indent' => 0],
 				'fields' => ['text' => 'Hello'],
@@ -348,7 +348,7 @@ final class BlocksValueTest extends TestCase
 	{
 		$rows = [
 			$this->row(
-				Types\Text::class,
+				Builtin\Text::class,
 				[
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['en' => 'Hello', 'de' => 'Hallo']],
 				],
@@ -535,7 +535,7 @@ final class BlocksValueTest extends TestCase
 	public function testVideoBlockRendersTheAssetAndSkipsDanglingOnes(): void
 	{
 		$video = fn(string $uid): array => $this->row(
-			Types\Video::class,
+			Builtin\Video::class,
 			[
 				'video' => [
 					'type' => \Cosray\Field\Video::class,

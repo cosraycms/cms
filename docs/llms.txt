@@ -461,7 +461,7 @@ final class Quote implements Block
 }
 ```
 
-- built-in types (`Cosray\Block\Types\*`, one field each): `RichText`,
+- built-in types (`Cosray\Block\*`, one field each): `RichText`,
   `Text` (escaped, `nl2br`), `Heading` (text plus a level option, replaces
   the old `h1`-`h6`), `Image`, `Images`, `Video`, `Youtube`, `Iframe`
   (renders its embed code raw — the one deliberate unescaped output)

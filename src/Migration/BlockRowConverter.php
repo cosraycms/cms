@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\Migration;
 
-use Cosray\Block\Types;
+use Cosray\Block\Heading;
+use Cosray\Block\Iframe;
+use Cosray\Block\Image;
+use Cosray\Block\Images;
+use Cosray\Block\RichText;
+use Cosray\Block\Text;
+use Cosray\Block\Video;
+use Cosray\Block\Youtube;
 use Cosray\Field;
 use Cosray\Uid;
 
@@ -29,20 +36,20 @@ final class BlockRowConverter
 
 	/** @var array<string, class-string> Legacy type id to block class. */
 	private const array TYPES = [
-		'richtext' => Types\RichText::class,
-		'html' => Types\RichText::class,
-		'text' => Types\Text::class,
-		'h1' => Types\Heading::class,
-		'h2' => Types\Heading::class,
-		'h3' => Types\Heading::class,
-		'h4' => Types\Heading::class,
-		'h5' => Types\Heading::class,
-		'h6' => Types\Heading::class,
-		'image' => Types\Image::class,
-		'images' => Types\Images::class,
-		'video' => Types\Video::class,
-		'youtube' => Types\Youtube::class,
-		'iframe' => Types\Iframe::class,
+		'richtext' => RichText::class,
+		'html' => RichText::class,
+		'text' => Text::class,
+		'h1' => Heading::class,
+		'h2' => Heading::class,
+		'h3' => Heading::class,
+		'h4' => Heading::class,
+		'h5' => Heading::class,
+		'h6' => Heading::class,
+		'image' => Image::class,
+		'images' => Images::class,
+		'video' => Video::class,
+		'youtube' => Youtube::class,
+		'iframe' => Iframe::class,
 	];
 
 	private const array ASPECT_RATIO = ['aspectRatioX', 'aspectRatioY'];

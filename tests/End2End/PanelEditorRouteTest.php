@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Blocks;
@@ -116,7 +116,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 						'en' => [
 							[
 								'uid' => 'block-a',
-								'type' => Types\Text::class,
+								'type' => Builtin\Text::class,
 								'layout' => ['span' => 6, 'rows' => 2, 'indent' => 3],
 								'fields' => [
 									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
@@ -156,7 +156,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// row as custom properties, the block meta in the row's own dialog.
 		$this->assertStringContainsString('name="' . $en . '[0][uid]"', $html);
 		$this->assertStringContainsString('value="block-a"', $html);
-		$this->assertStringContainsString('value="' . Types\Text::class . '"', $html);
+		$this->assertStringContainsString('value="' . Builtin\Text::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][layout][span]"', $html);
 		$this->assertStringContainsString('data-layout="indent"', $html);
 		$this->assertStringContainsString('style="--span: 6; --rows: 2; --indent: 3"', $html);
@@ -170,10 +170,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('value="block-gone"', $html);
 		// Templates per offered type, the picker in the footer and the
 		// insert-above/below pickers in the row menu.
-		$this->assertStringContainsString('data-repeater-template="' . Types\Heading::class . '"', $html);
+		$this->assertStringContainsString('data-repeater-template="' . Builtin\Heading::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[__i__][layout][span]"', $html);
 		$this->assertStringContainsString(
-			'data-repeater-add="' . Types\RichText::class . '" data-repeater-insert="append"',
+			'data-repeater-add="' . Builtin\RichText::class . '" data-repeater-insert="append"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringContainsString('data-repeater-insert="before"', $html);

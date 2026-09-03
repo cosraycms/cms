@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Block as Builtin;
 use Cosray\Block\RenderContext;
-use Cosray\Block\Types;
 use Cosray\Field;
 use Cosray\Field\Owner;
 use Cosray\Schema\Responsive;
@@ -99,7 +99,7 @@ class Blocks extends Value implements IteratorAggregate
 		$i = 0;
 
 		foreach ($this->blocks as $block) {
-			if ($block->type !== Types\Image::class) {
+			if ($block->type !== Builtin\Image::class) {
 				continue;
 			}
 
@@ -123,13 +123,13 @@ class Blocks extends Value implements IteratorAggregate
 
 		foreach ($lists as $blocks) {
 			foreach ($blocks as $block) {
-				if ($block->type === Types\Image::class) {
+				if ($block->type === Builtin\Image::class) {
 					$image = $block->image;
 
 					if ($image instanceof Image) {
 						yield $image;
 					}
-				} elseif ($block->type === Types\Images::class) {
+				} elseif ($block->type === Builtin\Images::class) {
 					foreach ($block->images as $image) {
 						yield $image;
 					}
@@ -152,7 +152,7 @@ class Blocks extends Value implements IteratorAggregate
 		$i = 0;
 
 		foreach ($this->blocks as $block) {
-			if ($block->type !== Types\RichText::class) {
+			if ($block->type !== Builtin\RichText::class) {
 				continue;
 			}
 

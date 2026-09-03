@@ -6,7 +6,7 @@ namespace Cosray\Tests\Integration;
 
 use Celema\Quma\Environment;
 use Celema\Sire\Issue;
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Config;
 use Cosray\Field\Blocks;
 use Cosray\Field\Services;
@@ -137,12 +137,12 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 		$this->assertArrayNotHasKey('meta', $content['blocks']);
 		$this->assertSame(
 			[
-				Types\RichText::class,
-				Types\Heading::class,
-				Types\Text::class,
-				Types\Image::class,
-				Types\Youtube::class,
-				Types\Iframe::class,
+				Builtin\RichText::class,
+				Builtin\Heading::class,
+				Builtin\Text::class,
+				Builtin\Image::class,
+				Builtin\Youtube::class,
+				Builtin\Iframe::class,
 			],
 			array_column($en, 'type'),
 		);
@@ -157,10 +157,10 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 		);
 		$this->assertArrayNotHasKey('meta', $en[4]);
 		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $en[5]['uid']);
-		$this->assertSame(Types\Text::class, $content['blocks']['value']['de'][0]['type']);
+		$this->assertSame(Builtin\Text::class, $content['blocks']['value']['de'][0]['type']);
 		$this->assertSame(['zxx' => '2'], $content['stacked']['value']['zxx'][0]['fields']['level']['value']);
 		$this->assertCount(2, $content['stacked']['value']['zxx'][1]['fields']['images']['value']['zxx']);
-		$this->assertSame(Types\Heading::class, $history['blocks']['value']['en'][0]['type']);
+		$this->assertSame(Builtin\Heading::class, $history['blocks']['value']['en'][0]['type']);
 		$this->assertArrayNotHasKey('meta', $history['blocks']);
 
 		// A pre-017 snapshot is not a blocks field the converter knows.

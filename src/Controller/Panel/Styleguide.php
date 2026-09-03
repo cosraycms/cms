@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Image;
@@ -428,7 +428,7 @@ final class Styleguide extends Panel
 		])->array();
 		$types = static fn(bool $translate): array => [
 			[
-				'type' => Types\RichText::class,
+				'type' => Builtin\RichText::class,
 				'handle' => 'richtext',
 				'label' => 'Rich text',
 				'fields' => [
@@ -447,7 +447,7 @@ final class Styleguide extends Panel
 				'fieldsets' => [],
 			],
 			[
-				'type' => Types\Heading::class,
+				'type' => Builtin\Heading::class,
 				'handle' => 'heading',
 				'label' => 'Heading',
 				'fields' => [
@@ -472,7 +472,7 @@ final class Styleguide extends Panel
 				'fieldsets' => [],
 			],
 			[
-				'type' => Types\Image::class,
+				'type' => Builtin\Image::class,
 				'handle' => 'image',
 				'label' => 'Single image',
 				'fields' => [
@@ -544,7 +544,7 @@ final class Styleguide extends Panel
 		];
 		$richtext = static fn(string $uid, array $layout, array $value): array => [
 			'uid' => $uid,
-			'type' => Types\RichText::class,
+			'type' => Builtin\RichText::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => [
@@ -557,7 +557,7 @@ final class Styleguide extends Panel
 		];
 		$heading = static fn(string $uid, array $layout, array $text, string $level): array => [
 			'uid' => $uid,
-			'type' => Types\Heading::class,
+			'type' => Builtin\Heading::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => ['type' => Text::class, 'value' => $text],
@@ -566,7 +566,7 @@ final class Styleguide extends Panel
 		];
 		$image = static fn(string $uid, array $layout, string $asset): array => [
 			'uid' => $uid,
-			'type' => Types\Image::class,
+			'type' => Builtin\Image::class,
 			'layout' => $layout,
 			'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
 		];

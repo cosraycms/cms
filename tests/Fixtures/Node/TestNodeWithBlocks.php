@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Fixtures\Node;
 
-use Cosray\Block\Types\Heading;
+use Cosray\Block\Heading;
 use Cosray\Contract\Title;
 use Cosray\Field\Blocks;
 use Cosray\Field\Text;

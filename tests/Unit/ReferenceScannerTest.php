@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Cosray\Block\Types;
+use Cosray\Block as Builtin;
 use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\Image;
@@ -51,10 +51,10 @@ final class ReferenceScannerTest extends TestCase
 				'type' => Blocks::class,
 				'value' => [
 					'en' => [
-						$this->block(Types\Image::class, [
+						$this->block(Builtin\Image::class, [
 							'image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => 'img-block']]]],
 						]),
-						$this->block(Types\Images::class, [
+						$this->block(Builtin\Images::class, [
 							'images' => [
 								'type' => Image::class,
 								'value' => ['zxx' => [['uid' => 'img-dup'], ['uid' => 'img-gallery']]],
@@ -62,10 +62,10 @@ final class ReferenceScannerTest extends TestCase
 						]),
 					],
 					'de' => [
-						$this->block(Types\Video::class, [
+						$this->block(Builtin\Video::class, [
 							'video' => ['type' => 'video', 'value' => ['zxx' => [['uid' => 'vid-block']]]],
 						]),
-						$this->block(Types\RichText::class, [
+						$this->block(Builtin\RichText::class, [
 							'text' => [
 								'type' => RichText::class,
 								'format' => 'cosray-richtext',
@@ -80,7 +80,7 @@ final class ReferenceScannerTest extends TestCase
 								])],
 							],
 						]),
-						$this->block(Types\Text::class, [
+						$this->block(Builtin\Text::class, [
 							'text' => ['type' => 'textarea', 'value' => ['zxx' => 'plain']],
 						]),
 					],
@@ -194,7 +194,7 @@ final class ReferenceScannerTest extends TestCase
 			],
 			'blocks' => [
 				'type' => Blocks::class,
-				'value' => ['zxx' => ['not-a-block', ['type' => Types\Image::class, 'fields' => 'nope']]],
+				'value' => ['zxx' => ['not-a-block', ['type' => Builtin\Image::class, 'fields' => 'nope']]],
 			],
 		]);
 
