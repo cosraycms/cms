@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 use Generator;
 use IteratorAggregate;
@@ -28,7 +29,9 @@ class Entries extends Value implements IteratorAggregate
 
 	public function __toString(): string
 	{
-		return $this->render();
+		throw new RuntimeException(
+			"The entries field '{$this->fieldName}' has no string representation. Iterate its rows in the template.",
+		);
 	}
 
 	public function json(): array
@@ -71,17 +74,6 @@ class Entries extends Value implements IteratorAggregate
 	public function isset(): bool
 	{
 		return count($this->entries) > 0;
-	}
-
-	public function render(mixed ...$args): string
-	{
-		$out = '';
-
-		foreach ($this->entries as $entry) {
-			$out .= $entry->render(...$args);
-		}
-
-		return $out;
 	}
 
 	protected function prepareEntries(): void

@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Context;
 use Cosray\Exception\NoSuchProperty;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Entries as EntriesField;
 use Cosray\Field\Services;
 use Cosray\Node\FieldOwner;
@@ -112,6 +113,26 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame('Second Item', $value->get(1)?->title->unwrap());
 		$this->assertNull($value->get(2));
 		$this->assertFalse($value->first()?->content->isset());
+	}
+
+	public function testEntriesValueHasNoStringRepresentation(): void
+	{
+		$value = $this->createEntriesValue($this->entriesData());
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("The entries field 'entries' has no string representation");
+
+		(string) $value;
+	}
+
+	public function testEntryRowHasNoStringRepresentation(): void
+	{
+		$entry = $this->createEntriesValue($this->entriesData())->first();
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("An entry row of 'entries' has no string representation");
+
+		(string) $entry;
 	}
 
 	public function testEntriesValueIssetIsFalseWhenEmpty(): void

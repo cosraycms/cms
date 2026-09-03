@@ -419,6 +419,12 @@ Stored entry rows carry a `uid`, an FQCN `type`, and their sub-field entries und
 }
 ```
 
+Entries have no frontend rendering: a list of typed rows is structured
+content, not a page fragment, so `(string)` on an entries field or on one
+of its rows throws `Cosray\Exception\RuntimeException`. Templates iterate
+the rows and render the fields they need. Blocks are the opposite case —
+their type classes own their markup (see below).
+
 Examples:
 
 - `$node->title?->unwrap()`

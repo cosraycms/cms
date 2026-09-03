@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Exception\NoSuchProperty;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 
 /**
@@ -27,7 +29,9 @@ class Entry extends Value
 
 	public function __toString(): string
 	{
-		return $this->render();
+		throw new RuntimeException(
+			"An entry row of '{$this->fieldName}' has no string representation. Read its fields in the template.",
+		);
 	}
 
 	public function json(): array
@@ -48,8 +52,8 @@ class Entry extends Value
 	}
 
 	/**
-	 * Entry fields resolve through the value layer, like `render()` does —
-	 * `structure()` is the editor's storage shape and belongs to the serializer.
+	 * Entry fields resolve through the value layer — `structure()` is the
+	 * editor's storage shape and belongs to the serializer.
 	 *
 	 * @param callable(Value): mixed $resolve
 	 * @return array{uid: ?string, type: string, fields: array<string, mixed>}
@@ -74,26 +78,13 @@ class Entry extends Value
 		return count($this->fields) > 0;
 	}
 
-	public function render(mixed ...$args): string
-	{
-		$out = '<div class="entry">';
-
-		foreach ($this->fields as $field) {
-			$out .= $field->value()->render(...$args);
-		}
-
-		$out .= '</div>';
-
-		return $out;
-	}
-
 	public function __get(string $name): mixed
 	{
 		if (isset($this->fields[$name])) {
 			return $this->fields[$name]->value();
 		}
 
-		throw new \Cosray\Exception\NoSuchProperty("Entry doesn't have field '{$name}'");
+		throw new NoSuchProperty("Entry doesn't have field '{$name}'");
 	}
 
 	protected function initFields(): void
