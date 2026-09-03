@@ -321,16 +321,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		$this->reviewRowFields($review);
 
 		foreach ($review->values() as $index => $row) {
-			$layout = is_array($row) ? $row['layout'] ?? null : null;
-
-			if (!is_array($layout)) {
-				continue;
-			}
-
-			$span = (int) ($layout['span'] ?? 0);
-			$indent = (int) ($layout['indent'] ?? 0);
-
-			if (($span + $indent) > $this->columns) {
+			if (((int) $row['layout']['span'] + (int) $row['layout']['indent']) > $this->columns) {
 				$review->addError([$index, 'layout', 'indent'], __('block:invalid-indent'));
 			}
 		}

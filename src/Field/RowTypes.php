@@ -91,13 +91,10 @@ trait RowTypes
 			return $fields;
 		}
 
+		// The node schema validated the order against the type's fields.
 		$ordered = [];
 
 		foreach ($order as $name) {
-			if (!is_string($name) || !isset($fields[$name])) {
-				continue;
-			}
-
 			$ordered[$name] = $fields[$name];
 		}
 
@@ -159,16 +156,15 @@ trait RowTypes
 		return $structure;
 	}
 
-	/** @param array<string, mixed> $values */
+	/**
+	 * Sire runs finalize and review callbacks on rule-clean data only, so
+	 * rows arrive here with an allowed `type` and array `fields`.
+	 *
+	 * @param array<string, mixed> $values
+	 */
 	protected function finalizeRowFields(mixed $value, array $values): mixed
 	{
-		$type = $values['type'] ?? null;
-
-		if (!is_string($type) || !$this->allows($type) || !is_array($value)) {
-			return $value;
-		}
-
-		$result = $this->rowShape($type)->validate($value);
+		$result = $this->rowShape((string) $values['type'])->validate(is_array($value) ? $value : []);
 
 		return $result->valid() ? $result->values() : $value;
 	}
@@ -176,23 +172,7 @@ trait RowTypes
 	protected function reviewRowFields(Review $review): void
 	{
 		foreach ($review->values() as $index => $row) {
-			if (!is_array($row)) {
-				continue;
-			}
-
-			$type = $row['type'] ?? null;
-
-			if (!is_string($type) || !$this->allows($type)) {
-				continue;
-			}
-
-			$value = $row['fields'] ?? null;
-
-			if (!is_array($value)) {
-				continue;
-			}
-
-			$result = $this->rowShape($type)->validate($value);
+			$result = $this->rowShape((string) $row['type'])->validate(is_array($row['fields']) ? $row['fields'] : []);
 
 			if ($result->valid()) {
 				continue;
