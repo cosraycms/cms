@@ -163,14 +163,16 @@ Field-level attributes (applied to field properties):
 - `#[DefaultValue(...)]`
 - `#[Width(int)]`
 - `#[Rows(int)]`
-- `#[Columns(int $columns, int $minCellWidth = 1)]`
+- `#[Columns(int $columns, int $min = 1, Responsive $responsive = Responsive::Stack)]`
+  (Blocks: the grid; without it the field is a one-column stack)
+- `#[Tools(Tool::..., ...)]` (RichText, and Blocks for its richtext sub-fields)
 - `#[Hidden]`
 - `#[Immutable]`
 - `#[Options([...])]`
 - `#[Limit(int $max, int $min = 0)]`
 - `#[Fulltext(FulltextWeight::A|B|C|D)]`
 - `#[Syntax('php', 'js', ...)]`
-- `#[Allows(Foo::class, Bar::class, ...)]` for `Entries` fields
+- `#[Allows(Foo::class, Bar::class, ...)]` for `Entries` and `Blocks` fields
 - `#[Title]` (property-level; selects a field or an embedded `Title` provider)
 
 Embedded-property layout attributes:
@@ -340,7 +342,11 @@ Field translation modes:
 - `#[Translate]` defaults to symmetric translation.
 - Symmetric media translation shares the file list and translates metadata such as `title` and `alt`.
 - `#[Translate(TranslateMode::Asymmetric)]` stores localized payloads, such as per-locale media file lists or per-locale block arrays.
-- `Blocks` currently supports asymmetric translation only.
+- `Blocks` supports both modes, and the mode decides what its rows do:
+  symmetric keeps one shared list whose sub-fields translate where the
+  block type declares `#[Translate]` on them; asymmetric keeps one list
+  per locale and forces every sub-field neutral. Switching a stored
+  field between the two is a manual content migration.
 - Required asymmetric fields require the default locale only; fallback locales are optional.
 
 Schema defaults worth knowing:
@@ -419,6 +425,84 @@ Examples:
 - `(string) $node->body`
 - `$node->heroImage?->first()?->url()`
 - `$node->staff?->first()?->fullName?->unwrap()`
+
+`Blocks` fields are typed rows with a grid layout. A block type is a class
+implementing `Cosray\Contract\Block`: its `Field` properties declare the
+schema exactly like an entry type, plus a
+`render(Value\Block, RenderContext): string` for the frontend. Full
+reference: `docs/blocks.md`.
+
+```php
+use Cosray\Block\RenderContext;
+use Cosray\Contract\Block;
+use Cosray\Field\{Text, Textarea};
+use Cosray\Schema\{Label, Required};
+use Cosray\Value\Block as BlockValue;
+
+#[Label('Quote')]
+final class Quote implements Block
+{
+    #[Label('Quote'), Required]
+    protected Textarea $text;
+
+    #[Label('Source')]
+    protected Text $source;
+
+    public function render(BlockValue $block, RenderContext $ctx): string
+    {
+        return "<blockquote><p>{$block->text}</p><cite>{$block->source}</cite></blockquote>";
+    }
+}
+```
+
+- built-in types (`Cosray\Block\Types\*`, one field each): `RichText`,
+  `Text` (escaped, `nl2br`), `Heading` (text plus a level option, replaces
+  the old `h1`-`h6`), `Image`, `Images`, `Video`, `Youtube`, `Iframe`
+  (renders its embed code raw — the one deliberate unescaped output)
+- `#[Columns(n, min:, responsive:)]` opts a field into the grid; without it
+  the field is a one-column stack with no layout controls
+- `#[Allows(A::class, B::class)]` is optional; without it a field offers the
+  default list, which plugins extend with `Registrar::blockType(A::class)`
+- a block type may contain neither `Blocks` nor `Entries`; entry types may
+  not contain `Blocks` (both rejected at boot)
+- stored row: `{uid, type: FQCN, layout: {span, rows, indent}, fields, meta?}`
+  in per-locale lists (asymmetric) or one `zxx` list; `fields` holds the
+  ordinary field envelopes, `meta` the block's `class`/`id`
+- readers clamp the layout (`span` into `[min, columns]`, `rows` into
+  `[1, 6]`, `indent` into `[0, columns - span]`); a write through the store
+  is validated instead, so out-of-range imports fail loudly
+- rendering contract: a `{prefix}-blocks` container with `data-columns`,
+  `data-responsive` and `--columns`, each block a `{prefix}-block` div with
+  `data-type` (the type handle), `data-span`/`-rows`/`-indent` and the
+  matching custom properties; an empty render emits no element; every
+  generated attribute is escaped
+- `Blocks::render()` args: `prefix`, `tag`, `class`, `imageSizes`, `sizes`,
+  `thumbSize` (see section 9); `tag` and `prefix` must match
+  `/^[a-z][a-z0-9-]*$/i`
+- `Value\Blocks` iterates `Value\Block` rows (`uid()`, `type`, `handle()`,
+  `layout()`, sub-fields as properties, `meta()`, `render()`) and offers
+  `count()`, `first()`, `last()`, `get()`, `columns()`, `responsive()`,
+  `image()`, `images()`, `hasImage()`, `excerpt()`; `unwrap()`/`json()`
+  return `{columns, blocks: [{uid, type, handle, layout, fields, meta}]}`
+- the reference stylesheet ships as `resources/blocks.css` (layer
+  `cms.blocks`, override points `--blocks-gap` and the container threshold)
+- migration `000000-000031` converts legacy blocks in nodes, drafts and both
+  history tables: `colspan`/`rowspan`/`colstart` become
+  `layout.span`/`rows`/`indent` (an offset), `width` and the field's
+  `columns`/`minCellWidth` meta are dropped, legacy ids become type classes
+  (`html` -> `RichText`, `h1`-`h6` -> `Heading`), media items move into the
+  type's field, the YouTube aspect ratio moves into the `Youtube` field meta,
+  missing uids are generated. Layouts are copied, not clamped. Unknown types
+  are left untouched and reported in `blocks-migration-report.json` at the
+  project root, next to the counts (`rows`, `updated`, `fields`, `blocks`,
+  `types`, `uidsGenerated`, `legacyRichtext`, `droppedMediaItems`,
+  `droppedItems`, `metaKeys`, `unresolvedFieldTypes`). Run
+  `php run db:migrations --apply` after upgrading; the rebuilt field rejects
+  the legacy shape on save.
+- same release, outside the field: a standalone `Iframe` field renders raw
+  (it was an escaped text field and useless as an embed), and `Youtube`
+  validates its value as a video id (`[A-Za-z0-9_-]{1,64}`) on save while
+  its aspect ratio moved into the field meta dialog
 
 `Reference` fields point at other nodes. They store a language-neutral,
 ordered `{uid}` list (`value.zxx`), unbounded by default (`#[Limit(max: 1)]`
@@ -752,8 +836,9 @@ Block image rendering:
 
 - `image` blocks emit a `srcset` ladder of width-mode named sizes (default
   `block-sm`/`block`/`block-lg`) plus a `sizes` attribute computed from
-  the block's colspan share; `images` blocks emit one `block-thumb`
-  rendition per item; generation is lazy via the cache fallback route
+  the block's share of the grid (`layout.span` over the field's columns);
+  `images` blocks emit one `block-thumb` rendition per item; generation is
+  lazy via the cache fallback route
 - `Blocks::render()` args: `imageSizes` (ladder names; a single entry
   emits a plain `src` and may use any mode, multiple entries must use the
   `width` mode), `sizes` (attribute template, `{pct}` = grid share in

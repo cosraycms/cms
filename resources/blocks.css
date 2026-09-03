@@ -1,0 +1,50 @@
+/*
+ * The reference stylesheet for the blocks rendering contract: the grid
+ * a `Blocks` field's markup expects. Import it from a bundler or copy
+ * it into the site's CSS:
+ *
+ *   @import 'vendor/cosray/cms/resources/blocks.css';
+ *
+ * It lives in the `cms.blocks` layer, so unlayered site CSS wins over
+ * every rule here without needing a more specific selector. The
+ * override points are `--blocks-gap` and the container threshold; the
+ * block prefix follows the `prefix` render argument, so a site that
+ * renders with a different prefix copies the file and renames.
+ *
+ * `data-responsive` carries the field's `#[Columns(responsive:)]`
+ * policy: `stack` collapses every block to full width below the
+ * threshold, `preserve` keeps the grid at every width, and `custom`
+ * means the site brings its own rules — this sheet has no rule for
+ * either of the latter two.
+ */
+
+@layer cms.blocks {
+	.cms-blocks {
+		display: grid;
+		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
+		gap: var(--blocks-gap, 2rem);
+		container-type: inline-size;
+	}
+
+	.cms-block {
+		min-width: 0;
+		grid-column: span var(--span, 1);
+		grid-row: span var(--rows, 1);
+	}
+
+	/*
+	 * An indented block needs the start line, not just a span; a custom
+	 * property alone cannot switch `grid-column` between the two forms
+	 * cross-browser, hence the attribute selector.
+	 */
+	.cms-block:not([data-indent="0"]) {
+		grid-column: calc(var(--indent) + 1) / span var(--span, 1);
+	}
+
+	@container (max-width: 42rem) {
+		.cms-blocks[data-responsive="stack"] > .cms-block {
+			grid-column: 1 / -1;
+			grid-row: auto;
+		}
+	}
+}

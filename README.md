@@ -249,7 +249,7 @@ public function register(Registrar $cms): void
 }
 ```
 
-Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('layer/main')` and renders its own fragment, which the layer templates wrap according to what htmx asked for. Custom editor UIs (field controls, block types) ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Cosray's own rich controls (richtext, code, media, blocks, entries) are built the same way and serve as reference implementations under `panel/src/elements/`. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel. Keyboard operation follows the vocabulary in `docs/panel-keyboard.md` — which key means what, on every screen.
+Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('layer/main')` and renders its own fragment, which the layer templates wrap according to what htmx asked for. Custom editor UIs ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Block types are plain PHP: a class with fields and a `render()`, documented in `docs/blocks.md`. Cosray's own rich controls (richtext, code, media) are built the same way and serve as reference implementations under `panel/src/elements/`; the structural ones (entries, blocks) are server-rendered views instead. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel. Keyboard operation follows the vocabulary in `docs/panel-keyboard.md` — which key means what, on every screen.
 
 ### Panel scripts across navigation
 
@@ -259,7 +259,7 @@ Panel navigation is htmx region swaps. Scripts registered via `Registrar::js()` 
 - Be idempotent: guard against double registration.
 - Treat panel markup as private: only the attributes and contracts documented in `docs/controls.md` are API; everything else may change without notice.
 
-Interactive UI beyond what delegated listeners can express belongs in a custom element (a field control, a block type, or a mount inside your own panel page) — elements upgrade wherever their markup lands, swapped-in fragments included.
+Interactive UI beyond what delegated listeners can express belongs in a custom element (a field control, or a mount inside your own panel page) — elements upgrade wherever their markup lands, swapped-in fragments included.
 
 ## Defining content types
 
@@ -359,7 +359,7 @@ An outer `Title` implementation takes precedence. Otherwise, `#[Title]` can sele
 
 `#[Translate]` defaults to symmetric translation. Symmetric media fields share one file list and translate metadata such as `title` and `alt`.
 
-Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varies by locale. `Blocks` currently supports asymmetric translation only. Media fields use asymmetric translation for separate per-locale file lists. Required asymmetric fields require content in the default locale; fallback locales are optional.
+Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varies by locale. Media fields use asymmetric translation for separate per-locale file lists, and a `Blocks` field keeps one block list per locale instead of translating inside a shared one — see [Blocks](docs/blocks.md#translation). Required asymmetric fields require content in the default locale; fallback locales are optional.
 
 ### Derived behavior
 

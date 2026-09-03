@@ -1,6 +1,6 @@
 # Editor control vocabulary
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater`/`entries` controls the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
+Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater`/`entries`/`blocks` controls the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
 
 Cross-cutting concerns are **not** part of the descriptor. Label, locale tabs, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared field wrapper.
 
@@ -25,6 +25,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `group` | `Control::group(fields)` | `fields: {key,label?,control,width?}[]` | `zxx` map of object keyed by `key` |
 | `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
 | `entries` | `Control::entries()` | `entryTypes` (built from `#[Allows]`), `min?`, `max?` | `zxx` map of `{uid, type, fields}[]` |
+| `blocks` | `Control::blocks()` | `blockTypes` (built from `#[Allows]` or the registry), `columns`, `min`, `responsive`, `meta` | locale map of `{uid, type, layout, fields, meta?}[]` |
 | `element` | `Control::element(tag, module)` | `tag`, `module` | whatever the field's `structure()` defines |
 
 Named rich controls (resolved to elements server-side; cosray's built-ins ship as custom elements under `cosray:` modules):
@@ -36,7 +37,6 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]` |
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
-| `blocks` | `Control::blocks()` | `cosray-blocks` | locale map of block list (see Blocks) |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
 ### Richtext toolbar
@@ -98,7 +98,7 @@ Row **uids** exist for patch matching: the client fills a fresh row's uid on sta
 
 **Saving** replaces the row list wholesale — order is submission order, missing rows are deleted, rows of types the field does not allow are dropped. Each surviving row is matched to its stored counterpart **by uid** and its sub-fields are patched individually, exactly like top-level fields (element leaves via `[json]`, primitives per locale, meta per key). One boundary to know: at the top level, unknown keys in stored content survive a save untouched; **inside entry rows they do not** — storing validates each row's fields and keeps only declared keys. The supported places for extra data inside entries are declared fields and declared meta.
 
-Limitations (v1): `#[When]` conditions are not emitted for sub-fields inside entries (a condition would otherwise evaluate against a same-named top-level field); an entry type must not contain another `Entries` field (rejected at boot); a summary line drawn from a richtext sub-field refreshes on the next full load, not while typing.
+Limitations (v1): `#[When]` conditions are not emitted for sub-fields inside entries (a condition would otherwise evaluate against a same-named top-level field); an entry type must not contain another `Entries` field or a `Blocks` field (both rejected at boot); a summary line drawn from a richtext sub-field refreshes on the next full load, not while typing.
 
 ## Field meta
 
@@ -115,6 +115,8 @@ public function metaControl(): ?Control
 ```
 
 The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
+
+A `blocks` field uses the same dialog for its **rows**: its descriptor carries a `meta` prop — a `group` with the `class` and `id` text controls — and every block row renders it behind the gear in its header strip, submitting as `content[{field}][value][{lo}][{i}][meta][{key}][zxx]`. It is one group for every block type; a descriptor without the prop stores no block meta at all.
 
 ## Save transport
 
@@ -147,9 +149,29 @@ Because form names mirror the data structure, the `errors` behavior resolves tha
 
 Theming hooks: `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error` on tabs and meta buttons, all in `@layer panel`. Element controls receive field-level marking only — the wrapper is marked, but the panel does not reach inside a host to point at a specific locale or sub-value; an element wanting finer error display can style itself when its host's field wrapper carries `data-invalid`.
 
-## Block types
+## Blocks
 
-Block types inside a `blocks` field are pluggable through the same mechanism. A block type extends `Cosray\Block\Type` and provides `id()`, `label()`, `control()`, `init()` (the payload created when the editor adds the block) and `render(Block, RenderContext)` (frontend HTML). Plugins register types via `Registrar::blockType(MyBlock::class)`; a `Blocks` field restricts its offered types with `#[Allows('richtext', 'my-block')]`. The block natives (`block-text`, `block-richtext`, `block-image`, `block-images`, `block-youtube`, `block-video`, `block-iframe`) are rendered internally by the `cosray-blocks` element; a plugin block type uses an `element` control, and its web component gets the contract below with `block` (`{type, index}`) assigned additionally.
+A `Blocks` field renders server-side as a **typed repeater with a grid**: the same row machinery as entries, plus a layout per row. Block types are plain PHP classes implementing `Cosray\Contract\Block` — fields for the schema, a `render()` for the frontend; plugins add one to the default offer list with `Registrar::blockType(MyBlock::class)`, a field restricts its own with `#[Allows(MyBlock::class)]`. The model, the stored shape, the rendering contract and the reference stylesheet live in [docs/blocks.md](blocks.md); this section is the editor side.
+
+```text
+content[f][value][{lo}][i][uid]                       hidden row identity
+content[f][value][{lo}][i][type]                      hidden row type (FQCN)
+content[f][value][{lo}][i][layout][span|rows|indent]  hidden, stepped by the toolbar
+content[f][value][{lo}][i][fields][sub][value][lo]    primitive sub-field, per locale
+content[f][value][{lo}][i][fields][sub][json]         element sub-field (cosray-host leaf)
+content[f][value][{lo}][i][fields][sub][meta][k][lo]  sub-field meta dialog
+content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
+```
+
+`{lo}` is the list's locale: an **asymmetric** field renders one list per locale under the field-level locale tabs and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list whose translated sub-fields carry their own tabs, exactly like entries sub-fields.
+
+Rows are **never collapsed**. Each carries a header strip — the type label, a drag grip, a width stepper (only when the field has more than one column), a gear opening the row's `class`/`id` dialog, and a menu with insert above/below, move up/down, row and indent steppers and remove. Everything but the type label fades in on hover and focus-within, and a narrow block folds the width stepper into the menu (container query, no JS). New blocks come from a picker at the foot; with a single allowed type the picker is a plain add button. Adding, removing, reordering and renumbering is the shared repeater behavior, stamping from one inert `<template>` per allowed type; a stamped row focuses its first input.
+
+The editor grid mirrors the frontend contract — `--columns` on the container, `--span`/`--rows`/`--indent` (plus `data-indent`) on the row — so a block sits where the site will place it. The steppers clamp against the field's own bounds (`span` ∈ `[min, columns]`, `rows` ∈ `[1, 6]`, `indent` ∈ `[0, columns − span]`, and widening re-clamps the indent), disable at the boundaries and dispatch `change` so the unsaved-changes guard sees the edit.
+
+**Saving** works like entries: the list is replaced wholesale, rows are matched by uid and their sub-fields patched individually, rows of a disallowed type are dropped. On top of that the layout is cast to ints and clamped into the field's grid — a stored layout a narrower field cannot hold saves back clamped, where the shape would reject it — and the block meta is patched against the descriptor's `meta` group, so unknown meta keys survive.
+
+Limitations (v1): the same as entries — no `#[When]` conditions on sub-fields, no nested typed repeaters (a block type may contain neither `Blocks` nor `Entries`, and an entry type may not contain `Blocks`); the block settings group is fixed to `class` and `id`; dragging is the only reorder that is not keyboard-reachable (the menu's move up/down is).
 
 ## Element controls
 
