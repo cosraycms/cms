@@ -31,16 +31,6 @@ foreach ((array) ($props['entryTypes'] ?? []) as $entryType) {
 	}
 }
 
-$grip = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
-	. '<path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 '
-	. '1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 '
-	. '1 1-2 0 1 1 0 0 1 2 0zM7 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 '
-	. '14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>';
-$plus = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
-	. '<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>'
-	. '<path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 '
-	. '0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>';
-
 $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	$name,
 	$id,
@@ -48,7 +38,6 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	$defaultLocale,
 	$node,
 	$assets,
-	$grip,
 ): void {
 	$rowName = "{$name}[{$index}]";
 	$rowId = "{$id}-{$index}";
@@ -62,7 +51,7 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	<div class="entry" data-repeater-row>
 		<div class="summary">
 			<span class="grip" data-repeater-grip title="<?= escape(__('field:drag-entry')) ?>">
-				<?= $grip ?>
+				<?php $this->insert('icon/grip.svg') ?>
 			</span>
 			<button
 				type="button"
@@ -193,7 +182,7 @@ $full = is_int($max) && $max > 0 && $count >= $max;
 				class="adder"
 				data-repeater-add="<?= escape((string) $entryType['type']) ?>"
 				<?= $full ? 'hidden' : '' ?>>
-				<?= $plus ?>
+				<?php $this->insert('icon/plus.svg') ?>
 				<?= escape($addLabel($entryType, $rows === [])) ?>
 			</button>
 		<?php endforeach ?>
