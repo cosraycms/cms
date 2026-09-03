@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
+use Cosray\Block\Types;
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
 use Cosray\Field\Image;
+use Cosray\Field\Option;
+use Cosray\Field\RichText;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
 use Cosray\Locales;
@@ -50,6 +53,8 @@ final class Styleguide extends Panel
 			'mediaAssets' => $this->mediaAssets(),
 			'entriesFields' => $this->entriesFields($controls),
 			'entriesContent' => $this->entriesContent(),
+			'blocksFields' => $this->blocksFields($controls),
+			'blocksContent' => $this->blocksContent(),
 			// Media controls need the editor bridge for uploads and the
 			// library picker; the payload is the one the editor embeds.
 			'system' => new System($this->config, $locales)->payload(),
@@ -402,6 +407,201 @@ final class Styleguide extends Panel
 				],
 			],
 			'teamEmpty' => ['value' => ['zxx' => []]],
+		];
+	}
+
+	/**
+	 * Blocks descriptors: a one-column symmetric field (a quiet list whose
+	 * richtext and heading translate inside the row) and a twelve-column
+	 * asymmetric field (bordered cells, one list per locale) in the shape
+	 * `Field\Blocks::control()` emits.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function blocksFields(Controls $controls): array
+	{
+		$richtext = Control::richtext()->resolve($controls)->array();
+		$image = Control::image()->resolve($controls)->array();
+		$meta = Control::group([
+			['key' => 'class', 'label' => 'CSS class', 'control' => Control::text()],
+			['key' => 'id', 'label' => 'Element ID', 'control' => Control::text()],
+		])->array();
+		$types = static fn(bool $translate): array => [
+			[
+				'type' => Types\RichText::class,
+				'handle' => 'richtext',
+				'label' => 'Rich text',
+				'fields' => [
+					[
+						'name' => 'text',
+						'label' => 'Rich text',
+						'type' => RichText::class,
+						'control' => $richtext,
+						'required' => true,
+						'translate' => $translate,
+						'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
+						'richtextClasses' => (object) [],
+						'richtextStyles' => (object) [],
+					],
+				],
+				'fieldsets' => [],
+			],
+			[
+				'type' => Types\Heading::class,
+				'handle' => 'heading',
+				'label' => 'Heading',
+				'fields' => [
+					[
+						'name' => 'text',
+						'label' => 'Heading text',
+						'type' => Text::class,
+						'control' => ['name' => 'text', 'props' => []],
+						'required' => true,
+						'translate' => $translate,
+						'width' => 75,
+					],
+					[
+						'name' => 'level',
+						'label' => 'Level',
+						'type' => Option::class,
+						'control' => ['name' => 'option', 'props' => []],
+						'options' => ['1', '2', '3', '4', '5', '6'],
+						'width' => 25,
+					],
+				],
+				'fieldsets' => [],
+			],
+			[
+				'type' => Types\Image::class,
+				'handle' => 'image',
+				'label' => 'Single image',
+				'fields' => [
+					[
+						'name' => 'image',
+						'label' => 'Image',
+						'type' => Image::class,
+						'control' => $image,
+						'limit' => ['min' => 0, 'max' => 1],
+						'required' => true,
+						'translate' => $translate,
+					],
+				],
+				'fieldsets' => [],
+			],
+		];
+
+		return [
+			[
+				'name' => 'story',
+				'label' => 'Story — one column, translated in the row',
+				'control' => [
+					'name' => 'blocks',
+					'props' => [
+						'blockTypes' => $types(true),
+						'columns' => 1,
+						'min' => 1,
+						'responsive' => 'stack',
+						'meta' => $meta,
+					],
+				],
+				'translate' => true,
+				'translateMode' => 'symmetric',
+				'description' => 'A stacked list: no layout controls, the sub-fields carry the locale tabs.',
+			],
+			[
+				'name' => 'grid',
+				'label' => 'Grid — twelve columns, one list per locale',
+				'control' => [
+					'name' => 'blocks',
+					'props' => [
+						'blockTypes' => $types(false),
+						'columns' => 12,
+						'min' => 2,
+						'responsive' => 'stack',
+						'meta' => $meta,
+					],
+				],
+				'translate' => true,
+				'translateMode' => 'asymmetric',
+				'description' => 'Width steps in the header, rows and indent in the block menu; the grid follows.',
+			],
+		];
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function blocksContent(): array
+	{
+		$doc = static fn(string $text): array => [
+			'type' => 'doc',
+			'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]]],
+		];
+		$layout = static fn(int $span, int $rows = 1, int $indent = 0): array => [
+			'span' => $span,
+			'rows' => $rows,
+			'indent' => $indent,
+		];
+		$richtext = static fn(string $uid, array $layout, array $value): array => [
+			'uid' => $uid,
+			'type' => Types\RichText::class,
+			'layout' => $layout,
+			'fields' => [
+				'text' => [
+					'type' => RichText::class,
+					'format' => Envelope::FORMAT,
+					'version' => Envelope::VERSION,
+					'value' => $value,
+				],
+			],
+		];
+		$heading = static fn(string $uid, array $layout, array $text, string $level): array => [
+			'uid' => $uid,
+			'type' => Types\Heading::class,
+			'layout' => $layout,
+			'fields' => [
+				'text' => ['type' => Text::class, 'value' => $text],
+				'level' => ['type' => Option::class, 'value' => ['zxx' => $level]],
+			],
+		];
+		$image = static fn(string $uid, array $layout, string $asset): array => [
+			'uid' => $uid,
+			'type' => Types\Image::class,
+			'layout' => $layout,
+			'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
+		];
+
+		return [
+			'story' => [
+				'value' => [
+					'zxx' => [
+						$heading('sg-story-1', $layout(1), ['en' => 'The brewhouse', 'de' => 'Das Sudhaus'], '2'),
+						$richtext('sg-story-2', $layout(1), [
+							'en' => $doc('The new mash tun arrives in autumn.'),
+							'de' => $doc('Die neue Maischepfanne wird im Herbst eingebaut.'),
+						]),
+						$image('sg-story-3', $layout(1), 'sg-cover'),
+					],
+				],
+			],
+			'grid' => [
+				'value' => [
+					'en' => [
+						$image('sg-grid-1', $layout(4, 2), self::galleryUid(1)),
+						$richtext('sg-grid-2', $layout(8), ['zxx' => $doc('Eight columns beside a two-row image.')]),
+						$richtext('sg-grid-3', $layout(8), ['zxx' => $doc('The second row of the same pair.')]),
+						$heading('sg-grid-4', $layout(6, 1, 3), ['zxx' => 'Centered by an indent of three'], '3'),
+						$richtext('sg-grid-5', $layout(4), ['zxx' => $doc('A third.')]),
+						$richtext('sg-grid-6', $layout(4), ['zxx' => $doc('Another third.')]),
+						$richtext('sg-grid-7', $layout(4), ['zxx' => $doc('And the last third.')]),
+					],
+					'de' => [
+						$heading('sg-grid-8', $layout(12), ['zxx' => 'Die deutsche Liste'], '2'),
+						$richtext('sg-grid-9', $layout(6), ['zxx' => $doc('Eine eigene Liste je Sprache.')]),
+					],
+				],
+				'meta' => [],
+			],
 		];
 	}
 

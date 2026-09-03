@@ -106,66 +106,7 @@ export interface UploadResponse {
 
 export type UploadType = 'image' | 'file' | 'video';
 
-export interface BlockBase {
-	type: string;
-	colspan: number;
-	rowspan: number;
-	colstart?: number | null;
-	width?: number | null;
-	meta?: Meta;
-}
-
-export interface BlockText extends BlockBase {
-	type: 'text' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'iframe';
-	value: LocaleMap<string>;
-}
-
-export interface BlockRichText extends BlockBase {
-	type: 'richtext';
-	format?: string;
-	version?: number;
-	value: LocaleMap<RichtextDoc | string | null>;
-}
-
-export interface BlockImage extends BlockBase {
-	type: 'image' | 'images' | 'video';
-	value: TranslatedFile[];
-}
-
-export interface BlockYoutube extends BlockBase {
-	type: 'youtube';
-	value: LocaleMap<string>;
-	meta: Meta & {
-		aspectRatioX: LocaleMap<number>;
-		aspectRatioY: LocaleMap<number>;
-	};
-}
-
-export interface BlockCustom extends BlockBase {
-	type: string;
-	value: unknown;
-	meta?: Meta;
-}
-
-export type Block = BlockText | BlockRichText | BlockImage | BlockYoutube | BlockCustom;
-export type BlockImages = BlockImage;
-export type BlockVideo = BlockImage;
-export type BlockIframe = BlockText;
-
-export interface LocalizedBlocksValue {
-	[key: string]: Block[];
-}
-
-export interface BlocksData {
-	type: string;
-	value: LocalizedBlocksValue;
-	meta: Meta & {
-		columns: LocaleMap<number>;
-		minCellWidth?: LocaleMap<number>;
-	};
-}
-
-export type Data = TextData | CodeData | FileData | BlocksData | NumberData | BooleanData;
+export type Data = TextData | CodeData | FileData | NumberData | BooleanData;
 export type Content = Record<string, Data>;
 export type Route = string | Record<string, string>;
 

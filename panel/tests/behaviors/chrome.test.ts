@@ -63,11 +63,11 @@ describe('editor chrome', () => {
 
 	it('opens the metadata dialog belonging to the clicked field', () => {
 		document.body.innerHTML = `
-			<div class="cms-field">
+			<div class="cms-field" data-meta-owner>
 				<button type="button" data-meta-open><span>Metadata</span></button>
 				<dialog data-meta></dialog>
 			</div>
-			<div class="cms-field"><dialog data-meta></dialog></div>
+			<div class="cms-field" data-meta-owner><dialog data-meta></dialog></div>
 		`;
 		const expected = document.querySelector<HTMLDialogElement>('dialog[data-meta]')!;
 
@@ -75,6 +75,33 @@ describe('editor chrome', () => {
 
 		expect(showModal).toHaveBeenCalledOnce();
 		expect(showModal.mock.instances[0]).toBe(expected);
+	});
+
+	it('opens the dialog of the block row, not of the field around it', () => {
+		document.body.innerHTML = `
+			<div class="cms-field" data-meta-owner>
+				<button type="button" class="meta-button" data-meta-open>Field meta</button>
+				<div class="control">
+					<div class="block" data-meta-owner>
+						<button type="button" class="gear" data-meta-open>Block meta</button>
+						<div class="body">
+							<div class="cms-field" data-meta-owner>
+								<dialog data-meta id="sub"></dialog>
+							</div>
+						</div>
+						<dialog data-meta id="block"></dialog>
+					</div>
+				</div>
+				<dialog data-meta id="field"></dialog>
+			</div>
+		`;
+
+		document.querySelector<HTMLElement>('.gear')!.click();
+		document.querySelector<HTMLElement>('.meta-button')!.click();
+
+		expect(showModal).toHaveBeenCalledTimes(2);
+		expect((showModal.mock.instances[0] as HTMLElement).id).toBe('block');
+		expect((showModal.mock.instances[1] as HTMLElement).id).toBe('field');
 	});
 
 	it('closes the metadata dialog containing the clicked control', () => {

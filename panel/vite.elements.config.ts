@@ -41,7 +41,6 @@ export default defineConfig({
 				code: path.resolve(root, 'src/elements/code.ts'),
 				media: path.resolve(root, 'src/elements/media.ts'),
 				'media-library': path.resolve(root, 'src/elements/media-library.ts'),
-				blocks: path.resolve(root, 'src/elements/blocks.ts'),
 				reference: path.resolve(root, 'src/elements/reference.ts'),
 			},
 			output: {

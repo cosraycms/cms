@@ -1,11 +1,14 @@
 // Repeater rows: add clones a server-rendered template (typed repeaters
-// like entries carry one template per row type and typed add buttons),
-// remove drops the row, move swaps it with a sibling row. Renumbering
-// keeps input names, ids and row labels dense so submissions stay
-// ordered (the server normalizes gaps anyway). It also rewrites the
-// data-name/data-id bases of nested repeater containers and recurses
-// into inert template content, so structural controls nested inside a
-// row keep renumbering against the right base after their row moved.
+// like entries carry one template per row type and typed add buttons)
+// at the end of the list, or before or after the row an add button sits
+// in when it says so (blocks: insert above/below), and focuses the
+// stamped row's first input; remove drops the row, move swaps it with a
+// sibling row. Renumbering keeps input names, ids and row labels dense
+// so submissions stay ordered (the server normalizes gaps anyway). It
+// also rewrites the data-name/data-id bases of nested repeater
+// containers and recurses into inert template content, so structural
+// controls nested inside a row keep renumbering against the right base
+// after their row moved.
 // Rows sit directly in the container, or in a [data-repeater-list]
 // child when the container also carries chrome around them (entries:
 // a count line, the footer); the count line follows the row count.
@@ -107,7 +110,9 @@ function changed(container: HTMLElement): void {
 	container.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-function add(container: HTMLElement, type: string | null): void {
+type Anchor = { row: HTMLElement; where: 'before' | 'after' };
+
+function add(container: HTMLElement, type: string | null, at: Anchor | null): void {
 	const templates = [
 		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
 	];
@@ -116,14 +121,15 @@ function add(container: HTMLElement, type: string | null): void {
 			? templates[0]
 			: templates.find((el) => el.getAttribute('data-repeater-template') === type);
 	const rows = list(container);
-	const anchor =
+	const footer =
 		rows === container ? container.querySelector(':scope > [data-repeater-footer]') : null;
 
-	if (!template || (rows === container && !anchor)) {
+	if (!template || (rows === container && !footer)) {
 		return;
 	}
 
 	const clone = template.content.cloneNode(true) as DocumentFragment;
+	const stamped = clone.querySelector<HTMLElement>('[data-repeater-row]');
 
 	// Fresh rows need a stable identity before their first save; the
 	// server backfills missing uids as a safety net. uid() rather than
@@ -135,13 +141,18 @@ function add(container: HTMLElement, type: string | null): void {
 		}
 	});
 
-	if (anchor) {
-		anchor.before(clone);
+	if (at?.where === 'before') {
+		at.row.before(clone);
+	} else if (at?.where === 'after') {
+		at.row.after(clone);
+	} else if (footer) {
+		footer.before(clone);
 	} else {
 		rows.append(clone);
 	}
 
 	changed(container);
+	stamped?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select')?.focus();
 }
 
 function move(mover: Element): void {
@@ -263,12 +274,17 @@ function onInput(event: Event): void {
 	}
 }
 
+// A closed menu also folds its submenus (the insert pickers), so it
+// reopens the way it was first rendered.
 function closeMenus(except: Element | null): void {
 	document
 		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
 		.forEach((menu) => {
 			if (menu !== except) {
 				menu.open = false;
+				menu.querySelectorAll<HTMLDetailsElement>('details[open]').forEach((sub) => {
+					sub.open = false;
+				});
 			}
 		});
 }
@@ -324,7 +340,17 @@ function onClick(event: Event): void {
 
 	if (adder && container) {
 		const type = adder.getAttribute('data-repeater-add');
-		add(container, type === null || type === '' ? null : type);
+		const where = adder.getAttribute('data-repeater-insert');
+		const row = adder.closest<HTMLElement>('[data-repeater-row]');
+		// Only a row of this container anchors; an adder in a nested
+		// repeater's row still appends to its own list.
+		const at: Anchor | null =
+			(where === 'before' || where === 'after') && row && row.parentElement === list(container)
+				? { row, where }
+				: null;
+
+		closeMenus(null);
+		add(container, type === null || type === '' ? null : type, at);
 	}
 }
 

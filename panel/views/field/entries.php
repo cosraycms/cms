@@ -5,12 +5,12 @@ use Cosray\Panel\EntrySummary;
 use function Cosray\escape;
 
 // Server-rendered entries: a typed repeater whose rows are groups of
-// regular field wrappers. Add/remove/move/renumber is wired by the
-// repeater behavior; one inert template per allowed entry type stamps
-// fresh rows entirely client-side. Stored rows render collapsed to a
-// summary line and open their form beneath it; stamped rows open
-// expanded. Receives the neutral-locale row list in $value and the
-// renumber base (content[f][value][zxx]) in $name.
+// regular field wrappers (field/row-fields). Add/remove/move/renumber is
+// wired by the repeater behavior; one inert template per allowed entry
+// type stamps fresh rows entirely client-side. Stored rows render
+// collapsed to a summary line and open their form beneath it; stamped
+// rows open expanded. Receives the neutral-locale row list in $value and
+// the renumber base (content[f][value][zxx]) in $name.
 
 $field = (array) $this->unwrap($field);
 $control = (array) $this->unwrap($control);
@@ -31,39 +31,6 @@ foreach ((array) ($props['entryTypes'] ?? []) as $entryType) {
 	}
 }
 
-$span = static function (mixed $width): string {
-	$width = is_int($width) && $width > 0 && $width <= 100 ? $width : 100;
-
-	return "grid-column: span {$width} / span {$width}";
-};
-
-$renderField = function (array $sub, array $fieldsData, string $rowName, string $rowId) use (
-	$span,
-	$locales,
-	$defaultLocale,
-	$node,
-	$assets,
-): void {
-	$subName = (string) ($sub['name'] ?? '');
-	// Conditions are top-level-only; emitting them here would evaluate
-	// against a same-named top-level field. Scoped conditions come later.
-	unset($sub['when']);
-	?>
-	<div style="<?= $span($sub['width'] ?? null) ?>">
-		<?php $this->insert('field/field', [
-			'field' => $sub,
-			'data' => $fieldsData[$subName] ?? null,
-			'locales' => $locales,
-			'defaultLocale' => $defaultLocale,
-			'node' => $node,
-			'assets' => $assets,
-			'nameRoot' => "{$rowName}[fields][{$subName}]",
-			'idRoot' => "{$rowId}-{$subName}",
-		]) ?>
-	</div>
-	<?php
-};
-
 $grip = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">'
 	. '<path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 '
 	. '1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 '
@@ -77,10 +44,10 @@ $plus = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" ari
 $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	$name,
 	$id,
-	$span,
-	$renderField,
-	$assets,
+	$locales,
 	$defaultLocale,
+	$node,
+	$assets,
 	$grip,
 ): void {
 	$rowName = "{$name}[{$index}]";
@@ -91,36 +58,6 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 	$summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 	// Stored rows start collapsed; a stamped row is empty and wants input.
 	$open = $rowData === null;
-	$subs = array_values(array_filter(
-		(array) ($entryType['fields'] ?? []),
-		static fn(mixed $sub): bool => is_array($sub) && !($sub['hidden'] ?? false),
-	));
-
-	$fieldsetsByFirst = [];
-	$fieldsetMembers = [];
-
-	foreach ((array) ($entryType['fieldsets'] ?? []) as $fieldset) {
-		$members = array_values(array_filter(
-			(array) ($fieldset['fields'] ?? []),
-			static fn(mixed $member): bool => is_string($member),
-		));
-
-		if ($members === []) {
-			continue;
-		}
-
-		$fieldsetsByFirst[$members[0]] = ['fieldset' => $fieldset, 'members' => $members];
-
-		foreach ($members as $member) {
-			$fieldsetMembers[$member] = true;
-		}
-	}
-
-	$subsByName = [];
-
-	foreach ($subs as $sub) {
-		$subsByName[(string) ($sub['name'] ?? '')] = $sub;
-	}
 	?>
 	<div class="entry" data-repeater-row>
 		<div class="summary">
@@ -184,29 +121,16 @@ $row = function (int|string $index, ?array $rowData, array $entryType) use (
 			id="<?= escape("{$rowId}-form") ?>"
 			data-repeater-body
 			<?= $open ? '' : 'hidden' ?>>
-			<?php foreach ($subs as $sub): ?>
-				<?php $subName = (string) ($sub['name'] ?? ''); ?>
-				<?php if (isset($fieldsetsByFirst[$subName])): ?>
-					<?php $fieldset = $fieldsetsByFirst[$subName]['fieldset']; ?>
-					<fieldset class="cms-fieldset" style="<?= $span($fieldset['width'] ?? null) ?>">
-						<?php if (is_string($fieldset['label'] ?? null) && $fieldset['label'] !== ''): ?>
-							<legend class="legend"><?= escape($fieldset['label']) ?></legend>
-						<?php endif ?>
-						<?php if (is_string($fieldset['description'] ?? null) && $fieldset['description'] !== ''): ?>
-							<div class="description"><?= escape($fieldset['description']) ?></div>
-						<?php endif ?>
-						<div class="cms-fields fields">
-							<?php foreach ($fieldsetsByFirst[$subName]['members'] as $member): ?>
-								<?php if (isset($subsByName[$member])) {
-									$renderField($subsByName[$member], $fieldsData, $rowName, $rowId);
-								} ?>
-							<?php endforeach ?>
-						</div>
-					</fieldset>
-				<?php elseif (!isset($fieldsetMembers[$subName])): ?>
-					<?php $renderField($sub, $fieldsData, $rowName, $rowId) ?>
-				<?php endif ?>
-			<?php endforeach ?>
+			<?php $this->insert('field/row-fields', [
+				'type' => $entryType,
+				'fieldsData' => $fieldsData,
+				'rowName' => $rowName,
+				'rowId' => $rowId,
+				'locales' => $locales,
+				'defaultLocale' => $defaultLocale,
+				'node' => $node,
+				'assets' => $assets,
+			]) ?>
 		</div>
 	</div>
 	<?php

@@ -38,7 +38,20 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			->prop('blockTypes', array_map($this->blockTypeProperties(...), $this->allowedBlockTypes()))
 			->prop('columns', $this->columns)
 			->prop('min', $this->min)
-			->prop('responsive', $this->responsive->value);
+			->prop('responsive', $this->responsive->value)
+			->prop('meta', $this->blockMetaControl());
+	}
+
+	/**
+	 * The block meta dialog: the same group for every block type, patched
+	 * on save like a field's meta.
+	 */
+	protected function blockMetaControl(): Control
+	{
+		return Control::group([
+			['key' => 'class', 'label' => __('block:class'), 'control' => Control::text()],
+			['key' => 'id', 'label' => __('block:id'), 'control' => Control::text()],
+		]);
 	}
 
 	/** @param class-string<Block> ...$types */

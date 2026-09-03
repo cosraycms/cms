@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
-		'block:no-settings' => 'No settings available',
-		'block:unknown-type' => 'Unknown block type ":type"',
 		'code:syntax' => 'Syntax',
 		'common:apply' => 'Apply',
 		'common:cancel' => 'Cancel',

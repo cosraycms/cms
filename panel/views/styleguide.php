@@ -18,6 +18,8 @@ $mediaContent = (array) $this->unwrap($mediaContent);
 $mediaAssets = (array) $this->unwrap($mediaAssets);
 $entriesFields = (array) $this->unwrap($entriesFields);
 $entriesContent = (array) $this->unwrap($entriesContent);
+$blocksFields = (array) $this->unwrap($blocksFields);
+$blocksContent = (array) $this->unwrap($blocksContent);
 $system = $this->unwrap($system);
 $panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -281,6 +283,36 @@ $chevronSvg = is_file($chevronSvgPath)
 									<?php $this->insert('field/item', [
 										'field' => $field,
 										'content' => $entriesContent,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => $mediaAssets,
+										'pathSourceFields' => [],
+										'span' => $span,
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section">
+				<h2>Blocks</h2>
+				<p class="note">
+					The typed repeater with a grid. A one-column field is a quiet list; a
+					twelve-column field places its blocks on the preview grid — width steps in
+					the block header, rows and indent in its menu, the gear opens the block's
+					class and id. A narrow block folds the width steps into the menu.
+				</p>
+				<div class="cms-node">
+					<div class="inner">
+						<div class="sheet">
+							<div class="cms-fields">
+								<?php foreach ($blocksFields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $blocksContent,
 										'locales' => $locales,
 										'defaultLocale' => $defaultLocale,
 										'uid' => 'styleguide',

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Panel;
 
+use Closure;
+use Cosray\Block\Layout;
 use Cosray\Uid;
 
 /**
@@ -164,12 +166,13 @@ final class FormPatch
 			);
 		}
 
-		if ($name === 'entries') {
-			return $this->entries(
-				$props,
-				is_array($raw) ? array_values($raw) : [],
-				is_array($stored) ? $stored : [],
-			);
+		if ($name === 'entries' || $name === 'blocks') {
+			$rows = is_array($raw) ? array_values($raw) : [];
+			$stored = is_array($stored) ? $stored : [];
+
+			return $name === 'entries'
+				? $this->entries($props, $rows, $stored)
+				: $this->blocks($props, $rows, $stored);
 		}
 
 		return match ($name) {
@@ -179,21 +182,79 @@ final class FormPatch
 		};
 	}
 
-	/**
-	 * Entry rows are replaced wholesale like a repeater, but each row's
-	 * fields are patched like a group: rows are matched to their stored
-	 * counterpart by uid, so unknown keys survive edits and reorders.
-	 */
 	private function entries(array $props, array $rows, array $stored): array
 	{
-		$types = [];
+		return $this->rows(
+			self::rowTypes($props['entryTypes'] ?? []),
+			$rows,
+			$stored,
+			static fn(array $storedRow, array $row, string $uid, string $type, array $fields): array => [
+				...$storedRow,
+				'uid' => $uid,
+				'type' => $type,
+				'fields' => $fields,
+			],
+		);
+	}
 
-		foreach ($props['entryTypes'] ?? [] as $entryType) {
-			if (is_array($entryType) && is_string($entryType['type'] ?? null)) {
-				$types[$entryType['type']] = $entryType;
-			}
-		}
+	/**
+	 * Block rows add the layout — ints clamped into the field's grid, so
+	 * a stored out-of-range value the editor loaded saves back clamped,
+	 * where the shape would reject it — and the block meta map, patched
+	 * like a field's meta against the descriptor's meta group.
+	 */
+	private function blocks(array $props, array $rows, array $stored): array
+	{
+		$columns = is_int($props['columns'] ?? null) && $props['columns'] > 0 ? $props['columns'] : 1;
+		$min = is_int($props['min'] ?? null) && $props['min'] > 0 ? min($props['min'], $columns) : 1;
+		$metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
 
+		return $this->rows(
+			self::rowTypes($props['blockTypes'] ?? []),
+			$rows,
+			$stored,
+			function (array $storedRow, array $row, string $uid, string $type, array $fields) use (
+				$columns,
+				$min,
+				$metaControl,
+			): array {
+				$layout = [
+					...(is_array($storedRow['layout'] ?? null) ? $storedRow['layout'] : []),
+					...(is_array($row['layout'] ?? null) ? $row['layout'] : []),
+				];
+				$result = [
+					...$storedRow,
+					'uid' => $uid,
+					'type' => $type,
+					'layout' => Layout::normalize($layout, $columns, $min)->array(),
+					'fields' => $fields,
+				];
+
+				if ($metaControl !== null && is_array($row['meta'] ?? null)) {
+					$result['meta'] = $this->meta(
+						$metaControl,
+						is_array($storedRow['meta'] ?? null) ? $storedRow['meta'] : [],
+						$row['meta'],
+					);
+				}
+
+				return $result;
+			},
+		);
+	}
+
+	/**
+	 * Rows are replaced wholesale like a repeater, but each row's fields
+	 * are patched like a group: rows are matched to their stored
+	 * counterpart by uid, so unknown keys survive edits and reorders.
+	 * `$build` assembles the row from the matched stored row (empty when
+	 * the type changed), the submitted row, the uid and the patched fields.
+	 *
+	 * @param array<string, array> $types row type descriptors keyed by class
+	 * @param Closure(array, array, string, string, array): array $build
+	 */
+	private function rows(array $types, array $rows, array $stored, Closure $build): array
+	{
 		$byUid = [];
 
 		foreach ($stored as $storedRow) {
@@ -256,7 +317,21 @@ final class FormPatch
 				}
 			}
 
-			$result[] = [...$storedRow, 'uid' => $uid, 'type' => $type, 'fields' => $fields];
+			$result[] = $build($storedRow, $row, $uid, $type, $fields);
+		}
+
+		return $result;
+	}
+
+	/** @return array<string, array> */
+	private static function rowTypes(mixed $types): array
+	{
+		$result = [];
+
+		foreach (is_array($types) ? $types : [] as $type) {
+			if (is_array($type) && is_string($type['type'] ?? null)) {
+				$result[$type['type']] = $type;
+			}
 		}
 
 		return $result;

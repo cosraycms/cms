@@ -23,6 +23,7 @@ $views = [
 	'group' => 'field/group',
 	'repeater' => 'field/repeater',
 	'entries' => 'field/entries',
+	'blocks' => 'field/blocks',
 ];
 
 $this->insert($views[$controlName] ?? 'field/unknown', [

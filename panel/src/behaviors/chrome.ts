@@ -1,6 +1,9 @@
-// Editor chrome: the preview overlay's close button. The overlay anchor
-// is only emptied, never removed — out-of-band swaps need the id to stay
-// in the document.
+// Editor chrome: the preview overlay's close button and the meta
+// dialogs. The overlay anchor is only emptied, never removed —
+// out-of-band swaps need the id to stay in the document. A meta button
+// opens the dialog of its nearest owner (the field wrapper, or a block
+// row inside a blocks field), so a row's gear never reaches the dialog
+// of the field around it.
 
 function onClick(event: Event): void {
 	const target = event.target;
@@ -26,7 +29,9 @@ function onClick(event: Event): void {
 	const metaOpen = target.closest('[data-meta-open]');
 
 	if (metaOpen) {
-		const dialog = metaOpen.closest('.cms-field')?.querySelector('dialog[data-meta]');
+		const dialog = metaOpen
+			.closest('[data-meta-owner]')
+			?.querySelector(':scope > dialog[data-meta]');
 
 		if (dialog instanceof HTMLDialogElement) {
 			dialog.showModal();

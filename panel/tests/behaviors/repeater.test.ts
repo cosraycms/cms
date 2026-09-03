@@ -516,6 +516,72 @@ describe('repeater behavior', () => {
 		]);
 	});
 
+	it('stamps before or after the row an anchored add button sits in', () => {
+		const anchored = (where: string): string =>
+			`<button type="button" data-repeater-add data-repeater-insert="${where}">Insert</button>`;
+		const container = repeater([
+			row('0', 'a', anchored('before')),
+			row('1', 'b', anchored('after')),
+		]);
+
+		container.querySelectorAll<HTMLElement>('[data-repeater-insert="before"]')[0]?.click();
+
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'',
+			'a',
+			'b',
+		]);
+		expect(names(container)).toEqual([`${NAME}[0]`, `${NAME}[1]`, `${NAME}[2]`]);
+
+		container.querySelector<HTMLElement>('[data-repeater-insert="after"]')?.click();
+
+		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
+			'',
+			'a',
+			'b',
+			'',
+		]);
+		expect(names(container)).toEqual([`${NAME}[0]`, `${NAME}[1]`, `${NAME}[2]`, `${NAME}[3]`]);
+	});
+
+	it("appends when the anchored button belongs to another repeater's row", () => {
+		const nestedTemplate = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
+		const container = repeater([nestedRow('0', 'a')], { template: nestedTemplate });
+		const nested = container.querySelector<HTMLElement>('[data-repeater] [data-repeater]');
+		const nestedFooter = nested?.querySelector('[data-repeater-footer]');
+
+		// An anchored adder in the nested footer: its closest row is the
+		// OUTER row, which is not a row of the nested container.
+		nestedFooter?.insertAdjacentHTML(
+			'beforeend',
+			'<button type="button" data-repeater-add data-repeater-insert="before">Anchored</button>',
+		);
+		nested?.querySelector<HTMLElement>('[data-repeater-insert="before"]')?.click();
+
+		expect(names(nested as HTMLElement)).toEqual([`${NAME}[0][items][0]`, `${NAME}[0][items][1]`]);
+		expect(container.querySelectorAll(':scope > [data-repeater-row]')).toHaveLength(1);
+	});
+
+	it('focuses the first input of a stamped row and closes the menu it came from', () => {
+		const menu = `<details data-repeater-menu open>
+			<summary>Actions</summary>
+			<details open><summary>Insert above</summary>
+				<button type="button" data-repeater-add data-repeater-insert="before">Row</button>
+			</details>
+		</details>`;
+		const container = repeater([row('0', 'a', menu)]);
+
+		container.querySelector<HTMLElement>('[data-repeater-insert="before"]')?.click();
+
+		const stamped = container.querySelector<HTMLElement>('[data-repeater-row]');
+
+		expect(document.activeElement).toBe(stamped?.querySelector('input'));
+		expect(Array.from(container.querySelectorAll('details'), (details) => details.open)).toEqual([
+			false,
+			false,
+		]);
+	});
+
 	it('leaves nested add buttons alone when the outer repeater is full', () => {
 		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
 		const container = repeater([], { max: 1, template });

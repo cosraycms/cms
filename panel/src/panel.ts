@@ -2,6 +2,7 @@ import '../styles/panel.css';
 
 import type { BridgeSystem } from '$lib/bridge';
 
+import { install as installBlocks } from './behaviors/blocks';
 import { install as installBulk } from './behaviors/bulk';
 import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
@@ -100,6 +101,7 @@ cleanups.push(
 	installDirty(),
 	installTabs(),
 	installRepeater(),
+	installBlocks(),
 	installChrome(),
 	installWhen(),
 	installSubmit(),

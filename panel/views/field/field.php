@@ -26,9 +26,12 @@ $value = is_array($value) ? $value : [];
 
 // Primitives rendered once per locale. Element controls receive the
 // whole locale map and handle locales internally — they still get tabs.
+// A blocks field has one row list per locale only in asymmetric mode;
+// a symmetric list is shared and its rows translate their own sub-fields.
 $localized = ['text', 'textarea', 'iframe'];
 $translate = (bool) ($field['translate'] ?? false);
-$variants = $translate && in_array($controlName, $localized, true);
+$asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
+$variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
 $tabs = $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
@@ -43,6 +46,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 <div
 	class="cms-field<?= $required ? ' required' : '' ?>"
+	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<label for="<?= escape($labelFor) ?>" class="label">

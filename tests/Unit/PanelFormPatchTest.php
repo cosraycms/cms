@@ -400,6 +400,222 @@ final class PanelFormPatchTest extends TestCase
 		$this->assertSame(['tone' => 'soft'], $rows[0]['fields']['bio']['meta']);
 	}
 
+	private function blocksPatch(int $columns = 12, int $min = 2): FormPatch
+	{
+		return new FormPatch([
+			[
+				'name' => 'body',
+				'type' => 'Blocks',
+				'control' => [
+					'name' => 'blocks',
+					'props' => [
+						'blockTypes' => [
+							[
+								'type' => 'App\Block\Quote',
+								'fields' => [
+									[
+										'name' => 'text',
+										'type' => 'Textarea',
+										'control' => ['name' => 'textarea', 'props' => []],
+									],
+								],
+							],
+						],
+						'columns' => $columns,
+						'min' => $min,
+						'responsive' => 'stack',
+						'meta' => [
+							'name' => 'group',
+							'props' => [
+								'fields' => [
+									['key' => 'class', 'control' => ['name' => 'text', 'props' => []]],
+									['key' => 'id', 'control' => ['name' => 'text', 'props' => []]],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+	}
+
+	public function testBlocksPatchRowsByUidPerLocaleWithLayoutAndMeta(): void
+	{
+		$stored = [
+			'body' => [
+				'type' => 'Blocks',
+				'value' => [
+					'en' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => 6, 'rows' => 1, 'indent' => 2],
+						'fields' => [
+							'text' => ['type' => 'Textarea', 'value' => ['zxx' => 'Old'], 'stashed' => 'kept'],
+						],
+						'meta' => ['class' => ['zxx' => 'old'], 'stashed' => ['zxx' => 'kept']],
+					]],
+					'de' => [[
+						'uid' => 'b2',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+						'fields' => ['text' => ['type' => 'Textarea', 'value' => ['zxx' => 'Alt']]],
+					]],
+				],
+			],
+		];
+		$submitted = [
+			'body' => [
+				'value' => [
+					'en' => [
+						[
+							'uid' => '',
+							'type' => 'App\Block\Quote',
+							'layout' => ['span' => '4', 'rows' => '2', 'indent' => '0'],
+							'fields' => ['text' => ['value' => ['zxx' => 'Fresh']]],
+						],
+						[
+							'uid' => 'b1',
+							'type' => 'App\Block\Quote',
+							'layout' => ['span' => '8', 'rows' => '1', 'indent' => '2'],
+							'fields' => ['text' => ['value' => ['zxx' => 'New']]],
+							'meta' => ['class' => ['zxx' => 'hero'], 'crafted' => ['zxx' => 'ignored']],
+						],
+					],
+				],
+			],
+		];
+
+		$value = $this->blocksPatch()->content($stored, $submitted)['body']['value'];
+
+		$this->assertSame(['uid', 'type', 'layout', 'fields'], array_keys($value['en'][0]));
+		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $value['en'][0]['uid']);
+		$this->assertSame(['span' => 4, 'rows' => 2, 'indent' => 0], $value['en'][0]['layout']);
+		$this->assertSame('Fresh', $value['en'][0]['fields']['text']['value']['zxx']);
+		$this->assertArrayNotHasKey('meta', $value['en'][0]);
+
+		$this->assertSame('b1', $value['en'][1]['uid']);
+		$this->assertSame(['span' => 8, 'rows' => 1, 'indent' => 2], $value['en'][1]['layout']);
+		$this->assertSame('New', $value['en'][1]['fields']['text']['value']['zxx']);
+		$this->assertSame('kept', $value['en'][1]['fields']['text']['stashed']);
+		$this->assertSame(
+			['class' => ['zxx' => 'hero'], 'stashed' => ['zxx' => 'kept']],
+			$value['en'][1]['meta'],
+		);
+		// The German list was not submitted and stays as stored.
+		$this->assertSame('Alt', $value['de'][0]['fields']['text']['value']['zxx']);
+	}
+
+	public function testBlocksClampTheLayoutIntoTheGrid(): void
+	{
+		$stored = [
+			'body' => [
+				'type' => 'Blocks',
+				'value' => [
+					'zxx' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+						'fields' => [],
+					]],
+				],
+			],
+		];
+		// A stored twelve-column layout loaded into a narrower field: the
+		// span is clamped and the indent re-clamped against it.
+		$submitted = [
+			'body' => [
+				'value' => [
+					'zxx' => [
+						[
+							'uid' => 'b1',
+							'type' => 'App\Block\Quote',
+							'layout' => ['span' => '12', 'rows' => '9', 'indent' => '3'],
+							'fields' => [],
+						],
+						[
+							'uid' => 'b2',
+							'type' => 'App\Block\Quote',
+							'layout' => ['span' => '1', 'rows' => '0', 'indent' => '-2'],
+							'fields' => [],
+						],
+						// No layout at all: the stored one is kept and normalized.
+						['uid' => 'b3', 'type' => 'App\Block\Quote', 'fields' => []],
+					],
+				],
+			],
+		];
+
+		$rows = $this->blocksPatch(6, 2)->content($stored, $submitted)['body']['value']['zxx'];
+
+		$this->assertSame(['span' => 6, 'rows' => 6, 'indent' => 0], $rows[0]['layout']);
+		$this->assertSame(['span' => 2, 'rows' => 1, 'indent' => 0], $rows[1]['layout']);
+		$this->assertSame(['span' => 6, 'rows' => 1, 'indent' => 0], $rows[2]['layout']);
+	}
+
+	public function testBlocksKeepAStoredLayoutPartWhenOnlySomeAreSubmitted(): void
+	{
+		$stored = [
+			'body' => [
+				'type' => 'Blocks',
+				'value' => [
+					'zxx' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => 6, 'rows' => 3, 'indent' => 2],
+						'fields' => [],
+					]],
+				],
+			],
+		];
+		$submitted = [
+			'body' => [
+				'value' => [
+					'zxx' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => '10'],
+						'fields' => [],
+					]],
+				],
+			],
+		];
+
+		$rows = $this->blocksPatch()->content($stored, $submitted)['body']['value']['zxx'];
+
+		$this->assertSame(['span' => 10, 'rows' => 3, 'indent' => 2], $rows[0]['layout']);
+	}
+
+	public function testBlocksWithoutGridPropsDefaultToOneColumn(): void
+	{
+		$patch = new FormPatch([[
+			'name' => 'body',
+			'type' => 'Blocks',
+			'control' => [
+				'name' => 'blocks',
+				'props' => ['blockTypes' => [['type' => 'App\Block\Quote', 'fields' => []]]],
+			],
+		]]);
+		$submitted = [
+			'body' => [
+				'value' => [
+					'zxx' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['span' => '4', 'rows' => '2', 'indent' => '1'],
+						'fields' => [],
+						'meta' => ['class' => ['zxx' => 'dropped']],
+					]],
+				],
+			],
+		];
+
+		$rows = $patch->content([], $submitted)['body']['value']['zxx'];
+
+		$this->assertSame(['span' => 1, 'rows' => 2, 'indent' => 0], $rows[0]['layout']);
+		// Without a meta group in the descriptor no meta is taken.
+		$this->assertArrayNotHasKey('meta', $rows[0]);
+	}
+
 	public function testEntriesTypeChangeIgnoresStaleStoredRow(): void
 	{
 		$stored = $this->entriesContent([

@@ -39,6 +39,15 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('class="chip is-create"', $html);
 		$this->assertStringContainsString('class="cms-entries"', $html);
 		$this->assertStringContainsString('data-repeater-add="App\\Styleguide\\Quote"', $html);
+		// Blocks: the quiet one-column list and the twelve-column grid, each a
+		// typed repeater with its layout on the row and a picker per type.
+		$this->assertStringContainsString('class="cms-blocks-editor is-list"', $html);
+		$this->assertStringContainsString('class="cms-blocks-editor is-grid"', $html);
+		$this->assertStringContainsString('data-name="content[grid][value][de]"', $html);
+		$this->assertStringContainsString('style="--span: 6; --rows: 1; --indent: 3"', $html);
+		$this->assertStringContainsString('name="content[grid][value][en][0][layout][rows]"', $html);
+		$this->assertStringContainsString('data-repeater-add="Cosray\\Block\\Types\\Heading"', $html);
+		$this->assertStringContainsString('name="content[story][value][zxx][1][fields][text][json]"', $html);
 		// Two richtext samples: the default toolbar and a #[Tools]-trimmed one,
 		// each an element host carrying its tools list in the field payload.
 		$this->assertStringContainsString('tag="cosray-richtext"', $html);

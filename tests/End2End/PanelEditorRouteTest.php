@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Block\Types;
 use Cosray\Bootstrap;
 use Cosray\Config;
+use Cosray\Field\Blocks;
+use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
@@ -94,6 +97,91 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('data-repeater-add="' . TestEntry::class . '"', $html);
 	}
 
+	public function testBlocksRenderAsServerRenderedTypedRepeaterWithAGrid(): void
+	{
+		$this->authenticateAs('editor');
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$typeId = $mediaType ? (int) $mediaType['type'] : $this->createTestType('test-media-document');
+		// Encoded up front: the helper's legacy normalizer would rewrite typed rows.
+		$this->createTestNode([
+			'uid' => 'panel-editor-blocks',
+			'type' => $typeId,
+			'published' => true,
+			'content' => json_encode([
+				'contentBlocks' => [
+					'type' => Blocks::class,
+					'value' => [
+						'en' => [
+							[
+								'uid' => 'block-a',
+								'type' => Types\Text::class,
+								'layout' => ['span' => 6, 'rows' => 2, 'indent' => 3],
+								'fields' => [
+									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
+								],
+								'meta' => ['class' => ['zxx' => 'wide']],
+							],
+							[
+								'uid' => 'block-gone',
+								'type' => 'Acme\\Gone',
+								'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+								'fields' => [],
+							],
+						],
+						'de' => [],
+					],
+				],
+			]),
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-blocks');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+
+		// Asymmetric: one list per locale under the field-level tabs.
+		$en = 'content[contentBlocks][value][en]';
+		$this->assertStringContainsString('data-locale-tab="de"', $html);
+		$this->assertStringContainsString('data-name="' . $en . '"', $html);
+		$this->assertStringContainsString('data-name="content[contentBlocks][value][de]"', $html);
+		$this->assertStringContainsString(
+			'class="cms-blocks-editor is-grid" data-repeater data-name="'
+				. $en
+				. '" data-id="field-contentBlocks-en" data-columns="12" data-min="2" style="--columns: 12"',
+			preg_replace('/\s+/', ' ', $html) ?? '',
+		);
+		// The row: uid, type and layout as hidden inputs, the layout on the
+		// row as custom properties, the block meta in the row's own dialog.
+		$this->assertStringContainsString('name="' . $en . '[0][uid]"', $html);
+		$this->assertStringContainsString('value="block-a"', $html);
+		$this->assertStringContainsString('value="' . Types\Text::class . '"', $html);
+		$this->assertStringContainsString('name="' . $en . '[0][layout][span]"', $html);
+		$this->assertStringContainsString('data-layout="indent"', $html);
+		$this->assertStringContainsString('style="--span: 6; --rows: 2; --indent: 3"', $html);
+		$this->assertStringContainsString('name="' . $en . '[0][fields][text][value][zxx]"', $html);
+		$this->assertStringContainsString('First block', $html);
+		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
+		$this->assertStringContainsString('value="wide"', $html);
+		$this->assertStringContainsString('name="' . $en . '[0][meta][id][zxx]"', $html);
+		// A row of a type no longer offered renders without inputs.
+		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
+		$this->assertStringNotContainsString('value="block-gone"', $html);
+		// Templates per offered type, the picker in the footer and the
+		// insert-above/below pickers in the row menu.
+		$this->assertStringContainsString('data-repeater-template="' . Types\Heading::class . '"', $html);
+		$this->assertStringContainsString('name="' . $en . '[__i__][layout][span]"', $html);
+		$this->assertStringContainsString(
+			'data-repeater-add="' . Types\RichText::class . '" data-repeater-insert="append"',
+			preg_replace('/\s+/', ' ', $html) ?? '',
+		);
+		$this->assertStringContainsString('data-repeater-insert="before"', $html);
+		$this->assertStringContainsString('data-repeater-insert="after"', $html);
+		$this->assertStringContainsString('data-layout-step="span:+1"', $html);
+		$this->assertStringContainsString('data-layout-step="indent:-1"', $html);
+	}
+
 	public function testPanelEditorRouteRendersShellForAuthenticatedUsers(): void
 	{
 		$this->authenticateAs('editor');
@@ -146,12 +234,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="content[gallery][json]"', $html);
 		$this->assertStringContainsString('tag="cosray-image"', $html);
 		$this->assertStringContainsString('module="cosray:media"', $html);
-		// The blocks editor is server-rendered in a later step; until then
-		// the field falls through to the unknown-control placeholder.
-		$this->assertStringContainsString(
-			'Unknown control &quot;blocks&quot; for field &quot;contentBlocks&quot;',
-			$html,
-		);
+		// An empty blocks field renders its editor with templates and picker.
+		$this->assertStringContainsString('class="cms-blocks-editor is-grid"', $html);
+		$this->assertStringContainsString('0 blocks', $html);
 		$this->assertStringContainsString('node="panel-editor-media"', $html);
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('"allowedFiles"', $html);

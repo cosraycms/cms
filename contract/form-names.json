@@ -4,12 +4,22 @@
 		{
 			"name": "flat scalar",
 			"entries": [["handle", "news"]],
-			"tree": { "handle": "news" }
+			"tree": {
+				"handle": "news"
+			}
 		},
 		{
 			"name": "nested locale value",
 			"entries": [["content[title][value][zxx]", "Hello"]],
-			"tree": { "content": { "title": { "value": { "zxx": "Hello" } } } }
+			"tree": {
+				"content": {
+					"title": {
+						"value": {
+							"zxx": "Hello"
+						}
+					}
+				}
+			}
 		},
 		{
 			"name": "entries row sub-field",
@@ -22,7 +32,67 @@
 						"value": {
 							"zxx": {
 								"3": {
-									"fields": { "name": { "value": { "de": "Freistaat Bayern" } } }
+									"fields": {
+										"name": {
+											"value": {
+												"de": "Freistaat Bayern"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "blocks row layout",
+			"entries": [["content[body][value][zxx][2][layout][span]", "6"]],
+			"tree": {
+				"content": {
+					"body": {
+						"value": {
+							"zxx": {
+								"2": {
+									"layout": {
+										"span": "6"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"name": "blocks per-locale row sub-field",
+			"entries": [
+				["content[body][value][de][0][fields][text][value][zxx]", "Hallo"],
+				["content[body][value][en][0][meta][class][zxx]", "wide"]
+			],
+			"tree": {
+				"content": {
+					"body": {
+						"value": {
+							"de": {
+								"0": {
+									"fields": {
+										"text": {
+											"value": {
+												"zxx": "Hallo"
+											}
+										}
+									}
+								}
+							},
+							"en": {
+								"0": {
+									"meta": {
+										"class": {
+											"zxx": "wide"
+										}
+									}
 								}
 							}
 						}
@@ -38,7 +108,18 @@
 				["handle", "page"]
 			],
 			"tree": {
-				"content": { "a": { "value": { "zxx": "1" } }, "b": { "value": { "zxx": "2" } } },
+				"content": {
+					"a": {
+						"value": {
+							"zxx": "1"
+						}
+					},
+					"b": {
+						"value": {
+							"zxx": "2"
+						}
+					}
+				},
 				"handle": "page"
 			}
 		},
@@ -48,7 +129,9 @@
 				["a", "1"],
 				["a", "2"]
 			],
-			"tree": { "a": "2" }
+			"tree": {
+				"a": "2"
+			}
 		},
 		{
 			"name": "hidden-input checkbox pair last wins",
@@ -56,7 +139,9 @@
 				["published", ""],
 				["published", "1"]
 			],
-			"tree": { "published": "1" }
+			"tree": {
+				"published": "1"
+			}
 		},
 		{
 			"name": "empty brackets append",
@@ -64,7 +149,12 @@
 				["a[]", "1"],
 				["a[]", "2"]
 			],
-			"tree": { "a": { "0": "1", "1": "2" } }
+			"tree": {
+				"a": {
+					"0": "1",
+					"1": "2"
+				}
+			}
 		},
 		{
 			"name": "append continues after explicit index",
@@ -72,7 +162,12 @@
 				["a[5]", "x"],
 				["a[]", "y"]
 			],
-			"tree": { "a": { "5": "x", "6": "y" } }
+			"tree": {
+				"a": {
+					"5": "x",
+					"6": "y"
+				}
+			}
 		},
 		{
 			"name": "empty segment mid-path appends per pair",
@@ -80,7 +175,16 @@
 				["a[][b]", "1"],
 				["a[][b]", "2"]
 			],
-			"tree": { "a": { "0": { "b": "1" }, "1": { "b": "2" } } }
+			"tree": {
+				"a": {
+					"0": {
+						"b": "1"
+					},
+					"1": {
+						"b": "2"
+					}
+				}
+			}
 		},
 		{
 			"name": "scalar replaced by deeper assignment",
@@ -88,7 +192,11 @@
 				["a", "1"],
 				["a[b]", "2"]
 			],
-			"tree": { "a": { "b": "2" } }
+			"tree": {
+				"a": {
+					"b": "2"
+				}
+			}
 		},
 		{
 			"name": "array replaced by scalar assignment",
@@ -96,22 +204,44 @@
 				["a[b]", "1"],
 				["a", "2"]
 			],
-			"tree": { "a": "2" }
+			"tree": {
+				"a": "2"
+			}
 		},
 		{
 			"name": "numeric segments become numeric keys",
 			"entries": [["paths[0]", "/start"]],
-			"tree": { "paths": { "0": "/start" } }
+			"tree": {
+				"paths": {
+					"0": "/start"
+				}
+			}
 		},
 		{
 			"name": "empty value survives",
 			"entries": [["content[title][value][zxx]", ""]],
-			"tree": { "content": { "title": { "value": { "zxx": "" } } } }
+			"tree": {
+				"content": {
+					"title": {
+						"value": {
+							"zxx": ""
+						}
+					}
+				}
+			}
 		},
 		{
 			"name": "unicode and reserved characters survive",
 			"entries": [["content[title][value][de]", "Grüße & »Zeichen« = 100%"]],
-			"tree": { "content": { "title": { "value": { "de": "Grüße & »Zeichen« = 100%" } } } }
+			"tree": {
+				"content": {
+					"title": {
+						"value": {
+							"de": "Grüße & »Zeichen« = 100%"
+						}
+					}
+				}
+			}
 		}
 	]
 }

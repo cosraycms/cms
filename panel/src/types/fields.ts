@@ -23,20 +23,4 @@ export interface Limit {
 	max: number;
 }
 
-export interface BlockTypeMeta {
-	id: string;
-	label: string;
-	control: ControlDescriptor;
-	init: Record<string, unknown>;
-	hidden: boolean;
-}
-
-export interface BlocksField extends SimpleField {
-	columns: number;
-	minCellWidth: number;
-	blockTypes: BlockTypeMeta[];
-	richtextClasses?: Record<string, string>;
-	richtextStyles?: Record<string, string>;
-}
-
-export type Field = BlocksField | SimpleField;
+export type Field = SimpleField;

@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Block\Types;
 use Cosray\Bootstrap;
 use Cosray\Config;
+use Cosray\Field\Blocks;
+use Cosray\Field\Text;
+use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Block\QuoteBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 
 final class PanelEditorSaveTest extends End2EndTestCase
@@ -30,6 +36,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->node(TestConditionalDocument::class);
 		$plugin->node(TestNodeWithEntries::class);
+		$plugin->node(TestNodeWithBlocks::class);
 
 		return $plugin;
 	}
@@ -114,6 +121,156 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('entry-a', $rows[1]['uid']);
 		$this->assertSame('New title', $rows[1]['fields']['title']['value']['en']);
 		$this->assertSame(['en' => []], $rows[1]['fields']['content']['value']);
+	}
+
+	public function testAsymmetricBlocksPatchRowsByUidPerLocale(): void
+	{
+		$this->createBlocksNode('panel-save-blocks', 'test-media-document', [
+			'contentBlocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'en' => [$this->textBlock('block-a', 'Old EN', ['span' => 6, 'rows' => 1, 'indent' => 2])],
+					'de' => [$this->textBlock('block-b', 'Alt DE', ['span' => 12, 'rows' => 1, 'indent' => 0])],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'contentBlocks' => [
+						'value' => [
+							'en' => [
+								[
+									'uid' => '',
+									'type' => Types\Heading::class,
+									'layout' => ['span' => '12', 'rows' => '1', 'indent' => '0'],
+									'fields' => [
+										'text' => ['value' => ['zxx' => 'Fresh heading']],
+										'level' => ['value' => ['zxx' => '3']],
+									],
+								],
+								[
+									'uid' => 'block-a',
+									'type' => Types\Text::class,
+									// Out of range: a twelve-column span with an indent left
+									// over from a narrower one is clamped, not rejected.
+									'layout' => ['span' => '14', 'rows' => '1', 'indent' => '2'],
+									'fields' => ['text' => ['value' => ['zxx' => 'New EN']]],
+									'meta' => ['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$value = $this->nodeContent('panel-save-blocks')['contentBlocks']['value'];
+
+		$this->assertCount(2, $value['en']);
+		$this->assertSame(Types\Heading::class, $value['en'][0]['type']);
+		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $value['en'][0]['uid']);
+		$this->assertSame('3', $value['en'][0]['fields']['level']['value']['zxx']);
+		$this->assertSame('block-a', $value['en'][1]['uid']);
+		// jsonb orders keys; compare by content.
+		$this->assertEquals(['span' => 12, 'rows' => 1, 'indent' => 0], $value['en'][1]['layout']);
+		$this->assertSame('New EN', $value['en'][1]['fields']['text']['value']['zxx']);
+		$this->assertSame('kept', $value['en'][1]['fields']['text']['stashed']);
+		$this->assertEquals(['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']], $value['en'][1]['meta']);
+		// The German list was not part of the submission.
+		$this->assertSame('Alt DE', $value['de'][0]['fields']['text']['value']['zxx']);
+	}
+
+	public function testSymmetricBlocksPatchTranslatedSubFieldsInsideTheSharedList(): void
+	{
+		$this->createBlocksNode('panel-save-blocks-symmetric', 'test-node-with-blocks', [
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'With blocks']],
+			'blocks' => [
+				'type' => Blocks::class,
+				'value' => ['zxx' => [$this->quoteBlock('quote-a', ['en' => 'Old EN', 'de' => 'Alt DE'])]],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks-symmetric', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'title' => ['value' => ['zxx' => 'With blocks']],
+					'blocks' => [
+						'value' => [
+							'zxx' => [[
+								'uid' => 'quote-a',
+								'type' => QuoteBlock::class,
+								'layout' => ['span' => '1', 'rows' => '1', 'indent' => '0'],
+								'fields' => ['text' => ['value' => ['de' => 'Neu DE']]],
+							]],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$row = $this->nodeContent('panel-save-blocks-symmetric')['blocks']['value']['zxx'][0];
+
+		$this->assertEquals(['en' => 'Old EN', 'de' => 'Neu DE'], $row['fields']['text']['value']);
+		$this->assertSame('Someone', $row['fields']['source']['value']['zxx']);
+	}
+
+	public function testValidationErrorsInsideBlocksCarryTheRowPath(): void
+	{
+		$this->createBlocksNode('panel-save-blocks-invalid', 'test-node-with-blocks', [
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'With blocks']],
+			'blocks' => [
+				'type' => Blocks::class,
+				'value' => ['zxx' => [$this->quoteBlock('quote-a', ['en' => 'Valid', 'de' => ''])]],
+			],
+		]);
+
+		// Everything else stays rule-clean on purpose: sire runs the row
+		// review, which reports the sub-fields, only on rule-clean data.
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks-invalid', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'title' => ['value' => ['zxx' => 'With blocks']],
+					'blocks' => [
+						'value' => [
+							'zxx' => [[
+								'uid' => 'quote-a',
+								'type' => QuoteBlock::class,
+								'layout' => ['span' => '1', 'rows' => '1', 'indent' => '0'],
+								// Empties the required quote in the default locale.
+								'fields' => ['text' => ['value' => ['en' => '']]],
+							]],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$html,
+		);
+		$this->assertStringContainsString(
+			'data-error-path=\'["content","blocks","value","zxx",0,"fields","text","value","en"]\'',
+			$html,
+		);
+		$this->assertSame(
+			'Valid',
+			$this->nodeContent(
+				'panel-save-blocks-invalid',
+			)['blocks']['value']['zxx'][0]['fields']['text']['value']['en'],
+		);
 	}
 
 	public function testMetaSubmissionsPatchTheStoredMetaMap(): void
@@ -549,6 +706,47 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$gone = $this->makeRequest('GET', '/cp/collection/test-articles/panel-save-delete');
 		$this->assertResponseStatus(404, $gone);
+	}
+
+	/**
+	 * Typed block rows are stored pre-encoded: the helper's legacy content
+	 * normalizer would rewrite them.
+	 */
+	private function createBlocksNode(string $uid, string $handle, array $content): void
+	{
+		$type = $this->db()->execute(
+			'SELECT type FROM cms.types WHERE handle = :handle',
+			['handle' => $handle],
+		)->first();
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $type ? (int) $type['type'] : $this->createTestType($handle),
+			'published' => true,
+			'content' => json_encode($content),
+		]);
+	}
+
+	private function textBlock(string $uid, string $text, array $layout): array
+	{
+		return [
+			'uid' => $uid,
+			'type' => Types\Text::class,
+			'layout' => $layout,
+			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text], 'stashed' => 'kept']],
+		];
+	}
+
+	private function quoteBlock(string $uid, array $text): array
+	{
+		return [
+			'uid' => $uid,
+			'type' => QuoteBlock::class,
+			'layout' => ['span' => 1, 'rows' => 1, 'indent' => 0],
+			'fields' => [
+				'text' => ['type' => Textarea::class, 'value' => $text],
+				'source' => ['type' => Text::class, 'value' => ['zxx' => 'Someone']],
+			],
+		];
 	}
 
 	private function nodeContent(string $uid): array
