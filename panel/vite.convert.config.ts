@@ -9,25 +9,44 @@ import { defineConfig, type Plugin } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
-function bundleJsdom(): Plugin {
-	const worker =
-		'const syncWorkerFile = require.resolve ? require.resolve("./xhr-sync-worker.js") : null;';
+// jsdom source fragments the standalone bundle must neutralize. Both are
+// optional runtime paths the converter never takes: it neither loads
+// resources nor runs page scripts, and it never decodes images.
+const jsdomPatches = [
+	{
+		file: '/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js',
+		search:
+			'const syncWorkerFile = require.resolve ? require.resolve("./xhr-sync-worker.js") : null;',
+		replace: 'const syncWorkerFile = null;',
+		subject: 'the jsdom synchronous XHR worker',
+	},
+	{
+		// Bundling resolves the absent optional `canvas` module to an empty
+		// object, which jsdom 25 no longer detects, so `new Canvas.Image()`
+		// would throw on every `<img>` carrying a `src` or `width`.
+		file: '/jsdom/lib/jsdom/utils.js',
+		search: 'try {\n  exports.Canvas = require("canvas");\n} catch {\n  exports.Canvas = null;\n}',
+		replace: 'exports.Canvas = null;',
+		subject: 'the optional jsdom canvas dependency',
+	},
+];
 
+function bundleJsdom(): Plugin {
 	return {
-		name: 'bundle-jsdom-without-sync-xhr',
+		name: 'bundle-jsdom-standalone',
 		enforce: 'pre',
 		transform(code, id) {
-			if (!id.endsWith('/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js')) {
+			const patch = jsdomPatches.find((candidate) => id.endsWith(candidate.file));
+
+			if (!patch) {
 				return;
 			}
 
-			if (!code.includes(worker)) {
-				throw new Error('Could not disable the jsdom synchronous XHR worker');
+			if (!code.includes(patch.search)) {
+				throw new Error(`Could not disable ${patch.subject}`);
 			}
 
-			// The converter neither loads resources nor runs page scripts. Removing
-			// this unreachable worker path lets jsdom ship in one ESM artifact.
-			return code.replace(worker, 'const syncWorkerFile = null;');
+			return code.replace(patch.search, patch.replace);
 		},
 	};
 }
