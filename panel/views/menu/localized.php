@@ -22,13 +22,14 @@ $multi = count($locales) > 1;
 ?>
 <div
 	class="cms-field<?= is_string($error) ? ' has-error' : '' ?>"
+	<?= $multi ? 'data-locale-scope' : '' ?>
 	<?= is_string($section) ? 'data-menu-section="' . escape($section) . '"' : '' ?>
 	<?= is_string($sectionHide) ? 'data-menu-section-hide="' . escape($sectionHide) . '"' : '' ?>
 	<?= $sectionHidden ? 'hidden' : '' ?>>
 	<label class="label" for="<?= escape($id) ?>-<?= escape($defaultLocale) ?>">
 		<div><?= escape($label) ?></div>
 		<?php if ($multi): ?>
-			<span class="locales">
+			<span class="cms-locales">
 				<?php foreach ($locales as $locale): ?>
 					<button
 						type="button"

@@ -58,46 +58,6 @@
 		line-height: 1.45;
 	}
 
-	/* Locale variants are all rendered; the tabs only toggle which is shown. */
-	& .locales {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--cms-space-0-5);
-		flex-shrink: 0;
-		margin-left: auto;
-		padding: var(--cms-space-0-5);
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-surface-sunken);
-	}
-
-	& .tab {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 1.75rem;
-		height: 1.5rem;
-		padding: 0 var(--cms-space-2);
-		border-radius: var(--cms-radius-full);
-		color: var(--cms-color-text-subtle);
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-
-		&:hover {
-			color: var(--cms-color-text);
-		}
-
-		&.active {
-			background: var(--cms-color-surface);
-			box-shadow: var(--cms-shadow-sm);
-			color: var(--cms-color-text);
-		}
-
-		&.has-error {
-			color: var(--cms-color-danger);
-		}
-	}
-
 	& .meta-button {
 		padding: 0 var(--cms-space-2);
 		border: 1px solid var(--cms-color-border);

@@ -1,7 +1,8 @@
-// Locale tabs on field wrappers: every locale variant is rendered
-// server-side; the tabs only toggle visibility and hand the editing
-// locale to hosted element controls (the wrapper owns the tabs, per the
-// element contract).
+// Locale tabs: every locale variant is rendered server-side; the tabs
+// only toggle visibility and hand the editing locale to hosted element
+// controls (the scope owns the tabs, per the element contract). A scope
+// is whatever carries data-locale-scope — a field wrapper, or a typed
+// repeater row switching all of its sub-fields at once.
 
 function activate(event: Event): void {
 	const target = event.target;
@@ -16,7 +17,7 @@ function activate(event: Event): void {
 		return;
 	}
 
-	const field = tab.closest('.cms-field');
+	const field = tab.closest('[data-locale-scope]');
 	const locale = tab.dataset.localeTab ?? '';
 
 	if (!field || locale === '') {

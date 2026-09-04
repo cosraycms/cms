@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Moved the locale tabs of a typed repeater's sub-fields onto the row. One strip per block or entry row now switches every translated sub-field in it at once, instead of each sub-field carrying its own pills. The tabs belong to the nearest `[data-locale-scope]`, which is the field wrapper at the top level and the row inside a repeater; a row declares itself one only when it has something to switch, so an asymmetric blocks field keeps its field-level tabs and its rows show none. Panel themes reaching into the markup should note that the pill strip is now the standalone `.cms-locales` part rather than a part of `.cms-field`.
+
 ### Breaking Changes
 
 - Removed `Value\Entries::render()` and `Value\Entry::render()`. They wrapped every row in a fixed `<div class="entry">` and called `render()` on each sub-field value — a method no scalar value has ever had, so printing an entries field raised `Error: Call to undefined method` rather than markup; nothing in the codebase or any project called them. A list of typed rows is structured content, not a page fragment: templates iterate the rows and render the fields they need. `(string)` on an entries field or on one of its rows now throws `Cosray\Exception\RuntimeException` with that instruction instead of failing obscurely.

@@ -35,6 +35,17 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('class="cms-button primary"', $html);
 		$this->assertStringContainsString('class="cms-field required"', $html);
 		$this->assertStringContainsString('data-locale-tab="de"', $html);
+		// A symmetric row switches its translated sub-fields as one: the row
+		// owns the strip and the wrappers inside it carry no tabs.
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row][@data-locale-scope]'
+				. '//span[@class="cms-locales"]/button[@data-locale-tab="de"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]//button[@data-locale-tab]',
+			$html,
+		);
 		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);
 		$this->assertStringContainsString('class="chip is-create"', $html);
 		$this->assertStringContainsString('class="cms-entries"', $html);

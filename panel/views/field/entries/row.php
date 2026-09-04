@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Panel\EntrySummary;
+use Cosray\Panel\RowLocales;
 
 $index = $this->unwrap($index);
 $rowData = $this->unwrap($rowData ?? null);
@@ -20,8 +21,9 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 
 // Stored rows start collapsed; a stamped row is empty and wants input.
 $open = $rowData === null;
+$ownsLocales = RowLocales::owned($entryType, count((array) $this->unwrap($locales)));
 ?>
-<div class="entry" data-repeater-row>
+<div class="entry" data-repeater-row <?= $ownsLocales ? 'data-locale-scope' : '' ?>>
 	<div class="summary">
 		<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
 			<?php $this->insert('icon/grip.svg') ?>
@@ -56,6 +58,9 @@ $open = $rowData === null;
 					) ?></span>
 			</span>
 		</button>
+		<?php if ($ownsLocales) {
+			$this->insert('field/row-locales');
+		} ?>
 		<details class="kebab" data-repeater-menu>
 			<summary aria-label="<?= $this->escape(__('field:entry-actions')) ?>"></summary>
 			<div class="kebab-menu">
@@ -87,6 +92,7 @@ $open = $rowData === null;
 		<?= $open ? '' : 'hidden' ?>>
 		<?php $this->insert('field/row-fields', [
 			'type' => $entryType,
+			'ownsLocales' => $ownsLocales,
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,

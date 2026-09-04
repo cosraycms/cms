@@ -5,14 +5,14 @@ let uninstall: (() => void) | null = null;
 
 beforeEach(() => {
 	document.body.innerHTML = `
-		<div class="cms-field" id="first">
+		<div class="cms-field" data-locale-scope id="first">
 			<button type="button" data-locale-tab="en" class="active">en</button>
 			<button type="button" data-locale-tab="de">de</button>
 			<div class="variant" data-locale="en"></div>
 			<div class="variant" data-locale="de" hidden></div>
 			<cosray-host></cosray-host>
 		</div>
-		<div class="cms-field" id="second">
+		<div class="cms-field" data-locale-scope id="second">
 			<button type="button" data-locale-tab="en" class="active">en</button>
 			<button type="button" data-locale-tab="de">de</button>
 			<div class="variant" data-locale="en"></div>

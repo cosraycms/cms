@@ -80,7 +80,7 @@ public function control(): Control
 
 ## Entries
 
-An `Entries` field renders server-side as a **typed repeater**: each stored row is a group of regular field wrappers, built from the row type's field table in the descriptor's `entryTypes` props. Everything a top-level field has works inside a row the same way — labels, locale tabs, descriptions, meta dialogs, fieldsets — because rows reuse the same wrapper views, just at a deeper form name:
+An `Entries` field renders server-side as a **typed repeater**: each stored row is a group of regular field wrappers, built from the row type's field table in the descriptor's `entryTypes` props. Everything a top-level field has works inside a row the same way — labels, descriptions, meta dialogs, fieldsets — because rows reuse the same wrapper views, just at a deeper form name. Locale tabs are the exception: a **row owns them for all of its sub-fields at once**, so one switch changes the language of the whole row instead of each field being switched by itself:
 
 ```text
 content[f][value][zxx][i][uid]                       hidden row identity
@@ -163,7 +163,7 @@ content[f][value][{lo}][i][fields][sub][meta][k][lo]  sub-field meta dialog
 content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
 ```
 
-`{lo}` is the list's locale: an **asymmetric** field renders one list per locale under the field-level locale tabs and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list whose translated sub-fields carry their own tabs, exactly like entries sub-fields.
+`{lo}` is the list's locale: an **asymmetric** field renders one list per locale under the field-level locale tabs and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list whose rows carry the locale tabs, exactly like entries rows.
 
 Rows are **never collapsed**. Each carries a header strip — the type label, a drag grip, a width stepper (only when the field has more than one column), a gear opening the row's `class`/`id` dialog, and a menu with insert above/below, move up/down, row and indent steppers and remove. Everything but the type label fades in on hover and focus-within, and a narrow block folds the width stepper into the menu (container query, no JS). New blocks come from a picker at the foot; with a single allowed type the picker is a plain add button. Adding, removing, reordering and renumbering is the shared repeater behavior, stamping from one inert `<template>` per allowed type; a stamped row focuses its first input.
 
@@ -225,7 +225,7 @@ Hand-written ES modules are sufficient — no build step required.
   - `meta` — the field's meta map when the structure has one (e.g. code syntax), else `undefined`.
   - `field` — the full field properties object (`name`, `label`, `required`, `translate`, `options`, ...).
   - `node` — the node uid; `''` while creating a node that has not been saved yet.
-  - `locale` — the **currently selected editing locale**. The field wrapper owns the locale tabs; when `field.translate` is true this property changes as the editor switches tabs — render `value[locale]`.
+  - `locale` — the **currently selected editing locale**. The locale tabs belong to the nearest `[data-locale-scope]`, which is the field wrapper at the top level and the row inside a typed repeater; when `field.translate` is true this property changes as the editor switches tabs — render `value[locale]`.
   - `locales` — `{ default: string, all: {id, title}[] }`.
   - `assets` — resolved catalog data for every asset uid the entry references: `{ [uid]: { filename, url, kind, mime?, width?, height?, meta? } }`. Media items in `value` are `{uid, meta?}`; previews resolve uids through this map. Upload responses carry the same data for freshly added assets.
 - The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** (and optionally meta) in the same shape:

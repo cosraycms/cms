@@ -1,6 +1,7 @@
 <?php
 
 use Cosray\Block\Layout;
+use Cosray\Panel\RowLocales;
 
 $field = (array) $this->unwrap($field);
 $index = $this->unwrap($index);
@@ -26,12 +27,14 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 // A stored layout a narrower field cannot hold is shown clamped, as
 // the save will store it.
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
+$ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
 ?>
 <div
 	class="block"
 	data-repeater-row
+	<?= $ownsLocales ? 'data-locale-scope' : '' ?>
 	data-meta-owner
 	data-indent="<?= $layout->indent ?>"
 	style="<?= $this->escape($style) ?>">
@@ -64,6 +67,9 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 			<?php $this->insert('icon/grip.svg') ?>
 		</span>
 		<span class="kind"><?= $this->escape($label) ?></span>
+		<?php if ($ownsLocales) {
+			$this->insert('field/row-locales');
+		} ?>
 		<?php if ($columns > 1): ?>
 			<span class="span" title="<?= $this->escape(__('field:span')) ?>">
 				<?php $this->insert('field/blocks/stepper', [
@@ -190,6 +196,7 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 	<div class="body cms-fields" id="<?= $this->escape("{$rowId}-form") ?>">
 		<?php $this->insert('field/row-fields', [
 			'type' => $blockType,
+			'ownsLocales' => $ownsLocales,
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,

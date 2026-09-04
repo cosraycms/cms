@@ -28,11 +28,14 @@ $value = is_array($value) ? $value : [];
 // whole locale map and handle locales internally — they still get tabs.
 // A blocks field has one row list per locale only in asymmetric mode;
 // a symmetric list is shared and its rows translate their own sub-fields.
+// A typed repeater row switches its sub-fields as one, and then owns the
+// pills; the sub-field wrappers inside it render none.
+$ownLocales = (bool) ($this->unwrap($ownLocales ?? null) ?? true);
 $localized = ['text', 'textarea', 'iframe'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
-$tabs = $translate && ($variants || $controlName === 'element');
+$tabs = $ownLocales && $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
@@ -45,6 +48,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 <div
 	class="cms-field<?= $required ? ' required' : '' ?>"
+	<?= $tabs ? 'data-locale-scope' : '' ?>
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
@@ -56,7 +60,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			</button>
 		<?php endif ?>
 		<?php if ($tabs): ?>
-			<span class="locales">
+			<span class="cms-locales">
 				<?php foreach ($locales as $locale): ?>
 					<button
 						type="button"

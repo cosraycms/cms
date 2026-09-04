@@ -184,7 +184,7 @@ content[f][value][{lo}][i][meta][class][zxx]          block settings dialog
 content[f][value][{lo}][i][meta][id][zxx]
 ```
 
-An asymmetric field renders one list per locale under the field-level locale tabs, so `{lo}` is a real locale and the sub-fields inside are neutral. A symmetric field renders a single `zxx` list whose translated sub-fields carry their own tabs.
+An asymmetric field renders one list per locale under the field-level locale tabs, so `{lo}` is a real locale and the sub-fields inside are neutral. A symmetric field renders a single `zxx` list whose rows carry the locale tabs: one strip per block switches every translated sub-field in it at once.
 
 Saving replaces the row list wholesale — order is submission order, missing rows are deleted, rows of a disallowed type are dropped. Surviving rows are matched to their stored counterpart **by uid**, so unknown keys inside a row survive edits and reorders, and each sub-field is patched individually like a top-level field. Validation errors carry the row path and the summary jumps into the block.
 

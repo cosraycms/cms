@@ -7,9 +7,9 @@ function editor(): void {
 	document.body.innerHTML = `
 		<form id="node-editor-form">
 			<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
-			<div class="cms-field" data-field="title">
+			<div class="cms-field" data-locale-scope data-field="title">
 				<label class="label"><div>Title</div>
-					<span class="locales">
+					<span class="cms-locales">
 						<button type="button" class="tab active" data-locale-tab="en">EN</button>
 						<button type="button" class="tab" data-locale-tab="de">DE</button>
 					</span>
@@ -39,14 +39,32 @@ function editor(): void {
 			<div class="cms-field" data-field="entries">
 				<div class="control">
 					<div data-repeater>
-						<div data-repeater-row>
+						<div data-repeater-row data-locale-scope>
 							<button type="button" data-repeater-collapse aria-expanded="false">Row</button>
+							<span class="cms-locales">
+								<button type="button" class="tab active" data-locale-tab="en">EN</button>
+								<button type="button" class="tab" data-locale-tab="de">DE</button>
+							</span>
 							<div class="body" data-repeater-body hidden>
 								<div class="cms-field" data-field="sub">
 									<div class="control">
 										<input
 											name="content[entries][value][zxx][0][fields][sub][value][zxx]"
 											type="text" />
+									</div>
+								</div>
+								<div class="cms-field" data-field="trans">
+									<div class="control">
+										<div class="variant" data-locale="en">
+											<input
+												name="content[entries][value][zxx][0][fields][trans][value][en]"
+												type="text" />
+										</div>
+										<div class="variant" data-locale="de" hidden>
+											<input
+												name="content[entries][value][zxx][0][fields][trans][value][de]"
+												type="text" />
+										</div>
 									</div>
 								</div>
 							</div>
@@ -143,6 +161,43 @@ describe('errors behavior', () => {
 		expect(
 			field('title').querySelector('[data-locale-tab="en"]')?.classList.contains('has-error'),
 		).toBe(false);
+	});
+
+	it('badges the row tab when the row owns its sub-fields locales', () => {
+		respond([
+			{
+				path: ['content', 'entries', 'value', 'zxx', 0, 'fields', 'trans', 'value', 'de'],
+				message: 'Fehlt',
+			},
+		]);
+
+		const row = document.querySelector('[data-repeater-row]');
+
+		expect(row?.querySelector('[data-locale-tab="de"]')?.classList.contains('has-error')).toBe(
+			true,
+		);
+		// The sub-field carries no tabs of its own to badge.
+		expect(field('trans').querySelector('[data-locale-tab]')).toBe(null);
+	});
+
+	it('clears a row tab badge once nothing in the row fails', () => {
+		respond([
+			{
+				path: ['content', 'entries', 'value', 'zxx', 0, 'fields', 'trans', 'value', 'de'],
+				message: 'Fehlt',
+			},
+		]);
+
+		const row = document.querySelector('[data-repeater-row]');
+		const input = document.querySelector<HTMLInputElement>(
+			'[name="content[entries][value][zxx][0][fields][trans][value][de]"]',
+		);
+
+		input?.dispatchEvent(new Event('input', { bubbles: true }));
+
+		expect(row?.querySelector('[data-locale-tab="de"]')?.classList.contains('has-error')).toBe(
+			false,
+		);
 	});
 
 	it('badges the meta button for issues inside the meta dialog', () => {

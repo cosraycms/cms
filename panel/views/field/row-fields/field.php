@@ -16,6 +16,7 @@ unset($sub['when']);
 <div style="<?= $this->escape($style) ?>">
 	<?php $this->insert('field/field', [
 		'field' => $sub,
+		'ownLocales' => !$this->unwrap($ownsLocales ?? false),
 		'data' => $fieldsData[$subName] ?? null,
 		'nameRoot' => "{$rowName}[fields][{$subName}]",
 		'idRoot' => "{$rowId}-{$subName}",

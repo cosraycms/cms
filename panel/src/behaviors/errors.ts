@@ -86,6 +86,16 @@ function wrapper(control: Element): Element {
 	return control.closest('.cms-field') ?? control.parentElement ?? control;
 }
 
+/** The tabs belong to whichever scope owns them, which for a sub-field of a
+ * typed repeater row is the row, not its own wrapper. */
+function localeTab(control: Element, locale: string | undefined): HTMLElement | null {
+	return (
+		control
+			.closest('[data-locale-scope]')
+			?.querySelector<HTMLElement>(`[data-locale-tab="${locale}"]`) ?? null
+	);
+}
+
 function unmark(field: Element): void {
 	field.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
 	field.querySelectorAll('[aria-invalid]').forEach((control) => {
@@ -94,11 +104,24 @@ function unmark(field: Element): void {
 	});
 	field.querySelectorAll('.has-error').forEach((badge) => badge.classList.remove('has-error'));
 	field.removeAttribute(INVALID);
+
+	// A row owns the tabs of its sub-fields, so its badge outlives the
+	// wrapper that put it there — drop it once nothing in the row fails.
+	const scope = field.closest('[data-locale-scope]');
+
+	if (scope && scope !== field && !scope.querySelector(`[${INVALID}]`)) {
+		scope
+			.querySelectorAll('[data-locale-tab].has-error')
+			.forEach((tab) => tab.classList.remove('has-error'));
+	}
 }
 
 function wipe(): void {
 	document.querySelectorAll(`[${INVALID}]`).forEach(unmark);
 	document.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
+	document
+		.querySelectorAll('[data-locale-tab].has-error')
+		.forEach((tab) => tab.classList.remove('has-error'));
 }
 
 function mark(control: Element, message: string): void {
@@ -133,9 +156,7 @@ function mark(control: Element, message: string): void {
 	const variant = control.closest('.variant[data-locale]');
 
 	if (variant instanceof HTMLElement && variant.hidden) {
-		field
-			.querySelector(`[data-locale-tab="${variant.dataset.locale}"]`)
-			?.classList.add('has-error');
+		localeTab(control, variant.dataset.locale)?.classList.add('has-error');
 	}
 
 	// An issue inside the meta dialog is invisible until opened.
@@ -203,11 +224,7 @@ function activate(event: Event): void {
 	const variant = control.closest('.variant[data-locale]');
 
 	if (variant instanceof HTMLElement && variant.hidden) {
-		const tab = field.querySelector(`[data-locale-tab="${variant.dataset.locale}"]`);
-
-		if (tab instanceof HTMLElement) {
-			tab.click();
-		}
+		localeTab(control, variant.dataset.locale)?.click();
 	}
 
 	for (
