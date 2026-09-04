@@ -65,6 +65,76 @@
 		}
 	}
 
+	/* A wide grab area carrying a short bar: easy to hit, quiet at rest. */
+	& .resize {
+		position: absolute;
+		z-index: 3;
+		/* Pointer capture needs the browser to keep the gesture. */
+		touch-action: none;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset-block-start: 50%;
+			inset-inline-start: 50%;
+			border-radius: 999px;
+			background: var(--cms-color-border-strong);
+			opacity: 0;
+			translate: -50% -50%;
+			transition: opacity 120ms ease;
+		}
+
+		&.is-start,
+		&.is-end {
+			inset-block: 0;
+			width: var(--blocks-gap);
+			min-width: 0.75rem;
+			cursor: col-resize;
+
+			&::before {
+				width: 3px;
+				height: 1.75rem;
+			}
+		}
+
+		&.is-start {
+			inset-inline-start: calc(var(--blocks-gap) / -2 - 1px);
+		}
+
+		&.is-end {
+			inset-inline-end: calc(var(--blocks-gap) / -2 - 1px);
+		}
+
+		/* Inset so the corners stay with the column handles. */
+		&.is-bottom {
+			inset-inline: var(--cms-space-6);
+			inset-block-end: calc(var(--blocks-gap) / -2 - 1px);
+			height: var(--blocks-gap);
+			min-height: 0.75rem;
+			cursor: row-resize;
+
+			&::before {
+				width: 1.75rem;
+				height: 3px;
+			}
+		}
+	}
+
+	& .block:hover > .resize::before,
+	& .block:focus-within > .resize::before {
+		opacity: 0.6;
+	}
+
+	& .resize:hover::before,
+	& .resize.is-active::before {
+		background: var(--cms-color-primary);
+		opacity: 1;
+	}
+
+	&.is-resizing {
+		user-select: none;
+	}
+
 	& .toolbar {
 		display: flex;
 		align-items: center;

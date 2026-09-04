@@ -172,6 +172,21 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 			</div>
 		</details>
 	</div>
+	<?php if ($columns > 1): ?>
+		<?php foreach (
+			[
+				'start' => __('field:indent'),
+				'end' => __('field:span'),
+				'bottom' => __('field:rows'),
+			] as $edge => $title
+		): ?>
+			<span
+				class="resize is-<?= $edge ?>"
+				data-layout-resize="<?= $edge ?>"
+				aria-hidden="true"
+				title="<?= $this->escape($title) ?>"></span>
+		<?php endforeach ?>
+	<?php endif ?>
 	<div class="body cms-fields" id="<?= $this->escape("{$rowId}-form") ?>">
 		<?php $this->insert('field/row-fields', [
 			'type' => $blockType,

@@ -10,7 +10,11 @@ import {
 	install,
 	MAX_ROWS,
 	parseStep,
+	pitch,
+	ratchet,
 	read,
+	resize,
+	shift,
 	step,
 	write,
 } from '../../src/behaviors/blocks';
@@ -235,5 +239,66 @@ describe('blocks layout stepping', () => {
 		document.body.innerHTML = `<button type="button" data-layout-step="span:+1">+</button>`;
 
 		expect(() => document.querySelector<HTMLElement>('button')?.click()).not.toThrow();
+	});
+});
+
+describe('blocks resize geometry', () => {
+	it('spreads the gaps over the tracks', () => {
+		// 12 columns of 61px with an 11px gap fill 863px.
+		expect(pitch(863, 12, 11)).toBeCloseTo(72.83, 2);
+		expect(pitch(100, 0, 8)).toBe(0);
+	});
+
+	it('takes a full step before a row follows', () => {
+		expect(ratchet(99, 100)).toBe(0);
+		expect(ratchet(100, 100)).toBe(1);
+		expect(ratchet(199, 100)).toBe(1);
+		expect(ratchet(-99, 100)).toBe(0);
+		expect(ratchet(-240, 100)).toBe(-2);
+		expect(ratchet(500, 0)).toBe(0);
+	});
+
+	it('rounds the travelled distance to whole tracks', () => {
+		expect(shift(0, 72)).toBe(0);
+		expect(shift(35, 72)).toBe(0);
+		expect(shift(37, 72)).toBe(1);
+		expect(shift(-150, 72)).toBe(-2);
+		expect(shift(100, 0)).toBe(0);
+	});
+});
+
+describe('blocks edge resizing', () => {
+	const grid = { columns: 12, min: 2 };
+	const layout = { span: 6, rows: 1, indent: 3 };
+
+	it('grows the end edge, leaving the indent alone', () => {
+		expect(resize(layout, 'end', 2, grid)).toEqual({ span: 8, rows: 1, indent: 3 });
+		// Nine columns are left beside the indent; it never gives way.
+		expect(resize(layout, 'end', 9, grid)).toEqual({ span: 9, rows: 1, indent: 3 });
+		expect(resize(layout, 'end', -9, grid)).toEqual({ span: 2, rows: 1, indent: 3 });
+	});
+
+	it('trades indent against span on the start edge', () => {
+		expect(resize(layout, 'start', -2, grid)).toEqual({ span: 8, rows: 1, indent: 1 });
+		expect(resize(layout, 'start', 3, grid)).toEqual({ span: 3, rows: 1, indent: 6 });
+		// Both directions stop before the block moves: indent 0, span min.
+		expect(resize(layout, 'start', -5, grid)).toEqual({ span: 9, rows: 1, indent: 0 });
+		expect(resize(layout, 'start', 8, grid)).toEqual({ span: 2, rows: 1, indent: 7 });
+	});
+
+	it('keeps the reserved width while the start edge moves', () => {
+		// Indent plus span is what the block takes out of the row, and the
+		// start edge only redistributes it — the block cannot wrap.
+		for (const steps of [-3, -1, 0, 2, 5]) {
+			const next = resize(layout, 'start', steps, grid);
+
+			expect(next.indent + next.span).toBe(layout.indent + layout.span);
+		}
+	});
+
+	it('counts rows on the bottom edge', () => {
+		expect(resize(layout, 'bottom', 2, grid)).toEqual({ span: 6, rows: 3, indent: 3 });
+		expect(resize(layout, 'bottom', 99, grid)).toEqual({ span: 6, rows: MAX_ROWS, indent: 3 });
+		expect(resize(layout, 'bottom', -4, grid)).toEqual({ span: 6, rows: 1, indent: 3 });
 	});
 });
