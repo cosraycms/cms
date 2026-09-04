@@ -1,8 +1,8 @@
 /*
  * The blocks editor: the entries card with a preview grid. The grid
  * mirrors the frontend contract — --columns on the container, --span,
- * --rows and --indent (plus data-indent) on the block — so a block sits
- * where the site will place it. A one-column field is a quiet list of
+ * --rows, --indent and --reserved (plus data-indent) on the block — so a
+ * block sits where the site will place it. A one-column field is a quiet list of
  * blocks separated by hairlines; a multi-column field renders bordered
  * cells. Every block has a header strip: the type label always, the
  * grip, stepper, gear and kebab on hover and focus-within. A narrow
@@ -37,17 +37,18 @@
 
 	& .block {
 		position: relative;
-		grid-column: span var(--span, 1);
+		/* The indent is relative: the block reserves it along with its span
+		   (--reserved is the sum), stays in the flow and pushes its own box
+		   past the indent. The percentage resolves against the block's own
+		   area, so one column is (100% + gap) / reserved. */
+		grid-column: span var(--reserved, 1);
 		grid-row: span var(--rows, 1);
+		margin-inline-start: calc(var(--indent, 0) * (100% + var(--blocks-gap)) / var(--reserved, 1));
 		min-width: 0;
 		border: 1px solid var(--cms-color-border-soft);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
 		container-type: inline-size;
-
-		&:not([data-indent='0']) {
-			grid-column: calc(var(--indent, 0) + 1) / span var(--span, 1);
-		}
 
 		/* The open kebab menu must paint over the blocks after it. */
 		&:focus-within,

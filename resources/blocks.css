@@ -26,25 +26,27 @@
 		container-type: inline-size;
 	}
 
+	/*
+	 * The indent is relative to the flow: a block reserves it along with
+	 * its span (`--reserved` is the sum) and pushes its own box past it.
+	 * The percentage resolves against the block's own grid area, which is
+	 * `--reserved` columns wide, so one column is (100% + gap) / reserved.
+	 * A block too wide for the columns left in its row wraps to the next.
+	 */
 	.cms-block {
 		min-width: 0;
-		grid-column: span var(--span, 1);
+		grid-column: span var(--reserved, 1);
 		grid-row: span var(--rows, 1);
-	}
-
-	/*
-	 * An indented block needs the start line, not just a span; a custom
-	 * property alone cannot switch `grid-column` between the two forms
-	 * cross-browser, hence the attribute selector.
-	 */
-	.cms-block:not([data-indent="0"]) {
-		grid-column: calc(var(--indent) + 1) / span var(--span, 1);
+		margin-inline-start: calc(
+			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
+		);
 	}
 
 	@container (max-width: 42rem) {
 		.cms-blocks[data-responsive="stack"] > .cms-block {
 			grid-column: 1 / -1;
 			grid-row: auto;
+			margin-inline-start: 0;
 		}
 	}
 }

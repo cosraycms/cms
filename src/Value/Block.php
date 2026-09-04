@@ -131,11 +131,15 @@ class Block extends Value
 		}
 
 		$layout = $this->layout;
+		// The columns the block takes out of its row: the reference sheet
+		// spans them and pushes the box past the indent.
+		$reserved = $layout->indent + $layout->span;
 		$attributes .=
 			' data-type="'
 			. escape($this->handle())
 			. "\" data-span=\"{$layout->span}\" data-rows=\"{$layout->rows}\" data-indent=\"{$layout->indent}\""
-			. " style=\"--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}\"";
+			. " style=\"--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent};"
+			. " --reserved: {$reserved}\"";
 
 		return "<div{$attributes}>{$inner}</div>";
 	}

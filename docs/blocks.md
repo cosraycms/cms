@@ -161,7 +161,7 @@ Symmetric is the mode to reach for when the locales share a layout and only the 
 
 - `uid` is a 13-character lowercase word-safe id, as on entry rows; the client fills it when a block is stamped, the server backfills a missing one.
 - `type` is the block type's FQCN. Rows of a type the field no longer allows are shown as unknown and dropped on the next save.
-- `layout` is always present and normalized. `span` counts columns, `rows` counts grid rows, `indent` is an offset from the row start (0 = none). For a one-column field it is `{1, 1, 0}`.
+- `layout` is always present and normalized. `span` counts columns, `rows` counts grid rows, `indent` counts the columns left free before the block (0 = none). The indent is relative to where the block falls in the flow, not an absolute column, so a block placed beside a neighbour is indented from that neighbour. For a one-column field the layout is `{1, 1, 0}`.
 - `fields` holds the block type's fields in the ordinary field envelope, so every sub-field carries its own `type`, `value` locale map and optional `meta`.
 - `meta` is the block's own settings, currently `class` and `id`, each a neutral-locale map. It is omitted when empty.
 
@@ -206,7 +206,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 		data-span="8"
 		data-rows="1"
 		data-indent="2"
-		style="--span: 8; --rows: 1; --indent: 2"
+		style="--span: 8; --rows: 1; --indent: 2; --reserved: 10"
 	>
 		…
 	</div>
@@ -215,6 +215,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 
 - The container is `{prefix}-blocks` plus the `class` argument, with `data-columns`, `data-responsive` and `--columns`. It is emitted even when the field is empty.
 - Each block is a `<div>` — `{prefix}-block` plus the block's `class` setting, the `id` setting, `data-type` (the type's handle) and the layout as both data attributes and custom properties, then the type's own output.
+- `--reserved` is `indent + span`, the columns the block takes out of its row. It is derived rather than stored, so it has no data attribute of its own.
 - The data attributes exist so a strict-CSP site can style through `[data-span='6']` selectors; the custom properties exist so the reference sheet stays twenty lines.
 
 ### Render arguments
@@ -302,22 +303,24 @@ Copying it into the site's own CSS is equally fine — it is twenty lines and ha
 
 	.cms-block {
 		min-width: 0;
-		grid-column: span var(--span, 1);
+		grid-column: span var(--reserved, 1);
 		grid-row: span var(--rows, 1);
-	}
-
-	.cms-block:not([data-indent="0"]) {
-		grid-column: calc(var(--indent) + 1) / span var(--span, 1);
+		margin-inline-start: calc(
+			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
+		);
 	}
 
 	@container (max-width: 42rem) {
 		.cms-blocks[data-responsive="stack"] > .cms-block {
 			grid-column: 1 / -1;
 			grid-row: auto;
+			margin-inline-start: 0;
 		}
 	}
 }
 ```
+
+A block spans `--reserved` columns — its indent plus its span — and a margin pushes its own box past the indent, so the indent stays in the flow instead of naming an absolute column. The percentage in that margin resolves against the block's own grid area, which is exactly `--reserved` columns wide, so one column is `(100% + gap) / reserved` and the sheet needs no measurement of the container. A block too wide for the columns still free in its row wraps onto the next one, the way any grid item does.
 
 Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins** over it without needing a more specific selector. The intended override points are:
 
@@ -352,7 +355,7 @@ Migration `000000-000031` converts stored blocks to the typed-row shape in `node
 
 What it does per block:
 
-- `colspan`, `rowspan` and `colstart` become `layout.span`, `layout.rows` and `layout.indent` (an offset, so `colstart: 3` is `indent: 2`); `width` and the field's `columns`/`minCellWidth` meta are dropped.
+- `colspan`, `rowspan` and `colstart` become `layout.span`, `layout.rows` and `layout.indent` (an offset, so `colstart: 3` is `indent: 2`). The legacy `colstart` named an absolute column and only ever placed a block that started its row; the offset is relative to the flow and renders such a block identically; `width` and the field's `columns`/`minCellWidth` meta are dropped.
 - The block type ids become classes: the legacy `html` id and `richtext` map to `Cosray\Block\RichText`, `h1`–`h6` to one `Cosray\Block\Heading` with the level as its option, and the media, YouTube and iframe blocks to their type with the value moved into the type's field.
 - The YouTube aspect ratio moves out of the block meta into the `Youtube` field's meta; `class` and `id` stay block meta; other meta keys are kept and reported.
 - Blocks without a `uid` get one.

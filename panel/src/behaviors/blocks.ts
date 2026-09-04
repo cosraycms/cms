@@ -104,6 +104,7 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 			});
 	}
 
+	row.style.setProperty('--reserved', String(layout.indent + layout.span));
 	row.dataset.indent = String(layout.indent);
 }
 

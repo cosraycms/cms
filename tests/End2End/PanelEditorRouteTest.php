@@ -159,7 +159,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="' . Builtin\Text::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][layout][span]"', $html);
 		$this->assertStringContainsString('data-layout="indent"', $html);
-		$this->assertStringContainsString('style="--span: 6; --rows: 2; --indent: 3"', $html);
+		$this->assertStringContainsString('style="--span: 6; --rows: 2; --indent: 3; --reserved: 9"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][fields][text][value][zxx]"', $html);
 		$this->assertStringContainsString('First block', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);

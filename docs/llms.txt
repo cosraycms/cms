@@ -473,15 +473,18 @@ final class Quote implements Block
   not contain `Blocks` (both rejected at boot)
 - stored row: `{uid, type: FQCN, layout: {span, rows, indent}, fields, meta?}`
   in per-locale lists (asymmetric) or one `zxx` list; `fields` holds the
-  ordinary field envelopes, `meta` the block's `class`/`id`
+  ordinary field envelopes, `meta` the block's `class`/`id`; the indent
+  counts columns left free before the block, relative to where the flow
+  places it, not an absolute column
 - readers clamp the layout (`span` into `[min, columns]`, `rows` into
   `[1, 6]`, `indent` into `[0, columns - span]`); a write through the store
   is validated instead, so out-of-range imports fail loudly
 - rendering contract: a `{prefix}-blocks` container with `data-columns`,
   `data-responsive` and `--columns`, each block a `{prefix}-block` div with
-  `data-type` (the type handle), `data-span`/`-rows`/`-indent` and the
-  matching custom properties; an empty render emits no element; every
-  generated attribute is escaped
+  `data-type` (the type handle), `data-span`/`-rows`/`-indent`, the matching
+  custom properties and `--reserved` (`indent + span`, derived, no data
+  attribute); an empty render emits no element; every generated attribute is
+  escaped
 - `Blocks::render()` args: `prefix`, `tag`, `class`, `imageSizes`, `sizes`,
   `thumbSize` (see section 9); `tag` and `prefix` must match
   `/^[a-z][a-z0-9-]*$/i`
@@ -491,7 +494,11 @@ final class Quote implements Block
   `image()`, `images()`, `hasImage()`, `excerpt()`; `unwrap()`/`json()`
   return `{columns, blocks: [{uid, type, handle, layout, fields, meta}]}`
 - the reference stylesheet ships as `resources/blocks.css` (layer
-  `cms.blocks`, override points `--blocks-gap` and the container threshold)
+  `cms.blocks`, override points `--blocks-gap` and the container threshold):
+  a block spans `--reserved` columns and a margin of
+  `indent * (100% + gap) / reserved` pushes its box past the indent, the
+  percentage resolving against its own grid area, so a block too wide for
+  the columns left in its row wraps onto the next one
 - migration `000000-000031` converts legacy blocks in nodes, drafts and both
   history tables: `colspan`/`rowspan`/`colstart` become
   `layout.span`/`rows`/`indent` (an offset), `width` and the field's

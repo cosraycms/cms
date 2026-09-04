@@ -26,7 +26,8 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 // A stored layout a narrower field cannot hold is shown clamped, as
 // the save will store it.
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
-$style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}";
+$reserved = $layout->indent + $layout->span;
+$style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
 ?>
 <div
 	class="block"
