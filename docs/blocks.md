@@ -206,6 +206,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 		data-span="8"
 		data-rows="1"
 		data-indent="2"
+		data-reserved="10"
 		style="--span: 8; --rows: 1; --indent: 2; --reserved: 10"
 	>
 		…
@@ -215,7 +216,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 
 - The container is `{prefix}-blocks` plus the `class` argument, with `data-columns`, `data-responsive` and `--columns`. It is emitted even when the field is empty.
 - Each block is a `<div>` — `{prefix}-block` plus the block's `class` setting, the `id` setting, `data-type` (the type's handle) and the layout as both data attributes and custom properties, then the type's own output.
-- `--reserved` is `indent + span`, the columns the block takes out of its row. It is derived rather than stored, so it has no data attribute of its own.
+- `reserved` is `indent + span`, the columns the block takes out of its row. It is derived rather than stored, but carried like the rest so that CSS which cannot read the inline style still has it in one attribute instead of having to pair `data-indent` with `data-span`.
 - The data attributes exist so a strict-CSP site can style through `[data-span='6']` selectors; the custom properties exist so the reference sheet stays twenty lines.
 
 ### Render arguments

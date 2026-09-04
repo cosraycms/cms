@@ -174,7 +174,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(
 			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
 				. '<div class="cms-block hero" id="intro" data-type="text" data-span="8" data-rows="2" data-indent="2"'
-				. ' style="--span: 8; --rows: 2; --indent: 2; --reserved: 10">'
+				. ' data-reserved="10" style="--span: 8; --rows: 2; --indent: 2; --reserved: 10">'
 				. "Hello<br />\nWorld"
 				. '</div></div>',
 			$blocks->render(),
@@ -374,7 +374,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertInstanceOf(Block::class, $block);
 		$this->assertSame(
 			'<div class="cms-block" data-type="text" data-span="3" data-rows="1" data-indent="0"'
-				. ' style="--span: 3; --rows: 1; --indent: 0; --reserved: 3">Solo</div>',
+				. ' data-reserved="3" style="--span: 3; --rows: 1; --indent: 0; --reserved: 3">Solo</div>',
 			(string) $block,
 		);
 		$this->assertStringStartsWith('<div class="x-block"', $block->render(prefix: 'x'));
