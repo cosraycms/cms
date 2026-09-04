@@ -197,6 +197,8 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 		<?php $this->insert('field/row-fields', [
 			'type' => $blockType,
 			'ownsLocales' => $ownsLocales,
+			// One visible field needs no label of its own: the block names it.
+			'labels' => (bool) ($blockType['labels'] ?? true),
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,

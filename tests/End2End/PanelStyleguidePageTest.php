@@ -46,6 +46,18 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]//button[@data-locale-tab]',
 			$html,
 		);
+		// A block with one field hides that field's label from sight; a
+		// block with several keeps them.
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]'
+				. '/label[contains(@class, "sr-only")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]'
+				. '/label[@class="label"]',
+			$html,
+		);
 		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);
 		$this->assertStringContainsString('class="chip is-create"', $html);
 		$this->assertStringContainsString('class="cms-entries"', $html);

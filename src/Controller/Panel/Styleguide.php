@@ -431,6 +431,8 @@ final class Styleguide extends Panel
 				'type' => Builtin\RichText::class,
 				'handle' => 'richtext',
 				'label' => 'Rich text',
+				// Mirrors Blocks::blockTypeProperties(): one visible field, no label.
+				'labels' => false,
 				'fields' => [
 					[
 						'name' => 'text',
@@ -450,6 +452,8 @@ final class Styleguide extends Panel
 				'type' => Builtin\Heading::class,
 				'handle' => 'heading',
 				'label' => 'Heading',
+				// Two visible fields, so the labels stay.
+				'labels' => true,
 				'fields' => [
 					[
 						'name' => 'text',
@@ -475,6 +479,8 @@ final class Styleguide extends Panel
 				'type' => Builtin\Image::class,
 				'handle' => 'image',
 				'label' => 'Single image',
+				// Mirrors Blocks::blockTypeProperties(): one visible field, no label.
+				'labels' => false,
 				'fields' => [
 					[
 						'name' => 'image',

@@ -228,16 +228,25 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	/**
 	 * @param class-string<Block> $type
-	 * @return array{type: class-string, handle: string, label: string, fields: list<array>, fieldsets: list<array>}
+	 * @return array{type: class-string, handle: string, label: string, labels: bool, fields: list<array>, fieldsets: list<array>}
 	 */
 	protected function blockTypeProperties(string $type): array
 	{
 		$properties = $this->rowTypeProperties($type);
+		$visible = array_filter(
+			$properties['fields'],
+			static fn(array $field): bool => !($field['hidden'] ?? false),
+		);
 
 		return [
 			'type' => $type,
 			'handle' => $this->blockHandle($type),
 			'label' => $properties['label'],
+			// A block with one field says what that field is; the label
+			// below the block's own would only repeat it. #[Labels] keeps it.
+			'labels' =>
+				count($visible) !== 1
+					|| (bool) $this->nodeTypes()->get($type, 'labels', false),
 			'fields' => $properties['fields'],
 			'fieldsets' => $properties['fieldsets'],
 		];

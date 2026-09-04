@@ -165,6 +165,20 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
 		$this->assertStringContainsString('value="wide"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][id][zxx]"', $html);
+		// A block with one field hides that field's label; where the field
+		// carries a meta dialog of its own, the row stays for its button.
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="Cosray\\Block\\Text"]'
+				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]'
+				. '//div[contains(@class, "cms-field")]'
+				. '/label[not(contains(@class, "sr-only"))]'
+				. '[div[contains(@class, "sr-only")]][.//button[@data-meta-open]]',
+			$html,
+		);
 		// A row of a type no longer offered renders without inputs.
 		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
 		$this->assertStringNotContainsString('value="block-gone"', $html);

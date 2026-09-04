@@ -47,6 +47,7 @@ Instances are created once per render call per type, through the autowiring crea
 | `#[Label('Quote')]` | the label in the block picker and the row's header strip |
 | `#[Handle('quote')]` | the `data-type` value; derived kebab-case from the class name when absent |
 | `#[FieldOrder('text', 'source')]` | the order the sub-fields render in |
+| `#[Labels]` | keeps the sub-field labels. A block type with a **single visible field** hides that field's label in the editor, since the block's own label already names it; declare this to bring it back. Types with two or more fields always label them. |
 
 Fieldsets come from `#[Fieldset]` on embedded properties, as on entry types.
 

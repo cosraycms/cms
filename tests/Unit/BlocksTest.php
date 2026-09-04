@@ -24,6 +24,7 @@ use Cosray\Schema\Columns;
 use Cosray\Schema\Responsive;
 use Cosray\Schema\Tool;
 use Cosray\Schema\TranslateMode;
+use Cosray\Tests\Fixtures\Block\LabelledBlock;
 use Cosray\Tests\Fixtures\Block\NestedBlocksBlock;
 use Cosray\Tests\Fixtures\Block\NestedEntriesBlock;
 use Cosray\Tests\Fixtures\Block\NoteBlock;
@@ -192,6 +193,23 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($blocks->allows(QuoteBlock::class));
 		$this->assertFalse($blocks->allows(Builtin\Image::class));
 		$this->assertSame(['text', 'source'], array_keys($blocks->blockFields(QuoteBlock::class)));
+	}
+
+	public function testASingleFieldBlockDropsItsSubFieldLabel(): void
+	{
+		$blocks = $this->createBlocks()->allow(
+			Builtin\Text::class,
+			QuoteBlock::class,
+			LabelledBlock::class,
+		);
+		$types = array_column($blocks->control()->array()['props']['blockTypes'], 'labels', 'type');
+
+		// One field: the block's own label already names it.
+		$this->assertFalse($types[Builtin\Text::class]);
+		// Two fields say different things, so both keep their labels.
+		$this->assertTrue($types[QuoteBlock::class]);
+		// One field, but the type asked for the label back.
+		$this->assertTrue($types[LabelledBlock::class]);
 	}
 
 	public function testAllowRejectsUnknownClasses(): void

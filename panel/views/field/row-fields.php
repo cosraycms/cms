@@ -4,8 +4,8 @@
 // the regular field wrapper at {$rowName}[fields][{sub}] and grouped by
 // the row type's fieldsets. Shared by the entries and blocks views.
 // Receives: type (the row type descriptor), fieldsData, rowName, rowId,
-// ownsLocales (the row switches the locales itself), locales,
-// defaultLocale, node, assets.
+// ownsLocales (the row switches the locales itself), labels (whether the
+// sub-fields show their own), locales, defaultLocale, node, assets.
 
 $type = (array) $this->unwrap($type);
 

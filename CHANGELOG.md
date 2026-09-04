@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Stopped labelling the single field of a block twice. A block type with one visible field now renders it without its own label — the block already names it — while the label stays in the markup for screen readers and, where the field carries a meta dialog, its row survives for that button. The new `#[Labels]` class attribute on a block type brings the labels back; types with two or more fields are unaffected.
 - Moved the locale tabs of a typed repeater's sub-fields onto the row. One strip per block or entry row now switches every translated sub-field in it at once, instead of each sub-field carrying its own pills. The tabs belong to the nearest `[data-locale-scope]`, which is the field wrapper at the top level and the row inside a repeater; a row declares itself one only when it has something to switch, so an asymmetric blocks field keeps its field-level tabs and its rows show none. Panel themes reaching into the markup should note that the pill strip is now the standalone `.cms-locales` part rather than a part of `.cms-field`.
 
 ### Breaking Changes

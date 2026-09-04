@@ -469,6 +469,8 @@ final class Quote implements Block
   the field is a one-column stack with no layout controls
 - `#[Allows(A::class, B::class)]` is optional; without it a field offers the
   default list, which plugins extend with `Registrar::blockType(A::class)`
+- a block type with one visible field renders it without a label (the panel
+  keeps it for screen readers); `#[Labels]` on the type brings it back
 - a block type may contain neither `Blocks` nor `Entries`; entry types may
   not contain `Blocks` (both rejected at boot)
 - stored row: `{uid, type: FQCN, layout: {span, rows, indent}, fields, meta?}`

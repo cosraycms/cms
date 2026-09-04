@@ -29,8 +29,11 @@ $value = is_array($value) ? $value : [];
 // A blocks field has one row list per locale only in asymmetric mode;
 // a symmetric list is shared and its rows translate their own sub-fields.
 // A typed repeater row switches its sub-fields as one, and then owns the
-// pills; the sub-field wrappers inside it render none.
+// pills; the sub-field wrappers inside it render none. The only field of
+// a block renders its label for screen readers only — the block's own
+// label already names it.
 $ownLocales = (bool) ($this->unwrap($ownLocales ?? null) ?? true);
+$bareLabel = (bool) ($this->unwrap($bareLabel ?? null) ?? false);
 $localized = ['text', 'textarea', 'iframe'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
@@ -52,8 +55,13 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
-	<label for="<?= escape($labelFor) ?>" class="label">
-		<div><?= escape((string) ($field['label'] ?? $fieldName)) ?></div>
+	<?php // Kept in the tree when hidden: the control needs its name. ?>
+	<label
+		for="<?= escape($labelFor) ?>"
+		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
+		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>><?= escape(
+			(string) ($field['label'] ?? $fieldName),
+		) ?></div>
 		<?php if (is_array($metaControl)): ?>
 			<button type="button" class="meta-button" data-meta-open>
 				<?= escape(__('field:meta')) ?>

@@ -10,6 +10,7 @@ use Cosray\Schema\FieldOrder;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Icon;
 use Cosray\Schema\Label;
+use Cosray\Schema\Labels;
 use Cosray\Schema\Permission;
 use Cosray\Schema\Render;
 use Cosray\Schema\Route;
@@ -85,6 +86,7 @@ class Registry
 		$registry->register(Title::class, new TitleHandler());
 		$registry->register(FieldOrder::class, new FieldOrderHandler());
 		$registry->register(Deletable::class, new DeletableHandler());
+		$registry->register(Labels::class, new LabelsHandler());
 		$registry->register(Children::class, new ChildrenHandler());
 
 		return $registry;
