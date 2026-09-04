@@ -165,6 +165,8 @@ content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
 
 `{lo}` is the list's locale: an **asymmetric** field renders one list per locale under the field-level locale tabs and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list whose rows carry the locale tabs, exactly like entries rows.
 
+No field inside a block carries a **required marker** — neither the asterisk on its label nor the outline the rich text and media controls draw around a required value. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
+
 A block with a **single visible field** renders that field without its label: the block's own label already names it. The label stays in the markup for screen readers, and where the field carries a meta dialog of its own the row survives for its button. `#[Labels]` on the block type brings the label back, and a type with two or more fields always labels them.
 
 Rows are **never collapsed**. Each carries a header strip — the type label, a drag grip, a width stepper (only when the field has more than one column), a gear opening the row's `class`/`id` dialog, and a menu with insert above/below, move up/down, row and indent steppers and remove. Everything but the type label fades in on hover and focus-within, and a narrow block folds the width stepper into the menu (container query, no JS). New blocks come from a picker at the foot; with a single allowed type the picker is a plain add button. Adding, removing, reordering and renumbering is the shared repeater behavior, stamping from one inert `<template>` per allowed type; a stamped row focuses its first input.

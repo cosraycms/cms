@@ -471,6 +471,10 @@ final class Quote implements Block
   default list, which plugins extend with `Registrar::blockType(A::class)`
 - a block type with one visible field renders it without a label (the panel
   keeps it for screen readers); `#[Labels]` on the type brings it back
+- a block's fields carry no required marker: the descriptor drops `required`,
+  which takes the asterisk, the `required` attribute and the outline the
+  richtext/media controls draw; `#[Required]` still validates, since the
+  shape is built from the field rather than from the descriptor
 - a block type may contain neither `Blocks` nor `Entries`; entry types may
   not contain `Blocks` (both rejected at boot)
 - stored row: `{uid, type: FQCN, layout: {span, rows, indent}, fields, meta?}`

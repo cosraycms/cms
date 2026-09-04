@@ -53,6 +53,8 @@ Fieldsets come from `#[Fieldset]` on embedded properties, as on entry types.
 
 ### Sub-fields
 
+A block **marks none of its fields as required** in the editor: reaching for a block is what makes its content mandatory, so the mark would tell an editor nothing the block does not already say. `#[Required]` still validates — it is only the panel's view of the field that loses the marker, which also takes the required outline the rich text and media controls draw. Entry rows and top-level fields are unaffected.
+
 Every field class works inside a block type, with two rules:
 
 - A block type must not contain an `Entries` or another `Blocks` field. Nested typed repeaters are rejected at boot. Entry types may not contain a `Blocks` field either.

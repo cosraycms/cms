@@ -212,6 +212,30 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($types[LabelledBlock::class]);
 	}
 
+	public function testBlocksDoNotMarkTheirFieldsAsRequired(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Text::class);
+		$fields = array_column($blocks->control()->array()['props']['blockTypes'], 'fields', 'type');
+
+		// The panel is told nothing about it …
+		$this->assertArrayNotHasKey('required', $fields[Builtin\Text::class][0]);
+
+		// … while the shape, built from the field itself, still insists.
+		$result = $blocks
+			->shape()
+			->validate([
+				'type' => Blocks::class,
+				'value' => [
+					Field::NEUTRAL_LOCALE => [
+						$this->textRow('b1', '', ['span' => 2, 'rows' => 1, 'indent' => 0]),
+					],
+				],
+			]);
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($result->has(['value', Field::NEUTRAL_LOCALE, 0, 'fields', 'text', 'value', 'zxx']));
+	}
+
 	public function testAllowRejectsUnknownClasses(): void
 	{
 		$this->throws(RuntimeException::class, "allows unknown block type 'App\\Nope'");

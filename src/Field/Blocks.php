@@ -247,9 +247,25 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			'labels' =>
 				count($visible) !== 1
 					|| (bool) $this->nodeTypes()->get($type, 'labels', false),
-			'fields' => $properties['fields'],
+			'fields' => array_map(self::unmarked(...), $properties['fields']),
 			'fieldsets' => $properties['fieldsets'],
 		];
+	}
+
+	/**
+	 * A block marks none of its fields as required. Reaching for a block is
+	 * what makes its content mandatory, so the mark tells the editor nothing
+	 * it does not already see. Only the panel's view of the field loses it —
+	 * the shape still validates, built from the field itself.
+	 *
+	 * @param array<string, mixed> $field
+	 * @return array<string, mixed>
+	 */
+	private static function unmarked(array $field): array
+	{
+		unset($field['required']);
+
+		return $field;
 	}
 
 	/**

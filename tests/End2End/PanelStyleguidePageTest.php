@@ -58,6 +58,22 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 				. '/label[@class="label"]',
 			$html,
 		);
+		// No block marks a field as required: reaching for the block is what
+		// makes its content mandatory. Top-level fields still do.
+		$this->assertHtmlNodeMissing(
+			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]'
+				. '//div[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]//textarea[@required]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[contains(concat(" ", normalize-space(@class), " "), " cms-field ")]'
+				. '[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+			$html,
+		);
 		$this->assertStringContainsString('<th class="col-actions" role="columnheader"></th>', $html);
 		$this->assertStringContainsString('class="chip is-create"', $html);
 		$this->assertStringContainsString('class="cms-entries"', $html);
