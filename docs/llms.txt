@@ -494,7 +494,9 @@ final class Quote implements Block
   `image()`, `images()`, `hasImage()`, `excerpt()`; `unwrap()`/`json()`
   return `{columns, blocks: [{uid, type, handle, layout, fields, meta}]}`
 - the reference stylesheet ships as `resources/blocks.css` (layer
-  `cms.blocks`, override points `--blocks-gap` and the container threshold):
+  `cms.blocks`, override points `--blocks-gap`, which must be a
+  context-independent length since it is resolved once by the grid and once
+  by the indent margin, and the container threshold):
   a block spans `--reserved` columns and a margin of
   `indent * (100% + gap) / reserved` pushes its box past the indent, the
   percentage resolving against its own grid area, so a block too wide for

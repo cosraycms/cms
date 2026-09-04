@@ -11,6 +11,11 @@
  * block prefix follows the `prefix` render argument, so a site that
  * renders with a different prefix copies the file and renames.
  *
+ * `--blocks-gap` must be a context-independent length — `rem` or `px`.
+ * The grid resolves it against the container and the indent margin
+ * against the block's own area, so a percentage means two different
+ * lengths, and an `em` follows whatever font size each of them has.
+ *
  * `data-responsive` carries the field's `#[Columns(responsive:)]`
  * policy: `stack` collapses every block to full width below the
  * threshold, `preserve` keeps the grid at every width, and `custom`

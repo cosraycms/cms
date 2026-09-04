@@ -325,7 +325,7 @@ A block spans `--reserved` columns — its indent plus its span — and a margin
 
 Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins** over it without needing a more specific selector. The intended override points are:
 
-- `--blocks-gap` — the grid gap, set it on `.cms-blocks` or anywhere above it.
+- `--blocks-gap` — the grid gap, set it on `.cms-blocks` or anywhere above it. It has to be a **context-independent length**, `rem` or `px`. The gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
 - The container threshold — redeclare the `@container` block at the width the design wants. The container itself is `.cms-blocks` (`container-type: inline-size`), so the query measures the blocks area, not the viewport.
 
 The three responsive policies:
