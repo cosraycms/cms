@@ -164,6 +164,7 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 }
 
 type Drag = {
+	pointer: number;
 	handle: HTMLElement;
 	row: HTMLElement;
 	container: HTMLElement;
@@ -206,13 +207,15 @@ function onPointerDown(event: PointerEvent): void {
 	const row = handle?.closest<HTMLElement>('[data-repeater-row]');
 	const container = row?.closest<HTMLElement>('[data-repeater]');
 
-	if (!handle || !edge || !row || !container) {
+	// A second finger does not join a gesture in progress.
+	if (drag || !handle || !edge || !row || !container) {
 		return;
 	}
 
 	const grid = gridOf(container);
 
 	drag = {
+		pointer: event.pointerId,
 		handle,
 		row,
 		container,
@@ -230,7 +233,7 @@ function onPointerDown(event: PointerEvent): void {
 }
 
 function onPointerMove(event: PointerEvent): void {
-	if (!drag) {
+	if (drag?.pointer !== event.pointerId) {
 		return;
 	}
 
@@ -248,7 +251,13 @@ function onPointerMove(event: PointerEvent): void {
 	drag.moved = true;
 }
 
-function onPointerUp(event: PointerEvent): void {
+/**
+ * The browser releases the capture itself once the gesture is over, so the
+ * end is the same whether the pointer was lifted or the capture was lost —
+ * the latter would otherwise leave a drag standing that refuses every
+ * later one.
+ */
+function end(): void {
 	if (!drag) {
 		return;
 	}
@@ -259,14 +268,22 @@ function onPointerUp(event: PointerEvent): void {
 	handle.classList.remove('is-active');
 	container.classList.remove('is-resizing');
 
-	if (handle.hasPointerCapture(event.pointerId)) {
-		handle.releasePointerCapture(event.pointerId);
-	}
-
 	if (moved) {
 		const dimension: Dimension = edge === 'bottom' ? 'rows' : 'span';
 
 		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+	}
+}
+
+function onPointerUp(event: PointerEvent): void {
+	if (drag?.pointer === event.pointerId) {
+		end();
+	}
+}
+
+function onLostCapture(event: Event): void {
+	if (drag && event.target === drag.handle) {
+		end();
 	}
 }
 
@@ -303,6 +320,7 @@ export function install(): () => void {
 	document.addEventListener('pointermove', onPointerMove);
 	document.addEventListener('pointerup', onPointerUp);
 	document.addEventListener('pointercancel', onPointerUp);
+	document.addEventListener('lostpointercapture', onLostCapture);
 
 	return () => {
 		document.removeEventListener('click', onClick);
@@ -310,5 +328,6 @@ export function install(): () => void {
 		document.removeEventListener('pointermove', onPointerMove);
 		document.removeEventListener('pointerup', onPointerUp);
 		document.removeEventListener('pointercancel', onPointerUp);
+		document.removeEventListener('lostpointercapture', onLostCapture);
 	};
 }
