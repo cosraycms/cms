@@ -39,28 +39,9 @@ $fieldsetMembers = array_flip(array_filter(
 	'is_string',
 ));
 
-// Mirrors editor.php: field/item places each field on the form grid.
-$span = static function (mixed $value, int $fallback): string {
-	$value = is_int($value) ? $value : $fallback;
-
-	if ($value > 100 || $value <= 0) {
-		$value = 100;
-	}
-
-	return "span {$value} / span {$value}";
-};
-
 $statuses = ['published', 'draft', 'hidden', 'locked'];
 $rows = (array) $this->unwrap($rows);
 
-$chevronSvgPath = __DIR__ . '/../icons/chevron.svg';
-$chevronSvg = is_file($chevronSvgPath)
-	? str_replace(
-		'<svg ',
-		'<svg class="chevron" aria-hidden="true" focusable="false" ',
-		trim((string) file_get_contents($chevronSvgPath)),
-	)
-	: '';
 ?>
 
 <div class="page cms-styleguide">
@@ -187,7 +168,6 @@ $chevronSvg = is_file($chevronSvgPath)
 								'uid' => 'styleguide',
 								'assets' => [],
 								'pathSourceFields' => [],
-								'span' => $span,
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($fields as $field): ?>
@@ -202,7 +182,6 @@ $chevronSvg = is_file($chevronSvgPath)
 										'uid' => 'styleguide',
 										'assets' => [],
 										'pathSourceFields' => [],
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -230,7 +209,6 @@ $chevronSvg = is_file($chevronSvgPath)
 										'uid' => 'styleguide',
 										'assets' => [],
 										'pathSourceFields' => [],
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -259,7 +237,6 @@ $chevronSvg = is_file($chevronSvgPath)
 										'uid' => 'styleguide',
 										'assets' => $mediaAssets,
 										'pathSourceFields' => [],
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -288,7 +265,6 @@ $chevronSvg = is_file($chevronSvgPath)
 										'uid' => 'styleguide',
 										'assets' => $mediaAssets,
 										'pathSourceFields' => [],
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -318,7 +294,6 @@ $chevronSvg = is_file($chevronSvgPath)
 										'uid' => 'styleguide',
 										'assets' => $mediaAssets,
 										'pathSourceFields' => [],
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -368,7 +343,6 @@ $chevronSvg = is_file($chevronSvgPath)
 											'row' => $row,
 											'treeMode' => true,
 											'showChildren' => true,
-											'chevronSvg' => $chevronSvg,
 											'hasRowActions' => true,
 											'bulk' => true,
 										]) ?>
@@ -396,7 +370,7 @@ $chevronSvg = is_file($chevronSvgPath)
 	</section>
 	<?php // Installs the editor bridge the media samples upload through. ?>
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
-	['panel' => $panelBase, 'system' => $system],
-	$jsonFlags,
-) ?></script>
+		['panel' => $panelBase, 'system' => $system],
+		$jsonFlags,
+	) ?></script>
 </div>

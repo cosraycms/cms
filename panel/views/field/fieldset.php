@@ -43,7 +43,6 @@ $descriptionId = "fieldset-{$name}-description";
 				'uid' => $uid,
 				'assets' => $assets,
 				'pathSourceFields' => $pathSourceFields,
-				'span' => $span,
 			]) ?>
 		<?php endforeach ?>
 	</div>

@@ -4,13 +4,11 @@ use function Cosray\escape;
 
 // One listing row. Shared by the collection and the styleguide so the sampler
 // shows the real thing rather than a copy that drifts.
-// Receives: row, treeMode, showChildren, chevronSvg, hasRowActions, bulk.
+// Receives: row, treeMode, showChildren, hasRowActions, bulk.
 
 $row = (array) $this->unwrap($row);
 $treeMode = (bool) $treeMode;
 $showChildren = (bool) $showChildren;
-// unwrap, not cast: the markup has to reach the page as markup.
-$chevronSvg = (string) $this->unwrap($chevronSvg);
 $hasRowActions = (bool) ($hasRowActions ?? false);
 $bulk = (bool) ($bulk ?? false);
 ?>
@@ -29,7 +27,7 @@ $bulk = (bool) ($bulk ?? false);
 				value="<?= escape((string) $row['uid']) ?>"
 				form="collection-bulk"
 				data-bulk-check
-				<?= ($row['hasChildren'] ?? false) ? 'data-has-children' : '' ?>
+				<?= $row['hasChildren'] ?? false ? 'data-has-children' : '' ?>
 				aria-label="<?= escape(__('bulk:select-row', [
 					'name' => (string) ($row['cells'][0]['value'] ?? $row['uid']),
 				])) ?>" />
@@ -48,10 +46,12 @@ $bulk = (bool) ($bulk ?? false);
 								class="toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
 								href="<?= escape((string) $row['childrenUrl']) ?>"
 								aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
-								aria-label="<?= escape($row['expanded']
-									? __('collection:collapse-children', ['name' => $cell['value']])
-									: __('collection:expand-children', ['name' => $cell['value']])) ?>">
-								<?= $chevronSvg !== '' ? $chevronSvg : ($row['expanded'] ? '⌄' : '›') ?>
+								aria-label="<?= escape(
+									$row['expanded']
+										? __('collection:collapse-children', ['name' => $cell['value']])
+										: __('collection:expand-children', ['name' => $cell['value']]),
+								) ?>">
+								<?php $this->insert('icon/chevron.svg') ?>
 							</a>
 						<?php else: ?>
 							<span class="toggle is-spacer" aria-hidden="true"></span>

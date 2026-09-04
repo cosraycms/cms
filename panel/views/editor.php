@@ -36,16 +36,6 @@ $action = $edit
 	? $links->edit($uid)
 	: $links->create((string) ($type['handle'] ?? ''));
 
-$span = static function (mixed $value, int $fallback): string {
-	$value = is_int($value) ? $value : $fallback;
-
-	if ($value > 100 || $value <= 0) {
-		$value = 100;
-	}
-
-	return "span {$value} / span {$value}";
-};
-
 $fieldsByName = [];
 
 foreach ($fields as $field) {
@@ -139,6 +129,7 @@ foreach ($fields as $field) {
 
 				// cannot nest. ?>
 				<?php // hx-swap="none" like the editor form: success is a 303 htmx
+
 				// follows into the collection, a refusal returns only the
 				// out-of-band status chip. ?>
 				<form
@@ -184,6 +175,7 @@ foreach ($fields as $field) {
 	// meta dialogs) that native validation cannot handle; the server validates
 	// and reports out of band. ?>
 	<?php // data-json-form: the transport behavior re-encodes the submit as one
+
 	// nested JSON body, so PHP's max_input_vars cannot truncate large forms. ?>
 	<form
 		id="node-editor-form"
@@ -215,7 +207,6 @@ foreach ($fields as $field) {
 								'uid' => $uid,
 								'assets' => $assets,
 								'pathSourceFields' => $pathSourceFields,
-								'span' => $span,
 							]) ?>
 						<?php else: ?>
 							<div class="cms-fields">
@@ -228,7 +219,6 @@ foreach ($fields as $field) {
 										'uid' => $uid,
 										'assets' => $assets,
 										'pathSourceFields' => $pathSourceFields,
-										'span' => $span,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -254,6 +244,7 @@ foreach ($fields as $field) {
 		<?php endif ?>
 
 		<?php // Truncation sentinel — the last control in the form. A submit cut
+
 		// short (a form-encoded POST past max_input_vars loses its tail) is
 		// missing it, and the server refuses to save such submissions. ?>
 		<input type="hidden" name="_complete" value="1" />
@@ -261,7 +252,7 @@ foreach ($fields as $field) {
 
 	<div id="editor-preview" hidden></div>
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
-	['panel' => $panelBase, 'system' => $system],
-	$jsonFlags,
-) ?></script>
+		['panel' => $panelBase, 'system' => $system],
+		$jsonFlags,
+	) ?></script>
 </div>

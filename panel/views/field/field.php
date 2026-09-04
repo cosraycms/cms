@@ -35,8 +35,7 @@ $variants = $translate && (in_array($controlName, $localized, true) || $asymmetr
 $tabs = $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
-$inputId = static fn(string $locale): string => "{$idRoot}-{$locale}";
-$labelFor = $variants ? $inputId($defaultLocale) : $inputId($neutral);
+$labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
 $when = $field['when'] ?? null;
@@ -82,7 +81,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					<?php $this->insert('field/control', [
 						'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
 						'control' => $control,
-						'id' => $inputId($locale['id']),
+						'id' => "{$idRoot}-{$locale['id']}",
 						'name' => "{$nameRoot}[value][{$locale['id']}]",
 						'nameRoot' => $nameRoot,
 						'value' => $value[$locale['id']] ?? null,
@@ -98,7 +97,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php $this->insert('field/control', [
 				'field' => $field,
 				'control' => $control,
-				'id' => $inputId($neutral),
+				'id' => "{$idRoot}-{$neutral}",
 				'name' => "{$nameRoot}[value][{$neutral}]",
 				'nameRoot' => $nameRoot,
 				'value' => $value[$neutral] ?? null,

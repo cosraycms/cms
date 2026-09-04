@@ -1,7 +1,5 @@
 <?php
 
-use function Cosray\escape;
-
 // The fields of one typed row — an entry or a block — rendered through
 // the regular field wrapper at {$rowName}[fields][{sub}] and grouped by
 // the row type's fieldsets. Shared by the entries and blocks views.
@@ -9,49 +7,6 @@ use function Cosray\escape;
 // locales, defaultLocale, node, assets.
 
 $type = (array) $this->unwrap($type);
-$fieldsData = (array) ($this->unwrap($fieldsData ?? null) ?? []);
-$rowName = (string) $rowName;
-$rowId = (string) $rowId;
-$locales = (array) $this->unwrap($locales);
-$defaultLocale = (string) $defaultLocale;
-$node = (string) ($node ?? '');
-$assets = (array) ($this->unwrap($assets ?? null) ?? []);
-
-$span = static function (mixed $width): string {
-	$width = is_int($width) && $width > 0 && $width <= 100 ? $width : 100;
-
-	return "grid-column: span {$width} / span {$width}";
-};
-
-$renderField = function (array $sub) use (
-	$span,
-	$fieldsData,
-	$rowName,
-	$rowId,
-	$locales,
-	$defaultLocale,
-	$node,
-	$assets,
-): void {
-	$subName = (string) ($sub['name'] ?? '');
-	// Conditions are top-level-only; emitting them here would evaluate
-	// against a same-named top-level field. Scoped conditions come later.
-	unset($sub['when']);
-	?>
-	<div style="<?= $span($sub['width'] ?? null) ?>">
-		<?php $this->insert('field/field', [
-			'field' => $sub,
-			'data' => $fieldsData[$subName] ?? null,
-			'locales' => $locales,
-			'defaultLocale' => $defaultLocale,
-			'node' => $node,
-			'assets' => $assets,
-			'nameRoot' => "{$rowName}[fields][{$subName}]",
-			'idRoot' => "{$rowId}-{$subName}",
-		]) ?>
-	</div>
-	<?php
-};
 
 $subs = array_values(array_filter(
 	(array) ($type['fields'] ?? []),
@@ -87,23 +42,29 @@ foreach ($subs as $sub) {
 <?php foreach ($subs as $sub): ?>
 	<?php $subName = (string) ($sub['name'] ?? ''); ?>
 	<?php if (isset($fieldsetsByFirst[$subName])): ?>
-		<?php $fieldset = $fieldsetsByFirst[$subName]['fieldset']; ?>
-		<fieldset class="cms-fieldset" style="<?= $span($fieldset['width'] ?? null) ?>">
+		<?php
+
+		$fieldset = $fieldsetsByFirst[$subName]['fieldset'];
+		$width = is_int($fieldset['width'] ?? null) ? $fieldset['width'] : 100;
+		$width = $width > 0 && $width <= 100 ? $width : 100;
+		$style = "grid-column: span {$width} / span {$width}";
+		?>
+		<fieldset class="cms-fieldset" style="<?= $this->escape($style) ?>">
 			<?php if (is_string($fieldset['label'] ?? null) && $fieldset['label'] !== ''): ?>
-				<legend class="legend"><?= escape($fieldset['label']) ?></legend>
+				<legend class="legend"><?= $this->escape($fieldset['label']) ?></legend>
 			<?php endif ?>
 			<?php if (is_string($fieldset['description'] ?? null) && $fieldset['description'] !== ''): ?>
-				<div class="description"><?= escape($fieldset['description']) ?></div>
+				<div class="description"><?= $this->escape($fieldset['description']) ?></div>
 			<?php endif ?>
 			<div class="cms-fields fields">
 				<?php foreach ($fieldsetsByFirst[$subName]['members'] as $member): ?>
-					<?php if (isset($subsByName[$member])) {
-						$renderField($subsByName[$member]);
-					} ?>
+					<?php if (isset($subsByName[$member])): ?>
+						<?php $this->insert('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
+					<?php endif ?>
 				<?php endforeach ?>
 			</div>
 		</fieldset>
 	<?php elseif (!isset($fieldsetMembers[$subName])): ?>
-		<?php $renderField($sub) ?>
+		<?php $this->insert('field/row-fields/field', ['sub' => $sub]) ?>
 	<?php endif ?>
 <?php endforeach ?>

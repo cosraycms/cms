@@ -4,25 +4,9 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$chevronSvgPath = __DIR__ . '/../icons/chevron.svg';
-$chevronSvg = is_file($chevronSvgPath)
-	? trim((string) file_get_contents($chevronSvgPath))
-	: '';
-$chevronSvg = str_replace(
-	'<svg ',
-	'<svg class="chevron" aria-hidden="true" focusable="false" ',
-	$chevronSvg,
-);
-
 // Track sizing per column kind. Badges and row actions size to their content
 // because the translation decides a pill's width; the title absorbs the slack,
 // and past the sum of the floors the list scrolls sideways.
-$track = static fn(string $kind): string => match ($kind) {
-	'date' => ' minmax(9rem, auto)',
-	'badge' => ' max-content',
-	default => ' minmax(7rem, auto)',
-};
-
 $hasRowActions = false;
 
 foreach ($page->table->rows as $row) {
@@ -39,7 +23,11 @@ $notice = (array) $this->unwrap($notice ?? []);
 $columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr)';
 
 foreach (array_slice((array) $this->unwrap($page->table->headers), 1) as $header) {
-	$columns .= $track((string) ($header['kind'] ?? 'text'));
+	$columns .= match ($header['kind'] ?? null) {
+		'date' => ' minmax(9rem, auto)',
+		'badge' => ' max-content',
+		default => ' minmax(7rem, auto)',
+	};
 }
 
 $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
@@ -238,7 +226,6 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 									'row' => $row,
 									'treeMode' => $page->table->treeMode,
 									'showChildren' => $page->table->showChildren,
-									'chevronSvg' => $chevronSvg,
 									'hasRowActions' => $hasRowActions,
 									'bulk' => $bulk,
 								]) ?>
