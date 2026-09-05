@@ -72,6 +72,28 @@ function editor(): void {
 					</div>
 				</div>
 			</div>
+			<div class="cms-field" data-field="blocks">
+				<div class="control">
+					<div data-repeater>
+						<div class="block" data-repeater-row data-meta-owner data-field="block">
+							<button type="button" class="gear" data-meta-open>Settings</button>
+							<div class="body">
+								<div class="cms-field" data-field="video">
+									<div class="control">
+										<input name="content[blocks][value][zxx][0][fields][video][value][zxx]" type="text" />
+									</div>
+								</div>
+							</div>
+							<dialog data-meta>
+								<input name="content[blocks][value][zxx][0][meta][class][zxx]" type="text" />
+								<input
+									name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]"
+									type="number" />
+							</dialog>
+						</div>
+					</div>
+				</div>
+			</div>
 		</form>`;
 }
 
@@ -209,6 +231,31 @@ describe('errors behavior', () => {
 			true,
 		);
 		expect(field('styled').getAttribute('data-invalid')).toBe('true');
+	});
+
+	it('badges the gear of a block for issues in the meta its dialog holds', () => {
+		respond([
+			{
+				path: [
+					'content',
+					'blocks',
+					'value',
+					'zxx',
+					0,
+					'fields',
+					'video',
+					'meta',
+					'aspectRatioX',
+					'zxx',
+				],
+				message: 'Aspect ratio is invalid',
+			},
+		]);
+
+		expect(field('block').querySelector('.gear')?.classList.contains('has-error')).toBe(true);
+		expect(field('block').getAttribute('data-invalid')).toBe('true');
+		expect(field('blocks').getAttribute('data-invalid')).toBeNull();
+		expect(field('video').getAttribute('data-invalid')).toBeNull();
 	});
 
 	it('marks sub-fields inside entries rows', () => {

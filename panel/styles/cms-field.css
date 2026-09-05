@@ -150,6 +150,15 @@
 	& .field + .field {
 		margin-top: var(--cms-space-3);
 	}
+
+	& .fields + .fields,
+	& .fields + .section {
+		margin-top: var(--cms-space-5);
+	}
+
+	& .section {
+		font-weight: 600;
+	}
 }
 
 @media (max-width: 52rem) {

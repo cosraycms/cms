@@ -31,8 +31,10 @@ $value = is_array($value) ? $value : [];
 // A typed repeater row switches its sub-fields as one, and then owns the
 // pills; the sub-field wrappers inside it render none. The only field of
 // a block renders its label for screen readers only — the block's own
-// label already names it.
+// label already names it. A block also takes its sub-fields' meta groups
+// into its settings dialog, so a sub-field renders no meta button there.
 $ownLocales = (bool) ($this->unwrap($ownLocales ?? null) ?? true);
+$ownMeta = (bool) ($this->unwrap($ownMeta ?? null) ?? true);
 $bareLabel = (bool) ($this->unwrap($bareLabel ?? null) ?? false);
 $localized = ['text', 'textarea', 'iframe'];
 $translate = (bool) ($field['translate'] ?? false);
@@ -45,7 +47,7 @@ $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
 $when = $field['when'] ?? null;
-$metaControl = $field['metaControl'] ?? null;
+$metaControl = $ownMeta ? $field['metaControl'] ?? null : null;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 

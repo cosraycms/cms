@@ -114,7 +114,7 @@ public function metaControl(): ?Control
 }
 ```
 
-The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
+The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Inside a block the row's settings dialog hosts the group instead, under the field's label when the block labels its fields, so no meta button sits in the content. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
 
 A `blocks` field uses the same dialog for its **rows**: its descriptor carries a `meta` prop — a `group` with the `class` and `id` text controls — and every block row renders it behind the gear in its header strip, submitting as `content[{field}][value][{lo}][{i}][meta][{key}][zxx]`. It is one group for every block type; a descriptor without the prop stores no block meta at all.
 
@@ -167,7 +167,7 @@ content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
 
 No field inside a block carries a **required marker** — neither the asterisk on its label nor the outline the rich text and media controls draw around a required value. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
 
-A block with a **single visible field** renders that field without its label: the block's own label already names it. The label stays in the markup for screen readers, and where the field carries a meta dialog of its own the row survives for its button. `#[Labels]` on the block type brings the label back, and a type with two or more fields always labels them.
+A block with a **single visible field** renders that field without its label: the block's own label already names it. The label stays in the markup for screen readers. A sub-field's meta group, where it has one, moves into the block's settings dialog after the layout and the block meta, so nothing but the control is left in the content; an error in it badges the block's gear. `#[Labels]` on the block type brings the label back, and a type with two or more fields always labels them.
 
 Such a **bare** block (`.block.is-bare`) is content first: its control renders without border or background, at reading size, with the field's `#[Placeholder]` while empty; a hairline appears on hover and the focus ring when it is active, which is what says the area is editable. Text areas grow with their text where the browser supports sizing a field to its content. The iframe code box keeps its inverted look, since code reads as code. The frame the panel draws around a rich text control goes the same way; element controls that draw their own frame, such as the media card, are left as they are. A block with two or more fields keeps its labelled, compact form.
 

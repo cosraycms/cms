@@ -30,8 +30,13 @@ $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
 $ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
-$settings = $metaControl !== null || $columns > 1;
 $labels = (bool) ($blockType['labels'] ?? true);
+// Sub-fields with a meta group of their own edit it in the block's dialog.
+$subMetas = array_values(array_filter(
+	(array) ($blockType['fields'] ?? []),
+	static fn(mixed $sub): bool => is_array($sub) && is_array($sub['metaControl'] ?? null) && !($sub['hidden'] ?? false),
+));
+$settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 ?>
 <div
 	class="block<?= $labels ? '' : ' is-bare' ?>"
@@ -142,6 +147,7 @@ $labels = (bool) ($blockType['labels'] ?? true);
 		<?php $this->insert('field/row-fields', [
 			'type' => $blockType,
 			'ownsLocales' => $ownsLocales,
+			'ownMeta' => false,
 			// One visible field needs no label of its own: the block names it.
 			'labels' => $labels,
 			'fieldsData' => $fieldsData,
@@ -176,6 +182,19 @@ $labels = (bool) ($blockType['labels'] ?? true);
 					'nameRoot' => $rowName,
 				]);
 			} ?>
+			<?php foreach ($subMetas as $sub): ?>
+				<?php $subName = (string) ($sub['name'] ?? ''); ?>
+				<?php if ($labels): ?>
+					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
+				<?php endif ?>
+				<?php $this->insert('field/meta', [
+					'field' => $sub,
+					'control' => $sub['metaControl'],
+					'meta' => $fieldsData[$subName]['meta'] ?? null,
+					'id' => "{$rowId}-{$subName}-meta",
+					'nameRoot' => "{$rowName}[fields][{$subName}]",
+				]) ?>
+			<?php endforeach ?>
 		</dialog>
 	<?php endif ?>
 </div>

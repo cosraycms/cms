@@ -165,8 +165,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
 		$this->assertStringContainsString('value="wide"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][id][zxx]"', $html);
-		// A block with one field hides that field's label; where the field
-		// carries a meta dialog of its own, the row stays for its button.
+		// A block with one field hides that field's label. A field's own meta
+		// group moves into the block's settings dialog, so no meta button
+		// sits in the content and the label row goes with it.
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Text"]'
 				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
@@ -174,9 +175,18 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]'
-				. '//div[contains(@class, "cms-field")]'
-				. '/label[not(contains(@class, "sr-only"))]'
-				. '[div[contains(@class, "sr-only")]][.//button[@data-meta-open]]',
+				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]//div[contains(@class, "cms-field")]//*[@data-meta-open]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]/div/dialog[@data-meta]'
+				. '//input[@name="'
+				. $en
+				. '[__i__][fields][video][meta][aspectRatioX][zxx]"]',
 			$html,
 		);
 		// A row of a type no longer offered renders without inputs.

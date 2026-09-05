@@ -82,8 +82,12 @@ function resolve(form: Element, path: Path): Element | null {
 	return null;
 }
 
+/** A control inside a meta dialog belongs to the dialog's owner — the field
+ * wrapper, or the block row whose settings dialog took the group. */
 function wrapper(control: Element): Element {
-	return control.closest('.cms-field') ?? control.parentElement ?? control;
+	const owner = control.closest('dialog[data-meta]')?.closest('[data-meta-owner]');
+
+	return owner ?? control.closest('.cms-field') ?? control.parentElement ?? control;
 }
 
 /** The tabs belong to whichever scope owns them, which for a sub-field of a
