@@ -2,7 +2,7 @@ import type { AssetMap } from '$types/data';
 
 import { loadElement } from '$lib/elements';
 
-type HostPayload = {
+export type HostPayload = {
 	value?: unknown;
 	meta?: unknown;
 	// Format envelope of structured richtext values; mirrored into the
@@ -66,6 +66,16 @@ export class CosrayHost extends HTMLElement {
 
 	get locale(): string {
 		return this.#locale;
+	}
+
+	/**
+	 * The payload as edited so far: what a copy of this control starts
+	 * from. A JSON round trip rather than structuredClone, because an
+	 * element may report its value as a state proxy, and JSON is what the
+	 * payload is anyway.
+	 */
+	get payload(): HostPayload {
+		return JSON.parse(JSON.stringify(this.#payload)) as HostPayload;
 	}
 
 	#readPayload(): HostPayload {

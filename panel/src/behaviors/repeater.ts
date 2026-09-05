@@ -1,9 +1,13 @@
 // Repeater rows: add clones a server-rendered template (typed repeaters
 // like entries carry one template per row type and typed add buttons)
 // at the end of the list, or before or after the row an add button sits
-// in when it says so (blocks: insert above/below), and focuses the
+// in when it says so (blocks: the inserters on a row), and focuses the
 // stamped row's first input; remove drops the row, move swaps it with a
-// sibling row. Renumbering keeps input names, ids and row labels dense
+// sibling row. Duplicate stamps the row's own template after it and
+// copies the live values control by control — typed values live on DOM
+// properties, and an element host keeps its edits to itself, so a plain
+// clone of the row would carry what the server last rendered instead.
+// Renumbering keeps input names, ids and row labels dense
 // so submissions stay ordered (the server normalizes gaps anyway). It
 // also rewrites the data-name/data-id bases of nested repeater
 // containers and recurses into inert template content, so structural
@@ -25,6 +29,7 @@
 import type { SortableEvent } from 'sortablejs';
 
 import { uid } from '$lib/content';
+import type { CosrayHost } from '$lib/host';
 
 const enhanced = new WeakSet<HTMLElement>();
 
@@ -112,7 +117,12 @@ function changed(container: HTMLElement): void {
 
 type Anchor = { row: HTMLElement; where: 'before' | 'after' };
 
-function add(container: HTMLElement, type: string | null, at: Anchor | null): void {
+function add(
+	container: HTMLElement,
+	type: string | null,
+	at: Anchor | null,
+	prepare?: (clone: DocumentFragment) => void,
+): void {
 	const templates = [
 		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
 	];
@@ -140,6 +150,7 @@ function add(container: HTMLElement, type: string | null, at: Anchor | null): vo
 			input.value = uid();
 		}
 	});
+	prepare?.(clone);
 
 	if (at?.where === 'before') {
 		at.row.before(clone);
@@ -151,8 +162,85 @@ function add(container: HTMLElement, type: string | null, at: Anchor | null): vo
 		rows.append(clone);
 	}
 
+	// Whoever renders state off the row's inputs (blocks: the layout)
+	// gets to do so before the change is announced.
+	stamped?.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
 	changed(container);
 	stamped?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select')?.focus();
+}
+
+const CONTROL = 'input, textarea, select';
+
+/** A control's name below its row, the same in the source and its copy. */
+function relative(name: string, container: HTMLElement): string {
+	const base = escapeRegex(container.dataset.name ?? '');
+
+	return name.replace(new RegExp(`^${base}\\[(?:\\d+|__i__)\\]`), '');
+}
+
+function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLElement): void {
+	const controls = new Map<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>();
+	const hosts = new Map<string, Element>();
+
+	// Unnamed controls are not submitted; they mirror state the row
+	// derives from what is, and follow it on their own.
+	source
+		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
+		.forEach((control) => {
+			if (control.name !== '') {
+				controls.set(relative(control.name, container), control);
+			}
+		});
+	source.querySelectorAll('cosray-host').forEach((host) => {
+		hosts.set(relative(host.getAttribute('name') ?? '', container), host);
+	});
+
+	// The uid keeps the fresh one the stamp gave it; a nested row list the
+	// template stamps empty stays empty, since nothing in it has a match.
+	clone
+		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
+		.forEach((control) => {
+			const from = control.name === '' ? null : controls.get(relative(control.name, container));
+
+			if (!from || control.hasAttribute('data-repeater-uid')) {
+				return;
+			}
+
+			if (
+				control instanceof HTMLInputElement &&
+				(control.type === 'checkbox' || control.type === 'radio')
+			) {
+				control.checked = (from as HTMLInputElement).checked;
+			} else {
+				control.value = from.value;
+			}
+		});
+
+	// A host reads its payload from the embedded script when it connects,
+	// so the copy is seeded there; the source's edits are on the element,
+	// its script only says what the server rendered.
+	clone.querySelectorAll('cosray-host').forEach((host) => {
+		const from = hosts.get(relative(host.getAttribute('name') ?? '', container));
+		const script = host.querySelector(':scope > script[type="application/json"]');
+		const payload = (from as Partial<CosrayHost> | undefined)?.payload;
+
+		if (!from || !script) {
+			return;
+		}
+
+		script.textContent =
+			payload === undefined
+				? (from.querySelector(':scope > script[type="application/json"]')?.textContent ?? '')
+				: JSON.stringify(payload);
+	});
+}
+
+function duplicate(source: HTMLElement, container: HTMLElement): void {
+	const type = source.querySelector<HTMLInputElement>(':scope > input[name$="[type]"]');
+
+	add(container, type?.value || null, { row: source, where: 'after' }, (clone) => {
+		copy(source, clone, container);
+	});
 }
 
 function move(mover: Element): void {
@@ -311,6 +399,17 @@ function onClick(event: Event): void {
 	if (mover) {
 		closeMenus(null);
 		move(mover);
+
+		return;
+	}
+
+	const duplicator = target.closest('[data-repeater-duplicate]');
+	const source = duplicator?.closest<HTMLElement>('[data-repeater-row]');
+	const owner = source?.closest<HTMLElement>('[data-repeater]');
+
+	if (duplicator && source && owner && source.parentElement === list(owner)) {
+		closeMenus(null);
+		duplicate(source, owner);
 
 		return;
 	}

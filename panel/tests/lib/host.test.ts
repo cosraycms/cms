@@ -173,4 +173,19 @@ describe('cosray host', () => {
 		expect(element.querySelector('test-control')).toBeNull();
 		expect(formValue(element)).toEqual({ value: 'kept' });
 	});
+
+	it('exposes the payload as edited, as a copy', () => {
+		const element = host({ value: { en: 'Before' }, assets: {} });
+
+		element.dispatchEvent(new CustomEvent('cosray-change', { detail: { value: { en: 'After' } } }));
+
+		const payload = element.payload;
+
+		expect(payload.value).toEqual({ en: 'After' });
+		expect(payload.assets).toEqual({});
+
+		(payload.value as Record<string, string>).en = 'Mutated';
+
+		expect(formValue(element)).toEqual({ value: { en: 'After' } });
+	});
 });

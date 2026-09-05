@@ -312,7 +312,22 @@ function onInput(event: Event): void {
 	write(row, set(before, dimension, Number.isNaN(typed) ? before[dimension] : typed, grid), grid);
 }
 
+/**
+ * A stamped row shows the layout its inputs carry: a duplicate copies
+ * the inputs of its source, while its style and dialog still say what
+ * the template did.
+ */
+function onStamp(event: Event): void {
+	const row = event.target;
+	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
+
+	if (row instanceof HTMLElement && container && input(row, 'span')) {
+		write(row, read(row), gridOf(container));
+	}
+}
+
 export function install(): () => void {
+	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
 	document.addEventListener('pointerdown', onPointerDown);
@@ -322,6 +337,7 @@ export function install(): () => void {
 	document.addEventListener('lostpointercapture', onLostCapture);
 
 	return () => {
+		document.removeEventListener('repeater:stamp', onStamp);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
 		document.removeEventListener('pointerdown', onPointerDown);

@@ -97,6 +97,9 @@ $settings = $metaControl !== null || $columns > 1;
 					<button type="button" data-repeater-move="down">
 						<?= $this->escape(__('common:move-down')) ?>
 					</button>
+					<button type="button" data-repeater-duplicate>
+						<?= $this->escape(__('field:duplicate-block')) ?>
+					</button>
 					<button type="button" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>

@@ -137,6 +137,7 @@ return [
 		'field:close' => 'Close',
 		'field:drag-block' => 'Drag to reorder',
 		'field:drag-entry' => 'Drag to reorder',
+		'field:duplicate-block' => 'Duplicate block',
 		'field:entry' => 'Entry',
 		'field:entry-actions' => 'Actions for this entry',
 		'field:entry-count' => ':count entry',

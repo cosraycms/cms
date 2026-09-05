@@ -237,6 +237,22 @@ describe('blocks layout numbers', () => {
 		expect(control('indent').value).toBe('2');
 	});
 
+	it('renders the layout a stamped row carries in its inputs', () => {
+		const { row, input, control } = editor({ span: 6, rows: 1, indent: 2 });
+
+		// A duplicate: the inputs were copied, the style and the dialog were not.
+		input('span').value = '4';
+		input('indent').value = '5';
+		row.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
+
+		expect(row.style.getPropertyValue('--span')).toBe('4');
+		expect(row.style.getPropertyValue('--indent')).toBe('5');
+		expect(row.style.getPropertyValue('--reserved')).toBe('9');
+		expect(row.dataset.indent).toBe('5');
+		expect(control('span').value).toBe('4');
+		expect(control('indent').max).toBe('8');
+	});
+
 	it('writes a layout without touching absent parts', () => {
 		const { row, input } = editor();
 		row.querySelector('dialog')?.remove();

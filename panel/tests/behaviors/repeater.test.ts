@@ -577,6 +577,98 @@ describe('repeater behavior', () => {
 		expect(container.querySelector<HTMLDetailsElement>('details')?.open).toBe(false);
 	});
 
+	it('duplicates a row after itself with its live values under a fresh uid', () => {
+		const typed = (index: string, uid: string, text: string, tone: string): string =>
+			`<div data-repeater-row>
+				<input type="hidden" data-repeater-uid name="${NAME}[${index}][uid]" value="${uid}">
+				<input type="hidden" name="${NAME}[${index}][type]" value="Note">
+				<input name="${NAME}[${index}][fields][text]" value="${text}">
+				<select name="${NAME}[${index}][fields][tone]">
+					<option value="calm"${tone === 'calm' ? ' selected' : ''}>Calm</option>
+					<option value="loud"${tone === 'loud' ? ' selected' : ''}>Loud</option>
+				</select>
+				<input type="checkbox" name="${NAME}[${index}][fields][on]">
+				<input type="number" value="1">
+				<button type="button" data-repeater-duplicate>Duplicate</button>
+			</div>`;
+		const container = repeater([typed('0', 'u-a', 'a', 'calm'), typed('1', 'u-b', 'b', 'loud')], {
+			template: `<template data-repeater-template="Note">${typed('__i__', '', '', 'calm')}</template>`,
+		});
+		const text = (row: Element | undefined): HTMLInputElement | null | undefined =>
+			row?.querySelector<HTMLInputElement>('input[name$="[fields][text]"]');
+		const first = container.querySelector<HTMLElement>('[data-repeater-row]');
+
+		// Edits live on the DOM, not in the attributes the server rendered.
+		text(first ?? undefined)!.value = 'edited';
+		first!.querySelector<HTMLSelectElement>('select')!.value = 'loud';
+		first!.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked = true;
+		// Unnamed controls mirror state and are not copied; the wrong one
+		// would otherwise land in every one of them.
+		first!.insertAdjacentHTML('beforeend', '<input type="number" value="9">');
+
+		let stamped: EventTarget | null = null;
+
+		document.addEventListener('repeater:stamp', (event) => {
+			stamped = event.target;
+		});
+		click(container, '[data-repeater-duplicate]');
+
+		const rows = container.querySelectorAll<HTMLElement>('[data-repeater-row]');
+		const copy = rows[1];
+		const uids = Array.from(
+			container.querySelectorAll<HTMLInputElement>('[data-repeater-uid]'),
+			(input) => input.value,
+		);
+
+		expect(rows).toHaveLength(3);
+		expect(stamped).toBe(copy);
+		expect(text(copy)?.value).toBe('edited');
+		expect(text(copy)?.name).toBe(`${NAME}[1][fields][text]`);
+		expect(copy?.querySelector<HTMLSelectElement>('select')?.value).toBe('loud');
+		expect(copy?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(true);
+		expect(copy?.querySelector<HTMLInputElement>('input[type="number"]')?.value).toBe('1');
+		expect(uids[1]).not.toBe('');
+		expect(uids[1]).not.toBe('u-a');
+		expect(uids[2]).toBe('u-b');
+		expect(text(rows[2])?.value).toBe('b');
+		expect(text(rows[2])?.name).toBe(`${NAME}[2][fields][text]`);
+	});
+
+	it('seeds a duplicated element host with the payload as edited on the source', () => {
+		if (!customElements.get('cosray-host')) {
+			customElements.define(
+				'cosray-host',
+				class extends HTMLElement {
+					get payload(): unknown {
+						return { value: 'edited', assets: {} };
+					}
+				},
+			);
+		}
+
+		const hosted = (index: string, value: string): string =>
+			`<div data-repeater-row>
+				<input type="hidden" data-repeater-uid name="${NAME}[${index}][uid]" value="">
+				<cosray-host name="${NAME}[${index}][fields][body][json]">
+					<script type="application/json">{"value":"${value}"}</script>
+				</cosray-host>
+				<button type="button" data-repeater-duplicate>Duplicate</button>
+			</div>`;
+		const container = repeater([hosted('0', 'saved')], {
+			template: `<template data-repeater-template>${hosted('__i__', '')}</template>`,
+		});
+
+		click(container, '[data-repeater-duplicate]');
+
+		const scripts = container.querySelectorAll('cosray-host > script');
+
+		expect(scripts).toHaveLength(2);
+		expect(JSON.parse(scripts[1]?.textContent ?? '')).toEqual({ value: 'edited', assets: {} });
+		expect(container.querySelectorAll('cosray-host')[1]?.getAttribute('name')).toBe(
+			`${NAME}[1][fields][body][json]`,
+		);
+	});
+
 	it('leaves nested add buttons alone when the outer repeater is full', () => {
 		const template = `<template data-repeater-template>${nestedRow('__i__', '')}</template>`;
 		const container = repeater([], { max: 1, template });

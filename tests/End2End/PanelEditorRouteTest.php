@@ -201,6 +201,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeMissing('//div[@class="kebab-menu"]//*[@data-repeater-insert]', $html);
+		$this->assertHtmlNodeExists('//div[@class="kebab-menu"]/button[@data-repeater-duplicate]', $html);
 		// The layout numbers in the settings dialog, each capped by the room
 		// the others leave: span 6 at indent 3 in twelve columns.
 		$this->assertStringContainsString(

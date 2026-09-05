@@ -137,6 +137,7 @@ return [
 		'field:close' => 'Schließen',
 		'field:drag-block' => 'Ziehen zum Verschieben',
 		'field:drag-entry' => 'Ziehen zum Verschieben',
+		'field:duplicate-block' => 'Block duplizieren',
 		'field:entry' => 'Eintrag',
 		'field:entry-actions' => 'Aktionen für diesen Eintrag',
 		'field:entry-count' => ':count Eintrag',
