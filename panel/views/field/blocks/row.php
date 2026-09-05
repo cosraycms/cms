@@ -63,6 +63,15 @@ $settings = $metaControl !== null || $columns > 1;
 		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
 		value="<?= $layout->indent ?>"
 		data-layout="indent" />
+	<?php // Where a new block lands: in a list on the seam above this one,
+
+	// in a grid before or after it in order, from either side edge. ?>
+	<?php $this->insert('field/blocks/inserter', [
+		'blockTypes' => $blockTypes,
+		'single' => $single,
+		'insert' => 'before',
+		'label' => __($columns > 1 ? 'field:insert-before' : 'field:insert-above'),
+	]) ?>
 	<div class="chrome">
 		<span class="tools">
 			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
@@ -82,39 +91,6 @@ $settings = $metaControl !== null || $columns > 1;
 			<details class="kebab" data-repeater-menu>
 				<summary aria-label="<?= $this->escape(__('field:block-actions')) ?>"></summary>
 				<div class="kebab-menu">
-					<?php if ($single !== null): ?>
-						<button
-							type="button"
-							data-repeater-add="<?= $this->escape($single) ?>"
-							data-repeater-insert="before">
-							<?= $this->escape(__('field:insert-above')) ?>
-						</button>
-						<button
-							type="button"
-							data-repeater-add="<?= $this->escape($single) ?>"
-							data-repeater-insert="after">
-							<?= $this->escape(__('field:insert-below')) ?>
-						</button>
-					<?php else: ?>
-						<details class="picker">
-							<summary><?= $this->escape(__('field:insert-above')) ?></summary>
-							<div class="picker-menu">
-								<?php $this->insert('field/blocks/picker', [
-									'blockTypes' => $blockTypes,
-									'insert' => 'before',
-								]) ?>
-							</div>
-						</details>
-						<details class="picker">
-							<summary><?= $this->escape(__('field:insert-below')) ?></summary>
-							<div class="picker-menu">
-								<?php $this->insert('field/blocks/picker', [
-									'blockTypes' => $blockTypes,
-									'insert' => 'after',
-								]) ?>
-							</div>
-						</details>
-					<?php endif ?>
 					<button type="button" data-repeater-move="up">
 						<?= $this->escape(__('common:move-up')) ?>
 					</button>
@@ -157,6 +133,14 @@ $settings = $metaControl !== null || $columns > 1;
 			'rowId' => $rowId,
 		]) ?>
 	</div>
+	<?php if ($columns > 1) {
+		$this->insert('field/blocks/inserter', [
+			'blockTypes' => $blockTypes,
+			'single' => $single,
+			'insert' => 'after',
+			'label' => __('field:insert-after'),
+		]);
+	} ?>
 	<?php if ($settings): ?>
 		<dialog class="cms-meta" data-meta>
 			<div class="head">

@@ -183,15 +183,24 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
 		$this->assertStringNotContainsString('value="block-gone"', $html);
 		// Templates per offered type, the picker in the footer and the
-		// insert-above/below pickers in the row menu.
+		// inserters on both sides of a grid row; the row menu inserts nothing.
 		$this->assertStringContainsString('data-repeater-template="' . Builtin\Heading::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[__i__][layout][span]"', $html);
 		$this->assertStringContainsString(
 			'data-repeater-add="' . Builtin\RichText::class . '" data-repeater-insert="append"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
-		$this->assertStringContainsString('data-repeater-insert="before"', $html);
-		$this->assertStringContainsString('data-repeater-insert="after"', $html);
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row]/details[contains(@class, "inserter")][contains(@class, "is-before")]'
+				. '/div/button[@data-repeater-insert="before"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row]/details[contains(@class, "inserter")][contains(@class, "is-after")]'
+				. '/div/button[@data-repeater-insert="after"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing('//div[@class="kebab-menu"]//*[@data-repeater-insert]', $html);
 		// The layout numbers in the settings dialog, each capped by the room
 		// the others leave: span 6 at indent 3 in twelve columns.
 		$this->assertStringContainsString(

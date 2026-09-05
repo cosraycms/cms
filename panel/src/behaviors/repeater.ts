@@ -274,17 +274,12 @@ function onInput(event: Event): void {
 	}
 }
 
-// A closed menu also folds its submenus (the insert pickers), so it
-// reopens the way it was first rendered.
 function closeMenus(except: Element | null): void {
 	document
 		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
 		.forEach((menu) => {
 			if (menu !== except) {
 				menu.open = false;
-				menu.querySelectorAll<HTMLDetailsElement>('details[open]').forEach((sub) => {
-					sub.open = false;
-				});
 			}
 		});
 }

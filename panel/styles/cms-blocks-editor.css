@@ -276,7 +276,6 @@
 	}
 
 	& .kebab-menu button,
-	& .kebab-menu .picker summary,
 	& .picker-menu button {
 		display: block;
 		width: 100%;
@@ -295,7 +294,7 @@
 		}
 	}
 
-	/* The insert submenus inside the kebab, and the footer picker. */
+	/* The footer picker and the inserters. */
 	& .picker summary {
 		list-style: none;
 		cursor: pointer;
@@ -305,18 +304,103 @@
 		}
 	}
 
-	& .kebab-menu .picker summary::after {
-		float: right;
+	/*
+	 * The + that inserts before or after this block. It comes and goes
+	 * with the chrome: unclickable while hidden, like the tools. The
+	 * button is the element itself when one type is offered and the
+	 * summary of the picker otherwise.
+	 */
+	& .inserter {
+		position: absolute;
+		z-index: 4;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 120ms ease;
+	}
+
+	& .inserter:not(details),
+	& .inserter > summary {
+		display: grid;
+		width: 1.5rem;
+		height: 1.5rem;
+		padding: 0;
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
 		color: var(--cms-color-text-subtle);
-		content: '›';
+		box-shadow: var(--cms-shadow-sm);
+		font: inherit;
+		place-items: center;
+		cursor: pointer;
+
+		&::before {
+			content: '+';
+			font-size: var(--cms-font-size-base);
+			font-weight: 700;
+			line-height: 1;
+		}
+
+		&:hover {
+			border-color: var(--cms-color-primary);
+			color: var(--cms-color-primary);
+		}
 	}
 
-	& .kebab-menu .picker[open] summary::after {
-		content: '⌄';
+	& .inserter[open] > summary {
+		border-color: var(--cms-color-primary);
+		color: var(--cms-color-primary);
 	}
 
-	& .kebab-menu .picker-menu {
-		padding-left: var(--cms-space-3);
+	& .block:hover > .inserter,
+	& .block:focus-within > .inserter,
+	& .block:has(details[open]) > .inserter {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	& .inserter:has(details[open]),
+	& .inserter[open] {
+		transition: none;
+	}
+
+	/* On the gap line beside the block, halfway down. */
+	& .inserter.is-before {
+		inset-block-start: 50%;
+		inset-inline-start: calc(var(--blocks-gap) / -2 - 1px);
+		translate: -50% -50%;
+	}
+
+	& .inserter.is-after {
+		inset-block-start: 50%;
+		inset-inline-end: calc(var(--blocks-gap) / -2 - 1px);
+		translate: 50% -50%;
+	}
+
+	/* The side handles show their bar above the + so both stay readable. */
+	& .resize.is-start::before,
+	& .resize.is-end::before {
+		inset-block-start: calc(50% - 1.75rem);
+	}
+
+	& .inserter .picker-menu {
+		position: absolute;
+		z-index: 20;
+		top: 100%;
+		min-width: 13rem;
+		margin-top: var(--cms-space-1);
+		padding: var(--cms-space-1);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-md);
+	}
+
+	& .inserter.is-before .picker-menu {
+		left: 0;
+	}
+
+	& .inserter.is-after .picker-menu {
+		right: 0;
 	}
 
 	/* The layout numbers in the settings dialog: three short inputs abreast. */
@@ -398,6 +482,18 @@
 
 		& .body {
 			padding: var(--cms-space-3) var(--blocks-x) var(--cms-space-5);
+		}
+
+		/* Centered on the seam above the block. */
+		& .inserter.is-before {
+			inset-block-start: 0;
+			inset-inline-start: 50%;
+			translate: -50% -50%;
+		}
+
+		& .inserter.is-before .picker-menu {
+			left: 50%;
+			translate: -50% 0;
 		}
 	}
 }

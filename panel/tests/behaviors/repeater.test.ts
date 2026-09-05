@@ -564,10 +564,8 @@ describe('repeater behavior', () => {
 
 	it('focuses the first input of a stamped row and closes the menu it came from', () => {
 		const menu = `<details data-repeater-menu open>
-			<summary>Actions</summary>
-			<details open><summary>Insert above</summary>
-				<button type="button" data-repeater-add data-repeater-insert="before">Row</button>
-			</details>
+			<summary>Insert above</summary>
+			<button type="button" data-repeater-add data-repeater-insert="before">Row</button>
 		</details>`;
 		const container = repeater([row('0', 'a', menu)]);
 
@@ -576,10 +574,7 @@ describe('repeater behavior', () => {
 		const stamped = container.querySelector<HTMLElement>('[data-repeater-row]');
 
 		expect(document.activeElement).toBe(stamped?.querySelector('input'));
-		expect(Array.from(container.querySelectorAll('details'), (details) => details.open)).toEqual([
-			false,
-			false,
-		]);
+		expect(container.querySelector<HTMLDetailsElement>('details')?.open).toBe(false);
 	});
 
 	it('leaves nested add buttons alone when the outer repeater is full', () => {

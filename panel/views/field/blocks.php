@@ -3,10 +3,11 @@
 // Server-rendered blocks: the entries typed repeater with a grid. Rows
 // are placed on a preview grid mirroring the frontend contract
 // (--columns on the container, --span/--rows/--indent on the row) and
-// carry their layout as hidden inputs; the blocks behavior steps them.
-// Add/remove/move/renumber comes from the repeater behavior; the type
-// picker is a <details> menu whose buttons stamp before or after the
-// row they sit in, or append from the footer. Rows are never collapsed.
+// carry their layout as hidden inputs; the blocks behavior edits them.
+// Add/remove/move/renumber comes from the repeater behavior: a + on each
+// row stamps before or after the row it sits in, the footer appends,
+// and either opens a <details> type picker when several types are
+// offered. Rows are never collapsed.
 // Receives one row list in $value and its renumber base — per locale
 // for an asymmetric field, the neutral locale otherwise — in $name.
 
