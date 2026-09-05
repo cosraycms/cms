@@ -199,6 +199,15 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeMissing('//div[@class="kebab-menu"]//*[@data-repeater-insert]', $html);
 		$this->assertHtmlNodeExists('//div[@class="kebab-menu"]/button[@data-repeater-duplicate]', $html);
 		$this->assertHtmlNodeExists('//span[@data-repeater-grip][@tabindex="0"][@aria-keyshortcuts]', $html);
+		// A single-field block is bare: its control renders as content.
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="Cosray\\Block\\Text"]/div[contains(@class, "is-bare")]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//template[@data-repeater-template="Cosray\\Block\\Heading"]/div[contains(@class, "is-bare")]',
+			$html,
+		);
 		// A block field says what belongs into it while empty.
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Text"]//textarea[@placeholder="Write…"]',

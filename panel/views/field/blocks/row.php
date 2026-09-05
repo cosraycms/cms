@@ -31,9 +31,10 @@ $ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locale
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
 $settings = $metaControl !== null || $columns > 1;
+$labels = (bool) ($blockType['labels'] ?? true);
 ?>
 <div
-	class="block"
+	class="block<?= $labels ? '' : ' is-bare' ?>"
 	data-repeater-row
 	<?= $ownsLocales ? 'data-locale-scope' : '' ?>
 	data-meta-owner
@@ -142,7 +143,7 @@ $settings = $metaControl !== null || $columns > 1;
 			'type' => $blockType,
 			'ownsLocales' => $ownsLocales,
 			// One visible field needs no label of its own: the block names it.
-			'labels' => (bool) ($blockType['labels'] ?? true),
+			'labels' => $labels,
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,

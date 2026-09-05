@@ -9,7 +9,9 @@
  * state — its locale pills — stays there at rest. One block per field is
  * active — the focused one, or the hovered one while none is focused —
  * and only it shows its grip, gear, kebab, + and handle bars; the layout
- * numbers live in the settings dialog the gear opens.
+ * numbers live in the settings dialog the gear opens. Inside a bare
+ * block — one visible field, no label — the control is the content: no
+ * frame, reading-size type, a placeholder while empty.
  * Part names are declared on this block (naming rule 5).
  */
 .cms-blocks-editor {
@@ -405,6 +407,77 @@
 
 	& .body {
 		padding: var(--cms-space-3) var(--cms-space-3) var(--cms-space-4);
+	}
+
+	/*
+	 * Content first. In a bare block the control is the content, not a box
+	 * around it: border and background go, the type is the reading size, a
+	 * hairline on hover and the focus ring say it can be edited. The
+	 * negative margin puts the text where the box's edge was. Element
+	 * controls draw their own frame and are left alone; the rich text frame
+	 * is panel CSS and goes with the others.
+	 */
+	& .block.is-bare > .body {
+		& :is(.cms-input, .cms-textarea):not(cosray-host *) {
+			width: calc(100% + 2 * var(--cms-space-2));
+			margin-inline: calc(-1 * var(--cms-space-2));
+			padding: var(--cms-space-1) var(--cms-space-2);
+			border-color: transparent;
+			background: none;
+			font-size: var(--cms-font-size-base);
+			line-height: 1.6;
+
+			&:hover {
+				border-color: var(--cms-color-border-soft);
+			}
+
+			&:focus {
+				border-color: var(--cms-color-focus);
+				box-shadow: var(--cms-focus-ring);
+			}
+		}
+
+		/* Grows with its text where the browser can size a field to its
+		   content; elsewhere the editor drags the corner. */
+		& .cms-textarea:not(cosray-host *) {
+			min-height: 2lh;
+			resize: vertical;
+
+			@supports (field-sizing: content) {
+				field-sizing: content;
+				resize: none;
+			}
+		}
+
+		/* Code stays inverted: it reads as code, not as the document. */
+		& .cms-textarea.iframe {
+			background-color: var(--cms-color-neutral-700);
+			font-size: var(--cms-font-size-sm);
+
+			&::placeholder {
+				color: var(--cms-color-neutral-400);
+			}
+		}
+
+		& .richtext {
+			border-color: transparent;
+			background: none;
+			font-size: var(--cms-font-size-base);
+
+			&:hover:not(:focus-within) {
+				border-color: var(--cms-color-border-soft);
+			}
+
+			& .cms-richtext-toolbar {
+				padding-inline: var(--cms-space-1);
+				border-bottom: 0;
+				background: none;
+			}
+
+			& .ProseMirror {
+				padding: var(--cms-space-1) var(--cms-space-2);
+			}
+		}
 	}
 
 	& .adders {
