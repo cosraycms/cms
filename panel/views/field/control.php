@@ -17,6 +17,7 @@ $views = [
 	'hidden' => 'field/hidden',
 	'textarea' => 'field/textarea',
 	'iframe' => 'field/iframe',
+	'youtube' => 'field/youtube',
 	'checkbox' => 'field/checkbox',
 	'option' => 'field/option',
 	'element' => 'field/element',

@@ -23,7 +23,7 @@ final class FieldControlTest extends TestCase
 	{
 		$expected = [
 			Field\Text::class => 'text',
-			Field\Youtube::class => 'text',
+			Field\Youtube::class => 'youtube',
 			Field\Textarea::class => 'textarea',
 			Field\Number::class => 'number',
 			Field\Decimal::class => 'number',

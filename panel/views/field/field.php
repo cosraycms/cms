@@ -36,7 +36,7 @@ $value = is_array($value) ? $value : [];
 $ownLocales = (bool) ($this->unwrap($ownLocales ?? null) ?? true);
 $ownMeta = (bool) ($this->unwrap($ownMeta ?? null) ?? true);
 $bareLabel = (bool) ($this->unwrap($bareLabel ?? null) ?? false);
-$localized = ['text', 'textarea', 'iframe'];
+$localized = ['text', 'textarea', 'iframe', 'youtube'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);

@@ -374,6 +374,6 @@ The report is written to `blocks-migration-report.json` at the project root, wit
 - `droppedMediaItems` counts items beyond the first in an `image` or `video` block — those types hold one item now.
 - `unknownTypes` lists what was left behind; those rows still hold the legacy shape and will be dropped the next time the node is saved.
 
-Two changes outside the blocks field come with the same release: a standalone `Iframe` field renders its code raw instead of escaped (it was unusable as an embed before), and a `Youtube` field validates its value as a video id (`[A-Za-z0-9_-]{1,64}`) on save and edits its aspect ratio through the field meta dialog — inside a block, through the block's settings dialog.
+Two changes outside the blocks field come with the same release: a standalone `Iframe` field renders its code raw instead of escaped (it was unusable as an embed before), and a `Youtube` field validates its value as a video id (`[A-Za-z0-9_-]{1,64}`) on save, edits its aspect ratio through the field meta dialog — inside a block, through the block's settings dialog — and renders through its own `youtube` control, which shows the video's thumbnail and turns a pasted URL into the id.
 
 Sites whose spans relied on the implicit 12 columns must add `#[Columns(12)]` to those fields — the column count is no longer stored per node, and without the attribute a field is a one-column stack.

@@ -185,6 +185,23 @@
 	min-width: 0;
 }
 
+/* The YouTube control: the thumbnail above the id it belongs to. Not
+   .preview — the node view uses that for its preview pane. */
+.cms-youtube {
+	display: grid;
+	gap: var(--cms-space-2);
+
+	& .thumbnail {
+		display: block;
+		width: 100%;
+		max-width: 28rem;
+		aspect-ratio: 16 / 9;
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface-sunken);
+		object-fit: cover;
+	}
+}
+
 .cms-sub-label {
 	display: block;
 	margin-bottom: var(--cms-space-1);

@@ -13,7 +13,7 @@ namespace Cosray\Panel;
  */
 final class RowLocales
 {
-	private const array SWITCHABLE = ['text', 'textarea', 'iframe', 'element'];
+	private const array SWITCHABLE = ['text', 'textarea', 'iframe', 'youtube', 'element'];
 
 	/** @param array<string, mixed> $type a row type descriptor */
 	public static function owned(array $type, int $locales): bool

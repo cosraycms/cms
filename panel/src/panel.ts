@@ -15,6 +15,7 @@ import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
 import { install as installTransport } from './behaviors/transport';
 import { install as installWhen } from './behaviors/when';
+import { install as installYoutube } from './behaviors/youtube';
 import { installBridge } from '$lib/bridge-standalone';
 import { loadElement } from '$lib/elements';
 import { installHost } from '$lib/host';
@@ -104,6 +105,7 @@ cleanups.push(
 	installBlocks(),
 	installChrome(),
 	installWhen(),
+	installYoutube(),
 	installSubmit(),
 	installTransport(),
 	installErrors(),

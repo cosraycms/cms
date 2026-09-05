@@ -104,6 +104,11 @@ final class Control
 		return new self('iframe');
 	}
 
+	public static function youtube(): self
+	{
+		return new self('youtube');
+	}
+
 	public static function blocks(): self
 	{
 		return new self('blocks');

@@ -17,6 +17,11 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 	/** A video id, not a URL: the value is spliced into the embed `src`. */
 	private const string ID_RULE = 'regex:/^[A-Za-z0-9_-]{1,64}$/';
 
+	public function control(): Control
+	{
+		return Control::youtube();
+	}
+
 	public function metaControl(): ?Control
 	{
 		return Control::group([
