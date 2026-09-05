@@ -1,5 +1,6 @@
 <?php
 
+use Cosray\Block\Heading;
 use Cosray\Block\Layout;
 use Cosray\Panel\RowLocales;
 
@@ -31,6 +32,13 @@ $ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locale
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
 $labels = (bool) ($blockType['labels'] ?? true);
+// A built-in type with an editor view of its own renders as content
+// whatever its field count; the generic form keeps its labels.
+$editor = match ($blockType['type'] ?? null) {
+	Heading::class => 'field/blocks/types/heading',
+	default => null,
+};
+$bare = !$labels || $editor !== null;
 // Sub-fields with a meta group of their own edit it in the block's dialog.
 $subMetas = array_values(array_filter(
 	(array) ($blockType['fields'] ?? []),
@@ -39,7 +47,7 @@ $subMetas = array_values(array_filter(
 $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 ?>
 <div
-	class="block<?= $labels ? '' : ' is-bare' ?>"
+	class="block<?= $bare ? ' is-bare' : '' ?>"
 	data-repeater-row
 	<?= $ownsLocales ? 'data-locale-scope' : '' ?>
 	data-meta-owner
@@ -144,7 +152,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 		<?php endforeach ?>
 	<?php endif ?>
 	<div class="body cms-fields" id="<?= $this->escape("{$rowId}-form") ?>">
-		<?php $this->insert('field/row-fields', [
+		<?php $this->insert($editor ?? 'field/row-fields', [
 			'type' => $blockType,
 			'ownsLocales' => $ownsLocales,
 			'ownMeta' => false,

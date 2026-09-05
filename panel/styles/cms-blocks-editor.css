@@ -459,6 +459,81 @@
 			}
 		}
 
+		/* The heading block: a chip reading "H2" before the text, with the
+		   "H" and the caret drawn by the wrapper around an unstyled select,
+		   and the text at the size of the level the select holds. */
+		& .heading {
+			display: flex;
+			gap: var(--cms-space-1);
+			align-items: baseline;
+
+			& .text {
+				flex: 1 1 auto;
+				min-width: 0;
+			}
+
+			& .text .cms-input {
+				font-weight: 600;
+				letter-spacing: -0.01em;
+				line-height: 1.25;
+			}
+
+			& .level .control {
+				flex-direction: row;
+				gap: 0;
+				align-items: baseline;
+				color: var(--cms-color-text-subtle);
+				font-size: var(--cms-font-size-xs);
+				font-weight: 600;
+				letter-spacing: 0.02em;
+
+				&::before {
+					content: 'H';
+				}
+
+				&::after {
+					padding-inline-start: var(--cms-space-0-5);
+					content: '⌄';
+				}
+
+				&:hover {
+					color: var(--cms-color-text);
+				}
+			}
+
+			& .level .cms-select {
+				width: auto;
+				min-width: 0;
+				padding: 0;
+				border: 0;
+				background: none;
+				color: inherit;
+				font: inherit;
+				appearance: none;
+				cursor: pointer;
+			}
+
+			&:has(.level option[value='1']:checked) .text .cms-input {
+				font-size: var(--cms-font-size-3xl);
+			}
+
+			&:has(.level option[value='2']:checked) .text .cms-input {
+				font-size: var(--cms-font-size-2xl);
+			}
+
+			&:has(.level option[value='3']:checked) .text .cms-input {
+				font-size: var(--cms-font-size-xl);
+			}
+
+			&:has(.level option[value='4']:checked) .text .cms-input {
+				font-size: var(--cms-font-size-lg);
+			}
+
+			&:has(.level option[value='6']:checked) .text .cms-input {
+				font-size: var(--cms-font-size-sm);
+			}
+		}
+
 		& .richtext {
 			border-color: transparent;
 			background: none;
