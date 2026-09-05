@@ -15,6 +15,7 @@ use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
 use Cosray\Schema\Options;
+use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
@@ -47,6 +48,7 @@ class Registry
 		$registry->register(Label::class, new LabelHandler());
 		$registry->register(Icon::class, new IconHandler());
 		$registry->register(Description::class, new DescriptionHandler());
+		$registry->register(Placeholder::class, new PlaceholderHandler());
 		$registry->register(Translate::class, new TranslateHandler());
 		$registry->register(Required::class, new RequiredHandler());
 		$registry->register(Validate::class, new ValidateHandler());

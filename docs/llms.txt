@@ -156,6 +156,7 @@ Field-level attributes (applied to field properties):
 
 - `#[Label('...')]`
 - `#[Description('...')]`
+- `#[Placeholder('...')]` (text-like fields and `Youtube`; shown while the control is empty)
 - `#[Translate]`
 - `#[Translate(TranslateMode::Asymmetric)]`
 - `#[Required]`

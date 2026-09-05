@@ -10,12 +10,14 @@ use Cosray\Schema\Badge;
 use Cosray\Schema\Description;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
+use Cosray\Schema\Placeholder;
 
 #[Label('Reservation form'), Badge('Beta')]
 class SchemaScanNode
 {
 	#[Label('Arrival day')]
 	#[Description('The day the guest arrives')]
+	#[Placeholder('Pick a day')]
 	public Text $arrival;
 
 	#[Label('Room type')]

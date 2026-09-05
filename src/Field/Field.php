@@ -155,7 +155,7 @@ abstract class Field implements
 	 */
 	private function localize(array $properties): array
 	{
-		foreach (['label', 'description'] as $key) {
+		foreach (['label', 'description', 'placeholder'] as $key) {
 			$value = $properties[$key] ?? null;
 
 			if (is_string($value)) {

@@ -8,9 +8,10 @@ use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Text as TextValue;
 
-class Text extends Field implements Capability\Translatable
+class Text extends Field implements Capability\Translatable, Capability\Placeholdable
 {
 	use Capability\IsTranslatable;
+	use Capability\IsPlaceholdable;
 
 	public function value(): TextValue
 	{

@@ -9,6 +9,7 @@ use Cosray\Field;
 use Cosray\Schema\DefaultValue;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
+use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Schema\Validate;
@@ -19,7 +20,7 @@ final class Heading implements Block
 {
 	public const int DEFAULT_LEVEL = 2;
 
-	#[Label('block:heading-text'), Required, Translate]
+	#[Label('block:heading-text'), Required, Translate, Placeholder('block:heading-placeholder')]
 	protected Field\Text $text;
 
 	// The option shape alone accepts any string, hence the rule.

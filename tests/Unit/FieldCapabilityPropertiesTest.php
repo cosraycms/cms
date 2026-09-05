@@ -29,6 +29,7 @@ use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
 use Cosray\Schema\Options;
+use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Syntax;
@@ -209,6 +210,23 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('description', $properties);
 		$this->assertEquals('Test description', $properties['description']);
+	}
+
+	public function testPlaceholderCapabilityReturnsPlaceholderProperty(): void
+	{
+		$field = $this->createTextField();
+		$meta = new Placeholder('Write…');
+
+		$properties = $this->applyAndGetProperties($meta, $field);
+
+		$this->assertSame('Write…', $properties['placeholder']);
+	}
+
+	public function testPlaceholderOnAFieldWithoutTextRejects(): void
+	{
+		$this->expectException(RuntimeException::class);
+
+		$this->applyAndGetProperties(new Placeholder('Pick one'), $this->createOptionField());
 	}
 
 	public function testHiddenCapabilityReturnsHiddenProperty(): void

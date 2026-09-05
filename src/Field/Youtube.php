@@ -8,10 +8,11 @@ use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Youtube as YoutubeValue;
 
-class Youtube extends Field implements Capability\Translatable, Capability\Limitable
+class Youtube extends Field implements Capability\Translatable, Capability\Limitable, Capability\Placeholdable
 {
 	use Capability\IsTranslatable;
 	use Capability\IsLimitable;
+	use Capability\IsPlaceholdable;
 
 	/** A video id, not a URL: the value is spliced into the embed `src`. */
 	private const string ID_RULE = 'regex:/^[A-Za-z0-9_-]{1,64}$/';

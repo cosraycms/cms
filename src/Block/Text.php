@@ -7,6 +7,7 @@ namespace Cosray\Block;
 use Cosray\Contract\Block;
 use Cosray\Field;
 use Cosray\Schema\Label;
+use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
@@ -14,7 +15,7 @@ use Cosray\Value\Block as BlockValue;
 #[Label('block:text')]
 final class Text implements Block
 {
-	#[Label('block:text'), Required, Translate]
+	#[Label('block:text'), Required, Translate, Placeholder('block:text-placeholder')]
 	protected Field\Textarea $text;
 
 	public function render(BlockValue $block, RenderContext $ctx): string

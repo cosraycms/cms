@@ -13,6 +13,7 @@ use Cosray\Schema\Badge;
 use Cosray\Schema\Description;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
+use Cosray\Schema\Placeholder;
 use ReflectionClass;
 
 /**
@@ -122,6 +123,10 @@ final class SchemaScanner implements Scanner
 
 			foreach ($property->getAttributes(Description::class) as $attribute) {
 				$this->add($messages, $attribute->newInstance()->description, $where);
+			}
+
+			foreach ($property->getAttributes(Placeholder::class) as $attribute) {
+				$this->add($messages, $attribute->newInstance()->placeholder, $where);
 			}
 
 			foreach ($property->getAttributes(Options::class) as $attribute) {

@@ -1,5 +1,6 @@
 <?php
 
+$field = (array) $this->unwrap($field);
 $control = (array) $this->unwrap($control);
 $props = (array) ($control['props'] ?? []);
 
@@ -9,5 +10,5 @@ $this->insert('field/input', [
 	'name' => $name,
 	'value' => $value ?? null,
 	'type' => 'text',
-	'attrs' => ['placeholder' => $props['placeholder'] ?? null],
+	'attrs' => ['placeholder' => $props['placeholder'] ?? $field['placeholder'] ?? null],
 ]);

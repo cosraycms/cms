@@ -34,6 +34,7 @@ final class SchemaScannerTest extends TestCase
 				'Arrival day',
 				'Beta',
 				'Double room',
+				'Pick a day',
 				'Reservation form',
 				'Room type',
 				'Single room',

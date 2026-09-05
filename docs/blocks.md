@@ -53,6 +53,8 @@ Fieldsets come from `#[Fieldset]` on embedded properties, as on entry types.
 
 ### Sub-fields
 
+A block field can carry `#[Placeholder('...')]` — a lang key or literal shown inside the empty control — and the built-in single-field types do, so an empty block says what belongs into it. The attribute is available on every text-like field and on `Youtube`, in blocks and at the top level alike.
+
 A block **marks none of its fields as required** in the editor: reaching for a block is what makes its content mandatory, so the mark would tell an editor nothing the block does not already say. `#[Required]` still validates — it is only the panel's view of the field that loses the marker, which also takes the required outline the rich text and media controls draw. Entry rows and top-level fields are unaffected.
 
 Every field class works inside a block type, with two rules:
