@@ -182,8 +182,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// A row of a type no longer offered renders without inputs.
 		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
 		$this->assertStringNotContainsString('value="block-gone"', $html);
-		// Templates per offered type, the picker in the footer and the
-		// inserters on both sides of a grid row; the row menu inserts nothing.
+		// Templates per offered type, the picker in the footer and one
+		// inserter per row, before it; the row menu inserts nothing.
 		$this->assertStringContainsString('data-repeater-template="' . Builtin\Heading::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[__i__][layout][span]"', $html);
 		$this->assertStringContainsString(
@@ -191,15 +191,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-repeater-row]/details[contains(@class, "inserter")][contains(@class, "is-before")]'
+			'//div[@data-repeater-row]/details[contains(@class, "inserter")]'
 				. '/div/button[@data-repeater-insert="before"]',
 			$html,
 		);
-		$this->assertHtmlNodeExists(
-			'//div[@data-repeater-row]/details[contains(@class, "inserter")][contains(@class, "is-after")]'
-				. '/div/button[@data-repeater-insert="after"]',
-			$html,
-		);
+		$this->assertHtmlNodeMissing('//div[@data-repeater-row]//*[@data-repeater-insert="after"]', $html);
 		$this->assertHtmlNodeMissing('//div[@class="kebab-menu"]//*[@data-repeater-insert]', $html);
 		$this->assertHtmlNodeExists('//div[@class="kebab-menu"]/button[@data-repeater-duplicate]', $html);
 		$this->assertHtmlNodeExists('//span[@data-repeater-grip][@tabindex="0"][@aria-keyshortcuts]', $html);

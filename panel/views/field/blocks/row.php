@@ -63,9 +63,9 @@ $settings = $metaControl !== null || $columns > 1;
 		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
 		value="<?= $layout->indent ?>"
 		data-layout="indent" />
-	<?php // Where a new block lands: in a list on the seam above this one,
+	<?php // Where a new block lands: before this one — above it in a list,
 
-	// in a grid before or after it in order, from either side edge. ?>
+	// before it in order in a grid. The footer appends. ?>
 	<?php $this->insert('field/blocks/inserter', [
 		'blockTypes' => $blockTypes,
 		'single' => $single,
@@ -148,14 +148,6 @@ $settings = $metaControl !== null || $columns > 1;
 			'rowId' => $rowId,
 		]) ?>
 	</div>
-	<?php if ($columns > 1) {
-		$this->insert('field/blocks/inserter', [
-			'blockTypes' => $blockTypes,
-			'single' => $single,
-			'insert' => 'after',
-			'label' => __('field:insert-after'),
-		]);
-	} ?>
 	<?php if ($settings): ?>
 		<dialog class="cms-meta" data-meta>
 			<div class="head">

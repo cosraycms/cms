@@ -144,7 +144,6 @@ return [
 		'field:entry-count-plural' => ':count Einträge',
 		'field:indent' => 'Einzug',
 		'field:insert-above' => 'Darüber einfügen',
-		'field:insert-after' => 'Danach einfügen',
 		'field:insert-before' => 'Davor einfügen',
 		'field:meta' => 'Meta',
 		'field:remove' => 'Entfernen',

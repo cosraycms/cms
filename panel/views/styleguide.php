@@ -279,8 +279,8 @@ $rows = (array) $this->unwrap($rows);
 					The typed repeater with a grid. A one-column field is a quiet list; a
 					twelve-column field places its blocks on the preview grid — drag an edge
 					to resize, or open the gear for the width, rows and indent as numbers
-					next to the block's class and id. The + on a hovered block's seam (list)
-					or side edges (grid) inserts before or after it.
+					next to the block's class and id. The + over a block's start corner
+					inserts before it.
 				</p>
 				<div class="cms-node">
 					<div class="inner">
