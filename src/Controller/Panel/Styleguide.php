@@ -7,11 +7,13 @@ namespace Cosray\Controller\Panel;
 use Cosray\Block as Builtin;
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
+use Cosray\Field\Iframe;
 use Cosray\Field\Image;
 use Cosray\Field\Option;
 use Cosray\Field\RichText;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
+use Cosray\Field\Youtube;
 use Cosray\Locales;
 use Cosray\Panel\System;
 use Cosray\Richtext\Envelope;
@@ -426,6 +428,20 @@ final class Styleguide extends Panel
 			['key' => 'class', 'label' => 'CSS class', 'control' => Control::text()],
 			['key' => 'id', 'label' => 'Element ID', 'control' => Control::text()],
 		])->array();
+		$aspect = Control::group([
+			[
+				'key' => 'aspectRatioX',
+				'label' => 'Aspect ratio width',
+				'control' => Control::number(step: 1, min: 1),
+				'width' => 50,
+			],
+			[
+				'key' => 'aspectRatioY',
+				'label' => 'Aspect ratio height',
+				'control' => Control::number(step: 1, min: 1),
+				'width' => 50,
+			],
+		])->array();
 		$types = static fn(bool $translate): array => [
 			[
 				'type' => Builtin\RichText::class,
@@ -469,6 +485,56 @@ final class Styleguide extends Panel
 						'control' => ['name' => 'option', 'props' => []],
 						'options' => ['1', '2', '3', '4', '5', '6'],
 						'width' => 25,
+					],
+				],
+				'fieldsets' => [],
+			],
+			[
+				'type' => Builtin\Text::class,
+				'handle' => 'text',
+				'label' => 'Plain text',
+				'labels' => false,
+				'fields' => [
+					[
+						'name' => 'text',
+						'label' => 'Plain text',
+						'type' => Textarea::class,
+						'control' => ['name' => 'textarea', 'props' => []],
+						'placeholder' => 'Write…',
+						'translate' => $translate,
+					],
+				],
+				'fieldsets' => [],
+			],
+			[
+				'type' => Builtin\Youtube::class,
+				'handle' => 'youtube',
+				'label' => 'YouTube video',
+				'labels' => false,
+				'fields' => [
+					[
+						'name' => 'video',
+						'label' => 'YouTube video',
+						'type' => Youtube::class,
+						'control' => ['name' => 'text', 'props' => []],
+						'placeholder' => 'YouTube URL or video id',
+						'metaControl' => $aspect,
+					],
+				],
+				'fieldsets' => [],
+			],
+			[
+				'type' => Builtin\Iframe::class,
+				'handle' => 'iframe',
+				'label' => 'Iframe',
+				'labels' => false,
+				'fields' => [
+					[
+						'name' => 'code',
+						'label' => 'Iframe',
+						'type' => Iframe::class,
+						'control' => ['name' => 'iframe', 'props' => []],
+						'placeholder' => 'Paste the embed code',
 					],
 				],
 				'fieldsets' => [],
@@ -526,7 +592,7 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'asymmetric',
-				'description' => 'Width steps in the header, rows and indent in the block menu; the grid follows.',
+				'description' => 'Drag an edge to resize; the gear holds width, rows and indent as numbers.',
 			],
 		];
 	}
@@ -573,6 +639,30 @@ final class Styleguide extends Panel
 			'layout' => $layout,
 			'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
 		];
+		$text = static fn(string $uid, array $layout, array $value): array => [
+			'uid' => $uid,
+			'type' => Builtin\Text::class,
+			'layout' => $layout,
+			'fields' => ['text' => ['type' => Textarea::class, 'value' => $value]],
+		];
+		$youtube = static fn(string $uid, array $layout, string $id): array => [
+			'uid' => $uid,
+			'type' => Builtin\Youtube::class,
+			'layout' => $layout,
+			'fields' => [
+				'video' => [
+					'type' => Youtube::class,
+					'value' => ['zxx' => $id],
+					'meta' => ['aspectRatioX' => ['zxx' => 16], 'aspectRatioY' => ['zxx' => 9]],
+				],
+			],
+		];
+		$iframe = static fn(string $uid, array $layout, string $code): array => [
+			'uid' => $uid,
+			'type' => Builtin\Iframe::class,
+			'layout' => $layout,
+			'fields' => ['code' => ['type' => Iframe::class, 'value' => ['zxx' => $code]]],
+		];
 
 		return [
 			'story' => [
@@ -583,7 +673,11 @@ final class Styleguide extends Panel
 							'en' => $doc('The new mash tun arrives in autumn.'),
 							'de' => $doc('Die neue Maischepfanne wird im Herbst eingebaut.'),
 						]),
-						$image('sg-story-3', $layout(1), 'sg-cover'),
+						$text('sg-story-3', $layout(1), [
+							'en' => "Opening hours\nTuesday to Saturday, 10 to 18.",
+							'de' => "Öffnungszeiten\nDienstag bis Samstag, 10 bis 18 Uhr.",
+						]),
+						$image('sg-story-4', $layout(1), 'sg-cover'),
 					],
 				],
 			],
@@ -597,6 +691,12 @@ final class Styleguide extends Panel
 						$richtext('sg-grid-5', $layout(4), ['zxx' => $doc('A third.')]),
 						$richtext('sg-grid-6', $layout(4), ['zxx' => $doc('Another third.')]),
 						$richtext('sg-grid-7', $layout(4), ['zxx' => $doc('And the last third.')]),
+						$youtube('sg-grid-8', $layout(6), 'dQw4w9WgXcQ'),
+						$iframe(
+							'sg-grid-9',
+							$layout(6),
+							'<iframe src="https://example.org/embed" title="Map"></iframe>',
+						),
 					],
 					'de' => [
 						$heading('sg-grid-8', $layout(12), ['zxx' => 'Die deutsche Liste'], '2'),
