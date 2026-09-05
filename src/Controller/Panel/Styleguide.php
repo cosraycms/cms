@@ -575,7 +575,7 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'symmetric',
-				'description' => 'A stacked list: no layout controls, the sub-fields carry the locale tabs.',
+				'description' => 'A stacked list: no layout controls, the row carries the locale tabs.',
 			],
 			[
 				'name' => 'grid',
