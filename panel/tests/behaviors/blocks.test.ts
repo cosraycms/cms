@@ -67,7 +67,7 @@ function editor(
 				<input type="hidden" name="${NAME}[0][layout][span]" value="${layout.span}" data-layout="span">
 				<input type="hidden" name="${NAME}[0][layout][rows]" value="${layout.rows}" data-layout="rows">
 				<input type="hidden" name="${NAME}[0][layout][indent]" value="${layout.indent}" data-layout="indent">
-				<div class="toolbar">${stepper('span', layout.span)}</div>
+				<div class="chrome"><span class="tools">${stepper('span', layout.span)}</span></div>
 				<div class="kebab-menu">
 					${stepper('span', layout.span)}
 					${stepper('rows', layout.rows)}

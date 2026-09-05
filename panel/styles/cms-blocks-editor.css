@@ -4,8 +4,10 @@
  * --rows, --indent and --reserved (plus data-indent) on the block — so a
  * block sits where the site will place it. A one-column field is a quiet list of
  * blocks separated by hairlines; a multi-column field renders bordered
- * cells. Every block has a header strip: the type label always, the
- * grip, stepper, gear and kebab on hover and focus-within. A narrow
+ * cells. A block carries no header: its chrome is a group hanging over
+ * its top right corner, and only what says something about the block's
+ * state — its locale pills — stays there at rest. The grip, stepper,
+ * gear and kebab come with the pointer and with keyboard focus. A narrow
  * block (container query) folds the stepper into the kebab.
  * Part names are declared on this block (naming rule 5).
  */
@@ -28,7 +30,7 @@
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
 		gap: var(--blocks-gap);
-		padding: 0 var(--blocks-x) var(--cms-space-4);
+		padding: var(--cms-space-2) var(--blocks-x) var(--cms-space-4);
 	}
 
 	& .cms-control-unknown {
@@ -60,8 +62,10 @@
 			opacity: 0.4;
 		}
 
-		&.sortable-chosen > .toolbar {
-			background: var(--cms-color-hover);
+		/* The hovered block's chrome hangs into its neighbour and has to
+		   paint over it. */
+		&:hover {
+			z-index: 3;
 		}
 	}
 
@@ -135,33 +139,48 @@
 		user-select: none;
 	}
 
-	& .toolbar {
+	/*
+	 * Hangs half over the block's top edge, right-aligned, so it needs no
+	 * gutter of its own — at rest it is as wide as what stays visible.
+	 */
+	& .chrome {
+		position: absolute;
+		z-index: 15;
+		inset-block-start: -0.875rem;
+		inset-inline-end: var(--cms-space-2);
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-1);
-		min-height: 2rem;
-		padding: 0 var(--cms-space-1-5) 0 var(--cms-space-2);
-		border-bottom: 1px solid var(--cms-color-border-soft);
-		border-radius: var(--cms-radius-md) var(--cms-radius-md) 0 0;
-
-		/* Only the label stays put; the controls appear on hover and for
-		   keyboard focus, staying in the tab order all along. */
-		& > :not(.kind) {
-			opacity: 0;
-			transition: opacity 120ms ease;
-		}
-
-		/* A fading element is a stacking context of its own, which would
-		   put the opening menu under the richtext toolbar for a moment. */
-		& > .kebab[open] {
-			transition: none;
-		}
 	}
 
-	& .block:hover > .toolbar > *,
-	& .block:focus-within > .toolbar > *,
-	& .block:has(details[open]) > .toolbar > * {
+	/* The controls: hidden means unclickable, or the invisible group would
+	   swallow clicks meant for the block underneath it. */
+	& .tools {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-1);
+		height: 1.75rem;
+		padding: 0 var(--cms-space-1-5);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-sm);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 120ms ease;
+	}
+
+	& .block:hover > .chrome > .tools,
+	& .block:focus-within > .chrome > .tools,
+	& .block:has(details[open]) > .chrome > .tools {
 		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* A fading element is a stacking context of its own, which would put
+	   the opening menu under the richtext toolbar for a moment. */
+	& .tools:has(details[open]) {
+		transition: none;
 	}
 
 	& .grip {
@@ -174,8 +193,8 @@
 	}
 
 	& .kind {
-		flex: 1 1 auto;
 		min-width: 0;
+		max-width: 12rem;
 		overflow: hidden;
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-xs);
@@ -343,7 +362,7 @@
 	}
 
 	/* A stepper row in the kebab: label, then −, value, +. The width row
-	   only shows where the toolbar folded it away. */
+	   only shows where the chrome folded it away. */
 	& .layout {
 		display: flex;
 		align-items: center;
@@ -422,7 +441,7 @@
 	&.is-list {
 		& .grid {
 			gap: 0;
-			padding: 0;
+			padding: var(--cms-space-2) 0 0;
 		}
 
 		& .block {
@@ -431,20 +450,15 @@
 			border-radius: 0;
 		}
 
-		& .toolbar {
-			border-bottom: 0;
-			border-radius: 0;
-		}
-
 		& .body {
-			padding: 0 var(--blocks-x) var(--cms-space-5);
+			padding: var(--cms-space-3) var(--blocks-x) var(--cms-space-5);
 		}
 	}
 }
 
 /* A narrow block folds the width stepper into the kebab. */
 @container (max-width: 18rem) {
-	.cms-blocks-editor .toolbar > .span {
+	.cms-blocks-editor .tools > .span {
 		display: none;
 	}
 
