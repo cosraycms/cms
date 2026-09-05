@@ -1,6 +1,7 @@
 // Contract-level tests against hand-built DOM mirroring what
 // panel/views/field/blocks.php renders: a container with the grid
-// bounds, a row with its hidden layout inputs, badges and step buttons.
+// bounds, a row with its hidden layout inputs and the number inputs of
+// its settings dialog.
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -9,13 +10,13 @@ import {
 	grid,
 	install,
 	MAX_ROWS,
-	parseStep,
+	parseDimension,
 	pitch,
 	ratchet,
 	read,
 	resize,
+	set,
 	shift,
-	step,
 	write,
 } from '../../src/behaviors/blocks';
 
@@ -33,12 +34,13 @@ afterEach(() => {
 	document.body.innerHTML = '';
 });
 
-function stepper(dimension: string, value: number): string {
-	return `<span class="stepper">
-		<button type="button" data-layout-step="${dimension}:-1">−</button>
-		<span data-layout-badge="${dimension}">${value}</span>
-		<button type="button" data-layout-step="${dimension}:+1">+</button>
-	</span>`;
+function number(dimension: string, value: number, low: number, high: number): string {
+	return `<input
+		type="number"
+		data-layout-input="${dimension}"
+		value="${value}"
+		min="${low}"
+		max="${high}">`;
 }
 
 function editor(
@@ -47,8 +49,7 @@ function editor(
 ): {
 	row: HTMLElement;
 	input: (dimension: string) => HTMLInputElement;
-	button: (step: string) => HTMLButtonElement;
-	badge: (dimension: string) => HTMLElement;
+	control: (dimension: string) => HTMLInputElement;
 } {
 	document.body.innerHTML = `<div
 		data-repeater
@@ -67,12 +68,13 @@ function editor(
 				<input type="hidden" name="${NAME}[0][layout][span]" value="${layout.span}" data-layout="span">
 				<input type="hidden" name="${NAME}[0][layout][rows]" value="${layout.rows}" data-layout="rows">
 				<input type="hidden" name="${NAME}[0][layout][indent]" value="${layout.indent}" data-layout="indent">
-				<div class="chrome"><span class="tools">${stepper('span', layout.span)}</span></div>
-				<div class="kebab-menu">
-					${stepper('span', layout.span)}
-					${stepper('rows', layout.rows)}
-					${stepper('indent', layout.indent)}
-				</div>
+				<dialog data-meta>
+					<div class="layout">
+						${number('span', layout.span, bounds.min, bounds.columns - layout.indent)}
+						${number('rows', layout.rows, 1, MAX_ROWS)}
+						${number('indent', layout.indent, 0, bounds.columns - layout.span)}
+					</div>
+				</dialog>
 			</div>
 		</div>
 	</div>`;
@@ -83,8 +85,8 @@ function editor(
 		throw new Error('row missing');
 	}
 
-	const one = <T extends Element>(selector: string): T => {
-		const found = row.querySelector<T>(selector);
+	const one = (selector: string): HTMLInputElement => {
+		const found = row.querySelector<HTMLInputElement>(selector);
 
 		if (!found) {
 			throw new Error(`missing ${selector}`);
@@ -95,13 +97,22 @@ function editor(
 
 	return {
 		row,
-		input: (dimension) => one<HTMLInputElement>(`input[data-layout="${dimension}"]`),
-		button: (step) => one<HTMLButtonElement>(`[data-layout-step="${step}"]`),
-		badge: (dimension) => one<HTMLElement>(`[data-layout-badge="${dimension}"]`),
+		input: (dimension) => one(`input[data-layout="${dimension}"]`),
+		control: (dimension) => one(`input[data-layout-input="${dimension}"]`),
 	};
 }
 
-describe('blocks layout stepping', () => {
+/** Types into a number input; committing is what leaving it does. */
+function type(control: HTMLInputElement, value: string, commit = false): void {
+	control.value = value;
+	control.dispatchEvent(new Event('input', { bubbles: true }));
+
+	if (commit) {
+		control.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+}
+
+describe('blocks layout numbers', () => {
 	it('clamps span into [min, columns] and rows into [1, MAX_ROWS]', () => {
 		const twelve = grid(12, 2);
 
@@ -119,20 +130,29 @@ describe('blocks layout stepping', () => {
 	});
 
 	it('keeps the indent within the room the span leaves', () => {
+		expect(clamp({ span: 8, rows: 1, indent: 6 }, grid(12, 2)).indent).toBe(4);
+	});
+
+	it('caps a dimension by the room the others leave instead of moving them', () => {
 		const twelve = grid(12, 2);
 
-		expect(clamp({ span: 8, rows: 1, indent: 6 }, twelve).indent).toBe(4);
-		// Widening re-clamps the indent; narrowing leaves it alone.
-		expect(step({ span: 8, rows: 1, indent: 4 }, 'span', 1, twelve)).toEqual({
-			span: 9,
+		// Widening stops at the grid's edge; the indent never gives way.
+		expect(set({ span: 8, rows: 1, indent: 4 }, 'span', 9, twelve)).toEqual({
+			span: 8,
 			rows: 1,
-			indent: 3,
+			indent: 4,
 		});
-		expect(step({ span: 8, rows: 1, indent: 4 }, 'span', -1, twelve)).toEqual({
+		expect(set({ span: 8, rows: 1, indent: 4 }, 'span', 7, twelve)).toEqual({
 			span: 7,
 			rows: 1,
 			indent: 4,
 		});
+		expect(set({ span: 8, rows: 1, indent: 4 }, 'indent', 9, twelve)).toEqual({
+			span: 8,
+			rows: 1,
+			indent: 4,
+		});
+		expect(set({ span: 8, rows: 1, indent: 4 }, 'rows', 99, twelve).rows).toBe(MAX_ROWS);
 	});
 
 	it('bounds every dimension given the others', () => {
@@ -141,6 +161,7 @@ describe('blocks layout stepping', () => {
 			rows: { low: 1, high: MAX_ROWS },
 			indent: { low: 0, high: 4 },
 		});
+		expect(bounds({ span: 6, rows: 1, indent: 3 }, grid(12, 2)).span).toEqual({ low: 2, high: 9 });
 	});
 
 	it('normalizes a degenerate grid', () => {
@@ -149,83 +170,76 @@ describe('blocks layout stepping', () => {
 		expect(grid(6.7, 2.2)).toEqual({ columns: 6, min: 2 });
 	});
 
-	it('parses step attributes and rejects anything else', () => {
-		expect(parseStep('span:+1')).toEqual({ dimension: 'span', delta: 1 });
-		expect(parseStep('indent:-2')).toEqual({ dimension: 'indent', delta: -2 });
-		expect(parseStep('width:+1')).toBeNull();
-		expect(parseStep('span:1')).toBeNull();
-		expect(parseStep(null)).toBeNull();
+	it('parses a dimension and rejects anything else', () => {
+		expect(parseDimension('span')).toBe('span');
+		expect(parseDimension('indent')).toBe('indent');
+		expect(parseDimension('width')).toBeNull();
+		expect(parseDimension(null)).toBeNull();
 	});
 
-	it('steps the hidden input, the custom properties, the badges and data-indent', () => {
-		const { row, input, button, badge } = editor();
+	it('applies a typed value to the hidden input, the custom properties and data-indent', () => {
+		const { row, input, control } = editor();
 
-		button('span:+1').click();
+		type(control('span'), '7');
 
 		expect(input('span').value).toBe('7');
 		expect(row.style.getPropertyValue('--span')).toBe('7');
-		expect(badge('span').textContent).toBe('7');
-		expect(
-			Array.from(row.querySelectorAll('[data-layout-badge="span"]'), (el) => el.textContent),
-		).toEqual(['7', '7']);
+		expect(row.style.getPropertyValue('--reserved')).toBe('9');
+		// The room the width leaves is the indent's new limit.
+		expect(control('indent').max).toBe('5');
 
-		button('rows:+1').click();
-		button('indent:-1').click();
+		type(control('rows'), '2');
+		type(control('indent'), '1');
 
 		expect(input('rows').value).toBe('2');
 		expect(row.style.getPropertyValue('--rows')).toBe('2');
 		expect(input('indent').value).toBe('1');
 		expect(row.style.getPropertyValue('--indent')).toBe('1');
 		expect(row.dataset.indent).toBe('1');
+		expect(control('span').max).toBe('11');
 		expect(read(row)).toEqual({ span: 7, rows: 2, indent: 1 });
 	});
 
-	it('disables the buttons at a bound and re-enables them on the way back', () => {
-		const { button } = editor({ span: 11, rows: 1, indent: 0 });
+	it('caps the width at the grid edge instead of pulling the indent in', () => {
+		const { input, control } = editor({ span: 8, rows: 1, indent: 4 });
 
-		button('span:+1').click();
+		type(control('span'), '9', true);
 
-		expect(button('span:+1').disabled).toBe(true);
-		expect(button('span:-1').disabled).toBe(false);
-		// Full width leaves no room for an indent.
-		expect(button('indent:+1').disabled).toBe(true);
-		expect(button('indent:-1').disabled).toBe(true);
-
-		button('span:-1').click();
-
-		expect(button('span:+1').disabled).toBe(false);
-		expect(button('indent:+1').disabled).toBe(false);
+		expect(input('span').value).toBe('8');
+		expect(input('indent').value).toBe('4');
+		expect(control('span').value).toBe('8');
 	});
 
-	it('re-clamps the indent when the span widens into it', () => {
-		const { input, button } = editor({ span: 8, rows: 1, indent: 4 });
+	it('waits for an out-of-range or half-typed value to commit', () => {
+		const { input, control } = editor();
 
-		button('span:+1').click();
+		// On the way to 10, the 1 is below the minimum of 2.
+		type(control('span'), '1');
 
-		expect(input('span').value).toBe('9');
-		expect(input('indent').value).toBe('3');
-	});
+		expect(input('span').value).toBe('6');
+		expect(control('span').value).toBe('1');
 
-	it('dispatches a bubbling change only when something moved', () => {
-		const { button } = editor({ span: 12, rows: MAX_ROWS, indent: 0 });
-		let changes = 0;
-		const count = (): void => {
-			changes += 1;
-		};
+		type(control('span'), '10');
 
-		document.addEventListener('change', count);
-		button('span:+1').click();
-		button('rows:+1').click();
-		button('indent:+1').click();
-		button('span:-1').click();
-		document.removeEventListener('change', count);
+		expect(input('span').value).toBe('10');
 
-		expect(changes).toBe(1);
+		type(control('span'), '');
+
+		expect(input('span').value).toBe('10');
+
+		type(control('span'), '', true);
+
+		expect(control('span').value).toBe('10');
+
+		type(control('indent'), '7', true);
+
+		expect(input('indent').value).toBe('2');
+		expect(control('indent').value).toBe('2');
 	});
 
 	it('writes a layout without touching absent parts', () => {
 		const { row, input } = editor();
-		row.querySelector('.kebab-menu')?.remove();
+		row.querySelector('dialog')?.remove();
 
 		write(row, { span: 3, rows: 4, indent: 5 }, grid(12, 2));
 
@@ -235,10 +249,11 @@ describe('blocks layout stepping', () => {
 		expect(row.style.getPropertyValue('--rows')).toBe('4');
 	});
 
-	it('ignores clicks outside a repeater row', () => {
-		document.body.innerHTML = `<button type="button" data-layout-step="span:+1">+</button>`;
+	it('ignores inputs outside a repeater row', () => {
+		document.body.innerHTML = `<input type="number" data-layout-input="span" value="3">`;
+		const stray = document.querySelector<HTMLInputElement>('input');
 
-		expect(() => document.querySelector<HTMLElement>('button')?.click()).not.toThrow();
+		expect(() => stray && type(stray, '4', true)).not.toThrow();
 	});
 });
 

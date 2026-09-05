@@ -192,8 +192,17 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		$this->assertStringContainsString('data-repeater-insert="before"', $html);
 		$this->assertStringContainsString('data-repeater-insert="after"', $html);
-		$this->assertStringContainsString('data-layout-step="span:+1"', $html);
-		$this->assertStringContainsString('data-layout-step="indent:-1"', $html);
+		// The layout numbers in the settings dialog, each capped by the room
+		// the others leave: span 6 at indent 3 in twelve columns.
+		$this->assertStringContainsString(
+			'data-layout-input="span" value="6" min="2" max="9"',
+			preg_replace('/\s+/', ' ', $html) ?? '',
+		);
+		$this->assertStringContainsString(
+			'data-layout-input="indent" value="3" min="0" max="6"',
+			preg_replace('/\s+/', ' ', $html) ?? '',
+		);
+		$this->assertStringNotContainsString('data-layout-step', $html);
 	}
 
 	public function testPanelEditorRouteRendersShellForAuthenticatedUsers(): void

@@ -1,17 +1,19 @@
-// Layout stepping for the blocks editor. A block row carries its
-// layout as hidden inputs (data-layout="span|rows|indent"); a click on
-// a [data-layout-step="span:+1"] button steps one of them within the
-// bounds the field's shape and the save patch enforce — span in
-// [min, columns], rows in [1, MAX_ROWS], indent in [0, columns − span],
-// a span change re-clamping the indent — then writes the input, the
-// row's custom properties and data-indent (the grid preview follows),
-// the value badges, disables the buttons that reached a bound and
-// dispatches change so the dirty guard sees the edit. The bounds come
-// from the container's data-columns/data-min. A row's edges also drag:
-// a pointer gesture on a [data-layout-resize] handle maps the travelled
-// distance to whole steps and writes the layout through the same path. Each edge moves only itself — the end edge grows the span up to
-// the grid's edge, the start edge trades indent against span so the end
-// edge stays put, and the bottom edge counts rows.
+// Layout editing for the blocks editor. A block row carries its layout
+// as hidden inputs (data-layout="span|rows|indent") and, in its settings
+// dialog, one number input per dimension ([data-layout-input]). Typing
+// into one applies the value as it is typed, within the bounds the
+// field's shape and the save patch enforce — span in
+// [min, columns − indent], rows in [1, MAX_ROWS], indent in
+// [0, columns − span]; a dimension is capped by the room the others
+// leave and never moves them — then writes the hidden input, the row's
+// custom properties and data-indent (the grid preview follows) and the
+// other inputs' limits. The bounds come from the container's
+// data-columns/data-min. A row's edges also drag: a pointer gesture on a
+// [data-layout-resize] handle maps the travelled distance to whole steps
+// and writes the layout through the same path. Each edge moves only
+// itself — the end edge grows the span up to the grid's edge, the start
+// edge trades indent against span so the end edge stays put, and the
+// bottom edge counts rows.
 
 export const MAX_ROWS = 6;
 
@@ -43,25 +45,26 @@ export function clamp(layout: Layout, grid: Grid): Layout {
 	};
 }
 
-export function step(layout: Layout, dimension: Dimension, delta: number, grid: Grid): Layout {
-	return clamp({ ...layout, [dimension]: layout[dimension] + delta }, grid);
-}
-
 /** The reachable range of each dimension given the others. */
 export function bounds(layout: Layout, grid: Grid): Bounds {
-	const { span } = clamp(layout, grid);
+	const { span, indent } = clamp(layout, grid);
 
 	return {
-		span: { low: grid.min, high: grid.columns },
+		span: { low: grid.min, high: grid.columns - indent },
 		rows: { low: 1, high: MAX_ROWS },
 		indent: { low: 0, high: grid.columns - span },
 	};
 }
 
-export function parseStep(value: string | null): { dimension: Dimension; delta: number } | null {
-	const match = /^(span|rows|indent):([+-]\d+)$/.exec(value ?? '');
+/** One dimension set, capped by the room the others leave; they stay put. */
+export function set(layout: Layout, dimension: Dimension, value: number, grid: Grid): Layout {
+	const { low, high } = bounds(layout, grid)[dimension];
 
-	return match ? { dimension: match[1] as Dimension, delta: Number(match[2]) } : null;
+	return clamp({ ...layout, [dimension]: between(value, low, high) }, grid);
+}
+
+export function parseDimension(value: string | null): Dimension | null {
+	return value === 'span' || value === 'rows' || value === 'indent' ? value : null;
 }
 
 /** One track plus one gap — the distance a span of 1 travels. */
@@ -94,15 +97,11 @@ export function ratchet(distance: number, step: number): number {
  */
 export function resize(start: Layout, edge: Edge, steps: number, grid: Grid): Layout {
 	if (edge === 'bottom') {
-		return clamp({ ...start, rows: start.rows + steps }, grid);
+		return set(start, 'rows', start.rows + steps, grid);
 	}
 
 	if (edge === 'end') {
-		// A block never reserves more than the field is wide.
-		return clamp(
-			{ ...start, span: Math.min(start.span + steps, grid.columns - start.indent) },
-			grid,
-		);
+		return set(start, 'span', start.span + steps, grid);
 	}
 
 	const moved = between(steps, -start.indent, start.span - grid.min);
@@ -144,18 +143,12 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 		}
 
 		row.style.setProperty(`--${dimension}`, value);
-		row.querySelectorAll<HTMLElement>(`[data-layout-badge="${dimension}"]`).forEach((badge) => {
-			badge.textContent = value;
-		});
 		row
-			.querySelectorAll<HTMLButtonElement>(`[data-layout-step="${dimension}:-1"]`)
-			.forEach((button) => {
-				button.disabled = layout[dimension] <= limits[dimension].low;
-			});
-		row
-			.querySelectorAll<HTMLButtonElement>(`[data-layout-step="${dimension}:+1"]`)
-			.forEach((button) => {
-				button.disabled = layout[dimension] >= limits[dimension].high;
+			.querySelectorAll<HTMLInputElement>(`input[data-layout-input="${dimension}"]`)
+			.forEach((control) => {
+				control.min = String(limits[dimension].low);
+				control.max = String(limits[dimension].high);
+				control.value = value;
 			});
 	}
 
@@ -287,35 +280,41 @@ function onLostCapture(event: Event): void {
 	}
 }
 
-function onClick(event: Event): void {
-	const target = event.target;
+/**
+ * A typed value is applied as soon as the block can take it; one that is
+ * out of range or half typed waits until the input commits, or the write
+ * back would fight the typing.
+ */
+function onInput(event: Event): void {
+	const control = event.target;
 
-	if (!(target instanceof Element)) {
+	if (!(control instanceof HTMLInputElement)) {
 		return;
 	}
 
-	const button = target.closest('[data-layout-step]');
-	const parsed = parseStep(button?.getAttribute('data-layout-step') ?? null);
-	const row = button?.closest<HTMLElement>('[data-repeater-row]');
+	const dimension = parseDimension(control.getAttribute('data-layout-input'));
+	const row = control.closest<HTMLElement>('[data-repeater-row]');
 	const container = row?.closest<HTMLElement>('[data-repeater]');
 
-	if (!parsed || !row || !container) {
+	if (!dimension || !row || !container) {
 		return;
 	}
 
+	const grid = gridOf(container);
 	const before = read(row);
-	const after = step(before, parsed.dimension, parsed.delta, gridOf(container));
+	const typed = control.value === '' ? NaN : Number(control.value);
+	const { low, high } = bounds(before, grid)[dimension];
 
-	if (DIMENSIONS.every((dimension) => before[dimension] === after[dimension])) {
+	if (event.type !== 'change' && !(typed >= low && typed <= high)) {
 		return;
 	}
 
-	write(row, after, gridOf(container));
-	(input(row, parsed.dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+	write(row, set(before, dimension, Number.isNaN(typed) ? before[dimension] : typed, grid), grid);
 }
 
 export function install(): () => void {
-	document.addEventListener('click', onClick);
+	document.addEventListener('input', onInput);
+	document.addEventListener('change', onInput);
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
 	document.addEventListener('pointerup', onPointerUp);
@@ -323,7 +322,8 @@ export function install(): () => void {
 	document.addEventListener('lostpointercapture', onLostCapture);
 
 	return () => {
-		document.removeEventListener('click', onClick);
+		document.removeEventListener('input', onInput);
+		document.removeEventListener('change', onInput);
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);
 		document.removeEventListener('pointerup', onPointerUp);

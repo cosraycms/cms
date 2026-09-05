@@ -277,9 +277,9 @@ $rows = (array) $this->unwrap($rows);
 				<h2>Blocks</h2>
 				<p class="note">
 					The typed repeater with a grid. A one-column field is a quiet list; a
-					twelve-column field places its blocks on the preview grid — width steps in
-					the block header, rows and indent in its menu, the gear opens the block's
-					class and id. A narrow block folds the width steps into the menu.
+					twelve-column field places its blocks on the preview grid — drag an edge
+					to resize, or open the gear for the width, rows and indent as numbers
+					next to the block's class and id.
 				</p>
 				<div class="cms-node">
 					<div class="inner">

@@ -30,6 +30,7 @@ $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
 $ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$settings = $metaControl !== null || $columns > 1;
 ?>
 <div
 	class="block"
@@ -68,19 +69,7 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 				<?php $this->insert('icon/grip.svg') ?>
 			</span>
 			<span class="kind"><?= $this->escape($label) ?></span>
-			<?php if ($columns > 1): ?>
-				<span class="span" title="<?= $this->escape(__('field:span')) ?>">
-					<?php $this->insert('field/blocks/stepper', [
-						'dimension' => 'span',
-						'value' => $layout->span,
-						'low' => $min,
-						'high' => $columns,
-						'less' => __('field:span-decrease'),
-						'more' => __('field:span-increase'),
-					]) ?>
-				</span>
-			<?php endif ?>
-			<?php if ($metaControl !== null): ?>
+			<?php if ($settings): ?>
 				<button
 					type="button"
 					class="gear"
@@ -132,44 +121,6 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 					<button type="button" data-repeater-move="down">
 						<?= $this->escape(__('common:move-down')) ?>
 					</button>
-					<?php if ($columns > 1): ?>
-						<?php // The width row only shows where the chrome folded
-
-						// it away (a narrow block, by container query). ?>
-						<div class="layout is-span">
-							<span class="name"><?= $this->escape(__('field:span')) ?></span>
-							<?php $this->insert('field/blocks/stepper', [
-								'dimension' => 'span',
-								'value' => $layout->span,
-								'low' => $min,
-								'high' => $columns,
-								'less' => __('field:span-decrease'),
-								'more' => __('field:span-increase'),
-							]) ?>
-						</div>
-						<div class="layout">
-							<span class="name"><?= $this->escape(__('field:rows')) ?></span>
-							<?php $this->insert('field/blocks/stepper', [
-								'dimension' => 'rows',
-								'value' => $layout->rows,
-								'low' => 1,
-								'high' => Layout::MAX_ROWS,
-								'less' => __('field:rows-decrease'),
-								'more' => __('field:rows-increase'),
-							]) ?>
-						</div>
-						<div class="layout">
-							<span class="name"><?= $this->escape(__('field:indent')) ?></span>
-							<?php $this->insert('field/blocks/stepper', [
-								'dimension' => 'indent',
-								'value' => $layout->indent,
-								'low' => 0,
-								'high' => $columns - $layout->span,
-								'less' => __('field:indent-decrease'),
-								'more' => __('field:indent-increase'),
-							]) ?>
-						</div>
-					<?php endif ?>
 					<button type="button" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
@@ -206,7 +157,7 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 			'rowId' => $rowId,
 		]) ?>
 	</div>
-	<?php if ($metaControl !== null): ?>
+	<?php if ($settings): ?>
 		<dialog class="cms-meta" data-meta>
 			<div class="head">
 				<span class="title">
@@ -216,13 +167,23 @@ $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->
 					<?= $this->escape(__('field:close')) ?>
 				</button>
 			</div>
-			<?php $this->insert('field/meta', [
-				'field' => $field,
-				'control' => $metaControl,
-				'meta' => $rowData['meta'] ?? null,
-				'id' => "{$rowId}-meta",
-				'nameRoot' => $rowName,
-			]) ?>
+			<?php if ($columns > 1) {
+				$this->insert('field/blocks/layout', [
+					'layout' => $layout->array(),
+					'columns' => $columns,
+					'min' => $min,
+					'id' => "{$rowId}-layout",
+				]);
+			} ?>
+			<?php if ($metaControl !== null) {
+				$this->insert('field/meta', [
+					'field' => $field,
+					'control' => $metaControl,
+					'meta' => $rowData['meta'] ?? null,
+					'id' => "{$rowId}-meta",
+					'nameRoot' => $rowName,
+				]);
+			} ?>
 		</dialog>
 	<?php endif ?>
 </div>

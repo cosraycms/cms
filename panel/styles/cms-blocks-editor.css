@@ -6,9 +6,9 @@
  * blocks separated by hairlines; a multi-column field renders bordered
  * cells. A block carries no header: its chrome is a group hanging over
  * its top right corner, and only what says something about the block's
- * state — its locale pills — stays there at rest. The grip, stepper,
- * gear and kebab come with the pointer and with keyboard focus. A narrow
- * block (container query) folds the stepper into the kebab.
+ * state — its locale pills — stays there at rest. The grip, gear and
+ * kebab come with the pointer and with keyboard focus; the layout
+ * numbers live in the settings dialog the gear opens.
  * Part names are declared on this block (naming rule 5).
  */
 .cms-blocks-editor {
@@ -50,7 +50,6 @@
 		border: 1px solid var(--cms-color-border-soft);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
-		container-type: inline-size;
 
 		/* The open kebab menu must paint over the blocks after it. */
 		&:focus-within,
@@ -205,47 +204,6 @@
 		white-space: nowrap;
 	}
 
-	& .stepper {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--cms-space-0-5);
-	}
-
-	& .step {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.5rem;
-		height: 1.5rem;
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-sm);
-		background: var(--cms-color-surface);
-		color: var(--cms-color-text-muted);
-		font: inherit;
-		font-size: var(--cms-font-size-sm);
-		line-height: 1;
-		cursor: pointer;
-
-		&:hover:not(:disabled) {
-			border-color: var(--cms-color-border-strong);
-			color: var(--cms-color-text);
-		}
-
-		&:disabled {
-			opacity: 0.4;
-			cursor: default;
-		}
-	}
-
-	& .badge {
-		min-width: 1.25rem;
-		color: var(--cms-color-text);
-		font-size: var(--cms-font-size-xs);
-		font-variant-numeric: tabular-nums;
-		font-weight: 600;
-		text-align: center;
-	}
-
 	& .gear,
 	& .kebab > summary {
 		display: inline-flex;
@@ -361,32 +319,20 @@
 		padding-left: var(--cms-space-3);
 	}
 
-	/* A stepper row in the kebab: label, then −, value, +. The width row
-	   only shows where the chrome folded it away. */
+	/* The layout numbers in the settings dialog: three short inputs abreast. */
 	& .layout {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		padding: var(--cms-space-1) var(--cms-space-2-5);
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--cms-space-3);
 
-		& .name {
-			flex: 1 1 auto;
-			font-size: var(--cms-font-size-sm);
-		}
-
-		& .step {
-			border: 0;
-			background: var(--cms-color-surface-sunken);
-		}
-
-		&.is-span {
-			display: none;
+		& .cms-input {
+			width: 100%;
+			min-width: 0;
 		}
 	}
 
-	& .kebab-menu > .layout:first-of-type {
-		margin-top: var(--cms-space-1);
-		border-top: 1px solid var(--cms-color-border-soft);
+	& .layout + .fields {
+		margin-top: var(--cms-space-4);
 	}
 
 	& .body {
@@ -453,26 +399,5 @@
 		& .body {
 			padding: var(--cms-space-3) var(--blocks-x) var(--cms-space-5);
 		}
-	}
-}
-
-/* A narrow block folds the width stepper into the kebab. */
-@container (max-width: 18rem) {
-	.cms-blocks-editor .tools > .span {
-		display: none;
-	}
-
-	.cms-blocks-editor .layout.is-span {
-		display: flex;
-	}
-
-	.cms-blocks-editor .kebab-menu > .layout:first-of-type {
-		margin-top: 0;
-		border-top: 0;
-	}
-
-	.cms-blocks-editor .kebab-menu > .layout.is-span {
-		margin-top: var(--cms-space-1);
-		border-top: 1px solid var(--cms-color-border-soft);
 	}
 }
