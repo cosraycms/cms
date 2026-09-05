@@ -11,6 +11,7 @@ import {
 	install,
 	MAX_ROWS,
 	parseDimension,
+	parseKey,
 	pitch,
 	ratchet,
 	read,
@@ -68,6 +69,7 @@ function editor(
 				<input type="hidden" name="${NAME}[0][layout][span]" value="${layout.span}" data-layout="span">
 				<input type="hidden" name="${NAME}[0][layout][rows]" value="${layout.rows}" data-layout="rows">
 				<input type="hidden" name="${NAME}[0][layout][indent]" value="${layout.indent}" data-layout="indent">
+				<div class="chrome"><span class="grip" data-repeater-grip tabindex="0"></span></div>
 				<dialog data-meta>
 					<div class="layout">
 						${number('span', layout.span, bounds.min, bounds.columns - layout.indent)}
@@ -270,6 +272,112 @@ describe('blocks layout numbers', () => {
 		const stray = document.querySelector<HTMLInputElement>('input');
 
 		expect(() => stray && type(stray, '4', true)).not.toThrow();
+	});
+});
+
+describe('blocks keyboard resizing', () => {
+	function press(
+		target: Element,
+		key: string,
+		modifiers: Partial<Record<'alt' | 'shift' | 'ctrl' | 'meta', boolean>> = { alt: true },
+	): KeyboardEvent {
+		const event = new KeyboardEvent('keydown', {
+			key,
+			altKey: modifiers.alt ?? false,
+			shiftKey: modifiers.shift ?? false,
+			ctrlKey: modifiers.ctrl ?? false,
+			metaKey: modifiers.meta ?? false,
+			bubbles: true,
+			cancelable: true,
+		});
+
+		target.dispatchEvent(event);
+
+		return event;
+	}
+
+	function grip(row: HTMLElement): Element {
+		const found = row.querySelector('[data-repeater-grip]');
+
+		if (!found) {
+			throw new Error('grip missing');
+		}
+
+		return found;
+	}
+
+	it('maps Alt with the arrows to the edges, Shift added for the start edge', () => {
+		const key = (k: string, shift = false, alt = true): KeyboardEvent =>
+			new KeyboardEvent('keydown', { key: k, altKey: alt, shiftKey: shift });
+
+		expect(parseKey(key('ArrowRight'))).toEqual({ edge: 'end', steps: 1 });
+		expect(parseKey(key('ArrowLeft'))).toEqual({ edge: 'end', steps: -1 });
+		expect(parseKey(key('ArrowRight', true))).toEqual({ edge: 'start', steps: 1 });
+		expect(parseKey(key('ArrowLeft', true))).toEqual({ edge: 'start', steps: -1 });
+		expect(parseKey(key('ArrowDown'))).toEqual({ edge: 'bottom', steps: 1 });
+		expect(parseKey(key('ArrowUp'))).toEqual({ edge: 'bottom', steps: -1 });
+		expect(parseKey(key('ArrowUp', true))).toBeNull();
+		expect(parseKey(key('ArrowRight', false, false))).toBeNull();
+		expect(parseKey(key('Enter'))).toBeNull();
+		expect(
+			parseKey(new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, ctrlKey: true })),
+		).toBeNull();
+	});
+
+	it('moves the edges from the focused grip and consumes the key', () => {
+		const { row, input } = editor({ span: 6, rows: 1, indent: 2 });
+		let changes = 0;
+		const count = (): void => {
+			changes += 1;
+		};
+
+		document.addEventListener('change', count);
+
+		expect(press(grip(row), 'ArrowRight').defaultPrevented).toBe(true);
+		expect(read(row)).toEqual({ span: 7, rows: 1, indent: 2 });
+		expect(row.style.getPropertyValue('--span')).toBe('7');
+
+		press(grip(row), 'ArrowLeft', { alt: true, shift: true });
+
+		// The start edge moved left: the block grew into its indent.
+		expect(read(row)).toEqual({ span: 8, rows: 1, indent: 1 });
+
+		press(grip(row), 'ArrowDown');
+		press(grip(row), 'ArrowDown');
+		press(grip(row), 'ArrowUp');
+
+		expect(read(row)).toEqual({ span: 8, rows: 2, indent: 1 });
+		document.removeEventListener('change', count);
+
+		expect(changes).toBe(5);
+	});
+
+	it('stops where the handles stop, without a change', () => {
+		const { row } = editor({ span: 10, rows: 1, indent: 2 });
+		let changes = 0;
+		const count = (): void => {
+			changes += 1;
+		};
+
+		document.addEventListener('change', count);
+		press(grip(row), 'ArrowRight');
+		document.removeEventListener('change', count);
+
+		expect(read(row)).toEqual({ span: 10, rows: 1, indent: 2 });
+		expect(changes).toBe(0);
+	});
+
+	it('leaves other keys, other targets and one-column fields alone', () => {
+		const { row } = editor({ span: 6, rows: 1, indent: 2 });
+
+		expect(press(grip(row), 'ArrowRight', { alt: false }).defaultPrevented).toBe(false);
+		expect(press(row, 'ArrowRight').defaultPrevented).toBe(false);
+		expect(read(row)).toEqual({ span: 6, rows: 1, indent: 2 });
+
+		const list = editor({ span: 1, rows: 1, indent: 0 }, { columns: 1, min: 1 });
+
+		expect(press(grip(list.row), 'ArrowDown').defaultPrevented).toBe(false);
+		expect(read(list.row)).toEqual({ span: 1, rows: 1, indent: 0 });
 	});
 });
 

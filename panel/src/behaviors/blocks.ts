@@ -13,7 +13,8 @@
 // and writes the layout through the same path. Each edge moves only
 // itself — the end edge grows the span up to the grid's edge, the start
 // edge trades indent against span so the end edge stays put, and the
-// bottom edge counts rows.
+// bottom edge counts rows. The keyboard reaches the same edges from the
+// focused grip: Alt with the arrows, Shift added for the start edge.
 
 export const MAX_ROWS = 6;
 
@@ -111,6 +112,26 @@ export function resize(start: Layout, edge: Edge, steps: number, grid: Grid): La
 
 export function parseEdge(value: string | null): Edge | null {
 	return value === 'start' || value === 'end' || value === 'bottom' ? value : null;
+}
+
+/** The edge and direction a key moves, or null for a key that is not ours. */
+export function parseKey(event: KeyboardEvent): { edge: Edge; steps: number } | null {
+	if (!event.altKey || event.ctrlKey || event.metaKey) {
+		return null;
+	}
+
+	switch (event.key) {
+		case 'ArrowLeft':
+			return { edge: event.shiftKey ? 'start' : 'end', steps: -1 };
+		case 'ArrowRight':
+			return { edge: event.shiftKey ? 'start' : 'end', steps: 1 };
+		case 'ArrowUp':
+			return event.shiftKey ? null : { edge: 'bottom', steps: -1 };
+		case 'ArrowDown':
+			return event.shiftKey ? null : { edge: 'bottom', steps: 1 };
+		default:
+			return null;
+	}
 }
 
 function gridOf(container: HTMLElement): Grid {
@@ -268,6 +289,48 @@ function end(): void {
 	}
 }
 
+/**
+ * Alt with an arrow is the browser's history on some platforms, so a
+ * handled key is consumed. A one-column field has no layout to reach.
+ */
+function onKeyDown(event: KeyboardEvent): void {
+	const grip = event.target;
+	const row = grip instanceof Element ? grip.closest<HTMLElement>('[data-repeater-row]') : null;
+	const container = row?.closest<HTMLElement>('[data-repeater]');
+	const key = parseKey(event);
+
+	if (
+		!(grip instanceof Element) ||
+		!grip.matches('[data-repeater-grip]') ||
+		!row ||
+		!container ||
+		!key
+	) {
+		return;
+	}
+
+	const grid = gridOf(container);
+
+	if (grid.columns < 2) {
+		return;
+	}
+
+	event.preventDefault();
+
+	const before = read(row);
+	const after = resize(before, key.edge, key.steps, grid);
+
+	if (DIMENSIONS.every((dimension) => before[dimension] === after[dimension])) {
+		return;
+	}
+
+	write(row, after, grid);
+
+	const dimension: Dimension = key.edge === 'bottom' ? 'rows' : 'span';
+
+	(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 function onPointerUp(event: PointerEvent): void {
 	if (drag?.pointer === event.pointerId) {
 		end();
@@ -330,6 +393,7 @@ export function install(): () => void {
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
+	document.addEventListener('keydown', onKeyDown);
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
 	document.addEventListener('pointerup', onPointerUp);
@@ -340,6 +404,7 @@ export function install(): () => void {
 		document.removeEventListener('repeater:stamp', onStamp);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
+		document.removeEventListener('keydown', onKeyDown);
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);
 		document.removeEventListener('pointerup', onPointerUp);

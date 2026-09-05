@@ -186,9 +186,15 @@
 		display: grid;
 		flex-shrink: 0;
 		place-items: center;
+		border-radius: var(--cms-radius-sm);
 		color: var(--cms-color-text-faint);
 		cursor: grab;
 		touch-action: none;
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--cms-focus-ring);
+		}
 	}
 
 	& .kind {

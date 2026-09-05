@@ -148,6 +148,7 @@ return [
 		'field:insert-before' => 'Insert before',
 		'field:meta' => 'Meta',
 		'field:remove' => 'Remove',
+		'field:resize-block' => 'Alt with the arrow keys resizes the block, with Shift added for its start edge',
 		'field:remove-block' => 'Remove block',
 		'field:remove-entry' => 'Remove entry',
 		'field:rows' => 'Rows',

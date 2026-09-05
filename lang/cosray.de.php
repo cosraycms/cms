@@ -148,6 +148,7 @@ return [
 		'field:insert-before' => 'Davor einfügen',
 		'field:meta' => 'Meta',
 		'field:remove' => 'Entfernen',
+		'field:resize-block' => 'Alt mit den Pfeiltasten ändert die Größe des Blocks, mit Umschalt dazu seine Startkante',
 		'field:remove-block' => 'Block entfernen',
 		'field:remove-entry' => 'Eintrag entfernen',
 		'field:rows' => 'Zeilen',

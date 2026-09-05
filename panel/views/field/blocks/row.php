@@ -74,9 +74,21 @@ $settings = $metaControl !== null || $columns > 1;
 	]) ?>
 	<div class="chrome">
 		<span class="tools">
-			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
-				<?php $this->insert('icon/grip.svg') ?>
-			</span>
+			<?php if ($columns > 1): ?>
+				<span
+					class="grip"
+					data-repeater-grip
+					tabindex="0"
+					title="<?= $this->escape(__('field:drag-block')) ?>"
+					aria-label="<?= $this->escape(__('field:drag-block') . '. ' . __('field:resize-block')) ?>"
+					aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown Alt+Shift+ArrowLeft Alt+Shift+ArrowRight">
+					<?php $this->insert('icon/grip.svg') ?>
+				</span>
+			<?php else: ?>
+				<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
+					<?php $this->insert('icon/grip.svg') ?>
+				</span>
+			<?php endif ?>
 			<span class="kind"><?= $this->escape($label) ?></span>
 			<?php if ($settings): ?>
 				<button
