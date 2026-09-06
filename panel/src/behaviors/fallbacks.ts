@@ -2,7 +2,7 @@ import { localeTitle, resolveFallback, type FallbackLocale } from '$lib/fallback
 import { ZXX } from '$types/data';
 
 const CONTENT_SCOPE = '[data-content-locale-scope]';
-const CONTENT_SELECT = '[data-content-locale-select]';
+const CONTENT_CONTROL = '[data-content-locale-control]';
 const INPUT = '[data-fallback-input]';
 const BLOCK_VARIANT = ':scope > .control > .variant[data-blocks-locale]';
 
@@ -162,7 +162,7 @@ function change(event: Event): void {
 		return;
 	}
 
-	if (target.matches(CONTENT_SELECT)) {
+	if (target.matches(CONTENT_CONTROL)) {
 		refresh();
 		return;
 	}
@@ -209,6 +209,7 @@ function swapped(): void {
 export function install(): () => void {
 	document.addEventListener('input', input);
 	document.addEventListener('change', change);
+	document.addEventListener('content-locale:change', change);
 	document.addEventListener('focusin', focus);
 	document.addEventListener('focusout', focus);
 	document.addEventListener('repeater:stamp', stamp);
@@ -218,6 +219,7 @@ export function install(): () => void {
 	return () => {
 		document.removeEventListener('input', input);
 		document.removeEventListener('change', change);
+		document.removeEventListener('content-locale:change', change);
 		document.removeEventListener('focusin', focus);
 		document.removeEventListener('focusout', focus);
 		document.removeEventListener('repeater:stamp', stamp);

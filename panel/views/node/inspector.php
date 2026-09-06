@@ -33,25 +33,10 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 	<div class="scroll">
 		<?php if ($contentLocales): ?>
 			<section class="section">
-				<div class="field">
-					<label class="label" for="cms-content-locale">
-						<?= escape(__('editor:content-language')) ?>
-					</label>
-					<select
-						id="cms-content-locale"
-						class="cms-select"
-						data-content-locale-select
-						data-editor-state>
-						<?php foreach ($locales as $locale): ?>
-							<option
-								value="<?= escape($locale['id']) ?>"
-								<?= $locale['id'] === $defaultLocale ? 'selected' : '' ?>>
-								<?= escape($locale['title']) ?>
-							</option>
-						<?php endforeach ?>
-					</select>
-					<span class="help"><?= escape(__('editor:content-language-help')) ?></span>
-				</div>
+				<?php $this->insert('node/content-locales', [
+					'locales' => $locales,
+					'defaultLocale' => $defaultLocale,
+				]) ?>
 			</section>
 		<?php endif ?>
 

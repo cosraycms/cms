@@ -112,7 +112,6 @@ return [
 		'dashboard:storage-used' => ':size belegt',
 		'editor:close' => 'schließen',
 		'editor:content-language' => 'Inhaltssprache',
-		'editor:content-language-help' => 'Übersetzte Felder folgen dieser Sprache. Gemeinsame Werte und symmetrische Strukturen gelten für alle Sprachen.',
 		'editor:created' => 'Erstellt',
 		'editor:delete' => 'Löschen',
 		'editor:delete-confirm' => 'Dieses Dokument wirklich löschen?',

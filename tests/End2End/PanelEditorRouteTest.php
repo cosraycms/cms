@@ -86,8 +86,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $base . '[0][fields][title][value][en]"', $html);
 		// Element controls inside rows go through the form host at a deep name.
 		$this->assertStringContainsString('name="' . $base . '[0][fields][content][json]"', $html);
-		// Nested translated fields still enable the one node-wide selector.
-		$this->assertHtmlNodeExists('//select[@data-content-locale-select]/option[@value="de"]', $html);
+		// Nested translated fields still enable the one node-wide control.
+		$this->assertHtmlNodeExists(
+			'//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
+			$html,
+		);
 		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		// The server renders the entry title from the first text value.
 		$this->assertStringContainsString('First entry', $html);
@@ -144,9 +147,12 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 
-		// Asymmetric: one list per locale, switched by the node selector.
+		// Asymmetric: one list per locale, switched by the node control.
 		$en = 'content[contentBlocks][value][en]';
-		$this->assertHtmlNodeExists('//select[@data-content-locale-select]/option[@value="de"]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
+			$html,
+		);
 		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		$this->assertStringContainsString('data-name="' . $en . '"', $html);
 		$this->assertStringContainsString('data-name="content[contentBlocks][value][de]"', $html);
@@ -599,7 +605,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="Panel Editor A"', $html);
 		$this->assertStringContainsString('name="content[content][value][en]"', $html);
 		$this->assertStringContainsString('data-locale="de"', $html);
-		$this->assertSame(1, substr_count($html, 'data-content-locale-select'));
+		$this->assertSame(1, substr_count($html, 'data-content-locale-control'));
+		$this->assertSame(2, substr_count($html, 'data-content-locale-option'));
+		$this->assertStringNotContainsString('data-content-locale-select', $html);
 		$this->assertStringContainsString('data-content-locale-scope', $html);
 		$this->assertStringContainsString('data-content-locales=', $html);
 		$this->assertStringContainsString('data-fallback-input', $html);

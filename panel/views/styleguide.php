@@ -209,13 +209,11 @@ $rows = (array) $this->unwrap($rows);
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<label>
-								Content language
-								<select class="cms-select" data-content-locale-select data-editor-state>
-									<option value="en">English</option>
-									<option value="de" selected>Deutsch</option>
-								</select>
-							</label>
+							<?php $this->insert('node/content-locales', [
+								'locales' => $locales,
+								'defaultLocale' => 'de',
+								'controlId' => 'styleguide-content-locale',
+							]) ?>
 							<div class="cms-fields">
 								<?php $this->insert('field/item', [
 									'field' => $fallbackField,

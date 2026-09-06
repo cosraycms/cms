@@ -102,14 +102,27 @@ function localeTab(control: Element, locale: string | undefined): HTMLElement | 
 	);
 }
 
-function contentLocale(form: Element, path: Path, control: Element): string | undefined {
-	const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]');
+function contentLocaleIds(control: HTMLElement): Set<string> {
+	if (control instanceof HTMLSelectElement) {
+		return new Set(Array.from(control.options, (option) => option.value));
+	}
 
-	if (!select || path[0] !== 'content') {
+	return new Set(
+		Array.from(
+			control.querySelectorAll<HTMLElement>('[data-content-locale-option]'),
+			(option) => option.dataset.contentLocaleOption ?? '',
+		).filter((locale) => locale !== ''),
+	);
+}
+
+function contentLocale(form: Element, path: Path, control: Element): string | undefined {
+	const localeControl = form.querySelector<HTMLElement>('[data-content-locale-control]');
+
+	if (!localeControl || path[0] !== 'content') {
 		return undefined;
 	}
 
-	const ids = new Set(Array.from(select.options, (option) => option.value));
+	const ids = contentLocaleIds(localeControl);
 	const variant = control.closest<HTMLElement>('.variant[data-locale]');
 
 	if (variant?.dataset.locale && ids.has(variant.dataset.locale)) {
@@ -122,9 +135,9 @@ function contentLocale(form: Element, path: Path, control: Element): string | un
 }
 
 function refreshContentBadge(form: Element): void {
-	const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]');
+	const control = form.querySelector<HTMLElement>('[data-content-locale-control]');
 
-	if (!select) {
+	if (!control) {
 		return;
 	}
 
@@ -136,13 +149,16 @@ function refreshContentBadge(form: Element): void {
 		}
 	});
 
-	select.classList.toggle('has-error', locales.size > 0);
-	select.toggleAttribute('aria-invalid', locales.size > 0);
+	control.classList.toggle('has-error', locales.size > 0);
+	control.toggleAttribute('aria-invalid', locales.size > 0);
+	control.querySelectorAll<HTMLElement>('[data-content-locale-option]').forEach((option) => {
+		option.classList.toggle('has-error', locales.has(option.dataset.contentLocaleOption ?? ''));
+	});
 
 	if (locales.size > 0) {
-		select.dataset.errorLocales = [...locales].join(' ');
+		control.dataset.errorLocales = [...locales].join(' ');
 	} else {
-		delete select.dataset.errorLocales;
+		delete control.dataset.errorLocales;
 	}
 }
 
@@ -190,10 +206,13 @@ function wipe(): void {
 	document
 		.querySelectorAll('[data-locale-tab].has-error')
 		.forEach((tab) => tab.classList.remove('has-error'));
-	document.querySelectorAll('[data-content-locale-select]').forEach((select) => {
-		select.classList.remove('has-error');
-		select.removeAttribute('aria-invalid');
-		delete (select as HTMLElement).dataset.errorLocales;
+	document.querySelectorAll('[data-content-locale-control]').forEach((control) => {
+		control.classList.remove('has-error');
+		control.removeAttribute('aria-invalid');
+		control
+			.querySelectorAll('[data-content-locale-option].has-error')
+			.forEach((option) => option.classList.remove('has-error'));
+		delete (control as HTMLElement).dataset.errorLocales;
 	});
 }
 

@@ -34,7 +34,7 @@ function renderBlocks(): void {
 			{"id":"en","title":"English"},
 			{"id":"de","title":"Deutsch","fallback":"en"}
 		]'>
-			<select data-content-locale-select><option value="en">English</option><option value="de" selected>Deutsch</option></select>
+			<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de" selected>Deutsch</option></select>
 			<div class="cms-field">
 				<div class="control">
 					<div class="variant" data-locale="en" data-blocks-locale hidden>

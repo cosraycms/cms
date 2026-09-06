@@ -185,21 +185,26 @@ describe('errors behavior', () => {
 		).toBe(false);
 	});
 
-	it('badges and switches the node selector for a native variant', () => {
+	it('badges and switches the node control for a native variant', () => {
 		const form = document.getElementById('node-editor-form')!;
 		form.setAttribute('data-content-locale-scope', '');
 		form.setAttribute('data-content-locale', 'en');
 		form.insertAdjacentHTML(
 			'afterbegin',
-			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+			`<div data-content-locale-control role="radiogroup">
+				<button type="button" data-content-locale-option="en" role="radio" aria-checked="true">English</button>
+				<button type="button" data-content-locale-option="de" role="radio" aria-checked="false">Deutsch</button>
+			</div>`,
 		);
 		respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
 
-		const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]')!;
-		expect(select.classList.contains('has-error')).toBe(true);
-		expect(select.dataset.errorLocales).toBe('de');
+		const control = form.querySelector<HTMLElement>('[data-content-locale-control]')!;
+		const german = control.querySelector<HTMLElement>('[data-content-locale-option="de"]')!;
+		expect(control.classList.contains('has-error')).toBe(true);
+		expect(control.dataset.errorLocales).toBe('de');
+		expect(german.classList.contains('has-error')).toBe(true);
 		document.querySelector<HTMLElement>('[data-error-path]')?.click();
-		expect(select.value).toBe('de');
+		expect(german.getAttribute('aria-checked')).toBe('true');
 		expect(field('title').querySelector<HTMLElement>('[data-locale="de"]')?.hidden).toBe(false);
 	});
 
@@ -209,14 +214,14 @@ describe('errors behavior', () => {
 		form.setAttribute('data-content-locale', 'en');
 		form.insertAdjacentHTML(
 			'afterbegin',
-			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+			'<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
 		);
 		const box = respond([
 			{ path: ['content', 'body', 'value', 'de', 'content', 0], message: 'Body is invalid' },
 		]);
 
 		expect(
-			form.querySelector<HTMLSelectElement>('[data-content-locale-select]')?.dataset.errorLocales,
+			form.querySelector<HTMLElement>('[data-content-locale-control]')?.dataset.errorLocales,
 		).toBe('de');
 		box.querySelector<HTMLElement>('[data-error-path]')?.click();
 		expect(form.getAttribute('data-content-locale')).toBe('de');
@@ -228,7 +233,7 @@ describe('errors behavior', () => {
 		form.setAttribute('data-content-locale', 'en');
 		form.insertAdjacentHTML(
 			'afterbegin',
-			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+			'<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
 		);
 		respond([
 			{
@@ -238,7 +243,7 @@ describe('errors behavior', () => {
 		]);
 
 		expect(
-			form.querySelector<HTMLSelectElement>('[data-content-locale-select]')?.dataset.errorLocales,
+			form.querySelector<HTMLElement>('[data-content-locale-control]')?.dataset.errorLocales,
 		).toBe('de');
 	});
 

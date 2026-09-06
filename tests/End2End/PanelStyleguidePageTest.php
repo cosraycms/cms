@@ -37,7 +37,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('data-locale-tab="de"', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope][@data-content-locale="de"]'
-				. '//select[@data-content-locale-select]/option[@value="de"][@selected]',
+				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"][@aria-checked="true"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(

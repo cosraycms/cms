@@ -19,10 +19,10 @@ beforeEach(() => {
 			<div class="variant" data-locale="de" hidden></div>
 		</div>
 		<form data-content-locale-scope data-content-locale="en" id="global">
-			<select data-content-locale-select data-editor-state>
-				<option value="en" selected>English</option>
-				<option value="de">Deutsch</option>
-			</select>
+			<div data-content-locale-control data-editor-state role="radiogroup">
+				<button type="button" data-content-locale-option="en" role="radio" aria-checked="true" tabindex="0">English</button>
+				<button type="button" data-content-locale-option="de" role="radio" aria-checked="false" tabindex="-1">Deutsch</button>
+			</div>
 			<div class="cms-field">
 				<label data-locale-label-for="field-title" for="field-title-en">Title</label>
 				<div class="variant" data-locale="en"><input id="field-title-en" /></div>
@@ -88,11 +88,13 @@ describe('locale tabs', () => {
 
 	it('switches every node-owned variant and translated host together', () => {
 		const scope = field('global');
-		const select = scope.querySelector<HTMLSelectElement>('[data-content-locale-select]')!;
-		select.value = 'de';
-		select.dispatchEvent(new Event('change', { bubbles: true }));
+		const control = scope.querySelector<HTMLElement>('[data-content-locale-control]')!;
+		let changes = 0;
+		control.addEventListener('content-locale:change', () => changes++);
+		scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')?.click();
 
 		expect(scope.dataset.contentLocale).toBe('de');
+		expect(changes).toBe(1);
 		expect(scope.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
 		expect(scope.querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(true);
 		expect(scope.querySelector('label')?.getAttribute('for')).toBe('field-title-de');
@@ -104,11 +106,46 @@ describe('locale tabs', () => {
 		).toBeUndefined();
 	});
 
-	it('applies the current node locale to newly stamped rows', () => {
+	it('supports arrow, Home, and End keys with one tab stop', () => {
 		const scope = field('global');
-		const select = scope.querySelector<HTMLSelectElement>('[data-content-locale-select]')!;
+		const english = scope.querySelector<HTMLButtonElement>('[data-content-locale-option="en"]')!;
+		const german = scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')!;
+		english.focus();
+		english.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+
+		expect(scope.dataset.contentLocale).toBe('de');
+		expect(german.getAttribute('aria-checked')).toBe('true');
+		expect(german.tabIndex).toBe(0);
+		expect(english.tabIndex).toBe(-1);
+		expect(document.activeElement).toBe(german);
+
+		german.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+		expect(scope.dataset.contentLocale).toBe('en');
+		expect(document.activeElement).toBe(english);
+
+		english.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+		expect(scope.dataset.contentLocale).toBe('de');
+		expect(document.activeElement).toBe(german);
+	});
+
+	it('keeps select controls for larger locale sets', () => {
+		const scope = field('global');
+		scope.querySelector('[data-content-locale-control]')?.remove();
+		scope.insertAdjacentHTML(
+			'afterbegin',
+			'<select data-content-locale-control><option value="en">English</option><option value="de">Deutsch</option></select>',
+		);
+		const select = scope.querySelector<HTMLSelectElement>('[data-content-locale-control]')!;
 		select.value = 'de';
 		select.dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(scope.dataset.contentLocale).toBe('de');
+		expect(scope.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
+	});
+
+	it('applies the current node locale to newly stamped rows', () => {
+		const scope = field('global');
+		scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')?.click();
 		const row = document.createElement('div');
 		row.innerHTML = `
 			<div class="variant" data-locale="en"></div>
