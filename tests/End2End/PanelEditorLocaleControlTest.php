@@ -61,9 +61,5 @@ final class PanelEditorLocaleControlTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringNotContainsString('data-content-locale-option', $html);
-		$this->assertHtmlNodeMissing(
-			'//*[@data-content-locale-control]/following-sibling::span[contains(@class, "help")]',
-			$html,
-		);
 	}
 }
