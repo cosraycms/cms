@@ -18,10 +18,11 @@
 		field: FieldInfo;
 		node: string;
 		locale: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		notify: () => void;
 	};
 
-	let { type, value = $bindable(), field, node, locale, notify }: Props = $props();
+	let { type, value = $bindable(), field, node, locale, locales, notify }: Props = $props();
 
 	let active = $derived(field.translateMode === 'asymmetric' ? locale : ZXX);
 
@@ -31,13 +32,19 @@
 </script>
 
 {#if value[active]}
-	<Upload
-		{type}
-		limit={field.limit}
-		required={field.required ?? false}
-		name={field.name}
-		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
-		bind:items={value[active]}
-		{notify}
-	/>
+	{#key active}
+		<Upload
+			{type}
+			limit={field.limit}
+			required={field.required ?? false}
+			name={field.name}
+			translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
+			locale={field.translateMode === 'asymmetric' ? ZXX : locale}
+			contentLocale={locale}
+			identity={active}
+			{locales}
+			bind:items={value[active]}
+			{notify}
+		/>
+	{/key}
 {/if}

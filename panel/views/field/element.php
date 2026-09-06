@@ -44,6 +44,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	tag="<?= escape($tag) ?>"
 	module="<?= escape($module) ?>"
 	node="<?= escape($node) ?>"
+	<?= $field['translate'] ?? false ? 'data-translated="true"' : '' ?>
 	locale="<?= escape($field['translate'] ?? false ? $defaultLocale : 'zxx') ?>">
 	<script type="application/json"><?= json_encode($payload, $jsonFlags) ?></script>
 </cosray-host>

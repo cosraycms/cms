@@ -21,7 +21,8 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 
 // Stored rows start collapsed; a stamped row is empty and wants input.
 $open = $rowData === null;
-$ownsLocales = RowLocales::owned($entryType, count((array) $this->unwrap($locales)));
+$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
+$ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $this->unwrap($locales)));
 ?>
 <div class="entry" data-repeater-row <?= $ownsLocales ? 'data-locale-scope' : '' ?>>
 	<div class="summary">
@@ -96,6 +97,7 @@ $ownsLocales = RowLocales::owned($entryType, count((array) $this->unwrap($locale
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,
+			'globalLocales' => $globalLocales,
 		]) ?>
 	</div>
 </div>

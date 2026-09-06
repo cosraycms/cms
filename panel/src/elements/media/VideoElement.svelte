@@ -13,6 +13,7 @@
 		field?: any;
 		node?: string;
 		locale?: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		assets?: AssetMap;
 	};
 
@@ -21,6 +22,7 @@
 		field = { name: 'video' },
 		node = '',
 		locale = ZXX,
+		locales,
 		assets = {},
 	}: Props = $props();
 
@@ -56,4 +58,4 @@
 	}
 </script>
 
-<MediaControl type="video" bind:value={map} {field} {node} {locale} {notify} />
+<MediaControl type="video" bind:value={map} {field} {node} {locale} {locales} {notify} />

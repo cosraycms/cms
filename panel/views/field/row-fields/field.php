@@ -21,5 +21,6 @@ unset($sub['when']);
 		'data' => $fieldsData[$subName] ?? null,
 		'nameRoot' => "{$rowName}[fields][{$subName}]",
 		'idRoot' => "{$rowId}-{$subName}",
+		'globalLocales' => $globalLocales ?? false,
 	]) ?>
 </div>

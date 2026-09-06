@@ -72,6 +72,7 @@ $count = count($rows);
 				'min' => $min,
 				'metaControl' => $metaControl,
 				'single' => $single,
+				'globalLocales' => $globalLocales ?? false,
 			]);
 		} ?>
 	</div>
@@ -86,6 +87,7 @@ $count = count($rows);
 				'min' => $min,
 				'metaControl' => $metaControl,
 				'single' => $single,
+				'globalLocales' => $globalLocales ?? false,
 			]) ?>
 		</template>
 	<?php endforeach ?>

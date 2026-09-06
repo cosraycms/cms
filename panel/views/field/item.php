@@ -31,5 +31,6 @@ $style = "grid-column: span {$width} / span {$width}; grid-row: span {$rows} / s
 		'defaultLocale' => $defaultLocale,
 		'node' => $uid,
 		'assets' => $assets,
+		'globalLocales' => $globalLocales ?? false,
 	]) ?>
 </div>

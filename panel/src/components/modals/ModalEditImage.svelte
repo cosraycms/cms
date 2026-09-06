@@ -12,10 +12,24 @@
 		apply: (asset: FileItem) => void;
 		asset: FileItem;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		identity: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		hasAlt: boolean;
 	};
 
-	let { close, apply, asset = $bindable(), translate, hasAlt }: Props = $props();
+	let {
+		close,
+		apply,
+		asset = $bindable(),
+		translate,
+		locale,
+		contentLocale,
+		identity,
+		locales,
+		hasAlt,
+	}: Props = $props();
 	asset.meta ??= {};
 	asset.meta.title ??= { zxx: '' };
 	asset.meta.alt ??= { zxx: '' };
@@ -25,13 +39,20 @@
 <ModalHeader>{__('image:title-and-alt')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-edit-image-fields">
-		<Input bind:value={meta.title} label={__('common:title')} id="edit_image_title" {translate} />
+		<Input
+			bind:value={meta.title}
+			label={__('common:title')}
+			id={`${identity}_edit_image_title`}
+			{translate}
+			{locale}
+		/>
 		{#if hasAlt}
 			<Input
 				bind:value={meta.alt}
 				label={__('image:alt-text')}
-				id="edit_image_alt"
+				id={`${identity}_edit_image_alt`}
 				{translate}
+				{locale}
 				description={__('image:alt-text-help')}
 			/>
 		{/if}

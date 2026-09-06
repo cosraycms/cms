@@ -28,7 +28,8 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 // A stored layout a narrower field cannot hold is shown clamped, as
 // the save will store it.
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
-$ownsLocales = RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
+$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
+$ownsLocales = !$globalLocales && RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->span;
 $style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
 $labels = (bool) ($blockType['labels'] ?? true);
@@ -161,6 +162,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 			'fieldsData' => $fieldsData,
 			'rowName' => $rowName,
 			'rowId' => $rowId,
+			'globalLocales' => $globalLocales,
 		]) ?>
 	</div>
 	<?php if ($settings): ?>

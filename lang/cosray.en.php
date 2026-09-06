@@ -108,6 +108,8 @@ return [
 		'dashboard:recent-empty' => 'No entries have been edited yet.',
 		'dashboard:storage-used' => ':size used',
 		'editor:close' => 'close',
+		'editor:content-language' => 'Content language',
+		'editor:content-language-help' => 'Translated fields follow this language. Shared values and symmetric structure apply to every language.',
 		'editor:created' => 'Created',
 		'editor:delete' => 'Delete',
 		'editor:delete-confirm' => 'Really delete this document?',

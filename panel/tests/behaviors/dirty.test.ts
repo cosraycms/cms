@@ -7,7 +7,10 @@ beforeEach(() => {
 	document.body.innerHTML = `
 		<span id="editor-dirty" hidden></span>
 		<span id="editor-status"></span>
-		<form id="node-editor-form"><input name="content[title][value][zxx]"></form>
+		<form id="node-editor-form">
+			<select data-editor-state><option>en</option><option>de</option></select>
+			<input name="content[title][value][zxx]">
+		</form>
 		<a id="outside" href="/elsewhere">Away</a>
 	`;
 	uninstall = install();
@@ -50,6 +53,14 @@ describe('dirty guard', () => {
 		edit();
 
 		expect(indicator()?.hidden).toBe(false);
+	});
+
+	it('does not mark editor-only state changes', () => {
+		const select = document.querySelector<HTMLSelectElement>('[data-editor-state]')!;
+		select.value = 'de';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(indicator()?.hidden).toBe(true);
 	});
 
 	it('blocks navigation away when the user declines', () => {

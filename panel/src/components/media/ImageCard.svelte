@@ -14,6 +14,10 @@
 		item: FileItem | null;
 		loading: boolean;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		identity: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		allowed: string;
 		update: (item: FileItem) => void;
 		remove: () => void;
@@ -21,7 +25,20 @@
 		library: () => void;
 	};
 
-	let { item, loading, translate, allowed, update, remove, upload, library }: Props = $props();
+	let {
+		item,
+		loading,
+		translate,
+		locale,
+		contentLocale,
+		identity,
+		locales,
+		allowed,
+		update,
+		remove,
+		upload,
+		library,
+	}: Props = $props();
 
 	const assets = useAssets();
 
@@ -69,8 +86,8 @@
 				</span>
 			</div>
 			<div class="facts">{loading ? __('upload:uploading') : line}</div>
-			{#key item.uid}
-				<MetaFields {item} {translate} {update} />
+			{#key `${identity}:${item.uid}`}
+				<MetaFields {item} {translate} {locale} {contentLocale} {locales} {update} />
 			{/key}
 		</div>
 	{:else}

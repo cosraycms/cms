@@ -13,6 +13,10 @@
 		items: FileItem[];
 		multiple: boolean;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		identity: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		type: UploadType;
 		loading: boolean;
 		remove: (index: number | null) => void;
@@ -23,6 +27,10 @@
 		items = $bindable(),
 		multiple,
 		translate,
+		locale,
+		contentLocale,
+		identity,
+		locales,
 		type,
 		loading,
 		remove,
@@ -66,6 +74,10 @@
 						handle.close();
 					},
 					translate,
+					locale,
+					contentLocale,
+					identity,
+					locales,
 					hasAlt,
 				},
 			});

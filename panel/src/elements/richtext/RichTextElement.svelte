@@ -27,7 +27,10 @@
 		format?: string;
 		field?: FieldInfo;
 		locale?: string;
-		locales?: { default: string; all: { id: string; title: string }[] };
+		locales?: {
+			default: string;
+			all: { id: string; title: string; fallback?: string | null }[];
+		};
 		assets?: AssetMap;
 	};
 

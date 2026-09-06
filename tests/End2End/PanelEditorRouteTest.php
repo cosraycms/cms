@@ -86,6 +86,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $base . '[0][fields][title][value][en]"', $html);
 		// Element controls inside rows go through the form host at a deep name.
 		$this->assertStringContainsString('name="' . $base . '[0][fields][content][json]"', $html);
+		// Nested translated fields still enable the one node-wide selector.
+		$this->assertHtmlNodeExists('//select[@data-content-locale-select]/option[@value="de"]', $html);
+		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		// The server renders the entry title from the first text value.
 		$this->assertStringContainsString('First entry', $html);
 		// One inert template per allowed type with the stamp placeholder.
@@ -141,9 +144,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 
-		// Asymmetric: one list per locale under the field-level tabs.
+		// Asymmetric: one list per locale, switched by the node selector.
 		$en = 'content[contentBlocks][value][en]';
-		$this->assertStringContainsString('data-locale-tab="de"', $html);
+		$this->assertHtmlNodeExists('//select[@data-content-locale-select]/option[@value="de"]', $html);
+		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		$this->assertStringContainsString('data-name="' . $en . '"', $html);
 		$this->assertStringContainsString('data-name="content[contentBlocks][value][de]"', $html);
 		$this->assertStringContainsString(
@@ -593,6 +597,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="Panel Editor A"', $html);
 		$this->assertStringContainsString('name="content[content][value][en]"', $html);
 		$this->assertStringContainsString('data-locale="de"', $html);
+		$this->assertSame(1, substr_count($html, 'data-content-locale-select'));
+		$this->assertStringContainsString('data-content-locale-scope', $html);
 		// Sub-route actions must not inherit the editor query string.
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-articles/panel-editor-a/delete"',

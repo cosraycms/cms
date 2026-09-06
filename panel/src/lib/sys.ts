@@ -10,7 +10,7 @@ export interface Type {
 export interface Locale {
 	id: string;
 	title: string;
-	fallback?: string;
+	fallback?: string | null;
 }
 
 export interface System {

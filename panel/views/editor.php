@@ -1,5 +1,7 @@
 <?php
 
+use Cosray\Panel\ContentLocales;
+
 use function Cosray\escape;
 
 $this->layout('layer/main');
@@ -27,10 +29,8 @@ $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
-// The inspector carries the settings a node only has when it is addressable or
-// rendered; without either there is nothing to put in it and the editor runs
-// single-column.
-$showSettings = $routable || $renderable;
+$contentLocales = ContentLocales::used($fields, count($locales));
+$showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
 $action = $edit
 	? $links->edit($uid)
@@ -184,6 +184,7 @@ foreach ($fields as $field) {
 		action="<?= escape($action) ?>"
 		hx-swap="none"
 		data-json-form
+		<?= $contentLocales ? 'data-content-locale-scope data-content-locale="' . escape($defaultLocale) . '"' : '' ?>
 		novalidate>
 		<div class="pane">
 			<div class="inner">
@@ -207,6 +208,7 @@ foreach ($fields as $field) {
 								'uid' => $uid,
 								'assets' => $assets,
 								'pathSourceFields' => $pathSourceFields,
+								'globalLocales' => $contentLocales,
 							]) ?>
 						<?php else: ?>
 							<div class="cms-fields">
@@ -219,6 +221,7 @@ foreach ($fields as $field) {
 										'uid' => $uid,
 										'assets' => $assets,
 										'pathSourceFields' => $pathSourceFields,
+										'globalLocales' => $contentLocales,
 									]) ?>
 								<?php endforeach ?>
 							</div>
@@ -240,6 +243,7 @@ foreach ($fields as $field) {
 					: $links->createPaths((string) ($type['handle'] ?? '')),
 				'generatedPaths' => $generatedPaths,
 				'meta' => $meta,
+				'contentLocales' => $contentLocales,
 			]) ?>
 		<?php endif ?>
 

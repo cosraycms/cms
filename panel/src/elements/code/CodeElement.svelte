@@ -21,7 +21,10 @@
 		meta?: Meta;
 		field?: FieldInfo;
 		locale?: string;
-		locales?: { default: string; all: { id: string; title: string }[] };
+		locales?: {
+			default: string;
+			all: { id: string; title: string; fallback?: string | null }[];
+		};
 	};
 
 	let { value = {}, meta = {}, field = { name: 'code' }, locale = ZXX, locales }: Props = $props();

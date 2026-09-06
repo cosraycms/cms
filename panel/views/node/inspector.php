@@ -11,6 +11,7 @@ $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $routable = (bool) $routable;
 $renderable = (bool) $renderable;
+$contentLocales = (bool) ($this->unwrap($contentLocales ?? null) ?? false);
 $pathsUrl = $this->unwrap($pathsUrl);
 $generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
 $meta = (array) ($this->unwrap($meta ?? null) ?? []);
@@ -30,6 +31,30 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 		<span class="title"><?= escape(__('editor:settings')) ?></span>
 	</div>
 	<div class="scroll">
+		<?php if ($contentLocales): ?>
+			<section class="section">
+				<div class="field">
+					<label class="label" for="cms-content-locale">
+						<?= escape(__('editor:content-language')) ?>
+					</label>
+					<select
+						id="cms-content-locale"
+						class="cms-select"
+						data-content-locale-select
+						data-editor-state>
+						<?php foreach ($locales as $locale): ?>
+							<option
+								value="<?= escape($locale['id']) ?>"
+								<?= $locale['id'] === $defaultLocale ? 'selected' : '' ?>>
+								<?= escape($locale['title']) ?>
+							</option>
+						<?php endforeach ?>
+					</select>
+					<span class="help"><?= escape(__('editor:content-language-help')) ?></span>
+				</div>
+			</section>
+		<?php endif ?>
+
 		<?php if ($renderable): ?>
 			<section class="section">
 				<label class="toggle">

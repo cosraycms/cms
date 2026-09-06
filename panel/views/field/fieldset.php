@@ -43,6 +43,7 @@ $descriptionId = "fieldset-{$name}-description";
 				'uid' => $uid,
 				'assets' => $assets,
 				'pathSourceFields' => $pathSourceFields,
+				'globalLocales' => $globalLocales ?? false,
 			]) ?>
 		<?php endforeach ?>
 	</div>

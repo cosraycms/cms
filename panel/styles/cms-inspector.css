@@ -65,6 +65,14 @@
 		font-weight: 500;
 	}
 
+	& .cms-select {
+		width: 100%;
+
+		&.has-error {
+			border-color: var(--cms-color-danger);
+		}
+	}
+
 	& input[type='text'] {
 		width: 100%;
 		min-width: 0;

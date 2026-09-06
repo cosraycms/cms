@@ -19,7 +19,7 @@ function indicate(dirty: boolean): void {
 function mark(event: Event): void {
 	const target = event.target;
 
-	if (target instanceof Element) {
+	if (target instanceof Element && !target.closest('[data-editor-state]')) {
 		const form = target.closest(FORM);
 
 		if (form instanceof HTMLFormElement) {

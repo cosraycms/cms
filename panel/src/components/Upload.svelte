@@ -22,6 +22,10 @@
 		type: UploadType;
 		name: string;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		identity: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		items: FileItem[];
 		limit?: Limit;
 		required?: boolean;
@@ -36,6 +40,10 @@
 		type,
 		name,
 		translate,
+		locale,
+		contentLocale,
+		identity,
+		locales,
 		items = $bindable(),
 		limit = { max: -1, min: 0 },
 		required = false,
@@ -320,6 +328,10 @@
 					bind:items
 					{loading}
 					{translate}
+					{locale}
+					{contentLocale}
+					{identity}
+					{locales}
 					{open}
 					{notify}
 					remove={(index) => remove(index)}
@@ -331,6 +343,10 @@
 					item={items?.[0] ?? null}
 					{loading}
 					{translate}
+					{locale}
+					{contentLocale}
+					{identity}
+					{locales}
 					allowed="{__('upload:allowed-extensions')} {allowedExtensions}"
 					update={replace}
 					remove={() => remove(null)}
@@ -366,7 +382,19 @@
 		class:upload-multiple={multiple}
 		class:upload-inline={inline}
 	>
-		<MediaList bind:items {multiple} {type} {remove} {loading} {translate} {notify} />
+		<MediaList
+			bind:items
+			{multiple}
+			{type}
+			{remove}
+			{loading}
+			{translate}
+			{locale}
+			{contentLocale}
+			{identity}
+			{locales}
+			{notify}
+		/>
 		{#if open}
 			<label
 				class="dragdrop"

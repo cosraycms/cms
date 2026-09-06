@@ -48,7 +48,11 @@ afterAll(() => {
 	}
 });
 
-function host(payload: unknown, attributes: Record<string, string> = {}): CosrayHost {
+function host(
+	payload: unknown,
+	attributes: Record<string, string> = {},
+	parent: ParentNode = document.body,
+): CosrayHost {
 	const element = document.createElement('cosray-host') as CosrayHost;
 	element.setAttribute('tag', 'test-control');
 	element.setAttribute('module', 'acme/control.js');
@@ -63,7 +67,7 @@ function host(payload: unknown, attributes: Record<string, string> = {}): Cosray
 	script.type = 'application/json';
 	script.textContent = JSON.stringify(payload);
 	element.append(script);
-	document.body.append(element);
+	parent.append(element);
 
 	return element;
 }
@@ -127,6 +131,23 @@ describe('cosray host', () => {
 			format: 'cosray-richtext',
 			version: 1,
 		});
+	});
+
+	it('mounts a translated control with the current node locale', async () => {
+		const form = document.createElement('form');
+		form.setAttribute('data-content-locale-scope', '');
+		form.setAttribute('data-content-locale', 'de');
+		document.body.append(form);
+		const element = host(
+			{ value: { en: 'Hello', de: 'Hallo' } },
+			{ 'data-translated': 'true' },
+			form,
+		);
+
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+
+		expect(element.locale).toBe('de');
+		expect(element.querySelector<Control>('test-control')!.locale).toBe('de');
 	});
 
 	it('forwards locale changes to a mounted control', async () => {

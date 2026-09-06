@@ -707,7 +707,11 @@ final class Editor extends Panel
 		array $meta = [],
 	): array {
 		$locales = array_map(
-			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title],
+			static fn($locale) => [
+				'id' => $locale->id,
+				'title' => $locale->title,
+				'fallback' => $locale->fallback,
+			],
 			iterator_to_array($context->locales(), false),
 		);
 

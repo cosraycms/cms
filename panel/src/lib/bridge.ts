@@ -16,7 +16,7 @@ export type UploadResult = {
 export type BridgeSystem = {
 	locale: string;
 	defaultLocale: string;
-	locales: { id: string; title: string }[];
+	locales: { id: string; title: string; fallback?: string | null }[];
 	customLocales: string[];
 	prefix: string;
 	assets: string;

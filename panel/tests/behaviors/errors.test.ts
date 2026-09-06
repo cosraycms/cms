@@ -185,6 +185,63 @@ describe('errors behavior', () => {
 		).toBe(false);
 	});
 
+	it('badges and switches the node selector for a native variant', () => {
+		const form = document.getElementById('node-editor-form')!;
+		form.setAttribute('data-content-locale-scope', '');
+		form.setAttribute('data-content-locale', 'en');
+		form.insertAdjacentHTML(
+			'afterbegin',
+			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+		);
+		respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
+
+		const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]')!;
+		expect(select.classList.contains('has-error')).toBe(true);
+		expect(select.dataset.errorLocales).toBe('de');
+		document.querySelector<HTMLElement>('[data-error-path]')?.click();
+		expect(select.value).toBe('de');
+		expect(field('title').querySelector<HTMLElement>('[data-locale="de"]')?.hidden).toBe(false);
+	});
+
+	it('gets the node locale for an element host from its issue path', () => {
+		const form = document.getElementById('node-editor-form')!;
+		form.setAttribute('data-content-locale-scope', '');
+		form.setAttribute('data-content-locale', 'en');
+		form.insertAdjacentHTML(
+			'afterbegin',
+			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+		);
+		const box = respond([
+			{ path: ['content', 'body', 'value', 'de', 'content', 0], message: 'Body is invalid' },
+		]);
+
+		expect(
+			form.querySelector<HTMLSelectElement>('[data-content-locale-select]')?.dataset.errorLocales,
+		).toBe('de');
+		box.querySelector<HTMLElement>('[data-error-path]')?.click();
+		expect(form.getAttribute('data-content-locale')).toBe('de');
+	});
+
+	it('uses the outer list locale rather than an inner neutral key', () => {
+		const form = document.getElementById('node-editor-form')!;
+		form.setAttribute('data-content-locale-scope', '');
+		form.setAttribute('data-content-locale', 'en');
+		form.insertAdjacentHTML(
+			'afterbegin',
+			'<select data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+		);
+		respond([
+			{
+				path: ['content', 'blocks', 'value', 'de', 0, 'fields', 'video', 'value', 'zxx'],
+				message: 'Video is invalid',
+			},
+		]);
+
+		expect(
+			form.querySelector<HTMLSelectElement>('[data-content-locale-select]')?.dataset.errorLocales,
+		).toBe('de');
+	});
+
 	it('badges the row tab when the row owns its sub-fields locales', () => {
 		respond([
 			{

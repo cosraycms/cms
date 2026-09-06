@@ -39,4 +39,5 @@ $this->insert($views[$controlName] ?? 'field/unknown', [
 	'locales' => $locales ?? [],
 	'defaultLocale' => $defaultLocale ?? '',
 	'assets' => $assets ?? [],
+	'globalLocales' => $globalLocales ?? false,
 ]);

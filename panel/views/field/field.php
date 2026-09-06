@@ -12,6 +12,7 @@ $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
 $assets = (array) ($this->unwrap($assets ?? null) ?? []);
+$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -40,7 +41,7 @@ $localized = ['text', 'textarea', 'iframe', 'youtube'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
-$tabs = $ownLocales && $translate && ($variants || $controlName === 'element');
+$tabs = !$globalLocales && $ownLocales && $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
@@ -54,12 +55,14 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <div
 	class="cms-field<?= $required ? ' required' : '' ?>"
 	<?= $tabs ? 'data-locale-scope' : '' ?>
+	data-field="<?= escape($fieldName) ?>"
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<?php // Kept in the tree when hidden: the control needs its name. ?>
 	<label
 		for="<?= escape($labelFor) ?>"
+		<?= $globalLocales && $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
 		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>><?= escape(
 			(string) ($field['label'] ?? $fieldName),
@@ -104,6 +107,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						'locales' => $locales,
 						'defaultLocale' => $defaultLocale,
 						'assets' => $assets,
+						'globalLocales' => $globalLocales,
 					]) ?>
 				</div>
 			<?php endforeach ?>
@@ -120,6 +124,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'locales' => $locales,
 				'defaultLocale' => $defaultLocale,
 				'assets' => $assets,
+				'globalLocales' => $globalLocales,
 			]) ?>
 		<?php endif ?>
 	</div>

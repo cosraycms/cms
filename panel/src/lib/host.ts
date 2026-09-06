@@ -10,7 +10,10 @@ export type HostPayload = {
 	format?: string | null;
 	version?: number | null;
 	field?: Record<string, unknown>;
-	locales?: { default: string; all: { id: string; title: string }[] };
+	locales?: {
+		default: string;
+		all: { id: string; title: string; fallback?: string | null }[];
+	};
 	assets?: AssetMap;
 };
 
@@ -46,7 +49,13 @@ export class CosrayHost extends HTMLElement {
 		}
 
 		this.#started = true;
-		this.#locale = this.getAttribute('locale') ?? '';
+		const contentLocale = this.closest('[data-content-locale-scope]')?.getAttribute(
+			'data-content-locale',
+		);
+		this.#locale =
+			this.dataset.translated === 'true' && contentLocale
+				? contentLocale
+				: (this.getAttribute('locale') ?? '');
 		this.#payload = this.#readPayload();
 		this.#setFormValue();
 		this.addEventListener('cosray-change', (event) => {

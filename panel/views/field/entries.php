@@ -61,6 +61,7 @@ $single = count($entryTypes) === 1;
 				'index' => $index,
 				'rowData' => $rowData,
 				'entryType' => $entryTypes[$type],
+				'globalLocales' => $globalLocales ?? false,
 			]);
 		} ?>
 	</div>
@@ -70,6 +71,7 @@ $single = count($entryTypes) === 1;
 				'index' => '__i__',
 				'rowData' => null,
 				'entryType' => $entryType,
+				'globalLocales' => $globalLocales ?? false,
 			]) ?>
 		</template>
 	<?php endforeach ?>

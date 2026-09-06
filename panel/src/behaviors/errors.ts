@@ -1,3 +1,5 @@
+import { selectContentLocale } from './tabs';
+
 // Field-level validation errors for the SSR editor form.
 //
 // A failed save swaps the #editor-errors summary out-of-band; each issue
@@ -100,6 +102,61 @@ function localeTab(control: Element, locale: string | undefined): HTMLElement | 
 	);
 }
 
+function contentLocale(form: Element, path: Path, control: Element): string | undefined {
+	const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]');
+
+	if (!select || path[0] !== 'content') {
+		return undefined;
+	}
+
+	const ids = new Set(Array.from(select.options, (option) => option.value));
+	const variant = control.closest<HTMLElement>('.variant[data-locale]');
+
+	if (variant?.dataset.locale && ids.has(variant.dataset.locale)) {
+		return variant.dataset.locale;
+	}
+
+	return path
+		.slice(2)
+		.find((segment): segment is string => typeof segment === 'string' && ids.has(segment));
+}
+
+function refreshContentBadge(form: Element): void {
+	const select = form.querySelector<HTMLSelectElement>('[data-content-locale-select]');
+
+	if (!select) {
+		return;
+	}
+
+	const locales = new Set<string>();
+
+	form.querySelectorAll(`[${INVALID}][data-error-locales]`).forEach((field) => {
+		for (const locale of field.getAttribute('data-error-locales')?.split(' ') ?? []) {
+			if (locale !== '') locales.add(locale);
+		}
+	});
+
+	select.classList.toggle('has-error', locales.size > 0);
+	select.toggleAttribute('aria-invalid', locales.size > 0);
+
+	if (locales.size > 0) {
+		select.dataset.errorLocales = [...locales].join(' ');
+	} else {
+		delete select.dataset.errorLocales;
+	}
+}
+
+function addErrorLocale(field: Element, locale: string | undefined): void {
+	if (!locale) {
+		return;
+	}
+
+	const locales = new Set(field.getAttribute('data-error-locales')?.split(' ') ?? []);
+	locales.delete('');
+	locales.add(locale);
+	field.setAttribute('data-error-locales', [...locales].join(' '));
+}
+
 function unmark(field: Element): void {
 	field.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
 	field.querySelectorAll('[aria-invalid]').forEach((control) => {
@@ -108,6 +165,7 @@ function unmark(field: Element): void {
 	});
 	field.querySelectorAll('.has-error').forEach((badge) => badge.classList.remove('has-error'));
 	field.removeAttribute(INVALID);
+	field.removeAttribute('data-error-locales');
 
 	// A row owns the tabs of its sub-fields, so its badge outlives the
 	// wrapper that put it there — drop it once nothing in the row fails.
@@ -118,6 +176,12 @@ function unmark(field: Element): void {
 			.querySelectorAll('[data-locale-tab].has-error')
 			.forEach((tab) => tab.classList.remove('has-error'));
 	}
+
+	const form = field.closest('form');
+
+	if (form) {
+		refreshContentBadge(form);
+	}
 }
 
 function wipe(): void {
@@ -126,11 +190,17 @@ function wipe(): void {
 	document
 		.querySelectorAll('[data-locale-tab].has-error')
 		.forEach((tab) => tab.classList.remove('has-error'));
+	document.querySelectorAll('[data-content-locale-select]').forEach((select) => {
+		select.classList.remove('has-error');
+		select.removeAttribute('aria-invalid');
+		delete (select as HTMLElement).dataset.errorLocales;
+	});
 }
 
-function mark(control: Element, message: string): void {
+function mark(control: Element, message: string, locale?: string): void {
 	const field = wrapper(control);
 	field.setAttribute(INVALID, 'true');
+	addErrorLocale(field, locale);
 
 	const note = document.createElement('p');
 	note.className = 'cms-field-error';
@@ -167,6 +237,12 @@ function mark(control: Element, message: string): void {
 	if (control.closest('dialog[data-meta]')) {
 		field.querySelector('[data-meta-open]')?.classList.add('has-error');
 	}
+
+	const form = field.closest('form');
+
+	if (form) {
+		refreshContentBadge(form);
+	}
 }
 
 function paint(box: Element | null): void {
@@ -182,8 +258,8 @@ function paint(box: Element | null): void {
 		const path = parsePath(item);
 		const control = path && resolve(form, path);
 
-		if (control) {
-			mark(control, item.textContent?.trim() ?? '');
+		if (control && path) {
+			mark(control, item.textContent?.trim() ?? '', contentLocale(form, path, control));
 		}
 	});
 
@@ -226,8 +302,14 @@ function activate(event: Event): void {
 
 	const field = wrapper(control);
 	const variant = control.closest('.variant[data-locale]');
+	const globalScope =
+		form.closest('[data-content-locale-scope]') ??
+		form.querySelector('[data-content-locale-scope]');
+	const locale = path ? contentLocale(form, path, control) : undefined;
 
-	if (variant instanceof HTMLElement && variant.hidden) {
+	if (globalScope && locale) {
+		selectContentLocale(globalScope, locale);
+	} else if (variant instanceof HTMLElement && variant.hidden) {
 		localeTab(control, variant.dataset.locale)?.click();
 	}
 

@@ -19,6 +19,10 @@
 		items: FileItem[];
 		loading: boolean;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		identity: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		// False once the field's limit is reached; hides the add actions.
 		open: boolean;
 		remove: (index: number) => void;
@@ -31,6 +35,10 @@
 		items = $bindable(),
 		loading,
 		translate,
+		locale,
+		contentLocale,
+		identity,
+		locales,
 		open,
 		remove,
 		upload,
@@ -187,8 +195,8 @@
 			{#if currentInfo && assetLine(currentInfo) !== ''}
 				<div class="facts">{assetLine(currentInfo)}</div>
 			{/if}
-			{#key current.uid}
-				<MetaFields item={current} {translate} {update} />
+			{#key `${identity}:${current.uid}`}
+				<MetaFields item={current} {translate} {locale} {contentLocale} {locales} {update} />
 			{/key}
 		</div>
 	{/if}

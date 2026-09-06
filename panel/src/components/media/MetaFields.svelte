@@ -3,20 +3,21 @@
 
 	import { untrack } from 'svelte';
 	import { ZXX } from '$types/data';
-	import { system, systemLocale } from '$lib/sys';
 	import { pruneItemMeta } from '$lib/content';
 	import { __ } from '$lib/locale';
-	import LocaleTabs from '$components/LocaleTabs.svelte';
 
 	type Props = {
 		item: FileItem;
 		translate: boolean;
+		locale: string;
+		contentLocale: string;
+		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		// Receives the item with pruned meta on every edit, so empty
 		// texts never shadow the asset's catalog defaults.
 		update: (item: FileItem) => void;
 	};
 
-	let { item, translate, update }: Props = $props();
+	let { item, translate, locale, contentLocale, locales, update }: Props = $props();
 
 	const id = $props.id();
 
@@ -24,8 +25,7 @@
 	// the asset uid, so a replaced image starts from its own meta.
 	let alt: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.alt ?? {}) })));
 	let title: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.title ?? {}) })));
-	let lang = $state(systemLocale($system));
-	let keys = $derived(translate ? $system.locales.map((locale) => locale.id) : [ZXX]);
+	let keys = $derived([translate ? locale : ZXX]);
 
 	function commit() {
 		update(
@@ -41,44 +41,34 @@
 	<div class="entry">
 		<label class="caption" for="{id}-alt">
 			<span>{__('image:alt-text')}</span>
-			{#if translate}
-				<LocaleTabs bind:lang />
-			{/if}
 		</label>
 		{#each keys as key (key)}
-			{#if !translate || key === lang}
-				<input
-					class="cms-input"
-					id="{id}-alt"
-					type="text"
-					autocomplete="off"
-					placeholder={__('image:alt-text-placeholder')}
-					bind:value={alt[key]}
-					oninput={commit}
-				/>
-			{/if}
+			<input
+				class="cms-input"
+				id="{id}-alt"
+				type="text"
+				autocomplete="off"
+				placeholder={__('image:alt-text-placeholder')}
+				bind:value={alt[key]}
+				oninput={commit}
+			/>
 		{/each}
 		<span class="help">{__('image:alt-text-hint')}</span>
 	</div>
 	<div class="entry">
 		<label class="caption" for="{id}-title">
 			<span>{__('common:title')}</span>
-			{#if translate}
-				<LocaleTabs bind:lang />
-			{/if}
 		</label>
 		{#each keys as key (key)}
-			{#if !translate || key === lang}
-				<input
-					class="cms-input"
-					id="{id}-title"
-					type="text"
-					autocomplete="off"
-					placeholder={__('common:optional')}
-					bind:value={title[key]}
-					oninput={commit}
-				/>
-			{/if}
+			<input
+				class="cms-input"
+				id="{id}-title"
+				type="text"
+				autocomplete="off"
+				placeholder={__('common:optional')}
+				bind:value={title[key]}
+				oninput={commit}
+			/>
 		{/each}
 	</div>
 </div>
