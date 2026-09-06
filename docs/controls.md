@@ -40,6 +40,16 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
+### Content language and fallback previews
+
+A node with any translated content has one **Content language** select in its inspector. It switches every translated primitive and element control, every translated field inside Entries and symmetric Blocks, and each locale-specific list of an asymmetric Blocks or media field. The select is editor state rather than content: changing it neither marks the form dirty nor changes a stored value.
+
+An empty selected translation displays the first non-empty value from that locale's configured `fallback` chain, then `zxx` when present. The preview is separate from the editing value and names the locale that supplied it. Native text controls use a placeholder; richtext and code use a read-only content layer; asymmetric media and Blocks show an inert rendering of the source list. Image `alt` and `title` also consult asset-catalog metadata after per-use metadata. Empty strings, semantically empty richtext documents, media lists without a usable uid, and empty block lists count as missing.
+
+Focusing an empty text, metadata, richtext, or code editor hides its preview; block previews also hide while the target list has focus. The target remains empty throughout. Switching language, focusing and blurring, opening or cancelling a metadata dialog, and saving another field never copy fallback text, documents, assets, metadata, or block rows into the target locale. Adding media or a block operates on the selected locale's empty list and removes the preview only after that locale gains its own item.
+
+Element payloads carry `locales.all[].fallback` with the same chain the server uses. Custom translated controls receive the selected `locale` and this metadata but own their empty-value test and preview UI; they must never write a resolved fallback into their `value` map merely to display it.
+
 ### Richtext toolbar
 
 The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else `Tool::DEFAULT` (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order, duplicates collapse.
@@ -164,7 +174,7 @@ content[f][value][{lo}][i][fields][sub][meta][k][lo]  sub-field meta dialog
 content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
 ```
 
-`{lo}` is the list's locale: an **asymmetric** field renders one list per locale and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list. The node-wide content-language selector switches asymmetric lists and translated sub-fields in shared rows together.
+`{lo}` is the list's locale: an **asymmetric** field renders one list per locale and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list. The node-wide content-language selector switches asymmetric lists and translated sub-fields in shared rows together. When the selected asymmetric list is empty, the first populated fallback list is also shown as an inert preview; its rows keep their original form names and values, while add actions continue to target the selected empty list.
 
 No field inside a block carries a **required marker** — neither the asterisk on its label nor the outline the rich text and media controls draw around a required value. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
 

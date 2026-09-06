@@ -186,6 +186,31 @@
 		max-width: 100%;
 	}
 
+	.cms-richtext-stack {
+		position: relative;
+
+		&.has-fallback > .cms-richtext-content {
+			position: absolute;
+			inset: 0;
+		}
+	}
+
+	.cms-richtext-fallback {
+		position: relative;
+		z-index: 1;
+		overflow: hidden;
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-subtle);
+		pointer-events: none;
+
+		> span {
+			display: block;
+			padding: 0 var(--cms-space-4) var(--cms-space-2);
+			font-size: var(--cms-font-size-xs);
+			font-style: italic;
+		}
+	}
+
 	/* Inverted on purpose: raw HTML reads as code, not as the document. */
 	.cms-richtext-source-input {
 		height: 16rem;

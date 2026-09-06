@@ -42,6 +42,8 @@ The two halves disagree only on layouts that move `h` `j` `k` `l` away from thei
 
 ## What is bound today
 
+The node editor's content-language selector is an ordinary select in the inspector and one normal `Tab` stop. It has no panel shortcut: browser select keys change the language, and the editor moves focus to it when a validation error belongs to another locale. Display-only fallback layers are not tab stops; asymmetric block previews are `inert`, so `Tab` reaches the selected locale's add controls instead of the source rows.
+
 The menu tree (`panel/src/behaviors/menu-keys.ts`) is the first screen built to these rules and is the reference implementation.
 
 Always on:

@@ -6,4 +6,5 @@ $this->insert('field/textarea', [
 	'id' => $id,
 	'name' => $name,
 	'value' => $value ?? null,
+	'fallbackPreview' => $fallbackPreview ?? false,
 ]);

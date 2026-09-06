@@ -3,6 +3,7 @@
 	import type { SortableEvent } from 'sortablejs';
 	import Sortable from 'sortablejs';
 	import { mount, onMount, unmount } from 'svelte';
+	import { useAssets } from '$lib/assets';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
 	import Video from '$components/Video.svelte';
@@ -13,7 +14,6 @@
 		items: FileItem[];
 		multiple: boolean;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
@@ -27,7 +27,6 @@
 		items = $bindable(),
 		multiple,
 		translate,
-		locale,
 		contentLocale,
 		identity,
 		locales,
@@ -36,6 +35,7 @@
 		remove,
 		notify = () => {},
 	}: Props = $props();
+	const assets = useAssets();
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
@@ -74,10 +74,10 @@
 						handle.close();
 					},
 					translate,
-					locale,
 					contentLocale,
 					identity,
 					locales,
+					catalog: items[index].uid ? $assets[items[index].uid]?.meta : undefined,
 					hasAlt,
 				},
 			});

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { DOMSerializer } from 'prosemirror-model';
 	import type { EditorState } from 'prosemirror-state';
 
 	import { type Component, mount, onDestroy, onMount, unmount } from 'svelte';
@@ -10,7 +11,7 @@
 	import ModalImage from '$components/modals/ModalImage.svelte';
 	import ModalLink from '$components/modals/ModalLink.svelte';
 	import createEditor, { type CmsEditor } from './editor';
-	import { type RichtextDoc } from './format';
+	import { docToPm, isFilledDoc, type RichtextDoc } from './format';
 	import { schema } from './schema';
 	import {
 		isMarkActive,
@@ -94,6 +95,8 @@
 		value: RichtextDoc | null;
 		name: string;
 		required?: boolean;
+		fallback?: RichtextDoc | null;
+		fallbackLabel?: string;
 		toolbar?: 'default' | 'inline';
 		embed?: boolean;
 		notify?: () => void;
@@ -113,6 +116,8 @@
 		value = $bindable(),
 		name,
 		required = false,
+		fallback = null,
+		fallbackLabel = '',
 		toolbar = 'default',
 		embed = false,
 		notify = () => {},
@@ -123,6 +128,7 @@
 		onAsset = () => {},
 	}: Props = $props();
 	let ref = $state<HTMLElement>();
+	let fallbackRef = $state<HTMLElement>();
 	let bubble = $state<HTMLElement>();
 	let editor = $state<CmsEditor>();
 	let editorState = $state({
@@ -149,6 +155,38 @@
 	let showDropdown = $state(false);
 	let showStyleDropdown = $state(false);
 	let showCompactToolsDropdown = $state(false);
+	let focused = $state(false);
+	let showFallback = $derived(
+		isFilledDoc(fallback) && !isFilledDoc(value) && !focused && !showSource,
+	);
+
+	$effect(() => {
+		if (!fallbackRef) return;
+
+		fallbackRef.replaceChildren();
+
+		if (isFilledDoc(fallback)) {
+			fallbackRef.append(
+				DOMSerializer.fromSchema(schema).serializeFragment(docToPm(fallback).content, { document }),
+			);
+
+			for (const image of fallbackRef.querySelectorAll<HTMLImageElement>('img[data-uid]')) {
+				const url = assetUrl(image.dataset.uid ?? '');
+
+				if (url) image.src = url;
+			}
+		}
+	});
+
+	function focusIn() {
+		focused = true;
+	}
+
+	function focusOut(event: FocusEvent) {
+		if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) {
+			focused = false;
+		}
+	}
 
 	// Config-declared options: both lists are empty unless the app
 	// declares entries — no built-in styling escape hatches.
@@ -546,7 +584,13 @@
 	</div>
 {/if}
 
-<div class="richtext richtext-{toolbar}" class:required class:embed>
+<div
+	class="richtext richtext-{toolbar}"
+	class:required
+	class:embed
+	onfocusin={focusIn}
+	onfocusout={focusOut}
+>
 	{#if editor}
 		{#if toolbar !== 'inline'}
 			<div
@@ -806,17 +850,28 @@
 		{/if}
 	{/if}
 
-	<div
-		class="richtext-editor cms-richtext-content cms-richtext-layer-base"
-		bind:this={ref}
-		data-name={name}
-		class:hide={showSource}
-	></div>
-	<div class="richtext-source cms-richtext-source cms-richtext-layer-base" class:hide={!showSource}>
-		<!-- No name: the host carries the value into the form. A named
-		     textarea would submit a bare key that, for a sub-field called
-		     "content" inside entries, wipes the whole content tree. -->
-		<textarea onkeyup={changeSource} bind:value={sourceHtml} class="cms-richtext-source-input">
-		</textarea>
+	<div class="cms-richtext-stack" class:has-fallback={showFallback}>
+		{#if showFallback}
+			<div class="cms-richtext-fallback" aria-hidden="true">
+				<div class="ProseMirror" bind:this={fallbackRef}></div>
+				<span>{fallbackLabel}</span>
+			</div>
+		{/if}
+		<div
+			class="richtext-editor cms-richtext-content cms-richtext-layer-base"
+			bind:this={ref}
+			data-name={name}
+			class:hide={showSource}
+		></div>
+		<div
+			class="richtext-source cms-richtext-source cms-richtext-layer-base"
+			class:hide={!showSource}
+		>
+			<!-- No name: the host carries the value into the form. A named
+			     textarea would submit a bare key that, for a sub-field called
+			     "content" inside entries, wipes the whole content tree. -->
+			<textarea onkeyup={changeSource} bind:value={sourceHtml} class="cms-richtext-source-input">
+			</textarea>
+		</div>
 	</div>
 </div>

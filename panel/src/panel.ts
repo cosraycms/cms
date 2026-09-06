@@ -7,6 +7,7 @@ import { install as installBulk } from './behaviors/bulk';
 import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
 import { install as installErrors } from './behaviors/errors';
+import { install as installFallbacks } from './behaviors/fallbacks';
 import { install as installMenu } from './behaviors/menu';
 import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
@@ -109,6 +110,7 @@ cleanups.push(
 	installSubmit(),
 	installTransport(),
 	installErrors(),
+	installFallbacks(),
 	installBulk(),
 	installMenu(),
 	installMenuTree(),

@@ -185,6 +185,7 @@ foreach ($fields as $field) {
 		hx-swap="none"
 		data-json-form
 		<?= $contentLocales ? 'data-content-locale-scope data-content-locale="' . escape($defaultLocale) . '"' : '' ?>
+		<?= $contentLocales ? "data-content-locales='" . escape(json_encode($locales, $jsonFlags)) . "'" : '' ?>
 		novalidate>
 		<div class="pane">
 			<div class="inner">

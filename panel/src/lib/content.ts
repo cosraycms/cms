@@ -7,9 +7,7 @@ export function neutral<T>(value: LocaleMap<T> | undefined, fallback: T): T {
 }
 
 export function ensureNeutral<T>(value: LocaleMap<T> | undefined, fallback: T): LocaleMap<T> {
-	if (!value) return { [ZXX]: fallback };
-	if (!(ZXX in value)) value[ZXX] = fallback;
-	return value;
+	return { [ZXX]: fallback, ...(value ?? {}) };
 }
 
 export function ensureLocales<T>(
@@ -17,7 +15,7 @@ export function ensureLocales<T>(
 	fallback: T,
 	locales: { id: string }[],
 ): LocaleMap<T> {
-	const result = value ?? {};
+	const result = { ...(value ?? {}) };
 	for (const locale of locales) {
 		if (!(locale.id in result)) result[locale.id] = fallback;
 	}

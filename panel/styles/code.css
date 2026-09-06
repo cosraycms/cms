@@ -17,6 +17,45 @@
 	min-width: 9rem;
 }
 
+.cms-code-editor-wrap {
+	position: relative;
+}
+
+.cms-code-editor-fallback {
+	position: absolute;
+	z-index: 1;
+	inset: 0;
+	overflow: hidden;
+	border: var(--cms-border);
+	border-radius: var(--cms-radius-md);
+	background-color: var(--cms-color-neutral-800);
+	color: var(--cms-color-neutral-300);
+	pointer-events: none;
+
+	> span {
+		position: absolute;
+		z-index: 1;
+		right: var(--cms-space-3);
+		bottom: var(--cms-space-2);
+		padding: var(--cms-space-0-5) var(--cms-space-1);
+		border-radius: var(--cms-radius-sm);
+		background: color-mix(in srgb, var(--cms-color-neutral-800) 90%, transparent);
+		font-size: var(--cms-font-size-xs);
+		font-style: italic;
+	}
+}
+
+.cms-code-editor-preview {
+	height: 100%;
+	border: 0;
+	border-radius: inherit;
+	box-shadow: none;
+
+	& .cm-editor {
+		height: 100%;
+	}
+}
+
 .cms-code-editor {
 	position: relative;
 	overflow: hidden;

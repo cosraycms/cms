@@ -2,7 +2,10 @@
 	import type { FileItem, LocaleMap, UploadType } from '$types/data';
 
 	import { ZXX } from '$types/data';
+	import { localeTitle, resolveFallback } from '$lib/fallback';
+	import { __ } from '$lib/locale';
 	import Upload from '$components/Upload.svelte';
+	import FallbackMedia from '$components/media/FallbackMedia.svelte';
 
 	type FieldInfo = {
 		name: string;
@@ -25,26 +28,50 @@
 	let { type, value = $bindable(), field, node, locale, locales, notify }: Props = $props();
 
 	let active = $derived(field.translateMode === 'asymmetric' ? locale : ZXX);
+	let configuredLocales = $derived(locales?.all ?? []);
+	let items = $state<FileItem[]>([]);
+
+	function hasItems(candidate: FileItem[] | undefined): boolean {
+		return candidate?.some((item) => typeof item.uid === 'string' && item.uid !== '') ?? false;
+	}
 
 	$effect(() => {
-		value[active] ??= [];
+		items = [...(value[active] ?? [])];
 	});
+
+	let fallback = $derived(
+		field.translateMode === 'asymmetric' && !hasItems(items)
+			? resolveFallback(value, active, configuredLocales, hasItems)
+			: null,
+	);
+
+	function commit() {
+		value[active] = items;
+		notify();
+	}
+
+	function sourceLabel(source: string): string {
+		const language =
+			source === ZXX ? __('field:shared-content') : localeTitle(configuredLocales, source);
+
+		return __('field:fallback-from', { language });
+	}
 </script>
 
-{#if value[active]}
-	{#key active}
-		<Upload
-			{type}
-			limit={field.limit}
-			required={field.required ?? false}
-			name={field.name}
-			translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
-			locale={field.translateMode === 'asymmetric' ? ZXX : locale}
-			contentLocale={locale}
-			identity={active}
-			{locales}
-			bind:items={value[active]}
-			{notify}
-		/>
-	{/key}
-{/if}
+{#key active}
+	{#if fallback}
+		<FallbackMedia items={fallback.value} {type} label={sourceLabel(fallback.locale)} />
+	{/if}
+	<Upload
+		{type}
+		limit={field.limit}
+		required={field.required ?? false}
+		name={field.name}
+		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
+		contentLocale={locale}
+		identity={active}
+		{locales}
+		bind:items
+		notify={commit}
+	/>
+{/key}

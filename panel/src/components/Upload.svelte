@@ -22,7 +22,6 @@
 		type: UploadType;
 		name: string;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
@@ -40,7 +39,6 @@
 		type,
 		name,
 		translate,
-		locale,
 		contentLocale,
 		identity,
 		locales,
@@ -328,7 +326,6 @@
 					bind:items
 					{loading}
 					{translate}
-					{locale}
 					{contentLocale}
 					{identity}
 					{locales}
@@ -343,7 +340,6 @@
 					item={items?.[0] ?? null}
 					{loading}
 					{translate}
-					{locale}
 					{contentLocale}
 					{identity}
 					{locales}
@@ -389,7 +385,6 @@
 			{remove}
 			{loading}
 			{translate}
-			{locale}
 			{contentLocale}
 			{identity}
 			{locales}

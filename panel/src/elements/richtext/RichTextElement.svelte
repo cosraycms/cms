@@ -8,10 +8,13 @@
 		FORMAT,
 		VERSION,
 		htmlToDoc,
+		isFilledDoc,
 		type RichtextDoc,
 		type RichtextValue,
 	} from '$components/richtext/format';
 	import RichTextEditor from '$components/richtext/RichTextEditor.svelte';
+	import { localeTitle, resolveFallback } from '$lib/fallback';
+	import { __ } from '$lib/locale';
 
 	type FieldInfo = {
 		name: string;
@@ -44,6 +47,7 @@
 	}: Props = $props();
 
 	let active = $derived(field.translate ? locale : ZXX);
+	let configuredLocales = $derived(locales?.all ?? []);
 
 	// Library picks and uploads register here so previews resolve
 	// before the payload knows the asset.
@@ -109,12 +113,27 @@
 	function onAsset(uid: string, info: AssetInfo) {
 		picked = { ...picked, [uid]: info };
 	}
+
+	let fallback = $derived(
+		field.translate && !isFilledDoc(map[active])
+			? resolveFallback(map, active, configuredLocales, (doc) => isFilledDoc(doc))
+			: null,
+	);
 </script>
 
 {#key active}
 	<RichTextEditor
 		name={field.name}
 		required={field.required ?? false}
+		fallback={fallback?.value ?? null}
+		fallbackLabel={fallback
+			? __('field:fallback-from', {
+					language:
+						fallback.locale === ZXX
+							? __('field:shared-content')
+							: localeTitle(configuredLocales, fallback.locale),
+				})
+			: ''}
 		tools={field.tools}
 		classes={field.richtextClasses ?? {}}
 		styles={field.richtextStyles ?? {}}

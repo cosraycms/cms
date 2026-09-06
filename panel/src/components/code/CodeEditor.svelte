@@ -21,6 +21,8 @@
 		syntax?: string;
 		required?: boolean;
 		readonly?: boolean;
+		fallback?: string;
+		fallbackLabel?: string;
 		notify?: () => void;
 	};
 
@@ -30,6 +32,8 @@
 		syntax = $bindable(DEFAULT_CODE_SYNTAX),
 		required = false,
 		readonly = false,
+		fallback = '',
+		fallbackLabel = '',
 		notify = () => {},
 	}: Props = $props();
 
@@ -37,6 +41,59 @@
 	let editor: EditorView | null = null;
 	let languageLoadId = 0;
 	let applyingExternalValue = false;
+	let focused = $state(false);
+
+	function preview(
+		element: HTMLElement,
+		initial: { value: string; syntax: string },
+	): {
+		update: (next: { value: string; syntax: string }) => void;
+		destroy: () => void;
+	} {
+		let view: EditorView | null = null;
+		let loadId = 0;
+		let destroyed = false;
+
+		async function render(next: { value: string; syntax: string }) {
+			const currentLoadId = ++loadId;
+			const language = await loadCodeLanguageExtension(next.syntax);
+
+			if (destroyed || currentLoadId !== loadId) {
+				return;
+			}
+
+			view?.destroy();
+			view = new EditorView({
+				state: EditorState.create({
+					doc: next.value,
+					extensions: [
+						lineNumbers(),
+						cosrayCodeTheme,
+						language,
+						EditorState.readOnly.of(true),
+						EditorView.editable.of(false),
+					],
+				}),
+				parent: element,
+			});
+		}
+
+		void render(initial);
+
+		return {
+			update: (next) => void render(next),
+			destroy() {
+				destroyed = true;
+				view?.destroy();
+			},
+		};
+	}
+
+	function focusOut(event: FocusEvent) {
+		if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) {
+			focused = false;
+		}
+	}
 
 	const externalUpdate = Annotation.define<boolean>();
 	const languageCompartment = new Compartment();
@@ -171,15 +228,26 @@
 	});
 </script>
 
-<div class="cms-code-editor" bind:this={editorElement}></div>
+<div class="cms-code-editor-wrap" onfocusin={() => (focused = true)} onfocusout={focusOut}>
+	{#if value === '' && fallback !== '' && !focused}
+		<div class="cms-code-editor-fallback" aria-hidden="true">
+			<div
+				class="cms-code-editor cms-code-editor-preview"
+				use:preview={{ value: fallback, syntax }}
+			></div>
+			<span>{fallbackLabel}</span>
+		</div>
+	{/if}
+	<div class="cms-code-editor" bind:this={editorElement}></div>
 
-<textarea
-	class="cms-code-editor-input"
-	{name}
-	bind:value
-	{required}
-	readonly
-	tabindex="-1"
-	aria-hidden="true"
->
-</textarea>
+	<textarea
+		class="cms-code-editor-input"
+		{name}
+		bind:value
+		{required}
+		readonly
+		tabindex="-1"
+		aria-hidden="true"
+	>
+	</textarea>
+</div>

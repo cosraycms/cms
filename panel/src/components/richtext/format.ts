@@ -43,6 +43,26 @@ export function pmToDoc(pm: PmNode): RichtextDoc {
 	return fromPmJson(pm.toJSON() as Json) as unknown as RichtextDoc;
 }
 
+export function isFilledDoc(doc: RichtextDoc | null | undefined): boolean {
+	if (!doc || doc.type !== 'doc') {
+		return false;
+	}
+
+	function filled(node: RichtextDoc['content'][number]): boolean {
+		if (typeof node.text === 'string' && node.text.trim() !== '') {
+			return true;
+		}
+
+		if (node.type === 'image' || node.type === 'horizontalRule') {
+			return true;
+		}
+
+		return node.content?.some(filled) ?? false;
+	}
+
+	return doc.content.some(filled);
+}
+
 export function htmlToDoc(html: string): RichtextDoc | null {
 	if (html.trim() === '') {
 		return null;

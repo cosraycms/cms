@@ -41,6 +41,8 @@ $localized = ['text', 'textarea', 'iframe', 'youtube'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
+$fallbackPreview = $globalLocales && $translate && in_array($controlName, $localized, true);
+$blockFallback = $globalLocales && $asymmetric;
 $tabs = !$globalLocales && $ownLocales && $translate && ($variants || $controlName === 'element');
 $neutral = 'zxx';
 
@@ -91,6 +93,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<div
 					class="variant"
 					data-locale="<?= escape($locale['id']) ?>"
+					<?= $blockFallback ? 'data-blocks-locale' : '' ?>
 					<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
 					<?php // Required applies to the default locale only — the same
 
@@ -108,7 +111,22 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						'defaultLocale' => $defaultLocale,
 						'assets' => $assets,
 						'globalLocales' => $globalLocales,
+						'fallbackPreview' => $fallbackPreview,
 					]) ?>
+					<?php if ($fallbackPreview): ?>
+						<span
+							class="cms-fallback-source"
+							data-fallback-source
+							data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
+							data-neutral="<?= escape(__('field:shared-content')) ?>"
+							hidden></span>
+					<?php elseif ($blockFallback): ?>
+						<span
+							class="cms-blocks-fallback-source"
+							data-blocks-fallback-source
+							data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
+							hidden></span>
+					<?php endif ?>
 				</div>
 			<?php endforeach ?>
 		<?php else: ?>
@@ -125,6 +143,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'defaultLocale' => $defaultLocale,
 				'assets' => $assets,
 				'globalLocales' => $globalLocales,
+				'fallbackPreview' => false,
 			]) ?>
 		<?php endif ?>
 	</div>

@@ -3,13 +3,14 @@
 
 	import { untrack } from 'svelte';
 	import { ZXX } from '$types/data';
+	import { useAssets } from '$lib/assets';
 	import { pruneItemMeta } from '$lib/content';
+	import { localeTitle, resolveTextFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
 
 	type Props = {
 		item: FileItem;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		// Receives the item with pruned meta on every edit, so empty
@@ -17,7 +18,7 @@
 		update: (item: FileItem) => void;
 	};
 
-	let { item, translate, locale, contentLocale, locales, update }: Props = $props();
+	let { item, translate, contentLocale, locales, update }: Props = $props();
 
 	const id = $props.id();
 
@@ -25,7 +26,34 @@
 	// the asset uid, so a replaced image starts from its own meta.
 	let alt: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.alt ?? {}) })));
 	let title: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.title ?? {}) })));
-	let keys = $derived([translate ? locale : ZXX]);
+	const assets = useAssets();
+	let key = $derived(translate ? contentLocale : ZXX);
+	let catalog = $derived(item.uid ? $assets[item.uid]?.meta : undefined);
+	let altFallback = $derived(
+		resolveTextFallback(
+			alt,
+			catalog?.alt as LocaleMap<string> | undefined,
+			key,
+			locales?.all ?? [],
+		),
+	);
+	let titleFallback = $derived(
+		resolveTextFallback(
+			title,
+			catalog?.title as LocaleMap<string> | undefined,
+			key,
+			locales?.all ?? [],
+		),
+	);
+	let altFocused = $state(false);
+	let titleFocused = $state(false);
+
+	function sourceLabel(source: string): string {
+		const language =
+			source === ZXX ? __('field:shared-content') : localeTitle(locales?.all ?? [], source);
+
+		return __('field:fallback-from', { language });
+	}
 
 	function commit() {
 		update(
@@ -42,34 +70,42 @@
 		<label class="caption" for="{id}-alt">
 			<span>{__('image:alt-text')}</span>
 		</label>
-		{#each keys as key (key)}
-			<input
-				class="cms-input"
-				id="{id}-alt"
-				type="text"
-				autocomplete="off"
-				placeholder={__('image:alt-text-placeholder')}
-				bind:value={alt[key]}
-				oninput={commit}
-			/>
-		{/each}
+		<input
+			class="cms-input"
+			id="{id}-alt"
+			type="text"
+			autocomplete="off"
+			placeholder={!altFocused && altFallback
+				? altFallback.value
+				: __('image:alt-text-placeholder')}
+			bind:value={alt[key]}
+			onfocus={() => (altFocused = true)}
+			onblur={() => (altFocused = false)}
+			oninput={commit}
+		/>
+		{#if !altFocused && altFallback}
+			<span class="fallback">{sourceLabel(altFallback.locale)}</span>
+		{/if}
 		<span class="help">{__('image:alt-text-hint')}</span>
 	</div>
 	<div class="entry">
 		<label class="caption" for="{id}-title">
 			<span>{__('common:title')}</span>
 		</label>
-		{#each keys as key (key)}
-			<input
-				class="cms-input"
-				id="{id}-title"
-				type="text"
-				autocomplete="off"
-				placeholder={__('common:optional')}
-				bind:value={title[key]}
-				oninput={commit}
-			/>
-		{/each}
+		<input
+			class="cms-input"
+			id="{id}-title"
+			type="text"
+			autocomplete="off"
+			placeholder={!titleFocused && titleFallback ? titleFallback.value : __('common:optional')}
+			bind:value={title[key]}
+			onfocus={() => (titleFocused = true)}
+			onblur={() => (titleFocused = false)}
+			oninput={commit}
+		/>
+		{#if !titleFocused && titleFallback}
+			<span class="fallback">{sourceLabel(titleFallback.locale)}</span>
+		{/if}
 	</div>
 </div>
 
@@ -97,10 +133,15 @@
 				line-height: 1.25rem;
 			}
 
+			& .fallback,
 			& .help {
 				color: var(--cms-color-text-subtle);
 				font-size: var(--cms-font-size-xs);
 				line-height: 1.45;
+			}
+
+			& .fallback {
+				font-style: italic;
 			}
 		}
 	}

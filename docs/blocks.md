@@ -137,6 +137,8 @@ There is no schema attribute for a CSS class on the container — the `class` re
 
 Symmetric is the mode to reach for when the locales share a layout and only the text differs; asymmetric when a locale needs its own blocks in its own order. Switching a stored field between the modes later is a manual content migration: per-locale lists with different structures cannot be merged automatically.
 
+The node editor's one content-language selector switches the translated sub-fields of a symmetric list or the complete list of an asymmetric field. If the selected asymmetric list is empty, the editor follows the configured locale fallback chain and shows the first populated list as an inert, labelled preview. The selected list remains empty and keeps its own add controls; inserting a block creates it only there. Merely switching locale, focusing the add controls, or saving another field never copies the preview rows.
+
 ## Stored shape
 
 ```jsonc
@@ -189,7 +191,7 @@ content[f][value][{lo}][i][meta][class][zxx]          block settings dialog
 content[f][value][{lo}][i][meta][id][zxx]
 ```
 
-An asymmetric field renders one list per locale, so `{lo}` is a real locale and the sub-fields inside are neutral. A symmetric field renders a single `zxx` list. The node editor's sidebar owns one content-language selector: it switches the asymmetric list or every translated sub-field in the shared rows while neutral fields remain visible and editable.
+An asymmetric field renders one list per locale, so `{lo}` is a real locale and the sub-fields inside are neutral. A symmetric field renders a single `zxx` list. The node editor's sidebar owns one content-language selector: it switches the asymmetric list or every translated sub-field in the shared rows while neutral fields remain visible and editable. An empty asymmetric list may display a fallback list at the same time, but that preview remains under its source locale's existing names; it is inert and does not become part of the selected locale.
 
 Saving replaces the row list wholesale — order is submission order, missing rows are deleted, rows of a disallowed type are dropped. Surviving rows are matched to their stored counterpart **by uid**, so unknown keys inside a row survive edits and reorders, and each sub-field is patched individually like a top-level field. Validation errors carry the row path and the summary jumps into the block.
 

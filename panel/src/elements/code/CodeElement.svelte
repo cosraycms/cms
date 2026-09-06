@@ -4,6 +4,7 @@
 	import type { LocaleMap, Meta } from '$types/data';
 
 	import { ensureLocales, ensureNeutral } from '$lib/content';
+	import { localeTitle, resolveFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
 	import { ZXX } from '$types/data';
 	import CodeEditor from '$components/code/CodeEditor.svelte';
@@ -30,6 +31,7 @@
 	let { value = {}, meta = {}, field = { name: 'code' }, locale = ZXX, locales }: Props = $props();
 
 	let active = $derived(field.translate ? locale : ZXX);
+	let configuredLocales = $derived(locales?.all ?? []);
 	let syntaxOptions = $derived(
 		field.syntaxes && field.syntaxes.length > 0 ? field.syntaxes : [DEFAULT_CODE_SYNTAX],
 	);
@@ -42,11 +44,11 @@
 
 	function syncMeta(): Meta {
 		const fallback = syntaxOptions[0] ?? DEFAULT_CODE_SYNTAX;
-		const result = meta ?? {};
-		result.syntax ??= { [ZXX]: fallback };
-		const normalized = normalizeCodeSyntax((result.syntax[ZXX] as string | undefined) ?? fallback);
-		result.syntax[ZXX] = syntaxOptions.includes(normalized) ? normalized : fallback;
-		return result;
+		const syntax = { ...((meta?.syntax as LocaleMap<string> | undefined) ?? {}) };
+		const normalized = normalizeCodeSyntax(syntax[ZXX] ?? fallback);
+		syntax[ZXX] = syntaxOptions.includes(normalized) ? normalized : fallback;
+
+		return { ...(meta ?? {}), syntax };
 	}
 
 	// Synchronous init: CodeMirror reads its content at mount, before
@@ -61,6 +63,10 @@
 	$effect(() => {
 		metaMap = syncMeta();
 	});
+
+	let fallback = $derived(
+		field.translate && map[active] === '' ? resolveFallback(map, active, configuredLocales) : null,
+	);
 
 	function notify() {
 		$host().dispatchEvent(
@@ -96,6 +102,15 @@
 		<CodeEditor
 			name={field.name}
 			required={field.required ?? false}
+			fallback={fallback?.value ?? ''}
+			fallbackLabel={fallback
+				? __('field:fallback-from', {
+						language:
+							fallback.locale === ZXX
+								? __('field:shared-content')
+								: localeTitle(configuredLocales, fallback.locale),
+					})
+				: ''}
 			bind:syntax={metaMap.syntax[ZXX] as string}
 			bind:value={map[active]}
 			{notify}

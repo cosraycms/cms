@@ -25,6 +25,15 @@ $panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
+$fallbackField = [
+	'name' => 'fallback-title',
+	'label' => 'Translated title',
+	'control' => ['name' => 'text', 'props' => ['placeholder' => 'Translated title']],
+	'translate' => true,
+];
+$fallbackContent = [
+	'fallback-title' => ['value' => ['en' => 'English fallback preview', 'de' => '']],
+];
 
 $fieldsByName = [];
 
@@ -184,6 +193,40 @@ $rows = (array) $this->unwrap($rows);
 										'pathSourceFields' => [],
 									]) ?>
 								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h3>Fallback preview</h3>
+				<p class="note">
+					The German target is empty. The English value is a placeholder only and
+					disappears while the input has focus.
+				</p>
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="de"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
+					<div class="inner">
+						<div class="sheet">
+							<label>
+								Content language
+								<select class="cms-select" data-content-locale-select data-editor-state>
+									<option value="en">English</option>
+									<option value="de" selected>Deutsch</option>
+								</select>
+							</label>
+							<div class="cms-fields">
+								<?php $this->insert('field/item', [
+									'field' => $fallbackField,
+									'content' => $fallbackContent,
+									'locales' => $locales,
+									'defaultLocale' => 'de',
+									'uid' => 'styleguide',
+									'assets' => [],
+									'pathSourceFields' => [],
+									'globalLocales' => true,
+								]) ?>
 							</div>
 						</div>
 					</div>

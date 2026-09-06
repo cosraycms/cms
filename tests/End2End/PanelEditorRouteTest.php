@@ -150,6 +150,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		$this->assertStringContainsString('data-name="' . $en . '"', $html);
 		$this->assertStringContainsString('data-name="content[contentBlocks][value][de]"', $html);
+		$this->assertSame(2, substr_count($html, 'data-blocks-locale'));
+		$this->assertSame(2, substr_count($html, 'data-blocks-fallback-source'));
 		$this->assertStringContainsString(
 			'class="cms-blocks-editor is-grid" data-repeater data-name="'
 				. $en
@@ -599,6 +601,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('data-locale="de"', $html);
 		$this->assertSame(1, substr_count($html, 'data-content-locale-select'));
 		$this->assertStringContainsString('data-content-locale-scope', $html);
+		$this->assertStringContainsString('data-content-locales=', $html);
+		$this->assertStringContainsString('data-fallback-input', $html);
+		$this->assertStringContainsString('data-fallback-source', $html);
+		$this->assertHtmlNodeExists('//input[@name="content[title][value][de]" and @value=""]', $html);
 		// Sub-route actions must not inherit the editor query string.
 		$this->assertStringContainsString(
 			'action="/cp/collection/test-articles/panel-editor-a/delete"',

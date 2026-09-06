@@ -617,3 +617,41 @@
 		}
 	}
 }
+
+.variant.is-fallback-preview {
+	margin-bottom: var(--cms-space-3);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface-sunken);
+	color: var(--cms-color-text-subtle);
+
+	& .cms-blocks-editor {
+		border: 0;
+		background: transparent;
+	}
+
+	& .cms-blocks-editor > .adders,
+	& .block > .inserter,
+	& .block > .chrome .tools > :not(.kind),
+	& .block > .resize,
+	& .block > dialog,
+	& .richtext-toolbar,
+	& .cms-code-control-toolbar,
+	& .cms-image-card .details .tools,
+	& .cms-gallery > .summary .tools,
+	& .cms-gallery .discard,
+	& .cms-media-meta,
+	& .cms-video-controls,
+	& .cms-file-action,
+	& .cms-file-download,
+	& .dragdrop {
+		display: none;
+	}
+}
+
+.cms-blocks-fallback-source {
+	display: block;
+	padding: 0 var(--cms-space-3) var(--cms-space-3);
+	font-size: var(--cms-font-size-xs);
+	font-style: italic;
+}

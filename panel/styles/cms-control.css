@@ -41,6 +41,14 @@
 	line-height: 1.55;
 }
 
+.cms-fallback-source {
+	display: block;
+	margin-block-start: var(--cms-space-1);
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-xs);
+	font-style: italic;
+}
+
 .cms-input[type='number'],
 .cms-input[type='date'],
 .cms-input[type='time'],

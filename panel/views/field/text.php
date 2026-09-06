@@ -10,5 +10,6 @@ $this->insert('field/input', [
 	'name' => $name,
 	'value' => $value ?? null,
 	'type' => 'text',
+	'fallbackPreview' => $fallbackPreview ?? false,
 	'attrs' => ['placeholder' => $props['placeholder'] ?? $field['placeholder'] ?? null],
 ]);

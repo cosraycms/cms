@@ -7,11 +7,13 @@ use function Cosray\escape;
 
 $field = (array) $this->unwrap($field);
 $attrs = (array) ($this->unwrap($attrs ?? null) ?? []);
+$fallbackPreview ??= false;
 $value = $this->unwrap($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 ?>
 <input
 	class="cms-input"
+	<?= $fallbackPreview ? 'data-fallback-input data-schema-placeholder="' . escape((string) ($attrs['placeholder'] ?? '')) . '"' : '' ?>
 	id="<?= escape($id) ?>"
 	name="<?= escape($name) ?>"
 	type="<?= escape($type) ?>"

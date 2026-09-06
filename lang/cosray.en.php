@@ -151,6 +151,8 @@ return [
 		'field:entry-actions' => 'Actions for this entry',
 		'field:entry-count' => ':count entry',
 		'field:entry-count-plural' => ':count entries',
+		'field:fallback-from' => 'Fallback from :language',
+		'field:shared-content' => 'shared content',
 		'field:indent' => 'Indent',
 		'field:insert-above' => 'Insert above',
 		'field:insert-before' => 'Insert before',

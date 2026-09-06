@@ -8,8 +8,10 @@ $value = $this->unwrap($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $iframe = ($control['name'] ?? '') === 'iframe';
 $placeholder = $field['placeholder'] ?? null;
+$fallbackPreview ??= false;
 ?>
 <textarea
+	<?= $fallbackPreview ? 'data-fallback-input data-schema-placeholder="' . escape((string) $placeholder) . '"' : '' ?>
 	class="cms-textarea<?= $iframe ? ' iframe' : '' ?>"
 	id="<?= escape($id) ?>"
 	name="<?= escape($name) ?>"

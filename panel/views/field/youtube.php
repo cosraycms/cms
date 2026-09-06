@@ -24,6 +24,7 @@ $video = preg_match('/^[A-Za-z0-9_-]{11}$/', $value) === 1 ? $value : '';
 		'name' => $name,
 		'value' => $value,
 		'type' => 'text',
+		'fallbackPreview' => $fallbackPreview ?? false,
 		'attrs' => [
 			'placeholder' => $field['placeholder'] ?? null,
 			'autocomplete' => 'off',

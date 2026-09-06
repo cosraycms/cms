@@ -19,7 +19,6 @@
 		items: FileItem[];
 		loading: boolean;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
@@ -35,7 +34,6 @@
 		items = $bindable(),
 		loading,
 		translate,
-		locale,
 		contentLocale,
 		identity,
 		locales,
@@ -196,7 +194,7 @@
 				<div class="facts">{assetLine(currentInfo)}</div>
 			{/if}
 			{#key `${identity}:${current.uid}`}
-				<MetaFields item={current} {translate} {locale} {contentLocale} {locales} {update} />
+				<MetaFields item={current} {translate} {contentLocale} {locales} {update} />
 			{/key}
 		</div>
 	{/if}

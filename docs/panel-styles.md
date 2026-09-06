@@ -169,6 +169,12 @@ Fields inside repeater fields, nodes inside a tree. Plain nesting cannot stop an
 
 Use it only where a block genuinely contains itself. Nesting handles everything else.
 
+## Fallback previews
+
+Fallback content is a secondary, display-only state, not a value style. Use the existing surface and text tokens so it remains legible in both themes; the shared source label is muted and italic. Native fields expose `.cms-fallback-source`, richtext and code use `.cms-richtext-fallback` and `.cms-code-editor-fallback`, media uses `.cms-media-fallback`, and an asymmetric block source carries `.variant.is-fallback-preview` plus `.cms-blocks-fallback-source`.
+
+The preview must not obscure the empty control's focus path. Text, richtext, and code layers disappear on focus; block and media previews retain separate target-locale add actions. Block previews are `inert`, and their editing chrome is hidden rather than merely dimmed. Theme overrides may restyle these hooks in `@layer theme`, but should preserve the distinction between source preview and editable target content.
+
 ## Styleguide
 
 `/<panel-path>/styleguide` renders every component against the current stylesheets — tokens, buttons, pills, status, form controls, fields, empty states — plus a theme toggle. It is registered only when `app.debug` is on, and sits behind the same authentication as the rest of the panel.

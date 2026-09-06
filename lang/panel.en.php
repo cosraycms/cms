@@ -32,6 +32,8 @@ return [
 		'field:cancel-delete-entry' => 'No, do not delete entry',
 		'field:confirm-delete' => 'Do you really want to delete this entry?',
 		'field:confirm-delete-entry' => 'Yes, delete entry',
+		'field:fallback-from' => 'Fallback from :language',
+		'field:shared-content' => 'shared content',
 		'image:add' => 'Add images',
 		'image:alt-text' => 'Alt text',
 		'image:alt-text-help' => 'An alt text is a short image description or a verbal translation of visual content on the internet that is read aloud to blind users by assistive tools like screen readers instead of the image. Search engines also use this text.',

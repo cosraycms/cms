@@ -1,5 +1,8 @@
 <script lang="ts">
-	import type { FileItem } from '$types/data';
+	import type { FileItem, LocaleMap, Meta } from '$types/data';
+	import { untrack } from 'svelte';
+	import { ZXX } from '$types/data';
+	import { localeTitle, resolveTextFallback } from '$lib/fallback';
 	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';
 	import Button from '$components/Button.svelte';
@@ -12,10 +15,10 @@
 		apply: (asset: FileItem) => void;
 		asset: FileItem;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
+		catalog?: Meta;
 		hasAlt: boolean;
 	};
 
@@ -24,16 +27,41 @@
 		apply,
 		asset = $bindable(),
 		translate,
-		locale,
 		contentLocale,
 		identity,
 		locales,
+		catalog,
 		hasAlt,
 	}: Props = $props();
-	asset.meta ??= {};
-	asset.meta.title ??= { zxx: '' };
-	asset.meta.alt ??= { zxx: '' };
-	let meta = $derived(asset.meta);
+	let draft = $state(untrack(() => structuredClone(asset)));
+	draft.meta ??= {};
+	draft.meta.title ??= { zxx: '' };
+	draft.meta.alt ??= { zxx: '' };
+	let meta = $derived(draft.meta);
+	let key = $derived(translate ? contentLocale : ZXX);
+	let titleFallback = $derived(
+		resolveTextFallback(
+			meta.title as LocaleMap<string>,
+			catalog?.title as LocaleMap<string> | undefined,
+			key,
+			locales?.all ?? [],
+		),
+	);
+	let altFallback = $derived(
+		resolveTextFallback(
+			meta.alt as LocaleMap<string>,
+			catalog?.alt as LocaleMap<string> | undefined,
+			key,
+			locales?.all ?? [],
+		),
+	);
+
+	function sourceLabel(source: string): string {
+		const language =
+			source === ZXX ? __('field:shared-content') : localeTitle(locales?.all ?? [], source);
+
+		return __('field:fallback-from', { language });
+	}
 </script>
 
 <ModalHeader>{__('image:title-and-alt')}</ModalHeader>
@@ -44,7 +72,9 @@
 			label={__('common:title')}
 			id={`${identity}_edit_image_title`}
 			{translate}
-			{locale}
+			locale={key}
+			fallback={titleFallback?.value ?? ''}
+			fallbackLabel={titleFallback ? sourceLabel(titleFallback.locale) : ''}
 		/>
 		{#if hasAlt}
 			<Input
@@ -52,7 +82,9 @@
 				label={__('image:alt-text')}
 				id={`${identity}_edit_image_alt`}
 				{translate}
-				{locale}
+				locale={key}
+				fallback={altFallback?.value ?? ''}
+				fallbackLabel={altFallback ? sourceLabel(altFallback.locale) : ''}
 				description={__('image:alt-text-help')}
 			/>
 		{/if}
@@ -63,7 +95,7 @@
 		<Button variant="danger" onclick={close}>
 			{__('common:cancel')}
 		</Button>
-		<Button variant="primary" onclick={() => apply(asset)}>
+		<Button variant="primary" onclick={() => apply(draft)}>
 			{__('common:apply')}
 		</Button>
 	</div>

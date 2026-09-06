@@ -14,7 +14,6 @@
 		item: FileItem | null;
 		loading: boolean;
 		translate: boolean;
-		locale: string;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
@@ -29,7 +28,6 @@
 		item,
 		loading,
 		translate,
-		locale,
 		contentLocale,
 		identity,
 		locales,
@@ -87,7 +85,7 @@
 			</div>
 			<div class="facts">{loading ? __('upload:uploading') : line}</div>
 			{#key `${identity}:${item.uid}`}
-				<MetaFields {item} {translate} {locale} {contentLocale} {locales} {update} />
+				<MetaFields {item} {translate} {contentLocale} {locales} {update} />
 			{/key}
 		</div>
 	{:else}

@@ -35,6 +35,15 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		$this->assertStringContainsString('class="cms-button primary"', $html);
 		$this->assertStringContainsString('class="cms-field required"', $html);
 		$this->assertStringContainsString('data-locale-tab="de"', $html);
+		$this->assertHtmlNodeExists(
+			'//div[@data-content-locale-scope][@data-content-locale="de"]'
+				. '//select[@data-content-locale-select]/option[@value="de"][@selected]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//input[@name="content[fallback-title][value][de]"][@value=""][@data-fallback-input]',
+			$html,
+		);
 		// A symmetric row switches its translated sub-fields as one: the row
 		// owns the strip and the wrappers inside it carry no tabs.
 		$this->assertHtmlNodeExists(

@@ -6,6 +6,7 @@ import {
 	VERSION,
 	docToPm,
 	htmlToDoc,
+	isFilledDoc,
 	pmToDoc,
 } from '../../../src/components/richtext/format';
 import { schema } from '../../../src/components/richtext/schema';
@@ -127,6 +128,25 @@ describe('richtext format', () => {
 
 	it('represents empty legacy HTML as no stored document', () => {
 		expect(htmlToDoc('  \n ')).toBeNull();
+	});
+
+	it('distinguishes semantically empty documents from displayable content', () => {
+		expect(isFilledDoc(null)).toBe(false);
+		expect(
+			isFilledDoc({
+				type: 'doc',
+				content: [{ type: 'paragraph', content: [{ type: 'text', text: '   ' }] }],
+			}),
+		).toBe(false);
+		expect(
+			isFilledDoc({
+				type: 'doc',
+				content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
+			}),
+		).toBe(true);
+		expect(isFilledDoc({ type: 'doc', content: [{ type: 'image', attrs: { uid: 'asset' } }] })).toBe(
+			true,
+		);
 	});
 
 	it('falls back to an empty document when stored JSON is invalid', () => {

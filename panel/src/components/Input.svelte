@@ -10,6 +10,8 @@
 		translate?: boolean;
 		locale?: string;
 		description?: string;
+		fallback?: string;
+		fallbackLabel?: string;
 	};
 
 	let {
@@ -20,8 +22,11 @@
 		translate = false,
 		locale = ZXX,
 		description = '',
+		fallback = '',
+		fallbackLabel = '',
 	}: Props = $props();
 
+	let focused = $state(false);
 	let localized = $derived(value as LocaleMap<string>);
 </script>
 
@@ -38,6 +43,9 @@
 				type="text"
 				{required}
 				autocomplete="off"
+				placeholder={!focused ? fallback : ''}
+				onfocus={() => (focused = true)}
+				onblur={() => (focused = false)}
 				bind:value={localized[locale]}
 			/>
 		{:else if typeof value === 'string'}
@@ -48,6 +56,9 @@
 				type="text"
 				{required}
 				autocomplete="off"
+				placeholder={!focused ? fallback : ''}
+				onfocus={() => (focused = true)}
+				onblur={() => (focused = false)}
 				bind:value
 			/>
 		{:else}
@@ -58,10 +69,16 @@
 				type="text"
 				{required}
 				autocomplete="off"
+				placeholder={!focused ? fallback : ''}
+				onfocus={() => (focused = true)}
+				onblur={() => (focused = false)}
 				bind:value={value[ZXX]}
 			/>
 		{/if}
 	</div>
+	{#if fallback && fallbackLabel && !focused}
+		<div class="cms-fallback-source">{fallbackLabel}</div>
+	{/if}
 	{#if description}
 		<div class="cms-field-description">
 			{description}

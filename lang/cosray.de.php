@@ -154,6 +154,8 @@ return [
 		'field:entry-actions' => 'Aktionen für diesen Eintrag',
 		'field:entry-count' => ':count Eintrag',
 		'field:entry-count-plural' => ':count Einträge',
+		'field:fallback-from' => 'Fallback aus :language',
+		'field:shared-content' => 'gemeinsamem Inhalt',
 		'field:indent' => 'Einzug',
 		'field:insert-above' => 'Darüber einfügen',
 		'field:insert-before' => 'Davor einfügen',

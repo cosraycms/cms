@@ -32,6 +32,8 @@ return [
 		'field:cancel-delete-entry' => 'Nein, Eintrag nicht löschen',
 		'field:confirm-delete' => 'Soll der Eintrag wirklich gelöscht werden?',
 		'field:confirm-delete-entry' => 'Ja, Eintrag löschen',
+		'field:fallback-from' => 'Fallback aus :language',
+		'field:shared-content' => 'gemeinsamem Inhalt',
 		'image:add' => 'Bilder hinzufügen',
 		'image:alt-text' => 'Alt-Text',
 		'image:alt-text-help' => 'Ein Alt-Text ist eine kurze Bildbeschreibung oder eine sprachliche Übersetzung eines visuellen Inhalts im Internet, die blinden Benutzern von Hilfsmitteln wie Screenreadern anstelle des Bildes vorgelesen wird. Suchmaschinen verwenden diesen Text ebenfalls.',

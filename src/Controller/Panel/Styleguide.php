@@ -40,7 +40,7 @@ final class Styleguide extends Panel
 			'tokenGroups' => $this->tokenGroups(),
 			'locales' => [
 				['id' => 'en', 'title' => 'English'],
-				['id' => 'de', 'title' => 'Deutsch'],
+				['id' => 'de', 'title' => 'Deutsch', 'fallback' => 'en'],
 			],
 			'defaultLocale' => 'en',
 			'fields' => $this->fields(),

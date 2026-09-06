@@ -150,6 +150,21 @@ describe('cosray host', () => {
 		expect(element.querySelector<Control>('test-control')!.locale).toBe('de');
 	});
 
+	it('does not materialize locale data when only the locale changes', async () => {
+		const form = document.createElement('form');
+		document.body.append(form);
+		const element = host(
+			{ value: { en: 'Hello' } },
+			{ name: 'content[title][json]', 'data-translated': 'true' },
+			form,
+		);
+
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+		element.locale = 'de';
+
+		expect(formValue(element)).toEqual({ value: { en: 'Hello' } });
+	});
+
 	it('forwards locale changes to a mounted control', async () => {
 		const element = host({ value: null });
 		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
