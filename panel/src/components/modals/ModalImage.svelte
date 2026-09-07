@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import type { AssetInfo } from '$types/data';
 	import type { LibraryItem } from '$lib/library';
 
@@ -18,6 +19,10 @@
 	let selected = $state<LibraryItem | null>(null);
 	let uploading = $state(false);
 	let fileInput = $state<HTMLInputElement>();
+	let disposed = false;
+	onDestroy(() => {
+		disposed = true;
+	});
 
 	function pick(item: LibraryItem) {
 		selected = item;
@@ -25,8 +30,9 @@
 
 	function clickAdd() {
 		if (selected) {
-			add(selected.uid, selected);
+			const item = selected;
 			close();
+			add(item.uid, item);
 		}
 	}
 
@@ -38,6 +44,7 @@
 
 		uploading = true;
 		const result = await cosray().upload('image', file);
+		if (disposed) return;
 		uploading = false;
 		input.value = '';
 
@@ -48,6 +55,7 @@
 		}
 
 		const thumbUrl = (result as { thumbUrl?: string }).thumbUrl;
+		close();
 		add(result.uid, {
 			filename: result.filename ?? '',
 			url: result.url ?? '',
@@ -57,7 +65,6 @@
 			width: result.width,
 			height: result.height,
 		});
-		close();
 	}
 </script>
 
@@ -86,14 +93,12 @@
 	</div>
 </ModalBody>
 <ModalFooter>
-	<div class="controls">
-		<Button variant="danger" onclick={close}>
-			{__('common:cancel')}
-		</Button>
-		<Button variant="primary" onclick={clickAdd} disabled={!selected}>
-			{__('image:insert')}
-		</Button>
-	</div>
+	<Button variant="danger" onclick={close}>
+		{__('common:cancel')}
+	</Button>
+	<Button variant="primary" onclick={clickAdd} disabled={!selected}>
+		{__('image:insert')}
+	</Button>
 </ModalFooter>
 
 <style>

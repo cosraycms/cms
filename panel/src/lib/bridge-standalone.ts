@@ -2,6 +2,7 @@ import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$li
 
 import { __ } from '$lib/locale';
 import { icon } from '$lib/icons';
+import { openDialog } from '$lib/dialogs';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
@@ -62,35 +63,47 @@ function openModal(
 	render: (host: HTMLElement) => (() => void) | void,
 	options: ModalOptions = {},
 ): { close(): void } {
-	const overlay = document.createElement('div');
-	overlay.className = 'cms-modal';
-	const container = document.createElement('div');
-	container.className = 'container';
-	overlay.append(container);
-
-	let cleanup: (() => void) | void = undefined;
-	const close = () => {
-		cleanup?.();
-		overlay.remove();
-	};
+	const active = document.activeElement;
+	const opener = active instanceof HTMLElement && active !== document.body ? active : null;
+	const dialog = document.createElement('dialog');
+	dialog.className = 'cms-modal';
+	if (options.label !== undefined) dialog.setAttribute('aria-label', options.label);
+	if (options.size) dialog.dataset.size = options.size;
 
 	if (!options.hideClose) {
 		const button = document.createElement('button');
 		button.type = 'button';
-		button.className = 'close';
+		button.className = 'modal-close';
+		button.dataset.dialogClose = '';
 		button.setAttribute('aria-label', __('common:close'));
 		button.innerHTML = icon('x-lg');
-		button.addEventListener('click', close);
-		container.append(button);
+		dialog.append(button);
 	}
 
 	const host = document.createElement('div');
 	host.className = 'element';
-	container.append(host);
-	document.body.append(overlay);
-	cleanup = render(host);
+	dialog.append(host);
+	document.body.append(dialog);
+	let cleanup: (() => void) | void;
 
-	return { close };
+	try {
+		cleanup = render(host);
+	} catch (error) {
+		dialog.remove();
+		throw error;
+	}
+
+	return openDialog(dialog, {
+		opener,
+		owner: options.owner ?? opener ?? document.getElementById('cosray-system-data') ?? undefined,
+		onClose: () => {
+			try {
+				cleanup?.();
+			} finally {
+				dialog.remove();
+			}
+		},
+	});
 }
 
 const TIMEOUTS = { success: 3000, error: 30000 };

@@ -39,6 +39,7 @@
 	}: Props = $props();
 
 	const assets = useAssets();
+	let root = $state<HTMLElement>();
 
 	let info = $derived(item?.uid ? $assets[item.uid] : undefined);
 	let filename = $derived(info?.filename ?? item?.uid ?? '');
@@ -52,18 +53,21 @@
 			return;
 		}
 
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ImagePreview, {
-				target: host,
-				props: { image, close: () => handle.close() },
-			});
+		cosray().modal.open(
+			(host) => {
+				const app = mount(ImagePreview, {
+					target: host,
+					props: { image },
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: root, size: 'wide' },
+		);
 	}
 </script>
 
-<div class="cms-image-card">
+<div class="cms-image-card" bind:this={root}>
 	{#if item}
 		<button type="button" class="thumb" title={__('common:preview')} onclick={preview}>
 			{#if thumb}

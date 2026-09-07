@@ -291,4 +291,14 @@ window.Cosray = {
 };
 ```
 
-`upload()` posts to the pool endpoint `POST /media/{type}` with the session's CSRF token — elements never handle credentials. It returns the catalog asset (`uid`, `url`, `filename`, ...); store `{uid}` in the field value and keep the rest for previews. `GET /media/library` lists the catalog for reuse pickers (`kind`, `q`, `since`, `page` parameters). `modal.open()` hands the callback an empty host element inside the panel's modal chrome; render arbitrary DOM into it and optionally return a cleanup function. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
+`upload()` posts to the pool endpoint `POST /media/{type}` with the session's CSRF token — elements never handle credentials. It returns the catalog asset (`uid`, `url`, `filename`, ...); store `{uid}` in the field value and keep the rest for previews. `GET /media/library` lists the catalog for reuse pickers (`kind`, `q`, `since`, `page` parameters). `modal.open()` hands the callback an empty host element inside a native modal `<dialog>`; render DOM into it and optionally return a cleanup function. The callback and returned `close()` handle are unchanged in bridge version 1. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
+
+### Modal controls
+
+The panel targets the latest stable Chrome/Edge, Firefox, Safari, and iOS Safari. Native dialogs provide modality and focus containment. Escape and a pointer gesture that starts and ends on the backdrop dismiss a dialog. `hideClose` hides only the built-in close button, not these dismissal paths. Closing cancels a confirmation; only its explicit confirm action may proceed.
+
+Optional bridge options are `{ hideClose?, label?, size?: 'compact' | 'wide', owner?: HTMLElement }`. Use `label` for content without a heading. Otherwise a heading supplies the accessible name. `owner` identifies the control whose removal should dismiss the modal; supply it for asynchronous callers or controls whose trigger can disappear independently of the screen. Without it, the bridge uses the focused opener or current system-payload element.
+
+Renderer cleanup runs exactly once on every close path, including owner removal and navigation. Close the modal **before** an action that focuses new content or runs a richtext command, so focus restoration cannot override the action. Nested dialogs return focus to the underlying dialog. A failing renderer cannot leave a modal host behind.
+
+Internal content uses `.modal-header` with a `.modal-title` heading, `.modal-body`, and `.modal-footer`; the Svelte wrappers in `panel/src/components/modal/` emit these same parts. `data-dialog-focus` designates initial focus, especially the safe action in a confirmation. Otherwise the first usable input receives focus. These markup names are internal, not a new plugin slot API. Plain TypeScript can render the same content through the bridge without mounting Svelte.

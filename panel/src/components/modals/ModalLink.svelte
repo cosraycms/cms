@@ -24,6 +24,7 @@
 	};
 
 	let { close, add, href = '', node = '', asset = '', blank = $bindable() }: Props = $props();
+	const id = $props.id();
 
 	// Editing an existing link opens on the tab that matches its kind; an
 	// asset link defaults to the files tab, which browses every kind. The
@@ -57,8 +58,8 @@
 		}
 
 		if (target) {
-			add(target, blank);
 			close();
+			add(target, blank);
 		}
 	}
 
@@ -82,6 +83,7 @@
 			<div class="cms-modal-link-tabs-frame">
 				<nav class="cms-modal-link-tabs-nav" aria-label={__('common:tabs')}>
 					<button
+						type="button"
 						class="tab"
 						class:active={currentTab === 'manually'}
 						onclick={changeTab('manually')}
@@ -89,15 +91,30 @@
 						<Icon name="link-45deg" />
 						<span>{__('link:manual')}</span>
 					</button>
-					<button class="tab" class:active={currentTab === 'page'} onclick={changeTab('page')}>
+					<button
+						type="button"
+						class="tab"
+						class:active={currentTab === 'page'}
+						onclick={changeTab('page')}
+					>
 						<Icon name="paragraph" />
 						<span>{__('node:page')}</span>
 					</button>
-					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
+					<button
+						type="button"
+						class="tab"
+						class:active={currentTab === 'images'}
+						onclick={changeTab('images')}
+					>
 						<Icon name="image" />
 						<span>{__('media:images')}</span>
 					</button>
-					<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
+					<button
+						type="button"
+						class="tab"
+						class:active={currentTab === 'files'}
+						onclick={changeTab('files')}
+					>
 						<Icon name="file-earmark-richtext" />
 						<span>{__('media:files-documents')}</span>
 					</button>
@@ -123,7 +140,13 @@
 						{__('link:invalid-url')}
 					</div>
 					<div class="cms-modal-link-manual-input-wrap">
-						<input class="cms-input" type="text" bind:value={url} />
+						<input
+							class="cms-input"
+							type="text"
+							data-dialog-focus
+							aria-label={__('link:manual')}
+							bind:value={url}
+						/>
 					</div>
 				</div>
 			{/if}
@@ -132,17 +155,10 @@
 	<div class="cms-modal-link-target-wrap">
 		<div class="cms-modal-link-target-row">
 			<div class="cms-modal-link-target-input-wrap">
-				<input
-					id="modallink_target"
-					aria-describedby="comments-description"
-					name="modallink_target"
-					type="checkbox"
-					bind:checked={blank}
-					class="cms-checkbox"
-				/>
+				<input id={`${id}-target`} type="checkbox" bind:checked={blank} class="cms-checkbox" />
 			</div>
 			<div class="cms-modal-link-target-label-wrap">
-				<label for="modallink_target" class="cms-checkbox-label">
+				<label for={`${id}-target`} class="cms-checkbox-label">
 					{__('link:open-new-window')}
 				</label>
 			</div>
@@ -150,14 +166,12 @@
 	</div>
 </ModalBody>
 <ModalFooter>
-	<div class="controls">
-		<Button variant="danger" onclick={close}>
-			{__('common:cancel')}
-		</Button>
-		<Button variant="primary" onclick={clickAdd} disabled={!canAdd}>
-			{__('link:add')}
-		</Button>
-	</div>
+	<Button variant="danger" onclick={close}>
+		{__('common:cancel')}
+	</Button>
+	<Button variant="primary" onclick={clickAdd} disabled={!canAdd}>
+		{__('link:add')}
+	</Button>
 </ModalFooter>
 
 <style>

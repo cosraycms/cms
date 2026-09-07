@@ -1,31 +1,45 @@
-/* These class names are built in plain DOM by lib/bridge-standalone.ts. */
-
 .cms-modal {
+	--width: 48rem;
 	position: fixed;
 	inset: 0;
-	z-index: 100;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: var(--cms-space-4);
-	background-color: color-mix(in srgb, var(--cms-color-neutral-900) 45%, transparent);
-	backdrop-filter: blur(var(--cms-blur-sm));
+	width: min(var(--width), calc(100% - 2 * var(--cms-space-4)));
+	max-width: none;
+	max-height: calc(100dvh - 2 * var(--cms-space-4));
+	margin: auto;
+	padding: 0;
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-lg);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text);
+	box-shadow: var(--cms-shadow-xl);
+	overflow: hidden;
 
-	& .container {
-		position: relative;
+	&[open] {
 		display: flex;
 		flex-direction: column;
-		width: 100%;
-		max-width: 48rem;
-		max-height: 90dvh;
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-lg);
-		background-color: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-xl);
-		overflow: hidden;
 	}
 
-	& .close {
+	&[data-size='compact'] {
+		--width: 32rem;
+	}
+	&[data-size='wide'] {
+		--width: 72rem;
+	}
+
+	&::backdrop {
+		background: color-mix(in srgb, var(--cms-color-neutral-900) 45%, transparent);
+		backdrop-filter: blur(var(--cms-blur-sm));
+	}
+
+	& > .element {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: auto;
+		overscroll-behavior: contain;
+	}
+
+	& .modal-close {
 		position: absolute;
 		top: var(--cms-space-3);
 		right: var(--cms-space-3);
@@ -35,10 +49,13 @@
 		justify-content: center;
 		width: 1.75rem;
 		height: 1.75rem;
+		padding: 0;
+		border: 0;
 		border-radius: var(--cms-radius-full);
+		background: none;
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-lg);
-		line-height: 1;
+		cursor: pointer;
 
 		&:hover {
 			background: var(--cms-color-hover);
@@ -46,31 +63,28 @@
 		}
 	}
 
-	& .header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--cms-space-4);
+	& .modal-header {
 		flex: 0 0 auto;
 		padding: var(--cms-space-4) var(--cms-space-6);
+		padding-inline-end: var(--cms-space-12);
 		border-bottom: 1px solid var(--cms-color-border);
 	}
 
-	& .title {
+	& .modal-title {
 		margin: 0;
 		font-size: var(--cms-font-size-base);
 		font-weight: 600;
 	}
 
-	& .body {
+	& .modal-body {
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: var(--cms-space-6);
-		overflow-y: auto;
+		overflow: auto;
 		overscroll-behavior: contain;
 	}
 
-	& .footer {
+	& .modal-footer {
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
@@ -80,34 +94,5 @@
 		padding: var(--cms-space-4) var(--cms-space-6);
 		border-top: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface-sunken);
-	}
-}
-
-.cms-dialog {
-	display: flex;
-	flex-direction: column;
-	gap: var(--cms-space-4);
-	padding: var(--cms-space-6);
-
-	& h2 {
-		margin: 0;
-		font-size: var(--cms-font-size-base);
-		font-weight: 600;
-	}
-
-	& .body {
-		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-sm);
-		line-height: 1.5;
-	}
-
-	& .controls {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--cms-space-2);
-	}
-
-	&.error .body {
-		color: var(--cms-color-danger-text);
 	}
 }

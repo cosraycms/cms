@@ -4,6 +4,6 @@
 	let { children, class: classes = '' }: { children: Snippet; class?: string } = $props();
 </script>
 
-<div class="modal-body body {classes}">
+<div class="modal-body {classes}">
 	{@render children()}
 </div>

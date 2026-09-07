@@ -53,6 +53,8 @@
 		<input
 			class="cms-input"
 			type="search"
+			data-dialog-focus
+			aria-label={__('media:search-filename')}
 			placeholder={__('media:search-filename')}
 			bind:value={q}
 		/>
@@ -82,7 +84,7 @@
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-4);
-			min-width: min(48rem, 80vw);
+			min-width: 0;
 		}
 
 		.cms-library-search {
@@ -91,6 +93,7 @@
 		}
 
 		.cms-library-search input {
+			min-width: 0;
 			flex: 1 1 auto;
 		}
 

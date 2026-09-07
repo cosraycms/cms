@@ -4,14 +4,6 @@
 	let { children, class: classes = '' }: { children: Snippet; class?: string } = $props();
 </script>
 
-<div class="modal-footer footer {classes}">
+<footer class="modal-footer {classes}">
 	{@render children()}
-</div>
-
-<style>
-	@layer panel {
-		.modal-footer {
-			border-color: var(--cms-border-color);
-		}
-	}
-</style>
+</footer>

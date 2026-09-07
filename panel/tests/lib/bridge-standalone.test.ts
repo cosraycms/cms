@@ -91,18 +91,79 @@ describe('standalone bridge', () => {
 
 		expect(render).toHaveBeenCalledWith(overlay.querySelector('.element'));
 		expect(overlay.textContent).toContain('Control');
-		expect(overlay.querySelector<HTMLButtonElement>('button.close')?.ariaLabel).toBe(
+		expect(overlay.querySelector<HTMLButtonElement>('[data-dialog-close]')?.ariaLabel).toBe(
 			'translated:common:close',
 		);
 
-		overlay.querySelector<HTMLButtonElement>('button.close')!.click();
+		overlay.querySelector<HTMLButtonElement>('[data-dialog-close]')!.click();
 		expect(cleanup).toHaveBeenCalledOnce();
 		expect(overlay.isConnected).toBe(false);
 
+		modal.close();
+		expect(cleanup).toHaveBeenCalledOnce();
+
 		const second = bridge().modal.open(() => cleanup, { hideClose: true });
-		expect(document.querySelector('.cms-modal button.close')).toBeNull();
+		expect(document.querySelector('.cms-modal [data-dialog-close]')).toBeNull();
 		second.close();
 		expect(cleanup).toHaveBeenCalledTimes(2);
+	});
+
+	it('removes a throwing renderer without opening a modal', () => {
+		const failure = new Error('render failed');
+		expect(() =>
+			bridge().modal.open((host) => {
+				host.append(document.createElement('input'));
+				throw failure;
+			}),
+		).toThrow(failure);
+		expect(document.querySelector('dialog')).toBeNull();
+	});
+
+	it('removes the modal even if renderer cleanup throws', () => {
+		const cleanup = vi.fn(() => {
+			throw new Error('cleanup failed');
+		});
+		const handle = bridge().modal.open(() => cleanup);
+		expect(() => handle.close()).toThrow('cleanup failed');
+		expect(document.querySelector('dialog')).toBeNull();
+		expect(() => handle.close()).not.toThrow();
+		expect(cleanup).toHaveBeenCalledOnce();
+	});
+
+	it('names a rendered dialog and focuses its useful input', () => {
+		bridge().modal.open((host) => {
+			host.innerHTML = '<h2>Find a file</h2><input type="search">';
+		});
+		const dialog = document.querySelector('dialog')!;
+		expect(dialog.open).toBe(true);
+		expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent).toBe(
+			'Find a file',
+		);
+		expect(document.activeElement).toBe(dialog.querySelector('input'));
+	});
+
+	it('cleans up when the owning control disappears, not on unrelated swaps', async () => {
+		const owner = document.createElement('button');
+		document.body.append(owner);
+		const cleanup = vi.fn();
+		bridge().modal.open(() => cleanup, { owner, label: 'Choose' });
+		document.body.append(document.createElement('output'));
+		document.dispatchEvent(new CustomEvent('htmx:after:swap'));
+		await Promise.resolve();
+		expect(cleanup).not.toHaveBeenCalled();
+		owner.remove();
+		await Promise.resolve();
+		expect(cleanup).toHaveBeenCalledOnce();
+		expect(document.querySelector('dialog')).toBeNull();
+	});
+
+	it('allows Escape dismissal when the close button is hidden', () => {
+		const cleanup = vi.fn();
+		const handle = bridge().modal.open(() => cleanup, { hideClose: true });
+		document.querySelector('dialog')!.dispatchEvent(new Event('cancel', { cancelable: true }));
+		handle.close();
+		expect(cleanup).toHaveBeenCalledOnce();
+		expect(document.querySelector('dialog')).toBeNull();
 	});
 
 	it('stacks dismissible toasts and expires them by severity', () => {

@@ -91,14 +91,12 @@
 	</div>
 </ModalBody>
 <ModalFooter>
-	<div class="controls">
-		<Button variant="danger" onclick={close}>
-			{__('common:cancel')}
-		</Button>
-		<Button variant="primary" onclick={() => apply(draft)}>
-			{__('common:apply')}
-		</Button>
-	</div>
+	<Button variant="danger" onclick={close}>
+		{__('common:cancel')}
+	</Button>
+	<Button variant="primary" onclick={() => apply(draft)}>
+		{__('common:apply')}
+	</Button>
 </ModalFooter>
 
 <style>

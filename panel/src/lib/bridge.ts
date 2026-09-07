@@ -1,5 +1,8 @@
 export type ModalOptions = {
 	hideClose?: boolean;
+	label?: string;
+	size?: 'compact' | 'wide';
+	owner?: HTMLElement;
 };
 
 export type UploadResult = {

@@ -9,6 +9,7 @@ return [
 		'common:cancel' => 'Abbrechen',
 		'common:close' => 'Schließen',
 		'common:delete' => 'Löschen',
+		'common:dialog' => 'Dialog',
 		'common:edit' => 'Bearbeiten',
 		'common:error' => 'Fehler',
 		'common:filter' => 'Filter',

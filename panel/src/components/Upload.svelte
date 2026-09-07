@@ -65,19 +65,22 @@
 	let open = $derived(!items || limit.max < 1 || items.length < limit.max);
 
 	function alert(body: string) {
-		const handle = cosray().modal.open((host) => {
-			const app = mount(Dialog, {
-				target: host,
-				props: {
-					title: __('common:error'),
-					body,
-					type: 'error',
-					close: () => handle.close(),
-				},
-			});
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(Dialog, {
+					target: host,
+					props: {
+						title: __('common:error'),
+						body,
+						type: 'error',
+						close: () => handle.close(),
+					},
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: picker ?? document.getElementById(name) ?? undefined, size: 'compact' },
+		);
 	}
 
 	function remove(index: number | null) {
@@ -278,21 +281,24 @@
 	}
 
 	function openLibrary() {
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ModalLibrary, {
-				target: host,
-				props: {
-					kind: type,
-					close: () => handle.close(),
-					pick: (item: LibraryItem) => {
-						pickFromLibrary(item);
-						handle.close();
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(ModalLibrary, {
+					target: host,
+					props: {
+						kind: type,
+						close: () => handle.close(),
+						pick: (item: LibraryItem) => {
+							handle.close();
+							pickFromLibrary(item);
+						},
 					},
-				},
-			});
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: picker ?? document.getElementById(name) ?? undefined },
+		);
 	}
 </script>
 

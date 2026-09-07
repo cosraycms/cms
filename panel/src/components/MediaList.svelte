@@ -61,29 +61,32 @@
 	}
 
 	function edit(index: number, hasAlt: boolean) {
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ModalEditImage, {
-				target: host,
-				props: {
-					asset: items[index],
-					close: () => handle.close(),
-					apply: (item: FileItem) => {
-						// Empty per-use meta is dropped so catalog defaults apply.
-						items[index] = pruneItemMeta(item);
-						notify();
-						handle.close();
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(ModalEditImage, {
+					target: host,
+					props: {
+						asset: items[index],
+						close: () => handle.close(),
+						apply: (item: FileItem) => {
+							handle.close();
+							// Empty per-use meta is dropped so catalog defaults apply.
+							items[index] = pruneItemMeta(item);
+							notify();
+						},
+						translate,
+						contentLocale,
+						identity,
+						locales,
+						catalog: items[index].uid ? $assets[items[index].uid]?.meta : undefined,
+						hasAlt,
 					},
-					translate,
-					contentLocale,
-					identity,
-					locales,
-					catalog: items[index].uid ? $assets[items[index].uid]?.meta : undefined,
-					hasAlt,
-				},
-			});
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: sorterElement },
+		);
 	}
 
 	onMount(createSorter);

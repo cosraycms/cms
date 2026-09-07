@@ -109,26 +109,31 @@
 		saving = false;
 	}
 
-	function confirmRemove() {
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ModalRemove, {
-				target: host,
-				props: {
-					close: () => handle.close(),
-					proceed: () => {
-						handle.close();
-						void remove();
-					},
-					message: asset?.filename ?? null,
-					title: __('media:delete'),
-					question: __('media:confirm-delete'),
-					confirm: __('media:confirm-delete-file'),
-					cancel: __('media:cancel-delete-file'),
-				},
-			});
+	let root = $state<HTMLElement>();
 
-			return () => void unmount(app);
-		});
+	function confirmRemove() {
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(ModalRemove, {
+					target: host,
+					props: {
+						close: () => handle.close(),
+						proceed: () => {
+							handle.close();
+							void remove();
+						},
+						message: asset?.filename ?? null,
+						title: __('media:delete'),
+						question: __('media:confirm-delete'),
+						confirm: __('media:confirm-delete-file'),
+						cancel: __('media:cancel-delete-file'),
+					},
+				});
+
+				return () => void unmount(app);
+			},
+			{ owner: root, size: 'compact' },
+		);
 	}
 
 	async function remove() {
@@ -185,7 +190,7 @@
 	});
 </script>
 
-<div class="cms-detail">
+<div class="cms-detail" bind:this={root}>
 	{#if loading}
 		<div class="cms-detail-status">{__('common:loading')}</div>
 	{:else if failed || asset === null}

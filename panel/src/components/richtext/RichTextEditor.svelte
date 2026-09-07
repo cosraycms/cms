@@ -284,21 +284,24 @@
 		const asset = typeof linkAttrs?.asset === 'string' ? linkAttrs.asset : '';
 		const target = linkAttrs?.target ?? '';
 
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ModalLink, {
-				target: host,
-				props: {
-					add: addLink,
-					close: () => handle.close(),
-					href,
-					node,
-					asset,
-					blank: target === '_blank',
-				},
-			});
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(ModalLink, {
+					target: host,
+					props: {
+						add: addLink,
+						close: () => handle.close(),
+						href,
+						node,
+						asset,
+						blank: target === '_blank',
+					},
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: ref },
+		);
 	}
 
 	function addImage(uid: string, info: AssetInfo) {
@@ -311,17 +314,20 @@
 		showCompactToolsDropdown = false;
 		if (!editor) return;
 
-		const handle = cosray().modal.open((host) => {
-			const app = mount(ModalImage, {
-				target: host,
-				props: {
-					add: addImage,
-					close: () => handle.close(),
-				},
-			});
+		const handle = cosray().modal.open(
+			(host) => {
+				const app = mount(ModalImage, {
+					target: host,
+					props: {
+						add: addImage,
+						close: () => handle.close(),
+					},
+				});
 
-			return () => void unmount(app);
-		});
+				return () => void unmount(app);
+			},
+			{ owner: ref },
+		);
 	}
 
 	function toggleHeading(level: 1 | 2 | 3) {

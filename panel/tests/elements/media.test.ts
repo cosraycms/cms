@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-	document.querySelector<HTMLButtonElement>('.cms-modal button.close')?.click();
+	document.querySelector<HTMLButtonElement>('.cms-modal [data-dialog-close]')?.click();
 	document.body.replaceChildren();
 	await tick();
 	delete window.Cosray;
@@ -107,7 +107,11 @@ describe('file metadata', () => {
 		const input = await edit(element);
 
 		expect(input.value).toBe('');
+		expect(document.activeElement).toBe(input);
+		input.blur();
+		await tick();
 		expect(input.placeholder).toBe('English title');
+		input.focus();
 		await enter(input, 'Discarded title');
 		await action('common:cancel');
 

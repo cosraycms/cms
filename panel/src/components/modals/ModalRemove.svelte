@@ -34,14 +34,12 @@
 	{/if}
 </ModalBody>
 <ModalFooter>
-	<div class="controls">
-		<Button variant="danger" onclick={proceed}>
-			{confirm}
-		</Button>
-		<Button variant="secondary" onclick={close}>
-			{cancel}
-		</Button>
-	</div>
+	<Button variant="danger" onclick={proceed}>
+		{confirm}
+	</Button>
+	<Button variant="secondary" data-dialog-focus onclick={close}>
+		{cancel}
+	</Button>
 </ModalFooter>
 
 <style>
