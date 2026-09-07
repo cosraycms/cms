@@ -29,25 +29,19 @@
 
 	let active = $derived(field.translateMode === 'asymmetric' ? locale : ZXX);
 	let configuredLocales = $derived(locales?.all ?? []);
-	let items = $state<FileItem[]>([]);
 
 	function hasItems(candidate: FileItem[] | undefined): boolean {
 		return candidate?.some((item) => typeof item.uid === 'string' && item.uid !== '') ?? false;
 	}
 
-	$effect(() => {
-		items = [...(value[active] ?? [])];
-	});
-
 	let fallback = $derived(
-		field.translateMode === 'asymmetric' && !hasItems(items)
+		field.translateMode === 'asymmetric' && !hasItems(value[active])
 			? resolveFallback(value, active, configuredLocales, hasItems)
 			: null,
 	);
 
-	function commit() {
-		value[active] = items;
-		notify();
+	function add(identity: string, item: FileItem): void {
+		value[identity] = field.limit?.max === 1 ? [item] : [...(value[identity] ?? []), item];
 	}
 
 	function sourceLabel(source: string): string {
@@ -58,7 +52,8 @@
 	}
 </script>
 
-{#key active}
+<!-- A keyed item keeps pending uploads bound to their original locale after switching. -->
+{#each [active] as identity (identity)}
 	{#if fallback}
 		<FallbackMedia items={fallback.value} {type} label={sourceLabel(fallback.locale)} />
 	{/if}
@@ -69,9 +64,10 @@
 		name={field.name}
 		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
 		contentLocale={locale}
-		identity={active}
+		{identity}
 		{locales}
-		bind:items
-		notify={commit}
+		bind:items={() => value[identity] ?? [], (items) => (value[identity] = items)}
+		add={(item) => add(identity, item)}
+		{notify}
 	/>
-{/key}
+{/each}

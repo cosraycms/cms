@@ -26,6 +26,7 @@
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		items: FileItem[];
+		add: (item: FileItem) => void;
 		limit?: Limit;
 		required?: boolean;
 		disabled?: boolean;
@@ -43,6 +44,7 @@
 		identity,
 		locales,
 		items = $bindable(),
+		add,
 		limit = { max: -1, min: 0 },
 		required = false,
 		disabled = false,
@@ -215,7 +217,7 @@
 
 	// Fresh items carry only the uid — per-use meta stays absent until
 	// the editor actually fills it, so catalog defaults keep applying.
-	function add(item: UploadResult) {
+	function uploaded(item: UploadResult) {
 		if (!item.ok || !item.uid) {
 			uploadError(item);
 
@@ -231,12 +233,7 @@
 			height: item.height,
 		});
 
-		if (multiple) {
-			items.push({ uid: item.uid });
-			items = [...items];
-		} else {
-			items = [{ uid: item.uid }];
-		}
+		add({ uid: item.uid });
 	}
 
 	function onFile(getFilesFunction: (event: DragEvent | Event) => File[]) {
@@ -251,7 +248,7 @@
 					(item): item is UploadResult => item !== undefined,
 				);
 
-				responses.map(add);
+				responses.forEach(uploaded);
 
 				if (items && callback) {
 					callback();
@@ -272,13 +269,7 @@
 
 		registerAsset(assetStore, item.uid, item);
 
-		if (multiple) {
-			items.push({ uid: item.uid });
-			items = [...items];
-		} else {
-			items = [{ uid: item.uid }];
-		}
-
+		add({ uid: item.uid });
 		notify();
 
 		if (callback) {

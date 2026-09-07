@@ -2,7 +2,7 @@ import Sortable, { type SortableEvent } from 'sortablejs';
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { BridgeSystem } from '../../src/lib/bridge';
+import type { BridgeSystem, UploadResult } from '../../src/lib/bridge';
 import type { HostPayload } from '../../src/lib/host';
 import type { FileItem, LocaleMap } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
@@ -83,6 +83,14 @@ async function enter(input: HTMLInputElement, value: string): Promise<void> {
 	await tick();
 }
 
+function upload(element: HTMLElement): void {
+	const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
+	Object.defineProperty(picker, 'files', {
+		value: [new File(['content'], 'uploaded.pdf', { type: 'application/pdf' })],
+	});
+	picker.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 async function action(label: string): Promise<void> {
 	const button = Array.from(document.querySelectorAll<HTMLButtonElement>('.cms-modal button')).find(
 		(button) => button.textContent?.trim() === label,
@@ -120,6 +128,83 @@ describe('file metadata', () => {
 		});
 		expect(element.assets).toEqual(catalog);
 		expect((await edit(element)).value).toBe('German title');
+	});
+});
+
+describe('media uploads', () => {
+	it.each([1, 4])(
+		'keeps a pending upload in its starting locale with a limit of %i',
+		async (max) => {
+			const pending = Promise.withResolvers<UploadResult>();
+			vi.spyOn(window.Cosray!, 'upload').mockReturnValueOnce(pending.promise);
+			const german = { uid: 'german', meta: { title: { zxx: 'German title' } } };
+			const english = max === 1 ? [] : [{ uid: 'english' }];
+			const { element, changes } = await media(
+				'cosray-file',
+				{
+					value: { en: english, de: [german] },
+					field: {
+						name: 'downloads',
+						translate: true,
+						translateMode: 'asymmetric',
+						limit: { max },
+					},
+				},
+				'en',
+			);
+			upload(element);
+
+			element.locale = 'de';
+			await tick();
+			expect(changes).not.toHaveBeenCalled();
+			pending.resolve({
+				ok: true,
+				uid: 'uploaded',
+				filename: 'uploaded.pdf',
+				url: '/media/uploaded.pdf',
+			});
+
+			await vi.waitFor(() => {
+				expect(changes).toHaveBeenCalledExactlyOnceWith({
+					en: [...english, { uid: 'uploaded' }],
+					de: [german],
+				});
+			});
+			expect(element.querySelector('.cms-file-name')?.textContent).toBe('german');
+
+			element.locale = 'en';
+			await tick();
+			expect(element.textContent).toContain('uploaded.pdf');
+		},
+	);
+
+	it('merges a late upload with changes made after returning to its locale', async () => {
+		const first = Promise.withResolvers<UploadResult>();
+		const second = Promise.withResolvers<UploadResult>();
+		vi.spyOn(window.Cosray!, 'upload')
+			.mockReturnValueOnce(first.promise)
+			.mockReturnValueOnce(second.promise);
+		const { element, changes } = await media(
+			'cosray-file',
+			{
+				value: {},
+				field: { name: 'downloads', translate: true, translateMode: 'asymmetric' },
+			},
+			'en',
+		);
+		upload(element);
+		element.locale = 'de';
+		await tick();
+		element.locale = 'en';
+		await tick();
+		upload(element);
+		second.resolve({ ok: true, uid: 'second' });
+		await vi.waitFor(() => expect(changes).toHaveBeenCalledTimes(1));
+		first.resolve({ ok: true, uid: 'first' });
+
+		await vi.waitFor(() => {
+			expect(changes).toHaveBeenLastCalledWith({ en: [{ uid: 'second' }, { uid: 'first' }] });
+		});
 	});
 });
 
