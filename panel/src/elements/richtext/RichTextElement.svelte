@@ -65,7 +65,7 @@
 	function convert(): RichtextValue {
 		const map: RichtextValue = {};
 
-		for (const id of localeIds()) {
+		for (const id of new Set([...Object.keys(value), ...localeIds()])) {
 			const raw = value[id] ?? null;
 
 			if (typeof raw === 'string') {
