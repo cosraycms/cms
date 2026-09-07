@@ -161,6 +161,7 @@ export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { 
 	observer.observe(document.documentElement, { childList: true, subtree: true });
 
 	try {
+		if (dialog.open) dialog.close();
 		dialog.showModal();
 		const focus = [
 			...dialog.querySelectorAll<HTMLElement>('[data-dialog-focus], [autofocus]'),

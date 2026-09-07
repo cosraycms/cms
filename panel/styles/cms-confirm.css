@@ -1,0 +1,19 @@
+.cms-confirm {
+	& .question {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .children {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-3);
+		font-size: var(--cms-font-size-sm);
+
+		&[hidden] {
+			display: none;
+		}
+	}
+}

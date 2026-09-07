@@ -1,3 +1,5 @@
+import { openDialog } from '$lib/dialogs';
+
 // Editor chrome: the preview overlay's close button and the meta
 // dialogs. The overlay anchor is only emptied, never removed —
 // out-of-band swaps need the id to stay in the document. A meta button
@@ -26,7 +28,7 @@ function onClick(event: Event): void {
 		return;
 	}
 
-	const metaOpen = target.closest('[data-meta-open]');
+	const metaOpen = target.closest<HTMLElement>('[data-meta-open]');
 
 	if (metaOpen) {
 		const dialog = metaOpen
@@ -34,20 +36,10 @@ function onClick(event: Event): void {
 			?.querySelector(':scope > dialog[data-meta]');
 
 		if (dialog instanceof HTMLDialogElement) {
-			dialog.showModal();
+			openDialog(dialog, { opener: metaOpen, owner: metaOpen });
 		}
 
 		return;
-	}
-
-	const metaClose = target.closest('[data-meta-close]');
-
-	if (metaClose) {
-		const dialog = metaClose.closest('dialog[data-meta]');
-
-		if (dialog instanceof HTMLDialogElement) {
-			dialog.close();
-		}
 	}
 }
 

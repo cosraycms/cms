@@ -1,18 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/bulk';
+import { closeDialog } from '../../src/lib/dialogs';
 
 let uninstall: (() => void) | null = null;
-
-// jsdom versions without <dialog> support get a minimal stand-in so the
-// open/close paths stay testable.
-if (typeof HTMLDialogElement.prototype.showModal !== 'function') {
-	HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement): void {
-		this.setAttribute('open', '');
-	};
-	HTMLDialogElement.prototype.close = function (this: HTMLDialogElement): void {
-		this.removeAttribute('open');
-	};
-}
 
 beforeEach(() => {
 	document.body.innerHTML = `
@@ -35,14 +25,14 @@ beforeEach(() => {
 			<tbody>
 				<tr>
 					<td>
-						<input type="checkbox" name="nodes[]" value="a" data-bulk-check data-has-children />
+						<input type="checkbox" name="nodes[]" form="collection-bulk" value="a" data-bulk-check data-has-children />
 					</td>
 				</tr>
 				<tr>
-					<td><input type="checkbox" name="nodes[]" value="b" data-bulk-check /></td>
+					<td><input type="checkbox" name="nodes[]" form="collection-bulk" value="b" data-bulk-check /></td>
 				</tr>
 				<tr>
-					<td><input type="checkbox" name="nodes[]" value="c" data-bulk-check /></td>
+					<td><input type="checkbox" name="nodes[]" form="collection-bulk" value="c" data-bulk-check /></td>
 				</tr>
 			</tbody>
 		</table>
@@ -52,10 +42,10 @@ beforeEach(() => {
 				data-label-one="Delete the selected entry?"
 				data-label-many="Delete the :count selected entries?"></p>
 			<label data-bulk-children data-bulk-gate hidden>
-				<input type="checkbox" name="children" value="1" />
+				<input type="checkbox" name="children" form="collection-bulk" value="1" />
 			</label>
-			<button type="button" data-bulk-close>Cancel</button>
-			<button type="submit" data-bulk-confirm>Delete</button>
+			<button type="button" data-dialog-close data-dialog-focus>Cancel</button>
+			<button type="submit" form="collection-bulk" formaction="/bulk/delete" data-bulk-confirm>Delete</button>
 		</dialog>
 		<dialog data-bulk-dialog="duplicate">
 			<p
@@ -63,16 +53,17 @@ beforeEach(() => {
 				data-label-one="Duplicate the selected entry?"
 				data-label-many="Duplicate the :count selected entries?"></p>
 			<label data-bulk-children hidden>
-				<input type="checkbox" name="children" value="1" />
+				<input type="checkbox" name="children" form="collection-bulk" value="1" />
 			</label>
-			<button type="button" data-bulk-close>Cancel</button>
-			<button type="submit" data-bulk-confirm>Duplicate</button>
+			<button type="button" data-dialog-close data-dialog-focus>Cancel</button>
+			<button type="submit" form="collection-bulk" formaction="/bulk/duplicate" data-bulk-confirm>Duplicate</button>
 		</dialog>
 	`;
 	uninstall = install();
 });
 
 afterEach(() => {
+	for (const dialog of document.querySelectorAll('dialog')) closeDialog(dialog);
 	uninstall?.();
 	uninstall = null;
 	document.body.innerHTML = '';
@@ -168,7 +159,7 @@ describe('bulk selection', () => {
 		expect(dialog.open).toBe(true);
 		expect(query('[data-bulk-question]').textContent).toBe('Delete the 2 selected entries?');
 
-		query('[data-bulk-close]').click();
+		query('[data-dialog-close]').click();
 
 		expect(dialog.open).toBe(false);
 	});
@@ -185,7 +176,7 @@ describe('bulk selection', () => {
 
 		expect(query('[data-bulk-children]').hidden).toBe(true);
 
-		query('[data-bulk-close]').click();
+		query('[data-dialog-close]').click();
 		box('a').click();
 		query('[data-bulk-open]').click();
 
@@ -239,10 +230,43 @@ describe('bulk selection', () => {
 		box('a').click();
 		query('[data-bulk-open]').click();
 		query<HTMLInputElement>('[data-bulk-children] input').click();
-		query('[data-bulk-close]').click();
+		query('[data-dialog-close]').click();
 		query('[data-bulk-open]').click();
 
 		expect(query<HTMLButtonElement>('[data-bulk-confirm]').disabled).toBe(true);
+	});
+
+	it.each(['button', 'escape'])('cancels with %s without submitting the selection', (path) => {
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		query<HTMLFormElement>('#collection-bulk').addEventListener('submit', submit);
+		box('b').click();
+		const opener = query<HTMLButtonElement>('[data-bulk-open="delete"]');
+		opener.click();
+		const dialog = query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]');
+		expect(document.activeElement).toBe(dialog.querySelector('[data-dialog-focus]'));
+		if (path === 'button') query('[data-dialog-close]').click();
+		else dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
+		expect(submit).not.toHaveBeenCalled();
+		expect(dialog.open).toBe(false);
+		expect(document.activeElement).toBe(opener);
+		expect(box('b').checked).toBe(true);
+	});
+
+	it('submits the chosen action and subtree opt-in once after closing', () => {
+		const form = query<HTMLFormElement>('#collection-bulk');
+		const submit = vi.fn((event: SubmitEvent) => {
+			event.preventDefault();
+			expect(event.submitter?.getAttribute('formaction')).toBe('/bulk/delete');
+			expect(new FormData(form).getAll('nodes[]')).toEqual(['a']);
+			expect(new FormData(form).get('children')).toBe('1');
+			expect(query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]').open).toBe(false);
+		});
+		form.addEventListener('submit', submit);
+		box('a').click();
+		query('[data-bulk-open="delete"]').click();
+		query<HTMLInputElement>('[data-bulk-children] input').click();
+		query('[data-bulk-confirm]').click();
+		expect(submit).toHaveBeenCalledOnce();
 	});
 
 	it('drops the notice param at install time', () => {
@@ -268,7 +292,7 @@ describe('bulk selection', () => {
 		const children = query<HTMLInputElement>('[data-bulk-children] input');
 
 		children.checked = true;
-		query('[data-bulk-close]').click();
+		query('[data-dialog-close]').click();
 		query('[data-bulk-open]').click();
 
 		expect(children.checked).toBe(false);

@@ -157,15 +157,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div class="description"><?= escape($description) ?></div>
 	<?php endif ?>
 	<?php if (is_array($metaControl)): ?>
-		<dialog class="cms-meta" data-meta>
-			<div class="head">
-				<span class="title">
-					<?= escape((string) ($field['label'] ?? $fieldName)) ?> — <?= escape(__('field:meta')) ?>
-				</span>
-				<button type="button" class="cms-button" data-meta-close>
-					<?= escape(__('field:close')) ?>
-				</button>
-			</div>
+		<dialog class="cms-modal" data-size="compact" data-meta>
+			<?php $this->insert('component/modal-header', [
+				'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
+			]) ?>
+			<div class="modal-body cms-settings">
 			<?php $this->insert('field/meta', [
 				'field' => $field,
 				'control' => $metaControl,
@@ -173,6 +169,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'id' => "{$idRoot}-meta",
 				'nameRoot' => $nameRoot,
 			]) ?>
+			</div>
 		</dialog>
 	<?php endif ?>
 </div>

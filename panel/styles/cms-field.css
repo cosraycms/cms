@@ -122,46 +122,6 @@
 	}
 }
 
-.cms-meta {
-	min-width: min(28rem, 90vw);
-	padding: var(--cms-space-6);
-	border: 1px solid var(--cms-color-border);
-	border-radius: var(--cms-radius-md);
-	background: var(--cms-color-surface);
-	color: var(--cms-color-text);
-	box-shadow: var(--cms-shadow-lg);
-
-	&::backdrop {
-		background-color: color-mix(in srgb, var(--cms-color-neutral-900) 40%, transparent);
-	}
-
-	& .head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--cms-space-4);
-		margin-bottom: var(--cms-space-4);
-	}
-
-	& .title {
-		font-size: var(--cms-font-size-sm);
-		font-weight: 600;
-	}
-
-	& .field + .field {
-		margin-top: var(--cms-space-3);
-	}
-
-	& .fields + .fields,
-	& .fields + .section {
-		margin-top: var(--cms-space-5);
-	}
-
-	& .section {
-		font-weight: 600;
-	}
-}
-
 @media (max-width: 52rem) {
 	.cms-fields > * {
 		grid-column: 1 / -1 !important;

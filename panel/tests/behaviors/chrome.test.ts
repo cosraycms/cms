@@ -1,46 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { install } from '../../src/behaviors/chrome';
+import { closeDialog } from '../../src/lib/dialogs';
 
-const showModalDescriptor = Object.getOwnPropertyDescriptor(
-	HTMLDialogElement.prototype,
-	'showModal',
-);
-const closeDescriptor = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'close');
-
-let showModal = vi.fn();
-let close = vi.fn();
-let uninstall = (): void => undefined;
+let uninstall: () => void;
 
 beforeEach(() => {
-	showModal = vi.fn();
-	close = vi.fn();
-	Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
-		configurable: true,
-		value: showModal,
-	});
-	Object.defineProperty(HTMLDialogElement.prototype, 'close', {
-		configurable: true,
-		value: close,
-	});
 	uninstall = install();
 });
 
 afterEach(() => {
+	for (const dialog of document.querySelectorAll('dialog')) closeDialog(dialog);
 	uninstall();
 	document.body.replaceChildren();
-
-	if (showModalDescriptor) {
-		Object.defineProperty(HTMLDialogElement.prototype, 'showModal', showModalDescriptor);
-	} else {
-		delete (HTMLDialogElement.prototype as { showModal?: () => void }).showModal;
-	}
-
-	if (closeDescriptor) {
-		Object.defineProperty(HTMLDialogElement.prototype, 'close', closeDescriptor);
-	} else {
-		delete (HTMLDialogElement.prototype as { close?: () => void }).close;
-	}
 });
 
 describe('editor chrome', () => {
@@ -52,9 +23,7 @@ describe('editor chrome', () => {
 			</div>
 		`;
 		const overlay = document.querySelector<HTMLElement>('#editor-preview')!;
-
 		document.querySelector<HTMLElement>('[data-overlay-close] span')!.click();
-
 		expect(overlay.isConnected).toBe(true);
 		expect(overlay.hidden).toBe(true);
 		expect(overlay.childElementCount).toBe(0);
@@ -63,86 +32,83 @@ describe('editor chrome', () => {
 
 	it('opens the metadata dialog belonging to the clicked field', () => {
 		document.body.innerHTML = `
-			<div class="cms-field" data-meta-owner>
+			<div data-meta-owner>
 				<button type="button" data-meta-open><span>Metadata</span></button>
-				<dialog data-meta></dialog>
+				<dialog data-meta><h2>Metadata</h2><input></dialog>
 			</div>
-			<div class="cms-field" data-meta-owner><dialog data-meta></dialog></div>
+			<div data-meta-owner><dialog data-meta></dialog></div>
 		`;
-		const expected = document.querySelector<HTMLDialogElement>('dialog[data-meta]')!;
-
+		const [expected, other] = document.querySelectorAll('dialog');
 		document.querySelector<HTMLElement>('[data-meta-open] span')!.click();
-
-		expect(showModal).toHaveBeenCalledOnce();
-		expect(showModal.mock.instances[0]).toBe(expected);
+		expect(expected.open).toBe(true);
+		expect(other.open).toBe(false);
+		expect(document.activeElement).toBe(expected.querySelector('input'));
 	});
 
 	it('opens the dialog of the block row, not of the field around it', () => {
 		document.body.innerHTML = `
-			<div class="cms-field" data-meta-owner>
+			<div data-meta-owner>
 				<button type="button" class="meta-button" data-meta-open>Field meta</button>
-				<div class="control">
-					<div class="block" data-meta-owner>
-						<button type="button" class="gear" data-meta-open>Block meta</button>
-						<div class="body">
-							<div class="cms-field" data-meta-owner>
-								<dialog data-meta id="sub"></dialog>
-							</div>
-						</div>
-						<dialog data-meta id="block"></dialog>
-					</div>
+				<div data-meta-owner>
+					<button type="button" class="gear" data-meta-open>Block meta</button>
+					<div data-meta-owner><dialog data-meta id="sub"></dialog></div>
+					<dialog data-meta id="block"></dialog>
 				</div>
 				<dialog data-meta id="field"></dialog>
 			</div>
 		`;
-
+		const block = document.querySelector<HTMLDialogElement>('#block')!;
+		const field = document.querySelector<HTMLDialogElement>('#field')!;
 		document.querySelector<HTMLElement>('.gear')!.click();
+		expect(block.open).toBe(true);
+		expect(field.open).toBe(false);
+		closeDialog(block);
 		document.querySelector<HTMLElement>('.meta-button')!.click();
-
-		expect(showModal).toHaveBeenCalledTimes(2);
-		expect((showModal.mock.instances[0] as HTMLElement).id).toBe('block');
-		expect((showModal.mock.instances[1] as HTMLElement).id).toBe('field');
+		expect(field.open).toBe(true);
+		expect(document.querySelector<HTMLDialogElement>('#sub')!.open).toBe(false);
 	});
 
-	it('closes the metadata dialog containing the clicked control', () => {
+	it('retains live settings and form ownership without submitting on close', () => {
 		document.body.innerHTML = `
-			<dialog data-meta>
-				<button type="button" data-meta-close><span>Close</span></button>
-			</dialog>
+			<form><div data-meta-owner>
+				<button type="button" data-meta-open>Metadata</button>
+				<dialog data-meta><h2>Settings</h2>
+					<input name="content[body][meta][class][zxx]" value="original">
+					<button type="button" data-dialog-close><span>Close</span></button>
+				</dialog>
+			</div></form>
 		`;
-		const expected = document.querySelector<HTMLDialogElement>('dialog[data-meta]')!;
-
-		document.querySelector<HTMLElement>('[data-meta-close] span')!.click();
-
-		expect(close).toHaveBeenCalledOnce();
-		expect(close.mock.instances[0]).toBe(expected);
+		const form = document.querySelector('form')!;
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		form.addEventListener('submit', submit);
+		const opener = document.querySelector<HTMLButtonElement>('[data-meta-open]')!;
+		opener.click();
+		const input = form.querySelector('input')!;
+		expect(input.form).toBe(form);
+		input.value = 'edited';
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+		document.querySelector<HTMLElement>('[data-dialog-close] span')!.click();
+		expect(form.querySelector('dialog')!.open).toBe(false);
+		expect(new FormData(form).get(input.name)).toBe('edited');
+		expect(submit).not.toHaveBeenCalled();
+		expect(document.activeElement).toBe(opener);
+		opener.click();
+		expect(input.value).toBe('edited');
 	});
 
 	it('ignores metadata controls outside their required containers', () => {
-		document.body.innerHTML = `
-			<button type="button" data-meta-open>Open</button>
-			<button type="button" data-meta-close>Close</button>
-		`;
-
+		document.body.innerHTML =
+			'<button type="button" data-meta-open>Open</button><dialog data-meta></dialog>';
 		document.querySelector<HTMLElement>('[data-meta-open]')!.click();
-		document.querySelector<HTMLElement>('[data-meta-close]')!.click();
-
-		expect(showModal).not.toHaveBeenCalled();
-		expect(close).not.toHaveBeenCalled();
+		expect(document.querySelector('dialog')!.open).toBe(false);
 	});
 
 	it('removes its delegated click listener on uninstall', () => {
-		document.body.innerHTML = `
-			<div id="editor-preview" class="is-open">
-				<button type="button" data-overlay-close>Close</button>
-			</div>
-		`;
+		document.body.innerHTML =
+			'<div id="editor-preview" class="is-open"><button type="button" data-overlay-close>Close</button></div>';
 		const overlay = document.querySelector<HTMLElement>('#editor-preview')!;
 		uninstall();
-		uninstall = (): void => undefined;
-
 		document.querySelector<HTMLElement>('[data-overlay-close]')!.click();
-
 		expect(overlay.hidden).toBe(false);
 		expect(overlay.className).toBe('is-open');
 	});

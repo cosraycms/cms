@@ -268,8 +268,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 	</div>
 
 	<?php if ($bulk): ?>
-		<dialog class="cms-confirm" data-bulk-dialog="delete">
-			<h2><?= escape(__('bulk:delete')) ?></h2>
+		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="delete">
+			<?php $this->insert('component/modal-header', ['title' => __('bulk:delete')]) ?>
+			<div class="modal-body cms-confirm">
 			<p
 				class="question"
 				data-bulk-question
@@ -283,8 +284,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />
 				<span><?= escape(__('bulk:delete-children')) ?></span>
 			</label>
-			<footer>
-				<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+			</div>
+			<footer class="modal-footer">
+				<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
 					__('bulk:cancel'),
 				) ?></button>
 				<button
@@ -298,8 +300,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</footer>
 		</dialog>
 
-		<dialog class="cms-confirm" data-bulk-dialog="duplicate">
-			<h2><?= escape(__('bulk:duplicate')) ?></h2>
+		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="duplicate">
+			<?php $this->insert('component/modal-header', ['title' => __('bulk:duplicate')]) ?>
+			<div class="modal-body cms-confirm">
 			<p
 				class="question"
 				data-bulk-question
@@ -312,8 +315,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<input type="checkbox" name="children" value="1" form="collection-bulk" />
 				<span><?= escape(__('bulk:duplicate-children')) ?></span>
 			</label>
-			<footer>
-				<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+			</div>
+			<footer class="modal-footer">
+				<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
 					__('bulk:cancel'),
 				) ?></button>
 				<button
@@ -328,8 +332,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 		</dialog>
 
 		<?php if ($page->bulk['showPublished']): ?>
-			<dialog class="cms-confirm" data-bulk-dialog="publish">
-				<h2><?= escape(__('bulk:publish')) ?></h2>
+			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="publish">
+				<?php $this->insert('component/modal-header', ['title' => __('bulk:publish')]) ?>
+				<div class="modal-body cms-confirm">
 				<p
 					class="question"
 					data-bulk-question
@@ -339,8 +344,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-children')) ?></span>
 				</label>
-				<footer>
-					<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+				</div>
+				<footer class="modal-footer">
+					<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
 						__('bulk:cancel'),
 					) ?></button>
 					<button
@@ -356,8 +362,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				</footer>
 			</dialog>
 
-			<dialog class="cms-confirm" data-bulk-dialog="draft">
-				<h2><?= escape(__('bulk:unpublish')) ?></h2>
+			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="draft">
+				<?php $this->insert('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
+				<div class="modal-body cms-confirm">
 				<p
 					class="question"
 					data-bulk-question
@@ -367,8 +374,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:unpublish-children')) ?></span>
 				</label>
-				<footer>
-					<button type="button" class="cms-button secondary" data-bulk-close><?= escape(
+				</div>
+				<footer class="modal-footer">
+					<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
 						__('bulk:cancel'),
 					) ?></button>
 					<button

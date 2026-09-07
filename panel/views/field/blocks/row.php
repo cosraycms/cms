@@ -170,15 +170,9 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 		]) ?>
 	</div>
 	<?php if ($settings): ?>
-		<dialog class="cms-meta" data-meta>
-			<div class="head">
-				<span class="title">
-					<?= $this->escape($label) ?> — <?= $this->escape(__('field:block-settings')) ?>
-				</span>
-				<button type="button" class="cms-button" data-meta-close>
-					<?= $this->escape(__('field:close')) ?>
-				</button>
-			</div>
+		<dialog class="cms-modal" data-size="compact" data-meta>
+			<?php $this->insert('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
+			<div class="modal-body cms-settings">
 			<?php if ($columns > 1) {
 				$this->insert('field/blocks/layout', [
 					'layout' => $layout->array(),
@@ -209,6 +203,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					'nameRoot' => "{$rowName}[fields][{$subName}]",
 				]) ?>
 			<?php endforeach ?>
+			</div>
 		</dialog>
 	<?php endif ?>
 </div>

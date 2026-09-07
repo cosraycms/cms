@@ -40,6 +40,12 @@ Unmodified letters stay on `event.key`, where the layout should decide.
 
 The two halves disagree only on layouts that move `h` `j` `k` `l` away from their QWERTY positions — Dvorak and Colemak, not QWERTZ or AZERTY. **Accepting both `code` and `key` is not the fix**: on exactly those layouts one physical key would then match two commands, and an ordered fallback only makes the wrong answer deterministic. Live with the seam.
 
+## Modals
+
+Native dialogs keep focus inside the active modal. Initial focus goes to a designated safe action or a useful input. `Escape` dismisses the innermost dialog without running its confirmation action; closing returns focus to a usable opener. Dialog keys do not reach background editor/tree shortcuts. An action that focuses new editor content closes its dialog first.
+
+Field and block settings retain their live values on closure. Media metadata keeps explicit Apply/Cancel semantics. Synchronous browser confirmation and unsaved-navigation prompts remain exceptions; `beforeunload` warnings are always browser-owned.
+
 ## What is bound today
 
 The node editor's content-language control is one normal `Tab` stop in the inspector. With up to three configured languages it is a segmented radio group: arrow keys select the previous or next language, while `Home` and `End` select the first and last. With four or more languages it is an ordinary select using the browser's keys. It has no panel shortcut, and the editor switches it when a validation error belongs to another locale. Display-only fallback layers are not tab stops; asymmetric block previews are `inert`, so `Tab` reaches the selected locale's add controls instead of the source rows.

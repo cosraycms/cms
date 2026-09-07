@@ -114,6 +114,12 @@ Built-in panel icons use the checked-in regular Bootstrap collection in `panel/i
 
 Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are decorative and hidden from assistive technology. Put a translated accessible name on an icon-only button or link, not on its SVG. Application-defined schema icons still resolve through the existing provider API; bundled defaults use a separate `panelIcon` name rather than reinterpreting provider IDs.
 
+## Modal shell
+
+`.cms-modal` is a native `<dialog>` shared by server-rendered settings/confirmations and bridge-mounted content. Its backdrop, border, scrolling, header, close button, and footer come from `cms-modal.css`. The content parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`. The normal width is 48rem; `data-size="compact"` uses 32rem and `data-size="wide"` uses 72rem, each bounded by the viewport.
+
+`cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.

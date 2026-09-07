@@ -1,3 +1,5 @@
+import { openDialog, closeDialog } from '$lib/dialogs';
+
 // Collection bulk selection: the checkbox column drives the action bar
 // (count, clear, action buttons) and the confirm dialogs. Server-rendered
 // strings arrive as data-label-one/-many templates with a :count
@@ -66,7 +68,7 @@ function sync(): void {
 	}
 }
 
-function openDialog(name: string): void {
+function confirmSelection(name: string, opener: HTMLElement): void {
 	const dialog = document.querySelector<HTMLDialogElement>(`dialog[data-bulk-dialog="${name}"]`);
 	const picked = selected();
 
@@ -102,7 +104,7 @@ function openDialog(name: string): void {
 			children !== null && !children.hidden && children.hasAttribute('data-bulk-gate');
 	}
 
-	dialog.showModal();
+	openDialog(dialog, { opener, owner: opener });
 }
 
 function onChange(event: Event): void {
@@ -157,14 +159,14 @@ function onClick(event: Event): void {
 	const open = target.closest<HTMLElement>('[data-bulk-open]');
 
 	if (open) {
-		openDialog(open.dataset.bulkOpen ?? '');
+		confirmSelection(open.dataset.bulkOpen ?? '', open);
 
 		return;
 	}
 
-	if (target.closest('[data-bulk-close]')) {
-		target.closest('dialog')?.close();
-	}
+	const confirm = target.closest<HTMLButtonElement>('[data-bulk-confirm]');
+	const dialog = confirm?.closest('dialog');
+	if (confirm && !confirm.disabled && dialog) closeDialog(dialog);
 }
 
 export function install(): () => void {

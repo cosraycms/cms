@@ -302,3 +302,7 @@ Optional bridge options are `{ hideClose?, label?, size?: 'compact' | 'wide', ow
 Renderer cleanup runs exactly once on every close path, including owner removal and navigation. Close the modal **before** an action that focuses new content or runs a richtext command, so focus restoration cannot override the action. Nested dialogs return focus to the underlying dialog. A failing renderer cannot leave a modal host behind.
 
 Internal content uses `.modal-header` with a `.modal-title` heading, `.modal-body`, and `.modal-footer`; the Svelte wrappers in `panel/src/components/modal/` emit these same parts. `data-dialog-focus` designates initial focus, especially the safe action in a confirmation. Otherwise the first usable input receives focus. These markup names are internal, not a new plugin slot API. Plain TypeScript can render the same content through the bridge without mounting Svelte.
+
+Server-rendered field/block settings and collection bulk confirmations use the same lifecycle in `panel/src/lib/dialogs.ts` and the same frame. Settings dialogs stay inside their editor form; closing keeps live settings values rather than reverting them. Media metadata dialogs retain their separate draft and explicit Apply/Cancel behavior.
+
+Browser-owned `beforeunload` warnings and the synchronous dirty-navigation / `hx-confirm` prompts remain intentional exceptions. They are not routed through the asynchronous dialog API.
