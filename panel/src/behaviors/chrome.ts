@@ -36,7 +36,10 @@ function onClick(event: Event): void {
 			?.querySelector(':scope > dialog[data-meta]');
 
 		if (dialog instanceof HTMLDialogElement) {
-			openDialog(dialog, { opener: metaOpen, owner: metaOpen });
+			openDialog(dialog, {
+				opener: metaOpen.checkVisibility({ visibilityProperty: true }) ? metaOpen : undefined,
+				owner: metaOpen,
+			});
 		}
 
 		return;

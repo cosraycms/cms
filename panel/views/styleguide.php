@@ -121,6 +121,56 @@ $rows = (array) $this->unwrap($rows);
 			</section>
 
 			<section class="section">
+				<h2>Dialogs and action menus</h2>
+				<p class="note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus. These samples never submit.</p>
+				<form data-meta-owner onsubmit="event.preventDefault()">
+					<div class="sample">
+						<?php foreach (['start', 'center', 'end'] as $align): ?>
+							<button type="button" class="cms-button secondary"
+								popovertarget="sample-actions-<?= $align ?>" aria-haspopup="menu">Actions (<?= $align ?>)</button>
+							<div id="sample-actions-<?= $align ?>" class="cms-action-menu" popover="auto" data-action-menu data-align="<?= $align ?>">
+								<button type="button" data-meta-open><?= \Cosray\Panel\Icon::render('gear') ?> Open dialog</button>
+								<a href="#sample-icons">Icon examples</a>
+								<hr />
+								<button type="button" disabled>Unavailable action</button>
+								<button type="button" class="danger">Destructive appearance</button>
+							</div>
+						<?php endforeach ?>
+					</div>
+					<dialog class="cms-modal" data-size="compact" data-meta>
+						<?php $this->insert('component/modal-header', ['title' => 'Shared dialog']) ?>
+						<div class="modal-body">
+							<label for="sample-dialog-name">Name</label>
+							<input id="sample-dialog-name" class="cms-input" data-dialog-focus value="Live setting" />
+							<div data-meta-owner>
+								<button type="button" class="cms-button secondary" popovertarget="sample-nested-actions" aria-haspopup="menu">Nested actions</button>
+								<div id="sample-nested-actions" class="cms-action-menu" popover="auto" data-action-menu>
+									<button type="button" data-meta-open>Open nested dialog</button>
+									<button type="button" disabled>Unavailable action</button>
+								</div>
+								<dialog class="cms-modal" data-size="compact" data-meta>
+									<?php $this->insert('component/modal-header', ['title' => 'Nested dialog']) ?>
+									<div class="modal-body">Escape returns to the underlying dialog.</div>
+									<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
+								</dialog>
+							</div>
+						</div>
+						<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
+					</dialog>
+				</form>
+			</section>
+
+			<section class="section" id="sample-icons">
+				<h2>Icons</h2>
+				<p class="note">Regular Bootstrap artwork shared with Svelte controls. Icons inherit text color and are decorative.</p>
+				<div class="sample">
+					<?php foreach (['plus', 'plus-circle', 'gear', 'three-dots-vertical', 'x-lg'] as $icon): ?>
+						<span><?= \Cosray\Panel\Icon::render($icon) ?> <?= escape($icon) ?></span>
+					<?php endforeach ?>
+				</div>
+			</section>
+
+			<section class="section">
 				<h2>Pills and status</h2>
 				<div class="sample">
 					<span class="cms-count">24 entries</span>

@@ -1,7 +1,8 @@
 .cms-action-menu {
+	--width: 13rem;
 	position: fixed;
 	inset: auto;
-	width: var(--width, 13rem);
+	width: var(--width);
 	min-width: 0;
 	max-width: calc(100vw - 2 * var(--cms-space-4));
 	max-height: calc(100dvh - 2 * var(--cms-space-4));

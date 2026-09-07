@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/chrome';
 import { closeDialog } from '../../src/lib/dialogs';
+import { install as installMenus } from '../../src/lib/action-menu';
 
 let uninstall: () => void;
 
@@ -94,6 +95,30 @@ describe('editor chrome', () => {
 		expect(document.activeElement).toBe(opener);
 		opener.click();
 		expect(input.value).toBe('edited');
+	});
+
+	it('returns from a menu-opened settings dialog to the visible menu trigger', async () => {
+		document.body.innerHTML = `<div data-meta-owner>
+			<button type="button" popovertarget="settings-actions">Actions</button>
+			<div id="settings-actions" popover="auto" data-action-menu>
+				<button type="button" data-meta-open>Settings</button>
+			</div>
+			<dialog data-meta><h2>Settings</h2><input></dialog>
+		</div>`;
+		const stopMenus = installMenus();
+		try {
+			const trigger = document.querySelector<HTMLButtonElement>('[popovertarget]')!;
+			vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 32, 24));
+			trigger.click();
+			await Promise.resolve();
+			document.querySelector<HTMLButtonElement>('[data-meta-open]')!.click();
+			const dialog = document.querySelector('dialog')!;
+			expect(document.activeElement).toBe(dialog.querySelector('input'));
+			closeDialog(dialog);
+			expect(document.activeElement).toBe(trigger);
+		} finally {
+			stopMenus();
+		}
 	});
 
 	it('ignores metadata controls outside their required containers', () => {

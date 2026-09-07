@@ -13,16 +13,16 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | Control | Builder | Props | Value shape |
 | --- | --- | --- | --- |
 | `text` | `Control::text(?placeholder)` | `placeholder?` | locale map of `string` |
-| `textarea` | `Control::textarea()` |  | locale map of `string` |
+| `textarea` | `Control::textarea()` | — | locale map of `string` |
 | `number` | `Control::number(step:,min:,max:)` | `step?`, `min?`, `max?` | locale map of `number\|string` |
-| `checkbox` | `Control::checkbox()` |  | locale map of `bool` |
+| `checkbox` | `Control::checkbox()` | — | locale map of `bool` |
 | `option` | `Control::option(display:)` | `display: select\|radio` | locale map of `string` (options come from `#[Options]`) |
-| `date` | `Control::date()` |  | locale map of `YYYY-MM-DD` |
-| `time` | `Control::time()` |  | locale map of `HH:MM` |
-| `datetime` | `Control::datetime()` |  | locale map of `YYYY-MM-DDTHH:MM` |
-| `hidden` | `Control::hidden()` |  | locale map of `string` |
-| `iframe` | `Control::iframe()` |  | locale map of `string` |
-| `youtube` | `Control::youtube()` |  | locale map of `string` — a video id; the control shows the video's thumbnail and reduces a pasted YouTube URL to its id |
+| `date` | `Control::date()` | — | locale map of `YYYY-MM-DD` |
+| `time` | `Control::time()` | — | locale map of `HH:MM` |
+| `datetime` | `Control::datetime()` | — | locale map of `YYYY-MM-DDTHH:MM` |
+| `hidden` | `Control::hidden()` | — | locale map of `string` |
+| `iframe` | `Control::iframe()` | — | locale map of `string` |
+| `youtube` | `Control::youtube()` | — | locale map of `string` — a video id; the control shows the video's thumbnail and reduces a pasted YouTube URL to its id |
 | `group` | `Control::group(fields)` | `fields: {key,label?,control,width?}[]` | `zxx` map of object keyed by `key` |
 | `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
 | `entries` | `Control::entries()` | `entryTypes` (built from `#[Allows]`), `min?`, `max?` | `zxx` map of `{uid, type, fields}[]` |
@@ -302,6 +302,8 @@ Optional bridge options are `{ hideClose?, label?, size?: 'compact' | 'wide', ow
 Renderer cleanup runs exactly once on every close path, including owner removal and navigation. Close the modal **before** an action that focuses new content or runs a richtext command, so focus restoration cannot override the action. Nested dialogs return focus to the underlying dialog. A failing renderer cannot leave a modal host behind.
 
 Internal content uses `.modal-header` with a `.modal-title` heading, `.modal-body`, and `.modal-footer`; the Svelte wrappers in `panel/src/components/modal/` emit these same parts. `data-dialog-focus` designates initial focus, especially the safe action in a confirmation. Otherwise the first usable input receives focus. These markup names are internal, not a new plugin slot API. Plain TypeScript can render the same content through the bridge without mounting Svelte.
+
+Built-in action menus use the shared [action-menu markup contract](panel-styles.md#action-menus) in both PHP and Svelte. The panel closes a menu and restores its opener **before** invoking the selected action, so that action can open a modal without losing its initial focus. Keep row/field ownership attached to the DOM instead of moving menu forms into a separate host. The styleguide demonstrates server-rendered menu-to-dialog transitions and nested menus/dialogs.
 
 Server-rendered field/block settings and collection bulk confirmations use the same lifecycle in `panel/src/lib/dialogs.ts` and the same frame. Settings dialogs stay inside their editor form; closing keeps live settings values rather than reverting them. Media metadata dialogs retain their separate draft and explicit Apply/Cancel behavior.
 
