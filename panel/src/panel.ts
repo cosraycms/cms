@@ -2,6 +2,7 @@ import '../styles/panel.css';
 
 import type { BridgeSystem } from '$lib/bridge';
 
+import { install as installActionMenus } from '$lib/action-menu';
 import { install as installBlocks } from './behaviors/blocks';
 import { install as installBulk } from './behaviors/bulk';
 import { install as installChrome } from './behaviors/chrome';
@@ -100,6 +101,7 @@ function afterSwap(): void {
 
 listen('keydown', focusSearch);
 cleanups.push(
+	installActionMenus(),
 	installDirty(),
 	installTabs(),
 	installRepeater(),

@@ -120,6 +120,14 @@ Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are deco
 
 `cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
 
+## Action menus
+
+The block footer picker and compact richtext toolbar use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Their buttons use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep the surface beside its trigger in the DOM, within any owning form; the top layer handles painting without reparenting.
+
+`panel.ts` installs the shared `$lib/action-menu` behavior for PHP and Svelte markup. It supplies expanded state, naming, keyboard navigation, focus restoration, and placement within the viewport and clipping panes. `data-align` accepts `start` (default), `end`, or `center`; `--width` overrides the normal 13rem width. Items can contain an icon, text, and `.shortcut`; use `hr` for separators, native `disabled` or `aria-disabled="true"` for unavailable actions, `.danger` for destructive actions, and `.is-active` for selected actions.
+
+Action activation closes the menu before the consumer handler runs, so a handler can focus new content or open a modal without a later menu cleanup reclaiming focus. Remaining action-menu families have not yet migrated to this contract.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.

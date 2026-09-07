@@ -269,12 +269,6 @@
 		}
 	}
 
-	/* Left-anchored: the overflow button sits at the strip's start, so a
-	   right-anchored menu would open off-screen. */
-	.cms-richtext-compact-tools-menu {
-		width: min(18rem, calc(100vw - 2rem));
-	}
-
 	.richtext-dropdown-item {
 		display: flex;
 		width: 100%;

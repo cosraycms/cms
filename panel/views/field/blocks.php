@@ -104,18 +104,28 @@ $count = count($rows);
 				) ?>
 			</button>
 		<?php else: ?>
-			<details class="picker" data-repeater-menu>
-				<summary class="adder">
-					<?= \Cosray\Panel\Icon::render('plus-circle') ?>
-					<?= $this->escape(__('field:add-block')) ?>
-				</summary>
-				<div class="picker-menu" data-repeater-picker>
-					<?php $this->insert('field/blocks/picker', [
-						'blockTypes' => $blockTypes,
-						'insert' => 'append',
-					]) ?>
-				</div>
-			</details>
+			<button
+				type="button"
+				class="adder"
+				id="<?= $this->escape($id . '-picker-trigger') ?>"
+				popovertarget="<?= $this->escape($id . '-picker') ?>"
+				aria-haspopup="menu"
+			>
+				<?= \Cosray\Panel\Icon::render('plus-circle') ?>
+				<?= $this->escape(__('field:add-block')) ?>
+			</button>
+			<div
+				id="<?= $this->escape($id . '-picker') ?>"
+				class="cms-action-menu"
+				popover="auto"
+				data-action-menu
+				data-align="center"
+			>
+				<?php $this->insert('field/blocks/picker', [
+					'blockTypes' => $blockTypes,
+					'insert' => 'append',
+				]) ?>
+			</div>
 		<?php endif ?>
 	</div>
 </div>

@@ -3,12 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import RichTextEditor from '../../../src/components/richtext/RichTextEditor.svelte';
 import { installBridge } from '../../../src/lib/bridge-standalone';
 import type { UploadResult } from '../../../src/lib/bridge';
+import { install as installMenus } from '../../../src/lib/action-menu';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
 
 let app: ReturnType<typeof mount>;
+let stopMenus: () => void;
 
 beforeEach(() => {
+	stopMenus = installMenus();
 	installBridge({
 		locale: 'en',
 		defaultLocale: 'en',
@@ -22,6 +25,8 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+	stopMenus();
+	vi.restoreAllMocks();
 	document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click();
 	if (app) await unmount(app);
 	document.body.replaceChildren();
@@ -62,7 +67,9 @@ async function editor() {
 
 async function action(label: string) {
 	const button = Array.from(document.querySelectorAll('button')).find(
-		(button) => button.getAttribute('aria-label') === label || button.textContent?.trim() === label,
+		(button) =>
+			button.checkVisibility() &&
+			(button.getAttribute('aria-label') === label || button.textContent?.trim() === label),
 	)!;
 	expect(button).toBeDefined();
 	button.focus();
@@ -71,21 +78,34 @@ async function action(label: string) {
 }
 
 describe('richtext dialogs', () => {
-	it('applies a link to the original selection and returns focus to the editor', async () => {
-		const { content, notify } = await editor();
-		await action('richtext:add-page-link');
-		const input = document.querySelector<HTMLInputElement>('dialog input[type="text"]')!;
-		expect(document.activeElement).toBe(input);
-		input.value = 'https://example.test/';
-		input.dispatchEvent(new Event('input', { bubbles: true }));
-		await tick();
-		await action('link:add');
-		expect(content.querySelector('a')?.textContent).toBe('Hello');
-		expect(content.querySelector('a')?.getAttribute('href')).toBe('https://example.test/');
-		expect(content.textContent).toBe('Hello world');
-		expect(document.activeElement).toBe(content);
-		expect(notify).toHaveBeenCalledOnce();
-	});
+	it.each(['toolbar', 'overflow'])(
+		'applies a link from the %s to the original selection and returns focus to the editor',
+		async (entry) => {
+			const { host, content, notify } = await editor();
+			if (entry === 'overflow') {
+				const trigger = host.querySelector<HTMLButtonElement>('[popovertarget]')!;
+				vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 24, 24));
+				trigger.focus();
+				trigger.dispatchEvent(
+					new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+				);
+				await tick();
+				expect(document.activeElement?.textContent?.trim()).toBe('richtext:add-page-link');
+			}
+			await action('richtext:add-page-link');
+			const input = document.querySelector<HTMLInputElement>('dialog input[type="text"]')!;
+			expect(document.activeElement).toBe(input);
+			input.value = 'https://example.test/';
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			await tick();
+			await action('link:add');
+			expect(content.querySelector('a')?.textContent).toBe('Hello');
+			expect(content.querySelector('a')?.getAttribute('href')).toBe('https://example.test/');
+			expect(content.textContent).toBe('Hello world');
+			expect(document.activeElement).toBe(content);
+			expect(notify).toHaveBeenCalledOnce();
+		},
+	);
 
 	it('cancels a link without editing the selected text', async () => {
 		const { content, notify } = await editor();

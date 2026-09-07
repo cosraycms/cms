@@ -1,0 +1,72 @@
+.cms-action-menu {
+	position: fixed;
+	inset: auto;
+	width: var(--width, 13rem);
+	min-width: 0;
+	max-width: calc(100vw - 2 * var(--cms-space-4));
+	max-height: calc(100dvh - 2 * var(--cms-space-4));
+	margin: 0;
+	padding: var(--cms-space-1);
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface);
+	color: var(--cms-color-text);
+	box-shadow: var(--cms-shadow-md);
+	overflow: auto;
+	overscroll-behavior: contain;
+
+	&:popover-open {
+		display: flex;
+		flex-direction: column;
+	}
+
+	& :is(button, a) {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		width: 100%;
+		flex-shrink: 0;
+		padding: var(--cms-space-1-5) var(--cms-space-2-5);
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+		color: inherit;
+		font: inherit;
+		font-size: var(--cms-font-size-sm);
+		text-align: start;
+		text-decoration: none;
+		cursor: pointer;
+
+		&:hover,
+		&:focus-visible {
+			background: var(--cms-color-hover);
+		}
+
+		&.is-active {
+			background: var(--cms-color-selected);
+		}
+
+		&.danger {
+			color: var(--cms-color-danger-text);
+		}
+
+		&:disabled,
+		&[aria-disabled='true'] {
+			background: none;
+			color: var(--cms-color-text-faint);
+			cursor: default;
+		}
+	}
+
+	& .shortcut {
+		margin-inline-start: auto;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+
+	& hr {
+		margin: var(--cms-space-1);
+		border: 0;
+		border-top: 1px solid var(--cms-color-border);
+	}
+}

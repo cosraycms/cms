@@ -126,7 +126,7 @@
 	let sourceHtml = $state('');
 	let showDropdown = $state(false);
 	let showStyleDropdown = $state(false);
-	let showCompactToolsDropdown = $state(false);
+	const menuId = $props.id();
 	let focused = $state(false);
 	let showFallback = $derived(
 		isFilledDoc(fallback) && !isFilledDoc(value) && !focused && !showSource,
@@ -223,7 +223,6 @@
 		return () => {
 			showDropdown = false;
 			showStyleDropdown = false;
-			showCompactToolsDropdown = false;
 			editor?.run(command);
 		};
 	}
@@ -233,7 +232,6 @@
 			editor?.run(command);
 			showDropdown = !showDropdown;
 			showStyleDropdown = false;
-			showCompactToolsDropdown = false;
 		};
 	}
 
@@ -242,7 +240,6 @@
 			editor?.run(command);
 			showStyleDropdown = false;
 			showDropdown = false;
-			showCompactToolsDropdown = false;
 		};
 	}
 
@@ -254,7 +251,6 @@
 		showSource = !showSource;
 		showDropdown = false;
 		showStyleDropdown = false;
-		showCompactToolsDropdown = false;
 	}
 
 	function addLink(target: { href?: string; node?: string; asset?: string }, blank: boolean) {
@@ -311,7 +307,6 @@
 	}
 
 	function openAddImageModal() {
-		showCompactToolsDropdown = false;
 		if (!editor) return;
 
 		const handle = cosray().modal.open(
@@ -341,11 +336,6 @@
 
 			run(active ? setParagraph() : setHeading(level))();
 		};
-	}
-
-	function openLinkModalClosed() {
-		showCompactToolsDropdown = false;
-		openAddLinkModal();
 	}
 
 	type ToolSpec = {
@@ -506,7 +496,7 @@
 			tool: 'link',
 			icon: 'link-45deg',
 			label: __('richtext:add-page-link'),
-			onclick: openLinkModalClosed,
+			onclick: openAddLinkModal,
 		},
 		{
 			key: 'unlink',
@@ -623,7 +613,6 @@
 									onclick={() => {
 										showDropdown = !showDropdown;
 										showStyleDropdown = false;
-										showCompactToolsDropdown = false;
 									}}
 								>
 									{__('richtext:paragraph')}
@@ -696,7 +685,6 @@
 									onclick={() => {
 										showStyleDropdown = !showStyleDropdown;
 										showDropdown = false;
-										showCompactToolsDropdown = false;
 									}}
 								>
 									<Icon name="fonts" />
@@ -742,53 +730,43 @@
 						</div>
 					{/if}
 					<div class="cms-richtext-dropdown-wrap cms-richtext-toolbar-compact-actions">
-						<div class="richtext-dropdown">
-							<button
-								type="button"
-								id="compact-tools-menu-button"
-								class="richtext-dropdown-button cms-richtext-compact-tools-button"
-								title={__('richtext:formatting-tools')}
-								aria-label={__('richtext:formatting-tools')}
-								aria-expanded={showCompactToolsDropdown}
-								aria-haspopup="true"
-								onclick={() => {
-									showCompactToolsDropdown = !showCompactToolsDropdown;
-									showDropdown = false;
-									showStyleDropdown = false;
-								}}
-							>
-								<Icon name="three-dots-vertical" />
-							</button>
+						<button
+							type="button"
+							id={`${menuId}-trigger`}
+							popovertarget={menuId}
+							aria-haspopup="menu"
+							class="richtext-dropdown-button cms-richtext-compact-tools-button"
+							title={__('richtext:formatting-tools')}
+							aria-label={__('richtext:formatting-tools')}
+						>
+							<Icon name="three-dots-vertical" />
+						</button>
+						<div
+							id={menuId}
+							class="cms-action-menu"
+							popover="auto"
+							data-action-menu
+							style="--width: 18rem"
+							onbeforetoggle={() => {
+								showDropdown = false;
+								showStyleDropdown = false;
+							}}
+						>
+							{#each activeSpecs as spec (spec.key)}
+								{#if spec.isVisible?.() ?? true}
+									<button
+										type="button"
+										onclick={spec.onclick}
+										role={spec.isActive ? 'menuitemcheckbox' : 'menuitem'}
+										aria-checked={spec.isActive?.()}
+										class:is-active={spec.isActive?.() ?? false}
+									>
+										<Icon name={spec.icon} />
+										<span>{spec.label}</span>
+									</button>
+								{/if}
+							{/each}
 						</div>
-						{#if showCompactToolsDropdown}
-							<div
-								class="richtext-dropdown-menu cms-richtext-compact-tools-menu"
-								role="menu"
-								aria-orientation="vertical"
-								aria-labelledby="compact-tools-menu-button"
-								tabindex="-1"
-							>
-								<div class="cms-richtext-dropdown-items" role="none">
-									{#each activeSpecs as spec (spec.key)}
-										{#if spec.isVisible?.() ?? true}
-											<button
-												type="button"
-												onclick={spec.onclick}
-												role="menuitem"
-												tabindex="-1"
-												class="richtext-dropdown-item"
-												class:active={spec.isActive?.() ?? false}
-											>
-												<Icon name={spec.icon} />
-												<span class="cms-richtext-dropdown-item-label">
-													{spec.label}
-												</span>
-											</button>
-										{/if}
-									{/each}
-								</div>
-							</div>
-						{/if}
 					</div>
 					<div
 						class="richtext-toolbar-btns cms-richtext-toolbar-btns-grow cms-richtext-toolbar-main-actions"

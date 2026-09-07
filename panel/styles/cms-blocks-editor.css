@@ -568,11 +568,6 @@
 		border-top: 1px dashed var(--cms-color-border);
 	}
 
-	& .adders > .picker {
-		position: relative;
-		flex: 1 1 0;
-	}
-
 	& .adder {
 		display: flex;
 		flex: 1 1 0;
@@ -592,20 +587,6 @@
 			background: var(--cms-color-hover);
 			color: var(--cms-color-text);
 		}
-	}
-
-	& .adders .picker-menu {
-		position: absolute;
-		z-index: 20;
-		top: 100%;
-		left: 50%;
-		translate: -50% 0;
-		min-width: 13rem;
-		padding: var(--cms-space-1);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-md);
 	}
 
 	/* One column: the quiet list — no cells, hairlines between blocks. */

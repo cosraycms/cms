@@ -29,6 +29,7 @@
 import type { SortableEvent } from 'sortablejs';
 
 import { uid } from '$lib/content';
+import { placement } from '$lib/action-menu';
 import type { CosrayHost } from '$lib/host';
 
 const enhanced = new WeakSet<HTMLElement>();
@@ -59,6 +60,15 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 			el.dataset.localeLabelFor = base.replace(renaming.idPattern, renaming.id);
 		}
 	});
+	for (const attribute of ['popovertarget', 'aria-labelledby']) {
+		scope.querySelectorAll<HTMLElement>(`[${attribute}]`).forEach((element) => {
+			const targets = (element.getAttribute(attribute) ?? '').split(/\s+/);
+			element.setAttribute(
+				attribute,
+				targets.map((target) => target.replace(renaming.idPattern, renaming.id)).join(' '),
+			);
+		});
+	}
 	// Nested containers renumber against their data-name/data-id; keep
 	// those bases in sync with the renamed inputs.
 	scope.querySelectorAll<HTMLElement>('[data-repeater]').forEach((nested) => {
@@ -374,28 +384,9 @@ function placePicker(details: HTMLDetailsElement): void {
 		return;
 	}
 
-	const trigger = details.getBoundingClientRect();
-	let top = 0;
-	let bottom = window.innerHeight;
-
-	// The editor clips at its scroll pane, which may end above the viewport.
-	for (let parent = details.parentElement; parent; parent = parent.parentElement) {
-		if (/^(auto|scroll|hidden|clip)$/.test(getComputedStyle(parent).overflowY)) {
-			const edge = parent.getBoundingClientRect().top + parent.clientTop;
-			top = Math.max(top, edge);
-			bottom = Math.min(bottom, edge + parent.clientHeight);
-		}
-	}
-
-	const style = getComputedStyle(picker);
-	const gap = Math.max(parseFloat(style.marginTop) || 0, parseFloat(style.marginBottom) || 0);
-	const height = picker.scrollHeight + picker.offsetHeight - picker.clientHeight;
-	const above = Math.max(0, trigger.top - top - gap);
-	const below = Math.max(0, bottom - trigger.bottom - gap);
-	const up = height > below && above > below;
-
-	details.classList.toggle('is-up', up);
-	picker.style.setProperty('--picker-height', `${up ? above : below}px`);
+	const point = placement(details, picker);
+	details.classList.toggle('is-up', point.up);
+	picker.style.setProperty('--picker-height', `${point.maxHeight}px`);
 }
 
 function onToggle(event: Event): void {
