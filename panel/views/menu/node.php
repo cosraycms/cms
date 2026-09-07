@@ -47,9 +47,10 @@ $confirm = $descendants === 0
 	data-uid="<?= escape($id) ?>">
 	<div
 		class="menu-card<?= $id === $selected ? ' is-selected' : '' ?><?= $hidden
-	? ' is-hidden'
-	: '' ?>">
+			? ' is-hidden'
+			: '' ?>">
 		<?php // The row owns `aria-expanded`, so the toggle is a pointer
+
 		// affordance only; the arrow keys drive it for everyone else. ?>
 		<?php if ($hasChildren): ?>
 			<button
@@ -57,9 +58,11 @@ $confirm = $descendants === 0
 				class="collapse"
 				tabindex="-1"
 				aria-hidden="true"
-				data-menu-collapse></button>
+				data-menu-collapse><span class="expanded-icon"><?= \Cosray\Panel\Icon::render(
+					'dash',
+				) ?></span><span class="collapsed-icon"><?= \Cosray\Panel\Icon::render('plus') ?></span></button>
 		<?php endif ?>
-		<span class="grip" data-menu-grip aria-hidden="true"></span>
+		<span class="grip" data-menu-grip aria-hidden="true"><?= \Cosray\Panel\Icon::render('grip-vertical') ?></span>
 		<a
 			class="text"
 			tabindex="-1"
@@ -67,30 +70,30 @@ $confirm = $descendants === 0
 			<strong><?= escape($title) ?></strong>
 			<small>
 				<?= $hidden ? escape(__('menu:item-hidden-mark')) . ' · ' : '' ?><?= escape(
-	$typeLabel,
-) ?><?= is_string($href) && $href !== '' ? ' · ' . escape($href) : '' ?>
+					$typeLabel,
+				) ?><?= is_string($href) && $href !== '' ? ' · ' . escape($href) : '' ?>
 			</small>
 		</a>
 		<details class="kebab">
 			<summary tabindex="-1" aria-label="<?= escape(
 				__('menu:item-actions'),
-			) ?>"></summary>
+			) ?>"><?= \Cosray\Panel\Icon::render('three-dots-vertical') ?></summary>
 			<div class="kebab-menu">
 				<a
 					data-menu-add="before"
 					href="<?= escape($treeUrl) ?>?before=<?= escape(rawurlencode($id)) ?>"><?= escape(
-					__('menu:add-before'),
-				) ?></a>
+						__('menu:add-before'),
+					) ?></a>
 				<a
 					data-menu-add="after"
 					href="<?= escape($treeUrl) ?>?after=<?= escape(rawurlencode($id)) ?>"><?= escape(
-					__('menu:add-after'),
-				) ?></a>
+						__('menu:add-after'),
+					) ?></a>
 				<a
 					data-menu-add="child"
 					href="<?= escape($treeUrl) ?>?add=<?= escape(rawurlencode($id)) ?>"><?= escape(
-					__('menu:add-child'),
-				) ?></a>
+						__('menu:add-child'),
+					) ?></a>
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
 				) ?>/move">
@@ -108,6 +111,7 @@ $confirm = $descendants === 0
 					) ?></button>
 				</form>
 				<?php // Indenting needs a sibling above to become a child of;
+
 				// outdenting needs a parent to be lifted out of. ?>
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
@@ -135,6 +139,7 @@ $confirm = $descendants === 0
 		</details>
 	</div>
 	<?php // Rendered even without children: every card owns a drop zone
+
 	// for the drag behavior, marked `no-children` while it is empty. ?>
 	<ul
 		class="menu-children<?= $hasChildren ? '' : ' no-children' ?>"

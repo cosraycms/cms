@@ -3,7 +3,7 @@
 
 	import { useAssets } from '$lib/assets';
 	import { assetLine, extension } from '$lib/library';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	type Props = {
 		items: FileItem[];
@@ -50,7 +50,7 @@
 		<div class="files">
 			{#each items as item (item)}
 				<div class="file">
-					<IcoDocument />
+					<Icon name="file-earmark-richtext" />
 					<span>{filename(item)}</span>
 					<small>{$assets[item.uid ?? ''] ? assetLine($assets[item.uid ?? '']) : ''}</small>
 				</div>

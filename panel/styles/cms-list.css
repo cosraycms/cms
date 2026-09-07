@@ -245,13 +245,13 @@
 			pointer-events: none;
 		}
 
-		& .chevron {
+		& .cms-icon {
 			width: 0.625rem;
 			height: 0.625rem;
 			transition: transform 0.16s ease;
 		}
 
-		&.is-open .chevron {
+		&.is-open .cms-icon {
 			transform: rotate(90deg);
 		}
 	}

@@ -43,7 +43,11 @@ $bare = !$labels || $editor !== null;
 // Sub-fields with a meta group of their own edit it in the block's dialog.
 $subMetas = array_values(array_filter(
 	(array) ($blockType['fields'] ?? []),
-	static fn(mixed $sub): bool => is_array($sub) && is_array($sub['metaControl'] ?? null) && !($sub['hidden'] ?? false),
+	static fn(mixed $sub): bool => (
+		is_array($sub)
+		&& is_array($sub['metaControl'] ?? null)
+		&& !($sub['hidden'] ?? false)
+	),
 ));
 $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 ?>
@@ -97,11 +101,11 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					title="<?= $this->escape(__('field:drag-block')) ?>"
 					aria-label="<?= $this->escape(__('field:drag-block') . '. ' . __('field:resize-block')) ?>"
 					aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown Alt+Shift+ArrowLeft Alt+Shift+ArrowRight">
-					<?php $this->insert('icon/grip.svg') ?>
+					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php else: ?>
 				<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-block')) ?>">
-					<?php $this->insert('icon/grip.svg') ?>
+					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php endif ?>
 			<span class="kind"><?= $this->escape($label) ?></span>
@@ -112,11 +116,13 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					data-meta-open
 					aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 					title="<?= $this->escape(__('field:block-settings')) ?>">
-					<?php $this->insert('icon/gear.svg') ?>
+					<?= \Cosray\Panel\Icon::render('gear') ?>
 				</button>
 			<?php endif ?>
 			<details class="kebab" data-repeater-menu>
-				<summary aria-label="<?= $this->escape(__('field:block-actions')) ?>"></summary>
+				<summary aria-label="<?= $this->escape(__('field:block-actions')) ?>"><?= \Cosray\Panel\Icon::render(
+					'three-dots-vertical',
+				) ?></summary>
 				<div class="kebab-menu">
 					<button type="button" data-repeater-move="up">
 						<?= $this->escape(__('common:move-up')) ?>
@@ -138,13 +144,11 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 		} ?>
 	</div>
 	<?php if ($columns > 1): ?>
-		<?php foreach (
-			[
-				'start' => __('field:indent'),
-				'end' => __('field:span'),
-				'bottom' => __('field:rows'),
-			] as $edge => $title
-		): ?>
+		<?php foreach ([
+			'start' => __('field:indent'),
+			'end' => __('field:span'),
+			'bottom' => __('field:rows'),
+		] as $edge => $title): ?>
 			<span
 				class="resize is-<?= $edge ?>"
 				data-layout-resize="<?= $edge ?>"

@@ -5,7 +5,7 @@ $default = (bool) ($default ?? false);
 $icon = is_array($iconMeta) ? (string) $this->unwrap($renderIcon($iconMeta)) : '';
 ?>
 <?php if ($iconMeta === null && $default): ?>
-	<span class="icon" aria-hidden="true"><?php $this->insert('icon/collection.svg') ?></span>
+	<span class="icon" aria-hidden="true"><?= \Cosray\Panel\Icon::render('collection') ?></span>
 <?php elseif ($icon !== ''): ?>
 	<span class="icon" aria-hidden="true"><?= $icon ?></span>
 <?php endif ?>

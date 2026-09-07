@@ -98,7 +98,7 @@ $count = count($rows);
 				class="adder"
 				data-repeater-add="<?= $this->escape($single) ?>"
 				data-repeater-insert="append">
-				<?php $this->insert('icon/plus.svg') ?>
+				<?= \Cosray\Panel\Icon::render('plus-circle') ?>
 				<?= $this->escape(
 					__('field:add-typed', ['label' => (string) ($blockTypes[$single]['label'] ?? __('field:block'))]),
 				) ?>
@@ -106,7 +106,7 @@ $count = count($rows);
 		<?php else: ?>
 			<details class="picker" data-repeater-menu>
 				<summary class="adder">
-					<?php $this->insert('icon/plus.svg') ?>
+					<?= \Cosray\Panel\Icon::render('plus-circle') ?>
 					<?= $this->escape(__('field:add-block')) ?>
 				</summary>
 				<div class="picker-menu" data-repeater-picker>

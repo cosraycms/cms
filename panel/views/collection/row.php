@@ -51,7 +51,7 @@ $bulk = (bool) ($bulk ?? false);
 										? __('collection:collapse-children', ['name' => $cell['value']])
 										: __('collection:expand-children', ['name' => $cell['value']]),
 								) ?>">
-								<?php $this->insert('icon/chevron.svg') ?>
+								<?= \Cosray\Panel\Icon::render('chevron-right') ?>
 							</a>
 						<?php else: ?>
 							<span class="toggle is-spacer" aria-hidden="true"></span>
@@ -102,7 +102,7 @@ $bulk = (bool) ($bulk ?? false);
 							'type' => $link['name'],
 							'name' => (string) $row['cells'][0]['value'],
 						])) ?>">
-						+ <?= escape((string) $link['name']) ?>
+						<?= \Cosray\Panel\Icon::render('plus') ?> <?= escape((string) $link['name']) ?>
 					</a>
 				<?php endforeach ?>
 			</span>

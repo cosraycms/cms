@@ -108,6 +108,12 @@ This is the same declaration a component stylesheet must not make, and it is fin
 
 Note what it overrules. `theme` is the highest layer and layer order beats specificity, so this plain `:root` also outranks the panel's `:root[data-theme='dark']` — the styleguide toggle stops responding, and a per-user theme preference would be overruled too. It bans a theme rather than changing the default, which is usually what is wanted, but it settles the question above the editor's head.
 
+## Built-in icons
+
+Built-in panel icons use the checked-in regular Bootstrap collection in `panel/icons/`, shared by `Cosray\Panel\Icon::render('plus')` and `<Icon name="plus" />` from `panel/src/components/Icon.svelte`. The collection README records its version, license, and mappings. No panel action icon requires a network request.
+
+Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are decorative and hidden from assistive technology. Put a translated accessible name on an icon-only button or link, not on its SVG. Application-defined schema icons still resolve through the existing provider API; bundled defaults use a separate `panelIcon` name rather than reinterpreting provider IDs.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.

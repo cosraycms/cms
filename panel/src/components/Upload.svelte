@@ -10,7 +10,7 @@
 	import { cosray } from '$lib/bridge';
 	import { registerAsset, useAssets } from '$lib/assets';
 	import { __ } from '$lib/locale';
-	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import Icon from '$components/Icon.svelte';
 	import Dialog from '$components/Dialog.svelte';
 	import Message from '$components/Message.svelte';
 	import MediaList from '$components/MediaList.svelte';
@@ -344,7 +344,7 @@
 			{#if dragging}
 				<div class="drop" aria-hidden="true">
 					<span>
-						<IcoUpload />
+						<Icon name="cloud-upload" />
 						{multiple ? __('upload:drop-to-add') : __('upload:drop-to-replace')}
 					</span>
 				</div>
@@ -390,7 +390,7 @@
 				ondragleave={preventDefault(stopDragging)}
 			>
 				<div class="cms-field-label upload-drop-label">
-					<span class="upload-drop-icon"><IcoUpload /></span>
+					<span class="upload-drop-icon"><Icon name="cloud-upload" /></span>
 					{__('upload:dropzone')}
 					<u>{__('common:select')}</u>
 				</div>

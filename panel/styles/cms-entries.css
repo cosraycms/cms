@@ -135,12 +135,6 @@
 				display: none;
 			}
 
-			&::before {
-				content: '⋮';
-				font-size: var(--cms-font-size-base);
-				font-weight: 700;
-			}
-
 			&:hover {
 				background: var(--cms-color-surface-sunken);
 				color: var(--cms-color-text);

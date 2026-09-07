@@ -59,6 +59,7 @@ $urls = (array) $this->unwrap($urls);
 					</div>
 				<?php else: ?>
 					<?php // The drag behavior posts drops through this form, so
+
 					// a move rides the boosted pipeline like every other action. ?>
 					<form
 						id="menu-drag"
@@ -69,6 +70,7 @@ $urls = (array) $this->unwrap($urls);
 						<input type="hidden" name="index" value="" />
 					</form>
 					<?php // ARIA `tree`: the list is one tab stop, exactly one row
+
 					// carries tabindex 0, and the behavior moves it. That is
 					// what frees Tab and Shift+Tab for indenting. ?>
 					<ul
@@ -90,8 +92,9 @@ $urls = (array) $this->unwrap($urls);
 				<?php endif ?>
 
 				<?php // Adding at the root belongs to the tree, not to the pane:
+
 				// it has to stay reachable while an item is being edited. ?>
-				<a class="add" href="<?= escape($urls['add']) ?>"><?= escape(
+				<a class="add" href="<?= escape($urls['add']) ?>"><?= \Cosray\Panel\Icon::render('plus') ?> <?= escape(
 					__('menu:add-item'),
 				) ?></a>
 
@@ -99,6 +102,7 @@ $urls = (array) $this->unwrap($urls);
 					<details class="preview">
 						<summary><?= escape(__('menu:preview')) ?></summary>
 						<?php // hx-boost off: preview links leave the panel for
+
 						// the real pages instead of swapping them into #main. ?>
 						<div class="preview-body" hx-boost="false">
 							<?= $preview ?>

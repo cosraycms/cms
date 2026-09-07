@@ -5,10 +5,7 @@
 	import { untrack } from 'svelte';
 	import { __ } from '$lib/locale';
 	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
-	import IcoImage from '$components/icons/IcoImage.svelte';
-	import IcoLink from '$components/icons/IcoLink.svelte';
-	import IcoParagraph from '$components/icons/IcoParagraph.svelte';
+	import Icon from '$components/Icon.svelte';
 	import Button from '$components/Button.svelte';
 	import LibraryBrowser from '$components/LibraryBrowser.svelte';
 	import NodeSearch from '$components/NodeSearch.svelte';
@@ -89,19 +86,19 @@
 						class:active={currentTab === 'manually'}
 						onclick={changeTab('manually')}
 					>
-						<IcoLink />
+						<Icon name="link-45deg" />
 						<span>{__('link:manual')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'page'} onclick={changeTab('page')}>
-						<IcoParagraph />
+						<Icon name="paragraph" />
 						<span>{__('node:page')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'images'} onclick={changeTab('images')}>
-						<IcoImage />
+						<Icon name="image" />
 						<span>{__('media:images')}</span>
 					</button>
 					<button class="tab" class:active={currentTab === 'files'} onclick={changeTab('files')}>
-						<IcoDocument />
+						<Icon name="file-earmark-richtext" />
 						<span>{__('media:files-documents')}</span>
 					</button>
 				</nav>

@@ -112,15 +112,13 @@ jobs:
 
           cp LICENSE.txt panel/static/LICENSE.txt
           cp -R LICENSES panel/static/LICENSES
-          cat > panel/static/FONT-AWESOME-NOTICE.txt <<'EOF'
-          Font Awesome Free 6.4.0
-          Copyright 2023 Fonticons, Inc.
-          https://fontawesome.com
+          cat > panel/static/BOOTSTRAP-ICONS-NOTICE.txt <<'EOF'
+          Bootstrap Icons 1.13.1
+          Copyright (c) 2019-2024 The Bootstrap Authors
+          https://github.com/twbs/icons/tree/v1.13.1
 
-          The Link, Text Height, and Unlink icons were adapted for Svelte.
-          They are licensed under the Creative Commons Attribution 4.0
-          International license:
-          https://creativecommons.org/licenses/by/4.0/
+          Bundled panel icons are licensed under MIT.
+          See LICENSES/MIT.txt for the license text.
           EOF
 
       - name: Create tarball

@@ -6,7 +6,7 @@
 	import { useAssets } from '$lib/assets';
 	import { assetLine, extension } from '$lib/library';
 	import { __ } from '$lib/locale';
-	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import Icon from '$components/Icon.svelte';
 	import ImagePreview from '$components/ImagePreview.svelte';
 	import MetaFields from './MetaFields.svelte';
 
@@ -89,7 +89,7 @@
 			{/key}
 		</div>
 	{:else}
-		<div class="thumb placeholder"><IcoUpload /></div>
+		<div class="thumb placeholder"><Icon name="cloud-upload" /></div>
 		<div class="details">
 			<div class="prompt">{loading ? __('upload:uploading') : __('upload:drop-image')}</div>
 			<div class="facts">{allowed}</div>

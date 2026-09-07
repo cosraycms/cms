@@ -3,10 +3,7 @@
 	import { __ } from '$lib/locale';
 	import { cosray } from '$lib/bridge';
 	import { useAssets } from '$lib/assets';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
-	import IcoDownload from '$components/icons/IcoDownload.svelte';
-	import IcoTrash from '$components/icons/IcoTrash.svelte';
-	import IcoPencil from '$components/icons/IcoPencil.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	type Props = {
 		asset: FileItem;
@@ -41,7 +38,7 @@
 
 {#if asset}
 	<div class="file cms-file">
-		<IcoDocument />
+		<Icon name="file-earmark-richtext" />
 		<div class="cms-file-meta">
 			<b class="cms-file-name">{info?.filename ?? asset.uid}</b>
 			<span class="cms-file-title">{title}</span>
@@ -49,20 +46,30 @@
 		{#if loading}
 			<div>{__('common:loading')}</div>
 		{/if}
-		<IcoDownload />
+		<Icon name="cloud-download" />
 		<a href={info?.url ?? ''} target="_blank" class="cms-file-download">
 			{__('media:download')}
 		</a>
 
-		<button onclick={edit} class="cms-file-action cms-file-action-edit">
+		<button
+			type="button"
+			aria-label={__('common:edit')}
+			onclick={edit}
+			class="cms-file-action cms-file-action-edit"
+		>
 			<span class="cms-file-action-icon">
-				<IcoPencil />
+				<Icon name="pencil" />
 			</span>
 		</button>
 
-		<button onclick={remove} class="cms-file-action cms-file-action-remove">
+		<button
+			type="button"
+			aria-label={__('common:remove')}
+			onclick={remove}
+			class="cms-file-action cms-file-action-remove"
+		>
 			<span class="cms-file-action-icon">
-				<IcoTrash />
+				<Icon name="trash3" />
 			</span>
 		</button>
 	</div>

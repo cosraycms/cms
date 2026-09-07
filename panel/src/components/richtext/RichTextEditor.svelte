@@ -2,7 +2,7 @@
 	import { DOMSerializer } from 'prosemirror-model';
 	import type { EditorState } from 'prosemirror-state';
 
-	import { type Component, mount, onDestroy, onMount, unmount } from 'svelte';
+	import { mount, onDestroy, onMount, unmount } from 'svelte';
 
 	import type { AssetInfo } from '$types/data';
 
@@ -46,35 +46,7 @@
 	} from './commands';
 	import { undo, redo } from 'prosemirror-history';
 
-	import IcoH1 from '$components/icons/IcoH1.svelte';
-	import IcoH2 from '$components/icons/IcoH2.svelte';
-	import IcoH3 from '$components/icons/IcoH3.svelte';
-	import IcoBold from '$components/icons/IcoBold.svelte';
-	import IcoBlockQuoteRight from '$components/icons/IcoBlockQuoteRight.svelte';
-	import IcoParagraph from '$components/icons/IcoParagraph.svelte';
-	import IcoHorizontalRule from '$components/icons/IcoHorizontalRule.svelte';
-	import IcoTextHeight from '$components/icons/IcoTextHeight.svelte';
-	import IcoItalic from '$components/icons/IcoItalic.svelte';
-	import IcoAlignLeft from '$components/icons/IcoAlignLeft.svelte';
-	import IcoAlignRight from '$components/icons/IcoAlignRight.svelte';
-	import IcoAlignCenter from '$components/icons/IcoAlignCenter.svelte';
-	import IcoAlignJustify from '$components/icons/IcoAlignJustify.svelte';
-	import IcoRemoveFormat from '$components/icons/IcoRemoveFormat.svelte';
-	import IcoSubscript from '$components/icons/IcoSubscript.svelte';
-	import IcoSuperscript from '$components/icons/IcoSuperscript.svelte';
-	import IcoStrikethrough from '$components/icons/IcoStrikethrough.svelte';
-	import IcoListUl from '$components/icons/IcoListUl.svelte';
-	import IcoListOl from '$components/icons/IcoListOl.svelte';
-	import IcoUndo from '$components/icons/IcoUndo.svelte';
-	import IcoRedo from '$components/icons/IcoRedo.svelte';
-	import IcoCode from '$components/icons/IcoCode.svelte';
-	import IcoImage from '$components/icons/IcoImage.svelte';
-	import IcoLink from '$components/icons/IcoLink.svelte';
-	import IcoUnlink from '$components/icons/IcoUnlink.svelte';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
-	import IcoLineBreak from '$components/icons/IcoLineBreak.svelte';
-	import IcoFontSize from '$components/icons/IcoFontSize.svelte';
-	import IcoThreeDots from '$components/icons/IcoThreeDots.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	// Mirrors Cosray\Schema\Tool::defaults() — the set an editor gets when
 	// neither the field nor the project configures one.
@@ -373,7 +345,7 @@
 	type ToolSpec = {
 		key: string;
 		tool: string;
-		icon: Component;
+		icon: string;
 		label: string;
 		onclick: () => void;
 		isActive?: () => boolean;
@@ -383,12 +355,24 @@
 	// The full vocabulary in canonical order; `tools` picks the subset, so a
 	// configured list is a set, not a layout.
 	const toolbarSpecs: ToolSpec[] = [
-		{ key: 'undo', tool: 'undo', icon: IcoUndo, label: __('richtext:undo'), onclick: run(undo) },
-		{ key: 'redo', tool: 'redo', icon: IcoRedo, label: __('richtext:redo'), onclick: run(redo) },
+		{
+			key: 'undo',
+			tool: 'undo',
+			icon: 'arrow-counterclockwise',
+			label: __('richtext:undo'),
+			onclick: run(undo),
+		},
+		{
+			key: 'redo',
+			tool: 'redo',
+			icon: 'arrow-clockwise',
+			label: __('richtext:redo'),
+			onclick: run(redo),
+		},
 		{
 			key: 'bold',
 			tool: 'bold',
-			icon: IcoBold,
+			icon: 'type-bold',
 			label: __('richtext:bold'),
 			onclick: run(toggleBold()),
 			isActive: () => editorState.bold,
@@ -396,7 +380,7 @@
 		{
 			key: 'italic',
 			tool: 'italic',
-			icon: IcoItalic,
+			icon: 'type-italic',
 			label: __('richtext:italic'),
 			onclick: run(toggleItalic()),
 			isActive: () => editorState.italic,
@@ -404,7 +388,7 @@
 		{
 			key: 'strike',
 			tool: 'strike',
-			icon: IcoStrikethrough,
+			icon: 'type-strikethrough',
 			label: __('richtext:strikethrough'),
 			onclick: run(toggleStrike()),
 			isActive: () => editorState.strike,
@@ -412,7 +396,7 @@
 		{
 			key: 'h1',
 			tool: 'h1',
-			icon: IcoH1,
+			icon: 'type-h1',
 			label: __('richtext:heading-1'),
 			onclick: toggleHeading(1),
 			isActive: () => editorState.heading1,
@@ -420,7 +404,7 @@
 		{
 			key: 'h2',
 			tool: 'h2',
-			icon: IcoH2,
+			icon: 'type-h2',
 			label: __('richtext:heading-2'),
 			onclick: toggleHeading(2),
 			isActive: () => editorState.heading2,
@@ -428,7 +412,7 @@
 		{
 			key: 'h3',
 			tool: 'h3',
-			icon: IcoH3,
+			icon: 'type-h3',
 			label: __('richtext:heading-3'),
 			onclick: toggleHeading(3),
 			isActive: () => editorState.heading3,
@@ -436,7 +420,7 @@
 		{
 			key: 'sub',
 			tool: 'sub',
-			icon: IcoSubscript,
+			icon: 'subscript',
 			label: __('richtext:subscript'),
 			onclick: run(toggleSubscript()),
 			isActive: () => editorState.subscript,
@@ -444,7 +428,7 @@
 		{
 			key: 'sup',
 			tool: 'sup',
-			icon: IcoSuperscript,
+			icon: 'superscript',
 			label: __('richtext:superscript'),
 			onclick: run(toggleSuperscript()),
 			isActive: () => editorState.superscript,
@@ -452,14 +436,14 @@
 		{
 			key: 'align-left',
 			tool: 'align',
-			icon: IcoAlignLeft,
+			icon: 'text-left',
 			label: __('richtext:align-left'),
 			onclick: run(unsetTextAlign()),
 		},
 		{
 			key: 'align-center',
 			tool: 'align',
-			icon: IcoAlignCenter,
+			icon: 'text-center',
 			label: __('richtext:align-center'),
 			onclick: run(setTextAlign('center')),
 			isActive: () => editorState.center,
@@ -467,7 +451,7 @@
 		{
 			key: 'align-right',
 			tool: 'align',
-			icon: IcoAlignRight,
+			icon: 'text-right',
 			label: __('richtext:align-right'),
 			onclick: run(setTextAlign('right')),
 			isActive: () => editorState.right,
@@ -475,7 +459,7 @@
 		{
 			key: 'align-justify',
 			tool: 'align',
-			icon: IcoAlignJustify,
+			icon: 'justify',
 			label: __('richtext:justify'),
 			onclick: run(setTextAlign('justify')),
 			isActive: () => editorState.justify,
@@ -483,7 +467,7 @@
 		{
 			key: 'bullet-list',
 			tool: 'bullet-list',
-			icon: IcoListUl,
+			icon: 'list-ul',
 			label: __('richtext:bullet-list'),
 			onclick: run(toggleBulletList()),
 			isActive: () => editorState.bulletList,
@@ -491,7 +475,7 @@
 		{
 			key: 'ordered-list',
 			tool: 'ordered-list',
-			icon: IcoListOl,
+			icon: 'list-ol',
 			label: __('richtext:numbered-list'),
 			onclick: run(toggleOrderedList()),
 			isActive: () => editorState.orderedList,
@@ -499,7 +483,7 @@
 		{
 			key: 'blockquote',
 			tool: 'blockquote',
-			icon: IcoBlockQuoteRight,
+			icon: 'blockquote-right',
 			label: __('richtext:blockquote'),
 			onclick: run(toggleBlockquote()),
 			isActive: () => editorState.blockquote,
@@ -507,21 +491,21 @@
 		{
 			key: 'hr',
 			tool: 'hr',
-			icon: IcoHorizontalRule,
+			icon: 'hr',
 			label: __('richtext:horizontal-line'),
 			onclick: run(insertHorizontalRule()),
 		},
 		{
 			key: 'link',
 			tool: 'link',
-			icon: IcoLink,
+			icon: 'link-45deg',
 			label: __('richtext:add-page-link'),
 			onclick: openLinkModalClosed,
 		},
 		{
 			key: 'unlink',
 			tool: 'link',
-			icon: IcoUnlink,
+			icon: 'slash-circle',
 			label: __('richtext:remove-link'),
 			onclick: run(unsetLink()),
 			isVisible: () => editorState.link,
@@ -529,21 +513,21 @@
 		{
 			key: 'image',
 			tool: 'image',
-			icon: IcoImage,
+			icon: 'image',
 			label: __('image:insert'),
 			onclick: openAddImageModal,
 		},
 		{
 			key: 'br',
 			tool: 'br',
-			icon: IcoLineBreak,
+			icon: 'arrow-return-left',
 			label: __('richtext:hard-break'),
 			onclick: run(insertHardBreak()),
 		},
 		{
 			key: 'clear',
 			tool: 'clear',
-			icon: IcoRemoveFormat,
+			icon: 'eraser',
 			label: __('richtext:remove-formats'),
 			onclick: run(clearMarks()),
 		},
@@ -557,28 +541,39 @@
 	<div class="richtext-bubble cms-richtext-bubble" bind:this={bubble}>
 		{#if editor}
 			<button
+				type="button"
+				aria-label={__('richtext:bold')}
 				class="richtext-toolbar-btn"
 				onclick={run(toggleBold())}
 				class:active={editorState.bold}
 			>
-				<IcoBold />
+				<Icon name="type-bold" />
 			</button>
 			<button
+				type="button"
+				aria-label={__('richtext:italic')}
 				class="richtext-toolbar-btn"
 				onclick={run(toggleItalic())}
 				class:active={editorState.italic}
 			>
-				<IcoItalic />
+				<Icon name="type-italic" />
 			</button>
 			<button
+				type="button"
+				aria-label={__('richtext:strikethrough')}
 				class="richtext-toolbar-btn"
 				onclick={run(toggleStrike())}
 				class:active={editorState.strike}
 			>
-				<IcoStrikethrough />
+				<Icon name="type-strikethrough" />
 			</button>
-			<button class="richtext-toolbar-btn" onclick={run(clearMarks())}>
-				<IcoRemoveFormat />
+			<button
+				type="button"
+				aria-label={__('richtext:remove-formats')}
+				class="richtext-toolbar-btn"
+				onclick={run(clearMarks())}
+			>
+				<Icon name="eraser" />
 			</button>
 		{/if}
 	</div>
@@ -604,7 +599,7 @@
 							onclick={toggleSource}
 							class="richtext-source-btn cms-richtext-source-btn-compact"
 						>
-							<IcoDocument />
+							<Icon name="file-earmark-richtext" />
 							<span class="cms-richtext-source-label">
 								{__('richtext:show-content')}
 							</span>
@@ -626,19 +621,7 @@
 									}}
 								>
 									{__('richtext:paragraph')}
-									<svg
-										class="cms-richtext-dropdown-icon"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-										aria-hidden="true"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-											clip-rule="evenodd"
-										/>
-									</svg>
+									<Icon name="chevron-down" />
 								</button>
 							</div>
 							{#if showDropdown}
@@ -658,7 +641,7 @@
 											class="richtext-dropdown-item"
 											class:active={editorState.paragraphClass === 'default'}
 										>
-											<IcoParagraph />
+											<Icon name="paragraph" />
 											<span class="cms-richtext-dropdown-item-label">
 												{__('richtext:paragraph')}
 											</span>
@@ -672,7 +655,7 @@
 												class="richtext-dropdown-item"
 												class:active={editorState.paragraphClass === cls}
 											>
-												<IcoTextHeight />
+												<Icon name="type" />
 												<span class="cms-richtext-dropdown-item-label">
 													{label}
 												</span>
@@ -685,7 +668,7 @@
 											tabindex="-1"
 											class="richtext-dropdown-item"
 										>
-											<IcoRemoveFormat />
+											<Icon name="eraser" />
 											<span class="cms-richtext-dropdown-item-label">
 												{__('richtext:remove-format')}
 											</span>
@@ -701,6 +684,7 @@
 								<button
 									type="button"
 									class="richtext-dropdown-button"
+									aria-label={__('richtext:text-style')}
 									aria-expanded={showStyleDropdown}
 									aria-haspopup="true"
 									onclick={() => {
@@ -709,20 +693,8 @@
 										showCompactToolsDropdown = false;
 									}}
 								>
-									<IcoFontSize />
-									<svg
-										class="cms-richtext-dropdown-icon"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-										aria-hidden="true"
-									>
-										<path
-											fill-rule="evenodd"
-											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-											clip-rule="evenodd"
-										/>
-									</svg>
+									<Icon name="fonts" />
+									<Icon name="chevron-down" />
 								</button>
 							</div>
 							{#if showStyleDropdown}
@@ -753,7 +725,7 @@
 											tabindex="-1"
 											class="richtext-dropdown-item"
 										>
-											<IcoRemoveFormat />
+											<Icon name="eraser" />
 											<span class="cms-richtext-dropdown-item-label">
 												{__('richtext:remove-style')}
 											</span>
@@ -779,7 +751,7 @@
 									showStyleDropdown = false;
 								}}
 							>
-								<IcoThreeDots />
+								<Icon name="three-dots-vertical" />
 							</button>
 						</div>
 						{#if showCompactToolsDropdown}
@@ -793,7 +765,6 @@
 								<div class="cms-richtext-dropdown-items" role="none">
 									{#each activeSpecs as spec (spec.key)}
 										{#if spec.isVisible?.() ?? true}
-											{@const Icon = spec.icon}
 											<button
 												type="button"
 												onclick={spec.onclick}
@@ -802,7 +773,7 @@
 												class="richtext-dropdown-item"
 												class:active={spec.isActive?.() ?? false}
 											>
-												<Icon />
+												<Icon name={spec.icon} />
 												<span class="cms-richtext-dropdown-item-label">
 													{spec.label}
 												</span>
@@ -818,15 +789,15 @@
 					>
 						{#each activeSpecs as spec (spec.key)}
 							{#if spec.isVisible?.() ?? true}
-								{@const Icon = spec.icon}
 								<button
 									type="button"
 									class="richtext-toolbar-btn"
 									title={spec.label}
+									aria-label={spec.label}
 									onclick={spec.onclick}
 									class:active={spec.isActive?.() ?? false}
 								>
-									<Icon />
+									<Icon name={spec.icon} />
 								</button>
 							{/if}
 						{/each}
@@ -838,7 +809,7 @@
 								onclick={toggleSource}
 								class="richtext-source-btn cms-richtext-source-btn-offset"
 							>
-								<IcoCode />
+								<Icon name="code-slash" />
 								<span class="cms-richtext-toolbar-source-label">
 									{__('richtext:show-source')}
 								</span>

@@ -1,4 +1,5 @@
 @import './common.css';
+@import './cms-icon.css' layer(panel);
 @import './cms-login.css' layer(panel);
 @import './cms-shell.css' layer(panel);
 @import './cms-sidebar.css' layer(panel);

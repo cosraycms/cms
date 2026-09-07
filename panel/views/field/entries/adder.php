@@ -14,6 +14,6 @@ $label = $single
 	class="adder"
 	data-repeater-add="<?= $this->escape((string) $entryType['type']) ?>"
 	<?= $full ? 'hidden' : '' ?>>
-	<?php $this->insert('icon/plus.svg') ?>
+	<?= \Cosray\Panel\Icon::render('plus-circle') ?>
 	<?= $this->escape($label) ?>
 </button>

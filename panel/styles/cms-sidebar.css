@@ -104,12 +104,6 @@
 		font-size: var(--cms-font-size-sm);
 		text-decoration: none;
 
-		&::before {
-			content: '+';
-			font-size: var(--cms-font-size-base);
-			line-height: 1;
-		}
-
 		&:hover {
 			background: var(--cms-color-hover);
 			color: var(--cms-color-text);

@@ -1,6 +1,7 @@
 <svelte:options customElement={{ tag: 'cosray-reference', shadow: 'none' }} />
 
 <script lang="ts">
+	import Icon from '$components/Icon.svelte';
 	import { onMount } from 'svelte';
 	import { ZXX, type LocaleMap } from '$types/data';
 	import { panelBase } from '$lib/runtime';
@@ -186,7 +187,7 @@
 						onclick={() => remove(item.uid)}
 						aria-label={__('common:remove')}
 					>
-						×
+						<Icon name="x-lg" />
 					</button>
 				</li>
 			{/each}

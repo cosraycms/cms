@@ -1,6 +1,7 @@
 import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$lib/bridge';
 
 import { __ } from '$lib/locale';
+import { icon } from '$lib/icons';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
@@ -78,7 +79,7 @@ function openModal(
 		button.type = 'button';
 		button.className = 'close';
 		button.setAttribute('aria-label', __('common:close'));
-		button.textContent = '×';
+		button.innerHTML = icon('x-lg');
 		button.addEventListener('click', close);
 		container.append(button);
 	}

@@ -15,7 +15,7 @@
 	} from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
-	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import Icon from '$components/Icon.svelte';
 	import AssetGrid from '$components/media/AssetGrid.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
 
@@ -358,7 +358,7 @@
 					disabled={uploading}
 					onclick={() => fileInput?.click()}
 				>
-					<IcoUpload />
+					<Icon name="cloud-upload" />
 					{uploading ? __('upload:in-progress') : __('common:upload')}
 					{#if uploading && uploadTotal > 1}
 						<span class="cms-media-upload-progress">{uploadDone}/{uploadTotal}</span>
@@ -379,7 +379,7 @@
 					type="button"
 					class="cms-media-error-dismiss"
 					aria-label={__('common:close')}
-					onclick={() => (uploadErrors = [])}>×</button
+					onclick={() => (uploadErrors = [])}><Icon name="x-lg" /></button
 				>
 			</div>
 		{/if}
@@ -405,7 +405,7 @@
 		{#if dragging}
 			<div class="cms-media-drop" aria-hidden="true">
 				<span>
-					<IcoUpload />
+					<Icon name="cloud-upload" />
 					{__('media:drop-to-upload')}
 				</span>
 			</div>

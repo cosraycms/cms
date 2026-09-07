@@ -7,11 +7,7 @@
 	import { afterMove, afterRemove } from '$lib/gallery';
 	import { assetLine, extension } from '$lib/library';
 	import { __ } from '$lib/locale';
-	import IcoChevronLeft from '$components/icons/IcoChevronLeft.svelte';
-	import IcoChevronRight from '$components/icons/IcoChevronRight.svelte';
-	import IcoPlus from '$components/icons/IcoPlus.svelte';
-	import IcoTimes from '$components/icons/IcoTimes.svelte';
-	import IcoUpload from '$components/icons/IcoUpload.svelte';
+	import Icon from '$components/Icon.svelte';
 	import MetaFields from './MetaFields.svelte';
 
 	type Props = {
@@ -123,7 +119,7 @@
 					{__('media:choose-from-library')}
 				</button>
 				<button type="button" class="cms-button secondary small" onclick={upload}>
-					<span class="icon"><IcoPlus /></span>
+					<span class="icon"><Icon name="plus" /></span>
 					{__('image:add')}
 				</button>
 			</span>
@@ -145,9 +141,10 @@
 							type="button"
 							class="discard"
 							title={__('common:remove')}
+							aria-label={__('common:remove')}
 							onclick={() => removeAt(index)}
 						>
-							<IcoTimes />
+							<Icon name="x-lg" />
 						</button>
 					</div>
 				{/each}
@@ -155,7 +152,7 @@
 		</div>
 	{:else}
 		<div class="blank">
-			<IcoUpload />
+			<Icon name="cloud-upload" />
 			<span>{__('upload:drop-images')}</span>
 		</div>
 	{/if}
@@ -174,20 +171,28 @@
 						type="button"
 						class="step prev"
 						title={__('image:previous')}
+						aria-label={__('image:previous')}
 						onclick={() => step(-1)}
 					>
-						<IcoChevronLeft />
+						<Icon name="chevron-left" />
 					</button>
-					<button type="button" class="step next" title={__('image:next')} onclick={() => step(1)}>
-						<IcoChevronRight />
+					<button
+						type="button"
+						class="step next"
+						title={__('image:next')}
+						aria-label={__('image:next')}
+						onclick={() => step(1)}
+					>
+						<Icon name="chevron-right" />
 					</button>
 					<button
 						type="button"
 						class="dismiss"
 						title={__('common:close')}
+						aria-label={__('common:close')}
 						onclick={() => (selected = null)}
 					>
-						<IcoTimes />
+						<Icon name="x-lg" />
 					</button>
 				</span>
 			</div>

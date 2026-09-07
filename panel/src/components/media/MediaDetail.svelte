@@ -4,8 +4,7 @@
 	import { cosray } from '$lib/bridge';
 	import { humanSize } from '$lib/library';
 	import { __ } from '$lib/locale';
-	import IcoDocument from '$components/icons/IcoDocument.svelte';
-	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import Icon from '$components/Icon.svelte';
 	import ModalRemove from '$components/modals/ModalRemove.svelte';
 	import MetaForm, { type Meta } from './MetaForm.svelte';
 
@@ -199,7 +198,7 @@
 				type="button"
 				class="cms-detail-close"
 				aria-label={__('common:close')}
-				onclick={onClose}>×</button
+				onclick={onClose}><Icon name="x-lg" /></button
 			>
 		</header>
 
@@ -221,7 +220,7 @@
 				</button>
 			{:else}
 				<div class="cms-detail-preview">
-					<span class="cms-detail-preview-icon"><IcoDocument /></span>
+					<span class="cms-detail-preview-icon"><Icon name="file-earmark-richtext" /></span>
 				</div>
 			{/if}
 
@@ -294,7 +293,7 @@
 				disabled={deleting}
 				onclick={confirmRemove}
 			>
-				<IcoTrash />
+				<Icon name="trash3" />
 				{__('common:delete')}
 			</button>
 			<div class="cms-detail-foot-right">

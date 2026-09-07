@@ -41,7 +41,7 @@ $currentPath = (string) $this->unwrap($currentPath);
 	</ul>
 
 	<?php if ($manages): ?>
-		<a class="create" href="<?= escape((string) $menuCreateUrl) ?>"><?= escape(
+		<a class="create" href="<?= escape((string) $menuCreateUrl) ?>"><?= \Cosray\Panel\Icon::render('plus') ?><?= escape(
 			__('menu:new'),
 		) ?></a>
 	<?php endif ?>

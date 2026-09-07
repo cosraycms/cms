@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	import IcoOctagonTimes from '$components/icons/IcoOctagonTimes.svelte';
-	import IcoShieldCheck from '$components/icons/IcoShieldCheck.svelte';
-	import IcoCircleInfo from '$components/icons/IcoCircleInfo.svelte';
-	import IcoTriangleExclamation from '$components/icons/IcoTriangleExclamation.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	type Props = {
 		type: any;
@@ -52,17 +49,15 @@
 	<div class="message cms-message {getToneClass()}" class:narrow>
 		<div class="cms-message-row">
 			<div class="cms-message-icon {getTextToneClass()}" style="margin-top: -0.15rem">
-				{#if type == 'success'}
-					<IcoShieldCheck />
-				{:else if type == 'info'}
-					<IcoCircleInfo />
-				{:else if type == 'warning'}
-					<IcoTriangleExclamation />
-				{:else if type == 'error'}
-					<IcoOctagonTimes />
-				{:else}
-					<IcoCircleInfo />
-				{/if}
+				<Icon
+					name={type === 'success'
+						? 'shield-check'
+						: type === 'warning'
+							? 'exclamation-triangle'
+							: type === 'error'
+								? 'x-octagon'
+								: 'info-circle'}
+				/>
 			</div>
 			<div class="cms-message-content" class:narrow>
 				<div class="cms-message-text {getTextToneClass()}">

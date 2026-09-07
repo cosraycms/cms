@@ -27,7 +27,7 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 <div class="entry" data-repeater-row <?= $ownsLocales ? 'data-locale-scope' : '' ?>>
 	<div class="summary">
 		<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
-			<?php $this->insert('icon/grip.svg') ?>
+			<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 		</span>
 		<button
 			type="button"
@@ -63,7 +63,9 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 			$this->insert('field/row-locales');
 		} ?>
 		<details class="kebab" data-repeater-menu>
-			<summary aria-label="<?= $this->escape(__('field:entry-actions')) ?>"></summary>
+			<summary aria-label="<?= $this->escape(__('field:entry-actions')) ?>"><?= \Cosray\Panel\Icon::render(
+				'three-dots-vertical',
+			) ?></summary>
 			<div class="kebab-menu">
 				<button type="button" data-repeater-move="up">
 					<?= $this->escape(__('common:move-up')) ?>

@@ -2,7 +2,7 @@
 	import type { FileItem } from '$types/data';
 	import { __ } from '$lib/locale';
 	import { useAssets } from '$lib/assets';
-	import IcoTrash from '$components/icons/IcoTrash.svelte';
+	import Icon from '$components/Icon.svelte';
 
 	type Props = {
 		file: FileItem;
@@ -31,9 +31,9 @@
 		</video>
 		<div class="controls cms-video-controls">
 			{#if remove}
-				<button class="cms-video-remove" onclick={remove}>
+				<button type="button" class="cms-video-remove" onclick={remove}>
 					<span class="ico cms-video-ico">
-						<IcoTrash />
+						<Icon name="trash3" />
 					</span>
 					<span class="icobtn cms-video-icobtn">{__('common:delete')}</span>
 				</button>

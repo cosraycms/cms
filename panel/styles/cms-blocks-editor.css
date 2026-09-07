@@ -256,12 +256,6 @@
 			&::-webkit-details-marker {
 				display: none;
 			}
-
-			&::before {
-				content: '⋮';
-				font-size: var(--cms-font-size-base);
-				font-weight: 700;
-			}
 		}
 
 		&[open] > summary {
@@ -370,13 +364,6 @@
 		font: inherit;
 		place-items: center;
 		cursor: pointer;
-
-		&::before {
-			content: '+';
-			font-size: var(--cms-font-size-base);
-			font-weight: 700;
-			line-height: 1;
-		}
 
 		&:hover {
 			border-color: var(--cms-color-primary);
@@ -509,8 +496,12 @@
 				}
 
 				&::after {
-					padding-inline-start: var(--cms-space-0-5);
-					content: '⌄';
+					content: '';
+					width: 0.6em;
+					height: 0.6em;
+					margin-inline-start: var(--cms-space-0-5);
+					background: currentColor;
+					mask: url('../icons/chevron-down.svg') center / contain no-repeat;
 				}
 
 				&:hover {

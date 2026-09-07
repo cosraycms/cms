@@ -16,10 +16,12 @@ $label = (string) $this->unwrap($label);
 		data-repeater-add="<?= $this->escape($single) ?>"
 		data-repeater-insert="<?= $this->escape($insert) ?>"
 		aria-label="<?= $this->escape($label) ?>"
-		title="<?= $this->escape($label) ?>"></button>
+		title="<?= $this->escape($label) ?>"><?= \Cosray\Panel\Icon::render('plus') ?></button>
 <?php else: ?>
 	<details class="inserter picker" data-repeater-menu>
-		<summary aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>"></summary>
+		<summary aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>"><?= \Cosray\Panel\Icon::render(
+			'plus',
+		) ?></summary>
 		<div class="picker-menu" data-repeater-picker>
 			<?php $this->insert('field/blocks/picker', [
 				'blockTypes' => $blockTypes,
