@@ -58,6 +58,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	class="cms-field<?= $required ? ' required' : '' ?>"
 	<?= $tabs ? 'data-locale-scope' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
+	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null) ? 'data-fallback-neutral="' . escape((string) $value[$neutral]) . '"' : '' ?>
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>

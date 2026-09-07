@@ -36,7 +36,7 @@ function refreshField(field: Element): void {
 	const scope = field.closest(CONTENT_SCOPE);
 	const configured = scope ? locales(scope) : [];
 	const controls = fieldInputs(field);
-	const map: Record<string, string> = {};
+	const map: Record<string, string> = { [ZXX]: field.getAttribute('data-fallback-neutral') ?? '' };
 
 	for (const control of controls) {
 		const locale = control.closest<HTMLElement>('.variant[data-locale]')?.dataset.locale;

@@ -1,31 +1,40 @@
+import { execFileSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { install } from '../../src/behaviors/fallbacks';
 
 let teardown: () => void;
 
-function render(values: { en?: string; de?: string; zxx?: string }): void {
-	document.body.innerHTML = `
-		<form data-content-locale-scope data-content-locales='[
-			{"id":"en","title":"English"},
-			{"id":"de","title":"Deutsch","fallback":"en"}
-		]'>
-			<div class="cms-field">
-				<div class="control">
-					<div class="variant" data-locale="en">
-						<input data-fallback-input data-schema-placeholder="Title" value="${values.en ?? ''}">
-						<span data-fallback-source data-template="Fallback from {language}" hidden></span>
-					</div>
-					<div class="variant" data-locale="de">
-						<input data-fallback-input data-schema-placeholder="Titel" value="${values.de ?? ''}">
-						<span data-fallback-source data-template="Fallback from {language}" hidden></span>
-					</div>
-					<div class="variant" data-locale="zxx">
-						<input data-fallback-input data-schema-placeholder="Shared title" value="${values.zxx ?? ''}">
-						<span data-fallback-source data-template="Fallback from {language}" hidden></span>
-					</div>
-				</div>
-			</div>
-		</form>`;
+function render(values: { en?: string; de?: string; zxx?: string }, control = 'text'): void {
+	const locales = [
+		{ id: 'en', title: 'English' },
+		{ id: 'de', title: 'Deutsch', fallback: 'en' },
+	];
+	const html = execFileSync(
+		'php',
+		[resolve(dirname(fileURLToPath(import.meta.url)), '../../../tests/Fixtures/Panel/field.php')],
+		{
+			encoding: 'utf8',
+			input: JSON.stringify({
+				field: {
+					name: 'title',
+					translate: true,
+					placeholder: 'Title',
+					control: { name: control, props: { placeholder: 'Title' } },
+				},
+				data: { value: values },
+				locales,
+				defaultLocale: 'de',
+				globalLocales: true,
+			}),
+		},
+	);
+	const form = document.createElement('form');
+	form.setAttribute('data-content-locale-scope', '');
+	form.dataset.contentLocales = JSON.stringify(locales);
+	form.innerHTML = html;
+	document.body.replaceChildren(form);
 }
 
 function renderBlocks(): void {
@@ -52,8 +61,8 @@ function renderBlocks(): void {
 		</form>`;
 }
 
-function input(locale: string): HTMLInputElement {
-	return document.querySelector(`.variant[data-locale="${locale}"] input`)!;
+function input(locale: string): HTMLInputElement | HTMLTextAreaElement {
+	return document.querySelector(`.variant[data-locale="${locale}"] [data-fallback-input]`)!;
 }
 
 function source(locale: string): HTMLElement {
@@ -83,14 +92,14 @@ describe('native fallback previews', () => {
 		render({ en: 'Hello', de: 'Hallo' });
 		teardown = install();
 
-		expect(input('de').placeholder).toBe('Titel');
+		expect(input('de').placeholder).toBe('Title');
 		expect(source('de').hidden).toBe(true);
 	});
 
 	it('hides the preview while the empty target is focused and restores it on blur', () => {
 		input('de').focus();
 
-		expect(input('de').placeholder).toBe('Titel');
+		expect(input('de').placeholder).toBe('Title');
 		expect(source('de').hidden).toBe(true);
 		expect(input('de').value).toBe('');
 
@@ -108,13 +117,36 @@ describe('native fallback previews', () => {
 		expect(input('de').value).toBe('');
 	});
 
-	it('uses neutral content only after an empty configured chain', () => {
+	it.each([
+		['text', 'Shared "title" & note'],
+		['textarea', 'Shared "text" & note\nSecond line'],
+		['iframe', '<iframe title="Shared & safe">\n</iframe>'],
+		['youtube', 'abcdefghijk'],
+	])('previews shared %s content without submitting it as a translation', (control, shared) => {
 		teardown();
-		render({ zxx: 'Shared' });
+		const edited = control === 'youtube' ? 'lmnopqrstuv' : 'Edited English';
+		render({ en: '', de: '', zxx: shared }, control);
 		teardown = install();
 
-		expect(input('de').placeholder).toBe('Shared');
+		expect(input('de').placeholder).toBe(shared);
+		expect(source('de').textContent).toBe('Fallback from shared content');
 		expect(input('de').value).toBe('');
+		input('de').focus();
+		expect(input('de').placeholder).toBe('Title');
+		input('de').blur();
+		expect(input('de').placeholder).toBe(shared);
+
+		input('en').value = edited;
+		input('en').dispatchEvent(new InputEvent('input', { bubbles: true }));
+		expect(input('de').placeholder).toBe(edited);
+		expect(Object.fromEntries(new FormData(document.querySelector('form')!))).toEqual({
+			'content[title][value][en]': edited,
+			'content[title][value][de]': '',
+		});
+
+		input('en').value = '';
+		input('en').dispatchEvent(new InputEvent('input', { bubbles: true }));
+		expect(input('de').placeholder).toBe(shared);
 	});
 
 	it('shows an inert source block list without adding rows to the target locale', async () => {

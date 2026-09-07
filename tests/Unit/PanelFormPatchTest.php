@@ -21,12 +21,12 @@ final class PanelFormPatchTest extends TestCase
 		]);
 
 		$content = $patch->content(
-			['title' => ['type' => 'Text', 'value' => ['en' => 'Old', 'fr' => 'Ancien']]],
-			['title' => ['value' => ['en' => 'New', 'de' => 'Neu']]],
+			['title' => ['type' => 'Text', 'value' => ['en' => 'Old', 'fr' => 'Ancien', 'zxx' => 'Shared']]],
+			['title' => ['value' => ['en' => 'New', 'de' => '']]],
 		);
 
 		$this->assertSame(
-			['en' => 'New', 'fr' => 'Ancien', 'de' => 'Neu'],
+			['en' => 'New', 'fr' => 'Ancien', 'zxx' => 'Shared', 'de' => ''],
 			$content['title']['value'],
 		);
 	}
