@@ -607,7 +607,8 @@
 		position: absolute;
 		z-index: 20;
 		top: 100%;
-		left: var(--blocks-x);
+		left: 50%;
+		translate: -50% 0;
 		min-width: 13rem;
 		padding: var(--cms-space-1);
 		border: 1px solid var(--cms-color-border);
