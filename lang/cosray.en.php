@@ -159,6 +159,7 @@ return [
 		'field:remove' => 'Remove',
 		'field:remove-block' => 'Remove block',
 		'field:remove-entry' => 'Remove entry',
+		'field:required' => 'required',
 		'field:resize-block' => 'Alt with the arrow keys resizes the block, with Shift added for its start edge',
 		'field:rows' => 'Rows',
 		'field:span' => 'Width',

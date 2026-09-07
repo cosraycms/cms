@@ -190,6 +190,7 @@
 	 * Semantic — text
 	 */
 	--cms-color-text: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-100));
+	--cms-color-text-label: var(--cms-color-text);
 	--cms-color-text-muted: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
 	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
 	--cms-color-text-faint: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-500));

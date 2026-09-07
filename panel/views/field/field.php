@@ -58,7 +58,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	class="cms-field<?= $required ? ' required' : '' ?>"
 	<?= $tabs ? 'data-locale-scope' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
-	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null) ? 'data-fallback-neutral="' . escape((string) $value[$neutral]) . '"' : '' ?>
+	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
+		? 'data-fallback-neutral="' . escape((string) $value[$neutral]) . '"'
+		: '' ?>
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
@@ -67,9 +69,12 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		for="<?= escape($labelFor) ?>"
 		<?= $globalLocales && $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
-		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>><?= escape(
-			(string) ($field['label'] ?? $fieldName),
-		) ?></div>
+		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>>
+			<?= escape((string) ($field['label'] ?? $fieldName)) ?>
+			<?php if ($required): ?>
+				<span class="requirement">(<?= escape(__('field:required')) ?>)</span>
+			<?php endif ?>
+		</div>
 		<?php if (is_array($metaControl)): ?>
 			<button type="button" class="meta-button" data-meta-open>
 				<?= escape(__('field:meta')) ?>

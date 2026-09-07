@@ -422,10 +422,6 @@
 				background: var(--cms-color-surface);
 			}
 
-			&.required .card {
-				border-left: 4px solid var(--cms-color-warning);
-			}
-
 			&.is-dragging .card {
 				border-color: var(--cms-color-info);
 			}
@@ -484,12 +480,6 @@
 
 			&.upload-multiple {
 				flex-direction: column;
-			}
-
-			&.required .dragdrop {
-				border-left-width: 4px;
-				border-left-color: var(--cms-color-danger);
-				border-left-style: solid;
 			}
 		}
 

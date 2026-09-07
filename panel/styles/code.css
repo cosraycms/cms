@@ -9,7 +9,7 @@
 .cms-code-control-syntax-label {
 	font-size: var(--cms-font-size-sm);
 	font-weight: 500;
-	color: var(--cms-color-neutral-700);
+	color: var(--cms-color-text-label);
 }
 
 .cms-code-control-syntax-select {

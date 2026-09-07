@@ -31,7 +31,7 @@
 </script>
 
 <div class="cms-field" class:required>
-	<Label of={id}>
+	<Label of={id} {required}>
 		{label}
 	</Label>
 	<div class="cms-field-control">

@@ -162,6 +162,7 @@ return [
 		'field:remove' => 'Entfernen',
 		'field:remove-block' => 'Block entfernen',
 		'field:remove-entry' => 'Eintrag entfernen',
+		'field:required' => 'erforderlich',
 		'field:resize-block' => 'Alt mit den Pfeiltasten ändert die Größe des Blocks, mit Umschalt dazu seine Startkante',
 		'field:rows' => 'Zeilen',
 		'field:span' => 'Breite',

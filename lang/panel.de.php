@@ -33,6 +33,7 @@ return [
 		'field:confirm-delete' => 'Soll der Eintrag wirklich gelöscht werden?',
 		'field:confirm-delete-entry' => 'Ja, Eintrag löschen',
 		'field:fallback-from' => 'Fallback aus :language',
+		'field:required' => 'erforderlich',
 		'field:shared-content' => 'gemeinsamem Inhalt',
 		'image:add' => 'Bilder hinzufügen',
 		'image:alt-text' => 'Alt-Text',

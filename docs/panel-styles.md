@@ -75,6 +75,8 @@ An override is a plain value and applies to both themes. A project that wants tw
 
 Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract.
 
+Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, using muted text. Required indicators are neutral; validation errors retain their error styling. Descriptions and section headings keep their separate typography.
+
 ### Colour roles
 
 Primary is monochrome — near-black on light, near-white on dark. The chrome stays neutral so a project's own colour can be the accent instead of fighting it.

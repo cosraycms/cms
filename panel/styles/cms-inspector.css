@@ -60,8 +60,8 @@
 	}
 
 	& .label {
-		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-xs);
+		color: var(--cms-color-text-label);
+		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
 	}
 
@@ -121,7 +121,7 @@
 		min-width: 0;
 
 		& .title {
-			color: var(--cms-color-text);
+			color: var(--cms-color-text-label);
 			font-size: var(--cms-font-size-sm);
 			font-weight: 500;
 		}

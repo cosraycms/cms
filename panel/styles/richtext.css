@@ -18,10 +18,6 @@
 		box-shadow: var(--cms-focus-ring);
 	}
 
-	&.required {
-		border-left: 4px solid var(--cms-color-warning);
-	}
-
 	&.embed {
 		border: 0;
 		padding: 0;

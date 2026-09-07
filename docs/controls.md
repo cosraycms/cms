@@ -176,7 +176,7 @@ content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
 
 `{lo}` is the list's locale: an **asymmetric** field renders one list per locale and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list. The node-wide content-language selector switches asymmetric lists and translated sub-fields in shared rows together. When the selected asymmetric list is empty, the first populated fallback list is also shown as an inert preview; its rows keep their original form names and values, while add actions continue to target the selected empty list.
 
-No field inside a block carries a **required marker** — neither the asterisk on its label nor the outline the rich text and media controls draw around a required value. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
+No field inside a block carries the **required marker** that other fields append to their label as translated `(required)` text. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
 
 A block with a **single visible field** renders that field without its label: the block's own label already names it. The label stays in the markup for screen readers. A sub-field's meta group, where it has one, moves into the block's settings dialog after the layout and the block meta, so nothing but the control is left in the content; an error in it badges the block's gear. `#[Labels]` on the block type brings the label back, and a type with two or more fields always labels them.
 

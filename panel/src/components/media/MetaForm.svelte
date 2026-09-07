@@ -133,7 +133,7 @@
 		}
 
 		.cms-meta-field > span {
-			color: var(--cms-color-text-muted);
+			color: var(--cms-color-text-label);
 		}
 	}
 </style>

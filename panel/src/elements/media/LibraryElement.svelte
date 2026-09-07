@@ -496,7 +496,7 @@
 			align-items: center;
 			gap: var(--cms-space-2);
 			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-text-muted);
+			color: var(--cms-color-text-label);
 			cursor: pointer;
 		}
 

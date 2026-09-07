@@ -127,8 +127,8 @@
 				display: flex;
 				align-items: center;
 				gap: var(--cms-space-2);
-				color: var(--cms-color-text-muted);
-				font-size: var(--cms-font-size-xs);
+				color: var(--cms-color-text-label);
+				font-size: var(--cms-font-size-sm);
 				font-weight: 600;
 				line-height: 1.25rem;
 			}
