@@ -33,7 +33,7 @@
 		catalog,
 		hasAlt,
 	}: Props = $props();
-	let draft = $state(untrack(() => structuredClone(asset)));
+	let draft = $state(untrack(() => $state.snapshot(asset)));
 	draft.meta ??= {};
 	draft.meta.title ??= { zxx: '' };
 	draft.meta.alt ??= { zxx: '' };
