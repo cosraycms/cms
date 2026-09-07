@@ -29,12 +29,17 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	use Capability\IsToolsAware;
 	use RowTypes;
 
+	public const int COMMON_LIMIT = 6;
+
 	/** @var list<class-string<Block>> */
 	protected array $allowedBlockTypes = [];
+
+	private array $commonTypes = [];
 
 	public function control(): Control
 	{
 		return Control::blocks()
+			->prop('commonTypes', $this->commonBlockTypes())
 			->prop('blockTypes', array_map($this->blockTypeProperties(...), $this->allowedBlockTypes()))
 			->prop('columns', $this->columns)
 			->prop('min', $this->min)
@@ -75,6 +80,42 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		]));
 
 		return $this;
+	}
+
+	public function common(string ...$types): static
+	{
+		$this->commonTypes = array_values(array_unique($types));
+
+		return $this;
+	}
+
+	private function commonBlockTypes(): array
+	{
+		$allowed = $this->allowedBlockTypes();
+
+		if ($this->commonTypes === []) {
+			return array_slice($allowed, 0, self::COMMON_LIMIT);
+		}
+
+		if (count($this->commonTypes) > self::COMMON_LIMIT) {
+			throw new RuntimeException(
+				"Blocks field '{$this->name}' may have at most " . self::COMMON_LIMIT . ' distinct common types',
+			);
+		}
+
+		foreach ($this->commonTypes as $type) {
+			if (!class_exists($type) || !is_a($type, Block::class, true)) {
+				throw new RuntimeException(
+					"Blocks field '{$this->name}' common type '{$type}' must be a class implementing " . Block::class,
+				);
+			}
+
+			if (!in_array($type, $allowed, true)) {
+				throw new RuntimeException("Blocks field '{$this->name}' common type '{$type}' is not allowed");
+			}
+		}
+
+		return $this->commonTypes;
 	}
 
 	public function allows(string $type): bool
@@ -228,7 +269,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	/**
 	 * @param class-string<Block> $type
-	 * @return array{type: class-string, handle: string, label: string, labels: bool, fields: list<array>, fieldsets: list<array>}
+	 * @return array{type: class-string, handle: string, label: string, icon: ?array, labels: bool, fields: list<array>, fieldsets: list<array>}
 	 */
 	protected function blockTypeProperties(string $type): array
 	{
@@ -242,6 +283,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			'type' => $type,
 			'handle' => $this->blockHandle($type),
 			'label' => $properties['label'],
+			'icon' => $this->nodeTypes()->get($type, 'icon'),
 			// A block with one field says what that field is; the label
 			// below the block's own would only repeat it. #[Labels] keeps it.
 			'labels' =>

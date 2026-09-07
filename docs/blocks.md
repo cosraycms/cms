@@ -46,6 +46,7 @@ Instances are created once per render call per type, through the autowiring crea
 | --- | --- |
 | `#[Label('Quote')]` | the label in the block picker and the row's header strip |
 | `#[Handle('quote')]` | the `data-type` value; derived kebab-case from the class name when absent |
+| `#[Icon('provider:id')]` | optional custom picker icon through the existing icon providers; unavailable icons use a generic fallback |
 | `#[FieldOrder('text', 'source')]` | the order the sub-fields render in |
 | `#[Labels]` | keeps the sub-field labels. A block type with a **single visible field** hides that field's label in the editor, since the block's own label already names it; declare this to bring it back. Types with two or more fields always label them. |
 
@@ -126,6 +127,27 @@ final class ArticlePage
 `Responsive` is `Stack`, `Preserve` or `Custom` and reaches the frontend as `data-responsive`; the [reference stylesheet](#the-reference-stylesheet) acts on `stack` only.
 
 There is no schema attribute for a CSS class on the container — the `class` render argument does that, and the per-block `class` comes from the block's own settings dialog.
+
+### Common choices
+
+The add menu offers the first six allowed types in their existing order. With one allowed type, it inserts immediately. With none, insertion is unavailable. **More blocks…** appears only when other allowed types remain and opens a searchable catalog of **all** allowed types, including the common choices. Search matches the panel-language label or stable handle. Built-in icons are bundled regular Bootstrap icons and need no network request.
+
+Use `Cosray\Schema\Common` to select and order a field's short menu:
+
+```php
+use Cosray\Block;
+use Cosray\Field\Blocks;
+use Cosray\Schema\Allows;
+use Cosray\Schema\Common;
+
+#[Allows(Block\RichText::class, Block\Heading::class, Block\Image::class, Block\Video::class)]
+#[Common(Block\RichText::class, Block\Image::class)]
+protected Blocks $content;
+```
+
+The fluent counterpart is `$blocks->common(Type::class, ...)`. Each call replaces the common list; duplicates collapse in declaration order. An empty list restores the default first-six selection. An explicit list may contain at most six distinct block classes, all in the final allowed list. Invalid classes, disallowed types and oversized lists raise a configuration error when the control is resolved. `Common` and `Allows` may appear in either attribute order.
+
+Common choices affect presentation only: they never change allowed types, existing rows, validation or stored values. Existing schemas require no changes, and this picker requires no migration. The control's additive `commonTypes` property contains type IDs in menu order; `blockTypes` still contains every allowed descriptor, including optional class-level `icon` metadata.
 
 ### Translation
 

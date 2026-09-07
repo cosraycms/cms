@@ -6,6 +6,7 @@ namespace Cosray\Field\Schema;
 
 use Cosray\Schema\Allows;
 use Cosray\Schema\Columns;
+use Cosray\Schema\Common;
 use Cosray\Schema\DefaultValue;
 use Cosray\Schema\Description;
 use Cosray\Schema\Fulltext;
@@ -45,6 +46,7 @@ class Registry
 	{
 		$registry = new self();
 		$registry->register(Allows::class, new AllowsHandler());
+		$registry->register(Common::class, new CommonHandler());
 		$registry->register(Label::class, new LabelHandler());
 		$registry->register(Icon::class, new IconHandler());
 		$registry->register(Description::class, new DescriptionHandler());
