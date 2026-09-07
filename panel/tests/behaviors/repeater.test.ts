@@ -5,6 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/repeater';
+import { install as installTabs } from '../../src/behaviors/tabs';
 
 const sortable = vi.hoisted(() => vi.fn());
 
@@ -265,6 +266,70 @@ describe('repeater behavior', () => {
 				?.content.querySelector('[data-repeater-uid]')
 				?.getAttribute('value'),
 		).toBe('');
+	});
+
+	describe('translated row labels', () => {
+		let uninstallTabs: () => void;
+
+		beforeEach(() => {
+			uninstallTabs = installTabs();
+		});
+
+		afterEach(() => {
+			uninstallTabs();
+		});
+
+		function translated(index: string): string {
+			const id = `${ID}-${index}-title`;
+
+			return `<div data-repeater-row>
+				<label for="${id}-en" data-locale-label-for="${id}">Title</label>
+				<div class="variant" data-locale="en">
+					<input id="${id}-en" name="${NAME}[${index}][fields][title][value][en]">
+				</div>
+				<div class="variant" data-locale="de" hidden>
+					<input id="${id}-de" name="${NAME}[${index}][fields][title][value][de]">
+				</div>
+				<button type="button" data-repeater-remove>Remove</button>
+				<button type="button" data-repeater-move="down">Down</button>
+				<button type="button" data-repeater-duplicate>Duplicate</button>
+			</div>`;
+		}
+
+		it.each([
+			['adding a row', '[data-repeater-add]'],
+			['removing a row', '[data-repeater-remove]'],
+			['moving a row', '[data-repeater-move]'],
+			['duplicating a row', '[data-repeater-duplicate]'],
+		])('keeps labels on the selected translation after %s', (_operation, selector) => {
+			const container = repeater([translated('0'), translated('1')], {
+				template: `<template data-repeater-template>${translated('__i__')}</template>`,
+			});
+			const form = document.createElement('form');
+			form.setAttribute('data-content-locale-scope', '');
+			form.setAttribute('data-content-locale', 'en');
+			form.innerHTML = `<select data-content-locale-control>
+				<option value="en">English</option><option value="de">Deutsch</option>
+			</select>`;
+			document.body.append(form);
+			form.append(container);
+			const select = form.querySelector('select')!;
+			select.value = 'de';
+			select.dispatchEvent(new Event('change', { bubbles: true }));
+
+			click(container, selector);
+
+			for (const locale of ['en', 'de']) {
+				select.value = locale;
+				select.dispatchEvent(new Event('change', { bubbles: true }));
+
+				for (const row of container.querySelectorAll('[data-repeater-row]')) {
+					const input = row.querySelector<HTMLInputElement>(`[data-locale="${locale}"] input`)!;
+					expect(row.querySelector('label')!.control).toBe(input);
+					expect(input.closest<HTMLElement>('.variant')!.hidden).toBe(false);
+				}
+			}
+		});
 	});
 
 	it('renumbers the data-name and data-id of nested containers', () => {

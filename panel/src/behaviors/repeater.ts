@@ -53,6 +53,11 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 	scope.querySelectorAll<HTMLElement>('label[for]').forEach((el) => {
 		const target = el.getAttribute('for') ?? '';
 		el.setAttribute('for', target.replace(renaming.idPattern, renaming.id));
+		const base = el.dataset.localeLabelFor;
+
+		if (base !== undefined) {
+			el.dataset.localeLabelFor = base.replace(renaming.idPattern, renaming.id);
+		}
 	});
 	// Nested containers renumber against their data-name/data-id; keep
 	// those bases in sync with the renamed inputs.
