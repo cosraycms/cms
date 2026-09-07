@@ -109,7 +109,7 @@ $count = count($rows);
 					<?php $this->insert('icon/plus.svg') ?>
 					<?= $this->escape(__('field:add-block')) ?>
 				</summary>
-				<div class="picker-menu">
+				<div class="picker-menu" data-repeater-picker>
 					<?php $this->insert('field/blocks/picker', [
 						'blockTypes' => $blockTypes,
 						'insert' => 'append',

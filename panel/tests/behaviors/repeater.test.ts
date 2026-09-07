@@ -751,3 +751,120 @@ describe('repeater behavior', () => {
 		expect(nestedAdd?.hidden).toBe(false);
 	});
 });
+
+describe('repeater picker placement', () => {
+	beforeEach(() => {
+		vi.stubGlobal('innerHeight', 800);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	function pickerAt(top: number, height = 240) {
+		const pane = document.createElement('div');
+		const details = document.createElement('details');
+		const picker = document.createElement('div');
+		const trigger = { top, height: 32 };
+
+		details.dataset.repeaterMenu = '';
+		details.innerHTML = '<summary>Add block</summary>';
+		picker.dataset.repeaterPicker = '';
+		picker.style.marginTop = '4px';
+		details.append(picker);
+		pane.append(details);
+		document.body.append(pane);
+
+		vi.spyOn(details, 'getBoundingClientRect').mockImplementation(
+			() => new DOMRect(0, trigger.top, 240, trigger.height),
+		);
+		Object.defineProperties(picker, {
+			scrollHeight: { value: height },
+			clientHeight: { value: height },
+			offsetHeight: { value: height + 2 },
+		});
+
+		const open = () => {
+			details.open = true;
+			details.dispatchEvent(new Event('toggle'));
+		};
+
+		return { pane, details, picker, trigger, open };
+	}
+
+	function clip(pane: HTMLElement, top: number, height: number, overflow = 'auto'): void {
+		pane.style.overflowY = overflow;
+		vi.spyOn(pane, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, top, 500, height));
+		Object.defineProperties(pane, {
+			clientTop: { value: 2 },
+			clientHeight: { value: height - 4 },
+		});
+	}
+
+	it('opens below when the full list fits, even if there is more room above', () => {
+		const { details, picker, open } = pickerAt(400);
+		open();
+
+		expect(details.classList.contains('is-up')).toBe(false);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('364px');
+	});
+
+	it('opens above a trigger near the viewport bottom', () => {
+		const { details, picker, open } = pickerAt(730);
+		open();
+
+		expect(details.classList.contains('is-up')).toBe(true);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('726px');
+	});
+
+	it.each(['auto', 'scroll', 'hidden', 'clip'])(
+		'respects an overflow:%s pane ending above the viewport bottom',
+		(overflow) => {
+			const { pane, details, picker, open } = pickerAt(550);
+			clip(pane, 100, 500, overflow);
+			open();
+
+			expect(details.classList.contains('is-up')).toBe(true);
+			expect(picker.style.getPropertyValue('--picker-height')).toBe('444px');
+		},
+	);
+
+	it('constrains a tall list to the larger side when neither side fits it', () => {
+		const { pane, details, picker, open } = pickerAt(220, 700);
+		clip(pane, 100, 300);
+		open();
+
+		expect(details.classList.contains('is-up')).toBe(false);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('142px');
+	});
+
+	it('intersects nested clipping panes instead of only using the nearest one', () => {
+		const { pane, details, picker, open } = pickerAt(500);
+		const outer = document.createElement('div');
+		pane.before(outer);
+		outer.append(pane);
+		clip(outer, 150, 550);
+		clip(pane, 100, 500);
+		open();
+
+		expect(details.classList.contains('is-up')).toBe(true);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('344px');
+	});
+
+	it('repositions an open picker when its pane scrolls or the viewport shrinks', () => {
+		const { pane, details, picker, trigger, open } = pickerAt(730);
+		open();
+
+		trigger.top = 100;
+		pane.dispatchEvent(new Event('scroll'));
+
+		expect(details.classList.contains('is-up')).toBe(false);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('664px');
+
+		vi.stubGlobal('innerHeight', 180);
+		window.dispatchEvent(new Event('resize'));
+
+		expect(details.classList.contains('is-up')).toBe(true);
+		expect(picker.style.getPropertyValue('--picker-height')).toBe('96px');
+	});
+});

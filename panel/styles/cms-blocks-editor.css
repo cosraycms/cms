@@ -310,6 +310,24 @@
 		}
 	}
 
+	& .picker-menu {
+		max-height: var(--picker-height, none);
+		margin-top: var(--cms-space-1);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+
+		& button {
+			flex-shrink: 0;
+		}
+	}
+
+	& .picker.is-up > .picker-menu {
+		top: auto;
+		bottom: 100%;
+		margin-top: 0;
+		margin-bottom: var(--cms-space-1);
+	}
+
 	/* The footer picker and the inserters. */
 	& .picker summary {
 		list-style: none;
@@ -381,7 +399,6 @@
 		top: 100%;
 		left: 0;
 		min-width: 13rem;
-		margin-top: var(--cms-space-1);
 		padding: var(--cms-space-1);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-md);

@@ -367,6 +367,55 @@ function onInput(event: Event): void {
 	}
 }
 
+function placePicker(details: HTMLDetailsElement): void {
+	const picker = details.querySelector<HTMLElement>(':scope > [data-repeater-picker]');
+
+	if (!details.open || !picker) {
+		return;
+	}
+
+	const trigger = details.getBoundingClientRect();
+	let top = 0;
+	let bottom = window.innerHeight;
+
+	// The editor clips at its scroll pane, which may end above the viewport.
+	for (let parent = details.parentElement; parent; parent = parent.parentElement) {
+		if (/^(auto|scroll|hidden|clip)$/.test(getComputedStyle(parent).overflowY)) {
+			const edge = parent.getBoundingClientRect().top + parent.clientTop;
+			top = Math.max(top, edge);
+			bottom = Math.min(bottom, edge + parent.clientHeight);
+		}
+	}
+
+	const style = getComputedStyle(picker);
+	const gap = Math.max(parseFloat(style.marginTop) || 0, parseFloat(style.marginBottom) || 0);
+	const height = picker.scrollHeight + picker.offsetHeight - picker.clientHeight;
+	const above = Math.max(0, trigger.top - top - gap);
+	const below = Math.max(0, bottom - trigger.bottom - gap);
+	const up = height > below && above > below;
+
+	details.classList.toggle('is-up', up);
+	picker.style.setProperty('--picker-height', `${up ? above : below}px`);
+}
+
+function onToggle(event: Event): void {
+	const details = event.target;
+
+	if (details instanceof HTMLDetailsElement && details.matches('[data-repeater-menu]')) {
+		placePicker(details);
+	}
+}
+
+function placePickers(event?: Event): void {
+	if (event?.target instanceof Element && event.target.closest('[data-repeater-picker]')) {
+		return;
+	}
+
+	document
+		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
+		.forEach(placePicker);
+}
+
 function closeMenus(except: Element | null): void {
 	document
 		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
@@ -489,16 +538,23 @@ async function initDrag(): Promise<void> {
 export function install(): () => void {
 	const rescan = (): void => {
 		void initDrag();
+		placePickers();
 	};
 
 	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
+	document.addEventListener('toggle', onToggle, true);
+	document.addEventListener('scroll', placePickers, true);
+	window.addEventListener('resize', placePickers);
 	document.addEventListener('htmx:after:swap', rescan);
 	rescan();
 
 	return () => {
 		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
+		document.removeEventListener('toggle', onToggle, true);
+		document.removeEventListener('scroll', placePickers, true);
+		window.removeEventListener('resize', placePickers);
 		document.removeEventListener('htmx:after:swap', rescan);
 	};
 }

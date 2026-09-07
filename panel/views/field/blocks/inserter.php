@@ -20,7 +20,7 @@ $label = (string) $this->unwrap($label);
 <?php else: ?>
 	<details class="inserter picker" data-repeater-menu>
 		<summary aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>"></summary>
-		<div class="picker-menu">
+		<div class="picker-menu" data-repeater-picker>
 			<?php $this->insert('field/blocks/picker', [
 				'blockTypes' => $blockTypes,
 				'insert' => $insert,
