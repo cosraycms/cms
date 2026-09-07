@@ -88,6 +88,22 @@ describe('action-menu keyboard and lifecycle', () => {
 		expect(document.activeElement).toBe(last);
 	});
 
+	it('scrolls the focused choice into the menu when the list is taller than its available space', async () => {
+		const { trigger, menu, first, last } = fixture();
+		vi.spyOn(menu, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 200, 240));
+		vi.spyOn(first, 'getBoundingClientRect').mockImplementation(
+			() => new DOMRect(100, 100 - menu.scrollTop, 200, 32),
+		);
+		vi.spyOn(last, 'getBoundingClientRect').mockImplementation(
+			() => new DOMRect(100, 500 - menu.scrollTop, 200, 32),
+		);
+		await key(trigger, 'ArrowDown');
+		await key(first, 'End');
+		expect(last.getBoundingClientRect().bottom).toBeLessThanOrEqual(100 + menu.clientHeight);
+		await key(last, 'Home');
+		expect(first.getBoundingClientRect().top).toBeGreaterThanOrEqual(100);
+	});
+
 	it.each(['Enter', ' '])(
 		'closes before %s activates an action without swallowing its event',
 		async (keyName) => {

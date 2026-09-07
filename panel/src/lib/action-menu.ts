@@ -72,9 +72,18 @@ function choices(menu: HTMLElement): HTMLElement[] {
 	);
 }
 
+function reveal(menu: HTMLElement, item: HTMLElement): void {
+	const box = item.getBoundingClientRect();
+	const top = menu.getBoundingClientRect().top + menu.clientTop;
+	const bottom = top + menu.clientHeight;
+	if (box.top < top) menu.scrollTop -= top - box.top;
+	else if (box.bottom > bottom) menu.scrollTop += box.bottom - bottom;
+}
+
 function focusChoice(menu: HTMLElement, item?: HTMLElement): void {
 	for (const choice of choices(menu)) choice.tabIndex = choice === item ? 0 : -1;
 	(item ?? menu).focus({ preventScroll: true });
+	if (item) reveal(menu, item);
 }
 
 function finish(menu: HTMLElement): void {
@@ -157,10 +166,17 @@ function toggle(event: Event): void {
 			closeMenu(menu);
 			return;
 		}
+		let moved = false;
 		for (const name of ['left', 'top', 'maxWidth', 'maxHeight'] as const) {
 			const value = `${point[name]}px`;
-			if (menu.style[name] !== value) menu.style[name] = value;
+			if (menu.style[name] !== value) {
+				menu.style[name] = value;
+				moved = true;
+			}
 		}
+		const focused = document.activeElement;
+		if (moved && focused instanceof HTMLElement && menu.contains(focused) && focused !== menu)
+			reveal(menu, focused);
 		state.frame = requestAnimationFrame(position);
 	};
 
