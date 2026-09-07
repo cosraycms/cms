@@ -3,7 +3,6 @@
 	import type { SortableEvent } from 'sortablejs';
 
 	import Sortable from 'sortablejs';
-	import { onMount } from 'svelte';
 	import { useAssets } from '$lib/assets';
 	import { afterMove, afterRemove } from '$lib/gallery';
 	import { assetLine, extension } from '$lib/library';
@@ -88,12 +87,12 @@
 		}
 	}
 
-	onMount(() => {
+	$effect(() => {
 		if (!grid) {
 			return;
 		}
 
-		Sortable.create(grid, {
+		const sorter = Sortable.create(grid, {
 			animation: 200,
 			onUpdate(event: SortableEvent) {
 				if (event.oldIndex === undefined || event.newIndex === undefined) {
@@ -110,6 +109,8 @@
 				notify();
 			},
 		});
+
+		return () => sorter.destroy();
 	});
 </script>
 
