@@ -3,7 +3,8 @@
 // The + that puts a new block before the row it sits in. One offered
 // type inserts at once; several open the type picker.
 
-$blockTypes = (array) $this->unwrap($blockTypes);
+$commonChoices = (array) $this->unwrap($commonChoices);
+$more = (bool) $this->unwrap($more);
 $single = $this->unwrap($single ?? null);
 $single = is_string($single) ? $single : null;
 $insert = (string) $this->unwrap($insert);
@@ -25,7 +26,8 @@ $label = (string) $this->unwrap($label);
 	</button>
 	<div id="<?= $this->escape($id) ?>" class="cms-action-menu" popover="auto" data-action-menu>
 			<?php $this->insert('field/blocks/picker', [
-				'blockTypes' => $blockTypes,
+				'commonChoices' => $commonChoices,
+				'more' => $more,
 				'insert' => $insert,
 			]) ?>
 	</div>

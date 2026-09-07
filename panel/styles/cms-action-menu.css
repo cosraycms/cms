@@ -62,6 +62,16 @@
 		}
 	}
 
+	& .icon {
+		display: inline-flex;
+		flex-shrink: 0;
+	}
+
+	& .icon svg {
+		width: 1em;
+		height: 1em;
+	}
+
 	& .shortcut {
 		margin-inline-start: auto;
 		color: var(--cms-color-text-subtle);

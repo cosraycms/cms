@@ -19,13 +19,13 @@ $columns = max(1, (int) ($props['columns'] ?? 1));
 $min = min($columns, max(1, (int) ($props['min'] ?? 1)));
 $metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
 
-$blockTypes = [];
-
-foreach ((array) ($props['blockTypes'] ?? []) as $blockType) {
-	if (is_array($blockType) && is_string($blockType['type'] ?? null)) {
-		$blockTypes[$blockType['type']] = $blockType;
-	}
-}
+$choices = new \Cosray\Panel\BlockChoices(
+	$props,
+	isset($renderIcon) ? fn(array $icon): string => (string) $this->unwrap($renderIcon($icon)) : null,
+);
+$blockTypes = $choices->types;
+$commonChoices = $choices->common;
+$more = count($choices->all) > count($commonChoices);
 
 $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
 $count = count($rows);
@@ -68,6 +68,8 @@ $count = count($rows);
 				'rowData' => $rowData,
 				'blockType' => $blockTypes[$type],
 				'blockTypes' => $blockTypes,
+				'commonChoices' => $commonChoices,
+				'more' => $more,
 				'columns' => $columns,
 				'min' => $min,
 				'metaControl' => $metaControl,
@@ -83,6 +85,8 @@ $count = count($rows);
 				'rowData' => null,
 				'blockType' => $blockType,
 				'blockTypes' => $blockTypes,
+				'commonChoices' => $commonChoices,
+				'more' => $more,
 				'columns' => $columns,
 				'min' => $min,
 				'metaControl' => $metaControl,
@@ -91,8 +95,13 @@ $count = count($rows);
 			]) ?>
 		</template>
 	<?php endforeach ?>
+	<?php if ($more) {
+		$this->insert('field/blocks/catalog', ['choices' => $choices->all]);
+	} ?>
 	<div class="adders" data-repeater-footer>
-		<?php if ($single !== null): ?>
+		<?php if ($blockTypes === []): ?>
+			<span><?= $this->escape(__('field:no-block-types')) ?></span>
+		<?php elseif ($single !== null): ?>
 			<button
 				type="button"
 				class="adder"
@@ -122,7 +131,8 @@ $count = count($rows);
 				data-align="center"
 			>
 				<?php $this->insert('field/blocks/picker', [
-					'blockTypes' => $blockTypes,
+					'commonChoices' => $commonChoices,
+					'more' => $more,
 					'insert' => 'append',
 				]) ?>
 			</div>

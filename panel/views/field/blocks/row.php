@@ -86,7 +86,8 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 
 	// before it in order in a grid. The footer appends. ?>
 	<?php $this->insert('field/blocks/inserter', [
-		'blockTypes' => $blockTypes,
+		'commonChoices' => $commonChoices,
+		'more' => $more,
 		'single' => $single,
 		'insert' => 'before',
 		'id' => "{$rowId}-insert",

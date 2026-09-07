@@ -1,0 +1,136 @@
+import { cosray } from '$lib/bridge';
+import { insertion, insert } from './repeater';
+
+function catalog(host: HTMLElement, choose: (type: string) => void): void {
+	const search = host.querySelector<HTMLInputElement>('[data-block-search]')!;
+	const status = host.querySelector<HTMLElement>('[data-block-results]')!;
+	const choices = [...host.querySelectorAll<HTMLButtonElement>('[data-block-choice]')];
+	let visible = choices;
+	let active: HTMLButtonElement | undefined = choices[0];
+
+	function rove(choice: HTMLButtonElement | undefined, focus = false): void {
+		active = choice;
+		for (const button of choices) button.tabIndex = button === active ? 0 : -1;
+		if (focus && active) {
+			active.focus({ preventScroll: true });
+			active.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+		}
+	}
+
+	function filter(): void {
+		const query = search.value.trim().toLocaleLowerCase(document.documentElement.lang || undefined);
+		visible = choices.filter((choice) => {
+			const text = `${choice.textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
+				document.documentElement.lang || undefined,
+			);
+			choice.hidden = !text.includes(query);
+			return !choice.hidden;
+		});
+		rove(active && visible.includes(active) ? active : visible[0]);
+		status.textContent =
+			visible.length === 0
+				? status.dataset.empty!
+				: status.dataset.count!.replace(':count', String(visible.length));
+	}
+
+	search.addEventListener('input', filter);
+	host.addEventListener('click', (event) => {
+		const choice =
+			event.target instanceof Element
+				? event.target.closest<HTMLButtonElement>('[data-block-choice]')
+				: null;
+		if (choice && visible.includes(choice)) choose(choice.dataset.blockChoice!);
+	});
+	host.addEventListener('focusin', (event) => {
+		if (event.target instanceof HTMLButtonElement && visible.includes(event.target))
+			rove(event.target);
+	});
+	host.addEventListener('keydown', (event) => {
+		if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+			return;
+		if (event.target === search) {
+			if (event.key === 'ArrowDown' || event.key === 'Enter') {
+				event.preventDefault();
+				rove(visible[0], true);
+			}
+			return;
+		}
+		if (!(event.target instanceof HTMLButtonElement) || !visible.includes(event.target)) return;
+		const index = visible.indexOf(event.target);
+		let next: HTMLButtonElement | undefined;
+		switch (event.key) {
+			case 'Home':
+				next = visible[0];
+				break;
+			case 'End':
+				next = visible.at(-1);
+				break;
+			case 'ArrowLeft':
+				next = visible[Math.max(0, index - 1)];
+				break;
+			case 'ArrowRight':
+				next = visible[Math.min(visible.length - 1, index + 1)];
+				break;
+			case 'ArrowUp':
+			case 'ArrowDown': {
+				const origin = event.target.getBoundingClientRect();
+				const direction = event.key === 'ArrowDown' ? 1 : -1;
+				const rows = visible
+					.map((choice) => ({ choice, box: choice.getBoundingClientRect() }))
+					.filter(({ box }) => (box.top - origin.top) * direction > 1);
+				const distance = Math.min(...rows.map(({ box }) => Math.abs(box.top - origin.top)));
+				next = rows
+					.filter(({ box }) => Math.abs(Math.abs(box.top - origin.top) - distance) < 1)
+					.sort(
+						(a, b) =>
+							Math.abs(a.box.left + a.box.width / 2 - origin.left - origin.width / 2) -
+							Math.abs(b.box.left + b.box.width / 2 - origin.left - origin.width / 2),
+					)[0]?.choice;
+				break;
+			}
+			default:
+				return;
+		}
+		event.preventDefault();
+		if (next) rove(next, true);
+	});
+	filter();
+}
+
+export function install(): () => void {
+	let opened: { close(): void } | undefined;
+	function click(event: MouseEvent): void {
+		const trigger =
+			event.target instanceof Element ? event.target.closest('[data-block-catalog-open]') : null;
+		if (!trigger) return;
+		const context = insertion(trigger);
+		const template = context?.owner.querySelector<HTMLTemplateElement>(
+			':scope > template[data-block-catalog]',
+		);
+		if (!context || !template) return;
+		opened?.close();
+		const modal = cosray().modal.open(
+			(host) => {
+				let live = true;
+				host.append(template.content.cloneNode(true));
+				catalog(host, (type) => {
+					if (!live) return;
+					// Restore the menu opener before the repeater focuses the new row.
+					modal.close();
+					insert(context, type);
+				});
+				return () => {
+					live = false;
+					opened = undefined;
+				};
+			},
+			{ hideClose: true, owner: context.at?.row ?? context.owner },
+		);
+		opened = modal;
+	}
+	document.addEventListener('click', click);
+	return () => {
+		document.removeEventListener('click', click);
+		opened?.close();
+	};
+}

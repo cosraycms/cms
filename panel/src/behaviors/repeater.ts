@@ -129,6 +129,42 @@ function changed(container: HTMLElement): void {
 }
 
 type Anchor = { row: HTMLElement; where: 'before' | 'after' };
+type Insertion = { owner: HTMLElement; at: Anchor | null; locale: string | null };
+
+function active(owner: HTMLElement): boolean {
+	return (
+		owner.isConnected &&
+		!owner.closest('[hidden], [inert]') &&
+		owner.checkVisibility({ visibilityProperty: true })
+	);
+}
+
+function locale(owner: HTMLElement): string | null {
+	return (
+		owner.closest('[data-content-locale-scope]')?.getAttribute('data-content-locale') ??
+		owner.closest('[data-locale-scope]')?.querySelector<HTMLElement>('[data-locale-tab].active')
+			?.dataset.localeTab ??
+		null
+	);
+}
+
+export function insertion(trigger: Element): Insertion | null {
+	const owner = trigger.closest<HTMLElement>('[data-repeater]');
+	if (!owner || !active(owner) || trigger.matches(':disabled')) return null;
+	const where = trigger.getAttribute('data-repeater-insert');
+	const row = trigger.closest<HTMLElement>('[data-repeater-row]');
+	if (where === 'before' || where === 'after') {
+		if (!row) return null;
+		if (row.parentElement === list(owner))
+			return { owner, at: { row, where }, locale: locale(owner) };
+	}
+	return { owner, at: null, locale: locale(owner) };
+}
+
+export function insert(context: Insertion, type: string | null): void {
+	if (context.locale !== locale(context.owner)) return;
+	add(context.owner, type, context.at);
+}
 
 function add(
 	container: HTMLElement,
@@ -136,6 +172,7 @@ function add(
 	at: Anchor | null,
 	prepare?: (clone: DocumentFragment) => void,
 ): void {
+	if (!active(container) || (at && at.row.parentElement !== list(container))) return;
 	const templates = [
 		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
 	];
@@ -179,7 +216,20 @@ function add(
 	// gets to do so before the change is announced.
 	stamped?.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
 	changed(container);
-	stamped?.querySelector<HTMLElement>('input:not([type="hidden"]), textarea, select')?.focus();
+	if (stamped) {
+		const focus = [
+			...stamped.querySelectorAll<HTMLElement>(
+				'input:not([type="hidden"]), textarea, select, [contenteditable="true"]',
+			),
+		].find(
+			(input) => !input.matches(':disabled') && input.checkVisibility({ visibilityProperty: true }),
+		);
+		if (focus) focus.focus();
+		else {
+			stamped.tabIndex = -1;
+			stamped.focus();
+		}
+	}
 }
 
 const CONTROL = 'input, textarea, select';
@@ -429,20 +479,10 @@ function onClick(event: Event): void {
 	}
 
 	const adder = target.closest('[data-repeater-add]');
-	const container = adder?.closest<HTMLElement>('[data-repeater]');
+	const context = adder ? insertion(adder) : null;
 
-	if (adder && container) {
-		const type = adder.getAttribute('data-repeater-add');
-		const where = adder.getAttribute('data-repeater-insert');
-		const row = adder.closest<HTMLElement>('[data-repeater-row]');
-		// Only a row of this container anchors; an adder in a nested
-		// repeater's row still appends to its own list.
-		const at: Anchor | null =
-			(where === 'before' || where === 'after') && row && row.parentElement === list(container)
-				? { row, where }
-				: null;
-
-		add(container, type === null || type === '' ? null : type, at);
+	if (adder && context) {
+		insert(context, adder.getAttribute('data-repeater-add') || null);
 	}
 }
 

@@ -3,6 +3,7 @@ import '../styles/panel.css';
 import type { BridgeSystem } from '$lib/bridge';
 
 import { install as installActionMenus } from '$lib/action-menu';
+import { install as installBlockCatalog } from './behaviors/block-catalog';
 import { install as installBlocks } from './behaviors/blocks';
 import { install as installBulk } from './behaviors/bulk';
 import { install as installChrome } from './behaviors/chrome';
@@ -106,6 +107,7 @@ cleanups.push(
 	installTabs(),
 	installRepeater(),
 	installBlocks(),
+	installBlockCatalog(),
 	installChrome(),
 	installWhen(),
 	installYoutube(),
