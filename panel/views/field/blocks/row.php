@@ -89,6 +89,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 		'blockTypes' => $blockTypes,
 		'single' => $single,
 		'insert' => 'before',
+		'id' => "{$rowId}-insert",
 		'label' => __($columns > 1 ? 'field:insert-before' : 'field:insert-above'),
 	]) ?>
 	<div class="chrome">
@@ -119,11 +120,13 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					<?= \Cosray\Panel\Icon::render('gear') ?>
 				</button>
 			<?php endif ?>
-			<details class="kebab" data-repeater-menu>
-				<summary aria-label="<?= $this->escape(__('field:block-actions')) ?>"><?= \Cosray\Panel\Icon::render(
-					'three-dots-vertical',
-				) ?></summary>
-				<div class="kebab-menu">
+			<button type="button" class="kebab"
+				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
+				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
+				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+			</button>
+			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
+				popover="auto" data-action-menu data-align="end">
 					<button type="button" data-repeater-move="up">
 						<?= $this->escape(__('common:move-up')) ?>
 					</button>
@@ -133,11 +136,10 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					<button type="button" data-repeater-duplicate>
 						<?= $this->escape(__('field:duplicate-block')) ?>
 					</button>
-					<button type="button" data-repeater-remove>
+					<button type="button" class="danger" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
-				</div>
-			</details>
+			</div>
 		</span>
 		<?php if ($ownsLocales) {
 			$this->insert('field/row-locales');

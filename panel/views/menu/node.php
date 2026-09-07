@@ -74,11 +74,13 @@ $confirm = $descendants === 0
 				) ?><?= is_string($href) && $href !== '' ? ' · ' . escape($href) : '' ?>
 			</small>
 		</a>
-		<details class="kebab">
-			<summary tabindex="-1" aria-label="<?= escape(
-				__('menu:item-actions'),
-			) ?>"><?= \Cosray\Panel\Icon::render('three-dots-vertical') ?></summary>
-			<div class="kebab-menu">
+		<button type="button" class="kebab" tabindex="-1"
+			popovertarget="<?= escape("menu-{$id}-actions") ?>"
+			aria-haspopup="menu" aria-label="<?= escape(__('menu:item-actions')) ?>">
+			<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+		</button>
+		<div id="<?= escape("menu-{$id}-actions") ?>" class="cms-action-menu"
+			popover="auto" data-action-menu data-align="end">
 				<a
 					data-menu-add="before"
 					href="<?= escape($treeUrl) ?>?before=<?= escape(rawurlencode($id)) ?>"><?= escape(
@@ -135,8 +137,7 @@ $confirm = $descendants === 0
 					hx-confirm="<?= escape($confirm) ?>">
 					<button type="submit" class="danger"><?= escape(__('menu:delete')) ?></button>
 				</form>
-			</div>
-		</details>
+		</div>
 	</div>
 	<?php // Rendered even without children: every card owns a drop zone
 

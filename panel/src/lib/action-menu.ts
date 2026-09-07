@@ -56,8 +56,17 @@ export function placement(anchor: HTMLElement, menu: HTMLElement, align: Align =
 const MENU = '[data-action-menu]';
 let id = 0;
 let uninstall: (() => void) | null = null;
-let active: { menu: HTMLElement; trigger: HTMLButtonElement; frame: number } | null = null;
-let pending: { trigger: HTMLButtonElement; focus: 'first' | 'last' | false } | null = null;
+let active: {
+	menu: HTMLElement;
+	trigger: HTMLButtonElement;
+	opener: HTMLElement;
+	frame: number;
+} | null = null;
+let pending: {
+	trigger: HTMLButtonElement;
+	opener: HTMLElement;
+	focus: 'first' | 'last' | false;
+} | null = null;
 
 function surface(trigger: HTMLButtonElement): HTMLElement | null {
 	const menu = document.getElementById(trigger.getAttribute('popovertarget') ?? '');
@@ -94,17 +103,23 @@ function finish(menu: HTMLElement): void {
 }
 
 export function closeMenu(menu: HTMLElement, restore = false): void {
-	const trigger = active?.menu === menu ? active.trigger : null;
+	const opener = active?.menu === menu ? active.opener : null;
 	if (menu.isConnected && menu.matches(':popover-open')) menu.hidePopover();
 	finish(menu);
-	if (restore && trigger?.isConnected && trigger.checkVisibility({ visibilityProperty: true })) {
-		trigger.focus({ preventScroll: true });
+	if (
+		restore &&
+		opener?.isConnected &&
+		!opener.matches(':disabled') &&
+		opener.checkVisibility({ visibilityProperty: true })
+	) {
+		opener.focus({ preventScroll: true });
 	}
 }
 
 export function openMenu(
 	trigger: HTMLButtonElement,
 	focus: 'first' | 'last' | false = 'first',
+	opener: HTMLElement = trigger,
 ): void {
 	const menu = surface(trigger);
 	if (!menu || trigger.disabled) return;
@@ -112,7 +127,7 @@ export function openMenu(
 		if (focus) focusChoice(menu, focus === 'last' ? choices(menu).at(-1) : choices(menu)[0]);
 		return;
 	}
-	pending = { trigger, focus };
+	pending = { trigger, focus, opener };
 	try {
 		menu.showPopover();
 	} finally {
@@ -146,7 +161,7 @@ function toggle(event: Event): void {
 	}
 
 	if (active && active.menu !== menu) closeMenu(active.menu);
-	const state = { menu, trigger, frame: 0 };
+	const state = { menu, trigger, opener: pending?.opener ?? trigger, frame: 0 };
 	active = state;
 
 	const position = (): void => {

@@ -6,7 +6,7 @@
 // carry their layout as hidden inputs; the blocks behavior edits them.
 // Add/remove/move/renumber comes from the repeater behavior: a + on each
 // row stamps before or after the row it sits in, the footer appends,
-// and either opens a <details> type picker when several types are
+// and either opens a type picker when several types are
 // offered. Rows are never collapsed.
 // Receives one row list in $value and its renumber base — per locale
 // for an asymmetric field, the neutral locale otherwise — in $name.

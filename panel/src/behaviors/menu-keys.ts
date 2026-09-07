@@ -10,6 +10,8 @@
 // a binding finds that form and submits it. The disabled attribute is the
 // legality check, and without JavaScript the kebab is simply used by hand.
 
+import { openMenu } from '$lib/action-menu';
+
 import {
 	collapsed,
 	currentRow,
@@ -22,6 +24,7 @@ import {
 } from './menu-tree';
 
 type Direction = 'up' | 'down' | 'in' | 'out';
+const ACTIONS = ':scope > .menu-card > [data-action-menu]';
 
 /**
  * The vim layer is off unless a browser opts into it. What it really gates
@@ -112,7 +115,7 @@ function unfold(root: HTMLElement, row: HTMLElement): void {
  * is undefined here — a first item cannot indent, a root item cannot outdent.
  */
 function move(row: HTMLElement, direction: Direction): void {
-	const input = row.querySelector<HTMLInputElement>(`.kebab form input[value="${direction}"]`);
+	const input = row.querySelector<HTMLInputElement>(`${ACTIONS} form input[value="${direction}"]`);
 	const form = input?.form;
 	const button = form?.querySelector('button[type="submit"]');
 
@@ -127,20 +130,22 @@ function activate(row: HTMLElement): void {
 
 /** Opens the create pane the row's kebab already links to. */
 function add(row: HTMLElement, kind: 'before' | 'after'): void {
-	row.querySelector<HTMLAnchorElement>(`.kebab a[data-menu-add="${kind}"]`)?.click();
+	row.querySelector<HTMLAnchorElement>(`${ACTIONS} a[data-menu-add="${kind}"]`)?.click();
 }
 
 function openKebab(row: HTMLElement): void {
-	const kebab = row.querySelector<HTMLDetailsElement>(':scope > .menu-card > .kebab');
-
-	if (kebab) {
-		kebab.open = true;
-		kebab.querySelector<HTMLElement>('a, button')?.focus();
-	}
+	const trigger = row.querySelector<HTMLButtonElement>(
+		':scope > .menu-card > button[popovertarget]',
+	);
+	if (trigger) openMenu(trigger, 'first', row);
 }
 
 function onKeydown(event: KeyboardEvent): void {
-	if (typing(event.target)) {
+	if (
+		typing(event.target) ||
+		(event.target instanceof Element &&
+			event.target.closest('[data-action-menu], button[popovertarget]'))
+	) {
 		return;
 	}
 

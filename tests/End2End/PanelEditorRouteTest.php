@@ -218,13 +218,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-repeater-row]/details[contains(@class, "inserter")]'
-				. '/div/button[@data-repeater-insert="before"]',
+			'//div[@data-repeater-row]/div[@data-action-menu]/button[@data-repeater-insert="before"]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing('//div[@data-repeater-row]//*[@data-repeater-insert="after"]', $html);
-		$this->assertHtmlNodeMissing('//div[@class="kebab-menu"]//*[@data-repeater-insert]', $html);
-		$this->assertHtmlNodeExists('//div[@class="kebab-menu"]/button[@data-repeater-duplicate]', $html);
+		$this->assertHtmlNodeExists('//*[@data-action-menu]/button[@data-repeater-duplicate]', $html);
 		$this->assertHtmlNodeExists('//span[@data-repeater-grip][@tabindex="0"][@aria-keyshortcuts]', $html);
 		// A single-field block is bare: its control renders as content.
 		$this->assertHtmlNodeExists(

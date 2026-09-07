@@ -117,67 +117,24 @@
 	}
 
 	& .kebab {
-		position: relative;
+		display: inline-flex;
 		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 1.625rem;
+		height: 1.625rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+		color: var(--cms-color-text-subtle);
+		font: inherit;
+		cursor: pointer;
 
-		& summary {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 1.625rem;
-			height: 1.625rem;
-			border-radius: var(--cms-radius-sm);
-			color: var(--cms-color-text-subtle);
-			cursor: pointer;
-			list-style: none;
-
-			&::-webkit-details-marker {
-				display: none;
-			}
-
-			&:hover {
-				background: var(--cms-color-surface-sunken);
-				color: var(--cms-color-text);
-			}
-		}
-
-		&[open] summary {
+		&:hover,
+		&[aria-expanded='true'] {
 			background: var(--cms-color-surface-sunken);
 			color: var(--cms-color-text);
-		}
-	}
-
-	& .kebab-menu {
-		position: absolute;
-		z-index: 5;
-		top: 100%;
-		right: 0;
-		display: flex;
-		flex-direction: column;
-		min-width: 12rem;
-		margin-top: var(--cms-space-1);
-		padding: var(--cms-space-1);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-md);
-
-		& button {
-			display: block;
-			width: 100%;
-			padding: var(--cms-space-1-5) var(--cms-space-2-5);
-			border: 0;
-			border-radius: var(--cms-radius-sm);
-			background: none;
-			color: var(--cms-color-text);
-			font: inherit;
-			font-size: var(--cms-font-size-sm);
-			text-align: left;
-			cursor: pointer;
-
-			&:hover {
-				background: var(--cms-color-hover);
-			}
 		}
 	}
 

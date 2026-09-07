@@ -62,22 +62,23 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 		<?php if ($ownsLocales) {
 			$this->insert('field/row-locales');
 		} ?>
-		<details class="kebab" data-repeater-menu>
-			<summary aria-label="<?= $this->escape(__('field:entry-actions')) ?>"><?= \Cosray\Panel\Icon::render(
-				'three-dots-vertical',
-			) ?></summary>
-			<div class="kebab-menu">
+		<button type="button" class="kebab"
+			popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
+			aria-haspopup="menu" aria-label="<?= $this->escape(__('field:entry-actions')) ?>">
+			<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+		</button>
+		<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
+			popover="auto" data-action-menu data-align="end">
 				<button type="button" data-repeater-move="up">
 					<?= $this->escape(__('common:move-up')) ?>
 				</button>
 				<button type="button" data-repeater-move="down">
 					<?= $this->escape(__('common:move-down')) ?>
 				</button>
-				<button type="button" data-repeater-remove>
+				<button type="button" class="danger" data-repeater-remove>
 					<?= $this->escape(__('field:remove-entry')) ?>
 				</button>
-			</div>
-		</details>
+		</div>
 	</div>
 	<input
 		type="hidden"

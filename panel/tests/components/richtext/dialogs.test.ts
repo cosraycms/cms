@@ -34,8 +34,10 @@ afterEach(async () => {
 	vi.unstubAllGlobals();
 });
 
-async function editor() {
-	const host = document.createElement('div');
+async function editor(
+	props: { classes?: Record<string, string>; styles?: Record<string, string> } = {},
+) {
+	const host = document.createElement('form');
 	document.body.append(host);
 	const notify = vi.fn();
 	app = mount(RichTextEditor, {
@@ -43,6 +45,7 @@ async function editor() {
 		props: {
 			name: 'body',
 			tools: ['link', 'image'],
+			...props,
 			notify,
 			value: {
 				type: 'doc',
@@ -51,6 +54,9 @@ async function editor() {
 		},
 	});
 	await tick();
+	for (const trigger of host.querySelectorAll('[popovertarget]')) {
+		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 24, 24));
+	}
 	const content = host.querySelector<HTMLElement>('[contenteditable="true"]')!;
 	content.focus();
 	const text = content.querySelector('p')!.firstChild!;
@@ -76,6 +82,33 @@ async function action(label: string) {
 	button.click();
 	await tick();
 }
+
+describe('richtext action menus', () => {
+	it('applies a paragraph class to the selected paragraph and returns focus to the document', async () => {
+		const { content, notify } = await editor({ classes: { lead: 'Lead' } });
+		await action('richtext:paragraph');
+		await action('Lead');
+		expect(content.querySelector('p')?.className).toBe('lead');
+		expect(content.textContent).toBe('Hello world');
+		expect(document.activeElement).toBe(content);
+		expect(notify).toHaveBeenCalledOnce();
+	});
+
+	it('applies and clears a text style on the original selection without submitting the editor', async () => {
+		const { host, content } = await editor({ styles: { accent: 'Accent' } });
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		host.addEventListener('submit', submit);
+		await action('richtext:text-style');
+		await action('Accent');
+		expect(content.querySelector('span.accent')?.textContent).toBe('Hello');
+		expect(document.activeElement).toBe(content);
+		await action('richtext:text-style');
+		await action('richtext:remove-style');
+		expect(content.querySelector('span.accent')).toBeNull();
+		expect(content.textContent).toBe('Hello world');
+		expect(submit).not.toHaveBeenCalled();
+	});
+});
 
 describe('richtext dialogs', () => {
 	it.each(['toolbar', 'overflow'])(

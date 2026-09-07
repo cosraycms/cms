@@ -20,12 +20,15 @@
 		flex-direction: column;
 	}
 
+	& > * {
+		flex-shrink: 0;
+	}
+
 	& :is(button, a) {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
 		width: 100%;
-		flex-shrink: 0;
 		padding: var(--cms-space-1-5) var(--cms-space-2-5);
 		border: 0;
 		border-radius: var(--cms-radius-sm);

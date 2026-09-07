@@ -2,7 +2,7 @@
 
 The panel should be operable from the keyboard throughout, and comfortable for someone who lives in vim. That is a consistency problem, not an engineering one: the same key has to mean the same thing on every screen, or the second screen teaches users to distrust the first.
 
-This file is that vocabulary. It is prose, not a framework — there is no keymap registry, no configuration, and each screen implements the rules locally. The consistency comes from the rules being written down, not from shared code.
+This file is that vocabulary. There is no keymap registry: navigation stays screen-specific, while dialogs and action menus share their lifecycle and keyboard behavior.
 
 ## Rules
 
@@ -39,6 +39,12 @@ macOS composes `Option` with a letter into a different character — `Option+h` 
 Unmodified letters stay on `event.key`, where the layout should decide.
 
 The two halves disagree only on layouts that move `h` `j` `k` `l` away from their QWERTY positions — Dvorak and Colemak, not QWERTZ or AZERTY. **Accepting both `code` and `key` is not the fix**: on exactly those layouts one physical key would then match two commands, and an ordered fallback only makes the wrong answer deterministic. Live with the seam.
+
+## Action menus
+
+PHP and Svelte action menus use the same native popover behavior. `Enter` or `Space` on the trigger opens the menu and focuses its first enabled item; `↓` opens at the first item and `↑` at the last. Within the menu, arrows and `Home`/`End` navigate enabled, visible choices and scroll them into view. `Enter` or `Space` activates the focused link or button. `Tab` and `Shift+Tab` retain normal browser focus movement, without trapping focus or reordering content.
+
+`Escape` closes only the menu and returns to its trigger, or to the tree row when opened with `.`. Outside-click dismissal leaves focus at the clicked control. Menu keys do not activate the background tree's navigation or move commands, including the vim layer. An action closes its menu before opening a modal or focusing new editor content.
 
 ## Modals
 

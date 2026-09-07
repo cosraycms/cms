@@ -22,14 +22,12 @@
 // the server rendered it. The header thus stays truthful with the form
 // open, and stamped rows, whose lines name nothing yet, take the first
 // two text-like fields the editor fills in declaration order. The
-// row's kebab (a <details>) closes after an action and on any click
-// outside it. Row lists reorder by drag on their grips through Sortable,
+// row lists reorder by drag on their grips through Sortable,
 // loaded on demand so only screens with such a list pay for it.
 
 import type { SortableEvent } from 'sortablejs';
 
 import { uid } from '$lib/content';
-import { placement } from '$lib/action-menu';
 import type { CosrayHost } from '$lib/host';
 
 const enhanced = new WeakSet<HTMLElement>();
@@ -377,54 +375,12 @@ function onInput(event: Event): void {
 	}
 }
 
-function placePicker(details: HTMLDetailsElement): void {
-	const picker = details.querySelector<HTMLElement>(':scope > [data-repeater-picker]');
-
-	if (!details.open || !picker) {
-		return;
-	}
-
-	const point = placement(details, picker);
-	details.classList.toggle('is-up', point.up);
-	picker.style.setProperty('--picker-height', `${point.maxHeight}px`);
-}
-
-function onToggle(event: Event): void {
-	const details = event.target;
-
-	if (details instanceof HTMLDetailsElement && details.matches('[data-repeater-menu]')) {
-		placePicker(details);
-	}
-}
-
-function placePickers(event?: Event): void {
-	if (event?.target instanceof Element && event.target.closest('[data-repeater-picker]')) {
-		return;
-	}
-
-	document
-		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
-		.forEach(placePicker);
-}
-
-function closeMenus(except: Element | null): void {
-	document
-		.querySelectorAll<HTMLDetailsElement>('details[data-repeater-menu][open]')
-		.forEach((menu) => {
-			if (menu !== except) {
-				menu.open = false;
-			}
-		});
-}
-
 function onClick(event: Event): void {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
-
-	closeMenus(target.closest('details[data-repeater-menu]'));
 
 	const remove = target.closest('[data-repeater-remove]');
 
@@ -442,7 +398,6 @@ function onClick(event: Event): void {
 	const mover = target.closest('[data-repeater-move]');
 
 	if (mover) {
-		closeMenus(null);
 		move(mover);
 
 		return;
@@ -453,7 +408,6 @@ function onClick(event: Event): void {
 	const owner = source?.closest<HTMLElement>('[data-repeater]');
 
 	if (duplicator && source && owner && source.parentElement === list(owner)) {
-		closeMenus(null);
 		duplicate(source, owner);
 
 		return;
@@ -488,7 +442,6 @@ function onClick(event: Event): void {
 				? { row, where }
 				: null;
 
-		closeMenus(null);
 		add(container, type === null || type === '' ? null : type, at);
 	}
 }
@@ -529,23 +482,16 @@ async function initDrag(): Promise<void> {
 export function install(): () => void {
 	const rescan = (): void => {
 		void initDrag();
-		placePickers();
 	};
 
 	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
-	document.addEventListener('toggle', onToggle, true);
-	document.addEventListener('scroll', placePickers, true);
-	window.addEventListener('resize', placePickers);
 	document.addEventListener('htmx:after:swap', rescan);
 	rescan();
 
 	return () => {
 		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
-		document.removeEventListener('toggle', onToggle, true);
-		document.removeEventListener('scroll', placePickers, true);
-		window.removeEventListener('resize', placePickers);
 		document.removeEventListener('htmx:after:swap', rescan);
 	};
 }

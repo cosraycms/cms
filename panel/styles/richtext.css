@@ -62,8 +62,6 @@
 		margin-bottom: 0;
 	}
 
-	/* The corners follow the card's border radius: menus have to escape the
-	   card, so the card cannot clip its children. */
 	.cms-richtext-toolbar {
 		position: relative;
 		z-index: 10;
@@ -117,21 +115,6 @@
 		display: inline-block;
 		flex-shrink: 0;
 		text-align: left;
-	}
-
-	.cms-richtext-dropdown-icon {
-		height: 1.25rem;
-		width: 1.25rem;
-		margin-left: var(--cms-space-2);
-		margin-right: calc(-1 * var(--cms-space-1));
-	}
-
-	.cms-richtext-dropdown-items {
-		padding: var(--cms-space-1) 0;
-	}
-
-	.cms-richtext-dropdown-item-label {
-		margin-left: var(--cms-space-2);
 	}
 
 	.cms-richtext-toolbar-btns-grow {
@@ -245,19 +228,6 @@
 			0 0 0 4px var(--cms-color-accent-ring);
 	}
 
-	.richtext-dropdown-menu {
-		position: absolute;
-		left: 0;
-		margin-top: var(--cms-space-2);
-		width: 16rem;
-		transform-origin: top right;
-		border-radius: var(--cms-radius);
-		background-color: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-lg);
-		border: 1px solid var(--cms-color-border);
-		outline: none;
-	}
-
 	.cms-richtext-compact-tools-button {
 		width: auto;
 		padding-left: var(--cms-space-2);
@@ -267,15 +237,6 @@
 			width: 1rem;
 			height: 1rem;
 		}
-	}
-
-	.richtext-dropdown-item {
-		display: flex;
-		width: 100%;
-		align-items: center;
-		padding: var(--cms-space-2) var(--cms-space-4);
-		font-size: var(--cms-font-size-sm);
-		color: var(--cms-color-text-muted);
 	}
 
 	.richtext-toolbar-btn {

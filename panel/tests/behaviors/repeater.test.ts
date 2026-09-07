@@ -5,6 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/repeater';
+import { install as installMenus } from '../../src/lib/action-menu';
 import { install as installTabs } from '../../src/behaviors/tabs';
 
 const sortable = vi.hoisted(() => vi.fn());
@@ -17,7 +18,12 @@ const ID = 'field-tags';
 let uninstall: (() => void) | null = null;
 
 beforeEach(() => {
-	uninstall = install();
+	const stopRepeater = install();
+	const stopMenus = installMenus();
+	uninstall = () => {
+		stopMenus();
+		stopRepeater();
+	};
 });
 
 afterEach(() => {
@@ -497,33 +503,19 @@ describe('repeater behavior', () => {
 		expect(subtitle?.textContent).toBe('Erzieherin');
 	});
 
-	it('closes a row menu after an action and on a click outside it', () => {
-		const menu = `<details data-repeater-menu open>
-			<summary>Actions</summary>
-			<button type="button" data-repeater-move="down">Down</button>
-		</details>`;
-		const container = repeater([row('0', 'a', menu), row('1', 'b', menu)]);
-		const menus = container.querySelectorAll<HTMLDetailsElement>('details');
-
+	it('closes a row action menu before moving its row', () => {
+		const menu = `<button type="button" popovertarget="${ID}-0-actions">Actions</button>
+			<div id="${ID}-0-actions" popover="auto" data-action-menu>
+				<button type="button" data-repeater-move="down">Down</button>
+			</div>`;
+		const container = repeater([row('0', 'a', menu), row('1', 'b')]);
+		click(container, '[popovertarget]');
 		click(container, '[data-repeater-move="down"]');
-
-		expect(menus[0]?.open).toBe(false);
-		expect(menus[1]?.open).toBe(false);
+		expect(container.querySelector('[data-action-menu]')?.matches(':popover-open')).toBe(false);
 		expect(Array.from(container.querySelectorAll('input'), (input) => input.value)).toEqual([
 			'b',
 			'a',
 		]);
-
-		// Opening one menu closes the other; the summary itself toggles natively.
-		menus[0]?.setAttribute('open', '');
-		menus[1]?.querySelector('summary')?.click();
-
-		expect(menus[0]?.open).toBe(false);
-		expect(menus[1]?.open).toBe(true);
-
-		document.body.click();
-
-		expect(menus[1]?.open).toBe(false);
 	});
 
 	it('reorders a row list by drag and enhances each list once', async () => {
@@ -628,18 +620,18 @@ describe('repeater behavior', () => {
 	});
 
 	it('focuses the first input of a stamped row and closes the menu it came from', () => {
-		const menu = `<details data-repeater-menu open>
-			<summary>Insert above</summary>
-			<button type="button" data-repeater-add data-repeater-insert="before">Row</button>
-		</details>`;
+		const menu = `<button type="button" popovertarget="${ID}-0-insert">Insert above</button>
+			<div id="${ID}-0-insert" popover="auto" data-action-menu>
+				<button type="button" data-repeater-add data-repeater-insert="before">Row</button>
+			</div>`;
 		const container = repeater([row('0', 'a', menu)]);
-
+		click(container, '[popovertarget]');
 		container.querySelector<HTMLElement>('[data-repeater-insert="before"]')?.click();
 
 		const stamped = container.querySelector<HTMLElement>('[data-repeater-row]');
 
 		expect(document.activeElement).toBe(stamped?.querySelector('input'));
-		expect(container.querySelector<HTMLDetailsElement>('details')?.open).toBe(false);
+		expect(container.querySelector('[data-action-menu]')?.matches(':popover-open')).toBe(false);
 	});
 
 	it('duplicates a row after itself with its live values under a fresh uid', () => {
@@ -749,122 +741,5 @@ describe('repeater behavior', () => {
 
 		expect(outerAdd?.hidden).toBe(true);
 		expect(nestedAdd?.hidden).toBe(false);
-	});
-});
-
-describe('repeater picker placement', () => {
-	beforeEach(() => {
-		vi.stubGlobal('innerHeight', 800);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
-	function pickerAt(top: number, height = 240) {
-		const pane = document.createElement('div');
-		const details = document.createElement('details');
-		const picker = document.createElement('div');
-		const trigger = { top, height: 32 };
-
-		details.dataset.repeaterMenu = '';
-		details.innerHTML = '<summary>Add block</summary>';
-		picker.dataset.repeaterPicker = '';
-		picker.style.marginTop = '4px';
-		details.append(picker);
-		pane.append(details);
-		document.body.append(pane);
-
-		vi.spyOn(details, 'getBoundingClientRect').mockImplementation(
-			() => new DOMRect(0, trigger.top, 240, trigger.height),
-		);
-		Object.defineProperties(picker, {
-			scrollHeight: { value: height },
-			clientHeight: { value: height },
-			offsetHeight: { value: height + 2 },
-		});
-
-		const open = () => {
-			details.open = true;
-			details.dispatchEvent(new Event('toggle'));
-		};
-
-		return { pane, details, picker, trigger, open };
-	}
-
-	function clip(pane: HTMLElement, top: number, height: number, overflow = 'auto'): void {
-		pane.style.overflowY = overflow;
-		vi.spyOn(pane, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, top, 500, height));
-		Object.defineProperties(pane, {
-			clientTop: { value: 2 },
-			clientHeight: { value: height - 4 },
-		});
-	}
-
-	it('opens below when the full list fits, even if there is more room above', () => {
-		const { details, picker, open } = pickerAt(400);
-		open();
-
-		expect(details.classList.contains('is-up')).toBe(false);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('364px');
-	});
-
-	it('opens above a trigger near the viewport bottom', () => {
-		const { details, picker, open } = pickerAt(730);
-		open();
-
-		expect(details.classList.contains('is-up')).toBe(true);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('726px');
-	});
-
-	it.each(['auto', 'scroll', 'hidden', 'clip'])(
-		'respects an overflow:%s pane ending above the viewport bottom',
-		(overflow) => {
-			const { pane, details, picker, open } = pickerAt(550);
-			clip(pane, 100, 500, overflow);
-			open();
-
-			expect(details.classList.contains('is-up')).toBe(true);
-			expect(picker.style.getPropertyValue('--picker-height')).toBe('444px');
-		},
-	);
-
-	it('constrains a tall list to the larger side when neither side fits it', () => {
-		const { pane, details, picker, open } = pickerAt(220, 700);
-		clip(pane, 100, 300);
-		open();
-
-		expect(details.classList.contains('is-up')).toBe(false);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('142px');
-	});
-
-	it('intersects nested clipping panes instead of only using the nearest one', () => {
-		const { pane, details, picker, open } = pickerAt(500);
-		const outer = document.createElement('div');
-		pane.before(outer);
-		outer.append(pane);
-		clip(outer, 150, 550);
-		clip(pane, 100, 500);
-		open();
-
-		expect(details.classList.contains('is-up')).toBe(true);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('344px');
-	});
-
-	it('repositions an open picker when its pane scrolls or the viewport shrinks', () => {
-		const { pane, details, picker, trigger, open } = pickerAt(730);
-		open();
-
-		trigger.top = 100;
-		pane.dispatchEvent(new Event('scroll'));
-
-		expect(details.classList.contains('is-up')).toBe(false);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('664px');
-
-		vi.stubGlobal('innerHeight', 180);
-		window.dispatchEvent(new Event('resize'));
-
-		expect(details.classList.contains('is-up')).toBe(true);
-		expect(picker.style.getPropertyValue('--picker-height')).toBe('96px');
 	});
 });

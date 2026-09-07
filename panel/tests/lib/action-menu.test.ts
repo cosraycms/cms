@@ -25,7 +25,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-function fixture(id = 'actions') {
+function fixture(id = 'actions', height = 240) {
 	const owner = document.createElement('div');
 	owner.innerHTML = `<button type="button" popovertarget="${id}">Actions</button>
 		<div id="${id}" popover="auto" data-action-menu>
@@ -47,9 +47,9 @@ function fixture(id = 'actions') {
 	);
 	Object.defineProperties(menu, {
 		offsetWidth: { value: 200 },
-		offsetHeight: { value: 240 },
-		clientHeight: { value: 238 },
-		scrollHeight: { value: 238 },
+		offsetHeight: { value: height },
+		clientHeight: { value: height - 2 },
+		scrollHeight: { value: height - 2 },
 	});
 	menu.style.padding = '4px';
 	return { owner, trigger, menu, first, last, next, box };
@@ -218,6 +218,66 @@ describe('action-menu keyboard and lifecycle', () => {
 });
 
 describe('action-menu geometry', () => {
+	function clip(pane: HTMLElement, top: number, height: number, overflow = 'auto'): void {
+		pane.style.overflowY = overflow;
+		vi.spyOn(pane, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, top, 500, height));
+		Object.defineProperties(pane, { clientTop: { value: 2 }, clientHeight: { value: height - 4 } });
+	}
+
+	it.each([
+		[400, false, 364],
+		[730, true, 726],
+	] as const)(
+		'opens below when it fits and flips near the bottom (anchor at %s)',
+		(y, up, maxHeight) => {
+			vi.stubGlobal('innerHeight', 800);
+			const { trigger, menu, box } = fixture();
+			box.y = y;
+			box.height = 32;
+			expect(placement(trigger, menu)).toMatchObject({ up, maxHeight });
+		},
+	);
+
+	it.each(['auto', 'scroll', 'hidden', 'clip'])(
+		'respects an overflow:%s pane ending above the viewport bottom',
+		(overflow) => {
+			vi.stubGlobal('innerHeight', 800);
+			const { owner, trigger, menu, box } = fixture();
+			box.y = 550;
+			clip(owner, 100, 500, overflow);
+			expect(placement(trigger, menu)).toMatchObject({ up: true, maxHeight: 444 });
+		},
+	);
+
+	it('constrains a tall list to the larger side when neither side fits it', () => {
+		const { owner, trigger, menu, box } = fixture('tall', 700);
+		box.y = 220;
+		box.height = 32;
+		clip(owner, 100, 300);
+		expect(placement(trigger, menu)).toMatchObject({ up: false, maxHeight: 142 });
+	});
+
+	it('intersects nested clipping panes instead of only using the nearest one', () => {
+		const { owner, trigger, menu, box } = fixture();
+		const outer = document.createElement('div');
+		owner.before(outer);
+		outer.append(owner);
+		clip(outer, 150, 550);
+		clip(owner, 100, 500);
+		box.y = 500;
+		expect(placement(trigger, menu)).toMatchObject({ up: true, maxHeight: 344 });
+	});
+
+	it('recomputes the available side after scrolling and resizing', () => {
+		const { trigger, menu, box } = fixture();
+		box.y = 100;
+		box.height = 32;
+		vi.stubGlobal('innerHeight', 800);
+		expect(placement(trigger, menu)).toMatchObject({ up: false, maxHeight: 664 });
+		vi.stubGlobal('innerHeight', 180);
+		expect(placement(trigger, menu)).toMatchObject({ up: true, maxHeight: 96 });
+	});
+
 	it.each(['start', 'end', 'center'] as const)(
 		'keeps %s-aligned menus within a narrow visible pane',
 		(align) => {
@@ -308,7 +368,9 @@ it.each([false, true])(
 				scope.querySelector<HTMLButtonElement>('[data-repeater-move="up"]')!.click();
 				changed.mockClear();
 			}
-			const trigger = scope.querySelector<HTMLButtonElement>('[popovertarget]')!;
+			const trigger = scope.querySelector<HTMLButtonElement>(
+				'[data-repeater-footer] > button[popovertarget]',
+			)!;
 			vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 100, 24));
 			await key(trigger, 'ArrowDown');
 			await key(document.activeElement!, 'ArrowDown');

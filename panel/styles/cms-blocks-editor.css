@@ -54,9 +54,9 @@
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
 
-		/* The open kebab menu must paint over the blocks after it. */
+		/* Active chrome hangs over the blocks after it. */
 		&:focus-within,
-		&:has(details[open]) {
+		&:has(:popover-open) {
 			z-index: 2;
 		}
 
@@ -132,8 +132,8 @@
 	 * inside it may have taken the focus elsewhere.
 	 */
 	& .block:focus-within,
-	& .block:has(details[open]),
-	&:not(:has(.block:focus-within, .block details[open])) .block:hover {
+	& .block:has(:popover-open),
+	&:not(:has(.block:focus-within, .block :popover-open)) .block:hover {
 		& > .resize::before {
 			opacity: 0.6;
 		}
@@ -186,9 +186,8 @@
 		transition: opacity 120ms ease;
 	}
 
-	/* A fading element is a stacking context of its own, which would put
-	   the opening menu under the richtext toolbar for a moment. */
-	& .tools:has(details[open]) {
+	/* Opening a menu must not leave its anchor at zero opacity during a fade. */
+	& .tools:has(:popover-open) {
 		transition: none;
 	}
 
@@ -221,7 +220,7 @@
 	}
 
 	& .gear,
-	& .kebab > summary {
+	& .kebab {
 		display: inline-flex;
 		flex-shrink: 0;
 		align-items: center;
@@ -246,99 +245,16 @@
 		color: var(--cms-color-danger);
 	}
 
-	& .kebab {
-		position: relative;
-		flex-shrink: 0;
-
-		& > summary {
-			list-style: none;
-
-			&::-webkit-details-marker {
-				display: none;
-			}
-		}
-
-		&[open] > summary {
-			background: var(--cms-color-surface-sunken);
-			color: var(--cms-color-text);
-		}
-	}
-
-	& .kebab-menu,
-	& .picker-menu {
-		display: flex;
-		flex-direction: column;
-	}
-
-	/* Above the richtext toolbar (z-index 10) inside the block. */
-	& .kebab-menu {
-		position: absolute;
-		z-index: 20;
-		top: 100%;
-		right: 0;
-		min-width: 13rem;
-		margin-top: var(--cms-space-1);
-		padding: var(--cms-space-1);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-md);
-	}
-
-	& .kebab-menu button,
-	& .picker-menu button {
-		display: block;
-		width: 100%;
-		padding: var(--cms-space-1-5) var(--cms-space-2-5);
-		border: 0;
-		border-radius: var(--cms-radius-sm);
-		background: none;
+	& .kebab[aria-expanded='true'] {
+		background: var(--cms-color-surface-sunken);
 		color: var(--cms-color-text);
-		font: inherit;
-		font-size: var(--cms-font-size-sm);
-		text-align: left;
-		cursor: pointer;
-
-		&:hover {
-			background: var(--cms-color-hover);
-		}
-	}
-
-	& .picker-menu {
-		max-height: var(--picker-height, none);
-		margin-top: var(--cms-space-1);
-		overflow-y: auto;
-		overscroll-behavior: contain;
-
-		& button {
-			flex-shrink: 0;
-		}
-	}
-
-	& .picker.is-up > .picker-menu {
-		top: auto;
-		bottom: 100%;
-		margin-top: 0;
-		margin-bottom: var(--cms-space-1);
-	}
-
-	/* The footer picker and the inserters. */
-	& .picker summary {
-		list-style: none;
-		cursor: pointer;
-
-		&::-webkit-details-marker {
-			display: none;
-		}
 	}
 
 	/*
 	 * The + that inserts before this block hangs over its start corner,
 	 * mirroring the chrome on the other one — off the edges, which belong
 	 * to the resize handles. It comes and goes with the chrome and is
-	 * unclickable while hidden, like the tools. The button is the element
-	 * itself when one type is offered and the summary of the picker
-	 * otherwise.
+	 * unclickable while hidden, like the tools.
 	 */
 	& .inserter {
 		position: absolute;
@@ -348,10 +264,6 @@
 		opacity: 0;
 		pointer-events: none;
 		transition: opacity 120ms ease;
-	}
-
-	& .inserter:not(details),
-	& .inserter > summary {
 		display: grid;
 		width: 1.5rem;
 		height: 1.5rem;
@@ -371,26 +283,10 @@
 		}
 	}
 
-	& .inserter[open] > summary {
+	& .inserter[aria-expanded='true'] {
 		border-color: var(--cms-color-primary);
 		color: var(--cms-color-primary);
-	}
-
-	& .inserter[open] {
 		transition: none;
-	}
-
-	& .inserter .picker-menu {
-		position: absolute;
-		z-index: 20;
-		top: 100%;
-		left: 0;
-		min-width: 13rem;
-		padding: var(--cms-space-1);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-md);
 	}
 
 	/* The layout numbers in the settings dialog: three short inputs abreast. */

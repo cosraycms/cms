@@ -7,6 +7,7 @@ $blockTypes = (array) $this->unwrap($blockTypes);
 $single = $this->unwrap($single ?? null);
 $single = is_string($single) ? $single : null;
 $insert = (string) $this->unwrap($insert);
+$id = (string) $this->unwrap($id);
 $label = (string) $this->unwrap($label);
 ?>
 <?php if ($single !== null): ?>
@@ -18,15 +19,14 @@ $label = (string) $this->unwrap($label);
 		aria-label="<?= $this->escape($label) ?>"
 		title="<?= $this->escape($label) ?>"><?= \Cosray\Panel\Icon::render('plus') ?></button>
 <?php else: ?>
-	<details class="inserter picker" data-repeater-menu>
-		<summary aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>"><?= \Cosray\Panel\Icon::render(
-			'plus',
-		) ?></summary>
-		<div class="picker-menu" data-repeater-picker>
+	<button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
+		aria-haspopup="menu" aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>">
+		<?= \Cosray\Panel\Icon::render('plus') ?>
+	</button>
+	<div id="<?= $this->escape($id) ?>" class="cms-action-menu" popover="auto" data-action-menu>
 			<?php $this->insert('field/blocks/picker', [
 				'blockTypes' => $blockTypes,
 				'insert' => $insert,
 			]) ?>
-		</div>
-	</details>
+	</div>
 <?php endif ?>

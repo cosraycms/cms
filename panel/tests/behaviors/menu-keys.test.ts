@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install as installKeys } from '../../src/behaviors/menu-keys';
 import { install as installTree } from '../../src/behaviors/menu-tree';
+import { install as installMenus } from '../../src/lib/action-menu';
 
 let uninstall: Array<() => void> = [];
 let submitted: string[] = [];
@@ -17,7 +18,7 @@ function press(key: string, init: KeyboardEventInit = {}): void {
 
 /** The kebab as the tree renders it: one form per direction. */
 function kebab(uid: string, disabled: string[]): string {
-	return `<details class="kebab"><summary tabindex="-1"></summary><div class="kebab-menu">
+	return `<button type="button" class="kebab" tabindex="-1" popovertarget="${uid}-actions">Actions</button><div id="${uid}-actions" popover="auto" data-action-menu>
 		<a data-menu-add="before" href="/cp/menus/main?before=${uid}"></a>
 		<a data-menu-add="after" href="/cp/menus/main?after=${uid}"></a>
 		<a data-menu-add="child" href="/cp/menus/main?add=${uid}"></a>
@@ -29,7 +30,7 @@ function kebab(uid: string, disabled: string[]): string {
 				</form>`,
 			)
 			.join('')}
-	</div></details>`;
+	</div>`;
 }
 
 beforeEach(() => {
@@ -60,13 +61,17 @@ beforeEach(() => {
 	`;
 
 	for (const form of document.querySelectorAll('form')) {
-		form.requestSubmit = (): void => {
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
 			const direction = form.querySelector<HTMLInputElement>('[name="direction"]')!.value;
 			submitted.push(`${form.action.split('/item/')[1].replace('/move', '')}:${direction}`);
-		};
+		});
 	}
 
-	uninstall = [installTree(), installKeys()];
+	for (const trigger of document.querySelectorAll('button[popovertarget]')) {
+		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 32, 24));
+	}
+	uninstall = [installMenus(), installTree(), installKeys()];
 });
 
 afterEach(() => {
@@ -236,12 +241,32 @@ describe('moves', () => {
 		expect(clicked).toHaveBeenCalled();
 	});
 
-	it('opens the kebab with a period', () => {
+	it('opens row actions with a period and returns to tree navigation on Escape', async () => {
 		row('second').focus();
-
 		press('.');
+		await Promise.resolve();
+		const menu = row('second').querySelector('[data-action-menu]')!;
+		expect(document.activeElement).toBe(menu.querySelector('a'));
+		press('Escape');
+		expect(menu.matches(':popover-open')).toBe(false);
+		expect(document.activeElement).toBe(row('second'));
+		press('ArrowUp');
+		expect(document.activeElement).toBe(row('child'));
+	});
 
-		expect(row('second').querySelector<HTMLDetailsElement>('.kebab')!.open).toBe(true);
+	it('isolates row-menu keys and submits the chosen enabled form exactly once', async () => {
+		row('second').focus();
+		press('.');
+		await Promise.resolve();
+		const first = document.activeElement;
+		press('j');
+		press('ArrowDown', { ctrlKey: true, shiftKey: true, code: 'ArrowDown' });
+		expect(document.activeElement).toBe(first);
+		expect(submitted).toEqual([]);
+		press('End');
+		press('Enter');
+		expect(submitted).toEqual(['second:in']);
+		expect(document.activeElement).toBe(row('second'));
 	});
 });
 

@@ -483,82 +483,22 @@
 	}
 
 	& .kebab {
-		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 0;
+		border-radius: var(--cms-radius-md);
+		background: none;
+		color: var(--cms-color-text-muted);
+		font: inherit;
+		cursor: pointer;
 
-		& summary {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 1.75rem;
-			height: 1.75rem;
-			border-radius: var(--cms-radius-md);
-			color: var(--cms-color-text-muted);
-			cursor: pointer;
-			list-style: none;
-
-			&::-webkit-details-marker {
-				display: none;
-			}
-
-			&:hover {
-				background: var(--cms-color-hover);
-			}
-		}
-
-		&[open] summary {
+		&:hover,
+		&[aria-expanded='true'] {
 			background: var(--cms-color-hover);
-		}
-
-		& .kebab-menu {
-			position: absolute;
-			z-index: 5;
-			top: 100%;
-			right: 0;
-			display: flex;
-			flex-direction: column;
-			min-width: 10rem;
-			margin-top: var(--cms-space-1);
-			padding: var(--cms-space-1);
-			border: 1px solid var(--cms-color-border);
-			border-radius: var(--cms-radius-md);
-			background: var(--cms-color-surface);
-			box-shadow: var(--cms-shadow-md, 0 4px 12px rgb(0 0 0 / 0.12));
-
-			& a,
-			& button {
-				display: block;
-				width: 100%;
-				padding: var(--cms-space-1-5) var(--cms-space-2-5);
-				border: 0;
-				border-radius: var(--cms-radius-sm);
-				background: none;
-				color: var(--cms-color-text);
-				font-size: var(--cms-font-size-sm);
-				text-align: left;
-				text-decoration: none;
-				cursor: pointer;
-
-				&:hover {
-					background: var(--cms-color-hover);
-				}
-
-				&:disabled {
-					color: var(--cms-color-text-faint);
-					cursor: default;
-
-					&:hover {
-						background: none;
-					}
-				}
-
-				&.danger {
-					color: var(--cms-color-danger-text);
-				}
-			}
-
-			& form {
-				display: block;
-			}
 		}
 	}
 

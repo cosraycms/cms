@@ -124,8 +124,6 @@
 	});
 	let showSource = $state(false);
 	let sourceHtml = $state('');
-	let showDropdown = $state(false);
-	let showStyleDropdown = $state(false);
 	const menuId = $props.id();
 	let focused = $state(false);
 	let showFallback = $derived(
@@ -220,27 +218,7 @@
 	}
 
 	function run(command: (state: any, dispatch?: any, view?: any) => boolean) {
-		return () => {
-			showDropdown = false;
-			showStyleDropdown = false;
-			editor?.run(command);
-		};
-	}
-
-	function runDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
-		return () => {
-			editor?.run(command);
-			showDropdown = !showDropdown;
-			showStyleDropdown = false;
-		};
-	}
-
-	function runStyleDropdown(command: (state: any, dispatch?: any, view?: any) => boolean) {
-		return () => {
-			editor?.run(command);
-			showStyleDropdown = false;
-			showDropdown = false;
-		};
+		return () => editor?.run(command);
 	}
 
 	function toggleSource() {
@@ -249,8 +227,6 @@
 		}
 
 		showSource = !showSource;
-		showDropdown = false;
-		showStyleDropdown = false;
 	}
 
 	function addLink(target: { href?: string; node?: string; asset?: string }, blank: boolean) {
@@ -604,129 +580,75 @@
 				{:else}
 					{#if classOptions.length > 0}
 						<div class="cms-richtext-dropdown-wrap">
-							<div class="richtext-dropdown">
+							<button
+								type="button"
+								class="richtext-dropdown-button"
+								popovertarget={`${menuId}-paragraph`}
+								aria-haspopup="menu"
+							>
+								{__('richtext:paragraph')}
+								<Icon name="chevron-down" />
+							</button>
+							<div
+								id={`${menuId}-paragraph`}
+								class="cms-action-menu"
+								popover="auto"
+								data-action-menu
+							>
 								<button
 									type="button"
-									class="richtext-dropdown-button"
-									aria-expanded={showDropdown}
-									aria-haspopup="true"
-									onclick={() => {
-										showDropdown = !showDropdown;
-										showStyleDropdown = false;
-									}}
+									onclick={run(setParagraph())}
+									role="menuitemradio"
+									aria-checked={editorState.paragraphClass === 'default'}
+									class:is-active={editorState.paragraphClass === 'default'}
 								>
-									{__('richtext:paragraph')}
-									<Icon name="chevron-down" />
+									<Icon name="paragraph" /> <span>{__('richtext:paragraph')}</span>
+								</button>
+								{#each classOptions as [cls, label] (cls)}
+									<button
+										type="button"
+										onclick={run(setParagraphClass(cls))}
+										role="menuitemradio"
+										aria-checked={editorState.paragraphClass === cls}
+										class:is-active={editorState.paragraphClass === cls}
+									>
+										<Icon name="type" /> <span>{label}</span>
+									</button>
+								{/each}
+								<button type="button" onclick={run(clearNodes())}>
+									<Icon name="eraser" /> <span>{__('richtext:remove-format')}</span>
 								</button>
 							</div>
-							{#if showDropdown}
-								<div
-									class="richtext-dropdown-menu"
-									role="menu"
-									aria-orientation="vertical"
-									aria-labelledby="menu-button"
-									tabindex="-1"
-								>
-									<div class="cms-richtext-dropdown-items" role="none">
-										<button
-											type="button"
-											onclick={runDropdown(setParagraph())}
-											role="menuitem"
-											tabindex="-1"
-											class="richtext-dropdown-item"
-											class:active={editorState.paragraphClass === 'default'}
-										>
-											<Icon name="paragraph" />
-											<span class="cms-richtext-dropdown-item-label">
-												{__('richtext:paragraph')}
-											</span>
-										</button>
-										{#each classOptions as [cls, label] (cls)}
-											<button
-												type="button"
-												onclick={runDropdown(setParagraphClass(cls))}
-												role="menuitem"
-												tabindex="-1"
-												class="richtext-dropdown-item"
-												class:active={editorState.paragraphClass === cls}
-											>
-												<Icon name="type" />
-												<span class="cms-richtext-dropdown-item-label">
-													{label}
-												</span>
-											</button>
-										{/each}
-										<button
-											type="button"
-											onclick={runDropdown(clearNodes())}
-											role="menuitem"
-											tabindex="-1"
-											class="richtext-dropdown-item"
-										>
-											<Icon name="eraser" />
-											<span class="cms-richtext-dropdown-item-label">
-												{__('richtext:remove-format')}
-											</span>
-										</button>
-									</div>
-								</div>
-							{/if}
 						</div>
 					{/if}
 					{#if styleOptions.length > 0}
 						<div class="cms-richtext-dropdown-wrap">
-							<div class="richtext-dropdown">
-								<button
-									type="button"
-									class="richtext-dropdown-button"
-									aria-label={__('richtext:text-style')}
-									aria-expanded={showStyleDropdown}
-									aria-haspopup="true"
-									onclick={() => {
-										showStyleDropdown = !showStyleDropdown;
-										showDropdown = false;
-									}}
-								>
-									<Icon name="fonts" />
-									<Icon name="chevron-down" />
+							<button
+								type="button"
+								class="richtext-dropdown-button"
+								popovertarget={`${menuId}-style`}
+								aria-haspopup="menu"
+								aria-label={__('richtext:text-style')}
+							>
+								<Icon name="fonts" />
+								<Icon name="chevron-down" />
+							</button>
+							<div id={`${menuId}-style`} class="cms-action-menu" popover="auto" data-action-menu>
+								{#each styleOptions as [cls, label] (cls)}
+									<button
+										type="button"
+										onclick={run(setStyle(cls))}
+										role="menuitemradio"
+										aria-checked={editorState.styleClass === cls}
+										class:is-active={editorState.styleClass === cls}
+									>
+										{label}
+									</button>
+								{/each}
+								<button type="button" onclick={run(unsetStyle())}>
+									<Icon name="eraser" /> <span>{__('richtext:remove-style')}</span>
 								</button>
 							</div>
-							{#if showStyleDropdown}
-								<div
-									class="richtext-dropdown-menu"
-									role="menu"
-									aria-orientation="vertical"
-									aria-labelledby="style-menu-button"
-									tabindex="-1"
-								>
-									<div class="cms-richtext-dropdown-items" role="none">
-										{#each styleOptions as [cls, label] (cls)}
-											<button
-												onclick={runStyleDropdown(setStyle(cls))}
-												role="menuitem"
-												tabindex="-1"
-												class="richtext-dropdown-item"
-												class:active={editorState.styleClass === cls}
-											>
-												<span class="cms-richtext-dropdown-item-label">
-													{label}
-												</span>
-											</button>
-										{/each}
-										<button
-											onclick={runStyleDropdown(unsetStyle())}
-											role="menuitem"
-											tabindex="-1"
-											class="richtext-dropdown-item"
-										>
-											<Icon name="eraser" />
-											<span class="cms-richtext-dropdown-item-label">
-												{__('richtext:remove-style')}
-											</span>
-										</button>
-									</div>
-								</div>
-							{/if}
 						</div>
 					{/if}
 					<div class="cms-richtext-dropdown-wrap cms-richtext-toolbar-compact-actions">
@@ -747,10 +669,6 @@
 							popover="auto"
 							data-action-menu
 							style="--width: 18rem"
-							onbeforetoggle={() => {
-								showDropdown = false;
-								showStyleDropdown = false;
-							}}
 						>
 							{#each activeSpecs as spec (spec.key)}
 								{#if spec.isVisible?.() ?? true}
