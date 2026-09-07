@@ -424,6 +424,7 @@ final class Styleguide extends Panel
 	{
 		$richtext = Control::richtext()->resolve($controls)->array();
 		$image = Control::image()->resolve($controls)->array();
+		$video = Control::video()->resolve($controls)->array();
 		$meta = Control::group([
 			['key' => 'class', 'label' => 'CSS class', 'control' => Control::text()],
 			['key' => 'id', 'label' => 'Element ID', 'control' => Control::text()],
@@ -540,6 +541,30 @@ final class Styleguide extends Panel
 				'fieldsets' => [],
 			],
 			[
+				'type' => Builtin\Images::class,
+				'handle' => 'images',
+				'label' => __('block:images'),
+				'labels' => false,
+				'fields' => [[
+					'name' => 'images',
+					'label' => __('block:images'),
+					'control' => $image,
+					'translate' => $translate,
+				]],
+			],
+			[
+				'type' => Builtin\Video::class,
+				'handle' => 'video',
+				'label' => __('block:video'),
+				'labels' => false,
+				'fields' => [[
+					'name' => 'video',
+					'label' => __('block:video'),
+					'control' => $video,
+					'translate' => $translate,
+				]],
+			],
+			[
 				'type' => Builtin\Image::class,
 				'handle' => 'image',
 				'label' => 'Single image',
@@ -567,6 +592,7 @@ final class Styleguide extends Panel
 					'name' => 'blocks',
 					'props' => [
 						'blockTypes' => $types(true),
+						'commonTypes' => [Builtin\RichText::class, Builtin\Image::class],
 						'columns' => 1,
 						'min' => 1,
 						'responsive' => 'stack',
@@ -575,7 +601,7 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'symmetric',
-				'description' => 'A stacked list: no layout controls, the row carries the locale tabs.',
+				'description' => 'Explicit common choices: Rich text and Image. More blocks opens the complete searchable catalog.',
 			],
 			[
 				'name' => 'grid',
@@ -592,7 +618,26 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'asymmetric',
-				'description' => 'Drag an edge to resize; the gear holds width, rows and indent as numbers.',
+				'description' => 'Default first-six menu and all eight types in the catalog. Drag an edge to resize; the gear holds layout settings.',
+			],
+			[
+				'name' => 'singleBlock',
+				'label' => 'One type — direct insertion',
+				'control' => Control::blocks()
+					->prop('blockTypes', [$types(false)[2]])
+					->array(),
+			],
+			[
+				'name' => 'fewBlocks',
+				'label' => 'Small catalog — no redundant More action',
+				'control' => Control::blocks()
+					->prop('blockTypes', array_slice($types(false), 0, 3))
+					->array(),
+			],
+			[
+				'name' => 'noBlocks',
+				'label' => 'No allowed types — insertion unavailable',
+				'control' => Control::blocks()->prop('blockTypes', [])->array(),
 			],
 		];
 	}

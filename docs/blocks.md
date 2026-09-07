@@ -120,6 +120,7 @@ final class ArticlePage
 | --- | --- |
 | `#[Columns(int $columns, int $min = 1, Responsive $responsive = Responsive::Stack)]` | turns the field into a grid of `$columns` columns; `$min` is the narrowest span a block may take. **Without the attribute the field is a stacked one-column list** with no layout controls. `$columns` is 1–25. |
 | `#[Allows(A::class, B::class)]` | the offered block types. Optional — without it the field offers the default list. |
+| `#[Common(A::class, B::class)]` | the ordered short menu, up to six allowed types; see [common choices](#common-choices). |
 | `#[Translate]` / `#[Translate(TranslateMode::Asymmetric)]` | see [translation](#translation). |
 | `#[Tools(...)]` | feeds every `RichText` sub-field inside the offered block types that does not declare its own `#[Tools]`. |
 | `#[Required]` | at least one block in the (default locale's) list. |

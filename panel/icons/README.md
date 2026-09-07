@@ -13,4 +13,6 @@ Notable mappings from the former artwork:
 - Font Awesome link/text-height artwork becomes `link-45deg` and `type`; unlink uses `slash-circle`.
 - Text style uses `fonts`, document uses `file-earmark-richtext`, and the collection fallback uses `collection`.
 
+Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `type-h1`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
+
 Bundled defaults use a separate `panelIcon` name when passed as data. Custom schema `icon` metadata remains `{id, args}` and resolves through the existing icon providers, including existing `bi:*` IDs. A bundled default is not a provider ID.

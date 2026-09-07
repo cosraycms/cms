@@ -371,7 +371,10 @@ $rows = (array) $this->unwrap($rows);
 					twelve-column field places its blocks on the preview grid — drag an edge
 					to resize, or open the gear for the width, rows and indent as numbers
 					next to the block's class and id. The + over a block's start corner
-					inserts before it.
+					inserts before it; the footer appends. The Story menu has two explicit
+					common choices, while Grid uses the first six. More blocks opens the
+					complete icon/name catalog in a native modal. Search by label or handle,
+					then use arrows and Home/End in the results; Escape cancels without edits.
 				</p>
 				<div class="cms-node">
 					<div class="inner">

@@ -130,6 +130,14 @@ Action activation closes the menu before the consumer handler runs, so a handler
 
 Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu` must target `.cms-action-menu` instead. Kebab triggers are buttons rather than `details`/`summary`; their open styling uses `aria-expanded="true"`. The bridge remains version 1 and application-defined icon providers are unchanged.
 
+## Block catalog
+
+The short block menu reuses `.cms-action-menu`; its choices and the modal catalog share the same server-resolved labels and decorative icons. `.cms-block-catalog` is content inside the shared `.cms-modal` shell, not another overlay. It keeps search and result availability above a bounded scrolling `.results` area. The responsive icon/name buttons reduce their column count as space narrows and wrap long labels; their focus ring uses `--cms-color-focus`.
+
+Built-in block icons are local regular Bootstrap assets. Class-level custom `icon` metadata still uses the configured provider, resolved once per field rather than for every row inserter. Missing custom artwork falls back to the bundled square. No search text or label becomes raw icon markup.
+
+The styleguide's Blocks section demonstrates an explicit common subset, the default six-choice menu with the complete eight-type catalog, a small menu, immediate single-type insertion and the no-types state. Its samples use the actual field partials.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.

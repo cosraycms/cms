@@ -12,6 +12,7 @@ use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\CatalogBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestCatalogDocument;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class PanelBlockCatalogTest extends End2EndTestCase
 {
@@ -24,8 +25,17 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 		return $bootstrap;
 	}
 
-	public function testCatalogsOfferOnlyTheirFieldsAllowedTypesAndKeepAllTemplates(): void
+	public static function languages(): array
 	{
+		return [['en', 'Heading', 'More blocks…'], ['de', 'Überschrift', 'Weitere Blöcke…']];
+	}
+
+	#[DataProvider('languages')]
+	public function testCatalogsOfferOnlyTheirFieldsAllowedTypesAndKeepAllTemplates(
+		string $language,
+		string $label,
+		string $more,
+	): void {
 		$this->authenticateAs('editor');
 		$this->createTestNode([
 			'uid' => 'catalog-editor',
@@ -43,7 +53,9 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 				],
 			]),
 		]);
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles/catalog-editor');
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/catalog-editor', ['headers' => [
+			'Accept-Language' => $language,
+		]]);
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$story = '//*[@data-name="content[story][value][zxx]"]';
@@ -57,7 +69,15 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 		$footer = $story . '/*[@data-repeater-footer]';
 		$this->assertHtmlNodeCount(1, $footer . '//*[@data-repeater-add]', $html);
 		$this->assertHtmlNodeExists($footer . '//*[@data-repeater-add="' . CatalogBlock::class . '"]', $html);
-		$this->assertHtmlNodeCount(1, $footer . '//*[@data-block-catalog-open]', $html);
+		$this->assertHtmlNodeExists(
+			$footer . '//*[@data-block-catalog-open][normalize-space()="' . $more . '"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			$catalog . '//*[@data-block-choice="' . CatalogBlock::class . '"][normalize-space()="' . $label . '"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//*[@data-content-locale-scope][@data-content-locale="en"]', $html);
 		foreach (['en', 'de'] as $locale) {
 			$list = '//*[@data-name="content[translated][value][' . $locale . ']"]';
 			$this->assertHtmlNodeCount(8, $list . '/template[@data-block-catalog]//*[@data-block-choice]', $html);
