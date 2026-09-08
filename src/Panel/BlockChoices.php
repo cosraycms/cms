@@ -20,8 +20,8 @@ final class BlockChoices
 		if (!is_array($descriptors)) {
 			throw new RuntimeException(
 				"Blocks field '{$field}' blockTypes must be a list of block type descriptors, "
-				. self::describe($descriptors)
-				. ' given',
+					. self::describe($descriptors)
+					. ' given',
 			);
 		}
 		$types = [];
@@ -29,8 +29,8 @@ final class BlockChoices
 			if (!is_array($type) || !is_string($type['type'] ?? null) || $type['type'] === '') {
 				throw new RuntimeException(
 					"Blocks field '{$field}' block type descriptor {$index} needs a non-empty string 'type', "
-					. self::describe(is_array($type) ? $type['type'] ?? null : $type)
-					. ' given',
+						. self::describe(is_array($type) ? $type['type'] ?? null : $type)
+						. ' given',
 				);
 			}
 			$types[$type['type']] = $type;
@@ -40,16 +40,16 @@ final class BlockChoices
 		if (!is_array($common) || !array_is_list($common)) {
 			throw new RuntimeException(
 				"Blocks field '{$field}' commonTypes must be a list of block type IDs, "
-				. self::describe($common)
-				. ' given',
+					. self::describe($common)
+					. ' given',
 			);
 		}
 		foreach ($common as $index => $type) {
 			if (!is_string($type)) {
 				throw new RuntimeException(
 					"Blocks field '{$field}' common type {$index} must be a block type ID, "
-					. self::describe($type)
-					. ' given',
+						. self::describe($type)
+						. ' given',
 				);
 			}
 		}
