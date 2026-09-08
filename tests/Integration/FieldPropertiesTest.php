@@ -93,8 +93,8 @@ final class FieldPropertiesTest extends IntegrationTestCase
 
 		$properties = $this->hydrator->getField($node, 'intro')->properties();
 
-		$this->assertArrayHasKey('rows', $properties);
-		$this->assertEquals(5, $properties['rows']);
+		$this->assertArrayHasKey('rowspan', $properties);
+		$this->assertEquals(5, $properties['rowspan']);
 
 		$this->assertSame(8, $properties['lines']);
 

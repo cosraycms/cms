@@ -7,7 +7,7 @@ namespace Cosray\Field\Capability;
 trait IsResizable
 {
 	protected ?int $width = null;
-	protected ?int $rows = null;
+	protected ?int $rowspan = null;
 
 	public function width(int $width): static
 	{
@@ -21,15 +21,15 @@ trait IsResizable
 		return $this->width;
 	}
 
-	public function rows(int $rows): static
+	public function rowspan(int $rowspan): static
 	{
-		$this->rows = $rows;
+		$this->rowspan = $rowspan;
 
 		return $this;
 	}
 
-	public function getRows(): int
+	public function getRowspan(): ?int
 	{
-		return $this->rows;
+		return $this->rowspan;
 	}
 }

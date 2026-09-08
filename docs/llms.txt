@@ -163,7 +163,7 @@ Field-level attributes (applied to field properties):
 - `#[Validate('rule', ...)]`
 - `#[DefaultValue(...)]`
 - `#[Width(int)]`
-- `#[Rows(int)]` (grid rows the field spans in the editor)
+- `#[Rowspan(int)]` (grid rows the field spans in the editor)
 - `#[Lines(int)]` (`Textarea` and `Iframe`: visible text lines the control opens at)
 - `#[Columns(int $columns, int $min = 1, Responsive $responsive = Responsive::Stack)]`
   (Blocks: the grid; without it the field is a one-column stack)

@@ -8,12 +8,12 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Resizable;
 use Cosray\Field\Field;
 
-class RowsHandler extends Handler
+class RowspanHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
 		if ($field instanceof Resizable) {
-			$field->rows($meta->rows);
+			$field->rowspan($meta->rowspan);
 
 			return;
 		}
@@ -24,7 +24,7 @@ class RowsHandler extends Handler
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Resizable) {
-			return ['rows' => $field->getRows()];
+			return ['rowspan' => $field->getRowspan()];
 		}
 
 		return [];

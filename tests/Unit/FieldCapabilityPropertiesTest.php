@@ -33,7 +33,7 @@ use Cosray\Schema\Lines;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
-use Cosray\Schema\Rows;
+use Cosray\Schema\Rowspan;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Tool;
 use Cosray\Schema\Tools;
@@ -272,15 +272,15 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertTrue($properties['immutable']);
 	}
 
-	public function testRowsCapabilityReturnsRowsProperty(): void
+	public function testRowspanCapabilityReturnsRowspanProperty(): void
 	{
 		$field = $this->createTextField();
-		$meta = new Rows(10);
+		$meta = new Rowspan(10);
 
 		$properties = $this->applyAndGetProperties($meta, $field);
 
-		$this->assertArrayHasKey('rows', $properties);
-		$this->assertEquals(10, $properties['rows']);
+		$this->assertArrayHasKey('rowspan', $properties);
+		$this->assertEquals(10, $properties['rowspan']);
 	}
 
 	public function testLinesCapabilityReturnsLinesProperty(): void

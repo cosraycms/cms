@@ -19,7 +19,7 @@ use Cosray\Schema\Lines;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
-use Cosray\Schema\Rows;
+use Cosray\Schema\Rowspan;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Tools;
 use Cosray\Schema\Translate;
@@ -57,7 +57,7 @@ class Registry
 		$registry->register(Validate::class, new ValidateHandler());
 		$registry->register(DefaultValue::class, new DefaultValueHandler());
 		$registry->register(Width::class, new WidthHandler());
-		$registry->register(Rows::class, new RowsHandler());
+		$registry->register(Rowspan::class, new RowspanHandler());
 		$registry->register(Lines::class, new LinesHandler());
 		$registry->register(Columns::class, new ColumnsHandler());
 		$registry->register(Hidden::class, new HiddenHandler());

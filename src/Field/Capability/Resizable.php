@@ -10,7 +10,7 @@ interface Resizable
 
 	public function getWidth(): int;
 
-	public function rows(int $rows): static;
+	public function rowspan(int $rowspan): static;
 
-	public function getRows(): int;
+	public function getRowspan(): ?int;
 }

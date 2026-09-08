@@ -10,17 +10,17 @@ $pathSourceFields = (array) $this->unwrap($pathSourceFields);
 $fieldName = (string) ($field['name'] ?? '');
 $isPathSource = in_array($fieldName, $pathSourceFields, true);
 $width = is_int($field['width'] ?? null) ? $field['width'] : 100;
-$rows = is_int($field['rows'] ?? null) ? $field['rows'] : 1;
+$rowspan = is_int($field['rowspan'] ?? null) ? $field['rowspan'] : 1;
 
 if ($width > 100 || $width <= 0) {
 	$width = 100;
 }
 
-if ($rows > 100 || $rows <= 0) {
-	$rows = 100;
+if ($rowspan > 100 || $rowspan <= 0) {
+	$rowspan = 100;
 }
 
-$style = "grid-column: span {$width} / span {$width}; grid-row: span {$rows} / span {$rows}";
+$style = "grid-column: span {$width} / span {$width}; grid-row: span {$rowspan} / span {$rowspan}";
 ?>
 
 <div<?= $isPathSource ? ' class="js-path-source"' : '' ?> style="<?= $this->escape($style) ?>">

@@ -7,9 +7,9 @@ namespace Cosray\Schema;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-readonly class Rows
+readonly class Rowspan
 {
 	public function __construct(
-		public int $rows,
+		public int $rowspan,
 	) {}
 }
