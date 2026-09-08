@@ -67,22 +67,35 @@ final class BlockChoicesTest extends TestCase
 	{
 		$types = array_map(static fn(int $i): array => ['type' => (string) $i], range(1, 7));
 		return [
-			[['blockTypes' => 'bad']],
-			[['blockTypes' => ['bad']]],
-			[['blockTypes' => [['type' => '']]]],
-			[['blockTypes' => $types, 'commonTypes' => null]],
-			[['blockTypes' => $types, 'commonTypes' => 'bad']],
-			[['blockTypes' => $types, 'commonTypes' => ['a' => '1']]],
-			[['blockTypes' => $types, 'commonTypes' => [1]]],
-			[['blockTypes' => $types, 'commonTypes' => ['missing']]],
-			[['blockTypes' => $types, 'commonTypes' => array_column($types, 'type')]],
+			[['blockTypes' => 'bad'], "blockTypes must be a list of block type descriptors, 'bad' given"],
+			[['blockTypes' => ['bad']], "block type descriptor 0 needs a non-empty string 'type', 'bad' given"],
+			[['blockTypes' => [['type' => '']]], "block type descriptor 0 needs a non-empty string 'type', '' given"],
+			[
+				['blockTypes' => $types, 'commonTypes' => null],
+				'commonTypes must be a list of block type IDs, null given',
+			],
+			[
+				['blockTypes' => $types, 'commonTypes' => 'bad'],
+				"commonTypes must be a list of block type IDs, 'bad' given",
+			],
+			[
+				['blockTypes' => $types, 'commonTypes' => ['a' => '1']],
+				'commonTypes must be a list of block type IDs, keyed array given',
+			],
+			[['blockTypes' => $types, 'commonTypes' => [1]], 'common type 0 must be a block type ID, 1 given'],
+			[['blockTypes' => $types, 'commonTypes' => ['missing']], "common type 'missing' is not allowed"],
+			[
+				['blockTypes' => $types, 'commonTypes' => array_column($types, 'type')],
+				'may have at most 6 distinct common types',
+			],
 		];
 	}
 
 	#[DataProvider('malformed')]
-	public function testMalformedSelectionsAreNotTreatedAsPermissions(array $props): void
+	public function testMalformedSelectionsFailNamingTheFieldAndEntry(array $props, string $message): void
 	{
 		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("Blocks field 'content' {$message}");
 		new BlockChoices('content', $props);
 	}
 }

@@ -18,23 +18,39 @@ final class BlockChoices
 	{
 		$descriptors = $props['blockTypes'] ?? [];
 		if (!is_array($descriptors)) {
-			throw new RuntimeException('Invalid block type descriptors');
+			throw new RuntimeException(
+				"Blocks field '{$field}' blockTypes must be a list of block type descriptors, "
+				. self::describe($descriptors)
+				. ' given',
+			);
 		}
 		$types = [];
-		foreach ($descriptors as $type) {
+		foreach ($descriptors as $index => $type) {
 			if (!is_array($type) || !is_string($type['type'] ?? null) || $type['type'] === '') {
-				throw new RuntimeException('Invalid block type descriptor');
+				throw new RuntimeException(
+					"Blocks field '{$field}' block type descriptor {$index} needs a non-empty string 'type', "
+					. self::describe(is_array($type) ? $type['type'] ?? null : $type)
+					. ' given',
+				);
 			}
 			$types[$type['type']] = $type;
 		}
 		$this->types = $types;
 		$common = array_key_exists('commonTypes', $props) ? $props['commonTypes'] : [];
 		if (!is_array($common) || !array_is_list($common)) {
-			throw new RuntimeException('Invalid common block type selection');
+			throw new RuntimeException(
+				"Blocks field '{$field}' commonTypes must be a list of block type IDs, "
+				. self::describe($common)
+				. ' given',
+			);
 		}
-		foreach ($common as $type) {
+		foreach ($common as $index => $type) {
 			if (!is_string($type)) {
-				throw new RuntimeException('Invalid common block type selection');
+				throw new RuntimeException(
+					"Blocks field '{$field}' common type {$index} must be a block type ID, "
+					. self::describe($type)
+					. ' given',
+				);
 			}
 		}
 		$common = Blocks::commonSelection($common, array_keys($types), $field);
@@ -66,5 +82,14 @@ final class BlockChoices
 		}
 		$this->all = $choices;
 		$this->common = array_map(static fn(string $type): array => $choices[$type], $common);
+	}
+
+	private static function describe(mixed $value): string
+	{
+		return match (true) {
+			is_scalar($value) => var_export($value, true),
+			is_array($value) && !array_is_list($value) => 'keyed array',
+			default => get_debug_type($value),
+		};
 	}
 }
