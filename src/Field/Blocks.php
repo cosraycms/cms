@@ -34,7 +34,8 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	/** @var list<class-string<Block>> */
 	protected array $allowedBlockTypes = [];
 
-	private array $commonTypes = [];
+	/** @var list<class-string<Block>> */
+	protected array $commonTypes = [];
 
 	public function control(): Control
 	{
