@@ -226,8 +226,14 @@ function add(
 		);
 		if (focus) focus.focus();
 		else {
+			// Focusable for the hand-off only, so the row behaves like a
+			// server-rendered one once focus moves on.
 			stamped.tabIndex = -1;
+			stamped.addEventListener('focusout', () => stamped.removeAttribute('tabindex'), {
+				once: true,
+			});
 			stamped.focus();
+			if (document.activeElement !== stamped) stamped.removeAttribute('tabindex');
 		}
 	}
 }

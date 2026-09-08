@@ -634,6 +634,20 @@ describe('repeater behavior', () => {
 		expect(container.querySelector('[data-action-menu]')?.matches(':popover-open')).toBe(false);
 	});
 
+	it('keeps a stamped row without inputs focusable only until focus moves on', () => {
+		const template = `<template data-repeater-template><div data-repeater-row>
+			<input type="hidden" data-repeater-uid name="${NAME}[__i__][uid]">
+		</div></template>`;
+		const container = repeater([], { template });
+		click(container, '[data-repeater-add]');
+		const stamped = container.querySelector<HTMLElement>('[data-repeater-row]')!;
+
+		expect(document.activeElement).toBe(stamped);
+		expect(stamped.getAttribute('tabindex')).toBe('-1');
+		container.querySelector<HTMLElement>('[data-repeater-add]')?.focus();
+		expect(stamped.hasAttribute('tabindex')).toBe(false);
+	});
+
 	it('duplicates a row after itself with its live values under a fresh uid', () => {
 		const typed = (index: string, uid: string, text: string, tone: string): string =>
 			`<div data-repeater-row>
