@@ -19,7 +19,9 @@ $columns = max(1, (int) ($props['columns'] ?? 1));
 $min = min($columns, max(1, (int) ($props['min'] ?? 1)));
 $metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
 
+$field = (array) $this->unwrap($field);
 $choices = new \Cosray\Panel\BlockChoices(
+	(string) ($field['name'] ?? ''),
 	$props,
 	isset($renderIcon) ? fn(array $icon): string => (string) $this->unwrap($renderIcon($icon)) : null,
 );

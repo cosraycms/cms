@@ -84,38 +84,53 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	public function common(string ...$types): static
 	{
-		$this->commonTypes = array_values(array_unique($types));
+		$this->commonTypes = $types;
 
 		return $this;
 	}
 
-	private function commonBlockTypes(): array
+	/**
+	 * The short menu's types in order: an explicit list checked against
+	 * the allowed types, or the first six allowed ones.
+	 *
+	 * @param list<string> $common
+	 * @param list<string> $allowed
+	 * @return list<string>
+	 */
+	public static function commonSelection(array $common, array $allowed, string $field): array
 	{
-		$allowed = $this->allowedBlockTypes();
+		$common = array_values(array_unique($common));
 
-		if ($this->commonTypes === []) {
+		if ($common === []) {
 			return array_slice($allowed, 0, self::COMMON_LIMIT);
 		}
 
-		if (count($this->commonTypes) > self::COMMON_LIMIT) {
+		if (count($common) > self::COMMON_LIMIT) {
 			throw new RuntimeException(
-				"Blocks field '{$this->name}' may have at most " . self::COMMON_LIMIT . ' distinct common types',
+				"Blocks field '{$field}' may have at most " . self::COMMON_LIMIT . ' distinct common types',
 			);
 		}
 
+		foreach ($common as $type) {
+			if (!in_array($type, $allowed, true)) {
+				throw new RuntimeException("Blocks field '{$field}' common type '{$type}' is not allowed");
+			}
+		}
+
+		return $common;
+	}
+
+	private function commonBlockTypes(): array
+	{
 		foreach ($this->commonTypes as $type) {
 			if (!class_exists($type) || !is_a($type, Block::class, true)) {
 				throw new RuntimeException(
 					"Blocks field '{$this->name}' common type '{$type}' must be a class implementing " . Block::class,
 				);
 			}
-
-			if (!in_array($type, $allowed, true)) {
-				throw new RuntimeException("Blocks field '{$this->name}' common type '{$type}' is not allowed");
-			}
 		}
 
-		return $this->commonTypes;
+		return self::commonSelection($this->commonTypes, $this->allowedBlockTypes(), $this->name);
 	}
 
 	public function allows(string $type): bool

@@ -14,7 +14,7 @@ final class BlockChoices
 	public readonly array $all;
 	public readonly array $common;
 
-	public function __construct(array $props, ?callable $renderIcon = null)
+	public function __construct(string $field, array $props, ?callable $renderIcon = null)
 	{
 		$descriptors = $props['blockTypes'] ?? [];
 		if (!is_array($descriptors)) {
@@ -28,24 +28,16 @@ final class BlockChoices
 			$types[$type['type']] = $type;
 		}
 		$this->types = $types;
-		$common = array_key_exists('commonTypes', $props)
-			? $props['commonTypes']
-			: array_slice(array_keys($types), 0, Blocks::COMMON_LIMIT);
+		$common = array_key_exists('commonTypes', $props) ? $props['commonTypes'] : [];
 		if (!is_array($common) || !array_is_list($common)) {
 			throw new RuntimeException('Invalid common block type selection');
 		}
-		if ($common === []) {
-			$common = array_slice(array_keys($types), 0, Blocks::COMMON_LIMIT);
-		}
 		foreach ($common as $type) {
-			if (!is_string($type) || !isset($types[$type])) {
-				throw new RuntimeException('Common block type is not allowed');
+			if (!is_string($type)) {
+				throw new RuntimeException('Invalid common block type selection');
 			}
 		}
-		$common = array_values(array_unique($common));
-		if (count($common) > Blocks::COMMON_LIMIT) {
-			throw new RuntimeException('Too many common block types');
-		}
+		$common = Blocks::commonSelection($common, array_keys($types), $field);
 
 		$choices = [];
 		foreach ($types as $id => $type) {

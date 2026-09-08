@@ -18,7 +18,7 @@ final class BlockChoicesTest extends TestCase
 		foreach (Registry::withDefaults()->all() as $type) {
 			$types[$type] = ['type' => $type];
 		}
-		$choices = new BlockChoices(['blockTypes' => $types], static function (): never {
+		$choices = new BlockChoices('content', ['blockTypes' => $types], static function (): never {
 			throw new \LogicException('Bundled icons must not call a provider');
 		});
 		$this->assertSame(array_keys($types), array_keys($choices->all));
@@ -27,7 +27,7 @@ final class BlockChoicesTest extends TestCase
 			$this->assertStringContainsString('<svg', $choice['icon']);
 			$this->assertNotEmpty($choice['label']);
 		}
-		$this->assertSame([], new BlockChoices([])->all);
+		$this->assertSame([], new BlockChoices('content', [])->all);
 	}
 
 	public function testCommonChoicesReuseProviderResultsWithoutChangingPermissionData(): void
@@ -39,13 +39,17 @@ final class BlockChoicesTest extends TestCase
 			['type' => 'missing', 'icon' => ['id' => 'missing']],
 			['type' => 'plain'],
 		];
-		$choices = new BlockChoices([
-			'blockTypes' => $types,
-			'commonTypes' => ['missing', 'custom', 'custom'],
-		], static function (array $icon) use (&$calls): string {
-			$calls[] = $icon;
-			return $icon['id'] === 'app:note' ? '<svg viewBox="0 0 16 16"></svg>' : '<!-- icon not found -->';
-		});
+		$choices = new BlockChoices(
+			'content',
+			[
+				'blockTypes' => $types,
+				'commonTypes' => ['missing', 'custom', 'custom'],
+			],
+			static function (array $icon) use (&$calls): string {
+				$calls[] = $icon;
+				return $icon['id'] === 'app:note' ? '<svg viewBox="0 0 16 16"></svg>' : '<!-- icon not found -->';
+			},
+		);
 		$this->assertSame([$custom, ['id' => 'missing']], $calls);
 		$this->assertSame(['missing', 'custom'], array_column($choices->common, 'type'));
 		$this->assertSame($choices->all['custom'], $choices->common[1]);
@@ -55,7 +59,7 @@ final class BlockChoicesTest extends TestCase
 		$this->assertSame($choices->all['plain']['icon'], $choices->all['missing']['icon']);
 		$this->assertSame(
 			['custom', 'missing', 'plain'],
-			array_column(new BlockChoices(['blockTypes' => $types, 'commonTypes' => []])->common, 'type'),
+			array_column(new BlockChoices('content', ['blockTypes' => $types, 'commonTypes' => []])->common, 'type'),
 		);
 	}
 
@@ -79,6 +83,6 @@ final class BlockChoicesTest extends TestCase
 	public function testMalformedSelectionsAreNotTreatedAsPermissions(array $props): void
 	{
 		$this->expectException(RuntimeException::class);
-		new BlockChoices($props);
+		new BlockChoices('content', $props);
 	}
 }
