@@ -146,7 +146,7 @@ use Cosray\Schema\Common;
 protected Blocks $content;
 ```
 
-The fluent form is `$blocks->common(Type::class, ...)`. Each call replaces the list, duplicates collapse, and an empty list restores the default. The list may hold at most six types, all of them allowed, in whichever order `Common` and `Allows` are declared; anything else fails when the control is resolved. The menu is presentation only: it does not change what the field allows, validates or stores.
+The fluent form is `$blocks->common(Type::class, ...)`. Each call replaces the list, duplicates collapse, and an empty list restores the default. A class that is not a block fails at once. The list may hold at most six types, all of them allowed, and that is checked when the control is resolved, so `Common` and `Allows` may be declared in either order. The menu is presentation only: it does not change what the field allows, validates or stores.
 
 ### Translation
 

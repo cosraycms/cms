@@ -39,7 +39,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	public function control(): Control
 	{
 		return Control::blocks()
-			->prop('commonTypes', $this->commonBlockTypes())
+			->prop('commonTypes', self::commonSelection($this->commonTypes, $this->allowedBlockTypes(), $this->name))
 			->prop('blockTypes', array_map($this->blockTypeProperties(...), $this->allowedBlockTypes()))
 			->prop('columns', $this->columns)
 			->prop('min', $this->min)
@@ -84,6 +84,18 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	public function common(string ...$types): static
 	{
+		foreach ($types as $type) {
+			if (!class_exists($type)) {
+				throw new RuntimeException("Blocks field '{$this->name}' has unknown common type '{$type}'");
+			}
+
+			if (!is_a($type, Block::class, true)) {
+				throw new RuntimeException(
+					"Blocks field '{$this->name}' common type '{$type}' must implement " . Block::class,
+				);
+			}
+		}
+
 		$this->commonTypes = $types;
 
 		return $this;
@@ -118,19 +130,6 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		}
 
 		return $common;
-	}
-
-	private function commonBlockTypes(): array
-	{
-		foreach ($this->commonTypes as $type) {
-			if (!class_exists($type) || !is_a($type, Block::class, true)) {
-				throw new RuntimeException(
-					"Blocks field '{$this->name}' common type '{$type}' must be a class implementing " . Block::class,
-				);
-			}
-		}
-
-		return self::commonSelection($this->commonTypes, $this->allowedBlockTypes(), $this->name);
 	}
 
 	public function allows(string $type): bool

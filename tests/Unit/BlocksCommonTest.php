@@ -116,18 +116,31 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 		$this->assertSame([CatalogBlock::class], $field->control()->array()['props']['commonTypes']);
 	}
 
-	public static function invalidCommonTypes(): array
+	public static function invalidCommonClasses(): array
 	{
 		return [
-			'unknown' => [['App\\MissingBlock'], 'must be a class implementing'],
-			'non-block' => [[Text::class], 'must be a class implementing'],
+			'unknown' => ['App\\MissingBlock', 'unknown common type'],
+			'non-block' => [Text::class, 'must implement'],
+		];
+	}
+
+	#[DataProvider('invalidCommonClasses')]
+	public function testCommonRejectsNonBlockClassesAtOnce(string $type, string $message): void
+	{
+		$this->throws(RuntimeException::class, $message);
+		$this->field()->common($type);
+	}
+
+	public static function invalidCommonSelections(): array
+	{
+		return [
 			'disallowed' => [[CatalogBlock::class], 'is not allowed'],
 			'oversized' => [array_slice(Block\Registry::withDefaults()->all(), 0, 7), 'at most 6 distinct'],
 		];
 	}
 
-	#[DataProvider('invalidCommonTypes')]
-	public function testInvalidCommonConfigurationFailsClearly(array $types, string $message): void
+	#[DataProvider('invalidCommonSelections')]
+	public function testInvalidCommonSelectionFailsWhenTheControlResolves(array $types, string $message): void
 	{
 		$field = $this->field()->common(...$types);
 		$this->throws(RuntimeException::class, $message);
