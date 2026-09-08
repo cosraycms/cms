@@ -214,7 +214,7 @@ final class ReferenceScannerTest extends TestCase
 		return [
 			'uid' => 'block-own-uid',
 			'type' => $type,
-			'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			'fields' => $fields,
 		];
 	}

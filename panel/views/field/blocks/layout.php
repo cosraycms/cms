@@ -11,13 +11,13 @@ $layout = (array) $this->unwrap($layout);
 $columns = max(1, (int) $columns);
 $min = min($columns, max(1, (int) $min));
 $id = (string) $this->unwrap($id);
-$span = (int) ($layout['span'] ?? $min);
+$colspan = (int) ($layout['colspan'] ?? $min);
 $indent = (int) ($layout['indent'] ?? 0);
 
 $dimensions = [
-	'span' => [__('field:span'), $span, $min, $columns - $indent],
-	'rows' => [__('field:rows'), (int) ($layout['rows'] ?? 1), 1, Layout::MAX_ROWS],
-	'indent' => [__('field:indent'), $indent, 0, $columns - $span],
+	'colspan' => [__('field:colspan'), $colspan, $min, $columns - $indent],
+	'rowspan' => [__('field:rowspan'), (int) ($layout['rowspan'] ?? 1), 1, Layout::MAX_ROWSPAN],
+	'indent' => [__('field:indent'), $indent, 0, $columns - $colspan],
 ];
 ?>
 <div class="layout">

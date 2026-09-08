@@ -479,18 +479,18 @@ final class Quote implements Block
   shape is built from the field rather than from the descriptor
 - a block type may contain neither `Blocks` nor `Entries`; entry types may
   not contain `Blocks` (both rejected at boot)
-- stored row: `{uid, type: FQCN, layout: {span, rows, indent}, fields, meta?}`
+- stored row: `{uid, type: FQCN, layout: {colspan, rowspan, indent}, fields, meta?}`
   in per-locale lists (asymmetric) or one `zxx` list; `fields` holds the
   ordinary field envelopes, `meta` the block's `class`/`id`; the indent
   counts columns left free before the block, relative to where the flow
   places it, not an absolute column
-- readers clamp the layout (`span` into `[min, columns]`, `rows` into
-  `[1, 6]`, `indent` into `[0, columns - span]`); a write through the store
+- readers clamp the layout (`colspan` into `[min, columns]`, `rowspan` into
+  `[1, 6]`, `indent` into `[0, columns - colspan]`); a write through the store
   is validated instead, so out-of-range imports fail loudly
 - rendering contract: a `{prefix}-blocks` container with `data-columns`,
   `data-responsive` and `--columns`, each block a `{prefix}-block` div with
-  `data-type` (the type handle), `data-span`/`-rows`/`-indent`/`-reserved`
-  and the matching custom properties (`reserved` is `indent + span`, derived
+  `data-type` (the type handle), `data-colspan`/`-rowspan`/`-indent`/`-reserved`
+  and the matching custom properties (`reserved` is `indent + colspan`, derived
   but carried for CSS that cannot read the inline style); an empty render
   emits no element; every generated attribute is escaped
 - `Blocks::render()` args: `prefix`, `tag`, `class`, `imageSizes`, `sizes`,
@@ -511,7 +511,7 @@ final class Quote implements Block
   the columns left in its row wraps onto the next one
 - migration `000000-000031` converts legacy blocks in nodes, drafts and both
   history tables: `colspan`/`rowspan`/`colstart` become
-  `layout.span`/`rows`/`indent` (an offset), `width` and the field's
+  `layout.colspan`/`rowspan`/`indent` (an offset), `width` and the field's
   `columns`/`minCellWidth` meta are dropped, legacy ids become type classes
   (`html` -> `RichText`, `h1`-`h6` -> `Heading`), media items move into the
   type's field, the YouTube aspect ratio moves into the `Youtube` field meta,
@@ -859,7 +859,7 @@ Block image rendering:
 
 - `image` blocks emit a `srcset` ladder of width-mode named sizes (default
   `block-sm`/`block`/`block-lg`) plus a `sizes` attribute computed from
-  the block's share of the grid (`layout.span` over the field's columns);
+  the block's share of the grid (`layout.colspan` over the field's columns);
   `images` blocks emit one `block-thumb` rendition per item; generation is
   lazy via the cache fallback route
 - `Blocks::render()` args: `imageSizes` (ladder names; a single entry

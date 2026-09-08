@@ -651,9 +651,9 @@ final class Styleguide extends Panel
 			'type' => 'doc',
 			'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]]],
 		];
-		$layout = static fn(int $span, int $rows = 1, int $indent = 0): array => [
-			'span' => $span,
-			'rows' => $rows,
+		$layout = static fn(int $colspan, int $rowspan = 1, int $indent = 0): array => [
+			'colspan' => $colspan,
+			'rowspan' => $rowspan,
 			'indent' => $indent,
 		];
 		$richtext = static fn(string $uid, array $layout, array $value): array => [

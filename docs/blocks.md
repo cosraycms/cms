@@ -172,7 +172,7 @@ The node editor's one content-language selector switches the translated sub-fiel
             {
                 "uid": "k3v9p2mq7x1zd",
                 "type": "Cosray\\Block\\Image",
-                "layout": { "span": 6, "rows": 1, "indent": 0 },
+                "layout": { "colspan": 6, "rowspan": 1, "indent": 0 },
                 "fields": {
                     "image": {
                         "type": "Cosray\\Field\\Image",
@@ -189,11 +189,11 @@ The node editor's one content-language selector switches the translated sub-fiel
 
 - `uid` is a 13-character lowercase word-safe id, as on entry rows; the client fills it when a block is stamped, the server backfills a missing one.
 - `type` is the block type's FQCN. Rows of a type the field no longer allows are shown as unknown and dropped on the next save.
-- `layout` is always present and normalized. `span` counts columns, `rows` counts grid rows, `indent` counts the columns left free before the block (0 = none). The indent is relative to where the block falls in the flow, not an absolute column, so a block placed beside a neighbour is indented from that neighbour. For a one-column field the layout is `{1, 1, 0}`.
+- `layout` is always present and normalized. `colspan` counts columns, `rowspan` counts grid rows, `indent` counts the columns left free before the block (0 = none). The indent is relative to where the block falls in the flow, not an absolute column, so a block placed beside a neighbour is indented from that neighbour. For a one-column field the layout is `{1, 1, 0}`.
 - `fields` holds the block type's fields in the ordinary field envelope, so every sub-field carries its own `type`, `value` locale map and optional `meta`.
 - `meta` is the block's own settings, currently `class` and `id`, each a neutral-locale map. It is omitted when empty.
 
-**Readers clamp** what they load: `span` into `[min, columns]`, `rows` into `[1, 6]`, `indent` into `[0, columns − span]`. Narrowing a field later, or importing out-of-range content, therefore never breaks a render — the block is simply placed inside the grid it has. A write **through the store** is not clamped but validated: an out-of-range layout is rejected, so a programmatic import fails loudly instead of persisting something the editor would silently rewrite. A save from the editor clamps before validating.
+**Readers clamp** what they load: `colspan` into `[min, columns]`, `rowspan` into `[1, 6]`, `indent` into `[0, columns − colspan]`. Narrowing a field later, or importing out-of-range content, therefore never breaks a render — the block is simply placed inside the grid it has. A write **through the store** is not clamped but validated: an out-of-range layout is rejected, so a programmatic import fails loudly instead of persisting something the editor would silently rewrite. A save from the editor clamps before validating.
 
 ## Editor form names
 
@@ -202,8 +202,8 @@ The editor is server-rendered HTML — the same typed repeater entries use, one 
 ```text
 content[f][value][{lo}][i][uid]                       hidden row identity
 content[f][value][{lo}][i][type]                      hidden row type (FQCN)
-content[f][value][{lo}][i][layout][span]              hidden, stepped by the toolbar
-content[f][value][{lo}][i][layout][rows]
+content[f][value][{lo}][i][layout][colspan]           hidden, stepped by the toolbar
+content[f][value][{lo}][i][layout][rowspan]
 content[f][value][{lo}][i][layout][indent]
 content[f][value][{lo}][i][fields][sub][value][lo]    primitive sub-field, per locale
 content[f][value][{lo}][i][fields][sub][json]         element sub-field (cosray-host leaf)
@@ -231,11 +231,11 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 		class="cms-block hero"
 		id="intro"
 		data-type="richtext"
-		data-span="8"
-		data-rows="1"
+		data-colspan="8"
+		data-rowspan="1"
 		data-indent="2"
 		data-reserved="10"
-		style="--span: 8; --rows: 1; --indent: 2; --reserved: 10"
+		style="--colspan: 8; --rowspan: 1; --indent: 2; --reserved: 10"
 	>
 		…
 	</div>
@@ -244,8 +244,8 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 
 - The container is `{prefix}-blocks` plus the `class` argument, with `data-columns`, `data-responsive` and `--columns`. It is emitted even when the field is empty.
 - Each block is a `<div>` — `{prefix}-block` plus the block's `class` setting, the `id` setting, `data-type` (the type's handle) and the layout as both data attributes and custom properties, then the type's own output.
-- `reserved` is `indent + span`, the columns the block takes out of its row. It is derived rather than stored, but carried like the rest so that CSS which cannot read the inline style still has it in one attribute instead of having to pair `data-indent` with `data-span`.
-- The data attributes exist so a strict-CSP site can style through `[data-span='6']` selectors; the custom properties exist so the reference sheet stays twenty lines.
+- `reserved` is `indent + colspan`, the columns the block takes out of its row. It is derived rather than stored, but carried like the rest so that CSS which cannot read the inline style still has it in one attribute instead of having to pair `data-indent` with `data-span`.
+- The data attributes exist so a strict-CSP site can style through `[data-colspan='6']` selectors; the custom properties exist so the reference sheet stays twenty lines.
 
 ### Render arguments
 
@@ -285,7 +285,7 @@ One row is a `Cosray\Value\Block`:
 | --- | --- |
 | `$block->fieldName` | the sub-field's `Value` object |
 | `uid()`, `$block->type`, `handle()` | the row identity and its type (FQCN) and handle |
-| `layout()` | a `Block\Layout` with `span`, `rows`, `indent` and `array()` |
+| `layout()` | a `Block\Layout` with `colspan`, `rowspan`, `indent` and `array()` |
 | `meta(string $key, mixed $default = null)`, `styleClass()`, `elementId()` | the block settings |
 | `render(...$args)`, `__toString()` | this block alone, wrapper included |
 
@@ -333,7 +333,7 @@ Copying it into the site's own CSS is equally fine — it is twenty lines and ha
 	.cms-block {
 		min-width: 0;
 		grid-column: span var(--reserved, 1);
-		grid-row: span var(--rows, 1);
+		grid-row: span var(--rowspan, 1);
 		margin-inline-start: calc(
 			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
 		);
@@ -349,7 +349,7 @@ Copying it into the site's own CSS is equally fine — it is twenty lines and ha
 }
 ```
 
-A block spans `--reserved` columns — its indent plus its span — and a margin pushes its own box past the indent, so the indent stays in the flow instead of naming an absolute column. The percentage in that margin resolves against the block's own grid area, which is exactly `--reserved` columns wide, so one column is `(100% + gap) / reserved` and the sheet needs no measurement of the container. A block too wide for the columns still free in its row wraps onto the next one, the way any grid item does.
+A block spans `--reserved` columns — its indent plus its colspan — and a margin pushes its own box past the indent, so the indent stays in the flow instead of naming an absolute column. The percentage in that margin resolves against the block's own grid area, which is exactly `--reserved` columns wide, so one column is `(100% + gap) / reserved` and the sheet needs no measurement of the container. A block too wide for the columns still free in its row wraps onto the next one, the way any grid item does.
 
 Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins** over it without needing a more specific selector. The intended override points are:
 
@@ -384,7 +384,7 @@ Migration `000000-000031` converts stored blocks to the typed-row shape in `node
 
 What it does per block:
 
-- `colspan`, `rowspan` and `colstart` become `layout.span`, `layout.rows` and `layout.indent` (an offset, so `colstart: 3` is `indent: 2`). The legacy `colstart` named an absolute column and only ever placed a block that started its row; the offset is relative to the flow and renders such a block identically; `width` and the field's `columns`/`minCellWidth` meta are dropped.
+- `colspan` and `rowspan` move into `layout` as they are; `colstart` becomes `layout.indent` (an offset, so `colstart: 3` is `indent: 2`). The legacy `colstart` named an absolute column and only ever placed a block that started its row; the offset is relative to the flow and renders such a block identically; `width` and the field's `columns`/`minCellWidth` meta are dropped.
 - The block type ids become classes: the legacy `html` id and `richtext` map to `Cosray\Block\RichText`, `h1`–`h6` to one `Cosray\Block\Heading` with the level as its option, and the media, YouTube and iframe blocks to their type with the value moved into the type's field.
 - The YouTube aspect ratio moves out of the block meta into the `Youtube` field's meta; `class` and `id` stay block meta; other meta keys are kept and reported.
 - Blocks without a `uid` get one.

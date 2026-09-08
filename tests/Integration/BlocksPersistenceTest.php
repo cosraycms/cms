@@ -73,7 +73,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		return [
 			'uid' => $uid,
 			'type' => Builtin\Heading::class,
-			'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			'fields' => [
 				'text' => ['type' => \Cosray\Field\Text::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
 				'level' => ['type' => \Cosray\Field\Option::class, 'value' => [Field::NEUTRAL_LOCALE => $level]],
@@ -97,11 +97,15 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 				'contentBlocks' => [
 					'en' => [
 						$this->headingRow('blockhead0001', 'Opening hours', '3'),
-						$this->textRow('blocktext0001', "Mon-Fri\n9-17", ['span' => 6, 'rows' => 1, 'indent' => 0]),
-						$this->textRow('blocktext0002', 'Sat 9-12', ['span' => 4, 'rows' => 2, 'indent' => 2]),
+						$this->textRow('blocktext0001', "Mon-Fri\n9-17", [
+							'colspan' => 6,
+							'rowspan' => 1,
+							'indent' => 0,
+						]),
+						$this->textRow('blocktext0002', 'Sat 9-12', ['colspan' => 4, 'rowspan' => 2, 'indent' => 2]),
 					],
 					'de' => [
-						$this->textRow('blocktext0003', 'Mo-Fr 9-17', ['span' => 12, 'rows' => 1, 'indent' => 0]),
+						$this->textRow('blocktext0003', 'Mo-Fr 9-17', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0]),
 					],
 				],
 			])
@@ -117,7 +121,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 			['blockhead0001', 'blocktext0001', 'blocktext0002'],
 			array_column($stored['value']['en'], 'uid'),
 		);
-		$this->assertEquals(['span' => 4, 'rows' => 2, 'indent' => 2], $stored['value']['en'][2]['layout']);
+		$this->assertEquals(['colspan' => 4, 'rowspan' => 2, 'indent' => 2], $stored['value']['en'][2]['layout']);
 		$this->assertSame(['class' => ['zxx' => 'lead']], $stored['value']['en'][0]['meta']);
 		$this->assertSame(['zxx' => '3'], $stored['value']['en'][0]['fields']['level']['value']);
 		$this->assertArrayNotHasKey('meta', $stored);
@@ -134,7 +138,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		$this->assertStringContainsString('data-columns="12"', $html);
 		$this->assertStringContainsString('<div class="cms-block lead" data-type="heading"', $html);
 		$this->assertStringContainsString('<h3>Opening hours</h3>', $html);
-		$this->assertStringContainsString('data-span="4" data-rows="2" data-indent="2"', $html);
+		$this->assertStringContainsString('data-colspan="4" data-rowspan="2" data-indent="2"', $html);
 		$this->assertStringContainsString("Mon-Fri<br />\n9-17", $html);
 		$this->assertStringNotContainsString('Mo-Fr', $html);
 	}
@@ -149,7 +153,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		$draft = $writer
 			->draft(TestMediaDocument::class, [
 				'contentBlocks' => [
-					'en' => [$this->textRow('blocktext0009', 'Wide', ['span' => 6, 'rows' => 1, 'indent' => 6])],
+					'en' => [$this->textRow('blocktext0009', 'Wide', ['colspan' => 6, 'rowspan' => 1, 'indent' => 6])],
 				],
 			])
 			->uid('blocks-invalid-node');

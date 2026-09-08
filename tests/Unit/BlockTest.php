@@ -23,21 +23,24 @@ final class BlockTest extends RichtextOwnerTestCase
 {
 	public function testLayoutNormalizesAndClamps(): void
 	{
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], Layout::normalize(null, 12, 1)->array());
-		$this->assertSame(['span' => 1, 'rows' => 1, 'indent' => 0], Layout::normalize(['span' => 6], 1, 1)->array());
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], Layout::normalize(null, 12, 1)->array());
 		$this->assertSame(
-			['span' => 6, 'rows' => 2, 'indent' => 3],
-			Layout::normalize(['span' => '6', 'rows' => '2', 'indent' => '3'], 12, 2)->array(),
+			['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
+			Layout::normalize(['colspan' => 6], 1, 1)->array(),
 		);
 		$this->assertSame(
-			['span' => 2, 'rows' => 6, 'indent' => 10],
-			Layout::normalize(['span' => 1, 'rows' => 99, 'indent' => 30], 12, 2)->array(),
+			['colspan' => 6, 'rowspan' => 2, 'indent' => 3],
+			Layout::normalize(['colspan' => '6', 'rowspan' => '2', 'indent' => '3'], 12, 2)->array(),
 		);
 		$this->assertSame(
-			['span' => 8, 'rows' => 1, 'indent' => 4],
-			Layout::normalize(['span' => 8, 'rows' => -1, 'indent' => 9], 12, 1)->array(),
+			['colspan' => 2, 'rowspan' => 6, 'indent' => 10],
+			Layout::normalize(['colspan' => 1, 'rowspan' => 99, 'indent' => 30], 12, 2)->array(),
 		);
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], Layout::normalize('junk', 12, 1)->array());
+		$this->assertSame(
+			['colspan' => 8, 'rowspan' => 1, 'indent' => 4],
+			Layout::normalize(['colspan' => 8, 'rowspan' => -1, 'indent' => 9], 12, 1)->array(),
+		);
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], Layout::normalize('junk', 12, 1)->array());
 	}
 
 	public function testBlockReturnsMetaStyleAndId(): void
@@ -63,7 +66,7 @@ final class BlockTest extends RichtextOwnerTestCase
 		$this->assertNull($block->styleClass());
 		$this->assertNull($block->elementId());
 		$this->assertNull($block->uid());
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $block->layout()->array());
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $block->layout()->array());
 		$this->assertTrue($block->isset());
 		$this->assertSame('', $block->text->unwrap());
 	}

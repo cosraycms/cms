@@ -146,10 +146,10 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 			],
 			array_column($en, 'type'),
 		);
-		$this->assertEquals(['span' => 8, 'rows' => 1, 'indent' => 2], $en[0]['layout']);
+		$this->assertEquals(['colspan' => 8, 'rowspan' => 1, 'indent' => 2], $en[0]['layout']);
 		$this->assertSame(['class' => ['zxx' => 'lead']], $en[0]['meta']);
 		$this->assertSame(['zxx' => '3'], $en[1]['fields']['level']['value']);
-		$this->assertEquals(['span' => 4, 'rows' => 2, 'indent' => 0], $en[2]['layout']);
+		$this->assertEquals(['colspan' => 4, 'rowspan' => 2, 'indent' => 0], $en[2]['layout']);
 		$this->assertArrayNotHasKey('width', $en[2]);
 		$this->assertSame(
 			['aspectRatioX' => ['zxx' => 16], 'aspectRatioY' => ['zxx' => 9]],

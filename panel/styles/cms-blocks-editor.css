@@ -1,7 +1,7 @@
 /*
  * The blocks editor: the entries card with a preview grid. The grid
- * mirrors the frontend contract — --columns on the container, --span,
- * --rows, --indent and --reserved (plus data-indent) on the block — so a
+ * mirrors the frontend contract — --columns on the container, --colspan,
+ * --rowspan, --indent and --reserved (plus data-indent) on the block — so a
  * block sits where the site will place it. A one-column field is a quiet list of
  * blocks separated by hairlines; a multi-column field renders bordered
  * cells. A block carries no header: its chrome is a group hanging over
@@ -47,7 +47,7 @@
 		   past the indent. The percentage resolves against the block's own
 		   area, so one column is (100% + gap) / reserved. */
 		grid-column: span var(--reserved, 1);
-		grid-row: span var(--rows, 1);
+		grid-row: span var(--rowspan, 1);
 		margin-inline-start: calc(var(--indent, 0) * (100% + var(--blocks-gap)) / var(--reserved, 1));
 		min-width: 0;
 		border: 1px solid var(--cms-color-border-soft);

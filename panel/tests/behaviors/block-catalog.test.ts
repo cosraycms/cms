@@ -141,7 +141,7 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 	const row = rows()[0];
 	expect(row.querySelector<HTMLInputElement>('input[name$="[type]"]')?.value).toBe(types[7].type);
 	expect(row.querySelector<HTMLInputElement>('[data-repeater-uid]')?.value).toMatch(/^\w{13}$/);
-	expect(row.style.getPropertyValue('--span')).toBe('12');
+	expect(row.style.getPropertyValue('--colspan')).toBe('12');
 	expect(row.contains(document.activeElement)).toBe(true);
 	expect(change).toHaveBeenCalledOnce();
 	expect(submit).not.toHaveBeenCalled();
@@ -156,7 +156,7 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 						zxx: {
 							0: {
 								type: types[7].type,
-								layout: { span: '12', rows: '1', indent: '0' },
+								layout: { colspan: '12', rowspan: '1', indent: '0' },
 								fields: { text: { value: { zxx: 'Catalog value' } } },
 							},
 						},

@@ -9,7 +9,7 @@ import {
 	clamp,
 	grid,
 	install,
-	MAX_ROWS,
+	MAX_ROWSPAN,
 	parseDimension,
 	parseKey,
 	pitch,
@@ -45,7 +45,7 @@ function number(dimension: string, value: number, low: number, high: number): st
 }
 
 function editor(
-	layout = { span: 6, rows: 1, indent: 2 },
+	layout = { colspan: 6, rowspan: 1, indent: 2 },
 	bounds = { columns: 12, min: 2 },
 ): {
 	row: HTMLElement;
@@ -64,17 +64,17 @@ function editor(
 				class="block"
 				data-repeater-row
 				data-indent="${layout.indent}"
-				style="--span: ${layout.span}; --rows: ${layout.rows}; --indent: ${layout.indent}">
+				style="--colspan: ${layout.colspan}; --rowspan: ${layout.rowspan}; --indent: ${layout.indent}">
 				<input type="hidden" name="${NAME}[0][uid]" value="b1">
-				<input type="hidden" name="${NAME}[0][layout][span]" value="${layout.span}" data-layout="span">
-				<input type="hidden" name="${NAME}[0][layout][rows]" value="${layout.rows}" data-layout="rows">
+				<input type="hidden" name="${NAME}[0][layout][colspan]" value="${layout.colspan}" data-layout="colspan">
+				<input type="hidden" name="${NAME}[0][layout][rowspan]" value="${layout.rowspan}" data-layout="rowspan">
 				<input type="hidden" name="${NAME}[0][layout][indent]" value="${layout.indent}" data-layout="indent">
 				<div class="chrome"><span class="grip" data-repeater-grip tabindex="0"></span></div>
 				<dialog data-meta>
 					<div class="layout">
-						${number('span', layout.span, bounds.min, bounds.columns - layout.indent)}
-						${number('rows', layout.rows, 1, MAX_ROWS)}
-						${number('indent', layout.indent, 0, bounds.columns - layout.span)}
+						${number('colspan', layout.colspan, bounds.min, bounds.columns - layout.indent)}
+						${number('rowspan', layout.rowspan, 1, MAX_ROWSPAN)}
+						${number('indent', layout.indent, 0, bounds.columns - layout.colspan)}
 					</div>
 				</dialog>
 			</div>
@@ -115,55 +115,64 @@ function type(control: HTMLInputElement, value: string, commit = false): void {
 }
 
 describe('blocks layout numbers', () => {
-	it('clamps span into [min, columns] and rows into [1, MAX_ROWS]', () => {
+	it('clamps colspan into [min, columns] and rowspan into [1, MAX_ROWSPAN]', () => {
 		const twelve = grid(12, 2);
 
-		expect(clamp({ span: 14, rows: 9, indent: 0 }, twelve)).toEqual({
-			span: 12,
-			rows: MAX_ROWS,
+		expect(clamp({ colspan: 14, rowspan: 9, indent: 0 }, twelve)).toEqual({
+			colspan: 12,
+			rowspan: MAX_ROWSPAN,
 			indent: 0,
 		});
-		expect(clamp({ span: 1, rows: 0, indent: 0 }, twelve)).toEqual({ span: 2, rows: 1, indent: 0 });
-		expect(clamp({ span: 4, rows: 2, indent: -1 }, twelve)).toEqual({
-			span: 4,
-			rows: 2,
+		expect(clamp({ colspan: 1, rowspan: 0, indent: 0 }, twelve)).toEqual({
+			colspan: 2,
+			rowspan: 1,
+			indent: 0,
+		});
+		expect(clamp({ colspan: 4, rowspan: 2, indent: -1 }, twelve)).toEqual({
+			colspan: 4,
+			rowspan: 2,
 			indent: 0,
 		});
 	});
 
 	it('keeps the indent within the room the span leaves', () => {
-		expect(clamp({ span: 8, rows: 1, indent: 6 }, grid(12, 2)).indent).toBe(4);
+		expect(clamp({ colspan: 8, rowspan: 1, indent: 6 }, grid(12, 2)).indent).toBe(4);
 	});
 
 	it('caps a dimension by the room the others leave instead of moving them', () => {
 		const twelve = grid(12, 2);
 
 		// Widening stops at the grid's edge; the indent never gives way.
-		expect(set({ span: 8, rows: 1, indent: 4 }, 'span', 9, twelve)).toEqual({
-			span: 8,
-			rows: 1,
+		expect(set({ colspan: 8, rowspan: 1, indent: 4 }, 'colspan', 9, twelve)).toEqual({
+			colspan: 8,
+			rowspan: 1,
 			indent: 4,
 		});
-		expect(set({ span: 8, rows: 1, indent: 4 }, 'span', 7, twelve)).toEqual({
-			span: 7,
-			rows: 1,
+		expect(set({ colspan: 8, rowspan: 1, indent: 4 }, 'colspan', 7, twelve)).toEqual({
+			colspan: 7,
+			rowspan: 1,
 			indent: 4,
 		});
-		expect(set({ span: 8, rows: 1, indent: 4 }, 'indent', 9, twelve)).toEqual({
-			span: 8,
-			rows: 1,
+		expect(set({ colspan: 8, rowspan: 1, indent: 4 }, 'indent', 9, twelve)).toEqual({
+			colspan: 8,
+			rowspan: 1,
 			indent: 4,
 		});
-		expect(set({ span: 8, rows: 1, indent: 4 }, 'rows', 99, twelve).rows).toBe(MAX_ROWS);
+		expect(set({ colspan: 8, rowspan: 1, indent: 4 }, 'rowspan', 99, twelve).rowspan).toBe(
+			MAX_ROWSPAN,
+		);
 	});
 
 	it('bounds every dimension given the others', () => {
-		expect(bounds({ span: 8, rows: 1, indent: 0 }, grid(12, 2))).toEqual({
-			span: { low: 2, high: 12 },
-			rows: { low: 1, high: MAX_ROWS },
+		expect(bounds({ colspan: 8, rowspan: 1, indent: 0 }, grid(12, 2))).toEqual({
+			colspan: { low: 2, high: 12 },
+			rowspan: { low: 1, high: MAX_ROWSPAN },
 			indent: { low: 0, high: 4 },
 		});
-		expect(bounds({ span: 6, rows: 1, indent: 3 }, grid(12, 2)).span).toEqual({ low: 2, high: 9 });
+		expect(bounds({ colspan: 6, rowspan: 1, indent: 3 }, grid(12, 2)).colspan).toEqual({
+			low: 2,
+			high: 9,
+		});
 	});
 
 	it('normalizes a degenerate grid', () => {
@@ -173,7 +182,7 @@ describe('blocks layout numbers', () => {
 	});
 
 	it('parses a dimension and rejects anything else', () => {
-		expect(parseDimension('span')).toBe('span');
+		expect(parseDimension('colspan')).toBe('colspan');
 		expect(parseDimension('indent')).toBe('indent');
 		expect(parseDimension('width')).toBeNull();
 		expect(parseDimension(null)).toBeNull();
@@ -182,56 +191,56 @@ describe('blocks layout numbers', () => {
 	it('applies a typed value to the hidden input, the custom properties and data-indent', () => {
 		const { row, input, control } = editor();
 
-		type(control('span'), '7');
+		type(control('colspan'), '7');
 
-		expect(input('span').value).toBe('7');
-		expect(row.style.getPropertyValue('--span')).toBe('7');
+		expect(input('colspan').value).toBe('7');
+		expect(row.style.getPropertyValue('--colspan')).toBe('7');
 		expect(row.style.getPropertyValue('--reserved')).toBe('9');
 		// The room the width leaves is the indent's new limit.
 		expect(control('indent').max).toBe('5');
 
-		type(control('rows'), '2');
+		type(control('rowspan'), '2');
 		type(control('indent'), '1');
 
-		expect(input('rows').value).toBe('2');
-		expect(row.style.getPropertyValue('--rows')).toBe('2');
+		expect(input('rowspan').value).toBe('2');
+		expect(row.style.getPropertyValue('--rowspan')).toBe('2');
 		expect(input('indent').value).toBe('1');
 		expect(row.style.getPropertyValue('--indent')).toBe('1');
 		expect(row.dataset.indent).toBe('1');
-		expect(control('span').max).toBe('11');
-		expect(read(row)).toEqual({ span: 7, rows: 2, indent: 1 });
+		expect(control('colspan').max).toBe('11');
+		expect(read(row)).toEqual({ colspan: 7, rowspan: 2, indent: 1 });
 	});
 
 	it('caps the width at the grid edge instead of pulling the indent in', () => {
-		const { input, control } = editor({ span: 8, rows: 1, indent: 4 });
+		const { input, control } = editor({ colspan: 8, rowspan: 1, indent: 4 });
 
-		type(control('span'), '9', true);
+		type(control('colspan'), '9', true);
 
-		expect(input('span').value).toBe('8');
+		expect(input('colspan').value).toBe('8');
 		expect(input('indent').value).toBe('4');
-		expect(control('span').value).toBe('8');
+		expect(control('colspan').value).toBe('8');
 	});
 
 	it('waits for an out-of-range or half-typed value to commit', () => {
 		const { input, control } = editor();
 
 		// On the way to 10, the 1 is below the minimum of 2.
-		type(control('span'), '1');
+		type(control('colspan'), '1');
 
-		expect(input('span').value).toBe('6');
-		expect(control('span').value).toBe('1');
+		expect(input('colspan').value).toBe('6');
+		expect(control('colspan').value).toBe('1');
 
-		type(control('span'), '10');
+		type(control('colspan'), '10');
 
-		expect(input('span').value).toBe('10');
+		expect(input('colspan').value).toBe('10');
 
-		type(control('span'), '');
+		type(control('colspan'), '');
 
-		expect(input('span').value).toBe('10');
+		expect(input('colspan').value).toBe('10');
 
-		type(control('span'), '', true);
+		type(control('colspan'), '', true);
 
-		expect(control('span').value).toBe('10');
+		expect(control('colspan').value).toBe('10');
 
 		type(control('indent'), '7', true);
 
@@ -240,18 +249,18 @@ describe('blocks layout numbers', () => {
 	});
 
 	it('renders the layout a stamped row carries in its inputs', () => {
-		const { row, input, control } = editor({ span: 6, rows: 1, indent: 2 });
+		const { row, input, control } = editor({ colspan: 6, rowspan: 1, indent: 2 });
 
 		// A duplicate: the inputs were copied, the style and the dialog were not.
-		input('span').value = '4';
+		input('colspan').value = '4';
 		input('indent').value = '5';
 		row.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
 
-		expect(row.style.getPropertyValue('--span')).toBe('4');
+		expect(row.style.getPropertyValue('--colspan')).toBe('4');
 		expect(row.style.getPropertyValue('--indent')).toBe('5');
 		expect(row.style.getPropertyValue('--reserved')).toBe('9');
 		expect(row.dataset.indent).toBe('5');
-		expect(control('span').value).toBe('4');
+		expect(control('colspan').value).toBe('4');
 		expect(control('indent').max).toBe('8');
 	});
 
@@ -259,16 +268,16 @@ describe('blocks layout numbers', () => {
 		const { row, input } = editor();
 		row.querySelector('dialog')?.remove();
 
-		write(row, { span: 3, rows: 4, indent: 5 }, grid(12, 2));
+		write(row, { colspan: 3, rowspan: 4, indent: 5 }, grid(12, 2));
 
-		expect(input('span').value).toBe('3');
-		expect(input('rows').value).toBe('4');
+		expect(input('colspan').value).toBe('3');
+		expect(input('rowspan').value).toBe('4');
 		expect(input('indent').value).toBe('5');
-		expect(row.style.getPropertyValue('--rows')).toBe('4');
+		expect(row.style.getPropertyValue('--rowspan')).toBe('4');
 	});
 
 	it('ignores inputs outside a repeater row', () => {
-		document.body.innerHTML = `<input type="number" data-layout-input="span" value="3">`;
+		document.body.innerHTML = `<input type="number" data-layout-input="colspan" value="3">`;
 		const stray = document.querySelector<HTMLInputElement>('input');
 
 		expect(() => stray && type(stray, '4', true)).not.toThrow();
@@ -325,7 +334,7 @@ describe('blocks keyboard resizing', () => {
 	});
 
 	it('moves the edges from the focused grip and consumes the key', () => {
-		const { row, input } = editor({ span: 6, rows: 1, indent: 2 });
+		const { row, input } = editor({ colspan: 6, rowspan: 1, indent: 2 });
 		let changes = 0;
 		const count = (): void => {
 			changes += 1;
@@ -334,26 +343,26 @@ describe('blocks keyboard resizing', () => {
 		document.addEventListener('change', count);
 
 		expect(press(grip(row), 'ArrowRight').defaultPrevented).toBe(true);
-		expect(read(row)).toEqual({ span: 7, rows: 1, indent: 2 });
-		expect(row.style.getPropertyValue('--span')).toBe('7');
+		expect(read(row)).toEqual({ colspan: 7, rowspan: 1, indent: 2 });
+		expect(row.style.getPropertyValue('--colspan')).toBe('7');
 
 		press(grip(row), 'ArrowLeft', { alt: true, shift: true });
 
 		// The start edge moved left: the block grew into its indent.
-		expect(read(row)).toEqual({ span: 8, rows: 1, indent: 1 });
+		expect(read(row)).toEqual({ colspan: 8, rowspan: 1, indent: 1 });
 
 		press(grip(row), 'ArrowDown');
 		press(grip(row), 'ArrowDown');
 		press(grip(row), 'ArrowUp');
 
-		expect(read(row)).toEqual({ span: 8, rows: 2, indent: 1 });
+		expect(read(row)).toEqual({ colspan: 8, rowspan: 2, indent: 1 });
 		document.removeEventListener('change', count);
 
 		expect(changes).toBe(5);
 	});
 
 	it('stops where the handles stop, without a change', () => {
-		const { row } = editor({ span: 10, rows: 1, indent: 2 });
+		const { row } = editor({ colspan: 10, rowspan: 1, indent: 2 });
 		let changes = 0;
 		const count = (): void => {
 			changes += 1;
@@ -363,21 +372,21 @@ describe('blocks keyboard resizing', () => {
 		press(grip(row), 'ArrowRight');
 		document.removeEventListener('change', count);
 
-		expect(read(row)).toEqual({ span: 10, rows: 1, indent: 2 });
+		expect(read(row)).toEqual({ colspan: 10, rowspan: 1, indent: 2 });
 		expect(changes).toBe(0);
 	});
 
 	it('leaves other keys, other targets and one-column fields alone', () => {
-		const { row } = editor({ span: 6, rows: 1, indent: 2 });
+		const { row } = editor({ colspan: 6, rowspan: 1, indent: 2 });
 
 		expect(press(grip(row), 'ArrowRight', { alt: false }).defaultPrevented).toBe(false);
 		expect(press(row, 'ArrowRight').defaultPrevented).toBe(false);
-		expect(read(row)).toEqual({ span: 6, rows: 1, indent: 2 });
+		expect(read(row)).toEqual({ colspan: 6, rowspan: 1, indent: 2 });
 
-		const list = editor({ span: 1, rows: 1, indent: 0 }, { columns: 1, min: 1 });
+		const list = editor({ colspan: 1, rowspan: 1, indent: 0 }, { columns: 1, min: 1 });
 
 		expect(press(grip(list.row), 'ArrowDown').defaultPrevented).toBe(false);
-		expect(read(list.row)).toEqual({ span: 1, rows: 1, indent: 0 });
+		expect(read(list.row)).toEqual({ colspan: 1, rowspan: 1, indent: 0 });
 	});
 });
 
@@ -408,21 +417,21 @@ describe('blocks resize geometry', () => {
 
 describe('blocks edge resizing', () => {
 	const grid = { columns: 12, min: 2 };
-	const layout = { span: 6, rows: 1, indent: 3 };
+	const layout = { colspan: 6, rowspan: 1, indent: 3 };
 
 	it('grows the end edge, leaving the indent alone', () => {
-		expect(resize(layout, 'end', 2, grid)).toEqual({ span: 8, rows: 1, indent: 3 });
+		expect(resize(layout, 'end', 2, grid)).toEqual({ colspan: 8, rowspan: 1, indent: 3 });
 		// Nine columns are left beside the indent; it never gives way.
-		expect(resize(layout, 'end', 9, grid)).toEqual({ span: 9, rows: 1, indent: 3 });
-		expect(resize(layout, 'end', -9, grid)).toEqual({ span: 2, rows: 1, indent: 3 });
+		expect(resize(layout, 'end', 9, grid)).toEqual({ colspan: 9, rowspan: 1, indent: 3 });
+		expect(resize(layout, 'end', -9, grid)).toEqual({ colspan: 2, rowspan: 1, indent: 3 });
 	});
 
 	it('trades indent against span on the start edge', () => {
-		expect(resize(layout, 'start', -2, grid)).toEqual({ span: 8, rows: 1, indent: 1 });
-		expect(resize(layout, 'start', 3, grid)).toEqual({ span: 3, rows: 1, indent: 6 });
+		expect(resize(layout, 'start', -2, grid)).toEqual({ colspan: 8, rowspan: 1, indent: 1 });
+		expect(resize(layout, 'start', 3, grid)).toEqual({ colspan: 3, rowspan: 1, indent: 6 });
 		// Both directions stop before the block moves: indent 0, span min.
-		expect(resize(layout, 'start', -5, grid)).toEqual({ span: 9, rows: 1, indent: 0 });
-		expect(resize(layout, 'start', 8, grid)).toEqual({ span: 2, rows: 1, indent: 7 });
+		expect(resize(layout, 'start', -5, grid)).toEqual({ colspan: 9, rowspan: 1, indent: 0 });
+		expect(resize(layout, 'start', 8, grid)).toEqual({ colspan: 2, rowspan: 1, indent: 7 });
 	});
 
 	it('keeps the reserved width while the start edge moves', () => {
@@ -431,13 +440,17 @@ describe('blocks edge resizing', () => {
 		for (const steps of [-3, -1, 0, 2, 5]) {
 			const next = resize(layout, 'start', steps, grid);
 
-			expect(next.indent + next.span).toBe(layout.indent + layout.span);
+			expect(next.indent + next.colspan).toBe(layout.indent + layout.colspan);
 		}
 	});
 
 	it('counts rows on the bottom edge', () => {
-		expect(resize(layout, 'bottom', 2, grid)).toEqual({ span: 6, rows: 3, indent: 3 });
-		expect(resize(layout, 'bottom', 99, grid)).toEqual({ span: 6, rows: MAX_ROWS, indent: 3 });
-		expect(resize(layout, 'bottom', -4, grid)).toEqual({ span: 6, rows: 1, indent: 3 });
+		expect(resize(layout, 'bottom', 2, grid)).toEqual({ colspan: 6, rowspan: 3, indent: 3 });
+		expect(resize(layout, 'bottom', 99, grid)).toEqual({
+			colspan: 6,
+			rowspan: MAX_ROWSPAN,
+			indent: 3,
+		});
+		expect(resize(layout, 'bottom', -4, grid)).toEqual({ colspan: 6, rowspan: 1, indent: 3 });
 	});
 });

@@ -1,30 +1,30 @@
 // Layout editing for the blocks editor. A block row carries its layout
-// as hidden inputs (data-layout="span|rows|indent") and, in its settings
+// as hidden inputs (data-layout="colspan|rowspan|indent") and, in its settings
 // dialog, one number input per dimension ([data-layout-input]). Typing
 // into one applies the value as it is typed, within the bounds the
-// field's shape and the save patch enforce — span in
-// [min, columns − indent], rows in [1, MAX_ROWS], indent in
-// [0, columns − span]; a dimension is capped by the room the others
+// field's shape and the save patch enforce — colspan in
+// [min, columns − indent], rowspan in [1, MAX_ROWSPAN], indent in
+// [0, columns − colspan]; a dimension is capped by the room the others
 // leave and never moves them — then writes the hidden input, the row's
 // custom properties and data-indent (the grid preview follows) and the
 // other inputs' limits. The bounds come from the container's
 // data-columns/data-min. A row's edges also drag: a pointer gesture on a
 // [data-layout-resize] handle maps the travelled distance to whole steps
 // and writes the layout through the same path. Each edge moves only
-// itself — the end edge grows the span up to the grid's edge, the start
-// edge trades indent against span so the end edge stays put, and the
-// bottom edge counts rows. The keyboard reaches the same edges from the
+// itself — the end edge grows the colspan up to the grid's edge, the start
+// edge trades indent against colspan so the end edge stays put, and the
+// bottom edge counts the rowspan. The keyboard reaches the same edges from the
 // focused grip: Alt with the arrows, Shift added for the start edge.
 
-export const MAX_ROWS = 6;
+export const MAX_ROWSPAN = 6;
 
-export type Dimension = 'span' | 'rows' | 'indent';
+export type Dimension = 'colspan' | 'rowspan' | 'indent';
 export type Layout = Record<Dimension, number>;
 export type Grid = { columns: number; min: number };
 export type Bounds = Record<Dimension, { low: number; high: number }>;
 export type Edge = 'start' | 'end' | 'bottom';
 
-const DIMENSIONS: Dimension[] = ['span', 'rows', 'indent'];
+const DIMENSIONS: Dimension[] = ['colspan', 'rowspan', 'indent'];
 
 function between(value: number, low: number, high: number): number {
 	return Math.max(low, Math.min(high, Math.trunc(value) || 0));
@@ -37,23 +37,23 @@ export function grid(columns: number, min: number): Grid {
 }
 
 export function clamp(layout: Layout, grid: Grid): Layout {
-	const span = between(layout.span, grid.min, grid.columns);
+	const colspan = between(layout.colspan, grid.min, grid.columns);
 
 	return {
-		span,
-		rows: between(layout.rows, 1, MAX_ROWS),
-		indent: between(layout.indent, 0, grid.columns - span),
+		colspan,
+		rowspan: between(layout.rowspan, 1, MAX_ROWSPAN),
+		indent: between(layout.indent, 0, grid.columns - colspan),
 	};
 }
 
 /** The reachable range of each dimension given the others. */
 export function bounds(layout: Layout, grid: Grid): Bounds {
-	const { span, indent } = clamp(layout, grid);
+	const { colspan, indent } = clamp(layout, grid);
 
 	return {
-		span: { low: grid.min, high: grid.columns - indent },
-		rows: { low: 1, high: MAX_ROWS },
-		indent: { low: 0, high: grid.columns - span },
+		colspan: { low: grid.min, high: grid.columns - indent },
+		rowspan: { low: 1, high: MAX_ROWSPAN },
+		indent: { low: 0, high: grid.columns - colspan },
 	};
 }
 
@@ -65,10 +65,10 @@ export function set(layout: Layout, dimension: Dimension, value: number, grid: G
 }
 
 export function parseDimension(value: string | null): Dimension | null {
-	return value === 'span' || value === 'rows' || value === 'indent' ? value : null;
+	return value === 'colspan' || value === 'rowspan' || value === 'indent' ? value : null;
 }
 
-/** One track plus one gap — the distance a span of 1 travels. */
+/** One track plus one gap — the distance a colspan of 1 travels. */
 export function pitch(extent: number, tracks: number, gap: number): number {
 	return tracks > 0 ? (extent + gap) / tracks : 0;
 }
@@ -98,16 +98,16 @@ export function ratchet(distance: number, step: number): number {
  */
 export function resize(start: Layout, edge: Edge, steps: number, grid: Grid): Layout {
 	if (edge === 'bottom') {
-		return set(start, 'rows', start.rows + steps, grid);
+		return set(start, 'rowspan', start.rowspan + steps, grid);
 	}
 
 	if (edge === 'end') {
-		return set(start, 'span', start.span + steps, grid);
+		return set(start, 'colspan', start.colspan + steps, grid);
 	}
 
-	const moved = between(steps, -start.indent, start.span - grid.min);
+	const moved = between(steps, -start.indent, start.colspan - grid.min);
 
-	return clamp({ ...start, indent: start.indent + moved, span: start.span - moved }, grid);
+	return clamp({ ...start, indent: start.indent + moved, colspan: start.colspan - moved }, grid);
 }
 
 export function parseEdge(value: string | null): Edge | null {
@@ -143,7 +143,7 @@ function input(row: HTMLElement, dimension: Dimension): HTMLInputElement | null 
 }
 
 export function read(row: HTMLElement): Layout {
-	const layout = { span: 1, rows: 1, indent: 0 };
+	const layout = { colspan: 1, rowspan: 1, indent: 0 };
 
 	for (const dimension of DIMENSIONS) {
 		layout[dimension] = Number(input(row, dimension)?.value) || layout[dimension];
@@ -173,7 +173,7 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 			});
 	}
 
-	row.style.setProperty('--reserved', String(layout.indent + layout.span));
+	row.style.setProperty('--reserved', String(layout.indent + layout.colspan));
 	row.dataset.indent = String(layout.indent);
 }
 
@@ -283,7 +283,7 @@ function end(): void {
 	container.classList.remove('is-resizing');
 
 	if (moved) {
-		const dimension: Dimension = edge === 'bottom' ? 'rows' : 'span';
+		const dimension: Dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
 
 		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 	}
@@ -326,7 +326,7 @@ function onKeyDown(event: KeyboardEvent): void {
 
 	write(row, after, grid);
 
-	const dimension: Dimension = key.edge === 'bottom' ? 'rows' : 'span';
+	const dimension: Dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
 
 	(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 }
@@ -384,7 +384,7 @@ function onStamp(event: Event): void {
 	const row = event.target;
 	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
 
-	if (row instanceof HTMLElement && container && input(row, 'span')) {
+	if (row instanceof HTMLElement && container && input(row, 'colspan')) {
 		write(row, read(row), gridOf(container));
 	}
 }

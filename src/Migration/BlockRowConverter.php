@@ -18,7 +18,7 @@ use Cosray\Uid;
 /**
  * Reshapes legacy blocks fields into typed rows for migration
  * 000000-000031: `{type: id, colspan, rowspan, colstart, width, value,
- * meta}` becomes `{uid, type: class, layout: {span, rows, indent},
+ * meta}` becomes `{uid, type: class, layout: {colspan, rowspan, indent},
  * fields, meta?}`.
  *
  * Layouts are copied, never clamped against the field's columns — the
@@ -264,15 +264,15 @@ final class BlockRowConverter
 	 * Values below the range no schema could accept are floored; the
 	 * field's real bounds are applied by the readers and the shape.
 	 *
-	 * @return array{span: int, rows: int, indent: int}
+	 * @return array{colspan: int, rowspan: int, indent: int}
 	 */
 	private function layout(array $block): array
 	{
 		$colstart = $this->int($block['colstart'] ?? null);
 
 		return [
-			'span' => max(1, $this->int($block['colspan'] ?? null) ?? self::LEGACY_COLUMNS),
-			'rows' => max(1, $this->int($block['rowspan'] ?? null) ?? 1),
+			'colspan' => max(1, $this->int($block['colspan'] ?? null) ?? self::LEGACY_COLUMNS),
+			'rowspan' => max(1, $this->int($block['rowspan'] ?? null) ?? 1),
 			'indent' => $colstart === null ? 0 : max(0, $colstart - 1),
 		];
 	}

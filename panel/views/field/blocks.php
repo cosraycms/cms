@@ -2,7 +2,7 @@
 
 // Server-rendered blocks: the entries typed repeater with a grid. Rows
 // are placed on a preview grid mirroring the frontend contract
-// (--columns on the container, --span/--rows/--indent on the row) and
+// (--columns on the container, --colspan/--rowspan/--indent on the row) and
 // carry their layout as hidden inputs; the blocks behavior edits them.
 // Add/remove/move/renumber comes from the repeater behavior: a + on each
 // row stamps before or after the row it sits in, the footer appends,

@@ -134,13 +134,13 @@ class Block extends Value
 		// The columns the block takes out of its row: the reference sheet
 		// spans them and pushes the box past the indent. Derived, but
 		// emitted so CSS that cannot read the inline style still has it.
-		$reserved = $layout->indent + $layout->span;
+		$reserved = $layout->indent + $layout->colspan;
 		$attributes .=
 			' data-type="'
 			. escape($this->handle())
-			. "\" data-span=\"{$layout->span}\" data-rows=\"{$layout->rows}\" data-indent=\"{$layout->indent}\""
+			. "\" data-colspan=\"{$layout->colspan}\" data-rowspan=\"{$layout->rowspan}\" data-indent=\"{$layout->indent}\""
 			. " data-reserved=\"{$reserved}\""
-			. " style=\"--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent};"
+			. " style=\"--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent};"
 			. " --reserved: {$reserved}\"";
 
 		return "<div{$attributes}>{$inner}</div>";

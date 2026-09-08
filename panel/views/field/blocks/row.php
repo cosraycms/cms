@@ -30,8 +30,8 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
 $globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 $ownsLocales = !$globalLocales && RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
-$reserved = $layout->indent + $layout->span;
-$style = "--span: {$layout->span}; --rows: {$layout->rows}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$reserved = $layout->indent + $layout->colspan;
+$style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
 $labels = (bool) ($blockType['labels'] ?? true);
 // A built-in type with an editor view of its own renders as content
 // whatever its field count; the generic form keeps its labels.
@@ -69,14 +69,14 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 		value="<?= $this->escape((string) $blockType['type']) ?>" />
 	<input
 		type="hidden"
-		name="<?= $this->escape("{$rowName}[layout][span]") ?>"
-		value="<?= $layout->span ?>"
-		data-layout="span" />
+		name="<?= $this->escape("{$rowName}[layout][colspan]") ?>"
+		value="<?= $layout->colspan ?>"
+		data-layout="colspan" />
 	<input
 		type="hidden"
-		name="<?= $this->escape("{$rowName}[layout][rows]") ?>"
-		value="<?= $layout->rows ?>"
-		data-layout="rows" />
+		name="<?= $this->escape("{$rowName}[layout][rowspan]") ?>"
+		value="<?= $layout->rowspan ?>"
+		data-layout="rowspan" />
 	<input
 		type="hidden"
 		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
@@ -149,8 +149,8 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 	<?php if ($columns > 1): ?>
 		<?php foreach ([
 			'start' => __('field:indent'),
-			'end' => __('field:span'),
-			'bottom' => __('field:rows'),
+			'end' => __('field:colspan'),
+			'bottom' => __('field:rowspan'),
 		] as $edge => $title): ?>
 			<span
 				class="resize is-<?= $edge ?>"

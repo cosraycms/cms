@@ -12,28 +12,28 @@ namespace Cosray\Block;
  */
 final readonly class Layout
 {
-	public const int MAX_ROWS = 6;
+	public const int MAX_ROWSPAN = 6;
 
 	public function __construct(
-		public int $span,
-		public int $rows,
+		public int $colspan,
+		public int $rowspan,
 		public int $indent,
 	) {}
 
 	public static function normalize(mixed $layout, int $columns, int $min): self
 	{
 		$layout = is_array($layout) ? $layout : [];
-		$span = self::clamp(self::int($layout['span'] ?? null, $columns), $min, $columns);
-		$rows = self::clamp(self::int($layout['rows'] ?? null, 1), 1, self::MAX_ROWS);
-		$indent = self::clamp(self::int($layout['indent'] ?? null, 0), 0, $columns - $span);
+		$colspan = self::clamp(self::int($layout['colspan'] ?? null, $columns), $min, $columns);
+		$rowspan = self::clamp(self::int($layout['rowspan'] ?? null, 1), 1, self::MAX_ROWSPAN);
+		$indent = self::clamp(self::int($layout['indent'] ?? null, 0), 0, $columns - $colspan);
 
-		return new self($span, $rows, $indent);
+		return new self($colspan, $rowspan, $indent);
 	}
 
-	/** @return array{span: int, rows: int, indent: int} */
+	/** @return array{colspan: int, rowspan: int, indent: int} */
 	public function array(): array
 	{
-		return ['span' => $this->span, 'rows' => $this->rows, 'indent' => $this->indent];
+		return ['colspan' => $this->colspan, 'rowspan' => $this->rowspan, 'indent' => $this->indent];
 	}
 
 	private static function int(mixed $value, int $default): int

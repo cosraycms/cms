@@ -106,7 +106,7 @@ final class BlocksValueTest extends TestCase
 			[
 				'image' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => [$item]]],
 			],
-			['span' => $span, 'rows' => 1, 'indent' => 0],
+			['colspan' => $span, 'rowspan' => 1, 'indent' => 0],
 			uid: $uid,
 		);
 	}
@@ -118,7 +118,7 @@ final class BlocksValueTest extends TestCase
 			[
 				'images' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => $items]],
 			],
-			['span' => 12, 'rows' => 1, 'indent' => 0],
+			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			uid: $uid,
 		);
 	}
@@ -140,7 +140,7 @@ final class BlocksValueTest extends TestCase
 					],
 				],
 			],
-			['span' => 12, 'rows' => 1, 'indent' => 0],
+			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			uid: $uid,
 		);
 	}
@@ -163,7 +163,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->text(
 				"Hello\nWorld",
-				['span' => 8, 'rows' => 2, 'indent' => 2],
+				['colspan' => 8, 'rowspan' => 2, 'indent' => 2],
 				[
 					'class' => ['zxx' => 'hero'],
 					'id' => ['zxx' => 'intro'],
@@ -173,8 +173,8 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertSame(
 			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
-				. '<div class="cms-block hero" id="intro" data-type="text" data-span="8" data-rows="2" data-indent="2"'
-				. ' data-reserved="10" style="--span: 8; --rows: 2; --indent: 2; --reserved: 10">'
+				. '<div class="cms-block hero" id="intro" data-type="text" data-colspan="8" data-rowspan="2" data-indent="2"'
+				. ' data-reserved="10" style="--colspan: 8; --rowspan: 2; --indent: 2; --reserved: 10">'
 				. "Hello<br />\nWorld"
 				. '</div></div>',
 			$blocks->render(),
@@ -184,7 +184,7 @@ final class BlocksValueTest extends TestCase
 
 	public function testRenderArgs(): void
 	{
-		$html = $this->createBlocksValue([$this->text('Hi', ['span' => 12, 'rows' => 1, 'indent' => 0])])
+		$html = $this->createBlocksValue([$this->text('Hi', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0])])
 			->render(tag: 'section', prefix: 'x', class: 'page');
 
 		$this->assertStringStartsWith('<section class="x-blocks page" data-columns="12"', $html);
@@ -212,7 +212,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->text(
 				'x',
-				['span' => 12, 'rows' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 				[
 					'class' => ['zxx' => '"><img src=x onerror=alert(1)>'],
 					'id' => ['zxx' => 'x" onmouseover="alert(1)'],
@@ -237,7 +237,7 @@ final class BlocksValueTest extends TestCase
 				[
 					'video' => ['type' => \Cosray\Field\Youtube::class, 'value' => ['zxx' => 'abc" onload="alert(1)']],
 				],
-				['span' => 12, 'rows' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			),
 		]);
 
@@ -250,17 +250,21 @@ final class BlocksValueTest extends TestCase
 	public function testReadersClampTheLayout(): void
 	{
 		$html = $this->createBlocksValue([
-			$this->text('x', ['span' => 30, 'rows' => 9, 'indent' => 4]),
+			$this->text('x', ['colspan' => 30, 'rowspan' => 9, 'indent' => 4]),
 		])->render();
 
-		$this->assertStringContainsString('data-span="12" data-rows="6" data-indent="0"', $html);
+		$this->assertStringContainsString('data-colspan="12" data-rowspan="6" data-indent="0"', $html);
 
-		$stacked = $this->createBlocksValue([$this->text('x', ['span' => 6, 'rows' => 1, 'indent' => 3])], columns: 1);
+		$stacked = $this->createBlocksValue([$this->text('x', [
+			'colspan' => 6,
+			'rowspan' => 1,
+			'indent' => 3,
+		])], columns: 1);
 		$html = $stacked->render();
 
 		$this->assertStringContainsString('data-columns="1"', $html);
-		$this->assertStringContainsString('data-span="1" data-rows="1" data-indent="0"', $html);
-		$this->assertSame(['span' => 1, 'rows' => 1, 'indent' => 0], $stacked->first()?->layout()->array());
+		$this->assertStringContainsString('data-colspan="1" data-rowspan="1" data-indent="0"', $html);
+		$this->assertSame(['colspan' => 1, 'rowspan' => 1, 'indent' => 0], $stacked->first()?->layout()->array());
 	}
 
 	public function testEmptyRenderEmitsNoElement(): void
@@ -276,8 +280,8 @@ final class BlocksValueTest extends TestCase
 	public function testIterationAndAccessors(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('One', ['span' => 4, 'rows' => 1, 'indent' => 0], uid: 'b1'),
-			$this->text('Two', ['span' => 8, 'rows' => 1, 'indent' => 0], uid: 'b2'),
+			$this->text('One', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('Two', ['colspan' => 8, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
 		]);
 
 		$this->assertTrue($blocks->isset());
@@ -290,13 +294,13 @@ final class BlocksValueTest extends TestCase
 		$this->assertNull($blocks->get(2));
 		$this->assertSame(Builtin\Text::class, $blocks->first()?->type);
 		$this->assertSame('text', $blocks->first()?->handle());
-		$this->assertSame(4, $blocks->first()?->layout()->span);
+		$this->assertSame(4, $blocks->first()?->layout()->colspan);
 	}
 
 	public function testUnwrapAndJson(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Hello', ['span' => 6, 'rows' => 1, 'indent' => 0], ['class' => ['zxx' => 'wide']]),
+			$this->text('Hello', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], ['class' => ['zxx' => 'wide']]),
 		]);
 
 		$unwrapped = $blocks->unwrap();
@@ -306,7 +310,7 @@ final class BlocksValueTest extends TestCase
 				'uid' => 'b1',
 				'type' => Builtin\Text::class,
 				'handle' => 'text',
-				'layout' => ['span' => 6, 'rows' => 1, 'indent' => 0],
+				'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
 				'fields' => ['text' => 'Hello'],
 				'meta' => ['class' => ['zxx' => 'wide']],
 			],
@@ -352,7 +356,7 @@ final class BlocksValueTest extends TestCase
 				[
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['en' => 'Hello', 'de' => 'Hallo']],
 				],
-				['span' => 12, 'rows' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			),
 		];
 
@@ -368,13 +372,13 @@ final class BlocksValueTest extends TestCase
 
 	public function testBlockRendersStandalone(): void
 	{
-		$blocks = $this->createBlocksValue([$this->text('Solo', ['span' => 3, 'rows' => 1, 'indent' => 0])]);
+		$blocks = $this->createBlocksValue([$this->text('Solo', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0])]);
 		$block = $blocks->first();
 
 		$this->assertInstanceOf(Block::class, $block);
 		$this->assertSame(
-			'<div class="cms-block" data-type="text" data-span="3" data-rows="1" data-indent="0"'
-				. ' data-reserved="3" style="--span: 3; --rows: 1; --indent: 0; --reserved: 3">Solo</div>',
+			'<div class="cms-block" data-type="text" data-colspan="3" data-rowspan="1" data-indent="0"'
+				. ' data-reserved="3" style="--colspan: 3; --rowspan: 1; --indent: 0; --reserved: 3">Solo</div>',
 			(string) $block,
 		);
 		$this->assertStringStartsWith('<div class="x-block"', $block->render(prefix: 'x'));
@@ -389,7 +393,7 @@ final class BlocksValueTest extends TestCase
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['zxx' => 'Less <is> more']],
 					'source' => ['type' => \Cosray\Field\Text::class, 'value' => ['zxx' => 'Mies']],
 				],
-				['span' => 12, 'rows' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			),
 		])->render();
 
@@ -412,7 +416,7 @@ final class BlocksValueTest extends TestCase
 
 		$html = $blocks->render();
 
-		$this->assertStringContainsString('class="cms-block" data-type="image" data-span="6"', $html);
+		$this->assertStringContainsString('class="cms-block" data-type="image" data-colspan="6"', $html);
 		$this->assertStringContainsString(
 			'src="/cms/cache/bl/blockimg12345/sun-sea-block.jpg"',
 			$html,
@@ -542,7 +546,7 @@ final class BlocksValueTest extends TestCase
 					'value' => [Field::NEUTRAL_LOCALE => [['uid' => $uid]]],
 				],
 			],
-			['span' => 12, 'rows' => 1, 'indent' => 0],
+			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 		);
 		$blocks = $this->createBlocksValue([$video('videoasset001')]);
 		$this->seedAsset('videoasset001', 'clip.mp4', 'video/mp4');
@@ -561,7 +565,7 @@ final class BlocksValueTest extends TestCase
 	public function testImageHelpers(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Intro', ['span' => 12, 'rows' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('Intro', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
 			$this->image(['uid' => 'blockimg12345'], uid: 'b2'),
 			$this->images([['uid' => 'galleryimg123'], ['uid' => 'galleryimg124']], uid: 'b3'),
 			$this->image(['uid' => 'blockimg12346'], uid: 'b4'),
@@ -606,7 +610,7 @@ final class BlocksValueTest extends TestCase
 	public function testExcerptReadsTheRichtextBlock(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Plain', ['span' => 12, 'rows' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('Plain', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
 			$this->richtext('One two three four five', uid: 'b2'),
 			$this->richtext('Second', uid: 'b3'),
 		]);

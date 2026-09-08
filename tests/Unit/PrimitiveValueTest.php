@@ -883,7 +883,7 @@ final class PrimitiveValueTest extends TestCase
 		$block = [
 			'uid' => 'block1',
 			'type' => \Cosray\Block\Text::class,
-			'layout' => ['span' => 1, 'rows' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
 			'fields' => [
 				'text' => [
 					'type' => \Cosray\Field\Textarea::class,

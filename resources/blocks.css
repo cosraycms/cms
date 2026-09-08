@@ -41,7 +41,7 @@
 	.cms-block {
 		min-width: 0;
 		grid-column: span var(--reserved, 1);
-		grid-row: span var(--rows, 1);
+		grid-row: span var(--rowspan, 1);
 		margin-inline-start: calc(
 			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
 		);

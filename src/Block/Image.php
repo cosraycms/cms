@@ -53,7 +53,7 @@ final class Image implements Block
 			static fn(SizeSpec $spec) => $asset->sizePath($spec->name) . " {$spec->first}w",
 			$specs,
 		)));
-		$sizes = escape($this->sizes($ctx, $block->layout()->span));
+		$sizes = escape($this->sizes($ctx, $block->layout()->colspan));
 
 		return (
 			"<img src=\"{$src}\" srcset=\"{$srcset}\" sizes=\"{$sizes}\""

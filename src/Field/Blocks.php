@@ -391,8 +391,8 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	private function rowsShape(): Shape
 	{
 		$layout = Shapes::create();
-		$layout->add('span', 'int')->rules('required', "min:{$this->min}", "max:{$this->columns}");
-		$layout->add('rows', 'int')->rules('required', 'min:1', 'max:' . Layout::MAX_ROWS);
+		$layout->add('colspan', 'int')->rules('required', "min:{$this->min}", "max:{$this->columns}");
+		$layout->add('rowspan', 'int')->rules('required', 'min:1', 'max:' . Layout::MAX_ROWSPAN);
 		$layout->add('indent', 'int')->rules('required', 'min:0', 'max:' . ($this->columns - $this->min));
 
 		$rows = Shapes::list();
@@ -416,7 +416,7 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		$this->reviewRowFields($review);
 
 		foreach ($review->values() as $index => $row) {
-			if (((int) $row['layout']['span'] + (int) $row['layout']['indent']) > $this->columns) {
+			if (((int) $row['layout']['colspan'] + (int) $row['layout']['indent']) > $this->columns) {
 				$review->addError([$index, 'layout', 'indent'], __('block:invalid-indent'));
 			}
 		}

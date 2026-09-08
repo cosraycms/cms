@@ -129,8 +129,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'contentBlocks' => [
 				'type' => Blocks::class,
 				'value' => [
-					'en' => [$this->textBlock('block-a', 'Old EN', ['span' => 6, 'rows' => 1, 'indent' => 2])],
-					'de' => [$this->textBlock('block-b', 'Alt DE', ['span' => 12, 'rows' => 1, 'indent' => 0])],
+					'en' => [$this->textBlock('block-a', 'Old EN', ['colspan' => 6, 'rowspan' => 1, 'indent' => 2])],
+					'de' => [$this->textBlock('block-b', 'Alt DE', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0])],
 				],
 			],
 		]);
@@ -146,7 +146,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								[
 									'uid' => '',
 									'type' => Builtin\Heading::class,
-									'layout' => ['span' => '12', 'rows' => '1', 'indent' => '0'],
+									'layout' => ['colspan' => '12', 'rowspan' => '1', 'indent' => '0'],
 									'fields' => [
 										'text' => ['value' => ['zxx' => 'Fresh heading']],
 										'level' => ['value' => ['zxx' => '3']],
@@ -157,7 +157,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 									'type' => Builtin\Text::class,
 									// Out of range: a twelve-column span with an indent left
 									// over from a narrower one is clamped, not rejected.
-									'layout' => ['span' => '14', 'rows' => '1', 'indent' => '2'],
+									'layout' => ['colspan' => '14', 'rowspan' => '1', 'indent' => '2'],
 									'fields' => ['text' => ['value' => ['zxx' => 'New EN']]],
 									'meta' => ['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']],
 								],
@@ -177,7 +177,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('3', $value['en'][0]['fields']['level']['value']['zxx']);
 		$this->assertSame('block-a', $value['en'][1]['uid']);
 		// jsonb orders keys; compare by content.
-		$this->assertEquals(['span' => 12, 'rows' => 1, 'indent' => 0], $value['en'][1]['layout']);
+		$this->assertEquals(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $value['en'][1]['layout']);
 		$this->assertSame('New EN', $value['en'][1]['fields']['text']['value']['zxx']);
 		$this->assertSame('kept', $value['en'][1]['fields']['text']['stashed']);
 		$this->assertEquals(['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']], $value['en'][1]['meta']);
@@ -206,7 +206,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'zxx' => [[
 								'uid' => 'quote-a',
 								'type' => QuoteBlock::class,
-								'layout' => ['span' => '1', 'rows' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '1', 'rowspan' => '1', 'indent' => '0'],
 								'fields' => ['text' => ['value' => ['de' => 'Neu DE']]],
 							]],
 						],
@@ -245,7 +245,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'zxx' => [[
 								'uid' => 'quote-a',
 								'type' => QuoteBlock::class,
-								'layout' => ['span' => '1', 'rows' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '1', 'rowspan' => '1', 'indent' => '0'],
 								// Empties the required quote in the default locale.
 								'fields' => ['text' => ['value' => ['en' => '']]],
 							]],
@@ -741,7 +741,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		return [
 			'uid' => $uid,
 			'type' => QuoteBlock::class,
-			'layout' => ['span' => 1, 'rows' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
 			'fields' => [
 				'text' => ['type' => Textarea::class, 'value' => $text],
 				'source' => ['type' => Text::class, 'value' => ['zxx' => 'Someone']],

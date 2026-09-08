@@ -123,7 +123,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 							[
 								'uid' => 'block-a',
 								'type' => Builtin\Text::class,
-								'layout' => ['span' => 6, 'rows' => 2, 'indent' => 3],
+								'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 3],
 								'fields' => [
 									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
 								],
@@ -132,7 +132,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 							[
 								'uid' => 'block-gone',
 								'type' => 'Acme\\Gone',
-								'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+								'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 								'fields' => [],
 							],
 						],
@@ -169,9 +169,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="' . $en . '[0][uid]"', $html);
 		$this->assertStringContainsString('value="block-a"', $html);
 		$this->assertStringContainsString('value="' . Builtin\Text::class . '"', $html);
-		$this->assertStringContainsString('name="' . $en . '[0][layout][span]"', $html);
+		$this->assertStringContainsString('name="' . $en . '[0][layout][colspan]"', $html);
 		$this->assertStringContainsString('data-layout="indent"', $html);
-		$this->assertStringContainsString('style="--span: 6; --rows: 2; --indent: 3; --reserved: 9"', $html);
+		$this->assertStringContainsString('style="--colspan: 6; --rowspan: 2; --indent: 3; --reserved: 9"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][fields][text][value][zxx]"', $html);
 		$this->assertStringContainsString('First block', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
@@ -212,7 +212,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// Templates per offered type, the picker in the footer and one
 		// inserter per row, before it; the row menu inserts nothing.
 		$this->assertStringContainsString('data-repeater-template="' . Builtin\Heading::class . '"', $html);
-		$this->assertStringContainsString('name="' . $en . '[__i__][layout][span]"', $html);
+		$this->assertStringContainsString('name="' . $en . '[__i__][layout][colspan]"', $html);
 		$this->assertStringContainsString(
 			'data-repeater-add="' . Builtin\RichText::class . '" data-repeater-insert="append"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
@@ -249,7 +249,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// The layout numbers in the settings dialog, each capped by the room
 		// the others leave: span 6 at indent 3 in twelve columns.
 		$this->assertStringContainsString(
-			'data-layout-input="span" value="6" min="2" max="9"',
+			'data-layout-input="colspan" value="6" min="2" max="9"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringContainsString(

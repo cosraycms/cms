@@ -14,7 +14,7 @@ use Cosray\Uid;
  * Reshapes every stored blocks field — nodes, drafts and both history
  * tables — from the legacy blocks `{type: id, colspan, rowspan,
  * colstart, width, value, meta}` to the typed rows `{uid, type: class,
- * layout: {span, rows, indent}, fields, meta?}` the rebuilt Blocks field
+ * layout: {colspan, rowspan, indent}, fields, meta?}` the rebuilt Blocks field
  * reads and validates; Cosray\Migration\BlockRowConverter holds the
  * conversion table.
  *

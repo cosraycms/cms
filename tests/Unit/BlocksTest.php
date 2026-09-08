@@ -227,7 +227,7 @@ final class BlocksTest extends TestCase
 				'type' => Blocks::class,
 				'value' => [
 					Field::NEUTRAL_LOCALE => [
-						$this->textRow('b1', '', ['span' => 2, 'rows' => 1, 'indent' => 0]),
+						$this->textRow('b1', '', ['colspan' => 2, 'rowspan' => 1, 'indent' => 0]),
 					],
 				],
 			]);
@@ -285,7 +285,12 @@ final class BlocksTest extends TestCase
 	public function testStructureOfASharedList(): void
 	{
 		$structure = $this->createBlocks()->structure([
-			$this->textRow('b1', 'Hello', ['span' => 20, 'rows' => 0, 'indent' => 5], ['class' => ['zxx' => 'wide']]),
+			$this->textRow(
+				'b1',
+				'Hello',
+				['colspan' => 20, 'rowspan' => 0, 'indent' => 5],
+				['class' => ['zxx' => 'wide']],
+			),
 			['uid' => 'b2', 'type' => 'legacy', 'colspan' => 12],
 			['uid' => 'b3', 'type' => Builtin\Heading::class, 'fields' => []],
 		]);
@@ -295,12 +300,12 @@ final class BlocksTest extends TestCase
 		$this->assertArrayNotHasKey('meta', $structure);
 		$this->assertCount(2, $rows);
 		$this->assertSame('b1', $rows[0]['uid']);
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $rows[0]['layout']);
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $rows[0]['layout']);
 		$this->assertSame(['class' => ['zxx' => 'wide']], $rows[0]['meta']);
 		$this->assertSame(Textarea::class, $rows[0]['fields']['text']['type']);
 		$this->assertSame(['zxx' => 'Hello'], $rows[0]['fields']['text']['value']);
 		// A fresh row carries every field of its type, defaults included.
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $rows[1]['layout']);
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $rows[1]['layout']);
 		$this->assertSame(['zxx' => null], $rows[1]['fields']['text']['value']);
 		$this->assertSame(['zxx' => '2'], $rows[1]['fields']['level']['value']);
 		$this->assertArrayNotHasKey('meta', $rows[1]);
@@ -428,13 +433,13 @@ final class BlocksTest extends TestCase
 						$this->textRow(
 							'b1',
 							'Hello',
-							['span' => '6', 'rows' => 1, 'indent' => 6],
+							['colspan' => '6', 'rowspan' => 1, 'indent' => 6],
 							['class' => ['zxx' => 'x']],
 						),
 						[
 							'uid' => 'b2',
 							'type' => Builtin\Heading::class,
-							'layout' => ['span' => 2, 'rows' => 6, 'indent' => 0],
+							'layout' => ['colspan' => 2, 'rowspan' => 6, 'indent' => 0],
 							'fields' => [
 								'text' => ['type' => Text::class, 'value' => ['zxx' => 'Title']],
 								'level' => ['type' => \Cosray\Field\Option::class, 'value' => ['zxx' => '3']],
@@ -446,7 +451,7 @@ final class BlocksTest extends TestCase
 
 		$this->assertTrue($result->valid(), json_encode($result->issues()));
 		$rows = $result->values()['value'][Field::NEUTRAL_LOCALE];
-		$this->assertSame(['span' => 6, 'rows' => 1, 'indent' => 6], $rows[0]['layout']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'indent' => 6], $rows[0]['layout']);
 		$this->assertSame(['class' => ['zxx' => 'x']], $rows[0]['meta']);
 		$this->assertSame('Title', $rows[1]['fields']['text']['value']['zxx']);
 	}
@@ -463,12 +468,12 @@ final class BlocksTest extends TestCase
 						[
 							'uid' => 'b1',
 							'type' => 'richtext',
-							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 							'fields' => [],
 						],
 						[
 							'type' => Builtin\Text::class,
-							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 							'fields' => [],
 						],
 					],
@@ -499,7 +504,7 @@ final class BlocksTest extends TestCase
 					[
 						'uid' => 'b1',
 						'type' => 'App\\Nope',
-						'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+						'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 						'fields' => [],
 					],
 				]))
@@ -516,14 +521,26 @@ final class BlocksTest extends TestCase
 		];
 		$path = static fn(string $key): array => ['value', Field::NEUTRAL_LOCALE, 0, 'layout', $key];
 
-		$this->assertTrue($shape->validate($row(['span' => 13, 'rows' => 1, 'indent' => 0]))->has($path('span')));
-		$this->assertTrue($shape->validate($row(['span' => 1, 'rows' => 1, 'indent' => 0]))->has($path('span')));
-		$this->assertTrue($shape->validate($row(['span' => 12, 'rows' => 7, 'indent' => 0]))->has($path('rows')));
-		$this->assertTrue($shape->validate($row(['span' => 12, 'rows' => 0, 'indent' => 0]))->has($path('rows')));
-		$this->assertTrue($shape->validate($row(['span' => 6, 'rows' => 1, 'indent' => 11]))->has($path('indent')));
-		$this->assertTrue($shape->validate($row(['span' => 6, 'rows' => 1, 'indent' => 7]))->has($path('indent')));
-		$this->assertTrue($shape->validate($row(['span' => 6, 'rows' => 1]))->has($path('indent')));
-		$this->assertTrue($shape->validate($row(['span' => 6, 'rows' => 1, 'indent' => 6]))->valid());
+		$this->assertTrue($shape->validate($row(['colspan' => 13, 'rowspan' => 1, 'indent' => 0]))->has($path(
+			'colspan',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 1, 'rowspan' => 1, 'indent' => 0]))->has($path(
+			'colspan',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 12, 'rowspan' => 7, 'indent' => 0]))->has($path(
+			'rowspan',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 12, 'rowspan' => 0, 'indent' => 0]))->has($path(
+			'rowspan',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1, 'indent' => 11]))->has($path(
+			'indent',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1, 'indent' => 7]))->has($path(
+			'indent',
+		)));
+		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1]))->has($path('indent')));
+		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1, 'indent' => 6]))->valid());
 	}
 
 	public function testShapeReportsSubFieldIssuesWithTheRowPath(): void
@@ -534,8 +551,8 @@ final class BlocksTest extends TestCase
 			->validate([
 				'type' => Blocks::class,
 				'value' => [Field::NEUTRAL_LOCALE => [$this->textRow('b1', '', [
-						'span' => 12,
-						'rows' => 1,
+						'colspan' => 12,
+						'rowspan' => 1,
 						'indent' => 0,
 					])]],
 			]);
@@ -549,7 +566,7 @@ final class BlocksTest extends TestCase
 		$blocks = $this->createBlocks()->translate(TranslateMode::Asymmetric);
 		$blocks->required();
 		$shape = $blocks->shape();
-		$row = $this->textRow('b1', 'Hello', ['span' => 12, 'rows' => 1, 'indent' => 0]);
+		$row = $this->textRow('b1', 'Hello', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0]);
 
 		$this->assertTrue($shape->validate(['type' => Blocks::class, 'value' => ['en' => [$row]]])->valid());
 		$this->assertTrue(
@@ -570,7 +587,7 @@ final class BlocksTest extends TestCase
 						[
 							'uid' => 'b1',
 							'type' => Builtin\Text::class,
-							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 							'fields' => [
 								'text' => ['type' => Textarea::class, 'value' => ['en' => 'Hello', 'de' => null]],
 							],
@@ -598,7 +615,7 @@ final class BlocksTest extends TestCase
 						[
 							'uid' => 'b1',
 							'type' => Builtin\Image::class,
-							'layout' => ['span' => 12, 'rows' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 							'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['meta' => []]]]]],
 						],
 					],

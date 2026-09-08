@@ -45,7 +45,7 @@ final class BlockRowConverterTest extends TestCase
 			[
 				'uid' => 'rich000000001',
 				'type' => Builtin\RichText::class,
-				'layout' => ['span' => 8, 'rows' => 1, 'indent' => 2],
+				'layout' => ['colspan' => 8, 'rowspan' => 1, 'indent' => 2],
 				'fields' => [
 					'text' => [
 						'type' => Field\RichText::class,
@@ -61,7 +61,7 @@ final class BlockRowConverterTest extends TestCase
 
 		// The legacy `html` id.
 		$this->assertSame(Builtin\RichText::class, $de[1]['type']);
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $de[1]['layout']);
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $de[1]['layout']);
 		$this->assertSame('cosray-richtext', $de[1]['fields']['text']['format']);
 		$this->assertArrayNotHasKey('meta', $de[1]);
 
@@ -70,7 +70,7 @@ final class BlockRowConverterTest extends TestCase
 			[
 				'uid' => 'text000000001',
 				'type' => Builtin\Text::class,
-				'layout' => ['span' => 6, 'rows' => 2, 'indent' => 0],
+				'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
 				'fields' => [
 					'text' => ['type' => Field\Textarea::class, 'value' => ['zxx' => "Mo-Fr\n9-17"]],
 				],
@@ -90,7 +90,7 @@ final class BlockRowConverterTest extends TestCase
 
 		// Media lists move under the neutral locale of the media field.
 		$this->assertSame(Builtin\Image::class, $de[4]['type']);
-		$this->assertSame(['span' => 4, 'rows' => 2, 'indent' => 0], $de[4]['layout']);
+		$this->assertSame(['colspan' => 4, 'rowspan' => 2, 'indent' => 0], $de[4]['layout']);
 		$this->assertSame(
 			[
 				'image' => [
@@ -117,7 +117,7 @@ final class BlockRowConverterTest extends TestCase
 			[
 				'uid' => 'yout000000001',
 				'type' => Builtin\Youtube::class,
-				'layout' => ['span' => 6, 'rows' => 1, 'indent' => 6],
+				'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 6],
 				'fields' => [
 					'video' => [
 						'type' => Field\Youtube::class,
@@ -156,10 +156,10 @@ final class BlockRowConverterTest extends TestCase
 		// Numeric strings and a value keyed by the list's own locale.
 		$en = $field['value']['en'];
 		$this->assertCount(4, $en);
-		$this->assertSame(['span' => 12, 'rows' => 1, 'indent' => 0], $en[0]['layout']);
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $en[0]['layout']);
 		$this->assertSame(['zxx' => 'Opening hours'], $en[0]['fields']['text']['value']);
 		// A float span, a row span below one, a scalar value and unusable meta.
-		$this->assertSame(['span' => 6, 'rows' => 1, 'indent' => 0], $en[1]['layout']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'indent' => 0], $en[1]['layout']);
 		$this->assertSame(['zxx' => 'plain'], $en[1]['fields']['text']['value']);
 		$this->assertArrayNotHasKey('meta', $en[1]);
 		// A map without the neutral or the list's locale yields its first entry.
@@ -264,7 +264,7 @@ final class BlockRowConverterTest extends TestCase
 		$this->assertSame('App\Gone', $field['type']);
 		$this->assertArrayNotHasKey('meta', $field);
 		$this->assertSame(Builtin\Text::class, $field['value']['de'][0]['type']);
-		$this->assertSame(['span' => 3, 'rows' => 1, 'indent' => 0], $field['value']['de'][0]['layout']);
+		$this->assertSame(['colspan' => 3, 'rowspan' => 1, 'indent' => 0], $field['value']['de'][0]['layout']);
 		$this->assertNull($field['value']['en']);
 		$this->assertSame(['App\Gone' => 1], $converter->report()['unresolvedFieldTypes']);
 	}
