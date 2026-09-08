@@ -54,11 +54,11 @@ Field and block settings retain their live values on closure. Media metadata kee
 
 ## Block catalog
 
-The add menu follows the action-menu keys above. **More blocks…** opens the full catalog with focus in its search input. Search is a normal tab stop, followed by one roving result stop. `↓` or `Enter` in search focuses the first matching choice without submitting the editor; with no results it does nothing. Typing filters by the translated label or handle and announces the available count politely.
+The `+` menu follows the action-menu keys above. **More blocks…** opens the catalog with focus in its search. Search is a normal tab stop, followed by one roving stop for the results. `↓` or `Enter` in search moves to the first match and never submits the editor. Typing filters by label or handle and announces the count of matches.
 
-Within results, `←`/`→` move through visible choices in source order, `↑`/`↓` move to the nearest column in the adjacent visible row, and `Home`/`End` reach the first/last result. `Enter` or `Space` inserts the focused type. Filtering preserves the active result if it still matches, otherwise the first visible result becomes the next tab target. These are ordinary buttons, not an ARIA grid or menu. `Tab` remains normal traversal; native dialog containment supplies the modal boundary.
+Within the results, `←`/`→` move through the matches in order, `↑`/`↓` move to the nearest choice in the adjacent row, and `Home`/`End` reach the first and last. `Enter` or `Space` inserts the focused type. Filtering keeps the focused result while it still matches, otherwise the first match takes its place. The results are plain buttons, not an ARIA grid, so `Tab` moves on as usual within the dialog.
 
-`Escape` dismisses the catalog, not a separate clear-search layer. Cancel restores the add trigger; insertion closes first and focuses the new row. Reopening resets the search and captures fresh field/locale/row context.
+`Escape` closes the catalog rather than clearing the search, and returns focus to the `+`; inserting closes it and focuses the new row. It reopens with the search empty.
 
 ## What is bound today
 

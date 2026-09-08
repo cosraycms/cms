@@ -132,11 +132,9 @@ Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu
 
 ## Block catalog
 
-The short block menu reuses `.cms-action-menu`; its choices and the modal catalog share the same server-resolved labels and decorative icons. `.cms-block-catalog` is content inside the shared `.cms-modal` shell, not another overlay. It keeps search and result availability above a bounded scrolling `.results` area. The responsive icon/name buttons reduce their column count as space narrows and wrap long labels; their focus ring uses `--cms-color-focus`.
+The short block menu is a `.cms-action-menu`. The catalog is `.cms-block-catalog`, a body inside the shared `.cms-modal` shell: the search and its status sit above a scrolling `.results` grid of `.choice` buttons, which drop columns as space narrows and wrap long labels. Menu and catalog draw the same icons: bundled Bootstrap artwork for the built-in types, the configured icon provider for a block's own `#[Icon]`, resolved once per field, and a plain square when neither is available.
 
-Built-in block icons are local regular Bootstrap assets. Class-level custom `icon` metadata still uses the configured provider, resolved once per field rather than for every row inserter. Missing custom artwork falls back to the bundled square. No search text or label becomes raw icon markup.
-
-The styleguide's Blocks section demonstrates an explicit common subset, the default six-choice menu with the complete eight-type catalog, a small menu, immediate single-type insertion and the no-types state. Its samples use the actual field partials.
+The styleguide's Blocks section shows an explicit common subset, the default six with the full catalog, a menu short enough to need no catalog, one-type insertion and a field with nothing to add.
 
 ## Class names
 

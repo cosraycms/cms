@@ -131,9 +131,9 @@ There is no schema attribute for a CSS class on the container — the `class` re
 
 ### Common choices
 
-The add menu offers the first six allowed types in their existing order. With one allowed type, it inserts immediately. With none, insertion is unavailable. **More blocks…** appears only when other allowed types remain and opens a searchable catalog of **all** allowed types, including the common choices. Search matches the panel-language label or stable handle. Built-in icons are bundled regular Bootstrap icons and need no network request.
+The `+` menu offers the first six allowed types in the order they are allowed; with one type it inserts at once, with none there is nothing to add. When more types remain, **More blocks…** opens a catalog of every allowed type, common ones included, searchable by label or handle.
 
-Use `Cosray\Schema\Common` to select and order a field's short menu:
+Use `Cosray\Schema\Common` to choose and order the menu:
 
 ```php
 use Cosray\Block;
@@ -146,9 +146,7 @@ use Cosray\Schema\Common;
 protected Blocks $content;
 ```
 
-The fluent counterpart is `$blocks->common(Type::class, ...)`. Each call replaces the common list; duplicates collapse in declaration order. An empty list restores the default first-six selection. An explicit list may contain at most six distinct block classes, all in the final allowed list. Invalid classes, disallowed types and oversized lists raise a configuration error when the control is resolved. `Common` and `Allows` may appear in either attribute order.
-
-Common choices affect presentation only: they never change allowed types, existing rows, validation or stored values. Existing schemas require no changes, and this picker requires no migration. The control's additive `commonTypes` property contains type IDs in menu order; `blockTypes` still contains every allowed descriptor, including optional class-level `icon` metadata.
+The fluent form is `$blocks->common(Type::class, ...)`. Each call replaces the list, duplicates collapse, and an empty list restores the default. The list may hold at most six types, all of them allowed, in whichever order `Common` and `Allows` are declared; anything else fails when the control is resolved. The menu is presentation only: it does not change what the field allows, validates or stores.
 
 ### Translation
 
