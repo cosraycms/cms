@@ -19,7 +19,10 @@ function doc(text: string): RichtextDoc {
 	};
 }
 
-async function richtext(value: LocaleMap<RichtextDoc | string | null>, format = 'cosray-richtext') {
+async function richtext(
+	value: LocaleMap<RichtextDoc | string | null> | null,
+	format = 'cosray-richtext',
+) {
 	const element = document.createElement('cosray-richtext') as RichtextElement;
 	Object.assign(element, {
 		value,
@@ -133,6 +136,20 @@ describe('richtext fallback previews', () => {
 			format: 'cosray-richtext',
 			version: 1,
 			value: { zxx: doc('Shared text'), en: null, de: null },
+		});
+	});
+});
+
+describe('richtext without stored data', () => {
+	// A freshly stamped repeater row renders no value and no envelope.
+	it('mounts and submits an empty envelope', async () => {
+		const { element, changes } = await richtext(null, '');
+
+		expect(element.querySelector('[contenteditable="true"]')).not.toBeNull();
+		expect(changes).toHaveBeenLastCalledWith({
+			format: 'cosray-richtext',
+			version: 1,
+			value: { en: null, de: null },
 		});
 	});
 });

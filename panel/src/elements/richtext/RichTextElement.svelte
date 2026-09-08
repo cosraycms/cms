@@ -64,9 +64,12 @@
 	 */
 	function convert(): RichtextValue {
 		const map: RichtextValue = {};
+		// A control the host renders without stored data — a freshly
+		// stamped row — assigns a null value, not an absent one.
+		const source = value ?? {};
 
-		for (const id of new Set([...Object.keys(value), ...localeIds()])) {
-			const raw = value[id] ?? null;
+		for (const id of new Set([...Object.keys(source), ...localeIds()])) {
+			const raw = source[id] ?? null;
 
 			if (typeof raw === 'string') {
 				map[id] = htmlToDoc(raw);
