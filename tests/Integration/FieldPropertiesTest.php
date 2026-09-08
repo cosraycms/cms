@@ -96,6 +96,8 @@ final class FieldPropertiesTest extends IntegrationTestCase
 		$this->assertArrayHasKey('rows', $properties);
 		$this->assertEquals(5, $properties['rows']);
 
+		$this->assertSame(8, $properties['lines']);
+
 		$this->assertArrayHasKey('width', $properties);
 		$this->assertEquals(12, $properties['width']);
 

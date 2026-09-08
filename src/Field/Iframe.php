@@ -6,8 +6,10 @@ namespace Cosray\Field;
 
 use Cosray\Value\Iframe as IframeValue;
 
-class Iframe extends Text
+class Iframe extends Text implements Capability\Multiline
 {
+	use Capability\IsMultiline;
+
 	public function control(): Control
 	{
 		return Control::iframe();

@@ -397,6 +397,31 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
 	}
 
+	public function testTextareaOpensAtItsConfiguredLines(): void
+	{
+		$this->authenticateAs('editor');
+		$documentType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-document'",
+		)->first();
+		$typeId = $documentType ? (int) $documentType['type'] : $this->createTestType('test-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-lines',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['zxx' => 'Lines']],
+			],
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-lines');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		// The fixture declares #[Lines(8)] on its translated intro textarea.
+		$this->assertHtmlNodeExists('//textarea[@name="content[intro][value][en]"][@rows="8"]', $html);
+		$this->assertHtmlNodeExists('//textarea[@name="content[intro][value][de]"][@rows="8"]', $html);
+	}
+
 	public function testEmbeddedFieldsRenderInsideConfiguredFieldset(): void
 	{
 		$this->authenticateAs('editor');

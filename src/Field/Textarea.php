@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-class Textarea extends Text
+class Textarea extends Text implements Capability\Multiline
 {
+	use Capability\IsMultiline;
+
 	public function control(): Control
 	{
 		return Control::textarea();

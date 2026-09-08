@@ -12,6 +12,7 @@ use Cosray\Schema\Description;
 use Cosray\Schema\Hidden;
 use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
+use Cosray\Schema\Lines;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rows;
 use Cosray\Schema\Translate;
@@ -29,6 +30,7 @@ class TestDocument implements Title
 	#[Label('Introduction')]
 	#[Description('A brief introduction to the document')]
 	#[Rows(5)]
+	#[Lines(8)]
 	#[Width(12)]
 	#[Translate]
 	public Textarea $intro;

@@ -18,6 +18,7 @@ use Cosray\Field\RichText;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
+use Cosray\Field\Textarea;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Types;
@@ -28,6 +29,7 @@ use Cosray\Schema\Hidden;
 use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
+use Cosray\Schema\Lines;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
@@ -115,6 +117,14 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createTextField(string $name = 'test'): Text
 	{
 		$field = new Text($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
+	}
+
+	private function createTextareaField(string $name = 'body'): Textarea
+	{
+		$field = new Textarea($name, $this->createOwner(), new ValueContext($name, []));
 		$field->init(Services::withDefaults());
 
 		return $field;
@@ -271,6 +281,21 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('rows', $properties);
 		$this->assertEquals(10, $properties['rows']);
+	}
+
+	public function testLinesCapabilityReturnsLinesProperty(): void
+	{
+		$properties = $this->applyAndGetProperties(new Lines(8), $this->createTextareaField());
+
+		$this->assertSame(8, $properties['lines']);
+	}
+
+	public function testLinesOnASingleLineFieldRejects(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot be used with the capability');
+
+		$this->applyAndGetProperties(new Lines(8), $this->createTextField());
 	}
 
 	public function testWidthCapabilityReturnsWidthProperty(): void
