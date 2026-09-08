@@ -245,13 +245,16 @@ it('cancels and searches without changing values, restores focus and resets on r
 	form.addEventListener('change', changed);
 	const initial = [...new FormData(form)];
 	const dialog = open();
+	const status = dialog.querySelector('[role="status"]')!;
+	expect(status.textContent).toBe('8 block types available');
 	const input = search(dialog, 'ÜBERSCHRIFT');
 	expect(choices(dialog)).toHaveLength(1);
 	expect(choices(dialog)[0].dataset.handle).toBe('heading');
+	expect(status.textContent).toBe('1 block type available');
 	expect(document.activeElement).toBe(input);
 	search(dialog, 'not a type');
 	expect(choices(dialog)).toHaveLength(0);
-	expect(dialog.querySelector('[role="status"]')?.textContent).toBe('No matching block types.');
+	expect(status.textContent).toBe('No matching block types.');
 	expect(key(input, 'Enter').defaultPrevented).toBe(true);
 	expect(key(input, 'ArrowDown').defaultPrevented).toBe(true);
 	cancel(dialog);

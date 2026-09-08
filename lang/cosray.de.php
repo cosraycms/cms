@@ -140,7 +140,7 @@ return [
 		'field:more-blocks' => 'Weitere Blöcke…',
 		'field:no-block-types' => 'Keine Blocktypen verfügbar.',
 		'field:search-blocks' => 'Blöcke suchen',
-		'field:block-results' => ':count Blocktypen verfügbar',
+		'field:block-results' => [':count Blocktyp verfügbar', ':count Blocktypen verfügbar'],
 		'field:no-block-results' => 'Keine passenden Blocktypen.',
 		'field:add-entry' => 'Eintrag hinzufügen',
 		'field:add-first-entry' => 'Ersten Eintrag hinzufügen',

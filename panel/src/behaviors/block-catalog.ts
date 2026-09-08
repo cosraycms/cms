@@ -27,10 +27,13 @@ function catalog(host: HTMLElement, choose: (type: string) => void): void {
 			return !choice.hidden;
 		});
 		rove(active && visible.includes(active) ? active : visible[0]);
+		const { empty, one, count } = status.dataset;
 		status.textContent =
 			visible.length === 0
-				? status.dataset.empty!
-				: status.dataset.count!.replace(':count', String(visible.length));
+				? empty!
+				: visible.length === 1
+					? one!
+					: count!.replace(':count', String(visible.length));
 	}
 
 	search.addEventListener('input', filter);

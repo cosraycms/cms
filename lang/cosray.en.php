@@ -137,7 +137,7 @@ return [
 		'field:more-blocks' => 'More blocks…',
 		'field:no-block-types' => 'No block types available.',
 		'field:search-blocks' => 'Search blocks',
-		'field:block-results' => ':count block types available',
+		'field:block-results' => [':count block type available', ':count block types available'],
 		'field:no-block-results' => 'No matching block types.',
 		'field:add-entry' => 'Add entry',
 		'field:add-first-entry' => 'Add first entry',
