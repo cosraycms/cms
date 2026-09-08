@@ -28,7 +28,7 @@ function field(
 	translateMode?: string,
 	blockTypes = types,
 ): string {
-	return execFileSync('php', [resolve('../tests/Fixtures/panel/field.php')], {
+	return execFileSync('php', [resolve('../tests/Fixtures/Panel/field.php')], {
 		encoding: 'utf8',
 		input: JSON.stringify({
 			field: {
