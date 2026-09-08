@@ -17,8 +17,8 @@ final class TestCatalogDocument
 	#[Label('Main content'), Columns(12, min: 2), Translate]
 	#[Common(CatalogBlock::class)]
 	#[Allows(Block\Text::class, CatalogBlock::class, Block\Iframe::class)]
-	protected Blocks $story;
+	private Blocks $story;
 
 	#[Label('Translated content'), Translate(TranslateMode::Asymmetric)]
-	protected Blocks $translated;
+	private Blocks $translated;
 }
