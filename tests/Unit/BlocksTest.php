@@ -296,6 +296,57 @@ final class BlocksTest extends TestCase
 		]));
 	}
 
+	public function testSpacingMetaGroupsOfferTheTokens(): void
+	{
+		$properties = $this
+			->createBlocks()
+			->allow(Builtin\Text::class)
+			->properties();
+		$tokens = static fn(array $control): array => array_column($control['props']['options'], 'value');
+		$gaps = $properties['metaControl']['props']['fields'];
+		$blockMeta = $properties['control']['props']['meta']['props']['fields'];
+
+		$this->assertSame(['gap', 'rowGap', 'columnGap'], array_column($gaps, 'key'));
+		$this->assertSame(['', 'none', 's', 'm', 'l', 'xl'], $tokens($gaps[0]['control']));
+		$this->assertSame(['class', 'id', 'padding'], array_column($blockMeta, 'key'));
+		$this->assertSame(['', 'none', 's', 'm', 'l', 'xl'], $tokens($blockMeta[2]['control']));
+	}
+
+	public function testSpacingMetaValidatesTheTokens(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Text::class);
+		$content = fn(array $meta, array $rowMeta): array => [
+			'type' => Blocks::class,
+			'value' => [
+				Field::NEUTRAL_LOCALE => [
+					$this->textRow('b1', 'Hi', ['colspan' => 2, 'rowspan' => 1, 'indent' => 0], $rowMeta),
+				],
+			],
+			'meta' => $meta,
+		];
+
+		$this->assertTrue(
+			$blocks
+				->shape()
+				->validate($content(
+					['gap' => ['zxx' => 's'], 'rowGap' => ['zxx' => ''], 'other' => ['zxx' => 'kept']],
+					['padding' => ['zxx' => 'xl'], 'class' => ['zxx' => 'hero']],
+				))
+				->valid(),
+		);
+
+		$result = $blocks
+			->shape()
+			->validate($content(
+				['columnGap' => ['zxx' => 'huge']],
+				['padding' => ['zxx' => 'huge']],
+			));
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($result->has(['meta', 'columnGap', 'zxx']));
+		$this->assertTrue($result->has(['value', Field::NEUTRAL_LOCALE, 0, 'meta', 'padding', 'zxx']));
+	}
+
 	public function testAllowRejectsUnknownClasses(): void
 	{
 		$this->throws(RuntimeException::class, "allows unknown block type 'App\\Nope'");

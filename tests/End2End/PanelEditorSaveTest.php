@@ -185,6 +185,53 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('Alt DE', $value['de'][0]['fields']['text']['value']['zxx']);
 	}
 
+	public function testBlocksSpacingRoundTripsThroughFieldAndBlockMeta(): void
+	{
+		$this->createBlocksNode('panel-save-spacing', 'test-media-document', [
+			'contentBlocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'en' => [$this->textBlock('block-a', 'Text', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0])],
+				],
+				'meta' => ['gap' => ['zxx' => 'm'], 'stashed' => ['zxx' => 'kept']],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-spacing', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'contentBlocks' => [
+						'value' => [
+							'en' => [[
+								'uid' => 'block-a',
+								'type' => Builtin\Text::class,
+								'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '0'],
+								'fields' => ['text' => ['value' => ['zxx' => 'Text']]],
+								'meta' => [
+									'class' => ['zxx' => ''],
+									'id' => ['zxx' => ''],
+									'padding' => ['zxx' => 'l'],
+								],
+							]],
+						],
+						'meta' => ['gap' => ['zxx' => ''], 'rowGap' => ['zxx' => 's'], 'columnGap' => ['zxx' => 'xl']],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$content = $this->nodeContent('panel-save-spacing')['contentBlocks'];
+
+		$this->assertSame('', $content['meta']['gap']['zxx']);
+		$this->assertSame('s', $content['meta']['rowGap']['zxx']);
+		$this->assertSame('xl', $content['meta']['columnGap']['zxx']);
+		$this->assertSame('kept', $content['meta']['stashed']['zxx']);
+		$this->assertSame('l', $content['value']['en'][0]['meta']['padding']['zxx']);
+	}
+
 	public function testSymmetricBlocksPatchTranslatedSubFieldsInsideTheSharedList(): void
 	{
 		$this->createBlocksNode('panel-save-blocks-symmetric', 'test-node-with-blocks', [

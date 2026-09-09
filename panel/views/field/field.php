@@ -162,12 +162,14 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
 			]) ?>
 			<div class="modal-body cms-settings">
-			<?php $this->insert('field/meta', [
+			<?php // The blocks field renders its gap group with the split toggle. ?>
+			<?php $this->insert($controlName === 'blocks' ? 'field/blocks/meta' : 'field/meta', [
 				'field' => $field,
 				'control' => $metaControl,
 				'meta' => $data['meta'] ?? null,
 				'id' => "{$idRoot}-meta",
 				'nameRoot' => $nameRoot,
+				'columns' => (int) (($control['props'] ?? [])['columns'] ?? 1),
 			]) ?>
 			</div>
 		</dialog>

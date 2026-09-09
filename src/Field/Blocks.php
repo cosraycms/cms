@@ -32,6 +32,9 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 
 	public const int COMMON_LIMIT = 6;
 
+	/** The spacing tokens the gap and padding settings choose from; unset means the site's default. */
+	public const array SPACING = ['none', 's', 'm', 'l', 'xl'];
+
 	/** @var list<class-string<Block>> */
 	protected array $allowedBlockTypes = [];
 
@@ -50,6 +53,19 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 	}
 
 	/**
+	 * The field's own settings: the gap between blocks, as one value or
+	 * split by axis. The panel renders the split as a toggle.
+	 */
+	public function metaControl(): ?Control
+	{
+		return Control::group([
+			['key' => 'gap', 'label' => __('field:gap'), 'control' => self::spacingControl()],
+			['key' => 'rowGap', 'label' => __('field:row-gap'), 'control' => self::spacingControl()],
+			['key' => 'columnGap', 'label' => __('field:column-gap'), 'control' => self::spacingControl()],
+		]);
+	}
+
+	/**
 	 * The block meta dialog: the same group for every block type, patched
 	 * on save like a field's meta.
 	 */
@@ -58,7 +74,53 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 		return Control::group([
 			['key' => 'class', 'label' => __('block:class'), 'control' => Control::text()],
 			['key' => 'id', 'label' => __('block:id'), 'control' => Control::text()],
+			['key' => 'padding', 'label' => __('field:padding'), 'control' => self::spacingControl()],
 		]);
+	}
+
+	/** An option control over the spacing tokens, the site's default first. */
+	public static function spacingControl(): Control
+	{
+		$labels = [
+			'none' => __('field:spacing-none'),
+			's' => __('field:spacing-s'),
+			'm' => __('field:spacing-m'),
+			'l' => __('field:spacing-l'),
+			'xl' => __('field:spacing-xl'),
+		];
+
+		return Control::option()->prop('options', [
+			['value' => '', 'label' => __('field:spacing-default')],
+			...array_map(
+				static fn(string $size): array => ['value' => $size, 'label' => $labels[$size]],
+				self::SPACING,
+			),
+		]);
+	}
+
+	/** Gap, row gap and column gap as spacing tokens; other meta keys pass through. */
+	protected function metaShape(): Shape
+	{
+		$shape = parent::metaShape();
+
+		foreach (['gap', 'rowGap', 'columnGap'] as $key) {
+			$shape->add($key, $this->spacingShape())->optional()->nullable();
+		}
+
+		return $shape;
+	}
+
+	/** A neutral-locale map holding a spacing token, or nothing for the site's default. */
+	private function spacingShape(): Shape
+	{
+		$shape = Shapes::create();
+		$shape
+			->add(self::NEUTRAL_LOCALE, 'string')
+			->rules('in:' . implode(',', ['', ...self::SPACING]))
+			->optional()
+			->nullable();
+
+		return $shape;
 	}
 
 	/** @param class-string<Block> ...$types */
@@ -411,7 +473,9 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			->add('fields', Shapes::create())
 			->rules('required')
 			->finalize($this->finalizeRowFields(...));
-		$rows->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
+		$meta = Shapes::create()->extra(Extra::Allow);
+		$meta->add('padding', $this->spacingShape())->optional()->nullable();
+		$rows->add('meta', $meta)->optional()->nullable();
 		$rows->review($this->reviewRows(...));
 
 		return $rows;

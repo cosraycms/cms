@@ -495,3 +495,79 @@ describe('blocks edge resizing', () => {
 		expect(resize(layout, 'bottom', -4, grid)).toEqual({ colspan: 6, rowspan: 1, indent: 3 });
 	});
 });
+
+describe('blocks gap settings', () => {
+	const TOKENS = ['', 'none', 's', 'm', 'l', 'xl'];
+
+	function gapDialog(gap: string, rowGap: string, columnGap: string): HTMLElement {
+		const split = rowGap !== '' || columnGap !== '';
+		const select = (key: string, value: string): string => `<div
+			class="field"
+			data-gap-${key === 'gap' ? 'single' : 'separate'}
+			${(key === 'gap') === split ? 'hidden' : ''}>
+			<select name="content[body][meta][${key}][zxx]">
+				${TOKENS.map((token) => `<option value="${token}"${token === value ? ' selected' : ''}>${token}</option>`).join('')}
+			</select>
+		</div>`;
+
+		document.body.innerHTML = `<div class="cms-field" data-meta-owner data-field="body">
+			<dialog data-meta>
+				<div class="fields" data-gap-scope>
+					${select('gap', gap)}
+					<label class="field split">
+						<input type="checkbox" data-gap-split ${split ? 'checked' : ''}>
+					</label>
+					${select('rowGap', rowGap)}
+					${select('columnGap', columnGap)}
+				</div>
+			</dialog>
+		</div>`;
+
+		return document.querySelector<HTMLElement>('[data-gap-scope]')!;
+	}
+
+	function gapSelect(scope: HTMLElement, key: string): HTMLSelectElement {
+		return scope.querySelector<HTMLSelectElement>(`select[name$="[meta][${key}][zxx]"]`)!;
+	}
+
+	it('splits the gap into row and column gap and joins them again', () => {
+		const scope = gapDialog('m', '', '');
+		const toggle = scope.querySelector<HTMLInputElement>('[data-gap-split]')!;
+		const changed: string[] = [];
+		document.addEventListener('change', (event) => {
+			if (event.target instanceof HTMLSelectElement) changed.push(event.target.name);
+		});
+
+		toggle.click();
+
+		expect(gapSelect(scope, 'gap').value).toBe('');
+		expect(gapSelect(scope, 'rowGap').value).toBe('m');
+		expect(gapSelect(scope, 'columnGap').value).toBe('m');
+		expect(scope.querySelector<HTMLElement>('[data-gap-single]')!.hidden).toBe(true);
+		expect(
+			[...scope.querySelectorAll<HTMLElement>('[data-gap-separate]')].map((part) => part.hidden),
+		).toEqual([false, false]);
+		expect(changed).toHaveLength(3);
+
+		gapSelect(scope, 'rowGap').value = 'l';
+		gapSelect(scope, 'columnGap').value = 's';
+		toggle.click();
+
+		expect(gapSelect(scope, 'gap').value).toBe('l');
+		expect(gapSelect(scope, 'rowGap').value).toBe('');
+		expect(gapSelect(scope, 'columnGap').value).toBe('');
+		expect(scope.querySelector<HTMLElement>('[data-gap-single]')!.hidden).toBe(false);
+		expect(
+			[...scope.querySelectorAll<HTMLElement>('[data-gap-separate]')].map((part) => part.hidden),
+		).toEqual([true, true]);
+	});
+
+	it('joins onto the column gap when no row gap is set', () => {
+		const scope = gapDialog('', '', 'xl');
+
+		scope.querySelector<HTMLInputElement>('[data-gap-split]')!.click();
+
+		expect(gapSelect(scope, 'gap').value).toBe('xl');
+		expect(gapSelect(scope, 'columnGap').value).toBe('');
+	});
+});

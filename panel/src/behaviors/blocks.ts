@@ -378,6 +378,51 @@ function onInput(event: Event): void {
 }
 
 /**
+ * The field's gap dialog: splitting copies the gap into both axes and
+ * clears it, joining copies the row gap back. The selects then report a
+ * change of their own, so the form turns dirty as for a typed choice.
+ */
+function onSplit(event: Event): void {
+	const toggle = event.target;
+
+	if (!(toggle instanceof HTMLInputElement) || !toggle.matches('[data-gap-split]')) {
+		return;
+	}
+
+	const scope = toggle.closest<HTMLElement>('[data-gap-scope]');
+	const select = (key: string): HTMLSelectElement | null =>
+		scope?.querySelector<HTMLSelectElement>(`select[name$="[meta][${key}][zxx]"]`) ?? null;
+	const gap = select('gap');
+	const row = select('rowGap');
+	const column = select('columnGap');
+
+	if (!scope || !gap || !row || !column) {
+		return;
+	}
+
+	if (toggle.checked) {
+		row.value = gap.value;
+		column.value = gap.value;
+		gap.value = '';
+	} else {
+		gap.value = row.value || column.value;
+		row.value = '';
+		column.value = '';
+	}
+
+	scope.querySelectorAll<HTMLElement>('[data-gap-single]').forEach((part) => {
+		part.hidden = toggle.checked;
+	});
+	scope.querySelectorAll<HTMLElement>('[data-gap-separate]').forEach((part) => {
+		part.hidden = !toggle.checked;
+	});
+
+	for (const changed of [gap, row, column]) {
+		changed.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+}
+
+/**
  * A stamped row shows the layout its inputs carry: a duplicate copies
  * the inputs of its source, while its style and dialog still say what
  * the template did.
@@ -424,6 +469,7 @@ export function install(): () => void {
 	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
+	document.addEventListener('change', onSplit);
 	document.addEventListener('keydown', onKeyDown);
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
@@ -436,6 +482,7 @@ export function install(): () => void {
 		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
+		document.removeEventListener('change', onSplit);
 		document.removeEventListener('keydown', onKeyDown);
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);

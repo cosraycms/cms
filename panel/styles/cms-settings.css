@@ -11,6 +11,15 @@
 	& .section {
 		font-weight: 600;
 	}
+
+	/* The toggle between one gap and a row and column gap of their own. */
+	& .split {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+	}
 }
 
 /* An element's per-use form stacks in the compact dialog; the element's own
