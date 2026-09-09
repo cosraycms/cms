@@ -13,6 +13,7 @@ use Cosray\Field\Option;
 use Cosray\Field\RichText;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
+use Cosray\Field\Video;
 use Cosray\Field\Youtube;
 use Cosray\Locales;
 use Cosray\Panel\System;
@@ -719,6 +720,12 @@ final class Styleguide extends Panel
 			'layout' => $layout,
 			'fields' => ['code' => ['type' => Iframe::class, 'value' => ['zxx' => $code]]],
 		];
+		$video = static fn(string $uid, array $layout, string $asset): array => [
+			'uid' => $uid,
+			'type' => Builtin\Video::class,
+			'layout' => $layout,
+			'fields' => ['video' => ['type' => Video::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
+		];
 
 		return [
 			'story' => [
@@ -748,6 +755,7 @@ final class Styleguide extends Panel
 						$richtext('sg-grid-6', $layout(4), ['zxx' => $doc('Another third.')]),
 						$richtext('sg-grid-7', $layout(4), ['zxx' => $doc('And the last third.')]),
 						$youtube('sg-grid-8', $layout(6), 'dQw4w9WgXcQ'),
+						$video('sg-grid-10', $layout(6), 'sg-clip'),
 						$iframe(
 							'sg-grid-9',
 							$layout(6),
@@ -829,6 +837,13 @@ final class Styleguide extends Panel
 		};
 
 		$assets = ['sg-cover' => $plate(28, 'sudhaus-kupferkessel.jpg', 2400, 1600, 862208)];
+		$assets['sg-clip'] = [
+			'filename' => 'brauerei-rundgang.mp4',
+			'url' => 'data:video/mp4,',
+			'kind' => 'video',
+			'mime' => 'video/mp4',
+			'bytes' => 18874368,
+		];
 
 		for ($i = 1; $i <= self::GALLERY_SIZE; $i++) {
 			$assets[self::galleryUid($i)] = $plate(

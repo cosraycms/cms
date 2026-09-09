@@ -13,6 +13,7 @@
 		translate?: boolean;
 		translateMode?: 'symmetric' | 'asymmetric';
 		limit?: { min: number; max: number };
+		presentation?: string;
 	};
 
 	type Props = {
@@ -22,10 +23,20 @@
 		node: string;
 		locale: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
+		settings?: HTMLElement;
 		notify: () => void;
 	};
 
-	let { type, value = $bindable(), field, node, locale, locales, notify }: Props = $props();
+	let {
+		type,
+		value = $bindable(),
+		field,
+		node,
+		locale,
+		locales,
+		settings,
+		notify,
+	}: Props = $props();
 
 	let active = $derived(field.translateMode === 'asymmetric' ? locale : ZXX);
 	let configuredLocales = $derived(locales?.all ?? []);
@@ -68,6 +79,8 @@
 		{locales}
 		bind:items={() => value[identity] ?? [], (items) => (value[identity] = items)}
 		add={(item) => add(identity, item)}
+		presentation={field.presentation}
+		{settings}
 		{notify}
 	/>
 {/each}

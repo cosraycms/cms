@@ -15,6 +15,7 @@
 		locale?: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		assets?: AssetMap;
+		settings?: HTMLElement;
 	};
 
 	let {
@@ -24,6 +25,7 @@
 		locale = ZXX,
 		locales,
 		assets = {},
+		settings,
 	}: Props = $props();
 
 	// The SSR payload seeds the store once; later host re-assignments
@@ -58,4 +60,4 @@
 	}
 </script>
 
-<MediaControl type="video" bind:value={map} {field} {node} {locale} {locales} {notify} />
+<MediaControl type="video" bind:value={map} {field} {node} {locale} {locales} {settings} {notify} />

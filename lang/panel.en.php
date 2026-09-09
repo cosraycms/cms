@@ -131,6 +131,7 @@ return [
 		'upload:drop-images' => 'Drop images here or add them above',
 		'upload:drop-to-add' => 'Drop to add',
 		'upload:drop-to-replace' => 'Drop to replace',
+		'upload:drop-video' => 'Drop a video here',
 		'upload:dropzone' => 'Drag and drop new files here or',
 		'upload:failed' => 'Upload failed',
 		'upload:file-label' => 'File:',
@@ -141,5 +142,6 @@ return [
 		'upload:single-only' => 'This field allows only a single file.',
 		'upload:slots-left' => 'Only :count more file(s) can be added.',
 		'upload:uploading' => 'Uploading …',
+		'video:upload' => 'Upload video',
 	],
 ];

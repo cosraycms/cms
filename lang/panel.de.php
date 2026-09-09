@@ -131,6 +131,7 @@ return [
 		'upload:drop-images' => 'Bilder hierher ziehen oder oben hinzufügen',
 		'upload:drop-to-add' => 'Ablegen zum Hinzufügen',
 		'upload:drop-to-replace' => 'Ablegen zum Ersetzen',
+		'upload:drop-video' => 'Video hierher ziehen',
 		'upload:dropzone' => 'Neue Dateien per Drag and Drop hier einfügen oder',
 		'upload:failed' => 'Upload fehlgeschlagen',
 		'upload:file-label' => 'Datei:',
@@ -141,5 +142,6 @@ return [
 		'upload:single-only' => 'In diesem Feld ist nur eine einzelne Datei erlaubt.',
 		'upload:slots-left' => 'Es können nur noch :count Datei(en) hinzugefügt werden.',
 		'upload:uploading' => 'Lädt hoch …',
+		'video:upload' => 'Video hochladen',
 	],
 ];

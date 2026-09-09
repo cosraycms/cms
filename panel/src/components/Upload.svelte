@@ -17,6 +17,8 @@
 	import ModalLibrary from '$components/modals/ModalLibrary.svelte';
 	import Gallery from '$components/media/Gallery.svelte';
 	import ImageCard from '$components/media/ImageCard.svelte';
+	import ImageFigure from '$components/media/ImageFigure.svelte';
+	import VideoFigure from '$components/media/VideoFigure.svelte';
 
 	type Props = {
 		type: UploadType;
@@ -34,6 +36,10 @@
 		callback?: (() => void) | null;
 		inline?: boolean;
 		notify?: () => void;
+		// The block presentation renders content only: a figure at block
+		// width whose per-use form goes into the settings slot when given.
+		presentation?: string;
+		settings?: HTMLElement;
 	};
 
 	let {
@@ -52,6 +58,8 @@
 		callback = null,
 		inline = false,
 		notify = () => {},
+		presentation,
+		settings,
 	}: Props = $props();
 
 	const assetStore = useAssets();
@@ -63,6 +71,9 @@
 	let allowedExtensions = $derived(allowedFiles.join(', '));
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
 	let open = $derived(!items || limit.max < 1 || items.length < limit.max);
+	let block = $derived(
+		presentation === 'block' && ((type === 'image' && !multiple) || type === 'video'),
+	);
 
 	function alert(body: string) {
 		const handle = cosray().modal.open(
@@ -139,6 +150,11 @@
 		// unlimited
 		if (limit.max < 1) {
 			return files;
+		}
+
+		// A single-item field replaces what it holds.
+		if (!multiple) {
+			return files.slice(0, 1);
 		}
 
 		const slotsLeft = Math.max(limit.max - (items?.length ?? 0), 0);
@@ -308,6 +324,63 @@
 	{:else}
 		<Message type="warning" text={__('upload:save-first')} />
 	{/if}
+{:else if block}
+	<div
+		class="cms-media-block"
+		class:is-dragging={dragging}
+		role="group"
+		ondragenter={dragEnter}
+		ondragover={dragOver}
+		ondragleave={dragLeave}
+		ondrop={drop}
+	>
+		{#if type === 'video'}
+			<VideoFigure
+				item={items?.[0] ?? null}
+				{loading}
+				{translate}
+				{contentLocale}
+				{identity}
+				{locales}
+				{settings}
+				allowed="{__('upload:allowed-extensions')} {allowedExtensions}"
+				update={replace}
+				remove={() => remove(null)}
+				upload={openPicker}
+				library={openLibrary}
+			/>
+		{:else}
+			<ImageFigure
+				item={items?.[0] ?? null}
+				{loading}
+				{translate}
+				{contentLocale}
+				{identity}
+				{locales}
+				{settings}
+				allowed="{__('upload:allowed-extensions')} {allowedExtensions}"
+				update={replace}
+				remove={() => remove(null)}
+				upload={openPicker}
+				library={openLibrary}
+			/>
+		{/if}
+		{#if dragging}
+			<div class="drop" aria-hidden="true">
+				<span>
+					<Icon name="cloud-upload" />
+					{items?.length ? __('upload:drop-to-replace') : __('upload:drop-to-add')}
+				</span>
+			</div>
+		{/if}
+		<input
+			bind:this={picker}
+			type="file"
+			id={name}
+			accept={allowedFiles.map((suffix) => '.' + suffix).join(',')}
+			oninput={onFile(getFilesFromInput)}
+		/>
+	</div>
 {:else if type === 'image'}
 	<div class="cms-media-field" class:required class:is-dragging={dragging}>
 		<div
@@ -462,6 +535,46 @@
 				font-size: var(--cms-font-size-xs);
 				line-height: 1.5;
 				color: var(--cms-color-text-faint);
+			}
+
+			& input[type='file'] {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				overflow: hidden;
+				clip: rect(1px, 1px, 1px, 1px);
+				white-space: nowrap;
+			}
+		}
+
+		/* The block presentation: no frame of its own, the figure is the content. */
+		.cms-media-block {
+			position: relative;
+
+			& .drop {
+				position: absolute;
+				inset: 0;
+				z-index: 1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: var(--cms-radius-md);
+				background: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
+				box-shadow: inset 0 0 0 2px var(--cms-color-info);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 600;
+				pointer-events: none;
+
+				& span {
+					display: inline-flex;
+					align-items: center;
+					gap: var(--cms-space-2);
+				}
+
+				& :global(svg) {
+					width: var(--cms-space-4);
+					height: var(--cms-space-4);
+				}
 			}
 
 			& input[type='file'] {

@@ -295,3 +295,120 @@ describe('per-use meta', () => {
 		});
 	});
 });
+
+describe('block presentation', () => {
+	const cover = { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' };
+
+	async function figure(settings?: HTMLElement, item: FileItem = { uid: 'cover' }) {
+		return media('cosray-image', {
+			value: { zxx: [item] },
+			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block' },
+			assets: { cover },
+			...(settings ? { settings } : {}),
+		} as HostPayload);
+	}
+
+	it('renders an image as a figure with its per-use form below it', async () => {
+		const { element } = await figure(undefined, {
+			uid: 'cover',
+			meta: { caption: { zxx: 'Under the image' } },
+		});
+
+		expect(element.querySelector('.cms-image-card')).toBeNull();
+		expect(element.querySelector('.cms-image-figure img')?.getAttribute('src')).toBe(
+			'/media/cover.jpg',
+		);
+		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
+			'Under the image',
+		);
+		expect(
+			element.querySelector('.cms-image-figure .cms-media-meta input[id$="-alt"]'),
+		).not.toBeNull();
+	});
+
+	it('keeps the form presentation for a standalone field', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'image', limit: { min: 0, max: 1 } },
+			assets: { cover },
+		});
+
+		expect(element.querySelector('.cms-image-card')).not.toBeNull();
+		expect(element.querySelector('.cms-image-figure')).toBeNull();
+	});
+
+	it('mounts the per-use form into the settings slot and edits through it', async () => {
+		const slot = document.createElement('div');
+		document.body.append(slot);
+		const { element, changes } = await figure(slot);
+		const alt = slot.querySelector<HTMLInputElement>('.cms-media-meta input[id$="-alt"]');
+
+		expect(alt).not.toBeNull();
+		expect(element.querySelector('.cms-media-meta')).toBeNull();
+
+		await enter(alt!, 'A copper kettle');
+
+		expect(changes).toHaveBeenLastCalledWith({
+			zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A copper kettle' } } }],
+		});
+	});
+
+	it('replaces the slot form along with the image and clears it on remove', async () => {
+		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
+			ok: true,
+			uid: 'fresh',
+			filename: 'fresh.png',
+			url: '/media/fresh.png',
+		});
+		const slot = document.createElement('div');
+		document.body.append(slot);
+		const { element, changes } = await figure(slot, {
+			uid: 'cover',
+			meta: { alt: { zxx: 'Old alt' } },
+		});
+
+		expect(slot.querySelector<HTMLInputElement>('input[id$="-alt"]')!.value).toBe('Old alt');
+
+		upload(element);
+		await vi.waitFor(() => {
+			expect(element.querySelector('.cms-image-figure img')?.getAttribute('src')).toBe(
+				'/media/fresh.png',
+			);
+		});
+		const alt = slot.querySelector<HTMLInputElement>('input[id$="-alt"]');
+
+		expect(slot.querySelectorAll('.cms-media-meta')).toHaveLength(1);
+		expect(alt!.value).toBe('');
+
+		await enter(alt!, 'New alt');
+		expect(changes).toHaveBeenLastCalledWith({
+			zxx: [{ uid: 'fresh', meta: { alt: { zxx: 'New alt' } } }],
+		});
+
+		element
+			.querySelector<HTMLButtonElement>('.cms-image-figure .overlay button:last-child')!
+			.click();
+		await tick();
+
+		expect(changes).toHaveBeenLastCalledWith({ zxx: [] });
+		expect(slot.querySelector('.cms-media-meta')).toBeNull();
+		expect(element.querySelector('.cms-image-figure .dropzone')).not.toBeNull();
+	});
+
+	it('renders a video as a player with its caption form in the slot', async () => {
+		const slot = document.createElement('div');
+		document.body.append(slot);
+		const { element } = await media('cosray-video', {
+			value: { zxx: [{ uid: 'clip' }] },
+			field: { name: 'video', limit: { min: 0, max: 1 }, presentation: 'block' },
+			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
+			settings: slot,
+		} as HostPayload);
+
+		expect(element.querySelector('.cms-video-figure video')?.getAttribute('src')).toBe(
+			'/media/clip.mp4',
+		);
+		expect(slot.querySelector('textarea[id$="-caption"]')).not.toBeNull();
+		expect(slot.querySelector('[id$="-alt"], [id$="-title"]')).toBeNull();
+	});
+});
