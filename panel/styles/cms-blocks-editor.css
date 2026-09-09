@@ -15,7 +15,16 @@
  */
 .cms-blocks-editor {
 	--blocks-x: var(--cms-space-4);
+	/* The spacing tokens the settings choose, in the panel's own scale; the
+	   canvas follows the dialog through the same attributes the site gets. */
+	--blocks-gap-none: 0px;
+	--blocks-gap-s: var(--cms-space-2);
+	--blocks-gap-m: var(--cms-space-4);
+	--blocks-gap-l: var(--cms-space-6);
+	--blocks-gap-xl: var(--cms-space-10);
 	--blocks-gap: var(--cms-space-3);
+	--blocks-row-gap: var(--blocks-gap);
+	--blocks-padding: 0px;
 
 	border: 1px solid var(--cms-color-border);
 	border-radius: var(--cms-radius-md);
@@ -24,7 +33,8 @@
 	& .grid {
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
-		gap: var(--blocks-gap);
+		column-gap: var(--blocks-gap);
+		row-gap: var(--blocks-row-gap);
 		padding: var(--cms-space-4) var(--blocks-x);
 	}
 
@@ -315,7 +325,9 @@
 	}
 
 	& .body {
-		padding: var(--cms-space-3) var(--cms-space-3) var(--cms-space-4);
+		padding: calc(var(--cms-space-3) + var(--blocks-padding))
+			calc(var(--cms-space-3) + var(--blocks-padding))
+			calc(var(--cms-space-4) + var(--blocks-padding));
 	}
 
 	/* A block grows with its text: no inner scrollbar on the canvas. */
@@ -506,14 +518,105 @@
 	   The blocks sit inset so an active border stays inside the canvas,
 	   and the body makes up the difference to the canvas padding. */
 	&.is-list {
+		--blocks-row-gap: 0px;
+
 		& .grid {
-			gap: 0;
 			padding: var(--cms-space-3) var(--cms-space-2);
 		}
 
 		& .body {
-			padding: var(--cms-space-3) calc(var(--blocks-x) - var(--cms-space-2)) var(--cms-space-4);
+			padding: calc(var(--cms-space-3) + var(--blocks-padding))
+				calc(var(--blocks-x) - var(--cms-space-2) + var(--blocks-padding))
+				calc(var(--cms-space-4) + var(--blocks-padding));
 		}
+	}
+
+	/* The chosen tokens, after the list default so they win there too; a
+	   gap set per axis beats the shared one. */
+	&[data-gap='none'] {
+		--blocks-gap: var(--blocks-gap-none);
+		--blocks-row-gap: var(--blocks-gap-none);
+	}
+
+	&[data-gap='s'] {
+		--blocks-gap: var(--blocks-gap-s);
+		--blocks-row-gap: var(--blocks-gap-s);
+	}
+
+	&[data-gap='m'] {
+		--blocks-gap: var(--blocks-gap-m);
+		--blocks-row-gap: var(--blocks-gap-m);
+	}
+
+	&[data-gap='l'] {
+		--blocks-gap: var(--blocks-gap-l);
+		--blocks-row-gap: var(--blocks-gap-l);
+	}
+
+	&[data-gap='xl'] {
+		--blocks-gap: var(--blocks-gap-xl);
+		--blocks-row-gap: var(--blocks-gap-xl);
+	}
+
+	&[data-column-gap='none'] {
+		--blocks-gap: var(--blocks-gap-none);
+	}
+
+	&[data-column-gap='s'] {
+		--blocks-gap: var(--blocks-gap-s);
+	}
+
+	&[data-column-gap='m'] {
+		--blocks-gap: var(--blocks-gap-m);
+	}
+
+	&[data-column-gap='l'] {
+		--blocks-gap: var(--blocks-gap-l);
+	}
+
+	&[data-column-gap='xl'] {
+		--blocks-gap: var(--blocks-gap-xl);
+	}
+
+	&[data-row-gap='none'] {
+		--blocks-row-gap: var(--blocks-gap-none);
+	}
+
+	&[data-row-gap='s'] {
+		--blocks-row-gap: var(--blocks-gap-s);
+	}
+
+	&[data-row-gap='m'] {
+		--blocks-row-gap: var(--blocks-gap-m);
+	}
+
+	&[data-row-gap='l'] {
+		--blocks-row-gap: var(--blocks-gap-l);
+	}
+
+	&[data-row-gap='xl'] {
+		--blocks-row-gap: var(--blocks-gap-xl);
+	}
+
+	/* A block's padding adds to the body's own. */
+	& .block[data-padding='none'] {
+		--blocks-padding: 0px;
+	}
+
+	& .block[data-padding='s'] {
+		--blocks-padding: var(--blocks-gap-s);
+	}
+
+	& .block[data-padding='m'] {
+		--blocks-padding: var(--blocks-gap-m);
+	}
+
+	& .block[data-padding='l'] {
+		--blocks-padding: var(--blocks-gap-l);
+	}
+
+	& .block[data-padding='xl'] {
+		--blocks-padding: var(--blocks-gap-xl);
 	}
 }
 

@@ -377,6 +377,60 @@ function onInput(event: Event): void {
 	write(row, set(before, dimension, Number.isNaN(typed) ? before[dimension] : typed, grid), grid);
 }
 
+const SPACING = ['none', 's', 'm', 'l', 'xl'];
+const CONTAINER_SPACING: Record<string, string> = {
+	gap: 'gap',
+	rowGap: 'rowGap',
+	columnGap: 'columnGap',
+};
+
+function spacingKey(control: HTMLSelectElement): string | null {
+	return /\[meta\]\[(gap|rowGap|columnGap|padding)\]\[zxx\]$/.exec(control.name)?.[1] ?? null;
+}
+
+function applySpacing(target: HTMLElement, key: string, value: string): void {
+	if (SPACING.includes(value)) {
+		target.dataset[key] = value;
+	} else {
+		delete target.dataset[key];
+	}
+}
+
+/**
+ * The canvas follows the spacing dialogs live: a block's padding select
+ * writes the row's attribute, the field's gap selects write every
+ * container of the field, so the grid and the resize math read the gap
+ * the site will render with.
+ */
+export function mirrorSpacing(control: HTMLSelectElement): void {
+	const key = spacingKey(control);
+
+	if (key === 'padding') {
+		const row = control.closest<HTMLElement>('[data-repeater-row]');
+
+		if (row) {
+			applySpacing(row, key, control.value);
+		}
+
+		return;
+	}
+
+	if (!key) {
+		return;
+	}
+
+	control
+		.closest('[data-meta-owner]')
+		?.querySelectorAll<HTMLElement>('.cms-blocks-editor')
+		.forEach((container) => applySpacing(container, CONTAINER_SPACING[key], control.value));
+}
+
+function onSpacing(event: Event): void {
+	if (event.target instanceof HTMLSelectElement) {
+		mirrorSpacing(event.target);
+	}
+}
+
 /**
  * The field's gap dialog: splitting copies the gap into both axes and
  * clears it, joining copies the row gap back. The selects then report a
@@ -459,8 +513,19 @@ function onStamp(event: Event): void {
 	const row = event.target;
 	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
 
-	if (row instanceof HTMLElement && container && input(row, 'colspan')) {
+	if (!(row instanceof HTMLElement) || !container) {
+		return;
+	}
+
+	if (input(row, 'colspan')) {
 		write(row, read(row), gridOf(container));
+	}
+
+	// A duplicate copies its source's padding select; the row shows it.
+	const padding = row.querySelector<HTMLSelectElement>('select[name$="[meta][padding][zxx]"]');
+
+	if (padding) {
+		mirrorSpacing(padding);
 	}
 }
 
@@ -470,6 +535,7 @@ export function install(): () => void {
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
 	document.addEventListener('change', onSplit);
+	document.addEventListener('change', onSpacing);
 	document.addEventListener('keydown', onKeyDown);
 	document.addEventListener('pointerdown', onPointerDown);
 	document.addEventListener('pointermove', onPointerMove);
@@ -483,6 +549,7 @@ export function install(): () => void {
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
 		document.removeEventListener('change', onSplit);
+		document.removeEventListener('change', onSpacing);
 		document.removeEventListener('keydown', onKeyDown);
 		document.removeEventListener('pointerdown', onPointerDown);
 		document.removeEventListener('pointermove', onPointerMove);

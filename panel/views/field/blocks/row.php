@@ -31,6 +31,8 @@ $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
 $globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 $ownsLocales = !$globalLocales && RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->colspan;
+$padding = $rowData['meta']['padding']['zxx'] ?? null;
+$padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
 $labels = (bool) ($blockType['labels'] ?? true);
 // A built-in type with an editor view of its own renders as content
@@ -68,6 +70,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 	<?= $ownsLocales ? 'data-locale-scope' : '' ?>
 	data-meta-owner
 	data-indent="<?= $layout->indent ?>"
+	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
 	<input
 		type="hidden"

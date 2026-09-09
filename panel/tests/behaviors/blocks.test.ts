@@ -571,3 +571,71 @@ describe('blocks gap settings', () => {
 		expect(gapSelect(scope, 'columnGap').value).toBe('');
 	});
 });
+
+describe('blocks spacing mirror', () => {
+	const TOKENS = ['', 'none', 's', 'm', 'l', 'xl'];
+
+	function select(name: string, value: string): string {
+		return `<select name="${name}">${TOKENS.map(
+			(token) => `<option value="${token}"${token === value ? ' selected' : ''}>${token}</option>`,
+		).join('')}</select>`;
+	}
+
+	function field(): { container: HTMLElement; row: HTMLElement } {
+		document.body.innerHTML = `<div class="cms-field" data-meta-owner data-field="body">
+			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-columns="12" data-min="2">
+				<div data-repeater-list>
+					<div class="block" data-repeater-row data-meta-owner>
+						<input type="hidden" name="${NAME}[0][layout][colspan]" value="6" data-layout="colspan">
+						<dialog data-meta>${select(`${NAME}[0][meta][padding][zxx]`, '')}</dialog>
+					</div>
+				</div>
+			</div>
+			<dialog data-meta>
+				${select('content[body][meta][gap][zxx]', '')}
+				${select('content[body][meta][rowGap][zxx]', '')}
+				${select('content[body][meta][columnGap][zxx]', '')}
+			</dialog>
+		</div>`;
+
+		return {
+			container: document.querySelector<HTMLElement>('.cms-blocks-editor')!,
+			row: document.querySelector<HTMLElement>('[data-repeater-row]')!,
+		};
+	}
+
+	function choose(name: string, value: string): void {
+		const control = document.querySelector<HTMLSelectElement>(`select[name="${name}"]`)!;
+
+		control.value = value;
+		control.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+
+	it('writes the gap selects onto the container and the padding onto the row', () => {
+		const { container, row } = field();
+
+		choose('content[body][meta][gap][zxx]', 's');
+		choose('content[body][meta][columnGap][zxx]', 'xl');
+		choose(`${NAME}[0][meta][padding][zxx]`, 'm');
+
+		expect(container.dataset.gap).toBe('s');
+		expect(container.dataset.columnGap).toBe('xl');
+		expect(container.hasAttribute('data-row-gap')).toBe(false);
+		expect(row.dataset.padding).toBe('m');
+
+		choose('content[body][meta][gap][zxx]', '');
+		choose(`${NAME}[0][meta][padding][zxx]`, '');
+
+		expect(container.hasAttribute('data-gap')).toBe(false);
+		expect(row.hasAttribute('data-padding')).toBe(false);
+	});
+
+	it('shows the padding a stamped row carries in its select', () => {
+		const { row } = field();
+
+		row.querySelector<HTMLSelectElement>('select')!.value = 'l';
+		row.dispatchEvent(new Event('repeater:stamp', { bubbles: true }));
+
+		expect(row.dataset.padding).toBe('l');
+	});
+});
