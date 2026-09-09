@@ -16,6 +16,8 @@
 // bottom edge counts the rowspan. The keyboard reaches the same edges from the
 // focused grip: Alt with the arrows, Shift added for the start edge.
 
+import { focusRow } from './repeater';
+
 export const MAX_ROWSPAN = 6;
 
 export type Dimension = 'colspan' | 'rowspan' | 'indent';
@@ -380,6 +382,34 @@ function onInput(event: Event): void {
  * the inputs of its source, while its style and dialog still say what
  * the template did.
  */
+const INTERACTIVE =
+	'a, button, input, select, textarea, label, summary, dialog, [popover], [contenteditable], [tabindex]';
+
+// A click on a block's own ground makes it the active one — the border
+// and the chrome follow focus — while a click on anything interactive
+// keeps its meaning.
+function onClick(event: MouseEvent): void {
+	const target = event.target;
+
+	if (!(target instanceof Element)) {
+		return;
+	}
+
+	const row = target.closest<HTMLElement>('.cms-blocks-editor [data-repeater-row]');
+
+	if (!row || row.contains(document.activeElement)) {
+		return;
+	}
+
+	const interactive = target.closest(INTERACTIVE);
+
+	if (interactive && row.contains(interactive)) {
+		return;
+	}
+
+	focusRow(row);
+}
+
 function onStamp(event: Event): void {
 	const row = event.target;
 	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
@@ -391,6 +421,7 @@ function onStamp(event: Event): void {
 
 export function install(): () => void {
 	document.addEventListener('repeater:stamp', onStamp);
+	document.addEventListener('click', onClick);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
 	document.addEventListener('keydown', onKeyDown);
@@ -402,6 +433,7 @@ export function install(): () => void {
 
 	return () => {
 		document.removeEventListener('repeater:stamp', onStamp);
+		document.removeEventListener('click', onClick);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
 		document.removeEventListener('keydown', onKeyDown);

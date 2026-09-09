@@ -114,6 +114,47 @@ function type(control: HTMLInputElement, value: string, commit = false): void {
 	}
 }
 
+describe('blocks selection', () => {
+	function canvas(): { row: HTMLElement; ground: HTMLElement; button: HTMLButtonElement } {
+		document.body.innerHTML = `
+			<div class="cms-blocks-editor is-list" data-repeater data-name="${NAME}" data-id="field-body" data-columns="1" data-min="1">
+				<div class="grid" data-repeater-list>
+					<div class="block" data-repeater-row>
+						<div class="body"><p class="ground">Content</p><button type="button">Act</button></div>
+					</div>
+				</div>
+			</div>`;
+
+		return {
+			row: document.querySelector<HTMLElement>('.block')!,
+			ground: document.querySelector<HTMLElement>('.ground')!,
+			button: document.querySelector<HTMLButtonElement>('button')!,
+		};
+	}
+
+	it('focuses a block clicked on its own ground, for as long as it keeps focus', () => {
+		const { row, ground, button } = canvas();
+
+		ground.click();
+
+		expect(document.activeElement).toBe(row);
+		expect(row.getAttribute('tabindex')).toBe('-1');
+
+		button.focus();
+
+		expect(row.hasAttribute('tabindex')).toBe(false);
+	});
+
+	it('leaves a click on a control to the control', () => {
+		const { row, button } = canvas();
+
+		button.click();
+
+		expect(document.activeElement).not.toBe(row);
+		expect(row.hasAttribute('tabindex')).toBe(false);
+	});
+});
+
 describe('blocks layout numbers', () => {
 	it('clamps colspan into [min, columns] and rowspan into [1, MAX_ROWSPAN]', () => {
 		const twelve = grid(12, 2);

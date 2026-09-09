@@ -225,17 +225,19 @@ function add(
 			(input) => !input.matches(':disabled') && input.checkVisibility({ visibilityProperty: true }),
 		);
 		if (focus) focus.focus();
-		else {
-			// Focusable for the hand-off only, so the row behaves like a
-			// server-rendered one once focus moves on.
-			stamped.tabIndex = -1;
-			stamped.addEventListener('focusout', () => stamped.removeAttribute('tabindex'), {
-				once: true,
-			});
-			stamped.focus();
-			if (document.activeElement !== stamped) stamped.removeAttribute('tabindex');
-		}
+		else focusRow(stamped);
 	}
+}
+
+/**
+ * Focus a row that has no control to take it: focusable for the hand-off
+ * only, so the row behaves like a server-rendered one once focus moves on.
+ */
+export function focusRow(row: HTMLElement): void {
+	row.tabIndex = -1;
+	row.addEventListener('focusout', () => row.removeAttribute('tabindex'), { once: true });
+	row.focus();
+	if (document.activeElement !== row) row.removeAttribute('tabindex');
 }
 
 const CONTROL = 'input, textarea, select';
