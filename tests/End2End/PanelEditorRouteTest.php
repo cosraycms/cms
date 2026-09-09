@@ -318,9 +318,17 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('name="content[gallery][json]"', $html);
 		$this->assertStringContainsString('tag="cosray-image"', $html);
 		$this->assertStringContainsString('module="cosray:media"', $html);
-		// An empty blocks field renders its editor with templates and picker.
+		// An empty blocks field renders its editor with templates and picker:
+		// an empty row list and the add bar, nothing else.
 		$this->assertStringContainsString('class="cms-blocks-editor is-grid"', $html);
-		$this->assertStringContainsString('0 blocks', $html);
+		$this->assertHtmlNodeExists(
+			'//div[contains(@class, "cms-blocks-editor")]/div[@data-repeater-list][not(*)]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[contains(@class, "cms-blocks-editor")]/div[@data-repeater-footer]//*[@popovertarget]',
+			$html,
+		);
 		$this->assertStringContainsString('node="panel-editor-media"', $html);
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('"allowedFiles"', $html);

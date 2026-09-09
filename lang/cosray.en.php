@@ -144,8 +144,6 @@ return [
 		'field:add-typed' => 'Add :label',
 		'field:block' => 'Block',
 		'field:block-actions' => 'Actions for this block',
-		'field:block-count' => ':count block',
-		'field:block-count-plural' => ':count blocks',
 		'field:block-settings' => 'Block settings',
 		'field:close' => 'Close',
 		'field:drag-block' => 'Drag to reorder',

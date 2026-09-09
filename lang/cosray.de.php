@@ -147,8 +147,6 @@ return [
 		'field:add-typed' => ':label hinzufügen',
 		'field:block' => 'Block',
 		'field:block-actions' => 'Aktionen für diesen Block',
-		'field:block-count' => ':count Block',
-		'field:block-count-plural' => ':count Blöcke',
 		'field:block-settings' => 'Blockeinstellungen',
 		'field:close' => 'Schließen',
 		'field:drag-block' => 'Ziehen zum Verschieben',

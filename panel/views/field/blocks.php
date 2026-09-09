@@ -30,7 +30,6 @@ $commonChoices = $choices->common;
 $more = count($choices->all) > count($commonChoices);
 
 $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
-$count = count($rows);
 ?>
 <div
 	class="cms-blocks-editor<?= $columns > 1 ? ' is-grid' : ' is-list' ?>"
@@ -40,13 +39,6 @@ $count = count($rows);
 	data-columns="<?= $columns ?>"
 	data-min="<?= $min ?>"
 	style="--columns: <?= $columns ?>">
-	<div
-		class="tally"
-		data-repeater-count
-		data-one="<?= $this->escape(__('field:block-count')) ?>"
-		data-many="<?= $this->escape(__('field:block-count-plural')) ?>"><?= $this->escape(
-			__($count === 1 ? 'field:block-count' : 'field:block-count-plural', ['count' => $count]),
-		) ?></div>
 	<div class="grid" data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {
 			if (!is_array($rowData)) {
