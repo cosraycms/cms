@@ -30,7 +30,7 @@ type ContractElement = HTMLElement & Record<string, unknown>;
  * Form-associated host for custom-element controls. It reads its
  * payload from an embedded JSON script, loads the element module,
  * assigns the element contract (value, meta, field, node, locale,
- * locales) and mirrors every reported edit into the form value as one
+ * locales, settings) and mirrors every reported edit into the form value as one
  * JSON string ({ value, meta? }) — the [json] leaf the save patch
  * consumes. Elements keep the exact contract they had under the island.
  */
@@ -131,9 +131,44 @@ export class CosrayHost extends HTMLElement {
 		element.locale = this.#locale;
 		element.locales = this.#payload.locales;
 		element.assets = this.#payload.assets ?? {};
+		const settings = this.#settingsSlot();
+
+		if (settings) {
+			element.settings = settings;
+		}
 
 		this.#element = element;
 		this.append(element);
+	}
+
+	// The slot an owner's settings dialog offers this control, so an element
+	// can keep its secondary controls out of the content. The nearest owner
+	// may be a field wrapper without a dialog of its own; the block row
+	// around it is the one that renders the slots.
+	#settingsSlot(): HTMLElement | null {
+		const name = this.#payload.field?.name;
+
+		if (typeof name !== 'string') {
+			return null;
+		}
+
+		for (
+			let owner = this.closest('[data-meta-owner]');
+			owner;
+			owner = owner.parentElement?.closest('[data-meta-owner]') ?? null
+		) {
+			const slots = owner.querySelectorAll<HTMLElement>(
+				':scope > dialog[data-meta] [data-settings-slot]',
+			);
+
+			for (const slot of slots) {
+				if (slot.dataset.settingsSlot === name) {
+					return slot;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	#apply(detail: ChangeDetail | null): void {

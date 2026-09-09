@@ -206,6 +206,13 @@ final class PanelEditorRouteTest extends End2EndTestCase
 				. '[__i__][fields][video][meta][aspectRatioX][zxx]"]',
 			$html,
 		);
+		// An element sub-field gets a slot in the block's dialog for the
+		// controls it keeps out of the content.
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="Cosray\\Block\\RichText"]/div/dialog[@data-meta]'
+				. '//*[@data-settings-slot="text"]',
+			$html,
+		);
 		// A row of a type no longer offered renders without inputs.
 		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
 		$this->assertStringNotContainsString('value="block-gone"', $html);

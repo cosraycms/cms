@@ -49,7 +49,18 @@ $subMetas = array_values(array_filter(
 		&& !($sub['hidden'] ?? false)
 	),
 ));
-$settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
+// An element sub-field gets a slot in the dialog for the controls it keeps
+// out of the content; the host hands the slot to the element.
+$slots = array_values(array_filter(
+	(array) ($blockType['fields'] ?? []),
+	static fn(mixed $sub): bool => (
+		is_array($sub)
+		&& is_array($sub['control'] ?? null)
+		&& ($sub['control']['name'] ?? null) === 'element'
+		&& !($sub['hidden'] ?? false)
+	),
+));
+$settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots !== [];
 ?>
 <div
 	class="block<?= $bare ? ' is-bare' : '' ?>"
@@ -205,6 +216,13 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [];
 					'id' => "{$rowId}-{$subName}-meta",
 					'nameRoot' => "{$rowName}[fields][{$subName}]",
 				]) ?>
+			<?php endforeach ?>
+			<?php foreach ($slots as $sub): ?>
+				<?php $subName = (string) ($sub['name'] ?? ''); ?>
+				<?php if ($labels): ?>
+					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
+				<?php endif ?>
+				<div class="cms-settings-slot" data-settings-slot="<?= $this->escape($subName) ?>"></div>
 			<?php endforeach ?>
 			</div>
 		</dialog>

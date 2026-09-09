@@ -212,6 +212,18 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($types[LabelledBlock::class]);
 	}
 
+	public function testBlockSubFieldsCarryTheBlockPresentation(): void
+	{
+		$blocks = $this->createBlocks()->allow(QuoteBlock::class);
+		$fields = array_column($blocks->control()->array()['props']['blockTypes'], 'fields', 'type');
+
+		$this->assertCount(2, $fields[QuoteBlock::class]);
+
+		foreach ($fields[QuoteBlock::class] as $field) {
+			$this->assertSame('block', $field['presentation']);
+		}
+	}
+
 	public function testBlocksDoNotMarkTheirFieldsAsRequired(): void
 	{
 		$blocks = $this->createBlocks()->allow(Builtin\Text::class);

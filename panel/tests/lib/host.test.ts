@@ -210,6 +210,36 @@ describe('cosray host', () => {
 		expect(formValue(element)).toEqual({ value: 'kept' });
 	});
 
+	it('hands a control the settings slot of the block around it', async () => {
+		const row = document.createElement('div');
+		row.setAttribute('data-meta-owner', '');
+		row.innerHTML =
+			'<div data-meta-owner><div class="body"></div></div>' +
+			'<dialog data-meta>' +
+			'<div data-settings-slot="cover"></div><div data-settings-slot="image"></div>' +
+			'</dialog>';
+		document.body.append(row);
+		const element = host({ value: {}, field: { name: 'image' } }, {}, row.querySelector('.body')!);
+
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+
+		expect(element.querySelector<Control>('test-control')!.settings).toBe(
+			row.querySelector('[data-settings-slot="image"]'),
+		);
+	});
+
+	it('leaves settings unset when no owner offers a slot', async () => {
+		const wrapper = document.createElement('div');
+		wrapper.setAttribute('data-meta-owner', '');
+		wrapper.innerHTML = '<dialog data-meta></dialog>';
+		document.body.append(wrapper);
+		const element = host({ value: {}, field: { name: 'image' } }, {}, wrapper);
+
+		await vi.waitFor(() => expect(element.querySelector('test-control')).not.toBeNull());
+
+		expect('settings' in element.querySelector<Control>('test-control')!).toBe(false);
+	});
+
 	it('exposes the payload as edited, as a copy', () => {
 		const element = host({ value: { en: 'Before' }, assets: {} });
 
