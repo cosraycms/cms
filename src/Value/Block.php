@@ -67,6 +67,14 @@ class Block extends Value
 		return parent::meta($key, $default);
 	}
 
+	/** The block's padding as a spacing token, `null` for the site's default. */
+	public function padding(): ?string
+	{
+		$value = $this->meta('padding');
+
+		return is_string($value) && in_array($value, Field\Blocks::SPACING, true) ? $value : null;
+	}
+
 	public function json(): array
 	{
 		return $this->fieldValues(static fn(Value $value): mixed => $value->json());
@@ -140,6 +148,7 @@ class Block extends Value
 			. escape($this->handle())
 			. "\" data-colspan=\"{$layout->colspan}\" data-rowspan=\"{$layout->rowspan}\" data-indent=\"{$layout->indent}\""
 			. " data-reserved=\"{$reserved}\""
+			. ($this->padding() !== null ? ' data-padding="' . escape((string) $this->padding()) . '"' : '')
 			. " style=\"--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent};"
 			. " --reserved: {$reserved}\"";
 

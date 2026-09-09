@@ -6,15 +6,24 @@
  *   @import 'vendor/cosray/cms/resources/blocks.css';
  *
  * It lives in the `cms.blocks` layer, so unlayered site CSS wins over
- * every rule here without needing a more specific selector. The
- * override points are `--blocks-gap` and the container threshold; the
- * block prefix follows the `prefix` render argument, so a site that
- * renders with a different prefix copies the file and renames.
+ * every rule here without needing a more specific selector. The block
+ * prefix follows the `prefix` render argument, so a site that renders
+ * with a different prefix copies the file and renames.
  *
- * `--blocks-gap` must be a context-independent length — `rem` or `px`.
- * The grid resolves it against the container and the indent margin
- * against the block's own area, so a percentage means two different
- * lengths, and an `em` follows whatever font size each of them has.
+ * The editor chooses spacing in tokens — `none`, `s`, `m`, `l`, `xl` —
+ * and the markup carries them as `data-gap`, `data-row-gap` and
+ * `data-column-gap` on the container and `data-padding` on a block.
+ * Each token reads a variable the site sets to its own scale, on the
+ * container or anywhere above it: `--blocks-gap-s` … `--blocks-gap-xl`
+ * and `--blocks-padding-s` … `--blocks-padding-xl`; `none` is zero.
+ * Without a token the container falls back to `--blocks-gap`, the
+ * site's default gap, and a `--blocks-gap` set directly also overrides
+ * every token — the site decides regardless of the editor.
+ *
+ * Gap lengths must be context-independent — `rem` or `px`. The grid
+ * resolves them against the container and the indent margin against
+ * the block's own area, so a percentage means two different lengths,
+ * and an `em` follows whatever font size each of them has.
  *
  * `data-responsive` carries the field's `#[Columns(responsive:)]`
  * policy: `stack` collapses every block to full width below the
@@ -24,11 +33,81 @@
  */
 
 @layer cms.blocks {
+	/*
+	 * `--blocks-column-gap` is the resolved column gap the grid and the
+	 * indent math read, `--blocks-row-gap` the row gap, which follows it
+	 * unless the markup says otherwise.
+	 */
 	.cms-blocks {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-row-gap: var(--blocks-column-gap);
+
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
-		gap: var(--blocks-gap, 2rem);
+		column-gap: var(--blocks-column-gap);
+		row-gap: var(--blocks-row-gap);
 		container-type: inline-size;
+	}
+
+	.cms-blocks[data-gap="none"] {
+		--blocks-column-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-gap="s"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-gap="m"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-gap="l"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-gap="xl"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+	}
+
+	/* A gap set per axis beats the shared one. */
+	.cms-blocks[data-column-gap="none"] {
+		--blocks-column-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-column-gap="s"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-column-gap="m"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-column-gap="l"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-column-gap="xl"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+	}
+
+	.cms-blocks[data-row-gap="none"] {
+		--blocks-row-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-row-gap="s"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-row-gap="m"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-row-gap="l"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-row-gap="xl"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
 	}
 
 	/*
@@ -43,8 +122,28 @@
 		grid-column: span var(--reserved, 1);
 		grid-row: span var(--rowspan, 1);
 		margin-inline-start: calc(
-			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
+			var(--indent, 0) * (100% + var(--blocks-column-gap)) / var(--reserved, 1)
 		);
+	}
+
+	.cms-block[data-padding="none"] {
+		padding: 0;
+	}
+
+	.cms-block[data-padding="s"] {
+		padding: var(--blocks-padding-s, 1rem);
+	}
+
+	.cms-block[data-padding="m"] {
+		padding: var(--blocks-padding-m, 2rem);
+	}
+
+	.cms-block[data-padding="l"] {
+		padding: var(--blocks-padding-l, 3rem);
+	}
+
+	.cms-block[data-padding="xl"] {
+		padding: var(--blocks-padding-xl, 4.5rem);
 	}
 
 	@container (max-width: 42rem) {

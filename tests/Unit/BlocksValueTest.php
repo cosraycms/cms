@@ -58,12 +58,19 @@ final class BlocksValueTest extends TestCase
 		?TranslateMode $mode = null,
 		string $locale = 'en',
 		int $columns = 12,
+		array $meta = [],
 	): BlocksValue {
 		$context = $this->createContext($locale);
 		$this->lastContext = $context;
 		$owner = new FieldOwner($context, 'test-node');
 		$value = array_is_list($rows) ? [Field::NEUTRAL_LOCALE => $rows] : $rows;
-		$field = new Blocks('blocks', $owner, new ValueContext('blocks', ['type' => Blocks::class, 'value' => $value]));
+		$data = ['type' => Blocks::class, 'value' => $value];
+
+		if ($meta !== []) {
+			$data['meta'] = $meta;
+		}
+
+		$field = new Blocks('blocks', $owner, new ValueContext('blocks', $data));
 		$field->init(Services::withDefaults());
 		$field
 			->columns($columns, min(2, $columns))
@@ -185,6 +192,38 @@ final class BlocksValueTest extends TestCase
 			$blocks->render(),
 		);
 		$this->assertSame($blocks->render(), (string) $blocks);
+	}
+
+	public function testRendersTheSpacingAttributesOnlyWhenSet(): void
+	{
+		$full = ['colspan' => 12, 'rowspan' => 1, 'indent' => 0];
+		$blocks = $this->createBlocksValue(
+			[$this->text('Hi', $full, ['padding' => ['zxx' => 'xl']])],
+			meta: ['gap' => ['zxx' => 's'], 'columnGap' => ['zxx' => 'l'], 'rowGap' => ['zxx' => 'huge']],
+		);
+		$html = $blocks->render();
+
+		$this->assertStringContainsString(
+			'data-responsive="stack" data-gap="s" data-column-gap="l" style="--columns: 12"',
+			$html,
+		);
+		$this->assertStringNotContainsString('data-row-gap', $html);
+		$this->assertStringContainsString('data-reserved="12" data-padding="xl" style="', $html);
+		$this->assertSame('s', $blocks->gap());
+		$this->assertNull($blocks->rowGap());
+		$this->assertSame('l', $blocks->columnGap());
+		$this->assertSame('xl', $blocks->first()?->padding());
+
+		$plain = $this->createBlocksValue(
+			[$this->text('Hi', $full, ['padding' => ['zxx' => '']])],
+			meta: ['gap' => ['zxx' => '']],
+		);
+		$html = $plain->render();
+
+		$this->assertStringNotContainsString('data-gap', $html);
+		$this->assertStringNotContainsString('data-padding', $html);
+		$this->assertNull($plain->gap());
+		$this->assertNull($plain->first()?->padding());
 	}
 
 	public function testRenderArgs(): void

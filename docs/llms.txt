@@ -491,8 +491,12 @@ final class Quote implements Block
   `data-responsive` and `--columns`, each block a `{prefix}-block` div with
   `data-type` (the type handle), `data-colspan`/`-rowspan`/`-indent`/`-reserved`
   and the matching custom properties (`reserved` is `indent + colspan`, derived
-  but carried for CSS that cannot read the inline style); an empty render
-  emits no element; every generated attribute is escaped
+  but carried for CSS that cannot read the inline style); when the editor
+  chose spacing the container also carries `data-gap`, `data-row-gap` and
+  `data-column-gap` and a block `data-padding`, tokens `none|s|m|l|xl`
+  (nothing for the default; `gap()`/`rowGap()`/`columnGap()`/`padding()`
+  read them); an empty render emits no element; every generated attribute
+  is escaped
 - `Blocks::render()` args: `prefix`, `tag`, `class`, `imageSizes`, `sizes`,
   `thumbSize` (see section 9); `tag` and `prefix` must match
   `/^[a-z][a-z0-9-]*$/i`
@@ -502,9 +506,12 @@ final class Quote implements Block
   `image()`, `images()`, `hasImage()`, `excerpt()`; `unwrap()`/`json()`
   return `{columns, blocks: [{uid, type, handle, layout, fields, meta}]}`
 - the reference stylesheet ships as `resources/blocks.css` (layer
-  `cms.blocks`, override points `--blocks-gap`, which must be a
-  context-independent length since it is resolved once by the grid and once
-  by the indent margin, and the container threshold):
+  `cms.blocks`; override points are the token variables `--blocks-gap-s` …
+  `--blocks-gap-xl` and `--blocks-padding-s` … `--blocks-padding-xl`, read with
+  fallbacks so a site sets them anywhere above the container, `--blocks-gap`
+  as the escape hatch overriding every token, and the container threshold;
+  gap lengths must be context-independent since they are resolved once by
+  the grid and once by the indent margin):
   a block spans `--reserved` columns and a margin of
   `indent * (100% + gap) / reserved` pushes its box past the indent, the
   percentage resolving against its own grid area, so a block too wide for

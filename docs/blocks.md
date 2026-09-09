@@ -197,7 +197,8 @@ The node editor's one content-language selector switches the translated sub-fiel
 - `type` is the block type's FQCN. Rows of a type the field no longer allows are shown as unknown and dropped on the next save.
 - `layout` is always present and normalized. `colspan` counts columns, `rowspan` counts grid rows, `indent` counts the columns left free before the block (0 = none). The indent is relative to where the block falls in the flow, not an absolute column, so a block placed beside a neighbour is indented from that neighbour. For a one-column field the layout is `{1, 1, 0}`.
 - `fields` holds the block type's fields in the ordinary field envelope, so every sub-field carries its own `type`, `value` locale map and optional `meta`.
-- `meta` is the block's own settings, currently `class` and `id`, each a neutral-locale map. It is omitted when empty.
+- `meta` is the block's own settings — `class`, `id` and `padding` — each a neutral-locale map. It is omitted when empty.
+- The field's own `meta` holds its gap settings — `gap`, or `rowGap` and `columnGap` — as neutral-locale maps of spacing tokens; see [spacing](#spacing).
 
 **Readers clamp** what they load: `colspan` into `[min, columns]`, `rowspan` into `[1, 6]`, `indent` into `[0, columns − colspan]`. Narrowing a field later, or importing out-of-range content, therefore never breaks a render — the block is simply placed inside the grid it has. A write **through the store** is not clamped but validated: an out-of-range layout is rejected, so a programmatic import fails loudly instead of persisting something the editor would silently rewrite. A save from the editor clamps before validating.
 
@@ -251,7 +252,14 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 - The container is `{prefix}-blocks` plus the `class` argument, with `data-columns`, `data-responsive` and `--columns`. It is emitted even when the field is empty.
 - Each block is a `<div>` — `{prefix}-block` plus the block's `class` setting, the `id` setting, `data-type` (the type's handle) and the layout as both data attributes and custom properties, then the type's own output.
 - `reserved` is `indent + colspan`, the columns the block takes out of its row. It is derived rather than stored, but carried like the rest so that CSS which cannot read the inline style still has it in one attribute instead of having to pair `data-indent` with `data-span`.
-- The data attributes exist so a strict-CSP site can style through `[data-colspan='6']` selectors; the custom properties exist so the reference sheet stays twenty lines.
+- The data attributes exist so a strict-CSP site can style through `[data-colspan='6']` selectors; the custom properties exist so the reference sheet needs no lookup table.
+- When the editor chose spacing, the container carries `data-gap`, `data-row-gap` and `data-column-gap` and a block `data-padding`, each one of the tokens `none`, `s`, `m`, `l`, `xl`; nothing is emitted for the site's default. See [spacing](#spacing).
+
+### Spacing
+
+The blocks field's meta dialog sets the **gap** between its blocks, as one value or — on a grid, behind a toggle — as a row gap and a column gap of their own; a block's settings dialog sets its **padding**. Both choose from the tokens `none`, `s`, `m`, `l` and `xl`, behind a Default that stores nothing, so existing content renders as before. The editor previews every choice on its canvas in its own scale.
+
+On the site the tokens are attributes, never lengths: `data-gap`, `data-row-gap` and `data-column-gap` on the container, `data-padding` on the block. A per-axis gap beats the shared one. The [reference stylesheet](#the-reference-stylesheet) maps each token to a variable the site sets to its own scale — `--blocks-gap-s` … `--blocks-gap-xl`, `--blocks-padding-s` … `--blocks-padding-xl` — so the site decides what "large" means, and a site that sets `--blocks-gap` directly keeps its one gap regardless of the editor. Templates read the tokens through `$node->content->gap()`, `rowGap()` and `columnGap()` and a block's `padding()`, each `null` for the default.
 
 ### Render arguments
 
@@ -279,6 +287,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 | iteration, `first()`, `last()`, `get(int $index)` | `Value\Block` rows |
 | `count()`, `isset()` | how many blocks, and whether there are any |
 | `columns()`, `responsive()` | the field's grid configuration |
+| `gap()`, `rowGap()`, `columnGap()` | the [spacing](#spacing) tokens, `null` for the site's default |
 | `image(int $index = 1)`, `hasImage(int $index = 1)` | the n-th image block's image |
 | `images(bool $all = false)` | every image of the image and images blocks; with `$all` those of every locale's list |
 | `excerpt(int $words = 30, string $allowedTags = '', int $index = 1)` | the n-th richtext block's excerpt |
@@ -292,7 +301,7 @@ One row is a `Cosray\Value\Block`:
 | `$block->fieldName` | the sub-field's `Value` object |
 | `uid()`, `$block->type`, `handle()` | the row identity and its type (FQCN) and handle |
 | `layout()` | a `Block\Layout` with `colspan`, `rowspan`, `indent` and `array()` |
-| `meta(string $key, mixed $default = null)`, `styleClass()`, `elementId()` | the block settings |
+| `meta(string $key, mixed $default = null)`, `styleClass()`, `elementId()`, `padding()` | the block settings; the padding as a [spacing](#spacing) token or `null` |
 | `render(...$args)`, `__toString()` | this block alone, wrapper included |
 
 ```php
@@ -329,20 +338,117 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 
 ```css
 @layer cms.blocks {
+	/*
+	 * `--blocks-column-gap` is the resolved column gap the grid and the
+	 * indent math read, `--blocks-row-gap` the row gap, which follows it
+	 * unless the markup says otherwise.
+	 */
 	.cms-blocks {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-row-gap: var(--blocks-column-gap);
+
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
-		gap: var(--blocks-gap, 2rem);
+		column-gap: var(--blocks-column-gap);
+		row-gap: var(--blocks-row-gap);
 		container-type: inline-size;
 	}
 
+	.cms-blocks[data-gap="none"] {
+		--blocks-column-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-gap="s"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-gap="m"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-gap="l"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-gap="xl"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+	}
+
+	/* A gap set per axis beats the shared one. */
+	.cms-blocks[data-column-gap="none"] {
+		--blocks-column-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-column-gap="s"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-column-gap="m"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-column-gap="l"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-column-gap="xl"] {
+		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+	}
+
+	.cms-blocks[data-row-gap="none"] {
+		--blocks-row-gap: var(--blocks-gap, 0px);
+	}
+
+	.cms-blocks[data-row-gap="s"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+	}
+
+	.cms-blocks[data-row-gap="m"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+	}
+
+	.cms-blocks[data-row-gap="l"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+	}
+
+	.cms-blocks[data-row-gap="xl"] {
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+	}
+
+	/*
+	 * The indent is relative to the flow: a block reserves it along with
+	 * its span (`--reserved` is the sum) and pushes its own box past it.
+	 * The percentage resolves against the block's own grid area, which is
+	 * `--reserved` columns wide, so one column is (100% + gap) / reserved.
+	 * A block too wide for the columns left in its row wraps to the next.
+	 */
 	.cms-block {
 		min-width: 0;
 		grid-column: span var(--reserved, 1);
 		grid-row: span var(--rowspan, 1);
 		margin-inline-start: calc(
-			var(--indent, 0) * (100% + var(--blocks-gap, 2rem)) / var(--reserved, 1)
+			var(--indent, 0) * (100% + var(--blocks-column-gap)) / var(--reserved, 1)
 		);
+	}
+
+	.cms-block[data-padding="none"] {
+		padding: 0;
+	}
+
+	.cms-block[data-padding="s"] {
+		padding: var(--blocks-padding-s, 1rem);
+	}
+
+	.cms-block[data-padding="m"] {
+		padding: var(--blocks-padding-m, 2rem);
+	}
+
+	.cms-block[data-padding="l"] {
+		padding: var(--blocks-padding-l, 3rem);
+	}
+
+	.cms-block[data-padding="xl"] {
+		padding: var(--blocks-padding-xl, 4.5rem);
 	}
 
 	@container (max-width: 42rem) {
@@ -353,6 +459,12 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 		}
 	}
 
+	/*
+	 * The gallery block carries the editor's settings on its container:
+	 * `data-ratio` with `--ratio` fixes the tiles' shape, `data-crop` fills
+	 * it instead of fitting the image in. Without them each image keeps
+	 * its own shape.
+	 */
 	.cms-blocks-images[data-ratio] img {
 		width: 100%;
 		height: auto;
@@ -370,7 +482,9 @@ A block spans `--reserved` columns — its indent plus its colspan — and a mar
 
 Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins** over it without needing a more specific selector. The intended override points are:
 
-- `--blocks-gap` — the grid gap, set it on `.cms-blocks` or anywhere above it. It has to be a **context-independent length**, `rem` or `px`. The gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
+- The spacing tokens — `--blocks-gap-s`, `--blocks-gap-m`, `--blocks-gap-l`, `--blocks-gap-xl` and `--blocks-padding-s` … `--blocks-padding-xl` — one length per token the editor may choose, set on `.cms-blocks` or anywhere above it; `none` is always zero. The sheet declares none of them and reads each with a fallback (1rem, 2rem, 3rem, 4.5rem), so a site sets only the ones it wants to change. The medium gap is what a field renders with when the editor chose nothing.
+- `--blocks-gap` — the escape hatch: set directly, on `.cms-blocks` or anywhere above it, it is the column and row gap whatever the tokens and the editor say. It and the gap tokens have to be **context-independent lengths**, `rem` or `px`. A gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
+- `--blocks-column-gap` and `--blocks-row-gap` — what the sheet resolves the tokens to; the indent margin reads the former. Read them, do not set them.
 - The container threshold — redeclare the `@container` block at the width the design wants. The container itself is `.cms-blocks` (`container-type: inline-size`), so the query measures the blocks area, not the viewport.
 - The gallery rules — `[data-ratio]` fixes the tiles' shape and `[data-crop]` fills it; both key on attributes the editor emits only when a gallery chose them, so a site without galleries or with its own gallery rules loses nothing by leaving them out.
 
