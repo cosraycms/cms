@@ -54,20 +54,20 @@
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
 
-		/* Active chrome hangs over the blocks after it. */
-		&:focus-within,
-		&:has(:popover-open) {
-			z-index: 2;
-		}
-
 		&.sortable-ghost {
 			opacity: 0.4;
 		}
 
 		/* The hovered block's chrome hangs into its neighbour and has to
-		   paint over it. */
+		   paint over it; the active block's chrome and its rich text bubble
+		   hang further, over a neighbour that may be hovered. */
 		&:hover {
 			z-index: 3;
+		}
+
+		&:focus-within,
+		&:has(:popover-open) {
+			z-index: 4;
 		}
 	}
 
@@ -445,12 +445,6 @@
 
 			&:hover:not(:focus-within) {
 				border-color: var(--cms-color-border-soft);
-			}
-
-			& .cms-richtext-toolbar {
-				padding-inline: var(--cms-space-1);
-				border-bottom: 0;
-				background: none;
 			}
 
 			& .ProseMirror {

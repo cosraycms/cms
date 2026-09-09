@@ -20,6 +20,7 @@
 		name: string;
 		required?: boolean;
 		translate?: boolean;
+		presentation?: string;
 		tools?: string[];
 		richtextClasses?: Record<string, string>;
 		richtextStyles?: Record<string, string>;
@@ -137,6 +138,7 @@
 							: localeTitle(configuredLocales, fallback.locale),
 				})
 			: ''}
+		toolbar={field.presentation === 'block' ? 'inline' : 'default'}
 		tools={field.tools}
 		classes={field.richtextClasses ?? {}}
 		styles={field.richtextStyles ?? {}}

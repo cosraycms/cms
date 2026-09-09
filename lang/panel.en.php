@@ -100,6 +100,7 @@ return [
 		'richtext:align-center' => 'Text align center',
 		'richtext:align-left' => 'Text align left',
 		'richtext:align-right' => 'Text align right',
+		'richtext:block-style' => 'Block style',
 		'richtext:blockquote' => 'Block quote',
 		'richtext:bold' => 'Bold text',
 		'richtext:bullet-list' => 'Bulleted list',

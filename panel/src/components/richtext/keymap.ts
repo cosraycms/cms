@@ -17,6 +17,7 @@ import {
 } from 'prosemirror-inputrules';
 import type { NodeType } from 'prosemirror-model';
 import type { Plugin } from 'prosemirror-state';
+import { toggleBulletList, toggleOrderedList } from './commands';
 import { schema } from './schema';
 
 function headingRule(level: number): InputRule {
@@ -51,6 +52,8 @@ export function buildKeymap(): Plugin {
 		'Mod-Shift-X': toggleMark(strike),
 		'Mod-e': toggleMark(code),
 		'Mod-E': toggleMark(code),
+		'Mod-Shift-7': toggleOrderedList(),
+		'Mod-Shift-8': toggleBulletList(),
 		'Mod-z': undo,
 		'Mod-y': redo,
 		'Mod-Shift-z': redo,

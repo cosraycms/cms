@@ -29,25 +29,9 @@
 		color: var(--cms-color-text-on-fill);
 	}
 
+	/* The bubble's offset origin. */
 	&.richtext-inline {
 		position: relative;
-		margin-top: 0;
-		padding: 0;
-		box-shadow: var(--cms-shadow-sm);
-
-		&::after {
-			color: var(--cms-color-text-faint);
-			content: 'RICHTEXT';
-			display: inline-block;
-			font-size: 70%;
-			font-weight: 300;
-			position: absolute;
-			top: 9px;
-			right: 10px;
-			opacity: 1;
-			letter-spacing: 0.05em;
-			transition: opacity 0.4s linear;
-		}
 	}
 
 	svg {
@@ -81,10 +65,17 @@
 
 	/* Inverted on purpose, like the code editor: chrome over the document. */
 	.cms-richtext-bubble {
+		position: absolute;
+		z-index: 20;
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-0-5);
 		border-radius: var(--cms-radius);
 		background-color: var(--cms-color-neutral-600);
 		padding: 0 var(--cms-space-1);
 		color: var(--cms-color-white);
+		box-shadow: var(--cms-shadow-md);
+		white-space: nowrap;
 
 		& .richtext-toolbar-btn {
 			color: var(--cms-color-white);
@@ -93,6 +84,17 @@
 				background: var(--cms-color-neutral-500);
 				color: var(--cms-color-white);
 			}
+
+			&.active {
+				background-color: var(--cms-color-info);
+			}
+		}
+
+		& .cms-richtext-block-style {
+			width: auto;
+			gap: var(--cms-space-0-5);
+			grid-auto-flow: column;
+			padding-inline: var(--cms-space-1-5);
 		}
 	}
 

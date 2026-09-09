@@ -443,7 +443,7 @@ final class Styleguide extends Panel
 				'width' => 50,
 			],
 		])->array();
-		$types = static fn(bool $translate): array => [
+		$build = static fn(bool $translate): array => [
 			[
 				'type' => Builtin\RichText::class,
 				'handle' => 'richtext',
@@ -457,7 +457,7 @@ final class Styleguide extends Panel
 						'type' => RichText::class,
 						'control' => $richtext,
 						'translate' => $translate,
-						'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
+						'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::INLINE),
 						'richtextClasses' => (object) [],
 						'richtextStyles' => (object) [],
 					],
@@ -583,6 +583,17 @@ final class Styleguide extends Panel
 				'fieldsets' => [],
 			],
 		];
+		// Mirrors Blocks::blockTypeProperties(): every sub-field renders inside a block.
+		$types = static fn(bool $translate): array => array_map(
+			static fn(array $type): array => [
+				...$type,
+				'fields' => array_map(
+					static fn(array $field): array => [...$field, 'presentation' => 'block'],
+					$type['fields'],
+				),
+			],
+			$build($translate),
+		);
 
 		return [
 			[

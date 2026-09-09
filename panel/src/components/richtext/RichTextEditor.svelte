@@ -507,49 +507,25 @@
 
 	let enabled = $derived(new Set(tools));
 	let activeSpecs = $derived(toolbarSpecs.filter((spec) => enabled.has(spec.tool)));
-</script>
 
-{#if toolbar === 'inline'}
-	<div class="richtext-bubble cms-richtext-bubble" bind:this={bubble}>
-		{#if editor}
-			<button
-				type="button"
-				aria-label={__('richtext:bold')}
-				class="richtext-toolbar-btn"
-				onclick={run(toggleBold())}
-				class:active={editorState.bold}
-			>
-				<Icon name="type-bold" />
-			</button>
-			<button
-				type="button"
-				aria-label={__('richtext:italic')}
-				class="richtext-toolbar-btn"
-				onclick={run(toggleItalic())}
-				class:active={editorState.italic}
-			>
-				<Icon name="type-italic" />
-			</button>
-			<button
-				type="button"
-				aria-label={__('richtext:strikethrough')}
-				class="richtext-toolbar-btn"
-				onclick={run(toggleStrike())}
-				class:active={editorState.strike}
-			>
-				<Icon name="type-strikethrough" />
-			</button>
-			<button
-				type="button"
-				aria-label={__('richtext:remove-formats')}
-				class="richtext-toolbar-btn"
-				onclick={run(clearMarks())}
-			>
-				<Icon name="eraser" />
-			</button>
-		{/if}
-	</div>
-{/if}
+	// The bubble shows on a selection: tools that act on the document as a
+	// whole have no place in it, block styles fold into one menu.
+	const bubbleless = new Set(['undo', 'redo', 'source', 'hr', 'br', 'image', 'align']);
+	const blockStyles = new Set(['h1', 'h2', 'h3', 'blockquote']);
+	let bubbleSpecs = $derived(
+		activeSpecs.filter((spec) => !bubbleless.has(spec.tool) && !blockStyles.has(spec.tool)),
+	);
+	let blockStyleSpecs = $derived(activeSpecs.filter((spec) => blockStyles.has(spec.tool)));
+	let blockStyleIcon = $derived(
+		blockStyleSpecs.find((spec) => spec.isActive?.())?.icon ?? 'paragraph',
+	);
+
+	// A click in the bubble must not take the focus, or the selection it
+	// acts on collapses before the command runs.
+	function keepFocus(event: MouseEvent) {
+		event.preventDefault();
+	}
+</script>
 
 <div
 	class="richtext richtext-{toolbar}"
@@ -558,6 +534,72 @@
 	onfocusin={focusIn}
 	onfocusout={focusOut}
 >
+	{#if toolbar === 'inline'}
+		<div class="richtext-bubble cms-richtext-bubble" bind:this={bubble}>
+			{#if editor}
+				{#if blockStyleSpecs.length > 0}
+					<div class="cms-richtext-dropdown-wrap">
+						<button
+							type="button"
+							class="richtext-toolbar-btn cms-richtext-block-style"
+							popovertarget={`${menuId}-block-style`}
+							aria-haspopup="menu"
+							title={__('richtext:block-style')}
+							aria-label={__('richtext:block-style')}
+							onmousedown={keepFocus}
+						>
+							<Icon name={blockStyleIcon} />
+							<Icon name="chevron-down" />
+						</button>
+						<div
+							id={`${menuId}-block-style`}
+							class="cms-action-menu"
+							popover="auto"
+							data-action-menu
+						>
+							<button
+								type="button"
+								onclick={run(setParagraph())}
+								onmousedown={keepFocus}
+								role="menuitemradio"
+								aria-checked={blockStyleIcon === 'paragraph'}
+								class:is-active={blockStyleIcon === 'paragraph'}
+							>
+								<Icon name="paragraph" /> <span>{__('richtext:paragraph')}</span>
+							</button>
+							{#each blockStyleSpecs as spec (spec.key)}
+								<button
+									type="button"
+									onclick={spec.onclick}
+									onmousedown={keepFocus}
+									role="menuitemradio"
+									aria-checked={spec.isActive?.() ?? false}
+									class:is-active={spec.isActive?.() ?? false}
+								>
+									<Icon name={spec.icon} /> <span>{spec.label}</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
+				{#each bubbleSpecs as spec (spec.key)}
+					{#if spec.isVisible?.() ?? true}
+						<button
+							type="button"
+							class="richtext-toolbar-btn"
+							title={spec.label}
+							aria-label={spec.label}
+							onclick={spec.onclick}
+							onmousedown={keepFocus}
+							class:active={spec.isActive?.() ?? false}
+						>
+							<Icon name={spec.icon} />
+						</button>
+					{/if}
+				{/each}
+			{/if}
+		</div>
+	{/if}
 	{#if editor}
 		{#if toolbar !== 'inline'}
 			<div

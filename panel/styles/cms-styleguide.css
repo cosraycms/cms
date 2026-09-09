@@ -20,7 +20,8 @@
 		letter-spacing: -0.03em;
 	}
 
-	& .body {
+	/* The page's own body only: the samples inside have parts of that name. */
+	& > .body {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;

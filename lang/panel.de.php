@@ -100,6 +100,7 @@ return [
 		'richtext:align-center' => 'Zentriert ausrichten',
 		'richtext:align-left' => 'Linksbündig ausrichten',
 		'richtext:align-right' => 'Rechtsbündig ausrichten',
+		'richtext:block-style' => 'Blockformat',
 		'richtext:blockquote' => 'Zitat',
 		'richtext:bold' => 'Fett',
 		'richtext:bullet-list' => 'Aufzählungsliste',

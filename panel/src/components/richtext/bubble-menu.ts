@@ -25,19 +25,23 @@ export function bubbleMenu(element: HTMLElement): Plugin {
 
 		element.style.display = '';
 
+		// Offsets are relative to the positioned ancestor the bubble hangs
+		// from, which is not the editor box; measure it once displayed. The
+		// stylesheet positions the bubble absolutely, so showing it never
+		// moves the text it is measured against.
+		const originRect = element.offsetParent?.getBoundingClientRect() ?? editorRect;
 		const menuWidth = element.offsetWidth;
 		const menuHeight = element.offsetHeight;
 
 		const centerX = (start.left + end.left) / 2;
-		let left = centerX - menuWidth / 2 - editorRect.left;
-		const top = start.top - menuHeight - 8 - editorRect.top;
+		const minLeft = editorRect.left - originRect.left;
+		let left = centerX - menuWidth / 2 - originRect.left;
+		const top = start.top - menuHeight - 8 - originRect.top;
 
-		left = Math.max(0, Math.min(left, editorRect.width - menuWidth));
+		left = Math.max(minLeft, Math.min(left, minLeft + editorRect.width - menuWidth));
 
-		element.style.position = 'absolute';
 		element.style.left = `${left}px`;
 		element.style.top = `${top}px`;
-		element.style.zIndex = '20';
 	}
 
 	return new Plugin({

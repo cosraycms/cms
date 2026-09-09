@@ -140,6 +140,108 @@ describe('richtext fallback previews', () => {
 	});
 });
 
+describe('richtext inside a block', () => {
+	async function block(tools: string[]) {
+		const element = document.createElement('cosray-richtext') as RichtextElement;
+		Object.assign(element, {
+			value: { zxx: doc('Block text') },
+			format: 'cosray-richtext',
+			field: { name: 'text', presentation: 'block', tools },
+			locale: 'zxx',
+		});
+		const changes = vi.fn<(detail: RichtextEnvelope) => void>();
+		element.addEventListener('cosray-change', (event) => {
+			changes(JSON.parse(JSON.stringify((event as CustomEvent).detail)));
+		});
+		document.body.append(element);
+		await tick();
+
+		return { element, changes };
+	}
+
+	// The bubble's own buttons, without the entries of its block-style menu.
+	function labels(element: HTMLElement): (string | null)[] {
+		const bubble = element.querySelector('.cms-richtext-bubble')!;
+
+		return Array.from(
+			bubble.querySelectorAll(':scope > button, :scope > .cms-richtext-dropdown-wrap > button'),
+		).map((button) => button.getAttribute('aria-label'));
+	}
+
+	it('shows a bubble with the configured tools instead of the toolbar', async () => {
+		const { element } = await block([
+			'undo',
+			'bold',
+			'italic',
+			'strike',
+			'link',
+			'bullet-list',
+			'ordered-list',
+			'clear',
+			'source',
+		]);
+
+		expect(element.querySelector('.cms-richtext-toolbar')).toBeNull();
+		expect(labels(element)).toEqual([
+			'richtext:bold',
+			'richtext:italic',
+			'richtext:strikethrough',
+			'richtext:bullet-list',
+			'richtext:numbered-list',
+			'richtext:add-page-link',
+			'richtext:remove-formats',
+		]);
+	});
+
+	it('folds enabled block styles into one menu', async () => {
+		const { element, changes } = await block(['bold', 'h2', 'blockquote']);
+
+		expect(labels(element)).toEqual(['richtext:block-style', 'richtext:bold']);
+		const entries = Array.from(
+			element.querySelectorAll<HTMLButtonElement>('.cms-richtext-bubble [data-action-menu] button'),
+		);
+		expect(entries.map((entry) => entry.textContent?.trim())).toEqual([
+			'richtext:paragraph',
+			'richtext:heading-2',
+			'richtext:blockquote',
+		]);
+
+		entries[1].click();
+		await tick();
+
+		expect(changes).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				value: {
+					zxx: expect.objectContaining({
+						content: [expect.objectContaining({ type: 'heading', attrs: { level: 2 } })],
+					}),
+				},
+			}),
+		);
+	});
+
+	it('toggles a list from the keyboard', async () => {
+		const { element, changes } = await block(['bullet-list']);
+		const content = element.querySelector<HTMLElement>('[contenteditable="true"]')!;
+
+		content.focus();
+		content.dispatchEvent(
+			new KeyboardEvent('keydown', { key: '8', shiftKey: true, ctrlKey: true, bubbles: true }),
+		);
+		await tick();
+
+		expect(changes).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				value: {
+					zxx: expect.objectContaining({
+						content: [expect.objectContaining({ type: 'bulletList' })],
+					}),
+				},
+			}),
+		);
+	});
+});
+
 describe('richtext without stored data', () => {
 	// A freshly stamped repeater row renders no value and no envelope.
 	it('mounts and submits an empty envelope', async () => {
