@@ -8,6 +8,7 @@ import type { FileItem, LocaleMap } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
 import '../../src/elements/media/FileElement.svelte';
 import '../../src/elements/media/ImageElement.svelte';
+import '../../src/elements/media/VideoElement.svelte';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
 
@@ -77,7 +78,7 @@ async function edit(element: HTMLElement): Promise<HTMLInputElement> {
 	return input!;
 }
 
-async function enter(input: HTMLInputElement, value: string): Promise<void> {
+async function enter(input: HTMLInputElement | HTMLTextAreaElement, value: string): Promise<void> {
 	input.value = value;
 	input.dispatchEvent(new Event('input', { bubbles: true }));
 	await tick();
@@ -238,5 +239,59 @@ describe('gallery ordering', () => {
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ en: [], de: [second, first] });
+	});
+});
+
+describe('per-use meta', () => {
+	it('offers alt text and caption for an image and keeps its stored title', async () => {
+		const { element, changes } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover', meta: { title: { zxx: 'Kept title' } } }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+			assets: { cover: { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' } },
+		});
+		const form = element.querySelector('.cms-media-meta')!;
+		const caption = form.querySelector<HTMLTextAreaElement>('textarea[id$="-caption"]');
+
+		expect(form.querySelector('input[id$="-alt"]')).not.toBeNull();
+		expect(caption).not.toBeNull();
+		expect(form.querySelector('[id$="-title"]')).toBeNull();
+
+		await enter(caption!, 'Under the image');
+		expect(changes).toHaveBeenLastCalledWith({
+			zxx: [
+				{
+					uid: 'cover',
+					meta: { title: { zxx: 'Kept title' }, caption: { zxx: 'Under the image' } },
+				},
+			],
+		});
+
+		await enter(caption!, '');
+		expect(changes).toHaveBeenLastCalledWith({
+			zxx: [{ uid: 'cover', meta: { title: { zxx: 'Kept title' } } }],
+		});
+	});
+
+	it('edits the caption of a video through its modal', async () => {
+		const { element, changes } = await media('cosray-video', {
+			value: { zxx: [{ uid: 'clip' }] },
+			field: { name: 'clip', limit: { min: 0, max: 1 } },
+			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
+		});
+		element.querySelector<HTMLButtonElement>('.cms-video-edit')!.click();
+		await tick();
+		const caption = document.querySelector<HTMLTextAreaElement>(
+			'.cms-modal textarea[id$="-caption"]',
+		);
+
+		expect(caption).not.toBeNull();
+		expect(document.querySelector('.cms-modal [id$="-alt"], .cms-modal [id$="-title"]')).toBeNull();
+
+		await enter(caption!, 'A short clip');
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [{ uid: 'clip', meta: { caption: { zxx: 'A short clip' } } }],
+		});
 	});
 });

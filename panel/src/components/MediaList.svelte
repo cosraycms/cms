@@ -3,7 +3,6 @@
 	import type { SortableEvent } from 'sortablejs';
 	import Sortable from 'sortablejs';
 	import { mount, onMount, unmount } from 'svelte';
-	import { useAssets } from '$lib/assets';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
 	import Video from '$components/Video.svelte';
@@ -35,7 +34,6 @@
 		remove,
 		notify = () => {},
 	}: Props = $props();
-	const assets = useAssets();
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
@@ -60,13 +58,14 @@
 		}
 	}
 
-	function edit(index: number, hasAlt: boolean) {
+	function edit(index: number, kind: 'video' | 'file') {
 		const handle = cosray().modal.open(
 			(host) => {
 				const app = mount(ModalEditImage, {
 					target: host,
 					props: {
 						asset: items[index],
+						kind,
 						close: () => handle.close(),
 						apply: (item: FileItem) => {
 							handle.close();
@@ -76,16 +75,13 @@
 						},
 						translate,
 						contentLocale,
-						identity,
 						locales,
-						catalog: items[index].uid ? $assets[items[index].uid]?.meta : undefined,
-						hasAlt,
 					},
 				});
 
 				return () => void unmount(app);
 			},
-			{ owner: sorterElement },
+			{ owner: sorterElement ?? document.getElementById(identity) ?? undefined },
 		);
 	}
 
@@ -95,13 +91,19 @@
 {#if multiple && type === 'file'}
 	<div class="multiple-files cms-media-list cms-media-list-files" bind:this={sorterElement}>
 		{#each items as item, index (item)}
-			<File {loading} asset={item} remove={() => remove(index)} edit={() => edit(index, false)} />
+			<File {loading} asset={item} remove={() => remove(index)} edit={() => edit(index, 'file')} />
 		{/each}
 	</div>
 {:else if !multiple && type === 'video' && items && items.length > 0}
-	<Video upload file={items[0]} remove={() => remove(null)} {loading} />
+	<Video
+		upload
+		file={items[0]}
+		remove={() => remove(null)}
+		edit={() => edit(0, 'video')}
+		{loading}
+	/>
 {:else if items && items.length > 0}
-	<File {loading} asset={items[0]} remove={() => remove(null)} edit={() => edit(0, false)} />
+	<File {loading} asset={items[0]} remove={() => remove(null)} edit={() => edit(0, 'file')} />
 {/if}
 
 <style>

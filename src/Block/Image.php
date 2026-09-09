@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Block;
 
+use Cosray\Assets\Asset;
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\SizeSpec;
 use Cosray\Contract\Block;
@@ -14,6 +15,7 @@ use Cosray\Schema\Limit;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
+use Cosray\Value\Image as ImageValue;
 
 use function Cosray\escape;
 
@@ -28,6 +30,7 @@ final class Image implements Block
 
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
+		/** @var ImageValue $image */
 		$image = $block->image;
 		$asset = $ctx->asset((string) ($image->unwrap()['uid'] ?? ''));
 
@@ -35,6 +38,19 @@ final class Image implements Block
 			return '';
 		}
 
+		$caption = $image->caption();
+		$figcaption = $caption === '' ? '' : '<figcaption>' . escape($caption) . '</figcaption>';
+
+		return (
+			"<figure class=\"{$ctx->prefix()}-figure\">"
+				. $this->img($image, $asset, $block, $ctx)
+				. $figcaption
+				. '</figure>'
+		);
+	}
+
+	private function img(ImageValue $image, Asset $asset, BlockValue $block, RenderContext $ctx): string
+	{
 		$alt = escape($image->alt() ?: strip_tags($image->title()));
 		$path = escape($asset->path());
 

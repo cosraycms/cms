@@ -862,6 +862,9 @@ Block image rendering:
   the block's share of the grid (`layout.colspan` over the field's columns);
   `images` blocks emit one `block-thumb` rendition per item; generation is
   lazy via the cache fallback route
+- an `image` block wraps its `<img>` in `<figure class="{prefix}-figure">`
+  and adds a `<figcaption>` when the item, or its catalog entry, carries a
+  caption (`$image->caption()` in templates)
 - `Blocks::render()` args: `imageSizes` (ladder names; a single entry
   emits a plain `src` and may use any mode, multiple entries must use the
   `width` mode), `sizes` (attribute template, `{pct}` = grid share in

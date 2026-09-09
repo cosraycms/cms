@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FileItem, LocaleMap } from '$types/data';
+	import type { FileItem, LocaleMap, UploadType } from '$types/data';
 
 	import { untrack } from 'svelte';
 	import { ZXX } from '$types/data';
@@ -8,8 +8,13 @@
 	import { localeTitle, resolveTextFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
 
+	type Key = 'alt' | 'caption' | 'title';
+
 	type Props = {
 		item: FileItem;
+		// Alt text describes what an image shows; a caption is visible text
+		// under an image or video; a file's title is its display name.
+		kind?: UploadType;
 		translate: boolean;
 		contentLocale: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
@@ -18,35 +23,36 @@
 		update: (item: FileItem) => void;
 	};
 
-	let { item, translate, contentLocale, locales, update }: Props = $props();
+	let { item, kind = 'image', translate, contentLocale, locales, update }: Props = $props();
 
 	const id = $props.id();
+	const keys: Key[] = $derived(
+		kind === 'image' ? ['alt', 'caption'] : kind === 'video' ? ['caption'] : ['title'],
+	);
+	const labels: Record<Key, string> = {
+		alt: __('image:alt-text'),
+		caption: __('image:caption'),
+		title: __('common:title'),
+	};
 
 	// Editing scaffold seeded once — the parent keys this component on
 	// the asset uid, so a replaced image starts from its own meta.
-	let alt: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.alt ?? {}) })));
-	let title: LocaleMap<string> = $state(untrack(() => ({ ...(item.meta?.title ?? {}) })));
+	let texts: Record<string, LocaleMap<string>> = $state(
+		untrack(() => Object.fromEntries(keys.map((key) => [key, { ...(item.meta?.[key] ?? {}) }]))),
+	);
+	let focused: Key | null = $state(null);
 	const assets = useAssets();
 	let key = $derived(translate ? contentLocale : ZXX);
 	let catalog = $derived(item.uid ? $assets[item.uid]?.meta : undefined);
-	let altFallback = $derived(
-		resolveTextFallback(
-			alt,
-			catalog?.alt as LocaleMap<string> | undefined,
+
+	function fallback(name: Key) {
+		return resolveTextFallback(
+			texts[name],
+			catalog?.[name] as LocaleMap<string> | undefined,
 			key,
 			locales?.all ?? [],
-		),
-	);
-	let titleFallback = $derived(
-		resolveTextFallback(
-			title,
-			catalog?.title as LocaleMap<string> | undefined,
-			key,
-			locales?.all ?? [],
-		),
-	);
-	let altFocused = $state(false);
-	let titleFocused = $state(false);
+		);
+	}
 
 	function sourceLabel(source: string): string {
 		const language =
@@ -55,58 +61,60 @@
 		return __('field:fallback-from', { language });
 	}
 
+	function placeholder(name: Key): string {
+		const resolved = focused === name ? null : fallback(name);
+
+		if (resolved) {
+			return resolved.value;
+		}
+
+		return name === 'alt' ? __('image:alt-text-placeholder') : __('common:optional');
+	}
+
 	function commit() {
-		update(
-			pruneItemMeta({
-				...item,
-				meta: { ...item.meta, alt: $state.snapshot(alt), title: $state.snapshot(title) },
-			}),
-		);
+		update(pruneItemMeta({ ...item, meta: { ...item.meta, ...$state.snapshot(texts) } }));
 	}
 </script>
 
 <div class="cms-media-meta">
-	<div class="entry">
-		<label class="caption" for="{id}-alt">
-			<span>{__('image:alt-text')}</span>
-		</label>
-		<input
-			class="cms-input"
-			id="{id}-alt"
-			type="text"
-			autocomplete="off"
-			placeholder={!altFocused && altFallback
-				? altFallback.value
-				: __('image:alt-text-placeholder')}
-			bind:value={alt[key]}
-			onfocus={() => (altFocused = true)}
-			onblur={() => (altFocused = false)}
-			oninput={commit}
-		/>
-		{#if !altFocused && altFallback}
-			<span class="fallback">{sourceLabel(altFallback.locale)}</span>
-		{/if}
-		<span class="help">{__('image:alt-text-hint')}</span>
-	</div>
-	<div class="entry">
-		<label class="caption" for="{id}-title">
-			<span>{__('common:title')}</span>
-		</label>
-		<input
-			class="cms-input"
-			id="{id}-title"
-			type="text"
-			autocomplete="off"
-			placeholder={!titleFocused && titleFallback ? titleFallback.value : __('common:optional')}
-			bind:value={title[key]}
-			onfocus={() => (titleFocused = true)}
-			onblur={() => (titleFocused = false)}
-			oninput={commit}
-		/>
-		{#if !titleFocused && titleFallback}
-			<span class="fallback">{sourceLabel(titleFallback.locale)}</span>
-		{/if}
-	</div>
+	{#each keys as name (name)}
+		{@const resolved = focused === name ? null : fallback(name)}
+		<div class="entry">
+			<label class="caption" for="{id}-{name}">
+				<span>{labels[name]}</span>
+			</label>
+			{#if name === 'caption'}
+				<textarea
+					class="cms-textarea"
+					id="{id}-{name}"
+					rows="2"
+					placeholder={placeholder(name)}
+					bind:value={texts[name][key]}
+					onfocus={() => (focused = name)}
+					onblur={() => (focused = null)}
+					oninput={commit}
+				></textarea>
+			{:else}
+				<input
+					class="cms-input"
+					id="{id}-{name}"
+					type="text"
+					autocomplete="off"
+					placeholder={placeholder(name)}
+					bind:value={texts[name][key]}
+					onfocus={() => (focused = name)}
+					onblur={() => (focused = null)}
+					oninput={commit}
+				/>
+			{/if}
+			{#if resolved}
+				<span class="fallback">{sourceLabel(resolved.locale)}</span>
+			{/if}
+			{#if name === 'alt'}
+				<span class="help">{__('image:alt-text-hint')}</span>
+			{/if}
+		</div>
+	{/each}
 </div>
 
 <style>
@@ -131,6 +139,11 @@
 				font-size: var(--cms-font-size-sm);
 				font-weight: 600;
 				line-height: 1.25rem;
+			}
+
+			& .cms-textarea {
+				min-height: 2lh;
+				resize: vertical;
 			}
 
 			& .fallback,

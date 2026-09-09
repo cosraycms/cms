@@ -145,7 +145,7 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
-	private function seedAsset(string $uid, string $filename, ?string $mime = 'image/jpeg'): void
+	private function seedAsset(string $uid, string $filename, ?string $mime = 'image/jpeg', array $meta = []): void
 	{
 		$this->lastContext->assets()->add(new Asset(
 			uid: $uid,
@@ -153,6 +153,7 @@ final class BlocksValueTest extends TestCase
 			key: Storage::key($uid, $filename),
 			filename: $filename,
 			mime: $mime,
+			meta: $meta,
 			assetsBase: '/cms/assets',
 			cacheBase: '/cms/cache',
 		));
@@ -417,6 +418,9 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render();
 
 		$this->assertStringContainsString('class="cms-block" data-type="image" data-colspan="6"', $html);
+		$this->assertStringContainsString('<figure class="cms-figure"><img ', $html);
+		$this->assertStringEndsWith('</figure></div></div>', $html);
+		$this->assertStringNotContainsString('<figcaption', $html);
 		$this->assertStringContainsString(
 			'src="/cms/cache/bl/blockimg12345/sun-sea-block.jpg"',
 			$html,
@@ -433,6 +437,35 @@ final class BlocksValueTest extends TestCase
 			'data-path-original="/cms/assets/bl/blockimg12345/sun-sea.jpg"',
 			$html,
 		);
+	}
+
+	public function testImageBlockRendersTheCaption(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->image([
+				'uid' => 'blockimg12345',
+				'meta' => ['caption' => ['en' => 'Sun & <sea>'], 'title' => ['en' => 'Title <b>only</b>']],
+			]),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg');
+
+		$html = $blocks->render(prefix: 'site');
+
+		$this->assertStringContainsString('<figure class="site-figure"><img ', $html);
+		$this->assertStringContainsString('alt="Title only"', $html);
+		$this->assertStringEndsWith(
+			'<figcaption>Sun &amp; &lt;sea&gt;</figcaption></figure></div></div>',
+			$html,
+		);
+	}
+
+	public function testImageBlockCaptionFallsBackToTheCatalog(): void
+	{
+		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
+		$this->seedAsset('blockimg12345', 'pic.jpg', meta: ['caption' => ['en' => 'From the catalog']]);
+
+		$this->assertStringContainsString('<figcaption>From the catalog</figcaption>', $blocks->render());
+		$this->assertSame('From the catalog', $blocks->image()?->caption());
 	}
 
 	public function testImageBlockSizesTemplateArg(): void

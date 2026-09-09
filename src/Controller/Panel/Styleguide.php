@@ -279,7 +279,7 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $single,
 				'translate' => true,
-				'description' => 'Alt text and title are edited in place; the thumbnail opens the preview.',
+				'description' => 'Alt text and caption are edited in place; the thumbnail opens the preview.',
 			],
 			[
 				'name' => 'coverEmpty',

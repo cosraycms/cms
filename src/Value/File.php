@@ -35,6 +35,11 @@ class File extends Value
 		return $this->textValue('title', $this->index);
 	}
 
+	public function caption(): string
+	{
+		return $this->textValue('caption', $this->index);
+	}
+
 	public function url(): string
 	{
 		$url = $this->owner->origin() . $this->publicPath();

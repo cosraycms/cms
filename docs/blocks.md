@@ -83,7 +83,7 @@ $cms->blockType(App\Block\Quote::class);
 | `RichText` | `richtext` | `text: RichText`, required | the rendered richtext document |
 | `Text` | `text` | `text: Textarea`, required | escaped, with `nl2br()` line breaks |
 | `Heading` | `heading` | `text: Text`, required; `level: Option` `'1'`–`'6'`, default `'2'` | `<hN>` with the escaped text |
-| `Image` | `image` | `image: Image`, one item, required | an `<img>` with a `srcset` ladder and a `sizes` attribute from the block's grid share |
+| `Image` | `image` | `image: Image`, one item, required | a `<figure>` holding an `<img>` with a `srcset` ladder and a `sizes` attribute from the block's grid share, plus a `<figcaption>` when the image has a caption |
 | `Images` | `images` | `images: Image`, required | one `{prefix}-blocks-images-image` per item inside a `{prefix}-blocks-images` wrapper |
 | `Video` | `video` | `video: Video`, one item, required | the `<video>` element |
 | `Youtube` | `youtube` | `video: Youtube`, required | the responsive embed; the aspect ratio lives in the field's meta |
@@ -91,7 +91,7 @@ $cms->blockType(App\Block\Quote::class);
 
 The iframe block is the one deliberate unescaped output in the CMS: an embed field holds trusted editor input and is useless escaped. Everything a block type emits itself is its own responsibility; everything Cosray generates around it is escaped.
 
-`richtext`, `text` and `heading` translate their text, the media types translate their media field (shared files, translated `alt` and `title`); the YouTube id, the iframe code and the heading level are not translatable.
+`richtext`, `text` and `heading` translate their text, the media types translate their media field (shared files, translated `alt` and `caption`); the YouTube id, the iframe code and the heading level are not translatable.
 
 ## Configuring the field
 

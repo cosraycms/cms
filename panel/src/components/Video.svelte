@@ -9,10 +9,11 @@
 		loading: boolean;
 		upload: boolean;
 		remove: () => void;
+		edit?: () => void;
 		class?: string;
 	};
 
-	let { file, loading, upload, remove, class: classes = '' }: Props = $props();
+	let { file, loading, upload, remove, edit, class: classes = '' }: Props = $props();
 
 	const assets = useAssets();
 
@@ -30,6 +31,14 @@
 			<source src={info?.url ?? ''} type="video/{ext}" />
 		</video>
 		<div class="controls cms-video-controls">
+			{#if edit}
+				<button type="button" class="cms-video-edit" onclick={edit}>
+					<span class="ico cms-video-ico">
+						<Icon name="pencil" />
+					</span>
+					<span class="icobtn cms-video-icobtn">{__('common:edit')}</span>
+				</button>
+			{/if}
 			{#if remove}
 				<button type="button" class="cms-video-remove" onclick={remove}>
 					<span class="ico cms-video-ico">
@@ -64,13 +73,24 @@
 
 		.cms-video-controls {
 			margin-top: var(--cms-space-4);
+			display: flex;
+			justify-content: center;
+			gap: var(--cms-space-4);
+		}
+
+		.cms-video-edit,
+		.cms-video-remove {
+			border: none;
+			background: transparent;
+			cursor: pointer;
+		}
+
+		.cms-video-edit {
+			color: var(--cms-color-info);
 		}
 
 		.cms-video-remove {
 			color: var(--cms-color-danger);
-			border: none;
-			background: transparent;
-			cursor: pointer;
 		}
 
 		.ico {
