@@ -248,6 +248,54 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($result->has(['value', Field::NEUTRAL_LOCALE, 0, 'fields', 'text', 'value', 'zxx']));
 	}
 
+	public function testImageSubFieldMetaValidatesTheGallerySettings(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Images::class);
+		$content = static fn(array $meta): array => [
+			'type' => Blocks::class,
+			'value' => [
+				Field::NEUTRAL_LOCALE => [[
+					'uid' => 'b1',
+					'type' => Builtin\Images::class,
+					'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+					'fields' => [
+						'images' => [
+							'type' => Image::class,
+							'value' => [Field::NEUTRAL_LOCALE => [['uid' => 'img']]],
+							'meta' => $meta,
+						],
+					],
+				]],
+			],
+		];
+
+		$this->assertTrue(
+			$blocks
+				->shape()
+				->validate($content([
+					'ratio' => ['zxx' => '4/3'],
+					'crop' => ['zxx' => true],
+					'other' => ['zxx' => 'kept'],
+				]))
+				->valid(),
+		);
+		$this->assertTrue($blocks->shape()->validate($content([]))->valid());
+
+		$result = $blocks->shape()->validate($content(['ratio' => ['zxx' => '5/4']]));
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($result->has([
+			'value',
+			Field::NEUTRAL_LOCALE,
+			0,
+			'fields',
+			'images',
+			'meta',
+			'ratio',
+			'zxx',
+		]));
+	}
+
 	public function testAllowRejectsUnknownClasses(): void
 	{
 		$this->throws(RuntimeException::class, "allows unknown block type 'App\\Nope'");

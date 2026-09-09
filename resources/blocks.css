@@ -54,4 +54,21 @@
 			margin-inline-start: 0;
 		}
 	}
+
+	/*
+	 * The gallery block carries the editor's settings on its container:
+	 * `data-ratio` with `--ratio` fixes the tiles' shape, `data-crop` fills
+	 * it instead of fitting the image in. Without them each image keeps
+	 * its own shape.
+	 */
+	.cms-blocks-images[data-ratio] img {
+		width: 100%;
+		height: auto;
+		aspect-ratio: var(--ratio);
+		object-fit: contain;
+	}
+
+	.cms-blocks-images[data-crop] img {
+		object-fit: cover;
+	}
 }

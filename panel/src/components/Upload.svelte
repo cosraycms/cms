@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { preventDefault } from 'svelte/legacy';
 
-	import type { FileItem, UploadType } from '$types/data';
+	import type { FileItem, Meta, UploadType } from '$types/data';
 	import type { UploadResult } from '$lib/bridge';
 	import type { Limit } from '$types/fields';
 	import type { LibraryItem } from '$lib/library';
@@ -40,6 +40,9 @@
 		// width whose per-use form goes into the settings slot when given.
 		presentation?: string;
 		settings?: HTMLElement;
+		// The gallery settings the element keeps as the field's meta.
+		meta?: Meta;
+		updateMeta?: (meta: Meta) => void;
 	};
 
 	let {
@@ -60,6 +63,8 @@
 		notify = () => {},
 		presentation,
 		settings,
+		meta,
+		updateMeta,
 	}: Props = $props();
 
 	const assetStore = useAssets();
@@ -71,9 +76,7 @@
 	let allowedExtensions = $derived(allowedFiles.join(', '));
 	let multiple = $derived(limit.max < 1 || limit.max > 1);
 	let open = $derived(!items || limit.max < 1 || items.length < limit.max);
-	let block = $derived(
-		presentation === 'block' && ((type === 'image' && !multiple) || type === 'video'),
-	);
+	let block = $derived(presentation === 'block' && (type === 'image' || type === 'video'));
 
 	function alert(body: string) {
 		const handle = cosray().modal.open(
@@ -349,6 +352,24 @@
 				upload={openPicker}
 				library={openLibrary}
 			/>
+		{:else if multiple}
+			<Gallery
+				bind:items
+				{loading}
+				{translate}
+				{contentLocale}
+				{identity}
+				{locales}
+				{open}
+				{notify}
+				presentation="block"
+				{settings}
+				{meta}
+				{updateMeta}
+				remove={(index) => remove(index)}
+				upload={openPicker}
+				library={openLibrary}
+			/>
 		{:else}
 			<ImageFigure
 				item={items?.[0] ?? null}
@@ -369,7 +390,7 @@
 			<div class="drop" aria-hidden="true">
 				<span>
 					<Icon name="cloud-upload" />
-					{items?.length ? __('upload:drop-to-replace') : __('upload:drop-to-add')}
+					{items?.length && !multiple ? __('upload:drop-to-replace') : __('upload:drop-to-add')}
 				</span>
 			</div>
 		{/if}
@@ -377,6 +398,7 @@
 			bind:this={picker}
 			type="file"
 			id={name}
+			{multiple}
 			accept={allowedFiles.map((suffix) => '.' + suffix).join(',')}
 			oninput={onFile(getFilesFromInput)}
 		/>

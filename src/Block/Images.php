@@ -10,6 +10,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
+use Cosray\Value\Images as ImagesValue;
 
 use function Cosray\escape;
 
@@ -28,6 +29,7 @@ final class Images implements Block
 		// not silently emit URLs the fallback route will 404.
 		$ctx->owner->config()->media->sizes->get($name);
 		$prefix = $ctx->prefix();
+		/** @var ImagesValue $images */
 		$images = $block->images;
 		$result = '';
 
@@ -46,6 +48,28 @@ final class Images implements Block
 			$result .= "<div class=\"{$prefix}-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"></div>";
 		}
 
-		return $result === '' ? '' : "<div class=\"{$prefix}-blocks-images\">{$result}</div>";
+		if ($result === '') {
+			return '';
+		}
+
+		return "<div class=\"{$prefix}-blocks-images\"{$this->settings($images)}>{$result}</div>";
+	}
+
+	/** The gallery settings as attributes: the ratio as data and custom property, the crop as a flag. */
+	private function settings(ImagesValue $images): string
+	{
+		$attributes = '';
+		$ratio = $images->ratio();
+
+		if ($ratio !== null) {
+			$ratio = escape($ratio);
+			$attributes .= " data-ratio=\"{$ratio}\" style=\"--ratio: {$ratio}\"";
+		}
+
+		if ($images->crop()) {
+			$attributes .= ' data-crop';
+		}
+
+		return $attributes;
 	}
 }

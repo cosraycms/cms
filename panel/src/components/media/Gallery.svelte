@@ -1,12 +1,14 @@
 <script lang="ts">
-	import type { FileItem } from '$types/data';
+	import type { FileItem, Meta } from '$types/data';
 	import type { SortableEvent } from 'sortablejs';
 
 	import Sortable from 'sortablejs';
+	import { ZXX } from '$types/data';
 	import { useAssets } from '$lib/assets';
-	import { afterMove, afterRemove } from '$lib/gallery';
+	import { RATIOS, afterMove, afterRemove, readRatio } from '$lib/gallery';
 	import { assetLine, extension } from '$lib/library';
 	import { __ } from '$lib/locale';
+	import { portal } from '$lib/portal';
 	import Icon from '$components/Icon.svelte';
 	import MetaFields from './MetaFields.svelte';
 
@@ -19,6 +21,13 @@
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		// False once the field's limit is reached; hides the add actions.
 		open: boolean;
+		// The block presentation shows the tiles alone; the per-image drawer
+		// and the gallery settings go into the settings slot.
+		presentation?: string;
+		settings?: HTMLElement;
+		// The gallery settings — ratio and crop — kept as the field's meta.
+		meta?: Meta;
+		updateMeta?: (meta: Meta) => void;
 		remove: (index: number) => void;
 		upload: () => void;
 		library: () => void;
@@ -33,6 +42,10 @@
 		identity,
 		locales,
 		open,
+		presentation,
+		settings,
+		meta,
+		updateMeta,
 		remove,
 		upload,
 		library,
@@ -40,11 +53,17 @@
 	}: Props = $props();
 
 	const assets = useAssets();
+	const id = $props.id();
 
+	let block = $derived(presentation === 'block');
 	let selected: number | null = $state(null);
 	let grid: HTMLElement | undefined = $state();
-	let current = $derived(selected === null ? null : (items[selected] ?? null));
-	let currentInfo = $derived(current?.uid ? $assets[current.uid] : undefined);
+	// The dialog's drawer always shows an image; the inline drawer opens on a pick.
+	let current = $derived(selected ?? (block && items.length > 0 ? 0 : null));
+	let currentItem = $derived(current === null ? null : (items[current] ?? null));
+	let currentInfo = $derived(currentItem?.uid ? $assets[currentItem.uid] : undefined);
+	let ratio = $derived(readRatio(meta?.ratio?.[ZXX]));
+	let crop = $derived(meta?.crop?.[ZXX] === true);
 	let count = $derived(
 		items.length === 1
 			? __('image:count-one', { count: 1 })
@@ -62,12 +81,12 @@
 	}
 
 	function select(index: number) {
-		selected = selected === index ? null : index;
+		selected = block || selected !== index ? index : null;
 	}
 
 	function step(delta: number) {
-		if (selected !== null && items.length > 0) {
-			selected = (selected + delta + items.length) % items.length;
+		if (current !== null && items.length > 0) {
+			selected = (current + delta + items.length) % items.length;
 		}
 	}
 
@@ -77,10 +96,28 @@
 	}
 
 	function update(item: FileItem) {
-		if (selected !== null) {
-			items[selected] = item;
+		if (current !== null) {
+			items[current] = item;
 			notify();
 		}
+	}
+
+	// Auto and crop-off are the site's defaults and are not stored.
+	function setSettings(nextRatio: string, nextCrop: boolean) {
+		const next: Meta = { ...meta };
+
+		delete next.ratio;
+		delete next.crop;
+
+		if (nextRatio !== 'auto') {
+			next.ratio = { [ZXX]: nextRatio };
+		}
+
+		if (nextCrop) {
+			next.crop = { [ZXX]: true };
+		}
+
+		updateMeta?.(next);
 	}
 
 	$effect(() => {
@@ -110,24 +147,83 @@
 	});
 </script>
 
-<div class="cms-gallery">
-	<div class="summary">
-		<span class="tally">{loading ? __('upload:uploading') : count}</span>
-		{#if open}
-			<span class="tools">
-				<button type="button" class="textlink" onclick={library}>
-					{__('media:choose-from-library')}
-				</button>
-				<button type="button" class="cms-button secondary small" onclick={upload}>
-					<span class="icon"><Icon name="plus" /></span>
-					{__('image:add')}
-				</button>
-			</span>
+{#snippet editor(index: number, item: FileItem)}
+	<div class="drawer-head">
+		{#if !block}
+			{#if thumb(item)}
+				<img class="mini" src={thumb(item)} alt="" />
+			{:else}
+				<span class="mini"></span>
+			{/if}
 		{/if}
+		<span class="filename" title={filename(item)}>{filename(item)}</span>
+		<span class="stepper">
+			<span class="position">{index + 1} / {items.length}</span>
+			<button
+				type="button"
+				class="step prev"
+				title={__('image:previous')}
+				aria-label={__('image:previous')}
+				onclick={() => step(-1)}
+			>
+				<Icon name="chevron-left" />
+			</button>
+			<button
+				type="button"
+				class="step next"
+				title={__('image:next')}
+				aria-label={__('image:next')}
+				onclick={() => step(1)}
+			>
+				<Icon name="chevron-right" />
+			</button>
+			{#if !block}
+				<button
+					type="button"
+					class="dismiss"
+					title={__('common:close')}
+					aria-label={__('common:close')}
+					onclick={() => (selected = null)}
+				>
+					<Icon name="x-lg" />
+				</button>
+			{/if}
+		</span>
 	</div>
+	{#if currentInfo && assetLine(currentInfo) !== ''}
+		<div class="facts">{assetLine(currentInfo)}</div>
+	{/if}
+	{#key `${identity}:${item.uid}`}
+		<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} />
+	{/key}
+{/snippet}
+
+<div class="cms-gallery" class:is-block={block}>
+	{#if !block}
+		<div class="summary">
+			<span class="tally">{loading ? __('upload:uploading') : count}</span>
+			{#if open}
+				<span class="tools">
+					<button type="button" class="textlink" onclick={library}>
+						{__('media:choose-from-library')}
+					</button>
+					<button type="button" class="cms-button secondary small" onclick={upload}>
+						<span class="icon"><Icon name="plus" /></span>
+						{__('image:add')}
+					</button>
+				</span>
+			{/if}
+		</div>
+	{/if}
 	{#if items.length > 0}
 		<div class="viewport">
-			<div class="tiles" bind:this={grid}>
+			<div
+				class="tiles"
+				class:has-ratio={ratio !== 'auto'}
+				class:is-cropped={crop}
+				style:--ratio={ratio !== 'auto' ? ratio : null}
+				bind:this={grid}
+			>
 				{#each items as item, index (item)}
 					<div class="tile" class:is-selected={selected === index} title={filename(item)}>
 						<button type="button" class="pick" onclick={() => select(index)}>
@@ -150,61 +246,87 @@
 				{/each}
 			</div>
 		</div>
+		{#if block && open}
+			<div class="bar">
+				<span class="status">{loading ? __('upload:uploading') : count}</span>
+				<button type="button" class="quiet" onclick={library}>
+					{__('media:choose-from-library')}
+				</button>
+				<button type="button" class="quiet" onclick={upload}>{__('image:add')}</button>
+			</div>
+		{/if}
+	{:else if block}
+		<div class="dropzone">
+			<Icon name="cloud-upload" />
+			<span class="prompt">{loading ? __('upload:uploading') : __('upload:drop-images-here')}</span>
+			<span class="tools">
+				<button type="button" class="cms-button secondary small" onclick={upload}>
+					{__('image:add')}
+				</button>
+				<button type="button" class="textlink" onclick={library}>
+					{__('media:choose-from-library')}
+				</button>
+			</span>
+		</div>
 	{:else}
 		<div class="blank">
 			<Icon name="cloud-upload" />
 			<span>{__('upload:drop-images')}</span>
 		</div>
 	{/if}
-	{#if current && selected !== null}
+	{#if !block && currentItem && current !== null}
 		<div class="drawer">
-			<div class="drawer-head">
-				{#if thumb(current)}
-					<img class="mini" src={thumb(current)} alt="" />
-				{:else}
-					<span class="mini"></span>
-				{/if}
-				<span class="filename" title={filename(current)}>{filename(current)}</span>
-				<span class="stepper">
-					<span class="position">{selected + 1} / {items.length}</span>
-					<button
-						type="button"
-						class="step prev"
-						title={__('image:previous')}
-						aria-label={__('image:previous')}
-						onclick={() => step(-1)}
-					>
-						<Icon name="chevron-left" />
-					</button>
-					<button
-						type="button"
-						class="step next"
-						title={__('image:next')}
-						aria-label={__('image:next')}
-						onclick={() => step(1)}
-					>
-						<Icon name="chevron-right" />
-					</button>
-					<button
-						type="button"
-						class="dismiss"
-						title={__('common:close')}
-						aria-label={__('common:close')}
-						onclick={() => (selected = null)}
-					>
-						<Icon name="x-lg" />
-					</button>
-				</span>
-			</div>
-			{#if currentInfo && assetLine(currentInfo) !== ''}
-				<div class="facts">{assetLine(currentInfo)}</div>
-			{/if}
-			{#key `${identity}:${current.uid}`}
-				<MetaFields item={current} {translate} {contentLocale} {locales} {update} />
-			{/key}
+			{@render editor(current, currentItem)}
 		</div>
 	{/if}
 </div>
+{#if block}
+	<div class="cms-gallery-settings" use:portal={settings}>
+		<div class="options">
+			<label class="option" for="{id}-ratio">
+				<span>{__('image:ratio')}</span>
+				<select
+					class="cms-select"
+					id="{id}-ratio"
+					value={ratio}
+					onchange={(event) => setSettings(event.currentTarget.value, crop)}
+				>
+					{#each RATIOS as value (value)}
+						<option {value}>{value === 'auto' ? __('image:ratio-auto') : value}</option>
+					{/each}
+				</select>
+			</label>
+			<label class="check">
+				<input
+					type="checkbox"
+					checked={crop}
+					onchange={(event) => setSettings(ratio, event.currentTarget.checked)}
+				/>
+				<span>{__('image:crop')}</span>
+			</label>
+		</div>
+		{#if currentItem && current !== null}
+			<div class="strip">
+				{#each items as item, index (item)}
+					<button
+						type="button"
+						class="thumb"
+						class:is-current={current === index}
+						title={filename(item)}
+						onclick={() => (selected = index)}
+					>
+						{#if thumb(item)}
+							<img src={thumb(item)} alt="" loading="lazy" />
+						{:else}
+							<span class="plate">{extension(filename(item))}</span>
+						{/if}
+					</button>
+				{/each}
+			</div>
+			{@render editor(current, currentItem)}
+		{/if}
+	</div>
+{/if}
 
 <style>
 	@layer panel {
@@ -371,6 +493,225 @@
 				background: var(--cms-color-surface-sunken);
 			}
 
+			/*
+			 * The block presentation: the tiles at block width and nothing
+			 * else at rest. Add and library sit on a bar along the bottom
+			 * edge that appears on hover; the tiles preview the ratio and
+			 * crop chosen in the settings dialog.
+			 */
+			&.is-block {
+				position: relative;
+
+				& .viewport {
+					max-height: none;
+					padding: 0;
+					overflow: visible;
+				}
+
+				& .tiles {
+					grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+					gap: var(--cms-space-2);
+				}
+
+				& .tile {
+					aspect-ratio: auto;
+					padding: 0;
+					border: 0;
+					border-radius: var(--cms-radius-sm);
+					background: none;
+					overflow: hidden;
+
+					&.is-selected {
+						box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+					}
+				}
+
+				& .tiles.has-ratio .tile {
+					aspect-ratio: var(--ratio);
+				}
+
+				& .pick {
+					display: block;
+					height: auto;
+
+					& img {
+						display: block;
+						width: 100%;
+						height: auto;
+						max-height: none;
+						border-radius: 0;
+					}
+				}
+
+				& .tiles.has-ratio .pick {
+					height: 100%;
+
+					& img {
+						height: 100%;
+						object-fit: contain;
+					}
+				}
+
+				& .tiles.is-cropped .pick img {
+					object-fit: cover;
+				}
+
+				& .plate {
+					display: grid;
+					place-items: center;
+					aspect-ratio: 4 / 3;
+					background: var(--cms-color-surface-sunken);
+				}
+
+				& .bar {
+					position: absolute;
+					inset-inline: 0;
+					inset-block-end: 0;
+					display: flex;
+					align-items: center;
+					gap: var(--cms-space-0-5);
+					padding: var(--cms-space-1-5) var(--cms-space-2);
+					border-radius: 0 0 var(--cms-radius-sm) var(--cms-radius-sm);
+					background: color-mix(in srgb, var(--cms-color-surface) 88%, transparent);
+					opacity: 0;
+					pointer-events: none;
+					transition: opacity 120ms ease;
+				}
+
+				&:hover .bar,
+				&:focus-within .bar {
+					opacity: 1;
+					pointer-events: auto;
+				}
+
+				& .status {
+					flex: 1 1 auto;
+					font-size: var(--cms-font-size-xs);
+					color: var(--cms-color-text-muted);
+					font-variant-numeric: tabular-nums;
+				}
+
+				& .quiet {
+					flex-shrink: 0;
+					padding: var(--cms-space-0-5) var(--cms-space-1-5);
+					border: 0;
+					border-radius: var(--cms-radius-md);
+					background: transparent;
+					font-size: var(--cms-font-size-xs);
+					font-weight: 500;
+					color: var(--cms-color-text-muted);
+					cursor: pointer;
+
+					&:hover {
+						background: var(--cms-color-hover);
+						color: var(--cms-color-text);
+					}
+				}
+
+				& .dropzone {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					gap: var(--cms-space-2);
+					padding: var(--cms-space-8) var(--cms-space-4);
+					border: 1px dashed var(--cms-color-border-strong);
+					border-radius: var(--cms-radius-md);
+					text-align: center;
+					color: var(--cms-color-text-subtle);
+
+					& :global(svg) {
+						width: var(--cms-space-5);
+						height: var(--cms-space-5);
+						color: var(--cms-color-text-faint);
+					}
+				}
+
+				& .prompt {
+					font-size: var(--cms-font-size-sm);
+					font-weight: 500;
+					color: var(--cms-color-text-muted);
+				}
+
+				& .dropzone .tools {
+					display: flex;
+					align-items: center;
+					gap: var(--cms-space-2);
+					margin-top: var(--cms-space-1);
+				}
+			}
+		}
+
+		/* The drawer in the settings dialog: a strip of thumbs to pick from,
+		   the gallery settings above it. */
+		.cms-gallery-settings {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-3);
+
+			& .options {
+				display: flex;
+				flex-direction: column;
+				gap: var(--cms-space-2);
+			}
+
+			& .option {
+				display: flex;
+				flex-direction: column;
+				gap: var(--cms-space-1);
+				color: var(--cms-color-text-label);
+				font-size: var(--cms-font-size-sm);
+				font-weight: 500;
+			}
+
+			& .check {
+				display: flex;
+				align-items: center;
+				gap: var(--cms-space-2);
+				font-size: var(--cms-font-size-sm);
+			}
+
+			& .strip {
+				display: flex;
+				gap: var(--cms-space-1-5);
+				padding-block: var(--cms-space-1);
+				overflow-x: auto;
+			}
+
+			& .thumb {
+				display: grid;
+				flex: 0 0 auto;
+				place-items: center;
+				width: 3rem;
+				height: 3rem;
+				padding: 0;
+				border: 1px solid var(--cms-color-border);
+				border-radius: var(--cms-radius);
+				background: var(--cms-color-surface);
+				overflow: hidden;
+				cursor: pointer;
+
+				& img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+				}
+
+				&.is-current {
+					border-color: var(--cms-color-info);
+					box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+				}
+			}
+
+			& .plate {
+				font-size: 0.625rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--cms-color-text-subtle);
+			}
+		}
+
+		/* The drawer parts, inline under the tiles or in the dialog alike. */
+		:is(.cms-gallery, .cms-gallery-settings) {
 			& .drawer-head {
 				display: flex;
 				align-items: center;

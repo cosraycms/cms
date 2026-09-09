@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { BridgeSystem, UploadResult } from '../../src/lib/bridge';
 import type { HostPayload } from '../../src/lib/host';
-import type { FileItem, LocaleMap } from '../../src/types/data';
+import type { FileItem, LocaleMap, Meta } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
 import '../../src/elements/media/FileElement.svelte';
 import '../../src/elements/media/ImageElement.svelte';
@@ -45,13 +45,17 @@ async function media(tag: string, payload: HostPayload, locale = 'de') {
 	element.locale = locale;
 	element.locales = { default: system.defaultLocale, all: system.locales };
 	const changes = vi.fn<(value: LocaleMap<FileItem[]>) => void>();
+	const details = vi.fn<(detail: { value: LocaleMap<FileItem[]>; meta?: Meta }) => void>();
 	element.addEventListener('cosray-change', (event) => {
-		changes(JSON.parse(JSON.stringify((event as CustomEvent).detail.value)));
+		const detail = JSON.parse(JSON.stringify((event as CustomEvent).detail));
+
+		changes(detail.value);
+		details(detail);
 	});
 	document.body.append(element);
 	await tick();
 
-	return { element, changes };
+	return { element, changes, details };
 }
 
 function file() {
@@ -410,5 +414,84 @@ describe('block presentation', () => {
 		);
 		expect(slot.querySelector('textarea[id$="-caption"]')).not.toBeNull();
 		expect(slot.querySelector('[id$="-alt"], [id$="-title"]')).toBeNull();
+	});
+});
+
+describe('gallery block', () => {
+	const assets = {
+		a: { filename: 'a.jpg', url: '/media/a.jpg', kind: 'image' },
+		b: { filename: 'b.jpg', url: '/media/b.jpg', kind: 'image' },
+	};
+
+	async function gallery(slot: HTMLElement, meta?: Meta) {
+		document.body.append(slot);
+
+		return media('cosray-image', {
+			value: { zxx: [{ uid: 'a' }, { uid: 'b' }] },
+			field: { name: 'images', presentation: 'block' },
+			assets,
+			settings: slot,
+			...(meta ? { meta } : {}),
+		} as HostPayload);
+	}
+
+	it('shows the tiles alone and keeps the drawer and the settings in the slot', async () => {
+		const slot = document.createElement('div');
+		const { element } = await gallery(slot, { ratio: { zxx: '4/3' } });
+		const tiles = element.querySelector<HTMLElement>('.cms-gallery.is-block .tiles')!;
+
+		expect(tiles.querySelectorAll('.tile')).toHaveLength(2);
+		expect(tiles.style.getPropertyValue('--ratio')).toBe('4/3');
+		expect(element.querySelector('.summary, .drawer, .cms-media-meta')).toBeNull();
+		expect(slot.querySelector<HTMLSelectElement>('select')!.value).toBe('4/3');
+		expect(slot.querySelectorAll('.strip .thumb')).toHaveLength(2);
+		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('a.jpg');
+		expect(slot.querySelector('.cms-media-meta input[id$="-alt"]')).not.toBeNull();
+	});
+
+	it('follows ratio and crop live and reports them as the field meta', async () => {
+		const slot = document.createElement('div');
+		const { element, details } = await gallery(slot);
+		const tiles = element.querySelector<HTMLElement>('.cms-gallery .tiles')!;
+		const select = slot.querySelector<HTMLSelectElement>('select')!;
+		const crop = slot.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+		const value = { zxx: [{ uid: 'a' }, { uid: 'b' }] };
+
+		select.value = '16/9';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+		await tick();
+		expect(tiles.style.getPropertyValue('--ratio')).toBe('16/9');
+		expect(tiles.classList.contains('has-ratio')).toBe(true);
+		expect(details).toHaveBeenLastCalledWith({ value, meta: { ratio: { zxx: '16/9' } } });
+
+		crop.click();
+		await tick();
+		expect(tiles.classList.contains('is-cropped')).toBe(true);
+		expect(details).toHaveBeenLastCalledWith({
+			value,
+			meta: { ratio: { zxx: '16/9' }, crop: { zxx: true } },
+		});
+
+		select.value = 'auto';
+		select.dispatchEvent(new Event('change', { bubbles: true }));
+		await tick();
+		expect(tiles.style.getPropertyValue('--ratio')).toBe('');
+		expect(tiles.classList.contains('has-ratio')).toBe(false);
+		expect(details).toHaveBeenLastCalledWith({ value, meta: { crop: { zxx: true } } });
+	});
+
+	it('steps through the images in the slot and edits the current one', async () => {
+		const slot = document.createElement('div');
+		const { changes } = await gallery(slot);
+
+		slot.querySelector<HTMLButtonElement>('.step.next')!.click();
+		await tick();
+		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('b.jpg');
+		expect(slot.querySelector('.position')?.textContent).toBe('2 / 2');
+
+		await enter(slot.querySelector<HTMLInputElement>('input[id$="-alt"]')!, 'Second');
+		expect(changes).toHaveBeenLastCalledWith({
+			zxx: [{ uid: 'a' }, { uid: 'b', meta: { alt: { zxx: 'Second' } } }],
+		});
 	});
 });

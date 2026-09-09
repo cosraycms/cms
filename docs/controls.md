@@ -35,7 +35,7 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | --- | --- | --- | --- |
 | `code` | `Control::code()` | `cosray-code` | locale map of `string`, `meta.syntax` (syntaxes from `#[Syntax]`) |
 | `richtext` | `Control::richtext()` | `cosray-richtext` | locale map of richtext documents; `field.tools` (toolbar set from `#[Tools]` / `richtext.tools`) |
-| `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]` |
+| `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]`; a gallery keeps its `ratio` and `crop` settings in the field meta |
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
@@ -128,6 +128,8 @@ public function metaControl(): ?Control
 ```
 
 The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Inside a block the row's settings dialog hosts the group instead, under the field's label when the block labels its fields, so no meta button sits in the content. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
+
+An element control reports its meta in the same `cosray-change` detail as its value — `{ value, meta }` — and the field's `metaShape()` validates it on save like any other meta. The image element inside an images block is the built-in example: it renders the gallery's aspect ratio and crop into its settings slot and reports them as `meta: { ratio: { zxx: '4/3' }, crop: { zxx: true } }`, which `Field\Image` validates and `Value\Images::ratio()` and `crop()` read on the site.
 
 A `blocks` field uses the same dialog for its **rows**: its descriptor carries a `meta` prop — a `group` with the `class` and `id` text controls — and every block row renders it behind the gear in its header strip, submitting as `content[{field}][value][{lo}][{i}][meta][{key}][zxx]`. It is one group for every block type; a descriptor without the prop stores no block meta at all.
 

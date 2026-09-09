@@ -84,7 +84,7 @@ $cms->blockType(App\Block\Quote::class);
 | `Text` | `text` | `text: Textarea`, required | escaped, with `nl2br()` line breaks |
 | `Heading` | `heading` | `text: Text`, required; `level: Option` `'1'`–`'6'`, default `'2'` | `<hN>` with the escaped text |
 | `Image` | `image` | `image: Image`, one item, required | a `<figure>` holding an `<img>` with a `srcset` ladder and a `sizes` attribute from the block's grid share, plus a `<figcaption>` when the image has a caption |
-| `Images` | `images` | `images: Image`, required | one `{prefix}-blocks-images-image` per item inside a `{prefix}-blocks-images` wrapper |
+| `Images` | `images` | `images: Image`, required | one `{prefix}-blocks-images-image` per item inside a `{prefix}-blocks-images` wrapper, which carries the [gallery settings](#gallery-settings) as `data-ratio` (plus `--ratio`) and `data-crop` |
 | `Video` | `video` | `video: Video`, one item, required | the `<video>` element |
 | `Youtube` | `youtube` | `video: Youtube`, required | the responsive embed; the aspect ratio lives in the field's meta |
 | `Iframe` | `iframe` | `code: Iframe`, required | the stored embed code **raw** |
@@ -92,6 +92,12 @@ $cms->blockType(App\Block\Quote::class);
 The iframe block is the one deliberate unescaped output in the CMS: an embed field holds trusted editor input and is useless escaped. Everything a block type emits itself is its own responsibility; everything Cosray generates around it is escaped.
 
 `richtext`, `text` and `heading` translate their text, the media types translate their media field (shared files, translated `alt` and `caption`); the YouTube id, the iframe code and the heading level are not translatable.
+
+Per image, `$image->alt()`, `$image->caption()` and `$image->title()` read the per-use meta and fall back to the asset catalog. The image block renders the caption under the picture; the gallery renders none, the caption of a gallery image is for templates.
+
+### Gallery settings
+
+The images block's settings dialog holds the tiles' **aspect ratio** — auto, `1/1`, `4/3`, `3/2`, `16/9`, `3/4`, `2/3` — and a **crop** toggle: off fits each image into the ratio, on fills it. The editor's tiles preview both live. They are stored as the images field's meta, `{"ratio": {"zxx": "4/3"}, "crop": {"zxx": true}}`, and validated on save; auto and crop off are the site's defaults and are not stored. The rendered container carries them as `data-ratio="4/3" style="--ratio: 4/3"` and `data-crop`, which the [reference stylesheet](#the-reference-stylesheet) acts on; templates read them through `$block->images->ratio()` (`null` for auto) and `$block->images->crop()`.
 
 ## Configuring the field
 
@@ -319,7 +325,7 @@ foreach ($node->content as $block) {
 @import "vendor/cosray/cms/resources/blocks.css";
 ```
 
-Copying it into the site's own CSS is equally fine — it is twenty lines and has no dependencies. A site rendering with a non-default `prefix` has to copy and rename.
+Copying it into the site's own CSS is equally fine — it is short and has no dependencies. A site rendering with a non-default `prefix` has to copy and rename.
 
 ```css
 @layer cms.blocks {
@@ -346,6 +352,17 @@ Copying it into the site's own CSS is equally fine — it is twenty lines and ha
 			margin-inline-start: 0;
 		}
 	}
+
+	.cms-blocks-images[data-ratio] img {
+		width: 100%;
+		height: auto;
+		aspect-ratio: var(--ratio);
+		object-fit: contain;
+	}
+
+	.cms-blocks-images[data-crop] img {
+		object-fit: cover;
+	}
 }
 ```
 
@@ -355,6 +372,7 @@ Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins*
 
 - `--blocks-gap` — the grid gap, set it on `.cms-blocks` or anywhere above it. It has to be a **context-independent length**, `rem` or `px`. The gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
 - The container threshold — redeclare the `@container` block at the width the design wants. The container itself is `.cms-blocks` (`container-type: inline-size`), so the query measures the blocks area, not the viewport.
+- The gallery rules — `[data-ratio]` fixes the tiles' shape and `[data-crop]` fills it; both key on attributes the editor emits only when a gallery chose them, so a site without galleries or with its own gallery rules loses nothing by leaving them out.
 
 The three responsive policies:
 

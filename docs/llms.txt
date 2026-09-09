@@ -865,6 +865,11 @@ Block image rendering:
 - an `image` block wraps its `<img>` in `<figure class="{prefix}-figure">`
   and adds a `<figcaption>` when the item, or its catalog entry, carries a
   caption (`$image->caption()` in templates)
+- an `images` block carries its gallery settings — the images field's meta
+  `ratio` (one of `auto|1/1|4/3|3/2|16/9|3/4|2/3`) and `crop` (bool), both
+  neutral-locale maps — as `data-ratio` plus `--ratio` and `data-crop` on
+  the container; `$block->images->ratio()` / `crop()` read them and
+  `resources/blocks.css` fits or crops the tiles accordingly
 - `Blocks::render()` args: `imageSizes` (ladder names; a single entry
   emits a plain `src` and may use any mode, multiple entries must use the
   `width` mode), `sizes` (attribute template, `{pct}` = grid share in

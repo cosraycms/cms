@@ -111,13 +111,17 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
-	private function images(array $items, string $uid = 'b1'): array
+	private function images(array $items, string $uid = 'b1', array $meta = []): array
 	{
+		$field = ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => $items]];
+
+		if ($meta !== []) {
+			$field['meta'] = $meta;
+		}
+
 		return $this->row(
 			Builtin\Images::class,
-			[
-				'images' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => $items]],
-			],
+			['images' => $field],
 			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
 			uid: $uid,
 		);
@@ -548,6 +552,31 @@ final class BlocksValueTest extends TestCase
 			$html,
 		);
 		$this->assertStringContainsString('alt="One"', $html);
+	}
+
+	public function testImagesBlockEmitsTheGallerySettings(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->images(
+				[['uid' => 'galleryimg123']],
+				meta: ['ratio' => ['zxx' => '4/3'], 'crop' => ['zxx' => true]],
+			),
+		]);
+		$this->seedAsset('galleryimg123', 'one.jpg');
+
+		$this->assertStringContainsString(
+			'<div class="cms-blocks-images" data-ratio="4/3" style="--ratio: 4/3" data-crop><div',
+			$blocks->render(),
+		);
+		$this->assertSame('4/3', $blocks->first()->images->ratio());
+		$this->assertTrue($blocks->first()->images->crop());
+
+		$plain = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
+		$this->seedAsset('galleryimg123', 'one.jpg');
+
+		$this->assertStringContainsString('<div class="cms-blocks-images"><div', $plain->render());
+		$this->assertNull($plain->first()->images->ratio());
+		$this->assertFalse($plain->first()->images->crop());
 	}
 
 	public function testImagesBlockThumbSizeArg(): void

@@ -726,6 +726,18 @@ final class Styleguide extends Panel
 			'layout' => $layout,
 			'fields' => ['video' => ['type' => Video::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
 		];
+		$images = static fn(string $uid, array $layout, array $assets, array $meta): array => [
+			'uid' => $uid,
+			'type' => Builtin\Images::class,
+			'layout' => $layout,
+			'fields' => [
+				'images' => [
+					'type' => Image::class,
+					'value' => ['zxx' => array_map(static fn(string $asset): array => ['uid' => $asset], $assets)],
+					'meta' => $meta,
+				],
+			],
+		];
 
 		return [
 			'story' => [
@@ -741,6 +753,9 @@ final class Styleguide extends Panel
 							'de' => "Öffnungszeiten\nDienstag bis Samstag, 10 bis 18 Uhr.",
 						]),
 						$image('sg-story-4', $layout(1), 'sg-cover'),
+						$images('sg-story-5', $layout(1), array_map(self::galleryUid(...), range(1, 6)), ['ratio' => [
+							'zxx' => '3/2',
+						]]),
 					],
 				],
 			],

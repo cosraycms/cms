@@ -418,6 +418,14 @@ final class PanelFormPatchTest extends TestCase
 										'type' => 'Textarea',
 										'control' => ['name' => 'textarea', 'props' => []],
 									],
+									[
+										'name' => 'images',
+										'type' => 'Image',
+										'control' => [
+											'name' => 'element',
+											'props' => ['tag' => 'cosray-image', 'module' => 'cosray:media'],
+										],
+									],
 								],
 							],
 						],
@@ -503,6 +511,35 @@ final class PanelFormPatchTest extends TestCase
 		);
 		// The German list was not submitted and stays as stored.
 		$this->assertSame('Alt', $value['de'][0]['fields']['text']['value']['zxx']);
+	}
+
+	public function testBlocksElementLeafCarriesItsMetaInsideARow(): void
+	{
+		$submitted = [
+			'body' => [
+				'value' => [
+					'zxx' => [[
+						'uid' => 'b1',
+						'type' => 'App\Block\Quote',
+						'layout' => ['colspan' => '12', 'rowspan' => '1', 'indent' => '0'],
+						'fields' => [
+							'images' => [
+								'json' => '{"value":{"zxx":[{"uid":"a"}]},"meta":{"ratio":{"zxx":"4/3"},"crop":{"zxx":true}}}',
+							],
+						],
+					]],
+				],
+			],
+		];
+
+		$rows = $this->blocksPatch()->content([], $submitted)['body']['value']['zxx'];
+
+		$this->assertSame('Image', $rows[0]['fields']['images']['type']);
+		$this->assertSame([['uid' => 'a']], $rows[0]['fields']['images']['value']['zxx']);
+		$this->assertSame(
+			['ratio' => ['zxx' => '4/3'], 'crop' => ['zxx' => true]],
+			$rows[0]['fields']['images']['meta'],
+		);
 	}
 
 	public function testBlocksClampTheLayoutIntoTheGrid(): void

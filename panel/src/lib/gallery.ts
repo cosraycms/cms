@@ -40,3 +40,14 @@ export function afterMove(selected: number | null, from: number, to: number): nu
 
 	return selected;
 }
+
+/** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
+export const RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'] as const;
+
+export type Ratio = (typeof RATIOS)[number];
+
+export function readRatio(value: unknown): Ratio {
+	return typeof value === 'string' && (RATIOS as readonly string[]).includes(value)
+		? (value as Ratio)
+		: 'auto';
+}

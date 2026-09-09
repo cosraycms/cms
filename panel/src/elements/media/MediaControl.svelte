@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FileItem, LocaleMap, UploadType } from '$types/data';
+	import type { FileItem, LocaleMap, Meta, UploadType } from '$types/data';
 
 	import { ZXX } from '$types/data';
 	import { localeTitle, resolveFallback } from '$lib/fallback';
@@ -24,6 +24,8 @@
 		locale: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		settings?: HTMLElement;
+		meta?: Meta;
+		updateMeta?: (meta: Meta) => void;
 		notify: () => void;
 	};
 
@@ -35,6 +37,8 @@
 		locale,
 		locales,
 		settings,
+		meta,
+		updateMeta,
 		notify,
 	}: Props = $props();
 
@@ -81,6 +85,8 @@
 		add={(item) => add(identity, item)}
 		presentation={field.presentation}
 		{settings}
+		{meta}
+		{updateMeta}
 		{notify}
 	/>
 {/each}
