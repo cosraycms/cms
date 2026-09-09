@@ -10,6 +10,7 @@ use Celema\Sire\Shape;
 use Cosray\Block\Layout;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
+use Cosray\Schema\Tool;
 use Cosray\Schema\Tools;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
@@ -273,12 +274,14 @@ class Blocks extends Field implements Capability\Translatable, Capability\Blocks
 			$field->translate(null);
 		}
 
+		// The project's richtext.tools describes the full toolbar and does
+		// not reach into blocks: without a list from the property or the
+		// field, the inline preset applies.
 		if (
 			$field instanceof Capability\ToolsAware
-			&& $this->tools !== []
 			&& $definition->property->getAttributes(Tools::class) === []
 		) {
-			$field->tools(...$this->tools);
+			$field->tools(...$this->tools !== [] ? $this->tools : Tool::INLINE);
 		}
 	}
 

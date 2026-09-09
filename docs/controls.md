@@ -54,7 +54,7 @@ Element payloads carry `locales.all[].fallback` with the same chain the server u
 
 The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else `Tool::DEFAULT` (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order, duplicates collapse.
 
-Attribute arguments mix single cases with lists (PHP forbids unpacking there), so the preset constants on the enum — `Tool::DEFAULT`, `Tool::MINIMAL` (bold, italic, link), `Tool::ALL` — seed a set without re-listing it:
+Attribute arguments mix single cases with lists (PHP forbids unpacking there), so the preset constants on the enum — `Tool::DEFAULT`, `Tool::MINIMAL` (bold, italic, link), `Tool::INLINE` (bold, italic, strike, link, bullet list, ordered list, clear), `Tool::ALL` — seed a set without re-listing it:
 
 ```php
 use Cosray\Schema\Tool;
@@ -72,6 +72,8 @@ public RichText $teaser;
 // the attribute still wins per field.
 'richtext.tools' => ['undo', 'redo', 'bold', 'italic', 'link'],
 ```
+
+Inside a block the resolution is: the block type property's own `#[Tools]`, else the blocks field's `#[Tools]`, else `Tool::INLINE`. The project's `richtext.tools` describes the full toolbar and does not reach into blocks.
 
 The paragraph-class and text-style dropdowns are not tools: they appear exactly when the project declares `richtext.classes` / `richtext.styles`, as before.
 

@@ -426,11 +426,14 @@ final class BlocksTest extends TestCase
 		$this->assertSame(['h1', 'bold'], $note['body']->getTools());
 		$this->assertSame(['bold', 'italic', 'link'], $note['aside']->getTools());
 
+		// Without a list from the field, a block's richtext gets the inline
+		// preset rather than the full toolbar's default.
 		$plain = $this->createBlocks()->allow(NoteBlock::class)->blockFields(NoteBlock::class);
 		$this->assertSame(
-			array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
+			array_map(static fn(Tool $tool): string => $tool->value, Tool::INLINE),
 			$plain['body']->getTools(),
 		);
+		$this->assertSame(['bold', 'italic', 'link'], $plain['aside']->getTools());
 	}
 
 	public function testShapeAcceptsValidRows(): void

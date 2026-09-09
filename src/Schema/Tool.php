@@ -54,6 +54,21 @@ enum Tool: string
 	public const array MINIMAL = [self::Bold, self::Italic, self::Link];
 
 	/**
+	 * What a richtext field inside a block gets unless the block type or
+	 * the blocks field says otherwise: the vocabulary of the bubble that
+	 * appears on a selection.
+	 */
+	public const array INLINE = [
+		self::Bold,
+		self::Italic,
+		self::Strike,
+		self::Link,
+		self::BulletList,
+		self::OrderedList,
+		self::Clear,
+	];
+
+	/**
 	 * Every tool there is. Spelled out because a constant cannot call
 	 * `cases()`; a test pins it to the case list.
 	 */
