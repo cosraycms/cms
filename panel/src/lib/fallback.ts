@@ -47,11 +47,18 @@ export function resolveFallback<T>(
 	return hasValue(map[ZXX]) ? { value: map[ZXX], locale: ZXX } : null;
 }
 
+/**
+ * A per-use text with the catalog behind it. The catalog may be read in a
+ * locale of its own: a neutral value is stored under `zxx`, which no
+ * catalog map carries, while the site resolves the catalog in the page's
+ * locale.
+ */
 export function resolveTextFallback(
 	override: LocaleMap<string> | undefined,
 	catalog: LocaleMap<string> | undefined,
 	locale: string,
 	locales: FallbackLocale[],
+	catalogLocale: string = locale,
 ): ResolvedFallback<string> | null {
 	if (filled(override?.[locale])) {
 		return null;
@@ -63,13 +70,13 @@ export function resolveTextFallback(
 		return perUse;
 	}
 
-	const current = catalog?.[locale];
+	const current = catalog?.[catalogLocale];
 
 	if (filled(current)) {
-		return { value: current ?? '', locale };
+		return { value: current ?? '', locale: catalogLocale };
 	}
 
-	return resolveFallback(catalog, locale, locales);
+	return resolveFallback(catalog, catalogLocale, locales);
 }
 
 export function localeTitle(locales: FallbackLocale[], locale: string): string {

@@ -3,6 +3,7 @@
 	import type { SortableEvent } from 'sortablejs';
 	import Sortable from 'sortablejs';
 	import { mount, onMount, unmount } from 'svelte';
+	import { assetsContext, useAssets } from '$lib/assets';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
 	import Video from '$components/Video.svelte';
@@ -34,6 +35,7 @@
 		remove,
 		notify = () => {},
 	}: Props = $props();
+	const assets = useAssets();
 	let sorterElement: HTMLElement | undefined = $state();
 
 	function createSorter() {
@@ -77,6 +79,8 @@
 						contentLocale,
 						locales,
 					},
+					// A separate mount: the catalog fallbacks need the element's store.
+					context: assetsContext(assets),
 				});
 
 				return () => void unmount(app);

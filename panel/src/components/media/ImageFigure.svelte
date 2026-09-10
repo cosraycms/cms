@@ -48,6 +48,9 @@
 	let filename = $derived(info?.filename ?? item?.uid ?? '');
 	let src = $derived(info?.previewUrl ?? info?.url ?? '');
 	let key = $derived(translate ? contentLocale : ZXX);
+	// A neutral value reads its catalog text in the site's default locale,
+	// the nearest the panel has to the page locale the site resolves with.
+	let catalogLocale = $derived(translate ? contentLocale : (locales?.default ?? contentLocale));
 	let caption = $derived(item ? effectiveCaption(item) : '');
 
 	// The caption as the site will render it: per use, else the catalog's.
@@ -64,6 +67,7 @@
 				info?.meta?.caption as LocaleMap<string> | undefined,
 				key,
 				locales?.all ?? [],
+				catalogLocale,
 			)?.value ?? ''
 		);
 	}

@@ -43,6 +43,9 @@
 	let focused: Key | null = $state(null);
 	const assets = useAssets();
 	let key = $derived(translate ? contentLocale : ZXX);
+	// A neutral value reads its catalog text in the site's default locale,
+	// the nearest the panel has to the page locale the site resolves with.
+	let catalogLocale = $derived(translate ? contentLocale : (locales?.default ?? contentLocale));
 	let catalog = $derived(item.uid ? $assets[item.uid]?.meta : undefined);
 
 	function fallback(name: Key) {
@@ -51,6 +54,7 @@
 			catalog?.[name] as LocaleMap<string> | undefined,
 			key,
 			locales?.all ?? [],
+			catalogLocale,
 		);
 	}
 

@@ -38,3 +38,8 @@ export function uploadInfo(item: UploadResponse, kind: string): AssetInfo {
 		height: item.height,
 	};
 }
+
+/** The context a component mounted outside the element's tree needs to share its store. */
+export function assetsContext(store: AssetStore): Map<symbol, AssetStore> {
+	return new Map([[KEY, store]]);
+}

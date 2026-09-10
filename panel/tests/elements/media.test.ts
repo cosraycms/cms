@@ -106,6 +106,27 @@ async function action(label: string): Promise<void> {
 }
 
 describe('file metadata', () => {
+	it('shows the catalog title as the placeholder of an item without its own', async () => {
+		const { element } = await media('cosray-file', {
+			value: { zxx: [{ uid: 'guide' }] },
+			field: { name: 'downloads', translate: true, translateMode: 'symmetric' },
+			assets: {
+				guide: {
+					filename: 'guide.pdf',
+					url: '/media/guide.pdf',
+					kind: 'file',
+					meta: { title: { de: 'Catalog title' } },
+				},
+			},
+		});
+		const input = await edit(element);
+
+		input.blur();
+		await tick();
+
+		expect(input.placeholder).toBe('Catalog title');
+	});
+
 	it('opens with an empty translation and discards cancelled edits', async () => {
 		const { element, changes } = await file();
 		const original = structuredClone(element.value);
@@ -328,6 +349,29 @@ describe('block presentation', () => {
 		expect(
 			element.querySelector('.cms-image-figure .cms-media-meta input[id$="-alt"]'),
 		).not.toBeNull();
+	});
+
+	it("shows a neutral image's catalog texts in the site's default locale", async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block' },
+			assets: {
+				cover: {
+					...cover,
+					meta: {
+						caption: { en: 'From the catalog', de: 'Aus dem Katalog' },
+						alt: { en: 'A kettle' },
+					},
+				},
+			},
+		});
+
+		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
+			'From the catalog',
+		);
+		expect(
+			element.querySelector<HTMLInputElement>('.cms-media-meta input[id$="-alt"]')?.placeholder,
+		).toBe('A kettle');
 	});
 
 	it('keeps the form presentation for a standalone field', async () => {

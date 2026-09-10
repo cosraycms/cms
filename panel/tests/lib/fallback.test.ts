@@ -77,6 +77,17 @@ describe('fallback resolution', () => {
 		expect(overrides.de).toBe('');
 	});
 
+	it('reads the catalog in a locale of its own for a neutral value', () => {
+		expect(
+			resolveTextFallback({ zxx: '' }, { de: 'Katalog', en: 'Catalog' }, 'zxx', locales, 'de'),
+		).toEqual({ value: 'Katalog', locale: 'de' });
+		expect(resolveTextFallback({ zxx: '' }, { en: 'Catalog' }, 'zxx', locales, 'de-CH')).toEqual({
+			value: 'Catalog',
+			locale: 'en',
+		});
+		expect(resolveTextFallback({ zxx: 'Own' }, { en: 'Catalog' }, 'zxx', locales, 'en')).toBeNull();
+	});
+
 	it('uses configured titles and a readable neutral label', () => {
 		expect(localeTitle(locales, 'de')).toBe('Deutsch');
 		expect(localeTitle(locales, 'zxx')).toBe('ZXX');

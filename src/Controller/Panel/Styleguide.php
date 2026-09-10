@@ -862,6 +862,9 @@ final class Styleguide extends Panel
 		};
 
 		$assets = ['sg-cover' => $plate(28, 'sudhaus-kupferkessel.jpg', 2400, 1600, 862208)];
+		$assets['sg-cover']['meta'] = [
+			'caption' => ['en' => 'Copper kettles in the brewhouse', 'de' => 'Kupferkessel im Sudhaus'],
+		];
 		$assets['sg-clip'] = [
 			'filename' => 'brauerei-rundgang.mp4',
 			'url' => 'data:video/mp4,',
@@ -879,6 +882,9 @@ final class Styleguide extends Panel
 				300000 + ($i * 41213),
 			);
 		}
+
+		// Catalog text a neutral image block shows in the site's default locale.
+		$assets[self::galleryUid(1)]['meta'] = ['caption' => ['en' => 'First stop of the brewery tour']];
 
 		return $assets;
 	}
