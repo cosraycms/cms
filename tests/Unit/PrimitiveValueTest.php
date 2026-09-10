@@ -969,19 +969,45 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertFalse($value->isset());
 	}
 
-	public function testDateTimeValueFormatsToExpectedString(): void
+	public function testDateTimeValueKeepsUtcStorageSeparateFromDisplayTimezone(): void
 	{
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\DateTime('timestamp', $owner, new ValueContext('timestamp', [
-			'value' => '2025-01-31 13:45:10',
-			'timezone' => 'UTC',
+			'value' => ['zxx' => '2025-01-31T13:45:10Z'],
+			'meta' => ['timezone' => ['zxx' => 'Europe/Berlin']],
 		]));
 
 		$value = $field->value();
-		$this->assertSame('2025-01-31 13:45:10', $value->format(\Cosray\Value\DateTime::FORMAT));
-		$this->assertSame('2025-01-31 13:45:10', (string) $value);
+		$this->assertSame('2025-01-31 14:45:10', $value->format('Y-m-d H:i:s'));
+		$this->assertSame('2025-01-31T13:45:10Z', (string) $value);
+		$this->assertSame('2025-01-31T13:45:10Z', $value->json());
 		$this->assertTrue($value->isset());
+	}
+
+	public function testDateTimeShapeNormalizesOffsetsAndRejectsLocalValues(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\DateTime(
+			'timestamp',
+			$this->createOwner($context),
+			new ValueContext('timestamp', []),
+		);
+		$shape = $field->shape();
+		$valid = $shape->validate([
+			'type' => \Cosray\Field\DateTime::class,
+			'value' => ['zxx' => '2025-01-31T14:45:10+01:00'],
+			'meta' => ['timezone' => ['zxx' => 'Europe/Berlin']],
+		]);
+
+		$this->assertTrue($valid->valid());
+		$this->assertSame('2025-01-31T13:45:10Z', $valid->values()['value']['zxx']);
+		$this->assertFalse(
+			$shape->validate([
+				'type' => \Cosray\Field\DateTime::class,
+				'value' => ['zxx' => '2025-01-31T14:45'],
+			])->valid(),
+		);
 	}
 
 	public function testDateValueFormatsToExpectedString(): void

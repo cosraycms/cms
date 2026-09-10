@@ -6,7 +6,10 @@ namespace Cosray\Panel;
 
 use Closure;
 use Cosray\Block\Layout;
+use Cosray\DateTime\Codec;
+use Cosray\Field\Field;
 use Cosray\Uid;
+use DateTimeZone;
 
 /**
  * Patches stored node content with submitted editor form data.
@@ -84,9 +87,10 @@ final class FormPatch
 
 		if (is_array($value)) {
 			$stored = is_array($entry['value'] ?? null) ? $entry['value'] : [];
+			$timezone = $this->timezone($entry);
 
 			foreach ($value as $locale => $raw) {
-				$stored[$locale] = $this->cast($control, $raw, $stored[$locale] ?? null);
+				$stored[$locale] = $this->cast($control, $raw, $stored[$locale] ?? null, $timezone);
 			}
 
 			$entry['value'] = $stored;
@@ -132,8 +136,12 @@ final class FormPatch
 		return $stored;
 	}
 
-	private function cast(array $control, mixed $raw, mixed $stored): mixed
-	{
+	private function cast(
+		array $control,
+		mixed $raw,
+		mixed $stored,
+		?DateTimeZone $timezone = null,
+	): mixed {
 		$name = $control['name'] ?? '';
 		$props = $control['props'] ?? [];
 
@@ -149,7 +157,12 @@ final class FormPatch
 					continue;
 				}
 
-				$result[$key] = $this->cast($sub['control'] ?? [], $raw[$key], $result[$key] ?? null);
+				$result[$key] = $this->cast(
+					$sub['control'] ?? [],
+					$raw[$key],
+					$result[$key] ?? null,
+					$timezone,
+				);
 			}
 
 			return $result;
@@ -161,7 +174,7 @@ final class FormPatch
 			$item = $props['item'] ?? [];
 
 			return array_map(
-				fn(mixed $rawItem): mixed => $this->cast($item, $rawItem, null),
+				fn(mixed $rawItem): mixed => $this->cast($item, $rawItem, null, $timezone),
 				is_array($raw) ? array_values($raw) : [],
 			);
 		}
@@ -178,8 +191,31 @@ final class FormPatch
 		return match ($name) {
 			'checkbox' => $raw === '1' || $raw === 'on' || $raw === true,
 			'number' => is_numeric($raw) ? (float) $raw : null,
+			'datetime' => $this->datetime($raw, $timezone ?? Codec::utc()),
 			default => is_scalar($raw) ? (string) $raw : null,
 		};
+	}
+
+	private function datetime(mixed $raw, DateTimeZone $timezone): mixed
+	{
+		if (!is_scalar($raw)) {
+			return null;
+		}
+
+		$value = (string) $raw;
+
+		return Codec::fromInput($value, $timezone) ?? Codec::normalize($value) ?? $value;
+	}
+
+	private function timezone(array $entry): DateTimeZone
+	{
+		$timezone = $entry['meta']['timezone'] ?? null;
+
+		if (is_array($timezone)) {
+			$timezone = $timezone[Field::NEUTRAL_LOCALE] ?? null;
+		}
+
+		return Codec::timezone($timezone) ?? Codec::utc();
 	}
 
 	private function entries(array $props, array $rows, array $stored): array

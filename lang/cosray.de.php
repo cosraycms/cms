@@ -313,6 +313,8 @@ return [
 		'status:published' => 'Veröffentlicht',
 		'validation:max-items' => 'Enthält mehr als die maximal erlaubten {arg1} Einträge',
 		'validation:min-items' => 'Enthält weniger als die mindestens erforderlichen {arg1} Einträge',
+		'validation:rfc3339' => 'Muss Datum und Uhrzeit im RFC-3339-Format enthalten',
+		'validation:timezone' => 'Muss eine gültige Zeitzone sein',
 		'youtube:aspect-ratio-x' => 'Seitenverhältnis Breite',
 		'youtube:aspect-ratio-y' => 'Seitenverhältnis Höhe',
 	],

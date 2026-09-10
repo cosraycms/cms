@@ -97,7 +97,7 @@ use Cosray\Node\Writer;
 $draft = $writer
     ->draft(Alert::class, [
         'value' => '31.4',
-        'readingTime' => '2026-08-05 12:00:00',
+        'readingTime' => '2026-08-05T12:00:00Z',
     ])
     ->uid('alert-stable-id')
     ->published()
@@ -105,6 +105,8 @@ $draft = $writer
 
 $writer->create($draft, new Actor($editorId));
 ```
+
+`DateTime` field values use RFC 3339. Writes with an explicit offset are normalized to UTC whole seconds (`2026-08-05T12:00:00Z`); `meta.timezone` controls local formatting and panel input, defaulting to UTC.
 
 The lower-level `Node\Store` is also request-neutral: callers pass `Locales` and an explicit `Actor`; HTTP controllers remain responsible for deriving that actor from their authenticated session.
 

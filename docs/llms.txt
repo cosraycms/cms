@@ -378,6 +378,7 @@ General value access pattern:
 - In templates and app code, field values are `Value` objects.
 - Use `->unwrap()` for raw value.
 - `__toString()` usually gives escaped/rendered output.
+- Non-empty `DateTime` values are stored as UTC RFC 3339 with whole-second precision (`YYYY-MM-DDTHH:MM:SSZ`). Writes with another RFC 3339 offset normalize to `Z`; `meta.timezone` controls display and panel input and defaults to UTC. `Date` and `Time` stay local values without offsets.
 
 Entries fields use plain node-style schema classes and `#[Allows(...)]`. The same schema class can also be registered as a real node. Entries reuse static embedded leaf declarations and fieldset layout, but do not instantiate embedded objects or run their constructors, methods, or initialization hooks.
 

@@ -92,6 +92,32 @@ final class PanelFormPatchTest extends TestCase
 		$this->assertNull($content['count']['value']['zxx']);
 	}
 
+	public function testDateTimeInputIsStoredAsUtcWithoutLosingSeconds(): void
+	{
+		$patch = new FormPatch([[
+			'name' => 'readingTime',
+			'type' => \Cosray\Field\DateTime::class,
+			'control' => ['name' => 'datetime', 'props' => []],
+		]]);
+		$stored = [
+			'readingTime' => [
+				'type' => \Cosray\Field\DateTime::class,
+				'value' => ['zxx' => '2026-07-30T17:00:00Z'],
+				'meta' => ['timezone' => ['zxx' => 'Europe/Berlin']],
+			],
+		];
+
+		$content = $patch->content($stored, [
+			'readingTime' => ['value' => ['zxx' => '2026-07-30T19:05']],
+		]);
+		$this->assertSame('2026-07-30T17:05:00Z', $content['readingTime']['value']['zxx']);
+
+		$content = $patch->content($content, [
+			'readingTime' => ['value' => ['zxx' => '2026-07-30T19:05:45']],
+		]);
+		$this->assertSame('2026-07-30T17:05:45Z', $content['readingTime']['value']['zxx']);
+	}
+
 	public function testGroupReplacesKnownKeysAndKeepsUnknownOnes(): void
 	{
 		$patch = new FormPatch([

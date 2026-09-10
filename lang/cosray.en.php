@@ -310,6 +310,8 @@ return [
 		'status:published' => 'Published',
 		'validation:max-items' => 'Has more than the maximum allowed number of {arg1} items',
 		'validation:min-items' => 'Has fewer than the minimum number of {arg1} items',
+		'validation:rfc3339' => 'Must be an RFC 3339 date and time',
+		'validation:timezone' => 'Must be a valid timezone',
 		'youtube:aspect-ratio-x' => 'Aspect ratio width',
 		'youtube:aspect-ratio-y' => 'Aspect ratio height',
 	],

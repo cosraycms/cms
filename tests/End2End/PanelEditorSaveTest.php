@@ -15,6 +15,7 @@ use Cosray\Tests\Fixtures\Block\QuoteBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
+use Cosray\Tests\Fixtures\Node\TestDateTimeDocument;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
@@ -35,10 +36,50 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->node(TestConditionalDocument::class);
+		$plugin->node(TestDateTimeDocument::class);
 		$plugin->node(TestNodeWithEntries::class);
 		$plugin->node(TestNodeWithBlocks::class);
 
 		return $plugin;
+	}
+
+	public function testDateTimeRoundTripsThroughThePanelAndDynamicTitle(): void
+	{
+		$typeId = $this->createTestType('test-date-time-document');
+		$this->createTestNode([
+			'uid' => 'panel-save-datetime',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['zxx' => 'Observation']],
+				'observedAt' => [
+					'type' => \Cosray\Field\DateTime::class,
+					'value' => ['zxx' => '2026-07-30T17:00:45Z'],
+					'meta' => ['timezone' => ['zxx' => 'Europe/Berlin']],
+				],
+			],
+		]);
+
+		$editor = $this->makeRequest('GET', '/cp/collection/test-articles/panel-save-datetime');
+		$html = (string) $editor->getBody();
+		$this->assertStringContainsString('value="2026-07-30T19:00:45"', $html);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-datetime', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'title' => ['value' => ['zxx' => 'Updated observation']],
+					'observedAt' => ['value' => ['zxx' => '2026-07-30T19:05:30']],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertSame(
+			'2026-07-30T17:05:30Z',
+			$this->nodeContent('panel-save-datetime')['observedAt']['value']['zxx'],
+		);
 	}
 
 	public function testEntriesSubmissionsPatchRowsByUid(): void

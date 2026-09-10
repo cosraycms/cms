@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\DateTime\Codec;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use DateTimeImmutable;
@@ -12,34 +14,34 @@ use IntlDateFormatter;
 
 class DateTime extends Value
 {
-	public const FORMAT = 'Y-m-d H:i:s';
+	public const FORMAT = Codec::STORAGE_FORMAT;
 
 	public readonly ?DateTimeImmutable $datetime;
-	public readonly ?DateTimeZone $timezone;
+	public readonly DateTimeZone $timezone;
 
 	public function __construct(Owner $owner, Field $field, ValueContext $context)
 	{
 		parent::__construct($owner, $field, $context);
 
-		$timezone = $this->meta('timezone');
-		$this->timezone = is_string($timezone) && $timezone !== '' ? new DateTimeZone($timezone) : null;
+		$timezone = $this->meta('timezone', 'UTC');
+		$this->timezone = Codec::timezone($timezone)
+			?? throw new RuntimeException("Invalid timezone for field '{$this->fieldName}'");
 
 		$value = $this->value();
 
-		if (is_string($value) && $value !== '') {
-			$this->datetime = DateTimeImmutable::createFromFormat(
-				static::FORMAT,
-				$value,
-				$this->timezone,
-			);
-		} else {
+		if (!is_string($value) || $value === '') {
 			$this->datetime = null;
+
+			return;
 		}
+
+		$this->datetime = $this->parse($value)
+			?? throw new RuntimeException("Invalid date/time in field '{$this->fieldName}'");
 	}
 
 	public function __toString(): string
 	{
-		return $this->format(static::FORMAT);
+		return $this->datetime === null ? '' : Codec::format($this->datetime);
 	}
 
 	public function isset(): bool
@@ -82,5 +84,30 @@ class DateTime extends Value
 	public function json(): mixed
 	{
 		return $this->__toString();
+	}
+
+	protected function parse(string $value): ?DateTimeImmutable
+	{
+		return Codec::parse($value)?->setTimezone($this->timezone);
+	}
+
+	protected function parseFormat(string $value, string $format): ?DateTimeImmutable
+	{
+		$date = DateTimeImmutable::createFromFormat('!' . $format, $value, $this->timezone);
+		$errors = DateTimeImmutable::getLastErrors();
+
+		if (
+			$date === false
+			|| $errors !== false
+			&& (
+				$errors['warning_count'] > 0
+				|| $errors['error_count'] > 0
+			)
+			|| $date->format($format) !== $value
+		) {
+			return null;
+		}
+
+		return $date;
 	}
 }

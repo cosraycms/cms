@@ -19,7 +19,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `option` | `Control::option(display:)` | `display: select\|radio` | locale map of `string` (options come from `#[Options]`) |
 | `date` | `Control::date()` | — | locale map of `YYYY-MM-DD` |
 | `time` | `Control::time()` | — | locale map of `HH:MM` |
-| `datetime` | `Control::datetime()` | — | locale map of `YYYY-MM-DDTHH:MM` |
+| `datetime` | `Control::datetime()` | — | locale map of UTC RFC 3339 `YYYY-MM-DDTHH:MM:SSZ` |
 | `hidden` | `Control::hidden()` | — | locale map of `string` |
 | `iframe` | `Control::iframe()` | — | locale map of `string` |
 | `youtube` | `Control::youtube()` | — | locale map of `string` — a video id; the control shows the video's thumbnail and reduces a pasted YouTube URL to its id |
@@ -39,6 +39,8 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
+
+A `DateTime` value is an instant. Every non-empty stored value is normalized to UTC with whole-second precision, for example `2026-07-30T17:00:00Z`; a programmatic write may supply another RFC 3339 offset and validation normalizes it to `Z`. The native `datetime-local` control has no offset: the panel converts its `YYYY-MM-DDTHH:MM[:SS]` form value through the field's `meta.timezone`, defaulting to UTC, and converts the stored instant back through the same timezone for editing. `Date` and `Time` remain local values without an offset.
 
 ### Content language and fallback previews
 
