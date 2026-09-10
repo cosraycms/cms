@@ -24,7 +24,7 @@ final class Sizes
 		'block-sm' => ['width' => 480],
 		'block' => ['width' => 960],
 		'block-lg' => ['width' => 1440],
-		'block-thumb' => ['crop' => [400, 267]],
+		'block-thumb' => ['width' => 480],
 	];
 
 	private const array SINGLE = [

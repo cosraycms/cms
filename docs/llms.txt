@@ -856,8 +856,8 @@ Named sizes (`media.sizes` config):
 - example: `'card' => ['crop' => [600, 400], 'quality' => 80]`
 - built-ins (overridable per app by redefining the name): `thumb` (width
   400) and `preview` (width 1280) for the panel; `block-sm` (width 480),
-  `block` (width 960), `block-lg` (width 1440), `block-thumb` (crop
-  400x267) for block rendering
+  `block` (width 960), `block-lg` (width 1440), `block-thumb` (width 480)
+  for block rendering
 - the whole config is validated on first use in every environment; an
   invalid entry or unknown size name fails loudly
 - template API: `$image->size('card')` (also `Image` values in loops);

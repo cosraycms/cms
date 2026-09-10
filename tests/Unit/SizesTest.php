@@ -71,11 +71,9 @@ final class SizesTest extends TestCase
 		$this->assertSame(480, $sizes->get('block-sm')->first);
 		$this->assertSame(960, $sizes->get('block')->first);
 		$this->assertSame(1440, $sizes->get('block-lg')->first);
-		$this->assertSame(ResizeMode::Crop, $sizes->get('block-thumb')->mode);
-		$this->assertSame(
-			[400, 267],
-			[$sizes->get('block-thumb')->first, $sizes->get('block-thumb')->second],
-		);
+		// Width, not a crop: the gallery's ratio and crop settings shape the tiles.
+		$this->assertSame(ResizeMode::Width, $sizes->get('block-thumb')->mode);
+		$this->assertSame(480, $sizes->get('block-thumb')->first);
 
 		$custom = new Sizes(['thumb' => ['crop' => [50, 50]]]);
 		$this->assertSame(ResizeMode::Crop, $custom->get('thumb')->mode);

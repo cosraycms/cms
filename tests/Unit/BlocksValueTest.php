@@ -46,7 +46,7 @@ final class BlocksValueTest extends TestCase
 		return new Context(
 			$this->db(),
 			new \Celema\Core\Request($psrRequest),
-			$this->config(['path.prefix' => '/cms']),
+			$this->config(['path.prefix' => '/cms', 'media.sizes' => ['square' => ['crop' => [300, 300]]]]),
 			$this->container(),
 			$this->factory(),
 		);
@@ -538,8 +538,8 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
-		$this->throws(RuntimeException::class, "srcset entry 'block-thumb' must use the `width` mode");
-		$blocks->render(imageSizes: ['block', 'block-thumb']);
+		$this->throws(RuntimeException::class, "srcset entry 'square' must use the `width` mode");
+		$blocks->render(imageSizes: ['block', 'square']);
 	}
 
 	public function testImageBlockUnknownSizeThrows(): void
