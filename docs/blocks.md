@@ -257,9 +257,9 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 
 ### Spacing
 
-The blocks field's meta dialog sets the **gap** between its blocks, as one value or — on a grid, behind a toggle — as a row gap and a column gap of their own; a block's settings dialog sets its **padding**. Both choose from the tokens `none`, `s`, `m`, `l` and `xl`, behind a Default that stores nothing, so existing content renders as before. The editor previews every choice on its canvas in its own scale.
+The blocks field's meta dialog sets the **gap** between its blocks, as one value or — on a grid, behind a toggle — as a row gap and a column gap of their own; a block's settings dialog sets its **padding**. Both choose from the tokens `none`, `s`, `m`, `l` and `xl`, behind a "Site default" choice that stores nothing, so existing content renders as before. The editor previews every choice on its canvas in its own scale.
 
-On the site the tokens are attributes, never lengths: `data-gap`, `data-row-gap` and `data-column-gap` on the container, `data-padding` on the block. A per-axis gap beats the shared one. The [reference stylesheet](#the-reference-stylesheet) maps each token to a variable the site sets to its own scale — `--blocks-gap-s` … `--blocks-gap-xl`, `--blocks-padding-s` … `--blocks-padding-xl` — so the site decides what "large" means, and a site that sets `--blocks-gap` directly keeps its one gap regardless of the editor. Templates read the tokens through `$node->content->gap()`, `rowGap()` and `columnGap()` and a block's `padding()`, each `null` for the default.
+On the site the tokens are attributes, never lengths: `data-gap`, `data-row-gap` and `data-column-gap` on the container, `data-padding` on the block. A per-axis gap beats the shared one. The [reference stylesheet](#the-reference-stylesheet) maps each token to a variable the site sets to its own scale — `--blocks-gap-s` … `--blocks-gap-xl`, `--blocks-padding-s` … `--blocks-padding-xl` — so the site decides what "large" means; `--blocks-gap` is the site's default, the gap a field renders with when the editor chose nothing, and a chosen token always wins over it, `none` included. Templates read the tokens through `$node->content->gap()`, `rowGap()` and `columnGap()` and a block's `padding()`, each `null` for the default.
 
 ### Render arguments
 
@@ -341,7 +341,8 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 	/*
 	 * `--blocks-column-gap` is the resolved column gap the grid and the
 	 * indent math read, `--blocks-row-gap` the row gap, which follows it
-	 * unless the markup says otherwise.
+	 * unless the markup says otherwise. Only the unset case consults the
+	 * site's default `--blocks-gap`.
 	 */
 	.cms-blocks {
 		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
@@ -355,64 +356,64 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 	}
 
 	.cms-blocks[data-gap="none"] {
-		--blocks-column-gap: var(--blocks-gap, 0px);
+		--blocks-column-gap: 0px;
 	}
 
 	.cms-blocks[data-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* A gap set per axis beats the shared one. */
 	.cms-blocks[data-column-gap="none"] {
-		--blocks-column-gap: var(--blocks-gap, 0px);
+		--blocks-column-gap: 0px;
 	}
 
 	.cms-blocks[data-column-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-column-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-column-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-column-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	.cms-blocks[data-row-gap="none"] {
-		--blocks-row-gap: var(--blocks-gap, 0px);
+		--blocks-row-gap: 0px;
 	}
 
 	.cms-blocks[data-row-gap="s"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-row-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-row-gap="m"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-row-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-row-gap="l"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-row-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-row-gap="xl"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/*
@@ -483,7 +484,7 @@ A block spans `--reserved` columns — its indent plus its colspan — and a mar
 Everything sits in the `cms.blocks` cascade layer, so **unlayered site CSS wins** over it without needing a more specific selector. The intended override points are:
 
 - The spacing tokens — `--blocks-gap-s`, `--blocks-gap-m`, `--blocks-gap-l`, `--blocks-gap-xl` and `--blocks-padding-s` … `--blocks-padding-xl` — one length per token the editor may choose, set on `.cms-blocks` or anywhere above it; `none` is always zero. The sheet declares none of them and reads each with a fallback (1rem, 2rem, 3rem, 4.5rem), so a site sets only the ones it wants to change. The medium gap is what a field renders with when the editor chose nothing.
-- `--blocks-gap` — the escape hatch: set directly, on `.cms-blocks` or anywhere above it, it is the column and row gap whatever the tokens and the editor say. It and the gap tokens have to be **context-independent lengths**, `rem` or `px`. A gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
+- `--blocks-gap` — the site's default gap, used when the editor chose nothing; a chosen token always wins over it, `none` included, so the canvas and the site agree. Set it on `.cms-blocks` or anywhere above it. It and the gap tokens have to be **context-independent lengths**, `rem` or `px`. A gap is resolved twice, once by the grid against the container and once by the indent margin against the block's own area, and the two agree only for a length that means the same in both places: a percentage does not (each resolves against its own box), and an `em` follows whatever font size the element it lands on has. Registering the property as a `<length>` would lift the restriction, but a registered property's initial value must be computationally independent and the `2rem` default is not, so the constraint stands.
 - `--blocks-column-gap` and `--blocks-row-gap` — what the sheet resolves the tokens to; the indent margin reads the former. Read them, do not set them.
 - The container threshold — redeclare the `@container` block at the width the design wants. The container itself is `.cms-blocks` (`container-type: inline-size`), so the query measures the blocks area, not the viewport.
 - The gallery rules — `[data-ratio]` fixes the tiles' shape and `[data-crop]` fills it; both key on attributes the editor emits only when a gallery chose them, so a site without galleries or with its own gallery rules loses nothing by leaving them out.

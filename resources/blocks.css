@@ -17,8 +17,8 @@
  * container or anywhere above it: `--blocks-gap-s` … `--blocks-gap-xl`
  * and `--blocks-padding-s` … `--blocks-padding-xl`; `none` is zero.
  * Without a token the container falls back to `--blocks-gap`, the
- * site's default gap, and a `--blocks-gap` set directly also overrides
- * every token — the site decides regardless of the editor.
+ * site's default gap; a chosen token always wins over it, `none`
+ * included, so what the editor sees is what the site renders.
  *
  * Gap lengths must be context-independent — `rem` or `px`. The grid
  * resolves them against the container and the indent margin against
@@ -36,7 +36,8 @@
 	/*
 	 * `--blocks-column-gap` is the resolved column gap the grid and the
 	 * indent math read, `--blocks-row-gap` the row gap, which follows it
-	 * unless the markup says otherwise.
+	 * unless the markup says otherwise. Only the unset case consults the
+	 * site's default `--blocks-gap`.
 	 */
 	.cms-blocks {
 		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
@@ -50,64 +51,64 @@
 	}
 
 	.cms-blocks[data-gap="none"] {
-		--blocks-column-gap: var(--blocks-gap, 0px);
+		--blocks-column-gap: 0px;
 	}
 
 	.cms-blocks[data-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* A gap set per axis beats the shared one. */
 	.cms-blocks[data-column-gap="none"] {
-		--blocks-column-gap: var(--blocks-gap, 0px);
+		--blocks-column-gap: 0px;
 	}
 
 	.cms-blocks[data-column-gap="s"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-column-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-column-gap="m"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-column-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-column-gap="l"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-column-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-column-gap="xl"] {
-		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	.cms-blocks[data-row-gap="none"] {
-		--blocks-row-gap: var(--blocks-gap, 0px);
+		--blocks-row-gap: 0px;
 	}
 
 	.cms-blocks[data-row-gap="s"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-s, 1rem));
+		--blocks-row-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-row-gap="m"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
+		--blocks-row-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-row-gap="l"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-l, 3rem));
+		--blocks-row-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-row-gap="xl"] {
-		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-xl, 4.5rem));
+		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/*

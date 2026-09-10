@@ -509,7 +509,8 @@ final class Quote implements Block
   `cms.blocks`; override points are the token variables `--blocks-gap-s` …
   `--blocks-gap-xl` and `--blocks-padding-s` … `--blocks-padding-xl`, read with
   fallbacks so a site sets them anywhere above the container, `--blocks-gap`
-  as the escape hatch overriding every token, and the container threshold;
+  as the site's default gap when the editor chose nothing, a chosen token
+  always winning, and the container threshold;
   gap lengths must be context-independent since they are resolved once by
   the grid and once by the indent margin):
   a block spans `--reserved` columns and a margin of

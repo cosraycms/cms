@@ -162,7 +162,7 @@ return [
 		'field:row-gap' => 'Zeilenabstand',
 		'field:column-gap' => 'Spaltenabstand',
 		'field:padding' => 'Innenabstand',
-		'field:spacing-default' => 'Standard',
+		'field:spacing-default' => 'Standard der Website',
 		'field:spacing-none' => 'Keiner',
 		'field:spacing-s' => 'Klein',
 		'field:spacing-m' => 'Mittel',

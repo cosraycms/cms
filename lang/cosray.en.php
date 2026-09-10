@@ -159,7 +159,7 @@ return [
 		'field:row-gap' => 'Row gap',
 		'field:column-gap' => 'Column gap',
 		'field:padding' => 'Padding',
-		'field:spacing-default' => 'Default',
+		'field:spacing-default' => 'Site default',
 		'field:spacing-none' => 'None',
 		'field:spacing-s' => 'Small',
 		'field:spacing-m' => 'Medium',

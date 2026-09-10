@@ -12,6 +12,11 @@
 		font-weight: 600;
 	}
 
+	/* A choice left at the site's default reads as a placeholder. */
+	& .cms-select:has(option[value='']:checked) {
+		color: var(--cms-color-text-subtle);
+	}
+
 	/* The toggle between one gap and a row and column gap of their own. */
 	& .split {
 		display: flex;
