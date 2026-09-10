@@ -270,7 +270,7 @@ On the site the tokens are attributes, never lengths: `data-gap`, `data-row-gap`
 | `class` | none | an extra class on the container |
 | `imageSizes` | `['block-sm', 'block', 'block-lg']` | `media.sizes` names forming the image block's `srcset` ladder; a single entry emits a plain `src` and may use any mode, several entries must all use the `width` mode |
 | `sizes` | `(min-width: 48rem) {pct}vw, 100vw` | the image block's `sizes` template; `{pct}` becomes the block's grid share in percent |
-| `thumbSize` | `block-thumb` | the `media.sizes` name for gallery thumbs |
+| `thumbSize` | `block-thumb` | the `media.sizes` name for gallery tiles, a 480 px wide rendition by default; the tiles' shape comes from the [gallery settings](#gallery-settings), so the rendition should not crop |
 
 ```php
 <?= $node->content->render(tag: 'section', class: 'page-body', imageSizes: ['block', 'block-lg']) ?>
@@ -340,13 +340,13 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 @layer cms.blocks {
 	/*
 	 * `--blocks-column-gap` is the resolved column gap the grid and the
-	 * indent math read, `--blocks-row-gap` the row gap, which follows it
-	 * unless the markup says otherwise. Only the unset case consults the
-	 * site's default `--blocks-gap`.
+	 * indent math read, `--blocks-row-gap` the row gap. Both start from the
+	 * site's default `--blocks-gap`; a shared `data-gap` sets both, a
+	 * per-axis attribute only its own.
 	 */
 	.cms-blocks {
 		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
-		--blocks-row-gap: var(--blocks-column-gap);
+		--blocks-row-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
 
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
@@ -357,22 +357,27 @@ Copying it into the site's own CSS is equally fine — it is short and has no de
 
 	.cms-blocks[data-gap="none"] {
 		--blocks-column-gap: 0px;
+		--blocks-row-gap: 0px;
 	}
 
 	.cms-blocks[data-gap="s"] {
 		--blocks-column-gap: var(--blocks-gap-s, 1rem);
+		--blocks-row-gap: var(--blocks-gap-s, 1rem);
 	}
 
 	.cms-blocks[data-gap="m"] {
 		--blocks-column-gap: var(--blocks-gap-m, 2rem);
+		--blocks-row-gap: var(--blocks-gap-m, 2rem);
 	}
 
 	.cms-blocks[data-gap="l"] {
 		--blocks-column-gap: var(--blocks-gap-l, 3rem);
+		--blocks-row-gap: var(--blocks-gap-l, 3rem);
 	}
 
 	.cms-blocks[data-gap="xl"] {
 		--blocks-column-gap: var(--blocks-gap-xl, 4.5rem);
+		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
 	/* A gap set per axis beats the shared one. */
