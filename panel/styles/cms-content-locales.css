@@ -27,13 +27,13 @@
 		}
 
 		&[aria-checked='true'] {
-			background: var(--cms-color-primary);
-			color: var(--cms-color-primary-text);
+			background: var(--cms-color-accent);
+			color: var(--cms-color-text-on-accent);
 		}
 
 		&:focus-visible {
-			outline: none;
-			box-shadow: var(--cms-focus-ring);
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
 		}
 
 		&.has-error:not([aria-checked='true']) {

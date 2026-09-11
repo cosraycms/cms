@@ -121,8 +121,8 @@
 		}
 
 		.cms-meta-locale.active {
-			border-color: var(--cms-color-info);
-			color: var(--cms-color-info);
+			border-color: var(--cms-color-accent);
+			color: var(--cms-color-accent);
 		}
 
 		.cms-meta-field {

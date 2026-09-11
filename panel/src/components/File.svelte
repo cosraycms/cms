@@ -121,7 +121,7 @@
 		}
 
 		.cms-file-action-edit {
-			color: var(--cms-color-info);
+			color: var(--cms-color-accent-text);
 		}
 
 		.cms-file-action-remove {

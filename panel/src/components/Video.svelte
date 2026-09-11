@@ -86,7 +86,7 @@
 		}
 
 		.cms-video-edit {
-			color: var(--cms-color-info);
+			color: var(--cms-color-accent-text);
 		}
 
 		.cms-video-remove {

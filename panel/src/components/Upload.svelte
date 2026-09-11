@@ -524,7 +524,7 @@
 			}
 
 			&.is-dragging .card {
-				border-color: var(--cms-color-info);
+				border-color: var(--cms-color-accent);
 			}
 
 			& .drop {
@@ -536,7 +536,7 @@
 				justify-content: center;
 				border-radius: inherit;
 				background: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
-				box-shadow: inset 0 0 0 2px var(--cms-color-info);
+				box-shadow: inset 0 0 0 2px var(--cms-color-accent);
 				font-size: var(--cms-font-size-sm);
 				font-weight: 600;
 				pointer-events: none;
@@ -582,7 +582,7 @@
 				justify-content: center;
 				border-radius: var(--cms-radius-md);
 				background: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
-				box-shadow: inset 0 0 0 2px var(--cms-color-info);
+				box-shadow: inset 0 0 0 2px var(--cms-color-accent);
 				font-size: var(--cms-font-size-sm);
 				font-weight: 600;
 				pointer-events: none;
@@ -650,8 +650,8 @@
 		}
 
 		.dragdrop.dragging {
-			border-color: var(--cms-color-info);
-			background-color: var(--cms-color-info-surface);
+			border-color: var(--cms-color-accent);
+			background-color: var(--cms-color-accent-surface);
 		}
 
 		.upload-drop-label {
@@ -688,7 +688,7 @@
 			margin-bottom: var(--cms-space-2);
 		}
 		:global(.dragdrop > .upload-drop-label u) {
-			color: var(--cms-color-info);
+			color: var(--cms-color-accent);
 		}
 
 		.dragdrop > div.file-extensions {
@@ -710,8 +710,8 @@
 		}
 
 		.library-button:hover {
-			border-color: var(--cms-color-info);
-			color: var(--cms-color-info);
+			border-color: var(--cms-color-accent);
+			color: var(--cms-color-accent);
 		}
 	}
 </style>

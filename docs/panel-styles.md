@@ -27,7 +27,7 @@ Layer order beats specificity, so a downstream project restyles the panel by red
 Three tiers:
 
 1. **Primitives** — raw values with no meaning attached: `--cms-color-neutral-300`, `--cms-space-4`, `--cms-radius-md`, `--cms-shadow-sm`. Panel-internal. Projects should not depend on them.
-2. **Semantic** — what a value is _for_: `--cms-font-family`, `--cms-color-surface`, `--cms-color-text-muted`, `--cms-color-primary`, `--cms-color-danger-surface`. This tier is the public theming contract.
+2. **Semantic** — what a value is _for_: `--cms-font-family`, `--cms-color-surface`, `--cms-color-text-muted`, `--cms-color-accent`, `--cms-color-danger-surface`. This tier is the public theming contract.
 3. **Component** — owned by one component: `--cms-button-primary-bg`, `--cms-sidebar-width`, `--cms-inspector-width`.
 
 ### The theming contract
@@ -48,7 +48,7 @@ Three rules make the palette work:
 
 - **Components reference semantic tokens, never primitives.** `--cms-color-white` and `--cms-color-neutral-900` do not flip — that is the point of a primitive. A component that reaches for one is pinned to the light theme even though it contains no raw hex. Use `--cms-color-surface` and `--cms-color-text`. The exceptions are values that genuinely must not flip: a scrim that stays dark in both themes, or an iframe showing site content rather than panel chrome.
 
-- **Pairs flip together.** `--cms-color-primary` and `--cms-color-primary-text` are one decision. Overriding the background alone produces an unreadable button in one of the two themes.
+- **Pairs flip together.** `--cms-color-accent` and `--cms-color-text-on-accent` are one decision. Overriding the background alone produces an unreadable button in one of the two themes.
 - **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas. The same holds for the direction a variant moves in: mix toward `--cms-color-shade`, which is black on light and white on dark, so a hover darkens on one theme and lightens on the other instead of sinking into the surface.
 
 An override is a plain value and applies to both themes. A project that wants two, and it usually does not, writes `light-dark()` itself.
@@ -79,9 +79,9 @@ Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` tok
 
 ### Colour roles
 
-Primary is monochrome — near-black on light, near-white on dark. The chrome stays neutral so a project's own colour can be the accent instead of fighting it.
+Accent is the one interaction colour: primary buttons, focus, selection, active navigation and links. It defaults to near-black on light and near-white on dark, so the chrome stays black, white and grey, and it is the pair projects are expected to tint — `--cms-color-accent` with `--cms-color-text-on-accent`. Hovers mix the accent toward the surface, which works for a near-black accent and a tinted one alike. A link set in the accent carries an underline, since a near-black link is otherwise just text.
 
-Accent covers links, focus rings, selection and active navigation, and is the token projects are expected to tint. Focus is accent-based on purpose: a neutral ring on a near-black primary button is invisible.
+Focus is a solid ring in the accent. Borderless elements take `outline: var(--cms-focus-outline)` with `outline-offset: var(--cms-focus-offset)`, and the gap keeps the ring visible around a filled button of the same colour. Bordered fields switch their border to `--cms-color-focus` and add `box-shadow: var(--cms-focus-ring)`, which thickens it.
 
 Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` is the brighter vermillion the red is built around; it clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
 

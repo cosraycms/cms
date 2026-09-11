@@ -73,13 +73,9 @@
 			width: 2.125rem;
 			height: 2.125rem;
 			border-radius: var(--cms-radius-md);
-			background: linear-gradient(
-				135deg,
-				var(--cms-color-accent),
-				color-mix(in oklch, var(--cms-color-accent), var(--cms-color-white) 25%)
-			);
+			background: linear-gradient(135deg, var(--cms-color-accent), var(--cms-color-accent-hover));
 			box-shadow: var(--cms-shadow-sm);
-			color: var(--cms-color-text-on-fill);
+			color: var(--cms-color-text-on-accent);
 			font-weight: 700;
 			letter-spacing: -0.03em;
 		}

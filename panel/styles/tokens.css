@@ -209,10 +209,10 @@
 	--cms-color-text-faint: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-500));
 
 	/*
-	 * Text on a filled status or accent surface — toasts, badges, the danger
-	 * button. Those fills lighten in the dark theme, so their text has to
-	 * darken with them; a fixed white would vanish. Note, not a section
-	 * heading: `/**` blocks in this file name a group.
+	 * Text on a filled status surface — toasts, badges, the danger button.
+	 * Those fills lighten in the dark theme, so their text has to darken with
+	 * them; a fixed white would vanish. Note, not a section heading: `/**`
+	 * blocks in this file name a group.
 	 */
 	--cms-color-text-on-fill: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
 
@@ -239,27 +239,20 @@
 	--cms-color-shade: light-dark(var(--cms-color-black), var(--cms-color-white));
 
 	/**
-	 * Semantic — primary
-	 *
-	 * Monochrome by design: the panel chrome stays neutral so a project's own
-	 * colour can be the accent without fighting it. The pair flips together in
-	 * the dark theme, otherwise primary buttons disappear into the page.
-	 */
-	--cms-color-primary: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-50));
-	--cms-color-primary-text: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
-	--cms-color-primary-hover: light-dark(var(--cms-color-neutral-700), var(--cms-color-neutral-200));
-
-	/**
 	 * Semantic — accent
 	 *
-	 * Links, focus, selection markers, active navigation. This is the token
-	 * downstream projects are expected to tint.
+	 * The one interaction colour: primary buttons, focus, selection, active
+	 * navigation and links. Near-black by default, so the chrome stays black,
+	 * white and grey; this is the pair downstream projects are expected to tint.
 	 */
-	--cms-color-accent: light-dark(var(--cms-color-blue-600), var(--cms-color-blue-400));
+	--cms-color-accent: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-50));
+	--cms-color-text-on-accent: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
+
+	/* Toward the surface, not the shade: a near-black accent has nowhere darker to go. */
 	--cms-color-accent-hover: color-mix(
 		in oklch,
 		var(--cms-color-accent),
-		var(--cms-color-shade) 12%
+		var(--cms-color-surface) 20%
 	);
 	--cms-color-accent-text: color-mix(in oklch, var(--cms-color-accent), var(--cms-color-shade) 12%);
 	--cms-color-accent-surface: color-mix(
@@ -272,13 +265,15 @@
 	/**
 	 * Semantic — focus
 	 *
-	 * Accent-based, never neutral: a near-black ring on a near-black primary
-	 * button is invisible.
+	 * A solid ring in the accent. The outline stands off the element, so the
+	 * gap keeps it visible around a filled button of the same colour; the
+	 * box-shadow ring thickens the border of a field that turns it the focus
+	 * colour.
 	 */
 	--cms-color-focus: var(--cms-color-accent);
-	--cms-focus-ring-width: 3px;
-	--cms-focus-ring: 0 0 0 var(--cms-focus-ring-width)
-		color-mix(in oklch, var(--cms-color-focus), transparent 72%);
+	--cms-focus-outline: 2px solid var(--cms-color-focus);
+	--cms-focus-offset: 2px;
+	--cms-focus-ring: 0 0 0 1px var(--cms-color-focus);
 
 	/**
 	 * Semantic — status
@@ -339,13 +334,13 @@
 	/**
 	 * Component — buttons
 	 */
-	--cms-button-primary-bg: var(--cms-color-primary);
-	--cms-button-primary-text: var(--cms-color-primary-text);
+	--cms-button-primary-bg: var(--cms-color-accent);
+	--cms-button-primary-text: var(--cms-color-text-on-accent);
 	--cms-button-primary-border: var(--cms-button-primary-bg);
-	--cms-button-primary-hover-bg: var(--cms-color-primary-hover);
+	--cms-button-primary-hover-bg: var(--cms-color-accent-hover);
 	--cms-button-primary-hover-text: var(--cms-button-primary-text);
 	--cms-button-primary-hover-border: var(--cms-button-primary-hover-bg);
-	--cms-button-primary-ring: var(--cms-color-accent-ring);
+	--cms-button-primary-ring: var(--cms-color-focus);
 
 	/*
 	 * Raised, not plain surface: identical to it on light, and the step that
@@ -357,7 +352,7 @@
 	--cms-button-secondary-hover-bg: var(--cms-color-hover);
 	--cms-button-secondary-hover-text: var(--cms-button-secondary-text);
 	--cms-button-secondary-hover-border: var(--cms-button-secondary-border);
-	--cms-button-secondary-ring: var(--cms-color-accent-ring);
+	--cms-button-secondary-ring: var(--cms-color-focus);
 
 	--cms-button-danger-bg: var(--cms-color-danger);
 	--cms-button-danger-text: var(--cms-color-text-on-fill);

@@ -401,8 +401,8 @@
 				background: var(--cms-color-surface);
 
 				&.is-selected {
-					border-color: var(--cms-color-info);
-					box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+					border-color: var(--cms-color-accent);
+					box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
 				}
 
 				&:hover .discard,
@@ -522,7 +522,7 @@
 					overflow: hidden;
 
 					&.is-selected {
-						box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+						box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
 					}
 				}
 
@@ -697,8 +697,8 @@
 				}
 
 				&.is-current {
-					border-color: var(--cms-color-info);
-					box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+					border-color: var(--cms-color-accent);
+					box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
 				}
 			}
 

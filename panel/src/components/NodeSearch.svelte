@@ -149,7 +149,7 @@
 			align-items: center;
 			gap: var(--cms-space-2);
 			padding: var(--cms-space-2) var(--cms-space-3);
-			border: 1px solid var(--cms-color-info);
+			border: 1px solid var(--cms-color-accent);
 			border-radius: var(--cms-radius-md);
 			background-color: var(--cms-color-surface-sunken);
 		}
@@ -185,8 +185,8 @@
 
 		.cms-nodesearch-result:hover,
 		.cms-nodesearch-result.active {
-			border-color: var(--cms-color-info);
-			outline: 2px solid var(--cms-color-info);
+			border-color: var(--cms-color-accent);
+			outline: 2px solid var(--cms-color-accent);
 		}
 
 		.cms-nodesearch-title {

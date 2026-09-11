@@ -64,7 +64,7 @@
 		cursor: pointer;
 
 		&:focus-visible {
-			outline: 2px solid var(--cms-color-info);
+			outline: var(--cms-focus-outline);
 			outline-offset: 2px;
 			border-radius: var(--cms-radius-sm);
 		}

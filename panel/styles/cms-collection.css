@@ -118,8 +118,8 @@
 		flex-wrap: wrap;
 		padding: var(--cms-space-2) var(--cms-space-4);
 		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-primary);
-		color: var(--cms-color-primary-text);
+		background: var(--cms-color-accent);
+		color: var(--cms-color-text-on-accent);
 
 		& .info {
 			display: flex;
@@ -136,14 +136,14 @@
 			padding: 0;
 			border: 0;
 			background: none;
-			color: color-mix(in srgb, var(--cms-color-primary-text) 75%, transparent);
+			color: color-mix(in srgb, var(--cms-color-text-on-accent) 75%, transparent);
 			font-size: var(--cms-font-size-xs);
 			text-decoration: underline;
 			cursor: pointer;
 
 			&:hover,
 			&:focus-visible {
-				color: var(--cms-color-primary-text);
+				color: var(--cms-color-text-on-accent);
 			}
 		}
 
@@ -156,17 +156,17 @@
 			align-items: center;
 			min-height: 1.875rem;
 			padding: 0 var(--cms-space-3);
-			border: 1px solid color-mix(in srgb, var(--cms-color-primary-text) 30%, transparent);
+			border: 1px solid color-mix(in srgb, var(--cms-color-text-on-accent) 30%, transparent);
 			border-radius: var(--cms-radius-md);
-			background: color-mix(in srgb, var(--cms-color-primary-text) 12%, transparent);
-			color: var(--cms-color-primary-text);
+			background: color-mix(in srgb, var(--cms-color-text-on-accent) 12%, transparent);
+			color: var(--cms-color-text-on-accent);
 			font-size: var(--cms-font-size-xs);
 			font-weight: 500;
 			cursor: pointer;
 
 			&:hover,
 			&:focus-visible {
-				background: color-mix(in srgb, var(--cms-color-primary-text) 22%, transparent);
+				background: color-mix(in srgb, var(--cms-color-text-on-accent) 22%, transparent);
 			}
 		}
 	}

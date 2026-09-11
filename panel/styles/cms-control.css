@@ -84,8 +84,8 @@
 	cursor: pointer;
 
 	&:focus-visible {
-		outline: none;
-		box-shadow: var(--cms-focus-ring);
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
 	}
 }
 
@@ -115,17 +115,17 @@
 	}
 
 	&:checked {
-		background: var(--cms-color-primary);
+		background: var(--cms-color-accent);
 
 		&::before {
-			background: var(--cms-color-primary-text);
+			background: var(--cms-color-text-on-accent);
 			translate: 1rem 0;
 		}
 	}
 
 	&:focus-visible {
-		outline: none;
-		box-shadow: var(--cms-focus-ring);
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
 	}
 
 	&:disabled {

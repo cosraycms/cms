@@ -537,7 +537,7 @@
 			justify-content: center;
 			border-radius: var(--cms-radius-md);
 			background-color: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
-			box-shadow: inset 0 0 0 2px var(--cms-color-info);
+			box-shadow: inset 0 0 0 2px var(--cms-color-accent);
 			pointer-events: none;
 			z-index: 1;
 		}
