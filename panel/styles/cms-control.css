@@ -32,7 +32,7 @@
 	}
 
 	&[aria-invalid='true'] {
-		border-color: var(--cms-color-danger);
+		border-color: var(--cms-color-danger-border);
 	}
 }
 
@@ -62,7 +62,7 @@
 	& .cms-input,
 	& .cms-select,
 	& .cms-textarea {
-		border-color: var(--cms-color-danger);
+		border-color: var(--cms-color-danger-border);
 	}
 }
 
@@ -223,7 +223,7 @@
 .cms-control-unknown,
 .cms-control-element-pending {
 	padding: var(--cms-space-3);
-	border: 1px dashed var(--cms-color-danger);
+	border: 1px dashed var(--cms-color-danger-border);
 	border-radius: var(--cms-radius-md);
 	color: var(--cms-color-danger-text);
 	font-size: var(--cms-font-size-sm);

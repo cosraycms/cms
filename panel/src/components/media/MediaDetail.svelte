@@ -494,11 +494,11 @@
 			display: inline-flex;
 			align-items: center;
 			gap: var(--cms-space-2);
-			color: var(--cms-color-danger, #b00020);
+			color: var(--cms-color-danger);
 		}
 
 		.cms-detail-saved {
-			color: var(--cms-color-success, #178a3a);
+			color: var(--cms-color-success-text);
 			font-size: var(--cms-font-size-sm);
 		}
 

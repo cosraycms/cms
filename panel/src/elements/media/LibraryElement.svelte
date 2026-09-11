@@ -625,7 +625,7 @@
 			align-items: flex-start;
 			justify-content: space-between;
 			gap: var(--cms-space-2);
-			color: var(--cms-color-danger, #b00020);
+			color: var(--cms-color-danger);
 			padding: var(--cms-space-2) var(--cms-space-3);
 			border-bottom: 1px solid var(--cms-color-border);
 			font-size: var(--cms-font-size-sm);

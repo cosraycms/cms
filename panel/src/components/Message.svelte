@@ -120,23 +120,23 @@
 
 		.cms-message-error {
 			background-color: var(--cms-color-danger-surface);
-			border-left-color: var(--cms-color-danger);
+			border-left-color: var(--cms-color-danger-border);
 		}
 
 		.cms-message-text-success {
-			color: var(--cms-color-success);
+			color: var(--cms-color-success-text);
 		}
 
 		.cms-message-text-info {
-			color: var(--cms-color-info);
+			color: var(--cms-color-info-text);
 		}
 
 		.cms-message-text-warning {
-			color: var(--cms-color-warning);
+			color: var(--cms-color-warning-text);
 		}
 
 		.cms-message-text-error {
-			color: var(--cms-color-danger);
+			color: var(--cms-color-danger-text);
 		}
 
 		:global(.message em) {

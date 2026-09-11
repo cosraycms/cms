@@ -137,17 +137,18 @@
 	/**
 	 * Primitives — hues
 	 *
-	 * Two steps per hue: a dark one that carries light-theme text and fills,
-	 * and a light one for the same job on dark surfaces.
+	 * Built around the vermillion red-500. A 600 carries light-theme text and
+	 * fills at 5:1 or more against white; a 400 does the same on dark surfaces.
 	 */
-	--cms-color-blue-400: #38bdf8;
-	--cms-color-blue-700: #0369a1;
-	--cms-color-green-400: #34d399;
-	--cms-color-green-600: #059669;
-	--cms-color-orange-400: #fb923c;
-	--cms-color-orange-700: #c2410c;
-	--cms-color-rose-400: #fb7185;
-	--cms-color-rose-700: #be123c;
+	--cms-color-red-400: #ff7d6b;
+	--cms-color-red-500: #e54231;
+	--cms-color-red-600: #c93223;
+	--cms-color-amber-400: #e39200;
+	--cms-color-amber-600: #975f00;
+	--cms-color-green-400: #43ba66;
+	--cms-color-green-600: #007d37;
+	--cms-color-blue-400: #51a8fd;
+	--cms-color-blue-600: #006dbd;
 
 	/**
 	 * Primitives — depth and edges
@@ -202,6 +203,7 @@
 	 */
 	--cms-color-text: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-100));
 	--cms-color-text-label: var(--cms-color-text);
+	--cms-color-text-requirement: var(--cms-color-danger);
 	--cms-color-text-muted: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
 	--cms-color-text-subtle: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
 	--cms-color-text-faint: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-500));
@@ -253,7 +255,7 @@
 	 * Links, focus, selection markers, active navigation. This is the token
 	 * downstream projects are expected to tint.
 	 */
-	--cms-color-accent: light-dark(var(--cms-color-blue-700), var(--cms-color-blue-400));
+	--cms-color-accent: light-dark(var(--cms-color-blue-600), var(--cms-color-blue-400));
 	--cms-color-accent-hover: color-mix(
 		in oklch,
 		var(--cms-color-accent),
@@ -285,8 +287,7 @@
 	 * and hover states against `--cms-color-shade` rather than black, so all
 	 * of them follow the theme instead of pinning themselves to the light one.
 	 */
-	--cms-color-info: var(--cms-color-accent);
-	--cms-color-info-hover: color-mix(in oklch, var(--cms-color-info), var(--cms-color-shade) 12%);
+	--cms-color-info: light-dark(var(--cms-color-blue-600), var(--cms-color-blue-400));
 	--cms-color-info-text: color-mix(in oklch, var(--cms-color-info), var(--cms-color-shade) 12%);
 	--cms-color-info-surface: color-mix(
 		in oklch,
@@ -296,11 +297,6 @@
 	--cms-color-info-ring: color-mix(in oklch, var(--cms-color-info), transparent 72%);
 
 	--cms-color-success: light-dark(var(--cms-color-green-600), var(--cms-color-green-400));
-	--cms-color-success-hover: color-mix(
-		in oklch,
-		var(--cms-color-success),
-		var(--cms-color-shade) 12%
-	);
 	--cms-color-success-text: color-mix(
 		in oklch,
 		var(--cms-color-success),
@@ -312,7 +308,7 @@
 		var(--cms-color-surface) 88%
 	);
 
-	--cms-color-warning: light-dark(var(--cms-color-orange-700), var(--cms-color-orange-400));
+	--cms-color-warning: light-dark(var(--cms-color-amber-600), var(--cms-color-amber-400));
 	--cms-color-warning-text: color-mix(
 		in oklch,
 		var(--cms-color-warning),
@@ -324,7 +320,7 @@
 		var(--cms-color-surface) 88%
 	);
 
-	--cms-color-danger: light-dark(var(--cms-color-rose-700), var(--cms-color-rose-400));
+	--cms-color-danger: light-dark(var(--cms-color-red-600), var(--cms-color-red-400));
 	--cms-color-danger-hover: color-mix(
 		in oklch,
 		var(--cms-color-danger),
@@ -336,6 +332,9 @@
 		var(--cms-color-danger),
 		var(--cms-color-surface) 90%
 	);
+
+	/* The palette's own vermillion clears only 3:1: edges and markers, never text. */
+	--cms-color-danger-border: light-dark(var(--cms-color-red-500), var(--cms-color-red-400));
 
 	/**
 	 * Component — buttons

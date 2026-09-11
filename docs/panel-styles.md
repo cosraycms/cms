@@ -75,13 +75,15 @@ An override is a plain value and applies to both themes. A project that wants tw
 
 Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract.
 
-Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, using muted text. Required indicators are neutral; validation errors retain their error styling. Descriptions and section headings keep their separate typography.
+Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, coloured by the public `--cms-color-text-requirement` token, which defaults to `--cms-color-danger`. Descriptions and section headings keep their separate typography.
 
 ### Colour roles
 
 Primary is monochrome — near-black on light, near-white on dark. The chrome stays neutral so a project's own colour can be the accent instead of fighting it.
 
 Accent covers links, focus rings, selection and active navigation, and is the token projects are expected to tint. Focus is accent-based on purpose: a neutral ring on a near-black primary button is invisible.
+
+Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` is the brighter vermillion the red is built around; it clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
 
 ### Dark theme
 

@@ -67,7 +67,7 @@
 		}
 
 		&.is-error {
-			border-color: var(--cms-color-danger);
+			border-color: var(--cms-color-danger-border);
 			color: var(--cms-color-danger-text);
 		}
 	}

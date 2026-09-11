@@ -40,7 +40,7 @@
 	}
 
 	& .requirement {
-		color: var(--cms-color-text-muted);
+		color: var(--cms-color-text-requirement);
 		font-size: var(--cms-font-size-xs);
 		font-weight: 400;
 		white-space: nowrap;
@@ -75,7 +75,7 @@
 		}
 
 		&.has-error {
-			border-color: var(--cms-color-danger);
+			border-color: var(--cms-color-danger-border);
 			color: var(--cms-color-danger);
 		}
 	}

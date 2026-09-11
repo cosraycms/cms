@@ -59,7 +59,7 @@
 	& .message {
 		margin: 0;
 		padding: var(--cms-space-3) var(--cms-space-4);
-		border: 1px solid var(--cms-color-danger);
+		border: 1px solid var(--cms-color-danger-border);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-danger-surface);
 		color: var(--cms-color-danger-text);
