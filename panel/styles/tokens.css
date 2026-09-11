@@ -132,7 +132,6 @@
 	--cms-color-neutral-900: #211b19;
 	--cms-color-neutral-925: #1b1614;
 	--cms-color-neutral-950: #15110f;
-	--cms-color-neutral-975: #0d0a09;
 
 	/**
 	 * Primitives — hues
@@ -187,8 +186,6 @@
 	 * canvas   the ground the shell sits on
 	 * surface  the shell itself: sidebars, topbars, menus, controls
 	 * sunken   recessed regions inside the shell (listing area, placeholders)
-	 * inset    the ground a form's controls sit on: just off white on light,
-	 *          the deepest step on dark, so the controls lift off it in both
 	 * raised   cards sitting on a sunken region
 	 */
 	--cms-color-canvas: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-950));
@@ -198,7 +195,6 @@
 		var(--cms-color-neutral-925)
 	);
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
-	--cms-color-surface-inset: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-975));
 	--cms-color-rail: var(--cms-color-surface);
 
 	/**
@@ -390,7 +386,7 @@
 	--cms-sidebar-width: 18rem;
 	--cms-inspector-width: 23.75rem;
 	--cms-inspector-bg: light-dark(var(--cms-color-surface), var(--cms-color-canvas));
-	--cms-pane-bg: var(--cms-color-surface-inset);
+	--cms-pane-bg: var(--cms-color-canvas);
 	--cms-tile-min: 11rem;
 }
 
