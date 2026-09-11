@@ -10,7 +10,7 @@
 	width: var(--cms-inspector-width);
 	min-width: 0;
 	border-left: 1px solid var(--cms-color-border);
-	background: var(--cms-color-surface);
+	background: var(--cms-inspector-bg);
 
 	& .head {
 		display: flex;
