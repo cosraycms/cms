@@ -112,6 +112,10 @@ This is the same declaration a component stylesheet must not make, and it is fin
 
 Note what it overrules. `theme` is the highest layer and layer order beats specificity, so this plain `:root` also outranks the panel's `:root[data-theme='dark']` — the styleguide toggle stops responding, and a per-user theme preference would be overruled too. It bans a theme rather than changing the default, which is usually what is wanted, but it settles the question above the editor's head.
 
+### More contrast
+
+`tokens.css` answers `prefers-contrast: more`, the operating system's increase-contrast setting, by darkening the border tokens, `--cms-color-border-control` included, and the muted, subtle and faint text colours. Everyone else keeps the calm default. The boost lives in the `tokens` layer, so a project that overrides one of these tokens in `@layer theme` replaces the boost for that token too and should repeat its value inside its own `@media (prefers-contrast: more)` block.
+
 ## Built-in icons
 
 Built-in panel icons use the checked-in regular Bootstrap collection in `panel/icons/`, shared by `Cosray\Panel\Icon::render('plus')` and `<Icon name="plus" />` from `panel/src/components/Icon.svelte`. The collection README records its version, license, and mappings. No panel action icon requires a network request.

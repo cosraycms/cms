@@ -411,3 +411,24 @@
 :root[data-theme='dark'] {
 	color-scheme: dark;
 }
+
+/**
+ * More contrast on request.
+ *
+ * People who ask their operating system for more contrast get firmer edges
+ * and darker secondary text; everyone else keeps the calm default.
+ */
+@media (prefers-contrast: more) {
+	:root {
+		--cms-color-border: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-600));
+		--cms-color-border-soft: light-dark(var(--cms-color-neutral-300), var(--cms-color-neutral-700));
+		--cms-color-border-strong: var(--cms-color-neutral-500);
+		--cms-color-border-control: light-dark(
+			var(--cms-color-neutral-600),
+			var(--cms-color-neutral-400)
+		);
+		--cms-color-text-muted: light-dark(var(--cms-color-neutral-700), var(--cms-color-neutral-200));
+		--cms-color-text-subtle: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
+		--cms-color-text-faint: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
+	}
+}
