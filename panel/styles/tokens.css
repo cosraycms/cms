@@ -110,23 +110,29 @@
 	/**
 	 * Primitives — neutral ramp
 	 *
-	 * Cool greys. Primitives never flip — that is what makes them primitives.
-	 * The ramp carries the dark theme's text, but not its surfaces: those are
-	 * their own values on the semantic tokens below, because inverting a light
-	 * ramp gives washed-out, flat darks.
+	 * Warm greys on one hue with little chroma, so the chrome reads as black,
+	 * white and grey. Primitives never flip — that is what makes them
+	 * primitives. The dark end is dense because the dark theme draws its
+	 * surfaces from it; the semantic tokens below pick a step per theme.
 	 */
 	--cms-color-white: #fff;
 	--cms-color-black: #000;
-	--cms-color-neutral-50: #f9fafb;
-	--cms-color-neutral-100: #f3f4f5;
-	--cms-color-neutral-200: #e5e7eb;
-	--cms-color-neutral-300: #d1d5db;
-	--cms-color-neutral-400: #9ca3af;
-	--cms-color-neutral-500: #6b7280;
-	--cms-color-neutral-600: #4b5563;
-	--cms-color-neutral-700: #374151;
-	--cms-color-neutral-800: #1f2937;
-	--cms-color-neutral-900: #111827;
+	--cms-color-neutral-50: #fcf9f9;
+	--cms-color-neutral-100: #f7f4f3;
+	--cms-color-neutral-150: #f3efee;
+	--cms-color-neutral-200: #eae5e3;
+	--cms-color-neutral-300: #d6cecc;
+	--cms-color-neutral-400: #afa5a2;
+	--cms-color-neutral-500: #786d6a;
+	--cms-color-neutral-600: #605552;
+	--cms-color-neutral-700: #4b413e;
+	--cms-color-neutral-800: #352d2b;
+	--cms-color-neutral-850: #2b2422;
+	--cms-color-neutral-875: #26201e;
+	--cms-color-neutral-900: #211b19;
+	--cms-color-neutral-925: #1b1614;
+	--cms-color-neutral-950: #15110f;
+	--cms-color-neutral-975: #0d0a09;
 
 	/**
 	 * Primitives — hues
@@ -147,7 +153,7 @@
 	 * Primitives — depth and edges
 	 */
 	--cms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-	--cms-shadow: rgba(17, 24, 39, 0.08) 0px 1px 3px, rgba(17, 24, 39, 0.05) 0px 0px 14px;
+	--cms-shadow: 0 1px 3px rgb(33 27 25 / 0.08), 0 0 14px rgb(33 27 25 / 0.05);
 	--cms-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 	--cms-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 	--cms-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
@@ -182,10 +188,13 @@
 	 * sunken   recessed regions inside the shell (listing area, field pane)
 	 * raised   cards sitting on a sunken region
 	 */
-	--cms-color-canvas: light-dark(var(--cms-color-neutral-100), #0f1115);
-	--cms-color-surface: light-dark(var(--cms-color-white), #171a20);
-	--cms-color-surface-sunken: light-dark(var(--cms-color-neutral-100), #13161b);
-	--cms-color-surface-raised: light-dark(var(--cms-color-white), #1c2027);
+	--cms-color-canvas: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-950));
+	--cms-color-surface: light-dark(var(--cms-color-white), var(--cms-color-neutral-900));
+	--cms-color-surface-sunken: light-dark(
+		var(--cms-color-neutral-150),
+		var(--cms-color-neutral-925)
+	);
+	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
 	--cms-color-rail: var(--cms-color-surface);
 
 	/**
@@ -208,17 +217,17 @@
 	/**
 	 * Semantic — edges
 	 */
-	--cms-color-border: light-dark(var(--cms-color-neutral-200), #282d36);
-	--cms-color-border-soft: light-dark(#eef0f3, #22262e);
-	--cms-color-border-strong: light-dark(var(--cms-color-neutral-300), #333a45);
+	--cms-color-border: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-800));
+	--cms-color-border-soft: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-850));
+	--cms-color-border-strong: light-dark(var(--cms-color-neutral-300), var(--cms-color-neutral-700));
 	--cms-border-color: var(--cms-color-border);
 	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
 
 	/**
 	 * Semantic — interaction
 	 */
-	--cms-color-hover: light-dark(var(--cms-color-neutral-100), #20242c);
-	--cms-color-selected: light-dark(var(--cms-color-neutral-100), #272c35);
+	--cms-color-hover: light-dark(var(--cms-color-neutral-100), var(--cms-color-neutral-850));
+	--cms-color-selected: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-800));
 
 	/*
 	 * The direction a hover or text variant moves in: toward black on a light
