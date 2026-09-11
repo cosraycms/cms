@@ -351,7 +351,7 @@
 			padding: var(--cms-space-1) var(--cms-space-2);
 			border-color: transparent;
 			background: none;
-			font-size: var(--cms-font-size-base);
+			font-size: var(--cms-font-size-sm);
 			line-height: 1.6;
 
 			&:hover {
@@ -470,7 +470,7 @@
 		& .richtext {
 			border-color: transparent;
 			background: none;
-			font-size: var(--cms-font-size-base);
+			font-size: var(--cms-font-size-sm);
 
 			&:hover:not(:focus-within) {
 				border-color: var(--cms-color-border-soft);

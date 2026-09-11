@@ -31,7 +31,6 @@
 	--cms-font-size-xs: 0.75rem;
 	--cms-font-size-sm: 0.875rem;
 	--cms-font-size-base: 1rem;
-	--cms-icon-size: 1em;
 	--cms-font-size-lg: 1.125rem;
 	--cms-font-size-xl: 1.25rem;
 	--cms-font-size-2xl: 1.5rem;
@@ -44,6 +43,8 @@
 	--cms-line-height-xl: 1.75rem;
 	--cms-line-height-2xl: 2rem;
 	--cms-line-height-3xl: 2.25rem;
+
+	--cms-icon-size: 1em;
 
 	/**
 	 * Primitives — space and size
@@ -367,7 +368,7 @@
 	 * screen the panel was given, so widening one must not stretch the other.
 	 */
 	--cms-content-max-width: 120rem;
-	--cms-editor-max-width: 70rem;
+	--cms-editor-max-width: 56rem;
 	--cms-row-height: 3.5rem;
 	--cms-masthead-bg: var(--cms-color-surface);
 	--cms-sidebar-width: 18rem;
