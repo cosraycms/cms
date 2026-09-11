@@ -199,12 +199,12 @@
 		border: 0;
 		border-bottom-left-radius: calc(var(--cms-radius-md) - 1px);
 		border-bottom-right-radius: calc(var(--cms-radius-md) - 1px);
-		background-color: var(--cms-color-neutral-700);
+		background-color: var(--cms-code-bg);
 		padding: var(--cms-space-1);
 		font-family:
 			'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
 			'Courier New', 'andale mono', 'lucida console', monospace;
-		color: var(--cms-color-white);
+		color: var(--cms-code-text);
 	}
 
 	.richtext-dropdown-button {

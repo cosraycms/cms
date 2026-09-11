@@ -366,6 +366,16 @@
 	--cms-button-danger-ring: var(--cms-color-danger);
 
 	/**
+	 * Component — code
+	 *
+	 * Dark in both themes: code and raw markup read as code, not as the
+	 * document.
+	 */
+	--cms-code-bg: var(--cms-color-neutral-800);
+	--cms-code-text: var(--cms-color-neutral-100);
+	--cms-code-muted: var(--cms-color-neutral-300);
+
+	/**
 	 * Component — shell
 	 */
 	/*

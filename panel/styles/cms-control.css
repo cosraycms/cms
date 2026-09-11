@@ -236,8 +236,8 @@
 
 /* Inverted on purpose in both themes, like the code editor. */
 .cms-textarea.iframe {
-	background-color: var(--cms-color-neutral-700);
-	color: var(--cms-color-neutral-100);
+	background-color: var(--cms-code-bg);
+	color: var(--cms-code-text);
 	font-family:
 		'JetBrains Mono', 'Menlo', 'DejaVu Sans Mono', 'Liberation Mono', 'Consolas', 'Ubuntu Mono',
 		'Courier New', 'andale mono', 'lucida console', monospace;

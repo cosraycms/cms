@@ -117,10 +117,10 @@
 			/* Sits on arbitrary media with a dark outline: stays white in both themes. */
 			color: var(--cms-color-white);
 			text-shadow:
-				-1px 0 #000,
-				0 1px #000,
-				1px 0 #000,
-				0 -1px #000;
+				-1px 0 var(--cms-color-black),
+				0 1px var(--cms-color-black),
+				1px 0 var(--cms-color-black),
+				0 -1px var(--cms-color-black);
 		}
 
 		.cms-video-ext {

@@ -410,10 +410,10 @@
 			width: 0.85rem;
 			height: 0.85rem;
 			/* Sits on arbitrary media: a white ring inside a dark one, both themes. */
-			border: 2px solid #fff;
+			border: 2px solid var(--cms-color-white);
 			border-radius: 50%;
-			background-color: var(--cms-color-info);
-			box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+			background-color: var(--cms-color-neutral-900);
+			box-shadow: 0 0 0 1px color-mix(in srgb, var(--cms-color-black) 40%, transparent);
 			transform: translate(-50%, -50%);
 			pointer-events: none;
 		}

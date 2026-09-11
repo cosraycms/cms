@@ -28,8 +28,8 @@
 	overflow: hidden;
 	border: var(--cms-border);
 	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-neutral-800);
-	color: var(--cms-color-neutral-300);
+	background-color: var(--cms-code-bg);
+	color: var(--cms-code-muted);
 	pointer-events: none;
 
 	> span {
@@ -39,7 +39,7 @@
 		bottom: var(--cms-space-2);
 		padding: var(--cms-space-0-5) var(--cms-space-1);
 		border-radius: var(--cms-radius-sm);
-		background: color-mix(in srgb, var(--cms-color-neutral-800) 90%, transparent);
+		background: color-mix(in srgb, var(--cms-code-bg) 90%, transparent);
 		font-size: var(--cms-font-size-xs);
 		font-style: italic;
 	}
@@ -61,14 +61,14 @@
 	overflow: hidden;
 	border: var(--cms-border);
 	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-neutral-800);
+	background-color: var(--cms-code-bg);
 	box-shadow: var(--cms-shadow-sm);
 }
 
 .cms-code-editor .cm-editor {
 	min-height: 16rem;
-	background-color: var(--cms-color-neutral-800);
-	color: var(--cms-color-neutral-100);
+	background-color: var(--cms-code-bg);
+	color: var(--cms-code-text);
 }
 
 .cms-code-editor .cm-scroller {
@@ -82,7 +82,7 @@
 .cms-code-editor .cm-gutters {
 	border-right: 1px solid color-mix(in srgb, var(--cms-color-neutral-500) 55%, transparent);
 	background-color: color-mix(in srgb, var(--cms-color-neutral-700) 75%, transparent);
-	color: var(--cms-color-neutral-300);
+	color: var(--cms-code-muted);
 }
 
 .cms-code-editor .cm-activeLine,
@@ -97,7 +97,7 @@
 
 .cms-code-editor .cm-editor.cm-focused {
 	outline: 0;
-	box-shadow: 0 0 0 2px var(--cms-color-info-ring);
+	box-shadow: 0 0 0 2px var(--cms-color-focus);
 }
 
 .cms-code-editor-input {

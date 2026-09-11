@@ -378,11 +378,11 @@
 
 		/* Code stays inverted: it reads as code, not as the document. */
 		& .cms-textarea.iframe {
-			background-color: var(--cms-color-neutral-700);
+			background-color: var(--cms-code-bg);
 			font-size: var(--cms-font-size-sm);
 
 			&::placeholder {
-				color: var(--cms-color-neutral-400);
+				color: var(--cms-code-muted);
 			}
 		}
 
