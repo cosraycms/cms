@@ -123,6 +123,7 @@
 	--cms-color-neutral-200: #eae5e3;
 	--cms-color-neutral-300: #d6cecc;
 	--cms-color-neutral-400: #afa5a2;
+	--cms-color-neutral-450: #928784;
 	--cms-color-neutral-500: #786d6a;
 	--cms-color-neutral-600: #605552;
 	--cms-color-neutral-700: #4b413e;
@@ -221,6 +222,12 @@
 	--cms-color-border: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-800));
 	--cms-color-border-soft: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-850));
 	--cms-color-border-strong: light-dark(var(--cms-color-neutral-300), var(--cms-color-neutral-700));
+
+	/* Form controls only: their edge is what marks them, so it clears 3:1 against the pane. */
+	--cms-color-border-control: light-dark(
+		var(--cms-color-neutral-450),
+		var(--cms-color-neutral-500)
+	);
 	--cms-border-color: var(--cms-color-border);
 	--cms-border: var(--cms-border-width) var(--cms-border-style) var(--cms-border-color);
 

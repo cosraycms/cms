@@ -4,7 +4,7 @@
 	width: 100%;
 	min-width: 0;
 	padding: var(--cms-space-2) var(--cms-space-2-5);
-	border: 1px solid var(--cms-color-border-strong);
+	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background-color: var(--cms-color-surface);
 	color: var(--cms-color-text);
@@ -99,7 +99,7 @@
 	padding: 0.1875rem;
 	border: 0;
 	border-radius: var(--cms-radius-full);
-	background: var(--cms-color-border-strong);
+	background: var(--cms-color-border-control);
 	cursor: pointer;
 	transition: background-color 120ms ease;
 

@@ -85,6 +85,8 @@ Focus is a solid ring in the accent. Borderless elements take `outline: var(--cm
 
 Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` is the brighter vermillion the red is built around; it clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
 
+Form controls draw their edge with `--cms-color-border-control`, which clears 3:1 against the pane and against white in both themes, as WCAG 1.4.11 asks of a boundary that identifies a control. It is the only strong line in the default chrome: sections, rows and cards use the softer border tokens, so contrast marks what can be filled in rather than the structure around it. Keep it off anything that is not a control.
+
 ### Dark theme
 
 The panel follows the operating system. There is no dark block: both themes live in the one `:root` block, and a token that differs carries `light-dark(light, dark)` so its two values sit on the same line and cannot be changed in one theme and forgotten in the other.

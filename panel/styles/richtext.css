@@ -3,7 +3,7 @@
 	container-type: inline-size;
 	width: 100%;
 	padding: 0;
-	border: 1px solid var(--cms-color-border-strong);
+	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background: var(--cms-color-surface);
 	color: var(--cms-color-text);

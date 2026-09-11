@@ -65,7 +65,7 @@ button:not(:disabled) {
 input,
 select,
 textarea {
-	border: var(--cms-border);
+	border: var(--cms-border-width) var(--cms-border-style) var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background-color: var(--cms-color-surface);
 }

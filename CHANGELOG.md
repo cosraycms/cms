@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Gave form controls a border of their own. Text inputs, selects, textareas, the rich text frame and the switch's off track use the new `--cms-color-border-control`, which clears 3:1 against the pane and against white in both themes; sections, rows and cards keep their softer lines.
 - Code editors, raw HTML sources and embed code boxes share one dark surface in both themes, themeable through the new `--cms-code-bg`, `--cms-code-text` and `--cms-code-muted` tokens, and a focused code editor rings in the focus colour.
 - Gave the node editor's field pane and the inspector theming tokens of their own, `--cms-pane-bg` and `--cms-inspector-bg`. The pane sits on the canvas colour, so white fields stand out from it; the inspector keeps the surface on light and recedes to the canvas on dark. A rich text field's toolbar now shares the field's surface.
 - Rebuilt the panel's status colours around the vermillion `#e54231`. Red, amber — replacing an orange that sat too close to the new red — green and blue are matched in contrast, so each status colour passes 4.5:1 as text and as a fill in both themes; `#e54231` itself is the new `--cms-color-danger-border` on invalid controls and error boxes. `--cms-color-info` no longer follows `--cms-color-accent`: a theme that tinted the accent and wants information messages to match sets `--cms-color-info` too. The unused `--cms-color-info-hover` and `--cms-color-success-hover` were dropped.

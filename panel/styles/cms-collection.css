@@ -191,7 +191,7 @@
 			width: 100%;
 			height: 2.375rem;
 			padding: 0 var(--cms-space-4) 0 var(--cms-space-8);
-			border: 1px solid var(--cms-color-border);
+			border: 1px solid var(--cms-color-border-control);
 			border-radius: var(--cms-radius-md);
 			background: var(--cms-color-surface);
 			color: var(--cms-color-text);
