@@ -369,10 +369,8 @@
 	--cms-content-max-width: 120rem;
 	--cms-editor-max-width: 70rem;
 	--cms-row-height: 3.5rem;
-	--cms-topbar-bg: var(--cms-color-surface);
+	--cms-masthead-bg: var(--cms-color-surface);
 	--cms-sidebar-width: 18rem;
-	--cms-sidebar-header-bg: var(--cms-topbar-bg);
-	--cms-sidebar-border-right: 0;
 	--cms-inspector-width: 23.75rem;
 	--cms-tile-min: 11rem;
 }

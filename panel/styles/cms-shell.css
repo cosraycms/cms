@@ -38,6 +38,9 @@
 }
 
 .cms-masthead {
+	--hover-bg: var(--cms-color-hover);
+	--current-bg: var(--cms-color-selected);
+
 	display: flex;
 	align-items: center;
 	gap: clamp(var(--cms-space-3), 2vw, var(--cms-space-8));
@@ -46,7 +49,8 @@
 	width: 100%;
 	max-width: var(--cms-content-max-width);
 	margin-inline: auto;
-	padding: var(--cms-space-3) var(--cms-space-6) var(--cms-space-4);
+	padding: var(--cms-space-1) var(--cms-space-6);
+	background-color: var(--cms-masthead-bg);
 
 	& .logo {
 		display: flex;
@@ -113,13 +117,13 @@
 			border-color 0.14s ease;
 
 		&:hover {
-			background: var(--cms-color-surface);
+			background: var(--hover-bg);
 			color: var(--cms-color-text);
 		}
 
 		&[aria-current='page'] {
 			border-color: var(--cms-color-border);
-			background: var(--cms-color-surface);
+			background: var(--current-bg);
 			color: var(--cms-color-text);
 			font-weight: 500;
 		}
@@ -141,7 +145,7 @@
 		font-weight: 400;
 
 		&:hover {
-			background: var(--cms-color-surface);
+			background: var(--hover-bg);
 			color: var(--cms-color-text);
 		}
 	}
@@ -161,8 +165,13 @@
 		box-shadow: var(--cms-shadow);
 	}
 
+	/* On the canvas beside the floating frame, items lift to the surface. */
 	.cms-masthead {
-		padding-inline: var(--cms-space-1);
+		--hover-bg: var(--cms-color-surface);
+		--current-bg: var(--cms-color-surface);
+
+		padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
+		background-color: transparent;
 	}
 }
 
