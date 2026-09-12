@@ -336,8 +336,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="richtext">
 				<h2>Richtext</h2>
 				<p class="note">
-					The default toolbar, and a field trimmed the way <code>#[Tools]</code> trims it —
-					including the source view, which only the second field enables.
+					The default toolbar, a <code>#[Tools]</code>-trimmed field with the source view,
+					and the read-only state, which mounts without a toolbar.
 				</p>
 				<div class="cms-node">
 					<div class="inner">
@@ -363,9 +363,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="media">
 				<h2>Media</h2>
 				<p class="note">
-					The image control in both shapes — a single image card and a gallery —
-					filled and empty. Fixture assets are inline SVG plates; uploads and the
-					library picker are live.
+					The image control as a card and as a gallery, filled, empty and read-only.
+					Fixture assets are inline SVG plates; uploads and the library picker are live.
 				</p>
 				<div class="cms-node">
 					<div class="inner">
@@ -391,9 +390,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="entries">
 				<h2>Entries</h2>
 				<p class="note">
-					A typed repeater: stored rows collapse to a summary line — thumb, primary and
-					secondary text from the first fields with content — and open their form beneath
-					it; rows reorder by their grip. Two entry types give two add buttons.
+					Stored rows collapse to a summary and open their form beneath it. The read-only
+					field keeps its rows and drops everything that restructures them.
 				</p>
 				<div class="cms-node">
 					<div class="inner">
@@ -419,14 +417,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="blocks">
 				<h2>Blocks</h2>
 				<p class="note">
-					The typed repeater with a grid. A one-column field is a quiet list; a
-					twelve-column field places its blocks on the preview grid — drag an edge
-					to resize, or open the gear for the width, rows and indent as numbers
-					next to the block's class and id. The + over a block's start corner
-					inserts before it; the footer appends. The Story menu has two explicit
-					common choices, while Grid uses the first six. More blocks opens the
-					complete icon/name catalog in a native modal. Search by label or handle,
-					then use arrows and Home/End in the results; Escape cancels without edits.
+					A one-column list and a twelve-column grid, both on the field's own well. A
+					block's chrome appears on the active row; the + inserts before it, the footer
+					appends, and More blocks opens the catalog.
 				</p>
 				<div class="cms-node">
 					<div class="inner">
@@ -461,9 +454,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="listing">
 				<h2>Listing</h2>
 				<p class="note">
-					Rendered through <code>panel/views/collection/row.php</code>, the same partial
-					the collection uses. Tree depth, the guide, hover actions and every status
-					badge in one place — a real collection rarely shows them together.
+					Rendered through <code>panel/views/collection/row.php</code>: tree depth, hover
+					actions and every status badge at once, which a real collection rarely shows.
 				</p>
 				<div class="cms-collection">
 					<div class="listing">

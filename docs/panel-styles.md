@@ -221,6 +221,8 @@ The preview must not obscure the empty control's focus path. Text, richtext, and
 
 It exists because the states that break quietly are the ones real content rarely produces: empty, disabled, error, a title long enough to truncate, a node with four locale paths in the inspector. Checking those, and checking dark, should not mean hunting for content that happens to trigger them.
 
+It is built to be checked, by a person or by a tool: `?section=<key>` narrows the page to one section and `?theme=light|dark` forces a theme, so one URL answers one question without scrolling or scripting. Every section carries its key as `data-section`, and every sample a `data-sample` hook — `input:readonly`, `field:invalid` — so a check addresses a state instead of hunting for it by position. Field samples sit in a `.pane`, the ground the node editor gives them, so a state is judged against the colour it actually appears on.
+
 Two rules keep it honest:
 
 - **Render partials, never copies.** Fields come from `panel/views/field/*` with fixture data. A styleguide with its own copy of the markup drifts, and a stale styleguide is worse than none. Where a screen has no extractable partial yet, its section is inline and marked, and it is replaced when that screen is ported.
