@@ -142,7 +142,7 @@
 				display: grid;
 				place-items: center;
 				aspect-ratio: 4 / 3;
-				background: var(--cms-color-surface-sunken);
+				background: var(--cms-color-surface);
 				font-size: var(--cms-font-size-xs);
 				letter-spacing: 0.08em;
 				text-transform: uppercase;

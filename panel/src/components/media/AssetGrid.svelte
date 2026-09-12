@@ -71,7 +71,7 @@
 			width: 100%;
 			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-surface-sunken);
+			background-color: var(--cms-color-surface);
 			overflow: hidden;
 		}
 

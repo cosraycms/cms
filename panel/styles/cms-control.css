@@ -207,7 +207,7 @@
 		max-width: 28rem;
 		aspect-ratio: 16 / 9;
 		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface-sunken);
+		background: var(--cms-color-surface);
 		object-fit: cover;
 	}
 }

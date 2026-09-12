@@ -62,7 +62,7 @@
 			position: relative;
 			width: 100%;
 			border: 1px solid var(--cms-color-border-strong);
-			background-color: var(--cms-color-surface-sunken);
+			background-color: var(--cms-color-surface);
 			padding: var(--cms-space-1);
 			text-align: center;
 		}

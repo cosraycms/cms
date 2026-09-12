@@ -560,7 +560,7 @@
 					display: grid;
 					place-items: center;
 					aspect-ratio: 4 / 3;
-					background: var(--cms-color-surface-sunken);
+					background: var(--cms-color-surface);
 				}
 
 				& .bar {
