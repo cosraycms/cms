@@ -51,6 +51,11 @@
 	}
 }
 
+/* Native date/time editors add padding inside the input's own padding. */
+.cms-input::-webkit-datetime-edit-fields-wrapper {
+	padding: 0;
+}
+
 .cms-textarea {
 	resize: vertical;
 	line-height: 1.55;
