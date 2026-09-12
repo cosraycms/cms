@@ -73,6 +73,8 @@ return [
 		'media:confirm-delete' => 'Soll die Datei wirklich gelöscht werden?',
 		'media:confirm-delete-file' => 'Ja, Datei löschen',
 		'media:current' => 'Aktuell:',
+		'media:date-30d' => 'Letzte 30 Tage',
+		'media:date-7d' => 'Letzte 7 Tage',
 		'media:date-any' => 'Jederzeit',
 		'media:date-year' => 'Dieses Jahr',
 		'media:delete' => 'Datei löschen',

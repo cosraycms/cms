@@ -73,6 +73,8 @@ return [
 		'media:confirm-delete' => 'Do you really want to delete this file?',
 		'media:confirm-delete-file' => 'Yes, delete file',
 		'media:current' => 'Current:',
+		'media:date-30d' => 'Last 30 days',
+		'media:date-7d' => 'Last 7 days',
 		'media:date-any' => 'Any time',
 		'media:date-year' => 'This year',
 		'media:delete' => 'Delete file',
