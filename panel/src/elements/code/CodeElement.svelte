@@ -13,6 +13,7 @@
 	type FieldInfo = {
 		name: string;
 		required?: boolean;
+		immutable?: boolean;
 		translate?: boolean;
 		syntaxes?: string[];
 	};
@@ -87,6 +88,7 @@
 		<select
 			class="cms-select cms-code-control-syntax-select"
 			id={`${field.name}-syntax`}
+			disabled={field.immutable ?? false}
 			bind:value={metaMap.syntax[ZXX]}
 			onchange={notify}
 		>
@@ -102,6 +104,7 @@
 		<CodeEditor
 			name={field.name}
 			required={field.required ?? false}
+			readonly={field.immutable ?? false}
 			fallback={fallback?.value ?? ''}
 			fallbackLabel={fallback
 				? __('field:fallback-from', {
