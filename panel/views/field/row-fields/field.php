@@ -22,12 +22,10 @@ unset($sub['when']);
 ?>
 <?php $this->insert('field/field', [
 	'field' => $sub,
-	'ownLocales' => !$this->unwrap($ownsLocales ?? false),
 	'bareLabel' => !$this->unwrap($labels ?? true),
 	'data' => $fieldsData[$subName] ?? null,
 	'nameRoot' => "{$rowName}[fields][{$subName}]",
 	'idRoot' => "{$rowId}-{$subName}",
-	'globalLocales' => $globalLocales ?? false,
 	'gridStyle' => $gridStyle,
 	'pathSource' => false,
 ]) ?>

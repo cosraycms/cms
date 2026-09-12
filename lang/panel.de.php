@@ -31,6 +31,7 @@ return [
 		'common:type' => 'Typ',
 		'common:upload' => 'Hochladen',
 		'document:delete' => 'Dokument löschen',
+		'editor:content-language' => 'Inhaltssprache',
 		'field:cancel-delete-entry' => 'Nein, Eintrag nicht löschen',
 		'field:confirm-delete' => 'Soll der Eintrag wirklich gelöscht werden?',
 		'field:confirm-delete-entry' => 'Ja, Eintrag löschen',

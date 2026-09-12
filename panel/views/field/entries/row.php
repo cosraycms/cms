@@ -1,7 +1,6 @@
 <?php
 
 use Cosray\Panel\EntrySummary;
-use Cosray\Panel\RowLocales;
 
 $index = $this->unwrap($index);
 $rowData = $this->unwrap($rowData ?? null);
@@ -22,10 +21,8 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 // Stored rows start collapsed; a stamped row is empty and wants input.
 $open = $rowData === null;
 $readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
-$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
-$ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $this->unwrap($locales)));
 ?>
-<div class="entry" data-repeater-row <?= $ownsLocales ? 'data-locale-scope' : '' ?>>
+<div class="entry" data-repeater-row>
 	<div class="summary">
 		<?php if (!$readonly): ?>
 			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
@@ -62,9 +59,6 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 					) ?></span>
 			</span>
 		</button>
-		<?php if ($ownsLocales) {
-			$this->insert('field/row-locales');
-		} ?>
 		<?php if (!$readonly): ?>
 			<button type="button" class="kebab"
 				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
@@ -102,11 +96,9 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 		<div class="cms-fields">
 			<?php $this->insert('field/row-fields', [
 				'type' => $entryType,
-				'ownsLocales' => $ownsLocales,
 				'fieldsData' => $fieldsData,
 				'rowName' => $rowName,
 				'rowId' => $rowId,
-				'globalLocales' => $globalLocales,
 				'readonly' => $readonly,
 			]) ?>
 		</div>

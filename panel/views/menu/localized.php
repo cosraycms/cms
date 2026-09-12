@@ -2,8 +2,8 @@
 
 use function Cosray\escape;
 
-// A per-locale text input group with the panel's locale tabs: every
-// variant renders, the tabs behavior toggles visibility.
+// A per-locale text input group: every variant renders, the screen's
+// content-language selector decides which one shows.
 
 $name = (string) $name;
 $label = (string) $label;
@@ -18,28 +18,17 @@ $helpHidden = (bool) ($helpHidden ?? false);
 $section = $this->unwrap($section ?? null);
 $sectionHide = $this->unwrap($sectionHide ?? null);
 $sectionHidden = (bool) ($sectionHidden ?? false);
-$multi = count($locales) > 1;
 ?>
 <div
 	class="cms-field<?= is_string($error) ? ' has-error' : '' ?>"
-	<?= $multi ? 'data-locale-scope' : '' ?>
 	<?= is_string($section) ? 'data-menu-section="' . escape($section) . '"' : '' ?>
 	<?= is_string($sectionHide) ? 'data-menu-section-hide="' . escape($sectionHide) . '"' : '' ?>
 	<?= $sectionHidden ? 'hidden' : '' ?>>
-	<label class="label" for="<?= escape($id) ?>-<?= escape($defaultLocale) ?>">
+	<label
+		class="label"
+		for="<?= escape($id) ?>-<?= escape($defaultLocale) ?>"
+		data-locale-label-for="<?= escape($id) ?>">
 		<div><?= escape($label) ?></div>
-		<?php if ($multi): ?>
-			<span class="cms-locales">
-				<?php foreach ($locales as $locale): ?>
-					<button
-						type="button"
-						class="tab<?= $locale['id'] === $defaultLocale ? ' active' : '' ?>"
-						data-locale-tab="<?= escape($locale['id']) ?>">
-						<?= escape(strtoupper($locale['id'])) ?>
-					</button>
-				<?php endforeach ?>
-			</span>
-		<?php endif ?>
 	</label>
 	<div class="control">
 		<?php foreach ($locales as $locale): ?>

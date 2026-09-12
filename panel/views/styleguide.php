@@ -266,10 +266,20 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php // Mirrors the editor: .inner is where its width cap lives and
 
 				// .pane the ground it sits on, so a sample reads as it will. ?>
-				<div class="cms-node" data-sample="fields:pane">
+				<div
+					class="cms-node"
+					data-sample="fields:pane"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="pane">
 						<div class="inner">
 							<div class="sheet">
+								<?php $this->insert('component/content-locales', [
+									'locales' => $locales,
+									'selected' => $defaultLocale,
+									'controlId' => 'styleguide-fields-locale',
+								]) ?>
 								<?php $this->insert('field/fieldset', [
 									'fieldset' => $fieldset,
 									'fieldsByName' => $fieldsByName,
@@ -312,10 +322,10 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('node/content-locales', [
+							<?php $this->insert('component/content-locales', [
 								'locales' => $locales,
-								'defaultLocale' => 'de',
-								'controlId' => 'styleguide-content-locale',
+								'selected' => 'de',
+								'controlId' => 'styleguide-fallback-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php $this->insert('field/item', [
@@ -326,7 +336,6 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 									'uid' => 'styleguide',
 									'assets' => [],
 									'pathSourceFields' => [],
-									'globalLocales' => true,
 								]) ?>
 							</div>
 						</div>
@@ -350,9 +359,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					The default toolbar, a <code>#[Tools]</code>-trimmed field with the source view,
 					and the read-only state, which mounts without a toolbar.
 				</p>
-				<div class="cms-node">
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
+							<?php $this->insert('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-richtext-locale',
+							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($richtextFields as $field): ?>
 									<?php $this->insert('field/item', [
@@ -377,9 +395,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					The image control as a card and as a gallery, filled, empty and read-only.
 					Fixture assets are inline SVG plates; uploads and the library picker are live.
 				</p>
-				<div class="cms-node">
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
+							<?php $this->insert('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-media-locale',
+							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($mediaFields as $field): ?>
 									<?php $this->insert('field/item', [
@@ -404,9 +431,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					Stored rows collapse to a summary and open their form beneath it. The read-only
 					field keeps its rows and drops everything that restructures them.
 				</p>
-				<div class="cms-node">
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
+							<?php $this->insert('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-entries-locale',
+							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($entriesFields as $field): ?>
 									<?php $this->insert('field/item', [
@@ -432,9 +468,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					block's chrome appears on the active row; the + inserts before it, the footer
 					appends, and More blocks opens the catalog.
 				</p>
-				<div class="cms-node">
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
+							<?php $this->insert('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-blocks-locale',
+							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($blocksFields as $field): ?>
 									<?php $this->insert('field/item', [

@@ -34,7 +34,6 @@ $alignmentFields = (array) $this->unwrap($alignmentFields);
 							'uid' => 'styleguide',
 							'assets' => [],
 							'pathSourceFields' => [],
-							'globalLocales' => true,
 						]) ?>
 					<?php endforeach ?>
 				</div>

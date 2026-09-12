@@ -5,6 +5,7 @@
 	import { __ } from '$lib/locale';
 	import { portal } from '$lib/portal';
 	import Icon from '$components/Icon.svelte';
+	import ContentLocales from '$components/ContentLocales.svelte';
 	import MetaFields from './MetaFields.svelte';
 
 	type Props = {
@@ -70,6 +71,9 @@
 		</figure>
 		{#key `${identity}:${item.uid}`}
 			<div class="cms-figure-settings" use:portal={settings}>
+				{#if settings && translate && locales && locales.all.length > 1}
+					<ContentLocales locales={locales.all} locale={contentLocale} />
+				{/if}
 				<MetaFields {item} kind="video" {translate} {contentLocale} {locales} {update} {readonly} />
 			</div>
 		{/key}

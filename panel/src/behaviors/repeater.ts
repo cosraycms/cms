@@ -142,12 +142,7 @@ function active(owner: HTMLElement): boolean {
 }
 
 function locale(owner: HTMLElement): string | null {
-	return (
-		owner.closest('[data-content-locale-scope]')?.getAttribute('data-content-locale') ??
-		owner.closest('[data-locale-scope]')?.querySelector<HTMLElement>('[data-locale-tab].active')
-			?.dataset.localeTab ??
-		null
-	);
+	return owner.closest('[data-content-locale-scope]')?.getAttribute('data-content-locale') ?? null;
 }
 
 export function insertion(trigger: Element): Insertion | null {

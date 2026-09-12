@@ -1,10 +1,11 @@
-// Locale switching keeps every submitted variant in the form. Node editors
-// use one control for the whole content tree; other panel screens retain
-// their nearest data-locale-scope tabs.
+// One content-language selector per screen. Every translated variant stays
+// in the form; selecting a language only changes which one shows, hands the
+// locale to hosted element controls, and remembers the choice per browser.
 
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
 const CONTENT_OPTION = '[data-content-locale-option]';
+const STORE = 'cosray:content-locale';
 
 function show(scope: Element, locale: string, root: ParentNode = scope): void {
 	root.querySelectorAll<HTMLElement>('.variant[data-locale]').forEach((variant) => {
@@ -16,11 +17,13 @@ function show(scope: Element, locale: string, root: ParentNode = scope): void {
 	});
 }
 
-function handToHosts(root: ParentNode, locale: string, translatedOnly: boolean): void {
-	const selector = translatedOnly ? 'cosray-host[data-translated="true"]' : 'cosray-host';
-
-	root.querySelectorAll(selector).forEach((host) => {
-		(host as HTMLElement & { locale: string }).locale = locale;
+// A host not yet upgraded reads the scope's locale when it connects; a
+// property assigned before that would shadow its accessor for good.
+function handToHosts(root: ParentNode, locale: string): void {
+	root.querySelectorAll('cosray-host[data-translated="true"]').forEach((host) => {
+		if ('locale' in host) {
+			(host as HTMLElement & { locale: string }).locale = locale;
+		}
 	});
 }
 
@@ -59,6 +62,22 @@ function updateControl(control: HTMLElement, locale: string): void {
 	});
 }
 
+function remembered(): string {
+	try {
+		return localStorage.getItem(STORE) ?? '';
+	} catch {
+		return '';
+	}
+}
+
+function remember(locale: string): void {
+	try {
+		localStorage.setItem(STORE, locale);
+	} catch {
+		// A private window or blocked storage: the choice lasts for the page.
+	}
+}
+
 export function selectContentLocale(scope: Element, locale: string, root?: ParentNode): void {
 	const control = scope.querySelector<HTMLElement>(CONTENT_CONTROL);
 
@@ -70,39 +89,40 @@ export function selectContentLocale(scope: Element, locale: string, root?: Paren
 	scope.setAttribute('data-content-locale', locale);
 	updateControl(control, locale);
 	show(scope, locale, root);
-	handToHosts(root ?? scope, locale, true);
+	handToHosts(root ?? scope, locale);
 
-	if (changed && root === undefined) {
+	if (root !== undefined) {
+		return;
+	}
+
+	remember(locale);
+
+	if (changed) {
 		control.dispatchEvent(new CustomEvent('content-locale:change', { bubbles: true }));
 	}
 }
 
 function initializeContent(scope: Element): void {
 	const control = scope.querySelector<HTMLElement>(CONTENT_CONTROL);
-	const locale = (control && selected(control)) || scope.getAttribute('data-content-locale') || '';
 
-	if (!control || locale === '') {
+	if (!control) {
 		return;
 	}
 
-	scope.setAttribute('data-content-locale', locale);
-	updateControl(control, locale);
-	show(scope, locale);
+	const stored = remembered();
+	const locale = locales(control).includes(stored)
+		? stored
+		: selected(control) || scope.getAttribute('data-content-locale') || '';
+
+	if (locale !== '') {
+		selectContentLocale(scope, locale);
+	}
 }
 
-function activateLocal(tab: HTMLElement): void {
-	const scope = tab.closest('[data-locale-scope]');
-	const locale = tab.dataset.localeTab ?? '';
+function single(): Element | null {
+	const scopes = document.querySelectorAll(CONTENT_SCOPE);
 
-	if (!scope || locale === '') {
-		return;
-	}
-
-	scope.querySelectorAll('[data-locale-tab]').forEach((other) => {
-		other.classList.toggle('active', other === tab);
-	});
-	show(scope, locale);
-	handToHosts(scope, locale, false);
+	return scopes.length === 1 ? scopes[0] : null;
 }
 
 function click(event: Event): void {
@@ -113,18 +133,29 @@ function click(event: Event): void {
 	}
 
 	const option = target.closest<HTMLElement>(CONTENT_OPTION);
-	const optionScope = option?.closest(CONTENT_SCOPE);
+	const scope = option?.closest(CONTENT_SCOPE);
 	const locale = option?.dataset.contentLocaleOption ?? '';
 
-	if (optionScope && locale !== '') {
-		selectContentLocale(optionScope, locale);
+	if (scope && locale !== '') {
+		selectContentLocale(scope, locale);
+	}
+}
+
+// A control mirrored elsewhere — inside a settings dialog, or a dialog
+// mounted on the body outside every scope, which then means the screen's
+// one scope — asks for the switch through this event.
+function select(event: Event): void {
+	const target = event.target;
+	const locale = (event as CustomEvent<{ locale?: string }>).detail?.locale ?? '';
+
+	if (!(target instanceof Element) || locale === '') {
 		return;
 	}
 
-	const tab = target.closest('[data-locale-tab]');
+	const scope = target.closest(CONTENT_SCOPE) ?? single();
 
-	if (tab instanceof HTMLElement) {
-		activateLocal(tab);
+	if (scope) {
+		selectContentLocale(scope, locale);
 	}
 }
 
@@ -207,6 +238,7 @@ export function install(): () => void {
 	document.addEventListener('click', click);
 	document.addEventListener('change', change);
 	document.addEventListener('keydown', keydown);
+	document.addEventListener('content-locale:select', select);
 	document.addEventListener('repeater:stamp', stamp);
 	document.addEventListener('htmx:after:swap', initialize);
 	initialize();
@@ -215,6 +247,7 @@ export function install(): () => void {
 		document.removeEventListener('click', click);
 		document.removeEventListener('change', change);
 		document.removeEventListener('keydown', keydown);
+		document.removeEventListener('content-locale:select', select);
 		document.removeEventListener('repeater:stamp', stamp);
 		document.removeEventListener('htmx:after:swap', initialize);
 	};

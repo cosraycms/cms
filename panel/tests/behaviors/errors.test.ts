@@ -7,13 +7,8 @@ function editor(): void {
 	document.body.innerHTML = `
 		<form id="node-editor-form">
 			<div id="editor-errors" class="errors" tabindex="-1" hidden></div>
-			<div class="cms-field" data-locale-scope data-field="title">
-				<label class="label"><div>Title</div>
-					<span class="cms-locales">
-						<button type="button" class="tab active" data-locale-tab="en">EN</button>
-						<button type="button" class="tab" data-locale-tab="de">DE</button>
-					</span>
-				</label>
+			<div class="cms-field" data-field="title">
+				<label class="label"><div>Title</div></label>
 				<div class="control">
 					<div class="variant" data-locale="en">
 						<input name="content[title][value][en]" type="text" />
@@ -39,12 +34,8 @@ function editor(): void {
 			<div class="cms-field" data-field="entries">
 				<div class="control">
 					<div data-repeater>
-						<div data-repeater-row data-locale-scope>
+						<div data-repeater-row>
 							<button type="button" data-repeater-collapse aria-expanded="false">Row</button>
-							<span class="cms-locales">
-								<button type="button" class="tab active" data-locale-tab="en">EN</button>
-								<button type="button" class="tab" data-locale-tab="de">DE</button>
-							</span>
 							<div class="body" data-repeater-body hidden>
 								<div class="cms-field" data-field="sub">
 									<div class="control">
@@ -155,6 +146,7 @@ describe('errors behavior', () => {
 	afterEach(() => {
 		uninstall.forEach((cleanup) => cleanup());
 		document.body.innerHTML = '';
+		localStorage.clear();
 	});
 
 	it('marks the resolved control and its field wrapper', () => {
@@ -182,17 +174,6 @@ describe('errors behavior', () => {
 		respond([{ path: ['content', 'body', 'value', 'de'], message: 'Body is invalid' }]);
 
 		expect(field('body').getAttribute('data-invalid')).toBe('true');
-	});
-
-	it('badges the locale tab when the errored variant is hidden', () => {
-		respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
-
-		expect(
-			field('title').querySelector('[data-locale-tab="de"]')?.classList.contains('has-error'),
-		).toBe(true);
-		expect(
-			field('title').querySelector('[data-locale-tab="en"]')?.classList.contains('has-error'),
-		).toBe(false);
 	});
 
 	it('badges and switches the node control for a native variant', () => {
@@ -255,43 +236,6 @@ describe('errors behavior', () => {
 		expect(
 			form.querySelector<HTMLElement>('[data-content-locale-control]')?.dataset.errorLocales,
 		).toBe('de');
-	});
-
-	it('badges the row tab when the row owns its sub-fields locales', () => {
-		respond([
-			{
-				path: ['content', 'entries', 'value', 'zxx', 0, 'fields', 'trans', 'value', 'de'],
-				message: 'Fehlt',
-			},
-		]);
-
-		const row = document.querySelector('[data-repeater-row]');
-
-		expect(row?.querySelector('[data-locale-tab="de"]')?.classList.contains('has-error')).toBe(
-			true,
-		);
-		// The sub-field carries no tabs of its own to badge.
-		expect(field('trans').querySelector('[data-locale-tab]')).toBe(null);
-	});
-
-	it('clears a row tab badge once nothing in the row fails', () => {
-		respond([
-			{
-				path: ['content', 'entries', 'value', 'zxx', 0, 'fields', 'trans', 'value', 'de'],
-				message: 'Fehlt',
-			},
-		]);
-
-		const row = document.querySelector('[data-repeater-row]');
-		const input = document.querySelector<HTMLInputElement>(
-			'[name="content[entries][value][zxx][0][fields][trans][value][de]"]',
-		);
-
-		input?.dispatchEvent(new Event('input', { bubbles: true }));
-
-		expect(row?.querySelector('[data-locale-tab="de"]')?.classList.contains('has-error')).toBe(
-			false,
-		);
 	});
 
 	it('badges the meta button for issues inside the meta dialog', () => {
@@ -373,6 +317,13 @@ describe('errors behavior', () => {
 	});
 
 	it('reveals the hidden locale variant and focuses the control on summary click', () => {
+		const form = document.getElementById('node-editor-form')!;
+		form.setAttribute('data-content-locale-scope', '');
+		form.setAttribute('data-content-locale', 'en');
+		form.insertAdjacentHTML(
+			'afterbegin',
+			'<select data-content-locale-control data-content-locale-select><option value="en">English</option><option value="de">Deutsch</option></select>',
+		);
 		const box = respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
 
 		box.querySelector('button')?.click();
@@ -381,9 +332,7 @@ describe('errors behavior', () => {
 		const input = document.querySelector('[name="content[title][value][de]"]');
 
 		expect(variant?.hidden).toBe(false);
-		expect(
-			field('title').querySelector('[data-locale-tab="de"]')?.classList.contains('active'),
-		).toBe(true);
+		expect(form.getAttribute('data-content-locale')).toBe('de');
 		expect(document.activeElement).toBe(input);
 	});
 

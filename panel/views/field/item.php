@@ -30,7 +30,6 @@ $gridStyle = "grid-column: span {$width} / span {$width}; --rows: {$rowspan}";
 	'defaultLocale' => $defaultLocale,
 	'node' => $uid,
 	'assets' => $assets,
-	'globalLocales' => $globalLocales ?? false,
 	'gridStyle' => $gridStyle,
 	'pathSource' => $isPathSource,
 ]) ?>

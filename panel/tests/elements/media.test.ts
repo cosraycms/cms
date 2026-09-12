@@ -297,6 +297,41 @@ describe('per-use meta', () => {
 		});
 	});
 
+	it('keeps the open video dialog on the language chosen meanwhile', async () => {
+		const { element } = await media('cosray-video', {
+			value: {
+				zxx: [{ uid: 'clip', meta: { caption: { de: 'Ein Clip', en: 'A clip' } } }],
+			},
+			field: { name: 'clip', translate: true, limit: { min: 0, max: 1 } },
+			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
+		});
+		element.querySelector<HTMLButtonElement>('.cms-video-edit')!.click();
+		await tick();
+		const caption = document.querySelector<HTMLTextAreaElement>(
+			'.cms-modal textarea[id$="-caption"]',
+		)!;
+		const mirror = document.querySelector<HTMLElement>('.cms-modal .cms-content-locales')!;
+
+		expect(caption.value).toBe('Ein Clip');
+		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('Deutsch');
+
+		const requests: string[] = [];
+		document.addEventListener(
+			'content-locale:select',
+			(event) => requests.push((event as CustomEvent<{ locale: string }>).detail.locale),
+			{ once: true },
+		);
+		mirror.querySelectorAll('button')[0].click();
+
+		expect(requests).toEqual(['en']);
+
+		element.locale = 'en';
+		await tick();
+
+		expect(caption.value).toBe('A clip');
+		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('English');
+	});
+
 	it('edits the caption of a video through its modal', async () => {
 		const { element, changes } = await media('cosray-video', {
 			value: { zxx: [{ uid: 'clip' }] },
@@ -399,6 +434,31 @@ describe('block presentation', () => {
 		expect(changes).toHaveBeenLastCalledWith({
 			zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A copper kettle' } } }],
 		});
+	});
+
+	it('mirrors the content language in the settings slot of a translated image', async () => {
+		const slot = document.createElement('div');
+		document.body.append(slot);
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'image', translate: true, limit: { min: 0, max: 1 }, presentation: 'block' },
+			assets: { cover },
+			settings: slot,
+		} as HostPayload);
+		const mirror = slot.querySelector<HTMLElement>('.cms-content-locales')!;
+		const requests: string[] = [];
+		document.addEventListener(
+			'content-locale:select',
+			(event) => requests.push((event as CustomEvent<{ locale: string }>).detail.locale),
+			{ once: true },
+		);
+
+		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('Deutsch');
+		expect(element.querySelector('.cms-content-locales')).toBeNull();
+
+		mirror.querySelectorAll('button')[0].click();
+
+		expect(requests).toEqual(['en']);
 	});
 
 	it('replaces the slot form along with the image and clears it on remove', async () => {

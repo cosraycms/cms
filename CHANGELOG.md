@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- One content-language selector per screen replaces the last per-field language tabs. The menu screens and the media library switch their translated texts through the same selector the node editor has, a block's settings dialog and the video and file edit dialogs mirror it so the language can change without closing them, and the choice is remembered per browser, so the next screen opens in the language you were working in. The tabs markup (`data-locale-scope`, `data-locale-tab`, `.cms-locales`) is gone; a panel theme or test matching it must match the selector (`.cms-content-locales`) instead.
 - Aligned neighbouring editor controls beneath wrapped labels, with descriptions directly below their controls and validation messages underneath. Date/time inputs match other simple input heights, and required/read-only markers no longer enlarge labels.
 
 - A read-only Entries or Blocks field keeps its rows readable and loses everything that restructures them: no adders, type picker or row templates, no drag grip, row menu, duplicate, insert or resize handles, and its rows' sub-fields render read-only too. The repeater and blocks behaviors refuse to add, move, remove or resize inside a `data-readonly` field, so a stray keyboard path cannot change what the save path ignores anyway.

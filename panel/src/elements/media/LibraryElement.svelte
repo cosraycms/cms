@@ -60,8 +60,23 @@
 	let fileInput: HTMLInputElement | undefined = $state();
 
 	const prefix = $derived($system.prefix);
-	const locales = $derived($system.locales);
-	const defaultLocale = $derived($system.defaultLocale || $system.locale);
+	// The screen's content-language selector sits outside the element: the
+	// scope around it carries the selection and announces every change.
+	let locale = $state('');
+
+	function readLocale(): void {
+		locale =
+			$host().closest('[data-content-locale-scope]')?.getAttribute('data-content-locale') ||
+			$system.defaultLocale ||
+			$system.locale;
+	}
+
+	onMount(() => {
+		readLocale();
+		document.addEventListener('content-locale:change', readLocale);
+
+		return () => document.removeEventListener('content-locale:change', readLocale);
+	});
 
 	async function load(reset: boolean) {
 		loading = true;
@@ -417,8 +432,7 @@
 			<MediaDetail
 				uid={selected}
 				{prefix}
-				{locales}
-				{defaultLocale}
+				{locale}
 				onClose={() => (selected = null)}
 				onDeleted={() => onDeleted(selected!)}
 			/>

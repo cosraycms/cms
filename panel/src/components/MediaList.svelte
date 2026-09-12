@@ -40,6 +40,15 @@
 	}: Props = $props();
 	const assets = useAssets();
 	let sorterElement: HTMLElement | undefined = $state();
+	// The open dialog's props stay live, so a language chosen through its
+	// mirrored selector reaches it while it is open.
+	let dialog: { contentLocale: string } | null = $state(null);
+
+	$effect(() => {
+		if (dialog) {
+			dialog.contentLocale = contentLocale;
+		}
+	});
 
 	function createSorter() {
 		if (sorterElement) {
@@ -64,29 +73,34 @@
 	}
 
 	function edit(index: number, kind: 'video' | 'file') {
+		const props = $state({
+			asset: items[index],
+			kind,
+			close: () => handle.close(),
+			apply: (item: FileItem) => {
+				handle.close();
+				// Empty per-use meta is dropped so catalog defaults apply.
+				items[index] = pruneItemMeta(item);
+				notify();
+			},
+			translate,
+			contentLocale,
+			locales,
+		});
 		const handle = cosray().modal.open(
 			(host) => {
+				dialog = props;
 				const app = mount(ModalEditImage, {
 					target: host,
-					props: {
-						asset: items[index],
-						kind,
-						close: () => handle.close(),
-						apply: (item: FileItem) => {
-							handle.close();
-							// Empty per-use meta is dropped so catalog defaults apply.
-							items[index] = pruneItemMeta(item);
-							notify();
-						},
-						translate,
-						contentLocale,
-						locales,
-					},
+					props,
 					// A separate mount: the catalog fallbacks need the element's store.
 					context: assetsContext(assets),
 				});
 
-				return () => void unmount(app);
+				return () => {
+					dialog = null;
+					void unmount(app);
+				};
 			},
 			{ owner: sorterElement ?? document.getElementById(identity) ?? undefined },
 		);

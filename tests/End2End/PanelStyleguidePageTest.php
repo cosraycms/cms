@@ -34,7 +34,6 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 		// Components render through the same partials the editor uses.
 		$this->assertStringContainsString('class="cms-button primary"', $html);
 		$this->assertStringContainsString('class="cms-field required"', $html);
-		$this->assertStringContainsString('data-locale-tab="de"', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope][@data-content-locale="de"]'
 				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"][@aria-checked="true"]',
@@ -44,15 +43,11 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 			'//input[@name="content[fallback-title][value][de]"][@value=""][@data-fallback-input]',
 			$html,
 		);
-		// A symmetric row switches its translated sub-fields as one: the row
-		// owns the strip and the wrappers inside it carry no tabs.
+		// A translated sub-field of a row renders one variant per locale under
+		// the pane's selector, like a top-level field.
 		$this->assertHtmlNodeExists(
-			'//div[@data-repeater-row][@data-locale-scope]'
-				. '//span[@class="cms-locales"]/button[@data-locale-tab="de"]',
-			$html,
-		);
-		$this->assertHtmlNodeMissing(
-			'//div[@data-repeater-row]//div[contains(@class, "cms-field")]//button[@data-locale-tab]',
+			'//div[@data-content-locale-scope]//*[@data-content-locale-control]'
+				. '/following::div[@data-repeater-row]//div[@class="variant"][@data-locale="de"]',
 			$html,
 		);
 		// A block with one field hides that field's label from sight; a

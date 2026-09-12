@@ -12,19 +12,18 @@
 </script>
 
 <script lang="ts">
-	import type { Locale } from '$lib/sys';
 	import { __ } from '$lib/locale';
 
 	type TextKey = 'alt' | 'title' | 'caption';
 
 	type Props = {
 		meta: Meta;
-		locales: Locale[];
-		activeLocale: string;
+		// The language whose texts the form edits: the screen's selection.
+		locale: string;
 		isImage: boolean;
 	};
 
-	let { meta = $bindable(), locales, activeLocale = $bindable(), isImage }: Props = $props();
+	let { meta = $bindable(), locale, isImage }: Props = $props();
 
 	const fields: { key: TextKey; label: string }[] = [
 		{ key: 'alt', label: __('image:alt-text-long') },
@@ -38,34 +37,17 @@
 	function text(key: TextKey): string {
 		const map = meta[key];
 
-		return (map && typeof map === 'object' ? ((map as LocaleText)[activeLocale] ?? '') : '') || '';
+		return (map && typeof map === 'object' ? ((map as LocaleText)[locale] ?? '') : '') || '';
 	}
 
 	function setText(key: TextKey, next: string) {
 		const map = { ...((meta[key] as LocaleText) ?? {}) };
-		map[activeLocale] = next;
+		map[locale] = next;
 		meta = { ...meta, [key]: map };
 	}
 </script>
 
 <div class="cms-meta-form">
-	{#if locales.length > 1}
-		<div class="cms-meta-locales" role="tablist">
-			{#each locales as locale (locale.id)}
-				<button
-					type="button"
-					role="tab"
-					class="cms-meta-locale"
-					class:active={activeLocale === locale.id}
-					aria-selected={activeLocale === locale.id}
-					onclick={() => (activeLocale = locale.id)}
-				>
-					{locale.id.toUpperCase()}
-				</button>
-			{/each}
-		</div>
-	{/if}
-
 	{#each shown as field (field.key)}
 		<label class="cms-meta-field">
 			<span>{field.label}</span>
@@ -104,25 +86,6 @@
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-3);
-		}
-
-		.cms-meta-locales {
-			display: flex;
-			gap: var(--cms-space-1);
-		}
-
-		.cms-meta-locale {
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius);
-			background-color: var(--cms-color-surface-sunken);
-			padding: var(--cms-space-1) var(--cms-space-2);
-			font-size: var(--cms-font-size-xs);
-			cursor: pointer;
-		}
-
-		.cms-meta-locale.active {
-			border-color: var(--cms-color-accent);
-			color: var(--cms-color-accent);
 		}
 
 		.cms-meta-field {

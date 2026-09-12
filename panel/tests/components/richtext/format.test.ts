@@ -144,9 +144,9 @@ describe('richtext format', () => {
 				content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
 			}),
 		).toBe(true);
-		expect(isFilledDoc({ type: 'doc', content: [{ type: 'image', attrs: { uid: 'asset' } }] })).toBe(
-			true,
-		);
+		expect(
+			isFilledDoc({ type: 'doc', content: [{ type: 'image', attrs: { uid: 'asset' } }] }),
+		).toBe(true);
 	});
 
 	it('falls back to an empty document when stored JSON is invalid', () => {

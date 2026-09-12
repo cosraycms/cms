@@ -141,7 +141,18 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'//li[@role="treeitem" and @data-uid="selected-item"]/div[contains(concat(" ", normalize-space(@class), " "), " is-selected ")]',
 			$html,
 		);
+		// The screen's one content-language selector switches the pane's
+		// translated inputs, whose labels follow the selected locale.
+		$this->assertHtmlNodeExists(
+			'//div[@data-content-locale-scope][@data-content-locale="en"]'
+				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
+			$html,
+		);
 		$form = '//form[@action="/cp/menus/tree-menu/item/selected-item"]';
+		$this->assertHtmlNodeExists(
+			"{$form}//label[@for=\"menu-item-title-en\" and @data-locale-label-for=\"menu-item-title\"]",
+			$html,
+		);
 		$this->assertHtmlNodeExists("{$form}//input[@name=\"title[en]\" and @value=\"Selected\"]", $html);
 		$this->assertHtmlNodeExists("{$form}//input[@name=\"path[en]\" and @value=\"/selected\"]", $html);
 		$this->assertHtmlNodeExists("{$form}//input[@name=\"class\" and @value=\"promoted\"]", $html);

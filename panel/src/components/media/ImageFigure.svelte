@@ -7,6 +7,7 @@
 	import { extension } from '$lib/library';
 	import { __ } from '$lib/locale';
 	import { portal } from '$lib/portal';
+	import ContentLocales from '$components/ContentLocales.svelte';
 	import Icon from '$components/Icon.svelte';
 	import MetaFields from './MetaFields.svelte';
 
@@ -103,6 +104,9 @@
 		</figure>
 		{#key `${identity}:${item.uid}`}
 			<div class="cms-figure-settings" use:portal={settings}>
+				{#if settings && translate && locales && locales.all.length > 1}
+					<ContentLocales locales={locales.all} locale={contentLocale} />
+				{/if}
 				<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} {readonly} />
 			</div>
 		{/key}

@@ -33,9 +33,9 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 	<div class="scroll">
 		<?php if ($contentLocales): ?>
 			<section class="section">
-				<?php $this->insert('node/content-locales', [
+				<?php $this->insert('component/content-locales', [
 					'locales' => $locales,
-					'defaultLocale' => $defaultLocale,
+					'selected' => $defaultLocale,
 				]) ?>
 			</section>
 		<?php endif ?>

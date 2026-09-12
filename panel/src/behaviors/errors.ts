@@ -92,16 +92,6 @@ function wrapper(control: Element): Element {
 	return owner ?? control.closest('.cms-field') ?? control.parentElement ?? control;
 }
 
-/** The tabs belong to whichever scope owns them, which for a sub-field of a
- * typed repeater row is the row, not its own wrapper. */
-function localeTab(control: Element, locale: string | undefined): HTMLElement | null {
-	return (
-		control
-			.closest('[data-locale-scope]')
-			?.querySelector<HTMLElement>(`[data-locale-tab="${locale}"]`) ?? null
-	);
-}
-
 function contentLocaleIds(control: HTMLElement): Set<string> {
 	if (control instanceof HTMLSelectElement) {
 		return new Set(Array.from(control.options, (option) => option.value));
@@ -183,16 +173,6 @@ function unmark(field: Element): void {
 	field.removeAttribute(INVALID);
 	field.removeAttribute('data-error-locales');
 
-	// A row owns the tabs of its sub-fields, so its badge outlives the
-	// wrapper that put it there — drop it once nothing in the row fails.
-	const scope = field.closest('[data-locale-scope]');
-
-	if (scope && scope !== field && !scope.querySelector(`[${INVALID}]`)) {
-		scope
-			.querySelectorAll('[data-locale-tab].has-error')
-			.forEach((tab) => tab.classList.remove('has-error'));
-	}
-
 	const form = field.closest('form');
 
 	if (form) {
@@ -203,9 +183,6 @@ function unmark(field: Element): void {
 function wipe(): void {
 	document.querySelectorAll(`[${INVALID}]`).forEach(unmark);
 	document.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
-	document
-		.querySelectorAll('[data-locale-tab].has-error')
-		.forEach((tab) => tab.classList.remove('has-error'));
 	document.querySelectorAll('[data-content-locale-control]').forEach((control) => {
 		control.classList.remove('has-error');
 		control.removeAttribute('aria-invalid');
@@ -247,13 +224,6 @@ function mark(control: Element, message: string, locale?: string): void {
 	) {
 		control.setAttribute('aria-invalid', 'true');
 		control.setAttribute('aria-describedby', note.id);
-	}
-
-	// The errored locale's variant may be hidden behind a tab; badge it.
-	const variant = control.closest('.variant[data-locale]');
-
-	if (variant instanceof HTMLElement && variant.hidden) {
-		localeTab(control, variant.dataset.locale)?.classList.add('has-error');
 	}
 
 	// An issue inside the meta dialog is invisible until opened.
@@ -301,7 +271,7 @@ function swapped(): void {
 	paint(box);
 }
 
-// Reveal the control (locale tab, collapsed rows, meta dialog), then go there.
+// Reveal the control (content language, collapsed rows, meta dialog), then go there.
 function activate(event: Event): void {
 	const target = event.target;
 
@@ -324,7 +294,6 @@ function activate(event: Event): void {
 	}
 
 	const field = wrapper(control);
-	const variant = control.closest('.variant[data-locale]');
 	const globalScope =
 		form.closest('[data-content-locale-scope]') ??
 		form.querySelector('[data-content-locale-scope]');
@@ -332,8 +301,6 @@ function activate(event: Event): void {
 
 	if (globalScope && locale) {
 		selectContentLocale(globalScope, locale);
-	} else if (variant instanceof HTMLElement && variant.hidden) {
-		localeTab(control, variant.dataset.locale)?.click();
 	}
 
 	for (

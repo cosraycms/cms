@@ -4,6 +4,7 @@
 	import { ModalHeader, ModalBody, ModalFooter } from '$components/modal';
 	import { __ } from '$lib/locale';
 	import Button from '$components/Button.svelte';
+	import ContentLocales from '$components/ContentLocales.svelte';
 	import MetaFields from '$components/media/MetaFields.svelte';
 
 	type Props = {
@@ -26,6 +27,11 @@
 <ModalHeader>{kind === 'video' ? __('image:caption') : __('media:file-details')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-edit-image-fields">
+		{#if translate && locales && locales.all.length > 1}
+			<div class="cms-modal-edit-image-locales">
+				<ContentLocales locales={locales.all} locale={contentLocale} />
+			</div>
+		{/if}
 		<MetaFields
 			item={draft}
 			{kind}
@@ -49,6 +55,10 @@
 	@layer panel {
 		.cms-modal-edit-image-fields {
 			margin-bottom: var(--cms-space-8);
+		}
+
+		.cms-modal-edit-image-locales {
+			margin-bottom: var(--cms-space-4);
 		}
 	}
 </style>

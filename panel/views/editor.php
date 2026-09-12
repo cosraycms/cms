@@ -209,7 +209,6 @@ foreach ($fields as $field) {
 								'uid' => $uid,
 								'assets' => $assets,
 								'pathSourceFields' => $pathSourceFields,
-								'globalLocales' => $contentLocales,
 							]) ?>
 						<?php else: ?>
 							<div class="cms-fields">
@@ -222,7 +221,6 @@ foreach ($fields as $field) {
 										'uid' => $uid,
 										'assets' => $assets,
 										'pathSourceFields' => $pathSourceFields,
-										'globalLocales' => $contentLocales,
 									]) ?>
 								<?php endforeach ?>
 							</div>

@@ -622,8 +622,8 @@ Menus:
 - `menus.description` is a jsonb locale map (`{locale: text}`, or
   `{zxx: text}` when not language-specific), like `nodes.title` and
   `topics.name`. `Menus::create()`/`update()` take that map; the panel
-  edits it with locale tabs and orders the menu list by it through
-  `Title\Sort::expression()`
+  edits it in the screen's content language and orders the menu list by
+  it through `Title\Sort::expression()`
 - `menus.max_depth` caps how deep the tree may be built (NULL is
   unlimited, the default). An authoring constraint, not a rendering one
   — a template may still output fewer levels. `Menus` enforces it on
@@ -956,7 +956,8 @@ Block image rendering:
   a three-pane workspace: filter rail (kind checkboxes with counts,
   upload-date ranges, reset), searchable tile grid with multi-file and
   drag-and-drop upload, and a persistent inspector for meta editing
-  (locale tabs, click-to-set focal), the usage list, and delete. Kind
+  (in the screen's content language, click-to-set focal), the usage
+  list, and delete. Kind
   set, committed search, date range, and selected file mirror into the
   query string (`kind`, `q`, `range`, `file`) via
   `history.replaceState`, so the screen state deep-links. Full-page

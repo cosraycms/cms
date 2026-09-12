@@ -65,7 +65,6 @@ $single = count($entryTypes) === 1;
 				'index' => $index,
 				'rowData' => $rowData,
 				'entryType' => $entryTypes[$type],
-				'globalLocales' => $globalLocales ?? false,
 				'readonly' => $readonly,
 			]);
 		} ?>
@@ -77,7 +76,6 @@ $single = count($entryTypes) === 1;
 					'index' => '__i__',
 					'rowData' => null,
 					'entryType' => $entryType,
-					'globalLocales' => $globalLocales ?? false,
 					'readonly' => false,
 				]) ?>
 			</template>

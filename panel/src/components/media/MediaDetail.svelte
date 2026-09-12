@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Locale } from '$lib/sys';
 	import { mount, unmount } from 'svelte';
 	import { cosray } from '$lib/bridge';
 	import { humanSize } from '$lib/library';
@@ -33,18 +32,17 @@
 	type Props = {
 		uid: string;
 		prefix: string;
-		locales: Locale[];
-		defaultLocale: string;
+		// The screen's content language: which translation the form edits.
+		locale: string;
 		onClose: () => void;
 		onDeleted: () => void;
 	};
 
-	let { uid, prefix, locales, defaultLocale, onClose, onDeleted }: Props = $props();
+	let { uid, prefix, locale, onClose, onDeleted }: Props = $props();
 
 	let asset = $state<Asset | null>(null);
 	let usage = $state<Owner[]>([]);
 	let meta = $state<Meta>({});
-	let activeLocale = $state('');
 	let loading = $state(false);
 	let failed = $state(false);
 	let saving = $state(false);
@@ -185,7 +183,6 @@
 	}
 
 	$effect(() => {
-		activeLocale = defaultLocale;
 		void loadDetail(uid);
 	});
 </script>
@@ -269,7 +266,7 @@
 				</div>
 			{/if}
 
-			<MetaForm bind:meta {locales} bind:activeLocale {isImage} />
+			<MetaForm bind:meta {locale} {isImage} />
 
 			<section class="cms-detail-usage">
 				<h3>{__('media:usage')}</h3>

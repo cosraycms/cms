@@ -2,7 +2,6 @@
 
 use Cosray\Block\Heading;
 use Cosray\Block\Layout;
-use Cosray\Panel\RowLocales;
 
 $field = (array) $this->unwrap($field);
 $index = $this->unwrap($index);
@@ -28,9 +27,7 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 // A stored layout a narrower field cannot hold is shown clamped, as
 // the save will store it.
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
-$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 $readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
-$ownsLocales = !$globalLocales && RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->colspan;
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
@@ -68,7 +65,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 <div
 	class="block<?= $bare ? ' is-bare' : '' ?>"
 	data-repeater-row
-	<?= $ownsLocales ? 'data-locale-scope' : '' ?>
 	data-meta-owner
 	data-indent="<?= $layout->indent ?>"
 	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
@@ -163,9 +159,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				</div>
 			<?php endif ?>
 		</span>
-		<?php if ($ownsLocales) {
-			$this->insert('field/row-locales');
-		} ?>
 	</div>
 	<?php if ($columns > 1 && !$readonly): ?>
 		<?php foreach ([
@@ -184,7 +177,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 		<div class="cms-fields">
 			<?php $this->insert($editor ?? 'field/row-fields', [
 				'type' => $blockType,
-				'ownsLocales' => $ownsLocales,
 				'ownMeta' => false,
 				'readonly' => $readonly,
 				// One visible field needs no label of its own: the block names it.
@@ -192,7 +184,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				'fieldsData' => $fieldsData,
 				'rowName' => $rowName,
 				'rowId' => $rowId,
-				'globalLocales' => $globalLocales,
 			]) ?>
 		</div>
 	</div>

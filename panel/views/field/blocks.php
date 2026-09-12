@@ -83,7 +83,6 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				'min' => $min,
 				'metaControl' => $metaControl,
 				'single' => $single,
-				'globalLocales' => $globalLocales ?? false,
 				'readonly' => $readonly,
 			]);
 		} ?>
@@ -104,7 +103,6 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				'min' => $min,
 				'metaControl' => $metaControl,
 				'single' => $single,
-				'globalLocales' => $globalLocales ?? false,
 				'readonly' => false,
 			]) ?>
 		</template>

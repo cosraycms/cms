@@ -31,6 +31,7 @@ return [
 		'common:type' => 'Type',
 		'common:upload' => 'Upload',
 		'document:delete' => 'Delete document',
+		'editor:content-language' => 'Content language',
 		'field:cancel-delete-entry' => 'No, do not delete entry',
 		'field:confirm-delete' => 'Do you really want to delete this entry?',
 		'field:confirm-delete-entry' => 'Yes, delete entry',

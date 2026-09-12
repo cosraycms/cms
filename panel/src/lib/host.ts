@@ -64,7 +64,7 @@ export class CosrayHost extends HTMLElement {
 		void this.#mount();
 	}
 
-	// The locale tabs behavior assigns the editing locale; forward it.
+	// The content-language behavior assigns the editing locale; forward it.
 	set locale(locale: string) {
 		this.#locale = locale;
 

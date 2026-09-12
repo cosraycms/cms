@@ -31,6 +31,7 @@ afterEach(() => {
 	uninstall = null;
 	document.body.innerHTML = '';
 	sortable.mockClear();
+	localStorage.clear();
 });
 
 function row(index: string, value = '', extra = ''): string {

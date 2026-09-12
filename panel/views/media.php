@@ -6,12 +6,23 @@ $this->layout('layer/main');
 
 $system = (array) $this->unwrap($system);
 $panelBase = (string) $panelBase;
+$locales = (array) ($system['locales'] ?? []);
+$defaultLocale = (string) ($system['defaultLocale'] ?? '');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 
-<div class="page cms-media">
+<div
+	class="page cms-media"
+	data-content-locale-scope
+	data-content-locale="<?= escape($defaultLocale) ?>">
 	<header class="head">
 		<h1><?= escape(__('media:title')) ?></h1>
+		<?php $this->insert('component/content-locales', [
+			'locales' => $locales,
+			'selected' => $defaultLocale,
+			'controlId' => 'cms-media-locale',
+			'labelled' => false,
+		]) ?>
 	</header>
 
 	<section class="body">

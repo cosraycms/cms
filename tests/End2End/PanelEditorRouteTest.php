@@ -91,7 +91,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
 			$html,
 		);
-		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		// The server renders the entry title from the first text value.
 		$this->assertStringContainsString('First entry', $html);
 		// One inert template per allowed type with the stamp placeholder.
@@ -154,7 +153,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
 			$html,
 		);
-		$this->assertStringNotContainsString('data-locale-tab=', $html);
 		$this->assertStringContainsString('data-name="' . $en . '"', $html);
 		$this->assertStringContainsString('data-name="content[contentBlocks][value][de]"', $html);
 		$this->assertSame(2, substr_count($html, 'data-blocks-locale'));

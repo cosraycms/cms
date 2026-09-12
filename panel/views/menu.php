@@ -13,9 +13,15 @@ $pane = $this->unwrap($pane);
 $notice = $this->unwrap($notice ?? null);
 $undo = $this->unwrap($undo ?? null);
 $urls = (array) $this->unwrap($urls);
+$props = (array) $this->unwrap($props);
+$locales = (array) $props['locales'];
+$defaultLocale = (string) $props['defaultLocale'];
 ?>
 
-<div class="page cms-menus cms-menu-tree">
+<div
+	class="page cms-menus cms-menu-tree"
+	data-content-locale-scope
+	data-content-locale="<?= escape($defaultLocale) ?>">
 	<header class="head">
 		<div class="titles">
 			<div class="line">
@@ -27,6 +33,12 @@ $urls = (array) $this->unwrap($urls);
 				)) ?></span>
 			</div>
 		</div>
+		<?php $this->insert('component/content-locales', [
+			'locales' => $locales,
+			'selected' => $defaultLocale,
+			'controlId' => 'cms-menu-locale',
+			'labelled' => false,
+		]) ?>
 	</header>
 
 	<div class="body">

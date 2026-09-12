@@ -3,35 +3,40 @@ import { install } from '../../src/behaviors/tabs';
 
 let uninstall: (() => void) | null = null;
 
-beforeEach(() => {
+// The host contract the behavior hands the locale to.
+if (!customElements.get('cosray-host')) {
+	customElements.define(
+		'cosray-host',
+		class extends HTMLElement {
+			locale = '';
+		},
+	);
+}
+
+function screen(selected = 'en'): void {
+	const checked = (locale: string) => (locale === selected ? 'true' : 'false');
+	const hidden = (locale: string) => (locale === selected ? '' : 'hidden');
+
 	document.body.innerHTML = `
-		<div class="cms-field" data-locale-scope id="first">
-			<button type="button" data-locale-tab="en" class="active">en</button>
-			<button type="button" data-locale-tab="de">de</button>
-			<div class="variant" data-locale="en"></div>
-			<div class="variant" data-locale="de" hidden></div>
-			<cosray-host></cosray-host>
-		</div>
-		<div class="cms-field" data-locale-scope id="second">
-			<button type="button" data-locale-tab="en" class="active">en</button>
-			<button type="button" data-locale-tab="de">de</button>
-			<div class="variant" data-locale="en"></div>
-			<div class="variant" data-locale="de" hidden></div>
-		</div>
-		<form data-content-locale-scope data-content-locale="en" id="global">
+		<form data-content-locale-scope data-content-locale="${selected}" id="screen">
 			<div data-content-locale-control data-editor-state role="radiogroup">
-				<button type="button" data-content-locale-option="en" role="radio" aria-checked="true" tabindex="0">English</button>
-				<button type="button" data-content-locale-option="de" role="radio" aria-checked="false" tabindex="-1">Deutsch</button>
+				<button type="button" data-content-locale-option="en" role="radio" aria-checked="${checked('en')}" tabindex="0">English</button>
+				<button type="button" data-content-locale-option="de" role="radio" aria-checked="${checked('de')}" tabindex="-1">Deutsch</button>
 			</div>
 			<div class="cms-field">
-				<label data-locale-label-for="field-title" for="field-title-en">Title</label>
-				<div class="variant" data-locale="en"><input id="field-title-en" /></div>
-				<div class="variant" data-locale="de" hidden><input id="field-title-de" /></div>
+				<label data-locale-label-for="field-title" for="field-title-${selected}">Title</label>
+				<div class="variant" data-locale="en" ${hidden('en')}><input id="field-title-en" /></div>
+				<div class="variant" data-locale="de" ${hidden('de')}><input id="field-title-de" /></div>
 				<cosray-host data-translated="true"></cosray-host>
 				<cosray-host id="neutral"></cosray-host>
+				<dialog><div id="mirror"></div></dialog>
 			</div>
 		</form>
 	`;
+}
+
+beforeEach(() => {
+	screen();
 	uninstall = install();
 });
 
@@ -39,124 +44,153 @@ afterEach(() => {
 	uninstall?.();
 	uninstall = null;
 	document.body.innerHTML = '';
+	localStorage.clear();
 });
 
-function field(id: string): HTMLElement {
-	const el = document.getElementById(id);
+function scope(): HTMLElement {
+	const el = document.getElementById('screen');
 
 	if (!el) {
-		throw new Error(`field ${id} missing`);
+		throw new Error('screen missing');
 	}
 
 	return el;
 }
 
-function activate(id: string, locale: string): void {
-	field(id).querySelector<HTMLElement>(`[data-locale-tab="${locale}"]`)?.click();
+function choose(locale: string): void {
+	scope().querySelector<HTMLButtonElement>(`[data-content-locale-option="${locale}"]`)?.click();
 }
 
-describe('locale tabs', () => {
-	it('toggles variant visibility and the active tab', () => {
-		activate('first', 'de');
+function request(from: Element, locale: string): void {
+	from.dispatchEvent(
+		new CustomEvent('content-locale:select', { bubbles: true, detail: { locale } }),
+	);
+}
 
-		const scope = field('first');
-
-		expect(scope.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
-		expect(scope.querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(true);
-		expect(scope.querySelector('[data-locale-tab="de"]')?.classList.contains('active')).toBe(true);
-		expect(scope.querySelector('[data-locale-tab="en"]')?.classList.contains('active')).toBe(false);
-	});
-
-	it('hands the editing locale to hosted elements', () => {
-		activate('first', 'de');
-
-		const host = field('first').querySelector('cosray-host') as HTMLElement & {
-			locale?: string;
-		};
-
-		expect(host.locale).toBe('de');
-	});
-
-	it('scopes the switch to the field wrapper the tab sits in', () => {
-		activate('first', 'de');
-
-		const other = field('second');
-
-		expect(other.querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(false);
-		expect(other.querySelector('[data-locale-tab="en"]')?.classList.contains('active')).toBe(true);
-	});
-
-	it('switches every node-owned variant and translated host together', () => {
-		const scope = field('global');
-		const control = scope.querySelector<HTMLElement>('[data-content-locale-control]')!;
+describe('content language', () => {
+	it('switches every variant and translated host of the screen together', () => {
+		const control = scope().querySelector<HTMLElement>('[data-content-locale-control]')!;
 		let changes = 0;
 		control.addEventListener('content-locale:change', () => changes++);
-		scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')?.click();
+		choose('de');
 
-		expect(scope.dataset.contentLocale).toBe('de');
+		expect(scope().dataset.contentLocale).toBe('de');
 		expect(changes).toBe(1);
-		expect(scope.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
-		expect(scope.querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(true);
-		expect(scope.querySelector('label')?.getAttribute('for')).toBe('field-title-de');
+		expect(scope().querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
+		expect(scope().querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(true);
+		expect(scope().querySelector('label')?.getAttribute('for')).toBe('field-title-de');
 		expect(
-			(scope.querySelector('[data-translated]') as HTMLElement & { locale?: string }).locale,
+			(scope().querySelector('[data-translated]') as HTMLElement & { locale?: string }).locale,
 		).toBe('de');
-		expect(
-			(scope.querySelector('#neutral') as HTMLElement & { locale?: string }).locale,
-		).toBeUndefined();
+		expect((scope().querySelector('#neutral') as HTMLElement & { locale?: string }).locale).toBe(
+			'',
+		);
 	});
 
 	it('supports arrow, Home, and End keys with one tab stop', () => {
-		const scope = field('global');
-		const english = scope.querySelector<HTMLButtonElement>('[data-content-locale-option="en"]')!;
-		const german = scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')!;
+		const english = scope().querySelector<HTMLButtonElement>('[data-content-locale-option="en"]')!;
+		const german = scope().querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')!;
 		english.focus();
 		english.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
 
-		expect(scope.dataset.contentLocale).toBe('de');
+		expect(scope().dataset.contentLocale).toBe('de');
 		expect(german.getAttribute('aria-checked')).toBe('true');
 		expect(german.tabIndex).toBe(0);
 		expect(english.tabIndex).toBe(-1);
 		expect(document.activeElement).toBe(german);
 
 		german.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
-		expect(scope.dataset.contentLocale).toBe('en');
+		expect(scope().dataset.contentLocale).toBe('en');
 		expect(document.activeElement).toBe(english);
 
 		english.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
-		expect(scope.dataset.contentLocale).toBe('de');
+		expect(scope().dataset.contentLocale).toBe('de');
 		expect(document.activeElement).toBe(german);
 	});
 
 	it('keeps select controls for larger locale sets', () => {
-		const scope = field('global');
-		scope.querySelector('[data-content-locale-control]')?.remove();
-		scope.insertAdjacentHTML(
+		scope().querySelector('[data-content-locale-control]')?.remove();
+		scope().insertAdjacentHTML(
 			'afterbegin',
 			'<select data-content-locale-control><option value="en">English</option><option value="de">Deutsch</option></select>',
 		);
-		const select = scope.querySelector<HTMLSelectElement>('[data-content-locale-control]')!;
+		const select = scope().querySelector<HTMLSelectElement>('[data-content-locale-control]')!;
 		select.value = 'de';
 		select.dispatchEvent(new Event('change', { bubbles: true }));
 
-		expect(scope.dataset.contentLocale).toBe('de');
-		expect(scope.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
+		expect(scope().dataset.contentLocale).toBe('de');
+		expect(scope().querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
 	});
 
-	it('applies the current node locale to newly stamped rows', () => {
-		const scope = field('global');
-		scope.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')?.click();
+	it('applies the current locale to newly stamped rows', () => {
+		choose('de');
 		const row = document.createElement('div');
 		row.innerHTML = `
 			<div class="variant" data-locale="en"></div>
 			<div class="variant" data-locale="de" hidden></div>
 			<cosray-host data-translated="true"></cosray-host>`;
-		scope.append(row);
+		scope().append(row);
 		row.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
 
 		expect(row.querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
 		expect((row.querySelector('cosray-host') as HTMLElement & { locale?: string }).locale).toBe(
 			'de',
 		);
+	});
+
+	it('remembers the choice and opens the next screen in that language', () => {
+		choose('de');
+
+		expect(localStorage.getItem('cosray:content-locale')).toBe('de');
+
+		uninstall?.();
+		screen('en');
+		let changes = 0;
+		document.addEventListener('content-locale:change', () => changes++, { once: true });
+		uninstall = install();
+
+		expect(scope().dataset.contentLocale).toBe('de');
+		expect(changes).toBe(1);
+		expect(
+			scope().querySelector('[data-content-locale-option="de"]')?.getAttribute('aria-checked'),
+		).toBe('true');
+		expect(scope().querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
+		expect(scope().querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(true);
+		expect(scope().querySelector('label')?.getAttribute('for')).toBe('field-title-de');
+	});
+
+	it('ignores a remembered language the screen does not offer', () => {
+		localStorage.setItem('cosray:content-locale', 'fr');
+		uninstall?.();
+		screen('en');
+		uninstall = install();
+
+		expect(scope().dataset.contentLocale).toBe('en');
+		expect(scope().querySelector('[data-locale="en"]')?.hasAttribute('hidden')).toBe(false);
+	});
+
+	it('switches on a request from a control mirrored inside the screen', () => {
+		request(document.getElementById('mirror')!, 'de');
+
+		expect(scope().dataset.contentLocale).toBe('de');
+		expect(
+			scope().querySelector('[data-content-locale-option="de"]')?.getAttribute('aria-checked'),
+		).toBe('true');
+		expect(localStorage.getItem('cosray:content-locale')).toBe('de');
+	});
+
+	it("lets a dialog mounted outside every scope address the screen's one scope", () => {
+		const dialog = document.createElement('dialog');
+		document.body.append(dialog);
+		request(dialog, 'de');
+
+		expect(scope().dataset.contentLocale).toBe('de');
+
+		const other = document.createElement('div');
+		other.setAttribute('data-content-locale-scope', '');
+		document.body.append(other);
+		request(dialog, 'en');
+
+		expect(scope().dataset.contentLocale).toBe('de');
 	});
 });

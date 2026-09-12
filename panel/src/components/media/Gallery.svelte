@@ -10,6 +10,7 @@
 	import { __ } from '$lib/locale';
 	import { portal } from '$lib/portal';
 	import Icon from '$components/Icon.svelte';
+	import ContentLocales from '$components/ContentLocales.svelte';
 	import MetaFields from './MetaFields.svelte';
 
 	type Props = {
@@ -297,6 +298,9 @@
 </div>
 {#if block}
 	<div class="cms-gallery-settings" use:portal={settings}>
+		{#if translate && locales && locales.all.length > 1}
+			<ContentLocales locales={locales.all} locale={contentLocale} />
+		{/if}
 		<div class="options">
 			<label class="option" for="{id}-ratio">
 				<span>{__('image:ratio')}</span>

@@ -2,9 +2,9 @@
 
 use function Cosray\escape;
 
-// Wrapper for a single field: label, locale tabs, control variants and
-// description. Cross-cutting concerns live here — control views only
-// render their input. Receives: field, data, locales, defaultLocale.
+// Wrapper for a single field: label, control variants and description.
+// Cross-cutting concerns live here — control views only render their
+// input. Receives: field, data, locales, defaultLocale.
 
 $field = (array) $this->unwrap($field);
 $data = (array) ($this->unwrap($data ?? null) ?? []);
@@ -12,7 +12,6 @@ $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
 $assets = (array) ($this->unwrap($assets ?? null) ?? []);
-$globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 $gridStyle = (string) ($gridStyle ?? '');
 $pathSource = (bool) ($this->unwrap($pathSource ?? null) ?? false);
 
@@ -27,25 +26,21 @@ $idRoot = (string) ($idRoot ?? "field-{$fieldName}");
 $value = $data['value'] ?? [];
 $value = is_array($value) ? $value : [];
 
-// Primitives rendered once per locale. Element controls receive the
-// whole locale map and handle locales internally — they still get tabs.
-// A blocks field has one row list per locale only in asymmetric mode;
-// a symmetric list is shared and its rows translate their own sub-fields.
-// A typed repeater row switches its sub-fields as one, and then owns the
-// pills; the sub-field wrappers inside it render none. The only field of
-// a block renders its label for screen readers only — the block's own
-// label already names it. A block also takes its sub-fields' meta groups
-// into its settings dialog, so a sub-field renders no meta button there.
-$ownLocales = (bool) ($this->unwrap($ownLocales ?? null) ?? true);
+// Primitives render once per locale and the screen's content-language
+// selector shows one variant; element controls receive the whole locale
+// map and handle locales internally. A blocks field has one row list per
+// locale only in asymmetric mode; a symmetric list is shared and its rows
+// translate their own sub-fields. The only field of a block renders its
+// label for screen readers only — the block's own label already names it.
+// A block also takes its sub-fields' meta groups into its settings dialog,
+// so a sub-field renders no meta button there.
 $ownMeta = (bool) ($this->unwrap($ownMeta ?? null) ?? true);
 $bareLabel = (bool) ($this->unwrap($bareLabel ?? null) ?? false);
 $localized = ['text', 'textarea', 'iframe', 'youtube'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
-$fallbackPreview = $globalLocales && $translate && in_array($controlName, $localized, true);
-$blockFallback = $globalLocales && $asymmetric;
-$tabs = !$globalLocales && $ownLocales && $translate && ($variants || $controlName === 'element');
+$fallbackPreview = $translate && in_array($controlName, $localized, true);
 $neutral = 'zxx';
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
@@ -60,7 +55,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <div
 	class="cms-field<?= $required ? ' required' : '' ?><?= $pathSource ? ' js-path-source' : '' ?>"
 	<?= $gridStyle !== '' ? 'style="' . escape($gridStyle) . '"' : '' ?>
-	<?= $tabs ? 'data-locale-scope' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
 	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
 		? 'data-fallback-neutral="' . escape((string) $value[$neutral]) . '"'
@@ -72,7 +66,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?php // Kept in the tree when hidden: the control needs its name. ?>
 	<label
 		for="<?= escape($labelFor) ?>"
-		<?= $globalLocales && $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
+		<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
 		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>>
 			<?= escape((string) ($field['label'] ?? $fieldName)) ?>
@@ -88,18 +82,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
-		<?php if ($tabs): ?>
-			<span class="cms-locales">
-				<?php foreach ($locales as $locale): ?>
-					<button
-						type="button"
-						class="tab<?= $locale['id'] === $defaultLocale ? ' active' : '' ?>"
-						data-locale-tab="<?= escape($locale['id']) ?>">
-						<?= escape(strtoupper($locale['id'])) ?>
-					</button>
-				<?php endforeach ?>
-			</span>
-		<?php endif ?>
 	</label>
 	<div class="field-body">
 		<div class="control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
@@ -108,7 +90,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					<div
 						class="variant"
 						data-locale="<?= escape($locale['id']) ?>"
-						<?= $blockFallback ? 'data-blocks-locale' : '' ?>
+						<?= $asymmetric ? 'data-blocks-locale' : '' ?>
 						<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
 						<?php // Required applies to the default locale only — the same
 
@@ -125,7 +107,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 							'locales' => $locales,
 							'defaultLocale' => $defaultLocale,
 							'assets' => $assets,
-							'globalLocales' => $globalLocales,
 							'fallbackPreview' => $fallbackPreview,
 						]) ?>
 						<?php if ($fallbackPreview): ?>
@@ -135,7 +116,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
 								data-neutral="<?= escape(__('field:shared-content')) ?>"
 								hidden></span>
-						<?php elseif ($blockFallback): ?>
+						<?php elseif ($asymmetric): ?>
 							<span
 								class="cms-blocks-fallback-source"
 								data-blocks-fallback-source
@@ -157,7 +138,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					'locales' => $locales,
 					'defaultLocale' => $defaultLocale,
 					'assets' => $assets,
-					'globalLocales' => $globalLocales,
 					'fallbackPreview' => false,
 				]) ?>
 			<?php endif ?>

@@ -122,6 +122,7 @@ afterEach(() => {
 	stop?.();
 	document.body.innerHTML = '';
 	delete window.Cosray;
+	localStorage.clear();
 });
 
 it('keeps the complete catalog reachable and appends a non-common row through the form pipeline', () => {

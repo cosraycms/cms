@@ -26,7 +26,8 @@
 			color: var(--cms-color-text);
 		}
 
-		&[aria-checked='true'] {
+		&[aria-checked='true'],
+		&[aria-pressed='true'] {
 			background: var(--cms-color-accent);
 			color: var(--cms-color-text-on-accent);
 		}
@@ -43,5 +44,15 @@
 
 	&.has-error {
 		box-shadow: 0 0 0 1px var(--cms-color-danger-border);
+	}
+
+	/* In a screen header: sized to its options and pushed to the end. */
+	&.is-compact {
+		width: auto;
+		margin-left: auto;
+
+		& .option {
+			flex: 0 0 auto;
+		}
 	}
 }
