@@ -344,8 +344,8 @@
 	</aside>
 
 	<section
-		class="cms-media-pane"
-		class:dragging
+		class="cms-media-pane cms-dropzone"
+		class:is-dragging={dragging}
 		aria-label={__('media:title')}
 		ondragenter={dragEnter}
 		ondragover={dragOver}
@@ -418,11 +418,9 @@
 		</div>
 
 		{#if dragging}
-			<div class="cms-media-drop" aria-hidden="true">
-				<span>
-					<Icon name="cloud-upload" />
-					{__('media:drop-to-upload')}
-				</span>
+			<div class="drop" aria-hidden="true">
+				<Icon name="cloud-upload" />
+				{__('media:drop-to-upload')}
 			</div>
 		{/if}
 	</section>
@@ -541,26 +539,6 @@
 			border: 1px solid var(--cms-color-border-strong);
 			border-radius: var(--cms-radius-md);
 			overflow: hidden;
-		}
-
-		.cms-media-drop {
-			position: absolute;
-			inset: 0;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: var(--cms-radius-md);
-			background-color: color-mix(in srgb, var(--cms-color-surface) 92%, transparent);
-			box-shadow: inset 0 0 0 2px var(--cms-color-accent);
-			pointer-events: none;
-			z-index: 1;
-		}
-
-		.cms-media-drop span {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--cms-space-2);
-			font-weight: 600;
 		}
 
 		.cms-media-toolbar {
