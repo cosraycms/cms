@@ -232,6 +232,42 @@ describe('the frame', () => {
 	});
 });
 
+describe('single image', () => {
+	const cover = { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' };
+
+	it('offers only removal on the card, since the bar replaces', async () => {
+		const { element, changes } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+			assets: { cover },
+		});
+		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
+
+		expect(card.querySelectorAll('button:not(.thumb)')).toHaveLength(1);
+
+		card.querySelector<HTMLButtonElement>('.discard')!.click();
+		await tick();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [] });
+		expect(element.querySelector('.cms-image-card')).toBeNull();
+		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
+	});
+
+	it('keeps the picture and its texts on a read-only card and drops the removal', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A kettle' } } }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 }, immutable: true },
+			assets: { cover },
+		});
+		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
+
+		expect(card.querySelector('img')?.getAttribute('src')).toBe('/media/cover.jpg');
+		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.value).toBe('A kettle');
+		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.readOnly).toBe(true);
+		expect(card.querySelector('.discard')).toBeNull();
+	});
+});
+
 describe('file rows', () => {
 	it('shows each file with its type icon or thumbnail, its link, its title and its size', async () => {
 		const { element } = await media('cosray-file', {

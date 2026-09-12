@@ -6,6 +6,7 @@
 	import { useAssets } from '$lib/assets';
 	import { assetLine, extension } from '$lib/library';
 	import { __ } from '$lib/locale';
+	import Icon from '$components/Icon.svelte';
 	import ImagePreview from '$components/ImagePreview.svelte';
 	import MetaFields from './MetaFields.svelte';
 
@@ -18,8 +19,6 @@
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		update: (item: FileItem) => void;
 		remove: () => void;
-		upload: () => void;
-		library: () => void;
 		readonly?: boolean;
 	};
 
@@ -32,8 +31,6 @@
 		locales,
 		update,
 		remove,
-		upload,
-		library,
 		readonly = false,
 	}: Props = $props();
 
@@ -78,13 +75,15 @@
 		<div class="filerow">
 			<span class="filename" title={filename}>{filename}</span>
 			{#if !readonly}
-				<span class="tools">
-					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-					<button type="button" class="quiet" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
-					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
-				</span>
+				<button
+					type="button"
+					class="discard"
+					title={__('common:remove')}
+					aria-label={__('common:remove')}
+					onclick={remove}
+				>
+					<Icon name="x-lg" />
+				</button>
 			{/if}
 		</div>
 		<div class="facts">{loading ? __('upload:uploading') : line}</div>
@@ -107,9 +106,9 @@
 				position: relative;
 				display: grid;
 				place-items: center;
-				width: 11.25rem;
+				width: 12rem;
 				max-width: 100%;
-				aspect-ratio: 4 / 3;
+				height: 9rem;
 				flex-shrink: 0;
 				padding: 0;
 				border: 0;
@@ -144,9 +143,8 @@
 
 			& .filerow {
 				display: flex;
-				flex-wrap: wrap;
-				align-items: baseline;
-				gap: var(--cms-space-1) var(--cms-space-2-5);
+				align-items: center;
+				gap: var(--cms-space-2);
 			}
 
 			& .filename {
@@ -159,27 +157,33 @@
 				white-space: nowrap;
 			}
 
-			& .tools {
-				display: flex;
+			& .discard {
+				display: grid;
 				flex-shrink: 0;
-				align-items: center;
-				gap: var(--cms-space-0-5);
+				place-items: center;
+				width: 1.75rem;
+				height: 1.75rem;
 				margin-left: auto;
-			}
-
-			& .quiet {
-				padding: var(--cms-space-0-5) var(--cms-space-1-5);
+				padding: 0;
 				border: 0;
-				border-radius: var(--cms-radius-md);
+				border-radius: var(--cms-radius);
 				background: transparent;
-				font-size: var(--cms-font-size-xs);
-				font-weight: 500;
 				color: var(--cms-color-text-muted);
 				cursor: pointer;
+
+				& :global(svg) {
+					width: 0.875rem;
+					height: 0.875rem;
+				}
 
 				&:hover {
 					background: var(--cms-color-hover);
 					color: var(--cms-color-text);
+				}
+
+				&:focus-visible {
+					outline: var(--cms-focus-outline);
+					outline-offset: var(--cms-focus-offset);
 				}
 			}
 

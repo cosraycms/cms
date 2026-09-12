@@ -445,8 +445,6 @@
 						{locales}
 						update={replace}
 						remove={() => remove(null)}
-						upload={openPicker}
-						library={openLibrary}
 					/>
 				{/if}
 			{:else}
