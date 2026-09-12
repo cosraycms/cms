@@ -147,7 +147,7 @@
 
 	& > .cms-field > .label {
 		grid-row: 1;
-		align-self: start;
+		align-self: end;
 		margin-block-end: var(--cms-space-1);
 	}
 
