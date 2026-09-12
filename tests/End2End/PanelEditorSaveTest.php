@@ -75,6 +75,14 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'//input[@name="content[featured][value][zxx]"][@type="hidden"]',
 			$html,
 		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-field="reference"][@data-readonly="true"]//span[@class="state"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing(
+			'//div[@data-field="reference"]//span[@class="requirement"]',
+			$html,
+		);
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-immutable', [
 			'headers' => ['HX-Request' => 'true'],

@@ -39,11 +39,19 @@
 		}
 	}
 
-	& .requirement {
-		color: var(--cms-color-text-requirement);
+	& .requirement,
+	& .state {
 		font-size: var(--cms-font-size-xs);
 		font-weight: 400;
 		white-space: nowrap;
+	}
+
+	& .requirement {
+		color: var(--cms-color-text-requirement);
+	}
+
+	& .state {
+		color: var(--cms-color-text-subtle);
 	}
 
 	& .control {

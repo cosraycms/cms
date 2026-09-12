@@ -35,6 +35,7 @@ return [
 		'field:confirm-delete' => 'Do you really want to delete this entry?',
 		'field:confirm-delete-entry' => 'Yes, delete entry',
 		'field:fallback-from' => 'Fallback from :language',
+		'field:readonly' => 'read-only',
 		'field:required' => 'required',
 		'field:shared-content' => 'shared content',
 		'image:add' => 'Add images',

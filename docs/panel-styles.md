@@ -75,7 +75,7 @@ An override is a plain value and applies to both themes. A project that wants tw
 
 Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract.
 
-Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, coloured by the public `--cms-color-text-requirement` token, which defaults to `--cms-color-danger`. Descriptions and section headings keep their separate typography.
+Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, coloured by the public `--cms-color-text-requirement` token, which defaults to `--cms-color-danger`. A read-only field marks itself the same way with `(read-only)` in muted text, and never carries the required marker as well. Descriptions and section headings keep their separate typography.
 
 ### Colour roles
 

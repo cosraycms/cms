@@ -73,7 +73,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
 		<div<?= $bareLabel ? ' class="sr-only"' : '' ?>>
 			<?= escape((string) ($field['label'] ?? $fieldName)) ?>
-			<?php if ($required): ?>
+			<?php // A field the editor cannot change is never also required of them. ?>
+			<?php if ($immutable): ?>
+				<span class="state">(<?= escape(__('field:readonly')) ?>)</span>
+			<?php elseif ($required): ?>
 				<span class="requirement">(<?= escape(__('field:required')) ?>)</span>
 			<?php endif ?>
 		</div>

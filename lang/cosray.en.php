@@ -170,6 +170,7 @@ return [
 		'field:insert-above' => 'Insert above',
 		'field:insert-before' => 'Insert before',
 		'field:meta' => 'Meta',
+		'field:readonly' => 'read-only',
 		'field:remove' => 'Remove',
 		'field:remove-block' => 'Remove block',
 		'field:remove-entry' => 'Remove entry',

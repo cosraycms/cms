@@ -173,6 +173,7 @@ return [
 		'field:insert-above' => 'Darüber einfügen',
 		'field:insert-before' => 'Davor einfügen',
 		'field:meta' => 'Meta',
+		'field:readonly' => 'nicht änderbar',
 		'field:remove' => 'Entfernen',
 		'field:remove-block' => 'Block entfernen',
 		'field:remove-entry' => 'Eintrag entfernen',
