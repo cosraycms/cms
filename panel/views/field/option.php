@@ -8,6 +8,8 @@ $props = (array) ($control['props'] ?? []);
 $value = $this->unwrap($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $required = (bool) ($field['required'] ?? false);
+// HTML has no readonly for a select or a radio, so an immutable option
+// field locks its control; the save path ignores what it submits anyway.
 $disabled = (bool) ($field['immutable'] ?? false);
 
 // Sub-controls inside group/repeater carry options in the descriptor

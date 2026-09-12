@@ -169,7 +169,7 @@ Field-level attributes (applied to field properties):
   (Blocks: the grid; without it the field is a one-column stack)
 - `#[Tools(Tool::..., ...)]` (RichText, and Blocks for its richtext sub-fields; inside a block the default is `Tool::INLINE`)
 - `#[Hidden]`
-- `#[Immutable]`
+- `#[Immutable]` (renders the control read-only; the save path ignores submitted values for the field)
 - `#[Options([...])]`
 - `#[Limit(int $max, int $min = 0)]`
 - `#[Fulltext(FulltextWeight::A|B|C|D)]`

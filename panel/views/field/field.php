@@ -49,6 +49,7 @@ $neutral = 'zxx';
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
 $required = (bool) ($field['required'] ?? false);
+$immutable = (bool) ($field['immutable'] ?? false);
 $when = $field['when'] ?? null;
 $metaControl = $ownMeta ? $field['metaControl'] ?? null : null;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -63,6 +64,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		: '' ?>
 	data-meta-owner
 	<?= $required ? 'data-required="true"' : '' ?>
+	<?= $immutable ? 'data-readonly="true"' : '' ?>
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<?php // Kept in the tree when hidden: the control needs its name. ?>
 	<label

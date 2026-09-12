@@ -24,4 +24,4 @@ $value = is_scalar($value) ? (string) $value : '';
 		<?php endif ?>
 	<?php endforeach ?>
 	<?= $field['required'] ?? false ? 'required' : '' ?>
-	<?= $field['immutable'] ?? false ? 'disabled' : '' ?> />
+	<?= $field['immutable'] ?? false ? 'readonly' : '' ?> />

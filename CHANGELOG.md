@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- `#[Immutable]` fields render read-only instead of disabled. A text control keeps its value focusable and selectable, and the save path now ignores whatever a submission carries for an immutable field, so its value can no longer be changed by editing the form. Select, radio and checkbox controls stay locked, since HTML has no read-only for them, and an immutable checkbox no longer loses its value on save: its presence marker reported it as unchecked. The field wrapper carries `data-readonly="true"`; a theme or test matching `[disabled]` on an immutable field must match `[readonly]` or that attribute instead.
 - The panel answers the operating system's increase-contrast setting (`prefers-contrast: more`) with darker borders and secondary text.
 - Gave form controls a border token of their own, `--cms-color-border-control`, used by text inputs, selects, textareas, the rich text frame and the switch's off track, so a theme or the operating system's increase-contrast setting can firm up their edges without touching the lines around sections, rows and cards.
 - Code editors, raw HTML sources and embed code boxes share one dark surface in both themes, themeable through the new `--cms-code-bg`, `--cms-code-text` and `--cms-code-muted` tokens, and a focused code editor rings in the focus colour.

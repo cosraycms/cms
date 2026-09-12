@@ -17,6 +17,7 @@ use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestDateTimeDocument;
 use Cosray\Tests\Fixtures\Node\TestEntry;
+use Cosray\Tests\Fixtures\Node\TestImmutableDocument;
 use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
 
@@ -39,8 +40,59 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin->node(TestDateTimeDocument::class);
 		$plugin->node(TestNodeWithEntries::class);
 		$plugin->node(TestNodeWithBlocks::class);
+		$plugin->node(TestImmutableDocument::class);
 
 		return $plugin;
+	}
+
+	public function testImmutableFieldsRenderReadOnlyAndIgnoreSubmittedValues(): void
+	{
+		$typeId = $this->createTestType('test-immutable-document');
+		$this->createTestNode([
+			'uid' => 'panel-save-immutable',
+			'type' => $typeId,
+			'published' => true,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['zxx' => 'Locked down']],
+				'reference' => ['type' => Text::class, 'value' => ['zxx' => 'REF-1']],
+				'featured' => ['type' => \Cosray\Field\Checkbox::class, 'value' => ['zxx' => true]],
+			],
+		]);
+
+		$html = (string) $this
+			->makeRequest('GET', '/cp/collection/test-articles/panel-save-immutable')
+			->getBody();
+		$this->assertHtmlNodeExists(
+			'//input[@name="content[reference][value][zxx]"][@readonly][not(@disabled)]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//input[@name="content[featured][value][zxx]"][@type="checkbox"][@disabled]',
+			$html,
+		);
+		// The presence marker would report the immutable checkbox as unchecked.
+		$this->assertHtmlNodeMissing(
+			'//input[@name="content[featured][value][zxx]"][@type="hidden"]',
+			$html,
+		);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-immutable', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'title' => ['value' => ['zxx' => 'Still editable']],
+					'reference' => ['value' => ['zxx' => 'forged']],
+					'featured' => ['value' => ['zxx' => '']],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$content = $this->nodeContent('panel-save-immutable');
+		$this->assertSame('Still editable', $content['title']['value']['zxx']);
+		$this->assertSame('REF-1', $content['reference']['value']['zxx']);
+		$this->assertSame(true, $content['featured']['value']['zxx']);
 	}
 
 	public function testDateTimeRoundTripsThroughThePanelAndDynamicTitle(): void

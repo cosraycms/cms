@@ -19,4 +19,4 @@ $fallbackPreview ??= false;
 	<?= is_string($placeholder) && $placeholder !== '' ? 'placeholder="' . escape($placeholder) . '"' : '' ?>
 	<?= is_int($lines) && $lines > 0 ? 'rows="' . $lines . '"' : '' ?>
 	<?= $field['required'] ?? false ? 'required' : '' ?>
-	<?= $field['immutable'] ?? false ? 'disabled' : '' ?>><?= escape($value) ?></textarea>
+	<?= $field['immutable'] ?? false ? 'readonly' : '' ?>><?= escape($value) ?></textarea>

@@ -31,6 +31,33 @@ final class PanelFormPatchTest extends TestCase
 		);
 	}
 
+	public function testNeverPatchesImmutableFields(): void
+	{
+		$patch = new FormPatch([
+			['name' => 'title', 'type' => 'Text', 'control' => ['name' => 'text', 'props' => []]],
+			[
+				'name' => 'reference',
+				'type' => 'Text',
+				'immutable' => true,
+				'control' => ['name' => 'text', 'props' => []],
+			],
+		]);
+
+		$content = $patch->content(
+			[
+				'title' => ['type' => 'Text', 'value' => ['zxx' => 'Old']],
+				'reference' => ['type' => 'Text', 'value' => ['zxx' => 'REF-1']],
+			],
+			[
+				'title' => ['value' => ['zxx' => 'New']],
+				'reference' => ['value' => ['zxx' => 'forged']],
+			],
+		);
+
+		$this->assertSame('New', $content['title']['value']['zxx']);
+		$this->assertSame('REF-1', $content['reference']['value']['zxx']);
+	}
+
 	public function testLeavesUnsubmittedFieldsAndUnknownKeysUntouched(): void
 	{
 		$patch = new FormPatch([

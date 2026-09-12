@@ -19,6 +19,9 @@ use DateTimeZone;
  * content survive untouched. Primitive leaves are cast according to the
  * field's control descriptor; rich fields submit their complete value
  * (and optionally meta) as one JSON string under the [json] key.
+ *
+ * An immutable field is never patched. The form renders it read-only, so
+ * whatever the submission carries for it has no authority.
  */
 final class FormPatch
 {
@@ -34,6 +37,10 @@ final class FormPatch
 			$name = $field['name'] ?? null;
 
 			if (!is_string($name) || !is_array($submitted[$name] ?? null)) {
+				continue;
+			}
+
+			if ($field['immutable'] ?? false) {
 				continue;
 			}
 
