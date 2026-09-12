@@ -22,6 +22,7 @@
 		remove: () => void;
 		upload: () => void;
 		library: () => void;
+		readonly?: boolean;
 	};
 
 	let {
@@ -37,6 +38,7 @@
 		remove,
 		upload,
 		library,
+		readonly = false,
 	}: Props = $props();
 
 	const assets = useAssets();
@@ -56,17 +58,19 @@
 					<span class="filename" title={filename}
 						>{loading ? __('upload:uploading') : filename}</span
 					>
-					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-					<button type="button" class="quiet" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
-					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
+					{#if !readonly}
+						<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
+						<button type="button" class="quiet" onclick={library}>
+							{__('media:choose-from-library')}
+						</button>
+						<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
+					{/if}
 				</div>
 			</div>
 		</figure>
 		{#key `${identity}:${item.uid}`}
 			<div class="cms-figure-settings" use:portal={settings}>
-				<MetaFields {item} kind="video" {translate} {contentLocale} {locales} {update} />
+				<MetaFields {item} kind="video" {translate} {contentLocale} {locales} {update} {readonly} />
 			</div>
 		{/key}
 	{:else}
@@ -74,14 +78,16 @@
 			<Icon name="cloud-upload" />
 			<span class="prompt">{loading ? __('upload:uploading') : __('upload:drop-video')}</span>
 			<span class="facts">{allowed}</span>
-			<span class="tools">
-				<button type="button" class="cms-button secondary small" onclick={upload}>
-					{__('video:upload')}
-				</button>
-				<button type="button" class="textlink" onclick={library}>
-					{__('media:choose-from-library')}
-				</button>
-			</span>
+			{#if !readonly}
+				<span class="tools">
+					<button type="button" class="cms-button secondary small" onclick={upload}>
+						{__('video:upload')}
+					</button>
+					<button type="button" class="textlink" onclick={library}>
+						{__('media:choose-from-library')}
+					</button>
+				</span>
+			{/if}
 		</div>
 	{/if}
 </div>

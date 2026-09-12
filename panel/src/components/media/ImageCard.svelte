@@ -22,6 +22,7 @@
 		remove: () => void;
 		upload: () => void;
 		library: () => void;
+		readonly?: boolean;
 	};
 
 	let {
@@ -36,6 +37,7 @@
 		remove,
 		upload,
 		library,
+		readonly = false,
 	}: Props = $props();
 
 	const assets = useAssets();
@@ -79,17 +81,19 @@
 		<div class="details">
 			<div class="filerow">
 				<span class="filename" title={filename}>{filename}</span>
-				<span class="tools">
-					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-					<button type="button" class="quiet" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
-					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
-				</span>
+				{#if !readonly}
+					<span class="tools">
+						<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
+						<button type="button" class="quiet" onclick={library}>
+							{__('media:choose-from-library')}
+						</button>
+						<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
+					</span>
+				{/if}
 			</div>
 			<div class="facts">{loading ? __('upload:uploading') : line}</div>
 			{#key `${identity}:${item.uid}`}
-				<MetaFields {item} {translate} {contentLocale} {locales} {update} />
+				<MetaFields {item} {translate} {contentLocale} {locales} {update} {readonly} />
 			{/key}
 		</div>
 	{:else}
@@ -97,14 +101,16 @@
 		<div class="details">
 			<div class="prompt">{loading ? __('upload:uploading') : __('upload:drop-image')}</div>
 			<div class="facts">{allowed}</div>
-			<div class="tools">
-				<button type="button" class="cms-button secondary small" onclick={upload}>
-					{__('image:upload')}
-				</button>
-				<button type="button" class="textlink" onclick={library}>
-					{__('media:choose-from-library')}
-				</button>
-			</div>
+			{#if !readonly}
+				<div class="tools">
+					<button type="button" class="cms-button secondary small" onclick={upload}>
+						{__('image:upload')}
+					</button>
+					<button type="button" class="textlink" onclick={library}>
+						{__('media:choose-from-library')}
+					</button>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>

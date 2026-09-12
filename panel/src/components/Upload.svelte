@@ -335,15 +335,16 @@
 		class="cms-media-block"
 		class:is-dragging={dragging}
 		role="group"
-		ondragenter={dragEnter}
-		ondragover={dragOver}
-		ondragleave={dragLeave}
-		ondrop={drop}
+		ondragenter={readonly ? undefined : dragEnter}
+		ondragover={readonly ? undefined : dragOver}
+		ondragleave={readonly ? undefined : dragLeave}
+		ondrop={readonly ? undefined : drop}
 	>
 		{#if type === 'video'}
 			<VideoFigure
 				item={items?.[0] ?? null}
 				{loading}
+				{readonly}
 				{translate}
 				{contentLocale}
 				{identity}
@@ -364,6 +365,7 @@
 				{identity}
 				{locales}
 				{open}
+				{readonly}
 				{notify}
 				presentation="block"
 				{settings}
@@ -377,6 +379,7 @@
 			<ImageFigure
 				item={items?.[0] ?? null}
 				{loading}
+				{readonly}
 				{translate}
 				{contentLocale}
 				{identity}
@@ -411,10 +414,10 @@
 		<div
 			class="card"
 			role="group"
-			ondragenter={dragEnter}
-			ondragover={dragOver}
-			ondragleave={dragLeave}
-			ondrop={drop}
+			ondragenter={readonly ? undefined : dragEnter}
+			ondragover={readonly ? undefined : dragOver}
+			ondragleave={readonly ? undefined : dragLeave}
+			ondrop={readonly ? undefined : drop}
 		>
 			{#if multiple}
 				<Gallery
@@ -425,6 +428,7 @@
 					{identity}
 					{locales}
 					{open}
+					{readonly}
 					{notify}
 					remove={(index) => remove(index)}
 					upload={openPicker}
@@ -434,6 +438,7 @@
 				<ImageCard
 					item={items?.[0] ?? null}
 					{loading}
+					{readonly}
 					{translate}
 					{contentLocale}
 					{identity}

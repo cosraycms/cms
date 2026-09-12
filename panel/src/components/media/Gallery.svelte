@@ -21,6 +21,8 @@
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		// False once the field's limit is reached; hides the add actions.
 		open: boolean;
+		/** The field cannot change: no add, no remove, no reordering. */
+		readonly?: boolean;
 		// The block presentation shows the tiles alone; the per-image drawer
 		// and the gallery settings go into the settings slot.
 		presentation?: string;
@@ -42,6 +44,7 @@
 		identity,
 		locales,
 		open,
+		readonly = false,
 		presentation,
 		settings,
 		meta,
@@ -91,6 +94,10 @@
 	}
 
 	function removeAt(index: number) {
+		if (readonly) {
+			return;
+		}
+
 		remove(index);
 		selected = afterRemove(selected, index, items.length);
 	}
@@ -104,6 +111,10 @@
 
 	// Auto and crop-off are the site's defaults and are not stored.
 	function setSettings(nextRatio: string, nextCrop: boolean) {
+		if (readonly) {
+			return;
+		}
+
 		const next: Meta = { ...meta };
 
 		delete next.ratio;
@@ -121,7 +132,7 @@
 	}
 
 	$effect(() => {
-		if (!grid) {
+		if (!grid || readonly) {
 			return;
 		}
 
@@ -194,7 +205,7 @@
 		<div class="facts">{assetLine(currentInfo)}</div>
 	{/if}
 	{#key `${identity}:${item.uid}`}
-		<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} />
+		<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} {readonly} />
 	{/key}
 {/snippet}
 
@@ -202,7 +213,7 @@
 	{#if !block}
 		<div class="summary">
 			<span class="tally">{loading ? __('upload:uploading') : count}</span>
-			{#if open}
+			{#if open && !readonly}
 				<span class="tools">
 					<button type="button" class="textlink" onclick={library}>
 						{__('media:choose-from-library')}
@@ -233,20 +244,22 @@
 								<span class="plate">{extension(filename(item))}</span>
 							{/if}
 						</button>
-						<button
-							type="button"
-							class="discard"
-							title={__('common:remove')}
-							aria-label={__('common:remove')}
-							onclick={() => removeAt(index)}
-						>
-							<Icon name="x-lg" />
-						</button>
+						{#if !readonly}
+							<button
+								type="button"
+								class="discard"
+								title={__('common:remove')}
+								aria-label={__('common:remove')}
+								onclick={() => removeAt(index)}
+							>
+								<Icon name="x-lg" />
+							</button>
+						{/if}
 					</div>
 				{/each}
 			</div>
 		</div>
-		{#if block && open}
+		{#if block && open && !readonly}
 			<div class="bar">
 				<span class="status">{loading ? __('upload:uploading') : count}</span>
 				<button type="button" class="quiet" onclick={library}>
@@ -259,14 +272,16 @@
 		<div class="dropzone">
 			<Icon name="cloud-upload" />
 			<span class="prompt">{loading ? __('upload:uploading') : __('upload:drop-images-here')}</span>
-			<span class="tools">
-				<button type="button" class="cms-button secondary small" onclick={upload}>
-					{__('image:add')}
-				</button>
-				<button type="button" class="textlink" onclick={library}>
-					{__('media:choose-from-library')}
-				</button>
-			</span>
+			{#if !readonly}
+				<span class="tools">
+					<button type="button" class="cms-button secondary small" onclick={upload}>
+						{__('image:add')}
+					</button>
+					<button type="button" class="textlink" onclick={library}>
+						{__('media:choose-from-library')}
+					</button>
+				</span>
+			{/if}
 		</div>
 	{:else}
 		<div class="blank">
@@ -289,6 +304,7 @@
 					class="cms-select"
 					id="{id}-ratio"
 					value={ratio}
+					disabled={readonly}
 					onchange={(event) => setSettings(event.currentTarget.value, crop)}
 				>
 					{#each RATIOS as value (value)}
@@ -300,6 +316,7 @@
 				<input
 					type="checkbox"
 					checked={crop}
+					disabled={readonly}
 					onchange={(event) => setSettings(ratio, event.currentTarget.checked)}
 				/>
 				<span>{__('image:crop')}</span>

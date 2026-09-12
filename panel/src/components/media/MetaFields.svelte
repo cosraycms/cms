@@ -21,9 +21,18 @@
 		// Receives the item with pruned meta on every edit, so empty
 		// texts never shadow the asset's catalog defaults.
 		update: (item: FileItem) => void;
+		readonly?: boolean;
 	};
 
-	let { item, kind = 'image', translate, contentLocale, locales, update }: Props = $props();
+	let {
+		item,
+		kind = 'image',
+		translate,
+		contentLocale,
+		locales,
+		update,
+		readonly = false,
+	}: Props = $props();
 
 	const id = $props.id();
 	const keys: Key[] = $derived(
@@ -92,6 +101,7 @@
 					class="cms-textarea"
 					id="{id}-{name}"
 					rows="2"
+					{readonly}
 					placeholder={placeholder(name)}
 					bind:value={texts[name][key]}
 					onfocus={() => (focused = name)}
@@ -104,6 +114,7 @@
 					id="{id}-{name}"
 					type="text"
 					autocomplete="off"
+					{readonly}
 					placeholder={placeholder(name)}
 					bind:value={texts[name][key]}
 					onfocus={() => (focused = name)}
