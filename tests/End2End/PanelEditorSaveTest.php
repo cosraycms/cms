@@ -83,6 +83,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'//div[@data-field="reference"]//span[@class="requirement"]',
 			$html,
 		);
+		// An element control reads the flag out of its payload and renders
+		// itself read-only; the wrapper says so for the styling.
+		$this->assertHtmlNodeExists(
+			'//div[@data-field="notes"][@data-readonly="true"]//cosray-host',
+			$html,
+		);
+		$this->assertStringContainsString('"immutable":true', $html);
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-immutable', [
 			'headers' => ['HX-Request' => 'true'],

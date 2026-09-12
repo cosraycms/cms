@@ -2,6 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Element controls honour a read-only field. Rich text mounts without a toolbar and refuses input while its text stays selectable, a code editor opens read-only, the reference picker drops its search and its remove actions, and a media field keeps its preview and per-use texts while the drop zone, library, replace, remove, reordering and gallery settings go. Their values were already safe on save; the controls no longer invite edits that would be dropped. An element reads the flag from `field.immutable` in its payload.
 - A blocks field's canvas and the gallery settings in an image block's dialog sit in a sunken well, so each reads as the field's own area rather than as another white box.
 - Editable, read-only and disabled controls read apart at a glance: an editable control is a white box, a read-only one a sunken well with its text at full contrast, and a disabled one an outline with no fill and muted text. The fallback previews of media and blocks take the same no-fill look, since they are shown but not editable there.
 - A control sitting on the editor pane is white like every other control: the file and video cards, the asset thumbnails, a block's image and gallery placeholders and the YouTube thumbnail no longer borrow the sunken fill, which is a well now. Recesses inside a white card — the image card's thumbnail, the gallery drawer, an entry row's form — keep it.
