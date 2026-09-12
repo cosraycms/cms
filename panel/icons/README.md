@@ -12,6 +12,7 @@ Notable mappings from the former artwork:
 - Filled status symbols become `info-circle`, `shield-check`, `x-octagon`, and `exclamation-triangle`.
 - Font Awesome link/text-height artwork becomes `link-45deg` and `type`; unlink uses `slash-circle`.
 - Text style uses `fonts`, document uses `file-earmark-richtext`, and the collection fallback uses `collection`.
+- Media fields use `folder2-open` for the library and the `file-earmark-*` family — `pdf`, `word`, `excel`, `ppt`, `zip`, `music`, `play`, `text`, `image`, plain `file-earmark` as the fallback — for files without a thumbnail.
 
 Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `type-h1`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
 

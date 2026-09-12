@@ -109,6 +109,79 @@ export function humanSize(bytes: number): string {
 	return `${unit === 0 ? size : size.toFixed(1)} ${units[unit]}`;
 }
 
+const FILE_ICONS: [icon: string, mimes: string[], extensions: string[]][] = [
+	['file-earmark-pdf', ['application/pdf'], ['pdf']],
+	[
+		'file-earmark-word',
+		[
+			'application/msword',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'application/vnd.oasis.opendocument.text',
+			'application/rtf',
+		],
+		['doc', 'docx', 'odt', 'rtf'],
+	],
+	[
+		'file-earmark-excel',
+		[
+			'application/vnd.ms-excel',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'application/vnd.oasis.opendocument.spreadsheet',
+			'text/csv',
+		],
+		['xls', 'xlsx', 'ods', 'csv'],
+	],
+	[
+		'file-earmark-ppt',
+		[
+			'application/vnd.ms-powerpoint',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			'application/vnd.oasis.opendocument.presentation',
+		],
+		['ppt', 'pptx', 'odp'],
+	],
+	[
+		'file-earmark-zip',
+		[
+			'application/zip',
+			'application/x-zip-compressed',
+			'application/x-7z-compressed',
+			'application/x-rar-compressed',
+			'application/vnd.rar',
+			'application/gzip',
+			'application/x-tar',
+		],
+		['zip', '7z', 'rar', 'gz', 'tgz', 'tar'],
+	],
+	['file-earmark-music', ['audio/'], ['mp3', 'wav', 'ogg', 'oga', 'm4a', 'flac', 'aac']],
+	['file-earmark-play', ['video/'], ['mp4', 'm4v', 'mov', 'webm', 'mkv', 'avi']],
+	['file-earmark-image', ['image/'], ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg']],
+	['file-earmark-text', ['text/'], ['txt', 'md']],
+];
+
+/**
+ * The icon standing in for a file without a thumbnail: by mime type
+ * first, by extension second, the plain sheet when neither is known.
+ */
+export function fileIcon(info: Pick<AssetInfo, 'filename' | 'mime'>): string {
+	const mime = (info.mime ?? '').toLowerCase();
+	const suffix = extension(info.filename).toLowerCase();
+
+	for (const [icon, mimes] of FILE_ICONS) {
+		if (mimes.some((entry) => (entry.endsWith('/') ? mime.startsWith(entry) : mime === entry))) {
+			return icon;
+		}
+	}
+
+	for (const [icon, , extensions] of FILE_ICONS) {
+		if (extensions.includes(suffix)) {
+			return icon;
+		}
+	}
+
+	return 'file-earmark';
+}
+
 export function extension(filename: string): string {
 	const dot = filename.lastIndexOf('.');
 
