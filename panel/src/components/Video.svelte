@@ -10,10 +10,19 @@
 		upload: boolean;
 		remove: () => void;
 		edit?: () => void;
+		readonly?: boolean;
 		class?: string;
 	};
 
-	let { file, loading, upload, remove, edit, class: classes = '' }: Props = $props();
+	let {
+		file,
+		loading,
+		upload,
+		remove,
+		edit,
+		readonly = false,
+		class: classes = '',
+	}: Props = $props();
 
 	const assets = useAssets();
 
@@ -30,8 +39,8 @@
 			<track kind="captions" />
 			<source src={info?.url ?? ''} type="video/{ext}" />
 		</video>
-		<div class="controls cms-video-controls">
-			{#if edit}
+		<div class="controls cms-video-controls" class:hide={readonly}>
+			{#if edit && !readonly}
 				<button type="button" class="cms-video-edit" onclick={edit}>
 					<span class="ico cms-video-ico">
 						<Icon name="pencil" />
@@ -39,7 +48,7 @@
 					<span class="icobtn cms-video-icobtn">{__('common:edit')}</span>
 				</button>
 			{/if}
-			{#if remove}
+			{#if remove && !readonly}
 				<button type="button" class="cms-video-remove" onclick={remove}>
 					<span class="ico cms-video-ico">
 						<Icon name="trash3" />

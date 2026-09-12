@@ -20,6 +20,8 @@
 		type: UploadType;
 		loading: boolean;
 		remove: (index: number | null) => void;
+		/** The field cannot change: no reordering, no per-item actions. */
+		readonly?: boolean;
 		notify?: () => void;
 	};
 
@@ -33,6 +35,7 @@
 		type,
 		loading,
 		remove,
+		readonly = false,
 		notify = () => {},
 	}: Props = $props();
 	const assets = useAssets();
@@ -89,13 +92,23 @@
 		);
 	}
 
-	onMount(createSorter);
+	onMount(() => {
+		if (!readonly) {
+			createSorter();
+		}
+	});
 </script>
 
 {#if multiple && type === 'file'}
 	<div class="multiple-files cms-media-list cms-media-list-files" bind:this={sorterElement}>
 		{#each items as item, index (item)}
-			<File {loading} asset={item} remove={() => remove(index)} edit={() => edit(index, 'file')} />
+			<File
+				{loading}
+				{readonly}
+				asset={item}
+				remove={() => remove(index)}
+				edit={() => edit(index, 'file')}
+			/>
 		{/each}
 	</div>
 {:else if !multiple && type === 'video' && items && items.length > 0}
@@ -105,9 +118,16 @@
 		remove={() => remove(null)}
 		edit={() => edit(0, 'video')}
 		{loading}
+		{readonly}
 	/>
 {:else if items && items.length > 0}
-	<File {loading} asset={items[0]} remove={() => remove(null)} edit={() => edit(0, 'file')} />
+	<File
+		{loading}
+		{readonly}
+		asset={items[0]}
+		remove={() => remove(null)}
+		edit={() => edit(0, 'file')}
+	/>
 {/if}
 
 <style>

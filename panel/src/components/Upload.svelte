@@ -31,6 +31,8 @@
 		add: (item: FileItem) => void;
 		limit?: Limit;
 		required?: boolean;
+		/** The field cannot change: no picker, no drop zone, no library. */
+		readonly?: boolean;
 		disabled?: boolean;
 		disabledMsg?: string;
 		callback?: (() => void) | null;
@@ -56,6 +58,7 @@
 		add,
 		limit = { max: -1, min: 0 },
 		required = false,
+		readonly = false,
 		disabled = false,
 		disabledMsg = '',
 		callback = null,
@@ -480,9 +483,10 @@
 			{contentLocale}
 			{identity}
 			{locales}
+			{readonly}
 			{notify}
 		/>
-		{#if open}
+		{#if open && !readonly}
 			<label
 				class="dragdrop"
 				for={name}

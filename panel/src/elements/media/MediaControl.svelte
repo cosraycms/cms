@@ -10,6 +10,7 @@
 	type FieldInfo = {
 		name: string;
 		required?: boolean;
+		immutable?: boolean;
 		translate?: boolean;
 		translateMode?: 'symmetric' | 'asymmetric';
 		limit?: { min: number; max: number };
@@ -76,6 +77,7 @@
 		{type}
 		limit={field.limit}
 		required={field.required ?? false}
+		readonly={field.immutable ?? false}
 		name={field.name}
 		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
 		contentLocale={locale}

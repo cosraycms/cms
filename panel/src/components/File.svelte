@@ -10,9 +10,10 @@
 		remove: () => void;
 		edit: () => void;
 		loading: boolean;
+		readonly?: boolean;
 	};
 
-	let { asset, remove, edit, loading }: Props = $props();
+	let { asset, remove, edit, loading, readonly = false }: Props = $props();
 
 	const assets = useAssets();
 
@@ -51,27 +52,29 @@
 			{__('media:download')}
 		</a>
 
-		<button
-			type="button"
-			aria-label={__('common:edit')}
-			onclick={edit}
-			class="cms-file-action cms-file-action-edit"
-		>
-			<span class="cms-file-action-icon">
-				<Icon name="pencil" />
-			</span>
-		</button>
+		{#if !readonly}
+			<button
+				type="button"
+				aria-label={__('common:edit')}
+				onclick={edit}
+				class="cms-file-action cms-file-action-edit"
+			>
+				<span class="cms-file-action-icon">
+					<Icon name="pencil" />
+				</span>
+			</button>
 
-		<button
-			type="button"
-			aria-label={__('common:remove')}
-			onclick={remove}
-			class="cms-file-action cms-file-action-remove"
-		>
-			<span class="cms-file-action-icon">
-				<Icon name="trash3" />
-			</span>
-		</button>
+			<button
+				type="button"
+				aria-label={__('common:remove')}
+				onclick={remove}
+				class="cms-file-action cms-file-action-remove"
+			>
+				<span class="cms-file-action-icon">
+					<Icon name="trash3" />
+				</span>
+			</button>
+		{/if}
 	</div>
 {/if}
 
