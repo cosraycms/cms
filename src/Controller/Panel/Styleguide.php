@@ -205,7 +205,7 @@ final class Styleguide extends Panel
 				'label' => 'Locked',
 				'control' => ['name' => 'text', 'props' => []],
 				'immutable' => true,
-				'description' => 'Immutable fields render disabled.',
+				'description' => 'Immutable fields render read-only.',
 			],
 			[
 				'name' => 'overflow',

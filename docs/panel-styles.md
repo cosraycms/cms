@@ -87,6 +87,8 @@ Status colours are the only hues in the default chrome: red for danger and error
 
 Form controls draw their edge with `--cms-color-border-control`. It defaults to the same soft step as the strong border: a white control on the canvas pane already stands apart by its fill, and its label identifies it. The token exists so `prefers-contrast: more` and a theme can firm up control edges without adding weight to sections, rows and cards, so keep it off anything that is not a control. A control without a visible label needs another cue, since WCAG 1.4.11 asks for a 3:1 boundary when the border is the only one.
 
+Three control states read apart by their fill: an editable control is a white box, a read-only one a `--cms-color-surface-sunken` well with its text at full contrast, and a disabled one an outline with no fill, muted text and a `not-allowed` cursor. Read-only keeps full contrast because the value is there to be read and copied, while a disabled control is exempt under WCAG 1.4.3. A select, radio or checkbox cannot be read-only in HTML, so the field wrapper's `data-readonly` gives it the same look.
+
 ### Dark theme
 
 The panel follows the operating system. There is no dark block: both themes live in the one `:root` block, and a token that differs carries `light-dark(light, dark)` so its two values sit on the same line and cannot be changed in one theme and forgotten in the other.

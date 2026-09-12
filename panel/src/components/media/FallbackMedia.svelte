@@ -67,7 +67,6 @@
 			margin-bottom: var(--cms-space-3);
 			border: 1px solid var(--cms-color-border);
 			border-radius: var(--cms-radius-md);
-			background: var(--cms-color-surface-sunken);
 			padding: var(--cms-space-3);
 			color: var(--cms-color-text-subtle);
 		}

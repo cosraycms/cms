@@ -87,10 +87,6 @@
 			color: var(--cms-color-danger);
 		}
 	}
-
-	&[data-disabled='true'] .label {
-		color: var(--cms-color-text-subtle);
-	}
 }
 
 /* Inline validation message painted below the control by errors.ts;
