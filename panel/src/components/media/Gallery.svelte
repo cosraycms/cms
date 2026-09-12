@@ -647,6 +647,9 @@
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-3);
+			padding: var(--cms-space-3);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-surface-sunken);
 
 			& .options {
 				display: flex;
