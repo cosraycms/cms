@@ -258,7 +258,7 @@ Hand-written ES modules are sufficient — no build step required.
   - `node` — the node uid; `''` while creating a node that has not been saved yet.
   - `locale` — the **currently selected editing locale**. It follows the screen's one content-language selector — in a node editor the one in the sidebar, including for controls nested in Entries or symmetric Blocks. When `field.translate` is true, render `value[locale]`; neutral controls keep using `zxx`.
   - `locales` — `{ default: string, all: {id, title, fallback?}[] }`.
-  - `assets` — resolved catalog data for every asset uid the entry references: `{ [uid]: { filename, url, kind, mime?, width?, height?, meta? } }`. Media items in `value` are `{uid, meta?}`; previews resolve uids through this map. Upload responses carry the same data for freshly added assets.
+  - `assets` — resolved catalog data for every asset uid the entry references: `{ [uid]: { filename, url, thumbUrl?, previewUrl?, kind, mime?, bytes?, width?, height?, meta? } }`. Media items in `value` are `{uid, meta?}`; previews resolve uids through this map. Upload responses carry the same data for freshly added assets.
   - `settings` — an element to render secondary controls into, assigned only when an owner around the control offers it a slot: today the settings dialog behind a block's gear, which holds one slot per element sub-field. Mount into it once, on assignment; the host never re-assigns it. Without a slot the property is absent and everything renders inline.
 - The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** (and optionally meta) in the same shape:
 

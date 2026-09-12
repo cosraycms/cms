@@ -91,19 +91,6 @@ export interface FileData {
 	meta?: Meta;
 }
 
-export interface UploadResponse {
-	ok: boolean;
-	error: string;
-	uid: string;
-	filename: string;
-	url: string;
-	thumbUrl?: string;
-	previewUrl?: string;
-	mime: string | null;
-	width: number | null;
-	height: number | null;
-}
-
 export type UploadType = 'image' | 'file' | 'video';
 
 export type Data = TextData | CodeData | FileData | NumberData | BooleanData;

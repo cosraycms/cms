@@ -252,8 +252,11 @@
 		registerAsset(assetStore, item.uid, {
 			filename: item.filename ?? '',
 			url: item.url ?? '',
+			thumbUrl: item.thumbUrl,
+			previewUrl: item.previewUrl,
 			kind: type,
 			mime: item.mime,
+			bytes: item.bytes,
 			width: item.width,
 			height: item.height,
 		});

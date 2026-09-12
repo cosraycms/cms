@@ -208,6 +208,33 @@ describe('media uploads', () => {
 		},
 	);
 
+	it('previews a fresh upload from its thumbnail and shows its size', async () => {
+		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
+			ok: true,
+			uid: 'fresh',
+			filename: 'fresh.png',
+			url: '/media/fresh.png',
+			thumbUrl: '/media/fresh-thumb.png',
+			bytes: 862208,
+			width: 2400,
+			height: 1600,
+		});
+		const { element } = await media('cosray-image', {
+			value: {},
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+		});
+		upload(element);
+
+		await vi.waitFor(() => {
+			expect(element.querySelector('.cms-image-card img')?.getAttribute('src')).toBe(
+				'/media/fresh-thumb.png',
+			);
+		});
+		expect(element.querySelector('.cms-image-card .facts')?.textContent).toBe(
+			'2400 × 1600 px · 842.0 KB',
+		);
+	});
+
 	it('merges a late upload with changes made after returning to its locale', async () => {
 		const first = Promise.withResolvers<UploadResult>();
 		const second = Promise.withResolvers<UploadResult>();

@@ -8,6 +8,7 @@ use Cosray\Block as Builtin;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Blocks;
+use Cosray\Field\Image;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
@@ -354,6 +355,41 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('node="panel-editor-media"', $html);
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('"allowedFiles"', $html);
+	}
+
+	public function testElementHostCarriesTheReferencedAssetsWithTheirSize(): void
+	{
+		$this->authenticateAs('editor');
+		$this->db()->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, mime, bytes, creator)
+			VALUES ('editor-asset-size', 'local', 'ed/editor-asset-size/flyer.pdf', 'flyer.pdf', 'application/pdf', 917290, 1)",
+		)->run();
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$mediaTypeId = $mediaType
+			? (int) $mediaType['type']
+			: $this->createTestType('test-media-document');
+		$this->createTestNode([
+			'uid' => 'panel-editor-asset-size',
+			'type' => $mediaTypeId,
+			'published' => true,
+			// Pre-encoded to bypass createTestNode's legacy content
+			// normalization, which rewrites {uid} items to {file}.
+			'content' => json_encode([
+				'gallery' => [
+					'type' => Image::class,
+					'value' => ['zxx' => [['uid' => 'editor-asset-size']]],
+				],
+			]),
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles/panel-editor-asset-size');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('"filename":"flyer.pdf"', $html);
+		$this->assertStringContainsString('"mime":"application/pdf","bytes":917290', $html);
 	}
 
 	public function testSidebarKeepsTheCollectionCurrentWhileANodeIsOpen(): void

@@ -1,4 +1,4 @@
-import type { AssetInfo, AssetMap, UploadResponse } from '$types/data';
+import type { AssetInfo, AssetMap } from '$types/data';
 
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
@@ -26,17 +26,6 @@ export function useAssets(): AssetStore {
 
 export function registerAsset(store: AssetStore, uid: string, info: AssetInfo): void {
 	store.update((map) => ({ ...map, [uid]: info }));
-}
-
-export function uploadInfo(item: UploadResponse, kind: string): AssetInfo {
-	return {
-		filename: item.filename,
-		url: item.url,
-		kind,
-		mime: item.mime,
-		width: item.width,
-		height: item.height,
-	};
 }
 
 /** The context a component mounted outside the element's tree needs to share its store. */

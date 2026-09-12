@@ -11,7 +11,10 @@ export type UploadResult = {
 	uid?: string;
 	filename?: string;
 	url?: string;
+	thumbUrl?: string;
+	previewUrl?: string;
 	mime?: string | null;
+	bytes?: number | null;
 	width?: number | null;
 	height?: number | null;
 };

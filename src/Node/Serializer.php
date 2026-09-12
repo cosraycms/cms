@@ -214,6 +214,7 @@ class Serializer
 				'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
 				'kind' => $asset->kind,
 				'mime' => $asset->mime,
+				'bytes' => $asset->bytes,
 				'width' => $asset->width,
 				'height' => $asset->height,
 				'meta' => $asset->meta,
