@@ -38,6 +38,10 @@ $commonChoices = $choices->common;
 $more = count($choices->all) > count($commonChoices);
 
 $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
+// An immutable field locks its canvas as well: the save path ignores the
+// whole field, so offering add, remove, move or resize would only lose
+// the work.
+$readonly = (bool) ($field['immutable'] ?? false);
 ?>
 <div
 	class="cms-blocks-editor<?= $columns > 1 ? ' is-grid' : ' is-list' ?>"
@@ -80,9 +84,13 @@ $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
 				'metaControl' => $metaControl,
 				'single' => $single,
 				'globalLocales' => $globalLocales ?? false,
+				'readonly' => $readonly,
 			]);
 		} ?>
 	</div>
+	<?php if ($readonly): ?>
+		<?php // No templates, no catalog, no adders: nothing stamps a row here. ?>
+	<?php else: ?>
 	<?php foreach ($blockTypes as $blockType): ?>
 		<template data-repeater-template="<?= $this->escape((string) $blockType['type']) ?>">
 			<?php $this->insert('field/blocks/row', [
@@ -97,6 +105,7 @@ $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
 				'metaControl' => $metaControl,
 				'single' => $single,
 				'globalLocales' => $globalLocales ?? false,
+				'readonly' => false,
 			]) ?>
 		</template>
 	<?php endforeach ?>
@@ -143,4 +152,5 @@ $single = count($blockTypes) === 1 ? array_key_first($blockTypes) : null;
 			</div>
 		<?php endif ?>
 	</div>
+	<?php endif ?>
 </div>

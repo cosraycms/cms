@@ -6,8 +6,10 @@ namespace Cosray\Tests\Fixtures\Node;
 
 use Cosray\Contract\Title;
 use Cosray\Field\Checkbox;
+use Cosray\Field\Entries;
 use Cosray\Field\RichText;
 use Cosray\Field\Text;
+use Cosray\Schema\Allows;
 use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 
@@ -28,6 +30,11 @@ class TestImmutableDocument implements Title
 	#[Label('Notes')]
 	#[Immutable]
 	public RichText $notes;
+
+	#[Label('People')]
+	#[Immutable]
+	#[Allows(TestEntry::class)]
+	public Entries $people;
 
 	public function title(): string
 	{

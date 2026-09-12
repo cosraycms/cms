@@ -56,6 +56,23 @@ final class PanelEditorSaveTest extends End2EndTestCase
 				'title' => ['type' => Text::class, 'value' => ['zxx' => 'Locked down']],
 				'reference' => ['type' => Text::class, 'value' => ['zxx' => 'REF-1']],
 				'featured' => ['type' => \Cosray\Field\Checkbox::class, 'value' => ['zxx' => true]],
+				'people' => [
+					'type' => \Cosray\Field\Entries::class,
+					'value' => [
+						'zxx' => [
+							[
+								'uid' => 'immutable-entry',
+								'type' => TestEntry::class,
+								'fields' => [
+									'title' => [
+										'type' => Text::class,
+										'value' => ['en' => 'Imported person'],
+									],
+								],
+							],
+						],
+					],
+				],
 			],
 		]);
 
@@ -90,6 +107,19 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString('"immutable":true', $html);
+		// A read-only repeater keeps its rows and loses everything that
+		// would restructure them, sub-fields included.
+		$this->assertHtmlNodeExists('//div[@data-field="people"]//div[@data-repeater-row]', $html);
+		$this->assertHtmlNodeMissing(
+			'//div[@data-field="people"]//*[@data-repeater-footer or @data-repeater-template'
+				. ' or @data-repeater-grip or @data-repeater-remove or @data-repeater-move]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-field="people"]//div[@data-repeater-row]'
+				. '//input[@readonly][contains(@name, "[fields][title]")]',
+			$html,
+		);
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-immutable', [
 			'headers' => ['HX-Request' => 'true'],

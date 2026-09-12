@@ -21,14 +21,17 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 
 // Stored rows start collapsed; a stamped row is empty and wants input.
 $open = $rowData === null;
+$readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
 $globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
 $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $this->unwrap($locales)));
 ?>
 <div class="entry" data-repeater-row <?= $ownsLocales ? 'data-locale-scope' : '' ?>>
 	<div class="summary">
-		<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
-			<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
-		</span>
+		<?php if (!$readonly): ?>
+			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
+				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
+			</span>
+		<?php endif ?>
 		<button
 			type="button"
 			class="opener"
@@ -62,23 +65,25 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 		<?php if ($ownsLocales) {
 			$this->insert('field/row-locales');
 		} ?>
-		<button type="button" class="kebab"
-			popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
-			aria-haspopup="menu" aria-label="<?= $this->escape(__('field:entry-actions')) ?>">
-			<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
-		</button>
-		<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
-			popover="auto" data-action-menu data-align="end">
-				<button type="button" data-repeater-move="up">
-					<?= $this->escape(__('common:move-up')) ?>
-				</button>
-				<button type="button" data-repeater-move="down">
-					<?= $this->escape(__('common:move-down')) ?>
-				</button>
-				<button type="button" class="danger" data-repeater-remove>
-					<?= $this->escape(__('field:remove-entry')) ?>
-				</button>
-		</div>
+		<?php if (!$readonly): ?>
+			<button type="button" class="kebab"
+				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
+				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:entry-actions')) ?>">
+				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+			</button>
+			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
+				popover="auto" data-action-menu data-align="end">
+					<button type="button" data-repeater-move="up">
+						<?= $this->escape(__('common:move-up')) ?>
+					</button>
+					<button type="button" data-repeater-move="down">
+						<?= $this->escape(__('common:move-down')) ?>
+					</button>
+					<button type="button" class="danger" data-repeater-remove>
+						<?= $this->escape(__('field:remove-entry')) ?>
+					</button>
+			</div>
+		<?php endif ?>
 	</div>
 	<input
 		type="hidden"
@@ -101,6 +106,7 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 			'rowName' => $rowName,
 			'rowId' => $rowId,
 			'globalLocales' => $globalLocales,
+			'readonly' => $readonly,
 		]) ?>
 	</div>
 </div>

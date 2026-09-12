@@ -29,6 +29,7 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 // the save will store it.
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
 $globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
+$readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
 $ownsLocales = !$globalLocales && RowLocales::owned($blockType, count((array) $this->unwrap($locales)));
 $reserved = $layout->indent + $layout->colspan;
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
@@ -99,17 +100,21 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 	<?php // Where a new block lands: before this one — above it in a list,
 
 	// before it in order in a grid. The footer appends. ?>
-	<?php $this->insert('field/blocks/inserter', [
-		'commonChoices' => $commonChoices,
-		'more' => $more,
-		'single' => $single,
-		'insert' => 'before',
-		'id' => "{$rowId}-insert",
-		'label' => __($columns > 1 ? 'field:insert-before' : 'field:insert-above'),
-	]) ?>
+	<?php if (!$readonly) {
+		$this->insert('field/blocks/inserter', [
+			'commonChoices' => $commonChoices,
+			'more' => $more,
+			'single' => $single,
+			'insert' => 'before',
+			'id' => "{$rowId}-insert",
+			'label' => __($columns > 1 ? 'field:insert-before' : 'field:insert-above'),
+		]);
+	} ?>
 	<div class="chrome">
 		<span class="tools">
-			<?php if ($columns > 1): ?>
+			<?php if ($readonly): ?>
+				<?php // Nothing to grab, open or remove: only the type label stays. ?>
+			<?php elseif ($columns > 1): ?>
 				<span
 					class="grip"
 					data-repeater-grip
@@ -125,7 +130,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				</span>
 			<?php endif ?>
 			<span class="kind"><?= $this->escape($label) ?></span>
-			<?php if ($settings): ?>
+			<?php if ($settings && !$readonly): ?>
 				<button
 					type="button"
 					class="gear"
@@ -135,32 +140,34 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 					<?= \Cosray\Panel\Icon::render('gear') ?>
 				</button>
 			<?php endif ?>
-			<button type="button" class="kebab"
-				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
-				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
-				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
-			</button>
-			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
-				popover="auto" data-action-menu data-align="end">
-					<button type="button" data-repeater-move="up">
-						<?= $this->escape(__('common:move-up')) ?>
-					</button>
-					<button type="button" data-repeater-move="down">
-						<?= $this->escape(__('common:move-down')) ?>
-					</button>
-					<button type="button" data-repeater-duplicate>
-						<?= $this->escape(__('field:duplicate-block')) ?>
-					</button>
-					<button type="button" class="danger" data-repeater-remove>
-						<?= $this->escape(__('field:remove-block')) ?>
-					</button>
-			</div>
+			<?php if (!$readonly): ?>
+				<button type="button" class="kebab"
+					popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
+					aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
+					<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+				</button>
+				<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
+					popover="auto" data-action-menu data-align="end">
+						<button type="button" data-repeater-move="up">
+							<?= $this->escape(__('common:move-up')) ?>
+						</button>
+						<button type="button" data-repeater-move="down">
+							<?= $this->escape(__('common:move-down')) ?>
+						</button>
+						<button type="button" data-repeater-duplicate>
+							<?= $this->escape(__('field:duplicate-block')) ?>
+						</button>
+						<button type="button" class="danger" data-repeater-remove>
+							<?= $this->escape(__('field:remove-block')) ?>
+						</button>
+				</div>
+			<?php endif ?>
 		</span>
 		<?php if ($ownsLocales) {
 			$this->insert('field/row-locales');
 		} ?>
 	</div>
-	<?php if ($columns > 1): ?>
+	<?php if ($columns > 1 && !$readonly): ?>
 		<?php foreach ([
 			'start' => __('field:indent'),
 			'end' => __('field:colspan'),
@@ -178,6 +185,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			'type' => $blockType,
 			'ownsLocales' => $ownsLocales,
 			'ownMeta' => false,
+			'readonly' => $readonly,
 			// One visible field needs no label of its own: the block names it.
 			'labels' => $labels,
 			'fieldsData' => $fieldsData,

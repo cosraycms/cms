@@ -13,6 +13,10 @@ $props = (array) ($control['props'] ?? []);
 $value = $this->unwrap($value ?? null);
 $rows = is_array($value) ? array_values($value) : [];
 $max = $props['max'] ?? null;
+// An immutable field locks its rows as well: the save path ignores the
+// whole field, so offering add, remove or move would only lose edits.
+$field = (array) $this->unwrap($field);
+$readonly = (bool) ($field['immutable'] ?? false);
 
 $entryTypes = [];
 
@@ -62,27 +66,31 @@ $single = count($entryTypes) === 1;
 				'rowData' => $rowData,
 				'entryType' => $entryTypes[$type],
 				'globalLocales' => $globalLocales ?? false,
+				'readonly' => $readonly,
 			]);
 		} ?>
 	</div>
-	<?php foreach ($entryTypes as $entryType): ?>
-		<template data-repeater-template="<?= $this->escape((string) $entryType['type']) ?>">
-			<?php $this->insert('field/entries/row', [
-				'index' => '__i__',
-				'rowData' => null,
-				'entryType' => $entryType,
-				'globalLocales' => $globalLocales ?? false,
-			]) ?>
-		</template>
-	<?php endforeach ?>
-	<div class="adders" data-repeater-footer>
+	<?php if (!$readonly): ?>
 		<?php foreach ($entryTypes as $entryType): ?>
-			<?php $this->insert('field/entries/adder', [
-				'entryType' => $entryType,
-				'empty' => $rows === [],
-				'full' => $full,
-				'single' => $single,
-			]) ?>
+			<template data-repeater-template="<?= $this->escape((string) $entryType['type']) ?>">
+				<?php $this->insert('field/entries/row', [
+					'index' => '__i__',
+					'rowData' => null,
+					'entryType' => $entryType,
+					'globalLocales' => $globalLocales ?? false,
+					'readonly' => false,
+				]) ?>
+			</template>
 		<?php endforeach ?>
-	</div>
+		<div class="adders" data-repeater-footer>
+			<?php foreach ($entryTypes as $entryType): ?>
+				<?php $this->insert('field/entries/adder', [
+					'entryType' => $entryType,
+					'empty' => $rows === [],
+					'full' => $full,
+					'single' => $single,
+				]) ?>
+			<?php endforeach ?>
+		</div>
+	<?php endif ?>
 </div>

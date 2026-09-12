@@ -1,6 +1,13 @@
 <?php
 
 $sub = (array) $this->unwrap($sub);
+
+// A read-only row hands its own state to every sub-field: the field it
+// belongs to is ignored whole on save.
+if ((bool) ($this->unwrap($readonly ?? null) ?? false)) {
+	$sub['immutable'] = true;
+}
+
 $fieldsData = (array) ($this->unwrap($fieldsData ?? null) ?? []);
 $rowName = (string) $this->unwrap($rowName);
 $rowId = (string) $this->unwrap($rowId);
