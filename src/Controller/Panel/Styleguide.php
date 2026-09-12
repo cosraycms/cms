@@ -39,6 +39,10 @@ final class Styleguide extends Panel
 		assert($locales instanceof Locales, 'The locales service must be available');
 
 		return $this->context([
+			// Addressable state: one section, one theme, one screenshot.
+			// `section` matches the data-section key a section carries.
+			'section' => (string) $this->request->param('section', ''),
+			'theme' => (string) $this->request->param('theme', ''),
 			'tokenGroups' => $this->tokenGroups(),
 			'locales' => [
 				['id' => 'en', 'title' => 'English'],
@@ -399,6 +403,17 @@ final class Styleguide extends Panel
 					'props' => ['entryTypes' => [$person], 'min' => 0, 'max' => 3],
 				],
 			],
+			// A read-only repeater: rows readable, nothing that restructures
+			// them — no adders, grip, row menu or sub-field input.
+			[
+				'name' => 'teamReadonly',
+				'label' => 'Team — read-only',
+				'control' => [
+					'name' => 'entries',
+					'props' => ['entryTypes' => [$person], 'min' => 0],
+				],
+				'immutable' => true,
+			],
 		];
 	}
 
@@ -438,6 +453,11 @@ final class Styleguide extends Panel
 				],
 			],
 			'teamEmpty' => ['value' => ['zxx' => []]],
+			'teamReadonly' => [
+				'value' => [
+					'zxx' => [$person('sg-person-3', 'sg-cover', 'Imported person', 'From the supplier feed')],
+				],
+			],
 		];
 	}
 

@@ -51,7 +51,25 @@ $fieldsetMembers = array_flip(array_filter(
 $statuses = ['published', 'draft', 'hidden', 'locked'];
 $rows = (array) $this->unwrap($rows);
 
+// ?section=<key> narrows the page to one section, ?theme=light|dark
+// forces a theme: one URL per question, so a check needs no scrolling
+// and no scripting.
+$section = (string) ($this->unwrap($section ?? '') ?? '');
+$theme = (string) ($this->unwrap($theme ?? '') ?? '');
+$theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 ?>
+<?php if ($section !== ''): ?>
+	<style>
+		.cms-styleguide .sections > .section:not([data-section="<?= escape($section) ?>"]) {
+			display: none;
+		}
+	</style>
+<?php endif ?>
+<?php if ($theme !== ''): ?>
+	<script>
+		document.documentElement.dataset.theme = <?= json_encode($theme, $jsonFlags) ?>;
+	</script>
+<?php endif ?>
 
 <div class="page cms-styleguide">
 	<header class="head">
@@ -71,7 +89,7 @@ $rows = (array) $this->unwrap($rows);
 
 	<section class="body">
 		<div class="sections">
-			<section class="section">
+			<section class="section" data-section="tokens">
 				<h2>Tokens</h2>
 				<p class="note">
 					Read out of <code>panel/styles/tokens.css</code> at request time, so this list
@@ -105,7 +123,7 @@ $rows = (array) $this->unwrap($rows);
 				<?php endforeach ?>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="buttons">
 				<h2>Buttons</h2>
 				<div class="sample">
 					<button type="button" class="cms-button primary">Save</button>
@@ -120,7 +138,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="dialogs">
 				<h2>Dialogs and action menus</h2>
 				<p class="note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus. These samples never submit.</p>
 				<form data-meta-owner onsubmit="event.preventDefault()">
@@ -160,7 +178,7 @@ $rows = (array) $this->unwrap($rows);
 				</form>
 			</section>
 
-			<section class="section" id="sample-icons">
+			<section class="section" id="sample-icons" data-section="icons">
 				<h2>Icons</h2>
 				<p class="note">Regular Bootstrap artwork shared with Svelte controls. Icons inherit text color and are decorative.</p>
 				<div class="sample">
@@ -170,7 +188,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="status">
 				<h2>Pills and status</h2>
 				<div class="sample">
 					<span class="cms-count">24 entries</span>
@@ -315,7 +333,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="richtext">
 				<h2>Richtext</h2>
 				<p class="note">
 					The default toolbar, and a field trimmed the way <code>#[Tools]</code> trims it —
@@ -342,7 +360,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="media">
 				<h2>Media</h2>
 				<p class="note">
 					The image control in both shapes — a single image card and a gallery —
@@ -370,7 +388,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="entries">
 				<h2>Entries</h2>
 				<p class="note">
 					A typed repeater: stored rows collapse to a summary line — thumb, primary and
@@ -398,7 +416,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="blocks">
 				<h2>Blocks</h2>
 				<p class="note">
 					The typed repeater with a grid. A one-column field is a quiet list; a
@@ -431,7 +449,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="inspector">
 				<h2>Inspector</h2>
 				<p class="note">
 					Rendered through <code>panel/views/node/inspector.php</code> — toggles, route
@@ -440,7 +458,7 @@ $rows = (array) $this->unwrap($rows);
 				<?php $this->insert('node/inspector', (array) $this->unwrap($inspector)) ?>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="listing">
 				<h2>Listing</h2>
 				<p class="note">
 					Rendered through <code>panel/views/collection/row.php</code>, the same partial
@@ -483,7 +501,7 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="empty">
 				<h2>Empty state</h2>
 				<div class="cms-collection">
 					<div class="listing">
