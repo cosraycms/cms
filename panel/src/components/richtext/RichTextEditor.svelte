@@ -67,6 +67,8 @@
 		value: RichtextDoc | null;
 		name: string;
 		required?: boolean;
+		/** Show the document, take no input: no toolbar, no bubble. */
+		readonly?: boolean;
 		fallback?: RichtextDoc | null;
 		fallbackLabel?: string;
 		toolbar?: 'default' | 'inline';
@@ -88,6 +90,7 @@
 		value = $bindable(),
 		name,
 		required = false,
+		readonly = false,
 		fallback = null,
 		fallbackLabel = '',
 		toolbar = 'default',
@@ -195,6 +198,7 @@
 			mode: toolbar,
 			bubbleElement: bubble,
 			assetUrl,
+			editable: () => !readonly,
 			// The bind write must land before notify: the element serializes
 			// the bound map into the cosray-change detail when notified.
 			onUpdate: (doc) => {
@@ -534,7 +538,7 @@
 	onfocusin={focusIn}
 	onfocusout={focusOut}
 >
-	{#if toolbar === 'inline'}
+	{#if toolbar === 'inline' && !readonly}
 		<div class="richtext-bubble cms-richtext-bubble" bind:this={bubble}>
 			{#if editor}
 				{#if blockStyleSpecs.length > 0}
@@ -600,7 +604,7 @@
 			{/if}
 		</div>
 	{/if}
-	{#if editor}
+	{#if editor && !readonly}
 		{#if toolbar !== 'inline'}
 			<div
 				class="richtext-toolbar cms-richtext-toolbar"
@@ -785,7 +789,12 @@
 			<!-- No name: the host carries the value into the form. A named
 			     textarea would submit a bare key that, for a sub-field called
 			     "content" inside entries, wipes the whole content tree. -->
-			<textarea onkeyup={changeSource} bind:value={sourceHtml} class="cms-richtext-source-input">
+			<textarea
+				onkeyup={changeSource}
+				bind:value={sourceHtml}
+				{readonly}
+				class="cms-richtext-source-input"
+			>
 			</textarea>
 		</div>
 	</div>

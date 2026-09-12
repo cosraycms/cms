@@ -35,6 +35,12 @@ export interface EditorOptions {
 	bubbleElement?: HTMLElement;
 	/** Resolve an asset uid to a display URL for inline images. */
 	assetUrl?: (uid: string) => string | null;
+	/**
+	 * Whether the document takes input; the view stays selectable either
+	 * way, so a read-only document can still be read and copied. Absent
+	 * means editable.
+	 */
+	editable?: () => boolean;
 }
 
 function parseContent(html: string) {
@@ -51,7 +57,8 @@ function serializeContent(state: EditorState): string {
 }
 
 export default function createEditor(options: EditorOptions): CmsEditor {
-	const { element, content, onUpdate, onStateChange, mode, bubbleElement, assetUrl } = options;
+	const { element, content, onUpdate, onStateChange, mode, bubbleElement, assetUrl, editable } =
+		options;
 
 	const plugins: Plugin[] = [
 		buildInputRules(),
@@ -74,6 +81,7 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 
 	const view = new EditorView(element, {
 		state,
+		editable,
 		nodeViews: {
 			image(node) {
 				const dom = document.createElement('img');

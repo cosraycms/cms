@@ -19,6 +19,7 @@
 	type FieldInfo = {
 		name: string;
 		required?: boolean;
+		immutable?: boolean;
 		translate?: boolean;
 		presentation?: string;
 		tools?: string[];
@@ -129,6 +130,7 @@
 	<RichTextEditor
 		name={field.name}
 		required={field.required ?? false}
+		readonly={field.immutable ?? false}
 		fallback={fallback?.value ?? null}
 		fallbackLabel={fallback
 			? __('field:fallback-from', {
