@@ -46,7 +46,7 @@
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: var(--cms-space-6);
-		background: var(--cms-color-surface-sunken);
+		background: var(--cms-pane-bg);
 		overflow-y: auto;
 		overscroll-behavior: contain;
 	}
