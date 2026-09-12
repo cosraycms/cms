@@ -184,25 +184,57 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="controls">
 				<h2>Controls</h2>
-				<div class="sample">
-					<input type="text" value="Sudhaus" />
-					<input type="text" placeholder="Placeholder" />
-					<input type="text" value="Disabled" disabled />
-					<select>
+				<p class="note">
+					Every control in every state it can reach, in the classes the panel renders:
+					editable, read-only, disabled, invalid.
+				</p>
+				<div class="sample" data-sample="input:states">
+					<input class="cms-input" type="text" value="Editable" data-sample="input:editable" />
+					<input class="cms-input" type="text" placeholder="Placeholder" data-sample="input:empty" />
+					<input class="cms-input" type="text" value="Read-only" readonly data-sample="input:readonly" />
+					<input class="cms-input" type="text" value="Disabled" disabled data-sample="input:disabled" />
+					<input
+						class="cms-input"
+						type="text"
+						value="Invalid"
+						aria-invalid="true"
+						data-sample="input:invalid" />
+				</div>
+				<div class="sample" data-sample="select:states">
+					<select class="cms-select" data-sample="select:editable">
 						<option>News</option>
 						<option>Event</option>
 					</select>
-					<label class="sample"><input type="checkbox" checked /> Checkbox</label>
+					<select class="cms-select" disabled data-sample="select:disabled">
+						<option>News</option>
+					</select>
+					<label class="sample">
+						<input class="cms-checkbox" type="checkbox" checked data-sample="checkbox:checked" />
+						Checkbox
+					</label>
+					<label class="sample">
+						<input class="cms-checkbox" type="checkbox" disabled data-sample="checkbox:disabled" />
+						Disabled
+					</label>
 				</div>
-				<div class="sample">
-					<label class="sample"><input type="checkbox" class="cms-switch" checked /> Switch on</label>
-					<label class="sample"><input type="checkbox" class="cms-switch" /> Switch off</label>
-					<label class="sample"><input type="checkbox" class="cms-switch" checked disabled /> Disabled</label>
+				<div class="sample" data-sample="switch:states">
+					<label class="sample">
+						<input type="checkbox" class="cms-switch" checked data-sample="switch:on" /> Switch on
+					</label>
+					<label class="sample">
+						<input type="checkbox" class="cms-switch" data-sample="switch:off" /> Switch off
+					</label>
+					<label class="sample">
+						<input type="checkbox" class="cms-switch" checked disabled data-sample="switch:disabled" />
+						Disabled
+					</label>
 				</div>
-				<div class="sample">
-					<textarea rows="2">Zweisprachige Betreuung für Kinder von 10 Monaten bis 3 Jahren.</textarea>
+				<div class="sample" data-sample="textarea:states">
+					<textarea class="cms-textarea" rows="2" data-sample="textarea:editable">Zweisprachige Betreuung für Kinder von 10 Monaten bis 3 Jahren.</textarea>
+					<textarea class="cms-textarea" rows="2" readonly data-sample="textarea:readonly">Read-only</textarea>
+					<textarea class="cms-textarea" rows="2" disabled data-sample="textarea:disabled">Disabled</textarea>
 				</div>
 			</section>
 
