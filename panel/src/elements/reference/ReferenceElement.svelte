@@ -19,6 +19,7 @@
 
 	let { value = {}, field = { name: 'reference' }, node = '' }: Props = $props();
 
+	const immutable = $derived(field?.immutable === true);
 	const ownerType = $derived(typeof field?.ownerType === 'string' ? field.ownerType : '');
 	const fieldName = $derived(typeof field?.name === 'string' ? field.name : '');
 	const max = $derived(typeof field?.limit?.max === 'number' ? field.limit.max : -1);
@@ -59,7 +60,7 @@
 	}
 
 	function add(info: NodeInfo): void {
-		if (has(info.uid)) {
+		if (immutable || has(info.uid)) {
 			return;
 		}
 
@@ -79,6 +80,10 @@
 	}
 
 	function remove(uid: string): void {
+		if (immutable) {
+			return;
+		}
+
 		items = items.filter((item) => item.uid !== uid);
 		emit();
 	}
@@ -181,20 +186,22 @@
 					{#if item.typeLabel}
 						<span class="cms-reference-type">{item.typeLabel}</span>
 					{/if}
-					<button
-						type="button"
-						class="cms-reference-remove"
-						onclick={() => remove(item.uid)}
-						aria-label={__('common:remove')}
-					>
-						<Icon name="x-lg" />
-					</button>
+					{#if !immutable}
+						<button
+							type="button"
+							class="cms-reference-remove"
+							onclick={() => remove(item.uid)}
+							aria-label={__('common:remove')}
+						>
+							<Icon name="x-lg" />
+						</button>
+					{/if}
 				</li>
 			{/each}
 		</ul>
 	{/if}
 
-	{#if !full()}
+	{#if !full() && !immutable}
 		<div class="cms-reference-search">
 			<input
 				class="cms-input"
