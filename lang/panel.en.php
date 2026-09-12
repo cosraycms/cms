@@ -78,7 +78,6 @@ return [
 		'media:delete' => 'Delete file',
 		'media:delete-in-use' => 'Cannot delete — the file is still in use:',
 		'media:documents' => 'Documents',
-		'media:download' => 'Download file',
 		'media:drop-to-upload' => 'Drop to upload',
 		'media:empty-many' => 'No files',
 		'media:empty-one' => 'No file',

@@ -70,7 +70,13 @@
 <!-- A keyed item keeps pending uploads bound to their original locale after switching. -->
 {#each [active] as identity (identity)}
 	{#if fallback}
-		<FallbackMedia items={fallback.value} {type} label={sourceLabel(fallback.locale)} />
+		<FallbackMedia
+			items={fallback.value}
+			{type}
+			label={sourceLabel(fallback.locale)}
+			translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}
+			contentLocale={locale}
+		/>
 	{/if}
 	<MediaField
 		{type}

@@ -646,9 +646,7 @@
 	& .cms-video-figure .overlay,
 	& .cms-gallery .discard,
 	& .cms-media-meta,
-	& .cms-video-controls,
-	& .cms-file-action,
-	& .cms-file-download {
+	& .cms-file-row .tool {
 		display: none;
 	}
 }

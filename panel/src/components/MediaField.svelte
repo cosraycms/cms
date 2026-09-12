@@ -10,8 +10,9 @@
 	import { __ } from '$lib/locale';
 	import Icon from '$components/Icon.svelte';
 	import Dialog from '$components/Dialog.svelte';
-	import MediaList from '$components/MediaList.svelte';
 	import ModalLibrary from '$components/modals/ModalLibrary.svelte';
+	import Video from '$components/Video.svelte';
+	import FileList from '$components/media/FileList.svelte';
 	import Gallery from '$components/media/Gallery.svelte';
 	import ImageCard from '$components/media/ImageCard.svelte';
 	import ImageFigure from '$components/media/ImageFigure.svelte';
@@ -449,11 +450,12 @@
 					/>
 				{/if}
 			{:else}
-				<MediaList
+				{#if type === 'video'}
+					<Video file={items[0]} />
+				{/if}
+				<FileList
 					bind:items
-					{multiple}
-					{type}
-					{remove}
+					kind={type === 'video' ? 'video' : 'file'}
 					{loading}
 					{translate}
 					{contentLocale}
@@ -461,6 +463,7 @@
 					{locales}
 					{readonly}
 					{notify}
+					remove={(index) => remove(index)}
 				/>
 			{/if}
 		</div>

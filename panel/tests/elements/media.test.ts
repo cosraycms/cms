@@ -74,7 +74,7 @@ function file() {
 }
 
 async function edit(element: HTMLElement): Promise<HTMLInputElement> {
-	element.querySelector<HTMLButtonElement>('.cms-file-action-edit')!.click();
+	element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
 	await tick();
 	const input = document.querySelector<HTMLInputElement>('.cms-modal input[type="text"]');
 	expect(input).not.toBeNull();
@@ -232,6 +232,90 @@ describe('the frame', () => {
 	});
 });
 
+describe('file rows', () => {
+	it('shows each file with its type icon or thumbnail, its link, its title and its size', async () => {
+		const { element } = await media('cosray-file', {
+			value: {
+				zxx: [
+					{ uid: 'terms', meta: { title: { zxx: 'Terms of delivery' } } },
+					{ uid: 'photo' },
+					{ uid: 'notes' },
+				],
+			},
+			field: { name: 'downloads' },
+			assets: {
+				terms: {
+					filename: 'terms.docx',
+					url: '/media/terms.docx',
+					kind: 'file',
+					mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+					bytes: 46490,
+				},
+				photo: {
+					filename: 'photo.jpg',
+					url: '/media/photo.jpg',
+					thumbUrl: '/media/photo-thumb.jpg',
+					kind: 'image',
+					bytes: 862208,
+				},
+				notes: { filename: 'notes', url: '/media/notes', kind: 'file' },
+			},
+		});
+		const rows = element.querySelectorAll<HTMLElement>('.cms-file-row');
+
+		expect(rows).toHaveLength(3);
+		expect(rows[0].querySelector('.icon svg')?.classList.contains('bi-file-earmark-word')).toBe(
+			true,
+		);
+		expect(rows[0].querySelector<HTMLAnchorElement>('a.filename')?.getAttribute('href')).toBe(
+			'/media/terms.docx',
+		);
+		expect(rows[0].querySelector('.title')?.textContent).toBe('Terms of delivery');
+		expect(rows[0].querySelector('.size')?.textContent).toBe('45.4 KB');
+		expect(rows[1].querySelector('.icon img')?.getAttribute('src')).toBe('/media/photo-thumb.jpg');
+		expect(rows[2].querySelector('.icon svg')?.classList.contains('bi-file-earmark')).toBe(true);
+		expect(rows[2].querySelector('.title')).toBeNull();
+		expect(rows[2].querySelector('.size')?.textContent).toBe('');
+	});
+
+	it('persists a reorder of the rows', async () => {
+		const { element, changes } = await media('cosray-file', {
+			value: { zxx: [{ uid: 'a' }, { uid: 'b' }] },
+			field: { name: 'downloads' },
+			assets: {
+				a: { filename: 'a.pdf', url: '/media/a.pdf', kind: 'file' },
+				b: { filename: 'b.pdf', url: '/media/b.pdf', kind: 'file' },
+			},
+		});
+		const list = element.querySelector<HTMLElement>('.cms-file-list')!;
+		const sorter = Sortable.get(list)!;
+
+		// jsdom has no drag layout; Sortable moves the DOM before calling onUpdate.
+		list.append(list.firstElementChild!);
+		sorter.option('onUpdate')!.call(sorter, { oldIndex: 0, newIndex: 1 } as SortableEvent);
+		await tick();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'b' }, { uid: 'a' }] });
+	});
+
+	it('removes a row and keeps the rest', async () => {
+		const { element, changes } = await media('cosray-file', {
+			value: { zxx: [{ uid: 'a' }, { uid: 'b' }] },
+			field: { name: 'downloads' },
+			assets: {
+				a: { filename: 'a.pdf', url: '/media/a.pdf', kind: 'file' },
+				b: { filename: 'b.pdf', url: '/media/b.pdf', kind: 'file' },
+			},
+		});
+
+		element.querySelector<HTMLButtonElement>('.cms-file-row .remove')!.click();
+		await tick();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'b' }] });
+		expect(element.querySelectorAll('.cms-file-row')).toHaveLength(1);
+	});
+});
+
 describe('file metadata', () => {
 	it('shows the catalog title as the placeholder of an item without its own', async () => {
 		const { element } = await media('cosray-file', {
@@ -327,7 +411,7 @@ describe('media uploads', () => {
 					de: [german],
 				});
 			});
-			expect(element.querySelector('.cms-file-name')?.textContent).toBe('german');
+			expect(element.querySelector('.cms-file-row .filename')?.textContent?.trim()).toBe('german');
 
 			element.locale = 'en';
 			await tick();
@@ -459,7 +543,7 @@ describe('per-use meta', () => {
 			field: { name: 'clip', translate: true, limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
-		element.querySelector<HTMLButtonElement>('.cms-video-edit')!.click();
+		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
 		await tick();
 		const caption = document.querySelector<HTMLTextAreaElement>(
 			'.cms-modal textarea[id$="-caption"]',
@@ -492,7 +576,8 @@ describe('per-use meta', () => {
 			field: { name: 'clip', limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
-		element.querySelector<HTMLButtonElement>('.cms-video-edit')!.click();
+		expect(element.querySelector('.cms-video video')?.getAttribute('src')).toBe('/media/clip.mp4');
+		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
 		await tick();
 		const caption = document.querySelector<HTMLTextAreaElement>(
 			'.cms-modal textarea[id$="-caption"]',

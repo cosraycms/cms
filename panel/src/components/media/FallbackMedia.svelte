@@ -2,16 +2,18 @@
 	import type { FileItem, UploadType } from '$types/data';
 
 	import { useAssets } from '$lib/assets';
-	import { assetLine, extension } from '$lib/library';
-	import Icon from '$components/Icon.svelte';
+	import { extension } from '$lib/library';
+	import FileRow from './FileRow.svelte';
 
 	type Props = {
 		items: FileItem[];
 		type: UploadType;
 		label: string;
+		translate: boolean;
+		contentLocale: string;
 	};
 
-	let { items, type, label }: Props = $props();
+	let { items, type, label, translate, contentLocale }: Props = $props();
 	const assets = useAssets();
 
 	function filename(item: FileItem): string {
@@ -49,11 +51,7 @@
 	{:else}
 		<div class="files">
 			{#each items as item (item)}
-				<div class="file">
-					<Icon name="file-earmark-richtext" />
-					<span>{filename(item)}</span>
-					<small>{$assets[item.uid ?? ''] ? assetLine($assets[item.uid ?? '']) : ''}</small>
-				</div>
+				<FileRow {item} {translate} {contentLocale} inert />
 			{/each}
 		</div>
 	{/if}
@@ -106,26 +104,8 @@
 		}
 
 		.files {
-			display: grid;
-			gap: var(--cms-space-2);
-		}
-
-		.file {
-			display: grid;
-			grid-template-columns: var(--cms-space-5) minmax(0, 1fr) auto;
-			align-items: center;
-			gap: var(--cms-space-2);
-		}
-
-		.file :global(svg) {
-			width: var(--cms-space-4);
-			height: var(--cms-space-4);
-		}
-
-		.file span {
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
+			display: flex;
+			flex-direction: column;
 		}
 	}
 </style>

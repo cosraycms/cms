@@ -1,45 +1,45 @@
 <script lang="ts">
-	import type { FileItem, UploadType } from '$types/data';
+	import type { FileItem } from '$types/data';
 	import type { SortableEvent } from 'sortablejs';
+
 	import Sortable from 'sortablejs';
-	import { mount, onMount, unmount } from 'svelte';
+	import { mount, unmount } from 'svelte';
 	import { assetsContext, useAssets } from '$lib/assets';
 	import { cosray } from '$lib/bridge';
 	import { pruneItemMeta } from '$lib/content';
-	import Video from '$components/Video.svelte';
-	import File from '$components/File.svelte';
 	import ModalEditImage from '$components/modals/ModalEditImage.svelte';
+	import FileRow from './FileRow.svelte';
 
 	type Props = {
 		items: FileItem[];
-		multiple: boolean;
+		// A file's pencil edits its title, a video's its caption.
+		kind: 'file' | 'video';
 		translate: boolean;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
-		type: UploadType;
 		loading: boolean;
-		remove: (index: number | null) => void;
+		remove: (index: number) => void;
 		/** The field cannot change: no reordering, no per-item actions. */
 		readonly?: boolean;
-		notify?: () => void;
+		notify: () => void;
 	};
 
 	let {
 		items = $bindable(),
-		multiple,
+		kind,
 		translate,
 		contentLocale,
 		identity,
 		locales,
-		type,
 		loading,
 		remove,
 		readonly = false,
-		notify = () => {},
+		notify,
 	}: Props = $props();
+
 	const assets = useAssets();
-	let sorterElement: HTMLElement | undefined = $state();
+	let list: HTMLElement | undefined = $state();
 	// The open dialog's props stay live, so a language chosen through its
 	// mirrored selector reaches it while it is open.
 	let dialog: { contentLocale: string } | null = $state(null);
@@ -50,29 +50,32 @@
 		}
 	});
 
-	function createSorter() {
-		if (sorterElement) {
-			Sortable.create(sorterElement, {
-				animation: 200,
-				onUpdate: function (event: SortableEvent) {
-					if (event.oldIndex === undefined || event.newIndex === undefined) {
-						return;
-					}
-
-					const tmp = items[event.oldIndex];
-
-					items.splice(event.oldIndex, 1);
-					items.splice(event.newIndex, 0, tmp);
-					items = items;
-					// The element only serializes into the form value when
-					// notified; without this the reorder is lost on save.
-					notify();
-				},
-			});
+	$effect(() => {
+		if (!list || readonly) {
+			return;
 		}
-	}
 
-	function edit(index: number, kind: 'video' | 'file') {
+		const sorter = Sortable.create(list, {
+			animation: 200,
+			onUpdate(event: SortableEvent) {
+				if (event.oldIndex === undefined || event.newIndex === undefined) {
+					return;
+				}
+
+				const [moved] = items.splice(event.oldIndex, 1);
+
+				items.splice(event.newIndex, 0, moved);
+				items = items;
+				// The element only serializes into the form value when
+				// notified; without this the reorder is lost on save.
+				notify();
+			},
+		});
+
+		return () => sorter.destroy();
+	});
+
+	function edit(index: number) {
 		const props = $state({
 			asset: items[index],
 			kind,
@@ -102,55 +105,30 @@
 					void unmount(app);
 				};
 			},
-			{ owner: sorterElement ?? document.getElementById(identity) ?? undefined },
+			{ owner: list ?? document.getElementById(identity) ?? undefined },
 		);
 	}
-
-	onMount(() => {
-		if (!readonly) {
-			createSorter();
-		}
-	});
 </script>
 
-<div class="cms-media-list" bind:this={sorterElement}>
-	{#if multiple && type === 'file'}
-		{#each items as item, index (item)}
-			<File
-				{loading}
-				{readonly}
-				asset={item}
-				remove={() => remove(index)}
-				edit={() => edit(index, 'file')}
-			/>
-		{/each}
-	{:else if !multiple && type === 'video' && items && items.length > 0}
-		<Video
-			upload
-			file={items[0]}
-			remove={() => remove(null)}
-			edit={() => edit(0, 'video')}
+<div class="cms-file-list" bind:this={list}>
+	{#each items as item, index (item)}
+		<FileRow
+			{item}
+			{translate}
+			{contentLocale}
 			{loading}
-			{readonly}
+			inert={readonly}
+			edit={() => edit(index)}
+			remove={() => remove(index)}
 		/>
-	{:else if items && items.length > 0}
-		<File
-			{loading}
-			{readonly}
-			asset={items[0]}
-			remove={() => remove(null)}
-			edit={() => edit(0, 'file')}
-		/>
-	{/if}
+	{/each}
 </div>
 
 <style>
 	@layer panel {
-		.cms-media-list {
+		.cms-file-list {
 			display: flex;
 			flex-direction: column;
-			gap: var(--cms-space-3);
-			padding: var(--cms-space-3);
 		}
 	}
 </style>

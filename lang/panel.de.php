@@ -78,7 +78,6 @@ return [
 		'media:delete' => 'Datei löschen',
 		'media:delete-in-use' => 'Löschen nicht möglich — die Datei wird noch verwendet:',
 		'media:documents' => 'Dokumente',
-		'media:download' => 'Datei herunterladen',
 		'media:drop-to-upload' => 'Zum Hochladen ablegen',
 		'media:empty-many' => 'Keine Dateien',
 		'media:empty-one' => 'Keine Datei',
