@@ -1,15 +1,3 @@
-/*
- * A hundred columns so a field can declare any width as a span. Row gap only:
- * a column gap would be applied ninety-nine times and push the grid far past
- * its container. The gutter between side-by-side fields comes from their own
- * inline padding instead.
- */
-.cms-fields {
-	display: grid;
-	grid-template-columns: repeat(100, minmax(0, 1fr));
-	row-gap: var(--cms-space-8);
-}
-
 /* display: flex outranks the UA rule behind the hidden attribute, which
    conditional visibility (when-conditions, the menu form's type sections)
    relies on. */
@@ -53,6 +41,13 @@
 
 	& .state {
 		color: var(--cms-color-text-subtle);
+	}
+
+	& > .field-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1);
+		min-width: 0;
 	}
 
 	& .control {
@@ -124,6 +119,41 @@
 	& .fields {
 		width: 100%;
 		margin-top: var(--cms-space-4);
+	}
+}
+
+/* Column gutters use field padding: a gap would repeat across all 100 columns. */
+.cms-fields {
+	display: grid;
+	grid-template-columns: repeat(100, minmax(0, 1fr));
+
+	/* Item margins separate logical rows without adding gaps inside a row span.
+	   Cancel the trailing margin only when the grid has visible items. */
+	&:has(> :not([hidden])) {
+		margin-block-end: calc(-1 * var(--cms-space-8));
+	}
+
+	& > * {
+		--rows: 1;
+		grid-row: span calc(2 * var(--rows));
+		margin-block-end: var(--cms-space-8);
+	}
+
+	& > .cms-field:not([hidden]) {
+		display: grid;
+		grid-template-rows: subgrid;
+		row-gap: 0;
+	}
+
+	& > .cms-field > .label {
+		grid-row: 1;
+		align-self: start;
+		margin-block-end: var(--cms-space-1);
+	}
+
+	& > .cms-field > .field-body {
+		grid-row: 2 / -1;
+		align-self: start;
 	}
 }
 

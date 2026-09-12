@@ -180,19 +180,21 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				title="<?= $this->escape($title) ?>"></span>
 		<?php endforeach ?>
 	<?php endif ?>
-	<div class="body cms-fields" id="<?= $this->escape("{$rowId}-form") ?>">
-		<?php $this->insert($editor ?? 'field/row-fields', [
-			'type' => $blockType,
-			'ownsLocales' => $ownsLocales,
-			'ownMeta' => false,
-			'readonly' => $readonly,
-			// One visible field needs no label of its own: the block names it.
-			'labels' => $labels,
-			'fieldsData' => $fieldsData,
-			'rowName' => $rowName,
-			'rowId' => $rowId,
-			'globalLocales' => $globalLocales,
-		]) ?>
+	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
+		<div class="cms-fields">
+			<?php $this->insert($editor ?? 'field/row-fields', [
+				'type' => $blockType,
+				'ownsLocales' => $ownsLocales,
+				'ownMeta' => false,
+				'readonly' => $readonly,
+				// One visible field needs no label of its own: the block names it.
+				'labels' => $labels,
+				'fieldsData' => $fieldsData,
+				'rowName' => $rowName,
+				'rowId' => $rowId,
+				'globalLocales' => $globalLocales,
+			]) ?>
+		</div>
 	</div>
 	<?php if ($settings): ?>
 		<dialog class="cms-modal" data-size="compact" data-meta>

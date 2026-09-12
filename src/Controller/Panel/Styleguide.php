@@ -50,6 +50,7 @@ final class Styleguide extends Panel
 			],
 			'defaultLocale' => 'en',
 			'fields' => $this->fields(),
+			'alignmentFields' => $this->alignmentFields(),
 			'fieldset' => $this->fieldset(),
 			'content' => $this->content(),
 			'rows' => $this->rows(),
@@ -222,6 +223,78 @@ final class Styleguide extends Panel
 				'name' => 'overflow',
 				'label' => 'A label long enough to find out what happens when it does not fit',
 				'control' => ['name' => 'text', 'props' => []],
+			],
+		];
+	}
+
+	private function alignmentFields(): array
+	{
+		return [
+			[
+				'name' => 'alignmentShort',
+				'label' => 'Short label',
+				'control' => Control::text()->array(),
+				'width' => 25,
+				'required' => true,
+				'description' => 'Help stays next to this input, even beside a taller control.',
+			],
+			[
+				'name' => 'alignmentLong',
+				'label' => 'A longer label that wraps across multiple lines',
+				'control' => Control::text()->array(),
+				'width' => 25,
+			],
+			[
+				'name' => 'alignmentDate',
+				'label' => 'Date',
+				'control' => Control::date()->array(),
+				'width' => 25,
+			],
+			[
+				'name' => 'alignmentTall',
+				'label' => 'Taller control',
+				'control' => Control::textarea()->array(),
+				'width' => 25,
+			],
+			[
+				'name' => 'alignmentSpan',
+				'label' => 'Spans two rows',
+				'control' => Control::textarea()->array(),
+				'width' => 50,
+				'rowspan' => 2,
+				'description' => 'The control keeps its own height; the next two fields sit beside it.',
+			],
+			[
+				'name' => 'alignmentNext',
+				'label' => 'Beside the spanning field',
+				'control' => Control::text()->array(),
+				'width' => 50,
+			],
+			[
+				'name' => 'alignmentLast',
+				'label' => 'Second row beside the spanning field',
+				'control' => Control::text()->array(),
+				'width' => 50,
+			],
+			[
+				'name' => 'alignmentToggle',
+				'label' => 'Show conditional field',
+				'control' => Control::checkbox()->array(),
+				'width' => 25,
+			],
+			[
+				'name' => 'alignmentConditional',
+				'label' => 'A conditional field with a longer label',
+				'control' => Control::text()->array(),
+				'width' => 25,
+				'required' => true,
+				'when' => ['field' => 'alignmentToggle', 'op' => 'truthy', 'value' => null],
+			],
+			[
+				'name' => 'alignmentAlways',
+				'label' => 'Always visible',
+				'control' => Control::text()->array(),
+				'width' => 50,
 			],
 		];
 	}

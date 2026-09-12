@@ -227,13 +227,14 @@ function mark(control: Element, message: string, locale?: string): void {
 	note.id = `cms-error-${++counter}`;
 	note.textContent = message;
 
-	const messages = field.querySelectorAll(`:scope > [${MESSAGE}]`);
-	const anchor = messages[messages.length - 1] ?? field.querySelector(':scope > .control');
+	const body = field.querySelector(':scope > .field-body') ?? field;
+	const messages = body.querySelectorAll(`:scope > [${MESSAGE}]`);
+	const anchor = messages[messages.length - 1] ?? body.querySelector(':scope > .control');
 
 	if (anchor) {
 		anchor.after(note);
 	} else {
-		field.append(note);
+		body.append(note);
 	}
 
 	if (

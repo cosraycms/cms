@@ -13,6 +13,8 @@ $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
 $assets = (array) ($this->unwrap($assets ?? null) ?? []);
 $globalLocales = (bool) ($this->unwrap($globalLocales ?? null) ?? false);
+$gridStyle = (string) ($gridStyle ?? '');
+$pathSource = (bool) ($this->unwrap($pathSource ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -56,7 +58,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 ?>
 
 <div
-	class="cms-field<?= $required ? ' required' : '' ?>"
+	class="cms-field<?= $required ? ' required' : '' ?><?= $pathSource ? ' js-path-source' : '' ?>"
+	<?= $gridStyle !== '' ? 'style="' . escape($gridStyle) . '"' : '' ?>
 	<?= $tabs ? 'data-locale-scope' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
 	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
@@ -98,69 +101,71 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			</span>
 		<?php endif ?>
 	</label>
-	<div class="control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
-		<?php if ($variants): ?>
-			<?php foreach ($locales as $locale): ?>
-				<div
-					class="variant"
-					data-locale="<?= escape($locale['id']) ?>"
-					<?= $blockFallback ? 'data-blocks-locale' : '' ?>
-					<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
-					<?php // Required applies to the default locale only — the same
+	<div class="field-body">
+		<div class="control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
+			<?php if ($variants): ?>
+				<?php foreach ($locales as $locale): ?>
+					<div
+						class="variant"
+						data-locale="<?= escape($locale['id']) ?>"
+						<?= $blockFallback ? 'data-blocks-locale' : '' ?>
+						<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>>
+						<?php // Required applies to the default locale only — the same
 
-					// rule the server-side shape validates. ?>
-					<?php $this->insert('field/control', [
-						'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
-						'control' => $control,
-						'id' => "{$idRoot}-{$locale['id']}",
-						'name' => "{$nameRoot}[value][{$locale['id']}]",
-						'nameRoot' => $nameRoot,
-						'value' => $value[$locale['id']] ?? null,
-						'data' => $data,
-						'node' => $node,
-						'locales' => $locales,
-						'defaultLocale' => $defaultLocale,
-						'assets' => $assets,
-						'globalLocales' => $globalLocales,
-						'fallbackPreview' => $fallbackPreview,
-					]) ?>
-					<?php if ($fallbackPreview): ?>
-						<span
-							class="cms-fallback-source"
-							data-fallback-source
-							data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
-							data-neutral="<?= escape(__('field:shared-content')) ?>"
-							hidden></span>
-					<?php elseif ($blockFallback): ?>
-						<span
-							class="cms-blocks-fallback-source"
-							data-blocks-fallback-source
-							data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
-							hidden></span>
-					<?php endif ?>
-				</div>
-			<?php endforeach ?>
-		<?php else: ?>
-			<?php $this->insert('field/control', [
-				'field' => $field,
-				'control' => $control,
-				'id' => "{$idRoot}-{$neutral}",
-				'name' => "{$nameRoot}[value][{$neutral}]",
-				'nameRoot' => $nameRoot,
-				'value' => $value[$neutral] ?? null,
-				'data' => $data,
-				'node' => $node,
-				'locales' => $locales,
-				'defaultLocale' => $defaultLocale,
-				'assets' => $assets,
-				'globalLocales' => $globalLocales,
-				'fallbackPreview' => false,
-			]) ?>
+						// rule the server-side shape validates. ?>
+						<?php $this->insert('field/control', [
+							'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
+							'control' => $control,
+							'id' => "{$idRoot}-{$locale['id']}",
+							'name' => "{$nameRoot}[value][{$locale['id']}]",
+							'nameRoot' => $nameRoot,
+							'value' => $value[$locale['id']] ?? null,
+							'data' => $data,
+							'node' => $node,
+							'locales' => $locales,
+							'defaultLocale' => $defaultLocale,
+							'assets' => $assets,
+							'globalLocales' => $globalLocales,
+							'fallbackPreview' => $fallbackPreview,
+						]) ?>
+						<?php if ($fallbackPreview): ?>
+							<span
+								class="cms-fallback-source"
+								data-fallback-source
+								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
+								data-neutral="<?= escape(__('field:shared-content')) ?>"
+								hidden></span>
+						<?php elseif ($blockFallback): ?>
+							<span
+								class="cms-blocks-fallback-source"
+								data-blocks-fallback-source
+								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
+								hidden></span>
+						<?php endif ?>
+					</div>
+				<?php endforeach ?>
+			<?php else: ?>
+				<?php $this->insert('field/control', [
+					'field' => $field,
+					'control' => $control,
+					'id' => "{$idRoot}-{$neutral}",
+					'name' => "{$nameRoot}[value][{$neutral}]",
+					'nameRoot' => $nameRoot,
+					'value' => $value[$neutral] ?? null,
+					'data' => $data,
+					'node' => $node,
+					'locales' => $locales,
+					'defaultLocale' => $defaultLocale,
+					'assets' => $assets,
+					'globalLocales' => $globalLocales,
+					'fallbackPreview' => false,
+				]) ?>
+			<?php endif ?>
+		</div>
+		<?php if (is_string($description) && $description !== ''): ?>
+			<div class="description"><?= escape($description) ?></div>
 		<?php endif ?>
 	</div>
-	<?php if (is_string($description) && $description !== ''): ?>
-		<div class="description"><?= escape($description) ?></div>
-	<?php endif ?>
 	<?php if (is_array($metaControl)): ?>
 		<dialog class="cms-modal" data-size="compact" data-meta>
 			<?php $this->insert('component/modal-header', [

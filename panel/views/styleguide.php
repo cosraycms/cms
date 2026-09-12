@@ -264,6 +264,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					ground is the editor's, so a state is judged against the colour it sits on.
 				</p>
 				<?php // Mirrors the editor: .inner is where its width cap lives and
+
 				// .pane the ground it sits on, so a sample reads as it will. ?>
 				<div class="cms-node" data-sample="fields:pane">
 					<div class="pane">
@@ -331,6 +332,16 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						</div>
 					</div>
 				</div>
+			</section>
+
+			<section class="section" data-section="alignment">
+				<h2>Field alignment</h2>
+				<p class="note">
+					Mixed label lengths share a control start line. Help and errors stay with their
+					own control, while row spans and conditional fields keep their grid placement.
+					Resize the viewport to check wrapping and stacked fields.
+				</p>
+				<?php $this->insert('styleguide/alignment') ?>
 			</section>
 
 			<section class="section" data-section="richtext">

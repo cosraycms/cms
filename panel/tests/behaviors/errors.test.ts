@@ -95,6 +95,16 @@ function editor(): void {
 				</div>
 			</div>
 		</form>`;
+
+	for (const field of document.querySelectorAll('.cms-field')) {
+		const body = document.createElement('div');
+		body.className = 'field-body';
+		const control = field.querySelector(':scope > .control')!;
+		control.before(body);
+		body.append(control);
+		const description = field.querySelector(':scope > .description');
+		if (description) body.append(description);
+	}
 }
 
 function respond(items: Array<{ path: unknown; message: string }>): HTMLElement {

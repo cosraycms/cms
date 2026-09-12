@@ -20,17 +20,17 @@ if ($rowspan > 100 || $rowspan <= 0) {
 	$rowspan = 100;
 }
 
-$style = "grid-column: span {$width} / span {$width}; grid-row: span {$rowspan} / span {$rowspan}";
+$gridStyle = "grid-column: span {$width} / span {$width}; --rows: {$rowspan}";
 ?>
 
-<div<?= $isPathSource ? ' class="js-path-source"' : '' ?> style="<?= $this->escape($style) ?>">
-	<?php $this->insert('field/field', [
-		'field' => $field,
-		'data' => $content[$fieldName] ?? null,
-		'locales' => $locales,
-		'defaultLocale' => $defaultLocale,
-		'node' => $uid,
-		'assets' => $assets,
-		'globalLocales' => $globalLocales ?? false,
-	]) ?>
-</div>
+<?php $this->insert('field/field', [
+	'field' => $field,
+	'data' => $content[$fieldName] ?? null,
+	'locales' => $locales,
+	'defaultLocale' => $defaultLocale,
+	'node' => $uid,
+	'assets' => $assets,
+	'globalLocales' => $globalLocales ?? false,
+	'gridStyle' => $gridStyle,
+	'pathSource' => $isPathSource,
+]) ?>

@@ -4,7 +4,7 @@ import { ZXX } from '$types/data';
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
 const INPUT = '[data-fallback-input]';
-const BLOCK_VARIANT = ':scope > .control > .variant[data-blocks-locale]';
+const BLOCK_VARIANT = ':scope > .field-body > .control > .variant[data-blocks-locale]';
 
 function locales(scope: Element): FallbackLocale[] {
 	try {
@@ -27,7 +27,7 @@ function locales(scope: Element): FallbackLocale[] {
 function fieldInputs(field: Element): Array<HTMLInputElement | HTMLTextAreaElement> {
 	return Array.from(
 		field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-			`:scope > .control > .variant[data-locale] ${INPUT}`,
+			`:scope > .field-body > .control > .variant[data-locale] ${INPUT}`,
 		),
 	);
 }

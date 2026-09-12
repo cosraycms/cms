@@ -95,18 +95,20 @@ $ownsLocales = !$globalLocales && RowLocales::owned($entryType, count((array) $t
 		name="<?= $this->escape("{$rowName}[type]") ?>"
 		value="<?= $this->escape((string) $entryType['type']) ?>" />
 	<div
-		class="form cms-fields"
+		class="form"
 		id="<?= $this->escape("{$rowId}-form") ?>"
 		data-repeater-body
 		<?= $open ? '' : 'hidden' ?>>
-		<?php $this->insert('field/row-fields', [
-			'type' => $entryType,
-			'ownsLocales' => $ownsLocales,
-			'fieldsData' => $fieldsData,
-			'rowName' => $rowName,
-			'rowId' => $rowId,
-			'globalLocales' => $globalLocales,
-			'readonly' => $readonly,
-		]) ?>
+		<div class="cms-fields">
+			<?php $this->insert('field/row-fields', [
+				'type' => $entryType,
+				'ownsLocales' => $ownsLocales,
+				'fieldsData' => $fieldsData,
+				'rowName' => $rowName,
+				'rowId' => $rowId,
+				'globalLocales' => $globalLocales,
+				'readonly' => $readonly,
+			]) ?>
+		</div>
 	</div>
 </div>

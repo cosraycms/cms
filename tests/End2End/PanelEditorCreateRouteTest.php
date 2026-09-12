@@ -250,7 +250,11 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		);
 		// ...and the {title} field the route references is marked so editing
 		// it refreshes the preview.
-		$this->assertStringContainsString('<div class="js-path-source"', $html);
+		$this->assertHtmlNodeExists(
+			'//div[contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]'
+				. '//input[starts-with(@name, "content[title][value]")]',
+			$html,
+		);
 	}
 
 	public function testCreatePathsPreviewsFromTheBlueprint(): void
