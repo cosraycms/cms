@@ -238,43 +238,45 @@ $rows = (array) $this->unwrap($rows);
 				</div>
 			</section>
 
-			<section class="section">
+			<section class="section" data-section="fields">
 				<h2>Fields</h2>
 				<p class="note">
 					Rendered through <code>panel/views/field/*</code> with fixture data — the same
-					partials the editor uses, so these cannot fall out of step with it.
+					partials the editor uses, so these cannot fall out of step with it. The pane
+					ground is the editor's, so a state is judged against the colour it sits on.
 				</p>
-				<?php // Mirrors the editor: .inner is where its width cap lives, so
-
-				// the sampler shows fields at the width they actually get. ?>
-				<div class="cms-node">
-					<div class="inner">
-						<div class="sheet">
-							<?php $this->insert('field/fieldset', [
-								'fieldset' => $fieldset,
-								'fieldsByName' => $fieldsByName,
-								'content' => $content,
-								'locales' => $locales,
-								'defaultLocale' => $defaultLocale,
-								'uid' => 'styleguide',
-								'assets' => [],
-								'pathSourceFields' => [],
-							]) ?>
-							<div class="cms-fields">
-								<?php foreach ($fields as $field): ?>
-									<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
-										continue;
-									} ?>
-									<?php $this->insert('field/item', [
-										'field' => $field,
-										'content' => $content,
-										'locales' => $locales,
-										'defaultLocale' => $defaultLocale,
-										'uid' => 'styleguide',
-										'assets' => [],
-										'pathSourceFields' => [],
-									]) ?>
-								<?php endforeach ?>
+				<?php // Mirrors the editor: .inner is where its width cap lives and
+				// .pane the ground it sits on, so a sample reads as it will. ?>
+				<div class="cms-node" data-sample="fields:pane">
+					<div class="pane">
+						<div class="inner">
+							<div class="sheet">
+								<?php $this->insert('field/fieldset', [
+									'fieldset' => $fieldset,
+									'fieldsByName' => $fieldsByName,
+									'content' => $content,
+									'locales' => $locales,
+									'defaultLocale' => $defaultLocale,
+									'uid' => 'styleguide',
+									'assets' => [],
+									'pathSourceFields' => [],
+								]) ?>
+								<div class="cms-fields">
+									<?php foreach ($fields as $field): ?>
+										<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
+											continue;
+										} ?>
+										<?php $this->insert('field/item', [
+											'field' => $field,
+											'content' => $content,
+											'locales' => $locales,
+											'defaultLocale' => $defaultLocale,
+											'uid' => 'styleguide',
+											'assets' => [],
+											'pathSourceFields' => [],
+										]) ?>
+									<?php endforeach ?>
+								</div>
 							</div>
 						</div>
 					</div>

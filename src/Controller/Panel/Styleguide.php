@@ -208,6 +208,13 @@ final class Styleguide extends Panel
 				'description' => 'Immutable fields render read-only.',
 			],
 			[
+				'name' => 'invalid',
+				'label' => 'Invalid',
+				'control' => ['name' => 'text', 'props' => []],
+				'required' => true,
+				'description' => 'Marked invalid the way the save path marks a field that failed.',
+			],
+			[
 				'name' => 'overflow',
 				'label' => 'A label long enough to find out what happens when it does not fit',
 				'control' => ['name' => 'text', 'props' => []],
@@ -259,6 +266,17 @@ final class Styleguide extends Panel
 				'richtextClasses' => (object) [],
 				'richtextStyles' => (object) [],
 			],
+			// The state an element control cannot be checked in anywhere else:
+			// the document without its toolbar, refusing input.
+			[
+				'name' => 'rtReadonly',
+				'label' => 'Richtext — read-only',
+				'control' => $control,
+				'immutable' => true,
+				'tools' => array_map(static fn(Tool $tool): string => $tool->value, Tool::DEFAULT),
+				'richtextClasses' => (object) [],
+				'richtextStyles' => (object) [],
+			],
 		];
 	}
 
@@ -302,6 +320,15 @@ final class Styleguide extends Panel
 				'label' => 'Gallery — empty',
 				'control' => $control,
 				'limit' => $many,
+			],
+			// The read-only state: the picture and its per-use texts stay,
+			// everything that would replace or drop the file is gone.
+			[
+				'name' => 'coverReadonly',
+				'label' => 'Cover image — read-only',
+				'control' => $control,
+				'limit' => $single,
+				'immutable' => true,
 			],
 		];
 	}
@@ -823,6 +850,14 @@ final class Styleguide extends Panel
 				],
 			],
 			'coverEmpty' => ['value' => ['zxx' => []]],
+			'coverReadonly' => [
+				'value' => [
+					'zxx' => [[
+						'uid' => 'sg-cover',
+						'meta' => ['caption' => ['zxx' => 'Provided by the image supplier']],
+					]],
+				],
+			],
 			'gallery' => ['value' => ['zxx' => $gallery]],
 			'galleryEmpty' => ['value' => ['zxx' => []]],
 		];
@@ -1031,6 +1066,7 @@ final class Styleguide extends Panel
 			'weight' => ['value' => ['zxx' => 20]],
 			'featured' => ['value' => ['zxx' => true]],
 			'locked' => ['value' => ['zxx' => 'node-4f21c8']],
+			'invalid' => ['value' => ['zxx' => '']],
 			'overflow' => ['value' => ['zxx' => '']],
 		];
 	}
