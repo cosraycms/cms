@@ -134,7 +134,9 @@ type Insertion = { owner: HTMLElement; at: Anchor | null; locale: string | null 
 function active(owner: HTMLElement): boolean {
 	return (
 		owner.isConnected &&
-		!owner.closest('[hidden], [inert]') &&
+		// A read-only field is ignored whole on save: adding, moving or
+		// removing a row here would only lose the work.
+		!owner.closest('[hidden], [inert], [data-readonly="true"]') &&
 		owner.checkVisibility({ visibilityProperty: true })
 	);
 }

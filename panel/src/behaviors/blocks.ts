@@ -202,6 +202,15 @@ function listOf(container: HTMLElement): HTMLElement {
 	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
 }
 
+/**
+ * A read-only field is ignored whole on save, so a layout gesture inside
+ * one would only lose the work. Its handles are not rendered either; this
+ * closes the keyboard and pointer paths that do not need them.
+ */
+function locked(container: HTMLElement): boolean {
+	return container.closest('[data-readonly="true"]') !== null;
+}
+
 /** The travel of one column: a track plus its gap, off the list's own box. */
 function pitchOf(container: HTMLElement, columns: number): number {
 	const list = listOf(container);
@@ -223,8 +232,9 @@ function onPointerDown(event: PointerEvent): void {
 	const row = handle?.closest<HTMLElement>('[data-repeater-row]');
 	const container = row?.closest<HTMLElement>('[data-repeater]');
 
-	// A second finger does not join a gesture in progress.
-	if (drag || !handle || !edge || !row || !container) {
+	// A second finger does not join a gesture in progress, and a read-only
+	// field has no layout to drag.
+	if (drag || !handle || !edge || !row || !container || locked(container)) {
 		return;
 	}
 
@@ -306,7 +316,8 @@ function onKeyDown(event: KeyboardEvent): void {
 		!grip.matches('[data-repeater-grip]') ||
 		!row ||
 		!container ||
-		!key
+		!key ||
+		locked(container)
 	) {
 		return;
 	}
@@ -361,7 +372,7 @@ function onInput(event: Event): void {
 	const row = control.closest<HTMLElement>('[data-repeater-row]');
 	const container = row?.closest<HTMLElement>('[data-repeater]');
 
-	if (!dimension || !row || !container) {
+	if (!dimension || !row || !container || locked(container)) {
 		return;
 	}
 
