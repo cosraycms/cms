@@ -392,9 +392,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="media">
 				<h2>Media</h2>
 				<p class="note">
-					The image control as a card and as a gallery, filled, empty and read-only.
-					Fixture assets are inline SVG plates; uploads and the library picker are live.
+					The media controls — a single image, a gallery, files, a video — filled, empty
+					and read-only. Fixture assets are inline SVG plates; uploads and the library
+					picker are live. The toggle drags a pretend file over every control.
 				</p>
+				<?php // A synthetic drag: the controls answer dragenter and dragleave alone. ?>
+				<button
+					type="button"
+					class="cms-button secondary small"
+					aria-pressed="false"
+					onclick="const on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', String(on)); const transfer = new DataTransfer(); transfer.items.add(new File(['x'], 'drop.png', { type: 'image/png' })); for (const root of this.closest('[data-section]').querySelectorAll('cosray-host > *')) { root.dispatchEvent(new DragEvent(on ? 'dragenter' : 'dragleave', { bubbles: true, cancelable: true, dataTransfer: transfer })); }">
+					Show drop state
+				</button>
 				<div
 					class="cms-node"
 					data-content-locale-scope

@@ -358,14 +358,17 @@ final class Styleguide extends Panel
 	}
 
 	/**
-	 * Image descriptors in both shapes the control takes: a single image
-	 * and a gallery, each once filled and once empty.
+	 * Media descriptors in every shape the controls take: a single image
+	 * and a gallery, a single file and a list, a video — filled, empty
+	 * and read-only.
 	 *
 	 * @return list<array<string, mixed>>
 	 */
 	private function mediaFields(Controls $controls): array
 	{
 		$control = Control::image()->resolve($controls)->array();
+		$file = Control::file()->resolve($controls)->array();
+		$video = Control::video()->resolve($controls)->array();
 		$single = ['min' => 0, 'max' => 1];
 		$many = ['min' => 0, 'max' => -1];
 
@@ -406,6 +409,44 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $single,
 				'immutable' => true,
+			],
+			[
+				'name' => 'downloads',
+				'label' => 'Downloads',
+				'control' => $file,
+				'limit' => ['min' => 0, 'max' => 5],
+				'description' => 'Rows reorder by drag; the pencil edits the title.',
+			],
+			[
+				'name' => 'brochure',
+				'label' => 'Brochure',
+				'control' => $file,
+				'limit' => $single,
+			],
+			[
+				'name' => 'brochureEmpty',
+				'label' => 'Brochure — empty',
+				'control' => $file,
+				'limit' => $single,
+			],
+			[
+				'name' => 'downloadsReadonly',
+				'label' => 'Downloads — read-only',
+				'control' => $file,
+				'limit' => $many,
+				'immutable' => true,
+			],
+			[
+				'name' => 'clip',
+				'label' => 'Clip',
+				'control' => $video,
+				'limit' => $single,
+			],
+			[
+				'name' => 'clipEmpty',
+				'label' => 'Clip — empty',
+				'control' => $video,
+				'limit' => $single,
 			],
 		];
 	}
@@ -953,6 +994,22 @@ final class Styleguide extends Panel
 			],
 			'gallery' => ['value' => ['zxx' => $gallery]],
 			'galleryEmpty' => ['value' => ['zxx' => []]],
+			'downloads' => [
+				'value' => [
+					'zxx' => [
+						['uid' => 'sg-brochure', 'meta' => ['title' => ['zxx' => 'Brewery brochure']]],
+						['uid' => 'sg-terms'],
+						['uid' => 'sg-cover'],
+					],
+				],
+			],
+			'brochure' => ['value' => ['zxx' => [['uid' => 'sg-brochure']]]],
+			'brochureEmpty' => ['value' => ['zxx' => []]],
+			'downloadsReadonly' => [
+				'value' => ['zxx' => [['uid' => 'sg-brochure'], ['uid' => 'sg-terms']]],
+			],
+			'clip' => ['value' => ['zxx' => [['uid' => 'sg-clip']]]],
+			'clipEmpty' => ['value' => ['zxx' => []]],
 		];
 	}
 
@@ -999,6 +1056,20 @@ final class Styleguide extends Panel
 			'kind' => 'video',
 			'mime' => 'video/mp4',
 			'bytes' => 18_874_368,
+		];
+		$assets['sg-brochure'] = [
+			'filename' => 'brauerei-prospekt-2026.pdf',
+			'url' => 'data:application/pdf,',
+			'kind' => 'file',
+			'mime' => 'application/pdf',
+			'bytes' => 939_305,
+		];
+		$assets['sg-terms'] = [
+			'filename' => 'agb-gastronomie-lieferung.docx',
+			'url' => 'data:application/octet-stream,',
+			'kind' => 'file',
+			'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'bytes' => 46_490,
 		];
 
 		for ($i = 1; $i <= self::GALLERY_SIZE; $i++) {
