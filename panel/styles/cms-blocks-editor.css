@@ -640,18 +640,15 @@
 	& .block > dialog,
 	& .richtext-toolbar,
 	& .cms-code-control-toolbar,
+	& .cms-media-field > .bar,
 	& .cms-image-card .details .tools,
 	& .cms-image-figure .overlay,
-	& .cms-image-figure .dropzone .tools,
 	& .cms-video-figure .overlay,
-	& .cms-video-figure .dropzone .tools,
-	& .cms-gallery > .summary .tools,
 	& .cms-gallery .discard,
 	& .cms-media-meta,
 	& .cms-video-controls,
 	& .cms-file-action,
-	& .cms-file-download,
-	& .dragdrop {
+	& .cms-file-download {
 		display: none;
 	}
 }

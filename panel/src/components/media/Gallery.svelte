@@ -211,22 +211,6 @@
 {/snippet}
 
 <div class="cms-gallery" class:is-block={block}>
-	{#if !block}
-		<div class="summary">
-			<span class="tally">{loading ? __('upload:uploading') : count}</span>
-			{#if open && !readonly}
-				<span class="tools">
-					<button type="button" class="textlink" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
-					<button type="button" class="cms-button secondary small" onclick={upload}>
-						<span class="icon"><Icon name="plus" /></span>
-						{__('image:add')}
-					</button>
-				</span>
-			{/if}
-		</div>
-	{/if}
 	{#if items.length > 0}
 		<div class="viewport">
 			<div
@@ -269,26 +253,6 @@
 				<button type="button" class="quiet" onclick={upload}>{__('image:add')}</button>
 			</div>
 		{/if}
-	{:else if block}
-		<div class="dropzone">
-			<Icon name="cloud-upload" />
-			<span class="prompt">{loading ? __('upload:uploading') : __('upload:drop-images-here')}</span>
-			{#if !readonly}
-				<span class="tools">
-					<button type="button" class="cms-button secondary small" onclick={upload}>
-						{__('image:add')}
-					</button>
-					<button type="button" class="textlink" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
-				</span>
-			{/if}
-		</div>
-	{:else}
-		<div class="blank">
-			<Icon name="cloud-upload" />
-			<span>{__('upload:drop-images')}</span>
-		</div>
 	{/if}
 	{#if !block && currentItem && current !== null}
 		<div class="drawer">
@@ -355,50 +319,6 @@
 			display: flex;
 			flex-direction: column;
 			min-height: 0;
-
-			& .summary {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: center;
-				gap: var(--cms-space-2);
-				padding: var(--cms-space-2) var(--cms-space-3) var(--cms-space-2) var(--cms-space-3-5);
-				border-bottom: 1px solid var(--cms-color-border);
-			}
-
-			& .tally {
-				font-size: var(--cms-font-size-xs);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-				font-variant-numeric: tabular-nums;
-			}
-
-			& .summary > .tools {
-				display: flex;
-				align-items: center;
-				gap: var(--cms-space-2);
-				margin-left: auto;
-			}
-
-			& .textlink {
-				padding: var(--cms-space-1) var(--cms-space-1);
-				border: 0;
-				background: transparent;
-				font-size: var(--cms-font-size-xs);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-				text-decoration: underline;
-				text-underline-offset: 3px;
-				cursor: pointer;
-
-				&:hover {
-					color: var(--cms-color-text);
-				}
-			}
-
-			& .icon :global(svg) {
-				width: 0.8125rem;
-				height: 0.8125rem;
-			}
 
 			& .viewport {
 				max-height: 17.5rem;
@@ -484,23 +404,6 @@
 				& :global(svg) {
 					width: 0.75rem;
 					height: 0.75rem;
-				}
-			}
-
-			& .blank {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				gap: var(--cms-space-2);
-				padding: var(--cms-space-8) var(--cms-space-4);
-				font-size: var(--cms-font-size-sm);
-				font-weight: 500;
-				color: var(--cms-color-text-subtle);
-
-				& :global(svg) {
-					width: var(--cms-space-5);
-					height: var(--cms-space-5);
-					color: var(--cms-color-text-faint);
 				}
 			}
 
@@ -627,37 +530,6 @@
 						background: var(--cms-color-hover);
 						color: var(--cms-color-text);
 					}
-				}
-
-				& .dropzone {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					gap: var(--cms-space-2);
-					padding: var(--cms-space-8) var(--cms-space-4);
-					border: 1px dashed var(--cms-color-border-strong);
-					border-radius: var(--cms-radius-md);
-					text-align: center;
-					color: var(--cms-color-text-subtle);
-
-					& :global(svg) {
-						width: var(--cms-space-5);
-						height: var(--cms-space-5);
-						color: var(--cms-color-text-faint);
-					}
-				}
-
-				& .prompt {
-					font-size: var(--cms-font-size-sm);
-					font-weight: 500;
-					color: var(--cms-color-text-muted);
-				}
-
-				& .dropzone .tools {
-					display: flex;
-					align-items: center;
-					gap: var(--cms-space-2);
-					margin-top: var(--cms-space-1);
 				}
 			}
 		}

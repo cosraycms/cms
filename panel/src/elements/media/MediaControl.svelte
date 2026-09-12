@@ -4,12 +4,11 @@
 	import { ZXX } from '$types/data';
 	import { localeTitle, resolveFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
-	import Upload from '$components/Upload.svelte';
+	import MediaField from '$components/MediaField.svelte';
 	import FallbackMedia from '$components/media/FallbackMedia.svelte';
 
 	type FieldInfo = {
 		name: string;
-		required?: boolean;
 		immutable?: boolean;
 		translate?: boolean;
 		translateMode?: 'symmetric' | 'asymmetric';
@@ -73,10 +72,9 @@
 	{#if fallback}
 		<FallbackMedia items={fallback.value} {type} label={sourceLabel(fallback.locale)} />
 	{/if}
-	<Upload
+	<MediaField
 		{type}
 		limit={field.limit}
-		required={field.required ?? false}
 		readonly={field.immutable ?? false}
 		name={field.name}
 		translate={field.translateMode === 'asymmetric' ? false : (field.translate ?? false)}

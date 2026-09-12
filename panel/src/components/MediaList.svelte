@@ -113,8 +113,8 @@
 	});
 </script>
 
-{#if multiple && type === 'file'}
-	<div class="multiple-files cms-media-list cms-media-list-files" bind:this={sorterElement}>
+<div class="cms-media-list" bind:this={sorterElement}>
+	{#if multiple && type === 'file'}
 		{#each items as item, index (item)}
 			<File
 				{loading}
@@ -124,36 +124,33 @@
 				edit={() => edit(index, 'file')}
 			/>
 		{/each}
-	</div>
-{:else if !multiple && type === 'video' && items && items.length > 0}
-	<Video
-		upload
-		file={items[0]}
-		remove={() => remove(null)}
-		edit={() => edit(0, 'video')}
-		{loading}
-		{readonly}
-	/>
-{:else if items && items.length > 0}
-	<File
-		{loading}
-		{readonly}
-		asset={items[0]}
-		remove={() => remove(null)}
-		edit={() => edit(0, 'file')}
-	/>
-{/if}
+	{:else if !multiple && type === 'video' && items && items.length > 0}
+		<Video
+			upload
+			file={items[0]}
+			remove={() => remove(null)}
+			edit={() => edit(0, 'video')}
+			{loading}
+			{readonly}
+		/>
+	{:else if items && items.length > 0}
+		<File
+			{loading}
+			{readonly}
+			asset={items[0]}
+			remove={() => remove(null)}
+			edit={() => edit(0, 'file')}
+		/>
+	{/if}
+</div>
 
 <style>
 	@layer panel {
 		.cms-media-list {
 			display: flex;
-		}
-
-		.cms-media-list-files {
-			margin-bottom: var(--cms-space-3);
 			flex-direction: column;
 			gap: var(--cms-space-3);
+			padding: var(--cms-space-3);
 		}
 	}
 </style>

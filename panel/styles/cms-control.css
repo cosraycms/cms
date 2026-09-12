@@ -62,8 +62,8 @@
 }
 
 /* Element controls follow the same three fills: a read-only rich text
-   frame or media card is a well, not a white box. */
-.cms-field[data-readonly='true'] :is(.richtext, .cms-media-field .card) {
+   frame is a well, not a white box. */
+.cms-field[data-readonly='true'] .richtext {
 	border-color: var(--cms-color-border);
 	background: var(--cms-color-surface-sunken);
 }

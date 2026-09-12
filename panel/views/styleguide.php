@@ -401,7 +401,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					type="button"
 					class="cms-button secondary small"
 					aria-pressed="false"
-					onclick="const on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', String(on)); const transfer = new DataTransfer(); transfer.items.add(new File(['x'], 'drop.png', { type: 'image/png' })); for (const root of this.closest('[data-section]').querySelectorAll('cosray-host > *')) { root.dispatchEvent(new DragEvent(on ? 'dragenter' : 'dragleave', { bubbles: true, cancelable: true, dataTransfer: transfer })); }">
+					onclick="const on = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', String(on)); const transfer = new DataTransfer(); transfer.items.add(new File(['x'], 'drop.png', { type: 'image/png' })); for (const root of this.closest('[data-section]').querySelectorAll('.cms-dropzone')) { root.dispatchEvent(new DragEvent(on ? 'dragenter' : 'dragleave', { bubbles: true, cancelable: true, dataTransfer: transfer })); }">
 					Show drop state
 				</button>
 				<div

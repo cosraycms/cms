@@ -1,0 +1,36 @@
+/* What a control looks like while a file hovers over it: a dashed accent
+   edge, the content dimmed, one label over it all. The control sets
+   `is-dragging` from its own drag events and renders `.drop` meanwhile. */
+.cms-dropzone {
+	position: relative;
+
+	&.is-dragging {
+		border-style: dashed;
+		border-color: var(--cms-color-accent);
+
+		& > :not(.drop) {
+			opacity: 0.3;
+			pointer-events: none;
+		}
+	}
+
+	& > .drop {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-2);
+		border-radius: inherit;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		font-weight: 600;
+		pointer-events: none;
+
+		& svg {
+			width: var(--cms-space-4);
+			height: var(--cms-space-4);
+		}
+	}
+}

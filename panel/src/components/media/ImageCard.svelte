@@ -6,18 +6,16 @@
 	import { useAssets } from '$lib/assets';
 	import { assetLine, extension } from '$lib/library';
 	import { __ } from '$lib/locale';
-	import Icon from '$components/Icon.svelte';
 	import ImagePreview from '$components/ImagePreview.svelte';
 	import MetaFields from './MetaFields.svelte';
 
 	type Props = {
-		item: FileItem | null;
+		item: FileItem;
 		loading: boolean;
 		translate: boolean;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
-		allowed: string;
 		update: (item: FileItem) => void;
 		remove: () => void;
 		upload: () => void;
@@ -32,7 +30,6 @@
 		contentLocale,
 		identity,
 		locales,
-		allowed,
 		update,
 		remove,
 		upload,
@@ -43,8 +40,8 @@
 	const assets = useAssets();
 	let root = $state<HTMLElement>();
 
-	let info = $derived(item?.uid ? $assets[item.uid] : undefined);
-	let filename = $derived(info?.filename ?? item?.uid ?? '');
+	let info = $derived(item.uid ? $assets[item.uid] : undefined);
+	let filename = $derived(info?.filename ?? item.uid ?? '');
 	let thumb = $derived(info?.thumbUrl ?? info?.url ?? '');
 	let line = $derived(info ? assetLine(info) : '');
 
@@ -70,49 +67,31 @@
 </script>
 
 <div class="cms-image-card" bind:this={root}>
-	{#if item}
-		<button type="button" class="thumb" title={__('common:preview')} onclick={preview}>
-			{#if thumb}
-				<img src={thumb} alt="" />
-			{:else}
-				<span class="plate">{extension(filename)}</span>
-			{/if}
-		</button>
-		<div class="details">
-			<div class="filerow">
-				<span class="filename" title={filename}>{filename}</span>
-				{#if !readonly}
-					<span class="tools">
-						<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-						<button type="button" class="quiet" onclick={library}>
-							{__('media:choose-from-library')}
-						</button>
-						<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
-					</span>
-				{/if}
-			</div>
-			<div class="facts">{loading ? __('upload:uploading') : line}</div>
-			{#key `${identity}:${item.uid}`}
-				<MetaFields {item} {translate} {contentLocale} {locales} {update} {readonly} />
-			{/key}
-		</div>
-	{:else}
-		<div class="thumb placeholder"><Icon name="cloud-upload" /></div>
-		<div class="details">
-			<div class="prompt">{loading ? __('upload:uploading') : __('upload:drop-image')}</div>
-			<div class="facts">{allowed}</div>
+	<button type="button" class="thumb" title={__('common:preview')} onclick={preview}>
+		{#if thumb}
+			<img src={thumb} alt="" />
+		{:else}
+			<span class="plate">{extension(filename)}</span>
+		{/if}
+	</button>
+	<div class="details">
+		<div class="filerow">
+			<span class="filename" title={filename}>{filename}</span>
 			{#if !readonly}
-				<div class="tools">
-					<button type="button" class="cms-button secondary small" onclick={upload}>
-						{__('image:upload')}
-					</button>
-					<button type="button" class="textlink" onclick={library}>
+				<span class="tools">
+					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
+					<button type="button" class="quiet" onclick={library}>
 						{__('media:choose-from-library')}
 					</button>
-				</div>
+					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
+				</span>
 			{/if}
 		</div>
-	{/if}
+		<div class="facts">{loading ? __('upload:uploading') : line}</div>
+		{#key `${identity}:${item.uid}`}
+			<MetaFields {item} {translate} {contentLocale} {locales} {update} {readonly} />
+		{/key}
+	</div>
 </div>
 
 <style>
@@ -145,17 +124,6 @@
 					width: 100%;
 					height: 100%;
 					object-fit: contain;
-				}
-
-				&.placeholder {
-					border: 1px dashed var(--cms-color-border-strong);
-					color: var(--cms-color-text-faint);
-					cursor: default;
-
-					& :global(svg) {
-						width: var(--cms-space-5);
-						height: var(--cms-space-5);
-					}
 				}
 			}
 
@@ -220,34 +188,6 @@
 				font-size: var(--cms-font-size-xs);
 				color: var(--cms-color-text-faint);
 				font-variant-numeric: tabular-nums;
-			}
-
-			& .prompt {
-				font-size: var(--cms-font-size-sm);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-			}
-
-			& .details > .tools {
-				margin-left: 0;
-				margin-top: var(--cms-space-0-5);
-				gap: var(--cms-space-2);
-			}
-
-			& .textlink {
-				padding: var(--cms-space-1-5) var(--cms-space-1);
-				border: 0;
-				background: transparent;
-				font-size: var(--cms-font-size-xs);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-				text-decoration: underline;
-				text-underline-offset: 3px;
-				cursor: pointer;
-
-				&:hover {
-					color: var(--cms-color-text);
-				}
 			}
 		}
 	}

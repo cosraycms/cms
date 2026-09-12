@@ -96,6 +96,12 @@ function upload(element: HTMLElement): void {
 	picker.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
+function drag(target: Element, name: string, types: string[], files: File[] = []): void {
+	const event = new Event(name, { bubbles: true, cancelable: true });
+	Object.defineProperty(event, 'dataTransfer', { value: { types, files, items: [] } });
+	target.dispatchEvent(event);
+}
+
 async function action(label: string): Promise<void> {
 	const button = Array.from(document.querySelectorAll<HTMLButtonElement>('.cms-modal button')).find(
 		(button) => button.textContent?.trim() === label,
@@ -104,6 +110,127 @@ async function action(label: string): Promise<void> {
 	button!.click();
 	await tick();
 }
+
+describe('the frame', () => {
+	const catalog = {
+		a: { filename: 'a.pdf', url: '/media/a.pdf', kind: 'file' },
+		b: { filename: 'b.pdf', url: '/media/b.pdf', kind: 'file' },
+	};
+
+	async function files(max: number, count = 2, extra: Record<string, unknown> = {}) {
+		return media('cosray-file', {
+			value: { zxx: [{ uid: 'a' }, { uid: 'b' }].slice(0, count) },
+			field: { name: 'downloads', limit: { min: 0, max }, ...extra },
+			assets: catalog,
+		});
+	}
+
+	it('opens the picker and the library from the bar and counts against the limit', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue({
+				json: async () => ({ ok: true, assets: [], page: 1, more: false, total: 0, counts: {} }),
+			}),
+		);
+		const { element } = await files(5);
+		const bar = element.querySelector<HTMLElement>('.cms-media-field > .bar')!;
+		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
+		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
+
+		expect(bar.querySelector('.tally')?.textContent).toBe('2 / 5');
+		expect(bar.querySelector('.choose')?.textContent).toBe('upload:choose-files');
+
+		bar.querySelector<HTMLButtonElement>('.choose')!.click();
+		expect(click).toHaveBeenCalledOnce();
+
+		bar.querySelector<HTMLButtonElement>('.browse')!.click();
+		await tick();
+		expect(document.querySelector('.cms-modal .cms-library-browser, .cms-modal')).not.toBeNull();
+
+		vi.unstubAllGlobals();
+	});
+
+	it('is the bar alone while empty and carries no tally on a single field', async () => {
+		const { element } = await files(1, 0);
+
+		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
+		expect(element.querySelector('.cms-media-field > .body')).toBeNull();
+		expect(element.querySelector('.choose')?.textContent).toBe('upload:choose-file');
+
+		const { element: filled } = await files(1, 1);
+
+		expect(filled.querySelector('.body')).not.toBeNull();
+		expect(filled.querySelector('.tally')).toBeNull();
+	});
+
+	it('closes the bar actions once the field is full', async () => {
+		const { element } = await files(2);
+
+		expect(element.querySelector<HTMLButtonElement>('.choose')!.disabled).toBe(true);
+		expect(element.querySelector<HTMLButtonElement>('.browse')!.disabled).toBe(true);
+	});
+
+	it('becomes the drop zone while files hover and uploads what lands', async () => {
+		const upload = vi
+			.spyOn(window.Cosray!, 'upload')
+			.mockResolvedValue({ ok: true, uid: 'dropped', filename: 'dropped.pdf' });
+		const { element, changes } = await files(5);
+		const frame = element.querySelector<HTMLElement>('.cms-media-field')!;
+		const bar = frame.querySelector<HTMLElement>('.bar')!;
+		const dropped = new File(['x'], 'dropped.pdf', { type: 'application/pdf' });
+
+		drag(frame, 'dragenter', ['text/plain']);
+		await tick();
+		expect(frame.classList.contains('is-dragging')).toBe(false);
+
+		drag(frame, 'dragenter', ['Files']);
+		drag(bar, 'dragenter', ['Files']);
+		await tick();
+		expect(frame.classList.contains('is-dragging')).toBe(true);
+		expect(frame.querySelector('.drop')?.textContent?.trim()).toBe('media:drop-to-upload');
+
+		drag(bar, 'dragleave', ['Files']);
+		await tick();
+		expect(frame.classList.contains('is-dragging')).toBe(true);
+
+		drag(frame, 'dragleave', ['Files']);
+		await tick();
+		expect(frame.classList.contains('is-dragging')).toBe(false);
+
+		drag(frame, 'dragenter', ['Files']);
+		drag(frame, 'drop', ['Files'], [dropped]);
+		await vi.waitFor(() => {
+			expect(changes).toHaveBeenLastCalledWith({
+				zxx: [{ uid: 'a' }, { uid: 'b' }, { uid: 'dropped' }],
+			});
+		});
+		expect(upload).toHaveBeenCalledExactlyOnceWith('file', dropped);
+		expect(frame.classList.contains('is-dragging')).toBe(false);
+	});
+
+	it('says that a drop replaces the file of a filled single field', async () => {
+		const { element } = await files(1, 1);
+		const frame = element.querySelector<HTMLElement>('.cms-media-field')!;
+
+		drag(frame, 'dragenter', ['Files']);
+		await tick();
+
+		expect(frame.querySelector('.drop')?.textContent?.trim()).toBe('upload:drop-to-replace');
+	});
+
+	it('renders a read-only field without the bar and names an empty one', async () => {
+		const { element } = await files(5, 2, { immutable: true });
+		const frame = element.querySelector<HTMLElement>('.cms-media-field.is-readonly')!;
+
+		expect(frame.querySelector('.bar')).toBeNull();
+		expect(frame.querySelector('input[type="file"]')).toBeNull();
+		expect(frame.querySelector('.body')).not.toBeNull();
+
+		const { element: blank } = await files(5, 0, { immutable: true });
+
+		expect(blank.querySelector('.cms-media-field > .none')?.textContent).toBe('media:empty-many');
+	});
+});
 
 describe('file metadata', () => {
 	it('shows the catalog title as the placeholder of an item without its own', async () => {
@@ -527,7 +654,8 @@ describe('block presentation', () => {
 
 		expect(changes).toHaveBeenLastCalledWith({ zxx: [] });
 		expect(slot.querySelector('.cms-media-meta')).toBeNull();
-		expect(element.querySelector('.cms-image-figure .dropzone')).not.toBeNull();
+		expect(element.querySelector('.cms-image-figure')).toBeNull();
+		expect(element.querySelector('.cms-media-field > .bar')).not.toBeNull();
 	});
 
 	it('renders a video as a player with its caption form in the slot', async () => {
@@ -573,7 +701,7 @@ describe('gallery block', () => {
 
 		expect(tiles.querySelectorAll('.tile')).toHaveLength(2);
 		expect(tiles.style.getPropertyValue('--ratio')).toBe('4/3');
-		expect(element.querySelector('.summary, .drawer, .cms-media-meta')).toBeNull();
+		expect(element.querySelector('.drawer, .cms-media-meta')).toBeNull();
 		expect(slot.querySelector<HTMLSelectElement>('select')!.value).toBe('4/3');
 		expect(slot.querySelectorAll('.strip .thumb')).toHaveLength(2);
 		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('a.jpg');

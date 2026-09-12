@@ -8,17 +8,15 @@
 	import { __ } from '$lib/locale';
 	import { portal } from '$lib/portal';
 	import ContentLocales from '$components/ContentLocales.svelte';
-	import Icon from '$components/Icon.svelte';
 	import MetaFields from './MetaFields.svelte';
 
 	type Props = {
-		item: FileItem | null;
+		item: FileItem;
 		loading: boolean;
 		translate: boolean;
 		contentLocale: string;
 		identity: string;
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
-		allowed: string;
 		// Where the per-use form goes: a settings dialog's slot when the
 		// owner offers one, below the image otherwise.
 		settings?: HTMLElement;
@@ -36,7 +34,6 @@
 		contentLocale,
 		identity,
 		locales,
-		allowed,
 		settings,
 		update,
 		remove,
@@ -47,14 +44,14 @@
 
 	const assets = useAssets();
 
-	let info = $derived(item?.uid ? $assets[item.uid] : undefined);
-	let filename = $derived(info?.filename ?? item?.uid ?? '');
+	let info = $derived(item.uid ? $assets[item.uid] : undefined);
+	let filename = $derived(info?.filename ?? item.uid ?? '');
 	let src = $derived(info?.previewUrl ?? info?.url ?? '');
 	let key = $derived(translate ? contentLocale : ZXX);
 	// A neutral value reads its catalog text in the site's default locale,
 	// the nearest the panel has to the page locale the site resolves with.
 	let catalogLocale = $derived(translate ? contentLocale : (locales?.default ?? contentLocale));
-	let caption = $derived(item ? effectiveCaption(item) : '');
+	let caption = $derived(effectiveCaption(item));
 
 	// The caption as the site will render it: per use, else the catalog's.
 	function effectiveCaption(item: FileItem): string {
@@ -77,56 +74,36 @@
 </script>
 
 <div class="cms-image-figure">
-	{#if item}
-		<figure>
-			<div class="frame">
-				{#if src}
-					<img {src} alt="" />
-				{:else}
-					<span class="plate">{extension(filename)}</span>
-				{/if}
-				<div class="overlay">
-					<span class="filename" title={filename}
-						>{loading ? __('upload:uploading') : filename}</span
-					>
-					{#if !readonly}
-						<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-						<button type="button" class="quiet" onclick={library}>
-							{__('media:choose-from-library')}
-						</button>
-						<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
-					{/if}
-				</div>
-			</div>
-			{#if caption}
-				<figcaption>{caption}</figcaption>
+	<figure>
+		<div class="frame">
+			{#if src}
+				<img {src} alt="" />
+			{:else}
+				<span class="plate">{extension(filename)}</span>
 			{/if}
-		</figure>
-		{#key `${identity}:${item.uid}`}
-			<div class="cms-figure-settings" use:portal={settings}>
-				{#if settings && translate && locales && locales.all.length > 1}
-					<ContentLocales locales={locales.all} locale={contentLocale} />
-				{/if}
-				<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} {readonly} />
-			</div>
-		{/key}
-	{:else}
-		<div class="dropzone">
-			<Icon name="cloud-upload" />
-			<span class="prompt">{loading ? __('upload:uploading') : __('upload:drop-image')}</span>
-			<span class="facts">{allowed}</span>
-			{#if !readonly}
-				<span class="tools">
-					<button type="button" class="cms-button secondary small" onclick={upload}>
-						{__('image:upload')}
-					</button>
-					<button type="button" class="textlink" onclick={library}>
+			<div class="overlay">
+				<span class="filename" title={filename}>{loading ? __('upload:uploading') : filename}</span>
+				{#if !readonly}
+					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
+					<button type="button" class="quiet" onclick={library}>
 						{__('media:choose-from-library')}
 					</button>
-				</span>
-			{/if}
+					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
+				{/if}
+			</div>
 		</div>
-	{/if}
+		{#if caption}
+			<figcaption>{caption}</figcaption>
+		{/if}
+	</figure>
+	{#key `${identity}:${item.uid}`}
+		<div class="cms-figure-settings" use:portal={settings}>
+			{#if settings && translate && locales && locales.all.length > 1}
+				<ContentLocales locales={locales.all} locale={contentLocale} />
+			{/if}
+			<MetaFields {item} kind="image" {translate} {contentLocale} {locales} {update} {readonly} />
+		</div>
+	{/key}
 </div>
 
 <style>
@@ -218,58 +195,6 @@
 
 			& .cms-figure-settings {
 				margin-top: var(--cms-space-3);
-			}
-
-			& .dropzone {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				gap: var(--cms-space-2);
-				padding: var(--cms-space-8) var(--cms-space-4);
-				border: 1px dashed var(--cms-color-border-strong);
-				border-radius: var(--cms-radius-md);
-				text-align: center;
-				color: var(--cms-color-text-subtle);
-
-				& :global(svg) {
-					width: var(--cms-space-5);
-					height: var(--cms-space-5);
-					color: var(--cms-color-text-faint);
-				}
-			}
-
-			& .prompt {
-				font-size: var(--cms-font-size-sm);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-			}
-
-			& .facts {
-				font-size: var(--cms-font-size-xs);
-				color: var(--cms-color-text-faint);
-			}
-
-			& .tools {
-				display: flex;
-				align-items: center;
-				gap: var(--cms-space-2);
-				margin-top: var(--cms-space-1);
-			}
-
-			& .textlink {
-				padding: var(--cms-space-1-5) var(--cms-space-1);
-				border: 0;
-				background: transparent;
-				font-size: var(--cms-font-size-xs);
-				font-weight: 500;
-				color: var(--cms-color-text-muted);
-				text-decoration: underline;
-				text-underline-offset: 3px;
-				cursor: pointer;
-
-				&:hover {
-					color: var(--cms-color-text);
-				}
 			}
 		}
 	}

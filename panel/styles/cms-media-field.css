@@ -1,0 +1,131 @@
+/* The frame around every media field — image, gallery, file list,
+   video: a header bar with the library and upload actions, the content
+   beneath it. Empty, the bar is the whole control and sits level with
+   the inputs beside it. */
+.cms-media-field {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface);
+
+	& > .bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-1) var(--cms-space-3);
+		min-height: 2.5rem;
+		padding: var(--cms-space-1);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& > .bar + .body {
+		border-top: 1px solid var(--cms-color-border);
+	}
+
+	& .browse {
+		padding: 0.3125rem 0.625rem;
+		box-shadow: none;
+
+		& svg {
+			width: 1rem;
+			height: 1rem;
+		}
+	}
+
+	& .hint {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+
+		& > svg {
+			flex-shrink: 0;
+			width: 1.125rem;
+			height: 1.125rem;
+			color: var(--cms-color-text-faint);
+		}
+	}
+
+	& .choose {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--cms-color-text);
+		font: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--cms-color-accent);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&[disabled] {
+			color: var(--cms-color-text-faint);
+			text-decoration: none;
+			cursor: default;
+		}
+	}
+
+	& .tally {
+		margin-left: auto;
+		padding-right: var(--cms-space-2);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	& > .body {
+		min-width: 0;
+	}
+
+	/* A block gallery keeps its (empty) tiles mounted for the settings slot. */
+	&.is-empty > .body {
+		display: none;
+	}
+
+	& > .none {
+		display: flex;
+		align-items: center;
+		min-height: 2.5rem;
+		padding: var(--cms-space-1) var(--cms-space-3);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	/* Locked: the content in a well, nothing that would change it. */
+	&.is-readonly {
+		border-color: var(--cms-color-border);
+		background: var(--cms-color-surface-sunken);
+	}
+
+	/* Inside a block a filled field is content alone; the drop state
+	   draws around it since there is no border to dash. */
+	&.is-block:not(.is-empty) {
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+
+		&.is-dragging {
+			outline: 1px dashed var(--cms-color-accent);
+			outline-offset: 2px;
+		}
+	}
+
+	& > input[type='file'] {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(1px, 1px, 1px, 1px);
+		white-space: nowrap;
+	}
+}
