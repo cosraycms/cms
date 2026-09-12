@@ -132,6 +132,7 @@
 	--cms-color-neutral-900: #211b19;
 	--cms-color-neutral-925: #1b1614;
 	--cms-color-neutral-950: #15110f;
+	--cms-color-neutral-975: #0d0a09;
 
 	/**
 	 * Primitives — hues
@@ -185,14 +186,15 @@
 	 *
 	 * canvas   the ground the shell sits on
 	 * surface  the shell itself: sidebars, topbars, menus, controls
-	 * sunken   recessed regions inside the shell (listing area, placeholders)
+	 * sunken   a well: a recess inside a surface, or a field's own area on the
+	 *          pane — always a step below the ground it sits on
 	 * raised   cards sitting on a sunken region
 	 */
 	--cms-color-canvas: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-950));
 	--cms-color-surface: light-dark(var(--cms-color-white), var(--cms-color-neutral-900));
 	--cms-color-surface-sunken: light-dark(
-		var(--cms-color-neutral-150),
-		var(--cms-color-neutral-925)
+		var(--cms-color-neutral-200),
+		var(--cms-color-neutral-975)
 	);
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
 	--cms-color-rail: var(--cms-color-surface);
