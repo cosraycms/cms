@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
-- Aligned neighbouring editor controls beneath wrapped labels while keeping help and validation messages next to their own controls. Date/time inputs match other simple input heights, and required/read-only markers no longer enlarge labels.
+- Aligned neighbouring editor controls beneath wrapped labels, with descriptions directly below their controls and validation messages underneath. Date/time inputs match other simple input heights, and required/read-only markers no longer enlarge labels.
 
 - A read-only Entries or Blocks field keeps its rows readable and loses everything that restructures them: no adders, type picker or row templates, no drag grip, row menu, duplicate, insert or resize handles, and its rows' sub-fields render read-only too. The repeater and blocks behaviors refuse to add, move, remove or resize inside a `data-readonly` field, so a stray keyboard path cannot change what the save path ignores anyway.
 - Element controls honour a read-only field. Rich text mounts without a toolbar and refuses input while its text stays selectable, a code editor opens read-only, the reference picker drops its search and its remove actions, and a media field keeps its preview and per-use texts while the drop zone, library, replace, remove, reordering and gallery settings go. Their values were already safe on save; the controls no longer invite edits that would be dropped. An element reads the flag from `field.immutable` in its payload.

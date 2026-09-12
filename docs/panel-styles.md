@@ -211,7 +211,7 @@ Use it only where a block genuinely contains itself. Nesting handles everything 
 
 ## Field alignment
 
-Each `.cms-fields` grid aligns the start of neighbouring controls beneath the tallest label in their row. A wrapped label, required marker or metadata button can enlarge that shared label area; errors and help remain immediately below their own control rather than lining up beneath the tallest neighbouring control. Controls keep their intrinsic heights.
+Each `.cms-fields` grid aligns the start of neighbouring controls beneath the tallest label in their row. A wrapped label, required marker or metadata button can enlarge that shared label area; descriptions stay directly below their own control, followed by validation messages, rather than lining up beneath the tallest neighbouring control. Controls keep their intrinsic heights.
 
 `#[Width]` still controls horizontal placement, and `#[Rowspan]` still counts complete field rows. Fieldsets and the field grids inside Entries and Blocks align independently, without sharing label heights with their outer field. Hidden labels retain their accessible names but contribute no height; a row containing only hidden labels has no header gap. Conditional fields leave the grid while hidden, and the narrow-screen layout stacks fields without reserving space for neighbouring labels.
 

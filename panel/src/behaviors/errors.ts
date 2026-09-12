@@ -229,7 +229,10 @@ function mark(control: Element, message: string, locale?: string): void {
 
 	const body = field.querySelector(':scope > .field-body') ?? field;
 	const messages = body.querySelectorAll(`:scope > [${MESSAGE}]`);
-	const anchor = messages[messages.length - 1] ?? body.querySelector(':scope > .control');
+	const anchor =
+		messages[messages.length - 1] ??
+		body.querySelector(':scope > .description') ??
+		body.querySelector(':scope > .control');
 
 	if (anchor) {
 		anchor.after(note);
