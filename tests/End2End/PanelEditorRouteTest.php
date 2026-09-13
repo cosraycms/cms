@@ -563,8 +563,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('from:#node-editor-form', $html);
 
 		// The initial preview renders server-side (route is /test/{uid}).
-		$this->assertStringContainsString('cms-generated-path', $html);
-		$this->assertStringContainsString('/test/' . $uid, $html);
+		$this->assertHtmlNodeExists(
+			'//div[@id="generated-paths"][contains(@data-paths, "/test/' . $uid . '")]',
+			$html,
+		);
 
 		// The /test/{uid} route references no content field, so no field
 		// wrapper is marked (only the handle input carries js-path-source).

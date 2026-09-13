@@ -323,7 +323,7 @@ final class Editor extends Panel
 		$pathsUrl = $links->paths($node);
 
 		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
-			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];
+			return ['paths' => [], 'pathsUrl' => $pathsUrl];
 		}
 
 		$serializer = new Serializer(
@@ -341,11 +341,9 @@ final class Editor extends Panel
 		$data = $this->applyForm($data, $form);
 
 		$generator = new RoutePathGenerator($context->db, $this->types());
-		$submitted = is_array($form['paths'] ?? null) ? $form['paths'] : [];
 
 		return [
 			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
-			'submitted' => $submitted,
 			'pathsUrl' => $pathsUrl,
 		];
 	}
@@ -365,7 +363,7 @@ final class Editor extends Panel
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
-			return ['paths' => [], 'submitted' => [], 'pathsUrl' => $pathsUrl];
+			return ['paths' => [], 'pathsUrl' => $pathsUrl];
 		}
 
 		$form = $this->formData();
@@ -377,11 +375,9 @@ final class Editor extends Panel
 		}
 
 		$generator = new RoutePathGenerator($context->db, $this->types());
-		$submitted = is_array($form['paths'] ?? null) ? $form['paths'] : [];
 
 		return [
 			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
-			'submitted' => $submitted,
 			'pathsUrl' => $pathsUrl,
 		];
 	}

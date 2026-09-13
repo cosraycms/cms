@@ -1138,8 +1138,9 @@ final class Styleguide extends Panel
 				'type' => ['label' => 'Page'],
 			],
 			'locales' => [
-				['id' => 'en', 'title' => 'English'],
-				['id' => 'de', 'title' => 'Deutsch'],
+				['id' => 'en', 'title' => 'English', 'fallback' => null],
+				['id' => 'de', 'title' => 'Deutsch', 'fallback' => 'en'],
+				['id' => 'it', 'title' => 'Italiano', 'fallback' => 'en'],
 			],
 			'defaultLocale' => 'en',
 			'routable' => true,

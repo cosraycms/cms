@@ -13,6 +13,7 @@ import { install as installFallbacks } from './behaviors/fallbacks';
 import { install as installMenu } from './behaviors/menu';
 import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
+import { install as installPaths } from './behaviors/paths';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
@@ -115,6 +116,7 @@ cleanups.push(
 	installTransport(),
 	installErrors(),
 	installFallbacks(),
+	installPaths(),
 	installBulk(),
 	installMenu(),
 	installMenuTree(),
