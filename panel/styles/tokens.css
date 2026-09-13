@@ -399,22 +399,35 @@
 	--cms-button-secondary-ring: var(--cms-color-focus);
 	--cms-button-secondary-shadow: var(--cms-shadow-raised);
 
-	--cms-button-danger-bg: var(--cms-color-danger);
-	--cms-button-danger-text: var(--cms-color-text-on-fill);
-	--cms-button-danger-border: color-mix(
-		in oklch,
-		var(--cms-button-danger-bg),
-		var(--cms-color-black) 25%
-	);
-	--cms-button-danger-hover-bg: var(--cms-color-danger-hover);
+	/*
+	 * A delete button only opens a confirmation, so it wears the secondary
+	 * face with danger text. The confirmation's own button is the solid one.
+	 */
+	--cms-button-danger-bg: var(--cms-button-secondary-bg);
+	--cms-button-danger-text: var(--cms-color-danger-text);
+	--cms-button-danger-border: var(--cms-button-secondary-border);
+	--cms-button-danger-hover-bg: var(--cms-color-danger-surface);
 	--cms-button-danger-hover-text: var(--cms-button-danger-text);
-	--cms-button-danger-hover-border: color-mix(
+	--cms-button-danger-hover-border: var(--cms-color-danger-border);
+	--cms-button-danger-ring: var(--cms-color-danger);
+	--cms-button-danger-shadow: var(--cms-shadow-raised);
+
+	--cms-button-danger-solid-bg: var(--cms-color-danger);
+	--cms-button-danger-solid-text: var(--cms-color-text-on-fill);
+	--cms-button-danger-solid-border: color-mix(
 		in oklch,
-		var(--cms-button-danger-hover-bg),
+		var(--cms-button-danger-solid-bg),
 		var(--cms-color-black) 25%
 	);
-	--cms-button-danger-ring: var(--cms-color-danger);
-	--cms-button-danger-shadow: var(--cms-shadow-raised-fill);
+	--cms-button-danger-solid-hover-bg: var(--cms-color-danger-hover);
+	--cms-button-danger-solid-hover-text: var(--cms-button-danger-solid-text);
+	--cms-button-danger-solid-hover-border: color-mix(
+		in oklch,
+		var(--cms-button-danger-solid-hover-bg),
+		var(--cms-color-black) 25%
+	);
+	--cms-button-danger-solid-ring: var(--cms-color-danger);
+	--cms-button-danger-solid-shadow: var(--cms-shadow-raised-fill);
 
 	/**
 	 * Component — switch

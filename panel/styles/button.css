@@ -63,6 +63,17 @@
 		--button-hover-border: var(--cms-button-danger-hover-border);
 		--button-ring: var(--cms-button-danger-ring);
 		--button-shadow: var(--cms-button-danger-shadow);
+
+		&.solid {
+			--button-bg: var(--cms-button-danger-solid-bg);
+			--button-text: var(--cms-button-danger-solid-text);
+			--button-border: var(--cms-button-danger-solid-border);
+			--button-hover-bg: var(--cms-button-danger-solid-hover-bg);
+			--button-hover-text: var(--cms-button-danger-solid-hover-text);
+			--button-hover-border: var(--cms-button-danger-solid-hover-border);
+			--button-ring: var(--cms-button-danger-solid-ring);
+			--button-shadow: var(--cms-button-danger-solid-shadow);
+		}
 	}
 
 	&.small {

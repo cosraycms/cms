@@ -138,6 +138,7 @@ foreach ($fields as $field) {
 					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
 					<button class="cms-button danger" type="submit">
+						<?= \Cosray\Panel\Icon::render('trash3') ?>
 						<?= escape(__('editor:delete')) ?>
 					</button>
 				</form>

@@ -80,7 +80,10 @@ $manages = (bool) $manages;
 			method="post"
 			action="<?= escape((string) $urls['delete']) ?>"
 			hx-confirm="<?= escape((string) $props['confirm']) ?>">
-			<button type="submit" class="cms-button danger"><?= escape(__('menu:delete')) ?></button>
+			<button type="submit" class="cms-button danger">
+				<?= \Cosray\Panel\Icon::render('trash3') ?>
+				<?= escape(__('menu:delete')) ?>
+			</button>
 		</form>
 	<?php endif ?>
 

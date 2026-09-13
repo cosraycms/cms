@@ -300,7 +300,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				) ?></button>
 				<button
 					type="submit"
-					class="cms-button danger"
+					class="cms-button danger solid"
 					form="collection-bulk"
 					formaction="<?= escape($page->bulk['deleteUrl']) ?>"
 					data-bulk-confirm>

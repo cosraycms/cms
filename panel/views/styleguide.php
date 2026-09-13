@@ -128,13 +128,18 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<div class="sample">
 					<button type="button" class="cms-button primary">Save</button>
 					<button type="button" class="cms-button secondary">Preview</button>
-					<button type="button" class="cms-button danger">Delete</button>
+					<button type="button" class="cms-button danger"><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 					<a class="cms-button secondary" href="#">Link</a>
 				</div>
 				<div class="sample">
 					<button type="button" class="cms-button primary" disabled>Save</button>
 					<button type="button" class="cms-button secondary" disabled>Preview</button>
-					<button type="button" class="cms-button danger" disabled>Delete</button>
+					<button type="button" class="cms-button danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
+				</div>
+				<div class="sample" data-sample="button:danger-solid">
+					<button type="button" class="cms-button secondary">Cancel</button>
+					<button type="button" class="cms-button danger solid">Delete</button>
+					<button type="button" class="cms-button danger solid" disabled>Delete</button>
 				</div>
 				<div class="sample" data-sample="button:small">
 					<button type="button" class="cms-button primary small">Save</button>

@@ -34,7 +34,7 @@
 	{/if}
 </ModalBody>
 <ModalFooter>
-	<Button variant="danger" onclick={proceed}>
+	<Button variant="danger" class="solid" onclick={proceed}>
 		{confirm}
 	</Button>
 	<Button variant="secondary" data-dialog-focus onclick={close}>

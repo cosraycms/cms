@@ -85,6 +85,8 @@ Focus is a solid ring in the accent. Borderless elements take `outline: var(--cm
 
 Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` is the brighter vermillion the red is built around; it clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
 
+A delete button stays quiet: `.cms-button.danger` wears the secondary face with danger text, a trash icon beside its label, and a red tint on hover, because it only opens a confirmation. The confirmation's own button adds `.solid` for the filled red, so the one irreversible click is the one that stands out.
+
 Form controls draw their edge with `--cms-color-border-control`. It defaults to the same soft step as the strong border: a white control on the canvas pane already stands apart by its fill, and its label identifies it. The token exists so `prefers-contrast: more` and a theme can firm up control edges without adding weight to sections, rows and cards, so keep it off anything that is not a control. A control without a visible label needs another cue, since WCAG 1.4.11 asks for a 3:1 boundary when the border is the only one.
 
 Three control states read apart by their fill and depth: an editable control is a raised white box, a read-only one a recessed `--cms-color-surface-sunken` well with its text at full contrast, and a disabled one a flat outline with no fill, muted text and a `not-allowed` cursor. Read-only keeps full contrast because the value is there to be read and copied, while a disabled control is exempt under WCAG 1.4.3. A select, radio or checkbox cannot be read-only in HTML, so the field wrapper's `data-readonly` gives it the same look.
@@ -99,8 +101,8 @@ Light falls from above. Four public tokens carry it. They are translucent white 
 
 | Token | Draws | Used on |
 | --- | --- | --- |
-| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary buttons, the chosen language |
-| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and danger buttons |
+| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary and danger buttons, the chosen language |
+| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and solid danger buttons |
 | `--cms-shadow-recessed` | shading inside the top edge | read-only wells, the switch track, the language selector's track, blocks canvas |
 | `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` | buttons and the chosen language |
 
