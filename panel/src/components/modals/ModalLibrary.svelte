@@ -20,7 +20,7 @@
 	<LibraryBrowser {kind} {pick} />
 </ModalBody>
 <ModalFooter>
-	<Button variant="danger" onclick={close}>
+	<Button variant="secondary" onclick={close}>
 		{__('common:cancel')}
 	</Button>
 </ModalFooter>
