@@ -168,7 +168,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 						<button type="button" class="action" data-bulk-open="publish">
 							<?= escape(__('bulk:publish')) ?>
 						</button>
-						<button type="button" class="action" data-bulk-open="draft">
+						<button type="button" class="action" data-bulk-open="unpublished">
 							<?= escape(__('bulk:unpublish')) ?>
 						</button>
 					<?php endif ?>
@@ -353,6 +353,10 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-children')) ?></span>
 				</label>
+				<label class="children" data-bulk-option>
+					<input type="checkbox" name="changes" value="1" form="collection-bulk" />
+					<span><?= escape(__('bulk:publish-changes')) ?></span>
+				</label>
 				</div>
 				<footer class="modal-footer">
 					<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
@@ -371,7 +375,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				</footer>
 			</dialog>
 
-			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="draft">
+			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="unpublished">
 				<?php $this->insert('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p
@@ -394,7 +398,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 						form="collection-bulk"
 						formaction="<?= escape($page->bulk['publishUrl']) ?>"
 						name="state"
-						value="draft"
+						value="unpublished"
 						data-bulk-confirm>
 						<?= escape(__('bulk:unpublish')) ?>
 					</button>

@@ -316,6 +316,7 @@ final class Nodes implements Iterator
 		$row['editor_data'] = json_decode($row['editor_data'], true);
 		$row['creator_data'] = json_decode($row['creator_data'], true);
 		$row['paths'] = json_decode($row['paths'], true);
+		$row = Node::foldDraft($row);
 		$class = $this->context
 			->container
 			->tag(Bootstrap::NODE_TAG)

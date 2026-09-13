@@ -285,9 +285,13 @@ final class CollectionTable
 		if ($meta->showPublished) {
 			$published = (bool) ($node['published'] ?? false);
 			$badges[] = [
-				'kind' => $published ? 'published' : 'draft',
-				'label' => $published ? __('status:published') : __('status:draft'),
+				'kind' => $published ? 'published' : 'unpublished',
+				'label' => $published ? __('status:published') : __('status:unpublished'),
 			];
+
+			if ((bool) ($node['hasDraft'] ?? false)) {
+				$badges[] = ['kind' => 'changes', 'label' => __('status:changes')];
+			}
 		}
 
 		if ($meta->showHidden && (bool) ($node['hidden'] ?? false)) {

@@ -54,7 +54,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="delete"]', $html);
 		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="publish"]', $html);
-		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="draft"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="unpublished"]', $html);
 		$this->assertHtmlNodeExists('//button[@type="button" and @data-bulk-open="publish"]', $html);
 		$this->assertHtmlNodeExists(
 			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&dir=desc"]',
@@ -119,20 +119,20 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertFalse($this->nodeFlag('bulk-pub-locked', 'published'));
 	}
 
-	public function testBulkUnpublishSetsDraft(): void
+	public function testBulkUnpublishTakesTheNodeOffline(): void
 	{
 		$this->createNode(uid: 'bulk-draft-a', title: 'Draft A', published: true);
 
 		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-draft-a'],
-				'state' => 'draft',
+				'state' => 'unpublished',
 			],
 		]);
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertStringContainsString(
-			'notice=' . rawurlencode('drafted:1'),
+			'notice=' . rawurlencode('unpublished:1'),
 			$response->getHeaderLine('Location'),
 		);
 		$this->assertFalse($this->nodeFlag('bulk-draft-a', 'published'));
@@ -255,14 +255,14 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-draft-tree-root'],
-				'state' => 'draft',
+				'state' => 'unpublished',
 				'children' => '1',
 			],
 		]);
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertStringContainsString(
-			'notice=' . rawurlencode('drafted:2'),
+			'notice=' . rawurlencode('unpublished:2'),
 			$response->getHeaderLine('Location'),
 		);
 		$this->assertFalse($this->nodeFlag('bulk-draft-tree-root', 'published'));

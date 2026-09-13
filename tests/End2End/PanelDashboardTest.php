@@ -52,7 +52,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			"SELECT type FROM cms.types WHERE handle = 'test-page'",
 		)->one()['type'];
 		$entries = (int) $this->db()->dashboard->entries()->one()['total'];
-		$drafts = $this->db()->dashboard->drafts()->one();
+		$changes = $this->db()->dashboard->changes()->one();
 
 		for ($index = 0; $index < 7; $index++) {
 			$this->createDashboardNode(
@@ -81,11 +81,13 @@ final class PanelDashboardTest extends End2EndTestCase
 		);
 		$this->createAsset('dashboard-asset-a', 1024);
 		$this->createAsset('dashboard-asset-b', 2048);
+		$this->createDraft('dashboard-recent-1', new DateTimeImmutable('-1 hour'));
+		$this->createDraft('dashboard-recent-3', new DateTimeImmutable('-30 days'));
 
 		$html = $this->html();
 		$entryTotal = $entries + 8;
-		$draftTotal = (int) $drafts['total'] + 5;
-		$recentDrafts = (int) $drafts['recent'] + 4;
+		$changesTotal = (int) $changes['total'] + 2;
+		$recentChanges = (int) $changes['recent'] + 1;
 		$this->assertHtmlNodeExists(
 			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Entries"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
 				. $entryTotal
@@ -93,10 +95,10 @@ final class PanelDashboardTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Drafts"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
-				. $draftTotal
+			'//*[contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Pending changes"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="'
+				. $changesTotal
 				. '"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="'
-				. $recentDrafts
+				. $recentChanges
 				. ' since last week"]]',
 			$html,
 		);
@@ -125,7 +127,8 @@ final class PanelDashboardTest extends End2EndTestCase
 			$previous = $position;
 		}
 		$this->assertStringContainsString('<span class="type">Test Page</span>', $html);
-		$this->assertStringContainsString('<span class="status sr-only">Draft</span>', $html);
+		$this->assertStringContainsString('<span class="status sr-only">Unpublished</span>', $html);
+		$this->assertSame(2, substr_count($html, 'cms-status is-changes'));
 		$this->assertStringContainsString('<span class="status sr-only">Published</span>', $html);
 		$this->assertHtmlNodeExists(
 			'//time[contains(concat(" ", normalize-space(@class), " "), " changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
@@ -171,6 +174,15 @@ final class PanelDashboardTest extends End2EndTestCase
 				'content' => '{}',
 				'title' => json_encode(['en' => $title]),
 			],
+		)->run();
+	}
+
+	private function createDraft(string $uid, DateTimeImmutable $changed): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.drafts (node, editor, content, changed)
+			 SELECT node, 1, '{}'::jsonb, :changed FROM cms.nodes WHERE uid = :uid",
+			['uid' => $uid, 'changed' => $changed->format(DATE_ATOM)],
 		)->run();
 	}
 

@@ -86,13 +86,14 @@ function confirmSelection(name: string, opener: HTMLElement): void {
 
 	if (children) {
 		children.hidden = !picked.some((box) => box.hasAttribute('data-has-children'));
-
-		const checkbox = children.querySelector<HTMLInputElement>('input');
-
-		if (checkbox) {
-			checkbox.checked = false;
-		}
 	}
+
+	// Every option starts unchecked: an option is a decision per confirmation.
+	dialog
+		.querySelectorAll<HTMLInputElement>('[data-bulk-children] input, [data-bulk-option] input')
+		.forEach((checkbox) => {
+			checkbox.checked = false;
+		});
 
 	const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
 

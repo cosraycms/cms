@@ -1,6 +1,7 @@
 SELECT
 	n.uid,
 	n.published,
+	EXISTS (SELECT 1 FROM /*:cms.prefix:*/drafts d WHERE d.node = n.node) AS has_draft,
 	n.changed,
 	n.title,
 	t.handle AS type

@@ -171,9 +171,14 @@ final class Collection extends Panel
 				'bulk:notice-published-plural',
 				$n,
 			),
-			'drafted' => static fn(int $n): string => __n(
-				'bulk:notice-drafted',
-				'bulk:notice-drafted-plural',
+			'unpublished' => static fn(int $n): string => __n(
+				'bulk:notice-unpublished',
+				'bulk:notice-unpublished-plural',
+				$n,
+			),
+			'changes-published' => static fn(int $n): string => __n(
+				'bulk:notice-changes-published',
+				'bulk:notice-changes-published-plural',
 				$n,
 			),
 			'duplicated' => static fn(int $n): string => __n(
@@ -232,9 +237,13 @@ final class Collection extends Panel
 		if ($meta->showPublished) {
 			$published = (bool) $node->meta->get('published');
 			$status[] = [
-				'kind' => $published ? 'published' : 'draft',
-				'label' => $published ? __('status:published') : __('status:draft'),
+				'kind' => $published ? 'published' : 'unpublished',
+				'label' => $published ? __('status:published') : __('status:unpublished'),
 			];
+
+			if ($node->meta->get('draft') !== null) {
+				$status[] = ['kind' => 'changes', 'label' => __('status:changes')];
+			}
 		}
 
 		if ($meta->showHidden && (bool) $node->meta->get('hidden')) {

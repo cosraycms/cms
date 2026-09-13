@@ -7,7 +7,7 @@ namespace Cosray\Panel\Dashboard;
 use Celema\Quma\Database;
 use Cosray\Contract\DashboardCard;
 
-final readonly class Drafts implements DashboardCard
+final readonly class Changes implements DashboardCard
 {
 	public function __construct(
 		private Database $db,
@@ -15,15 +15,15 @@ final readonly class Drafts implements DashboardCard
 
 	public function card(): Card
 	{
-		$row = $this->db->dashboard->drafts()->one();
+		$row = $this->db->dashboard->changes()->one();
 		$recent = (int) ($row['recent'] ?? 0);
 
 		return new Card(
-			label: __('dashboard:drafts'),
+			label: __('dashboard:changes'),
 			value: (int) ($row['total'] ?? 0),
 			note: __n(
-				'dashboard:recent-drafts',
-				'dashboard:recent-drafts-plural',
+				'dashboard:recent-changes',
+				'dashboard:recent-changes-plural',
 				$recent,
 			),
 		);

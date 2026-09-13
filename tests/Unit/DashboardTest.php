@@ -9,7 +9,7 @@ use Cosray\Contract\DashboardCard;
 use Cosray\Exception\RuntimeException;
 use Cosray\Panel\Dashboard;
 use Cosray\Panel\Dashboard\Card;
-use Cosray\Panel\Dashboard\Drafts;
+use Cosray\Panel\Dashboard\Changes;
 use Cosray\Panel\Dashboard\Entries;
 use Cosray\Panel\Dashboard\Media;
 use PHPUnit\Framework\TestCase;
@@ -25,7 +25,7 @@ final class DashboardTest extends TestCase
 	public function testDefaultCardsHaveAStableOrder(): void
 	{
 		$this->assertSame(
-			[Entries::class, Drafts::class, Media::class],
+			[Entries::class, Changes::class, Media::class],
 			Dashboard::withDefaults()->cards(),
 		);
 	}

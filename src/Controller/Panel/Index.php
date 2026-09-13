@@ -113,7 +113,8 @@ final class Index extends Panel
 				'changed' => $formatted === false ? '' : $formatted,
 				'datetime' => $changed->format(DATE_ATOM),
 				'published' => $published,
-				'status' => $published ? __('status:published') : __('status:draft'),
+				'hasDraft' => (bool) ($row['has_draft'] ?? false),
+				'status' => $published ? __('status:published') : __('status:unpublished'),
 			];
 		}
 

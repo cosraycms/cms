@@ -6,7 +6,7 @@ namespace Cosray\Panel;
 
 use Cosray\Contract\DashboardCard;
 use Cosray\Exception\RuntimeException;
-use Cosray\Panel\Dashboard\Drafts;
+use Cosray\Panel\Dashboard\Changes;
 use Cosray\Panel\Dashboard\Entries;
 use Cosray\Panel\Dashboard\Media;
 use ReflectionClass;
@@ -26,7 +26,7 @@ final class Dashboard
 	{
 		return new self([
 			Entries::class,
-			Drafts::class,
+			Changes::class,
 			Media::class,
 		]);
 	}

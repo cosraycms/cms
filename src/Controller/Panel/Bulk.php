@@ -33,30 +33,39 @@ final class Bulk extends Panel
 {
 	private const int MAX_NODES = 250;
 
-	public function publish(Context $context, Factory $factory, string $collection): Response
+	public function publish(Context $context, Cms $cms, Factory $factory, string $collection): Response
 	{
 		$obj = $this->collection($collection);
 		$form = $this->formData();
 		$state = $form['state'] ?? null;
 
-		if (!in_array($state, ['published', 'draft'], true)) {
+		if (!in_array($state, ['published', 'unpublished'], true)) {
 			throw new HttpBadRequest($this->request);
 		}
 
 		$published = $state === 'published';
+		$withChanges = $published && ($form['changes'] ?? null) === '1';
 		$withChildren = ($form['children'] ?? null) === '1';
 		[$nodes, $missing] = $this->selection($obj, $form);
-		$editor = $this->actor()->id;
+		$store = $this->store($context, $cms);
+		$locales = $context->locales();
+		$actor = $this->actor();
 		$changed = 0;
+		$changesPublished = 0;
 		$skippedLocked = 0;
 
 		$this->transaction($context, static function () use (
 			$context,
+			$cms,
+			$store,
+			$locales,
+			$actor,
 			$nodes,
 			$published,
+			$withChanges,
 			$withChildren,
-			$editor,
 			&$changed,
+			&$changesPublished,
 			&$skippedLocked,
 		): void {
 			$processed = [];
@@ -78,16 +87,25 @@ final class Bulk extends Panel
 						// Locked guards only the node itself; the walk goes
 						// on below it.
 						$skippedLocked++;
-					} else {
-						$context
-							->db
-							->nodes
-							->setPublished([
-								'uid' => $entry['uid'],
-								'published' => $published,
-								'editor' => $editor,
-							])
-							->run();
+					} elseif (($current = $cms->node->byUid($entry['uid'], published: null)) !== null) {
+						$nodeObj = Wrapper::unwrap($current);
+
+						if (!$published) {
+							$store->unpublish($nodeObj, $locales, $actor);
+						} elseif (!$current->meta->published) {
+							$context
+								->db
+								->nodes
+								->setPublished([
+									'uid' => $entry['uid'],
+									'published' => true,
+									'editor' => $actor->id,
+								])
+								->run();
+						} elseif ($withChanges && $store->publishDraft($nodeObj, $locales, $actor)) {
+							$changesPublished++;
+						}
+
 						$changed++;
 					}
 
@@ -106,7 +124,8 @@ final class Bulk extends Panel
 		});
 
 		return $this->redirect($factory, $collection, [
-			$published ? 'published' : 'drafted' => $changed,
+			$published ? 'published' : 'unpublished' => $changed,
+			'changes-published' => $changesPublished,
 			'skipped-locked' => $skippedLocked,
 			'skipped' => $missing,
 		]);
@@ -118,15 +137,7 @@ final class Bulk extends Panel
 		$form = $this->formData();
 		$withChildren = ($form['children'] ?? null) === '1';
 		[$nodes, $missing] = $this->selection($obj, $form);
-		$store = new Store(
-			$context->db,
-			new PathManager(),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		$store = $this->store($context, $cms);
 		$actor = $this->actor();
 		$deleted = [];
 		$skippedChildren = 0;
@@ -245,6 +256,19 @@ final class Bulk extends Panel
 		}
 
 		return false;
+	}
+
+	private function store(Context $context, Cms $cms): Store
+	{
+		return new Store(
+			$context->db,
+			new PathManager(),
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			factory: $cms->nodeFactory(),
+			cms: $cms,
+			context: $context,
+		);
 	}
 
 	private function transaction(Context $context, callable $work): void

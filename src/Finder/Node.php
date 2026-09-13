@@ -89,7 +89,7 @@ class Node
 		$data['editor_data'] = json_decode($data['editor_data'], true);
 		$data['creator_data'] = json_decode($data['creator_data'], true);
 		$data['paths'] = json_decode($data['paths'], true);
-		$data = $this->overlayDraftSettings($data);
+		$data = self::foldDraft($data);
 		$class = $this->context
 			->container
 			->tag(Bootstrap::NODE_TAG)
@@ -112,14 +112,15 @@ class Node
 	}
 
 	/**
-	 * Folds the joined draft columns into one `draft` entry (null without a
-	 * working copy). When the working copy was requested, its handle and
-	 * paths replace the row's live values the same way its content did.
+	 * Folds the joined draft columns of a `nodes/find` row into one `draft`
+	 * entry (null without a working copy). When the working copy was
+	 * requested, its handle and paths replace the row's live values the
+	 * same way its content did.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array<string, mixed>
 	 */
-	private function overlayDraftSettings(array $data): array
+	public static function foldDraft(array $data): array
 	{
 		$hasDraft = (bool) ($data['has_draft'] ?? false);
 		$data['draft'] = $hasDraft

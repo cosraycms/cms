@@ -53,10 +53,13 @@ $recent = (array) $this->unwrap($recent ?? []);
 						<?php $row = (array) $this->unwrap($row) ?>
 						<div class="row">
 							<span
-								class="dot <?= $row['published'] ?? false ? 'is-published' : 'is-draft' ?>"
+								class="dot <?= $row['published'] ?? false ? 'is-published' : 'is-unpublished' ?>"
 								aria-hidden="true"></span>
 							<span class="status sr-only"><?= escape((string) ($row['status'] ?? '')) ?></span>
 							<span class="title"><?= escape((string) ($row['title'] ?? '')) ?></span>
+							<?php if ($row['hasDraft'] ?? false): ?>
+								<span class="cms-status is-changes"><?= escape(__('status:changes')) ?></span>
+							<?php endif ?>
 							<span class="type"><?= escape((string) ($row['type'] ?? '')) ?></span>
 							<time class="changed" datetime="<?= escape((string) ($row['datetime'] ?? '')) ?>"><?= escape(
 								(string) ($row['changed'] ?? ''),

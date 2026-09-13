@@ -132,6 +132,7 @@ final class Listing
 		return [
 			'uid' => $node->meta->uid,
 			'published' => $node->meta->published,
+			'hasDraft' => $node->meta->get('draft') !== null,
 			'locked' => $node->meta->locked,
 			'hidden' => $node->meta->hidden,
 			'parent' => $parent,
