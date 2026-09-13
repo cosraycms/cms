@@ -410,7 +410,7 @@
 	/**
 	 * Component — switch
 	 */
-	--cms-switch-bg: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-600));
+	--cms-switch-bg: var(--cms-color-surface-sunken);
 
 	/**
 	 * Component — select
