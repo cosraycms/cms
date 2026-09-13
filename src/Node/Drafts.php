@@ -65,20 +65,4 @@ final class Drafts
 	{
 		$this->db->drafts->delete(['node' => $node])->run();
 	}
-
-	/**
-	 * @param list<string> $uids
-	 * @return list<string>
-	 */
-	public function withDrafts(array $uids): array
-	{
-		if ($uids === []) {
-			return [];
-		}
-
-		return array_map(
-			static fn(array $row): string => (string) $row['uid'],
-			$this->db->drafts->withDrafts(['uids' => json_encode(array_values($uids))])->all(),
-		);
-	}
 }
