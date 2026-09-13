@@ -177,7 +177,7 @@ final class Editor extends Panel
 			'errors' => [],
 			'published' => (bool) ($data['published'] ?? false),
 			'renderable' => (bool) ($data['type']['renderable'] ?? false),
-			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($cms, $node) : null,
+			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
 		];
 	}
 
@@ -485,25 +485,10 @@ final class Editor extends Panel
 		return $data;
 	}
 
-	/** The public path the preview overlay loads after a save. */
-	private function previewPath(Cms $cms, string $uid): ?string
+	/** The path the preview overlay loads after a save: the node's working copy, by uid. */
+	private function previewPath(string $uid): string
 	{
-		$result = $cms->node->byUid($uid, published: null);
-
-		if (!$result) {
-			return null;
-		}
-
-		$node = Wrapper::unwrap($result);
-		$paths = NodeFactory::dataFor($node)['paths'] ?? [];
-
-		foreach (is_array($paths) ? $paths : [] as $path) {
-			if (is_string($path) && trim($path) !== '') {
-				return $path;
-			}
-		}
-
-		return null;
+		return '/preview/' . rawurlencode($uid);
 	}
 
 	/**

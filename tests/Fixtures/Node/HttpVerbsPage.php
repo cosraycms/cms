@@ -14,9 +14,11 @@ use Cosray\Contract\HttpPut;
 use Cosray\Contract\Title;
 use Cosray\Field\Text;
 use Cosray\Schema\Label;
+use Cosray\Schema\Route;
 use Cosray\Util\Form;
 
 #[Label('Http Verbs Page')]
+#[Route('/http-verbs')]
 class HttpVerbsPage implements HttpDelete, HttpGet, HttpPost, HttpPut, Title
 {
 	#[Label('Title')]

@@ -66,6 +66,7 @@ class Serializer
 			],
 			'content' => $this->content($node, $rawData, $fieldNames),
 			'deletable' => $this->resolveDeletable($node),
+			'draft' => $rawData['draft'] ?? null,
 		];
 	}
 

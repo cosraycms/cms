@@ -40,6 +40,7 @@ final class Nodes implements Iterator
 	) {
 		$this->builtins = [
 			'changed' => 'n.changed',
+			'changes' => 'd.node IS NOT NULL',
 			'created' => 'n.created',
 			'creator' => 'uc.uid',
 			'editor' => 'ue.uid',

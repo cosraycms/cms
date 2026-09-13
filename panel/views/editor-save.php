@@ -77,6 +77,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<button type="button" class="close" data-overlay-close>
 			<?= escape(__('editor:close')) ?>
 		</button>
-		<iframe src="/preview<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>
+		<iframe src="<?= escape($preview) ?>" title="<?= escape(__('editor:preview')) ?>"></iframe>
 	</div>
 <?php endif ?>

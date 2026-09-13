@@ -57,6 +57,20 @@ class Node
 		]);
 	}
 
+	/**
+	 * The node as the editor sees it: the working copy where one exists,
+	 * the live row otherwise. Published or not, never deleted.
+	 */
+	public function working(string $uid): ?Wrapper
+	{
+		return $this->get([
+			'uid' => $uid,
+			'published' => null,
+			'deleted' => false,
+			'working' => true,
+		]);
+	}
+
 	public function get(
 		array $params,
 	): ?Wrapper {
@@ -75,6 +89,7 @@ class Node
 		$data['editor_data'] = json_decode($data['editor_data'], true);
 		$data['creator_data'] = json_decode($data['creator_data'], true);
 		$data['paths'] = json_decode($data['paths'], true);
+		$data = $this->overlayDraftSettings($data);
 		$class = $this->context
 			->container
 			->tag(Bootstrap::NODE_TAG)
@@ -94,5 +109,47 @@ class Node
 		string $query,
 	): array {
 		return [];
+	}
+
+	/**
+	 * Folds the joined draft columns into one `draft` entry (null without a
+	 * working copy). When the working copy was requested, its handle and
+	 * paths replace the row's live values the same way its content did.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
+	private function overlayDraftSettings(array $data): array
+	{
+		$hasDraft = (bool) ($data['has_draft'] ?? false);
+		$data['draft'] = $hasDraft
+			? [
+				'created' => $data['draft_created'],
+				'changed' => $data['draft_changed'],
+				'editor' => (int) $data['draft_editor'],
+			]
+			: null;
+		$settings = json_decode((string) ($data['draft_settings'] ?? ''), true);
+		unset(
+			$data['has_draft'],
+			$data['draft_created'],
+			$data['draft_changed'],
+			$data['draft_editor'],
+			$data['draft_settings'],
+		);
+
+		if (!$hasDraft || !is_array($settings)) {
+			return $data;
+		}
+
+		if (array_key_exists('handle', $settings)) {
+			$data['handle'] = $settings['handle'];
+		}
+
+		if (is_array($settings['paths'] ?? null)) {
+			$data['paths'] = $settings['paths'];
+		}
+
+		return $data;
 	}
 }

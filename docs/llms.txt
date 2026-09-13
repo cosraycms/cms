@@ -716,7 +716,7 @@ against a string and never matches.
 - A node answers a method on its own path by implementing `Cosray\Contract\HttpGet`, `HttpPost`, `HttpPut`, or `HttpDelete`; the hook runs before the CMS defaults and takes over content negotiation for that request.
 - Without a hook: GET renders the view, GET with `Accept: application/json` returns the JSON read output, any other method answers 400.
 - The hooks take no arguments. Read the body through the autowired `Celema\Core\Request`, or `Cosray\Util\Form::body($request)` for PUT and JSON payloads.
-- `/preview/...slug` dispatches the same way, so `HttpGet` also drives the panel preview.
+- `/preview/{uid}` (panel permission) renders a node's working copy — published or not — through the same dispatch, so `HttpGet` also drives the panel preview.
 
 Render context keys available to renderers include:
 

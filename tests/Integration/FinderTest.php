@@ -659,4 +659,62 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertEquals('Testhomepage', $content['title']['value']['de']);
 		$this->assertEquals('Test Homepage', $content['title']['value']['en']);
 	}
+
+	public function testWorkingCopyOverlaysDraftContentHandleAndPaths(): void
+	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$nodeId = $this->createTestNode([
+			'uid' => 'finder-working-node',
+			'type' => $typeId,
+			'published' => true,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Live']]],
+		]);
+		$this->createTestPath($nodeId, '/finder-live');
+		$this->db()->execute(
+			'INSERT INTO cms.drafts (node, editor, content, settings)
+			VALUES (:node, 1, :content::jsonb, :settings::jsonb)',
+			[
+				'node' => $nodeId,
+				'content' => json_encode(['title' => ['type' => 'text', 'value' => ['en' => 'Working']]]),
+				'settings' => json_encode(['handle' => 'drafted', 'paths' => ['en' => '/finder-drafted']]),
+			],
+		)->run();
+		$cms = $this->createCms();
+
+		$live = $cms->node->byUid('finder-working-node');
+		$working = $cms->node->working('finder-working-node');
+
+		$this->assertNotNull($live);
+		$this->assertNotNull($working);
+		$this->assertSame('Live', $live->title());
+		$this->assertSame('/finder-live', $live->path());
+		$this->assertNull($live->meta->get('handle'));
+		$this->assertSame('Working', $working->title());
+		$this->assertSame('/finder-drafted', $working->path());
+		$this->assertSame('drafted', $working->meta->get('handle'));
+		$this->assertSame(1, $working->meta->get('draft')['editor']);
+		$this->assertSame(1, $live->meta->get('draft')['editor']);
+	}
+
+	public function testChangesBuiltinFiltersNodesWithAWorkingCopy(): void
+	{
+		$typeId = $this->createTestType('renderable-test-page');
+		$this->createTestNode(['uid' => 'finder-changes-clean', 'type' => $typeId]);
+		$nodeId = $this->createTestNode(['uid' => 'finder-changes-dirty', 'type' => $typeId]);
+		$this->db()->execute(
+			"INSERT INTO cms.drafts (node, editor, content) VALUES (:node, 1, '{}'::jsonb)",
+			['node' => $nodeId],
+		)->run();
+		$finder = $this->createCms();
+
+		$dirty = $finder->nodes()->types('renderable-test-page')->filter('changes = true');
+		$clean = $finder->nodes()->types('renderable-test-page')->filter('changes = false');
+
+		$this->assertSame(1, $dirty->count());
+		$this->assertSame(['finder-changes-dirty'], array_map(
+			static fn(Wrapper $node): string => $node->meta->uid,
+			iterator_to_array($dirty),
+		));
+		$this->assertNull(iterator_to_array($clean)[0]->meta->get('draft'));
+	}
 }

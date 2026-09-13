@@ -7,6 +7,8 @@ FROM
 		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
 		np.node = n.parent
+	LEFT JOIN /*:cms.prefix:*/drafts d ON
+		d.node = n.node
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
 	INNER JOIN /*:cms.prefix:*/users ue ON

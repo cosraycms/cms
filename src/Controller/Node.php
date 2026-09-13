@@ -71,12 +71,13 @@ class Node
 		return $this->dispatch($node, $context, $cms);
 	}
 
+	/** The working copy of a node, published or not, rendered as the public path would. */
 	#[Permission('panel')]
-	public function preview(Context $context, Cms $cms, string $slug): Response
+	public function preview(Context $context, Cms $cms, string $uid): Response
 	{
-		$node = $cms->node->byPath('/' . $slug);
+		$node = $cms->node->working($uid);
 
-		if (!$node) {
+		if (!$node || !(bool) $this->types->get(Wrapper::unwrap($node)::class, 'renderable', false)) {
 			throw new HttpNotFound($context->httpRequest());
 		}
 

@@ -111,13 +111,13 @@ final class NodeHttpVerbsTest extends End2EndTestCase
 	public function testPreviewRunsThroughTheGetHook(): void
 	{
 		$this->authenticateAs('editor');
-		$response = $this->makeRequest('GET', '/preview/http-verbs');
+		$response = $this->makeRequest('GET', '/preview/verbs-node');
 
 		$this->assertResponseOk($response);
 		$this->assertSame('get:', $this->getHtmlResponse($response));
 	}
 
-	public function testPreviewReturnsNotFoundForAnUnknownPath(): void
+	public function testPreviewReturnsNotFoundForAnUnknownNode(): void
 	{
 		$this->authenticateAs('editor');
 

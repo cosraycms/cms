@@ -49,7 +49,7 @@ class Routes
 			$app->post('/', [Node::class, 'catchall'], 'cms.index.post'),
 			$app->put('/', [Node::class, 'catchall'], 'cms.index.put'),
 			$app->delete('/', [Node::class, 'catchall'], 'cms.index.delete'),
-			$app->get('/preview/...slug', [Node::class, 'preview'], 'cms.preview.catchall'),
+			$app->get('/preview/{uid:[A-Za-z0-9-_.]{1,64}}', [Node::class, 'preview'], 'cms.preview'),
 		];
 
 		// Rendition fallback: the web server serves existing cache files
