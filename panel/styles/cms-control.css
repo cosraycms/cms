@@ -70,6 +70,17 @@
 	line-height: 1.55;
 }
 
+/* The native look ignores line-height, which leaves a select shorter than an
+   input, and pins its arrow to the edge. */
+.cms-select {
+	appearance: none;
+	padding-inline-end: calc(var(--cms-space-2-5) * 2 + 1rem);
+	background-image: var(--cms-select-chevron);
+	background-position: right var(--cms-space-2-5) center;
+	background-repeat: no-repeat;
+	background-size: 1rem;
+}
+
 /* Element controls follow the same three fills: a read-only rich text
    frame is a well, not a white box. */
 .cms-field[data-readonly='true'] .richtext {

@@ -143,6 +143,9 @@
 		& select {
 			width: auto;
 			min-width: 12rem;
+		}
+
+		& input:not([type='checkbox']) {
 			padding: var(--cms-space-2);
 		}
 

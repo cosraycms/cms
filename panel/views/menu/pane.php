@@ -60,7 +60,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		<div class="cms-field<?= isset($errors['type']) ? ' has-error' : '' ?>">
 			<label class="label" for="menu-item-type"><div><?= escape(__('menu:item-type')) ?></div></label>
 			<div class="control">
-				<select class="cms-input" id="menu-item-type" name="type" data-menu-type>
+				<select class="cms-select" id="menu-item-type" name="type" data-menu-type>
 					<?php foreach ($types as $option): ?>
 						<option value="<?= escape($option) ?>"<?= $option === $type ? ' selected' : '' ?>><?= escape(
 							$typeLabels[$option],
@@ -139,7 +139,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 		<div class="cms-field" data-menu-section="children" <?= $section('children') ? 'hidden' : '' ?>>
 			<label class="label" for="menu-item-order"><div><?= escape(__('menu:item-order')) ?></div></label>
 			<div class="control">
-				<select class="cms-input" id="menu-item-order" name="order">
+				<select class="cms-select" id="menu-item-order" name="order">
 					<?php foreach ($orders as $value => $label): ?>
 						<option value="<?= escape($value) ?>"<?= $value === $values['order'] ? ' selected' : '' ?>><?= escape(
 							$label,
