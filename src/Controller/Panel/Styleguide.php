@@ -1192,7 +1192,7 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 1,
 				'childrenUrl' => '#',
-				'status' => [['kind' => 'draft', 'label' => 'Draft']],
+				'status' => [['kind' => 'unpublished', 'label' => 'Unpublished']],
 				'published' => false,
 				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
 			]),
@@ -1210,7 +1210,11 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 1,
 				'last' => true,
-				'status' => [['kind' => 'locked', 'label' => 'Locked']],
+				'status' => [
+					['kind' => 'published', 'label' => 'Published'],
+					['kind' => 'changes', 'label' => 'Changes'],
+					['kind' => 'locked', 'label' => 'Locked'],
+				],
 				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
 			]),
 		];

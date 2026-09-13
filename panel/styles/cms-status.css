@@ -23,7 +23,7 @@
 		color: var(--cms-color-success-text);
 	}
 
-	&.is-draft,
+	&.is-changes,
 	&.is-hidden {
 		border-color: color-mix(in oklch, var(--cms-color-warning), transparent 70%);
 		background: var(--cms-color-warning-surface);

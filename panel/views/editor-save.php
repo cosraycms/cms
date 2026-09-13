@@ -14,6 +14,8 @@ $errors = (array) $this->unwrap($errors);
 $published = (bool) ($this->unwrap($published ?? null) ?? false);
 $renderable = (bool) ($this->unwrap($renderable ?? null) ?? false);
 $preview = $this->unwrap($preview ?? null);
+$draft = $this->unwrap($draft ?? null);
+$draft = is_array($draft) ? $draft : null;
 
 // The controller reduces validation issues to message + path; anything
 // else is not renderable and must not be swallowed quietly by walking
@@ -71,6 +73,16 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		value="1"
 		hx-swap-oob="true"
 		<?= $published ? 'checked' : '' ?> />
+	<?php // The working copy came or went with this save: the chip, the save
+
+	// menu's entries and the note under the switch follow it. ?>
+	<span
+		id="editor-changes"
+		class="cms-status is-changes"
+		hx-swap-oob="true"
+		<?= $draft ? '' : 'hidden' ?>><?= escape(__('editor:changes')) ?></span>
+	<?php $this->insert('node/save-options', ['draft' => $draft, 'oob' => true]) ?>
+	<?php $this->insert('node/changes-note', ['draft' => $draft, 'oob' => true]) ?>
 <?php endif ?>
 <?php if ($saved && is_string($preview) && $preview !== ''): ?>
 	<div id="editor-preview" class="preview" hx-swap-oob="true">

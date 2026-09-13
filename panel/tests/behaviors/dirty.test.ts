@@ -128,6 +128,20 @@ describe('dirty guard', () => {
 		expect(event.defaultPrevented).toBe(false);
 	});
 
+	it('lets a request marked data-dirty-bypass through without asking', () => {
+		const confirm = vi.spyOn(window, 'confirm');
+		const discard = document.createElement('form');
+		discard.id = 'node-editor-discard';
+		discard.setAttribute('data-dirty-bypass', '');
+		document.body.append(discard);
+
+		edit();
+		const event = request(discard);
+
+		expect(confirm).not.toHaveBeenCalled();
+		expect(event.defaultPrevented).toBe(false);
+	});
+
 	it('prevents unload while dirty', () => {
 		edit();
 		const event = new Event('beforeunload', { cancelable: true });

@@ -48,7 +48,7 @@ $fieldsetMembers = array_flip(array_filter(
 	'is_string',
 ));
 
-$statuses = ['published', 'draft', 'hidden', 'locked'];
+$statuses = ['published', 'unpublished', 'changes', 'hidden', 'locked'];
 $rows = (array) $this->unwrap($rows);
 
 // ?section=<key> narrows the page to one section, ?theme=light|dark
@@ -234,10 +234,6 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<?php foreach ($statuses as $status): ?>
 						<span class="cms-status is-<?= escape($status) ?>"><?= escape(ucfirst($status)) ?></span>
 					<?php endforeach ?>
-				</div>
-				<div class="sample">
-					<span class="cms-status is-published">Published</span>
-					<span class="cms-status is-unpublished">Unpublished</span>
 				</div>
 			</section>
 

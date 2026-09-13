@@ -40,7 +40,9 @@ function guard(event: Event): void {
 	const source =
 		detail?.ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
-	if (source instanceof Element && source.closest(FORM)) {
+	// A request marked data-dirty-bypass drops the unsaved edits on purpose
+	// (discarding the working copy) and confirms on its own.
+	if (source instanceof Element && source.closest(`${FORM}, [data-dirty-bypass]`)) {
 		return;
 	}
 

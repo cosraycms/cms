@@ -127,6 +127,7 @@ class Node
 				'created' => $data['draft_created'],
 				'changed' => $data['draft_changed'],
 				'editor' => (int) $data['draft_editor'],
+				'editorName' => $data['draft_editor_name'] ?? null,
 			]
 			: null;
 		$settings = json_decode((string) ($data['draft_settings'] ?? ''), true);
@@ -135,6 +136,7 @@ class Node
 			$data['draft_created'],
 			$data['draft_changed'],
 			$data['draft_editor'],
+			$data['draft_editor_name'],
 			$data['draft_settings'],
 		);
 

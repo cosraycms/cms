@@ -350,6 +350,13 @@ class Routes
 					->after($renderers->get('editor-save'));
 				$panel
 					->post(
+						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/discard',
+						[Panel\Editor::class, 'discard'],
+						'editor.discard',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/paths',
 						[Panel\Editor::class, 'paths'],
 						'editor.paths',

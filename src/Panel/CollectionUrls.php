@@ -105,6 +105,11 @@ final class CollectionUrls
 		return $this->path() . '/' . rawurlencode($uid) . '/delete';
 	}
 
+	public function discard(string $uid): string
+	{
+		return $this->path() . '/' . rawurlencode($uid) . '/discard';
+	}
+
 	/**
 	 * Bulk-action endpoint, carrying the full listing query (offset
 	 * included) so the response can redirect back to the same view.

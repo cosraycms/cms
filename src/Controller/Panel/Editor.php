@@ -44,7 +44,7 @@ final class Editor extends Panel
 	{
 		[$name, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
-		$result = $cms->node->byUid($node, published: null);
+		$result = $cms->node->working($node);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
@@ -108,7 +108,7 @@ final class Editor extends Panel
 	): Response|array {
 		[, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
-		$result = $cms->node->byUid($node, published: null);
+		$result = $cms->node->working($node);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
@@ -134,20 +134,17 @@ final class Editor extends Panel
 		}
 
 		$data = $this->applyForm($data, $form);
-		$store = new Store(
-			$context->db,
-			new PathManager(),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		$store = $this->nodeStore($context, $cms);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 		$htmx = $this->request->hasHeader('HX-Request');
+		$toDraft = $this->savesAsDraft($nodeObj, $data, $form);
 
 		try {
-			$store->save($nodeObj, $data, $context->locales(), $this->actor());
+			if ($toDraft) {
+				$store->draft($nodeObj, $data, $context->locales(), $this->actor());
+			} else {
+				$store->publish($nodeObj, $data, $context->locales(), $this->actor());
+			}
 		} catch (HttpBadRequest $e) {
 			if (!$htmx) {
 				// Non-htmx fallback follows the PRG pattern; errors are
@@ -173,12 +170,83 @@ final class Editor extends Panel
 
 		return [
 			'saved' => true,
-			'message' => __('editor:saved'),
+			'message' => $toDraft ? __('editor:changes-saved') : __('editor:saved'),
 			'errors' => [],
 			'published' => (bool) ($data['published'] ?? false),
 			'renderable' => (bool) ($data['type']['renderable'] ?? false),
 			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
+			'draft' => $this->draftFacts($cms->node->working($node)?->meta->get('draft')),
 		];
+	}
+
+	public function discard(
+		Context $context,
+		Cms $cms,
+		Factory $factory,
+		string $collection,
+		string $node,
+	): Response {
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$this->nodeStore($context, $cms)->discard(Wrapper::unwrap($result));
+		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+
+		// The redirect swaps the editor back in from the live row; htmx follows it.
+		return Response::create($factory)->redirect($links->edit($node), 303);
+	}
+
+	/**
+	 * A published node that stays published takes a plain save as its
+	 * working copy. Everything else — an unpublished node, the switch
+	 * turned off, or an explicit publish — writes the live row.
+	 */
+	private function savesAsDraft(object $node, array $data, array $form): bool
+	{
+		return (
+			(bool) ($data['type']['renderable'] ?? false)
+				&& (bool) NodeFactory::meta($node, 'published')
+				&& (bool) ($data['published'] ?? false)
+				&& ($form['publish'] ?? null) !== '1'
+		);
+	}
+
+	/**
+	 * The working copy's facts for the editor: when it diverged, and who
+	 * last saved it.
+	 *
+	 * @return ?array{since: ?string, editor: ?string}
+	 */
+	private function draftFacts(mixed $draft): ?array
+	{
+		if (!is_array($draft)) {
+			return null;
+		}
+
+		$editor = $draft['editorName'] ?? null;
+
+		return [
+			'since' => $this->displayDate($draft['created'] ?? null),
+			'editor' => is_string($editor) && trim($editor) !== '' ? $editor : null,
+		];
+	}
+
+	private function nodeStore(Context $context, Cms $cms): Store
+	{
+		return new Store(
+			$context->db,
+			new PathManager(),
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			factory: $cms->nodeFactory(),
+			cms: $cms,
+			context: $context,
+		);
 	}
 
 	public function store(
@@ -223,15 +291,7 @@ final class Editor extends Panel
 			$data['parent'] = $query->parent;
 		}
 
-		$store = new Store(
-			$context->db,
-			new PathManager(),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		$store = $this->nodeStore($context, $cms);
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 
 		try {
@@ -269,22 +329,14 @@ final class Editor extends Panel
 	): Response|array {
 		[, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
-		$result = $cms->node->byUid($node, published: null);
+		$result = $cms->node->working($node);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
 		}
 
 		$nodeObj = Wrapper::unwrap($result);
-		$store = new Store(
-			$context->db,
-			new PathManager(),
-			$this->types(),
-			$cms->nodeFactory()->uid(),
-			factory: $cms->nodeFactory(),
-			cms: $cms,
-			context: $context,
-		);
+		$store = $this->nodeStore($context, $cms);
 
 		try {
 			$store->delete($nodeObj, $this->actor());
@@ -312,7 +364,7 @@ final class Editor extends Panel
 	{
 		[, $obj] = $this->collection($collection);
 		$query = $this->queryState($obj);
-		$result = $cms->node->byUid($node, published: null);
+		$result = $cms->node->working($node);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
@@ -723,6 +775,7 @@ final class Editor extends Panel
 		return [
 			'created' => $this->displayDate($data['created'] ?? null),
 			'editor' => $this->userLabel($data['editor'] ?? null),
+			'draft' => $this->draftFacts($data['draft'] ?? null),
 		];
 	}
 

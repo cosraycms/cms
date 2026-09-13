@@ -29,6 +29,7 @@ $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
 $deletable = (bool) ($node['deletable'] ?? false);
+$draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
 $contentLocales = ContentLocales::used($fields, count($locales));
 $showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
@@ -113,6 +114,9 @@ foreach ($fields as $field) {
 						class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>">
 						<?= escape($published ? __('editor:published') : __('editor:unpublished')) ?>
 					</span>
+					<span id="editor-changes" class="cms-status is-changes" <?= $draft ? '' : 'hidden' ?>>
+						<?= escape(__('editor:changes')) ?>
+					</span>
 				<?php endif ?>
 				<span
 					id="editor-dirty"
@@ -143,6 +147,19 @@ foreach ($fields as $field) {
 					</button>
 				</form>
 			<?php endif ?>
+			<?php if ($edit && $renderable): ?>
+				<?php // Discarding the working copy: its own form like delete, submitted
+
+				// from the save menu. The unsaved-changes guard stands aside; dropping
+				// the unsaved edits is the point, and hx-confirm asks once. ?>
+				<form
+					id="node-editor-discard"
+					method="post"
+					action="<?= escape($links->discard($uid)) ?>"
+					hx-swap="none"
+					hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
+					data-dirty-bypass></form>
+			<?php endif ?>
 			<?php if ($edit && $routable && $renderable): ?>
 				<button
 					class="cms-button secondary"
@@ -168,12 +185,7 @@ foreach ($fields as $field) {
 					aria-label="<?= escape(__('editor:save-options')) ?>">
 					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
 				</button>
-				<div id="editor-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
-					<button type="submit" form="node-editor-form" name="publish" value="1" data-editor-submit>
-						<?= \Cosray\Panel\Icon::render('floppy') ?>
-						<?= escape(__('editor:save-publish')) ?>
-					</button>
-				</div>
+				<?php $this->insert('node/save-options', ['draft' => $draft]) ?>
 			</div>
 		</div>
 	</header>

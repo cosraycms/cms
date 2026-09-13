@@ -20,6 +20,7 @@ SELECT
 	d.created AS draft_created,
 	d.changed AS draft_changed,
 	d.editor AS draft_editor,
+	coalesce(ud.data->>'name', ud.username, ud.email) AS draft_editor_name,
 	t.handle AS type_handle,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,
@@ -42,6 +43,8 @@ FROM
 		np.node = n.parent
 	LEFT JOIN /*:cms.prefix:*/drafts d ON
 		d.node = n.node
+	LEFT JOIN /*:cms.prefix:*/users ud ON
+		ud.usr = d.editor
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
 	INNER JOIN /*:cms.prefix:*/users ue ON
@@ -90,6 +93,9 @@ WHERE
 GROUP BY
 	n.node,
 	d.node,
+	ud.data,
+	ud.username,
+	ud.email,
 	np.uid,
 	uc.uid,
 	uc.email,

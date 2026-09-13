@@ -56,6 +56,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 						value="1"
 						<?= $node['published'] ?? false ? 'checked' : '' ?> />
 				</label>
+				<?php $this->insert('node/changes-note', ['draft' => $meta['draft'] ?? null]) ?>
 
 				<label class="toggle">
 					<span class="copy">
