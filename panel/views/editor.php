@@ -153,18 +153,24 @@ foreach ($fields as $field) {
 					<?= escape(__('editor:preview')) ?>
 				</button>
 			<?php endif ?>
-			<button
-				class="cms-button secondary"
-				type="submit"
-				form="node-editor-form"
-				name="publish"
-				value="1"
-				data-editor-submit>
-				<?= escape(__('editor:save-publish')) ?>
-			</button>
-			<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
-				<?= escape(__('editor:save')) ?>
-			</button>
+			<div class="cms-split-button">
+				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+					<?= escape(__('editor:save')) ?>
+				</button>
+				<button
+					class="cms-button primary toggle"
+					type="button"
+					popovertarget="editor-save-options"
+					aria-haspopup="menu"
+					aria-label="<?= escape(__('editor:save-options')) ?>">
+					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
+				</button>
+				<div id="editor-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+					<button type="submit" form="node-editor-form" name="publish" value="1" data-editor-submit>
+						<?= escape(__('editor:save-publish')) ?>
+					</button>
+				</div>
+			</div>
 		</div>
 	</header>
 

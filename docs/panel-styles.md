@@ -164,6 +164,8 @@ Block pickers, block/entry row actions, menu-tree actions, and richtext menus us
 
 Action activation closes the menu before the consumer handler runs, so a handler can focus new content or open a modal without a later menu cleanup reclaiming focus. Tree actions opened with `.` return focus to the row; ordinary triggers regain focus on Escape. Native selects, autocomplete results, and the menu preview disclosure keep their own semantics.
 
+A split button pairs a default action with its alternatives. `.cms-split-button` holds the default `.cms-button`, a `.cms-button.toggle` of the same variant carrying a chevron and a translated accessible name, and the `.cms-action-menu` the toggle opens with `data-align="end"`, which sizes to its longest choice. A choice may be a submit button with a `form` attribute: the menu closes first and the native submit still carries the choice as its submitter, so its `name` and `value` reach the server. The node editor's Save uses one, with Save and publish behind the chevron.
+
 Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu` must target `.cms-action-menu` instead. Kebab triggers are buttons rather than `details`/`summary`; their open styling uses `aria-expanded="true"`. The bridge remains version 1 and application-defined icon providers are unchanged.
 
 ## Block catalog

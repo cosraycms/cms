@@ -136,6 +136,7 @@ return [
 		'editor:published-help' => 'Legt fest, ob die Seite für alle Besucher erreichbar ist.',
 		'editor:published-label' => 'Veröffentlicht',
 		'editor:save' => 'Speichern',
+		'editor:save-options' => 'Weitere Speicheroptionen',
 		'editor:save-publish' => 'Speichern und veröffentlichen',
 		'editor:saved' => 'Gespeichert',
 		'editor:settings' => 'Einstellungen',

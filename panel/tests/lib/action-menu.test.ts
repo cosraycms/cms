@@ -135,6 +135,31 @@ describe('action-menu keyboard and lifecycle', () => {
 		expect(menu.matches(':popover-open')).toBe(true);
 	});
 
+	it('closes before a submit choice submits its form with the choice as submitter', async () => {
+		const { owner, trigger, menu } = fixture();
+		const form = document.createElement('form');
+		form.id = 'editor';
+		owner.append(form);
+		menu.insertAdjacentHTML(
+			'beforeend',
+			'<button type="submit" form="editor" name="publish" value="1">Save and publish</button>',
+		);
+		const choice = menu.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+		let submitter: HTMLElement | null = null;
+		let open: boolean | null = null;
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			submitter = event.submitter;
+			open = menu.matches(':popover-open');
+		});
+		trigger.click();
+		await Promise.resolve();
+		expect(menu.matches(':popover-open')).toBe(true);
+		choice.click();
+		expect(submitter).toBe(choice);
+		expect(open).toBe(false);
+	});
+
 	it('lets Tab leave without redirecting focus to the trigger', async () => {
 		const { trigger, menu, first, next } = fixture();
 		await key(trigger, 'ArrowDown');

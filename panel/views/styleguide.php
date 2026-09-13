@@ -142,6 +142,25 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<button type="button" class="cms-button danger small">Delete</button>
 					<button type="button" class="cms-button secondary small" disabled>Use</button>
 				</div>
+				<div class="sample" data-sample="button:split">
+					<div class="cms-split-button">
+						<button type="button" class="cms-button primary">Save</button>
+						<button type="button" class="cms-button primary toggle" popovertarget="sample-save-options"
+							aria-haspopup="menu" aria-label="More save options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
+						<div id="sample-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+							<button type="button">Save and publish</button>
+						</div>
+					</div>
+					<div class="cms-split-button">
+						<button type="button" class="cms-button secondary">Export</button>
+						<button type="button" class="cms-button secondary toggle" popovertarget="sample-export-options"
+							aria-haspopup="menu" aria-label="More export options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
+						<div id="sample-export-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+							<button type="button">Export as CSV</button>
+							<button type="button">Export as JSON</button>
+						</div>
+					</div>
+				</div>
 			</section>
 
 			<section class="section" data-section="dialogs">

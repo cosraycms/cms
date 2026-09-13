@@ -133,6 +133,7 @@ return [
 		'editor:published-help' => 'Determines whether the page is reachable for all visitors.',
 		'editor:published-label' => 'Published',
 		'editor:save' => 'Save',
+		'editor:save-options' => 'More save options',
 		'editor:save-publish' => 'Save and publish',
 		'editor:saved' => 'Saved',
 		'editor:settings' => 'Settings',

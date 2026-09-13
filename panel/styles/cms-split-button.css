@@ -1,0 +1,29 @@
+.cms-split-button {
+	display: inline-flex;
+
+	/* The toggle's darker start border is the divider between the two. */
+	& > .cms-button:first-child {
+		border-inline-end: 0;
+		border-start-end-radius: 0;
+		border-end-end-radius: 0;
+	}
+
+	& > .toggle {
+		padding-inline: var(--cms-space-2-5);
+		border-start-start-radius: 0;
+		border-end-start-radius: 0;
+		border-inline-start-color: color-mix(
+			in oklch,
+			var(--button-border),
+			var(--cms-color-shade) 14%
+		);
+
+		&[aria-expanded='true'] {
+			background-color: var(--button-hover-bg);
+		}
+	}
+
+	& > .cms-action-menu {
+		--width: max-content;
+	}
+}
