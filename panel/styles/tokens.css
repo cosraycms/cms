@@ -110,29 +110,29 @@
 	/**
 	 * Primitives — neutral ramp
 	 *
-	 * Warm greys on one hue with little chroma, so the chrome reads as black,
-	 * white and grey. Primitives never flip — that is what makes them
-	 * primitives. The dark end is dense because the dark theme draws its
+	 * Greys on one yellowish hue with very little chroma, so the chrome reads
+	 * as black, white and grey. Primitives never flip — that is what makes
+	 * them primitives. The dark end is dense because the dark theme draws its
 	 * surfaces from it; the semantic tokens below pick a step per theme.
 	 */
 	--cms-color-white: #fff;
 	--cms-color-black: #000;
-	--cms-color-neutral-50: #fcf9f9;
-	--cms-color-neutral-100: #f7f4f3;
-	--cms-color-neutral-150: #f3efee;
-	--cms-color-neutral-200: #eae5e3;
-	--cms-color-neutral-300: #d6cecc;
-	--cms-color-neutral-400: #afa5a2;
-	--cms-color-neutral-500: #786d6a;
-	--cms-color-neutral-600: #605552;
-	--cms-color-neutral-700: #4b413e;
-	--cms-color-neutral-800: #352d2b;
-	--cms-color-neutral-850: #2b2422;
-	--cms-color-neutral-875: #26201e;
-	--cms-color-neutral-900: #211b19;
-	--cms-color-neutral-925: #1b1614;
-	--cms-color-neutral-950: #15110f;
-	--cms-color-neutral-975: #0d0a09;
+	--cms-color-neutral-50: #fafaf8;
+	--cms-color-neutral-100: #f5f5f3;
+	--cms-color-neutral-150: #f0f0ee;
+	--cms-color-neutral-200: #e7e7e5;
+	--cms-color-neutral-300: #d2d2d0;
+	--cms-color-neutral-400: #a7a7a5;
+	--cms-color-neutral-500: #737371;
+	--cms-color-neutral-600: #585856;
+	--cms-color-neutral-700: #474745;
+	--cms-color-neutral-800: #323230;
+	--cms-color-neutral-850: #2a2a28;
+	--cms-color-neutral-875: #252523;
+	--cms-color-neutral-900: #21211f;
+	--cms-color-neutral-925: #1a1a18;
+	--cms-color-neutral-950: #131311;
+	--cms-color-neutral-975: #0c0c0a;
 
 	/**
 	 * Primitives — hues
@@ -154,7 +154,7 @@
 	 * Primitives — depth and edges
 	 */
 	--cms-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-	--cms-shadow: 0 1px 3px rgb(33 27 25 / 0.08), 0 0 14px rgb(33 27 25 / 0.05);
+	--cms-shadow: 0 1px 3px rgb(33 33 31 / 0.08), 0 0 14px rgb(33 33 31 / 0.05);
 	--cms-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 	--cms-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 	--cms-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
