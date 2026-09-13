@@ -31,7 +31,6 @@ final class CollectionTable
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
-	 *     childLinks: list<array{label: string, url: string}>,
 	 * }> $rows
 	 */
 	private function __construct(
@@ -118,7 +117,6 @@ final class CollectionTable
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
-	 *     childLinks: list<array{label: string, url: string}>,
 	 * }>
 	 */
 	private static function rows(
@@ -161,9 +159,6 @@ final class CollectionTable
 						: null,
 				'childCreateLinks' => $meta->showChildren
 					? self::childCreateLinks($childBlueprints, $urls, $uid)
-					: [],
-				'childLinks' => $meta->showChildren
-					? self::childLinks($node, $urls, $childBlueprints)
 					: [],
 			];
 		}
@@ -272,40 +267,6 @@ final class CollectionTable
 			$links[] = [
 				'slug' => $blueprint['slug'],
 				'name' => __($blueprint['name']),
-				'url' => $urls->create($blueprint['slug'], $uid),
-			];
-		}
-
-		return $links;
-	}
-
-	/**
-	 * @param array<string, mixed> $node
-	 * @param list<array{slug: string, name: string}> $blueprints
-	 * @return list<array{label: string, url: string}>
-	 */
-	private static function childLinks(
-		array $node,
-		CollectionUrls $urls,
-		array $blueprints,
-	): array {
-		$links = [];
-		$uid = (string) ($node['uid'] ?? '');
-
-		if ($uid === '') {
-			return [];
-		}
-
-		if ((bool) ($node['hasChildren'] ?? false)) {
-			$links[] = [
-				'label' => __('collection:open-children'),
-				'url' => $urls->children($uid),
-			];
-		}
-
-		foreach ($blueprints as $blueprint) {
-			$links[] = [
-				'label' => __('collection:add', ['name' => __($blueprint['name'])]),
 				'url' => $urls->create($blueprint['slug'], $uid),
 			];
 		}
