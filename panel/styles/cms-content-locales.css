@@ -15,6 +15,8 @@
 		min-width: 0;
 		padding: var(--cms-space-1-5) var(--cms-space-2);
 		overflow: hidden;
+		/* Transparent, not none: choosing a language must not shift the labels. */
+		border: 1px solid transparent;
 		border-radius: var(--cms-radius-full);
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
@@ -29,6 +31,7 @@
 
 		&[aria-checked='true'],
 		&[aria-pressed='true'] {
+			border-color: var(--cms-button-secondary-border);
 			background: var(--cms-button-secondary-bg);
 			background-image: var(--cms-gradient-raised);
 			box-shadow: var(--cms-button-secondary-shadow);
@@ -36,6 +39,7 @@
 
 			@media (forced-colors: active) {
 				forced-color-adjust: none;
+				border-color: Highlight;
 				background: Highlight;
 				box-shadow: none;
 				color: HighlightText;
