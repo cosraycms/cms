@@ -249,13 +249,14 @@
 	 * Semantic — accent
 	 *
 	 * The one interaction colour: primary buttons, focus, selection, active
-	 * navigation and links. Near-black by default, so the chrome stays black,
-	 * white and grey; this is the pair downstream projects are expected to tint.
+	 * navigation and links. Dark grey by default, so the chrome stays black,
+	 * white and grey while a filled button keeps room for a darker border; this
+	 * is the pair downstream projects are expected to tint.
 	 */
-	--cms-color-accent: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-50));
+	--cms-color-accent: light-dark(var(--cms-color-neutral-700), var(--cms-color-neutral-50));
 	--cms-color-text-on-accent: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-900));
 
-	/* Toward the surface, not the shade: a near-black accent has nowhere darker to go. */
+	/* Toward the surface, not the shade: a dark accent has little room to darken. */
 	--cms-color-accent-hover: color-mix(
 		in oklch,
 		var(--cms-color-accent),
@@ -289,9 +290,11 @@
 	 * edge and catches a sheen along its top, a well is shaded inside its top
 	 * edge. The values are translucent white and shadow laid over whatever is
 	 * beneath, so they need no flip — a lip disappears on a dark ground, a
-	 * sheen on a white one. `none` flattens a role.
+	 * sheen on a white one. A filled control takes the stronger `raised-fill`,
+	 * whose sheen has a colour to show against. `none` flattens a role.
 	 */
 	--cms-shadow-raised: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 1px 1px rgb(33 33 31 / 0.08);
+	--cms-shadow-raised-fill: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 2px rgb(33 33 31 / 0.12);
 	--cms-shadow-recessed: inset 0 1px 2px rgb(33 33 31 / 0.08);
 	--cms-gradient-raised: linear-gradient(rgb(255 255 255 / 0.08), rgb(33 33 31 / 0.04));
 
@@ -353,14 +356,26 @@
 
 	/**
 	 * Component — buttons
+	 *
+	 * A filled button's border is its fill a quarter of the way to black: the
+	 * rim its sheen sits inside.
 	 */
 	--cms-button-primary-bg: var(--cms-color-accent);
 	--cms-button-primary-text: var(--cms-color-text-on-accent);
-	--cms-button-primary-border: var(--cms-button-primary-bg);
+	--cms-button-primary-border: color-mix(
+		in oklch,
+		var(--cms-button-primary-bg),
+		var(--cms-color-black) 25%
+	);
 	--cms-button-primary-hover-bg: var(--cms-color-accent-hover);
 	--cms-button-primary-hover-text: var(--cms-button-primary-text);
-	--cms-button-primary-hover-border: var(--cms-button-primary-hover-bg);
+	--cms-button-primary-hover-border: color-mix(
+		in oklch,
+		var(--cms-button-primary-hover-bg),
+		var(--cms-color-black) 25%
+	);
 	--cms-button-primary-ring: var(--cms-color-focus);
+	--cms-button-primary-shadow: var(--cms-shadow-raised-fill);
 
 	/*
 	 * Raised, not plain surface: identical to it on light, and the step that
@@ -373,14 +388,24 @@
 	--cms-button-secondary-hover-text: var(--cms-button-secondary-text);
 	--cms-button-secondary-hover-border: var(--cms-button-secondary-border);
 	--cms-button-secondary-ring: var(--cms-color-focus);
+	--cms-button-secondary-shadow: var(--cms-shadow-raised);
 
 	--cms-button-danger-bg: var(--cms-color-danger);
 	--cms-button-danger-text: var(--cms-color-text-on-fill);
-	--cms-button-danger-border: var(--cms-button-danger-bg);
+	--cms-button-danger-border: color-mix(
+		in oklch,
+		var(--cms-button-danger-bg),
+		var(--cms-color-black) 25%
+	);
 	--cms-button-danger-hover-bg: var(--cms-color-danger-hover);
 	--cms-button-danger-hover-text: var(--cms-button-danger-text);
-	--cms-button-danger-hover-border: var(--cms-button-danger-hover-bg);
+	--cms-button-danger-hover-border: color-mix(
+		in oklch,
+		var(--cms-button-danger-hover-bg),
+		var(--cms-color-black) 25%
+	);
 	--cms-button-danger-ring: var(--cms-color-danger);
+	--cms-button-danger-shadow: var(--cms-shadow-raised-fill);
 
 	/**
 	 * Component — switch
@@ -442,11 +467,13 @@
 /**
  * More contrast on request.
  *
- * People who ask their operating system for more contrast get firmer edges
- * and darker secondary text; everyone else keeps the calm default.
+ * People who ask their operating system for more contrast get firmer edges,
+ * darker secondary text and a near-black accent; everyone else keeps the calm
+ * default.
  */
 @media (prefers-contrast: more) {
 	:root {
+		--cms-color-accent: light-dark(var(--cms-color-neutral-900), var(--cms-color-neutral-50));
 		--cms-color-border: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-600));
 		--cms-color-border-soft: light-dark(var(--cms-color-neutral-300), var(--cms-color-neutral-700));
 		--cms-color-border-strong: var(--cms-color-neutral-500);

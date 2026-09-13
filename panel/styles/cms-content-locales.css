@@ -31,7 +31,7 @@
 		&[aria-pressed='true'] {
 			background: var(--cms-color-accent);
 			background-image: var(--cms-gradient-raised);
-			box-shadow: var(--cms-shadow-raised);
+			box-shadow: var(--cms-shadow-raised-fill);
 			color: var(--cms-color-text-on-accent);
 
 			@media (forced-colors: active) {

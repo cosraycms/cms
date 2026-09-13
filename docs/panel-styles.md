@@ -79,7 +79,7 @@ Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` tok
 
 ### Colour roles
 
-Accent is the one interaction colour: primary buttons, focus, selection, active navigation and links. It defaults to near-black on light and near-white on dark, so the chrome stays black, white and grey, and it is the pair projects are expected to tint — `--cms-color-accent` with `--cms-color-text-on-accent`. Hovers mix the accent toward the surface, which works for a near-black accent and a tinted one alike. A link set in the accent carries an underline, since a near-black link is otherwise just text.
+Accent is the one interaction colour: primary buttons, focus, selection, active navigation and links. It defaults to dark grey on light and near-white on dark, so the chrome stays black, white and grey, and it is the pair projects are expected to tint — `--cms-color-accent` with `--cms-color-text-on-accent`. `prefers-contrast: more` deepens the light accent to near-black. Hovers mix the accent toward the surface, which works for a dark accent and a tinted one alike. A link set in the accent carries an underline, since a dark grey link is otherwise just text.
 
 Focus is a solid ring in the accent. Borderless elements take `outline: var(--cms-focus-outline)` with `outline-offset: var(--cms-focus-offset)`, and the gap keeps the ring visible around a filled button of the same colour. Bordered fields switch their border to `--cms-color-focus` and add `box-shadow: var(--cms-focus-ring)`, which thickens it.
 
@@ -93,15 +93,16 @@ Every text input, select and textarea in the panel carries `.cms-input`, `.cms-s
 
 ### Depth
 
-Light falls from above. Three public tokens carry it. They are translucent white and shadow laid over whatever sits beneath, not colours, so neither theme needs its own value: a shadow disappears on a dark ground and a sheen on a white one.
+Light falls from above. Four public tokens carry it. They are translucent white and shadow laid over whatever sits beneath, not colours, so neither theme needs its own value: a shadow disappears on a dark ground and a sheen on a white one.
 
 | Token | Draws | Used on |
 | --- | --- | --- |
-| `--cms-shadow-raised` | a lip below the bottom edge and a sheen along the top | editable fields, the rich text and media frames, buttons, the chosen language |
+| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary buttons |
+| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and danger buttons, the chosen language |
 | `--cms-shadow-recessed` | shading inside the top edge | read-only wells, the switch track, the language selector's track, blocks canvas |
 | `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` | buttons and the chosen language |
 
-A disabled control is flat. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth. A theme that wants a flat panel sets all three tokens to `none`.
+A filled button's border is its fill mixed a quarter of the way to black, so the sheen sits inside a darker rim. A disabled control is flat. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth. A theme that wants a flat panel sets all four tokens to `none`.
 
 Two rules keep depth from going wrong. The gradient belongs in `background-image`, so a hover can still change the `background-color` beneath it. And a context that strips a control's border and fill, such as a bare block, sets `box-shadow: none` too, or the lip floats under nothing.
 
