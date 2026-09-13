@@ -97,8 +97,8 @@ Light falls from above. Four public tokens carry it. They are translucent white 
 
 | Token | Draws | Used on |
 | --- | --- | --- |
-| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary buttons |
-| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and danger buttons, the chosen language |
+| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary buttons, the chosen language |
+| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and danger buttons |
 | `--cms-shadow-recessed` | shading inside the top edge | read-only wells, the switch track, the language selector's track, blocks canvas |
 | `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` | buttons and the chosen language |
 

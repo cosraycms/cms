@@ -4,7 +4,7 @@
 	gap: var(--cms-space-0-5);
 	width: 100%;
 	min-width: 0;
-	padding: var(--cms-space-0-5);
+	padding: var(--cms-space-1);
 	border-radius: var(--cms-radius-full);
 	background: var(--cms-color-surface-sunken);
 	box-shadow: var(--cms-shadow-recessed);
@@ -29,10 +29,10 @@
 
 		&[aria-checked='true'],
 		&[aria-pressed='true'] {
-			background: var(--cms-color-accent);
+			background: var(--cms-button-secondary-bg);
 			background-image: var(--cms-gradient-raised);
-			box-shadow: var(--cms-shadow-raised-fill);
-			color: var(--cms-color-text-on-accent);
+			box-shadow: var(--cms-button-secondary-shadow);
+			color: var(--cms-button-secondary-text);
 
 			@media (forced-colors: active) {
 				forced-color-adjust: none;
