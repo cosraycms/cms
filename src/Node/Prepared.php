@@ -7,7 +7,7 @@ namespace Cosray\Node;
 use Cosray\Exception\NoSuchField;
 use ValueError;
 
-final class Draft
+final class Prepared
 {
 	public function __construct(
 		public readonly object $node,
@@ -66,7 +66,7 @@ final class Draft
 	public function fieldMeta(string $field, string $key, mixed $value): self
 	{
 		if (!isset($this->data['content'][$field])) {
-			throw new NoSuchField("Draft does not have a field named '{$field}'");
+			throw new NoSuchField("Node does not have a field named '{$field}'");
 		}
 
 		$this->data['content'][$field]['meta'][$key] = $value;

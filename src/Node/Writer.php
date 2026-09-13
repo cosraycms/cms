@@ -42,7 +42,7 @@ final class Writer
 	 * @param class-string $class
 	 * @param array<string, mixed> $values
 	 */
-	public function draft(string $class, array $values = []): Draft
+	public function prepare(string $class, array $values = []): Prepared
 	{
 		$node = $this->factory->blueprint($class, $this->context, $this->cms);
 		$data = $this->serializer->blueprint(
@@ -52,17 +52,17 @@ final class Writer
 			$values,
 		);
 
-		return new Draft($node, $data);
+		return new Prepared($node, $data);
 	}
 
 	/** @return array{success: true, uid: string} */
-	public function create(Draft $draft, ?Actor $actor = null): array
+	public function create(Prepared $prepared, ?Actor $actor = null): array
 	{
-		$this->assertUsablePaths($draft->data());
+		$this->assertUsablePaths($prepared->data());
 
 		return $this->store->create(
-			$draft->node,
-			$draft->data(),
+			$prepared->node,
+			$prepared->data(),
 			$this->context->locales(),
 			$actor ?? Actor::system(),
 		);

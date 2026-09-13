@@ -64,13 +64,13 @@ final class NodeWriterTest extends IntegrationTestCase
 		);
 		$services = Services::withDefaults();
 		$writer = new Writer($context, new Cms($context, $services), $services->types);
-		$draft = $writer
-			->draft(PlainBlock::class, ['content' => 'Console content'])
+		$prepared = $writer
+			->prepare(PlainBlock::class, ['content' => 'Console content'])
 			->uid('writer-console-node')
 			->published()
 			->fieldMeta('content', 'source', ['zxx' => 'console']);
 
-		$result = $writer->create($draft);
+		$result = $writer->create($prepared);
 		$stored = $this->db()->execute(
 			'SELECT uid, published, content FROM cms.nodes WHERE uid = :uid',
 			['uid' => 'writer-console-node'],
@@ -94,12 +94,12 @@ final class NodeWriterTest extends IntegrationTestCase
 	public function testExplicitPathIsPreserved(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer
-			->draft(PlainPage::class, ['heading' => 'Fees'])
+		$prepared = $writer
+			->prepare(PlainPage::class, ['heading' => 'Fees'])
 			->uid('writer-explicit-path')
 			->path('en', 'gebuehren');
 
-		$writer->create($draft);
+		$writer->create($prepared);
 
 		$this->assertSame('/gebuehren', $this->activePath('writer-explicit-path'));
 	}
@@ -107,11 +107,11 @@ final class NodeWriterTest extends IntegrationTestCase
 	public function testPathIsGeneratedWithoutExplicitPath(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer
-			->draft(PlainPage::class, ['heading' => 'Generated'])
+		$prepared = $writer
+			->prepare(PlainPage::class, ['heading' => 'Generated'])
 			->uid('writer-generated-path');
 
-		$writer->create($draft);
+		$writer->create($prepared);
 
 		$this->assertSame(
 			'/plain-page/writer-generated-path',
@@ -124,7 +124,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		$writer = $this->writer();
 		$writer->create(
 			$writer
-				->draft(PlainPage::class, ['heading' => 'First'])
+				->prepare(PlainPage::class, ['heading' => 'First'])
 				->uid('writer-path-first')
 				->path('en', '/legacy/page'),
 		);
@@ -132,7 +132,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		$this->throws(RuntimeException::class, "The URL path '/legacy/page' is already in use");
 		$writer->create(
 			$writer
-				->draft(PlainPage::class, ['heading' => 'Second'])
+				->prepare(PlainPage::class, ['heading' => 'Second'])
 				->uid('writer-path-second')
 				->path('en', '/legacy/page'),
 		);
@@ -141,20 +141,20 @@ final class NodeWriterTest extends IntegrationTestCase
 	public function testExplicitPathWithUnknownLocaleIsRejected(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer
-			->draft(PlainPage::class, ['heading' => 'Wrong locale'])
+		$prepared = $writer
+			->prepare(PlainPage::class, ['heading' => 'Wrong locale'])
 			->path('fr', '/page');
 
 		$this->throws(RuntimeException::class, "Unknown locale 'fr' for the node path '/page'");
-		$writer->create($draft);
+		$writer->create($prepared);
 	}
 
 	public function testEmptyExplicitPathIsRejected(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer->draft(PlainPage::class, ['heading' => 'Empty path']);
+		$prepared = $writer->prepare(PlainPage::class, ['heading' => 'Empty path']);
 
 		$this->throws(ValueError::class, 'A node path must not be empty');
-		$draft->path('en', '   ');
+		$prepared->path('en', '   ');
 	}
 }

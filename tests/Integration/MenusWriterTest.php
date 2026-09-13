@@ -485,7 +485,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$writer = new Writer($context, new Cms($context, $services), $services->types);
 		$writer->create(
 			$writer
-				->draft(PlainPage::class, ['heading' => $heading])
+				->prepare(PlainPage::class, ['heading' => $heading])
 				->uid($uid)
 				->parent($parent)
 				->published($published)

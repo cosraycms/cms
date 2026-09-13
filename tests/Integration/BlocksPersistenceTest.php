@@ -92,8 +92,8 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 	public function testPerLocaleListsRoundTripThroughTheStore(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer
-			->draft(TestMediaDocument::class, [
+		$prepared = $writer
+			->prepare(TestMediaDocument::class, [
 				'contentBlocks' => [
 					'en' => [
 						$this->headingRow('blockhead0001', 'Opening hours', '3'),
@@ -112,7 +112,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 			->uid('blocks-persist-node')
 			->published();
 
-		$writer->create($draft);
+		$writer->create($prepared);
 
 		$stored = $this->storedContent('blocks-persist-node')['contentBlocks'];
 		$this->assertSame(\Cosray\Field\Blocks::class, $stored['type']);
@@ -150,14 +150,14 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 	public function testTheStoreRejectsRowsOutsideTheGrid(): void
 	{
 		$writer = $this->writer();
-		$draft = $writer
-			->draft(TestMediaDocument::class, [
+		$prepared = $writer
+			->prepare(TestMediaDocument::class, [
 				'contentBlocks' => [
 					'en' => [$this->textRow('blocktext0009', 'Wide', ['colspan' => 6, 'rowspan' => 1, 'indent' => 6])],
 				],
 			])
 			->uid('blocks-invalid-node');
-		$data = $draft->data();
+		$data = $prepared->data();
 		$data['content']['contentBlocks']['value']['en'][0]['layout']['indent'] = 8;
 		$factory = $this->cms->nodeFactory();
 		$store = new Store(
@@ -171,7 +171,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		);
 
 		try {
-			$store->create($draft->node, $data, $this->context->locales(), Actor::system());
+			$store->create($prepared->node, $data, $this->context->locales(), Actor::system());
 			$this->fail('An indent beyond the grid must be rejected');
 		} catch (HttpBadRequest $e) {
 			$paths = array_map(

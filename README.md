@@ -94,8 +94,8 @@ Console commands run with the default content locale and an active Verba transla
 use Cosray\Node\Actor;
 use Cosray\Node\Writer;
 
-$draft = $writer
-    ->draft(Alert::class, [
+$prepared = $writer
+    ->prepare(Alert::class, [
         'value' => '31.4',
         'readingTime' => '2026-08-05T12:00:00Z',
     ])
@@ -103,7 +103,7 @@ $draft = $writer
     ->published()
     ->fieldMeta('readingTime', 'timezone', ['zxx' => 'UTC']);
 
-$writer->create($draft, new Actor($editorId));
+$writer->create($prepared, new Actor($editorId));
 ```
 
 `DateTime` field values use RFC 3339. Writes with an explicit offset are normalized to UTC whole seconds (`2026-08-05T12:00:00Z`); `meta.timezone` controls local formatting and panel input, defaulting to UTC.
