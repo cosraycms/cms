@@ -19,11 +19,17 @@ WHERE node IN (
 DELETE FROM
 	/*:cms.prefix:*/asset_references
 WHERE
-	owner_type = 'node'
+	owner_type IN ('node', 'draft')
 	AND owner_uid = :uid;
 
 DELETE FROM
 	/*:cms.prefix:*/node_references
 WHERE
-	owner_type = 'node'
+	owner_type IN ('node', 'draft')
 	AND owner_uid = :uid;
+
+DELETE FROM
+	/*:cms.prefix:*/drafts
+WHERE node IN (
+	SELECT n.node FROM /*:cms.prefix:*/nodes n WHERE n.uid = :uid
+);

@@ -272,14 +272,26 @@ CREATE UNIQUE INDEX /*:cms.obj:*/ux_url_paths_locale ON /*:cms.prefix:*/url_path
 	USING btree (node, locale) WHERE (inactive IS NULL);
 
 
+-- Working copies of published nodes. `content` keeps the exact shape of
+-- nodes.content so content migrations rewrite both tables the same way;
+-- `settings` holds the drafted handle and URL paths
+-- ({"handle": ?text, "paths": {locale: path}}). `created` is when the
+-- working copy diverged from the live row.
 CREATE TABLE /*:cms.prefix:*/drafts (
 	node bigint NOT NULL,
-	changed timestamp with time zone NOT NULL,
+	created timestamp with time zone NOT NULL DEFAULT now(),
+	changed timestamp with time zone NOT NULL DEFAULT now(),
 	editor bigint NOT NULL,
 	content jsonb NOT NULL,
+	settings jsonb NOT NULL DEFAULT '{}',
 	CONSTRAINT /*:cms.obj:*/pk_drafts PRIMARY KEY (node),
-	CONSTRAINT /*:cms.obj:*/fk_drafts_nodes FOREIGN KEY (node) REFERENCES /*:cms.prefix:*/nodes (node)
+	CONSTRAINT /*:cms.obj:*/fk_drafts_nodes FOREIGN KEY (node) REFERENCES /*:cms.prefix:*/nodes (node),
+	CONSTRAINT /*:cms.obj:*/fk_drafts_users_editor FOREIGN KEY (editor)
+		REFERENCES /*:cms.prefix:*/users (usr)
 );
+CREATE TRIGGER /*:cms.obj:*/drafts_trigger_02_change BEFORE UPDATE
+	ON /*:cms.prefix:*/drafts
+	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 CREATE FUNCTION /*:cms.prefix:*/record_draft_history()
 	RETURNS TRIGGER AS $$
 BEGIN
@@ -425,8 +437,9 @@ CREATE TABLE /*:cms.prefix:*/drafts_history (
 	editor bigint NOT NULL,
 	content jsonb NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_drafts_history PRIMARY KEY (node, changed),
+	-- Publishing or discarding deletes the working copy; its history goes with it.
 	CONSTRAINT /*:cms.obj:*/fk_drafts_history_drafts FOREIGN KEY (node)
-		REFERENCES /*:cms.prefix:*/drafts (node)
+		REFERENCES /*:cms.prefix:*/drafts (node) ON DELETE CASCADE
 );
 
 

@@ -9,8 +9,17 @@ SELECT
 	n.created,
 	n.changed,
 	n.deleted,
+<?php if (isset($working) && $working) : ?>
+	coalesce(d.content, n.content) AS content,
+	coalesce(d.settings, '{}'::jsonb) AS draft_settings,
+<?php else: ?>
 	n.content,
+<?php endif ?>
 	n.title,
+	d.node IS NOT NULL AS has_draft,
+	d.created AS draft_created,
+	d.changed AS draft_changed,
+	d.editor AS draft_editor,
 	t.handle AS type_handle,
 	uc.uid AS creator_uid,
 	uc.email AS creator_email,
@@ -31,6 +40,8 @@ FROM
 		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
 		np.node = n.parent
+	LEFT JOIN /*:cms.prefix:*/drafts d ON
+		d.node = n.node
 	INNER JOIN /*:cms.prefix:*/users uc ON
 		uc.usr = n.creator
 	INNER JOIN /*:cms.prefix:*/users ue ON
@@ -78,6 +89,7 @@ WHERE
 
 GROUP BY
 	n.node,
+	d.node,
 	np.uid,
 	uc.uid,
 	uc.email,
