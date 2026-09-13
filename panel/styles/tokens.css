@@ -370,6 +370,11 @@
 	--cms-button-danger-ring: var(--cms-color-danger);
 
 	/**
+	 * Component — switch
+	 */
+	--cms-switch-bg: light-dark(var(--cms-color-neutral-400), var(--cms-color-neutral-600));
+
+	/**
 	 * Component — code
 	 *
 	 * Dark in both themes: code and raw markup read as code, not as the
@@ -431,5 +436,6 @@
 		--cms-color-text-muted: light-dark(var(--cms-color-neutral-700), var(--cms-color-neutral-200));
 		--cms-color-text-subtle: light-dark(var(--cms-color-neutral-600), var(--cms-color-neutral-300));
 		--cms-color-text-faint: light-dark(var(--cms-color-neutral-500), var(--cms-color-neutral-400));
+		--cms-switch-bg: var(--cms-color-neutral-500);
 	}
 }

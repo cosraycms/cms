@@ -15,6 +15,7 @@
 
 	&:focus-within {
 		border-color: var(--cms-color-focus);
+		outline: 1px solid transparent;
 		box-shadow: var(--cms-focus-ring);
 	}
 

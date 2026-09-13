@@ -19,9 +19,10 @@
 		color: var(--cms-color-text-faint);
 	}
 
+	/* Transparent, not none: forced colours drop the ring and paint the outline. */
 	&:focus {
 		border-color: var(--cms-color-focus);
-		outline: none;
+		outline: 1px solid transparent;
 		box-shadow: var(--cms-focus-ring);
 	}
 
@@ -40,7 +41,7 @@
 	}
 
 	&[disabled] {
-		border-color: var(--cms-color-border);
+		border-color: var(--cms-color-border-control);
 		background-color: transparent;
 		color: var(--cms-color-text-subtle);
 		cursor: not-allowed;
@@ -117,7 +118,7 @@
 	padding: 0.1875rem;
 	border: 0;
 	border-radius: var(--cms-radius-full);
-	background: var(--cms-color-border-control);
+	background: var(--cms-switch-bg);
 	cursor: pointer;
 	transition: background-color 120ms ease;
 
@@ -149,6 +150,47 @@
 	&:disabled {
 		opacity: 0.5;
 		cursor: default;
+	}
+
+	/* Forced colours flatten both fills, so on and off would look alike. */
+	@media (forced-colors: active) {
+		forced-color-adjust: none;
+		background: Canvas;
+		box-shadow: inset 0 0 0 1px ButtonText;
+
+		&::before {
+			background: ButtonText;
+			box-shadow: none;
+		}
+
+		&:checked {
+			background: Highlight;
+			box-shadow: none;
+
+			&::before {
+				background: HighlightText;
+			}
+		}
+
+		&:disabled {
+			box-shadow: inset 0 0 0 1px GrayText;
+
+			&::before {
+				background: GrayText;
+			}
+
+			&:checked {
+				background: GrayText;
+
+				&::before {
+					background: Canvas;
+				}
+			}
+		}
+
+		&:focus-visible {
+			outline-color: Highlight;
+		}
 	}
 }
 

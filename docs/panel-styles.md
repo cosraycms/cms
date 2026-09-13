@@ -118,6 +118,13 @@ Note what it overrules. `theme` is the highest layer and layer order beats speci
 
 `tokens.css` answers `prefers-contrast: more`, the operating system's increase-contrast setting, by darkening the border tokens, `--cms-color-border-control` included, and the muted, subtle and faint text colours. Everyone else keeps the calm default. The boost lives in the `tokens` layer, so a project that overrides one of these tokens in `@layer theme` replaces the boost for that token too and should repeat its value inside its own `@media (prefers-contrast: more)` block.
 
+### Forced colours
+
+Windows contrast themes (`forced-colors: active`) replace every colour with a small system palette, drop box-shadows and flatten backgrounds. Two things follow for panel CSS:
+
+- **Focus must survive without colour and shadow.** A field that shows focus through its border colour and `--cms-focus-ring` resets the outline to `1px solid transparent`, never `none`. Forced colours paint a transparent outline, so it becomes the focus indicator there and stays invisible everywhere else.
+- **A state carried by a background alone disappears.** The switch's position and the chosen content language are such states. The component opts out with `forced-color-adjust: none` inside `@media (forced-colors: active)` and redraws the state with system colours: `Canvas`, `ButtonText`, `Highlight`, `HighlightText`, `GrayText`. System colour keywords are the one colour value allowed outside `tokens.css`, since they are the palette the user chose.
+
 ## Built-in icons
 
 Built-in panel icons use the checked-in regular Bootstrap collection in `panel/icons/`, shared by `Cosray\Panel\Icon::render('plus')` and `<Icon name="plus" />` from `panel/src/components/Icon.svelte`. The collection README records its version, license, and mappings. No panel action icon requires a network request.

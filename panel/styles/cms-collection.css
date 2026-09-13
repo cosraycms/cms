@@ -199,7 +199,7 @@
 
 			&:focus {
 				border-color: var(--cms-color-focus);
-				outline: none;
+				outline: 1px solid transparent;
 				box-shadow: var(--cms-focus-ring);
 			}
 		}
