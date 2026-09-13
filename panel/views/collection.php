@@ -75,7 +75,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php endif ?>
 			<?php if (count($page->createLinks) === 1): ?>
 				<a class="cms-button primary" href="<?= escape($page->createLinks[0]['url']) ?>">
-					<?= escape(__('collection:new', ['name' => $page->createLinks[0]['name']])) ?>
+					<?= escape(__('collection:new-entry')) ?>
 				</a>
 			<?php elseif (count($page->createLinks) > 1): ?>
 				<button type="button" class="cms-button primary" popovertarget="collection-create" aria-haspopup="menu">
