@@ -88,7 +88,7 @@ Console commands run with the default content locale and an active Verba transla
 
 ### Creating content from commands
 
-`Cosray\Node\Writer` hides node factory, blueprint serializer, and store coordination. Build a draft from field values, apply node-level settings, then create it. The default actor is the seeded system user; pass an explicit `Cosray\Node\Actor` when another audit identity owns the change.
+`Cosray\Node\Writer` hides node factory, blueprint serializer, and store coordination. Prepare a node from field values, apply node-level settings, then create it. The default actor is the seeded system user; pass an explicit `Cosray\Node\Actor` when another audit identity owns the change.
 
 ```php
 use Cosray\Node\Actor;

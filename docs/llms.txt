@@ -753,7 +753,7 @@ New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
   (`direction=up|down`, or `parent` + `index` for exact drag placement),
   `POST .../item/{item}/delete` (subtree)
 
-The dashboard has an ordered card registry exposed as the `$app->dashboard` property. Cosray registers entries, drafts, and media cards by default; applications call `$app->dashboard->add(CardProvider::class)` or `replace(...)`, and plugins call `Registrar::dashboardCard()`. Providers implement `Cosray\Contract\DashboardCard` and return a nullable `Cosray\Panel\Dashboard\Card` DTO (`label`, `value`, optional `note` and `url`). Class-string providers are autowired per dashboard request; `null` omits the card. Integer values are locale-formatted, while strings are display-ready. The optional `url` is panel-internal.
+The dashboard has an ordered card registry exposed as the `$app->dashboard` property. Cosray registers entries, pending-changes, and media cards by default; applications call `$app->dashboard->add(CardProvider::class)` or `replace(...)`, and plugins call `Registrar::dashboardCard()`. Providers implement `Cosray\Contract\DashboardCard` and return a nullable `Cosray\Panel\Dashboard\Card` DTO (`label`, `value`, optional `note` and `url`). Class-string providers are autowired per dashboard request; `null` omits the card. Integer values are locale-formatted, while strings are display-ready. The optional `url` is panel-internal.
 
 Panel responses are rendered in layers, and htmx picks the layer by naming the region it is about to swap. `Panel::layer()` reads the request headers:
 
@@ -798,6 +798,38 @@ Path behavior:
 - For routable nodes, default locale path must be present.
 - If a target path already exists, system appends a short suffix for uniqueness.
 - Old paths can be marked inactive and used for redirects.
+
+Working copies:
+
+- A published, renderable node is never edited in place by the panel. A
+  plain editor save of such a node that stays published lands in its
+  working copy — the `drafts` row (`content` in the shape of
+  `nodes.content`, plus `settings {handle, paths}`) — and visitors keep
+  seeing the live row. Every other save writes the live row and removes
+  the working copy: an unpublished node, the published switch turned off
+  (the working copy folds into the node first), or an explicit publish.
+- Invariant: a `drafts` row exists only for a renderable, published,
+  undeleted node whose working copy differs from the live row.
+  Unpublished nodes and non-renderable types are edited directly.
+- `published` and `hidden` are live switches; a `hidden` change on a
+  draft save applies at once. Content, handle and URL paths are drafted;
+  a drafted path reaches `url_paths` on publish.
+- `Node\Store`: `save()` is the API path and never touches a working
+  copy (publishing later supersedes it, like two editors do); `draft()`
+  saves one, `publish()` writes live and drops it, `discard()` drops it,
+  `unpublish()` folds it in, `publishDraft()` releases it.
+- Reading: `$cms->node->working($uid)` hydrates the working copy (content,
+  handle, paths; published or not); every node carries `meta->draft`
+  (null, or `created`, `changed`, `editor`, `editorName`); the finder
+  builtin `changes` filters nodes with a working copy. Listings, search,
+  the materialized title, full text, menus and the frontend read live.
+- Panel: the editor shows the working copy with a "Changes" badge; the
+  save menu reads "Publish changes" and offers "Discard changes"
+  (`POST …/{node}/discard`); listings badge such nodes; the dashboard
+  card counts them; bulk publish has an option to release them and bulk
+  unpublish folds them in; `/preview/{uid}` renders the working copy.
+- Duplicating copies the live version. Draft content is indexed under
+  the reference owner type `draft`.
 
 9) Media handling
 
@@ -924,8 +956,9 @@ Block image rendering:
   `asset_references (owner_type, owner_uid, asset_uid)` with an
   `ON DELETE RESTRICT` FK on the asset, and
   `node_references (owner_type, owner_uid, target_uid)`; owner types
-  today: `node` and `menu` (menu rows via `Cosray\Menus` writes and the
-  rebuild; per item, the `image` icon and `asset` link target count)
+  today: `node`, `draft` (a node's working copy, see section 8) and
+  `menu` (menu rows via `Cosray\Menus` writes and the rebuild; per item,
+  the `image` icon and `asset` link target count)
 - `Cosray\References\Scanner` walks stored content for every carrier:
   Image/File/Video field items (`{uid}`) and image/images/video block
   items as assets, `Reference` field targets (`{uid}`) as node targets,
@@ -937,7 +970,8 @@ Block image rendering:
   save error); the node delete script drops the owner's rows with the
   soft-delete
 - everything is derived and rebuildable: `php run db:references` wipes
-  and rescans (live nodes + menu item image/asset uids); migration
+  and rescans (live nodes, their working copies, menu item image/asset
+  uids); migration
   000000-000021 creates the tables and runs the same population
 - `DELETE /media/{uid}` (panel permission) hard-deletes an asset only
   when unreferenced: 404 unknown, 409 with a display-ready `usage` list
