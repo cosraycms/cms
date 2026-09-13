@@ -91,6 +91,8 @@ Three control states read apart by their fill and depth: an editable control is 
 
 Every text input, select and textarea in the panel carries `.cms-input`, `.cms-select` or `.cms-textarea`, in PHP views and Svelte components alike, and those classes are the only place a control's border, fill, depth, focus and states are drawn. A component may size and place a control, never redraw it. A select drops the native look, which ignores `line-height`, and draws its chevron from `--cms-select-chevron`, an image in a grey that works on both themes' control fill. There is no element-level control look: a bare `input` renders as the browser draws it, which makes a missing class obvious. Controls that are not form fields keep their own rules, such as the inverted code and source editors or the language select in the masthead.
 
+Text inputs, selects and buttons are `--cms-control-height` tall, and a `.small` button `--cms-control-height-sm`, so a button lines up with the field beside it. Both derive their vertical padding from the token: give a control a width and inline padding, never a height of its own. A theme that wants roomier or denser forms changes the token once.
+
 ### Depth
 
 Light falls from above. Four public tokens carry it. They are translucent white and shadow laid over whatever sits beneath, not colours, so neither theme needs its own value: a shadow disappears on a dark ground and a sheen on a white one.

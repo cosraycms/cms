@@ -188,8 +188,7 @@
 		}
 
 		& .cms-input {
-			height: 2.375rem;
-			padding: 0 var(--cms-space-4) 0 var(--cms-space-8);
+			padding-inline: var(--cms-space-8) var(--cms-space-4);
 		}
 	}
 

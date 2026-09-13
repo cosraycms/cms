@@ -145,13 +145,8 @@
 			min-width: 12rem;
 		}
 
-		& input:not([type='checkbox']) {
-			padding: var(--cms-space-2);
-		}
-
 		& textarea {
 			width: 24rem;
-			padding: var(--cms-space-2);
 		}
 	}
 }

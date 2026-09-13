@@ -3,7 +3,7 @@
 .cms-select {
 	width: 100%;
 	min-width: 0;
-	padding: var(--cms-space-2) var(--cms-space-2-5);
+	padding: calc((var(--cms-control-height) - 1.5rem - 2px) / 2) var(--cms-space-2-5);
 	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background-color: var(--cms-color-surface);
@@ -66,6 +66,7 @@
 }
 
 .cms-textarea {
+	padding-block: var(--cms-space-2);
 	resize: vertical;
 	line-height: 1.55;
 }

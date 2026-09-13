@@ -355,6 +355,15 @@
 	--cms-color-danger-border: light-dark(var(--cms-color-red-500), var(--cms-color-red-400));
 
 	/**
+	 * Component — controls
+	 *
+	 * Text inputs, selects and buttons share one height, so a button lines up
+	 * with the field beside it.
+	 */
+	--cms-control-height: 2.625rem;
+	--cms-control-height-sm: 2.375rem;
+
+	/**
 	 * Component — buttons
 	 *
 	 * A filled button's border is its fill a quarter of the way to black: the
