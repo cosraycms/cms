@@ -30,6 +30,7 @@ class Store
 	private readonly References\Scanner $scanner;
 	private readonly References\Sync $sync;
 	private readonly TitleResolver $titleResolver;
+	private readonly Drafts $drafts;
 
 	public function __construct(
 		private readonly Database $db,
@@ -49,8 +50,15 @@ class Store
 		$this->scanner = new References\Scanner();
 		$this->sync = new References\Sync($db);
 		$this->titleResolver = new TitleResolver($types);
+		$this->drafts = new Drafts($db);
 	}
 
+	/**
+	 * Writes the live row. A pending working copy is left alone: this is
+	 * the API path, and the editor's publish() is what supersedes a draft.
+	 *
+	 * @return array{success: true, uid: string}
+	 */
 	public function save(
 		object $node,
 		array $data,
@@ -58,6 +66,168 @@ class Store
 		Actor $actor,
 		bool $create = false,
 	): array {
+		$data = $this->prepare($node, $data, $locales, $create);
+
+		$this->transaction(
+			fn() => $this->persist($node, $data, $actor->id, $locales, $create),
+			'Error while saving: ',
+		);
+
+		return ['success' => true, 'uid' => $data['uid']];
+	}
+
+	/**
+	 * Writes the live row and drops the working copy it supersedes.
+	 *
+	 * @return array{success: true, uid: string}
+	 */
+	public function publish(object $node, array $data, Locales $locales, Actor $actor): array
+	{
+		$data = $this->prepare($node, $data, $locales);
+		$nodeId = $this->nodeId($node);
+
+		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
+			$this->persist($node, $data, $actor->id, $locales);
+			$this->drafts->delete($nodeId);
+			$this->sync->remove('draft', $data['uid']);
+		}, 'Error while publishing: ');
+
+		return ['success' => true, 'uid' => $data['uid']];
+	}
+
+	/**
+	 * Saves the working copy of a published node. Content, handle and
+	 * paths wait for publish(); `hidden` is a live switch and applies now.
+	 *
+	 * @return array{success: true, uid: string}
+	 */
+	public function draft(object $node, array $data, Locales $locales, Actor $actor): array
+	{
+		if (!$this->holdsDrafts($node)) {
+			throw new RuntimeException('Only a published, renderable node can hold a working copy');
+		}
+
+		$data = $this->prepare($node, $data, $locales);
+		$nodeId = $this->nodeId($node);
+		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
+
+		$this->transaction(function () use ($node, $data, $actor, $nodeId, $content): void {
+			$this->drafts->save(
+				$nodeId,
+				$content,
+				['handle' => $data['handle'], 'paths' => $this->submittedPaths($data)],
+				$actor->id,
+			);
+			$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+
+			if ($data['hidden'] !== (bool) Factory::meta($node, 'hidden')) {
+				$this->db->nodes->setHidden([
+					'node' => $nodeId,
+					'hidden' => $data['hidden'],
+					'editor' => $actor->id,
+				])->run();
+			}
+		}, 'Error while saving the working copy: ');
+
+		return ['success' => true, 'uid' => $data['uid']];
+	}
+
+	public function discard(object $node): void
+	{
+		$nodeId = $this->nodeId($node);
+		$uid = (string) Factory::meta($node, 'uid');
+
+		$this->transaction(function () use ($nodeId, $uid): void {
+			$this->drafts->delete($nodeId);
+			$this->sync->remove('draft', $uid);
+		}, 'Error while discarding: ');
+	}
+
+	/**
+	 * Takes the node offline. A working copy becomes the node content:
+	 * with nothing live left to protect, the node is edited directly again.
+	 */
+	public function unpublish(object $node, Locales $locales, Actor $actor): void
+	{
+		$draft = $this->drafts->get($this->nodeId($node));
+
+		if ($draft === null) {
+			$this->db->nodes->setPublished([
+				'uid' => (string) Factory::meta($node, 'uid'),
+				'published' => false,
+				'editor' => $actor->id,
+			])->run();
+
+			return;
+		}
+
+		$this->publish($node, $this->workingData($node, $draft, published: false), $locales, $actor);
+	}
+
+	/** Publishes the working copy, if there is one. */
+	public function publishDraft(object $node, Locales $locales, Actor $actor): bool
+	{
+		$draft = $this->drafts->get($this->nodeId($node));
+
+		if ($draft === null) {
+			return false;
+		}
+
+		$this->publish($node, $this->workingData($node, $draft, published: true), $locales, $actor);
+
+		return true;
+	}
+
+	public function holdsDrafts(object $node): bool
+	{
+		return (
+			(bool) $this->types->get($node::class, 'renderable', false)
+				&& (bool) Factory::meta($node, 'published')
+				&& Factory::meta($node, 'deleted') === null
+		);
+	}
+
+	/**
+	 * The save payload for a node's working copy: the drafted content,
+	 * handle and paths over the live flags.
+	 *
+	 * @param array{content: array<string, mixed>, settings: array<string, mixed>} $draft
+	 * @return array<string, mixed>
+	 */
+	private function workingData(object $node, array $draft, bool $published): array
+	{
+		$settings = $draft['settings'];
+		$paths = $settings['paths'] ?? Factory::meta($node, 'paths');
+
+		return [
+			'uid' => (string) Factory::meta($node, 'uid'),
+			'handle' => array_key_exists('handle', $settings)
+				? $settings['handle']
+				: Factory::meta($node, 'handle'),
+			'published' => $published,
+			'hidden' => (bool) Factory::meta($node, 'hidden'),
+			'locked' => (bool) Factory::meta($node, 'locked'),
+			'paths' => is_array($paths) ? $paths : [],
+			'content' => $draft['content'],
+		];
+	}
+
+	/** @return array<string, string> */
+	private function submittedPaths(array $data): array
+	{
+		$paths = [];
+
+		foreach (is_array($data['paths'] ?? null) ? $data['paths'] : [] as $locale => $path) {
+			if (is_string($locale) && is_string($path)) {
+				$paths[$locale] = $path;
+			}
+		}
+
+		return $paths;
+	}
+
+	private function prepare(object $node, array $data, Locales $locales, bool $create = false): array
+	{
 		$data = $this->normalizeSubmittedHandle($data);
 		$data = $this->validate($node, $data, $locales);
 
@@ -77,6 +247,11 @@ class Store
 			throw new HttpBadRequest(payload: ['message' => __('node:locked')]);
 		}
 
+		return $data;
+	}
+
+	private function transaction(callable $work, string $failure): void
+	{
 		$ownsTransaction = !$this->db->getConn()->inTransaction();
 
 		try {
@@ -84,7 +259,7 @@ class Store
 				$this->db->begin();
 			}
 
-			$this->persist($node, $data, $actor->id, $locales, $create);
+			$work();
 
 			if ($ownsTransaction) {
 				$this->db->commit();
@@ -99,16 +274,22 @@ class Store
 			}
 
 			throw new RuntimeException(
-				'Error while saving: ' . $e->getMessage(),
+				$failure . $e->getMessage(),
 				(int) $e->getCode(),
 				previous: $e,
 			);
 		}
+	}
 
-		return [
-			'success' => true,
-			'uid' => $data['uid'],
-		];
+	private function nodeId(object $node): int
+	{
+		$nodeId = Factory::meta($node, 'node');
+
+		if (!is_int($nodeId) && !is_string($nodeId)) {
+			throw new RuntimeException('Missing node id for update');
+		}
+
+		return (int) $nodeId;
 	}
 
 	public function create(object $node, array $data, Locales $locales, Actor $actor): array
@@ -146,34 +327,15 @@ class Store
 		}
 
 		$uids = $withChildren ? $this->subtreeUids($uid) : [$uid];
-		$ownsTransaction = !$this->db->getConn()->inTransaction();
 
-		try {
-			if ($ownsTransaction) {
-				$this->db->begin();
-			}
-
+		$this->transaction(function () use ($uids, $actor): void {
 			foreach ($uids as $deleteUid) {
 				$this->db->nodes->delete([
 					'uid' => $deleteUid,
 					'editor' => $actor->id,
 				])->run();
 			}
-
-			if ($ownsTransaction) {
-				$this->db->commit();
-			}
-		} catch (Throwable $e) {
-			if ($ownsTransaction) {
-				$this->db->rollback();
-			}
-
-			throw new RuntimeException(
-				'Error while deleting: ' . $e->getMessage(),
-				(int) $e->getCode(),
-				previous: $e,
-			);
-		}
+		}, 'Error while deleting: ');
 
 		return [
 			'success' => true,
@@ -357,14 +519,8 @@ class Store
 		];
 
 		if (!$create) {
-			$nodeId = Factory::meta($node, 'node');
-
-			if (!is_int($nodeId) && !is_string($nodeId)) {
-				throw new RuntimeException('Missing node id for update');
-			}
-
 			return (int) $this->db->nodes->save([
-				'node' => (int) $nodeId,
+				'node' => $this->nodeId($node),
 				'parent' => $params['parent'],
 				'hidden' => $params['hidden'],
 				'published' => $params['published'],

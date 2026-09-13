@@ -9,8 +9,9 @@ use Cosray\Field;
 
 /**
  * Rebuilds both reference indexes from scratch: wipe, then rescan all
- * live nodes and every menu item's references (image icons, asset links,
- * and the node a `node` or `children` item points at).
+ * live nodes, their working copies, and every menu item's references
+ * (image icons, asset links, and the node a `node` or `children` item
+ * points at).
  * Everything in the indexes is derived, so a rebuild is always safe; it
  * is the recovery path after restores, imports, or content migrations.
  */
@@ -35,17 +36,24 @@ final class Rebuild
 		$owners = 0;
 		$scanned = 0;
 
-		foreach ($this->db->references->nodeContents()->lazy() as $row) {
-			$content = json_decode((string) $row['content'], true);
-			$refs = $this->scanner->scan(is_array($content) ? $content : []);
+		$sources = [
+			'node' => $this->db->references->nodeContents()->lazy(),
+			'draft' => $this->db->drafts->contents()->lazy(),
+		];
 
-			if ($refs['assets'] === [] && $refs['nodes'] === []) {
-				continue;
+		foreach ($sources as $ownerType => $rows) {
+			foreach ($rows as $row) {
+				$content = json_decode((string) $row['content'], true);
+				$refs = $this->scanner->scan(is_array($content) ? $content : []);
+
+				if ($refs['assets'] === [] && $refs['nodes'] === []) {
+					continue;
+				}
+
+				$this->sync->replace($ownerType, (string) $row['uid'], $refs);
+				$owners++;
+				$scanned += count($refs['assets']) + count($refs['nodes']);
 			}
-
-			$this->sync->replace('node', (string) $row['uid'], $refs);
-			$owners++;
-			$scanned += count($refs['assets']) + count($refs['nodes']);
 		}
 
 		// Merged per item before writing: `Sync::replace()` is a full replace

@@ -281,7 +281,11 @@
 								<span class="cms-detail-usage-title">{owner.title || owner.ownerUid}</span>
 								<span class="cms-detail-usage-kind">
 									{owner.nodeType ?? owner.ownerType}
-									{#if owner.published === false}· {__('node:draft')}{/if}
+									{#if owner.ownerType === 'draft'}
+										· {__('media:usage-changes')}
+									{:else if owner.published === false}
+										· {__('node:unpublished')}
+									{/if}
 								</span>
 							</li>
 						{/each}
