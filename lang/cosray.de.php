@@ -86,6 +86,7 @@ return [
 		'collection:expand-children' => 'Unterelemente von :name ausklappen',
 		'collection:list' => 'Liste',
 		'collection:new' => ':name erstellen',
+		'collection:new-entry' => 'Eintrag erstellen',
 		'collection:next' => 'Weiter',
 		'collection:open-children' => 'Unterelemente öffnen',
 		'collection:page' => 'Seite :page von :pages',

@@ -166,6 +166,8 @@ Action activation closes the menu before the consumer handler runs, so a handler
 
 A split button pairs a default action with its alternatives. `.cms-split-button` holds the default `.cms-button`, a `.cms-button.toggle` of the same variant carrying a chevron and a translated accessible name, and the `.cms-action-menu` the toggle opens with `data-align="end"`, which sizes to its longest choice. A choice may be a submit button with a `form` attribute: the menu closes first and the native submit still carries the choice as its submitter, so its `name` and `value` reach the server. The node editor's Save uses one, with Save and publish behind the chevron.
 
+A menu button has no action of its own: one `.cms-button` with a label, a trailing chevron and `popovertarget` opens the menu from its whole face. Use it when no choice is a natural default, since a split button promises one. A collection that allows several types offers them behind one such button; with a single type, the button creates that type directly. Both keep their hover look while their menu is open.
+
 Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu` must target `.cms-action-menu` instead. Kebab triggers are buttons rather than `details`/`summary`; their open styling uses `aria-expanded="true"`. The bridge remains version 1 and application-defined icon providers are unchanged.
 
 ## Block catalog

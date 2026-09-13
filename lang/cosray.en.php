@@ -83,6 +83,7 @@ return [
 		'collection:expand-children' => 'Expand children of :name',
 		'collection:list' => 'List',
 		'collection:new' => 'New :name',
+		'collection:new-entry' => 'New entry',
 		'collection:next' => 'Next',
 		'collection:open-children' => 'Open children',
 		'collection:page' => 'Page :page of :pages',

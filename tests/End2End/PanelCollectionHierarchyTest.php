@@ -262,7 +262,10 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc&amp;parent=panel-parent-filter"',
 			$html,
 		);
-		$this->assertStringContainsString('New Hierarchy Child', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="collection-create"]//a[starts-with(@href, "/cp/collection/test-hierarchy/create/test-hierarchy-child") and normalize-space() = "Hierarchy Child"]',
+			$html,
+		);
 		$this->assertStringContainsString('Hierarchy Parent', $html);
 		$this->assertStringContainsString('Edit parent', $html);
 		$this->assertStringContainsString('Show in tree', $html);

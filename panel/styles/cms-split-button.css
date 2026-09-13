@@ -17,10 +17,6 @@
 			var(--button-border),
 			var(--cms-color-shade) 14%
 		);
-
-		&[aria-expanded='true'] {
-			background-color: var(--button-hover-bg);
-		}
 	}
 
 	& > .cms-action-menu {

@@ -161,6 +161,15 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						</div>
 					</div>
 				</div>
+				<div class="sample" data-sample="button:menu">
+					<button type="button" class="cms-button primary" popovertarget="sample-create-options"
+						aria-haspopup="menu">New entry <?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
+					<div id="sample-create-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+						<a href="#">Page</a>
+						<a href="#">News overview</a>
+						<a href="#">Data export</a>
+					</div>
+				</div>
 			</section>
 
 			<section class="section" data-section="dialogs">

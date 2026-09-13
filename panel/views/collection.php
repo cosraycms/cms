@@ -73,13 +73,21 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					__('collection:show-in-tree'),
 				) ?></a>
 			<?php endif ?>
-			<?php foreach ($page->createLinks as $link): ?>
-				<a
-					class="cms-button primary"
-					href="<?= escape($link['url']) ?>">
-					<?= escape(__('collection:new', ['name' => $link['name']])) ?>
+			<?php if (count($page->createLinks) === 1): ?>
+				<a class="cms-button primary" href="<?= escape($page->createLinks[0]['url']) ?>">
+					<?= escape(__('collection:new', ['name' => $page->createLinks[0]['name']])) ?>
 				</a>
-			<?php endforeach ?>
+			<?php elseif (count($page->createLinks) > 1): ?>
+				<button type="button" class="cms-button primary" popovertarget="collection-create" aria-haspopup="menu">
+					<?= escape(__('collection:new-entry')) ?>
+					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
+				</button>
+				<div id="collection-create" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
+					<?php foreach ($page->createLinks as $link): ?>
+						<a href="<?= escape($link['url']) ?>"><?= escape($link['name']) ?></a>
+					<?php endforeach ?>
+				</div>
+			<?php endif ?>
 		</div>
 	</header>
 

@@ -9,6 +9,7 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\Collection\TestMixedCollection;
 
 final class PanelCollectionTest extends End2EndTestCase
 {
@@ -32,6 +33,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	{
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
+		$plugin->section('Inhalt')->collection(TestMixedCollection::class);
 
 		return $plugin;
 	}
@@ -55,6 +57,22 @@ final class PanelCollectionTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
+	}
+
+	public function testSeveralCreatableTypesShareOneMenuButton(): void
+	{
+		$response = $this->makeRequest('GET', '/cp/collection/test-mixed');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists('//button[@popovertarget="collection-create"]', $html);
+
+		foreach (['test-page', 'test-article'] as $type) {
+			$this->assertHtmlNodeExists(
+				"//*[@id=\"collection-create\"]//a[starts-with(@href, \"/cp/collection/test-mixed/create/{$type}\")]",
+				$html,
+			);
+		}
 	}
 
 	public function testPanelCollectionFormatsDateColumnsForConfiguredTimezone(): void

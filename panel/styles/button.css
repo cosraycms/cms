@@ -91,7 +91,8 @@
 		outline-offset: 2px;
 	}
 
-	&:hover {
+	&:hover,
+	&[aria-expanded='true'] {
 		border-color: var(--button-hover-border);
 		background-color: var(--button-hover-bg);
 		color: var(--button-hover-text);
