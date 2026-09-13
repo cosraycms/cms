@@ -283,6 +283,19 @@
 	--cms-focus-ring: 0 0 0 1px var(--cms-color-focus);
 
 	/**
+	 * Semantic — depth
+	 *
+	 * Light falls from above: a raised control casts a lip below its bottom
+	 * edge and catches a sheen along its top, a well is shaded inside its top
+	 * edge. The values are translucent white and shadow laid over whatever is
+	 * beneath, so they need no flip — a lip disappears on a dark ground, a
+	 * sheen on a white one. `none` flattens a role.
+	 */
+	--cms-shadow-raised: inset 0 1px 0 rgb(255 255 255 / 0.05), 0 1px 1px rgb(33 33 31 / 0.08);
+	--cms-shadow-recessed: inset 0 1px 2px rgb(33 33 31 / 0.08);
+	--cms-gradient-raised: linear-gradient(rgb(255 255 255 / 0.08), rgb(33 33 31 / 0.04));
+
+	/**
 	 * Semantic — status
 	 *
 	 * Surfaces mix against `--cms-color-surface` rather than white, and text

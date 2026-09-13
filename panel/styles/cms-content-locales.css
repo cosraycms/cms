@@ -7,6 +7,7 @@
 	padding: var(--cms-space-0-5);
 	border-radius: var(--cms-radius-full);
 	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
 
 	& .option {
 		display: block;
@@ -29,11 +30,14 @@
 		&[aria-checked='true'],
 		&[aria-pressed='true'] {
 			background: var(--cms-color-accent);
+			background-image: var(--cms-gradient-raised);
+			box-shadow: var(--cms-shadow-raised);
 			color: var(--cms-color-text-on-accent);
 
 			@media (forced-colors: active) {
 				forced-color-adjust: none;
 				background: Highlight;
+				box-shadow: none;
 				color: HighlightText;
 			}
 		}

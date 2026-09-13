@@ -87,7 +87,21 @@ Status colours are the only hues in the default chrome: red for danger and error
 
 Form controls draw their edge with `--cms-color-border-control`. It defaults to the same soft step as the strong border: a white control on the canvas pane already stands apart by its fill, and its label identifies it. The token exists so `prefers-contrast: more` and a theme can firm up control edges without adding weight to sections, rows and cards, so keep it off anything that is not a control. A control without a visible label needs another cue, since WCAG 1.4.11 asks for a 3:1 boundary when the border is the only one.
 
-Three control states read apart by their fill: an editable control is a white box, a read-only one a `--cms-color-surface-sunken` well with its text at full contrast, and a disabled one an outline with no fill, muted text and a `not-allowed` cursor. Read-only keeps full contrast because the value is there to be read and copied, while a disabled control is exempt under WCAG 1.4.3. A select, radio or checkbox cannot be read-only in HTML, so the field wrapper's `data-readonly` gives it the same look.
+Three control states read apart by their fill and depth: an editable control is a raised white box, a read-only one a recessed `--cms-color-surface-sunken` well with its text at full contrast, and a disabled one a flat outline with no fill, muted text and a `not-allowed` cursor. Read-only keeps full contrast because the value is there to be read and copied, while a disabled control is exempt under WCAG 1.4.3. A select, radio or checkbox cannot be read-only in HTML, so the field wrapper's `data-readonly` gives it the same look.
+
+### Depth
+
+Light falls from above. Three public tokens carry it. They are translucent white and shadow laid over whatever sits beneath, not colours, so neither theme needs its own value: a shadow disappears on a dark ground and a sheen on a white one.
+
+| Token | Draws | Used on |
+| --- | --- | --- |
+| `--cms-shadow-raised` | a lip below the bottom edge and a sheen along the top | editable fields, the rich text and media frames, buttons, the chosen language |
+| `--cms-shadow-recessed` | shading inside the top edge | read-only wells, the switch track, the language selector's track, blocks canvas |
+| `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` | buttons and the chosen language |
+
+A disabled control is flat. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth. A theme that wants a flat panel sets all three tokens to `none`.
+
+Two rules keep depth from going wrong. The gradient belongs in `background-image`, so a hover can still change the `background-color` beneath it. And a context that strips a control's border and fill, such as a bare block, sets `box-shadow: none` too, or the lip floats under nothing.
 
 ### Dark theme
 

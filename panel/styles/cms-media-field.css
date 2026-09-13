@@ -9,6 +9,7 @@
 	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
 
 	& > .bar {
 		display: flex;
@@ -27,7 +28,6 @@
 
 	& .browse {
 		padding: 0.3125rem 0.625rem;
-		box-shadow: none;
 
 		& svg {
 			width: 1rem;
@@ -105,6 +105,7 @@
 	&.is-readonly {
 		border-color: var(--cms-color-border);
 		background: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
 	}
 
 	/* Inside a block a filled field is content alone; the drop state
@@ -113,6 +114,7 @@
 		border: 0;
 		border-radius: var(--cms-radius-sm);
 		background: none;
+		box-shadow: none;
 
 		&.is-dragging {
 			outline: 1px dashed var(--cms-color-accent);

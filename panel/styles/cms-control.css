@@ -7,6 +7,7 @@
 	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
 	background-color: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
 	color: var(--cms-color-text);
 	font-family: inherit;
 	font-size: var(--cms-font-size-sm);
@@ -37,12 +38,19 @@
 	.cms-field[data-readonly='true'] &[disabled] {
 		border-color: var(--cms-color-border);
 		background-color: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
 		color: var(--cms-color-text);
+
+		&:focus {
+			border-color: var(--cms-color-focus);
+			box-shadow: var(--cms-focus-ring);
+		}
 	}
 
 	&[disabled] {
 		border-color: var(--cms-color-border-control);
 		background-color: transparent;
+		box-shadow: none;
 		color: var(--cms-color-text-subtle);
 		cursor: not-allowed;
 	}
@@ -67,6 +75,7 @@
 .cms-field[data-readonly='true'] .richtext {
 	border-color: var(--cms-color-border);
 	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
 }
 
 .cms-fallback-source {
@@ -119,6 +128,7 @@
 	border: 0;
 	border-radius: var(--cms-radius-full);
 	background: var(--cms-switch-bg);
+	box-shadow: var(--cms-shadow-recessed);
 	cursor: pointer;
 	transition: background-color 120ms ease;
 

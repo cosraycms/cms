@@ -29,6 +29,7 @@
 	border: 1px solid var(--cms-color-border);
 	border-radius: var(--cms-radius-md);
 	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
 
 	& .grid {
 		display: grid;
@@ -351,6 +352,7 @@
 			padding: var(--cms-space-1) var(--cms-space-2);
 			border-color: transparent;
 			background: none;
+			box-shadow: none;
 			font-size: var(--cms-font-size-sm);
 			line-height: 1.6;
 
@@ -440,6 +442,7 @@
 				padding: 0;
 				border: 0;
 				background: none;
+				box-shadow: none;
 				color: inherit;
 				font: inherit;
 				appearance: none;
@@ -471,6 +474,10 @@
 			border-color: transparent;
 			background: none;
 			font-size: var(--cms-font-size-sm);
+
+			&:not(:focus-within) {
+				box-shadow: none;
+			}
 
 			&:hover:not(:focus-within) {
 				border-color: var(--cms-color-border-soft);
@@ -631,6 +638,7 @@
 	& .cms-blocks-editor {
 		border: 0;
 		background: transparent;
+		box-shadow: none;
 	}
 
 	& .cms-blocks-editor > .adders,
