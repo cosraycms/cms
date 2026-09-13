@@ -136,6 +136,12 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					<button type="button" class="cms-button secondary" disabled>Preview</button>
 					<button type="button" class="cms-button danger" disabled>Delete</button>
 				</div>
+				<div class="sample" data-sample="button:small">
+					<button type="button" class="cms-button primary small">Save</button>
+					<button type="button" class="cms-button secondary small">Edit</button>
+					<button type="button" class="cms-button danger small">Delete</button>
+					<button type="button" class="cms-button secondary small" disabled>Use</button>
+				</div>
 			</section>
 
 			<section class="section" data-section="dialogs">
