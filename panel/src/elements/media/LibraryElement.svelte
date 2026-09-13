@@ -361,7 +361,7 @@
 					value={q}
 					oninput={edited}
 				/>
-				<button type="submit" class="cms-button">{__('common:search')}</button>
+				<button type="submit" class="cms-button secondary">{__('common:search')}</button>
 			</form>
 
 			<span class="cms-media-count">{__('media:file-count', { count: total })}</span>
@@ -369,7 +369,7 @@
 			<div class="cms-media-upload">
 				<button
 					type="button"
-					class="cms-button cms-button-primary"
+					class="cms-button primary"
 					disabled={uploading}
 					onclick={() => fileInput?.click()}
 				>
@@ -411,7 +411,11 @@
 			{#if loading}
 				<div class="cms-media-loading">{__('common:loading')}</div>
 			{:else if more}
-				<button type="button" class="cms-button cms-media-more" onclick={() => void load(false)}>
+				<button
+					type="button"
+					class="cms-button secondary cms-media-more"
+					onclick={() => void load(false)}
+				>
 					{__('common:load-more')}
 				</button>
 			{/if}
@@ -565,12 +569,6 @@
 			color: var(--cms-color-text-muted);
 			font-variant-numeric: tabular-nums;
 			white-space: nowrap;
-		}
-
-		.cms-media-upload button {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--cms-space-2);
 		}
 
 		.cms-media-upload-progress {

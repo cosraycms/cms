@@ -58,7 +58,7 @@
 			placeholder={__('media:search-filename')}
 			bind:value={q}
 		/>
-		<button type="submit" class="cms-button">{__('common:search')}</button>
+		<button type="submit" class="cms-button secondary">{__('common:search')}</button>
 	</form>
 	{#if failed}
 		<div class="cms-library-empty">{__('media:library-load-failed')}</div>
@@ -72,7 +72,11 @@
 	{#if loading}
 		<div class="cms-library-loading">{__('common:loading')}</div>
 	{:else if more}
-		<button type="button" class="cms-button cms-library-more" onclick={() => void load(false)}>
+		<button
+			type="button"
+			class="cms-button secondary cms-library-more"
+			onclick={() => void load(false)}
+		>
 			{__('common:load-more')}
 		</button>
 	{/if}

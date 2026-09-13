@@ -192,7 +192,9 @@
 		<div class="cms-detail-status">{__('common:loading')}</div>
 	{:else if failed || asset === null}
 		<div class="cms-detail-status">{__('media:file-load-failed')}</div>
-		<button type="button" class="cms-button" onclick={onClose}>{__('common:close')}</button>
+		<button type="button" class="cms-button secondary" onclick={onClose}
+			>{__('common:close')}</button
+		>
 	{:else}
 		<header class="cms-detail-head">
 			<h2 title={asset.filename}>{asset.filename}</h2>
@@ -259,7 +261,7 @@
 						{/if}
 					</span>
 					{#if meta.focal}
-						<button type="button" class="cms-button" onclick={clearFocal}
+						<button type="button" class="cms-button secondary small" onclick={clearFocal}
 							>{__('image:focus-remove')}</button
 						>
 					{/if}
@@ -289,23 +291,13 @@
 		</div>
 
 		<footer class="cms-detail-foot">
-			<button
-				type="button"
-				class="cms-button cms-detail-delete"
-				disabled={deleting}
-				onclick={confirmRemove}
-			>
+			<button type="button" class="cms-button danger" disabled={deleting} onclick={confirmRemove}>
 				<Icon name="trash3" />
 				{__('common:delete')}
 			</button>
 			<div class="cms-detail-foot-right">
 				{#if saved}<span class="cms-detail-saved">{__('common:saved')}</span>{/if}
-				<button
-					type="button"
-					class="cms-button cms-button-primary"
-					disabled={saving}
-					onclick={save}
-				>
+				<button type="button" class="cms-button primary" disabled={saving} onclick={save}>
 					{saving ? __('common:saving') : __('common:save')}
 				</button>
 			</div>
@@ -485,13 +477,6 @@
 			display: flex;
 			align-items: center;
 			gap: var(--cms-space-3);
-		}
-
-		.cms-detail-delete {
-			display: inline-flex;
-			align-items: center;
-			gap: var(--cms-space-2);
-			color: var(--cms-color-danger);
 		}
 
 		.cms-detail-saved {
