@@ -8,7 +8,7 @@ Notable mappings from the former artwork:
 
 - The old PHP `plus.svg` becomes `plus-circle`; plain add actions use `plus`.
 - Kebab and overflow actions use `three-dots-vertical`.
-- Close actions use `x-lg`.
+- Close actions use `x-lg`; save actions use `floppy`, preview uses `eye`, and delete uses `trash3`.
 - Filled status symbols become `info-circle`, `shield-check`, `x-octagon`, and `exclamation-triangle`.
 - Font Awesome link/text-height artwork becomes `link-45deg` and `type`; unlink uses `slash-circle`.
 - Text style uses `fonts`, document uses `file-earmark-richtext`, and the collection fallback uses `collection`.

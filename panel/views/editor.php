@@ -151,11 +151,13 @@ foreach ($fields as $field) {
 					name="preview"
 					value="1"
 					data-editor-submit>
+					<?= \Cosray\Panel\Icon::render('eye') ?>
 					<?= escape(__('editor:preview')) ?>
 				</button>
 			<?php endif ?>
 			<div class="cms-split-button">
 				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+					<?= \Cosray\Panel\Icon::render('floppy') ?>
 					<?= escape(__('editor:save')) ?>
 				</button>
 				<button
@@ -168,6 +170,7 @@ foreach ($fields as $field) {
 				</button>
 				<div id="editor-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
 					<button type="submit" form="node-editor-form" name="publish" value="1" data-editor-submit>
+						<?= \Cosray\Panel\Icon::render('floppy') ?>
 						<?= escape(__('editor:save-publish')) ?>
 					</button>
 				</div>

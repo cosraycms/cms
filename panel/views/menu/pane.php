@@ -273,9 +273,12 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<a class="cms-button secondary" href="<?= escape($cancelUrl) ?>"><?= escape(
 				__('menu:cancel'),
 			) ?></a>
-			<button type="submit" class="cms-button primary"><?= escape(
-				$mode === 'create' ? __('menu:add-item') : __('menu:save'),
-			) ?></button>
+			<button type="submit" class="cms-button primary">
+				<?php if ($mode !== 'create'): ?>
+					<?= \Cosray\Panel\Icon::render('floppy') ?>
+				<?php endif ?>
+				<?= escape($mode === 'create' ? __('menu:add-item') : __('menu:save')) ?>
+			</button>
 		</footer>
 	</form>
 </div>

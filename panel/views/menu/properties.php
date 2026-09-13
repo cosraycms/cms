@@ -72,7 +72,10 @@ $manages = (bool) $manages;
 			<?php endif ?>
 		</div>
 
-		<button type="submit" class="cms-button primary"><?= escape(__('menu:save')) ?></button>
+		<button type="submit" class="cms-button primary">
+			<?= \Cosray\Panel\Icon::render('floppy') ?>
+			<?= escape(__('menu:save')) ?>
+		</button>
 	</form>
 
 	<?php if ($manages): ?>

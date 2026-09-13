@@ -298,6 +298,7 @@
 			<div class="cms-detail-foot-right">
 				{#if saved}<span class="cms-detail-saved">{__('common:saved')}</span>{/if}
 				<button type="button" class="cms-button primary" disabled={saving} onclick={save}>
+					<Icon name="floppy" />
 					{saving ? __('common:saving') : __('common:save')}
 				</button>
 			</div>

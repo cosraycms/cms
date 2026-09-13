@@ -126,14 +126,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="buttons">
 				<h2>Buttons</h2>
 				<div class="sample">
-					<button type="button" class="cms-button primary">Save</button>
-					<button type="button" class="cms-button secondary">Preview</button>
+					<button type="button" class="cms-button primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
+					<button type="button" class="cms-button secondary"><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
 					<button type="button" class="cms-button danger"><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 					<a class="cms-button secondary" href="#">Link</a>
 				</div>
 				<div class="sample">
-					<button type="button" class="cms-button primary" disabled>Save</button>
-					<button type="button" class="cms-button secondary" disabled>Preview</button>
+					<button type="button" class="cms-button primary" disabled><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
+					<button type="button" class="cms-button secondary" disabled><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
 					<button type="button" class="cms-button danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 				</div>
 				<div class="sample" data-sample="button:danger-solid">
@@ -149,11 +149,11 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 				<div class="sample" data-sample="button:split">
 					<div class="cms-split-button">
-						<button type="button" class="cms-button primary">Save</button>
+						<button type="button" class="cms-button primary"><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
 						<button type="button" class="cms-button primary toggle" popovertarget="sample-save-options"
 							aria-haspopup="menu" aria-label="More save options"><?= \Cosray\Panel\Icon::render('chevron-down') ?></button>
 						<div id="sample-save-options" class="cms-action-menu" popover="auto" data-action-menu data-align="end">
-							<button type="button">Save and publish</button>
+							<button type="button"><?= \Cosray\Panel\Icon::render('floppy') ?> Save and publish</button>
 						</div>
 					</div>
 					<div class="cms-split-button">
