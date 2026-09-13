@@ -61,6 +61,16 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		id="editor-published"
 		class="cms-status <?= $published ? 'is-published' : 'is-unpublished' ?>"
 		hx-swap-oob="true"><?= escape($published ? __('editor:published') : __('editor:unpublished')) ?></span>
+	<?php // Save and publish changes the flag behind the switch's back; left
+	// stale, the switch would unpublish the node again on the next save. ?>
+	<input
+		id="editor-published-switch"
+		type="checkbox"
+		class="cms-switch"
+		name="published"
+		value="1"
+		hx-swap-oob="true"
+		<?= $published ? 'checked' : '' ?> />
 <?php endif ?>
 <?php if ($saved && is_string($preview) && $preview !== ''): ?>
 	<div id="editor-preview" class="preview" hx-swap-oob="true">

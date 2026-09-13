@@ -49,6 +49,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 					</span>
 					<input type="hidden" name="published" value="" />
 					<input
+						id="editor-published-switch"
 						type="checkbox"
 						class="cms-switch"
 						name="published"

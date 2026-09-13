@@ -13,6 +13,7 @@ use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\QuoteBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestDateTimeDocument;
@@ -41,6 +42,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin->node(TestNodeWithEntries::class);
 		$plugin->node(TestNodeWithBlocks::class);
 		$plugin->node(TestImmutableDocument::class);
+		$plugin->node(NodeWithRenderAttribute::class);
 
 		return $plugin;
 	}
@@ -865,6 +867,27 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			['uid' => 'panel-save-publish'],
 		)->one();
 		$this->assertSame('panel-save-handle', $handle['handle'] ?? null);
+	}
+
+	public function testPublishingChecksThePublishedSwitch(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-publish-switch',
+			'type' => $this->createTestType('node-with-render-attribute'),
+			'published' => false,
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-publish-switch', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => ['_complete' => '1', 'publish' => '1'],
+		]);
+
+		$this->assertResponseOk($response);
+		// Left unchecked, the switch would unpublish the node on the next save.
+		$this->assertHtmlNodeExists(
+			'//input[@id="editor-published-switch" and @hx-swap-oob="true" and @checked]',
+			$this->getHtmlResponse($response),
+		);
 	}
 
 	public function testDeleteRedirectsToTheCollection(): void

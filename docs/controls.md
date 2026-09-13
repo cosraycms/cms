@@ -152,7 +152,7 @@ Plugins are unaffected: element controls keep submitting through their host's fo
 
 ## Save response
 
-A save answers with out-of-band swaps only — the form itself is never re-rendered. The response fragment (`panel/views/editor-save.php`) targets four fixed ids: `#editor-status` (the status chip; `data-saved` on it is what stands the unsaved-changes guard down), `#editor-errors` (the validation summary, next section), `#editor-published` (the published badge, on successful saves of renderable nodes) and `#editor-preview` (the preview overlay, when the save requested one). The controller feeds the fragment a fixed payload: `saved`, `message`, `errors` (message + path pairs), `published`, `renderable`, `preview`.
+A save answers with out-of-band swaps only — the form itself is never re-rendered. The response fragment (`panel/views/editor-save.php`) targets five fixed ids: `#editor-status` (the status chip; `data-saved` on it is what stands the unsaved-changes guard down), `#editor-errors` (the validation summary, next section), `#editor-published` and `#editor-published-switch` (the published badge and the inspector's switch, on successful saves of renderable nodes, so publishing from the save menu cannot be undone by the next save) and `#editor-preview` (the preview overlay, when the save requested one). The controller feeds the fragment a fixed payload: `saved`, `message`, `errors` (message + path pairs), `published`, `renderable`, `preview`.
 
 These ids and keys are an **internal contract**, pinned by the e2e save tests. It is deliberately closed to plugins; a sanctioned way for plugin actions to ride the save round trip is part of the future action-slot design.
 
