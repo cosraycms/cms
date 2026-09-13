@@ -62,14 +62,6 @@ button:not(:disabled) {
 	cursor: pointer;
 }
 
-input,
-select,
-textarea {
-	border: var(--cms-border-width) var(--cms-border-style) var(--cms-color-border-control);
-	border-radius: var(--cms-radius-md);
-	background-color: var(--cms-color-surface);
-}
-
 input::placeholder,
 textarea::placeholder {
 	color: var(--cms-color-text-faint);

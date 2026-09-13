@@ -85,7 +85,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 						</label>
 						<input
 							id="cms-node-path-<?= escape($locale['id']) ?>"
-							class="js-path-source"
+							class="cms-input js-path-source"
 							type="text"
 							name="paths[<?= escape($locale['id']) ?>]"
 							value="<?= escape((string) ($paths[$locale['id']] ?? '')) ?>" />
@@ -107,7 +107,7 @@ $showMeta = $showType || $renderable || $showCreated || $showEditor;
 				<label class="label" for="cms-node-handle"><?= escape(__('editor:handle')) ?></label>
 				<input
 					id="cms-node-handle"
-					class="js-path-source"
+					class="cms-input js-path-source"
 					type="text"
 					name="handle"
 					maxlength="64"

@@ -73,19 +73,6 @@
 		}
 	}
 
-	& input[type='text'] {
-		width: 100%;
-		min-width: 0;
-		padding: var(--cms-space-2) var(--cms-space-2-5);
-		font-size: var(--cms-font-size-sm);
-
-		&:focus {
-			border-color: var(--cms-color-focus);
-			outline: 1px solid transparent;
-			box-shadow: var(--cms-focus-ring);
-		}
-	}
-
 	& .facts {
 		display: grid;
 		grid-template-columns: auto 1fr;

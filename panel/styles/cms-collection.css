@@ -187,22 +187,9 @@
 			pointer-events: none;
 		}
 
-		& input[type='search'] {
-			width: 100%;
+		& .cms-input {
 			height: 2.375rem;
 			padding: 0 var(--cms-space-4) 0 var(--cms-space-8);
-			border: 1px solid var(--cms-color-border-control);
-			border-radius: var(--cms-radius-md);
-			background: var(--cms-color-surface);
-			box-shadow: var(--cms-shadow-raised);
-			color: var(--cms-color-text);
-			font-size: var(--cms-font-size-sm);
-
-			&:focus {
-				border-color: var(--cms-color-focus);
-				outline: 1px solid transparent;
-				box-shadow: var(--cms-focus-ring);
-			}
 		}
 	}
 

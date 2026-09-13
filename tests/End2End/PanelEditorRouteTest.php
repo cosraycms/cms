@@ -550,7 +550,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// Handle and path inputs carry the js-path-source hook so the preview
 		// only recomputes when a route-determining input changes.
 		$this->assertStringContainsString('id="cms-node-handle"', $html);
-		$this->assertStringContainsString('class="js-path-source"', $html);
+		$this->assertHtmlNodeExists(
+			'//input[@id="cms-node-handle"][contains(concat(" ", normalize-space(@class), " "), " js-path-source ")]',
+			$html,
+		);
 		$this->assertStringContainsString('name="paths[en]"', $html);
 
 		// The preview trigger is scoped to those inputs, not the whole form,

@@ -103,6 +103,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 				<span class="icon" aria-hidden="true">⌕</span>
 				<input
 					id="collection-search"
+					class="cms-input"
 					name="q"
 					type="search"
 					value="<?= escape($page->search->value) ?>"

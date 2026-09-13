@@ -148,7 +148,8 @@
 
 	& select {
 		padding: 0.375rem var(--cms-space-2);
-		border-color: var(--cms-color-border-control);
+		border: 1px solid var(--cms-color-border-control);
+		border-radius: var(--cms-radius-md);
 		background: transparent;
 		font-size: var(--cms-font-size-sm);
 	}
