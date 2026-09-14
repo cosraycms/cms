@@ -297,14 +297,20 @@ CREATE TRIGGER /*:cms.obj:*/drafts_trigger_02_change BEFORE UPDATE
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
 -- Records every superseded state of a working copy, and its last state
 -- when publishing or discarding deletes the row, so the history outlives
--- the working copy.
+-- the working copy. The row written on delete says why the draft went:
+-- `published` when the store says so through the transaction-local
+-- setting `cosray.draft_outcome`, `discarded` otherwise.
 CREATE FUNCTION /*:cms.prefix:*/record_draft_history()
 	RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO /*:cms.prefix:*/drafts_history (
-		node, changed, editor, content, settings
+		node, created, changed, editor, content, settings, outcome
 	) VALUES (
-		OLD.node, OLD.changed, OLD.editor, OLD.content, OLD.settings
+		OLD.node, OLD.created, OLD.changed, OLD.editor, OLD.content, OLD.settings,
+		CASE WHEN TG_OP = 'DELETE'
+			THEN coalesce(nullif(current_setting('cosray.draft_outcome', true), ''), 'discarded')
+			ELSE 'saved'
+		END
 	);
 
 	RETURN OLD;
@@ -437,17 +443,25 @@ CREATE TABLE /*:cms.prefix:*/nodes_history (
 );
 
 
+-- `created` is copied from the draft row and keys the rows of one working
+-- copy together; `outcome` is `saved` for a row superseded by the next
+-- save and, on the row written when the draft is deleted, `published` or
+-- `discarded`.
 CREATE TABLE /*:cms.prefix:*/drafts_history (
 	node bigint NOT NULL,
+	created timestamp with time zone NOT NULL DEFAULT now(),
 	changed timestamp with time zone NOT NULL,
 	editor bigint NOT NULL,
 	content jsonb NOT NULL,
 	settings jsonb NOT NULL DEFAULT '{}',
+	outcome text NOT NULL DEFAULT 'saved',
 	CONSTRAINT /*:cms.obj:*/pk_drafts_history PRIMARY KEY (node, changed),
 	-- Keyed to the node, not the working copy: the history stays when
 	-- publishing or discarding deletes the drafts row.
 	CONSTRAINT /*:cms.obj:*/fk_drafts_history_nodes FOREIGN KEY (node)
-		REFERENCES /*:cms.prefix:*/nodes (node)
+		REFERENCES /*:cms.prefix:*/nodes (node),
+	CONSTRAINT /*:cms.obj:*/ck_drafts_history_outcome
+		CHECK (outcome IN ('saved', 'published', 'discarded'))
 );
 
 

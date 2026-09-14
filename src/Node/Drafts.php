@@ -61,8 +61,18 @@ final class Drafts
 		])->run();
 	}
 
-	public function delete(int $node): void
+	/**
+	 * Deletes the working copy; its history keeps the last state and, when
+	 * the caller says the content went live, records it as published rather
+	 * than discarded. Must run inside the caller's transaction: the reason
+	 * travels as a transaction-local setting the history trigger reads.
+	 */
+	public function delete(int $node, bool $published = false): void
 	{
+		if ($published) {
+			$this->db->drafts->outcome(['outcome' => 'published'])->run();
+		}
+
 		$this->db->drafts->delete(['node' => $node])->run();
 	}
 }

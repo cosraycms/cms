@@ -137,7 +137,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->store->publishDraft($this->node('drafts-timeline'), $this->locales(), Actor::system());
 
 		$history = $this->db()->execute(
-			'SELECT h.editor, h.content, h.settings FROM cms.drafts_history h
+			'SELECT h.editor, h.content, h.settings, h.outcome, h.created FROM cms.drafts_history h
 				JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid ORDER BY h.changed',
 			['uid' => 'drafts-timeline'],
 		)->all();
@@ -148,6 +148,8 @@ final class NodeDraftsTest extends IntegrationTestCase
 		);
 		$this->assertSame('Pictures added', json_decode((string) $history[1]['content'], true)['title']['value']['en']);
 		$this->assertSame('timeline', json_decode((string) $history[1]['settings'], true)['handle']);
+		$this->assertSame(['saved', 'published'], array_column($history, 'outcome'));
+		$this->assertSame($history[0]['created'], $history[1]['created']);
 		$this->assertSame('Pictures added', $this->liveTitle('drafts-timeline'));
 	}
 
@@ -165,6 +167,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 
 		$this->assertSame(0, $this->rows('drafts', 'drafts-discard-history'));
 		$this->assertSame(1, $this->rows('drafts_history', 'drafts-discard-history'));
+		$this->assertSame('discarded', $this->row('drafts_history', 'drafts-discard-history')['outcome']);
 		$this->assertSame(
 			'Thrown away',
 			json_decode(

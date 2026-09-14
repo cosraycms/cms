@@ -88,7 +88,7 @@ class Store
 
 		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
 			$this->persist($node, $data, $actor->id, $locales);
-			$this->drafts->delete($nodeId);
+			$this->drafts->delete($nodeId, published: true);
 			$this->sync->remove('draft', $data['uid']);
 		}, 'Error while publishing: ');
 

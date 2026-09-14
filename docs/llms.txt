@@ -833,9 +833,14 @@ Working copies:
 - `drafts_history` records every superseded state of a working copy and
   its last state when publishing or discarding deletes the row (editor,
   content, settings), keyed to the node so it outlives the working copy.
+  `created` is copied from the draft row and groups the rows of one
+  working copy; `outcome` is `saved` for a row superseded by the next
+  save and, on the row written when the draft is deleted, `published` or
+  `discarded` (the store sets the transaction-local `cosray.draft_outcome`
+  before deleting on publish; every other deletion reads as discarded).
   Together with `nodes_history` (superseded live versions) it is the
-  node's timeline: who saved what while changes were pending, and when
-  they went live.
+  node's timeline: a revision list takes the node versions plus the draft
+  rows of runs that ended in `published`; an audit reads everything.
 
 9) Media handling
 
