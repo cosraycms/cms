@@ -30,6 +30,7 @@ use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\Fixtures\Node\PlainPageWithInit;
 use Cosray\Tests\Fixtures\Node\TestBaseFields;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
+use Cosray\Tests\Fixtures\Node\TestNullableCheckbox;
 use Cosray\Tests\Fixtures\Node\TestPage;
 use Cosray\Tests\Fixtures\Node\TestReorderedFieldsetDocument;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetDocument;
@@ -587,6 +588,22 @@ final class NodeFactoryTest extends TestCase
 		$this->assertCount(2, $fields);
 		$this->assertEquals('heading', $fields[0]['name']);
 		$this->assertEquals('body', $fields[1]['name']);
+	}
+
+	public function testBlueprintDistinguishesOmittedCheckboxValuesFromExplicitNull(): void
+	{
+		$node = $this->factory->blueprint(TestNullableCheckbox::class, $this->context, $this->cms);
+		$fields = Factory::fieldNamesFor($node);
+		$serializer = new Serializer($this->types, $this->uid);
+		$locales = $this->context->locales();
+
+		$this->assertTrue($serializer->blueprint($node, $fields, $locales)['content']['flag']['value']['zxx']);
+		$this->assertNull($serializer->blueprint($node, $fields, $locales, [
+			'flag' => null,
+		])['content']['flag']['value']['zxx']);
+		$this->assertFalse($serializer->blueprint($node, $fields, $locales, [
+			'flag' => false,
+		])['content']['flag']['value']['zxx']);
 	}
 
 	public function testSerializerBlueprintForPlainPage(): void

@@ -44,9 +44,9 @@ final class Control
 		));
 	}
 
-	public static function checkbox(): self
+	public static function checkbox(bool $nullable = false): self
 	{
-		return new self('checkbox');
+		return new self('checkbox', ['nullable' => $nullable]);
 	}
 
 	public static function option(string $display = 'select'): self

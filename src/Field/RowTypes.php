@@ -140,8 +140,9 @@ trait RowTypes
 
 		foreach ($this->rowFieldsFor($type) as $name => $field) {
 			$fieldData = $value[$name] ?? null;
-			$fieldValue = is_array($fieldData) ? $fieldData['value'] ?? null : null;
-			$fieldStructure = $field->structure($fieldValue);
+			$fieldStructure = is_array($fieldData) && array_key_exists('value', $fieldData)
+				? $field->structure($fieldData['value'])
+				: $field->structure();
 
 			if (is_array($fieldData)) {
 				$structure[$name] = array_replace_recursive($fieldStructure, $fieldData);

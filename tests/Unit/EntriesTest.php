@@ -14,6 +14,7 @@ use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Node\FieldOwner;
 use Cosray\Node\Types;
+use Cosray\Panel\FormPatch;
 use Cosray\Richtext\Envelope;
 use Cosray\Schema\Allows;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
@@ -21,6 +22,7 @@ use Cosray\Tests\Fixtures\Node\TestBlocksEntry;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedEntry;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestNestedEntriesEntry;
+use Cosray\Tests\Fixtures\Node\TestNullableCheckbox;
 use Cosray\Tests\Fixtures\Node\TestRichTextEntry;
 use Cosray\Tests\Fixtures\Node\TestSplitFieldsetEntry;
 use Cosray\Tests\TestCase;
@@ -92,6 +94,38 @@ class EntriesTest extends TestCase
 
 		// Rich sub-fields arrive resolved to their element form.
 		$this->assertSame('element', $entryTypes[0]['fields'][1]['control']['name']);
+	}
+
+	public function testNullableCheckboxDefaultsAndClearingInsideEntries(): void
+	{
+		$entries = $this->createEntries()->allow(TestNullableCheckbox::class);
+		$structure = $entries->structure([['type' => TestNullableCheckbox::class, 'fields' => []]]);
+		$row = $structure['value']['zxx'][0];
+		$this->assertTrue($row['fields']['flag']['value']['zxx']);
+
+		$patch = new FormPatch([$entries->properties()]);
+		$content = $patch->content(
+			['test_entries' => $structure],
+			[
+				'test_entries' => [
+					'value' => [
+						'zxx' => [[
+							'uid' => $row['uid'],
+							'type' => TestNullableCheckbox::class,
+							'fields' => ['flag' => ['value' => ['zxx' => '']]],
+						]],
+					],
+				],
+			],
+		);
+		$result = $entries->shape()->validate($content['test_entries']);
+		$this->assertTrue($result->valid());
+		$stored = $result->values();
+		$this->assertNull($stored['value']['zxx'][0]['fields']['flag']['value']['zxx']);
+
+		$rebuilt = $entries->structure($stored['value']['zxx']);
+		$this->assertCount(1, $rebuilt['value']['zxx']);
+		$this->assertNull($rebuilt['value']['zxx'][0]['fields']['flag']['value']['zxx']);
 	}
 
 	public function testEntriesControlCarriesLimits(): void

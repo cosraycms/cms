@@ -196,7 +196,14 @@ final class FormPatch
 		}
 
 		return match ($name) {
-			'checkbox' => $raw === '1' || $raw === 'on' || $raw === true,
+			'checkbox' => $props['nullable'] ?? false
+				? match ($raw) {
+					'', null => null,
+					'1', true => true,
+					'0', false => false,
+					default => $raw,
+				}
+				: $raw === '1' || $raw === 'on' || $raw === true,
 			'number' => is_numeric($raw) ? (float) $raw : null,
 			'datetime' => $this->datetime($raw, $timezone ?? Codec::utc()),
 			default => is_scalar($raw) ? (string) $raw : null,

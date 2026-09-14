@@ -15,7 +15,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `text` | `Control::text(?placeholder)` | `placeholder?` | locale map of `string` |
 | `textarea` | `Control::textarea()` | — | locale map of `string` |
 | `number` | `Control::number(step:,min:,max:)` | `step?`, `min?`, `max?` | locale map of `number\|string` |
-| `checkbox` | `Control::checkbox()` | `labels?: {true?, false?}` | locale map of `bool` |
+| `checkbox` | `Control::checkbox(nullable:)` | `nullable`, `labels?: {true?, false?, null?}` | locale map of `bool`, or `bool\|null` when nullable |
 | `option` | `Control::option(display:)` | `display: select\|radio` | locale map of `string` (options come from `#[Options]`) |
 | `date` | `Control::date()` | — | locale map of `YYYY-MM-DD` |
 | `time` | `Control::time()` | — | locale map of `HH:MM` |
@@ -48,7 +48,30 @@ A `DateTime` value is an instant. Every non-empty stored value is normalized to 
 
 `Cosray\Field\Checkbox` renders as a toggle with its field label above and its current state beside it. The default state labels are “Yes” and “No”, translated into the panel language. Override them with `#[StateLabels(true: 'Enabled', false: 'Disabled')]` from `Cosray\Schema`; custom labels are translated like field labels and included by the schema translation scanner. Labels do not change the stored boolean values.
 
-A required Checkbox accepts `false`: requiring an answer is not the same as requiring consent. Immutable fields keep their value visible but cannot be toggled. Like other fields, a toggle is persisted by saving the editor, not immediately on interaction.
+Opt into a nullable value with `#[Nullable]`. This renders three explicit choices as a segmented radio group: “Not set”, “Yes”, and “No”. Editors can return to “Not set” after choosing either boolean value. Customize its label with `StateLabels(null: 'Automatic')`; that changes only the wording, not how the application interprets `null`.
+
+```php
+use Cosray\Field\Checkbox;
+use Cosray\Schema\DefaultValue;
+use Cosray\Schema\Label;
+use Cosray\Schema\Nullable;
+use Cosray\Schema\StateLabels;
+
+#[Label('Available'), Nullable]
+public Checkbox $available;
+
+#[Label('Enabled'), Nullable, DefaultValue(true)]
+#[StateLabels(true: 'Enabled', false: 'Disabled', null: 'Automatic')]
+public Checkbox $enabled;
+```
+
+New ordinary fields default to `false`, nullable ones to `null`; `#[DefaultValue(...)]` overrides the creation default. `Checkbox::structure()` applies that default, whereas `structure(null)` preserves an explicit null for a nullable field. Blueprint values and nested entry/block fields also distinguish omission from explicit null. Saving an explicit null clears the stored value; omitting the field from a patch leaves it untouched. No migration is needed.
+
+`Cosray\Value\Boolean::$value`, `unwrap()` and `json()` preserve `null` for nullable Checkbox fields. `isset()` is false only for null; a stored `false` is still a value. Ordinary Checkbox fields retain their two-state read behaviour, including reading legacy null values as `false`. Code opting into `#[Nullable]` must handle the nullable return from `unwrap()` explicitly.
+
+A required Checkbox accepts `false`: requiring an answer is not the same as requiring consent. With `#[Nullable, Required]`, “Not set” is unavailable and an unset field requires a Yes/No choice; the server rejects null and missing values. Immutable fields keep their value visible but cannot be changed and submit no value. Like other fields, these controls are persisted by saving the editor, not immediately on interaction.
+
+`Nullable` and `StateLabels` currently apply only to Checkbox fields. Conditional visibility keeps its existing boolean comparison semantics: `#[When]` treats false and null alike as empty, even though nullable field values preserve the distinction. Custom primitive controls can use `Control::checkbox(nullable: true)` and pass already translated labels through `->prop('labels', ['true' => ..., 'false' => ..., 'null' => ...])`.
 
 ### Content language and fallback previews
 

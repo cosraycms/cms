@@ -190,6 +190,7 @@ return [
 		'field:meta' => 'Meta',
 		'field:yes' => 'Yes',
 		'field:no' => 'No',
+		'field:not-set' => 'Not set',
 		'field:readonly' => 'read-only',
 		'field:remove' => 'Remove',
 		'field:remove-block' => 'Remove block',

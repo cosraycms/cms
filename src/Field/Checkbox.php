@@ -11,13 +11,14 @@ use Cosray\Value\Boolean;
 
 class Checkbox extends Field
 {
+	public bool $nullable = false;
 	public ?StateLabels $stateLabels = null;
 
 	public function control(): Control
 	{
 		$labels = [];
 
-		foreach (['true', 'false'] as $state) {
+		foreach (['true', 'false', 'null'] as $state) {
 			$label = $this->stateLabels?->{$state};
 
 			if ($label !== null) {
@@ -25,7 +26,7 @@ class Checkbox extends Field
 			}
 		}
 
-		return Control::checkbox()->prop('labels', $labels);
+		return Control::checkbox(nullable: $this->nullable)->prop('labels', $labels);
 	}
 
 	public function value(): Boolean
@@ -35,7 +36,21 @@ class Checkbox extends Field
 
 	public function structure(mixed $value = null): array
 	{
-		return $this->getSimpleStructure('checkbox', $value);
+		// A nullable field must be able to clear a configured default.
+		if ($value === null && (!$this->nullable || func_num_args() === 0)) {
+			$value = $this->default;
+		}
+
+		if ($value === null && !$this->nullable) {
+			$value = false;
+		}
+
+		return [
+			'type' => $this::class,
+			'value' => is_array($value) && array_key_exists(self::NEUTRAL_LOCALE, $value)
+				? $value
+				: [self::NEUTRAL_LOCALE => $value],
+		];
 	}
 
 	public function shape(): Shape

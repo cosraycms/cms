@@ -196,6 +196,7 @@ return [
 		'field:meta' => 'Meta',
 		'field:yes' => 'Ja',
 		'field:no' => 'Nein',
+		'field:not-set' => 'Nicht gesetzt',
 		'field:readonly' => 'nicht änderbar',
 		'field:remove' => 'Entfernen',
 		'field:remove-block' => 'Block entfernen',

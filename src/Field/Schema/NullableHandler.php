@@ -7,18 +7,16 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Checkbox;
 use Cosray\Field\Field;
-use Cosray\Schema\StateLabels;
 
-class StateLabelsHandler extends Handler
+class NullableHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
 		if (!$field instanceof Checkbox) {
-			throw new RuntimeException('StateLabels requires a Checkbox field.');
+			throw new RuntimeException('Nullable requires a Checkbox field.');
 		}
 
-		assert($meta instanceof StateLabels, 'The registry only routes StateLabels attributes to this handler');
-		$field->stateLabels = $meta;
+		$field->nullable = true;
 	}
 
 	public function properties(object $meta, Field $field): array

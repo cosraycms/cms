@@ -58,7 +58,7 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 			el.dataset.localeLabelFor = base.replace(renaming.idPattern, renaming.id);
 		}
 	});
-	for (const attribute of ['popovertarget', 'aria-labelledby']) {
+	for (const attribute of ['popovertarget', 'aria-labelledby', 'aria-describedby']) {
 		scope.querySelectorAll<HTMLElement>(`[${attribute}]`).forEach((element) => {
 			const targets = (element.getAttribute(attribute) ?? '').split(/\s+/);
 			element.setAttribute(
@@ -90,6 +90,10 @@ function renumber(container: HTMLElement): void {
 	const namePattern = new RegExp(`^${escapeRegex(nameBase)}\\[(?:\\d+|__i__)\\]`);
 	const idPattern = new RegExp(`^${escapeRegex(idBase)}-(?:\\d+|__i__)`);
 	const rows = list(container).querySelectorAll<HTMLElement>(':scope > [data-repeater-row]');
+	// Renaming temporarily merges adjacent radio groups and can uncheck their selections.
+	const checked = Array.from(
+		container.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked'),
+	);
 
 	rows.forEach((row, index) => {
 		rewrite(row, {
@@ -104,6 +108,10 @@ function renumber(container: HTMLElement): void {
 		if (label) {
 			label.textContent = `${index + 1}.`;
 		}
+	});
+
+	checked.forEach((input) => {
+		input.checked = true;
 	});
 
 	const count = container.querySelector<HTMLElement>(':scope > [data-repeater-count]');
@@ -255,9 +263,20 @@ function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLEleme
 	source
 		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
 		.forEach((control) => {
-			if (control.name !== '') {
-				controls.set(relative(control.name, container), control);
-			}
+			if (control.name === '') return;
+			const key = relative(control.name, container);
+			const previous = controls.get(key);
+
+			// A radio group shares a name; keep its selected input rather than its last option.
+			if (
+				control instanceof HTMLInputElement &&
+				control.type === 'radio' &&
+				previous instanceof HTMLInputElement &&
+				previous.checked
+			)
+				return;
+
+			controls.set(key, control);
 		});
 	source.querySelectorAll('cosray-host').forEach((host) => {
 		hosts.set(relative(host.getAttribute('name') ?? '', container), host);
@@ -278,7 +297,9 @@ function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLEleme
 				control instanceof HTMLInputElement &&
 				(control.type === 'checkbox' || control.type === 'radio')
 			) {
-				control.checked = (from as HTMLInputElement).checked;
+				control.checked =
+					(from as HTMLInputElement).checked &&
+					(control.type !== 'radio' || control.value === from.value);
 			} else {
 				control.value = from.value;
 			}

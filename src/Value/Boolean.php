@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Field\Checkbox;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 
 class Boolean extends Value
 {
-	public readonly bool $value;
+	public readonly ?bool $value;
 
 	public function __construct(Owner $owner, Field $field, ValueContext $context)
 	{
@@ -20,7 +21,7 @@ class Boolean extends Value
 		if (is_bool($value)) {
 			$this->value = $value;
 		} else {
-			$this->value = false;
+			$this->value = $field instanceof Checkbox && $field->nullable ? null : false;
 		}
 	}
 
@@ -29,7 +30,7 @@ class Boolean extends Value
 		return (string) $this->value;
 	}
 
-	public function unwrap(): bool
+	public function unwrap(): ?bool
 	{
 		return $this->value;
 	}
@@ -41,6 +42,6 @@ class Boolean extends Value
 
 	public function isset(): bool
 	{
-		return true;
+		return $this->value !== null;
 	}
 }

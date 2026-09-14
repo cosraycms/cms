@@ -9,8 +9,18 @@ type Condition = { field: string; op: string; value: unknown };
 
 function formValue(form: HTMLFormElement, field: string): string {
 	// The last entry wins: checkbox presence markers precede the box.
-	const values = new FormData(form).getAll(`content[${field}][value][zxx]`);
-	const last = values.at(-1);
+	const name = `content[${field}][value][zxx]`;
+	const last = new FormData(form).getAll(name).at(-1);
+
+	// When historically treats false as empty, including nullable checkbox fields.
+	if (
+		last === '0' &&
+		Array.from(form.querySelectorAll<HTMLInputElement>('[data-checkbox] input')).some(
+			(input) => input.name === name,
+		)
+	) {
+		return '';
+	}
 
 	return typeof last === 'string' ? last : '';
 }

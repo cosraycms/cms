@@ -129,6 +129,23 @@ describe('repeater behavior', () => {
 		).toEqual(['1.', '2.']);
 	});
 
+	it('keeps accessible descriptions attached to their own row after removal', () => {
+		const container = repeater([
+			row('0', 'first', `<span id="${ID}-0-status">First status</span>`),
+			row('1', 'second', `<span id="${ID}-1-status">Second status</span>`),
+		]);
+		container.querySelectorAll<HTMLInputElement>('input').forEach((input) => {
+			input.setAttribute('aria-describedby', `${input.id}-status`);
+		});
+		click(container, '[data-repeater-remove]');
+
+		const remaining = container.querySelector<HTMLInputElement>('input')!;
+		expect(remaining.value).toBe('second');
+		expect(document.getElementById(remaining.getAttribute('aria-describedby')!)?.textContent).toBe(
+			'Second status',
+		);
+	});
+
 	it('dispatches a bubbling change event on structural edits', () => {
 		const container = repeater([row('0', 'a')]);
 		let changes = 0;
@@ -705,6 +722,36 @@ describe('repeater behavior', () => {
 		expect(text(rows[2])?.value).toBe('b');
 		expect(text(rows[2])?.name).toBe(`${NAME}[2][fields][text]`);
 	});
+
+	it.each(['', '1', '0', null])(
+		'preserves nullable checkbox choices when duplicating and moving rows (%s)',
+		(selected) => {
+			const choiceRow = (index: string, value: string | null): string => `<div data-repeater-row>
+			${['', '1', '0'].map((choice) => `<input type="radio" name="${NAME}[${index}][flag]" value="${choice}" ${choice === value ? 'checked' : ''}>`).join('')}
+			<button type="button" data-repeater-duplicate>Duplicate</button>
+			<button type="button" data-repeater-move="down">Down</button>
+		</div>`;
+			const container = repeater([choiceRow('0', ''), choiceRow('1', '1')], {
+				template: `<template data-repeater-template>${choiceRow('__i__', '')}</template>`,
+			});
+			container
+				.querySelector('[data-repeater-row]')!
+				.querySelectorAll<HTMLInputElement>('input')
+				.forEach((input) => {
+					input.checked = input.value === selected;
+				});
+			const values = () =>
+				Array.from(
+					container.querySelectorAll('[data-repeater-row]'),
+					(row) => row.querySelector<HTMLInputElement>('input:checked')?.value ?? null,
+				);
+
+			click(container, '[data-repeater-duplicate]');
+			expect(values()).toEqual([selected, selected, '1']);
+			container.querySelectorAll<HTMLElement>('[data-repeater-move]')[1]!.click();
+			expect(values()).toEqual([selected, '1', selected]);
+		},
+	);
 
 	it('seeds a duplicated element host with the payload as edited on the source', () => {
 		if (!customElements.get('cosray-host')) {

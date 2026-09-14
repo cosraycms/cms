@@ -272,6 +272,75 @@
 	}
 }
 
+.cms-tristate {
+	display: inline-flex;
+	align-self: flex-start;
+	max-width: 100%;
+	min-height: var(--cms-control-height);
+	padding: var(--cms-space-1);
+	gap: var(--cms-space-1);
+	border: 1px solid var(--cms-color-border-control);
+	border-radius: var(--cms-radius-md);
+	background: var(--cms-color-surface-sunken);
+	box-shadow: var(--cms-shadow-recessed);
+	color: var(--cms-color-text);
+	font-size: var(--cms-font-size-sm);
+
+	& .option {
+		position: relative;
+		display: flex;
+		min-width: 0;
+
+		& > span {
+			display: flex;
+			align-items: center;
+			padding: 0 var(--cms-space-2);
+			border: 1px solid transparent;
+			border-radius: var(--cms-radius);
+			overflow-wrap: anywhere;
+			cursor: pointer;
+		}
+	}
+
+	& :checked + span {
+		border-color: var(--cms-color-border-control);
+		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-raised);
+	}
+
+	& :focus-visible + span {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	& :disabled + span {
+		color: var(--cms-color-text-subtle);
+		cursor: default;
+	}
+
+	.cms-field[data-readonly='true'] & :checked + span {
+		color: var(--cms-color-text);
+	}
+
+	@media (forced-colors: active) {
+		& :checked + span {
+			forced-color-adjust: none;
+			border-color: Highlight;
+			background: Highlight;
+			color: HighlightText;
+			box-shadow: none;
+		}
+
+		& :focus-visible + span {
+			outline-color: Highlight;
+		}
+
+		.cms-field[data-readonly='true'] & :checked + span {
+			color: HighlightText;
+		}
+	}
+}
+
 .cms-checkbox-label {
 	display: inline-flex;
 	align-items: center;

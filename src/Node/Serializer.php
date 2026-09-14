@@ -81,7 +81,9 @@ class Serializer
 
 		foreach ($fieldNames as $fieldName) {
 			$field = Factory::fieldFor($node, $fieldName);
-			$content[$fieldName] = $field->structure($values[$fieldName] ?? null);
+			$content[$fieldName] = array_key_exists($fieldName, $values)
+				? $field->structure($values[$fieldName])
+				: $field->structure();
 		}
 
 		$class = $node::class;
