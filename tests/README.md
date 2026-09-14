@@ -92,7 +92,7 @@ The full-text tests require migration `000000-000036` (or the current fresh-inst
 - `FulltextIndexTest`: configurations, stemming/stopwords, original-spelling accent highlights, weights/phrases, replacement, oversized vectors and fresh-install parity.
 - `FulltextStoreTest`: live writes and working-copy transitions, rollback, rebuild equivalence, missing titles, removed selections and failure reporting.
 - `FulltextConcurrencyTest`: a separate PHP process waits for an uncommitted live writer, then rebuilds its committed content. It uses `proc_open`, observes lock waits through `pg_stat_activity`, and cleans up its own committed fixtures.
-- `FulltextFinderTest`: result eligibility, active/fallback URLs, filter/count/pagination composition, web-search syntax, query-local metadata and an `EXPLAIN (ANALYZE, BUFFERS)` guard against pre-pagination headline evaluation.
+- `FulltextFinderTest`: result eligibility, active/fallback URLs, filter/count/pagination composition, web-search syntax and query-local metadata.
 - `FulltextSnippetTest`: escaped highlights and deliberate safe rendering through Boiler.
 
 Configuration provisioning and install-parity tests create temporary schema objects inside the test transaction. No application schema opt-ins or application database rebuilds are needed to run this suite. Operational guidance is in [Full-text search](../docs/fulltext.md).

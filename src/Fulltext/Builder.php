@@ -15,6 +15,7 @@ use Cosray\Field\Schema\FulltextHandler;
 use Cosray\Locale;
 use Cosray\Node\Types;
 use Cosray\Richtext\Envelope;
+use Cosray\Richtext\Spec;
 use Cosray\Schema\Allows;
 use Cosray\Schema\Fulltext;
 use Cosray\Schema\FulltextWeight;
@@ -214,7 +215,7 @@ final class Builder
 				if (!Envelope::isStructured($data)) {
 					continue;
 				}
-				$value = $this->richtext($value, $where);
+				$value = $this->richtext($value);
 			}
 			if (!is_string($value)) {
 				throw new RuntimeException(
@@ -236,32 +237,25 @@ final class Builder
 		return null;
 	}
 
-	private function richtext(mixed $node, string $field): string
+	// Reader-tolerant like Richtext\Renderer: unknown types are skipped with their subtree.
+	private function richtext(mixed $node): string
 	{
 		$type = is_array($node) ? $node['type'] ?? null : null;
-		if ($type === 'text' && is_string($node['text'] ?? null)) {
-			return $node['text'];
-		}
-		if ($type === 'image') {
+		if (!is_string($type) || !Spec::isNode($type)) {
 			return '';
 		}
-		if ($type === 'hardBreak' || $type === 'horizontalRule') {
-			return "\n";
+		if ($type === 'text') {
+			return is_string($node['text'] ?? null) ? $node['text'] : '';
 		}
-		// The v1 node vocabulary of docs/richtext-format.md; a new node type
-		// must be handled here before selected fields can store it.
-		if (!in_array(
-			$type,
-			['doc', 'paragraph', 'heading', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock'],
-			true,
-		)) {
-			throw new RuntimeException("Unsupported richtext node in fulltext field '{$field}'.");
+		$boundary = $type === 'hardBreak' || !Spec::isInline($type) ? "\n" : '';
+		if (Spec::isLeaf($type)) {
+			return $boundary;
 		}
 		$text = '';
-		foreach ($node['content'] ?? [] as $child) {
-			$text .= $this->richtext($child, $field);
+		foreach (is_array($node['content'] ?? null) ? $node['content'] : [] as $child) {
+			$text .= $this->richtext($child);
 		}
-		return $text . "\n";
+		return $text . $boundary;
 	}
 
 	private function append(array &$parts, string $field, FulltextWeight $weight, string $text): void

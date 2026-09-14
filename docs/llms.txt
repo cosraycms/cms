@@ -1055,6 +1055,8 @@ Full-text search (complete contract: `docs/fulltext.md`)
 - Builder reads flattened schema definitions and stored structured text without
   hydrating nodes or rendering HTML. It honors allowed typed rows, Blocks
   translation modes, owning-scope `When` conditions, locale fallbacks and zxx.
+  Unknown rich-text node types are skipped with their subtree, as the renderer
+  does.
 - One `full_text` row per node/content locale: ordered weighted tsvector plus
   original plain-text `source`. The target locale's analyzer handles the whole
   effective document, including fallback prose. This does not translate queries

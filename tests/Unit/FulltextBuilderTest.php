@@ -228,6 +228,41 @@ final class FulltextBuilderTest extends TestCase
 		self::assertSame("cooperate now\nnext\nparagraph\nitem one\n\nitem two\n\n\nVisible link", $doc->source);
 	}
 
+	public function testUnknownRichtextNodesAreSkippedWithTheirSubtreeLikeTheRenderer(): void
+	{
+		$text = static fn(string $text): array => ['type' => 'text', 'text' => $text];
+		$doc = $this->build(FtsRich::class, [
+			'body' => [
+				'format' => 'cosray-richtext',
+				'version' => 1,
+				'value' => [
+					'zxx' => [
+						'type' => 'doc',
+						'content' => [
+							[
+								'type' => 'paragraph',
+								'content' => [
+									$text('before '),
+									['type' => 'mention', 'attrs' => ['label' => 'hidden label']],
+									$text('after'),
+								],
+							],
+							[
+								'type' => 'figure',
+								'content' => [['type' => 'paragraph', 'content' => [$text('hidden caption')]]],
+							],
+							[
+								'type' => 'paragraph',
+								'content' => [['type' => 'text', 'text' => 42], 'not a node', $text('last')],
+							],
+						],
+					],
+				],
+			],
+		]);
+		self::assertSame("before after\nlast", $doc->source);
+	}
+
 	public function testFlatEmbeddedFieldsAndOnlyTheResolvedTitleProviderContribute(): void
 	{
 		$content = ['body' => $this->text('Flat body')];

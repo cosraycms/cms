@@ -42,7 +42,7 @@ Supported field classes are exactly `Text`, `Textarea`, `RichText`, `Blocks` and
 - An unannotated structural field still discovers explicitly annotated children, but supplies no inherited weight. Only allowed row types contribute. The existing restrictions on nested repeaters apply.
 - Embedded fields use their ordinary flat stored names. The embedding property itself is not a full-text container.
 - `#[When]` deactivation excludes dormant values. Conditions read neutral-locale siblings in the owning node or row, not similarly named fields elsewhere.
-- Rich text is read from its structured document, without rendering templates or loading assets. Adjacent marked text runs stay adjacent; paragraphs, list items and hard breaks retain word boundaries. Link destinations, image metadata, row identities, layout and arbitrary JSON keys never contribute.
+- Rich text is read from its structured document, without rendering templates or loading assets. Adjacent marked text runs stay adjacent; paragraphs, list items and hard breaks retain word boundaries. Link destinations, image metadata, row identities, layout and arbitrary JSON keys never contribute. Node types the format does not know are skipped with their subtree, as the renderer does.
 - Both the vector and the snippet source contain only selected text. Do not opt private fields into this shared index; panel-only fields are not supported in v1.
 
 An annotated `title()` contributes only when it is the resolved `Title` provider: an outer implementation wins over an embedded one, and an explicitly selected embedded provider wins over automatic candidates. Inherited concrete implementations retain their annotations. Arbitrary method annotations are unsupported; the `Title` interface itself does not opt classes in.
@@ -139,7 +139,7 @@ In an escaped Boiler template, deliberately unwrap that safe HTML:
 
 Do not output raw PostgreSQL headline text as HTML. Source control characters used as headline markers are stripped during extraction; every resulting segment is escaped before markup is added. Source spelling and accents are retained. PostgreSQL may omit HTML-like tags when constructing a headline; this is not an HTML-preservation API.
 
-The fixed headline settings are `MaxWords=35`, `MinWords=15`, `MaxFragments=2`, with a spaced ellipsis between fragments. These are word/fragment bounds, not a byte-size limit. Headlines are part of the find statement but not its ordering or grouping. With pagination PostgreSQL evaluates them for limit plus offset rows; an integration `EXPLAIN` check guards that plan shape. Unlimited queries generate one headline per match. Use a limit and avoid unnecessarily large offsets.
+The fixed headline settings are `MaxWords=35`, `MinWords=15`, `MaxFragments=2`, with a spaced ellipsis between fragments. These are word/fragment bounds, not a byte-size limit. Headlines are part of the find statement but not its ordering or grouping. With a `LIMIT`, PostgreSQL evaluates them after the sort and only for the limit plus offset rows: the planner postpones target-list expressions costing more than ten times `cpu_operator_cost`, and `ts_headline` is declared with cost 100. Keeping the headline out of ordering and grouping preserves that. Unlimited queries generate one headline per match. Use a limit and avoid unnecessarily large offsets.
 
 The placement under `meta->search` remains a v1 working API scheduled for review after real template usage; score and snippet access are already available.
 
