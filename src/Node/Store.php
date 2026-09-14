@@ -9,10 +9,12 @@ use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpError;
 use Celema\Quma\Database;
 use Cosray\Actor;
+use Cosray\Block\Registry as Blocks;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
+use Cosray\Fulltext;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\References;
@@ -31,6 +33,7 @@ class Store
 	private readonly References\Sync $sync;
 	private readonly TitleResolver $titleResolver;
 	private readonly Drafts $drafts;
+	private readonly Fulltext\Sync $fulltext;
 
 	public function __construct(
 		private readonly Database $db,
@@ -51,6 +54,10 @@ class Store
 		$this->sync = new References\Sync($db);
 		$this->titleResolver = new TitleResolver($types);
 		$this->drafts = new Drafts($db);
+		$this->fulltext = new Fulltext\Sync($db, new Fulltext\Builder(
+			$types,
+			$factory?->hydrator()->services()->blocks ?? Blocks::withDefaults(),
+		));
 	}
 
 	/**
@@ -257,16 +264,23 @@ class Store
 		try {
 			if ($ownsTransaction) {
 				$this->db->begin();
+			} else {
+				$this->db->nodes->savepoint()->run();
 			}
 
 			$work();
 
 			if ($ownsTransaction) {
 				$this->db->commit();
+			} else {
+				$this->db->nodes->releaseSavepoint()->run();
 			}
 		} catch (Throwable $e) {
 			if ($ownsTransaction) {
 				$this->db->rollback();
+			} else {
+				$this->db->nodes->rollbackSavepoint()->run();
+				$this->db->nodes->releaseSavepoint()->run();
 			}
 
 			if ($e instanceof HttpError) {
@@ -418,6 +432,7 @@ class Store
 		// The reference indexes ride in the save transaction: full
 		// replace per owner from the content just written.
 		$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));
+		$this->fulltext->replace($nodeId, $data['uid'], $node::class, $data['content'] ?? [], $data['title'], $locales);
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->ensureRouteHandle($node, $handle);

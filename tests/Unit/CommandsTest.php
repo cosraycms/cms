@@ -58,6 +58,32 @@ final class CommandsTest extends TestCase
 		$this->assertSame($expected, $entry->command());
 	}
 
+	public function testFulltextResolvesInConsoleScopeWithoutOpeningTheDatabase(): void
+	{
+		$config = $this->config([
+			'db.dsn' => 'pgsql:host=not-a-database.invalid;dbname=missing',
+			'error.enabled' => false,
+		]);
+		$app = new App($config, $this->factory(), new Router(), $this->container());
+		$locales = new Locales();
+		$locales->add('en', 'English', pgDict: 'english');
+		$app->load($locales);
+		$commands = new Commands($app);
+		foreach ($commands->commands()->entries() as $entry) {
+			if ($entry->meta->full() === 'db:fulltext') {
+				$this->assertInstanceOf(\Cosray\Commands\Fulltext::class, $entry->command());
+				$this->assertFalse(
+					$app
+						->container()
+						->get(\Celema\Quma\Database::class)
+						->connected(),
+				);
+				return;
+			}
+		}
+		$this->fail('The app must provide db:fulltext.');
+	}
+
 	public function testServerRegistersBothDevServers(): void
 	{
 		$config = $this->config([

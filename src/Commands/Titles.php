@@ -17,7 +17,7 @@ use Cosray\Title\Rebuild;
 /**
  * Re-materializes every node's title from its content. Needs the booted app
  * (node type registry + locales), so it is constructed with those services —
- * unlike the self-describing `db:references`/`db:fulltext` commands.
+ * like `db:fulltext`, unlike the self-describing `db:references` command.
  */
 #[Command('db:titles', 'Rebuilds the materialized node titles from content', group: 'Database')]
 class Titles

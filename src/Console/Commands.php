@@ -60,7 +60,7 @@ final class Commands
 			migrationFactory: new MigrationFactory($container),
 		);
 		$this->commands->add([
-			Fulltext::class => fn(): Fulltext => new Fulltext($this->conn()),
+			Fulltext::class => fn(): Fulltext => $this->resolve(Fulltext::class),
 			References::class => fn(): References => new References($this->conn()),
 			RecreateSortIndex::class => fn(): RecreateSortIndex => new RecreateSortIndex($this->conn()),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),

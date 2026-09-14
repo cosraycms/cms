@@ -1,0 +1,10 @@
+DELETE FROM cms.full_text WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.url_paths WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.node_handles WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.asset_references WHERE owner_uid = :uid AND owner_type IN ('node', 'draft');
+DELETE FROM cms.node_references WHERE owner_uid = :uid AND owner_type IN ('node', 'draft');
+DELETE FROM cms.drafts WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.drafts_history WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.nodes_history WHERE node IN (SELECT node FROM cms.nodes WHERE uid = :uid);
+DELETE FROM cms.nodes WHERE uid = :uid;
+DELETE FROM cms.types t WHERE handle = 'fulltext-page' AND NOT EXISTS (SELECT FROM cms.nodes n WHERE n.type = t.type);

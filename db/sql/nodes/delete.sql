@@ -28,6 +28,11 @@ WHERE
 	owner_type IN ('node', 'draft')
 	AND owner_uid = :uid;
 
+DELETE FROM /*:cms.prefix:*/full_text
+WHERE node IN (
+	SELECT n.node FROM /*:cms.prefix:*/nodes n WHERE n.uid = :uid
+);
+
 DELETE FROM
 	/*:cms.prefix:*/drafts
 WHERE node IN (
