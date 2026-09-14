@@ -16,6 +16,11 @@ SELECT
 	n.content,
 <?php endif ?>
 	n.title,
+<?php if (isset($fulltext)) : ?>
+	ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)) AS search_score,
+	ts_headline(:search_config::regconfig, ft.source, websearch_to_tsquery(:search_config::regconfig, :fulltext),
+		'StartSel=' || chr(1) || ', StopSel=' || chr(2) || ', MaxWords=35, MinWords=15, MaxFragments=2, FragmentDelimiter= … ') AS search_headline,
+<?php endif ?>
 	d.node IS NOT NULL AS has_draft,
 	d.created AS draft_created,
 	d.changed AS draft_changed,
@@ -37,6 +42,9 @@ SELECT
 FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
+<?php if (isset($fulltext)) : ?>
+	INNER JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
+<?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/node_handles h ON
 		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
@@ -63,6 +71,18 @@ FROM
 	) sup ON sup.node = n.node
 WHERE
 	1 = 1
+<?php if (isset($fulltext)) : ?>
+	AND ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
+<?php endif ?>
+<?php if (isset($active_url) && $active_url) : ?>
+	AND (<?= $routable ?>)
+	AND EXISTS (
+		SELECT FROM /*:cms.prefix:*/url_paths public_path
+		WHERE public_path.node = n.node AND public_path.inactive IS NULL
+			AND public_path.path <> ''
+			AND public_path.locale IN (SELECT jsonb_array_elements_text(:url_locales::jsonb))
+	)
+<?php endif ?>
 <?php if (isset($uid)) : ?>
 	AND n.uid = :uid
 <?php endif ?>
@@ -91,6 +111,9 @@ WHERE
 <?php endif ?>
 
 GROUP BY
+<?php if (isset($fulltext)) : ?>
+	ft.node, ft.locale,
+<?php endif ?>
 	n.node,
 	d.node,
 	ud.data,

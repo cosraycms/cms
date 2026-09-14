@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Cosray\Exception\NoSuchProperty;
+use Cosray\Fulltext\Search;
 
 class Meta
 {
 	private readonly object $node;
 	public readonly string $uid;
 	public readonly Type $type;
+	public readonly Search $search;
 
 	public function __construct(
 		object $node,
@@ -19,6 +21,10 @@ class Meta
 		$this->node = Wrapper::unwrap($node);
 		$this->uid = (string) (Factory::meta($this->node, 'uid') ?? '');
 		$this->type = $this->types->typeOf($this->node::class);
+		$search = Factory::meta($this->node, 'search');
+		if ($search instanceof Search) {
+			$this->search = $search;
+		}
 	}
 
 	public function __get(string $name): mixed

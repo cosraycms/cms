@@ -3,6 +3,9 @@ SELECT
 FROM
 	/*:cms.prefix:*/nodes n
 	INNER JOIN /*:cms.prefix:*/types t USING(type)
+<?php if (isset($fulltext)) : ?>
+	INNER JOIN /*:cms.prefix:*/full_text ft ON ft.node = n.node AND ft.locale = :search_locale
+<?php endif ?>
 	LEFT JOIN /*:cms.prefix:*/node_handles h ON
 		h.node = n.node
 	LEFT JOIN /*:cms.prefix:*/nodes np ON
@@ -15,6 +18,18 @@ FROM
 		ue.usr = n.editor
 WHERE
 	1 = 1
+<?php if (isset($fulltext)) : ?>
+	AND ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
+<?php endif ?>
+<?php if (isset($active_url) && $active_url) : ?>
+	AND (<?= $routable ?>)
+	AND EXISTS (
+		SELECT FROM /*:cms.prefix:*/url_paths public_path
+		WHERE public_path.node = n.node AND public_path.inactive IS NULL
+			AND public_path.path <> ''
+			AND public_path.locale IN (SELECT jsonb_array_elements_text(:url_locales::jsonb))
+	)
+<?php endif ?>
 <?php if (isset($deleted)) : ?>
 <?php if ($deleted) : ?>
 	AND n.deleted IS NOT NULL

@@ -36,12 +36,4 @@ final class QueryCompiler
 
 		return $clause;
 	}
-
-	private function translateKeyword(string $keyword): string
-	{
-		return match ($keyword) {
-			'now' => 'NOW()',
-			'fulltext' => 'tsv websearch_to_tsquery',
-		};
-	}
 }

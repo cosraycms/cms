@@ -84,6 +84,37 @@ final class FulltextIndexTest extends FulltextTestCase
 		self::assertSame('<mark>Häuser</mark> mit <mark>Gärten</mark>', new Snippet($match['headline'])->html());
 	}
 
+	public function testRichtextPhrasesPreserveAdjacentMarkedRuns(): void
+	{
+		$node = $this->createTestNode(['type' => $this->createTestType('fts-richtext')]);
+		$content = [
+			'body' => [
+				'format' => 'cosray-richtext',
+				'version' => 1,
+				'value' => [
+					'en' => [
+						'type' => 'doc',
+						'content' => [
+							[
+								'type' => 'paragraph',
+								'content' => [
+									['type' => 'text', 'text' => 'coop'],
+									['type' => 'text', 'text' => 'erate', 'marks' => [['type' => 'bold']]],
+									['type' => 'text', 'text' => ' today'],
+								],
+							],
+							['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'together']]],
+						],
+					],
+				],
+			],
+		];
+		$this->sync()->replace($node, 'fts-richtext', FtsRichContent::class, $content, [], $this->locales());
+		self::assertNotNull($this->match($node, '"cooperate today"'));
+		self::assertNotNull($this->match($node, '"today together"'));
+		self::assertNull($this->match($node, '"coop erate"'));
+	}
+
 	public function testUnknownConfigurationIsAnErrorBeforeReplacingExistingDocuments(): void
 	{
 		$node = $this->index(['a' => 'Keep me']);
@@ -172,6 +203,12 @@ final class FulltextIndexTest extends FulltextTestCase
 			self::assertSame($row['updated_headline'], $row['installed_headline'], $row['cfgname']);
 		}
 	}
+}
+
+class FtsRichContent
+{
+	#[Fulltext(Weight::D)]
+	protected \Cosray\Field\RichText $body;
 }
 
 class FtsIndexContent

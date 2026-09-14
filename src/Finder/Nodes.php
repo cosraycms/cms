@@ -9,6 +9,9 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
+use Cosray\Fulltext\Configurations;
+use Cosray\Fulltext\Search;
+use Cosray\Fulltext\Snippet;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -25,6 +28,9 @@ final class Nodes implements Iterator
 	private string $order = '';
 	private ?int $limit = null;
 	private ?int $offset = null;
+	private ?string $fulltext = null;
+	private ?bool $activeUrl = null;
+	private readonly Configurations $configurations;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
 	private ?bool $published = true; // ditto
 	private ?bool $hidden = false; // ditto
@@ -38,6 +44,7 @@ final class Nodes implements Iterator
 		private readonly Factory $nodeFactory,
 		private readonly Types $types,
 	) {
+		$this->configurations = new Configurations($context->db);
 		$this->builtins = [
 			'changed' => 'n.changed',
 			'changes' => 'd.node IS NOT NULL',
@@ -66,6 +73,20 @@ final class Nodes implements Iterator
 	{
 		$compiler = new QueryCompiler($this->context, $this->builtins);
 		$this->addWhere($compiler->compile($query));
+
+		return $this;
+	}
+
+	public function fulltext(string $query): self
+	{
+		$this->fulltext = $query;
+
+		return $this;
+	}
+
+	public function activeUrl(bool $required = true): self
+	{
+		$this->activeUrl = $required;
 
 		return $this;
 	}
@@ -317,6 +338,10 @@ final class Nodes implements Iterator
 		$row['creator_data'] = json_decode($row['creator_data'], true);
 		$row['paths'] = json_decode($row['paths'], true);
 		$row = Node::foldDraft($row);
+		if (isset($row['search_score'], $row['search_headline'])) {
+			$row['search'] = new Search((float) $row['search_score'], new Snippet($row['search_headline']));
+			unset($row['search_score'], $row['search_headline']);
+		}
 		$class = $this->context
 			->container
 			->tag(Bootstrap::NODE_TAG)
@@ -349,6 +374,8 @@ final class Nodes implements Iterator
 
 		if ($this->order) {
 			$params['order'] = $this->order;
+		} elseif ($this->fulltext !== null) {
+			$params['order'] = 'search_score DESC, n.uid ASC';
 		}
 
 		if ($this->limit !== null) {
@@ -394,6 +421,18 @@ final class Nodes implements Iterator
 
 		if (is_bool($this->hidden)) {
 			$params['hidden'] = $this->hidden;
+		}
+
+		if ($this->fulltext !== null) {
+			$params['fulltext'] = $this->fulltext;
+			$params['search_locale'] = $this->context->localeId();
+			$params['search_config'] = $this->configurations->for($this->context->locale());
+		}
+
+		if ($this->activeUrl ?? $this->fulltext !== null) {
+			$params['active_url'] = true;
+			$params['url_locales'] = json_encode($this->localeIds(), JSON_THROW_ON_ERROR);
+			$params['routable'] = $this->builtins['routable'];
 		}
 
 		return $params;
