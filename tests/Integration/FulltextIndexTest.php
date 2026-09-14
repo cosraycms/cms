@@ -115,6 +115,22 @@ final class FulltextIndexTest extends FulltextTestCase
 		self::assertNull($this->match($node, '"coop erate"'));
 	}
 
+	public function testReplacementRequiresATransaction(): void
+	{
+		$db = new \Celema\Quma\Database($this->conn());
+		$builder = new \Cosray\Fulltext\Builder(new \Cosray\Node\Types(), \Cosray\Block\Registry::withDefaults());
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('requires a transaction');
+		new \Cosray\Fulltext\Sync($db, $builder)->replace(
+			0,
+			'unlocked',
+			FtsIndexContent::class,
+			[],
+			[],
+			$this->locales(),
+		);
+	}
+
 	public function testUnknownConfigurationIsAnErrorBeforeReplacingExistingDocuments(): void
 	{
 		$node = $this->index(['a' => 'Keep me']);

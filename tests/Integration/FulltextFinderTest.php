@@ -211,6 +211,18 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(0, $this->cms->nodes()->fulltext('publicword')->count());
 	}
 
+	public function testHidingAWorkingCopyImmediatelyHidesTheUnchangedLiveDocument(): void
+	{
+		$this->page('fts-hidden-draft', 'Liveword');
+		$payload = $this->payload('fts-hidden-draft', 'Pendingword');
+		$payload['hidden'] = true;
+		$this->store->draft($this->node('fts-hidden-draft'), $payload, $this->languages, Actor::system());
+		self::assertSame('Liveword', $this->source('fts-hidden-draft'));
+		self::assertSame(0, $this->cms->nodes()->fulltext('liveword')->count());
+		self::assertSame(0, $this->cms->nodes()->fulltext('pendingword')->hidden(null)->count());
+		self::assertSame(1, $this->cms->nodes()->fulltext('liveword')->hidden(null)->count());
+	}
+
 	public function testSearchingInsideALocaleLoopDoesNotMoveItsCursor(): void
 	{
 		$this->page('fts-locale-loop', 'Needle');
@@ -256,6 +268,9 @@ final class FulltextFinderTest extends FulltextTestCase
 			'published' => true,
 			'hidden' => false,
 			'deleted' => false,
+			'active_url' => true,
+			'url_locales' => '["en"]',
+			'routable' => "t.handle = 'fulltext-page'",
 			'order' => 'search_score DESC, n.uid ASC',
 			'limit' => 2,
 			'offset' => 3,

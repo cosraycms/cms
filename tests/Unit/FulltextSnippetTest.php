@@ -26,6 +26,14 @@ final class FulltextSnippetTest extends TestCase
 		);
 	}
 
+	public function testBoilerCanDeliberatelyEmitSafeHighlightsWithoutDoubleEscaping(): void
+	{
+		$renderer = new \Cosray\View\Boiler\Renderer(dirname(__DIR__) . '/Fixtures/Boiler/templates');
+		$search = new \Cosray\Fulltext\Search(1.0, new Snippet("<img src=x onerror=evil()> \x01Café\x02"));
+		$html = $renderer->render('search', ['search' => $search]);
+		self::assertSame('&lt;img src=x onerror=evil()&gt; <mark>Café</mark>', trim($html));
+	}
+
 	public function testEmptyAndUnhighlightedSnippetsArePlainText(): void
 	{
 		self::assertSame('', new Snippet('')->html());
