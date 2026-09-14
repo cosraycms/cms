@@ -205,12 +205,14 @@ final class Editor extends Panel
 		// A followed redirect would land on the discard form's hx-swap="none"
 		// and render nothing. HX-Location has htmx fetch the editor from the
 		// live row into the main region itself; sourced from the discard
-		// form, so the unsaved-changes guard stands aside for that request.
+		// form, so the unsaved-changes guard stands aside for that request,
+		// and without the form's confirmation, which the POST already asked.
 		return $response->header('HX-Location', json_encode([
 			'path' => $links->edit($node),
 			'target' => '#main',
 			'swap' => 'innerHTML show:top',
 			'source' => '#node-editor-discard',
+			'confirm' => false,
 			'replace' => 'true',
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
 	}
