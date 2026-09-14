@@ -20,6 +20,7 @@ use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rowspan;
+use Cosray\Schema\StateLabels;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Tools;
 use Cosray\Schema\Translate;
@@ -63,6 +64,7 @@ class Registry
 		$registry->register(Hidden::class, new HiddenHandler());
 		$registry->register(Immutable::class, new ImmutableHandler());
 		$registry->register(Options::class, new OptionsHandler());
+		$registry->register(StateLabels::class, new StateLabelsHandler());
 		$registry->register(Limit::class, new LimitHandler());
 		$registry->register(Fulltext::class, new FulltextHandler());
 		$registry->register(Syntax::class, new SyntaxHandler());

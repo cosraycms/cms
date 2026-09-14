@@ -225,6 +225,53 @@
 	cursor: default;
 }
 
+.cms-toggle {
+	& .toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-height: var(--cms-control-height);
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+
+		&:has(:disabled) {
+			cursor: default;
+		}
+	}
+
+	& .cms-switch {
+		width: 2.75rem;
+		height: 1.625rem;
+
+		&::before {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
+
+		&:checked::before {
+			translate: 1.125rem 0;
+		}
+	}
+
+	& .status {
+		display: grid;
+
+		& > span {
+			grid-area: 1 / 1;
+		}
+	}
+
+	& .on,
+	& :checked ~ .status .off {
+		visibility: hidden;
+	}
+
+	& :checked ~ .status .on {
+		visibility: visible;
+	}
+}
+
 .cms-checkbox-label {
 	display: inline-flex;
 	align-items: center;

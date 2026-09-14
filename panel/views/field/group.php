@@ -28,7 +28,7 @@ $subField = ['required' => false, 'immutable' => false];
 		<div
 			class="cms-group-field"
 			<?= $sized ? 'data-width style="--group-width: ' . $width . '%"' : '' ?>>
-			<label class="cms-sub-label" for="<?= escape($subId) ?>">
+			<label class="cms-sub-label" id="<?= escape($subId) ?>-label" for="<?= escape($subId) ?>">
 				<?= escape((string) ($sub['label'] ?? $key)) ?>
 			</label>
 			<?php $this->insert('field/control', [

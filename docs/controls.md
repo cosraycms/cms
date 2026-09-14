@@ -15,7 +15,7 @@ Field values are persisted as locale maps. The neutral locale key is `zxx`; tran
 | `text` | `Control::text(?placeholder)` | `placeholder?` | locale map of `string` |
 | `textarea` | `Control::textarea()` | — | locale map of `string` |
 | `number` | `Control::number(step:,min:,max:)` | `step?`, `min?`, `max?` | locale map of `number\|string` |
-| `checkbox` | `Control::checkbox()` | — | locale map of `bool` |
+| `checkbox` | `Control::checkbox()` | `labels?: {true?, false?}` | locale map of `bool` |
 | `option` | `Control::option(display:)` | `display: select\|radio` | locale map of `string` (options come from `#[Options]`) |
 | `date` | `Control::date()` | — | locale map of `YYYY-MM-DD` |
 | `time` | `Control::time()` | — | locale map of `HH:MM` |
@@ -43,6 +43,12 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 The three media controls share one frame. A header bar holds the library button, the upload prompt — drag and drop, or choose through the file picker — and a count against the field's limit; an empty field is that bar alone, one control high. The whole frame is the drop target: while files hover over it, its edge turns dashed, its content dims and one label says what a drop does — add, or replace on a single-item field. A read-only field renders no bar, only its content in a well. Beneath the bar a single image shows its card — the thumbnail, which opens a preview, the file name, the dimensions and size, alt text and caption in place, and a × to remove it; replacing goes through the bar — and a gallery its tiles. Files list as rows — a type icon or, for an image, its thumbnail, the file name linking to the file, the per-use title, the size, edit and remove — that reorder by drag; a video shows its player above one such row.
 
 A `DateTime` value is an instant. Every non-empty stored value is normalized to UTC with whole-second precision, for example `2026-07-30T17:00:00Z`; a programmatic write may supply another RFC 3339 offset and validation normalizes it to `Z`. The native `datetime-local` control has no offset: the panel converts its `YYYY-MM-DDTHH:MM[:SS]` form value through the field's `meta.timezone`, defaulting to UTC, and converts the stored instant back through the same timezone for editing. `Date` and `Time` remain local values without an offset.
+
+### Checkbox fields
+
+`Cosray\Field\Checkbox` renders as a toggle with its field label above and its current state beside it. The default state labels are “Yes” and “No”, translated into the panel language. Override them with `#[StateLabels(true: 'Enabled', false: 'Disabled')]` from `Cosray\Schema`; custom labels are translated like field labels and included by the schema translation scanner. Labels do not change the stored boolean values.
+
+A required Checkbox accepts `false`: requiring an answer is not the same as requiring consent. Immutable fields keep their value visible but cannot be toggled. Like other fields, a toggle is persisted by saving the editor, not immediately on interaction.
 
 ### Content language and fallback previews
 

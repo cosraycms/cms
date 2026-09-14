@@ -188,6 +188,8 @@ return [
 		'field:insert-above' => 'Insert above',
 		'field:insert-before' => 'Insert before',
 		'field:meta' => 'Meta',
+		'field:yes' => 'Yes',
+		'field:no' => 'No',
 		'field:readonly' => 'read-only',
 		'field:remove' => 'Remove',
 		'field:remove-block' => 'Remove block',

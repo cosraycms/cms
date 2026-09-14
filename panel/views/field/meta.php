@@ -15,7 +15,7 @@ $id = (string) $id;
 
 $fieldName = (string) ($field['name'] ?? '');
 $nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
-$subs = (array) ((($control['props'] ?? []))['fields'] ?? []);
+$subs = (array) (($control['props'] ?? [])['fields'] ?? []);
 $subField = ['required' => false, 'immutable' => false];
 ?>
 <div class="fields">
@@ -26,7 +26,7 @@ $subField = ['required' => false, 'immutable' => false];
 		$subId = "{$id}-{$key}";
 		?>
 		<div class="field">
-			<label class="cms-sub-label" for="<?= escape($subId) ?>">
+			<label class="cms-sub-label" id="<?= escape($subId) ?>-label" for="<?= escape($subId) ?>">
 				<?= escape((string) ($sub['label'] ?? $key)) ?>
 			</label>
 			<?php $this->insert('field/control', [

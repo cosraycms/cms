@@ -10,7 +10,9 @@ $subField = ['required' => false, 'immutable' => false];
 ?>
 <div class="cms-repeater-item" data-repeater-row>
 	<div class="cms-repeater-item-control">
-		<label class="cms-sub-label" for="<?= $this->escape($itemId) ?>" data-repeater-label>
+		<label class="cms-sub-label" id="<?= $this->escape($itemId) ?>-label" for="<?= $this->escape(
+			$itemId,
+		) ?>" data-repeater-label>
 			<?= is_int($index) ? ($index + 1) . '.' : '' ?>
 		</label>
 		<?php $this->insert('field/control', [

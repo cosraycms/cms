@@ -5,14 +5,27 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celema\Sire\Shape;
+use Cosray\Schema\StateLabels;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Boolean;
 
 class Checkbox extends Field
 {
+	public ?StateLabels $stateLabels = null;
+
 	public function control(): Control
 	{
-		return Control::checkbox();
+		$labels = [];
+
+		foreach (['true', 'false'] as $state) {
+			$label = $this->stateLabels?->{$state};
+
+			if ($label !== null) {
+				$labels[$state] = __($label);
+			}
+		}
+
+		return Control::checkbox()->prop('labels', $labels);
 	}
 
 	public function value(): Boolean

@@ -14,6 +14,7 @@ use Cosray\Schema\Description;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
+use Cosray\Schema\StateLabels;
 use ReflectionClass;
 
 /**
@@ -127,6 +128,14 @@ final class SchemaScanner implements Scanner
 
 			foreach ($property->getAttributes(Placeholder::class) as $attribute) {
 				$this->add($messages, $attribute->newInstance()->placeholder, $where);
+			}
+
+			foreach ($property->getAttributes(StateLabels::class) as $attribute) {
+				foreach (get_object_vars($attribute->newInstance()) as $label) {
+					if ($label !== null) {
+						$this->add($messages, $label, $where);
+					}
+				}
 			}
 
 			foreach ($property->getAttributes(Options::class) as $attribute) {

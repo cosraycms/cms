@@ -65,6 +65,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?= is_array($when) ? "data-when='" . json_encode($when, $jsonFlags) . "'" : '' ?>>
 	<?php // Kept in the tree when hidden: the control needs its name. ?>
 	<label
+		id="<?= escape($labelFor) ?>-label"
 		for="<?= escape($labelFor) ?>"
 		<?= $variants ? 'data-locale-label-for="' . escape($idRoot) . '"' : '' ?>
 		class="label<?= $bareLabel && !is_array($metaControl) ? ' sr-only' : '' ?>">
@@ -84,7 +85,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<?php endif ?>
 	</label>
 	<div class="field-body">
-		<div class="control<?= $controlName === 'checkbox' ? ' cms-checkbox-wrap' : '' ?>">
+		<div class="control">
 			<?php if ($variants): ?>
 				<?php foreach ($locales as $locale): ?>
 					<div
