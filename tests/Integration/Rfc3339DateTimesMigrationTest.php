@@ -72,8 +72,9 @@ final class Rfc3339DateTimesMigrationTest extends IntegrationTestCase
 	protected function tearDown(): void
 	{
 		$db = $this->db();
-		$db->execute('DELETE FROM cms.drafts_history WHERE node = :node', ['node' => $this->nodeId])->run();
+		// The draft first: deleting it records its last state in the history.
 		$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $this->nodeId])->run();
+		$db->execute('DELETE FROM cms.drafts_history WHERE node = :node', ['node' => $this->nodeId])->run();
 		$db->execute('DELETE FROM cms.nodes_history WHERE node = :node', ['node' => $this->nodeId])->run();
 		$db->execute('DELETE FROM cms.nodes WHERE node = :node', ['node' => $this->nodeId])->run();
 		$db->execute('DELETE FROM cms.types WHERE type = :type', ['type' => $this->typeId])->run();

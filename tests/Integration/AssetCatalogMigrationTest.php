@@ -143,10 +143,11 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 			'item' => "migtest-{$this->nodeUid}",
 		])->run();
 		$db->execute("DELETE FROM cms.menus WHERE menu = 'migtest'")->run();
+		// The draft first: deleting it records its last state in the history.
+		$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $this->nodeId])->run();
 		$db->execute('DELETE FROM cms.drafts_history WHERE node = :node', [
 			'node' => $this->nodeId,
 		])->run();
-		$db->execute('DELETE FROM cms.drafts WHERE node = :node', ['node' => $this->nodeId])->run();
 		$db->execute('DELETE FROM cms.nodes_history WHERE node = :node', [
 			'node' => $this->nodeId,
 		])->run();

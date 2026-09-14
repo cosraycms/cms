@@ -114,7 +114,64 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertSame(['node'], $this->referenceOwners('drafts-target'));
 		$this->assertSame('Links', $this->liveTitle('drafts-referrer'));
 		$this->assertSame(0, $this->rows('drafts', 'drafts-referrer'));
-		$this->assertSame(0, $this->rows('drafts_history', 'drafts-referrer'));
+	}
+
+	public function testTheHistoryOutlivesTheWorkingCopyAndNamesEachEditor(): void
+	{
+		$writer = $this->createTestUser(['uid' => 'drafts-writer']);
+		$photographer = $this->createTestUser(['uid' => 'drafts-photographer']);
+		$this->createPage('drafts-timeline', 'Live');
+
+		$this->store->draft(
+			$this->node('drafts-timeline'),
+			$this->payload('drafts-timeline', 'Text written'),
+			$this->locales(),
+			new Actor($writer),
+		);
+		$this->store->draft(
+			$this->node('drafts-timeline'),
+			$this->payload('drafts-timeline', 'Pictures added') + ['handle' => 'timeline'],
+			$this->locales(),
+			new Actor($photographer),
+		);
+		$this->store->publishDraft($this->node('drafts-timeline'), $this->locales(), Actor::system());
+
+		$history = $this->db()->execute(
+			'SELECT h.editor, h.content, h.settings FROM cms.drafts_history h
+				JOIN cms.nodes n ON n.node = h.node WHERE n.uid = :uid ORDER BY h.changed',
+			['uid' => 'drafts-timeline'],
+		)->all();
+		$this->assertCount(2, $history);
+		$this->assertSame(
+			[$writer, $photographer],
+			array_map(static fn(array $row): int => (int) $row['editor'], $history),
+		);
+		$this->assertSame('Pictures added', json_decode((string) $history[1]['content'], true)['title']['value']['en']);
+		$this->assertSame('timeline', json_decode((string) $history[1]['settings'], true)['handle']);
+		$this->assertSame('Pictures added', $this->liveTitle('drafts-timeline'));
+	}
+
+	public function testDiscardRecordsTheLastStateOfTheWorkingCopy(): void
+	{
+		$this->createPage('drafts-discard-history', 'Live');
+		$this->store->draft(
+			$this->node('drafts-discard-history'),
+			$this->payload('drafts-discard-history', 'Thrown away'),
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->store->discard($this->node('drafts-discard-history'));
+
+		$this->assertSame(0, $this->rows('drafts', 'drafts-discard-history'));
+		$this->assertSame(1, $this->rows('drafts_history', 'drafts-discard-history'));
+		$this->assertSame(
+			'Thrown away',
+			json_decode(
+				(string) $this->row('drafts_history', 'drafts-discard-history')['content'],
+				true,
+			)['title']['value']['en'],
+		);
 	}
 
 	public function testDiscardDropsTheWorkingCopyAndItsReferences(): void

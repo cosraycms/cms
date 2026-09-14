@@ -55,4 +55,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000031-blocks-typed-rows[pgsql].php', now()),
 	('000000-000032-block-layout-keys[pgsql].php', now()),
 	('000000-000033-rfc3339-datetimes[pgsql].php', now()),
-	('000000-000034-node-drafts.sql', now());
+	('000000-000034-node-drafts.sql', now()),
+	('000000-000035-draft-history-outlives-drafts.sql', now());

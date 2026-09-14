@@ -1,7 +1,10 @@
+-- Statement time, not transaction time: the history tables key their rows
+-- by `changed`, and two writes to one row inside a transaction must both
+-- keep theirs.
 CREATE FUNCTION /*:cms.prefix:*/update_changed_column()
 	RETURNS TRIGGER AS $$
 BEGIN
-   NEW.changed = now();
+   NEW.changed = clock_timestamp();
    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -292,13 +295,16 @@ CREATE TABLE /*:cms.prefix:*/drafts (
 CREATE TRIGGER /*:cms.obj:*/drafts_trigger_02_change BEFORE UPDATE
 	ON /*:cms.prefix:*/drafts
 	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
+-- Records every superseded state of a working copy, and its last state
+-- when publishing or discarding deletes the row, so the history outlives
+-- the working copy.
 CREATE FUNCTION /*:cms.prefix:*/record_draft_history()
 	RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO /*:cms.prefix:*/drafts_history (
-		node, changed, editor, content
+		node, changed, editor, content, settings
 	) VALUES (
-		OLD.node, OLD.changed, OLD.editor, OLD.content
+		OLD.node, OLD.changed, OLD.editor, OLD.content, OLD.settings
 	);
 
 	RETURN OLD;
@@ -307,7 +313,7 @@ EXCEPTION WHEN unique_violation THEN
 	RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
-CREATE TRIGGER /*:cms.obj:*/drafts_trigger_01_history AFTER UPDATE
+CREATE TRIGGER /*:cms.obj:*/drafts_trigger_01_history AFTER UPDATE OR DELETE
 	ON /*:cms.prefix:*/drafts FOR EACH ROW EXECUTE FUNCTION
 	/*:cms.prefix:*/record_draft_history();
 
@@ -436,10 +442,12 @@ CREATE TABLE /*:cms.prefix:*/drafts_history (
 	changed timestamp with time zone NOT NULL,
 	editor bigint NOT NULL,
 	content jsonb NOT NULL,
+	settings jsonb NOT NULL DEFAULT '{}',
 	CONSTRAINT /*:cms.obj:*/pk_drafts_history PRIMARY KEY (node, changed),
-	-- Publishing or discarding deletes the working copy; its history goes with it.
-	CONSTRAINT /*:cms.obj:*/fk_drafts_history_drafts FOREIGN KEY (node)
-		REFERENCES /*:cms.prefix:*/drafts (node) ON DELETE CASCADE
+	-- Keyed to the node, not the working copy: the history stays when
+	-- publishing or discarding deletes the drafts row.
+	CONSTRAINT /*:cms.obj:*/fk_drafts_history_nodes FOREIGN KEY (node)
+		REFERENCES /*:cms.prefix:*/nodes (node)
 );
 
 

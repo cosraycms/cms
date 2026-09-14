@@ -830,6 +830,12 @@ Working copies:
   unpublish folds them in; `/preview/{uid}` renders the working copy.
 - Duplicating copies the live version. Draft content is indexed under
   the reference owner type `draft`.
+- `drafts_history` records every superseded state of a working copy and
+  its last state when publishing or discarding deletes the row (editor,
+  content, settings), keyed to the node so it outlives the working copy.
+  Together with `nodes_history` (superseded live versions) it is the
+  node's timeline: who saved what while changes were pending, and when
+  they went live.
 
 9) Media handling
 
