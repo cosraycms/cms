@@ -17,6 +17,11 @@
 		content: '';
 	}
 
+	/* The editor toggles its changes chip with the attribute; the display above would win otherwise. */
+	&[hidden] {
+		display: none;
+	}
+
 	&.is-published {
 		border-color: color-mix(in oklch, var(--cms-color-success), transparent 70%);
 		background: var(--cms-color-success-surface);
