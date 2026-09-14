@@ -6,10 +6,10 @@ namespace Cosray\Schema;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_METHOD)]
 readonly class Fulltext
 {
 	public function __construct(
-		public FulltextWeight $fulltextWeight,
+		public FulltextWeight|false $fulltextWeight,
 	) {}
 }

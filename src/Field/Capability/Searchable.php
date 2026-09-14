@@ -8,7 +8,7 @@ use Cosray\Schema\FulltextWeight;
 
 interface Searchable
 {
-	public function fulltext(FulltextWeight $fulltextWeight): static;
+	public function fulltext(FulltextWeight|false $fulltextWeight): static;
 
-	public function getFulltextWeight(): ?FulltextWeight;
+	public function fulltextWeight(): FulltextWeight|false|null;
 }

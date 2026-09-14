@@ -10,8 +10,9 @@ use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Entries as EntriesValue;
 
-class Entries extends Field implements Capability\Limitable
+class Entries extends Field implements Capability\Limitable, Capability\Searchable
 {
+	use Capability\IsSearchable;
 	use Capability\IsLimitable;
 	use RowTypes;
 

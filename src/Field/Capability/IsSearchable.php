@@ -8,14 +8,16 @@ use Cosray\Schema\FulltextWeight;
 
 trait IsSearchable
 {
-	public function fulltext(FulltextWeight $fulltextWeight): static
+	protected FulltextWeight|false|null $fulltextWeight = null;
+
+	public function fulltext(FulltextWeight|false $fulltextWeight): static
 	{
 		$this->fulltextWeight = $fulltextWeight;
 
 		return $this;
 	}
 
-	public function getFulltextWeight(): ?FulltextWeight
+	public function fulltextWeight(): FulltextWeight|false|null
 	{
 		return $this->fulltextWeight;
 	}

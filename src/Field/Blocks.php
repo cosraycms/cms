@@ -23,8 +23,13 @@ use Cosray\Value\Blocks as BlocksValue;
  * offers the registry's default list, without `#[Columns]` it is a
  * stacked one-column list.
  */
-class Blocks extends Field implements Capability\Translatable, Capability\Blocks\Resizable, Capability\ToolsAware
+class Blocks extends Field implements
+	Capability\Translatable,
+	Capability\Blocks\Resizable,
+	Capability\ToolsAware,
+	Capability\Searchable
 {
+	use Capability\IsSearchable;
 	use Capability\IsTranslatable;
 	use Capability\Blocks\IsResizable;
 	use Capability\IsToolsAware;
