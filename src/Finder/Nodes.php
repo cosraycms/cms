@@ -424,12 +424,12 @@ final class Nodes implements Iterator
 		}
 
 		if ($this->fulltext !== null) {
-			$this->configurations->load($this->context->locales());
 			$params['fulltext'] = $this->fulltext;
 			$params['search_locale'] = $this->context->localeId();
 			$params['search_config'] = $this->configurations->for($this->context->locale());
 		}
 
+		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active.
 		if ($this->activeUrl ?? $this->fulltext !== null) {
 			$params['active_url'] = true;
 			$params['url_locales'] = json_encode($this->localeIds(), JSON_THROW_ON_ERROR);

@@ -248,6 +248,8 @@ final class Builder
 		if ($type === 'hardBreak' || $type === 'horizontalRule') {
 			return "\n";
 		}
+		// The v1 node vocabulary of docs/richtext-format.md; a new node type
+		// must be handled here before selected fields can store it.
 		if (!in_array(
 			$type,
 			['doc', 'paragraph', 'heading', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock'],

@@ -139,7 +139,7 @@ In an escaped Boiler template, deliberately unwrap that safe HTML:
 
 Do not output raw PostgreSQL headline text as HTML. Source control characters used as headline markers are stripped during extraction; every resulting segment is escaped before markup is added. Source spelling and accents are retained. PostgreSQL may omit HTML-like tags when constructing a headline; this is not an HTML-preservation API.
 
-The fixed headline settings are `MaxWords=35`, `MinWords=15`, `MaxFragments=2`, with `…` between fragments. These are word/fragment bounds, not a byte-size limit. Headlines are part of the find statement but not its ordering or grouping. With pagination PostgreSQL evaluates them for limit plus offset rows; an integration `EXPLAIN` check guards that plan shape. Unlimited queries generate one headline per match. Use a limit and avoid unnecessarily large offsets.
+The fixed headline settings are `MaxWords=35`, `MinWords=15`, `MaxFragments=2`, with a spaced ellipsis between fragments. These are word/fragment bounds, not a byte-size limit. Headlines are part of the find statement but not its ordering or grouping. With pagination PostgreSQL evaluates them for limit plus offset rows; an integration `EXPLAIN` check guards that plan shape. Unlimited queries generate one headline per match. Use a limit and avoid unnecessarily large offsets.
 
 The placement under `meta->search` remains a v1 working API scheduled for review after real template usage; score and snippet access are already available.
 

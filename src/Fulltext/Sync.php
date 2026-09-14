@@ -67,14 +67,18 @@ final class Sync
 		}
 
 		$this->db->fulltext->delete(['node' => $node])->run();
+		$indexed = 0;
 		if ($documents !== []) {
-			$this->db->fulltext->insert([
-				'node' => $node,
-				'uid' => $uid,
-				'documents' => json_encode($documents, JSON_THROW_ON_ERROR),
-			])->run();
+			// The insert writes nothing for a node deleted meanwhile.
+			$indexed = count(
+				$this->db->fulltext->insert([
+					'node' => $node,
+					'uid' => $uid,
+					'documents' => json_encode($documents, JSON_THROW_ON_ERROR),
+				])->all(),
+			);
 		}
 
-		return ['indexed' => count($documents), 'missingTitles' => $missingTitles];
+		return ['indexed' => $indexed, 'missingTitles' => $missingTitles];
 	}
 }

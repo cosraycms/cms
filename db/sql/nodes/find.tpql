@@ -19,7 +19,7 @@ SELECT
 <?php if (isset($fulltext)) : ?>
 	ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)) AS search_score,
 	ts_headline(:search_config::regconfig, ft.source, websearch_to_tsquery(:search_config::regconfig, :fulltext),
-		'StartSel=' || chr(1) || ', StopSel=' || chr(2) || ', MaxWords=35, MinWords=15, MaxFragments=2, FragmentDelimiter= … ') AS search_headline,
+		'StartSel=' || chr(1) || ', StopSel=' || chr(2) || ', MaxWords=35, MinWords=15, MaxFragments=2, FragmentDelimiter=" … "') AS search_headline,
 <?php endif ?>
 	d.node IS NOT NULL AS has_draft,
 	d.created AS draft_created,

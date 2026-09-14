@@ -179,6 +179,25 @@ final class FulltextIndexTest extends FulltextTestCase
 		self::assertSame([], $this->sql('inspect', ['node' => $node])->all());
 	}
 
+	public function testADeletedNodeIsNeverIndexedAndReportsNothingIndexed(): void
+	{
+		$node = $this->createTestNode([
+			'uid' => 'fts-deleted-guard',
+			'type' => $this->createTestType(uniqid('fts-type-')),
+		]);
+		$this->sql('deleted', ['uid' => 'fts-deleted-guard'])->run();
+		$report = $this->sync()->replace(
+			$node,
+			'fts-deleted-guard',
+			FtsIndexContent::class,
+			$this->content(['a' => 'Ghost words']),
+			[],
+			$this->locales(),
+		);
+		self::assertSame(['indexed' => 0, 'missingTitles' => 0], $report);
+		self::assertSame([], $this->sql('inspect', ['node' => $node])->all());
+	}
+
 	public function testOversizedVectorsFailWithNodeAndFieldAndRollbackRestoresTheIndex(): void
 	{
 		$node = $this->index(['a' => 'Previous version']);
