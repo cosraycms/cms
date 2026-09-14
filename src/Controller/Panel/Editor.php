@@ -196,9 +196,23 @@ final class Editor extends Panel
 
 		$this->nodeStore($context, $cms)->discard(Wrapper::unwrap($result));
 		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$response = Response::create($factory);
 
-		// The redirect swaps the editor back in from the live row; htmx follows it.
-		return Response::create($factory)->redirect($links->edit($node), 303);
+		if (!$this->request->hasHeader('HX-Request')) {
+			return $response->redirect($links->edit($node), 303);
+		}
+
+		// A followed redirect would land on the discard form's hx-swap="none"
+		// and render nothing. HX-Location has htmx fetch the editor from the
+		// live row into the main region itself; sourced from the discard
+		// form, so the unsaved-changes guard stands aside for that request.
+		return $response->header('HX-Location', json_encode([
+			'path' => $links->edit($node),
+			'target' => '#main',
+			'swap' => 'innerHTML show:top',
+			'source' => '#node-editor-discard',
+			'replace' => 'true',
+		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
 	}
 
 	/**

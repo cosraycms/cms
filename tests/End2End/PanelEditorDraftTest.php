@@ -177,10 +177,17 @@ final class PanelEditorDraftTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
-		$this->assertResponseStatus(303, $response);
-		$this->assertStringEndsWith('/cp/collection/test-articles/draft-discard', $response->getHeaderLine('Location'));
+		$this->assertResponseOk($response);
+		$location = json_decode($response->getHeaderLine('HX-Location'), true);
+		$this->assertSame('/cp/collection/test-articles/draft-discard', $location['path'] ?? null);
+		$this->assertSame('#main', $location['target'] ?? null);
 		$this->assertNull($this->draftRow('draft-discard'));
 		$this->assertSame('Live', $this->liveTitle('draft-discard'));
+
+		$plain = $this->makeRequest('POST', '/cp/collection/test-articles/draft-discard/discard');
+
+		$this->assertResponseStatus(303, $plain);
+		$this->assertStringEndsWith('/cp/collection/test-articles/draft-discard', $plain->getHeaderLine('Location'));
 	}
 
 	public function testPreviewPointsAtTheWorkingCopy(): void
