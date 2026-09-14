@@ -1,0 +1,1 @@
+SAVEPOINT fulltext_test;

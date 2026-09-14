@@ -1,0 +1,1 @@
+ROLLBACK TO SAVEPOINT fulltext_test;
