@@ -7,6 +7,7 @@ namespace Cosray\Fulltext;
 use Celema\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locale;
+use Cosray\Locales;
 
 final class Configurations
 {
@@ -15,6 +16,14 @@ final class Configurations
 	public function __construct(
 		private readonly Database $db,
 	) {}
+
+	public function load(Locales $locales): void
+	{
+		// Locales is an Iterator; a search may run inside a caller's locale loop.
+		foreach (clone $locales as $locale) {
+			$this->for($locale);
+		}
+	}
 
 	public function for(Locale $locale): string
 	{

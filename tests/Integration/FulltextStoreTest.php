@@ -113,17 +113,20 @@ final class FulltextStoreTest extends FulltextTestCase
 	{
 		$this->page('fts-rollback', 'Keep title', 'Keep body');
 		$before = $this->sql('node', ['uid' => 'fts-rollback'])->one();
-		$this->languages->add('bad', 'Bad analyzer', pgDict: 'unavailable');
+		$oversized = implode(' ', array_map(
+			static fn(int $i): string => 'lexeme' . str_pad((string) $i, 8, '0', STR_PAD_LEFT),
+			range(1, 120000),
+		));
 		try {
 			$this->store->save(
 				$this->node('fts-rollback'),
-				$this->payload('fts-rollback', 'Rejected', 'Must not persist'),
+				$this->payload('fts-rollback', 'Rejected', $oversized),
 				$this->languages,
 				Actor::system(),
 			);
 			self::fail('Expected indexing to fail.');
 		} catch (RuntimeException $e) {
-			self::assertStringContainsString('unavailable', $e->getMessage());
+			self::assertStringContainsString('exceeds PostgreSQL limits at field body', $e->getMessage());
 		}
 		self::assertSame($before, $this->sql('node', ['uid' => 'fts-rollback'])->one());
 		self::assertSame("Keep title\n\nKeep body", $this->source('fts-rollback'));
@@ -163,6 +166,40 @@ final class FulltextStoreTest extends FulltextTestCase
 		self::assertSame('Body', $this->source('fts-title-map'));
 	}
 
+	public function testEmptyRebuildStillRejectsAnUnavailableConfiguration(): void
+	{
+		$this->languages->add('bad', 'Bad analyzer', pgDict: 'unavailable');
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("'unavailable' for locale 'bad'");
+		$this->rebuild()->run();
+	}
+
+	public function testRemovedSelectionsAndDeletedNodesAreReconciledWithoutEditorialWrites(): void
+	{
+		$this->page('fts-unselected', 'Old title', 'Old body');
+		$this->page('fts-soft-deleted', 'Deleted title');
+		$this->sql('deleted', ['uid' => 'fts-soft-deleted'])->run();
+		$this->context->container->tag(\Cosray\Bootstrap::NODE_TAG)->add('fulltext-page', FulltextUnselected::class);
+		$before = $this->sql('node', ['uid' => 'fts-unselected'])->one();
+		$report = $this->rebuild()->run();
+		self::assertSame(2, $report['empty']);
+		self::assertSame('', $this->source('fts-unselected'));
+		self::assertSame('', $this->source('fts-soft-deleted'));
+		self::assertSame($before, $this->sql('node', ['uid' => 'fts-unselected'])->one());
+	}
+
+	public function testAnExtractionFailureKeepsThatNodesPreviousIndex(): void
+	{
+		$this->page('fts-malformed', 'Previous', 'Keep this document');
+		$this->sql('content', [
+			'uid' => 'fts-malformed',
+			'content' => '{"body":{"value":{"en":{"secret":"invalid"}}}}',
+		])->run();
+		$report = $this->rebuild()->run();
+		self::assertSame(1, $report['failed']);
+		self::assertSame("Previous\n\nKeep this document", $this->source('fts-malformed'));
+	}
+
 	public function testUnknownSchemasAreReportedAndDoNotPreventOtherNodesFromRebuilding(): void
 	{
 		$type = $this->createTestType('fts-missing-schema');
@@ -179,4 +216,9 @@ final class FulltextStoreTest extends FulltextTestCase
 		self::assertSame('Known', $this->source('fts-known'));
 		self::assertSame(1, (new Fulltext($this->rebuild()))(new Args(), new BufferedIo()));
 	}
+}
+
+class FulltextUnselected
+{
+	protected \Cosray\Field\Text $body;
 }

@@ -73,6 +73,7 @@ class Store
 		Actor $actor,
 		bool $create = false,
 	): array {
+		$this->fulltext->validate($locales);
 		$data = $this->prepare($node, $data, $locales, $create);
 
 		$this->transaction(
@@ -90,6 +91,7 @@ class Store
 	 */
 	public function publish(object $node, array $data, Locales $locales, Actor $actor): array
 	{
+		$this->fulltext->validate($locales);
 		$data = $this->prepare($node, $data, $locales);
 		$nodeId = $this->nodeId($node);
 

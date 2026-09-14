@@ -20,6 +20,11 @@ final class Sync
 		$this->configurations = new Configurations($db);
 	}
 
+	public function validate(Locales $locales): void
+	{
+		$this->configurations->load($locales);
+	}
+
 	/**
 	 * The caller must hold the node's row lock until the transaction ends.
 	 *

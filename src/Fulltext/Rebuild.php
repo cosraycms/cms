@@ -31,6 +31,7 @@ final class Rebuild
 	 */
 	public function run(?callable $failure = null): array
 	{
+		$this->sync->validate($this->locales);
 		$classes = [];
 		$tag = $this->container->tag(Bootstrap::NODE_TAG);
 		foreach ($tag->entries() as $handle) {

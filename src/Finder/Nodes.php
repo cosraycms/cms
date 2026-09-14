@@ -424,6 +424,7 @@ final class Nodes implements Iterator
 		}
 
 		if ($this->fulltext !== null) {
+			$this->configurations->load($this->context->locales());
 			$params['fulltext'] = $this->fulltext;
 			$params['search_locale'] = $this->context->localeId();
 			$params['search_config'] = $this->configurations->for($this->context->locale());

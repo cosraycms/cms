@@ -211,6 +211,17 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(0, $this->cms->nodes()->fulltext('publicword')->count());
 	}
 
+	public function testSearchingInsideALocaleLoopDoesNotMoveItsCursor(): void
+	{
+		$this->page('fts-locale-loop', 'Needle');
+		$seen = [];
+		foreach ($this->languages as $locale) {
+			self::assertSame(1, $this->cms->nodes()->fulltext('needle')->count());
+			$seen[] = $locale->id;
+		}
+		self::assertSame(['en', 'de'], $seen);
+	}
+
 	public function testSubstringSearchesKeepTheirPartialWordBehavior(): void
 	{
 		$this->page('fts-substring', 'Apple');
