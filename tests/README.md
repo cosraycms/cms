@@ -16,7 +16,7 @@ The test suite combines three types of tests:
 2. **Transaction Isolation for Integration Tests**: Each integration test runs in a transaction that's rolled back after completion
 3. **Transaction Isolation for E2E Tests**: E2E tests share the application's database instance with the test harness so HTTP writes roll back with the test
 4. **Fixture-Based**: Tests use SQL fixtures and helper methods for consistent test data
-5. **Shared Setup**: Database schema is initialized once per test run, then transactions provide isolation for database tests
+5. **Shared Setup**: Initialize an isolated database before running tests; the suite checks its schema once, then transactions isolate ordinary database tests. The full-text concurrency test uses committed, uniquely named fixtures and removes them in `finally`.
 
 ## Prerequisites
 
@@ -46,27 +46,24 @@ Override the host or credentials with environment variables:
 
 ```bash
 COSRAY_DB_HOST=<your-hostname> composer test
-COSRAY_DB_HOST=<your-hostname> ./run migrate --apply
+COSRAY_DB_HOST=<your-hostname> php run db:migrations --apply
 ```
 
 ### 3. Initialize Test Database
 
-Create and initialize the test database:
+Use an explicitly authorized, isolated database, never an application database. Set the same connection variables for every migration and test command. Supply credentials locally through the existing test environment or `.pgpass` for PostgreSQL CLI tools.
 
 ```bash
-# Create the database
-./run recreate-db
+export COSRAY_DB_HOST=localhost
+export COSRAY_DB_NAME=cosray_test
+export COSRAY_DB_USER=cosray
 
-# Apply all migrations
-./run migrate --apply
+createdb --host "$COSRAY_DB_HOST" --username "$COSRAY_DB_USER" "$COSRAY_DB_NAME"
+php run db:migrations --namespace=install --apply
+php run db:migrations --apply
 ```
 
-The `recreate-db` command:
-
-- Terminates existing connections to the database
-- Drops the database if it exists
-- Creates a fresh database
-- Sets the owner to `cosray`
+The install namespace creates the current schema and records included updates. An existing initialized test database normally only needs `php run db:migrations --apply`. `recreate-db` is destructive: it terminates connections, drops the target database and creates it again. Use it only for an explicitly approved reset of an isolated database.
 
 ## Running Tests
 
@@ -79,8 +76,26 @@ composer test
 ## How to Resume
 
 - Run `composer test` to verify the suite.
-- If the database is out of date, run `./run recreate-db && ./run migrate --apply`.
+- If the initialized database is out of date, run `php run db:migrations --apply` with the same isolated connection variables.
 - Use `composer coverage` when you need updated coverage numbers.
+
+### Full-text search validation
+
+```bash
+vendor/bin/phpunit --no-coverage --filter Fulltext
+composer ci:full
+```
+
+The full-text tests require migration `000000-000036` (or the current fresh-install schema) and PostgreSQL's `unaccent` extension:
+
+- `FulltextBuilderTest`: database-free selection, inheritance/exclusion, effective locales, typed rows, embeds, conditions, rich-text boundaries and title-provider precedence.
+- `FulltextIndexTest`: configurations, stemming/stopwords, original-spelling accent highlights, weights/phrases, replacement, oversized vectors and fresh-install parity.
+- `FulltextStoreTest`: live writes and working-copy transitions, rollback, rebuild equivalence, missing titles, removed selections and failure reporting.
+- `FulltextConcurrencyTest`: a separate PHP process waits for an uncommitted live writer, then rebuilds its committed content. It uses `proc_open`, observes lock waits through `pg_stat_activity`, and cleans up its own committed fixtures.
+- `FulltextFinderTest`: result eligibility, active/fallback URLs, filter/count/pagination composition, web-search syntax, query-local metadata and an `EXPLAIN (ANALYZE, BUFFERS)` guard against pre-pagination headline evaluation.
+- `FulltextSnippetTest`: escaped highlights and deliberate safe rendering through Boiler.
+
+Configuration provisioning and install-parity tests create temporary schema objects inside the test transaction. No application schema opt-ins or application database rebuilds are needed to run this suite. Operational guidance is in [Full-text search](../docs/fulltext.md).
 
 ### Run Specific Test Suite
 
@@ -125,7 +140,7 @@ Open `coverage/index.html` in your browser to view the report.
 
 ### Directory Layout
 
-```
+```text
 tests/
 ├── TestCase.php                  # Base class for all tests
 ├── IntegrationTestCase.php       # Base class for integration tests
@@ -175,15 +190,14 @@ Extends `IntegrationTestCase` for end-to-end HTTP tests, provides:
 
 - **Application setup**: `createApp()` initializes the full CMS application
 - **Authentication helpers**:
-    - `createAuthenticatedUser(role)` - Creates a user with auth token
-    - `authenticateAs(role)` - Sets default auth token for subsequent requests
+  - `createAuthenticatedUser(role)` - Creates a user with auth token
+  - `authenticateAs(role)` - Sets default auth token for subsequent requests
 - **HTTP request helpers**: `makeRequest(method, uri, options)` - Simulates HTTP requests through the app
 - **Response assertions**:
-    - `assertResponseOk(response)` - Assert status code is 2xx
-    - `assertResponseStatus(expected, response)` - Assert specific status code
-    - `getJsonResponse(response)` - Decode response body as JSON
-- **Disabled transactions**: Sets `$useTransactions = false` because the CMS creates separate DB connections
-- **Automatic cleanup**: Cleans up created test data including FK-referenced records
+  - `assertResponseOk(response)` - Assert status code is 2xx
+  - `assertResponseStatus(expected, response)` - Assert specific status code
+  - `getJsonResponse(response)` - Decode response body as JSON
+- **Shared transactions**: Uses the application's database instance so HTTP writes roll back with the test
 
 ## Writing Tests
 
@@ -338,15 +352,12 @@ PostgreSQL also rolls back the open transaction if an interrupted test process d
 
 ### When to Recreate the Database
 
-Recreate the test database when:
-
-- Migrations have been added or modified
-- Database structure has changed
-- Tests are failing due to schema issues
-- You want a completely fresh start
+Apply new migrations to an initialized test database with `php run db:migrations --apply`. A fresh start or an incompatible local schema edit may require an explicitly approved reset of the isolated database:
 
 ```bash
-./run recreate-db && ./run migrate --apply
+php run recreate-db
+php run db:migrations --namespace=install --apply
+php run db:migrations --apply
 ```
 
 ## Troubleshooting
@@ -355,35 +366,36 @@ Recreate the test database when:
 
 **Error:**
 
-```
+```text
 RuntimeException: Test database not initialized. Run: ./run recreate-db && ./run migrate --apply
 ```
 
-**Solution:**
+**Solution:** After checking the isolated connection variables, initialize the existing empty test database:
 
 ```bash
-./run recreate-db && ./run migrate --apply
+php run db:migrations --namespace=install --apply
+php run db:migrations --apply
 ```
 
 ### "Migrations not applied"
 
 **Error:**
 
-```
+```text
 RuntimeException: Migrations not applied to test database. Run: ./run migrate --apply
 ```
 
 **Solution:**
 
 ```bash
-./run migrate --apply
+php run db:migrations --apply
 ```
 
 ### "Authentication failed"
 
 **Error:**
 
-```
+```text
 PDOException: SQLSTATE[28000] authentication failed for user "cosray"
 ```
 
@@ -393,7 +405,7 @@ PDOException: SQLSTATE[28000] authentication failed for user "cosray"
 
 **Error:**
 
-```
+```text
 PDOException: permission denied to create database
 ```
 
@@ -431,52 +443,52 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
+    env:
+      COSRAY_DB_HOST: localhost
+      COSRAY_DB_NAME: cosray
+      COSRAY_DB_USER: cosray
+      COSRAY_DB_PASSWORD: cosray
+
+    services:
+      postgres:
+        image: postgres:16
         env:
-            COSRAY_DB_HOST: localhost
-            COSRAY_DB_NAME: cosray
-            COSRAY_DB_USER: cosray
-            COSRAY_DB_PASSWORD: cosray
-
-        services:
-            postgres:
-                image: postgres:16
-                env:
-                    POSTGRES_DB: cosray
-                    POSTGRES_USER: cosray
-                    POSTGRES_PASSWORD: cosray
-                options: >-
-                    --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          POSTGRES_DB: cosray
+          POSTGRES_USER: cosray
+          POSTGRES_PASSWORD: cosray
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
 
-                ports:
-                    - 5432:5432
+        ports:
+          - 5432:5432
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.5'
-                  extensions: pdo, pdo_pgsql, pgsql
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          extensions: pdo, pdo_pgsql, pgsql
 
-            - name: Install dependencies
-              run: composer install
+      - name: Install dependencies
+        run: composer install
 
-            - name: Initialize test database
-              run: |
-                  ./run recreate-db
-                  ./run migrate --apply
+      - name: Initialize test database
+        run: |
+          php run db:migrations --namespace=install --apply
+          php run db:migrations --apply
 
-            - name: Run tests
-              run: composer test
+      - name: Run tests
+        run: composer test
 
-            - name: Upload coverage
-              uses: codecov/codecov-action@v3
-              with:
-                  files: ./coverage.xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
 ```
 
 ## Best Practices
@@ -525,7 +537,7 @@ To optimize:
 - [x] Add authentication integration tests (via E2E tests)
 - [x] Add URL path resolution tests (via E2E routing tests)
 - [ ] Tag tests with `@group integration` for filtering
-- [ ] Add full-text search integration tests
+- [x] Add full-text search integration tests
 - [ ] Database seeder for realistic test data
 - [ ] Parallel test execution
 - [ ] API documentation generation from E2E tests

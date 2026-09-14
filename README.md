@@ -387,6 +387,27 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 
 Route templates can generate URL paths from node fields and hierarchy data.
 
+## Full-text search
+
+Opt selected prose fields into PostgreSQL search with `#[Fulltext(FulltextWeight::A)]` through `D`. `Text`, `Textarea`, `RichText`, `Blocks` and `Entries` are supported; containers pass their weight to supported children, which can override it or opt out with `#[Fulltext(false)]`. Computed titles require an annotation on the resolved `Title::title()` implementation. Nothing is indexed automatically.
+
+```php
+$results = $cms->nodes()->fulltext($query)->limit(20);
+$total = $results->count();
+
+foreach ($results as $node) {
+    $path = $node->path();
+    $score = $node->meta->search->score;
+    $snippet = $node->meta->search->snippet;
+}
+```
+
+Results default to published, visible, undeleted nodes with an active public URL for the current locale or a fallback. Ranking, type/field filters, counts and pagination compose; empty queries return no results. `snippet->html()` escapes text and adds fixed `<mark>` highlights; escaped Boiler templates emit it with `$this->unwrap(...)`.
+
+The locale's `pgDict` chooses the language analyzer; omitted values use accent-insensitive `simple` without stemming or stopwords. Live writes synchronize the index transactionally, while working copies stay out. Existing panel searches, `search()` and `searchTitle()` retain substring behavior.
+
+Apply migration `000000-000036`, add schema opt-ins, then run the app's `php run db:fulltext`. Run `db:titles` first when materialized titles need refreshing. See [Full-text search](docs/fulltext.md) for selection, query syntax, safe rendering, public gates and deployment ordering.
+
 ## Collections
 
 Collections are configured through class attributes — the same schema mechanism as nodes and fields. Behavior (the query, columns, sorts) stays on methods:

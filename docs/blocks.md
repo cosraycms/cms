@@ -130,6 +130,7 @@ final class ArticlePage
 | `#[Translate]` / `#[Translate(TranslateMode::Asymmetric)]` | see [translation](#translation). |
 | `#[Tools(...)]` | feeds every `RichText` sub-field inside the offered block types that does not declare its own `#[Tools]`. Without it those sub-fields get `Tool::INLINE`, not the project's `richtext.tools`. |
 | `#[Required]` | at least one block in the (default locale's) list. |
+| `#[Fulltext(FulltextWeight::D)]` | opts supported text sub-fields into [full-text search](fulltext.md), inheriting the weight unless a child overrides it or uses `#[Fulltext(false)]`. |
 
 `Responsive` is `Stack`, `Preserve` or `Custom` and reaches the frontend as `data-responsive`; the [reference stylesheet](#the-reference-stylesheet) acts on `stack` only.
 

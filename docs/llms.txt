@@ -2,7 +2,7 @@ project: Cosray Content Management Framework (cosray/cms)
 repository: https://github.com/cosray/cms
 canonical_branch: main
 license: MIT (https://codefloe.com/cosray/cms/src/branch/main/LICENSE.txt)
-last_updated: 2026-07-05
+last_updated: 2026-09-14
 contact: https://github.com/cosray/cms/issues
 
 summary:
@@ -40,6 +40,7 @@ high_value_topics:
 - Route, render, and metadata attributes
 - Parent/child hierarchy metadata with `#[Children(...)]`
 - Behavioral interfaces in `Cosray\Contract` (Title, Init, HttpGet, HttpPost, HttpPut, HttpDelete, ViewContext)
+- Explicit PostgreSQL full-text search, ranked Finder results and safe snippets (`docs/fulltext.md`)
 - Admin panel theming via panel.theme
 - Root-based Config initialization, environment variable reading, and Config defaults
 - Default error handling and error renderer settings via Config defaults
@@ -70,8 +71,10 @@ Local test database workflow used in this repo:
 
 - Defaults: host `localhost`, database/user/password `cosray`
 - Override with `COSRAY_DB_HOST`, `COSRAY_DB_NAME`, `COSRAY_DB_USER`, or `COSRAY_DB_PASSWORD`
-- `./run recreate-db`
-- `./run migrate --apply`
+- Use an explicitly authorized, isolated test database, never an application database.
+- Fresh database: `php run db:migrations --namespace=install --apply`.
+- Existing database: `php run db:migrations --apply`.
+- `php run recreate-db` drops and recreates the selected database; only use it for an approved isolated reset, then apply the install namespace again.
 
 2) Minimal integration pattern
 
@@ -172,7 +175,7 @@ Field-level attributes (applied to field properties):
 - `#[Immutable]` (renders the control read-only; the save path ignores submitted values for the field)
 - `#[Options([...])]`
 - `#[Limit(int $max, int $min = 0)]`
-- `#[Fulltext(FulltextWeight::A|B|C|D)]`
+- `#[Fulltext(FulltextWeight::A|B|C|D)]` / `#[Fulltext(false)]` (explicit search selection/exclusion; also supported on the resolved `Title::title()` implementation)
 - `#[Syntax('php', 'js', ...)]`
 - `#[Allows(Foo::class, Bar::class, ...)]` for `Entries` and `Blocks` fields
 - `#[Title]` (property-level; selects a field or an embedded `Title` provider)
@@ -1036,6 +1039,72 @@ Block image rendering:
   adds the column) and the recovery tool. It needs the booted app (node
   type registry + locales), so an app registers it from its own
   commands.php; the change/history triggers are suspended during the run
+
+Full-text search (complete contract: `docs/fulltext.md`)
+
+- Explicit opt-in only: `#[Fulltext(FulltextWeight::A)]` through D on Text,
+  Textarea, RichText, Blocks or Entries. Containers pass weights to supported
+  descendants; local weights override and `#[Fulltext(false)]` excludes a
+  field/subtree from both matching and snippets. An unselected container can
+  still contain explicitly selected children. Custom field types, code, iframe
+  markup, identifiers and media are not automatically searchable.
+- The resolved computed `Title::title()` implementation may opt in. Its text
+  comes from the materialized title map, not a method invocation during
+  indexing. Outer/embedded provider precedence is unchanged. Empty effective
+  titles contribute nothing and are counted by the rebuild.
+- Builder reads flattened schema definitions and stored structured text without
+  hydrating nodes or rendering HTML. It honors allowed typed rows, Blocks
+  translation modes, owning-scope `When` conditions, locale fallbacks and zxx.
+- One `full_text` row per node/content locale: ordered weighted tsvector plus
+  original plain-text `source`. The target locale's analyzer handles the whole
+  effective document, including fallback prose. This does not translate queries
+  or promise source-language stemming for fallback text.
+- `pgDict` names a built-in text-search configuration. Migration 000000-000036
+  provisions derived accent-insensitive copies (`fts_<name>`) with unaccent
+  ahead of the dictionaries. Missing pgDict uses derived simple; an explicitly
+  unavailable name fails when FTS lazily loads configurations before use.
+  No runtime DDL; CLI help and migration boot remain database-independent.
+- `$cms->nodes()->fulltext($query)->limit(20)->offset($offset)` composes with
+  types, filter, hierarchy and counts. Input is bound to websearch_to_tsquery:
+  terms AND together, quotes form phrases, OR alternates, minus excludes.
+  Empty/punctuation/stopword-only queries match nothing. Negative-only queries
+  retain PostgreSQL semantics and may be expensive. No prefix or fuzzy search.
+- Default rank is ts_rank_cd, normal A-D weights and normalization 0, then UID
+  ascending for stable ties. Explicit order() overrides relevance. Count ignores
+  pagination and never evaluates headlines. The DSL identifier fulltext still
+  refers to an ordinary content field; search()/searchTitle() are unchanged.
+- Public defaults: published, visible, undeleted, with an active usable URL for
+  the requested locale/fallback and a routable type. Existing flag toggles are
+  inherited; activeUrl(false) separately disables the URL/routability gate.
+  Applications must not let client input relax authorization gates. The shared
+  index includes selected unpublished, hidden and non-routable live content.
+- Fetched wrappers carry readonly Fulltext\Search under meta->search with float
+  score and Fulltext\Snippet. Ordinary fetches have no search value; use isset.
+  Snippet segments are text/match pairs; text() returns plain text and html()
+  escapes all text before adding fixed mark tags. In escaped Boiler use
+  `$this->unwrap($node->meta->search->snippet->html())`, never raw ts_headline.
+  Highlighting preserves original accents. Fixed bounds: 35 max words, 15 min,
+  two fragments separated by an ellipsis. With LIMIT PostgreSQL evaluates
+  headlines for limit+offset rows; unlimited results pay per match.
+- Store synchronizes live content in the same transaction, using savepoints
+  inside an outer transaction. Draft saves/discards keep live text unchanged;
+  publishing or folding a working copy reindexes it. Flags/paths are queried
+  live; deletion removes documents. Imports bypassing Store need a rebuild.
+- App Console\Commands resolves db:fulltext lazily with configured types,
+  fields, block registry and locales. Rebuild fetches bounded key batches,
+  locks a node before reading, replaces it atomically, reports missing schemas
+  and extraction failures, and exits nonzero if incomplete. It changes no
+  editorial content/history and disables no triggers. Missing titles are
+  reported; after title logic changes run db:titles before db:fulltext.
+- Migration 000000-000036 and explicit opt-ins plus a rebuild are required on
+  existing apps. Coordinate writes/searches across the deployment/rebuild
+  window; row locking alone cannot reconcile different selection/analysis
+  policies. Changes to weights, fields, locales, fallbacks or analyzers need
+  reindexing. Cosray never truncates to satisfy PostgreSQL's 1 MB vector limit;
+  failures name the node/field. PostgreSQL silently clamps positions at 16383.
+- Panel FTS, panel-only fields/separate source, class-level defaults, working-copy
+  search and ranking customization are deferred. Locale fallback policy and
+  the placement of search metadata remain explicit follow-up review topics.
 
 13) Key configuration settings (defaults)
 

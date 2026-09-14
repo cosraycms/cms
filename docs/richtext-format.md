@@ -57,11 +57,11 @@ Normalization: attributes equal to their spec default are **omitted**; empty `at
 
 | type | attrs | notes |
 | --- | --- | --- |
-| `bold` | — |  |
-| `italic` | — |  |
-| `underline` | — |  |
-| `strike` | — |  |
-| `code` | — |  |
+| `bold` | — | — |
+| `italic` | — | — |
+| `underline` | — | — |
+| `strike` | — | — |
+| `code` | — | — |
 | `subscript` | — | excludes `superscript` |
 | `superscript` | — | excludes `subscript` |
 | `style` | `class` (config-declared) | unusable until classes are declared; replaces `fontSize` |
@@ -113,6 +113,7 @@ With no declared classes (the default) the mark is unusable — no toolbar contr
 - **PM adapter** (panel) — near-identity mapping to/from the live PM doc; refills omitted defaults, drops them again on save, maps `align` ↔ text-align style, renders `style` marks as class-carrying spans.
 - **Serializer / headless** — emits the envelope verbatim; blif-ui et al. consume a cosray-documented format, not an editor's.
 - **Reference scanner** (Phase 2) — collects `image.uid`, `link.node`, `link.asset`.
+- **Full-text search** — explicitly selected rich-text fields contribute text nodes, preserving adjacent marked runs and structural word boundaries without rendering HTML. Links and image metadata do not enter the search source. See [Full-text search](fulltext.md).
 
 ## Migration (one-shot, later phase)
 
