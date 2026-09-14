@@ -62,6 +62,14 @@ final class PanelEditorDraftTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists('//*[@id="editor-changes-note" and @hx-swap-oob="true" and not(@hidden)]', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-changes-note"]//button[@form="node-editor-discard"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-changes-note"]//button[@form="node-editor-form"][@name="publish"][@data-editor-submit]',
+			$html,
+		);
 	}
 
 	public function testTheEditorShowsTheWorkingCopy(): void
