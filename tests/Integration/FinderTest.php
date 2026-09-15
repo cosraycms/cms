@@ -414,6 +414,35 @@ final class FinderTest extends IntegrationTestCase
 		$this->assertSame('search-node-alpha', Factory::meta($nodes[0], 'uid'));
 	}
 
+	public function testFinderSearchesMaterializedTitleValues(): void
+	{
+		$typeId = $this->createTestType('ordered-test-page');
+
+		// Computed titles exist only in the materialized column, not as a content field.
+		foreach ([
+			'computed-a' => ['en' => 'Frost · Station Fürstenberg', 'de' => 'Frost · Station Fürstenberg'],
+			'computed-b' => ['en' => 'Frost · Station Bruchsal'],
+		] as $uid => $title) {
+			$this->createTestNode(['uid' => $uid, 'type' => $typeId]);
+			$this->db()->execute(
+				'UPDATE cms.nodes SET title = :title::jsonb WHERE uid = :uid',
+				['uid' => $uid, 'title' => json_encode($title)],
+			)->run();
+		}
+
+		$nodes = iterator_to_array(
+			$this
+				->createCms()
+				->nodes()
+				->types('ordered-test-page')
+				->search('station fürstenberg', ['uid', 'title']),
+		);
+
+		$this->assertCount(1, $nodes);
+		$this->assertSame('computed-a', Factory::meta($nodes[0], 'uid'));
+		$this->assertSame(0, $this->createCms()->nodes()->types('ordered-test-page')->searchTitle('de')->count());
+	}
+
 	public function testFinderFiltersHiddenNodes(): void
 	{
 		$typeId = $this->createTestType('hidden-test-page');

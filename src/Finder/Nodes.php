@@ -132,35 +132,9 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
-	/**
-	 * Match the materialized title column across every locale. Unlike
-	 * search(..., ['title']) — which reads the title *field* in content —
-	 * this also finds nodes whose title is dynamic (no title field), so
-	 * the reference picker can surface them.
-	 */
 	public function searchTitle(string $query): self
 	{
-		$query = trim($query);
-
-		if ($query === '') {
-			return $this;
-		}
-
-		$terms = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
-
-		if (!is_array($terms) || $terms === []) {
-			return $this;
-		}
-
-		$clauses = array_map(
-			fn(string $term): string => "COALESCE(n.title::text, '') ILIKE "
-			. $this->context->db->quote('%' . $term . '%'),
-			$terms,
-		);
-
-		$this->addWhere(implode(' AND ', $clauses));
-
-		return $this;
+		return $this->search($query, ['title']);
 	}
 
 	public function types(string ...$types): self
@@ -458,6 +432,12 @@ final class Nodes implements Iterator
 
 	private function fieldExpression(string $field): string
 	{
+		// The materialized title also covers computed titles that have no
+		// content field. Only its values are matched, never the locale keys.
+		if ($field === 'title') {
+			return "(SELECT string_agg(value, ' ') FROM jsonb_each_text(n.title))";
+		}
+
 		$builtin = $this->builtins[$field] ?? null;
 
 		if (is_string($builtin) && $builtin !== '') {
