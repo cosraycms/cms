@@ -3,7 +3,7 @@
 
 	// A mirror of the screen's content-language selector for a dialog that
 	// holds translated texts: choosing here switches the whole screen. The
-	// request travels as an event; the tabs behavior resolves the scope.
+	// request travels as an event; the content-locales behavior resolves the scope.
 	type Props = {
 		locales: { id: string; title: string }[];
 		locale: string;

@@ -17,7 +17,7 @@ import { install as installPaths } from './behaviors/paths';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installScroll } from './behaviors/scroll';
 import { install as installSubmit } from './behaviors/submit';
-import { install as installTabs } from './behaviors/tabs';
+import { install as installContentLocales } from './behaviors/content-locales';
 import { install as installTransport } from './behaviors/transport';
 import { install as installWhen } from './behaviors/when';
 import { install as installYoutube } from './behaviors/youtube';
@@ -106,7 +106,7 @@ listen('keydown', focusSearch);
 cleanups.push(
 	installActionMenus(),
 	installDirty(),
-	installTabs(),
+	installContentLocales(),
 	installRepeater(),
 	installBlocks(),
 	installBlockCatalog(),

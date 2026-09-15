@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { install as installErrors } from '../../src/behaviors/errors';
 import { install as installRepeater } from '../../src/behaviors/repeater';
-import { install as installTabs } from '../../src/behaviors/tabs';
+import { install as installContentLocales } from '../../src/behaviors/content-locales';
 
 function editor(): void {
 	document.body.innerHTML = `
@@ -140,7 +140,7 @@ describe('errors behavior', () => {
 	beforeEach(() => {
 		Element.prototype.scrollIntoView = () => {};
 		editor();
-		uninstall = [installErrors(), installTabs(), installRepeater()];
+		uninstall = [installErrors(), installContentLocales(), installRepeater()];
 	});
 
 	afterEach(() => {

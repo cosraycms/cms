@@ -3,7 +3,7 @@
 use function Cosray\escape;
 
 // The content-language selector of a screen: one per data-content-locale-scope,
-// which the tabs behavior binds. A radiogroup up to three locales, a select
+// which the content-locales behavior binds. A radiogroup up to three locales, a select
 // beyond. Receives: locales, selected, and optionally controlId and labelled
 // (false renders the bare control with an accessible name, for a header).
 

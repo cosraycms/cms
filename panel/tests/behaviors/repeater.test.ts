@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/repeater';
 import { install as installMenus } from '../../src/lib/action-menu';
-import { install as installTabs } from '../../src/behaviors/tabs';
+import { install as installContentLocales } from '../../src/behaviors/content-locales';
 
 const sortable = vi.hoisted(() => vi.fn());
 
@@ -293,14 +293,14 @@ describe('repeater behavior', () => {
 	});
 
 	describe('translated row labels', () => {
-		let uninstallTabs: () => void;
+		let uninstallContentLocales: () => void;
 
 		beforeEach(() => {
-			uninstallTabs = installTabs();
+			uninstallContentLocales = installContentLocales();
 		});
 
 		afterEach(() => {
-			uninstallTabs();
+			uninstallContentLocales();
 		});
 
 		function translated(index: string): string {

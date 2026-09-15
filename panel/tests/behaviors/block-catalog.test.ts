@@ -4,7 +4,10 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/block-catalog';
 import { install as installRepeater } from '../../src/behaviors/repeater';
 import { install as installBlocks } from '../../src/behaviors/blocks';
-import { install as installTabs, selectContentLocale } from '../../src/behaviors/tabs';
+import {
+	install as installContentLocales,
+	selectContentLocale,
+} from '../../src/behaviors/content-locales';
 import { install as installFallbacks } from '../../src/behaviors/fallbacks';
 import { install as installMenus, openMenu } from '../../src/lib/action-menu';
 import { installBridge } from '../../src/lib/bridge-standalone';
@@ -59,7 +62,7 @@ function setup(html = field()): HTMLFormElement {
 		installMenus(),
 		installRepeater(),
 		installBlocks(),
-		installTabs(),
+		installContentLocales(),
 		installFallbacks(),
 		install(),
 	];

@@ -1,4 +1,4 @@
-import { selectContentLocale } from './tabs';
+import { selectContentLocale } from './content-locales';
 
 // Field-level validation errors for the SSR editor form.
 //

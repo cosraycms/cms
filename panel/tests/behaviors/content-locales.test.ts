@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { install } from '../../src/behaviors/tabs';
+import { install } from '../../src/behaviors/content-locales';
 
 let uninstall: (() => void) | null = null;
 
