@@ -99,7 +99,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-2);
-		padding: var(--cms-space-2) var(--cms-space-3-5);
+		padding: var(--cms-space-1) var(--cms-space-2-5);
 		border: 1px solid transparent;
 		border-radius: var(--cms-radius-lg);
 		color: var(--cms-color-text-muted);
@@ -240,7 +240,6 @@
 		--current-bg: var(--cms-color-surface);
 
 		padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
-		background-color: transparent;
 	}
 }
 

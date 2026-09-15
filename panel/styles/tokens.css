@@ -461,11 +461,11 @@
 	 * screen the panel was given, so widening one must not stretch the other.
 	 */
 	--cms-content-max-width: 120rem;
-	--cms-editor-max-width: 56rem;
+	--cms-editor-max-width: 73rem;
 	--cms-row-height: 3.5rem;
-	--cms-masthead-bg: var(--cms-color-surface);
-	--cms-sidebar-width: 18rem;
-	--cms-inspector-width: 23.75rem;
+	--cms-masthead-bg: var(--cms-color-canvas);
+	--cms-sidebar-width: 13rem;
+	--cms-inspector-width: 19rem;
 	--cms-inspector-bg: light-dark(var(--cms-color-surface), var(--cms-color-canvas));
 	--cms-pane-bg: var(--cms-color-canvas);
 	--cms-tile-min: 11rem;
