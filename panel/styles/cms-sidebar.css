@@ -1,9 +1,17 @@
+/* A sticky rail fills the viewport below the masthead: align-self keeps it
+   from stretching to the frame, where it would have nothing to stick against,
+   and the fixed height keeps its ground under a page shorter than the screen. */
+
 .cms-sidebar {
+	position: sticky;
+	top: var(--cms-masthead-height);
 	display: flex;
 	flex: 0 0 var(--cms-sidebar-width);
 	flex-direction: column;
+	align-self: flex-start;
 	width: var(--cms-sidebar-width);
 	min-width: 0;
+	height: calc(100dvh - var(--cms-masthead-height));
 	border-right: 1px solid var(--cms-color-border-soft);
 	background: var(--cms-color-rail);
 
@@ -130,6 +138,7 @@
 
 @media (max-width: 52rem) {
 	.cms-sidebar {
+		position: static;
 		flex-basis: auto;
 		width: 100%;
 		height: auto;

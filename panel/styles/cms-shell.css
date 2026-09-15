@@ -1,15 +1,17 @@
 /*
- * The shell is exactly one viewport tall and never scrolls; the regions inside
- * it do. Below the breakpoint it hands scrolling back to the document, because
- * nested scrollers and an on-screen keyboard do not get along.
+ * The document scrolls. The masthead sticks to its top, page heads and rails
+ * stick below the masthead, and every offset derives from
+ * --cms-masthead-height. Nothing between a sticky part and the document may
+ * become a scroll container: clip where a box needs clipping, never hide.
+ * The collection list and the media library opt out and keep a viewport of
+ * their own. Below the breakpoint nothing sticks.
  */
 
 .cms-shell {
 	display: flex;
 	flex-direction: column;
-	height: 100dvh;
+	min-height: 100dvh;
 	padding-inline: 0;
-	overflow: hidden;
 	background: var(--cms-color-canvas);
 
 	& .frame {
@@ -18,13 +20,10 @@
 		align-items: stretch;
 		width: 100%;
 		max-width: var(--cms-content-max-width);
-		min-height: 0;
 		margin-inline: auto;
-		border-top: 1px solid var(--cms-color-border);
 		border-radius: 0;
 		background: var(--cms-color-surface);
 		box-shadow: none;
-		overflow: hidden;
 	}
 
 	& .main {
@@ -32,8 +31,6 @@
 		flex: 1 1 auto;
 		flex-direction: column;
 		min-width: 0;
-		min-height: 0;
-		overflow: hidden;
 	}
 }
 
@@ -41,15 +38,21 @@
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);
 
+	position: sticky;
+	top: 0;
+	z-index: 40;
 	display: flex;
 	align-items: center;
 	gap: clamp(var(--cms-space-3), 2vw, var(--cms-space-8));
 	flex: 0 0 auto;
-	flex-wrap: wrap;
 	width: 100%;
 	max-width: var(--cms-content-max-width);
+	height: var(--cms-masthead-height);
 	margin-inline: auto;
 	padding: var(--cms-space-1) var(--cms-space-6);
+	/* The frame's top edge, carried here so the frame's height below the
+	   masthead is exactly what the rails and the bounded screens compute. */
+	border-bottom: 1px solid var(--cms-color-border);
 	background-color: var(--cms-masthead-bg);
 
 	& .logo {
@@ -228,10 +231,15 @@
 }
 
 @media (width > 120rem) {
-	.cms-shell .frame {
-		border-top: 0;
-		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
-		box-shadow: var(--cms-shadow);
+	.cms-shell {
+		--cms-masthead-height: 3.875rem;
+
+		& .frame {
+			border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+			box-shadow: var(--cms-shadow);
+			/* Rounds the corners without becoming a scroll container. */
+			overflow: clip;
+		}
 	}
 
 	/* On the canvas beside the floating frame, items lift to the surface. */
@@ -240,25 +248,19 @@
 		--current-bg: var(--cms-color-surface);
 
 		padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
+		border-bottom: 0;
 	}
 }
 
 @media (max-width: 52rem) {
-	.cms-shell {
-		height: auto;
-		min-height: 100dvh;
-		overflow: visible;
-
-		& .frame {
-			flex-direction: column;
-		}
-
-		& .main {
-			overflow: visible;
-		}
+	.cms-shell .frame {
+		flex-direction: column;
 	}
 
 	.cms-masthead {
+		position: static;
+		flex-wrap: wrap;
+		height: auto;
 		padding-inline: var(--cms-space-4);
 	}
 }

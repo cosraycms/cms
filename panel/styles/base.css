@@ -10,6 +10,21 @@ body {
 	padding: 0;
 }
 
+/* The document scrolls under sticky bars: anchor jumps land below them. */
+html {
+	scroll-padding-top: calc(var(--cms-masthead-height) + var(--cms-space-16));
+}
+
+/* A stable gutter keeps the floating frame centred between pages that scroll
+   and pages that do not. Below the breakpoint the frame fills the width and
+   the gutter would run beside it as an empty lane on screens with a viewport
+   of their own, next to the list's scrollbar, so there the edge may move. */
+@media (width > 120rem) {
+	html {
+		scrollbar-gutter: stable;
+	}
+}
+
 body {
 	background: var(--cms-color-canvas);
 	color: var(--cms-color-text);

@@ -4,11 +4,15 @@
  */
 
 .cms-inspector {
+	position: sticky;
+	top: calc(var(--cms-masthead-height) + var(--cms-head-height));
 	display: flex;
 	flex-direction: column;
 	flex: 0 0 var(--cms-inspector-width);
+	align-self: flex-start;
 	width: var(--cms-inspector-width);
 	min-width: 0;
+	height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
 	border-left: 1px solid var(--cms-color-border);
 	background: var(--cms-inspector-bg);
 
@@ -219,8 +223,10 @@
 /* Above the fields, not below: a publish toggle under a long form is unreachable. */
 @media (max-width: 52rem) {
 	.cms-inspector {
+		position: static;
 		flex-basis: auto;
 		width: 100%;
+		height: auto;
 		order: -1;
 		border-left: 0;
 		border-bottom: 1px solid var(--cms-color-border);

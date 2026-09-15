@@ -2,10 +2,11 @@
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
-	min-height: 0;
-	overflow: hidden;
 
 	& .head {
+		position: sticky;
+		top: var(--cms-masthead-height);
+		z-index: 30;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
@@ -13,6 +14,7 @@
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
 		border-bottom: 1px solid var(--cms-color-border);
+		background: var(--cms-color-surface);
 	}
 
 	& h1 {
@@ -27,11 +29,8 @@
 		flex: 1 1 auto;
 		flex-direction: column;
 		gap: var(--cms-space-4);
-		min-height: 0;
 		padding: var(--cms-space-6);
 		background: var(--cms-pane-bg);
-		overflow-y: auto;
-		overscroll-behavior: contain;
 	}
 
 	& .cards {
@@ -153,15 +152,13 @@
 
 @media (max-width: 52rem) {
 	.cms-dashboard {
-		overflow: visible;
-
 		& .head,
 		& .body {
 			padding-inline: var(--cms-space-4);
 		}
 
-		& .body {
-			overflow: visible;
+		& .head {
+			position: static;
 		}
 
 		& .recent .row {

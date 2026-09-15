@@ -1,16 +1,18 @@
 .cms-styleguide {
 	display: flex;
 	flex-direction: column;
-	min-height: 0;
-	overflow: hidden;
 
 	& .head {
+		position: sticky;
+		top: var(--cms-masthead-height);
+		z-index: 30;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
 		flex: 0 0 auto;
 		padding: var(--cms-space-3) var(--cms-space-6);
 		border-bottom: 1px solid var(--cms-color-border);
+		background: var(--cms-color-surface);
 	}
 
 	& h1 {
@@ -25,9 +27,7 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
-		min-height: 0;
 		padding: var(--cms-space-6);
-		overflow: hidden;
 	}
 
 	& .sections {
@@ -35,9 +35,7 @@
 		flex: 1;
 		flex-direction: column;
 		gap: var(--cms-space-10);
-		min-height: 0;
 		padding-bottom: var(--cms-space-10);
-		overflow-y: auto;
 	}
 
 	& .section {

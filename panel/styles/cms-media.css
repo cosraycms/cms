@@ -1,10 +1,13 @@
-/* The library is a custom element rendering into light DOM; the page only
-   provides the bounded flex chain its panes scroll inside. */
+/* The library is a custom element rendering into light DOM whose rail,
+   gallery and inspector scroll on their own, so like the collection list the
+   page keeps a viewport of its own: it takes the height below the masthead
+   and provides the bounded flex chain the panes scroll inside. */
 
 .cms-media {
 	/* Claim the whole main region: without this the page sizes to its
 	   content and the workspace shrinks when a search returns few rows. */
 	flex: 1 1 auto;
+	height: calc(100dvh - var(--cms-masthead-height));
 }
 
 .cms-media .body {
@@ -54,6 +57,7 @@
 
 @media (max-width: 52rem) {
 	.cms-media {
+		height: auto;
 		overflow: visible;
 
 		& .head,

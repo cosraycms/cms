@@ -1,6 +1,13 @@
+/* A screen with a viewport of its own, like the media library. The list
+   scrolls sideways with a sticky title column and a sticky header row, and a
+   box that scrolls one way is a scroll container both ways, so the header
+   could not stick to the document. The page takes the height below the
+   masthead and keeps its bounded flex chain. */
+
 .cms-collection {
 	display: flex;
 	flex-direction: column;
+	height: calc(100dvh - var(--cms-masthead-height));
 	min-height: 0;
 	overflow: hidden;
 
@@ -353,6 +360,7 @@
 
 @media (max-width: 52rem) {
 	.cms-collection {
+		height: auto;
 		overflow: visible;
 
 		& .head,

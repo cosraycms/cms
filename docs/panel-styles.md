@@ -178,6 +178,12 @@ The short block menu is a `.cms-action-menu`. The catalog is `.cms-block-catalog
 
 The styleguide's Blocks section shows an explicit common subset, the default six with the full catalog, a menu short enough to need no catalog, one-type insertion and a field with nothing to add.
 
+## Shell scrolling
+
+The document scrolls. The masthead sticks to the top of the viewport, a page head sticks below it, and the rails beside the content (the collection tree, the node inspector, the menu item pane) stick below whichever bar is above them and scroll on their own when they overflow. Every offset derives from `--cms-masthead-height`, a fixed height the masthead is given rather than measured. A page head wraps its actions on narrow screens, so `behaviors/scroll.ts` measures it into `--cms-head-height` on the `.page` element; each page declares its unwrapped height as the fallback. Nothing between a sticky part and the document may become a scroll container: use `overflow: clip` where a box needs clipping, never `hidden`. `scroll-padding-top` on `html` keeps anchor jumps below the bars, and after a navigation swap the behavior scrolls back to the top; partial swaps and history restores leave the position alone. `scrollbar-gutter: stable` applies only above 120rem, where it keeps the floating frame centred; below that the gutter would run beside the full-width frame as an empty lane on the screens that never scroll the document.
+
+Two screens keep a viewport of their own and never scroll the document: the collection list, which scrolls sideways with a sticky header row and title column, and the media library, whose rail, gallery and inspector scroll independently. Both take the height below the masthead and keep a bounded flex chain inside. Below the 52rem breakpoint nothing sticks and every screen scrolls with the document.
+
 ## Class names
 
 Prefix the block root with `cms-`. Everything inside is a plain noun, nested, and never referenced from outside its block.

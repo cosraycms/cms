@@ -15,6 +15,7 @@ import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
 import { install as installPaths } from './behaviors/paths';
 import { install as installRepeater } from './behaviors/repeater';
+import { install as installScroll } from './behaviors/scroll';
 import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
 import { install as installTransport } from './behaviors/transport';
@@ -110,6 +111,7 @@ cleanups.push(
 	installBlocks(),
 	installBlockCatalog(),
 	installChrome(),
+	installScroll(),
 	installWhen(),
 	installYoutube(),
 	installSubmit(),
