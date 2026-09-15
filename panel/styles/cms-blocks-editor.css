@@ -26,10 +26,17 @@
 	--blocks-row-gap: var(--blocks-gap);
 	--blocks-padding: 0px;
 
-	border: 1px solid var(--cms-color-border);
+	border: 1px solid var(--cms-color-border-control);
 	border-radius: var(--cms-radius-md);
-	background: var(--cms-color-surface-sunken);
-	box-shadow: var(--cms-shadow-recessed);
+	background: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
+
+	/* Locked: the canvas in a well, like a read-only control. */
+	.cms-field[data-readonly='true'] & {
+		border-color: var(--cms-color-border);
+		background: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
+	}
 
 	& .grid {
 		display: grid;
@@ -46,6 +53,20 @@
 
 	&:not(:has(> .grid > *)) > .adders {
 		border-top: 0;
+	}
+
+	/* Empty and editable, the add bar is the whole control, level with
+	   the inputs beside it, like an empty media field. */
+	&:not(:has(> .grid > *)):has(> .adders) {
+		& > .adders,
+		& > .adders > .adder {
+			border-radius: calc(var(--cms-radius-md) - 1px);
+		}
+
+		& > .adders > .adder {
+			min-height: calc(var(--cms-control-height) - 2px);
+			padding-block: var(--cms-space-1);
+		}
 	}
 
 	& .cms-control-unknown {
