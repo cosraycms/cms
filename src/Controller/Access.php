@@ -6,10 +6,11 @@ namespace Cosray\Controller;
 
 use Celema\Core\Exception\HttpForbidden;
 use Celema\Core\Response;
+use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\AccessThrottled;
+use Cosray\Renderer;
 use Cosray\Util\Form;
-use Cosray\View\Boiler\Renderer;
 
 final class Access
 {
@@ -37,7 +38,7 @@ final class Access
 		return $response->redirect($this->url($permission) . '?' . http_build_query(['next' => $target]), 303);
 	}
 
-	public function login(string $permission): Response
+	public function login(string $permission, Cms $cms): Response
 	{
 		$access = $this->context->access();
 		$request = $this->context->httpRequest();
@@ -70,17 +71,24 @@ final class Access
 		}
 
 		$config = $this->context->config;
-		$html = new Renderer([
-			$config->path->root . '/' . ltrim($config->path->views, '/'),
-			dirname(__DIR__, 2) . '/resources/views',
-		])->render('access', [
-			'permission' => $permission,
-			'locale' => $this->context->localeId(),
-			'action' => $this->url($permission),
-			'next' => $target,
-			'token' => $access->token($permission),
-			'message' => $message,
-		]);
+		$html = $this->context
+			->container
+			->tag(Renderer::class)
+			->get('view')
+			->render('access', [
+				'permission' => $permission,
+				'locale' => $this->context->locale(),
+				'locales' => $this->context->locales(),
+				'cms' => $cms,
+				'request' => $request,
+				'container' => $this->context->container,
+				'debug' => $config->debug(),
+				'env' => $config->env(),
+				'action' => $this->url($permission),
+				'next' => $target,
+				'token' => $access->token($permission),
+				'message' => $message,
+			]);
 
 		$response = Response::create($this->context->factory)
 			->status($status)

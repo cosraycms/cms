@@ -552,7 +552,11 @@ class Bootstrap implements CorePlugin
 		}
 
 		$this->renderer('view', BoilerRenderer::class)->args(
-			dirs: ['app' => $this->viewPath(), ...$this->pluginTemplates['view']],
+			dirs: [
+				'app' => $this->viewPath(),
+				...$this->pluginTemplates['view'],
+				'cosray' => dirname(__DIR__) . '/resources/views',
+			],
 			autoescape: true,
 			trusted: $this->trustedViewClasses(),
 		);

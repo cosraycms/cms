@@ -413,6 +413,8 @@ Grants live in the server session. Unlock rotates the session ID; changing a has
 
 Configuring shared passwords enables frontend sessions and marks their responses `Cache-Control: private, no-store`, including pages embedding restricted content. Do not put those responses in a shared page cache. This deliberately trades public page caching for a simple, safe session boundary. Protecting a page does not, by itself, protect publicly stored files linked from it.
 
+The `access` view can use the usual `cms`, `locale`, `locales`, `request`, `container`, `debug`, and `env` globals, so it can extend the site's layout. Its form data is `permission`, `action`, `next`, `token`, and nullable `message`; escape these when using a renderer without automatic escaping.
+
 ### Private assets
 
 After migration `000000-000038`, pass `permission: 'staff'` to `Assets\Ingest::ingest()` to store an asset outside the document root. The default `everyone` keeps the existing public behavior. Named permissions must be configured, or be built-in user permissions such as `authenticated`.
