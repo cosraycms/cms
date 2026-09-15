@@ -61,7 +61,7 @@ final class PanelAssetTest extends TestCase
 	{
 		$static = $this->createPanelAssets(['panel.js' => 'console.log("panel");']);
 		$panel = new Assets(
-			$this->config(['path.panelAssets' => $static]),
+			$this->config(['panel.assets_dir' => $static]),
 			$this->container(),
 			$this->request(),
 		);
@@ -84,7 +84,7 @@ final class PanelAssetTest extends TestCase
 			'panel.js' => 'console.log("panel");',
 			'htmx.js' => 'var htmx = {};',
 		]);
-		$panel = $this->panel(['path.panelAssets' => $static]);
+		$panel = $this->panel(['panel.assets_dir' => $static]);
 
 		try {
 			$context = $panel->data();
@@ -103,7 +103,7 @@ final class PanelAssetTest extends TestCase
 			'panel.css' => 'body {}',
 			'panel.js' => 'console.log("panel");',
 		]);
-		$panel = $this->panel(['path.panelAssets' => $static]);
+		$panel = $this->panel(['panel.assets_dir' => $static]);
 
 		try {
 			$context = $panel->data();
@@ -123,7 +123,7 @@ final class PanelAssetTest extends TestCase
 			'panel.js' => 'console.log("panel");',
 			'htmx.js' => 'var htmx = {};',
 		]);
-		$panel = $this->panel(['app.env' => 'development', 'path.panelAssets' => $static]);
+		$panel = $this->panel(['app.env' => 'development', 'panel.assets_dir' => $static]);
 
 		try {
 			$context = $panel->data();

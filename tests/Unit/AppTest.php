@@ -171,7 +171,7 @@ final class AppTest extends TestCase
 
 	public function testCoreMethodsDelegateToInternalCoreApp(): void
 	{
-		$app = $this->app(['path.prefix' => '/site']);
+		$app = $this->app(['app.url_prefix' => '/site']);
 		$app->get(
 			'/ok',
 			static fn(): CoreResponse => CoreResponse::create($app->factory())->body('ok'),
@@ -226,7 +226,7 @@ final class AppTest extends TestCase
 		return new App(
 			$config,
 			$this->factory(),
-			new Router($config->path->prefix),
+			new Router($config->app->urlPrefix),
 			$this->container(),
 		);
 	}

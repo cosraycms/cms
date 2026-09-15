@@ -41,7 +41,7 @@ final class PrimitiveValueTest extends TestCase
 		return new Context(
 			$this->db(),
 			$request,
-			$this->config(['path.prefix' => '/cms']),
+			$this->config(['app.url_prefix' => '/cms']),
 			$this->container(),
 			$this->factory(),
 		);

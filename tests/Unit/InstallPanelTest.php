@@ -15,7 +15,7 @@ final class InstallPanelTest extends TestCase
 	public function testInstallPathUsesConfiguredPanelAssetsPath(): void
 	{
 		$command = new InstallPanel($this->config([
-			'path.panelAssets' => '/var/www/panel/static',
+			'panel.assets_dir' => '/var/www/panel/static',
 		]));
 
 		$this->assertSame('/var/www/panel/static', $this->invoke($command, 'targetDir'));
@@ -77,8 +77,8 @@ final class InstallPanelTest extends TestCase
 		$public = $this->createLegacyPanelDir();
 		$command = new InstallPanel($this->config([
 			'path.public' => $public,
-			'path.panel' => '/cp',
-			'path.panelAssets' => $public . '/../panel/static',
+			'panel.path' => '/cp',
+			'panel.assets_dir' => $public . '/../panel/static',
 		]));
 		$io = new BufferedIo();
 		new ReflectionProperty($command, 'io')->setValue($command, $io);

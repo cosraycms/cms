@@ -36,7 +36,7 @@ final class Asset
 	public static function fromRow(array $row, Config $config): self
 	{
 		$meta = json_decode((string) ($row['meta'] ?? '{}'), true);
-		$prefix = $config->path->prefix;
+		$prefix = $config->app->urlPrefix;
 
 		return new self(
 			uid: (string) $row['uid'],

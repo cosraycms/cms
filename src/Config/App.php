@@ -27,6 +27,10 @@ final class App
 		get => $this->config->get('app.env');
 	}
 
+	public string $urlPrefix {
+		get => $this->config->get('app.url_prefix');
+	}
+
 	public DateTimeZone $timezone {
 		get => $this->timezoneCache ??= new DateTimeZone($this->config->get('app.timezone'));
 	}

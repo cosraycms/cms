@@ -546,7 +546,7 @@ For advanced integrations, the bundled error integration remains available as `C
 
 `App::create()` creates `Config` from the root path and settings array and exposes it as `$app->config`. `Config` loads `.env` from the root path with `Dotenv::safeLoad()` and merges built-in defaults with the settings array. Use `requireEnv()` when an application wants to fail fast for required environment variables.
 
-Prefer building the settings array upfront and passing it once to `App::create()` or `new Config(...)`. `Config` is immutable after construction, and values such as `path.prefix`, `path.panel`, and `error.enabled` are consumed while the app boots. The immutable shape also lets typed config objects lazily normalize, validate, and cache values safely across long-running worker processes. Use native booleans and integers in PHP settings; environment values are cast by the built-in defaults.
+Prefer building the settings array upfront and passing it once to `App::create()` or `new Config(...)`. `Config` is immutable after construction, and values such as `app.url_prefix`, `panel.path`, and `error.enabled` are consumed while the app boots. The immutable shape also lets typed config objects lazily normalize, validate, and cache values safely across long-running worker processes. Use native booleans and integers in PHP settings; environment values are cast by the built-in defaults.
 
 ```php
 use Cosray\App;
@@ -555,7 +555,7 @@ $root = dirname(__DIR__);
 $settings = [
     'app.name' => 'mycms',
     'path.public' => "{$root}/public",
-    'path.panel' => '/cp',
+    'panel.path' => '/cp',
     'db.dsn' => env('DATABASE_URL'),
     'db.sql' => ["{$root}/db/sql"],
     'panel.theme' => "{$root}/theme",
@@ -572,6 +572,8 @@ Read built-in settings through typed config objects or by key. The built-in obje
 ```php
 $name = $app->config->app->name;
 $panel = $app->config->panel->path;
+$panelAssets = $app->config->panel->assetsDir;
+$urlPrefix = $app->config->app->urlPrefix;
 $theme = $app->config->panel->theme;
 $session = $app->config->session->options;
 $timezone = $app->config->app->timezone;
@@ -590,16 +592,16 @@ Common built-in settings:
     'app.env' => env('APP_ENV', ''),
     'app.secret' => env('APP_SECRET', null),
     'app.timezone' => env('APP_TIMEZONE', 'UTC'),
+    'app.url_prefix' => '',
 
     'path.root' => $root,
     'path.public' => $root . '/public',
-    'path.prefix' => '',
     'path.assets' => '/assets',
     'path.cache' => '/cache',
     'path.views' => '/views',
-    'path.panel' => '/cp',
-    'path.api' => null,
 
+    'panel.path' => '/cp',
+    'panel.assets_dir' => $root . '/panel/static',
     'panel.theme' => [],
     'panel.logo' => '/images/logo.png',
     'panel.dashboard' => true,
@@ -629,25 +631,38 @@ Common built-in settings:
 
 The admin panel formats database timestamps with `app.timezone`. Use an IANA identifier such as `Europe/Berlin` for local editor times.
 
-### Admin panel paths
+### Filesystem directories and URL paths
 
-The SSR/HTMX admin panel uses `path.panel`, which defaults to `/cp`.
+| Setting | Meaning |
+| --- | --- |
+| `path.root` | Project filesystem root supplied to `App::create()` |
+| `path.public` | Filesystem document root; defaults to `$root/public` |
+| `path.views` | View directory relative to `path.root`; `/views` means `$root/views`, not the filesystem's `/views` |
+| `path.assets` | Uploaded originals below `path.public`, also used as their URL path; defaults to `/assets` |
+| `path.cache` | Generated renditions below `path.public`, also used as their URL path; defaults to `/cache` and also holds cached icons |
+| `app.url_prefix` | Application URL mount prefix, such as `/site`; defaults to `''` and does not change filesystem locations |
+| `panel.path` | SSR/HTMX panel URL path; defaults to `/cp` |
+| `panel.assets_dir` | Filesystem directory containing the installed panel client; defaults to `$root/panel/static` |
+
+`path.assets` and `path.cache` deliberately couple the directory layout below `path.public` to media URL paths. For example, with `app.url_prefix => '/site'`, an original stored below `$root/public/assets` has a URL starting with `/site/assets/`. They are not independently configurable storage directories and URLs.
+
+The router applies `app.url_prefix` to application routes, including panel routes. Non-empty prefixes are not yet consistently included in panel-generated links and login redirects.
 
 ### Admin panel assets
 
-The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `path.panelAssets`, which defaults to `{path.root}/panel/static`. The `Cosray\Console\Commands` facade registers the installer as `panel:install`; run it after Composer installs or updates Cosray, e.g. via the `post-install-cmd`/`post-update-cmd` scripts:
+The panel PHP views ship with the Composer package. The client assets are installed separately from the signed `cosray-panel-{version}.tar.gz` release artifact into `panel.assets_dir`, which defaults to `{path.root}/panel/static`. The `Cosray\Console\Commands` facade registers the installer as `panel:install`; run it after Composer installs or updates Cosray, e.g. via the `post-install-cmd`/`post-update-cmd` scripts:
 
 ```bash
 php run panel:install
 ```
 
-That directory sits outside `path.public` on purpose. The panel serves its own client through the `{path.panel}/static/...` route with ETag revalidation, so the files never have to be reachable by the web server. Keeping them out also keeps the public directory free of a `{path.panel}` directory, which web servers configured with a `try_files $uri $uri/ ...` style fallback would otherwise serve — or refuse to serve — instead of routing the request to the panel.
+That directory sits outside `path.public` on purpose. The panel serves its own client through the `{panel.path}/static/...` route with ETag revalidation, so the files never have to be reachable by the web server. Keeping them out also keeps the public directory free of a `{panel.path}` directory, which web servers configured with a `try_files $uri $uri/ ...` style fallback would otherwise serve — or refuse to serve — instead of routing the request to the panel.
 
-Point `path.panelAssets` inside `path.public` if you would rather have the web server deliver the assets directly. Choose a directory that does not collide with `path.panel` or with your frontend build output:
+Override `panel.assets_dir` to install the client elsewhere. This changes only the filesystem location: generated URLs still use `{panel.path}/static/...`. Direct web-server delivery requires a matching URL-to-directory mapping; moving the files inside `path.public` alone does not change those URLs. Choose a directory that does not collide with `panel.path` or with your frontend build output:
 
 ```php
 return [
-	'path.panelAssets' => $root . '/public/panel-assets',
+	'panel.assets_dir' => $root . '/public/panel-assets',
 ];
 ```
 

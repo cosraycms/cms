@@ -123,7 +123,7 @@ Important:
 - `Config::requireEnv(...)` asserts required environment variables are present, throwing `Cosray\Exception\InvalidEnvironment` when one is missing.
 - `Config` is immutable after construction. Prefer building the settings array upfront and passing it once to `App::create(...)` or `new Config(...)`; use native booleans and integers in PHP settings.
 - Use `Config::with(...)` sparingly for changed standalone config copies, tests, or small derived configs. Do not recommend long `with()` chains for full app config files.
-- Built-in settings are available by key (`$config->get('path.panel')`) and through typed lazy objects (`$config->panel->path`, `$config->session->options`). The lazy object properties own domain-specific conversion and broad type checks and may cache values safely because `Config` is immutable.
+- Built-in settings are available by key (`$config->get('panel.path')`) and through typed lazy objects (`$config->panel->path`, `$config->session->options`). The lazy object properties own domain-specific conversion and broad type checks and may cache values safely because `Config` is immutable.
 - `Cosray\App` installs default PSR-15 error middleware unless `error.enabled` is false.
 - Error pages use a dedicated Boiler renderer, independent from the CMS `view` renderer.
 - Project `http-error.php` and `http-server-error.php` templates in `{path.root}{path.views}` override built-in fallback templates.
@@ -730,7 +730,7 @@ Render context keys available to renderers include:
 
 7) Panel/API surface (high-level)
 
-New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
+New SSR/HTMX panel routes use `panel.path`, which defaults to `/cp`:
 
 - `GET <panelPath>` panel dashboard; with `panel.dashboard` off it redirects
   (303) to the first collection, or to media when there is none
@@ -885,8 +885,8 @@ Serving:
 - URLs equal file paths below `path.public`, so the web server serves both
   originals and renditions natively via the standard front-controller
   rewrite (`try_files $uri /index.php`); PHP is not involved
-- originals: `{path.prefix}{path.assets}/{uid[:2]}/{uid}/{slug}`
-- renditions: `{path.prefix}{path.cache}/{uid[:2]}/{uid}/{stem}-{size}.{ext}`
+- originals: `{app.url_prefix}{path.assets}/{uid[:2]}/{uid}/{slug}`
+- renditions: `{app.url_prefix}{path.cache}/{uid[:2]}/{uid}/{stem}-{size}.{ext}`
 - a fallback route on `{path.cache}/...` generates a missing rendition once
   (atomic write), serves it, and every later request is native again
 - only size names configured in `media.sizes` are generated; unknown names,
@@ -1117,16 +1117,17 @@ App and environment:
 - `app.debug`: `env('APP_DEBUG', false)` from `$_SERVER`/`$_ENV`
 - `app.env`: `env('APP_ENV', '')` from `$_SERVER`/`$_ENV`
 - `app.secret`: `env('APP_SECRET', null)` from `$_SERVER`/`$_ENV`
+- `app.url_prefix`: `''` (application URL mount prefix, e.g. `/site`; exposed as `$config->app->urlPrefix`; never a filesystem prefix). The router applies it to all routes and media URLs include it, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 
-Paths and panel:
+Filesystem directories and panel URL paths:
 
-- `path.root`: root path passed to `new Config($root, ...)` or `App::create($root, ...)`
-- `path.public`: `$root . '/public'`
-- `path.prefix`: `''`
-- `path.assets`: `'/assets'`
-- `path.cache`: `'/cache'`
-- `path.views`: `'/views'` (view directory relative to `path.root`)
-- `path.panel`: `'/cp'` (SSR/HTMX panel path; installed client assets live below `{path.public}{path.panel}/static`; set `COSRAY_PANEL_DEV=1` to use the Vite dev server)
+- `path.root`: filesystem root passed to `new Config($root, ...)` or `App::create($root, ...)`
+- `path.public`: `$root . '/public'` (filesystem document root)
+- `path.assets`: `'/assets'` (uploaded originals below `path.public`, also used as their URL path)
+- `path.cache`: `'/cache'` (generated renditions below `path.public`, also used as their URL path; cached icons also live here)
+- `path.views`: `'/views'` (view directory relative to `path.root`, despite the leading slash)
+- `panel.path`: `'/cp'` (SSR/HTMX panel URL path; exposed as `$config->panel->path`)
+- `panel.assets_dir`: `$root . '/panel/static'` (filesystem directory for the built client, exposed as `$config->panel->assetsDir`; `panel:install` writes here and the panel serves it through `{panel.path}/static/...`; changing this directory does not change generated URLs; set `COSRAY_PANEL_DEV=1` to use the Vite dev server)
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
 - `panel.dashboard`: `true` (`false` removes the dashboard's masthead entry; the panel root and the logo lead to the first collection, or media)

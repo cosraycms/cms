@@ -46,7 +46,7 @@ final class BlocksValueTest extends TestCase
 		return new Context(
 			$this->db(),
 			new \Celema\Core\Request($psrRequest),
-			$this->config(['path.prefix' => '/cms', 'media.sizes' => ['square' => ['crop' => [300, 300]]]]),
+			$this->config(['app.url_prefix' => '/cms', 'media.sizes' => ['square' => ['crop' => [300, 300]]]]),
 			$this->container(),
 			$this->factory(),
 		);

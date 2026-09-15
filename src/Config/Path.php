@@ -20,10 +20,6 @@ final class Path
 		get => $this->config->get('path.public');
 	}
 
-	public string $prefix {
-		get => $this->config->get('path.prefix');
-	}
-
 	/** @var non-empty-string */
 	public string $assets {
 		get => $this->config->get('path.assets');
@@ -37,15 +33,5 @@ final class Path
 	/** @var non-empty-string */
 	public string $views {
 		get => $this->config->get('path.views');
-	}
-
-	/** @var non-empty-string */
-	public string $panel {
-		get => $this->config->get('path.panel');
-	}
-
-	/** @var non-empty-string Directory holding the built panel client. */
-	public string $panelAssets {
-		get => $this->config->get('path.panelAssets');
 	}
 }

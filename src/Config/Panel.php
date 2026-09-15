@@ -15,7 +15,12 @@ final class Panel
 
 	/** @var non-empty-string */
 	public string $path {
-		get => $this->config->get('path.panel');
+		get => $this->config->get('panel.path');
+	}
+
+	/** @var non-empty-string */
+	public string $assetsDir {
+		get => $this->config->get('panel.assets_dir');
 	}
 
 	/** @var list<non-empty-string> */

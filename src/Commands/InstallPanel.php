@@ -330,7 +330,7 @@ class InstallPanel
 
 	private function targetDir(): string
 	{
-		return $this->absolutePath($this->option('target') ?? $this->config->path->panelAssets);
+		return $this->absolutePath($this->option('target') ?? $this->config->panel->assetsDir);
 	}
 
 	private function releaseBaseUrl(): string

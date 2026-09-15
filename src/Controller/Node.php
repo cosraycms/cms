@@ -48,7 +48,7 @@ class Node
 		$request = $context->httpRequest();
 		$config = $context->config;
 		$path = $request->uri()->getPath();
-		$prefix = $config->path->prefix;
+		$prefix = $config->app->urlPrefix;
 
 		if ($prefix) {
 			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path);

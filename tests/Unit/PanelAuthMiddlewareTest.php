@@ -36,7 +36,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 	public function testGuestRequestRedirectsToPanelLogin(): void
 	{
 		$middleware = new PanelAuth(
-			$this->config(['path.panel' => '/admin']),
+			$this->config(['panel.path' => '/admin']),
 			$this->users(),
 			$this->factory(),
 		);
@@ -60,7 +60,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 	public function testHtmxGuestRequestReturnsHxRedirectHeader(): void
 	{
 		$middleware = new PanelAuth(
-			$this->config(['path.panel' => '/admin']),
+			$this->config(['panel.path' => '/admin']),
 			$this->users(),
 			$this->factory(),
 		);
@@ -94,7 +94,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 		]);
 
 		$middleware = new PanelAuth(
-			$this->config(['path.panel' => '/admin']),
+			$this->config(['panel.path' => '/admin']),
 			$this->users([$user]),
 			$this->factory(),
 		);
@@ -130,7 +130,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 		]);
 
 		$middleware = new PanelAuth(
-			$this->config(['path.panel' => '/admin']),
+			$this->config(['panel.path' => '/admin']),
 			$this->users([$admin]),
 			$this->factory(),
 		);

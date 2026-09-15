@@ -77,7 +77,9 @@ final class ConfigTest extends TestCase
 		$this->assertSame('cosray', $config->app->name);
 		$this->assertSame(self::root(), $config->path->root);
 		$this->assertSame(self::root() . '/public', $config->path->public);
+		$this->assertSame('', $config->app->urlPrefix);
 		$this->assertSame('/cp', $config->panel->path);
+		$this->assertSame(self::root() . '/panel/static', $config->panel->assetsDir);
 		$this->assertNull($config->app->secret);
 		$this->assertSame('UTC', $config->app->timezone->getName());
 		$this->assertSame(60 * 60 * 24 * 30, $config->auth->rememberLifetime);
@@ -162,7 +164,7 @@ final class ConfigTest extends TestCase
 	{
 		$config = new Config(self::root(), [
 			'app.env' => 'cms-development',
-			'path.panel' => '/admin',
+			'panel.path' => '/admin',
 		]);
 
 		$this->assertSame('/admin', $config->panel->path);

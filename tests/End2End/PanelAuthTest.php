@@ -138,7 +138,7 @@ final class PanelAuthTest extends End2EndTestCase
 
 	public function testConfiguredPanelPathApplies(): void
 	{
-		$this->app = $this->createApp(['path.panel' => '/admin']);
+		$this->app = $this->createApp(['panel.path' => '/admin']);
 
 		$response = $this->makeRequest('GET', '/admin');
 
@@ -155,7 +155,7 @@ final class PanelAuthTest extends End2EndTestCase
 	 */
 	public function testDocumentCarriesThePanelBaseForElementModules(): void
 	{
-		$this->app = $this->createApp(['path.panel' => '/admin']);
+		$this->app = $this->createApp(['panel.path' => '/admin']);
 		$token = $this->createAuthenticatedUser('editor');
 
 		$response = $this->makeRequest('GET', '/admin', ['authToken' => $token]);

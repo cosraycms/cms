@@ -40,7 +40,7 @@ final class System
 			'defaultLocale' => $this->locales->getDefault()->id,
 			'locales' => $locales,
 			'customLocales' => [],
-			'prefix' => $config->path->prefix,
+			'prefix' => $config->app->urlPrefix,
 			'assets' => $config->path->assets,
 			'allowedFiles' => [
 				'file' => array_merge(...array_values($config->upload->file)),

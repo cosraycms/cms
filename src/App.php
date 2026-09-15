@@ -68,7 +68,7 @@ class App implements RouteAdder
 		return new self(
 			$config,
 			new Nyholm(),
-			new Router($config->path->prefix),
+			new Router($config->app->urlPrefix),
 			new Container(),
 		);
 	}

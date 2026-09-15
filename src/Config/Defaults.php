@@ -18,7 +18,7 @@ final class Defaults
 			self::app($env),
 			self::auth($env),
 			self::paths($root),
-			self::panel(),
+			self::panel($root),
 			self::error(),
 			self::icons(),
 			self::database(),
@@ -40,6 +40,7 @@ final class Defaults
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
+			'app.url_prefix' => '',
 			'plugins' => [],
 		];
 	}
@@ -58,23 +59,20 @@ final class Defaults
 		return [
 			'path.root' => $root,
 			'path.public' => $root . '/public',
-			'path.prefix' => '',
 			'path.assets' => '/assets',
 			'path.cache' => '/cache',
 			'path.views' => '/views',
-			'path.panel' => '/cp',
-			// The built panel client, served by the panel's own static route
-			// rather than by the web server. Keeping it out of the public
-			// directory means nothing occupies `{path.panel}` on disk, which
-			// would otherwise shadow the panel route itself.
-			'path.panelAssets' => $root . '/panel/static',
 		];
 	}
 
 	/** @return array<string, mixed> */
-	private static function panel(): array
+	private static function panel(string $root): array
 	{
 		return [
+			'panel.path' => '/cp',
+			// Keep the client outside the public directory so a physical
+			// directory cannot shadow the panel route in the web server.
+			'panel.assets_dir' => $root . '/panel/static',
 			'panel.theme' => [],
 			'panel.logo' => '/images/logo.png',
 			'panel.dashboard' => true,

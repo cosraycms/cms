@@ -239,7 +239,7 @@ abstract class Panel
 
 	protected function panelAssetsDir(): string
 	{
-		return rtrim($this->config->path->panelAssets, '/\\');
+		return rtrim($this->config->panel->assetsDir, '/\\');
 	}
 
 	private function panelDev(): bool

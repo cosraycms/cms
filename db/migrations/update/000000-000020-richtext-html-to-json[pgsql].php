@@ -79,8 +79,7 @@ final class Migration implements Contract\Migration
 
 	public function run(Environment $env): void
 	{
-		$this->assetsBase =
-			$this->config->path->prefix . '/' . trim((string) $this->config->get('path.assets'), '/');
+		$this->assetsBase = $this->config->app->urlPrefix . '/' . trim((string) $this->config->get('path.assets'), '/');
 		$this->pathMap = $this->loadPathMap($env);
 
 		$rows = [];
