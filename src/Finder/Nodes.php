@@ -373,6 +373,11 @@ final class Nodes implements Iterator
 			[
 				trim($this->whereFields),
 				trim($this->whereTypes),
+				$this->typeFlagExpression(fn(string $class): bool => $this->context
+					->access()
+					->allows(
+						\Cosray\Access::permission($class, $this->types),
+					)),
 			],
 			static fn(string $clause): bool => $clause !== '',
 		));

@@ -43,6 +43,11 @@ class Permission implements Middleware
 				throw new HttpForbidden($request);
 			}
 
+			$request = $request->withAttribute('user', $user);
+			if ($this->permission === 'panel') {
+				$request = $request->withAttribute('cms.management', true);
+			}
+
 			return $handler->handle($request);
 		}
 

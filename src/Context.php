@@ -44,6 +44,11 @@ final class Context
 		return $context;
 	}
 
+	public function access(): Access
+	{
+		return new Access($this);
+	}
+
 	public function assets(): Assets\Repository
 	{
 		return $this->assets ??= new Assets\Repository($this->db, $this->config);

@@ -59,6 +59,7 @@ class Render
 			throw new RuntimeException('Invalid renderable node class ' . $class);
 		}
 
+		$this->context->access()->require(\Cosray\Access::permission($class, $this->types));
 		$data['content'] = json_decode($data['content'], true);
 		$this->node = $this->nodeFactory->create($class, $context, $cms, $data);
 	}

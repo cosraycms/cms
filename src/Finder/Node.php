@@ -97,6 +97,7 @@ class Node
 			->definition();
 
 		if ($this->types->isNode($class)) {
+			$this->context->access()->require(\Cosray\Access::permission($class, $this->types));
 			$node = $this->nodeFactory->create($class, $this->context, $this->cms, $data);
 
 			return $this->nodeFactory->proxy($node, $this->context, $this->cms);

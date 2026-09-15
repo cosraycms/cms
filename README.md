@@ -389,6 +389,12 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 
 Route templates can generate URL paths from node fields and hierarchy data.
 
+## Frontend read permissions
+
+A node type can require a read permission with `#[Permission(['read' => 'staff'])]` (`Cosray\Schema\Permission`). Without an attribute, reads are public (`everyone`). A string permission applies to reads; a map can name `read` independently of other operations. Missing `read` entries remain public.
+
+Direct node reads and rendering reject unauthorized access with `ReadDenied`; listings and full-text search exclude inaccessible types before counting and pagination. Hiding a node is not access control. Explicit menu labels and URLs may still advertise a protected page, but cannot grant access to its content. Authenticated panel requests and previews may read restricted nodes. A request-free `Context::console()` is trusted for imports and maintenance; do not use it to answer public requests. These read rules do not grant write or panel permissions.
+
 ## Full-text search
 
 Opt selected prose fields into PostgreSQL search with `#[Fulltext(FulltextWeight::A)]` through `D`. `Text`, `Textarea`, `RichText`, `Blocks` and `Entries` are supported; containers pass their weight to supported children, which can override it or opt out with `#[Fulltext(false)]`. Computed titles require an annotation on the resolved `Title::title()` implementation. Nothing is indexed automatically.

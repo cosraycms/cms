@@ -54,6 +54,8 @@ final class View
 	 */
 	public function output(array $context = []): string
 	{
+		$this->context->access()->require(\Cosray\Access::permission($this->node::class, $this->types));
+
 		return $this->context
 			->container
 			->tag(Renderer::class)
