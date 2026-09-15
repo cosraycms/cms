@@ -7,6 +7,8 @@ namespace Cosray\Tests\Unit;
 use Celema\Verba\Tool\JavascriptScanner;
 use Celema\Verba\Tool\Message;
 use Celema\Verba\Tool\PhpScanner;
+use Cosray\Block\Registry;
+use Cosray\I18n\SchemaScanner;
 use Cosray\Tests\TestCase;
 
 final class TranslationCatalogTest extends TestCase
@@ -15,6 +17,13 @@ final class TranslationCatalogTest extends TestCase
 	{
 		$root = dirname(__DIR__, 2);
 		$messages = new PhpScanner([$root . '/src', $root . '/panel/views'])->scan();
+
+		$this->assertCatalogsCover($messages, 'cosray');
+	}
+
+	public function testCosrayCatalogsCoverBuiltinBlockSchemas(): void
+	{
+		$messages = new SchemaScanner(Registry::withDefaults()->all())->scan();
 
 		$this->assertCatalogsCover($messages, 'cosray');
 	}

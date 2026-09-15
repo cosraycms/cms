@@ -20,17 +20,17 @@
 	import MediaDetail from '$components/media/MediaDetail.svelte';
 
 	const KIND_LABELS: Record<string, string> = {
-		image: 'media:images',
-		video: 'media:videos',
-		audio: 'media:audio',
-		document: 'media:documents',
+		image: __('media:images'),
+		video: __('media:videos'),
+		audio: __('media:audio'),
+		document: __('media:documents'),
 	};
 
 	const RANGES: { value: MediaRange; label: string }[] = [
-		{ value: '', label: 'media:date-any' },
-		{ value: '7d', label: 'media:date-7d' },
-		{ value: '30d', label: 'media:date-30d' },
-		{ value: 'year', label: 'media:date-year' },
+		{ value: '', label: __('media:date-any') },
+		{ value: '7d', label: __('media:date-7d') },
+		{ value: '30d', label: __('media:date-30d') },
+		{ value: 'year', label: __('media:date-year') },
 	];
 
 	ensureSystem();
@@ -321,7 +321,7 @@
 			{#each FILTER_KINDS as kind (kind)}
 				<label class="cms-media-check">
 					<input type="checkbox" checked={kinds.includes(kind)} onchange={() => toggleKind(kind)} />
-					<span class="cms-media-check-label">{__(KIND_LABELS[kind])}</span>
+					<span class="cms-media-check-label">{KIND_LABELS[kind]}</span>
 					<span class="cms-media-check-count">{counts[kind] ?? 0}</span>
 				</label>
 			{/each}
@@ -337,7 +337,7 @@
 						checked={range === entry.value}
 						onchange={() => setRange(entry.value)}
 					/>
-					<span class="cms-media-check-label">{__(entry.label)}</span>
+					<span class="cms-media-check-label">{entry.label}</span>
 				</label>
 			{/each}
 		</fieldset>

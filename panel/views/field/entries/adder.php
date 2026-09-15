@@ -6,7 +6,7 @@ $full = (bool) $full;
 $single = (bool) $single;
 
 $label = $single
-	? __($empty ? 'field:add-first-entry' : 'field:add-entry')
+	? ($empty ? __('field:add-first-entry') : __('field:add-entry'))
 	: __('field:add-typed', ['label' => (string) ($entryType['label'] ?? __('field:entry'))]);
 ?>
 <button

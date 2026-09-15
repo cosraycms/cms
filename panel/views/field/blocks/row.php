@@ -103,7 +103,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			'single' => $single,
 			'insert' => 'before',
 			'id' => "{$rowId}-insert",
-			'label' => __($columns > 1 ? 'field:insert-before' : 'field:insert-above'),
+			'label' => $columns > 1 ? __('field:insert-before') : __('field:insert-above'),
 		]);
 	} ?>
 	<div class="chrome">
