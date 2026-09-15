@@ -82,22 +82,23 @@ final class PanelAreasTest extends End2EndTestCase
 		$this->assertStringContainsString('hx-target:inherited="#frame"', $html);
 	}
 
-	/**
-	 * The switcher has to mark the language it is showing. Unmarked, a browser
-	 * displays the first option, so the panel claims a language it is not in —
-	 * and picking that one fires no change event, which leaves it unreachable.
-	 */
+	/** The account menu's language choices have to mark the language the panel is showing. */
 	public function testTheLanguageSwitcherMarksTheActiveLocale(): void
 	{
 		$german = $this->html('/cp', 'de');
-		$this->assertStringContainsString('<option value="de" selected>Deutsch</option>', $german);
-		$this->assertStringContainsString('<option value="en">English</option>', $german);
+		$this->assertHtmlNodeExists($this->localeChoice('de', 'true'), $german);
+		$this->assertHtmlNodeExists($this->localeChoice('en', 'false'), $german);
 		$this->assertStringContainsString('<html lang="de">', $german);
 
 		$english = $this->html('/cp', 'en');
-		$this->assertStringContainsString('<option value="en" selected>English</option>', $english);
-		$this->assertStringContainsString('<option value="de">Deutsch</option>', $english);
+		$this->assertHtmlNodeExists($this->localeChoice('en', 'true'), $english);
+		$this->assertHtmlNodeExists($this->localeChoice('de', 'false'), $english);
 		$this->assertStringContainsString('<html lang="en">', $english);
+	}
+
+	private function localeChoice(string $locale, string $checked): string
+	{
+		return "//button[@name=\"locale\" and @value=\"{$locale}\" and @role=\"menuitemradio\" and @aria-checked=\"{$checked}\"]";
 	}
 
 	private function html(string $path, ?string $language = null): string

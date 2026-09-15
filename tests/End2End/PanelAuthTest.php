@@ -116,6 +116,11 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
 		$this->assertStringContainsString('class="logo"', $html);
 		$this->assertStringContainsString('action="/cp/logout"', $html);
+		// A user without a stored name is identified by their login.
+		$this->assertMatchesRegularExpression(
+			'/popovertarget="cms-account-menu"[^>]*aria-label="Account: test-auth-[^"]+@example\.com"/',
+			$html,
+		);
 		// Dashboard and media are areas in the masthead, not rail entries.
 		$this->assertStringContainsString('class="areas"', $html);
 		$this->assertStringContainsString('Dashboard', $html);

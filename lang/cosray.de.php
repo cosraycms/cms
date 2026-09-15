@@ -311,6 +311,7 @@ return [
 		'menu:type-url' => 'Link (URL)',
 		'menu:undo' => 'Rückgängig',
 		'menu:untitled' => '(ohne Titel)',
+		'nav:account' => 'Konto: :name',
 		'nav:content' => 'Inhalte',
 		'nav:dashboard' => 'Dashboard',
 		'nav:language' => 'Sprache',

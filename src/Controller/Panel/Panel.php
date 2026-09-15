@@ -57,6 +57,7 @@ abstract class Panel
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
 			'panelLocales' => $this->panelLocales(),
+			'account' => $this->account(),
 			'config' => $this->config,
 			'renderIcon' => $this->renderIcon(...),
 			'stylesheets' => $this->stylesheets($panelPath),
@@ -321,6 +322,25 @@ abstract class Panel
 		}
 
 		return null;
+	}
+
+	/** @return array{name: ?string, initials: string, title: string, detail: string}|null */
+	private function account(): ?array
+	{
+		$user = $this->request->get('user', null);
+
+		if (!$user instanceof User) {
+			return null;
+		}
+
+		$title = $user->name ?? ($user->username !== '' ? $user->username : $user->email);
+
+		return [
+			'name' => $user->name,
+			'initials' => $user->initials(),
+			'title' => $title,
+			'detail' => $user->email !== $title ? $user->email : '',
+		];
 	}
 
 	/** @param array{id: string, args?: array<array-key, mixed>}|null $icon */

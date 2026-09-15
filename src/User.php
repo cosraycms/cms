@@ -13,6 +13,7 @@ class User
 	public readonly string $password;
 	public readonly string $role;
 	public readonly bool $active;
+	public readonly ?string $name;
 	public readonly ?string $panelLocale;
 	public readonly string $created;
 	public readonly string $changed;
@@ -29,11 +30,31 @@ class User
 		$this->password = $data['password'];
 		$this->role = $data['role'];
 		$this->active = $data['active'];
+		$this->name = self::displayName($data['data'] ?? null);
 		$this->panelLocale = $data['panel_locale'] ?? null;
 		$this->created = $data['created'];
 		$this->changed = $data['changed'];
 		$this->deleted = $data['deleted'];
 		$this->expires = $data['expires'] ?? null;
+	}
+
+	/**
+	 * First and last word of the name, or of the username or the email's local
+	 * part when there is none ("m.keller" → "MK"). A single word gives its
+	 * first two letters.
+	 */
+	public function initials(): string
+	{
+		$source = $this->name ?? ($this->username !== '' ? $this->username : strstr($this->email, '@', true));
+		$words = preg_split('/[\s._-]+/u', (string) $source, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+		$initials = match (count($words)) {
+			0 => '',
+			1 => mb_substr($words[0], 0, 2),
+			default => mb_substr($words[0], 0, 1) . mb_substr($words[array_key_last($words)], 0, 1),
+		};
+
+		return mb_strtoupper($initials);
 	}
 
 	public function hasPermission(string $permission): bool
@@ -56,5 +77,16 @@ class User
 		unset($data['password']);
 
 		return $data;
+	}
+
+	private static function displayName(mixed $data): ?string
+	{
+		if (is_string($data)) {
+			$data = json_decode($data, true);
+		}
+
+		$name = is_array($data) ? $data['name'] ?? null : null;
+
+		return is_string($name) && trim($name) !== '' ? trim($name) : null;
 	}
 }

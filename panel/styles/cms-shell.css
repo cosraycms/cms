@@ -126,32 +126,89 @@
 	}
 
 	& .account {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
 		flex-shrink: 0;
+		min-width: 0;
 		margin-left: auto;
 	}
 
-	& .action {
-		padding: 0.4375rem 0.8125rem;
-		border-radius: var(--cms-radius-md);
-		color: var(--cms-color-text-muted);
+	& .account-trigger {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		max-width: 16rem;
+		padding: var(--cms-space-0-5);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-gradient-raised), var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-raised);
 		font-size: var(--cms-font-size-sm);
-		font-weight: 400;
+		transition: border-color 0.14s ease;
 
-		&:hover {
-			background: var(--hover-bg);
-			color: var(--cms-color-text);
+		&:has(.name) {
+			padding-inline-end: var(--cms-space-3);
+		}
+
+		&:hover,
+		&[aria-expanded='true'] {
+			border-color: var(--cms-color-border-strong);
 		}
 	}
 
-	& select {
-		padding: 0.375rem var(--cms-space-2);
-		border: 1px solid var(--cms-color-border-control);
-		border-radius: var(--cms-radius-md);
-		background: transparent;
-		font-size: var(--cms-font-size-sm);
+	& .avatar {
+		display: grid;
+		place-items: center;
+		flex-shrink: 0;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-accent);
+		color: var(--cms-color-text-on-accent);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 600;
+		letter-spacing: 0.02em;
+	}
+
+	& .name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .account-menu {
+		--width: 16rem;
+
+		& .identity {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-0-5);
+			padding: var(--cms-space-1-5) var(--cms-space-2-5);
+			overflow-wrap: anywhere;
+		}
+
+		& .title {
+			font-size: var(--cms-font-size-sm);
+			font-weight: 500;
+		}
+
+		& .detail,
+		& .group-label {
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+		}
+
+		& .group-label {
+			display: block;
+			padding: var(--cms-space-1) var(--cms-space-2-5) 0;
+		}
+
+		& [aria-checked='true'] {
+			font-weight: 500;
+
+			&::after {
+				content: '✓' / '';
+				margin-inline-start: auto;
+			}
+		}
 	}
 }
 

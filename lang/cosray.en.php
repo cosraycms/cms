@@ -305,6 +305,7 @@ return [
 		'menu:type-url' => 'Link (URL)',
 		'menu:undo' => 'Undo',
 		'menu:untitled' => '(untitled)',
+		'nav:account' => 'Account: :name',
 		'nav:content' => 'Content',
 		'nav:dashboard' => 'Dashboard',
 		'nav:language' => 'Language',
