@@ -545,8 +545,8 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 			<section class="section" data-section="inspector">
 				<h2>Inspector</h2>
 				<p class="note">
-					Rendered through <code>panel/views/node/inspector.php</code> — toggles, route
-					paths, handle and the fact rows of an existing node.
+					Rendered through <code>panel/views/node/inspector.php</code> — the status,
+					paths and advanced tabs of an existing node.
 				</p>
 				<?php $this->insert('node/inspector', (array) $this->unwrap($inspector)) ?>
 			</section>

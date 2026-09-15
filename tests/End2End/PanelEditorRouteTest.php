@@ -556,6 +556,18 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		$this->assertStringContainsString('name="paths[en]"', $html);
 
+		// The inspector arrives with its first tab selected and the other
+		// panels hidden, the handle among them, so nothing flashes before the
+		// tabs behavior runs.
+		$this->assertHtmlNodeExists(
+			'//aside[@data-tabs]//*[@role="tablist"]/button[@role="tab"][@aria-selected="true"][@aria-controls="cms-inspector-panel-status"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@id="cms-inspector-panel-advanced"][@role="tabpanel"][@hidden]//input[@id="cms-node-handle"]',
+			$html,
+		);
+
 		// The preview trigger is scoped to those inputs, not the whole form,
 		// so editing content fields no longer fires the paths POST.
 		$this->assertStringContainsString('id="generated-paths"', $html);

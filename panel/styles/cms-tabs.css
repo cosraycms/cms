@@ -38,5 +38,9 @@
 			outline: var(--cms-focus-outline);
 			outline-offset: var(--cms-focus-offset);
 		}
+
+		&.has-error:not([aria-selected='true']) {
+			color: var(--cms-color-danger);
+		}
 	}
 }

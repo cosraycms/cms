@@ -1,4 +1,5 @@
 import { selectContentLocale } from './content-locales';
+import { revealTab } from './tabs';
 
 // Field-level validation errors for the SSR editor form.
 //
@@ -152,6 +153,15 @@ function refreshContentBadge(form: Element): void {
 	}
 }
 
+// A tab whose panel holds an issue shows it, since the panel may be hidden.
+function refreshTabBadges(form: Element): void {
+	form.querySelectorAll<HTMLElement>('[data-tabs] [role="tab"][aria-controls]').forEach((tab) => {
+		const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
+
+		tab.classList.toggle('has-error', panel?.querySelector(`[${INVALID}]`) != null);
+	});
+}
+
 function addErrorLocale(field: Element, locale: string | undefined): void {
 	if (!locale) {
 		return;
@@ -177,6 +187,7 @@ function unmark(field: Element): void {
 
 	if (form) {
 		refreshContentBadge(form);
+		refreshTabBadges(form);
 	}
 }
 
@@ -191,6 +202,9 @@ function wipe(): void {
 			.forEach((option) => option.classList.remove('has-error'));
 		delete (control as HTMLElement).dataset.errorLocales;
 	});
+	document
+		.querySelectorAll('[data-tabs] [role="tab"].has-error')
+		.forEach((tab) => tab.classList.remove('has-error'));
 }
 
 function mark(control: Element, message: string, locale?: string): void {
@@ -235,6 +249,7 @@ function mark(control: Element, message: string, locale?: string): void {
 
 	if (form) {
 		refreshContentBadge(form);
+		refreshTabBadges(form);
 	}
 }
 
@@ -271,7 +286,8 @@ function swapped(): void {
 	paint(box);
 }
 
-// Reveal the control (content language, collapsed rows, meta dialog), then go there.
+// Reveal the control (content language, inspector tab, collapsed rows, meta
+// or paths dialog), then go there.
 function activate(event: Event): void {
 	const target = event.target;
 
@@ -303,6 +319,8 @@ function activate(event: Event): void {
 		selectContentLocale(globalScope, locale);
 	}
 
+	revealTab(control);
+
 	for (
 		let body = control.closest('[data-repeater-body]');
 		body;
@@ -321,6 +339,12 @@ function activate(event: Event): void {
 
 	if (dialog instanceof HTMLDialogElement && !dialog.open) {
 		field.querySelector<HTMLElement>('[data-meta-open]')?.click();
+	}
+
+	const paths = control.closest('dialog[data-paths-dialog]');
+
+	if (paths instanceof HTMLDialogElement && !paths.open) {
+		paths.closest('[data-paths]')?.querySelector<HTMLElement>('[data-paths-open]')?.click();
 	}
 
 	if (field instanceof HTMLElement) {

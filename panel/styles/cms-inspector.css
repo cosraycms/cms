@@ -15,17 +15,9 @@
 	height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
 	background: var(--cms-inspector-bg);
 
-	& .head {
-		display: flex;
-		align-items: center;
+	& > .cms-tabs {
 		flex: 0 0 auto;
-		padding: var(--cms-space-3-5) var(--cms-space-5);
-		border-bottom: 1px solid var(--cms-color-border);
-
-		& .title {
-			font-size: var(--cms-font-size-sm);
-			font-weight: 600;
-		}
+		padding-inline: var(--cms-space-5);
 	}
 
 	& .scroll {

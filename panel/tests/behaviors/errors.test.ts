@@ -85,6 +85,23 @@ function editor(): void {
 					</div>
 				</div>
 			</div>
+			<aside data-tabs>
+				<div role="tablist">
+					<button type="button" role="tab" id="tab-status" aria-controls="panel-status" aria-selected="true" tabindex="0">Status</button>
+					<button type="button" role="tab" id="tab-advanced" aria-controls="panel-advanced" aria-selected="false" tabindex="-1">Advanced</button>
+				</div>
+				<div id="panel-status" role="tabpanel">
+					<section data-paths>
+						<button type="button" data-paths-open>Edit</button>
+						<dialog data-paths-dialog>
+							<div class="field"><input name="paths[en]" data-path-locale="en" type="text" /></div>
+						</dialog>
+					</section>
+				</div>
+				<div id="panel-advanced" role="tabpanel" hidden>
+					<div class="field"><input name="handle" type="text" /></div>
+				</div>
+			</aside>
 		</form>`;
 
 	for (const field of document.querySelectorAll('.cms-field')) {
@@ -369,6 +386,43 @@ describe('errors behavior', () => {
 		const box = respond([
 			{ path: ['content', 'styled', 'meta', 'cssClass', 'zxx'], message: 'Class is invalid' },
 		]);
+		box.querySelector('button')?.click();
+
+		document.removeEventListener('click', listener);
+		expect(opened).toBe(1);
+	});
+
+	it('badges the tab whose hidden panel holds the issue and brings it to the front', () => {
+		const box = respond([{ path: ['handle'], message: 'Handle is taken' }]);
+		const tab = document.getElementById('tab-advanced')!;
+		const panel = document.getElementById('panel-advanced')!;
+		const handle = document.querySelector<HTMLInputElement>('[name="handle"]')!;
+
+		expect(tab.classList.contains('has-error')).toBe(true);
+		expect(panel.hidden).toBe(true);
+
+		box.querySelector('button')?.click();
+
+		expect(panel.hidden).toBe(false);
+		expect(tab.getAttribute('aria-selected')).toBe('true');
+		expect(document.getElementById('tab-status')?.getAttribute('aria-selected')).toBe('false');
+		expect(document.activeElement).toBe(handle);
+
+		handle.dispatchEvent(new Event('input', { bubbles: true }));
+
+		expect(tab.classList.contains('has-error')).toBe(false);
+	});
+
+	it('opens the paths dialog on summary click', () => {
+		let opened = 0;
+		const listener = (event: Event): void => {
+			if (event.target instanceof Element && event.target.closest('[data-paths-open]')) {
+				opened++;
+			}
+		};
+		document.addEventListener('click', listener);
+
+		const box = respond([{ path: ['paths', 'en'], message: 'Path is taken' }]);
 		box.querySelector('button')?.click();
 
 		document.removeEventListener('click', listener);

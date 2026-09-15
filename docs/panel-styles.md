@@ -160,7 +160,7 @@ Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are deco
 
 ## Tabs
 
-`.cms-tabs` is a row of tabs over a line, the chosen one underlined in the accent colour. The row is the `role="tablist"`; each `.tab` inside is a `role="tab"` button carrying `aria-selected`, `aria-controls` and a roving `tabindex`, so the row is one tab stop and the arrow keys move between tabs. The panels sit wherever the screen puts them as `role="tabpanel"` elements labelled by their tab. The stylesheet draws only the row; the richtext link modal drives its tabs in Svelte.
+`.cms-tabs` is a row of tabs over a line, the chosen one underlined in the accent colour. The row is the `role="tablist"`; each `.tab` inside is a `role="tab"` button carrying `aria-selected`, `aria-controls` and a roving `tabindex`, so the row is one tab stop and the arrow keys move between tabs. The panels sit wherever the screen puts them as `role="tabpanel"` elements labelled by their tab. The stylesheet draws only the row; the richtext link modal drives its tabs in Svelte. A server-rendered screen marks the block holding the row and its panels with `data-tabs`, and `behaviors/tabs.ts` moves the selection on click and by key. The markup arrives with one tab selected and the other panels `hidden`, so nothing flashes before the script runs. The node inspector is such a block: its status, paths and advanced tabs form the rail's head, and a tab whose panel holds a validation issue carries `.has-error`.
 
 ## Action menus
 
