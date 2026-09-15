@@ -7,7 +7,7 @@ use function Cosray\escape;
 $this->layout('layer/main');
 
 $mode = (string) $mode;
-$name = (string) $name;
+$name = (string) $this->unwrap($name);
 $slug = (string) $slug;
 $node = (array) $this->unwrap($node);
 $locales = (array) $this->unwrap($locales);

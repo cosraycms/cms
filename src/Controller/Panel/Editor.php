@@ -609,7 +609,7 @@ final class Editor extends Panel
 		);
 		assert($obj instanceof CmsCollection, 'The editor route must resolve a collection');
 
-		return [$ref->meta->label, $obj];
+		return [__($ref->meta->label), $obj];
 	}
 
 	private function canCreate(CmsCollection $collection, string $type, ?string $parent): bool

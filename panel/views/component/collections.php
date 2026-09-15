@@ -6,6 +6,7 @@ use function Cosray\escape;
 <?php if (count($collections) > 0): ?>
 <ul class="list level-<?= $level ?>">
 <?php foreach ($collections as $item): ?>
+	<?php $label = escape(__((string) $this->unwrap($item->meta->label))) ?>
 	<li class="item">
 	<?php if ($this->unwrap($item) instanceof \Cosray\NavLink): ?>
 		<?php
@@ -23,7 +24,7 @@ use function Cosray\escape;
 					'iconMeta' => $iconMeta,
 					'default' => true,
 				]) ?>
-				<span><?= $item->meta->label ?></span>
+				<span><?= $label ?></span>
 			</span>
 			<?php if (trim((string) $item->meta->badge) !== ''): ?>
 				<span class="badge"><?= $item->meta->badge ?></span>
@@ -49,7 +50,7 @@ use function Cosray\escape;
 					'iconMeta' => $iconMeta,
 					'default' => true,
 				]) ?>
-				<span><?= $item->meta->label ?></span>
+				<span><?= $label ?></span>
 			</span>
 			<?php if (trim((string) $item->meta->badge) !== ''): ?>
 				<span class="badge"><?= $item->meta->badge ?></span>
@@ -65,7 +66,7 @@ use function Cosray\escape;
 			style="--depth: <?= $level ?>">
 			<span class="title">
 				<?php $this->insert('component/collection-icon', ['iconMeta' => $iconMeta]) ?>
-				<span><?= $item->meta->label ?></span>
+				<span><?= $label ?></span>
 			</span>
 			<?php $this->insert('component/collections', [
 				'collections' => $item->children(),
