@@ -82,6 +82,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame('UTC', $config->app->timezone->getName());
 		$this->assertSame(60 * 60 * 24 * 30, $config->auth->rememberLifetime);
 		$this->assertSame([], $config->panel->theme);
+		$this->assertTrue($config->panel->dashboard);
 		$this->assertFalse($config->session->enabled);
 		$this->assertSame(0, $config->session->options['cookie_lifetime']);
 		$this->assertSame('Lax', $config->session->options['cookie_samesite']);

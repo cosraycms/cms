@@ -144,6 +144,25 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->assertStringContainsString('Custom total', $html);
 	}
 
+	public function testDisabledDashboardLeavesTheMastheadAndOpensTheContentArea(): void
+	{
+		$this->app = $this->createApp(['panel.dashboard' => false]);
+
+		$response = $this->makeRequest('GET', '/cp');
+		$this->assertSame(303, $response->getStatusCode());
+		$this->assertSame('/cp/collection/test-articles', $response->getHeaderLine('Location'));
+
+		$response = $this->makeRequest('GET', '/cp/collection/test-articles');
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+
+		$this->assertHtmlNodeMissing('//*[@id="area-nav"]/a[@href="/cp"]', $html);
+		$this->assertHtmlNodeExists(
+			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/cp/collection/test-articles"]',
+			$html,
+		);
+	}
+
 	private function html(): string
 	{
 		$response = $this->makeRequest('GET', '/cp');

@@ -5,10 +5,12 @@ use function Cosray\escape;
 ?>
 <a
 	class="logo"
-	href="<?= $panelPath ?>"
-	<?php // Leads to the dashboard, so it switches areas: see the area nav.?>
+	href="<?= $homeUrl ?>"
+	<?php // Leads to the panel's start area, so it switches areas: see the area nav. ?>
 	hx-target="#frame"
-	aria-label="<?= escape(__('nav:dashboard')) ?>">
+	<?php if ($dashboard): ?>
+		aria-label="<?= escape(__('nav:dashboard')) ?>"
+	<?php endif ?>>
 	<?php if ($logo !== null): ?>
 		<img class="image" src="<?= $logo ?>" alt="<?= escape(__('panel:logo')) ?>" />
 	<?php else: ?>

@@ -202,6 +202,8 @@ $app->dashboard->add(\App\Panel\OpenForms::class);
 
 A card implements `Cosray\Contract\DashboardCard` and returns a `Cosray\Panel\Dashboard\Card` DTO. Providers registered by class name are constructed per dashboard request, so they may inject services such as `Database`, `Config`, or `Context`. Returning `null` omits the card for that request.
 
+A site without use for the dashboard sets `panel.dashboard` to `false`. The masthead then drops its entry, and the panel root and the logo open the first collection instead, or the media library when there is none.
+
 ```php
 use Celema\Quma\Database;
 use Cosray\Contract\DashboardCard;
@@ -600,6 +602,7 @@ Common built-in settings:
 
     'panel.theme' => [],
     'panel.logo' => '/images/logo.png',
+    'panel.dashboard' => true,
 
     'db.dsn' => env('DATABASE_URL', null),
     'db.sql' => [],

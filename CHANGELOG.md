@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Sites can turn the panel dashboard off with `panel.dashboard => false`. Its masthead entry disappears, and the panel root, the logo and the redirect after login open the first collection instead, or the media library when there is none.
+
 - Add opt-in nullable Checkbox fields through `#[Nullable]`, with explicit Not set/Yes/No choices and translated `#[StateLabels]` overrides. Nullable `Value\Boolean` values preserve `null` through saving, loading and JSON; applications opting in must handle `bool|null` from `unwrap()`. Creation defaults never replace an explicitly supplied null. Existing Checkbox fields keep their two-state read behaviour; no migration is needed. See [Checkbox fields](docs/controls.md#checkbox-fields).
 
 - Add explicit, weighted PostgreSQL full-text search through `Nodes::fulltext()`, with locale-aware accent-insensitive matching, ranked results, safe highlighted snippets and transactional live-content indexing. Working copies and existing panel substring searches remain separate. Apply migration `000000-000036`, opt fields or computed titles in with `#[Fulltext(...)]`, and run the app-aware `db:fulltext` rebuild; refresh materialized titles with `db:titles` first when needed. See [full-text search](docs/fulltext.md) for the coordinated deployment order.

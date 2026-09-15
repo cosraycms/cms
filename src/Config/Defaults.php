@@ -77,6 +77,7 @@ final class Defaults
 		return [
 			'panel.theme' => [],
 			'panel.logo' => '/images/logo.png',
+			'panel.dashboard' => true,
 			// Default panel UI language; NULL negotiates from the browser.
 			'panel.locale' => null,
 		];

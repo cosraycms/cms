@@ -732,7 +732,8 @@ Render context keys available to renderers include:
 
 New SSR/HTMX panel routes use `path.panel`, which defaults to `/cp`:
 
-- `GET <panelPath>` panel dashboard
+- `GET <panelPath>` panel dashboard; with `panel.dashboard` off it redirects
+  (303) to the first collection, or to media when there is none
 - `GET <panelPath>/login` login form
 - `POST <panelPath>/login` authenticate
 - `POST <panelPath>/logout` logout
@@ -1128,6 +1129,7 @@ Paths and panel:
 - `path.panel`: `'/cp'` (SSR/HTMX panel path; installed client assets live below `{path.public}{path.panel}/static`; set `COSRAY_PANEL_DEV=1` to use the Vite dev server)
 - `panel.theme`: `[]` (input may be a string or string[] and is exposed as a list through `$config->panel->theme`)
 - `panel.logo`: `'/images/logo.png'`
+- `panel.dashboard`: `true` (`false` removes the dashboard's masthead entry; the panel root and the logo lead to the first collection, or media)
 
 Errors:
 

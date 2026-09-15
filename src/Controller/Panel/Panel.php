@@ -52,6 +52,8 @@ abstract class Panel
 			'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
 			'currentPath' => $this->request->uri()->getPath(),
 			'area' => static::AREA,
+			'dashboard' => $this->config->panel->dashboard,
+			'homeUrl' => $this->homeUrl(),
 			'contentUrl' => $this->firstUrl($collections),
 			'menusUrl' => $this->menusUrl($panelPath),
 			'logo' => $this->logo(),
@@ -116,6 +118,22 @@ abstract class Panel
 	protected function panelPath(): string
 	{
 		return $this->config->panel->path;
+	}
+
+	/**
+	 * Where the logo and the panel root lead. Without the dashboard that is the
+	 * first remaining masthead area: content, or media for a project without
+	 * collections.
+	 */
+	protected function homeUrl(): string
+	{
+		$panelPath = $this->panelPath();
+
+		if ($this->config->panel->dashboard) {
+			return $panelPath;
+		}
+
+		return $this->firstUrl($this->collections()) ?? $panelPath . '/media';
 	}
 
 	/**

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Controller\Panel;
 
+use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
+use Celema\Core\Response;
 use Celema\Quma\Database;
 use Celema\Wire\Creator;
 use Cosray\Bootstrap;
@@ -27,8 +29,13 @@ final class Index extends Panel
 		Context $context,
 		Database $db,
 		Dashboard $dashboard,
+		Factory $factory,
 		Types $types,
-	): array {
+	): array|Response {
+		if (!$this->config->panel->dashboard) {
+			return Response::create($factory)->redirect($this->homeUrl(), 303);
+		}
+
 		return $this->context([
 			'cards' => $this->cards($context, $dashboard),
 			'recent' => $this->recent($context, $db, $types),

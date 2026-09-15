@@ -10,7 +10,11 @@ $oob = (bool) ($oob ?? false);
 $currentArea = (string) ($area ?? '');
 $contentUrl = $this->unwrap($contentUrl ?? null);
 
-$areas = [['area' => 'dashboard', 'url' => (string) $panelPath, 'label' => __('nav:dashboard')]];
+$areas = [];
+
+if ((bool) ($dashboard ?? true)) {
+	$areas[] = ['area' => 'dashboard', 'url' => (string) $panelPath, 'label' => __('nav:dashboard')];
+}
 
 if (is_string($contentUrl)) {
 	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content')];

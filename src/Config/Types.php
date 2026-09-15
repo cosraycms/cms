@@ -40,6 +40,7 @@ namespace Cosray\Config;
  *
  *     'panel.theme': null|string|list<string>,
  *     'panel.logo': ?string,
+ *     'panel.dashboard': bool,
  *     'panel.locale': ?string,
  *
  *     'error.enabled': bool,
@@ -97,6 +98,7 @@ namespace Cosray\Config;
  *     'path.panelAssets'?: string,
  *     'panel.theme'?: null|string|list<string>,
  *     'panel.logo'?: null|string,
+ *     'panel.dashboard'?: bool,
  *     'panel.locale'?: null|string,
  *     'error.enabled'?: bool,
  *     'error.renderer'?: mixed,

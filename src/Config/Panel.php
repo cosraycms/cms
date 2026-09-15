@@ -28,6 +28,10 @@ final class Panel
 		get => $this->config->get('panel.logo');
 	}
 
+	public bool $dashboard {
+		get => $this->config->get('panel.dashboard');
+	}
+
 	/** @var ?non-empty-string Default panel UI language; NULL negotiates from the browser. */
 	public ?string $locale {
 		get => $this->config->get('panel.locale');
