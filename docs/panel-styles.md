@@ -158,6 +158,10 @@ Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are deco
 
 `cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
 
+## Tabs
+
+`.cms-tabs` is a row of tabs over a line, the chosen one underlined in the accent colour. The row is the `role="tablist"`; each `.tab` inside is a `role="tab"` button carrying `aria-selected`, `aria-controls` and a roving `tabindex`, so the row is one tab stop and the arrow keys move between tabs. The panels sit wherever the screen puts them as `role="tabpanel"` elements labelled by their tab. The stylesheet draws only the row; the richtext link modal drives its tabs in Svelte.
+
 ## Action menus
 
 Block pickers, block/entry row actions, menu-tree actions, and richtext menus use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Their buttons use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep the surface beside its trigger in the DOM, within any owning form; the top layer handles painting without reparenting.

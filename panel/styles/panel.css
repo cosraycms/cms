@@ -20,7 +20,7 @@
 @import './cms-blocks-editor.css' layer(panel);
 @import './cms-node.css' layer(panel);
 @import './cms-inspector.css' layer(panel);
-@import './tabs.css' layer(panel);
+@import './cms-tabs.css' layer(panel);
 @import './cms-modal.css' layer(panel);
 @import './cms-block-catalog.css' layer(panel);
 @import './cms-settings.css' layer(panel);

@@ -26,11 +26,20 @@
 	let { close, add, href = '', node = '', asset = '', blank = $bindable() }: Props = $props();
 	const id = $props.id();
 
+	type Tab = 'manually' | 'page' | 'images' | 'files';
+
+	const tabs: { id: Tab; icon: string; label: string }[] = [
+		{ id: 'manually', icon: 'link-45deg', label: __('link:manual') },
+		{ id: 'page', icon: 'paragraph', label: __('node:page') },
+		{ id: 'images', icon: 'image', label: __('media:images') },
+		{ id: 'files', icon: 'file-earmark-richtext', label: __('media:files-documents') },
+	];
+
 	// Editing an existing link opens on the tab that matches its kind; an
 	// asset link defaults to the files tab, which browses every kind. The
 	// modal is remounted per open, so these props are a one-time seed
 	// (untrack captures the current value without a reactive dependency).
-	let currentTab = $state(
+	let currentTab = $state<Tab>(
 		untrack(() => (node !== '' ? 'page' : asset !== '' ? 'files' : 'manually')),
 	);
 
@@ -71,57 +80,64 @@
 		pickedNode = item.uid;
 	}
 
-	function changeTab(tab: string) {
+	function changeTab(tab: Tab) {
 		return () => (currentTab = tab);
+	}
+
+	function keydown(event: KeyboardEvent & { currentTarget: HTMLElement }) {
+		const index = tabs.findIndex((tab) => tab.id === currentTab);
+		let next = -1;
+
+		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			next = (index + 1) % tabs.length;
+		} else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			next = (index - 1 + tabs.length) % tabs.length;
+		} else if (event.key === 'Home') {
+			next = 0;
+		} else if (event.key === 'End') {
+			next = tabs.length - 1;
+		}
+
+		if (next < 0) {
+			return;
+		}
+
+		event.preventDefault();
+		currentTab = tabs[next].id;
+		event.currentTarget
+			.closest('[role="tablist"]')
+			?.querySelectorAll<HTMLElement>('[role="tab"]')
+			[next]?.focus();
 	}
 </script>
 
 <ModalHeader>{__('richtext:add-link')}</ModalHeader>
 <ModalBody>
 	<div class="cms-modal-link-body">
-		<div class="tabs">
-			<div class="cms-modal-link-tabs-frame">
-				<nav class="cms-modal-link-tabs-nav" aria-label={__('common:tabs')}>
-					<button
-						type="button"
-						class="tab"
-						class:active={currentTab === 'manually'}
-						onclick={changeTab('manually')}
-					>
-						<Icon name="link-45deg" />
-						<span>{__('link:manual')}</span>
-					</button>
-					<button
-						type="button"
-						class="tab"
-						class:active={currentTab === 'page'}
-						onclick={changeTab('page')}
-					>
-						<Icon name="paragraph" />
-						<span>{__('node:page')}</span>
-					</button>
-					<button
-						type="button"
-						class="tab"
-						class:active={currentTab === 'images'}
-						onclick={changeTab('images')}
-					>
-						<Icon name="image" />
-						<span>{__('media:images')}</span>
-					</button>
-					<button
-						type="button"
-						class="tab"
-						class:active={currentTab === 'files'}
-						onclick={changeTab('files')}
-					>
-						<Icon name="file-earmark-richtext" />
-						<span>{__('media:files-documents')}</span>
-					</button>
-				</nav>
-			</div>
+		<div class="cms-tabs" role="tablist" aria-label={__('common:tabs')}>
+			{#each tabs as tab (tab.id)}
+				<button
+					type="button"
+					class="tab"
+					role="tab"
+					id={`${id}-tab-${tab.id}`}
+					aria-selected={currentTab === tab.id}
+					aria-controls={`${id}-panel`}
+					tabindex={currentTab === tab.id ? 0 : -1}
+					onclick={changeTab(tab.id)}
+					onkeydown={keydown}
+				>
+					<Icon name={tab.icon} />
+					<span>{tab.label}</span>
+				</button>
+			{/each}
 		</div>
-		<div class="files cms-modal-link-files">
+		<div
+			class="files cms-modal-link-files"
+			role="tabpanel"
+			id={`${id}-panel`}
+			aria-labelledby={`${id}-tab-${currentTab}`}
+		>
 			{#if currentTab === 'page'}
 				{#key currentTab}
 					<NodeSearch pick={pickNode} selected={pickedNode || null} />
@@ -180,16 +196,6 @@
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-4);
-		}
-
-		.cms-modal-link-tabs-frame {
-			border-bottom: 1px solid var(--cms-color-border);
-		}
-
-		.cms-modal-link-tabs-nav {
-			display: flex;
-			flex-wrap: wrap;
-			gap: var(--cms-space-2);
 		}
 
 		.cms-modal-link-files {
