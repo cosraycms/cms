@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
+		'Incorrect password.' => 'Das Passwort ist nicht korrekt.',
+		'Password' => 'Passwort',
+		'Protected content' => 'Geschützter Inhalt',
+		'Too many attempts. Please try again in 15 minutes.' => 'Zu viele Versuche. Bitte versuchen Sie es in 15 Minuten erneut.',
+		'Unlock' => 'Freischalten',
 		'auth:forgot-password' => 'Passwort vergessen?',
 		'auth:invalid-credentials' => 'Benutzername oder Passwort ungültig',
 		'auth:login-label' => 'Benutzername oder E-Mail',

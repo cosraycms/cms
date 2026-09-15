@@ -57,4 +57,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000033-rfc3339-datetimes[pgsql].php', now()),
 	('000000-000034-node-drafts.sql', now()),
 	('000000-000035-draft-history-outlives-drafts.sql', now()),
-	('000000-000036-fulltext[pgsql].sql', now());
+	('000000-000036-fulltext[pgsql].sql', now()),
+	('000000-000037-access-attempts.sql', now());

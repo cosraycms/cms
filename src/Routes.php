@@ -37,7 +37,7 @@ class Routes
 		protected array $panelPages = [],
 	) {
 		$this->panelPath = $config->panel->path;
-		$this->frontendSession = $config->session->enabled;
+		$this->frontendSession = $config->session->enabled || $config->get('access.passwords', []) !== [];
 		$this->initRequestMiddlware = new InitRequest($config);
 		$this->session = new Session($this->config, $this->db);
 	}
@@ -76,6 +76,21 @@ class Routes
 			->middleware($this->session);
 
 		$app->delete('/media/{uid}', [Media::class, 'delete'], 'cms.media.delete')
+			->middleware($this->session);
+
+		$app->get('/access/{permission:[a-z][a-z0-9-]{0,63}}', [Controller\Access::class, 'login'], 'cms.access.login')
+			->middleware($this->session);
+		$app->post(
+			'/access/{permission:[a-z][a-z0-9-]{0,63}}',
+			[Controller\Access::class, 'login'],
+			'cms.access.unlock',
+		)
+			->middleware($this->session);
+		$app->post(
+			'/access/{permission:[a-z][a-z0-9-]{0,63}}/logout',
+			[Controller\Access::class, 'logout'],
+			'cms.access.logout',
+		)
 			->middleware($this->session);
 
 		$this->addPanel($app);

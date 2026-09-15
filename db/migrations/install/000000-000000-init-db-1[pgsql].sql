@@ -10,6 +10,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 
+CREATE TABLE /*:cms.prefix:*/access_attempts (
+	permission text NOT NULL,
+	client text NOT NULL,
+	attempts integer NOT NULL,
+	expires timestamptz NOT NULL,
+	PRIMARY KEY (permission, client)
+);
+CREATE INDEX ON /*:cms.prefix:*/access_attempts (expires);
+
 CREATE TABLE /*:cms.prefix:*/roles (
 	rolename text NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_roles PRIMARY KEY (rolename)

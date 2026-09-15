@@ -110,6 +110,7 @@ class Bootstrap implements CorePlugin
 		protected readonly Config $config,
 		?Types $types = null,
 	) {
+		Access::validate($config);
 		$this->types = $types ?? new Types();
 		$this->fieldSchemas = FieldSchemas::withDefaults();
 		$this->blocks = BlockRegistry::withDefaults();
