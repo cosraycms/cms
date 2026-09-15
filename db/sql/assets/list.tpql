@@ -2,6 +2,7 @@ SELECT
 	asset,
 	uid,
 	disk,
+	permission,
 	key,
 	filename,
 	mime,

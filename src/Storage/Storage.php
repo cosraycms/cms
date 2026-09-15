@@ -6,30 +6,36 @@ namespace Cosray\Storage;
 
 use Cosray\Assets\Util;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 
-/**
- * Storage seam for the asset pool.
- *
- * Keys are sharded per-asset paths like `ab/abcdefghij123/logo.png`,
- * relative to the disk root. The only disk in phase 1a is `local`, rooted
- * at the public assets directory. path() resolves a key to an absolute
- * local file, which the resize pipeline, Response::file() and X-Sendfile
- * require; a non-local disk will need a temp-download strategy for those
- * before it can exist.
- */
+/** Sharded asset keys are relative to either the public or private local disk. */
 class Storage
 {
-	public readonly string $disk;
 	protected readonly Filesystem $filesystem;
-	protected readonly string $root;
+	public readonly string $root;
 
-	public function __construct(Config $config)
-	{
-		$this->disk = 'local';
-		$this->root = rtrim($config->path->public, '\\/') . '/' . trim($config->path->assets, '/');
+	public function __construct(
+		Config $config,
+		public readonly string $disk = 'local',
+	) {
+		$this->root = match ($disk) {
+			'local' => rtrim($config->path->public, '\\/') . '/' . trim($config->path->assets, '/'),
+			'private' => $config->media->privateDir,
+			default => throw new RuntimeException('Unknown media disk: ' . $disk),
+		};
+		if ($disk === 'private') {
+			if (!is_dir($this->root) && !mkdir($this->root, 0o700, true) && !is_dir($this->root)) {
+				throw new RuntimeException('Cannot create private media directory');
+			}
+			$root = realpath($this->root);
+			$public = realpath($config->path->public);
+			if ($root === false || $public === false || $root === $public || str_starts_with($root, $public . '/')) {
+				throw new RuntimeException('Private media must be outside the document root');
+			}
+		}
 		$this->filesystem = new Filesystem(new LocalFilesystemAdapter($this->root));
 	}
 

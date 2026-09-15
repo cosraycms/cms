@@ -128,6 +128,17 @@ final class Access
 		return $this->context->config->get('access.passwords', [])[$permission] ?? null;
 	}
 
+	public static function validatePermission(Config $config, string $permission): void
+	{
+		if (
+			$permission !== 'everyone'
+			&& !in_array($permission, new Permissions()->get('superuser'), true)
+			&& !array_key_exists($permission, $config->get('access.passwords', []))
+		) {
+			throw new RuntimeException('Unknown read permission: ' . $permission);
+		}
+	}
+
 	public static function validate(Config $config): void
 	{
 		$passwords = $config->get('access.passwords', []);

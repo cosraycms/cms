@@ -31,6 +31,8 @@ final class Asset
 		public readonly array $meta = [],
 		private readonly string $assetsBase = '/assets',
 		private readonly string $cacheBase = '/cache',
+		public readonly string $permission = 'everyone',
+		private readonly string $filesBase = '/files',
 	) {}
 
 	public static function fromRow(array $row, Config $config): self
@@ -48,18 +50,19 @@ final class Asset
 			width: isset($row['width']) ? (int) $row['width'] : null,
 			height: isset($row['height']) ? (int) $row['height'] : null,
 			meta: is_array($meta) ? $meta : [],
+			permission: (string) ($row['permission'] ?? 'everyone'),
+			filesBase: $prefix . '/files',
 			assetsBase: $prefix . '/' . trim($config->path->assets, '/'),
 			cacheBase: $prefix . '/' . trim($config->path->cache, '/'),
 		);
 	}
 
-	/**
-	 * Root-relative URL of the original. The URL equals the file's path
-	 * below the public directory, so the web server serves it natively.
-	 */
+	/** Private URLs always pass through authorization, even after the browser knows the uid. */
 	public function path(): string
 	{
-		return "{$this->assetsBase}/" . $this->encode($this->key);
+		return $this->permission !== 'everyone'
+			? $this->filesBase . '/' . rawurlencode($this->uid)
+			: "{$this->assetsBase}/" . $this->encode($this->key);
 	}
 
 	/**
@@ -69,6 +72,10 @@ final class Asset
 	 */
 	public function sizePath(string $size): string
 	{
+		if ($this->permission !== 'everyone') {
+			return $this->path() . '/' . rawurlencode($size);
+		}
+
 		$dir = dirname($this->key);
 		$base = basename($this->key);
 		$dot = strrpos($base, '.');

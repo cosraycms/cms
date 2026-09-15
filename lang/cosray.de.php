@@ -217,6 +217,7 @@ return [
 		'field:unknown-entry-type' => 'Unbekannter Eintragstyp: :type',
 		'field:yes' => 'Ja',
 		'media:disallowed-type' => 'Der Dateityp ist nicht erlaubt: :type.',
+		'media:permission-conflict' => 'Diese Datei existiert bereits mit anderen Zugriffsrechten. Bitte schützen Sie die vorhandene Datei zuerst.',
 		'media:title' => 'Medien',
 		'media:too-large' => 'Die Datei ist zu groß: :size MB. Erlaubt sind :allowed MB',
 		'media:unknown-file' => 'Unbekannte Datei',

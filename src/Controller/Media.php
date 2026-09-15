@@ -329,12 +329,61 @@ class Media
 			throw $e;
 		}
 
+		$storage = new Storage($this->config, $row['disk']);
+		$storage->deleteDirectory(dirname((string) $row['key']));
 		if ($row['disk'] === 'local') {
-			new Storage($this->config)->deleteDirectory(dirname((string) $row['key']));
 			$this->purgeRenditions((string) $row['key']);
+		} else {
+			$storage->deleteDirectory('.cache/' . dirname((string) $row['key']));
 		}
 
 		return $response->json(['ok' => true]);
+	}
+
+	public function download(string $uid, \Cosray\Context $context, ?string $size = null): Response
+	{
+		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+		if ($row === null || $row['disk'] !== 'private') {
+			throw new HttpNotFound($this->request);
+		}
+
+		$auth = new Auth(
+			$this->request->unwrap(),
+			new Users($this->db),
+			$this->config,
+			$this->request->get('session', null),
+		);
+		if (!$context->access()->allows($row['permission']) && !$auth->user()?->hasPermission('panel')) {
+			return new Access($context)->challenge($row['permission']);
+		}
+
+		$asset = Asset::fromRow($row, $this->config);
+		$storage = new Storage($this->config, 'private');
+		if (!$storage->exists($asset->key)) {
+			throw new HttpNotFound($this->request);
+		}
+		$path = $storage->path($asset->key);
+		if ($size !== null) {
+			if (!$asset->resizable() || !$this->config->media->sizes->has($size)) {
+				throw new HttpNotFound($this->request);
+			}
+			$spec = $this->config->media->sizes->get($size);
+			$path = new Assets($this->config, 'private')
+				->image($asset->key)
+				->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $spec->name)
+				->path();
+		}
+
+		$response = Response::create($this->factory)
+			->file($path)
+			->header('Cache-Control', 'private, no-store')
+			->header('X-Robots-Tag', 'noindex, nofollow')
+			->header('X-Content-Type-Options', 'nosniff');
+		if ($asset->kind === 'file') {
+			$response->header('Content-Disposition', "attachment; filename*=UTF-8''" . rawurlencode($asset->filename));
+		}
+
+		return $response;
 	}
 
 	/** Removes the rendition cache directory `{cache}/{shard}/{uid}/`. */
@@ -430,34 +479,50 @@ class Media
 
 		$asset = Asset::fromRow($row, $this->config);
 
-		if (dirname($asset->key) !== "{$shard}/{$uid}" || !$asset->resizable()) {
-			throw new HttpNotFound($this->request);
+		$owns = !$this->db->getConn()->inTransaction();
+		if ($owns) {
+			$this->db->begin();
 		}
-
-		$spec = $this->sizeSpec($asset->key, $file);
-
 		try {
-			$image = $this
-				->getAssets()
-				->image($asset->key)
-				->resize(
-					$spec->size(),
-					$spec->mode,
-					$spec->enlarge,
-					$spec->quality,
-					$spec->name,
-				);
-		} catch (RuntimeException $e) {
-			throw new HttpNotFound($this->request, previous: $e);
+			$this->db->assets->lockHash(['hash' => (string) ($row['hash'] ?? $uid)])->run();
+			$current = $this->db->assets->byUid(['uid' => $uid])->first();
+			if ($current === null || $current['disk'] !== 'local') {
+				throw new HttpNotFound($this->request);
+			}
+
+			if (dirname($asset->key) !== "{$shard}/{$uid}" || !$asset->resizable()) {
+				throw new HttpNotFound($this->request);
+			}
+
+			$spec = $this->sizeSpec($asset->key, $file);
+
+			try {
+				$image = $this
+					->getAssets()
+					->image($asset->key)
+					->resize(
+						$spec->size(),
+						$spec->mode,
+						$spec->enlarge,
+						$spec->quality,
+						$spec->name,
+					);
+			} catch (RuntimeException $e) {
+				throw new HttpNotFound($this->request, previous: $e);
+			}
+
+			$fileServer = $this->config->media->fileServer;
+
+			if ($fileServer) {
+				return $this->sendFile($fileServer, $image->path());
+			}
+
+			return Response::create($this->factory)->file($image->path());
+		} finally {
+			if ($owns) {
+				$this->db->rollback();
+			}
 		}
-
-		$fileServer = $this->config->media->fileServer;
-
-		if ($fileServer) {
-			return $this->sendFile($fileServer, $image->path());
-		}
-
-		return Response::create($this->factory)->file($image->path());
 	}
 
 	/**

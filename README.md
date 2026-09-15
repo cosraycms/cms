@@ -413,6 +413,20 @@ Grants live in the server session. Unlock rotates the session ID; changing a has
 
 Configuring shared passwords enables frontend sessions and marks their responses `Cache-Control: private, no-store`, including pages embedding restricted content. Do not put those responses in a shared page cache. This deliberately trades public page caching for a simple, safe session boundary. Protecting a page does not, by itself, protect publicly stored files linked from it.
 
+### Private assets
+
+After migration `000000-000038`, pass `permission: 'staff'` to `Assets\Ingest::ingest()` to store an asset outside the document root. The default `everyone` keeps the existing public behavior. Named permissions must be configured, or be built-in user permissions such as `authenticated`.
+
+`media.private_dir` defaults to `{path.root}/storage/media`; include it in backups and keep it out of Git and the web server's public roots and aliases. Private originals and renditions use `/files/{uid}` and `/files/{uid}/{size}`. Every request, including cached renditions, checks access. Panel editors may inspect these files without unlocking a shared password. Asset references, `path()`, `sizePath()`, and field `publicPath()` produce the appropriate protected URLs automatically. The legacy method name `publicPath()` describes a URL, not public access.
+
+Ingest deduplicates within a permission. Identical bytes under a different permission are rejected, not reused or silently made public. To protect an existing asset while retaining its UID and references:
+
+```php
+$asset = new \Cosray\Assets\Protection($config, $db)->protect($uid, 'staff');
+```
+
+This removes the public original and renditions before changing the catalog row. The operation is retryable and fail-closed: an interrupted operation may leave a public link unavailable, but does not restore publicly readable bytes. It cannot make an asset public again. Review public uses before protecting a shared asset, purge external caches, and remember that downloaded copies cannot be revoked. Do not wrap protection in a transaction you intend to roll back: filesystem changes cannot roll back with PostgreSQL.
+
 ## Full-text search
 
 Opt selected prose fields into PostgreSQL search with `#[Fulltext(FulltextWeight::A)]` through `D`. `Text`, `Textarea`, `RichText`, `Blocks` and `Entries` are supported; containers pass their weight to supported children, which can override it or opt out with `#[Fulltext(false)]`. Computed titles require an annotation on the resolved `Title::title()` implementation. Nothing is indexed automatically.

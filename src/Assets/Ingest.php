@@ -22,14 +22,10 @@ use Throwable;
  */
 final class Ingest
 {
-	private readonly Storage $storage;
-
 	public function __construct(
 		private readonly Config $config,
 		private readonly Database $db,
-	) {
-		$this->storage = new Storage($config);
-	}
+	) {}
 
 	public function ingest(
 		string $contents,
@@ -37,7 +33,10 @@ final class Ingest
 		string $mediatype,
 		?Actor $actor = null,
 		array $meta = [],
+		string $permission = 'everyone',
 	): IngestResult {
+		\Cosray\Access::validatePermission($this->config, $permission);
+		$storage = new Storage($this->config, $permission === 'everyone' ? 'local' : 'private');
 		$filename = self::safeFilename($filename);
 		$mime = $this->validate($contents, $filename, $mediatype);
 
@@ -55,47 +54,71 @@ final class Ingest
 		}
 
 		$hash = hash('sha256', $contents);
-		$existing = $this->db
-			->assets
-			->byHash([
-				'hash' => $hash,
-				'disk' => $this->storage->disk,
-			])
-			->first();
-
-		if ($existing) {
-			return new IngestResult($existing, created: false);
+		$owns = !$this->db->getConn()->inTransaction();
+		if ($owns) {
+			$this->db->begin();
 		}
-
-		[$width, $height] = $this->imageDimensions($mediatype, $contents);
-		$uidConfig = $this->config->uid;
-		$uid = new Uid($uidConfig->alphabet, $uidConfig->length)->generate();
-		$key = Storage::key($uid, $filename);
-		$this->storage->write($key, $contents);
-
-		$row = [
-			'uid' => $uid,
-			'disk' => $this->storage->disk,
-			'key' => $key,
-			'filename' => $filename,
-			'mime' => $mime,
-			'bytes' => strlen($contents),
-			'width' => $width,
-			'height' => $height,
-			'hash' => $hash,
-			'meta' => $meta === [] ? '{}' : json_encode($meta),
-			'creator' => ($actor ?? Actor::system())->id,
-		];
-
+		$writtenKey = null;
 		try {
+			$this->db->assets->lockHash(['hash' => $hash])->run();
+			if ($this->db->assets->conflict(['hash' => $hash, 'permission' => $permission])->first()) {
+				throw new IngestError(
+					'These bytes already exist with a different read permission; protect the existing asset explicitly',
+					__('media:permission-conflict'),
+				);
+			}
+			$existing = $this->db
+				->assets
+				->byHash([
+					'hash' => $hash,
+					'disk' => $storage->disk,
+					'permission' => $permission,
+				])
+				->first();
+
+			if ($existing) {
+				if ($owns) {
+					$this->db->commit();
+				}
+				return new IngestResult($existing, created: false);
+			}
+
+			[$width, $height] = $this->imageDimensions($mediatype, $contents);
+			$uidConfig = $this->config->uid;
+			$uid = new Uid($uidConfig->alphabet, $uidConfig->length)->generate();
+			$key = Storage::key($uid, $filename);
+			$storage->write($key, $contents);
+			$writtenKey = $key;
+
+			$row = [
+				'uid' => $uid,
+				'disk' => $storage->disk,
+				'permission' => $permission,
+				'key' => $key,
+				'filename' => $filename,
+				'mime' => $mime,
+				'bytes' => strlen($contents),
+				'width' => $width,
+				'height' => $height,
+				'hash' => $hash,
+				'meta' => $meta === [] ? '{}' : json_encode($meta),
+				'creator' => ($actor ?? Actor::system())->id,
+			];
+
 			$this->db->assets->create($row)->one();
-		} catch (Throwable $e) {
-			$this->storage->delete($key);
-
-			throw $e;
+			if ($owns) {
+				$this->db->commit();
+			}
+			return new IngestResult($row, created: true);
+		} catch (Throwable $error) {
+			if ($owns && $this->db->getConn()->inTransaction()) {
+				$this->db->rollback();
+			}
+			if ($writtenKey !== null) {
+				$storage->delete($writtenKey);
+			}
+			throw $error;
 		}
-
-		return new IngestResult($row, created: true);
 	}
 
 	/** @return string the detected mime type */

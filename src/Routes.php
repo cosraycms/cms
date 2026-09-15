@@ -60,6 +60,15 @@ class Routes
 			'cms.media.cache',
 		);
 
+		$app->get('/files/{uid:[A-Za-z0-9_.-]{1,64}}', [Media::class, 'download'], 'cms.media.download')
+			->middleware($this->initRequestMiddlware, $this->session);
+		$app->get(
+			'/files/{uid:[A-Za-z0-9_.-]{1,64}}/{size:[A-Za-z0-9_-]{1,64}}',
+			[Media::class, 'download'],
+			'cms.media.private-size',
+		)
+			->middleware($this->initRequestMiddlware, $this->session);
+
 		$app->post(
 			'/media/{mediatype:(image|file|video)}',
 			[Media::class, 'upload'],

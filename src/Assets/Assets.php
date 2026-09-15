@@ -15,11 +15,16 @@ class Assets
 
 	public function __construct(
 		protected readonly Config $config,
+		string $disk = 'local',
 	) {
 		$this->publicDir = rtrim(realpath($config->path->public), '\\/');
 
-		$this->assetsDir = Path::inside($this->publicDir, $config->path->assets);
-		$this->cacheDir = Path::inside($this->publicDir, $config->path->cache);
+		$this->assetsDir = $disk === 'private'
+			? new \Cosray\Storage\Storage($config, $disk)->root
+			: Path::inside($this->publicDir, $config->path->assets);
+		$this->cacheDir = $disk === 'private'
+			? $this->assetsDir . '/.cache'
+			: Path::inside($this->publicDir, $config->path->cache);
 	}
 
 	public function image(string $path): Image

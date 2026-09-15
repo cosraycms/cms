@@ -51,10 +51,7 @@ class File extends Value
 		throw new RuntimeException('Invalid file url');
 	}
 
-	/**
-	 * Root-relative URL of the asset. Equal to the file's path below the
-	 * public directory, so the web server serves it without PHP.
-	 */
+	/** Root-relative URL, routed through authorization for private assets. */
 	public function publicPath(): string
 	{
 		return $this->asset($this->index)?->path() ?? '';
