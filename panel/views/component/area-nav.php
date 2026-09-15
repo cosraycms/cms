@@ -13,19 +13,24 @@ $contentUrl = $this->unwrap($contentUrl ?? null);
 $areas = [];
 
 if ((bool) ($dashboard ?? true)) {
-	$areas[] = ['area' => 'dashboard', 'url' => (string) $panelPath, 'label' => __('nav:dashboard')];
+	$areas[] = [
+		'area' => 'dashboard',
+		'url' => (string) $panelPath,
+		'label' => __('nav:dashboard'),
+		'icon' => 'grid-1x2',
+	];
 }
 
 if (is_string($contentUrl)) {
-	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content')];
+	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content'), 'icon' => 'file-earmark-text'];
 }
 
-$areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media')];
+$areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
 $menusUrl = $this->unwrap($menusUrl ?? null);
 
 if (is_string($menusUrl)) {
-	$areas[] = ['area' => 'menus', 'url' => $menusUrl, 'label' => __('nav:menus')];
+	$areas[] = ['area' => 'menus', 'url' => $menusUrl, 'label' => __('nav:menus'), 'icon' => 'list-nested'];
 }
 
 ?>
@@ -40,6 +45,7 @@ if (is_string($menusUrl)) {
 			class="area"
 			href="<?= escape($entry['url']) ?>"
 			<?= $entry['area'] === $currentArea ? 'aria-current="page"' : '' ?>>
+			<?= \Cosray\Panel\Icon::render($entry['icon']) ?>
 			<?= escape($entry['label']) ?>
 		</a>
 	<?php endforeach ?>

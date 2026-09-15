@@ -39,7 +39,7 @@
 
 .cms-masthead {
 	--hover-bg: var(--cms-color-hover);
-	--current-bg: var(--cms-color-selected);
+	--current-bg: var(--cms-button-secondary-bg);
 
 	display: flex;
 	align-items: center;
@@ -99,12 +99,12 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--cms-space-2);
-		padding: 0.4375rem 0.8125rem;
+		padding: var(--cms-space-2) var(--cms-space-3-5);
 		border: 1px solid transparent;
-		border-radius: var(--cms-radius-md);
+		border-radius: var(--cms-radius-lg);
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
-		font-weight: 400;
+		font-weight: 500;
 		white-space: nowrap;
 		text-decoration: none;
 		transition:
@@ -112,16 +112,31 @@
 			color 0.14s ease,
 			border-color 0.14s ease;
 
+		& .cms-icon {
+			--cms-icon-size: 1rem;
+
+			color: var(--cms-color-text-subtle);
+			transition: color 0.14s ease;
+		}
+
 		&:hover {
 			background: var(--hover-bg);
 			color: var(--cms-color-text);
+
+			& .cms-icon {
+				color: currentColor;
+			}
 		}
 
 		&[aria-current='page'] {
-			border-color: var(--cms-color-border);
-			background: var(--current-bg);
+			border-color: var(--cms-button-secondary-border);
+			background: var(--cms-gradient-raised), var(--current-bg);
+			box-shadow: var(--cms-button-secondary-shadow);
 			color: var(--cms-color-text);
-			font-weight: 500;
+
+			& .cms-icon {
+				color: currentColor;
+			}
 		}
 	}
 
