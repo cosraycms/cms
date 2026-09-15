@@ -15,6 +15,7 @@
 	} from '$lib/library';
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
+	import { cosray } from '$lib/bridge';
 	import Icon from '$components/Icon.svelte';
 	import AssetGrid from '$components/media/AssetGrid.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
@@ -51,6 +52,7 @@
 	let selected: string | null = $state(null);
 	let uploading = $state(false);
 	let uploadErrors: { file: string; error: string }[] = $state([]);
+	let uploadPermission = $state('everyone');
 	let uploadDone = $state(0);
 	let uploadTotal = $state(0);
 	let dragging = $state(false);
@@ -164,12 +166,15 @@
 		body.set('file', file);
 
 		try {
-			const response = await fetch(`${prefix}/media/${uploadKind(file.type)}`, {
-				method: 'POST',
-				body,
-				credentials: 'same-origin',
-				headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
-			});
+			const response = await fetch(
+				`${prefix}/media/${uploadKind(file.type)}?permission=${encodeURIComponent(uploadPermission)}`,
+				{
+					method: 'POST',
+					body,
+					credentials: 'same-origin',
+					headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
+				},
+			);
 			const data = (await response.json()) as {
 				ok: boolean;
 				error?: string;
@@ -367,6 +372,16 @@
 			<span class="cms-media-count">{__('media:file-count', { count: total })}</span>
 
 			<div class="cms-media-upload">
+				<label>
+					{__('media:upload-access')}
+					<select bind:value={uploadPermission} disabled={uploading}>
+						{#each cosray().system().readPermissions ?? ['everyone'] as permission (permission)}
+							<option value={permission}
+								>{permission === 'everyone' ? __('media:public') : permission}</option
+							>
+						{/each}
+					</select>
+				</label>
 				<button
 					type="button"
 					class="cms-button primary"

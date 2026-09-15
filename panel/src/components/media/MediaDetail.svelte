@@ -17,6 +17,7 @@
 
 	type Asset = {
 		uid: string;
+		permission: string;
 		filename: string;
 		kind: string;
 		mime: string | null;
@@ -198,6 +199,11 @@
 	{:else}
 		<header class="cms-detail-head">
 			<h2 title={asset.filename}>{asset.filename}</h2>
+			<p>
+				{__('media:read-access')}: {asset.permission === 'everyone'
+					? __('media:public')
+					: asset.permission}
+			</p>
 			<button
 				type="button"
 				class="cms-detail-close"

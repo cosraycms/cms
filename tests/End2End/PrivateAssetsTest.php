@@ -44,6 +44,14 @@ final class PrivateAssetsTest extends End2EndTestCase
 		parent::tearDown();
 	}
 
+	protected function createBootstrap(Config $config): \Cosray\Bootstrap
+	{
+		$bootstrap = parent::createBootstrap($config);
+		$bootstrap->node(\Cosray\Tests\Fixtures\Node\RestrictedPage::class);
+
+		return $bootstrap;
+	}
+
 	private function mediaConfig(): Config
 	{
 		return $this->app->container()->get(Config::class);
@@ -56,6 +64,44 @@ final class PrivateAssetsTest extends End2EndTestCase
 		imagepng($image);
 
 		return (string) ob_get_clean();
+	}
+
+	public function testEditorUploadsAndPickerCountsInheritReadPermission(): void
+	{
+		$this->authenticateAs('editor');
+		$response = $this->makeRequest('POST', '/media/image', [
+			'query' => ['nodeType' => 'restricted-page', 'permission' => 'everyone'],
+			'files' => ['file' => $this->factory()->uploadedFile(
+				$this->factory()->streamFactory()->createStream($this->png()),
+				strlen($this->png()),
+				UPLOAD_ERR_OK,
+				'scope-media-private.png',
+				'image/png',
+			)],
+		]);
+		$this->assertResponseOk($response);
+		$upload = $this->getJsonResponse($response);
+		$this->assertTrue($upload['ok']);
+		$this->assertSame('staff', $upload['permission']);
+		$ingest = new Ingest($this->mediaConfig(), $this->db());
+		$ingest->ingest("%PDF-1.4\npublic document", 'scope-media-public.pdf', 'file');
+		$response = $this->makeRequest('GET', '/media/library', ['query' => [
+			'nodeType' => 'restricted-page',
+			'q' => 'scope-media-',
+		]]);
+		$data = $this->getJsonResponse($response);
+		$this->assertSame(1, $data['total']);
+		$this->assertSame(1, $data['counts']['image']);
+		$this->assertSame(0, $data['counts']['document']);
+		$this->assertSame([$upload['uid']], array_column($data['assets'], 'uid'));
+		$response = $this->makeRequest('GET', '/media/library', ['query' => [
+			'nodeType' => 'test-page',
+			'q' => 'scope-media-',
+		]]);
+		$data = $this->getJsonResponse($response);
+		$this->assertSame(1, $data['counts']['document']);
+		$this->assertSame(0, $data['counts']['image']);
+		$this->assertSame('scope-media-public.pdf', $data['assets'][0]['filename']);
 	}
 
 	public function testOriginalAndCachedRenditionsRequireAccessOnEveryRequest(): void

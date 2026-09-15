@@ -2,6 +2,7 @@
 	import type { LibraryItem } from '$lib/library';
 
 	import { onMount } from 'svelte';
+	import { editorType } from '$lib/bridge';
 	import { fetchLibrary } from '$lib/library';
 	import { system } from '$lib/sys';
 	import { __ } from '$lib/locale';
@@ -27,7 +28,12 @@
 	async function load(reset: boolean) {
 		loading = true;
 		failed = false;
-		const result = await fetchLibrary($system.prefix, { kind, q, page: reset ? 1 : page + 1 });
+		const result = await fetchLibrary($system.prefix, {
+			kind,
+			q,
+			page: reset ? 1 : page + 1,
+			nodeType: editorType(),
+		});
 
 		if (result === null) {
 			failed = true;

@@ -16,6 +16,7 @@ export type LibraryItem = AssetInfo & { uid: string; thumbUrl: string };
 export const FILTER_KINDS = ['image', 'video', 'audio', 'document'] as const;
 
 export type LibraryQuery = {
+	nodeType?: string | null;
 	// Restricts the listing to one kind or a set of filter kinds; null
 	// (and 'file' — a File field accepts every kind) browses the whole
 	// pool.
@@ -230,6 +231,10 @@ export function libraryParams(query: LibraryQuery): URLSearchParams {
 
 	if (typeof query.since === 'string' && query.since !== '') {
 		params.set('since', query.since);
+	}
+
+	if (query.nodeType) {
+		params.set('nodeType', query.nodeType);
 	}
 
 	params.set('page', String(query.page ?? 1));

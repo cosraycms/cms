@@ -44,7 +44,7 @@ class Media
 	) {}
 
 	#[Permission('panel')]
-	public function upload(string $mediatype): Response
+	public function upload(string $mediatype, \Cosray\Context $context): Response
 	{
 		$response = Response::create($this->factory);
 		$file = $this->uploadedFile();
@@ -86,6 +86,7 @@ class Media
 				$filename,
 				$mediatype,
 				new Actor($this->userId()),
+				permission: $this->requestedPermission($context) ?? 'everyone',
 			);
 		} catch (IngestError $e) {
 			return $this->ingestFailure($response, $e, $filename);
@@ -121,7 +122,7 @@ class Media
 	 * show what selecting each kind would yield.
 	 */
 	#[Permission('panel')]
-	public function library(): Response
+	public function library(\Cosray\Context $context): Response
 	{
 		$params = $this->request->params();
 		$q = trim((string) ($params['q'] ?? ''));
@@ -132,6 +133,11 @@ class Media
 		// applies — Quma templates refuse empty argument lists — and
 		// isset() in the template still skips the clause.
 		$countArgs = ['q' => null];
+		$permission = $this->requestedPermission($context);
+		if ($permission !== null) {
+			$args['permission'] = $permission;
+			$countArgs['permission'] = $permission;
+		}
 
 		$kinds = $this->filterKinds((string) ($params['kind'] ?? ''));
 
@@ -196,6 +202,34 @@ class Media
 		return $time === false ? null : date(DATE_ATOM, $time);
 	}
 
+	private function requestedPermission(\Cosray\Context $context): ?string
+	{
+		$type = $this->request->param('nodeType', null);
+		$permission = $this->request->param('permission', null);
+		if ($type !== null) {
+			$nodes = $context->container->tag(\Cosray\Bootstrap::NODE_TAG);
+			if (!is_string($type) || !in_array($type, $nodes->entries(), true)) {
+				throw new \Celema\Core\Exception\HttpBadRequest();
+			}
+			$permission = \Cosray\Access::permission(
+				$nodes->entry($type)->definition(),
+				$context->container->get(\Cosray\Node\Types::class),
+			);
+		}
+		if ($permission !== null) {
+			if (!is_string($permission)) {
+				throw new \Celema\Core\Exception\HttpBadRequest();
+			}
+			try {
+				\Cosray\Access::validatePermission($this->config, $permission);
+			} catch (RuntimeException $error) {
+				throw new \Celema\Core\Exception\HttpBadRequest(previous: $error);
+			}
+		}
+
+		return $permission;
+	}
+
 	protected function libraryItem(array $row): array
 	{
 		$asset = Asset::fromRow($row, $this->config);
@@ -203,6 +237,7 @@ class Media
 		return [
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
+			'permission' => $asset->permission,
 			'url' => $asset->path(),
 			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
 			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
@@ -267,6 +302,7 @@ class Media
 	protected function detailItem(Asset $asset, array $row): array
 	{
 		return [
+			'permission' => $asset->permission,
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
 			'kind' => $asset->kind,
@@ -416,6 +452,7 @@ class Media
 		return [
 			'ok' => true,
 			'error' => '',
+			'permission' => $asset->permission,
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
 			'kind' => $asset->kind,

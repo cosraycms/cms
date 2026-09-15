@@ -206,6 +206,7 @@ foreach ($fields as $field) {
 		action="<?= escape($action) ?>"
 		hx-swap="none"
 		data-json-form
+		data-node-type="<?= escape($type['handle']) ?>"
 		<?= $contentLocales ? 'data-content-locale-scope data-content-locale="' . escape($defaultLocale) . '"' : '' ?>
 		<?= $contentLocales ? "data-content-locales='" . escape(json_encode($locales, $jsonFlags)) . "'" : '' ?>
 		novalidate>

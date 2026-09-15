@@ -19,6 +19,9 @@ FROM
 	/*:cms.prefix:*/assets
 WHERE
 	1 = 1
+<?php if (isset($permission)) : ?>
+	AND permission = :permission
+<?php endif ?>
 <?php if (isset($kinds)) : ?>
 	-- Filter vocabulary: splits classify()'s `file` into audio/document.
 	-- Keep the prefixes in sync with Asset::classify() and counts.tpql.

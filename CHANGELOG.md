@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Enforce node-type read permissions in frontend rendering, JSON, finders and full-text search. Add shared-password session grants independent of panel accounts, and private asset storage with permission-checked original and rendition URLs. Editor uploads and media pickers inherit the node type's permission; existing public assets can be explicitly protected without changing their UIDs. Apply migrations `000000-000037` and `000000-000038`, configure password hashes and private storage outside every public web root, and explicitly migrate existing files before treating a formerly public page as private. See [frontend read access](README.md#frontend-read-permissions).
+
 - Sites can turn the panel dashboard off with `panel.dashboard => false`. Its masthead entry disappears, and the panel root, the logo and the redirect after login open the first collection instead, or the media library when there is none.
 
 - Add opt-in nullable Checkbox fields through `#[Nullable]`, with explicit Not set/Yes/No choices and translated `#[StateLabels]` overrides. Nullable `Value\Boolean` values preserve `null` through saving, loading and JSON; applications opting in must handle `bool|null` from `unwrap()`. Creation defaults never replace an explicitly supplied null. Existing Checkbox fields keep their two-state read behaviour; no migration is needed. See [Checkbox fields](docs/controls.md#checkbox-fields).
