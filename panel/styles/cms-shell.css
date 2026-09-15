@@ -34,6 +34,48 @@
 	}
 }
 
+/*
+ * The pane is an inset in the frame: the sidebar, the page head and a rail
+ * beside the pane share one ground, and the pane's top corners curve into it.
+ * The head draws the inset so it stays put while the pane scrolls under it:
+ * ::before fills the ground outside the two curves, and ::after lays a
+ * rounded, transparent sheet carrying the frame's shadow turned inward over
+ * the pane's visible part. A page with a rail on the right moves the inset's
+ * right edge to the pane's edge.
+ */
+.cms-dashboard > .head,
+.cms-media > .head,
+.cms-menus > .head,
+.cms-node > .head {
+	&::before,
+	&::after {
+		content: '';
+		position: absolute;
+		top: 100%;
+		right: var(--cms-pane-right, 0px);
+		left: 0;
+		pointer-events: none;
+	}
+
+	&::before {
+		--corner: var(--cms-pane-radius) var(--cms-pane-radius) no-repeat;
+		--curve:
+			transparent calc(var(--cms-pane-radius) - 1px),
+			var(--cms-color-surface) var(--cms-pane-radius);
+
+		height: var(--cms-pane-radius);
+		background:
+			radial-gradient(circle at 100% 100%, var(--curve)) left top / var(--corner),
+			radial-gradient(circle at 0 100%, var(--curve)) right top / var(--corner);
+	}
+
+	&::after {
+		height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
+		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
+		box-shadow: var(--cms-pane-shadow);
+	}
+}
+
 .cms-masthead {
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);
@@ -255,6 +297,12 @@
 @media (max-width: 52rem) {
 	.cms-shell .frame {
 		flex-direction: column;
+	}
+
+	/* Nothing sticks and the rails stack, so there is no frame to curve into. */
+	.cms-shell .page > .head::before,
+	.cms-shell .page > .head::after {
+		display: none;
 	}
 
 	.cms-masthead {

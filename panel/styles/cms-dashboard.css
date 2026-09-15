@@ -1,4 +1,7 @@
+/* The head's unwrapped height, the fallback until the scroll behavior measures it. */
 .cms-dashboard {
+	--cms-head-height: 3.0625rem;
+
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
@@ -13,7 +16,6 @@
 		flex: 0 0 auto;
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
-		border-bottom: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface);
 	}
 

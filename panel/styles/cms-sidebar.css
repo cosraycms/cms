@@ -12,7 +12,6 @@
 	width: var(--cms-sidebar-width);
 	min-width: 0;
 	height: calc(100dvh - var(--cms-masthead-height));
-	border-right: 1px solid var(--cms-color-border-soft);
 	background: var(--cms-color-rail);
 
 	& .scroll {
@@ -142,7 +141,6 @@
 		flex-basis: auto;
 		width: 100%;
 		height: auto;
-		border-right: 0;
 		border-bottom: 1px solid var(--cms-color-border);
 
 		& .scroll {

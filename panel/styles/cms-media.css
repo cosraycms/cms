@@ -4,6 +4,8 @@
    and provides the bounded flex chain the panes scroll inside. */
 
 .cms-media {
+	/* The head's unwrapped height, the fallback until the scroll behavior measures it. */
+	--cms-head-height: 4.125rem;
 	/* Claim the whole main region: without this the page sizes to its
 	   content and the workspace shrinks when a search returns few rows. */
 	flex: 1 1 auto;
@@ -29,13 +31,13 @@
 	overflow: hidden;
 
 	& .head {
+		position: relative;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
 		flex: 0 0 auto;
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
-		border-bottom: 1px solid var(--cms-color-border);
 	}
 
 	& h1 {

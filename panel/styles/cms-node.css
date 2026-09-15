@@ -5,6 +5,7 @@
 
 .cms-node {
 	--cms-head-height: 4.5rem;
+	--cms-pane-right: var(--cms-inspector-width);
 
 	display: flex;
 	flex-direction: column;
@@ -20,7 +21,6 @@
 		flex: 0 0 auto;
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
-		border-bottom: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface);
 	}
 

@@ -13,7 +13,6 @@
 	width: var(--cms-inspector-width);
 	min-width: 0;
 	height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
-	border-left: 1px solid var(--cms-color-border);
 	background: var(--cms-inspector-bg);
 
 	& .head {
@@ -228,7 +227,6 @@
 		width: 100%;
 		height: auto;
 		order: -1;
-		border-left: 0;
 		border-bottom: 1px solid var(--cms-color-border);
 
 		& .scroll {
