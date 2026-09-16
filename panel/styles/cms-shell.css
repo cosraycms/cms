@@ -44,7 +44,6 @@
  * right edge to the pane's edge.
  */
 .cms-dashboard > .head,
-.cms-media > .head,
 .cms-menus > .head,
 .cms-node > .head {
 	&::before,

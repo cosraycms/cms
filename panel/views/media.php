@@ -23,6 +23,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			'controlId' => 'cms-media-locale',
 			'labelled' => false,
 		]) ?>
+		<div class="actions" data-media-toolbar></div>
 	</header>
 
 	<section class="body">
@@ -30,7 +31,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	</section>
 
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
-	['panel' => $panelBase, 'system' => $system],
-	$jsonFlags,
-) ?></script>
+		['panel' => $panelBase, 'system' => $system],
+		$jsonFlags,
+	) ?></script>
 </div>

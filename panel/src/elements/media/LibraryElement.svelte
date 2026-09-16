@@ -16,6 +16,7 @@
 	import { system, ensureSystem } from '$lib/sys';
 	import { __ } from '$lib/locale';
 	import { cosray } from '$lib/bridge';
+	import { portal } from '$lib/portal';
 	import Icon from '$components/Icon.svelte';
 	import AssetGrid from '$components/media/AssetGrid.svelte';
 	import MediaDetail from '$components/media/MediaDetail.svelte';
@@ -60,6 +61,7 @@
 	// flicker; the overlay shows while the depth is above zero.
 	let dragDepth = 0;
 	let fileInput: HTMLInputElement | undefined = $state();
+	let toolbar: HTMLElement | undefined = $state();
 
 	const prefix = $derived($system.prefix);
 	// The screen's content-language selector sits outside the element: the
@@ -74,6 +76,9 @@
 	}
 
 	onMount(() => {
+		toolbar =
+			$host().closest('.cms-media')?.querySelector<HTMLElement>('[data-media-toolbar]') ??
+			undefined;
 		readLocale();
 		document.addEventListener('content-locale:change', readLocale);
 
@@ -310,6 +315,50 @@
 	});
 </script>
 
+{#if toolbar}
+	<div class="cms-media-toolbar" use:portal={toolbar}>
+		<form class="search" data-hx-boost="false" onsubmit={search}>
+			<input
+				class="cms-input"
+				type="search"
+				aria-label={__('media:search-filename')}
+				placeholder={__('media:search-filename')}
+				value={q}
+				oninput={edited}
+			/>
+			<button type="submit" class="cms-button secondary">{__('common:search')}</button>
+		</form>
+
+		<span class="count">{__('media:file-count', { count: total })}</span>
+
+		<div class="upload">
+			<label>
+				{__('media:upload-access')}
+				<select class="cms-select" bind:value={uploadPermission} disabled={uploading}>
+					{#each cosray().system().readPermissions ?? ['everyone'] as permission (permission)}
+						<option value={permission}
+							>{permission === 'everyone' ? __('media:public') : permission}</option
+						>
+					{/each}
+				</select>
+			</label>
+			<button
+				type="button"
+				class="cms-button primary"
+				disabled={uploading}
+				onclick={() => fileInput?.click()}
+			>
+				<Icon name="cloud-upload" />
+				{uploading ? __('upload:in-progress') : __('common:upload')}
+				{#if uploading && uploadTotal > 1}
+					<span class="progress">{uploadDone}/{uploadTotal}</span>
+				{/if}
+			</button>
+			<input bind:this={fileInput} type="file" multiple hidden onchange={upload} />
+		</div>
+	</div>
+{/if}
+
 <div class="cms-media-workspace">
 	<aside class="cms-media-rail" aria-label={__('common:filter')}>
 		<div class="cms-media-rail-head">
@@ -357,47 +406,6 @@
 		ondragleave={dragLeave}
 		ondrop={drop}
 	>
-		<div class="cms-media-toolbar">
-			<form class="cms-media-search" onsubmit={search}>
-				<input
-					class="cms-input"
-					type="search"
-					placeholder={__('media:search-filename')}
-					value={q}
-					oninput={edited}
-				/>
-				<button type="submit" class="cms-button secondary">{__('common:search')}</button>
-			</form>
-
-			<span class="cms-media-count">{__('media:file-count', { count: total })}</span>
-
-			<div class="cms-media-upload">
-				<label>
-					{__('media:upload-access')}
-					<select bind:value={uploadPermission} disabled={uploading}>
-						{#each cosray().system().readPermissions ?? ['everyone'] as permission (permission)}
-							<option value={permission}
-								>{permission === 'everyone' ? __('media:public') : permission}</option
-							>
-						{/each}
-					</select>
-				</label>
-				<button
-					type="button"
-					class="cms-button primary"
-					disabled={uploading}
-					onclick={() => fileInput?.click()}
-				>
-					<Icon name="cloud-upload" />
-					{uploading ? __('upload:in-progress') : __('common:upload')}
-					{#if uploading && uploadTotal > 1}
-						<span class="cms-media-upload-progress">{uploadDone}/{uploadTotal}</span>
-					{/if}
-				</button>
-				<input bind:this={fileInput} type="file" multiple hidden onchange={upload} />
-			</div>
-		</div>
-
 		{#if uploadErrors.length > 0}
 			<div class="cms-media-error">
 				<ul>
@@ -465,13 +473,16 @@
 			flex: 1 1 auto;
 			min-height: 0;
 			display: grid;
-			grid-template-columns: 11rem minmax(0, 1fr) minmax(18rem, 22rem);
-			gap: var(--cms-space-4);
+			grid-template-columns: var(--cms-sidebar-width) minmax(0, 1fr) var(--cms-inspector-width);
 			align-items: stretch;
 		}
 
 		.cms-media-rail {
+			min-width: 0;
 			min-height: 0;
+			padding: var(--cms-space-5) var(--cms-space-6);
+			background: var(--cms-color-rail);
+			overscroll-behavior: contain;
 			overflow-y: auto;
 			display: flex;
 			flex-direction: column;
@@ -554,10 +565,18 @@
 			flex-direction: column;
 			min-height: 0;
 			min-width: 0;
-			background-color: var(--cms-color-surface);
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
+			background: var(--cms-pane-bg);
+			border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
 			overflow: hidden;
+
+			&::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border-radius: inherit;
+				box-shadow: var(--cms-pane-shadow);
+				pointer-events: none;
+			}
 		}
 
 		.cms-media-toolbar {
@@ -565,45 +584,71 @@
 			flex-wrap: wrap;
 			align-items: center;
 			gap: var(--cms-space-3);
-			padding: var(--cms-space-3);
-			border-bottom: 1px solid var(--cms-color-border);
-		}
 
-		.cms-media-search {
-			display: flex;
-			gap: var(--cms-space-2);
-			flex: 1 1 14rem;
-		}
+			& .search {
+				display: flex;
+				gap: var(--cms-space-2);
+				flex: 1 1 14rem;
+				max-width: 26rem;
+				min-width: 0;
+			}
 
-		.cms-media-search input {
-			flex: 1 1 auto;
-		}
+			& .search input {
+				flex: 1 1 auto;
+				min-width: 0;
+			}
 
-		.cms-media-count {
-			font-size: var(--cms-font-size-sm);
-			color: var(--cms-color-text-muted);
-			font-variant-numeric: tabular-nums;
-			white-space: nowrap;
-		}
+			& .count {
+				font-size: var(--cms-font-size-sm);
+				color: var(--cms-color-text-muted);
+				font-variant-numeric: tabular-nums;
+				white-space: nowrap;
+			}
 
-		.cms-media-upload-progress {
-			font-variant-numeric: tabular-nums;
+			& .upload {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: var(--cms-space-3);
+				margin-inline-start: auto;
+			}
+
+			& label {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: var(--cms-space-2);
+				font-size: var(--cms-font-size-sm);
+				color: var(--cms-color-text-muted);
+			}
+
+			& select {
+				width: auto;
+				max-width: 12rem;
+			}
+
+			& .progress {
+				font-variant-numeric: tabular-nums;
+			}
 		}
 
 		.cms-media-scroll {
 			flex: 1 1 auto;
 			min-height: 0;
 			overflow-y: auto;
-			padding: var(--cms-space-3);
+			padding: var(--cms-space-6);
+			overscroll-behavior: contain;
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-3);
 		}
 
 		.cms-media-inspector {
+			min-width: 0;
 			min-height: 0;
 			display: flex;
 			flex-direction: column;
+			background: var(--cms-inspector-bg);
 		}
 
 		.cms-media-inspector-empty {
@@ -612,8 +657,6 @@
 			align-items: center;
 			justify-content: center;
 			padding: var(--cms-space-4);
-			border: 1px dashed var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
 			color: var(--cms-color-text-subtle);
 			font-size: var(--cms-font-size-sm);
 			text-align: center;
@@ -665,6 +708,7 @@
 			}
 
 			.cms-media-rail,
+			.cms-media-pane,
 			.cms-media-scroll {
 				overflow: visible;
 			}
@@ -684,6 +728,25 @@
 			.cms-media-pane,
 			.cms-media-inspector {
 				min-height: auto;
+			}
+		}
+
+		@media (max-width: 52rem) {
+			.cms-media-toolbar .upload {
+				margin-inline-start: 0;
+			}
+
+			.cms-media-rail,
+			.cms-media-scroll {
+				padding-inline: var(--cms-space-4);
+			}
+
+			.cms-media-pane {
+				border-radius: 0;
+
+				&::after {
+					display: none;
+				}
 			}
 		}
 	}

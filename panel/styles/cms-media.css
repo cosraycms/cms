@@ -1,36 +1,15 @@
-/* The library is a custom element rendering into light DOM whose rail,
-   gallery and inspector scroll on their own, so like the collection list the
-   page keeps a viewport of its own: it takes the height below the masthead
-   and provides the bounded flex chain the panes scroll inside. */
-
+/* The rail, grid and inspector scroll independently on wide screens. */
 .cms-media {
-	/* The head's unwrapped height, the fallback until the scroll behavior measures it. */
-	--cms-head-height: 4.125rem;
-	/* Claim the whole main region: without this the page sizes to its
-	   content and the workspace shrinks when a search returns few rows. */
+	--cms-head-height: 4.5rem;
+
+	display: flex;
 	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
 	height: calc(100dvh - var(--cms-masthead-height));
-}
-
-.cms-media .body {
-	display: flex;
-	flex-direction: column;
-}
-
-.cms-media cosray-media-library {
-	display: flex;
-	flex-direction: column;
-	flex: 1 1 auto;
-	min-height: 0;
-}
-
-.cms-media {
-	display: flex;
-	flex-direction: column;
-	min-height: 0;
 	overflow: hidden;
 
-	& .head {
+	& > .head {
 		position: relative;
 		display: flex;
 		align-items: center;
@@ -38,6 +17,7 @@
 		flex: 0 0 auto;
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
+		background: var(--cms-color-surface);
 	}
 
 	& h1 {
@@ -47,28 +27,36 @@
 		letter-spacing: -0.03em;
 	}
 
-	& .body {
+	& .actions {
+		flex: 1 1 40rem;
+		min-width: 0;
+	}
+
+	& > .body,
+	& cosray-media-library {
+		display: flex;
+		flex-direction: column;
 		flex: 1 1 auto;
 		min-height: 0;
-		padding: var(--cms-space-6);
-		background: var(--cms-pane-bg);
-		overflow-y: auto;
-		overscroll-behavior: contain;
 	}
 }
 
-@media (max-width: 52rem) {
+@media (max-width: 72rem) {
 	.cms-media {
 		height: auto;
 		overflow: visible;
 
-		& .head,
-		& .body {
-			padding-inline: var(--cms-space-4);
+		& > .head {
+			position: sticky;
+			top: var(--cms-masthead-height);
+			z-index: 30;
 		}
+	}
+}
 
-		& .body {
-			overflow: visible;
-		}
+@media (max-width: 52rem) {
+	.cms-media > .head {
+		position: static;
+		padding-inline: var(--cms-space-4);
 	}
 }

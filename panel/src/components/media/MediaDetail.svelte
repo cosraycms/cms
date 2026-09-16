@@ -198,12 +198,14 @@
 		>
 	{:else}
 		<header class="cms-detail-head">
-			<h2 title={asset.filename}>{asset.filename}</h2>
-			<p>
-				{__('media:read-access')}: {asset.permission === 'everyone'
-					? __('media:public')
-					: asset.permission}
-			</p>
+			<div class="titles">
+				<h2 title={asset.filename}>{asset.filename}</h2>
+				<p>
+					{__('media:read-access')}: {asset.permission === 'everyone'
+						? __('media:public')
+						: asset.permission}
+				</p>
+			</div>
 			<button
 				type="button"
 				class="cms-detail-close"
@@ -331,12 +333,11 @@
 	@layer panel {
 		.cms-detail {
 			flex: 1 1 auto;
+			min-width: 0;
 			min-height: 0;
 			display: flex;
 			flex-direction: column;
-			background-color: var(--cms-color-surface);
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
+			background: var(--cms-inspector-bg);
 			overflow: hidden;
 		}
 
@@ -347,6 +348,16 @@
 			gap: var(--cms-space-2);
 			padding: var(--cms-space-4);
 			border-bottom: 1px solid var(--cms-color-border);
+
+			& .titles {
+				min-width: 0;
+			}
+
+			& p {
+				margin: var(--cms-space-1) 0 0;
+				color: var(--cms-color-text-subtle);
+				font-size: var(--cms-font-size-xs);
+			}
 		}
 
 		.cms-detail-head h2 {
@@ -357,6 +368,7 @@
 		}
 
 		.cms-detail-close {
+			flex-shrink: 0;
 			border: 0;
 			background: none;
 			font-size: 1.5rem;
@@ -369,6 +381,7 @@
 			flex: 1 1 auto;
 			min-height: 0;
 			overflow-y: auto;
+			overscroll-behavior: contain;
 			padding: var(--cms-space-4);
 			display: flex;
 			flex-direction: column;
@@ -506,6 +519,13 @@
 			margin-top: var(--cms-space-1);
 			padding-left: var(--cms-space-4);
 			list-style: disc;
+		}
+
+		@media (max-width: 72rem) {
+			.cms-detail,
+			.cms-detail-body {
+				overflow: visible;
+			}
 		}
 	}
 </style>
