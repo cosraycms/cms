@@ -25,13 +25,13 @@ if (is_string($contentUrl)) {
 	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content'), 'icon' => 'file-earmark-text'];
 }
 
-$areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
-
 $menusUrl = $this->unwrap($menusUrl ?? null);
 
 if (is_string($menusUrl)) {
 	$areas[] = ['area' => 'menus', 'url' => $menusUrl, 'label' => __('nav:menus'), 'icon' => 'list-nested'];
 }
+
+$areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
 ?>
 <nav
