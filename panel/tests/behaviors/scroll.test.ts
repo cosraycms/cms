@@ -32,6 +32,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	uninstall();
+	vi.restoreAllMocks();
 	vi.unstubAllGlobals();
 	document.body.replaceChildren();
 });
@@ -57,6 +58,40 @@ describe('document scrolling', () => {
 		swap(document.querySelector('.cms-shell'));
 		swap(undefined);
 		expect(window.scrollTo).not.toHaveBeenCalled();
+	});
+
+	it('keeps the collection position when opening or closing children', () => {
+		vi.spyOn(window, 'scrollX', 'get').mockReturnValue(17);
+		vi.spyOn(window, 'scrollY', 'get').mockReturnValue(240);
+		document.body.innerHTML = `
+			<main id="main">
+				<div class="cms-collection">
+					<div class="scroll">
+						<a href="?open=parent" data-collection-toggle>Open</a>
+					</div>
+				</div>
+			</main>
+		`;
+		const main = document.getElementById('main')!;
+		const oldList = document.querySelector<HTMLElement>('.cms-collection .scroll')!;
+		const toggle = document.querySelector<HTMLElement>('[data-collection-toggle]')!;
+		oldList.scrollLeft = 31;
+		oldList.scrollTop = 420;
+		const ctx = { sourceElement: toggle, target: main };
+
+		toggle.dispatchEvent(
+			new CustomEvent('htmx:before:request', { bubbles: true, detail: { ctx } }),
+		);
+		main.innerHTML = '<div class="cms-collection"><div class="scroll"></div></div>';
+		ctx.sourceElement = main;
+		main.dispatchEvent(new CustomEvent('htmx:after:swap', { bubbles: true, detail: { ctx } }));
+		main.dispatchEvent(new CustomEvent('htmx:finally:swap', { bubbles: true, detail: { ctx } }));
+
+		const newList = document.querySelector<HTMLElement>('.cms-collection .scroll')!;
+		expect(newList.scrollLeft).toBe(31);
+		expect(newList.scrollTop).toBe(420);
+		expect(window.scrollTo).toHaveBeenCalledOnce();
+		expect(window.scrollTo).toHaveBeenCalledWith(17, 240);
 	});
 
 	it('measures the page head into the sticky offset of its page', () => {

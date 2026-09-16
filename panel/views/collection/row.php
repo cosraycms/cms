@@ -46,6 +46,7 @@ $bulk = (bool) ($bulk ?? false);
 								class="toggle<?= $row['expanded'] ? ' is-open' : '' ?>"
 								href="<?= escape((string) $row['childrenUrl']) ?>"
 								aria-expanded="<?= $row['expanded'] ? 'true' : 'false' ?>"
+								data-collection-toggle
 								aria-label="<?= escape(
 									$row['expanded']
 										? __('collection:collapse-children', ['name' => $cell['value']])
