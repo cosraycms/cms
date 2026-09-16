@@ -110,24 +110,19 @@
 		}
 	}
 
+	/* Sized, scaled and centred by the behavior: its box is the preset's
+	   size, so the document inside sees exactly those pixels, and a box
+	   larger than the stage is pulled back in by the transform. An outline,
+	   not a border, so the edge adds nothing to that size. */
 	& .frame {
 		display: block;
 		width: 100%;
-		max-width: 100%;
 		height: 100%;
-		margin-inline: auto;
-		/* An outline, not a border: the frame's box is the preset width, so
-		   the document inside sees exactly that many pixels. */
 		border: 0;
 		outline: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-md);
 		background: #fff;
 		transform-origin: top left;
 		transition: opacity var(--cms-duration-fast, 120ms) ease;
-	}
-
-	/* A scaled frame overflows its stage by design; the transform pulls it back in. */
-	& .frame.is-scaled {
-		max-width: none;
 	}
 }

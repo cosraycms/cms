@@ -39,9 +39,9 @@ function page(locale = 'de'): void {
 				<h2 class="modal-title" data-dialog-title>Layout preview</h2>
 				<div class="widths" role="group">
 					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1200">Desktop</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024">Tablet landscape</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="768">Tablet portrait</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="390">Smartphone</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024" data-layout-preview-height="768">Tablet landscape</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="768" data-layout-preview-height="1024">Tablet portrait</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="390" data-layout-preview-height="844">Smartphone</button>
 				</div>
 				<button type="button" data-layout-preview-reload>Reload</button>
 				<button type="button" data-dialog-close>Close</button>
@@ -129,8 +129,15 @@ describe('layout preview', () => {
 		preset(390).click();
 		expect(preset(390).getAttribute('aria-pressed')).toBe('true');
 		expect(preset(1200).getAttribute('aria-pressed')).toBe('false');
+		// A device preset gives the frame the device's screen; the desktop fills the stage.
 		expect(frame().style.width).toBe('390px');
+		expect(frame().style.height).toBe('844px');
 		expect(localStorage.getItem('cosray:layout-preview-width')).toBe('390');
+
+		preset(1200).click();
+		expect(frame().style.width).toBe('1200px');
+		expect(frame().style.height).toBe('');
+		preset(390).click();
 
 		closeDialog(dialog());
 		await vi.waitFor(() => expect(dialog().open).toBe(false));

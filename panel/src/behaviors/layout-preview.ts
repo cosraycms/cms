@@ -42,13 +42,22 @@ function presets(dialog: HTMLElement): HTMLElement[] {
 	return Array.from(dialog.querySelectorAll<HTMLElement>(WIDTH));
 }
 
-function chosen(dialog: HTMLElement): number {
-	const pressed = presets(dialog).find((option) => option.getAttribute('aria-pressed') === 'true');
+type Preset = { width: number; height: number | null };
 
-	return Number(pressed?.dataset.layoutPreviewWidth) || DEFAULT_WIDTH;
+function chosen(dialog: HTMLElement): Preset {
+	const pressed = presets(dialog).find((option) => option.getAttribute('aria-pressed') === 'true');
+	const height = Number(pressed?.dataset.layoutPreviewHeight);
+
+	return {
+		width: Number(pressed?.dataset.layoutPreviewWidth) || DEFAULT_WIDTH,
+		height: height > 0 ? height : null,
+	};
 }
 
-// The frame keeps the preset's width; the stage decides the scale.
+// The frame is the preset's size — a device's screen, or the stage's
+// height for the desktop — and the stage decides the scale: down until
+// both sides fit, never up. It is centred by a translation, since the
+// transform does not change what the layout thinks the frame's width is.
 function layout(dialog: HTMLElement): void {
 	const stage = dialog.querySelector<HTMLElement>(STAGE);
 	const frame = dialog.querySelector<HTMLElement>(FRAME);
@@ -57,15 +66,26 @@ function layout(dialog: HTMLElement): void {
 		return;
 	}
 
-	const width = chosen(dialog);
-	const available = stage.clientWidth;
-	const scale = available > 0 && available < width ? available / width : 1;
-	const height = stage.clientHeight;
+	const { width, height } = chosen(dialog);
+	const availableWidth = stage.clientWidth;
+	const availableHeight = stage.clientHeight;
+	let scale = availableWidth > 0 && availableWidth < width ? availableWidth / width : 1;
+
+	if (height !== null && availableHeight > 0 && availableHeight < height * scale) {
+		scale = availableHeight / height;
+	}
+
+	const offset = availableWidth > 0 ? Math.max(0, (availableWidth - width * scale) / 2) : 0;
 
 	frame.style.width = `${width}px`;
-	frame.style.height = height > 0 ? `${Math.round(height / scale)}px` : '';
-	frame.style.transform = scale < 1 ? `scale(${scale})` : '';
-	frame.classList.toggle('is-scaled', scale < 1);
+	frame.style.height =
+		height !== null
+			? `${height}px`
+			: availableHeight > 0
+				? `${Math.round(availableHeight / scale)}px`
+				: '';
+	frame.style.transform =
+		scale < 1 || offset > 0 ? `translateX(${Math.round(offset)}px) scale(${scale})` : '';
 }
 
 function choose(dialog: HTMLElement, width: number, persist = true): void {
@@ -160,7 +180,7 @@ async function open(button: HTMLElement): Promise<void> {
 	}
 
 	if (!dialog.open) {
-		choose(dialog, remembered() || chosen(dialog), false);
+		choose(dialog, remembered() || chosen(dialog).width, false);
 		openDialog(dialog, { opener: button });
 	}
 

@@ -12,11 +12,18 @@ use function Cosray\escape;
 // per browser. Receives: url.
 
 $url = (string) $this->unwrap($url);
+// A device preset carries its height too, so on a large screen the frame
+// is the device's screen rather than a column; the desktop fills the stage.
 $presets = [
-	['width' => 1200, 'icon' => 'display', 'label' => __('editor:layout-preview-desktop')],
-	['width' => 1024, 'icon' => 'tablet-landscape', 'label' => __('editor:layout-preview-tablet-landscape')],
-	['width' => 768, 'icon' => 'tablet', 'label' => __('editor:layout-preview-tablet-portrait')],
-	['width' => 390, 'icon' => 'phone', 'label' => __('editor:layout-preview-phone')],
+	['width' => 1200, 'height' => null, 'icon' => 'display', 'label' => __('editor:layout-preview-desktop')],
+	[
+		'width' => 1024,
+		'height' => 768,
+		'icon' => 'tablet-landscape',
+		'label' => __('editor:layout-preview-tablet-landscape'),
+	],
+	['width' => 768, 'height' => 1024, 'icon' => 'tablet', 'label' => __('editor:layout-preview-tablet-portrait')],
+	['width' => 390, 'height' => 844, 'icon' => 'phone', 'label' => __('editor:layout-preview-phone')],
 ];
 ?>
 <dialog
@@ -33,8 +40,15 @@ $presets = [
 					type="button"
 					class="option"
 					aria-pressed="false"
-					title="<?= escape("{$preset['label']} ({$preset['width']} px)") ?>"
-					data-layout-preview-width="<?= $preset['width'] ?>">
+					title="<?= escape(
+						$preset['label']
+						. ' ('
+						. $preset['width']
+						. ($preset['height'] !== null ? " × {$preset['height']}" : '')
+						. ' px)',
+					) ?>"
+					data-layout-preview-width="<?= $preset['width'] ?>"
+					<?= $preset['height'] !== null ? 'data-layout-preview-height="' . $preset['height'] . '"' : '' ?>>
 					<?= Icon::render($preset['icon']) ?>
 					<span class="text"><?= escape($preset['label']) ?></span>
 				</button>
