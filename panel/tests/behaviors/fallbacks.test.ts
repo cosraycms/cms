@@ -1,8 +1,11 @@
 import { execFileSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/fallbacks';
+import { install as installRepeater } from '../../src/behaviors/repeater';
+
+vi.mock('sortablejs', () => ({ default: vi.fn() }));
 
 let teardown: () => void;
 
@@ -148,6 +151,85 @@ describe('native fallback previews', () => {
 		input('en').dispatchEvent(new InputEvent('input', { bubbles: true }));
 		expect(input('de').placeholder).toBe(shared);
 	});
+
+	it.each([0, 1])(
+		'keeps a single-language block editor usable with %i existing rows',
+		async (count) => {
+			teardown();
+			const type = 'Cosray\\Block\\Text';
+			const html = execFileSync(
+				'php',
+				[
+					resolve(
+						dirname(fileURLToPath(import.meta.url)),
+						'../../../tests/Fixtures/Panel/field.php',
+					),
+				],
+				{
+					encoding: 'utf8',
+					input: JSON.stringify({
+						field: {
+							name: 'content',
+							translate: true,
+							translateMode: 'asymmetric',
+							control: {
+								name: 'blocks',
+								props: {
+									blockTypes: [
+										{ type, label: 'Text', fields: [{ name: 'text', control: { name: 'text' } }] },
+									],
+								},
+							},
+						},
+						data: {
+							value: {
+								de: Array.from({ length: count }, () => ({
+									type,
+									fields: { text: { value: { zxx: 'Existing content' } } },
+								})),
+							},
+						},
+						locales: [{ id: 'de', title: 'Deutsch' }],
+						defaultLocale: 'de',
+					}),
+				},
+			);
+			const form = document.createElement('form');
+			form.innerHTML = html;
+			document.body.replaceChildren(form);
+			const stopFallbacks = install();
+			const stopRepeater = installRepeater();
+			teardown = () => {
+				stopRepeater();
+				stopFallbacks();
+			};
+
+			const add = form.querySelector<HTMLButtonElement>('[data-repeater-footer] button')!;
+			expect(add.checkVisibility()).toBe(true);
+			add.focus();
+			await Promise.resolve();
+			expect(add.checkVisibility()).toBe(true);
+			add.click();
+			await Promise.resolve();
+
+			const inputs = Array.from(form.querySelectorAll<HTMLInputElement>('input[type="text"]'));
+			expect(inputs).toHaveLength(count + 1);
+			const added = inputs[count];
+			expect(added.checkVisibility()).toBe(true);
+			expect(document.activeElement).toBe(added);
+			added.value = 'New content';
+			added.dispatchEvent(new Event('change', { bubbles: true }));
+			document.dispatchEvent(new Event('htmx:after:swap'));
+			await Promise.resolve();
+
+			expect(inputs.every((input) => input.checkVisibility())).toBe(true);
+			const submitted = new FormData(form);
+			expect(inputs.map((input) => submitted.get(input.name))).toEqual([
+				...Array(count).fill('Existing content'),
+				'New content',
+			]);
+		},
+	);
 
 	it('shows an inert source block list without adding rows to the target locale', async () => {
 		teardown();

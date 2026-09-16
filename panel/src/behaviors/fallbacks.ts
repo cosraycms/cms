@@ -76,8 +76,14 @@ function refreshField(field: Element): void {
 
 function refreshBlockField(field: Element): void {
 	const scope = field.closest<HTMLElement>(CONTENT_SCOPE);
-	const active = scope?.dataset.contentLocale ?? '';
-	const configured = scope ? locales(scope) : [];
+
+	// Single-language editors have no locale scope; keep their server-rendered variant.
+	if (!scope) {
+		return;
+	}
+
+	const active = scope.dataset.contentLocale ?? '';
+	const configured = locales(scope);
 	const variants = Array.from(field.querySelectorAll<HTMLElement>(BLOCK_VARIANT));
 	const counts: Record<string, number> = {};
 
