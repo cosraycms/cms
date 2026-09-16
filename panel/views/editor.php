@@ -150,7 +150,8 @@ foreach ($fields as $field) {
 			<?php if ($edit && $renderable): ?>
 				<?php // Discarding the working copy: its own form like delete, submitted
 
-				// from the save menu. The unsaved-changes guard stands aside; dropping
+				// from the save menu. Hidden so the empty element does not take a gap
+				// in the action row. The unsaved-changes guard stands aside; dropping
 				// the unsaved edits is the point, and hx-confirm asks once. ?>
 				<form
 					id="node-editor-discard"
@@ -158,7 +159,8 @@ foreach ($fields as $field) {
 					action="<?= escape($links->discard($uid)) ?>"
 					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
-					data-dirty-bypass></form>
+					data-dirty-bypass
+					hidden></form>
 			<?php endif ?>
 			<?php if ($edit && $routable && $renderable): ?>
 				<button

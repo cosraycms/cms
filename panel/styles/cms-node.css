@@ -106,6 +106,10 @@
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
 
+		&:empty {
+			display: none;
+		}
+
 		&.is-success {
 			color: var(--cms-color-success-text);
 		}
