@@ -6,6 +6,7 @@
 	import { fileIcon, humanSize } from '$lib/library';
 	import { __ } from '$lib/locale';
 	import Icon from '$components/Icon.svelte';
+	import ReplaceMenu from './ReplaceMenu.svelte';
 
 	type Props = {
 		item: FileItem;
@@ -16,6 +17,8 @@
 		inert?: boolean;
 		edit?: () => void;
 		remove?: () => void;
+		// Given on a single field, which replaces its file from the row.
+		replace?: { upload: () => void; library: () => void };
 	};
 
 	let {
@@ -26,6 +29,7 @@
 		inert = false,
 		edit,
 		remove,
+		replace,
 	}: Props = $props();
 
 	const assets = useAssets();
@@ -73,6 +77,9 @@
 		>
 			<Icon name="pencil" />
 		</button>
+		{#if replace}
+			<ReplaceMenu {...replace} />
+		{/if}
 		<button
 			type="button"
 			class="tool remove"

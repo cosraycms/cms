@@ -43,6 +43,11 @@
 		caption: __('image:caption'),
 		title: __('common:title'),
 	};
+	const notes: Record<Key, string> = {
+		alt: __('image:alt-text-note'),
+		caption: __('field:optional'),
+		title: __('field:optional'),
+	};
 
 	// Editing scaffold seeded once — the parent keys this component on
 	// the asset uid, so a replaced image starts from its own meta.
@@ -81,7 +86,15 @@
 			return resolved.value;
 		}
 
-		return name === 'alt' ? __('image:alt-text-placeholder') : __('common:optional');
+		if (name === 'alt') {
+			return __('image:alt-text-placeholder');
+		}
+
+		if (name === 'title') {
+			return __('media:title-placeholder');
+		}
+
+		return kind === 'video' ? __('video:caption-placeholder') : __('image:caption-placeholder');
 	}
 
 	function commit() {
@@ -94,13 +107,14 @@
 		{@const resolved = focused === name ? null : fallback(name)}
 		<div class="entry">
 			<label class="caption" for="{id}-{name}">
-				<span>{labels[name]}</span>
+				{labels[name]}
+				<span class="remark">{notes[name]}</span>
 			</label>
 			{#if name === 'caption'}
 				<textarea
 					class="cms-textarea"
 					id="{id}-{name}"
-					rows="2"
+					rows="1"
 					{readonly}
 					placeholder={placeholder(name)}
 					bind:value={texts[name][key]}
@@ -125,9 +139,6 @@
 			{#if resolved}
 				<span class="fallback">{sourceLabel(resolved.locale)}</span>
 			{/if}
-			{#if name === 'alt'}
-				<span class="help">{__('image:alt-text-hint')}</span>
-			{/if}
 		</div>
 	{/each}
 </div>
@@ -148,21 +159,36 @@
 
 			& .caption {
 				display: flex;
-				align-items: center;
-				gap: var(--cms-space-2);
+				flex-wrap: wrap;
+				align-items: baseline;
+				gap: 0 var(--cms-space-1-5);
 				color: var(--cms-color-text-label);
 				font-size: var(--cms-font-size-sm);
 				font-weight: 600;
 				line-height: 1.25rem;
 			}
 
-			& .cms-textarea {
-				min-height: 2lh;
-				resize: vertical;
+			& .remark {
+				color: var(--cms-color-text-subtle);
+				font-size: var(--cms-font-size-xs);
+				font-weight: 400;
 			}
 
-			& .fallback,
-			& .help {
+			/* One line, level with the input beside it, growing with its text
+			   where the browser can size a field to its content. */
+			& .cms-textarea {
+				min-height: var(--cms-control-height);
+				padding-block: calc((var(--cms-control-height) - 1.5rem - 2px) / 2);
+				line-height: 1.5rem;
+				resize: vertical;
+
+				@supports (field-sizing: content) {
+					field-sizing: content;
+					resize: none;
+				}
+			}
+
+			& .fallback {
 				color: var(--cms-color-text-subtle);
 				font-size: var(--cms-font-size-xs);
 				line-height: 1.45;

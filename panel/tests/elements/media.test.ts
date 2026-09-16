@@ -150,17 +150,13 @@ describe('the frame', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('is the bar alone while empty and carries no tally on a single field', async () => {
+	it('is the bar alone while empty', async () => {
 		const { element } = await files(1, 0);
 
 		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
 		expect(element.querySelector('.cms-media-field > .body')).toBeNull();
 		expect(element.querySelector('.choose')?.textContent).toBe('upload:choose-file');
-
-		const { element: filled } = await files(1, 1);
-
-		expect(filled.querySelector('.body')).not.toBeNull();
-		expect(filled.querySelector('.tally')).toBeNull();
+		expect(element.querySelector('.tally')).toBeNull();
 	});
 
 	it('closes the bar actions once the field is full', async () => {
@@ -232,18 +228,60 @@ describe('the frame', () => {
 	});
 });
 
+describe('filled single field', () => {
+	const assets = {
+		cover: { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' },
+		guide: { filename: 'guide.pdf', url: '/media/guide.pdf', kind: 'file' },
+		clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' },
+	};
+
+	it.each([
+		{ label: 'image card', tag: 'cosray-image', uid: 'cover' },
+		{ label: 'image figure', tag: 'cosray-image', uid: 'cover', presentation: 'block' },
+		{ label: 'file row', tag: 'cosray-file', uid: 'guide' },
+		{ label: 'video row', tag: 'cosray-video', uid: 'clip' },
+		{ label: 'video figure', tag: 'cosray-video', uid: 'clip', presentation: 'block' },
+	])('replaces its file from the menu of the $label', async ({ tag, uid, presentation }) => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue({
+				json: async () => ({ ok: true, assets: [], page: 1, more: false, total: 0, counts: {} }),
+			}),
+		);
+		const { element } = await media(tag, {
+			value: { zxx: [{ uid }] },
+			field: { name: 'single', limit: { min: 0, max: 1 }, presentation },
+			assets,
+		} as HostPayload);
+		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
+		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
+		const [library, device] = element.querySelectorAll<HTMLButtonElement>(
+			'.cms-replace-menu button',
+		);
+
+		expect(element.querySelector('.cms-media-field > .bar')).toBeNull();
+
+		device.click();
+		expect(click).toHaveBeenCalledOnce();
+
+		library.click();
+		await tick();
+		expect(document.querySelector('.cms-modal')).not.toBeNull();
+
+		vi.unstubAllGlobals();
+	});
+});
+
 describe('single image', () => {
 	const cover = { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' };
 
-	it('offers only removal on the card, since the bar replaces', async () => {
+	it('removes the image through the card and falls back to the bar', async () => {
 		const { element, changes } = await media('cosray-image', {
 			value: { zxx: [{ uid: 'cover' }] },
 			field: { name: 'cover', limit: { min: 0, max: 1 } },
 			assets: { cover },
 		});
 		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
-
-		expect(card.querySelectorAll('button:not(.thumb)')).toHaveLength(1);
 
 		card.querySelector<HTMLButtonElement>('.discard')!.click();
 		await tick();
@@ -264,7 +302,7 @@ describe('single image', () => {
 		expect(card.querySelector('img')?.getAttribute('src')).toBe('/media/cover.jpg');
 		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.value).toBe('A kettle');
 		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.readOnly).toBe(true);
-		expect(card.querySelector('.discard')).toBeNull();
+		expect(card.querySelector('.discard, .replace')).toBeNull();
 	});
 });
 
@@ -477,9 +515,9 @@ describe('media uploads', () => {
 				'/media/fresh-thumb.png',
 			);
 		});
-		expect(element.querySelector('.cms-image-card .facts')?.textContent).toBe(
-			'2400 × 1600 px · 842.0 KB',
-		);
+		expect(
+			element.querySelector('.cms-image-card .facts')?.textContent?.replace(/\s+/g, ' ').trim(),
+		).toBe('2400 × 1600 px · 842.0 KB');
 	});
 
 	it('merges a late upload with changes made after returning to its locale', async () => {
@@ -769,7 +807,7 @@ describe('block presentation', () => {
 		});
 
 		element
-			.querySelector<HTMLButtonElement>('.cms-image-figure .overlay button:last-child')!
+			.querySelector<HTMLButtonElement>('.cms-image-figure .overlay > button:last-child')!
 			.click();
 		await tick();
 

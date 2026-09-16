@@ -670,12 +670,12 @@
 	& .richtext-toolbar,
 	& .cms-code-control-toolbar,
 	& .cms-media-field > .bar,
-	& .cms-image-card .discard,
+	& .cms-image-card :is(.controls, .descriptions),
 	& .cms-image-figure .overlay,
 	& .cms-video-figure .overlay,
 	& .cms-gallery .discard,
 	& .cms-media-meta,
-	& .cms-file-row .tool {
+	& .cms-file-row :is(.tool, .replace) {
 		display: none;
 	}
 }

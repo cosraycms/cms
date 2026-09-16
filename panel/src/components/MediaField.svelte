@@ -336,7 +336,8 @@
 	ondragleave={readonly ? undefined : dragLeave}
 	ondrop={readonly ? undefined : drop}
 >
-	{#if !readonly && (!block || empty)}
+	<!-- A filled single field replaces through its own menu instead. -->
+	{#if !readonly && (empty || (multiple && !block))}
 		<div class="bar">
 			<button
 				type="button"
@@ -445,6 +446,8 @@
 						{locales}
 						update={replace}
 						remove={() => remove(null)}
+						upload={openPicker}
+						library={openLibrary}
 					/>
 				{/if}
 			{:else}
@@ -462,6 +465,7 @@
 					{readonly}
 					{notify}
 					remove={(index) => remove(index)}
+					replace={multiple ? undefined : { upload: openPicker, library: openLibrary }}
 				/>
 			{/if}
 		</div>

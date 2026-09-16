@@ -20,6 +20,7 @@
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		loading: boolean;
 		remove: (index: number) => void;
+		replace?: { upload: () => void; library: () => void };
 		/** The field cannot change: no reordering, no per-item actions. */
 		readonly?: boolean;
 		notify: () => void;
@@ -34,6 +35,7 @@
 		locales,
 		loading,
 		remove,
+		replace,
 		readonly = false,
 		notify,
 	}: Props = $props();
@@ -120,6 +122,7 @@
 			inert={readonly}
 			edit={() => edit(index)}
 			remove={() => remove(index)}
+			{replace}
 		/>
 	{/each}
 </div>

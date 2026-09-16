@@ -6,6 +6,7 @@
 	import { portal } from '$lib/portal';
 	import ContentLocales from '$components/ContentLocales.svelte';
 	import MetaFields from './MetaFields.svelte';
+	import ReplaceMenu from './ReplaceMenu.svelte';
 
 	type Props = {
 		item: FileItem;
@@ -54,10 +55,7 @@
 			<div class="overlay">
 				<span class="filename" title={filename}>{loading ? __('upload:uploading') : filename}</span>
 				{#if !readonly}
-					<button type="button" class="quiet" onclick={upload}>{__('image:replace')}</button>
-					<button type="button" class="quiet" onclick={library}>
-						{__('media:choose-from-library')}
-					</button>
+					<ReplaceMenu quiet {upload} {library} />
 					<button type="button" class="quiet" onclick={remove}>{__('common:remove')}</button>
 				{/if}
 			</div>
@@ -82,8 +80,9 @@
 
 			& .frame {
 				position: relative;
-				border-radius: var(--cms-radius-sm);
-				overflow: hidden;
+				/* Clipped without overflow, which would also confine the replace
+				   menu's placement to the frame. */
+				clip-path: inset(0 round var(--cms-radius-sm));
 				background: var(--cms-color-neutral-900);
 			}
 
@@ -108,9 +107,15 @@
 			}
 
 			& figure:hover .overlay,
-			& figure:focus-within .overlay {
+			& figure:focus-within .overlay,
+			& figure:has(:popover-open) .overlay {
 				opacity: 1;
 				pointer-events: auto;
+			}
+
+			/* Opening the menu must not leave its anchor at zero opacity during the fade. */
+			& figure:has(:popover-open) .overlay {
+				transition: none;
 			}
 
 			& .filename {
@@ -123,7 +128,10 @@
 				white-space: nowrap;
 			}
 
-			& .quiet {
+			& :global(.quiet) {
+				display: inline-flex;
+				align-items: center;
+				gap: var(--cms-space-1);
 				flex-shrink: 0;
 				padding: var(--cms-space-0-5) var(--cms-space-1-5);
 				border: 0;
@@ -134,7 +142,8 @@
 				color: var(--cms-color-text-muted);
 				cursor: pointer;
 
-				&:hover {
+				&:hover,
+				&:global([aria-expanded='true']) {
 					background: var(--cms-color-hover);
 					color: var(--cms-color-text);
 				}

@@ -9,6 +9,7 @@
 	import Icon from '$components/Icon.svelte';
 	import ImagePreview from '$components/ImagePreview.svelte';
 	import MetaFields from './MetaFields.svelte';
+	import ReplaceMenu from './ReplaceMenu.svelte';
 
 	type Props = {
 		item: FileItem;
@@ -19,6 +20,8 @@
 		locales?: { default: string; all: { id: string; title: string; fallback?: string | null }[] };
 		update: (item: FileItem) => void;
 		remove: () => void;
+		upload: () => void;
+		library: () => void;
 		readonly?: boolean;
 	};
 
@@ -31,6 +34,8 @@
 		locales,
 		update,
 		remove,
+		upload,
+		library,
 		readonly = false,
 	}: Props = $props();
 
@@ -40,7 +45,7 @@
 	let info = $derived(item.uid ? $assets[item.uid] : undefined);
 	let filename = $derived(info?.filename ?? item.uid ?? '');
 	let thumb = $derived(info?.thumbUrl ?? info?.url ?? '');
-	let line = $derived(info ? assetLine(info) : '');
+	let facts = $derived(info ? assetLine(info).split(' · ') : []);
 
 	function preview() {
 		const image = info?.previewUrl ?? info?.url;
@@ -63,30 +68,43 @@
 	}
 </script>
 
-<div class="cms-image-card" bind:this={root}>
-	<button type="button" class="thumb" title={__('common:preview')} onclick={preview}>
-		{#if thumb}
-			<img src={thumb} alt="" />
-		{:else}
-			<span class="plate">{extension(filename)}</span>
-		{/if}
-	</button>
-	<div class="details">
-		<div class="filerow">
+<div class="cms-image-card" class:is-readonly={readonly} bind:this={root}>
+	<div class="overview">
+		<button type="button" class="thumb" title={__('common:preview')} onclick={preview}>
+			{#if thumb}
+				<img src={thumb} alt="" />
+			{:else}
+				<span class="plate">{extension(filename)}</span>
+			{/if}
+		</button>
+		<div class="details">
 			<span class="filename" title={filename}>{filename}</span>
-			{#if !readonly}
+			<span class="facts">
+				{#if loading}
+					{__('upload:uploading')}
+				{:else}
+					{#each facts as fact, index (index)}
+						<span>{fact}{index < facts.length - 1 ? ' ·' : ''}</span>{' '}
+					{/each}
+				{/if}
+			</span>
+		</div>
+		{#if !readonly}
+			<div class="controls">
+				<ReplaceMenu {upload} {library} />
 				<button
 					type="button"
-					class="discard"
+					class="discard cms-button secondary small"
 					title={__('common:remove')}
 					aria-label={__('common:remove')}
 					onclick={remove}
 				>
 					<Icon name="x-lg" />
 				</button>
-			{/if}
-		</div>
-		<div class="facts">{loading ? __('upload:uploading') : line}</div>
+			</div>
+		{/if}
+	</div>
+	<div class="descriptions">
 		{#key `${identity}:${item.uid}`}
 			<MetaFields {item} {translate} {contentLocale} {locales} {update} {readonly} />
 		{/key}
@@ -96,19 +114,19 @@
 <style>
 	@layer panel {
 		.cms-image-card {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: flex-start;
-			gap: var(--cms-space-3-5);
-			padding: var(--cms-space-4);
+			& .overview {
+				display: flex;
+				align-items: center;
+				gap: var(--cms-space-3);
+				padding: var(--cms-space-3);
+			}
 
 			& .thumb {
 				position: relative;
 				display: grid;
 				place-items: center;
-				width: 12rem;
-				max-width: 100%;
-				height: 9rem;
+				width: 4.5rem;
+				height: 4.5rem;
 				flex-shrink: 0;
 				padding: 0;
 				border: 0;
@@ -124,6 +142,11 @@
 					height: 100%;
 					object-fit: contain;
 				}
+
+				&:focus-visible {
+					outline: var(--cms-focus-outline);
+					outline-offset: var(--cms-focus-offset);
+				}
 			}
 
 			& .plate {
@@ -135,63 +158,60 @@
 
 			& .details {
 				display: flex;
-				flex: 1 1 14rem;
+				flex: 1 1 auto;
 				flex-direction: column;
-				gap: var(--cms-space-2);
+				gap: var(--cms-space-0-5);
 				min-width: 0;
-			}
-
-			& .filerow {
-				display: flex;
-				align-items: center;
-				gap: var(--cms-space-2);
 			}
 
 			& .filename {
-				flex: 1 1 8rem;
-				min-width: 0;
-				font-size: var(--cms-font-size-sm);
-				font-weight: 500;
 				overflow: hidden;
+				font-size: var(--cms-font-size-sm);
+				font-weight: 600;
 				text-overflow: ellipsis;
 				white-space: nowrap;
-			}
-
-			& .discard {
-				display: grid;
-				flex-shrink: 0;
-				place-items: center;
-				width: 1.75rem;
-				height: 1.75rem;
-				margin-left: auto;
-				padding: 0;
-				border: 0;
-				border-radius: var(--cms-radius);
-				background: transparent;
-				color: var(--cms-color-text-muted);
-				cursor: pointer;
-
-				& :global(svg) {
-					width: 0.875rem;
-					height: 0.875rem;
-				}
-
-				&:hover {
-					background: var(--cms-color-hover);
-					color: var(--cms-color-text);
-				}
-
-				&:focus-visible {
-					outline: var(--cms-focus-outline);
-					outline-offset: var(--cms-focus-offset);
-				}
 			}
 
 			& .facts {
 				min-height: 1.25rem;
 				font-size: var(--cms-font-size-xs);
-				color: var(--cms-color-text-faint);
+				color: var(--cms-color-text-subtle);
 				font-variant-numeric: tabular-nums;
+
+				/* Wraps between the facts, and inside one only when it cannot fit a line. */
+				& span {
+					display: inline-block;
+					max-width: 100%;
+				}
+			}
+
+			& .controls {
+				display: flex;
+				flex-shrink: 0;
+				align-items: center;
+				gap: var(--cms-space-2);
+			}
+
+			& .discard {
+				width: var(--cms-control-height-sm);
+				padding-inline: 0;
+
+				& :global(svg) {
+					width: 0.75rem;
+					height: 0.75rem;
+				}
+			}
+
+			/* The frame's radius less its border, so the band fills the corners. */
+			& .descriptions {
+				padding: var(--cms-space-3);
+				border-top: 1px solid var(--cms-color-border);
+				border-radius: 0 0 calc(var(--cms-radius-md) - 1px) calc(var(--cms-radius-md) - 1px);
+				background: var(--cms-color-surface-muted);
+			}
+
+			&.is-readonly .descriptions {
+				background: none;
 			}
 		}
 	}
