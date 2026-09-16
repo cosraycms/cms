@@ -255,7 +255,9 @@ class End2EndTestCase extends IntegrationTestCase
 			foreach ($options['cookies'] as $name => $value) {
 				$cookieHeader[] = "{$name}={$value}";
 			}
-			$psrRequest = $psrRequest->withHeader('Cookie', implode('; ', $cookieHeader));
+			$psrRequest = $psrRequest
+				->withHeader('Cookie', implode('; ', $cookieHeader))
+				->withCookieParams($options['cookies']);
 		}
 
 		// Add uploaded files

@@ -266,6 +266,7 @@ foreach ($fields as $field) {
 				'generatedPaths' => $generatedPaths,
 				'meta' => $meta,
 				'contentLocales' => $contentLocales,
+				'collapsed' => (bool) $inspectorCollapsed,
 			]) ?>
 		<?php endif ?>
 

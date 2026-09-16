@@ -1,23 +1,128 @@
 /*
  * A multilingual node stacks one full URL per locale in a rail this narrow, so
  * route paths take the full width with their locale labelled above, not beside.
+ *
+ * Collapsed, the rail narrows to a strip of quick controls. The drawer keeps
+ * its full width, pinned to the rail's left edge, and the rail clips it, so
+ * its content slides out instead of rewrapping. Each state declares the
+ * transition that leads into it: visibility flips at once when a part
+ * appears and only after its fade when it goes.
  */
 
 .cms-inspector {
 	position: sticky;
 	top: calc(var(--cms-masthead-height) + var(--cms-head-height));
-	display: flex;
-	flex-direction: column;
 	flex: 0 0 var(--cms-inspector-width);
 	align-self: flex-start;
 	width: var(--cms-inspector-width);
 	min-width: 0;
 	height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
+	overflow: clip;
 	background: var(--cms-inspector-bg);
+	transition: flex-basis 200ms cubic-bezier(0.2, 0, 0, 1);
 
-	& > .cms-tabs {
+	&[data-collapsed] {
+		flex-basis: var(--cms-inspector-collapsed-width);
+		width: var(--cms-inspector-collapsed-width);
+	}
+
+	& .drawer {
+		position: absolute;
+		inset-block: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		width: var(--cms-inspector-width);
+		transition:
+			opacity 200ms ease-out,
+			visibility 0s;
+	}
+
+	&[data-collapsed] .drawer {
+		opacity: 0;
+		visibility: hidden;
+		transition:
+			opacity 200ms ease-in,
+			visibility 0s 200ms;
+	}
+
+	& .strip {
+		position: absolute;
+		inset-block: 0;
+		right: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--cms-space-4);
+		width: var(--cms-inspector-collapsed-width);
+		padding-block: var(--cms-space-3);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		opacity: 0;
+		visibility: hidden;
+		transition:
+			opacity 100ms ease,
+			visibility 0s 100ms;
+	}
+
+	&[data-collapsed] .strip {
+		opacity: 1;
+		visibility: visible;
+		transition:
+			opacity 100ms ease 100ms,
+			visibility 0s;
+	}
+
+	& .shortcuts {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--cms-space-1);
+		padding-top: var(--cms-space-4);
+		border-top: 1px solid var(--cms-color-border-soft);
+	}
+
+	& .tool {
+		--cms-icon-size: 1rem;
+
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 2rem;
+		height: 2rem;
+		border-radius: var(--cms-radius-md);
+		color: var(--cms-color-text-subtle);
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.has-error {
+			color: var(--cms-color-danger);
+		}
+	}
+
+	/* The line sits under the whole row, so the tabs' underline overlaps it. */
+	& .top {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
 		flex: 0 0 auto;
-		padding-inline: var(--cms-space-5);
+		padding-inline: var(--cms-space-5) var(--cms-space-3);
+		border-bottom: 1px solid var(--cms-color-border);
+
+		& > .cms-tabs {
+			flex: 1 1 auto;
+			align-self: stretch;
+			border-bottom: 0;
+		}
 	}
 
 	& .scroll {
@@ -213,7 +318,8 @@
 
 /* Above the fields, not below: a publish toggle under a long form is unreachable. */
 @media (max-width: 52rem) {
-	.cms-inspector {
+	.cms-inspector,
+	.cms-inspector[data-collapsed] {
 		position: static;
 		flex-basis: auto;
 		width: 100%;
@@ -221,9 +327,32 @@
 		order: -1;
 		border-bottom: 1px solid var(--cms-color-border);
 
+		& .drawer {
+			position: static;
+			width: auto;
+			opacity: 1;
+			visibility: visible;
+		}
+
+		& .strip,
+		& .top .tool {
+			display: none;
+		}
+
 		& .scroll {
 			padding: var(--cms-space-4);
 			overflow: visible;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.cms-inspector,
+	.cms-inspector[data-collapsed] {
+		&,
+		& .drawer,
+		& .strip {
+			transition: none;
 		}
 	}
 }

@@ -85,7 +85,8 @@ function editor(): void {
 					</div>
 				</div>
 			</div>
-			<aside data-tabs>
+			<aside data-tabs data-inspector>
+				<button type="button" data-inspector-open="tab-advanced">Advanced</button>
 				<div role="tablist">
 					<button type="button" role="tab" id="tab-status" aria-controls="panel-status" aria-selected="true" tabindex="0">Status</button>
 					<button type="button" role="tab" id="tab-advanced" aria-controls="panel-advanced" aria-selected="false" tabindex="-1">Advanced</button>
@@ -397,16 +398,23 @@ describe('errors behavior', () => {
 	});
 
 	it('badges the tab whose hidden panel holds the issue and brings it to the front', () => {
+		const inspector = document.querySelector<HTMLElement>('[data-inspector]')!;
+		inspector.setAttribute('data-collapsed', '');
 		const box = respond([{ path: ['handle'], message: 'Handle is taken' }]);
 		const tab = document.getElementById('tab-advanced')!;
+		const shortcut = document.querySelector('[data-inspector-open="tab-advanced"]')!;
 		const panel = document.getElementById('panel-advanced')!;
 		const handle = document.querySelector<HTMLInputElement>('[name="handle"]')!;
 
 		expect(tab.classList.contains('has-error')).toBe(true);
+		expect(shortcut.classList.contains('has-error')).toBe(true);
 		expect(panel.hidden).toBe(true);
 
 		box.querySelector('button')?.click();
 
+		// Opened for the jump, not remembered as the editor's choice.
+		expect(inspector.hasAttribute('data-collapsed')).toBe(false);
+		expect(document.cookie).not.toContain('cosray_inspector');
 		expect(panel.hidden).toBe(false);
 		expect(tab.getAttribute('aria-selected')).toBe('true');
 		expect(document.getElementById('tab-status')?.getAttribute('aria-selected')).toBe('false');
@@ -415,6 +423,7 @@ describe('errors behavior', () => {
 		handle.dispatchEvent(new Event('input', { bubbles: true }));
 
 		expect(tab.classList.contains('has-error')).toBe(false);
+		expect(shortcut.classList.contains('has-error')).toBe(false);
 	});
 
 	it('opens the paths dialog on summary click', () => {

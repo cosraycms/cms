@@ -60,6 +60,10 @@ final class PanelEditorLocaleControlTest extends End2EndTestCase
 				. '/option[@value="fr"]',
 			$html,
 		);
-		$this->assertStringNotContainsString('data-content-locale-option', $html);
+		// The collapsed strip keeps its column of locale ids at any count.
+		$this->assertHtmlNodeMissing(
+			'//*[contains(concat(" ", @class, " "), " drawer ")]//*[@data-content-locale-option]',
+			$html,
+		);
 	}
 }

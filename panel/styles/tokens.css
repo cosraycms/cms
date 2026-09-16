@@ -468,6 +468,7 @@
 	--cms-masthead-height: calc(2.625rem + 1px);
 	--cms-sidebar-width: 13rem;
 	--cms-inspector-width: 19rem;
+	--cms-inspector-collapsed-width: 3.5rem;
 	--cms-inspector-bg: var(--cms-color-rail);
 	--cms-pane-bg: var(--cms-color-canvas);
 	--cms-pane-radius: var(--cms-radius-2xl);

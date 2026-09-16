@@ -60,6 +60,19 @@
 		box-shadow: 0 0 0 1px var(--cms-color-danger-border);
 	}
 
+	/* In the collapsed inspector: a column of locale ids. */
+	&.is-vertical {
+		flex-direction: column;
+		width: auto;
+
+		& .option {
+			flex: 0 0 auto;
+			padding-inline: var(--cms-space-1-5);
+			font-size: var(--cms-font-size-xs);
+			text-transform: uppercase;
+		}
+	}
+
 	/* In a screen header: sized to its options and pushed to the end. */
 	&.is-compact {
 		width: auto;

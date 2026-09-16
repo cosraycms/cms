@@ -158,6 +158,8 @@ return [
 		'editor:save-publish' => 'Speichern und veröffentlichen',
 		'editor:saved' => 'Gespeichert',
 		'editor:settings' => 'Einstellungen',
+		'editor:settings-hide' => 'Einstellungen ausblenden',
+		'editor:settings-show' => 'Einstellungen einblenden',
 		'editor:tab-advanced' => 'Erweitert',
 		'editor:tab-paths' => 'Pfade',
 		'editor:tab-status' => 'Status',

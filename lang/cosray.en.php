@@ -152,6 +152,8 @@ return [
 		'editor:save-publish' => 'Save and publish',
 		'editor:saved' => 'Saved',
 		'editor:settings' => 'Settings',
+		'editor:settings-hide' => 'Hide settings',
+		'editor:settings-show' => 'Show settings',
 		'editor:tab-advanced' => 'Advanced',
 		'editor:tab-paths' => 'Paths',
 		'editor:tab-status' => 'Status',

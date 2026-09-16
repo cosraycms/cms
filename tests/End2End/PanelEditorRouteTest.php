@@ -594,6 +594,31 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('<code>' . $uid . '</code>', $html);
 	}
 
+	public function testInspectorArrivesInTheStateTheCookieRemembers(): void
+	{
+		$this->authenticateAs('editor');
+		$uid = 'panel-editor-inspector';
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $this->pageTypeId(),
+			'content' => [
+				'title' => ['type' => 'text', 'value' => ['en' => 'A Page']],
+			],
+		]);
+		$uri = '/cp/collection/test-articles/' . $uid;
+
+		$this->assertHtmlNodeMissing(
+			'//aside[@data-inspector][@data-collapsed]',
+			$this->getHtmlResponse($this->makeRequest('GET', $uri)),
+		);
+		$this->assertHtmlNodeExists(
+			'//aside[@data-inspector][@data-collapsed]',
+			$this->getHtmlResponse($this->makeRequest('GET', $uri, [
+				'cookies' => ['cosray_inspector' => 'collapsed'],
+			])),
+		);
+	}
+
 	public function testRouteReferencedContentFieldsAreMarkedAsPathSources(): void
 	{
 		$this->authenticateAs('editor');
@@ -722,8 +747,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="Panel Editor A"', $html);
 		$this->assertStringContainsString('name="content[content][value][en]"', $html);
 		$this->assertStringContainsString('data-locale="de"', $html);
-		$this->assertSame(1, substr_count($html, 'data-content-locale-control'));
-		$this->assertSame(2, substr_count($html, 'data-content-locale-option'));
+		// One selector, rendered in the inspector and again in its collapsed strip.
+		$this->assertSame(2, substr_count($html, 'data-content-locale-control'));
+		$this->assertSame(4, substr_count($html, 'data-content-locale-option'));
 		$this->assertStringNotContainsString('data-content-locale-select', $html);
 		$this->assertStringContainsString('data-content-locale-scope', $html);
 		$this->assertStringContainsString('data-content-locales=', $html);

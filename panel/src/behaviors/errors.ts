@@ -1,4 +1,5 @@
 import { selectContentLocale } from './content-locales';
+import { revealInspector } from './inspector';
 import { revealTab } from './tabs';
 
 // Field-level validation errors for the SSR editor form.
@@ -149,12 +150,15 @@ function refreshContentBadge(form: Element): void {
 	});
 }
 
-// A tab whose panel holds an issue shows it, since the panel may be hidden.
+// A tab whose panel holds an issue shows it, since the panel may be hidden,
+// and so does its shortcut in the collapsed inspector.
 function refreshTabBadges(form: Element): void {
 	form.querySelectorAll<HTMLElement>('[data-tabs] [role="tab"][aria-controls]').forEach((tab) => {
 		const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
+		const invalid = panel?.querySelector(`[${INVALID}]`) != null;
 
-		tab.classList.toggle('has-error', panel?.querySelector(`[${INVALID}]`) != null);
+		tab.classList.toggle('has-error', invalid);
+		form.querySelector(`[data-inspector-open="${tab.id}"]`)?.classList.toggle('has-error', invalid);
 	});
 }
 
@@ -282,8 +286,9 @@ function swapped(): void {
 	paint(box);
 }
 
-// Reveal the control (content language, inspector tab, collapsed rows, meta
-// or paths dialog), then go there.
+// Reveal the control (content language, inspector and its tab, collapsed
+// rows, meta or paths dialog), then go there. The inspector opens before a
+// dialog inside it: a dialog in a hidden drawer would open invisible.
 function activate(event: Event): void {
 	const target = event.target;
 
@@ -316,6 +321,7 @@ function activate(event: Event): void {
 	}
 
 	revealTab(control);
+	revealInspector(control);
 
 	for (
 		let body = control.closest('[data-repeater-body]');
