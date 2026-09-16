@@ -14,7 +14,7 @@
 	padding-inline: 0;
 	background: var(--cms-color-canvas);
 
-	& .frame {
+	& > .frame {
 		display: flex;
 		flex: 1 1 auto;
 		align-items: stretch;
@@ -26,7 +26,7 @@
 		box-shadow: none;
 	}
 
-	& .main {
+	& > .frame > .main {
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: column;
@@ -276,7 +276,7 @@
 	.cms-shell {
 		--cms-masthead-height: 3.875rem;
 
-		& .frame {
+		& > .frame {
 			border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
 			box-shadow: var(--cms-shadow);
 			/* Rounds the corners without becoming a scroll container. */
@@ -295,7 +295,7 @@
 }
 
 @media (max-width: 52rem) {
-	.cms-shell .frame {
+	.cms-shell > .frame {
 		flex-direction: column;
 	}
 
