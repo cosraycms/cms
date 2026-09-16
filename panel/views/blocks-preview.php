@@ -125,7 +125,7 @@ video {
 
 .cms-blocks-images {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 	gap: 1rem;
 }
 </style>

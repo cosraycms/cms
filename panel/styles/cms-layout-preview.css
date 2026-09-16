@@ -1,0 +1,128 @@
+/*
+ * The layout preview dialog: the shared modal shell, wide and as tall as
+ * the viewport allows, its body a sunken stage holding the frame. The
+ * frame is as wide as the chosen preset; the behavior scales it down from
+ * its top left corner when the stage is narrower and gives it the height
+ * the scale eats, so it fills the stage either way. Narrower than the
+ * preset the frame is scaled, wider it is centred.
+ * Part names are declared on this block (naming rule 5).
+ */
+.cms-layout-preview {
+	--width: 78rem;
+	height: calc(100dvh - 2 * var(--cms-space-4));
+
+	& .modal-header {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+	}
+
+	& .modal-title {
+		flex: 0 0 auto;
+	}
+
+	& .note {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	/* The width presets: a segmented group like the content-language control. */
+	& .widths {
+		display: flex;
+		flex: 0 0 auto;
+		gap: var(--cms-space-0-5);
+		padding: var(--cms-space-1);
+		border-radius: var(--cms-radius-full);
+		background: var(--cms-color-surface-sunken);
+		box-shadow: var(--cms-shadow-recessed);
+
+		& .option {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--cms-space-1-5);
+			padding: var(--cms-space-1) var(--cms-space-2);
+			/* Transparent, not none: choosing a width must not shift the labels. */
+			border: 1px solid transparent;
+			border-radius: var(--cms-radius-full);
+			color: var(--cms-color-text-muted);
+			font-size: var(--cms-font-size-xs);
+			font-weight: 500;
+			white-space: nowrap;
+
+			&:hover {
+				color: var(--cms-color-text);
+			}
+
+			&[aria-pressed='true'] {
+				border-color: var(--cms-button-secondary-border);
+				background: var(--cms-button-secondary-bg);
+				background-image: var(--cms-gradient-raised);
+				box-shadow: var(--cms-button-secondary-shadow);
+				color: var(--cms-button-secondary-text);
+
+				@media (forced-colors: active) {
+					forced-color-adjust: none;
+					border-color: Highlight;
+					background: Highlight;
+					box-shadow: none;
+					color: HighlightText;
+				}
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+		}
+
+		@media (width < 60rem) {
+			& .option .text {
+				display: none;
+			}
+		}
+	}
+
+	& .reload {
+		flex: 0 0 auto;
+	}
+
+	& .modal-body {
+		display: flex;
+		flex-direction: column;
+		padding: var(--cms-space-4);
+		background: var(--cms-color-surface-sunken);
+	}
+
+	& .stage {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: hidden;
+
+		&.is-loading .frame {
+			opacity: 0.5;
+		}
+	}
+
+	& .frame {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		height: 100%;
+		margin-inline: auto;
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-md);
+		background: #fff;
+		transform-origin: top left;
+		transition: opacity var(--cms-duration-fast, 120ms) ease;
+	}
+
+	/* A scaled frame overflows its stage by design; the transform pulls it back in. */
+	& .frame.is-scaled {
+		max-width: none;
+	}
+}

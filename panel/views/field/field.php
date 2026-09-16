@@ -83,6 +83,12 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
+		<?php if ($controlName === 'blocks'): ?>
+			<?php // The layout-preview behavior posts the form and opens the shared dialog. ?>
+			<button type="button" class="meta-button layout-preview" data-layout-preview="<?= escape($fieldName) ?>">
+				<?= escape(__('editor:layout-preview')) ?>
+			</button>
+		<?php endif ?>
 	</label>
 	<div class="field-body">
 		<div class="control">

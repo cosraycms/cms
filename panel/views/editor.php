@@ -280,6 +280,14 @@ foreach ($fields as $field) {
 	</form>
 
 	<div id="editor-preview" hidden></div>
+	<?php if (array_any(
+		$fieldsByName,
+		static fn(mixed $f): bool => (($f['control'] ?? [])['name'] ?? null) === 'blocks',
+	)) {
+		$this->insert('node/layout-preview', [
+			'url' => $edit ? $links->blocks($uid) : $links->createBlocks((string) ($type['handle'] ?? '')),
+		]);
+	} ?>
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
 		['panel' => $panelBase, 'system' => $system],
 		$jsonFlags,

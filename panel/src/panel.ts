@@ -11,6 +11,7 @@ import { install as installDirty } from './behaviors/dirty';
 import { install as installErrors } from './behaviors/errors';
 import { install as installFallbacks } from './behaviors/fallbacks';
 import { install as installInspector } from './behaviors/inspector';
+import { install as installLayoutPreview } from './behaviors/layout-preview';
 import { install as installMenu } from './behaviors/menu';
 import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
@@ -115,6 +116,7 @@ cleanups.push(
 	installBlocks(),
 	installBlockCatalog(),
 	installChrome(),
+	installLayoutPreview(),
 	installScroll(),
 	installWhen(),
 	installYoutube(),

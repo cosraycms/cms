@@ -63,6 +63,11 @@
 		line-height: 1.45;
 	}
 
+	/* Nothing to lay out yet: the preview waits for the first block. */
+	&:not(:has(.cms-blocks-editor > .grid > *)) .layout-preview {
+		display: none;
+	}
+
 	& .meta-button {
 		padding: 0 var(--cms-space-2);
 		border: 1px solid var(--cms-color-border);

@@ -8,6 +8,7 @@ use Cosray\Block as Builtin;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Blocks;
+use Cosray\Field\Text;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
@@ -153,6 +154,40 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		));
 		$this->assertStringContainsString('<html lang="en">', $fallback);
 		$this->assertStringContainsString('English text', $fallback);
+	}
+
+	public function testEditorRendersThePreviewButtonAndTheDialogForBlocksFields(): void
+	{
+		$this->createBlocksNode('preview-editor', 'test-media-document', [
+			'contentBlocks' => ['type' => Blocks::class, 'value' => ['en' => []]],
+		]);
+
+		$html = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/collection/test-articles/preview-editor'),
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-field="contentBlocks"]/label//button[@data-layout-preview="contentBlocks"]',
+			$html,
+		);
+		$this->assertHtmlNodeMissing('//div[@data-field="title"]//button[@data-layout-preview]', $html);
+		$this->assertHtmlNodeExists(
+			'//dialog[@data-layout-preview-dialog][@data-url="/cp/collection/test-articles/preview-editor/blocks"]'
+				. '//iframe[@sandbox="allow-same-origin"][@data-layout-preview-frame]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//dialog[@data-layout-preview-dialog]//button[@data-layout-preview-width="390"]',
+			$html,
+		);
+
+		// A type without a blocks field renders no dialog.
+		$this->createBlocksNode('preview-plain', 'test-article', [
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Plain']],
+		]);
+		$plain = $this->getHtmlResponse(
+			$this->makeRequest('GET', '/cp/collection/test-articles/preview-plain'),
+		);
+		$this->assertHtmlNodeMissing('//dialog[@data-layout-preview-dialog]', $plain);
 	}
 
 	public function testRefusesUnknownNodesAndFieldsThatAreNotBlocks(): void
