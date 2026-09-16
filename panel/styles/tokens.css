@@ -188,6 +188,8 @@
 	 * surface  the shell itself: sidebars, topbars, menus, controls
 	 * sunken   a well: a recess inside a surface, or a field's own area on the
 	 *          pane — always a step below the ground it sits on
+	 * muted    a quiet band inside a surface holding the details of what sits
+	 *          above it — lighter than a well, and never a read-only state
 	 * raised   cards sitting on a sunken region
 	 */
 	--cms-color-canvas: light-dark(var(--cms-color-neutral-150), var(--cms-color-neutral-950));
@@ -196,6 +198,7 @@
 		var(--cms-color-neutral-200),
 		var(--cms-color-neutral-975)
 	);
+	--cms-color-surface-muted: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-925));
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
 	--cms-color-rail: var(--cms-color-surface);
 
