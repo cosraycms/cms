@@ -95,7 +95,7 @@ final class PanelLayersTest extends End2EndTestCase
 		);
 	}
 
-	public function testAnAreaSwitchRendersTheFrameAndPatchesTheMasthead(): void
+	public function testAnAreaSwitchRendersTheFrameContentsAndPatchesTheMasthead(): void
 	{
 		$html = $this->layerHtml([
 			'HX-Request' => 'true',
@@ -103,8 +103,15 @@ final class PanelLayersTest extends End2EndTestCase
 			'HX-Target' => 'div#frame',
 		]);
 
-		$this->assertHtmlNodeExists('//*[@id="frame"]', $html);
-		$this->assertHtmlNodeExists('//*[contains(concat(" ", normalize-space(@class), " "), " cms-sidebar ")]', $html);
+		$swapped = '<div id="frame" class="frame">' . $html . '</div>';
+		$this->assertHtmlNodeExists(
+			'/html/body/div[@id="frame"]/aside[contains(concat(" ", normalize-space(@class), " "), " cms-sidebar ")]',
+			$swapped,
+		);
+		$this->assertHtmlNodeExists(
+			'/html/body/div[@id="frame"]/main[@id="main"]/div[contains(concat(" ", normalize-space(@class), " "), " cms-collection ")]',
+			$swapped,
+		);
 		$this->assertStringNotContainsString('<!DOCTYPE html>', $html);
 		$this->assertHtmlNodeMissing(
 			'//*[contains(concat(" ", normalize-space(@class), " "), " cms-masthead ")]',
