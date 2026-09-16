@@ -51,7 +51,7 @@ A `DateTime` value is an instant. Every non-empty stored value is normalized to 
 
 Reference fields open a searchable dropdown on focus or click, initially offering recently edited eligible entries. The picker loads 30 entries at a time and offers **Load more** when another page exists. Typing searches titles across the entire eligible set; clearing the query restores recent entries. The field's server-side `#[Pick]` constraints still determine eligibility.
 
-Selected entries remain above the search and are omitted from its choices. Multi-selection stays open until the field's limit is reached; selecting a search result clears the query for the next choice. Loading, request failures with Retry, no eligible entries, and searches without matches have distinct feedback. See [Panel keyboard vocabulary](panel-keyboard.md#reference-fields) for keyboard operation.
+Selected entries appear below the search and are omitted from its choices. Multi-selection stays open until the field's limit is reached; selecting a search result clears the query for the next choice. Loading, request failures with Retry, no eligible entries, and searches without matches have distinct feedback. See [Panel keyboard vocabulary](panel-keyboard.md#reference-fields) for keyboard operation.
 
 ### Checkbox fields
 

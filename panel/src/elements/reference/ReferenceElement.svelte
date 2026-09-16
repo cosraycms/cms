@@ -275,29 +275,6 @@
 />
 
 <div class="cms-reference">
-	{#if items.length > 0}
-		<ul class="cms-reference-list" bind:this={selected}>
-			{#each items as item (item.uid)}
-				<li class="cms-reference-item">
-					<span class="cms-reference-title">{item.title || item.uid}</span>
-					{#if item.typeLabel}
-						<span class="cms-reference-type">{item.typeLabel}</span>
-					{/if}
-					{#if !immutable}
-						<button
-							type="button"
-							class="cms-reference-remove"
-							onclick={() => remove(item.uid)}
-							aria-label={__('common:remove')}
-						>
-							<Icon name="x-lg" />
-						</button>
-					{/if}
-				</li>
-			{/each}
-		</ul>
-	{/if}
-
 	{#if !full() && !immutable}
 		<div
 			class="cms-reference-search"
@@ -390,6 +367,29 @@
 				{/if}
 			</div>
 		</div>
+	{/if}
+
+	{#if items.length > 0}
+		<ul class="cms-reference-list" bind:this={selected}>
+			{#each items as item (item.uid)}
+				<li class="cms-reference-item">
+					<span class="cms-reference-title">{item.title || item.uid}</span>
+					{#if item.typeLabel}
+						<span class="cms-reference-type">{item.typeLabel}</span>
+					{/if}
+					{#if !immutable}
+						<button
+							type="button"
+							class="cms-reference-remove"
+							onclick={() => remove(item.uid)}
+							aria-label={__('common:remove')}
+						>
+							<Icon name="x-lg" />
+						</button>
+					{/if}
+				</li>
+			{/each}
+		</ul>
 	{/if}
 </div>
 
