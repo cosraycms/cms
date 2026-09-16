@@ -4,6 +4,11 @@
    could not stick to the document. The page takes the height below the
    masthead and keeps its bounded flex chain. */
 
+/* Without an inset, only a line separates the sidebar from the list. */
+.cms-sidebar:has(+ .main > .cms-collection) {
+	border-right: 1px solid var(--cms-color-border-soft);
+}
+
 .cms-collection {
 	display: flex;
 	flex-direction: column;
@@ -359,6 +364,10 @@
 }
 
 @media (max-width: 52rem) {
+	.cms-sidebar:has(+ .main > .cms-collection) {
+		border-right: 0;
+	}
+
 	.cms-collection {
 		height: auto;
 		overflow: visible;
