@@ -47,7 +47,7 @@
 		.cms-asset-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(var(--cms-tile-min, 9.5rem), 1fr));
-			gap: var(--cms-space-3);
+			gap: var(--gap, var(--cms-space-3));
 			align-content: start;
 		}
 

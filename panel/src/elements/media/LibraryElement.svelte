@@ -428,7 +428,12 @@
 			{:else if items.length === 0 && !loading}
 				<div class="cms-media-empty">{__('media:no-files')}</div>
 			{:else}
-				<AssetGrid {items} {selected} pick={(item) => (selected = item.uid)} />
+				<AssetGrid
+					--gap="var(--cms-space-8) var(--cms-space-6)"
+					{items}
+					{selected}
+					pick={(item) => (selected = item.uid)}
+				/>
 			{/if}
 
 			{#if loading}
