@@ -100,6 +100,12 @@ final class CollectionUrls
 		return $this->path() . '/' . rawurlencode($uid) . '/paths';
 	}
 
+	/** The layout preview of a blocks field; the client appends `/{field}`. */
+	public function blocks(string $uid): string
+	{
+		return $this->path() . '/' . rawurlencode($uid) . '/blocks';
+	}
+
 	public function delete(string $uid): string
 	{
 		return $this->path() . '/' . rawurlencode($uid) . '/delete';
@@ -124,6 +130,11 @@ final class CollectionUrls
 	public function createPaths(string $type): string
 	{
 		return $this->path() . '/create/' . rawurlencode($type) . '/paths';
+	}
+
+	public function createBlocks(string $type): string
+	{
+		return $this->path() . '/create/' . rawurlencode($type) . '/blocks';
 	}
 
 	public function create(string $type, ?string $parent = null): string

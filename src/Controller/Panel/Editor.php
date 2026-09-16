@@ -18,6 +18,7 @@ use Cosray\Cms;
 use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Context;
+use Cosray\Exception\NoSuchField;
 use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
@@ -31,6 +32,8 @@ use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
 use Cosray\Panel\System;
+use Cosray\Richtext\Normalizer;
+use Cosray\Value\Blocks as BlocksValue;
 use DateTimeImmutable;
 use IntlDateFormatter;
 use Throwable;
@@ -447,6 +450,102 @@ final class Editor extends Panel
 		return [
 			'paths' => $generator->preview($nodeObj::class, $data, $context->locales()),
 			'pathsUrl' => $pathsUrl,
+		];
+	}
+
+	/**
+	 * The layout preview of a blocks field: the field as the site renders
+	 * it, built from the submitted form on top of the working copy. Nothing
+	 * is validated or saved — readers clamp what they load and an empty
+	 * block renders nothing, so half-finished content previews as well.
+	 */
+	public function blocks(
+		Context $context,
+		Cms $cms,
+		string $collection,
+		string $node,
+		string $field,
+	): array {
+		$this->collection($collection);
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Wrapper::unwrap($result);
+		$serializer = new Serializer(
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			$context->assets(),
+			$context->paths(),
+		);
+		$data = $serializer->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
+
+		return $this->blocksPreview($context, $cms, $nodeObj, $data, $field);
+	}
+
+	/** The layout preview for a not-yet-saved node, built from its blueprint. */
+	public function createBlocks(
+		Context $context,
+		Cms $cms,
+		string $collection,
+		string $type,
+		string $field,
+	): array {
+		[, $obj] = $this->collection($collection);
+		$query = $this->queryState($obj);
+
+		if (!$this->canCreate($obj, $type, $query->parent)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+
+		return $this->blocksPreview($context, $cms, $nodeObj, $data, $field);
+	}
+
+	private function blocksPreview(
+		Context $context,
+		Cms $cms,
+		object $node,
+		array $data,
+		string $field,
+	): array {
+		$data = $this->applyForm($data, $this->formData());
+
+		if (is_array($data['content'] ?? null)) {
+			// The renderer reads the canonical richtext document the save
+			// would store, not the envelope as the editor submits it.
+			$data['content'] = new Normalizer()->content($data['content']);
+		}
+
+		$hydrated = $cms->nodeFactory()->create($node::class, $context, $cms, $data);
+
+		try {
+			$value = NodeFactory::fieldFor($hydrated, $field)->value();
+		} catch (NoSuchField) {
+			throw new HttpNotFound($this->request);
+		}
+
+		if (!$value instanceof BlocksValue) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$locales = $context->locales();
+		$requested = $this->request->param('locale', '');
+		$locale = is_string($requested) && $locales->exists($requested)
+			? $locales->get($requested)
+			: $locales->getDefault();
+
+		return [
+			'html' => $context->withLocale($locale, $value->render(...)),
+			'stylesheet' => (string) file_get_contents(dirname(__DIR__, 3) . '/resources/blocks.css'),
+			'locale' => $locale->id,
 		];
 	}
 

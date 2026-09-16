@@ -341,6 +341,14 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('editor-paths'));
+				$panel
+					->post(
+						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
+						[Panel\Editor::class, 'createBlocks'],
+						'editor.create.blocks',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('blocks-preview'));
 				// Before the {node} routes: like `create`, the `bulk` segment
 				// wins over a node uid of the same name.
 				$panel
@@ -387,6 +395,14 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('editor-paths'));
+				$panel
+					->post(
+						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
+						[Panel\Editor::class, 'blocks'],
+						'editor.blocks',
+					)
+					->middleware($panelAuth)
+					->after($renderers->get('blocks-preview'));
 				$panel
 					->get(
 						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
