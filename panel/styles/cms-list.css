@@ -34,7 +34,7 @@
 		align-items: center;
 		padding: var(--cms-space-3) var(--cms-space-4);
 		border-bottom: 1px solid var(--cms-color-border);
-		background: var(--cms-color-surface-sunken);
+		background: var(--cms-list-header-bg);
 		color: var(--cms-color-text-subtle);
 		font-size: 0.625rem;
 		font-weight: 500;
@@ -84,7 +84,7 @@
 		}
 
 		&.is-tree:not([data-depth='0']) {
-			--row-bg: var(--cms-color-surface-sunken);
+			--row-bg: var(--cms-list-child-bg);
 
 			&:hover {
 				--row-bg: var(--cms-color-hover);

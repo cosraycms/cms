@@ -456,6 +456,16 @@
 	--cms-code-muted: var(--cms-color-neutral-300);
 
 	/**
+	 * Component — list
+	 *
+	 * The header row and the children of an expanded tree row both sit a step
+	 * below the surface, the children the lighter of the two so a parent's
+	 * group reads as one block without competing with the header.
+	 */
+	--cms-list-header-bg: light-dark(var(--cms-color-neutral-100), var(--cms-color-neutral-950));
+	--cms-list-child-bg: var(--cms-color-surface-muted);
+
+	/**
 	 * Component — shell
 	 */
 	/*
