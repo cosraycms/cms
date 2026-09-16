@@ -1,5 +1,6 @@
 import { openDialog } from '$lib/dialogs';
 import { nest } from '$lib/form-json';
+import { thumbnail } from './youtube';
 
 // The layout preview of a blocks field: the field rendered through the
 // site's render path from the form as it stands, in the frame of the one
@@ -125,6 +126,31 @@ function fail(dialog: HTMLElement): void {
 	}
 }
 
+function thumbnails(html: string): string {
+	const sheet = new DOMParser().parseFromString(html, 'text/html');
+
+	// Nested players inherit the script-free sandbox, so replace them before loading the sheet.
+	for (const embed of sheet.querySelectorAll<HTMLIFrameElement>('iframe.youtube')) {
+		const id = /^https:\/\/www\.youtube\.com\/embed\/([A-Za-z0-9_-]{11})$/.exec(
+			embed.getAttribute('src') ?? '',
+		)?.[1];
+
+		if (!id) {
+			continue;
+		}
+
+		const image = sheet.createElement('img');
+		image.src = thumbnail(id);
+		image.alt = 'YouTube';
+		image.className = embed.className;
+		image.style.cssText = embed.style.cssText;
+		image.style.objectFit = 'cover';
+		embed.replaceWith(image);
+	}
+
+	return `<!doctype html>\n${sheet.documentElement.outerHTML}`;
+}
+
 async function load(dialog: HTMLElement, field: string): Promise<boolean> {
 	const form = document.querySelector<HTMLFormElement>(FORM);
 	const stage = dialog.querySelector<HTMLElement>(STAGE);
@@ -155,7 +181,7 @@ async function load(dialog: HTMLElement, field: string): Promise<boolean> {
 			return false;
 		}
 
-		frame.srcdoc = await response.text();
+		frame.srcdoc = thumbnails(await response.text());
 
 		return true;
 	} catch {

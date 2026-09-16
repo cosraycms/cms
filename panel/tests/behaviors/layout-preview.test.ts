@@ -109,6 +109,50 @@ describe('layout preview', () => {
 		expect(frame().style.width).toBe('1200px');
 	});
 
+	it.each(['56.25%', '177.78%'])(
+		'shows the YouTube thumbnail in the rendered video space (%s)',
+		async (ratio) => {
+			page();
+			respond(`<!doctype html><html lang="de"><head><style>body { margin: 0; }</style></head><body>
+				<h2>Video</h2>
+				<div class="youtube-container"><div style="position: relative; padding-top: ${ratio}">
+					<iframe class="youtube" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+						src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+				</div></div>
+				<iframe src="https://example.com/embed/other"></iframe>
+			</body></html>`);
+
+			button().click();
+			await vi.waitFor(() => expect(dialog().open).toBe(true));
+
+			const sheet = new DOMParser().parseFromString(frame().srcdoc, 'text/html');
+			const image = sheet.querySelector<HTMLImageElement>('.youtube-container img')!;
+			expect(image.src).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
+			expect(image.alt).toBe('YouTube');
+			expect(image.parentElement!.style.paddingTop).toBe(ratio);
+			expect(image.style.position).toBe('absolute');
+			expect(image.style.width).toBe('100%');
+			expect(image.style.height).toBe('100%');
+			expect(image.style.objectFit).toBe('cover');
+			expect(sheet.doctype?.name).toBe('html');
+			expect(sheet.documentElement.lang).toBe('de');
+			expect(sheet.querySelector('style')!.textContent).toBe('body { margin: 0; }');
+			expect(sheet.querySelector('h2')!.textContent).toBe('Video');
+			expect(sheet.querySelector('iframe')!.src).toBe('https://example.com/embed/other');
+		},
+	);
+
+	it('keeps incomplete YouTube ids from becoming thumbnail requests', async () => {
+		page();
+		respond('<iframe class="youtube" src="https://www.youtube.com/embed/unfinished"></iframe>');
+
+		button().click();
+		await vi.waitFor(() => expect(dialog().open).toBe(true));
+
+		const sheet = new DOMParser().parseFromString(frame().srcdoc, 'text/html');
+		expect(sheet.querySelector('iframe')!.src).toBe('https://www.youtube.com/embed/unfinished');
+	});
+
 	it('leaves the locale out when the form has none', async () => {
 		page('');
 		const fetchMock = respond();
