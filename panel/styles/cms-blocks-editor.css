@@ -352,6 +352,10 @@
 			calc(var(--cms-space-4) + var(--blocks-padding));
 	}
 
+	& .cms-youtube .thumbnail {
+		justify-self: center;
+	}
+
 	/* A block grows with its text: no inner scrollbar on the canvas. */
 	& .block .ProseMirror {
 		max-height: none;
