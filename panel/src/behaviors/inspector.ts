@@ -1,21 +1,48 @@
 import { selectTab } from './tabs';
 
-// The node inspector collapses to a strip of quick controls. The choice lives
-// in a cookie the editor reads, so a page arrives in its state and never
-// slides on load. The strip's published switch is an unnamed copy: the form
-// submits the real one, which a save replaces out of band.
+// The node inspector collapses to a strip of quick controls. Beside the fields
+// the choice lives in a cookie the editor reads, so a page arrives in its
+// state and never slides on load. Narrower, the inspector starts collapsed
+// and data-open lasts for the page; between the breakpoints, which match
+// cms-inspector.css, it opens over the fields as a layer that Escape and a
+// press outside close. The strip's published switch is an unnamed copy: the
+// form submits the real one, which a save replaces out of band.
 
 const ROOT = '[data-inspector]';
 const PUBLISHED = 'editor-published-switch';
+const BESIDE = '(width >= 75rem)';
+const OVER = '(52rem < width < 75rem)';
 
-function collapse(inspector: HTMLElement, collapsed: boolean, remember = true): void {
-	inspector.toggleAttribute('data-collapsed', collapsed);
+let opener: HTMLElement | null = null;
+
+function expand(inspector: HTMLElement, expanded: boolean, remember = true): void {
+	if (!matchMedia(BESIDE).matches) {
+		inspector.toggleAttribute('data-open', expanded);
+		return;
+	}
+
+	inspector.toggleAttribute('data-collapsed', !expanded);
 
 	if (remember) {
-		document.cookie = collapsed
-			? 'cosray_inspector=collapsed; path=/; max-age=31536000; samesite=lax'
-			: 'cosray_inspector=; path=/; max-age=0; samesite=lax';
+		document.cookie = expanded
+			? 'cosray_inspector=; path=/; max-age=0; samesite=lax'
+			: 'cosray_inspector=collapsed; path=/; max-age=31536000; samesite=lax';
 	}
+}
+
+function close(inspector: HTMLElement): void {
+	expand(inspector, false);
+
+	const target = opener?.isConnected
+		? opener
+		: inspector.querySelector<HTMLElement>('[data-inspector-expand]');
+	target?.focus();
+}
+
+function closeLayers(): void {
+	document.querySelectorAll(`${ROOT}[data-open]`).forEach((inspector) => {
+		inspector.removeAttribute('data-open');
+	});
 }
 
 // Opens the inspector around a control an error jump targets, without
@@ -23,8 +50,8 @@ function collapse(inspector: HTMLElement, collapsed: boolean, remember = true): 
 export function revealInspector(control: Element): void {
 	const inspector = control.closest<HTMLElement>(ROOT);
 
-	if (inspector?.hasAttribute('data-collapsed')) {
-		collapse(inspector, false, false);
+	if (inspector) {
+		expand(inspector, true, false);
 	}
 }
 
@@ -37,27 +64,59 @@ function click(event: Event): void {
 	}
 
 	if (target.closest('[data-inspector-collapse]')) {
-		collapse(inspector, true);
-		inspector.querySelector<HTMLElement>('[data-inspector-expand]')?.focus();
+		close(inspector);
 		return;
 	}
 
-	const shortcut = target.closest<HTMLElement>('[data-inspector-open]');
+	const trigger = target.closest<HTMLElement>('[data-inspector-open], [data-inspector-expand]');
 
-	if (!shortcut && !target.closest('[data-inspector-expand]')) {
+	if (!trigger) {
 		return;
 	}
 
-	const tab = shortcut
-		? document.getElementById(shortcut.dataset.inspectorOpen ?? '')
+	const tab = trigger.dataset.inspectorOpen
+		? document.getElementById(trigger.dataset.inspectorOpen)
 		: inspector.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
 
 	if (tab) {
 		selectTab(tab);
 	}
 
-	collapse(inspector, false);
+	opener = trigger;
+	expand(inspector, true);
 	tab?.focus();
+}
+
+function keydown(event: KeyboardEvent): void {
+	const target = event.target;
+
+	if (
+		event.key !== 'Escape' ||
+		event.defaultPrevented ||
+		!(target instanceof Element) ||
+		target.closest('dialog') ||
+		!matchMedia(OVER).matches
+	) {
+		return;
+	}
+
+	const inspector = target.closest<HTMLElement>(`${ROOT}[data-open]`);
+
+	if (inspector) {
+		event.preventDefault();
+		close(inspector);
+	}
+}
+
+function pointerdown(event: Event): void {
+	const target = event.target;
+
+	if (
+		matchMedia(OVER).matches &&
+		!(target instanceof Element && target.closest(`${ROOT}, dialog, [popover]`))
+	) {
+		closeLayers();
+	}
 }
 
 function syncPublished(): void {
@@ -93,14 +152,23 @@ function change(event: Event): void {
 }
 
 export function install(): () => void {
+	const beside = matchMedia(BESIDE);
+
 	document.addEventListener('click', click);
 	document.addEventListener('change', change);
+	document.addEventListener('keydown', keydown);
+	document.addEventListener('pointerdown', pointerdown);
 	document.addEventListener('htmx:after:swap', syncPublished);
+	beside.addEventListener('change', closeLayers);
 	syncPublished();
 
 	return () => {
 		document.removeEventListener('click', click);
 		document.removeEventListener('change', change);
+		document.removeEventListener('keydown', keydown);
+		document.removeEventListener('pointerdown', pointerdown);
 		document.removeEventListener('htmx:after:swap', syncPublished);
+		beside.removeEventListener('change', closeLayers);
+		opener = null;
 	};
 }

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install as installDirty } from '../../src/behaviors/dirty';
 import { install } from '../../src/behaviors/inspector';
 
@@ -30,6 +30,15 @@ function editor(collapsed = false): void {
 		</form>`;
 }
 
+function viewport(width: 'beside' | 'over'): void {
+	const query = width === 'beside' ? '(width >= 75rem)' : '(52rem < width < 75rem)';
+	const unmatched = window.matchMedia;
+	vi.stubGlobal('matchMedia', (media: string) => ({
+		...unmatched(media),
+		matches: media === query,
+	}));
+}
+
 function inspector(): HTMLElement {
 	return document.querySelector<HTMLElement>('[data-inspector]')!;
 }
@@ -45,12 +54,14 @@ beforeEach(() => {
 
 afterEach(() => {
 	uninstall.forEach((cleanup) => cleanup());
+	vi.unstubAllGlobals();
 	document.cookie = 'cosray_inspector=; path=/; max-age=0';
 	document.body.innerHTML = '';
 });
 
 describe('inspector', () => {
-	it('collapses and expands, remembering the choice for the next page', () => {
+	it('collapses and expands beside the fields, remembering the choice for the next page', () => {
+		viewport('beside');
 		click('[data-inspector-collapse]');
 
 		expect(inspector().hasAttribute('data-collapsed')).toBe(true);
@@ -68,6 +79,7 @@ describe('inspector', () => {
 		uninstall.forEach((cleanup) => cleanup());
 		editor(true);
 		uninstall = [install()];
+		viewport('beside');
 
 		click('[data-inspector-open="tab-advanced"]');
 
@@ -75,6 +87,38 @@ describe('inspector', () => {
 		expect(document.getElementById('tab-advanced')?.getAttribute('aria-selected')).toBe('true');
 		expect(document.getElementById('panel-advanced')?.hidden).toBe(false);
 		expect(document.activeElement).toBe(document.getElementById('tab-advanced'));
+	});
+
+	it('opens over the fields for this page only and closes on Escape back to its opener', () => {
+		viewport('over');
+		const shortcut = document.querySelector<HTMLElement>('[data-inspector-open="tab-advanced"]')!;
+		shortcut.click();
+
+		expect(inspector().hasAttribute('data-open')).toBe(true);
+		expect(document.cookie).not.toContain('cosray_inspector');
+
+		document.activeElement?.dispatchEvent(
+			new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+		);
+
+		expect(inspector().hasAttribute('data-open')).toBe(false);
+		expect(document.activeElement).toBe(shortcut);
+	});
+
+	it('closes the overlay on a press outside it', () => {
+		viewport('over');
+		click('[data-inspector-expand]');
+		document
+			.getElementById('tab-advanced')
+			?.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+
+		expect(inspector().hasAttribute('data-open')).toBe(true);
+
+		document
+			.getElementById('editor-dirty')
+			?.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+
+		expect(inspector().hasAttribute('data-open')).toBe(false);
 	});
 
 	it('flips the real published switch from the strip and marks the form dirty', () => {

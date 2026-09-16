@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install as installErrors } from '../../src/behaviors/errors';
 import { install as installRepeater } from '../../src/behaviors/repeater';
 import { install as installContentLocales } from '../../src/behaviors/content-locales';
@@ -163,6 +163,7 @@ describe('errors behavior', () => {
 
 	afterEach(() => {
 		uninstall.forEach((cleanup) => cleanup());
+		vi.unstubAllGlobals();
 		document.body.innerHTML = '';
 		localStorage.clear();
 	});
@@ -398,6 +399,11 @@ describe('errors behavior', () => {
 	});
 
 	it('badges the tab whose hidden panel holds the issue and brings it to the front', () => {
+		const unmatched = window.matchMedia;
+		vi.stubGlobal('matchMedia', (media: string) => ({
+			...unmatched(media),
+			matches: media === '(width >= 75rem)',
+		}));
 		const inspector = document.querySelector<HTMLElement>('[data-inspector]')!;
 		inspector.setAttribute('data-collapsed', '');
 		const box = respond([{ path: ['handle'], message: 'Handle is taken' }]);

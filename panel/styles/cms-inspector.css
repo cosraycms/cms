@@ -316,6 +316,52 @@
 	}
 }
 
+/*
+ * Too narrow to share the row, the inspector starts collapsed whatever the
+ * cookie says, and data-open marks it opened for this page. Between 52rem and
+ * 75rem the drawer slides over the fields from the pane's edge and waits
+ * beside it when closed, where the panes clip it rather than widen the page.
+ */
+@media (52rem < width < 75rem) {
+	.cms-inspector,
+	.cms-inspector[data-collapsed] {
+		z-index: 25;
+		flex-basis: var(--cms-inspector-collapsed-width);
+		width: var(--cms-inspector-collapsed-width);
+		overflow: visible;
+
+		& .strip {
+			opacity: 1;
+			visibility: visible;
+		}
+
+		& .drawer {
+			right: 0;
+			left: auto;
+			opacity: 1;
+			visibility: hidden;
+			translate: 100% 0;
+			background: var(--cms-inspector-bg);
+			box-shadow: var(--cms-shadow);
+			transition:
+				translate 200ms cubic-bezier(0.2, 0, 0, 1),
+				visibility 0s 200ms;
+		}
+	}
+
+	.cms-inspector[data-open] .drawer {
+		visibility: visible;
+		translate: 0;
+		transition:
+			translate 200ms cubic-bezier(0.2, 0, 0, 1),
+			visibility 0s;
+	}
+
+	.cms-node .panes {
+		overflow-x: clip;
+	}
+}
+
 /* Above the fields, not below: a publish toggle under a long form is unreachable. */
 @media (max-width: 52rem) {
 	.cms-inspector,
@@ -325,23 +371,52 @@
 		width: 100%;
 		height: auto;
 		order: -1;
+		overflow: visible;
 		border-bottom: 1px solid var(--cms-color-border);
 
+		& .strip {
+			position: static;
+			flex-direction: row;
+			flex-wrap: wrap;
+			width: auto;
+			padding: var(--cms-space-2) var(--cms-space-4);
+			overflow: visible;
+			opacity: 1;
+			visibility: visible;
+
+			& .cms-content-locales {
+				flex-direction: row;
+			}
+		}
+
+		& .shortcuts {
+			flex-direction: row;
+			margin-left: auto;
+			padding-top: 0;
+			border-top: 0;
+		}
+
 		& .drawer {
+			display: none;
 			position: static;
 			width: auto;
 			opacity: 1;
 			visibility: visible;
 		}
 
-		& .strip,
-		& .top .tool {
-			display: none;
-		}
-
 		& .scroll {
 			padding: var(--cms-space-4);
 			overflow: visible;
+		}
+	}
+
+	.cms-inspector[data-open] {
+		& .strip {
+			display: none;
+		}
+
+		& .drawer {
+			display: flex;
 		}
 	}
 }

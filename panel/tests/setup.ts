@@ -39,6 +39,18 @@ HTMLDialogElement.prototype.close = function () {
 	this.open = false;
 	queueMicrotask(() => this.dispatchEvent(new Event('close')));
 };
+// No viewport either: every media query fails unless a test stubs matchMedia.
+window.matchMedia = (query) =>
+	({
+		matches: false,
+		media: query,
+		onchange: null,
+		addEventListener() {},
+		removeEventListener() {},
+		addListener() {},
+		removeListener() {},
+		dispatchEvent: () => false,
+	}) as MediaQueryList;
 HTMLElement.prototype.checkVisibility = function () {
 	if (this.closest('[hidden], [inert], dialog:not([open])')) return false;
 	const popover = this.closest('[popover]');

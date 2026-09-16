@@ -214,6 +214,12 @@
 	}
 }
 
+@media (52rem < width < 75rem) {
+	.cms-node {
+		--cms-pane-right: var(--cms-inspector-collapsed-width);
+	}
+}
+
 @media (max-width: 52rem) {
 	.cms-node {
 		& .head {
