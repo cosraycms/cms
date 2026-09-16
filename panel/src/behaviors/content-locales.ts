@@ -1,6 +1,8 @@
 // One content-language selector per screen. Every translated variant stays
 // in the form; selecting a language only changes which one shows, hands the
 // locale to hosted element controls, and remembers the choice per browser.
+// The selector may render more than once in a scope, as in the node
+// inspector and its collapsed strip; every copy follows the choice.
 
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
@@ -79,7 +81,8 @@ function remember(locale: string): void {
 }
 
 export function selectContentLocale(scope: Element, locale: string, root?: ParentNode): void {
-	const control = scope.querySelector<HTMLElement>(CONTENT_CONTROL);
+	const controls = Array.from(scope.querySelectorAll<HTMLElement>(CONTENT_CONTROL));
+	const control = controls[0];
 
 	if (!control || !locales(control).includes(locale)) {
 		return;
@@ -87,7 +90,7 @@ export function selectContentLocale(scope: Element, locale: string, root?: Paren
 
 	const changed = scope.getAttribute('data-content-locale') !== locale;
 	scope.setAttribute('data-content-locale', locale);
-	updateControl(control, locale);
+	controls.forEach((copy) => updateControl(copy, locale));
 	show(scope, locale, root);
 	handToHosts(root ?? scope, locale);
 

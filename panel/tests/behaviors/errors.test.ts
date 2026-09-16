@@ -197,20 +197,24 @@ describe('errors behavior', () => {
 		const form = document.getElementById('node-editor-form')!;
 		form.setAttribute('data-content-locale-scope', '');
 		form.setAttribute('data-content-locale', 'en');
-		form.insertAdjacentHTML(
-			'afterbegin',
-			`<div data-content-locale-control role="radiogroup">
+		const selector = `<div data-content-locale-control role="radiogroup">
 				<button type="button" data-content-locale-option="en" role="radio" aria-checked="true">English</button>
 				<button type="button" data-content-locale-option="de" role="radio" aria-checked="false">Deutsch</button>
-			</div>`,
-		);
+			</div>`;
+		// Twice, as the inspector and its collapsed strip render it.
+		form.insertAdjacentHTML('afterbegin', selector + selector);
 		respond([{ path: ['content', 'title', 'value', 'de'], message: 'Titel fehlt' }]);
+
+		for (const copy of form.querySelectorAll<HTMLElement>('[data-content-locale-control]')) {
+			expect(copy.classList.contains('has-error')).toBe(true);
+			expect(copy.dataset.errorLocales).toBe('de');
+			expect(
+				copy.querySelector('[data-content-locale-option="de"]')?.classList.contains('has-error'),
+			).toBe(true);
+		}
 
 		const control = form.querySelector<HTMLElement>('[data-content-locale-control]')!;
 		const german = control.querySelector<HTMLElement>('[data-content-locale-option="de"]')!;
-		expect(control.classList.contains('has-error')).toBe(true);
-		expect(control.dataset.errorLocales).toBe('de');
-		expect(german.classList.contains('has-error')).toBe(true);
 		document.querySelector<HTMLElement>('[data-error-path]')?.click();
 		expect(german.getAttribute('aria-checked')).toBe('true');
 		expect(field('title').querySelector<HTMLElement>('[data-locale="de"]')?.hidden).toBe(false);

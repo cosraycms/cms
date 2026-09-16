@@ -122,6 +122,21 @@ describe('content language', () => {
 		expect(scope().querySelector('[data-locale="de"]')?.hasAttribute('hidden')).toBe(false);
 	});
 
+	it('keeps every copy of the selector in step', () => {
+		const first = scope().querySelector<HTMLElement>('[data-content-locale-control]')!;
+		const copy = first.cloneNode(true) as HTMLElement;
+		scope().append(copy);
+		copy.querySelector<HTMLButtonElement>('[data-content-locale-option="de"]')?.click();
+
+		expect(scope().dataset.contentLocale).toBe('de');
+
+		for (const control of [first, copy]) {
+			const german = control.querySelector('[data-content-locale-option="de"]');
+			expect(german?.getAttribute('aria-checked')).toBe('true');
+			expect(german?.getAttribute('tabindex')).toBe('0');
+		}
+	});
+
 	it('applies the current locale to newly stamped rows', () => {
 		choose('de');
 		const row = document.createElement('div');

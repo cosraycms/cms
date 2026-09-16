@@ -126,12 +126,6 @@ function contentLocale(form: Element, path: Path, control: Element): string | un
 }
 
 function refreshContentBadge(form: Element): void {
-	const control = form.querySelector<HTMLElement>('[data-content-locale-control]');
-
-	if (!control) {
-		return;
-	}
-
 	const locales = new Set<string>();
 
 	form.querySelectorAll(`[${INVALID}][data-error-locales]`).forEach((field) => {
@@ -140,17 +134,19 @@ function refreshContentBadge(form: Element): void {
 		}
 	});
 
-	control.classList.toggle('has-error', locales.size > 0);
-	control.toggleAttribute('aria-invalid', locales.size > 0);
-	control.querySelectorAll<HTMLElement>('[data-content-locale-option]').forEach((option) => {
-		option.classList.toggle('has-error', locales.has(option.dataset.contentLocaleOption ?? ''));
-	});
+	form.querySelectorAll<HTMLElement>('[data-content-locale-control]').forEach((control) => {
+		control.classList.toggle('has-error', locales.size > 0);
+		control.toggleAttribute('aria-invalid', locales.size > 0);
+		control.querySelectorAll<HTMLElement>('[data-content-locale-option]').forEach((option) => {
+			option.classList.toggle('has-error', locales.has(option.dataset.contentLocaleOption ?? ''));
+		});
 
-	if (locales.size > 0) {
-		control.dataset.errorLocales = [...locales].join(' ');
-	} else {
-		delete control.dataset.errorLocales;
-	}
+		if (locales.size > 0) {
+			control.dataset.errorLocales = [...locales].join(' ');
+		} else {
+			delete control.dataset.errorLocales;
+		}
+	});
 }
 
 // A tab whose panel holds an issue shows it, since the panel may be hidden.
