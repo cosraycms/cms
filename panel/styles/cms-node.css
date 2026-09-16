@@ -5,11 +5,14 @@
 
 .cms-node {
 	--cms-head-height: 4.5rem;
-	--cms-pane-right: var(--cms-inspector-width);
 
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
+
+	&:has(.cms-inspector) {
+		--cms-pane-right: var(--cms-inspector-width);
+	}
 
 	&:has(.cms-inspector[data-collapsed]) {
 		--cms-pane-right: var(--cms-inspector-collapsed-width);
@@ -215,7 +218,7 @@
 }
 
 @media (52rem < width < 75rem) {
-	.cms-node {
+	.cms-node:has(.cms-inspector) {
 		--cms-pane-right: var(--cms-inspector-collapsed-width);
 	}
 }
