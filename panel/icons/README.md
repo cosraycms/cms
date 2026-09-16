@@ -18,7 +18,7 @@ Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content
 
 The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs.
 
-The layout preview's width presets use `display`, `laptop`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
+The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 
 Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `type-h1`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
 

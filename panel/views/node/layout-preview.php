@@ -13,15 +13,14 @@ use function Cosray\escape;
 
 $url = (string) $this->unwrap($url);
 $presets = [
-	['id' => 'desktop', 'width' => 1200, 'icon' => 'display', 'label' => __('editor:layout-preview-desktop')],
-	['id' => 'laptop', 'width' => 1024, 'icon' => 'laptop', 'label' => __('editor:layout-preview-laptop')],
-	['id' => 'tablet', 'width' => 768, 'icon' => 'tablet', 'label' => __('editor:layout-preview-tablet')],
-	['id' => 'phone', 'width' => 390, 'icon' => 'phone', 'label' => __('editor:layout-preview-phone')],
+	['width' => 1200, 'icon' => 'display', 'label' => __('editor:layout-preview-desktop')],
+	['width' => 1024, 'icon' => 'tablet-landscape', 'label' => __('editor:layout-preview-tablet-landscape')],
+	['width' => 768, 'icon' => 'tablet', 'label' => __('editor:layout-preview-tablet-portrait')],
+	['width' => 390, 'icon' => 'phone', 'label' => __('editor:layout-preview-phone')],
 ];
 ?>
 <dialog
 	class="cms-modal cms-layout-preview"
-	data-size="wide"
 	data-layout-preview-dialog
 	data-url="<?= escape($url) ?>"
 	data-error="<?= escape(__('editor:layout-preview-failed')) ?>">

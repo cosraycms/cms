@@ -39,9 +39,9 @@ function page(locale = 'de'): void {
 				<h2 class="modal-title" data-dialog-title>Layout preview</h2>
 				<div class="widths" role="group">
 					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1200">Desktop</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024">Laptop</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="768">Tablet</button>
-					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="390">Phone</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="1024">Tablet landscape</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="768">Tablet portrait</button>
+					<button type="button" class="option" aria-pressed="false" data-layout-preview-width="390">Smartphone</button>
 				</div>
 				<button type="button" data-layout-preview-reload>Reload</button>
 				<button type="button" data-dialog-close>Close</button>
