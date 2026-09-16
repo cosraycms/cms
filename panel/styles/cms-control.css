@@ -408,11 +408,15 @@
 	display: grid;
 	gap: var(--cms-space-2);
 
+	/* A token for the video, not the video: a small source image, so it
+	   never grows to block width, in the shape the field's meta stores.
+	   A tall shape stops at the same 30rem line as image and video
+	   blocks; the width cap follows so the ratio holds. */
 	& .thumbnail {
 		display: block;
 		width: 100%;
-		max-width: 28rem;
-		aspect-ratio: 16 / 9;
+		max-width: min(28rem, calc(30rem * var(--ratio, 16 / 9)));
+		aspect-ratio: var(--ratio, 16 / 9);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
 		object-fit: cover;

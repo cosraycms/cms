@@ -218,7 +218,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]//div[@data-youtube]'
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]//div[@data-youtube][@style="--ratio: 16 / 9"]'
 				. '[img[@data-youtube-preview][@hidden]][input[@type="text"][@placeholder]]',
 			$html,
 		);

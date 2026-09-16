@@ -118,10 +118,14 @@
 				clip-path: inset(0 round var(--cms-radius-sm));
 			}
 
+			/* At block width, but no taller than 30rem: a portrait picture
+			   letterboxes inside the block instead of taking the screen. */
 			& img {
 				display: block;
 				width: 100%;
 				height: auto;
+				max-height: 30rem;
+				object-fit: contain;
 			}
 
 			& .plate {

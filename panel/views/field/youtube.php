@@ -11,8 +11,18 @@ $field = (array) $this->unwrap($field);
 $value = $this->unwrap($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $video = preg_match('/^[A-Za-z0-9_-]{11}$/', $value) === 1 ? $value : '';
+// The thumbnail takes the shape the field's meta gives the video, so a
+// vertical clip reads as one; the behavior follows the meta inputs live.
+$data = $this->unwrap($data ?? null);
+$meta = is_array($data) && is_array($data['meta'] ?? null) ? $data['meta'] : [];
+$side = static fn(string $key, int $default): int => is_array($meta[$key] ?? null)
+	&& is_numeric($meta[$key]['zxx'] ?? null)
+	&& (int) $meta[$key]['zxx'] > 0
+		? (int) $meta[$key]['zxx']
+		: $default;
+$ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 ?>
-<div class="cms-youtube" data-youtube>
+<div class="cms-youtube" data-youtube style="--ratio: <?= $ratio ?>">
 	<img
 		class="thumbnail"
 		data-youtube-preview

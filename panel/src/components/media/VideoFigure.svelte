@@ -86,10 +86,11 @@
 				background: var(--cms-color-neutral-900);
 			}
 
+			/* The same 30rem line as the image block; a portrait clip letterboxes. */
 			& video {
 				display: block;
 				width: 100%;
-				max-height: 32rem;
+				max-height: 30rem;
 			}
 
 			& .overlay {

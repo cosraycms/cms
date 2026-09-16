@@ -41,11 +41,52 @@ function preview(box: Element, id: string | null): void {
 	image.hidden = false;
 }
 
+// The aspect ratio lives in the field's meta — inside a block, in the
+// settings dialog — as two inputs named `{root}[meta][aspectRatioX][zxx]`
+// and `…Y…`; the control's own input is `{root}[value][{locale}]`.
+const RATIO_META = /^(.*)\[meta\]\[aspectRatio[XY]\]\[zxx\]$/;
+
+function side(root: string, axis: 'X' | 'Y'): number | null {
+	const input = document.getElementsByName(`${root}[meta][aspectRatio${axis}][zxx]`)[0];
+	const value = input instanceof HTMLInputElement ? Number(input.value) : NaN;
+
+	return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+/** Re-shapes the thumbnail whose ratio meta input changed. */
+function followRatio(input: HTMLInputElement): boolean {
+	const root = RATIO_META.exec(input.name)?.[1];
+
+	if (root === undefined) {
+		return false;
+	}
+
+	const box = Array.from(document.querySelectorAll<HTMLElement>('[data-youtube]')).find(
+		(candidate) =>
+			candidate
+				.querySelector<HTMLInputElement>('input[type="text"]')
+				?.name.startsWith(`${root}[value]`),
+	);
+	const x = side(root, 'X');
+	const y = side(root, 'Y');
+
+	if (box && x !== null && y !== null) {
+		box.style.setProperty('--ratio', `${x} / ${y}`);
+	}
+
+	return true;
+}
+
 function onInput(event: Event): void {
 	const input = event.target;
-	const box = input instanceof HTMLInputElement ? input.closest('[data-youtube]') : null;
 
-	if (!(input instanceof HTMLInputElement) || !box) {
+	if (!(input instanceof HTMLInputElement) || followRatio(input)) {
+		return;
+	}
+
+	const box = input.closest('[data-youtube]');
+
+	if (!box) {
 		return;
 	}
 

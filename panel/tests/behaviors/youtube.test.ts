@@ -81,6 +81,36 @@ describe('youtube control', () => {
 		expect(image.hidden).toBe(true);
 	});
 
+	it('reshapes the thumbnail as the ratio meta of its own field is edited', () => {
+		document.body.innerHTML = `
+			<div class="cms-youtube" data-youtube style="--ratio: 16 / 9">
+				<img class="thumbnail" data-youtube-preview alt="" src="${thumbnail('dQw4w9WgXcQ')}" />
+				<input type="text" name="content[blocks][value][zxx][0][fields][video][value][zxx]" value="dQw4w9WgXcQ" />
+			</div>
+			<div class="cms-youtube" data-youtube style="--ratio: 16 / 9">
+				<img class="thumbnail" data-youtube-preview alt="" hidden />
+				<input type="text" name="content[other][value][zxx]" value="" />
+			</div>
+			<dialog>
+				<input type="number" name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]" value="9" />
+				<input type="number" name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioY][zxx]" value="16" />
+			</dialog>
+		`;
+		const [own, other] = document.querySelectorAll<HTMLElement>('[data-youtube]');
+		const y = document.querySelector<HTMLInputElement>('input[name$="[aspectRatioY][zxx]"]')!;
+
+		type(y, '16');
+
+		expect(own.style.getPropertyValue('--ratio')).toBe('9 / 16');
+		expect(other.style.getPropertyValue('--ratio')).toBe('16 / 9');
+		// The thumbnail's own id stays what it was: a meta input is not an id.
+		expect(own.querySelector('input')!.value).toBe('dQw4w9WgXcQ');
+
+		// A half-typed or empty side keeps the last shape.
+		type(y, '');
+		expect(own.style.getPropertyValue('--ratio')).toBe('9 / 16');
+	});
+
 	it('leaves other inputs alone', () => {
 		document.body.innerHTML = `<input type="text" value="https://youtu.be/dQw4w9WgXcQ" />`;
 		const stray = document.querySelector<HTMLInputElement>('input')!;
