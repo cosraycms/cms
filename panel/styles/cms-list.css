@@ -190,12 +190,23 @@
 		flex-wrap: wrap;
 	}
 
+	/*
+	 * A dashed line drops from the parent's toggle through its children, and
+	 * each child hangs from it by a branch; the last child ends the line at
+	 * its branch. An outer line still running past a nested row is a .guide
+	 * the row carries for it. The title stretches to the cell and the lines
+	 * overshoot the cell's padding, so they run unbroken from row to row.
+	 */
 	& .title {
 		--step: 1.375rem;
+		--line: var(--cms-color-text-faint);
+		--line-x: calc((var(--tree-depth, 0) - 0.5) * var(--step));
+		--line-dash: repeating-linear-gradient(to bottom, var(--line) 0 3px, transparent 3px 6px);
 
 		position: relative;
 		display: flex;
 		align-items: center;
+		align-self: stretch;
 		gap: var(--cms-space-2);
 		min-width: 0;
 		padding-left: calc(var(--tree-depth, 0) * var(--step));
@@ -204,23 +215,42 @@
 			padding-left: 0;
 		}
 
-		&:not(.is-flat)::before {
+		&:not(.is-flat)::before,
+		&:not(.is-flat)::after {
 			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: calc((var(--tree-depth, 0) - 0.5) * var(--step));
-			width: 1px;
-			background-image: repeating-linear-gradient(
-				to bottom,
-				var(--cms-color-border-strong) 0 2px,
-				transparent 2px 4px
-			);
+			left: var(--line-x);
 			content: '';
+			pointer-events: none;
+		}
+
+		&:not(.is-flat)::before,
+		& .guide {
+			top: calc(-1 * var(--cms-space-2));
+			bottom: calc(-1 * var(--cms-space-2));
+			width: 1px;
+			background-image: var(--line-dash);
+		}
+
+		&:not(.is-flat)::after {
+			top: 50%;
+			width: var(--step);
+			height: 1px;
+			background-image: repeating-linear-gradient(to right, var(--line) 0 3px, transparent 3px 6px);
+		}
+
+		& .guide {
+			position: absolute;
+			left: calc((var(--guide-depth) - 0.5) * var(--step));
 			pointer-events: none;
 		}
 	}
 
-	& .row[data-depth='0'] .title::before {
+	& .row[data-last='true'] .title::before {
+		bottom: 50%;
+	}
+
+	& .row[data-depth='0'] .title::before,
+	& .row[data-depth='0'] .title::after {
 		display: none;
 	}
 
@@ -232,6 +262,10 @@
 		height: 1.375rem;
 		flex-shrink: 0;
 		border-radius: var(--cms-radius);
+		/* Sits on the branch: its own ground ends the branch at its edge. */
+		position: relative;
+		z-index: 1;
+		background: var(--row-bg);
 		color: var(--cms-color-text-subtle);
 		text-decoration: none;
 
@@ -242,6 +276,7 @@
 		}
 
 		&.is-spacer {
+			background: none;
 			pointer-events: none;
 		}
 

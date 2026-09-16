@@ -12,7 +12,7 @@ final class CollectionTree
 	 * @param list<array<string, mixed>> $nodes
 	 * @param list<string> $open
 	 * @param callable(string): list<array<string, mixed>> $children
-	 * @return list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, descendants: list<string>}>
+	 * @return list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, guides: list<int>, descendants: list<string>}>
 	 */
 	public static function build(array $nodes, array $open, callable $children): array
 	{
@@ -22,6 +22,7 @@ final class CollectionTree
 			children: $children,
 			depth: 0,
 			stack: [],
+			guides: [],
 		);
 
 		return $rows;
@@ -32,7 +33,8 @@ final class CollectionTree
 	 * @param array<string, true> $open
 	 * @param callable(string): list<array<string, mixed>> $children
 	 * @param list<string> $stack
-	 * @return array{0: list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, descendants: list<string>}>, 1: list<string>}
+	 * @param list<int> $guides depths whose sibling line runs on through these rows
+	 * @return array{0: list<array{node: array<string, mixed>, depth: int, expanded: bool, last: bool, guides: list<int>, descendants: list<string>}>, 1: list<string>}
 	 */
 	private static function walk(
 		array $nodes,
@@ -40,6 +42,7 @@ final class CollectionTree
 		callable $children,
 		int $depth,
 		array $stack,
+		array $guides,
 	): array {
 		$rows = [];
 		$uids = [];
@@ -55,16 +58,20 @@ final class CollectionTree
 				&& isset($open[$uid])
 				&& (bool) ($node['hasChildren'] ?? false)
 				&& !in_array($uid, $stack, true);
+			$last = $position === $lastIndex;
 			$childRows = [];
 			$descendants = [];
 
 			if ($expanded) {
+				// Root rows draw no sibling line, so only a deeper, non-last
+				// node passes its line down through its children.
 				[$childRows, $descendants] = self::walk(
 					nodes: $children($uid),
 					open: $open,
 					children: $children,
 					depth: $depth + 1,
 					stack: array_merge($stack, [$uid]),
+					guides: $depth > 0 && !$last ? array_merge($guides, [$depth]) : $guides,
 				);
 			}
 
@@ -72,7 +79,8 @@ final class CollectionTree
 				'node' => $node,
 				'depth' => $depth,
 				'expanded' => $expanded,
-				'last' => $position === $lastIndex,
+				'last' => $last,
+				'guides' => $guides,
 				'descendants' => $descendants,
 			];
 

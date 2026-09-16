@@ -148,6 +148,7 @@ final class CollectionTable
 				'depth' => $tree['depth'],
 				'expanded' => $tree['expanded'],
 				'last' => $tree['last'],
+				'guides' => $tree['guides'],
 				'published' => (bool) ($node['published'] ?? false),
 				'hasChildren' => $hasChildren,
 				'cells' => self::cells($node, $headers, $urls, $locale, $timezone),
@@ -172,6 +173,7 @@ final class CollectionTable
 	 *     depth: int,
 	 *     expanded: bool,
 	 *     last: bool,
+	 *     guides: list<int>,
 	 *     descendants: list<string>,
 	 * }
 	 */
@@ -185,6 +187,7 @@ final class CollectionTable
 				'depth' => 0,
 				'expanded' => false,
 				'last' => false,
+				'guides' => [],
 				'descendants' => [],
 			];
 		}
@@ -194,6 +197,7 @@ final class CollectionTable
 			'depth' => max(0, (int) ($tree['depth'] ?? 0)),
 			'expanded' => (bool) ($tree['expanded'] ?? false),
 			'last' => (bool) ($tree['last'] ?? false),
+			'guides' => array_values(array_map(intval(...), (array) ($tree['guides'] ?? []))),
 			'descendants' => self::strings($tree['descendants'] ?? []),
 		];
 	}

@@ -41,6 +41,9 @@ $bulk = (bool) ($bulk ?? false);
 			<?php if ($index === 0 && $showChildren): ?>
 				<div class="title<?= $treeMode ? '' : ' is-flat' ?>">
 					<?php if ($treeMode): ?>
+						<?php foreach ((array) ($row['guides'] ?? []) as $guide): ?>
+							<span class="guide" style="--guide-depth: <?= (int) $guide ?>" aria-hidden="true"></span>
+						<?php endforeach ?>
 						<?php if ($row['childrenUrl'] !== null): ?>
 							<a
 								class="toggle<?= $row['expanded'] ? ' is-open' : '' ?>"

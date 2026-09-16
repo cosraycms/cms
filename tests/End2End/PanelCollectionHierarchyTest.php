@@ -207,10 +207,18 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			title: 'Panel Tree Grandchild Deep',
 			parent: $childId,
 		);
+		$this->createHierarchyNode(
+			uid: 'panel-tree-child-deep-two',
+			type: $this->childTypeId,
+			title: 'Panel Tree Child Deep Two',
+			parent: $rootId,
+		);
 
 		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
 			'query' => [
 				'open' => 'panel-tree-root-deep,panel-tree-child-deep',
+				'sort' => 'uid',
+				'dir' => 'asc',
 			],
 		]);
 
@@ -219,6 +227,17 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertStringContainsString('Panel Tree Root Deep', $html);
 		$this->assertStringContainsString('Panel Tree Child Deep', $html);
 		$this->assertStringContainsString('Panel Tree Grandchild Deep', $html);
+
+		// The first child's sibling line runs on past its grandchild to the
+		// second child, which closes the branch.
+		$this->assertMatchesRegularExpression(
+			'/data-uid="panel-tree-grandchild-deep"[^>]*data-last="true".*?<span class="guide" style="--guide-depth: 1"/s',
+			$html,
+		);
+		$this->assertMatchesRegularExpression(
+			'/data-uid="panel-tree-child-deep-two"\s+data-depth="1"\s+data-last="true"/',
+			$html,
+		);
 	}
 
 	public function testHierarchyCollectionRendersDirectChildrenByParent(): void

@@ -1164,6 +1164,7 @@ final class Styleguide extends Panel
 			'uid' => 'styleguide',
 			'depth' => 0,
 			'last' => false,
+			'guides' => [],
 			'expanded' => false,
 			'published' => true,
 			'hasChildren' => false,
@@ -1199,6 +1200,7 @@ final class Styleguide extends Panel
 			$row([
 				'depth' => 2,
 				'last' => true,
+				'guides' => [1],
 				'status' => [['kind' => 'hidden', 'label' => 'Hidden']],
 				'published' => false,
 				'cells' => $cells(
