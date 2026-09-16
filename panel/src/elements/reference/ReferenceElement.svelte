@@ -23,6 +23,7 @@
 	const ownerType = $derived(typeof field?.ownerType === 'string' ? field.ownerType : '');
 	const fieldName = $derived(typeof field?.name === 'string' ? field.name : '');
 	const max = $derived(typeof field?.limit?.max === 'number' ? field.limit.max : -1);
+	const single = $derived(max === 1);
 	const label = $derived(field?.label || fieldName || __('node:search'));
 	const id = $props.id();
 
@@ -40,7 +41,8 @@
 	let offset = 0;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let request: AbortController | undefined;
-	const choices = $derived(results.filter((result) => !has(result.uid)));
+	const title = $derived(items[0]?.title || items[0]?.uid || '');
+	const choices = $derived(single ? results : results.filter((result) => !has(result.uid)));
 	const activeId = $derived(open && active >= 0 && choices[active] ? `${id}-${active}` : undefined);
 
 	function storedUids(): string[] {
@@ -69,8 +71,22 @@
 		);
 	}
 
-	async function add(info: NodeInfo): Promise<void> {
-		if (immutable || has(info.uid) || full()) {
+	async function choose(info: NodeInfo): Promise<void> {
+		if (immutable) return;
+
+		if (single) {
+			if (!has(info.uid)) {
+				items = [info];
+				emit();
+			}
+
+			input?.focus();
+			close();
+
+			return;
+		}
+
+		if (has(info.uid) || full()) {
 			return;
 		}
 
@@ -103,6 +119,12 @@
 		items = items.filter((item) => item.uid !== uid);
 		active = -1;
 		emit();
+
+		if (single) {
+			q = '';
+			search();
+		}
+
 		await tick();
 		input?.focus();
 	}
@@ -137,6 +159,8 @@
 		cancel();
 		open = false;
 		active = -1;
+
+		if (single) q = '';
 	}
 
 	async function load(): Promise<void> {
@@ -181,7 +205,7 @@
 	function search(): void {
 		cancel();
 
-		if (immutable || full() || ownerType === '') return;
+		if (immutable || (!single && full()) || ownerType === '') return;
 
 		results = [];
 		offset = 0;
@@ -202,8 +226,16 @@
 		if (!open) search();
 	}
 
+	function toggle(): void {
+		const wasOpen = open;
+		input?.focus();
+
+		if (wasOpen) close();
+		else show();
+	}
+
 	async function onKeydown(event: KeyboardEvent): Promise<void> {
-		if (event.isComposing) return;
+		if (immutable || event.isComposing) return;
 
 		if (event.key === 'Escape' && open) {
 			event.preventDefault();
@@ -220,7 +252,8 @@
 			event.preventDefault();
 			event.stopPropagation();
 
-			if (open && choices[active]) void add(choices[active]);
+			if (!open && single) show();
+			else if (open && choices[active]) void choose(choices[active]);
 
 			return;
 		}
@@ -275,31 +308,64 @@
 />
 
 <div class="cms-reference">
-	{#if !full() && !immutable}
+	{#if single || (!full() && !immutable)}
 		<div
 			class="cms-reference-search"
 			onfocusout={(event) => {
 				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) close();
 			}}
 		>
-			<input
-				class="cms-input"
-				type="text"
-				role="combobox"
-				aria-label={label}
-				aria-autocomplete="list"
-				aria-expanded={open}
-				aria-controls={`${id}-results`}
-				aria-activedescendant={activeId}
-				autocomplete="off"
-				placeholder={__('reference:placeholder')}
-				bind:this={input}
-				bind:value={q}
-				oninput={search}
-				onfocus={show}
-				onclick={show}
-				onkeydown={onKeydown}
-			/>
+			<div class="control-wrap">
+				<input
+					class="cms-input"
+					class:single-input={single}
+					class:has-selection={single && items.length > 0}
+					type="text"
+					role={immutable ? undefined : 'combobox'}
+					aria-label={label}
+					aria-autocomplete={immutable ? undefined : 'list'}
+					aria-expanded={immutable ? undefined : open}
+					aria-controls={immutable ? undefined : `${id}-results`}
+					aria-activedescendant={activeId}
+					readonly={immutable}
+					autocomplete="off"
+					placeholder={single && title ? title : __('reference:placeholder')}
+					bind:this={input}
+					value={single && !open ? title : q}
+					oninput={(event) => {
+						q = event.currentTarget.value;
+						search();
+					}}
+					onfocus={show}
+					onclick={show}
+					onkeydown={onKeydown}
+				/>
+				{#if single && !immutable}
+					<div class="single-tools">
+						{#if items[0]}
+							<button
+								type="button"
+								aria-label={__('common:remove')}
+								onclick={() => remove(items[0].uid)}
+								onkeydown={onKeydown}
+							>
+								<Icon name="x-lg" />
+							</button>
+						{/if}
+						<button
+							type="button"
+							tabindex="-1"
+							aria-label={open ? __('common:close') : __('common:open')}
+							aria-expanded={open}
+							aria-controls={`${id}-results`}
+							onclick={toggle}
+							onkeydown={onKeydown}
+						>
+							<Icon name="chevron-down" />
+						</button>
+					</div>
+				{/if}
+			</div>
 			<div class="cms-reference-popup" hidden={!open}>
 				{#if q.trim() === ''}
 					<div class="cms-reference-note">{__('reference:recent')}</div>
@@ -318,16 +384,19 @@
 								type="button"
 								role="option"
 								tabindex="-1"
-								aria-selected={index === active}
+								aria-selected={single ? has(result.uid) : index === active}
 								class="cms-reference-result"
 								class:is-active={index === active}
 								onmousedown={(event) => event.preventDefault()}
-								onclick={() => add(result)}
+								onclick={() => choose(result)}
 								onkeydown={onKeydown}
 							>
 								<span class="cms-reference-title">{result.title || result.uid}</span>
 								{#if result.typeLabel}
 									<span class="cms-reference-type">{result.typeLabel}</span>
+								{/if}
+								{#if single && has(result.uid)}
+									<Icon name="check-lg" />
 								{/if}
 							</button>
 						</li>
@@ -369,7 +438,7 @@
 		</div>
 	{/if}
 
-	{#if items.length > 0}
+	{#if !single && items.length > 0}
 		<ul class="cms-reference-list" bind:this={selected}>
 			{#each items as item (item.uid)}
 				<li class="cms-reference-item">
@@ -441,8 +510,41 @@
 		padding: 0 0.25rem;
 	}
 
-	.cms-reference-search {
+	.cms-reference-search,
+	.control-wrap {
 		position: relative;
+	}
+
+	.single-input:not([readonly]) {
+		padding-inline-end: calc(var(--cms-space-2-5) + 3.5rem);
+	}
+
+	.single-input.has-selection::placeholder {
+		color: var(--cms-color-text);
+	}
+
+	.single-tools {
+		position: absolute;
+		inset-block: 1px;
+		inset-inline-end: var(--cms-space-2-5);
+		display: flex;
+		align-items: center;
+	}
+
+	.single-tools button {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+	}
+
+	.single-tools button:hover {
+		color: var(--cms-color-text);
 	}
 
 	.cms-reference-popup {

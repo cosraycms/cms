@@ -365,15 +365,138 @@ describe('reference browsing', () => {
 		expect(selected[0].parentElement?.textContent).toContain('Entry new');
 	});
 
-	it.each([{ immutable: true }, { limit: { max: 1 } }])(
+	it.each([{ immutable: true }, { limit: { max: 2 } }])(
 		'does not offer additions for a readonly or full field: %j',
 		async (field) => {
-			fetchMock.mockResolvedValueOnce(page(['a']));
-			const { element, changes } = await picker(field, ['a']);
+			fetchMock.mockResolvedValueOnce(page(['a', 'b']));
+			const { element, changes } = await picker(field, ['a', 'b']);
 			expect(element.querySelector('[role="combobox"]')).toBeNull();
 			expect(fetchMock).toHaveBeenCalledTimes(1);
 			expect(String(fetchMock.mock.calls[0][0])).toContain('/reference/labels?');
 			expect(changes).not.toHaveBeenCalled();
 		},
 	);
+});
+
+describe('single references', () => {
+	it('replaces a selected reference directly without emitting an empty intermediate value', async () => {
+		fetchMock.mockResolvedValueOnce(page(['a']));
+		const { element, input, changes } = await picker({ limit: { max: 1 } }, ['a']);
+		expect(input.value).toBe('Entry a');
+
+		fetchMock.mockResolvedValueOnce(page(['a', 'b']));
+		input.focus();
+		await settle();
+		expect(params().get('q')).toBe('');
+		expect(options(element)[0].getAttribute('aria-selected')).toBe('true');
+
+		await key(input, 'ArrowDown');
+		await key(input, 'ArrowDown');
+		expect(options(element)[0].getAttribute('aria-selected')).toBe('true');
+		expect(options(element)[1].getAttribute('aria-selected')).toBe('false');
+		expect(changes).not.toHaveBeenCalled();
+		await key(input, 'Enter');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ value: { zxx: [{ uid: 'b' }] } });
+		expect(input.value).toBe('Entry b');
+		expect(input.getAttribute('aria-expanded')).toBe('false');
+		expect(document.activeElement).toBe(input);
+
+		fetchMock.mockResolvedValueOnce(page(['a', 'b']));
+		await key(input, 'Enter');
+		expect(input.getAttribute('aria-expanded')).toBe('true');
+		expect(options(element)[1].getAttribute('aria-selected')).toBe('true');
+	});
+
+	it.each(['escape', 'blur', 'outside', 'toggle'])(
+		'keeps the selected value when a search is dismissed by %s',
+		async (dismiss) => {
+			fetchMock.mockResolvedValueOnce(page(['a']));
+			const { element, input, changes } = await picker({ limit: { max: 1 } }, ['a']);
+			input.focus();
+			await settle();
+			await enter(input, 'another entry');
+			await vi.advanceTimersByTimeAsync(200);
+			await tick();
+			expect(input.value).toBe('another entry');
+
+			if (dismiss === 'escape') await key(input, 'Escape');
+			if (dismiss === 'blur') input.blur();
+			if (dismiss === 'outside')
+				document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+			if (dismiss === 'toggle')
+				element.querySelector<HTMLButtonElement>('[aria-label="common:close"]')!.click();
+			await settle();
+
+			expect(input.value).toBe('Entry a');
+			expect(input.getAttribute('aria-expanded')).toBe('false');
+			expect(changes).not.toHaveBeenCalled();
+		},
+	);
+
+	it('clears explicitly, restores recent choices, and allows selecting again', async () => {
+		fetchMock.mockResolvedValueOnce(page(['a']));
+		const { element, input, changes } = await picker({ limit: { max: 1 } }, ['a']);
+		input.focus();
+		await settle();
+		await enter(input, 'something');
+
+		fetchMock.mockResolvedValueOnce(page(['a', 'b']));
+		const clear = element.querySelector<HTMLButtonElement>('[aria-label="common:remove"]')!;
+		clear.focus();
+		clear.click();
+		await settle();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ value: { zxx: [] } });
+		expect(input.value).toBe('');
+		expect(params().get('q')).toBe('');
+		expect(input.getAttribute('aria-expanded')).toBe('true');
+		expect(document.activeElement).toBe(input);
+
+		options(element)[0].click();
+		await settle();
+		expect(changes).toHaveBeenLastCalledWith({ value: { zxx: [{ uid: 'a' }] } });
+		expect(input.value).toBe('Entry a');
+		expect(input.getAttribute('aria-expanded')).toBe('false');
+	});
+
+	it('closes without dirtying the field when the same reference is chosen', async () => {
+		fetchMock.mockResolvedValueOnce(page(['a']));
+		const { element, input, changes } = await picker({ limit: { max: 1 } }, ['a']);
+		fetchMock.mockResolvedValueOnce(page(['a']));
+		element.querySelector<HTMLButtonElement>('[aria-label="common:open"]')!.click();
+		await settle();
+		expect(document.activeElement).toBe(input);
+
+		options(element)[0].click();
+		await settle();
+		expect(changes).not.toHaveBeenCalled();
+		expect(input.value).toBe('Entry a');
+		expect(input.getAttribute('aria-expanded')).toBe('false');
+	});
+
+	it('does not mistake uncommitted search text for a selected reference', async () => {
+		const { input, changes } = await picker({ limit: { max: 1 } });
+		input.focus();
+		await settle();
+		await enter(input, 'not a selection');
+		await key(input, 'Enter');
+		expect(changes).not.toHaveBeenCalled();
+		input.blur();
+		await settle();
+		expect(input.value).toBe('');
+	});
+
+	it('shows an immutable selection as a read-only value without querying choices', async () => {
+		fetchMock.mockResolvedValueOnce(page(['a']));
+		const { element, changes } = await picker({ limit: { max: 1 }, immutable: true }, ['a']);
+		const input = element.querySelector<HTMLInputElement>('input')!;
+		expect(input.readOnly).toBe(true);
+		expect(input.value).toBe('Entry a');
+		input.focus();
+		await key(input, 'ArrowDown');
+		await key(input, 'Enter');
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(changes).not.toHaveBeenCalled();
+	});
 });

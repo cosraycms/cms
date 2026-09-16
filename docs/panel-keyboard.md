@@ -64,7 +64,9 @@ Within the results, `←`/`→` move through the matches in order, `↑`/`↓` m
 
 Focusing the reference combobox opens recently edited entries; typing searches the full eligible set. `↑`/`↓` highlight choices and scroll them into view while focus stays in the input. `Enter` selects only the highlighted choice and never submits the editor. Text-editing keys retain their browser behavior.
 
-`Tab` skips individual choices and reaches **Load more** or **Retry**, when available, before leaving the picker. `Escape` closes the dropdown and returns focus to its input without clearing the query or closing a surrounding dialog. Click or an arrow key reopens it. Selecting keeps a multi-reference picker open; reaching the field limit moves focus to the newly selected entry's remove button.
+`Tab` skips individual choices and reaches **Load more** or **Retry**, when available, before leaving the picker. A single-reference field also has a clear button in the tab order; its dropdown button is reachable through the input's keyboard controls instead of adding another tab stop. `Escape` closes the dropdown and returns focus to its input without closing a surrounding dialog. Click or an arrow key reopens it; `Enter` also opens a closed single-reference picker.
+
+Selecting a single reference replaces its value, closes the dropdown, and keeps focus in the input. Dismissing a single-reference search discards the query and restores the selected title; only choosing or explicitly clearing changes the reference. A multi-reference picker retains its query on dismissal and stays open after selection; reaching the field limit moves focus to the newly selected entry's remove button.
 
 ## What is bound today
 
