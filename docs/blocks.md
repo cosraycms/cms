@@ -337,6 +337,8 @@ foreach ($node->content as $block) {
 
 Copying it into the site's own CSS is equally fine — it is short and has no dependencies. A site rendering with a non-default `prefix` has to copy and rename.
 
+The panel's **Layout preview** renders a field through this same path with this sheet and a small typographic base, so what the editor sees in the preview is the contract above with the default lengths — the site's own tokens, fonts and per-type styling do not reach it. See [the editor side](controls.md#blocks).
+
 ```css
 @layer cms.blocks {
 	/*

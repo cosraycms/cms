@@ -50,7 +50,7 @@ PHP and Svelte action menus use the same native popover behavior. `Enter` or `Sp
 
 Native dialogs keep focus inside the active modal. Initial focus goes to a designated safe action or a useful input. `Escape` dismisses the innermost dialog without running its confirmation action; closing returns focus to a usable opener. Dialog keys do not reach background editor/tree shortcuts. An action that focuses new editor content closes its dialog first.
 
-Field and block settings retain their live values on closure. Media metadata keeps explicit Apply/Cancel semantics. Synchronous browser confirmation and unsaved-navigation prompts remain exceptions; `beforeunload` warnings are always browser-owned.
+Field and block settings retain their live values on closure. Media metadata keeps explicit Apply/Cancel semantics. The layout preview dialog opens with focus on the pressed width preset; the presets, the reload button and the close button are plain `Tab` stops, `Escape` closes it and returns focus to the field's button. Synchronous browser confirmation and unsaved-navigation prompts remain exceptions; `beforeunload` warnings are always browser-owned.
 
 ## Block catalog
 

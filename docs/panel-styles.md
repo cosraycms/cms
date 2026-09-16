@@ -158,7 +158,7 @@ Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are deco
 
 `.cms-modal` is a native `<dialog>` shared by server-rendered settings/confirmations and bridge-mounted content. Its backdrop, border, scrolling, header, close button, and footer come from `cms-modal.css`. The content parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`. The normal width is 48rem; `data-size="compact"` uses 32rem and `data-size="wide"` uses 72rem, each bounded by the viewport.
 
-`cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
+`cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. `cms-layout-preview.css` extends the shell for the blocks layout preview: `.cms-layout-preview` is a `.cms-modal` as tall as the viewport allows, its header a row of title, `.note`, the `.widths` preset group and `.reload`, its body a sunken `.stage` holding the `.frame`, which the behavior sizes and scales. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
 
 ## Tabs
 
