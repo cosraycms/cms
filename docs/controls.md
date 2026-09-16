@@ -38,6 +38,7 @@ Named rich controls (resolved to elements server-side; cosray's built-ins ship a
 | `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]`; a gallery keeps its `ratio` and `crop` settings in the field meta |
 | `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
 | `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
+| `reference` | `Control::reference()` | `cosray-reference` | `zxx` map of `{uid}[]` |
 | _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
 
 The three media controls share one frame. An empty field and a field holding several files carry a header bar: the library button, the upload prompt — drag and drop, or choose through the file picker — and a count against the field's limit; an empty field is that bar alone, one control high. A filled single-item field has no bar; a **Replace** menu beside its file chooses from media or uploads from the device instead. The whole frame is the drop target: while files hover over it, its edge turns dashed, its content dims and one label says what a drop does — add, or replace on a single-item field. A read-only field renders no bar and no menu, only its content in a well. A single image shows its card — a row with the thumbnail, which opens a preview, the file name, the dimensions and size, Replace and a × to remove it, over a muted band with alt text and caption in place — and a gallery its tiles beneath the bar. Files list as rows — a type icon or, for an image, its thumbnail, the file name linking to the file, the per-use title, the size, edit, Replace on a single-file field, and remove — that reorder by drag; a video shows its player above one such row.
@@ -45,6 +46,12 @@ The three media controls share one frame. An empty field and a field holding sev
 Media uploads through `window.Cosray.upload()` inherit the current node type's read permission; the server resolves the type, not a permission supplied by a field. Media pickers offer only assets with that permission, including their counts and pagination. On the standalone library screen, editors explicitly choose the read permission for new uploads. Restricted originals and previews remain authorization-checked, including panel previews. Uploading bytes already catalogued under a different permission fails rather than creating a public/private duplicate; an explicit `Assets\Protection::protect()` operation is required to reclassify an existing public asset.
 
 A `DateTime` value is an instant. Every non-empty stored value is normalized to UTC with whole-second precision, for example `2026-07-30T17:00:00Z`; a programmatic write may supply another RFC 3339 offset and validation normalizes it to `Z`. The native `datetime-local` control has no offset: the panel converts its `YYYY-MM-DDTHH:MM[:SS]` form value through the field's `meta.timezone`, defaulting to UTC, and converts the stored instant back through the same timezone for editing. `Date` and `Time` remain local values without an offset.
+
+### Reference fields
+
+Reference fields open a searchable dropdown on focus or click, initially offering recently edited eligible entries. The picker loads 30 entries at a time and offers **Load more** when another page exists. Typing searches titles across the entire eligible set; clearing the query restores recent entries. The field's server-side `#[Pick]` constraints still determine eligibility.
+
+Selected entries remain above the search and are omitted from its choices. Multi-selection stays open until the field's limit is reached; selecting a search result clears the query for the next choice. Loading, request failures with Retry, no eligible entries, and searches without matches have distinct feedback. See [Panel keyboard vocabulary](panel-keyboard.md#reference-fields) for keyboard operation.
 
 ### Checkbox fields
 

@@ -71,6 +71,29 @@ final class ReferenceSearchTest extends IntegrationTestCase
 		}
 	}
 
+	public function testBrowsesPagesInStableOrderWhenEditTimesMatch(): void
+	{
+		foreach (['page-b', 'page-a'] as $uid) {
+			$this->createTestNode([
+				'uid' => $uid,
+				'type' => $this->typeId('test-article'),
+				'changed' => '2100-01-01 00:00:00+00',
+			]);
+		}
+
+		$params = ['type' => 'test-reference', 'field' => 'related', 'limit' => 1];
+		$first = $this->search($params);
+		$second = $this->search($params + ['offset' => 1]);
+		$last = $this->search(array_replace($params, ['offset' => 2, 'limit' => 2]));
+
+		$this->assertSame(['page-a'], $this->uids($first));
+		$this->assertTrue($first['more']);
+		$this->assertSame(['page-b'], $this->uids($second));
+		$this->assertTrue($second['more']);
+		$this->assertEqualsCanonicalizing(['ref-alpha', 'ref-beta'], $this->uids($last));
+		$this->assertFalse($last['more']);
+	}
+
 	public function testExcludesTheEditedNodeItself(): void
 	{
 		// The `author` field has no #[Targets], so any non-deleted node is pickable.

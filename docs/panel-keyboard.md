@@ -60,6 +60,12 @@ Within the results, `←`/`→` move through the matches in order, `↑`/`↓` m
 
 `Escape` closes the catalog rather than clearing the search, and returns focus to the `+`; inserting closes it and focuses the new row. It reopens with the search empty.
 
+## Reference fields
+
+Focusing the reference combobox opens recently edited entries; typing searches the full eligible set. `↑`/`↓` highlight choices and scroll them into view while focus stays in the input. `Enter` selects only the highlighted choice and never submits the editor. Text-editing keys retain their browser behavior.
+
+`Tab` skips individual choices and reaches **Load more** or **Retry**, when available, before leaving the picker. `Escape` closes the dropdown and returns focus to its input without clearing the query or closing a surrounding dialog. Click or an arrow key reopens it. Selecting keeps a multi-reference picker open; reaching the field limit moves focus to the newly selected entry's remove button.
+
 ## What is bound today
 
 The node editor's content-language control is one normal `Tab` stop in the inspector, and again in the collapsed inspector's strip, where it is always a vertical radio group. With up to three configured languages it is a segmented radio group: arrow keys select the previous or next language, while `Home` and `End` select the first and last. With four or more languages it is an ordinary select using the browser's keys. It has no panel shortcut, and the editor switches it when a validation error belongs to another locale. Between 52rem and 75rem the node inspector opens over the fields as a layer: `Escape` inside it closes it and returns focus to the strip button that opened it. Display-only fallback layers are not tab stops; asymmetric block previews are `inert`, so `Tab` reaches the selected locale's add controls instead of the source rows.

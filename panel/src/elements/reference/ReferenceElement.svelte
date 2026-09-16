@@ -2,7 +2,7 @@
 
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { ZXX, type LocaleMap } from '$types/data';
 	import { panelBase } from '$lib/runtime';
 	import { __ } from '$lib/locale';
@@ -23,15 +23,25 @@
 	const ownerType = $derived(typeof field?.ownerType === 'string' ? field.ownerType : '');
 	const fieldName = $derived(typeof field?.name === 'string' ? field.name : '');
 	const max = $derived(typeof field?.limit?.max === 'number' ? field.limit.max : -1);
-	const single = $derived(max === 1);
+	const label = $derived(field?.label || fieldName || __('node:search'));
+	const id = $props.id();
 
+	let input = $state<HTMLInputElement>();
+	let selected = $state<HTMLUListElement>();
+	let pageButton = $state<HTMLButtonElement>();
 	let items: NodeInfo[] = $state([]);
 	let q = $state('');
 	let results: NodeInfo[] = $state([]);
 	let open = $state(false);
 	let loading = $state(false);
+	let failed = $state(false);
+	let more = $state(false);
 	let active = $state(-1);
+	let offset = 0;
 	let timer: ReturnType<typeof setTimeout> | undefined;
+	let request: AbortController | undefined;
+	const choices = $derived(results.filter((result) => !has(result.uid)));
+	const activeId = $derived(open && active >= 0 && choices[active] ? `${id}-${active}` : undefined);
 
 	function storedUids(): string[] {
 		const list = (value ?? {})[ZXX] ?? [];
@@ -59,104 +69,178 @@
 		);
 	}
 
-	function add(info: NodeInfo): void {
-		if (immutable || has(info.uid)) {
+	async function add(info: NodeInfo): Promise<void> {
+		if (immutable || has(info.uid) || full()) {
 			return;
 		}
 
-		if (single) {
-			items = [info];
-		} else if (!full()) {
-			items = [...items, info];
-		} else {
-			return;
-		}
-
-		q = '';
-		results = [];
-		open = false;
+		items = [...items, info];
 		active = -1;
 		emit();
+
+		if (full()) {
+			q = '';
+			close();
+		} else if (q !== '') {
+			q = '';
+			search();
+		}
+
+		await tick();
+
+		if (full()) {
+			selected?.lastElementChild?.querySelector('button')?.focus();
+		} else {
+			input?.focus();
+		}
 	}
 
-	function remove(uid: string): void {
+	async function remove(uid: string): Promise<void> {
 		if (immutable) {
 			return;
 		}
 
 		items = items.filter((item) => item.uid !== uid);
+		active = -1;
 		emit();
+		await tick();
+		input?.focus();
 	}
 
-	async function query(path: string, params: URLSearchParams): Promise<NodeInfo[]> {
+	async function query(path: string, params: URLSearchParams, signal: AbortSignal) {
 		const response = await fetch(`${panelBase()}${path}?${params.toString()}`, {
 			credentials: 'same-origin',
 			headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
+			signal,
 		});
-		const data = (await response.json()) as { ok: boolean; nodes: NodeInfo[] };
 
-		return data.ok ? data.nodes : [];
-	}
-
-	async function search(): Promise<void> {
-		const term = q.trim();
-
-		if (term === '' || ownerType === '') {
-			results = [];
-			open = false;
-
-			return;
+		if (!response.ok) {
+			throw new Error('Could not load reference entries.');
 		}
 
+		const data = (await response.json()) as { ok: boolean; nodes: NodeInfo[]; more: boolean };
+
+		if (!data.ok) {
+			throw new Error('Could not load reference entries.');
+		}
+
+		return data;
+	}
+
+	function cancel(): void {
+		clearTimeout(timer);
+		request?.abort();
+		loading = false;
+	}
+
+	function close(): void {
+		cancel();
+		open = false;
+		active = -1;
+	}
+
+	async function load(): Promise<void> {
+		const controller = new AbortController();
+		request = controller;
 		loading = true;
-		const params = new URLSearchParams({ type: ownerType, field: fieldName, q: term });
+		const params = new URLSearchParams({
+			type: ownerType,
+			field: fieldName,
+			q: q.trim(),
+			offset: String(offset),
+			limit: '30',
+		});
 
 		if (node !== '') {
 			params.set('node', node);
 		}
 
 		try {
-			const nodes = await query('reference/search', params);
-			results = nodes.filter((n) => !has(n.uid));
-			open = true;
-			active = -1;
-		} catch {
-			results = [];
-		}
+			const data = await query('reference/search', params, controller.signal);
 
-		loading = false;
-	}
+			if (controller.signal.aborted) return;
 
-	function onInput(): void {
-		clearTimeout(timer);
-		timer = setTimeout(() => void search(), 200);
-	}
+			// Paging counts server rows, including entries already selected in this field.
+			offset += data.nodes.length;
+			results = [...results, ...data.nodes.filter((n) => !results.some((r) => r.uid === n.uid))];
+			more = data.more;
+			failed = false;
 
-	function onKeydown(event: KeyboardEvent): void {
-		if (event.key === 'Escape') {
-			open = false;
-
-			return;
-		}
-
-		if (!open || results.length === 0) {
-			return;
-		}
-
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			active = (active + 1) % results.length;
-		} else if (event.key === 'ArrowUp') {
-			event.preventDefault();
-			active = (active - 1 + results.length) % results.length;
-		} else if (event.key === 'Enter') {
-			event.preventDefault();
-			const pick = results[active] ?? results[0];
-
-			if (pick) {
-				add(pick);
+			if (!more && document.activeElement === pageButton) {
+				input?.focus();
 			}
+		} catch {
+			if (controller.signal.aborted) return;
+
+			failed = true;
+		} finally {
+			if (!controller.signal.aborted) loading = false;
 		}
+	}
+
+	function search(): void {
+		cancel();
+
+		if (immutable || full() || ownerType === '') return;
+
+		results = [];
+		offset = 0;
+		more = false;
+		failed = false;
+		active = -1;
+		open = true;
+		loading = true;
+
+		if (q.trim() === '') {
+			void load();
+		} else {
+			timer = setTimeout(() => void load(), 200);
+		}
+	}
+
+	function show(): void {
+		if (!open) search();
+	}
+
+	async function onKeydown(event: KeyboardEvent): Promise<void> {
+		if (event.isComposing) return;
+
+		if (event.key === 'Escape' && open) {
+			event.preventDefault();
+			event.stopPropagation();
+			input?.focus();
+			close();
+
+			return;
+		}
+
+		if (event.target !== input) return;
+
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			event.stopPropagation();
+
+			if (open && choices[active]) void add(choices[active]);
+
+			return;
+		}
+
+		if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+
+		event.preventDefault();
+		event.stopPropagation();
+		show();
+
+		if (choices.length === 0) return;
+
+		active =
+			event.key === 'ArrowDown'
+				? Math.min(active + 1, choices.length - 1)
+				: active < 0
+					? choices.length - 1
+					: Math.max(active - 1, 0);
+		await tick();
+		document.getElementById(activeId ?? '')?.scrollIntoView({ block: 'nearest' });
 	}
 
 	onMount(() => {
@@ -168,18 +252,31 @@
 
 		items = uids.map((uid) => ({ uid, title: uid, type: '', typeLabel: '' }));
 
-		void query('reference/labels', new URLSearchParams({ uids: uids.join(',') }))
-			.then((nodes) => {
+		const controller = new AbortController();
+		void query('reference/labels', new URLSearchParams({ uids: uids.join(',') }), controller.signal)
+			.then(({ nodes }) => {
+				if (controller.signal.aborted) return;
+
 				const map = new Map(nodes.map((n) => [n.uid, n]));
-				items = uids.map((uid) => map.get(uid) ?? { uid, title: uid, type: '', typeLabel: '' });
+				items = items.map((item) => map.get(item.uid) ?? item);
 			})
 			.catch(() => {});
+
+		return () => controller.abort();
 	});
+
+	onDestroy(cancel);
 </script>
+
+<svelte:document
+	onpointerdown={(event) => {
+		if (open && !$host().contains(event.target as Node)) close();
+	}}
+/>
 
 <div class="cms-reference">
 	{#if items.length > 0}
-		<ul class="cms-reference-list">
+		<ul class="cms-reference-list" bind:this={selected}>
 			{#each items as item (item.uid)}
 				<li class="cms-reference-item">
 					<span class="cms-reference-title">{item.title || item.uid}</span>
@@ -202,28 +299,54 @@
 	{/if}
 
 	{#if !full() && !immutable}
-		<div class="cms-reference-search">
+		<div
+			class="cms-reference-search"
+			onfocusout={(event) => {
+				if (!event.currentTarget.contains(event.relatedTarget as Node | null)) close();
+			}}
+		>
 			<input
 				class="cms-input"
-				type="search"
-				placeholder={__('node:search')}
+				type="text"
+				role="combobox"
+				aria-label={label}
+				aria-autocomplete="list"
+				aria-expanded={open}
+				aria-controls={`${id}-results`}
+				aria-activedescendant={activeId}
+				autocomplete="off"
+				placeholder={__('reference:placeholder')}
+				bind:this={input}
 				bind:value={q}
-				oninput={onInput}
+				oninput={search}
+				onfocus={show}
+				onclick={show}
 				onkeydown={onKeydown}
-				onblur={() => setTimeout(() => (open = false), 150)}
 			/>
-			{#if open && results.length > 0}
-				<ul class="cms-reference-results">
-					{#each results as result, index (result.uid)}
-						<li>
+			<div class="cms-reference-popup" hidden={!open}>
+				{#if q.trim() === ''}
+					<div class="cms-reference-note">{__('reference:recent')}</div>
+				{/if}
+				<ul
+					id={`${id}-results`}
+					class="cms-reference-results"
+					role="listbox"
+					aria-label={label}
+					aria-busy={loading}
+				>
+					{#each choices as result, index (result.uid)}
+						<li role="presentation">
 							<button
+								id={`${id}-${index}`}
 								type="button"
+								role="option"
+								tabindex="-1"
+								aria-selected={index === active}
 								class="cms-reference-result"
 								class:is-active={index === active}
-								onmousedown={(event) => {
-									event.preventDefault();
-									add(result);
-								}}
+								onmousedown={(event) => event.preventDefault()}
+								onclick={() => add(result)}
+								onkeydown={onKeydown}
 							>
 								<span class="cms-reference-title">{result.title || result.uid}</span>
 								{#if result.typeLabel}
@@ -233,9 +356,39 @@
 						</li>
 					{/each}
 				</ul>
-			{:else if open && q.trim() !== '' && !loading}
-				<div class="cms-reference-empty">{__('search:no-results')}</div>
-			{/if}
+				<div class="cms-reference-note" role="status">
+					{#if open}
+						{#if loading}
+							{__('common:loading')}
+						{:else if failed}
+							{__('reference:failed')}
+						{:else if choices.length > 0}
+							{__('reference:result-count', { count: choices.length })}
+						{:else if more}
+							{__('reference:loaded-selected')}
+						{:else if q.trim() !== '' && results.length === 0}
+							{__('search:no-results')}
+						{:else}
+							{__('reference:empty')}
+						{/if}
+					{/if}
+				</div>
+				{#if more || failed}
+					<button
+						type="button"
+						class="cms-reference-result"
+						bind:this={pageButton}
+						aria-disabled={loading}
+						onkeydown={onKeydown}
+						onclick={() => {
+							if (!loading) void load();
+						}}>{failed ? __('common:retry') : __('common:load-more')}</button
+					>
+				{/if}
+				{#if more}
+					<div class="cms-reference-note">{__('reference:refine')}</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </div>
@@ -292,20 +445,24 @@
 		position: relative;
 	}
 
-	.cms-reference-results {
+	.cms-reference-popup {
 		position: absolute;
 		z-index: 20;
 		left: 0;
 		right: 0;
-		margin: 0.15rem 0 0;
-		padding: 0;
-		list-style: none;
-		max-height: 16rem;
+		margin-top: 0.15rem;
+		max-height: 20rem;
 		overflow-y: auto;
 		border: 1px solid var(--cms-color-border);
 		border-radius: 0.25rem;
 		background: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-md);
+	}
+
+	.cms-reference-results {
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
 
 	.cms-reference-result {
@@ -325,8 +482,9 @@
 		background: var(--cms-color-hover);
 	}
 
-	.cms-reference-empty {
+	.cms-reference-note {
 		padding: 0.4rem 0.6rem;
-		opacity: 0.6;
+		font-size: 0.85em;
+		color: var(--cms-color-text-muted);
 	}
 </style>

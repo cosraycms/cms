@@ -51,7 +51,7 @@ final class Reference extends Panel
 			->published($constraints['published'])
 			->hidden($constraints['hidden'])
 			->types(...$types)
-			->order('changed DESC');
+			->order('changed DESC', 'uid ASC');
 
 		if ($exclude !== '') {
 			$finder->exclude($exclude);
