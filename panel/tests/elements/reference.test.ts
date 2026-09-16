@@ -93,6 +93,31 @@ afterEach(async () => {
 });
 
 describe('reference browsing', () => {
+	it.each([1, 3])('shows loading feedback until stored labels resolve (limit %i)', async (max) => {
+		const labels = Promise.withResolvers<Response>();
+		fetchMock.mockReturnValueOnce(labels.promise);
+		const { element, input, changes } = await picker({ limit: { max } }, ['a']);
+
+		expect(max === 1 ? input.value : element.textContent).toContain('common:loading');
+		labels.resolve(page(['a']));
+		await settle();
+
+		expect(max === 1 ? input.value : element.textContent).toContain('Entry a');
+		expect(changes).not.toHaveBeenCalled();
+	});
+
+	it.each(['missing', 'failed'])(
+		'keeps a %s reference identifiable after label lookup',
+		async (result) => {
+			if (result === 'missing') fetchMock.mockResolvedValueOnce(page([]));
+			else fetchMock.mockRejectedValueOnce(new TypeError('Offline'));
+			const { input, changes } = await picker({ limit: { max: 1 } }, ['unresolved']);
+
+			expect(input.value).toBe('unresolved');
+			expect(changes).not.toHaveBeenCalled();
+		},
+	);
+
 	it('loads a bounded first page on focus without changing the field', async () => {
 		fetchMock.mockResolvedValue(page(['a', 'b'], true));
 		const { element, input, changes } = await picker();

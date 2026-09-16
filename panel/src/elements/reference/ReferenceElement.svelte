@@ -31,6 +31,7 @@
 	let selected = $state<HTMLUListElement>();
 	let pageButton = $state<HTMLButtonElement>();
 	let items: NodeInfo[] = $state([]);
+	let resolving = $state(false);
 	let q = $state('');
 	let results: NodeInfo[] = $state([]);
 	let open = $state(false);
@@ -41,7 +42,9 @@
 	let offset = 0;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let request: AbortController | undefined;
-	const title = $derived(items[0]?.title || items[0]?.uid || '');
+	const title = $derived(
+		items[0] ? items[0].title || (resolving ? __('common:loading') : items[0].uid) : '',
+	);
 	const choices = $derived(single ? results : results.filter((result) => !has(result.uid)));
 	const activeId = $derived(open && active >= 0 && choices[active] ? `${id}-${active}` : undefined);
 
@@ -283,7 +286,8 @@
 			return;
 		}
 
-		items = uids.map((uid) => ({ uid, title: uid, type: '', typeLabel: '' }));
+		resolving = true;
+		items = uids.map((uid) => ({ uid, title: '', type: '', typeLabel: '' }));
 
 		const controller = new AbortController();
 		void query('reference/labels', new URLSearchParams({ uids: uids.join(',') }), controller.signal)
@@ -293,7 +297,10 @@
 				const map = new Map(nodes.map((n) => [n.uid, n]));
 				items = items.map((item) => map.get(item.uid) ?? item);
 			})
-			.catch(() => {});
+			.catch(() => {})
+			.finally(() => {
+				if (!controller.signal.aborted) resolving = false;
+			});
 
 		return () => controller.abort();
 	});
@@ -442,7 +449,9 @@
 		<ul class="cms-reference-list" bind:this={selected}>
 			{#each items as item (item.uid)}
 				<li class="cms-reference-item">
-					<span class="cms-reference-title">{item.title || item.uid}</span>
+					<span class="cms-reference-title">
+						{item.title || (resolving ? __('common:loading') : item.uid)}
+					</span>
 					{#if item.typeLabel}
 						<span class="cms-reference-type">{item.typeLabel}</span>
 					{/if}
