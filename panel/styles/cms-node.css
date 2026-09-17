@@ -143,9 +143,14 @@
 		flex-direction: column;
 		gap: var(--cms-space-7);
 
-		& > * + * {
+		& > * + *,
+		& + .sheet {
 			padding-top: var(--cms-space-7);
 			border-top: 1px solid var(--cms-color-border-soft);
+		}
+
+		& + .sheet {
+			margin-top: var(--cms-space-7);
 		}
 	}
 

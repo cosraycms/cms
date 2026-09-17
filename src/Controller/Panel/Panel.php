@@ -57,6 +57,7 @@ abstract class Panel
 			'homeUrl' => $this->homeUrl(),
 			'contentUrl' => $this->firstUrl($collections),
 			'menusUrl' => $this->menusUrl($panelPath),
+			'usersUrl' => $this->permits('edit-users') ? $panelPath . '/users' : null,
 			'logo' => $this->logo(),
 			'localeId' => $localeId,
 			'panelLocales' => $this->panelLocales(),

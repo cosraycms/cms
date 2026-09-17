@@ -98,6 +98,7 @@ final class UsersTest extends IntegrationTestCase
 		$this->assertSame(['ada@example.com'], array_column($users->list(null, 'lovelace', 50, 0), 'email'));
 		$this->assertSame(['100%@example.com'], array_column($users->list(null, '0%@', 50, 0), 'email'));
 		$this->assertSame(1, $users->count('customer', ''));
+		$this->assertGreaterThanOrEqual(2, $users->count(null, ''));
 		$this->assertNotContains('system@cosray.dev', array_column($users->list(null, '', 500, 0), 'email'));
 	}
 

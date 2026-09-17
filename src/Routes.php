@@ -166,6 +166,33 @@ class Routes
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('media'));
+				$uid = '{uid:[A-Za-z0-9-_.]{1,64}}';
+				$type = '{type:[a-z][a-z0-9-]{0,63}}';
+				$panel
+					->get('/users', [Panel\Users::class, 'index'], 'users')
+					->middleware($panelAuth)
+					->after($renderers->get('users'));
+				// Before the {uid} routes: the literal segment wins over a uid.
+				$panel
+					->get("/users/create/{$type}", [Panel\Users::class, 'create'], 'users.create')
+					->middleware($panelAuth)
+					->after($renderers->get('user'));
+				$panel
+					->post("/users/create/{$type}", [Panel\Users::class, 'store'], 'users.store')
+					->middleware($panelAuth)
+					->after($renderers->get('editor-save'));
+				$panel
+					->get("/users/{$uid}", [Panel\Users::class, 'edit'], 'users.edit')
+					->middleware($panelAuth)
+					->after($renderers->get('user'));
+				$panel
+					->post("/users/{$uid}", [Panel\Users::class, 'update'], 'users.update')
+					->middleware($panelAuth)
+					->after($renderers->get('editor-save'));
+				$panel
+					->post("/users/{$uid}/delete", [Panel\Users::class, 'delete'], 'users.delete')
+					->middleware($panelAuth)
+					->after($renderers->get('editor-save'));
 				$panel
 					->get(
 						'/menus',

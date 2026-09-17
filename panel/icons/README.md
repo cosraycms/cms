@@ -14,7 +14,7 @@ Notable mappings from the former artwork:
 - Text style uses `fonts`, document uses `file-earmark-richtext`, and the collection fallback uses `collection`.
 - Media fields use `folder2-open` for the library and the `file-earmark-*` family — `pdf`, `word`, `excel`, `ppt`, `zip`, `music`, `play`, `text`, `image`, plain `file-earmark` as the fallback — for files without a thumbnail.
 
-Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content, `image` for media, and `list-nested` for menus.
+Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content, `image` for media, `list-nested` for menus, and `people` for users.
 
 The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs.
 

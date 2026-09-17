@@ -33,6 +33,12 @@ if (is_string($menusUrl)) {
 
 $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
+$usersUrl = $this->unwrap($usersUrl ?? null);
+
+if (is_string($usersUrl)) {
+	$areas[] = ['area' => 'users', 'url' => $usersUrl, 'label' => __('nav:users'), 'icon' => 'people'];
+}
+
 ?>
 <nav
 	id="area-nav"

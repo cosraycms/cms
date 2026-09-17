@@ -535,6 +535,12 @@ $policy->permits($user, 'edit-orders'); // $user may be null for a visitor
 
 Routes are guarded with the `#[Permission('edit-orders')]` middleware attribute; controllers extending `Cosray\Controller\Panel\Panel` call `$this->permits('edit-orders')`.
 
+### Managing users
+
+The panel's Users area lists, creates, edits and soft-deletes users of every type; it needs `edit-users`. Nobody reaches beyond their own permissions there: a user can only be edited by someone holding everything that user's roles grant, and a role can only be given by someone holding everything it grants. Nobody changes their own roles, deactivates or deletes themselves, and the last active superuser keeps the role. A changed password ends the user's other sessions and remembered logins.
+
+Every user has an email address, which is the login; a username is an optional second login and cannot contain `@`.
+
 ### User models
 
 Every user is a `Cosray\User`: the account with its login, roles and state. A class extending it adds fields the way a node class does, and names a user type of its own:
