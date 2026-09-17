@@ -9,8 +9,8 @@ use Cosray\Field;
 
 /**
  * Rebuilds both reference indexes from scratch: wipe, then rescan all
- * live nodes, their working copies, and every menu item's references
- * (image icons, asset links, and the node a `node` or `children` item
+ * live nodes, their working copies, every user's fields, and every menu
+ * item's references (image icons, asset links, and the node a `node` or `children` item
  * points at).
  * Everything in the indexes is derived, so a rebuild is always safe; it
  * is the recovery path after restores, imports, or content migrations.
@@ -39,6 +39,7 @@ final class Rebuild
 		$sources = [
 			'node' => $this->db->references->nodeContents()->lazy(),
 			'draft' => $this->db->drafts->contents()->lazy(),
+			'user' => $this->db->references->userContents()->lazy(),
 		];
 
 		foreach ($sources as $ownerType => $rows) {

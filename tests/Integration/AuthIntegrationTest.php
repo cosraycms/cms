@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Cosray\Actor;
 use Cosray\Auth;
 use Cosray\Session;
 use Cosray\Tests\IntegrationTestCase;
@@ -450,7 +451,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 		$request = $this->psrRequest();
 		$session = new Session(['cache_expire' => 3600], 'test_session');
-		$session->setUser($userId);
+		$session->setUser(new Users($this->db())->byId($userId));
 
 		$auth = $this->createAuth($request, $session);
 
@@ -458,5 +459,17 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 		$this->assertInstanceOf(\Cosray\User::class, $user);
 		$this->assertEquals($userId, $user->id);
+	}
+
+	public function testASessionFromBeforeAPasswordChangeNoLongerAuthenticates(): void
+	{
+		$userId = $this->createTestUser(['uid' => 'stale-session-user']);
+		$users = new Users($this->db());
+		$session = new Session(['cache_expire' => 3600], 'test_session');
+		$session->setUser($users->byId($userId));
+
+		$users->setPassword($users->byId($userId), 'a different long password', Actor::system());
+
+		$this->assertNull($this->createAuth($this->psrRequest(), $session)->user());
 	}
 }

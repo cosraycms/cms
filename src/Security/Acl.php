@@ -33,4 +33,10 @@ final class Acl
 
 		return false;
 	}
+
+	/** @return list<string> */
+	public function permissions(string $principal): array
+	{
+		return array_keys($this->entries[$principal] ?? []);
+	}
 }

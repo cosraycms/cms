@@ -83,4 +83,22 @@ final class Policy
 	{
 		return $this->acl->permits($this->principals($user), $permission);
 	}
+
+	/**
+	 * Whether the user holds everything the given roles grant. Managing an
+	 * account or handing out a role must never reach beyond one's own
+	 * permissions.
+	 */
+	public function covers(User $user, string ...$roles): bool
+	{
+		foreach ($roles as $role) {
+			foreach ($this->acl->permissions("role:{$role}") as $permission) {
+				if (!$this->permits($user, $permission)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }

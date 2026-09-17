@@ -3,12 +3,17 @@ SELECT
 	r.owner_uid AS "ownerUid",
 	t.handle AS "nodeType",
 	n.published,
-	COALESCE(n.content -> 'title' -> 'value', m.data -> 'title') AS title
+	COALESCE(
+		n.content -> 'title' -> 'value',
+		m.data -> 'title',
+		jsonb_build_object('zxx', COALESCE(NULLIF(u.data ->> 'name', ''), u.username, u.email))
+	) AS title
 FROM
 	/*:cms.prefix:*/asset_references r
 	LEFT JOIN /*:cms.prefix:*/nodes n ON r.owner_type IN ('node', 'draft') AND n.uid = r.owner_uid
 	LEFT JOIN /*:cms.prefix:*/types t ON t.type = n.type
 	LEFT JOIN /*:cms.prefix:*/menu_items m ON r.owner_type = 'menu' AND m.item = r.owner_uid
+	LEFT JOIN /*:cms.prefix:*/users u ON r.owner_type = 'user' AND u.uid = r.owner_uid
 WHERE
 	r.asset_uid = :uid
 ORDER BY

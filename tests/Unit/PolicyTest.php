@@ -65,6 +65,17 @@ final class PolicyTest extends TestCase
 		$this->assertFalse($policy->permits($this->user(['editor']), 'edit-menus'));
 	}
 
+	public function testNobodyReachesBeyondTheirOwnPermissions(): void
+	{
+		$policy = Policy::withDefaults();
+		$admin = $this->user(['admin']);
+
+		$this->assertTrue($policy->covers($admin, 'editor', 'admin'));
+		$this->assertFalse($policy->covers($admin, 'superuser'));
+		$this->assertTrue($policy->covers($this->user(['superuser']), 'admin', 'editor'));
+		$this->assertTrue($policy->covers($admin, 'retired'));
+	}
+
 	/** @param list<string> $roles */
 	private function user(array $roles, string $type = 'user'): User
 	{

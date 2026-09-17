@@ -1,0 +1,17 @@
+SELECT
+	count(*) AS total
+FROM
+	/*:cms.prefix:*/users u
+WHERE
+	u.deleted IS NULL
+	AND u.type != 'system'
+<?php if (isset($type)) : ?>
+	AND u.type = :type
+<?php endif ?>
+<?php if (isset($search)) : ?>
+	AND (
+		u.email ILIKE :search
+		OR u.username ILIKE :search
+		OR u.data->>'name' ILIKE :search
+	)
+<?php endif ?>
