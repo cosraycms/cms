@@ -50,7 +50,6 @@ final class PermissionMiddlewareTest extends TestCase
 	{
 		$session = new Session(['use_cookies' => 0], 'permission-test');
 		$session->start();
-		$session->setUser(42);
 
 		$user = new User([
 			'usr' => 42,
@@ -65,6 +64,7 @@ final class PermissionMiddlewareTest extends TestCase
 			'deleted' => null,
 			'expires' => null,
 		]);
+		$session->setUser($user);
 
 		$users = new class($this->db(), $user) extends Users {
 			public function __construct(

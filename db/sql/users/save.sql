@@ -1,9 +1,0 @@
-UPDATE /*:cms.prefix:*/users
-SET
-	email = :email,
-	username = :username,
-	data = :data,
-	editor = :editor,
-	password = :password
-WHERE
-	usr = :usr;

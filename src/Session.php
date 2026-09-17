@@ -21,9 +21,21 @@ class Session extends BaseSession
 		$this->authCookie = $name ? $name . '_auth' : 'cosray_auth';
 	}
 
-	public function setUser(int $userId): void
+	public function setUser(User $user): void
 	{
-		$_SESSION['user_id'] = $userId;
+		$_SESSION['user_id'] = $user->id;
+		$_SESSION['user_stamp'] = self::stamp($user);
+	}
+
+	/**
+	 * A session opened before the user's password last changed no longer
+	 * counts. One without a stamp predates the stamp and is left alone.
+	 */
+	public function holds(User $user): bool
+	{
+		$stamp = $_SESSION['user_stamp'] ?? null;
+
+		return !is_string($stamp) || hash_equals($stamp, self::stamp($user));
 	}
 
 	public function authenticatedUserId(): ?int
@@ -67,6 +79,11 @@ class Session extends BaseSession
 	public function lastActivity(): ?int
 	{
 		return $_SESSION['last_activity'] ?? null;
+	}
+
+	private static function stamp(User $user): string
+	{
+		return substr(hash('sha256', $user->password), 0, 32);
 	}
 
 	/** @return array{expires: int, path: string, domain?: string, secure: bool, httponly: bool, samesite: string, partitioned?: bool} */

@@ -80,7 +80,6 @@ final class PanelAuthMiddlewareTest extends TestCase
 	{
 		$session = new Session(['use_cookies' => 0], 'panel-auth');
 		$session->start();
-		$session->setUser(42);
 
 		$user = new User([
 			'usr' => 42,
@@ -95,6 +94,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			'deleted' => null,
 			'expires' => null,
 		]);
+		$session->setUser($user);
 
 		$middleware = new PanelAuth(
 			$this->config(['panel.path' => '/admin']),
@@ -117,7 +117,6 @@ final class PanelAuthMiddlewareTest extends TestCase
 	{
 		$session = new Session(['use_cookies' => 0], 'panel-auth');
 		$session->start();
-		$session->setUser(7);
 
 		$admin = new User([
 			'usr' => 7,
@@ -132,6 +131,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			'deleted' => null,
 			'expires' => null,
 		]);
+		$session->setUser($admin);
 
 		$middleware = new PanelAuth(
 			$this->config(['panel.path' => '/admin']),

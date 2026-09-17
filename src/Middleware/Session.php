@@ -41,7 +41,10 @@ class Session implements Middleware
 
 		if ($userId) {
 			$user = $this->users->byId($userId);
-			$request = $request->withAttribute('user', $user);
+
+			if ($user !== null && $session->holds($user)) {
+				$request = $request->withAttribute('user', $user);
+			}
 		}
 
 		$request = $request->withAttribute('session', $session);

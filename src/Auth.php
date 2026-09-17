@@ -50,7 +50,7 @@ class Auth
 
 		if (password_verify($password, $user->password)) {
 			if ($initSession) {
-				$this->login($user->id, $remember);
+				$this->login($user, $remember);
 			}
 
 			return $user;
@@ -71,7 +71,7 @@ class Auth
 		}
 
 		if ($initSession) {
-			$this->login($user->id, false);
+			$this->login($user, false);
 		}
 
 		return $user;
@@ -107,7 +107,9 @@ class Auth
 		$userId = $this->session->authenticatedUserId();
 
 		if ($userId) {
-			return $this->users->byId($userId);
+			$user = $this->users->byId($userId);
+
+			return $user !== null && $this->session->holds($user) ? $user : null;
 		}
 
 		$hash = $this->getSessionTokenHash();
@@ -116,7 +118,7 @@ class Auth
 			$user = $this->users->bySession($hash);
 
 			if ($user && !(strtotime($user->expires) < time())) {
-				$this->startSession($user->id);
+				$this->startSession($user);
 				$this->rememberUser($user->id);
 
 				return $user;
@@ -171,18 +173,18 @@ class Auth
 		throw new RuntimeException('Could not remember user');
 	}
 
-	protected function login(int $userId, bool $remember): void
+	protected function login(User $user, bool $remember): void
 	{
-		$this->startSession($userId);
+		$this->startSession($user);
 
 		if ($remember) {
-			$this->rememberUser($userId);
+			$this->rememberUser($user->id);
 		} else {
 			$this->forgetRemembered();
 		}
 	}
 
-	private function startSession(int $userId): void
+	private function startSession(User $user): void
 	{
 		$session = $this->session;
 
@@ -197,7 +199,7 @@ class Auth
 		// Regenerate the session id before setting the user id
 		// to mitigate session fixation attack.
 		$session->regenerate();
-		$session->setUser($userId);
+		$session->setUser($user);
 	}
 
 	private function rememberUser(int $userId): void

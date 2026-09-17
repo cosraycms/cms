@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Session;
 use Cosray\Tests\TestCase;
 use Cosray\Token;
+use Cosray\User;
 
 /**
  * @internal
@@ -30,9 +31,33 @@ final class SessionTest extends TestCase
 	{
 		$session = new Session(['use_cookies' => 0], 'test-session');
 		$session->start();
-		$session->setUser(42);
+		$session->setUser($this->user('hash'));
 
 		$this->assertSame(42, $session->authenticatedUserId());
+	}
+
+	public function testASessionStopsCountingOnceThePasswordChanged(): void
+	{
+		$session = new Session(['use_cookies' => 0], 'test-session');
+		$session->start();
+		$session->setUser($this->user('hash'));
+
+		$this->assertTrue($session->holds($this->user('hash')));
+		$this->assertFalse($session->holds($this->user('another hash')));
+	}
+
+	private function user(string $hash): User
+	{
+		return new User([
+			'usr' => 42,
+			'uid' => 'someone',
+			'email' => 'someone@example.com',
+			'password' => $hash,
+			'active' => true,
+			'created' => '2024-01-01T00:00:00+00:00',
+			'changed' => '2024-01-01T00:00:00+00:00',
+			'deleted' => null,
+		]);
 	}
 
 	public function testSignalActivityPersistsTimestamp(): void
