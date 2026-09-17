@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
-		'Incorrect password.' => 'Incorrect password.',
-		'Password' => 'Password',
-		'Protected content' => 'Protected content',
-		'Too many attempts. Please try again in 15 minutes.' => 'Too many attempts. Please try again in 15 minutes.',
-		'Unlock' => 'Unlock',
 		'auth:forgot-password' => 'Forgot password?',
 		'auth:invalid-credentials' => 'Invalid username or password',
 		'auth:login-label' => 'Username or email',
@@ -222,7 +217,6 @@ return [
 		'field:unknown-entry-type' => 'Unknown entry type: :type',
 		'field:yes' => 'Yes',
 		'media:disallowed-type' => 'The file type is not allowed: :type.',
-		'media:permission-conflict' => 'This file already exists with different access rights. Protect the existing file first.',
 		'media:title' => 'Media',
 		'media:too-large' => 'The file is too large: :size MB. Allowed are :allowed MB',
 		'media:unknown-file' => 'Unknown file',

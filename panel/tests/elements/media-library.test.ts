@@ -30,7 +30,6 @@ beforeEach(() => {
 		assets: '/assets',
 		debug: false,
 		allowedFiles: { file: ['pdf'], image: ['png'], video: ['mp4'] },
-		readPermissions: ['everyone', 'staff'],
 	});
 	fetcher.mockReset();
 	fetcher.mockImplementation(async (url) => {
@@ -93,7 +92,7 @@ describe('media page controls', () => {
 		expect(document.querySelector('header')?.textContent).toContain('media:file-count: 0');
 	});
 
-	it('reconnects the upload controls with the library and honors the selected access', async () => {
+	it('reconnects the upload controls with the library', async () => {
 		const element = await library();
 		element.remove();
 		await tick();
@@ -108,11 +107,6 @@ describe('media page controls', () => {
 		button.click();
 		expect(open).toHaveBeenCalledOnce();
 
-		const permission = document.querySelector<HTMLSelectElement>('header select')!;
-		permission.value = 'staff';
-		permission.dispatchEvent(new Event('change', { bubbles: true }));
-		await tick();
-
 		fetcher.mockResolvedValueOnce(
 			new Response(JSON.stringify({ ok: false, error: 'Upload rejected' })),
 		);
@@ -122,7 +116,7 @@ describe('media page controls', () => {
 
 		await vi.waitFor(() => expect(document.body.textContent).toContain('Upload rejected'));
 		const [url, request] = fetcher.mock.lastCall!;
-		expect(url).toBe('/cp/media/file?permission=staff');
+		expect(url).toBe('/cp/media/file');
 		expect(request?.method).toBe('POST');
 		expect((request?.body as FormData).get('file')).toBe(file);
 		expect(button.disabled).toBe(false);

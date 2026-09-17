@@ -31,7 +31,7 @@ class PanelAuth implements Middleware
 			// Expose the resolved user downstream (chrome gating, panel
 			// locale) for token requests too, which never touch the
 			// session middleware's attribute.
-			return $handler->handle($request->withAttribute('user', $user)->withAttribute('cms.management', true));
+			return $handler->handle($request->withAttribute('user', $user));
 		}
 
 		return $this->unauthorized($request, $user !== null);

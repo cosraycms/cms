@@ -54,11 +54,7 @@ class Node
 			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path);
 		}
 
-		try {
-			$node = $cms->node->byPath($path === '' ? '/' : $path);
-		} catch (\Cosray\Exception\ReadDenied $denied) {
-			return new Access($context)->challenge($denied->permission);
-		}
+		$node = $cms->node->byPath($path === '' ? '/' : $path);
 
 		if (!$node) {
 			try {

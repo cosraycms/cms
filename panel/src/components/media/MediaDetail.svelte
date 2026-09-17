@@ -17,7 +17,6 @@
 
 	type Asset = {
 		uid: string;
-		permission: string;
 		filename: string;
 		kind: string;
 		mime: string | null;
@@ -198,14 +197,7 @@
 		>
 	{:else}
 		<header class="cms-detail-head">
-			<div class="titles">
-				<h2 title={asset.filename}>{asset.filename}</h2>
-				<p>
-					{__('media:read-access')}: {asset.permission === 'everyone'
-						? __('media:public')
-						: asset.permission}
-				</p>
-			</div>
+			<h2 title={asset.filename}>{asset.filename}</h2>
 			<button
 				type="button"
 				class="cms-detail-close"
@@ -348,16 +340,6 @@
 			gap: var(--cms-space-2);
 			padding: var(--cms-space-4);
 			border-bottom: 1px solid var(--cms-color-border);
-
-			& .titles {
-				min-width: 0;
-			}
-
-			& p {
-				margin: var(--cms-space-1) 0 0;
-				color: var(--cms-color-text-subtle);
-				font-size: var(--cms-font-size-xs);
-			}
 		}
 
 		.cms-detail-head h2 {

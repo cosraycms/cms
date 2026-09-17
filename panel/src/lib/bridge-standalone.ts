@@ -1,7 +1,6 @@
 import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$lib/bridge';
 
 import { __ } from '$lib/locale';
-import { editorType } from '$lib/bridge';
 import { icon } from '$lib/icons';
 import { openDialog } from '$lib/dialogs';
 
@@ -25,11 +24,9 @@ export function installBridge(system: BridgeSystem): void {
 		async upload(type, file) {
 			const body = new FormData();
 			body.append('file', file);
-			const owner = editorType();
-			const query = owner ? `?nodeType=${encodeURIComponent(owner)}` : '';
 
 			try {
-				const response = await fetch(`${system.prefix}/media/${type}${query}`, {
+				const response = await fetch(`${system.prefix}/media/${type}`, {
 					method: 'POST',
 					body,
 					credentials: 'same-origin',

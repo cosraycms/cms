@@ -47,11 +47,6 @@ class Session implements Middleware
 
 		$request = $request->withAttribute('session', $session);
 
-		$response = $handler->handle($request);
-		if ($this->config->get('access.passwords', []) !== []) {
-			$response = $response->withHeader('Cache-Control', 'private, no-store');
-		}
-
-		return $response;
+		return $handler->handle($request);
 	}
 }

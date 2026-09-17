@@ -16,7 +16,7 @@ final class TranslationCatalogTest extends TestCase
 	public function testCosrayCatalogsCoverPhpMessages(): void
 	{
 		$root = dirname(__DIR__, 2);
-		$messages = new PhpScanner([$root . '/src', $root . '/panel/views', $root . '/resources/views'])->scan();
+		$messages = new PhpScanner([$root . '/src', $root . '/panel/views'])->scan();
 
 		$this->assertCatalogsCover($messages, 'cosray');
 	}

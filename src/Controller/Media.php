@@ -44,7 +44,7 @@ class Media
 	) {}
 
 	#[Permission('panel')]
-	public function upload(string $mediatype, \Cosray\Context $context): Response
+	public function upload(string $mediatype): Response
 	{
 		$response = Response::create($this->factory);
 		$file = $this->uploadedFile();
@@ -86,7 +86,6 @@ class Media
 				$filename,
 				$mediatype,
 				new Actor($this->userId()),
-				permission: $this->requestedPermission($context) ?? 'everyone',
 			);
 		} catch (IngestError $e) {
 			return $this->ingestFailure($response, $e, $filename);
@@ -122,7 +121,7 @@ class Media
 	 * show what selecting each kind would yield.
 	 */
 	#[Permission('panel')]
-	public function library(\Cosray\Context $context): Response
+	public function library(): Response
 	{
 		$params = $this->request->params();
 		$q = trim((string) ($params['q'] ?? ''));
@@ -133,11 +132,6 @@ class Media
 		// applies — Quma templates refuse empty argument lists — and
 		// isset() in the template still skips the clause.
 		$countArgs = ['q' => null];
-		$permission = $this->requestedPermission($context);
-		if ($permission !== null) {
-			$args['permission'] = $permission;
-			$countArgs['permission'] = $permission;
-		}
 
 		$kinds = $this->filterKinds((string) ($params['kind'] ?? ''));
 
@@ -202,34 +196,6 @@ class Media
 		return $time === false ? null : date(DATE_ATOM, $time);
 	}
 
-	private function requestedPermission(\Cosray\Context $context): ?string
-	{
-		$type = $this->request->param('nodeType', null);
-		$permission = $this->request->param('permission', null);
-		if ($type !== null) {
-			$nodes = $context->container->tag(\Cosray\Bootstrap::NODE_TAG);
-			if (!is_string($type) || !in_array($type, $nodes->entries(), true)) {
-				throw new \Celema\Core\Exception\HttpBadRequest();
-			}
-			$permission = \Cosray\Access::permission(
-				$nodes->entry($type)->definition(),
-				$context->container->get(\Cosray\Node\Types::class),
-			);
-		}
-		if ($permission !== null) {
-			if (!is_string($permission)) {
-				throw new \Celema\Core\Exception\HttpBadRequest();
-			}
-			try {
-				\Cosray\Access::validatePermission($this->config, $permission);
-			} catch (RuntimeException $error) {
-				throw new \Celema\Core\Exception\HttpBadRequest(previous: $error);
-			}
-		}
-
-		return $permission;
-	}
-
 	protected function libraryItem(array $row): array
 	{
 		$asset = Asset::fromRow($row, $this->config);
@@ -237,7 +203,6 @@ class Media
 		return [
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
-			'permission' => $asset->permission,
 			'url' => $asset->path(),
 			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
 			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
@@ -302,7 +267,6 @@ class Media
 	protected function detailItem(Asset $asset, array $row): array
 	{
 		return [
-			'permission' => $asset->permission,
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
 			'kind' => $asset->kind,
@@ -365,61 +329,12 @@ class Media
 			throw $e;
 		}
 
-		$storage = new Storage($this->config, $row['disk']);
-		$storage->deleteDirectory(dirname((string) $row['key']));
 		if ($row['disk'] === 'local') {
+			new Storage($this->config)->deleteDirectory(dirname((string) $row['key']));
 			$this->purgeRenditions((string) $row['key']);
-		} else {
-			$storage->deleteDirectory('.cache/' . dirname((string) $row['key']));
 		}
 
 		return $response->json(['ok' => true]);
-	}
-
-	public function download(string $uid, \Cosray\Context $context, ?string $size = null): Response
-	{
-		$row = $this->db->assets->byUid(['uid' => $uid])->first();
-		if ($row === null || $row['disk'] !== 'private') {
-			throw new HttpNotFound($this->request);
-		}
-
-		$auth = new Auth(
-			$this->request->unwrap(),
-			new Users($this->db),
-			$this->config,
-			$this->request->get('session', null),
-		);
-		if (!$context->access()->allows($row['permission']) && !$auth->user()?->hasPermission('panel')) {
-			return new Access($context)->challenge($row['permission']);
-		}
-
-		$asset = Asset::fromRow($row, $this->config);
-		$storage = new Storage($this->config, 'private');
-		if (!$storage->exists($asset->key)) {
-			throw new HttpNotFound($this->request);
-		}
-		$path = $storage->path($asset->key);
-		if ($size !== null) {
-			if (!$asset->resizable() || !$this->config->media->sizes->has($size)) {
-				throw new HttpNotFound($this->request);
-			}
-			$spec = $this->config->media->sizes->get($size);
-			$path = new Assets($this->config, 'private')
-				->image($asset->key)
-				->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $spec->name)
-				->path();
-		}
-
-		$response = Response::create($this->factory)
-			->file($path)
-			->header('Cache-Control', 'private, no-store')
-			->header('X-Robots-Tag', 'noindex, nofollow')
-			->header('X-Content-Type-Options', 'nosniff');
-		if ($asset->kind === 'file') {
-			$response->header('Content-Disposition', "attachment; filename*=UTF-8''" . rawurlencode($asset->filename));
-		}
-
-		return $response;
 	}
 
 	/** Removes the rendition cache directory `{cache}/{shard}/{uid}/`. */
@@ -452,7 +367,6 @@ class Media
 		return [
 			'ok' => true,
 			'error' => '',
-			'permission' => $asset->permission,
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
 			'kind' => $asset->kind,
@@ -516,50 +430,34 @@ class Media
 
 		$asset = Asset::fromRow($row, $this->config);
 
-		$owns = !$this->db->getConn()->inTransaction();
-		if ($owns) {
-			$this->db->begin();
+		if (dirname($asset->key) !== "{$shard}/{$uid}" || !$asset->resizable()) {
+			throw new HttpNotFound($this->request);
 		}
+
+		$spec = $this->sizeSpec($asset->key, $file);
+
 		try {
-			$this->db->assets->lockHash(['hash' => (string) ($row['hash'] ?? $uid)])->run();
-			$current = $this->db->assets->byUid(['uid' => $uid])->first();
-			if ($current === null || $current['disk'] !== 'local') {
-				throw new HttpNotFound($this->request);
-			}
-
-			if (dirname($asset->key) !== "{$shard}/{$uid}" || !$asset->resizable()) {
-				throw new HttpNotFound($this->request);
-			}
-
-			$spec = $this->sizeSpec($asset->key, $file);
-
-			try {
-				$image = $this
-					->getAssets()
-					->image($asset->key)
-					->resize(
-						$spec->size(),
-						$spec->mode,
-						$spec->enlarge,
-						$spec->quality,
-						$spec->name,
-					);
-			} catch (RuntimeException $e) {
-				throw new HttpNotFound($this->request, previous: $e);
-			}
-
-			$fileServer = $this->config->media->fileServer;
-
-			if ($fileServer) {
-				return $this->sendFile($fileServer, $image->path());
-			}
-
-			return Response::create($this->factory)->file($image->path());
-		} finally {
-			if ($owns) {
-				$this->db->rollback();
-			}
+			$image = $this
+				->getAssets()
+				->image($asset->key)
+				->resize(
+					$spec->size(),
+					$spec->mode,
+					$spec->enlarge,
+					$spec->quality,
+					$spec->name,
+				);
+		} catch (RuntimeException $e) {
+			throw new HttpNotFound($this->request, previous: $e);
 		}
+
+		$fileServer = $this->config->media->fileServer;
+
+		if ($fileServer) {
+			return $this->sendFile($fileServer, $image->path());
+		}
+
+		return Response::create($this->factory)->file($image->path());
 	}
 
 	/**

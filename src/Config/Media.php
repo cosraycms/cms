@@ -19,10 +19,6 @@ final class Media
 		get => $this->config->get('media.fileserver');
 	}
 
-	public string $privateDir {
-		get => $this->config->get('media.private_dir');
-	}
-
 	public Sizes $sizes {
 		get => $this->sizesRegistry ??= new Sizes((array) $this->config->get('media.sizes'));
 	}

@@ -28,7 +28,6 @@ export type BridgeSystem = {
 	assets: string;
 	debug: boolean;
 	allowedFiles: { file: string[]; image: string[]; video: string[] };
-	readPermissions?: string[];
 };
 
 /**
@@ -56,10 +55,6 @@ declare global {
 	interface Window {
 		Cosray?: CosrayBridge;
 	}
-}
-
-export function editorType(): string | null {
-	return document.querySelector<HTMLElement>('#node-editor-form')?.dataset.nodeType ?? null;
 }
 
 export function cosray(): CosrayBridge {

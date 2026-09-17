@@ -2,7 +2,6 @@ SELECT
 	asset,
 	uid,
 	disk,
-	permission,
 	key,
 	filename,
 	mime,
@@ -18,7 +17,6 @@ FROM
 WHERE
 	hash = :hash
 	AND disk = :disk
-	AND permission = :permission
 ORDER BY
 	asset
 LIMIT 1;

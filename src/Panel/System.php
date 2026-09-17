@@ -42,7 +42,6 @@ final class System
 			'customLocales' => [],
 			'prefix' => $config->app->urlPrefix,
 			'assets' => $config->path->assets,
-			'readPermissions' => ['everyone', 'authenticated', ...array_keys($config->get('access.passwords', []))],
 			'allowedFiles' => [
 				'file' => array_merge(...array_values($config->upload->file)),
 				'image' => array_merge(...array_values($config->upload->image)),

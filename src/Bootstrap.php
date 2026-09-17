@@ -110,7 +110,6 @@ class Bootstrap implements CorePlugin
 		protected readonly Config $config,
 		?Types $types = null,
 	) {
-		Access::validate($config);
 		$this->types = $types ?? new Types();
 		$this->fieldSchemas = FieldSchemas::withDefaults();
 		$this->blocks = BlockRegistry::withDefaults();
@@ -552,11 +551,7 @@ class Bootstrap implements CorePlugin
 		}
 
 		$this->renderer('view', BoilerRenderer::class)->args(
-			dirs: [
-				'app' => $this->viewPath(),
-				...$this->pluginTemplates['view'],
-				'cosray' => dirname(__DIR__) . '/resources/views',
-			],
+			dirs: ['app' => $this->viewPath(), ...$this->pluginTemplates['view']],
 			autoescape: true,
 			trusted: $this->trustedViewClasses(),
 		);

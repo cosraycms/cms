@@ -69,21 +69,6 @@ describe('standalone bridge', () => {
 		expect((options.body as FormData).get('file')).toBe(file);
 	});
 
-	it('uses the current editor type for uploads after navigation', async () => {
-		const fetchMock = vi.fn().mockResolvedValue({ json: async () => ({ ok: true }) });
-		vi.stubGlobal('fetch', fetchMock);
-		const form = document.createElement('form');
-		form.id = 'node-editor-form';
-		form.dataset.nodeType = 'restricted-page';
-		document.body.append(form);
-		const file = new File(['document'], 'document.pdf');
-		await bridge().upload('file', file);
-		expect(fetchMock.mock.calls[0][0]).toBe('/cp/media/file?nodeType=restricted-page');
-		form.dataset.nodeType = 'public-page';
-		await bridge().upload('file', file);
-		expect(fetchMock.mock.calls[1][0]).toBe('/cp/media/file?nodeType=public-page');
-	});
-
 	it('returns a localized failure when upload transport fails', async () => {
 		vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
 		const file = new File([], 'image.jpg');

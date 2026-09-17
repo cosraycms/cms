@@ -23,7 +23,7 @@ final class Defaults
 			self::icons(),
 			self::database(),
 			self::session($env),
-			self::media($root),
+			self::media(),
 			self::richtext(),
 			self::upload(),
 			self::uid(),
@@ -42,7 +42,6 @@ final class Defaults
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 			'app.url_prefix' => '',
 			'plugins' => [],
-			'access.passwords' => [],
 		];
 	}
 
@@ -143,11 +142,10 @@ final class Defaults
 	}
 
 	/** @return array<string, mixed> */
-	private static function media(string $root): array
+	private static function media(): array
 	{
 		return [
 			'media.fileserver' => null,
-			'media.private_dir' => $root . '/storage/media',
 			'media.sizes' => [],
 		];
 	}

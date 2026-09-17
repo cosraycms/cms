@@ -69,7 +69,7 @@ $cosrayI18n = new Domain(
 	dir: __DIR__ . '/lang',
 	locales: ['de', 'en'],
 	scanners: [
-		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views', __DIR__ . '/resources/views']),
+		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views']),
 		new SchemaScanner(BlockRegistry::withDefaults()->all()),
 	],
 	default: true,

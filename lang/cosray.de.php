@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
-		'Incorrect password.' => 'Das Passwort ist nicht korrekt.',
-		'Password' => 'Passwort',
-		'Protected content' => 'Geschützter Inhalt',
-		'Too many attempts. Please try again in 15 minutes.' => 'Zu viele Versuche. Bitte versuchen Sie es in 15 Minuten erneut.',
-		'Unlock' => 'Freischalten',
 		'auth:forgot-password' => 'Passwort vergessen?',
 		'auth:invalid-credentials' => 'Benutzername oder Passwort ungültig',
 		'auth:login-label' => 'Benutzername oder E-Mail',
@@ -228,7 +223,6 @@ return [
 		'field:unknown-entry-type' => 'Unbekannter Eintragstyp: :type',
 		'field:yes' => 'Ja',
 		'media:disallowed-type' => 'Der Dateityp ist nicht erlaubt: :type.',
-		'media:permission-conflict' => 'Diese Datei existiert bereits mit anderen Zugriffsrechten. Bitte schützen Sie die vorhandene Datei zuerst.',
 		'media:title' => 'Medien',
 		'media:too-large' => 'Die Datei ist zu groß: :size MB. Erlaubt sind :allowed MB',
 		'media:unknown-file' => 'Unbekannte Datei',

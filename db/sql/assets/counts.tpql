@@ -12,9 +12,6 @@ FROM
 	/*:cms.prefix:*/assets
 WHERE
 	1 = 1
-<?php if (isset($permission)) : ?>
-	AND permission = :permission
-<?php endif ?>
 <?php if (isset($q)) : ?>
 	AND filename ILIKE :q
 <?php endif ?>

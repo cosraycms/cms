@@ -10,15 +10,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE TABLE /*:cms.prefix:*/access_attempts (
-	permission text NOT NULL,
-	client text NOT NULL,
-	attempts integer NOT NULL,
-	expires timestamptz NOT NULL,
-	PRIMARY KEY (permission, client)
-);
-CREATE INDEX ON /*:cms.prefix:*/access_attempts (expires);
-
 CREATE TABLE /*:cms.prefix:*/roles (
 	rolename text NOT NULL,
 	CONSTRAINT /*:cms.obj:*/pk_roles PRIMARY KEY (rolename)
@@ -552,7 +543,6 @@ CREATE TABLE /*:cms.prefix:*/assets (
 	asset bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
 	disk text NOT NULL DEFAULT 'local',
-	permission text NOT NULL DEFAULT 'everyone',
 	key text NOT NULL,
 	filename text NOT NULL,
 	mime text,
@@ -567,10 +557,6 @@ CREATE TABLE /*:cms.prefix:*/assets (
 	CONSTRAINT /*:cms.obj:*/pk_assets PRIMARY KEY (asset),
 	CONSTRAINT /*:cms.obj:*/uc_assets_uid UNIQUE (uid),
 	CONSTRAINT /*:cms.obj:*/uc_assets_disk_key UNIQUE (disk, key),
-	CONSTRAINT /*:cms.obj:*/ck_assets_permission CHECK (
-		(permission = 'everyone' AND disk = 'local') OR
-		(permission ~ '^[a-z][a-z0-9-]{0,63}$' AND permission <> 'everyone' AND disk = 'private')
-	),
 	CONSTRAINT /*:cms.obj:*/fk_assets_users_creator FOREIGN KEY (creator)
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/ck_assets_uid CHECK (

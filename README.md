@@ -389,46 +389,6 @@ Use `#[Translate(TranslateMode::Asymmetric)]` when the whole field payload varie
 
 Route templates can generate URL paths from node fields and hierarchy data.
 
-## Frontend read permissions
-
-A node type can require a read permission with `#[Permission(['read' => 'staff'])]` (`Cosray\Schema\Permission`). Without an attribute, reads are public (`everyone`). A string permission applies to reads; a map can name `read` independently of other operations. Missing `read` entries remain public.
-
-Direct node reads and rendering reject unauthorized access with `ReadDenied`; listings and full-text search exclude inaccessible types before counting and pagination. Hiding a node is not access control. Explicit menu labels and URLs may still advertise a protected page, but cannot grant access to its content. Authenticated panel requests and previews may read restricted nodes. A request-free `Context::console()` is trusted for imports and maintenance; do not use it to answer public requests. These read rules do not grant write or panel permissions.
-
-### Shared passwords
-
-Configure hashes under `access.passwords` to grant named read permissions without creating CMS users:
-
-```php
-'access.passwords' => ['staff' => env('STAFF_PASSWORD_HASH')],
-```
-
-Generate the hash with PHP's `password_hash()` and store it in a local environment file, never in content or Git. `app.secret` is required. Built-in panel permissions cannot be granted by shared passwords. Apply migration `000000-000037` first.
-
-A denied page redirects to `/access/staff?next=...`; JSON reads return `401`. `GET` and `POST /access/{permission}` provide the password form and unlock action. Applications can replace `views/access.php`; the template receives `action`, `next`, `token`, `message`, `locale`, and `permission`, never protected content. The form posts `_token`, `password`, and `next`. Return paths must stay inside the application. `POST /access/{permission}/logout` takes `_token` and optional `next`.
-
-For custom forms, inject `Cosray\Access` or use `$context->access()`: `token($permission)`, `unlock($permission, $password, $token)`, `allows($permission)`, `require($permission)`, and `logout($permission, $token)`. Unlock and logout verify CSRF themselves. Unlock returns a boolean for credential failure and throws `AccessThrottled` after ten failed attempts per permission and peer address in fifteen minutes. Counters live in PostgreSQL, not in cookies; forwarded client-address headers are not trusted.
-
-Grants live in the server session. Unlock rotates the session ID; changing a hash revokes existing grants. The session's `gc_maxlifetime` controls idle expiry and the maximum grant lifetime. Logout removes only that permission, not panel login. There is no persistent remember-me cookie. Use HTTPS in production.
-
-Configuring shared passwords enables frontend sessions and marks their responses `Cache-Control: private, no-store`, including pages embedding restricted content. Do not put those responses in a shared page cache. This deliberately trades public page caching for a simple, safe session boundary. Protecting a page does not, by itself, protect publicly stored files linked from it.
-
-The `access` view can use the usual `cms`, `locale`, `locales`, `request`, `container`, `debug`, and `env` globals, so it can extend the site's layout. Its form data is `permission`, `action`, `next`, `token`, and nullable `message`; escape these when using a renderer without automatic escaping.
-
-### Private assets
-
-After migration `000000-000038`, pass `permission: 'staff'` to `Assets\Ingest::ingest()` to store an asset outside the document root. The default `everyone` keeps the existing public behavior. Named permissions must be configured, or be built-in user permissions such as `authenticated`.
-
-`media.private_dir` defaults to `{path.root}/storage/media`; include it in backups and keep it out of Git and the web server's public roots and aliases. Private originals and renditions use `/files/{uid}` and `/files/{uid}/{size}`. Every request, including cached renditions, checks access. Panel editors may inspect these files without unlocking a shared password. Asset references, `path()`, `sizePath()`, and field `publicPath()` produce the appropriate protected URLs automatically. The legacy method name `publicPath()` describes a URL, not public access.
-
-Ingest deduplicates within a permission. Identical bytes under a different permission are rejected, not reused or silently made public. To protect an existing asset while retaining its UID and references:
-
-```php
-$asset = new \Cosray\Assets\Protection($config, $db)->protect($uid, 'staff');
-```
-
-This removes the public original and renditions before changing the catalog row. The operation is retryable and fail-closed: an interrupted operation may leave a public link unavailable, but does not restore publicly readable bytes. It cannot make an asset public again. Review public uses before protecting a shared asset, purge external caches, and remember that downloaded copies cannot be revoked. Do not wrap protection in a transaction you intend to roll back: filesystem changes cannot roll back with PostgreSQL.
-
 ## Full-text search
 
 Opt selected prose fields into PostgreSQL search with `#[Fulltext(FulltextWeight::A)]` through `D`. `Text`, `Textarea`, `RichText`, `Blocks` and `Entries` are supported; containers pass their weight to supported children, which can override it or opt out with `#[Fulltext(false)]`. Computed titles require an annotation on the resolved `Title::title()` implementation. Nothing is indexed automatically.

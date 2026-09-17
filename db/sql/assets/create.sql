@@ -1,7 +1,6 @@
 INSERT INTO /*:cms.prefix:*/assets (
 	uid,
 	disk,
-	permission,
 	key,
 	filename,
 	mime,
@@ -14,7 +13,6 @@ INSERT INTO /*:cms.prefix:*/assets (
 ) VALUES (
 	:uid,
 	:disk,
-	:permission,
 	:key,
 	:filename,
 	:mime,
