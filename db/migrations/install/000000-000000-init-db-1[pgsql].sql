@@ -10,19 +10,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE TABLE /*:cms.prefix:*/roles (
-	rolename text NOT NULL,
-	CONSTRAINT /*:cms.obj:*/pk_roles PRIMARY KEY (rolename)
-);
-
-
 CREATE TABLE /*:cms.prefix:*/users (
 	usr bigint GENERATED ALWAYS AS IDENTITY,
 	uid text NOT NULL,
+	type text NOT NULL DEFAULT 'user',
 	username text,
 	email text,
 	password text NOT NULL,
-	rolename text NOT NULL,
+	roles text[] NOT NULL DEFAULT '{}',
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
 	-- Panel UI language preference; NULL inherits the negotiated default.
@@ -35,8 +30,6 @@ CREATE TABLE /*:cms.prefix:*/users (
 	deleted timestamp with time zone,
 	CONSTRAINT /*:cms.obj:*/pk_users PRIMARY KEY (usr),
 	CONSTRAINT /*:cms.obj:*/uc_users_uid UNIQUE (uid),
-	CONSTRAINT /*:cms.obj:*/fk_users_roles FOREIGN KEY (rolename)
-		REFERENCES /*:cms.prefix:*/roles (rolename) ON UPDATE CASCADE,
 	CONSTRAINT /*:cms.obj:*/fk_users_users_creator FOREIGN KEY (creator)
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/fk_users_users_editor FOREIGN KEY (editor)
@@ -44,9 +37,18 @@ CREATE TABLE /*:cms.prefix:*/users (
 	CONSTRAINT /*:cms.obj:*/ck_users_uid CHECK (char_length(uid) <= 64),
 	CONSTRAINT /*:cms.obj:*/ck_users_panel_locale
 		CHECK (panel_locale IS NULL OR char_length(panel_locale) <= 32),
-	CONSTRAINT /*:cms.obj:*/ck_users_username_or_email CHECK (deleted IS NOT NULL OR username IS NOT NULL OR email IS NOT NULL),
-	CONSTRAINT /*:cms.obj:*/ck_users_username CHECK
-		(username IS NULL OR (char_length(username) > 0 AND char_length(username) <= 64)),
+	CONSTRAINT /*:cms.obj:*/ck_users_type CHECK (char_length(type) > 0 AND char_length(type) <= 64),
+	CONSTRAINT /*:cms.obj:*/ck_users_email_required CHECK (deleted IS NOT NULL OR email IS NOT NULL),
+	-- The login lookup matches a login against both the email and the
+	-- username, so a username must never be able to equal another account's
+	-- email.
+	CONSTRAINT /*:cms.obj:*/ck_users_username CHECK (
+		username IS NULL OR (
+			char_length(username) > 0
+			AND char_length(username) <= 64
+			AND username NOT LIKE '%@%'
+		)
+	),
 	CONSTRAINT /*:cms.obj:*/ck_users_email CHECK (
 		-- This is not full RFC email validation.
 		-- It only rejects obviously malformed addresses as a last database-level safeguard.
@@ -68,10 +70,10 @@ CREATE FUNCTION /*:cms.prefix:*/record_user_history()
 	RETURNS TRIGGER AS $$
 BEGIN
 	INSERT INTO /*:cms.prefix:*/users_history (
-		usr, username, email, password, rolename, active,
+		usr, type, username, email, password, roles, active,
 		data, panel_locale, editor, changed, deleted
 	) VALUES (
-		OLD.usr, OLD.username, OLD.email, OLD.password, OLD.rolename, OLD.active,
+		OLD.usr, OLD.type, OLD.username, OLD.email, OLD.password, OLD.roles, OLD.active,
 		OLD.data, OLD.panel_locale, OLD.editor, OLD.changed, OLD.deleted
 	);
 
@@ -523,10 +525,11 @@ CREATE TABLE /*:cms.prefix:*/drafts_history (
 
 CREATE TABLE /*:cms.prefix:*/users_history (
 	usr bigint NOT NULL,
+	type text NOT NULL DEFAULT 'user',
 	username text,
 	email text,
 	password text NOT NULL,
-	rolename text NOT NULL,
+	roles text[] NOT NULL DEFAULT '{}',
 	active boolean NOT NULL,
 	data jsonb NOT NULL,
 	panel_locale text,

@@ -207,7 +207,7 @@ final class MediaLibraryTest extends End2EndTestCase
 	{
 		$uid = bin2hex(random_bytes(8));
 		$db = $this->db();
-		$system = $db->execute("SELECT usr FROM cms.users WHERE rolename = 'system' LIMIT 1")->one();
+		$system = $db->execute("SELECT usr FROM cms.users WHERE type = 'system' LIMIT 1")->one();
 		$this->assertNotEmpty($system);
 
 		$db->execute(

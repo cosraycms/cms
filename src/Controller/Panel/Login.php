@@ -10,6 +10,7 @@ use Celema\Core\Request;
 use Celema\Core\Response;
 use Cosray\Auth as CmsAuth;
 use Cosray\Config;
+use Cosray\Security\Policy;
 use Cosray\Validation;
 
 final class Login extends Panel
@@ -69,7 +70,7 @@ final class Login extends Panel
 			]);
 		}
 
-		if (!$user->hasPermission('panel')) {
+		if (!$this->policy()->permits($user, 'panel')) {
 			$this->auth->logout();
 
 			return $this->context([
@@ -101,13 +102,12 @@ final class Login extends Panel
 
 	private function hasPanelPermission(): bool
 	{
-		$user = $this->auth->user();
+		return $this->policy()->permits($this->auth->user(), 'panel');
+	}
 
-		if ($user === null) {
-			return false;
-		}
-
-		return $user->hasPermission('panel');
+	private function policy(): Policy
+	{
+		return $this->container->get(Policy::class);
 	}
 
 	private function sanitizedNext(string $next = ''): string

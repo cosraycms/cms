@@ -1,10 +1,11 @@
 SELECT
 	u.usr,
 	u.uid,
+	u.type,
 	u.username,
 	u.email,
 	u.password,
-	u.rolename AS role,
+	array_to_json(u.roles) AS roles,
 	u.active,
 	u.panel_locale,
 	u.data,
@@ -59,7 +60,7 @@ WHERE
 	u.uid = :uid
 <?php endif ?>
 
-	AND u.rolename != 'system'
+	AND u.type != 'system'
 
 <?php if (!isset($deletedAlso) || $deletedAlso === false) : ?>
 	AND u.deleted IS NULL

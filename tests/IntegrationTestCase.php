@@ -319,7 +319,7 @@ class IntegrationTestCase extends TestCase
 			'username' => $data['username'] ?? $uid,
 			'email' => $data['email'] ?? $uid . '@example.com',
 			'password' => password_hash('password', PASSWORD_ARGON2ID),
-			'rolename' => 'editor',
+			'role' => 'editor',
 			'active' => true,
 			'data' => ['name' => 'Test User'],
 			'creator' => 1,
@@ -332,8 +332,8 @@ class IntegrationTestCase extends TestCase
 			$data['data'] = json_encode($data['data']);
 		}
 
-		$sql = 'INSERT INTO cms.users (uid, username, email, password, rolename, active, data, creator, editor)
-				VALUES (:uid, :username, :email, :password, :rolename, :active, :data::jsonb, :creator, :editor)
+		$sql = 'INSERT INTO cms.users (uid, username, email, password, roles, active, data, creator, editor)
+				VALUES (:uid, :username, :email, :password, ARRAY[:role], :active, :data::jsonb, :creator, :editor)
 				RETURNING usr';
 
 		return $this->db()->execute($sql, $data)->one()['usr'];

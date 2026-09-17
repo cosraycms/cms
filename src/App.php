@@ -147,6 +147,20 @@ class App implements RouteAdder
 		return $this->bootstrap->meta();
 	}
 
+	public function role(string $name, string $label): self
+	{
+		$this->bootstrap->policy()->role($name, $label);
+
+		return $this;
+	}
+
+	public function allow(string $principal, string ...$permissions): self
+	{
+		$this->bootstrap->policy()->allow($principal, ...$permissions);
+
+		return $this;
+	}
+
 	/** @param class-string $class */
 	public function node(string $class): self
 	{

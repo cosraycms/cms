@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Roles and permissions are defined in code and resolved by `Cosray\Security\Policy`. A user holds any number of roles; `$app->role()` and `$app->allow()` (or the plugin `Registrar`) add roles and allow entries for the principals `everyone`, `authenticated`, `role:{name}`, `type:{handle}` and `user:{uid}`. **Breaking:** `Cosray\Permissions`, `User::hasPermission()`, `User::permissions()`, `User::$role` and `Auth::permissions()` are gone; ask `Policy::permits($user, $permission)` and read `User::$roles`. The role names and `authenticated` are no longer permissions, and `edit-blocks` is dropped. Migration `000000-000039` replaces `users.rolename` and the `roles` table with `users.roles`, adds `users.type`, requires an email for every live user and rejects `@` in usernames; app SQL that inserts users must write `roles` instead of `rolename`.
+
 - Added a layout preview to blocks fields. A button beside the field's meta button renders the field's blocks through the site's render path, from the form as it stands and without saving, on a white sheet styled by the reference stylesheet, in a wide dialog with width presets for desktop, tablet landscape, tablet portrait and smartphone that show the responsive stacking. The panel posts the form to the new `…/{node}/blocks/{field}` and `…/create/{type}/blocks/{field}` editor routes. See [the editor side of blocks](docs/controls.md#blocks).
 
 - Sites can turn the panel dashboard off with `panel.dashboard => false`. Its masthead entry disappears, and the panel root, the logo and the redirect after login open the first collection instead, or the media library when there is none.

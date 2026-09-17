@@ -9,6 +9,7 @@ use Celema\Core\Exception\HttpUnauthorized;
 use Celema\Core\Factory\Factory;
 use Celema\Quma\Database;
 use Cosray\Middleware\Permission;
+use Cosray\Security\Policy;
 use Cosray\Session;
 use Cosray\Tests\TestCase;
 use Cosray\User;
@@ -38,7 +39,7 @@ final class PermissionMiddlewareTest extends TestCase
 	public function testUnauthorizedWhenNoUser(): void
 	{
 		$middleware = new Permission('edit-users');
-		$middleware->init(new Users($this->db()), $this->config());
+		$middleware->init(new Users($this->db()), $this->config(), Policy::withDefaults());
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/');
 
 		$this->throws(HttpUnauthorized::class);
@@ -57,7 +58,7 @@ final class PermissionMiddlewareTest extends TestCase
 			'username' => 'test-editor',
 			'email' => 'editor@example.com',
 			'password' => 'hash',
-			'role' => 'editor',
+			'roles' => ['editor'],
 			'active' => true,
 			'created' => '2024-01-01T00:00:00+00:00',
 			'changed' => '2024-01-01T00:00:00+00:00',
@@ -84,7 +85,7 @@ final class PermissionMiddlewareTest extends TestCase
 		};
 
 		$middleware = new Permission('edit-users');
-		$middleware->init($users, $this->config());
+		$middleware->init($users, $this->config(), Policy::withDefaults());
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/');
 		$request = $request->withAttribute('session', $session);
 

@@ -80,9 +80,7 @@ final class Menus extends Panel
 	 */
 	private function manages(): bool
 	{
-		$user = $this->request->get('user', null);
-
-		return $user instanceof User && $user->hasPermission('manage-menus');
+		return $this->permits('manage-menus');
 	}
 
 	/**

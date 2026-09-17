@@ -78,13 +78,12 @@ class End2EndTestCase extends IntegrationTestCase
 		$token = bin2hex(random_bytes(32));
 		$tokenHash = hash('sha256', $token);
 
-		// Create user with correct schema (rolename instead of role)
-		$sql = "INSERT INTO cms.users (uid, email, password, rolename, active, data, creator, editor)
-				VALUES (:uid, :email, :password, :rolename, true, '{}'::jsonb, :creator, :editor)
+		$sql = "INSERT INTO cms.users (uid, email, password, roles, active, data, creator, editor)
+				VALUES (:uid, :email, :password, ARRAY[:role], true, '{}'::jsonb, :creator, :editor)
 				RETURNING usr";
 
 		$systemUser = $db->execute(
-			"SELECT usr FROM cms.users WHERE rolename = 'system' LIMIT 1",
+			"SELECT usr FROM cms.users WHERE type = 'system' LIMIT 1",
 		)->one();
 		$this->assertNotEmpty($systemUser);
 		$systemUserId = (int) $systemUser['usr'];
@@ -93,7 +92,7 @@ class End2EndTestCase extends IntegrationTestCase
 			'uid' => $uid,
 			'email' => $uid . '@example.com',
 			'password' => password_hash('password', PASSWORD_ARGON2ID),
-			'rolename' => $role,
+			'role' => $role,
 			'creator' => $systemUserId,
 			'editor' => $systemUserId,
 		])->one()['usr'];

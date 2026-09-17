@@ -1,11 +1,9 @@
-INSERT INTO /*:cms.prefix:*/roles (rolename) VALUES ('system'), ('superuser'), ('admin'), ('editor');
-
 INSERT INTO /*:cms.prefix:*/users (
 	uid,
+	type,
 	username,
 	email,
 	password,
-	rolename,
 	active,
 	data,
 	creator,
@@ -13,9 +11,9 @@ INSERT INTO /*:cms.prefix:*/users (
 ) VALUES (
 	'0000000000000',
 	'system',
+	'system',
 	'system@cosray.dev',
 	'$2y$13$r30g3d99Nf5r4t6L1eDAa.FcMNazGHpwndT0Ak6Bvfhr7SEhaeepC',
-	'system',
 	true,
 	'{}'::jsonb,
 	1,
@@ -57,4 +55,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000033-rfc3339-datetimes[pgsql].php', now()),
 	('000000-000034-node-drafts.sql', now()),
 	('000000-000035-draft-history-outlives-drafts.sql', now()),
-	('000000-000036-fulltext[pgsql].sql', now());
+	('000000-000036-fulltext[pgsql].sql', now()),
+	('000000-000039-user-roles-and-types.sql', now());

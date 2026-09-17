@@ -54,7 +54,7 @@ final class UserTest extends TestCase
 			'username' => 'editor',
 			'email' => 'editor@example.com',
 			'password' => 'hash',
-			'role' => 'editor',
+			'roles' => ['editor'],
 			'active' => true,
 			'created' => '2024-01-01T00:00:00+00:00',
 			'changed' => '2024-01-01T00:00:00+00:00',

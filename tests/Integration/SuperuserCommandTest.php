@@ -38,7 +38,7 @@ final class SuperuserCommandTest extends IntegrationTestCase
 				['email' => $email],
 			)->one();
 
-			$this->assertSame('superuser', $user['rolename']);
+			$this->assertSame('{superuser}', $user['roles']);
 			$this->assertTrue((bool) $user['active']);
 			$this->assertTrue(password_verify('secret', (string) $user['password']));
 			$this->assertSame(

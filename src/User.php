@@ -8,10 +8,12 @@ class User
 {
 	public readonly int $id;
 	public readonly string $uid;
+	public readonly string $type;
 	public readonly string $username;
 	public readonly string $email;
 	public readonly string $password;
-	public readonly string $role;
+	/** @var list<string> */
+	public readonly array $roles;
 	public readonly bool $active;
 	public readonly ?string $name;
 	public readonly ?string $panelLocale;
@@ -25,10 +27,11 @@ class User
 	) {
 		$this->id = $data['usr'];
 		$this->uid = $data['uid'];
+		$this->type = $data['type'] ?? 'user';
 		$this->username = $data['username'] ?? '';
 		$this->email = $data['email'];
 		$this->password = $data['password'];
-		$this->role = $data['role'];
+		$this->roles = self::roleNames($data['roles'] ?? []);
 		$this->active = $data['active'];
 		$this->name = self::displayName($data['data'] ?? null);
 		$this->panelLocale = $data['panel_locale'] ?? null;
@@ -57,26 +60,22 @@ class User
 		return mb_strtoupper($initials);
 	}
 
-	public function hasPermission(string $permission): bool
-	{
-		$permissions = new Permissions();
-
-		return $permissions->has($this->role, $permission);
-	}
-
-	public function permissions(): array
-	{
-		$permissions = new Permissions();
-
-		return $permissions->get($this->role);
-	}
-
 	public function array(): array
 	{
 		$data = $this->data;
 		unset($data['password']);
 
 		return $data;
+	}
+
+	/** @return list<string> */
+	private static function roleNames(mixed $roles): array
+	{
+		if (is_string($roles)) {
+			$roles = json_decode($roles, true);
+		}
+
+		return is_array($roles) ? array_values(array_filter($roles, is_string(...))) : [];
 	}
 
 	private static function displayName(mixed $data): ?string

@@ -53,8 +53,8 @@ final class MenusWriterTest extends IntegrationTestCase
 	{
 		return (int) $this->db()->execute(
 			"INSERT INTO cms.users
-			(uid, username, email, password, rolename, active, data, creator, editor)
-			VALUES (:uid, :name, :email, 'x', 'editor', true, '{}'::jsonb, 1, 1)
+			(uid, username, email, password, roles, active, data, creator, editor)
+			VALUES (:uid, :name, :email, 'x', ARRAY['editor'], true, '{}'::jsonb, 1, 1)
 			RETURNING usr",
 			['uid' => $name, 'name' => $name, 'email' => $name . '@example.test'],
 		)->one()['usr'];

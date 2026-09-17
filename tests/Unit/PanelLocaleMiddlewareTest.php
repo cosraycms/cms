@@ -159,7 +159,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 			'username' => 'editor',
 			'email' => 'editor@example.com',
 			'password' => 'hash',
-			'role' => 'editor',
+			'roles' => ['editor'],
 			'active' => true,
 			'panel_locale' => $panelLocale,
 			'created' => '2024-01-01T00:00:00+00:00',

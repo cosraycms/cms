@@ -17,6 +17,7 @@ use Cosray\Middleware\InitRequest;
 use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\PanelLocale;
 use Cosray\Middleware\Session;
+use Cosray\Security\Policy;
 
 class Routes
 {
@@ -33,6 +34,7 @@ class Routes
 		protected Config $config,
 		protected Database $db,
 		protected Factory $factory,
+		protected Policy $policy,
 		protected array $pluginRoutes = [],
 		protected array $panelPages = [],
 	) {
@@ -117,6 +119,7 @@ class Routes
 					$this->config,
 					new Users($this->db),
 					$this->factory,
+					$this->policy,
 				);
 				// PanelLocale runs after Session so the user attribute (and
 				// with it the stored panel language preference) is available.

@@ -141,17 +141,6 @@ class Auth
 		return null;
 	}
 
-	public function permissions(): array
-	{
-		$user = $this->user();
-
-		if ($user === null) {
-			return [];
-		}
-
-		return $user->permissions();
-	}
-
 	public function getAuthToken(): string
 	{
 		$authToken = '';

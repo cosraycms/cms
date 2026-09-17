@@ -773,7 +773,7 @@ Links inherit their target from the region they sit in (`hx-target:inherited`), 
 Auth:
 
 - Token auth header: `Authentication: Bearer <token>`
-- Roles/permissions include `superuser`, `admin`, `editor`, `panel`, `authenticated`; `edit-menus` (superuser, admin) gates the panel menus area, and `manage-menus` (superuser) gates creating, renaming, and deleting a menu inside it — a handle is what templates fetch a menu by, so the set of menus is contract rather than content.
+- Roles (`superuser`, `admin`, `editor`, plus app-defined ones) live in code, a user holds any number of them in `users.roles`. `Cosray\Security\Policy::permits(?User $user, string $permission)` resolves the user's principals (`everyone`, `authenticated`, `user:{uid}`, `type:{handle}`, `role:{name}`) against allow-only entries registered with `$app->role()`/`$app->allow()` or the plugin `Registrar`. Permissions: `panel`, `edit-nodes`, `edit-menus`, `manage-menus`, `edit-users`, `edit-settings`; `edit-menus` (superuser, admin) gates the panel menus area, and `manage-menus` (superuser) gates creating, renaming, and deleting a menu inside it — a handle is what templates fetch a menu by, so the set of menus is contract rather than content.
 
 8) Node save payload basics
 

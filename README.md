@@ -509,6 +509,32 @@ Render a node by handle from templates with the neutral CMS API:
 
 `render()` resolves handles first and falls back to immutable UIDs.
 
+## Users, roles and permissions
+
+Roles and what they allow are defined in code; the database stores only the role names a user holds. Three concepts stay apart:
+
+- A **principal** says who is asking: `everyone`, `authenticated`, `user:{uid}`, `type:{handle}` and one `role:{name}` per role the user holds. Every visitor is `everyone`, every signed-in user is also `authenticated`.
+- A **permission** says what is asked for: `panel`, `edit-nodes`, `edit-menus`, `manage-menus`, `edit-users`, `edit-settings`, or whatever an app adds.
+- The **policy** holds the allow entries that connect them. There are no deny entries, so a user with several roles holds the union of what they grant.
+
+Cosray ships `superuser`, `admin` and `editor`. An app adds roles and entries while bootstrapping, a plugin through its `Registrar`:
+
+```php
+$app->role('shop', 'Shop manager');
+$app->allow('role:shop', 'panel', 'edit-orders');
+$app->allow('authenticated', 'comment');
+```
+
+A role stored on a user that the app no longer defines grants nothing. Ask the policy, which the container provides, instead of looking at a user's roles:
+
+```php
+use Cosray\Security\Policy;
+
+$policy->permits($user, 'edit-orders'); // $user may be null for a visitor
+```
+
+Routes are guarded with the `#[Permission('edit-orders')]` middleware attribute; controllers extending `Cosray\Controller\Panel\Panel` call `$this->permits('edit-orders')`.
+
 ## Boiler rendering
 
 `cosray/cms` bundles the Boiler renderer under the `Cosray\View\Boiler` namespace and registers it as the default `view` renderer. You do not need to require a separate renderer package or register a renderer for the common case.

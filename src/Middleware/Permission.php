@@ -10,6 +10,7 @@ use Celema\Core\Exception\HttpUnauthorized;
 use Celema\Wire\Call;
 use Cosray\Auth;
 use Cosray\Config;
+use Cosray\Security\Policy;
 use Cosray\Users;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -21,6 +22,7 @@ class Permission implements Middleware
 {
 	protected Users $users;
 	protected Config $config;
+	protected Policy $policy;
 
 	public function __construct(
 		public readonly string $permission,
@@ -39,7 +41,7 @@ class Permission implements Middleware
 		$user = $auth->user();
 
 		if ($user) {
-			if (!$user->hasPermission($this->permission)) {
+			if (!$this->policy->permits($user, $this->permission)) {
 				throw new HttpForbidden($request);
 			}
 
@@ -49,9 +51,10 @@ class Permission implements Middleware
 		throw new HttpUnauthorized($request);
 	}
 
-	public function init(Users $users, Config $config): void
+	public function init(Users $users, Config $config, Policy $policy): void
 	{
 		$this->users = $users;
 		$this->config = $config;
+		$this->policy = $policy;
 	}
 }

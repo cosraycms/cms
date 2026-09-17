@@ -247,10 +247,10 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertSame(
 			'superuser',
 			$this->db()->execute(
-				"SELECT u.rolename FROM cms.menus m
+				"SELECT u.roles[1] AS role FROM cms.menus m
 				JOIN cms.users u ON u.usr = m.editor
 				WHERE m.menu = 'audited'",
-			)->one()['rolename'],
+			)->one()['role'],
 		);
 	}
 

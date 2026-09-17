@@ -86,6 +86,20 @@ final class Registrar
 		$this->bootstrap->dashboard->add($card);
 	}
 
+	public function role(string $name, string $label): void
+	{
+		$this->bootstrap->policy()->role($name, $label);
+	}
+
+	/**
+	 * Principals are 'everyone', 'authenticated', 'role:{name}',
+	 * 'type:{handle}' and 'user:{uid}'.
+	 */
+	public function allow(string $principal, string ...$permissions): void
+	{
+		$this->bootstrap->policy()->allow($principal, ...$permissions);
+	}
+
 	public function migrations(string $dir): void
 	{
 		$this->bootstrap->addMigrations($dir);

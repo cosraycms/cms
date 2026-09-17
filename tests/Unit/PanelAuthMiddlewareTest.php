@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Celema\Core\Factory\Factory;
 use Celema\Quma\Database;
 use Cosray\Middleware\PanelAuth;
+use Cosray\Security\Policy;
 use Cosray\Session;
 use Cosray\Tests\TestCase;
 use Cosray\User;
@@ -39,6 +40,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			$this->config(['panel.path' => '/admin']),
 			$this->users(),
 			$this->factory(),
+			Policy::withDefaults(),
 		);
 		$request = $this
 			->factory()
@@ -63,6 +65,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			$this->config(['panel.path' => '/admin']),
 			$this->users(),
 			$this->factory(),
+			Policy::withDefaults(),
 		);
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/admin');
 		$request = $request->withHeader('HX-Request', 'true');
@@ -85,7 +88,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			'username' => 'guest',
 			'email' => 'guest@example.com',
 			'password' => 'hash',
-			'role' => 'guest',
+			'roles' => ['guest'],
 			'active' => true,
 			'created' => '2024-01-01T00:00:00+00:00',
 			'changed' => '2024-01-01T00:00:00+00:00',
@@ -97,6 +100,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			$this->config(['panel.path' => '/admin']),
 			$this->users([$user]),
 			$this->factory(),
+			Policy::withDefaults(),
 		);
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/admin');
 		$request = $request
@@ -121,7 +125,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			'username' => 'admin',
 			'email' => 'admin@example.com',
 			'password' => 'hash',
-			'role' => 'admin',
+			'roles' => ['admin'],
 			'active' => true,
 			'created' => '2024-01-01T00:00:00+00:00',
 			'changed' => '2024-01-01T00:00:00+00:00',
@@ -133,6 +137,7 @@ final class PanelAuthMiddlewareTest extends TestCase
 			$this->config(['panel.path' => '/admin']),
 			$this->users([$admin]),
 			$this->factory(),
+			Policy::withDefaults(),
 		);
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/admin');
 		$request = $request->withAttribute('session', $session);

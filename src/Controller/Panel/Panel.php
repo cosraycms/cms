@@ -14,6 +14,7 @@ use Cosray\Navigation;
 use Cosray\NavigationItem;
 use Cosray\NavLink;
 use Cosray\Panel\Extras;
+use Cosray\Security\Policy;
 use Cosray\User;
 use Cosray\Util\Form;
 
@@ -333,13 +334,16 @@ abstract class Panel
 	 */
 	private function menusUrl(string $panelPath): ?string
 	{
+		return $this->permits('edit-menus') ? $panelPath . '/menus' : null;
+	}
+
+	protected function permits(string $permission): bool
+	{
 		$user = $this->request->get('user', null);
 
-		if ($user instanceof User && $user->hasPermission('edit-menus')) {
-			return $panelPath . '/menus';
-		}
-
-		return null;
+		return $this->container
+			->get(Policy::class)
+			->permits($user instanceof User ? $user : null, $permission);
 	}
 
 	/** @return array{name: ?string, initials: string, title: string, detail: string}|null */

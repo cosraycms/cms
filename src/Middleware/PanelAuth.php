@@ -7,6 +7,7 @@ namespace Cosray\Middleware;
 use Celema\Core\Factory\Factory;
 use Cosray\Auth;
 use Cosray\Config;
+use Cosray\Security\Policy;
 use Cosray\Users;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -19,6 +20,7 @@ class PanelAuth implements Middleware
 		private readonly Config $config,
 		private readonly Users $users,
 		private readonly Factory $factory,
+		private readonly Policy $policy,
 	) {}
 
 	public function process(Request $request, Handler $handler): Response
@@ -27,7 +29,7 @@ class PanelAuth implements Middleware
 		$auth = new Auth($request, $this->users, $this->config, $session);
 		$user = $auth->user();
 
-		if ($user !== null && $user->hasPermission('panel')) {
+		if ($this->policy->permits($user, 'panel')) {
 			// Expose the resolved user downstream (chrome gating, panel
 			// locale) for token requests too, which never touch the
 			// session middleware's attribute.

@@ -316,49 +316,6 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->assertNull($user);
 	}
 
-	public function testPermissionsReturnsEmptyArrayForGuest(): void
-	{
-		$request = $this->psrRequest();
-		$auth = $this->createAuth($request);
-
-		$permissions = $auth->permissions();
-
-		$this->assertIsArray($permissions);
-		$this->assertCount(0, $permissions);
-	}
-
-	public function testPermissionsReturnsUserPermissions(): void
-	{
-		$userId = $this->createTestUser([
-			'uid' => 'permissions-user',
-			'email' => 'perms@example.com',
-			'rolename' => 'editor',
-		]);
-
-		// Create auth token
-		$token = bin2hex(random_bytes(32));
-		$tokenHash = hash('sha256', $token);
-
-		$this->db()->execute(
-			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
-			['token' => $tokenHash, 'usr' => $userId],
-		)->run();
-
-		$request = $this->psrRequest()->withHeader('Authentication', 'Bearer ' . $token);
-		// Pass PSR request directly
-		$auth = $this->createAuth($request);
-
-		$permissions = $auth->permissions();
-
-		$this->assertIsArray($permissions);
-		// Editor role has specific permissions defined in the database
-
-		// Cleanup
-		$this->db()->execute('DELETE FROM cms.auth_tokens WHERE token = :token', [
-			'token' => $tokenHash,
-		])->run();
-	}
-
 	public function testAuthenticateByOneTimeTokenWithValidToken(): void
 	{
 		$userId = $this->createTestUser([

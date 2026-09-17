@@ -43,6 +43,7 @@ use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
+use Cosray\Security\Policy;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
 use ReflectionClass;
@@ -64,6 +65,7 @@ class Bootstrap implements CorePlugin
 	protected readonly Controls $controls;
 	protected readonly CollectionSchemas $collectionSchemas;
 	protected readonly PanelDashboard $dashboardCards;
+	protected readonly Policy $policy;
 
 	public PanelDashboard $dashboard {
 		get => $this->dashboardCards;
@@ -126,6 +128,7 @@ class Bootstrap implements CorePlugin
 		$this->collectionSchemas = new CollectionSchemas(CollectionSchemaRegistry::withDefaults());
 		$this->navigation = new Navigation($this->collectionSchemas);
 		$this->dashboardCards = PanelDashboard::withDefaults();
+		$this->policy = Policy::withDefaults();
 	}
 
 	public function load(App $app): void
@@ -161,6 +164,7 @@ class Bootstrap implements CorePlugin
 		$this->container->add(PanelDashboard::class, $this->dashboardCards)->value();
 		$this->container->add(PluginAssets::class, $this->pluginAssets);
 		$this->container->add(PanelExtras::class, $this->panelExtras);
+		$this->container->add(Policy::class, $this->policy);
 		$this->container->add(IconProvider::class, Icons::class);
 		// A constructed instance: the argument resolver would otherwise try
 		// to build the defaulted Uid parameter and fail on its string args.
@@ -170,6 +174,7 @@ class Bootstrap implements CorePlugin
 			$this->config,
 			$this->db,
 			$this->factory,
+			$this->policy,
 			$this->pluginRoutes,
 			$this->panelPages,
 		);
@@ -288,6 +293,11 @@ class Bootstrap implements CorePlugin
 	public function panelExtras(): PanelExtras
 	{
 		return $this->panelExtras;
+	}
+
+	public function policy(): Policy
+	{
+		return $this->policy;
 	}
 
 	/**
