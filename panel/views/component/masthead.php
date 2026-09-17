@@ -64,6 +64,8 @@ $label = is_array($account) && $account['name'] === null
 					</form>
 					<hr />
 				<?php endif ?>
+				<a href="<?= $panelPath ?>/profile" role="menuitem" hx-target="#frame"><?= escape(__('nav:profile')) ?></a>
+				<hr />
 				<form method="post" action="<?= $panelPath ?>/logout" hx-boost="false">
 					<button type="submit"><?= escape(__('nav:logout')) ?></button>
 				</form>

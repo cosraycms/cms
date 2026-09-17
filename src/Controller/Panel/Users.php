@@ -107,8 +107,28 @@ final class Users extends Panel
 	#[Permission('edit-users')]
 	public function update(Context $context, string $uid): array
 	{
-		$user = $this->editable($uid);
+		return $this->save($context, $this->editable($uid), false);
+	}
+
+	/** Every panel user's own account; it needs no `edit-users`. */
+	public function profile(Context $context): array
+	{
+		return $this->form($context, $this->currentUser(), true, true);
+	}
+
+	public function saveProfile(Context $context): array
+	{
+		return $this->save($context, $this->currentUser(), true);
+	}
+
+	private function save(Context $context, User $user, bool $profile): array
+	{
 		[$values, $password, $errors] = $this->submitted($this->fields($context), $user, $user);
+		$current = $this->formData()['current_password'] ?? '';
+
+		if ($profile && $password !== null && !password_verify(is_string($current) ? $current : '', $user->password)) {
+			$errors[] = ['message' => __('user:error-current-password'), 'path' => ['current_password']];
+		}
 
 		if ($errors !== []) {
 			return $this->rejected($errors);
@@ -142,7 +162,7 @@ final class Users extends Panel
 		return Response::create($factory)->redirect($this->url('', ['notice' => 'deleted']), 303);
 	}
 
-	private function form(Context $context, User $user, bool $exists): array
+	private function form(Context $context, User $user, bool $exists, bool $profile = false): array
 	{
 		$locales = array_map(
 			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title, 'fallback' => $locale->fallback],
@@ -151,8 +171,14 @@ final class Users extends Panel
 		$self = $this->isSelf($user);
 
 		return $this->context([
+			'area' => $profile ? 'profile' : self::AREA,
+			'profile' => $profile,
 			'exists' => $exists,
-			'action' => $exists ? $this->url('/' . $user->uid) : $this->url('/create/' . $user->type),
+			'action' => match (true) {
+				$profile => $this->panelPath() . '/profile',
+				$exists => $this->url('/' . $user->uid),
+				default => $this->url('/create/' . $user->type),
+			},
 			'deleteUrl' => $exists && !$self ? $this->url('/' . $user->uid . '/delete') : null,
 			'listUrl' => $this->url(),
 			'title' => $exists

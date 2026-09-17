@@ -147,6 +147,49 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->assertNull($this->users()->find($editor->uid));
 	}
 
+	public function testEveryPanelUserEditsTheirOwnProfileButNotTheirAccess(): void
+	{
+		$this->authenticateAs('editor');
+		$self = $this->currentUser();
+
+		$this->assertResponseOk($this->makeRequest('GET', '/cp/profile'));
+
+		$html = $this->getHtmlResponse($this->save('/cp/profile', [
+			'email' => $self->email,
+			'name' => 'Edith Editor',
+			'password' => '',
+			'password_repeat' => '',
+			'roles' => ['superuser'],
+			'active' => '0',
+		]));
+		$saved = $this->users()->find($self->uid);
+
+		$this->assertStringContainsString('data-saved', $html);
+		$this->assertSame('Edith Editor', $saved->name);
+		$this->assertSame(['editor'], $saved->roles);
+		$this->assertTrue($saved->active);
+	}
+
+	public function testANewPasswordOnTheProfileNeedsTheCurrentOne(): void
+	{
+		$this->authenticateAs('editor');
+		$self = $this->currentUser();
+		$new = [
+			'email' => $self->email,
+			'password' => 'a brand new long password',
+			'password_repeat' => 'a brand new long password',
+		];
+
+		$refused = $this->getHtmlResponse($this->save('/cp/profile', ['current_password' => 'wrong'] + $new));
+
+		$this->assertStringContainsString('["current_password"]', $refused);
+		$this->assertTrue(password_verify('password', $this->users()->find($self->uid)->password));
+
+		$this->save('/cp/profile', ['current_password' => 'password'] + $new);
+
+		$this->assertTrue(password_verify('a brand new long password', $this->users()->find($self->uid)->password));
+	}
+
 	/** @param array<string, mixed> $form */
 	private function save(string $uri, array $form): ResponseInterface
 	{

@@ -10,6 +10,7 @@ $this->layout('layer/main');
 $user = $this->unwrap($user);
 $exists = (bool) $exists;
 $locked = (bool) $locked;
+$profile = (bool) $profile;
 $roles = (array) $this->unwrap($roles);
 $fields = (array) $this->unwrap($fields);
 $locales = (array) $this->unwrap($locales);
@@ -24,9 +25,13 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<header class="head">
 		<div class="titles">
 			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<a href="<?= escape((string) $listUrl) ?>"><?= escape(__('user:users')) ?></a>
-				<span class="sep" aria-hidden="true">/</span>
-				<span><?= escape((string) $typeLabel) ?></span>
+				<?php if ($profile): ?>
+					<span><?= escape(__('user:profile')) ?></span>
+				<?php else: ?>
+					<a href="<?= escape((string) $listUrl) ?>"><?= escape(__('user:users')) ?></a>
+					<span class="sep" aria-hidden="true">/</span>
+					<span><?= escape((string) $typeLabel) ?></span>
+				<?php endif ?>
 			</nav>
 			<div class="line">
 				<h1><?= escape((string) $title) ?></h1>
@@ -124,6 +129,16 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 									</div>
 								</div>
 							<?php endif ?>
+							<?php if ($profile): ?>
+								<?php $this->insert('user/input', [
+									'name' => 'current_password',
+									'label' => __('user:current-password'),
+									'type' => 'password',
+									'autocomplete' => 'current-password',
+									'help' => __('user:current-password-help'),
+									'width' => 100,
+								]) ?>
+							<?php endif ?>
 							<?php $this->insert('user/input', [
 								'name' => 'password',
 								'label' => $exists ? __('user:new-password') : __('user:password'),
@@ -142,53 +157,55 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						</div>
 					</fieldset>
 
-					<fieldset class="cms-fieldset" data-fieldset="access" <?= $locked ? 'disabled' : '' ?>>
-						<legend class="legend"><?= escape(__('user:access')) ?></legend>
-						<?php if ($locked): ?>
-							<div class="description"><?= escape(__('user:access-own-help')) ?></div>
-						<?php endif ?>
-						<div class="cms-fields fields">
-							<div class="cms-field" style="grid-column: span 100 / span 100" data-field="active">
-								<div class="field-body">
-									<div class="control cms-toggle">
-										<label class="toggle">
-											<input
-												type="checkbox"
-												role="switch"
-												class="cms-switch"
-												name="active"
-												value="1"
-												<?= $user->active ? 'checked' : '' ?> />
-											<span><?= escape(__('user:active')) ?></span>
-										</label>
-									</div>
-									<div class="description"><?= escape(__('user:active-help')) ?></div>
-								</div>
-							</div>
-							<?php if ($roles !== []): ?>
-								<div class="cms-field" style="grid-column: span 100 / span 100" data-field="roles">
-									<div class="label" id="user-roles-label"><div><?= escape(__('user:roles')) ?></div></div>
-									<div class="field-body">
-										<div class="control cms-radio-group" role="group" aria-labelledby="user-roles-label">
-											<?php foreach ($roles as $role): ?>
-												<label class="cms-checkbox-label">
-													<input
-														type="checkbox"
-														class="cms-checkbox"
-														name="roles[]"
-														value="<?= escape((string) $role['name']) ?>"
-														<?= $role['held'] ? 'checked' : '' ?>
-														<?= $role['assignable'] ? '' : 'disabled' ?> />
-													<span><?= escape((string) $role['label']) ?></span>
-												</label>
-											<?php endforeach ?>
-										</div>
-										<div class="description"><?= escape(__('user:roles-help')) ?></div>
-									</div>
-								</div>
+					<?php if (!$profile): ?>
+						<fieldset class="cms-fieldset" data-fieldset="access" <?= $locked ? 'disabled' : '' ?>>
+							<legend class="legend"><?= escape(__('user:access')) ?></legend>
+							<?php if ($locked): ?>
+								<div class="description"><?= escape(__('user:access-own-help')) ?></div>
 							<?php endif ?>
-						</div>
-					</fieldset>
+							<div class="cms-fields fields">
+								<div class="cms-field" style="grid-column: span 100 / span 100" data-field="active">
+									<div class="field-body">
+										<div class="control cms-toggle">
+											<label class="toggle">
+												<input
+													type="checkbox"
+													role="switch"
+													class="cms-switch"
+													name="active"
+													value="1"
+													<?= $user->active ? 'checked' : '' ?> />
+												<span><?= escape(__('user:active')) ?></span>
+											</label>
+										</div>
+										<div class="description"><?= escape(__('user:active-help')) ?></div>
+									</div>
+								</div>
+								<?php if ($roles !== []): ?>
+									<div class="cms-field" style="grid-column: span 100 / span 100" data-field="roles">
+										<div class="label" id="user-roles-label"><div><?= escape(__('user:roles')) ?></div></div>
+										<div class="field-body">
+											<div class="control cms-radio-group" role="group" aria-labelledby="user-roles-label">
+												<?php foreach ($roles as $role): ?>
+													<label class="cms-checkbox-label">
+														<input
+															type="checkbox"
+															class="cms-checkbox"
+															name="roles[]"
+															value="<?= escape((string) $role['name']) ?>"
+															<?= $role['held'] ? 'checked' : '' ?>
+															<?= $role['assignable'] ? '' : 'disabled' ?> />
+														<span><?= escape((string) $role['label']) ?></span>
+													</label>
+												<?php endforeach ?>
+											</div>
+											<div class="description"><?= escape(__('user:roles-help')) ?></div>
+										</div>
+									</div>
+								<?php endif ?>
+							</div>
+						</fieldset>
+					<?php endif ?>
 				</div>
 
 				<?php if ($fields['fields'] !== []): ?>

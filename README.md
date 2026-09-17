@@ -539,6 +539,8 @@ Routes are guarded with the `#[Permission('edit-orders')]` middleware attribute;
 
 The panel's Users area lists, creates, edits and soft-deletes users of every type; it needs `edit-users`. Nobody reaches beyond their own permissions there: a user can only be edited by someone holding everything that user's roles grant, and a role can only be given by someone holding everything it grants. Nobody changes their own roles, deactivates or deletes themselves, and the last active superuser keeps the role. A changed password ends the user's other sessions and remembered logins.
 
+Every panel user edits their own account, without roles and state, on the profile page in the account menu; a new password there needs the current one.
+
 Every user has an email address, which is the login; a username is an optional second login and cannot contain `@`.
 
 ### User models

@@ -190,6 +190,14 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));
 				$panel
+					->get('/profile', [Panel\Users::class, 'profile'], 'profile')
+					->middleware($panelAuth)
+					->after($renderers->get('user'));
+				$panel
+					->post('/profile', [Panel\Users::class, 'saveProfile'], 'profile.save')
+					->middleware($panelAuth)
+					->after($renderers->get('editor-save'));
+				$panel
 					->post("/users/{$uid}/delete", [Panel\Users::class, 'delete'], 'users.delete')
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));
