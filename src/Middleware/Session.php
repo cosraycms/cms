@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Middleware;
 
-use Celema\Quma\Database;
 use Cosray\Config;
 use Cosray\Users;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -16,7 +15,7 @@ class Session implements Middleware
 {
 	public function __construct(
 		protected Config $config,
-		protected Database $db,
+		protected Users $users,
 	) {}
 
 	public function process(Request $request, Handler $handler): Response
@@ -41,7 +40,7 @@ class Session implements Middleware
 		$userId = $session->authenticatedUserId();
 
 		if ($userId) {
-			$user = new Users($this->db)->byId($userId);
+			$user = $this->users->byId($userId);
 			$request = $request->withAttribute('user', $user);
 		}
 

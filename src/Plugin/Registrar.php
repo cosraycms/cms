@@ -86,6 +86,12 @@ final class Registrar
 		$this->bootstrap->dashboard->add($card);
 	}
 
+	/** @param class-string<\Cosray\User> $class */
+	public function user(string $class): void
+	{
+		$this->bootstrap->user($class);
+	}
+
 	public function role(string $name, string $label): void
 	{
 		$this->bootstrap->policy()->role($name, $label);

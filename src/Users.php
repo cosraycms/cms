@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Celema\Quma\Database;
+use Cosray\User\Types;
 
 class Users
 {
 	public function __construct(
 		protected Database $db,
+		protected Types $types = new Types(),
 	) {}
 
 	public function byLogin(string $login): ?User
@@ -122,7 +124,7 @@ class Users
 	protected function getUserOrNull(?array $data): ?User
 	{
 		if ($data) {
-			return new User($data);
+			return new ($this->types->class($data['type'] ?? Types::DEFAULT))($data);
 		}
 
 		return null;

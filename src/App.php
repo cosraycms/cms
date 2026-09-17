@@ -161,6 +161,14 @@ class App implements RouteAdder
 		return $this;
 	}
 
+	/** @param class-string<User> $class */
+	public function user(string $class): self
+	{
+		$this->bootstrap->user($class);
+
+		return $this;
+	}
+
 	/** @param class-string $class */
 	public function node(string $class): self
 	{

@@ -535,6 +535,39 @@ $policy->permits($user, 'edit-orders'); // $user may be null for a visitor
 
 Routes are guarded with the `#[Permission('edit-orders')]` middleware attribute; controllers extending `Cosray\Controller\Panel\Panel` call `$this->permits('edit-orders')`.
 
+### User models
+
+Every user is a `Cosray\User`: the account with its login, roles and state. A class extending it adds fields the way a node class does, and names a user type of its own:
+
+```php
+use Cosray\Field\Date;
+use Cosray\Field\Image;
+use Cosray\Schema\{Label, Limit, Required, Roles, Width};
+use Cosray\User;
+
+#[Label('Teacher'), Roles('editor')]
+class Teacher extends User
+{
+    #[Label('Birthday'), Required, Width(50)]
+    protected Date $birthday;
+
+    #[Label('Profile image'), Limit(max: 1)]
+    protected Image $image;
+}
+
+$app->user(Teacher::class);
+```
+
+The type handle derives from the class name (`teacher`) unless `#[Handle('…')]` sets it; registering a class under the handle `user` replaces the default type. `#[Roles(...)]` limits the roles a type can be given, and `#[Roles]` without arguments allows none: such users sign in and hold `authenticated` and `type:{handle}`, but never reach the panel. User fields are not translated and have no working copies.
+
+The values live under `content` in `users.data`. The fields of a user are hydrated on demand, not on every request:
+
+```php
+use Cosray\User\Fields;
+
+$fields->hydrate($user); // Fields comes from the container
+```
+
 ## Boiler rendering
 
 `cosray/cms` bundles the Boiler renderer under the `Cosray\View\Boiler` namespace and registers it as the default `view` renderer. You do not need to require a separate renderer package or register a renderer for the common case.

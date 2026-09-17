@@ -60,6 +60,20 @@ class User
 		return mb_strtoupper($initials);
 	}
 
+	/** @return array<string, array> the stored values of the fields a user model declares */
+	public function content(): array
+	{
+		$data = $this->data['data'] ?? [];
+
+		if (is_string($data)) {
+			$data = json_decode($data, true);
+		}
+
+		$content = is_array($data) ? $data['content'] ?? [] : [];
+
+		return is_array($content) ? $content : [];
+	}
+
 	public function array(): array
 	{
 		$data = $this->data;

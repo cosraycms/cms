@@ -8,6 +8,7 @@ use Celema\Core\Factory\Factory;
 use Cosray\Middleware\Session as SessionMiddleware;
 use Cosray\Session;
 use Cosray\Tests\TestCase;
+use Cosray\Users;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -47,7 +48,7 @@ final class SessionMiddlewareTest extends TestCase
 		$_SESSION['last_activity'] = time() - 10;
 
 		$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/');
-		$middleware = new SessionMiddleware($config, $this->db());
+		$middleware = new SessionMiddleware($config, new Users($this->db()));
 		$handler = new class($this->factory()) implements RequestHandlerInterface {
 			public ?ServerRequestInterface $request = null;
 

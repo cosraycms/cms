@@ -35,13 +35,14 @@ class Routes
 		protected Database $db,
 		protected Factory $factory,
 		protected Policy $policy,
+		protected Users $users,
 		protected array $pluginRoutes = [],
 		protected array $panelPages = [],
 	) {
 		$this->panelPath = $config->panel->path;
 		$this->frontendSession = $config->session->enabled;
 		$this->initRequestMiddlware = new InitRequest($config);
-		$this->session = new Session($this->config, $this->db);
+		$this->session = new Session($this->config, $this->users);
 	}
 
 	public function add(App $app): void
@@ -117,7 +118,7 @@ class Routes
 				$renderers = new PanelRenderers($app);
 				$panelAuth = new PanelAuth(
 					$this->config,
-					new Users($this->db),
+					$this->users,
 					$this->factory,
 					$this->policy,
 				);
