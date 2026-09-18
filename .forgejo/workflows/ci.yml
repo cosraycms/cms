@@ -79,6 +79,9 @@ jobs:
         run: php ./run db:migrations --apply
 
       - name: Run tests with coverage
+        # Composer's own process timeout is disabled for this script, so the
+        # bound that catches a hung test lives here.
+        timeout-minutes: 20
         run: composer coverage:test
         env:
           XDEBUG_MODE: coverage
