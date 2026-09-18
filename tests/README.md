@@ -288,7 +288,7 @@ final class NodeSaveTest extends End2EndTestCase
         ]);
 
         // Make an HTTP request against the panel editor endpoint
-        $response = $this->makeRequest('POST', '/cp/collection/test-articles/my-node', [
+        $response = $this->makeRequest('POST', '/cp/node/my-node', [
             'headers' => ['HX-Request' => 'true'],
             'body' => [
                 'publish' => '1',

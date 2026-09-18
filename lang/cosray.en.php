@@ -322,6 +322,7 @@ return [
 		'nav:account' => 'Account: :name',
 		'nav:content' => 'Content',
 		'nav:dashboard' => 'Dashboard',
+		'nav:home' => 'Home',
 		'nav:language' => 'Language',
 		'nav:logout' => 'Log out',
 		'nav:media' => 'Media',

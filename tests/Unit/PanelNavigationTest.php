@@ -90,6 +90,7 @@ final class PanelNavigationTest extends TestCase
 				->withAttribute('locales', $this->locales)
 				->withAttribute('locale', $this->locales->get('en'))
 				->withAttribute('panelLocale', 'de')
+				->withQueryParams(['from' => 'collection:articles'])
 				->withHeader('HX-Request', 'true')
 				->withHeader('HX-Target', 'main#main'),
 		);
@@ -99,11 +100,19 @@ final class PanelNavigationTest extends TestCase
 		$container->add(Cms::class, $cms);
 		Verba::activate(new Translator('de', $this->locales->catalogs()));
 
-		$data = new Editor($config, $container, $request)->create($context, $cms, 'articles', 'plain-block');
+		$data = new Editor($config, $container, $request)->create($context, $cms, 'plain-block');
 		$html = new Renderer(self::root() . '/panel/views')->render('editor', $data);
 
 		$this->assertHtmlNodeExists(
 			'//nav[@class="breadcrumb"]/a[text()="Artikel & Seiten"]',
+			$html,
+		);
+		$container->add(Navigation::class, new Navigation());
+		$request->wrap($request->unwrap()->withQueryParams([]));
+		$data = new Editor($config, $container, $request)->create($context, $cms, 'plain-block');
+		$html = new Renderer(self::root() . '/panel/views')->render('editor', $data);
+		$this->assertHtmlNodeExists(
+			'//form[@id="node-editor-form"][@action="/cp/node/create/plain-block"]',
 			$html,
 		);
 		$this->assertFalse($db->connected());

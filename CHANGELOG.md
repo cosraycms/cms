@@ -2,6 +2,8 @@
 
 ## [Unreleased](https://codefloe.com/cosray/cms/compare/0.2.0...HEAD)
 
+- Node editors and creation use collection-independent URLs: `{panel.path}/node/{uid}` and `{panel.path}/node/create/{type}`. Optional origin state preserves the return listing, including pagination and expanded branches. **Breaking:** collection-prefixed editor and creation routes are removed; custom panel links must use the global routes. Creation accepts registered node types independently of collection blueprints, while an explicit parent must permit the child type. Panel authentication remains unchanged; node-specific permissions are separate work.
+
 - Added user management to the panel. The System area, open to holders of `edit-users`, lists users by type with search, and creates, edits, deactivates and soft-deletes them: email, optional username, name, panel language and password in the form, the active switch and the roles in the editor's inspector. Nobody edits a user or gives a role beyond their own permissions, nobody changes their own access, and a changed password ends the user's other sessions. Every panel user edits their own account on a profile page in the account menu.
 
 - Added user types. A class extending `Cosray\User`, registered with `$app->user()`, names a type, limits its roles with `#[Roles(...)]` and declares fields like a node class; the panel renders them below the account and stores them under `content` in `users.data`. A type without roles gives accounts that sign in but never reach the panel.

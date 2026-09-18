@@ -50,7 +50,7 @@ final class PanelEditorLocaleControlTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-articles/panel-editor-locales',
+			'/cp/node/panel-editor-locales',
 		);
 
 		$this->assertResponseOk($response);

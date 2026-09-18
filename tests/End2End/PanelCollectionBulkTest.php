@@ -786,7 +786,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-hierarchy/bulk-editor-root/delete',
+			'/cp/node/bulk-editor-root/delete',
 		);
 
 		$this->assertResponseOk($response);

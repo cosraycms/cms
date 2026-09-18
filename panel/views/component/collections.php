@@ -34,10 +34,9 @@ use function Cosray\escape;
 		<?php
 
 		$href = $panelPath . '/collection/' . $item->slug();
-		// Node, create, and paths URLs all live below the collection URL, so
-		// the entry stays marked while the user works inside the collection.
-		$prefix = $href . '/';
-		$active = (string) $currentPath === $href || str_starts_with((string) $currentPath, $prefix);
+		$active =
+			(string) $currentPath === $href
+			|| (string) ($activeCollection ?? '') === (string) $item->slug();
 		$iconMeta = $this->unwrap($item->meta->icon);
 		?>
 		<a

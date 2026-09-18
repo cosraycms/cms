@@ -69,7 +69,7 @@ final class PanelSaveTitleTest extends End2EndTestCase
 
 	private function save(string $uid, string $title): void
 	{
-		$response = $this->makeRequest('POST', "/cp/collection/test-articles/{$uid}", [
+		$response = $this->makeRequest('POST', "/cp/node/{$uid}", [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => ['_complete' => '1', 'content' => ['title' => ['value' => ['en' => $title]]]],
 		]);

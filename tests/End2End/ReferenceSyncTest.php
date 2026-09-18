@@ -98,7 +98,7 @@ final class ReferenceSyncTest extends End2EndTestCase
 			]),
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/e2e-refsync-node', [
+		$response = $this->makeRequest('POST', '/cp/node/e2e-refsync-node', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',

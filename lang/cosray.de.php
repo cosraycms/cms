@@ -328,6 +328,7 @@ return [
 		'nav:account' => 'Konto: :name',
 		'nav:content' => 'Inhalte',
 		'nav:dashboard' => 'Dashboard',
+		'nav:home' => 'Startseite',
 		'nav:language' => 'Sprache',
 		'nav:logout' => 'Abmelden',
 		'nav:media' => 'Medien',

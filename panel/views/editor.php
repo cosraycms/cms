@@ -7,8 +7,9 @@ use function Cosray\escape;
 $this->layout('layer/main');
 
 $mode = (string) $mode;
-$name = (string) $this->unwrap($name);
-$slug = (string) $slug;
+$backUrl = (string) $this->unwrap($backUrl);
+$backLabel = (string) $this->unwrap($backLabel);
+$links = $this->unwrap($links);
 $node = (array) $this->unwrap($node);
 $locales = (array) $this->unwrap($locales);
 $defaultLocale = (string) $defaultLocale;
@@ -25,6 +26,7 @@ $content = $node['content'] ?? [];
 $assets = $node['assets'] ?? [];
 $type = $node['type'] ?? [];
 $uid = (string) ($node['uid'] ?? '');
+$parent = $node['parent'] ?? null;
 $routable = (bool) ($type['routable'] ?? false);
 $renderable = (bool) ($type['renderable'] ?? false);
 $published = (bool) ($node['published'] ?? false);
@@ -35,14 +37,14 @@ $showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
 $action = $edit
 	? $links->edit($uid)
-	: $links->create((string) ($type['handle'] ?? ''));
+	: $links->create((string) ($type['handle'] ?? ''), $parent);
 ?>
 
 <div class="page cms-node">
 	<header class="head">
 		<div class="titles">
 			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<a href="<?= escape($links->back()) ?>"><?= escape($name) ?></a>
+				<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
 				<span class="sep" aria-hidden="true">/</span>
 				<span><?= escape($edit ? __('editor:mode-edit') : __('editor:mode-create')) ?></span>
 			</nav>
@@ -72,11 +74,9 @@ $action = $edit
 				<?php // Its own form: the editor form wraps the panes, and forms
 
 				// cannot nest. ?>
-				<?php // hx-swap="none" like the editor form: success is a 303 htmx
-
-				// follows into the collection, a refusal returns only the
-				// out-of-band status chip. ?>
 				<form
+					id="node-editor-delete"
+					data-dirty-bypass
 					method="post"
 					action="<?= escape($links->delete($uid)) ?>"
 					hx-swap="none"
@@ -183,7 +183,7 @@ $action = $edit
 				'renderable' => $renderable,
 				'pathsUrl' => $edit
 					? $links->paths($uid)
-					: $links->createPaths((string) ($type['handle'] ?? '')),
+					: $links->createPaths((string) ($type['handle'] ?? ''), $parent),
 				'generatedPaths' => $generatedPaths,
 				'meta' => $meta,
 				'contentLocales' => $contentLocales,
@@ -204,7 +204,7 @@ $action = $edit
 		static fn(mixed $f): bool => is_array($f) && (($f['control'] ?? [])['name'] ?? null) === 'blocks',
 	)) {
 		$this->insert('node/layout-preview', [
-			'url' => $edit ? $links->blocks($uid) : $links->createBlocks((string) ($type['handle'] ?? '')),
+			'url' => $edit ? $links->blocks($uid) : $links->createBlocks((string) ($type['handle'] ?? ''), $parent),
 		]);
 	} ?>
 	<script id="cosray-system-data" type="application/json"><?= json_encode(

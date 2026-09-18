@@ -278,11 +278,11 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc&amp;parent=panel-parent-filter"',
+			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc&amp;list%5Bparent%5D=panel-parent-filter&amp;parent=panel-parent-filter"',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[@id="collection-create"]//a[starts-with(@href, "/cp/collection/test-hierarchy/create/test-hierarchy-child") and normalize-space() = "Hierarchy Child"]',
+			'//*[@id="collection-create"]//a[starts-with(@href, "/cp/node/create/test-hierarchy-child") and normalize-space() = "Hierarchy Child"]',
 			$html,
 		);
 		$this->assertStringContainsString('Hierarchy Parent', $html);

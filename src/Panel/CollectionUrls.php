@@ -86,34 +86,7 @@ final class CollectionUrls
 
 	public function edit(string $uid): string
 	{
-		$path = $this->path() . '/' . rawurlencode($uid);
-
-		return $this->url($path, $this->query->editorParams());
-	}
-
-	/**
-	 * Editor sub-routes carry no query — appending to edit() would land
-	 * the suffix inside its query string.
-	 */
-	public function paths(string $uid): string
-	{
-		return $this->path() . '/' . rawurlencode($uid) . '/paths';
-	}
-
-	/** The layout preview of a blocks field; the client appends `/{field}`. */
-	public function blocks(string $uid): string
-	{
-		return $this->path() . '/' . rawurlencode($uid) . '/blocks';
-	}
-
-	public function delete(string $uid): string
-	{
-		return $this->path() . '/' . rawurlencode($uid) . '/delete';
-	}
-
-	public function discard(string $uid): string
-	{
-		return $this->path() . '/' . rawurlencode($uid) . '/discard';
+		return new NodeUrls($this->panelPath, 'collection:' . $this->slug, $this->query)->edit($uid);
 	}
 
 	/**
@@ -127,27 +100,10 @@ final class CollectionUrls
 		return $this->url($path, $this->query->editorParams());
 	}
 
-	public function createPaths(string $type): string
-	{
-		return $this->path() . '/create/' . rawurlencode($type) . '/paths';
-	}
-
-	public function createBlocks(string $type): string
-	{
-		return $this->path() . '/create/' . rawurlencode($type) . '/blocks';
-	}
-
 	public function create(string $type, ?string $parent = null): string
 	{
-		$overrides = [];
-
-		if ($parent !== null) {
-			$overrides['parent'] = $parent;
-		}
-
-		$path = $this->path() . '/create/' . rawurlencode($type);
-
-		return $this->url($path, $this->query->editorParams($overrides));
+		return new NodeUrls($this->panelPath, 'collection:' . $this->slug, $this->query)
+			->create($type, $parent ?? $this->query->parent);
 	}
 
 	/** @param array<string, mixed> $params */

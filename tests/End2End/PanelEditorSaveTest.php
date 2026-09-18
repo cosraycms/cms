@@ -79,7 +79,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		]);
 
 		$html = (string) $this
-			->makeRequest('GET', '/cp/collection/test-articles/panel-save-immutable')
+			->makeRequest('GET', '/cp/node/panel-save-immutable')
 			->getBody();
 		$this->assertHtmlNodeExists(
 			'//input[@name="content[reference][value][zxx]"][@readonly][not(@disabled)]',
@@ -123,7 +123,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			$html,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-immutable', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-immutable', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -159,11 +159,11 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$editor = $this->makeRequest('GET', '/cp/collection/test-articles/panel-save-datetime');
+		$editor = $this->makeRequest('GET', '/cp/node/panel-save-datetime');
 		$html = (string) $editor->getBody();
 		$this->assertStringContainsString('value="2026-07-30T19:00:45"', $html);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-datetime', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-datetime', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -220,7 +220,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-entries', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-entries', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -275,7 +275,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-blocks', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -337,7 +337,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-spacing', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-spacing', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -382,7 +382,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks-symmetric', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-blocks-symmetric', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -421,7 +421,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		// Everything else stays rule-clean on purpose: sire runs the row
 		// review, which reports the sub-fields, only on rule-clean data.
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-blocks-invalid', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-blocks-invalid', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -481,7 +481,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-meta', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-meta', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -515,7 +515,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-a', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-a', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -557,7 +557,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-plain', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-plain', [
+			'query' => ['from' => 'collection:test-articles', 'list' => ['offset' => 50]],
 			'body' => [
 				'_complete' => '1',
 				'content' => ['title' => ['value' => ['en' => 'Plain Updated']]],
@@ -566,7 +567,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame(
-			'/cp/collection/test-articles/panel-save-plain',
+			'/cp/node/panel-save-plain?from=collection%3Atest-articles&list%5Boffset%5D=50',
 			$response->getHeaderLine('Location'),
 		);
 		$this->assertSame(
@@ -592,7 +593,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-invalid', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-invalid', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -657,7 +658,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-entries-invalid', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-entries-invalid', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -701,7 +702,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 	public function testSaveRejectsUnknownNode(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/does-not-exist', [
+		$response = $this->makeRequest('POST', '/cp/node/does-not-exist', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => ['_complete' => '1', 'content' => []],
 		]);
@@ -720,7 +721,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-urlencoded', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-urlencoded', [
 			'headers' => [
 				'HX-Request' => 'true',
 				'Content-Type' => 'application/x-www-form-urlencoded',
@@ -751,7 +752,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		// A POST truncated by max_input_vars loses its tail — including the
 		// sentinel the editor form renders as its last control.
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-truncated', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-truncated', [
 			'headers' => [
 				'HX-Request' => 'true',
 				'Content-Type' => 'application/x-www-form-urlencoded',
@@ -787,7 +788,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		// Without htmx there is no error box to render into; a silent PRG
 		// redirect would hide the data loss, so the save fails hard instead.
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-truncated-plain', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-truncated-plain', [
 			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
 			'body' => http_build_query([
 				'content' => ['title' => ['value' => ['en' => 'Lost Update']]],
@@ -814,7 +815,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		// The guard is transport-independent: a JSON body that lost the
 		// sentinel (mangled or hand-built) is refused the same way.
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-nosentinel', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-nosentinel', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'content' => ['title' => ['value' => ['en' => 'Lost Update']]],
@@ -843,7 +844,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-publish', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-publish', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => [
 				'_complete' => '1',
@@ -877,7 +878,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'published' => false,
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-articles/panel-save-publish-switch', [
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-publish-switch', [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => ['_complete' => '1', 'publish' => '1'],
 		]);
@@ -903,17 +904,42 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-articles/panel-save-delete/delete',
+			'/cp/node/panel-save-delete/delete',
+			[
+				'query' => [
+					'from' => 'collection:test-articles',
+					'list' => ['q' => 'Doomed', 'offset' => 50],
+				],
+			],
 		);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertStringStartsWith(
-			'/cp/collection/test-articles',
+		$this->assertSame(
+			'/cp/collection/test-articles?q=Doomed&offset=50',
 			$response->getHeaderLine('Location'),
 		);
 
-		$gone = $this->makeRequest('GET', '/cp/collection/test-articles/panel-save-delete');
+		$gone = $this->makeRequest('GET', '/cp/node/panel-save-delete');
 		$this->assertResponseStatus(404, $gone);
+	}
+
+	public function testHtmxDeleteReturnsToHomeWithAnAreaSwap(): void
+	{
+		$this->createTestNode([
+			'uid' => 'delete-direct',
+			'type' => $this->articleTypeId(),
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Delete me']]],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/node/delete-direct/delete', [
+			'headers' => ['HX-Request' => 'true'],
+			'query' => ['from' => 'https://example.com/untrusted'],
+		]);
+		$this->assertResponseOk($response);
+		$location = json_decode($response->getHeaderLine('HX-Location'), true);
+		$this->assertSame('/cp', $location['path']);
+		$this->assertSame('#frame', $location['target']);
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/node/delete-direct'));
 	}
 
 	/**

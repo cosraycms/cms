@@ -6,9 +6,11 @@ namespace Cosray\Tests\End2End;
 
 use Cosray\Bootstrap;
 use Cosray\Config;
+use Cosray\Schema\Children;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 use Cosray\Tests\Fixtures\Collection\TestRoutableCollection;
+use Cosray\Tests\Fixtures\Node\ParentPathRoutePage;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
 use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
 
@@ -31,6 +33,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		$plugin = parent::createBootstrap($config);
 		$plugin->node(TestHierarchyParent::class);
+		$plugin->node(PreviewParent::class);
 		$plugin->node(TestHierarchyChild::class);
 		$plugin->collection(TestHierarchyCollection::class);
 		$plugin->collection(TestRoutableCollection::class);
@@ -48,15 +51,18 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			'/cp/node/create/test-hierarchy-child',
 			[
 				'query' => [
 					'parent' => 'panel-create-parent',
-					'q' => 'Hierarchy',
-					'sort' => 'uid',
-					'dir' => 'asc',
-					'view' => 'tree',
-					'open' => 'panel-create-parent',
+					'from' => 'collection:test-hierarchy',
+					'list' => [
+						'q' => 'Hierarchy',
+						'sort' => 'uid',
+						'dir' => 'asc',
+						'view' => 'tree',
+						'open' => 'panel-create-parent',
+					],
 				],
 			],
 		);
@@ -69,14 +75,15 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertCreateAssetStateIsRendered($html);
 	}
 
-	public function testPanelCreateRouteRejectsChildTypeWithoutParent(): void
+	public function testRegisteredTypeCanBeCreatedWithoutCollectionOrParent(): void
 	{
-		$response = $this->makeRequest(
-			'GET',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
-		);
+		$response = $this->makeRequest('GET', '/cp/node/create/test-hierarchy-child');
 
-		$this->assertResponseStatus(404, $response);
+		$this->assertResponseOk($response);
+		$this->assertHtmlNodeExists(
+			'//form[@id="node-editor-form"][@action="/cp/node/create/test-hierarchy-child"]',
+			$this->getHtmlResponse($response),
+		);
 	}
 
 	public function testCollectionListLinksToCreateRouteWithParent(): void
@@ -91,11 +98,11 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy/create/test-hierarchy-parent?sort=changed&amp;dir=desc"',
+			'href="/cp/node/create/test-hierarchy-parent?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc&amp;parent=panel-create-parent"',
+			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc&amp;parent=panel-create-parent"',
 			$html,
 		);
 	}
@@ -122,7 +129,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy/create/test-hierarchy-child?sort=changed&amp;dir=desc&amp;parent=panel-current-parent"',
+			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc&amp;list%5Bparent%5D=panel-current-parent&amp;parent=panel-current-parent"',
 			$html,
 		);
 	}
@@ -137,7 +144,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			'/cp/node/create/test-hierarchy-child',
 			[
 				'query' => ['parent' => 'panel-store-parent'],
 				'body' => [
@@ -152,7 +159,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseStatus(303, $response);
 		$location = $response->getHeaderLine('Location');
 		$this->assertMatchesRegularExpression(
-			'#^/cp/collection/test-hierarchy/[A-Za-z0-9_-]+\?#',
+			'#^/cp/node/[A-Za-z0-9_-]+$#',
 			$location,
 		);
 
@@ -166,6 +173,81 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertNotNull($row['parent']);
 	}
 
+	public function testCreationParentIsIndependentOfTheReturnListing(): void
+	{
+		$listParent = $this->createHierarchyNode('list-parent', $this->parentTypeId, 'List parent');
+		$actualParent = $this->createHierarchyNode('actual-parent', $this->parentTypeId, 'Actual parent');
+		$query = [
+			'from' => 'collection:test-hierarchy',
+			'list' => ['parent' => 'list-parent', 'offset' => 50, 'q' => 'Find me'],
+			'parent' => 'actual-parent',
+		];
+		$response = $this->makeRequest('GET', '/cp/node/create/test-hierarchy-child', ['query' => $query]);
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		preg_match('/id="node-editor-form"[^>]*action="([^"]+)"/s', $html, $matches);
+		$action = html_entity_decode($matches[1] ?? '', ENT_QUOTES);
+		parse_str((string) parse_url($action, PHP_URL_QUERY), $params);
+		$this->assertEquals($query, $params);
+
+		$response = $this->makeRequest('POST', (string) parse_url($action, PHP_URL_PATH), [
+			'query' => $params,
+			'body' => [
+				'_complete' => '1',
+				'uid' => 'independent-parent',
+				'content' => [
+					'title' => ['value' => ['en' => 'New child']],
+				],
+			],
+		]);
+		$this->assertResponseStatus(303, $response);
+		$location = $response->getHeaderLine('Location');
+		parse_str((string) parse_url($location, PHP_URL_QUERY), $params);
+		$this->assertEquals(
+			[
+				'from' => $query['from'],
+				'list' => $query['list'],
+			],
+			$params,
+		);
+		$row = $this->db()->execute('SELECT parent FROM cms.nodes WHERE uid = :uid', [
+			'uid' => 'independent-parent',
+		])->one();
+		$this->assertSame($actualParent, (int) $row['parent']);
+		$this->assertNotSame($listParent, (int) $row['parent']);
+
+		$editor = $this->makeRequest('GET', (string) parse_url($location, PHP_URL_PATH), ['query' => $params]);
+		$this->assertResponseOk($editor);
+		$this->assertHtmlNodeExists(
+			'//nav[@class="breadcrumb"]/a[@href="/cp/collection/test-hierarchy?q=Find%20me&offset=50&parent=list-parent"]',
+			$this->getHtmlResponse($editor),
+		);
+	}
+
+	public function testCreationRejectsUnknownTypesAndInvalidParentsAcrossEndpoints(): void
+	{
+		$this->createHierarchyNode('valid-parent', $this->parentTypeId, 'Parent');
+		$this->createHierarchyNode('leaf-parent', $this->childTypeId, 'Leaf');
+
+		foreach ([
+			['unknown-type', null],
+			['test-hierarchy-child', 'missing-parent'],
+			['test-hierarchy-child', 'leaf-parent'],
+			['parent-path-route-page', 'valid-parent'],
+		] as [$type, $parent]) {
+			foreach ([['GET', ''], ['POST', ''], ['POST', '/paths'], ['POST', '/blocks/content']] as [
+				$method,
+				$suffix,
+			]) {
+				$response = $this->makeRequest($method, '/cp/node/create/' . $type . $suffix, [
+					'query' => $parent === null ? [] : ['parent' => $parent],
+					'body' => ['_complete' => '1'],
+				]);
+				$this->assertResponseStatus(404, $response, "{$method} {$type}{$suffix} parent={$parent}");
+			}
+		}
+	}
+
 	public function testCreateRouteCarriesBlueprintUidForPreSaveMedia(): void
 	{
 		$this->createHierarchyNode(
@@ -175,7 +257,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		);
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			'/cp/node/create/test-hierarchy-child',
 			['query' => ['parent' => 'panel-create-uid-parent']],
 		);
 
@@ -201,7 +283,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		// client uploads to it, then submits it so the saved node adopts it.
 		$get = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			'/cp/node/create/test-hierarchy-child',
 			['query' => ['parent' => 'panel-store-uid-parent']],
 		);
 		preg_match('/name="uid" value="([A-Za-z0-9._-]+)"/', $this->getHtmlResponse($get), $m);
@@ -210,7 +292,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-hierarchy/create/test-hierarchy-child',
+			'/cp/node/create/test-hierarchy-child',
 			[
 				'query' => ['parent' => 'panel-store-uid-parent'],
 				'body' => [
@@ -223,7 +305,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertStringContainsString(
-			'/cp/collection/test-hierarchy/' . $uid . '?',
+			'/cp/node/' . $uid,
 			$response->getHeaderLine('Location'),
 		);
 		$row = $this->db()->execute(
@@ -237,7 +319,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-routable/create/parent-path-route-page',
+			'/cp/node/create/parent-path-route-page',
 		);
 
 		$this->assertResponseOk($response);
@@ -245,7 +327,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		// The preview posts to the blueprint-based create-paths endpoint...
 		$this->assertStringContainsString('id="generated-paths"', $html);
 		$this->assertStringContainsString(
-			'/cp/collection/test-routable/create/parent-path-route-page/paths',
+			'/cp/node/create/parent-path-route-page/paths',
 			$html,
 		);
 		// ...and the {title} field the route references is marked so editing
@@ -261,7 +343,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-routable/create/parent-path-route-page/paths',
+			'/cp/node/create/parent-path-route-page/paths',
 			['body' => ['content' => ['title' => ['value' => ['en' => 'Fresh Title']]]]],
 		);
 
@@ -271,13 +353,36 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('fresh-title', $html);
 	}
 
+	public function testCreationPathPreviewUsesTheActualParent(): void
+	{
+		$type = $this->createTestType('preview-parent');
+		$parent = $this->createHierarchyNode('preview-parent-node', $type, 'Preview parent');
+		$this->createTestPath($parent, '/parent-path');
+
+		$response = $this->makeRequest('GET', '/cp/node/create/parent-path-route-page', [
+			'query' => ['parent' => 'preview-parent-node'],
+		]);
+		$this->assertResponseOk($response);
+		$this->assertHtmlNodeExists(
+			'//*[@hx-post="/cp/node/create/parent-path-route-page/paths?parent=preview-parent-node"]',
+			$this->getHtmlResponse($response),
+		);
+
+		$response = $this->makeRequest('POST', '/cp/node/create/parent-path-route-page/paths', [
+			'query' => ['parent' => 'preview-parent-node'],
+			'body' => ['content' => ['title' => ['value' => ['en' => 'Fresh title']]]],
+		]);
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString('/parent-path/fresh-title', $this->getHtmlResponse($response));
+	}
+
 	private function assertCreateAssetStateIsRendered(string $html): void
 	{
 		// The editor is a server-rendered form regardless of the panel static assets.
 		$this->assertStringContainsString('id="node-editor-form"', $html);
 		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
-			'action="/cp/collection/test-hierarchy/create/test-hierarchy-child?q=Hierarchy&amp;sort=uid&amp;dir=asc&amp;parent=panel-create-parent&amp;view=tree&amp;open=panel-create-parent"',
+			'action="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=uid&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
@@ -312,3 +417,6 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		return $this->createTestNode($data);
 	}
 }
+
+#[Children(ParentPathRoutePage::class)]
+final class PreviewParent extends TestHierarchyParent {}

@@ -334,7 +334,7 @@ class Routes
 					->after($renderers->get('collection'));
 				$panel
 					->get(
-						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}',
+						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'create'],
 						'editor.create',
 					)
@@ -342,7 +342,7 @@ class Routes
 					->after($renderers->get('editor'));
 				$panel
 					->post(
-						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}',
+						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'store'],
 						'editor.store',
 					)
@@ -350,7 +350,7 @@ class Routes
 					->after($renderers->get('editor-save'));
 				$panel
 					->post(
-						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}/paths',
+						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}/paths',
 						[Panel\Editor::class, 'createPaths'],
 						'editor.create.paths',
 					)
@@ -358,14 +358,12 @@ class Routes
 					->after($renderers->get('editor-paths'));
 				$panel
 					->post(
-						'/collection/{collection}/create/{type:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
+						'/node/create/{type:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
 						[Panel\Editor::class, 'createBlocks'],
 						'editor.create.blocks',
 					)
 					->middleware($panelAuth)
 					->after($renderers->get('blocks-preview'));
-				// Before the {node} routes: like `create`, the `bulk` segment
-				// wins over a node uid of the same name.
 				$panel
 					->post(
 						'/collection/{collection}/bulk/publish',
@@ -389,7 +387,7 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->post(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/delete',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/delete',
 						[Panel\Editor::class, 'delete'],
 						'editor.delete',
 					)
@@ -397,14 +395,14 @@ class Routes
 					->after($renderers->get('editor-save'));
 				$panel
 					->post(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/discard',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/discard',
 						[Panel\Editor::class, 'discard'],
 						'editor.discard',
 					)
 					->middleware($panelAuth);
 				$panel
 					->post(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/paths',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/paths',
 						[Panel\Editor::class, 'paths'],
 						'editor.paths',
 					)
@@ -412,7 +410,7 @@ class Routes
 					->after($renderers->get('editor-paths'));
 				$panel
 					->post(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}/blocks/{field:[A-Za-z0-9_]{1,64}}',
 						[Panel\Editor::class, 'blocks'],
 						'editor.blocks',
 					)
@@ -420,7 +418,7 @@ class Routes
 					->after($renderers->get('blocks-preview'));
 				$panel
 					->get(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'edit'],
 						'editor',
 					)
@@ -428,7 +426,7 @@ class Routes
 					->after($renderers->get('editor'));
 				$panel
 					->post(
-						'/collection/{collection}/{node:[A-Za-z0-9-_.]{1,64}}',
+						'/node/{node:[A-Za-z0-9-_.]{1,64}}',
 						[Panel\Editor::class, 'save'],
 						'editor.save',
 					)

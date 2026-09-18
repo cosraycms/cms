@@ -69,7 +69,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		foreach (['test-page', 'test-article'] as $type) {
 			$this->assertHtmlNodeExists(
-				"//*[@id=\"collection-create\"]//a[starts-with(@href, \"/cp/collection/test-mixed/create/{$type}\")]",
+				"//*[@id=\"collection-create\"]//a[starts-with(@href, \"/cp/node/create/{$type}\")]",
 				$html,
 			);
 		}

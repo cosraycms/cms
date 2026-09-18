@@ -255,6 +255,20 @@ public function register(Registrar $cms): void
 
 Panel page controllers extend `Cosray\Controller\Panel\Panel` and return `$this->context([...])`; the page template calls `$this->layout('layer/main')` and renders its own fragment, which the layer templates wrap according to what htmx asked for. Custom editor UIs ship as web components and use the `window.Cosray` runtime (modals, uploads, toasts, system info) — see `docs/controls.md` for the control vocabulary and the element contract. Block types are plain PHP: a class with fields and a `render()`, documented in `docs/blocks.md`. Cosray's own rich controls (richtext, code, media) are built the same way and serve as reference implementations under `panel/src/elements/`; the structural ones (entries, blocks) are server-rendered views instead. Panel CSS follows the cascade layers, design tokens and naming convention described in `docs/panel-styles.md`, which also documents the tokens a project may override to theme the panel. Keyboard operation follows the vocabulary in `docs/panel-keyboard.md` — which key means what, on every screen.
 
+### Node editor URLs
+
+Existing nodes open at `{panel.path}/node/{uid}`; creation opens at `{panel.path}/node/create/{type}`. Neither requires a collection. Build links with `Cosray\Panel\NodeUrls`, passing the configured panel path:
+
+```php
+$links = new \Cosray\Panel\NodeUrls($config->panel->path);
+$editUrl = $links->edit($uid);
+$createUrl = $links->create('article', parent: $parentUid);
+```
+
+Optional `from=collection:{handle}` or `from=dashboard` supplies return navigation, not ownership or authorization. Collection links preserve search, sorting, pagination and tree state in `list[...]`; creation's top-level `parent` is the actual new node's parent, independent of `list[parent]`. Missing or unknown origins return to panel home. Links between dashboard and editor must use `hx-target="#frame"` to switch panel areas.
+
+The endpoints currently require panel access. Creation accepts registered node types; an explicit parent must exist and allow the type through `#[Children(...)]`. Collection blueprints control the choices displayed in listings, not endpoint access. A separate node permission policy is not yet enforced.
+
 ### Panel scripts across navigation
 
 Panel navigation is htmx region swaps. Scripts registered via `Registrar::js()` load once per full document render and are **not** re-executed when the user navigates inside the panel; the history-restore layer carries no script tags at all. Plugin scripts must therefore work like the panel's own behaviors:

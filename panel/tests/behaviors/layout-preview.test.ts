@@ -34,7 +34,7 @@ function page(locale = 'de'): void {
 			<input type="hidden" name="_complete" value="1" />
 		</form>
 		<dialog class="cms-modal cms-layout-preview" data-layout-preview-dialog
-			data-url="/cp/collection/pages/node-1/blocks" data-error="Preview failed">
+			data-url="/cp/node/node-1/blocks" data-error="Preview failed">
 			<header class="modal-header">
 				<h2 class="modal-title" data-dialog-title>Layout preview</h2>
 				<div class="widths" role="group">
@@ -91,7 +91,7 @@ describe('layout preview', () => {
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(url).toBe('/cp/collection/pages/node-1/blocks/content?locale=de');
+		expect(url).toBe('/cp/node/node-1/blocks/content?locale=de');
 		expect(init.method).toBe('POST');
 		expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/json');
 		// The file input stays out; the rest nests like the save body, with
@@ -160,7 +160,21 @@ describe('layout preview', () => {
 		button().click();
 		await vi.waitFor(() => expect(dialog().open).toBe(true));
 
-		expect(fetchMock.mock.calls[0][0]).toBe('/cp/collection/pages/node-1/blocks/content');
+		expect(fetchMock.mock.calls[0][0]).toBe('/cp/node/node-1/blocks/content');
+	});
+
+	it('preserves the creation parent when appending the field and content language', async () => {
+		page();
+		dialog().dataset.url = '/cp/node/create/page/blocks?parent=parent-node';
+		const fetchMock = respond();
+
+		button().click();
+		await vi.waitFor(() => expect(dialog().open).toBe(true));
+
+		const url = new URL(fetchMock.mock.calls[0][0], location.href);
+		expect(url.pathname).toBe('/cp/node/create/page/blocks/content');
+		expect(url.searchParams.get('parent')).toBe('parent-node');
+		expect(url.searchParams.get('locale')).toBe('de');
 	});
 
 	it('changes the frame width with a preset and remembers it for the next opening', async () => {

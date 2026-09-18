@@ -16,10 +16,8 @@ use Cosray\Actor;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection as CmsCollection;
-use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
-use Cosray\Exception\RuntimeException;
 use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
@@ -31,6 +29,7 @@ use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionQuery;
 use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\FormPatch;
+use Cosray\Panel\NodeUrls;
 use Cosray\Panel\System;
 use Cosray\Richtext\Normalizer;
 use Cosray\Value\Blocks as BlocksValue;
@@ -43,10 +42,8 @@ final class Editor extends Panel
 	private const int LIMIT_DEFAULT = 50;
 	private const int LIMIT_MAX = 250;
 
-	public function edit(Context $context, Cms $cms, string $collection, string $node): array
+	public function edit(Context $context, Cms $cms, string $node): array
 	{
-		[$name, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
 		$result = $cms->node->working($node);
 
 		if (!$result) {
@@ -68,10 +65,7 @@ final class Editor extends Panel
 
 		return $this->editorContext(
 			mode: 'edit',
-			name: $name,
-			collection: $collection,
 			node: $data,
-			query: $query,
 			context: $context,
 			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
@@ -79,23 +73,13 @@ final class Editor extends Panel
 		);
 	}
 
-	public function create(Context $context, Cms $cms, string $collection, string $type): array
+	public function create(Context $context, Cms $cms, string $type): array
 	{
-		[$name, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
-
-		if (!$this->canCreate($obj, $type, $query->parent)) {
-			throw new HttpNotFound($this->request);
-		}
-
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		return $this->editorContext(
 			mode: 'create',
-			name: $name,
-			collection: $collection,
 			node: $data,
-			query: $query,
 			context: $context,
 			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
@@ -106,11 +90,8 @@ final class Editor extends Panel
 		Context $context,
 		Cms $cms,
 		Factory $factory,
-		string $collection,
 		string $node,
 	): Response|array {
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
 		$result = $cms->node->working($node);
 
 		if (!$result) {
@@ -138,7 +119,7 @@ final class Editor extends Panel
 
 		$data = $this->applyForm($data, $form);
 		$store = $this->nodeStore($context, $cms);
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$links = $this->origin()['links'];
 		$htmx = $this->request->hasHeader('HX-Request');
 		$toDraft = $this->savesAsDraft($nodeObj, $data, $form);
 
@@ -186,19 +167,16 @@ final class Editor extends Panel
 		Context $context,
 		Cms $cms,
 		Factory $factory,
-		string $collection,
 		string $node,
 	): Response {
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
 		$result = $cms->node->working($node);
 
 		if (!$result) {
 			throw new HttpNotFound($this->request);
 		}
 
+		$links = $this->origin()['links'];
 		$this->nodeStore($context, $cms)->discard(Wrapper::unwrap($result));
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
 		$response = Response::create($factory);
 
 		if (!$this->request->hasHeader('HX-Request')) {
@@ -272,16 +250,8 @@ final class Editor extends Panel
 		Context $context,
 		Cms $cms,
 		Factory $factory,
-		string $collection,
 		string $type,
 	): Response|array {
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
-
-		if (!$this->canCreate($obj, $type, $query->parent)) {
-			throw new HttpNotFound($this->request);
-		}
-
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		$form = $this->formData();
@@ -306,18 +276,14 @@ final class Editor extends Panel
 			$data['uid'] = $uid;
 		}
 
-		if ($query->parent !== null) {
-			$data['parent'] = $query->parent;
-		}
-
 		$store = $this->nodeStore($context, $cms);
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$links = $this->origin()['links'];
 
 		try {
 			$result = $store->create($nodeObj, $data, $context->locales(), $this->actor());
 		} catch (HttpBadRequest $e) {
 			if (!$this->request->hasHeader('HX-Request')) {
-				return Response::create($factory)->redirect($links->create($type), 303);
+				return Response::create($factory)->redirect($links->create($type, $data['parent'] ?? null), 303);
 			}
 
 			$payload = is_array($e->payload()) ? $e->payload() : [];
@@ -343,11 +309,9 @@ final class Editor extends Panel
 		Context $context,
 		Cms $cms,
 		Factory $factory,
-		string $collection,
 		string $node,
 	): Response|array {
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
+		$origin = $this->origin();
 		$result = $cms->node->working($node);
 
 		if (!$result) {
@@ -374,15 +338,23 @@ final class Editor extends Panel
 			];
 		}
 
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
+		$response = Response::create($factory);
 
-		return Response::create($factory)->redirect($links->collection(), 303);
+		if (!$this->request->hasHeader('HX-Request')) {
+			return $response->redirect($origin['backUrl'], 303);
+		}
+
+		return $response->header('HX-Location', json_encode([
+			'path' => $origin['backUrl'],
+			'target' => '#frame',
+			'swap' => 'innerHTML show:top',
+			'source' => '#node-editor-delete',
+			'confirm' => false,
+		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
 	}
 
-	public function paths(Context $context, Cms $cms, string $collection, string $node): array
+	public function paths(Context $context, Cms $cms, string $node): array
 	{
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
 		$result = $cms->node->working($node);
 
 		if (!$result) {
@@ -390,8 +362,7 @@ final class Editor extends Panel
 		}
 
 		$nodeObj = Wrapper::unwrap($result);
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
-		$pathsUrl = $links->paths($node);
+		$pathsUrl = new NodeUrls($this->panelPath())->paths($node);
 
 		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
 			return ['paths' => [], 'pathsUrl' => $pathsUrl];
@@ -420,18 +391,10 @@ final class Editor extends Panel
 	}
 
 	/** Route-path preview for a not-yet-saved node, built from its blueprint. */
-	public function createPaths(Context $context, Cms $cms, string $collection, string $type): array
+	public function createPaths(Context $context, Cms $cms, string $type): array
 	{
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
-
-		if (!$this->canCreate($obj, $type, $query->parent)) {
-			throw new HttpNotFound($this->request);
-		}
-
-		$links = new CollectionUrls($this->panelPath(), $collection, $query);
-		$pathsUrl = $links->createPaths($type);
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+		$pathsUrl = new NodeUrls($this->panelPath())->createPaths($type, $data['parent'] ?? null);
 
 		if (!(bool) $this->types()->get($nodeObj::class, 'routable', false)) {
 			return ['paths' => [], 'pathsUrl' => $pathsUrl];
@@ -462,11 +425,9 @@ final class Editor extends Panel
 	public function blocks(
 		Context $context,
 		Cms $cms,
-		string $collection,
 		string $node,
 		string $field,
 	): array {
-		$this->collection($collection);
 		$result = $cms->node->working($node);
 
 		if (!$result) {
@@ -493,17 +454,9 @@ final class Editor extends Panel
 	public function createBlocks(
 		Context $context,
 		Cms $cms,
-		string $collection,
 		string $type,
 		string $field,
 	): array {
-		[, $obj] = $this->collection($collection);
-		$query = $this->queryState($obj);
-
-		if (!$this->canCreate($obj, $type, $query->parent)) {
-			throw new HttpNotFound($this->request);
-		}
-
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
 
 		return $this->blocksPreview($context, $cms, $nodeObj, $data, $field);
@@ -665,14 +618,29 @@ final class Editor extends Panel
 	 */
 	private function blueprint(Cms $cms, Context $context, string $type): array
 	{
-		$class = $this->container
-			->tag(Bootstrap::NODE_TAG)
-			->entry($type)
-			->definition();
+		$registered = $this->container->tag(Bootstrap::NODE_TAG);
+
+		if (!$registered->has($type)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$class = $registered->entry($type)->definition();
+		$parent = $this->stringParam('parent', $this->request->params());
+
+		if ($parent !== '') {
+			$parentNode = $cms->node->byUid($parent, published: null);
+			$children = $parentNode?->meta->type->get('children', []);
+
+			if (!$parentNode || !is_array($children) || !in_array($class, $children, true)) {
+				throw new HttpNotFound($this->request);
+			}
+		}
+
 		$factory = $cms->nodeFactory();
 		$node = $factory->blueprint($class, $context, $cms);
 		$serializer = new Serializer($this->types(), $factory->uid());
 		$data = $serializer->blueprint($node, NodeFactory::fieldNamesFor($node), $context->locales());
+		$data['parent'] = $parent === '' ? null : $parent;
 
 		return [$node, $data];
 	}
@@ -692,66 +660,47 @@ final class Editor extends Panel
 		return null;
 	}
 
-	/** @return array{string, CmsCollection} */
-	private function collection(string $collection): array
+	private function origin(): array
 	{
-		try {
-			$ref = $this->navigation()->ref($collection);
-		} catch (RuntimeException $e) {
-			throw new HttpNotFound($this->request, previous: $e);
+		$origin = [
+			'backUrl' => $this->homeUrl(),
+			'backLabel' => __('nav:home'),
+			'activeCollection' => null,
+			'links' => new NodeUrls($this->panelPath()),
+		];
+		$from = $this->request->param('from', '');
+
+		if ($from === 'dashboard' && $this->config->panel->dashboard) {
+			return array_replace($origin, [
+				'backLabel' => __('nav:dashboard'),
+				'links' => new NodeUrls($this->panelPath(), 'dashboard'),
+			]);
 		}
 
-		$creator = new Creator($this->container);
-		$obj = $creator->create(
+		if (!is_string($from) || !str_starts_with($from, 'collection:')) {
+			return $origin;
+		}
+
+		$slug = substr($from, strlen('collection:'));
+		$ref = $this->navigation()->refs()[$slug] ?? null;
+
+		if ($ref === null) {
+			return $origin;
+		}
+
+		$obj = new Creator($this->container)->create(
 			$ref->class,
 			predefinedTypes: [Request::class => $this->request],
 		);
-		assert($obj instanceof CmsCollection, 'The editor route must resolve a collection');
+		assert($obj instanceof CmsCollection, 'The origin must resolve a collection');
+		$query = $this->queryState($obj);
 
-		return [__($ref->meta->label), $obj];
-	}
-
-	private function canCreate(CmsCollection $collection, string $type, ?string $parent): bool
-	{
-		if ($parent === null) {
-			return in_array($type, $this->blueprintHandles($collection), true);
-		}
-
-		if (!$collection->listMeta->showChildren) {
-			return false;
-		}
-
-		$lister = new Listing($collection, $this->types());
-		$childHandles = array_column(
-			$lister->childBlueprints($this->parentNode($collection, $parent)),
-			'slug',
-		);
-
-		return in_array($type, $childHandles, true);
-	}
-
-	private function parentNode(CmsCollection $collection, string $uid): Wrapper
-	{
-		$node = $collection->cms?->node->byUid($uid, published: null);
-
-		if (!$node) {
-			throw new HttpNotFound($this->request);
-		}
-
-		return $node;
-	}
-
-	/** @return list<string> */
-	private function blueprintHandles(CmsCollection $collection): array
-	{
-		$types = $this->types();
-		$handles = [];
-
-		foreach ($collection->blueprints() as $blueprint) {
-			$handles[] = (string) $types->get($blueprint, 'handle');
-		}
-
-		return $handles;
+		return [
+			'backUrl' => new CollectionUrls($this->panelPath(), $slug, $query)->back(),
+			'backLabel' => __($ref->meta->label),
+			'activeCollection' => $slug,
+			'links' => new NodeUrls($this->panelPath(), $from, $query),
+		];
 	}
 
 	private function actor(): Actor
@@ -775,18 +724,29 @@ final class Editor extends Panel
 
 	private function queryState(CmsCollection $collection): CollectionQuery
 	{
-		$offset = $this->intParam('offset', 0, min: 0);
-		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
-		$dir = strtolower($this->stringParam('dir'));
+		$params = $this->request->param('list', []);
+
+		if (!is_array($params)) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		$offset = $this->intParam('offset', $params, 0, min: 0);
+		$limit = $this->intParam('limit', $params, self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
+		$dir = strtolower($this->stringParam('dir', $params));
 
 		if ($dir !== '' && !in_array($dir, ['asc', 'desc'], true)) {
 			throw new HttpBadRequest($this->request);
 		}
 
-		$parent = $this->stringParam('parent');
-		$parent = $parent === '' ? null : $parent;
-		$view = $this->stringParam('view');
-		$open = $this->openParam('open');
+		$parent = $this->stringParam('parent', $params);
+		$parent = $collection->listMeta->showChildren && $parent !== '' ? $parent : null;
+		$view = $this->stringParam('view', $params);
+		$open = $this->openParam($params);
+		$sort = $this->stringParam('sort', $params);
+
+		if ($sort !== '' && !array_key_exists($sort, $collection->sorts())) {
+			$sort = '';
+		}
 		$defaultView = $collection->listMeta->showChildren && $parent === null ? 'tree' : 'list';
 
 		if ($view === '') {
@@ -802,8 +762,8 @@ final class Editor extends Panel
 		}
 
 		return new CollectionQuery(
-			q: $this->stringParam('q'),
-			sort: $this->stringParam('sort'),
+			q: $this->stringParam('q', $params),
+			sort: $sort,
 			dir: $dir,
 			offset: $offset,
 			limit: $limit,
@@ -845,10 +805,7 @@ final class Editor extends Panel
 
 	private function editorContext(
 		string $mode,
-		string $name,
-		string $collection,
 		array $node,
-		CollectionQuery $query,
 		Context $context,
 		array $generatedPaths = [],
 		array $pathSourceFields = [],
@@ -864,15 +821,12 @@ final class Editor extends Panel
 		);
 
 		return $this->context([
+			...$this->origin(),
 			'mode' => $mode,
-			'name' => $name,
-			'slug' => $collection,
 			'node' => $node,
 			'locales' => $locales,
 			'defaultLocale' => $context->locales()->getDefault()->id,
 			'system' => new System($this->config, $context->locales())->payload(),
-			'queryState' => $query,
-			'links' => new CollectionUrls($this->panelPath(), $collection, $query),
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,
 			'meta' => $meta,
@@ -949,11 +903,12 @@ final class Editor extends Panel
 
 	private function intParam(
 		string $key,
+		array $params,
 		int $default,
 		int $min,
 		?int $max = null,
 	): int {
-		$value = $this->request->param($key, (string) $default);
+		$value = $params[$key] ?? $default;
 
 		if (is_int($value)) {
 			$int = $value;
@@ -975,9 +930,9 @@ final class Editor extends Panel
 	}
 
 	/** @return list<string> */
-	private function openParam(string $key): array
+	private function openParam(array $params): array
 	{
-		$value = $this->request->param($key, '');
+		$value = $params['open'] ?? '';
 
 		if (!is_string($value)) {
 			throw new HttpBadRequest($this->request);
@@ -996,9 +951,9 @@ final class Editor extends Panel
 		return $open;
 	}
 
-	private function stringParam(string $key): string
+	private function stringParam(string $key, array $params): string
 	{
-		$value = $this->request->param($key, '');
+		$value = $params[$key] ?? '';
 
 		if (!is_string($value)) {
 			throw new HttpBadRequest($this->request);

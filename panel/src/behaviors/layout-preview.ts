@@ -161,15 +161,18 @@ async function load(dialog: HTMLElement, field: string): Promise<boolean> {
 	}
 
 	const locale = form.getAttribute('data-content-locale') ?? '';
-	const url =
-		`${dialog.dataset.url ?? ''}/${encodeURIComponent(field)}` +
-		(locale !== '' ? `?locale=${encodeURIComponent(locale)}` : '');
+	const url = new URL(dialog.dataset.url ?? '', location.href);
+	url.pathname += `/${encodeURIComponent(field)}`;
+
+	if (locale !== '') {
+		url.searchParams.set('locale', locale);
+	}
 
 	dialog.dataset.field = field;
 	stage.classList.add('is-loading');
 
 	try {
-		const response = await fetch(url, {
+		const response = await fetch(url.pathname + url.search, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', Accept: 'text/html' },
 			body: body(form),
