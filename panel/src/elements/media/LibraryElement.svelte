@@ -61,6 +61,8 @@
 	let fileInput: HTMLInputElement | undefined = $state();
 	let toolbar: HTMLElement | undefined = $state();
 	let rail: HTMLElement | undefined = $state();
+	// One panel-wide preference: an inspector is collapsed or it is not.
+	let collapsed = $state(false);
 
 	const prefix = $derived($system.prefix);
 	// The screen's content-language selector sits outside the element: the
@@ -81,6 +83,7 @@
 		// The filter rail is the shell's, so it sits outside this element's
 		// subtree, like the toolbar.
 		rail = document.querySelector<HTMLElement>('[data-media-rail]') ?? undefined;
+		collapsed = document.cookie.includes('cosray_inspector=collapsed');
 		readLocale();
 		document.addEventListener('content-locale:change', readLocale);
 
@@ -448,29 +451,60 @@
 		{/if}
 	</section>
 
-	<aside class="cms-media-inspector" aria-label={__('media:file-details')}>
-		{#if selected !== null}
-			<MediaDetail
-				uid={selected}
-				{prefix}
-				{locale}
-				onClose={() => (selected = null)}
-				onDeleted={() => onDeleted(selected!)}
-			/>
-		{:else}
-			<div class="cms-media-inspector-empty">{__('media:select-hint')}</div>
-		{/if}
+	<aside
+		class="cms-inspector"
+		aria-label={__('media:file-details')}
+		data-inspector
+		data-collapsed={collapsed ? '' : undefined}
+	>
+		<div class="strip">
+			<button
+				type="button"
+				class="tool"
+				title={__('media:details-show')}
+				aria-label={__('media:details-show')}
+				data-inspector-expand
+			>
+				<Icon name="layout-sidebar-inset-reverse" />
+			</button>
+		</div>
+		<div class="drawer">
+			<div class="top">
+				<span class="heading">{__('media:file-details')}</span>
+				<button
+					type="button"
+					class="tool"
+					title={__('media:details-hide')}
+					aria-label={__('media:details-hide')}
+					data-inspector-collapse
+				>
+					<Icon name="layout-sidebar-inset-reverse" />
+				</button>
+			</div>
+			<div class="scroll">
+				{#if selected !== null}
+					<MediaDetail
+						uid={selected}
+						{prefix}
+						{locale}
+						onClose={() => (selected = null)}
+						onDeleted={() => onDeleted(selected!)}
+					/>
+				{:else}
+					<div class="cms-media-inspector-empty">{__('media:select-hint')}</div>
+				{/if}
+			</div>
+		</div>
 	</aside>
 </div>
 
 <style>
 	@layer panel {
 		.cms-media-workspace {
+			display: flex;
 			flex: 1 1 auto;
-			min-height: 0;
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) var(--cms-inspector-width);
 			align-items: stretch;
+			min-height: 0;
 		}
 
 		.cms-media-rail {
@@ -553,6 +587,7 @@
 		.cms-media-pane {
 			position: relative;
 			display: flex;
+			flex: 1 1 auto;
 			flex-direction: column;
 			min-height: 0;
 			min-width: 0;
@@ -620,16 +655,7 @@
 			gap: var(--cms-space-3);
 		}
 
-		.cms-media-inspector {
-			min-width: 0;
-			min-height: 0;
-			display: flex;
-			flex-direction: column;
-			background: var(--cms-inspector-bg);
-		}
-
 		.cms-media-inspector-empty {
-			flex: 1 1 auto;
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -677,11 +703,15 @@
 			align-self: center;
 		}
 
-		/* The inspector stops sharing the row with the grid. */
-		@media (width < 75rem) {
+		/* No shell: the rail is a strip above the content, the panes stop
+		   scrolling internally and the page scrolls. */
+		@media (width < 40rem), (height < 30rem) {
 			.cms-media-workspace {
-				display: flex;
 				flex-direction: column;
+			}
+
+			.cms-media-pane {
+				min-height: auto;
 			}
 
 			.cms-media-pane,
@@ -689,14 +719,6 @@
 				overflow: visible;
 			}
 
-			.cms-media-pane,
-			.cms-media-inspector {
-				min-height: auto;
-			}
-		}
-
-		/* No shell: the rail is a strip above the content. */
-		@media (width < 40rem), (height < 30rem) {
 			.cms-media-rail {
 				flex-direction: row;
 				flex-wrap: wrap;

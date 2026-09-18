@@ -83,6 +83,8 @@ return [
 		'media:empty-many' => 'Keine Dateien',
 		'media:empty-one' => 'Keine Datei',
 		'media:file-count' => ':count Dateien',
+		'media:details-hide' => 'Datei-Details ausblenden',
+		'media:details-show' => 'Datei-Details einblenden',
 		'media:file-details' => 'Datei-Details',
 		'media:file-load-failed' => 'Die Datei konnte nicht geladen werden.',
 		'media:file-size' => 'Dateigröße',

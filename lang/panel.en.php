@@ -83,6 +83,8 @@ return [
 		'media:empty-many' => 'No files',
 		'media:empty-one' => 'No file',
 		'media:file-count' => ':count files',
+		'media:details-hide' => 'Hide file details',
+		'media:details-show' => 'Show file details',
 		'media:file-details' => 'File details',
 		'media:file-load-failed' => 'The file could not be loaded.',
 		'media:file-size' => 'File size',
