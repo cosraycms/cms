@@ -34,10 +34,12 @@
 					<span class="cms-asset-ext">{extension(item.filename) || item.kind}</span>
 				{/if}
 			</span>
-			<span class="cms-asset-name">{item.filename}</span>
-			{#if assetLine(item) !== ''}
-				<span class="cms-asset-line">{assetLine(item)}</span>
-			{/if}
+			<span class="cms-asset-meta">
+				<span class="cms-asset-name">{item.filename}</span>
+				{#if assetLine(item) !== ''}
+					<span class="cms-asset-line">{assetLine(item)}</span>
+				{/if}
+			</span>
 		</button>
 	{/each}
 </div>
@@ -54,24 +56,34 @@
 		.cms-asset-tile {
 			display: flex;
 			flex-direction: column;
-			gap: var(--cms-space-1);
 			padding: 0;
-			border: 0;
-			background: none;
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius-lg);
+			background: var(--cms-color-surface);
+			box-shadow: var(--cms-shadow-raised);
 			cursor: pointer;
 			text-align: left;
 			min-width: 0;
+			overflow: hidden;
+		}
+
+		.cms-asset-tile:hover {
+			border-color: var(--cms-color-border-strong);
+		}
+
+		.cms-asset-tile:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
 		}
 
 		.cms-asset-thumb {
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			aspect-ratio: 4 / 3;
+			aspect-ratio: 1 / 1;
 			width: 100%;
-			border: 1px solid var(--cms-color-border-strong);
-			border-radius: var(--cms-radius-md);
-			background-color: var(--cms-color-surface);
+			border-bottom: 1px solid var(--cms-color-border);
+			background-color: var(--cms-color-surface-sunken);
 			overflow: hidden;
 		}
 
@@ -88,13 +100,25 @@
 			color: var(--cms-color-text-subtle);
 		}
 
-		.cms-asset-tile.active .cms-asset-thumb {
+		/* The ring sits outside the border, so both together read as one edge. */
+		.cms-asset-tile.active {
 			border-color: var(--cms-color-accent);
-			outline: 2px solid var(--cms-color-accent);
+			box-shadow:
+				0 0 0 1px var(--cms-color-accent),
+				var(--cms-shadow-raised);
+		}
+
+		.cms-asset-meta {
+			display: flex;
+			flex-direction: column;
+			gap: var(--cms-space-0-5);
+			padding: var(--cms-space-2) var(--cms-space-3) var(--cms-space-3);
+			min-width: 0;
 		}
 
 		.cms-asset-name {
 			font-size: var(--cms-font-size-sm);
+			font-weight: 500;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -105,6 +129,10 @@
 			font-size: var(--cms-font-size-xs);
 			color: var(--cms-color-text-subtle);
 			font-variant-numeric: tabular-nums;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			max-width: 100%;
 		}
 	}
 </style>

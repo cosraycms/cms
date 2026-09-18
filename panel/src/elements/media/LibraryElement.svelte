@@ -414,7 +414,7 @@
 				<div class="cms-media-empty">{__('media:no-files')}</div>
 			{:else}
 				<AssetGrid
-					--gap="var(--cms-space-8) var(--cms-space-6)"
+					--gap="var(--cms-space-4)"
 					{items}
 					{selected}
 					pick={(item) => (selected = item.uid)}
