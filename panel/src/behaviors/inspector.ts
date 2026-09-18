@@ -3,15 +3,15 @@ import { selectTab } from './tabs';
 // The node inspector collapses to a strip of quick controls. Beside the fields
 // the choice lives in a cookie the editor reads, so a page arrives in its
 // state and never slides on load. Narrower, the inspector starts collapsed
-// and data-open lasts for the page; between the breakpoints, which match
-// cms-inspector.css, it opens over the fields as a layer that Escape and a
-// press outside close. The strip's published switch is an unnamed copy: the
+// and data-open lasts for the page; in the shell's middle band, whose query
+// matches cms-inspector.css, it opens over the fields as a layer that Escape
+// and a press outside close. The strip's published switch is an unnamed copy: the
 // form submits the real one, which a save replaces out of band.
 
 const ROOT = '[data-inspector]';
 const PUBLISHED = 'editor-published-switch';
 const BESIDE = '(width >= 75rem)';
-const OVER = '(52rem < width < 75rem)';
+const OVER = '(width >= 40rem) and (height >= 30rem) and (width < 75rem)';
 
 let opener: HTMLElement | null = null;
 

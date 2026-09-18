@@ -31,7 +31,10 @@ function editor(collapsed = false): void {
 }
 
 function viewport(width: 'beside' | 'over'): void {
-	const query = width === 'beside' ? '(width >= 75rem)' : '(52rem < width < 75rem)';
+	const query =
+		width === 'beside'
+			? '(width >= 75rem)'
+			: '(width >= 40rem) and (height >= 30rem) and (width < 75rem)';
 	const unmatched = window.matchMedia;
 	vi.stubGlobal('matchMedia', (media: string) => ({
 		...unmatched(media),
