@@ -6,11 +6,6 @@
 	min-height: 0;
 	overflow: hidden;
 
-	& .actions {
-		flex: 1 1 40rem;
-		min-width: 0;
-	}
-
 	& > .body,
 	& cosray-media-library {
 		display: flex;

@@ -74,6 +74,27 @@
 	flex: 0 0 auto;
 	flex-wrap: wrap;
 	padding: var(--cms-space-4) var(--cms-space-6);
+
+	& .search {
+		position: relative;
+		flex: 1 1 18rem;
+		max-width: 32rem;
+
+		& .icon {
+			position: absolute;
+			top: 50%;
+			left: var(--cms-space-3);
+			color: var(--cms-color-text-faint);
+			font-size: 1rem;
+			line-height: 1;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+
+		& .cms-input {
+			padding-inline: var(--cms-space-8) var(--cms-space-4);
+		}
+	}
 }
 
 @media (width < 40rem), (height < 30rem) {

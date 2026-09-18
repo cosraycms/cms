@@ -32,11 +32,11 @@ final class PanelMediaPageTest extends End2EndTestCase
 		);
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
 		$this->assertStringContainsString('"defaultLocale":"en"', $html);
-		// The screen's content-language selector wraps the library, so the
-		// inspector edits the selected translation.
+		// The library renders its own selector, in its inspector; the page
+		// only carries the scope it reads the choice from and announces it to.
 		$this->assertHtmlNodeExists(
 			'//div[@data-content-locale-scope][@data-content-locale="en"]'
-				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
+				. '//cosray-media-library',
 			$html,
 		);
 		// Browser-rendered controls boot with the panel catalog.

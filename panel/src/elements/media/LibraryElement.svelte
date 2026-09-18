@@ -60,11 +60,13 @@
 	let dragDepth = 0;
 	let fileInput: HTMLInputElement | undefined = $state();
 	let toolbar: HTMLElement | undefined = $state();
+	let counter: HTMLElement | undefined = $state();
 	let rail: HTMLElement | undefined = $state();
 	// One panel-wide preference: an inspector is collapsed or it is not.
 	let collapsed = $state(false);
 
 	const prefix = $derived($system.prefix);
+	const contentLocales = $derived($system.locales);
 	// The screen's content-language selector sits outside the element: the
 	// scope around it carries the selection and announces every change.
 	let locale = $state('');
@@ -83,6 +85,12 @@
 		// The filter rail is the shell's, so it sits outside this element's
 		// subtree, like the toolbar.
 		rail = document.querySelector<HTMLElement>('[data-media-rail]') ?? undefined;
+		counter =
+			$host().closest('.cms-media')?.querySelector<HTMLElement>('[data-media-count]') ?? undefined;
+
+		if (counter) {
+			counter.hidden = false;
+		}
 		collapsed = document.cookie.includes('cosray_inspector=collapsed');
 		readLocale();
 		document.addEventListener('content-locale:change', readLocale);
@@ -121,6 +129,11 @@
 		}
 
 		loading = false;
+	}
+
+	function clearSearch() {
+		q = '';
+		void load(true);
 	}
 
 	function search(event: Event) {
@@ -317,37 +330,27 @@
 	});
 </script>
 
+{#if counter}
+	<span class="cms-media-count" use:portal={counter}>
+		{__('media:file-count', { count: total })}
+	</span>
+{/if}
+
 {#if toolbar}
 	<div class="cms-media-toolbar" use:portal={toolbar}>
-		<form class="search" data-hx-boost="false" onsubmit={search}>
-			<input
-				class="cms-input"
-				type="search"
-				aria-label={__('media:search-filename')}
-				placeholder={__('media:search-filename')}
-				value={q}
-				oninput={edited}
-			/>
-			<button type="submit" class="cms-button secondary">{__('common:search')}</button>
-		</form>
-
-		<span class="count">{__('media:file-count', { count: total })}</span>
-
-		<div class="upload">
-			<button
-				type="button"
-				class="cms-button primary"
-				disabled={uploading}
-				onclick={() => fileInput?.click()}
-			>
-				<Icon name="cloud-upload" />
-				{uploading ? __('upload:in-progress') : __('common:upload')}
-				{#if uploading && uploadTotal > 1}
-					<span class="progress">{uploadDone}/{uploadTotal}</span>
-				{/if}
-			</button>
-			<input bind:this={fileInput} type="file" multiple hidden onchange={upload} />
-		</div>
+		<button
+			type="button"
+			class="cms-button primary"
+			disabled={uploading}
+			onclick={() => fileInput?.click()}
+		>
+			<Icon name="cloud-upload" />
+			{uploading ? __('upload:in-progress') : __('common:upload')}
+			{#if uploading && uploadTotal > 1}
+				<span class="progress">{uploadDone}/{uploadTotal}</span>
+			{/if}
+		</button>
+		<input bind:this={fileInput} type="file" multiple hidden onchange={upload} />
 	</div>
 {/if}
 
@@ -400,6 +403,25 @@
 		ondragleave={dragLeave}
 		ondrop={drop}
 	>
+		<div class="toolbar">
+			<form class="search" data-hx-boost="false" onsubmit={search}>
+				<span class="icon" aria-hidden="true">⌕</span>
+				<input
+					class="cms-input"
+					type="search"
+					aria-label={__('media:search-filename')}
+					placeholder={__('media:search-filename')}
+					value={q}
+					oninput={edited}
+				/>
+			</form>
+			{#if committed !== ''}
+				<button type="button" class="cms-button secondary" onclick={clearSearch}>
+					{__('common:reset')}
+				</button>
+			{/if}
+		</div>
+
 		{#if uploadErrors.length > 0}
 			<div class="cms-media-error">
 				<ul>
@@ -467,6 +489,29 @@
 			>
 				<Icon name="layout-sidebar-inset-reverse" />
 			</button>
+			{#if contentLocales.length > 1}
+				<div
+					class="cms-content-locales is-vertical"
+					role="radiogroup"
+					aria-label={__('editor:content-language')}
+					data-content-locale-control
+				>
+					{#each contentLocales as entry (entry.id)}
+						<button
+							type="button"
+							class="option"
+							role="radio"
+							aria-checked={locale === entry.id}
+							tabindex={locale === entry.id ? 0 : -1}
+							title={entry.title}
+							aria-label={entry.title}
+							data-content-locale-option={entry.id}
+						>
+							{entry.id}
+						</button>
+					{/each}
+				</div>
+			{/if}
 		</div>
 		<div class="drawer">
 			<div class="top">
@@ -482,6 +527,30 @@
 				</button>
 			</div>
 			<div class="scroll">
+				{#if contentLocales.length > 1}
+					<div class="cms-field">
+						<span class="label" id="cms-media-locale-label">{__('editor:content-language')}</span>
+						<div
+							class="cms-content-locales"
+							role="radiogroup"
+							aria-labelledby="cms-media-locale-label"
+							data-content-locale-control
+						>
+							{#each contentLocales as entry (entry.id)}
+								<button
+									type="button"
+									class="option"
+									role="radio"
+									aria-checked={locale === entry.id}
+									tabindex={locale === entry.id ? 0 : -1}
+									data-content-locale-option={entry.id}
+								>
+									{entry.title}
+								</button>
+							{/each}
+						</div>
+					</div>
+				{/if}
 				{#if selected !== null}
 					<MediaDetail
 						uid={selected}
@@ -607,37 +676,8 @@
 
 		.cms-media-toolbar {
 			display: flex;
-			flex-wrap: wrap;
 			align-items: center;
 			gap: var(--cms-space-3);
-
-			& .search {
-				display: flex;
-				gap: var(--cms-space-2);
-				flex: 1 1 14rem;
-				max-width: 26rem;
-				min-width: 0;
-			}
-
-			& .search input {
-				flex: 1 1 auto;
-				min-width: 0;
-			}
-
-			& .count {
-				font-size: var(--cms-font-size-sm);
-				color: var(--cms-color-text-muted);
-				font-variant-numeric: tabular-nums;
-				white-space: nowrap;
-			}
-
-			& .upload {
-				display: flex;
-				align-items: center;
-				flex-wrap: wrap;
-				gap: var(--cms-space-3);
-				margin-inline-start: auto;
-			}
 
 			& .progress {
 				font-variant-numeric: tabular-nums;
@@ -728,10 +768,6 @@
 
 			.cms-media-rail-head {
 				flex-basis: 100%;
-			}
-
-			.cms-media-toolbar .upload {
-				margin-inline-start: 0;
 			}
 
 			.cms-media-scroll {

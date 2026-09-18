@@ -6,7 +6,6 @@ $this->layout('layer/main');
 
 $system = (array) $this->unwrap($system);
 $panelBase = (string) $panelBase;
-$locales = (array) ($system['locales'] ?? []);
 $defaultLocale = (string) ($system['defaultLocale'] ?? '');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
@@ -19,14 +18,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<div class="titles">
 			<div class="line">
 				<h1><?= escape(__('media:title')) ?></h1>
+				<?php // The count belongs to the listing, which the island owns. ?>
+				<span class="cms-count" data-media-count hidden></span>
 			</div>
 		</div>
-		<?php $this->insert('component/content-locales', [
-			'locales' => $locales,
-			'selected' => $defaultLocale,
-			'controlId' => 'cms-media-locale',
-			'labelled' => false,
-		]) ?>
 		<div class="actions" data-media-toolbar></div>
 	</header>
 

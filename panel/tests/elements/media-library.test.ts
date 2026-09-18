@@ -58,12 +58,14 @@ afterEach(async () => {
 async function library() {
 	document.body.innerHTML = `
 		<div class="page cms-media" data-content-locale-scope data-content-locale="en">
-			<header class="head"><h1>Media</h1><div data-media-toolbar></div></header>
+			<header class="head">
+				<h1>Media</h1>
+				<span class="cms-count" data-media-count hidden></span>
+				<div class="actions" data-media-toolbar></div>
+			</header>
 			<section class="body"><cosray-media-library></cosray-media-library></section>
 		</div>`;
-	await vi.waitFor(() =>
-		expect(document.querySelector('header input[type="search"]')).not.toBeNull(),
-	);
+	await vi.waitFor(() => expect(document.querySelector('input[type="search"]')).not.toBeNull());
 	await vi.waitFor(() =>
 		expect(document.querySelector('header')?.textContent).toContain('media:file-count: 0'),
 	);
@@ -71,9 +73,9 @@ async function library() {
 }
 
 describe('media page controls', () => {
-	it('searches from the page header and keeps results and URL state in sync', async () => {
+	it('searches from the toolbar and keeps results, count and URL state in sync', async () => {
 		const element = await library();
-		const search = document.querySelector<HTMLInputElement>('header input[type="search"]')!;
+		const search = element.querySelector<HTMLInputElement>('.toolbar input[type="search"]')!;
 		search.value = 'guide';
 		search.dispatchEvent(new Event('input', { bubbles: true }));
 		await tick();
@@ -97,6 +99,7 @@ describe('media page controls', () => {
 		element.remove();
 		await tick();
 		expect(document.querySelector('[data-media-toolbar]')?.childElementCount).toBe(0);
+		expect(document.querySelector('[data-media-count]')?.childElementCount).toBe(0);
 
 		await library();
 		const picker = document.querySelector<HTMLInputElement>('header input[type="file"]')!;
