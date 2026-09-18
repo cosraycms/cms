@@ -1,15 +1,10 @@
-/* The head's unwrapped height, the fallback until the scroll behavior measures it. */
 .cms-dashboard {
-	--cms-head-height: 3.0625rem;
-
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
+	min-height: 0;
 
 	& .head {
-		position: sticky;
-		top: var(--cms-masthead-height);
-		z-index: 30;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
@@ -31,8 +26,13 @@
 		flex: 1 1 auto;
 		flex-direction: column;
 		gap: var(--cms-space-4);
+		min-height: 0;
 		padding: var(--cms-space-6);
+		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
 		background: var(--cms-pane-bg);
+		box-shadow: var(--cms-pane-shadow);
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	& .cards {
@@ -159,8 +159,10 @@
 			padding-inline: var(--cms-space-4);
 		}
 
-		& .head {
-			position: static;
+		& .body {
+			border-radius: 0;
+			box-shadow: none;
+			overflow: visible;
 		}
 
 		& .recent .row {

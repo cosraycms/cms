@@ -477,8 +477,6 @@
 	--cms-editor-max-width: 73rem;
 	--cms-row-height: 3.5rem;
 	--cms-masthead-bg: var(--cms-color-canvas);
-	/* Fixed, not measured: the sticky page heads and rails offset by it. */
-	--cms-masthead-height: calc(2.625rem + 1px);
 	--cms-sidebar-width: 13rem;
 	--cms-inspector-width: 19rem;
 	--cms-inspector-collapsed-width: 3.5rem;

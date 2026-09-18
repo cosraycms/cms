@@ -1,9 +1,3 @@
-/* A screen with a viewport of its own, like the media library. The list
-   scrolls sideways with a sticky title column and a sticky header row, and a
-   box that scrolls one way is a scroll container both ways, so the header
-   could not stick to the document. The page takes the height below the
-   masthead and keeps its bounded flex chain. */
-
 /* Without an inset, only a line separates the sidebar from the list. */
 .cms-sidebar:has(+ .main > .cms-collection) {
 	border-right: 1px solid var(--cms-color-border-soft);
@@ -11,8 +5,8 @@
 
 .cms-collection {
 	display: flex;
+	flex: 1 1 auto;
 	flex-direction: column;
-	height: calc(100dvh - var(--cms-masthead-height));
 	min-height: 0;
 	overflow: hidden;
 
@@ -369,7 +363,6 @@
 	}
 
 	.cms-collection {
-		height: auto;
 		overflow: visible;
 
 		& .head,

@@ -1,16 +1,12 @@
 /* The rail, grid and inspector scroll independently on wide screens. */
 .cms-media {
-	--cms-head-height: 4.5rem;
-
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
 	min-height: 0;
-	height: calc(100dvh - var(--cms-masthead-height));
 	overflow: hidden;
 
 	& > .head {
-		position: relative;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
@@ -41,22 +37,12 @@
 	}
 }
 
-@media (max-width: 72rem) {
+@media (max-width: 52rem) {
 	.cms-media {
-		height: auto;
 		overflow: visible;
 
 		& > .head {
-			position: sticky;
-			top: var(--cms-masthead-height);
-			z-index: 30;
+			padding-inline: var(--cms-space-4);
 		}
-	}
-}
-
-@media (max-width: 52rem) {
-	.cms-media > .head {
-		position: static;
-		padding-inline: var(--cms-space-4);
 	}
 }

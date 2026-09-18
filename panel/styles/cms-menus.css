@@ -1,18 +1,10 @@
-/* The head sticks below the masthead and the item pane below the head, which
-   the scroll behavior measures into --cms-head-height; the fallback is its
-   unwrapped height. */
-
 .cms-menus {
-	--cms-head-height: 4.25rem;
-
 	display: flex;
 	flex: 1 1 auto;
 	flex-direction: column;
+	min-height: 0;
 
 	& .head {
-		position: sticky;
-		top: var(--cms-masthead-height);
-		z-index: 30;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
@@ -51,8 +43,12 @@
 		flex-direction: column;
 		gap: var(--cms-space-3);
 		flex: 1 1 auto;
+		min-height: 0;
 		padding: var(--cms-space-4) var(--cms-space-6) 0;
+		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
 		background: var(--cms-pane-bg);
+		box-shadow: var(--cms-pane-shadow);
+		overflow: hidden;
 	}
 
 	& .cms-notice {
@@ -245,12 +241,17 @@
 		grid-template-columns: minmax(0, 1fr) var(--menu-pane-width);
 		gap: var(--cms-space-4);
 		flex: 1 1 auto;
+		min-height: 0;
 		/* Stretched, the pane would be as tall as the tree and never stick. */
 		align-items: start;
 	}
 
 	& .tree {
+		min-height: 0;
+		height: 100%;
 		padding-bottom: var(--cms-space-6);
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	/* Sits where the item it creates will appear: after the last root card,
@@ -554,10 +555,8 @@
 
 	& .pane {
 		position: sticky;
-		top: calc(var(--cms-masthead-height) + var(--cms-head-height) + var(--cms-space-4));
-		max-height: calc(
-			100dvh - var(--cms-masthead-height) - var(--cms-head-height) - 2 * var(--cms-space-4)
-		);
+		top: 0;
+		max-height: 100%;
 		padding: var(--cms-space-4);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
@@ -685,8 +684,10 @@
 			padding-inline: var(--cms-space-4);
 		}
 
-		& .head {
-			position: static;
+		& .body {
+			border-radius: 0;
+			box-shadow: none;
+			overflow: visible;
 		}
 	}
 
@@ -707,6 +708,11 @@
 
 		& .workspace {
 			grid-template-columns: minmax(0, 1fr);
+		}
+
+		& .tree {
+			height: auto;
+			overflow: visible;
 		}
 
 		& .pane {

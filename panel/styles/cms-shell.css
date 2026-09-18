@@ -1,18 +1,19 @@
 /*
- * The document scrolls. The masthead sticks to its top, page heads and rails
- * stick below the masthead, and every offset derives from
- * --cms-masthead-height. Nothing between a sticky part and the document may
- * become a scroll container: clip where a box needs clipping, never hide.
- * The collection list and the media library opt out and keep a viewport of
- * their own. Below the breakpoint nothing sticks.
+ * The shell is exactly one viewport tall and never scrolls; the regions inside
+ * it do. Every fixed row is `flex: 0 0 auto`, every scroller is
+ * `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs
+ * that `min-height: 0` or the scroller grows instead of scrolling. Below the
+ * breakpoint the shell hands scrolling back to the document, because nested
+ * scrollers and an on-screen keyboard do not get along.
  */
 
 .cms-shell {
 	display: flex;
 	flex-direction: column;
-	min-height: 100dvh;
+	height: 100dvh;
 	padding-inline: 0;
 	background: var(--cms-color-canvas);
+	overflow: hidden;
 
 	& > .frame {
 		display: flex;
@@ -20,10 +21,13 @@
 		align-items: stretch;
 		width: 100%;
 		max-width: var(--cms-content-max-width);
+		min-height: 0;
 		margin-inline: auto;
+		border-top: 1px solid var(--cms-color-border);
 		border-radius: 0;
 		background: var(--cms-color-surface);
 		box-shadow: none;
+		overflow: hidden;
 	}
 
 	& > .frame > .main {
@@ -31,47 +35,7 @@
 		flex: 1 1 auto;
 		flex-direction: column;
 		min-width: 0;
-	}
-}
-
-/*
- * The pane is an inset in the frame: the sidebar, the page head and a rail
- * beside the pane share one ground, and the pane's top corners curve into it.
- * The head draws the inset so it stays put while the pane scrolls under it:
- * ::before fills the ground outside the two curves, and ::after lays a
- * rounded, transparent sheet carrying the frame's shadow turned inward over
- * the pane's visible part. A page with a rail on the right moves the inset's
- * right edge to the pane's edge.
- */
-.cms-dashboard > .head,
-.cms-menus > .head,
-.cms-node > .head {
-	&::before,
-	&::after {
-		content: '';
-		position: absolute;
-		top: 100%;
-		right: var(--cms-pane-right, 0px);
-		left: 0;
-		pointer-events: none;
-	}
-
-	&::before {
-		--corner: var(--cms-pane-radius) var(--cms-pane-radius) no-repeat;
-		--curve:
-			transparent calc(var(--cms-pane-radius) - 1px),
-			var(--cms-color-surface) var(--cms-pane-radius);
-
-		height: var(--cms-pane-radius);
-		background:
-			radial-gradient(circle at 100% 100%, var(--curve)) left top / var(--corner),
-			radial-gradient(circle at 0 100%, var(--curve)) right top / var(--corner);
-	}
-
-	&::after {
-		height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
-		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
-		box-shadow: var(--cms-pane-shadow);
+		min-height: 0;
 	}
 }
 
@@ -79,21 +43,15 @@
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);
 
-	position: sticky;
-	top: 0;
-	z-index: 40;
 	display: flex;
 	align-items: center;
 	gap: clamp(var(--cms-space-3), 2vw, var(--cms-space-8));
 	flex: 0 0 auto;
+	flex-wrap: wrap;
 	width: 100%;
 	max-width: var(--cms-content-max-width);
-	height: var(--cms-masthead-height);
 	margin-inline: auto;
 	padding: var(--cms-space-1) var(--cms-space-6);
-	/* The frame's top edge, carried here so the frame's height below the
-	   masthead is exactly what the rails and the bounded screens compute. */
-	border-bottom: 1px solid var(--cms-color-border);
 	background-color: var(--cms-masthead-bg);
 
 	& .logo {
@@ -272,15 +230,10 @@
 }
 
 @media (width > 120rem) {
-	.cms-shell {
-		--cms-masthead-height: 3.875rem;
-
-		& > .frame {
-			border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
-			box-shadow: var(--cms-shadow);
-			/* Rounds the corners without becoming a scroll container. */
-			overflow: clip;
-		}
+	.cms-shell > .frame {
+		border-top: 0;
+		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+		box-shadow: var(--cms-shadow);
 	}
 
 	/* On the canvas beside the floating frame, items lift to the surface. */
@@ -289,25 +242,25 @@
 		--current-bg: var(--cms-color-surface);
 
 		padding: var(--cms-space-3) var(--cms-space-1) var(--cms-space-4);
-		border-bottom: 0;
 	}
 }
 
 @media (max-width: 52rem) {
-	.cms-shell > .frame {
-		flex-direction: column;
-	}
+	.cms-shell {
+		height: auto;
+		min-height: 100dvh;
+		overflow: visible;
 
-	/* Nothing sticks and the rails stack, so there is no frame to curve into. */
-	.cms-shell .page > .head::before,
-	.cms-shell .page > .head::after {
-		display: none;
+		& > .frame {
+			flex-direction: column;
+		}
+
+		& > .frame > .main {
+			min-height: 0;
+		}
 	}
 
 	.cms-masthead {
-		position: static;
-		flex-wrap: wrap;
-		height: auto;
 		padding-inline: var(--cms-space-4);
 	}
 }

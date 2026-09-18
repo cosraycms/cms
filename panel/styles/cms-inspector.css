@@ -10,13 +10,11 @@
  */
 
 .cms-inspector {
-	position: sticky;
-	top: calc(var(--cms-masthead-height) + var(--cms-head-height));
+	/* The drawer and the strip are absolute inside it. */
+	position: relative;
 	flex: 0 0 var(--cms-inspector-width);
-	align-self: flex-start;
 	width: var(--cms-inspector-width);
 	min-width: 0;
-	height: calc(100dvh - var(--cms-masthead-height) - var(--cms-head-height));
 	overflow: clip;
 	background: var(--cms-inspector-bg);
 	transition: flex-basis 200ms cubic-bezier(0.2, 0, 0, 1);

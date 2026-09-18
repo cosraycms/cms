@@ -1,11 +1,9 @@
 .cms-styleguide {
 	display: flex;
 	flex-direction: column;
+	min-height: 0;
 
 	& .head {
-		position: sticky;
-		top: var(--cms-masthead-height);
-		z-index: 30;
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-4);
@@ -27,7 +25,9 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
+		min-height: 0;
 		padding: var(--cms-space-6);
+		overflow: hidden;
 	}
 
 	& .sections {
@@ -35,7 +35,9 @@
 		flex: 1;
 		flex-direction: column;
 		gap: var(--cms-space-10);
+		min-height: 0;
 		padding-bottom: var(--cms-space-10);
+		overflow-y: auto;
 	}
 
 	& .section {
