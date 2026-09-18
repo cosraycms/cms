@@ -60,6 +60,7 @@
 	let dragDepth = 0;
 	let fileInput: HTMLInputElement | undefined = $state();
 	let toolbar: HTMLElement | undefined = $state();
+	let rail: HTMLElement | undefined = $state();
 
 	const prefix = $derived($system.prefix);
 	// The screen's content-language selector sits outside the element: the
@@ -77,6 +78,9 @@
 		toolbar =
 			$host().closest('.cms-media')?.querySelector<HTMLElement>('[data-media-toolbar]') ??
 			undefined;
+		// The filter rail is the shell's, so it sits outside this element's
+		// subtree, like the toolbar.
+		rail = document.querySelector<HTMLElement>('[data-media-rail]') ?? undefined;
 		readLocale();
 		document.addEventListener('content-locale:change', readLocale);
 
@@ -344,8 +348,8 @@
 	</div>
 {/if}
 
-<div class="cms-media-workspace">
-	<aside class="cms-media-rail" aria-label={__('common:filter')}>
+{#if rail}
+	<div class="cms-media-rail" use:portal={rail}>
 		<div class="cms-media-rail-head">
 			<span class="cms-media-rail-title">{__('common:filter')}</span>
 			{#if filtered}
@@ -380,8 +384,10 @@
 				</label>
 			{/each}
 		</fieldset>
-	</aside>
+	</div>
+{/if}
 
+<div class="cms-media-workspace">
 	<section
 		class="cms-media-pane cms-dropzone"
 		class:is-dragging={dragging}
@@ -463,20 +469,15 @@
 			flex: 1 1 auto;
 			min-height: 0;
 			display: grid;
-			grid-template-columns: var(--cms-sidebar-width) minmax(0, 1fr) var(--cms-inspector-width);
+			grid-template-columns: minmax(0, 1fr) var(--cms-inspector-width);
 			align-items: stretch;
 		}
 
 		.cms-media-rail {
-			min-width: 0;
-			min-height: 0;
-			padding: var(--cms-space-5) var(--cms-space-6);
-			background: var(--cms-color-rail);
-			overscroll-behavior: contain;
-			overflow-y: auto;
 			display: flex;
 			flex-direction: column;
 			gap: var(--cms-space-3);
+			min-width: 0;
 		}
 
 		.cms-media-rail-head {
@@ -676,19 +677,26 @@
 			align-self: center;
 		}
 
-		/* Stacked: panes stop scrolling internally, the page scrolls. */
+		/* The inspector stops sharing the row with the grid. */
 		@media (width < 75rem) {
 			.cms-media-workspace {
 				display: flex;
 				flex-direction: column;
 			}
 
-			.cms-media-rail,
 			.cms-media-pane,
 			.cms-media-scroll {
 				overflow: visible;
 			}
 
+			.cms-media-pane,
+			.cms-media-inspector {
+				min-height: auto;
+			}
+		}
+
+		/* No shell: the rail is a strip above the content. */
+		@media (width < 40rem), (height < 30rem) {
 			.cms-media-rail {
 				flex-direction: row;
 				flex-wrap: wrap;
@@ -700,19 +708,10 @@
 				flex-basis: 100%;
 			}
 
-			.cms-media-rail,
-			.cms-media-pane,
-			.cms-media-inspector {
-				min-height: auto;
-			}
-		}
-
-		@media (width < 40rem), (height < 30rem) {
 			.cms-media-toolbar .upload {
 				margin-inline-start: 0;
 			}
 
-			.cms-media-rail,
 			.cms-media-scroll {
 				padding-inline: var(--cms-space-4);
 			}

@@ -33,14 +33,21 @@ final class PanelAreasTest extends End2EndTestCase
 		return $plugin;
 	}
 
-	public function testTheCollectionRailBelongsToContentAlone(): void
+	public function testOnlyAnAreaWithARailRendersOne(): void
 	{
 		$this->assertStringContainsString(
 			'class="cms-sidebar"',
 			$this->html('/cp/collection/test-articles'),
 		);
 		$this->assertStringNotContainsString('class="cms-sidebar"', $this->html('/cp'));
-		$this->assertStringNotContainsString('class="cms-sidebar"', $this->html('/cp/media'));
+	}
+
+	public function testTheMediaRailIsNotAnnouncedAsNavigation(): void
+	{
+		$html = $this->html('/cp/media');
+
+		$this->assertHtmlNodeExists('//aside[@class="cms-sidebar"]//*[@data-media-rail]', $html);
+		$this->assertHtmlNodeMissing('//aside[@class="cms-sidebar"]//nav', $html);
 	}
 
 	public function testEachAreaMarksItselfCurrent(): void

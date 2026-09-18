@@ -45,9 +45,10 @@ final class PanelMediaPageTest extends End2EndTestCase
 		// The masthead carries the media area.
 		$this->assertStringContainsString('href="/cp/media"', $html);
 		// This panel defines no collections, so the content entry has nowhere
-		// to lead and stays away — the same condition that hides the rail.
+		// to lead and stays away.
 		$this->assertStringNotContainsString('>Content<', $html);
-		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
+		// The library's filters mount into the shell's rail.
+		$this->assertHtmlNodeExists('//aside[@class="cms-sidebar"]//*[@data-media-rail]', $html);
 	}
 
 	public function testMediaPageRequiresAuthentication(): void

@@ -18,6 +18,7 @@ final class Media extends Panel
 
 		return $this->context([
 			'system' => new System($this->config, $locales)->payload(),
+			'rail' => true,
 		]);
 	}
 }
