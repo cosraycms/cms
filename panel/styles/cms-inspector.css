@@ -123,6 +123,13 @@
 			align-self: stretch;
 			border-bottom: 0;
 		}
+
+		/* Without tabs the heading sets the row's height, so it repeats a
+		   tab's vertical padding. */
+		& > .heading {
+			flex: 1 1 auto;
+			padding-block: var(--cms-space-3);
+		}
 	}
 
 	& .scroll {
@@ -270,12 +277,12 @@
 			font-size: var(--cms-font-size-sm);
 			font-weight: 500;
 		}
+	}
 
-		& .help {
-			color: var(--cms-color-text-subtle);
-			font-size: var(--cms-font-size-xs);
-			line-height: 1.4;
-		}
+	& .help {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		line-height: 1.4;
 	}
 
 	& .changes {
@@ -299,12 +306,6 @@
 			color: var(--cms-color-warning-text);
 			font-size: var(--cms-font-size-sm);
 			font-weight: 500;
-		}
-
-		& .help {
-			color: var(--cms-color-text-subtle);
-			font-size: var(--cms-font-size-xs);
-			line-height: 1.4;
 		}
 
 		& .actions {

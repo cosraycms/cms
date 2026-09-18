@@ -156,56 +156,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 							]) ?>
 						</div>
 					</fieldset>
-
-					<?php if (!$profile): ?>
-						<fieldset class="cms-fieldset" data-fieldset="access" <?= $locked ? 'disabled' : '' ?>>
-							<legend class="legend"><?= escape(__('user:access')) ?></legend>
-							<?php if ($locked): ?>
-								<div class="description"><?= escape(__('user:access-own-help')) ?></div>
-							<?php endif ?>
-							<div class="cms-fields fields">
-								<div class="cms-field" style="grid-column: span 100 / span 100" data-field="active">
-									<div class="field-body">
-										<div class="control cms-toggle">
-											<label class="toggle">
-												<input
-													type="checkbox"
-													role="switch"
-													class="cms-switch"
-													name="active"
-													value="1"
-													<?= $user->active ? 'checked' : '' ?> />
-												<span><?= escape(__('user:active')) ?></span>
-											</label>
-										</div>
-										<div class="description"><?= escape(__('user:active-help')) ?></div>
-									</div>
-								</div>
-								<?php if ($roles !== []): ?>
-									<div class="cms-field" style="grid-column: span 100 / span 100" data-field="roles">
-										<div class="label" id="user-roles-label"><div><?= escape(__('user:roles')) ?></div></div>
-										<div class="field-body">
-											<div class="control cms-radio-group" role="group" aria-labelledby="user-roles-label">
-												<?php foreach ($roles as $role): ?>
-													<label class="cms-checkbox-label">
-														<input
-															type="checkbox"
-															class="cms-checkbox"
-															name="roles[]"
-															value="<?= escape((string) $role['name']) ?>"
-															<?= $role['held'] ? 'checked' : '' ?>
-															<?= $role['assignable'] ? '' : 'disabled' ?> />
-														<span><?= escape((string) $role['label']) ?></span>
-													</label>
-												<?php endforeach ?>
-											</div>
-											<div class="description"><?= escape(__('user:roles-help')) ?></div>
-										</div>
-									</div>
-								<?php endif ?>
-							</div>
-						</fieldset>
-					<?php endif ?>
 				</div>
 
 				<?php if ($fields['fields'] !== []): ?>
@@ -220,6 +170,15 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<?php endif ?>
 			</div>
 		</div>
+
+		<?php if (!$profile): ?>
+			<?php $this->insert('user/inspector', [
+				'user' => $user,
+				'roles' => $roles,
+				'locked' => $locked,
+				'collapsed' => (bool) $inspectorCollapsed,
+			]) ?>
+		<?php endif ?>
 
 		<?php // Truncation sentinel, the last control in the form; see the node editor. ?>
 		<input type="hidden" name="_complete" value="1" />

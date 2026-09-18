@@ -194,11 +194,13 @@ The document scrolls. The masthead sticks to the top of the viewport, a page hea
 
 Two screens keep a viewport of their own and never scroll the document: the collection list, which scrolls sideways with a sticky header row and title column, and the media library, whose rail, gallery and inspector scroll independently. Both take the height below the masthead and keep a bounded flex chain inside. At 72rem and below, the media library stacks its filters, grid and inspector and scrolls with the document. Below the 52rem breakpoint nothing sticks and every screen scrolls with the document.
 
-## Node inspector
+## Inspector
 
 The node inspector collapses to a strip `--cms-inspector-collapsed-width` wide: a button that expands it, the content-language selector as a column of locale ids, an unnamed copy of the published switch, and one button per inspector tab that expands the inspector on that tab. `behaviors/inspector.ts` sets `data-collapsed` on the `[data-inspector]` aside and remembers the choice in the `cosray_inspector` cookie, which the editor controller reads, so a page arrives in its state and nothing slides on load. The rail's width transitions while the drawer inside keeps the full `--cms-inspector-width` and is clipped, so the settings slide out without rewrapping; `prefers-reduced-motion: reduce` turns the motion off. The form submits only the drawer's switch, and the behavior keeps the strip's copy in step with it, also after a save replaces it out of band. A validation jump to a control in the drawer expands the inspector without changing the remembered choice.
 
 The remembered choice applies only from 75rem up, where the inspector sits beside the fields. Narrower, it starts collapsed whatever the cookie says, and `data-open` expands it for the current page only. Between 52rem and 75rem the drawer slides over the fields from the pane's edge, carrying `--cms-shadow`, and a press outside or `Escape` closes it; the closed drawer waits beside the pane, and the panes clip it with `overflow-x: clip` so the page never widens. Below 52rem the strip becomes a row above the fields, and expanding replaces it with the drawer in the flow. The breakpoints are repeated in `behaviors/inspector.ts`.
+
+The user editor uses the same rail with a single section and no tabs, so it carries neither the tab shortcuts nor a copied switch, and its strip holds the expand button alone. That button is not decoration: below 75rem the CSS forces the collapsed presentation, and below 52rem the drawer is `display: none` until `data-open`, so a rail without `[data-inspector-expand]` cannot be opened at all. `behaviors/inspector.ts` needs nothing per screen — it works off the `[data-inspector]` ancestor, and only the published mirror is bound to the node editor.
 
 ## Class names
 

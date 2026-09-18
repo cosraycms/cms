@@ -210,6 +210,7 @@ final class Users extends Panel
 			'user' => $user,
 			'roles' => $this->roleChoices($user),
 			'locked' => $self,
+			'inspectorCollapsed' => $this->request->cookie('cosray_inspector', '') === 'collapsed',
 			'panelLocaleChoices' => $this->panelLocales(),
 			'fields' => $this->fields($context)->form($user),
 			'locales' => $locales,
