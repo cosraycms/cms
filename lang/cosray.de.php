@@ -333,6 +333,7 @@ return [
 		'nav:media' => 'Medien',
 		'nav:menus' => 'Menüs',
 		'nav:profile' => 'Profil',
+		'nav:system' => 'System',
 		'nav:users' => 'Benutzer',
 		'node:copy-suffix' => '(Kopie)',
 		'node:duplicate-handle' => 'Es existiert bereits ein Knoten mit demselben Handle: :handle',

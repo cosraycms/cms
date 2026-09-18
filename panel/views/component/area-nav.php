@@ -33,10 +33,10 @@ if (is_string($menusUrl)) {
 
 $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
-$usersUrl = $this->unwrap($usersUrl ?? null);
+$systemUrl = $this->unwrap($systemUrl ?? null);
 
-if (is_string($usersUrl)) {
-	$areas[] = ['area' => 'users', 'url' => $usersUrl, 'label' => __('nav:users'), 'icon' => 'people'];
+if (is_string($systemUrl)) {
+	$areas[] = ['area' => 'system', 'url' => $systemUrl, 'label' => __('nav:system'), 'icon' => 'gear'];
 }
 
 ?>

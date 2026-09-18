@@ -327,6 +327,7 @@ return [
 		'nav:media' => 'Media',
 		'nav:menus' => 'Menus',
 		'nav:profile' => 'Profile',
+		'nav:system' => 'System',
 		'nav:users' => 'Users',
 		'node:copy-suffix' => '(Copy)',
 		'node:duplicate-handle' => 'A node with the same handle already exists: :handle',

@@ -29,7 +29,7 @@ use Cosray\Validation\Account;
 
 final class Users extends Panel
 {
-	protected const string AREA = 'users';
+	protected const string AREA = 'system';
 
 	private const int PAGE_SIZE = 50;
 
@@ -42,6 +42,27 @@ final class Users extends Panel
 		private readonly Policy $policy,
 	) {
 		parent::__construct($config, $container, $request);
+	}
+
+	/**
+	 * Every screen in the area renders the rail, so its entries ride the
+	 * shared context. The profile screen sits outside the area and turns
+	 * the rail off in its own data.
+	 */
+	protected function context(array $data = []): array
+	{
+		$url = $this->url();
+		$path = $this->request->uri()->getPath();
+
+		return parent::context(array_merge([
+			'systemNav' => [[
+				'label' => __('nav:users'),
+				'url' => $url,
+				'icon' => 'people',
+				'active' => $path === $url || str_starts_with($path, $url . '/'),
+			]],
+			'rail' => true,
+		], $data));
 	}
 
 	#[Permission('edit-users')]
@@ -172,6 +193,7 @@ final class Users extends Panel
 
 		return $this->context([
 			'area' => $profile ? 'profile' : self::AREA,
+			'rail' => !$profile,
 			'profile' => $profile,
 			'exists' => $exists,
 			'action' => match (true) {
