@@ -196,6 +196,22 @@ Every scroll region holds focusable content — links, inputs, checkboxes — so
 
 After a navigation swap the new page brings a fresh scroll region, so nothing has to be reset. `behaviors/scroll.ts` exists for one case that survives a swap in the other direction: a collection tree toggle re-renders the list, and the behaviour carries the list's position across.
 
+## Breakpoints
+
+Three bands, and they are the only viewport-width queries the panel should contain:
+
+| Band | Shell | Rail | Inspector |
+| --- | --- | --- | --- |
+| `width >= 75rem` | bounded | docked, 13rem | docked, 19rem |
+| `40rem <= width < 75rem` | bounded | docked, 13rem | collapsed to its strip, drawer slides over the content |
+| `width < 40rem` or `height < 30rem` | none, the document scrolls | a strip above the content | full width, above the content |
+
+The boundaries sit in the gaps between real devices rather than on them. The largest phone is about 27rem wide and the smallest tablet about 46.5rem, so 40rem has room on both sides; a tablet in portrait keeps a docked rail, which the previous 52rem boundary denied it by falling inside the iPad range. 75rem is the width at which the content column still reaches 40rem with both rails docked. The height condition catches a phone in landscape, where a bounded shell would leave under 400px of content; it catches a very short desktop window too, which is the same situation.
+
+Phones therefore never get a bounded shell, and with that the mobile address bar keeps working: it only retracts in response to document scrolling, and `dvh` shifts while it does.
+
+Anything else is a container query. Whether the shell fits is a viewport question; whether a component fits is not, because the same viewport means a different content width depending on what is docked beside it. The content columns — `.cms-collection .listing` and `.cms-node .pane` — declare `container: content / inline-size`, and the list's card stacking, the field grid's single column and the layout preview's labels query that instead.
+
 ## Page head
 
 `cms-page-head.css` styles the head and the toolbar of every screen. The order is fixed and every part is optional:

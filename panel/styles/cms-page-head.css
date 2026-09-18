@@ -77,7 +77,7 @@
 	background-color: var(--cms-color-surface);
 }
 
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.page > .head,
 	.page .toolbar {
 		padding-inline: var(--cms-space-4);

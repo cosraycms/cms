@@ -317,11 +317,12 @@
 
 /*
  * Too narrow to share the row, the inspector starts collapsed whatever the
- * cookie says, and data-open marks it opened for this page. Between 52rem and
- * 75rem the drawer slides over the fields from the pane's edge and waits
- * beside it when closed, where the panes clip it rather than widen the page.
+ * cookie says, and data-open marks it opened for this page. The drawer slides
+ * over the fields from the pane's edge and waits beside it when closed, where
+ * the panes clip it rather than widen the page. Below the shell's own band the
+ * rules further down take over and stack it above the fields.
  */
-@media (52rem < width < 75rem) {
+@media (width < 75rem) {
 	.cms-inspector,
 	.cms-inspector[data-collapsed] {
 		z-index: 25;
@@ -362,7 +363,7 @@
 }
 
 /* Above the fields, not below: a publish toggle under a long form is unreachable. */
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.cms-inspector,
 	.cms-inspector[data-collapsed] {
 		position: static;

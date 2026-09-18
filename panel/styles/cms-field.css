@@ -162,7 +162,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@container content (width < 45rem) {
 	.cms-fields > * {
 		grid-column: 1 / -1 !important;
 	}

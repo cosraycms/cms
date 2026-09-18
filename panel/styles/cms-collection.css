@@ -184,6 +184,7 @@
 	}
 
 	& .listing {
+		container: content / inline-size;
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
@@ -289,7 +290,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.cms-sidebar:has(+ .main > .cms-collection) {
 		border-right: 0;
 	}

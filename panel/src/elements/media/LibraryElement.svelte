@@ -677,7 +677,7 @@
 		}
 
 		/* Stacked: panes stop scrolling internally, the page scrolls. */
-		@media (max-width: 72rem) {
+		@media (width < 75rem) {
 			.cms-media-workspace {
 				display: flex;
 				flex-direction: column;
@@ -707,7 +707,7 @@
 			}
 		}
 
-		@media (max-width: 52rem) {
+		@media (width < 40rem), (height < 30rem) {
 			.cms-media-toolbar .upload {
 				margin-inline-start: 0;
 			}

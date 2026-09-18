@@ -82,7 +82,7 @@
 			}
 		}
 
-		@media (width < 60rem) {
+		@container content (width < 50rem) {
 			& .option .text {
 				display: none;
 			}

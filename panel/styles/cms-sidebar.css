@@ -128,7 +128,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.cms-sidebar {
 		flex-basis: auto;
 		width: 100%;

@@ -377,7 +377,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@container content (width < 45rem) {
 	.cms-list {
 		/*
 		 * Overrides the property, not --columns: the collection sets that one

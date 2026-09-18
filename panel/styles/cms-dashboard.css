@@ -135,7 +135,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.cms-dashboard {
 		& .body {
 			padding-inline: var(--cms-space-4);

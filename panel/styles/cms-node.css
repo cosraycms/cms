@@ -42,6 +42,7 @@
 	}
 
 	& .pane {
+		container: content / inline-size;
 		flex: 1 1 auto;
 		min-width: 0;
 		min-height: 0;
@@ -147,7 +148,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@media (width < 40rem), (height < 30rem) {
 	.cms-node {
 		& .panes {
 			flex-direction: column;
