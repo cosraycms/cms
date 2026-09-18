@@ -14,6 +14,8 @@ if (!$rail) {
 
 $menus = (array) $this->unwrap($menuNav);
 $currentPath = (string) $this->unwrap($currentPath);
+$locales = (array) $this->unwrap($menuLocales);
+$defaultLocale = (string) $this->unwrap($menuDefaultLocale);
 ?>
 <div id="menu-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
 	<ul class="list">
@@ -33,7 +35,21 @@ $currentPath = (string) $this->unwrap($currentPath);
 						(string) $entry['menu'],
 					) ?>"
 					<?= $active ? 'aria-current="page"' : '' ?>>
-					<span class="label"><span><?= escape((string) $entry['label']) ?></span></span>
+					<span class="label">
+						<?php if (count($locales) < 2): ?>
+							<span><?= escape((string) $entry['label']) ?></span>
+						<?php else: ?>
+							<?php foreach ($locales as $locale): ?>
+								<?php $own = (string) (((array) $entry['description'])[$locale['id']] ?? '') ?>
+								<span
+									class="variant<?= $own === '' ? ' is-fallback' : '' ?>"
+									data-locale="<?= escape((string) $locale['id']) ?>"
+									<?= $locale['id'] === $defaultLocale ? '' : 'hidden' ?>><?= escape(
+										$own !== '' ? $own : (string) $entry['label'],
+									) ?></span>
+							<?php endforeach ?>
+						<?php endif ?>
+					</span>
 					<span class="badge"><?= escape((string) $entry['items']) ?></span>
 				</a>
 			</li>

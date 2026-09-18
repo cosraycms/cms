@@ -8,9 +8,11 @@ use function Cosray\escape;
 $row = (array) $this->unwrap($row);
 $treeUrl = (string) $treeUrl;
 $selected = (string) $selected;
+$defaultLocale = (string) $defaultLocale;
 
 $id = (string) $row['id'];
 $title = (string) $row['title'] !== '' ? (string) $row['title'] : __('menu:untitled');
+$titles = (array) ($row['titles'] ?? []);
 $href = $row['href'] ?? null;
 $children = (array) $row['children'];
 $descendants = (int) $row['descendants'];
@@ -67,7 +69,20 @@ $confirm = $descendants === 0
 			class="text"
 			tabindex="-1"
 			href="<?= escape($treeUrl) ?>?item=<?= escape(rawurlencode($id)) ?>">
-			<strong><?= escape($title) ?></strong>
+			<strong>
+				<?php if ($titles === []): ?>
+					<?= escape($title) ?>
+				<?php else: ?>
+					<?php foreach ($titles as $variant): ?>
+						<span
+							class="variant<?= $variant['fallback'] ? ' is-fallback' : '' ?>"
+							data-locale="<?= escape((string) $variant['locale']) ?>"
+							<?= $variant['locale'] === $defaultLocale ? '' : 'hidden' ?>><?= escape(
+								(string) $variant['title'],
+							) ?></span>
+					<?php endforeach ?>
+				<?php endif ?>
+			</strong>
 			<small>
 				<?= $hidden ? escape(__('menu:item-hidden-mark')) . ' · ' : '' ?><?= escape(
 					$typeLabel,
@@ -152,6 +167,7 @@ $confirm = $descendants === 0
 				'row' => $child,
 				'treeUrl' => $treeUrl,
 				'selected' => $selected,
+				'defaultLocale' => $defaultLocale,
 			]) ?>
 		<?php endforeach ?>
 	</ul>

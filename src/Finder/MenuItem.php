@@ -151,6 +151,28 @@ class MenuItem implements Iterator
 		return count($this->children) > 0;
 	}
 
+	/**
+	 * The stored title per locale, each exactly as stored and never through a
+	 * fallback: a locale without its own title is absent, which is what lets
+	 * the panel show the gap.
+	 *
+	 * @return array<string, string>
+	 */
+	public function titles(): array
+	{
+		$stored = is_array($this->data['title'] ?? null) ? $this->data['title'] : [];
+		$inherited = $this->joined('node_title') ?? [];
+		$titles = [];
+
+		foreach ($stored + $inherited as $locale => $title) {
+			if (is_string($locale) && is_string($title) && $title !== '') {
+				$titles[$locale] = $title;
+			}
+		}
+
+		return $titles;
+	}
+
 	protected function translated(string $key): string
 	{
 		return $this->localized($this->data[$key] ?? null);
@@ -195,6 +217,7 @@ class MenuItem implements Iterator
 	 *
 	 * @return ?array<string, string>
 	 */
+	/** @return array<string, string>|null */
 	private function joined(string $key): ?array
 	{
 		$value = $this->item[$key] ?? null;

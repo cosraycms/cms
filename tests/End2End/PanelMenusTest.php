@@ -271,6 +271,41 @@ final class PanelMenusTest extends End2EndTestCase
 		);
 	}
 
+	public function testTheTreeCarriesEveryLocalesTitleAndMarksTheMissingOnes(): void
+	{
+		$this->createMenu('main-nav', 'Main navigation');
+		$this->db()->execute(
+			'INSERT INTO cms.menu_items (item, parent, menu, position, data)
+			VALUES (:item, NULL, :menu, 1, :data::jsonb)',
+			[
+				'item' => 'german-only',
+				'menu' => 'main-nav',
+				'data' => json_encode([
+					'type' => 'url',
+					'title' => ['de' => 'Nur auf Deutsch'],
+					'path' => ['en' => '/x'],
+				]),
+			],
+		)->run();
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav'));
+
+		// The German title is there although the request is served in English,
+		// so switching the content language needs no round trip.
+		$this->assertHtmlNodeExists(
+			'//*[@data-uid="german-only"]//strong'
+				. '/span[@data-locale="de"][not(@class="variant is-fallback")]'
+				. '[normalize-space()="Nur auf Deutsch"]',
+			$html,
+		);
+		// English has none of its own, so the row stands in and says so.
+		$this->assertHtmlNodeExists(
+			'//*[@data-uid="german-only"]//strong'
+				. '/span[@data-locale="en"][contains(@class, "is-fallback")]',
+			$html,
+		);
+	}
+
 	public function testTheRailNamesAMenuThatMissesTheRequestLocale(): void
 	{
 		// Written by a site migration, so the name sits under the neutral key.
@@ -280,8 +315,14 @@ final class PanelMenusTest extends End2EndTestCase
 
 		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/neutral'));
 
-		$this->assertStringContainsString('<span>Neutral name</span>', $html);
-		$this->assertStringContainsString('<span>Nur deutsch</span>', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="menu-nav"]//span[normalize-space()="Neutral name"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="menu-nav"]//span[normalize-space()="Nur deutsch"]',
+			$html,
+		);
 	}
 
 	public function testTheAreaCarriesANoticeIntoTheFirstMenu(): void
@@ -312,7 +353,10 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('href="/cp/menus/create"', $html);
 		// The rail reads as menu names; hovering spells out the truncated ones
 		// and names the handle behind them.
-		$this->assertStringContainsString('<span>Main navigation</span>', $html);
+		$this->assertHtmlNodeExists(
+			'//*[@id="menu-nav"]//span[normalize-space()="Main navigation"]',
+			$html,
+		);
 		$this->assertStringContainsString('title="Main navigation · main-nav"', $html);
 		// The open menu is marked, and its item count rides along as the badge.
 		$this->assertHtmlNodeExists(

@@ -1,3 +1,12 @@
+/* A tree row and a rail entry carry one title span per locale, of which the
+   content-language behaviour shows one. A locale without its own title shows
+   the resolved one dimmed, so the gap is visible and the row stays
+   recognizable. */
+.cms-menus .variant.is-fallback,
+.cms-sidebar .variant.is-fallback {
+	color: var(--cms-color-text-faint);
+}
+
 .cms-menus {
 	display: flex;
 	flex: 1 1 auto;

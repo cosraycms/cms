@@ -101,6 +101,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Baum',
 		'collection:view' => 'Sammlungsansicht',
+		'common:filter' => 'Filter',
 		'common:move-down' => 'Nach unten verschieben',
 		'common:move-up' => 'Nach oben verschieben',
 		'common:no' => 'Nein',

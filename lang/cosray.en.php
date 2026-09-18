@@ -95,6 +95,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Tree',
 		'collection:view' => 'Collection view',
+		'common:filter' => 'Filter',
 		'common:move-down' => 'Move down',
 		'common:move-up' => 'Move up',
 		'common:no' => 'No',

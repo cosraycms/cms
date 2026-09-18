@@ -18,6 +18,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Finder\Menu as FinderMenu;
 use Cosray\Locale;
+use Cosray\Locales;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
 use Cosray\Title\Sort;
@@ -65,8 +66,13 @@ final class Menus extends Panel
 	{
 		$menus = $this->menuRows();
 
+		$locales = $this->container->get(Locales::class);
+		assert($locales instanceof Locales, 'The locales service must be available');
+
 		return parent::context(array_merge([
 			'menuNav' => $menus,
+			'menuLocales' => $this->locales($locales),
+			'menuDefaultLocale' => $locales->getDefault()->id,
 			'menuCreateUrl' => $this->base() . '/create',
 			'manages' => $this->manages(),
 			'rail' => $menus !== [],
@@ -444,6 +450,7 @@ final class Menus extends Panel
 			'tree' => $this->branch(
 				new FinderMenu($context, $menu, expand: false, hidden: true),
 				$cms,
+				$this->localeList($context),
 			),
 			'preview' => $cms->menu($menu)->html(),
 			'pane' => $pane,
@@ -567,15 +574,18 @@ final class Menus extends Panel
 	 * Flattens one sibling group of the menu iterator into view rows,
 	 * recursing into children.
 	 *
+	 * @param list<array{id: string, title: string}> $locales
+	 *
 	 * @return list<array<string, mixed>>
 	 */
-	private function branch(iterable $items, Cms $cms): array
+	private function branch(iterable $items, Cms $cms, array $locales): array
 	{
 		$rows = [];
 
 		foreach ($items as $entry) {
-			$children = $this->branch($entry->children(), $cms);
+			$children = $this->branch($entry->children(), $cms, $locales);
 			$title = $entry->title();
+			$titles = $this->titleVariants($entry->titles(), $title, $locales);
 
 			if ($entry->type() === 'children') {
 				$node = $entry->node();
@@ -584,12 +594,16 @@ final class Menus extends Panel
 						? ''
 						: $cms->node->byUid($node, published: null)?->label() ?? $node,
 				]);
+				// Interface text, not content: it reads the same whichever
+				// content language the tree is showing.
+				$titles = [];
 			}
 
 			$rows[] = [
 				'id' => $entry->id(),
 				'type' => $entry->type(),
 				'title' => $title,
+				'titles' => $titles,
 				'hidden' => $entry->hidden(),
 				'href' => $entry->href(),
 				'level' => $entry->level(),
@@ -786,12 +800,50 @@ final class Menus extends Panel
 		return $map;
 	}
 
+	/**
+	 * One entry per locale for a tree row's title: the stored one where there
+	 * is one, otherwise the row's resolved title marked as standing in, which
+	 * is what makes a missing translation visible while the row stays
+	 * recognizable.
+	 *
+	 * @param array<string, string> $stored
+	 * @param list<array{id: string, title: string}> $locales
+	 *
+	 * @return list<array{locale: string, title: string, fallback: bool}>
+	 */
+	private function titleVariants(array $stored, string $resolved, array $locales): array
+	{
+		if (count($locales) < 2) {
+			return [];
+		}
+
+		$variants = [];
+		$standIn = $resolved !== '' ? $resolved : __('menu:untitled');
+
+		foreach ($locales as $locale) {
+			$own = $stored[$locale['id']] ?? '';
+			$variants[] = [
+				'locale' => $locale['id'],
+				'title' => $own !== '' ? $own : $standIn,
+				'fallback' => $own === '',
+			];
+		}
+
+		return $variants;
+	}
+
 	/** @return list<array{id: string, title: string}> */
 	private function localeList(Context $context): array
 	{
+		return $this->locales($context->locales());
+	}
+
+	/** @return list<array{id: string, title: string}> */
+	private function locales(Locales $locales): array
+	{
 		return array_map(
 			static fn($locale) => ['id' => $locale->id, 'title' => $locale->title],
-			iterator_to_array($context->locales(), false),
+			iterator_to_array($locales, false),
 		);
 	}
 

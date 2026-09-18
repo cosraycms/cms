@@ -61,7 +61,8 @@
 		gap: var(--cms-space-2);
 		min-width: 0;
 
-		& > span:last-child {
+		& > span:last-child,
+		& > .variant {
 			overflow-wrap: anywhere;
 		}
 	}

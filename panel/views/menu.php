@@ -100,6 +100,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 								'row' => $row,
 								'treeUrl' => $urls['tree'],
 								'selected' => is_array($pane) ? (string) ($pane['item'] ?? '') : '',
+								'defaultLocale' => $defaultLocale,
 							]) ?>
 						<?php endforeach ?>
 					</ul>
