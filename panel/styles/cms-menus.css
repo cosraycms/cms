@@ -4,40 +4,6 @@
 	flex-direction: column;
 	min-height: 0;
 
-	& .head {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-4);
-		flex: 0 0 auto;
-		flex-wrap: wrap;
-		padding: var(--cms-space-3) var(--cms-space-6);
-		background: var(--cms-color-surface);
-	}
-
-	& .line {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-3);
-		min-width: 0;
-		flex-wrap: wrap;
-
-		& h1 {
-			margin: 0;
-			font-size: var(--cms-font-size-xl);
-			font-weight: 600;
-			letter-spacing: -0.03em;
-		}
-	}
-
-	& .actions {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: var(--cms-space-2);
-		margin-left: auto;
-		flex-wrap: wrap;
-	}
-
 	& .body {
 		display: flex;
 		flex-direction: column;
@@ -171,13 +137,6 @@
 }
 
 .cms-menu-tree {
-	& .titles {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-1);
-		min-width: 0;
-	}
-
 	/* The menu's own fields belong to the tree, not to the item pane beside
 	   it, so the bar stops where the pane column begins. The forms lay their
 	   controls out as cells of this grid, which is what lines the buttons up
@@ -679,7 +638,6 @@
 
 @media (max-width: 52rem) {
 	.cms-menus {
-		& .head,
 		& .body {
 			padding-inline: var(--cms-space-4);
 		}

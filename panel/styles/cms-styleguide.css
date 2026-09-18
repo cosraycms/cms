@@ -3,21 +3,16 @@
 	flex-direction: column;
 	min-height: 0;
 
-	& .head {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-4);
-		flex: 0 0 auto;
-		padding: var(--cms-space-3) var(--cms-space-6);
+	/* No pane inset on this page, so a line separates the head. */
+	& > .head {
 		border-bottom: 1px solid var(--cms-color-border);
-		background: var(--cms-color-surface);
 	}
 
-	& h1 {
-		margin: 0;
-		font-size: var(--cms-font-size-xl);
-		font-weight: 600;
-		letter-spacing: -0.03em;
+	/* A page head shown as a sample, framed so its own edges are visible. */
+	& .sample-page {
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		overflow: hidden;
 	}
 
 	/* The page's own body only: the samples inside have parts of that name. */

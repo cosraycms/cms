@@ -39,7 +39,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php if ($page->parent !== null): ?>
 				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
 					<a href="<?= escape($page->parent->rootUrl) ?>"><?= escape($page->name) ?></a>
-					<span aria-hidden="true">/</span>
+					<span class="sep" aria-hidden="true">/</span>
 					<span><?= escape($page->parent->title ?? $page->parent->uid) ?></span>
 				</nav>
 			<?php endif ?>

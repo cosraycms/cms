@@ -33,12 +33,14 @@ $defaultLocale = (string) $props['defaultLocale'];
 				)) ?></span>
 			</div>
 		</div>
-		<?php $this->insert('component/content-locales', [
-			'locales' => $locales,
-			'selected' => $defaultLocale,
-			'controlId' => 'cms-menu-locale',
-			'labelled' => false,
-		]) ?>
+		<div class="actions">
+			<?php $this->insert('component/content-locales', [
+				'locales' => $locales,
+				'selected' => $defaultLocale,
+				'controlId' => 'cms-menu-locale',
+				'labelled' => false,
+			]) ?>
+		</div>
 	</header>
 
 	<div class="body">

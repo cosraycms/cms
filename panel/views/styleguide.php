@@ -551,6 +551,39 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<?php $this->insert('node/inspector', (array) $this->unwrap($inspector)) ?>
 			</section>
 
+			<section class="section" data-section="page-head">
+				<h2>Page head</h2>
+				<p class="note">
+					Every part is optional and the order is fixed. <code>cms-page-head.css</code>
+					styles all of them; a screen adds only what is its own. The toolbar is a row of
+					the content column, outside its scroller, so it stays put while the content
+					moves.
+				</p>
+				<div class="page sample-page">
+					<header class="head">
+						<div class="titles">
+							<nav class="breadcrumb" aria-label="Breadcrumb">
+								<a href="#">Pages</a>
+								<span class="sep" aria-hidden="true">/</span>
+								<span>Edit</span>
+							</nav>
+							<div class="line">
+								<h1>A page with a rather long title</h1>
+								<span class="cms-count">42 entries</span>
+								<span class="cms-status is-published">Published</span>
+							</div>
+						</div>
+						<div class="actions">
+							<button type="button" class="cms-button secondary">Preview</button>
+							<button type="button" class="cms-button primary">Save</button>
+						</div>
+					</header>
+					<div class="toolbar">
+						<input class="cms-input" type="search" aria-label="Search" placeholder="Search entries …" />
+					</div>
+				</div>
+			</section>
+
 			<section class="section" data-section="listing">
 				<h2>Listing</h2>
 				<p class="note">

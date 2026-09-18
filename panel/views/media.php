@@ -16,7 +16,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	data-content-locale-scope
 	data-content-locale="<?= escape($defaultLocale) ?>">
 	<header class="head">
-		<h1><?= escape(__('media:title')) ?></h1>
+		<div class="titles">
+			<div class="line">
+				<h1><?= escape(__('media:title')) ?></h1>
+			</div>
+		</div>
 		<?php $this->insert('component/content-locales', [
 			'locales' => $locales,
 			'selected' => $defaultLocale,

@@ -1,0 +1,92 @@
+/* The head and the toolbar of every screen. A screen's own stylesheet adds
+   only what is specific to it; the parts below it are all optional. */
+
+.page > .head {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-4);
+	flex: 0 0 auto;
+	flex-wrap: wrap;
+	padding: var(--cms-space-3) var(--cms-space-6);
+	background: var(--cms-color-surface);
+
+	& h1 {
+		margin: 0;
+		overflow: hidden;
+		font-size: var(--cms-font-size-xl);
+		font-weight: 600;
+		letter-spacing: -0.03em;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .titles {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1);
+		min-width: 0;
+	}
+
+	& .line {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+		min-width: 0;
+		flex-wrap: wrap;
+	}
+
+	& .breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 500;
+
+		& a {
+			color: var(--cms-color-text-muted);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--cms-color-accent-text);
+			}
+		}
+
+		& .sep {
+			color: var(--cms-color-text-faint);
+		}
+	}
+
+	& .actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--cms-space-2);
+		margin-left: auto;
+		flex-wrap: wrap;
+	}
+}
+
+.page .toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-3);
+	flex: 0 0 auto;
+	flex-wrap: wrap;
+	padding: var(--cms-space-4) var(--cms-space-6);
+	background-color: var(--cms-color-surface);
+}
+
+@media (max-width: 52rem) {
+	.page > .head,
+	.page .toolbar {
+		padding-inline: var(--cms-space-4);
+	}
+
+	/* Under a wrapped title the actions read as a row of their own. */
+	.page > .head .actions {
+		justify-content: flex-start;
+		width: 100%;
+		margin-left: 0;
+	}
+}

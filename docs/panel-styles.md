@@ -192,7 +192,30 @@ The sidebar, the page head and a rail beside the content share one ground, `--cm
 
 The shell is exactly one viewport tall and never scrolls; the regions inside it do. A screen is a column of fixed rows around exactly one scrolling region, and a screen with an inspector is that column beside a second one. Every fixed row is `flex: 0 0 auto`, every scroller is `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs that `min-height: 0` as well or the scroller grows instead of scrolling. Scroll regions carry `overscroll-behavior: contain`. `position: sticky` is used only where a part sticks inside its own scroll region: the collection list's header row and its pinned title column. Below the 52rem breakpoint the shell hands scrolling back to the document, because nested scrollers and an on-screen keyboard do not get along.
 
+Every scroll region holds focusable content — links, inputs, checkboxes — so tabbing reaches it and the arrow keys and Page Down work from there. None of them carries `tabindex`, which would only add an empty tab stop ahead of the first link. A scroll region built without focusable content would need one.
+
 After a navigation swap the new page brings a fresh scroll region, so nothing has to be reset. `behaviors/scroll.ts` exists for one case that survives a swap in the other direction: a collection tree toggle re-renders the list, and the behaviour carries the list's position across.
+
+## Page head
+
+`cms-page-head.css` styles the head and the toolbar of every screen. The order is fixed and every part is optional:
+
+```html
+<header class="head">
+	<div class="titles">
+		<nav class="breadcrumb">…</nav>
+		<div class="line">
+			<h1>…</h1>
+			<span class="cms-count">…</span> <span class="cms-status …">…</span>
+		</div>
+	</div>
+	<div class="actions">…</div>
+</header>
+```
+
+A screen with a single title can put the `h1` straight into the head; `.titles` and `.line` are only needed once something joins it. The actions stay hand-written per screen, since a save split-button, a create menu and an upload button share nothing but their side of the head. Below 52rem they take a row of their own under the wrapped title.
+
+`.toolbar` is a row of the content column, above the scroller and outside it, so a search field or a view toggle stays put while the content moves. The styleguide's `page-head` section shows every part at once.
 
 ## Class names
 
