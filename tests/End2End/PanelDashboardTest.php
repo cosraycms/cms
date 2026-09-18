@@ -12,6 +12,7 @@ use Cosray\Panel\Dashboard\Card;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use DateTimeImmutable;
+use Dom\HTMLDocument;
 
 /**
  * @internal
@@ -133,6 +134,50 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->assertHtmlNodeExists(
 			'//time[contains(concat(" ", normalize-space(@class), " "), " changed ") and string-length(@datetime) > 0 and string-length(normalize-space(.)) > 0]',
 			$html,
+		);
+	}
+
+	public function testRecentEntryOutsideTheCollectionOpensAndReturnsToTheDashboard(): void
+	{
+		$type = (int) $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one()['type'];
+		$this->createDashboardNode($type, 'dashboard-link', 'Recent page', false, new DateTimeImmutable());
+
+		$dashboard = HTMLDocument::createFromString($this->html());
+		$link = $dashboard->querySelector('.recent a');
+		$this->assertNotNull($link);
+		$this->assertSame('Recent page', trim($link->textContent));
+		$this->assertSame('#frame', $link->getAttribute('hx-target'));
+		$url = $link->getAttribute('href');
+		parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+		$headers = ['HX-Request' => 'true', 'HX-Target' => 'div#frame'];
+		$response = $this->makeRequest('GET', (string) parse_url($url, PHP_URL_PATH), [
+			'query' => $query,
+			'headers' => $headers,
+		]);
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists(
+			'//form[@id="node-editor-form"][@action="/cp/node/dashboard-link?from=dashboard"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@id="area-nav"]//a[@aria-current="page"][normalize-space(.)="Content"]',
+			$html,
+		);
+		$editor = HTMLDocument::createFromString('<!doctype html>' . $html);
+		$back = $editor->querySelector('.breadcrumb a');
+		$this->assertNotNull($back);
+		$this->assertSame('Dashboard', trim($back->textContent));
+		$this->assertSame('#frame', $back->getAttribute('hx-target'));
+
+		$response = $this->makeRequest('GET', $back->getAttribute('href'), ['headers' => $headers]);
+		$this->assertResponseOk($response);
+		$this->assertHtmlNodeExists(
+			'//*[@id="area-nav"]//a[@aria-current="page"][normalize-space(.)="Dashboard"]',
+			$this->getHtmlResponse($response),
 		);
 	}
 

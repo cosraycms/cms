@@ -14,6 +14,7 @@ use Cosray\Context;
 use Cosray\Contract\DashboardCard;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard;
+use Cosray\Panel\NodeUrls;
 use Cosray\Title\Resolver as TitleResolver;
 use DateTimeImmutable;
 use IntlDateFormatter;
@@ -80,6 +81,7 @@ final class Index extends Panel
 	/**
 	 * @return list<array{
 	 *     uid: string,
+	 *     url: string,
 	 *     title: string,
 	 *     type: string,
 	 *     changed: string,
@@ -91,6 +93,7 @@ final class Index extends Panel
 	private function recent(Context $context, Database $db, Types $types): array
 	{
 		$labels = $this->typeLabels($types);
+		$links = new NodeUrls($this->panelPath(), 'dashboard');
 		$titles = new TitleResolver($types);
 		$date = new IntlDateFormatter(
 			$this->localeId(),
@@ -115,6 +118,7 @@ final class Index extends Panel
 			$type = (string) ($row['type'] ?? '');
 			$recent[] = [
 				'uid' => $uid,
+				'url' => $links->edit($uid),
 				'title' => $title ?? $uid,
 				'type' => $labels[$type] ?? $type,
 				'changed' => $formatted === false ? '' : $formatted,

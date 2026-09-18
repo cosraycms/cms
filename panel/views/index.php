@@ -56,7 +56,9 @@ $recent = (array) $this->unwrap($recent ?? []);
 								class="dot <?= $row['published'] ?? false ? 'is-published' : 'is-unpublished' ?>"
 								aria-hidden="true"></span>
 							<span class="status sr-only"><?= escape((string) ($row['status'] ?? '')) ?></span>
-							<span class="title"><?= escape((string) ($row['title'] ?? '')) ?></span>
+							<a class="title" href="<?= escape((string) $row['url']) ?>" hx-target="#frame"><?= escape(
+								(string) ($row['title'] ?? ''),
+							) ?></a>
 							<?php if ($row['hasDraft'] ?? false): ?>
 								<span class="cms-status is-changes"><?= escape(__('status:changes')) ?></span>
 							<?php endif ?>
