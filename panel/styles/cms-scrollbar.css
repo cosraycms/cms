@@ -7,4 +7,11 @@
 			scrollbar-color: color-mix(in oklab, currentColor 13%, transparent) transparent;
 		}
 	}
+
+	@media (hover: hover) {
+		.cms-sidebar:not(:hover) .scroll,
+		.cms-inspector:not(:hover) :is(.scroll, .strip) {
+			scrollbar-color: transparent transparent;
+		}
+	}
 }
