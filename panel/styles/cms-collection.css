@@ -11,7 +11,8 @@
 		flex: 1 1 auto;
 		min-height: 0;
 		padding: 0;
-		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
+		border-start-start-radius: var(--cms-pane-radius-start);
+		border-start-end-radius: var(--cms-pane-radius-end);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;

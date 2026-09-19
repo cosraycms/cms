@@ -661,7 +661,8 @@
 			min-height: 0;
 			min-width: 0;
 			background: var(--cms-pane-bg);
-			border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
+			border-start-start-radius: var(--cms-pane-radius-start);
+			border-start-end-radius: var(--cms-pane-radius-end);
 			overflow: hidden;
 
 			&::after {

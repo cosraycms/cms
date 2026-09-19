@@ -47,7 +47,8 @@
 		min-width: 0;
 		min-height: 0;
 		padding: var(--cms-space-12) var(--cms-space-6);
-		border-radius: var(--cms-pane-radius) var(--cms-pane-radius) 0 0;
+		border-start-start-radius: var(--cms-pane-radius-start);
+		border-start-end-radius: var(--cms-pane-radius-end);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		overflow-y: auto;

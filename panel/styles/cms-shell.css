@@ -39,6 +39,20 @@
 	}
 }
 
+/*
+ * The pane is a recess cut into the white frame, and a rounded top corner only
+ * reads as one where a white column carries on below it: the rail on the left,
+ * the inspector on the right. A side without one leaves a white tip standing
+ * alone against the canvas, so the pane squares that side instead.
+ */
+.cms-shell > .frame:not(:has(> .cms-sidebar)) {
+	--cms-pane-radius-start: 0;
+}
+
+.cms-shell > .frame > .main:not(:has(.cms-inspector)) {
+	--cms-pane-radius-end: 0;
+}
+
 .cms-masthead {
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);
