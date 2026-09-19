@@ -2,6 +2,8 @@
 
 How CSS is organised in `panel/styles/` and in the `<style>` block of panel Svelte components: cascade layers, the design tokens, and the class naming convention.
 
+This file holds the rules. It deliberately does not describe what the panel currently looks like: `tokens.css` is the token list, and the styleguide at `/<panel-path>/styleguide` renders every component against the live stylesheets. Prose that mirrors CSS goes stale on the next restyle and nothing lints it.
+
 ## Cascade layers
 
 `panel/views/base.php` declares the order before any stylesheet loads:
@@ -30,6 +32,8 @@ Three tiers:
 2. **Semantic** — what a value is _for_: `--cms-font-family`, `--cms-color-surface`, `--cms-color-text-muted`, `--cms-color-accent`, `--cms-color-danger-surface`. This tier is the public theming contract.
 3. **Component** — owned by one component: `--cms-button-primary-bg`, `--cms-sidebar-width`, `--cms-inspector-width`.
 
+A `/**` comment block in `tokens.css` names a group and the styleguide parses those groups out of the file at request time, so a new token appears there by being declared.
+
 ### The theming contract
 
 Downstream projects override semantic and component tokens. Primitives are internal and may be renamed or re-tinted without notice.
@@ -47,7 +51,6 @@ Downstream projects override semantic and component tokens. Primitives are inter
 Three rules make the palette work:
 
 - **Components reference semantic tokens, never primitives.** `--cms-color-white` and `--cms-color-neutral-900` do not flip — that is the point of a primitive. A component that reaches for one is pinned to the light theme even though it contains no raw hex. Use `--cms-color-surface` and `--cms-color-text`. The exceptions are values that genuinely must not flip: a scrim that stays dark in both themes, an iframe showing site content rather than panel chrome, or a marker drawn over arbitrary media. Code boxes stay dark in both themes too, but through `--cms-code-bg`, `--cms-code-text` and `--cms-code-muted`, so a theme can restyle them.
-
 - **Pairs flip together.** `--cms-color-accent` and `--cms-color-text-on-accent` are one decision. Overriding the background alone produces an unreadable button in one of the two themes.
 - **Mix against tokens, not literals.** `color-mix(…, var(--cms-color-surface) 88%)` survives the dark flip; `color-mix(…, white 88%)` glows on a dark canvas. The same holds for the direction a variant moves in: mix toward `--cms-color-shade`, which is black on light and white on dark, so a hover darkens on one theme and lightens on the other instead of sinking into the surface.
 
@@ -73,42 +76,32 @@ An override is a plain value and applies to both themes. A project that wants tw
 }
 ```
 
-Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract.
-
-Form labels use `--cms-font-size-sm` and the public `--cms-color-text-label` token, which defaults to `--cms-color-text` in both themes. Required fields append a smaller, normal-weight `(required)` in the panel language, coloured by the public `--cms-color-text-requirement` token, which defaults to `--cms-color-danger`. A read-only field marks itself the same way with `(read-only)` in muted text, and never carries the required marker as well. Descriptions and section headings keep their separate typography.
+Font-size and line-height tokens form the panel's internal type scale and are not part of the theming contract. Form labels are public through `--cms-color-text-label`, and the `(required)` marker through `--cms-color-text-requirement`.
 
 ### Colour roles
 
-Accent is the one interaction colour: primary buttons, focus, selection, active navigation and links. It defaults to dark grey on light and near-white on dark, so the chrome stays black, white and grey, and it is the pair projects are expected to tint — `--cms-color-accent` with `--cms-color-text-on-accent`. `prefers-contrast: more` deepens the light accent to near-black. Hovers mix the accent toward the surface, which works for a dark accent and a tinted one alike. A link set in the accent carries an underline, since a dark grey link is otherwise just text.
+Accent is the one interaction colour: primary buttons, focus, selection, active navigation and links. It defaults to a neutral so the chrome stays black, white and grey, and it is the pair projects are expected to tint — `--cms-color-accent` with `--cms-color-text-on-accent`. Hovers mix the accent toward the surface, which works for a dark accent and a tinted one alike. A link set in the accent carries an underline, since a dark grey link is otherwise just text.
 
 Focus is a solid ring in the accent. Borderless elements take `outline: var(--cms-focus-outline)` with `outline-offset: var(--cms-focus-offset)`, and the gap keeps the ring visible around a filled button of the same colour. Bordered fields switch their border to `--cms-color-focus` and add `box-shadow: var(--cms-focus-ring)`, which thickens it.
 
-Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` is the brighter vermillion the red is built around; it clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
+Status colours are the only hues in the default chrome: red for danger and errors, amber for warnings, green for success and blue for information. Each `--cms-color-{status}` passes 4.5:1 as text and as a fill behind `--cms-color-text-on-fill` in both themes. `--cms-color-danger-border` clears 3:1 only, so it marks invalid controls and error boxes and never colours text.
 
-A delete button stays quiet: `.cms-button.danger` wears the secondary face with danger text, a trash icon beside its label, and a red tint on hover, because it only opens a confirmation. The confirmation's own button adds `.solid` for the filled red, so the one irreversible click is the one that stands out.
+Form controls draw their edge with `--cms-color-border-control`, which exists so `prefers-contrast: more` and a theme can firm up control edges without adding weight to sections, rows and cards. Keep it off anything that is not a control. A control without a visible label needs another cue, since WCAG 1.4.11 asks for a 3:1 boundary when the border is the only one. A read-only control keeps full contrast, because the value is there to be read and copied; a disabled one is exempt under WCAG 1.4.3.
 
-Form controls draw their edge with `--cms-color-border-control`. It defaults to the same soft step as the strong border: a white control on the canvas pane already stands apart by its fill, and its label identifies it. The token exists so `prefers-contrast: more` and a theme can firm up control edges without adding weight to sections, rows and cards, so keep it off anything that is not a control. A control without a visible label needs another cue, since WCAG 1.4.11 asks for a 3:1 boundary when the border is the only one.
-
-Three control states read apart by their fill and depth: an editable control is a raised white box, a read-only one a recessed `--cms-color-surface-sunken` well with its text at full contrast, and a disabled one a flat outline with no fill, muted text and a `not-allowed` cursor. Read-only keeps full contrast because the value is there to be read and copied, while a disabled control is exempt under WCAG 1.4.3. A select, radio or checkbox cannot be read-only in HTML, so the field wrapper's `data-readonly` gives it the same look.
-
-`--cms-color-surface-muted` tints a quiet band inside a surface that holds the details of what sits above it, such as a media field's alt text and caption under the file. It is a step lighter than a well, so the controls on it still stand out as editable in both themes, and it never marks a read-only state.
-
-Every text input, select and textarea in the panel carries `.cms-input`, `.cms-select` or `.cms-textarea`, in PHP views and Svelte components alike, and those classes are the only place a control's border, fill, depth, focus and states are drawn. A component may size and place a control, never redraw it. A select drops the native look, which ignores `line-height`, and draws its chevron from `--cms-select-chevron`, an image in a grey that works on both themes' control fill. There is no element-level control look: a bare `input` renders as the browser draws it, which makes a missing class obvious. Controls that are not form fields keep their own rules, such as the inverted code and source editors.
-
-Text inputs, selects and buttons are `--cms-control-height` tall, and a `.small` button `--cms-control-height-sm` with extra-small type, so a button lines up with the field beside it. Both derive their vertical padding from the token: give a control a width and inline padding, never a height of its own. A theme that wants roomier or denser forms changes the token once.
+Every text input, select and textarea in the panel carries `.cms-input`, `.cms-select` or `.cms-textarea`, in PHP views and Svelte components alike, and those classes are the only place a control's border, fill, depth, focus and states are drawn. A component may size and place a control, never redraw it. There is no element-level control look: a bare `input` renders as the browser draws it, which makes a missing class obvious. Controls are `--cms-control-height` tall and derive their vertical padding from it, so a theme changes form density once; give a control a width and inline padding, never a height of its own.
 
 ### Depth
 
 Light falls from above. Four public tokens carry it. They are translucent white and shadow laid over whatever sits beneath, not colours, so neither theme needs its own value: a shadow disappears on a dark ground and a sheen on a white one.
 
-| Token | Draws | Used on |
-| --- | --- | --- |
-| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top | editable fields, the rich text and media frames, secondary and danger buttons, the chosen language |
-| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top | primary and solid danger buttons |
-| `--cms-shadow-recessed` | shading inside the top edge | read-only wells, the switch track, the language selector's track, blocks canvas |
-| `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` | buttons and the chosen language |
+| Token | Draws |
+| --- | --- |
+| `--cms-shadow-raised` | a lip below the bottom edge and a faint sheen along the top |
+| `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top |
+| `--cms-shadow-recessed` | shading inside the top edge |
+| `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` |
 
-A filled button's border is its fill mixed a quarter of the way to black, so the sheen sits inside a darker rim. A disabled control is flat. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth. A theme that wants a flat panel sets all four tokens to `none`.
+A theme that wants a flat panel sets all four to `none`. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth.
 
 Two rules keep depth from going wrong. The gradient belongs in `background-image`, so a hover can still change the `background-color` beneath it. And a context that strips a control's border and fill, such as a bare block, sets `box-shadow: none` too, or the lip floats under nothing.
 
@@ -147,93 +140,6 @@ Windows contrast themes (`forced-colors: active`) replace every colour with a sm
 
 - **Focus must survive without colour and shadow.** A field that shows focus through its border colour and `--cms-focus-ring` resets the outline to `1px solid transparent`, never `none`. Forced colours paint a transparent outline, so it becomes the focus indicator there and stays invisible everywhere else.
 - **A state carried by a background alone disappears.** The switch's position and the chosen content language are such states. The component opts out with `forced-color-adjust: none` inside `@media (forced-colors: active)` and redraws the state with system colours: `Canvas`, `ButtonText`, `Highlight`, `HighlightText`, `GrayText`. System colour keywords are the one colour value allowed outside `tokens.css`, since they are the palette the user chose.
-
-## Built-in icons
-
-Built-in panel icons use the checked-in regular Bootstrap collection in `panel/icons/`, shared by `Cosray\Panel\Icon::render('plus')` and `<Icon name="plus" />` from `panel/src/components/Icon.svelte`. The collection README records its version, license, and mappings. No panel action icon requires a network request.
-
-Icons inherit `currentColor`; `--cms-icon-size` defaults to `1em`. They are decorative and hidden from assistive technology. Put a translated accessible name on an icon-only button or link, not on its SVG. Application-defined schema icons still resolve through the existing provider API; bundled defaults use a separate `panelIcon` name rather than reinterpreting provider IDs.
-
-## Modal shell
-
-`.cms-modal` is a native `<dialog>` shared by server-rendered settings/confirmations and bridge-mounted content. Its backdrop, border, scrolling, header, close button, and footer come from `cms-modal.css`. The content parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`. The normal width is 48rem; `data-size="compact"` uses 32rem and `data-size="wide"` uses 72rem, each bounded by the viewport.
-
-`cms-settings.css` and `cms-confirm.css` style only their content, not parallel frames. `cms-layout-preview.css` extends the shell for the blocks layout preview: `.cms-layout-preview` is a `.cms-modal` as tall as the viewport allows, its header a row of title, `.note`, the `.widths` preset group and `.reload`, its body a sunken `.stage` holding the `.frame`, which the behavior sizes and scales. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the browser's top layer handles that.
-
-## Tabs
-
-`.cms-tabs` is a row of tabs over a line, the chosen one underlined in the accent colour. The row is the `role="tablist"`; each `.tab` inside is a `role="tab"` button carrying `aria-selected`, `aria-controls` and a roving `tabindex`, so the row is one tab stop and the arrow keys move between tabs. The panels sit wherever the screen puts them as `role="tabpanel"` elements labelled by their tab. The stylesheet draws only the row; the richtext link modal drives its tabs in Svelte. A server-rendered screen marks the block holding the row and its panels with `data-tabs`, and `behaviors/tabs.ts` moves the selection on click and by key. The markup arrives with one tab selected and the other panels `hidden`, so nothing flashes before the script runs. The node inspector is such a block: its status, paths and advanced tabs form the rail's head, and a tab whose panel holds a validation issue carries `.has-error`.
-
-## Action menus
-
-Block pickers, block/entry row actions, menu-tree actions, and richtext menus use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Their buttons use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep the surface beside its trigger in the DOM, within any owning form; the top layer handles painting without reparenting.
-
-`panel.ts` installs the shared `$lib/action-menu` behavior for PHP and Svelte markup. It supplies expanded state, naming, keyboard navigation, focus restoration, and placement within the viewport and clipping panes. `data-align` accepts `start` (default), `end`, or `center`; `--width` overrides the normal 13rem width. Items can contain an icon, text, and `.shortcut`; use `hr` for separators, native `disabled` or `aria-disabled="true"` for unavailable actions, `.danger` for destructive actions, and `.is-active` for selected actions.
-
-Action activation closes the menu before the consumer handler runs, so a handler can focus new content or open a modal without a later menu cleanup reclaiming focus. Tree actions opened with `.` return focus to the row; ordinary triggers regain focus on Escape. Native selects, autocomplete results, and the menu preview disclosure keep their own semantics.
-
-A split button pairs a default action with its alternatives. `.cms-split-button` holds the default `.cms-button`, a `.cms-button.toggle` of the same variant carrying a chevron and a translated accessible name, and the `.cms-action-menu` the toggle opens with `data-align="end"`, which sizes to its longest choice. A choice may be a submit button with a `form` attribute: the menu closes first and the native submit still carries the choice as its submitter, so its `name` and `value` reach the server. The node editor's Save uses one, with Save and publish behind the chevron.
-
-A menu button has no action of its own: one `.cms-button` with a label, a trailing chevron and `popovertarget` opens the menu from its whole face. Use it when no choice is a natural default, since a split button promises one. A collection that allows several types offers them behind one such button; with a single type, the button creates that type directly. Both keep their hover look while their menu is open.
-
-Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu` must target `.cms-action-menu` instead. Kebab triggers are buttons rather than `details`/`summary`; their open styling uses `aria-expanded="true"`. The bridge remains version 1 and application-defined icon providers are unchanged.
-
-## Block catalog
-
-The short block menu is a `.cms-action-menu`. The catalog is `.cms-block-catalog`, a body inside the shared `.cms-modal` shell: the search and its status sit above a scrolling `.results` grid of `.choice` buttons, which drop columns as space narrows and wrap long labels. Menu and catalog draw the same icons: bundled Bootstrap artwork for the built-in types, the configured icon provider for a block's own `#[Icon]`, resolved once per field, and a plain square when neither is available.
-
-The styleguide's Blocks section shows an explicit common subset, the default six with the full catalog, a menu short enough to need no catalog, one-type insertion and a field with nothing to add.
-
-## Shell frame
-
-The sidebar, the page head and a rail beside the content share one ground, `--cms-color-surface`, the sidebar through `--cms-color-rail` and the node inspector through `--cms-inspector-bg`, and no line separates them. The content area sits on `--cms-pane-bg` as an inset in that frame: it is a real box with `--cms-pane-radius` on its top corners, so the frame shows through the curves, and `--cms-pane-shadow`, the frame's own shadow turned inward, along its edges; a theme sets the shadow to `none` for a flat inset. A curve only reads as an inset where a white column carries on below it, so the shell zeroes the side that has none: `--cms-pane-radius-start` where the frame holds no rail, `--cms-pane-radius-end` where the main region holds no inspector. The dashboard and the profile, which have neither, meet the frame square on both sides. Because the inset is the content box itself, a rail beside it needs no correction — the node editor's pane simply ends where its inspector begins, and follows it as it collapses. Every screen draws it the same way: the dashboard and the menu on their body, the node editor on its field pane, the media library on its grid pane, which leaves the filter rail and the file inspector on the surface ground. A screen whose content is a list or a board lays that content on the pane as a white card with its own `--cms-radius-lg` corners, the collection list and the menu tree alike. The media library's head controls belong to the library island: the file count mounts into `[data-media-count]` beside the title and the upload button into `[data-media-toolbar]` in the actions, both removed with the island. Its search is a toolbar row of the grid pane, like the collection's. The island also renders its own content-language selector, in its inspector and its collapsed strip, and reads the page's `data-content-locale-scope` for the choice. Below the shell's smallest band the curves are gone and the cards run to the edges.
-
-## Shell scrolling
-
-The shell is exactly one viewport tall and never scrolls; the regions inside it do. A screen is a column of fixed rows around exactly one scrolling region, and a screen with an inspector is that column beside a second one. Every fixed row is `flex: 0 0 auto`, every scroller is `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs that `min-height: 0` as well or the scroller grows instead of scrolling. Scroll regions carry `overscroll-behavior: contain`. `position: sticky` is used only where a part sticks inside its own scroll region: the collection list's header row and its pinned title column, and the editor's top fade. Below 40rem in width or 30rem in height the shell hands scrolling back to the document, because nested scrollers and an on-screen keyboard do not get along.
-
-The node and user editors separate the stationary `.pane` frame from its `.pane-scroll` child. The frame owns the rounded corners, shadow and top inset; the child owns scrolling, horizontal and bottom padding, and the `content` container query. Its sticky `::before` gradient starts at the scrollport's top edge and also supplies the initial space above the fields. In the document-scrolling band the child has ordinary content padding, visible overflow and no fade.
-
-Every scroll region holds focusable content — links, inputs, checkboxes — so tabbing reaches it and the arrow keys and Page Down work from there. None of them carries `tabindex`, which would only add an empty tab stop ahead of the first link. A scroll region built without focusable content would need one.
-
-After a navigation swap the new page brings a fresh scroll region, so nothing has to be reset. `behaviors/scroll.ts` exists for one case that survives a swap in the other direction: a collection tree toggle re-renders the list, and the behaviour carries the list's position across.
-
-## Breakpoints
-
-Three bands, and they are the only viewport-width queries the panel should contain:
-
-| Band | Shell | Rail | Inspector |
-| --- | --- | --- | --- |
-| `width >= 75rem` | bounded | docked, 13rem | docked, 19rem |
-| `40rem <= width < 75rem` | bounded | docked, 13rem | collapsed to its strip, drawer slides over the content |
-| `width < 40rem` or `height < 30rem` | none, the document scrolls | a strip above the content | full width, above the content |
-
-The boundaries sit in the gaps between real devices rather than on them. The largest phone is about 27rem wide and the smallest tablet about 46.5rem, so 40rem has room on both sides; a tablet in portrait keeps a docked rail, which the previous 52rem boundary denied it by falling inside the iPad range. 75rem is the width at which the content column still reaches 40rem with both rails docked. The height condition catches a phone in landscape, where a bounded shell would leave under 400px of content; it catches a very short desktop window too, which is the same situation.
-
-Phones therefore never get a bounded shell, and with that the mobile address bar keeps working: it only retracts in response to document scrolling, and `dvh` shifts while it does.
-
-Anything else is a container query. Whether the shell fits is a viewport question; whether a component fits is not, because the same viewport means a different content width depending on what is docked beside it. The content columns — `.cms-collection .listing` and `.cms-node .pane-scroll` — declare `container: content / inline-size`, and the list's card stacking, the field grid's single column and the layout preview's labels query that instead.
-
-## Page head
-
-`cms-page-head.css` styles the head and the toolbar of every screen. The order is fixed and every part is optional:
-
-```html
-<header class="head">
-	<div class="titles">
-		<nav class="breadcrumb">…</nav>
-		<div class="line">
-			<h1>…</h1>
-			<span class="cms-count">…</span> <span class="cms-status …">…</span>
-		</div>
-	</div>
-	<div class="actions">…</div>
-</header>
-```
-
-A screen with a single title can put the `h1` straight into the head; `.titles` and `.line` are only needed once something joins it. The actions stay hand-written per screen, since a save split-button, a create menu and an upload button share nothing but their side of the head. Below 52rem they take a row of their own under the wrapped title.
-
-`.toolbar` is a row of the content column, above the scroller and outside it, so a search field or a view toggle stays put while the content moves. The styleguide's `page-head` section shows every part at once.
 
 ## Class names
 
@@ -298,27 +204,96 @@ Fields inside repeater fields, nodes inside a tree. Plain nesting cannot stop an
 
 Use it only where a block genuinely contains itself. Nesting handles everything else.
 
-## Field alignment
+## Shell frame
 
-Each `.cms-fields` grid aligns the start of neighbouring controls beneath the tallest label in their row. A wrapped label, required marker or metadata button can enlarge that shared label area; descriptions stay directly below their own control, followed by validation messages, rather than lining up beneath the tallest neighbouring control. Controls keep their intrinsic heights.
+The shell is a white frame on the canvas. The sidebar, the page head and a rail beside the content share that one ground, `--cms-color-surface`, the sidebar through `--cms-color-rail` and the node inspector through `--cms-inspector-bg`, and no line separates them. Each screen's content area is a pane inside the frame, drawn from one set of tokens:
 
-`#[Width]` still controls horizontal placement, and `#[Rowspan]` still counts complete field rows. Fieldsets and the field grids inside Entries and Blocks align independently, without sharing label heights with their outer field. Hidden labels retain their accessible names but contribute no height; a row containing only hidden labels has no header gap. Conditional fields leave the grid while hidden, and the narrow-screen layout stacks fields without reserving space for neighbouring labels.
+| Token | Is |
+| --- | --- |
+| `--cms-pane-radius`, `--cms-pane-radius-start`, `--cms-pane-radius-end` | its top corners |
+| `--cms-pane-border`, `--cms-pane-border-start`, `--cms-pane-border-end` | its top and side edges |
+| `--cms-pane-shadow` | shading over the pane, `none` by default |
 
-The styleguide's `?section=alignment` sample combines mixed label lengths, native dates, textareas, row spans and conditional visibility. Its validation button exercises the normal error-rendering behaviour, including multiple messages for one input.
+The fill is the screen's own decision, not part of the set: `--cms-color-surface` where the pane is the page itself, `--cms-pane-bg` where it is a ground for items laid on it.
 
-## Fallback previews
+A pane meets a white column on a side, or it meets the frame's own edge. A curve there leaves a white tip standing alone against the canvas and a border doubles the frame's, so `cms-shell.css` zeroes both the `-start` and `-end` tokens on the side that has no column beside it — no rail in the frame, no inspector in the main region — and zeroes both below the smallest band, where nothing sits beside anything. A pane therefore writes the same three border declarations and the two radius ones wherever it is, and never a bottom border: it runs off the bottom of the viewport.
 
-Fallback content is a secondary, display-only state, not a value style. Use the existing surface and text tokens so it remains legible in both themes; the shared source label is muted and italic. Native fields expose `.cms-fallback-source`, richtext and code use `.cms-richtext-fallback` and `.cms-code-editor-fallback`, media uses `.cms-media-fallback`, and an asymmetric block source carries `.variant.is-fallback-preview` plus `.cms-blocks-fallback-source`.
+## Shell scrolling
 
-The preview must not obscure the empty control's focus path. Text, richtext, and code layers disappear on focus; block and media previews retain separate target-locale add actions. Block previews are `inert`, and their editing chrome is hidden rather than merely dimmed. Theme overrides may restyle these hooks in `@layer theme`, but should preserve the distinction between source preview and editable target content.
+The shell is exactly one viewport tall and never scrolls; the regions inside it do. A screen is a column of fixed rows around exactly one scrolling region, and a screen with an inspector is that column beside a second one. Every fixed row is `flex: 0 0 auto`, every scroller is `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs that `min-height: 0` as well or the scroller grows instead of scrolling. Scroll regions carry `overscroll-behavior: contain`. `position: sticky` is used only where a part sticks inside its own scroll region. Below 40rem in width or 30rem in height the shell hands scrolling back to the document, because nested scrollers and an on-screen keyboard do not get along.
+
+The node and user editors separate the stationary `.pane` frame from its `.pane-scroll` child. The frame owns the pane tokens; the child owns scrolling, horizontal and bottom padding, and the `content` container query. In the document-scrolling band the child has ordinary content padding and visible overflow.
+
+Every scroll region holds focusable content — links, inputs, checkboxes — so tabbing reaches it and the arrow keys and Page Down work from there. None of them carries `tabindex`, which would only add an empty tab stop ahead of the first link. A scroll region built without focusable content would need one.
+
+After a navigation swap the new page brings a fresh scroll region, so nothing has to be reset. `behaviors/scroll.ts` exists for one case that survives a swap in the other direction: a collection tree toggle re-renders the list, and the behaviour carries the list's position across.
+
+## Breakpoints
+
+Three bands, and they are the only viewport-width queries the panel should contain:
+
+| Band | Shell | Rail | Inspector |
+| --- | --- | --- | --- |
+| `width >= 75rem` | bounded | docked, 13rem | docked, 19rem |
+| `40rem <= width < 75rem` | bounded | docked, 13rem | collapsed to its strip, drawer slides over the content |
+| `width < 40rem` or `height < 30rem` | none, the document scrolls | a strip above the content | full width, above the content |
+
+The boundaries sit in the gaps between real devices rather than on them: the largest phone is about 27rem wide and the smallest tablet about 46.5rem, so 40rem leaves a tablet in portrait its docked rail, and 75rem is the width at which the content column still reaches 40rem with both rails docked. The height condition catches a phone in landscape and a very short desktop window, which is the same situation. Phones therefore never get a bounded shell, and with that the mobile address bar keeps working: it only retracts in response to document scrolling.
+
+Anything else is a container query. Whether the shell fits is a viewport question; whether a component fits is not, because the same viewport means a different content width depending on what is docked beside it. The content columns declare `container: content / inline-size`, and the list's card stacking, the field grid's single column and the layout preview's labels query that instead.
+
+## Page head
+
+`cms-page-head.css` styles the head and the toolbar of every screen. The order is fixed and every part is optional:
+
+```html
+<header class="head">
+	<div class="titles">
+		<nav class="breadcrumb">…</nav>
+		<div class="line">
+			<h1>…</h1>
+			<span class="cms-count">…</span> <span class="cms-status …">…</span>
+		</div>
+	</div>
+	<div class="actions">…</div>
+</header>
+```
+
+A screen with a single title can put the `h1` straight into the head; `.titles` and `.line` are only needed once something joins it. The actions stay hand-written per screen, since a save split-button, a create menu and an upload button share nothing but their side of the head.
+
+`.toolbar` is a row of the content column, above the scroller and outside it, so a search field or a view toggle stays put while the content moves.
+
+## Action menus
+
+Block pickers, block/entry row actions, menu-tree actions, and richtext menus use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Their buttons use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep the surface beside its trigger in the DOM, within any owning form; the top layer handles painting without reparenting.
+
+`panel.ts` installs the shared `$lib/action-menu` behavior for PHP and Svelte markup. It supplies expanded state, naming, keyboard navigation, focus restoration, and placement within the viewport and clipping panes. `data-align` accepts `start` (default), `end`, or `center`; `--width` overrides the normal 13rem width. Items can contain an icon, text, and `.shortcut`; use `hr` for separators, native `disabled` or `aria-disabled="true"` for unavailable actions, `.danger` for destructive actions, and `.is-active` for selected actions.
+
+Action activation closes the menu before the consumer handler runs, so a handler can focus new content or open a modal without a later menu cleanup reclaiming focus. Tree actions opened with `.` return focus to the row; ordinary triggers regain focus on Escape.
+
+A split button pairs a default action with its alternatives: `.cms-split-button` holds the default `.cms-button`, a `.cms-button.toggle` of the same variant carrying a chevron and a translated accessible name, and the `.cms-action-menu` the toggle opens with `data-align="end"`. A choice may be a submit button with a `form` attribute: the menu closes first and the native submit still carries the choice as its submitter, so its `name` and `value` reach the server. A menu button has no action of its own — one `.cms-button` with a label, a trailing chevron and `popovertarget` — and is the right one where no choice is a natural default, since a split button promises one.
+
+Theme rules targeting `.kebab-menu`, `.picker-menu`, or `.richtext-dropdown-menu` must target `.cms-action-menu` instead.
+
+## Shared shells
+
+`.cms-modal` is a native `<dialog>` shared by server-rendered settings/confirmations and bridge-mounted content. Its backdrop, border, scrolling, header, close button, and footer come from `cms-modal.css`; the content parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`. The normal width is 48rem, `data-size="compact"` 32rem and `data-size="wide"` 72rem, each bounded by the viewport. A footer is optional: settings edit live and need no invented Apply step. Do not move a server-rendered dialog out of its form to escape clipping; the top layer handles that. The block catalog is such a body, as is the blocks layout preview.
+
+`.cms-tabs` is a row of tabs over a line. The row is the `role="tablist"`; each `.tab` inside is a `role="tab"` button carrying `aria-selected`, `aria-controls` and a roving `tabindex`, so the row is one tab stop and the arrow keys move between tabs. The panels sit wherever the screen puts them as `role="tabpanel"` elements labelled by their tab. A server-rendered screen marks the block holding the row and its panels with `data-tabs`, and `behaviors/tabs.ts` moves the selection; the markup arrives with one tab selected and the other panels `hidden`, so nothing flashes before the script runs.
+
+Built-in panel icons use the checked-in regular Bootstrap collection in `panel/icons/`, shared by `Cosray\Panel\Icon::render('plus')` and `<Icon name="plus" />` from `panel/src/components/Icon.svelte`; the collection README records its version, license and mappings. No panel action icon requires a network request. Icons inherit `currentColor`, `--cms-icon-size` defaults to `1em`, and they are decorative: put a translated accessible name on an icon-only button or link, not on its SVG.
+
+## Fields
+
+Each `.cms-fields` grid aligns the start of neighbouring controls beneath the tallest label in their row; descriptions and validation messages stay directly below their own control. `#[Width]` controls horizontal placement and `#[Rowspan]` counts complete field rows. Fieldsets and the field grids inside Entries and Blocks align independently, hidden labels contribute no height, conditional fields leave the grid while hidden, and the narrow-screen layout stacks fields without reserving label space.
+
+Fallback content is a secondary, display-only state, not a value style, and it must not obscure the empty control's focus path: text, richtext and code layers disappear on focus, block previews are `inert` with their editing chrome hidden rather than dimmed. The hooks a theme may restyle are `.cms-fallback-source` for native fields, `.cms-richtext-fallback`, `.cms-code-editor-fallback`, `.cms-media-fallback`, and `.variant.is-fallback-preview` with `.cms-blocks-fallback-source` for an asymmetric block source. Preserve the distinction between source preview and editable target content.
 
 ## Styleguide
 
-`/<panel-path>/styleguide` renders every component against the current stylesheets — tokens, buttons, pills, status, form controls, fields, empty states — plus a theme toggle. It is registered only when `app.debug` is on, and sits behind the same authentication as the rest of the panel.
+`/<panel-path>/styleguide` renders every component against the current stylesheets, plus a theme toggle. It is registered only when `app.debug` is on, and sits behind the same authentication as the rest of the panel.
 
-It exists because the states that break quietly are the ones real content rarely produces: empty, disabled, error, a title long enough to truncate, a node with four locale paths in the inspector. Checking those, and checking dark, should not mean hunting for content that happens to trigger them.
-
-It is built to be checked, by a person or by a tool: `?section=<key>` narrows the page to one section and `?theme=light|dark` forces a theme, so one URL answers one question without scrolling or scripting. Every section carries its key as `data-section`, and every sample a `data-sample` hook — `input:readonly`, `field:invalid` — so a check addresses a state instead of hunting for it by position. Field samples sit in a `.pane`, the ground the node editor gives them, so a state is judged against the colour it actually appears on.
+It exists for the states that break quietly and real content rarely produces: empty, disabled, error, a title long enough to truncate, a node with four locale paths in the inspector. It is built to be checked, by a person or by a tool: `?section=<key>` narrows the page to one section and `?theme=light|dark` forces a theme, so one URL answers one question. Every section carries its key as `data-section`, and every sample a `data-sample` hook — `input:readonly`, `field:invalid` — so a check addresses a state instead of hunting for it by position.
 
 Two rules keep it honest:
 
