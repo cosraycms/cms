@@ -13,7 +13,10 @@
 		padding: var(--cms-space-6);
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
-		background: var(--cms-pane-bg);
+		border-top: var(--cms-pane-border);
+		border-inline-start: var(--cms-pane-border-start);
+		border-inline-end: var(--cms-pane-border-end);
+		background: var(--cms-color-surface);
 		box-shadow: var(--cms-pane-shadow);
 		overflow-y: auto;
 		overscroll-behavior: contain;
@@ -31,7 +34,7 @@
 		padding: var(--cms-space-5);
 		color: var(--cms-color-text);
 		text-decoration: none;
-		background: var(--cms-color-surface-raised);
+		background: var(--cms-dashboard-card-bg);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-xl);
 
@@ -68,7 +71,7 @@
 	}
 
 	& .recent {
-		background: var(--cms-color-surface-raised);
+		background: var(--cms-dashboard-card-bg);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-xl);
 		overflow: hidden;
@@ -140,9 +143,6 @@
 	.cms-dashboard {
 		& .body {
 			padding-inline: var(--cms-space-4);
-		}
-
-		& .body {
 			border-radius: 0;
 			box-shadow: none;
 			overflow: visible;

@@ -46,6 +46,9 @@
 		flex: 1 1 auto;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
+		border-top: var(--cms-pane-border);
+		border-inline-start: var(--cms-pane-border-start);
+		border-inline-end: var(--cms-pane-border-end);
 		padding-top: calc(var(--cms-pane-radius) * 2);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);

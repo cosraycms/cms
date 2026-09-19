@@ -663,6 +663,9 @@
 			background: var(--cms-pane-bg);
 			border-start-start-radius: var(--cms-pane-radius-start);
 			border-start-end-radius: var(--cms-pane-radius-end);
+			border-top: var(--cms-pane-border);
+			border-inline-start: var(--cms-pane-border-start);
+			border-inline-end: var(--cms-pane-border-end);
 			overflow: hidden;
 
 			&::after {

@@ -22,6 +22,8 @@
 		padding: var(--cms-space-4) var(--cms-space-6) 0;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
+		border-top: 1px solid var(--cms-color-border);
+		border-left: 1px solid var(--cms-color-border);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;

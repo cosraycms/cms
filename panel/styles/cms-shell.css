@@ -40,17 +40,20 @@
 }
 
 /*
- * The pane is a recess cut into the white frame, and a rounded top corner only
- * reads as one where a white column carries on below it: the rail on the left,
- * the inspector on the right. A side without one leaves a white tip standing
- * alone against the canvas, so the pane squares that side instead.
+ * The pane is a box inside the white frame, and its corner and edge only read
+ * as one where a white column carries on beside it: the rail on the left, the
+ * inspector on the right. A side without one meets the frame's own edge, where
+ * a curve leaves a white tip standing alone and a border doubles the frame's,
+ * so the pane squares and opens that side instead.
  */
 .cms-shell > .frame:not(:has(> .cms-sidebar)) {
 	--cms-pane-radius-start: 0;
+	--cms-pane-border-start: 0;
 }
 
 .cms-shell > .frame > .main:not(:has(.cms-inspector)) {
 	--cms-pane-radius-end: 0;
+	--cms-pane-border-end: 0;
 }
 
 .cms-masthead {
@@ -245,9 +248,8 @@
 
 @media (width > 120rem) {
 	.cms-shell > .frame {
-		border-top: 0;
+		border: var(--cms-border);
 		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
-		box-shadow: var(--cms-shadow);
 	}
 
 	/* On the canvas beside the floating frame, items lift to the surface. */
@@ -261,6 +263,10 @@
 
 @media (width < 40rem), (height < 30rem) {
 	.cms-shell {
+		/* Stacked, no column sits beside a pane and every side is an edge. */
+		--cms-pane-border-start: 0;
+		--cms-pane-border-end: 0;
+
 		height: auto;
 		min-height: 100dvh;
 		overflow: visible;

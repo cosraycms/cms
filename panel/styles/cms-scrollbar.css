@@ -1,7 +1,7 @@
 @media (pointer: fine) {
 	* {
 		scrollbar-width: var(--cms-scrollbar-width);
-		scrollbar-color: var(--cms-color-scrollbar-thumb) var(--cms-color-scrollbar-gutter);
+		scrollbar-color: var(--cms-scrollbar-thumb) var(--cms-scrollbar-gutter, transparent);
 	}
 
 	@media (hover: hover) {

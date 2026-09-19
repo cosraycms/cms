@@ -13,7 +13,10 @@
 		padding: 0;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
-		background: var(--cms-pane-bg);
+		border-top: var(--cms-pane-border);
+		border-inline-start: var(--cms-pane-border-start);
+		border-inline-end: var(--cms-pane-border-end);
+		background: var(--cms-color-surface);
 		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;
 	}
@@ -162,19 +165,28 @@
 		flex-direction: column;
 		flex: 1 1 auto;
 		min-height: 0;
-		margin-inline: var(--cms-space-6);
-		border: 1px solid var(--cms-color-border);
-		border-bottom: 0;
-		border-radius: var(--cms-radius-lg) var(--cms-radius-lg) 0 0;
-		background: var(--cms-color-surface);
+		border-top: 1px solid var(--cms-color-border);
 		overflow: hidden;
 	}
 
+	/*
+	 * A border on the scroller would sit outside the scrollbar, so the line
+	 * that closes the list against the gutter belongs to the table, and only
+	 * while there is a gutter to close against. Where scroll-state queries
+	 * are unsupported the container declaration drops whole and the list
+	 * keeps no line, which is why nothing else depends on that container.
+	 */
 	& .scroll {
-		flex: 1 1 auto;
+		container: collection-content / scroll-state;
 		min-height: 0;
 		overflow: auto;
 		overscroll-behavior: contain;
+
+		@container collection-content scroll-state(scrollable: y) {
+			& > * {
+				border-right: 1px solid var(--cms-color-border);
+			}
+		}
 	}
 
 	& .foot {
@@ -186,7 +198,8 @@
 		flex-wrap: wrap;
 		padding: var(--cms-space-3) var(--cms-space-6);
 		border-top: 1px solid var(--cms-color-border);
-		background: var(--cms-color-surface-sunken);
+		border-bottom: 1px solid var(--cms-color-border);
+		background: var(--cms-list-header-bg);
 	}
 
 	& .range,
@@ -273,12 +286,6 @@
 			border-radius: 0;
 			box-shadow: none;
 			overflow: visible;
-		}
-
-		& .listing {
-			margin-inline: 0;
-			border-inline: 0;
-			border-radius: 0;
 		}
 
 		& .scroll {
