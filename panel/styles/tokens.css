@@ -482,7 +482,7 @@
 	--cms-inspector-collapsed-width: 3.5rem;
 	--cms-inspector-bg: var(--cms-color-rail);
 	--cms-pane-bg: var(--cms-color-canvas);
-	--cms-pane-radius: var(--cms-radius-2xl);
+	--cms-pane-radius: var(--cms-radius-xl);
 	/* The shell zeroes the side that has no white column beside it. */
 	--cms-pane-radius-start: var(--cms-pane-radius);
 	--cms-pane-radius-end: var(--cms-pane-radius);

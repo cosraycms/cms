@@ -133,7 +133,9 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				</div>
 				<div class="sample">
 					<button type="button" class="cms-button primary" disabled><?= \Cosray\Panel\Icon::render('floppy') ?> Save</button>
-					<button type="button" class="cms-button secondary" disabled><?= \Cosray\Panel\Icon::render('eye') ?> Preview</button>
+					<button type="button" class="cms-button secondary" disabled><?= \Cosray\Panel\Icon::render(
+						'eye',
+					) ?> Preview</button>
 					<button type="button" class="cms-button danger" disabled><?= \Cosray\Panel\Icon::render('trash3') ?> Delete</button>
 				</div>
 				<div class="sample" data-sample="button:danger-solid">
@@ -308,38 +310,40 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locale="<?= escape($defaultLocale) ?>"
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="pane">
-						<div class="inner">
-							<div class="sheet">
-								<?php $this->insert('component/content-locales', [
-									'locales' => $locales,
-									'selected' => $defaultLocale,
-									'controlId' => 'styleguide-fields-locale',
-								]) ?>
-								<?php $this->insert('field/fieldset', [
-									'fieldset' => $fieldset,
-									'fieldsByName' => $fieldsByName,
-									'content' => $content,
-									'locales' => $locales,
-									'defaultLocale' => $defaultLocale,
-									'uid' => 'styleguide',
-									'assets' => [],
-									'pathSourceFields' => [],
-								]) ?>
-								<div class="cms-fields">
-									<?php foreach ($fields as $field): ?>
-										<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
-											continue;
-										} ?>
-										<?php $this->insert('field/item', [
-											'field' => $field,
-											'content' => $content,
-											'locales' => $locales,
-											'defaultLocale' => $defaultLocale,
-											'uid' => 'styleguide',
-											'assets' => [],
-											'pathSourceFields' => [],
-										]) ?>
-									<?php endforeach ?>
+						<div class="pane-scroll">
+							<div class="inner">
+								<div class="sheet">
+									<?php $this->insert('component/content-locales', [
+										'locales' => $locales,
+										'selected' => $defaultLocale,
+										'controlId' => 'styleguide-fields-locale',
+									]) ?>
+									<?php $this->insert('field/fieldset', [
+										'fieldset' => $fieldset,
+										'fieldsByName' => $fieldsByName,
+										'content' => $content,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => [],
+										'pathSourceFields' => [],
+									]) ?>
+									<div class="cms-fields">
+										<?php foreach ($fields as $field): ?>
+											<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
+												continue;
+											} ?>
+											<?php $this->insert('field/item', [
+												'field' => $field,
+												'content' => $content,
+												'locales' => $locales,
+												'defaultLocale' => $defaultLocale,
+												'uid' => 'styleguide',
+												'assets' => [],
+												'pathSourceFields' => [],
+											]) ?>
+										<?php endforeach ?>
+									</div>
 								</div>
 							</div>
 						</div>

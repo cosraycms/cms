@@ -152,25 +152,27 @@ $action = $edit
 		<?= $contentLocales ? "data-content-locales='" . escape(json_encode($locales, $jsonFlags)) . "'" : '' ?>
 		novalidate>
 		<div class="pane">
-			<div class="inner">
-				<div id="editor-errors" class="errors" hidden></div>
-				<?php if (!$edit): ?>
-					<?php // A new node carries the blueprint uid so media uploaded
+			<div class="pane-scroll">
+				<div class="inner">
+					<div id="editor-errors" class="errors" hidden></div>
+					<?php if (!$edit): ?>
+						<?php // A new node carries the blueprint uid so media uploaded
 
-					// before the first save lands under node/<uid>/ and the stored
-					// node adopts the same uid. ?>
-					<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
-				<?php endif ?>
-				<?php $this->insert('field/sheet', [
-					'fields' => $fields,
-					'fieldsets' => $fieldsets,
-					'content' => $content,
-					'locales' => $locales,
-					'defaultLocale' => $defaultLocale,
-					'uid' => $uid,
-					'assets' => $assets,
-					'pathSourceFields' => $pathSourceFields,
-				]) ?>
+						// before the first save lands under node/<uid>/ and the stored
+						// node adopts the same uid. ?>
+						<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
+					<?php endif ?>
+					<?php $this->insert('field/sheet', [
+						'fields' => $fields,
+						'fieldsets' => $fieldsets,
+						'content' => $content,
+						'locales' => $locales,
+						'defaultLocale' => $defaultLocale,
+						'uid' => $uid,
+						'assets' => $assets,
+						'pathSourceFields' => $pathSourceFields,
+					]) ?>
+				</div>
 			</div>
 		</div>
 

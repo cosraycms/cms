@@ -80,94 +80,96 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		data-json-form
 		novalidate>
 		<div class="pane">
-			<div class="inner">
-				<?php if (is_string($notice)): ?>
-					<div class="cms-notice" role="status">
-						<p><?= escape($notice) ?></p>
-					</div>
-				<?php endif ?>
-				<div id="editor-errors" class="errors" hidden></div>
+			<div class="pane-scroll">
+				<div class="inner">
+					<?php if (is_string($notice)): ?>
+						<div class="cms-notice" role="status">
+							<p><?= escape($notice) ?></p>
+						</div>
+					<?php endif ?>
+					<div id="editor-errors" class="errors" hidden></div>
 
-				<div class="sheet">
-					<fieldset class="cms-fieldset" data-fieldset="account">
-						<legend class="legend"><?= escape(__('user:account')) ?></legend>
-						<div class="cms-fields fields">
-							<?php $this->insert('user/input', [
-								'name' => 'email',
-								'label' => __('user:email'),
-								'type' => 'email',
-								'value' => $user->email,
-								'required' => true,
-							]) ?>
-							<?php $this->insert('user/input', [
-								'name' => 'username',
-								'label' => __('user:username'),
-								'value' => $user->username,
-								'help' => __('user:username-help'),
-							]) ?>
-							<?php $this->insert('user/input', [
-								'name' => 'name',
-								'label' => __('user:name'),
-								'value' => $user->name ?? '',
-							]) ?>
-							<?php if (count($panelLocaleChoices) > 1): ?>
-								<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_locale">
-									<label class="label" for="user-panel-locale"><div><?= escape(
-										__('user:panel-language'),
-									) ?></div></label>
-									<div class="field-body">
-										<div class="control">
-											<select class="cms-input" id="user-panel-locale" name="panel_locale">
-												<option value=""><?= escape(__('user:panel-language-auto')) ?></option>
-												<?php foreach ($panelLocaleChoices as $id => $label): ?>
-													<option
-														value="<?= escape((string) $id) ?>"
-														<?= $user->panelLocale === $id ? 'selected' : '' ?>><?= escape((string) $label) ?></option>
-												<?php endforeach ?>
-											</select>
+					<div class="sheet">
+						<fieldset class="cms-fieldset" data-fieldset="account">
+							<legend class="legend"><?= escape(__('user:account')) ?></legend>
+							<div class="cms-fields fields">
+								<?php $this->insert('user/input', [
+									'name' => 'email',
+									'label' => __('user:email'),
+									'type' => 'email',
+									'value' => $user->email,
+									'required' => true,
+								]) ?>
+								<?php $this->insert('user/input', [
+									'name' => 'username',
+									'label' => __('user:username'),
+									'value' => $user->username,
+									'help' => __('user:username-help'),
+								]) ?>
+								<?php $this->insert('user/input', [
+									'name' => 'name',
+									'label' => __('user:name'),
+									'value' => $user->name ?? '',
+								]) ?>
+								<?php if (count($panelLocaleChoices) > 1): ?>
+									<div class="cms-field" style="grid-column: span 50 / span 50" data-field="panel_locale">
+										<label class="label" for="user-panel-locale"><div><?= escape(
+											__('user:panel-language'),
+										) ?></div></label>
+										<div class="field-body">
+											<div class="control">
+												<select class="cms-input" id="user-panel-locale" name="panel_locale">
+													<option value=""><?= escape(__('user:panel-language-auto')) ?></option>
+													<?php foreach ($panelLocaleChoices as $id => $label): ?>
+														<option
+															value="<?= escape((string) $id) ?>"
+															<?= $user->panelLocale === $id ? 'selected' : '' ?>><?= escape((string) $label) ?></option>
+													<?php endforeach ?>
+												</select>
+											</div>
 										</div>
 									</div>
-								</div>
-							<?php endif ?>
-							<?php if ($profile): ?>
+								<?php endif ?>
+								<?php if ($profile): ?>
+									<?php $this->insert('user/input', [
+										'name' => 'current_password',
+										'label' => __('user:current-password'),
+										'type' => 'password',
+										'autocomplete' => 'current-password',
+										'help' => __('user:current-password-help'),
+										'width' => 100,
+									]) ?>
+								<?php endif ?>
 								<?php $this->insert('user/input', [
-									'name' => 'current_password',
-									'label' => __('user:current-password'),
+									'name' => 'password',
+									'label' => $exists ? __('user:new-password') : __('user:password'),
 									'type' => 'password',
-									'autocomplete' => 'current-password',
-									'help' => __('user:current-password-help'),
-									'width' => 100,
+									'required' => !$exists,
+									'autocomplete' => 'new-password',
+									'help' => $exists ? __('user:password-keep-help') : __('user:password-help'),
 								]) ?>
-							<?php endif ?>
-							<?php $this->insert('user/input', [
-								'name' => 'password',
-								'label' => $exists ? __('user:new-password') : __('user:password'),
-								'type' => 'password',
-								'required' => !$exists,
-								'autocomplete' => 'new-password',
-								'help' => $exists ? __('user:password-keep-help') : __('user:password-help'),
-							]) ?>
-							<?php $this->insert('user/input', [
-								'name' => 'password_repeat',
-								'label' => __('user:password-repeat'),
-								'type' => 'password',
-								'required' => !$exists,
-								'autocomplete' => 'new-password',
-							]) ?>
-						</div>
-					</fieldset>
-				</div>
+								<?php $this->insert('user/input', [
+									'name' => 'password_repeat',
+									'label' => __('user:password-repeat'),
+									'type' => 'password',
+									'required' => !$exists,
+									'autocomplete' => 'new-password',
+								]) ?>
+							</div>
+						</fieldset>
+					</div>
 
-				<?php if ($fields['fields'] !== []): ?>
-					<?php $this->insert('field/sheet', [
-						'fields' => $fields['fields'],
-						'fieldsets' => $fields['fieldsets'],
-						'content' => $fields['content'],
-						'locales' => $locales,
-						'defaultLocale' => $defaultLocale,
-						'uid' => $user->uid,
-					]) ?>
-				<?php endif ?>
+					<?php if ($fields['fields'] !== []): ?>
+						<?php $this->insert('field/sheet', [
+							'fields' => $fields['fields'],
+							'fieldsets' => $fields['fieldsets'],
+							'content' => $fields['content'],
+							'locales' => $locales,
+							'defaultLocale' => $defaultLocale,
+							'uid' => $user->uid,
+						]) ?>
+					<?php endif ?>
+				</div>
 			</div>
 		</div>
 

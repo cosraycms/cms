@@ -190,7 +190,9 @@ The sidebar, the page head and a rail beside the content share one ground, `--cm
 
 ## Shell scrolling
 
-The shell is exactly one viewport tall and never scrolls; the regions inside it do. A screen is a column of fixed rows around exactly one scrolling region, and a screen with an inspector is that column beside a second one. Every fixed row is `flex: 0 0 auto`, every scroller is `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs that `min-height: 0` as well or the scroller grows instead of scrolling. Scroll regions carry `overscroll-behavior: contain`. `position: sticky` is used only where a part sticks inside its own scroll region: the collection list's header row and its pinned title column. Below the 52rem breakpoint the shell hands scrolling back to the document, because nested scrollers and an on-screen keyboard do not get along.
+The shell is exactly one viewport tall and never scrolls; the regions inside it do. A screen is a column of fixed rows around exactly one scrolling region, and a screen with an inspector is that column beside a second one. Every fixed row is `flex: 0 0 auto`, every scroller is `flex: 1 1 auto; min-height: 0`, and each flex ancestor of a scroller needs that `min-height: 0` as well or the scroller grows instead of scrolling. Scroll regions carry `overscroll-behavior: contain`. `position: sticky` is used only where a part sticks inside its own scroll region: the collection list's header row and its pinned title column, and the editor's top fade. Below 40rem in width or 30rem in height the shell hands scrolling back to the document, because nested scrollers and an on-screen keyboard do not get along.
+
+The node and user editors separate the stationary `.pane` frame from its `.pane-scroll` child. The frame owns the rounded corners, shadow and top inset; the child owns scrolling, horizontal and bottom padding, and the `content` container query. Its sticky `::before` gradient starts at the scrollport's top edge and also supplies the initial space above the fields. In the document-scrolling band the child has ordinary content padding, visible overflow and no fade.
 
 Every scroll region holds focusable content — links, inputs, checkboxes — so tabbing reaches it and the arrow keys and Page Down work from there. None of them carries `tabindex`, which would only add an empty tab stop ahead of the first link. A scroll region built without focusable content would need one.
 
@@ -210,7 +212,7 @@ The boundaries sit in the gaps between real devices rather than on them. The lar
 
 Phones therefore never get a bounded shell, and with that the mobile address bar keeps working: it only retracts in response to document scrolling, and `dvh` shifts while it does.
 
-Anything else is a container query. Whether the shell fits is a viewport question; whether a component fits is not, because the same viewport means a different content width depending on what is docked beside it. The content columns — `.cms-collection .listing` and `.cms-node .pane` — declare `container: content / inline-size`, and the list's card stacking, the field grid's single column and the layout preview's labels query that instead.
+Anything else is a container query. Whether the shell fits is a viewport question; whether a component fits is not, because the same viewport means a different content width depending on what is docked beside it. The content columns — `.cms-collection .listing` and `.cms-node .pane-scroll` — declare `container: content / inline-size`, and the list's card stacking, the field grid's single column and the layout preview's labels query that instead.
 
 ## Page head
 

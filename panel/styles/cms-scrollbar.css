@@ -1,0 +1,10 @@
+@media (pointer: fine) {
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: currentColor transparent;
+
+		@supports (color: color-mix(in lab, red, red)) {
+			scrollbar-color: color-mix(in oklab, currentColor 13%, transparent) transparent;
+		}
+	}
+}

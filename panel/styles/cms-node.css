@@ -42,17 +42,36 @@
 	}
 
 	& .pane {
+		display: flex;
+		flex: 1 1 auto;
+		border-start-start-radius: var(--cms-pane-radius-start);
+		border-start-end-radius: var(--cms-pane-radius-end);
+		padding-top: calc(var(--cms-pane-radius) * 1.5);
+		background: var(--cms-pane-bg);
+		box-shadow: var(--cms-pane-shadow);
+		min-width: 0;
+		min-height: 0;
+	}
+
+	.pane-scroll {
 		container: content / inline-size;
 		flex: 1 1 auto;
 		min-width: 0;
 		min-height: 0;
-		padding: var(--cms-space-12) var(--cms-space-6);
-		border-start-start-radius: var(--cms-pane-radius-start);
-		border-start-end-radius: var(--cms-pane-radius-end);
-		background: var(--cms-pane-bg);
-		box-shadow: var(--cms-pane-shadow);
+		padding: 0 var(--cms-space-6) var(--cms-space-12);
 		overflow-y: auto;
 		overscroll-behavior: contain;
+
+		&::before {
+			content: '';
+			display: block;
+			position: sticky;
+			top: 0;
+			z-index: 1;
+			height: 0.73rem;
+			background: linear-gradient(var(--cms-pane-bg), transparent);
+			pointer-events: none;
+		}
 	}
 
 	& .inner {
@@ -156,10 +175,18 @@
 		}
 
 		& .pane {
-			padding: var(--cms-space-4);
+			padding: 0;
 			border-radius: 0;
 			box-shadow: none;
-			overflow: visible;
+
+			& > .pane-scroll {
+				padding: var(--cms-space-4);
+				overflow: visible;
+
+				&::before {
+					display: none;
+				}
+			}
 		}
 	}
 }
