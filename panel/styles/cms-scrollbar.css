@@ -1,11 +1,7 @@
 @media (pointer: fine) {
 	* {
-		scrollbar-width: thin;
-		scrollbar-color: currentColor transparent;
-
-		@supports (color: color-mix(in lab, red, red)) {
-			scrollbar-color: color-mix(in oklab, currentColor 13%, transparent) transparent;
-		}
+		scrollbar-width: var(--cms-scrollbar-width);
+		scrollbar-color: var(--cms-color-scrollbar-thumb) var(--cms-color-scrollbar-gutter);
 	}
 
 	@media (hover: hover) {

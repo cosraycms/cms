@@ -46,7 +46,7 @@
 		flex: 1 1 auto;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
-		padding-top: calc(var(--cms-pane-radius) * 1.5);
+		padding-top: calc(var(--cms-pane-radius) * 2);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		min-width: 0;
@@ -68,7 +68,7 @@
 			position: sticky;
 			top: 0;
 			z-index: 1;
-			height: 0.73rem;
+			height: 0.5rem;
 			background: linear-gradient(var(--cms-pane-bg), transparent);
 			pointer-events: none;
 		}

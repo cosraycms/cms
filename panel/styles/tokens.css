@@ -201,6 +201,8 @@
 	--cms-color-surface-muted: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-925));
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
 	--cms-color-rail: var(--cms-color-surface);
+	--cms-color-scrollbar-gutter: transparent;
+	--cms-color-scrollbar-thumb: var(--cms-color-neutral-300);
 
 	/**
 	 * Semantic — text
@@ -489,6 +491,7 @@
 	/* --cms-shadow turned inward: the pane is a recess in the frame. */
 	--cms-pane-shadow: inset 0 1px 3px rgb(33 33 31 / 0.08), inset 0 0 14px rgb(33 33 31 / 0.05);
 	--cms-tile-min: 11rem;
+	--cms-scrollbar-width: thin;
 }
 
 /**
