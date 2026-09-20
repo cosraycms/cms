@@ -68,7 +68,7 @@
 	width: 100%;
 	max-width: var(--cms-content-max-width);
 	margin-inline: auto;
-	padding: var(--cms-space-1) var(--cms-space-6);
+	padding: var(--cms-space-2) var(--cms-space-6);
 	background-color: var(--cms-masthead-bg);
 
 	& .logo {
