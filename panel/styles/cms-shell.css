@@ -148,9 +148,8 @@
 		}
 
 		&[aria-current='page'] {
-			border-color: var(--cms-button-secondary-border);
-			background: var(--cms-gradient-raised), var(--current-bg);
-			box-shadow: var(--cms-button-secondary-shadow);
+			border-color: var(--cms-color-border-strong);
+			background: var(--current-bg);
 			color: var(--cms-color-text);
 
 			& .cms-icon {
