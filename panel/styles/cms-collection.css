@@ -166,7 +166,7 @@
 		flex: 1 1 auto;
 		min-height: 0;
 		border-top: 1px solid var(--cms-color-border);
-		background: var(--cms-color-canvas);
+		background: var(--cms-pane-bg);
 		overflow: hidden;
 	}
 
