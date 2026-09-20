@@ -457,12 +457,8 @@
 
 	/**
 	 * Component — dashboard
-	 *
-	 * The dashboard has no rail and no inspector, so its body is the frame's
-	 * own surface and its cards read as wells cut into it rather than as
-	 * cards laid on top.
 	 */
-	--cms-dashboard-card-bg: var(--cms-color-canvas);
+	--cms-dashboard-card-bg: var(--cms-color-surface);
 
 	/**
 	 * Component — list
