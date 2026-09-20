@@ -505,6 +505,7 @@
 	--cms-pane-border: 1px solid var(--cms-color-border);
 	--cms-pane-border-start: var(--cms-pane-border);
 	--cms-pane-border-end: var(--cms-pane-border);
+	--cms-pane-gap-end: 0;
 	--cms-pane-shadow: none;
 	--cms-tile-min: 11rem;
 }

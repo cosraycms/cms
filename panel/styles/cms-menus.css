@@ -19,11 +19,13 @@
 		gap: var(--cms-space-3);
 		flex: 1 1 auto;
 		min-height: 0;
+		margin-inline-end: var(--cms-pane-gap-end);
 		padding: var(--cms-space-4) var(--cms-space-6) 0;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
-		border-top: 1px solid var(--cms-color-border);
-		border-left: 1px solid var(--cms-color-border);
+		border-top: var(--cms-pane-border);
+		border-inline-start: var(--cms-pane-border-start);
+		border-inline-end: var(--cms-pane-border-end);
 		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;

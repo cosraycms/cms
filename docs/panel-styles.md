@@ -212,11 +212,12 @@ The shell is a white frame on the canvas. The sidebar, the page head and a rail 
 | --- | --- |
 | `--cms-pane-radius`, `--cms-pane-radius-start`, `--cms-pane-radius-end` | its top corners |
 | `--cms-pane-border`, `--cms-pane-border-start`, `--cms-pane-border-end` | its top and side edges |
+| `--cms-pane-gap-end` | its distance from the frame's end edge, `0` by default |
 | `--cms-pane-shadow` | shading over the pane, `none` by default |
 
 The fill is the screen's own decision, not part of the set: `--cms-color-surface` where the pane is the page itself, `--cms-pane-bg` where it is a ground for items laid on it.
 
-A pane meets a white column on a side, or it meets the frame's own edge. A curve there leaves a white tip standing alone against the canvas and a border doubles the frame's, so `cms-shell.css` zeroes both the `-start` and `-end` tokens on the side that has no column beside it — no rail in the frame, no inspector in the main region — and zeroes both below the smallest band, where nothing sits beside anything. A pane therefore writes the same three border declarations and the two radius ones wherever it is, and never a bottom border: it runs off the bottom of the viewport.
+A pane meets a white column on a side, or it meets the frame's own edge. A curve there leaves a white tip standing alone against the canvas and a border doubles the frame's, so `cms-shell.css` zeroes both the `-start` and `-end` tokens on the side that has no column beside it — no rail in the frame, no inspector in the main region — and zeroes both below the smallest band, where nothing sits beside anything. Above 120rem the frame floats on the canvas, and a pane without an inspector stands off the frame's end edge instead: the shell sets `--cms-pane-gap-end` there and hands the end curve and border back. A pane therefore writes the same three border declarations, the two radius ones and `margin-inline-end: var(--cms-pane-gap-end)` wherever it is, and never a bottom border: it runs off the bottom of the viewport.
 
 ## Shell scrolling
 

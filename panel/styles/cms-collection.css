@@ -10,6 +10,7 @@
 		flex-direction: column;
 		flex: 1 1 auto;
 		min-height: 0;
+		margin-inline-end: var(--cms-pane-gap-end);
 		padding: 0;
 		border-start-start-radius: var(--cms-pane-radius-start);
 		border-start-end-radius: var(--cms-pane-radius-end);
@@ -276,14 +277,6 @@
 			color: var(--cms-color-text-faint);
 			font-size: 1.5rem;
 		}
-	}
-}
-
-@media (width > 120rem) {
-	.cms-collection .body {
-		margin-inline-end: var(--cms-space-2);
-		border-start-end-radius: var(--cms-pane-radius);
-		border-inline-end: var(--cms-pane-border);
 	}
 }
 

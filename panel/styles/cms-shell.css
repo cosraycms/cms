@@ -252,6 +252,12 @@
 		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
 	}
 
+	.cms-shell > .frame > .main:not(:has(.cms-inspector)) {
+		--cms-pane-radius-end: var(--cms-pane-radius);
+		--cms-pane-border-end: var(--cms-pane-border);
+		--cms-pane-gap-end: var(--cms-space-2);
+	}
+
 	.cms-shell > .frame:has(.cms-dashboard) {
 		flex: 0 1 auto;
 		margin-bottom: var(--cms-space-6);
