@@ -16,7 +16,7 @@
 		border-top: var(--cms-pane-border);
 		border-inline-start: var(--cms-pane-border-start);
 		border-inline-end: var(--cms-pane-border-end);
-		background: var(--cms-color-surface);
+		background: var(--cms-pane-bg);
 		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;
 	}
@@ -166,6 +166,7 @@
 		flex: 1 1 auto;
 		min-height: 0;
 		border-top: 1px solid var(--cms-color-border);
+		background: var(--cms-color-surface);
 		overflow: hidden;
 	}
 
@@ -275,6 +276,14 @@
 			color: var(--cms-color-text-faint);
 			font-size: 1.5rem;
 		}
+	}
+}
+
+@media (width > 120rem) {
+	.cms-collection .body {
+		margin-inline-end: var(--cms-space-2);
+		border-start-end-radius: var(--cms-pane-radius);
+		border-inline-end: var(--cms-pane-border);
 	}
 }
 
