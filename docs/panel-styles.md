@@ -100,8 +100,11 @@ Light falls from above. Four public tokens carry it. They are translucent white 
 | `--cms-shadow-raised-fill` | the same lip and a bright sheen along the top |
 | `--cms-shadow-recessed` | shading inside the top edge |
 | `--cms-gradient-raised` | a lighter top than bottom, over the `background-color` |
+| `--cms-shadow-card` | a lip and a small spread below a card lying on the pane |
+| `--cms-shadow-frame` | the shell frame's shadow on the canvas, where the frame floats |
+| `--cms-pane-shadow` | shading inside a pane's edges |
 
-A theme that wants a flat panel sets all four to `none`. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth.
+A theme that wants a flat panel sets all seven to `none`; the first four flatten the controls alone. Borders remain the edge of every control: forced colours drop shadows and gradients, and `prefers-contrast: more` firms borders, not depth.
 
 Two rules keep depth from going wrong. The gradient belongs in `background-image`, so a hover can still change the `background-color` beneath it. And a context that strips a control's border and fill, such as a bare block, sets `box-shadow: none` too, or the lip floats under nothing.
 
@@ -213,11 +216,11 @@ The shell is a white frame on the canvas. The sidebar, the page head and a rail 
 | `--cms-pane-radius`, `--cms-pane-radius-start`, `--cms-pane-radius-end` | its top corners |
 | `--cms-pane-border`, `--cms-pane-border-start`, `--cms-pane-border-end` | its top and side edges |
 | `--cms-pane-gap-end` | its distance from the frame's end edge, `0` by default |
-| `--cms-pane-shadow` | shading over the pane, `none` by default |
+| `--cms-pane-shadow` | shading inside its edges |
 
 The fill is the screen's own decision, not part of the set: `--cms-color-surface` where the pane is the page itself, `--cms-pane-bg` where it is a ground for items laid on it.
 
-A pane meets a white column on a side, or it meets the frame's own edge. A curve there leaves a white tip standing alone against the canvas and a border doubles the frame's, so `cms-shell.css` zeroes both the `-start` and `-end` tokens on the side that has no column beside it — no rail in the frame, no inspector in the main region — and zeroes both below the smallest band, where nothing sits beside anything. Above 120rem the frame floats on the canvas, and a pane without an inspector stands off the frame's end edge instead: the shell sets `--cms-pane-gap-end` there and hands the end curve and border back. A pane therefore writes the same three border declarations, the two radius ones and `margin-inline-end: var(--cms-pane-gap-end)` wherever it is, and never a bottom border: it runs off the bottom of the viewport.
+A pane meets a white column on a side, or it meets the frame's own edge. A curve there leaves a white tip standing alone against the canvas and a border doubles the frame's, so `cms-shell.css` zeroes both the `-start` and `-end` tokens on the side that has no column beside it — no rail in the frame, no inspector in the main region — and zeroes both below the smallest band, where nothing sits beside anything. Above 120rem the frame floats on the canvas, and a pane without an inspector stands off the frame's end edge instead: the shell sets `--cms-pane-gap-end` there and hands the end curve and border back. A pane therefore writes the same three border declarations, the two radius ones and `margin-inline-end: var(--cms-pane-gap-end)` wherever it is, and never a bottom border: it runs off the bottom of the viewport. A pane whose content paints over its ground, such as a list that fills it, draws `--cms-pane-shadow` from an `::after` overlay with `pointer-events: none` instead of its own `box-shadow`, or the content covers the shade.
 
 ## Shell scrolling
 

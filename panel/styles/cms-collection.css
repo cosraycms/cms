@@ -9,6 +9,7 @@
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
+		position: relative;
 		min-height: 0;
 		margin-inline-end: var(--cms-pane-gap-end);
 		padding: 0;
@@ -18,8 +19,18 @@
 		border-inline-start: var(--cms-pane-border-start);
 		border-inline-end: var(--cms-pane-border-end);
 		background: var(--cms-pane-bg);
-		box-shadow: var(--cms-pane-shadow);
 		overflow: hidden;
+
+		/* The list paints over the body, so the shade lies on top of both. */
+		&::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: 1;
+			border-radius: inherit;
+			box-shadow: var(--cms-pane-shadow);
+			pointer-events: none;
+		}
 	}
 
 	& .cms-notice {
