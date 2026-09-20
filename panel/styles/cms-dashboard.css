@@ -20,6 +20,11 @@
 		overscroll-behavior: contain;
 	}
 
+	& .cards,
+	& .recent {
+		flex: 0 0 auto;
+	}
+
 	& .cards {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr));
