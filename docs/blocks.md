@@ -258,7 +258,7 @@ Saving replaces the row list wholesale — order is submission order, missing ro
 
 ### Spacing
 
-The blocks field's meta dialog sets the **gap** between its blocks, as one value or — on a grid, behind a toggle — as a row gap and a column gap of their own; a block's settings dialog sets its **padding**. Both choose from the tokens `none`, `s`, `m`, `l` and `xl`, behind a "Site default" choice that stores nothing, so existing content renders as before. The editor previews every choice on its canvas in its own scale.
+The blocks field's meta dialog sets the **gap** between its blocks, as one value or — on a grid, behind a toggle — as a row gap and a column gap of their own; a block's settings dialog sets its **padding**. Both choose from the tokens `none`, `s`, `m`, `l` and `xl`, behind a "Site default" choice that stores nothing, so existing content renders as before. The editor keeps consistent card spacing; **Layout preview** shows these choices using the reference stylesheet's scale.
 
 On the site the tokens are attributes, never lengths: `data-gap`, `data-row-gap` and `data-column-gap` on the container, `data-padding` on the block. A per-axis gap beats the shared one. The [reference stylesheet](#the-reference-stylesheet) maps each token to a variable the site sets to its own scale — `--blocks-gap-s` … `--blocks-gap-xl`, `--blocks-padding-s` … `--blocks-padding-xl` — so the site decides what "large" means; `--blocks-gap` is the site's default, the gap a field renders with when the editor chose nothing, and a chosen token always wins over it, `none` included. Templates read the tokens through `$node->content->gap()`, `rowGap()` and `columnGap()` and a block's `padding()`, each `null` for the default.
 
