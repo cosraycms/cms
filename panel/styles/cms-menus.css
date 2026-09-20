@@ -393,7 +393,7 @@
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-sm, none);
+		box-shadow: var(--cms-shadow-card);
 
 		/* Which item the pane is editing — a state, not a focus position. */
 		&.is-selected {
@@ -534,6 +534,7 @@
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
 		background: var(--cms-color-surface);
+		box-shadow: var(--cms-shadow-card);
 		overflow-y: auto;
 
 		& .pane-empty {

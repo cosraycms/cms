@@ -300,6 +300,8 @@
 	--cms-shadow-raised-fill: inset 0 1px 0 rgb(255 255 255 / 0.25), 0 1px 2px rgb(33 33 31 / 0.12);
 	--cms-shadow-recessed: inset 0 1px 2px rgb(33 33 31 / 0.08);
 	--cms-gradient-raised: linear-gradient(rgb(255 255 255 / 0.08), rgb(33 33 31 / 0.04));
+	--cms-shadow-card: 0 1px 2px rgb(33 33 31 / 0.06), 0 3px 8px -3px rgb(33 33 31 / 0.08);
+	--cms-shadow-frame: var(--cms-shadow);
 
 	/**
 	 * Semantic — status

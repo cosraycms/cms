@@ -40,6 +40,7 @@
 		background: var(--cms-dashboard-card-bg);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-xl);
+		box-shadow: var(--cms-shadow-card);
 
 		&:is(a):hover {
 			background: var(--cms-color-hover);
@@ -77,6 +78,7 @@
 		background: var(--cms-dashboard-card-bg);
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-xl);
+		box-shadow: var(--cms-shadow-card);
 		overflow: hidden;
 
 		& h2 {

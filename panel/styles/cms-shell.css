@@ -250,6 +250,7 @@
 	.cms-shell > .frame {
 		border: var(--cms-border);
 		border-radius: var(--cms-radius-2xl) var(--cms-radius-2xl) 0 0;
+		box-shadow: var(--cms-shadow-frame);
 	}
 
 	.cms-shell > .frame > .main:not(:has(.cms-inspector)) {
