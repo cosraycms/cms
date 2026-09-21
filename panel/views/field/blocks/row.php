@@ -93,24 +93,10 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
 		value="<?= $layout->indent ?>"
 		data-layout="indent" />
-	<?php // Where a new block lands: before this one — above it in a list,
-
-	// before it in order in a grid. The footer appends. ?>
-	<?php if (!$readonly) {
-		$this->insert('field/blocks/inserter', [
-			'commonChoices' => $commonChoices,
-			'more' => $more,
-			'single' => $single,
-			'insert' => 'before',
-			'id' => "{$rowId}-insert",
-			'label' => $columns > 1 ? __('field:insert-before') : __('field:insert-above'),
-		]);
-	} ?>
+	<?php if (!$readonly): ?>
 	<div class="chrome">
 		<span class="tools">
-			<?php if ($readonly): ?>
-				<?php // Nothing to grab, open or remove: only the type label stays. ?>
-			<?php elseif ($columns > 1): ?>
+			<?php if ($columns > 1): ?>
 				<span
 					class="grip"
 					data-repeater-grip
@@ -125,41 +111,47 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php endif ?>
-			<span class="kind"><?= $this->escape($label) ?></span>
-			<?php if ($settings && !$readonly): ?>
+			<?php $this->insert('field/blocks/inserter', [
+				'commonChoices' => $commonChoices,
+				'more' => $more,
+				'single' => $single,
+				'insert' => 'before',
+				'id' => "{$rowId}-insert",
+				'label' => $columns > 1 ? __('field:insert-before') : __('field:insert-above'),
+			]) ?>
+			<?php if ($settings): ?>
 				<button
 					type="button"
 					class="gear"
 					data-meta-open
 					aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 					title="<?= $this->escape(__('field:block-settings')) ?>">
-					<?= \Cosray\Panel\Icon::render('gear') ?>
+					<?= \Cosray\Panel\Icon::render('pencil') ?>
 				</button>
 			<?php endif ?>
-			<?php if (!$readonly): ?>
-				<button type="button" class="kebab"
-					popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
-					aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
-					<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
-				</button>
-				<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
-					popover="auto" data-action-menu data-align="end">
-						<button type="button" data-repeater-move="up">
-							<?= $this->escape(__('common:move-up')) ?>
-						</button>
-						<button type="button" data-repeater-move="down">
-							<?= $this->escape(__('common:move-down')) ?>
-						</button>
-						<button type="button" data-repeater-duplicate>
-							<?= $this->escape(__('field:duplicate-block')) ?>
-						</button>
-						<button type="button" class="danger" data-repeater-remove>
-							<?= $this->escape(__('field:remove-block')) ?>
-						</button>
-				</div>
-			<?php endif ?>
+			<button type="button" class="kebab"
+				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
+				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:block-actions')) ?>">
+				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
+			</button>
+			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
+				popover="auto" data-action-menu data-align="end">
+					<button type="button" data-repeater-move="up">
+						<?= $this->escape(__('common:move-up')) ?>
+					</button>
+					<button type="button" data-repeater-move="down">
+						<?= $this->escape(__('common:move-down')) ?>
+					</button>
+					<button type="button" data-repeater-duplicate>
+						<?= $this->escape(__('field:duplicate-block')) ?>
+					</button>
+					<button type="button" class="danger" data-repeater-remove>
+						<?= $this->escape(__('field:remove-block')) ?>
+					</button>
+			</div>
 		</span>
 	</div>
+	<?php endif ?>
 	<?php if ($columns > 1 && !$readonly): ?>
 		<?php foreach ([
 			// Later side handles own the overlapping bottom corners.
@@ -182,7 +174,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				'type' => $blockType,
 				'ownMeta' => false,
 				'readonly' => $readonly,
-				// One visible field needs no label of its own: the block names it.
 				'labels' => $labels,
 				'fieldsData' => $fieldsData,
 				'rowName' => $rowName,

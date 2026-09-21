@@ -161,8 +161,7 @@
 		border-color: var(--cms-color-border-strong);
 		border-style: solid;
 
-		& > .chrome > .tools,
-		& > .inserter {
+		& > .chrome > .tools {
 			opacity: 1;
 			pointer-events: auto;
 		}
@@ -243,19 +242,7 @@
 		}
 	}
 
-	& .kind {
-		min-width: 0;
-		max-width: 12rem;
-		overflow: hidden;
-		color: var(--cms-color-text-subtle);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 600;
-		letter-spacing: 0.02em;
-		text-overflow: ellipsis;
-		text-transform: uppercase;
-		white-space: nowrap;
-	}
-
+	& .inserter,
 	& .gear,
 	& .kebab {
 		display: inline-flex;
@@ -278,52 +265,22 @@
 		}
 	}
 
+	& .inserter {
+		--cms-icon-size: 1.5em;
+	}
+
+	& .gear {
+		--cms-icon-size: 0.9em;
+	}
+
 	& .gear.has-error {
 		color: var(--cms-color-danger);
 	}
 
+	& .inserter[aria-expanded='true'],
 	& .kebab[aria-expanded='true'] {
 		background: var(--cms-color-surface-sunken);
 		color: var(--cms-color-text);
-	}
-
-	/*
-	 * The + that inserts before this block hangs over its start corner,
-	 * mirroring the chrome on the other one — off the edges, which belong
-	 * to the resize handles. It comes and goes with the chrome and is
-	 * unclickable while hidden, like the tools.
-	 */
-	& .inserter {
-		position: absolute;
-		z-index: 15;
-		inset-block-start: -0.75rem;
-		inset-inline-start: var(--cms-space-2);
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 120ms ease;
-		display: grid;
-		width: 1.5rem;
-		height: 1.5rem;
-		padding: 0;
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-full);
-		background: var(--cms-color-surface);
-		color: var(--cms-color-text-subtle);
-		box-shadow: var(--cms-shadow-sm);
-		font: inherit;
-		place-items: center;
-		cursor: pointer;
-
-		&:hover {
-			border-color: var(--cms-color-accent);
-			color: var(--cms-color-accent);
-		}
-	}
-
-	& .inserter[aria-expanded='true'] {
-		border-color: var(--cms-color-accent);
-		color: var(--cms-color-accent);
-		transition: none;
 	}
 
 	/* The layout numbers in the settings dialog: three short inputs abreast. */
@@ -530,8 +487,7 @@
 	}
 
 	& .cms-blocks-editor > .adders,
-	& .block > .inserter,
-	& .block > .chrome .tools > :not(.kind),
+	& .block > .chrome,
 	& .block > .resize,
 	& .block > dialog,
 	& .richtext-toolbar,
