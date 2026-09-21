@@ -1,12 +1,40 @@
 .cms-blocks-editor {
-	/* Editor spacing keeps card edges reachable even when the layout has no gap. */
-	--blocks-gap: var(--cms-space-3);
+	--blocks-gap: var(--cms-space-px);
 
 	& .grid {
+		position: relative;
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
 		gap: var(--blocks-gap);
-		padding-block-end: var(--cms-space-4);
+		background: var(--cms-blocks-bg);
+		border-radius: var(--cms-radius-md);
+		box-shadow: var(--cms-shadow-raised);
+
+		/* Paint before the positioned blocks so their borders cover the frame. */
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border: 1px dashed var(--cms-blocks-border);
+			border-radius: inherit;
+			pointer-events: none;
+		}
+
+		& > [data-corners~='top-left'] {
+			border-top-left-radius: var(--cms-radius-md);
+		}
+
+		& > [data-corners~='top-right'] {
+			border-top-right-radius: var(--cms-radius-md);
+		}
+
+		& > [data-corners~='bottom-left'] {
+			border-bottom-left-radius: var(--cms-radius-md);
+		}
+
+		& > [data-corners~='bottom-right'] {
+			border-bottom-right-radius: var(--cms-radius-md);
+		}
 	}
 
 	/* An empty field is the canvas with its add bar alone. */
@@ -48,9 +76,7 @@
 		margin-inline-start: calc(var(--indent, 0) * (100% + var(--blocks-gap)) / var(--reserved, 1));
 		min-width: 0;
 		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
-		box-shadow: var(--cms-shadow-card);
 
 		.cms-field[data-readonly='true'] & {
 			background: var(--cms-color-surface-sunken);

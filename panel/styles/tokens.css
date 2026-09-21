@@ -458,6 +458,16 @@
 	--cms-code-muted: var(--cms-color-neutral-300);
 
 	/**
+	 * Component — blocks
+	 */
+	--cms-blocks-bg: var(--cms-color-canvas);
+	--cms-blocks-border: color-mix(
+		in srgb,
+		var(--cms-color-border-strong) 90%,
+		var(--cms-color-shade)
+	);
+
+	/**
 	 * Component — dashboard
 	 */
 	--cms-dashboard-card-bg: var(--cms-color-surface);
