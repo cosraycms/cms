@@ -154,6 +154,13 @@
 		}
 	}
 
+	& .block:focus-within,
+	& .block:has(:popover-open) {
+		border-color: var(--cms-color-accent);
+		/* Forced colours paint this outline when the accent border is flattened. */
+		outline: 1px solid transparent;
+	}
+
 	& .resize:hover::before,
 	& .resize.is-active::before {
 		background: var(--cms-color-accent);
@@ -328,33 +335,19 @@
 		overflow-y: visible;
 	}
 
-	/*
-	 * Content first. In a bare block the control is the content, not a box
-	 * around it: border and background go, the type is the reading size, a
-	 * hairline on hover and the focus ring say it can be edited. The
-	 * negative margin puts the text where the box's edge was. Element
-	 * controls draw their own frame and are left alone; the rich text frame
-	 * is panel CSS and goes with the others.
-	 */
+	/* The negative margin puts bare text where the control's edge was.
+	   The card carries focus, including the forced-colours outline. */
 	& .block.is-bare > .body {
 		& :is(.cms-input, .cms-textarea):not(cosray-host *) {
 			width: calc(100% + 2 * var(--cms-space-2));
 			margin-inline: calc(-1 * var(--cms-space-2));
 			padding: var(--cms-space-1) var(--cms-space-2);
 			border-color: transparent;
+			outline: none;
 			background: none;
 			box-shadow: none;
 			font-size: var(--cms-font-size-sm);
 			line-height: 1.6;
-
-			&:hover {
-				border-color: var(--cms-color-border-soft);
-			}
-
-			&:focus {
-				border-color: var(--cms-color-focus);
-				box-shadow: var(--cms-focus-ring);
-			}
 		}
 
 		/* Grows with its text where the browser can size a field to its
@@ -463,16 +456,10 @@
 
 		& .richtext {
 			border-color: transparent;
+			outline: none;
 			background: none;
+			box-shadow: none;
 			font-size: var(--cms-font-size-sm);
-
-			&:not(:focus-within) {
-				box-shadow: none;
-			}
-
-			&:hover:not(:focus-within) {
-				border-color: var(--cms-color-border-soft);
-			}
 
 			& .ProseMirror {
 				padding: var(--cms-space-1) var(--cms-space-2);
