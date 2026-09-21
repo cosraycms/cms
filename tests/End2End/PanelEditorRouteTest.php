@@ -260,10 +260,10 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		// The heading has two fields but an editor view of its own: the level
-		// as a chip before the text, both labels for screen readers only.
+		// beside the text, both labels for screen readers only.
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="Cosray\\Block\\Heading"]/div[contains(@class, "is-bare")]'
-				. '//div[@class="heading"]/div[@class="level"]//select/following::div[@class="text"]//input',
+				. '//div[@class="heading"]/div[@class="text"]//input/following::div[@class="level"]//button[@popovertarget]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing(

@@ -11,6 +11,7 @@ import { install as installChrome } from './behaviors/chrome';
 import { install as installDirty } from './behaviors/dirty';
 import { install as installErrors } from './behaviors/errors';
 import { install as installFallbacks } from './behaviors/fallbacks';
+import { install as installHeading } from './behaviors/heading';
 import { install as installInspector } from './behaviors/inspector';
 import { install as installLayoutPreview } from './behaviors/layout-preview';
 import { install as installMenu } from './behaviors/menu';
@@ -115,6 +116,7 @@ cleanups.push(
 	installInspector(),
 	installRepeater(),
 	installBlocks(),
+	installHeading(),
 	installBlockCorners(),
 	installBlockCatalog(),
 	installChrome(),
