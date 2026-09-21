@@ -105,20 +105,19 @@
 		}
 	}
 
-	/* A wide grab area carrying a short bar: easy to hit, quiet at rest. */
+	/* Keep the full edge draggable around the visible grip. */
 	& .resize {
 		position: absolute;
 		z-index: 3;
 		/* Pointer capture needs the browser to keep the gesture. */
 		touch-action: none;
 
-		&::before {
-			content: '';
+		& > .cms-icon {
 			position: absolute;
 			inset-block-start: 50%;
 			inset-inline-start: 50%;
-			border-radius: 999px;
-			background: var(--cms-color-border-strong);
+			color: var(--cms-color-text-faint);
+			pointer-events: none;
 			opacity: 0;
 			translate: -50% -50%;
 			transition: opacity 120ms ease;
@@ -127,33 +126,26 @@
 		&.is-start,
 		&.is-end {
 			inset-block: 0;
-			width: 0.75rem;
+			width: 1rem;
 			cursor: col-resize;
-
-			&::before {
-				width: 3px;
-				height: 1.75rem;
-			}
 		}
 
 		&.is-start {
-			inset-inline-start: calc(-0.375rem - 1px);
+			inset-inline-start: 0;
 		}
 
 		&.is-end {
-			inset-inline-end: calc(-0.375rem - 1px);
+			inset-inline-end: 0;
 		}
 
-		/* Inset so the corners stay with the column handles. */
 		&.is-bottom {
-			inset-inline: var(--cms-space-6);
-			inset-block-end: calc(-0.375rem - 1px);
-			height: 0.75rem;
+			inset-inline: 0;
+			inset-block-end: 0;
+			height: 1rem;
 			cursor: row-resize;
 
-			&::before {
-				width: 1.75rem;
-				height: 3px;
+			& > .cms-icon {
+				rotate: 90deg;
 			}
 		}
 	}
@@ -169,10 +161,6 @@
 		border-color: var(--cms-color-border-strong);
 		border-style: solid;
 
-		& > .resize::before {
-			opacity: 0.6;
-		}
-
 		& > .chrome > .tools,
 		& > .inserter {
 			opacity: 1;
@@ -185,11 +173,18 @@
 		border-color: var(--cms-color-accent);
 		/* Forced colours paint this outline when the accent border is flattened. */
 		outline: 1px solid transparent;
+
+		& > .resize > .cms-icon {
+			color: var(--cms-color-accent);
+		}
 	}
 
-	& .resize:hover::before,
-	& .resize.is-active::before {
-		background: var(--cms-color-accent);
+	& .resize:hover {
+		background: var(--cms-color-canvas);
+	}
+	& .resize:hover > .cms-icon,
+	& .resize.is-active > .cms-icon {
+		color: var(--cms-color-accent);
 		opacity: 1;
 	}
 

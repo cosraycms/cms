@@ -162,15 +162,18 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 	</div>
 	<?php if ($columns > 1 && !$readonly): ?>
 		<?php foreach ([
+			// Later side handles own the overlapping bottom corners.
+			'bottom' => __('field:rowspan'),
 			'start' => __('field:indent'),
 			'end' => __('field:colspan'),
-			'bottom' => __('field:rowspan'),
 		] as $edge => $title): ?>
 			<span
 				class="resize is-<?= $edge ?>"
 				data-layout-resize="<?= $edge ?>"
 				aria-hidden="true"
-				title="<?= $this->escape($title) ?>"></span>
+				title="<?= $this->escape($title) ?>">
+				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
+			</span>
 		<?php endforeach ?>
 	<?php endif ?>
 	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
