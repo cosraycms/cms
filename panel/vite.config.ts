@@ -40,6 +40,9 @@ export default defineConfig({
 			$components: path.resolve(root, 'src/components'),
 		},
 	},
+	css: {
+		devSourcemap: true,
+	},
 	server: {
 		port: Number.isFinite(devPort) ? devPort : 2001,
 		host: devHost,
