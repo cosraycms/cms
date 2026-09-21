@@ -1,16 +1,32 @@
 import { cosray } from '$lib/bridge';
 import { insertion, insert } from './repeater';
 
-function catalog(host: HTMLElement, choose: (type: string) => void): void {
+type Position = 'before' | 'after';
+
+function catalog(
+	host: HTMLElement,
+	anchored: boolean,
+	choose: (type: string, position?: Position) => void,
+): void {
 	const search = host.querySelector<HTMLInputElement>('[data-block-search]')!;
 	const status = host.querySelector<HTMLElement>('[data-block-results]')!;
-	const choices = [...host.querySelectorAll<HTMLButtonElement>('[data-block-choice]')];
+	const choices = [...host.querySelectorAll<HTMLElement>('[data-block-choice]')];
 	let visible = choices;
-	let active: HTMLButtonElement | undefined = choices[0];
+	let active: HTMLElement | undefined = choices[0];
 
-	function rove(choice: HTMLButtonElement | undefined, focus = false): void {
+	for (const choice of choices) {
+		choice.setAttribute('role', anchored ? 'group' : 'button');
+		choice.querySelector<HTMLElement>('.cms-block-actions')!.hidden = !anchored;
+	}
+
+	function rove(choice: HTMLElement | undefined, focus = false): void {
 		active = choice;
-		for (const button of choices) button.tabIndex = button === active ? 0 : -1;
+		for (const card of choices) {
+			card.tabIndex = card === active ? 0 : -1;
+			for (const action of card.querySelectorAll<HTMLButtonElement>('[data-block-insert]')) {
+				action.tabIndex = anchored && card === active ? 0 : -1;
+			}
+		}
 		if (focus && active) {
 			active.focus({ preventScroll: true });
 			active.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
@@ -20,9 +36,10 @@ function catalog(host: HTMLElement, choose: (type: string) => void): void {
 	function filter(): void {
 		const query = search.value.trim().toLocaleLowerCase(document.documentElement.lang || undefined);
 		visible = choices.filter((choice) => {
-			const text = `${choice.textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
-				document.documentElement.lang || undefined,
-			);
+			const text =
+				`${choice.querySelector('.select')!.textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
+					document.documentElement.lang || undefined,
+				);
 			choice.hidden = !text.includes(query);
 			return !choice.hidden;
 		});
@@ -38,15 +55,24 @@ function catalog(host: HTMLElement, choose: (type: string) => void): void {
 
 	search.addEventListener('input', filter);
 	host.addEventListener('click', (event) => {
-		const choice =
-			event.target instanceof Element
-				? event.target.closest<HTMLButtonElement>('[data-block-choice]')
-				: null;
-		if (choice && visible.includes(choice)) choose(choice.dataset.blockChoice!);
+		const target = event.target instanceof Element ? event.target : null;
+		const choice = target?.closest<HTMLElement>('[data-block-choice]');
+		if (!choice || !visible.includes(choice)) return;
+		const position = target?.closest<HTMLElement>('[data-block-insert]')?.dataset.blockInsert;
+		if (position !== undefined) {
+			if (anchored && (position === 'before' || position === 'after')) {
+				choose(choice.dataset.blockChoice!, position);
+			}
+			return;
+		}
+		if (!anchored) choose(choice.dataset.blockChoice!);
 	});
 	host.addEventListener('focusin', (event) => {
-		if (event.target instanceof HTMLButtonElement && visible.includes(event.target))
-			rove(event.target);
+		const choice =
+			event.target instanceof Element
+				? event.target.closest<HTMLElement>('[data-block-choice]')
+				: null;
+		if (choice && visible.includes(choice)) rove(choice);
 	});
 	host.addEventListener('keydown', (event) => {
 		if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
@@ -58,10 +84,15 @@ function catalog(host: HTMLElement, choose: (type: string) => void): void {
 			}
 			return;
 		}
-		if (!(event.target instanceof HTMLButtonElement) || !visible.includes(event.target)) return;
+		if (!(event.target instanceof HTMLElement) || !visible.includes(event.target)) return;
 		const index = visible.indexOf(event.target);
-		let next: HTMLButtonElement | undefined;
+		let next: HTMLElement | undefined;
 		switch (event.key) {
+			case 'Enter':
+			case ' ':
+				event.preventDefault();
+				if (!anchored) choose(event.target.dataset.blockChoice!);
+				return;
 			case 'Home':
 				next = visible[0];
 				break;
@@ -116,11 +147,12 @@ export function install(): () => void {
 			(host) => {
 				let live = true;
 				host.append(template.content.cloneNode(true));
-				catalog(host, (type) => {
+				catalog(host, context.at !== null, (type, position) => {
 					if (!live) return;
 					// Restore the menu opener before the repeater focuses the new row.
 					modal.close();
-					insert(context, type);
+					const at = context.at && position ? { ...context.at, where: position } : context.at;
+					insert({ ...context, at }, type);
 				});
 				return () => {
 					live = false;

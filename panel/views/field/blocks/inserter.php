@@ -19,7 +19,7 @@ $id = (string) $this->unwrap($id);
 					<span class="icon" aria-hidden="true"><?= $choice['icon'] ?></span>
 					<span><?= $this->escape($choice['label']) ?></span>
 				</span>
-				<span class="actions">
+				<span class="cms-block-actions">
 					<?php foreach (['before' => __('field:before'), 'after' => __('field:after')] as $position => $label): ?>
 						<?php $buttonId = "{$choiceId}-{$position}"; ?>
 						<button type="button" class="cms-button secondary small"

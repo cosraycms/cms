@@ -97,8 +97,10 @@ function search(dialog: ParentNode, value: string): HTMLInputElement {
 	input.dispatchEvent(new Event('input', { bubbles: true }));
 	return input;
 }
-function choices(dialog: ParentNode): HTMLButtonElement[] {
-	return [...dialog.querySelectorAll<HTMLButtonElement>('[data-block-choice]:not([hidden])')];
+function choices(dialog: ParentNode): HTMLElement[] {
+	return [...dialog.querySelectorAll<HTMLElement>('[data-block-choice]')].filter(
+		(choice) => !choice.closest('[hidden]'),
+	);
 }
 function key(target: Element, key: string): KeyboardEvent {
 	const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
@@ -137,6 +139,9 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 	expect(footer().querySelectorAll('[data-repeater-add]')).toHaveLength(6);
 	const dialog = open();
 	expect(document.activeElement).toBe(dialog.querySelector('input'));
+	expect(
+		[...dialog.querySelectorAll<HTMLElement>('.cms-block-actions')].every((group) => group.hidden),
+	).toBe(true);
 	expect(choices(dialog).map((button) => button.dataset.blockChoice)).toEqual(
 		types.map((type) => type.type),
 	);
@@ -226,7 +231,7 @@ it('inserts before the captured row after its position changes and starts fresh 
 	const anchor = rows()[1];
 	const dialog = open(anchor);
 	anchor.querySelector<HTMLButtonElement>('[data-repeater-move="up"]')!.click();
-	choices(dialog)[7].click();
+	choices(dialog)[7].querySelector<HTMLButtonElement>('[data-block-insert="before"]')!.click();
 	expect(rows()[1]).toBe(anchor);
 	expect(rows()[0].querySelector<HTMLInputElement>('input[name$="[type]"]')?.value).toBe(
 		types[7].type,
@@ -238,6 +243,61 @@ it('inserts before the captured row after its position changes and starts fresh 
 	);
 });
 
+it.each(['before', 'after'])(
+	'inserts a catalog selection %s the captured block after filtering and moving it',
+	(position) => {
+		const form = setup();
+		quick();
+		quick();
+		const [sibling, anchor] = rows();
+		const value = anchor.querySelector<HTMLInputElement>('input[type="text"]')!;
+		value.value = 'Keep this content';
+		const dialog = open(anchor);
+		const input = search(dialog, 'iframe');
+		key(input, 'ArrowDown');
+		const choice = choices(dialog)[0];
+		expect(document.activeElement).toBe(choice);
+		const before = [...new FormData(form)];
+		choice.click();
+		choice.querySelector<HTMLElement>('.select')!.click();
+		key(choice, 'Enter');
+		key(choice, ' ');
+		expect(rows()).toEqual([sibling, anchor]);
+		expect([...new FormData(form)]).toEqual(before);
+		expect(dialog.open).toBe(true);
+		const actions = [...choice.querySelectorAll<HTMLButtonElement>('[data-block-insert]')];
+		expect(actions.map((action) => action.tabIndex)).toEqual([0, 0]);
+		expect(choice.querySelector<HTMLElement>('.cms-block-actions')!.hidden).toBe(false);
+		anchor.querySelector<HTMLButtonElement>('[data-repeater-move="up"]')!.click();
+		const changed = vi.fn();
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		form.addEventListener('change', changed);
+		form.addEventListener('submit', submit);
+		const action = actions.find((action) => action.dataset.blockInsert === position)!;
+		action.focus();
+		expect(
+			action
+				.getAttribute('aria-labelledby')!
+				.split(' ')
+				.map((id) => document.getElementById(id)?.textContent?.trim())
+				.join(' '),
+		).toBe(`${position === 'before' ? 'Before' : 'After'} Iframe`);
+		action.click();
+		const inserted = rows()[position === 'before' ? 0 : 1];
+		expect(rows()).toEqual(
+			position === 'before' ? [inserted, anchor, sibling] : [anchor, inserted, sibling],
+		);
+		expect(inserted.querySelector<HTMLInputElement>('input[name$="[type]"]')?.value).toBe(
+			types[7].type,
+		);
+		expect(value.value).toBe('Keep this content');
+		expect(inserted.contains(document.activeElement)).toBe(true);
+		expect(document.querySelector('dialog[open]')).toBeNull();
+		expect(changed).toHaveBeenCalledOnce();
+		expect(submit).not.toHaveBeenCalled();
+	},
+);
+
 it.each([
 	'removed anchor',
 	'moved anchor',
@@ -246,7 +306,7 @@ it.each([
 	'inert owner',
 	'changed locale',
 	'removed template',
-])('refuses stale selections with %s', (state) => {
+])('refuses stale after-insertion selections with %s', (state) => {
 	const form = setup(field() + field('other'));
 	const first = owner();
 	quick();
@@ -263,7 +323,7 @@ it.each([
 	if (state === 'changed locale') selectContentLocale(form, 'de');
 	if (state === 'removed template')
 		first.querySelectorAll('template[data-repeater-template]')[7].remove();
-	choices(dialog)[7].click();
+	choices(dialog)[7].querySelector<HTMLButtonElement>('[data-block-insert="after"]')!.click();
 	expect(changed).not.toHaveBeenCalled();
 	expect(rows(second).length).toBe(state === 'moved anchor' ? 1 : 0);
 	expect(document.querySelector('dialog[open]')).toBeNull();
@@ -289,6 +349,25 @@ it('isolates fields and asymmetric locale instances, including inactive fallback
 	expect(changed).toHaveBeenCalledOnce();
 	const other = [...form.querySelectorAll<HTMLElement>('[data-repeater]')].at(-1)!;
 	expect(rows(other)).toHaveLength(0);
+});
+
+it.each(['Enter', ' '])('appends from the footer catalog with %j', (activation) => {
+	const form = setup();
+	const submit = vi.fn((event: Event) => event.preventDefault());
+	form.addEventListener('submit', submit);
+	const dialog = open();
+	const input = search(dialog, 'iframe');
+	key(input, 'ArrowDown');
+	const choice = choices(dialog)[0];
+	expect(document.activeElement).toBe(choice);
+	key(choice, activation);
+	expect(rows()).toHaveLength(1);
+	expect(rows()[0].querySelector<HTMLInputElement>('input[name$="[type]"]')?.value).toBe(
+		types[7].type,
+	);
+	expect(rows()[0].contains(document.activeElement)).toBe(true);
+	expect(document.querySelector('dialog[open]')).toBeNull();
+	expect(submit).not.toHaveBeenCalled();
 });
 
 it('cancels and searches without changing values, restores focus and resets on reopening', () => {

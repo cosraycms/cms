@@ -1,4 +1,6 @@
 .cms-block-catalog {
+	--action-height: 1.375rem;
+
 	display: flex;
 	flex-direction: column;
 	gap: var(--cms-space-3);
@@ -32,17 +34,15 @@
 		gap: var(--cms-space-2);
 		min-height: 0;
 		max-height: 55dvh;
-		padding: var(--cms-space-1);
 		overflow: auto;
 		overscroll-behavior: contain;
 	}
 
 	& .choice {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		gap: var(--cms-space-2);
 		min-width: 0;
 		min-height: 5rem;
 		padding: var(--cms-space-3);
@@ -59,13 +59,61 @@
 			display: none;
 		}
 
+		&:has(> .cms-block-actions:not([hidden])) {
+			padding-block-end: var(--action-height);
+			cursor: default;
+		}
+
 		&:hover {
 			background: var(--cms-color-hover);
 		}
 
 		&:focus-visible {
 			outline: 2px solid var(--cms-color-focus);
-			outline-offset: 1px;
+			outline-offset: -2px;
+		}
+	}
+
+	& .select {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-2);
+		width: 100%;
+		min-width: 0;
+	}
+
+	& .cms-block-actions {
+		position: absolute;
+		inset-inline: -1px;
+		inset-block-end: -1px;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 120ms ease;
+
+		& > .cms-button {
+			--height: var(--action-height);
+
+			width: 50%;
+			min-width: 0;
+
+			&:focus-visible {
+				outline-offset: -2px;
+			}
+		}
+	}
+
+	& .choice:is(:hover, :focus-within) > .cms-block-actions {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	@media (hover: none), (any-pointer: coarse) {
+		& .cms-block-actions {
+			opacity: 1;
+			pointer-events: auto;
 		}
 	}
 
