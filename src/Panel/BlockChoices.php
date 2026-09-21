@@ -64,7 +64,7 @@ final class BlockChoices
 				: match ($id) {
 					Block\RichText::class => 'body-text',
 					Block\Text::class => 'text-left',
-					Block\Heading::class => 'type-h1',
+					Block\Heading::class => 'heading',
 					Block\Image::class => 'image',
 					Block\Images::class => 'images',
 					Block\Video::class => 'film',

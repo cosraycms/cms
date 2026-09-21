@@ -1,6 +1,6 @@
 # Built-in panel icons
 
-These unmodified SVG assets are a subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
+Except for the custom artwork noted below, these unmodified SVG assets are a subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
 
 Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and the Svelte `Icon` component read this collection. Their only argument is a canonical asset name, not a path or arbitrary SVG. Icons are decorative; name icon-only actions on their buttons or links.
 
@@ -20,6 +20,8 @@ The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, a
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 
-Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `type-h1`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
+Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `heading`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
+
+The custom `heading` icon is inspired by Bootstrap's `card-heading`, without the card border and with an additional thin text line. Level-specific rich-text actions retain `type-h1`, `type-h2`, and `type-h3`.
 
 Bundled defaults use a separate `panelIcon` name when passed as data. Custom schema `icon` metadata remains `{id, args}` and resolves through the existing icon providers, including existing `bi:*` IDs. A bundled default is not a provider ID.
