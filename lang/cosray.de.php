@@ -176,6 +176,8 @@ return [
 		'field:add-entry' => 'Eintrag hinzufügen',
 		'field:add-first-entry' => 'Ersten Eintrag hinzufügen',
 		'field:add-typed' => ':label hinzufügen',
+		'field:after' => 'Danach',
+		'field:before' => 'Davor',
 		'field:block' => 'Block',
 		'field:block-actions' => 'Aktionen für diesen Block',
 		'field:block-results' => [':count Blocktyp verfügbar', ':count Blocktypen verfügbar'],

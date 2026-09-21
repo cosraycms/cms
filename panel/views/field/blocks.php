@@ -6,8 +6,8 @@
 // carry their layout as hidden inputs; the blocks behavior edits them.
 // Add/remove/move/renumber comes from the repeater behavior: a + on each
 // row stamps before or after the row it sits in, the footer appends,
-// and either opens a type picker when several types are
-// offered. Rows are never collapsed.
+// with a type picker for row insertions and multi-type footers.
+// Rows are never collapsed.
 // Receives one row list in $value and its renumber base — per locale
 // for an asymmetric field, the neutral locale otherwise — in $name.
 
@@ -81,7 +81,6 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				'columns' => $columns,
 				'min' => $min,
 				'metaControl' => $metaControl,
-				'single' => $single,
 				'readonly' => $readonly,
 			]);
 		} ?>
@@ -101,7 +100,6 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				'columns' => $columns,
 				'min' => $min,
 				'metaControl' => $metaControl,
-				'single' => $single,
 				'readonly' => false,
 			]) ?>
 		</template>

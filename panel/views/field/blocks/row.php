@@ -13,8 +13,6 @@ $columns = max(1, (int) $columns);
 $min = min($columns, max(1, (int) $min));
 $metaControl = $this->unwrap($metaControl ?? null);
 $metaControl = is_array($metaControl) ? $metaControl : null;
-$single = $this->unwrap($single ?? null);
-$single = is_string($single) ? $single : null;
 $name = (string) $this->unwrap($name);
 $id = (string) $this->unwrap($id);
 
@@ -114,10 +112,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			<?php $this->insert('field/blocks/inserter', [
 				'commonChoices' => $commonChoices,
 				'more' => $more,
-				'single' => $single,
-				'insert' => 'before',
 				'id' => "{$rowId}-insert",
-				'label' => $columns > 1 ? __('field:insert-before') : __('field:insert-above'),
 			]) ?>
 			<?php if ($settings): ?>
 				<button

@@ -20,6 +20,7 @@
 @import './cms-media-field.css' layer(panel);
 @import './cms-entries.css' layer(panel);
 @import './cms-blocks-editor.css' layer(panel);
+@import './cms-block-picker.css' layer(panel);
 @import './cms-node.css' layer(panel);
 @import './cms-inspector.css' layer(panel);
 @import './cms-tabs.css' layer(panel);

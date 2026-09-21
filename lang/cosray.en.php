@@ -170,6 +170,8 @@ return [
 		'field:add-entry' => 'Add entry',
 		'field:add-first-entry' => 'Add first entry',
 		'field:add-typed' => 'Add :label',
+		'field:after' => 'After',
+		'field:before' => 'Before',
 		'field:block' => 'Block',
 		'field:block-actions' => 'Actions for this block',
 		'field:block-results' => [':count block type available', ':count block types available'],

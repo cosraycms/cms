@@ -1,0 +1,56 @@
+.cms-block-picker {
+	--width: max-content;
+
+	& .choices {
+		display: grid;
+		grid-template-columns: minmax(0, max-content) max-content;
+		column-gap: var(--cms-space-4);
+	}
+
+	& .choice {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: center;
+		column-gap: inherit;
+		padding: var(--cms-space-2) var(--cms-space-2-5);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .caption {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+		max-width: 18rem;
+		overflow-wrap: anywhere;
+	}
+
+	& .actions {
+		display: inline-flex;
+	}
+
+	& .actions > .cms-button {
+		--height: 1.375rem;
+
+		position: relative;
+		padding-inline: var(--cms-space-1-5);
+		text-transform: lowercase;
+		white-space: nowrap;
+
+		&:first-child {
+			border-inline-end: 0;
+			border-start-end-radius: 0;
+			border-end-end-radius: 0;
+		}
+
+		&:last-child {
+			border-start-start-radius: 0;
+			border-end-start-radius: 0;
+		}
+
+		&:focus-visible {
+			z-index: 1;
+		}
+	}
+}

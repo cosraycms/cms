@@ -1,34 +1,44 @@
 <?php
 
-// The + that puts a new block before the row it sits in. One offered
-// type inserts at once; several open the type picker.
-
 $commonChoices = (array) $this->unwrap($commonChoices);
 $more = (bool) $this->unwrap($more);
-$single = $this->unwrap($single ?? null);
-$single = is_string($single) ? $single : null;
-$insert = (string) $this->unwrap($insert);
 $id = (string) $this->unwrap($id);
-$label = (string) $this->unwrap($label);
 ?>
-<?php if ($single !== null): ?>
-	<button
-		type="button"
-		class="inserter"
-		data-repeater-add="<?= $this->escape($single) ?>"
-		data-repeater-insert="<?= $this->escape($insert) ?>"
-		aria-label="<?= $this->escape($label) ?>"
-		title="<?= $this->escape($label) ?>"><?= \Cosray\Panel\Icon::render('plus') ?></button>
-<?php else: ?>
-	<button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
-		aria-haspopup="menu" aria-label="<?= $this->escape($label) ?>" title="<?= $this->escape($label) ?>">
-		<?= \Cosray\Panel\Icon::render('plus') ?>
-	</button>
-	<div id="<?= $this->escape($id) ?>" class="cms-action-menu" popover="auto" data-action-menu>
-			<?php $this->insert('field/blocks/picker', [
-				'commonChoices' => $commonChoices,
-				'more' => $more,
-				'insert' => $insert,
-			]) ?>
+<button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
+	aria-haspopup="menu" aria-label="<?= $this->escape(__('field:add-block')) ?>" title="<?= $this->escape(__(
+		'field:add-block',
+	)) ?>">
+	<?= \Cosray\Panel\Icon::render('plus') ?>
+</button>
+<div id="<?= $this->escape($id) ?>" class="cms-action-menu cms-block-picker" popover="auto" data-action-menu>
+	<div class="choices">
+		<?php foreach ($commonChoices as $index => $choice): ?>
+			<?php $choiceId = "{$id}-choice-{$index}"; ?>
+			<div class="choice" role="group" aria-labelledby="<?= $this->escape($choiceId) ?>">
+				<span class="caption" id="<?= $this->escape($choiceId) ?>">
+					<span class="icon" aria-hidden="true"><?= $choice['icon'] ?></span>
+					<span><?= $this->escape($choice['label']) ?></span>
+				</span>
+				<span class="actions">
+					<?php foreach (['before' => __('field:before'), 'after' => __('field:after')] as $position => $label): ?>
+						<?php $buttonId = "{$choiceId}-{$position}"; ?>
+						<button type="button" class="cms-button secondary small"
+							id="<?= $this->escape($buttonId) ?>"
+							aria-labelledby="<?= $this->escape("{$buttonId} {$choiceId}") ?>"
+							data-repeater-add="<?= $this->escape($choice['type']) ?>"
+							data-repeater-insert="<?= $this->escape($position) ?>">
+							<?= $this->escape($label) ?>
+						</button>
+					<?php endforeach ?>
+				</span>
+			</div>
+		<?php endforeach ?>
 	</div>
-<?php endif ?>
+	<?php if ($more): ?>
+		<hr />
+		<button type="button" data-block-catalog-open data-repeater-insert="before">
+			<?= \Cosray\Panel\Icon::render('collection') ?>
+			<?= $this->escape(__('field:more-blocks')) ?>
+		</button>
+	<?php endif ?>
+</div>

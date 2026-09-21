@@ -171,6 +171,54 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 	);
 });
 
+it.each([
+	{ count: 1, position: 'before' },
+	{ count: 1, position: 'after' },
+	{ count: 8, position: 'before' },
+	{ count: 8, position: 'after' },
+])(
+	'inserts $position a row from the $count-type dropdown using the keyboard',
+	async ({ count, position }) => {
+		const form = setup(field('story', undefined, undefined, types.slice(0, count)));
+		quick(footer(), 0);
+		quick(footer(), 0);
+		const [anchor, sibling] = rows();
+		const value = anchor.querySelector<HTMLInputElement>('input[type="text"]')!;
+		value.value = 'Keep this content';
+		const changed = vi.fn();
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		form.addEventListener('change', changed);
+		form.addEventListener('submit', submit);
+		const trigger = anchor.querySelector<HTMLButtonElement>('button[popovertarget]')!;
+		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(150, 120, 30, 30));
+		openMenu(trigger, 'first');
+		await Promise.resolve();
+		if (position === 'after') key(document.activeElement!, 'ArrowDown');
+		const action = document.activeElement as HTMLButtonElement;
+		expect(action.dataset.repeaterInsert).toBe(position);
+		expect(
+			action
+				.getAttribute('aria-labelledby')!
+				.split(' ')
+				.map((id) => document.getElementById(id)?.textContent?.trim())
+				.join(' '),
+		).toBe(`${position === 'before' ? 'Before' : 'After'} RichText`);
+		key(action, 'Enter');
+		const inserted = rows()[position === 'before' ? 0 : 1];
+		expect(rows()).toEqual(
+			position === 'before' ? [inserted, anchor, sibling] : [anchor, inserted, sibling],
+		);
+		expect(inserted.querySelector<HTMLInputElement>('input[name$="[type]"]')?.value).toBe(
+			types[0].type,
+		);
+		expect(value.value).toBe('Keep this content');
+		expect(inserted.contains(document.activeElement)).toBe(true);
+		expect(trigger.getAttribute('aria-expanded')).toBe('false');
+		expect(changed).toHaveBeenCalledOnce();
+		expect(submit).not.toHaveBeenCalled();
+	},
+);
+
 it('inserts before the captured row after its position changes and starts fresh when reopened', () => {
 	setup();
 	quick();
