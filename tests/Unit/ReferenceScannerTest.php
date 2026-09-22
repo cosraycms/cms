@@ -174,6 +174,31 @@ final class ReferenceScannerTest extends TestCase
 		$this->assertSame([], $refs['nodes']);
 	}
 
+	public function testCollectsTheBlocksOfASplit(): void
+	{
+		$refs = new Scanner()->scan([
+			'blocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'zxx' => [[
+						'uid' => 'split',
+						'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+						'blocks' => [
+							$this->block(Builtin\Image::class, [
+								'image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => 'img-in-split']]]],
+							]),
+							$this->block(Builtin\Video::class, [
+								'video' => ['type' => 'video', 'value' => ['zxx' => [['uid' => 'vid-in-split']]]],
+							]),
+						],
+					]],
+				],
+			],
+		]);
+
+		$this->assertSame(['img-in-split', 'vid-in-split'], $refs['assets']);
+	}
+
 	public function testToleratesMalformedContent(): void
 	{
 		$refs = new Scanner()->scan([

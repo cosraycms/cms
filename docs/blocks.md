@@ -125,6 +125,33 @@ Row UIDs identify rows across edits and reordering. `type` is an FQCN; rows no l
 
 Readers clamp layouts to the configured field: span into `[min, columns]`, rows into `[1, 6]`, indent into `[0, columns - span]`. Direct Store writes validate rather than clamp out-of-range imports; editor saves clamp before validation. See [Layout](../src/Block/Layout.php), [Field\Blocks](../src/Field/Blocks.php), and [FormPatch](../src/Panel/FormPatch.php).
 
+### Splits
+
+A row can instead be a split: a `uid`, a `layout`, optional `meta`, and `blocks`, with no `type` and no `fields`. Its blocks are ordinary rows laid out on the split's area — their `colspan` and `indent` count the split's columns (the field's own tracks), their `rowspan` the split's rows:
+
+```json
+{
+	"uid": "p8d2kq4mz7wn1",
+	"layout": { "colspan": 6, "rowspan": 2, "indent": 0 },
+	"blocks": [
+		{
+			"uid": "k3v9p2mq7x1zd",
+			"type": "Cosray\\Block\\Image",
+			"layout": { "colspan": 3, "rowspan": 2, "indent": 0 },
+			"fields": {}
+		},
+		{
+			"uid": "r5t1wq8ne2xb4",
+			"type": "Cosray\\Block\\RichText",
+			"layout": { "colspan": 3, "rowspan": 2, "indent": 0 },
+			"fields": {}
+		}
+	]
+}
+```
+
+The direction is not stored. Blocks side by side (each as tall as the split) make a columns split, stacked blocks (each as wide as the split) a rows split. A split holds at least two blocks, and its blocks are never splits themselves. Validation places the blocks the way the browser's grid flow does and rejects one that would land outside the split's area: a subgrid has no rows of its own to grow into. Readers clamp each block into its split's area; an editor save turns a split left with one block into that block, with the split's layout.
+
 ## Editor form names
 
 ```text
@@ -137,9 +164,14 @@ content[f][value][lo][i][fields][sub][value][subLocale]
 content[f][value][lo][i][fields][sub][json]
 content[f][value][lo][i][fields][sub][meta][key][subLocale]
 content[f][value][lo][i][meta][key][zxx]
+content[f][value][lo][i][blocks][j][uid]
+content[f][value][lo][i][blocks][j][type]
+content[f][value][lo][i][blocks][j][layout][colspan]
+content[f][value][lo][i][blocks][j][fields][sub][value][subLocale]
+content[f][value][lo][i][blocks][j][meta][key][zxx]
 ```
 
-`lo` is `zxx` for shared lists or a real locale for asymmetric lists. Submission replaces the row list in order, matching surviving rows by UID and patching sub-fields individually. See [editor transport](controls.md#save-transport) for JSON encoding and truncation protection and [block controls](controls.md#blocks) for live editing behavior.
+`lo` is `zxx` for shared lists or a real locale for asymmetric lists. A split submits no `type` and its blocks under `[blocks][j]`, with the same names below them. Submission replaces the row list in order, matching surviving rows by UID — across splits, so a block moved into or out of one keeps its stored data — and patching sub-fields individually. See [editor transport](controls.md#save-transport) for JSON encoding and truncation protection and [block controls](controls.md#blocks) for live editing behavior.
 
 ## Rendering
 
@@ -166,6 +198,23 @@ content[f][value][lo][i][meta][key][zxx]
 </div>
 ```
 
+A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split="rows"` in place of `data-type`, the same layout attributes, and its blocks inside it as ordinary `{prefix}-block` elements whose layout counts the split's area:
+
+```html
+<div
+	class="cms-block"
+	data-split="columns"
+	data-colspan="6"
+	data-rowspan="2"
+	data-indent="0"
+	data-reserved="6"
+	style="--colspan: 6; --rowspan: 2; --indent: 0; --reserved: 6"
+>
+	<div class="cms-block" data-type="image" data-colspan="3" …>…</div>
+	<div class="cms-block" data-type="richtext" data-colspan="3" …>…</div>
+</div>
+```
+
 The container is emitted even for an empty field. `reserved` is the derived sum of indent and span. Data attributes support styles that cannot use inline custom properties. All generated attribute values are escaped, including class/id settings; the type's own output is not sanitized by the wrapper.
 
 ### Spacing
@@ -182,7 +231,7 @@ The editor keeps usable control spacing; Layout preview shows configured spacing
 | `tag` | Container tag, default `div` |
 | `class` | Additional container class |
 | `imageSizes` | Named rendition ladder, default `block-sm`, `block`, `block-lg` |
-| `sizes` | Image sizes template; `{pct}` is the block's grid share, default `(min-width: 48rem) {pct}vw, 100vw` |
+| `sizes` | Image sizes template; `{pct}` is the block's share of the field's columns, inside a split too, default `(min-width: 48rem) {pct}vw, 100vw` |
 | `thumbSize` | Gallery rendition, default `block-thumb` |
 
 `tag` and `prefix` accept plain names matching `/^[a-z][a-z0-9-]*$/i`. An image ladder with several sizes requires width-mode sizes; one size can use any mode and emits a plain `src`. Missing assets produce no media block; non-resizable assets keep their original URL.
@@ -190,6 +239,8 @@ The editor keeps usable control spacing; Layout preview shows configured spacing
 ### The value API
 
 [Value\Blocks](../src/Value/Blocks.php) iterates [Value\Block](../src/Value/Block.php) rows and exposes `count()`, `first()`, `last()`, `get()`, grid settings, image helpers, and richtext excerpts. Rows expose their identity, type/handle, layout, sub-fields as values, metadata, and rendering. `unwrap()`/`json()` return `{columns, blocks: [...]}` with resolved sub-field values, not the storage envelopes above.
+
+Iteration and `count()` stay on the top-level rows, so a split is one row there: `isSplit()` tells it apart, `split()` returns `columns` or `rows`, `blocks()` its blocks, and its `type` and `handle()` are null. `leaves()` yields every block in reading order with a split's blocks in its place; `image()`, `images()`, `hasImage()`, and `excerpt()` read through it. A split's `unwrap()`/`json()` entry carries `blocks` instead of `fields`.
 
 ### The reference stylesheet
 
@@ -199,7 +250,7 @@ Import the shipped [resources/blocks.css](../resources/blocks.css), or copy it w
 @import "vendor/cosray/cms/resources/blocks.css";
 ```
 
-It uses the `cms.blocks` cascade layer, so ordinary unlayered site CSS wins. A block reserves indent plus span columns; its margin pushes the content past the indent within that area. This lets a block wrap naturally when it no longer fits beside its neighbors.
+It uses the `cms.blocks` cascade layer, so ordinary unlayered site CSS wins. A block reserves indent plus span columns; its margin pushes the content past the indent within that area. This lets a block wrap naturally when it no longer fits beside its neighbors. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
 
 Override points:
 

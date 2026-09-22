@@ -8,7 +8,9 @@ namespace Cosray\Block;
  * A block's grid placement: the columns it spans, the rows it spans
  * and its offset from the row start. Readers clamp stored values so a
  * field narrowed later or an out-of-range import never breaks a render;
- * the same bounds are enforced on save by the field shape.
+ * the same bounds are enforced on save by the field shape. The blocks
+ * of a split are placed on the split's area: its colspan is their
+ * column count, its rowspan their row limit.
  */
 final readonly class Layout
 {
@@ -20,11 +22,11 @@ final readonly class Layout
 		public int $indent,
 	) {}
 
-	public static function normalize(mixed $layout, int $columns, int $min): self
+	public static function normalize(mixed $layout, int $columns, int $min, int $rows = self::MAX_ROWSPAN): self
 	{
 		$layout = is_array($layout) ? $layout : [];
 		$colspan = self::clamp(self::int($layout['colspan'] ?? null, $columns), $min, $columns);
-		$rowspan = self::clamp(self::int($layout['rowspan'] ?? null, 1), 1, self::MAX_ROWSPAN);
+		$rowspan = self::clamp(self::int($layout['rowspan'] ?? null, 1), 1, $rows);
 		$indent = self::clamp(self::int($layout['indent'] ?? null, 0), 0, $columns - $colspan);
 
 		return new self($colspan, $rowspan, $indent);

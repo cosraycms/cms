@@ -89,6 +89,11 @@ final class BlocksTest extends TestCase
 		return $row;
 	}
 
+	private function split(array $blocks, array $layout, string $uid = 's1'): array
+	{
+		return ['uid' => $uid, 'layout' => $layout, 'blocks' => $blocks];
+	}
+
 	public function testBlocksFieldCreation(): void
 	{
 		$blocks = $this->createBlocks();
@@ -747,6 +752,196 @@ final class BlocksTest extends TestCase
 			'zxx',
 			0,
 			'uid',
+		]));
+	}
+
+	public function testStructureOfASplit(): void
+	{
+		$rows = $this->createBlocks()->structure([
+			[
+				...$this->split(
+					[
+						$this->textRow('b1', 'Left', ['colspan' => 12, 'rowspan' => 4, 'indent' => 0]),
+						['uid' => 'b2', 'type' => 'legacy'],
+						'junk',
+						$this->textRow('b3', 'Right', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0]),
+					],
+					['colspan' => 6, 'rowspan' => 2, 'indent' => 6],
+				),
+				'meta' => ['class' => ['zxx' => 'pair']],
+			],
+		])['value'][Field::NEUTRAL_LOCALE];
+
+		$this->assertSame(['uid', 'layout', 'blocks', 'meta'], array_keys($rows[0]));
+		$this->assertSame(['class' => ['zxx' => 'pair']], $rows[0]['meta']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'indent' => 6], $rows[0]['layout']);
+		$this->assertSame(['b1', 'b3'], array_column($rows[0]['blocks'], 'uid'));
+		// Clamped into the split's area, not the field's.
+		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'indent' => 0], $rows[0]['blocks'][0]['layout']);
+		$this->assertSame(['zxx' => 'Right'], $rows[0]['blocks'][1]['fields']['text']['value']);
+	}
+
+	public function testStructureDissolvesASplitLeftWithOneBlock(): void
+	{
+		$rows = $this->createBlocks()->structure([
+			$this->split(
+				[
+					$this->textRow('b1', 'Kept', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+					['uid' => 'b2', 'type' => 'legacy'],
+				],
+				['colspan' => 6, 'rowspan' => 1, 'indent' => 2],
+			),
+			$this->split([['uid' => 'b3', 'type' => 'legacy']], ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], 's2'),
+		])['value'][Field::NEUTRAL_LOCALE];
+
+		$this->assertCount(1, $rows);
+		$this->assertSame('b1', $rows[0]['uid']);
+		$this->assertSame(Builtin\Text::class, $rows[0]['type']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'indent' => 2], $rows[0]['layout']);
+	}
+
+	public function testShapeAcceptsSplitsInBothDirections(): void
+	{
+		$column = ['colspan' => 3, 'rowspan' => 2, 'indent' => 0];
+		$row = ['colspan' => 6, 'rowspan' => 1, 'indent' => 0];
+		$result = $this
+			->createBlocks()
+			->shape()
+			->validate([
+				'type' => Blocks::class,
+				'value' => [
+					Field::NEUTRAL_LOCALE => [
+						$this->split(
+							[$this->textRow('b1', 'Left', $column), $this->textRow('b2', 'Right', $column)],
+							['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+						),
+						$this->split(
+							[
+								$this->textRow('b3', 'Top', $row),
+								$this->textRow('b4', 'Middle', $row),
+								$this->textRow('b5', 'Bottom', $row),
+							],
+							['colspan' => 6, 'rowspan' => 3, 'indent' => 0],
+							's2',
+						),
+					],
+				],
+			]);
+
+		$this->assertTrue($result->valid(), json_encode($result->issues()));
+		$rows = $result->values()['value'][Field::NEUTRAL_LOCALE];
+		$this->assertSame(['b1', 'b2'], array_column($rows[0]['blocks'], 'uid'));
+		$this->assertSame('Bottom', $rows[1]['blocks'][2]['fields']['text']['value']['zxx']);
+	}
+
+	public function testShapeRejectsRowsThatAreNeitherBlockNorSplit(): void
+	{
+		$shape = $this->createBlocks()->shape();
+		$half = ['colspan' => 6, 'rowspan' => 1, 'indent' => 0];
+		$full = ['colspan' => 12, 'rowspan' => 1, 'indent' => 0];
+		$rows = static fn(array ...$rows): array => [
+			'type' => Blocks::class,
+			'value' => [Field::NEUTRAL_LOCALE => $rows],
+		];
+		$kind = ['value', Field::NEUTRAL_LOCALE, 0];
+
+		// One block is no split.
+		$this->assertTrue($shape->validate($rows($this->split([$this->textRow('b1', 'x', $full)], $full)))->has($kind));
+		// A type or fields beside the blocks, or neither.
+		$both = [...$this->split([$this->textRow('b1', 'x', $half), $this->textRow('b2', 'y', $half)], $full)];
+		$this->assertTrue($shape->validate($rows([...$both, 'type' => Builtin\Text::class, 'fields' => []]))->has(
+			$kind,
+		));
+		$this->assertTrue($shape->validate($rows([...$both, 'fields' => []]))->has($kind));
+		$this->assertTrue($shape->validate($rows(['uid' => 'b1', 'layout' => $full]))->has($kind));
+		$this->assertTrue($shape->validate($rows([
+			'uid' => 'b1',
+			'type' => Builtin\Text::class,
+			'layout' => $full,
+		]))->has($kind));
+		// A block of a split is never split again.
+		$nested = $this->split([$this->textRow('b3', 'x', $half), $this->textRow('b4', 'y', $half)], $half, 's2');
+		$this->assertTrue(
+			$shape
+				->validate($rows($this->split([
+					[...$this->textRow('b1', 'x', $half), ...$nested],
+					$this->textRow('b2', 'y', $half),
+				], $full)))
+				->has(['value', Field::NEUTRAL_LOCALE, 0, 'blocks', 0, 'blocks']),
+		);
+		$this->assertTrue($shape->validate($rows($both))->valid());
+	}
+
+	public function testShapeRejectsBlocksOverflowingTheirSplit(): void
+	{
+		$shape = $this->createBlocks()->shape();
+		$validate = fn(array $area, array ...$layouts) => $shape->validate([
+			'type' => Blocks::class,
+			'value' => [
+				Field::NEUTRAL_LOCALE => [
+					$this->split(
+						array_map(fn(int $i): array => $this->textRow(
+							"b{$i}",
+							'x',
+							$layouts[$i],
+						), array_keys($layouts)),
+						$area,
+					),
+				],
+			],
+		]);
+		$area = static fn(int $colspan, int $rowspan): array => [
+			'colspan' => $colspan,
+			'rowspan' => $rowspan,
+			'indent' => 0,
+		];
+		$block = static fn(int $colspan, int $rowspan, int $indent = 0): array => [
+			'colspan' => $colspan,
+			'rowspan' => $rowspan,
+			'indent' => $indent,
+		];
+		$overflow = static fn(int $index): array => ['value', Field::NEUTRAL_LOCALE, 0, 'blocks', $index, 'layout'];
+
+		// Wider than the split, with or without an indent.
+		$this->assertTrue($validate($area(6, 1), $block(4, 1), $block(4, 1))->has($overflow(1)));
+		$this->assertTrue($validate($area(6, 1), $block(2, 1, 5), $block(2, 1))->has($overflow(0)));
+		// Taller than the split, or wrapping past its last row.
+		$this->assertTrue($validate($area(6, 1), $block(3, 2), $block(3, 1))->has($overflow(0)));
+		$this->assertTrue($validate($area(6, 2), $block(6, 1), $block(6, 1), $block(6, 1))->has($overflow(2)));
+		// The flow fills the cell a taller neighbour leaves free.
+		$this->assertTrue($validate($area(6, 2), $block(3, 2), $block(3, 1), $block(3, 1))->valid());
+		$this->assertTrue($validate($area(6, 2), $block(2, 2), $block(2, 2, 2))->valid());
+	}
+
+	public function testShapeReportsSplitBlockIssuesWithTheirPath(): void
+	{
+		$half = ['colspan' => 6, 'rowspan' => 1, 'indent' => 0];
+		$result = $this
+			->createBlocks()
+			->shape()
+			->validate([
+				'type' => Blocks::class,
+				'value' => [
+					Field::NEUTRAL_LOCALE => [
+						$this->split(
+							[$this->textRow('b1', 'Filled', $half), $this->textRow('b2', '', $half)],
+							['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+						),
+					],
+				],
+			]);
+
+		$this->assertFalse($result->valid());
+		$this->assertTrue($result->has([
+			'value',
+			Field::NEUTRAL_LOCALE,
+			0,
+			'blocks',
+			1,
+			'fields',
+			'text',
+			'value',
+			'zxx',
 		]));
 	}
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Block;
 
 use Celema\Wire\Creator;
+use Closure;
 use Cosray\Config;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
@@ -73,6 +74,21 @@ final class Registry
 		assert($instance instanceof Block, 'The creator returns the requested class');
 
 		return $instance;
+	}
+
+	/**
+	 * The factory for one render: each type is created once and reused
+	 * for every block of that type.
+	 *
+	 * @return Closure(class-string<Block>): Block
+	 */
+	public function cached(Owner $owner): Closure
+	{
+		$instances = [];
+
+		return function (string $class) use ($owner, &$instances): Block {
+			return $instances[$class] ??= $this->create($class, $owner);
+		};
 	}
 
 	public static function withDefaults(): self

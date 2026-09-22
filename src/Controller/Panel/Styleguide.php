@@ -897,6 +897,11 @@ final class Styleguide extends Panel
 			'layout' => $layout,
 			'fields' => ['video' => ['type' => Video::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
 		];
+		$split = static fn(string $uid, array $layout, array ...$blocks): array => [
+			'uid' => $uid,
+			'layout' => $layout,
+			'blocks' => $blocks,
+		];
 		$images = static fn(string $uid, array $layout, array $assets, array $meta): array => [
 			'uid' => $uid,
 			'type' => Builtin\Images::class,
@@ -946,6 +951,20 @@ final class Styleguide extends Panel
 							'sg-grid-9',
 							$layout(6),
 							'<iframe src="https://example.org/embed" title="Map"></iframe>',
+						),
+						$split(
+							'sg-grid-11',
+							$layout(6, 2),
+							$image('sg-grid-12', $layout(3, 2), self::galleryUid(2)),
+							$richtext('sg-grid-13', $layout(3, 2), [
+								'zxx' => $doc('Split into columns beside its image.'),
+							]),
+						),
+						$split(
+							'sg-grid-14',
+							$layout(6, 2),
+							$text('sg-grid-15', $layout(6), ['zxx' => 'Split into rows: the upper one.']),
+							$text('sg-grid-16', $layout(6), ['zxx' => 'And the lower one.']),
 						),
 					],
 					'de' => [

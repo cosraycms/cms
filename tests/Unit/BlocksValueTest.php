@@ -134,8 +134,11 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
-	private function richtext(string $text, string $uid = 'b1'): array
-	{
+	private function richtext(
+		string $text,
+		string $uid = 'b1',
+		array $layout = ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+	): array {
 		return $this->row(
 			Builtin\RichText::class,
 			[
@@ -151,9 +154,20 @@ final class BlocksValueTest extends TestCase
 					],
 				],
 			],
-			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+			$layout,
 			uid: $uid,
 		);
+	}
+
+	private function split(array $blocks, array $layout, string $uid = 's1', array $meta = []): array
+	{
+		$row = ['uid' => $uid, 'layout' => $layout, 'blocks' => $blocks];
+
+		if ($meta !== []) {
+			$row['meta'] = $meta;
+		}
+
+		return $row;
 	}
 
 	private function seedAsset(string $uid, string $filename, ?string $mime = 'image/jpeg', array $meta = []): void
@@ -720,5 +734,172 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('Second', $blocks->excerpt(index: 2));
 		$this->assertSame('', $blocks->excerpt(index: 3));
 		$this->assertSame('', $this->createBlocksValue([])->excerpt());
+	}
+
+	public function testSplitsRenderTheirBlocksInside(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->split(
+				[
+					$this->text('Left', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0], uid: 'b1'),
+					$this->text('Right', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0], uid: 'b2'),
+				],
+				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				meta: ['class' => ['zxx' => 'pair']],
+			),
+			$this->split(
+				[
+					$this->text('Top', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b3'),
+					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b4'),
+				],
+				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				uid: 's2',
+			),
+		]);
+		$child = static fn(string $text, int $colspan, int $rowspan): string => (
+			"<div class=\"cms-block\" data-type=\"text\" data-colspan=\"{$colspan}\" data-rowspan=\"{$rowspan}\""
+			. " data-indent=\"0\" data-reserved=\"{$colspan}\""
+			. " style=\"--colspan: {$colspan}; --rowspan: {$rowspan}; --indent: 0; --reserved: {$colspan}\">{$text}</div>"
+		);
+		$split = static fn(string $attributes, string $inner): string => (
+			"<div class=\"cms-block{$attributes}\" data-colspan=\"6\" data-rowspan=\"2\" data-indent=\"0\" data-reserved=\"6\""
+			. " style=\"--colspan: 6; --rowspan: 2; --indent: 0; --reserved: 6\">{$inner}</div>"
+		);
+
+		$this->assertSame(
+			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
+				. $split(' pair" data-split="columns', $child('Left', 3, 2) . $child('Right', 3, 2))
+				. $split('" data-split="rows', $child('Top', 6, 1) . $child('Bottom', 6, 1))
+				. '</div>',
+			$blocks->render(),
+		);
+	}
+
+	public function testIterationStaysOnTheTopLevelAndLeavesDescend(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->text('One', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+			$this->split(
+				[
+					$this->text('Two', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+					$this->text('Three', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0], uid: 'b3'),
+				],
+				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+			),
+			$this->text('Four', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b4'),
+		]);
+		$uids = static fn(iterable $blocks): array => array_map(
+			static fn(Block $block): ?string => $block->uid(),
+			[
+				...$blocks,
+			],
+		);
+		$split = $blocks->get(1);
+
+		$this->assertSame(3, $blocks->count());
+		$this->assertSame(['b1', 's1', 'b4'], $uids($blocks));
+		$this->assertSame(['b1', 'b2', 'b3', 'b4'], $uids($blocks->leaves()));
+		$this->assertTrue($split?->isSplit());
+		$this->assertFalse($blocks->first()?->isSplit());
+		$this->assertTrue($split?->isset());
+		$this->assertNull($split?->type);
+		$this->assertNull($split?->handle());
+		$this->assertSame('columns', $split?->split());
+		$this->assertSame(['b2', 'b3'], $uids($split?->blocks() ?? []));
+		$this->assertSame('Two', $split?->blocks()[0]->text->unwrap());
+		$this->assertSame([], $blocks->first()?->blocks());
+		$this->assertNull($blocks->first()?->split());
+
+		$this->throws(\Cosray\Exception\NoSuchProperty::class, "Block doesn't have field 'text'");
+		$split?->text;
+	}
+
+	public function testSplitsUnwrapWithTheirBlocks(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->split(
+				[
+					$this->text('Top', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+				],
+				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				meta: ['padding' => ['zxx' => 's']],
+			),
+		]);
+
+		$split = $blocks->unwrap()['blocks'][0];
+
+		$this->assertSame(
+			['uid', 'type', 'handle', 'layout', 'blocks', 'meta'],
+			array_keys($split),
+		);
+		$this->assertNull($split['type']);
+		$this->assertNull($split['handle']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'indent' => 0], $split['layout']);
+		$this->assertSame(['padding' => ['zxx' => 's']], $split['meta']);
+		$this->assertSame(['Top', 'Bottom'], array_column(array_column($split['blocks'], 'fields'), 'text'));
+		$this->assertSame('text', $split['blocks'][0]['handle']);
+		$this->assertSame('Bottom', $blocks->json()['blocks'][0]['blocks'][1]['fields']['text']);
+		$this->assertSame('rows', $blocks->first()?->split());
+	}
+
+	public function testReadersClampSplitBlocksIntoTheirArea(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->split(
+				[
+					$this->text('Wide', ['colspan' => 12, 'rowspan' => 5, 'indent' => 4], uid: 'b1'),
+					$this->text('Narrow', ['colspan' => 2, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+				],
+				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+			),
+		]);
+
+		$this->assertSame(
+			['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+			$blocks->first()?->blocks()[0]->layout()->array(),
+		);
+	}
+
+	public function testSplitsWithoutAllowedBlocksAreSkipped(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->split(
+				[['uid' => 'b1', 'type' => 'App\\Nope', 'fields' => []], 'junk'],
+				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+			),
+			$this->text('Kept', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+		]);
+
+		$this->assertSame(1, $blocks->count());
+		$this->assertSame('b2', $blocks->first()?->uid());
+	}
+
+	public function testHelpersReadTheBlocksOfASplit(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->split(
+				[
+					$this->image(['uid' => 'blockimg12345'], span: 3, uid: 'b1'),
+					$this->richtext('Beside the image', 'b2', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+				],
+				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+			),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg');
+
+		$this->assertSame('pic.jpg', $blocks->image()?->filename());
+		$this->assertSame(
+			['pic.jpg'],
+			array_map(
+				static fn(Image $image): string => $image->filename(),
+				[
+					...$blocks->images(),
+				],
+			),
+		);
+		$this->assertSame('Beside the image', $blocks->excerpt());
+		// A block's share of the field's columns: a split's tracks are the field's.
+		$this->assertStringContainsString('sizes="(min-width: 48rem) 25vw, 100vw"', $blocks->render());
 	}
 }

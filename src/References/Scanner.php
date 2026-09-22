@@ -74,12 +74,29 @@ final class Scanner
 	private function rows(mixed $value, array &$assets, array &$nodes): void
 	{
 		foreach (is_array($value) ? $value : [] as $rows) {
-			foreach (is_array($rows) ? $rows : [] as $row) {
-				if (!is_array($row) || !is_array($row['fields'] ?? null)) {
-					continue;
-				}
+			$this->list($rows, $assets, $nodes);
+		}
+	}
 
+	/**
+	 * A split of a Blocks field holds its rows under `blocks`.
+	 *
+	 * @param list<string> $assets
+	 * @param list<string> $nodes
+	 */
+	private function list(mixed $rows, array &$assets, array &$nodes): void
+	{
+		foreach (is_array($rows) ? $rows : [] as $row) {
+			if (!is_array($row)) {
+				continue;
+			}
+
+			if (is_array($row['fields'] ?? null)) {
 				$this->fields($row['fields'], $assets, $nodes);
+			}
+
+			if (is_array($row['blocks'] ?? null)) {
+				$this->list($row['blocks'], $assets, $nodes);
 			}
 		}
 	}

@@ -248,49 +248,103 @@ final class FormPatch
 	}
 
 	/**
-	 * Block rows add the layout — ints clamped into the field's grid, so
-	 * a stored out-of-range value the editor loaded saves back clamped,
-	 * where the shape would reject it — and the block meta map, patched
-	 * like a field's meta against the descriptor's meta group.
+	 * Block rows add the layout — ints clamped into the area the block is
+	 * laid out on, the field's grid or the split it sits in, so a stored
+	 * out-of-range value the editor loaded saves back clamped, where the
+	 * shape would reject it — and the block meta map, patched like a
+	 * field's meta against the descriptor's meta group. Blocks are matched
+	 * by uid against every stored block, so one the editor moved into or
+	 * out of a split keeps whatever the form does not carry.
 	 */
 	private function blocks(array $props, array $rows, array $stored): array
 	{
 		$columns = is_int($props['columns'] ?? null) && $props['columns'] > 0 ? $props['columns'] : 1;
 		$min = is_int($props['min'] ?? null) && $props['min'] > 0 ? min($props['min'], $columns) : 1;
 		$metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
+		$types = self::rowTypes($props['blockTypes'] ?? []);
+		$known = $stored;
+
+		foreach ($stored as $storedRow) {
+			if (is_array($storedRow) && is_array($storedRow['blocks'] ?? null)) {
+				array_push($known, ...array_values($storedRow['blocks']));
+			}
+		}
+
+		$block = fn(int $columns, int $rowspan): Closure => fn(
+			array $storedRow,
+			array $row,
+			string $uid,
+			string $type,
+			array $fields,
+		): array => $this->withMeta(
+			[
+				...$storedRow,
+				'uid' => $uid,
+				'type' => $type,
+				'layout' => Layout::normalize(self::layout($storedRow, $row), $columns, $min, $rowspan)->array(),
+				'fields' => $fields,
+			],
+			$storedRow,
+			$row,
+			$metaControl,
+		);
 
 		return $this->rows(
-			self::rowTypes($props['blockTypes'] ?? []),
+			$types,
 			$rows,
-			$stored,
-			function (array $storedRow, array $row, string $uid, string $type, array $fields) use (
+			$known,
+			$block($columns, Layout::MAX_ROWSPAN),
+			function (array $storedRow, array $row, string $uid) use (
+				$types,
+				$known,
+				$block,
 				$columns,
 				$min,
 				$metaControl,
-			): array {
-				$layout = [
-					...(is_array($storedRow['layout'] ?? null) ? $storedRow['layout'] : []),
-					...(is_array($row['layout'] ?? null) ? $row['layout'] : []),
-				];
-				$result = [
-					...$storedRow,
-					'uid' => $uid,
-					'type' => $type,
-					'layout' => Layout::normalize($layout, $columns, $min)->array(),
-					'fields' => $fields,
-				];
+			): ?array {
+				$layout = Layout::normalize(self::layout($storedRow, $row), $columns, $min);
+				$blocks = $this->rows(
+					$types,
+					array_values($row['blocks']),
+					$known,
+					$block($layout->colspan, $layout->rowspan),
+				);
 
-				if ($metaControl !== null && is_array($row['meta'] ?? null)) {
-					$result['meta'] = $this->meta(
-						$metaControl,
-						is_array($storedRow['meta'] ?? null) ? $storedRow['meta'] : [],
-						$row['meta'],
-					);
+				// A split holds two blocks at least; the one left takes its place.
+				if (count($blocks) < 2) {
+					return $blocks === [] ? null : [...$blocks[0], 'layout' => $layout->array()];
 				}
 
-				return $result;
+				return $this->withMeta(
+					[...$storedRow, 'uid' => $uid, 'layout' => $layout->array(), 'blocks' => $blocks],
+					$storedRow,
+					$row,
+					$metaControl,
+				);
 			},
 		);
+	}
+
+	/** The stored layout with the submitted dimensions over it. */
+	private static function layout(array $storedRow, array $row): array
+	{
+		return [
+			...(is_array($storedRow['layout'] ?? null) ? $storedRow['layout'] : []),
+			...(is_array($row['layout'] ?? null) ? $row['layout'] : []),
+		];
+	}
+
+	private function withMeta(array $result, array $storedRow, array $row, ?array $metaControl): array
+	{
+		if ($metaControl !== null && is_array($row['meta'] ?? null)) {
+			$result['meta'] = $this->meta(
+				$metaControl,
+				is_array($storedRow['meta'] ?? null) ? $storedRow['meta'] : [],
+				$row['meta'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -299,11 +353,15 @@ final class FormPatch
 	 * counterpart by uid, so unknown keys survive edits and reorders.
 	 * `$build` assembles the row from the matched stored row (empty when
 	 * the type changed), the submitted row, the uid and the patched fields.
+	 * A row without a type carrying `blocks` goes to `$split` when one is
+	 * given, with its stored counterpart unless that one is a block; a
+	 * null from it drops the row.
 	 *
 	 * @param array<string, array> $types row type descriptors keyed by class
 	 * @param Closure(array, array, string, string, array): array $build
+	 * @param ?Closure(array, array, string): ?array $split
 	 */
-	private function rows(array $types, array $rows, array $stored, Closure $build): array
+	private function rows(array $types, array $rows, array $stored, Closure $build, ?Closure $split = null): array
 	{
 		$byUid = [];
 
@@ -323,8 +381,9 @@ final class FormPatch
 			}
 
 			$type = $row['type'] ?? null;
+			$isSplit = $split !== null && $type === null && is_array($row['blocks'] ?? null);
 
-			if (!is_string($type) || !isset($types[$type])) {
+			if (!$isSplit && (!is_string($type) || !isset($types[$type]))) {
 				continue;
 			}
 
@@ -337,6 +396,16 @@ final class FormPatch
 			}
 
 			$storedRow = $byUid[$uid] ?? [];
+
+			if ($isSplit) {
+				$built = $split(isset($storedRow['type']) ? [] : $storedRow, $row, $uid);
+
+				if ($built !== null) {
+					$result[] = $built;
+				}
+
+				continue;
+			}
 
 			if (($storedRow['type'] ?? null) !== $type) {
 				$storedRow = [];

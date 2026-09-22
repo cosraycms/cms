@@ -460,6 +460,170 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		);
 	}
 
+	public function testSplitsPatchTheirBlocksByUid(): void
+	{
+		$column = ['colspan' => 3, 'rowspan' => 2, 'indent' => 0];
+		$this->createBlocksNode('panel-save-splits', 'test-media-document', [
+			'contentBlocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'en' => [
+						[
+							'uid' => 'split-a',
+							'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+							'stashed' => 'kept',
+							'blocks' => [
+								$this->textBlock('block-a', 'Left', $column),
+								$this->textBlock('block-b', 'Right', $column),
+							],
+						],
+						$this->textBlock('block-c', 'Solo', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0]),
+						[
+							'uid' => 'split-b',
+							'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+							'blocks' => [
+								$this->textBlock('block-d', 'Gone', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+								$this->textBlock('block-e', 'Last', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+							],
+						],
+					],
+				],
+			],
+		]);
+		$submitted = static fn(string $uid, string $text, array $layout): array => [
+			'uid' => $uid,
+			'type' => Builtin\Text::class,
+			'layout' => $layout,
+			'fields' => ['text' => ['value' => ['zxx' => $text]]],
+		];
+
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-splits', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'contentBlocks' => [
+						'value' => [
+							'en' => [
+								[
+									'uid' => 'split-a',
+									'layout' => ['colspan' => '6', 'rowspan' => '2', 'indent' => '0'],
+									'meta' => ['class' => ['zxx' => 'pair']],
+									'blocks' => [
+										// Taller than its split: clamped into the split's rows.
+										$submitted('block-a', 'Left new', [
+											'colspan' => '3',
+											'rowspan' => '5',
+											'indent' => '0',
+										]),
+										// Moved in from the top level.
+										$submitted('block-c', 'Solo', [
+											'colspan' => '3',
+											'rowspan' => '2',
+											'indent' => '0',
+										]),
+									],
+								],
+								[
+									'uid' => 'split-b',
+									'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '2'],
+									'blocks' => [
+										$submitted('block-e', 'Last', [
+											'colspan' => '3',
+											'rowspan' => '1',
+											'indent' => '0',
+										]),
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$rows = $this->nodeContent('panel-save-splits')['contentBlocks']['value']['en'];
+
+		$this->assertCount(2, $rows);
+		$this->assertSame('split-a', $rows[0]['uid']);
+		$this->assertArrayNotHasKey('type', $rows[0]);
+		$this->assertSame('kept', $rows[0]['stashed']);
+		$this->assertEquals(['class' => ['zxx' => 'pair']], $rows[0]['meta']);
+		$this->assertSame(['block-a', 'block-c'], array_column($rows[0]['blocks'], 'uid'));
+		$this->assertEquals(['colspan' => 3, 'rowspan' => 2, 'indent' => 0], $rows[0]['blocks'][0]['layout']);
+		$this->assertSame('Left new', $rows[0]['blocks'][0]['fields']['text']['value']['zxx']);
+		$this->assertSame('kept', $rows[0]['blocks'][0]['fields']['text']['stashed']);
+		$this->assertSame('kept', $rows[0]['blocks'][1]['fields']['text']['stashed']);
+		// A split left with one block turns into it, keeping the split's layout.
+		$this->assertSame('block-e', $rows[1]['uid']);
+		$this->assertSame(Builtin\Text::class, $rows[1]['type']);
+		$this->assertEquals(['colspan' => 6, 'rowspan' => 1, 'indent' => 2], $rows[1]['layout']);
+	}
+
+	public function testValidationErrorsInsideSplitsCarryTheBlockPath(): void
+	{
+		$column = ['colspan' => 3, 'rowspan' => 1, 'indent' => 0];
+		$this->createBlocksNode('panel-save-splits-invalid', 'test-media-document', [
+			'contentBlocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'en' => [[
+						'uid' => 'split-a',
+						'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+						'blocks' => [
+							$this->textBlock('block-a', 'Left', $column),
+							$this->textBlock('block-b', 'Right', $column),
+						],
+					]],
+				],
+			],
+		]);
+
+		$response = $this->makeRequest('POST', '/cp/node/panel-save-splits-invalid', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => [
+					'contentBlocks' => [
+						'value' => [
+							'en' => [[
+								'uid' => 'split-a',
+								'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '0'],
+								'blocks' => [
+									[
+										'uid' => 'block-a',
+										'type' => Builtin\Text::class,
+										'layout' => ['colspan' => '3', 'rowspan' => '1', 'indent' => '0'],
+										'fields' => ['text' => ['value' => ['zxx' => 'Left']]],
+									],
+									[
+										'uid' => 'block-b',
+										'type' => Builtin\Text::class,
+										'layout' => ['colspan' => '3', 'rowspan' => '1', 'indent' => '0'],
+										'fields' => ['text' => ['value' => ['zxx' => '']]],
+									],
+								],
+							]],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'data-error-path=\'["content","contentBlocks","value","en",0,"blocks",1,"fields","text","value","zxx"]\'',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertSame(
+			'Right',
+			$this->nodeContent(
+				'panel-save-splits-invalid',
+			)['contentBlocks']['value']['en'][0]['blocks'][1]['fields']['text']['value']['zxx'],
+		);
+	}
+
 	public function testMetaSubmissionsPatchTheStoredMetaMap(): void
 	{
 		$conditionalType = $this->db()->execute(

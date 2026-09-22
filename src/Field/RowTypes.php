@@ -159,13 +159,21 @@ trait RowTypes
 
 	/**
 	 * Sire runs finalize and review callbacks on rule-clean data only, so
-	 * rows arrive here with an allowed `type` and array `fields`.
+	 * a row's `type` is allowed unless it is empty. A row without one — a
+	 * split of a Blocks field — has no fields of its own; the field's
+	 * review reports whatever else is wrong with it.
 	 *
 	 * @param array<string, mixed> $values
 	 */
 	protected function finalizeRowFields(mixed $value, array $values): mixed
 	{
-		$result = $this->rowShape((string) $values['type'])->validate(is_array($value) ? $value : []);
+		$type = $values['type'] ?? '';
+
+		if (!is_string($type) || $type === '') {
+			return $value;
+		}
+
+		$result = $this->rowShape($type)->validate(is_array($value) ? $value : []);
 
 		return $result->valid() ? $result->values() : $value;
 	}
@@ -173,7 +181,13 @@ trait RowTypes
 	protected function reviewRowFields(Review $review): void
 	{
 		foreach ($review->values() as $index => $row) {
-			$result = $this->rowShape((string) $row['type'])->validate(is_array($row['fields']) ? $row['fields'] : []);
+			$type = $row['type'] ?? '';
+
+			if (!is_string($type) || $type === '') {
+				continue;
+			}
+
+			$result = $this->rowShape($type)->validate(is_array($row['fields'] ?? null) ? $row['fields'] : []);
 
 			if ($result->valid()) {
 				continue;

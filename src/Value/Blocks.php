@@ -83,6 +83,12 @@ class Blocks extends Value implements IteratorAggregate
 		return count($this->blocks) > 0;
 	}
 
+	/** Every block in reading order, the blocks of a split in its place. */
+	public function leaves(): Generator
+	{
+		yield from self::flatten($this->blocks);
+	}
+
 	public function columns(): int
 	{
 		return $this->field->getColumns();
@@ -114,7 +120,7 @@ class Blocks extends Value implements IteratorAggregate
 	{
 		$i = 0;
 
-		foreach ($this->blocks as $block) {
+		foreach ($this->leaves() as $block) {
 			if ($block->type !== Builtin\Image::class) {
 				continue;
 			}
@@ -138,7 +144,7 @@ class Blocks extends Value implements IteratorAggregate
 		$lists = $all && $this->perLocale() ? $this->lists() : [$this->blocks];
 
 		foreach ($lists as $blocks) {
-			foreach ($blocks as $block) {
+			foreach (self::flatten($blocks) as $block) {
 				if ($block->type === Builtin\Image::class) {
 					$image = $block->image;
 
@@ -167,7 +173,7 @@ class Blocks extends Value implements IteratorAggregate
 	): string {
 		$i = 0;
 
-		foreach ($this->blocks as $block) {
+		foreach ($this->leaves() as $block) {
 			if ($block->type !== Builtin\RichText::class) {
 				continue;
 			}
@@ -221,12 +227,10 @@ class Blocks extends Value implements IteratorAggregate
 		}
 
 		$out = '<' . $ctx->tag() . $attributes . " style=\"--columns: {$columns}\">";
-		$registry = $this->field->services()->blocks;
-		$types = [];
+		$types = $this->field->services()->blocks->cached($this->owner);
 
 		foreach ($this->blocks as $block) {
-			$types[$block->type] ??= $registry->create($block->type, $this->owner);
-			$out .= $block->renderWith($ctx, $types[$block->type]);
+			$out .= $block->renderWith($ctx, $types);
 		}
 
 		return $out . '</' . $ctx->tag() . '>';
@@ -276,7 +280,12 @@ class Blocks extends Value implements IteratorAggregate
 		return $lists;
 	}
 
-	/** @return list<Block> */
+	/**
+	 * A row without a type holding `blocks` is a split; one left without
+	 * a block of an allowed type is skipped like a row of such a type.
+	 *
+	 * @return list<Block>
+	 */
 	private function rows(array $list): array
 	{
 		$rows = [];
@@ -287,14 +296,31 @@ class Blocks extends Value implements IteratorAggregate
 			}
 
 			$type = $row['type'] ?? null;
+			$context = new ValueContext($this->fieldName, $row);
 
-			if (!is_string($type) || !$this->field->allows($type)) {
-				continue;
+			if ($type === null && is_array($row['blocks'] ?? null)) {
+				$split = new Block($this->owner, $this->field, $context, null);
+
+				if ($split->blocks() !== []) {
+					$rows[] = $split;
+				}
+			} elseif (is_string($type) && $this->field->allows($type)) {
+				$rows[] = new Block($this->owner, $this->field, $context, $type);
 			}
-
-			$rows[] = new Block($this->owner, $this->field, new ValueContext($this->fieldName, $row), $type);
 		}
 
 		return $rows;
+	}
+
+	/** @param list<Block> $blocks */
+	private static function flatten(array $blocks): Generator
+	{
+		foreach ($blocks as $block) {
+			if ($block->isSplit()) {
+				yield from $block->blocks();
+			} else {
+				yield $block;
+			}
+		}
 	}
 }

@@ -432,36 +432,88 @@ class Blocks extends Field implements
 				continue;
 			}
 
-			$type = $row['type'] ?? null;
+			$layout = Layout::normalize($row['layout'] ?? null, $this->columns, $this->min);
+			$structure = !isset($row['type']) && is_array($row['blocks'] ?? null)
+				? $this->splitStructure($row, $layout)
+				: $this->blockStructure($row, $layout);
 
-			if (!is_string($type) || !$this->allows($type)) {
-				continue;
+			if ($structure !== null) {
+				$result[] = $structure;
 			}
-
-			$fields = is_array($row['fields'] ?? null) ? $row['fields'] : [];
-			$structure = [
-				'uid' => is_string($row['uid'] ?? null) ? $row['uid'] : null,
-				'type' => $type,
-				'layout' => Layout::normalize($row['layout'] ?? null, $this->columns, $this->min)->array(),
-				'fields' => $this->rowStructure($type, $fields),
-			];
-
-			if (is_array($row['meta'] ?? null) && $row['meta'] !== []) {
-				$structure['meta'] = $row['meta'];
-			}
-
-			$result[] = $structure;
 		}
 
 		return $result;
 	}
 
+	private function blockStructure(array $row, Layout $layout): ?array
+	{
+		$type = $row['type'] ?? null;
+
+		if (!is_string($type) || !$this->allows($type)) {
+			return null;
+		}
+
+		$fields = is_array($row['fields'] ?? null) ? $row['fields'] : [];
+		$structure = [
+			'uid' => is_string($row['uid'] ?? null) ? $row['uid'] : null,
+			'type' => $type,
+			'layout' => $layout->array(),
+			'fields' => $this->rowStructure($type, $fields),
+		];
+
+		if (is_array($row['meta'] ?? null) && $row['meta'] !== []) {
+			$structure['meta'] = $row['meta'];
+		}
+
+		return $structure;
+	}
+
 	/**
-	 * One row: uid, an allowed type, a layout inside the field's bounds
-	 * (out-of-range values are rejected, not clamped, so a programmatic
-	 * write fails loudly), the type's fields and the block meta.
+	 * A split's blocks are laid out on its area and never split again.
+	 * One left over after dropping disallowed types is no split: it takes
+	 * the split's place, as in the editor.
 	 */
-	private function rowsShape(): Shape
+	private function splitStructure(array $row, Layout $layout): ?array
+	{
+		$blocks = [];
+
+		foreach ($row['blocks'] as $child) {
+			if (!is_array($child)) {
+				continue;
+			}
+
+			$childLayout = Layout::normalize($child['layout'] ?? null, $layout->colspan, $this->min, $layout->rowspan);
+			$structure = $this->blockStructure($child, $childLayout);
+
+			if ($structure !== null) {
+				$blocks[] = $structure;
+			}
+		}
+
+		if (count($blocks) < 2) {
+			return $blocks === [] ? null : [...$blocks[0], 'layout' => $layout->array()];
+		}
+
+		$structure = [
+			'uid' => is_string($row['uid'] ?? null) ? $row['uid'] : null,
+			'layout' => $layout->array(),
+			'blocks' => $blocks,
+		];
+
+		if (is_array($row['meta'] ?? null) && $row['meta'] !== []) {
+			$structure['meta'] = $row['meta'];
+		}
+
+		return $structure;
+	}
+
+	/**
+	 * One row: uid, a layout inside the field's bounds (out-of-range
+	 * values are rejected, not clamped, so a programmatic write fails
+	 * loudly), the block meta, and either an allowed type with its fields
+	 * or — at the top level only — the `blocks` of a split.
+	 */
+	private function rowsShape(bool $children = false): Shape
 	{
 		$layout = Shapes::create();
 		$layout->add('colspan', 'int')->rules('required', "min:{$this->min}", "max:{$this->columns}");
@@ -470,17 +522,24 @@ class Blocks extends Field implements
 
 		$rows = Shapes::list();
 		$rows->add('uid', 'string')->rules('required');
-		$rows
-			->add('type', 'string')
-			->rules('required', 'in:' . implode(',', $this->allowedBlockTypes()));
+		$type = $rows->add('type', 'string')->rules('in:' . implode(',', $this->allowedBlockTypes()));
 		$rows->add('layout', $layout)->rules('required');
-		$rows
-			->add('fields', Shapes::create())
-			->rules('required')
-			->finalize($this->finalizeRowFields(...));
+		$fields = $rows->add('fields', Shapes::create())->finalize($this->finalizeRowFields(...));
 		$meta = Shapes::create()->extra(Extra::Allow);
 		$meta->add('padding', $this->spacingShape())->optional()->nullable();
 		$rows->add('meta', $meta)->optional()->nullable();
+
+		if ($children) {
+			$type->rules('required');
+			$fields->rules('required');
+			$rows->review($this->reviewChildren(...));
+
+			return $rows;
+		}
+
+		$type->optional();
+		$fields->optional();
+		$rows->add('blocks', $this->rowsShape(children: true))->optional();
 		$rows->review($this->reviewRows(...));
 
 		return $rows;
@@ -494,6 +553,109 @@ class Blocks extends Field implements
 			if (((int) $row['layout']['colspan'] + (int) $row['layout']['indent']) > $this->columns) {
 				$review->addError([$index, 'layout', 'indent'], __('block:invalid-indent'));
 			}
+
+			// An optional type may arrive empty; a non-empty one is allowed.
+			$blocks = $row['blocks'] ?? null;
+			$isBlock = ($row['type'] ?? '') !== '' && isset($row['fields']) && $blocks === null;
+			$isSplit =
+				!array_key_exists('type', $row)
+				&& !array_key_exists('fields', $row)
+				&& is_array($blocks)
+				&& count($blocks) >= 2;
+
+			if ($isSplit) {
+				$this->reviewSplit($review, $index, $row['layout'], $blocks);
+			} elseif (!$isBlock) {
+				$review->addError([$index], __('block:row-kind'));
+			}
 		}
+	}
+
+	private function reviewChildren(Review $review): void
+	{
+		$this->reviewRowFields($review);
+
+		foreach ($review->values() as $index => $row) {
+			if (array_key_exists('blocks', $row)) {
+				$review->addError([$index, 'blocks'], __('block:row-kind'));
+			}
+		}
+	}
+
+	/**
+	 * A split's area has no rows beyond its own — a subgrid never grows —
+	 * so a block the flow would put outside it lands on top of another.
+	 * Each block is placed as the browser's sparse row flow places it: at
+	 * the first spot from the cursor where it fits.
+	 *
+	 * @param array<string, mixed> $area
+	 * @param list<array<string, mixed>> $blocks
+	 */
+	private function reviewSplit(Review $review, int $index, array $area, array $blocks): void
+	{
+		$columns = (int) $area['colspan'];
+		$rows = (int) $area['rowspan'];
+		$taken = [];
+		$cursor = [0, 0];
+
+		foreach ($blocks as $position => $block) {
+			$width = (int) $block['layout']['indent'] + (int) $block['layout']['colspan'];
+			$height = (int) $block['layout']['rowspan'];
+			$spot = self::firstFit($taken, $cursor, $width, $height, $columns, $rows);
+
+			if ($spot === null) {
+				$review->addError([$index, 'blocks', $position, 'layout'], __('block:children-overflow'));
+
+				return;
+			}
+
+			[$top, $left] = $spot;
+
+			for ($row = $top; $row < ($top + $height); $row++) {
+				for ($col = $left; $col < ($left + $width); $col++) {
+					$taken["{$row}:{$col}"] = true;
+				}
+			}
+
+			$cursor = [$top, $left + $width];
+		}
+	}
+
+	/**
+	 * @param array<string, true> $taken
+	 * @param array{int, int} $cursor
+	 * @return ?array{int, int}
+	 */
+	private static function firstFit(
+		array $taken,
+		array $cursor,
+		int $width,
+		int $height,
+		int $columns,
+		int $rows,
+	): ?array {
+		for ([$top, $left] = $cursor; ($top + $height) <= $rows; $top++, $left = 0) {
+			for (; ($left + $width) <= $columns; $left++) {
+				if (self::vacant($taken, $top, $left, $width, $height)) {
+					return [$top, $left];
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/** @param array<string, true> $taken */
+	private static function vacant(array $taken, int $top, int $left, int $width, int $height): bool
+	{
+		for ($row = $top; $row < ($top + $height); $row++) {
+			for ($col = $left; $col < ($left + $width); $col++) {
+				if (isset($taken["{$row}:{$col}"])) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }

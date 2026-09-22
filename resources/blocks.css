@@ -25,6 +25,13 @@
  * the block's own area, so a percentage means two different lengths,
  * and an `em` follows whatever font size each of them has.
  *
+ * A split — `data-split` in place of `data-type` — holds blocks laid
+ * out on its own area, side by side or stacked. It is a subgrid on
+ * both axes, so its blocks sit on the field's own tracks, and it keeps
+ * its indent columns empty with a leading pseudo-element: the split's
+ * margin would otherwise shift the blocks at its start edge. Below the
+ * stacking threshold it stacks its blocks like everything else.
+ *
  * `data-responsive` carries the field's `#[Columns(responsive:)]`
  * policy: `stack` collapses every block to full width below the
  * threshold, `preserve` keeps the grid at every width, and `custom`
@@ -132,6 +139,18 @@
 		);
 	}
 
+	.cms-block[data-split] {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-template-rows: subgrid;
+	}
+
+	.cms-block[data-split]:not([data-indent="0"])::before {
+		content: "";
+		grid-column: span var(--indent);
+		grid-row: 1 / -1;
+	}
+
 	.cms-block[data-padding="none"] {
 		padding: 0;
 	}
@@ -153,10 +172,20 @@
 	}
 
 	@container (max-width: 42rem) {
-		.cms-blocks[data-responsive="stack"] > .cms-block {
+		.cms-blocks[data-responsive="stack"] .cms-block {
 			grid-column: 1 / -1;
 			grid-row: auto;
 			margin-inline-start: 0;
+		}
+
+		.cms-blocks[data-responsive="stack"] .cms-block[data-split] {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-rows: none;
+			row-gap: var(--blocks-row-gap);
+		}
+
+		.cms-blocks[data-responsive="stack"] .cms-block[data-split]::before {
+			display: none;
 		}
 	}
 
