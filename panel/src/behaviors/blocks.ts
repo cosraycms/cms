@@ -136,7 +136,7 @@ export function parseKey(event: KeyboardEvent): { edge: Edge; steps: number } | 
 	}
 }
 
-function gridOf(container: HTMLElement): Grid {
+export function gridOf(container: HTMLElement): Grid {
 	return grid(Number(container.dataset.columns) || 1, Number(container.dataset.min) || 1);
 }
 

@@ -137,7 +137,13 @@ function changed(container: HTMLElement): void {
 }
 
 type Anchor = { row: HTMLElement; where: 'before' | 'after' };
-type Insertion = { owner: HTMLElement; at: Anchor | null; locale: string | null };
+export type Insertion = {
+	owner: HTMLElement;
+	at: Anchor | null;
+	locale: string | null;
+	/** Runs on the stamped clone before it lands, for a caller that knows the row's layout. */
+	prepare?: (clone: DocumentFragment) => void;
+};
 
 function active(owner: HTMLElement): boolean {
 	return (
@@ -168,7 +174,7 @@ export function insertion(trigger: Element): Insertion | null {
 
 export function insert(context: Insertion, type: string | null): void {
 	if (context.locale !== locale(context.owner)) return;
-	add(context.owner, type, context.at);
+	add(context.owner, type, context.at, context.prepare);
 }
 
 function add(

@@ -1,9 +1,19 @@
-// Contract-level tests against hand-built DOM mirroring what
-// panel/views/field/blocks.php renders. jsdom lays nothing out, so the
-// grid's resolved tracks and the rows' boxes are stubbed.
+// The fills are tested on plain numbers, the rendering on hand-built DOM
+// mirroring what panel/views/field/blocks.php renders, and the insert
+// paths on the real view. jsdom lays nothing out, so the grid's resolved
+// tracks and the rows' boxes are stubbed throughout.
 
+import { execFileSync } from 'node:child_process';
+import { resolve } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { install as installCatalog } from '../../src/behaviors/block-catalog';
+import { install as installBlocks } from '../../src/behaviors/blocks';
 import { fills, install, tracks, type Occupant } from '../../src/behaviors/ghosts';
+import { install as installRepeater } from '../../src/behaviors/repeater';
+import { install as installMenus, openMenu } from '../../src/lib/action-menu';
+import { installBridge } from '../../src/lib/bridge-standalone';
+
+vi.mock('sortablejs', () => ({ default: vi.fn() }));
 
 const TRACK = 100;
 
@@ -25,6 +35,7 @@ afterEach(() => {
 	uninstall?.();
 	uninstall = undefined;
 	document.body.replaceChildren();
+	delete window.Cosray;
 	vi.unstubAllGlobals();
 });
 
@@ -110,13 +121,32 @@ function place(row: HTMLElement, box: Box): void {
 		new DOMRect(box.col * TRACK, box.row * TRACK, box.colspan * TRACK, (box.rowspan ?? 1) * TRACK);
 }
 
+/** Resolved tracks for a grid whose implicit rows a test shrinks as rows move up. */
+function stubTracks(grid: HTMLElement, columns: number, size: { rows: number }): void {
+	const original = getComputedStyle;
+
+	grid.getBoundingClientRect = () => new DOMRect(0, 0, columns * TRACK, size.rows * TRACK);
+	vi.stubGlobal('getComputedStyle', (element: Element, pseudo?: string | null) =>
+		element === grid
+			? ({
+					display: 'grid',
+					gridTemplateColumns: `${TRACK}px `.repeat(columns).trim(),
+					gridTemplateRows: `${TRACK}px `.repeat(size.rows).trim(),
+					columnGap: '0px',
+					rowGap: '0px',
+					paddingLeft: '0px',
+					paddingTop: '0px',
+				} as CSSStyleDeclaration)
+			: original(element, pseudo),
+	);
+}
+
 function canvas(
 	boxes: Box[],
 	rows: number,
 	options: { columns?: number; min?: number; list?: boolean; readonly?: boolean } = {},
 ): { grid: HTMLElement; rows: HTMLElement[]; adder: HTMLElement; size: { rows: number } } {
 	const columns = options.columns ?? 12;
-	// The implicit rows a real grid would have: a test shrinks it as rows move up.
 	const size = { rows };
 	const field = document.createElement('div');
 
@@ -152,22 +182,8 @@ function canvas(
 
 		return row;
 	});
-	const original = getComputedStyle;
 
-	grid.getBoundingClientRect = () => new DOMRect(0, 0, columns * TRACK, size.rows * TRACK);
-	vi.stubGlobal('getComputedStyle', (element: Element, pseudo?: string | null) =>
-		element === grid
-			? ({
-					display: 'grid',
-					gridTemplateColumns: `${TRACK}px `.repeat(columns).trim(),
-					gridTemplateRows: `${TRACK}px `.repeat(size.rows).trim(),
-					columnGap: '0px',
-					rowGap: '0px',
-					paddingLeft: '0px',
-					paddingTop: '0px',
-				} as CSSStyleDeclaration)
-			: original(element, pseudo),
-	);
+	stubTracks(grid, columns, size);
 	document.body.append(field);
 
 	return { grid, rows: elements, adder: field.querySelector<HTMLElement>('.adder')!, size };
@@ -275,5 +291,249 @@ describe('ghost rendering', () => {
 
 		expect(ghosts(grid)).toEqual([]);
 		expect(document.activeElement).toBe(adder);
+	});
+});
+
+const TEXT = 'Cosray\\Block\\Text';
+const QUOTE = 'Acme\\Quote';
+
+function view(rows: Box[], options: { types?: string[]; common?: string[] } = {}): string {
+	const types = (options.types ?? [TEXT]).map((type) => ({
+		type,
+		handle: type.split('\\').pop()!.toLowerCase(),
+		label: type.split('\\').pop(),
+		fields: [{ name: 'text', control: { name: 'text' } }],
+	}));
+
+	return execFileSync('php', [resolve('../tests/Fixtures/Panel/field.php')], {
+		encoding: 'utf8',
+		input: JSON.stringify({
+			field: {
+				name: 'body',
+				label: 'Body',
+				translate: false,
+				control: {
+					name: 'blocks',
+					props: {
+						blockTypes: types,
+						...(options.common ? { commonTypes: options.common } : {}),
+						columns: 12,
+						min: 1,
+					},
+				},
+			},
+			data: {
+				value: {
+					zxx: rows.map((box, index) => ({
+						uid: `row-${index}`,
+						type: TEXT,
+						layout: { colspan: box.colspan, rowspan: box.rowspan ?? 1, indent: box.indent ?? 0 },
+						fields: { text: { value: { zxx: `Row ${index}` } } },
+					})),
+				},
+			},
+			locales: [{ id: 'en', title: 'English' }],
+			defaultLocale: 'en',
+			globalLocales: true,
+		}),
+	});
+}
+
+/** The real blocks view with the rows' boxes stubbed, every behavior installed. */
+async function editor(
+	boxes: Box[],
+	rows: number,
+	options: { types?: string[]; common?: string[] } = {},
+): Promise<{ form: HTMLFormElement; grid: HTMLElement; rows: () => HTMLElement[] }> {
+	installBridge({
+		locale: 'en',
+		defaultLocale: 'en',
+		locales: [],
+		customLocales: [],
+		prefix: '/cp',
+		assets: '',
+		debug: false,
+		allowedFiles: { file: [], image: [], video: [] },
+	});
+	document.body.innerHTML = `<form id="node-editor-form" data-content-locale-scope data-content-locale="en">${view(boxes, options)}</form>`;
+
+	const form = document.querySelector('form')!;
+	const grid = form.querySelector<HTMLElement>('.cms-blocks-editor.is-grid > .grid')!;
+	const list = () => [...grid.querySelectorAll<HTMLElement>(':scope > [data-repeater-row]')];
+
+	list().forEach((row, index) => place(row, boxes[index]));
+	stubTracks(grid, 12, { rows });
+
+	const stops = [installMenus(), installRepeater(), installBlocks(), installCatalog(), install()];
+
+	uninstall = () => stops.reverse().forEach((stop) => stop());
+	await paint();
+
+	return { form, grid, rows: list };
+}
+
+function layout(row: HTMLElement): Record<string, string> {
+	return Object.fromEntries(
+		[...row.querySelectorAll<HTMLInputElement>('input[data-layout]')].map((input) => [
+			input.dataset.layout,
+			input.value,
+		]),
+	);
+}
+
+/** Clicks the choice for a type; a backslash in the name defeats an attribute selector. */
+function pick(root: ParentNode, attribute: string, type: string): void {
+	[...root.querySelectorAll<HTMLElement>(`[${attribute}]`)]
+		.find((element) => element.getAttribute(attribute) === type)!
+		.click();
+}
+
+function open(ghost: HTMLElement): HTMLElement {
+	vi.spyOn(ghost, 'getBoundingClientRect').mockReturnValue(new DOMRect(150, 120, 80, 30));
+	ghost.click();
+
+	return document.getElementById(ghost.getAttribute('popovertarget')!)!;
+}
+
+describe('ghost insert', () => {
+	it('stamps the one type before the row after the gap, sized to the gap', async () => {
+		const { form, rows } = await editor(
+			[
+				{ row: 0, col: 0, colspan: 8 },
+				{ row: 1, col: 0, colspan: 12 },
+			],
+			2,
+		);
+		const change = vi.fn();
+
+		form.addEventListener('change', change);
+		ghosts(rows()[0].parentElement!)[0].click();
+
+		const [, added, wrapped] = rows();
+
+		expect(rows()).toHaveLength(3);
+		expect(wrapped.querySelector<HTMLInputElement>('[data-repeater-uid]')!.value).toBe('row-1');
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0' });
+		expect(added.style.getPropertyValue('--colspan')).toBe('4');
+		expect(added.contains(document.activeElement)).toBe(true);
+		expect(change).toHaveBeenCalledOnce();
+	});
+
+	it('appends into the trailing gap of the last row', async () => {
+		const { grid, rows } = await editor([{ row: 0, col: 0, colspan: 6 }], 1);
+
+		ghosts(grid)[0].click();
+
+		expect(rows().map(layout)).toEqual([
+			{ colspan: '6', rowspan: '1', indent: '0' },
+			{ colspan: '6', rowspan: '1', indent: '0' },
+		]);
+	});
+
+	it('takes the indent away from the row whose gap it fills', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 0, col: 3, colspan: 6, indent: 3 },
+				{ row: 1, col: 0, colspan: 12 },
+			],
+			2,
+		);
+		const [indented] = rows();
+
+		ghosts(grid)[0].click();
+
+		expect(rows()[1]).toBe(indented);
+		expect(layout(rows()[0])).toEqual({ colspan: '3', rowspan: '1', indent: '0' });
+		expect(layout(indented)).toEqual({ colspan: '6', rowspan: '1', indent: '0' });
+		expect(indented.dataset.indent).toBe('0');
+		expect(indented.style.getPropertyValue('--indent')).toBe('0');
+	});
+
+	it('inserts the type picked from the menu it opens at the gap', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 0, col: 0, colspan: 8 },
+				{ row: 1, col: 0, colspan: 12 },
+			],
+			2,
+			{ types: [TEXT, QUOTE] },
+		);
+		const ghost = ghosts(grid)[0];
+		const menu = open(ghost);
+
+		await paint();
+
+		expect(menu.matches(':popover-open')).toBe(true);
+		expect(ghost.getAttribute('aria-expanded')).toBe('true');
+
+		pick(menu, 'data-repeater-add', QUOTE);
+
+		const [, added] = rows();
+
+		expect(rows()).toHaveLength(3);
+		expect(added.querySelector<HTMLInputElement>('input[name$="[type]"]')!.value).toBe(QUOTE);
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0' });
+		expect(menu.matches(':popover-open')).toBe(false);
+	});
+
+	it('inserts a catalog choice at the gap without offering before or after', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 0, col: 0, colspan: 8 },
+				{ row: 1, col: 0, colspan: 12 },
+			],
+			2,
+			{ types: [TEXT, QUOTE], common: [TEXT] },
+		);
+		const menu = open(ghosts(grid)[0]);
+
+		await paint();
+		menu.querySelector<HTMLButtonElement>('[data-block-catalog-open]')!.click();
+
+		const dialog = document.querySelector<HTMLDialogElement>('dialog[open]')!;
+
+		expect(
+			[...dialog.querySelectorAll<HTMLElement>('.cms-block-actions')].every(
+				(group) => group.hidden,
+			),
+		).toBe(true);
+
+		pick(dialog, 'data-block-choice', QUOTE);
+
+		const [, added] = rows();
+
+		expect(rows()).toHaveLength(3);
+		expect(added.querySelector<HTMLInputElement>('input[name$="[type]"]')!.value).toBe(QUOTE);
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0' });
+	});
+
+	it('forgets the gap once its menu closed, so the footer appends as before', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 0, col: 0, colspan: 8 },
+				{ row: 1, col: 0, colspan: 12 },
+			],
+			2,
+			{ types: [TEXT, QUOTE] },
+		);
+		const menu = open(ghosts(grid)[0]);
+
+		await paint();
+		menu.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+		await paint();
+
+		expect(menu.matches(':popover-open')).toBe(false);
+
+		const trigger = grid.parentElement!.querySelector<HTMLButtonElement>(
+			'[data-repeater-footer] button[popovertarget]',
+		)!;
+
+		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(150, 400, 80, 30));
+		openMenu(trigger, 'first');
+		await paint();
+		pick(menu, 'data-repeater-add', QUOTE);
+
+		expect(rows()).toHaveLength(3);
+		expect(layout(rows()[2])).toEqual({ colspan: '12', rowspan: '1', indent: '0' });
 	});
 });

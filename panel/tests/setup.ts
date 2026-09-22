@@ -19,6 +19,14 @@ function togglePopover(element: HTMLElement, open: boolean): void {
 	if (!element.dispatchEvent(event)) return;
 	if (open) popovers.add(element);
 	else popovers.delete(element);
+	queueMicrotask(() => {
+		const toggle = new Event('toggle');
+		Object.defineProperties(toggle, {
+			newState: { value: open ? 'open' : 'closed' },
+			oldState: { value: open ? 'closed' : 'open' },
+		});
+		element.dispatchEvent(toggle);
+	});
 }
 HTMLElement.prototype.showPopover = function () {
 	togglePopover(this, true);

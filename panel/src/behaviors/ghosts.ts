@@ -15,8 +15,16 @@
 // not fill first, because the same block fits an earlier free spot on
 // the way from the flow cursor, gets no ghost; the block would land
 // there instead.
+//
+// A field with one block type stamps it on the click. Otherwise the
+// click opens the field's own picker at the ghost, and the ghost stays
+// armed until that menu closes: a choice or the catalog picked from it
+// inserts at the ghost's spot instead of appending.
 
 import { icon } from '$lib/icons';
+import { open as openCatalog } from './block-catalog';
+import { gridOf, read, write } from './blocks';
+import { insert, insertion, type Insertion } from './repeater';
 
 export type Edges = { starts: number[]; ends: number[] };
 export type Cells = { row: number; col: number; rowspan: number; colspan: number };
@@ -194,6 +202,17 @@ export function fills(occupants: Occupant[], columns: number, rows: number, min:
 
 const FILLS = new WeakMap<HTMLElement, Fill>();
 
+type Adder = { picker: string } | { type: string };
+
+/** How the field adds a block: its footer picker, or its one type outright. */
+function adder(container: HTMLElement): Adder | null {
+	const button = container.querySelector<HTMLElement>(':scope > [data-repeater-footer] > button');
+	const picker = button?.getAttribute('popovertarget');
+	const type = button?.getAttribute('data-repeater-add');
+
+	return picker ? { picker } : type ? { type } : null;
+}
+
 function ghosts(grid: HTMLElement): HTMLElement[] {
 	return Array.from(grid.querySelectorAll<HTMLElement>(':scope > [data-ghost]'));
 }
@@ -211,8 +230,10 @@ function key(fills: Fill[], rows: HTMLElement[]): string {
 		.join(';');
 }
 
-function measure(grid: HTMLElement): { fills: Fill[]; rows: HTMLElement[] } {
-	const container = grid.closest<HTMLElement>('.cms-blocks-editor');
+function measure(
+	grid: HTMLElement,
+	container: HTMLElement,
+): { fills: Fill[]; rows: HTMLElement[] } {
 	const rows = rowsOf(grid);
 	const style = getComputedStyle(grid);
 	const cols = tracks(style.gridTemplateColumns, parseFloat(style.columnGap) || 0);
@@ -230,14 +251,13 @@ function measure(grid: HTMLElement): { fills: Fill[]; rows: HTMLElement[] } {
 			occupants,
 			cols.starts.length,
 			lines.starts.length,
-			Number(container?.dataset.min) || 1,
+			Number(container.dataset.min) || 1,
 		),
 	};
 }
 
-function render(grid: HTMLElement, fills: Fill[]): void {
-	const container = grid.closest<HTMLElement>('.cms-blocks-editor');
-	const label = container?.dataset.ghostLabel ?? '';
+function render(grid: HTMLElement, container: HTMLElement, adder: Adder, fills: Fill[]): void {
+	const label = container.dataset.ghostLabel ?? '';
 	const focused = document.activeElement;
 	const focus =
 		focused instanceof HTMLElement && FILLS.has(focused) && grid.contains(focused)
@@ -262,6 +282,13 @@ function render(grid: HTMLElement, fills: Fill[]): void {
 		ghost.setAttribute('aria-label', name);
 		ghost.title = name;
 		ghost.innerHTML = icon('plus');
+
+		if ('picker' in adder) {
+			ghost.setAttribute('popovertarget', adder.picker);
+		} else {
+			ghost.dataset.ghostType = adder.type;
+		}
+
 		FILLS.set(ghost, fill);
 		grid.append(ghost);
 
@@ -271,11 +298,113 @@ function render(grid: HTMLElement, fills: Fill[]): void {
 	}
 
 	if (focus && document.activeElement !== focused && !grid.contains(document.activeElement)) {
-		container?.querySelector<HTMLElement>(':scope > .adders > .adder')?.focus();
+		container.querySelector<HTMLElement>(':scope > [data-repeater-footer] > button')?.focus();
 	}
 }
 
-function watch(grid: HTMLElement): { refresh(): void; dispose(): void } {
+/**
+ * The insertion a ghost stands for: before its target row, with the
+ * clone's layout inputs set to the gap before the row lands, and for an
+ * indent gap the target's indent taken away in the same step.
+ */
+function context(ghost: HTMLElement): Insertion | null {
+	const fill = FILLS.get(ghost);
+	const base = insertion(ghost);
+
+	if (!fill || !base) {
+		return null;
+	}
+
+	const grid = gridOf(base.owner);
+
+	return {
+		...base,
+		at: fill.target ? { row: fill.target, where: 'before' } : null,
+		prepare(clone) {
+			const layout: Array<[string, number]> = [
+				['colspan', fill.colspan],
+				['rowspan', fill.rowspan],
+				['indent', 0],
+			];
+
+			for (const [dimension, value] of layout) {
+				const input = clone.querySelector<HTMLInputElement>(`input[data-layout="${dimension}"]`);
+
+				if (input) {
+					input.value = String(value);
+				}
+			}
+
+			if (fill.kind === 'indent' && fill.target) {
+				write(fill.target, { ...read(fill.target), indent: 0 }, grid);
+			}
+		},
+	};
+}
+
+let armed: { menu: HTMLElement; context: Insertion } | null = null;
+
+// Runs in the capture phase after the menu library's own handler, which
+// has already opened the picker at a clicked ghost or closed it under a
+// clicked choice; the repeater's bubble handler must not see a choice
+// picked from an armed menu, or it would append a second row.
+function onClick(event: MouseEvent): void {
+	const target = event.target instanceof Element ? event.target : null;
+	const ghost = target?.closest<HTMLElement>('[data-ghost]');
+
+	if (ghost) {
+		const insertion = context(ghost);
+
+		if (!insertion) {
+			return;
+		}
+
+		if (ghost.dataset.ghostType) {
+			insert(insertion, ghost.dataset.ghostType);
+			return;
+		}
+
+		const menu = document.getElementById(ghost.getAttribute('popovertarget') ?? '');
+
+		armed = menu ? { menu, context: insertion } : null;
+		return;
+	}
+
+	if (!armed || !target || !armed.menu.contains(target)) {
+		return;
+	}
+
+	const choice = target.closest('[data-repeater-add]');
+	const catalog = target.closest('[data-block-catalog-open]');
+
+	if (!choice && !catalog) {
+		return;
+	}
+
+	event.stopPropagation();
+
+	const { context: insertion } = armed;
+
+	armed = null;
+
+	if (choice) {
+		insert(insertion, choice.getAttribute('data-repeater-add') || null);
+	} else {
+		openCatalog(insertion, true);
+	}
+}
+
+function onToggle(event: Event): void {
+	if (armed && event.target === armed.menu && (event as ToggleEvent).newState === 'closed') {
+		armed = null;
+	}
+}
+
+function watch(
+	grid: HTMLElement,
+	container: HTMLElement,
+	adder: Adder,
+): { refresh(): void; dispose(): void } {
 	let frame = 0;
 	let last = '';
 
@@ -294,12 +423,12 @@ function watch(grid: HTMLElement): { refresh(): void; dispose(): void } {
 			return;
 		}
 
-		const { fills, rows } = measure(grid);
+		const { fills, rows } = measure(grid, container);
 		const next = key(fills, rows);
 
 		if (next !== last) {
 			last = next;
-			render(grid, fills);
+			render(grid, container, adder, fills);
 		}
 	}
 
@@ -349,8 +478,11 @@ export function install(): () => void {
 		}
 
 		document.querySelectorAll<HTMLElement>('.cms-blocks-editor.is-grid > .grid').forEach((grid) => {
-			if (!grids.has(grid) && !grid.closest('[data-readonly="true"]')) {
-				grids.set(grid, watch(grid));
+			const container = grid.parentElement;
+			const how = container && adder(container);
+
+			if (!grids.has(grid) && how && !grid.closest('[data-readonly="true"]')) {
+				grids.set(grid, watch(grid, container, how));
 			}
 		});
 	}
@@ -368,11 +500,16 @@ export function install(): () => void {
 
 	document.addEventListener('htmx:after:swap', scan);
 	document.addEventListener('change', changed);
+	document.addEventListener('click', onClick, true);
+	document.addEventListener('toggle', onToggle, true);
 	scan();
 
 	return () => {
 		document.removeEventListener('htmx:after:swap', scan);
 		document.removeEventListener('change', changed);
+		document.removeEventListener('click', onClick, true);
+		document.removeEventListener('toggle', onToggle, true);
+		armed = null;
 
 		for (const watcher of grids.values()) {
 			watcher.dispose();

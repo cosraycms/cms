@@ -130,10 +130,17 @@
 	}
 
 	& .ghost:hover,
-	& .ghost:focus-visible {
+	& .ghost:focus-visible,
+	& .ghost[aria-expanded='true'] {
 		border-color: var(--cms-color-border-strong);
 		color: var(--cms-color-text-subtle);
 		opacity: 1;
+	}
+
+	/* An armed ghost is visible at once: the menu library closes a menu
+	   whose trigger is still fading in. */
+	& .ghost[aria-expanded='true'] {
+		transition: none;
 	}
 
 	& .ghost:focus-visible {

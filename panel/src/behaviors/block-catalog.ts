@@ -1,5 +1,5 @@
 import { cosray } from '$lib/bridge';
-import { insertion, insert } from './repeater';
+import { insertion, insert, type Insertion } from './repeater';
 
 type Position = 'before' | 'after';
 
@@ -131,37 +131,45 @@ function catalog(
 	filter();
 }
 
+let opened: { close(): void } | undefined;
+
+/**
+ * The owner's catalog for this insertion. Anchored to a row, the cards
+ * offer before and after; `fixed` keeps them plain, the spot is settled.
+ */
+export function open(context: Insertion, fixed = false): void {
+	const template = context.owner.querySelector<HTMLTemplateElement>(
+		':scope > template[data-block-catalog]',
+	);
+	if (!template) return;
+	opened?.close();
+	const modal = cosray().modal.open(
+		(host) => {
+			let live = true;
+			host.append(template.content.cloneNode(true));
+			catalog(host, !fixed && context.at !== null, (type, position) => {
+				if (!live) return;
+				// Restore the menu opener before the repeater focuses the new row.
+				modal.close();
+				const at = context.at && position ? { ...context.at, where: position } : context.at;
+				insert({ ...context, at }, type);
+			});
+			return () => {
+				live = false;
+				opened = undefined;
+			};
+		},
+		{ hideClose: true, owner: context.at?.row ?? context.owner },
+	);
+	opened = modal;
+}
+
 export function install(): () => void {
-	let opened: { close(): void } | undefined;
 	function click(event: MouseEvent): void {
 		const trigger =
 			event.target instanceof Element ? event.target.closest('[data-block-catalog-open]') : null;
-		if (!trigger) return;
-		const context = insertion(trigger);
-		const template = context?.owner.querySelector<HTMLTemplateElement>(
-			':scope > template[data-block-catalog]',
-		);
-		if (!context || !template) return;
-		opened?.close();
-		const modal = cosray().modal.open(
-			(host) => {
-				let live = true;
-				host.append(template.content.cloneNode(true));
-				catalog(host, context.at !== null, (type, position) => {
-					if (!live) return;
-					// Restore the menu opener before the repeater focuses the new row.
-					modal.close();
-					const at = context.at && position ? { ...context.at, where: position } : context.at;
-					insert({ ...context, at }, type);
-				});
-				return () => {
-					live = false;
-					opened = undefined;
-				};
-			},
-			{ hideClose: true, owner: context.at?.row ?? context.owner },
-		);
-		opened = modal;
+		const context = trigger && insertion(trigger);
+		if (context) open(context);
 	}
 	document.addEventListener('click', click);
 	return () => {
