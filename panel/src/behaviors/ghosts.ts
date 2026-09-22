@@ -24,6 +24,7 @@
 import { icon } from '$lib/icons';
 import { open as openCatalog } from './block-catalog';
 import { gridOf, read, write } from './blocks';
+import { adder, arm, type Adder } from './pick';
 import { insert, insertion, type Insertion } from './repeater';
 
 export type Edges = { starts: number[]; ends: number[] };
@@ -202,17 +203,6 @@ export function fills(occupants: Occupant[], columns: number, rows: number, min:
 
 const FILLS = new WeakMap<HTMLElement, Fill>();
 
-type Adder = { picker: string } | { type: string };
-
-/** How the field adds a block: its footer picker, or its one type outright. */
-function adder(container: HTMLElement): Adder | null {
-	const button = container.querySelector<HTMLElement>(':scope > [data-repeater-footer] > button');
-	const picker = button?.getAttribute('popovertarget');
-	const type = button?.getAttribute('data-repeater-add');
-
-	return picker ? { picker } : type ? { type } : null;
-}
-
 function ghosts(grid: HTMLElement): HTMLElement[] {
 	return Array.from(grid.querySelectorAll<HTMLElement>(':scope > [data-ghost]'));
 }
@@ -343,61 +333,30 @@ function context(ghost: HTMLElement): Insertion | null {
 	};
 }
 
-let armed: { menu: HTMLElement; context: Insertion } | null = null;
-
 // Runs in the capture phase after the menu library's own handler, which
-// has already opened the picker at a clicked ghost or closed it under a
-// clicked choice; the repeater's bubble handler must not see a choice
-// picked from an armed menu, or it would append a second row.
+// has already opened the picker at a clicked ghost.
 function onClick(event: MouseEvent): void {
-	const target = event.target instanceof Element ? event.target : null;
-	const ghost = target?.closest<HTMLElement>('[data-ghost]');
+	const ghost =
+		event.target instanceof Element ? event.target.closest<HTMLElement>('[data-ghost]') : null;
+	const insertion = ghost && context(ghost);
 
-	if (ghost) {
-		const insertion = context(ghost);
-
-		if (!insertion) {
-			return;
-		}
-
-		if (ghost.dataset.ghostType) {
-			insert(insertion, ghost.dataset.ghostType);
-			return;
-		}
-
-		const menu = document.getElementById(ghost.getAttribute('popovertarget') ?? '');
-
-		armed = menu ? { menu, context: insertion } : null;
+	if (!ghost || !insertion) {
 		return;
 	}
 
-	if (!armed || !target || !armed.menu.contains(target)) {
+	if (ghost.dataset.ghostType) {
+		insert(insertion, ghost.dataset.ghostType);
 		return;
 	}
 
-	const choice = target.closest('[data-repeater-add]');
-	const catalog = target.closest('[data-block-catalog-open]');
+	const menu = document.getElementById(ghost.getAttribute('popovertarget') ?? '');
 
-	if (!choice && !catalog) {
-		return;
-	}
-
-	event.stopPropagation();
-
-	const { context: insertion } = armed;
-
-	armed = null;
-
-	if (choice) {
-		insert(insertion, choice.getAttribute('data-repeater-add') || null);
-	} else {
-		openCatalog(insertion, true);
-	}
-}
-
-function onToggle(event: Event): void {
-	if (armed && event.target === armed.menu && (event as ToggleEvent).newState === 'closed') {
-		armed = null;
+	if (menu) {
+		arm(
+			menu,
+			(type) => insert(insertion, type),
+			() => openCatalog(insertion, true),
+		);
 	}
 }
 
@@ -502,15 +461,12 @@ export function install(): () => void {
 	document.addEventListener('htmx:after:swap', scan);
 	document.addEventListener('change', changed);
 	document.addEventListener('click', onClick, true);
-	document.addEventListener('toggle', onToggle, true);
 	scan();
 
 	return () => {
 		document.removeEventListener('htmx:after:swap', scan);
 		document.removeEventListener('change', changed);
 		document.removeEventListener('click', onClick, true);
-		document.removeEventListener('toggle', onToggle, true);
-		armed = null;
 
 		for (const watcher of grids.values()) {
 			watcher.dispose();

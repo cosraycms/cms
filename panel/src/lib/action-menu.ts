@@ -145,12 +145,16 @@ export function closeMenu(menu: HTMLElement, restore = false): void {
 	}
 }
 
+/**
+ * Opens the trigger's menu, or another menu anchored at the trigger: a
+ * block's split entry opens the field's picker at the block's kebab.
+ */
 export function openMenu(
 	trigger: HTMLButtonElement,
 	focus: 'first' | 'last' | false = 'first',
 	opener: HTMLElement = trigger,
+	menu: HTMLElement | null = surface(trigger),
 ): void {
-	const menu = surface(trigger);
 	if (!menu || trigger.disabled) return;
 	if (menu.matches(':popover-open')) {
 		if (focus) focusChoice(menu, focus === 'last' ? choices(menu).at(-1) : choices(menu)[0]);

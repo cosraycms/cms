@@ -136,8 +136,13 @@ let opened: { close(): void } | undefined;
 /**
  * The owner's catalog for this insertion. Anchored to a row, the cards
  * offer before and after; `fixed` keeps them plain, the spot is settled.
+ * A caller with an insertion of its own (a split) takes the choice.
  */
-export function open(context: Insertion, fixed = false): void {
+export function open(
+	context: Insertion,
+	fixed = false,
+	choose: (type: string) => void = (type) => insert(context, type),
+): void {
 	const template = context.owner.querySelector<HTMLTemplateElement>(
 		':scope > template[data-block-catalog]',
 	);
@@ -151,8 +156,11 @@ export function open(context: Insertion, fixed = false): void {
 				if (!live) return;
 				// Restore the menu opener before the repeater focuses the new row.
 				modal.close();
-				const at = context.at && position ? { ...context.at, where: position } : context.at;
-				insert({ ...context, at }, type);
+				if (position) {
+					insert({ ...context, at: context.at && { ...context.at, where: position } }, type);
+				} else {
+					choose(type);
+				}
 			});
 			return () => {
 				live = false;

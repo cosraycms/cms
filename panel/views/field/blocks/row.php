@@ -212,8 +212,15 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 			</span>
 		<?php endforeach ?>
-		<?php // The line to the next part of a split, centred in the gap. ?>
-		<span class="seam" data-places="columns" aria-hidden="true"></span>
+		<?php // The line to the next part of a split, centred in the gap; side by side it drags. ?>
+		<span
+			class="seam"
+			data-places="columns"
+			data-layout-resize="end"
+			aria-hidden="true"
+			title="<?= $this->escape(__('field:colspan')) ?>">
+			<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
+		</span>
 		<span class="seam" data-places="rows" aria-hidden="true"></span>
 	<?php endif ?>
 	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">

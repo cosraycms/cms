@@ -15,6 +15,13 @@
 // edge trades indent against colspan so the end edge stays put, and the
 // bottom edge counts the rowspan. The keyboard reaches the same edges from the
 // focused grip: Alt with the arrows, Shift added for the start edge.
+//
+// A split's parts follow it: side by side they share its width in
+// proportion and take its height, stacked they take its width while its
+// height is theirs added up. A part itself changes only along its split —
+// side by side its width trades with its neighbour, the seam between two
+// parts dragging that trade; stacked its rows change and the split's
+// follow.
 
 import { focusRow } from './repeater';
 
@@ -25,6 +32,7 @@ export type Layout = Record<Dimension, number>;
 export type Grid = { columns: number; min: number };
 export type Bounds = Record<Dimension, { low: number; high: number }>;
 export type Edge = 'start' | 'end' | 'bottom';
+export type Direction = 'columns' | 'rows';
 
 const DIMENSIONS: Dimension[] = ['colspan', 'rowspan', 'indent'];
 
@@ -140,6 +148,53 @@ export function gridOf(container: HTMLElement): Grid {
 	return grid(Number(container.dataset.columns) || 1, Number(container.dataset.min) || 1);
 }
 
+/** The split a part sits in; null for a block on the grid. */
+export function splitOf(row: HTMLElement): HTMLElement | null {
+	const list = row.parentElement;
+
+	return list?.matches('.parts') ? list.closest<HTMLElement>('[data-repeater-row]') : null;
+}
+
+export function partsOf(split: HTMLElement): HTMLElement[] {
+	return [...split.querySelectorAll<HTMLElement>(':scope > .parts > [data-repeater-row]')];
+}
+
+export function directionOf(split: HTMLElement): Direction {
+	return split.dataset.split === 'rows' ? 'rows' : 'columns';
+}
+
+/**
+ * The grid a row's layout moves in: its list's, and for a split into
+ * columns one that leaves each part its minimum width.
+ */
+export function gridFor(row: HTMLElement): Grid {
+	const list = row.parentElement?.closest<HTMLElement>('[data-repeater]');
+	const base = list ? gridOf(list) : grid(1, 1);
+
+	return row.matches('.is-split') && directionOf(row) === 'columns'
+		? grid(base.columns, base.min * Math.max(1, partsOf(row).length))
+		: base;
+}
+
+/**
+ * Whole widths in proportion to `widths` adding up to `total`, none
+ * below `min`; the last takes what rounding leaves.
+ */
+function shares(widths: number[], total: number, min: number): number[] {
+	const sum = widths.reduce((all, width) => all + width, 0) || 1;
+	let left = total;
+
+	return widths.map((width, index) => {
+		const rest = widths.length - index - 1;
+		const share =
+			rest === 0 ? left : between(Math.round((width * total) / sum), min, left - rest * min);
+
+		left -= share;
+
+		return share;
+	});
+}
+
 function input(row: HTMLElement, dimension: Dimension): HTMLInputElement | null {
 	return row.querySelector<HTMLInputElement>(`input[data-layout="${dimension}"]`);
 }
@@ -179,6 +234,108 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 	row.dataset.indent = String(layout.indent);
 }
 
+function widthsOf(split: HTMLElement): number[] {
+	return partsOf(split).map((part) => read(part).colspan);
+}
+
+/**
+ * A row's layout written, and a split's parts fitted to it: side by side
+ * in proportion to `widths`, their widths when the gesture began, since
+ * rounding step by step would drift.
+ */
+function apply(row: HTMLElement, layout: Layout, grid: Grid, widths = widthsOf(row)): void {
+	const parts = row.querySelector<HTMLElement>(':scope > .parts');
+
+	write(row, layout, grid);
+
+	if (!row.matches('.is-split') || !parts) {
+		return;
+	}
+
+	parts.dataset.columns = String(layout.colspan);
+
+	const inner = gridOf(parts);
+	const rows = partsOf(row);
+
+	if (directionOf(row) === 'rows') {
+		rows.forEach((part) =>
+			write(part, { ...read(part), colspan: layout.colspan, indent: 0 }, inner),
+		);
+
+		return;
+	}
+
+	const shared = shares(widths, layout.colspan, inner.min);
+
+	rows.forEach((part, index) =>
+		write(part, { colspan: shared[index], rowspan: layout.rowspan, indent: 0 }, inner),
+	);
+}
+
+/** The part a part's width trades with: the next one, or the previous for the last. */
+function neighbour(part: HTMLElement, parts: HTMLElement[]): HTMLElement | undefined {
+	const index = parts.indexOf(part);
+
+	return parts[index + 1] ?? parts[index - 1];
+}
+
+/** The values a part can take for a dimension: only its split's direction moves. */
+function reach(part: HTMLElement, dimension: Dimension): { low: number; high: number } {
+	const split = splitOf(part);
+	const own = read(part)[dimension];
+
+	if (!split) {
+		return { low: own, high: own };
+	}
+
+	const parts = partsOf(split);
+
+	if (directionOf(split) === 'columns' && dimension === 'colspan') {
+		const other = neighbour(part, parts);
+		const { min } = gridFor(part);
+
+		return other ? { low: min, high: own + read(other).colspan - min } : { low: own, high: own };
+	}
+
+	if (directionOf(split) === 'rows' && dimension === 'rowspan') {
+		const others = parts.reduce((sum, row) => sum + (row === part ? 0 : read(row).rowspan), 0);
+
+		return { low: 1, high: MAX_ROWSPAN - others };
+	}
+
+	return { low: own, high: own };
+}
+
+/** A part's dimension set within its reach; false when nothing changed. */
+function resizePart(part: HTMLElement, dimension: Dimension, value: number): boolean {
+	const split = splitOf(part);
+	const before = read(part);
+	const { low, high } = reach(part, dimension);
+	const next = between(value, low, high);
+
+	if (!split || next === before[dimension]) {
+		return false;
+	}
+
+	const grid = gridFor(part);
+	const change = next - before[dimension];
+
+	if (dimension === 'colspan') {
+		const other = neighbour(part, partsOf(split))!;
+		const layout = read(other);
+
+		write(other, { ...layout, colspan: layout.colspan - change }, grid);
+	} else {
+		const area = read(split);
+
+		write(split, { ...area, rowspan: area.rowspan + change }, gridFor(split));
+	}
+
+	write(part, { ...before, [dimension]: next }, grid);
+
+	return true;
+}
+
 type Drag = {
 	pointer: number;
 	handle: HTMLElement;
@@ -188,6 +345,7 @@ type Drag = {
 	grid: Grid;
 	pitch: number;
 	start: Layout;
+	widths: number[];
 	origin: number;
 	moved: boolean;
 };
@@ -211,13 +369,18 @@ function locked(container: HTMLElement): boolean {
 	return container.closest('[data-readonly="true"]') !== null;
 }
 
-/** The travel of one column: a track plus its gap, off the list's own box. */
+/**
+ * The travel of one column: a track plus its gap, off the list's own box.
+ * A split's parts are a subgrid, whose gap computes to `normal`: the gap
+ * is the field grid's.
+ */
 function pitchOf(container: HTMLElement, columns: number): number {
 	const list = listOf(container);
 	const style = getComputedStyle(list);
 	const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+	const gap = getComputedStyle(list.closest('.grid') ?? list).columnGap;
 
-	return pitch(list.clientWidth - padding, columns, parseFloat(style.columnGap) || 0);
+	return pitch(list.clientWidth - padding, columns, parseFloat(gap) || 0);
 }
 
 function onPointerDown(event: PointerEvent): void {
@@ -238,7 +401,7 @@ function onPointerDown(event: PointerEvent): void {
 		return;
 	}
 
-	const grid = gridOf(container);
+	const grid = gridFor(row);
 
 	drag = {
 		pointer: event.pointerId,
@@ -249,6 +412,7 @@ function onPointerDown(event: PointerEvent): void {
 		grid,
 		pitch: pitchOf(container, grid.columns),
 		start: read(row),
+		widths: widthsOf(row),
 		origin: position(event, edge),
 		moved: false,
 	};
@@ -266,6 +430,15 @@ function onPointerMove(event: PointerEvent): void {
 	const travelled = position(event, drag.edge) - drag.origin;
 	const steps =
 		drag.edge === 'bottom' ? ratchet(travelled, ROW_STEP) : shift(travelled, drag.pitch);
+
+	// A part's only handle is the seam to the next part; the pair's width
+	// stays the same, so the start plus the steps is the part's new width.
+	if (splitOf(drag.row)) {
+		drag.moved = resizePart(drag.row, 'colspan', drag.start.colspan + steps) || drag.moved;
+
+		return;
+	}
+
 	const next = resize(drag.start, drag.edge, steps, drag.grid);
 	const current = read(drag.row);
 
@@ -273,7 +446,7 @@ function onPointerMove(event: PointerEvent): void {
 		return;
 	}
 
-	write(drag.row, next, drag.grid);
+	apply(drag.row, next, drag.grid, drag.widths);
 	drag.moved = true;
 }
 
@@ -322,13 +495,28 @@ function onKeyDown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const grid = gridOf(container);
+	const grid = gridFor(row);
 
-	if (grid.columns < 2) {
+	if (gridOf(container).columns < 2) {
 		return;
 	}
 
 	event.preventDefault();
+
+	const dimension: Dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
+
+	if (splitOf(row)) {
+		if (key.edge !== 'start' && resizePart(row, dimension, read(row)[dimension] + key.steps)) {
+			(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+		}
+
+		return;
+	}
+
+	// A split into rows is as tall as its parts.
+	if (row.matches('.is-split') && directionOf(row) === 'rows' && key.edge === 'bottom') {
+		return;
+	}
 
 	const before = read(row);
 	const after = resize(before, key.edge, key.steps, grid);
@@ -337,10 +525,7 @@ function onKeyDown(event: KeyboardEvent): void {
 		return;
 	}
 
-	write(row, after, grid);
-
-	const dimension: Dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
-
+	apply(row, after, grid);
 	(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 }
 
@@ -376,16 +561,24 @@ function onInput(event: Event): void {
 		return;
 	}
 
-	const grid = gridOf(container);
+	const grid = gridFor(row);
 	const before = read(row);
 	const typed = control.value === '' ? NaN : Number(control.value);
-	const { low, high } = bounds(before, grid)[dimension];
+	const part = splitOf(row) !== null;
+	const { low, high } = part ? reach(row, dimension) : bounds(before, grid)[dimension];
 
 	if (event.type !== 'change' && !(typed >= low && typed <= high)) {
 		return;
 	}
 
-	write(row, set(before, dimension, Number.isNaN(typed) ? before[dimension] : typed, grid), grid);
+	const value = Number.isNaN(typed) ? before[dimension] : typed;
+
+	if (!part) {
+		apply(row, set(before, dimension, value, grid), grid);
+	} else if (!resizePart(row, dimension, value)) {
+		// Out of reach: the number shows what the part kept.
+		write(row, before, grid);
+	}
 }
 
 const SPACING = ['none', 's', 'm', 'l', 'xl'];

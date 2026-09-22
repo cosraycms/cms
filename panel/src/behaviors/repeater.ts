@@ -16,6 +16,9 @@
 // Rows sit directly in the container, or in a [data-repeater-list]
 // child when the container also carries chrome around them (entries:
 // a count line, the footer); the count line follows the row count.
+// A nested container without templates of its own (a blocks split)
+// borrows the enclosing one's, renamed to its own base, and a row moves
+// between two containers by rebasing its names from one to the other.
 // A row's summary lines name the sub-field each was rendered from; while
 // the editor types into that sub-field, only that line follows, so a
 // line drawn from something the client cannot read (richtext) stays as
@@ -80,6 +83,19 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 	});
 }
 
+/**
+ * A row renamed for another container: its names and ids leave the
+ * source's base for the target's, indexed by the target's renumbering.
+ */
+export function rebase(scope: ParentNode, from: HTMLElement, to: HTMLElement): void {
+	rewrite(scope, {
+		namePattern: new RegExp(`^${escapeRegex(from.dataset.name ?? '')}\\[(?:\\d+|__i__)\\]`),
+		idPattern: new RegExp(`^${escapeRegex(from.dataset.id ?? '')}-(?:\\d+|__i__)`),
+		name: `${to.dataset.name ?? ''}[__i__]`,
+		id: `${to.dataset.id ?? ''}-__i__`,
+	});
+}
+
 function list(container: HTMLElement): HTMLElement {
 	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
 }
@@ -131,7 +147,7 @@ function renumber(container: HTMLElement): void {
 		});
 }
 
-function changed(container: HTMLElement): void {
+export function changed(container: HTMLElement): void {
 	renumber(container);
 	container.dispatchEvent(new Event('change', { bubbles: true }));
 }
@@ -184,9 +200,10 @@ function add(
 	prepare?: (clone: DocumentFragment) => void,
 ): void {
 	if (!active(container) || (at && at.row.parentElement !== list(container))) return;
-	const templates = [
-		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
-	];
+	const own = templatesOf(container);
+	const lender =
+		own.length === 0 ? container.parentElement?.closest<HTMLElement>('[data-repeater]') : null;
+	const templates = lender ? templatesOf(lender) : own;
 	const template =
 		type === null
 			? templates[0]
@@ -195,11 +212,16 @@ function add(
 	const footer =
 		rows === container ? container.querySelector(':scope > [data-repeater-footer]') : null;
 
-	if (!template || (rows === container && !footer)) {
+	if (!template) {
 		return;
 	}
 
 	const clone = template.content.cloneNode(true) as DocumentFragment;
+
+	if (lender) {
+		rebase(clone, lender, container);
+	}
+
 	const stamped = clone.querySelector<HTMLElement>('[data-repeater-row]');
 
 	// Fresh rows need a stable identity before their first save; the
@@ -238,6 +260,12 @@ function add(
 		if (focus) focus.focus();
 		else focusRow(stamped);
 	}
+}
+
+function templatesOf(container: HTMLElement): HTMLTemplateElement[] {
+	return [
+		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
+	];
 }
 
 /**
@@ -518,7 +546,8 @@ function onClick(event: Event): void {
 	}
 }
 
-async function initDrag(): Promise<void> {
+/** Every row list not yet draggable becomes so: on load, after a swap, and for a new split. */
+export async function initDrag(): Promise<void> {
 	const lists = [...document.querySelectorAll<HTMLElement>('[data-repeater-list]')].filter(
 		(list) => !enhanced.has(list),
 	);

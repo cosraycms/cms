@@ -19,8 +19,10 @@ import { install as installMenu } from './behaviors/menu';
 import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
 import { install as installPaths } from './behaviors/paths';
+import { install as installPick } from './behaviors/pick';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installScroll } from './behaviors/scroll';
+import { install as installSplit } from './behaviors/split';
 import { install as installSubmit } from './behaviors/submit';
 import { install as installTabs } from './behaviors/tabs';
 import { install as installContentLocales } from './behaviors/content-locales';
@@ -120,6 +122,8 @@ cleanups.push(
 	installHeading(),
 	installBlockCorners(),
 	installGhosts(),
+	installPick(),
+	installSplit(),
 	installBlockCatalog(),
 	installChrome(),
 	installLayoutPreview(),

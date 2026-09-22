@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install as installCatalog } from '../../src/behaviors/block-catalog';
 import { install as installBlocks } from '../../src/behaviors/blocks';
 import { fills, install, tracks, type Occupant } from '../../src/behaviors/ghosts';
+import { install as installPick } from '../../src/behaviors/pick';
 import { install as installRepeater } from '../../src/behaviors/repeater';
 import { install as installMenus, openMenu } from '../../src/lib/action-menu';
 import { installBridge } from '../../src/lib/bridge-standalone';
@@ -364,7 +365,14 @@ async function editor(
 	list().forEach((row, index) => place(row, boxes[index]));
 	stubTracks(grid, 12, { rows });
 
-	const stops = [installMenus(), installRepeater(), installBlocks(), installCatalog(), install()];
+	const stops = [
+		installMenus(),
+		installRepeater(),
+		installBlocks(),
+		installCatalog(),
+		install(),
+		installPick(),
+	];
 
 	uninstall = () => stops.reverse().forEach((stop) => stop());
 	await paint();
