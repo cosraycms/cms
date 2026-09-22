@@ -1,29 +1,23 @@
-# Cross-implementation contract fixtures
+# Cross-implementation fixtures
 
-These files are executable spec for the seams where one contract deliberately has two implementations — one in PHP, one in the panel's TypeScript. Both test suites consume the same fixture file, so a change here fails on whichever side has not been updated yet. **Changing a file here means touching both implementations.**
+These fixtures describe behavior shared across PHP and TypeScript. They make disagreement visible without maintaining a second prose implementation. Changing the intended behavior means checking both consumers; adding a case does not necessarily require changing either implementation.
 
-## `conditions.json` — When-condition semantics
+## Conditions
 
-Two implementations of one semantics: `src/Field/Condition.php` evaluates conditions against stored node content at read time, `panel/src/behaviors/when.ts` evaluates the identical conditions against live form state in the editor.
+[conditions.json](conditions.json) compares stored neutral values with their form representation. [Field\Condition](../src/Field/Condition.php) and [when.ts](../panel/src/behaviors/when.ts) should agree on whether the field is active.
 
-Each case carries both representations of the same user state: `stored` is the neutral-locale value as PHP sees it in content (omit the key for a missing field), `form` is the string the browser form yields for it. Both suites must agree on `active`.
+Consumed by [FieldConditionTest](../tests/Unit/FieldConditionTest.php) and [conditions.test.ts](../panel/tests/contract/conditions.test.ts). Editor conditions currently apply to top-level fields; scoped conditions would need corresponding cases if implemented.
 
-Consumed by `tests/Unit/FieldConditionTest.php` and `panel/tests/contract/conditions.test.ts`.
+## Form names
 
-Conditions are currently top-level only on both sides. When scoped conditions inside entries are designed, their semantics land here first.
+[form-names.json](form-names.json) defines submitted name/value pairs and the expected nested tree. PHP's `parse_str()` handles the urlencoded fallback; [form-json.ts](../panel/src/lib/form-json.ts) builds the equivalent JSON body. A disagreement could save different content through the two transports.
 
-## `form-names.json` — bracket form-name parsing
+Only generated, well-formed bracket names are covered. Dots/spaces or stray brackets in top-level names are outside that boundary because PHP mangles them.
 
-Two implementations of one semantics: PHP's `parse_str()` is the reference that parses the native urlencoded fallback, and `panel/src/lib/form-json.ts` re-encodes the same submitted pairs into the nested JSON body the editor's JSON save transport posts. Both must hand the server the identical tree, or the two transports would save different content.
+Consumed by [FormNameContractTest](../tests/Unit/FormNameContractTest.php) and [form-names.test.ts](../panel/tests/contract/form-names.test.ts).
 
-Each case: `entries` is the submitted `[name, value]` pairs in order, `tree` the expected parse result. Only well-formed bracket names are covered — top-level names must not contain dots, spaces or brackets outside `[...]` groups, because `parse_str()` mangles those; the panel never generates such names.
+## Element form leaf
 
-Consumed by `tests/Unit/FormNameContractTest.php` and `panel/tests/contract/form-names.test.ts`.
+[form-leaf.json](form-leaf.json) exercises the `[json]` leaf produced by [host.ts](../panel/src/lib/host.ts) and merged by [FormPatch](../src/Panel/FormPatch.php). Cases specify stored content, a decoded leaf (or deliberately malformed raw leaf), and the expected patch result.
 
-## `form-leaf.json` — the element `[json]` form leaf
-
-A producer/consumer pipe, not two evaluators: `panel/src/lib/host.ts` serializes an element's live state into one JSON string submitted under the field's `[json]` key, and `src/Panel/FormPatch.php` merges that leaf back into stored content. The leaf in the middle is the shared artifact.
-
-Each case: `stored` entry + `leaf` (the decoded leaf object; `leafRaw` for a deliberately malformed raw string) → `patched` expected entry.
-
-Consumed by `tests/Unit/PanelFormPatchTest.php`. The producer side joins when the deferred browser-mode `host.ts` tests are written (jsdom cannot run form-associated custom elements) — see `../memory/cosray/panel/frontend-test-suite-plan.md` in the workspace.
+[PanelFormPatchTest](../tests/Unit/PanelFormPatchTest.php) covers the PHP consumer. The real host producer still needs browser-mode coverage: jsdom cannot exercise form-associated custom elements. The fixture alone is not an end-to-end guarantee.

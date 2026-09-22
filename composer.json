@@ -65,8 +65,8 @@
 			"Composer\\Config::disableProcessTimeout",
 			"@php vendor/bin/phpunit --testdox --no-coverage --colors=always"
 		],
-		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md CHANGELOG.md",
-		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celema/dev/config/markdownlint.jsonc README.md CHANGELOG.md",
+		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celema/dev/config/markdownlint.jsonc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
 		"lint": [
 			"@php vendor/bin/mago fmt --check",
 			"@php vendor/bin/mago lint"

@@ -2,6 +2,8 @@
 
 Cosray provides PostgreSQL full-text search for public websites through `Nodes::fulltext()`. Applications supply their own search page or endpoint. Existing panel collection searches, reference pickers, `search()` and `searchTitle()` remain substring searches.
 
+This is the current implementation, not a frozen search API. [Fulltext/](../src/Fulltext/), [Finder\Nodes](../src/Finder/Nodes.php), and their tests are the starting points for changes; the data-safety and deployment considerations below still apply when revisiting the design.
+
 ## Select the content
 
 Nothing is indexed automatically, including conventional title fields and implementations of `Title`. Opt in with an explicit A–D weight:
@@ -139,9 +141,9 @@ In an escaped Boiler template, deliberately unwrap that safe HTML:
 
 Do not output raw PostgreSQL headline text as HTML. Source control characters used as headline markers are stripped during extraction; every resulting segment is escaped before markup is added. Source spelling and accents are retained. PostgreSQL may omit HTML-like tags when constructing a headline; this is not an HTML-preservation API.
 
-The fixed headline settings are `MaxWords=35`, `MinWords=15`, `MaxFragments=2`, with a spaced ellipsis between fragments. These are word/fragment bounds, not a byte-size limit. Headlines are part of the find statement but not its ordering or grouping. With a `LIMIT`, PostgreSQL evaluates them after the sort and only for the limit plus offset rows: the planner postpones target-list expressions costing more than ten times `cpu_operator_cost`, and `ts_headline` is declared with cost 100. Keeping the headline out of ordering and grouping preserves that. Unlimited queries generate one headline per match. Use a limit and avoid unnecessarily large offsets.
+Headline word/fragment bounds are currently fixed in the implementation, not a byte-size limit or a configurable API. Keeping headlines out of ordering and grouping lets PostgreSQL postpone their evaluation until after limiting results. Unlimited queries generate a headline per match; use a limit and avoid unnecessarily large offsets. Recheck the query plan when changing this placement.
 
-The placement under `meta->search` remains a v1 working API scheduled for review after real template usage; score and snippet access are already available.
+The placement under `meta->search` is a working API to assess through real template usage.
 
 ## Synchronization and maintenance
 
@@ -177,6 +179,6 @@ Computed titles may depend on other nodes, external state or time. There is no d
 
 Cosray does not truncate selected documents to make indexing succeed. PostgreSQL's 1 MB vector limit fails the write with the node UID and contributing field named. PostgreSQL also clamps word positions above 16383, degrading phrase/rank behavior late in very long documents, and ignores individual lexemes longer than 2047 bytes; these server limits are not detected or repaired by Cosray.
 
-## Deferred work
+## Current limits
 
-Panel FTS, working-copy search, panel-only fields with a separate vector/source, class-level defaults, prefix/autocomplete, typo tolerance, attachment extraction and ranking customization are not part of v1. Public extraction and storage are shared machinery, not panel permissions. Displayed-content fallback and the `meta->search` placement are explicit follow-up review topics.
+Panel FTS, working-copy search, panel-only fields with a separate vector/source, class-level defaults, prefix/autocomplete, typo tolerance, attachment extraction, and ranking customization are not implemented. These are possible directions, not permanent exclusions. Public extraction and storage do not enforce panel permissions; extensions need their own authorization assessment.

@@ -1,369 +1,238 @@
-# Editor control vocabulary
+# Editor controls
 
-Every field type describes its editor UI as a **control descriptor** returned by the field's `control(): Cosray\Field\Control` method and serialized into the field payload as `control: { name, props }`. The editor renders **primitive** controls as server-side Boiler views (plain HTML inputs) and the structural `group`/`repeater`/`entries`/`blocks` controls the same way. Everything else — named rich controls, cosray's own included — resolves server-side through the control registry to an element descriptor and is rendered by a **custom element** hosted in a form-associated `<cosray-host>` that carries the value into the form submission as one JSON leaf. The panel knows neither field type classes nor built-in control names.
+This reference describes the current boundary between PHP field definitions, server-rendered forms, and custom elements. It is not a fixed panel design: presentation can evolve while preserving correct submission, accessible interaction, and stored values.
 
-Cross-cutting concerns are **not** part of the descriptor. Label, content-language selection, required marker, description, and width come from the field's other properties (driven by schema attributes such as `#[Label]`, `#[Required]`, `#[Translate]`, `#[Width]`) and are rendered by the shared editor views.
-
-Fields declared by a class implementing `Cosray\Contract\Embedded` use the same descriptors and flat form names as direct fields. An embedded property without `#[Fieldset]` contributes ordinary wrappers at its declaration position. With `#[Fieldset]`, the editor groups its children in a semantic fieldset — at the top level and inside entry rows alike; `Label`, `Description`, and `Width` configure the group. Child widths are relative to the fieldset's inner layout. Fieldset metadata is serialized separately from the flat `fields` array, so controls require no fieldset-specific behavior.
+[Field\Control](../src/Field/Control.php) describes a field's editor as `{name, props}`. Primitive and structural controls render through [Boiler views](../panel/views/field/); named rich controls resolve through the registry to custom elements inside a form-associated `<cosray-host>`. Labels, descriptions, required state, translation, and layout come from field properties rather than the control descriptor.
 
 ## Value shapes
 
-Field values are persisted as locale maps. The neutral locale key is `zxx`; translatable fields (`#[Translate]`) use real locale ids (`de`, `en`, ...). The table lists the shape of `value` per control name.
+Fields persist locale maps: `zxx` is neutral; translated values use configured locale IDs. The field's `structure()` and validation shape define the actual payload.
 
-| Control | Builder | Props | Value shape |
-| --- | --- | --- | --- |
-| `text` | `Control::text(?placeholder)` | `placeholder?` | locale map of `string` |
-| `textarea` | `Control::textarea()` | — | locale map of `string` |
-| `number` | `Control::number(step:,min:,max:)` | `step?`, `min?`, `max?` | locale map of `number\|string` |
-| `checkbox` | `Control::checkbox(nullable:)` | `nullable`, `labels?: {true?, false?, null?}` | locale map of `bool`, or `bool\|null` when nullable |
-| `option` | `Control::option(display:)` | `display: select\|radio` | locale map of `string` (options come from `#[Options]`) |
-| `date` | `Control::date()` | — | locale map of `YYYY-MM-DD` |
-| `time` | `Control::time()` | — | locale map of `HH:MM` |
-| `datetime` | `Control::datetime()` | — | locale map of UTC RFC 3339 `YYYY-MM-DDTHH:MM:SSZ` |
-| `hidden` | `Control::hidden()` | — | locale map of `string` |
-| `iframe` | `Control::iframe()` | — | locale map of `string` |
-| `youtube` | `Control::youtube()` | — | locale map of `string` — a video id; the control shows the video's thumbnail and reduces a pasted YouTube URL to its id |
-| `group` | `Control::group(fields)` | `fields: {key,label?,control,width?}[]` | `zxx` map of object keyed by `key` |
-| `repeater` | `Control::repeater(item,min:,max:)` | `item`, `min?`, `max?` | `zxx` map of list of item values |
-| `entries` | `Control::entries()` | `entryTypes` (built from `#[Allows]`), `min?`, `max?` | `zxx` map of `{uid, type, fields}[]` |
-| `blocks` | `Control::blocks()` | `blockTypes` (every allowed descriptor, with `icon?`), `commonTypes?` (type IDs in menu order; the first six when absent), `columns`, `min`, `responsive`, `meta` | locale map of `{uid, type, layout, fields, meta?}[]` |
-| `element` | `Control::element(tag, module)` | `tag`, `module` | whatever the field's `structure()` defines |
+| Control | Value per locale |
+| --- | --- |
+| `text`, `textarea`, `hidden`, `iframe` | String |
+| `number` | Number or numeric string |
+| `checkbox` | Boolean, or boolean/null when nullable |
+| `option` | Option value; select or radio presentation |
+| `date`, `time` | Local date or time string |
+| `datetime` | UTC RFC 3339 instant |
+| `youtube` | Video ID |
+| `group` | Object of sub-control values under `zxx` |
+| `repeater` | List of item values under `zxx` |
+| `entries` | List of `{uid, type, fields}` under `zxx` |
+| `blocks` | List of typed rows with layout; see [Blocks](blocks.md#stored-shape) |
+| `element` | Whatever the field defines |
 
-Named rich controls (resolved to elements server-side; cosray's built-ins ship as custom elements under `cosray:` modules):
+Named built-ins resolve to the `cosray-code`, `cosray-richtext`, `cosray-image`, `cosray-file`, `cosray-video`, and `cosray-reference` elements. Code values are strings with syntax in field meta; richtext uses the [structured format](richtext-format.md); media values are `{uid, meta?}` lists; references are ordered neutral `{uid}` lists. [Media](media.md) explains catalog lookup and metadata fallback.
 
-| Control | Builder | Element | Value shape |
-| --- | --- | --- | --- |
-| `code` | `Control::code()` | `cosray-code` | locale map of `string`, `meta.syntax` (syntaxes from `#[Syntax]`) |
-| `richtext` | `Control::richtext()` | `cosray-richtext` | locale map of richtext documents; `field.tools` (toolbar set from `#[Tools]` / `richtext.tools`) |
-| `image` | `Control::image()` | `cosray-image` | locale map of `{file, meta?}[]`; a gallery keeps its `ratio` and `crop` settings in the field meta |
-| `file` | `Control::file()` | `cosray-file` | locale map of `{file, meta?}[]` |
-| `video` | `Control::video()` | `cosray-video` | locale map of `{file, meta?}[]` |
-| `reference` | `Control::reference()` | `cosray-reference` | `zxx` map of `{uid}[]` |
-| _custom_ | `Control::named('acme-map')` | via `Registrar::control()` | whatever the field's `structure()` defines |
+`DateTime` writes normalize offsets to UTC whole seconds. The panel converts between that instant and `datetime-local` input using `meta.timezone`, defaulting to UTC. `Date` and `Time` do not carry offsets. The YouTube control can extract an ID from a pasted URL and fetches thumbnails from YouTube's image host; it does not store the pasted URL as the value.
 
-The three media controls share one frame. An empty field and a field holding several files carry a header bar: the library button, the upload prompt — drag and drop, or choose through the file picker — and a count against the field's limit; an empty field is that bar alone, one control high. A filled single-item field has no bar; a **Replace** menu beside its file chooses from media or uploads from the device instead. The whole frame is the drop target: while files hover over it, its edge turns dashed, its content dims and one label says what a drop does — add, or replace on a single-item field. A read-only field renders no bar and no menu, only its content in a well. A single image shows its card — a row with the thumbnail, which opens a preview, the file name, the dimensions and size, Replace and a × to remove it, over a muted band with alt text and caption in place — and a gallery its tiles beneath the bar. Files list as rows — a type icon or, for an image, its thumbnail, the file name linking to the file, the per-use title, the size, edit, Replace on a single-file field, and remove — that reorder by drag; a video shows its player above one such row.
+### Groups, repeaters, and fieldsets
 
-A `DateTime` value is an instant. Every non-empty stored value is normalized to UTC with whole-second precision, for example `2026-07-30T17:00:00Z`; a programmatic write may supply another RFC 3339 offset and validation normalizes it to `Z`. The native `datetime-local` control has no offset: the panel converts its `YYYY-MM-DDTHH:MM[:SS]` form value through the field's `meta.timezone`, defaulting to UTC, and converts the stored instant back through the same timezone for editing. `Date` and `Time` remain local values without an offset.
+`Control::group()` and `Control::repeater()` currently support neutral primitive sub-controls. Group parts can carry width percentages. Embedded fieldsets are separate schema layout metadata: field names stay flat and controls need no embedded-object behavior. Entries and block rows reuse those field declarations. See [embedded fields](content.md#embedded-fields).
 
 ### Reference fields
 
-Reference fields open a searchable dropdown on focus or click, initially offering recently edited eligible entries. The picker loads 30 entries at a time and offers **Load more** when another page exists. Typing searches titles across the entire eligible set; clearing the query restores recent entries. The field's server-side `#[Pick]` constraints still determine eligibility.
+`#[Pick]` determines the eligible set server-side. The picker searches titles across that set and pages results; it does not accept client-defined eligibility rules.
 
-With `#[Limit(max: 1)]`, the reference is a persistent select-style input with its selected title inside the control, a clear button, and a dropdown button. Choosing another entry replaces the reference directly. The current selection stays marked in the results; typing only changes the search, and dismissing restores the selected title without changing the stored value. A read-only single reference uses a read-only input.
-
-Multi-reference fields show selected entries below the search and omit them from its choices. Multi-selection stays open until the field's limit is reached; selecting a search result clears the query for the next choice. Loading, request failures with Retry, no eligible entries, and searches without matches have distinct feedback. See [Panel keyboard vocabulary](panel-keyboard.md#reference-fields) for keyboard operation.
+`#[Limit(max: 1)]` gives a single choice. Typing changes the search, not the reference; selecting replaces it, clearing removes it, and dismissing restores the selected title. Multiple-reference fields keep a list of selected values, omit them from search choices, and stop accepting new ones at the limit. Loading, errors/retry, no eligible entries, and no search matches are distinct states. See [keyboard behavior](panel-keyboard.md#reference-fields) and [Reference](../src/Field/Reference.php).
 
 ### Checkbox fields
 
-`Cosray\Field\Checkbox` renders as a toggle with its field label above and its current state beside it. The default state labels are “Yes” and “No”, translated into the panel language. Override them with `#[StateLabels(true: 'Enabled', false: 'Disabled')]` from `Cosray\Schema`; custom labels are translated like field labels and included by the schema translation scanner. Labels do not change the stored boolean values.
-
-Opt into a nullable value with `#[Nullable]`. This renders three explicit choices as a segmented radio group: “Not set”, “Yes”, and “No”. Editors can return to “Not set” after choosing either boolean value. Customize its label with `StateLabels(null: 'Automatic')`; that changes only the wording, not how the application interprets `null`.
+`Cosray\Field\Checkbox` is two-state by default. `#[Nullable]` allows explicit null, presented as Not set/Yes/No. `#[StateLabels]` customizes translated labels without changing stored values:
 
 ```php
 use Cosray\Field\Checkbox;
-use Cosray\Schema\DefaultValue;
-use Cosray\Schema\Label;
 use Cosray\Schema\Nullable;
 use Cosray\Schema\StateLabels;
 
-#[Label('Available'), Nullable]
-public Checkbox $available;
-
-#[Label('Enabled'), Nullable, DefaultValue(true)]
-#[StateLabels(true: 'Enabled', false: 'Disabled', null: 'Automatic')]
+#[Nullable, StateLabels(true: 'Enabled', false: 'Disabled', null: 'Automatic')]
 public Checkbox $enabled;
 ```
 
-New ordinary fields default to `false`, nullable ones to `null`; `#[DefaultValue(...)]` overrides the creation default. `Checkbox::structure()` applies that default, whereas `structure(null)` preserves an explicit null for a nullable field. Blueprint values and nested entry/block fields also distinguish omission from explicit null. Saving an explicit null clears the stored value; omitting the field from a patch leaves it untouched. No migration is needed.
+New ordinary fields default to false, nullable ones to null; `#[DefaultValue]` overrides creation defaults. `structure()` applies a default, whereas `structure(null)` preserves explicit null on a nullable field. Blueprint and nested row values also distinguish omission from explicit null. An omitted patch leaves the value untouched; an explicit null clears it.
 
-`Cosray\Value\Boolean::$value`, `unwrap()` and `json()` preserve `null` for nullable Checkbox fields. `isset()` is false only for null; a stored `false` is still a value. Ordinary Checkbox fields retain their two-state read behaviour, including reading legacy null values as `false`. Code opting into `#[Nullable]` must handle the nullable return from `unwrap()` explicitly.
+`Value\Boolean::unwrap()` and `json()` preserve null for nullable fields. `isset()` is false for null but true for a stored false. Ordinary fields retain their two-state read behavior, including legacy null read as false. Consumers opting into nullable values must handle `bool|null`.
 
-A required Checkbox accepts `false`: requiring an answer is not the same as requiring consent. With `#[Nullable, Required]`, “Not set” is unavailable and an unset field requires a Yes/No choice; the server rejects null and missing values. Immutable fields keep their value visible but cannot be changed and submit no value. Like other fields, these controls are persisted by saving the editor, not immediately on interaction.
-
-`Nullable` and `StateLabels` currently apply only to Checkbox fields. Conditional visibility keeps its existing boolean comparison semantics: `#[When]` treats false and null alike as empty, even though nullable field values preserve the distinction. Custom primitive controls can use `Control::checkbox(nullable: true)` and pass already translated labels through `->prop('labels', ['true' => ..., 'false' => ..., 'null' => ...])`.
+A required checkbox accepts false: requiring an answer is different from requiring consent. `#[Nullable, Required]` rejects null/missing values. `Nullable` and `StateLabels` currently apply only to Checkbox fields. `#[When]` still treats false and null alike as empty. See [Checkbox](../src/Field/Checkbox.php) and its tests for defaults and validation.
 
 ### Content language and fallback previews
 
-A node with any translated content has one **Content language** select in its inspector, repeated as a column of locale ids in the collapsed inspector's strip; both copies follow every choice. It switches every translated primitive and element control, every translated field inside Entries and symmetric Blocks, and each locale-specific list of an asymmetric Blocks or media field. The select is editor state rather than content: changing it neither marks the form dirty nor changes a stored value. The choice is remembered per browser, so the next screen with translated content — a node, a menu, the media library — opens in the same language when it offers it.
+One content-language selection switches translated fields across the screen, including nested entries and blocks. It is editor state, not stored content: changing it does not mark the form dirty. The browser remembers the choice. Dialogs can mirror it by dispatching a bubbling `content-locale:select` event with `detail.locale`.
 
-A dialog that holds translated texts, such as a block's settings with an image's alt text and caption, mirrors the selector so the language can change without closing it; the mirror switches the whole screen. A custom control can do the same by dispatching a bubbling `content-locale:select` event with `detail.locale` from inside the screen, or from a dialog mounted on the body.
+An empty selected translation previews the first non-empty value in its configured fallback chain, then `zxx`. The preview is separate from the editable value and identifies its source locale. Image metadata can additionally fall back to catalog metadata. Native text, richtext, code, and media controls use different presentation mechanisms; asymmetric block previews are inert.
 
-An empty selected translation displays the first non-empty value from that locale's configured `fallback` chain, then `zxx` when present. The preview is separate from the editing value and names the locale that supplied it. Native text controls use a placeholder; richtext and code use a read-only content layer; asymmetric media and Blocks show an inert rendering of the source list. Image `alt`, `caption` and `title` also consult asset-catalog metadata after per-use metadata. Empty strings, semantically empty richtext documents, media lists without a usable uid, and empty block lists count as missing.
+Switching language, focusing or blurring, cancelling a dialog, and saving another field must not copy fallback content into the selected locale. Adding media or a block operates on the target's own list. Custom controls receive `locales.all[].fallback` and own their empty-value test and preview UI; resolving a fallback for display is not a value change.
 
-Focusing an empty text, metadata, richtext, or code editor hides its preview; block previews also hide while the target list has focus. The target remains empty throughout. Switching language, focusing and blurring, opening or cancelling a metadata dialog, and saving another field never copy fallback text, documents, assets, metadata, or block rows into the target locale. Adding media or a block operates on the selected locale's empty list and removes the preview only after that locale gains its own item.
+### Richtext tools
 
-Element payloads carry `locales.all[].fallback` with the same chain the server uses. Custom translated controls receive the selected `locale` and this metadata but own their empty-value test and preview UI; they must never write a resolved fallback into their `value` map merely to display it.
-
-### Richtext toolbar
-
-The richtext toolbar shows a configured set of tools, resolved as: the field's `#[Tools(...)]` attribute, else the project's `richtext.tools` config key, else `Tool::DEFAULT` (undo, redo, bold, italic, strike, h2, h3, bullet list, ordered list, link). The vocabulary is the `Cosray\Schema\Tool` enum — `Undo`, `Redo`, `H1`–`H3`, `Bold`, `Italic`, `Strike`, `Sub`, `Sup`, `Align`, `BulletList`, `OrderedList`, `Blockquote`, `Hr`, `Link`, `Image`, `Br`, `Clear`, `Source` — and both the attribute and the config key replace the default set rather than extending it. The list is a set: the toolbar renders whatever is picked in its own canonical order, duplicates collapse.
-
-Attribute arguments mix single cases with lists (PHP forbids unpacking there), so the preset constants on the enum — `Tool::DEFAULT`, `Tool::MINIMAL` (bold, italic, link), `Tool::INLINE` (bold, italic, strike, link, bullet list, ordered list, clear), `Tool::ALL` — seed a set without re-listing it:
+Tool selection resolves from the field's `#[Tools(...)]`, then `richtext.tools`, then `Tool::DEFAULT`. The selection replaces rather than extends the default. Preset arrays can appear alongside enum cases in the attribute:
 
 ```php
 use Cosray\Schema\Tool;
 use Cosray\Schema\Tools;
 
-#[Tools(Tool::DEFAULT, Tool::Align, Tool::Source)]  // the default plus two
+#[Tools(Tool::DEFAULT, Tool::Align, Tool::Source)]
 public RichText $body;
-
-#[Tools(Tool::MINIMAL)]
-public RichText $teaser;
 ```
 
-```php
-// Project-wide, in app settings, as Tool cases or their string values;
-// the attribute still wins per field.
-'richtext.tools' => ['undo', 'redo', 'bold', 'italic', 'link'],
-```
+Inside a block, resolution is the block type property's own `#[Tools]`, then the blocks field's `#[Tools]`, then `Tool::INLINE`. Project toolbar settings do not override that block default. The current block editor uses a selection bubble rather than the standalone toolbar, so document-level commands may have no button there.
 
-Inside a block the resolution is: the block type property's own `#[Tools]`, else the blocks field's `#[Tools]`, else `Tool::INLINE`. The project's `richtext.tools` describes the full toolbar and does not reach into blocks.
-
-The paragraph-class and text-style dropdowns are not tools: they appear exactly when the project declares `richtext.classes` / `richtext.styles`, as before.
-
-Limitations (v1): `group` and `repeater` support only primitive sub-controls (`text`, `textarea`, `number`, `checkbox`, `option`, `date`, `time`, `datetime`, `hidden`) and neutral-locale values.
-
-A group sub-control may declare a `width` percentage; sized sub-controls share a row and stack at full width when the group container gets narrow (pure CSS, container queries). A date range is two 50% dates:
-
-```php
-public function control(): Control
-{
-    return Control::group([
-        ['key' => 'from', 'label' => 'Von', 'control' => Control::date(), 'width' => 50],
-        ['key' => 'to', 'label' => 'Bis', 'control' => Control::date(), 'width' => 50],
-    ]);
-}
-```
+[Tool](../src/Schema/Tool.php) defines the vocabulary and presets. Paragraph-class and text-style choices come from `richtext.classes` and `richtext.styles`, independently of the tool set. Hiding a tool does not remove its stored content semantics.
 
 ## Entries
 
-An `Entries` field renders server-side as a **typed repeater**: each stored row is a group of regular field wrappers, built from the row type's field table in the descriptor's `entryTypes` props. Everything a top-level field has works inside a row the same way — labels, descriptions, meta dialogs, fieldsets — because rows reuse the same wrapper views, just at a deeper form name. In the node editor, the sidebar's content-language selector changes every translated sub-field in every row together. Rows retain all locale values in the form; changing the selector only changes which variants are visible.
+An Entries field is a server-rendered typed repeater. Allowed schemas supply row templates; client-side behavior stamps, removes, reorders, and renumbers rows. Element controls upgrade in inserted rows just as on a full page load.
 
 ```text
-content[f][value][zxx][i][uid]                       hidden row identity
-content[f][value][zxx][i][type]                      hidden row type (FQCN)
-content[f][value][zxx][i][fields][sub][value][lo]    primitive sub-field, per locale
-content[f][value][zxx][i][fields][sub][json]         element sub-field (cosray-host leaf)
-content[f][value][zxx][i][fields][sub][meta][k][lo]  sub-field meta dialog
+content[f][value][zxx][i][uid]
+content[f][value][zxx][i][type]
+content[f][value][zxx][i][fields][sub][value][lo]
+content[f][value][zxx][i][fields][sub][json]
+content[f][value][zxx][i][fields][sub][meta][key][lo]
 ```
 
-Adding, removing, reordering and collapsing rows happens entirely client-side: the editor page carries one inert `<template>` per allowed entry type, the add button stamps a copy into the form, rows reorder by dragging their grip (or through the row menu's move up/down), and renumbering keeps names dense. Element controls inside a stamped row upgrade and load on insertion like any other. No server round trip is involved until save.
+Row UIDs match submitted rows to stored rows across reordering. They are internal 13-character IDs, independent of node/asset UID configuration. Submission order is row order; missing rows are deleted and disallowed row types dropped. Surviving sub-fields are patched individually. Unlike top-level node content, unknown stored field keys inside entry rows do not survive validation; additional persistent values belong in declared fields or supported meta.
 
-Stored rows render **collapsed to a summary line** and open their form beneath it when clicked; several rows can be open at once, and a freshly added row opens right away. The summary needs no configuration — it follows the entry type's field order: the first text-like sub-field with content (`Text`, `Textarea`, `Number`, `Decimal`, or a `RichText` flattened to plain text) is the primary line, the next one the secondary line, and the first `Image` sub-field carrying an asset supplies the thumb. Translated fields contribute the default locale's value, falling back to the neutral locale and then to any locale with content; a row without any text shows its type label. While a row is open, each summary line follows the input of the sub-field it was drawn from as the editor types; a line drawn from a richtext keeps what the server rendered until the next load.
-
-Row **uids** exist for patch matching: the client fills a fresh row's uid on stamping (13-char lowercase word-safe format; the server backfills any row arriving without one). Entry uids are internal identifiers — deliberately fixed-format, not governed by the `uid.*` config that shapes node and asset uids.
-
-**Saving** replaces the row list wholesale — order is submission order, missing rows are deleted, rows of types the field does not allow are dropped. Each surviving row is matched to its stored counterpart **by uid** and its sub-fields are patched individually, exactly like top-level fields (element leaves via `[json]`, primitives per locale, meta per key). One boundary to know: at the top level, unknown keys in stored content survive a save untouched; **inside entry rows they do not** — storing validates each row's fields and keeps only declared keys. The supported places for extra data inside entries are declared fields and declared meta.
-
-Limitations (v1): `#[When]` conditions are not emitted for sub-fields inside entries (a condition would otherwise evaluate against a same-named top-level field); an entry type must not contain another `Entries` field or a `Blocks` field (both rejected at boot); a summary line drawn from a richtext sub-field refreshes on the next full load, not while typing.
+Rows currently have collapsible summaries derived from their fields; [EntrySummary](../src/Panel/EntrySummary.php) defines that selection. This presentation is independent of their storage contract. Nested typed repeaters are not supported, and sub-field `#[When]` conditions are not emitted for the editor.
 
 ## Field meta
 
-A field's meta map gets an editor UI by overriding `metaControl()` with a `group` whose sub-control keys name the meta entries:
+Native fields can expose metadata through `metaControl()`:
 
 ```php
 public function metaControl(): ?Control
 {
     return Control::group([
         ['key' => 'cssClass', 'label' => 'CSS class', 'control' => Control::text()],
-        ['key' => 'tone', 'control' => Control::option()->prop('options', ['calm', 'loud'])],
     ]);
 }
 ```
 
-The field wrapper then shows a "Meta" button opening a per-field dialog; entries submit as `content[{field}][meta][{key}][zxx]` through the merge patch — meta keys the group does not know survive untouched. Inside a block the row's settings dialog hosts the group instead, under the field's label when the block labels its fields, so no meta button sits in the content. Element controls keep managing their meta themselves (through the `cosray-change` detail); `metaControl()` is for native fields.
+Values submit as `content[field][meta][key][zxx]`. Unknown meta keys survive the merge patch. A block can host its sub-fields' meta controls in its settings dialog rather than in the inline content.
 
-An element control reports its meta in the same `cosray-change` detail as its value — `{ value, meta }` — and the field's `metaShape()` validates it on save like any other meta. The image element inside an images block is the built-in example: it renders the gallery's aspect ratio and crop into its settings slot and reports them as `meta: { ratio: { zxx: '4/3' }, crop: { zxx: true } }`, which `Field\Image` validates and `Value\Images::ratio()` and `crop()` read on the site.
-
-A `blocks` field uses the same dialog for its **rows**: its descriptor carries a `meta` prop — a `group` with the `class` and `id` text controls and the `padding` spacing option — and every block row renders it behind its gear, submitting as `content[{field}][value][{lo}][{i}][meta][{key}][zxx]`. It is one group for every block type; a descriptor without the prop stores no block meta at all. The field itself declares a meta group of its own — the gap between its blocks, as one value or, on a grid, split into row and column gap behind a toggle — so its wrapper shows the Meta button like any other field with meta. The spacing options are the tokens `none`, `s`, `m`, `l`, `xl` behind a "Site default" choice that stores nothing; how they render is the [rendering contract](blocks.md#rendering).
+Elements report optional field meta alongside value through `cosray-change`; the field's `metaShape()` validates it. Gallery ratio/crop settings are one example. Block row and field spacing metadata are described in [Blocks](blocks.md#spacing).
 
 ## Save transport
 
-The editor is one plain HTML form; every control participates through its form name — primitives directly, element controls through their host's `[json]` leaf. At submit time the panel re-encodes the collected form data into a single nested JSON body (`Content-Type: application/json`): the bracket names are parsed client-side with the exact `parse_str()` semantics pinned in `contract/form-names.json`, so the server receives the identical tree either way. This lifts PHP's `max_input_vars` cap off the editor — a content-heavy node (entries rows × sub-fields × locales) would otherwise exceed the default of 1000 input keys and be **silently truncated**, and since entries rows are replaced wholesale on save, truncation would delete content.
+Every control participates in the editor form through its name; element hosts contribute a `[json]` leaf. At submit time, [form-json.ts](../panel/src/lib/form-json.ts) encodes the collected bracket names into a single nested JSON body. Its parsing follows PHP's `parse_str()` for generated names, with shared cases in [contract/form-names.json](../contract/form-names.json).
 
-Two safeguards back this up:
+This avoids `max_input_vars` silently truncating a large urlencoded form. Because row lists are replaced on save, truncation could delete content. Both JSON and supported urlencoded submissions require `_complete: "1"`, rendered as the form's final control; the server refuses a body without it.
 
-- The form renders a sentinel input (`_complete`) as its last control. A submission that lost its tail — a form-encoded POST past `max_input_vars`, a mangled body — is refused with an error instead of being saved, on both transports.
-- The native urlencoded submit remains supported server-side and stays covered by the same sentinel guard.
-
-Plugins are unaffected: element controls keep submitting through their host's form value, and neither the name scheme nor the value shapes change with the transport.
+[FormPatch](../src/Panel/FormPatch.php) merges values into stored content. `#[Immutable]` fields are ignored on save; their editors should expose reading rather than offer changes that will be discarded. Preserve submission semantics when experimenting with form layout or state management.
 
 ## Save response
 
-A save answers with out-of-band swaps only — the form itself is never re-rendered. The response fragment (`panel/views/editor-save.php`) targets eight fixed ids: `#editor-status` (the status chip; `data-saved` on it is what stands the unsaved-changes guard down), `#editor-errors` (the validation summary, next section), `#editor-published` and `#editor-published-switch` (the published badge and the inspector's switch, on successful saves of renderable nodes, so publishing from the save menu cannot be undone by the next save; the collapsed inspector's unnamed copy of the switch follows it client-side), `#editor-changes`, `#editor-save-options` and `#editor-changes-note` (the changes badge, the save menu and the note under the published switch, on the same saves, so they follow the node's working copy — see [Working copies](#working-copies)) and `#editor-preview` (the preview overlay, when the save requested one). The controller feeds the fragment a fixed payload: `saved`, `message`, `errors` (message + path pairs), `published`, `renderable`, `preview`, `draft` (`null`, or `since` and `editor` for display).
+The current save path leaves the form mounted and returns out-of-band updates for status, errors, publication, working-copy state, and preview. Replacing the form would lose unsaved client state. The coupled payload and targets live in [Editor](../src/Controller/Panel/Editor.php), [editor-save.php](../panel/views/editor-save.php), and the [save tests](../tests/End2End/PanelEditorSaveTest.php), not a second list of IDs here.
 
-These ids and keys are an **internal contract**, pinned by the e2e save tests. It is deliberately closed to plugins; a sanctioned way for plugin actions to ride the save round trip is part of the future action-slot design.
+This is an internal boundary, not a plugin action-slot API. Changes to it need corresponding consumer updates rather than an assumption that the current IDs are permanent.
 
 ## Working copies
 
-A published node is never edited in place. A plain save of a published, renderable node that stays published lands in its **working copy** — the `drafts` row — and the live row is what visitors keep seeing; the editor shows the working copy, a "Changes" badge next to the published one, and a note under the published switch saying since when and by whom, with a "Publish" and a "Discard" button of its own. "Save and publish" reads "Publish changes" while a working copy exists and writes it live; "Discard changes" in the same menu drops it. The note's buttons and the menu entries submit forms of their own: the publish entry the editor form with `publish=1`, the discard entry the empty `#node-editor-discard` form next to the delete form, which posts to `…/{node}/discard`, confirms through `hx-confirm`, and carries `data-dirty-bypass` so the unsaved-changes guard does not ask a second time. Every other save — an unpublished node, the published switch turned off, an explicit publish — writes the live row and removes the working copy. The preview button saves the same way and opens `/preview/{uid}`, which renders the working copy.
+See [working copies](content.md#working-copies) for live/draft semantics and the Store API. The editor saves, previews, publishes, and discards through those transitions; publication and visibility are not interchangeable with ordinary content fields.
 
 ## Validation errors
 
-The editor form is never re-rendered after a failed save (client state stays the source of truth). Instead the save response swaps the error summary out-of-band, and each issue carries the sire data path of the failing value:
+Failed saves preserve the mounted form. Error-summary items carry Sire paths:
 
 ```html
-<button type="button" data-error-path='["content","title","value","de"]'>
-	Title (Deutsch) is required
+<button type="button" data-error-path='["content","title","value","en"]'>
+	Title (English) is required
 </button>
 ```
 
-Because form names mirror the data structure, the `errors` behavior resolves that path to its control — exact name first, then shrinking prefixes, which is how an issue pointing inside an element control's value finds the host's `[json]` leaf. It then marks the field: `data-invalid="true"` on the `.cms-field` wrapper, `aria-invalid` + `aria-describedby` on native controls, an inline `.cms-field-error` message below the control's optional description, an error badge on the node's content-language selector, and on the meta button for issues inside the meta dialog. Summary items are jump links: they reveal the target (switch the content language, expand a collapsed inspector and bring its tab to the front, expand collapsed entries rows, open the meta or paths dialog) and focus it. Editing a field clears its marks; the summary stays until the next save.
+[errors.ts](../panel/src/behaviors/errors.ts) resolves paths to form controls, falling back to containing element hosts for nested values. It marks fields and reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing clears field marks; the summary remains until another save.
 
-Theming hooks: `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error` on the content-language selector, the inspector tabs and their buttons in the collapsed strip, and meta buttons, all in `@layer panel`. Element controls receive field-level marking only — the wrapper is marked, but the panel does not reach inside a host to point at a specific locale or sub-value; an element wanting finer error display can style itself when its host's field wrapper carries `data-invalid`.
+Current styling hooks include `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error`. Native controls receive accessible invalid/error associations. Custom elements currently receive field-level marking rather than a standardized per-sub-value error API.
 
 ## Blocks
 
-A `Blocks` field renders server-side as a **typed repeater with a grid**: the same row machinery as entries, plus a layout per row. Block types are plain PHP classes implementing `Cosray\Contract\Block` — fields for the schema, a `render()` for the frontend; plugins add one to the default offer list with `Registrar::blockType(MyBlock::class)`, a field restricts its own with `#[Allows(MyBlock::class)]`. The model, the stored shape, the rendering contract and the reference stylesheet live in [docs/blocks.md](blocks.md); this section is the editor side.
+[Blocks](blocks.md) documents types, translation, stored shape, form names, and frontend output. The editor shares the repeater machinery with Entries and adds layout, duplication, and a type catalog. Duplication copies live values, not the original server payload, while assigning a fresh UID; media duplication copies references, not files.
 
-```text
-content[f][value][{lo}][i][uid]                       hidden row identity
-content[f][value][{lo}][i][type]                      hidden row type (FQCN)
-content[f][value][{lo}][i][layout][colspan|rowspan|indent]  hidden, stepped by the toolbar
-content[f][value][{lo}][i][fields][sub][value][lo]    primitive sub-field, per locale
-content[f][value][{lo}][i][fields][sub][json]         element sub-field (cosray-host leaf)
-content[f][value][{lo}][i][fields][sub][meta][k][lo]  sub-field meta dialog
-content[f][value][{lo}][i][meta][class|id][zxx]       block settings dialog
-```
+The current canvas is an editing surface rather than a rendering of the site. Its controls can use a content-first presentation through `field.presentation = 'block'` and a settings slot, described below. Layout changes update hidden form inputs; the dialog and resize handles apply the same bounds. See [keyboard alternatives](panel-keyboard.md#block-controls).
 
-`{lo}` is the list's locale: an **asymmetric** field renders one list per locale and its sub-fields are neutral; a **symmetric or untranslated** field renders a single `zxx` list. The node-wide content-language selector switches asymmetric lists and translated sub-fields in shared rows together. When the selected asymmetric list is empty, the first populated fallback list is also shown as an inert preview; its rows keep their original form names and values, while add actions continue to target the selected empty list.
-
-No field inside a block carries the **required marker** that other fields append to their label as translated `(required)` text. The block's descriptor simply does not claim it; validation is unchanged, since the shape is built from the field and not from the descriptor.
-
-A block with a **single visible field** renders that field without its label: the block's own label already names it. The label stays in the markup for screen readers. A sub-field's meta group, where it has one, moves into the block's settings dialog after the layout and the block meta, so nothing but the control is left in the content; an error in it badges the block's gear. `#[Labels]` on the block type brings the label back, and a type with two or more fields always labels them.
-
-Such a **bare** block (`.block.is-bare`) is content first: its control renders without border or background, at reading size, with the field's `#[Placeholder]` while empty; hover and focus are shown on the card rather than as an inner control border. The card border takes the accent colour when focus is inside it. Text areas grow with their text where the browser supports sizing a field to its content. The iframe code box keeps its inverted look, since code reads as code. The YouTube block shows the video's thumbnail above its id once an id is stored and follows the input as it is typed — a full eleven-character id only, so no image is requested per keystroke — and a pasted YouTube URL becomes its id on landing; the thumbnail is fetched from YouTube's image host by the editor's browser. It is a token for the video, not the video: a small source image, so it stays at most 28rem wide rather than growing to block width, in the shape the field's aspect-ratio meta stores, following the meta inputs as they are edited. The frame the panel draws around a rich text control goes the same way. An image or video inside a block is a **figure**: the picture, or the player, at block width but no taller than 30rem — a portrait picture or clip letterboxes inside the block instead of taking the screen — with the Replace menu and remove on a bar along its edge that appears on hover, and the shared header bar while empty; an image shows its caption underneath when it has one. The alt text and caption form lives in the block's settings dialog, in the slot the host hands the element (see [The element contract](#the-element-contract)); a media field outside a block keeps its card. Rich text inside a block — bare or not — edits with a **bubble** instead of the toolbar: it appears over a selection and carries the block's resolved tools (see [Richtext toolbar](#richtext-toolbar)). Block styles — headings and quote, where enabled — fold into one menu in it; tools that act on the document as a whole (undo, redo, source, image, rule, break, align) have no button there. Lists also toggle from the keyboard with Mod+Shift+7 and Mod+Shift+8, and by typing `-` or `1.` at the start of a line. A block with two or more fields keeps its labelled, compact form — unless the type brings an editor view of its own, as the built-in heading does: its level is a quiet button reading "H2" to the right of the text. The button opens a menu of H1–H6 icons and labels, with the active row highlighted. The text sits at that level's size and shows a localized heading placeholder while empty; both field labels are for screen readers only. The row picks such a view by block class (`panel/views/field/blocks/types/`); it receives what the generic field list receives.
-
-Blocks form a **bordered grid with a rounded outer frame**, with narrow internal gaps and no outer gutter. Only block corners touching a corner of the frame are rounded; the editor follows their rendered positions as the layout changes. The frame does not clip content, so controls can extend beyond it. Rows are **never collapsed** and carry **no header**. A block's chrome is a group hanging over its top right corner: a drag grip, the type label, a gear opening the block's settings dialog, and a menu with move up, move down, duplicate and remove. One block per field is **active** — the focused one, or the hovered one while none is focused — and only it gets a stronger border and shows its chrome, its `+` and its edge-mounted handle bars; hover and focus as independent reveals would show two blocks' controls at once. A click on a block's own ground focuses it; a click on a control inside it keeps its meaning. The controls are unclickable while hidden, so they never intercept a click meant for the block beneath them. An empty field shows its add bar as a single control.
-
-At rest a card shows only its content. Its controls appear when the block is active; content language is selected once in the node sidebar rather than on the row. New blocks come from one `+` per block, hanging over its start corner opposite the chrome, which inserts before it — above it in a list, before it in document order in a grid, where a seam between wrapped cells cannot say where a block would land but the block's start corner can. Together with the permanently visible `+` at the foot, which appends, that covers every insertion point once. The corner keeps the `+` off the edges, which belong to the resize handles, the way a table editor puts its insert control at the end of a column boundary rather than on it. With several allowed types the `+` opens a short menu of icon and name choices, with one it inserts at once, and with none there is nothing to add. The menu shows the first six allowed types unless `#[Common(...)]` or `Blocks::common(...)` picks an ordered subset; see [common choices](blocks.md#common-choices). Whenever other allowed types remain, **More blocks…** follows the menu and opens a catalog of every allowed type, common ones included, searchable by label or handle.
-
-The catalog is one inert `<template>` per field — per locale on an asymmetric field — opened in the shared modal. It opens fresh each time, search empty and focused, and remembers the field and row it was opened for: a choice inserts before that row, or appends from the foot, and does nothing if the row or field has meanwhile gone or the content language changed. Cancelling changes nothing and returns focus to the `+`.
-
-Adding, removing, reordering and renumbering is the shared repeater behavior, stamping from one inert `<template>` per allowed type; a stamped row focuses its first visible input, or itself when it has none, staying focusable only until focus moves on. **Duplicate** stamps the block's own template right after it and copies the live values control by control — layout included, a media reference rather than the file, and for an element control such as rich text its payload as edited so far, read off the host rather than the last server-rendered value — under a fresh uid.
-
-The editor grid keeps the frontend's structural contract — `--columns` on the container and `--colspan`/`--rowspan`/`--indent`/`--reserved` (plus `data-indent`) on the row. Cards use consistent editor gaps and padding so their controls remain reachable, even when the stored layout has no gaps. Gap and padding settings remain editable and are reflected in **Layout preview**, not in the card spacing. The **settings dialog** holds the layout as three number inputs — width, rows, indent — above the block's `class`, `id` and `padding` meta, and opens on any multi-column field, meta or not (a one-column field has no layout to edit and shows the gear only for the meta). A value applies as it is typed, within the field's own bounds: `span` ∈ `[min, columns − indent]`, `rows` ∈ `[1, 6]`, `indent` ∈ `[0, columns − span]`. Each dimension is capped by the room the other two leave and never moves them, so widening stops at the grid's edge instead of pulling the indent in; a value that is out of range or half typed waits until the input commits. The inputs are unnamed mirrors of the row's hidden layout inputs, which are what the form submits. After the layout and the meta groups the dialog holds one empty slot per element sub-field (`data-settings-slot="{sub}"`), which the host hands to the element as its `settings` property so the element can keep its secondary controls out of the content.
-
-A multi-column field also puts a **resize handle on each edge** of a block: a grab area the width of the gap, marked by a short bar that appears on hover and focus-within. The end edge grows the span and lets the grid wrap the block once it no longer fits beside its neighbours, the start edge trades indent against span so the block stays where it is, and the bottom edge changes the **row span** — not a height. Grid rows size to their content, so there is no pixel height for the bottom edge to follow; it therefore ratchets one row per 100px of travel rather than tracking the pointer, and the block's real height is whatever the tracks it now spans happen to be. Columns do track the pointer. A gesture writes the same hidden inputs the dialog writes and dispatches one `change` when it ends. The **keyboard** reaches the same edges from the focused grip, which is in the tab order on a multi-column field: Alt with the left and right arrows moves the end edge, Alt and Shift with them the start edge, Alt with up and down the bottom edge; each stops where its handle stops, and the key is consumed so Alt with an arrow never turns into the browser's history.
-
-**Saving** works like entries: the list is replaced wholesale, rows are matched by uid and their sub-fields patched individually, rows of a disallowed type are dropped. On top of that the layout is cast to ints and clamped into the field's grid — a stored layout a narrower field cannot hold saves back clamped, where the shape would reject it — and the block meta is patched against the descriptor's `meta` group, so unknown meta keys survive.
-
-The canvas shows structure, not the site. For the proportions a **Layout preview** button beside the field's meta button renders the field through the site's render path — the block types' `render()`, the layout contract, the `figure` and `srcset` ladder, the gallery settings — on a white sheet styled by the shipped reference stylesheet and a small typographic base, in a wide dialog. Nothing is saved or validated: the behavior posts the editor form as it stands to `…/{node}/blocks/{field}` (`…/create/{type}/blocks/{field}` for a new node) with the selected content language as `?locale=`, the server applies it to the working copy the way the route-path preview does, hydrates the node and returns the rendered field as a complete HTML document, which the dialog loads into an `<iframe sandbox="allow-same-origin">` through `srcdoc` — no script runs, the session still reaches permission-checked renditions. Before loading the sheet, the client replaces built-in YouTube players with thumbnails from YouTube's image host, preserving the configured aspect ratio; public pages still render real embeds. Readers clamp layouts and an empty block renders nothing, so half-finished content previews too. Width presets — desktop 1200, tablet landscape 1024 × 768, tablet portrait 768 × 1024, smartphone 390 × 844 — set the frame's size, and the document inside sees exactly those pixels, so the reference sheet's container query shows the responsive stacking; a device preset gives the frame the device's screen, centred on the stage, while the desktop fills the stage's height. The dialog is wide enough for the desktop preset; a frame the stage cannot hold is scaled down until both sides fit, never up. The last preset is remembered per browser. A reload button re-posts the current form. The button is hidden while the canvas has no rows. The sheet cannot show the site's own spacing lengths, fonts, column width or per-type styling, and rows of a type the field no longer allows are absent, as they are on the site.
-
-Limitations (v1): the same as entries — no `#[When]` conditions on sub-fields, no nested typed repeaters (a block type may contain neither `Blocks` nor `Entries`, and an entry type may not contain `Blocks`); the block meta group is fixed to `class`, `id` and `padding`; dragging is the only reorder that is not keyboard-reachable (the menu's move up/down is), while resizing is.
+Layout preview posts the current form without saving or validating, renders the selected field through its block types, and displays it with the reference stylesheet. It does not include site-specific fonts or styles. The preview iframe uses `sandbox="allow-same-origin"` without script permission; that restriction matters even though block output can contain trusted embed markup. Browser-side YouTube thumbnail replacement also contacts YouTube's image host. See [Editor](../src/Controller/Panel/Editor.php) and the panel behaviors for endpoint and preset details.
 
 ## Element controls
 
-Controls beyond the primitive vocabulary are rendered by **custom elements** (web components). A field either uses a one-off element:
+A field can select a one-off element with `Control::element('acme-picker', 'acme-shop/picker.js')`, or use `Control::named('acme-map')` registered by a plugin:
 
 ```php
-public function control(): Control
-{
-    return Control::element('acme-color-picker', 'acme-shop/controls.js');
-}
-```
-
-or a **named control** registered once and reusable across fields:
-
-```php
-// in the plugin's register():
 $cms->control('acme-map', 'acme-map-picker', 'map.js');
-
-// in any field:
-public function control(): Control
-{
-    return Control::named('acme-map');
-}
 ```
 
-Named controls are resolved server-side to element descriptors before serialization; the editor never sees the name. Later registrations win, so a plugin may replace a built-in editor by registering its name (e.g. `richtext`). Cosray's own rich controls are registered through the same registry and shipped as custom elements — they are the reference implementations.
+Named controls resolve server-side; later registrations replace earlier ones, including built-ins. Hand-written ES modules are sufficient; Svelte is not required.
 
 ### Module values
 
-| Form | Served from |
+| Form | Resolution |
 | --- | --- |
-| `{pluginId}/{file}` | the plugin's asset dir via `{panel}/vendor/{pluginId}/{file}` (`Registrar::control()` prefixes the plugin id automatically) |
-| `cosray:{entry}` | the panel static assets (`{panel}/static/elements/{entry}.js`, or the Vite dev server when `COSRAY_PANEL_DEV=1`). `cosray` is a reserved plugin id. |
-| `https?://...` | used as-is |
+| `{pluginId}/{file}` | Plugin asset directory; Registrar prefixes its ID automatically |
+| `cosray:{entry}` | Built-in panel element, or Vite during development |
+| `https?://...` | Used as supplied |
 
-Modules load once via dynamic `import()` and must define their custom element at top level:
-
-```js
-customElements.get('acme-color-picker') ||
-    customElements.define('acme-color-picker', class extends HTMLElement { ... });
-```
-
-Hand-written ES modules are sufficient — no build step required.
+Modules load once through dynamic `import()` and register their element at module evaluation. Registration should tolerate a definition already existing.
 
 ### The element contract
 
-- The host assigns JS **properties** (not attributes) on the element and re-assigns them when they change:
-  - `value` — the stored value in the exact shape the field's `structure()` persists (usually a locale map). Treat repeated assignments as idempotent.
-  - `meta` — the field's meta map when the structure has one (e.g. code syntax), else `undefined`.
-  - `field` — the full field properties object (`name`, `label`, `required`, `translate`, `options`, ...). A read-only field carries `immutable: true`: show the value, take no input, and leave out whatever would change it — no picker, no remove, no reordering. The save path ignores what such a field submits, so a control that still offers edits only loses them. Inside a block it also carries `presentation: 'block'`: render as content — no frame of your own, the field's placeholder while empty — and keep whatever is not the content out of the inline area.
-  - `node` — the node uid; `''` while creating a node that has not been saved yet.
-  - `locale` — the **currently selected editing locale**. It follows the screen's one content-language selector — in a node editor the one in the sidebar, including for controls nested in Entries or symmetric Blocks. When `field.translate` is true, render `value[locale]`; neutral controls keep using `zxx`.
-  - `locales` — `{ default: string, all: {id, title, fallback?}[] }`.
-  - `assets` — resolved catalog data for every asset uid the entry references: `{ [uid]: { filename, url, thumbUrl?, previewUrl?, kind, mime?, bytes?, width?, height?, meta? } }`. Media items in `value` are `{uid, meta?}`; previews resolve uids through this map. Upload responses carry the same data for freshly added assets.
-  - `settings` — an element to render secondary controls into, assigned only when an owner around the control offers it a slot: today the settings dialog behind a block's gear, which holds one slot per element sub-field. Mount into it once, on assignment; the host never re-assigns it. Without a slot the property is absent and everything renders inline.
-- The element reports every edit by dispatching a composed, bubbling custom event with the **full new value** (and optionally meta) in the same shape:
+The [host](../panel/src/lib/host.ts) assigns JavaScript properties, not attributes:
 
-  ```js
-  this.dispatchEvent(
-  	new CustomEvent("cosray-change", {
-  		detail: { value, meta },
-  		bubbles: true,
-  		composed: true,
-  	}),
-  );
-  ```
+| Property | Meaning |
+| --- | --- |
+| `value` | Full stored value shape, usually a locale map |
+| `meta` | Field metadata when present |
+| `field` | Field properties; `immutable` signals read-only, `presentation: 'block'` requests the current content-first block presentation |
+| `node` | Owner node UID, or an empty string during creation |
+| `locale` | Selected editing locale; neutral controls still use `zxx` |
+| `locales` | `{default, all: [{id, title, fallback?}]}` |
+| `assets` | Catalog metadata keyed by asset UID, for resolving previews from `{uid, meta?}` values |
+| `settings` | Optional external host for secondary controls, currently a block settings slot |
 
-  Dispatch only from user-initiated edits, never in response to a property assignment.
+Values and locale properties can be reassigned; handle repeated assignments idempotently. A settings slot is assigned once by the current host; without one, secondary UI remains inline.
+
+Report user edits using the full new value and optional meta:
+
+```js
+this.dispatchEvent(
+	new CustomEvent("cosray-change", {
+		detail: { value, meta },
+		bubbles: true,
+		composed: true,
+	}),
+);
+```
+
+Do not emit edits merely in response to host assignments: that creates feedback loops and can turn display-only changes into saved values. Read-only elements should retain usable reading/selection without offering mutation actions.
 
 ## Conditional fields
 
-A field can be tied to a sibling field's value with the `When` schema attribute:
-
 ```php
-#[When('multiDay')]                    // truthy
-#[When('layout', 'hero')]              // equality
-#[When('template', in: ['a', 'b'])]    // membership
-#[When('teaser', op: 'empty')]         // explicit operator: truthy, eq, neq, in, empty, notEmpty
+#[When('multiDay')]
 public Date $endDate;
 ```
 
-The editor hides an inactive field (its inputs stay in the form, `required` is suspended) and shows it again the moment the condition holds — the stored value is **never** cleared by toggling. On the frontend and API the same condition is enforced at read time: an inactive field presents as empty, without any template code checking the source field. `Field::raw()` deliberately bypasses the enforcement for consumers that need the dormant value.
+`#[When]` supports truthiness, equality, membership, and explicit operators; see [Schema\When](../src/Schema/When.php) and the shared [condition fixtures](../contract/conditions.json).
 
-Limitations (v1): condition sources must be primitive, non-translated fields (checkbox, option, text, number); conditions are not emitted for sub-fields inside repeaters or entries; combining `#[When]` with `#[Required]` still enforces required on save while the field is inactive.
+Inactive controls are hidden without clearing their stored values. Reads present an inactive field as empty; `Field::raw()` bypasses that behavior. Editor condition sources currently need primitive, non-translated fields, and conditions are not emitted inside typed rows. `#[Required]` still validates on the server while a field is inactive, despite browser required state being suspended. These are current limitations, not restrictions on future scoped conditions.
 
 ## The window.Cosray bridge
 
-Panel editor pages install `window.Cosray` from the embedded system payload, a versioned runtime API for element controls — cosray's own and plugin-shipped ones alike:
+The [bridge](../panel/src/lib/bridge.ts) exposes versioned services to element controls:
 
-```ts
-window.Cosray = {
-	version: 1,
-	system(): { locale, defaultLocale, locales, customLocales, prefix, assets, debug, allowedFiles },
-	upload(type: 'image' | 'file' | 'video', file: File): Promise<{ok, error?, uid?, filename?, url?, mime?, width?, height?}>,
-	modal: { open(render: (host: HTMLElement) => cleanup?, options?): { close() } },
-	toast: { success(message), error(message) },
-};
-```
+- `version`: currently `1`; check it before relying on the interface.
+- `system()`: panel locale, content locales, paths, upload settings, and related runtime metadata.
+- `upload(type, file)`: uploads to the asset pool with the session CSRF token.
+- `modal.open(render, options?)`: mounts content and returns a `close()` handle.
+- `toast.success(message)` and `toast.error(message)`.
 
-`upload()` posts to the pool endpoint `POST /media/{type}` with the session's CSRF token — elements never handle credentials. It returns the catalog asset (`uid`, `url`, `filename`, ...); store `{uid}` in the field value and keep the rest for previews. `GET /media/library` lists the catalog for reuse pickers (`kind`, `q`, `since`, `page` parameters). `modal.open()` hands the callback an empty host element inside a native modal `<dialog>`; render DOM into it and optionally return a cleanup function. The callback and returned `close()` handle are unchanged in bridge version 1. The bridge only exists on editor pages — elements used elsewhere should degrade or show a hint. Check `window.Cosray?.version === 1` before relying on it.
+Upload results include catalog identity and preview information; persist `{uid}` in the value, not the whole response. The bridge is installed from system payloads, so elements mounted outside a configured panel screen need to handle its absence.
 
 ### Modal controls
 
-The panel targets the latest stable Chrome/Edge, Firefox, Safari, and iOS Safari. Native dialogs provide modality and focus containment. Escape and a pointer gesture that starts and ends on the backdrop dismiss a dialog. `hideClose` hides only the built-in close button, not these dismissal paths. Closing cancels a confirmation; only its explicit confirm action may proceed.
+`modal.open()` supplies an empty host in a native dialog. Its renderer may return a cleanup function, run once on closure including navigation or owner removal. Options include `hideClose`, `label`, `size` (`compact` or `wide`), and `owner`. Supply an owner for asynchronous callers or controls whose removal is independent of the screen.
 
-Optional bridge options are `{ hideClose?, label?, size?: 'compact' | 'wide', owner?: HTMLElement }`. Use `label` for content without a heading. Otherwise a heading supplies the accessible name. `owner` identifies the control whose removal should dismiss the modal; supply it for asynchronous callers or controls whose trigger can disappear independently of the screen. Without it, the bridge uses the focused opener or current system-payload element.
+Escape and a gesture starting and ending on the backdrop dismiss the dialog; `hideClose` hides only the close button. Dismissal cancels confirmations. Nested dialogs return focus to the underlying dialog; a renderer failure must not leave a modal host behind. Close before an action that focuses new content so restoration cannot override it.
 
-Renderer cleanup runs exactly once on every close path, including owner removal and navigation. Close the modal **before** an action that focuses new content or runs a richtext command, so focus restoration cannot override the action. Nested dialogs return focus to the underlying dialog. A failing renderer cannot leave a modal host behind.
+Current internal parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`; `data-dialog-focus` selects initial focus. They are shared markup, not an additional plugin slot API. Server-rendered settings stay inside their editor form and retain live values on closure; media metadata dialogs keep their own draft and Apply/Cancel behavior.
 
-Internal content uses `.modal-header` with a `.modal-title` heading, `.modal-body`, and `.modal-footer`; the Svelte wrappers in `panel/src/components/modal/` emit these same parts. `data-dialog-focus` designates initial focus, especially the safe action in a confirmation. Otherwise the first usable input receives focus. These markup names are internal, not a new plugin slot API. Plain TypeScript can render the same content through the bridge without mounting Svelte.
-
-Built-in action menus use the shared [action-menu markup contract](panel-styles.md#action-menus) in both PHP and Svelte. The panel closes a menu and restores its opener **before** invoking the selected action, so that action can open a modal without losing its initial focus. Keep row/field ownership attached to the DOM instead of moving menu forms into a separate host. The styleguide demonstrates server-rendered menu-to-dialog transitions and nested menus/dialogs.
-
-Server-rendered field/block settings and collection bulk confirmations use the same lifecycle in `panel/src/lib/dialogs.ts` and the same frame. Settings dialogs stay inside their editor form; closing keeps live settings values rather than reverting them. Media metadata dialogs retain their separate draft and explicit Apply/Cancel behavior.
-
-Browser-owned `beforeunload` warnings and the synchronous dirty-navigation / `hx-confirm` prompts remain intentional exceptions. They are not routed through the asynchronous dialog API.
+[dialogs.ts](../panel/src/lib/dialogs.ts) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. Browser `beforeunload`, dirty-navigation, and `hx-confirm` prompts remain separate synchronous paths.
