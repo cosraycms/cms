@@ -465,6 +465,9 @@ describe('ghost insert', () => {
 
 		expect(menu.matches(':popover-open')).toBe(true);
 		expect(ghost.getAttribute('aria-expanded')).toBe('true');
+		// Inside the ghost's box, top edge at its middle.
+		expect(menu.style.top).toBe('135px');
+		expect(menu.style.left).toBe('190px');
 
 		pick(menu, 'data-repeater-add', QUOTE);
 

@@ -318,6 +318,27 @@ describe('action-menu geometry', () => {
 		},
 	);
 
+	it('sits inside a trigger with room for it, top edge at the middle or centred when the lower half is short', () => {
+		vi.stubGlobal('innerHeight', 800);
+		const { trigger, menu, box } = fixture();
+		box.width = 600;
+		box.height = 600;
+		expect(placement(trigger, menu, 'center', true)).toMatchObject({
+			up: false,
+			top: 400,
+			left: 300,
+			maxHeight: 400,
+		});
+		box.height = 300;
+		expect(placement(trigger, menu, 'center', true)).toMatchObject({ top: 130, left: 300 });
+		box.height = 200;
+		expect(placement(trigger, menu, 'center', true)).toMatchObject({
+			up: false,
+			top: 304,
+			left: 300,
+		});
+	});
+
 	it('intersects the visual viewport and reports anchors scrolled out of view', () => {
 		const { trigger, menu, box } = fixture();
 		vi.stubGlobal('visualViewport', { offsetLeft: 100, offsetTop: 50, width: 300, height: 400 });

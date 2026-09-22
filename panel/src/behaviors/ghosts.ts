@@ -285,6 +285,7 @@ function render(grid: HTMLElement, container: HTMLElement, adder: Adder, fills: 
 
 		if ('picker' in adder) {
 			ghost.setAttribute('popovertarget', adder.picker);
+			ghost.dataset.menuInside = '';
 		} else {
 			ghost.dataset.ghostType = adder.type;
 		}

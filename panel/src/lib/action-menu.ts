@@ -1,6 +1,11 @@
 type Align = 'start' | 'end' | 'center';
 
-export function placement(anchor: HTMLElement, menu: HTMLElement, align: Align = 'start') {
+export function placement(
+	anchor: HTMLElement,
+	menu: HTMLElement,
+	align: Align = 'start',
+	inside = false,
+) {
 	const trigger = anchor.getBoundingClientRect();
 	const viewport = window.visualViewport;
 	let top = viewport?.offsetTop ?? 0;
@@ -35,6 +40,31 @@ export function placement(anchor: HTMLElement, menu: HTMLElement, align: Align =
 	const up = height > below && above > below;
 	const maxWidth = Math.max(0, right - left);
 	const width = Math.min(menu.offsetWidth, maxWidth);
+	const visible =
+		trigger.bottom > top && trigger.top < bottom && trigger.right > left && trigger.left < right;
+
+	// Inside a trigger with room for it: centred, the top edge at the
+	// trigger's middle so the first choice sits under a centred mark, or
+	// centred outright when the lower half is too short. A smaller
+	// trigger gets the menu below or above it like any other.
+	if (inside && width + 2 * gap <= trigger.width && height + 2 * gap <= trigger.height) {
+		const middle = trigger.top + trigger.height / 2;
+		const preferred =
+			middle + height + gap <= trigger.bottom
+				? middle
+				: trigger.top + (trigger.height - height) / 2;
+		const edge = Math.max(top + gap, Math.min(preferred, bottom - gap - height));
+
+		return {
+			up: false,
+			maxWidth,
+			maxHeight: Math.max(0, bottom - edge),
+			top: edge,
+			left: Math.max(left, Math.min(trigger.left + (trigger.width - width) / 2, right - width)),
+			visible,
+		};
+	}
+
 	const start =
 		align === 'center'
 			? trigger.left + (trigger.width - width) / 2
@@ -48,8 +78,7 @@ export function placement(anchor: HTMLElement, menu: HTMLElement, align: Align =
 		maxHeight: up ? above : below,
 		top: up ? trigger.top - gap - Math.min(height, above) : trigger.bottom + gap,
 		left: Math.max(left, Math.min(start, right - width)),
-		visible:
-			trigger.bottom > top && trigger.top < bottom && trigger.right > left && trigger.left < right,
+		visible,
 	};
 }
 
@@ -176,7 +205,12 @@ function toggle(event: Event): void {
 			return;
 		}
 		const align = menu.dataset.align;
-		const point = placement(trigger, menu, align === 'end' || align === 'center' ? align : 'start');
+		const point = placement(
+			trigger,
+			menu,
+			align === 'end' || align === 'center' ? align : 'start',
+			trigger.hasAttribute('data-menu-inside'),
+		);
 		if (!point.visible) {
 			closeMenu(menu);
 			return;
