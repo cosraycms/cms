@@ -161,7 +161,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString(
 			'class="cms-blocks-editor is-grid" data-repeater data-name="'
 				. $en
-				. '" data-id="field-contentBlocks-en" data-columns="12" data-min="2" data-gap="s" style="--columns: 12"',
+				. '" data-id="field-contentBlocks-en" data-columns="12" data-min="2" data-ghost-label="Add block here"'
+				. ' data-gap="s" style="--columns: 12"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		// The row: uid, type and layout as hidden inputs, the layout on the

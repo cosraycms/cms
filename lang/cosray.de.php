@@ -174,6 +174,7 @@ return [
 		'editor:unsaved-changes' => 'Nicht gespeicherte Änderungen',
 		'field:add' => 'Hinzufügen',
 		'field:add-block' => 'Block hinzufügen',
+		'field:add-block-here' => 'Block hier einfügen',
 		'field:add-entry' => 'Eintrag hinzufügen',
 		'field:add-first-entry' => 'Ersten Eintrag hinzufügen',
 		'field:add-typed' => ':label hinzufügen',

@@ -105,6 +105,55 @@
 		}
 	}
 
+	/* An empty run of cells: a dashed button that inserts a block filling
+	   it exactly. Faint while the canvas is hovered, full when the ghost
+	   itself is. */
+	& .ghost {
+		--cms-icon-size: 1.5em;
+
+		position: absolute;
+		inset: 0;
+		display: grid;
+		place-items: center;
+		padding: 0;
+		border: 1px dashed var(--cms-blocks-border);
+		border-radius: var(--cms-radius-md);
+		background: none;
+		color: var(--cms-color-text-faint);
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 120ms ease;
+	}
+
+	& .grid:hover > .ghost {
+		opacity: 0.5;
+	}
+
+	& .ghost:hover,
+	& .ghost:focus-visible {
+		border-color: var(--cms-color-border-strong);
+		color: var(--cms-color-text-subtle);
+		opacity: 1;
+	}
+
+	& .ghost:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	/* Without hover there is no reveal; an invisible button must not take taps. */
+	@media (hover: none) {
+		& .ghost {
+			opacity: 0.5;
+		}
+	}
+
+	/* A gesture in progress has no gaps worth showing yet. */
+	& .grid:has(> .sortable-ghost) > .ghost,
+	&.is-resizing .ghost {
+		display: none;
+	}
+
 	/* Keep the full edge draggable around the visible grip. */
 	& .resize {
 		position: absolute;

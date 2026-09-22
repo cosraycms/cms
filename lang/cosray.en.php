@@ -168,6 +168,7 @@ return [
 		'editor:unsaved-changes' => 'Unsaved changes',
 		'field:add' => 'Add',
 		'field:add-block' => 'Add block',
+		'field:add-block-here' => 'Add block here',
 		'field:add-entry' => 'Add entry',
 		'field:add-first-entry' => 'Add first entry',
 		'field:add-typed' => 'Add :label',
