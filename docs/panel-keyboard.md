@@ -69,6 +69,8 @@ Field and block settings edit live and retain values on closure; media metadata 
 
 A multi-column block's focused grip supports resizing: Alt+Left/Right moves the end edge; Alt+Shift+Left/Right the start edge; Alt+Up/Down changes row span. The settings dialog provides number inputs for the same layout values. Move up/down actions provide a keyboard alternative to drag reordering.
 
+A block's split entries open the field's picker at the action menu's trigger, focused on its first type, or split at once when the field has one type. A split's tools come before its parts, and each part's tools before its content, as a block's do. On a part's grip Alt+Left/Right trades width with its neighbour in a split into columns and Alt+Up/Down changes a part's rows in a split into rows; the start edge has no keys inside a split, and a split into rows takes no Alt+Up/Down, since its height is its parts'. The seam between two parts is a pointer handle only; the grip and the settings dialog reach the same widths.
+
 Ghost blocks, the buttons a multi-column canvas shows in its empty cells, are tab stops after the field's rows and before its add bar. Enter or Space inserts a block into that gap; with several block types it opens the picker inside the ghost, which then behaves as the add bar's picker does.
 
 The block catalog opens with focus in search. Down or Enter moves from search to the first match without submitting the editor. Its result buttons form one roving stop: Left/Right moves through matches, Up/Down to an adjacent row, and Home/End to the first/last match. Enter/Space inserts the chosen type. Escape closes and restores the opener; inserting closes and focuses the new row. The layout preview's presets, reload, and close are ordinary tab stops.

@@ -89,6 +89,8 @@ Nested selectors match the whole subtree, not just a component's own parts. A ge
 }
 ```
 
+Markup that changes place keeps one form. A block of the blocks canvas renders the same on the field's grid and as a part of a split, because splitting and removing parts move blocks between the two; its place-dependent controls — the inserter, the resize edges, the action menu's entries, the settings dialog's layout numbers — list the places they serve in `data-places` (`block`, `columns`, `rows`), and [cms-blocks-editor.css](../panel/styles/cms-blocks-editor.css) shows them from where the block sits: `.grid > .block`, or `.parts > .block` inside a `.block.is-split` whose `data-split` names the direction. The split's own chrome carries no places.
+
 ## Layout and scrolling
 
 The current shell uses bounded, independently scrolling regions on larger screens and document scrolling on small or short viewports. See [cms-shell.css](../panel/styles/cms-shell.css), [cms-page-head.css](../panel/styles/cms-page-head.css), and each screen stylesheet for actual breakpoints and pane geometry rather than maintaining another numeric specification here.
