@@ -3,8 +3,10 @@
 $commonChoices = (array) $this->unwrap($commonChoices);
 $more = (bool) $this->unwrap($more);
 $id = (string) $this->unwrap($id);
+$places = $this->unwrap($places ?? null);
 ?>
 <button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
+	<?= is_string($places) ? 'data-places="' . $this->escape($places) . '"' : '' ?>
 	aria-haspopup="menu" aria-label="<?= $this->escape(__('field:add-block')) ?>" title="<?= $this->escape(__(
 		'field:add-block',
 	)) ?>">

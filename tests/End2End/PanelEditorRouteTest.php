@@ -298,6 +298,104 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('data-layout-step', $html);
 	}
 
+	public function testSplitsRenderTheirPartsInANestedRepeater(): void
+	{
+		$this->authenticateAs('editor');
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$typeId = $mediaType ? (int) $mediaType['type'] : $this->createTestType('test-media-document');
+		$text = static fn(string $uid, string $value, array $layout): array => [
+			'uid' => $uid,
+			'type' => Builtin\Text::class,
+			'layout' => $layout,
+			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $value]]],
+		];
+		$this->createTestNode([
+			'uid' => 'panel-editor-splits',
+			'type' => $typeId,
+			'published' => true,
+			'content' => json_encode([
+				'contentBlocks' => [
+					'type' => Blocks::class,
+					'value' => [
+						'en' => [
+							[
+								'uid' => 'split-a',
+								'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 2],
+								'blocks' => [
+									$text('part-a', 'Left part', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0]),
+									// Taller than its split: shown clamped, as the save stores it.
+									$text('part-b', 'Right part', ['colspan' => 3, 'rowspan' => 4, 'indent' => 0]),
+									['uid' => 'part-gone', 'type' => 'Acme\\Gone', 'fields' => []],
+								],
+							],
+							[
+								'uid' => 'split-b',
+								'layout' => ['colspan' => 4, 'rowspan' => 2, 'indent' => 0],
+								'blocks' => [
+									$text('part-c', 'Upper part', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0]),
+									$text('part-d', 'Lower part', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0]),
+								],
+							],
+						],
+						'de' => [],
+					],
+				],
+			]),
+		]);
+
+		$response = $this->makeRequest('GET', '/cp/node/panel-editor-splits');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$split = 'content[contentBlocks][value][en][0]';
+		$parts = "{$split}[blocks]";
+
+		// The split carries uid and layout but no type; its direction is read off its parts.
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row][@data-split="columns"]/input[@name="' . $split . '[uid]"][@value="split-a"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//input[@name="' . $split . '[layout][indent]"][@value="2"]', $html);
+		$this->assertHtmlNodeMissing('//input[@name="' . $split . '[type]"]', $html);
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row][@data-split="rows"]/input[@name="content[contentBlocks][value][en][1][uid]"]',
+			$html,
+		);
+		// Its parts form a repeater of their own, bounded by the split's width.
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row][@data-split="columns"]/div[@data-repeater][@data-repeater-list]'
+				. '[@data-name="'
+				. $parts
+				. '"][@data-id="field-contentBlocks-en-0-blocks"][@data-columns="6"][@data-min="2"]'
+				. '/div[@data-repeater-row]/input[@name="'
+				. $parts
+				. '[0][uid]"][@value="part-a"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//input[@name="' . $parts . '[1][type]"][@value="' . Builtin\Text::class . '"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists('//textarea[@name="' . $parts . '[0][fields][text][value][zxx]"]', $html);
+		$this->assertHtmlNodeExists('//input[@name="' . $parts . '[1][layout][rowspan]"][@value="2"]', $html);
+		$this->assertStringContainsString(
+			'data-layout-input="colspan" value="3" min="2" max="6"',
+			preg_replace('/\s+/', ' ', $html) ?? '',
+		);
+		// A part of a type no longer offered renders without inputs.
+		$this->assertStringContainsString('Unknown block type: Acme\Gone', $html);
+		$this->assertStringNotContainsString('value="part-gone"', $html);
+		// The split behavior stamps new splits from one template per list.
+		$this->assertSame(2, substr_count($html, '<template data-repeater-container>'));
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-container]/div[@data-repeater-row][contains(@class, "is-split")]'
+				. '/div[@data-repeater][@data-name="content[contentBlocks][value][en][__i__][blocks]"]',
+			$html,
+		);
+	}
+
 	public function testPanelEditorRouteRendersShellForAuthenticatedUsers(): void
 	{
 		$this->authenticateAs('editor');

@@ -105,6 +105,96 @@
 		}
 	}
 
+	/*
+	 * A split is one block on the canvas. Its parts sit on the field's
+	 * own tracks through a subgrid on both axes; their list spans the
+	 * columns after the split's indent, since the split's margin would
+	 * otherwise land on the parts at its start edge. A part has no box of
+	 * its own, its tools sit inside its bottom end corner, and a dashed
+	 * seam in the gap separates it from the next.
+	 */
+	& .block.is-split {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-template-rows: subgrid;
+
+		& > .parts {
+			display: grid;
+			grid-template-columns: subgrid;
+			grid-template-rows: subgrid;
+			grid-column: span var(--colspan, 1) / -1;
+			grid-row: 1 / -1;
+		}
+	}
+
+	& .parts > .block {
+		border: 0;
+		background: none;
+
+		& > .chrome {
+			inset-block: auto var(--cms-space-2);
+		}
+	}
+
+	& .seam {
+		position: absolute;
+		z-index: 5;
+
+		&::before {
+			content: '';
+			position: absolute;
+			border: 0 dashed var(--cms-blocks-border);
+		}
+
+		&[data-places='columns'] {
+			inset-block: 0;
+			inset-inline-end: calc(-1 * var(--blocks-gap) / 2);
+			width: 1rem;
+			translate: 50% 0;
+
+			&::before {
+				inset-block: 0;
+				inset-inline-start: 50%;
+				border-inline-start-width: 1px;
+			}
+		}
+
+		&[data-places='rows'] {
+			inset-inline: 0;
+			inset-block-end: calc(-1 * var(--blocks-gap) / 2);
+			height: 1rem;
+			translate: 0 50%;
+			pointer-events: none;
+
+			&::before {
+				inset-inline: 0;
+				inset-block-start: 50%;
+				border-block-start-width: 1px;
+			}
+		}
+	}
+
+	& .parts > .block:last-child > .seam {
+		display: none;
+	}
+
+	/*
+	 * What a block offers depends on where it sits: on the field's grid,
+	 * or in a split, whose direction decides. Each such control lists its
+	 * places; a split's own chrome has none.
+	 */
+	& .grid > .block:not(.is-split) [data-places]:not([data-places~='block']),
+	& [data-split='columns'] > .parts > .block [data-places]:not([data-places~='columns']),
+	& [data-split='rows'] > .parts > .block [data-places]:not([data-places~='rows']) {
+		display: none;
+	}
+
+	/* A split into rows is as tall as its parts: no bottom edge of its own. */
+	& [data-split='rows'] > .resize.is-bottom,
+	& [data-split='rows'] > dialog .dimension:has([data-layout-input='rowspan']) {
+		display: none;
+	}
+
 	/* An empty run of cells: a dashed button that inserts a block filling
 	   it exactly. Faint while the canvas is hovered, full when the ghost
 	   itself is. */

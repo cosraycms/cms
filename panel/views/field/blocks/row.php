@@ -3,6 +3,12 @@
 use Cosray\Block\Heading;
 use Cosray\Block\Layout;
 
+// One block, on the field's grid or as a part of a split: the same
+// markup serves both, since a split moves blocks between the two. What
+// differs by place is marked with data-places — `block` on the grid,
+// `columns` or `rows` in a split of that direction — and shown by the
+// editor styles, so a block moved in or out needs no new markup.
+
 $field = (array) $this->unwrap($field);
 $index = $this->unwrap($index);
 $rowData = $this->unwrap($rowData ?? null);
@@ -16,6 +22,10 @@ $metaControl = is_array($metaControl) ? $metaControl : null;
 $name = (string) $this->unwrap($name);
 $id = (string) $this->unwrap($id);
 
+// The split a part sits in, which bounds its layout.
+$area = $this->unwrap($area ?? null);
+$area = $area instanceof Layout ? $area : null;
+
 $rowName = "{$name}[{$index}]";
 $rowId = "{$id}-{$index}";
 $uid = is_string($rowData['uid'] ?? null) ? $rowData['uid'] : '';
@@ -24,7 +34,9 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 
 // A stored layout a narrower field cannot hold is shown clamped, as
 // the save will store it.
-$layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
+$layout = $area === null
+	? Layout::normalize($rowData['layout'] ?? null, $columns, $min)
+	: Layout::normalize($rowData['layout'] ?? null, $area->colspan, $min, $area->rowspan);
 $readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
 $reserved = $layout->indent + $layout->colspan;
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
@@ -113,6 +125,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 				'commonChoices' => $commonChoices,
 				'more' => $more,
 				'id' => "{$rowId}-insert",
+				'places' => $columns > 1 ? 'block' : null,
 			]) ?>
 			<?php if ($settings): ?>
 				<button
@@ -131,6 +144,41 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			</button>
 			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
 				popover="auto" data-action-menu data-align="end">
+				<?php if ($columns > 1): ?>
+					<button type="button" data-repeater-move="up" data-places="block rows">
+						<?= $this->escape(__('common:move-up')) ?>
+					</button>
+					<button type="button" data-repeater-move="down" data-places="block rows">
+						<?= $this->escape(__('common:move-down')) ?>
+					</button>
+					<button type="button" data-repeater-move="up" data-places="columns">
+						<?= $this->escape(__('common:move-left')) ?>
+					</button>
+					<button type="button" data-repeater-move="down" data-places="columns">
+						<?= $this->escape(__('common:move-right')) ?>
+					</button>
+					<button type="button" data-repeater-duplicate data-places="block">
+						<?= $this->escape(__('field:duplicate-block')) ?>
+					</button>
+					<button type="button" data-split-into="columns" data-places="block">
+						<?= $this->escape(__('field:split-columns')) ?>
+					</button>
+					<button type="button" data-split-into="rows" data-places="block">
+						<?= $this->escape(__('field:split-rows')) ?>
+					</button>
+					<button type="button" data-split-into="columns" data-places="columns">
+						<?= $this->escape(__('field:split')) ?>
+					</button>
+					<button type="button" data-split-into="rows" data-places="rows">
+						<?= $this->escape(__('field:split')) ?>
+					</button>
+					<button type="button" class="danger" data-repeater-remove data-places="block">
+						<?= $this->escape(__('field:remove-block')) ?>
+					</button>
+					<button type="button" class="danger" data-split-remove data-places="columns rows">
+						<?= $this->escape(__('field:remove-block')) ?>
+					</button>
+				<?php else: ?>
 					<button type="button" data-repeater-move="up">
 						<?= $this->escape(__('common:move-up')) ?>
 					</button>
@@ -143,6 +191,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 					<button type="button" class="danger" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>
+				<?php endif ?>
 			</div>
 		</span>
 	</div>
@@ -157,11 +206,15 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			<span
 				class="resize is-<?= $edge ?>"
 				data-layout-resize="<?= $edge ?>"
+				data-places="block"
 				aria-hidden="true"
 				title="<?= $this->escape($title) ?>">
 				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 			</span>
 		<?php endforeach ?>
+		<?php // The line to the next part of a split, centred in the gap. ?>
+		<span class="seam" data-places="columns" aria-hidden="true"></span>
+		<span class="seam" data-places="rows" aria-hidden="true"></span>
 	<?php endif ?>
 	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
 		<div class="cms-fields">
@@ -183,7 +236,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			<?php if ($columns > 1) {
 				$this->insert('field/blocks/layout', [
 					'layout' => $layout->array(),
-					'columns' => $columns,
+					'columns' => $area->colspan ?? $columns,
 					'min' => $min,
 					'id' => "{$rowId}-layout",
 				]);

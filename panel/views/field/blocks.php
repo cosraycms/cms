@@ -7,7 +7,9 @@
 // Add/remove/move/renumber comes from the repeater behavior: a + on each
 // row stamps before or after the row it sits in, the footer appends,
 // with a type picker for row insertions and multi-type footers.
-// Rows are never collapsed.
+// Rows are never collapsed. A split renders through its own partial,
+// which holds its parts; one container template per field variant is
+// what the split behavior stamps a new split from.
 // Receives one row list in $value and its renumber base — per locale
 // for an asymmetric field, the neutral locale otherwise — in $name.
 
@@ -62,6 +64,22 @@ $readonly = (bool) ($field['immutable'] ?? false);
 
 			$type = $rowData['type'] ?? null;
 
+			if ($type === null && is_array($rowData['blocks'] ?? null)) {
+				$this->insert('field/blocks/split', [
+					'index' => $index,
+					'rowData' => $rowData,
+					'blockTypes' => $blockTypes,
+					'commonChoices' => $commonChoices,
+					'more' => $more,
+					'columns' => $columns,
+					'min' => $min,
+					'metaControl' => $metaControl,
+					'readonly' => $readonly,
+				]);
+
+				continue;
+			}
+
 			if (!is_string($type) || !isset($blockTypes[$type])) {
 				// Rendered without inputs: rows of types no longer allowed
 				// cannot be edited and are dropped on the next save.
@@ -105,6 +123,21 @@ $readonly = (bool) ($field['immutable'] ?? false);
 			]) ?>
 		</template>
 	<?php endforeach ?>
+	<?php if ($columns > 1): ?>
+		<template data-repeater-container>
+			<?php $this->insert('field/blocks/split', [
+				'index' => '__i__',
+				'rowData' => null,
+				'blockTypes' => $blockTypes,
+				'commonChoices' => $commonChoices,
+				'more' => $more,
+				'columns' => $columns,
+				'min' => $min,
+				'metaControl' => $metaControl,
+				'readonly' => false,
+			]) ?>
+		</template>
+	<?php endif ?>
 	<?php if ($more) {
 		$this->insert('field/blocks/catalog', ['choices' => $choices->all]);
 	} ?>

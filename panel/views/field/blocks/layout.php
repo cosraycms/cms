@@ -14,15 +14,16 @@ $id = (string) $this->unwrap($id);
 $colspan = (int) ($layout['colspan'] ?? $min);
 $indent = (int) ($layout['indent'] ?? 0);
 
+// A part of a split edits the one dimension its split lets it change.
 $dimensions = [
-	'colspan' => [__('field:colspan'), $colspan, $min, $columns - $indent],
-	'rowspan' => [__('field:rowspan'), (int) ($layout['rowspan'] ?? 1), 1, Layout::MAX_ROWSPAN],
-	'indent' => [__('field:indent'), $indent, 0, $columns - $colspan],
+	'colspan' => [__('field:colspan'), $colspan, $min, $columns - $indent, 'block columns'],
+	'rowspan' => [__('field:rowspan'), (int) ($layout['rowspan'] ?? 1), 1, Layout::MAX_ROWSPAN, 'block rows'],
+	'indent' => [__('field:indent'), $indent, 0, $columns - $colspan, 'block'],
 ];
 ?>
 <div class="layout">
-	<?php foreach ($dimensions as $dimension => [$label, $value, $low, $high]): ?>
-		<div class="dimension">
+	<?php foreach ($dimensions as $dimension => [$label, $value, $low, $high, $places]): ?>
+		<div class="dimension" data-places="<?= $places ?>">
 			<label class="cms-sub-label" for="<?= $this->escape("{$id}-{$dimension}") ?>">
 				<?= $this->escape($label) ?>
 			</label>

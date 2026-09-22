@@ -66,6 +66,47 @@
 			}
 		},
 		{
+			"name": "blocks split part sub-field",
+			"entries": [
+				["content[body][value][zxx][2][layout][colspan]", "6"],
+				["content[body][value][zxx][2][blocks][0][uid]", "p1"],
+				["content[body][value][zxx][2][blocks][0][fields][text][value][zxx]", "Left"],
+				["content[body][value][zxx][2][blocks][1][layout][colspan]", "3"]
+			],
+			"tree": {
+				"content": {
+					"body": {
+						"value": {
+							"zxx": {
+								"2": {
+									"layout": {
+										"colspan": "6"
+									},
+									"blocks": {
+										"0": {
+											"uid": "p1",
+											"fields": {
+												"text": {
+													"value": {
+														"zxx": "Left"
+													}
+												}
+											}
+										},
+										"1": {
+											"layout": {
+												"colspan": "3"
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
 			"name": "blocks per-locale row sub-field",
 			"entries": [
 				["content[body][value][de][0][fields][text][value][zxx]", "Hallo"],
