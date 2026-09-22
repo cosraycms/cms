@@ -74,7 +74,13 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			$catalog . '//*[@data-block-choice="' . CatalogBlock::class . '"][normalize-space()="' . $label . '"]',
+			$catalog
+				. '//*[@data-block-choice="'
+				. CatalogBlock::class
+				. '"]'
+				. '/*[@class="select"][normalize-space()="'
+				. $label
+				. '"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//*[@data-content-locale-scope][@data-content-locale="en"]', $html);
