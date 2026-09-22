@@ -303,12 +303,17 @@
 		padding: var(--cms-space-4);
 	}
 
+	& .cms-field {
+		padding-inline: 0;
+	}
+
 	& .cms-youtube .thumbnail {
 		justify-self: center;
 	}
 
 	/* A block grows with its text: no inner scrollbar on the canvas. */
 	& .block .ProseMirror {
+		padding: 0;
 		max-height: none;
 		overflow-y: visible;
 	}
@@ -366,6 +371,7 @@
 				font-weight: 600;
 				letter-spacing: -0.01em;
 				line-height: 1.25;
+				padding-block: 0;
 			}
 
 			& .level {
@@ -434,10 +440,6 @@
 			background: none;
 			box-shadow: none;
 			font-size: var(--cms-font-size-sm);
-
-			& .ProseMirror {
-				padding: var(--cms-space-1) var(--cms-space-2);
-			}
 		}
 	}
 
