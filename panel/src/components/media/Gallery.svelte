@@ -432,59 +432,18 @@
 					overflow: visible;
 				}
 
-				& .tiles {
-					grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-					gap: var(--cms-space-2);
-				}
-
-				& .tile {
-					aspect-ratio: auto;
-					padding: 0;
-					border: 0;
-					border-radius: var(--cms-radius-sm);
-					background: none;
-					overflow: hidden;
-
-					&.is-selected {
-						box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
-					}
-				}
-
 				& .tiles.has-ratio .tile {
 					aspect-ratio: var(--ratio);
 				}
 
-				& .pick {
-					display: block;
-					height: auto;
-
-					& img {
-						display: block;
-						width: 100%;
-						height: auto;
-						max-height: none;
-						border-radius: 0;
-					}
-				}
-
-				& .tiles.has-ratio .pick {
+				& .tiles.has-ratio .pick img {
+					width: 100%;
 					height: 100%;
-
-					& img {
-						height: 100%;
-						object-fit: contain;
-					}
+					object-fit: contain;
 				}
 
 				& .tiles.is-cropped .pick img {
 					object-fit: cover;
-				}
-
-				& .plate {
-					display: grid;
-					place-items: center;
-					aspect-ratio: 4 / 3;
-					background: var(--cms-color-surface);
 				}
 
 				& .bar {
