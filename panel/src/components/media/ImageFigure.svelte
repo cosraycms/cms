@@ -124,7 +124,7 @@
 				display: block;
 				width: 100%;
 				height: auto;
-				max-height: 30rem;
+				max-height: 20rem;
 				object-fit: contain;
 			}
 

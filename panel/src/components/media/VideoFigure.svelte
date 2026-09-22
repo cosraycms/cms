@@ -90,7 +90,7 @@
 			& video {
 				display: block;
 				width: 100%;
-				max-height: 30rem;
+				max-height: 20rem;
 			}
 
 			& .overlay {
