@@ -25,6 +25,7 @@ import {
 	type Layout,
 } from './blocks';
 import { adder, arm } from './pick';
+import { adopt, release } from './placement';
 import { changed, focusRow, initDrag, insert, insertion, rebase } from './repeater';
 
 function parse(value: string | null): Direction | null {
@@ -65,6 +66,8 @@ function wrap(row: HTMLElement, direction: Direction): HTMLElement | null {
 	rebase(row, field, parts);
 	parts.append(row);
 	write(split, layout, gridOf(field));
+	adopt(row, split);
+	release(row);
 	parts.dataset.columns = String(layout.colspan);
 	write(row, { ...layout, indent: 0 }, gridOf(parts));
 	changed(field);
@@ -192,6 +195,7 @@ function remove(part: HTMLElement): void {
 
 	rebase(heir, list, field);
 	container.replaceWith(heir);
+	adopt(container, heir);
 	write(heir, area, gridOf(field));
 	changed(field);
 	focusRow(heir);

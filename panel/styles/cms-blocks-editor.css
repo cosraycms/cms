@@ -105,6 +105,26 @@
 		}
 	}
 
+	/* A placed block sits on its own lines; no indent applies. */
+	& .grid > .block[data-placed] {
+		grid-column: var(--col) / span var(--colspan, 1);
+		grid-row: var(--row) / span var(--rowspan, 1);
+		margin-inline-start: 0;
+	}
+
+	/* The dragged block shows where it lands and stays above the ones it pushes. */
+	& .grid > .block.is-dragging {
+		z-index: 6;
+		border-color: var(--cms-color-accent);
+		border-style: solid;
+		box-shadow: var(--cms-shadow-lg);
+	}
+
+	&.is-moving {
+		cursor: grabbing;
+		user-select: none;
+	}
+
 	/*
 	 * A split is one block on the canvas. Its parts sit on the field's
 	 * own tracks through a subgrid on both axes; their list spans the
@@ -298,7 +318,8 @@
 
 	/* A gesture in progress has no gaps worth showing yet. */
 	& .grid:has(> .sortable-ghost) > .ghost,
-	&.is-resizing .ghost {
+	&.is-resizing .ghost,
+	&.is-moving .ghost {
 		display: none;
 	}
 

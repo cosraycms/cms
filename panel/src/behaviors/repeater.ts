@@ -100,7 +100,7 @@ function list(container: HTMLElement): HTMLElement {
 	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
 }
 
-function renumber(container: HTMLElement): void {
+export function renumber(container: HTMLElement): void {
 	const nameBase = container.dataset.name ?? '';
 	const idBase = container.dataset.id ?? '';
 	const namePattern = new RegExp(`^${escapeRegex(nameBase)}\\[(?:\\d+|__i__)\\]`);
@@ -247,7 +247,7 @@ function add(
 
 	// Whoever renders state off the row's inputs (blocks: the layout)
 	// gets to do so before the change is announced.
-	stamped?.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true }));
+	stamped?.dispatchEvent(new CustomEvent('repeater:stamp', { bubbles: true, detail: { at } }));
 	changed(container);
 	if (stamped) {
 		const focus = [
@@ -507,6 +507,11 @@ function onClick(event: Event): void {
 
 	const mover = target.closest('[data-repeater-move]');
 
+	// A placed block moves by position; the placement behavior took it.
+	if (mover && event.defaultPrevented) {
+		return;
+	}
+
 	if (mover) {
 		move(mover);
 
@@ -548,8 +553,9 @@ function onClick(event: Event): void {
 
 /** Every row list not yet draggable becomes so: on load, after a swap, and for a new split. */
 export async function initDrag(): Promise<void> {
+	// A multi-column canvas drags by position, through the placement behavior.
 	const lists = [...document.querySelectorAll<HTMLElement>('[data-repeater-list]')].filter(
-		(list) => !enhanced.has(list),
+		(list) => !enhanced.has(list) && !list.matches('.cms-blocks-editor.is-grid > .grid'),
 	);
 
 	if (lists.length === 0) {

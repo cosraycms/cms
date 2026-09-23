@@ -16,6 +16,12 @@
 // bottom edge counts the rowspan. The keyboard reaches the same edges from the
 // focused grip: Alt with the arrows, Shift added for the start edge.
 //
+// A block on a multi-column grid is placed by position instead (see
+// the placement behavior): its edges grow into free cells only, the
+// start edge moves its start column, and a taller block pushes the ones
+// below down; the positions of every block the gesture moved are written
+// along with its spans.
+//
 // A split's parts follow it: side by side they share its width in
 // proportion and take its height, stacked they take its width while its
 // height is theirs added up. A part itself changes only along its split —
@@ -23,9 +29,21 @@
 // parts dragging that trade; stacked its rows change and the split's
 // follow.
 
+import {
+	MAX_ROWSPAN,
+	commit,
+	gridOf as canvasOf,
+	limits,
+	place,
+	placed,
+	resize as resizePlaced,
+	snapshot,
+	span,
+	type Boxes,
+} from './placement';
 import { focusRow } from './repeater';
 
-export const MAX_ROWSPAN = 6;
+export { MAX_ROWSPAN };
 
 export type Dimension = 'colspan' | 'rowspan' | 'indent';
 export type Layout = Record<Dimension, number>;
@@ -336,6 +354,33 @@ function resizePart(part: HTMLElement, dimension: Dimension, value: number): boo
 	return true;
 }
 
+/** A placed block's spans written from its box, and every block's position. */
+function applyPlaced(
+	row: HTMLElement,
+	boxes: Boxes<HTMLElement>,
+	grid: Grid,
+	widths?: number[],
+): void {
+	const box = boxes.get(row)!;
+
+	apply(row, { colspan: box.colspan, rowspan: box.rowspan, indent: 0 }, grid, widths);
+	place(canvasOf(row)!, boxes);
+}
+
+function same(a: Boxes<HTMLElement>, b: Boxes<HTMLElement>): boolean {
+	return [...a].every(([row, box]) => {
+		const other = b.get(row);
+
+		return (
+			other !== undefined &&
+			other.col === box.col &&
+			other.row === box.row &&
+			other.colspan === box.colspan &&
+			other.rowspan === box.rowspan
+		);
+	});
+}
+
 type Drag = {
 	pointer: number;
 	handle: HTMLElement;
@@ -348,6 +393,8 @@ type Drag = {
 	widths: number[];
 	origin: number;
 	moved: boolean;
+	/** The canvas as the gesture found it, for a placed block. */
+	boxes: Boxes<HTMLElement> | null;
 };
 
 let drag: Drag | null = null;
@@ -415,6 +462,7 @@ function onPointerDown(event: PointerEvent): void {
 		widths: widthsOf(row),
 		origin: position(event, edge),
 		moved: false,
+		boxes: placed(row) ? snapshot(canvasOf(row)!) : null,
 	};
 	handle.setPointerCapture(event.pointerId);
 	handle.classList.add('is-active');
@@ -435,6 +483,25 @@ function onPointerMove(event: PointerEvent): void {
 	// stays the same, so the start plus the steps is the part's new width.
 	if (splitOf(drag.row)) {
 		drag.moved = resizePart(drag.row, 'colspan', drag.start.colspan + steps) || drag.moved;
+
+		return;
+	}
+
+	if (drag.boxes) {
+		const canvas = canvasOf(drag.row)!;
+		const next = resizePlaced(
+			drag.boxes,
+			drag.row,
+			drag.edge,
+			steps,
+			drag.grid.columns,
+			drag.grid.min,
+		);
+
+		if (!same(next, snapshot(canvas))) {
+			applyPlaced(drag.row, next, drag.grid, drag.widths);
+			drag.moved = true;
+		}
 
 		return;
 	}
@@ -461,13 +528,15 @@ function end(): void {
 		return;
 	}
 
-	const { handle, row, container, edge, moved } = drag;
+	const { handle, row, container, edge, moved, boxes } = drag;
 
 	drag = null;
 	handle.classList.remove('is-active');
 	container.classList.remove('is-resizing');
 
-	if (moved) {
+	if (moved && boxes) {
+		commit(canvasOf(row)!);
+	} else if (moved) {
 		const dimension: Dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
 
 		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
@@ -518,6 +587,19 @@ function onKeyDown(event: KeyboardEvent): void {
 		return;
 	}
 
+	if (placed(row)) {
+		const canvas = canvasOf(row)!;
+		const boxes = snapshot(canvas);
+		const next = resizePlaced(boxes, row, key.edge, key.steps, grid.columns, grid.min);
+
+		if (!same(next, boxes)) {
+			applyPlaced(row, next, grid);
+			commit(canvas);
+		}
+
+		return;
+	}
+
 	const before = read(row);
 	const after = resize(before, key.edge, key.steps, grid);
 
@@ -565,6 +647,26 @@ function onInput(event: Event): void {
 	const before = read(row);
 	const typed = control.value === '' ? NaN : Number(control.value);
 	const part = splitOf(row) !== null;
+
+	if (placed(row) && dimension !== 'indent') {
+		const canvas = canvasOf(row)!;
+		const boxes = snapshot(canvas);
+		const { low, high } = limits(boxes, row, grid.columns, grid.min)[dimension];
+
+		if (event.type !== 'change' && !(typed >= low && typed <= high)) {
+			return;
+		}
+
+		const value = Number.isNaN(typed) ? before[dimension] : typed;
+
+		applyPlaced(row, span(boxes, row, dimension, value, grid.columns, grid.min), grid);
+
+		if (event.type === 'change') {
+			commit(canvas);
+		}
+
+		return;
+	}
 	const { low, high } = part ? reach(row, dimension) : bounds(before, grid)[dimension];
 
 	if (event.type !== 'change' && !(typed >= low && typed <= high)) {

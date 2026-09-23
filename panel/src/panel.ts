@@ -20,6 +20,7 @@ import { install as installMenuKeys } from './behaviors/menu-keys';
 import { install as installMenuTree } from './behaviors/menu-tree';
 import { install as installPaths } from './behaviors/paths';
 import { install as installPick } from './behaviors/pick';
+import { install as installPlacement } from './behaviors/placement';
 import { install as installRepeater } from './behaviors/repeater';
 import { install as installScroll } from './behaviors/scroll';
 import { install as installSplit } from './behaviors/split';
@@ -119,6 +120,7 @@ cleanups.push(
 	installInspector(),
 	installRepeater(),
 	installBlocks(),
+	installPlacement(),
 	installHeading(),
 	installBlockCorners(),
 	installGhosts(),
