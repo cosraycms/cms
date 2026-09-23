@@ -223,8 +223,7 @@
 	}
 
 	/* An empty run of cells: a dashed button that inserts a block filling
-	   it exactly. Faint while the canvas is hovered, full when the ghost
-	   itself is. */
+	   it exactly. Hidden until the pointer is over its own cells. */
 	& .ghost {
 		--cms-icon-size: 1.5em;
 
@@ -240,10 +239,6 @@
 		cursor: pointer;
 		opacity: 0;
 		transition: opacity 120ms ease;
-	}
-
-	& .grid:hover > .ghost {
-		opacity: 0.5;
 	}
 
 	& .ghost:hover,
