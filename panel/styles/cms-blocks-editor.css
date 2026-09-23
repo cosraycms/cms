@@ -126,9 +126,8 @@
 
 	/* Where the dragged block lands: its size, among the blocks it moves. */
 	& .grid > .landing {
-		border: 1px dashed var(--cms-color-accent);
 		border-radius: var(--cms-radius-md);
-		background: var(--cms-color-surface-muted);
+		background: var(--cms-color-surface-sunken);
 	}
 
 	&.is-moving {
