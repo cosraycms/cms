@@ -222,31 +222,50 @@
 		display: none;
 	}
 
-	/* An empty run of cells: a dashed button that inserts a block filling
-	   it exactly. Hidden until the pointer is over its own cells. */
+	/* An empty run of cells: a button that inserts a block filling it
+	   exactly, drawn as a dotted box inset from its cells. Hidden until the
+	   pointer is over those cells. */
 	& .ghost {
-		--cms-icon-size: 1.5em;
+		--cms-icon-size: min(1.75rem, 50cqmin);
 
 		position: absolute;
 		inset: 0;
 		display: grid;
 		place-items: center;
 		padding: 0;
-		border: 1px dashed var(--cms-blocks-border);
-		border-radius: var(--cms-radius-md);
 		background: none;
 		color: var(--cms-color-text-faint);
 		cursor: pointer;
 		opacity: 0;
 		transition: opacity 120ms ease;
+		/* A gap may be small: the icon shrinks with it. */
+		container-type: size;
+
+		/* Percentages resolve per axis, so a thin gap keeps a box. */
+		&::before {
+			content: '';
+			position: absolute;
+			inset: min(var(--cms-space-4), 20%);
+			border: 1px dotted var(--cms-blocks-border);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-surface-muted);
+		}
+
+		/* Positioned after the box, so it paints over it. */
+		& > .cms-icon {
+			position: relative;
+		}
 	}
 
 	& .ghost:hover,
 	& .ghost:focus-visible,
 	& .ghost[aria-expanded='true'] {
-		border-color: var(--cms-color-border-strong);
 		color: var(--cms-color-text-subtle);
 		opacity: 1;
+
+		&::before {
+			border-color: var(--cms-color-border-strong);
+		}
 	}
 
 	/* An armed ghost is visible at once: the menu library closes a menu
@@ -256,8 +275,12 @@
 	}
 
 	& .ghost:focus-visible {
-		outline: var(--cms-focus-outline);
-		outline-offset: var(--cms-focus-offset);
+		outline: none;
+
+		&::before {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
 	}
 
 	/* Without hover there is no reveal; an invisible button must not take taps. */
