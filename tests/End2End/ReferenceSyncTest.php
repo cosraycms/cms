@@ -68,7 +68,7 @@ final class ReferenceSyncTest extends End2EndTestCase
 						'en' => [[
 							'uid' => 'refsyncblock1',
 							'type' => \Cosray\Block\RichText::class,
-							'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 							'fields' => [
 								'text' => [
 									'type' => \Cosray\Field\RichText::class,

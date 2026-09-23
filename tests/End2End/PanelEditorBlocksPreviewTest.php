@@ -47,7 +47,6 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 					'en' => [$this->textBlock('block-a', 'Stored text', [
 						'colspan' => 6,
 						'rowspan' => 1,
-						'indent' => 2,
 					])],
 				],
 				'meta' => ['gap' => ['zxx' => 'l']],
@@ -66,7 +65,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 									[
 										'uid' => '',
 										'type' => Builtin\Heading::class,
-										'layout' => ['colspan' => '12', 'rowspan' => '1', 'indent' => '0'],
+										'layout' => ['colspan' => '12', 'rowspan' => '1'],
 										'fields' => [
 											'text' => ['value' => ['zxx' => 'Fresh heading']],
 											'level' => ['value' => ['zxx' => '3']],
@@ -76,7 +75,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 										'uid' => 'block-a',
 										'type' => Builtin\Text::class,
 										// Out of range: clamped into the grid, as the save would store it.
-										'layout' => ['colspan' => '14', 'rowspan' => '1', 'indent' => '2'],
+										'layout' => ['colspan' => '14', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => 'Edited text']]],
 									],
 								],
@@ -101,7 +100,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//div[@data-type="heading"]/h3[text()="Fresh heading"]', $html);
 		$this->assertHtmlNodeExists(
-			'//div[@data-type="text"][@data-colspan="12"][@data-indent="0"][contains(., "Edited text")]',
+			'//div[@data-type="text"][@data-colspan="12"][@data-col="1"][@data-row="2"][contains(., "Edited text")]',
 			$html,
 		);
 		$this->assertStringNotContainsString('Stored text', $html);
@@ -126,12 +125,10 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 					'en' => [$this->textBlock('block-en', 'English text', [
 						'colspan' => 12,
 						'rowspan' => 1,
-						'indent' => 0,
 					])],
 					'de' => [$this->textBlock('block-de', 'Deutscher Text', [
 						'colspan' => 12,
 						'rowspan' => 1,
-						'indent' => 0,
 					])],
 				],
 			],
@@ -227,7 +224,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 									[
 										'uid' => '',
 										'type' => Builtin\Heading::class,
-										'layout' => ['colspan' => '1', 'rowspan' => '1', 'indent' => '0'],
+										'layout' => ['colspan' => '1', 'rowspan' => '1'],
 										'fields' => [
 											'text' => ['value' => [
 												'en' => 'Blueprint heading',

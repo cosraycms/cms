@@ -123,7 +123,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 							[
 								'uid' => 'block-a',
 								'type' => Builtin\Text::class,
-								'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 3],
+								'layout' => ['colspan' => 6, 'rowspan' => 2, 'col' => 4, 'row' => 1],
 								'fields' => [
 									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
 								],
@@ -132,7 +132,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 							[
 								'uid' => 'block-gone',
 								'type' => 'Acme\\Gone',
-								'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+								'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 3],
 								'fields' => [],
 							],
 						],
@@ -171,8 +171,13 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('value="block-a"', $html);
 		$this->assertStringContainsString('value="' . Builtin\Text::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][layout][colspan]"', $html);
-		$this->assertStringContainsString('data-layout="indent"', $html);
-		$this->assertStringContainsString('style="--colspan: 6; --rowspan: 2; --indent: 3; --reserved: 9"', $html);
+		$this->assertStringContainsString('data-layout="col"', $html);
+		$this->assertStringContainsString('style="--colspan: 6; --rowspan: 2; --col: 4; --row: 1"', $html);
+		// The grid the value was placed on is saved with it, the default for a value without one.
+		$this->assertHtmlNodeExists(
+			'//input[@type="hidden"][@name="content[contentBlocks][columns]"][@value="12"]',
+			$html,
+		);
 		$this->assertStringContainsString('name="' . $en . '[0][fields][text][value][zxx]"', $html);
 		$this->assertStringContainsString('First block', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][meta][class][zxx]"', $html);
@@ -286,14 +291,13 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		// The layout numbers in the settings dialog, each capped by the room
-		// the others leave: span 6 at indent 3 in twelve columns. A block not
-		// placed yet gets its column from the canvas.
+		// the others leave: span 6 from column 4 in twelve columns.
 		$this->assertStringContainsString(
 			'data-layout-input="colspan" value="6" min="2" max="9"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringContainsString(
-			'data-layout-input="col" value="0" min="1" max="7"',
+			'data-layout-input="col" value="4" min="1" max="7"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringNotContainsString('data-layout-step', $html);
@@ -323,20 +327,20 @@ final class PanelEditorRouteTest extends End2EndTestCase
 						'en' => [
 							[
 								'uid' => 'split-a',
-								'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 2],
+								'layout' => ['colspan' => 6, 'rowspan' => 2, 'col' => 3, 'row' => 1],
 								'blocks' => [
-									$text('part-a', 'Left part', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0]),
+									$text('part-a', 'Left part', ['colspan' => 3, 'rowspan' => 2]),
 									// Taller than its split: shown clamped, as the save stores it.
-									$text('part-b', 'Right part', ['colspan' => 3, 'rowspan' => 4, 'indent' => 0]),
+									$text('part-b', 'Right part', ['colspan' => 3, 'rowspan' => 4]),
 									['uid' => 'part-gone', 'type' => 'Acme\\Gone', 'fields' => []],
 								],
 							],
 							[
 								'uid' => 'split-b',
-								'layout' => ['colspan' => 4, 'rowspan' => 2, 'indent' => 0],
+								'layout' => ['colspan' => 4, 'rowspan' => 2],
 								'blocks' => [
-									$text('part-c', 'Upper part', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0]),
-									$text('part-d', 'Lower part', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0]),
+									$text('part-c', 'Upper part', ['colspan' => 4, 'rowspan' => 1]),
+									$text('part-d', 'Lower part', ['colspan' => 4, 'rowspan' => 1]),
 								],
 							],
 						],
@@ -358,7 +362,12 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'//div[@data-repeater-row][@data-split="columns"]/input[@name="' . $split . '[uid]"][@value="split-a"]',
 			$html,
 		);
-		$this->assertHtmlNodeExists('//input[@name="' . $split . '[layout][indent]"][@value="2"]', $html);
+		$this->assertHtmlNodeExists('//input[@name="' . $split . '[layout][col]"][@value="3"]', $html);
+		// One stored without a position is placed below the others.
+		$this->assertHtmlNodeExists(
+			'//input[@name="content[contentBlocks][value][en][1][layout][row]"][@value="3"]',
+			$html,
+		);
 		$this->assertHtmlNodeMissing('//input[@name="' . $split . '[type]"]', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@data-repeater-row][@data-split="rows"]/input[@name="content[contentBlocks][value][en][1][uid]"]',

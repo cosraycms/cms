@@ -8,6 +8,7 @@ use Celema\Sire\Extra;
 use Celema\Sire\Review;
 use Celema\Sire\Shape;
 use Cosray\Block\Layout;
+use Cosray\Block\Placement;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Schema\Tool;
@@ -22,6 +23,11 @@ use Cosray\Value\Blocks as BlocksValue;
  * implementing Cosray\Contract\Block; without `#[Allows]` the field
  * offers the registry's default list, without `#[Columns]` it is a
  * stacked one-column list.
+ *
+ * The column count is stored with the value (`columns` next to `value`
+ * and `meta`): the blocks' positions only mean something on the grid
+ * they were placed on. `#[Columns]` is the default a new value starts
+ * with, so changing it leaves stored content alone.
  */
 class Blocks extends Field implements
 	Capability\Translatable,
@@ -36,6 +42,7 @@ class Blocks extends Field implements
 	use RowTypes;
 
 	public const int COMMON_LIMIT = 6;
+	public const int MAX_COLUMNS = 25;
 
 	/** The spacing tokens the gap and padding settings choose from; unset means the site's default. */
 	public const array SPACING = ['none', 's', 'm', 'l', 'xl'];
@@ -258,13 +265,33 @@ class Blocks extends Field implements
 		return new BlocksValue($this->owner, $this, $this->valueContext);
 	}
 
+	/** The stored column count, the field's default for a value without one. */
+	public function columnsOf(mixed $stored): int
+	{
+		return self::storedColumns($stored, $this->columns);
+	}
+
+	/** A stored column count if it is one, `$default` otherwise. */
+	public static function storedColumns(mixed $stored, int $default): int
+	{
+		return is_int($stored) && $stored >= 1 && $stored <= self::MAX_COLUMNS ? $stored : $default;
+	}
+
+	/** The narrowest block on a grid of that many columns. */
+	public function minOf(int $columns): int
+	{
+		return min($this->min, $columns);
+	}
+
 	public function structure(mixed $value = null): array
 	{
 		$value ??= $this->valueContext->data['value'] ?? $this->default ?? [];
+		$columns = $this->columnsOf($this->valueContext->data['columns'] ?? null);
 
 		return [
 			'type' => $this::class,
-			'value' => $this->structureMap(is_array($value) ? $value : []),
+			'columns' => $columns,
+			'value' => $this->structureMap(is_array($value) ? $value : [], $columns),
 		];
 	}
 
@@ -306,9 +333,66 @@ class Blocks extends Field implements
 			$value->optional()->nullable();
 		}
 
+		$shape->add('columns', 'int')->optional()->rules('min:1', 'max:' . self::MAX_COLUMNS);
 		$this->addMeta($shape);
+		$shape->review($this->reviewGrid(...));
 
 		return $shape;
+	}
+
+	/**
+	 * The layouts against the value's own grid: every block on the field's
+	 * grid inside its columns and clear of the others, every split's
+	 * blocks within its area.
+	 */
+	private function reviewGrid(Review $review): void
+	{
+		$data = $review->values();
+		$columns = $this->columnsOf($data['columns'] ?? null);
+		$min = $this->minOf($columns);
+		$lists = is_array($data['value'] ?? null) ? $data['value'] : [];
+
+		foreach ($lists as $locale => $rows) {
+			$layouts = [];
+
+			foreach (is_array($rows) ? array_values($rows) : [] as $index => $row) {
+				$layout = is_array($row) && is_array($row['layout'] ?? null) ? $row['layout'] : [];
+				$area = new Layout(
+					(int) ($layout['colspan'] ?? 0),
+					(int) ($layout['rowspan'] ?? 1),
+					(int) ($layout['col'] ?? 0),
+					(int) ($layout['row'] ?? 0),
+				);
+				$path = ['value', $locale, $index, 'layout'];
+				$layouts[] = $area;
+
+				if ($area->colspan < $min || $area->colspan > $columns) {
+					$review->addError([...$path, 'colspan'], __('block:invalid-width'));
+				} elseif (
+					isset($layout['col']) !== isset($layout['row'])
+					|| $area->placed()
+					&& ($area->col + $area->colspan - 1) > $columns
+				) {
+					$review->addError([...$path, 'col'], __('block:invalid-position'));
+				}
+
+				if (is_array($row) && is_array($row['blocks'] ?? null)) {
+					$this->reviewSplit(
+						$review,
+						['value', $locale, $index, 'blocks'],
+						$area,
+						array_values($row['blocks']),
+						$min,
+					);
+				}
+			}
+
+			$overlap = Placement::overlap($layouts);
+
+			if ($overlap !== null) {
+				$review->addError(['value', $locale, $overlap, 'layout', 'col'], __('block:overlap'));
+			}
+		}
 	}
 
 	protected function rowKind(): string
@@ -404,14 +488,14 @@ class Blocks extends Field implements
 	 *
 	 * @return array<string, list<array>>
 	 */
-	private function structureMap(array $value): array
+	private function structureMap(array $value, int $columns): array
 	{
 		if ($this->isAsymmetricallyTranslated()) {
 			$map = array_is_list($value) ? [$this->owner->defaultLocale()->id => $value] : $value;
 			$result = [];
 
 			foreach ($this->owner->locales() as $locale) {
-				$result[$locale->id] = $this->rowStructures($map[$locale->id] ?? []);
+				$result[$locale->id] = $this->rowStructures($map[$locale->id] ?? [], $columns);
 			}
 
 			return $result;
@@ -419,22 +503,28 @@ class Blocks extends Field implements
 
 		$rows = array_is_list($value) ? $value : $value[self::NEUTRAL_LOCALE] ?? [];
 
-		return [self::NEUTRAL_LOCALE => $this->rowStructures($rows)];
+		return [self::NEUTRAL_LOCALE => $this->rowStructures($rows, $columns)];
 	}
 
-	/** @return list<array> */
-	private function rowStructures(mixed $rows): array
+	/**
+	 * Every row with its position on the grid; one without gets a place
+	 * below the others.
+	 *
+	 * @return list<array>
+	 */
+	private function rowStructures(mixed $rows, int $columns): array
 	{
 		$result = [];
+		$min = $this->minOf($columns);
 
 		foreach (is_array($rows) ? $rows : [] as $row) {
 			if (!is_array($row)) {
 				continue;
 			}
 
-			$layout = Layout::normalize($row['layout'] ?? null, $this->columns, $this->min);
+			$layout = Layout::normalize($row['layout'] ?? null, $columns, $min);
 			$structure = !isset($row['type']) && is_array($row['blocks'] ?? null)
-				? $this->splitStructure($row, $layout)
+				? $this->splitStructure($row, $layout, $min)
 				: $this->blockStructure($row, $layout);
 
 			if ($structure !== null) {
@@ -442,7 +532,7 @@ class Blocks extends Field implements
 			}
 		}
 
-		return $result;
+		return Placement::rows($result, $columns, $min);
 	}
 
 	private function blockStructure(array $row, Layout $layout): ?array
@@ -473,7 +563,7 @@ class Blocks extends Field implements
 	 * One left over after dropping disallowed types is no split: it takes
 	 * the split's place, as in the editor.
 	 */
-	private function splitStructure(array $row, Layout $layout): ?array
+	private function splitStructure(array $row, Layout $layout, int $min): ?array
 	{
 		$blocks = [];
 
@@ -482,7 +572,7 @@ class Blocks extends Field implements
 				continue;
 			}
 
-			$childLayout = Layout::normalize($child['layout'] ?? null, $layout->colspan, $this->min, $layout->rowspan);
+			$childLayout = Layout::normalize($child['layout'] ?? null, $layout->colspan, $min, $layout->rowspan);
 			$structure = $this->blockStructure($child, $childLayout);
 
 			if ($structure !== null) {
@@ -508,19 +598,25 @@ class Blocks extends Field implements
 	}
 
 	/**
-	 * One row: uid, a layout inside the field's bounds (out-of-range
-	 * values are rejected, not clamped, so a programmatic write fails
-	 * loudly), the block meta, and either an allowed type with its fields
-	 * or — at the top level only — the `blocks` of a split.
+	 * One row: uid, a layout (out-of-range values are rejected, not
+	 * clamped, so a programmatic write fails loudly; the bounds that
+	 * depend on the value's column count are checked against it; a
+	 * position is optional, but both of its lines or neither), the
+	 * block meta, and either an allowed type with its fields or — at the
+	 * top level only — the `blocks` of a split, whose blocks have no
+	 * position of their own.
 	 */
 	private function rowsShape(bool $children = false): Shape
 	{
 		$layout = Shapes::create();
-		$layout->add('colspan', 'int')->rules('required', "min:{$this->min}", "max:{$this->columns}");
+		$layout->add('colspan', 'int')->rules('required', 'min:1', 'max:' . self::MAX_COLUMNS);
 		$layout->add('rowspan', 'int')->rules('required', 'min:1', 'max:' . Layout::MAX_ROWSPAN);
-		$layout->add('indent', 'int')->rules('required', 'min:0', 'max:' . ($this->columns - $this->min));
-		$layout->add('col', 'int')->optional()->rules('min:0', "max:{$this->columns}");
-		$layout->add('row', 'int')->optional()->rules('min:0');
+
+		// Without a position a block is placed below the others on read.
+		if (!$children) {
+			$layout->add('col', 'int')->optional()->rules('min:1', 'max:' . self::MAX_COLUMNS);
+			$layout->add('row', 'int')->optional()->rules('min:1');
+		}
 
 		$rows = Shapes::list();
 		$rows->add('uid', 'string')->rules('required');
@@ -552,16 +648,6 @@ class Blocks extends Field implements
 		$this->reviewRowFields($review);
 
 		foreach ($review->values() as $index => $row) {
-			if (((int) $row['layout']['colspan'] + (int) $row['layout']['indent']) > $this->columns) {
-				$review->addError([$index, 'layout', 'indent'], __('block:invalid-indent'));
-			}
-
-			$col = (int) ($row['layout']['col'] ?? 0);
-
-			if ($col > 0 && ($col + (int) $row['layout']['colspan'] - 1) > $this->columns) {
-				$review->addError([$index, 'layout', 'col'], __('block:invalid-position'));
-			}
-
 			// An optional type may arrive empty; a non-empty one is allowed.
 			$blocks = $row['blocks'] ?? null;
 			$isBlock = ($row['type'] ?? '') !== '' && isset($row['fields']) && $blocks === null;
@@ -571,9 +657,7 @@ class Blocks extends Field implements
 				&& is_array($blocks)
 				&& count($blocks) >= 2;
 
-			if ($isSplit) {
-				$this->reviewSplit($review, $index, $row['layout'], $blocks);
-			} elseif (!$isBlock) {
+			if (!$isSplit && !$isBlock) {
 				$review->addError([$index], __('block:row-kind'));
 			}
 		}
@@ -593,77 +677,34 @@ class Blocks extends Field implements
 	/**
 	 * A split's area has no rows beyond its own — a subgrid never grows —
 	 * so a block the flow would put outside it lands on top of another.
-	 * Each block is placed as the browser's sparse row flow places it: at
-	 * the first spot from the cursor where it fits.
+	 * Its blocks are placed as the browser's sparse row flow places them.
 	 *
-	 * @param array<string, mixed> $area
-	 * @param list<array<string, mixed>> $blocks
+	 * @param list<int|string> $path
+	 * @param list<mixed> $blocks
 	 */
-	private function reviewSplit(Review $review, int $index, array $area, array $blocks): void
+	private function reviewSplit(Review $review, array $path, Layout $area, array $blocks, int $min): void
 	{
-		$columns = (int) $area['colspan'];
-		$rows = (int) $area['rowspan'];
-		$taken = [];
-		$cursor = [0, 0];
+		$spans = [];
 
 		foreach ($blocks as $position => $block) {
-			$width = (int) $block['layout']['indent'] + (int) $block['layout']['colspan'];
-			$height = (int) $block['layout']['rowspan'];
-			$spot = self::firstFit($taken, $cursor, $width, $height, $columns, $rows);
+			$layout = is_array($block) && is_array($block['layout'] ?? null) ? $block['layout'] : [];
+			$colspan = (int) ($layout['colspan'] ?? 0);
 
-			if ($spot === null) {
-				$review->addError([$index, 'blocks', $position, 'layout'], __('block:children-overflow'));
+			if ($colspan < $min || $colspan > $area->colspan) {
+				$review->addError([...$path, $position, 'layout', 'colspan'], __('block:invalid-width'));
 
 				return;
 			}
 
-			[$top, $left] = $spot;
-
-			for ($row = $top; $row < ($top + $height); $row++) {
-				for ($col = $left; $col < ($left + $width); $col++) {
-					$taken["{$row}:{$col}"] = true;
-				}
-			}
-
-			$cursor = [$top, $left + $width];
-		}
-	}
-
-	/**
-	 * @param array<string, true> $taken
-	 * @param array{int, int} $cursor
-	 * @return ?array{int, int}
-	 */
-	private static function firstFit(
-		array $taken,
-		array $cursor,
-		int $width,
-		int $height,
-		int $columns,
-		int $rows,
-	): ?array {
-		for ([$top, $left] = $cursor; ($top + $height) <= $rows; $top++, $left = 0) {
-			for (; ($left + $width) <= $columns; $left++) {
-				if (self::vacant($taken, $top, $left, $width, $height)) {
-					return [$top, $left];
-				}
-			}
+			$spans[] = ['colspan' => $colspan, 'rowspan' => (int) ($layout['rowspan'] ?? 1)];
 		}
 
-		return null;
-	}
+		foreach (Placement::flow($spans, $area->colspan) as $position => $spot) {
+			if (($spot['row'] + $spans[$position]['rowspan'] - 1) > $area->rowspan) {
+				$review->addError([...$path, $position, 'layout'], __('block:children-overflow'));
 
-	/** @param array<string, true> $taken */
-	private static function vacant(array $taken, int $top, int $left, int $width, int $height): bool
-	{
-		for ($row = $top; $row < ($top + $height); $row++) {
-			for ($col = $left; $col < ($left + $width); $col++) {
-				if (isset($taken["{$row}:{$col}"])) {
-					return false;
-				}
+				return;
 			}
 		}
-
-		return true;
 	}
 }

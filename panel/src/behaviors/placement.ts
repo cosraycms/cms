@@ -6,11 +6,8 @@
 // Blocks never overlap: a block moved, or grown downwards, onto others
 // pushes them down below itself, and whatever they land on in turn.
 // Rows no block covers any more are taken out. A block grows sideways
-// only into free cells, up to the grid's edge.
-//
-// A grid saved before positions existed flows: its blocks are placed
-// where the browser's sparse row flow put them, indent included, and
-// keep that position from then on.
+// only into free cells, up to the grid's edge. Every row arrives with its
+// position from the server; a stamped one gets it here.
 //
 // The grip drags a block to another spot: the cell under the pointer is
 // where its grabbed cell lands, and the pointer right on a line between
@@ -32,7 +29,6 @@ import { changed, focusRow, renumber } from './repeater';
 export type Box = { col: number; row: number; colspan: number; rowspan: number };
 export type Boxes<T> = Map<T, Box>;
 export type Edge = 'start' | 'end' | 'bottom';
-export type Flowing = { colspan: number; rowspan: number; indent: number };
 export type Edges = { starts: number[]; ends: number[] };
 
 export const MAX_ROWSPAN = 6;
@@ -64,48 +60,6 @@ function bottom(boxes: Iterable<Box>): number {
 	}
 
 	return last;
-}
-
-/**
- * Where the sparse row flow puts each block: at the first spot from the
- * cursor where its indent and span fit, the box past the indent.
- */
-export function flow(layouts: Flowing[], columns: number): Box[] {
-	const taken = new Set<string>();
-	const free = (row: number, col: number, width: number, height: number): boolean => {
-		for (let r = row; r < row + height; r++) {
-			for (let c = col; c < col + width; c++) {
-				if (taken.has(`${r}:${c}`)) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	};
-	let cursor = { row: 0, col: 0 };
-
-	return layouts.map(({ colspan, rowspan, indent }) => {
-		const width = Math.min(columns, indent + colspan);
-
-		for (let row = cursor.row, col = cursor.col; ; row++, col = 0) {
-			for (; col + width <= columns; col++) {
-				if (!free(row, col, width, rowspan)) {
-					continue;
-				}
-
-				for (let r = row; r < row + rowspan; r++) {
-					for (let c = col; c < col + width; c++) {
-						taken.add(`${r}:${c}`);
-					}
-				}
-
-				cursor = { row, col: col + width };
-
-				return { col: col + width - colspan + 1, row: row + 1, colspan, rowspan };
-			}
-		}
-	});
 }
 
 /**
@@ -413,10 +367,7 @@ function set(row: HTMLElement, key: string, value: number): void {
 	}
 }
 
-/**
- * The positions written: the hidden inputs, the row's custom properties
- * and the dialog's numbers. A placed row has no indent.
- */
+/** The positions written: the hidden inputs, the row's custom properties and the dialog's numbers. */
 export function place(grid: HTMLElement, boxes: Boxes<HTMLElement>): void {
 	const { columns, min } = columnsOf(grid);
 
@@ -426,13 +377,6 @@ export function place(grid: HTMLElement, boxes: Boxes<HTMLElement>): void {
 		row.style.setProperty('--col', String(box.col));
 		row.style.setProperty('--row', String(box.row));
 		row.toggleAttribute('data-placed', true);
-
-		if (number(row, 'indent') !== 0) {
-			set(row, 'indent', 0);
-			row.style.setProperty('--indent', '0');
-			row.style.setProperty('--reserved', String(box.colspan));
-			row.dataset.indent = '0';
-		}
 
 		const dialog = row.querySelector<HTMLElement>(':scope > dialog');
 		const colspan = limits(boxes, row, columns, min).colspan;
@@ -541,49 +485,6 @@ export function commit(grid: HTMLElement): void {
 	place(grid, compact(snapshot(grid)));
 	reorder(grid);
 	changed(grid.parentElement!);
-}
-
-/** A grid whose blocks do not all have a position yet gets them. */
-function derive(grid: HTMLElement): void {
-	const rows = rowsOf(grid);
-	const { columns } = columnsOf(grid);
-	const missing = rows.filter((row) => number(row, 'col') === 0);
-
-	if (missing.length === 0) {
-		if (rows.some((row) => !row.hasAttribute('data-placed'))) {
-			place(grid, snapshot(grid));
-		}
-
-		return;
-	}
-
-	if (missing.length === rows.length) {
-		const boxes = flow(
-			rows.map((row) => ({
-				colspan: number(row, 'colspan') || 1,
-				rowspan: number(row, 'rowspan') || 1,
-				indent: number(row, 'indent'),
-			})),
-			columns,
-		);
-
-		place(grid, new Map(rows.map((row, index) => [row, boxes[index]])));
-
-		return;
-	}
-
-	let last = bottom(rows.filter((row) => !missing.includes(row)).map(boxOf));
-
-	for (const row of missing) {
-		const box = { ...boxOf(row), col: 1, row: last + 1 };
-
-		place(grid, new Map([[row, box]]));
-		last += box.rowspan;
-	}
-}
-
-function scan(): void {
-	document.querySelectorAll<HTMLElement>(GRID).forEach(derive);
 }
 
 type Anchor = { row: HTMLElement; where: 'before' | 'after' } | null;
@@ -1066,7 +967,6 @@ function onKeyDown(event: KeyboardEvent): void {
 }
 
 export function install(): () => void {
-	document.addEventListener('htmx:after:swap', scan);
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('change', onChange);
 	document.addEventListener('click', onMove, true);
@@ -1078,10 +978,8 @@ export function install(): () => void {
 	document.addEventListener('pointercancel', onPointerUp);
 	document.addEventListener('lostpointercapture', onLostCapture);
 	document.addEventListener('keydown', onKeyDown, true);
-	scan();
 
 	return () => {
-		document.removeEventListener('htmx:after:swap', scan);
 		document.removeEventListener('repeater:stamp', onStamp);
 		document.removeEventListener('change', onChange);
 		document.removeEventListener('click', onMove, true);

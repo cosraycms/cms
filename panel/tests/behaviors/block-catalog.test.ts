@@ -165,7 +165,7 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 						zxx: {
 							0: {
 								type: types[7].type,
-								layout: { colspan: '12', rowspan: '1', indent: '0' },
+								layout: { colspan: '12', rowspan: '1' },
 								fields: { text: { value: { zxx: 'Catalog value' } } },
 							},
 						},

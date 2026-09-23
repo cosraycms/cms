@@ -244,7 +244,7 @@ function view(rows: Box[], options: { types?: string[]; common?: string[] } = {}
 					zxx: rows.map((box, index) => ({
 						uid: `row-${index}`,
 						type: TEXT,
-						layout: { ...box, rowspan: box.rowspan ?? 1, indent: 0 },
+						layout: { ...box, rowspan: box.rowspan ?? 1 },
 						fields: { text: { value: { zxx: `Row ${index}` } } },
 					})),
 				},
@@ -334,7 +334,7 @@ describe('ghost insert', () => {
 
 		expect(rows()).toHaveLength(3);
 		expect(uid(below)).toBe('row-1');
-		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0', col: '9', row: '1' });
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', col: '9', row: '1' });
 		expect(added.style.getPropertyValue('--col')).toBe('9');
 		expect(added.hasAttribute('data-placed')).toBe(true);
 		expect(added.contains(document.activeElement)).toBe(true);
@@ -350,9 +350,9 @@ describe('ghost insert', () => {
 		ghosts(grid)[1].click();
 
 		expect(rows().map(layout)).toEqual([
-			{ colspan: '6', rowspan: '1', indent: '0', col: '1', row: '1' },
-			{ colspan: '5', rowspan: '1', indent: '0', col: '1', row: '2' },
-			{ colspan: '7', rowspan: '1', indent: '0', col: '6', row: '2' },
+			{ colspan: '6', rowspan: '1', col: '1', row: '1' },
+			{ colspan: '5', rowspan: '1', col: '1', row: '2' },
+			{ colspan: '7', rowspan: '1', col: '6', row: '2' },
 		]);
 	});
 
@@ -381,7 +381,7 @@ describe('ghost insert', () => {
 
 		expect(rows()).toHaveLength(3);
 		expect(added.querySelector<HTMLInputElement>('input[name$="[type]"]')!.value).toBe(QUOTE);
-		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0', col: '9', row: '1' });
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', col: '9', row: '1' });
 		expect(menu.matches(':popover-open')).toBe(false);
 	});
 
@@ -412,7 +412,7 @@ describe('ghost insert', () => {
 
 		expect(rows()).toHaveLength(3);
 		expect(added.querySelector<HTMLInputElement>('input[name$="[type]"]')!.value).toBe(QUOTE);
-		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', indent: '0', col: '9', row: '1' });
+		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', col: '9', row: '1' });
 	});
 
 	it('forgets the gap once its menu closed, so the footer appends below everything', async () => {
@@ -444,7 +444,6 @@ describe('ghost insert', () => {
 		expect(layout(rows()[2])).toEqual({
 			colspan: '12',
 			rowspan: '1',
-			indent: '0',
 			col: '1',
 			row: '3',
 		});

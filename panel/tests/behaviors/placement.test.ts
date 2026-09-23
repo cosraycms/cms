@@ -7,7 +7,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { install as installBlocks } from '../../src/behaviors/blocks';
 import {
 	compact,
-	flow,
 	gaps,
 	install,
 	limits,
@@ -53,48 +52,6 @@ function plain(boxes: Boxes<string>): Record<string, Box> {
 // A B C in the first row, D E in the second.
 const two = (): Boxes<string> =>
 	grid({ a: box(1, 1, 5), b: box(6, 1, 4), c: box(10, 1, 3), d: box(1, 2, 6), e: box(7, 2, 6) });
-
-describe('placement flow', () => {
-	it('places spans and indents as the sparse row flow does', () => {
-		expect(
-			flow(
-				[
-					{ colspan: 8, rowspan: 1, indent: 0 },
-					{ colspan: 12, rowspan: 1, indent: 0 },
-					{ colspan: 6, rowspan: 1, indent: 3 },
-				],
-				12,
-			),
-		).toEqual([box(1, 1, 8), box(1, 2, 12), box(4, 3, 6)]);
-	});
-
-	it('never goes back to a gap the cursor passed', () => {
-		// The indented block would fit beside the first one, but the flow put
-		// it a row further down, next to its indent.
-		expect(
-			flow(
-				[
-					{ colspan: 6, rowspan: 1, indent: 0 },
-					{ colspan: 7, rowspan: 1, indent: 5 },
-				],
-				12,
-			),
-		).toEqual([box(1, 1, 6), box(6, 2, 7)]);
-	});
-
-	it('fits blocks beside a tall one', () => {
-		expect(
-			flow(
-				[
-					{ colspan: 4, rowspan: 2, indent: 0 },
-					{ colspan: 8, rowspan: 1, indent: 0 },
-					{ colspan: 8, rowspan: 1, indent: 0 },
-				],
-				12,
-			),
-		).toEqual([box(1, 1, 4, 2), box(5, 1, 8), box(5, 2, 8)]);
-	});
-});
 
 describe('placement model', () => {
 	it('pushes what a block lands on below it, and on down', () => {
@@ -207,7 +164,7 @@ describe('placement model', () => {
 const TEXT = 'Cosray\\Block\\Text';
 const TRACK = 100;
 
-type Layout = { colspan: number; rowspan?: number; indent?: number; col?: number; row?: number };
+type Layout = { colspan: number; rowspan?: number; col?: number; row?: number };
 
 function view(rows: Layout[]): string {
 	return execFileSync('php', [resolve('../tests/Fixtures/Panel/field.php')], {
@@ -238,7 +195,7 @@ function view(rows: Layout[]): string {
 					zxx: rows.map((layout, index) => ({
 						uid: `row-${index}`,
 						type: TEXT,
-						layout: { rowspan: 1, indent: 0, ...layout },
+						layout: { rowspan: 1, ...layout },
 						fields: { text: { value: { zxx: `Row ${index}` } } },
 					})),
 				},
@@ -296,35 +253,6 @@ function menuItem(row: HTMLElement, selector: string): HTMLElement {
 }
 
 describe('placement on the canvas', () => {
-	it('places a grid saved before positions where the flow put it', () => {
-		const { rows } = editor([{ colspan: 6 }, { colspan: 7, indent: 5 }]);
-
-		expect(rows().map(spot)).toEqual(['1/1 6×1', '6/2 7×1']);
-		expect(rows()[1].querySelector<HTMLInputElement>('input[data-layout="indent"]')!.value).toBe(
-			'0',
-		);
-		expect(rows().every((row) => row.hasAttribute('data-placed'))).toBe(true);
-	});
-
-	it('keeps stored positions and submits the rows in reading order', () => {
-		const { form, rows } = editor([
-			{ colspan: 6, col: 7, row: 1 },
-			{ colspan: 6, col: 1, row: 1 },
-		]);
-
-		expect(rows().map(spot)).toEqual(['7/1 6×1', '1/1 6×1']);
-
-		// Any structural change puts the DOM, and so the submitted order, in line.
-		form
-			.querySelector<HTMLElement>('.cms-blocks-editor')!
-			.dispatchEvent(new Event('change', { bubbles: true }));
-
-		expect(rows().map(uid)).toEqual(['row-1', 'row-0']);
-		expect(rows()[0].querySelector<HTMLInputElement>('[data-repeater-uid]')!.name).toBe(
-			'content[body][value][zxx][0][uid]',
-		);
-	});
-
 	it('stamps a block after another in new rows below it, and appends below everything', () => {
 		const { rows } = editor([
 			{ colspan: 6, col: 1, row: 1 },

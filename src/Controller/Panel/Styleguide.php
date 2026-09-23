@@ -834,10 +834,10 @@ final class Styleguide extends Panel
 			'type' => 'doc',
 			'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]]],
 		];
-		$layout = static fn(int $colspan, int $rowspan = 1, int $indent = 0): array => [
+		$layout = static fn(int $colspan, int $rowspan = 1, int $col = 0, int $row = 0): array => [
 			'colspan' => $colspan,
 			'rowspan' => $rowspan,
-			'indent' => $indent,
+			...($col > 0 ? ['col' => $col, 'row' => $row] : []),
 		];
 		$richtext = static fn(string $uid, array $layout, array $value): array => [
 			'uid' => $uid,
@@ -938,23 +938,27 @@ final class Styleguide extends Panel
 			'grid' => [
 				'value' => [
 					'en' => [
-						$image('sg-grid-1', $layout(4, 2), self::galleryUid(1)),
-						$richtext('sg-grid-2', $layout(8), ['zxx' => $doc('Eight columns beside a two-row image.')]),
-						$richtext('sg-grid-3', $layout(8), ['zxx' => $doc('The second row of the same pair.')]),
-						$heading('sg-grid-4', $layout(6, 1, 3), ['zxx' => 'Centered by an indent of three'], '3'),
-						$richtext('sg-grid-5', $layout(4), ['zxx' => $doc('A third.')]),
-						$richtext('sg-grid-6', $layout(4), ['zxx' => $doc('Another third.')]),
-						$richtext('sg-grid-7', $layout(4), ['zxx' => $doc('And the last third.')]),
-						$youtube('sg-grid-8', $layout(6), 'dQw4w9WgXcQ'),
-						$video('sg-grid-10', $layout(6), 'sg-clip'),
+						$image('sg-grid-1', $layout(4, 2, 1, 1), self::galleryUid(1)),
+						$richtext('sg-grid-2', $layout(8, 1, 5, 1), [
+							'zxx' => $doc('Eight columns beside a two-row image.'),
+						]),
+						$richtext('sg-grid-3', $layout(8, 1, 5, 2), [
+							'zxx' => $doc('The second row of the same pair.'),
+						]),
+						$heading('sg-grid-4', $layout(6, 1, 4, 3), ['zxx' => 'Centered on the grid'], '3'),
+						$richtext('sg-grid-5', $layout(4, 1, 1, 4), ['zxx' => $doc('A third.')]),
+						$richtext('sg-grid-6', $layout(4, 1, 5, 4), ['zxx' => $doc('Another third.')]),
+						$richtext('sg-grid-7', $layout(4, 1, 9, 4), ['zxx' => $doc('And the last third.')]),
+						$youtube('sg-grid-8', $layout(6, 1, 1, 5), 'dQw4w9WgXcQ'),
+						$video('sg-grid-10', $layout(6, 1, 7, 5), 'sg-clip'),
 						$iframe(
 							'sg-grid-9',
-							$layout(6),
+							$layout(6, 1, 1, 6),
 							'<iframe src="https://example.org/embed" title="Map"></iframe>',
 						),
 						$split(
 							'sg-grid-11',
-							$layout(6, 2),
+							$layout(6, 2, 7, 6),
 							$image('sg-grid-12', $layout(3, 2), self::galleryUid(2)),
 							$richtext('sg-grid-13', $layout(3, 2), [
 								'zxx' => $doc('Split into columns beside its image.'),
@@ -962,14 +966,14 @@ final class Styleguide extends Panel
 						),
 						$split(
 							'sg-grid-14',
-							$layout(6, 2),
+							$layout(6, 2, 1, 7),
 							$text('sg-grid-15', $layout(6), ['zxx' => 'Split into rows: the upper one.']),
 							$text('sg-grid-16', $layout(6), ['zxx' => 'And the lower one.']),
 						),
 					],
 					'de' => [
-						$heading('sg-grid-8', $layout(12), ['zxx' => 'Die deutsche Liste'], '2'),
-						$richtext('sg-grid-9', $layout(6), ['zxx' => $doc('Eine eigene Liste je Sprache.')]),
+						$heading('sg-grid-8', $layout(12, 1, 1, 1), ['zxx' => 'Die deutsche Liste'], '2'),
+						$richtext('sg-grid-9', $layout(6, 1, 1, 2), ['zxx' => $doc('Eine eigene Liste je Sprache.')]),
 					],
 				],
 				'meta' => [],

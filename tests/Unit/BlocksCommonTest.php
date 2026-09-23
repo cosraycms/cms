@@ -83,7 +83,7 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 		$row = [
 			'uid' => 'row1',
 			'type' => Block\Text::class,
-			'layout' => ['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 1, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 			'fields' => ['text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['zxx' => 'Not common']]],
 		];
 		$this->assertTrue(

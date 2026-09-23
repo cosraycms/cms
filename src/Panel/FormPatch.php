@@ -6,7 +6,9 @@ namespace Cosray\Panel;
 
 use Closure;
 use Cosray\Block\Layout;
+use Cosray\Block\Placement;
 use Cosray\DateTime\Codec;
+use Cosray\Field\Blocks;
 use Cosray\Field\Field;
 use Cosray\Uid;
 use DateTimeZone;
@@ -91,6 +93,18 @@ final class FormPatch
 
 		$changed = false;
 		$value = $submitted['value'] ?? null;
+
+		// A blocks value keeps the grid it was placed on; its rows are read
+		// against that count, not the field's default.
+		if (($control['name'] ?? null) === 'blocks') {
+			$default = is_int($control['props']['columns'] ?? null) ? $control['props']['columns'] : 1;
+			$columns = Blocks::storedColumns(
+				is_numeric($submitted['columns'] ?? null) ? (int) $submitted['columns'] : null,
+				Blocks::storedColumns($entry['columns'] ?? null, $default),
+			);
+			$control['props']['columns'] = $columns;
+			$entry['columns'] = $columns;
+		}
 
 		if (is_array($value)) {
 			$stored = is_array($entry['value'] ?? null) ? $entry['value'] : [];
@@ -270,7 +284,9 @@ final class FormPatch
 			}
 		}
 
-		$block = fn(int $columns, int $rowspan): Closure => fn(
+		// The blocks of a split have no position, not even one stored from
+		// before they were moved into it.
+		$block = fn(int $columns, int $rowspan, bool $part = false): Closure => fn(
 			array $storedRow,
 			array $row,
 			string $uid,
@@ -281,7 +297,10 @@ final class FormPatch
 				...$storedRow,
 				'uid' => $uid,
 				'type' => $type,
-				'layout' => Layout::normalize(self::layout($storedRow, $row), $columns, $min, $rowspan)->array(),
+				'layout' => self::area(
+					Layout::normalize(self::layout($storedRow, $row), $columns, $min, $rowspan),
+					$part,
+				),
 				'fields' => $fields,
 			],
 			$storedRow,
@@ -289,40 +308,51 @@ final class FormPatch
 			$metaControl,
 		);
 
-		return $this->rows(
-			$types,
-			$rows,
-			$known,
-			$block($columns, Layout::MAX_ROWSPAN),
-			function (array $storedRow, array $row, string $uid) use (
+		// A row that arrives without a position gets one below the others.
+		return Placement::rows(
+			$this->rows(
 				$types,
+				$rows,
 				$known,
-				$block,
-				$columns,
-				$min,
-				$metaControl,
-			): ?array {
-				$layout = Layout::normalize(self::layout($storedRow, $row), $columns, $min);
-				$blocks = $this->rows(
+				$block($columns, Layout::MAX_ROWSPAN),
+				function (array $storedRow, array $row, string $uid) use (
 					$types,
-					array_values($row['blocks']),
 					$known,
-					$block($layout->colspan, $layout->rowspan),
-				);
-
-				// A split holds two blocks at least; the one left takes its place.
-				if (count($blocks) < 2) {
-					return $blocks === [] ? null : [...$blocks[0], 'layout' => $layout->array()];
-				}
-
-				return $this->withMeta(
-					[...$storedRow, 'uid' => $uid, 'layout' => $layout->array(), 'blocks' => $blocks],
-					$storedRow,
-					$row,
+					$block,
+					$columns,
+					$min,
 					$metaControl,
-				);
-			},
+				): ?array {
+					$layout = Layout::normalize(self::layout($storedRow, $row), $columns, $min);
+					$blocks = $this->rows(
+						$types,
+						array_values($row['blocks']),
+						$known,
+						$block($layout->colspan, $layout->rowspan, part: true),
+					);
+
+					// A split holds two blocks at least; the one left takes its place.
+					if (count($blocks) < 2) {
+						return $blocks === [] ? null : [...$blocks[0], 'layout' => $layout->array()];
+					}
+
+					return $this->withMeta(
+						[...$storedRow, 'uid' => $uid, 'layout' => $layout->array(), 'blocks' => $blocks],
+						$storedRow,
+						$row,
+						$metaControl,
+					);
+				},
+			),
+			$columns,
+			$min,
 		);
+	}
+
+	/** @return array{colspan: int, rowspan: int, col?: int, row?: int} */
+	private static function area(Layout $layout, bool $part): array
+	{
+		return $part ? new Layout($layout->colspan, $layout->rowspan)->array() : $layout->array();
 	}
 
 	/** The stored layout with the submitted dimensions over it. */

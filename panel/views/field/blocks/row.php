@@ -38,10 +38,9 @@ $layout = $area === null
 	? Layout::normalize($rowData['layout'] ?? null, $columns, $min)
 	: Layout::normalize($rowData['layout'] ?? null, $area->colspan, $min, $area->rowspan);
 $readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
-$reserved = $layout->indent + $layout->colspan;
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
-$style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";
 $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $labels = (bool) ($blockType['labels'] ?? true);
 // A built-in type with an editor view of its own renders as content
@@ -77,7 +76,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 	class="block<?= $bare ? ' is-bare' : '' ?>"
 	data-repeater-row
 	data-meta-owner
-	data-indent="<?= $layout->indent ?>"
 	<?= $layout->placed() ? 'data-placed' : '' ?>
 	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
@@ -100,11 +98,6 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 		name="<?= $this->escape("{$rowName}[layout][rowspan]") ?>"
 		value="<?= $layout->rowspan ?>"
 		data-layout="rowspan" />
-	<input
-		type="hidden"
-		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
-		value="<?= $layout->indent ?>"
-		data-layout="indent" />
 	<input
 		type="hidden"
 		name="<?= $this->escape("{$rowName}[layout][col]") ?>"

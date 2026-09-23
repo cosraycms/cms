@@ -26,7 +26,6 @@ $rowName = "{$name}[{$index}]";
 $rowId = "{$id}-{$index}";
 $uid = is_string($rowData['uid'] ?? null) ? $rowData['uid'] : '';
 $layout = Layout::normalize($rowData['layout'] ?? null, $columns, $min);
-$reserved = $layout->indent + $layout->colspan;
 $blocks = array_values(array_filter(
 	is_array($rowData['blocks'] ?? null) ? $rowData['blocks'] : [],
 	is_array(...),
@@ -35,7 +34,7 @@ $first = Layout::normalize($blocks[0]['layout'] ?? null, $layout->colspan, $min,
 $direction = $blocks !== [] && $first->colspan === $layout->colspan ? 'rows' : 'columns';
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
-$style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";
 $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $label = __('field:split-block');
 ?>
@@ -44,7 +43,6 @@ $label = __('field:split-block');
 	data-repeater-row
 	data-meta-owner
 	data-split="<?= $direction ?>"
-	data-indent="<?= $layout->indent ?>"
 	<?= $layout->placed() ? 'data-placed' : '' ?>
 	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">

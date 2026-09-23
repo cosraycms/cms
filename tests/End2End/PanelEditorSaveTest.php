@@ -269,8 +269,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'contentBlocks' => [
 				'type' => Blocks::class,
 				'value' => [
-					'en' => [$this->textBlock('block-a', 'Old EN', ['colspan' => 6, 'rowspan' => 1, 'indent' => 2])],
-					'de' => [$this->textBlock('block-b', 'Alt DE', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0])],
+					'en' => [$this->textBlock('block-a', 'Old EN', ['colspan' => 6, 'rowspan' => 1])],
+					'de' => [$this->textBlock('block-b', 'Alt DE', ['colspan' => 12, 'rowspan' => 1])],
 				],
 			],
 		]);
@@ -286,7 +286,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								[
 									'uid' => '',
 									'type' => Builtin\Heading::class,
-									'layout' => ['colspan' => '12', 'rowspan' => '1', 'indent' => '0'],
+									'layout' => ['colspan' => '12', 'rowspan' => '1'],
 									'fields' => [
 										'text' => ['value' => ['zxx' => 'Fresh heading']],
 										'level' => ['value' => ['zxx' => '3']],
@@ -295,9 +295,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								[
 									'uid' => 'block-a',
 									'type' => Builtin\Text::class,
-									// Out of range: a twelve-column span with an indent left
-									// over from a narrower one is clamped, not rejected.
-									'layout' => ['colspan' => '14', 'rowspan' => '1', 'indent' => '2'],
+									// Out of range: wider than the grid is clamped, not rejected.
+									'layout' => ['colspan' => '14', 'rowspan' => '1'],
 									'fields' => ['text' => ['value' => ['zxx' => 'New EN']]],
 									'meta' => ['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']],
 								],
@@ -317,7 +316,8 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('3', $value['en'][0]['fields']['level']['value']['zxx']);
 		$this->assertSame('block-a', $value['en'][1]['uid']);
 		// jsonb orders keys; compare by content.
-		$this->assertEquals(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $value['en'][1]['layout']);
+		// Clamped, and placed below the heading: the form sent no position.
+		$this->assertEquals(['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 2], $value['en'][1]['layout']);
 		$this->assertSame('New EN', $value['en'][1]['fields']['text']['value']['zxx']);
 		$this->assertSame('kept', $value['en'][1]['fields']['text']['stashed']);
 		$this->assertEquals(['class' => ['zxx' => 'hero'], 'id' => ['zxx' => 'intro']], $value['en'][1]['meta']);
@@ -331,7 +331,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'contentBlocks' => [
 				'type' => Blocks::class,
 				'value' => [
-					'en' => [$this->textBlock('block-a', 'Text', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0])],
+					'en' => [$this->textBlock('block-a', 'Text', ['colspan' => 6, 'rowspan' => 1])],
 				],
 				'meta' => ['gap' => ['zxx' => 'm'], 'stashed' => ['zxx' => 'kept']],
 			],
@@ -347,7 +347,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'en' => [[
 								'uid' => 'block-a',
 								'type' => Builtin\Text::class,
-								'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '6', 'rowspan' => '1'],
 								'fields' => ['text' => ['value' => ['zxx' => 'Text']]],
 								'meta' => [
 									'class' => ['zxx' => ''],
@@ -393,7 +393,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'zxx' => [[
 								'uid' => 'quote-a',
 								'type' => QuoteBlock::class,
-								'layout' => ['colspan' => '1', 'rowspan' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '1', 'rowspan' => '1'],
 								'fields' => ['text' => ['value' => ['de' => 'Neu DE']]],
 							]],
 						],
@@ -432,7 +432,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'zxx' => [[
 								'uid' => 'quote-a',
 								'type' => QuoteBlock::class,
-								'layout' => ['colspan' => '1', 'rowspan' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '1', 'rowspan' => '1'],
 								// Empties the required quote in the default locale.
 								'fields' => ['text' => ['value' => ['en' => '']]],
 							]],
@@ -462,7 +462,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 
 	public function testSplitsPatchTheirBlocksByUid(): void
 	{
-		$column = ['colspan' => 3, 'rowspan' => 2, 'indent' => 0];
+		$column = ['colspan' => 3, 'rowspan' => 2];
 		$this->createBlocksNode('panel-save-splits', 'test-media-document', [
 			'contentBlocks' => [
 				'type' => Blocks::class,
@@ -470,20 +470,20 @@ final class PanelEditorSaveTest extends End2EndTestCase
 					'en' => [
 						[
 							'uid' => 'split-a',
-							'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+							'layout' => ['colspan' => 6, 'rowspan' => 2],
 							'stashed' => 'kept',
 							'blocks' => [
 								$this->textBlock('block-a', 'Left', $column),
 								$this->textBlock('block-b', 'Right', $column),
 							],
 						],
-						$this->textBlock('block-c', 'Solo', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0]),
+						$this->textBlock('block-c', 'Solo', ['colspan' => 6, 'rowspan' => 1, 'col' => 7, 'row' => 1]),
 						[
 							'uid' => 'split-b',
-							'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+							'layout' => ['colspan' => 6, 'rowspan' => 1],
 							'blocks' => [
-								$this->textBlock('block-d', 'Gone', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
-								$this->textBlock('block-e', 'Last', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+								$this->textBlock('block-d', 'Gone', ['colspan' => 3, 'rowspan' => 1]),
+								$this->textBlock('block-e', 'Last', ['colspan' => 3, 'rowspan' => 1]),
 							],
 						],
 					],
@@ -507,31 +507,28 @@ final class PanelEditorSaveTest extends End2EndTestCase
 							'en' => [
 								[
 									'uid' => 'split-a',
-									'layout' => ['colspan' => '6', 'rowspan' => '2', 'indent' => '0'],
+									'layout' => ['colspan' => '6', 'rowspan' => '2', 'col' => '1', 'row' => '1'],
 									'meta' => ['class' => ['zxx' => 'pair']],
 									'blocks' => [
 										// Taller than its split: clamped into the split's rows.
 										$submitted('block-a', 'Left new', [
 											'colspan' => '3',
 											'rowspan' => '5',
-											'indent' => '0',
 										]),
 										// Moved in from the top level.
 										$submitted('block-c', 'Solo', [
 											'colspan' => '3',
 											'rowspan' => '2',
-											'indent' => '0',
 										]),
 									],
 								],
 								[
 									'uid' => 'split-b',
-									'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '2'],
+									'layout' => ['colspan' => '6', 'rowspan' => '1', 'col' => '3', 'row' => '3'],
 									'blocks' => [
 										$submitted('block-e', 'Last', [
 											'colspan' => '3',
 											'rowspan' => '1',
-											'indent' => '0',
 										]),
 									],
 								],
@@ -551,26 +548,28 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('kept', $rows[0]['stashed']);
 		$this->assertEquals(['class' => ['zxx' => 'pair']], $rows[0]['meta']);
 		$this->assertSame(['block-a', 'block-c'], array_column($rows[0]['blocks'], 'uid'));
-		$this->assertEquals(['colspan' => 3, 'rowspan' => 2, 'indent' => 0], $rows[0]['blocks'][0]['layout']);
+		$this->assertEquals(['colspan' => 3, 'rowspan' => 2], $rows[0]['blocks'][0]['layout']);
+		// Moved in from the grid, it leaves its position behind.
+		$this->assertEquals(['colspan' => 3, 'rowspan' => 2], $rows[0]['blocks'][1]['layout']);
 		$this->assertSame('Left new', $rows[0]['blocks'][0]['fields']['text']['value']['zxx']);
 		$this->assertSame('kept', $rows[0]['blocks'][0]['fields']['text']['stashed']);
 		$this->assertSame('kept', $rows[0]['blocks'][1]['fields']['text']['stashed']);
 		// A split left with one block turns into it, keeping the split's layout.
 		$this->assertSame('block-e', $rows[1]['uid']);
 		$this->assertSame(Builtin\Text::class, $rows[1]['type']);
-		$this->assertEquals(['colspan' => 6, 'rowspan' => 1, 'indent' => 2], $rows[1]['layout']);
+		$this->assertEquals(['colspan' => 6, 'rowspan' => 1, 'col' => 3, 'row' => 3], $rows[1]['layout']);
 	}
 
 	public function testValidationErrorsInsideSplitsCarryTheBlockPath(): void
 	{
-		$column = ['colspan' => 3, 'rowspan' => 1, 'indent' => 0];
+		$column = ['colspan' => 3, 'rowspan' => 1];
 		$this->createBlocksNode('panel-save-splits-invalid', 'test-media-document', [
 			'contentBlocks' => [
 				'type' => Blocks::class,
 				'value' => [
 					'en' => [[
 						'uid' => 'split-a',
-						'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+						'layout' => ['colspan' => 6, 'rowspan' => 1],
 						'blocks' => [
 							$this->textBlock('block-a', 'Left', $column),
 							$this->textBlock('block-b', 'Right', $column),
@@ -589,18 +588,18 @@ final class PanelEditorSaveTest extends End2EndTestCase
 						'value' => [
 							'en' => [[
 								'uid' => 'split-a',
-								'layout' => ['colspan' => '6', 'rowspan' => '1', 'indent' => '0'],
+								'layout' => ['colspan' => '6', 'rowspan' => '1'],
 								'blocks' => [
 									[
 										'uid' => 'block-a',
 										'type' => Builtin\Text::class,
-										'layout' => ['colspan' => '3', 'rowspan' => '1', 'indent' => '0'],
+										'layout' => ['colspan' => '3', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => 'Left']]],
 									],
 									[
 										'uid' => 'block-b',
 										'type' => Builtin\Text::class,
-										'layout' => ['colspan' => '3', 'rowspan' => '1', 'indent' => '0'],
+										'layout' => ['colspan' => '3', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => '']]],
 									],
 								],
@@ -1139,7 +1138,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		return [
 			'uid' => $uid,
 			'type' => QuoteBlock::class,
-			'layout' => ['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
+			'layout' => ['colspan' => 1, 'rowspan' => 1],
 			'fields' => [
 				'text' => ['type' => Textarea::class, 'value' => $text],
 				'source' => ['type' => Text::class, 'value' => ['zxx' => 'Someone']],

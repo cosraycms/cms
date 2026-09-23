@@ -30,9 +30,13 @@ class Block extends Value
 
 	protected readonly Layout $layout;
 
+	/** The field grid's column count, which a split's blocks share. */
+	protected readonly int $columns;
+
 	/**
 	 * @param ?string $type null for a split
 	 * @param ?Layout $area the split a block sits in, which bounds its layout
+	 * @param ?int $columns the grid's column count, the field's default without one
 	 */
 	public function __construct(
 		Field\Owner $owner,
@@ -40,12 +44,15 @@ class Block extends Value
 		ValueContext $context,
 		public readonly ?string $type,
 		?Layout $area = null,
+		?int $columns = null,
 	) {
 		parent::__construct($owner, $field, $context);
 
+		$this->columns = $columns ?? $field->getColumns();
+		$min = $field->minOf($this->columns);
 		$this->layout = $area === null
-			? Layout::normalize($this->data['layout'] ?? null, $field->getColumns(), $field->getMin())
-			: Layout::normalize($this->data['layout'] ?? null, $area->colspan, $field->getMin(), $area->rowspan);
+			? Layout::normalize($this->data['layout'] ?? null, $this->columns, $min)
+			: Layout::normalize($this->data['layout'] ?? null, $area->colspan, $min, $area->rowspan);
 
 		if ($type !== null) {
 			$data = $this->data['fields'] ?? [];
@@ -64,6 +71,7 @@ class Block extends Value
 					new ValueContext($this->fieldName, $row),
 					$childType,
 					$this->layout,
+					$this->columns,
 				);
 			}
 		}
@@ -160,7 +168,7 @@ class Block extends Value
 	 */
 	public function render(mixed ...$args): string
 	{
-		$ctx = new RenderContext($this->owner, $this->fieldName, $this->field->getColumns(), $args);
+		$ctx = new RenderContext($this->owner, $this->fieldName, $this->columns, $args);
 
 		return $this->renderWith($ctx, $this->field->services()->blocks->cached($this->owner));
 	}
@@ -208,16 +216,16 @@ class Block extends Value
 			? ' data-split="' . escape((string) $this->split()) . '"'
 			: ' data-type="' . escape((string) $this->handle()) . '"';
 		$layout = $this->layout;
-		// The columns the block takes out of its row: the reference sheet
-		// spans them and pushes the box past the indent. Derived, but
-		// emitted so CSS that cannot read the inline style still has it.
-		$reserved = $layout->indent + $layout->colspan;
+		// A block on the field's grid carries the lines it starts at; the
+		// blocks of a split follow each other on its area.
+		$position = $layout->placed() ? " data-col=\"{$layout->col}\" data-row=\"{$layout->row}\"" : '';
+		$style =
+			"--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}"
+			. ($layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '');
 		$attributes .=
-			" data-colspan=\"{$layout->colspan}\" data-rowspan=\"{$layout->rowspan}\" data-indent=\"{$layout->indent}\""
-			. " data-reserved=\"{$reserved}\""
+			" data-colspan=\"{$layout->colspan}\" data-rowspan=\"{$layout->rowspan}\"{$position}"
 			. ($this->padding() !== null ? ' data-padding="' . escape((string) $this->padding()) . '"' : '')
-			. " style=\"--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent};"
-			. " --reserved: {$reserved}\"";
+			. " style=\"{$style}\"";
 
 		return "<div{$attributes}>{$inner}</div>";
 	}

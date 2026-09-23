@@ -19,7 +19,7 @@ const TEXT = 'Cosray\\Block\\Text';
 const QUOTE = 'Acme\\Quote';
 const BASE = 'content[body][value][zxx]';
 
-type Layout = { colspan: number; rowspan: number; indent: number };
+type Layout = { colspan: number; rowspan: number };
 type Row = Record<string, unknown>;
 
 let uninstall: (() => void) | undefined;
@@ -31,7 +31,7 @@ afterEach(() => {
 	delete window.Cosray;
 });
 
-const area = (colspan: number, rowspan = 1, indent = 0): Layout => ({ colspan, rowspan, indent });
+const area = (colspan: number, rowspan = 1): Layout => ({ colspan, rowspan });
 const text = (uid: string, layout: Layout): Row => ({
 	uid,
 	type: TEXT,
@@ -110,7 +110,7 @@ function layout(row: HTMLElement): Layout {
 			row.querySelector<HTMLInputElement>(`:scope > input[data-layout="${dimension}"]`)!.value,
 		);
 
-	return { colspan: value('colspan'), rowspan: value('rowspan'), indent: value('indent') };
+	return { colspan: value('colspan'), rowspan: value('rowspan') };
 }
 
 function uid(row: HTMLElement): HTMLInputElement {
@@ -155,7 +155,7 @@ const ROWS = '[data-split-into="rows"][data-places="block"]';
 
 describe('splitting a block', () => {
 	it('puts a split in its place holding it and the picked type, the larger half kept', () => {
-		const { rows } = editor([text('a', area(5, 2, 2)), text('b', area(12))], [TEXT, QUOTE]);
+		const { rows } = editor([text('a', area(5, 2)), text('b', area(12))], [TEXT, QUOTE]);
 		const [block] = rows();
 
 		act(block, COLUMNS);
@@ -174,7 +174,7 @@ describe('splitting a block', () => {
 		expect(uid(container).value).toMatch(/^[a-z0-9]{13}$/);
 		expect(container.dataset.split).toBe('columns');
 		expect(type(container)).toBeUndefined();
-		expect(layout(container)).toEqual(area(5, 2, 2));
+		expect(layout(container)).toEqual(area(5, 2));
 		expect(kept).toBe(block);
 		expect(layout(kept)).toEqual(area(3, 2));
 		expect(layout(added)).toEqual(area(2, 2));
@@ -284,7 +284,7 @@ describe('removing a part', () => {
 	it('turns a split left with one part back into that block, with the split’s layout', () => {
 		const { rows } = editor([
 			text('x', area(3)),
-			split('s1', area(6, 2, 3), text('a', area(3, 2)), text('b', area(3, 2))),
+			split('s1', area(6, 2), text('a', area(3, 2)), text('b', area(3, 2))),
 			split('s2', area(6, 3), text('c', area(6, 2)), text('d', area(6))),
 		]);
 
@@ -294,7 +294,7 @@ describe('removing a part', () => {
 		const [, left, lower] = rows();
 
 		expect(rows().map((row) => uid(row).value)).toEqual(['x', 'a', 'd']);
-		expect(layout(left)).toEqual(area(6, 2, 3));
+		expect(layout(left)).toEqual(area(6, 2));
 		expect(uid(left).name).toBe(`${BASE}[1][uid]`);
 		expect(
 			left.querySelector('input[name$="[fields][text][value][zxx]"]')!.getAttribute('name'),
@@ -369,16 +369,14 @@ describe('resizing a split', () => {
 		).toBe('6');
 
 		// The last part trades with the one before it.
-		last
-			.querySelector<HTMLElement>(':scope > .chrome [data-repeater-grip]')!
-			.dispatchEvent(
-				new KeyboardEvent('keydown', {
-					key: 'ArrowRight',
-					altKey: true,
-					bubbles: true,
-					cancelable: true,
-				}),
-			);
+		last.querySelector<HTMLElement>(':scope > .chrome [data-repeater-grip]')!.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'ArrowRight',
+				altKey: true,
+				bubbles: true,
+				cancelable: true,
+			}),
+		);
 
 		expect(parts(container).map(layout)).toEqual([area(5), area(3)]);
 		expect(layout(container)).toEqual(area(8));

@@ -23,37 +23,33 @@ final class BlockTest extends RichtextOwnerTestCase
 {
 	public function testLayoutNormalizesAndClamps(): void
 	{
-		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], Layout::normalize(null, 12, 1)->array());
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1], Layout::normalize(null, 12, 1)->array());
+		$this->assertSame(['colspan' => 1, 'rowspan' => 1], Layout::normalize(['colspan' => 6], 1, 1)->array());
 		$this->assertSame(
-			['colspan' => 1, 'rowspan' => 1, 'indent' => 0],
-			Layout::normalize(['colspan' => 6], 1, 1)->array(),
-		);
-		$this->assertSame(
-			['colspan' => 6, 'rowspan' => 2, 'indent' => 3],
+			['colspan' => 6, 'rowspan' => 2],
 			Layout::normalize(['colspan' => '6', 'rowspan' => '2', 'indent' => '3'], 12, 2)->array(),
 		);
 		$this->assertSame(
-			['colspan' => 2, 'rowspan' => 6, 'indent' => 10],
-			Layout::normalize(['colspan' => 1, 'rowspan' => 99, 'indent' => 30], 12, 2)->array(),
+			['colspan' => 2, 'rowspan' => 6],
+			Layout::normalize(['colspan' => 1, 'rowspan' => 99], 12, 2)->array(),
 		);
 		$this->assertSame(
-			['colspan' => 8, 'rowspan' => 1, 'indent' => 4],
-			Layout::normalize(['colspan' => 8, 'rowspan' => -1, 'indent' => 9], 12, 1)->array(),
+			['colspan' => 8, 'rowspan' => 1],
+			Layout::normalize(['colspan' => 8, 'rowspan' => -1], 12, 1)->array(),
 		);
-		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], Layout::normalize('junk', 12, 1)->array());
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1], Layout::normalize('junk', 12, 1)->array());
 	}
 
 	public function testPlacedLayoutKeepsItsPositionInsideTheGrid(): void
 	{
-		// The position says where the block sits; an indent next to it is void.
 		$this->assertSame(
-			['colspan' => 6, 'rowspan' => 1, 'indent' => 0, 'col' => 7, 'row' => 3],
-			Layout::normalize(['colspan' => 6, 'indent' => 2, 'col' => '9', 'row' => '3'], 12, 1)->array(),
+			['colspan' => 6, 'rowspan' => 1, 'col' => 7, 'row' => 3],
+			Layout::normalize(['colspan' => 6, 'col' => '9', 'row' => '3'], 12, 1)->array(),
 		);
-		// Without both lines the block still flows.
+		// Without both lines the block has no position yet.
 		$this->assertSame(
-			['colspan' => 6, 'rowspan' => 1, 'indent' => 2],
-			Layout::normalize(['colspan' => 6, 'indent' => 2, 'col' => 3, 'row' => 0], 12, 1)->array(),
+			['colspan' => 6, 'rowspan' => 1],
+			Layout::normalize(['colspan' => 6, 'col' => 3, 'row' => 0], 12, 1)->array(),
 		);
 	}
 
@@ -80,7 +76,7 @@ final class BlockTest extends RichtextOwnerTestCase
 		$this->assertNull($block->styleClass());
 		$this->assertNull($block->elementId());
 		$this->assertNull($block->uid());
-		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], $block->layout()->array());
+		$this->assertSame(['colspan' => 12, 'rowspan' => 1], $block->layout()->array());
 		$this->assertTrue($block->isset());
 		$this->assertSame('', $block->text->unwrap());
 	}

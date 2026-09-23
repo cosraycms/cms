@@ -20,17 +20,20 @@
  * site's default gap; a chosen token always wins over it, `none`
  * included, so what the editor sees is what the site renders.
  *
- * Gap lengths must be context-independent — `rem` or `px`. The grid
- * resolves them against the container and the indent margin against
- * the block's own area, so a percentage means two different lengths,
- * and an `em` follows whatever font size each of them has.
+ * Gap lengths should be context-independent — `rem` or `px`: an `em`
+ * follows whatever font size the container has.
+ *
+ * A block on the field's grid carries the lines it starts at —
+ * `data-col`/`data-row` and `--col`/`--row` — next to its spans, and
+ * sits exactly there. The markup lists the blocks in reading order,
+ * row by row and left to right, the order they stack in below the
+ * threshold. A block whose type renders nothing leaves its cells empty.
  *
  * A split — `data-split` in place of `data-type` — holds blocks laid
- * out on its own area, side by side or stacked. It is a subgrid on
- * both axes, so its blocks sit on the field's own tracks, and it keeps
- * its indent columns empty with a leading pseudo-element: the split's
- * margin would otherwise shift the blocks at its start edge. Below the
- * stacking threshold it stacks its blocks like everything else.
+ * out on its own area, side by side or stacked; they carry spans but
+ * no position and follow each other there. It is a subgrid on both
+ * axes, so its blocks sit on the field's own tracks. Below the stacking
+ * threshold it stacks its blocks like everything else.
  *
  * `data-responsive` carries the field's `#[Columns(responsive:)]`
  * policy: `stack` collapses every block to full width below the
@@ -41,10 +44,9 @@
 
 @layer cms.blocks {
 	/*
-	 * `--blocks-column-gap` is the resolved column gap the grid and the
-	 * indent math read, `--blocks-row-gap` the row gap. Both start from the
-	 * site's default `--blocks-gap`; a shared `data-gap` sets both, a
-	 * per-axis attribute only its own.
+	 * `--blocks-column-gap` is the resolved column gap, `--blocks-row-gap`
+	 * the row gap. Both start from the site's default `--blocks-gap`; a
+	 * shared `data-gap` sets both, a per-axis attribute only its own.
 	 */
 	.cms-blocks {
 		--blocks-column-gap: var(--blocks-gap, var(--blocks-gap-m, 2rem));
@@ -123,32 +125,22 @@
 		--blocks-row-gap: var(--blocks-gap-xl, 4.5rem);
 	}
 
-	/*
-	 * The indent is relative to the flow: a block reserves it along with
-	 * its span (`--reserved` is the sum) and pushes its own box past it.
-	 * The percentage resolves against the block's own grid area, which is
-	 * `--reserved` columns wide, so one column is (100% + gap) / reserved.
-	 * A block too wide for the columns left in its row wraps to the next.
-	 */
+	/* The blocks of a split follow each other; a placed block sits on its lines. */
 	.cms-block {
 		min-width: 0;
-		grid-column: span var(--reserved, 1);
+		grid-column: span var(--colspan, 1);
 		grid-row: span var(--rowspan, 1);
-		margin-inline-start: calc(
-			var(--indent, 0) * (100% + var(--blocks-column-gap)) / var(--reserved, 1)
-		);
+	}
+
+	.cms-block[data-col] {
+		grid-column: var(--col) / span var(--colspan, 1);
+		grid-row: var(--row) / span var(--rowspan, 1);
 	}
 
 	.cms-block[data-split] {
 		display: grid;
 		grid-template-columns: subgrid;
 		grid-template-rows: subgrid;
-	}
-
-	.cms-block[data-split]:not([data-indent="0"])::before {
-		content: "";
-		grid-column: span var(--indent);
-		grid-row: 1 / -1;
 	}
 
 	.cms-block[data-padding="none"] {
@@ -175,17 +167,12 @@
 		.cms-blocks[data-responsive="stack"] .cms-block {
 			grid-column: 1 / -1;
 			grid-row: auto;
-			margin-inline-start: 0;
 		}
 
 		.cms-blocks[data-responsive="stack"] .cms-block[data-split] {
 			grid-template-columns: minmax(0, 1fr);
 			grid-template-rows: none;
 			row-gap: var(--blocks-row-gap);
-		}
-
-		.cms-blocks[data-responsive="stack"] .cms-block[data-split]::before {
-			display: none;
 		}
 	}
 

@@ -69,7 +69,7 @@ function wrap(row: HTMLElement, direction: Direction): HTMLElement | null {
 	adopt(row, split);
 	release(row);
 	parts.dataset.columns = String(layout.colspan);
-	write(row, { ...layout, indent: 0 }, gridOf(parts));
+	write(row, layout, gridOf(parts));
 	changed(field);
 	void initDrag();
 
@@ -97,12 +97,12 @@ function split(row: HTMLElement, direction: Direction, type: string | null): voi
 		const kept = Math.ceil(layout.colspan / 2);
 
 		write(row, { ...layout, colspan: kept }, gridOf(parts));
-		added = { colspan: layout.colspan - kept, rowspan: layout.rowspan, indent: 0 };
+		added = { colspan: layout.colspan - kept, rowspan: layout.rowspan };
 	} else {
 		const area = read(container);
 
 		write(container, { ...area, rowspan: area.rowspan + 1 }, gridFor(container));
-		added = { colspan: area.colspan, rowspan: 1, indent: 0 };
+		added = { colspan: area.colspan, rowspan: 1 };
 	}
 
 	insert(

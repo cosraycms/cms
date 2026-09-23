@@ -59,6 +59,7 @@ final class BlocksValueTest extends TestCase
 		string $locale = 'en',
 		int $columns = 12,
 		array $meta = [],
+		?int $stored = null,
 	): BlocksValue {
 		$context = $this->createContext($locale);
 		$this->lastContext = $context;
@@ -68,6 +69,10 @@ final class BlocksValueTest extends TestCase
 
 		if ($meta !== []) {
 			$data['meta'] = $meta;
+		}
+
+		if ($stored !== null) {
+			$data['columns'] = $stored;
 		}
 
 		$field = new Blocks('blocks', $owner, new ValueContext('blocks', $data));
@@ -113,7 +118,7 @@ final class BlocksValueTest extends TestCase
 			[
 				'image' => ['type' => \Cosray\Field\Image::class, 'value' => [Field::NEUTRAL_LOCALE => [$item]]],
 			],
-			['colspan' => $span, 'rowspan' => 1, 'indent' => 0],
+			['colspan' => $span, 'rowspan' => 1],
 			uid: $uid,
 		);
 	}
@@ -129,7 +134,7 @@ final class BlocksValueTest extends TestCase
 		return $this->row(
 			Builtin\Images::class,
 			['images' => $field],
-			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+			['colspan' => 12, 'rowspan' => 1],
 			uid: $uid,
 		);
 	}
@@ -137,7 +142,7 @@ final class BlocksValueTest extends TestCase
 	private function richtext(
 		string $text,
 		string $uid = 'b1',
-		array $layout = ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+		array $layout = ['colspan' => 12, 'rowspan' => 1],
 	): array {
 		return $this->row(
 			Builtin\RichText::class,
@@ -189,7 +194,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->text(
 				"Hello\nWorld",
-				['colspan' => 8, 'rowspan' => 2, 'indent' => 2],
+				['colspan' => 8, 'rowspan' => 2, 'col' => 3, 'row' => 1],
 				[
 					'class' => ['zxx' => 'hero'],
 					'id' => ['zxx' => 'intro'],
@@ -199,8 +204,8 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertSame(
 			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
-				. '<div class="cms-block hero" id="intro" data-type="text" data-colspan="8" data-rowspan="2" data-indent="2"'
-				. ' data-reserved="10" style="--colspan: 8; --rowspan: 2; --indent: 2; --reserved: 10">'
+				. '<div class="cms-block hero" id="intro" data-type="text" data-colspan="8" data-rowspan="2" data-col="3"'
+				. ' data-row="1" style="--colspan: 8; --rowspan: 2; --col: 3; --row: 1">'
 				. "Hello<br />\nWorld"
 				. '</div></div>',
 			$blocks->render(),
@@ -210,7 +215,7 @@ final class BlocksValueTest extends TestCase
 
 	public function testRendersTheSpacingAttributesOnlyWhenSet(): void
 	{
-		$full = ['colspan' => 12, 'rowspan' => 1, 'indent' => 0];
+		$full = ['colspan' => 12, 'rowspan' => 1];
 		$blocks = $this->createBlocksValue(
 			[$this->text('Hi', $full, ['padding' => ['zxx' => 'xl']])],
 			meta: ['gap' => ['zxx' => 's'], 'columnGap' => ['zxx' => 'l'], 'rowGap' => ['zxx' => 'huge']],
@@ -222,7 +227,7 @@ final class BlocksValueTest extends TestCase
 			$html,
 		);
 		$this->assertStringNotContainsString('data-row-gap', $html);
-		$this->assertStringContainsString('data-reserved="12" data-padding="xl" style="', $html);
+		$this->assertStringContainsString('data-row="1" data-padding="xl" style="', $html);
 		$this->assertSame('s', $blocks->gap());
 		$this->assertNull($blocks->rowGap());
 		$this->assertSame('l', $blocks->columnGap());
@@ -242,7 +247,7 @@ final class BlocksValueTest extends TestCase
 
 	public function testRenderArgs(): void
 	{
-		$html = $this->createBlocksValue([$this->text('Hi', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0])])
+		$html = $this->createBlocksValue([$this->text('Hi', ['colspan' => 12, 'rowspan' => 1])])
 			->render(tag: 'section', prefix: 'x', class: 'page');
 
 		$this->assertStringStartsWith('<section class="x-blocks page" data-columns="12"', $html);
@@ -270,7 +275,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->text(
 				'x',
-				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1],
 				[
 					'class' => ['zxx' => '"><img src=x onerror=alert(1)>'],
 					'id' => ['zxx' => 'x" onmouseover="alert(1)'],
@@ -295,7 +300,7 @@ final class BlocksValueTest extends TestCase
 				[
 					'video' => ['type' => \Cosray\Field\Youtube::class, 'value' => ['zxx' => 'abc" onload="alert(1)']],
 				],
-				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1],
 			),
 		]);
 
@@ -308,21 +313,63 @@ final class BlocksValueTest extends TestCase
 	public function testReadersClampTheLayout(): void
 	{
 		$html = $this->createBlocksValue([
-			$this->text('x', ['colspan' => 30, 'rowspan' => 9, 'indent' => 4]),
+			$this->text('x', ['colspan' => 30, 'rowspan' => 9, 'col' => 10, 'row' => 2]),
 		])->render();
 
-		$this->assertStringContainsString('data-colspan="12" data-rowspan="6" data-indent="0"', $html);
+		$this->assertStringContainsString('data-colspan="12" data-rowspan="6" data-col="1" data-row="2"', $html);
 
 		$stacked = $this->createBlocksValue([$this->text('x', [
 			'colspan' => 6,
 			'rowspan' => 1,
-			'indent' => 3,
+			'col' => 4,
+			'row' => 1,
 		])], columns: 1);
 		$html = $stacked->render();
 
 		$this->assertStringContainsString('data-columns="1"', $html);
-		$this->assertStringContainsString('data-colspan="1" data-rowspan="1" data-indent="0"', $html);
-		$this->assertSame(['colspan' => 1, 'rowspan' => 1, 'indent' => 0], $stacked->first()?->layout()->array());
+		$this->assertStringContainsString('data-colspan="1" data-rowspan="1" data-col="1" data-row="1"', $html);
+		$this->assertSame(
+			['colspan' => 1, 'rowspan' => 1, 'col' => 1, 'row' => 1],
+			$stacked->first()?->layout()->array(),
+		);
+	}
+
+	public function testReadsTheGridStoredWithTheValue(): void
+	{
+		// Saved on six columns, read by a field that now defaults to twelve.
+		$blocks = $this->createBlocksValue(
+			[$this->text('x', ['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 1])],
+			stored: 6,
+		);
+		$html = $blocks->render();
+
+		$this->assertSame(6, $blocks->columns());
+		$this->assertStringContainsString('data-columns="6"', $html);
+		$this->assertStringContainsString('style="--columns: 6"', $html);
+		$this->assertSame(6, $blocks->unwrap()['columns']);
+		$this->assertSame(12, $this->createBlocksValue([], stored: 99)->columns());
+	}
+
+	public function testPlacesRowsStoredWithoutAPositionBelowThePlacedOnesInReadingOrder(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->text('Loose', ['colspan' => 6, 'rowspan' => 1], uid: 'b1'),
+			$this->text('Placed', ['colspan' => 6, 'rowspan' => 2, 'col' => 7, 'row' => 1], uid: 'b2'),
+			$this->text('Loose too', ['colspan' => 8, 'rowspan' => 1], uid: 'b3'),
+		]);
+
+		$this->assertSame(
+			[
+				['colspan' => 6, 'rowspan' => 2, 'col' => 7, 'row' => 1],
+				['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 3],
+				['colspan' => 8, 'rowspan' => 1, 'col' => 1, 'row' => 4],
+			],
+			array_map(static fn(Block $block): array => $block->layout()->array(), iterator_to_array($blocks)),
+		);
+		$this->assertSame(
+			['b2', 'b1', 'b3'],
+			array_map(static fn(Block $block): ?string => $block->uid(), iterator_to_array($blocks)),
+		);
 	}
 
 	public function testEmptyRenderEmitsNoElement(): void
@@ -338,8 +385,8 @@ final class BlocksValueTest extends TestCase
 	public function testIterationAndAccessors(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('One', ['colspan' => 4, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
-			$this->text('Two', ['colspan' => 8, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+			$this->text('One', ['colspan' => 4, 'rowspan' => 1], uid: 'b1'),
+			$this->text('Two', ['colspan' => 8, 'rowspan' => 1], uid: 'b2'),
 		]);
 
 		$this->assertTrue($blocks->isset());
@@ -358,7 +405,7 @@ final class BlocksValueTest extends TestCase
 	public function testUnwrapAndJson(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Hello', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], ['class' => ['zxx' => 'wide']]),
+			$this->text('Hello', ['colspan' => 6, 'rowspan' => 1], ['class' => ['zxx' => 'wide']]),
 		]);
 
 		$unwrapped = $blocks->unwrap();
@@ -368,7 +415,7 @@ final class BlocksValueTest extends TestCase
 				'uid' => 'b1',
 				'type' => Builtin\Text::class,
 				'handle' => 'text',
-				'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+				'layout' => ['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 				'fields' => ['text' => 'Hello'],
 				'meta' => ['class' => ['zxx' => 'wide']],
 			],
@@ -414,7 +461,7 @@ final class BlocksValueTest extends TestCase
 				[
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['en' => 'Hello', 'de' => 'Hallo']],
 				],
-				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1],
 			),
 		];
 
@@ -430,13 +477,13 @@ final class BlocksValueTest extends TestCase
 
 	public function testBlockRendersStandalone(): void
 	{
-		$blocks = $this->createBlocksValue([$this->text('Solo', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0])]);
+		$blocks = $this->createBlocksValue([$this->text('Solo', ['colspan' => 3, 'rowspan' => 1])]);
 		$block = $blocks->first();
 
 		$this->assertInstanceOf(Block::class, $block);
 		$this->assertSame(
-			'<div class="cms-block" data-type="text" data-colspan="3" data-rowspan="1" data-indent="0"'
-				. ' data-reserved="3" style="--colspan: 3; --rowspan: 1; --indent: 0; --reserved: 3">Solo</div>',
+			'<div class="cms-block" data-type="text" data-colspan="3" data-rowspan="1" data-col="1" data-row="1"'
+				. ' style="--colspan: 3; --rowspan: 1; --col: 1; --row: 1">Solo</div>',
 			(string) $block,
 		);
 		$this->assertStringStartsWith('<div class="x-block"', $block->render(prefix: 'x'));
@@ -451,7 +498,7 @@ final class BlocksValueTest extends TestCase
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['zxx' => 'Less <is> more']],
 					'source' => ['type' => \Cosray\Field\Text::class, 'value' => ['zxx' => 'Mies']],
 				],
-				['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 12, 'rowspan' => 1],
 			),
 		])->render();
 
@@ -661,7 +708,7 @@ final class BlocksValueTest extends TestCase
 					'value' => [Field::NEUTRAL_LOCALE => [['uid' => $uid]]],
 				],
 			],
-			['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+			['colspan' => 12, 'rowspan' => 1],
 		);
 		$blocks = $this->createBlocksValue([$video('videoasset001')]);
 		$this->seedAsset('videoasset001', 'clip.mp4', 'video/mp4');
@@ -680,7 +727,7 @@ final class BlocksValueTest extends TestCase
 	public function testImageHelpers(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Intro', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('Intro', ['colspan' => 12, 'rowspan' => 1], uid: 'b1'),
 			$this->image(['uid' => 'blockimg12345'], uid: 'b2'),
 			$this->images([['uid' => 'galleryimg123'], ['uid' => 'galleryimg124']], uid: 'b3'),
 			$this->image(['uid' => 'blockimg12346'], uid: 'b4'),
@@ -725,7 +772,7 @@ final class BlocksValueTest extends TestCase
 	public function testExcerptReadsTheRichtextBlock(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('Plain', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('Plain', ['colspan' => 12, 'rowspan' => 1], uid: 'b1'),
 			$this->richtext('One two three four five', uid: 'b2'),
 			$this->richtext('Second', uid: 'b3'),
 		]);
@@ -741,35 +788,35 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->split(
 				[
-					$this->text('Left', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0], uid: 'b1'),
-					$this->text('Right', ['colspan' => 3, 'rowspan' => 2, 'indent' => 0], uid: 'b2'),
+					$this->text('Left', ['colspan' => 3, 'rowspan' => 2], uid: 'b1'),
+					$this->text('Right', ['colspan' => 3, 'rowspan' => 2], uid: 'b2'),
 				],
-				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 2],
 				meta: ['class' => ['zxx' => 'pair']],
 			),
 			$this->split(
 				[
-					$this->text('Top', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b3'),
-					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b4'),
+					$this->text('Top', ['colspan' => 6, 'rowspan' => 1], uid: 'b3'),
+					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1], uid: 'b4'),
 				],
-				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 2],
 				uid: 's2',
 			),
 		]);
+		// The blocks of a split have no position; they follow each other on its area.
 		$child = static fn(string $text, int $colspan, int $rowspan): string => (
 			"<div class=\"cms-block\" data-type=\"text\" data-colspan=\"{$colspan}\" data-rowspan=\"{$rowspan}\""
-			. " data-indent=\"0\" data-reserved=\"{$colspan}\""
-			. " style=\"--colspan: {$colspan}; --rowspan: {$rowspan}; --indent: 0; --reserved: {$colspan}\">{$text}</div>"
+			. " style=\"--colspan: {$colspan}; --rowspan: {$rowspan}\">{$text}</div>"
 		);
-		$split = static fn(string $attributes, string $inner): string => (
-			"<div class=\"cms-block{$attributes}\" data-colspan=\"6\" data-rowspan=\"2\" data-indent=\"0\" data-reserved=\"6\""
-			. " style=\"--colspan: 6; --rowspan: 2; --indent: 0; --reserved: 6\">{$inner}</div>"
+		$split = static fn(string $attributes, string $inner, int $col): string => (
+			"<div class=\"cms-block{$attributes}\" data-colspan=\"6\" data-rowspan=\"2\" data-col=\"{$col}\" data-row=\"1\""
+			. " style=\"--colspan: 6; --rowspan: 2; --col: {$col}; --row: 1\">{$inner}</div>"
 		);
 
 		$this->assertSame(
 			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12">'
-				. $split(' pair" data-split="columns', $child('Left', 3, 2) . $child('Right', 3, 2))
-				. $split('" data-split="rows', $child('Top', 6, 1) . $child('Bottom', 6, 1))
+				. $split(' pair" data-split="columns', $child('Left', 3, 2) . $child('Right', 3, 2), 1)
+				. $split('" data-split="rows', $child('Top', 6, 1) . $child('Bottom', 6, 1), 7)
 				. '</div>',
 			$blocks->render(),
 		);
@@ -778,15 +825,15 @@ final class BlocksValueTest extends TestCase
 	public function testIterationStaysOnTheTopLevelAndLeavesDescend(): void
 	{
 		$blocks = $this->createBlocksValue([
-			$this->text('One', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
+			$this->text('One', ['colspan' => 6, 'rowspan' => 1], uid: 'b1'),
 			$this->split(
 				[
-					$this->text('Two', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
-					$this->text('Three', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0], uid: 'b3'),
+					$this->text('Two', ['colspan' => 3, 'rowspan' => 1], uid: 'b2'),
+					$this->text('Three', ['colspan' => 3, 'rowspan' => 1], uid: 'b3'),
 				],
-				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 1],
 			),
-			$this->text('Four', ['colspan' => 12, 'rowspan' => 1, 'indent' => 0], uid: 'b4'),
+			$this->text('Four', ['colspan' => 12, 'rowspan' => 1], uid: 'b4'),
 		]);
 		$uids = static fn(iterable $blocks): array => array_map(
 			static fn(Block $block): ?string => $block->uid(),
@@ -819,10 +866,10 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->split(
 				[
-					$this->text('Top', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b1'),
-					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+					$this->text('Top', ['colspan' => 6, 'rowspan' => 1], uid: 'b1'),
+					$this->text('Bottom', ['colspan' => 6, 'rowspan' => 1], uid: 'b2'),
 				],
-				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 2],
 				meta: ['padding' => ['zxx' => 's']],
 			),
 		]);
@@ -835,7 +882,7 @@ final class BlocksValueTest extends TestCase
 		);
 		$this->assertNull($split['type']);
 		$this->assertNull($split['handle']);
-		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'indent' => 0], $split['layout']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 2, 'col' => 1, 'row' => 1], $split['layout']);
 		$this->assertSame(['padding' => ['zxx' => 's']], $split['meta']);
 		$this->assertSame(['Top', 'Bottom'], array_column(array_column($split['blocks'], 'fields'), 'text'));
 		$this->assertSame('text', $split['blocks'][0]['handle']);
@@ -848,17 +895,14 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->split(
 				[
-					$this->text('Wide', ['colspan' => 12, 'rowspan' => 5, 'indent' => 4], uid: 'b1'),
-					$this->text('Narrow', ['colspan' => 2, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+					$this->text('Wide', ['colspan' => 12, 'rowspan' => 5], uid: 'b1'),
+					$this->text('Narrow', ['colspan' => 2, 'rowspan' => 1], uid: 'b2'),
 				],
-				['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 2],
 			),
 		]);
 
-		$this->assertSame(
-			['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
-			$blocks->first()?->blocks()[0]->layout()->array(),
-		);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 2], $blocks->first()?->blocks()[0]->layout()->array());
 	}
 
 	public function testSplitsWithoutAllowedBlocksAreSkipped(): void
@@ -866,9 +910,9 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([
 			$this->split(
 				[['uid' => 'b1', 'type' => 'App\\Nope', 'fields' => []], 'junk'],
-				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 1],
 			),
-			$this->text('Kept', ['colspan' => 6, 'rowspan' => 1, 'indent' => 0], uid: 'b2'),
+			$this->text('Kept', ['colspan' => 6, 'rowspan' => 1], uid: 'b2'),
 		]);
 
 		$this->assertSame(1, $blocks->count());
@@ -881,9 +925,9 @@ final class BlocksValueTest extends TestCase
 			$this->split(
 				[
 					$this->image(['uid' => 'blockimg12345'], span: 3, uid: 'b1'),
-					$this->richtext('Beside the image', 'b2', ['colspan' => 3, 'rowspan' => 1, 'indent' => 0]),
+					$this->richtext('Beside the image', 'b2', ['colspan' => 3, 'rowspan' => 1]),
 				],
-				['colspan' => 6, 'rowspan' => 1, 'indent' => 0],
+				['colspan' => 6, 'rowspan' => 1],
 			),
 		]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');

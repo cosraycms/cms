@@ -67,13 +67,9 @@
 
 	& .block {
 		position: relative;
-		/* The indent is relative: the block reserves it along with its span
-		   (--reserved is the sum), stays in the flow and pushes its own box
-		   past the indent. The percentage resolves against the block's own
-		   area, so one column is (100% + gap) / reserved. */
-		grid-column: span var(--reserved, 1);
+		/* The parts of a split follow each other; a block on the grid is placed. */
+		grid-column: span var(--colspan, 1);
 		grid-row: span var(--rowspan, 1);
-		margin-inline-start: calc(var(--indent, 0) * (100% + var(--blocks-gap)) / var(--reserved, 1));
 		min-width: 0;
 		border: 1px solid var(--cms-color-border);
 		background: var(--cms-color-surface);
@@ -105,11 +101,9 @@
 		}
 	}
 
-	/* A placed block sits on its own lines; no indent applies. */
 	& .grid > .block[data-placed] {
 		grid-column: var(--col) / span var(--colspan, 1);
 		grid-row: var(--row) / span var(--rowspan, 1);
-		margin-inline-start: 0;
 	}
 
 	/* The dragged block leaves the grid and follows the pointer above it. */
@@ -137,11 +131,9 @@
 
 	/*
 	 * A split is one block on the canvas. Its parts sit on the field's
-	 * own tracks through a subgrid on both axes; their list spans the
-	 * columns after the split's indent, since the split's margin would
-	 * otherwise land on the parts at its start edge. A part has no box of
-	 * its own, its tools sit inside its bottom end corner, and a dashed
-	 * seam in the gap separates it from the next.
+	 * own tracks through a subgrid on both axes. A part has no box of its
+	 * own, its tools sit inside its bottom end corner, and a dashed seam
+	 * in the gap separates it from the next.
 	 */
 	& .block.is-split {
 		display: grid;
@@ -152,7 +144,7 @@
 			display: grid;
 			grid-template-columns: subgrid;
 			grid-template-rows: subgrid;
-			grid-column: span var(--colspan, 1) / -1;
+			grid-column: 1 / -1;
 			grid-row: 1 / -1;
 		}
 	}

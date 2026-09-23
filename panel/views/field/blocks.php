@@ -2,8 +2,11 @@
 
 // Server-rendered blocks: the entries typed repeater with a grid. Rows
 // are placed on a preview grid mirroring the frontend contract
-// (--columns on the container, --colspan/--rowspan/--indent on the row) and
-// carry their layout as hidden inputs; the blocks behavior edits them.
+// (--columns on the container, --colspan/--rowspan and --col/--row on
+// the row) and carry their layout as hidden inputs; the blocks and
+// placement behaviors edit them. The grid is the one stored with the
+// value, the field's default for a new one, and every row arrives with
+// its position.
 // Add/remove/move/renumber comes from the repeater behavior: a + on each
 // row stamps before or after the row it sits in, the footer appends,
 // with a type picker for row insertions and multi-type footers.
@@ -16,12 +19,15 @@
 $control = (array) $this->unwrap($control);
 $props = (array) ($control['props'] ?? []);
 $value = $this->unwrap($value ?? null);
-$rows = is_array($value) ? array_values($value) : [];
-$columns = max(1, (int) ($props['columns'] ?? 1));
+$data = $this->unwrap($data ?? null);
+$columns = \Cosray\Field\Blocks::storedColumns(
+	is_array($data) ? $data['columns'] ?? null : null,
+	max(1, (int) ($props['columns'] ?? 1)),
+);
 $min = min($columns, max(1, (int) ($props['min'] ?? 1)));
+$rows = \Cosray\Block\Placement::rows(is_array($value) ? $value : [], $columns, $min);
 $metaControl = is_array($props['meta'] ?? null) ? $props['meta'] : null;
 // The field's own settings: the gap tokens the canvas renders like the site.
-$data = $this->unwrap($data ?? null);
 $meta = is_array($data) && is_array($data['meta'] ?? null) ? $data['meta'] : [];
 $spacing = static fn(string $key): string => is_array($meta[$key] ?? null)
 	&& in_array($meta[$key]['zxx'] ?? null, \Cosray\Field\Blocks::SPACING, true)

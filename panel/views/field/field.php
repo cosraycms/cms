@@ -91,6 +91,13 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<?php endif ?>
 	</label>
 	<div class="field-body">
+		<?php if ($controlName === 'blocks'): ?>
+			<?php // The grid the blocks were placed on is saved with them. ?>
+			<input
+				type="hidden"
+				name="<?= escape("{$nameRoot}[columns]") ?>"
+				value="<?= \Cosray\Field\Blocks::storedColumns($data['columns'] ?? null, (int) ($control['props']['columns'] ?? 1)) ?>" />
+		<?php endif ?>
 		<div class="control">
 			<?php if ($variants): ?>
 				<?php foreach ($locales as $locale): ?>

@@ -106,7 +106,6 @@ function context(ghost: HTMLElement): Insertion | null {
 			const layout: Array<[string, number]> = [
 				['colspan', fill.colspan],
 				['rowspan', fill.rowspan],
-				['indent', 0],
 				['col', fill.col],
 				['row', fill.row],
 			];
@@ -201,7 +200,7 @@ function watch(
 	observer.observe(grid, {
 		childList: true,
 		attributes: true,
-		attributeFilter: ['style', 'data-indent', 'data-placed'],
+		attributeFilter: ['style', 'data-placed'],
 		subtree: true,
 	});
 	schedule();

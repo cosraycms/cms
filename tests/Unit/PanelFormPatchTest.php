@@ -509,7 +509,7 @@ final class PanelFormPatchTest extends TestCase
 					'en' => [[
 						'uid' => 'b1',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => 6, 'rowspan' => 1, 'indent' => 2],
+						'layout' => ['colspan' => 6, 'rowspan' => 1, 'col' => 3, 'row' => 1],
 						'fields' => [
 							'text' => ['type' => 'Textarea', 'value' => ['zxx' => 'Old'], 'stashed' => 'kept'],
 						],
@@ -518,7 +518,7 @@ final class PanelFormPatchTest extends TestCase
 					'de' => [[
 						'uid' => 'b2',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+						'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 						'fields' => ['text' => ['type' => 'Textarea', 'value' => ['zxx' => 'Alt']]],
 					]],
 				],
@@ -531,13 +531,13 @@ final class PanelFormPatchTest extends TestCase
 						[
 							'uid' => '',
 							'type' => 'App\Block\Quote',
-							'layout' => ['colspan' => '4', 'rowspan' => '2', 'indent' => '0'],
+							'layout' => ['colspan' => '4', 'rowspan' => '2', 'col' => '1', 'row' => '1'],
 							'fields' => ['text' => ['value' => ['zxx' => 'Fresh']]],
 						],
 						[
 							'uid' => 'b1',
 							'type' => 'App\Block\Quote',
-							'layout' => ['colspan' => '8', 'rowspan' => '1', 'indent' => '2'],
+							'layout' => ['colspan' => '8', 'rowspan' => '1', 'col' => '5', 'row' => '1'],
 							'fields' => ['text' => ['value' => ['zxx' => 'New']]],
 							'meta' => ['class' => ['zxx' => 'hero'], 'crafted' => ['zxx' => 'ignored']],
 						],
@@ -550,12 +550,12 @@ final class PanelFormPatchTest extends TestCase
 
 		$this->assertSame(['uid', 'type', 'layout', 'fields'], array_keys($value['en'][0]));
 		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $value['en'][0]['uid']);
-		$this->assertSame(['colspan' => 4, 'rowspan' => 2, 'indent' => 0], $value['en'][0]['layout']);
+		$this->assertSame(['colspan' => 4, 'rowspan' => 2, 'col' => 1, 'row' => 1], $value['en'][0]['layout']);
 		$this->assertSame('Fresh', $value['en'][0]['fields']['text']['value']['zxx']);
 		$this->assertArrayNotHasKey('meta', $value['en'][0]);
 
 		$this->assertSame('b1', $value['en'][1]['uid']);
-		$this->assertSame(['colspan' => 8, 'rowspan' => 1, 'indent' => 2], $value['en'][1]['layout']);
+		$this->assertSame(['colspan' => 8, 'rowspan' => 1, 'col' => 5, 'row' => 1], $value['en'][1]['layout']);
 		$this->assertSame('New', $value['en'][1]['fields']['text']['value']['zxx']);
 		$this->assertSame('kept', $value['en'][1]['fields']['text']['stashed']);
 		$this->assertSame(
@@ -574,7 +574,7 @@ final class PanelFormPatchTest extends TestCase
 					'zxx' => [[
 						'uid' => 'b1',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => '12', 'rowspan' => '1', 'indent' => '0'],
+						'layout' => ['colspan' => '12', 'rowspan' => '1', 'col' => '1', 'row' => '1'],
 						'fields' => [
 							'images' => [
 								'json' => '{"value":{"zxx":[{"uid":"a"}]},"meta":{"ratio":{"zxx":"4/3"},"crop":{"zxx":true}}}',
@@ -604,14 +604,14 @@ final class PanelFormPatchTest extends TestCase
 					'zxx' => [[
 						'uid' => 'b1',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => 12, 'rowspan' => 1, 'indent' => 0],
+						'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 						'fields' => [],
 					]],
 				],
 			],
 		];
 		// A stored twelve-column layout loaded into a narrower field: the
-		// span is clamped and the indent re-clamped against it.
+		// span is clamped and the start column re-clamped against it.
 		$submitted = [
 			'body' => [
 				'value' => [
@@ -619,16 +619,16 @@ final class PanelFormPatchTest extends TestCase
 						[
 							'uid' => 'b1',
 							'type' => 'App\Block\Quote',
-							'layout' => ['colspan' => '12', 'rowspan' => '9', 'indent' => '3'],
+							'layout' => ['colspan' => '12', 'rowspan' => '9', 'col' => '3', 'row' => '1'],
 							'fields' => [],
 						],
 						[
 							'uid' => 'b2',
 							'type' => 'App\Block\Quote',
-							'layout' => ['colspan' => '1', 'rowspan' => '0', 'indent' => '-2'],
+							'layout' => ['colspan' => '1', 'rowspan' => '0', 'col' => '9', 'row' => '7'],
 							'fields' => [],
 						],
-						// No layout at all: the stored one is kept and normalized.
+						// No layout at all: nothing stored either, so it is placed below the others.
 						['uid' => 'b3', 'type' => 'App\Block\Quote', 'fields' => []],
 					],
 				],
@@ -637,9 +637,9 @@ final class PanelFormPatchTest extends TestCase
 
 		$rows = $this->blocksPatch(6, 2)->content($stored, $submitted)['body']['value']['zxx'];
 
-		$this->assertSame(['colspan' => 6, 'rowspan' => 6, 'indent' => 0], $rows[0]['layout']);
-		$this->assertSame(['colspan' => 2, 'rowspan' => 1, 'indent' => 0], $rows[1]['layout']);
-		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'indent' => 0], $rows[2]['layout']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 6, 'col' => 1, 'row' => 1], $rows[0]['layout']);
+		$this->assertSame(['colspan' => 2, 'rowspan' => 1, 'col' => 5, 'row' => 7], $rows[1]['layout']);
+		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 8], $rows[2]['layout']);
 	}
 
 	public function testBlocksKeepAStoredLayoutPartWhenOnlySomeAreSubmitted(): void
@@ -651,7 +651,7 @@ final class PanelFormPatchTest extends TestCase
 					'zxx' => [[
 						'uid' => 'b1',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => 6, 'rowspan' => 3, 'indent' => 2],
+						'layout' => ['colspan' => 6, 'rowspan' => 3, 'col' => 3, 'row' => 2],
 						'fields' => [],
 					]],
 				],
@@ -672,7 +672,33 @@ final class PanelFormPatchTest extends TestCase
 
 		$rows = $this->blocksPatch()->content($stored, $submitted)['body']['value']['zxx'];
 
-		$this->assertSame(['colspan' => 10, 'rowspan' => 3, 'indent' => 2], $rows[0]['layout']);
+		$this->assertSame(['colspan' => 10, 'rowspan' => 3, 'col' => 3, 'row' => 2], $rows[0]['layout']);
+	}
+
+	public function testBlocksKeepTheGridTheyWerePlacedOn(): void
+	{
+		$row = static fn(string $colspan): array => [
+			'uid' => 'b1',
+			'type' => 'App\Block\Quote',
+			'layout' => ['colspan' => $colspan, 'rowspan' => '1', 'col' => '1', 'row' => '1'],
+			'fields' => [],
+		];
+		$stored = ['body' => ['type' => 'Blocks', 'columns' => 6, 'value' => ['zxx' => []]]];
+		$patch = $this->blocksPatch();
+
+		// The stored grid, not the field's default of twelve, bounds the rows.
+		$kept = $patch->content($stored, ['body' => ['value' => ['zxx' => [$row('12')]]]])['body'];
+
+		$this->assertSame(6, $kept['columns']);
+		$this->assertSame(6, $kept['value']['zxx'][0]['layout']['colspan']);
+
+		// A submitted grid replaces it; a new value starts on the default.
+		$moved = $patch->content($stored, ['body' => ['columns' => '12', 'value' => ['zxx' => [$row('12')]]]])['body'];
+		$fresh = $patch->content([], ['body' => ['value' => ['zxx' => [$row('12')]]]])['body'];
+
+		$this->assertSame(12, $moved['columns']);
+		$this->assertSame(12, $moved['value']['zxx'][0]['layout']['colspan']);
+		$this->assertSame(12, $fresh['columns']);
 	}
 
 	public function testBlocksWithoutGridPropsDefaultToOneColumn(): void
@@ -691,7 +717,7 @@ final class PanelFormPatchTest extends TestCase
 					'zxx' => [[
 						'uid' => 'b1',
 						'type' => 'App\Block\Quote',
-						'layout' => ['colspan' => '4', 'rowspan' => '2', 'indent' => '1'],
+						'layout' => ['colspan' => '4', 'rowspan' => '2', 'col' => '2', 'row' => '1'],
 						'fields' => [],
 						'meta' => ['class' => ['zxx' => 'dropped']],
 					]],
@@ -701,7 +727,7 @@ final class PanelFormPatchTest extends TestCase
 
 		$rows = $patch->content([], $submitted)['body']['value']['zxx'];
 
-		$this->assertSame(['colspan' => 1, 'rowspan' => 2, 'indent' => 0], $rows[0]['layout']);
+		$this->assertSame(['colspan' => 1, 'rowspan' => 2, 'col' => 1, 'row' => 1], $rows[0]['layout']);
 		// Without a meta group in the descriptor no meta is taken.
 		$this->assertArrayNotHasKey('meta', $rows[0]);
 	}

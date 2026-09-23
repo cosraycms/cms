@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Value;
 
 use Cosray\Block as Builtin;
+use Cosray\Block\Placement;
 use Cosray\Block\RenderContext;
 use Cosray\Field;
 use Cosray\Field\Owner;
@@ -89,9 +90,10 @@ class Blocks extends Value implements IteratorAggregate
 		yield from self::flatten($this->blocks);
 	}
 
+	/** The column count stored with the value, the field's default without one. */
 	public function columns(): int
 	{
-		return $this->field->getColumns();
+		return $this->field->columnsOf($this->data['columns'] ?? null);
 	}
 
 	public function responsive(): Responsive
@@ -283,14 +285,17 @@ class Blocks extends Value implements IteratorAggregate
 	/**
 	 * A row without a type holding `blocks` is a split; one left without
 	 * a block of an allowed type is skipped like a row of such a type.
+	 * Every row has its position; one stored without gets a place below
+	 * the others.
 	 *
 	 * @return list<Block>
 	 */
 	private function rows(array $list): array
 	{
 		$rows = [];
+		$columns = $this->columns();
 
-		foreach ($list as $row) {
+		foreach (Placement::rows($list, $columns, $this->field->minOf($columns)) as $row) {
 			if (!is_array($row)) {
 				continue;
 			}
@@ -299,13 +304,13 @@ class Blocks extends Value implements IteratorAggregate
 			$context = new ValueContext($this->fieldName, $row);
 
 			if ($type === null && is_array($row['blocks'] ?? null)) {
-				$split = new Block($this->owner, $this->field, $context, null);
+				$split = new Block($this->owner, $this->field, $context, null, columns: $columns);
 
 				if ($split->blocks() !== []) {
 					$rows[] = $split;
 				}
 			} elseif (is_string($type) && $this->field->allows($type)) {
-				$rows[] = new Block($this->owner, $this->field, $context, $type);
+				$rows[] = new Block($this->owner, $this->field, $context, $type, columns: $columns);
 			}
 		}
 
