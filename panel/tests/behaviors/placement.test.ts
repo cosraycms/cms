@@ -314,10 +314,12 @@ describe('placement on the canvas', () => {
 			);
 		}
 
+		// jsdom's MouseEvent stands in for a pointer event; a browser's always carries its id.
 		function pointer(target: EventTarget, type: string, x: number, y: number): void {
-			target.dispatchEvent(
-				new MouseEvent(type, { bubbles: true, clientX: x, clientY: y, button: 0 }),
-			);
+			const event = new MouseEvent(type, { bubbles: true, clientX: x, clientY: y, button: 0 });
+
+			Object.defineProperty(event, 'pointerId', { value: 1 });
+			target.dispatchEvent(event);
 		}
 
 		// A B C, then D E: C's grip grabbed in its top left cell.

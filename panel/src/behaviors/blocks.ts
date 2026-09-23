@@ -435,7 +435,7 @@ function onPointerDown(event: PointerEvent): void {
 }
 
 function onPointerMove(event: PointerEvent): void {
-	if (drag?.pointer !== event.pointerId) {
+	if (!drag || drag.pointer !== event.pointerId) {
 		return;
 	}
 
@@ -555,7 +555,7 @@ function onKeyDown(event: KeyboardEvent): void {
 }
 
 function onPointerUp(event: PointerEvent): void {
-	if (drag?.pointer === event.pointerId) {
+	if (drag && drag.pointer === event.pointerId) {
 		end();
 	}
 }

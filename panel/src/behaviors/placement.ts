@@ -866,7 +866,7 @@ function land(current: Drag, boxes: Boxes<HTMLElement>, done: () => void): void 
 }
 
 function onPointerMove(event: PointerEvent): void {
-	if (drag?.pointer !== event.pointerId) {
+	if (!drag || drag.pointer !== event.pointerId) {
 		return;
 	}
 
@@ -947,7 +947,7 @@ function finish(keep: boolean): void {
 }
 
 function onPointerUp(event: PointerEvent): void {
-	if (drag?.pointer === event.pointerId) {
+	if (drag && drag.pointer === event.pointerId) {
 		finish(true);
 	}
 }
