@@ -440,6 +440,46 @@ describe('placement on the canvas', () => {
 			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '1/2 6×1', '10/2 3×1', '7/3 6×1']);
 		});
 
+		it('scrolls near the edge and retargets under the resting pointer', () => {
+			const { rows, grid, grip, form } = scene();
+			const frames: FrameRequestCallback[] = [];
+			const scroller = document.createElement('div');
+			let top = 0;
+
+			vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+				frames.push(callback),
+			);
+			vi.stubGlobal('cancelAnimationFrame', () => {});
+			scroller.style.overflowY = 'auto';
+			document.body.append(scroller);
+			scroller.append(form);
+			Object.defineProperty(scroller, 'scrollHeight', { value: 1000 });
+			Object.defineProperty(scroller, 'clientHeight', { value: 150 });
+			Object.defineProperty(scroller, 'scrollTop', {
+				get: () => top,
+				set: (value: number) => {
+					top = Math.max(0, Math.min(850, value));
+				},
+			});
+			scroller.getBoundingClientRect = () => new DOMRect(0, 0, 12 * TRACK, 150);
+			grid.getBoundingClientRect = () => new DOMRect(0, -top, 12 * TRACK, 2 * TRACK);
+
+			pointer(grip, 'pointerdown', 950, 50);
+			pointer(document, 'pointermove', 950, 140);
+
+			// Mid-drag the DOM keeps its order; the drop puts it in reading order.
+			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '10/2 3×1', '1/2 6×1', '7/3 6×1']);
+
+			for (let frame = 0; frame < 6; frame++) {
+				frames.shift()?.(0);
+			}
+
+			expect(top).toBeGreaterThan(60);
+			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '10/3 3×1', '1/2 6×1', '7/2 6×1']);
+
+			pointer(document, 'pointerup', 950, 140);
+		});
+
 		it('puts everything back on Escape', () => {
 			const { rows, grip } = scene();
 

@@ -19,7 +19,9 @@
 // not move the target. The block is lifted out of the grid and follows
 // the pointer; a slot of its size takes part in the grid where it would
 // land, and the others show where they would go. Escape puts everything
-// back.
+// back. Near the top or bottom edge of whatever scrolls the canvas, the
+// drag scrolls it, faster the closer the pointer gets, and the target
+// follows the grid moving under the resting pointer.
 //
 // The grid places blocks without motion. Every change of positions
 // animates the blocks from where they appeared to where the grid put
@@ -731,7 +733,12 @@ type Drag = {
 	start: Boxes<HTMLElement>;
 	cols: Edges;
 	rows: Edges;
-	origin: { left: number; top: number };
+	/** The grid's content box from its border box: the tracks start there. */
+	inset: { left: number; top: number };
+	scroller: HTMLElement;
+	/** The last pointer position, for the target while the scroller moves. */
+	at: { x: number; y: number };
+	frame: number;
 	grab: { col: number; row: number };
 	/** Where the pointer holds the lifted block, from its top left corner. */
 	hold: { x: number; y: number };
@@ -743,6 +750,9 @@ const THRESHOLD = 4;
 const BAND = 10;
 // Rows below the grid have no height yet; the pointer there counts in this.
 const PROBE = 96;
+// How close to a scroller's edge the drag scrolls it, and its speed there per frame.
+const EDGE = 56;
+const SPEED = 18;
 
 let drag: Drag | null = null;
 
@@ -785,18 +795,82 @@ function lineOf(edges: Edges, offset: number): number | null {
 	return null;
 }
 
-function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'origin'> {
+function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'inset'> {
 	const style = getComputedStyle(grid);
-	const rect = grid.getBoundingClientRect();
 
 	return {
 		cols: tracks(style.gridTemplateColumns, parseFloat(style.columnGap) || 0),
 		rows: tracks(style.gridTemplateRows, parseFloat(style.rowGap) || 0),
-		origin: {
-			left: rect.left + grid.clientLeft + (parseFloat(style.paddingLeft) || 0),
-			top: rect.top + grid.clientTop + (parseFloat(style.paddingTop) || 0),
+		inset: {
+			left: grid.clientLeft + (parseFloat(style.paddingLeft) || 0),
+			top: grid.clientTop + (parseFloat(style.paddingTop) || 0),
 		},
 	};
+}
+
+/** The pointer in the grid's content box, wherever the grid has scrolled to. */
+function local(current: Drag, x: number, y: number): { x: number; y: number } {
+	const rect = current.grid.getBoundingClientRect();
+
+	return { x: x - rect.left - current.inset.left, y: y - rect.top - current.inset.top };
+}
+
+/** The nearest ancestor that scrolls vertically; the document otherwise. */
+function scrollerOf(element: HTMLElement): HTMLElement {
+	for (let node = element.parentElement; node; node = node.parentElement) {
+		const { overflowY } = getComputedStyle(node);
+
+		if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+			return node;
+		}
+	}
+
+	return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+}
+
+/** Pixels to scroll this frame: none away from the edges, full speed at or past them. */
+function pace(current: Drag): number {
+	const rect =
+		current.scroller === document.scrollingElement
+			? null
+			: current.scroller.getBoundingClientRect();
+	const top = Math.max(0, rect?.top ?? 0);
+	const bottom = Math.min(innerHeight, rect?.bottom ?? innerHeight);
+	const { y } = current.at;
+
+	if (y < top + EDGE) {
+		return -SPEED * Math.min(1, (top + EDGE - y) / EDGE);
+	}
+
+	if (y > bottom - EDGE) {
+		return SPEED * Math.min(1, (y - bottom + EDGE) / EDGE);
+	}
+
+	return 0;
+}
+
+function scroll(): void {
+	if (!drag?.started) {
+		return;
+	}
+
+	const current = drag;
+	const speed = pace(current);
+	const before = current.scroller.scrollTop;
+
+	current.frame = 0;
+
+	if (speed === 0) {
+		return;
+	}
+
+	current.scroller.scrollTop = before + speed;
+
+	if (current.scroller.scrollTop !== before) {
+		track(current);
+	}
+
+	current.frame = requestAnimationFrame(scroll);
 }
 
 function onPointerDown(event: PointerEvent): void {
@@ -821,6 +895,9 @@ function onPointerDown(event: PointerEvent): void {
 		started: false,
 		start: new Map(),
 		...geometry(grid),
+		scroller: scrollerOf(grid),
+		at: { x: event.clientX, y: event.clientY },
+		frame: 0,
 		grab: { col: 0, row: 0 },
 		hold: { x: 0, y: 0 },
 		slot: null,
@@ -847,8 +924,7 @@ function follow(current: Drag, x: number, y: number): void {
 
 function begin(current: Drag): void {
 	const box = boxOf(current.row);
-	const x = current.x - current.origin.left;
-	const y = current.y - current.origin.top;
+	const { x, y } = local(current, current.x, current.y);
 	const rect = current.row.getBoundingClientRect();
 	const slot = document.createElement('div');
 
@@ -901,20 +977,28 @@ function onPointerMove(event: PointerEvent): void {
 		begin(drag);
 	}
 
-	follow(drag, event.clientX, event.clientY);
+	drag.at = { x: event.clientX, y: event.clientY };
+	track(drag);
 
-	const x = event.clientX - drag.origin.left;
-	const y = event.clientY - drag.origin.top;
-	const line = lineOf(drag.rows, y);
-	const col = cellOf(drag.cols, x, PROBE) - drag.grab.col;
-	const row = line ?? cellOf(drag.rows, y, PROBE) - drag.grab.row;
+	if (!drag.frame && pace(drag) !== 0) {
+		drag.frame = requestAnimationFrame(scroll);
+	}
+}
+
+/** The lifted block under the pointer, and the canvas as it would be with it dropped there. */
+function track(current: Drag): void {
+	follow(current, current.at.x, current.at.y);
+
+	const { x, y } = local(current, current.at.x, current.at.y);
+	const line = lineOf(current.rows, y);
+	const col = cellOf(current.cols, x, PROBE) - current.grab.col;
+	const row = line ?? cellOf(current.rows, y, PROBE) - current.grab.row;
 	const target = `${col}/${row}/${line !== null}`;
 
-	if (target === drag.target) {
+	if (target === current.target) {
 		return;
 	}
 
-	const current = drag;
 	const next = move(
 		current.start,
 		current.row,
@@ -943,6 +1027,7 @@ function finish(keep: boolean): void {
 	const { grip, row, grid, started, start } = current;
 
 	drag = null;
+	cancelAnimationFrame(current.frame);
 
 	if (!started) {
 		grip.focus();
@@ -1008,6 +1093,11 @@ export function install(): () => void {
 		document.removeEventListener('pointercancel', onPointerUp);
 		document.removeEventListener('lostpointercapture', onLostCapture);
 		document.removeEventListener('keydown', onKeyDown, true);
+
+		if (drag) {
+			cancelAnimationFrame(drag.frame);
+		}
+
 		drag = null;
 	};
 }
