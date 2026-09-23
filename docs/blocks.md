@@ -79,7 +79,7 @@ use Cosray\Schema\Translate;
 protected Blocks $content;
 ```
 
-`#[Columns]` opts into a grid; without it, the field is a one-column stack. It currently accepts 1–25 columns, a minimum span, and a responsive policy (`Stack`, `Preserve`, or `Custom`). `#[Required]` requires content in the relevant list; [richtext tools](controls.md#richtext-tools) and [full-text selection](fulltext.md) propagate to supported sub-fields according to their own rules.
+`#[Columns]` opts into a grid; without it, the field is a one-column stack. It currently accepts 1–25 columns, a minimum span, and a responsive policy (`Stack`, `Preserve`, or `Custom`). The column count is the default for new content only: every value stores the grid its blocks were placed on, so changing `#[Columns]` later leaves existing nodes as they are. `#[Required]` requires content in the relevant list; [richtext tools](controls.md#richtext-tools) and [full-text selection](fulltext.md) propagate to supported sub-fields according to their own rules.
 
 ### Common choices
 
@@ -100,12 +100,13 @@ Symmetric translation shares structure; asymmetric translation permits different
 ```json
 {
 	"type": "Cosray\\Field\\Blocks",
+	"columns": 12,
 	"value": {
 		"zxx": [
 			{
 				"uid": "k3v9p2mq7x1zd",
 				"type": "Cosray\\Block\\Image",
-				"layout": { "colspan": 6, "rowspan": 1, "indent": 2 },
+				"layout": { "colspan": 6, "rowspan": 1, "col": 3, "row": 1 },
 				"fields": {
 					"image": {
 						"type": "Cosray\\Field\\Image",
@@ -119,31 +120,31 @@ Symmetric translation shares structure; asymmetric translation permits different
 }
 ```
 
-Row UIDs identify rows across edits and reordering. `type` is an FQCN; rows no longer allowed by the field are dropped on save. Fields retain their ordinary envelopes. Row meta includes `class`, `id`, and `padding`, each a neutral map; empty row meta can be omitted. Field meta holds gap settings.
+`columns` is the grid the value was placed on, `#[Columns]` for a new value. Row UIDs identify rows across edits and reordering. `type` is an FQCN; rows no longer allowed by the field are dropped on save. Fields retain their ordinary envelopes. Row meta includes `class`, `id`, and `padding`, each a neutral map; empty row meta can be omitted. Field meta holds gap settings.
 
-`colspan` counts columns, `rowspan` grid rows, and `indent` columns left free before the block **relative to its position in the flow**, not an absolute starting column. One-column fields use `{colspan: 1, rowspan: 1, indent: 0}`.
+`colspan` counts columns and `rowspan` grid rows; `col` and `row` are the 1-based lines the block starts at. A block sits exactly there, cells left free stay empty, and blocks never overlap. Rows are stored in reading order, row by row and left to right, which is also the order they stack in on narrow screens. A position is optional on write: a row without one is placed below the placed rows, the rows flowing in order the way the browser's grid flow places spans, so imports may leave it out.
 
-Readers clamp layouts to the configured field: span into `[min, columns]`, rows into `[1, 6]`, indent into `[0, columns - span]`. Direct Store writes validate rather than clamp out-of-range imports; editor saves clamp before validation. See [Layout](../src/Block/Layout.php), [Field\Blocks](../src/Field/Blocks.php), and [FormPatch](../src/Panel/FormPatch.php).
+Readers clamp layouts to the stored grid: span into `[min, columns]`, rows into `[1, 6]`, the start column into `[1, columns - span + 1]`. Direct Store writes validate rather than clamp: out-of-range values, a position with only one of its lines, and overlapping blocks are rejected. Editor saves clamp before validation. See [Layout](../src/Block/Layout.php), [Field\Blocks](../src/Field/Blocks.php), and [FormPatch](../src/Panel/FormPatch.php).
 
 ### Splits
 
-A row can instead be a split: a `uid`, a `layout`, optional `meta`, and `blocks`, with no `type` and no `fields`. Its blocks are ordinary rows laid out on the split's area — their `colspan` and `indent` count the split's columns (the field's own tracks), their `rowspan` the split's rows:
+A row can instead be a split: a `uid`, a `layout`, optional `meta`, and `blocks`, with no `type` and no `fields`. Its blocks are ordinary rows laid out on the split's area — their `colspan` counts the split's columns (the field's own tracks), their `rowspan` the split's rows — and they have no position of their own: they follow each other on the area:
 
 ```json
 {
 	"uid": "p8d2kq4mz7wn1",
-	"layout": { "colspan": 6, "rowspan": 2, "indent": 0 },
+	"layout": { "colspan": 6, "rowspan": 2, "col": 1, "row": 2 },
 	"blocks": [
 		{
 			"uid": "k3v9p2mq7x1zd",
 			"type": "Cosray\\Block\\Image",
-			"layout": { "colspan": 3, "rowspan": 2, "indent": 0 },
+			"layout": { "colspan": 3, "rowspan": 2 },
 			"fields": {}
 		},
 		{
 			"uid": "r5t1wq8ne2xb4",
 			"type": "Cosray\\Block\\RichText",
-			"layout": { "colspan": 3, "rowspan": 2, "indent": 0 },
+			"layout": { "colspan": 3, "rowspan": 2 },
 			"fields": {}
 		}
 	]
@@ -155,11 +156,13 @@ The direction is not stored. Blocks side by side (each as tall as the split) mak
 ## Editor form names
 
 ```text
+content[f][columns]
 content[f][value][lo][i][uid]
 content[f][value][lo][i][type]
 content[f][value][lo][i][layout][colspan]
 content[f][value][lo][i][layout][rowspan]
-content[f][value][lo][i][layout][indent]
+content[f][value][lo][i][layout][col]
+content[f][value][lo][i][layout][row]
 content[f][value][lo][i][fields][sub][value][subLocale]
 content[f][value][lo][i][fields][sub][json]
 content[f][value][lo][i][fields][sub][meta][key][subLocale]
@@ -171,7 +174,7 @@ content[f][value][lo][i][blocks][j][fields][sub][value][subLocale]
 content[f][value][lo][i][blocks][j][meta][key][zxx]
 ```
 
-`lo` is `zxx` for shared lists or a real locale for asymmetric lists. A split submits no `type` and its blocks under `[blocks][j]`, with the same names below them. Submission replaces the row list in order, matching surviving rows by UID — across splits, so a block moved into or out of one keeps its stored data — and patching sub-fields individually. See [editor transport](controls.md#save-transport) for JSON encoding and truncation protection and [block controls](controls.md#blocks) for live editing behavior.
+`lo` is `zxx` for shared lists or a real locale for asymmetric lists. `columns` is submitted once per field, not per locale. A split submits no `type` and its blocks under `[blocks][j]`, with the same names below them; a block of a split submits a position of `0`, which means none. Submission replaces the row list in order, matching surviving rows by UID — across splits, so a block moved into or out of one keeps its stored data — and patching sub-fields individually. See [editor transport](controls.md#save-transport) for JSON encoding and truncation protection and [block controls](controls.md#blocks) for live editing behavior.
 
 ## Rendering
 
@@ -189,16 +192,16 @@ content[f][value][lo][i][blocks][j][meta][key][zxx]
 		data-type="image"
 		data-colspan="6"
 		data-rowspan="1"
-		data-indent="2"
-		data-reserved="8"
-		style="--colspan: 6; --rowspan: 1; --indent: 2; --reserved: 8"
+		data-col="3"
+		data-row="1"
+		style="--colspan: 6; --rowspan: 1; --col: 3; --row: 1"
 	>
 		…
 	</div>
 </div>
 ```
 
-A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split="rows"` in place of `data-type`, the same layout attributes, and its blocks inside it as ordinary `{prefix}-block` elements whose layout counts the split's area:
+A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split="rows"` in place of `data-type`, the same layout attributes, and its blocks inside it as ordinary `{prefix}-block` elements whose spans count the split's area and which carry no position:
 
 ```html
 <div
@@ -206,16 +209,16 @@ A split renders as a `{prefix}-block` with `data-split="columns"` or `data-split
 	data-split="columns"
 	data-colspan="6"
 	data-rowspan="2"
-	data-indent="0"
-	data-reserved="6"
-	style="--colspan: 6; --rowspan: 2; --indent: 0; --reserved: 6"
+	data-col="1"
+	data-row="2"
+	style="--colspan: 6; --rowspan: 2; --col: 1; --row: 2"
 >
 	<div class="cms-block" data-type="image" data-colspan="3" …>…</div>
 	<div class="cms-block" data-type="richtext" data-colspan="3" …>…</div>
 </div>
 ```
 
-The container is emitted even for an empty field. `reserved` is the derived sum of indent and span. Data attributes support styles that cannot use inline custom properties. All generated attribute values are escaped, including class/id settings; the type's own output is not sanitized by the wrapper.
+The container is emitted even for an empty field; `data-columns` and `--columns` carry the stored grid. Blocks are emitted in reading order. A block whose type renders nothing leaves its cells empty. Data attributes support styles that cannot use inline custom properties. All generated attribute values are escaped, including class/id settings; the type's own output is not sanitized by the wrapper.
 
 ### Spacing
 
@@ -250,13 +253,13 @@ Import the shipped [resources/blocks.css](../resources/blocks.css), or copy it w
 @import "vendor/cosray/cms/resources/blocks.css";
 ```
 
-It uses the `cms.blocks` cascade layer, so ordinary unlayered site CSS wins. A block reserves indent plus span columns; its margin pushes the content past the indent within that area. This lets a block wrap naturally when it no longer fits beside its neighbors. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
+It uses the `cms.blocks` cascade layer, so ordinary unlayered site CSS wins. A block with a position sits on its lines: `grid-column: var(--col) / span var(--colspan)`, and the same for rows. Below the stacking threshold every block takes the full width in document order, which is the reading order. A split is a subgrid on both axes, so its blocks share the field's tracks; a site with its own grid sheet needs the same rules, or a split's blocks fall back to normal flow inside it.
 
 Override points:
 
 - `--blocks-gap-s` through `--blocks-gap-xl` and matching `--blocks-padding-*` values define the site's spacing scale.
 - `--blocks-gap` supplies the gap when the editor chose nothing; an explicit token wins, including `none`.
-- Gap values need context-independent lengths such as `rem` or `px`: grid and indent math resolve the same length against different boxes. Percentages or font-relative values can disagree.
+- Gap values should be context-independent lengths such as `rem` or `px`; font-relative values follow whatever font size the container has.
 - `--blocks-column-gap` and `--blocks-row-gap` are resolved internal values used by the sheet, rather than primary theme inputs.
 - Container queries and gallery rules can be replaced by site styles. `Stack` collapses the grid below the sheet's threshold; `Preserve` and `Custom` leave it to the site.
 
@@ -264,8 +267,14 @@ The stylesheet itself is the reference for selectors and defaults; its implement
 
 ## Migration from the legacy shape
 
-Migration `000000-000031` converts blocks in nodes, working copies, and history. It moves spans into `layout`, converts absolute `colstart` to relative `indent`, drops old width/column metadata, maps legacy type IDs to classes, moves values into sub-fields, and generates missing UIDs. Layouts are copied, not clamped, because the migration does not know each field's schema.
+Migration `000000-000031` converts blocks in nodes, working copies, and history. It moves spans into `layout`, converts absolute `colstart` to relative `indent` (which `000000-000040` turns into positions), drops old width/column metadata, maps legacy type IDs to classes, moves values into sub-fields, and generates missing UIDs. Layouts are copied, not clamped, because the migration does not know each field's schema.
 
 Apply the normal application migrations before saving legacy content. Review `blocks-migration-report.json`, especially unknown types, unresolved field types, legacy richtext, and dropped media items. Unknown rows are retained by the migration but may be dropped on the next editor save. Richtext without its format marker still needs migration `000000-000020`.
 
 Fields relying on the old implicit twelve columns need `#[Columns(12)]`; otherwise they are one-column stacks. The migration and renderer details live in [db/migrations/update/](../db/migrations/update/) and the implementation links above.
+
+### Positions
+
+Migration `000000-000040` places the blocks of nodes, working copies, and both history tables where the old relative layout put them: each list flowed, a block after its indent in the first spot from the previous block where it fit. Every top-level block gets the `col` and `row` of that spot, its indent is dropped, including from the blocks of splits, and each field stores the grid it was laid out on, read from the node type's `#[Columns]`. Spans are clamped as the readers clamped them, so blocks keep the size they rendered with. A list that already holds a position is left as it is, so the migration can run again. Content of a type no registered node class has stays untouched and is counted in the migration's output; readers place its blocks in order.
+
+Sites need to switch any own block CSS from the indent (`--indent`, `--reserved`) to the positions (`--col`, `--row`); the reference stylesheet already has.
