@@ -286,13 +286,14 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		// The layout numbers in the settings dialog, each capped by the room
-		// the others leave: span 6 at indent 3 in twelve columns.
+		// the others leave: span 6 at indent 3 in twelve columns. A block not
+		// placed yet gets its column from the canvas.
 		$this->assertStringContainsString(
 			'data-layout-input="colspan" value="6" min="2" max="9"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringContainsString(
-			'data-layout-input="indent" value="3" min="0" max="6"',
+			'data-layout-input="col" value="0" min="1" max="7"',
 			preg_replace('/\s+/', ' ', $html) ?? '',
 		);
 		$this->assertStringNotContainsString('data-layout-step', $html);

@@ -36,6 +36,7 @@ $direction = $blocks !== [] && $first->colspan === $layout->colspan ? 'rows' : '
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $label = __('field:split-block');
 ?>
 <div
@@ -44,6 +45,7 @@ $label = __('field:split-block');
 	data-meta-owner
 	data-split="<?= $direction ?>"
 	data-indent="<?= $layout->indent ?>"
+	<?= $layout->placed() ? 'data-placed' : '' ?>
 	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
 	<input
@@ -51,7 +53,7 @@ $label = __('field:split-block');
 		data-repeater-uid
 		name="<?= $this->escape("{$rowName}[uid]") ?>"
 		value="<?= $this->escape($uid) ?>" />
-	<?php foreach ($layout->array() as $dimension => $value): ?>
+	<?php foreach (['col' => 0, 'row' => 0, ...$layout->array()] as $dimension => $value): ?>
 		<input
 			type="hidden"
 			name="<?= $this->escape("{$rowName}[layout][{$dimension}]") ?>"
@@ -99,7 +101,7 @@ $label = __('field:split-block');
 	</div>
 	<?php foreach ([
 		'bottom' => __('field:rowspan'),
-		'start' => __('field:indent'),
+		'start' => __('field:column'),
 		'end' => __('field:colspan'),
 	] as $edge => $title): ?>
 		<span

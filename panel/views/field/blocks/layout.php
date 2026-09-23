@@ -13,12 +13,16 @@ $min = min($columns, max(1, (int) $min));
 $id = (string) $this->unwrap($id);
 $colspan = (int) ($layout['colspan'] ?? $min);
 $indent = (int) ($layout['indent'] ?? 0);
+$col = (int) ($layout['col'] ?? 0);
 
-// A part of a split edits the one dimension its split lets it change.
+// A part of a split edits the one dimension its split lets it change. A
+// block on the grid is placed by its start column and row; the blocks
+// behavior keeps the limits to the room its neighbours leave.
 $dimensions = [
-	'colspan' => [__('field:colspan'), $colspan, $min, $columns - $indent, 'block columns'],
+	'colspan' => [__('field:colspan'), $colspan, $min, $columns - max($indent, $col - 1), 'block columns'],
 	'rowspan' => [__('field:rowspan'), (int) ($layout['rowspan'] ?? 1), 1, Layout::MAX_ROWSPAN, 'block rows'],
-	'indent' => [__('field:indent'), $indent, 0, $columns - $colspan, 'block'],
+	'col' => [__('field:column'), $col, 1, $columns - $colspan + 1, 'block'],
+	'row' => [__('field:row'), (int) ($layout['row'] ?? 0), 1, 999, 'block'],
 ];
 ?>
 <div class="layout">

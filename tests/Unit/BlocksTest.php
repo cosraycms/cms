@@ -660,6 +660,18 @@ final class BlocksTest extends TestCase
 		)));
 		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1]))->has($path('indent')));
 		$this->assertTrue($shape->validate($row(['colspan' => 6, 'rowspan' => 1, 'indent' => 6]))->valid());
+		$this->assertTrue($shape->validate($row([
+			'colspan' => 6,
+			'rowspan' => 1,
+			'indent' => 0,
+			'col' => 8,
+			'row' => 2,
+		]))->has(
+			$path('col'),
+		));
+		$this->assertTrue(
+			$shape->validate($row(['colspan' => 6, 'rowspan' => 1, 'indent' => 0, 'col' => 7, 'row' => 2]))->valid(),
+		);
 	}
 
 	public function testShapeReportsSubFieldIssuesWithTheRowPath(): void

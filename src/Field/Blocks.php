@@ -519,6 +519,8 @@ class Blocks extends Field implements
 		$layout->add('colspan', 'int')->rules('required', "min:{$this->min}", "max:{$this->columns}");
 		$layout->add('rowspan', 'int')->rules('required', 'min:1', 'max:' . Layout::MAX_ROWSPAN);
 		$layout->add('indent', 'int')->rules('required', 'min:0', 'max:' . ($this->columns - $this->min));
+		$layout->add('col', 'int')->optional()->rules('min:0', "max:{$this->columns}");
+		$layout->add('row', 'int')->optional()->rules('min:0');
 
 		$rows = Shapes::list();
 		$rows->add('uid', 'string')->rules('required');
@@ -552,6 +554,12 @@ class Blocks extends Field implements
 		foreach ($review->values() as $index => $row) {
 			if (((int) $row['layout']['colspan'] + (int) $row['layout']['indent']) > $this->columns) {
 				$review->addError([$index, 'layout', 'indent'], __('block:invalid-indent'));
+			}
+
+			$col = (int) ($row['layout']['col'] ?? 0);
+
+			if ($col > 0 && ($col + (int) $row['layout']['colspan'] - 1) > $this->columns) {
+				$review->addError([$index, 'layout', 'col'], __('block:invalid-position'));
 			}
 
 			// An optional type may arrive empty; a non-empty one is allowed.

@@ -42,6 +42,7 @@ $reserved = $layout->indent + $layout->colspan;
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}; --indent: {$layout->indent}; --reserved: {$reserved}";
+$style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $labels = (bool) ($blockType['labels'] ?? true);
 // A built-in type with an editor view of its own renders as content
 // whatever its field count; the generic form keeps its labels.
@@ -77,6 +78,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 	data-repeater-row
 	data-meta-owner
 	data-indent="<?= $layout->indent ?>"
+	<?= $layout->placed() ? 'data-placed' : '' ?>
 	<?= $padding !== '' ? 'data-padding="' . $this->escape($padding) . '"' : '' ?>
 	style="<?= $this->escape($style) ?>">
 	<input
@@ -103,6 +105,16 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 		name="<?= $this->escape("{$rowName}[layout][indent]") ?>"
 		value="<?= $layout->indent ?>"
 		data-layout="indent" />
+	<input
+		type="hidden"
+		name="<?= $this->escape("{$rowName}[layout][col]") ?>"
+		value="<?= $layout->col ?>"
+		data-layout="col" />
+	<input
+		type="hidden"
+		name="<?= $this->escape("{$rowName}[layout][row]") ?>"
+		value="<?= $layout->row ?>"
+		data-layout="row" />
 	<?php if (!$readonly): ?>
 	<div class="chrome">
 		<span class="tools">
@@ -200,7 +212,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 		<?php foreach ([
 			// Later side handles own the overlapping bottom corners.
 			'bottom' => __('field:rowspan'),
-			'start' => __('field:indent'),
+			'start' => __('field:column'),
 			'end' => __('field:colspan'),
 		] as $edge => $title): ?>
 			<span

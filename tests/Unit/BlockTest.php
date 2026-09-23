@@ -43,6 +43,20 @@ final class BlockTest extends RichtextOwnerTestCase
 		$this->assertSame(['colspan' => 12, 'rowspan' => 1, 'indent' => 0], Layout::normalize('junk', 12, 1)->array());
 	}
 
+	public function testPlacedLayoutKeepsItsPositionInsideTheGrid(): void
+	{
+		// The position says where the block sits; an indent next to it is void.
+		$this->assertSame(
+			['colspan' => 6, 'rowspan' => 1, 'indent' => 0, 'col' => 7, 'row' => 3],
+			Layout::normalize(['colspan' => 6, 'indent' => 2, 'col' => '9', 'row' => '3'], 12, 1)->array(),
+		);
+		// Without both lines the block still flows.
+		$this->assertSame(
+			['colspan' => 6, 'rowspan' => 1, 'indent' => 2],
+			Layout::normalize(['colspan' => 6, 'indent' => 2, 'col' => 3, 'row' => 0], 12, 1)->array(),
+		);
+	}
+
 	public function testBlockReturnsMetaStyleAndId(): void
 	{
 		$block = $this->block([
