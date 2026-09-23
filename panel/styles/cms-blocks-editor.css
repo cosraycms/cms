@@ -112,12 +112,23 @@
 		margin-inline-start: 0;
 	}
 
-	/* The dragged block shows where it lands and stays above the ones it pushes. */
-	& .grid > .block.is-dragging {
-		z-index: 6;
+	/* The dragged block leaves the grid and follows the pointer above it. */
+	& .grid > .block.is-lifted[data-placed] {
+		position: absolute;
+		z-index: 20;
+		inset: 0 auto auto 0;
+		grid-area: auto;
 		border-color: var(--cms-color-accent);
 		border-style: solid;
-		box-shadow: var(--cms-shadow-lg);
+		box-shadow: var(--cms-shadow-xl);
+		pointer-events: none;
+	}
+
+	/* Where the dragged block lands: its size, among the blocks it moves. */
+	& .grid > .landing {
+		border: 1px dashed var(--cms-color-accent);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface-muted);
 	}
 
 	&.is-moving {

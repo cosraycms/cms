@@ -31,6 +31,7 @@
 
 import {
 	MAX_ROWSPAN,
+	animate,
 	commit,
 	gridOf as canvasOf,
 	limits,
@@ -363,8 +364,16 @@ function applyPlaced(
 ): void {
 	const box = boxes.get(row)!;
 
-	apply(row, { colspan: box.colspan, rowspan: box.rowspan, indent: 0 }, grid, widths);
-	place(canvasOf(row)!, boxes);
+	const canvas = canvasOf(row)!;
+
+	animate(
+		canvas,
+		() => {
+			apply(row, { colspan: box.colspan, rowspan: box.rowspan, indent: 0 }, grid, widths);
+			place(canvas, boxes);
+		},
+		row,
+	);
 }
 
 function same(a: Boxes<HTMLElement>, b: Boxes<HTMLElement>): boolean {

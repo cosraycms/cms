@@ -422,12 +422,21 @@ describe('placement on the canvas', () => {
 		});
 
 		it('drops on a cell, pushing only the block in the way', () => {
-			const { rows, grip } = scene();
+			const { rows, grid, grip } = scene();
 
 			pointer(grip, 'pointerdown', 950, 50);
 			pointer(document, 'pointermove', 950, 150);
+
+			// Lifted out of the grid, with a slot where it would land.
+			const slot = grid.querySelector<HTMLElement>(':scope > .landing')!;
+
+			expect(rows()[2].classList.contains('is-lifted')).toBe(true);
+			expect([slot.style.gridColumn, slot.style.gridRow]).toEqual(['10 / span 3', '2 / span 1']);
+
 			pointer(document, 'pointerup', 950, 150);
 
+			expect(grid.querySelector('.landing')).toBeNull();
+			expect(grid.querySelector('.is-lifted')).toBeNull();
 			expect(rows().map(spot)).toEqual(['1/1 5×1', '6/1 4×1', '1/2 6×1', '10/2 3×1', '7/3 6×1']);
 		});
 

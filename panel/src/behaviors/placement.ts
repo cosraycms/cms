@@ -16,8 +16,14 @@
 // where its grabbed cell lands, and the pointer right on a line between
 // two rows opens a new row there. The grid's tracks are read once when
 // the drag starts, so a row changing height under a moved block does
-// not move the target. The canvas shows the result while dragging;
-// Escape puts everything back.
+// not move the target. The block is lifted out of the grid and follows
+// the pointer; a slot of its size takes part in the grid where it would
+// land, and the others show where they would go. Escape puts everything
+// back.
+//
+// The grid places blocks without motion. Every change of positions
+// animates the blocks from where they appeared to where the grid put
+// them (FLIP), a lifted block settling into its slot as well.
 
 import { changed, focusRow, renumber } from './repeater';
 
@@ -466,6 +472,42 @@ export function release(row: HTMLElement): void {
 	row.removeAttribute('data-placed');
 }
 
+const MOTION = { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', id: 'placement' };
+
+/**
+ * Runs a change of positions and slides every block from where it
+ * appeared to where it is now. A block already sliding starts from where
+ * it shows, so a change mid-animation does not jump. `still` is left out:
+ * a block being resized, or one that has just been stamped.
+ */
+export function animate(grid: HTMLElement, change: () => void, still?: HTMLElement): void {
+	const rows = rowsOf(grid).filter((row) => row !== still && 'animate' in row);
+
+	if (rows.length === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		change();
+
+		return;
+	}
+
+	const first = new Map(rows.map((row) => [row, row.getBoundingClientRect()]));
+
+	for (const row of rows) {
+		row.getAnimations().forEach((running) => running.id === MOTION.id && running.cancel());
+	}
+
+	change();
+
+	for (const [row, before] of first) {
+		const after = row.getBoundingClientRect();
+		const x = before.left - after.left;
+		const y = before.top - after.top;
+
+		if (row.isConnected && (Math.abs(x) >= 1 || Math.abs(y) >= 1)) {
+			row.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: 'none' }], MOTION);
+		}
+	}
+}
+
 /** The rows in reading order in the DOM; true when any moved. */
 function reorder(grid: HTMLElement): boolean {
 	const rows = rowsOf(grid);
@@ -587,7 +629,7 @@ function onStamp(event: Event): void {
 	}
 
 	boxes.set(row, { ...own, col, row: line });
-	place(grid, boxes);
+	animate(grid, () => place(grid, boxes), row);
 }
 
 /** Structural changes of a grid: rows left empty go, the DOM follows the positions. */
@@ -602,11 +644,13 @@ function onChange(event: Event): void {
 		return;
 	}
 
-	place(grid, compact(snapshot(grid)));
+	animate(grid, () => {
+		place(grid, compact(snapshot(grid)));
 
-	if (reorder(grid)) {
-		renumber(container as HTMLElement);
-	}
+		if (reorder(grid)) {
+			renumber(container as HTMLElement);
+		}
+	});
 }
 
 function locked(grid: HTMLElement): boolean {
@@ -634,8 +678,13 @@ function onMove(event: MouseEvent): void {
 		return;
 	}
 
-	place(grid, move(snapshot(grid), row, { col: box.col, row: to }, false, columnsOf(grid).columns));
-	commit(grid);
+	animate(grid, () => {
+		place(
+			grid,
+			move(snapshot(grid), row, { col: box.col, row: to }, false, columnsOf(grid).columns),
+		);
+		commit(grid);
+	});
 }
 
 /** The column and row numbers in a block's dialog move it like a drop. */
@@ -659,7 +708,12 @@ function onInput(event: Event): void {
 
 	const box = boxOf(row);
 
-	place(grid, move(snapshot(grid), row, { ...box, [key]: value }, false, columnsOf(grid).columns));
+	animate(grid, () =>
+		place(
+			grid,
+			move(snapshot(grid), row, { ...box, [key]: value }, false, columnsOf(grid).columns),
+		),
+	);
 
 	if (event.type === 'change') {
 		commit(grid);
@@ -679,6 +733,9 @@ type Drag = {
 	rows: Edges;
 	origin: { left: number; top: number };
 	grab: { col: number; row: number };
+	/** Where the pointer holds the lifted block, from its top left corner. */
+	hold: { x: number; y: number };
+	slot: HTMLElement | null;
 	target: string;
 };
 
@@ -765,16 +822,35 @@ function onPointerDown(event: PointerEvent): void {
 		start: new Map(),
 		...geometry(grid),
 		grab: { col: 0, row: 0 },
+		hold: { x: 0, y: 0 },
+		slot: null,
 		target: '',
 	};
 	grip.setPointerCapture?.(event.pointerId);
 	event.preventDefault();
 }
 
+/** The slot stands in for the lifted block, as tall as it was. */
+function fit(slot: HTMLElement, box: Box): void {
+	slot.style.gridColumn = `${box.col} / span ${box.colspan}`;
+	slot.style.gridRow = `${box.row} / span ${box.rowspan}`;
+}
+
+/** The lifted block, positioned in the grid's box, under the pointer. */
+function follow(current: Drag, x: number, y: number): void {
+	const rect = current.grid.getBoundingClientRect();
+	const left = x - rect.left - current.grid.clientLeft - current.hold.x;
+	const top = y - rect.top - current.grid.clientTop - current.hold.y;
+
+	current.row.style.transform = `translate(${left}px, ${top}px)`;
+}
+
 function begin(current: Drag): void {
 	const box = boxOf(current.row);
 	const x = current.x - current.origin.left;
 	const y = current.y - current.origin.top;
+	const rect = current.row.getBoundingClientRect();
+	const slot = document.createElement('div');
 
 	current.started = true;
 	current.start = snapshot(current.grid);
@@ -782,8 +858,34 @@ function begin(current: Drag): void {
 		col: cellOf(current.cols, x, PROBE) - box.col,
 		row: cellOf(current.rows, y, PROBE) - box.row,
 	};
-	current.row.classList.add('is-dragging');
+	current.hold = { x: current.x - rect.left, y: current.y - rect.top };
+	slot.className = 'landing';
+	slot.setAttribute('aria-hidden', 'true');
+	slot.style.minHeight = `${rect.height}px`;
+	fit(slot, box);
+	current.slot = slot;
+	current.grid.append(slot);
+	current.row.style.width = `${rect.width}px`;
+	current.row.style.height = `${rect.height}px`;
+	current.row.classList.add('is-lifted');
 	current.grid.parentElement!.classList.add('is-moving');
+	follow(current, current.x, current.y);
+}
+
+/** The lifted block back in the grid, sliding from where it was held. */
+function land(current: Drag, boxes: Boxes<HTMLElement>, done: () => void): void {
+	const { row, grid, slot } = current;
+
+	animate(grid, () => {
+		slot?.remove();
+		row.classList.remove('is-lifted');
+		row.style.removeProperty('transform');
+		row.style.removeProperty('width');
+		row.style.removeProperty('height');
+		grid.parentElement!.classList.remove('is-moving');
+		place(grid, boxes);
+		done();
+	});
 }
 
 function onPointerMove(event: PointerEvent): void {
@@ -799,6 +901,8 @@ function onPointerMove(event: PointerEvent): void {
 		begin(drag);
 	}
 
+	follow(drag, event.clientX, event.clientY);
+
 	const x = event.clientX - drag.origin.left;
 	const y = event.clientY - drag.origin.top;
 	const line = lineOf(drag.rows, y);
@@ -810,11 +914,23 @@ function onPointerMove(event: PointerEvent): void {
 		return;
 	}
 
-	drag.target = target;
-	drag.grid.parentElement!.classList.toggle('is-opening-row', line !== null);
-	place(
-		drag.grid,
-		move(drag.start, drag.row, { col, row }, line !== null, columnsOf(drag.grid).columns),
+	const current = drag;
+	const next = move(
+		current.start,
+		current.row,
+		{ col, row },
+		line !== null,
+		columnsOf(current.grid).columns,
+	);
+
+	current.target = target;
+	animate(
+		current.grid,
+		() => {
+			place(current.grid, next);
+			fit(current.slot!, next.get(current.row)!);
+		},
+		current.row,
 	);
 }
 
@@ -823,7 +939,8 @@ function finish(keep: boolean): void {
 		return;
 	}
 
-	const { grip, row, grid, started, start } = drag;
+	const current = drag;
+	const { grip, row, grid, started, start } = current;
 
 	drag = null;
 
@@ -833,16 +950,13 @@ function finish(keep: boolean): void {
 		return;
 	}
 
-	row.classList.remove('is-dragging');
-	grid.parentElement!.classList.remove('is-moving', 'is-opening-row');
-
 	if (!keep) {
-		place(grid, start);
+		land(current, start, () => {});
 
 		return;
 	}
 
-	commit(grid);
+	land(current, snapshot(grid), () => commit(grid));
 	focusRow(row);
 }
 
