@@ -237,7 +237,7 @@
 		color: var(--cms-color-text-faint);
 		cursor: pointer;
 		opacity: 0;
-		transition: opacity 120ms ease;
+		transition: opacity 160ms ease-out;
 		/* A gap may be small: the icon shrinks with it. */
 		container-type: size;
 
@@ -266,6 +266,12 @@
 		&::before {
 			border-color: var(--cms-color-border-strong);
 		}
+	}
+
+	/* The fade in waits a moment, so a pointer only passing over a gap on
+	   its way to a block does not flash its ghost. */
+	& .ghost:hover {
+		transition: opacity 240ms cubic-bezier(0.2, 0, 0, 1) 80ms;
 	}
 
 	/* An armed ghost is visible at once: the menu library closes a menu
