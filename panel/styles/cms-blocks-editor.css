@@ -412,6 +412,54 @@
 	}
 
 	/*
+	 * While an edge drags: the block's cells, the row and column lines
+	 * running through it, and the free cells around. Over the blocks, so
+	 * a line crossing the block shows; the chrome stays on top.
+	 */
+	& .guide {
+		position: absolute;
+		z-index: 5;
+		inset: 0;
+		pointer-events: none;
+
+		&.is-own {
+			outline: 1px dashed color-mix(in oklch, var(--cms-color-accent), transparent 40%);
+			outline-offset: -1px;
+			background: color-mix(in oklch, var(--cms-color-accent), transparent 90%);
+		}
+
+		&.is-free {
+			border: 1px dashed var(--cms-color-border-strong);
+			border-radius: var(--cms-radius-md);
+			background: var(--cms-color-surface-muted);
+		}
+	}
+
+	& .guide-label {
+		position: absolute;
+		z-index: 16;
+		padding: 0.125rem var(--cms-space-2);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-accent);
+		color: var(--cms-color-text-on-accent);
+		font-size: var(--cms-font-size-sm);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+		pointer-events: none;
+		translate: 0.75rem 0.75rem;
+	}
+
+	/* The other blocks the gesture changed, until it ends. */
+	& .grid > .block[data-affected]::after {
+		content: '';
+		position: absolute;
+		z-index: 5;
+		inset: -1px;
+		outline: 2px solid var(--cms-color-accent-ring);
+		pointer-events: none;
+	}
+
+	/*
 	 * Hangs half over the block's top edge, right-aligned, so it needs no
 	 * gutter of its own — at rest it is as wide as what stays visible.
 	 */

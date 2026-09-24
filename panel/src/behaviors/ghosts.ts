@@ -148,6 +148,11 @@ function onClick(event: MouseEvent): void {
 	}
 }
 
+/** Drawn over the grid, not placed on it: ghosts and resize guides. */
+function overlay(node: HTMLElement): boolean {
+	return node.hasAttribute('data-ghost') || node.hasAttribute('data-guide');
+}
+
 function watch(
 	grid: HTMLElement,
 	container: HTMLElement,
@@ -185,11 +190,11 @@ function watch(
 			record.type === 'childList'
 				? record.target === grid &&
 					[...record.addedNodes, ...record.removedNodes].some(
-						(node) => !(node instanceof HTMLElement && node.hasAttribute('data-ghost')),
+						(node) => !(node instanceof HTMLElement && overlay(node)),
 					)
 				: record.target instanceof HTMLElement &&
 					record.target.parentElement === grid &&
-					!record.target.hasAttribute('data-ghost'),
+					!overlay(record.target),
 		);
 
 		if (structural) {

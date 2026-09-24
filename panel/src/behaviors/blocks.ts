@@ -16,6 +16,10 @@
 // with its spans. The keyboard reaches the same edges from the focused
 // grip: Alt with the arrows, Shift added for the start edge.
 //
+// While an edge drags, the guides show the block's cells and the free
+// ones around it, a label at the pointer names the value, and every
+// other block the gesture changed is marked until it ends.
+//
 // A split's parts follow it: side by side they share its width in
 // proportion and take its height, stacked they take its width while its
 // height is theirs added up. A part itself changes only along its split —
@@ -23,10 +27,12 @@
 // parts dragging that trade; stacked its rows change and the split's
 // follow.
 
+import { clear as clearGuides, draw as drawGuides, label as labelGuide } from './guides';
 import {
 	MAX_ROWSPAN,
 	animate,
 	commit,
+	geometry,
 	gridOf as canvasOf,
 	limits,
 	place,
@@ -88,16 +94,37 @@ export function shift(distance: number, pitch: number): number {
 }
 
 /**
- * Rows ratchet instead of following the pointer: grid tracks size to their
- * content, so a row is worth whatever the tallest block in it happens to
- * be — nothing the bottom edge could track. One row per full step of
- * travel, so the first one takes a deliberate drag.
+ * The last row of a block starting at row `first` whose bottom edge is
+ * dragged to `offset`: the row whose end line, of `ends`, lies nearest.
+ * Rows below the grid have no height yet and count `probe` each. The
+ * lines are the grid's as the gesture found them: tracks size to their
+ * content, so the live ones move with every step the edge takes.
  */
-export const ROW_STEP = 100;
+export function snap(ends: number[], offset: number, first: number, probe: number): number {
+	let best = first;
+	let nearest = Infinity;
 
-export function ratchet(distance: number, step: number): number {
-	return step > 0 ? Math.trunc(distance / step) || 0 : 0;
+	for (let row = first; row < first + MAX_ROWSPAN; row++) {
+		const line =
+			row <= ends.length
+				? ends[row - 1]
+				: probe > 0 && ends.length > 0
+					? ends[ends.length - 1] + (row - ends.length) * probe
+					: NaN;
+
+		if (Number.isNaN(line) || Math.abs(offset - line) >= nearest) {
+			break;
+		}
+
+		nearest = Math.abs(offset - line);
+		best = row;
+	}
+
+	return best;
 }
+
+// Rows below the grid have no height yet; the pointer there counts in this.
+const PROBE = 96;
 
 export function parseEdge(value: string | null): Edge | null {
 	return value === 'start' || value === 'end' || value === 'bottom' ? value : null;
@@ -310,18 +337,21 @@ function resizePart(part: HTMLElement, dimension: Dimension, value: number): boo
 	return true;
 }
 
-/** A placed block's spans written from its box, and every block's position. */
+/**
+ * A placed block's spans written from its box, and every block's
+ * position; returns every block's box on screen after the change.
+ */
 function applyPlaced(
 	row: HTMLElement,
 	boxes: Boxes<HTMLElement>,
 	grid: Grid,
 	widths?: number[],
-): void {
+): Map<HTMLElement, DOMRect> {
 	const box = boxes.get(row)!;
 
 	const canvas = canvasOf(row)!;
 
-	animate(
+	return animate(
 		canvas,
 		() => {
 			apply(row, { colspan: box.colspan, rowspan: box.rowspan }, grid, widths);
@@ -359,6 +389,15 @@ type Drag = {
 	moved: boolean;
 	/** The canvas as the gesture found it, for a placed block. */
 	boxes: Boxes<HTMLElement> | null;
+	/** Every block's box on screen as the gesture found it, and after its last step. */
+	rects: Map<HTMLElement, DOMRect>;
+	last: Map<HTMLElement, DOMRect>;
+	/** The end line of every row, in the canvas's content box, at the start. */
+	ends: number[];
+	/** Where the grid's tracks begin inside its border box. */
+	top: number;
+	/** The label's name for the edge. */
+	title: string;
 };
 
 let drag: Drag | null = null;
@@ -413,6 +452,8 @@ function onPointerDown(event: PointerEvent): void {
 	}
 
 	const grid = gridFor(row);
+	const canvas = placed(row) ? canvasOf(row) : null;
+	const tracks = canvas ? geometry(canvas) : null;
 
 	drag = {
 		pointer: event.pointerId,
@@ -426,12 +467,102 @@ function onPointerDown(event: PointerEvent): void {
 		widths: widthsOf(row),
 		origin: position(event, edge),
 		moved: false,
-		boxes: placed(row) ? snapshot(canvasOf(row)!) : null,
+		boxes: canvas ? snapshot(canvas) : null,
+		rects: canvas ? rectsOf(canvas) : new Map(),
+		last: canvas ? rectsOf(canvas) : new Map(),
+		ends: tracks?.rows.ends ?? [],
+		top: tracks?.inset.top ?? 0,
+		title: handle.title,
 	};
 	handle.setPointerCapture(event.pointerId);
 	handle.classList.add('is-active');
 	container.classList.add('is-resizing');
 	event.preventDefault();
+
+	if (canvas) {
+		guide(drag, canvas, event);
+	}
+}
+
+function rectsOf(canvas: HTMLElement): Map<HTMLElement, DOMRect> {
+	return new Map([...snapshot(canvas).keys()].map((row) => [row, row.getBoundingClientRect()]));
+}
+
+/** What the dragged edge sets, as the label says it. */
+function value(current: Drag, box: { col: number; colspan: number; rowspan: number }): string {
+	switch (current.edge) {
+		case 'bottom':
+			return `${current.title}: ${box.rowspan}`;
+		case 'end':
+			return `${current.title}: ${box.colspan}/${current.grid.columns}`;
+		default:
+			return `${current.title}: ${box.col}`;
+	}
+}
+
+function guide(current: Drag, canvas: HTMLElement, event: PointerEvent): void {
+	const boxes = snapshot(canvas);
+
+	drawGuides(
+		canvas,
+		current.row,
+		boxes,
+		current.grid.columns,
+		current.edge === 'bottom' ? 'rows' : 'columns',
+	);
+
+	// On the edge rather than at the pointer: rows size to their content,
+	// so the bottom edge often stays behind the pointer.
+	const rect = current.row.getBoundingClientRect();
+	const x =
+		current.edge === 'bottom' ? event.clientX : rect[current.edge === 'end' ? 'right' : 'left'];
+	const y = current.edge === 'bottom' ? rect.bottom : event.clientY;
+
+	labelGuide(canvas, value(current, boxes.get(current.row)!), x, y);
+}
+
+/**
+ * The other blocks the gesture changed so far, marked: moved, or sized
+ * differently, as a neighbour whose row no longer has to match the
+ * block. A mark whose block changed size in this step grows or shrinks
+ * from the size it had, on the mark alone: a block's own height would
+ * drive its row and move the grid under the animation.
+ */
+function mark(current: Drag, rects: Map<HTMLElement, DOMRect>): void {
+	for (const [row, after] of rects) {
+		const start = current.rects.get(row);
+		const before = current.last.get(row);
+		const changed =
+			row !== current.row &&
+			start !== undefined &&
+			[
+				start.left - after.left,
+				start.top - after.top,
+				start.width - after.width,
+				start.height - after.height,
+			].some((difference) => Math.abs(difference) >= 1);
+
+		row.toggleAttribute('data-affected', changed);
+
+		const width = before ? before.width - after.width : 0;
+		const height = before ? before.height - after.height : 0;
+
+		if (changed && (Math.abs(width) >= 1 || Math.abs(height) >= 1) && 'animate' in row) {
+			row.animate([{ inset: `-1px ${-1 - width}px ${-1 - height}px -1px` }, { inset: '-1px' }], {
+				duration: 240,
+				easing: 'cubic-bezier(0.2, 0, 0, 1)',
+				pseudoElement: '::after',
+			});
+		}
+	}
+
+	current.last = rects;
+}
+
+function unmark(canvas: HTMLElement): void {
+	canvas
+		.querySelectorAll(':scope > [data-affected]')
+		.forEach((row) => row.removeAttribute('data-affected'));
 }
 
 function onPointerMove(event: PointerEvent): void {
@@ -440,8 +571,7 @@ function onPointerMove(event: PointerEvent): void {
 	}
 
 	const travelled = position(event, drag.edge) - drag.origin;
-	const steps =
-		drag.edge === 'bottom' ? ratchet(travelled, ROW_STEP) : shift(travelled, drag.pitch);
+	const steps = drag.edge === 'bottom' ? rowSteps(drag, event) : shift(travelled, drag.pitch);
 
 	// A part's only handle is the seam to the next part; the pair's width
 	// stays the same, so the start plus the steps is the part's new width.
@@ -463,10 +593,27 @@ function onPointerMove(event: PointerEvent): void {
 		);
 
 		if (!same(next, snapshot(canvas))) {
-			applyPlaced(drag.row, next, drag.grid, drag.widths);
+			mark(drag, applyPlaced(drag.row, next, drag.grid, drag.widths));
 			drag.moved = true;
 		}
+
+		guide(drag, canvas, event);
 	}
+}
+
+/** The rows the bottom edge moves by: to the row line nearest the pointer. */
+function rowSteps(current: Drag, event: PointerEvent): number {
+	const box = current.boxes?.get(current.row);
+	const canvas = canvasOf(current.row);
+
+	if (!box || !canvas) {
+		return 0;
+	}
+
+	const offset = event.clientY - canvas.getBoundingClientRect().top - current.top;
+	const last = snap(current.ends, offset, box.row, PROBE);
+
+	return last - box.row + 1 - box.rowspan;
 }
 
 /**
@@ -486,8 +633,15 @@ function end(): void {
 	handle.classList.remove('is-active');
 	container.classList.remove('is-resizing');
 
+	const canvas = canvasOf(row);
+
+	if (canvas) {
+		clearGuides(canvas);
+		unmark(canvas);
+	}
+
 	if (moved && boxes) {
-		commit(canvasOf(row)!);
+		commit(canvas!);
 	} else if (moved) {
 		const dimension: Dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
 

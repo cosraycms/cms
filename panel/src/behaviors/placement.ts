@@ -424,27 +424,28 @@ const MOTION = { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', id: 'place
  * Runs a change of positions and slides every block from where it
  * appeared to where it is now. A block already sliding starts from where
  * it shows, so a change mid-animation does not jump. `still` is left out:
- * a block being resized, or one that has just been stamped.
+ * a block being resized, or one that has just been stamped. Returns
+ * every block's box on screen after the change.
  */
-export function animate(grid: HTMLElement, change: () => void, still?: HTMLElement): void {
+export function animate(
+	grid: HTMLElement,
+	change: () => void,
+	still?: HTMLElement,
+): Map<HTMLElement, DOMRect> {
 	const rows = rowsOf(grid).filter((row) => row !== still && 'animate' in row);
+	const calm = rows.length === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const first = new Map(calm ? [] : rows.map((row) => [row, row.getBoundingClientRect()]));
 
-	if (rows.length === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-		change();
-
-		return;
-	}
-
-	const first = new Map(rows.map((row) => [row, row.getBoundingClientRect()]));
-
-	for (const row of rows) {
+	for (const row of first.keys()) {
 		row.getAnimations().forEach((running) => running.id === MOTION.id && running.cancel());
 	}
 
 	change();
 
+	const last = new Map(rowsOf(grid).map((row) => [row, row.getBoundingClientRect()]));
+
 	for (const [row, before] of first) {
-		const after = row.getBoundingClientRect();
+		const after = last.get(row)!;
 		const x = before.left - after.left;
 		const y = before.top - after.top;
 
@@ -452,6 +453,8 @@ export function animate(grid: HTMLElement, change: () => void, still?: HTMLEleme
 			row.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: 'none' }], MOTION);
 		}
 	}
+
+	return last;
 }
 
 /** The rows in reading order in the DOM; true when any moved. */
@@ -696,7 +699,7 @@ function lineOf(edges: Edges, offset: number): number | null {
 	return null;
 }
 
-function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'inset'> {
+export function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'inset'> {
 	const style = getComputedStyle(grid);
 
 	return {

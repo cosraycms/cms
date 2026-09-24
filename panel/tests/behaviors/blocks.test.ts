@@ -13,9 +13,9 @@ import {
 	parseDimension,
 	parseKey,
 	pitch,
-	ratchet,
 	read,
 	shift,
+	snap,
 	write,
 } from '../../src/behaviors/blocks';
 
@@ -394,13 +394,19 @@ describe('blocks resize geometry', () => {
 		expect(pitch(100, 0, 8)).toBe(0);
 	});
 
-	it('takes a full step before a row follows', () => {
-		expect(ratchet(99, 100)).toBe(0);
-		expect(ratchet(100, 100)).toBe(1);
-		expect(ratchet(199, 100)).toBe(1);
-		expect(ratchet(-99, 100)).toBe(0);
-		expect(ratchet(-240, 100)).toBe(-2);
-		expect(ratchet(500, 0)).toBe(0);
+	it('ends a block at the row line nearest the pointer', () => {
+		// Rows of 385, 60 and 60px with a 4px gap.
+		const ends = [385, 449, 513];
+
+		expect(snap(ends, 400, 1, 96)).toBe(1);
+		expect(snap(ends, 420, 1, 96)).toBe(2);
+		expect(snap(ends, 500, 1, 96)).toBe(3);
+		expect(snap(ends, 100, 2, 96)).toBe(2);
+		// Below the grid, a row counts the probe.
+		expect(snap(ends, 513 + 150, 1, 96)).toBe(5);
+		expect(snap(ends, 2000, 1, 96)).toBe(6);
+		expect(snap(ends, 2000, 1, 0)).toBe(3);
+		expect(snap([], 50, 1, 96)).toBe(1);
 	});
 
 	it('rounds the travelled distance to whole tracks', () => {
