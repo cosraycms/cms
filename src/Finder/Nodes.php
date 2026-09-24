@@ -219,7 +219,7 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
-	public function order(string ...$order): self
+	public function order(string|Order ...$order): self
 	{
 		// `title` orders by the materialized node title for the request
 		// locale (neutral key as fallback) — the expression Title\Sort
@@ -229,7 +229,7 @@ final class Nodes implements Iterator
 			$this->builtins + ['title' => $this->titleSort()],
 			$this->context,
 		);
-		$this->order = $compiler->compile(implode(',', $order));
+		$this->order = $compiler->compile(...$order);
 
 		return $this;
 	}

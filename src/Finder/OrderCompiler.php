@@ -16,36 +16,83 @@ final class OrderCompiler
 		private readonly ?Context $context = null,
 	) {}
 
-	public function compile(string $statement): string
+	public function compile(string|Order ...$statements): string
 	{
-		if (trim($statement) === '') {
+		$expressions = [];
+
+		foreach ($statements as $statement) {
+			if ($statement instanceof Order) {
+				$expressions[] = $this->structured($statement);
+				continue;
+			}
+
+			if (trim($statement) === '') {
+				throw new ParserException('Empty order by clause');
+			}
+
+			foreach ($this->parse($statement) as $field) {
+				$fieldName = $field['field'];
+				$expression = $this->builtins[$fieldName]
+					?? $this->compileField($fieldName, 'n.content', localeIds: $this->localeIds());
+				$expressions[] = $expression . ' ' . $field['direction'];
+			}
+		}
+
+		if ($expressions === []) {
 			throw new ParserException('Empty order by clause');
 		}
 
-		$parsed = $this->parse($statement);
+		return "\n    " . implode(",\n    ", $expressions);
+	}
 
-		if (count($parsed) === 0) {
-			throw new ParserException('Invalid query');
+	private function structured(Order $order): string
+	{
+		$field = $order->field;
+		$expression = $this->builtins[$field->name] ?? null;
+
+		if ($expression !== null && $field->type !== 'text') {
+			throw new ParserException("Built-in sort field '{$field->name}' already has a native type");
 		}
 
-		$expressions = [];
+		if ($expression === null) {
+			$expression = $this->scalar($field->name);
 
-		foreach ($parsed as $field) {
-			$fieldName = $field['field'];
-			$expression = $this->builtins[$fieldName] ?? null;
-
-			if (!$expression) {
-				$expression = $this->compileField($fieldName, 'n.content', localeIds: $this->localeIds());
+			if ($field->type !== 'text') {
+				// PostgreSQL accepts relative dates and special numeric values. Stored
+				// CMS values must be absolute, finite scalars; corrupt data must fail.
+				$pattern = match ($field->type) {
+					'numeric' => '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$',
+					'date' => '^[0-9]{4}-[0-9]{2}-[0-9]{2}$',
+					'timestamptz'
+						=> '^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$',
+				};
+				$expression =
+					"CAST(CASE WHEN {$expression} ~ '{$pattern}' THEN {$expression} "
+					. "ELSE 'Invalid {$field->type} sort value for {$field->name}: ' || {$expression} END AS {$field->type})";
 			}
-
-			$expressions[] = $expression . ' ' . $field['direction'];
 		}
 
-		if (count($expressions) > 0) {
-			return "\n    " . implode(",\n    ", $expressions);
+		return $expression . ' ' . strtoupper($order->direction) . ' NULLS LAST';
+	}
+
+	private function scalar(string $field): string
+	{
+		$fields = str_contains($field, '.')
+			? [$field]
+			: array_map(
+				static fn(string $locale): string => $field . '.' . $locale,
+				$this->normalizeLocaleIds($this->localeIds()),
+			);
+		$values = [];
+
+		foreach ($fields as $path) {
+			// JSON_VALUE rejects arrays/objects instead of silently sorting their
+			// serialized representation. SQL/JSON nulls allow locale fallback.
+			$json = $this->compileField($path, 'n.content', asIs: true);
+			$values[] = "NULLIF(BTRIM(JSON_VALUE({$json}, '$' RETURNING text ERROR ON ERROR)), '')";
 		}
 
-		return '';
+		return 'COALESCE(' . implode(', ', $values) . ')';
 	}
 
 	private function localeIds(): array
@@ -54,15 +101,9 @@ final class OrderCompiler
 			return ['zxx'];
 		}
 
-		$ids = [];
 		$locale = $this->context->locale();
 
-		while ($locale) {
-			$ids[] = $locale->id;
-			$locale = $locale->fallback();
-		}
-
-		return $ids;
+		return [$locale->id, ...$locale->fallbacks()];
 	}
 
 	private function parse(string $statement): array

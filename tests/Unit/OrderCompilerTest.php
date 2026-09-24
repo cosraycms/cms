@@ -5,13 +5,53 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Exception\ParserException;
+use Cosray\Finder\Order;
 use Cosray\Finder\OrderCompiler;
+use Cosray\Finder\SortField;
 use Cosray\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 const OB = "\n    ";
 
 final class OrderCompilerTest extends TestCase
 {
+	public function testStructuredOrdersCanBeCombinedWithLegacyClauses(): void
+	{
+		$compiler = new OrderCompiler(['changed' => 'n.changed', 'uid' => 'n.uid']);
+		$this->assertSame(
+			OB . "n.changed DESC NULLS LAST,\n    n.uid ASC",
+			$compiler->compile(new Order('changed', 'desc'), 'uid ASC'),
+		);
+	}
+
+	public static function invalidFields(): iterable
+	{
+		yield [''];
+		yield ['name DESC'];
+		yield ['name, uid'];
+		yield ['name..en'];
+		yield ["name'); DROP TABLE nodes; --"];
+	}
+
+	#[DataProvider('invalidFields')]
+	public function testStructuredFieldsRejectExpressions(string $field): void
+	{
+		$this->expectException(ParserException::class);
+		SortField::text($field);
+	}
+
+	public function testStructuredDirectionIsValidated(): void
+	{
+		$this->expectException(ParserException::class);
+		new Order('title', 'sideways');
+	}
+
+	public function testBuiltinsCannotBeReinterpretedAsCustomTypes(): void
+	{
+		$this->expectException(ParserException::class);
+		new OrderCompiler(['uid' => 'n.uid'])->compile(new Order(SortField::number('uid')));
+	}
+
 	public function testFailOnEmptyStatement(): void
 	{
 		$this->throws(ParserException::class, 'Empty order by clause');
