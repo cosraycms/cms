@@ -278,6 +278,7 @@ class IntegrationTestCase extends TestCase
 			'created' => 'now()',
 			'changed' => 'now()',
 			'content' => '{}',
+			'title' => '{}',
 		];
 
 		$data = array_merge($defaults, $data);
@@ -290,8 +291,12 @@ class IntegrationTestCase extends TestCase
 			$data['content'] = json_encode($data['content']);
 		}
 
-		$sql = 'INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content)
-				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb)
+		if (is_array($data['title'])) {
+			$data['title'] = json_encode((object) $data['title']);
+		}
+
+		$sql = 'INSERT INTO cms.nodes (uid, parent, published, hidden, locked, type, creator, editor, created, changed, content, title)
+				VALUES (:uid, :parent, :published, :hidden, :locked, :type, :creator, :editor, :created, :changed, :content::jsonb, :title::jsonb)
 				RETURNING node';
 
 		$nodeId = $this->db()->execute($sql, $data)->one()['node'];

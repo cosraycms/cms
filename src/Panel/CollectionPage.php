@@ -31,7 +31,6 @@ final class CollectionPage
 
 	/**
 	 * @param iterable<Column> $columns
-	 * @param iterable<mixed> $sortKeys
 	 * @param iterable<mixed> $blueprints
 	 * @param iterable<mixed> $nodes
 	 * @param iterable<mixed>|null $createBlueprints
@@ -40,7 +39,6 @@ final class CollectionPage
 		string $name,
 		CollectionUrls $urls,
 		iterable $columns,
-		iterable $sortKeys,
 		iterable $blueprints,
 		iterable $nodes,
 		int $total,
@@ -74,7 +72,6 @@ final class CollectionPage
 			createLinks: self::createLinks($createBlueprints, $urls),
 			table: CollectionTable::from(
 				columns: $columns,
-				sortKeys: $sortKeys,
 				nodes: $nodes,
 				urls: $urls,
 				meta: $meta,

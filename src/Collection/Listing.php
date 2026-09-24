@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Collection;
 
 use Cosray\Collection;
+use Cosray\Column;
 use Cosray\Exception\RuntimeException;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -17,19 +18,47 @@ use Cosray\Node\Wrapper;
  */
 final class Listing
 {
+	/** @var list<Column> */
+	public readonly array $columns;
+	/** @var array<string, Sort> */
+	public readonly array $sorts;
+	private readonly string $defaultSort;
+
 	public function __construct(
 		private readonly Collection $collection,
 		private readonly Types $types,
-	) {}
+	) {
+		$this->columns = array_values($collection->columns());
+		$sorts = [];
+		foreach ($this->columns as $column) {
+			if (!$column instanceof Column) {
+				throw new RuntimeException('Collection columns must be Column objects');
+			}
+			$sort = $column->sort;
+			if ($sort === null) {
+				continue;
+			}
+			if (isset($sorts[$sort->key])) {
+				throw new RuntimeException("Duplicate collection sort key '{$sort->key}'");
+			}
+			$sorts[$sort->key] = $sort;
+		}
+		$this->sorts = $sorts;
+		$this->defaultSort = $collection->defaultSort();
+		if (!isset($sorts[$this->defaultSort])) {
+			throw new RuntimeException("Default collection sort '{$this->defaultSort}' has no sortable column");
+		}
+	}
 
 	public function list(
 		int $offset = 0,
 		int $limit = 50,
 		string $q = '',
 		string $sort = '',
-		string $dir = 'desc',
+		string $dir = '',
 		?string $parent = null,
 	): array {
+		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$nodes = $this->collection->entries();
 
 		if ($this->collection->listMeta->showChildren) {
@@ -48,7 +77,6 @@ final class Listing
 			$nodes->search($q, $this->collection->searchFields());
 		}
 
-		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$nodes->order(...$order);
 
 		$total = $nodes->count();
@@ -125,7 +153,7 @@ final class Listing
 			? $this->childBlueprints($node)
 			: [];
 
-		foreach ($this->collection->columns() as $column) {
+		foreach ($this->columns as $column) {
 			$columns[] = $column->get($node);
 		}
 
@@ -189,17 +217,11 @@ final class Listing
 	private function resolveOrder(string $sort, string $dir): array
 	{
 		$sort = trim($sort);
+		$sort = $sort === '' ? $this->defaultSort : $sort;
+		$definition = $this->sorts[$sort] ?? throw new RuntimeException("Unknown collection sort '{$sort}'");
 		$dir = strtolower(trim($dir));
-		$dir = in_array($dir, ['asc', 'desc'], true) ? $dir : strtolower($this->collection->defaultDir());
-		$sorts = $this->collection->sorts();
-		$sort = array_key_exists($sort, $sorts) ? $sort : $this->collection->defaultSort();
-		$field = $sorts[$sort] ?? 'changed';
-		$order = [sprintf('%s %s', $field, strtoupper($dir))];
+		$dir = $dir === '' ? $definition->direction : $dir;
 
-		if ($field !== 'uid') {
-			$order[] = 'uid ASC';
-		}
-
-		return [$sort, $dir, $order];
+		return [$sort, $dir, $definition->order($dir)];
 	}
 }

@@ -57,11 +57,11 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="unpublished"]', $html);
 		$this->assertHtmlNodeExists('//button[@type="button" and @data-bulk-open="publish"]', $html);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/publish?sort=changed&dir=desc"]',
+			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/publish?sort=title&dir=asc"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/delete?sort=changed&dir=desc"]',
+			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/delete?sort=title&dir=asc"]',
 			$html,
 		);
 	}
@@ -513,7 +513,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertStringContainsString('data-bulk-dialog="duplicate"', $html);
 		$this->assertStringContainsString('data-bulk-open="duplicate"', $html);
 		$this->assertStringContainsString(
-			'formaction="/cp/collection/test-hierarchy/bulk/duplicate?sort=changed&amp;dir=desc"',
+			'formaction="/cp/collection/test-hierarchy/bulk/duplicate?sort=title&amp;dir=asc"',
 			$html,
 		);
 		$this->assertStringContainsString('data-bulk-children data-bulk-gate', $html);

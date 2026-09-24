@@ -112,6 +112,60 @@ final class Articles extends Collection
 
 Hierarchy listings show roots and expand direct children. `#[Children]` supplies child creation choices. [Collection](../src/Collection.php) and [collection schema attributes](../src/Schema/) define columns, ordering, blueprints, badges, and other listing options.
 
+### Columns and panel ordering
+
+The default listing shows title, last changed, and the configured status indicators. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
+
+`entries()` defines collection membership. The panel replaces any Finder `order()` in that method with the selected column order, before applying pagination. Put the panel's default in `defaultSort()`, not in `entries()`.
+
+A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending:
+
+```php
+use Cosray\Column;
+use Cosray\Finder\SortField;
+use Cosray\Node\Wrapper;
+
+public function columns(): array
+{
+    return [
+        Column::new(__('Name'), static fn(Wrapper $node): string =>
+            $node->lastName . ', ' . $node->firstName
+        )->bold(true)->sort('name', fields: ['lastName', 'firstName']),
+        Column::new(__('Last changed'), 'meta.changed')
+            ->date(true)->sort('changed', direction: 'desc'),
+        Column::new(__('Editor'), 'meta.editor'),
+    ];
+}
+
+public function defaultSort(): string
+{
+    return 'name';
+}
+```
+
+Both fields in a compound sort follow the selected direction. UID ascending is appended as a unique final tie-breaker, not offered as a default user-facing sort. This makes pagination deterministic for unchanged data with equal names or dates.
+
+Declare numeric and date semantics explicitly for custom fields. Plain field strings sort as text; formatting a column as a date does not change its database ordering:
+
+```php
+Column::new(__('Amount'), 'amount')
+    ->sort('amount', fields: [SortField::number('amount')]);
+Column::new(__('Publication date'), 'date')->date(true)
+    ->sort('date', fields: [SortField::date('date')], direction: 'desc');
+Column::new(__('Start'), 'start')->date(true)
+    ->sort('start', fields: [SortField::dateTime('start')], direction: 'desc');
+Column::new(__('Created'), 'meta.created')->date(true)
+    ->sort('created', direction: 'desc');
+```
+
+For dated collections, select `date` or `start` in `defaultSort()` as appropriate. A callback-rendered column uses the same declarations: sorting still operates on stored fields, never on a fetched page or the callback's result. `SortField::number()` supports both Number and Decimal values without PHP float conversion. Dates require `YYYY-MM-DD`; datetimes require RFC 3339 values with seconds and an offset or `Z` and sort by instant. Missing and whitespace-only custom values sort last in either direction. Arrays, objects, malformed typed values, relative dates, and non-finite numbers cause query errors rather than silently receiving a misleading order.
+
+A column without `sort(...)` is not sortable; `sort(null)` explicitly disables it. Keys must be unique, and `defaultSort()` must select a declared key (`title` in the base collection). Invalid definitions fail as configuration errors. HTTP `sort` and `dir` parameters only select declared orders; unknown keys and invalid directions return 400. Omitting the direction uses the selected column's initial direction, switching headers starts in that direction, and clicking the active header reverses it. Header navigation resets pagination while preserving the listing's other state.
+
+When updating existing collections, move `sorts()` mappings into their columns and move `defaultDir()` into each sort's `direction`; those collection methods are no longer used. Add explicit sorts to columns that previously relied on field-name inference, and remove redundant ordering from `entries()`. A title-sorting trait is no longer needed. Custom columns replacing the default title column must declare a matching default key. Remove dead type/editor sort markers unless handle/UID ordering is explicitly intended. Old URLs requesting removed keys, including the former default `uid` option, are invalid. Code inspecting columns reads the nullable `Column::$sort` definition instead of `sortKey()`.
+
+### Frontend queries
+
 Frontend queries use [Cms](../src/Cms.php) and the [Nodes](../src/Finder/Nodes.php) builder:
 
 ```php
@@ -130,6 +184,8 @@ foreach ($latest as $node) {
 $about = $cms->node->byPath('/about');
 $children = $about->children();
 ```
+
+Existing Finder string orders keep their direction and PostgreSQL null-placement behavior. For typed ordering outside the panel, pass structured terms, for example `->order(new \Cosray\Finder\Order(SortField::number('amount'), 'desc'), new \Cosray\Finder\Order('uid'))`. Structured terms put nulls last; direct Finder queries add their own tie-breaker when required.
 
 `roots()` and `childrenOf($uid)` filter hierarchy. Finder's DSL supports comparisons, boolean expressions, lists, patterns, and field existence:
 

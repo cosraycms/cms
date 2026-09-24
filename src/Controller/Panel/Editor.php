@@ -16,6 +16,7 @@ use Cosray\Actor;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection as CmsCollection;
+use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
 use Cosray\Navigation;
@@ -744,8 +745,8 @@ final class Editor extends Panel
 		$open = $this->openParam($params);
 		$sort = $this->stringParam('sort', $params);
 
-		if ($sort !== '' && !array_key_exists($sort, $collection->sorts())) {
-			$sort = '';
+		if ($sort !== '' && !array_key_exists($sort, new Listing($collection, $this->types())->sorts)) {
+			throw new HttpBadRequest($this->request);
 		}
 		$defaultView = $collection->listMeta->showChildren && $parent === null ? 'tree' : 'list';
 

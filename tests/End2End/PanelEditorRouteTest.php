@@ -417,7 +417,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 					'q' => 'Panel Editor',
 					'offset' => '20',
 					'limit' => '10',
-					'sort' => 'uid',
+					'sort' => 'title',
 					'dir' => 'asc',
 				],
 			],
@@ -814,7 +814,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Editor',
-				'sort' => 'uid',
+				'sort' => 'title',
 				'dir' => 'asc',
 				'limit' => '10',
 			],
@@ -823,7 +823,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/panel-editor-link?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=uid&amp;list%5Bdir%5D=asc&amp;list%5Blimit%5D=10"',
+			'href="/cp/node/panel-editor-link?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		$this->assertStringContainsString('class="value link"', $html);
@@ -871,6 +871,16 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/cp"]', $html);
 	}
 
+	public function testEditorReturnStateRejectsUnknownCollectionSorts(): void
+	{
+		$this->authenticateAs('editor');
+		$this->createArticle('panel-editor-sort', 'Editor sort');
+		$response = $this->makeRequest('GET', '/cp/node/panel-editor-sort', [
+			'query' => ['from' => 'collection:test-articles', 'list' => ['sort' => 'not-allowed']],
+		]);
+		$this->assertResponseStatus(400, $response);
+	}
+
 	public function testPanelEditorRouteRedirectsGuestToLogin(): void
 	{
 		$response = $this->makeRequest('GET', '/cp/node/panel-editor-a');
@@ -890,7 +900,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('id="node-editor-form"', $html);
 		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/panel-editor-a?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=uid&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
+			'action="/cp/node/panel-editor-a?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
@@ -907,7 +917,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('data-fallback-source', $html);
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][de]" and @value=""]', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/panel-editor-a/delete?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=uid&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
+			'action="/cp/node/panel-editor-a/delete?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		// Native validation cannot handle legitimately hidden controls

@@ -55,7 +55,7 @@ final class Collection extends Panel
 			throw new HttpBadRequest($this->request);
 		}
 
-		$sorts = $obj->sorts();
+		$sorts = $lister->sorts;
 
 		if ($sort !== '' && !array_key_exists($sort, $sorts)) {
 			throw new HttpBadRequest($this->request);
@@ -126,8 +126,7 @@ final class Collection extends Panel
 			'page' => CollectionPage::from(
 				name: __($ref->meta->label),
 				urls: $urls,
-				columns: $obj->columns(),
-				sortKeys: array_keys($sorts),
+				columns: $lister->columns,
 				blueprints: $this->blueprints($obj),
 				nodes: $nodes,
 				total: $listing['total'],

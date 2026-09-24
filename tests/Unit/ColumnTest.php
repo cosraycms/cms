@@ -46,14 +46,14 @@ final class ColumnTest extends TestCase
 		$column = Column::new('Title', 'title')
 			->sort(' title ');
 
-		$this->assertSame('title', $column->sortKey());
+		$this->assertSame('title', $column->sort?->key);
 	}
 
-	public function testEmptySortDisablesSorting(): void
+	public function testNullSortDisablesSorting(): void
 	{
 		$column = Column::new('Title', 'title')
-			->sort('');
+			->sort('title')->sort(null);
 
-		$this->assertNull($column->sortKey());
+		$this->assertNull($column->sort);
 	}
 }

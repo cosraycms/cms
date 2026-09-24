@@ -54,19 +54,15 @@ abstract class Collection implements NavigationItem
 		return [];
 	}
 
-	/**
-	 * Returns an array of columns with column definitions.
-	 *
-	 * Each column array must have the fields `title` and `field`
-	 */
+	/** @return list<Column> */
 	public function columns(): array
 	{
 		return [
 			Column::new(__('collection:column-title'), 'title')->bold(true)->sort('title'),
-			Column::new(__('collection:column-type'), 'meta.name')->sort('type'),
-			Column::new(__('collection:column-editor'), 'meta.editor')->sort('editor'),
-			Column::new(__('collection:column-changed'), 'meta.changed')->date(true)->sort('changed'),
-			Column::new(__('collection:column-created'), 'meta.created')->date(true)->sort('created'),
+			Column::new(__('collection:column-changed'), 'meta.changed')->date(true)->sort(
+				'changed',
+				direction: 'desc',
+			),
 		];
 	}
 
@@ -80,22 +76,8 @@ abstract class Collection implements NavigationItem
 		return ['uid', 'title'];
 	}
 
-	public function sorts(): array
-	{
-		return [
-			'changed' => 'changed',
-			'created' => 'created',
-			'uid' => 'uid',
-		];
-	}
-
 	public function defaultSort(): string
 	{
-		return 'changed';
-	}
-
-	public function defaultDir(): string
-	{
-		return 'desc';
+		return 'title';
 	}
 }

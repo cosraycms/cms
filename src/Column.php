@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Closure;
+use Cosray\Collection\Sort;
+use Cosray\Finder\SortField;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
 
@@ -14,7 +16,7 @@ final class Column
 	private bool|Closure $italic = false;
 	private bool|Closure $badge = false;
 	private bool|Closure $date = false;
-	private ?string $sort = null;
+	public private(set) ?Sort $sort = null;
 	private string|Closure $color = '';
 
 	public function __construct(
@@ -57,17 +59,12 @@ final class Column
 		return $this;
 	}
 
-	public function sort(?string $sort): self
+	/** @param non-empty-list<string|SortField>|null $fields */
+	public function sort(?string $key, ?array $fields = null, string $direction = 'asc'): self
 	{
-		$sort = trim((string) $sort);
-		$this->sort = $sort === '' ? null : $sort;
+		$this->sort = $key === null ? null : new Sort(trim($key), $fields, $direction);
 
 		return $this;
-	}
-
-	public function sortKey(): ?string
-	{
-		return $this->sort;
 	}
 
 	/**

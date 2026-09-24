@@ -38,7 +38,7 @@ See [application setup](docs/application.md) for environment loading, console co
 ## Requirements
 
 - PHP `^8.5` and Composer 2. Required extensions are declared in [composer.json](composer.json); run `composer check-platform-reqs` after installation.
-- PostgreSQL with `btree_gist`, `btree_gin`, and `unaccent`. CI uses PostgreSQL 17. The migration role needs permission to create the required extensions, or an administrator must provision them.
+- PostgreSQL 17 or newer with `btree_gist`, `btree_gin`, and `unaccent`. Structured field sorting uses PostgreSQL 17's SQL/JSON scalar extraction. CI uses PostgreSQL 17. The migration role needs permission to create the required extensions, or an administrator must provision them.
 - A web server routing requests to the public PHP entrypoint while serving existing public files directly.
 - Node.js and pnpm for building the panel, with versions declared in [panel/package.json](panel/package.json). The transitional legacy richtext migration also needs Node.js, but ordinary CMS requests do not.
 

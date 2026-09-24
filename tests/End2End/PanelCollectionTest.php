@@ -10,6 +10,8 @@ use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestMixedCollection;
+use Cosray\Tests\Fixtures\Collection\TestSortedCollection;
+use Cosray\Tests\Fixtures\Node\TestSortableEntry;
 
 final class PanelCollectionTest extends End2EndTestCase
 {
@@ -34,6 +36,8 @@ final class PanelCollectionTest extends End2EndTestCase
 		$plugin = parent::createBootstrap($config);
 		$plugin->section('Inhalt')->collection(TestArticlesCollection::class);
 		$plugin->section('Inhalt')->collection(TestMixedCollection::class);
+		$plugin->node(TestSortableEntry::class);
+		$plugin->collection(TestSortedCollection::class);
 
 		return $plugin;
 	}
@@ -57,6 +61,59 @@ final class PanelCollectionTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
+	}
+
+	public function testDefaultAndSelectedOrdersUseTheirOwnDirections(): void
+	{
+		$this->createArticle('sort-a', 'Zulu', '2026-02-01 00:00:00+00');
+		$this->createArticle('sort-z', 'Alpha', '2026-01-01 00:00:00+00');
+		foreach ([
+			[[], 'sort-z'],
+			[['sort' => 'title'], 'sort-z'],
+			[['dir' => 'desc'], 'sort-a'],
+			[['sort' => 'changed'], 'sort-a'],
+			[['sort' => 'changed', 'dir' => 'asc'], 'sort-z'],
+		] as [$query, $first]) {
+			$response = $this->makeRequest('GET', '/cp/collection/test-articles', ['query' => $query]);
+			$this->assertResponseOk($response);
+			$html = $this->getHtmlResponse($response);
+			$this->assertHtmlNodeExists('//tbody/tr[1][@data-uid="' . $first . '"]', $html);
+			$this->assertHtmlNodeExists('//th[@aria-sort]/a', $html);
+		}
+	}
+
+	public function testCustomCompoundAndTypedColumnSorts(): void
+	{
+		$type = $this->createTestType('test-sortable-entry');
+		foreach ([
+			'a' => ['Smith', 'Zoe', 2, '2026-01-01T10:00:00Z'],
+			'b' => ['Smith', 'Amy', 10, '2026-02-01T10:00:00Z'],
+			'c' => ['Brown', 'Zoe', -5, null],
+		] as $uid => [$last, $first, $amount, $start]) {
+			$this->createTestNode([
+				'uid' => $uid,
+				'type' => $type,
+				'content' => [
+					'lastName' => ['type' => 'text', 'value' => ['zxx' => $last]],
+					'firstName' => ['type' => 'text', 'value' => ['zxx' => $first]],
+					'amount' => ['type' => 'number', 'value' => ['zxx' => $amount]],
+					'start' => ['type' => 'datetime', 'value' => ['zxx' => $start]],
+				],
+			]);
+		}
+		foreach ([
+			[[], ['c', 'b', 'a']],
+			[['sort' => 'name', 'dir' => 'desc'], ['a', 'b', 'c']],
+			[['sort' => 'amount'], ['c', 'a', 'b']],
+			[['sort' => 'start'], ['b', 'a', 'c']],
+		] as [$query, $expected]) {
+			$response = $this->makeRequest('GET', '/cp/collection/test-sorted', ['query' => $query]);
+			$this->assertResponseOk($response);
+			$html = $this->getHtmlResponse($response);
+			foreach ($expected as $index => $uid) {
+				$this->assertHtmlNodeExists('//tbody/tr[' . ($index + 1) . '][@data-uid="' . $uid . '"]', $html);
+			}
+		}
 	}
 
 	public function testSeveralCreatableTypesShareOneMenuButton(): void
@@ -159,7 +216,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Link',
-				'sort' => 'uid',
+				'sort' => 'title',
 				'dir' => 'asc',
 				'limit' => '1',
 			],
@@ -168,7 +225,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?q=Panel%20Link&amp;sort=uid&amp;dir=asc&amp;limit=1&amp;offset=1"',
+			'href="/cp/collection/test-articles?q=Panel%20Link&amp;sort=title&amp;dir=asc&amp;limit=1&amp;offset=1"',
 			$html,
 		);
 	}
@@ -179,7 +236,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Clear',
-				'sort' => 'uid',
+				'sort' => 'title',
 				'dir' => 'asc',
 				'limit' => '10',
 			],
@@ -189,7 +246,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Clear search', $html);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?sort=uid&amp;dir=asc&amp;limit=10"',
+			'href="/cp/collection/test-articles?sort=title&amp;dir=asc&amp;limit=10"',
 			$html,
 		);
 	}
@@ -260,6 +317,7 @@ final class PanelCollectionTest extends End2EndTestCase
 			'uid' => $uid,
 			'type' => $this->articleTypeId(),
 			'changed' => $changed,
+			'title' => ['en' => $title],
 			'published' => true,
 			'content' => [
 				'title' => [

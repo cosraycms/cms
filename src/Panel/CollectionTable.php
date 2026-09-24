@@ -42,12 +42,10 @@ final class CollectionTable
 
 	/**
 	 * @param iterable<Column> $columns
-	 * @param iterable<mixed> $sortKeys
 	 * @param iterable<mixed> $nodes
 	 */
 	public static function from(
 		iterable $columns,
-		iterable $sortKeys,
 		iterable $nodes,
 		CollectionUrls $urls,
 		CollectionListMeta $meta,
@@ -55,7 +53,7 @@ final class CollectionTable
 		DateTimeZone $timezone,
 	): self {
 		$nodes = self::items($nodes);
-		$headers = self::headers($columns, $sortKeys, $urls);
+		$headers = self::headers($columns, $urls);
 
 		return new self(
 			showChildren: $meta->showChildren,
@@ -67,25 +65,26 @@ final class CollectionTable
 
 	/**
 	 * @param iterable<Column> $columns
-	 * @param iterable<mixed> $sortKeys
-	 * @return list<array{label: string, url: ?string, class: string, kind: string}>
+	 * @return list<array{label: string, url: ?string, class: string, kind: string, ariaSort: ?string}>
 	 */
 	private static function headers(
 		iterable $columns,
-		iterable $sortKeys,
 		CollectionUrls $urls,
 	): array {
-		$sortKeys = self::sortKeys($sortKeys);
 		$headers = [];
 
 		foreach ($columns as $column) {
 			$label = $column->title;
-			$sort = self::columnSort($column, $sortKeys);
-			$isSorted = $sort !== null && $sort === $urls->query->sort;
-			$nextDir = $isSorted && $urls->query->dir === 'asc' ? 'desc' : 'asc';
+			$sort = $column->sort;
+			$isSorted = $sort !== null && $sort->key === $urls->query->sort;
+			$nextDir = $sort?->direction;
+			$ariaSort = null;
 			$class = $sort === null ? '' : 'is-sortable';
 
 			if ($isSorted) {
+				$ascending = $urls->query->dir === 'asc';
+				$nextDir = $ascending ? 'desc' : 'asc';
+				$ariaSort = $ascending ? 'ascending' : 'descending';
 				$class .= ' is-sorted is-' . $urls->query->dir;
 			}
 
@@ -93,9 +92,10 @@ final class CollectionTable
 				'label' => $label,
 				'url' => $sort === null
 					? null
-					: $urls->collection(['sort' => $sort, 'dir' => $nextDir, 'offset' => '']),
+					: $urls->collection(['sort' => $sort->key, 'dir' => $nextDir, 'offset' => '']),
 				'class' => $class,
 				'kind' => $column->kind(),
+				'ariaSort' => $ariaSort,
 			];
 		}
 
@@ -339,48 +339,6 @@ final class CollectionTable
 		}
 
 		return $blueprints;
-	}
-
-	/** @return list<string> */
-	private static function sortKeys(iterable $sorts): array
-	{
-		return array_values(array_filter(
-			array_map(static fn(mixed $sort): string => trim((string) $sort), self::items($sorts)),
-			static fn(string $sort): bool => $sort !== '',
-		));
-	}
-
-	/** @param list<string> $sorts */
-	private static function columnSort(Column $column, array $sorts): ?string
-	{
-		$explicit = $column->sortKey();
-
-		if ($explicit !== null) {
-			return in_array($explicit, $sorts, true) ? $explicit : null;
-		}
-
-		if (!is_string($column->field)) {
-			return null;
-		}
-
-		$candidates = [$column->field];
-
-		if (str_starts_with($column->field, 'meta.')) {
-			$candidates[] = substr($column->field, 5);
-		}
-
-		$candidates[] = match ($column->field) {
-			'meta.name', 'meta.class', 'meta.classname' => 'type',
-			default => '',
-		};
-
-		foreach (array_unique($candidates) as $candidate) {
-			if ($candidate !== '' && in_array($candidate, $sorts, true)) {
-				return $candidate;
-			}
-		}
-
-		return null;
 	}
 
 	private static function displayValue(

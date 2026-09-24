@@ -58,7 +58,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 					'from' => 'collection:test-hierarchy',
 					'list' => [
 						'q' => 'Hierarchy',
-						'sort' => 'uid',
+						'sort' => 'title',
 						'dir' => 'asc',
 						'view' => 'tree',
 						'open' => 'panel-create-parent',
@@ -98,11 +98,11 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-parent?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc"',
+			'href="/cp/node/create/test-hierarchy-parent?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc&amp;parent=panel-create-parent"',
+			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;parent=panel-create-parent"',
 			$html,
 		);
 	}
@@ -129,7 +129,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=changed&amp;list%5Bdir%5D=desc&amp;list%5Bparent%5D=panel-current-parent&amp;parent=panel-current-parent"',
+			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bparent%5D=panel-current-parent&amp;parent=panel-current-parent"',
 			$html,
 		);
 	}
@@ -382,7 +382,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('id="node-editor-form"', $html);
 		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=uid&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
+			'action="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);

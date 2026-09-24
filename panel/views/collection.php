@@ -210,7 +210,12 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 									</th>
 								<?php endif ?>
 								<?php foreach ($page->table->headers as $header): ?>
-									<th class="<?= escape($header['class']) ?>" role="columnheader">
+									<th
+										class="<?= escape($header['class']) ?>"
+										role="columnheader"
+										<?php if ($header['ariaSort'] !== null): ?>
+											aria-sort="<?= escape($header['ariaSort']) ?>"
+										<?php endif ?>>
 										<?php if ($header['url'] === null): ?>
 											<span class="inner"><?= escape($header['label']) ?></span>
 										<?php else: ?>
