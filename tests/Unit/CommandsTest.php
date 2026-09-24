@@ -17,6 +17,23 @@ use Cosray\Tests\TestCase;
 
 final class CommandsTest extends TestCase
 {
+	public function testStandaloneRunnerListsCommandsWithoutOpeningTheDatabase(): void
+	{
+		$process = proc_open(
+			[PHP_BINARY, self::root() . '/run', 'commands'],
+			[1 => ['pipe', 'w'], 2 => ['redirect', 1]],
+			$pipes,
+			self::root(),
+			['COSRAY_DB_HOST' => 'not-a-database.invalid'],
+		);
+		$this->assertIsResource($process);
+		$output = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+
+		$this->assertSame(0, proc_close($process), $output);
+		$this->assertStringContainsString('db:migrations', $output);
+	}
+
 	public function testClassStringsAreAutowiredInConsoleScope(): void
 	{
 		$config = $this->config([
