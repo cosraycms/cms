@@ -78,7 +78,7 @@ final class TitleSortTest extends IntegrationTestCase
 		try {
 			$db->execute("CREATE TEMP TABLE {$table} (uid text, title jsonb)")->run();
 			// An unmarked, old expression must be replaced even with the right name.
-			$db->execute("CREATE INDEX {$objectPrefix}ix_nodes_title_fr_CA ON {$table} ((title->>'fr-CA'))")->run();
+			$db->execute("CREATE INDEX \"ix_nodes_title_fr_CA\" ON {$table} ((title->>'fr-CA'))")->run();
 			$locales = $this->localesWithFallback();
 			$indexes = new Indexes($db, $locales);
 			$this->assertSame(
