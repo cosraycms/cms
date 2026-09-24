@@ -149,7 +149,11 @@ references.related @ ['first-uid', 'second-uid']
 
 ### Materialized titles
 
-`title()` resolves dynamically; `label()` uses the materialized `nodes.title` locale map with a live fallback. Listings and title ordering use that map. A computed title depending on other nodes or external state can become stale: saving its owner refreshes it, but editing its dependencies does not. Run the app's `php run db:titles` when refreshing those titles, before `db:fulltext` when search also needs rebuilding. `db:recreate-sort-index` reconciles locale sort indexes. See [Title/](../src/Title/) for rebuild and ordering behavior.
+`title()` resolves dynamically; `label()` uses the materialized `nodes.title` locale map with a live fallback. Listings and title ordering use that map. Ordering follows the active content locale's fallback chain, then the neutral title, ignoring blank titles. It uses the locale's available PostgreSQL ICU collation, falling back to the ICU root collation or the database default. Query expressions and title indexes use the same fallback and collation policy.
+
+A computed title depending on other nodes or external state can become stale: saving its owner refreshes it, but editing its dependencies does not. Run the app's `php run db:titles` when refreshing those titles, before `db:fulltext` when search also needs rebuilding. Sorting does not evaluate live title callbacks: a title missing from the materialized map remains absent for ordering even if `label()` can resolve it live.
+
+`php run db:recreate-sort-index` now needs the booted application's configured locales. It creates indexes even for locales without stored titles, replaces outdated same-named definitions, and removes indexes for unconfigured locales. Run it after upgrading the title-ordering implementation or changing locale fallbacks/collation availability. Reconciliation is transactional but uses ordinary index creation, which can block writes; schedule it as an explicit maintenance operation. It does not modify content or refresh materialized titles. See [Title/](../src/Title/) for rebuild and ordering behavior.
 
 ## Rendering and HTTP hooks
 

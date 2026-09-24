@@ -1,0 +1,1 @@
+CREATE INDEX "/*:cms.obj:*/<?= $index ?>" ON /*:cms.prefix:*/nodes ((<?= $expression ?>));

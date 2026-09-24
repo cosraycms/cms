@@ -4,55 +4,73 @@ declare(strict_types=1);
 
 namespace Cosray\Title;
 
+use Celema\Quma\Database;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
+use Cosray\Locale;
 
-/**
- * Canonical SQL for ordering nodes by their materialized title in a given
- * locale. The same expression backs the per-locale sort indexes and the
- * queries that use them, so an `ORDER BY` matches its index exactly.
- *
- * Locale ids are inlined into the SQL (they are trusted config values, like
- * the field read path in Finder\CompilesField), so every id passes through
- * {@see self::valid()} first.
- */
-class Sort
+/** Shared title expressions and collation selection for queries and indexes. */
+final class Sort
 {
-	/**
-	 * Sort key for one locale: the title in that locale, falling back to the
-	 * neutral key, with blanks treated as absent.
-	 */
-	public static function expression(string $localeId, string $column = 'title'): string
+	/** @var array<string, string>|null */
+	private ?array $collations = null;
+
+	public function __construct(
+		private readonly Database $db,
+	) {}
+
+	public function order(Locale $locale, string $column = 'title'): string
 	{
-		return sprintf(
-			"COALESCE(NULLIF(%s->>'%s', ''), NULLIF(%s->>'%s', ''))",
-			$column,
-			$localeId,
-			$column,
-			Field::NEUTRAL_LOCALE,
-		);
+		$this->collations ??= array_column($this->db->titleSort->collations()->all(), 'identifier', 'name');
+		$collation = self::chooseCollation($locale->id, $this->collations);
+		$expression = self::expression($locale, $column);
+
+		return $collation === null ? $expression : "({$expression}) COLLATE {$collation}";
 	}
 
-	/**
-	 * ICU collation name for locale-correct ordering, e.g. `de-x-icu`.
-	 */
+	/** @param array<string, string> $available Catalog names mapped to quoted SQL identifiers. */
+	public static function chooseCollation(string $localeId, array $available): ?string
+	{
+		return $available[self::collation($localeId)] ?? $available['und-x-icu'] ?? null;
+	}
+
+	/** Match Resolver::stored(), including locale fallback and whitespace-only titles. */
+	public static function expression(Locale|string $locale, string $column = 'title'): string
+	{
+		$ids = $locale instanceof Locale ? [$locale->id, ...$locale->fallbacks()] : [$locale];
+		$ids[] = Field::NEUTRAL_LOCALE;
+		$values = [];
+
+		foreach (array_unique($ids) as $id) {
+			if (!self::valid($id)) {
+				throw new RuntimeException("Invalid title sort locale '{$id}'");
+			}
+
+			$value = "{$column}->>'{$id}'";
+			$values[] =
+				"CASE WHEN jsonb_typeof({$column}->'{$id}') = 'string' "
+				. "AND BTRIM({$value}, E' \\t\\n\\r\\013') <> '' THEN {$value} END";
+		}
+
+		return 'COALESCE(' . implode(', ', $values) . ')';
+	}
+
 	public static function collation(string $localeId): string
 	{
-		return $localeId . '-x-icu';
+		return str_replace('_', '-', $localeId) . '-x-icu';
 	}
 
-	/**
-	 * Unprefixed index name for a locale's sort index.
-	 */
 	public static function indexName(string $localeId): string
 	{
+		if (!self::valid($localeId)) {
+			throw new RuntimeException("Invalid title sort locale '{$localeId}'");
+		}
+
 		return 'ix_nodes_title_' . str_replace('-', '_', $localeId);
 	}
 
-	/**
-	 * A locale id safe to inline into SQL and to use in an identifier.
-	 */
 	public static function valid(string $localeId): bool
 	{
-		return preg_match('/^[A-Za-z][A-Za-z0-9_-]*$/', $localeId) === 1;
+		return preg_match('/^[A-Za-z][A-Za-z0-9_-]*$/D', $localeId) === 1;
 	}
 }

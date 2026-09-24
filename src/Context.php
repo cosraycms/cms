@@ -16,6 +16,7 @@ final class Context
 {
 	private ?Assets\Repository $assets = null;
 	private ?Node\UrlPaths $paths = null;
+	private ?Title\Sort $titleSort = null;
 	private ?Locales $runtimeLocales = null;
 	private ?Locale $runtimeLocale = null;
 
@@ -52,6 +53,11 @@ final class Context
 	public function paths(): Node\UrlPaths
 	{
 		return $this->paths ??= new Node\UrlPaths($this->db);
+	}
+
+	public function titleSort(): Title\Sort
+	{
+		return $this->titleSort ??= new Title\Sort($this->db);
 	}
 
 	public function locales(): Locales

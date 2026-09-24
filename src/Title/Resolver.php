@@ -97,14 +97,12 @@ class Resolver
 	 */
 	public function stored(array $map, ?Locale $locale): ?string
 	{
-		while ($locale) {
-			$title = $this->text($map, $locale->id);
+		foreach ($locale === null ? [] : [$locale->id, ...$locale->fallbacks()] as $id) {
+			$title = $this->text($map, $id);
 
 			if ($title !== null) {
 				return $title;
 			}
-
-			$locale = $locale->fallback();
 		}
 
 		return $this->text($map, Field::NEUTRAL_LOCALE);

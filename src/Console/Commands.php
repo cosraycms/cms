@@ -62,7 +62,7 @@ final class Commands
 		$this->commands->add([
 			Fulltext::class => fn(): Fulltext => $this->resolve(Fulltext::class),
 			References::class => fn(): References => new References($this->conn()),
-			RecreateSortIndex::class => fn(): RecreateSortIndex => new RecreateSortIndex($this->conn()),
+			RecreateSortIndex::class => fn(): RecreateSortIndex => $this->resolve(RecreateSortIndex::class),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
 			InstallPanel::class => fn(): InstallPanel => new InstallPanel($this->app->config),
 			Titles::class => fn(): Titles => $this->resolve(Titles::class),

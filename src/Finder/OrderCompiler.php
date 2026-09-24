@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Finder;
 
+use Closure;
 use Cosray\Context;
 use Cosray\Exception\ParserException;
 
@@ -32,7 +33,7 @@ final class OrderCompiler
 
 			foreach ($this->parse($statement) as $field) {
 				$fieldName = $field['field'];
-				$expression = $this->builtins[$fieldName]
+				$expression = $this->builtin($fieldName)
 					?? $this->compileField($fieldName, 'n.content', localeIds: $this->localeIds());
 				$expressions[] = $expression . ' ' . $field['direction'];
 			}
@@ -48,7 +49,7 @@ final class OrderCompiler
 	private function structured(Order $order): string
 	{
 		$field = $order->field;
-		$expression = $this->builtins[$field->name] ?? null;
+		$expression = $this->builtin($field->name);
 
 		if ($expression !== null && $field->type !== 'text') {
 			throw new ParserException("Built-in sort field '{$field->name}' already has a native type");
@@ -93,6 +94,13 @@ final class OrderCompiler
 		}
 
 		return 'COALESCE(' . implode(', ', $values) . ')';
+	}
+
+	private function builtin(string $field): ?string
+	{
+		$value = $this->builtins[$field] ?? null;
+
+		return $value instanceof Closure ? $value() : $value;
 	}
 
 	private function localeIds(): array
