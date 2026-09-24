@@ -22,9 +22,25 @@ export function clear(grid: HTMLElement): void {
 	grid.querySelectorAll(':scope > [data-guide]').forEach((guide) => guide.remove());
 }
 
+/** A run of cells cut into single rows or single columns. */
+function cut(box: Box, across: 'rows' | 'columns'): Box[] {
+	return across === 'rows'
+		? Array.from({ length: box.rowspan }, (_, index) => ({
+				...box,
+				row: box.row + index,
+				rowspan: 1,
+			}))
+		: Array.from({ length: box.colspan }, (_, index) => ({
+				...box,
+				col: box.col + index,
+				colspan: 1,
+			}));
+}
+
 /**
- * The block cut along the dimension its edge changes — into rows for the
- * bottom edge, into columns for a side — and every free run of cells.
+ * The block and every free run of cells, cut along the dimension its
+ * edge changes — into rows for the bottom edge, into columns for a side —
+ * so the lines it moves along run through the empty space as well.
  */
 export function draw(
 	grid: HTMLElement,
@@ -41,18 +57,14 @@ export function draw(
 		return;
 	}
 
-	if (across === 'rows') {
-		for (let line = own.row; line < own.row + own.rowspan; line++) {
-			cell(grid, { ...own, row: line, rowspan: 1 }, 'own');
-		}
-	} else {
-		for (let col = own.col; col < own.col + own.colspan; col++) {
-			cell(grid, { ...own, col, colspan: 1 }, 'own');
-		}
+	for (const part of cut(own, across)) {
+		cell(grid, part, 'own');
 	}
 
 	for (const free of gaps(boxes.values(), columns, 1)) {
-		cell(grid, free, 'free');
+		for (const part of cut(free, across)) {
+			cell(grid, part, 'free');
+		}
 	}
 }
 
