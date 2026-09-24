@@ -40,7 +40,7 @@ final class FinderOrderTest extends IntegrationTestCase
 	public function testTypedOrderingBeforePagination(SortField $field, array $values, array $ascending): void
 	{
 		$type = $this->createTestType('ordered-test-page');
-		foreach (array_combine(['a', 'b', 'c', 'd', 'e'], [...$values, '', null]) as $uid => $value) {
+		foreach (array_combine(['a', 'b', 'c', 'd', 'e', 'g'], [...$values, '', null, " \t\n\r\v"]) as $uid => $value) {
 			$this->createTestNode([
 				'uid' => $uid,
 				'type' => $type,
@@ -52,12 +52,12 @@ final class FinderOrderTest extends IntegrationTestCase
 		$cms = $this->createCms();
 
 		foreach (['asc' => $ascending, 'desc' => array_reverse($ascending)] as $direction => $expected) {
-			$expected = [...$expected, 'd', 'e', 'f'];
+			$expected = [...$expected, 'd', 'e', 'f', 'g'];
 			$actual = [];
 			for ($offset = 0; $offset < count($expected); $offset += 2) {
 				$nodes = $cms
 					->nodes()
-					->only('a', 'b', 'c', 'd', 'e', 'f')
+					->only('a', 'b', 'c', 'd', 'e', 'f', 'g')
 					->order(new Order($field, $direction), new Order('uid'))
 					->offset($offset)
 					->limit(2);

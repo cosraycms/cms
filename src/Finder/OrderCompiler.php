@@ -90,7 +90,7 @@ final class OrderCompiler
 			// JSON_VALUE rejects arrays/objects instead of silently sorting their
 			// serialized representation. SQL/JSON nulls allow locale fallback.
 			$json = $this->compileField($path, 'n.content', asIs: true);
-			$values[] = "NULLIF(BTRIM(JSON_VALUE({$json}, '$' RETURNING text ERROR ON ERROR)), '')";
+			$values[] = "NULLIF(BTRIM(JSON_VALUE({$json}, '$' RETURNING text ERROR ON ERROR), E' \\t\\n\\r\\013'), '')";
 		}
 
 		return 'COALESCE(' . implode(', ', $values) . ')';
