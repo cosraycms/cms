@@ -81,8 +81,6 @@ final class CollectionSchemaTest extends TestCase
 	{
 		$collection = new FancyPagesCollection();
 
-		$this->assertSame('fancy-pages-collection', $collection->slug());
-		$this->assertSame('Fancy', $collection->meta->label);
 		$this->assertTrue($collection->listMeta->showChildren);
 		$this->assertSame([PlainPage::class], $collection->blueprints());
 	}

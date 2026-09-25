@@ -7,17 +7,14 @@ namespace Cosray;
 use Cosray\Collection\Schema;
 use Cosray\Collection\Schemas;
 use Cosray\Finder\Nodes;
-use Override;
 
 /**
  * Collections are configured through class attributes: #[Label],
  * #[Handle], #[Icon], #[Badge], #[Permission], #[Hidden], #[Order],
  * #[Listing], #[Blueprints]. Behavior stays on methods.
  */
-abstract class Collection implements NavigationItem
+abstract class Collection
 {
-	public readonly NavMeta $meta;
-
 	protected readonly Schema $schema;
 
 	public function __construct(
@@ -26,7 +23,6 @@ abstract class Collection implements NavigationItem
 	) {
 		$schemas ??= new Schemas();
 		$this->schema = $schemas->of(static::class);
-		$this->meta = $schemas->nav(static::class);
 	}
 
 	abstract public function entries(): Nodes;
@@ -41,19 +37,6 @@ abstract class Collection implements NavigationItem
 		return $this->schema->blueprints;
 	}
 
-	#[Override]
-	public function slug(): ?string
-	{
-		return $this->schema->handle;
-	}
-
-	/** @return list<NavigationItem> */
-	#[Override]
-	public function children(): array
-	{
-		return [];
-	}
-
 	/** @return list<Column> */
 	public function columns(): array
 	{
@@ -64,11 +47,6 @@ abstract class Collection implements NavigationItem
 				direction: 'desc',
 			),
 		];
-	}
-
-	public function header(): array
-	{
-		return array_map(static fn(Column $column) => $column->title, $this->columns());
 	}
 
 	public function searchFields(): array
