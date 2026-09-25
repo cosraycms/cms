@@ -174,6 +174,82 @@ describe('blocks selection', () => {
 	});
 });
 
+describe('blocks text on the ground', () => {
+	function canvas(): { body: HTMLElement; text: HTMLTextAreaElement; edge: HTMLElement } {
+		document.body.innerHTML = `
+			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-id="field-body" data-columns="12" data-min="2">
+				<div class="grid" data-repeater-list>
+					<div class="block" data-repeater-row>
+						<input type="hidden" data-layout="colspan" value="6" />
+						<input type="hidden" data-layout="rowspan" value="1" />
+						<span class="resize is-bottom" data-layout-resize="bottom"></span>
+						<div class="body"><div class="field"><textarea>Hello</textarea></div></div>
+					</div>
+				</div>
+			</div>`;
+
+		return {
+			body: document.querySelector<HTMLElement>('.body')!,
+			text: document.querySelector<HTMLTextAreaElement>('textarea')!,
+			edge: document.querySelector<HTMLElement>('.resize')!,
+		};
+	}
+
+	function press(target: Element): MouseEvent {
+		const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 });
+
+		target.dispatchEvent(event);
+
+		return event;
+	}
+
+	it('puts the caret at the end of the block’s text when the ground around it is pressed', () => {
+		const { body, text } = canvas();
+		const event = press(body);
+
+		expect(event.defaultPrevented).toBe(true);
+		expect(document.activeElement).toBe(text);
+		expect([text.selectionStart, text.selectionEnd]).toEqual([5, 5]);
+	});
+
+	it('leaves a press on the text itself, and the ground of a split, to their own ways', () => {
+		const { text } = canvas();
+
+		expect(press(text).defaultPrevented).toBe(false);
+
+		document.body.innerHTML = `
+			<div class="cms-blocks-editor is-grid" data-repeater data-name="${NAME}" data-columns="12" data-min="2">
+				<div class="grid" data-repeater-list>
+					<div class="block is-split" data-repeater-row>
+						<div class="parts" data-repeater>
+							<div class="block" data-repeater-row><div class="body"><textarea>Part</textarea></div></div>
+						</div>
+					</div>
+				</div>
+			</div>`;
+
+		const split = document.querySelector<HTMLElement>('.is-split')!;
+
+		expect(press(split).defaultPrevented).toBe(false);
+		expect(document.activeElement).not.toBe(document.querySelector('textarea'));
+	});
+
+	it('takes a press on an edge that resizes nothing for one on the ground', () => {
+		const { text, edge } = canvas();
+		const pointer = (type: string) =>
+			Object.assign(new MouseEvent(type, { bubbles: true, cancelable: true, button: 0 }), {
+				pointerId: 1,
+			});
+
+		edge.setPointerCapture = () => {};
+		edge.dispatchEvent(pointer('pointerdown'));
+		edge.dispatchEvent(pointer('pointerup'));
+
+		expect(document.activeElement).toBe(text);
+		expect(text.selectionStart).toBe(5);
+	});
+});
+
 describe('blocks layout numbers', () => {
 	it('clamps colspan into [min, columns] and rowspan into [1, MAX_ROWSPAN]', () => {
 		const twelve = grid(12, 2);

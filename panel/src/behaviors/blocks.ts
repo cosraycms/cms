@@ -667,6 +667,15 @@ function end(): void {
 		const dimension: Dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
 
 		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+	} else if (handle.matches('.resize')) {
+		// A press on an edge that changed nothing was one on the block's
+		// ground, which the edges take much of in a block of one line. A
+		// seam lies between two parts, so it is no one's ground.
+		const control = textOf(row);
+
+		if (control) {
+			edit(control);
+		}
 	}
 }
 
@@ -932,6 +941,73 @@ function onClick(event: MouseEvent): void {
 	focusRow(row);
 }
 
+// Text a caret can go into; email and number inputs take no selection range.
+const TEXT = [
+	'[contenteditable="true"]',
+	'textarea',
+	'input:not([type])',
+	'input[type="text"]',
+	'input[type="search"]',
+	'input[type="url"]',
+	'input[type="tel"]',
+].join(', ');
+
+/** A block's own first text on the canvas, not one of a nested row's or in its dialog. */
+function textOf(row: HTMLElement): HTMLElement | null {
+	return (
+		[...row.querySelectorAll<HTMLElement>(TEXT)].find(
+			(control) =>
+				control.closest('[data-repeater-row]') === row &&
+				!control.closest('dialog, .chrome') &&
+				!(
+					(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) &&
+					(control.readOnly || control.disabled)
+				) &&
+				control.checkVisibility(),
+		) ?? null
+	);
+}
+
+/** The caret at the end of the text, where a press below its last line puts it. */
+function edit(control: HTMLElement): void {
+	control.focus();
+
+	if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) {
+		control.setSelectionRange(control.value.length, control.value.length);
+
+		return;
+	}
+
+	const selection = getSelection();
+
+	selection?.selectAllChildren(control);
+	selection?.collapseToEnd();
+}
+
+// A press anywhere on the ground around a block's text edits the text,
+// not only one on its lines. Its default would move the focus away in
+// between, so the block would flicker inactive, and start a selection.
+function onMouseDown(event: MouseEvent): void {
+	const target = event.target;
+	const row =
+		target instanceof Element
+			? target.closest<HTMLElement>('.cms-blocks-editor [data-repeater-row]')
+			: null;
+	const control = row && textOf(row);
+
+	if (
+		event.button !== 0 ||
+		!control ||
+		target === control ||
+		!(target as Element).contains(control)
+	) {
+		return;
+	}
+
+	event.preventDefault();
+	edit(control);
+}
+
 function onStamp(event: Event): void {
 	const row = event.target;
 	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
@@ -955,6 +1031,7 @@ function onStamp(event: Event): void {
 export function install(): () => void {
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('click', onClick);
+	document.addEventListener('mousedown', onMouseDown);
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
 	document.addEventListener('change', onSplit);
@@ -969,6 +1046,7 @@ export function install(): () => void {
 	return () => {
 		document.removeEventListener('repeater:stamp', onStamp);
 		document.removeEventListener('click', onClick);
+		document.removeEventListener('mousedown', onMouseDown);
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
 		document.removeEventListener('change', onSplit);
