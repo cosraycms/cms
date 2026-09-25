@@ -22,6 +22,7 @@ import { install as installPaths } from './behaviors/paths';
 import { install as installPick } from './behaviors/pick';
 import { install as installPlacement } from './behaviors/placement';
 import { install as installRepeater } from './behaviors/repeater';
+import { install as installRetype } from './behaviors/retype';
 import { install as installScroll } from './behaviors/scroll';
 import { install as installSplit } from './behaviors/split';
 import { install as installSubmit } from './behaviors/submit';
@@ -126,6 +127,7 @@ cleanups.push(
 	installGhosts(),
 	installPick(),
 	installSplit(),
+	installRetype(),
 	installBlockCatalog(),
 	installChrome(),
 	installLayoutPreview(),

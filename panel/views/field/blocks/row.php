@@ -71,6 +71,8 @@ $slots = array_values(array_filter(
 	),
 ));
 $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots !== [];
+// Another type to change to replaces the block with a fresh one of it.
+$retype = count($blockTypes) > 1;
 ?>
 <div
 	class="block<?= $bare ? ' is-bare' : '' ?>"
@@ -165,6 +167,15 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 					<button type="button" data-repeater-duplicate data-places="block">
 						<?= $this->escape(__('field:duplicate-block')) ?>
 					</button>
+					<?php if ($retype): ?>
+						<button
+							type="button"
+							data-retype
+							data-retype-confirm="<?= $this->escape(__('field:change-type-confirm')) ?>"
+							data-places="block columns rows">
+							<?= $this->escape(__('field:change-type')) ?>
+						</button>
+					<?php endif ?>
 					<button type="button" data-split-into="columns" data-places="block">
 						<?= $this->escape(__('field:split-columns')) ?>
 					</button>
@@ -193,6 +204,14 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 					<button type="button" data-repeater-duplicate>
 						<?= $this->escape(__('field:duplicate-block')) ?>
 					</button>
+					<?php if ($retype): ?>
+						<button
+							type="button"
+							data-retype
+							data-retype-confirm="<?= $this->escape(__('field:change-type-confirm')) ?>">
+							<?= $this->escape(__('field:change-type')) ?>
+						</button>
+					<?php endif ?>
 					<button type="button" class="danger" data-repeater-remove>
 						<?= $this->escape(__('field:remove-block')) ?>
 					</button>

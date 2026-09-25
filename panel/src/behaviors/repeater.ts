@@ -288,7 +288,17 @@ function relative(name: string, container: HTMLElement): string {
 	return name.replace(new RegExp(`^${base}\\[(?:\\d+|__i__)\\]`), '');
 }
 
-function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLElement): void {
+/**
+ * The source row's values seeded into a stamped clone, control by
+ * control where their names below the row match, or only those names
+ * `only` keeps.
+ */
+export function copy(
+	source: HTMLElement,
+	clone: DocumentFragment,
+	container: HTMLElement,
+	only: (name: string) => boolean = () => true,
+): void {
 	const controls = new Map<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>();
 	const hosts = new Map<string, Element>();
 
@@ -321,7 +331,8 @@ function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLEleme
 	clone
 		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
 		.forEach((control) => {
-			const from = control.name === '' ? null : controls.get(relative(control.name, container));
+			const key = relative(control.name, container);
+			const from = control.name === '' || !only(key) ? null : controls.get(key);
 
 			if (!from || control.hasAttribute('data-repeater-uid')) {
 				return;
@@ -343,7 +354,8 @@ function copy(source: HTMLElement, clone: DocumentFragment, container: HTMLEleme
 	// so the copy is seeded there; the source's edits are on the element,
 	// its script only says what the server rendered.
 	clone.querySelectorAll('cosray-host').forEach((host) => {
-		const from = hosts.get(relative(host.getAttribute('name') ?? '', container));
+		const key = relative(host.getAttribute('name') ?? '', container);
+		const from = only(key) ? hosts.get(key) : undefined;
 		const script = host.querySelector(':scope > script[type="application/json"]');
 		const payload = (from as Partial<CosrayHost> | undefined)?.payload;
 

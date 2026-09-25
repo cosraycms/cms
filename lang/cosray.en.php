@@ -184,6 +184,8 @@ return [
 		'field:block-actions' => 'Actions for this block',
 		'field:block-results' => [':count block type available', ':count block types available'],
 		'field:block-settings' => 'Block settings',
+		'field:change-type' => 'Change block type',
+		'field:change-type-confirm' => 'Change the block type? Its content will be removed.',
 		'field:close' => 'Close',
 		'field:colspan' => 'Width',
 		'field:column' => 'Column',
