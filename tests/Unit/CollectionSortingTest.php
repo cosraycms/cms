@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Cms;
 use Cosray\Collection;
 use Cosray\Collection\Listing;
+use Cosray\Collection\Schemas;
 use Cosray\Collection\Sort;
 use Cosray\CollectionListMeta;
 use Cosray\Column;
@@ -169,6 +170,11 @@ final class CollectionSortingTest extends TestCase
 	{
 		$context = new Context($this->db(), $this->request(), $this->config(), $this->container(), $this->factory());
 
-		return new Listing($collection, new Cms($context, Services::withDefaults()), new Types());
+		return new Listing(
+			$collection,
+			new Schemas()->of($collection::class),
+			new Cms($context, Services::withDefaults()),
+			new Types(),
+		);
 	}
 }

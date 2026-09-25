@@ -34,10 +34,11 @@ final class Listing
 
 	public function __construct(
 		private readonly Collection $collection,
+		private readonly Schema $schema,
 		private readonly Cms $cms,
 		private readonly Types $types,
 	) {
-		$this->meta = $collection->listMeta;
+		$this->meta = $schema->listing;
 		$this->blueprints = $collection->blueprints();
 		$this->columns = array_values($collection->columns());
 		$sorts = [];
@@ -94,7 +95,7 @@ final class Listing
 		$q = trim($q);
 
 		if ($q !== '') {
-			$nodes->search($q, $this->collection->searchFields());
+			$nodes->search($q, $this->schema->search);
 		}
 
 		$nodes->order(...$order);

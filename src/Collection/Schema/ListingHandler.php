@@ -17,6 +17,7 @@ class ListingHandler extends Handler
 				showHidden: $meta->hidden,
 				showChildren: $meta->children,
 			),
+			'search' => $meta->search,
 		];
 	}
 }

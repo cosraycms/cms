@@ -7,6 +7,7 @@ namespace Cosray\Tests\Integration;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
+use Cosray\Collection\Schemas;
 use Cosray\Context;
 use Cosray\Field\Services;
 use Cosray\Node\Types;
@@ -41,7 +42,7 @@ final class CollectionListingTest extends IntegrationTestCase
 			Services::withDefaults(),
 		);
 		$collection = new TestSortedCollection($cms);
-		$listing = new Listing($collection, $cms, new Types());
+		$listing = new Listing($collection, new Schemas()->of($collection::class), $cms, new Types());
 		$default = $listing->list();
 		$this->assertSame('name', $default['sort']);
 		$this->assertSame('asc', $default['dir']);

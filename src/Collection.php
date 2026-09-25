@@ -48,9 +48,4 @@ abstract class Collection
 			),
 		];
 	}
-
-	public function searchFields(): array
-	{
-		return ['uid', 'title'];
-	}
 }

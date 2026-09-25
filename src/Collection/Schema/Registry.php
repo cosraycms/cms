@@ -106,6 +106,7 @@ class Registry
 			static fn(string $class, array $properties): CollectionListMeta => new CollectionListMeta(),
 		);
 		$this->default('blueprints', static fn(string $class, array $properties): array => []);
+		$this->default('search', static fn(string $class, array $properties): array => ['uid', 'title']);
 	}
 
 	/**

@@ -13,6 +13,7 @@ use Cosray\Cms;
 use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Collection\Ref;
+use Cosray\Collection\Schemas;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Provider as IconProvider;
@@ -334,10 +335,12 @@ abstract class Panel
 		assert($cms instanceof Cms, 'The CMS must be available');
 		$collection = $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms]);
 		assert($collection instanceof CmsCollection, 'Collection routes must resolve a collection');
+		$schemas = $this->container->get(Schemas::class);
+		assert($schemas instanceof Schemas, 'The collection schemas must be available');
 		$types = $this->container->get(Types::class);
 		assert($types instanceof Types, 'The node type service must be available');
 
-		return new Listing($collection, $cms, $types);
+		return new Listing($collection, $schemas->of($ref->class), $cms, $types);
 	}
 
 	/**

@@ -110,7 +110,7 @@ final class Articles extends Collection
 }
 ```
 
-Hierarchy listings show roots and expand direct children. `#[Children]` supplies child creation choices. [Collection](../src/Collection.php) and [collection schema attributes](../src/Schema/) define columns, ordering, blueprints, badges, and other listing options.
+Hierarchy listings show roots and expand direct children. `#[Children]` supplies child creation choices. [Collection](../src/Collection.php) and [collection schema attributes](../src/Schema/) define columns, ordering, blueprints, badges, and other listing options. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default.
 
 ### Columns and panel ordering
 
