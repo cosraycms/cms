@@ -56,4 +56,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000034-node-drafts.sql', now()),
 	('000000-000035-draft-history-outlives-drafts.sql', now()),
 	('000000-000036-fulltext[pgsql].sql', now()),
-	('000000-000039-user-roles-and-types.sql', now());
+	('000000-000039-user-roles-and-types.sql', now()),
+	('000000-000041-text-blocks-to-richtext[pgsql].php', now());
