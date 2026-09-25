@@ -106,7 +106,6 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Baum',
 		'collection:view' => 'Sammlungsansicht',
-		'common:cancel' => 'Abbrechen',
 		'common:filter' => 'Filter',
 		'common:move-down' => 'Nach unten verschieben',
 		'common:move-left' => 'Nach links verschieben',

@@ -100,7 +100,6 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Tree',
 		'collection:view' => 'Collection view',
-		'common:cancel' => 'Cancel',
 		'common:filter' => 'Filter',
 		'common:move-down' => 'Move down',
 		'common:move-left' => 'Move left',

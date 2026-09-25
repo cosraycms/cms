@@ -51,17 +51,6 @@ $ratio = $side('aspectRatioX', 16) . ' / ' . $side('aspectRatioY', 9);
 			<button type="button" class="cms-button secondary small" data-youtube-add <?= trim($value) === '' ? 'hidden' : '' ?>>
 				<?= escape(__('youtube:add')) ?>
 			</button>
-			<button type="button" class="cms-button secondary small" data-youtube-confirm hidden>
-				<?= escape(__('youtube:replace')) ?>
-			</button>
-			<button type="button" class="cms-button quiet small" data-youtube-cancel hidden>
-				<?= escape(__('common:cancel')) ?>
-			</button>
-			<?php if (!($field['required'] ?? false)): ?>
-				<button type="button" class="cms-button quiet small" data-youtube-remove hidden>
-					<?= escape(__('field:remove')) ?>
-				</button>
-			<?php endif ?>
 		<?php endif ?>
 	</div>
 	<p class="cms-field-error" id="<?= escape($id) ?>-youtube-error" data-youtube-error role="alert" hidden>

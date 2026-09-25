@@ -59,11 +59,7 @@ function clearError(box: Element): void {
 }
 
 function actions(box: Element): void {
-	const replacing = box.hasAttribute('data-youtube-replacing');
-	show(box, '[data-youtube-add]', !replacing && input(box).value.trim() !== '');
-	show(box, '[data-youtube-confirm]', replacing);
-	show(box, '[data-youtube-cancel]', replacing);
-	show(box, '[data-youtube-remove]', replacing);
+	show(box, '[data-youtube-add]', input(box).value.trim() !== '');
 }
 
 function render(box: Element): void {
@@ -78,25 +74,12 @@ function render(box: Element): void {
 		player.removeAttribute('src');
 	}
 
-	box.removeAttribute('data-youtube-replacing');
 	input(box).value = id;
 	clearError(box);
 	show(box, '[data-youtube-player]', filled);
 	show(box, '[data-youtube-entry]', !filled);
 	show(box, '[data-youtube-replace]', filled);
 	actions(box);
-}
-
-function replace(box: Element): void {
-	if (input(box).readOnly) return;
-	box.setAttribute('data-youtube-replacing', '');
-	input(box).value = value(box).value;
-	clearError(box);
-	show(box, '[data-youtube-entry]', true);
-	show(box, '[data-youtube-replace]', false);
-	actions(box);
-	input(box).focus();
-	input(box).select();
 }
 
 function commit(box: Element, id: string): void {
@@ -128,11 +111,6 @@ function confirm(box: Element): void {
 	}
 
 	commit(box, id);
-}
-
-function cancel(box: Element): void {
-	render(box);
-	box.querySelector<HTMLElement>('[data-youtube-replace]')?.focus();
 }
 
 const RATIO_META = /^(.*)\[meta\]\[aspectRatio[XY]\]\[zxx\]$/;
@@ -180,28 +158,17 @@ function onClick(event: MouseEvent): void {
 	const box = button?.closest('[data-youtube]');
 	if (!button || !box || input(box).readOnly) return;
 
-	if (button.hasAttribute('data-youtube-replace')) replace(box);
-	else if (button.matches('[data-youtube-add], [data-youtube-confirm]')) confirm(box);
-	else if (button.hasAttribute('data-youtube-cancel')) cancel(box);
-	else if (button.hasAttribute('data-youtube-remove')) commit(box, '');
+	if (button.hasAttribute('data-youtube-replace')) commit(box, '');
+	else if (button.hasAttribute('data-youtube-add')) confirm(box);
 }
 
 function onKeydown(event: KeyboardEvent): void {
 	const control = event.target;
-	const box =
-		control instanceof Element
-			? control.closest('[data-youtube-entry]')?.closest('[data-youtube]')
-			: null;
-	if (!box || event.isComposing || input(box).readOnly) return;
+	if (!(control instanceof HTMLInputElement) || !control.matches('[data-youtube-input]')) return;
+	if (event.isComposing || control.readOnly || event.key !== 'Enter') return;
 
-	if (event.key === 'Enter' && control instanceof HTMLInputElement) {
-		event.preventDefault();
-		confirm(box);
-	} else if (event.key === 'Escape' && box.hasAttribute('data-youtube-replacing')) {
-		event.preventDefault();
-		event.stopPropagation();
-		cancel(box);
-	}
+	event.preventDefault();
+	confirm(control.closest('[data-youtube]')!);
 }
 
 function stamp(event: Event): void {

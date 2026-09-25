@@ -349,19 +349,16 @@ function activate(event: Event): void {
 		paths.closest('[data-paths]')?.querySelector<HTMLElement>('[data-paths-open]')?.click();
 	}
 
-	if (control.closest('[data-youtube-entry]')?.hasAttribute('hidden')) {
-		control
-			.closest('[data-youtube]')
-			?.querySelector<HTMLButtonElement>('[data-youtube-replace]')
-			?.click();
-	}
-
 	if (field instanceof HTMLElement) {
 		field.scrollIntoView?.({ block: 'center' });
 	}
 
-	if (control instanceof HTMLElement) {
-		control.focus?.();
+	const focus = control.closest('[data-youtube-entry]')?.hasAttribute('hidden')
+		? control.closest('[data-youtube]')?.querySelector('[data-youtube-replace]')
+		: control;
+
+	if (focus instanceof HTMLElement) {
+		focus.focus();
 	}
 }
 

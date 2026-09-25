@@ -166,13 +166,12 @@ describe('YouTube control', () => {
 		expect(submitted()).toBe(ID);
 	});
 
-	it('shows an accessible validation error without changing the video', () => {
-		control(ID);
-		button('replace').click();
+	it('shows an accessible validation error without accepting the invalid video', () => {
+		control();
 		type('https://example.org/watch?v=abcdefghijk');
-		button('confirm').click();
+		button('add').click();
 
-		expect(submitted()).toBe(ID);
+		expect(submitted()).toBe('');
 		expect(error().hidden).toBe(false);
 		expect(input().getAttribute('aria-invalid')).toBe('true');
 		expect(input().getAttribute('aria-describedby')).toBe(error().id);
@@ -182,83 +181,54 @@ describe('YouTube control', () => {
 		expect(input().hasAttribute('aria-invalid')).toBe(false);
 	});
 
-	it.each(['cancel', 'Escape'])(
-		'preserves the current video when replacing is cancelled by %s',
-		(action) => {
-			control(ID);
-			const current = player();
+	it.each([true, false])(
+		'returns a required=%s video to the fresh input state on Replace',
+		(required) => {
+			control(ID, { required });
+			document.body.insertAdjacentHTML(
+				'beforeend',
+				'<span id="editor-dirty" hidden>Unsaved</span>',
+			);
+			stops.push(installDirty());
 			button('replace').click();
+
+			expect(submitted()).toBe('');
+			expect(input().value).toBe('');
+			expect(input().placeholder).toBe('Paste a YouTube URL or video ID…');
 			expect(document.activeElement).toBe(input());
-			expect(input().value).toBe(ID);
-			type(NEXT);
-			expect(submitted()).toBe(ID);
-
-			if (action === 'cancel') button('cancel').click();
-			else expect(key('Escape').defaultPrevented).toBe(true);
-
-			expect(player()).toBe(current);
-			expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${ID}`);
-			expect(submitted()).toBe(ID);
-			expect(input().value).toBe(ID);
-			expect(document.activeElement).toBe(button('replace'));
+			expect(player().hidden).toBe(true);
+			expect(player().hasAttribute('src')).toBe(false);
+			expect(button('add').hidden).toBe(true);
+			expect(document.getElementById('editor-dirty')!.hidden).toBe(false);
 		},
 	);
 
-	it('replaces only on confirmation and reports the committed ID', () => {
-		control(ID);
-		const changes: string[] = [];
-		document
-			.querySelector('[data-youtube-value]')!
-			.addEventListener('change', () => changes.push(String(submitted())));
-		button('replace').click();
-		type(NEXT);
-		expect(changes).toEqual([]);
-		button('confirm').click();
-		expect(submitted()).toBe(NEXT);
-		expect(changes).toEqual([NEXT]);
-		expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${NEXT}`);
-	});
-
-	it('does not mark a cancelled replacement as an unsaved content change', () => {
-		control(ID);
-		document.body.insertAdjacentHTML('beforeend', '<span id="editor-dirty" hidden>Unsaved</span>');
-		stops.push(installDirty());
-		const dirty = document.getElementById('editor-dirty')!;
-		button('replace').click();
-		type(NEXT);
-		button('cancel').click();
-		expect(dirty.hidden).toBe(true);
-		button('replace').click();
-		type(NEXT);
-		button('confirm').click();
-		expect(dirty.hidden).toBe(false);
-	});
-
-	it('cancels with Escape from a replacement action as well as its input', () => {
-		control(ID);
-		button('replace').click();
-		type(NEXT);
-		button('confirm').focus();
-		button('confirm').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-		expect(submitted()).toBe(ID);
-		expect(document.activeElement).toBe(button('replace'));
-	});
+	it.each(['click', 'Enter'])(
+		'adds a replacement through %s after reporting the cleared selection',
+		(action) => {
+			control(ID);
+			const changes: string[] = [];
+			document
+				.querySelector('[data-youtube-value]')!
+				.addEventListener('change', () => changes.push(String(submitted())));
+			button('replace').click();
+			type(NEXT);
+			expect(changes).toEqual(['']);
+			expect(submitted()).toBe('');
+			expect(button('add').hidden).toBe(false);
+			if (action === 'click') button('add').click();
+			else key('Enter');
+			expect(submitted()).toBe(NEXT);
+			expect(changes).toEqual(['', NEXT]);
+			expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${NEXT}`);
+		},
+	);
 
 	it('does not accept Enter during composition', () => {
 		control();
 		type(ID);
 		expect(key('Enter', input(), true).defaultPrevented).toBe(false);
 		expect(submitted()).toBe('');
-	});
-
-	it('lets an optional field be cleared explicitly', () => {
-		control(ID, { required: false });
-		button('replace').click();
-		button('remove').click();
-		expect(submitted()).toBe('');
-		expect(player().hidden).toBe(true);
-		expect(player().hasAttribute('src')).toBe(false);
-		expect(document.activeElement).toBe(input());
 	});
 
 	it('keeps immutable videos readable without offering changes', () => {
@@ -299,7 +269,7 @@ describe('YouTube control', () => {
 	});
 
 	it.each(['', ID])(
-		'focuses the editable input from server validation errors for "%s"',
+		'focuses the control without changing "%s" when following server validation errors',
 		(value) => {
 			control(value);
 			stops.push(installErrors());
@@ -311,69 +281,77 @@ describe('YouTube control', () => {
 				);
 			document.dispatchEvent(new Event('htmx:after:swap'));
 			document.querySelector<HTMLButtonElement>('[data-error-path]')!.click();
-			expect(document.activeElement).toBe(input());
+			expect(document.activeElement).toBe(value === '' ? input() : button('replace'));
 			expect(input().getAttribute('aria-invalid')).toBe('true');
+			expect(submitted()).toBe(value);
 		},
 	);
 
-	it('duplicates the committed video rather than an unconfirmed replacement', async () => {
-		const html = markup(
-			'',
-			{
-				name: 'blocks',
-				required: false,
-				control: {
+	it.each([false, true])(
+		'duplicates the current selection with replacement started=%s',
+		async (replacing) => {
+			const html = markup(
+				'',
+				{
 					name: 'blocks',
-					props: {
-						blockTypes: [
-							{
-								type: 'Cosray\\Block\\Youtube',
-								label: 'Video',
-								fields: [
-									{
-										name: 'video',
-										required: true,
-										control: { name: 'youtube' },
-										metaControl: {
-											name: 'group',
-											props: {
-												fields: ['X', 'Y'].map((axis) => ({
-													key: `aspectRatio${axis}`,
-													control: { name: 'number' },
-												})),
+					required: false,
+					control: {
+						name: 'blocks',
+						props: {
+							blockTypes: [
+								{
+									type: 'Cosray\\Block\\Youtube',
+									label: 'Video',
+									fields: [
+										{
+											name: 'video',
+											required: true,
+											control: { name: 'youtube' },
+											metaControl: {
+												name: 'group',
+												props: {
+													fields: ['X', 'Y'].map((axis) => ({
+														key: `aspectRatio${axis}`,
+														control: { name: 'number' },
+													})),
+												},
 											},
 										},
-									},
-								],
-							},
-						],
+									],
+								},
+							],
+						},
 					},
 				},
-			},
-			{
-				data: {
-					value: {
-						zxx: [{ type: 'Cosray\\Block\\Youtube', fields: { video: { value: { zxx: ID } } } }],
+				{
+					data: {
+						value: {
+							zxx: [{ type: 'Cosray\\Block\\Youtube', fields: { video: { value: { zxx: ID } } } }],
+						},
 					},
 				},
-			},
-		);
-		document.body.innerHTML = `<form>${html}</form>`;
-		stops.push(installRepeater());
-		type('9', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioX][zxx]"]')!);
-		type('16', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioY][zxx]"]')!);
-		button('replace').click();
-		type(NEXT);
-		document.querySelector<HTMLButtonElement>('[data-repeater-duplicate]')!.click();
-		await Promise.resolve();
-		const boxes = document.querySelectorAll<HTMLElement>('[data-youtube]');
-		expect(boxes).toHaveLength(2);
-		expect(player(boxes[1]).getAttribute('src')).toBe(
-			`https://www.youtube-nocookie.com/embed/${ID}`,
-		);
-		expect(submitted('content[blocks][value][zxx][1][fields][video][value][zxx]')).toBe(ID);
-		expect(boxes[1].style.getPropertyValue('--ratio')).toBe('9 / 16');
-	});
+			);
+			document.body.innerHTML = `<form>${html}</form>`;
+			stops.push(installRepeater());
+			type('9', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioX][zxx]"]')!);
+			type('16', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioY][zxx]"]')!);
+			if (replacing) {
+				button('replace').click();
+				type(NEXT);
+			}
+			document.querySelector<HTMLButtonElement>('[data-repeater-duplicate]')!.click();
+			await Promise.resolve();
+			const boxes = document.querySelectorAll<HTMLElement>('[data-youtube]');
+			expect(boxes).toHaveLength(2);
+			expect(player(boxes[1]).getAttribute('src')).toBe(
+				replacing ? null : `https://www.youtube-nocookie.com/embed/${ID}`,
+			);
+			expect(submitted('content[blocks][value][zxx][1][fields][video][value][zxx]')).toBe(
+				replacing ? '' : ID,
+			);
+			expect(boxes[1].style.getPropertyValue('--ratio')).toBe('9 / 16');
+		},
+	);
 
 	it('previews locale fallbacks without submitting drafts or copying shared content', () => {
 		const locales = [
