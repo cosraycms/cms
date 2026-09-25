@@ -68,7 +68,7 @@ function resolve(form: Element, path: Path): Element | null {
 		const exact = form.querySelector(`[name="${selectorValue(name)}"]`);
 
 		if (exact) {
-			return exact;
+			return exact.closest('[data-youtube]')?.querySelector('[data-youtube-input]') ?? exact;
 		}
 
 		// The prefix probe appends "[" so content[f] cannot match a
@@ -347,6 +347,13 @@ function activate(event: Event): void {
 
 	if (paths instanceof HTMLDialogElement && !paths.open) {
 		paths.closest('[data-paths]')?.querySelector<HTMLElement>('[data-paths-open]')?.click();
+	}
+
+	if (control.closest('[data-youtube-entry]')?.hasAttribute('hidden')) {
+		control
+			.closest('[data-youtube]')
+			?.querySelector<HTMLButtonElement>('[data-youtube-replace]')
+			?.click();
 	}
 
 	if (field instanceof HTMLElement) {

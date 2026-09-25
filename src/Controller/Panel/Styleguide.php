@@ -688,7 +688,7 @@ final class Styleguide extends Panel
 						'label' => 'YouTube video',
 						'type' => Youtube::class,
 						'control' => ['name' => 'youtube', 'props' => []],
-						'placeholder' => 'YouTube URL or video id',
+						'placeholder' => 'Paste a YouTube URL or video ID…',
 						'metaControl' => $aspect,
 					],
 				],

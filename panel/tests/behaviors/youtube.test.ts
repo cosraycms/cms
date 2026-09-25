@@ -1,122 +1,400 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { install, thumbnail, urlId } from '../../src/behaviors/youtube';
+import { execFileSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { install, urlId } from '../../src/behaviors/youtube';
+import { install as installFallbacks } from '../../src/behaviors/fallbacks';
+import { install as installErrors } from '../../src/behaviors/errors';
+import { install as installDirty } from '../../src/behaviors/dirty';
+import { install as installRepeater } from '../../src/behaviors/repeater';
 
-let uninstall: (() => void) | null = null;
+vi.mock('sortablejs', () => ({ default: vi.fn() }));
+
+const ID = 'dQw4w9WgXcQ';
+const NEXT = 'abcdefghijk';
+const NAME = 'content[video][value][zxx]';
+const stops: Array<() => void> = [];
 
 beforeEach(() => {
-	uninstall = install();
+	stops.push(install());
 });
 
 afterEach(() => {
-	uninstall?.();
-	uninstall = null;
+	stops
+		.splice(0)
+		.reverse()
+		.forEach((stop) => stop());
 	document.body.innerHTML = '';
 });
 
-function control(value = ''): { input: HTMLInputElement; image: HTMLImageElement } {
-	document.body.innerHTML = `<div class="cms-youtube" data-youtube>
-		<img class="thumbnail" data-youtube-preview alt="" ${value === '' ? 'hidden' : `src="${thumbnail(value)}"`} />
-		<input type="text" name="content[video][value][zxx]" value="${value}" />
-	</div>`;
-
-	return {
-		input: document.querySelector<HTMLInputElement>('input')!,
-		image: document.querySelector<HTMLImageElement>('img')!,
-	};
+function markup(
+	value = '',
+	field: Record<string, unknown> = {},
+	extra: Record<string, unknown> = {},
+): string {
+	return execFileSync(
+		'php',
+		[resolve(dirname(fileURLToPath(import.meta.url)), '../../../tests/Fixtures/Panel/field.php')],
+		{
+			encoding: 'utf8',
+			input: JSON.stringify({
+				field: {
+					name: 'video',
+					label: 'YouTube video',
+					required: true,
+					control: { name: 'youtube' },
+					...field,
+				},
+				data: { value: { zxx: value } },
+				locales: [],
+				defaultLocale: 'en',
+				...extra,
+			}),
+		},
+	);
 }
 
-function type(input: HTMLInputElement, value: string): void {
-	input.value = value;
-	input.dispatchEvent(new Event('input', { bubbles: true }));
+function control(value = '', field: Record<string, unknown> = {}): HTMLElement {
+	document.body.innerHTML = `<form id="node-editor-form">${markup(value, field)}</form>`;
+	return document.querySelector<HTMLElement>('[data-youtube]')!;
 }
 
-describe('youtube control', () => {
-	it('reads the id off every YouTube URL shape and nothing else', () => {
-		expect(urlId('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
-		expect(urlId('https://www.youtube.com/watch?feature=share&v=dQw4w9WgXcQ&t=42s')).toBe(
-			'dQw4w9WgXcQ',
+function input(box: ParentNode = document): HTMLInputElement {
+	return box.querySelector<HTMLInputElement>('[data-youtube-input]')!;
+}
+
+function player(box: ParentNode = document): HTMLIFrameElement {
+	return box.querySelector<HTMLIFrameElement>('[data-youtube-player]')!;
+}
+
+function button(action: string, box: ParentNode = document): HTMLButtonElement {
+	return box.querySelector<HTMLButtonElement>(`[data-youtube-${action}]`)!;
+}
+
+function type(value: string, target = input()): void {
+	target.value = value;
+	target.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function key(key: string, target = input(), isComposing = false): KeyboardEvent {
+	const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, isComposing });
+	target.dispatchEvent(event);
+	return event;
+}
+
+function submitted(name = NAME): FormDataEntryValue | null {
+	return new FormData(document.querySelector('form')!).get(name);
+}
+
+function error(): HTMLElement {
+	return document.querySelector('[data-youtube-error]')!;
+}
+
+describe('YouTube URLs', () => {
+	it.each([
+		`https://www.youtube.com/watch?v=${ID}`,
+		`https://www.youtube.com/watch?feature=share&v=${ID}&t=42s`,
+		`https://youtu.be/${ID}?t=3`,
+		`https://youtube.com/shorts/${ID}`,
+		`https://www.youtube-nocookie.com/embed/${ID}?rel=0`,
+		`https://www.youtube.com/live/${ID}`,
+		`https://m.youtube.com/watch?v=${ID}`,
+		`youtube.com/watch?v=${ID}`,
+		`youtu.be/${ID}`,
+	])('extracts the ID from %s', (url) => {
+		expect(urlId(url)).toBe(ID);
+	});
+
+	it.each([
+		ID,
+		'https://vimeo.com/12345',
+		'https://www.youtube.com/watch?v=tooshort',
+		`https://www.youtube.com/watch?v=${ID}extra`,
+		`https://example.org/watch?v=${ID}`,
+		`https://youtube.com.example.org/embed/${ID}`,
+		`https://example.org/youtu.be/${ID}`,
+		`https://youtu.be/${ID}/extra`,
+		`<iframe src="https://www.youtube.com/embed/${ID}"></iframe>`,
+		'not a URL',
+	])('rejects %s', (url) => {
+		expect(urlId(url)).toBeNull();
+	});
+});
+
+describe('YouTube control', () => {
+	it('keeps typing and blur separate from the submitted video', () => {
+		control();
+		expect(input().placeholder).toBe('Paste a YouTube URL or video ID…');
+		expect(input().getAttribute('aria-label')).toBe('YouTube video');
+		expect(button('add').hidden).toBe(true);
+		expect(player().hidden).toBe(true);
+
+		type(`https://youtu.be/${ID}`);
+		input().dispatchEvent(new Event('change', { bubbles: true }));
+
+		expect(input().value).toBe(`https://youtu.be/${ID}`);
+		expect(submitted()).toBe('');
+		expect(player().hasAttribute('src')).toBe(false);
+		expect(button('add').hidden).toBe(false);
+		type('   ');
+		expect(button('add').hidden).toBe(true);
+	});
+
+	it.each(['click', 'Enter'])('adds through %s without submitting the enclosing form', (action) => {
+		control();
+		const submit = vi.fn((event: Event) => event.preventDefault());
+		document.querySelector('form')!.addEventListener('submit', submit);
+		type(` https://youtu.be/${ID} `);
+
+		if (action === 'click') button('add').click();
+		else expect(key('Enter').defaultPrevented).toBe(true);
+
+		expect(submit).not.toHaveBeenCalled();
+		expect(submitted()).toBe(ID);
+		expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${ID}`);
+		expect(player().title).toBe('YouTube video');
+		expect(player().hidden).toBe(false);
+		expect(document.querySelector<HTMLElement>('[data-youtube-entry]')!.hidden).toBe(true);
+		expect(document.activeElement).toBe(button('replace'));
+	});
+
+	it('renders a saved video without showing its ID input', () => {
+		control(ID);
+		expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${ID}`);
+		expect(document.querySelector<HTMLElement>('[data-youtube-entry]')!.hidden).toBe(true);
+		expect(button('replace').hidden).toBe(false);
+		expect(submitted()).toBe(ID);
+	});
+
+	it('shows an accessible validation error without changing the video', () => {
+		control(ID);
+		button('replace').click();
+		type('https://example.org/watch?v=abcdefghijk');
+		button('confirm').click();
+
+		expect(submitted()).toBe(ID);
+		expect(error().hidden).toBe(false);
+		expect(input().getAttribute('aria-invalid')).toBe('true');
+		expect(input().getAttribute('aria-describedby')).toBe(error().id);
+		expect(document.activeElement).toBe(input());
+		type(NEXT);
+		expect(error().hidden).toBe(true);
+		expect(input().hasAttribute('aria-invalid')).toBe(false);
+	});
+
+	it.each(['cancel', 'Escape'])(
+		'preserves the current video when replacing is cancelled by %s',
+		(action) => {
+			control(ID);
+			const current = player();
+			button('replace').click();
+			expect(document.activeElement).toBe(input());
+			expect(input().value).toBe(ID);
+			type(NEXT);
+			expect(submitted()).toBe(ID);
+
+			if (action === 'cancel') button('cancel').click();
+			else expect(key('Escape').defaultPrevented).toBe(true);
+
+			expect(player()).toBe(current);
+			expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${ID}`);
+			expect(submitted()).toBe(ID);
+			expect(input().value).toBe(ID);
+			expect(document.activeElement).toBe(button('replace'));
+		},
+	);
+
+	it('replaces only on confirmation and reports the committed ID', () => {
+		control(ID);
+		const changes: string[] = [];
+		document
+			.querySelector('[data-youtube-value]')!
+			.addEventListener('change', () => changes.push(String(submitted())));
+		button('replace').click();
+		type(NEXT);
+		expect(changes).toEqual([]);
+		button('confirm').click();
+		expect(submitted()).toBe(NEXT);
+		expect(changes).toEqual([NEXT]);
+		expect(player().getAttribute('src')).toBe(`https://www.youtube-nocookie.com/embed/${NEXT}`);
+	});
+
+	it('does not mark a cancelled replacement as an unsaved content change', () => {
+		control(ID);
+		document.body.insertAdjacentHTML('beforeend', '<span id="editor-dirty" hidden>Unsaved</span>');
+		stops.push(installDirty());
+		const dirty = document.getElementById('editor-dirty')!;
+		button('replace').click();
+		type(NEXT);
+		button('cancel').click();
+		expect(dirty.hidden).toBe(true);
+		button('replace').click();
+		type(NEXT);
+		button('confirm').click();
+		expect(dirty.hidden).toBe(false);
+	});
+
+	it('cancels with Escape from a replacement action as well as its input', () => {
+		control(ID);
+		button('replace').click();
+		type(NEXT);
+		button('confirm').focus();
+		button('confirm').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+		expect(submitted()).toBe(ID);
+		expect(document.activeElement).toBe(button('replace'));
+	});
+
+	it('does not accept Enter during composition', () => {
+		control();
+		type(ID);
+		expect(key('Enter', input(), true).defaultPrevented).toBe(false);
+		expect(submitted()).toBe('');
+	});
+
+	it('lets an optional field be cleared explicitly', () => {
+		control(ID, { required: false });
+		button('replace').click();
+		button('remove').click();
+		expect(submitted()).toBe('');
+		expect(player().hidden).toBe(true);
+		expect(player().hasAttribute('src')).toBe(false);
+		expect(document.activeElement).toBe(input());
+	});
+
+	it('keeps immutable videos readable without offering changes', () => {
+		control(ID, { immutable: true });
+		expect(player().hidden).toBe(false);
+		expect(input().readOnly).toBe(true);
+		expect(document.querySelectorAll('[data-youtube] button')).toHaveLength(0);
+		key('Enter');
+		expect(submitted()).toBe(ID);
+	});
+
+	it('preserves unrecognized stored IDs until explicitly corrected', () => {
+		control('legacy');
+		expect(submitted()).toBe('legacy');
+		expect(input().value).toBe('legacy');
+		expect(player().hasAttribute('src')).toBe(false);
+		type(ID);
+		button('add').click();
+		expect(submitted()).toBe(ID);
+	});
+
+	it('reshapes only the players belonging to the edited ratio meta', () => {
+		control(ID);
+		document.querySelector('form')!.insertAdjacentHTML(
+			'beforeend',
+			`${markup(NEXT, { name: 'other' })}
+			<input type="number" name="content[video][meta][aspectRatioX][zxx]" value="9" />
+			<input type="number" name="content[video][meta][aspectRatioY][zxx]" value="16" />`,
 		);
-		expect(urlId('https://youtu.be/dQw4w9WgXcQ?t=3')).toBe('dQw4w9WgXcQ');
-		expect(urlId('https://youtube.com/shorts/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
-		expect(urlId('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0')).toBe('dQw4w9WgXcQ');
-		expect(urlId('https://www.youtube.com/live/dQw4w9WgXcQ')).toBe('dQw4w9WgXcQ');
-		expect(urlId('dQw4w9WgXcQ')).toBeNull();
-		expect(urlId('https://vimeo.com/12345')).toBeNull();
-		expect(urlId('https://www.youtube.com/watch?v=tooshort')).toBeNull();
-	});
-
-	it('reduces a pasted URL to its id and shows the thumbnail', () => {
-		const { input, image } = control();
-
-		type(input, 'https://youtu.be/dQw4w9WgXcQ');
-
-		expect(input.value).toBe('dQw4w9WgXcQ');
-		expect(image.hidden).toBe(false);
-		expect(image.getAttribute('src')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
-	});
-
-	it('asks for an image only once the id is complete', () => {
-		const { input, image } = control();
-
-		type(input, 'dQw4w9');
-
-		expect(image.hidden).toBe(true);
-		expect(image.hasAttribute('src')).toBe(false);
-
-		type(input, 'dQw4w9WgXcQ');
-
-		expect(image.hidden).toBe(false);
-
-		type(input, '');
-
-		expect(image.hidden).toBe(true);
-		expect(image.hasAttribute('src')).toBe(false);
-	});
-
-	it('hides a thumbnail YouTube has no image for', () => {
-		const { image } = control('dQw4w9WgXcQ');
-
-		image.dispatchEvent(new Event('error'));
-
-		expect(image.hidden).toBe(true);
-	});
-
-	it('reshapes the thumbnail as the ratio meta of its own field is edited', () => {
-		document.body.innerHTML = `
-			<div class="cms-youtube" data-youtube style="--ratio: 16 / 9">
-				<img class="thumbnail" data-youtube-preview alt="" src="${thumbnail('dQw4w9WgXcQ')}" />
-				<input type="text" name="content[blocks][value][zxx][0][fields][video][value][zxx]" value="dQw4w9WgXcQ" />
-			</div>
-			<div class="cms-youtube" data-youtube style="--ratio: 16 / 9">
-				<img class="thumbnail" data-youtube-preview alt="" hidden />
-				<input type="text" name="content[other][value][zxx]" value="" />
-			</div>
-			<dialog>
-				<input type="number" name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]" value="9" />
-				<input type="number" name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioY][zxx]" value="16" />
-			</dialog>
-		`;
 		const [own, other] = document.querySelectorAll<HTMLElement>('[data-youtube]');
 		const y = document.querySelector<HTMLInputElement>('input[name$="[aspectRatioY][zxx]"]')!;
-
-		type(y, '16');
-
+		type('16', y);
 		expect(own.style.getPropertyValue('--ratio')).toBe('9 / 16');
 		expect(other.style.getPropertyValue('--ratio')).toBe('16 / 9');
-		// The thumbnail's own id stays what it was: a meta input is not an id.
-		expect(own.querySelector('input')!.value).toBe('dQw4w9WgXcQ');
-
-		// A half-typed or empty side keeps the last shape.
-		type(y, '');
+		expect(submitted()).toBe(ID);
+		type('', y);
 		expect(own.style.getPropertyValue('--ratio')).toBe('9 / 16');
 	});
 
-	it('leaves other inputs alone', () => {
-		document.body.innerHTML = `<input type="text" value="https://youtu.be/dQw4w9WgXcQ" />`;
-		const stray = document.querySelector<HTMLInputElement>('input')!;
+	it.each(['', ID])(
+		'focuses the editable input from server validation errors for "%s"',
+		(value) => {
+			control(value);
+			stops.push(installErrors());
+			document
+				.querySelector('form')!
+				.insertAdjacentHTML(
+					'afterbegin',
+					`<div id="editor-errors" tabindex="-1"><button type="button" data-error-path='["content","video","value","zxx"]'>Video is required</button></div>`,
+				);
+			document.dispatchEvent(new Event('htmx:after:swap'));
+			document.querySelector<HTMLButtonElement>('[data-error-path]')!.click();
+			expect(document.activeElement).toBe(input());
+			expect(input().getAttribute('aria-invalid')).toBe('true');
+		},
+	);
 
-		type(stray, 'https://youtu.be/dQw4w9WgXcQ');
+	it('duplicates the committed video rather than an unconfirmed replacement', async () => {
+		const html = markup(
+			'',
+			{
+				name: 'blocks',
+				required: false,
+				control: {
+					name: 'blocks',
+					props: {
+						blockTypes: [
+							{
+								type: 'Cosray\\Block\\Youtube',
+								label: 'Video',
+								fields: [
+									{
+										name: 'video',
+										required: true,
+										control: { name: 'youtube' },
+										metaControl: {
+											name: 'group',
+											props: {
+												fields: ['X', 'Y'].map((axis) => ({
+													key: `aspectRatio${axis}`,
+													control: { name: 'number' },
+												})),
+											},
+										},
+									},
+								],
+							},
+						],
+					},
+				},
+			},
+			{
+				data: {
+					value: {
+						zxx: [{ type: 'Cosray\\Block\\Youtube', fields: { video: { value: { zxx: ID } } } }],
+					},
+				},
+			},
+		);
+		document.body.innerHTML = `<form>${html}</form>`;
+		stops.push(installRepeater());
+		type('9', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioX][zxx]"]')!);
+		type('16', document.querySelector<HTMLInputElement>('input[name$="[aspectRatioY][zxx]"]')!);
+		button('replace').click();
+		type(NEXT);
+		document.querySelector<HTMLButtonElement>('[data-repeater-duplicate]')!.click();
+		await Promise.resolve();
+		const boxes = document.querySelectorAll<HTMLElement>('[data-youtube]');
+		expect(boxes).toHaveLength(2);
+		expect(player(boxes[1]).getAttribute('src')).toBe(
+			`https://www.youtube-nocookie.com/embed/${ID}`,
+		);
+		expect(submitted('content[blocks][value][zxx][1][fields][video][value][zxx]')).toBe(ID);
+		expect(boxes[1].style.getPropertyValue('--ratio')).toBe('9 / 16');
+	});
 
-		expect(stray.value).toBe('https://youtu.be/dQw4w9WgXcQ');
+	it('previews locale fallbacks without submitting drafts or copying shared content', () => {
+		const locales = [
+			{ id: 'en', title: 'English' },
+			{ id: 'de', title: 'Deutsch', fallback: 'en' },
+		];
+		document.body.innerHTML = `<form data-content-locale-scope data-content-locales='${JSON.stringify(locales)}'>${markup('', { translate: true }, { locales, defaultLocale: 'de', data: { value: { zxx: ID } } })}</form>`;
+		stops.push(installFallbacks());
+		const en = document.querySelector<HTMLElement>('.variant[data-locale="en"]')!;
+		const de = document.querySelector<HTMLElement>('.variant[data-locale="de"]')!;
+		expect(input(de).placeholder).toBe(ID);
+		expect(submitted('content[video][value][de]')).toBe('');
+		input(de).focus();
+		expect(input(de).placeholder).toBe('Paste a YouTube URL or video ID…');
+		input(de).blur();
+		expect(input(de).placeholder).toBe(ID);
+		type(NEXT, input(en));
+		expect(input(de).placeholder).toBe(ID);
+		button('add', en).click();
+		expect(input(de).placeholder).toBe(NEXT);
+		expect(submitted('content[video][value][en]')).toBe(NEXT);
+		expect(submitted('content[video][value][de]')).toBe('');
 	});
 });

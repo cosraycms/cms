@@ -402,24 +402,54 @@
 	min-width: 0;
 }
 
-/* The YouTube control: the thumbnail above the id it belongs to. Not
-   .preview — the node view uses that for its preview pane. */
 .cms-youtube {
 	display: grid;
 	gap: var(--cms-space-2);
 
-	/* A token for the video, not the video: a small source image, so it
-	   never grows to block width, in the shape the field's meta stores.
-	   A tall shape stops at the same 30rem line as image and video
-	   blocks; the width cap follows so the ratio holds. */
-	& .thumbnail {
+	& .player {
 		display: block;
 		width: 100%;
-		max-width: min(28rem, calc(30rem * var(--ratio, 16 / 9)));
+		max-width: calc(30rem * var(--ratio, 16 / 9));
 		aspect-ratio: var(--ratio, 16 / 9);
+		border: 0;
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
-		object-fit: cover;
+	}
+
+	& .entry {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--cms-space-2);
+
+		& .cms-input {
+			flex: 1 1 12rem;
+			min-width: 0;
+		}
+	}
+
+	& .replace {
+		justify-self: end;
+	}
+
+	& .quiet {
+		border-color: transparent;
+		background: none;
+		box-shadow: none;
+		color: var(--cms-color-text-muted);
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+	}
+
+	& [hidden] {
+		display: none;
+	}
+
+	& .cms-field-error {
+		margin: 0;
 	}
 }
 

@@ -25,7 +25,7 @@ Fields persist locale maps: `zxx` is neutral; translated values use configured l
 
 Named built-ins resolve to the `cosray-code`, `cosray-richtext`, `cosray-image`, `cosray-file`, `cosray-video`, and `cosray-reference` elements. Code values are strings with syntax in field meta; richtext uses the [structured format](richtext-format.md); media values are `{uid, meta?}` lists; references are ordered neutral `{uid}` lists. [Media](media.md) explains catalog lookup and metadata fallback.
 
-`DateTime` writes normalize offsets to UTC whole seconds. The panel converts between that instant and `datetime-local` input using `meta.timezone`, defaulting to UTC. `Date` and `Time` do not carry offsets. The YouTube control can extract an ID from a pasted URL and fetches thumbnails from YouTube's image host; it does not store the pasted URL as the value.
+`DateTime` writes normalize offsets to UTC whole seconds. The panel converts between that instant and `datetime-local` input using `meta.timezone`, defaulting to UTC. `Date` and `Time` do not carry offsets. The YouTube control accepts a URL or video ID through **Add video** or Enter, then shows a player from `youtube-nocookie.com` without autoplay. **Replace video** opens a draft input; confirmation changes the stored ID, while Cancel or Escape keeps the existing video. Optional standalone fields also offer Remove while replacing. Only the committed ID is submitted, never a pasted URL or an unconfirmed draft. Loading the player contacts YouTube; the privacy-enhanced origin does not eliminate third-party requests.
 
 ### Groups, repeaters, and fieldsets
 

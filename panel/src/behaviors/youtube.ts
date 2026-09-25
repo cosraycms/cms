@@ -1,122 +1,229 @@
-// The YouTube control: its input holds a video id, the image above it
-// the video's thumbnail. A pasted YouTube URL — watch, shorts, embed,
-// live or youtu.be — is reduced to its id as soon as it lands, and the
-// preview follows whatever the input holds. Only a full eleven-character
-// id asks YouTube for an image, so typing one does not request a
-// thumbnail per keystroke; an id YouTube has no image for hides it.
-
 const ID = /^[A-Za-z0-9_-]{11}$/;
-const URL_ID =
-	/(?:youtu\.be\/|\/(?:watch\?(?:[^#]*&)?v=|shorts\/|embed\/|live\/|v\/))([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/;
 
-/** The id a YouTube URL names, or null when the text is not one. */
 export function urlId(text: string): string | null {
-	return URL_ID.exec(text.trim())?.[1] ?? null;
+	try {
+		const url = new URL(/^https?:\/\//i.test(text.trim()) ? text.trim() : `https://${text.trim()}`);
+		const host = url.hostname;
+		let id: string | null = null;
+
+		if (host === 'youtu.be') {
+			id = /^\/([^/]+)\/?$/.exec(url.pathname)?.[1] ?? null;
+		} else if (
+			[
+				'youtube.com',
+				'www.youtube.com',
+				'm.youtube.com',
+				'music.youtube.com',
+				'youtube-nocookie.com',
+				'www.youtube-nocookie.com',
+			].includes(host)
+		) {
+			id =
+				url.pathname === '/watch'
+					? url.searchParams.get('v')
+					: (/^\/(?:shorts|embed|live|v)\/([^/]+)\/?$/.exec(url.pathname)?.[1] ?? null);
+		}
+
+		return id !== null && ID.test(id) ? id : null;
+	} catch {
+		return null;
+	}
 }
 
 export function thumbnail(id: string): string {
 	return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
-function preview(box: Element, id: string | null): void {
-	const image = box.querySelector<HTMLImageElement>('[data-youtube-preview]');
-
-	if (!image) {
-		return;
-	}
-
-	if (id === null) {
-		image.hidden = true;
-		image.removeAttribute('src');
-
-		return;
-	}
-
-	const src = thumbnail(id);
-
-	if (image.getAttribute('src') !== src) {
-		image.setAttribute('src', src);
-	}
-
-	image.hidden = false;
+function value(box: Element): HTMLInputElement {
+	return box.querySelector<HTMLInputElement>('[data-youtube-value]')!;
 }
 
-// The aspect ratio lives in the field's meta — inside a block, in the
-// settings dialog — as two inputs named `{root}[meta][aspectRatioX][zxx]`
-// and `…Y…`; the control's own input is `{root}[value][{locale}]`.
+function input(box: Element): HTMLInputElement {
+	return box.querySelector<HTMLInputElement>('[data-youtube-input]')!;
+}
+
+function show(box: Element, selector: string, visible: boolean): void {
+	const element = box.querySelector<HTMLElement>(selector);
+	if (element) element.hidden = !visible;
+}
+
+function clearError(box: Element): void {
+	const editor = input(box);
+	const error = box.querySelector<HTMLElement>('[data-youtube-error]')!;
+
+	if (editor.getAttribute('aria-describedby') === error.id) {
+		editor.removeAttribute('aria-invalid');
+		editor.removeAttribute('aria-describedby');
+	}
+	error.hidden = true;
+}
+
+function actions(box: Element): void {
+	const replacing = box.hasAttribute('data-youtube-replacing');
+	show(box, '[data-youtube-add]', !replacing && input(box).value.trim() !== '');
+	show(box, '[data-youtube-confirm]', replacing);
+	show(box, '[data-youtube-cancel]', replacing);
+	show(box, '[data-youtube-remove]', replacing);
+}
+
+function render(box: Element): void {
+	const id = value(box).value;
+	const filled = ID.test(id);
+	const player = box.querySelector<HTMLIFrameElement>('[data-youtube-player]')!;
+
+	if (filled) {
+		const src = `https://www.youtube-nocookie.com/embed/${id}`;
+		if (player.getAttribute('src') !== src) player.src = src;
+	} else {
+		player.removeAttribute('src');
+	}
+
+	box.removeAttribute('data-youtube-replacing');
+	input(box).value = id;
+	clearError(box);
+	show(box, '[data-youtube-player]', filled);
+	show(box, '[data-youtube-entry]', !filled);
+	show(box, '[data-youtube-replace]', filled);
+	actions(box);
+}
+
+function replace(box: Element): void {
+	if (input(box).readOnly) return;
+	box.setAttribute('data-youtube-replacing', '');
+	input(box).value = value(box).value;
+	clearError(box);
+	show(box, '[data-youtube-entry]', true);
+	show(box, '[data-youtube-replace]', false);
+	actions(box);
+	input(box).focus();
+	input(box).select();
+}
+
+function commit(box: Element, id: string): void {
+	const control = value(box);
+	const changed = control.value !== id;
+	control.value = id;
+	render(box);
+	box
+		.querySelector<HTMLElement>(id === '' ? '[data-youtube-input]' : '[data-youtube-replace]')
+		?.focus();
+
+	if (changed) {
+		control.dispatchEvent(new Event('input', { bubbles: true }));
+		control.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+}
+
+function confirm(box: Element): void {
+	const text = input(box).value.trim();
+	const id = ID.test(text) ? text : urlId(text);
+
+	if (id === null) {
+		const error = box.querySelector<HTMLElement>('[data-youtube-error]')!;
+		error.hidden = false;
+		input(box).setAttribute('aria-invalid', 'true');
+		input(box).setAttribute('aria-describedby', error.id);
+		input(box).focus();
+		return;
+	}
+
+	commit(box, id);
+}
+
+function cancel(box: Element): void {
+	render(box);
+	box.querySelector<HTMLElement>('[data-youtube-replace]')?.focus();
+}
+
 const RATIO_META = /^(.*)\[meta\]\[aspectRatio[XY]\]\[zxx\]$/;
 
 function side(root: string, axis: 'X' | 'Y'): number | null {
-	const input = document.getElementsByName(`${root}[meta][aspectRatio${axis}][zxx]`)[0];
-	const value = input instanceof HTMLInputElement ? Number(input.value) : NaN;
+	const control = document.getElementsByName(`${root}[meta][aspectRatio${axis}][zxx]`)[0];
+	const number = control instanceof HTMLInputElement ? Number(control.value) : NaN;
 
-	return Number.isInteger(value) && value > 0 ? value : null;
+	return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-/** Re-shapes the thumbnail whose ratio meta input changed. */
-function followRatio(input: HTMLInputElement): boolean {
-	const root = RATIO_META.exec(input.name)?.[1];
+function followRatio(control: HTMLInputElement): void {
+	const root = RATIO_META.exec(control.name)?.[1];
+	if (root === undefined) return;
 
-	if (root === undefined) {
-		return false;
-	}
-
-	const box = Array.from(document.querySelectorAll<HTMLElement>('[data-youtube]')).find(
-		(candidate) =>
-			candidate
-				.querySelector<HTMLInputElement>('input[type="text"]')
-				?.name.startsWith(`${root}[value]`),
-	);
 	const x = side(root, 'X');
 	const y = side(root, 'Y');
+	if (x === null || y === null) return;
 
-	if (box && x !== null && y !== null) {
-		box.style.setProperty('--ratio', `${x} / ${y}`);
+	for (const box of document.querySelectorAll<HTMLElement>('[data-youtube]')) {
+		if (value(box).name.startsWith(`${root}[value]`)) {
+			box.style.setProperty('--ratio', `${x} / ${y}`);
+		}
 	}
-
-	return true;
 }
 
 function onInput(event: Event): void {
-	const input = event.target;
+	const control = event.target;
+	if (!(control instanceof HTMLInputElement)) return;
 
-	if (!(input instanceof HTMLInputElement) || followRatio(input)) {
-		return;
+	followRatio(control);
+	const box = control.closest('[data-youtube]');
+	if (!box) return;
+
+	if (control.matches('[data-youtube-input]')) {
+		clearError(box);
+		actions(box);
+	} else if (control.matches('[data-youtube-value]')) {
+		render(box);
 	}
-
-	const box = input.closest('[data-youtube]');
-
-	if (!box) {
-		return;
-	}
-
-	const fromUrl = urlId(input.value);
-
-	if (fromUrl !== null) {
-		input.value = fromUrl;
-	}
-
-	const value = input.value.trim();
-
-	preview(box, ID.test(value) ? value : null);
 }
 
-function onError(event: Event): void {
-	const image = event.target;
+function onClick(event: MouseEvent): void {
+	const button = event.target instanceof Element ? event.target.closest('button') : null;
+	const box = button?.closest('[data-youtube]');
+	if (!button || !box || input(box).readOnly) return;
 
-	if (image instanceof HTMLImageElement && image.matches('[data-youtube-preview]')) {
-		image.hidden = true;
+	if (button.hasAttribute('data-youtube-replace')) replace(box);
+	else if (button.matches('[data-youtube-add], [data-youtube-confirm]')) confirm(box);
+	else if (button.hasAttribute('data-youtube-cancel')) cancel(box);
+	else if (button.hasAttribute('data-youtube-remove')) commit(box, '');
+}
+
+function onKeydown(event: KeyboardEvent): void {
+	const control = event.target;
+	const box =
+		control instanceof Element
+			? control.closest('[data-youtube-entry]')?.closest('[data-youtube]')
+			: null;
+	if (!box || event.isComposing || input(box).readOnly) return;
+
+	if (event.key === 'Enter' && control instanceof HTMLInputElement) {
+		event.preventDefault();
+		confirm(box);
+	} else if (event.key === 'Escape' && box.hasAttribute('data-youtube-replacing')) {
+		event.preventDefault();
+		event.stopPropagation();
+		cancel(box);
+	}
+}
+
+function stamp(event: Event): void {
+	if (event.target instanceof Element) {
+		event.target.querySelectorAll('[data-youtube]').forEach(render);
+		// Duplicated rows copy live meta inputs, not the template's preview ratio.
+		event.target.querySelectorAll<HTMLInputElement>('input[type="number"]').forEach(followRatio);
 	}
 }
 
 export function install(): () => void {
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
-	document.addEventListener('error', onError, true);
+	document.addEventListener('click', onClick);
+	document.addEventListener('keydown', onKeydown);
+	document.addEventListener('repeater:stamp', stamp);
 
 	return () => {
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
-		document.removeEventListener('error', onError, true);
+		document.removeEventListener('click', onClick);
+		document.removeEventListener('keydown', onKeydown);
+		document.removeEventListener('repeater:stamp', stamp);
 	};
 }

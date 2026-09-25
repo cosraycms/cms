@@ -124,10 +124,9 @@ describe('native fallback previews', () => {
 		['text', 'Shared "title" & note'],
 		['textarea', 'Shared "text" & note\nSecond line'],
 		['iframe', '<iframe title="Shared & safe">\n</iframe>'],
-		['youtube', 'abcdefghijk'],
 	])('previews shared %s content without submitting it as a translation', (control, shared) => {
 		teardown();
-		const edited = control === 'youtube' ? 'lmnopqrstuv' : 'Edited English';
+		const edited = 'Edited English';
 		render({ en: '', de: '', zxx: shared }, control);
 		teardown = install();
 

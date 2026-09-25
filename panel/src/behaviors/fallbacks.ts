@@ -49,14 +49,17 @@ function refreshField(field: Element): void {
 	for (const control of controls) {
 		const variant = control.closest<HTMLElement>('.variant[data-locale]');
 		const locale = variant?.dataset.locale ?? '';
+		const editor =
+			control.closest('[data-youtube]')?.querySelector<HTMLInputElement>('[data-youtube-input]') ??
+			control;
 		const fallback =
-			control.value === '' && document.activeElement !== control
+			control.value === '' && document.activeElement !== editor
 				? resolveFallback(map, locale, configured)
 				: null;
 		const schemaPlaceholder = control.dataset.schemaPlaceholder ?? '';
 		const source = variant?.querySelector<HTMLElement>(':scope > [data-fallback-source]');
 
-		control.placeholder = fallback?.value ?? schemaPlaceholder;
+		editor.placeholder = fallback?.value ?? schemaPlaceholder;
 
 		if (!source) {
 			continue;
@@ -154,7 +157,7 @@ function refresh(root: ParentNode = document): void {
 function input(event: Event): void {
 	const target = event.target;
 
-	if (target instanceof Element && target.matches(INPUT)) {
+	if (target instanceof Element && target.matches(`${INPUT}, [data-fallback-editor]`)) {
 		const field = target.closest('.cms-field');
 
 		if (field) refreshField(field);
@@ -186,7 +189,7 @@ function focus(event: FocusEvent): void {
 		return;
 	}
 
-	if (target.matches(INPUT)) {
+	if (target.matches(`${INPUT}, [data-fallback-editor]`)) {
 		const field = target.closest('.cms-field');
 
 		if (field) refreshField(field);
