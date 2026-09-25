@@ -227,6 +227,13 @@
 		display: none;
 	}
 
+	/* A seam overhangs the next part, which may be the active one. The
+	   hover would lift the seam's part to 3, below that neighbour, which
+	   then covers the seam and ends the hover again: a flicker. */
+	& .parts > .block:has(> .seam:hover) {
+		z-index: 5;
+	}
+
 	/*
 	 * What a block offers depends on where it sits: on the field's grid,
 	 * or in a split, whose direction decides. Each such control lists its
