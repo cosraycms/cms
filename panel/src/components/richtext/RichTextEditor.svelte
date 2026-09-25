@@ -84,6 +84,8 @@
 		assetUrl?: (uid: string) => string | null;
 		/** Register an asset picked from the library or uploaded. */
 		onAsset?: (uid: string, info: AssetInfo) => void;
+		/** Shown while the document is blank; not on a read-only one. */
+		placeholder?: string;
 	};
 
 	let {
@@ -101,6 +103,7 @@
 		styles = {},
 		assetUrl = () => null,
 		onAsset = () => {},
+		placeholder = '',
 	}: Props = $props();
 	let ref = $state<HTMLElement>();
 	let fallbackRef = $state<HTMLElement>();
@@ -199,6 +202,7 @@
 			bubbleElement: bubble,
 			assetUrl,
 			editable: () => !readonly,
+			placeholder: readonly ? '' : placeholder,
 			// The bind write must land before notify: the element serializes
 			// the bound map into the cosray-change detail when notified.
 			onUpdate: (doc) => {

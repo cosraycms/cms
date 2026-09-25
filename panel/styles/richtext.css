@@ -303,6 +303,16 @@
 		line-height: 1.65;
 		white-space: pre-wrap;
 
+		/* On a blank document's empty line, taking no room of its own, so
+		   the caret stays where the text will start. */
+		.is-placeholder::before {
+			content: attr(data-placeholder);
+			float: inline-start;
+			height: 0;
+			color: var(--cms-color-text-faint);
+			pointer-events: none;
+		}
+
 		h1,
 		h2,
 		h3 {

@@ -8,6 +8,7 @@ use Cosray\Contract\Block;
 use Cosray\Field;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Label;
+use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
@@ -15,7 +16,7 @@ use Cosray\Value\Block as BlockValue;
 #[Label('block:richtext'), Handle('richtext')]
 final class RichText implements Block
 {
-	#[Label('block:richtext'), Required, Translate]
+	#[Label('block:richtext'), Required, Translate, Placeholder('block:text-placeholder')]
 	protected Field\RichText $text;
 
 	public function render(BlockValue $block, RenderContext $ctx): string

@@ -22,6 +22,7 @@
 		immutable?: boolean;
 		translate?: boolean;
 		presentation?: string;
+		placeholder?: string;
 		tools?: string[];
 		richtextClasses?: Record<string, string>;
 		richtextStyles?: Record<string, string>;
@@ -142,6 +143,7 @@
 			: ''}
 		toolbar={field.presentation === 'block' ? 'inline' : 'default'}
 		tools={field.tools}
+		placeholder={field.placeholder ?? ''}
 		classes={field.richtextClasses ?? {}}
 		styles={field.richtextStyles ?? {}}
 		{assetUrl}

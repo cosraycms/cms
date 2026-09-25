@@ -1,5 +1,6 @@
-import { EditorState, type Command, type Plugin } from 'prosemirror-state';
-import { EditorView } from 'prosemirror-view';
+import { EditorState, Plugin, type Command } from 'prosemirror-state';
+import type { Node } from 'prosemirror-model';
+import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { history } from 'prosemirror-history';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
@@ -41,6 +42,8 @@ export interface EditorOptions {
 	 * means editable.
 	 */
 	editable?: () => boolean;
+	/** Shown on a blank document's empty line; none when empty. */
+	placeholder?: string;
 }
 
 function parseContent(html: string) {
@@ -56,9 +59,45 @@ function serializeContent(state: EditorState): string {
 	return container.innerHTML;
 }
 
+/** Nothing but one empty line, of whatever kind. */
+function blank(doc: Node): boolean {
+	return doc.childCount === 1 && doc.firstChild!.isTextblock && doc.firstChild!.content.size === 0;
+}
+
+/**
+ * The placeholder sits on the empty line itself, so it takes that line's
+ * font and place; the stylesheet shows it through the attribute.
+ */
+function placeholderPlugin(text: string): Plugin {
+	return new Plugin({
+		props: {
+			attributes: { 'aria-placeholder': text },
+			decorations(state) {
+				return blank(state.doc)
+					? DecorationSet.create(state.doc, [
+							Decoration.node(0, state.doc.firstChild!.nodeSize, {
+								class: 'is-placeholder',
+								'data-placeholder': text,
+							}),
+						])
+					: null;
+			},
+		},
+	});
+}
+
 export default function createEditor(options: EditorOptions): CmsEditor {
-	const { element, content, onUpdate, onStateChange, mode, bubbleElement, assetUrl, editable } =
-		options;
+	const {
+		element,
+		content,
+		onUpdate,
+		onStateChange,
+		mode,
+		bubbleElement,
+		assetUrl,
+		editable,
+		placeholder,
+	} = options;
 
 	const plugins: Plugin[] = [
 		buildInputRules(),
@@ -71,6 +110,10 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 
 	if (mode === 'inline' && bubbleElement) {
 		plugins.push(bubbleMenu(bubbleElement));
+	}
+
+	if (placeholder) {
+		plugins.push(placeholderPlugin(placeholder));
 	}
 
 	const state = EditorState.create({
