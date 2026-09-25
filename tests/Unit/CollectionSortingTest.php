@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Cms;
 use Cosray\Collection;
 use Cosray\Collection\Listing;
 use Cosray\Collection\Sort;
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Field\Services;
 use Cosray\Finder\Nodes;
 use Cosray\Finder\SortField;
 use Cosray\Node\Types;
@@ -45,7 +48,7 @@ final class CollectionSortingTest extends TestCase
 			Column::new('Again', 'title')->sort('title'),
 		];
 		$this->expectExceptionMessage("Duplicate collection sort key 'title'");
-		new Listing($collection, new Types())->list();
+		$this->listing($collection)->list();
 	}
 
 	public function testMissingDefaultFailsBeforeQuerying(): void
@@ -53,7 +56,7 @@ final class CollectionSortingTest extends TestCase
 		$collection = new SortingTestCollection();
 		$collection->configured = [Column::new('Name', 'title')->sort('name', ['title'])];
 		$this->expectExceptionMessage("Default collection sort 'title' has no sortable column");
-		new Listing($collection, new Types())->list();
+		$this->listing($collection)->list();
 	}
 
 	public static function invalidSelections(): iterable
@@ -71,7 +74,7 @@ final class CollectionSortingTest extends TestCase
 		$collection = new SortingTestCollection();
 		$collection->configured = [Column::new('Title', 'title')->sort('title')];
 		$this->expectExceptionMessage($message);
-		new Listing($collection, new Types())->list(sort: $sort, dir: $direction);
+		$this->listing($collection)->list(sort: $sort, dir: $direction);
 	}
 
 	public static function invalidDefinitions(): iterable
@@ -122,5 +125,12 @@ final class CollectionSortingTest extends TestCase
 		$this->assertSame('/cp/collection/content?q=term&sort=changed&dir=desc&limit=10', $table->headers[1]['url']);
 		$this->assertNull($table->headers[1]['ariaSort']);
 		$this->assertNull($table->headers[2]['url']);
+	}
+
+	private function listing(Collection $collection): Listing
+	{
+		$context = new Context($this->db(), $this->request(), $this->config(), $this->container(), $this->factory());
+
+		return new Listing($collection, new Cms($context, Services::withDefaults()), new Types());
 	}
 }

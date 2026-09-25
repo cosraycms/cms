@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Cosray\Collection;
 
+use Cosray\Cms;
 use Cosray\Collection;
+use Cosray\CollectionListMeta;
 use Cosray\Column;
 use Cosray\Exception\RuntimeException;
+use Cosray\Finder\Nodes;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 
 /**
- * List, row and hierarchy logic for collection pages.
+ * A registered collection as the panel lists it: its entries, columns,
+ * sorts, list options and blueprints, plus the row and hierarchy logic
+ * of collection pages.
  *
- * Kept out of the Collection base class so collections stay pure
+ * Kept out of the collection class so collections stay pure
  * configuration + query objects.
  */
 final class Listing
@@ -22,12 +27,18 @@ final class Listing
 	public readonly array $columns;
 	/** @var array<string, Sort> */
 	public readonly array $sorts;
+	public readonly CollectionListMeta $meta;
+	/** @var list<class-string> */
+	public readonly array $blueprints;
 	private readonly string $defaultSort;
 
 	public function __construct(
 		private readonly Collection $collection,
+		private readonly Cms $cms,
 		private readonly Types $types,
 	) {
+		$this->meta = $collection->listMeta;
+		$this->blueprints = $collection->blueprints();
 		$this->columns = array_values($collection->columns());
 		$sorts = [];
 		foreach ($this->columns as $column) {
@@ -50,6 +61,18 @@ final class Listing
 		}
 	}
 
+	/** A fresh finder over the collection's entries per call; callers narrow it. */
+	public function entries(): Nodes
+	{
+		return $this->collection->entries();
+	}
+
+	/** The node a hierarchy listing is scoped to, in any state. */
+	public function parent(string $uid): ?Wrapper
+	{
+		return $this->cms->node->byUid($uid, published: null);
+	}
+
 	public function list(
 		int $offset = 0,
 		int $limit = 50,
@@ -59,9 +82,9 @@ final class Listing
 		?string $parent = null,
 	): array {
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
-		$nodes = $this->collection->entries();
+		$nodes = $this->entries();
 
-		if ($this->collection->listMeta->showChildren) {
+		if ($this->meta->showChildren) {
 			$parent = trim((string) $parent);
 
 			if ($parent === '') {
@@ -129,7 +152,7 @@ final class Listing
 	private function rows(array $nodes): array
 	{
 		$result = [];
-		$hasChildren = $this->collection->listMeta->showChildren
+		$hasChildren = $this->meta->showChildren
 			? $this->hasChildrenMap($nodes)
 			: [];
 
@@ -149,7 +172,7 @@ final class Listing
 			$parent = null;
 		}
 
-		$childBlueprints = $this->collection->listMeta->showChildren
+		$childBlueprints = $this->meta->showChildren
 			? $this->childBlueprints($node)
 			: [];
 
@@ -196,8 +219,7 @@ final class Listing
 			return [];
 		}
 
-		$children = $this->collection
-			->cms
+		$children = $this->cms
 			->nodes("parent @ [{$list}]")
 			->published(null)
 			->hidden(null);

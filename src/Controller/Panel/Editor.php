@@ -8,18 +8,14 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Sire\Issue;
-use Celema\Wire\Creator;
 use Cosray\Actor;
 use Cosray\Bootstrap;
 use Cosray\Cms;
-use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
-use Cosray\Navigation;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
 use Cosray\Node\RoutePathGenerator;
@@ -689,12 +685,7 @@ final class Editor extends Panel
 			return $origin;
 		}
 
-		$obj = new Creator($this->container)->create(
-			$ref->class,
-			predefinedTypes: [Request::class => $this->request],
-		);
-		assert($obj instanceof CmsCollection, 'The origin must resolve a collection');
-		$query = $this->queryState($obj);
+		$query = $this->queryState($this->listing($ref));
 
 		return [
 			'backUrl' => new CollectionUrls($this->panelPath(), $slug, $query)->back(),
@@ -723,7 +714,7 @@ final class Editor extends Panel
 		return $types;
 	}
 
-	private function queryState(CmsCollection $collection): CollectionQuery
+	private function queryState(Listing $lister): CollectionQuery
 	{
 		$params = $this->request->param('list', []);
 
@@ -740,15 +731,15 @@ final class Editor extends Panel
 		}
 
 		$parent = $this->stringParam('parent', $params);
-		$parent = $collection->listMeta->showChildren && $parent !== '' ? $parent : null;
+		$parent = $lister->meta->showChildren && $parent !== '' ? $parent : null;
 		$view = $this->stringParam('view', $params);
 		$open = $this->openParam($params);
 		$sort = $this->stringParam('sort', $params);
 
-		if ($sort !== '' && !array_key_exists($sort, new Listing($collection, $this->types())->sorts)) {
+		if ($sort !== '' && !array_key_exists($sort, $lister->sorts)) {
 			throw new HttpBadRequest($this->request);
 		}
-		$defaultView = $collection->listMeta->showChildren && $parent === null ? 'tree' : 'list';
+		$defaultView = $lister->meta->showChildren && $parent === null ? 'tree' : 'list';
 
 		if ($view === '') {
 			$view = $defaultView;
@@ -758,7 +749,7 @@ final class Editor extends Panel
 			throw new HttpBadRequest($this->request);
 		}
 
-		if (!$collection->listMeta->showChildren) {
+		if (!$lister->meta->showChildren) {
 			$open = [];
 		}
 
@@ -961,13 +952,5 @@ final class Editor extends Panel
 		}
 
 		return trim($value);
-	}
-
-	private function navigation(): Navigation
-	{
-		$navigation = $this->container->get(Navigation::class);
-		assert($navigation instanceof Navigation, 'The navigation service must be available');
-
-		return $navigation;
 	}
 }

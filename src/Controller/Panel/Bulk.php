@@ -6,17 +6,12 @@ namespace Cosray\Controller\Panel;
 
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
-use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
 use Celema\Core\Response;
-use Celema\Wire\Creator;
 use Cosray\Actor;
 use Cosray\Cms;
-use Cosray\Collection as CmsCollection;
+use Cosray\Collection\Listing;
 use Cosray\Context;
-use Cosray\Exception\RuntimeException;
-use Cosray\Navigation;
 use Cosray\Node\Duplicator;
 use Cosray\Node\PathManager;
 use Cosray\Node\Store;
@@ -304,7 +299,7 @@ final class Bulk extends Panel
 	 * @param array<array-key, mixed> $form
 	 * @return array{0: array<string, Wrapper>, 1: int}
 	 */
-	private function selection(CmsCollection $obj, array $form): array
+	private function selection(Listing $obj, array $form): array
 	{
 		$submitted = $form['nodes'] ?? null;
 
@@ -412,22 +407,9 @@ final class Bulk extends Panel
 		);
 	}
 
-	private function collection(string $collection): CmsCollection
+	private function collection(string $collection): Listing
 	{
-		try {
-			$ref = $this->navigation()->ref($collection);
-		} catch (RuntimeException $e) {
-			throw new HttpNotFound($this->request, previous: $e);
-		}
-
-		$creator = new Creator($this->container);
-		$obj = $creator->create(
-			$ref->class,
-			predefinedTypes: [Request::class => $this->request],
-		);
-		assert($obj instanceof CmsCollection, 'The bulk route must resolve a collection');
-
-		return $obj;
+		return $this->listing($this->ref($collection));
 	}
 
 	private function actor(): Actor
@@ -447,13 +429,5 @@ final class Bulk extends Panel
 		assert($types instanceof Types, 'The node type service must be available');
 
 		return $types;
-	}
-
-	private function navigation(): Navigation
-	{
-		$navigation = $this->container->get(Navigation::class);
-		assert($navigation instanceof Navigation, 'The navigation service must be available');
-
-		return $navigation;
 	}
 }

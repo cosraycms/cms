@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace Cosray\Controller\Panel;
 
 use Celema\Container\Container;
+use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Request;
 use Celema\Verba\Verba;
+use Celema\Wire\Creator;
+use Cosray\Cms;
+use Cosray\Collection as CmsCollection;
+use Cosray\Collection\Listing;
+use Cosray\Collection\Ref;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
 use Cosray\Navigation;
 use Cosray\NavigationItem;
 use Cosray\NavLink;
+use Cosray\Node\Types;
 use Cosray\Panel\Extras;
 use Cosray\Security\Policy;
 use Cosray\User;
@@ -293,10 +301,43 @@ abstract class Panel
 
 	protected function collections(): array
 	{
-		/** @var Navigation $navigation */
-		$navigation = $this->container->get(Navigation::class);
+		return $this->navigation()->items();
+	}
 
-		return $navigation->items();
+	protected function navigation(): Navigation
+	{
+		$navigation = $this->container->get(Navigation::class);
+		assert($navigation instanceof Navigation, 'The navigation service must be available');
+
+		return $navigation;
+	}
+
+	/** The registered collection a panel URL names; unknown handles are not found. */
+	protected function ref(string $handle): Ref
+	{
+		try {
+			return $this->navigation()->ref($handle);
+		} catch (RuntimeException $e) {
+			throw new HttpNotFound($this->request, previous: $e);
+		}
+	}
+
+	/**
+	 * The panel listing of a registered collection. The collection class is
+	 * autowired per request and shares the listing's CMS instance.
+	 */
+	protected function listing(Ref $ref): Listing
+	{
+		$creator = new Creator($this->container);
+		$predefined = [Request::class => $this->request];
+		$cms = $creator->create(Cms::class, predefinedTypes: $predefined);
+		assert($cms instanceof Cms, 'The CMS must be available');
+		$collection = $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms]);
+		assert($collection instanceof CmsCollection, 'Collection routes must resolve a collection');
+		$types = $this->container->get(Types::class);
+		assert($types instanceof Types, 'The node type service must be available');
+
+		return new Listing($collection, $cms, $types);
 	}
 
 	/**

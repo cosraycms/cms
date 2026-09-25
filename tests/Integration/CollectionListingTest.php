@@ -41,7 +41,7 @@ final class CollectionListingTest extends IntegrationTestCase
 			Services::withDefaults(),
 		);
 		$collection = new TestSortedCollection($cms);
-		$listing = new Listing($collection, new Types());
+		$listing = new Listing($collection, $cms, new Types());
 		$default = $listing->list();
 		$this->assertSame('name', $default['sort']);
 		$this->assertSame('asc', $default['dir']);

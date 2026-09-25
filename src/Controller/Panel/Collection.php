@@ -6,12 +6,7 @@ namespace Cosray\Controller\Panel;
 
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpNotFound;
-use Celema\Core\Request;
-use Celema\Wire\Creator;
-use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
-use Cosray\Exception\RuntimeException;
-use Cosray\Navigation;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
@@ -26,21 +21,8 @@ final class Collection extends Panel
 
 	public function collection(string $collection): array
 	{
-		$creator = new Creator($this->container);
-		$navigation = $this->navigation();
-
-		try {
-			$ref = $navigation->ref($collection);
-		} catch (RuntimeException $e) {
-			throw new HttpNotFound($this->request, previous: $e);
-		}
-
-		$obj = $creator->create(
-			$ref->class,
-			predefinedTypes: [Request::class => $this->request],
-		);
-		assert($obj instanceof CmsCollection, 'The collection route must resolve a collection');
-		$lister = new Listing($obj, $this->types());
+		$ref = $this->ref($collection);
+		$lister = $this->listing($ref);
 
 		$offset = $this->intParam('offset', 0, min: 0);
 		$limit = $this->intParam('limit', self::LIMIT_DEFAULT, min: 1, max: self::LIMIT_MAX);
@@ -61,8 +43,8 @@ final class Collection extends Panel
 			throw new HttpBadRequest($this->request);
 		}
 
-		$parentUid = $obj->listMeta->showChildren && $parent !== '' ? $parent : null;
-		$defaultView = $obj->listMeta->showChildren && $parentUid === null ? 'tree' : 'list';
+		$parentUid = $lister->meta->showChildren && $parent !== '' ? $parent : null;
+		$defaultView = $lister->meta->showChildren && $parentUid === null ? 'tree' : 'list';
 
 		if ($view === '') {
 			$view = $defaultView;
@@ -72,11 +54,11 @@ final class Collection extends Panel
 			throw new HttpBadRequest($this->request);
 		}
 
-		if (!$obj->listMeta->showChildren) {
+		if (!$lister->meta->showChildren) {
 			$open = [];
 		}
 
-		$parentNode = $parentUid === null ? null : $this->parentNode($obj, $parentUid);
+		$parentNode = $parentUid === null ? null : $this->parentNode($lister, $parentUid);
 		$parentTitle = $parentNode?->title();
 
 		if ($parentTitle !== null && trim($parentTitle) === '') {
@@ -105,7 +87,7 @@ final class Collection extends Panel
 		);
 		$nodes = $listing['nodes'];
 
-		if ($obj->listMeta->showChildren && $view === 'tree') {
+		if ($lister->meta->showChildren && $view === 'tree') {
 			$nodes = CollectionTree::build(
 				nodes: $nodes,
 				open: $open,
@@ -127,17 +109,17 @@ final class Collection extends Panel
 				name: __($ref->meta->label),
 				urls: $urls,
 				columns: $lister->columns,
-				blueprints: $this->blueprints($obj),
+				blueprints: $this->blueprints($lister),
 				nodes: $nodes,
 				total: $listing['total'],
-				meta: $obj->listMeta,
+				meta: $lister->meta,
 				locale: $this->localeId(),
 				timezone: $this->config->app->timezone,
 				parentTitle: $parentTitle,
 				parentType: $parentNode === null
 					? null
 					: __((string) $parentNode->meta->type->get('label', '')),
-				parentStatus: $parentNode === null ? null : $this->nodeStatus($obj, $parentNode),
+				parentStatus: $parentNode === null ? null : $this->nodeStatus($lister, $parentNode),
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 			),
 		]);
@@ -216,9 +198,9 @@ final class Collection extends Panel
 		return $messages;
 	}
 
-	private function parentNode(CmsCollection $collection, string $uid): Wrapper
+	private function parentNode(Listing $lister, string $uid): Wrapper
 	{
-		$node = $collection->cms?->node->byUid($uid, published: null);
+		$node = $lister->parent($uid);
 
 		if (!$node) {
 			throw new HttpNotFound($this->request);
@@ -228,10 +210,10 @@ final class Collection extends Panel
 	}
 
 	/** @return list<array{kind: string, label: string}> */
-	private function nodeStatus(CmsCollection $collection, Wrapper $node): array
+	private function nodeStatus(Listing $lister, Wrapper $node): array
 	{
 		$status = [];
-		$meta = $collection->listMeta;
+		$meta = $lister->meta;
 
 		if ($meta->showPublished) {
 			$published = (bool) $node->meta->get('published');
@@ -271,12 +253,12 @@ final class Collection extends Panel
 	}
 
 	/** @return list<array{slug: string, name: string}> */
-	private function blueprints(CmsCollection $collection): array
+	private function blueprints(Listing $lister): array
 	{
 		$types = $this->types();
 		$result = [];
 
-		foreach ($collection->blueprints() as $blueprint) {
+		foreach ($lister->blueprints as $blueprint) {
 			$result[] = [
 				'slug' => (string) $types->get($blueprint, 'handle'),
 				'name' => (string) $types->get($blueprint, 'label'),
@@ -344,13 +326,5 @@ final class Collection extends Panel
 		}
 
 		return trim($value);
-	}
-
-	private function navigation(): Navigation
-	{
-		$navigation = $this->container->get(Navigation::class);
-		assert($navigation instanceof Navigation, 'The navigation service must be available');
-
-		return $navigation;
 	}
 }
