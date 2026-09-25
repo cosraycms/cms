@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
+use Cosray\Finder\Nodes;
 use Cosray\Navigation;
+use Cosray\Schema\Handle;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 use Cosray\Tests\Fixtures\Collection\TestStaticIconCollection;
@@ -83,6 +86,22 @@ final class NavigationTest extends TestCase
 		$this->assertSame('test-articles', $items[1]->slug());
 	}
 
+	public function testCollectionsMustDeclareWhatTheyList(): void
+	{
+		$navigation = new Navigation();
+		$navigation->collection(EntriesOnlyCollection::class);
+		$this->assertSame(EntriesOnlyCollection::class, $navigation->ref('entries-only')->class);
+
+		$this->throws(RuntimeException::class, 'must declare #[Types] or implement ' . Entries::class);
+		$navigation->collection(UndeclaredCollection::class);
+	}
+
+	public function testUnknownCollectionClassesAreRejected(): void
+	{
+		$this->throws(RuntimeException::class, "Unknown collection class 'App\\Missing'");
+		new Navigation()->collection('App\\Missing');
+	}
+
 	public function testCollectionIconAttributeIsNormalizedInMeta(): void
 	{
 		$navigation = new Navigation();
@@ -101,3 +120,14 @@ final class NavigationTest extends TestCase
 		);
 	}
 }
+
+#[Handle('entries-only')]
+final class EntriesOnlyCollection implements Entries
+{
+	public function entries(Nodes $nodes): Nodes
+	{
+		return $nodes;
+	}
+}
+
+final class UndeclaredCollection {}

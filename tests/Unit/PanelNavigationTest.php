@@ -9,13 +9,11 @@ use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\Bootstrap;
 use Cosray\Cms;
-use Cosray\Collection;
 use Cosray\Collection\Schemas;
 use Cosray\Context;
 use Cosray\Controller\Panel\Editor;
 use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
-use Cosray\Finder\Nodes;
 use Cosray\Locales;
 use Cosray\Navigation;
 use Cosray\Node\Types;
@@ -23,6 +21,7 @@ use Cosray\Panel\Extras;
 use Cosray\Schema\Blueprints;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Label;
+use Cosray\Schema\Types as TypesAttribute;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Renderer;
@@ -119,11 +118,5 @@ final class PanelNavigationTest extends TestCase
 	}
 }
 
-#[Label('Articles & pages'), Handle('articles'), Blueprints(PlainBlock::class)]
-final class NavigationCollection extends Collection
-{
-	public function entries(): Nodes
-	{
-		return $this->cms->nodes();
-	}
-}
+#[Label('Articles & pages'), Handle('articles'), TypesAttribute('plain-block'), Blueprints(PlainBlock::class)]
+final class NavigationCollection {}

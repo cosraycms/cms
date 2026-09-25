@@ -7,6 +7,7 @@ namespace Cosray;
 use Closure;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schemas;
+use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Override;
 
@@ -97,11 +98,23 @@ final class Section implements NavigationItem
 		return $link;
 	}
 
-	/** @param class-string<Collection> $class */
+	/**
+	 * Registers a collection class. It must declare what it lists, through
+	 * #[Types] or by implementing Entries, so mistakes fail at boot rather
+	 * than on the first panel request.
+	 *
+	 * @param class-string $class
+	 */
 	public function collection(string $class): Ref
 	{
-		if (!is_a($class, Collection::class, true)) {
-			throw new RuntimeException('Collections must extend ' . Collection::class);
+		if (!class_exists($class)) {
+			throw new RuntimeException("Unknown collection class '{$class}'");
+		}
+
+		if ($this->schemas->get($class, 'types') === [] && !is_a($class, Entries::class, true)) {
+			throw new RuntimeException(
+				"Collection '{$class}' must declare #[Types] or implement " . Entries::class,
+			);
 		}
 
 		$ref = new Ref(

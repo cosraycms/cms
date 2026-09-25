@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Cosray\Collection;
 
 use Cosray\Cms;
-use Cosray\Collection;
 use Cosray\CollectionListMeta;
 use Cosray\Column;
+use Cosray\Contract\Columns;
+use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
 use Cosray\Node\Types;
@@ -18,8 +19,8 @@ use Cosray\Node\Wrapper;
  * sorts, list options and blueprints, plus the row and hierarchy logic
  * of collection pages.
  *
- * Kept out of the collection class so collections stay pure
- * configuration + query objects.
+ * Collections are plain classes configured through schema attributes.
+ * The instance is only needed when it implements Entries or Columns.
  */
 final class Listing
 {
@@ -33,14 +34,14 @@ final class Listing
 	public readonly string $defaultSort;
 
 	public function __construct(
-		private readonly Collection $collection,
 		private readonly Schema $schema,
 		private readonly Cms $cms,
 		private readonly Types $types,
+		private readonly ?object $collection = null,
 	) {
 		$this->meta = $schema->listing;
-		$this->blueprints = $collection->blueprints();
-		$this->columns = array_values($collection->columns());
+		$this->blueprints = $schema->blueprints;
+		$this->columns = array_values($collection instanceof Columns ? $collection->columns() : Column::defaults());
 		$sorts = [];
 		foreach ($this->columns as $column) {
 			if (!$column instanceof Column) {
@@ -62,7 +63,13 @@ final class Listing
 	/** A fresh finder over the collection's entries per call; callers narrow it. */
 	public function entries(): Nodes
 	{
-		return $this->collection->entries();
+		$nodes = $this->cms->nodes()->published(null)->hidden(null);
+
+		if ($this->schema->types !== []) {
+			$nodes->types(...$this->schema->types);
+		}
+
+		return $this->collection instanceof Entries ? $this->collection->entries($nodes) : $nodes;
 	}
 
 	/** The node a hierarchy listing is scoped to, in any state. */

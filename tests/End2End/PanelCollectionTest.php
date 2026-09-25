@@ -10,6 +10,7 @@ use Cosray\Config;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestMixedCollection;
+use Cosray\Tests\Fixtures\Collection\TestServiceCollection;
 use Cosray\Tests\Fixtures\Collection\TestSortedCollection;
 use Cosray\Tests\Fixtures\Node\TestSortableEntry;
 
@@ -38,6 +39,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$plugin->section('Inhalt')->collection(TestMixedCollection::class);
 		$plugin->node(TestSortableEntry::class);
 		$plugin->collection(TestSortedCollection::class);
+		$plugin->collection(TestServiceCollection::class);
 
 		return $plugin;
 	}
@@ -61,6 +63,17 @@ final class PanelCollectionTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringNotContainsString('class="collection-grid"', $html);
+	}
+
+	public function testCollectionConstructorIsAutowired(): void
+	{
+		$this->createArticle('service-entry', 'Service Entry');
+		$response = $this->makeRequest('GET', '/cp/collection/test-service');
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringContainsString('Listed in Europe/Berlin', $html);
+		$this->assertStringContainsString('Service Entry', $html);
 	}
 
 	public function testDefaultAndSelectedOrdersUseTheirOwnDirections(): void

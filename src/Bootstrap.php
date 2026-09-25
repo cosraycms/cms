@@ -332,12 +332,6 @@ class Bootstrap implements CorePlugin
 	{
 		$this->container->add(Navigation::class, $this->navigation)->value();
 
-		foreach ($this->navigation->refs() as $name => $ref) {
-			$this->container
-				->tag(Collection::class)
-				->add($name, $ref->class);
-		}
-
 		foreach ($this->nodes as $name => $node) {
 			$this->container
 				->tag(self::NODE_TAG)
@@ -369,7 +363,7 @@ class Bootstrap implements CorePlugin
 		return $this->navigation->section($name);
 	}
 
-	/** @param class-string<Collection> $class */
+	/** @param class-string $class */
 	public function collection(string $class): CollectionRef
 	{
 		return $this->navigation->collection($class);

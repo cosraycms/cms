@@ -14,6 +14,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Listing;
 use Cosray\Schema\Order;
 use Cosray\Schema\Permission;
+use Cosray\Schema\Types;
 
 class Registry
 {
@@ -79,6 +80,7 @@ class Registry
 		$registry->register(Order::class, new OrderHandler());
 		$registry->register(Listing::class, new ListingHandler());
 		$registry->register(Blueprints::class, new BlueprintsHandler());
+		$registry->register(Types::class, new TypesHandler());
 
 		return $registry;
 	}
@@ -107,6 +109,7 @@ class Registry
 		);
 		$this->default('blueprints', static fn(string $class, array $properties): array => []);
 		$this->default('search', static fn(string $class, array $properties): array => ['uid', 'title']);
+		$this->default('types', static fn(string $class, array $properties): array => []);
 	}
 
 	/**

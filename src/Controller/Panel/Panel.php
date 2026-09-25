@@ -10,11 +10,12 @@ use Celema\Core\Request;
 use Celema\Verba\Verba;
 use Celema\Wire\Creator;
 use Cosray\Cms;
-use Cosray\Collection as CmsCollection;
 use Cosray\Collection\Listing;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schemas;
 use Cosray\Config;
+use Cosray\Contract\Columns;
+use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Locale;
@@ -324,7 +325,8 @@ abstract class Panel
 	}
 
 	/**
-	 * The panel listing of a registered collection. The collection class is
+	 * The panel listing of a registered collection. A collection class is
+	 * only instantiated when it implements Entries or Columns; it is then
 	 * autowired per request and shares the listing's CMS instance.
 	 */
 	protected function listing(Ref $ref): Listing
@@ -333,14 +335,15 @@ abstract class Panel
 		$predefined = [Request::class => $this->request];
 		$cms = $creator->create(Cms::class, predefinedTypes: $predefined);
 		assert($cms instanceof Cms, 'The CMS must be available');
-		$collection = $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms]);
-		assert($collection instanceof CmsCollection, 'Collection routes must resolve a collection');
+		$collection = is_a($ref->class, Entries::class, true) || is_a($ref->class, Columns::class, true)
+			? $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms])
+			: null;
 		$schemas = $this->container->get(Schemas::class);
 		assert($schemas instanceof Schemas, 'The collection schemas must be available');
 		$types = $this->container->get(Types::class);
 		assert($types instanceof Types, 'The node type service must be available');
 
-		return new Listing($collection, $schemas->of($ref->class), $cms, $types);
+		return new Listing($schemas->of($ref->class), $cms, $types, $collection);
 	}
 
 	/**

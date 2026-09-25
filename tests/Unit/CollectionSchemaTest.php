@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Cosray\Collection;
 use Cosray\Collection\Schemas;
-use Cosray\Finder\Nodes;
+use Cosray\Exception\RuntimeException;
 use Cosray\Schema\Badge;
 use Cosray\Schema\Blueprints;
 use Cosray\Schema\Hidden;
 use Cosray\Schema\Label;
 use Cosray\Schema\Listing;
 use Cosray\Schema\Order;
-use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
+use Cosray\Schema\Types;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\TestCase;
 
@@ -24,22 +23,14 @@ use Cosray\Tests\TestCase;
 	Order(7),
 	Listing(published: false, children: true, search: ['title', 'lastName']),
 	Blueprints(PlainPage::class),
+	Types('test-page', PlainPage::class),
 ]
-final class FancyPagesCollection extends Collection
-{
-	public function entries(): Nodes
-	{
-		return $this->cms->nodes();
-	}
-}
+final class FancyPagesCollection {}
 
-final class BarePagesCollection extends Collection
-{
-	public function entries(): Nodes
-	{
-		return $this->cms->nodes();
-	}
-}
+final class BarePagesCollection {}
+
+#[Types(' ')]
+final class BlankTypesCollection {}
 
 /**
  * @internal
@@ -61,6 +52,7 @@ final class CollectionSchemaTest extends TestCase
 		$this->assertTrue($schema->listing->showChildren);
 		$this->assertSame(['title', 'lastName'], $schema->search);
 		$this->assertSame([PlainPage::class], $schema->blueprints);
+		$this->assertSame(['test-page', PlainPage::class], $schema->types);
 		$this->assertSame('fancy-pages-collection', $schema->handle);
 	}
 
@@ -77,20 +69,12 @@ final class CollectionSchemaTest extends TestCase
 		$this->assertTrue($schema->listing->showPublished);
 		$this->assertSame(['uid', 'title'], $schema->search);
 		$this->assertSame([], $schema->blueprints);
+		$this->assertSame([], $schema->types);
 	}
 
-	public function testCollectionInstanceReadsSchema(): void
+	public function testBlankTypesFail(): void
 	{
-		$collection = new FancyPagesCollection();
-
-		$this->assertTrue($collection->listMeta->showChildren);
-		$this->assertSame([PlainPage::class], $collection->blueprints());
-	}
-
-	public function testBlueprintsMethodOverrideStillWins(): void
-	{
-		$collection = new TestHierarchyCollection();
-
-		$this->assertNotSame([], $collection->blueprints());
+		$this->throws(RuntimeException::class, 'must name at least one node type');
+		new Schemas()->of(BlankTypesCollection::class);
 	}
 }

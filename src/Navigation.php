@@ -26,7 +26,7 @@ final class Navigation
 		return $this->root->section($label);
 	}
 
-	/** @param class-string<Collection> $class */
+	/** @param class-string $class */
 	public function collection(string $class): Ref
 	{
 		return $this->root->collection($class);

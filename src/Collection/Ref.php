@@ -16,7 +16,7 @@ use Override;
 final class Ref implements NavigationItem
 {
 	/**
-	 * @param class-string<\Cosray\Collection> $class
+	 * @param class-string $class
 	 */
 	public function __construct(
 		public readonly string $class,

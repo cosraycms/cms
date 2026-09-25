@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Cms;
-use Cosray\Collection;
 use Cosray\Collection\Listing;
 use Cosray\Collection\Schemas;
 use Cosray\Collection\Sort;
 use Cosray\CollectionListMeta;
 use Cosray\Column;
 use Cosray\Context;
+use Cosray\Contract\Columns;
+use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Finder\Nodes;
@@ -24,7 +25,7 @@ use Cosray\Tests\TestCase;
 use DateTimeZone;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-final class SortingTestCollection extends Collection
+final class SortingTestCollection implements Columns, Entries
 {
 	public array $configured = [];
 
@@ -33,7 +34,7 @@ final class SortingTestCollection extends Collection
 		return $this->configured;
 	}
 
-	public function entries(): Nodes
+	public function entries(Nodes $nodes): Nodes
 	{
 		throw new RuntimeException('Query must not run for invalid configuration');
 	}
@@ -166,15 +167,15 @@ final class CollectionSortingTest extends TestCase
 		$this->assertNull($table->headers[2]['url']);
 	}
 
-	private function listing(Collection $collection): Listing
+	private function listing(SortingTestCollection $collection): Listing
 	{
 		$context = new Context($this->db(), $this->request(), $this->config(), $this->container(), $this->factory());
 
 		return new Listing(
-			$collection,
 			new Schemas()->of($collection::class),
 			new Cms($context, Services::withDefaults()),
 			new Types(),
+			$collection,
 		);
 	}
 }

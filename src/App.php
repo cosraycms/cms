@@ -119,7 +119,7 @@ class App implements RouteAdder
 		return $this->bootstrap->section($name);
 	}
 
-	/** @param class-string<Collection> $class */
+	/** @param class-string $class */
 	public function collection(string $class): Collection\Ref
 	{
 		return $this->bootstrap->collection($class);

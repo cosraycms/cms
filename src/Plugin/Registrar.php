@@ -7,7 +7,6 @@ namespace Cosray\Plugin;
 use Celema\Container\Entry;
 use Closure;
 use Cosray\Bootstrap;
-use Cosray\Collection;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schema\Handler as CollectionHandler;
 use Cosray\Config;
@@ -74,7 +73,7 @@ final class Registrar
 		return $this->bootstrap->section($name);
 	}
 
-	/** @param class-string<Collection> $class */
+	/** @param class-string $class */
 	public function collection(string $class): Ref
 	{
 		return $this->bootstrap->collection($class);

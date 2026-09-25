@@ -92,31 +92,49 @@ Field values, UID, and handle are slugified. Transformers include `lowercase`, `
 
 ## Collections and queries
 
-Collections describe panel listings using attributes and methods:
+Collections are plain classes that describe panel listings. Attributes configure them; they need no base class:
 
 ```php
-use Cosray\Collection;
-use Cosray\Finder\Nodes;
+use Cosray\Schema\Blueprints;
 use Cosray\Schema\Label;
 use Cosray\Schema\Listing;
+use Cosray\Schema\Types;
 
-#[Label('Articles'), Listing(children: true)]
-final class Articles extends Collection
+#[
+    Label('Articles'),
+    Types(Article::class, ArticleSeries::class),
+    Blueprints(ArticleSeries::class),
+    Listing(children: true),
+]
+final class Articles {}
+```
+
+`#[Types]` names the node types a collection lists, as classes or handles. The panel lists them in any state, unpublished and hidden entries included. `#[Blueprints]` names the types editors can create at the top of the listing. Hierarchy listings show roots and expand direct children, and `#[Children]` on a node supplies its child creation choices, so blueprints are often a subset of the listed types. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default. Further [collection schema attributes](../src/Schema/) set the label, handle, icon, badge, permission, visibility, and navigation order.
+
+Behavior is opt-in through [contracts](../src/Contract/). `Entries` narrows the finder the panel prepares, which covers nodes in any state and is already limited to the collection's `#[Types]`. A collection implementing `Entries` may omit `#[Types]` to narrow all nodes; registering a collection that declares neither fails at boot. `Columns` replaces the default listing columns. Only collections implementing a contract are instantiated, through the container, so their constructors can take autowired services such as `Cms` or `Config`:
+
+```php
+use Cosray\Contract\Entries;
+use Cosray\Finder\Nodes;
+use Cosray\Schema\Types;
+
+#[Types(Alert::class)]
+final class Alerts implements Entries
 {
-    public function entries(): Nodes
+    public function entries(Nodes $nodes): Nodes
     {
-        return $this->cms->nodes()->types(Article::class)->published(null);
+        return $nodes->filter('ignore=false');
     }
 }
 ```
-
-Hierarchy listings show roots and expand direct children. `#[Children]` supplies child creation choices. [Collection](../src/Collection.php) and [collection schema attributes](../src/Schema/) define columns, ordering, blueprints, badges, and other listing options. The panel search matches the fields named by `#[Listing(search: [...])]`, UID and title by default.
 
 ### Columns and panel ordering
 
 The default listing shows title, last changed, and the configured status indicators. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
 
-`entries()` defines collection membership. The panel replaces any Finder `order()` in that method with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
+`#[Types]` and `entries()` define collection membership. The panel replaces any Finder `order()` set in `entries()` with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
+
+A collection implementing `Columns` declares its own columns. `Column::defaults()` returns the default title and last-changed columns, so `[...Column::defaults(), $column]` extends them.
 
 A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
 
@@ -158,6 +176,8 @@ For dated collections, flag the `date` or `start` sort as the default as appropr
 A column without `sort(...)` is not sortable; `sort(null)` explicitly disables it. Keys must be unique, at most one sort may be the default, and a listing needs at least one sortable column. Invalid definitions fail as configuration errors. HTTP `sort` and `dir` parameters only select declared orders; unknown keys and invalid directions return 400. Omitting the direction uses the selected column's initial direction, switching headers starts in that direction, and clicking the active header reverses it. Header navigation resets pagination while preserving the listing's other state.
 
 When updating existing collections, move `sorts()` mappings into their columns and move `defaultDir()` into each sort's `direction`; those collection methods are no longer used. Add explicit sorts to columns that previously relied on field-name inference, and remove redundant ordering from `entries()`. A title-sorting trait is no longer needed. Replace a collection's `defaultSort()` with `default: true` on the matching column's sort. Remove dead type/editor sort markers unless handle/UID ordering is explicitly intended. Old URLs requesting removed keys, including the former default `uid` option, are invalid. Code inspecting columns reads the nullable `Column::$sort` definition instead of `sortKey()`.
+
+Collections no longer extend a `Cosray\Collection` base class. When updating existing collections, remove `extends Collection`. Move the node types of a plain `entries()` query into `#[Types]` and remove the method, including its `published(null)` and `hidden(null)` calls. Implement `Entries` for any further narrowing; it receives the prepared finder instead of reading `$this->cms`. Move `blueprints()` into `#[Blueprints]` and `searchFields()` into `#[Listing(search: [...])]`. Implement `Columns` for custom columns and replace `...parent::columns()` with `...Column::defaults()`. A collection that needs services, including the CMS, takes them in its own constructor.
 
 ### Frontend queries
 

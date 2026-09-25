@@ -12,6 +12,7 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Index as FieldIndex;
 use Cosray\Field\Schema\Registry as FieldSchemas;
+use Cosray\Navigation;
 use Cosray\Panel\Dashboard;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
@@ -79,12 +80,8 @@ final class PluginRegistrationTest extends TestCase
 			$bootstrap->plugin(new TestPlugin());
 		});
 
-		$collection = $app
-			->container()
-			->tag(\Cosray\Collection::class)
-			->entry('test-articles')
-			->definition();
-		$this->assertSame(TestArticlesCollection::class, $collection);
+		$navigation = $app->container()->get(Navigation::class);
+		$this->assertSame(TestArticlesCollection::class, $navigation->ref('test-articles')->class);
 	}
 
 	public function testPluginMigrationAndSqlDirs(): void

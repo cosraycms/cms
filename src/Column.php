@@ -31,6 +31,25 @@ final class Column
 		return new self($title, $field);
 	}
 
+	/**
+	 * The listing columns of a collection without its own: the title, which
+	 * is also the initial order, and the last change.
+	 *
+	 * @return list<self>
+	 */
+	public static function defaults(): array
+	{
+		return [
+			self::new(__('collection:column-title'), 'title')->bold(true)->sort('title'),
+			self::new(__('collection:column-changed'), 'meta.changed')
+				->date(true)
+				->sort(
+					'changed',
+					direction: 'desc',
+				),
+		];
+	}
+
 	public function bold(bool|Closure $bold): self
 	{
 		$this->bold = $bold;
