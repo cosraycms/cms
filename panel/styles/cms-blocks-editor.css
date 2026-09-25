@@ -1,10 +1,15 @@
 .cms-blocks-editor {
 	--blocks-gap: var(--cms-space-px);
+	/* Just under a block of one line, so rows with text keep their height. */
+	--blocks-row-min: 3.5rem;
 
 	& .grid {
 		position: relative;
 		display: grid;
 		grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
+		/* Rows size to what starts in them; a row only spanned through,
+		   or empty, would otherwise close to the gap and hide its cells. */
+		grid-auto-rows: minmax(var(--blocks-row-min), auto);
 		gap: var(--blocks-gap);
 		background: var(--cms-blocks-bg);
 		border-radius: var(--cms-radius-md);
