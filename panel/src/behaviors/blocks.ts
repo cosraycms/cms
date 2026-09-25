@@ -327,14 +327,35 @@ function resizePart(part: HTMLElement, dimension: Dimension, value: number): boo
 
 		write(other, { ...layout, colspan: layout.colspan - change }, grid);
 	} else {
-		const area = read(split);
-
-		write(split, { ...area, rowspan: area.rowspan + change }, gridFor(split));
+		stretch(split, read(split).rowspan + change);
 	}
 
 	write(part, { ...before, [dimension]: next }, grid);
 
 	return true;
+}
+
+/**
+ * A split's rows set as its parts need them. On the field's grid it
+ * moves as its bottom edge would, a taller split pushing the blocks
+ * below down instead of covering them.
+ */
+export function stretch(split: HTMLElement, rowspan: number): void {
+	const grid = gridFor(split);
+	const canvas = placed(split) ? canvasOf(split) : null;
+
+	if (!canvas) {
+		write(split, { ...read(split), rowspan }, grid);
+
+		return;
+	}
+
+	applyPlaced(
+		split,
+		span(snapshot(canvas), split, 'rowspan', rowspan, grid.columns, grid.min),
+		grid,
+	);
+	commit(canvas);
 }
 
 /**

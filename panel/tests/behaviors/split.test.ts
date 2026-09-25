@@ -20,6 +20,7 @@ const QUOTE = 'Acme\\Quote';
 const BASE = 'content[body][value][zxx]';
 
 type Layout = { colspan: number; rowspan: number };
+type Placed = Layout & { col: number; row: number };
 type Row = Record<string, unknown>;
 
 let uninstall: (() => void) | undefined;
@@ -32,6 +33,12 @@ afterEach(() => {
 });
 
 const area = (colspan: number, rowspan = 1): Layout => ({ colspan, rowspan });
+const at = (col: number, row: number, colspan: number, rowspan = 1): Placed => ({
+	col,
+	row,
+	colspan,
+	rowspan,
+});
 const text = (uid: string, layout: Layout): Row => ({
 	uid,
 	type: TEXT,
@@ -111,6 +118,13 @@ function layout(row: HTMLElement): Layout {
 		);
 
 	return { colspan: value('colspan'), rowspan: value('rowspan') };
+}
+
+function position(row: HTMLElement): Placed {
+	const value = (key: string): number =>
+		Number(row.querySelector<HTMLInputElement>(`:scope > input[data-layout="${key}"]`)!.value);
+
+	return { ...layout(row), col: value('col'), row: value('row') };
 }
 
 function uid(row: HTMLElement): HTMLInputElement {
@@ -207,6 +221,18 @@ describe('splitting a block', () => {
 		expect(layout(kept)).toEqual(area(6, 2));
 		expect(layout(added)).toEqual(area(6, 1));
 		expect(type(added)).toBe(TEXT);
+	});
+
+	it('pushes the blocks below down when a placed block splits into rows', () => {
+		const { rows } = editor([text('a', at(1, 1, 6)), text('b', at(1, 2, 12))]);
+
+		act(rows()[0], ROWS);
+
+		const [container, below] = rows();
+
+		expect(position(container)).toEqual(at(1, 1, 6, 2));
+		expect(uid(below).value).toBe('b');
+		expect(position(below)).toEqual(at(1, 3, 12));
 	});
 
 	it('takes a catalog choice from the split’s picker', () => {
@@ -349,6 +375,19 @@ describe('resizing a split', () => {
 		number(container, 'colspan', '8');
 
 		expect(parts(container).map(layout)).toEqual([area(8, 3), area(8)]);
+	});
+
+	it('pushes the blocks below down when a placed stacked part grows', () => {
+		const { rows } = editor([
+			split('s1', at(1, 1, 6, 2), text('a', area(6)), text('b', area(6))),
+			text('c', at(1, 3, 12)),
+		]);
+		const [container, below] = rows();
+
+		number(parts(container)[1], 'rowspan', '2');
+
+		expect(position(container)).toEqual(at(1, 1, 6, 3));
+		expect(position(below)).toEqual(at(1, 4, 12));
 	});
 
 	it('trades width between neighbouring parts, never below the minimum', () => {

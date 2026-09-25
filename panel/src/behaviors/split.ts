@@ -20,6 +20,7 @@ import {
 	partsOf,
 	read,
 	splitOf,
+	stretch,
 	write,
 	type Direction,
 	type Layout,
@@ -101,7 +102,7 @@ function split(row: HTMLElement, direction: Direction, type: string | null): voi
 	} else {
 		const area = read(container);
 
-		write(container, { ...area, rowspan: area.rowspan + 1 }, gridFor(container));
+		stretch(container, area.rowspan + 1);
 		added = { colspan: area.colspan, rowspan: 1 };
 	}
 
@@ -176,9 +177,7 @@ function remove(part: HTMLElement): void {
 
 		write(heir, { ...layout, colspan: layout.colspan + read(part).colspan }, gridOf(list));
 	} else {
-		const area = read(container);
-
-		write(container, { ...area, rowspan: area.rowspan - read(part).rowspan }, gridFor(container));
+		stretch(container, read(container).rowspan - read(part).rowspan);
 	}
 
 	part.remove();
