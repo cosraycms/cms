@@ -11,6 +11,7 @@ use Cosray\Field\Blocks;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Collection\TestBlocksCollection;
 use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
@@ -73,7 +74,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 									],
 									[
 										'uid' => 'block-a',
-										'type' => Builtin\Text::class,
+										'type' => TextBlock::class,
 										// Out of range: clamped into the grid, as the save would store it.
 										'layout' => ['colspan' => '14', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => 'Edited text']]],
@@ -274,7 +275,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text]]],
 		];

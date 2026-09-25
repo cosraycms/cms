@@ -7,7 +7,6 @@ namespace Cosray\Tests\Unit;
 use Cosray\Assets\Asset;
 use Cosray\Block\Image;
 use Cosray\Block\RichText;
-use Cosray\Block\Text;
 use Cosray\Field;
 use Cosray\Migration\TextBlocks;
 use Cosray\Richtext\Renderer;
@@ -125,7 +124,7 @@ final class TextBlocksTest extends TestCase
 	): array {
 		return [
 			'uid' => $uid,
-			'type' => Text::class,
+			'type' => TextBlocks::TYPE,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Field\Textarea::class, 'value' => $value]],
 			...($meta === null ? [] : ['meta' => $meta]),

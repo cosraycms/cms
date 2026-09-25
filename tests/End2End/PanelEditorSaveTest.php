@@ -12,6 +12,7 @@ use Cosray\Field\Text;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\QuoteBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\Fixtures\Node\TestAlternateEntry;
@@ -294,7 +295,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								],
 								[
 									'uid' => 'block-a',
-									'type' => Builtin\Text::class,
+									'type' => TextBlock::class,
 									// Out of range: wider than the grid is clamped, not rejected.
 									'layout' => ['colspan' => '14', 'rowspan' => '1'],
 									'fields' => ['text' => ['value' => ['zxx' => 'New EN']]],
@@ -346,7 +347,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 						'value' => [
 							'en' => [[
 								'uid' => 'block-a',
-								'type' => Builtin\Text::class,
+								'type' => TextBlock::class,
 								'layout' => ['colspan' => '6', 'rowspan' => '1'],
 								'fields' => ['text' => ['value' => ['zxx' => 'Text']]],
 								'meta' => [
@@ -492,7 +493,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		]);
 		$submitted = static fn(string $uid, string $text, array $layout): array => [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['value' => ['zxx' => $text]]],
 		];
@@ -556,7 +557,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('kept', $rows[0]['blocks'][1]['fields']['text']['stashed']);
 		// A split left with one block turns into it, keeping the split's layout.
 		$this->assertSame('block-e', $rows[1]['uid']);
-		$this->assertSame(Builtin\Text::class, $rows[1]['type']);
+		$this->assertSame(TextBlock::class, $rows[1]['type']);
 		$this->assertEquals(['colspan' => 6, 'rowspan' => 1, 'col' => 3, 'row' => 3], $rows[1]['layout']);
 	}
 
@@ -592,13 +593,13 @@ final class PanelEditorSaveTest extends End2EndTestCase
 								'blocks' => [
 									[
 										'uid' => 'block-a',
-										'type' => Builtin\Text::class,
+										'type' => TextBlock::class,
 										'layout' => ['colspan' => '3', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => 'Left']]],
 									],
 									[
 										'uid' => 'block-b',
-										'type' => Builtin\Text::class,
+										'type' => TextBlock::class,
 										'layout' => ['colspan' => '3', 'rowspan' => '1'],
 										'fields' => ['text' => ['value' => ['zxx' => '']]],
 									],
@@ -1127,7 +1128,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text], 'stashed' => 'kept']],
 		];

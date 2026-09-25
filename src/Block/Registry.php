@@ -95,7 +95,6 @@ final class Registry
 	{
 		$registry = new self();
 		$registry->register(RichText::class);
-		$registry->register(Text::class);
 		$registry->register(Heading::class);
 		$registry->register(Image::class);
 		$registry->register(Images::class);

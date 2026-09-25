@@ -10,11 +10,11 @@ use Cosray\Block as Builtin;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\Field;
-use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\PathManager;
 use Cosray\Node\Store;
 use Cosray\Node\Writer;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Node\TestMediaDocument;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\Value\Blocks;
@@ -50,7 +50,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 			$this->factory(),
 			$locales,
 		);
-		$services = Services::withDefaults();
+		$services = self::blockServices();
 		$this->cms = new Cms($this->context, $services);
 
 		return new Writer($this->context, $this->cms, $services->types);
@@ -60,7 +60,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],

@@ -10,6 +10,7 @@ use Cosray\Config;
 use Cosray\Field\Blocks;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\CatalogBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestCatalogDocument;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -46,7 +47,7 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 					'value' => [
 						'zxx' => [[
 							'uid' => 'existing',
-							'type' => Block\Text::class,
+							'type' => TextBlock::class,
 							'fields' => ['text' => ['value' => ['en' => 'Original', 'de' => 'Ursprünglich']]],
 						]],
 					],
@@ -62,7 +63,7 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 		$catalog = $story . '/template[@data-block-catalog]';
 		$this->assertHtmlNodeCount(1, $catalog, $html);
 		$this->assertHtmlNodeCount(3, $catalog . '//*[@data-block-choice]', $html);
-		foreach ([Block\Text::class, CatalogBlock::class, Block\Iframe::class] as $type) {
+		foreach ([TextBlock::class, CatalogBlock::class, Block\Iframe::class] as $type) {
 			$this->assertHtmlNodeCount(1, $catalog . '//*[@data-block-choice="' . $type . '"]', $html);
 			$this->assertHtmlNodeCount(1, $story . '/template[@data-repeater-template="' . $type . '"]', $html);
 		}
@@ -87,7 +88,7 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 		foreach (['en', 'de'] as $locale) {
 			$list = '//*[@data-name="content[translated][value][' . $locale . ']"]';
 			$this->assertHtmlNodeCount(8, $list . '/template[@data-block-catalog]//*[@data-block-choice]', $html);
-			$this->assertHtmlNodeCount(6, $list . '/*[@data-repeater-footer]//*[@data-repeater-add]', $html);
+			$this->assertHtmlNodeCount(5, $list . '/*[@data-repeater-footer]//*[@data-repeater-add]', $html);
 		}
 		$this->assertHtmlNodeExists(
 			'//textarea[@name="content[story][value][zxx][0][fields][text][value][en]"][text()="Original"]',

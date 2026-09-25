@@ -136,7 +136,7 @@ it('keeps the complete catalog reachable and appends a non-common row through th
 	const submit = vi.fn((event: Event) => event.preventDefault());
 	form.addEventListener('change', change);
 	form.addEventListener('submit', submit);
-	expect(footer().querySelectorAll('[data-repeater-add]')).toHaveLength(6);
+	expect(footer().querySelectorAll('[data-repeater-add]')).toHaveLength(5);
 	const dialog = open();
 	expect(document.activeElement).toBe(dialog.querySelector('input'));
 	expect(
@@ -429,7 +429,7 @@ it.each([2, 4])('uses one roving stop and navigates the visible %s-column grid',
 	expect(buttons[7].tabIndex).toBe(0);
 });
 
-it.each([0, 1, 4, 6])('keeps the %s-type catalog usable without a redundant modal', (count) => {
+it.each([0, 1, 4, 5])('keeps the %s-type catalog usable without a redundant modal', (count) => {
 	setup(field('story', undefined, undefined, types.slice(0, count)));
 	if (count === 0) expect(footer().textContent).toContain('No block types available.');
 	else {

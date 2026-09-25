@@ -10,12 +10,12 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
 use Cosray\Field\Field;
-use Cosray\Field\Services;
 use Cosray\Node\FieldOwner;
 use Cosray\Richtext\Envelope;
 use Cosray\Schema\TranslateMode;
 use Cosray\Storage\Storage;
 use Cosray\Tests\Fixtures\Block\QuoteBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Block;
 use Cosray\Value\Blocks as BlocksValue;
@@ -76,7 +76,7 @@ final class BlocksValueTest extends TestCase
 		}
 
 		$field = new Blocks('blocks', $owner, new ValueContext('blocks', $data));
-		$field->init(Services::withDefaults());
+		$field->init(self::blockServices());
 		$field
 			->columns($columns, min(2, $columns))
 			->translate($mode)
@@ -101,7 +101,7 @@ final class BlocksValueTest extends TestCase
 		$value = is_array($text) ? $text : [Field::NEUTRAL_LOCALE => $text];
 
 		return $this->row(
-			Builtin\Text::class,
+			TextBlock::class,
 			[
 				'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => $value],
 			],
@@ -397,7 +397,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('Two', $blocks->last()?->text->unwrap());
 		$this->assertSame('b2', $blocks->get(1)?->uid());
 		$this->assertNull($blocks->get(2));
-		$this->assertSame(Builtin\Text::class, $blocks->first()?->type);
+		$this->assertSame(TextBlock::class, $blocks->first()?->type);
 		$this->assertSame('text', $blocks->first()?->handle());
 		$this->assertSame(4, $blocks->first()?->layout()->colspan);
 	}
@@ -413,7 +413,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'b1',
-				'type' => Builtin\Text::class,
+				'type' => TextBlock::class,
 				'handle' => 'text',
 				'layout' => ['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 				'fields' => ['text' => 'Hello'],
@@ -457,7 +457,7 @@ final class BlocksValueTest extends TestCase
 	{
 		$rows = [
 			$this->row(
-				Builtin\Text::class,
+				TextBlock::class,
 				[
 					'text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['en' => 'Hello', 'de' => 'Hallo']],
 				],

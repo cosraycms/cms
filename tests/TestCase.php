@@ -10,7 +10,9 @@ use Celema\Core\Factory\Nyholm;
 use Celema\Core\Request;
 use Celema\Quma\Delimiters;
 use Cosray\Config;
+use Cosray\Field\Services;
 use Cosray\Locales;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use DOMDocument;
 use DOMXPath;
 use PDO;
@@ -39,6 +41,18 @@ class TestCase extends BaseTestCase
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_SERVER['REQUEST_URI'] = '/';
 		$_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+	}
+
+	/**
+	 * Default services whose block registry also holds the plain text
+	 * fixture, for fields that allow every registered type.
+	 */
+	protected static function blockServices(): Services
+	{
+		$services = Services::withDefaults();
+		$services->blocks->register(TextBlock::class);
+
+		return $services;
 	}
 
 	protected static function root(): string

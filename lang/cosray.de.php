@@ -31,7 +31,6 @@ return [
 		'block:overlap' => 'Blöcke dürfen sich nicht überlappen.',
 		'block:richtext' => 'Formatierter Text',
 		'block:row-kind' => 'Ein Block braucht einen Typ und Felder; eine Teilung hält mindestens zwei Blöcke und wird nicht weiter geteilt.',
-		'block:text' => 'Einfacher Text',
 		'block:text-placeholder' => 'Schreiben…',
 		'block:video' => 'Video',
 		'block:youtube' => 'YouTube-Video',

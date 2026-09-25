@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Celema\Quma\Environment;
-use Cosray\Block as Builtin;
 use Cosray\Field\Blocks;
 use Cosray\Field\Textarea;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\IntegrationTestCase;
 
 /**
@@ -125,7 +125,7 @@ final class BlockLayoutKeysMigrationTest extends IntegrationTestCase
 	{
 		return [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text]]],
 		];

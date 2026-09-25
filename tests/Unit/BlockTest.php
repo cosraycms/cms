@@ -9,7 +9,7 @@ use Cosray\Block\Layout;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field;
 use Cosray\Field\Blocks;
-use Cosray\Field\Services;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\RichtextOwnerTestCase;
 use Cosray\Value\Block;
 use Cosray\Value\ValueContext;
@@ -99,14 +99,14 @@ final class BlockTest extends RichtextOwnerTestCase
 	{
 		$owner = $this->owner();
 		$field = new Blocks('content', $owner, new ValueContext('content', []));
-		$field->init(Services::withDefaults());
+		$field->init(self::blockServices());
 		$field->columns(12);
 
 		return new Block(
 			$owner,
 			$field,
-			new ValueContext('content', [...$data, 'type' => Builtin\Text::class]),
-			Builtin\Text::class,
+			new ValueContext('content', [...$data, 'type' => TextBlock::class]),
+			TextBlock::class,
 		);
 	}
 }

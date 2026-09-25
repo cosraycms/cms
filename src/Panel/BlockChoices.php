@@ -63,7 +63,6 @@ final class BlockChoices
 				? 'square'
 				: match ($id) {
 					Block\RichText::class => 'body-text',
-					Block\Text::class => 'text-left',
 					Block\Heading::class => 'heading',
 					Block\Image::class => 'image',
 					Block\Images::class => 'images',

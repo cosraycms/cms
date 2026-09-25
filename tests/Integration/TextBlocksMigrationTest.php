@@ -8,6 +8,7 @@ use Celema\Quma\Environment;
 use Cosray\Block as Builtin;
 use Cosray\Field\Blocks;
 use Cosray\Field\Textarea;
+use Cosray\Migration\TextBlocks;
 use Cosray\Tests\IntegrationTestCase;
 
 /**
@@ -151,7 +152,7 @@ final class TextBlocksMigrationTest extends IntegrationTestCase
 				'value' => [
 					'zxx' => [[
 						'uid' => $uid,
-						'type' => Builtin\Text::class,
+						'type' => TextBlocks::TYPE,
 						'layout' => ['col' => 1, 'row' => 1, 'colspan' => 12, 'rowspan' => 1],
 						'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $text]]],
 					]],

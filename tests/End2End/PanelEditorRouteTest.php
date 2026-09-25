@@ -11,6 +11,7 @@ use Cosray\Field\Blocks;
 use Cosray\Field\Image;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
@@ -122,7 +123,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 						'en' => [
 							[
 								'uid' => 'block-a',
-								'type' => Builtin\Text::class,
+								'type' => TextBlock::class,
 								'layout' => ['colspan' => 6, 'rowspan' => 2, 'col' => 4, 'row' => 1],
 								'fields' => [
 									'text' => ['type' => Textarea::class, 'value' => ['zxx' => 'First block']],
@@ -169,7 +170,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// row as custom properties, the block meta in the row's own dialog.
 		$this->assertStringContainsString('name="' . $en . '[0][uid]"', $html);
 		$this->assertStringContainsString('value="block-a"', $html);
-		$this->assertStringContainsString('value="' . Builtin\Text::class . '"', $html);
+		$this->assertStringContainsString('value="' . TextBlock::class . '"', $html);
 		$this->assertStringContainsString('name="' . $en . '[0][layout][colspan]"', $html);
 		$this->assertStringContainsString('data-layout="col"', $html);
 		$this->assertStringContainsString('style="--colspan: 6; --rowspan: 2; --col: 4; --row: 1"', $html);
@@ -210,7 +211,9 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// group moves into the block's settings dialog, so no meta button
 		// sits in the content and the label row goes with it.
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\Text"]'
+			'//template[@data-repeater-template="'
+				. TextBlock::class
+				. '"]'
 				. '//div[contains(@class, "cms-field")]/label[contains(@class, "sr-only")]',
 			$html,
 		);
@@ -270,7 +273,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//span[@data-repeater-grip][@tabindex="0"][@aria-keyshortcuts]', $html);
 		// A single-field block is bare: its control renders as content.
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\Text"]/div[contains(@class, "is-bare")]',
+			'//template[@data-repeater-template="' . TextBlock::class . '"]/div[contains(@class, "is-bare")]',
 			$html,
 		);
 		// The heading has two fields but an editor view of its own: the level
@@ -287,7 +290,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 		// A block field says what belongs into it while empty.
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\Text"]//textarea[@placeholder="Write…"]',
+			'//template[@data-repeater-template="Cosray\\Block\\Heading"]//input[@placeholder="Heading..."]',
 			$html,
 		);
 		// The layout numbers in the settings dialog, each capped by the room
@@ -312,7 +315,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$typeId = $mediaType ? (int) $mediaType['type'] : $this->createTestType('test-media-document');
 		$text = static fn(string $uid, string $value, array $layout): array => [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => ['text' => ['type' => Textarea::class, 'value' => ['zxx' => $value]]],
 		];
@@ -385,7 +388,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//input[@name="' . $parts . '[1][type]"][@value="' . Builtin\Text::class . '"]',
+			'//input[@name="' . $parts . '[1][type]"][@value="' . TextBlock::class . '"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists('//textarea[@name="' . $parts . '[0][fields][text][value][zxx]"]', $html);

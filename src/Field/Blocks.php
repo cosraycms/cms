@@ -41,7 +41,7 @@ class Blocks extends Field implements
 	use Capability\IsToolsAware;
 	use RowTypes;
 
-	public const int COMMON_LIMIT = 6;
+	public const int COMMON_LIMIT = 5;
 	public const int MAX_COLUMNS = 25;
 
 	/** The spacing tokens the gap and padding settings choose from; unset means the site's default. */
@@ -179,7 +179,7 @@ class Blocks extends Field implements
 
 	/**
 	 * The short menu's types in order: an explicit list checked against
-	 * the allowed types, or the first six allowed ones.
+	 * the allowed types, or the first five allowed ones.
 	 *
 	 * @param list<string> $common
 	 * @param list<string> $allowed

@@ -37,7 +37,6 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$this->assertSame(
 			[
 				Builtin\RichText::class,
-				Builtin\Text::class,
 				Builtin\Heading::class,
 				Builtin\Image::class,
 				Builtin\Images::class,
@@ -107,7 +106,6 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$this->assertSame(
 			[
 				Builtin\RichText::class => 'richtext',
-				Builtin\Text::class => 'text',
 				Builtin\Heading::class => 'heading',
 				Builtin\Image::class => 'image',
 				Builtin\Images::class => 'images',
@@ -130,7 +128,6 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		}
 
 		$this->assertSame('Formatierter Text', $labels['richtext']);
-		$this->assertSame('Einfacher Text', $labels['text']);
 		$this->assertSame('Überschrift', $labels['heading']);
 		$this->assertSame('Quote', $labels['quote-block']);
 	}
@@ -147,25 +144,16 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$this->assertSame('', $ctx->class());
 	}
 
-	public function testTextRendersEscapedWithLineBreaks(): void
-	{
-		$this->assertSame(
-			"a &lt;b&gt;<br />\nc",
-			$this->render(Builtin\Text::class, [
-				'text' => ['type' => Field\Textarea::class, 'value' => ['zxx' => "a <b>\nc"]],
-			]),
-		);
-	}
-
 	public function testRenderResolvesTheLocaleFallback(): void
 	{
 		$owner = $this->owner();
 		$field = $this->field($owner)->translate();
 
-		$this->assertSame('fallback', $this->render(
-			Builtin\Text::class,
+		$this->assertSame('<h2>fallback</h2>', $this->render(
+			Builtin\Heading::class,
 			[
-				'text' => ['type' => Field\Textarea::class, 'value' => ['de' => '', 'en' => 'fallback']],
+				'text' => ['type' => Field\Text::class, 'value' => ['de' => '', 'en' => 'fallback']],
+				'level' => ['type' => Field\Option::class, 'value' => ['zxx' => '2']],
 			],
 			$field,
 		));

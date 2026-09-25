@@ -11,12 +11,13 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Translate;
 use Cosray\Schema\TranslateMode;
 use Cosray\Tests\Fixtures\Block\CatalogBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 
 final class TestCatalogDocument
 {
 	#[Label('Main content'), Columns(12, min: 2), Translate]
 	#[Common(CatalogBlock::class)]
-	#[Allows(Block\Text::class, CatalogBlock::class, Block\Iframe::class)]
+	#[Allows(TextBlock::class, CatalogBlock::class, Block\Iframe::class)]
 	private Blocks $story;
 
 	#[Label('Translated content'), Translate(TranslateMode::Asymmetric)]

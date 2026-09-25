@@ -10,6 +10,7 @@ use Cosray\Block as Builtin;
 use Cosray\Config;
 use Cosray\Field\Blocks;
 use Cosray\Field\Services;
+use Cosray\Migration\TextBlocks;
 use Cosray\Node\FieldOwner;
 use Cosray\Schema\TranslateMode;
 use Cosray\Tests\IntegrationTestCase;
@@ -140,7 +141,7 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 			[
 				Builtin\RichText::class,
 				Builtin\Heading::class,
-				Builtin\Text::class,
+				TextBlocks::TYPE,
 				Builtin\Image::class,
 				Builtin\Youtube::class,
 				Builtin\Iframe::class,
@@ -158,7 +159,7 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 		);
 		$this->assertArrayNotHasKey('meta', $en[4]);
 		$this->assertMatchesRegularExpression('/^[123456789bcdfghklmnpqrstvwxyz]{13}$/', $en[5]['uid']);
-		$this->assertSame(Builtin\Text::class, $content['blocks']['value']['de'][0]['type']);
+		$this->assertSame(TextBlocks::TYPE, $content['blocks']['value']['de'][0]['type']);
 		$this->assertSame(['zxx' => '2'], $content['stacked']['value']['zxx'][0]['fields']['level']['value']);
 		$this->assertCount(2, $content['stacked']['value']['zxx'][1]['fields']['images']['value']['zxx']);
 		$this->assertSame(Builtin\Heading::class, $history['blocks']['value']['en'][0]['type']);
@@ -217,7 +218,9 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 		$blocks = new Blocks('blocks', $owner, new ValueContext('blocks', []));
 		$blocks->init(Services::withDefaults());
 		$blocks->columns(12, 2)->translate($mode);
-		$result = $blocks->shape()->validate($field);
+		// Legacy `text` rows become plain text blocks, a type since removed;
+		// migration 000000-000041 turns them into rich text right after.
+		$result = $blocks->shape()->validate(TextBlocks::content($field));
 
 		$this->assertTrue($result->valid(), implode("\n", array_map(
 			static fn(Issue $issue): string => implode('.', $issue->path) . ': ' . $issue->message,

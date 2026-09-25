@@ -661,23 +661,6 @@ final class Styleguide extends Panel
 				'fieldsets' => [],
 			],
 			[
-				'type' => Builtin\Text::class,
-				'handle' => 'text',
-				'label' => 'Plain text',
-				'labels' => false,
-				'fields' => [
-					[
-						'name' => 'text',
-						'label' => 'Plain text',
-						'type' => Textarea::class,
-						'control' => ['name' => 'textarea', 'props' => []],
-						'placeholder' => 'Write…',
-						'translate' => $translate,
-					],
-				],
-				'fieldsets' => [],
-			],
-			[
 				'type' => Builtin\Youtube::class,
 				'handle' => 'youtube',
 				'label' => 'YouTube video',
@@ -801,13 +784,13 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'asymmetric',
-				'description' => 'Default first-six menu and all eight types in the catalog. Drag an edge to resize; the gear holds layout settings.',
+				'description' => 'Default first-five menu and all seven types in the catalog. Drag an edge to resize; the gear holds layout settings.',
 			],
 			[
 				'name' => 'singleBlock',
 				'label' => 'One type — direct insertion',
 				'control' => Control::blocks()
-					->prop('blockTypes', [$types(false)[2]])
+					->prop('blockTypes', [$types(false)[1]])
 					->array(),
 			],
 			[
@@ -867,12 +850,6 @@ final class Styleguide extends Panel
 			'layout' => $layout,
 			'fields' => ['image' => ['type' => Image::class, 'value' => ['zxx' => [['uid' => $asset]]]]],
 		];
-		$text = static fn(string $uid, array $layout, array $value): array => [
-			'uid' => $uid,
-			'type' => Builtin\Text::class,
-			'layout' => $layout,
-			'fields' => ['text' => ['type' => Textarea::class, 'value' => $value]],
-		];
 		$youtube = static fn(string $uid, array $layout, string $id): array => [
 			'uid' => $uid,
 			'type' => Builtin\Youtube::class,
@@ -924,9 +901,9 @@ final class Styleguide extends Panel
 							'en' => $doc('The new mash tun arrives in autumn.'),
 							'de' => $doc('Die neue Maischepfanne wird im Herbst eingebaut.'),
 						]),
-						$text('sg-story-3', $layout(1), [
-							'en' => "Opening hours\nTuesday to Saturday, 10 to 18.",
-							'de' => "Öffnungszeiten\nDienstag bis Samstag, 10 bis 18 Uhr.",
+						$richtext('sg-story-3', $layout(1), [
+							'en' => $doc('Opening hours: Tuesday to Saturday, 10 to 18.'),
+							'de' => $doc('Öffnungszeiten: Dienstag bis Samstag, 10 bis 18 Uhr.'),
 						]),
 						$image('sg-story-4', $layout(1), 'sg-cover'),
 						$images('sg-story-5', $layout(1), array_map(self::galleryUid(...), range(1, 6)), ['ratio' => [
@@ -967,8 +944,8 @@ final class Styleguide extends Panel
 						$split(
 							'sg-grid-14',
 							$layout(6, 2, 1, 7),
-							$text('sg-grid-15', $layout(6), ['zxx' => 'Split into rows: the upper one.']),
-							$text('sg-grid-16', $layout(6), ['zxx' => 'And the lower one.']),
+							$richtext('sg-grid-15', $layout(6), ['zxx' => $doc('Split into rows: the upper one.')]),
+							$richtext('sg-grid-16', $layout(6), ['zxx' => $doc('And the lower one.')]),
 						),
 					],
 					'de' => [

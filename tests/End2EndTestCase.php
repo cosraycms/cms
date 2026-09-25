@@ -171,6 +171,7 @@ class End2EndTestCase extends IntegrationTestCase
 
 		$plugin->user(\Cosray\Tests\Fixtures\User\Teacher::class);
 		$plugin->user(\Cosray\Tests\Fixtures\User\Customer::class);
+		$plugin->blockType(\Cosray\Tests\Fixtures\Block\TextBlock::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestPage::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestArticle::class);
 		$plugin->node(\Cosray\Tests\Fixtures\Node\TestHome::class);

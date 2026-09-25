@@ -20,7 +20,7 @@ The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, a
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.
 
-Block defaults map RichText → `body-text`, Text → `text-left`, Heading → `heading`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
+Block defaults map RichText → `body-text`, Heading → `heading`, Image → `image`, Images → `images`, Video → `film`, Youtube → `play-btn`, and Iframe → `window`. Custom blocks without available artwork use `square`. These defaults are bundled and work without an Iconify request, including on a cold cache.
 
 The custom `heading` icon is inspired by Bootstrap's `card-heading`, without the card border and with an additional thin text line. Level-specific rich-text actions retain `type-h1`, `type-h2`, and `type-h3`.
 

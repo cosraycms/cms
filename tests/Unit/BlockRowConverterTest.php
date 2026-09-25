@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Block as Builtin;
 use Cosray\Field;
 use Cosray\Migration\BlockRowConverter;
+use Cosray\Migration\TextBlocks;
 use Cosray\Tests\Fixtures\Field\TestBlocks;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
@@ -69,7 +70,7 @@ final class BlockRowConverterTest extends TestCase
 		$this->assertSame(
 			[
 				'uid' => 'text000000001',
-				'type' => Builtin\Text::class,
+				'type' => TextBlocks::TYPE,
 				'layout' => ['colspan' => 6, 'rowspan' => 2, 'indent' => 0],
 				'fields' => [
 					'text' => ['type' => Field\Textarea::class, 'value' => ['zxx' => "Mo-Fr\n9-17"]],
@@ -263,7 +264,7 @@ final class BlockRowConverterTest extends TestCase
 
 		$this->assertSame('App\Gone', $field['type']);
 		$this->assertArrayNotHasKey('meta', $field);
-		$this->assertSame(Builtin\Text::class, $field['value']['de'][0]['type']);
+		$this->assertSame(TextBlocks::TYPE, $field['value']['de'][0]['type']);
 		$this->assertSame(['colspan' => 3, 'rowspan' => 1, 'indent' => 0], $field['value']['de'][0]['layout']);
 		$this->assertNull($field['value']['en']);
 		$this->assertSame(['App\Gone' => 1], $converter->report()['unresolvedFieldTypes']);

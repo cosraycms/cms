@@ -12,7 +12,6 @@ use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
-use Cosray\Field\Services;
 use Cosray\Migration\NodeContentNormalizer;
 use Cosray\Uid;
 use PDO;
@@ -376,6 +375,6 @@ class IntegrationTestCase extends TestCase
 
 	protected function createCms(): Cms
 	{
-		return new Cms($this->createContext(), Services::withDefaults());
+		return new Cms($this->createContext(), self::blockServices());
 	}
 }

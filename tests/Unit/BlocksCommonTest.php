@@ -15,6 +15,7 @@ use Cosray\Field\Text;
 use Cosray\Schema\Allows;
 use Cosray\Schema\Common;
 use Cosray\Tests\Fixtures\Block\CatalogBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\RichtextOwnerTestCase;
 use Cosray\Value\ValueContext;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -22,10 +23,10 @@ use ReflectionProperty;
 
 final class CommonFields
 {
-	#[Common(CatalogBlock::class), Allows(Block\Text::class, CatalogBlock::class)]
+	#[Common(CatalogBlock::class), Allows(TextBlock::class, CatalogBlock::class)]
 	public Blocks $before;
 
-	#[Allows(Block\Text::class, CatalogBlock::class), Common(CatalogBlock::class)]
+	#[Allows(TextBlock::class, CatalogBlock::class), Common(CatalogBlock::class)]
 	public Blocks $after;
 
 	#[Common(Block\Iframe::class)]
@@ -38,7 +39,7 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 	{
 		$field = new Blocks('content', $this->owner(), new ValueContext('content', []));
 		$field->init(
-			$services ?? Services::withDefaults(),
+			$services ?? self::blockServices(),
 			$property === null ? null : new ReflectionProperty(CommonFields::class, $property),
 		);
 
@@ -61,7 +62,7 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 				),
 			);
 			$props = $field->control()->array()['props'];
-			$this->assertSame(array_slice($types, 0, 6), $props['commonTypes']);
+			$this->assertSame(array_slice($types, 0, 5), $props['commonTypes']);
 			$this->assertSame($types, array_column($props['blockTypes'], 'type'));
 		}
 	}
@@ -70,19 +71,19 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 	{
 		$field = $this
 			->field()
-			->allow(Block\Text::class, Block\Heading::class)
-			->common(Block\Heading::class, Block\Heading::class, Block\Text::class);
+			->allow(TextBlock::class, Block\Heading::class)
+			->common(Block\Heading::class, Block\Heading::class, TextBlock::class);
 		$this->assertSame(
-			[Block\Heading::class, Block\Text::class],
+			[Block\Heading::class, TextBlock::class],
 			$field->control()->array()['props']['commonTypes'],
 		);
 		$field->common(Block\Heading::class);
 		$this->assertSame([Block\Heading::class], $field->control()->array()['props']['commonTypes']);
-		$this->assertSame([Block\Text::class, Block\Heading::class], $field->allowedBlockTypes());
-		$this->assertTrue($field->allows(Block\Text::class));
+		$this->assertSame([TextBlock::class, Block\Heading::class], $field->allowedBlockTypes());
+		$this->assertTrue($field->allows(TextBlock::class));
 		$row = [
 			'uid' => 'row1',
-			'type' => Block\Text::class,
+			'type' => TextBlock::class,
 			'layout' => ['colspan' => 1, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 			'fields' => ['text' => ['type' => \Cosray\Field\Textarea::class, 'value' => ['zxx' => 'Not common']]],
 		];
@@ -135,7 +136,7 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 	{
 		return [
 			'disallowed' => [[CatalogBlock::class], 'is not allowed'],
-			'oversized' => [array_slice(Block\Registry::withDefaults()->all(), 0, 7), 'at most 6 distinct'],
+			'oversized' => [array_slice(Block\Registry::withDefaults()->all(), 0, 6), 'at most 5 distinct'],
 		];
 	}
 

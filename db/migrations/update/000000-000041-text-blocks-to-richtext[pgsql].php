@@ -6,7 +6,6 @@ namespace Quma\Migrations\M000000_000041_TextBlocksToRichtext;
 
 use Celema\Quma\Contract;
 use Celema\Quma\Environment;
-use Cosray\Block\Text;
 use Cosray\Migration\TextBlocks;
 
 /**
@@ -50,7 +49,7 @@ final class Migration implements Contract\Migration
 		$where = implode(' AND ', array_map(static fn(string $key): string => "{$key} = :{$key}", $table['keys']));
 		// JSON escapes the class name's backslashes the way a jsonpath
 		// string wants them.
-		$path = 'strict $.** ? (@.type == ' . json_encode(Text::class, JSON_THROW_ON_ERROR) . ')';
+		$path = 'strict $.** ? (@.type == ' . json_encode(TextBlocks::TYPE, JSON_THROW_ON_ERROR) . ')';
 		$rows = $env->db->execute(
 			$this->sql($env, "
 			SELECT {$keys}, content::text AS content

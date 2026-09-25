@@ -49,7 +49,6 @@ A field's `#[Allows(Quote::class)]` makes the type available without separate re
 | Type | Content |
 | --- | --- |
 | `RichText` | Structured richtext |
-| `Text` | Escaped text with line breaks |
 | `Heading` | Text and a heading-level option |
 | `Image` | Single image in a figure, optional caption, responsive image ladder |
 | `Images` | Gallery with ratio/crop settings |
@@ -83,7 +82,7 @@ protected Blocks $content;
 
 ### Common choices
 
-The add menu currently offers the first six allowed types, with a searchable catalog for the rest. `#[Common(A::class, B::class)]` or `$blocks->common(...)` selects an ordered subset, at most six allowed types. Repeated calls replace the selection; an empty list restores the default. This changes presentation, not the set of valid stored types.
+The add menu currently offers the first five allowed types, with a searchable catalog for the rest. `#[Common(A::class, B::class)]` or `$blocks->common(...)` selects an ordered subset, at most five allowed types. Repeated calls replace the selection; an empty list restores the default. This changes presentation, not the set of valid stored types.
 
 ### Translation
 
@@ -281,4 +280,4 @@ Sites need to switch any own block CSS from the indent (`--indent`, `--reserved`
 
 ### Plain text blocks
 
-Migration `000000-000041` turns the `Text` blocks of nodes, working copies, and both history tables into `RichText` blocks, including those in splits and nested blocks fields. Lines separated by a blank line become paragraphs and single line breaks hard breaks; a text holding only whitespace becomes an empty value. A block keeps its UID, layout, and settings. Its output changes from bare text with `<br>` to paragraphs in `<p>`, and its wrapper's `data-type` from `text` to `richtext`, so site CSS aimed at either needs checking. The rewrite keeps change times and records no history; content without `Text` blocks is left as it is, so the migration can run again. The `Text` type itself stays available.
+Migration `000000-000041` turns the `Text` blocks of nodes, working copies, and both history tables into `RichText` blocks, including those in splits and nested blocks fields. Lines separated by a blank line become paragraphs and single line breaks hard breaks; a text holding only whitespace becomes an empty value. A block keeps its UID, layout, and settings. Its output changes from bare text with `<br>` to paragraphs in `<p>`, and its wrapper's `data-type` from `text` to `richtext`, so site CSS aimed at either needs checking. The rewrite keeps change times and records no history; content without `Text` blocks is left as it is, so the migration can run again. The `Text` type is gone: until the migration has run, pages leave its blocks out and an editor save may drop them, so apply it together with the code that removed the type.

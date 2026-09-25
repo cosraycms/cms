@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Migration;
 
 use Cosray\Block\RichText;
-use Cosray\Block\Text;
 use Cosray\Field;
 use Cosray\Richtext\Envelope;
 
@@ -21,13 +20,16 @@ use Cosray\Richtext\Envelope;
  */
 final class TextBlocks
 {
+	/** The plain text block type, removed since; stored content may still name it. */
+	public const string TYPE = 'Cosray\\Block\\Text';
+
 	/**
 	 * @param array<array-key, mixed> $data
 	 * @return array<array-key, mixed>
 	 */
 	public static function content(array $data): array
 	{
-		if (($data['type'] ?? null) === Text::class && is_array($data['fields'] ?? null)) {
+		if (($data['type'] ?? null) === self::TYPE && is_array($data['fields'] ?? null)) {
 			return self::block($data);
 		}
 

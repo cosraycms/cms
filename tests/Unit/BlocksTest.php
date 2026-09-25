@@ -29,6 +29,7 @@ use Cosray\Tests\Fixtures\Block\NestedBlocksBlock;
 use Cosray\Tests\Fixtures\Block\NestedEntriesBlock;
 use Cosray\Tests\Fixtures\Block\NoteBlock;
 use Cosray\Tests\Fixtures\Block\QuoteBlock;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Blocks as BlocksValue;
@@ -65,7 +66,7 @@ final class BlocksTest extends TestCase
 	{
 		$owner = new FieldOwner($this->createContext(), 'test-node');
 		$blocks = new Blocks('content', $owner, new \Cosray\Value\ValueContext('content', $data));
-		$blocks->init(Services::withDefaults());
+		$blocks->init(self::blockServices());
 		$blocks->columns($columns, $min);
 
 		return $blocks;
@@ -75,7 +76,7 @@ final class BlocksTest extends TestCase
 	{
 		$row = [
 			'uid' => $uid,
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $layout,
 			'fields' => [
 				'text' => ['type' => Textarea::class, 'value' => [Field::NEUTRAL_LOCALE => $text]],
@@ -99,7 +100,7 @@ final class BlocksTest extends TestCase
 		$blocks = $this->createBlocks();
 
 		$this->assertInstanceOf(BlocksValue::class, $blocks->value());
-		$this->assertSame(Registry::withDefaults()->all(), $blocks->allowedBlockTypes());
+		$this->assertSame([...Registry::withDefaults()->all(), TextBlock::class], $blocks->allowedBlockTypes());
 		$this->assertSame(['text', 'level'], array_keys($blocks->blockFields(Builtin\Heading::class)));
 		$this->assertSame(['text'], array_keys($blocks->blockFields()));
 		$this->assertTrue($blocks->allows(Builtin\Image::class));
@@ -139,7 +140,7 @@ final class BlocksTest extends TestCase
 	{
 		$owner = new FieldOwner($this->createContext(), 'test-node');
 		$blocks = new Blocks('content', $owner, new \Cosray\Value\ValueContext('content', []));
-		$blocks->init(Services::withDefaults());
+		$blocks->init(self::blockServices());
 		$control = $blocks->control()->array();
 
 		$this->assertSame(1, $control['props']['columns']);
@@ -191,10 +192,10 @@ final class BlocksTest extends TestCase
 
 	public function testAllowRestrictsTheOfferedTypes(): void
 	{
-		$blocks = $this->createBlocks()->allow(QuoteBlock::class, Builtin\Text::class);
+		$blocks = $this->createBlocks()->allow(QuoteBlock::class, TextBlock::class);
 		$types = array_column($blocks->control()->array()['props']['blockTypes'], 'handle', 'type');
 
-		$this->assertSame([QuoteBlock::class => 'quote-block', Builtin\Text::class => 'text'], $types);
+		$this->assertSame([QuoteBlock::class => 'quote-block', TextBlock::class => 'text'], $types);
 		$this->assertTrue($blocks->allows(QuoteBlock::class));
 		$this->assertFalse($blocks->allows(Builtin\Image::class));
 		$this->assertSame(['text', 'source'], array_keys($blocks->blockFields(QuoteBlock::class)));
@@ -203,14 +204,14 @@ final class BlocksTest extends TestCase
 	public function testASingleFieldBlockDropsItsSubFieldLabel(): void
 	{
 		$blocks = $this->createBlocks()->allow(
-			Builtin\Text::class,
+			TextBlock::class,
 			QuoteBlock::class,
 			LabelledBlock::class,
 		);
 		$types = array_column($blocks->control()->array()['props']['blockTypes'], 'labels', 'type');
 
 		// One field: the block's own label already names it.
-		$this->assertFalse($types[Builtin\Text::class]);
+		$this->assertFalse($types[TextBlock::class]);
 		// Two fields say different things, so both keep their labels.
 		$this->assertTrue($types[QuoteBlock::class]);
 		// One field, but the type asked for the label back.
@@ -231,11 +232,11 @@ final class BlocksTest extends TestCase
 
 	public function testBlocksDoNotMarkTheirFieldsAsRequired(): void
 	{
-		$blocks = $this->createBlocks()->allow(Builtin\Text::class);
+		$blocks = $this->createBlocks()->allow(TextBlock::class);
 		$fields = array_column($blocks->control()->array()['props']['blockTypes'], 'fields', 'type');
 
 		// The panel is told nothing about it …
-		$this->assertArrayNotHasKey('required', $fields[Builtin\Text::class][0]);
+		$this->assertArrayNotHasKey('required', $fields[TextBlock::class][0]);
 
 		// … while the shape, built from the field itself, still insists.
 		$result = $blocks
@@ -305,7 +306,7 @@ final class BlocksTest extends TestCase
 	{
 		$properties = $this
 			->createBlocks()
-			->allow(Builtin\Text::class)
+			->allow(TextBlock::class)
 			->properties();
 		$tokens = static fn(array $control): array => array_column($control['props']['options'], 'value');
 		$gaps = $properties['metaControl']['props']['fields'];
@@ -319,7 +320,7 @@ final class BlocksTest extends TestCase
 
 	public function testSpacingMetaValidatesTheTokens(): void
 	{
-		$blocks = $this->createBlocks()->allow(Builtin\Text::class);
+		$blocks = $this->createBlocks()->allow(TextBlock::class);
 		$content = fn(array $meta, array $rowMeta): array => [
 			'type' => Blocks::class,
 			'value' => [
@@ -372,7 +373,7 @@ final class BlocksTest extends TestCase
 
 		$this
 			->createBlocks()
-			->allow(Builtin\Text::class)
+			->allow(TextBlock::class)
 			->blockFieldsFor(QuoteBlock::class);
 	}
 
@@ -471,7 +472,7 @@ final class BlocksTest extends TestCase
 			->structure([
 				[
 					'uid' => 'b1',
-					'type' => Builtin\Text::class,
+					'type' => TextBlock::class,
 					'fields' => ['text' => ['type' => Textarea::class, 'value' => ['en' => 'Hello']]],
 				],
 			]);
@@ -485,24 +486,24 @@ final class BlocksTest extends TestCase
 		$symmetric = $this
 			->createBlocks()
 			->translate()
-			->allow(NoteBlock::class, Builtin\Text::class);
+			->allow(NoteBlock::class, TextBlock::class);
 		$asymmetric = $this
 			->createBlocks()
 			->translate(TranslateMode::Asymmetric)
-			->allow(NoteBlock::class, Builtin\Text::class);
-		$untranslated = $this->createBlocks()->allow(NoteBlock::class, Builtin\Text::class);
+			->allow(NoteBlock::class, TextBlock::class);
+		$untranslated = $this->createBlocks()->allow(NoteBlock::class, TextBlock::class);
 
 		$this->assertSame(
 			TranslateMode::Symmetric,
-			$symmetric->blockFields(Builtin\Text::class)['text']->translateMode(),
+			$symmetric->blockFields(TextBlock::class)['text']->translateMode(),
 		);
 		$this->assertSame(
 			TranslateMode::Asymmetric,
 			$symmetric->blockFields(NoteBlock::class)['cover']->translateMode(),
 		);
-		$this->assertNull($asymmetric->blockFields(Builtin\Text::class)['text']->translateMode());
+		$this->assertNull($asymmetric->blockFields(TextBlock::class)['text']->translateMode());
 		$this->assertNull($asymmetric->blockFields(NoteBlock::class)['cover']->translateMode());
-		$this->assertNull($untranslated->blockFields(Builtin\Text::class)['text']->translateMode());
+		$this->assertNull($untranslated->blockFields(TextBlock::class)['text']->translateMode());
 
 		$properties = $untranslated->control()->array()['props']['blockTypes'][1]['fields'][0];
 		$this->assertFalse($properties['translate']);
@@ -594,7 +595,7 @@ final class BlocksTest extends TestCase
 							'fields' => [],
 						],
 						[
-							'type' => Builtin\Text::class,
+							'type' => TextBlock::class,
 							'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 2],
 							'fields' => [],
 						],
@@ -616,7 +617,7 @@ final class BlocksTest extends TestCase
 		$this->assertFalse(
 			$shape
 				->validate($rows([
-					['uid' => 'b1', 'type' => Builtin\Text::class, 'layout' => 'junk', 'fields' => 'junk'],
+					['uid' => 'b1', 'type' => TextBlock::class, 'layout' => 'junk', 'fields' => 'junk'],
 				]))
 				->valid(),
 		);
@@ -746,7 +747,7 @@ final class BlocksTest extends TestCase
 					Field::NEUTRAL_LOCALE => [
 						[
 							'uid' => 'b1',
-							'type' => Builtin\Text::class,
+							'type' => TextBlock::class,
 							'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 							'fields' => [
 								'text' => ['type' => Textarea::class, 'value' => ['en' => 'Hello', 'de' => null]],
@@ -841,7 +842,7 @@ final class BlocksTest extends TestCase
 
 		$this->assertCount(1, $rows);
 		$this->assertSame('b1', $rows[0]['uid']);
-		$this->assertSame(Builtin\Text::class, $rows[0]['type']);
+		$this->assertSame(TextBlock::class, $rows[0]['type']);
 		$this->assertSame(['colspan' => 6, 'rowspan' => 1, 'col' => 3, 'row' => 1], $rows[0]['layout']);
 	}
 
@@ -895,14 +896,14 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($shape->validate($rows($this->split([$this->textRow('b1', 'x', $wide)], $full)))->has($kind));
 		// A type or fields beside the blocks, or neither.
 		$both = [...$this->split([$this->textRow('b1', 'x', $half), $this->textRow('b2', 'y', $half)], $full)];
-		$this->assertTrue($shape->validate($rows([...$both, 'type' => Builtin\Text::class, 'fields' => []]))->has(
+		$this->assertTrue($shape->validate($rows([...$both, 'type' => TextBlock::class, 'fields' => []]))->has(
 			$kind,
 		));
 		$this->assertTrue($shape->validate($rows([...$both, 'fields' => []]))->has($kind));
 		$this->assertTrue($shape->validate($rows(['uid' => 'b1', 'layout' => $full]))->has($kind));
 		$this->assertTrue($shape->validate($rows([
 			'uid' => 'b1',
-			'type' => Builtin\Text::class,
+			'type' => TextBlock::class,
 			'layout' => $full,
 		]))->has($kind));
 		// A block of a split is never split again.

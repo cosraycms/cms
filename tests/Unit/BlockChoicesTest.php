@@ -22,7 +22,7 @@ final class BlockChoicesTest extends TestCase
 			throw new \LogicException('Bundled icons must not call a provider');
 		});
 		$this->assertSame(array_keys($types), array_keys($choices->all));
-		$this->assertSame(array_slice(array_keys($types), 0, 6), array_column($choices->common, 'type'));
+		$this->assertSame(array_slice(array_keys($types), 0, 5), array_column($choices->common, 'type'));
 		foreach ($choices->all as $choice) {
 			$this->assertStringContainsString('<svg', $choice['icon']);
 			$this->assertNotEmpty($choice['label']);
@@ -86,7 +86,7 @@ final class BlockChoicesTest extends TestCase
 			[['blockTypes' => $types, 'commonTypes' => ['missing']], "common type 'missing' is not allowed"],
 			[
 				['blockTypes' => $types, 'commonTypes' => array_column($types, 'type')],
-				'may have at most 6 distinct common types',
+				'may have at most 5 distinct common types',
 			],
 		];
 	}

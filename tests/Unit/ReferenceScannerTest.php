@@ -11,6 +11,7 @@ use Cosray\Field\Image;
 use Cosray\Field\Reference;
 use Cosray\Field\RichText;
 use Cosray\References\Scanner;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\TestCase;
 
 /**
@@ -80,7 +81,7 @@ final class ReferenceScannerTest extends TestCase
 								])],
 							],
 						]),
-						$this->block(Builtin\Text::class, [
+						$this->block(TextBlock::class, [
 							'text' => ['type' => 'textarea', 'value' => ['zxx' => 'plain']],
 						]),
 					],

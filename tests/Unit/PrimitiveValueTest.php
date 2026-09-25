@@ -9,6 +9,7 @@ use Cosray\Context;
 use Cosray\Node\FieldOwner;
 use Cosray\Schema\TranslateMode;
 use Cosray\Storage\Storage;
+use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Field\TestCheckbox;
 use Cosray\Tests\Fixtures\Field\TestCode;
 use Cosray\Tests\Fixtures\Field\TestNumber;
@@ -875,14 +876,14 @@ final class PrimitiveValueTest extends TestCase
 		$context = $this->createContext();
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Blocks('content', $owner, new ValueContext('content', []));
-		$field->init(\Cosray\Field\Services::withDefaults());
+		$field->init(self::blockServices());
 		$field->required();
 		$field->translate(TranslateMode::Asymmetric);
 
 		$shape = $field->shape();
 		$block = [
 			'uid' => 'block1',
-			'type' => \Cosray\Block\Text::class,
+			'type' => TextBlock::class,
 			'layout' => ['colspan' => 1, 'rowspan' => 1, 'col' => 1, 'row' => 1],
 			'fields' => [
 				'text' => [

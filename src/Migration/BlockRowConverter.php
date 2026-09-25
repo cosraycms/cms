@@ -9,7 +9,6 @@ use Cosray\Block\Iframe;
 use Cosray\Block\Image;
 use Cosray\Block\Images;
 use Cosray\Block\RichText;
-use Cosray\Block\Text;
 use Cosray\Block\Video;
 use Cosray\Block\Youtube;
 use Cosray\Field;
@@ -34,11 +33,12 @@ final class BlockRowConverter
 	/** The implicit column count every legacy span was measured in. */
 	private const int LEGACY_COLUMNS = 12;
 
-	/** @var array<string, class-string> Legacy type id to block class. */
+	/** @var array<string, string> Legacy type id to block type name, as stored. */
 	private const array TYPES = [
 		'richtext' => RichText::class,
 		'html' => RichText::class,
-		'text' => Text::class,
+		// Migration 000000-000041 turns these into rich text.
+		'text' => TextBlocks::TYPE,
 		'h1' => Heading::class,
 		'h2' => Heading::class,
 		'h3' => Heading::class,

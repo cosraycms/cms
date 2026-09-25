@@ -31,7 +31,6 @@ return [
 		'block:overlap' => 'Blocks must not overlap.',
 		'block:richtext' => 'Rich text',
 		'block:row-kind' => 'A block needs a type and fields; a split holds two blocks or more and is not split again.',
-		'block:text' => 'Plain text',
 		'block:text-placeholder' => 'Write…',
 		'block:video' => 'Video',
 		'block:youtube' => 'YouTube video',
