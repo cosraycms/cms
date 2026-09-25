@@ -22,6 +22,7 @@ use Cosray\Richtext\Normalizer;
 use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
 use Cosray\Validation\ValidatorFactory;
+use DateTimeInterface;
 use Throwable;
 
 class Store
@@ -308,8 +309,22 @@ class Store
 		return (int) $nodeId;
 	}
 
-	public function create(object $node, array $data, Locales $locales, Actor $actor): array
-	{
+	/** @return array{success: true, uid: string} */
+	public function create(
+		object $node,
+		array $data,
+		Locales $locales,
+		Actor $actor,
+		?Actor $creator = null,
+		?DateTimeInterface $created = null,
+		?DateTimeInterface $changed = null,
+	): array {
+		$this->fulltext->validate($locales);
+		$metadata = [
+			'creator' => ($creator ?? $actor)->id,
+			'created' => $created?->format('Y-m-d\TH:i:s.uP'),
+			'changed' => $changed?->format('Y-m-d\TH:i:s.uP'),
+		];
 		$generatedUid = !array_key_exists('uid', $data);
 		if ($generatedUid) {
 			$data['uid'] = Factory::meta($node, 'uid') ?? $this->uid->generate();
@@ -322,7 +337,13 @@ class Store
 			}
 
 			try {
-				return $this->save($node, $data, $locales, $actor, create: true);
+				$prepared = $this->prepare($node, $data, $locales, create: true);
+				$this->transaction(
+					fn() => $this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata),
+					'Error while saving: ',
+				);
+
+				return ['success' => true, 'uid' => $prepared['uid']];
 			} catch (HttpConflict $e) {
 				if (!$generatedUid || $attempt === $attempts) {
 					throw $e;
@@ -413,12 +434,14 @@ class Store
 		return $result->values();
 	}
 
+	/** @param array{creator?: int, created?: ?string, changed?: ?string} $metadata */
 	private function persist(
 		object $node,
 		array $data,
 		int $editor,
 		Locales $locales,
 		bool $create = false,
+		array $metadata = [],
 	): void {
 		$parentUid = $this->resolveParentUid($node, $data);
 		$parentId = $this->resolveParentId($parentUid);
@@ -428,7 +451,7 @@ class Store
 		// (a single change/history record instead of two).
 		$data['title'] = $this->materializeTitle($node, $data, $locales);
 
-		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create);
+		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $metadata);
 		$this->persistHandle($nodeId, $handle, $editor);
 
 		// The reference indexes ride in the save transaction: full
@@ -513,12 +536,14 @@ class Store
 		return $node;
 	}
 
+	/** @param array{creator?: int, created?: ?string, changed?: ?string} $metadata */
 	private function persistNode(
 		object $node,
 		array $data,
 		int $editor,
 		?int $parent,
 		bool $create,
+		array $metadata,
 	): int {
 		$class = $node::class;
 		$handle = (string) $this->types->get($class, 'handle');
@@ -548,7 +573,15 @@ class Store
 			])->one()['node'];
 		}
 
-		$result = $this->db->nodes->create($params)->first();
+		$result = $this->db
+			->nodes
+			->create([
+				...$params,
+				'creator' => $metadata['creator'] ?? $editor,
+				'created' => $metadata['created'] ?? null,
+				'changed' => $metadata['changed'] ?? null,
+			])
+			->first();
 
 		if (!$result) {
 			throw new HttpConflict(payload: [

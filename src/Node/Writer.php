@@ -8,6 +8,7 @@ use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use DateTimeInterface;
 
 /**
  * Creates CMS nodes without exposing blueprint, serialization, and storage wiring.
@@ -55,9 +56,19 @@ final class Writer
 		return new Prepared($node, $data);
 	}
 
-	/** @return array{success: true, uid: string} */
-	public function create(Prepared $prepared, ?Actor $actor = null): array
-	{
+	/**
+	 * The actor is the last editor and, unless overridden, the creator.
+	 * Historical dates apply only to the node, not its paths or handle.
+	 *
+	 * @return array{success: true, uid: string}
+	 */
+	public function create(
+		Prepared $prepared,
+		?Actor $actor = null,
+		?Actor $creator = null,
+		?DateTimeInterface $created = null,
+		?DateTimeInterface $changed = null,
+	): array {
 		$this->assertUsablePaths($prepared->data());
 
 		return $this->store->create(
@@ -65,6 +76,9 @@ final class Writer
 			$prepared->data(),
 			$this->context->locales(),
 			$actor ?? Actor::system(),
+			$creator,
+			$created,
+			$changed,
 		);
 	}
 

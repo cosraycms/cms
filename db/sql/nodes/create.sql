@@ -7,6 +7,8 @@ INSERT INTO /*:cms.prefix:*/nodes (
 	hidden,
 	editor,
 	creator,
+	created,
+	changed,
 	content,
 	title
 )
@@ -18,7 +20,9 @@ SELECT
 	:locked,
 	:hidden,
 	:editor,
-	:editor,
+	:creator,
+	COALESCE(CAST(:created AS timestamptz), now()),
+	COALESCE(CAST(:changed AS timestamptz), now()),
 	:content,
 	:title
 FROM

@@ -72,6 +72,36 @@ An `Entries` field uses `#[Allows(Row::class, ...)]` to choose node-style row sc
 
 A `Reference` field stores an ordered neutral `{uid}` list. `#[Limit(max: 1)]` makes it single; `#[Pick(...)]` constrains eligible types, content predicates through `where`, and publication/visibility through `published` and `hidden`. Defaults include any publication state and hidden nodes, but not soft-deleted nodes. Read `uids()` or `uid()` and resolve through `$cms->node->byUid($uid)`. Eligibility is derived server-side from the field schema, not from client-supplied filters. See [Reference](../src/Field/Reference.php) and [Pick](../src/Schema/Pick.php).
 
+## Programmatic creation
+
+`Node\Writer` prepares and creates nodes without an HTTP request. Pass field values to `prepare()`; use the returned `Node\Prepared` to set the UID, publication state, parent, or localized paths.
+
+```php
+use Cosray\Actor;
+use Cosray\Node\Writer;
+
+$writer = new Writer($context, $cms, $types);
+$prepared = $writer->prepare(Article::class, [
+    'title' => ['en' => 'Imported article'],
+])->published()->path('en', '/articles/imported');
+
+$writer->create(
+    $prepared,
+    actor: new Actor($lastEditorId),
+    creator: new Actor($originalAuthorId),
+    created: new DateTimeImmutable('2016-01-02T03:04:05Z'),
+    changed: new DateTimeImmutable('2020-07-08T09:10:11Z'),
+);
+```
+
+The actor identifies the last editor and defaults to `Actor::system()`. The creator defaults to that actor. Both refer to existing Cosray user IDs; resolving legacy users and choosing a fallback is the caller's responsibility.
+
+`created` and `changed` independently accept optional `DateTimeInterface` values. Supply an explicit timezone when constructing dates from legacy strings. Offsets and microseconds are preserved as instants in PostgreSQL; each omitted date defaults to the current database transaction time, as in ordinary creation.
+
+These overrides apply only to the node's initial insert. Paths and handles use the actor and current database timestamps. Creation does not manufacture historical revisions. Later saves keep the original creator and creation date, update the editor and change date normally, and record the preceding version in history. Import steps that subsequently edit a node therefore also update its last-editor metadata.
+
+The lower-level `Node\Store::create()` accepts the same optional `creator`, `created`, and `changed` arguments after its required actor. Historical metadata is not accepted through the content payload or ordinary `save()`/`publish()` methods. No schema migration is required.
+
 ## Route templates
 
 `#[Route('/articles/{title}')]` applies to all locales; a locale map such as `#[Route(['en' => '/articles/{title}', 'de' => '/artikel/{title}'])` generates only the listed locales.
