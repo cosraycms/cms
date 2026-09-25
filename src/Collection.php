@@ -53,9 +53,4 @@ abstract class Collection
 	{
 		return ['uid', 'title'];
 	}
-
-	public function defaultSort(): string
-	{
-		return 'title';
-	}
 }

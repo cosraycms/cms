@@ -116,9 +116,9 @@ Hierarchy listings show roots and expand direct children. `#[Children]` supplies
 
 The default listing shows title, last changed, and the configured status indicators. Its initial order is title ascending. Type, editor, and created are opt-in columns; type and editor have no built-in display-name sort. Finder's `type` and `editor` fields mean type handle and editor UID, not the labels displayed in those columns.
 
-`entries()` defines collection membership. The panel replaces any Finder `order()` in that method with the selected column order, before applying pagination. Put the panel's default in `defaultSort()`, not in `entries()`.
+`entries()` defines collection membership. The panel replaces any Finder `order()` in that method with the selected column order, before applying pagination. Declare the panel's initial order on a column, not in `entries()`.
 
-A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending:
+A column declares its own allowed sort key, order fields, and initial direction. Without `fields`, the key is also the order field. Without `direction`, the initial direction is ascending. `default: true` makes a column's sort the listing's initial order; without a flagged sort, the listing starts in the first sortable column's order:
 
 ```php
 use Cosray\Column;
@@ -132,14 +132,9 @@ public function columns(): array
             $node->lastName . ', ' . $node->firstName
         )->bold(true)->sort('name', fields: ['lastName', 'firstName']),
         Column::new(__('Last changed'), 'meta.changed')
-            ->date(true)->sort('changed', direction: 'desc'),
+            ->date(true)->sort('changed', direction: 'desc', default: true),
         Column::new(__('Editor'), 'meta.editor'),
     ];
-}
-
-public function defaultSort(): string
-{
-    return 'name';
 }
 ```
 
@@ -158,11 +153,11 @@ Column::new(__('Created'), 'meta.created')->date(true)
     ->sort('created', direction: 'desc');
 ```
 
-For dated collections, select `date` or `start` in `defaultSort()` as appropriate. A callback-rendered column uses the same declarations: sorting still operates on stored fields, never on a fetched page or the callback's result. `SortField::number()` supports both Number and Decimal values without PHP float conversion. Dates require `YYYY-MM-DD`; datetimes require RFC 3339 values with seconds and an offset or `Z` and sort by instant. Missing and whitespace-only custom values sort last in either direction. Arrays, objects, malformed typed values, relative dates, and non-finite numbers cause query errors rather than silently receiving a misleading order.
+For dated collections, flag the `date` or `start` sort as the default as appropriate. A callback-rendered column uses the same declarations: sorting still operates on stored fields, never on a fetched page or the callback's result. `SortField::number()` supports both Number and Decimal values without PHP float conversion. Dates require `YYYY-MM-DD`; datetimes require RFC 3339 values with seconds and an offset or `Z` and sort by instant. Missing and whitespace-only custom values sort last in either direction. Arrays, objects, malformed typed values, relative dates, and non-finite numbers cause query errors rather than silently receiving a misleading order.
 
-A column without `sort(...)` is not sortable; `sort(null)` explicitly disables it. Keys must be unique, and `defaultSort()` must select a declared key (`title` in the base collection). Invalid definitions fail as configuration errors. HTTP `sort` and `dir` parameters only select declared orders; unknown keys and invalid directions return 400. Omitting the direction uses the selected column's initial direction, switching headers starts in that direction, and clicking the active header reverses it. Header navigation resets pagination while preserving the listing's other state.
+A column without `sort(...)` is not sortable; `sort(null)` explicitly disables it. Keys must be unique, at most one sort may be the default, and a listing needs at least one sortable column. Invalid definitions fail as configuration errors. HTTP `sort` and `dir` parameters only select declared orders; unknown keys and invalid directions return 400. Omitting the direction uses the selected column's initial direction, switching headers starts in that direction, and clicking the active header reverses it. Header navigation resets pagination while preserving the listing's other state.
 
-When updating existing collections, move `sorts()` mappings into their columns and move `defaultDir()` into each sort's `direction`; those collection methods are no longer used. Add explicit sorts to columns that previously relied on field-name inference, and remove redundant ordering from `entries()`. A title-sorting trait is no longer needed. Custom columns replacing the default title column must declare a matching default key. Remove dead type/editor sort markers unless handle/UID ordering is explicitly intended. Old URLs requesting removed keys, including the former default `uid` option, are invalid. Code inspecting columns reads the nullable `Column::$sort` definition instead of `sortKey()`.
+When updating existing collections, move `sorts()` mappings into their columns and move `defaultDir()` into each sort's `direction`; those collection methods are no longer used. Add explicit sorts to columns that previously relied on field-name inference, and remove redundant ordering from `entries()`. A title-sorting trait is no longer needed. Replace a collection's `defaultSort()` with `default: true` on the matching column's sort. Remove dead type/editor sort markers unless handle/UID ordering is explicitly intended. Old URLs requesting removed keys, including the former default `uid` option, are invalid. Code inspecting columns reads the nullable `Column::$sort` definition instead of `sortKey()`.
 
 ### Frontend queries
 

@@ -59,10 +59,18 @@ final class Column
 		return $this;
 	}
 
-	/** @param non-empty-list<string|SortField>|null $fields */
-	public function sort(?string $key, ?array $fields = null, string $direction = 'asc'): self
-	{
-		$this->sort = $key === null ? null : new Sort(trim($key), $fields, $direction);
+	/**
+	 * @param non-empty-list<string|SortField>|null $fields
+	 * @param bool $default Whether the listing starts in this order; without
+	 *                      a flagged column it starts in the first sortable one
+	 */
+	public function sort(
+		?string $key,
+		?array $fields = null,
+		string $direction = 'asc',
+		bool $default = false,
+	): self {
+		$this->sort = $key === null ? null : new Sort(trim($key), $fields, $direction, $default);
 
 		return $this;
 	}

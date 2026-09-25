@@ -14,11 +14,15 @@ final readonly class Sort
 	public array $fields;
 	public string $direction;
 
-	/** @param non-empty-list<string|SortField>|null $fields */
+	/**
+	 * @param non-empty-list<string|SortField>|null $fields
+	 * @param bool $default Whether the listing starts in this order
+	 */
 	public function __construct(
 		public string $key,
 		?array $fields = null,
 		string $direction = 'asc',
+		public bool $default = false,
 	) {
 		if (preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*$/D', $key) !== 1) {
 			throw new RuntimeException("Invalid collection sort key '{$key}'");

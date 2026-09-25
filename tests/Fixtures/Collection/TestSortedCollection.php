@@ -28,7 +28,7 @@ final class TestSortedCollection extends Collection
 		$this->columnsCalls++;
 		return [
 			Column::new('Name', static fn(Wrapper $node): string => $node->lastName . ', ' . $node->firstName)
-				->sort('name', fields: ['lastName', 'firstName']),
+				->sort('name', fields: ['lastName', 'firstName'], default: true),
 			Column::new('Amount', 'amount')->sort('amount', fields: [SortField::number('amount')]),
 			Column::new('Start', 'start')->date(true)->sort(
 				'start',
@@ -38,10 +38,5 @@ final class TestSortedCollection extends Collection
 			Column::new('Created', 'meta.created')->date(true)->sort('created', direction: 'desc'),
 			Column::new('Editor', 'meta.editor'),
 		];
-	}
-
-	public function defaultSort(): string
-	{
-		return 'name';
 	}
 }

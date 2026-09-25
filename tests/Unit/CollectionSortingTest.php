@@ -51,11 +51,49 @@ final class CollectionSortingTest extends TestCase
 		$this->listing($collection)->list();
 	}
 
-	public function testMissingDefaultFailsBeforeQuerying(): void
+	public static function defaultSorts(): iterable
+	{
+		yield 'flagged column' => [
+			[
+				Column::new('Title', 'title')->sort('title'),
+				Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc', default: true),
+			],
+			'changed',
+		];
+		yield 'first sortable column' => [
+			[
+				Column::new('Editor', 'meta.editor'),
+				Column::new('Name', 'title')->sort('name', ['title']),
+				Column::new('Changed', 'meta.changed')->sort('changed', direction: 'desc'),
+			],
+			'name',
+		];
+	}
+
+	#[DataProvider('defaultSorts')]
+	public function testDefaultSortIsTheFlaggedOrFirstSortableColumn(array $columns, string $expected): void
 	{
 		$collection = new SortingTestCollection();
-		$collection->configured = [Column::new('Name', 'title')->sort('name', ['title'])];
-		$this->expectExceptionMessage("Default collection sort 'title' has no sortable column");
+		$collection->configured = $columns;
+		$this->assertSame($expected, $this->listing($collection)->defaultSort);
+	}
+
+	public function testSeveralDefaultsFailBeforeQuerying(): void
+	{
+		$collection = new SortingTestCollection();
+		$collection->configured = [
+			Column::new('Title', 'title')->sort('title', default: true),
+			Column::new('Changed', 'meta.changed')->sort('changed', default: true),
+		];
+		$this->expectExceptionMessage("Only one collection sort can be the default, found 'title', 'changed'");
+		$this->listing($collection)->list();
+	}
+
+	public function testUnsortableListingsFailBeforeQuerying(): void
+	{
+		$collection = new SortingTestCollection();
+		$collection->configured = [Column::new('Title', 'title')];
+		$this->expectExceptionMessage('Collection listings need at least one sortable column');
 		$this->listing($collection)->list();
 	}
 

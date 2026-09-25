@@ -30,7 +30,7 @@ final class Listing
 	public readonly CollectionListMeta $meta;
 	/** @var list<class-string> */
 	public readonly array $blueprints;
-	private readonly string $defaultSort;
+	public readonly string $defaultSort;
 
 	public function __construct(
 		private readonly Collection $collection,
@@ -55,10 +55,7 @@ final class Listing
 			$sorts[$sort->key] = $sort;
 		}
 		$this->sorts = $sorts;
-		$this->defaultSort = $collection->defaultSort();
-		if (!isset($sorts[$this->defaultSort])) {
-			throw new RuntimeException("Default collection sort '{$this->defaultSort}' has no sortable column");
-		}
+		$this->defaultSort = self::defaultSort($sorts);
 	}
 
 	/** A fresh finder over the collection's entries per call; callers narrow it. */
@@ -234,6 +231,30 @@ final class Listing
 		}
 
 		return $result;
+	}
+
+	/**
+	 * The flagged sort, or the first sortable column when none is flagged.
+	 *
+	 * @param array<string, Sort> $sorts
+	 */
+	private static function defaultSort(array $sorts): string
+	{
+		$defaults = array_keys(array_filter($sorts, static fn(Sort $sort): bool => $sort->default));
+
+		if (count($defaults) > 1) {
+			throw new RuntimeException(
+				"Only one collection sort can be the default, found '" . implode("', '", $defaults) . "'",
+			);
+		}
+
+		$default = $defaults[0] ?? array_key_first($sorts);
+
+		if ($default === null) {
+			throw new RuntimeException('Collection listings need at least one sortable column');
+		}
+
+		return $default;
 	}
 
 	private function resolveOrder(string $sort, string $dir): array
