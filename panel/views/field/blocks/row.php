@@ -224,7 +224,7 @@ $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots 
 			data-layout-resize="end"
 			aria-hidden="true"
 			title="<?= $this->escape(__('field:colspan')) ?>">
-			<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
+			<span class="knob"></span>
 		</span>
 		<span class="seam" data-places="rows" aria-hidden="true"></span>
 	<?php endif ?>
