@@ -817,6 +817,48 @@ function fit(slot: HTMLElement, box: Box): void {
 	slot.style.gridRow = `${box.row} / span ${box.rowspan}`;
 }
 
+/**
+ * A split's parts sit on the grid's tracks through subgrid, which a
+ * lifted block leaves: it takes the tracks it spans along, as measured
+ * when the gesture began, rows included, which its neighbours may have
+ * sized. A subgrid's border and padding narrow its edge tracks.
+ */
+function freeze(current: Drag, box: Box): void {
+	const { row } = current;
+
+	if (!row.matches('.is-split')) {
+		return;
+	}
+
+	const style = getComputedStyle(row);
+	const inset = (border: string, padding: string) => parseFloat(border) + parseFloat(padding);
+	const span = (edges: Edges, from: number, count: number, start: number, end: number) => {
+		const sizes = edges.starts
+			.slice(from - 1, from - 1 + count)
+			.map((at, index) => edges.ends[from - 1 + index]! - at);
+
+		sizes[0]! -= start;
+		sizes[sizes.length - 1]! -= end;
+
+		return sizes.map((size) => `${size}px`).join(' ');
+	};
+
+	row.style.gridTemplateColumns = span(
+		current.cols,
+		box.col,
+		box.colspan,
+		inset(style.borderInlineStartWidth, style.paddingInlineStart),
+		inset(style.borderInlineEndWidth, style.paddingInlineEnd),
+	);
+	row.style.gridTemplateRows = span(
+		current.rows,
+		box.row,
+		box.rowspan,
+		inset(style.borderBlockStartWidth, style.paddingBlockStart),
+		inset(style.borderBlockEndWidth, style.paddingBlockEnd),
+	);
+}
+
 /** The lifted block, positioned in the grid's box, under the pointer. */
 function follow(current: Drag, x: number, y: number): void {
 	const rect = current.grid.getBoundingClientRect();
@@ -839,6 +881,7 @@ function begin(current: Drag): void {
 		row: cellOf(current.rows, y, PROBE) - box.row,
 	};
 	current.hold = { x: current.x - rect.left, y: current.y - rect.top };
+	freeze(current, box);
 	slot.className = 'landing';
 	slot.setAttribute('aria-hidden', 'true');
 	slot.style.minHeight = `${rect.height}px`;
@@ -862,6 +905,8 @@ function land(current: Drag, boxes: Boxes<HTMLElement>, done: () => void): void 
 		row.style.removeProperty('transform');
 		row.style.removeProperty('width');
 		row.style.removeProperty('height');
+		row.style.removeProperty('grid-template-columns');
+		row.style.removeProperty('grid-template-rows');
 		grid.parentElement!.classList.remove('is-moving');
 		place(grid, boxes);
 		done();

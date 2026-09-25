@@ -149,6 +149,12 @@
 		}
 	}
 
+	/* A lifted split has left the grid and takes its tracks along
+	   (placement.ts); without a subgrid it has no gap of the grid's. */
+	& .grid > .block.is-split.is-lifted {
+		gap: var(--blocks-gap);
+	}
+
 	& .parts > .block {
 		border: 0;
 		background: none;
