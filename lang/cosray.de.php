@@ -118,6 +118,7 @@ return [
 		'common:reset' => 'Zurücksetzen',
 		'common:save' => 'Speichern',
 		'common:saved' => 'Gespeichert',
+		'common:search' => 'Suchen',
 		'common:title' => 'Titel',
 		'common:type' => 'Typ',
 		'common:upload' => 'Hochladen',

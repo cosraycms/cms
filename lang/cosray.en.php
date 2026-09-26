@@ -112,6 +112,7 @@ return [
 		'common:reset' => 'Reset',
 		'common:save' => 'Save',
 		'common:saved' => 'Saved',
+		'common:search' => 'Search',
 		'common:title' => 'Title',
 		'common:type' => 'Type',
 		'common:upload' => 'Upload',
