@@ -10,22 +10,30 @@
 // without JavaScript the hidden uid input simply keeps its value and
 // the kebab's move buttons stay the reorder path.
 
-import type { SortableEvent } from 'sortablejs';
+/** @import { SortableEvent } from 'sortablejs' */
 
-type PickerItem = { uid: string; label: string; sub: string };
+/**
+ * @typedef {object} PickerItem
+ * @property {string} uid
+ * @property {string} label
+ * @property {string} sub
+ */
 
-const timers = new WeakMap<HTMLInputElement, ReturnType<typeof setTimeout>>();
-const aborters = new WeakMap<HTMLInputElement, AbortController>();
-const enhanced = new WeakSet<Element>();
+const timers = /** @type {WeakMap<HTMLInputElement, ReturnType<typeof setTimeout>>} */ (
+	new WeakMap()
+);
+const aborters = /** @type {WeakMap<HTMLInputElement, AbortController>} */ (new WeakMap());
+const enhanced = /** @type {WeakSet<Element>} */ (new WeakSet());
 
-function tree(): Element | null {
+/** @returns {Element | null} */
+function tree() {
 	return document.querySelector('.cms-menu-tree .tree');
 }
 
-async function initDrag(): Promise<void> {
-	const lists = [...document.querySelectorAll<HTMLElement>('[data-menu-list]')].filter(
-		(list) => !enhanced.has(list),
-	);
+async function initDrag() {
+	const lists = [
+		.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-menu-list]')),
+	].filter((list) => !enhanced.has(list));
 
 	if (lists.length === 0) {
 		return;
@@ -47,7 +55,7 @@ async function initDrag(): Promise<void> {
 			fallbackOnBody: true,
 			swapThreshold: 0.65,
 			onStart: () => tree()?.classList.add('is-dragging'),
-			onEnd: (event: SortableEvent) => {
+			onEnd: (/** @type {SortableEvent} */ event) => {
 				tree()?.classList.remove('is-dragging');
 				submitMove(event.item, event.to, event.from, event.newIndex ?? 0, event.oldIndex ?? 0);
 			},
@@ -60,20 +68,20 @@ async function initDrag(): Promise<void> {
  * move rides the same boosted pipeline as every other tree action and
  * the response re-renders the tree (or rejects the move with a
  * notice). Exported for the behavior tests; `onEnd` delegates here.
+ *
+ * @param {HTMLElement} item
+ * @param {HTMLElement} to
+ * @param {HTMLElement} from
+ * @param {number} newIndex
+ * @param {number} oldIndex
  */
-export function submitMove(
-	item: HTMLElement,
-	to: HTMLElement,
-	from: HTMLElement,
-	newIndex: number,
-	oldIndex: number,
-): void {
+export function submitMove(item, to, from, newIndex, oldIndex) {
 	if (to === from && newIndex === oldIndex) {
 		return;
 	}
 
 	const uid = item.dataset.uid ?? '';
-	const form = document.querySelector<HTMLFormElement>('#menu-drag');
+	const form = /** @type {HTMLFormElement | null} */ (document.querySelector('#menu-drag'));
 	const template = form?.dataset.menuDragAction ?? '';
 
 	if (!form || uid === '' || template === '') {
@@ -95,18 +103,33 @@ export function submitMove(
 	form.requestSubmit();
 }
 
-function picker(el: Element): HTMLElement | null {
+/**
+ * @param {Element} el
+ * @returns {HTMLElement | null}
+ */
+function picker(el) {
 	return el.closest('[data-menu-picker]');
 }
 
-function resultsOf(box: HTMLElement): HTMLElement | null {
-	return box.querySelector<HTMLElement>('[data-menu-picker-results]');
+/**
+ * @param {HTMLElement} box
+ * @returns {HTMLElement | null}
+ */
+function resultsOf(box) {
+	return /** @type {HTMLElement | null} */ (box.querySelector('[data-menu-picker-results]'));
 }
 
-function parse(box: HTMLElement, payload: unknown): PickerItem[] {
+/**
+ * @param {HTMLElement} box
+ * @param {unknown} payload
+ * @returns {PickerItem[]}
+ */
+function parse(box, payload) {
 	const key = box.dataset.menuPicker ?? '';
 	const rows =
-		payload && typeof payload === 'object' ? (payload as Record<string, unknown>)[key] : null;
+		payload && typeof payload === 'object'
+			? /** @type {Record<string, unknown>} */ (payload)[key]
+			: null;
 
 	if (!Array.isArray(rows)) {
 		return [];
@@ -117,7 +140,7 @@ function parse(box: HTMLElement, payload: unknown): PickerItem[] {
 			return [];
 		}
 
-		const item = row as Record<string, unknown>;
+		const item = /** @type {Record<string, unknown>} */ (row);
 		const uid = typeof item.uid === 'string' ? item.uid : '';
 		const label =
 			typeof item.title === 'string'
@@ -136,7 +159,11 @@ function parse(box: HTMLElement, payload: unknown): PickerItem[] {
 	});
 }
 
-function render(box: HTMLElement, items: PickerItem[]): void {
+/**
+ * @param {HTMLElement} box
+ * @param {PickerItem[]} items
+ */
+function render(box, items) {
 	const list = resultsOf(box);
 
 	if (!list) {
@@ -167,7 +194,10 @@ function render(box: HTMLElement, items: PickerItem[]): void {
 	list.hidden = items.length === 0;
 }
 
-async function search(input: HTMLInputElement): Promise<void> {
+/**
+ * @param {HTMLInputElement} input
+ */
+async function search(input) {
 	const box = picker(input);
 	const url = box?.dataset.menuPickerUrl ?? '';
 
@@ -195,7 +225,10 @@ async function search(input: HTMLInputElement): Promise<void> {
 	}
 }
 
-function onInput(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onInput(event) {
 	const input = event.target;
 
 	if (!(input instanceof HTMLInputElement) || !input.matches('[data-menu-picker-search]')) {
@@ -203,7 +236,9 @@ function onInput(event: Event): void {
 	}
 
 	// Typing invalidates the previous selection; picking writes it back.
-	const value = picker(input)?.querySelector<HTMLInputElement>('[data-menu-picker-value]');
+	const value = /** @type {HTMLInputElement | null} */ (
+		picker(input)?.querySelector('[data-menu-picker-value]')
+	);
 
 	if (value) {
 		value.value = '';
@@ -221,7 +256,10 @@ function onInput(event: Event): void {
 	);
 }
 
-function onChange(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onChange(event) {
 	const select = event.target;
 
 	if (!(select instanceof HTMLSelectElement) || !select.matches('[data-menu-type]')) {
@@ -230,31 +268,38 @@ function onChange(event: Event): void {
 
 	const form = select.closest('form');
 
-	form
-		?.querySelectorAll<HTMLElement>('[data-menu-section], [data-menu-section-hide]')
-		.forEach((section) => {
-			const show = section.dataset.menuSection;
+	/** @type {NodeListOf<HTMLElement>} */ (
+		form?.querySelectorAll('[data-menu-section], [data-menu-section-hide]')
+	).forEach((section) => {
+		const show = section.dataset.menuSection;
 
-			if (typeof show === 'string' && show !== '') {
-				section.hidden = !show.split(' ').includes(select.value);
+		if (typeof show === 'string' && show !== '') {
+			section.hidden = !show.split(' ').includes(select.value);
 
-				return;
-			}
+			return;
+		}
 
-			const hide = section.dataset.menuSectionHide ?? '';
-			section.hidden = hide.split(' ').includes(select.value);
-		});
+		const hide = section.dataset.menuSectionHide ?? '';
+		section.hidden = hide.split(' ').includes(select.value);
+	});
 }
 
-function pick(option: HTMLElement): void {
+/**
+ * @param {HTMLElement} option
+ */
+function pick(option) {
 	const box = picker(option);
 
 	if (!box) {
 		return;
 	}
 
-	const value = box.querySelector<HTMLInputElement>('[data-menu-picker-value]');
-	const input = box.querySelector<HTMLInputElement>('[data-menu-picker-search]');
+	const value = /** @type {HTMLInputElement | null} */ (
+		box.querySelector('[data-menu-picker-value]')
+	);
+	const input = /** @type {HTMLInputElement | null} */ (
+		box.querySelector('[data-menu-picker-search]')
+	);
 
 	if (value) {
 		value.value = option.dataset.menuPickerOption ?? '';
@@ -272,7 +317,10 @@ function pick(option: HTMLElement): void {
 	}
 }
 
-function onClick(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -289,13 +337,18 @@ function onClick(event: Event): void {
 
 	// A click outside any picker closes every open result list.
 	if (!target.closest('[data-menu-picker]')) {
-		document.querySelectorAll<HTMLElement>('[data-menu-picker-results]').forEach((list) => {
+		/** @type {NodeListOf<HTMLElement>} */ (
+			document.querySelectorAll('[data-menu-picker-results]')
+		).forEach((list) => {
 			list.hidden = true;
 		});
 	}
 }
 
-function onKeydown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function onKeydown(event) {
 	const target = event.target;
 
 	if (
@@ -308,8 +361,9 @@ function onKeydown(event: KeyboardEvent): void {
 	}
 }
 
-export function install(): () => void {
-	const rescan = (): void => {
+/** @returns {() => void} */
+export function install() {
+	const rescan = () => {
 		void initDrag();
 	};
 

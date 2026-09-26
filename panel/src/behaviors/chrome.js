@@ -1,4 +1,4 @@
-import { openDialog } from '$lib/dialogs';
+import { openDialog } from '../lib/dialogs.js';
 
 // Editor chrome: the preview overlay's close button and the meta
 // dialogs. The overlay anchor is only emptied, never removed —
@@ -7,7 +7,10 @@ import { openDialog } from '$lib/dialogs';
 // row inside a blocks field), so a row's gear never reaches the dialog
 // of the field around it.
 
-function onClick(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -28,7 +31,7 @@ function onClick(event: Event): void {
 		return;
 	}
 
-	const metaOpen = target.closest<HTMLElement>('[data-meta-open]');
+	const metaOpen = /** @type {HTMLElement | null} */ (target.closest('[data-meta-open]'));
 
 	if (metaOpen) {
 		const dialog = metaOpen
@@ -46,7 +49,8 @@ function onClick(event: Event): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', onClick);
 
 	return () => {

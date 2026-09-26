@@ -24,22 +24,49 @@
 // animates the blocks from where they appeared to where the grid put
 // them (FLIP), a lifted block settling into its slot as well.
 
-import { changed, focusRow, renumber } from './repeater';
+import { changed, focusRow, renumber } from './repeater.js';
 
-export type Box = { col: number; row: number; colspan: number; rowspan: number };
-export type Boxes<T> = Map<T, Box>;
-export type Edge = 'start' | 'end' | 'bottom';
-export type Edges = { starts: number[]; ends: number[] };
+/**
+ * @typedef {object} Box
+ * @property {number} col
+ * @property {number} row
+ * @property {number} colspan
+ * @property {number} rowspan
+ */
+
+/**
+ * @template T
+ * @typedef {Map<T, Box>} Boxes
+ */
+
+/** @typedef {'start' | 'end' | 'bottom'} Edge */
+
+/**
+ * @typedef {object} Edges
+ * @property {number[]} starts
+ * @property {number[]} ends
+ */
 
 export const MAX_ROWSPAN = 6;
 
 const GRID = '.cms-blocks-editor.is-grid > .grid';
 
-function between(value: number, low: number, high: number): number {
+/**
+ * @param {number} value
+ * @param {number} low
+ * @param {number} high
+ * @returns {number}
+ */
+function between(value, low, high) {
 	return Math.max(low, Math.min(high, Math.trunc(value) || 0));
 }
 
-export function overlaps(a: Box, b: Box): boolean {
+/**
+ * @param {Box} a
+ * @param {Box} b
+ * @returns {boolean}
+ */
+export function overlaps(a, b) {
 	return (
 		a.col < b.col + b.colspan &&
 		b.col < a.col + a.colspan &&
@@ -48,11 +75,20 @@ export function overlaps(a: Box, b: Box): boolean {
 	);
 }
 
-function copy<T>(boxes: Boxes<T>): Boxes<T> {
+/**
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @returns {Boxes<T>}
+ */
+function copy(boxes) {
 	return new Map([...boxes].map(([key, box]) => [key, { ...box }]));
 }
 
-function bottom(boxes: Iterable<Box>): number {
+/**
+ * @param {Iterable<Box>} boxes
+ * @returns {number}
+ */
+function bottom(boxes) {
 	let last = 0;
 
 	for (const box of boxes) {
@@ -65,17 +101,22 @@ function bottom(boxes: Iterable<Box>): number {
 /**
  * The fixed block stays; the others, top to bottom, each move down below
  * whatever they hit, so blocks pushed together keep their order.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} fixed
+ * @returns {Boxes<T>}
  */
-export function settle<T>(boxes: Boxes<T>, fixed: T): Boxes<T> {
+export function settle(boxes, fixed) {
 	const result = copy(boxes);
-	const settled = [result.get(fixed)!];
+	const settled = [/** @type {Box} */ (result.get(fixed))];
 
 	for (const key of sorted(boxes)) {
 		if (key === fixed) {
 			continue;
 		}
 
-		const box = result.get(key)!;
+		const box = /** @type {Box} */ (result.get(key));
 
 		for (
 			let hit = settled.find((other) => overlaps(box, other));
@@ -91,8 +132,14 @@ export function settle<T>(boxes: Boxes<T>, fixed: T): Boxes<T> {
 	return result;
 }
 
-/** Rows no block covers are taken out; the blocks below move up. */
-export function compact<T>(boxes: Boxes<T>): Boxes<T> {
+/**
+ * Rows no block covers are taken out; the blocks below move up.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @returns {Boxes<T>}
+ */
+export function compact(boxes) {
 	const result = copy(boxes);
 
 	for (let line = bottom(result.values()); line >= 1; line--) {
@@ -112,24 +159,32 @@ export function compact<T>(boxes: Boxes<T>): Boxes<T> {
 	return result;
 }
 
-/** Reading order: row by row, left to right. */
-export function sorted<T>(boxes: Boxes<T>): T[] {
+/**
+ * Reading order: row by row, left to right.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @returns {T[]}
+ */
+export function sorted(boxes) {
 	return [...boxes].sort(([, a], [, b]) => a.row - b.row || a.col - b.col).map(([key]) => key);
 }
 
 /**
  * The block moved to a spot, clamped into the columns; with `insert`, it
  * gets rows of its own there, the blocks from that row on moving down.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @param {{ col: number; row: number }} to
+ * @param {boolean} insert
+ * @param {number} columns
+ * @returns {Boxes<T>}
  */
-export function move<T>(
-	boxes: Boxes<T>,
-	key: T,
-	to: { col: number; row: number },
-	insert: boolean,
-	columns: number,
-): Boxes<T> {
+export function move(boxes, key, to, insert, columns) {
 	const result = copy(boxes);
-	const box = result.get(key)!;
+	const box = /** @type {Box} */ (result.get(key));
 
 	box.col = between(to.col, 1, columns - box.colspan + 1);
 	box.row = Math.max(1, Math.trunc(to.row) || 1);
@@ -145,9 +200,17 @@ export function move<T>(
 	return compact(settle(result, key));
 }
 
-/** The widest the block can get from where it starts: free cells up to the grid's edge. */
-function reach<T>(boxes: Boxes<T>, key: T, columns: number): { left: number; right: number } {
-	const box = boxes.get(key)!;
+/**
+ * The widest the block can get from where it starts: free cells up to the grid's edge.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @param {number} columns
+ * @returns {{ left: number; right: number }}
+ */
+function reach(boxes, key, columns) {
+	const box = /** @type {Box} */ (boxes.get(key));
 	let left = 1;
 	let right = columns;
 
@@ -170,14 +233,18 @@ function reach<T>(boxes: Boxes<T>, key: T, columns: number): { left: number; rig
 	return { left, right };
 }
 
-/** The range each span can take where the block sits. */
-export function limits<T>(
-	boxes: Boxes<T>,
-	key: T,
-	columns: number,
-	min: number,
-): { colspan: { low: number; high: number }; rowspan: { low: number; high: number } } {
-	const box = boxes.get(key)!;
+/**
+ * The range each span can take where the block sits.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @param {number} columns
+ * @param {number} min
+ * @returns {{ colspan: { low: number; high: number }; rowspan: { low: number; high: number } }}
+ */
+export function limits(boxes, key, columns, min) {
+	const box = /** @type {Box} */ (boxes.get(key));
 	const { right } = reach(boxes, key, columns);
 
 	return {
@@ -186,17 +253,21 @@ export function limits<T>(
 	};
 }
 
-/** One span set within its limits; a taller block pushes the ones below down. */
-export function span<T>(
-	boxes: Boxes<T>,
-	key: T,
-	dimension: 'colspan' | 'rowspan',
-	value: number,
-	columns: number,
-	min: number,
-): Boxes<T> {
+/**
+ * One span set within its limits; a taller block pushes the ones below down.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @param {'colspan' | 'rowspan'} dimension
+ * @param {number} value
+ * @param {number} columns
+ * @param {number} min
+ * @returns {Boxes<T>}
+ */
+export function span(boxes, key, dimension, value, columns, min) {
 	const result = copy(boxes);
-	const box = result.get(key)!;
+	const box = /** @type {Box} */ (result.get(key));
 	const { low, high } = limits(boxes, key, columns, min)[dimension];
 
 	box[dimension] = between(value, low, high);
@@ -208,16 +279,18 @@ export function span<T>(
  * One edge moved by whole steps: the end edge grows into free cells up
  * to the grid's edge, the start edge moves the start column the same way
  * and keeps the end edge where it is, the bottom edge counts rows.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @param {Edge} edge
+ * @param {number} steps
+ * @param {number} columns
+ * @param {number} min
+ * @returns {Boxes<T>}
  */
-export function resize<T>(
-	boxes: Boxes<T>,
-	key: T,
-	edge: Edge,
-	steps: number,
-	columns: number,
-	min: number,
-): Boxes<T> {
-	const box = boxes.get(key)!;
+export function resize(boxes, key, edge, steps, columns, min) {
+	const box = /** @type {Box} */ (boxes.get(key));
 
 	if (edge === 'bottom') {
 		return span(boxes, key, 'rowspan', box.rowspan + steps, columns, min);
@@ -239,11 +312,19 @@ export function resize<T>(
 /**
  * The free runs of every row, merged down while the rows below are free
  * the same way, up to the tallest block there is.
+ *
+ * @param {Iterable<Box>} boxes
+ * @param {number} columns
+ * @param {number} min
+ * @returns {Box[]}
  */
-export function gaps(boxes: Iterable<Box>, columns: number, min: number): Box[] {
+export function gaps(boxes, columns, min) {
 	const list = [...boxes];
 	const rows = bottom(list);
-	const taken = Array.from({ length: rows + 1 }, () => Array<boolean>(columns + 1).fill(false));
+	const taken = Array.from(
+		{ length: rows + 1 },
+		() => /** @type {boolean[]} */ (Array(columns + 1).fill(false)),
+	);
 
 	for (const box of list) {
 		for (let row = box.row; row < box.row + box.rowspan; row++) {
@@ -253,7 +334,8 @@ export function gaps(boxes: Iterable<Box>, columns: number, min: number): Box[] 
 		}
 	}
 
-	const found: Box[] = [];
+	/** @type {Box[]} */
+	const found = [];
 
 	for (let row = 1; row <= rows; row++) {
 		for (let col = 1; col <= columns;) {
@@ -293,10 +375,18 @@ export function gaps(boxes: Iterable<Box>, columns: number, min: number): Box[] 
 	return found;
 }
 
-/** Track edges from a resolved `grid-template-*` value, gaps added between. */
-export function tracks(template: string, gap: number): Edges {
-	const starts: number[] = [];
-	const ends: number[] = [];
+/**
+ * Track edges from a resolved `grid-template-*` value, gaps added between.
+ *
+ * @param {string} template
+ * @param {number} gap
+ * @returns {Edges}
+ */
+export function tracks(template, gap) {
+	/** @type {number[]} */
+	const starts = [];
+	/** @type {number[]} */
+	const ends = [];
 	let at = 0;
 
 	for (const token of template.split(/\s+/)) {
@@ -316,30 +406,63 @@ export function tracks(template: string, gap: number): Edges {
 
 // The DOM side.
 
-/** The grid a row is placed on; null for a part, a list or a read-only canvas row alike. */
-export function gridOf(row: HTMLElement): HTMLElement | null {
+/**
+ * The grid a row is placed on; null for a part, a list or a read-only canvas row alike.
+ *
+ * @param {HTMLElement} row
+ * @returns {HTMLElement | null}
+ */
+export function gridOf(row) {
 	const grid = row.parentElement;
 
 	return grid?.matches(GRID) ? grid : null;
 }
 
-export function placed(row: HTMLElement): boolean {
+/**
+ * @param {HTMLElement} row
+ * @returns {boolean}
+ */
+export function placed(row) {
 	return row.hasAttribute('data-placed') && gridOf(row) !== null;
 }
 
-function rowsOf(grid: HTMLElement): HTMLElement[] {
-	return [...grid.querySelectorAll<HTMLElement>(':scope > [data-repeater-row]')];
+/**
+ * @param {HTMLElement} grid
+ * @returns {HTMLElement[]}
+ */
+function rowsOf(grid) {
+	return [
+		.../** @type {NodeListOf<HTMLElement>} */ (
+			grid.querySelectorAll(':scope > [data-repeater-row]')
+		),
+	];
 }
 
-function field(row: HTMLElement, key: string): HTMLInputElement | null {
-	return row.querySelector<HTMLInputElement>(`:scope > input[data-layout="${key}"]`);
+/**
+ * @param {HTMLElement} row
+ * @param {string} key
+ * @returns {HTMLInputElement | null}
+ */
+function field(row, key) {
+	return /** @type {HTMLInputElement | null} */ (
+		row.querySelector(`:scope > input[data-layout="${key}"]`)
+	);
 }
 
-function number(row: HTMLElement, key: string): number {
+/**
+ * @param {HTMLElement} row
+ * @param {string} key
+ * @returns {number}
+ */
+function number(row, key) {
 	return Number(field(row, key)?.value) || 0;
 }
 
-export function boxOf(row: HTMLElement): Box {
+/**
+ * @param {HTMLElement} row
+ * @returns {Box}
+ */
+export function boxOf(row) {
 	return {
 		col: number(row, 'col'),
 		row: number(row, 'row'),
@@ -348,18 +471,31 @@ export function boxOf(row: HTMLElement): Box {
 	};
 }
 
-export function columnsOf(grid: HTMLElement): { columns: number; min: number } {
-	const container = grid.parentElement!;
+/**
+ * @param {HTMLElement} grid
+ * @returns {{ columns: number; min: number }}
+ */
+export function columnsOf(grid) {
+	const container = /** @type {HTMLElement} */ (grid.parentElement);
 	const columns = Math.max(1, Number(container.dataset.columns) || 1);
 
 	return { columns, min: between(Number(container.dataset.min) || 1, 1, columns) };
 }
 
-export function snapshot(grid: HTMLElement): Boxes<HTMLElement> {
+/**
+ * @param {HTMLElement} grid
+ * @returns {Boxes<HTMLElement>}
+ */
+export function snapshot(grid) {
 	return new Map(rowsOf(grid).map((row) => [row, boxOf(row)]));
 }
 
-function set(row: HTMLElement, key: string, value: number): void {
+/**
+ * @param {HTMLElement} row
+ * @param {string} key
+ * @param {number} value
+ */
+function set(row, key, value) {
 	const input = field(row, key);
 
 	if (input) {
@@ -367,8 +503,13 @@ function set(row: HTMLElement, key: string, value: number): void {
 	}
 }
 
-/** The positions written: the hidden inputs, the row's custom properties and the dialog's numbers. */
-export function place(grid: HTMLElement, boxes: Boxes<HTMLElement>): void {
+/**
+ * The positions written: the hidden inputs, the row's custom properties and the dialog's numbers.
+ *
+ * @param {HTMLElement} grid
+ * @param {Boxes<HTMLElement>} boxes
+ */
+export function place(grid, boxes) {
 	const { columns, min } = columnsOf(grid);
 
 	for (const [row, box] of boxes) {
@@ -378,15 +519,17 @@ export function place(grid: HTMLElement, boxes: Boxes<HTMLElement>): void {
 		row.style.setProperty('--row', String(box.row));
 		row.toggleAttribute('data-placed', true);
 
-		const dialog = row.querySelector<HTMLElement>(':scope > dialog');
+		const dialog = /** @type {HTMLElement | null} */ (row.querySelector(':scope > dialog'));
 		const colspan = limits(boxes, row, columns, min).colspan;
 
-		for (const [key, value, low, high] of [
+		for (const [key, value, low, high] of /** @type {const} */ ([
 			['col', box.col, 1, columns - box.colspan + 1],
 			['row', box.row, 1, 999],
 			['colspan', box.colspan, colspan.low, colspan.high],
-		] as const) {
-			const control = dialog?.querySelector<HTMLInputElement>(`input[data-layout-input="${key}"]`);
+		])) {
+			const control = /** @type {HTMLInputElement | null} */ (
+				dialog?.querySelector(`input[data-layout-input="${key}"]`)
+			);
 
 			if (control && control !== document.activeElement) {
 				control.min = String(low);
@@ -397,8 +540,13 @@ export function place(grid: HTMLElement, boxes: Boxes<HTMLElement>): void {
 	}
 }
 
-/** A position handed over, as from a block to the split that takes its place. */
-export function adopt(from: HTMLElement, to: HTMLElement): void {
+/**
+ * A position handed over, as from a block to the split that takes its place.
+ *
+ * @param {HTMLElement} from
+ * @param {HTMLElement} to
+ */
+export function adopt(from, to) {
 	const grid = gridOf(to);
 
 	if (grid && number(from, 'col') > 0) {
@@ -409,8 +557,12 @@ export function adopt(from: HTMLElement, to: HTMLElement): void {
 	}
 }
 
-/** A block leaving the grid for a split flows there again. */
-export function release(row: HTMLElement): void {
+/**
+ * A block leaving the grid for a split flows there again.
+ *
+ * @param {HTMLElement} row
+ */
+export function release(row) {
 	set(row, 'col', 0);
 	set(row, 'row', 0);
 	row.style.removeProperty('--col');
@@ -426,12 +578,13 @@ const MOTION = { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', id: 'place
  * it shows, so a change mid-animation does not jump. `still` is left out:
  * a block being resized, or one that has just been stamped. Returns
  * every block's box on screen after the change.
+ *
+ * @param {HTMLElement} grid
+ * @param {() => void} change
+ * @param {HTMLElement} [still]
+ * @returns {Map<HTMLElement, DOMRect>}
  */
-export function animate(
-	grid: HTMLElement,
-	change: () => void,
-	still?: HTMLElement,
-): Map<HTMLElement, DOMRect> {
+export function animate(grid, change, still) {
 	const rows = rowsOf(grid).filter((row) => row !== still && 'animate' in row);
 	const calm = rows.length === 0 || matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const first = new Map(calm ? [] : rows.map((row) => [row, row.getBoundingClientRect()]));
@@ -445,7 +598,7 @@ export function animate(
 	const last = new Map(rowsOf(grid).map((row) => [row, row.getBoundingClientRect()]));
 
 	for (const [row, before] of first) {
-		const after = last.get(row)!;
+		const after = /** @type {DOMRect} */ (last.get(row));
 		const x = before.left - after.left;
 		const y = before.top - after.top;
 
@@ -457,8 +610,13 @@ export function animate(
 	return last;
 }
 
-/** The rows in reading order in the DOM; true when any moved. */
-function reorder(grid: HTMLElement): boolean {
+/**
+ * The rows in reading order in the DOM; true when any moved.
+ *
+ * @param {HTMLElement} grid
+ * @returns {boolean}
+ */
+function reorder(grid) {
 	const rows = rowsOf(grid);
 	const order = sorted(snapshot(grid));
 
@@ -467,12 +625,14 @@ function reorder(grid: HTMLElement): boolean {
 	}
 
 	// An atomic move keeps focus and element state; append reconnects.
-	const move = (row: HTMLElement): void => {
+	/**
+	 * @param {HTMLElement} row
+	 */
+	const move = (row) => {
 		if ('moveBefore' in grid) {
-			(grid as HTMLElement & { moveBefore(node: Node, child: Node | null): void }).moveBefore(
-				row,
-				null,
-			);
+			/** @type {HTMLElement & { moveBefore(node: Node, child: Node | null): void }} */ (
+				grid
+			).moveBefore(row, null);
 		} else {
 			grid.append(row);
 		}
@@ -483,22 +643,28 @@ function reorder(grid: HTMLElement): boolean {
 	return true;
 }
 
-/** Empty rows out, the DOM in reading order, and the change announced. */
-export function commit(grid: HTMLElement): void {
+/**
+ * Empty rows out, the DOM in reading order, and the change announced.
+ *
+ * @param {HTMLElement} grid
+ */
+export function commit(grid) {
 	place(grid, compact(snapshot(grid)));
 	reorder(grid);
-	changed(grid.parentElement!);
+	changed(/** @type {HTMLElement} */ (grid.parentElement));
 }
 
-type Anchor = { row: HTMLElement; where: 'before' | 'after' } | null;
+/** @typedef {{ row: HTMLElement; where: 'before' | 'after' } | null} Anchor */
 
 /**
  * A stamped block's spot: before a block, in new rows where that block
  * starts; after one, in new rows below it; appended, below everything.
  * It keeps the anchor's column where its span fits. One stamped with a
  * position of its own (a ghost fills its gap) stays there.
+ *
+ * @param {Event} event
  */
-function onStamp(event: Event): void {
+function onStamp(event) {
 	const row = event.target;
 	const grid = row instanceof HTMLElement ? gridOf(row) : null;
 
@@ -506,7 +672,7 @@ function onStamp(event: Event): void {
 		return;
 	}
 
-	const at = (event as CustomEvent<{ at?: Anchor }>).detail?.at ?? null;
+	const at = /** @type {CustomEvent<{ at?: Anchor }>} */ (event).detail?.at ?? null;
 	const own = boxOf(row);
 
 	if (!at && own.col > 0) {
@@ -538,12 +704,16 @@ function onStamp(event: Event): void {
 	animate(grid, () => place(grid, boxes), row);
 }
 
-/** Structural changes of a grid: rows left empty go, the DOM follows the positions. */
-function onChange(event: Event): void {
+/**
+ * Structural changes of a grid: rows left empty go, the DOM follows the positions.
+ *
+ * @param {Event} event
+ */
+function onChange(event) {
 	const container = event.target;
 	const grid =
 		container instanceof HTMLElement && container.matches('.cms-blocks-editor.is-grid')
-			? container.querySelector<HTMLElement>(':scope > .grid')
+			? /** @type {HTMLElement | null} */ (container.querySelector(':scope > .grid'))
 			: null;
 
 	if (!grid || rowsOf(grid).some((row) => number(row, 'col') === 0)) {
@@ -554,20 +724,28 @@ function onChange(event: Event): void {
 		place(grid, compact(snapshot(grid)));
 
 		if (reorder(grid)) {
-			renumber(container as HTMLElement);
+			renumber(/** @type {HTMLElement} */ (container));
 		}
 	});
 }
 
-function locked(grid: HTMLElement): boolean {
+/**
+ * @param {HTMLElement} grid
+ * @returns {boolean}
+ */
+function locked(grid) {
 	return grid.closest('[data-readonly="true"]') !== null;
 }
 
-/** Move up and down go one row: the block lands there and pushes what it meets. */
-function onMove(event: MouseEvent): void {
+/**
+ * Move up and down go one row: the block lands there and pushes what it meets.
+ *
+ * @param {MouseEvent} event
+ */
+function onMove(event) {
 	const mover =
 		event.target instanceof Element ? event.target.closest('[data-repeater-move]') : null;
-	const row = mover?.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (mover?.closest('[data-repeater-row]'));
 	const grid = row && placed(row) ? gridOf(row) : null;
 	const direction = mover?.getAttribute('data-repeater-move');
 
@@ -593,13 +771,19 @@ function onMove(event: MouseEvent): void {
 	});
 }
 
-/** The column and row numbers in a block's dialog move it like a drop. */
-function onInput(event: Event): void {
+/**
+ * The column and row numbers in a block's dialog move it like a drop.
+ *
+ * @param {Event} event
+ */
+function onInput(event) {
 	const control = event.target;
 	const key =
 		control instanceof HTMLInputElement ? control.getAttribute('data-layout-input') : null;
 	const row =
-		control instanceof HTMLElement ? control.closest<HTMLElement>('[data-repeater-row]') : null;
+		control instanceof HTMLElement
+			? /** @type {HTMLElement | null} */ (control.closest('[data-repeater-row]'))
+			: null;
 	const grid = row && placed(row) ? gridOf(row) : null;
 
 	if (!(control instanceof HTMLInputElement) || (key !== 'col' && key !== 'row') || !row || !grid) {
@@ -626,29 +810,27 @@ function onInput(event: Event): void {
 	}
 }
 
-type Drag = {
-	pointer: number;
-	grip: HTMLElement;
-	row: HTMLElement;
-	grid: HTMLElement;
-	x: number;
-	y: number;
-	started: boolean;
-	start: Boxes<HTMLElement>;
-	cols: Edges;
-	rows: Edges;
-	/** The grid's content box from its border box: the tracks start there. */
-	inset: { left: number; top: number };
-	scroller: HTMLElement;
-	/** The last pointer position, for the target while the scroller moves. */
-	at: { x: number; y: number };
-	frame: number;
-	grab: { col: number; row: number };
-	/** Where the pointer holds the lifted block, from its top left corner. */
-	hold: { x: number; y: number };
-	slot: HTMLElement | null;
-	target: string;
-};
+/**
+ * @typedef {object} Drag
+ * @property {number} pointer
+ * @property {HTMLElement} grip
+ * @property {HTMLElement} row
+ * @property {HTMLElement} grid
+ * @property {number} x
+ * @property {number} y
+ * @property {boolean} started
+ * @property {Boxes<HTMLElement>} start
+ * @property {Edges} cols
+ * @property {Edges} rows
+ * @property {{ left: number; top: number }} inset The grid's content box from its border box: the tracks start there.
+ * @property {HTMLElement} scroller
+ * @property {{ x: number; y: number }} at The last pointer position, for the target while the scroller moves.
+ * @property {number} frame
+ * @property {{ col: number; row: number }} grab
+ * @property {{ x: number; y: number }} hold Where the pointer holds the lifted block, from its top left corner.
+ * @property {HTMLElement | null} slot
+ * @property {string} target
+ */
 
 const THRESHOLD = 4;
 const BAND = 10;
@@ -658,9 +840,16 @@ const PROBE = 96;
 const EDGE = 56;
 const SPEED = 18;
 
-let drag: Drag | null = null;
+/** @type {Drag | null} */
+let drag = null;
 
-function cellOf(edges: Edges, offset: number, fallback: number): number {
+/**
+ * @param {Edges} edges
+ * @param {number} offset
+ * @param {number} fallback
+ * @returns {number}
+ */
+function cellOf(edges, offset, fallback) {
 	const { starts, ends } = edges;
 
 	if (starts.length === 0) {
@@ -679,8 +868,14 @@ function cellOf(edges: Edges, offset: number, fallback: number): number {
 	return starts.length + 1 + Math.floor((offset - ends[ends.length - 1]) / fallback);
 }
 
-/** The line between two rows the pointer sits on, as the row a new one would take. */
-function lineOf(edges: Edges, offset: number): number | null {
+/**
+ * The line between two rows the pointer sits on, as the row a new one would take.
+ *
+ * @param {Edges} edges
+ * @param {number} offset
+ * @returns {number | null}
+ */
+function lineOf(edges, offset) {
 	const { starts, ends } = edges;
 
 	for (let index = 0; index <= starts.length; index++) {
@@ -699,7 +894,11 @@ function lineOf(edges: Edges, offset: number): number | null {
 	return null;
 }
 
-export function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'inset'> {
+/**
+ * @param {HTMLElement} grid
+ * @returns {Pick<Drag, 'cols' | 'rows' | 'inset'>}
+ */
+export function geometry(grid) {
 	const style = getComputedStyle(grid);
 
 	return {
@@ -712,15 +911,27 @@ export function geometry(grid: HTMLElement): Pick<Drag, 'cols' | 'rows' | 'inset
 	};
 }
 
-/** The pointer in the grid's content box, wherever the grid has scrolled to. */
-function local(current: Drag, x: number, y: number): { x: number; y: number } {
+/**
+ * The pointer in the grid's content box, wherever the grid has scrolled to.
+ *
+ * @param {Drag} current
+ * @param {number} x
+ * @param {number} y
+ * @returns {{ x: number; y: number }}
+ */
+function local(current, x, y) {
 	const rect = current.grid.getBoundingClientRect();
 
 	return { x: x - rect.left - current.inset.left, y: y - rect.top - current.inset.top };
 }
 
-/** The nearest ancestor that scrolls vertically; the document otherwise. */
-function scrollerOf(element: HTMLElement): HTMLElement {
+/**
+ * The nearest ancestor that scrolls vertically; the document otherwise.
+ *
+ * @param {HTMLElement} element
+ * @returns {HTMLElement}
+ */
+function scrollerOf(element) {
 	for (let node = element.parentElement; node; node = node.parentElement) {
 		const { overflowY } = getComputedStyle(node);
 
@@ -729,11 +940,16 @@ function scrollerOf(element: HTMLElement): HTMLElement {
 		}
 	}
 
-	return (document.scrollingElement as HTMLElement | null) ?? document.documentElement;
+	return /** @type {HTMLElement | null} */ (document.scrollingElement) ?? document.documentElement;
 }
 
-/** Pixels to scroll this frame: none away from the edges, full speed at or past them. */
-function pace(current: Drag): number {
+/**
+ * Pixels to scroll this frame: none away from the edges, full speed at or past them.
+ *
+ * @param {Drag} current
+ * @returns {number}
+ */
+function pace(current) {
 	const rect =
 		current.scroller === document.scrollingElement
 			? null
@@ -753,7 +969,7 @@ function pace(current: Drag): number {
 	return 0;
 }
 
-function scroll(): void {
+function scroll() {
 	if (!drag?.started) {
 		return;
 	}
@@ -777,12 +993,15 @@ function scroll(): void {
 	current.frame = requestAnimationFrame(scroll);
 }
 
-function onPointerDown(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerDown(event) {
 	const grip =
 		event.target instanceof Element
-			? event.target.closest<HTMLElement>('[data-repeater-grip]')
+			? /** @type {HTMLElement | null} */ (event.target.closest('[data-repeater-grip]'))
 			: null;
-	const row = grip?.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (grip?.closest('[data-repeater-row]'));
 	const grid = row && placed(row) ? gridOf(row) : null;
 
 	if (drag || event.button !== 0 || !grip || !row || !grid || locked(grid)) {
@@ -811,8 +1030,13 @@ function onPointerDown(event: PointerEvent): void {
 	event.preventDefault();
 }
 
-/** The slot stands in for the lifted block, as tall as it was. */
-function fit(slot: HTMLElement, box: Box): void {
+/**
+ * The slot stands in for the lifted block, as tall as it was.
+ *
+ * @param {HTMLElement} slot
+ * @param {Box} box
+ */
+function fit(slot, box) {
 	slot.style.gridColumn = `${box.col} / span ${box.colspan}`;
 	slot.style.gridRow = `${box.row} / span ${box.rowspan}`;
 }
@@ -822,8 +1046,11 @@ function fit(slot: HTMLElement, box: Box): void {
  * lifted block leaves: it takes the tracks it spans along, as measured
  * when the gesture began, rows included, which its neighbours may have
  * sized. A subgrid's border and padding narrow its edge tracks.
+ *
+ * @param {Drag} current
+ * @param {Box} box
  */
-function freeze(current: Drag, box: Box): void {
+function freeze(current, box) {
 	const { row } = current;
 
 	if (!row.matches('.is-split')) {
@@ -831,14 +1058,25 @@ function freeze(current: Drag, box: Box): void {
 	}
 
 	const style = getComputedStyle(row);
-	const inset = (border: string, padding: string) => parseFloat(border) + parseFloat(padding);
-	const span = (edges: Edges, from: number, count: number, start: number, end: number) => {
+	/**
+	 * @param {string} border
+	 * @param {string} padding
+	 */
+	const inset = (border, padding) => parseFloat(border) + parseFloat(padding);
+	/**
+	 * @param {Edges} edges
+	 * @param {number} from
+	 * @param {number} count
+	 * @param {number} start
+	 * @param {number} end
+	 */
+	const span = (edges, from, count, start, end) => {
 		const sizes = edges.starts
 			.slice(from - 1, from - 1 + count)
-			.map((at, index) => edges.ends[from - 1 + index]! - at);
+			.map((at, index) => /** @type {number} */ (edges.ends[from - 1 + index]) - at);
 
-		sizes[0]! -= start;
-		sizes[sizes.length - 1]! -= end;
+		/** @type {number} */ (sizes[0]) -= start;
+		/** @type {number} */ (sizes[sizes.length - 1]) -= end;
 
 		return sizes.map((size) => `${size}px`).join(' ');
 	};
@@ -859,8 +1097,14 @@ function freeze(current: Drag, box: Box): void {
 	);
 }
 
-/** The lifted block, positioned in the grid's box, under the pointer. */
-function follow(current: Drag, x: number, y: number): void {
+/**
+ * The lifted block, positioned in the grid's box, under the pointer.
+ *
+ * @param {Drag} current
+ * @param {number} x
+ * @param {number} y
+ */
+function follow(current, x, y) {
 	const rect = current.grid.getBoundingClientRect();
 	const left = x - rect.left - current.grid.clientLeft - current.hold.x;
 	const top = y - rect.top - current.grid.clientTop - current.hold.y;
@@ -868,7 +1112,10 @@ function follow(current: Drag, x: number, y: number): void {
 	current.row.style.transform = `translate(${left}px, ${top}px)`;
 }
 
-function begin(current: Drag): void {
+/**
+ * @param {Drag} current
+ */
+function begin(current) {
 	const box = boxOf(current.row);
 	const { x, y } = local(current, current.x, current.y);
 	const rect = current.row.getBoundingClientRect();
@@ -891,12 +1138,18 @@ function begin(current: Drag): void {
 	current.row.style.width = `${rect.width}px`;
 	current.row.style.height = `${rect.height}px`;
 	current.row.classList.add('is-lifted');
-	current.grid.parentElement!.classList.add('is-moving');
+	/** @type {HTMLElement} */ (current.grid.parentElement).classList.add('is-moving');
 	follow(current, current.x, current.y);
 }
 
-/** The lifted block back in the grid, sliding from where it was held. */
-function land(current: Drag, boxes: Boxes<HTMLElement>, done: () => void): void {
+/**
+ * The lifted block back in the grid, sliding from where it was held.
+ *
+ * @param {Drag} current
+ * @param {Boxes<HTMLElement>} boxes
+ * @param {() => void} done
+ */
+function land(current, boxes, done) {
 	const { row, grid, slot } = current;
 
 	animate(grid, () => {
@@ -907,13 +1160,16 @@ function land(current: Drag, boxes: Boxes<HTMLElement>, done: () => void): void 
 		row.style.removeProperty('height');
 		row.style.removeProperty('grid-template-columns');
 		row.style.removeProperty('grid-template-rows');
-		grid.parentElement!.classList.remove('is-moving');
+		/** @type {HTMLElement} */ (grid.parentElement).classList.remove('is-moving');
 		place(grid, boxes);
 		done();
 	});
 }
 
-function onPointerMove(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerMove(event) {
 	if (!drag || drag.pointer !== event.pointerId) {
 		return;
 	}
@@ -934,8 +1190,12 @@ function onPointerMove(event: PointerEvent): void {
 	}
 }
 
-/** The lifted block under the pointer, and the canvas as it would be with it dropped there. */
-function track(current: Drag): void {
+/**
+ * The lifted block under the pointer, and the canvas as it would be with it dropped there.
+ *
+ * @param {Drag} current
+ */
+function track(current) {
 	follow(current, current.at.x, current.at.y);
 
 	const { x, y } = local(current, current.at.x, current.at.y);
@@ -961,13 +1221,16 @@ function track(current: Drag): void {
 		current.grid,
 		() => {
 			place(current.grid, next);
-			fit(current.slot!, next.get(current.row)!);
+			fit(/** @type {HTMLElement} */ (current.slot), /** @type {Box} */ (next.get(current.row)));
 		},
 		current.row,
 	);
 }
 
-function finish(keep: boolean): void {
+/**
+ * @param {boolean} keep
+ */
+function finish(keep) {
 	if (!drag) {
 		return;
 	}
@@ -994,19 +1257,28 @@ function finish(keep: boolean): void {
 	focusRow(row);
 }
 
-function onPointerUp(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerUp(event) {
 	if (drag && drag.pointer === event.pointerId) {
 		finish(true);
 	}
 }
 
-function onLostCapture(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onLostCapture(event) {
 	if (drag && event.target === drag.grip) {
 		finish(true);
 	}
 }
 
-function onKeyDown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function onKeyDown(event) {
 	if (drag?.started && event.key === 'Escape') {
 		event.preventDefault();
 		event.stopPropagation();
@@ -1014,7 +1286,8 @@ function onKeyDown(event: KeyboardEvent): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('change', onChange);
 	document.addEventListener('click', onMove, true);

@@ -12,16 +12,21 @@
 // URLSearchParams there; requests without one (boosted GETs, multipart)
 // pass through untouched.
 
-import { nest } from '$lib/form-json';
+import { nest } from '../lib/form-json.js';
 
-interface TransportRequest {
-	form?: unknown;
-	body?: unknown;
-	headers?: Record<string, string>;
-}
+/**
+ * @typedef {object} TransportRequest
+ * @property {unknown} [form]
+ * @property {unknown} [body]
+ * @property {Record<string, string>} [headers]
+ */
 
-function encode(event: Event): void {
-	const detail = (event as CustomEvent<{ ctx?: { request?: TransportRequest } }>).detail;
+/**
+ * @param {Event} event
+ */
+function encode(event) {
+	const detail = /** @type {CustomEvent<{ ctx?: { request?: TransportRequest } }>} */ (event)
+		.detail;
 	const request = detail?.ctx?.request;
 
 	if (
@@ -37,7 +42,8 @@ function encode(event: Event): void {
 	request.headers = { ...request.headers, 'Content-Type': 'application/json' };
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('htmx:before:request', encode);
 
 	return () => document.removeEventListener('htmx:before:request', encode);

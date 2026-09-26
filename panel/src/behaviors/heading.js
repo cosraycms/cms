@@ -1,23 +1,33 @@
-function refresh(heading: Element): void {
-	const select = heading.querySelector<HTMLSelectElement>('.level select');
+/**
+ * @param {Element} heading
+ */
+function refresh(heading) {
+	const select = /** @type {HTMLSelectElement | null} */ (heading.querySelector('.level select'));
 	const caption = heading.querySelector('[data-heading-caption]');
 	if (!select || !caption) return;
 
 	caption.textContent = `H${select.value}`;
-	for (const choice of heading.querySelectorAll<HTMLButtonElement>('[data-heading-level]')) {
+	for (const choice of /** @type {NodeListOf<HTMLButtonElement>} */ (
+		heading.querySelectorAll('[data-heading-level]')
+	)) {
 		const active = choice.dataset.headingLevel === select.value;
 		choice.classList.toggle('is-active', active);
 		choice.setAttribute('aria-checked', String(active));
 	}
 }
 
-function click(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function click(event) {
 	const target = event.target;
 	if (!(target instanceof Element)) return;
 
-	const choice = target.closest<HTMLButtonElement>('button[data-heading-level]');
+	const choice = /** @type {HTMLButtonElement | null} */ (
+		target.closest('button[data-heading-level]')
+	);
 	const heading = choice?.closest('[data-heading]');
-	const select = heading?.querySelector<HTMLSelectElement>('.level select');
+	const select = /** @type {HTMLSelectElement | null} */ (heading?.querySelector('.level select'));
 	if (!choice || !heading || !select || choice.disabled || select.disabled) return;
 	if (heading.closest('[inert], [data-readonly="true"]')) return;
 
@@ -33,7 +43,10 @@ function click(event: MouseEvent): void {
 	select.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-function change(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function change(event) {
 	const target = event.target;
 	if (!(target instanceof HTMLSelectElement)) return;
 
@@ -41,13 +54,17 @@ function change(event: Event): void {
 	if (heading) refresh(heading);
 }
 
-function stamp(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function stamp(event) {
 	if (event.target instanceof Element) {
 		event.target.querySelectorAll('[data-heading]').forEach(refresh);
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', click);
 	document.addEventListener('change', change);
 	document.addEventListener('repeater:stamp', stamp);

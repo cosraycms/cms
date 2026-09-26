@@ -1,17 +1,21 @@
-function watch(grid: HTMLElement): () => void {
+/**
+ * @param {HTMLElement} grid
+ * @returns {() => void}
+ */
+function watch(grid) {
 	let frame = 0;
-	const observed = new Set<HTMLElement>();
+	const observed = /** @type {Set<HTMLElement>} */ (new Set());
 	const resize = new ResizeObserver(schedule);
 	const mutations = new MutationObserver(schedule);
 
-	function schedule(): void {
+	function schedule() {
 		if (!frame) frame = requestAnimationFrame(refresh);
 	}
 
-	function refresh(): void {
+	function refresh() {
 		frame = 0;
 		const rows = Array.from(grid.children).filter(
-			(child): child is HTMLElement =>
+			/** @returns {child is HTMLElement} */ (child) =>
 				child instanceof HTMLElement && !child.hasAttribute('data-ghost'),
 		);
 
@@ -68,10 +72,11 @@ function watch(grid: HTMLElement): () => void {
 	};
 }
 
-export function install(): () => void {
-	const grids = new Map<HTMLElement, () => void>();
+/** @returns {() => void} */
+export function install() {
+	const grids = /** @type {Map<HTMLElement, () => void>} */ (new Map());
 
-	function scan(): void {
+	function scan() {
 		for (const [grid, dispose] of grids) {
 			if (!grid.isConnected) {
 				dispose();
@@ -79,12 +84,17 @@ export function install(): () => void {
 			}
 		}
 
-		document.querySelectorAll<HTMLElement>('.cms-blocks-editor > .grid').forEach((grid) => {
+		/** @type {NodeListOf<HTMLElement>} */ (
+			document.querySelectorAll('.cms-blocks-editor > .grid')
+		).forEach((grid) => {
 			if (!grids.has(grid)) grids.set(grid, watch(grid));
 		});
 	}
 
-	function changed(event: Event): void {
+	/**
+	 * @param {Event} event
+	 */
+	function changed(event) {
 		if (event.target instanceof Element && event.target.closest('.cms-blocks-editor')) scan();
 	}
 

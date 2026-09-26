@@ -10,28 +10,53 @@
 // armed until that menu closes: a choice or the catalog picked from it
 // inserts at the ghost's spot instead of appending.
 
-import { icon } from '$lib/icons';
-import { open as openCatalog } from './block-catalog';
-import { adder, arm, type Adder } from './pick';
-import { columnsOf, gaps, placed, snapshot, type Box } from './placement';
-import { insert, insertion, type Insertion } from './repeater';
+/** @import { Adder } from './pick.js' */
+/** @import { Box } from './placement.js' */
+/** @import { Insertion } from './repeater.js' */
 
-const FILLS = new WeakMap<HTMLElement, Box>();
+import { icon } from '../lib/icons.js';
+import { open as openCatalog } from './block-catalog.js';
+import { adder, arm } from './pick.js';
+import { columnsOf, gaps, placed, snapshot } from './placement.js';
+import { insert, insertion } from './repeater.js';
 
-function ghosts(grid: HTMLElement): HTMLElement[] {
-	return Array.from(grid.querySelectorAll<HTMLElement>(':scope > [data-ghost]'));
+const FILLS = /** @type {WeakMap<HTMLElement, Box>} */ (new WeakMap());
+
+/**
+ * @param {HTMLElement} grid
+ * @returns {HTMLElement[]}
+ */
+function ghosts(grid) {
+	return Array.from(
+		/** @type {NodeListOf<HTMLElement>} */ (grid.querySelectorAll(':scope > [data-ghost]')),
+	);
 }
 
-function rowsOf(grid: HTMLElement): HTMLElement[] {
-	return Array.from(grid.querySelectorAll<HTMLElement>(':scope > [data-repeater-row]'));
+/**
+ * @param {HTMLElement} grid
+ * @returns {HTMLElement[]}
+ */
+function rowsOf(grid) {
+	return Array.from(
+		/** @type {NodeListOf<HTMLElement>} */ (grid.querySelectorAll(':scope > [data-repeater-row]')),
+	);
 }
 
-function key(fills: Box[]): string {
+/**
+ * @param {Box[]} fills
+ * @returns {string}
+ */
+function key(fills) {
 	return fills.map((fill) => `${fill.row}/${fill.col}/${fill.rowspan}/${fill.colspan}`).join(';');
 }
 
-/** The free runs of a grid whose blocks all have their position; none before. */
-function measure(grid: HTMLElement): Box[] {
+/**
+ * The free runs of a grid whose blocks all have their position; none before.
+ *
+ * @param {HTMLElement} grid
+ * @returns {Box[]}
+ */
+function measure(grid) {
 	const rows = rowsOf(grid);
 
 	if (!rows.every(placed)) {
@@ -43,7 +68,13 @@ function measure(grid: HTMLElement): Box[] {
 	return gaps(snapshot(grid).values(), columns, min);
 }
 
-function render(grid: HTMLElement, container: HTMLElement, adder: Adder, fills: Box[]): void {
+/**
+ * @param {HTMLElement} grid
+ * @param {HTMLElement} container
+ * @param {Adder} adder
+ * @param {Box[]} fills
+ */
+function render(grid, container, adder, fills) {
 	const label = container.dataset.ghostLabel ?? '';
 	const focused = document.activeElement;
 	const focus =
@@ -86,12 +117,19 @@ function render(grid: HTMLElement, container: HTMLElement, adder: Adder, fills: 
 	}
 
 	if (focus && document.activeElement !== focused && !grid.contains(document.activeElement)) {
-		container.querySelector<HTMLElement>(':scope > [data-repeater-footer] > button')?.focus();
+		/** @type {HTMLElement | null} */ (
+			container.querySelector(':scope > [data-repeater-footer] > button')
+		)?.focus();
 	}
 }
 
-/** The insertion a ghost stands for: a block stamped at the gap, sized to it. */
-function context(ghost: HTMLElement): Insertion | null {
+/**
+ * The insertion a ghost stands for: a block stamped at the gap, sized to it.
+ *
+ * @param {HTMLElement} ghost
+ * @returns {Insertion | null}
+ */
+function context(ghost) {
 	const fill = FILLS.get(ghost);
 	const base = insertion(ghost);
 
@@ -103,7 +141,8 @@ function context(ghost: HTMLElement): Insertion | null {
 		...base,
 		at: null,
 		prepare(clone) {
-			const layout: Array<[string, number]> = [
+			/** @type {Array<[string, number]>} */
+			const layout = [
 				['colspan', fill.colspan],
 				['rowspan', fill.rowspan],
 				['col', fill.col],
@@ -111,7 +150,9 @@ function context(ghost: HTMLElement): Insertion | null {
 			];
 
 			for (const [dimension, value] of layout) {
-				const input = clone.querySelector<HTMLInputElement>(`input[data-layout="${dimension}"]`);
+				const input = /** @type {HTMLInputElement | null} */ (
+					clone.querySelector(`input[data-layout="${dimension}"]`)
+				);
 
 				if (input) {
 					input.value = String(value);
@@ -123,9 +164,14 @@ function context(ghost: HTMLElement): Insertion | null {
 
 // Runs in the capture phase after the menu library's own handler, which
 // has already opened the picker at a clicked ghost.
-function onClick(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function onClick(event) {
 	const ghost =
-		event.target instanceof Element ? event.target.closest<HTMLElement>('[data-ghost]') : null;
+		event.target instanceof Element
+			? /** @type {HTMLElement | null} */ (event.target.closest('[data-ghost]'))
+			: null;
 	const insertion = ghost && context(ghost);
 
 	if (!ghost || !insertion) {
@@ -148,26 +194,33 @@ function onClick(event: MouseEvent): void {
 	}
 }
 
-/** Drawn over the grid, not placed on it: ghosts and resize guides. */
-function overlay(node: HTMLElement): boolean {
+/**
+ * Drawn over the grid, not placed on it: ghosts and resize guides.
+ *
+ * @param {HTMLElement} node
+ * @returns {boolean}
+ */
+function overlay(node) {
 	return node.hasAttribute('data-ghost') || node.hasAttribute('data-guide');
 }
 
-function watch(
-	grid: HTMLElement,
-	container: HTMLElement,
-	adder: Adder,
-): { refresh(): void; dispose(): void } {
+/**
+ * @param {HTMLElement} grid
+ * @param {HTMLElement} container
+ * @param {Adder} adder
+ * @returns {{ refresh(): void; dispose(): void }}
+ */
+function watch(grid, container, adder) {
 	let frame = 0;
 	let last = '';
 
-	function schedule(): void {
+	function schedule() {
 		if (!frame) {
 			frame = requestAnimationFrame(refresh);
 		}
 	}
 
-	function refresh(): void {
+	function refresh() {
 		frame = 0;
 
 		// A dragged or resized row is not where it will end up; the change
@@ -219,10 +272,11 @@ function watch(
 	};
 }
 
-export function install(): () => void {
-	const grids = new Map<HTMLElement, ReturnType<typeof watch>>();
+/** @returns {() => void} */
+export function install() {
+	const grids = /** @type {Map<HTMLElement, ReturnType<typeof watch>>} */ (new Map());
 
-	function scan(): void {
+	function scan() {
 		for (const [grid, watcher] of grids) {
 			if (!grid.isConnected) {
 				watcher.dispose();
@@ -230,7 +284,9 @@ export function install(): () => void {
 			}
 		}
 
-		document.querySelectorAll<HTMLElement>('.cms-blocks-editor.is-grid > .grid').forEach((grid) => {
+		/** @type {NodeListOf<HTMLElement>} */ (
+			document.querySelectorAll('.cms-blocks-editor.is-grid > .grid')
+		).forEach((grid) => {
 			const container = grid.parentElement;
 			const how = container && adder(container);
 
@@ -240,10 +296,13 @@ export function install(): () => void {
 		});
 	}
 
-	function changed(event: Event): void {
+	/**
+	 * @param {Event} event
+	 */
+	function changed(event) {
 		const grid =
 			event.target instanceof Element
-				? event.target.closest<HTMLElement>('.cms-blocks-editor > .grid')
+				? /** @type {HTMLElement | null} */ (event.target.closest('.cms-blocks-editor > .grid'))
 				: null;
 
 		if (grid) {

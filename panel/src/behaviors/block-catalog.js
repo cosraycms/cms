@@ -1,29 +1,47 @@
-import { cosray } from '$lib/bridge';
-import { insertion, insert, type Insertion } from './repeater';
+/** @import { Insertion } from './repeater.js' */
 
-type Position = 'before' | 'after';
+import { cosray } from '../lib/bridge.js';
+import { insertion, insert } from './repeater.js';
 
-function catalog(
-	host: HTMLElement,
-	anchored: boolean,
-	choose: (type: string, position?: Position) => void,
-): void {
-	const search = host.querySelector<HTMLInputElement>('[data-block-search]')!;
-	const status = host.querySelector<HTMLElement>('[data-block-results]')!;
-	const choices = [...host.querySelectorAll<HTMLElement>('[data-block-choice]')];
+/** @typedef {'before' | 'after'} Position */
+
+/**
+ * @param {HTMLElement} host
+ * @param {boolean} anchored
+ * @param {(type: string, position?: Position) => void} choose
+ */
+function catalog(host, anchored, choose) {
+	const search = /** @type {HTMLInputElement} */ (
+		/** @type {HTMLInputElement | null} */ (host.querySelector('[data-block-search]'))
+	);
+	const status = /** @type {HTMLElement} */ (
+		/** @type {HTMLElement | null} */ (host.querySelector('[data-block-results]'))
+	);
+	const choices = [
+		.../** @type {NodeListOf<HTMLElement>} */ (host.querySelectorAll('[data-block-choice]')),
+	];
 	let visible = choices;
-	let active: HTMLElement | undefined = choices[0];
+	/** @type {HTMLElement | undefined} */
+	let active = choices[0];
 
 	for (const choice of choices) {
 		choice.setAttribute('role', anchored ? 'group' : 'button');
-		choice.querySelector<HTMLElement>('.cms-block-actions')!.hidden = !anchored;
+		/** @type {HTMLElement} */ (
+			/** @type {HTMLElement | null} */ (choice.querySelector('.cms-block-actions'))
+		).hidden = !anchored;
 	}
 
-	function rove(choice: HTMLElement | undefined, focus = false): void {
+	/**
+	 * @param {HTMLElement | undefined} choice
+	 * @param {boolean} [focus]
+	 */
+	function rove(choice, focus = false) {
 		active = choice;
 		for (const card of choices) {
 			card.tabIndex = card === active ? 0 : -1;
-			for (const action of card.querySelectorAll<HTMLButtonElement>('[data-block-insert]')) {
+			for (const action of /** @type {NodeListOf<HTMLButtonElement>} */ (
+				card.querySelectorAll('[data-block-insert]')
+			)) {
 				action.tabIndex = anchored && card === active ? 0 : -1;
 			}
 		}
@@ -33,11 +51,11 @@ function catalog(
 		}
 	}
 
-	function filter(): void {
+	function filter() {
 		const query = search.value.trim().toLocaleLowerCase(document.documentElement.lang || undefined);
 		visible = choices.filter((choice) => {
 			const text =
-				`${choice.querySelector('.select')!.textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
+				`${/** @type {Element} */ (choice.querySelector('.select')).textContent} ${choice.dataset.handle}`.toLocaleLowerCase(
 					document.documentElement.lang || undefined,
 				);
 			choice.hidden = !text.includes(query);
@@ -47,30 +65,31 @@ function catalog(
 		const { empty, one, count } = status.dataset;
 		status.textContent =
 			visible.length === 0
-				? empty!
+				? /** @type {string} */ (empty)
 				: visible.length === 1
-					? one!
-					: count!.replace(':count', String(visible.length));
+					? /** @type {string} */ (one)
+					: /** @type {string} */ (count).replace(':count', String(visible.length));
 	}
 
 	search.addEventListener('input', filter);
 	host.addEventListener('click', (event) => {
 		const target = event.target instanceof Element ? event.target : null;
-		const choice = target?.closest<HTMLElement>('[data-block-choice]');
+		const choice = /** @type {HTMLElement | null} */ (target?.closest('[data-block-choice]'));
 		if (!choice || !visible.includes(choice)) return;
-		const position = target?.closest<HTMLElement>('[data-block-insert]')?.dataset.blockInsert;
+		const position = /** @type {HTMLElement | null} */ (target?.closest('[data-block-insert]'))
+			?.dataset.blockInsert;
 		if (position !== undefined) {
 			if (anchored && (position === 'before' || position === 'after')) {
-				choose(choice.dataset.blockChoice!, position);
+				choose(/** @type {string} */ (choice.dataset.blockChoice), position);
 			}
 			return;
 		}
-		if (!anchored) choose(choice.dataset.blockChoice!);
+		if (!anchored) choose(/** @type {string} */ (choice.dataset.blockChoice));
 	});
 	host.addEventListener('focusin', (event) => {
 		const choice =
 			event.target instanceof Element
-				? event.target.closest<HTMLElement>('[data-block-choice]')
+				? /** @type {HTMLElement | null} */ (event.target.closest('[data-block-choice]'))
 				: null;
 		if (choice && visible.includes(choice)) rove(choice);
 	});
@@ -86,12 +105,13 @@ function catalog(
 		}
 		if (!(event.target instanceof HTMLElement) || !visible.includes(event.target)) return;
 		const index = visible.indexOf(event.target);
-		let next: HTMLElement | undefined;
+		/** @type {HTMLElement | undefined} */
+		let next;
 		switch (event.key) {
 			case 'Enter':
 			case ' ':
 				event.preventDefault();
-				if (!anchored) choose(event.target.dataset.blockChoice!);
+				if (!anchored) choose(/** @type {string} */ (event.target.dataset.blockChoice));
 				return;
 			case 'Home':
 				next = visible[0];
@@ -131,20 +151,21 @@ function catalog(
 	filter();
 }
 
-let opened: { close(): void } | undefined;
+/** @type {{ close(): void } | undefined} */
+let opened;
 
 /**
  * The owner's catalog for this insertion. Anchored to a row, the cards
  * offer before and after; `fixed` keeps them plain, the spot is settled.
  * A caller with an insertion of its own (a split) takes the choice.
+ *
+ * @param {Insertion} context
+ * @param {boolean} [fixed]
+ * @param {(type: string) => void} [choose]
  */
-export function open(
-	context: Insertion,
-	fixed = false,
-	choose: (type: string) => void = (type) => insert(context, type),
-): void {
-	const template = context.owner.querySelector<HTMLTemplateElement>(
-		':scope > template[data-block-catalog]',
+export function open(context, fixed = false, choose = (type) => insert(context, type)) {
+	const template = /** @type {HTMLTemplateElement | null} */ (
+		context.owner.querySelector(':scope > template[data-block-catalog]')
 	);
 	if (!template) return;
 	opened?.close();
@@ -172,8 +193,12 @@ export function open(
 	opened = modal;
 }
 
-export function install(): () => void {
-	function click(event: MouseEvent): void {
+/** @returns {() => void} */
+export function install() {
+	/**
+	 * @param {MouseEvent} event
+	 */
+	function click(event) {
 		const trigger =
 			event.target instanceof Element ? event.target.closest('[data-block-catalog-open]') : null;
 		const context = trigger && insertion(trigger);

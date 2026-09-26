@@ -1,4 +1,4 @@
-import { openDialog, closeDialog } from '$lib/dialogs';
+import { openDialog, closeDialog } from '../lib/dialogs.js';
 
 // Collection bulk selection: the checkbox column drives the action bar
 // (count, clear, action buttons) and the confirm dialogs. Server-rendered
@@ -11,7 +11,7 @@ import { openDialog, closeDialog } from '$lib/dialogs';
 // param the server renders as a banner once. The param leaves the
 // address bar right after, so a refresh or a copied link does not
 // repeat a stale message.
-function stripNotice(): void {
+function stripNotice() {
 	const url = new URL(window.location.href);
 
 	if (!url.searchParams.has('notice')) {
@@ -24,26 +24,36 @@ function stripNotice(): void {
 
 // htmx writes the swapped-in URL to history after the swap event, so
 // the strip has to run behind it.
-function onSwap(): void {
+function onSwap() {
 	setTimeout(stripNotice, 0);
 }
 
-function boxes(): HTMLInputElement[] {
-	return Array.from(document.querySelectorAll<HTMLInputElement>('input[data-bulk-check]'));
+/** @returns {HTMLInputElement[]} */
+function boxes() {
+	return Array.from(
+		/** @type {NodeListOf<HTMLInputElement>} */ (
+			document.querySelectorAll('input[data-bulk-check]')
+		),
+	);
 }
 
-function selected(): HTMLInputElement[] {
+/** @returns {HTMLInputElement[]} */
+function selected() {
 	return boxes().filter((box) => box.checked);
 }
 
-function fill(target: HTMLElement, count: number): void {
+/**
+ * @param {HTMLElement} target
+ * @param {number} count
+ */
+function fill(target, count) {
 	const template = count === 1 ? target.dataset.labelOne : target.dataset.labelMany;
 
 	target.textContent = (template ?? '').replace(':count', String(count));
 }
 
-function sync(): void {
-	const bar = document.querySelector<HTMLElement>('[data-bulk-bar]');
+function sync() {
+	const bar = /** @type {HTMLElement | null} */ (document.querySelector('[data-bulk-bar]'));
 
 	if (!bar) {
 		return;
@@ -54,13 +64,15 @@ function sync(): void {
 
 	bar.hidden = count === 0;
 
-	const output = bar.querySelector<HTMLElement>('[data-bulk-count]');
+	const output = /** @type {HTMLElement | null} */ (bar.querySelector('[data-bulk-count]'));
 
 	if (output) {
 		fill(output, count);
 	}
 
-	const master = document.querySelector<HTMLInputElement>('input[data-bulk-all]');
+	const master = /** @type {HTMLInputElement | null} */ (
+		document.querySelector('input[data-bulk-all]')
+	);
 
 	if (master) {
 		master.checked = count > 0 && count === all.length;
@@ -68,34 +80,42 @@ function sync(): void {
 	}
 }
 
-function confirmSelection(name: string, opener: HTMLElement): void {
-	const dialog = document.querySelector<HTMLDialogElement>(`dialog[data-bulk-dialog="${name}"]`);
+/**
+ * @param {string} name
+ * @param {HTMLElement} opener
+ */
+function confirmSelection(name, opener) {
+	const dialog = /** @type {HTMLDialogElement | null} */ (
+		document.querySelector(`dialog[data-bulk-dialog="${name}"]`)
+	);
 	const picked = selected();
 
 	if (!dialog || picked.length === 0) {
 		return;
 	}
 
-	const question = dialog.querySelector<HTMLElement>('[data-bulk-question]');
+	const question = /** @type {HTMLElement | null} */ (dialog.querySelector('[data-bulk-question]'));
 
 	if (question) {
 		fill(question, picked.length);
 	}
 
-	const children = dialog.querySelector<HTMLElement>('[data-bulk-children]');
+	const children = /** @type {HTMLElement | null} */ (dialog.querySelector('[data-bulk-children]'));
 
 	if (children) {
 		children.hidden = !picked.some((box) => box.hasAttribute('data-has-children'));
 	}
 
 	// Every option starts unchecked: an option is a decision per confirmation.
-	dialog
-		.querySelectorAll<HTMLInputElement>('[data-bulk-children] input, [data-bulk-option] input')
-		.forEach((checkbox) => {
-			checkbox.checked = false;
-		});
+	/** @type {NodeListOf<HTMLInputElement>} */ (
+		dialog.querySelectorAll('[data-bulk-children] input, [data-bulk-option] input')
+	).forEach((checkbox) => {
+		checkbox.checked = false;
+	});
 
-	const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
+	const confirm = /** @type {HTMLButtonElement | null} */ (
+		dialog.querySelector('[data-bulk-confirm]')
+	);
 
 	if (confirm) {
 		// A children row marked data-bulk-gate commits the selection to the
@@ -108,7 +128,10 @@ function confirmSelection(name: string, opener: HTMLElement): void {
 	openDialog(dialog, { opener, owner: opener });
 }
 
-function onChange(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onChange(event) {
 	const target = event.target;
 
 	if (!(target instanceof HTMLInputElement)) {
@@ -116,9 +139,9 @@ function onChange(event: Event): void {
 	}
 
 	if (target.matches('[data-bulk-children][data-bulk-gate] input')) {
-		const confirm = target
-			.closest('dialog')
-			?.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
+		const confirm = /** @type {HTMLButtonElement | null} */ (
+			target.closest('dialog')?.querySelector('[data-bulk-confirm]')
+		);
 
 		if (confirm) {
 			confirm.disabled = !target.checked;
@@ -141,7 +164,10 @@ function onChange(event: Event): void {
 	}
 }
 
-function onClick(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
 	const target = event.target instanceof Element ? event.target : null;
 
 	if (!target) {
@@ -157,7 +183,7 @@ function onClick(event: Event): void {
 		return;
 	}
 
-	const open = target.closest<HTMLElement>('[data-bulk-open]');
+	const open = /** @type {HTMLElement | null} */ (target.closest('[data-bulk-open]'));
 
 	if (open) {
 		confirmSelection(open.dataset.bulkOpen ?? '', open);
@@ -165,12 +191,13 @@ function onClick(event: Event): void {
 		return;
 	}
 
-	const confirm = target.closest<HTMLButtonElement>('[data-bulk-confirm]');
+	const confirm = /** @type {HTMLButtonElement | null} */ (target.closest('[data-bulk-confirm]'));
 	const dialog = confirm?.closest('dialog');
 	if (confirm && !confirm.disabled && dialog) closeDialog(dialog);
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('change', onChange);
 	document.addEventListener('click', onClick);
 	document.addEventListener('htmx:after:swap', onSwap);

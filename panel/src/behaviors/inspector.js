@@ -1,4 +1,4 @@
-import { selectTab } from './tabs';
+import { selectTab } from './tabs.js';
 
 // The node inspector collapses to a strip of quick controls. Beside the fields
 // the choice lives in a cookie the editor reads, so a page arrives in its
@@ -13,9 +13,15 @@ const PUBLISHED = 'editor-published-switch';
 const BESIDE = '(width >= 75rem)';
 const OVER = '(width >= 40rem) and (height >= 30rem) and (width < 75rem)';
 
-let opener: HTMLElement | null = null;
+/** @type {HTMLElement | null} */
+let opener = null;
 
-function expand(inspector: HTMLElement, expanded: boolean, remember = true): void {
+/**
+ * @param {HTMLElement} inspector
+ * @param {boolean} expanded
+ * @param {boolean} [remember]
+ */
+function expand(inspector, expanded, remember = true) {
 	if (!matchMedia(BESIDE).matches) {
 		inspector.toggleAttribute('data-open', expanded);
 		return;
@@ -30,16 +36,19 @@ function expand(inspector: HTMLElement, expanded: boolean, remember = true): voi
 	}
 }
 
-function close(inspector: HTMLElement): void {
+/**
+ * @param {HTMLElement} inspector
+ */
+function close(inspector) {
 	expand(inspector, false);
 
 	const target = opener?.isConnected
 		? opener
-		: inspector.querySelector<HTMLElement>('[data-inspector-expand]');
+		: /** @type {HTMLElement | null} */ (inspector.querySelector('[data-inspector-expand]'));
 	target?.focus();
 }
 
-function closeLayers(): void {
+function closeLayers() {
 	document.querySelectorAll(`${ROOT}[data-open]`).forEach((inspector) => {
 		inspector.removeAttribute('data-open');
 	});
@@ -47,17 +56,24 @@ function closeLayers(): void {
 
 // Opens the inspector around a control an error jump targets, without
 // taking that for the editor's choice.
-export function revealInspector(control: Element): void {
-	const inspector = control.closest<HTMLElement>(ROOT);
+/**
+ * @param {Element} control
+ */
+export function revealInspector(control) {
+	const inspector = /** @type {HTMLElement | null} */ (control.closest(ROOT));
 
 	if (inspector) {
 		expand(inspector, true, false);
 	}
 }
 
-function click(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function click(event) {
 	const target = event.target;
-	const inspector = target instanceof Element ? target.closest<HTMLElement>(ROOT) : null;
+	const inspector =
+		target instanceof Element ? /** @type {HTMLElement | null} */ (target.closest(ROOT)) : null;
 
 	if (!(target instanceof Element) || !inspector) {
 		return;
@@ -68,7 +84,9 @@ function click(event: Event): void {
 		return;
 	}
 
-	const trigger = target.closest<HTMLElement>('[data-inspector-open], [data-inspector-expand]');
+	const trigger = /** @type {HTMLElement | null} */ (
+		target.closest('[data-inspector-open], [data-inspector-expand]')
+	);
 
 	if (!trigger) {
 		return;
@@ -76,7 +94,9 @@ function click(event: Event): void {
 
 	const tab = trigger.dataset.inspectorOpen
 		? document.getElementById(trigger.dataset.inspectorOpen)
-		: inspector.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+		: /** @type {HTMLElement | null} */ (
+				inspector.querySelector('[role="tab"][aria-selected="true"]')
+			);
 
 	if (tab) {
 		selectTab(tab);
@@ -87,7 +107,10 @@ function click(event: Event): void {
 	tab?.focus();
 }
 
-function keydown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function keydown(event) {
 	const target = event.target;
 
 	if (
@@ -100,7 +123,7 @@ function keydown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const inspector = target.closest<HTMLElement>(`${ROOT}[data-open]`);
+	const inspector = /** @type {HTMLElement | null} */ (target.closest(`${ROOT}[data-open]`));
 
 	if (inspector) {
 		event.preventDefault();
@@ -108,7 +131,10 @@ function keydown(event: KeyboardEvent): void {
 	}
 }
 
-function pointerdown(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function pointerdown(event) {
 	const target = event.target;
 
 	if (
@@ -119,19 +145,24 @@ function pointerdown(event: Event): void {
 	}
 }
 
-function syncPublished(): void {
+function syncPublished() {
 	const source = document.getElementById(PUBLISHED);
 
 	if (!(source instanceof HTMLInputElement)) {
 		return;
 	}
 
-	document.querySelectorAll<HTMLInputElement>('[data-inspector-published]').forEach((copy) => {
+	/** @type {NodeListOf<HTMLInputElement>} */ (
+		document.querySelectorAll('[data-inspector-published]')
+	).forEach((copy) => {
 		copy.checked = source.checked;
 	});
 }
 
-function change(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function change(event) {
 	const target = event.target;
 
 	if (!(target instanceof HTMLInputElement)) {
@@ -151,7 +182,8 @@ function change(event: Event): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	const beside = matchMedia(BESIDE);
 
 	document.addEventListener('click', click);

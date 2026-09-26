@@ -1,6 +1,6 @@
-import { openDialog } from '$lib/dialogs';
-import { nest } from '$lib/form-json';
-import { thumbnail } from './youtube';
+import { openDialog } from '../lib/dialogs.js';
+import { nest } from '../lib/form-json.js';
+import { thumbnail } from './youtube.js';
 
 // The layout preview of a blocks field: the field rendered through the
 // site's render path from the form as it stands, in the frame of the one
@@ -21,9 +21,11 @@ const FRAME = '[data-layout-preview-frame]';
 const STORE = 'cosray:layout-preview-width';
 const DEFAULT_WIDTH = 1200;
 
-let observer: ResizeObserver | null = null;
+/** @type {ResizeObserver | null} */
+let observer = null;
 
-function remembered(): number {
+/** @returns {number} */
+function remembered() {
 	try {
 		return Number(localStorage.getItem(STORE)) || 0;
 	} catch {
@@ -31,7 +33,10 @@ function remembered(): number {
 	}
 }
 
-function remember(width: number): void {
+/**
+ * @param {number} width
+ */
+function remember(width) {
 	try {
 		localStorage.setItem(STORE, String(width));
 	} catch {
@@ -39,13 +44,25 @@ function remember(width: number): void {
 	}
 }
 
-function presets(dialog: HTMLElement): HTMLElement[] {
-	return Array.from(dialog.querySelectorAll<HTMLElement>(WIDTH));
+/**
+ * @param {HTMLElement} dialog
+ * @returns {HTMLElement[]}
+ */
+function presets(dialog) {
+	return Array.from(/** @type {NodeListOf<HTMLElement>} */ (dialog.querySelectorAll(WIDTH)));
 }
 
-type Preset = { width: number; height: number | null };
+/**
+ * @typedef {object} Preset
+ * @property {number} width
+ * @property {number | null} height
+ */
 
-function chosen(dialog: HTMLElement): Preset {
+/**
+ * @param {HTMLElement} dialog
+ * @returns {Preset}
+ */
+function chosen(dialog) {
 	const pressed = presets(dialog).find((option) => option.getAttribute('aria-pressed') === 'true');
 	const height = Number(pressed?.dataset.layoutPreviewHeight);
 
@@ -59,9 +76,12 @@ function chosen(dialog: HTMLElement): Preset {
 // height for the desktop — and the stage decides the scale: down until
 // both sides fit, never up. It is centred by a translation, since the
 // transform does not change what the layout thinks the frame's width is.
-function layout(dialog: HTMLElement): void {
-	const stage = dialog.querySelector<HTMLElement>(STAGE);
-	const frame = dialog.querySelector<HTMLElement>(FRAME);
+/**
+ * @param {HTMLElement} dialog
+ */
+function layout(dialog) {
+	const stage = /** @type {HTMLElement | null} */ (dialog.querySelector(STAGE));
+	const frame = /** @type {HTMLElement | null} */ (dialog.querySelector(FRAME));
 
 	if (!stage || !frame) {
 		return;
@@ -89,7 +109,12 @@ function layout(dialog: HTMLElement): void {
 		scale < 1 || offset > 0 ? `translateX(${Math.round(offset)}px) scale(${scale})` : '';
 }
 
-function choose(dialog: HTMLElement, width: number, persist = true): void {
+/**
+ * @param {HTMLElement} dialog
+ * @param {number} width
+ * @param {boolean} [persist]
+ */
+function choose(dialog, width, persist = true) {
 	const options = presets(dialog);
 	const match = options.find((option) => Number(option.dataset.layoutPreviewWidth) === width);
 
@@ -110,15 +135,22 @@ function choose(dialog: HTMLElement, width: number, persist = true): void {
 	layout(dialog);
 }
 
-function body(form: HTMLFormElement): string {
+/**
+ * @param {HTMLFormElement} form
+ * @returns {string}
+ */
+function body(form) {
 	const entries = Array.from(new FormData(form)).filter(
-		(entry): entry is [string, string] => typeof entry[1] === 'string',
+		/** @returns {entry is [string, string]} */ (entry) => typeof entry[1] === 'string',
 	);
 
 	return JSON.stringify(nest(entries));
 }
 
-function fail(dialog: HTMLElement): void {
+/**
+ * @param {HTMLElement} dialog
+ */
+function fail(dialog) {
 	const message = dialog.dataset.error ?? '';
 
 	if (message !== '') {
@@ -126,11 +158,17 @@ function fail(dialog: HTMLElement): void {
 	}
 }
 
-function thumbnails(html: string): string {
+/**
+ * @param {string} html
+ * @returns {string}
+ */
+function thumbnails(html) {
 	const sheet = new DOMParser().parseFromString(html, 'text/html');
 
 	// Nested players inherit the script-free sandbox, so replace them before loading the sheet.
-	for (const embed of sheet.querySelectorAll<HTMLIFrameElement>('iframe.youtube')) {
+	for (const embed of /** @type {NodeListOf<HTMLIFrameElement>} */ (
+		sheet.querySelectorAll('iframe.youtube')
+	)) {
 		const id = /^https:\/\/www\.youtube\.com\/embed\/([A-Za-z0-9_-]{11})$/.exec(
 			embed.getAttribute('src') ?? '',
 		)?.[1];
@@ -151,10 +189,15 @@ function thumbnails(html: string): string {
 	return `<!doctype html>\n${sheet.documentElement.outerHTML}`;
 }
 
-async function load(dialog: HTMLElement, field: string): Promise<boolean> {
-	const form = document.querySelector<HTMLFormElement>(FORM);
-	const stage = dialog.querySelector<HTMLElement>(STAGE);
-	const frame = dialog.querySelector<HTMLIFrameElement>(FRAME);
+/**
+ * @param {HTMLElement} dialog
+ * @param {string} field
+ * @returns {Promise<boolean>}
+ */
+async function load(dialog, field) {
+	const form = /** @type {HTMLFormElement | null} */ (document.querySelector(FORM));
+	const stage = /** @type {HTMLElement | null} */ (dialog.querySelector(STAGE));
+	const frame = /** @type {HTMLIFrameElement | null} */ (dialog.querySelector(FRAME));
 
 	if (!form || !stage || !frame) {
 		return false;
@@ -196,8 +239,11 @@ async function load(dialog: HTMLElement, field: string): Promise<boolean> {
 	}
 }
 
-async function open(button: HTMLElement): Promise<void> {
-	const dialog = document.querySelector<HTMLDialogElement>(DIALOG);
+/**
+ * @param {HTMLElement} button
+ */
+async function open(button) {
+	const dialog = /** @type {HTMLDialogElement | null} */ (document.querySelector(DIALOG));
 	const field = button.dataset.layoutPreview ?? '';
 
 	if (!dialog || field === '') {
@@ -213,7 +259,7 @@ async function open(button: HTMLElement): Promise<void> {
 		openDialog(dialog, { opener: button });
 	}
 
-	const stage = dialog.querySelector<HTMLElement>(STAGE);
+	const stage = /** @type {HTMLElement | null} */ (dialog.querySelector(STAGE));
 
 	if (stage && typeof ResizeObserver !== 'undefined') {
 		observer?.disconnect();
@@ -224,14 +270,17 @@ async function open(button: HTMLElement): Promise<void> {
 	layout(dialog);
 }
 
-function onClick(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
 
-	const button = target.closest<HTMLElement>(BUTTON);
+	const button = /** @type {HTMLElement | null} */ (target.closest(BUTTON));
 
 	if (button) {
 		void open(button);
@@ -239,13 +288,13 @@ function onClick(event: Event): void {
 		return;
 	}
 
-	const dialog = target.closest<HTMLElement>(DIALOG);
+	const dialog = /** @type {HTMLElement | null} */ (target.closest(DIALOG));
 
 	if (!dialog) {
 		return;
 	}
 
-	const width = target.closest<HTMLElement>(WIDTH);
+	const width = /** @type {HTMLElement | null} */ (target.closest(WIDTH));
 
 	if (width) {
 		choose(dialog, Number(width.dataset.layoutPreviewWidth));
@@ -258,7 +307,8 @@ function onClick(event: Event): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', onClick);
 
 	return () => {

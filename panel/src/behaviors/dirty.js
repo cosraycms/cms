@@ -6,17 +6,25 @@
 const FORM = '#node-editor-form';
 const INDICATOR = 'editor-dirty';
 
-let dirtyForm: HTMLFormElement | null = null;
+/** @type {HTMLFormElement | null} */
+let dirtyForm = null;
 
-function isDirty(): boolean {
+/** @returns {boolean} */
+function isDirty() {
 	return dirtyForm !== null && document.contains(dirtyForm);
 }
 
-function indicate(dirty: boolean): void {
+/**
+ * @param {boolean} dirty
+ */
+function indicate(dirty) {
 	document.getElementById(INDICATOR)?.toggleAttribute('hidden', !dirty);
 }
 
-function mark(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function mark(event) {
 	const target = event.target;
 
 	if (target instanceof Element && !target.closest('[data-editor-state]')) {
@@ -29,14 +37,17 @@ function mark(event: Event): void {
 	}
 }
 
-function guard(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function guard(event) {
 	if (!isDirty()) {
 		return;
 	}
 
 	// htmx dispatches the event on the request's source element; requests
 	// originating inside the form (save, route-path preview) must pass.
-	const detail = (event as CustomEvent<{ ctx?: { sourceElement?: Element } }>).detail;
+	const detail = /** @type {CustomEvent<{ ctx?: { sourceElement?: Element } }>} */ (event).detail;
 	const source =
 		detail?.ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
@@ -51,7 +62,10 @@ function guard(event: Event): void {
 	}
 }
 
-function unload(event: BeforeUnloadEvent): void {
+/**
+ * @param {BeforeUnloadEvent} event
+ */
+function unload(event) {
 	if (!isDirty()) {
 		return;
 	}
@@ -62,7 +76,7 @@ function unload(event: BeforeUnloadEvent): void {
 
 // The save response swaps the status chip out-of-band; a successful
 // save marks it data-saved so the guard can stand down.
-function settle(): void {
+function settle() {
 	const status = document.getElementById('editor-status');
 
 	if (status?.dataset.saved === 'true') {
@@ -72,7 +86,8 @@ function settle(): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('input', mark);
 	document.addEventListener('change', mark);
 	document.addEventListener('cosray-change', mark);

@@ -10,7 +10,7 @@
 // a binding finds that form and submits it. The disabled attribute is the
 // legality check, and without JavaScript the kebab is simply used by hand.
 
-import { openMenu } from '$lib/action-menu';
+import { openMenu } from '../lib/action-menu.js';
 
 import {
 	collapsed,
@@ -21,9 +21,10 @@ import {
 	toggle,
 	tree,
 	visibleRows,
-} from './menu-tree';
+} from './menu-tree.js';
 
-type Direction = 'up' | 'down' | 'in' | 'out';
+/** @typedef {'up' | 'down' | 'in' | 'out'} Direction */
+
 const ACTIONS = ':scope > .menu-card > [data-action-menu]';
 
 /**
@@ -37,7 +38,8 @@ const ACTIONS = ':scope > .menu-card > [data-action-menu]';
  */
 const VIM_SETTING = 'cosray:vim-keys';
 
-function vim(): boolean {
+/** @returns {boolean} */
+function vim() {
 	try {
 		return localStorage.getItem(VIM_SETTING) === 'on';
 	} catch {
@@ -45,8 +47,12 @@ function vim(): boolean {
 	}
 }
 
-/** The vim spellings fold onto the keys the base layer already handles. */
-const VIM_KEYS: Record<string, string> = {
+/**
+ * The vim spellings fold onto the keys the base layer already handles.
+ *
+ * @type {Record<string, string>}
+ */
+const VIM_KEYS = {
 	j: 'ArrowDown',
 	k: 'ArrowUp',
 	h: 'ArrowLeft',
@@ -54,7 +60,11 @@ const VIM_KEYS: Record<string, string> = {
 	e: 'Enter',
 };
 
-function typing(target: EventTarget | null): boolean {
+/**
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+function typing(target) {
 	return (
 		target instanceof HTMLInputElement ||
 		target instanceof HTMLTextAreaElement ||
@@ -63,7 +73,12 @@ function typing(target: EventTarget | null): boolean {
 	);
 }
 
-function step(root: HTMLElement, row: HTMLElement, offset: number): void {
+/**
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ * @param {number} offset
+ */
+function step(root, row, offset) {
 	const visible = visibleRows(root);
 	const next = visible[visible.indexOf(row) + offset];
 
@@ -72,16 +87,31 @@ function step(root: HTMLElement, row: HTMLElement, offset: number): void {
 	}
 }
 
-function parentRow(row: HTMLElement): HTMLElement | null {
-	return row.parentElement?.closest<HTMLElement>('[role="treeitem"]') ?? null;
+/**
+ * @param {HTMLElement} row
+ * @returns {HTMLElement | null}
+ */
+function parentRow(row) {
+	return (
+		/** @type {HTMLElement | null} */ (row.parentElement?.closest('[role="treeitem"]')) ?? null
+	);
 }
 
-function firstChild(row: HTMLElement): HTMLElement | null {
-	return row.querySelector<HTMLElement>(':scope > ul > [role="treeitem"]');
+/**
+ * @param {HTMLElement} row
+ * @returns {HTMLElement | null}
+ */
+function firstChild(row) {
+	return /** @type {HTMLElement | null} */ (row.querySelector(':scope > ul > [role="treeitem"]'));
 }
 
-/** Left: fold this branch, or leave it when there is nothing left to fold. */
-function fold(root: HTMLElement, row: HTMLElement): void {
+/**
+ * Left: fold this branch, or leave it when there is nothing left to fold.
+ *
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ */
+function fold(root, row) {
 	if (expandable(row) && !collapsed(row)) {
 		toggle(root, row, true);
 
@@ -95,8 +125,13 @@ function fold(root: HTMLElement, row: HTMLElement): void {
 	}
 }
 
-/** Right: unfold this branch, or descend into it when it is already open. */
-function unfold(root: HTMLElement, row: HTMLElement): void {
+/**
+ * Right: unfold this branch, or descend into it when it is already open.
+ *
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ */
+function unfold(root, row) {
 	if (expandable(row) && collapsed(row)) {
 		toggle(root, row, false);
 
@@ -113,9 +148,14 @@ function unfold(root: HTMLElement, row: HTMLElement): void {
 /**
  * Submits the row's own move form, unless the kebab already knows the move
  * is undefined here — a first item cannot indent, a root item cannot outdent.
+ *
+ * @param {HTMLElement} row
+ * @param {Direction} direction
  */
-function move(row: HTMLElement, direction: Direction): void {
-	const input = row.querySelector<HTMLInputElement>(`${ACTIONS} form input[value="${direction}"]`);
+function move(row, direction) {
+	const input = /** @type {HTMLInputElement | null} */ (
+		row.querySelector(`${ACTIONS} form input[value="${direction}"]`)
+	);
 	const form = input?.form;
 	const button = form?.querySelector('button[type="submit"]');
 
@@ -124,23 +164,39 @@ function move(row: HTMLElement, direction: Direction): void {
 	}
 }
 
-function activate(row: HTMLElement): void {
-	row.querySelector<HTMLAnchorElement>('a.text')?.click();
+/**
+ * @param {HTMLElement} row
+ */
+function activate(row) {
+	/** @type {HTMLAnchorElement | null} */ (row.querySelector('a.text'))?.click();
 }
 
-/** Opens the create pane the row's kebab already links to. */
-function add(row: HTMLElement, kind: 'before' | 'after'): void {
-	row.querySelector<HTMLAnchorElement>(`${ACTIONS} a[data-menu-add="${kind}"]`)?.click();
+/**
+ * Opens the create pane the row's kebab already links to.
+ *
+ * @param {HTMLElement} row
+ * @param {'before' | 'after'} kind
+ */
+function add(row, kind) {
+	/** @type {HTMLAnchorElement | null} */ (
+		row.querySelector(`${ACTIONS} a[data-menu-add="${kind}"]`)
+	)?.click();
 }
 
-function openKebab(row: HTMLElement): void {
-	const trigger = row.querySelector<HTMLButtonElement>(
-		':scope > .menu-card > button[popovertarget]',
+/**
+ * @param {HTMLElement} row
+ */
+function openKebab(row) {
+	const trigger = /** @type {HTMLButtonElement | null} */ (
+		row.querySelector(':scope > .menu-card > button[popovertarget]')
 	);
 	if (trigger) openMenu(trigger, 'first', row);
 }
 
-function onKeydown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function onKeydown(event) {
 	if (
 		typing(event.target) ||
 		(event.target instanceof Element &&
@@ -194,22 +250,31 @@ function onKeydown(event: KeyboardEvent): void {
  * another character entirely — Option+h is `˙`, Option+l is `¬` — so the
  * letter never arrives. The physical key is the same one on QWERTY and
  * QWERTZ, which is what these bindings mean anyway.
+ *
+ * @type {Record<string, Direction>}
  */
-const ARROW_MOVES: Record<string, Direction> = {
+const ARROW_MOVES = {
 	ArrowUp: 'up',
 	ArrowDown: 'down',
 	ArrowRight: 'in',
 	ArrowLeft: 'out',
 };
 
-const VIM_MOVES: Record<string, Direction> = {
+/** @type {Record<string, Direction>} */
+const VIM_MOVES = {
 	KeyK: 'up',
 	KeyJ: 'down',
 	KeyL: 'in',
 	KeyH: 'out',
 };
 
-function moveBy(row: HTMLElement, code: string, map: Record<string, Direction>): boolean {
+/**
+ * @param {HTMLElement} row
+ * @param {string} code
+ * @param {Record<string, Direction>} map
+ * @returns {boolean}
+ */
+function moveBy(row, code, map) {
 	if (!(code in map)) {
 		return false;
 	}
@@ -219,7 +284,13 @@ function moveBy(row: HTMLElement, code: string, map: Record<string, Direction>):
 	return true;
 }
 
-function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boolean {
+/**
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ * @param {KeyboardEvent} event
+ * @returns {boolean}
+ */
+function plain(root, row, event) {
 	const letters = vim();
 	const key = letters ? (VIM_KEYS[event.key] ?? event.key) : event.key;
 	const visible = visibleRows(root);
@@ -279,7 +350,8 @@ function plain(root: HTMLElement, row: HTMLElement, event: KeyboardEvent): boole
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('keydown', onKeydown);
 
 	return () => {

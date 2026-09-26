@@ -9,9 +9,11 @@
 // split as they are, never cloned: an element host keeps its edits on the
 // element.
 
-import { openMenu } from '$lib/action-menu';
-import { uid } from '$lib/content';
-import { open as openCatalog } from './block-catalog';
+/** @import { Direction, Layout } from './blocks.js' */
+
+import { openMenu } from '../lib/action-menu.js';
+import { uid } from '../lib/content.js';
+import { open as openCatalog } from './block-catalog.js';
 import {
 	MAX_ROWSPAN,
 	directionOf,
@@ -22,19 +24,27 @@ import {
 	splitOf,
 	stretch,
 	write,
-	type Direction,
-	type Layout,
-} from './blocks';
-import { adder, arm } from './pick';
-import { adopt, release } from './placement';
-import { changed, focusRow, initDrag, insert, insertion, rebase } from './repeater';
+} from './blocks.js';
+import { adder, arm } from './pick.js';
+import { adopt, release } from './placement.js';
+import { changed, focusRow, initDrag, insert, insertion, rebase } from './repeater.js';
 
-function parse(value: string | null): Direction | null {
+/**
+ * @param {string | null} value
+ * @returns {Direction | null}
+ */
+function parse(value) {
 	return value === 'columns' || value === 'rows' ? value : null;
 }
 
-/** Room for two halves side by side, or a row to spare below. */
-function splittable(row: HTMLElement, direction: Direction): boolean {
+/**
+ * Room for two halves side by side, or a row to spare below.
+ *
+ * @param {HTMLElement} row
+ * @param {Direction} direction
+ * @returns {boolean}
+ */
+function splittable(row, direction) {
 	const split = splitOf(row);
 
 	if (split && directionOf(split) !== direction) {
@@ -46,11 +56,17 @@ function splittable(row: HTMLElement, direction: Direction): boolean {
 		: read(split ?? row).rowspan < MAX_ROWSPAN;
 }
 
-/** The first split of a block on the grid: a split in its place, holding it. */
-function wrap(row: HTMLElement, direction: Direction): HTMLElement | null {
-	const field = row.closest<HTMLElement>('[data-repeater]');
-	const template = field?.querySelector<HTMLTemplateElement>(
-		':scope > template[data-repeater-container]',
+/**
+ * The first split of a block on the grid: a split in its place, holding it.
+ *
+ * @param {HTMLElement} row
+ * @param {Direction} direction
+ * @returns {HTMLElement | null}
+ */
+function wrap(row, direction) {
+	const field = /** @type {HTMLElement | null} */ (row.closest('[data-repeater]'));
+	const template = /** @type {HTMLTemplateElement | null} */ (
+		field?.querySelector(':scope > template[data-repeater-container]')
 	);
 	const split = template?.content.firstElementChild?.cloneNode(true);
 
@@ -58,10 +74,14 @@ function wrap(row: HTMLElement, direction: Direction): HTMLElement | null {
 		return null;
 	}
 
-	const parts = split.querySelector<HTMLElement>(':scope > .parts')!;
+	const parts = /** @type {HTMLElement} */ (
+		/** @type {HTMLElement | null} */ (split.querySelector(':scope > .parts'))
+	);
 	const layout = read(row);
 
-	split.querySelector<HTMLInputElement>('[data-repeater-uid]')!.value = uid();
+	/** @type {HTMLInputElement} */ (
+		/** @type {HTMLInputElement | null} */ (split.querySelector('[data-repeater-uid]'))
+	).value = uid();
 	split.dataset.split = direction;
 	row.before(split);
 	rebase(row, field, parts);
@@ -77,14 +97,20 @@ function wrap(row: HTMLElement, direction: Direction): HTMLElement | null {
 	return split;
 }
 
-/** Halves the block, or stacks a part below it, and stamps the new part beside it. */
-function split(row: HTMLElement, direction: Direction, type: string | null): void {
+/**
+ * Halves the block, or stacks a part below it, and stamps the new part beside it.
+ *
+ * @param {HTMLElement} row
+ * @param {Direction} direction
+ * @param {string | null} type
+ */
+function split(row, direction, type) {
 	if (!insertion(row) || !splittable(row, direction)) {
 		return;
 	}
 
 	const container = splitOf(row) ?? wrap(row, direction);
-	const parts = container?.querySelector<HTMLElement>(':scope > .parts');
+	const parts = /** @type {HTMLElement | null} */ (container?.querySelector(':scope > .parts'));
 	const context = parts && insertion(parts);
 
 	if (!container || !parts || !context) {
@@ -92,7 +118,8 @@ function split(row: HTMLElement, direction: Direction, type: string | null): voi
 	}
 
 	const layout = read(row);
-	let added: Layout;
+	/** @type {Layout} */
+	let added;
 
 	if (direction === 'columns') {
 		const kept = Math.ceil(layout.colspan / 2);
@@ -112,7 +139,9 @@ function split(row: HTMLElement, direction: Direction, type: string | null): voi
 			at: { row, where: 'after' },
 			prepare(clone) {
 				for (const [dimension, value] of Object.entries(added)) {
-					const input = clone.querySelector<HTMLInputElement>(`input[data-layout="${dimension}"]`);
+					const input = /** @type {HTMLInputElement | null} */ (
+						clone.querySelector(`input[data-layout="${dimension}"]`)
+					);
 
 					if (input) {
 						input.value = String(value);
@@ -124,9 +153,15 @@ function split(row: HTMLElement, direction: Direction, type: string | null): voi
 	);
 }
 
-/** The picker at the block's kebab, or the field's one type right away. */
-function choose(row: HTMLElement, direction: Direction, keyboard: boolean): void {
-	const field = row.closest<HTMLElement>('.cms-blocks-editor');
+/**
+ * The picker at the block's kebab, or the field's one type right away.
+ *
+ * @param {HTMLElement} row
+ * @param {Direction} direction
+ * @param {boolean} keyboard
+ */
+function choose(row, direction, keyboard) {
+	const field = /** @type {HTMLElement | null} */ (row.closest('.cms-blocks-editor'));
 	const how = field && adder(field);
 	const base = field && insertion(field);
 
@@ -140,7 +175,9 @@ function choose(row: HTMLElement, direction: Direction, keyboard: boolean): void
 	}
 
 	const menu = document.getElementById(how.picker);
-	const kebab = row.querySelector<HTMLButtonElement>(':scope > .chrome .kebab');
+	const kebab = /** @type {HTMLButtonElement | null} */ (
+		row.querySelector(':scope > .chrome .kebab')
+	);
 
 	if (!menu || !kebab) {
 		return;
@@ -160,8 +197,10 @@ function choose(row: HTMLElement, direction: Direction, keyboard: boolean): void
 /**
  * The part's space goes to its neighbour: the previous part's width (the
  * next one's, for the first), or the split's rows.
+ *
+ * @param {HTMLElement} part
  */
-function remove(part: HTMLElement): void {
+function remove(part) {
 	const container = splitOf(part);
 	const parts = container ? partsOf(container) : [];
 	const index = parts.indexOf(part);
@@ -189,7 +228,9 @@ function remove(part: HTMLElement): void {
 		return;
 	}
 
-	const field = container.closest<HTMLElement>('[data-repeater]')!;
+	const field = /** @type {HTMLElement} */ (
+		/** @type {HTMLElement | null} */ (container.closest('[data-repeater]'))
+	);
 	const area = read(container);
 
 	rebase(heir, list, field);
@@ -200,11 +241,14 @@ function remove(part: HTMLElement): void {
 	focusRow(heir);
 }
 
-function onClick(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function onClick(event) {
 	const target = event.target instanceof Element ? event.target : null;
-	const entry = target?.closest<HTMLElement>('[data-split-into]');
+	const entry = /** @type {HTMLElement | null} */ (target?.closest('[data-split-into]'));
 	const direction = parse(entry?.getAttribute('data-split-into') ?? null);
-	const row = entry?.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (entry?.closest('[data-repeater-row]'));
 
 	if (direction && row) {
 		choose(row, direction, event.detail === 0);
@@ -212,31 +256,40 @@ function onClick(event: MouseEvent): void {
 		return;
 	}
 
-	const part = target?.closest('[data-split-remove]')?.closest<HTMLElement>('[data-repeater-row]');
+	const part = /** @type {HTMLElement | null} */ (
+		target?.closest('[data-split-remove]')?.closest('[data-repeater-row]')
+	);
 
 	if (part) {
 		remove(part);
 	}
 }
 
-/** A block's kebab offers the splits it has room for. */
-function onBeforeToggle(event: Event): void {
+/**
+ * A block's kebab offers the splits it has room for.
+ *
+ * @param {Event} event
+ */
+function onBeforeToggle(event) {
 	const menu = event.target;
 
-	if (!(menu instanceof HTMLElement) || (event as ToggleEvent).newState !== 'open') {
+	if (!(menu instanceof HTMLElement) || /** @type {ToggleEvent} */ (event).newState !== 'open') {
 		return;
 	}
 
-	const row = menu.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (menu.closest('[data-repeater-row]'));
 
-	for (const entry of menu.querySelectorAll<HTMLButtonElement>(':scope > [data-split-into]')) {
+	for (const entry of /** @type {NodeListOf<HTMLButtonElement>} */ (
+		menu.querySelectorAll(':scope > [data-split-into]')
+	)) {
 		const direction = parse(entry.getAttribute('data-split-into'));
 
 		entry.disabled = !row || !direction || !splittable(row, direction);
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', onClick);
 	document.addEventListener('beforetoggle', onBeforeToggle, true);
 
