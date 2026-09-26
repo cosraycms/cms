@@ -10,7 +10,9 @@
 // Entry points are the bare imports in src/ (Svelte and Node-only tools
 // excepted) plus the classic scripts listed in package.json#cosray. Every
 // entry's package has to be a runtime dependency; transitive packages come
-// along through the import graph.
+// along through the import graph. Plain .js files in src/ are served as they
+// are, so their imports also have to be ones a browser resolves: mapped
+// packages and relative paths to existing files, no aliases.
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -144,11 +146,14 @@ function entries() {
 			continue;
 		}
 
-		const source = fs.readFileSync(file, 'utf8');
+		const specifiers = file.endsWith('.js')
+			? servedImports(file)
+			: Array.from(
+					fs.readFileSync(file, 'utf8').matchAll(sourceImport),
+					(match) => match[1] ?? match[2],
+				);
 
-		for (const match of source.matchAll(sourceImport)) {
-			const specifier = match[1] ?? match[2];
-
+		for (const specifier of specifiers) {
 			if (isBare(specifier) && specifier !== 'svelte' && !specifier.startsWith('svelte/')) {
 				found.add(specifier);
 			}
@@ -158,7 +163,25 @@ function entries() {
 	return [...found].sort();
 }
 
-function moduleImports(file) {
+/** Imports of a file the browser loads unbundled, checked for resolvability. */
+function servedImports(file) {
+	// Our own computed imports load plugin modules by URL at runtime.
+	const specifiers = moduleImports(file, false);
+
+	for (const specifier of specifiers) {
+		if (isRelative(specifier)) {
+			if (!specifier.endsWith('.js') || !isFile(path.resolve(path.dirname(file), specifier))) {
+				throw new Failure(`${display(file)} imports ${specifier}, which a browser cannot load`);
+			}
+		} else if (!isBare(specifier)) {
+			throw new Failure(`${display(file)} imports ${specifier}, which a browser cannot resolve`);
+		}
+	}
+
+	return specifiers;
+}
+
+function moduleImports(file, warnComputed = true) {
 	const [imports] = parse(fs.readFileSync(file, 'utf8'), file);
 	const specifiers = [];
 
@@ -169,7 +192,10 @@ function moduleImports(file) {
 		}
 
 		if (entry.n === undefined) {
-			console.warn(`modules: skipping a computed import in ${display(file)}`);
+			if (warnComputed) {
+				console.warn(`modules: skipping a computed import in ${display(file)}`);
+			}
+
 			continue;
 		}
 
