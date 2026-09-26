@@ -115,7 +115,7 @@ Elements report optional field meta alongside value through `cosray-change`; the
 
 ## Save transport
 
-Every control participates in the editor form through its name; element hosts contribute a `[json]` leaf. At submit time, [form-json.ts](../panel/src/lib/form-json.ts) encodes the collected bracket names into a single nested JSON body. Its parsing follows PHP's `parse_str()` for generated names, with shared cases in [contract/form-names.json](../contract/form-names.json).
+Every control participates in the editor form through its name; element hosts contribute a `[json]` leaf. At submit time, [form-json.js](../panel/src/lib/form-json.js) encodes the collected bracket names into a single nested JSON body. Its parsing follows PHP's `parse_str()` for generated names, with shared cases in [contract/form-names.json](../contract/form-names.json).
 
 This avoids `max_input_vars` silently truncating a large urlencoded form. Because row lists are replaced on save, truncation could delete content. Both JSON and supported urlencoded submissions require `_complete: "1"`, rendered as the form's final control; the server refuses a body without it.
 
@@ -185,7 +185,7 @@ Modules load once through dynamic `import()` and register their element at modul
 
 ### The element contract
 
-The [host](../panel/src/lib/host.ts) assigns JavaScript properties, not attributes:
+The [host](../panel/src/lib/host.js) assigns JavaScript properties, not attributes:
 
 | Property | Meaning |
 | --- | --- |
@@ -227,7 +227,7 @@ Inactive controls are hidden without clearing their stored values. Reads present
 
 ## The window.Cosray bridge
 
-The [bridge](../panel/src/lib/bridge.ts) exposes versioned services to element controls:
+The [bridge](../panel/src/lib/bridge.js) exposes versioned services to element controls:
 
 - `version`: currently `1`; check it before relying on the interface.
 - `system()`: panel locale, content locales, paths, upload settings, and related runtime metadata.
@@ -245,4 +245,4 @@ Escape and a gesture starting and ending on the backdrop dismiss the dialog; `hi
 
 Current internal parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`; `data-dialog-focus` selects initial focus. They are shared markup, not an additional plugin slot API. Server-rendered settings stay inside their editor form and retain live values on closure; media metadata dialogs keep their own draft and Apply/Cancel behavior.
 
-[dialogs.ts](../panel/src/lib/dialogs.ts) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. Browser `beforeunload`, dirty-navigation, and `hx-confirm` prompts remain separate synchronous paths.
+[dialogs.js](../panel/src/lib/dialogs.js) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. Browser `beforeunload`, dirty-navigation, and `hx-confirm` prompts remain separate synchronous paths.
