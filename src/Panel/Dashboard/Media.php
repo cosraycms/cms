@@ -8,7 +8,7 @@ use Celema\Core\Request;
 use Celema\Quma\Database;
 use Cosray\Config;
 use Cosray\Contract\DashboardCard;
-use NumberFormatter;
+use Cosray\Panel\AssetFacts;
 
 final readonly class Media implements DashboardCard
 {
@@ -26,30 +26,16 @@ final readonly class Media implements DashboardCard
 			label: __('dashboard:media'),
 			value: (int) ($row['total'] ?? 0),
 			note: __('dashboard:storage-used', [
-				'size' => $this->humanSize((int) ($row['bytes'] ?? 0)),
+				'size' => AssetFacts::size((int) ($row['bytes'] ?? 0), $this->locale()),
 			]),
 			url: $this->config->panel->path . '/media',
 		);
 	}
 
-	private function humanSize(int $bytes): string
+	private function locale(): string
 	{
-		$units = ['B', 'KB', 'MB', 'GB', 'TB'];
-		$size = (float) max(0, $bytes);
-		$unit = 0;
-
-		while ($size >= 1024 && $unit < (count($units) - 1)) {
-			$size /= 1024;
-			$unit++;
-		}
-
 		$locale = $this->request->get('panelLocale', 'en');
-		$formatter = new NumberFormatter(is_string($locale) ? $locale : 'en', NumberFormatter::DECIMAL);
-		$digits = $unit === 0 ? 0 : 1;
-		$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $digits);
-		$formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $digits);
-		$value = $formatter->format($size);
 
-		return ($value === false ? (string) $size : $value) . ' ' . $units[$unit];
+		return is_string($locale) ? $locale : 'en';
 	}
 }
