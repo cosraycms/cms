@@ -6,9 +6,6 @@ import {
 	fileIcon,
 	humanSize,
 	libraryParams,
-	readMediaState,
-	sinceFor,
-	writeMediaState,
 } from '../../src/lib/library';
 
 afterEach(() => {
@@ -105,82 +102,6 @@ describe('library fetch', () => {
 		);
 
 		expect(await fetchLibrary('/panel', {})).toBeNull();
-	});
-});
-
-describe('media screen state', () => {
-	it('reads state from the query string', () => {
-		expect(readMediaState('?kind=image,audio&q=logo&range=7d&file=abc123')).toEqual({
-			kinds: ['image', 'audio'],
-			q: 'logo',
-			range: '7d',
-			file: 'abc123',
-		});
-	});
-
-	it('defaults an empty or foreign query string', () => {
-		expect(readMediaState('')).toEqual({ kinds: [], q: '', range: '', file: null });
-		expect(readMediaState('?kind=nonsense,image,image&range=8w&foo=1')).toEqual({
-			kinds: ['image'],
-			q: '',
-			range: '',
-			file: null,
-		});
-	});
-
-	it('writes state into the href and drops defaults', () => {
-		const href = 'https://example.test/cp/media?kind=video&q=old&range=7d&file=gone';
-
-		expect(writeMediaState(href, { kinds: [], q: '  ', range: '', file: null })).toBe(
-			'https://example.test/cp/media',
-		);
-		expect(
-			writeMediaState('https://example.test/cp/media', {
-				kinds: ['image', 'audio'],
-				q: ' logo ',
-				range: 'year',
-				file: 'abc',
-			}),
-		).toBe('https://example.test/cp/media?kind=image%2Caudio&q=logo&range=year&file=abc');
-	});
-
-	it('leaves foreign params untouched', () => {
-		expect(
-			writeMediaState('https://example.test/cp/media?foo=1', {
-				kinds: ['video'],
-				q: '',
-				range: '',
-				file: null,
-			}),
-		).toBe('https://example.test/cp/media?foo=1&kind=video');
-	});
-
-	it('round-trips through read and write', () => {
-		const state = { kinds: ['image', 'document'], q: 'beer', range: '30d' as const, file: 'a1b2' };
-		const href = writeMediaState('https://example.test/cp/media', state);
-
-		expect(readMediaState(new URL(href).search)).toEqual(state);
-	});
-});
-
-describe('range cutoffs', () => {
-	const now = new Date('2026-08-27T12:00:00.000Z');
-
-	it('computes the cutoff a range token stands for', () => {
-		expect(sinceFor('7d', now)).toBe('2026-08-20T12:00:00.000Z');
-		expect(sinceFor('30d', now)).toBe('2026-07-28T12:00:00.000Z');
-	});
-
-	it('anchors the year range to the local January first', () => {
-		const cutoff = new Date(sinceFor('year', now)!);
-
-		expect(cutoff.getFullYear()).toBe(2026);
-		expect(cutoff.getMonth()).toBe(0);
-		expect(cutoff.getDate()).toBe(1);
-	});
-
-	it('means no cutoff for the empty range', () => {
-		expect(sinceFor('', now)).toBeNull();
 	});
 });
 

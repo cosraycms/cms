@@ -6,8 +6,7 @@
 	min-height: 0;
 	overflow: hidden;
 
-	& > .body,
-	& cosray-media-library {
+	& > .body {
 		display: flex;
 		flex-direction: column;
 		flex: 1 1 auto;
@@ -15,8 +14,510 @@
 	}
 }
 
+.cms-media-workspace {
+	display: flex;
+	flex: 1 1 auto;
+	align-items: stretch;
+	min-height: 0;
+}
+
+.cms-media-rail {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-3);
+	min-width: 0;
+}
+
+.cms-media-rail-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+}
+
+.cms-media-rail-title {
+	font-size: var(--cms-font-size-xs);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--cms-color-text-subtle);
+}
+
+.cms-media-reset {
+	font-size: var(--cms-font-size-xs);
+	color: var(--cms-color-text-muted);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+
+	&:hover {
+		color: var(--cms-color-text);
+	}
+}
+
+.cms-media-rail-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-2);
+	border: 0;
+	padding: 0;
+	margin: 0;
+
+	& legend {
+		padding: 0;
+		margin-bottom: var(--cms-space-1);
+	}
+}
+
+.cms-media-check {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+	font-size: var(--cms-font-size-sm);
+	color: var(--cms-color-text-label);
+	cursor: pointer;
+
+	& input {
+		accent-color: var(--cms-color-text);
+	}
+}
+
+.cms-media-check-label {
+	flex: 1 1 auto;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cms-media-check-count {
+	font-size: var(--cms-font-size-xs);
+	color: var(--cms-color-text-subtle);
+	font-variant-numeric: tabular-nums;
+}
+
+.cms-media-pane {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-height: 0;
+	min-width: 0;
+	background: var(--cms-pane-bg);
+	border-start-start-radius: var(--cms-pane-radius-start);
+	border-start-end-radius: var(--cms-pane-radius-end);
+	border-top: var(--cms-pane-border);
+	border-inline-start: var(--cms-pane-border-start);
+	border-inline-end: var(--cms-pane-border-end);
+	overflow: hidden;
+
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		box-shadow: var(--cms-pane-shadow);
+		pointer-events: none;
+	}
+}
+
+.cms-media-toolbar {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-3);
+
+	& .progress {
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.cms-media-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	padding: var(--cms-space-6);
+	overscroll-behavior: contain;
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-3);
+}
+
+.cms-media-empty {
+	color: var(--cms-color-text-muted);
+	padding: var(--cms-space-4) 0;
+}
+
+/* The next page's link is the grid's last cell, so its tiles land in place. */
+.cms-media-more {
+	grid-column: 1 / -1;
+	justify-self: center;
+}
+
+.cms-media-detail {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+}
+
+.cms-media-inspector-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--cms-space-4);
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-sm);
+	text-align: center;
+}
+
+.cms-asset-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(var(--cms-tile-min, 9.5rem), 1fr));
+	gap: var(--gap, var(--cms-space-3));
+	align-content: start;
+
+	.cms-media-scroll > & {
+		--gap: var(--cms-space-4);
+	}
+}
+
+.cms-asset-tile {
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	border: 1px solid var(--cms-color-border);
+	border-radius: var(--cms-radius-lg);
+	background: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-raised);
+	color: inherit;
+	cursor: pointer;
+	text-align: left;
+	text-decoration: none;
+	min-width: 0;
+	overflow: hidden;
+
+	&:hover {
+		border-color: var(--cms-color-border-strong);
+	}
+
+	&:focus-visible {
+		outline: var(--cms-focus-outline);
+		outline-offset: var(--cms-focus-offset);
+	}
+
+	/* The ring sits outside the border, so both together read as one edge. */
+	&.active {
+		border-color: var(--cms-color-accent);
+		box-shadow:
+			0 0 0 1px var(--cms-color-accent),
+			var(--cms-shadow-raised);
+	}
+}
+
+.cms-asset-thumb {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1 / 1;
+	width: 100%;
+	border-bottom: 1px solid var(--cms-color-border);
+	background-color: var(--cms-color-surface-sunken);
+	overflow: hidden;
+
+	& img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+.cms-asset-ext {
+	font-size: var(--cms-font-size-xs);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--cms-color-text-subtle);
+}
+
+.cms-asset-meta {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-0-5);
+	padding: var(--cms-space-2) var(--cms-space-3) var(--cms-space-3);
+	min-width: 0;
+}
+
+.cms-asset-name {
+	font-size: var(--cms-font-size-sm);
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
+}
+
+.cms-asset-line {
+	font-size: var(--cms-font-size-xs);
+	color: var(--cms-color-text-subtle);
+	font-variant-numeric: tabular-nums;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
+}
+
+.cms-detail {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--cms-inspector-bg);
+	overflow: hidden;
+}
+
+.cms-detail-status {
+	padding: var(--cms-space-4);
+	color: var(--cms-color-text-muted);
+}
+
+.cms-detail-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+	padding: var(--cms-space-4);
+	border-bottom: 1px solid var(--cms-color-border);
+
+	& h2 {
+		font-size: var(--cms-font-size-base);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.cms-detail-close {
+	flex-shrink: 0;
+	line-height: 1;
+	color: var(--cms-color-text-subtle);
+
+	&:hover {
+		color: var(--cms-color-text);
+	}
+}
+
+.cms-detail-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: var(--cms-space-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+}
+
+.cms-detail-preview {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 8rem;
+	max-height: 16rem;
+	padding: 0;
+	border: 0;
+	background-color: var(--cms-color-surface-sunken);
+	border-radius: var(--cms-radius-md);
+	overflow: hidden;
+
+	&.focusable {
+		cursor: crosshair;
+	}
+
+	& img {
+		max-width: 100%;
+		max-height: 16rem;
+		object-fit: contain;
+	}
+}
+
+.cms-detail-preview-icon {
+	font-size: 3rem;
+	color: var(--cms-color-text-subtle);
+}
+
+.cms-detail-focal {
+	position: absolute;
+	width: 0.85rem;
+	height: 0.85rem;
+	/* Sits on arbitrary media: a white ring inside a dark one, both themes. */
+	border: 2px solid var(--cms-color-white);
+	border-radius: 50%;
+	background-color: var(--cms-color-neutral-900);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--cms-color-black) 40%, transparent);
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+}
+
+.cms-detail-meta {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-1);
+	font-size: var(--cms-font-size-sm);
+
+	& > div {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--cms-space-2);
+	}
+
+	& dt {
+		color: var(--cms-color-text-subtle);
+	}
+}
+
+.cms-detail-focal-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+	font-size: var(--cms-font-size-sm);
+	color: var(--cms-color-text-muted);
+}
+
+.cms-meta-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-3);
+}
+
+.cms-meta-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-1);
+	font-size: var(--cms-font-size-sm);
+
+	& > label {
+		color: var(--cms-color-text-label);
+	}
+}
+
+.cms-detail-usage {
+	& h3 {
+		font-size: var(--cms-font-size-sm);
+		margin-bottom: var(--cms-space-2);
+	}
+
+	& ul {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-1);
+	}
+
+	& li {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--cms-space-2);
+		font-size: var(--cms-font-size-sm);
+		padding: var(--cms-space-1) 0;
+		border-bottom: 1px solid var(--cms-color-border-soft);
+	}
+}
+
+.cms-detail-usage-kind {
+	color: var(--cms-color-text-subtle);
+	white-space: nowrap;
+}
+
+.cms-detail-hint {
+	color: var(--cms-color-text-subtle);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-detail-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--cms-space-2);
+	padding: var(--cms-space-4);
+	border-top: 1px solid var(--cms-color-border);
+}
+
+.cms-detail-foot-right {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-3);
+}
+
+.cms-detail-saved {
+	color: var(--cms-color-success-text);
+	font-size: var(--cms-font-size-sm);
+}
+
+.cms-detail-blocked {
+	padding: var(--cms-space-3) var(--cms-space-4);
+	background-color: var(--cms-color-warning-surface);
+	border-top: 1px solid var(--cms-color-border);
+	font-size: var(--cms-font-size-sm);
+
+	& ul {
+		margin-top: var(--cms-space-1);
+		padding-left: var(--cms-space-4);
+		list-style: disc;
+	}
+}
+
+.cms-modal-remove-message {
+	margin-top: var(--cms-space-6);
+	font-weight: 500;
+}
+
+@media (max-width: 72rem) {
+	.cms-detail,
+	.cms-detail-body {
+		overflow: visible;
+	}
+}
+
+/* No shell: the rail is a strip above the content, the panes stop scrolling
+   internally and the page scrolls. */
 @media (width < 40rem), (height < 30rem) {
 	.cms-media {
 		overflow: visible;
+	}
+
+	.cms-media-workspace {
+		flex-direction: column;
+	}
+
+	.cms-media-pane {
+		min-height: auto;
+		border-radius: 0;
+
+		&::after {
+			display: none;
+		}
+	}
+
+	.cms-media-pane,
+	.cms-media-scroll {
+		overflow: visible;
+	}
+
+	.cms-media-rail {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		column-gap: var(--cms-space-6);
+	}
+
+	.cms-media-rail-head {
+		flex-basis: 100%;
+	}
+
+	.cms-media-scroll {
+		padding-inline: var(--cms-space-4);
 	}
 }

@@ -9,12 +9,6 @@ import type { AssetInfo } from '$types/data';
 
 export type LibraryItem = AssetInfo & { uid: string; thumbUrl: string };
 
-/**
- * The filter vocabulary the library endpoint accepts: it splits the
- * catalog kind `file` into audio and document.
- */
-export const FILTER_KINDS = ['image', 'video', 'audio', 'document'] as const;
-
 export type LibraryQuery = {
 	// Restricts the listing to one kind or a set of filter kinds; null
 	// (and 'file' — a File field accepts every kind) browses the whole
@@ -35,66 +29,6 @@ export type LibraryPage = {
 	// Per-filter-kind totals honoring q and since, but not kind.
 	counts: Record<string, number>;
 };
-
-export type MediaRange = '' | '7d' | '30d' | 'year';
-
-/**
- * The media screen's deep-linkable state, mirrored into the query string
- * via history.replaceState: kind set, committed search, upload-date
- * range, selected file. The range travels as a token, not a timestamp,
- * so a shared link keeps meaning "the last 7 days".
- */
-export type MediaScreenState = {
-	kinds: string[];
-	q: string;
-	range: MediaRange;
-	file: string | null;
-};
-
-export function readMediaState(search: string): MediaScreenState {
-	const params = new URLSearchParams(search);
-	const kinds = (params.get('kind') ?? '')
-		.split(',')
-		.filter((kind): kind is (typeof FILTER_KINDS)[number] =>
-			(FILTER_KINDS as readonly string[]).includes(kind),
-		);
-	const range = params.get('range');
-
-	return {
-		kinds: [...new Set(kinds)],
-		q: params.get('q') ?? '',
-		range: range === '7d' || range === '30d' || range === 'year' ? range : '',
-		file: params.get('file'),
-	};
-}
-
-/** The href with the state written in; foreign params survive untouched. */
-export function writeMediaState(href: string, state: MediaScreenState): string {
-	const url = new URL(href);
-	const params = url.searchParams;
-	const q = state.q.trim();
-
-	state.kinds.length === 0 ? params.delete('kind') : params.set('kind', state.kinds.join(','));
-	q === '' ? params.delete('q') : params.set('q', q);
-	state.range === '' ? params.delete('range') : params.set('range', state.range);
-	state.file === null ? params.delete('file') : params.set('file', state.file);
-
-	return url.toString();
-}
-
-/** The created-timestamp cutoff a range token stands for right now. */
-export function sinceFor(range: MediaRange, now: Date = new Date()): string | null {
-	switch (range) {
-		case '7d':
-			return new Date(now.getTime() - 7 * 86_400_000).toISOString();
-		case '30d':
-			return new Date(now.getTime() - 30 * 86_400_000).toISOString();
-		case 'year':
-			return new Date(now.getFullYear(), 0, 1).toISOString();
-		default:
-			return null;
-	}
-}
 
 export function humanSize(bytes: number): string {
 	const units = ['B', 'KB', 'MB', 'GB'];
