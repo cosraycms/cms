@@ -99,7 +99,7 @@ The renderer resolves asset/node references and escapes generated values. Full-t
 
 The format currently has semantic prose containers rather than arbitrary div/span nesting. Page composition lives in [Blocks](blocks.md); tables and generic layout containers are not currently implemented in richtext. This separation limits renderer, scanner, and migration complexity, but can be reconsidered for a concrete editing need.
 
-Changing an omitted attribute's default changes existing documents' meaning. Renames, restructures, and default changes therefore need a version/migration decision. Additive vocabulary may not require rewriting old content, but still needs coordinated PHP and panel support and tests for old readers/editors. Useful starting points are [Spec](../src/Richtext/Spec.php), the panel [schema](../panel/src/components/richtext/schema.ts), and its [format adapter](../panel/src/components/richtext/format.ts).
+Changing an omitted attribute's default changes existing documents' meaning. Renames, restructures, and default changes therefore need a version/migration decision. Additive vocabulary may not require rewriting old content, but still needs coordinated PHP and panel support and tests for old readers/editors. Useful starting points are [Spec](../src/Richtext/Spec.php), the panel [schema](../panel/src/elements/richtext/schema.js), and its [format adapter](../panel/src/elements/richtext/format.js).
 
 ## Legacy migration
 
