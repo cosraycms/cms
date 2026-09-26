@@ -19,7 +19,6 @@ use Celema\Verba\Tool\PhpScanner;
 use Closure;
 use Cosray\App;
 use Cosray\Commands\Fulltext;
-use Cosray\Commands\InstallPanel;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Commands\Superuser;
@@ -64,7 +63,6 @@ final class Commands
 			References::class => fn(): References => new References($this->conn()),
 			RecreateSortIndex::class => fn(): RecreateSortIndex => $this->resolve(RecreateSortIndex::class),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
-			InstallPanel::class => fn(): InstallPanel => new InstallPanel($this->app->config),
 			Titles::class => fn(): Titles => $this->resolve(Titles::class),
 		]);
 	}

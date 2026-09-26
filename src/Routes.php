@@ -317,12 +317,6 @@ class Routes
 					);
 				$panel
 					->get(
-						'/static/...slug',
-						[Panel\Assets::class, 'staticAsset'],
-						'static.asset',
-					);
-				$panel
-					->get(
 						'/vendor/{plugin:[a-z0-9-]{1,64}}/...slug',
 						[Panel\Assets::class, 'vendor'],
 						'vendor.asset',
