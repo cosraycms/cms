@@ -16,6 +16,7 @@
 @import './cms-field.css' layer(panel);
 @import './cms-content-locales.css' layer(panel);
 @import './cms-control.css' layer(panel);
+@import './cms-reference.css' layer(panel);
 @import './cms-dropzone.css' layer(panel);
 @import './cms-media-field.css' layer(panel);
 @import './cms-entries.css' layer(panel);
