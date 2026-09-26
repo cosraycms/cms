@@ -63,8 +63,9 @@ describe('code editing', () => {
 			meta: { syntax: { zxx: 'php' } },
 		});
 		const input = element.querySelector('textarea')!;
-		expect(input.name).toBe('snippet');
 		expect(input.value).toBe('a = 1;');
+		// The host submits the value; the mirror must not add a form entry.
+		expect(input.name).toBe('');
 		expect(element.querySelector('select')).toBeNull();
 	});
 

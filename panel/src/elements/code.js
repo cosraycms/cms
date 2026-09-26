@@ -82,6 +82,9 @@ export class CosrayCode extends HTMLElement {
 			}
 		});
 		this.#editor.className = 'cms-code-editor';
+		// No name: the host carries the value into the form. A named mirror
+		// would submit a bare key, which for a sub-field called "content"
+		// inside entries replaces the whole content tree.
 		this.#input.className = 'cms-code-editor-input';
 		this.#input.readOnly = true;
 		this.#input.tabIndex = -1;
@@ -141,8 +144,6 @@ export class CosrayCode extends HTMLElement {
 			this.append(this.#toolbar(options));
 		}
 
-		this.#input.name = this.field.name;
-		this.#input.required = this.field.required ?? false;
 		this.#wrap.replaceChildren(this.#editor, this.#input);
 		this.append(this.#wrap);
 		this.#rendered = true;
