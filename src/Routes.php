@@ -100,6 +100,20 @@ class Routes
 
 	protected function addPanel(App $app): void
 	{
+		// A page loads a hundred of the panel's files, and none of them needs
+		// the session or the user the panel's middleware would load for each.
+		$app->group(
+			$this->panelPath,
+			static function (Group $files): void {
+				$files->get('/assets/{version:[a-z0-9]{1,40}}/...slug', [Panel\Assets::class, 'asset'], 'asset');
+				$files->get(
+					'/vendor/{plugin:[a-z0-9-]{1,64}}/...slug',
+					[Panel\Assets::class, 'vendor'],
+					'vendor.asset',
+				);
+			},
+			'cms.panel.',
+		);
 		$app->group(
 			$this->panelPath,
 			function (Group $panel) use ($app) {
@@ -309,18 +323,6 @@ class Routes
 						'reference.labels',
 					)
 					->middleware($panelAuth);
-				$panel
-					->get(
-						'/assets/{version:[a-z0-9]{1,40}}/...slug',
-						[Panel\Assets::class, 'asset'],
-						'asset',
-					);
-				$panel
-					->get(
-						'/vendor/{plugin:[a-z0-9-]{1,64}}/...slug',
-						[Panel\Assets::class, 'vendor'],
-						'vendor.asset',
-					);
 				$panel
 					->get(
 						'/collection/{collection}',
