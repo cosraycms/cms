@@ -29,7 +29,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
-	<?php // Element control modules resolve against this base. It has to be set
+	<?php // Element control modules and script-built icons resolve against these
+	// bases. They have to be set
 
 	// before the panel module runs: a boosted navigation upgrades the custom
 	// elements in the swapped markup as they are inserted, which is before any
@@ -37,7 +38,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<script>window.COSRAY_BASE_PATH = <?= json_encode(
 		(string) $panelBase,
 		$jsonFlags,
-	) ?>;</script>
+	) ?>;
+	window.COSRAY_ASSETS_PATH = <?= json_encode((string) $assetsBase, $jsonFlags) ?>;</script>
 
 <?php foreach ($scripts as $script): ?>
 	<script src="<?= escape((string) $script) ?>"></script>

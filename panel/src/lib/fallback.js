@@ -1,17 +1,26 @@
-import { ZXX, type LocaleMap } from '$types/data';
+/** @import { LocaleMap } from '../types/data' */
 
-export type FallbackLocale = {
-	id: string;
-	title: string;
-	fallback?: string | null;
-};
+import { ZXX } from './content.js';
 
-export type ResolvedFallback<T> = {
-	value: T;
-	locale: string;
-};
+/**
+ * @typedef {object} FallbackLocale
+ * @property {string} id
+ * @property {string} title
+ * @property {string | null} [fallback]
+ */
 
-export function filled(value: unknown): boolean {
+/**
+ * @template T
+ * @typedef {object} ResolvedFallback
+ * @property {T} value
+ * @property {string} locale
+ */
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+export function filled(value) {
 	return (
 		value !== null &&
 		value !== undefined &&
@@ -20,12 +29,15 @@ export function filled(value: unknown): boolean {
 	);
 }
 
-export function resolveFallback<T>(
-	map: LocaleMap<T> | undefined,
-	locale: string,
-	locales: FallbackLocale[],
-	hasValue: (value: T | undefined) => boolean = filled,
-): ResolvedFallback<T> | null {
+/**
+ * @template T
+ * @param {LocaleMap<T> | undefined} map
+ * @param {string} locale
+ * @param {FallbackLocale[]} locales
+ * @param {(value: T | undefined) => boolean} [hasValue]
+ * @returns {ResolvedFallback<T> | null}
+ */
+export function resolveFallback(map, locale, locales, hasValue = filled) {
 	if (!map) {
 		return null;
 	}
@@ -52,14 +64,15 @@ export function resolveFallback<T>(
  * locale of its own: a neutral value is stored under `zxx`, which no
  * catalog map carries, while the site resolves the catalog in the page's
  * locale.
+ *
+ * @param {LocaleMap<string> | undefined} override
+ * @param {LocaleMap<string> | undefined} catalog
+ * @param {string} locale
+ * @param {FallbackLocale[]} locales
+ * @param {string} [catalogLocale]
+ * @returns {ResolvedFallback<string> | null}
  */
-export function resolveTextFallback(
-	override: LocaleMap<string> | undefined,
-	catalog: LocaleMap<string> | undefined,
-	locale: string,
-	locales: FallbackLocale[],
-	catalogLocale: string = locale,
-): ResolvedFallback<string> | null {
+export function resolveTextFallback(override, catalog, locale, locales, catalogLocale = locale) {
 	if (filled(override?.[locale])) {
 		return null;
 	}
@@ -79,6 +92,11 @@ export function resolveTextFallback(
 	return resolveFallback(catalog, catalogLocale, locales);
 }
 
-export function localeTitle(locales: FallbackLocale[], locale: string): string {
+/**
+ * @param {FallbackLocale[]} locales
+ * @param {string} locale
+ * @returns {string}
+ */
+export function localeTitle(locales, locale) {
 	return locales.find((entry) => entry.id === locale)?.title ?? locale.toUpperCase();
 }

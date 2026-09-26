@@ -56,13 +56,3 @@ declare global {
 		Cosray?: CosrayBridge;
 	}
 }
-
-export function cosray(): CosrayBridge {
-	if (!window.Cosray) {
-		throw new Error(
-			'window.Cosray is unavailable — editor controls only run on panel editor pages',
-		);
-	}
-
-	return window.Cosray;
-}

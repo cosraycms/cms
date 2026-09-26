@@ -1,21 +1,28 @@
-import { __ } from '$lib/locale';
+import { __ } from './locale.js';
 
-type Options = {
-	owner?: HTMLElement;
-	opener?: HTMLElement | null;
-	onClose?: () => void;
-};
+/**
+ * @typedef {object} Options
+ * @property {HTMLElement} [owner]
+ * @property {HTMLElement | null} [opener]
+ * @property {() => void} [onClose]
+ */
 
-type Dialog = {
-	close(): void;
-	owner?: HTMLElement;
-	opener: HTMLElement | null;
-};
+/**
+ * @typedef {object} Dialog
+ * @property {() => void} close
+ * @property {HTMLElement} [owner]
+ * @property {HTMLElement | null} opener
+ */
 
-const dialogs = new WeakMap<HTMLDialogElement, Dialog>();
+/** @type {WeakMap<HTMLDialogElement, Dialog>} */
+const dialogs = new WeakMap();
 let titleId = 0;
 
-function usable(element: HTMLElement): boolean {
+/**
+ * @param {HTMLElement} element
+ * @returns {boolean}
+ */
+function usable(element) {
 	return (
 		element.isConnected &&
 		!element.matches(':disabled') &&
@@ -24,13 +31,19 @@ function usable(element: HTMLElement): boolean {
 	);
 }
 
-export function closeDialog(dialog: HTMLDialogElement): void {
+/** @param {HTMLDialogElement} dialog */
+export function closeDialog(dialog) {
 	const active = dialogs.get(dialog);
 	if (active) active.close();
 	else if (dialog.open) dialog.close();
 }
 
-export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { close(): void } {
+/**
+ * @param {HTMLDialogElement} dialog
+ * @param {Options} [options]
+ * @returns {{ close(): void }}
+ */
+export function openDialog(dialog, options = {}) {
 	const existing = dialogs.get(dialog);
 	if (existing && dialog.open) return existing;
 	existing?.close();
@@ -45,13 +58,14 @@ export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { 
 	const owner = options.owner ?? opener ?? undefined;
 	const events = new AbortController();
 	let finished = false;
-	let backdropPointer: number | null = null;
+	/** @type {number | null} */
+	let backdropPointer = null;
 
 	const observer = new MutationObserver(() => {
 		if (!dialog.isConnected || (owner && !owner.isConnected)) close();
 	});
 
-	function close(): void {
+	function close() {
 		if (finished) return;
 		finished = true;
 		observer.disconnect();
@@ -77,7 +91,11 @@ export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { 
 		}
 	}
 
-	function backdrop(event: PointerEvent): boolean {
+	/**
+	 * @param {PointerEvent} event
+	 * @returns {boolean}
+	 */
+	function backdrop(event) {
 		if (event.target !== dialog) return false;
 		const box = dialog.getBoundingClientRect();
 		return (
@@ -143,7 +161,7 @@ export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { 
 	window.addEventListener('pagehide', close, { signal: events.signal });
 
 	if (!dialog.hasAttribute('aria-label') && !dialog.hasAttribute('aria-labelledby')) {
-		const heading = dialog.querySelector<HTMLElement>('[data-dialog-title], h1, h2, h3');
+		const heading = dialog.querySelector('[data-dialog-title], h1, h2, h3');
 		if (heading) {
 			heading.id ||= `cms-dialog-title-${++titleId}`;
 			dialog.setAttribute('aria-labelledby', heading.id);
@@ -164,11 +182,11 @@ export function openDialog(dialog: HTMLDialogElement, options: Options = {}): { 
 		if (dialog.open) dialog.close();
 		dialog.showModal();
 		const focus = [
-			...dialog.querySelectorAll<HTMLElement>('[data-dialog-focus], [autofocus]'),
-			...dialog.querySelectorAll<HTMLElement>(
-				'input:not([type="hidden"]):not([type="file"]), textarea, select',
-			),
-		].find(usable);
+			...dialog.querySelectorAll('[data-dialog-focus], [autofocus]'),
+			...dialog.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, select'),
+		]
+			.filter((element) => element instanceof HTMLElement)
+			.find(usable);
 		focus?.focus({ preventScroll: true });
 	} catch (error) {
 		close();

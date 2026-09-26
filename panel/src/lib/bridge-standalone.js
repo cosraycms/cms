@@ -1,20 +1,23 @@
-import type { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '$lib/bridge';
+/** @import { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '../types/bridge' */
 
-import { __ } from '$lib/locale';
-import { icon } from '$lib/icons';
-import { openDialog } from '$lib/dialogs';
+import { __ } from './locale.js';
+import { icon } from './icons.js';
+import { openDialog } from './dialogs.js';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
  * comes SSR-embedded from the page, modal chrome and toasts are plain
  * DOM. The bridge API (version 1) is unchanged for element controls.
+ *
+ * @param {BridgeSystem} system
  */
-export function installBridge(system: BridgeSystem): void {
+export function installBridge(system) {
 	if (window.Cosray?.version === 1) {
 		return;
 	}
 
-	const bridge: CosrayBridge = {
+	/** @type {CosrayBridge} */
+	const bridge = {
 		version: 1,
 
 		system() {
@@ -36,7 +39,7 @@ export function installBridge(system: BridgeSystem): void {
 					},
 				});
 
-				return (await response.json()) as UploadResult;
+				return /** @type {UploadResult} */ (await response.json());
 			} catch {
 				return { ok: false, error: __('upload:failed') };
 			}
@@ -59,10 +62,12 @@ export function installBridge(system: BridgeSystem): void {
 	window.Cosray = bridge;
 }
 
-function openModal(
-	render: (host: HTMLElement) => (() => void) | void,
-	options: ModalOptions = {},
-): { close(): void } {
+/**
+ * @param {(host: HTMLElement) => (() => void) | void} render
+ * @param {ModalOptions} [options]
+ * @returns {{ close(): void }}
+ */
+function openModal(render, options = {}) {
 	const active = document.activeElement;
 	const opener = active instanceof HTMLElement && active !== document.body ? active : null;
 	const dialog = document.createElement('dialog');
@@ -84,7 +89,8 @@ function openModal(
 	host.className = 'element';
 	dialog.append(host);
 	document.body.append(dialog);
-	let cleanup: (() => void) | void;
+	/** @type {(() => void) | void} */
+	let cleanup;
 
 	try {
 		cleanup = render(host);
@@ -108,7 +114,11 @@ function openModal(
 
 const TIMEOUTS = { success: 3000, error: 30000 };
 
-function toast(kind: 'success' | 'error', message: string): void {
+/**
+ * @param {'success' | 'error'} kind
+ * @param {string} message
+ */
+function toast(kind, message) {
 	let stack = document.querySelector('.cms-toasts');
 
 	if (!stack) {

@@ -1,4 +1,4 @@
-import type { ControlDescriptor } from '$types/controls';
+import type { ControlDescriptor } from './controls';
 
 export type TranslateMode = 'symmetric' | 'asymmetric';
 

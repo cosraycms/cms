@@ -1,6 +1,4 @@
-import type { Field } from '$types/fields';
-
-export const ZXX = 'zxx';
+import type { Field } from './fields';
 
 export type LocaleMap<T> = Record<string, T>;
 

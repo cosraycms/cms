@@ -76,6 +76,7 @@ abstract class Panel
 			'account' => $this->account(),
 			'config' => $this->config,
 			'renderIcon' => $this->renderIcon(...),
+			'assetsBase' => $this->client()->url(),
 			'importMap' => $this->client()->importMap(),
 			'stylesheets' => $this->stylesheets($panelPath),
 			'scripts' => $this->scripts($panelPath),

@@ -55,7 +55,9 @@ final class PanelLayersTest extends End2EndTestCase
 
 	public function testTheDocumentMapsVendoredModulesToServedUrls(): void
 	{
-		$document = \Dom\HTMLDocument::createFromString($this->layerHtml(), LIBXML_NOERROR);
+		$html = $this->layerHtml();
+		$this->assertMatchesRegularExpression('~window\.COSRAY_ASSETS_PATH = "/cp/assets/[0-9a-z]+/";~', $html);
+		$document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
 		$script = $document->querySelector('script[type="importmap"]');
 		$this->assertNotNull($script);
 		$map = json_decode($script->textContent, true, flags: JSON_THROW_ON_ERROR);

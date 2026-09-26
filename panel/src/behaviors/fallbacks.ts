@@ -1,5 +1,5 @@
 import { localeTitle, resolveFallback, type FallbackLocale } from '$lib/fallback';
-import { ZXX } from '$types/data';
+import { ZXX } from '$lib/content';
 
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';

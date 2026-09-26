@@ -2,7 +2,7 @@
 	import type { FileItem, LocaleMap, UploadType } from '$types/data';
 
 	import { untrack } from 'svelte';
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { useAssets } from '$lib/assets';
 	import { pruneItemMeta } from '$lib/content';
 	import { localeTitle, resolveTextFallback } from '$lib/fallback';

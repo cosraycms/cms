@@ -4,6 +4,7 @@
 		"allowSyntheticDefaultImports": true,
 		"allowJs": true,
 		"checkJs": true,
+		"noEmit": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
@@ -28,6 +29,7 @@
 		"vite.config.ts",
 		"vitest.config.ts",
 		"src/**/*.d.ts",
+		"src/**/*.js",
 		"src/**/*.ts",
 		"src/**/*.svelte",
 		"tests/**/*.ts"

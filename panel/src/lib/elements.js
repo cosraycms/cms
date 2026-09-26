@@ -1,6 +1,7 @@
-import { panelBase } from '$lib/runtime';
+import { panelBase } from './runtime.js';
 
-const modules = new Map<string, Promise<unknown>>();
+/** @type {Map<string, Promise<unknown>>} */
+const modules = new Map();
 
 /**
  * Resolve a control module value to a URL.
@@ -11,8 +12,14 @@ const modules = new Map<string, Promise<unknown>>();
  * - `https?://...` — used as-is.
  * - anything else — `{pluginId}/{file}`, served from the plugin's
  *   asset dir under the panel vendor route.
+ *
+ * This module still runs inside the Vite bundle; the `import.meta.env`
+ * branches go with the Svelte elements (buildless plan, Phase 3).
+ *
+ * @param {string} module
+ * @returns {string}
  */
-export function moduleUrl(module: string): string {
+export function moduleUrl(module) {
 	const base = panelBase();
 
 	if (module.startsWith('cosray:')) {
@@ -36,7 +43,11 @@ export function moduleUrl(module: string): string {
 	return `${base}vendor/${module}`;
 }
 
-export function loadElement(module: string): Promise<unknown> {
+/**
+ * @param {string} module
+ * @returns {Promise<unknown>}
+ */
+export function loadElement(module) {
 	const url = moduleUrl(module);
 	let promise = modules.get(url);
 
@@ -52,7 +63,7 @@ export function loadElement(module: string): Promise<unknown> {
 	return promise;
 }
 
-function ensureCss(): void {
+function ensureCss() {
 	const id = 'cosray-elements-css';
 
 	if (document.getElementById(id)) {
