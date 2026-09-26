@@ -36,7 +36,6 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
 | `panel.path` | Panel URL path; defaults to `/cp` |
-| `panel.assets_dir` | Installed panel client directory; defaults to `$root/panel/static` |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 
@@ -57,7 +56,7 @@ Error pages use a separate Boiler renderer. Project `http-error.php` and `http-s
 
 ## Console commands
 
-[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel installer, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
+[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
 A project `run` script can load an `app/console.php` returning the runner:
 
@@ -184,17 +183,15 @@ Registered scripts load once per full document and do not run again after htmx n
 
 `panel.dashboard => false` removes the dashboard entry and directs panel home to the first collection, or media when there is none.
 
-## Panel installation and theming
+## Panel assets and theming
 
-PHP views ship with the package. Install the signed client assets after Composer installation or updates:
+The panel's browser files ship with the package as they are, so `composer install` or `update` is the whole installation. PHP serves `panel/src`, `panel/styles`, `panel/icons` and the vendored third-party modules in `panel/modules` under `{panel.path}/assets/{revision}/`, plus an icon sprite it builds from `panel/icons`. The revision is the start of the commit Composer installed, or a hash of the version for a package without one. Responses for the installed revision may be cached for a year (`immutable`); in debug mode, in a Git working copy such as a symlinked path repository, and for any other revision they are revalidated through an ETag.
 
-```bash
-php run panel:install
-```
+A first visit loads the modules one by one: about 90 files for the dashboard and 130 for an editor with rich text and code, around 200 and 700 KB compressed. Make sure the web server compresses `text/javascript` and `text/css` responses (gzip, Brotli or zstd) and speaks HTTP/2; uncompressed, the same visits move several times the bytes. Later visits load nothing but the page.
 
-The default `panel.assets_dir` is outside `path.public` to avoid a physical directory shadowing the panel route under a web server's `try_files` rules. Changing that directory does not change the `{panel.path}/static/...` URLs. Direct web-server delivery needs an explicit URL-to-directory mapping.
+Letting the web server deliver these files instead of PHP is optional. A mapping has to drop the revision segment, allow only `src/`, `styles/`, `modules/` and `icons/` with the `.js`, `.css` and `.svg` extensions, serve `.js` as `text/javascript`, and send the immutable `Cache-Control` header only for the installed revision; the sprite `icons.svg` has to reach PHP.
 
-`panel.theme` accepts a stylesheet URL or a list of URLs. [Panel styles](panel-styles.md) explains the cascade and current theming approach. [Panel development](../panel/README.md) covers Vite and the live styleguide.
+`panel.theme` accepts a stylesheet URL or a list of URLs. [Panel styles](panel-styles.md) explains the cascade and current theming approach. [Panel development](../panel/README.md) covers the optional Vite dev server and the live styleguide.
 
 ## Users, roles and permissions
 
