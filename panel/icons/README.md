@@ -2,7 +2,7 @@
 
 Except for the custom artwork noted below, these unmodified SVG assets are a subset of [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/v1.13.1/icons), licensed under MIT. Copyright (c) 2019–2024 The Bootstrap Authors. See `LICENSES/MIT.txt` and the file-level attribution in `REUSE.toml` at the repository root.
 
-Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and the Svelte `Icon` component read this collection. Their only argument is a canonical asset name, not a path or arbitrary SVG. Icons are decorative; name icon-only actions on their buttons or links.
+Use regular variants, never `*-fill` artwork. Both `Cosray\Panel\Icon::render()` and `icon()` in `src/lib/icons.js`, through the served sprite, read this collection. Their only argument is a canonical asset name, not a path or arbitrary SVG. Icons are decorative; name icon-only actions on their buttons or links.
 
 Notable mappings from the former artwork:
 

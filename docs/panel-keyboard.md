@@ -49,7 +49,7 @@ Modified letter bindings match `event.code` because macOS Option can change `eve
 
 ## Action menus
 
-The shared [action-menu behavior](../panel/src/lib/action-menu.js) works with both PHP and Svelte markup:
+The shared [action-menu behavior](../panel/src/lib/action-menu.js) works with both server-rendered and script-built markup:
 
 - Enter or Space on the trigger opens at the first enabled item; Down opens at the first and Up at the last.
 - Arrows and Home/End navigate enabled, visible items and scroll them into view.

@@ -71,7 +71,7 @@ There is no rolling changelog before the first public release. Git history and t
 - [src/Config/Defaults.php](src/Config/Defaults.php), [src/Config.php](src/Config.php): settings and typed access.
 - [src/Node/](src/Node/), [src/Field/](src/Field/), [src/Value/](src/Value/): schema, persistence, and template-facing values.
 - [src/Routes.php](src/Routes.php), [src/Controller/](src/Controller/): HTTP endpoints and access checks.
-- [panel/views/](panel/views/), [panel/src/](panel/src/), [panel/styles/](panel/styles/): Boiler SSR views, htmx behaviors, Svelte custom elements, and CSS.
+- [panel/views/](panel/views/), [panel/src/](panel/src/), [panel/styles/](panel/styles/): Boiler SSR views, htmx behaviors, custom elements, and CSS.
 - [db/migrations/](db/migrations/), [db/sql/](db/sql/): schema evolution and named queries.
 - [tests/](tests/), [panel/tests/](panel/tests/): executable examples and regression coverage.
 

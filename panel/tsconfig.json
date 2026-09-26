@@ -1,5 +1,4 @@
 {
-	"extends": "@tsconfig/svelte/tsconfig.json",
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"allowJs": true,
@@ -11,6 +10,7 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
+		"verbatimModuleSyntax": true,
 		"moduleResolution": "bundler",
 		"module": "esnext",
 		"target": "esnext",
@@ -19,8 +19,6 @@
 		"paths": {
 			"$lib": ["./src/lib"],
 			"$lib/*": ["./src/lib/*"],
-			"$components": ["./src/components"],
-			"$components/*": ["./src/components/*"],
 			"$types": ["./src/types"],
 			"$types/*": ["./src/types/*"]
 		}
@@ -31,7 +29,6 @@
 		"src/**/*.d.ts",
 		"src/**/*.js",
 		"src/**/*.ts",
-		"src/**/*.svelte",
 		"tests/**/*.ts"
 	],
 	"exclude": ["node_modules/**"]

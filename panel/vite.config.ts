@@ -1,7 +1,6 @@
 import { copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { svelte, vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
@@ -20,24 +19,11 @@ const copyHtmx = {
 
 export default defineConfig({
 	base: './',
-	plugins: [
-		copyHtmx,
-		svelte({
-			preprocess: vitePreprocess({ script: true }),
-			// Only element wrappers compile as custom elements; they embed
-			// normally compiled components.
-			dynamicCompileOptions({ filename }) {
-				if (filename.includes('/src/elements/')) {
-					return { customElement: true };
-				}
-			},
-		}),
-	],
+	plugins: [copyHtmx],
 	resolve: {
 		alias: {
 			$lib: path.resolve(root, 'src/lib'),
 			$types: path.resolve(root, 'src/types'),
-			$components: path.resolve(root, 'src/components'),
 		},
 	},
 	css: {

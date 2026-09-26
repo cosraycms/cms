@@ -7,12 +7,12 @@
 //   pnpm run modules          regenerate modules/
 //   pnpm run modules:check    fail when modules/ is out of date
 //
-// Entry points are the bare imports in src/ (Svelte and Node-only tools
-// excepted) plus the classic scripts listed in package.json#cosray. Every
-// entry's package has to be a runtime dependency; transitive packages come
-// along through the import graph. Plain .js files in src/ are served as they
-// are, so their imports also have to be ones a browser resolves: mapped
-// packages and relative paths to existing files, no aliases.
+// Entry points are the bare imports in src/ (Node-only tools excepted) plus
+// the classic scripts listed in package.json#cosray. Every entry's package
+// has to be a runtime dependency; transitive packages come along through the
+// import graph. Plain .js files in src/ are served as they are, so their
+// imports also have to be ones a browser resolves: mapped packages and
+// relative paths to existing files, no aliases.
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -26,8 +26,8 @@ const manifest = readJson(path.join(root, 'package.json'));
 const config = manifest.cosray ?? {};
 const conditions = ['browser', 'import', 'module', 'default'];
 
-// Our own code: prettier-formatted TypeScript, JavaScript and Svelte, where
-// a lexer for plain JavaScript would trip over type syntax.
+// Our own code still in TypeScript, where a lexer for plain JavaScript would
+// trip over type syntax.
 const sourceImport =
 	/(?:^|[\s;{}])(?:import|export)\s+(?!type\b)(?:[^'"`;]*?\sfrom\s*)?['"]([^'"\n]+)['"]|\bimport\(\s*['"]([^'"\n]+)['"]\s*\)/g;
 
@@ -138,7 +138,7 @@ function entries() {
 	const found = new Set();
 
 	for (const file of walk(path.join(root, 'src'))) {
-		if (!/\.(js|ts|svelte)$/.test(file) || file.endsWith('.d.ts')) {
+		if (!/\.(js|ts)$/.test(file) || file.endsWith('.d.ts')) {
 			continue;
 		}
 
@@ -154,7 +154,7 @@ function entries() {
 				);
 
 		for (const specifier of specifiers) {
-			if (isBare(specifier) && specifier !== 'svelte' && !specifier.startsWith('svelte/')) {
+			if (isBare(specifier)) {
 				found.add(specifier);
 			}
 		}

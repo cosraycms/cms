@@ -9,7 +9,7 @@
 		"build": "vite build",
 		"build:converter": "vite build -c vite.convert.config.ts",
 		"dev": "vite",
-		"check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings options_missing_custom_element:ignore",
+		"check": "tsc -p tsconfig.json",
 		"format": "prettier -w .",
 		"test": "vitest run",
 		"modules": "node scripts/modules.mjs",
@@ -46,17 +46,12 @@
 		"sortablejs": "^1.15.7"
 	},
 	"devDependencies": {
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@tsconfig/svelte": "^5.0.8",
 		"@types/jsdom": "^28.0.3",
 		"@types/node": "^25.9.5",
 		"@types/sortablejs": "^1.15.9",
 		"es-module-lexer": "^2.3.2",
 		"jsdom": "^25.0.1",
 		"prettier": "^3.9.6",
-		"prettier-plugin-svelte": "^3.5.2",
-		"svelte": "^5.56.10",
-		"svelte-check": "^4.7.6",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.6",
 		"vitest": "^4.1.11"
