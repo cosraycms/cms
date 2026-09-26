@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FileItem, LocaleMap } from '$types/data';
 
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { useAssets } from '$lib/assets';
 	import { fileIcon, humanSize } from '$lib/library';
 	import { __ } from '$lib/locale';

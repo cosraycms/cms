@@ -3,7 +3,8 @@
 <script lang="ts">
 	import Icon from '$components/Icon.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
-	import { ZXX, type LocaleMap } from '$types/data';
+	import type { LocaleMap } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { panelBase } from '$lib/runtime';
 	import { __ } from '$lib/locale';
 

@@ -7,7 +7,10 @@ import '../../src/elements/reference/ReferenceElement.svelte';
 vi.mock('$lib/locale', () => ({
 	__: (id: string, params?: { count: number }) => (params ? `${id}: ${params.count}` : id),
 }));
-vi.mock('$lib/runtime', () => ({ panelBase: () => '/cp/' }));
+vi.mock('$lib/runtime', () => ({
+	panelBase: () => '/cp/',
+	assetsBase: () => '/cp/assets/dev/',
+}));
 
 const fetchMock = vi.fn<typeof fetch>();
 

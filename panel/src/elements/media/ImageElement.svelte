@@ -4,7 +4,7 @@
 	import type { AssetMap, FileItem, LocaleMap, Meta } from '$types/data';
 
 	import { untrack } from 'svelte';
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { provideAssets } from '$lib/assets';
 	import MediaControl from './MediaControl.svelte';
 

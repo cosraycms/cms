@@ -1,11 +1,11 @@
-type Align = 'start' | 'end' | 'center';
+/** @typedef {'start' | 'end' | 'center'} Align */
 
-export function placement(
-	anchor: HTMLElement,
-	menu: HTMLElement,
-	align: Align = 'start',
-	inside = false,
-) {
+/**
+ * @param {HTMLElement} anchor
+ * @param {HTMLElement} menu
+ * @param {Align} [align]
+ */
+export function placement(anchor, menu, align = 'start', inside = false) {
 	const trigger = anchor.getBoundingClientRect();
 	const viewport = window.visualViewport;
 	let top = viewport?.offsetTop ?? 0;
@@ -84,33 +84,43 @@ export function placement(
 
 const MENU = '[data-action-menu]';
 let id = 0;
-let uninstall: (() => void) | null = null;
-let active: {
-	menu: HTMLElement;
-	trigger: HTMLButtonElement;
-	opener: HTMLElement;
-	frame: number;
-} | null = null;
-let pending: {
-	trigger: HTMLButtonElement;
-	opener: HTMLElement;
-	focus: 'first' | 'last' | false;
-} | null = null;
+/** @typedef {'first' | 'last' | false} Focus */
 
-function surface(trigger: HTMLButtonElement): HTMLElement | null {
+/** @type {(() => void) | null} */
+let uninstall = null;
+/** @type {{ menu: HTMLElement, trigger: HTMLButtonElement, opener: HTMLElement, frame: number } | null} */
+let active = null;
+/** @type {{ trigger: HTMLButtonElement, opener: HTMLElement, focus: Focus } | null} */
+let pending = null;
+
+/**
+ * @param {HTMLButtonElement} trigger
+ * @returns {HTMLElement | null}
+ */
+function surface(trigger) {
 	const menu = document.getElementById(trigger.getAttribute('popovertarget') ?? '');
 	return menu?.matches(MENU) ? menu : null;
 }
 
-function choices(menu: HTMLElement): HTMLElement[] {
-	return Array.from(menu.querySelectorAll<HTMLElement>('button, a[href]')).filter(
-		(item) =>
-			!item.matches(':disabled, [aria-disabled="true"]') &&
-			item.checkVisibility({ visibilityProperty: true }),
-	);
+/**
+ * @param {HTMLElement} menu
+ * @returns {HTMLElement[]}
+ */
+function choices(menu) {
+	return Array.from(menu.querySelectorAll('button, a[href]'))
+		.filter((item) => item instanceof HTMLElement)
+		.filter(
+			(item) =>
+				!item.matches(':disabled, [aria-disabled="true"]') &&
+				item.checkVisibility({ visibilityProperty: true }),
+		);
 }
 
-function reveal(menu: HTMLElement, item: HTMLElement): void {
+/**
+ * @param {HTMLElement} menu
+ * @param {HTMLElement} item
+ */
+function reveal(menu, item) {
 	const box = item.getBoundingClientRect();
 	const top = menu.getBoundingClientRect().top + menu.clientTop;
 	const bottom = top + menu.clientHeight;
@@ -118,20 +128,26 @@ function reveal(menu: HTMLElement, item: HTMLElement): void {
 	else if (box.bottom > bottom) menu.scrollTop += box.bottom - bottom;
 }
 
-function focusChoice(menu: HTMLElement, item?: HTMLElement): void {
+/**
+ * @param {HTMLElement} menu
+ * @param {HTMLElement} [item]
+ */
+function focusChoice(menu, item) {
 	for (const choice of choices(menu)) choice.tabIndex = choice === item ? 0 : -1;
 	(item ?? menu).focus({ preventScroll: true });
 	if (item) reveal(menu, item);
 }
 
-function finish(menu: HTMLElement): void {
+/** @param {HTMLElement} menu */
+function finish(menu) {
 	if (active?.menu !== menu) return;
 	active.trigger.setAttribute('aria-expanded', 'false');
 	cancelAnimationFrame(active.frame);
 	active = null;
 }
 
-export function closeMenu(menu: HTMLElement, restore = false): void {
+/** @param {HTMLElement} menu */
+export function closeMenu(menu, restore = false) {
 	const opener = active?.menu === menu ? active.opener : null;
 	if (menu.isConnected && menu.matches(':popover-open')) menu.hidePopover();
 	finish(menu);
@@ -148,13 +164,13 @@ export function closeMenu(menu: HTMLElement, restore = false): void {
 /**
  * Opens the trigger's menu, or another menu anchored at the trigger: a
  * block's split entry opens the field's picker at the block's kebab.
+ *
+ * @param {HTMLButtonElement} trigger
+ * @param {Focus} [focus]
+ * @param {HTMLElement} [opener]
+ * @param {HTMLElement | null} [menu]
  */
-export function openMenu(
-	trigger: HTMLButtonElement,
-	focus: 'first' | 'last' | false = 'first',
-	opener: HTMLElement = trigger,
-	menu: HTMLElement | null = surface(trigger),
-): void {
+export function openMenu(trigger, focus = 'first', opener = trigger, menu = surface(trigger)) {
 	if (!menu || trigger.disabled) return;
 	if (menu.matches(':popover-open')) {
 		if (focus) focusChoice(menu, focus === 'last' ? choices(menu).at(-1) : choices(menu)[0]);
@@ -168,17 +184,18 @@ export function openMenu(
 	}
 }
 
-function toggle(event: Event): void {
+/** @param {Event} event */
+function toggle(event) {
 	const menu = event.target;
 	if (!(menu instanceof HTMLElement) || !menu.matches(MENU)) return;
-	if ((event as ToggleEvent).newState === 'closed') {
+	if (/** @type {ToggleEvent} */ (event).newState === 'closed') {
 		finish(menu);
 		return;
 	}
 
+	/** @type {HTMLButtonElement | null} */
 	const trigger =
-		pending?.trigger ??
-		document.querySelector<HTMLButtonElement>(`button[popovertarget="${CSS.escape(menu.id)}"]`);
+		pending?.trigger ?? document.querySelector(`button[popovertarget="${CSS.escape(menu.id)}"]`);
 	if (!trigger) return;
 	const focus = pending?.focus ?? false;
 	trigger.id ||= `cms-menu-trigger-${++id}`;
@@ -187,7 +204,9 @@ function toggle(event: Event): void {
 	menu.setAttribute('role', 'menu');
 	menu.setAttribute('aria-labelledby', trigger.id);
 	menu.tabIndex = -1;
-	for (const item of menu.querySelectorAll<HTMLElement>('button, a[href]')) {
+	for (const item of /** @type {NodeListOf<HTMLElement>} */ (
+		menu.querySelectorAll('button, a[href]')
+	)) {
 		if (!['menuitemcheckbox', 'menuitemradio'].includes(item.getAttribute('role') ?? ''))
 			item.setAttribute('role', 'menuitem');
 		item.tabIndex = -1;
@@ -197,7 +216,7 @@ function toggle(event: Event): void {
 	const state = { menu, trigger, opener: pending?.opener ?? trigger, frame: 0 };
 	active = state;
 
-	const position = (): void => {
+	const position = () => {
 		if (active !== state) return;
 		if (
 			!menu.isConnected ||
@@ -220,7 +239,7 @@ function toggle(event: Event): void {
 			return;
 		}
 		let moved = false;
-		for (const name of ['left', 'top', 'maxWidth', 'maxHeight'] as const) {
+		for (const name of /** @type {const} */ (['left', 'top', 'maxWidth', 'maxHeight'])) {
 			const value = `${point[name]}px`;
 			if (menu.style[name] !== value) {
 				menu.style[name] = value;
@@ -247,9 +266,11 @@ function toggle(event: Event): void {
 	});
 }
 
-function click(event: MouseEvent): void {
+/** @param {MouseEvent} event */
+function click(event) {
 	const target = event.target instanceof Element ? event.target : null;
-	const trigger = target?.closest<HTMLButtonElement>('button[popovertarget]');
+	/** @type {HTMLButtonElement | null | undefined} */
+	const trigger = target?.closest('button[popovertarget]');
 	const menu = trigger && surface(trigger);
 	if (trigger && menu) {
 		event.preventDefault();
@@ -258,7 +279,8 @@ function click(event: MouseEvent): void {
 		return;
 	}
 
-	const item = target?.closest<HTMLElement>('button, a[href]');
+	/** @type {HTMLElement | null | undefined} */
+	const item = target?.closest('button, a[href]');
 	if (!active || !item || item.closest(MENU) !== active.menu) return;
 	if (
 		!active.trigger.isConnected ||
@@ -272,15 +294,18 @@ function click(event: MouseEvent): void {
 	closeMenu(active.menu, true);
 }
 
-function keydown(event: KeyboardEvent): void {
+/** @param {KeyboardEvent} event */
+function keydown(event) {
 	const target = event.target instanceof Element ? event.target : null;
-	const menu = target?.closest<HTMLElement>(MENU);
+	/** @type {HTMLElement | null | undefined} */
+	const menu = target?.closest(MENU);
 	if (menu && active?.menu === menu) {
 		event.stopPropagation();
 		if (event.metaKey || event.ctrlKey || event.altKey) return;
 		const items = choices(menu);
-		const index = items.indexOf(document.activeElement as HTMLElement);
-		let next: HTMLElement | undefined;
+		const index = items.indexOf(/** @type {HTMLElement} */ (document.activeElement));
+		/** @type {HTMLElement | undefined} */
+		let next;
 		switch (event.key) {
 			case 'ArrowDown':
 				next = items[(index + 1) % items.length];
@@ -311,7 +336,8 @@ function keydown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const trigger = target?.closest<HTMLButtonElement>('button[popovertarget]');
+	/** @type {HTMLButtonElement | null | undefined} */
+	const trigger = target?.closest('button[popovertarget]');
 	if (!trigger || !surface(trigger) || event.metaKey || event.ctrlKey || event.altKey) return;
 	if (event.key === 'Escape' && active?.trigger === trigger) {
 		event.preventDefault();
@@ -326,13 +352,15 @@ function keydown(event: KeyboardEvent): void {
 	}
 }
 
-function focusout(event: FocusEvent): void {
+/** @param {FocusEvent} event */
+function focusout(event) {
 	if (!active || !(event.target instanceof Node) || !active.menu.contains(event.target)) return;
 	if (event.relatedTarget instanceof Node && !active.menu.contains(event.relatedTarget))
 		closeMenu(active.menu);
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	if (uninstall) return () => {};
 	const dismiss = () => {
 		if (active) closeMenu(active.menu);

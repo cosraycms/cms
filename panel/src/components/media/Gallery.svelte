@@ -3,7 +3,7 @@
 	import type { SortableEvent } from 'sortablejs';
 
 	import Sortable from 'sortablejs';
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { useAssets } from '$lib/assets';
 	import { RATIOS, afterMove, afterRemove, readRatio } from '$lib/gallery';
 	import { assetLine, extension } from '$lib/library';

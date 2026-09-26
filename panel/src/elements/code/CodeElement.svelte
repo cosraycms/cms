@@ -6,7 +6,7 @@
 	import { ensureLocales, ensureNeutral } from '$lib/content';
 	import { localeTitle, resolveFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import CodeEditor from '$components/code/CodeEditor.svelte';
 	import { DEFAULT_CODE_SYNTAX, normalizeCodeSyntax } from '$components/code/languages';
 

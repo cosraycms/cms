@@ -3,7 +3,7 @@
 <script lang="ts">
 	import type { AssetInfo, AssetMap, LocaleMap } from '$types/data';
 
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import {
 		FORMAT,
 		VERSION,

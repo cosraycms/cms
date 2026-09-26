@@ -5,9 +5,13 @@
 // (dots or spaces in top-level names, stray brackets) are unsupported —
 // the panel never generates such names.
 
-type Tree = Record<string, unknown>;
+/** @typedef {Record<string, unknown>} Tree */
 
-function segments(name: string): string[] | null {
+/**
+ * @param {string} name
+ * @returns {string[] | null}
+ */
+function segments(name) {
 	const open = name.indexOf('[');
 
 	if (open <= 0) {
@@ -29,8 +33,13 @@ function segments(name: string): string[] | null {
 	return parts;
 }
 
-// parse_str appends [] entries at max(existing integer keys) + 1.
-function nextIndex(node: Tree): number {
+/**
+ * parse_str appends [] entries at max(existing integer keys) + 1.
+ *
+ * @param {Tree} node
+ * @returns {number}
+ */
+function nextIndex(node) {
 	let next = 0;
 
 	for (const key of Object.keys(node)) {
@@ -44,8 +53,13 @@ function nextIndex(node: Tree): number {
 	return next;
 }
 
-export function nest(entries: Iterable<[string, string]>): Tree {
-	const root: Tree = {};
+/**
+ * @param {Iterable<[string, string]>} entries
+ * @returns {Tree}
+ */
+export function nest(entries) {
+	/** @type {Tree} */
+	const root = {};
 
 	for (const [name, value] of entries) {
 		// A malformed name becomes a literal top-level key instead of
@@ -58,9 +72,10 @@ export function nest(entries: Iterable<[string, string]>): Tree {
 			const existing = node[key];
 
 			if (typeof existing === 'object' && existing !== null) {
-				node = existing as Tree;
+				node = /** @type {Tree} */ (existing);
 			} else {
-				const fresh: Tree = {};
+				/** @type {Tree} */
+				const fresh = {};
 				node[key] = fresh;
 				node = fresh;
 			}

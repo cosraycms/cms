@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FileItem, LocaleMap, Meta, UploadType } from '$types/data';
 
-	import { ZXX } from '$types/data';
+	import { ZXX } from '$lib/content';
 	import { localeTitle, resolveFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
 	import MediaField from '$components/MediaField.svelte';
