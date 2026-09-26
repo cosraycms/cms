@@ -110,11 +110,17 @@ abstract class Panel
 			return 'shell';
 		}
 
-		// The target reads `<tag>#<id>`; only the id names a panel region.
+		return $this->target() === 'frame' ? 'frame' : 'main';
+	}
+
+	/** The id of the element an htmx request swaps, if any. */
+	protected function target(): string
+	{
+		// The header reads `<tag>#<id>`; only the id names a panel region.
 		$target = $this->request->header('HX-Target');
 		$hash = strrpos($target, '#');
 
-		return $hash !== false && substr($target, $hash + 1) === 'frame' ? 'frame' : 'main';
+		return $hash === false ? '' : substr($target, $hash + 1);
 	}
 
 	/**

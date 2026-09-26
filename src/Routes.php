@@ -169,6 +169,14 @@ class Routes
 				$uid = '{uid:[A-Za-z0-9-_.]{1,64}}';
 				$type = '{type:[a-z][a-z0-9-]{0,63}}';
 				$panel
+					->post("/media/{$uid}", [Panel\Media::class, 'save'], 'media.save')
+					->middleware($panelAuth)
+					->after($renderers->get('media'));
+				$panel
+					->post("/media/{$uid}/delete", [Panel\Media::class, 'delete'], 'media.delete')
+					->middleware($panelAuth)
+					->after($renderers->get('media'));
+				$panel
 					->get('/users', [Panel\Users::class, 'index'], 'users')
 					->middleware($panelAuth)
 					->after($renderers->get('users'));

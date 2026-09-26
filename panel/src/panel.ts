@@ -17,6 +17,7 @@ import { install as installInspector } from './behaviors/inspector';
 import { install as installLayoutPreview } from './behaviors/layout-preview';
 import { install as installMenu } from './behaviors/menu';
 import { install as installMenuKeys } from './behaviors/menu-keys';
+import { install as installMedia } from './behaviors/media.js';
 import { install as installMenuTree } from './behaviors/menu-tree';
 import { install as installPaths } from './behaviors/paths';
 import { install as installPick } from './behaviors/pick';
@@ -143,6 +144,7 @@ cleanups.push(
 	installMenu(),
 	installMenuTree(),
 	installMenuKeys(),
+	installMedia(),
 );
 listen('htmx:after:swap' as keyof DocumentEventMap, afterSwap);
 
