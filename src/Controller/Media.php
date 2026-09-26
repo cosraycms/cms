@@ -15,16 +15,12 @@ use Cosray\Actor;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
 use Cosray\Assets\Ingest;
-use Cosray\Assets\Library;
-use Cosray\Assets\Meta;
 use Cosray\Assets\SizeSpec;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\IngestError;
 use Cosray\Exception\RuntimeException;
-use Cosray\Locales;
 use Cosray\Middleware\Permission;
-use Cosray\References\Usage;
 use Cosray\Users;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
 
@@ -37,7 +33,6 @@ class Media
 		protected readonly Request $request,
 		protected readonly Config $config,
 		protected readonly Database $db,
-		protected readonly Locales $locales,
 	) {}
 
 	#[Permission('panel')]
@@ -105,144 +100,6 @@ class Media
 		}
 
 		return $response->json($payload, 400);
-	}
-
-	/**
-	 * Paged asset catalog listing for the panel (media screen, library
-	 * picker, link modal). `kind` takes a comma-separated set from the
-	 * filter vocabulary image/video/audio/document — which splits the
-	 * catalog kind `file` in two; `file` itself (a File field accepts
-	 * every kind) and no kind list everything. `q` matches the filename,
-	 * `since` cuts on the created timestamp. `counts` reports per-kind
-	 * totals honoring `q` and `since` but not `kind`, so a filter UI can
-	 * show what selecting each kind would yield.
-	 */
-	#[Permission('panel')]
-	public function library(): Response
-	{
-		$params = $this->request->params();
-		$uids = (string) ($params['uids'] ?? '');
-		$page = $this->catalog()->page(
-			kinds: Library::filterKinds((string) ($params['kind'] ?? '')),
-			q: (string) ($params['q'] ?? ''),
-			since: Library::since($params['since'] ?? null),
-			page: (int) ($params['page'] ?? 1),
-			uids: $uids !== '' ? explode(',', $uids) : null,
-		);
-
-		return Response::create($this->factory)->json([
-			'ok' => true,
-			'assets' => array_map(Library::item(...), $page->assets),
-			'page' => $page->page,
-			'more' => $page->more,
-			'total' => $page->total,
-			'counts' => $page->counts,
-		]);
-	}
-
-	/**
-	 * Single-asset detail for the media panel: the catalog row plus its
-	 * editable meta and the display-ready usage list (who points at it).
-	 */
-	#[Permission('panel')]
-	public function detail(string $uid): Response
-	{
-		$response = Response::create($this->factory);
-		$row = $this->db->assets->byUid(['uid' => $uid])->first();
-
-		if (!$row) {
-			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
-		}
-
-		return $response->json([
-			'ok' => true,
-			'asset' => $this->detailItem(Asset::fromRow($row, $this->config), $row),
-			'usage' => new Usage($this->db)->forAsset($uid),
-		]);
-	}
-
-	/**
-	 * Persist the editable meta slice (localized alt/title/caption,
-	 * scalar credit, image focal point). The submitted patch replaces
-	 * the managed keys and leaves the rest of the bag untouched.
-	 */
-	#[Permission('panel')]
-	public function updateMeta(string $uid): Response
-	{
-		$response = Response::create($this->factory);
-		$row = $this->db->assets->byUid(['uid' => $uid])->first();
-
-		if (!$row) {
-			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
-		}
-
-		$stored = json_decode((string) ($row['meta'] ?? '{}'), true);
-		$input = $this->request->json();
-		$meta = Meta::apply(
-			is_array($stored) ? $stored : [],
-			is_array($input) ? $input['meta'] ?? $input : [],
-			$this->localeIds(),
-			Asset::fromRow($row, $this->config)->kind === 'image',
-		);
-
-		$this->db->assets->updateMeta(['uid' => $uid, 'meta' => json_encode($meta)])->run();
-
-		return $response->json(['ok' => true, 'meta' => $meta]);
-	}
-
-	protected function detailItem(Asset $asset, array $row): array
-	{
-		return [
-			'uid' => $asset->uid,
-			'filename' => $asset->filename,
-			'kind' => $asset->kind,
-			'mime' => $asset->mime,
-			'bytes' => $asset->bytes,
-			'width' => $asset->width,
-			'height' => $asset->height,
-			'url' => $asset->path(),
-			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
-			'created' => isset($row['created']) ? (string) $row['created'] : null,
-			'meta' => $asset->meta,
-		];
-	}
-
-	/** @return list<string> */
-	protected function localeIds(): array
-	{
-		$ids = [];
-
-		foreach ($this->locales as $locale) {
-			$ids[] = $locale->id;
-		}
-
-		return $ids;
-	}
-
-	/**
-	 * Hard delete, unreferenced only (see Library::delete()): an asset in
-	 * use answers 409 with a display-ready owner list.
-	 */
-	#[Permission('panel')]
-	public function delete(string $uid): Response
-	{
-		$response = Response::create($this->factory);
-		$owners = $this->catalog()->delete($uid);
-
-		if ($owners === null) {
-			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
-		}
-
-		if ($owners !== []) {
-			return $response->json(['ok' => false, 'usage' => $owners], 409);
-		}
-
-		return $response->json(['ok' => true]);
-	}
-
-	protected function catalog(): Library
-	{
-		return new Library($this->db, $this->config);
 	}
 
 	/** Build the client payload for a catalog row. */

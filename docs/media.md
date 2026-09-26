@@ -47,17 +47,9 @@ Block image ladders, responsive `sizes`, gallery ratios, and spacing are documen
 
 ## HTTP integration
 
-Editor elements should use `window.Cosray.upload(type, file)`, which supplies the session's CSRF token; see the [bridge](controls.md#the-windowcosray-bridge). Custom integrations should inspect [Routes](../src/Routes.php) and [Controller\Media](../src/Controller/Media.php) for current access checks and request/response fields.
+Editor elements should use `window.Cosray.upload(type, file)`, which supplies the session's CSRF token; see the [bridge](controls.md#the-windowcosray-bridge). The upload is `POST /media/{mediatype}`, a multipart request with the file under `file`, for image, file, or video; [Routes](../src/Routes.php) and [Controller\Media](../src/Controller/Media.php) hold its access checks and response fields.
 
-The current endpoint groups are:
-
-- `POST /media/{mediatype}`: multipart upload under `file`, for image, file, or video.
-- `GET /media/library`: paged catalog search, kind/date filters, and batch UID lookup.
-- `GET /media/{uid}`: asset metadata and usage.
-- `PUT /media/{uid}`: editable catalog metadata.
-- `DELETE /media/{uid}`: deletion when unreferenced; referenced assets return `409` with usage information.
-
-The library's filter vocabulary splits catalog files into audio and documents. Missing catalog entries render no media; old owner-scoped asset URLs are not supported by the catalog routes.
+Browsing, editing and deleting catalog entries happen in the panel's media screen, whose server-rendered picker the editor controls embed; [Assets\Library](../src/Assets/Library.php) holds the listing and deletion rules. There is no JSON API for the catalog. The library's filter vocabulary splits catalog files into audio and documents. Missing catalog entries render no media; old owner-scoped asset URLs are not supported by the catalog routes.
 
 ## Reference indexes
 

@@ -16,7 +16,7 @@ use RecursiveIteratorIterator;
 /**
  * The asset catalog as the panel browses and prunes it: paged listings
  * filtered by kind, filename and upload date, and the deletion of assets
- * nothing references. The media screen and the JSON endpoints share it.
+ * nothing references. The media screen and the library picker share it.
  */
 final class Library
 {
@@ -41,14 +41,12 @@ final class Library
 	 * selecting each kind would yield.
 	 *
 	 * @param list<string> $kinds
-	 * @param list<string>|null $uids
 	 */
 	public function page(
 		array $kinds = [],
 		string $q = '',
 		?string $since = null,
 		int $page = 1,
-		?array $uids = null,
 	): LibraryPage {
 		$page = max(1, $page);
 		$args = ['limit' => self::LIMIT + 1, 'offset' => ($page - 1) * self::LIMIT];
@@ -72,10 +70,6 @@ final class Library
 		if ($since !== null) {
 			$args['since'] = $since;
 			$countArgs['since'] = $since;
-		}
-
-		if ($uids !== null) {
-			$args['uids'] = $uids;
 		}
 
 		$rows = $this->db->assets->list($args)->all();

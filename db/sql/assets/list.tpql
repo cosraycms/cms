@@ -36,9 +36,6 @@ WHERE
 <?php if (isset($since)) : ?>
 	AND created >= :since
 <?php endif ?>
-<?php if (isset($uids)) : ?>
-	AND uid IN (SELECT jsonb_array_elements_text(:uids::jsonb))
-<?php endif ?>
 ORDER BY
 	created DESC,
 	asset DESC
