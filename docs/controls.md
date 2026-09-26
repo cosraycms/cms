@@ -178,7 +178,7 @@ Named controls resolve server-side; later registrations replace earlier ones, in
 | Form | Resolution |
 | --- | --- |
 | `{pluginId}/{file}` | Plugin asset directory; Registrar prefixes its ID automatically |
-| `cosray:{entry}` | Built-in panel element, or Vite during development |
+| `cosray:{entry}` | Built-in panel element from `panel/src/elements/` |
 | `https?://...` | Used as supplied |
 
 Modules load once through dynamic `import()` and register their element at module evaluation. Registration should tolerate a definition already existing.

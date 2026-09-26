@@ -1,16 +1,16 @@
 import Sortable, { type SortableEvent } from 'sortablejs';
-import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { BridgeSystem, UploadResult } from '../../src/lib/bridge';
 import type { HostPayload } from '../../src/lib/host';
 import type { FileItem, LocaleMap, Meta } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
-import '../../src/elements/media/FileElement.svelte';
-import '../../src/elements/media/ImageElement.svelte';
-import '../../src/elements/media/VideoElement.svelte';
+import '../../src/elements/media.js';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+
+// The element updates synchronously; a microtask lets pending promises land.
+const tick = () => Promise.resolve();
 
 const system: BridgeSystem = {
 	locale: 'en',
@@ -28,8 +28,12 @@ const system: BridgeSystem = {
 
 type MediaElement = HTMLElement & HostPayload & { locale: string };
 
+// The library dialog loads the server-rendered picker through htmx.
+const ajax = vi.fn().mockResolvedValue(undefined);
+
 beforeEach(() => {
 	installBridge(system);
+	vi.stubGlobal('htmx', { ajax });
 });
 
 afterEach(async () => {
@@ -37,6 +41,8 @@ afterEach(async () => {
 	document.body.replaceChildren();
 	await tick();
 	delete window.Cosray;
+	vi.unstubAllGlobals();
+	ajax.mockClear();
 });
 
 async function media(tag: string, payload: HostPayload, locale = 'de') {
@@ -126,12 +132,6 @@ describe('the frame', () => {
 	}
 
 	it('opens the picker and the library from the bar and counts against the limit', async () => {
-		vi.stubGlobal(
-			'fetch',
-			vi.fn().mockResolvedValue({
-				json: async () => ({ ok: true, assets: [], page: 1, more: false, total: 0, counts: {} }),
-			}),
-		);
 		const { element } = await files(5);
 		const bar = element.querySelector<HTMLElement>('.cms-media-field > .bar')!;
 		const picker = element.querySelector<HTMLInputElement>('input[type="file"]')!;
@@ -145,9 +145,8 @@ describe('the frame', () => {
 
 		bar.querySelector<HTMLButtonElement>('.browse')!.click();
 		await tick();
-		expect(document.querySelector('.cms-modal .cms-library-browser, .cms-modal')).not.toBeNull();
-
-		vi.unstubAllGlobals();
+		expect(document.querySelector('.cms-modal')).not.toBeNull();
+		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker', expect.anything());
 	});
 
 	it('is the bar alone while empty', async () => {
@@ -242,12 +241,6 @@ describe('filled single field', () => {
 		{ label: 'video row', tag: 'cosray-video', uid: 'clip' },
 		{ label: 'video figure', tag: 'cosray-video', uid: 'clip', presentation: 'block' },
 	])('replaces its file from the menu of the $label', async ({ tag, uid, presentation }) => {
-		vi.stubGlobal(
-			'fetch',
-			vi.fn().mockResolvedValue({
-				json: async () => ({ ok: true, assets: [], page: 1, more: false, total: 0, counts: {} }),
-			}),
-		);
 		const { element } = await media(tag, {
 			value: { zxx: [{ uid }] },
 			field: { name: 'single', limit: { min: 0, max: 1 }, presentation },
@@ -267,8 +260,6 @@ describe('filled single field', () => {
 		library.click();
 		await tick();
 		expect(document.querySelector('.cms-modal')).not.toBeNull();
-
-		vi.unstubAllGlobals();
 	});
 });
 
@@ -446,6 +437,25 @@ describe('file metadata', () => {
 	});
 });
 
+describe('file dialog focus', () => {
+	it('returns to the row after the language changed while the dialog was open', async () => {
+		const { element } = await file();
+		const pencil = element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!;
+		pencil.focus();
+		pencil.click();
+		await tick();
+
+		element.locale = 'en';
+		expect(element.querySelector('.cms-file-row .title')?.textContent).toBe('English title');
+
+		await enter(document.querySelector<HTMLInputElement>('.cms-modal input')!, 'Retitled');
+		await action('common:apply');
+
+		expect(element.querySelector('.cms-file-row .title')?.textContent).toBe('Retitled');
+		expect(document.activeElement).toBe(element.querySelector('.cms-file-row .edit'));
+	});
+});
+
 describe('media uploads', () => {
 	it.each([1, 4])(
 		'keeps a pending upload in its starting locale with a limit of %i',
@@ -576,6 +586,32 @@ describe('gallery ordering', () => {
 		await tick();
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({ en: [], de: [second, first] });
+	});
+});
+
+describe('gallery drawer', () => {
+	it('opens on a pick and keeps the stepper focused while stepping', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }] },
+			field: { name: 'gallery' },
+			assets: {
+				a: { filename: 'a.jpg', url: '/media/a.jpg', kind: 'image' },
+				b: { filename: 'b.jpg', url: '/media/b.jpg', kind: 'image' },
+				c: { filename: 'c.jpg', url: '/media/c.jpg', kind: 'image' },
+			},
+		});
+
+		expect(element.querySelector('.cms-gallery .drawer')).toBeNull();
+
+		element.querySelectorAll<HTMLButtonElement>('.tile .pick')[1].click();
+		const next = element.querySelector<HTMLButtonElement>('.drawer .step.next')!;
+		next.focus();
+		next.click();
+		next.click();
+
+		expect(element.querySelector('.drawer .position')?.textContent).toBe('1 / 3');
+		expect(element.querySelector('.drawer .filename')?.textContent).toBe('a.jpg');
+		expect(document.activeElement).toBe(next);
 	});
 });
 

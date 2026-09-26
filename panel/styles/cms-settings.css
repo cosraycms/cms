@@ -27,8 +27,7 @@
 	}
 }
 
-/* An element's per-use form stacks in the compact dialog; the element's own
-   scoped rule has the same specificity and loads later, hence the depth. */
+/* An element's per-use form stacks in the compact dialog. */
 .cms-settings .cms-settings-slot .cms-media-meta {
 	grid-template-columns: minmax(0, 1fr);
 }

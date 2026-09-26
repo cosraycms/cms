@@ -4,12 +4,13 @@
  * into a new order around it.
  */
 
-/** `length` is the item count after the removal. */
-export function afterRemove(
-	selected: number | null,
-	removed: number,
-	length: number,
-): number | null {
+/**
+ * @param {number | null} selected
+ * @param {number} removed
+ * @param {number} length The item count after the removal.
+ * @returns {number | null}
+ */
+export function afterRemove(selected, removed, length) {
 	if (selected === null || length === 0) {
 		return null;
 	}
@@ -21,7 +22,13 @@ export function afterRemove(
 	return Math.min(selected, length - 1);
 }
 
-export function afterMove(selected: number | null, from: number, to: number): number | null {
+/**
+ * @param {number | null} selected
+ * @param {number} from
+ * @param {number} to
+ * @returns {number | null}
+ */
+export function afterMove(selected, from, to) {
 	if (selected === null || from === to) {
 		return selected;
 	}
@@ -42,12 +49,14 @@ export function afterMove(selected: number | null, from: number, to: number): nu
 }
 
 /** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
-export const RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'] as const;
+export const RATIOS = /** @type {const} */ (['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3']);
 
-export type Ratio = (typeof RATIOS)[number];
+/** @typedef {(typeof RATIOS)[number]} Ratio */
 
-export function readRatio(value: unknown): Ratio {
-	return typeof value === 'string' && (RATIOS as readonly string[]).includes(value)
-		? (value as Ratio)
-		: 'auto';
+/**
+ * @param {unknown} value
+ * @returns {Ratio}
+ */
+export function readRatio(value) {
+	return RATIOS.find((ratio) => ratio === value) ?? 'auto';
 }
