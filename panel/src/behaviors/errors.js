@@ -1,6 +1,6 @@
-import { selectContentLocale } from './content-locales';
-import { revealInspector } from './inspector';
-import { revealTab } from './tabs';
+import { selectContentLocale } from './content-locales.js';
+import { revealInspector } from './inspector.js';
+import { revealTab } from './tabs.js';
 
 // Field-level validation errors for the SSR editor form.
 //
@@ -21,12 +21,17 @@ const FORM = 'node-editor-form';
 const INVALID = 'data-invalid';
 const MESSAGE = 'data-error-message';
 
-type Path = Array<string | number>;
+/** @typedef {Array<string | number>} Path */
 
-let lastBox: Element | null = null;
+/** @type {Element | null} */
+let lastBox = null;
 let counter = 0;
 
-function nameFor(path: Path): string {
+/**
+ * @param {Path} path
+ * @returns {string}
+ */
+function nameFor(path) {
 	return (
 		String(path[0]) +
 		path
@@ -36,16 +41,21 @@ function nameFor(path: Path): string {
 	);
 }
 
-function parsePath(item: Element): Path | null {
+/**
+ * @param {Element} item
+ * @returns {Path | null}
+ */
+function parsePath(item) {
 	try {
-		const parsed: unknown = JSON.parse(item.getAttribute('data-error-path') ?? '');
+		/** @type {unknown} */
+		const parsed = JSON.parse(item.getAttribute('data-error-path') ?? '');
 
 		if (
 			Array.isArray(parsed) &&
 			parsed.length > 0 &&
 			parsed.every((segment) => typeof segment === 'string' || typeof segment === 'number')
 		) {
-			return parsed as Path;
+			return /** @type {Path} */ (parsed);
 		}
 	} catch {
 		// Fall through to null: a malformed path renders in the summary
@@ -58,11 +68,20 @@ function parsePath(item: Element): Path | null {
 // Escapes a form name for use inside a quoted attribute selector; the
 // brackets need it too — not per CSS grammar, but jsdom's selector
 // engine rejects them unescaped.
-function selectorValue(name: string): string {
+/**
+ * @param {string} name
+ * @returns {string}
+ */
+function selectorValue(name) {
 	return name.replace(/[\\"[\]]/g, '\\$&');
 }
 
-function resolve(form: Element, path: Path): Element | null {
+/**
+ * @param {Element} form
+ * @param {Path} path
+ * @returns {Element | null}
+ */
+function resolve(form, path) {
 	for (let end = path.length; end > 0; end--) {
 		const name = nameFor(path.slice(0, end));
 		const exact = form.querySelector(`[name="${selectorValue(name)}"]`);
@@ -86,36 +105,55 @@ function resolve(form: Element, path: Path): Element | null {
 	return null;
 }
 
-/** A control inside a meta dialog belongs to the dialog's owner — the field
- * wrapper, or the block row whose settings dialog took the group. */
-function wrapper(control: Element): Element {
+/**
+ * A control inside a meta dialog belongs to the dialog's owner — the field
+ * wrapper, or the block row whose settings dialog took the group.
+ *
+ * @param {Element} control
+ * @returns {Element}
+ */
+function wrapper(control) {
 	const owner = control.closest('dialog[data-meta]')?.closest('[data-meta-owner]');
 
 	return owner ?? control.closest('.cms-field') ?? control.parentElement ?? control;
 }
 
-function contentLocaleIds(control: HTMLElement): Set<string> {
+/**
+ * @param {HTMLElement} control
+ * @returns {Set<string>}
+ */
+function contentLocaleIds(control) {
 	if (control instanceof HTMLSelectElement) {
 		return new Set(Array.from(control.options, (option) => option.value));
 	}
 
 	return new Set(
 		Array.from(
-			control.querySelectorAll<HTMLElement>('[data-content-locale-option]'),
+			/** @type {NodeListOf<HTMLElement>} */ (
+				control.querySelectorAll('[data-content-locale-option]')
+			),
 			(option) => option.dataset.contentLocaleOption ?? '',
 		).filter((locale) => locale !== ''),
 	);
 }
 
-function contentLocale(form: Element, path: Path, control: Element): string | undefined {
-	const localeControl = form.querySelector<HTMLElement>('[data-content-locale-control]');
+/**
+ * @param {Element} form
+ * @param {Path} path
+ * @param {Element} control
+ * @returns {string | undefined}
+ */
+function contentLocale(form, path, control) {
+	const localeControl = /** @type {HTMLElement | null} */ (
+		form.querySelector('[data-content-locale-control]')
+	);
 
 	if (!localeControl || path[0] !== 'content') {
 		return undefined;
 	}
 
 	const ids = contentLocaleIds(localeControl);
-	const variant = control.closest<HTMLElement>('.variant[data-locale]');
+	const variant = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'));
 
 	if (variant?.dataset.locale && ids.has(variant.dataset.locale)) {
 		return variant.dataset.locale;
@@ -123,11 +161,17 @@ function contentLocale(form: Element, path: Path, control: Element): string | un
 
 	return path
 		.slice(2)
-		.find((segment): segment is string => typeof segment === 'string' && ids.has(segment));
+		.find(
+			/** @returns {segment is string} */ (segment) =>
+				typeof segment === 'string' && ids.has(segment),
+		);
 }
 
-function refreshContentBadge(form: Element): void {
-	const locales = new Set<string>();
+/**
+ * @param {Element} form
+ */
+function refreshContentBadge(form) {
+	const locales = /** @type {Set<string>} */ (new Set());
 
 	form.querySelectorAll(`[${INVALID}][data-error-locales]`).forEach((field) => {
 		for (const locale of field.getAttribute('data-error-locales')?.split(' ') ?? []) {
@@ -135,10 +179,14 @@ function refreshContentBadge(form: Element): void {
 		}
 	});
 
-	form.querySelectorAll<HTMLElement>('[data-content-locale-control]').forEach((control) => {
+	/** @type {NodeListOf<HTMLElement>} */ (
+		form.querySelectorAll('[data-content-locale-control]')
+	).forEach((control) => {
 		control.classList.toggle('has-error', locales.size > 0);
 		control.toggleAttribute('aria-invalid', locales.size > 0);
-		control.querySelectorAll<HTMLElement>('[data-content-locale-option]').forEach((option) => {
+		/** @type {NodeListOf<HTMLElement>} */ (
+			control.querySelectorAll('[data-content-locale-option]')
+		).forEach((option) => {
 			option.classList.toggle('has-error', locales.has(option.dataset.contentLocaleOption ?? ''));
 		});
 
@@ -152,8 +200,13 @@ function refreshContentBadge(form: Element): void {
 
 // A tab whose panel holds an issue shows it, since the panel may be hidden,
 // and so does its shortcut in the collapsed inspector.
-function refreshTabBadges(form: Element): void {
-	form.querySelectorAll<HTMLElement>('[data-tabs] [role="tab"][aria-controls]').forEach((tab) => {
+/**
+ * @param {Element} form
+ */
+function refreshTabBadges(form) {
+	/** @type {NodeListOf<HTMLElement>} */ (
+		form.querySelectorAll('[data-tabs] [role="tab"][aria-controls]')
+	).forEach((tab) => {
 		const panel = document.getElementById(tab.getAttribute('aria-controls') ?? '');
 		const invalid = panel?.querySelector(`[${INVALID}]`) != null;
 
@@ -162,7 +215,11 @@ function refreshTabBadges(form: Element): void {
 	});
 }
 
-function addErrorLocale(field: Element, locale: string | undefined): void {
+/**
+ * @param {Element} field
+ * @param {string | undefined} locale
+ */
+function addErrorLocale(field, locale) {
 	if (!locale) {
 		return;
 	}
@@ -173,7 +230,10 @@ function addErrorLocale(field: Element, locale: string | undefined): void {
 	field.setAttribute('data-error-locales', [...locales].join(' '));
 }
 
-function unmark(field: Element): void {
+/**
+ * @param {Element} field
+ */
+function unmark(field) {
 	field.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
 	field.querySelectorAll('[aria-invalid]').forEach((control) => {
 		control.removeAttribute('aria-invalid');
@@ -191,7 +251,7 @@ function unmark(field: Element): void {
 	}
 }
 
-function wipe(): void {
+function wipe() {
 	document.querySelectorAll(`[${INVALID}]`).forEach(unmark);
 	document.querySelectorAll(`[${MESSAGE}]`).forEach((message) => message.remove());
 	document.querySelectorAll('[data-content-locale-control]').forEach((control) => {
@@ -200,14 +260,19 @@ function wipe(): void {
 		control
 			.querySelectorAll('[data-content-locale-option].has-error')
 			.forEach((option) => option.classList.remove('has-error'));
-		delete (control as HTMLElement).dataset.errorLocales;
+		delete (/** @type {HTMLElement} */ (control).dataset.errorLocales);
 	});
 	document
 		.querySelectorAll('[data-tabs] [role="tab"].has-error')
 		.forEach((tab) => tab.classList.remove('has-error'));
 }
 
-function mark(control: Element, message: string, locale?: string): void {
+/**
+ * @param {Element} control
+ * @param {string} message
+ * @param {string} [locale]
+ */
+function mark(control, message, locale) {
 	const field = wrapper(control);
 	field.setAttribute(INVALID, 'true');
 	addErrorLocale(field, locale);
@@ -253,7 +318,10 @@ function mark(control: Element, message: string, locale?: string): void {
 	}
 }
 
-function paint(box: Element | null): void {
+/**
+ * @param {Element | null} box
+ */
+function paint(box) {
 	wipe();
 
 	const form = document.getElementById(FORM);
@@ -275,7 +343,7 @@ function paint(box: Element | null): void {
 	box.focus();
 }
 
-function swapped(): void {
+function swapped() {
 	const box = document.getElementById(BOX);
 
 	if (box === lastBox) {
@@ -289,7 +357,10 @@ function swapped(): void {
 // Reveal the control (content language, inspector and its tab, collapsed
 // rows, meta or paths dialog), then go there. The inspector opens before a
 // dialog inside it: a dialog in a hidden drawer would open invisible.
-function activate(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function activate(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -340,13 +411,15 @@ function activate(event: Event): void {
 	const dialog = control.closest('dialog[data-meta]');
 
 	if (dialog instanceof HTMLDialogElement && !dialog.open) {
-		field.querySelector<HTMLElement>('[data-meta-open]')?.click();
+		/** @type {HTMLElement | null} */ (field.querySelector('[data-meta-open]'))?.click();
 	}
 
 	const paths = control.closest('dialog[data-paths-dialog]');
 
 	if (paths instanceof HTMLDialogElement && !paths.open) {
-		paths.closest('[data-paths]')?.querySelector<HTMLElement>('[data-paths-open]')?.click();
+		/** @type {HTMLElement | null} */ (
+			paths.closest('[data-paths]')?.querySelector('[data-paths-open]')
+		)?.click();
 	}
 
 	if (field instanceof HTMLElement) {
@@ -362,7 +435,10 @@ function activate(event: Event): void {
 	}
 }
 
-function clear(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function clear(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -376,7 +452,8 @@ function clear(event: Event): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('htmx:after:swap', swapped);
 	document.addEventListener('click', activate);
 	document.addEventListener('input', clear);

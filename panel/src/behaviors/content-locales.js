@@ -9,62 +9,91 @@ const CONTENT_CONTROL = '[data-content-locale-control]';
 const CONTENT_OPTION = '[data-content-locale-option]';
 const STORE = 'cosray:content-locale';
 
-function show(scope: Element, locale: string, root: ParentNode = scope): void {
-	root.querySelectorAll<HTMLElement>('.variant[data-locale]').forEach((variant) => {
-		variant.hidden = variant.dataset.locale !== locale;
-	});
+/**
+ * @param {Element} scope
+ * @param {string} locale
+ * @param {ParentNode} [root]
+ */
+function show(scope, locale, root = scope) {
+	/** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.variant[data-locale]')).forEach(
+		(variant) => {
+			variant.hidden = variant.dataset.locale !== locale;
+		},
+	);
 
-	root.querySelectorAll<HTMLLabelElement>('[data-locale-label-for]').forEach((label) => {
+	/** @type {NodeListOf<HTMLLabelElement>} */ (
+		root.querySelectorAll('[data-locale-label-for]')
+	).forEach((label) => {
 		label.htmlFor = `${label.dataset.localeLabelFor}-${locale}`;
 	});
 }
 
 // A host not yet upgraded reads the scope's locale when it connects; a
 // property assigned before that would shadow its accessor for good.
-function handToHosts(root: ParentNode, locale: string): void {
+/**
+ * @param {ParentNode} root
+ * @param {string} locale
+ */
+function handToHosts(root, locale) {
 	root.querySelectorAll('cosray-host[data-translated="true"]').forEach((host) => {
 		if ('locale' in host) {
-			(host as HTMLElement & { locale: string }).locale = locale;
+			/** @type {HTMLElement & { locale: string }} */ (host).locale = locale;
 		}
 	});
 }
 
-function locales(control: HTMLElement): string[] {
+/**
+ * @param {HTMLElement} control
+ * @returns {string[]}
+ */
+function locales(control) {
 	if (control instanceof HTMLSelectElement) {
 		return Array.from(control.options, (option) => option.value);
 	}
 
 	return Array.from(
-		control.querySelectorAll<HTMLElement>(CONTENT_OPTION),
+		/** @type {NodeListOf<HTMLElement>} */ (control.querySelectorAll(CONTENT_OPTION)),
 		(option) => option.dataset.contentLocaleOption ?? '',
 	).filter((locale) => locale !== '');
 }
 
-function selected(control: HTMLElement): string {
+/**
+ * @param {HTMLElement} control
+ * @returns {string}
+ */
+function selected(control) {
 	if (control instanceof HTMLSelectElement) {
 		return control.value;
 	}
 
 	return (
-		control.querySelector<HTMLElement>(`${CONTENT_OPTION}[aria-checked="true"]`)?.dataset
-			.contentLocaleOption ?? ''
+		/** @type {HTMLElement | null} */ (
+			control.querySelector(`${CONTENT_OPTION}[aria-checked="true"]`)
+		)?.dataset.contentLocaleOption ?? ''
 	);
 }
 
-function updateControl(control: HTMLElement, locale: string): void {
+/**
+ * @param {HTMLElement} control
+ * @param {string} locale
+ */
+function updateControl(control, locale) {
 	if (control instanceof HTMLSelectElement) {
 		control.value = locale;
 		return;
 	}
 
-	control.querySelectorAll<HTMLElement>(CONTENT_OPTION).forEach((option) => {
-		const active = option.dataset.contentLocaleOption === locale;
-		option.setAttribute('aria-checked', String(active));
-		option.tabIndex = active ? 0 : -1;
-	});
+	/** @type {NodeListOf<HTMLElement>} */ (control.querySelectorAll(CONTENT_OPTION)).forEach(
+		(option) => {
+			const active = option.dataset.contentLocaleOption === locale;
+			option.setAttribute('aria-checked', String(active));
+			option.tabIndex = active ? 0 : -1;
+		},
+	);
 }
 
-function remembered(): string {
+/** @returns {string} */
+function remembered() {
 	try {
 		return localStorage.getItem(STORE) ?? '';
 	} catch {
@@ -72,7 +101,10 @@ function remembered(): string {
 	}
 }
 
-function remember(locale: string): void {
+/**
+ * @param {string} locale
+ */
+function remember(locale) {
 	try {
 		localStorage.setItem(STORE, locale);
 	} catch {
@@ -80,8 +112,15 @@ function remember(locale: string): void {
 	}
 }
 
-export function selectContentLocale(scope: Element, locale: string, root?: ParentNode): void {
-	const controls = Array.from(scope.querySelectorAll<HTMLElement>(CONTENT_CONTROL));
+/**
+ * @param {Element} scope
+ * @param {string} locale
+ * @param {ParentNode} [root]
+ */
+export function selectContentLocale(scope, locale, root) {
+	const controls = Array.from(
+		/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll(CONTENT_CONTROL)),
+	);
 	const control = controls[0];
 
 	if (!control || !locales(control).includes(locale)) {
@@ -105,8 +144,11 @@ export function selectContentLocale(scope: Element, locale: string, root?: Paren
 	}
 }
 
-function initializeContent(scope: Element): void {
-	const control = scope.querySelector<HTMLElement>(CONTENT_CONTROL);
+/**
+ * @param {Element} scope
+ */
+function initializeContent(scope) {
+	const control = /** @type {HTMLElement | null} */ (scope.querySelector(CONTENT_CONTROL));
 
 	if (!control) {
 		return;
@@ -122,20 +164,24 @@ function initializeContent(scope: Element): void {
 	}
 }
 
-function single(): Element | null {
+/** @returns {Element | null} */
+function single() {
 	const scopes = document.querySelectorAll(CONTENT_SCOPE);
 
 	return scopes.length === 1 ? scopes[0] : null;
 }
 
-function click(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function click(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
 
-	const option = target.closest<HTMLElement>(CONTENT_OPTION);
+	const option = /** @type {HTMLElement | null} */ (target.closest(CONTENT_OPTION));
 	const scope = option?.closest(CONTENT_SCOPE);
 	const locale = option?.dataset.contentLocaleOption ?? '';
 
@@ -147,9 +193,12 @@ function click(event: Event): void {
 // A control mirrored elsewhere — inside a settings dialog, or a dialog
 // mounted on the body outside every scope, which then means the screen's
 // one scope — asks for the switch through this event.
-function select(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function select(event) {
 	const target = event.target;
-	const locale = (event as CustomEvent<{ locale?: string }>).detail?.locale ?? '';
+	const locale = /** @type {CustomEvent<{ locale?: string }>} */ (event).detail?.locale ?? '';
 
 	if (!(target instanceof Element) || locale === '') {
 		return;
@@ -162,7 +211,10 @@ function select(event: Event): void {
 	}
 }
 
-function change(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function change(event) {
 	const control = event.target;
 
 	if (!(control instanceof HTMLSelectElement) || !control.matches(CONTENT_CONTROL)) {
@@ -176,7 +228,10 @@ function change(event: Event): void {
 	}
 }
 
-function keydown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function keydown(event) {
 	const target = event.target;
 
 	if (
@@ -190,9 +245,11 @@ function keydown(event: KeyboardEvent): void {
 		return;
 	}
 
-	const control = target.closest<HTMLElement>(CONTENT_CONTROL);
+	const control = /** @type {HTMLElement | null} */ (target.closest(CONTENT_CONTROL));
 	const scope = target.closest(CONTENT_SCOPE);
-	const options = control ? Array.from(control.querySelectorAll<HTMLElement>(CONTENT_OPTION)) : [];
+	const options = control
+		? Array.from(/** @type {NodeListOf<HTMLElement>} */ (control.querySelectorAll(CONTENT_OPTION)))
+		: [];
 	const index = options.indexOf(target);
 	let next = -1;
 
@@ -218,7 +275,10 @@ function keydown(event: KeyboardEvent): void {
 	option.focus();
 }
 
-function stamp(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function stamp(event) {
 	const row = event.target;
 
 	if (!(row instanceof Element)) {
@@ -233,11 +293,12 @@ function stamp(event: Event): void {
 	}
 }
 
-function initialize(): void {
+function initialize() {
 	document.querySelectorAll(CONTENT_SCOPE).forEach(initializeContent);
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', click);
 	document.addEventListener('change', change);
 	document.addEventListener('keydown', keydown);

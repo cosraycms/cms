@@ -1,11 +1,17 @@
-import { openDialog } from '$lib/dialogs';
-import { localeTitle, resolveFallback, type FallbackLocale } from '$lib/fallback';
+/** @import { FallbackLocale } from '../lib/fallback.js' */
+
+import { openDialog } from '../lib/dialogs.js';
+import { localeTitle, resolveFallback } from '../lib/fallback.js';
 
 const SECTION = '[data-paths]';
 const INPUT = 'input[data-path-locale]';
 const PREVIEW = 'generated-paths';
 
-function parse(json: string | undefined): unknown {
+/**
+ * @param {string | undefined} json
+ * @returns {unknown}
+ */
+function parse(json) {
 	try {
 		return JSON.parse(json ?? '');
 	} catch {
@@ -13,23 +19,29 @@ function parse(json: string | undefined): unknown {
 	}
 }
 
-function locales(section: HTMLElement): FallbackLocale[] {
+/**
+ * @param {HTMLElement} section
+ * @returns {FallbackLocale[]}
+ */
+function locales(section) {
 	const value = parse(section.dataset.locales);
 
 	return Array.isArray(value)
 		? value.filter(
-				(entry): entry is FallbackLocale =>
+				/** @returns {entry is FallbackLocale} */ (entry) =>
 					typeof entry === 'object' &&
 					entry !== null &&
-					typeof (entry as FallbackLocale).id === 'string' &&
-					typeof (entry as FallbackLocale).title === 'string',
+					typeof (/** @type {FallbackLocale} */ (entry).id) === 'string' &&
+					typeof (/** @type {FallbackLocale} */ (entry).title) === 'string',
 			)
 		: [];
 }
 
-function generated(): Record<string, string> {
+/** @returns {Record<string, string>} */
+function generated() {
 	const value = parse(document.getElementById(PREVIEW)?.dataset.paths);
-	const paths: Record<string, string> = {};
+	/** @type {Record<string, string>} */
+	const paths = {};
 
 	if (typeof value === 'object' && value !== null) {
 		for (const [locale, path] of Object.entries(value)) {
@@ -42,9 +54,15 @@ function generated(): Record<string, string> {
 	return paths;
 }
 
-function render(row: HTMLElement | undefined, path: string, note: string, derived: boolean): void {
-	const value = row?.querySelector<HTMLElement>('[data-path-value]');
-	const hint = row?.querySelector<HTMLElement>('[data-path-note]');
+/**
+ * @param {HTMLElement | undefined} row
+ * @param {string} path
+ * @param {string} note
+ * @param {boolean} derived
+ */
+function render(row, path, note, derived) {
+	const value = /** @type {HTMLElement | null} */ (row?.querySelector('[data-path-value]'));
+	const hint = /** @type {HTMLElement | null} */ (row?.querySelector('[data-path-note]'));
 
 	row?.classList.toggle('is-derived', derived);
 
@@ -59,8 +77,15 @@ function render(row: HTMLElement | undefined, path: string, note: string, derive
 	}
 }
 
-function offer(input: HTMLInputElement, suggestion: string, path: string): void {
-	const offer = input.closest('.field')?.querySelector<HTMLElement>('[data-path-suggestion]');
+/**
+ * @param {HTMLInputElement} input
+ * @param {string} suggestion
+ * @param {string} path
+ */
+function offer(input, suggestion, path) {
+	const offer = /** @type {HTMLElement | null} */ (
+		input.closest('.field')?.querySelector('[data-path-suggestion]')
+	);
 
 	if (!offer) {
 		return;
@@ -74,17 +99,23 @@ function offer(input: HTMLInputElement, suggestion: string, path: string): void 
 	}
 }
 
-function refresh(section: HTMLElement): void {
+/**
+ * @param {HTMLElement} section
+ */
+function refresh(section) {
 	const configured = locales(section);
 	const suggestions = generated();
-	const inputs = Array.from(section.querySelectorAll<HTMLInputElement>(INPUT));
-	const rows = new Map(
-		Array.from(section.querySelectorAll<HTMLElement>('[data-path-row]'), (row) => [
-			row.dataset.pathRow ?? '',
-			row,
-		]),
+	const inputs = Array.from(
+		/** @type {NodeListOf<HTMLInputElement>} */ (section.querySelectorAll(INPUT)),
 	);
-	const values: Record<string, string> = {};
+	const rows = new Map(
+		Array.from(
+			/** @type {NodeListOf<HTMLElement>} */ (section.querySelectorAll('[data-path-row]')),
+			(row) => [row.dataset.pathRow ?? '', row],
+		),
+	);
+	/** @type {Record<string, string>} */
+	const values = {};
 
 	for (const input of inputs) {
 		values[input.dataset.pathLocale ?? ''] = input.value.trim();
@@ -121,15 +152,18 @@ function refresh(section: HTMLElement): void {
 	}
 }
 
-function refreshAll(): void {
-	document.querySelectorAll<HTMLElement>(SECTION).forEach(refresh);
+function refreshAll() {
+	/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll(SECTION)).forEach(refresh);
 }
 
-function input(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function input(event) {
 	const target = event.target;
 	const section =
 		target instanceof Element && target.matches(INPUT)
-			? target.closest<HTMLElement>(SECTION)
+			? /** @type {HTMLElement | null} */ (target.closest(SECTION))
 			: null;
 
 	if (section) {
@@ -137,14 +171,17 @@ function input(event: Event): void {
 	}
 }
 
-function click(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function click(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
 
-	const open = target.closest<HTMLElement>('[data-paths-open]');
+	const open = /** @type {HTMLElement | null} */ (target.closest('[data-paths-open]'));
 
 	if (open) {
 		const dialog = open.closest(SECTION)?.querySelector(':scope > dialog[data-paths-dialog]');
@@ -157,7 +194,7 @@ function click(event: MouseEvent): void {
 	}
 
 	const field = target.closest('[data-path-use]')?.closest('.field');
-	const control = field?.querySelector<HTMLInputElement>(INPUT);
+	const control = /** @type {HTMLInputElement | null} */ (field?.querySelector(INPUT));
 	const suggestion = control ? generated()[control.dataset.pathLocale ?? ''] : undefined;
 
 	if (control && suggestion) {
@@ -167,7 +204,8 @@ function click(event: MouseEvent): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', click);
 	document.addEventListener('input', input);
 	document.addEventListener('htmx:after:swap', refreshAll);

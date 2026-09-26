@@ -1,22 +1,29 @@
-import { localeTitle, resolveFallback, type FallbackLocale } from '$lib/fallback';
-import { ZXX } from '$lib/content';
+/** @import { FallbackLocale } from '../lib/fallback.js' */
+
+import { localeTitle, resolveFallback } from '../lib/fallback.js';
+import { ZXX } from '../lib/content.js';
 
 const CONTENT_SCOPE = '[data-content-locale-scope]';
 const CONTENT_CONTROL = '[data-content-locale-control]';
 const INPUT = '[data-fallback-input]';
 const BLOCK_VARIANT = ':scope > .field-body > .control > .variant[data-blocks-locale]';
 
-function locales(scope: Element): FallbackLocale[] {
+/**
+ * @param {Element} scope
+ * @returns {FallbackLocale[]}
+ */
+function locales(scope) {
 	try {
-		const value: unknown = JSON.parse(scope.getAttribute('data-content-locales') ?? '[]');
+		/** @type {unknown} */
+		const value = JSON.parse(scope.getAttribute('data-content-locales') ?? '[]');
 
 		return Array.isArray(value)
 			? value.filter(
-					(entry): entry is FallbackLocale =>
+					/** @returns {entry is FallbackLocale} */ (entry) =>
 						typeof entry === 'object' &&
 						entry !== null &&
-						typeof (entry as FallbackLocale).id === 'string' &&
-						typeof (entry as FallbackLocale).title === 'string',
+						typeof (/** @type {FallbackLocale} */ (entry).id) === 'string' &&
+						typeof (/** @type {FallbackLocale} */ (entry).title) === 'string',
 				)
 			: [];
 	} catch {
@@ -24,22 +31,31 @@ function locales(scope: Element): FallbackLocale[] {
 	}
 }
 
-function fieldInputs(field: Element): Array<HTMLInputElement | HTMLTextAreaElement> {
+/**
+ * @param {Element} field
+ * @returns {Array<HTMLInputElement | HTMLTextAreaElement>}
+ */
+function fieldInputs(field) {
 	return Array.from(
-		field.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-			`:scope > .field-body > .control > .variant[data-locale] ${INPUT}`,
+		/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
+			field.querySelectorAll(`:scope > .field-body > .control > .variant[data-locale] ${INPUT}`)
 		),
 	);
 }
 
-function refreshField(field: Element): void {
+/**
+ * @param {Element} field
+ */
+function refreshField(field) {
 	const scope = field.closest(CONTENT_SCOPE);
 	const configured = scope ? locales(scope) : [];
 	const controls = fieldInputs(field);
-	const map: Record<string, string> = { [ZXX]: field.getAttribute('data-fallback-neutral') ?? '' };
+	/** @type {Record<string, string>} */
+	const map = { [ZXX]: field.getAttribute('data-fallback-neutral') ?? '' };
 
 	for (const control of controls) {
-		const locale = control.closest<HTMLElement>('.variant[data-locale]')?.dataset.locale;
+		const locale = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'))
+			?.dataset.locale;
 
 		if (locale) {
 			map[locale] = control.value;
@@ -47,17 +63,20 @@ function refreshField(field: Element): void {
 	}
 
 	for (const control of controls) {
-		const variant = control.closest<HTMLElement>('.variant[data-locale]');
+		const variant = /** @type {HTMLElement | null} */ (control.closest('.variant[data-locale]'));
 		const locale = variant?.dataset.locale ?? '';
 		const editor =
-			control.closest('[data-youtube]')?.querySelector<HTMLInputElement>('[data-youtube-input]') ??
-			control;
+			/** @type {HTMLInputElement | null} */ (
+				control.closest('[data-youtube]')?.querySelector('[data-youtube-input]')
+			) ?? control;
 		const fallback =
 			control.value === '' && document.activeElement !== editor
 				? resolveFallback(map, locale, configured)
 				: null;
 		const schemaPlaceholder = control.dataset.schemaPlaceholder ?? '';
-		const source = variant?.querySelector<HTMLElement>(':scope > [data-fallback-source]');
+		const source = /** @type {HTMLElement | null} */ (
+			variant?.querySelector(':scope > [data-fallback-source]')
+		);
 
 		editor.placeholder = fallback?.value ?? schemaPlaceholder;
 
@@ -77,8 +96,11 @@ function refreshField(field: Element): void {
 	}
 }
 
-function refreshBlockField(field: Element): void {
-	const scope = field.closest<HTMLElement>(CONTENT_SCOPE);
+/**
+ * @param {Element} field
+ */
+function refreshBlockField(field) {
+	const scope = /** @type {HTMLElement | null} */ (field.closest(CONTENT_SCOPE));
 
 	// Single-language editors have no locale scope; keep their server-rendered variant.
 	if (!scope) {
@@ -87,13 +109,18 @@ function refreshBlockField(field: Element): void {
 
 	const active = scope.dataset.contentLocale ?? '';
 	const configured = locales(scope);
-	const variants = Array.from(field.querySelectorAll<HTMLElement>(BLOCK_VARIANT));
-	const counts: Record<string, number> = {};
+	const variants = Array.from(
+		/** @type {NodeListOf<HTMLElement>} */ (field.querySelectorAll(BLOCK_VARIANT)),
+	);
+	/** @type {Record<string, number>} */
+	const counts = {};
 
 	for (const variant of variants) {
 		const locale = variant.dataset.locale ?? '';
 		const list = variant.querySelector(':scope > .cms-blocks-editor > [data-repeater-list]');
-		const source = variant.querySelector<HTMLElement>(':scope > [data-blocks-fallback-source]');
+		const source = /** @type {HTMLElement | null} */ (
+			variant.querySelector(':scope > [data-blocks-fallback-source]')
+		);
 
 		counts[locale] = list?.children.length ?? 0;
 		variant.classList.remove('is-fallback-preview');
@@ -119,19 +146,23 @@ function refreshBlockField(field: Element): void {
 	variant.inert = true;
 	variant.classList.add('is-fallback-preview');
 
-	for (const nested of variant.querySelectorAll<HTMLElement>('.variant[data-locale]')) {
+	for (const nested of /** @type {NodeListOf<HTMLElement>} */ (
+		variant.querySelectorAll('.variant[data-locale]')
+	)) {
 		if (nested.closest('[data-blocks-locale]') === variant) {
 			nested.hidden = nested.dataset.locale !== fallback.locale;
 		}
 	}
 
-	for (const host of variant.querySelectorAll<HTMLElement & { locale: string }>(
-		'cosray-host[data-translated]',
+	for (const host of /** @type {NodeListOf<HTMLElement & { locale: string }>} */ (
+		variant.querySelectorAll('cosray-host[data-translated]')
 	)) {
 		host.locale = fallback.locale;
 	}
 
-	const source = variant.querySelector<HTMLElement>(':scope > [data-blocks-fallback-source]');
+	const source = /** @type {HTMLElement | null} */ (
+		variant.querySelector(':scope > [data-blocks-fallback-source]')
+	);
 
 	if (source) {
 		source.hidden = false;
@@ -142,7 +173,10 @@ function refreshBlockField(field: Element): void {
 	}
 }
 
-function refresh(root: ParentNode = document): void {
+/**
+ * @param {ParentNode} [root]
+ */
+function refresh(root = document) {
 	root.querySelectorAll('.cms-field').forEach((field) => {
 		if (fieldInputs(field).length > 0) {
 			refreshField(field);
@@ -154,7 +188,10 @@ function refresh(root: ParentNode = document): void {
 	});
 }
 
-function input(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function input(event) {
 	const target = event.target;
 
 	if (target instanceof Element && target.matches(`${INPUT}, [data-fallback-editor]`)) {
@@ -164,7 +201,10 @@ function input(event: Event): void {
 	}
 }
 
-function change(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function change(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -182,7 +222,10 @@ function change(event: Event): void {
 	if (field) refreshBlockField(field);
 }
 
-function focus(event: FocusEvent): void {
+/**
+ * @param {FocusEvent} event
+ */
+function focus(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -202,7 +245,10 @@ function focus(event: FocusEvent): void {
 	}
 }
 
-function stamp(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function stamp(event) {
 	if (event.target instanceof Element) {
 		refresh(event.target);
 		const field = event.target.closest('.cms-field');
@@ -211,11 +257,12 @@ function stamp(event: Event): void {
 	}
 }
 
-function swapped(): void {
+function swapped() {
 	refresh();
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('input', input);
 	document.addEventListener('change', change);
 	document.addEventListener('content-locale:change', change);

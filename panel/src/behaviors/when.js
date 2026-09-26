@@ -5,9 +5,19 @@
 // submit. The PHP evaluator (Cosray\Field\Condition) applies the exact
 // same semantics to stored content at read time; keep them in lockstep.
 
-type Condition = { field: string; op: string; value: unknown };
+/**
+ * @typedef {object} Condition
+ * @property {string} field
+ * @property {string} op
+ * @property {unknown} value
+ */
 
-function formValue(form: HTMLFormElement, field: string): string {
+/**
+ * @param {HTMLFormElement} form
+ * @param {string} field
+ * @returns {string}
+ */
+function formValue(form, field) {
 	// The last entry wins: checkbox presence markers precede the box.
 	const name = `content[${field}][value][zxx]`;
 	const last = new FormData(form).getAll(name).at(-1);
@@ -15,9 +25,9 @@ function formValue(form: HTMLFormElement, field: string): string {
 	// When historically treats false as empty, including nullable checkbox fields.
 	if (
 		last === '0' &&
-		Array.from(form.querySelectorAll<HTMLInputElement>('[data-checkbox] input')).some(
-			(input) => input.name === name,
-		)
+		Array.from(
+			/** @type {NodeListOf<HTMLInputElement>} */ (form.querySelectorAll('[data-checkbox] input')),
+		).some((input) => input.name === name)
 	) {
 		return '';
 	}
@@ -25,7 +35,11 @@ function formValue(form: HTMLFormElement, field: string): string {
 	return typeof last === 'string' ? last : '';
 }
 
-function normalize(value: unknown): string {
+/**
+ * @param {unknown} value
+ * @returns {string}
+ */
+function normalize(value) {
 	if (typeof value === 'boolean') {
 		return value ? '1' : '';
 	}
@@ -33,7 +47,12 @@ function normalize(value: unknown): string {
 	return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
 }
 
-export function active(condition: Condition, value: string): boolean {
+/**
+ * @param {Condition} condition
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function active(condition, value) {
 	switch (condition.op) {
 		case 'truthy':
 			return value !== '' && value !== '0';
@@ -52,18 +71,21 @@ export function active(condition: Condition, value: string): boolean {
 	}
 }
 
-function apply(): void {
-	document.querySelectorAll<HTMLElement>('.cms-field[data-when]').forEach((wrapper) => {
+function apply() {
+	/** @type {NodeListOf<HTMLElement>} */ (
+		document.querySelectorAll('.cms-field[data-when]')
+	).forEach((wrapper) => {
 		const form = wrapper.closest('form');
 
 		if (!(form instanceof HTMLFormElement)) {
 			return;
 		}
 
-		let condition: Condition;
+		/** @type {Condition} */
+		let condition;
 
 		try {
-			condition = JSON.parse(wrapper.dataset.when ?? '') as Condition;
+			condition = /** @type {Condition} */ (JSON.parse(wrapper.dataset.when ?? ''));
 		} catch {
 			return;
 		}
@@ -87,23 +109,31 @@ function apply(): void {
 		}
 	});
 
-	document.querySelectorAll<HTMLFieldSetElement>('.cms-fieldset').forEach((fieldset) => {
-		const fields = Array.from(fieldset.querySelectorAll<HTMLElement>('.cms-field'));
+	/** @type {NodeListOf<HTMLFieldSetElement>} */ (
+		document.querySelectorAll('.cms-fieldset')
+	).forEach((fieldset) => {
+		const fields = Array.from(
+			/** @type {NodeListOf<HTMLElement>} */ (fieldset.querySelectorAll('.cms-field')),
+		);
 		fieldset.hidden = fields.length === 0 || fields.every((field) => field.hidden);
 	});
 }
 
-function reapply(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function reapply(event) {
 	if (event.target instanceof Element && event.target.closest('#node-editor-form')) {
 		apply();
 	}
 }
 
-function swapped(): void {
+function swapped() {
 	apply();
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('input', reapply);
 	document.addEventListener('change', reapply);
 	document.addEventListener('cosray-change', reapply);

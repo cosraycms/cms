@@ -5,9 +5,16 @@
 // lines between them, and the free cells around it, as the grid has
 // them now. A label at the pointer names the value the edge sets.
 
-import { gaps, type Box, type Boxes } from './placement';
+/** @import { Box, Boxes } from './placement.js' */
 
-function cell(grid: HTMLElement, box: Box, kind: string): void {
+import { gaps } from './placement.js';
+
+/**
+ * @param {HTMLElement} grid
+ * @param {Box} box
+ * @param {string} kind
+ */
+function cell(grid, box, kind) {
 	const guide = document.createElement('div');
 
 	guide.className = `guide is-${kind}`;
@@ -18,12 +25,21 @@ function cell(grid: HTMLElement, box: Box, kind: string): void {
 	grid.append(guide);
 }
 
-export function clear(grid: HTMLElement): void {
+/**
+ * @param {HTMLElement} grid
+ */
+export function clear(grid) {
 	grid.querySelectorAll(':scope > [data-guide]').forEach((guide) => guide.remove());
 }
 
-/** A run of cells cut into single rows or single columns. */
-function cut(box: Box, across: 'rows' | 'columns'): Box[] {
+/**
+ * A run of cells cut into single rows or single columns.
+ *
+ * @param {Box} box
+ * @param {'rows' | 'columns'} across
+ * @returns {Box[]}
+ */
+function cut(box, across) {
 	return across === 'rows'
 		? Array.from({ length: box.rowspan }, (_, index) => ({
 				...box,
@@ -41,14 +57,14 @@ function cut(box: Box, across: 'rows' | 'columns'): Box[] {
  * The block and every free run of cells, cut along the dimension its
  * edge changes — into rows for the bottom edge, into columns for a side —
  * so the lines it moves along run through the empty space as well.
+ *
+ * @param {HTMLElement} grid
+ * @param {HTMLElement} row
+ * @param {Boxes<HTMLElement>} boxes
+ * @param {number} columns
+ * @param {'rows' | 'columns'} across
  */
-export function draw(
-	grid: HTMLElement,
-	row: HTMLElement,
-	boxes: Boxes<HTMLElement>,
-	columns: number,
-	across: 'rows' | 'columns',
-): void {
+export function draw(grid, row, boxes, columns, across) {
 	const own = boxes.get(row);
 
 	clear(grid);
@@ -68,9 +84,16 @@ export function draw(
 	}
 }
 
-/** The label next to the pointer, in the grid's box so it scrolls along. */
-export function label(grid: HTMLElement, text: string, x: number, y: number): void {
-	let tag = grid.querySelector<HTMLElement>(':scope > .guide-label');
+/**
+ * The label next to the pointer, in the grid's box so it scrolls along.
+ *
+ * @param {HTMLElement} grid
+ * @param {string} text
+ * @param {number} x
+ * @param {number} y
+ */
+export function label(grid, text, x, y) {
+	let tag = /** @type {HTMLElement | null} */ (grid.querySelector(':scope > .guide-label'));
 
 	if (!tag) {
 		tag = document.createElement('div');

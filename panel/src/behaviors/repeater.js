@@ -28,31 +28,39 @@
 // row lists reorder by drag on their grips through Sortable,
 // loaded on demand so only screens with such a list pay for it.
 
-import type { SortableEvent } from 'sortablejs';
+/** @import { SortableEvent } from 'sortablejs' */
+/** @import { CosrayHost } from '../lib/host.js' */
 
-import { uid } from '$lib/content';
-import type { CosrayHost } from '$lib/host';
+import { uid } from '../lib/content.js';
 
-const enhanced = new WeakSet<HTMLElement>();
+const enhanced = /** @type {WeakSet<HTMLElement>} */ (new WeakSet());
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/**
+ * @param {string} value
+ */
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-type Renaming = {
-	namePattern: RegExp;
-	idPattern: RegExp;
-	name: string;
-	id: string;
-};
+/**
+ * @typedef {object} Renaming
+ * @property {RegExp} namePattern
+ * @property {RegExp} idPattern
+ * @property {string} name
+ * @property {string} id
+ */
 
-function rewrite(scope: ParentNode, renaming: Renaming): void {
-	scope.querySelectorAll<HTMLElement>('[name]').forEach((el) => {
+/**
+ * @param {ParentNode} scope
+ * @param {Renaming} renaming
+ */
+function rewrite(scope, renaming) {
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[name]')).forEach((el) => {
 		const name = el.getAttribute('name') ?? '';
 		el.setAttribute('name', name.replace(renaming.namePattern, renaming.name));
 	});
-	scope.querySelectorAll<HTMLElement>('[id]').forEach((el) => {
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[id]')).forEach((el) => {
 		el.id = el.id.replace(renaming.idPattern, renaming.id);
 	});
-	scope.querySelectorAll<HTMLElement>('label[for]').forEach((el) => {
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('label[for]')).forEach((el) => {
 		const target = el.getAttribute('for') ?? '';
 		el.setAttribute('for', target.replace(renaming.idPattern, renaming.id));
 		const base = el.dataset.localeLabelFor;
@@ -62,32 +70,45 @@ function rewrite(scope: ParentNode, renaming: Renaming): void {
 		}
 	});
 	for (const attribute of ['popovertarget', 'aria-labelledby', 'aria-describedby']) {
-		scope.querySelectorAll<HTMLElement>(`[${attribute}]`).forEach((element) => {
-			const targets = (element.getAttribute(attribute) ?? '').split(/\s+/);
-			element.setAttribute(
-				attribute,
-				targets.map((target) => target.replace(renaming.idPattern, renaming.id)).join(' '),
-			);
-		});
+		/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll(`[${attribute}]`)).forEach(
+			(element) => {
+				const targets = (element.getAttribute(attribute) ?? '').split(/\s+/);
+				element.setAttribute(
+					attribute,
+					targets.map((target) => target.replace(renaming.idPattern, renaming.id)).join(' '),
+				);
+			},
+		);
 	}
 	// Nested containers renumber against their data-name/data-id; keep
 	// those bases in sync with the renamed inputs.
-	scope.querySelectorAll<HTMLElement>('[data-repeater]').forEach((nested) => {
-		nested.dataset.name = (nested.dataset.name ?? '').replace(renaming.namePattern, renaming.name);
-		nested.dataset.id = (nested.dataset.id ?? '').replace(renaming.idPattern, renaming.id);
-	});
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[data-repeater]')).forEach(
+		(nested) => {
+			nested.dataset.name = (nested.dataset.name ?? '').replace(
+				renaming.namePattern,
+				renaming.name,
+			);
+			nested.dataset.id = (nested.dataset.id ?? '').replace(renaming.idPattern, renaming.id);
+		},
+	);
 	// querySelectorAll cannot see into template content; recurse so the
 	// rows a nested template will stamp carry the renamed outer base.
-	scope.querySelectorAll<HTMLTemplateElement>('template').forEach((template) => {
-		rewrite(template.content, renaming);
-	});
+	/** @type {NodeListOf<HTMLTemplateElement>} */ (scope.querySelectorAll('template')).forEach(
+		(template) => {
+			rewrite(template.content, renaming);
+		},
+	);
 }
 
 /**
  * A row renamed for another container: its names and ids leave the
  * source's base for the target's, indexed by the target's renumbering.
+ *
+ * @param {ParentNode} scope
+ * @param {HTMLElement} from
+ * @param {HTMLElement} to
  */
-export function rebase(scope: ParentNode, from: HTMLElement, to: HTMLElement): void {
+export function rebase(scope, from, to) {
 	rewrite(scope, {
 		namePattern: new RegExp(`^${escapeRegex(from.dataset.name ?? '')}\\[(?:\\d+|__i__)\\]`),
 		idPattern: new RegExp(`^${escapeRegex(from.dataset.id ?? '')}-(?:\\d+|__i__)`),
@@ -96,19 +117,33 @@ export function rebase(scope: ParentNode, from: HTMLElement, to: HTMLElement): v
 	});
 }
 
-function list(container: HTMLElement): HTMLElement {
-	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
+/**
+ * @param {HTMLElement} container
+ * @returns {HTMLElement}
+ */
+function list(container) {
+	return (
+		/** @type {HTMLElement | null} */ (container.querySelector(':scope > [data-repeater-list]')) ??
+		container
+	);
 }
 
-export function renumber(container: HTMLElement): void {
+/**
+ * @param {HTMLElement} container
+ */
+export function renumber(container) {
 	const nameBase = container.dataset.name ?? '';
 	const idBase = container.dataset.id ?? '';
 	const namePattern = new RegExp(`^${escapeRegex(nameBase)}\\[(?:\\d+|__i__)\\]`);
 	const idPattern = new RegExp(`^${escapeRegex(idBase)}-(?:\\d+|__i__)`);
-	const rows = list(container).querySelectorAll<HTMLElement>(':scope > [data-repeater-row]');
+	const rows = /** @type {NodeListOf<HTMLElement>} */ (
+		list(container).querySelectorAll(':scope > [data-repeater-row]')
+	);
 	// Renaming temporarily merges adjacent radio groups and can uncheck their selections.
 	const checked = Array.from(
-		container.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked'),
+		/** @type {NodeListOf<HTMLInputElement>} */ (
+			container.querySelectorAll('input[type="radio"]:checked')
+		),
 	);
 
 	rows.forEach((row, index) => {
@@ -130,7 +165,9 @@ export function renumber(container: HTMLElement): void {
 		input.checked = true;
 	});
 
-	const count = container.querySelector<HTMLElement>(':scope > [data-repeater-count]');
+	const count = /** @type {HTMLElement | null} */ (
+		container.querySelector(':scope > [data-repeater-count]')
+	);
 
 	if (count) {
 		const template = rows.length === 1 ? count.dataset.one : count.dataset.many;
@@ -140,28 +177,40 @@ export function renumber(container: HTMLElement): void {
 	const max = Number(container.dataset.max ?? '');
 	const full = Number.isFinite(max) && max > 0 && rows.length >= max;
 
-	container
-		.querySelectorAll<HTMLElement>(':scope > [data-repeater-footer] [data-repeater-add]')
-		.forEach((add) => {
-			add.hidden = full;
-		});
+	/** @type {NodeListOf<HTMLElement>} */ (
+		container.querySelectorAll(':scope > [data-repeater-footer] [data-repeater-add]')
+	).forEach((add) => {
+		add.hidden = full;
+	});
 }
 
-export function changed(container: HTMLElement): void {
+/**
+ * @param {HTMLElement} container
+ */
+export function changed(container) {
 	renumber(container);
 	container.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-type Anchor = { row: HTMLElement; where: 'before' | 'after' };
-export type Insertion = {
-	owner: HTMLElement;
-	at: Anchor | null;
-	locale: string | null;
-	/** Runs on the stamped clone before it lands, for a caller that knows the row's layout. */
-	prepare?: (clone: DocumentFragment) => void;
-};
+/**
+ * @typedef {object} Anchor
+ * @property {HTMLElement} row
+ * @property {'before' | 'after'} where
+ */
 
-function active(owner: HTMLElement): boolean {
+/**
+ * @typedef {object} Insertion
+ * @property {HTMLElement} owner
+ * @property {Anchor | null} at
+ * @property {string | null} locale
+ * @property {(clone: DocumentFragment) => void} [prepare] Runs on the stamped clone before it lands, for a caller that knows the row's layout.
+ */
+
+/**
+ * @param {HTMLElement} owner
+ * @returns {boolean}
+ */
+function active(owner) {
 	return (
 		owner.isConnected &&
 		// A read-only field is ignored whole on save: adding, moving or
@@ -171,15 +220,23 @@ function active(owner: HTMLElement): boolean {
 	);
 }
 
-function locale(owner: HTMLElement): string | null {
+/**
+ * @param {HTMLElement} owner
+ * @returns {string | null}
+ */
+function locale(owner) {
 	return owner.closest('[data-content-locale-scope]')?.getAttribute('data-content-locale') ?? null;
 }
 
-export function insertion(trigger: Element): Insertion | null {
-	const owner = trigger.closest<HTMLElement>('[data-repeater]');
+/**
+ * @param {Element} trigger
+ * @returns {Insertion | null}
+ */
+export function insertion(trigger) {
+	const owner = /** @type {HTMLElement | null} */ (trigger.closest('[data-repeater]'));
 	if (!owner || !active(owner) || trigger.matches(':disabled')) return null;
 	const where = trigger.getAttribute('data-repeater-insert');
-	const row = trigger.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (trigger.closest('[data-repeater-row]'));
 	if (where === 'before' || where === 'after') {
 		if (!row) return null;
 		if (row.parentElement === list(owner))
@@ -188,21 +245,28 @@ export function insertion(trigger: Element): Insertion | null {
 	return { owner, at: null, locale: locale(owner) };
 }
 
-export function insert(context: Insertion, type: string | null): void {
+/**
+ * @param {Insertion} context
+ * @param {string | null} type
+ */
+export function insert(context, type) {
 	if (context.locale !== locale(context.owner)) return;
 	add(context.owner, type, context.at, context.prepare);
 }
 
-function add(
-	container: HTMLElement,
-	type: string | null,
-	at: Anchor | null,
-	prepare?: (clone: DocumentFragment) => void,
-): void {
+/**
+ * @param {HTMLElement} container
+ * @param {string | null} type
+ * @param {Anchor | null} at
+ * @param {(clone: DocumentFragment) => void} [prepare]
+ */
+function add(container, type, at, prepare) {
 	if (!active(container) || (at && at.row.parentElement !== list(container))) return;
 	const own = templatesOf(container);
 	const lender =
-		own.length === 0 ? container.parentElement?.closest<HTMLElement>('[data-repeater]') : null;
+		own.length === 0
+			? /** @type {HTMLElement | null} */ (container.parentElement?.closest('[data-repeater]'))
+			: null;
 	const templates = lender ? templatesOf(lender) : own;
 	const template =
 		type === null
@@ -216,19 +280,21 @@ function add(
 		return;
 	}
 
-	const clone = template.content.cloneNode(true) as DocumentFragment;
+	const clone = /** @type {DocumentFragment} */ (template.content.cloneNode(true));
 
 	if (lender) {
 		rebase(clone, lender, container);
 	}
 
-	const stamped = clone.querySelector<HTMLElement>('[data-repeater-row]');
+	const stamped = /** @type {HTMLElement | null} */ (clone.querySelector('[data-repeater-row]'));
 
 	// Fresh rows need a stable identity before their first save; the
 	// server backfills missing uids as a safety net. uid() rather than
 	// crypto.randomUUID(): dev servers on http://*.local are not secure
 	// contexts, and it matches the server's uid format.
-	clone.querySelectorAll<HTMLInputElement>('[data-repeater-uid]').forEach((input) => {
+	/** @type {NodeListOf<HTMLInputElement>} */ (
+		clone.querySelectorAll('[data-repeater-uid]')
+	).forEach((input) => {
 		if (input.value === '') {
 			input.value = uid();
 		}
@@ -251,8 +317,10 @@ function add(
 	changed(container);
 	if (stamped) {
 		const focus = [
-			...stamped.querySelectorAll<HTMLElement>(
-				'input:not([type="hidden"]), textarea, select, [contenteditable="true"]',
+			.../** @type {NodeListOf<HTMLElement>} */ (
+				stamped.querySelectorAll(
+					'input:not([type="hidden"]), textarea, select, [contenteditable="true"]',
+				)
 			),
 		].find(
 			(input) => !input.matches(':disabled') && input.checkVisibility({ visibilityProperty: true }),
@@ -262,17 +330,25 @@ function add(
 	}
 }
 
-function templatesOf(container: HTMLElement): HTMLTemplateElement[] {
+/**
+ * @param {HTMLElement} container
+ * @returns {HTMLTemplateElement[]}
+ */
+function templatesOf(container) {
 	return [
-		...container.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
+		.../** @type {NodeListOf<HTMLTemplateElement>} */ (
+			container.querySelectorAll(':scope > template[data-repeater-template]')
+		),
 	];
 }
 
 /**
  * Focus a row that has no control to take it: focusable for the hand-off
  * only, so the row behaves like a server-rendered one once focus moves on.
+ *
+ * @param {HTMLElement} row
  */
-export function focusRow(row: HTMLElement): void {
+export function focusRow(row) {
 	row.tabIndex = -1;
 	row.addEventListener('focusout', () => row.removeAttribute('tabindex'), { once: true });
 	row.focus();
@@ -281,8 +357,14 @@ export function focusRow(row: HTMLElement): void {
 
 const CONTROL = 'input, textarea, select';
 
-/** A control's name below its row, the same in the source and its copy. */
-function relative(name: string, container: HTMLElement): string {
+/**
+ * A control's name below its row, the same in the source and its copy.
+ *
+ * @param {string} name
+ * @param {HTMLElement} container
+ * @returns {string}
+ */
+function relative(name, container) {
 	const base = escapeRegex(container.dataset.name ?? '');
 
 	return name.replace(new RegExp(`^${base}\\[(?:\\d+|__i__)\\]`), '');
@@ -292,63 +374,66 @@ function relative(name: string, container: HTMLElement): string {
  * The source row's values seeded into a stamped clone, control by
  * control where their names below the row match, or only those names
  * `only` keeps.
+ *
+ * @param {HTMLElement} source
+ * @param {DocumentFragment} clone
+ * @param {HTMLElement} container
+ * @param {(name: string) => boolean} [only]
  */
-export function copy(
-	source: HTMLElement,
-	clone: DocumentFragment,
-	container: HTMLElement,
-	only: (name: string) => boolean = () => true,
-): void {
-	const controls = new Map<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>();
-	const hosts = new Map<string, Element>();
+export function copy(source, clone, container, only = () => true) {
+	const controls =
+		/** @type {Map<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} */ (
+			new Map()
+		);
+	const hosts = /** @type {Map<string, Element>} */ (new Map());
 
 	// Unnamed controls are not submitted; they mirror state the row
 	// derives from what is, and follow it on their own.
-	source
-		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
-		.forEach((control) => {
-			if (control.name === '') return;
-			const key = relative(control.name, container);
-			const previous = controls.get(key);
+	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} */ (
+		source.querySelectorAll(CONTROL)
+	).forEach((control) => {
+		if (control.name === '') return;
+		const key = relative(control.name, container);
+		const previous = controls.get(key);
 
-			// A radio group shares a name; keep its selected input rather than its last option.
-			if (
-				control instanceof HTMLInputElement &&
-				control.type === 'radio' &&
-				previous instanceof HTMLInputElement &&
-				previous.checked
-			)
-				return;
+		// A radio group shares a name; keep its selected input rather than its last option.
+		if (
+			control instanceof HTMLInputElement &&
+			control.type === 'radio' &&
+			previous instanceof HTMLInputElement &&
+			previous.checked
+		)
+			return;
 
-			controls.set(key, control);
-		});
+		controls.set(key, control);
+	});
 	source.querySelectorAll('cosray-host').forEach((host) => {
 		hosts.set(relative(host.getAttribute('name') ?? '', container), host);
 	});
 
 	// The uid keeps the fresh one the stamp gave it; a nested row list the
 	// template stamps empty stays empty, since nothing in it has a match.
-	clone
-		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(CONTROL)
-		.forEach((control) => {
-			const key = relative(control.name, container);
-			const from = control.name === '' || !only(key) ? null : controls.get(key);
+	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} */ (
+		clone.querySelectorAll(CONTROL)
+	).forEach((control) => {
+		const key = relative(control.name, container);
+		const from = control.name === '' || !only(key) ? null : controls.get(key);
 
-			if (!from || control.hasAttribute('data-repeater-uid')) {
-				return;
-			}
+		if (!from || control.hasAttribute('data-repeater-uid')) {
+			return;
+		}
 
-			if (
-				control instanceof HTMLInputElement &&
-				(control.type === 'checkbox' || control.type === 'radio')
-			) {
-				control.checked =
-					(from as HTMLInputElement).checked &&
-					(control.type !== 'radio' || control.value === from.value);
-			} else {
-				control.value = from.value;
-			}
-		});
+		if (
+			control instanceof HTMLInputElement &&
+			(control.type === 'checkbox' || control.type === 'radio')
+		) {
+			control.checked =
+				/** @type {HTMLInputElement} */ (from).checked &&
+				(control.type !== 'radio' || control.value === from.value);
+		} else {
+			control.value = from.value;
+		}
+	});
 
 	// A host reads its payload from the embedded script when it connects,
 	// so the copy is seeded there; the source's edits are on the element,
@@ -357,7 +442,7 @@ export function copy(
 		const key = relative(host.getAttribute('name') ?? '', container);
 		const from = only(key) ? hosts.get(key) : undefined;
 		const script = host.querySelector(':scope > script[type="application/json"]');
-		const payload = (from as Partial<CosrayHost> | undefined)?.payload;
+		const payload = /** @type {Partial<CosrayHost> | undefined} */ (from)?.payload;
 
 		if (!from || !script) {
 			return;
@@ -370,18 +455,27 @@ export function copy(
 	});
 }
 
-function duplicate(source: HTMLElement, container: HTMLElement): void {
-	const type = source.querySelector<HTMLInputElement>(':scope > input[name$="[type]"]');
+/**
+ * @param {HTMLElement} source
+ * @param {HTMLElement} container
+ */
+function duplicate(source, container) {
+	const type = /** @type {HTMLInputElement | null} */ (
+		source.querySelector(':scope > input[name$="[type]"]')
+	);
 
 	add(container, type?.value || null, { row: source, where: 'after' }, (clone) => {
 		copy(source, clone, container);
 	});
 }
 
-function move(mover: Element): void {
+/**
+ * @param {Element} mover
+ */
+function move(mover) {
 	const direction = mover.getAttribute('data-repeater-move');
-	const row = mover.closest<HTMLElement>('[data-repeater-row]');
-	const container = mover.closest<HTMLElement>('[data-repeater]');
+	const row = /** @type {HTMLElement | null} */ (mover.closest('[data-repeater-row]'));
+	const container = /** @type {HTMLElement | null} */ (mover.closest('[data-repeater]'));
 
 	if ((direction !== 'up' && direction !== 'down') || !row || !container) {
 		return;
@@ -406,18 +500,33 @@ function move(mover: Element): void {
 // keep unnamed inputs of their own in the row, which are not fields.
 const TEXT_LIKE = 'input[type="text"][name], input[type="number"][name], textarea[name]';
 
-function fieldOf(input: Element): string | null {
+/**
+ * @param {Element} input
+ * @returns {string | null}
+ */
+function fieldOf(input) {
 	return /\[fields\]\[([^\]]+)\]/.exec(input.getAttribute('name') ?? '')?.[1] ?? null;
 }
 
-/** The row's own text-like inputs, keyed by sub-field, in form order. */
-function fields(row: HTMLElement): Map<string, Array<HTMLInputElement | HTMLTextAreaElement>> {
-	const body = row.querySelector<HTMLElement>(':scope > [data-repeater-body]');
-	const result = new Map<string, Array<HTMLInputElement | HTMLTextAreaElement>>();
+/**
+ * The row's own text-like inputs, keyed by sub-field, in form order.
+ *
+ * @param {HTMLElement} row
+ * @returns {Map<string, Array<HTMLInputElement | HTMLTextAreaElement>>}
+ */
+function fields(row) {
+	const body = /** @type {HTMLElement | null} */ (
+		row.querySelector(':scope > [data-repeater-body]')
+	);
+	const result = /** @type {Map<string, Array<HTMLInputElement | HTMLTextAreaElement>>} */ (
+		new Map()
+	);
 
 	// Own fields only: a nested repeater's rows and the meta dialogs are
 	// not part of the summary, matching the server-side rule.
-	body?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(TEXT_LIKE).forEach((input) => {
+	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
+		body?.querySelectorAll(TEXT_LIKE)
+	).forEach((input) => {
 		const field = fieldOf(input);
 
 		if (
@@ -432,22 +541,37 @@ function fields(row: HTMLElement): Map<string, Array<HTMLInputElement | HTMLText
 	return result;
 }
 
-function value(inputs: Array<HTMLInputElement | HTMLTextAreaElement> | undefined): string {
+/**
+ * @param {Array<HTMLInputElement | HTMLTextAreaElement> | undefined} inputs
+ * @returns {string}
+ */
+function value(inputs) {
 	return inputs?.map((input) => input.value.trim()).find((text) => text !== '') ?? '';
 }
 
-function summarize(row: HTMLElement, changed: string): void {
-	const title = row.querySelector<HTMLElement>('[data-repeater-title]');
-	const subtitle = row.querySelector<HTMLElement>('[data-repeater-subtitle]');
+/**
+ * @param {HTMLElement} row
+ * @param {string} changed
+ */
+function summarize(row, changed) {
+	const title = /** @type {HTMLElement | null} */ (row.querySelector('[data-repeater-title]'));
+	const subtitle = /** @type {HTMLElement | null} */ (
+		row.querySelector('[data-repeater-subtitle]')
+	);
 
 	if (!title) {
 		return;
 	}
 
 	const own = fields(row);
-	const lines = [title, subtitle].filter((line): line is HTMLElement => line !== null);
-	const attribute = (line: HTMLElement): string =>
-		line === title ? 'data-repeater-title' : 'data-repeater-subtitle';
+	const lines = [title, subtitle].filter(
+		/** @returns {line is HTMLElement} */ (line) => line !== null,
+	);
+	/**
+	 * @param {HTMLElement} line
+	 * @returns {string}
+	 */
+	const attribute = (line) => (line === title ? 'data-repeater-title' : 'data-repeater-subtitle');
 	const sources = lines.map((line) => line.getAttribute(attribute(line)) ?? '');
 
 	// A line without a source claims the first text-like field with
@@ -482,14 +606,17 @@ function summarize(row: HTMLElement, changed: string): void {
 	});
 }
 
-function onInput(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onInput(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element) || !target.matches(TEXT_LIKE)) {
 		return;
 	}
 
-	const row = target.closest<HTMLElement>('[data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (target.closest('[data-repeater-row]'));
 	const field = fieldOf(target);
 
 	if (row && field !== null) {
@@ -497,7 +624,10 @@ function onInput(event: Event): void {
 	}
 }
 
-function onClick(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -507,7 +637,7 @@ function onClick(event: Event): void {
 	const remove = target.closest('[data-repeater-remove]');
 
 	if (remove) {
-		const container = remove.closest<HTMLElement>('[data-repeater]');
+		const container = /** @type {HTMLElement | null} */ (remove.closest('[data-repeater]'));
 		remove.closest('[data-repeater-row]')?.remove();
 
 		if (container) {
@@ -531,8 +661,8 @@ function onClick(event: Event): void {
 	}
 
 	const duplicator = target.closest('[data-repeater-duplicate]');
-	const source = duplicator?.closest<HTMLElement>('[data-repeater-row]');
-	const owner = source?.closest<HTMLElement>('[data-repeater]');
+	const source = /** @type {HTMLElement | null} */ (duplicator?.closest('[data-repeater-row]'));
+	const owner = /** @type {HTMLElement | null} */ (source?.closest('[data-repeater]'));
 
 	if (duplicator && source && owner && source.parentElement === list(owner)) {
 		duplicate(source, owner);
@@ -564,11 +694,11 @@ function onClick(event: Event): void {
 }
 
 /** Every row list not yet draggable becomes so: on load, after a swap, and for a new split. */
-export async function initDrag(): Promise<void> {
+export async function initDrag() {
 	// A multi-column canvas drags by position, through the placement behavior.
-	const lists = [...document.querySelectorAll<HTMLElement>('[data-repeater-list]')].filter(
-		(list) => !enhanced.has(list) && !list.matches('.cms-blocks-editor.is-grid > .grid'),
-	);
+	const lists = [
+		.../** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('[data-repeater-list]')),
+	].filter((list) => !enhanced.has(list) && !list.matches('.cms-blocks-editor.is-grid > .grid'));
 
 	if (lists.length === 0) {
 		return;
@@ -587,8 +717,8 @@ export async function initDrag(): Promise<void> {
 			draggable: '[data-repeater-row]',
 			animation: 150,
 			fallbackOnBody: true,
-			onEnd: (event: SortableEvent) => {
-				const container = list.closest<HTMLElement>('[data-repeater]');
+			onEnd: (/** @type {SortableEvent} */ event) => {
+				const container = /** @type {HTMLElement | null} */ (list.closest('[data-repeater]'));
 
 				if (container && event.oldIndex !== event.newIndex) {
 					changed(container);
@@ -598,8 +728,9 @@ export async function initDrag(): Promise<void> {
 	}
 }
 
-export function install(): () => void {
-	const rescan = (): void => {
+/** @returns {() => void} */
+export function install() {
+	const rescan = () => {
 		void initDrag();
 	};
 

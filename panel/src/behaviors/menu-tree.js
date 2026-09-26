@@ -12,51 +12,84 @@ const STORE = 'cosray:menu-collapsed:';
 /** Whether the tree held focus before the swap that is about to replace it. */
 let held = false;
 
-export function tree(): HTMLElement | null {
-	return document.querySelector<HTMLElement>('[data-menu-tree]');
+/** @returns {HTMLElement | null} */
+export function tree() {
+	return /** @type {HTMLElement | null} */ (document.querySelector('[data-menu-tree]'));
 }
 
-export function rows(root: HTMLElement): HTMLElement[] {
-	return [...root.querySelectorAll<HTMLElement>('[role="treeitem"]')];
+/**
+ * @param {HTMLElement} root
+ * @returns {HTMLElement[]}
+ */
+export function rows(root) {
+	return [.../** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('[role="treeitem"]'))];
 }
 
-/** Rows the user can reach: everything not sitting inside a collapsed branch. */
-export function visibleRows(root: HTMLElement): HTMLElement[] {
+/**
+ * Rows the user can reach: everything not sitting inside a collapsed branch.
+ *
+ * @param {HTMLElement} root
+ * @returns {HTMLElement[]}
+ */
+export function visibleRows(root) {
 	return rows(root).filter(
 		// Starting at the parent, so a collapsed row stays visible itself.
 		(row) => row.parentElement?.closest('.menu-node.is-collapsed') == null,
 	);
 }
 
-export function currentRow(root: HTMLElement): HTMLElement | null {
+/**
+ * @param {HTMLElement} root
+ * @returns {HTMLElement | null}
+ */
+export function currentRow(root) {
 	const active = document.activeElement;
 
 	if (active instanceof HTMLElement && active.matches('[role="treeitem"]')) {
 		return active;
 	}
 
-	return root.querySelector<HTMLElement>('[role="treeitem"][tabindex="0"]');
+	return /** @type {HTMLElement | null} */ (root.querySelector('[role="treeitem"][tabindex="0"]'));
 }
 
-export function expandable(row: HTMLElement): boolean {
+/**
+ * @param {HTMLElement} row
+ * @returns {boolean}
+ */
+export function expandable(row) {
 	return row.getAttribute('aria-expanded') !== null;
 }
 
-export function collapsed(row: HTMLElement): boolean {
+/**
+ * @param {HTMLElement} row
+ * @returns {boolean}
+ */
+export function collapsed(row) {
 	return row.classList.contains('is-collapsed');
 }
 
-function menuOf(root: HTMLElement): string {
+/**
+ * @param {HTMLElement} root
+ * @returns {string}
+ */
+function menuOf(root) {
 	return root.dataset.menuTree ?? '';
 }
 
-function stored(menu: string): Set<string> {
+/**
+ * @param {string} menu
+ * @returns {Set<string>}
+ */
+function stored(menu) {
 	try {
 		const raw = localStorage.getItem(STORE + menu);
-		const ids: unknown = raw === null ? [] : JSON.parse(raw);
+		/** @type {unknown} */
+		const ids = raw === null ? [] : JSON.parse(raw);
 
 		return new Set(
-			Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [],
+			Array.isArray(ids)
+				? ids.filter(/** @returns {id is string} */ (id) => typeof id === 'string')
+				: [],
 		);
 	} catch {
 		// A private window, cleared site data, or blocked storage: the tree
@@ -65,7 +98,10 @@ function stored(menu: string): Set<string> {
 	}
 }
 
-function persist(root: HTMLElement): void {
+/**
+ * @param {HTMLElement} root
+ */
+function persist(root) {
 	const ids = rows(root)
 		.filter(collapsed)
 		.map((row) => row.dataset.uid ?? '');
@@ -77,7 +113,11 @@ function persist(root: HTMLElement): void {
 	}
 }
 
-export function setCollapsed(row: HTMLElement, value: boolean): void {
+/**
+ * @param {HTMLElement} row
+ * @param {boolean} value
+ */
+export function setCollapsed(row, value) {
 	if (!expandable(row)) {
 		return;
 	}
@@ -86,8 +126,14 @@ export function setCollapsed(row: HTMLElement, value: boolean): void {
 	row.setAttribute('aria-expanded', String(!value));
 }
 
-/** Moves the roving tabindex, and the focus with it when asked. */
-export function focusRow(root: HTMLElement, row: HTMLElement, move = true): void {
+/**
+ * Moves the roving tabindex, and the focus with it when asked.
+ *
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ * @param {boolean} [move]
+ */
+export function focusRow(root, row, move = true) {
 	for (const other of rows(root)) {
 		other.tabIndex = -1;
 	}
@@ -106,7 +152,7 @@ export function focusRow(root: HTMLElement, row: HTMLElement, move = true): void
  * the selected row — the one a move redirect just named. Focus follows only
  * when the tree had it, so opening a menu does not steal it from elsewhere.
  */
-export function restore(): void {
+export function restore() {
 	const root = tree();
 
 	if (!root) {
@@ -121,9 +167,11 @@ export function restore(): void {
 		setCollapsed(row, ids.has(row.dataset.uid ?? ''));
 	}
 
-	const selected = root
-		.querySelector<HTMLElement>('.menu-card.is-selected')
-		?.closest<HTMLElement>('[role="treeitem"]');
+	const selected = /** @type {HTMLElement | null} */ (
+		/** @type {HTMLElement | null} */ (root.querySelector('.menu-card.is-selected'))?.closest(
+			'[role="treeitem"]',
+		)
+	);
 	const target = selected ?? visibleRows(root)[0];
 
 	if (target) {
@@ -131,7 +179,11 @@ export function restore(): void {
 	}
 }
 
-function onToggle(event: Event): boolean {
+/**
+ * @param {Event} event
+ * @returns {boolean}
+ */
+function onToggle(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
@@ -140,7 +192,7 @@ function onToggle(event: Event): boolean {
 
 	const toggle = target.closest('[data-menu-collapse]');
 	const root = tree();
-	const row = toggle?.closest<HTMLElement>('[role="treeitem"]');
+	const row = /** @type {HTMLElement | null} */ (toggle?.closest('[role="treeitem"]'));
 
 	if (!root || !row) {
 		return false;
@@ -153,7 +205,12 @@ function onToggle(event: Event): boolean {
 	return true;
 }
 
-export function toggle(root: HTMLElement, row: HTMLElement, value: boolean): void {
+/**
+ * @param {HTMLElement} root
+ * @param {HTMLElement} row
+ * @param {boolean} value
+ */
+export function toggle(root, row, value) {
 	setCollapsed(row, value);
 	persist(root);
 }
@@ -163,8 +220,10 @@ export function toggle(root: HTMLElement, row: HTMLElement, value: boolean): voi
  * `focusout`: a move replaces the screen, and a focused row being removed
  * looks exactly like the user leaving — which would drop the focus every
  * time and make consecutive moves impossible.
+ *
+ * @param {Event} event
  */
-function onLeaveOrEnter(event: Event): void {
+function onLeaveOrEnter(event) {
 	const root = tree();
 	const target = event.target;
 
@@ -173,17 +232,25 @@ function onLeaveOrEnter(event: Event): void {
 	}
 }
 
-/** Lets a keyboard user out again, now that Tab means something else. */
-export function release(root: HTMLElement): void {
+/**
+ * Lets a keyboard user out again, now that Tab means something else.
+ *
+ * @param {HTMLElement} root
+ */
+export function release(root) {
 	held = false;
 	root.focus();
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	// A fresh install is a fresh page as far as focus goes.
 	held = false;
 
-	const onClick = (event: Event): void => {
+	/**
+	 * @param {Event} event
+	 */
+	const onClick = (event) => {
 		onToggle(event);
 	};
 

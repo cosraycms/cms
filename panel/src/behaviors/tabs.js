@@ -6,17 +6,28 @@
 const ROOT = '[data-tabs]';
 const TAB = '[role="tab"]';
 
-function tabs(root: Element): HTMLElement[] {
-	return Array.from(root.querySelectorAll<HTMLElement>(TAB));
+/**
+ * @param {Element} root
+ * @returns {HTMLElement[]}
+ */
+function tabs(root) {
+	return Array.from(/** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll(TAB)));
 }
 
-function panel(tab: HTMLElement): HTMLElement | null {
+/**
+ * @param {HTMLElement} tab
+ * @returns {HTMLElement | null}
+ */
+function panel(tab) {
 	const id = tab.getAttribute('aria-controls') ?? '';
 
 	return id === '' ? null : document.getElementById(id);
 }
 
-export function selectTab(tab: HTMLElement): void {
+/**
+ * @param {HTMLElement} tab
+ */
+export function selectTab(tab) {
 	const root = tab.closest(ROOT);
 
 	if (!root) {
@@ -38,8 +49,11 @@ export function selectTab(tab: HTMLElement): void {
 
 // Brings the tab holding a control to the front, for a jump from the
 // error summary.
-export function revealTab(control: Element): void {
-	const target = control.closest<HTMLElement>('[role="tabpanel"]');
+/**
+ * @param {Element} control
+ */
+export function revealTab(control) {
+	const target = /** @type {HTMLElement | null} */ (control.closest('[role="tabpanel"]'));
 	const root = target?.closest(ROOT);
 
 	if (!target || !root) {
@@ -53,16 +67,23 @@ export function revealTab(control: Element): void {
 	}
 }
 
-function click(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function click(event) {
 	const target = event.target;
-	const tab = target instanceof Element ? target.closest<HTMLElement>(TAB) : null;
+	const tab =
+		target instanceof Element ? /** @type {HTMLElement | null} */ (target.closest(TAB)) : null;
 
 	if (tab?.closest(ROOT)) {
 		selectTab(tab);
 	}
 }
 
-function keydown(event: KeyboardEvent): void {
+/**
+ * @param {KeyboardEvent} event
+ */
+function keydown(event) {
 	const target = event.target;
 
 	if (
@@ -102,7 +123,8 @@ function keydown(event: KeyboardEvent): void {
 	tab.focus();
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', click);
 	document.addEventListener('keydown', keydown);
 

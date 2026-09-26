@@ -2,18 +2,26 @@
 // back as a new element at the top. Remembering its position across the swap
 // keeps the row that was clicked where it was.
 
-interface RequestContext {
-	sourceElement?: unknown;
-}
+/**
+ * @typedef {object} RequestContext
+ * @property {unknown} [sourceElement]
+ */
 
-const positions = new WeakMap<object, { left: number; top: number }>();
+const positions = /** @type {WeakMap<object, { left: number; top: number }>} */ (new WeakMap());
 
-function context(event: Event): RequestContext | undefined {
-	const ctx = (event as CustomEvent<{ ctx?: RequestContext }>).detail?.ctx;
+/**
+ * @param {Event} event
+ * @returns {RequestContext | undefined}
+ */
+function context(event) {
+	const ctx = /** @type {CustomEvent<{ ctx?: RequestContext }>} */ (event).detail?.ctx;
 	return ctx && typeof ctx === 'object' ? ctx : undefined;
 }
 
-function remember(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function remember(event) {
 	const ctx = context(event);
 	const source = ctx?.sourceElement;
 
@@ -21,7 +29,9 @@ function remember(event: Event): void {
 		return;
 	}
 
-	const list = source.closest('.cms-collection')?.querySelector<HTMLElement>('.scroll');
+	const list = /** @type {HTMLElement | null} */ (
+		source.closest('.cms-collection')?.querySelector('.scroll')
+	);
 
 	if (list) {
 		positions.set(ctx, { left: list.scrollLeft, top: list.scrollTop });
@@ -30,7 +40,10 @@ function remember(event: Event): void {
 
 // Boosted links apply their own show position after `htmx:after:swap`, so the
 // position has to be restored at the end of the swap lifecycle.
-function restore(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function restore(event) {
 	const ctx = context(event);
 	const position = ctx ? positions.get(ctx) : undefined;
 
@@ -40,7 +53,9 @@ function restore(event: Event): void {
 
 	positions.delete(ctx);
 
-	const list = document.querySelector<HTMLElement>('.cms-collection .scroll');
+	const list = /** @type {HTMLElement | null} */ (
+		document.querySelector('.cms-collection .scroll')
+	);
 
 	if (list) {
 		list.scrollLeft = position.left;
@@ -48,7 +63,8 @@ function restore(event: Event): void {
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('htmx:before:request', remember);
 	document.addEventListener('htmx:finally:swap', restore);
 

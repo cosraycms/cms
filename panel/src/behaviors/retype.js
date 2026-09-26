@@ -4,32 +4,58 @@
 // a split a removed part hands its space on or dissolves the split. The
 // content does not carry over; a block that has any asks first.
 
-import { openMenu } from '$lib/action-menu';
-import type { CosrayHost, HostPayload } from '$lib/host';
-import { open as openCatalog } from './block-catalog';
-import { adder, arm } from './pick';
-import { placed } from './placement';
-import { changed, copy, insert, insertion } from './repeater';
+/** @import { CosrayHost, HostPayload } from '../lib/host.js' */
 
-function typeOf(row: HTMLElement): string {
-	return row.querySelector<HTMLInputElement>(':scope > input[name$="[type]"]')?.value ?? '';
+import { openMenu } from '../lib/action-menu.js';
+
+import { open as openCatalog } from './block-catalog.js';
+import { adder, arm } from './pick.js';
+import { placed } from './placement.js';
+import { changed, copy, insert, insertion } from './repeater.js';
+
+/**
+ * @param {HTMLElement} row
+ * @returns {string}
+ */
+function typeOf(row) {
+	return (
+		/** @type {HTMLInputElement | null} */ (row.querySelector(':scope > input[name$="[type]"]'))
+			?.value ?? ''
+	);
 }
 
-/** The names of a row's own controls start with this: its uid's without `[uid]`. */
-function prefix(row: ParentNode): string {
-	const uid = row.querySelector<HTMLInputElement>('[data-repeater-uid]');
+/**
+ * The names of a row's own controls start with this: its uid's without `[uid]`.
+ *
+ * @param {ParentNode} row
+ * @returns {string}
+ */
+function prefix(row) {
+	const uid = /** @type {HTMLInputElement | null} */ (row.querySelector('[data-repeater-uid]'));
 
 	return uid?.name.replace(/\[uid\]$/, '') ?? '';
 }
 
-function template(field: HTMLElement, type: string): HTMLTemplateElement | undefined {
+/**
+ * @param {HTMLElement} field
+ * @param {string} type
+ * @returns {HTMLTemplateElement | undefined}
+ */
+function template(field, type) {
 	return [
-		...field.querySelectorAll<HTMLTemplateElement>(':scope > template[data-repeater-template]'),
+		.../** @type {NodeListOf<HTMLTemplateElement>} */ (
+			field.querySelectorAll(':scope > template[data-repeater-template]')
+		),
 	].find((candidate) => candidate.getAttribute('data-repeater-template') === type);
 }
 
-/** Text anywhere in a structured value, as words or a file's uid; a node's type is none. */
-function holds(value: unknown): boolean {
+/**
+ * Text anywhere in a structured value, as words or a file's uid; a node's type is none.
+ *
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function holds(value) {
 	if (typeof value === 'string') {
 		return value.trim() !== '';
 	}
@@ -45,9 +71,14 @@ function holds(value: unknown): boolean {
 	return false;
 }
 
-/** A custom control's value; one never connected still has its payload script. */
-function hostHolds(host: Element): boolean {
-	const payload = (host as Partial<CosrayHost>).payload;
+/**
+ * A custom control's value; one never connected still has its payload script.
+ *
+ * @param {Element} host
+ * @returns {boolean}
+ */
+function hostHolds(host) {
+	const payload = /** @type {Partial<CosrayHost>} */ (host).payload;
 
 	if (payload) {
 		return holds(payload.value);
@@ -56,7 +87,9 @@ function hostHolds(host: Element): boolean {
 	const script = host.querySelector(':scope > script[type="application/json"]');
 
 	try {
-		return holds((JSON.parse(script?.textContent || 'null') as HostPayload | null)?.value);
+		return holds(
+			/** @type {HostPayload | null} */ (JSON.parse(script?.textContent || 'null'))?.value,
+		);
 	} catch {
 		// What cannot be read may well be content.
 		return true;
@@ -67,18 +100,22 @@ function hostHolds(host: Element): boolean {
  * Whether the block holds anything a fresh one of its type would not: a
  * typed value other than the template's, or a custom control's value
  * with text in it. Choices are settings, not content.
+ *
+ * @param {HTMLElement} row
+ * @param {HTMLTemplateElement | undefined} fresh
+ * @returns {boolean}
  */
-function filled(row: HTMLElement, fresh: HTMLTemplateElement | undefined): boolean {
+function filled(row, fresh) {
 	const own = prefix(row);
 	const base = fresh ? prefix(fresh.content) : '';
-	const defaults = new Map<string, string>();
+	const defaults = /** @type {Map<string, string>} */ (new Map());
 
-	fresh?.content
-		.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
-		.forEach((control) => defaults.set(control.name.slice(base.length), control.value));
+	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
+		fresh?.content.querySelectorAll('input, textarea')
+	).forEach((control) => defaults.set(control.name.slice(base.length), control.value));
 
-	for (const control of row.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-		'input, textarea',
+	for (const control of /** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
+		row.querySelectorAll('input, textarea')
 	)) {
 		const name = control.name.startsWith(own) ? control.name.slice(own.length) : '';
 
@@ -99,7 +136,13 @@ function filled(row: HTMLElement, fresh: HTMLTemplateElement | undefined): boole
 	);
 }
 
-function retype(row: HTMLElement, field: HTMLElement, type: string | null, question: string): void {
+/**
+ * @param {HTMLElement} row
+ * @param {HTMLElement} field
+ * @param {string | null} type
+ * @param {string} question
+ */
+function retype(row, field, type, question) {
 	const context = row.parentElement && insertion(row.parentElement);
 	const current = typeOf(row);
 
@@ -135,35 +178,52 @@ function retype(row: HTMLElement, field: HTMLElement, type: string | null, quest
 	}
 }
 
-/** The field's picker at the block's kebab; its choice replaces the block. */
-function choose(row: HTMLElement, question: string, keyboard: boolean): void {
-	const field = row.closest<HTMLElement>('.cms-blocks-editor');
+/**
+ * The field's picker at the block's kebab; its choice replaces the block.
+ *
+ * @param {HTMLElement} row
+ * @param {string} question
+ * @param {boolean} keyboard
+ */
+function choose(row, question, keyboard) {
+	const field = /** @type {HTMLElement | null} */ (row.closest('.cms-blocks-editor'));
 	const how = field && adder(field);
 	const base = field && insertion(field);
 	const menu = how && 'picker' in how ? document.getElementById(how.picker) : null;
-	const kebab = row.querySelector<HTMLButtonElement>(':scope > .chrome .kebab');
+	const kebab = /** @type {HTMLButtonElement | null} */ (
+		row.querySelector(':scope > .chrome .kebab')
+	);
 
 	if (!field || !base || !menu || !kebab) {
 		return;
 	}
 
-	const change = (type: string | null) => retype(row, field, type, question);
+	/**
+	 * @param {string | null} type
+	 */
+	const change = (type) => retype(row, field, type, question);
 
 	openMenu(kebab, keyboard ? 'first' : false, kebab, menu);
 	arm(menu, change, () => openCatalog({ ...base, at: { row, where: 'after' } }, true, change));
 }
 
-function onClick(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function onClick(event) {
 	const entry =
-		event.target instanceof Element ? event.target.closest<HTMLElement>('[data-retype]') : null;
-	const row = entry?.closest<HTMLElement>('[data-repeater-row]');
+		event.target instanceof Element
+			? /** @type {HTMLElement | null} */ (event.target.closest('[data-retype]'))
+			: null;
+	const row = /** @type {HTMLElement | null} */ (entry?.closest('[data-repeater-row]'));
 
 	if (entry && row) {
 		choose(row, entry.getAttribute('data-retype-confirm') ?? '', event.detail === 0);
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('click', onClick);
 
 	return () => document.removeEventListener('click', onClick);

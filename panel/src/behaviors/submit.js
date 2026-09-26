@@ -8,7 +8,10 @@
 
 const FORM = 'node-editor-form';
 
-function guard(event: SubmitEvent): void {
+/**
+ * @param {SubmitEvent} event
+ */
+function guard(event) {
 	const form = event.target;
 
 	if (!(form instanceof HTMLFormElement) || form.id !== FORM) {
@@ -26,7 +29,8 @@ function guard(event: SubmitEvent): void {
 	event.stopImmediatePropagation();
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('submit', guard, true);
 
 	return () => document.removeEventListener('submit', guard, true);

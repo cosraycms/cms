@@ -27,7 +27,9 @@
 // parts dragging that trade; stacked its rows change and the split's
 // follow.
 
-import { clear as clearGuides, draw as drawGuides, label as labelGuide } from './guides';
+/** @import { Box, Boxes } from './placement.js' */
+
+import { clear as clearGuides, draw as drawGuides, label as labelGuide } from './guides.js';
 import {
 	MAX_ROWSPAN,
 	animate,
@@ -40,56 +42,102 @@ import {
 	resize as resizePlaced,
 	snapshot,
 	span,
-	type Boxes,
-} from './placement';
-import { focusRow } from './repeater';
+} from './placement.js';
+import { focusRow } from './repeater.js';
 
 export { MAX_ROWSPAN };
 
-export type Dimension = 'colspan' | 'rowspan';
-export type Layout = Record<Dimension, number>;
-export type Grid = { columns: number; min: number };
-export type Bounds = Record<Dimension, { low: number; high: number }>;
-export type Edge = 'start' | 'end' | 'bottom';
-export type Direction = 'columns' | 'rows';
+/** @typedef {'colspan' | 'rowspan'} Dimension */
 
-const DIMENSIONS: Dimension[] = ['colspan', 'rowspan'];
+/** @typedef {Record<Dimension, number>} Layout */
 
-function between(value: number, low: number, high: number): number {
+/**
+ * @typedef {object} Grid
+ * @property {number} columns
+ * @property {number} min
+ */
+
+/** @typedef {Record<Dimension, { low: number; high: number }>} Bounds */
+
+/** @typedef {'start' | 'end' | 'bottom'} Edge */
+
+/** @typedef {'columns' | 'rows'} Direction */
+
+/** @type {Dimension[]} */
+const DIMENSIONS = ['colspan', 'rowspan'];
+
+/**
+ * @param {number} value
+ * @param {number} low
+ * @param {number} high
+ * @returns {number}
+ */
+function between(value, low, high) {
 	return Math.max(low, Math.min(high, Math.trunc(value) || 0));
 }
 
-export function grid(columns: number, min: number): Grid {
+/**
+ * @param {number} columns
+ * @param {number} min
+ * @returns {Grid}
+ */
+export function grid(columns, min) {
 	const cols = between(columns, 1, Number.MAX_SAFE_INTEGER);
 
 	return { columns: cols, min: between(min, 1, cols) };
 }
 
-export function clamp(layout: Layout, grid: Grid): Layout {
+/**
+ * @param {Layout} layout
+ * @param {Grid} grid
+ * @returns {Layout}
+ */
+export function clamp(layout, grid) {
 	return {
 		colspan: between(layout.colspan, grid.min, grid.columns),
 		rowspan: between(layout.rowspan, 1, MAX_ROWSPAN),
 	};
 }
 
-/** The range of each dimension on a grid. */
-export function bounds(grid: Grid): Bounds {
+/**
+ * The range of each dimension on a grid.
+ *
+ * @param {Grid} grid
+ * @returns {Bounds}
+ */
+export function bounds(grid) {
 	return {
 		colspan: { low: grid.min, high: grid.columns },
 		rowspan: { low: 1, high: MAX_ROWSPAN },
 	};
 }
 
-export function parseDimension(value: string | null): Dimension | null {
+/**
+ * @param {string | null} value
+ * @returns {Dimension | null}
+ */
+export function parseDimension(value) {
 	return value === 'colspan' || value === 'rowspan' ? value : null;
 }
 
-/** One track plus one gap — the distance a colspan of 1 travels. */
-export function pitch(extent: number, tracks: number, gap: number): number {
+/**
+ * One track plus one gap — the distance a colspan of 1 travels.
+ *
+ * @param {number} extent
+ * @param {number} tracks
+ * @param {number} gap
+ * @returns {number}
+ */
+export function pitch(extent, tracks, gap) {
 	return tracks > 0 ? (extent + gap) / tracks : 0;
 }
 
-export function shift(distance: number, pitch: number): number {
+/**
+ * @param {number} distance
+ * @param {number} pitch
+ * @returns {number}
+ */
+export function shift(distance, pitch) {
 	return pitch > 0 ? Math.round(distance / pitch) : 0;
 }
 
@@ -99,8 +147,14 @@ export function shift(distance: number, pitch: number): number {
  * Rows below the grid have no height yet and count `probe` each. The
  * lines are the grid's as the gesture found them: tracks size to their
  * content, so the live ones move with every step the edge takes.
+ *
+ * @param {number[]} ends
+ * @param {number} offset
+ * @param {number} first
+ * @param {number} probe
+ * @returns {number}
  */
-export function snap(ends: number[], offset: number, first: number, probe: number): number {
+export function snap(ends, offset, first, probe) {
 	let best = first;
 	let nearest = Infinity;
 
@@ -126,12 +180,21 @@ export function snap(ends: number[], offset: number, first: number, probe: numbe
 // Rows below the grid have no height yet; the pointer there counts in this.
 const PROBE = 96;
 
-export function parseEdge(value: string | null): Edge | null {
+/**
+ * @param {string | null} value
+ * @returns {Edge | null}
+ */
+export function parseEdge(value) {
 	return value === 'start' || value === 'end' || value === 'bottom' ? value : null;
 }
 
-/** The edge and direction a key moves, or null for a key that is not ours. */
-export function parseKey(event: KeyboardEvent): { edge: Edge; steps: number } | null {
+/**
+ * The edge and direction a key moves, or null for a key that is not ours.
+ *
+ * @param {KeyboardEvent} event
+ * @returns {{ edge: Edge; steps: number } | null}
+ */
+export function parseKey(event) {
 	if (!event.altKey || event.ctrlKey || event.metaKey) {
 		return null;
 	}
@@ -150,31 +213,57 @@ export function parseKey(event: KeyboardEvent): { edge: Edge; steps: number } | 
 	}
 }
 
-export function gridOf(container: HTMLElement): Grid {
+/**
+ * @param {HTMLElement} container
+ * @returns {Grid}
+ */
+export function gridOf(container) {
 	return grid(Number(container.dataset.columns) || 1, Number(container.dataset.min) || 1);
 }
 
-/** The split a part sits in; null for a block on the grid. */
-export function splitOf(row: HTMLElement): HTMLElement | null {
+/**
+ * The split a part sits in; null for a block on the grid.
+ *
+ * @param {HTMLElement} row
+ * @returns {HTMLElement | null}
+ */
+export function splitOf(row) {
 	const list = row.parentElement;
 
-	return list?.matches('.parts') ? list.closest<HTMLElement>('[data-repeater-row]') : null;
+	return list?.matches('.parts')
+		? /** @type {HTMLElement | null} */ (list.closest('[data-repeater-row]'))
+		: null;
 }
 
-export function partsOf(split: HTMLElement): HTMLElement[] {
-	return [...split.querySelectorAll<HTMLElement>(':scope > .parts > [data-repeater-row]')];
+/**
+ * @param {HTMLElement} split
+ * @returns {HTMLElement[]}
+ */
+export function partsOf(split) {
+	return [
+		.../** @type {NodeListOf<HTMLElement>} */ (
+			split.querySelectorAll(':scope > .parts > [data-repeater-row]')
+		),
+	];
 }
 
-export function directionOf(split: HTMLElement): Direction {
+/**
+ * @param {HTMLElement} split
+ * @returns {Direction}
+ */
+export function directionOf(split) {
 	return split.dataset.split === 'rows' ? 'rows' : 'columns';
 }
 
 /**
  * The grid a row's layout moves in: its list's, and for a split into
  * columns one that leaves each part its minimum width.
+ *
+ * @param {HTMLElement} row
+ * @returns {Grid}
  */
-export function gridFor(row: HTMLElement): Grid {
-	const list = row.parentElement?.closest<HTMLElement>('[data-repeater]');
+export function gridFor(row) {
+	const list = /** @type {HTMLElement | null} */ (row.parentElement?.closest('[data-repeater]'));
 	const base = list ? gridOf(list) : grid(1, 1);
 
 	return row.matches('.is-split') && directionOf(row) === 'columns'
@@ -185,8 +274,13 @@ export function gridFor(row: HTMLElement): Grid {
 /**
  * Whole widths in proportion to `widths` adding up to `total`, none
  * below `min`; the last takes what rounding leaves.
+ *
+ * @param {number[]} widths
+ * @param {number} total
+ * @param {number} min
+ * @returns {number[]}
  */
-function shares(widths: number[], total: number, min: number): number[] {
+function shares(widths, total, min) {
 	const sum = widths.reduce((all, width) => all + width, 0) || 1;
 	let left = total;
 
@@ -201,11 +295,22 @@ function shares(widths: number[], total: number, min: number): number[] {
 	});
 }
 
-function input(row: HTMLElement, dimension: Dimension): HTMLInputElement | null {
-	return row.querySelector<HTMLInputElement>(`input[data-layout="${dimension}"]`);
+/**
+ * @param {HTMLElement} row
+ * @param {Dimension} dimension
+ * @returns {HTMLInputElement | null}
+ */
+function input(row, dimension) {
+	return /** @type {HTMLInputElement | null} */ (
+		row.querySelector(`input[data-layout="${dimension}"]`)
+	);
 }
 
-export function read(row: HTMLElement): Layout {
+/**
+ * @param {HTMLElement} row
+ * @returns {Layout}
+ */
+export function read(row) {
 	const layout = { colspan: 1, rowspan: 1 };
 
 	for (const dimension of DIMENSIONS) {
@@ -215,7 +320,12 @@ export function read(row: HTMLElement): Layout {
 	return layout;
 }
 
-export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
+/**
+ * @param {HTMLElement} row
+ * @param {Layout} layout
+ * @param {Grid} grid
+ */
+export function write(row, layout, grid) {
 	const limits = bounds(grid);
 
 	for (const dimension of DIMENSIONS) {
@@ -227,17 +337,21 @@ export function write(row: HTMLElement, layout: Layout, grid: Grid): void {
 		}
 
 		row.style.setProperty(`--${dimension}`, value);
-		row
-			.querySelectorAll<HTMLInputElement>(`input[data-layout-input="${dimension}"]`)
-			.forEach((control) => {
-				control.min = String(limits[dimension].low);
-				control.max = String(limits[dimension].high);
-				control.value = value;
-			});
+		/** @type {NodeListOf<HTMLInputElement>} */ (
+			row.querySelectorAll(`input[data-layout-input="${dimension}"]`)
+		).forEach((control) => {
+			control.min = String(limits[dimension].low);
+			control.max = String(limits[dimension].high);
+			control.value = value;
+		});
 	}
 }
 
-function widthsOf(split: HTMLElement): number[] {
+/**
+ * @param {HTMLElement} split
+ * @returns {number[]}
+ */
+function widthsOf(split) {
 	return partsOf(split).map((part) => read(part).colspan);
 }
 
@@ -245,9 +359,14 @@ function widthsOf(split: HTMLElement): number[] {
  * A row's layout written, and a split's parts fitted to it: side by side
  * in proportion to `widths`, their widths when the gesture began, since
  * rounding step by step would drift.
+ *
+ * @param {HTMLElement} row
+ * @param {Layout} layout
+ * @param {Grid} grid
+ * @param {number[]} [widths]
  */
-function apply(row: HTMLElement, layout: Layout, grid: Grid, widths = widthsOf(row)): void {
-	const parts = row.querySelector<HTMLElement>(':scope > .parts');
+function apply(row, layout, grid, widths = widthsOf(row)) {
+	const parts = /** @type {HTMLElement | null} */ (row.querySelector(':scope > .parts'));
 
 	write(row, layout, grid);
 
@@ -273,15 +392,27 @@ function apply(row: HTMLElement, layout: Layout, grid: Grid, widths = widthsOf(r
 	);
 }
 
-/** The part a part's width trades with: the next one, or the previous for the last. */
-function neighbour(part: HTMLElement, parts: HTMLElement[]): HTMLElement | undefined {
+/**
+ * The part a part's width trades with: the next one, or the previous for the last.
+ *
+ * @param {HTMLElement} part
+ * @param {HTMLElement[]} parts
+ * @returns {HTMLElement | undefined}
+ */
+function neighbour(part, parts) {
 	const index = parts.indexOf(part);
 
 	return parts[index + 1] ?? parts[index - 1];
 }
 
-/** The values a part can take for a dimension: only its split's direction moves. */
-function reach(part: HTMLElement, dimension: Dimension): { low: number; high: number } {
+/**
+ * The values a part can take for a dimension: only its split's direction moves.
+ *
+ * @param {HTMLElement} part
+ * @param {Dimension} dimension
+ * @returns {{ low: number; high: number }}
+ */
+function reach(part, dimension) {
 	const split = splitOf(part);
 	const own = read(part)[dimension];
 
@@ -307,8 +438,15 @@ function reach(part: HTMLElement, dimension: Dimension): { low: number; high: nu
 	return { low: own, high: own };
 }
 
-/** A part's dimension set within its reach; false when nothing changed. */
-function resizePart(part: HTMLElement, dimension: Dimension, value: number): boolean {
+/**
+ * A part's dimension set within its reach; false when nothing changed.
+ *
+ * @param {HTMLElement} part
+ * @param {Dimension} dimension
+ * @param {number} value
+ * @returns {boolean}
+ */
+function resizePart(part, dimension, value) {
 	const split = splitOf(part);
 	const before = read(part);
 	const { low, high } = reach(part, dimension);
@@ -322,7 +460,7 @@ function resizePart(part: HTMLElement, dimension: Dimension, value: number): boo
 	const change = next - before[dimension];
 
 	if (dimension === 'colspan') {
-		const other = neighbour(part, partsOf(split))!;
+		const other = /** @type {HTMLElement} */ (neighbour(part, partsOf(split)));
 		const layout = read(other);
 
 		write(other, { ...layout, colspan: layout.colspan - change }, grid);
@@ -339,8 +477,11 @@ function resizePart(part: HTMLElement, dimension: Dimension, value: number): boo
  * A split's rows set as its parts need them. On the field's grid it
  * moves as its bottom edge would, a taller split pushing the blocks
  * below down instead of covering them.
+ *
+ * @param {HTMLElement} split
+ * @param {number} rowspan
  */
-export function stretch(split: HTMLElement, rowspan: number): void {
+export function stretch(split, rowspan) {
 	const grid = gridFor(split);
 	const canvas = placed(split) ? canvasOf(split) : null;
 
@@ -361,16 +502,17 @@ export function stretch(split: HTMLElement, rowspan: number): void {
 /**
  * A placed block's spans written from its box, and every block's
  * position; returns every block's box on screen after the change.
+ *
+ * @param {HTMLElement} row
+ * @param {Boxes<HTMLElement>} boxes
+ * @param {Grid} grid
+ * @param {number[]} [widths]
+ * @returns {Map<HTMLElement, DOMRect>}
  */
-function applyPlaced(
-	row: HTMLElement,
-	boxes: Boxes<HTMLElement>,
-	grid: Grid,
-	widths?: number[],
-): Map<HTMLElement, DOMRect> {
-	const box = boxes.get(row)!;
+function applyPlaced(row, boxes, grid, widths) {
+	const box = /** @type {Box} */ (boxes.get(row));
 
-	const canvas = canvasOf(row)!;
+	const canvas = /** @type {HTMLElement} */ (canvasOf(row));
 
 	return animate(
 		canvas,
@@ -382,7 +524,12 @@ function applyPlaced(
 	);
 }
 
-function same(a: Boxes<HTMLElement>, b: Boxes<HTMLElement>): boolean {
+/**
+ * @param {Boxes<HTMLElement>} a
+ * @param {Boxes<HTMLElement>} b
+ * @returns {boolean}
+ */
+function same(a, b) {
 	return [...a].every(([row, box]) => {
 		const other = b.get(row);
 
@@ -396,47 +543,59 @@ function same(a: Boxes<HTMLElement>, b: Boxes<HTMLElement>): boolean {
 	});
 }
 
-type Drag = {
-	pointer: number;
-	handle: HTMLElement;
-	row: HTMLElement;
-	container: HTMLElement;
-	edge: Edge;
-	grid: Grid;
-	pitch: number;
-	start: Layout;
-	widths: number[];
-	origin: number;
-	moved: boolean;
-	/** The canvas as the gesture found it, for a placed block. */
-	boxes: Boxes<HTMLElement> | null;
-	/** Every block's box on screen as the gesture found it, and after its last step. */
-	rects: Map<HTMLElement, DOMRect>;
-	last: Map<HTMLElement, DOMRect>;
-	/** The end line of every row, in the canvas's content box, at the start. */
-	ends: number[];
-	/** Where the grid's tracks begin inside its border box. */
-	top: number;
-	/** The label's name for the edge. */
-	title: string;
-};
+/**
+ * @typedef {object} Drag
+ * @property {number} pointer
+ * @property {HTMLElement} handle
+ * @property {HTMLElement} row
+ * @property {HTMLElement} container
+ * @property {Edge} edge
+ * @property {Grid} grid
+ * @property {number} pitch
+ * @property {Layout} start
+ * @property {number[]} widths
+ * @property {number} origin
+ * @property {boolean} moved
+ * @property {Boxes<HTMLElement> | null} boxes The canvas as the gesture found it, for a placed block.
+ * @property {Map<HTMLElement, DOMRect>} rects Every block's box on screen as the gesture found it, and after its last step.
+ * @property {Map<HTMLElement, DOMRect>} last
+ * @property {number[]} ends The end line of every row, in the canvas's content box, at the start.
+ * @property {number} top Where the grid's tracks begin inside its border box.
+ * @property {string} title The label's name for the edge.
+ */
 
-let drag: Drag | null = null;
+/** @type {Drag | null} */
+let drag = null;
 
-function position(event: PointerEvent, edge: Edge): number {
+/**
+ * @param {PointerEvent} event
+ * @param {Edge} edge
+ * @returns {number}
+ */
+function position(event, edge) {
 	return edge === 'bottom' ? event.clientY : event.clientX;
 }
 
-function listOf(container: HTMLElement): HTMLElement {
-	return container.querySelector<HTMLElement>(':scope > [data-repeater-list]') ?? container;
+/**
+ * @param {HTMLElement} container
+ * @returns {HTMLElement}
+ */
+function listOf(container) {
+	return (
+		/** @type {HTMLElement | null} */ (container.querySelector(':scope > [data-repeater-list]')) ??
+		container
+	);
 }
 
 /**
  * A read-only field is ignored whole on save, so a layout gesture inside
  * one would only lose the work. Its handles are not rendered either; this
  * closes the keyboard and pointer paths that do not need them.
+ *
+ * @param {HTMLElement} container
+ * @returns {boolean}
  */
-function locked(container: HTMLElement): boolean {
+function locked(container) {
 	return container.closest('[data-readonly="true"]') !== null;
 }
 
@@ -444,8 +603,12 @@ function locked(container: HTMLElement): boolean {
  * The travel of one column: a track plus its gap, off the list's own box.
  * A split's parts are a subgrid, whose gap computes to `normal`: the gap
  * is the field grid's.
+ *
+ * @param {HTMLElement} container
+ * @param {number} columns
+ * @returns {number}
  */
-function pitchOf(container: HTMLElement, columns: number): number {
+function pitchOf(container, columns) {
 	const list = listOf(container);
 	const style = getComputedStyle(list);
 	const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
@@ -454,17 +617,20 @@ function pitchOf(container: HTMLElement, columns: number): number {
 	return pitch(list.clientWidth - padding, columns, parseFloat(gap) || 0);
 }
 
-function onPointerDown(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerDown(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element) || event.button !== 0) {
 		return;
 	}
 
-	const handle = target.closest<HTMLElement>('[data-layout-resize]');
+	const handle = /** @type {HTMLElement | null} */ (target.closest('[data-layout-resize]'));
 	const edge = parseEdge(handle?.getAttribute('data-layout-resize') ?? null);
-	const row = handle?.closest<HTMLElement>('[data-repeater-row]');
-	const container = row?.closest<HTMLElement>('[data-repeater]');
+	const row = /** @type {HTMLElement | null} */ (handle?.closest('[data-repeater-row]'));
+	const container = /** @type {HTMLElement | null} */ (row?.closest('[data-repeater]'));
 
 	// A second finger does not join a gesture in progress, and a read-only
 	// field has no layout to drag.
@@ -505,12 +671,22 @@ function onPointerDown(event: PointerEvent): void {
 	}
 }
 
-function rectsOf(canvas: HTMLElement): Map<HTMLElement, DOMRect> {
+/**
+ * @param {HTMLElement} canvas
+ * @returns {Map<HTMLElement, DOMRect>}
+ */
+function rectsOf(canvas) {
 	return new Map([...snapshot(canvas).keys()].map((row) => [row, row.getBoundingClientRect()]));
 }
 
-/** What the dragged edge sets, as the label says it. */
-function value(current: Drag, box: { col: number; colspan: number; rowspan: number }): string {
+/**
+ * What the dragged edge sets, as the label says it.
+ *
+ * @param {Drag} current
+ * @param {{ col: number; colspan: number; rowspan: number }} box
+ * @returns {string}
+ */
+function value(current, box) {
 	switch (current.edge) {
 		case 'bottom':
 			return `${current.title}: ${box.rowspan}`;
@@ -521,7 +697,12 @@ function value(current: Drag, box: { col: number; colspan: number; rowspan: numb
 	}
 }
 
-function guide(current: Drag, canvas: HTMLElement, event: PointerEvent): void {
+/**
+ * @param {Drag} current
+ * @param {HTMLElement} canvas
+ * @param {PointerEvent} event
+ */
+function guide(current, canvas, event) {
 	const boxes = snapshot(canvas);
 
 	drawGuides(
@@ -539,7 +720,7 @@ function guide(current: Drag, canvas: HTMLElement, event: PointerEvent): void {
 		current.edge === 'bottom' ? event.clientX : rect[current.edge === 'end' ? 'right' : 'left'];
 	const y = current.edge === 'bottom' ? rect.bottom : event.clientY;
 
-	labelGuide(canvas, value(current, boxes.get(current.row)!), x, y);
+	labelGuide(canvas, value(current, /** @type {Box} */ (boxes.get(current.row))), x, y);
 }
 
 /**
@@ -548,8 +729,11 @@ function guide(current: Drag, canvas: HTMLElement, event: PointerEvent): void {
  * block. A mark whose block changed size in this step grows or shrinks
  * from the size it had, on the mark alone: a block's own height would
  * drive its row and move the grid under the animation.
+ *
+ * @param {Drag} current
+ * @param {Map<HTMLElement, DOMRect>} rects
  */
-function mark(current: Drag, rects: Map<HTMLElement, DOMRect>): void {
+function mark(current, rects) {
 	for (const [row, after] of rects) {
 		const start = current.rects.get(row);
 		const before = current.last.get(row);
@@ -580,13 +764,19 @@ function mark(current: Drag, rects: Map<HTMLElement, DOMRect>): void {
 	current.last = rects;
 }
 
-function unmark(canvas: HTMLElement): void {
+/**
+ * @param {HTMLElement} canvas
+ */
+function unmark(canvas) {
 	canvas
 		.querySelectorAll(':scope > [data-affected]')
 		.forEach((row) => row.removeAttribute('data-affected'));
 }
 
-function onPointerMove(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerMove(event) {
 	if (!drag || drag.pointer !== event.pointerId) {
 		return;
 	}
@@ -603,7 +793,7 @@ function onPointerMove(event: PointerEvent): void {
 	}
 
 	if (drag.boxes) {
-		const canvas = canvasOf(drag.row)!;
+		const canvas = /** @type {HTMLElement} */ (canvasOf(drag.row));
 		const next = resizePlaced(
 			drag.boxes,
 			drag.row,
@@ -622,8 +812,14 @@ function onPointerMove(event: PointerEvent): void {
 	}
 }
 
-/** The rows the bottom edge moves by: to the row line nearest the pointer. */
-function rowSteps(current: Drag, event: PointerEvent): number {
+/**
+ * The rows the bottom edge moves by: to the row line nearest the pointer.
+ *
+ * @param {Drag} current
+ * @param {PointerEvent} event
+ * @returns {number}
+ */
+function rowSteps(current, event) {
 	const box = current.boxes?.get(current.row);
 	const canvas = canvasOf(current.row);
 
@@ -643,7 +839,7 @@ function rowSteps(current: Drag, event: PointerEvent): number {
  * the latter would otherwise leave a drag standing that refuses every
  * later one.
  */
-function end(): void {
+function end() {
 	if (!drag) {
 		return;
 	}
@@ -662,9 +858,10 @@ function end(): void {
 	}
 
 	if (moved && boxes) {
-		commit(canvas!);
+		commit(/** @type {HTMLElement} */ (canvas));
 	} else if (moved) {
-		const dimension: Dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
+		/** @type {Dimension} */
+		const dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
 
 		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 	} else if (handle.matches('.resize')) {
@@ -682,11 +879,16 @@ function end(): void {
 /**
  * Alt with an arrow is the browser's history on some platforms, so a
  * handled key is consumed. A one-column field has no layout to reach.
+ *
+ * @param {KeyboardEvent} event
  */
-function onKeyDown(event: KeyboardEvent): void {
+function onKeyDown(event) {
 	const grip = event.target;
-	const row = grip instanceof Element ? grip.closest<HTMLElement>('[data-repeater-row]') : null;
-	const container = row?.closest<HTMLElement>('[data-repeater]');
+	const row =
+		grip instanceof Element
+			? /** @type {HTMLElement | null} */ (grip.closest('[data-repeater-row]'))
+			: null;
+	const container = /** @type {HTMLElement | null} */ (row?.closest('[data-repeater]'));
 	const key = parseKey(event);
 
 	if (
@@ -708,7 +910,8 @@ function onKeyDown(event: KeyboardEvent): void {
 
 	event.preventDefault();
 
-	const dimension: Dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
+	/** @type {Dimension} */
+	const dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
 
 	if (splitOf(row)) {
 		if (key.edge !== 'start' && resizePart(row, dimension, read(row)[dimension] + key.steps)) {
@@ -738,13 +941,19 @@ function onKeyDown(event: KeyboardEvent): void {
 	}
 }
 
-function onPointerUp(event: PointerEvent): void {
+/**
+ * @param {PointerEvent} event
+ */
+function onPointerUp(event) {
 	if (drag && drag.pointer === event.pointerId) {
 		end();
 	}
 }
 
-function onLostCapture(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onLostCapture(event) {
 	if (drag && event.target === drag.handle) {
 		end();
 	}
@@ -754,8 +963,10 @@ function onLostCapture(event: Event): void {
  * A typed value is applied as soon as the block can take it; one that is
  * out of range or half typed waits until the input commits, or the write
  * back would fight the typing.
+ *
+ * @param {Event} event
  */
-function onInput(event: Event): void {
+function onInput(event) {
 	const control = event.target;
 
 	if (!(control instanceof HTMLInputElement)) {
@@ -763,8 +974,8 @@ function onInput(event: Event): void {
 	}
 
 	const dimension = parseDimension(control.getAttribute('data-layout-input'));
-	const row = control.closest<HTMLElement>('[data-repeater-row]');
-	const container = row?.closest<HTMLElement>('[data-repeater]');
+	const row = /** @type {HTMLElement | null} */ (control.closest('[data-repeater-row]'));
+	const container = /** @type {HTMLElement | null} */ (row?.closest('[data-repeater]'));
 
 	if (!dimension || !row || !container || locked(container)) {
 		return;
@@ -776,7 +987,7 @@ function onInput(event: Event): void {
 	const part = splitOf(row) !== null;
 
 	if (placed(row)) {
-		const canvas = canvasOf(row)!;
+		const canvas = /** @type {HTMLElement} */ (canvasOf(row));
 		const boxes = snapshot(canvas);
 		const { low, high } = limits(boxes, row, grid.columns, grid.min)[dimension];
 
@@ -810,17 +1021,27 @@ function onInput(event: Event): void {
 }
 
 const SPACING = ['none', 's', 'm', 'l', 'xl'];
-const CONTAINER_SPACING: Record<string, string> = {
+/** @type {Record<string, string>} */
+const CONTAINER_SPACING = {
 	gap: 'gap',
 	rowGap: 'rowGap',
 	columnGap: 'columnGap',
 };
 
-function spacingKey(control: HTMLSelectElement): string | null {
+/**
+ * @param {HTMLSelectElement} control
+ * @returns {string | null}
+ */
+function spacingKey(control) {
 	return /\[meta\]\[(gap|rowGap|columnGap|padding)\]\[zxx\]$/.exec(control.name)?.[1] ?? null;
 }
 
-function applySpacing(target: HTMLElement, key: string, value: string): void {
+/**
+ * @param {HTMLElement} target
+ * @param {string} key
+ * @param {string} value
+ */
+function applySpacing(target, key, value) {
 	if (SPACING.includes(value)) {
 		target.dataset[key] = value;
 	} else {
@@ -833,12 +1054,14 @@ function applySpacing(target: HTMLElement, key: string, value: string): void {
  * writes the row's attribute, the field's gap selects write every
  * container of the field, so the grid and the resize math read the gap
  * the site will render with.
+ *
+ * @param {HTMLSelectElement} control
  */
-export function mirrorSpacing(control: HTMLSelectElement): void {
+export function mirrorSpacing(control) {
 	const key = spacingKey(control);
 
 	if (key === 'padding') {
-		const row = control.closest<HTMLElement>('[data-repeater-row]');
+		const row = /** @type {HTMLElement | null} */ (control.closest('[data-repeater-row]'));
 
 		if (row) {
 			applySpacing(row, key, control.value);
@@ -851,13 +1074,15 @@ export function mirrorSpacing(control: HTMLSelectElement): void {
 		return;
 	}
 
-	control
-		.closest('[data-meta-owner]')
-		?.querySelectorAll<HTMLElement>('.cms-blocks-editor')
-		.forEach((container) => applySpacing(container, CONTAINER_SPACING[key], control.value));
+	/** @type {NodeListOf<HTMLElement>} */ (
+		control.closest('[data-meta-owner]')?.querySelectorAll('.cms-blocks-editor')
+	).forEach((container) => applySpacing(container, CONTAINER_SPACING[key], control.value));
 }
 
-function onSpacing(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onSpacing(event) {
 	if (event.target instanceof HTMLSelectElement) {
 		mirrorSpacing(event.target);
 	}
@@ -867,17 +1092,25 @@ function onSpacing(event: Event): void {
  * The field's gap dialog: splitting copies the gap into both axes and
  * clears it, joining copies the row gap back. The selects then report a
  * change of their own, so the form turns dirty as for a typed choice.
+ *
+ * @param {Event} event
  */
-function onSplit(event: Event): void {
+function onSplit(event) {
 	const toggle = event.target;
 
 	if (!(toggle instanceof HTMLInputElement) || !toggle.matches('[data-gap-split]')) {
 		return;
 	}
 
-	const scope = toggle.closest<HTMLElement>('[data-gap-scope]');
-	const select = (key: string): HTMLSelectElement | null =>
-		scope?.querySelector<HTMLSelectElement>(`select[name$="[meta][${key}][zxx]"]`) ?? null;
+	const scope = /** @type {HTMLElement | null} */ (toggle.closest('[data-gap-scope]'));
+	/**
+	 * @param {string} key
+	 * @returns {HTMLSelectElement | null}
+	 */
+	const select = (key) =>
+		/** @type {HTMLSelectElement | null} */ (
+			scope?.querySelector(`select[name$="[meta][${key}][zxx]"]`)
+		) ?? null;
 	const gap = select('gap');
 	const row = select('rowGap');
 	const column = select('columnGap');
@@ -896,12 +1129,16 @@ function onSplit(event: Event): void {
 		column.value = '';
 	}
 
-	scope.querySelectorAll<HTMLElement>('[data-gap-single]').forEach((part) => {
-		part.hidden = toggle.checked;
-	});
-	scope.querySelectorAll<HTMLElement>('[data-gap-separate]').forEach((part) => {
-		part.hidden = !toggle.checked;
-	});
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[data-gap-single]')).forEach(
+		(part) => {
+			part.hidden = toggle.checked;
+		},
+	);
+	/** @type {NodeListOf<HTMLElement>} */ (scope.querySelectorAll('[data-gap-separate]')).forEach(
+		(part) => {
+			part.hidden = !toggle.checked;
+		},
+	);
 
 	for (const changed of [gap, row, column]) {
 		changed.dispatchEvent(new Event('change', { bubbles: true }));
@@ -919,14 +1156,19 @@ const INTERACTIVE =
 // A click on a block's own ground makes it the active one — the border
 // and the chrome follow focus — while a click on anything interactive
 // keeps its meaning.
-function onClick(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function onClick(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
 		return;
 	}
 
-	const row = target.closest<HTMLElement>('.cms-blocks-editor [data-repeater-row]');
+	const row = /** @type {HTMLElement | null} */ (
+		target.closest('.cms-blocks-editor [data-repeater-row]')
+	);
 
 	if (!row || row.contains(document.activeElement)) {
 		return;
@@ -952,10 +1194,15 @@ const TEXT = [
 	'input[type="tel"]',
 ].join(', ');
 
-/** A block's own first text on the canvas, not one of a nested row's or in its dialog. */
-function textOf(row: HTMLElement): HTMLElement | null {
+/**
+ * A block's own first text on the canvas, not one of a nested row's or in its dialog.
+ *
+ * @param {HTMLElement} row
+ * @returns {HTMLElement | null}
+ */
+function textOf(row) {
 	return (
-		[...row.querySelectorAll<HTMLElement>(TEXT)].find(
+		[.../** @type {NodeListOf<HTMLElement>} */ (row.querySelectorAll(TEXT))].find(
 			(control) =>
 				control.closest('[data-repeater-row]') === row &&
 				!control.closest('dialog, .chrome') &&
@@ -968,8 +1215,12 @@ function textOf(row: HTMLElement): HTMLElement | null {
 	);
 }
 
-/** The caret at the end of the text, where a press below its last line puts it. */
-function edit(control: HTMLElement): void {
+/**
+ * The caret at the end of the text, where a press below its last line puts it.
+ *
+ * @param {HTMLElement} control
+ */
+function edit(control) {
 	control.focus();
 
 	if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) {
@@ -987,11 +1238,14 @@ function edit(control: HTMLElement): void {
 // A press anywhere on the ground around a block's text edits the text,
 // not only one on its lines. Its default would move the focus away in
 // between, so the block would flicker inactive, and start a selection.
-function onMouseDown(event: MouseEvent): void {
+/**
+ * @param {MouseEvent} event
+ */
+function onMouseDown(event) {
 	const target = event.target;
 	const row =
 		target instanceof Element
-			? target.closest<HTMLElement>('.cms-blocks-editor [data-repeater-row]')
+			? /** @type {HTMLElement | null} */ (target.closest('.cms-blocks-editor [data-repeater-row]'))
 			: null;
 	const control = row && textOf(row);
 
@@ -999,7 +1253,7 @@ function onMouseDown(event: MouseEvent): void {
 		event.button !== 0 ||
 		!control ||
 		target === control ||
-		!(target as Element).contains(control)
+		!(/** @type {Element} */ (target).contains(control))
 	) {
 		return;
 	}
@@ -1008,9 +1262,15 @@ function onMouseDown(event: MouseEvent): void {
 	edit(control);
 }
 
-function onStamp(event: Event): void {
+/**
+ * @param {Event} event
+ */
+function onStamp(event) {
 	const row = event.target;
-	const container = row instanceof HTMLElement ? row.closest<HTMLElement>('[data-repeater]') : null;
+	const container =
+		row instanceof HTMLElement
+			? /** @type {HTMLElement | null} */ (row.closest('[data-repeater]'))
+			: null;
 
 	if (!(row instanceof HTMLElement) || !container) {
 		return;
@@ -1021,14 +1281,17 @@ function onStamp(event: Event): void {
 	}
 
 	// A duplicate copies its source's padding select; the row shows it.
-	const padding = row.querySelector<HTMLSelectElement>('select[name$="[meta][padding][zxx]"]');
+	const padding = /** @type {HTMLSelectElement | null} */ (
+		row.querySelector('select[name$="[meta][padding][zxx]"]')
+	);
 
 	if (padding) {
 		mirrorSpacing(padding);
 	}
 }
 
-export function install(): () => void {
+/** @returns {() => void} */
+export function install() {
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('click', onClick);
 	document.addEventListener('mousedown', onMouseDown);
