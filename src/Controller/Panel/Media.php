@@ -67,6 +67,25 @@ final class Media extends Panel
 	}
 
 	/**
+	 * Assets whose filename matches `q`, as JSON for the menu editor's
+	 * asset picker: the listing's first page, narrowed by `kind`.
+	 */
+	public function search(Database $db, Factory $factory): Response
+	{
+		$kind = $this->request->param('kind', '');
+		$q = $this->request->param('q', '');
+		$page = new Library($db, $this->config)->page(
+			kinds: Library::filterKinds(is_string($kind) ? $kind : ''),
+			q: is_string($q) ? $q : '',
+		);
+
+		return Response::create($factory)->json([
+			'ok' => true,
+			'assets' => array_map(Library::item(...), $page->assets),
+		]);
+	}
+
+	/**
 	 * The library as controls embed it to pick an asset: a search and the
 	 * tile grid, whose tiles carry the asset they stand for. `kind` narrows
 	 * the listing, `file` marks the current pick.

@@ -173,6 +173,9 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('media'));
 				$panel
+					->get('/media/search', [Panel\Media::class, 'search'], 'media.search')
+					->middleware($panelAuth);
+				$panel
 					->post("/media/{$uid}", [Panel\Media::class, 'save'], 'media.save')
 					->middleware($panelAuth)
 					->after($renderers->get('media'));

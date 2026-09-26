@@ -564,8 +564,8 @@ final class Menus extends Panel
 			'defaultLocale' => $context->locales()->getDefault()->id,
 			'searchUrls' => [
 				'node' => $this->panelPath() . '/reference/nodes?limit=8',
-				'asset' => '/media/library?kind=',
-				'image' => '/media/library?kind=image',
+				'asset' => $this->panelPath() . '/media/search?kind=',
+				'image' => $this->panelPath() . '/media/search?kind=image',
 			],
 		];
 	}
