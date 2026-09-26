@@ -29,6 +29,8 @@ use Cosray\Security\Policy;
 use Cosray\User;
 use Cosray\Util\Form;
 
+use function Cosray\env;
+
 abstract class Panel
 {
 	/**
@@ -55,6 +57,7 @@ abstract class Panel
 		$localeId = $this->localeId();
 		$collections = $this->collections();
 		$layer = $this->layer();
+		$dev = $this->devServer();
 
 		return array_merge(
 			[
@@ -78,9 +81,9 @@ abstract class Panel
 				'renderIcon' => $this->renderIcon(...),
 				'assetsBase' => $this->client()->url(),
 				'importMap' => $this->client()->importMap(),
-				'stylesheets' => $this->stylesheets(),
+				'stylesheets' => $this->stylesheets($dev),
 				'scripts' => $this->scripts(),
-				'moduleScripts' => $this->moduleScripts(),
+				'moduleScripts' => $this->moduleScripts($dev),
 				// Only a full document loads the entry; a swap reuses the modules.
 				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
 				'collections' => $collections,
@@ -204,10 +207,16 @@ abstract class Panel
 		return $titles;
 	}
 
-	/** @return list<string> */
-	private function stylesheets(): array
+	/**
+	 * With the dev server, its client injects the panel stylesheet instead.
+	 *
+	 * @return list<string>
+	 */
+	private function stylesheets(?string $dev): array
 	{
-		return [...$this->config->panel->theme, $this->client()->url('styles/panel.css'), ...$this->extras()->css()];
+		$panel = $dev === null ? [$this->client()->url('styles/panel.css')] : [];
+
+		return [...$this->config->panel->theme, ...$panel, ...$this->extras()->css()];
 	}
 
 	/**
@@ -221,9 +230,39 @@ abstract class Panel
 	}
 
 	/** @return list<string> */
-	private function moduleScripts(): array
+	private function moduleScripts(?string $dev): array
 	{
-		return [$this->client()->url('src/panel.js'), ...$this->extras()->moduleScripts()];
+		$vite = $dev === null ? [] : ["{$dev}/@vite/client", "{$dev}/dev.js"];
+
+		return [...$vite, $this->client()->url('src/panel.js'), ...$this->extras()->moduleScripts()];
+	}
+
+	/**
+	 * The origin of the optional Vite dev server (`COSRAY_PANEL_DEV`), or null.
+	 * It serves the panel stylesheet with hot updates and reloads the page when
+	 * a script or view changes; everything else loads as in production.
+	 */
+	private function devServer(): ?string
+	{
+		if (!filter_var(env('COSRAY_PANEL_DEV', false), FILTER_VALIDATE_BOOL)) {
+			return null;
+		}
+
+		$origin = env('COSRAY_PANEL_DEV_ORIGIN', null);
+
+		if (is_string($origin) && trim($origin) !== '') {
+			return rtrim(trim($origin), '/');
+		}
+
+		$scheme = env('COSRAY_PANEL_DEV_SCHEME', 'http');
+		$scheme = is_string($scheme) && in_array($scheme, ['http', 'https'], true) ? $scheme : 'http';
+		$port = env('COSRAY_PANEL_DEV_PORT', '2001');
+		$port = is_scalar($port) && preg_match('/^[0-9]+$/', (string) $port) ? (string) $port : '2001';
+		$host = $this->request->uri()->getHost() ?: $this->request->header('Host');
+		$host = trim(explode(':', $host)[0] ?? '');
+		$host = preg_match('/^[A-Za-z0-9.-]+$/', $host) === 1 ? $host : 'localhost';
+
+		return "{$scheme}://{$host}:{$port}";
 	}
 
 	protected function client(): Client

@@ -11,6 +11,7 @@
 # The panel ships its browser files as they are; its dev tooling stays behind.
 /panel/.* export-ignore
 /panel/*.config.* export-ignore
+/panel/dev.js export-ignore
 /panel/package.json export-ignore
 /panel/pnpm-*.yaml export-ignore
 /panel/scripts/ export-ignore
