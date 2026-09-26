@@ -1,7 +1,14 @@
-import type { Attrs, MarkType, NodeType } from 'prosemirror-model';
-import { type EditorState, NodeSelection } from 'prosemirror-state';
+/** @import { Attrs, MarkType, NodeType } from 'prosemirror-model' */
+/** @import { EditorState } from 'prosemirror-state' */
 
-export function isMarkActive(state: EditorState, type: MarkType): boolean {
+import { NodeSelection } from 'prosemirror-state';
+
+/**
+ * @param {EditorState} state
+ * @param {MarkType} type
+ * @returns {boolean}
+ */
+export function isMarkActive(state, type) {
 	const { from, $from, to, empty } = state.selection;
 	if (empty) {
 		return !!type.isInSet(state.storedMarks || $from.marks());
@@ -9,7 +16,12 @@ export function isMarkActive(state: EditorState, type: MarkType): boolean {
 	return state.doc.rangeHasMark(from, to, type);
 }
 
-export function getMarkAttributes(state: EditorState, type: MarkType): Attrs | null {
+/**
+ * @param {EditorState} state
+ * @param {MarkType} type
+ * @returns {Attrs | null}
+ */
+export function getMarkAttributes(state, type) {
 	const { from, $from, to, empty } = state.selection;
 
 	if (empty) {
@@ -18,7 +30,8 @@ export function getMarkAttributes(state: EditorState, type: MarkType): Attrs | n
 		return mark ? mark.attrs : null;
 	}
 
-	let attrs: Attrs | null = null;
+	/** @type {Attrs | null} */
+	let attrs = null;
 	state.doc.nodesBetween(from, to, (node) => {
 		if (attrs !== null) return false;
 		const mark = type.isInSet(node.marks);
@@ -30,7 +43,13 @@ export function getMarkAttributes(state: EditorState, type: MarkType): Attrs | n
 	return attrs;
 }
 
-export function isNodeActive(state: EditorState, type: NodeType, attrs?: Attrs): boolean {
+/**
+ * @param {EditorState} state
+ * @param {NodeType} type
+ * @param {Attrs} [attrs]
+ * @returns {boolean}
+ */
+export function isNodeActive(state, type, attrs) {
 	const { $from, to } = state.selection;
 
 	for (let depth = $from.depth; depth >= 0; depth--) {
@@ -52,7 +71,12 @@ export function isNodeActive(state: EditorState, type: NodeType, attrs?: Attrs):
 	return false;
 }
 
-export function getBlockAttributes(state: EditorState, type: NodeType): Attrs | null {
+/**
+ * @param {EditorState} state
+ * @param {NodeType} type
+ * @returns {Attrs | null}
+ */
+export function getBlockAttributes(state, type) {
 	const { $from } = state.selection;
 
 	for (let depth = $from.depth; depth >= 0; depth--) {
@@ -64,7 +88,11 @@ export function getBlockAttributes(state: EditorState, type: NodeType): Attrs | 
 	return null;
 }
 
-export function getActiveTextAlign(state: EditorState): string | null {
+/**
+ * @param {EditorState} state
+ * @returns {string | null}
+ */
+export function getActiveTextAlign(state) {
 	const { $from } = state.selection;
 
 	for (let depth = $from.depth; depth >= 0; depth--) {

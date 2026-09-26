@@ -1,3 +1,6 @@
+/** @import { NodeType } from 'prosemirror-model' */
+/** @import { Plugin } from 'prosemirror-state' */
+
 import { keymap } from 'prosemirror-keymap';
 import {
 	chainCommands,
@@ -15,25 +18,30 @@ import {
 	textblockTypeInputRule,
 	InputRule,
 } from 'prosemirror-inputrules';
-import type { NodeType } from 'prosemirror-model';
-import type { Plugin } from 'prosemirror-state';
-import { toggleBulletList, toggleOrderedList } from './commands';
-import { schema } from './schema';
 
-function headingRule(level: number): InputRule {
+import { toggleBulletList, toggleOrderedList } from './commands.js';
+import { schema } from './schema.js';
+
+/**
+ * @param {number} level
+ * @returns {InputRule}
+ */
+function headingRule(level) {
 	const pattern = new RegExp(`^(#{${level}})\\s$`);
 	return textblockTypeInputRule(pattern, schema.nodes.heading, () => ({
 		level,
 	}));
 }
 
-function horizontalRuleInputRule(): InputRule {
+/** @returns {InputRule} */
+function horizontalRuleInputRule() {
 	return new InputRule(/^---$/, (state, _match, start, end) => {
 		return state.tr.delete(start, end).insert(start, schema.nodes.horizontalRule.create());
 	});
 }
 
-export function buildKeymap(): Plugin {
+/** @returns {Plugin} */
+export function buildKeymap() {
 	const { bold, italic, strike, code } = schema.marks;
 	const { listItem, hardBreak } = schema.nodes;
 
@@ -70,7 +78,8 @@ export function buildKeymap(): Plugin {
 	});
 }
 
-export function buildInputRules(): Plugin {
+/** @returns {Plugin} */
+export function buildInputRules() {
 	return inputRules({
 		rules: [
 			headingRule(1),

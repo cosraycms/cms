@@ -1,15 +1,18 @@
-import { EditorState, Plugin, type Command } from 'prosemirror-state';
-import type { Node } from 'prosemirror-model';
+/** @import { Command } from 'prosemirror-state' */
+/** @import { Node } from 'prosemirror-model' */
+/** @import { RichtextDoc } from './format.js' */
+
+import { EditorState, Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { history } from 'prosemirror-history';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { gapCursor } from 'prosemirror-gapcursor';
-import { schema, parser, serializer } from './schema';
-import { buildKeymap, buildInputRules } from './keymap';
-import { bubbleMenu } from './bubble-menu';
-import { docToPm, pmToDoc, type RichtextDoc } from './format';
+import { schema, parser, serializer } from './schema.js';
+import { buildKeymap, buildInputRules } from './keymap.js';
+import { bubbleMenu } from './bubble-menu.js';
+import { docToPm, pmToDoc } from './format.js';
 
 /**
  * The internal editor driver seam: components talk documents in the
@@ -17,65 +20,75 @@ import { docToPm, pmToDoc, type RichtextDoc } from './format';
  * ProseMirror-specific stays behind this module (and schema/format/
  * commands). A future editor swap replaces the driver, not the
  * callers.
+ *
+ * @typedef {object} CmsEditor
+ * @property {EditorView} view
+ * @property {(command: Command) => void} run
+ * @property {() => RichtextDoc} getDoc
+ * @property {() => string} getHTML
+ * @property {(html: string) => void} setContent
+ * @property {() => void} destroy
  */
-export interface CmsEditor {
-	view: EditorView;
-	run(command: Command): void;
-	getDoc(): RichtextDoc;
-	getHTML(): string;
-	setContent(html: string): void;
-	destroy(): void;
-}
 
-export interface EditorOptions {
-	element: HTMLElement;
-	content: RichtextDoc | null;
-	onUpdate: (doc: RichtextDoc) => void;
-	onStateChange: (state: EditorState) => void;
-	mode: 'default' | 'inline';
-	bubbleElement?: HTMLElement;
-	/** Resolve an asset uid to a display URL for inline images. */
-	assetUrl?: (uid: string) => string | null;
-	/**
-	 * Whether the document takes input; the view stays selectable either
-	 * way, so a read-only document can still be read and copied. Absent
-	 * means editable.
-	 */
-	editable?: () => boolean;
-	/** Shown on a blank document's empty line; none when empty. */
-	placeholder?: string;
-}
+/**
+ * @typedef {object} EditorOptions
+ * @property {HTMLElement} element
+ * @property {RichtextDoc | null} content
+ * @property {(doc: RichtextDoc) => void} onUpdate
+ * @property {(state: EditorState) => void} onStateChange
+ * @property {'default' | 'inline'} mode
+ * @property {HTMLElement} [bubbleElement]
+ * @property {(uid: string) => string | null} [assetUrl] Resolve an asset uid to a display URL for inline images.
+ * @property {() => boolean} [editable] Whether the document takes input; the view stays selectable
+ *     either way, so a read-only document can still be read and copied. Absent means editable.
+ * @property {string} [placeholder] Shown on a blank document's empty line; none when empty.
+ */
 
-function parseContent(html: string) {
+/** @param {string} html */
+function parseContent(html) {
 	const container = document.createElement('div');
 	container.innerHTML = html;
 	return parser.parse(container);
 }
 
-function serializeContent(state: EditorState): string {
+/**
+ * @param {EditorState} state
+ * @returns {string}
+ */
+function serializeContent(state) {
 	const fragment = serializer.serializeFragment(state.doc.content);
 	const container = document.createElement('div');
 	container.appendChild(fragment);
 	return container.innerHTML;
 }
 
-/** Nothing but one empty line, of whatever kind. */
-function blank(doc: Node): boolean {
-	return doc.childCount === 1 && doc.firstChild!.isTextblock && doc.firstChild!.content.size === 0;
+/**
+ * Nothing but one empty line, of whatever kind.
+ *
+ * @param {Node} doc
+ * @returns {boolean}
+ */
+function blank(doc) {
+	const first = doc.firstChild;
+
+	return doc.childCount === 1 && first !== null && first.isTextblock && first.content.size === 0;
 }
 
 /**
  * The placeholder sits on the empty line itself, so it takes that line's
  * font and place; the stylesheet shows it through the attribute.
+ *
+ * @param {string} text
+ * @returns {Plugin}
  */
-function placeholderPlugin(text: string): Plugin {
+function placeholderPlugin(text) {
 	return new Plugin({
 		props: {
 			attributes: { 'aria-placeholder': text },
 			decorations(state) {
 				return blank(state.doc)
 					? DecorationSet.create(state.doc, [
-							Decoration.node(0, state.doc.firstChild!.nodeSize, {
+							Decoration.node(0, /** @type {Node} */ (state.doc.firstChild).nodeSize, {
 								class: 'is-placeholder',
 								'data-placeholder': text,
 							}),
@@ -86,7 +99,11 @@ function placeholderPlugin(text: string): Plugin {
 	});
 }
 
-export default function createEditor(options: EditorOptions): CmsEditor {
+/**
+ * @param {EditorOptions} options
+ * @returns {CmsEditor}
+ */
+export default function createEditor(options) {
 	const {
 		element,
 		content,
@@ -99,7 +116,7 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 		placeholder,
 	} = options;
 
-	const plugins: Plugin[] = [
+	const plugins = [
 		buildInputRules(),
 		buildKeymap(),
 		keymap(baseKeymap),
@@ -157,20 +174,20 @@ export default function createEditor(options: EditorOptions): CmsEditor {
 	return {
 		view,
 
-		run(command: Command) {
+		run(command) {
 			view.focus();
 			command(view.state, view.dispatch, view);
 		},
 
-		getDoc(): RichtextDoc {
+		getDoc() {
 			return pmToDoc(view.state.doc);
 		},
 
-		getHTML(): string {
+		getHTML() {
 			return serializeContent(view.state);
 		},
 
-		setContent(html: string) {
+		setContent(html) {
 			const newDoc = parseContent(html);
 			const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
 			view.dispatch(tr);

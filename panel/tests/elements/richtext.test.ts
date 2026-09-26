@@ -1,7 +1,7 @@
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { RichtextEnvelope } from '../../src/components/richtext/format';
+import type { RichtextEnvelope } from '../../src/elements/richtext/format.js';
 import type { HostPayload } from '../../src/lib/host';
 import type { LocaleMap, RichtextDoc } from '../../src/types/data';
 import '../../src/elements/richtext/RichTextElement.svelte';

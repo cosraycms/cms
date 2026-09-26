@@ -1,7 +1,7 @@
-import type { Node as PmNode } from 'prosemirror-model';
-import type { RichtextDoc } from '$types/data';
+/** @import { Node as PmNode } from 'prosemirror-model' */
+/** @import { RichtextNode } from '../../types/data' */
 
-import { parser, schema } from './schema';
+import { parser, schema } from './schema.js';
 
 /**
  * The cosray richtext storage format (docs/richtext-format.md) and its
@@ -13,25 +13,23 @@ import { parser, schema } from './schema';
 export const FORMAT = 'cosray-richtext';
 export const VERSION = 1;
 
-export type { RichtextDoc, RichtextMark, RichtextNode } from '$types/data';
+/** @typedef {import('../../types/data').RichtextDoc} RichtextDoc */
+/** @typedef {import('../../types/data').RichtextMark} RichtextMark */
+/** @typedef {Record<string, RichtextDoc | null>} RichtextValue */
+/** @typedef {{ format: typeof FORMAT, version: number, value: RichtextValue }} RichtextEnvelope */
+/** @typedef {Record<string, unknown>} Json */
 
-export type RichtextValue = Record<string, RichtextDoc | null>;
-
-export type RichtextEnvelope = {
-	format: typeof FORMAT;
-	version: number;
-	value: RichtextValue;
-};
-
-type Json = Record<string, unknown>;
-
-export function docToPm(doc: RichtextDoc | null): PmNode {
+/**
+ * @param {RichtextDoc | null} doc
+ * @returns {PmNode}
+ */
+export function docToPm(doc) {
 	if (!doc || doc.type !== 'doc') {
 		return emptyPm();
 	}
 
 	try {
-		return schema.nodeFromJSON(toPmJson(doc as unknown as Json));
+		return schema.nodeFromJSON(toPmJson(/** @type {Json} */ (/** @type {unknown} */ (doc))));
 	} catch (error) {
 		console.error('Could not read the stored richtext document.', error);
 
@@ -39,16 +37,28 @@ export function docToPm(doc: RichtextDoc | null): PmNode {
 	}
 }
 
-export function pmToDoc(pm: PmNode): RichtextDoc {
-	return fromPmJson(pm.toJSON() as Json) as unknown as RichtextDoc;
+/**
+ * @param {PmNode} pm
+ * @returns {RichtextDoc}
+ */
+export function pmToDoc(pm) {
+	return /** @type {RichtextDoc} */ (/** @type {unknown} */ (fromPmJson(pm.toJSON())));
 }
 
-export function isFilledDoc(doc: RichtextDoc | null | undefined): boolean {
+/**
+ * @param {RichtextDoc | null | undefined} doc
+ * @returns {boolean}
+ */
+export function isFilledDoc(doc) {
 	if (!doc || doc.type !== 'doc') {
 		return false;
 	}
 
-	function filled(node: RichtextDoc['content'][number]): boolean {
+	/**
+	 * @param {RichtextNode} node
+	 * @returns {boolean}
+	 */
+	function filled(node) {
 		if (typeof node.text === 'string' && node.text.trim() !== '') {
 			return true;
 		}
@@ -63,7 +73,11 @@ export function isFilledDoc(doc: RichtextDoc | null | undefined): boolean {
 	return doc.content.some(filled);
 }
 
-export function htmlToDoc(html: string): RichtextDoc | null {
+/**
+ * @param {string} html
+ * @returns {RichtextDoc | null}
+ */
+export function htmlToDoc(html) {
 	if (html.trim() === '') {
 		return null;
 	}
@@ -71,21 +85,26 @@ export function htmlToDoc(html: string): RichtextDoc | null {
 	const container = document.createElement('div');
 	container.innerHTML = html;
 
-	return pmToDoc(parser.parse(container) as unknown as PmNode);
+	return pmToDoc(parser.parse(container));
 }
 
-function emptyPm(): PmNode {
-	return schema.nodes.doc.createAndFill() as PmNode;
+/** @returns {PmNode} */
+function emptyPm() {
+	return /** @type {PmNode} */ (schema.nodes.doc.createAndFill());
 }
 
 /**
  * Stored -> ProseMirror JSON: rename `align` to the schema's
  * `textAlign`; everything else is shape-identical (nodeFromJSON fills
  * omitted attribute defaults from the schema).
+ *
+ * @param {Json} node
+ * @returns {Json}
  */
-function toPmJson(node: Json): Json {
-	const result: Json = { ...node };
-	const attrs = node.attrs as Json | undefined;
+function toPmJson(node) {
+	/** @type {Json} */
+	const result = { ...node };
+	const attrs = /** @type {Json | undefined} */ (node.attrs);
 
 	if (attrs && 'align' in attrs) {
 		const { align, ...rest } = attrs;
@@ -93,7 +112,7 @@ function toPmJson(node: Json): Json {
 	}
 
 	if (Array.isArray(node.content)) {
-		result.content = node.content.map((child) => toPmJson(child as Json));
+		result.content = node.content.map((child) => toPmJson(child));
 	}
 
 	return result;
@@ -104,10 +123,14 @@ function toPmJson(node: Json): Json {
  * null attributes and empty attrs/marks. The server normalizes to full
  * canonical form on save; this keeps the payload within the writer-
  * strict vocabulary (no nulls on link target kinds, no empty objects).
+ *
+ * @param {Json} node
+ * @returns {Json}
  */
-function fromPmJson(node: Json): Json {
-	const result: Json = { type: node.type };
-	const attrs = cleanAttrs(node.attrs as Json | undefined, true);
+function fromPmJson(node) {
+	/** @type {Json} */
+	const result = { type: node.type };
+	const attrs = cleanAttrs(/** @type {Json | undefined} */ (node.attrs), true);
 
 	if (attrs) {
 		result.attrs = attrs;
@@ -119,9 +142,9 @@ function fromPmJson(node: Json): Json {
 
 	if (Array.isArray(node.marks) && node.marks.length > 0) {
 		result.marks = node.marks.map((mark) => {
-			const m = mark as Json;
-			const entry: Json = { type: m.type };
-			const markAttrs = cleanAttrs(m.attrs as Json | undefined, false);
+			/** @type {Json} */
+			const entry = { type: mark.type };
+			const markAttrs = cleanAttrs(mark.attrs, false);
 
 			if (markAttrs) {
 				entry.attrs = markAttrs;
@@ -132,18 +155,24 @@ function fromPmJson(node: Json): Json {
 	}
 
 	if (Array.isArray(node.content) && node.content.length > 0) {
-		result.content = node.content.map((child) => fromPmJson(child as Json));
+		result.content = node.content.map((child) => fromPmJson(child));
 	}
 
 	return result;
 }
 
-function cleanAttrs(attrs: Json | undefined, renameAlign: boolean): Json | null {
+/**
+ * @param {Json | undefined} attrs
+ * @param {boolean} renameAlign
+ * @returns {Json | null}
+ */
+function cleanAttrs(attrs, renameAlign) {
 	if (!attrs) {
 		return null;
 	}
 
-	const result: Json = {};
+	/** @type {Json} */
+	const result = {};
 
 	for (const [key, value] of Object.entries(attrs)) {
 		if (value === null || value === undefined) {

@@ -1,7 +1,7 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import RichTextEditor from '../../../src/components/richtext/RichTextEditor.svelte';
-import type { RichtextDoc } from '../../../src/components/richtext/format';
+import type { RichtextDoc } from '../../../src/elements/richtext/format.js';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
 

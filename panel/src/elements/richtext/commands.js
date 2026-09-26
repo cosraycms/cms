@@ -1,10 +1,15 @@
-import type { Attrs, MarkType, NodeType } from 'prosemirror-model';
-import type { Command, EditorState } from 'prosemirror-state';
+/** @import { Attrs, MarkType, NodeType } from 'prosemirror-model' */
+/** @import { Command, EditorState } from 'prosemirror-state' */
+
 import { toggleMark } from 'prosemirror-commands';
 import { liftListItem, wrapInList } from 'prosemirror-schema-list';
-import { schema } from './schema';
+import { schema } from './schema.js';
 
-export function setTextAlign(alignment: string): Command {
+/**
+ * @param {string} alignment
+ * @returns {Command}
+ */
+export function setTextAlign(alignment) {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
@@ -19,7 +24,8 @@ export function setTextAlign(alignment: string): Command {
 	};
 }
 
-export function unsetTextAlign(): Command {
+/** @returns {Command} */
+export function unsetTextAlign() {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
@@ -34,7 +40,11 @@ export function unsetTextAlign(): Command {
 	};
 }
 
-export function setParagraphClass(cls: string): Command {
+/**
+ * @param {string} cls
+ * @returns {Command}
+ */
+export function setParagraphClass(cls) {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
@@ -54,7 +64,8 @@ export function setParagraphClass(cls: string): Command {
 	};
 }
 
-export function insertHorizontalRule(): Command {
+/** @returns {Command} */
+export function insertHorizontalRule() {
 	return (state, dispatch) => {
 		if (!dispatch) return true;
 		const { $to } = state.selection;
@@ -69,7 +80,11 @@ export function insertHorizontalRule(): Command {
 // one, otherwise the full extent of the link mark under a collapsed cursor.
 // Editing a link commonly leaves the cursor inside it with nothing selected,
 // so without this expansion re-picking a target would be a silent no-op.
-function linkRange(state: EditorState): { from: number; to: number } | null {
+/**
+ * @param {EditorState} state
+ * @returns {{ from: number; to: number } | null}
+ */
+function linkRange(state) {
 	const { from, to, empty } = state.selection;
 	if (!empty) return { from, to };
 
@@ -95,7 +110,11 @@ function linkRange(state: EditorState): { from: number; to: number } | null {
 	return { from: start, to: end };
 }
 
-export function setLink(attrs: Attrs): Command {
+/**
+ * @param {Attrs} attrs
+ * @returns {Command}
+ */
+export function setLink(attrs) {
 	return (state, dispatch) => {
 		const range = linkRange(state);
 		if (!range) return false;
@@ -111,7 +130,8 @@ export function setLink(attrs: Attrs): Command {
 	};
 }
 
-export function unsetLink(): Command {
+/** @returns {Command} */
+export function unsetLink() {
 	return (state, dispatch) => {
 		const range = linkRange(state);
 		if (!range) return false;
@@ -122,7 +142,8 @@ export function unsetLink(): Command {
 	};
 }
 
-export function clearMarks(): Command {
+/** @returns {Command} */
+export function clearMarks() {
 	return (state, dispatch) => {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
@@ -136,7 +157,8 @@ export function clearMarks(): Command {
 	};
 }
 
-export function clearNodes(): Command {
+/** @returns {Command} */
+export function clearNodes() {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
@@ -157,7 +179,8 @@ export function clearNodes(): Command {
 	};
 }
 
-export function insertHardBreak(): Command {
+/** @returns {Command} */
+export function insertHardBreak() {
 	return (state, dispatch) => {
 		if (!dispatch) return true;
 		dispatch(state.tr.replaceSelectionWith(schema.nodes.hardBreak.create()).scrollIntoView());
@@ -165,31 +188,41 @@ export function insertHardBreak(): Command {
 	};
 }
 
-export function toggleBold(): Command {
+/** @returns {Command} */
+export function toggleBold() {
 	return toggleMark(schema.marks.bold);
 }
 
-export function toggleItalic(): Command {
+/** @returns {Command} */
+export function toggleItalic() {
 	return toggleMark(schema.marks.italic);
 }
 
-export function toggleStrike(): Command {
+/** @returns {Command} */
+export function toggleStrike() {
 	return toggleMark(schema.marks.strike);
 }
 
-export function toggleCode(): Command {
+/** @returns {Command} */
+export function toggleCode() {
 	return toggleMark(schema.marks.code);
 }
 
-export function toggleSubscript(): Command {
+/** @returns {Command} */
+export function toggleSubscript() {
 	return toggleMark(schema.marks.subscript);
 }
 
-export function toggleSuperscript(): Command {
+/** @returns {Command} */
+export function toggleSuperscript() {
 	return toggleMark(schema.marks.superscript);
 }
 
-export function setStyle(cls: string): Command {
+/**
+ * @param {string} cls
+ * @returns {Command}
+ */
+export function setStyle(cls) {
 	return (state, dispatch) => {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
@@ -200,7 +233,8 @@ export function setStyle(cls: string): Command {
 	};
 }
 
-export function unsetStyle(): Command {
+/** @returns {Command} */
+export function unsetStyle() {
 	return (state, dispatch) => {
 		const { from, to, empty } = state.selection;
 		if (empty) return false;
@@ -210,7 +244,11 @@ export function unsetStyle(): Command {
 	};
 }
 
-export function insertImage(uid: string): Command {
+/**
+ * @param {string} uid
+ * @returns {Command}
+ */
+export function insertImage(uid) {
 	return (state, dispatch) => {
 		if (!dispatch) return true;
 		const node = schema.nodes.image.create({ uid });
@@ -219,7 +257,8 @@ export function insertImage(uid: string): Command {
 	};
 }
 
-export function toggleBulletList(): Command {
+/** @returns {Command} */
+export function toggleBulletList() {
 	return (state, dispatch, view) => {
 		const { bulletList, listItem } = schema.nodes;
 		if (state.selection.$from.node(-1)?.type === bulletList) {
@@ -229,7 +268,8 @@ export function toggleBulletList(): Command {
 	};
 }
 
-export function toggleOrderedList(): Command {
+/** @returns {Command} */
+export function toggleOrderedList() {
 	return (state, dispatch, view) => {
 		const { orderedList, listItem } = schema.nodes;
 		if (state.selection.$from.node(-1)?.type === orderedList) {
@@ -239,7 +279,8 @@ export function toggleOrderedList(): Command {
 	};
 }
 
-export function toggleBlockquote(): Command {
+/** @returns {Command} */
+export function toggleBlockquote() {
 	return (state, dispatch) => {
 		const { blockquote } = schema.nodes;
 		const { $from } = state.selection;
@@ -264,7 +305,11 @@ export function toggleBlockquote(): Command {
 	};
 }
 
-export function setHeading(level: number): Command {
+/**
+ * @param {number} level
+ * @returns {Command}
+ */
+export function setHeading(level) {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
@@ -287,7 +332,8 @@ export function setHeading(level: number): Command {
 	};
 }
 
-export function setParagraph(): Command {
+/** @returns {Command} */
+export function setParagraph() {
 	return (state, dispatch) => {
 		const { from, to } = state.selection;
 		if (!dispatch) return true;
