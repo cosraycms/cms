@@ -126,7 +126,7 @@ final class BlocksTest extends TestCase
 		$this->assertSame(2, $control['props']['min']);
 		$this->assertSame('stack', $control['props']['responsive']);
 		$this->assertSame('richtext', $types[Builtin\RichText::class]['handle']);
-		$this->assertSame('Formatierter Text', $types[Builtin\RichText::class]['label']);
+		$this->assertSame('Text', $types[Builtin\RichText::class]['label']);
 		$this->assertSame('heading', $types[Builtin\Heading::class]['handle']);
 		$this->assertSame('Überschrift', $types[Builtin\Heading::class]['label']);
 		$this->assertSame(['text', 'level'], array_column($types[Builtin\Heading::class]['fields'], 'name'));

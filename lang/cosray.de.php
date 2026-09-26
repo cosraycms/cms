@@ -29,7 +29,7 @@ return [
 		'block:invalid-position' => 'Position und Breite müssen in die Spalten passen.',
 		'block:invalid-width' => 'Die Breite muss in die Spalten passen.',
 		'block:overlap' => 'Blöcke dürfen sich nicht überlappen.',
-		'block:richtext' => 'Formatierter Text',
+		'block:richtext' => 'Text',
 		'block:row-kind' => 'Ein Block braucht einen Typ und Felder; eine Teilung hält mindestens zwei Blöcke und wird nicht weiter geteilt.',
 		'block:text-placeholder' => 'Schreiben…',
 		'block:video' => 'Video',

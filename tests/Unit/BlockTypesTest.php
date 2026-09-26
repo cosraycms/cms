@@ -127,7 +127,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 			Verba::deactivate();
 		}
 
-		$this->assertSame('Formatierter Text', $labels['richtext']);
+		$this->assertSame('Text', $labels['richtext']);
 		$this->assertSame('Überschrift', $labels['heading']);
 		$this->assertSame('Quote', $labels['quote-block']);
 	}

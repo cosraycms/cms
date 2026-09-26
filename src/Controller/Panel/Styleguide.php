@@ -617,13 +617,13 @@ final class Styleguide extends Panel
 			[
 				'type' => Builtin\RichText::class,
 				'handle' => 'richtext',
-				'label' => 'Rich text',
+				'label' => 'Text',
 				// Mirrors Blocks::blockTypeProperties(): one visible field, no label.
 				'labels' => false,
 				'fields' => [
 					[
 						'name' => 'text',
-						'label' => 'Rich text',
+						'label' => 'Text',
 						'type' => RichText::class,
 						'control' => $richtext,
 						'translate' => $translate,
@@ -766,7 +766,7 @@ final class Styleguide extends Panel
 				],
 				'translate' => true,
 				'translateMode' => 'symmetric',
-				'description' => 'Explicit common choices: Rich text and Image. More blocks opens the complete searchable catalog.',
+				'description' => 'Explicit common choices: Text and Image. More blocks opens the complete searchable catalog.',
 			],
 			[
 				'name' => 'grid',

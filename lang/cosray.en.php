@@ -29,7 +29,7 @@ return [
 		'block:invalid-position' => 'Position and width must fit into the columns.',
 		'block:invalid-width' => 'The width must fit into the columns.',
 		'block:overlap' => 'Blocks must not overlap.',
-		'block:richtext' => 'Rich text',
+		'block:richtext' => 'Text',
 		'block:row-kind' => 'A block needs a type and fields; a split holds two blocks or more and is not split again.',
 		'block:text-placeholder' => 'Write…',
 		'block:video' => 'Video',
