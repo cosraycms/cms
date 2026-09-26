@@ -97,26 +97,6 @@ final class PanelAssetTest extends TestCase
 		$this->assertStringContainsString('<symbol id="plus" ', $sprite);
 	}
 
-	public function testStaticAssetReturnsFileFromPanelAssetsDirectory(): void
-	{
-		$static = $this->createPanelAssets(['panel.js' => 'console.log("panel");']);
-		$panel = new Assets(
-			$this->config(['panel.assets_dir' => $static]),
-			$this->container(),
-			$this->request(),
-		);
-
-		try {
-			$response = $panel->staticAsset($this->request(), $this->factory(), 'panel.js');
-
-			$this->assertSame(200, $response->getStatusCode());
-			$this->assertSame(['private, no-cache'], $response->getHeader('Cache-Control'));
-			$this->assertSame('console.log("panel");', (string) $response->getBody());
-		} finally {
-			$this->removeDirectory($static);
-		}
-	}
-
 	public function testPanelContextLoadsThePackageFiles(): void
 	{
 		$client = new Client($this->config());
@@ -148,36 +128,5 @@ final class PanelAssetTest extends TestCase
 				return [];
 			}
 		};
-	}
-
-	/** @param array<string, string> $files */
-	private function createPanelAssets(array $files): string
-	{
-		$static = sys_get_temp_dir() . '/cosray-panel-' . bin2hex(random_bytes(8));
-		$this->assertTrue(mkdir($static, 0o775, true));
-
-		foreach ($files as $name => $content) {
-			$this->assertNotFalse(file_put_contents($static . '/' . $name, $content));
-		}
-
-		return $static;
-	}
-
-	private function removeDirectory(string $path): void
-	{
-		if (!is_dir($path)) {
-			return;
-		}
-
-		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
-			\RecursiveIteratorIterator::CHILD_FIRST,
-		);
-
-		foreach ($files as $file) {
-			$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-		}
-
-		rmdir($path);
 	}
 }

@@ -72,7 +72,6 @@ final class Defaults
 			'panel.path' => '/cp',
 			// Keep the client outside the public directory so a physical
 			// directory cannot shadow the panel route in the web server.
-			'panel.assets_dir' => $root . '/panel/static',
 			'panel.theme' => [],
 			'panel.logo' => '/images/logo.png',
 			'panel.dashboard' => true,

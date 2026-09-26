@@ -15,7 +15,6 @@ use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\JavascriptScanner;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\Block\Registry as BlockRegistry;
-use Cosray\Commands\InstallPanel;
 use Cosray\Commands\RecreateDb;
 use Cosray\Commands\References;
 use Cosray\Config;
@@ -50,7 +49,6 @@ $conn = new Connection($dsn, __DIR__ . '/db/sql')
 	]);
 
 $commands = QumaCommands::get($conn, migrationFactory: new MigrationFactory($container));
-$commands->add(new InstallPanel($config));
 $commands->add(new RecreateDb($database, $username, $password, $host));
 $commands->add(new References($conn));
 // `db:titles` and `db:recreate-sort-index` need the booted app's node types

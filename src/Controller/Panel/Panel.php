@@ -239,11 +239,6 @@ abstract class Panel
 		return $extras;
 	}
 
-	protected function panelAssetsDir(): string
-	{
-		return rtrim($this->config->panel->assetsDir, '/\\');
-	}
-
 	private function logo(): ?string
 	{
 		$logo = $this->config->panel->logo;

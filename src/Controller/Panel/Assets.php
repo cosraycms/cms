@@ -62,18 +62,6 @@ final class Assets extends Panel
 		return $this->sendFile($request, $factory, $file, $cacheControl);
 	}
 
-	public function staticAsset(Request $request, Factory $factory, string $slug): Response
-	{
-		return $this->serve(
-			$request,
-			$factory,
-			$this->panelAssetsDir(),
-			$slug,
-			self::PUBLIC_EXTENSIONS,
-			cacheControl: 'private, no-cache',
-		);
-	}
-
 	public function vendor(Request $request, Factory $factory, string $plugin, string $slug): Response
 	{
 		$dir = $this->container->get(PluginAssets::class)->dir($plugin);
@@ -91,7 +79,6 @@ final class Assets extends Panel
 		string $root,
 		string $slug,
 		array $extensions = ['css', 'js', 'svg'],
-		string $cacheControl = 'private, max-age=3600',
 	): Response {
 		try {
 			$file = Path::inside($root, $slug, checkIsFile: true);
@@ -105,7 +92,7 @@ final class Assets extends Panel
 			throw new HttpNotFound($request);
 		}
 
-		return $this->sendFile($request, $factory, $file, $cacheControl);
+		return $this->sendFile($request, $factory, $file, 'private, max-age=3600');
 	}
 
 	private function sendFile(Request $request, Factory $factory, string $file, string $cacheControl): Response

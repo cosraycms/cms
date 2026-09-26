@@ -18,11 +18,6 @@ final class Panel
 		get => $this->config->get('panel.path');
 	}
 
-	/** @var non-empty-string */
-	public string $assetsDir {
-		get => $this->config->get('panel.assets_dir');
-	}
-
 	/** @var list<non-empty-string> */
 	public array $theme {
 		get => $this->themeCache ??= self::strings($this->config->get('panel.theme'));
