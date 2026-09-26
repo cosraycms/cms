@@ -7,7 +7,7 @@ import type { FileItem, LocaleMap, Meta } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
 import '../../src/elements/media.js';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 // The element updates synchronously; a microtask lets pending promises land.
 const tick = () => Promise.resolve();

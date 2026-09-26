@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RichtextDoc } from '../../../src/elements/richtext/format.js';
 import '../../../src/elements/richtext.js';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 afterEach(() => {
 	document.body.replaceChildren();

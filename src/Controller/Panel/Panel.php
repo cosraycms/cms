@@ -29,8 +29,6 @@ use Cosray\Security\Policy;
 use Cosray\User;
 use Cosray\Util\Form;
 
-use function Cosray\env;
-
 abstract class Panel
 {
 	/**
@@ -56,35 +54,41 @@ abstract class Panel
 		$panelPath = $this->panelPath();
 		$localeId = $this->localeId();
 		$collections = $this->collections();
+		$layer = $this->layer();
 
-		return array_merge([
-			'debug' => $this->config->debug(),
-			'env' => $this->config->env(),
-			'layer' => $this->layer(),
-			'panelPath' => $panelPath,
-			'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
-			'currentPath' => $this->request->uri()->getPath(),
-			'area' => static::AREA,
-			'dashboard' => $this->config->panel->dashboard,
-			'homeUrl' => $this->homeUrl(),
-			'contentUrl' => $this->firstUrl($collections),
-			'menusUrl' => $this->menusUrl($panelPath),
-			'systemUrl' => $this->permits('edit-users') ? $panelPath . '/users' : null,
-			'logo' => $this->logo(),
-			'localeId' => $localeId,
-			'panelLocales' => $this->panelLocales(),
-			'account' => $this->account(),
-			'config' => $this->config,
-			'renderIcon' => $this->renderIcon(...),
-			'assetsBase' => $this->client()->url(),
-			'importMap' => $this->client()->importMap(),
-			'stylesheets' => $this->stylesheets($panelPath),
-			'scripts' => $this->scripts($panelPath),
-			'moduleScripts' => $this->moduleScripts($panelPath),
-			'collections' => $collections,
-			'rail' => static::AREA === 'content' && $collections !== [],
-			'messages' => $this->messages(),
-		], $data);
+		return array_merge(
+			[
+				'debug' => $this->config->debug(),
+				'env' => $this->config->env(),
+				'layer' => $layer,
+				'panelPath' => $panelPath,
+				'panelBase' => $panelPath === '/' ? '/' : rtrim($panelPath, '/') . '/',
+				'currentPath' => $this->request->uri()->getPath(),
+				'area' => static::AREA,
+				'dashboard' => $this->config->panel->dashboard,
+				'homeUrl' => $this->homeUrl(),
+				'contentUrl' => $this->firstUrl($collections),
+				'menusUrl' => $this->menusUrl($panelPath),
+				'systemUrl' => $this->permits('edit-users') ? $panelPath . '/users' : null,
+				'logo' => $this->logo(),
+				'localeId' => $localeId,
+				'panelLocales' => $this->panelLocales(),
+				'account' => $this->account(),
+				'config' => $this->config,
+				'renderIcon' => $this->renderIcon(...),
+				'assetsBase' => $this->client()->url(),
+				'importMap' => $this->client()->importMap(),
+				'stylesheets' => $this->stylesheets(),
+				'scripts' => $this->scripts(),
+				'moduleScripts' => $this->moduleScripts(),
+				// Only a full document loads the entry; a swap reuses the modules.
+				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
+				'collections' => $collections,
+				'rail' => static::AREA === 'content' && $collections !== [],
+				'messages' => $this->messages(),
+			],
+			$data,
+		);
 	}
 
 	/**
@@ -200,44 +204,26 @@ abstract class Panel
 		return $titles;
 	}
 
-	private function stylesheets(string $panelPath): array
+	/** @return list<string> */
+	private function stylesheets(): array
 	{
-		$stylesheets = $this->config->panel->theme;
-
-		if (!$this->panelDev() && $this->hasPanelStatic()) {
-			$stylesheets[] = "{$panelPath}/static/panel.css";
-		}
-
-		return [...$stylesheets, ...$this->extras()->css()];
+		return [...$this->config->panel->theme, $this->client()->url('styles/panel.css'), ...$this->extras()->css()];
 	}
 
-	private function scripts(string $panelPath): array
+	/**
+	 * Classic scripts, htmx first: plugins rely on its global.
+	 *
+	 * @return list<string>
+	 */
+	private function scripts(): array
 	{
-		if ($this->panelDev()) {
-			$origin = $this->panelDevOrigin();
-			$scripts = ["{$origin}/node_modules/htmx.org/dist/htmx.min.js"];
-		} else {
-			$scripts = $this->hasPanelStatic() ? ["{$panelPath}/static/htmx.js"] : [];
-		}
-
-		return [...$scripts, ...$this->extras()->scripts()];
+		return [...$this->client()->scripts(), ...$this->extras()->scripts()];
 	}
 
-	private function moduleScripts(string $panelPath): array
+	/** @return list<string> */
+	private function moduleScripts(): array
 	{
-		if ($this->panelDev()) {
-			$origin = $this->panelDevOrigin();
-
-			return [
-				"{$origin}/@vite/client",
-				"{$origin}/src/panel.ts",
-				...$this->extras()->moduleScripts(),
-			];
-		}
-
-		$scripts = $this->hasPanelStatic() ? ["{$panelPath}/static/panel.js"] : [];
-
-		return [...$scripts, ...$this->extras()->moduleScripts()];
+		return [$this->client()->url('src/panel.js'), ...$this->extras()->moduleScripts()];
 	}
 
 	protected function client(): Client
@@ -253,54 +239,9 @@ abstract class Panel
 		return $extras;
 	}
 
-	protected function hasPanelStatic(): bool
-	{
-		$static = $this->panelAssetsDir();
-
-		return (
-			is_file($static . '/panel.js')
-				&& is_file($static . '/panel.css')
-				&& is_file($static . '/htmx.js')
-		);
-	}
-
 	protected function panelAssetsDir(): string
 	{
 		return rtrim($this->config->panel->assetsDir, '/\\');
-	}
-
-	private function panelDev(): bool
-	{
-		return filter_var(env('COSRAY_PANEL_DEV', false), FILTER_VALIDATE_BOOL);
-	}
-
-	private function panelDevOrigin(): string
-	{
-		$origin = env('COSRAY_PANEL_DEV_ORIGIN', null);
-
-		if (is_string($origin) && trim($origin) !== '') {
-			return rtrim(trim($origin), '/');
-		}
-
-		$scheme = env('COSRAY_PANEL_DEV_SCHEME', 'http');
-		$scheme = is_string($scheme) && in_array($scheme, ['http', 'https'], true) ? $scheme : 'http';
-		$port = env('COSRAY_PANEL_DEV_PORT', '2001');
-		$port = is_scalar($port) && preg_match('/^[0-9]+$/', (string) $port) ? (string) $port : '2001';
-
-		return "{$scheme}://{$this->panelDevHost()}:{$port}";
-	}
-
-	private function panelDevHost(): string
-	{
-		$host = $this->request->uri()->getHost();
-
-		if ($host === '') {
-			$host = $this->request->header('Host');
-		}
-
-		$host = trim(explode(':', $host)[0] ?? '');
-
-		return preg_match('/^[A-Za-z0-9.-]+$/', $host) === 1 ? $host : 'localhost';
 	}
 
 	private function logo(): ?string

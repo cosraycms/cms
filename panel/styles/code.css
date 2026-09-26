@@ -1,7 +1,7 @@
 /* The editor's own layout: a transparent textarea over the highlighted
    lines. It joins the panel layer, where its class selectors outrank the
    element rules of base.css; a sublayer would lose to them. */
-@import 'prism-code-editor/layout.css';
+@import '../modules/prism-code-editor/dist/layout.css';
 
 .cms-code-control-toolbar {
 	display: flex;

@@ -7,9 +7,10 @@
 //   pnpm run modules          regenerate modules/
 //   pnpm run modules:check    fail when modules/ is out of date
 //
-// Entry points are the bare imports in src/ (Node-only tools excepted) plus
-// the classic scripts listed in package.json#cosray. Every entry's package
-// has to be a runtime dependency; transitive packages come along through the
+// Entry points are the bare imports in src/ (Node-only tools excepted), the
+// package stylesheets styles/ imports by their path in modules/, and the
+// classic scripts listed in package.json#cosray. Every entry's package has
+// to be a runtime dependency; transitive packages come along through the
 // import graph. Plain .js files in src/ are served as they are, so their
 // imports also have to be ones a browser resolves: mapped packages and
 // relative paths to existing files, no aliases.
@@ -30,6 +31,8 @@ const conditions = ['browser', 'import', 'module', 'default'];
 // trip over type syntax.
 const sourceImport =
 	/(?:^|[\s;{}])(?:import|export)\s+(?!type\b)(?:[^'"`;]*?\sfrom\s*)?['"]([^'"\n]+)['"]|\bimport\(\s*['"]([^'"\n]+)['"]\s*\)/g;
+
+const styleImport = /@import\s+(?:url\(\s*)?['"]([^'"]+)['"]/g;
 
 class Failure extends Error {}
 
@@ -112,6 +115,23 @@ function collect() {
 		scripts.push(path.posix.join(owner.name, toPosix(path.relative(owner.dir, file))));
 	}
 
+	for (const stylesheet of stylesheets()) {
+		const name = packageName(stylesheet);
+
+		if (!Object.hasOwn(manifest.dependencies ?? {}, name)) {
+			throw new Failure(`styles/ imports ${stylesheet}, but ${name} is not in dependencies`);
+		}
+
+		const file = path.join(packageDir(name, anchor), stylesheet.slice(name.length + 1));
+
+		if (!isFile(file)) {
+			throw new Failure(`styles/ imports ${stylesheet}, which does not exist`);
+		}
+
+		// Its own @import rules stay unfollowed; none of ours need them.
+		add(file, false);
+	}
+
 	while (queue.length > 0) {
 		const file = queue.shift();
 
@@ -156,6 +176,28 @@ function entries() {
 		for (const specifier of specifiers) {
 			if (isBare(specifier)) {
 				found.add(specifier);
+			}
+		}
+	}
+
+	return [...found].sort();
+}
+
+/** Package files the panel's stylesheets import from modules/, as package paths. */
+function stylesheets() {
+	const modules = target + path.sep;
+	const found = new Set();
+
+	for (const file of walk(path.join(root, 'styles'))) {
+		if (!file.endsWith('.css')) {
+			continue;
+		}
+
+		for (const match of fs.readFileSync(file, 'utf8').matchAll(styleImport)) {
+			const imported = path.resolve(path.dirname(file), match[1]);
+
+			if (imported.startsWith(modules)) {
+				found.add(toPosix(path.relative(modules, imported)));
 			}
 		}
 	}

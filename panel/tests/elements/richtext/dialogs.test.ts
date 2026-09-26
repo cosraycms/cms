@@ -4,7 +4,7 @@ import { installBridge } from '../../../src/lib/bridge-standalone';
 import type { UploadResult } from '../../../src/lib/bridge';
 import { install as installMenus } from '../../../src/lib/action-menu';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 const tick = () => Promise.resolve();
 let stopMenus: () => void;

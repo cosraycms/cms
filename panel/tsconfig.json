@@ -15,21 +15,8 @@
 		"module": "esnext",
 		"target": "esnext",
 		"lib": ["esnext", "DOM", "DOM.Iterable"],
-		"types": ["node"],
-		"paths": {
-			"$lib": ["./src/lib"],
-			"$lib/*": ["./src/lib/*"],
-			"$types": ["./src/types"],
-			"$types/*": ["./src/types/*"]
-		}
+		"types": ["node"]
 	},
-	"include": [
-		"vite.config.ts",
-		"vitest.config.ts",
-		"src/**/*.d.ts",
-		"src/**/*.js",
-		"src/**/*.ts",
-		"tests/**/*.ts"
-	],
+	"include": ["vitest.config.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "tests/**/*.ts"],
 	"exclude": ["node_modules/**"]
 }

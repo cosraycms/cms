@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CosrayBridge, UploadResult } from '../../src/types/bridge';
 import { install } from '../../src/behaviors/media.js';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 let uninstall: () => void;
 const ajax =

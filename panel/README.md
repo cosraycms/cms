@@ -7,13 +7,12 @@ The panel combines PHP SSR views in `views/`, htmx behaviors in `src/behaviors/`
 Node.js and pnpm versions are declared in [package.json](package.json). From this directory:
 
 ```bash
-pnpm dev
 pnpm test
 pnpm run check
-pnpm run build
+pnpm run modules:check
 ```
 
-The application loads Vite assets when `COSRAY_PANEL_DEV=1`. `COSRAY_PANEL_DEV_ORIGIN` overrides the origin; otherwise the request host and `COSRAY_PANEL_DEV_PORT` (default `2001`) select it. Production client installation is described in [application setup](../docs/application.md#panel-installation-and-theming).
+Nothing is built. The application serves `src/`, `styles/`, `icons/` and the vendored `modules/` from the package as they are, so an edit shows on the next reload. `pnpm run modules` refreshes `modules/` and its import map after a runtime dependency in `package.json` changes; `pnpm run check` type-checks the JSDoc-typed sources with `tsc`.
 
 Native field tests render the actual PHP views before exercising browser-side behavior, so they need PHP 8.5 and the repository's Composer dependencies. No database is needed. These tests use jsdom; browser-only features such as form-associated custom elements still need real-browser verification.
 

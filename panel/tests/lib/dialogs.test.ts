@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { closeDialog, openDialog } from '../../src/lib/dialogs';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 afterEach(() => {
 	for (const dialog of document.querySelectorAll('dialog')) closeDialog(dialog);

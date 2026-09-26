@@ -26,6 +26,13 @@ final class Client
 	private const array DIRS = ['src', 'styles', 'modules', 'icons'];
 	private const array EXTENSIONS = ['js', 'css', 'svg'];
 
+	/**
+	 * A static `import … from '…'`, `import '…'` or `export … from '…'`. The
+	 * served modules are formatted, unminified source, where statements start
+	 * after whitespace or a brace; `import(` and a JSDoc `@import` never match.
+	 */
+	private const string STATIC_IMPORT = '/(?:^|[\s;{}])(?:import|export)\s+(?:[^\'"`;]*?\sfrom\s*)?[\'"]([^\'"\n]+)[\'"]/';
+
 	public readonly string $dir;
 	private ?string $version = null;
 
@@ -131,6 +138,59 @@ final class Client
 			fn(string $path): string => $this->url('modules/' . $path),
 			$this->modules()['scripts'],
 		);
+	}
+
+	/**
+	 * Every module `$entry` imports statically, directly or through others, for
+	 * `<link rel="modulepreload">`: the browser then fetches the graph at once
+	 * instead of one import level after the other. Dynamic imports, such as
+	 * the element controls, load on demand and stay out.
+	 *
+	 * @return list<string>
+	 */
+	public function preloads(string $entry = 'src/panel.js'): array
+	{
+		$root = realpath($this->dir);
+		$start = $root === false ? false : realpath($root . '/' . $entry);
+
+		if ($root === false || $start === false) {
+			return [];
+		}
+
+		$imports = $this->modules()['imports'];
+		$seen = [$start => true];
+		$queue = [$start];
+		$urls = [];
+
+		while ($queue !== []) {
+			$file = array_shift($queue);
+			$matches = [];
+			preg_match_all(self::STATIC_IMPORT, (string) file_get_contents($file), $matches);
+
+			foreach ($matches[1] as $specifier) {
+				$target = match (true) {
+					str_starts_with($specifier, './'), str_starts_with($specifier, '../') => realpath(
+						dirname($file) . '/' . $specifier,
+					),
+					isset($imports[$specifier]) => realpath($root . '/modules/' . $imports[$specifier]),
+					default => false,
+				};
+
+				if (
+					$target === false
+					|| isset($seen[$target])
+					|| !str_starts_with($target, $root . DIRECTORY_SEPARATOR)
+				) {
+					continue;
+				}
+
+				$seen[$target] = true;
+				$queue[] = $target;
+				$urls[] = $this->url(str_replace(DIRECTORY_SEPARATOR, '/', substr($target, strlen($root) + 1)));
+			}
+		}
+
+		return $urls;
 	}
 
 	/**
