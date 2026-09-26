@@ -94,7 +94,7 @@
 		gap: var(--cms-space-2);
 	}
 
-	& .token {
+	& .tokens > .token {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-3);

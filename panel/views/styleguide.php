@@ -13,6 +13,8 @@ $fieldset = (array) $this->unwrap($fieldset);
 $content = (array) $this->unwrap($content);
 $richtextFields = (array) $this->unwrap($richtextFields);
 $richtextContent = (array) $this->unwrap($richtextContent);
+$codeFields = (array) $this->unwrap($codeFields);
+$codeContent = (array) $this->unwrap($codeContent);
 $mediaFields = (array) $this->unwrap($mediaFields);
 $mediaContent = (array) $this->unwrap($mediaContent);
 $mediaAssets = (array) $this->unwrap($mediaAssets);
@@ -415,6 +417,42 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 									<?php $this->insert('field/item', [
 										'field' => $field,
 										'content' => $richtextContent,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => [],
+										'pathSourceFields' => [],
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" data-section="code">
+				<h2>Code</h2>
+				<p class="note">
+					A field offering several syntaxes, a translated field whose empty German value
+					shows the English fallback, and the read-only state.
+				</p>
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
+					<div class="inner">
+						<div class="sheet">
+							<?php $this->insert('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-code-locale',
+							]) ?>
+							<div class="cms-fields">
+								<?php foreach ($codeFields as $field): ?>
+									<?php $this->insert('field/item', [
+										'field' => $field,
+										'content' => $codeContent,
 										'locales' => $locales,
 										'defaultLocale' => $defaultLocale,
 										'uid' => 'styleguide',

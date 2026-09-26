@@ -57,6 +57,8 @@ final class Styleguide extends Panel
 			'inspector' => $this->inspector(),
 			'richtextFields' => $this->richtextFields($controls),
 			'richtextContent' => $this->richtextContent(),
+			'codeFields' => $this->codeFields($controls),
+			'codeContent' => $this->codeContent(),
 			'mediaFields' => $this->mediaFields($controls),
 			'mediaContent' => $this->mediaContent(),
 			'mediaAssets' => $this->mediaAssets(),
@@ -1116,6 +1118,81 @@ final class Styleguide extends Panel
 				'format' => Envelope::FORMAT,
 				'version' => Envelope::VERSION,
 			],
+		];
+	}
+
+	/**
+	 * Code descriptors: a field offering several syntaxes, a translated one
+	 * whose empty German value shows the English fallback, and the
+	 * read-only state.
+	 *
+	 * @return list<array<string, mixed>>
+	 */
+	private function codeFields(Controls $controls): array
+	{
+		$control = Control::code()->resolve($controls)->array();
+
+		return [
+			[
+				'name' => 'codeEmbed',
+				'label' => 'Code — html, css, javascript',
+				'control' => $control,
+				'syntaxes' => ['html', 'css', 'javascript'],
+			],
+			[
+				'name' => 'codeConfig',
+				'label' => 'Code — translated yaml',
+				'control' => $control,
+				'translate' => true,
+				'syntaxes' => ['yaml'],
+			],
+			[
+				'name' => 'codeReadonly',
+				'label' => 'Code — read-only',
+				'control' => $control,
+				'immutable' => true,
+				'syntaxes' => ['json', 'php'],
+			],
+		];
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function codeContent(): array
+	{
+		$embed = <<<'HTML'
+			<style>
+				.map { aspect-ratio: 16 / 9; }
+			</style>
+			<div class="map" data-zoom="12"></div>
+			<script>
+				// Loads the map once the frame is visible.
+				const map = document.querySelector('.map');
+				map.dataset.ready = 'true';
+			</script>
+			HTML;
+		$config = <<<'YAML'
+			# Opening hours shown in the footer
+			days:
+			  - Mon–Fri
+			  - Sat
+			hours: "11:00–22:00"
+			closed: false
+			YAML;
+		$json = <<<'JSON'
+			{
+				"brew": "Lager",
+				"gravity": 12.5,
+				"hops": ["Hallertauer", "Tettnanger"],
+				"filtered": true
+			}
+			JSON;
+
+		return [
+			'codeEmbed' => ['value' => ['zxx' => $embed], 'meta' => ['syntax' => ['zxx' => 'html']]],
+			'codeConfig' => ['value' => ['en' => $config, 'de' => ''], 'meta' => ['syntax' => ['zxx' => 'yaml']]],
+			'codeReadonly' => ['value' => ['zxx' => $json], 'meta' => ['syntax' => ['zxx' => 'json']]],
 		];
 	}
 
