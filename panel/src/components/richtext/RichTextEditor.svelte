@@ -10,16 +10,16 @@
 	import { __ } from '$lib/locale';
 	import ModalImage from '$components/modals/ModalImage.svelte';
 	import ModalLink from '$components/modals/ModalLink.svelte';
-	import createEditor, { type CmsEditor } from './editor';
-	import { docToPm, isFilledDoc, type RichtextDoc } from './format';
-	import { schema } from './schema';
+	import createEditor, { type CmsEditor } from '../../elements/richtext/editor.js';
+	import { docToPm, isFilledDoc, type RichtextDoc } from '../../elements/richtext/format.js';
+	import { schema } from '../../elements/richtext/schema.js';
 	import {
 		isMarkActive,
 		isNodeActive,
 		getActiveTextAlign,
 		getMarkAttributes,
 		getBlockAttributes,
-	} from './state-helpers';
+	} from '../../elements/richtext/state-helpers.js';
 	import {
 		toggleBold,
 		toggleItalic,
@@ -43,7 +43,7 @@
 		setStyle,
 		unsetStyle,
 		insertImage,
-	} from './commands';
+	} from '../../elements/richtext/commands.js';
 	import { undo, redo } from 'prosemirror-history';
 
 	import Icon from '$components/Icon.svelte';

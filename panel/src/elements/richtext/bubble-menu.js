@@ -1,10 +1,16 @@
+/** @import { EditorView } from 'prosemirror-view' */
+
 import { Plugin, PluginKey } from 'prosemirror-state';
-import type { EditorView } from 'prosemirror-view';
 
 const bubbleMenuKey = new PluginKey('bubbleMenu');
 
-export function bubbleMenu(element: HTMLElement): Plugin {
-	function update(view: EditorView) {
+/**
+ * @param {HTMLElement} element
+ * @returns {Plugin}
+ */
+export function bubbleMenu(element) {
+	/** @param {EditorView} view */
+	function update(view) {
 		const { state } = view;
 		const { selection } = state;
 		const { empty, from, to } = selection;

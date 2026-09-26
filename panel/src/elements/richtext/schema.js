@@ -1,15 +1,26 @@
-import { type MarkSpec, type NodeSpec, DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
+/** @import { MarkSpec, NodeSpec } from 'prosemirror-model' */
 
-function parseTextAlign(dom: HTMLElement): string | null {
+import { DOMParser, DOMSerializer, Schema } from 'prosemirror-model';
+
+/**
+ * @param {HTMLElement} dom
+ * @returns {string | null}
+ */
+function parseTextAlign(dom) {
 	return dom.style.textAlign || null;
 }
 
-function textAlignAttrs(textAlign: string | null): Record<string, string> {
+/**
+ * @param {string | null} textAlign
+ * @returns {Record<string, string>}
+ */
+function textAlignAttrs(textAlign) {
 	if (!textAlign) return {};
 	return { style: `text-align: ${textAlign}` };
 }
 
-const nodes: Record<string, NodeSpec> = {
+/** @type {Record<string, NodeSpec>} */
+const nodes = {
 	doc: {
 		content: 'block+',
 	},
@@ -24,8 +35,7 @@ const nodes: Record<string, NodeSpec> = {
 		parseDOM: [
 			{
 				tag: 'p',
-				getAttrs(dom) {
-					const el = dom as HTMLElement;
+				getAttrs(el) {
 					return {
 						class: el.getAttribute('class') || 'default',
 						textAlign: parseTextAlign(el),
@@ -34,7 +44,8 @@ const nodes: Record<string, NodeSpec> = {
 			},
 		],
 		toDOM(node) {
-			const attrs: Record<string, string> = {};
+			/** @type {Record<string, string>} */
+			const attrs = {};
 			if (node.attrs.class && node.attrs.class !== 'default') {
 				attrs.class = node.attrs.class;
 			}
@@ -53,10 +64,10 @@ const nodes: Record<string, NodeSpec> = {
 		},
 		parseDOM: [1, 2, 3, 4, 5, 6].map((level) => ({
 			tag: `h${level}`,
-			getAttrs(dom: unknown) {
+			getAttrs(dom) {
 				return {
 					level,
-					textAlign: parseTextAlign(dom as HTMLElement),
+					textAlign: parseTextAlign(dom),
 				};
 			},
 		})),
@@ -83,16 +94,15 @@ const nodes: Record<string, NodeSpec> = {
 		parseDOM: [
 			{
 				tag: 'ol',
-				getAttrs(dom) {
-					const el = dom as HTMLElement;
+				getAttrs(el) {
 					return {
-						start: el.hasAttribute('start') ? parseInt(el.getAttribute('start')!, 10) : 1,
+						start: el.hasAttribute('start') ? parseInt(el.getAttribute('start') ?? '1', 10) : 1,
 					};
 				},
 			},
 		],
 		toDOM(node) {
-			return node.attrs.start === 1 ? ['ol', 0] : (['ol', { start: node.attrs.start }, 0] as const);
+			return node.attrs.start === 1 ? ['ol', 0] : ['ol', { start: node.attrs.start }, 0];
 		},
 	},
 
@@ -121,7 +131,7 @@ const nodes: Record<string, NodeSpec> = {
 		marks: '',
 		code: true,
 		defining: true,
-		parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' as const }],
+		parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' }],
 		toDOM() {
 			return ['pre', ['code', 0]];
 		},
@@ -137,7 +147,7 @@ const nodes: Record<string, NodeSpec> = {
 				tag: 'hr',
 				getAttrs(dom) {
 					return {
-						class: (dom as HTMLElement).getAttribute('class') || null,
+						class: dom.getAttribute('class') || null,
 					};
 				},
 			},
@@ -169,7 +179,7 @@ const nodes: Record<string, NodeSpec> = {
 			{
 				tag: 'img[data-uid]',
 				getAttrs(dom) {
-					const uid = (dom as HTMLElement).getAttribute('data-uid');
+					const uid = dom.getAttribute('data-uid');
 					return uid ? { uid, meta: null } : false;
 				},
 			},
@@ -186,13 +196,14 @@ const nodes: Record<string, NodeSpec> = {
 	},
 };
 
-const marks: Record<string, MarkSpec> = {
+/** @type {Record<string, MarkSpec>} */
+const marks = {
 	bold: {
 		parseDOM: [
 			{ tag: 'strong' },
 			{
 				tag: 'b',
-				getAttrs: (dom) => (dom as HTMLElement).style.fontWeight !== 'normal' && null,
+				getAttrs: (dom) => dom.style.fontWeight !== 'normal' && null,
 			},
 			{
 				style: 'font-weight=400',
@@ -200,7 +211,7 @@ const marks: Record<string, MarkSpec> = {
 			},
 			{
 				style: 'font-weight',
-				getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value as string) && null,
+				getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,
 			},
 		],
 		toDOM() {
@@ -213,7 +224,7 @@ const marks: Record<string, MarkSpec> = {
 			{ tag: 'em' },
 			{
 				tag: 'i',
-				getAttrs: (dom) => (dom as HTMLElement).style.fontStyle !== 'normal' && null,
+				getAttrs: (dom) => dom.style.fontStyle !== 'normal' && null,
 			},
 			{ style: 'font-style=italic' },
 		],
@@ -227,7 +238,7 @@ const marks: Record<string, MarkSpec> = {
 			{ tag: 'u' },
 			{
 				style: 'text-decoration',
-				getAttrs: (value) => (value as string).includes('underline') && null,
+				getAttrs: (value) => value.includes('underline') && null,
 			},
 		],
 		toDOM() {
@@ -242,7 +253,7 @@ const marks: Record<string, MarkSpec> = {
 			{ tag: 'strike' },
 			{
 				style: 'text-decoration',
-				getAttrs: (value) => (value as string).includes('line-through') && null,
+				getAttrs: (value) => value.includes('line-through') && null,
 			},
 		],
 		toDOM() {
@@ -271,8 +282,7 @@ const marks: Record<string, MarkSpec> = {
 		parseDOM: [
 			{
 				tag: 'a[data-node]',
-				getAttrs(dom) {
-					const el = dom as HTMLElement;
+				getAttrs(el) {
 					return {
 						node: el.getAttribute('data-node'),
 						target: el.getAttribute('target') || null,
@@ -282,8 +292,7 @@ const marks: Record<string, MarkSpec> = {
 			},
 			{
 				tag: 'a[data-asset]',
-				getAttrs(dom) {
-					const el = dom as HTMLElement;
+				getAttrs(el) {
 					return {
 						asset: el.getAttribute('data-asset'),
 						target: el.getAttribute('target') || null,
@@ -293,8 +302,7 @@ const marks: Record<string, MarkSpec> = {
 			},
 			{
 				tag: 'a[href]',
-				getAttrs(dom) {
-					const el = dom as HTMLElement;
+				getAttrs(el) {
 					return {
 						href: el.getAttribute('href'),
 						target: el.getAttribute('target') || null,
@@ -305,7 +313,8 @@ const marks: Record<string, MarkSpec> = {
 		],
 		toDOM(mark) {
 			const { href, node, asset, target, class: cls } = mark.attrs;
-			const attrs: Record<string, string> = {};
+			/** @type {Record<string, string>} */
+			const attrs = {};
 			if (node) {
 				attrs.href = '#';
 				attrs['data-node'] = node;
@@ -348,7 +357,7 @@ const marks: Record<string, MarkSpec> = {
 			{
 				tag: 'span[class]',
 				getAttrs(dom) {
-					const cls = (dom as HTMLElement).getAttribute('class') || '';
+					const cls = dom.getAttribute('class') || '';
 					return cls ? { class: cls } : false;
 				},
 			},

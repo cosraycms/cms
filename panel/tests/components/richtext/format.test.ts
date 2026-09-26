@@ -8,8 +8,8 @@ import {
 	htmlToDoc,
 	isFilledDoc,
 	pmToDoc,
-} from '../../../src/components/richtext/format';
-import { schema } from '../../../src/components/richtext/schema';
+} from '../../../src/elements/richtext/format.js';
+import { schema } from '../../../src/elements/richtext/schema.js';
 
 afterEach(() => {
 	vi.restoreAllMocks();

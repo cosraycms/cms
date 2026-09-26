@@ -11,7 +11,7 @@
 		isFilledDoc,
 		type RichtextDoc,
 		type RichtextValue,
-	} from '$components/richtext/format';
+	} from './format.js';
 	import RichTextEditor from '$components/richtext/RichTextEditor.svelte';
 	import { localeTitle, resolveFallback } from '$lib/fallback';
 	import { __ } from '$lib/locale';
