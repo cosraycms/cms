@@ -111,6 +111,29 @@ final class PanelAssetTest extends TestCase
 		$this->assertContains($client->url('modules/@celema/verba/dist/index.js'), $context['modulePreloads']);
 	}
 
+	public function testTheDevServerServesOnlyTheStylesheet(): void
+	{
+		$_SERVER['COSRAY_PANEL_DEV'] = '1';
+		$_SERVER['COSRAY_PANEL_DEV_ORIGIN'] = 'http://localhost:2001/';
+		$client = new Client($this->config());
+
+		try {
+			$context = $this->panel()->data();
+
+			$this->assertNotContains($client->url('styles/panel.css'), $context['stylesheets']);
+			$this->assertSame(
+				['http://localhost:2001/@vite/client', 'http://localhost:2001/dev.js', $client->url('src/panel.js')],
+				$context['moduleScripts'],
+			);
+			// Scripts, import map and icons stay as in production.
+			$this->assertSame([$client->url('modules/htmx.org/dist/htmx.js')], $context['scripts']);
+			$this->assertContains($client->url('src/behaviors/blocks.js'), $context['modulePreloads']);
+			$this->assertSame($client->url(), $context['assetsBase']);
+		} finally {
+			unset($_SERVER['COSRAY_PANEL_DEV'], $_SERVER['COSRAY_PANEL_DEV_ORIGIN']);
+		}
+	}
+
 	private function panel(array $config = []): \Cosray\Controller\Panel\Panel
 	{
 		return new class(

@@ -17,6 +17,13 @@
 		"lib": ["esnext", "DOM", "DOM.Iterable"],
 		"types": ["node"]
 	},
-	"include": ["vitest.config.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "tests/**/*.ts"],
+	"include": [
+		"vite.config.ts",
+		"vitest.config.ts",
+		"src/**/*.d.ts",
+		"src/**/*.js",
+		"src/**/*.ts",
+		"tests/**/*.ts"
+	],
 	"exclude": ["node_modules/**"]
 }

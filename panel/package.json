@@ -8,6 +8,7 @@
 	"scripts": {
 		"build:converter": "vite build -c vite.convert.config.ts",
 		"check": "tsc -p tsconfig.json",
+		"dev": "vite",
 		"format": "prettier -w .",
 		"test": "vitest run",
 		"modules": "node scripts/modules.mjs",

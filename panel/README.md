@@ -14,6 +14,8 @@ pnpm run modules:check
 
 Nothing is built. The application serves `src/`, `styles/`, `icons/` and the vendored `modules/` from the package as they are, so an edit shows on the next reload. `pnpm run modules` refreshes `modules/` and its import map after a runtime dependency in `package.json` changes; `pnpm run check` type-checks the JSDoc-typed sources with `tsc`.
 
+For styling work, `pnpm dev` starts an optional Vite dev server; set `COSRAY_PANEL_DEV=1` for the application. The panel then takes its stylesheet from Vite, which applies style changes in place, and the page reloads when a file in `src/`, `views/` or `icons/` changes. Everything else still loads from PHP as in production, so check the result without the dev server too. `COSRAY_PANEL_DEV_ORIGIN` sets the server's origin; otherwise the request host with `COSRAY_PANEL_DEV_SCHEME` (default `http`) and `COSRAY_PANEL_DEV_PORT` (default `2001`) name it, and `COSRAY_PANEL_DEV_HOST` sets the address Vite listens on. The dev server is [vite.config.ts](vite.config.ts) and [dev.js](dev.js) plus one switch in [Controller\Panel\Panel](../src/Controller/Panel/Panel.php), so it can go again without leaving traces.
+
 Native field tests render the actual PHP views before exercising browser-side behavior, so they need PHP 8.5 and the repository's Composer dependencies. No database is needed. These tests use jsdom; browser-only features such as form-associated custom elements still need real-browser verification.
 
 `pnpm run format` formats the panel. For scoped changes, run Prettier only on the files changed rather than formatting unrelated files.
