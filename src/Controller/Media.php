@@ -15,6 +15,7 @@ use Cosray\Actor;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
 use Cosray\Assets\Ingest;
+use Cosray\Assets\Library;
 use Cosray\Assets\Meta;
 use Cosray\Assets\SizeSpec;
 use Cosray\Auth;
@@ -24,12 +25,8 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\References\Usage;
-use Cosray\Storage\Storage;
 use Cosray\Users;
-use PDOException;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 class Media
 {
@@ -124,82 +121,27 @@ class Media
 	public function library(): Response
 	{
 		$params = $this->request->params();
-		$q = trim((string) ($params['q'] ?? ''));
-		$page = max(1, (int) ($params['page'] ?? 1));
-		$limit = 60;
-		$args = ['limit' => $limit + 1, 'offset' => ($page - 1) * $limit];
-		// The null seed keeps the args named and non-empty when no filter
-		// applies — Quma templates refuse empty argument lists — and
-		// isset() in the template still skips the clause.
-		$countArgs = ['q' => null];
-
-		$kinds = $this->filterKinds((string) ($params['kind'] ?? ''));
-
-		if ($kinds !== []) {
-			$args['kinds'] = json_encode($kinds);
-		}
-
-		if ($q !== '') {
-			$args['q'] = '%' . addcslashes($q, '%_\\') . '%';
-			$countArgs['q'] = $args['q'];
-		}
-
-		$since = $this->since($params['since'] ?? null);
-
-		if ($since !== null) {
-			$args['since'] = $since;
-			$countArgs['since'] = $since;
-		}
-
-		if (isset($params['uids']) && $params['uids'] !== '') {
-			$args['uids'] = explode(',', (string) $params['uids']);
-		}
-
-		$rows = $this->db->assets->list($args)->all();
-		$more = count($rows) > $limit;
-		$counts = ['image' => 0, 'video' => 0, 'audio' => 0, 'document' => 0];
-
-		foreach ($this->db->assets->counts($countArgs)->all() as $row) {
-			$counts[(string) $row['kind']] = (int) $row['total'];
-		}
+		$uids = (string) ($params['uids'] ?? '');
+		$page = $this->catalog()->page(
+			kinds: Library::filterKinds((string) ($params['kind'] ?? '')),
+			q: (string) ($params['q'] ?? ''),
+			since: Library::since($params['since'] ?? null),
+			page: (int) ($params['page'] ?? 1),
+			uids: $uids !== '' ? explode(',', $uids) : null,
+		);
 
 		return Response::create($this->factory)->json([
 			'ok' => true,
-			'assets' => array_map($this->libraryItem(...), array_slice($rows, 0, $limit)),
-			'page' => $page,
-			'more' => $more,
-			// 0 when paging past the end: the window count needs a row to ride on.
-			'total' => $rows === [] ? 0 : (int) $rows[0]['total'],
-			'counts' => $counts,
+			'assets' => array_map($this->libraryItem(...), $page->assets),
+			'page' => $page->page,
+			'more' => $page->more,
+			'total' => $page->total,
+			'counts' => $page->counts,
 		]);
 	}
 
-	/** @return list<string> */
-	protected function filterKinds(string $kind): array
+	protected function libraryItem(Asset $asset): array
 	{
-		$valid = ['image', 'video', 'audio', 'document'];
-		$requested = array_values(array_intersect($valid, array_map(trim(...), explode(',', $kind))));
-
-		// All four match everything; skipping the clause keeps the plan flat.
-		return count($requested) === count($valid) ? [] : $requested;
-	}
-
-	/** A created-timestamp cutoff, normalized; invalid input means none. */
-	protected function since(mixed $value): ?string
-	{
-		if (!is_string($value) || trim($value) === '') {
-			return null;
-		}
-
-		$time = strtotime($value);
-
-		return $time === false ? null : date(DATE_ATOM, $time);
-	}
-
-	protected function libraryItem(array $row): array
-	{
-		$asset = Asset::fromRow($row, $this->config);
-
 		return [
 			'uid' => $asset->uid,
 			'filename' => $asset->filename,
@@ -294,69 +236,29 @@ class Media
 	}
 
 	/**
-	 * Hard delete, unreferenced-only: the usage check answers 409 with
-	 * a display-ready owner list; the RESTRICT FK on `asset_references`
-	 * is the backstop against references appearing mid-request. The
-	 * catalog row goes first — a leftover file is a harmless orphan, a
-	 * dangling row is not.
+	 * Hard delete, unreferenced only (see Library::delete()): an asset in
+	 * use answers 409 with a display-ready owner list.
 	 */
 	#[Permission('panel')]
 	public function delete(string $uid): Response
 	{
 		$response = Response::create($this->factory);
-		$row = $this->db->assets->byUid(['uid' => $uid])->first();
+		$owners = $this->catalog()->delete($uid);
 
-		if (!$row) {
+		if ($owners === null) {
 			return $response->json(['ok' => false, 'error' => __('media:unknown-file')], 404);
 		}
-
-		$usage = new Usage($this->db);
-		$owners = $usage->forAsset($uid);
 
 		if ($owners !== []) {
 			return $response->json(['ok' => false, 'usage' => $owners], 409);
 		}
 
-		try {
-			$this->db->assets->delete(['uid' => $uid])->run();
-		} catch (PDOException $e) {
-			// RESTRICT violations report SQLSTATE 23001; plain FK
-			// violations 23503.
-			if (in_array((string) $e->getCode(), ['23001', '23503'], true)) {
-				return $response->json(['ok' => false, 'usage' => $usage->forAsset($uid)], 409);
-			}
-
-			throw $e;
-		}
-
-		if ($row['disk'] === 'local') {
-			new Storage($this->config)->deleteDirectory(dirname((string) $row['key']));
-			$this->purgeRenditions((string) $row['key']);
-		}
-
 		return $response->json(['ok' => true]);
 	}
 
-	/** Removes the rendition cache directory `{cache}/{shard}/{uid}/`. */
-	protected function purgeRenditions(string $key): void
+	protected function catalog(): Library
 	{
-		$root = rtrim($this->config->path->public, '\\/') . '/' . trim($this->config->path->cache, '/');
-		$dir = $root . '/' . dirname($key);
-
-		if (!is_dir($dir) || !str_starts_with((string) realpath($dir), (string) realpath($root))) {
-			return;
-		}
-
-		$files = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-			RecursiveIteratorIterator::CHILD_FIRST,
-		);
-
-		foreach ($files as $file) {
-			$file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-		}
-
-		rmdir($dir);
+		return new Library($this->db, $this->config);
 	}
 
 	/** Build the client payload for a catalog row. */
