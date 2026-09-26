@@ -60,6 +60,10 @@ jobs:
         working-directory: panel
         run: pnpm install --frozen-lockfile
 
+      - name: Check vendored panel modules
+        working-directory: panel
+        run: pnpm run modules:check
+
       - name: Run panel checks
         working-directory: panel
         run: pnpm check
