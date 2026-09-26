@@ -6,7 +6,7 @@ const modules = new Map();
 // cosray elements already rewritten as plain modules. They load from the
 // package like every other panel file; the Svelte ones still come from the
 // Vite build.
-const PLAIN = new Set(['code', 'reference']);
+const PLAIN = new Set(['code', 'reference', 'richtext']);
 
 /**
  * Resolve a control module value to a URL.
