@@ -22,11 +22,8 @@ final class Client
 {
 	public const string SPRITE = 'icons.svg';
 
-	/**
-	 * The directories below `panel/` a browser may load from. `static` holds
-	 * a local Vite build of the Svelte elements that are not rewritten yet.
-	 */
-	private const array DIRS = ['src', 'styles', 'modules', 'icons', 'static'];
+	/** The directories below `panel/` a browser may load from. */
+	private const array DIRS = ['src', 'styles', 'modules', 'icons'];
 	private const array EXTENSIONS = ['js', 'css', 'svg'];
 
 	public readonly string $dir;
