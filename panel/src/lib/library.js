@@ -1,36 +1,15 @@
-import type { AssetInfo } from '$types/data';
+/** @import { AssetInfo } from '../types/data' */
 
 /**
- * The asset-catalog listing client shared by every library view: the
- * media screen's grid and the pickers inside editor controls and
- * richtext modals. The `GET {prefix}/media/library` contract lives here
- * and nowhere else.
+ * How the panel's scripts state an asset's facts: its size, extension,
+ * dimensions and the icon of a file without a thumbnail.
  */
 
-export type LibraryItem = AssetInfo & { uid: string; thumbUrl: string };
-
-export type LibraryQuery = {
-	// Restricts the listing to one kind or a set of filter kinds; null
-	// (and 'file' — a File field accepts every kind) browses the whole
-	// pool.
-	kind?: string | string[] | null;
-	q?: string;
-	page?: number;
-	// ISO created-timestamp cutoff.
-	since?: string | null;
-};
-
-export type LibraryPage = {
-	items: LibraryItem[];
-	page: number;
-	more: boolean;
-	// Full match count across all pages; 0 when paging past the end.
-	total: number;
-	// Per-filter-kind totals honoring q and since, but not kind.
-	counts: Record<string, number>;
-};
-
-export function humanSize(bytes: number): string {
+/**
+ * @param {number} bytes
+ * @returns {string}
+ */
+export function humanSize(bytes) {
 	const units = ['B', 'KB', 'MB', 'GB'];
 	let size = bytes;
 	let unit = 0;
@@ -43,7 +22,8 @@ export function humanSize(bytes: number): string {
 	return `${unit === 0 ? size : size.toFixed(1)} ${units[unit]}`;
 }
 
-const FILE_ICONS: [icon: string, mimes: string[], extensions: string[]][] = [
+/** @type {[icon: string, mimes: string[], extensions: string[]][]} */
+const FILE_ICONS = [
 	['file-earmark-pdf', ['application/pdf'], ['pdf']],
 	[
 		'file-earmark-word',
@@ -96,8 +76,11 @@ const FILE_ICONS: [icon: string, mimes: string[], extensions: string[]][] = [
 /**
  * The icon standing in for a file without a thumbnail: by mime type
  * first, by extension second, the plain sheet when neither is known.
+ *
+ * @param {Pick<AssetInfo, 'filename' | 'mime'>} info
+ * @returns {string}
  */
-export function fileIcon(info: Pick<AssetInfo, 'filename' | 'mime'>): string {
+export function fileIcon(info) {
 	const mime = (info.mime ?? '').toLowerCase();
 	const suffix = extension(info.filename).toLowerCase();
 
@@ -116,7 +99,11 @@ export function fileIcon(info: Pick<AssetInfo, 'filename' | 'mime'>): string {
 	return 'file-earmark';
 }
 
-export function extension(filename: string): string {
+/**
+ * @param {string} filename
+ * @returns {string}
+ */
+export function extension(filename) {
 	const dot = filename.lastIndexOf('.');
 
 	return dot === -1 ? '' : filename.slice(dot + 1, dot + 6).toUpperCase();
@@ -125,11 +112,12 @@ export function extension(filename: string): string {
 /**
  * The one-line fact row under an asset name: pixel dimensions when
  * known, otherwise the extension, then the size — "2400 × 1600 px · 842 KB".
+ *
+ * @param {Pick<AssetInfo, 'filename' | 'width' | 'height' | 'bytes'>} info
+ * @returns {string}
  */
-export function assetLine(
-	info: Pick<AssetInfo, 'filename' | 'width' | 'height' | 'bytes'>,
-): string {
-	const parts: string[] = [];
+export function assetLine(info) {
+	const parts = [];
 
 	if (info.width && info.height) {
 		parts.push(`${info.width} × ${info.height} px`);
@@ -146,62 +134,4 @@ export function assetLine(
 	}
 
 	return parts.join(' · ');
-}
-
-export function libraryParams(query: LibraryQuery): URLSearchParams {
-	const params = new URLSearchParams();
-	const raw = query.kind ?? null;
-	const kind = Array.isArray(raw) ? raw.filter((entry) => entry !== '').join(',') : raw;
-	const q = (query.q ?? '').trim();
-
-	if (kind !== null && kind !== '' && kind !== 'file') {
-		params.set('kind', kind);
-	}
-
-	if (q !== '') {
-		params.set('q', q);
-	}
-
-	if (typeof query.since === 'string' && query.since !== '') {
-		params.set('since', query.since);
-	}
-
-	params.set('page', String(query.page ?? 1));
-
-	return params;
-}
-
-/** One catalog page, or null on any transport or server failure. */
-export async function fetchLibrary(
-	prefix: string,
-	query: LibraryQuery,
-): Promise<LibraryPage | null> {
-	try {
-		const response = await fetch(`${prefix}/media/library?${libraryParams(query).toString()}`, {
-			credentials: 'same-origin',
-			headers: { Accept: 'application/json', 'X-Requested-With': 'xmlhttprequest' },
-		});
-		const data = (await response.json()) as {
-			ok: boolean;
-			assets: LibraryItem[];
-			page: number;
-			more: boolean;
-			total: number;
-			counts: Record<string, number>;
-		};
-
-		if (!data.ok) {
-			return null;
-		}
-
-		return {
-			items: data.assets,
-			page: data.page,
-			more: data.more,
-			total: data.total ?? 0,
-			counts: data.counts ?? {},
-		};
-	} catch {
-		return null;
-	}
 }

@@ -3,54 +3,28 @@ import { assetsBase, panelBase } from './runtime.js';
 /** @type {Map<string, Promise<unknown>>} */
 const modules = new Map();
 
-// cosray elements already rewritten as plain modules. They load from the
-// package like every other panel file; the Svelte ones still come from the
-// Vite build.
-const PLAIN = new Set(['code', 'reference', 'richtext']);
-
 /**
  * Resolve a control module value to a URL.
  *
  * - `cosray:{entry}` — cosray-shipped element ('cosray' is a reserved
- *   plugin id): a plain module from the package's `src/elements/`, or a
- *   Svelte build from the panel static assets in production and from the
- *   Vite dev server in development.
+ *   plugin id), a module from the package's `src/elements/`.
  * - `https?://...` — used as-is.
  * - anything else — `{pluginId}/{file}`, served from the plugin's
  *   asset dir under the panel vendor route.
- *
- * This module still runs inside the Vite bundle; the `import.meta.env`
- * branches go with the last Svelte element.
  *
  * @param {string} module
  * @returns {string}
  */
 export function moduleUrl(module) {
-	const base = panelBase();
-
 	if (module.startsWith('cosray:')) {
-		const entry = module.slice('cosray:'.length);
-
-		if (PLAIN.has(entry)) {
-			return `${assetsBase()}src/elements/${entry}.js`;
-		}
-
-		if (import.meta.env.DEV) {
-			// Indirection keeps Vite's static new URL() analysis from
-			// emitting the source files as build assets.
-			const source = '/src/elements/' + entry + '.ts';
-
-			return new URL(source, import.meta.url).href;
-		}
-
-		return `${base}static/elements/${entry}.js`;
+		return `${assetsBase()}src/elements/${module.slice('cosray:'.length)}.js`;
 	}
 
 	if (/^https?:\/\//.test(module)) {
 		return module;
 	}
 
-	return `${base}vendor/${module}`;
+	return `${panelBase()}vendor/${module}`;
 }
 
 /**
@@ -62,32 +36,9 @@ export function loadElement(module) {
 	let promise = modules.get(url);
 
 	if (!promise) {
-		if (
-			!import.meta.env.DEV &&
-			module.startsWith('cosray:') &&
-			!PLAIN.has(module.slice('cosray:'.length))
-		) {
-			ensureCss();
-		}
-
 		promise = import(/* @vite-ignore */ url);
 		modules.set(url, promise);
 	}
 
 	return promise;
-}
-
-function ensureCss() {
-	const id = 'cosray-elements-css';
-
-	if (document.getElementById(id)) {
-		return;
-	}
-
-	const link = document.createElement('link');
-	link.id = id;
-	link.rel = 'stylesheet';
-	link.href = `${panelBase()}static/elements/style.css`;
-	link.onerror = () => link.remove();
-	document.head.append(link);
 }
