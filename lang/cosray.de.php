@@ -285,7 +285,6 @@ return [
 		'media:select-hint' => 'Datei auswählen, um Details anzuzeigen.',
 		'media:title' => 'Medien',
 		'media:too-large' => 'Die Datei ist zu groß: :size MB. Erlaubt sind :allowed MB',
-		'media:unknown-file' => 'Unbekannte Datei',
 		'media:unknown-filename' => 'Dateiname unbekannt',
 		'media:unsafe-svg' => 'Die SVG-Datei konnte nicht sicher verarbeitet werden.',
 		'media:unused' => 'Diese Datei wird nirgendwo verwendet.',

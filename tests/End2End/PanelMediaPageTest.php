@@ -102,6 +102,19 @@ final class PanelMediaPageTest extends End2EndTestCase
 			"//dialog[@data-media-delete-dialog]//form[@action='/cp/media/{$uid}/delete?file={$uid}']",
 			$html,
 		);
+
+		$this->db()->execute(
+			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid)
+			VALUES ('node', 'e2e-detail-owner', :uid)",
+			['uid' => $uid],
+		)->run();
+
+		$used = $this->html('/cp/media', ['file' => $uid], ['HX-Request' => 'true', 'HX-Target' => 'div#media-detail']);
+
+		$this->assertHtmlNodeExists(
+			'//section[@class="cms-detail-usage"]//span[@class="cms-detail-usage-title"][text()="e2e-detail-owner"]',
+			$used,
+		);
 	}
 
 	public function testTheNextPageSwapsInAfterTheTiles(): void
@@ -219,6 +232,12 @@ final class PanelMediaPageTest extends End2EndTestCase
 	{
 		$gone = $this->upload('e2e-delete-page-gone.png', 'image/png');
 		$used = $this->upload('e2e-delete-page-used.png', 'image/png');
+		$shard = substr($gone, 0, 2);
+		$assetDir = "{$this->publicDir}/assets/{$shard}/{$gone}";
+		$cacheDir = "{$this->publicDir}/cache/{$shard}/{$gone}";
+		mkdir($cacheDir, 0o755, true);
+		file_put_contents("{$cacheDir}/e2e-delete-page-gone-thumb.png", 'rendition');
+		$this->assertDirectoryExists($assetDir);
 		$this->db()->execute(
 			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid)
 			VALUES ('node', 'e2e-media-page-owner', :uid)",
@@ -242,6 +261,8 @@ final class PanelMediaPageTest extends End2EndTestCase
 				['uid' => $gone],
 			)->all(),
 		);
+		$this->assertDirectoryDoesNotExist($assetDir);
+		$this->assertDirectoryDoesNotExist($cacheDir);
 
 		$blocked = $this->makeRequest('POST', "/cp/media/{$used}/delete", [
 			'headers' => ['HX-Request' => 'true'],
@@ -252,6 +273,9 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists(
 			'//div[@class="cms-detail-blocked"]//li[contains(., "e2e-media-page-owner")]',
 			$html,
+		);
+		$this->assertNotEmpty(
+			$this->db()->execute('SELECT 1 FROM cms.assets WHERE uid = :uid', ['uid' => $used])->all(),
 		);
 
 		$plain = $this->makeRequest('POST', '/cp/media/nope-no-such-uid/delete');

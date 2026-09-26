@@ -69,18 +69,6 @@ class Routes
 			'cms.media.upload',
 		)->middleware($this->session);
 
-		$app->get('/media/library', [Media::class, 'library'], 'cms.media.library')
-			->middleware($this->session);
-
-		$app->get('/media/{uid}', [Media::class, 'detail'], 'cms.media.detail')
-			->middleware($this->session);
-
-		$app->put('/media/{uid}', [Media::class, 'updateMeta'], 'cms.media.meta')
-			->middleware($this->session);
-
-		$app->delete('/media/{uid}', [Media::class, 'delete'], 'cms.media.delete')
-			->middleware($this->session);
-
 		$this->addPanel($app);
 
 		foreach ($this->pluginRoutes as $addRoutes) {

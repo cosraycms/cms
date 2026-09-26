@@ -75,6 +75,35 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertSame(hash('sha256', $png), $row['hash']);
 	}
 
+	/**
+	 * Projects routinely allow image mimes on the File field. Those uploads
+	 * belong in the image filter: the kind follows the bytes, not the route
+	 * that catalogued them.
+	 */
+	public function testAnImageUploadedThroughTheFileRouteIsStillAnImage(): void
+	{
+		$this->app = $this->createApp([
+			'path.public' => $this->publicDir,
+			'upload.mimetypes.file' => [
+				'application/pdf' => ['pdf'],
+				'image/png' => ['png'],
+			],
+		]);
+		$this->authenticateAs('editor');
+		$png = base64_decode(self::PNG_BASE64, true);
+
+		$json = $this->getJsonResponse($this->makeRequest('POST', '/media/file', [
+			'files' => ['file' => $this->uploadedFile($png, 'e2e-upload-logo.png', 'image/png')],
+		]));
+
+		$this->assertTrue($json['ok']);
+		$this->assertSame('image', $json['kind']);
+
+		$images = $this->getHtmlResponse($this->makeRequest('GET', '/cp/media', ['query' => ['kind' => ['image']]]));
+
+		$this->assertStringContainsString('e2e-upload-logo.png', $images);
+	}
+
 	public function testDuplicateUploadReturnsExistingAsset(): void
 	{
 		$png = base64_decode(self::PNG_BASE64, true);
