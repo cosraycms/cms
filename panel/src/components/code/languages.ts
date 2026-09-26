@@ -1,6 +1,3 @@
-import type { Extension } from '@codemirror/state';
-import { StreamLanguage } from '@codemirror/language';
-
 export const DEFAULT_CODE_SYNTAX = 'plaintext';
 
 export const CODE_SYNTAXES = [
@@ -19,7 +16,6 @@ export const CODE_SYNTAXES = [
 ] as const;
 
 type SyntaxKey = (typeof CODE_SYNTAXES)[number];
-type LanguageLoader = () => Promise<Extension>;
 
 const syntaxAliases: Record<string, SyntaxKey> = {
 	js: 'javascript',
@@ -31,63 +27,70 @@ const syntaxAliases: Record<string, SyntaxKey> = {
 	text: 'plaintext',
 };
 
-const languageLoaders: Record<SyntaxKey, LanguageLoader> = {
-	plaintext: async () => [],
-	php: async () => {
-		const { php } = await import('@codemirror/lang-php');
-
-		return php();
-	},
-	javascript: async () => {
-		const { javascript } = await import('@codemirror/lang-javascript');
-
-		return javascript();
-	},
-	typescript: async () => {
-		const { javascript } = await import('@codemirror/lang-javascript');
-
-		return javascript({ typescript: true });
-	},
-	html: async () => {
-		const { html } = await import('@codemirror/lang-html');
-
-		return html();
-	},
-	css: async () => {
-		const { css } = await import('@codemirror/lang-css');
-
-		return css();
-	},
-	json: async () => {
-		const { json } = await import('@codemirror/lang-json');
-
-		return json();
-	},
-	markdown: async () => {
-		const { markdown } = await import('@codemirror/lang-markdown');
-
-		return markdown();
-	},
-	sql: async () => {
-		const { sql } = await import('@codemirror/lang-sql');
-
-		return sql();
-	},
-	yaml: async () => {
-		const { yaml } = await import('@codemirror/lang-yaml');
-
-		return yaml();
-	},
-	xml: async () => {
-		const { xml } = await import('@codemirror/lang-xml');
-
-		return xml();
-	},
-	bash: async () => {
-		const { shell } = await import('@codemirror/legacy-modes/mode/shell');
-
-		return StreamLanguage.define(shell);
-	},
+// Each syntax key is also the editor's language name. A load registers the
+// Prism grammar and the editing behavior (comment tokens, indentation, tag
+// closing) globally; plaintext has neither and stays unhighlighted. HTML
+// brings the grammars its style and script elements embed.
+const languageLoaders: Record<SyntaxKey, () => Promise<unknown>> = {
+	plaintext: async () => {},
+	php: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/php'),
+			import('prism-code-editor/languages/php'),
+		]),
+	javascript: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/javascript'),
+			import('prism-code-editor/languages/clike'),
+		]),
+	typescript: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/typescript'),
+			import('prism-code-editor/languages/clike'),
+		]),
+	html: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/markup'),
+			import('prism-code-editor/prism/languages/css'),
+			import('prism-code-editor/prism/languages/javascript'),
+			import('prism-code-editor/languages/html'),
+		]),
+	css: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/css'),
+			import('prism-code-editor/languages/css'),
+		]),
+	json: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/json'),
+			import('prism-code-editor/languages/json'),
+		]),
+	// The HTML behavior also registers markdown.
+	markdown: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/markdown'),
+			import('prism-code-editor/languages/html'),
+		]),
+	sql: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/sql'),
+			import('prism-code-editor/languages/sql'),
+		]),
+	yaml: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/yaml'),
+			import('prism-code-editor/languages/yaml'),
+		]),
+	xml: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/xml'),
+			import('prism-code-editor/languages/xml'),
+		]),
+	bash: () =>
+		Promise.all([
+			import('prism-code-editor/prism/languages/bash'),
+			import('prism-code-editor/languages/bash'),
+		]),
 };
 
 export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKey {
@@ -108,10 +111,10 @@ export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKe
 	return DEFAULT_CODE_SYNTAX;
 }
 
-export async function loadCodeLanguageExtension(
-	syntax: string | null | undefined,
-): Promise<Extension> {
-	const normalized = normalizeCodeSyntax(syntax);
+/** Loads a syntax once and returns the editor language name for it. */
+export async function loadCodeLanguage(syntax: string | null | undefined): Promise<SyntaxKey> {
+	const key = normalizeCodeSyntax(syntax);
+	await languageLoaders[key]();
 
-	return languageLoaders[normalized]();
+	return key;
 }

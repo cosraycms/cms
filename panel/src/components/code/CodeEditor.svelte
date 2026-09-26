@@ -1,19 +1,16 @@
 <script lang="ts">
-	import type { Extension } from '@codemirror/state';
+	import type { PrismEditor } from 'prism-code-editor';
 
 	import { onDestroy, onMount } from 'svelte';
-	import { Compartment, EditorState, Annotation } from '@codemirror/state';
-	import { EditorView, keymap, lineNumbers, highlightActiveLineGutter } from '@codemirror/view';
-	import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-	import { foldGutter, foldKeymap } from '@codemirror/language';
-	import { indentOnInput, bracketMatching } from '@codemirror/language';
-	import { drawSelection, highlightActiveLine, rectangularSelection } from '@codemirror/view';
+	import { createEditor } from 'prism-code-editor';
+	import { defaultKeymap, editHistory, editorCommands } from 'prism-code-editor/commands';
+	import { highlightBracketPairs } from 'prism-code-editor/highlight-brackets';
+	import { matchBrackets } from 'prism-code-editor/match-brackets';
 	import {
 		DEFAULT_CODE_SYNTAX,
-		loadCodeLanguageExtension,
+		loadCodeLanguage,
 		normalizeCodeSyntax,
 	} from '$components/code/languages';
-	import { cosrayCodeTheme } from '$components/code/theme';
 
 	type Props = {
 		name: string;
@@ -38,9 +35,8 @@
 	}: Props = $props();
 
 	let editorElement = $state<HTMLElement>();
-	let editor: EditorView | null = null;
+	let editor: PrismEditor | null = null;
 	let languageLoadId = 0;
-	let applyingExternalValue = false;
 	let focused = $state(false);
 
 	function preview(
@@ -50,32 +46,20 @@
 		update: (next: { value: string; syntax: string }) => void;
 		destroy: () => void;
 	} {
-		let view: EditorView | null = null;
+		let view: PrismEditor | null = null;
 		let loadId = 0;
 		let destroyed = false;
 
 		async function render(next: { value: string; syntax: string }) {
 			const currentLoadId = ++loadId;
-			const language = await loadCodeLanguageExtension(next.syntax);
+			const language = await loadCodeLanguage(next.syntax);
 
 			if (destroyed || currentLoadId !== loadId) {
 				return;
 			}
 
-			view?.destroy();
-			view = new EditorView({
-				state: EditorState.create({
-					doc: next.value,
-					extensions: [
-						lineNumbers(),
-						cosrayCodeTheme,
-						language,
-						EditorState.readOnly.of(true),
-						EditorView.editable.of(false),
-					],
-				}),
-				parent: element,
-			});
+			view?.remove();
+			view = createEditor(element, { language, value: next.value, readOnly: true });
 		}
 
 		void render(initial);
@@ -84,7 +68,7 @@
 			update: (next) => void render(next),
 			destroy() {
 				destroyed = true;
-				view?.destroy();
+				view?.remove();
 			},
 		};
 	}
@@ -95,82 +79,29 @@
 		}
 	}
 
-	const externalUpdate = Annotation.define<boolean>();
-	const languageCompartment = new Compartment();
-	const readOnlyCompartment = new Compartment();
-
-	function editorExtensions(languageExtension: Extension): Extension[] {
-		return [
-			lineNumbers(),
-			highlightActiveLineGutter(),
-			history(),
-			drawSelection(),
-			EditorState.allowMultipleSelections.of(true),
-			indentOnInput(),
-			bracketMatching(),
-			rectangularSelection(),
-			highlightActiveLine(),
-			foldGutter(),
-			cosrayCodeTheme,
-			keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
-			languageCompartment.of(languageExtension),
-			readOnlyCompartment.of(EditorState.readOnly.of(readonly)),
-			EditorView.updateListener.of((update) => {
-				if (!update.docChanged) {
-					return;
-				}
-
-				value = update.state.doc.toString();
-
-				if (applyingExternalValue) {
-					return;
-				}
-
-				const hasExternalUpdate = update.transactions.some((transaction) =>
-					transaction.annotation(externalUpdate),
-				);
-
-				if (!hasExternalUpdate) {
-					notify();
-				}
-			}),
-		];
-	}
-
 	async function reconfigureLanguage(nextSyntax: string) {
 		if (!editor) {
 			return;
 		}
 
 		const currentLoadId = ++languageLoadId;
-		const extension = await loadCodeLanguageExtension(nextSyntax);
+		const language = await loadCodeLanguage(nextSyntax);
 
 		if (!editor || currentLoadId !== languageLoadId) {
 			return;
 		}
 
-		editor.dispatch({
-			effects: languageCompartment.reconfigure(extension),
-		});
+		editor.setOptions({ language });
 	}
 
+	// Replacing the text reports no change: the update it causes leaves
+	// the editor's text equal to value.
 	function replaceDoc(nextValue: string) {
-		if (!editor) {
+		if (!editor || editor.value === nextValue) {
 			return;
 		}
 
-		const current = editor.state.doc.toString();
-
-		if (current === nextValue) {
-			return;
-		}
-
-		applyingExternalValue = true;
-		editor.dispatch({
-			changes: { from: 0, to: editor.state.doc.length, insert: nextValue },
-			annotations: externalUpdate.of(true),
-		});
-		applyingExternalValue = false;
+		editor.setOptions({ value: nextValue });
 	}
 
 	onMount(async () => {
@@ -179,19 +110,34 @@
 		}
 
 		syntax = normalizeCodeSyntax(syntax);
-		const initialLanguage = await loadCodeLanguageExtension(syntax);
+		const language = await loadCodeLanguage(syntax);
 
-		editor = new EditorView({
-			state: EditorState.create({
-				doc: value ?? '',
-				extensions: editorExtensions(initialLanguage),
-			}),
-			parent: editorElement,
-		});
+		editor = createEditor(
+			editorElement,
+			{
+				language,
+				value: value ?? '',
+				readOnly: readonly,
+				// Also called for the initial value, a language switch and a
+				// replaced text, which leave the text equal to value.
+				onUpdate: (next) => {
+					if (next === value) {
+						return;
+					}
+
+					value = next;
+					notify();
+				},
+			},
+			editHistory(),
+			editorCommands(defaultKeymap),
+			matchBrackets(false),
+			highlightBracketPairs(),
+		);
 	});
 
 	onDestroy(() => {
-		editor?.destroy();
+		editor?.remove();
 		editor = null;
 	});
 
@@ -222,15 +168,15 @@
 			return;
 		}
 
-		editor.dispatch({
-			effects: readOnlyCompartment.reconfigure(EditorState.readOnly.of(readonly)),
-		});
+		editor.setOptions({ readOnly: readonly });
 	});
 </script>
 
 <div class="cms-code-editor-wrap" onfocusin={() => (focused = true)} onfocusout={focusOut}>
 	{#if value === '' && fallback !== '' && !focused}
-		<div class="cms-code-editor-fallback" aria-hidden="true">
+		<!-- Inert: hidden from assistive technology, and the read-only
+		     editor's textarea cannot take focus. -->
+		<div class="cms-code-editor-fallback" inert>
 			<div
 				class="cms-code-editor cms-code-editor-preview"
 				use:preview={{ value: fallback, syntax }}

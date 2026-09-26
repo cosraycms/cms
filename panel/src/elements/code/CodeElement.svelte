@@ -52,7 +52,7 @@
 		return { ...(meta ?? {}), syntax };
 	}
 
-	// Synchronous init: CodeMirror reads its content at mount, before
+	// Synchronous init: the editor reads its content at mount, before
 	// effects run; the effects handle later host re-assignments.
 	let map: LocaleMap<string> = $state(sync());
 	let metaMap: Meta = $state(syncMeta());

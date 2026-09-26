@@ -457,6 +457,21 @@
 	--cms-code-text: var(--cms-color-neutral-100);
 	--cms-code-muted: var(--cms-color-neutral-300);
 
+	/* Syntax colours, tuned for the dark code ground. */
+	--cms-code-comment: #b8b0ac;
+	--cms-code-keyword: #c6a0f6;
+	--cms-code-literal: #8bd5ca;
+	--cms-code-string: #f5a97f;
+	--cms-code-regex: #f5bde6;
+	--cms-code-function: #8aadf4;
+	--cms-code-variable: #f6f5f4;
+	--cms-code-property: #b7bdf8;
+	--cms-code-type: #91d7e3;
+	--cms-code-meta: #eed49f;
+	--cms-code-punctuation: #d7d3d1;
+	--cms-code-inserted: #a6da95;
+	--cms-code-deleted: #ed8796;
+
 	/**
 	 * Component — blocks
 	 */
