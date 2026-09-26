@@ -37,7 +37,6 @@ export default defineConfig({
 		cssCodeSplit: false,
 		rollupOptions: {
 			input: {
-				richtext: path.resolve(root, 'src/elements/richtext.ts'),
 				media: path.resolve(root, 'src/elements/media.ts'),
 			},
 			output: {

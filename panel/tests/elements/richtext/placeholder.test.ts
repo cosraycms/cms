@@ -1,29 +1,24 @@
-import { mount, tick, unmount } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import RichTextEditor from '../../../src/components/richtext/RichTextEditor.svelte';
 import type { RichtextDoc } from '../../../src/elements/richtext/format.js';
+import '../../../src/elements/richtext.js';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
 
-let app: ReturnType<typeof mount> | null = null;
-
-afterEach(async () => {
-	if (app) await unmount(app);
-	app = null;
+afterEach(() => {
 	document.body.replaceChildren();
 });
 
 async function editor(value: RichtextDoc | null, readonly = false): Promise<HTMLElement> {
-	const target = document.createElement('div');
-
-	document.body.append(target);
-	app = mount(RichTextEditor, {
-		target,
-		props: { name: 'body', value, readonly, placeholder: 'Write…' },
+	const element = document.createElement('cosray-richtext');
+	Object.assign(element, {
+		value: { zxx: value },
+		format: 'cosray-richtext',
+		field: { name: 'body', immutable: readonly, placeholder: 'Write…' },
 	});
-	await tick();
+	document.body.append(element);
+	await Promise.resolve();
 
-	return target.querySelector<HTMLElement>('.ProseMirror')!;
+	return element.querySelector<HTMLElement>('.ProseMirror')!;
 }
 
 const words: RichtextDoc = {

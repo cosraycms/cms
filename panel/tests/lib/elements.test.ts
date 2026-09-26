@@ -11,13 +11,13 @@ describe('module resolution', () => {
 	it('serves cosray-shipped elements from the panel static assets', () => {
 		vi.stubEnv('DEV', false);
 
-		expect(moduleUrl('cosray:richtext')).toBe('/panel/static/elements/richtext.js');
+		expect(moduleUrl('cosray:media')).toBe('/panel/static/elements/media.js');
 	});
 
 	it('resolves cosray-shipped elements against the Vite dev server in dev', () => {
 		// Vitest runs in dev mode; the URL is anchored to the module, so
 		// only the path shape is stable.
-		expect(moduleUrl('cosray:richtext').endsWith('/src/elements/richtext.ts')).toBe(true);
+		expect(moduleUrl('cosray:media').endsWith('/src/elements/media.ts')).toBe(true);
 	});
 
 	it('serves rewritten cosray elements as plain modules from the package', () => {

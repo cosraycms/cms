@@ -1,13 +1,12 @@
-import { mount, tick, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import RichTextEditor from '../../../src/components/richtext/RichTextEditor.svelte';
+import '../../../src/elements/richtext.js';
 import { installBridge } from '../../../src/lib/bridge-standalone';
 import type { UploadResult } from '../../../src/lib/bridge';
 import { install as installMenus } from '../../../src/lib/action-menu';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
 
-let app: ReturnType<typeof mount>;
+const tick = () => Promise.resolve();
 let stopMenus: () => void;
 
 beforeEach(() => {
@@ -22,13 +21,14 @@ beforeEach(() => {
 		debug: false,
 		allowedFiles: { file: [], image: ['png'], video: [] },
 	});
+	// The dialogs load the library picker through htmx.
+	vi.stubGlobal('htmx', { ajax: vi.fn().mockResolvedValue(undefined) });
 });
 
 afterEach(async () => {
 	stopMenus();
 	vi.restoreAllMocks();
 	document.querySelector<HTMLButtonElement>('[data-dialog-close]')?.click();
-	if (app) await unmount(app);
 	document.body.replaceChildren();
 	delete window.Cosray;
 	vi.unstubAllGlobals();
@@ -40,19 +40,24 @@ async function editor(
 	const host = document.createElement('form');
 	document.body.append(host);
 	const notify = vi.fn();
-	app = mount(RichTextEditor, {
-		target: host,
-		props: {
+	const element = document.createElement('cosray-richtext');
+	Object.assign(element, {
+		format: 'cosray-richtext',
+		field: {
 			name: 'body',
 			tools: ['link', 'image'],
-			...props,
-			notify,
-			value: {
+			richtextClasses: props.classes ?? {},
+			richtextStyles: props.styles ?? {},
+		},
+		value: {
+			zxx: {
 				type: 'doc',
 				content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello world' }] }],
 			},
 		},
 	});
+	element.addEventListener('cosray-change', () => notify());
+	host.append(element);
 	await tick();
 	for (const trigger of host.querySelectorAll('[popovertarget]')) {
 		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 24, 24));
@@ -151,12 +156,6 @@ describe('richtext dialogs', () => {
 
 	it('does not apply an image when its upload finishes after dismissal', async () => {
 		const { notify } = await editor();
-		vi.stubGlobal(
-			'fetch',
-			vi
-				.fn()
-				.mockResolvedValue({ ok: true, json: async () => ({ items: [], page: 1, more: false }) }),
-		);
 		const pending = Promise.withResolvers<UploadResult>();
 		vi.spyOn(window.Cosray!, 'upload').mockReturnValue(pending.promise);
 		await action('image:insert');
@@ -170,4 +169,59 @@ describe('richtext dialogs', () => {
 		await tick();
 		expect(notify).not.toHaveBeenCalled();
 	});
+
+	it('inserts a library image picked in the dialog', async () => {
+		const { content, notify } = await editor();
+		pickerWith({
+			uid: 'pic',
+			filename: 'pic.png',
+			url: '/assets/pic.png',
+			thumbUrl: '/cache/pic-thumb.png',
+			kind: 'image',
+		});
+
+		await action('image:insert');
+		document.querySelector<HTMLElement>('dialog [data-pick]')!.click();
+		document.querySelector<HTMLButtonElement>('dialog .modal-footer .primary')!.click();
+		await tick();
+
+		const image = content.querySelector<HTMLImageElement>('img[data-uid="pic"]');
+		expect(image?.getAttribute('src')).toBe('/cache/pic-thumb.png');
+		expect(notify).toHaveBeenCalledOnce();
+	});
+
+	it('links the selection to an asset picked on the files tab', async () => {
+		const { content, notify } = await editor();
+		pickerWith({
+			uid: 'doc',
+			filename: 'doc.pdf',
+			url: '/assets/doc.pdf',
+			thumbUrl: '/assets/doc.pdf',
+			kind: 'file',
+		});
+
+		await action('richtext:add-page-link');
+		expect(
+			document.querySelector<HTMLButtonElement>('dialog .modal-footer .primary')!.disabled,
+		).toBe(true);
+		[...document.querySelectorAll<HTMLElement>('dialog [role="tab"]')]
+			.find((tab) => tab.textContent?.includes('media:files-documents'))!
+			.click();
+		await tick();
+		document.querySelector<HTMLElement>('dialog [data-pick]')!.click();
+		await action('link:add');
+
+		expect(content.querySelector('a')?.getAttribute('data-asset')).toBe('doc');
+		expect(content.querySelector('a')?.textContent).toBe('Hello');
+		expect(notify).toHaveBeenCalledOnce();
+	});
 });
+
+// The picker the dialogs embed, as the server would render it.
+function pickerWith(item: Record<string, string>): void {
+	vi.stubGlobal('htmx', {
+		ajax: vi.fn(async (_verb: string, _path: string, { target }: { target: Element }) => {
+			target.innerHTML = `<button type="button" class="cms-asset-tile" data-pick='${JSON.stringify(item)}'></button>`;
+		}),
+	});
+}

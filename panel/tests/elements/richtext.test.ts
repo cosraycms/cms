@@ -1,12 +1,14 @@
-import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { RichtextEnvelope } from '../../src/elements/richtext/format.js';
 import type { HostPayload } from '../../src/lib/host';
 import type { LocaleMap, RichtextDoc } from '../../src/types/data';
-import '../../src/elements/richtext/RichTextElement.svelte';
+import '../../src/elements/richtext.js';
 
 vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+
+// The element updates synchronously; a microtask lets pending work land.
+const tick = () => Promise.resolve();
 
 type RichtextElement = HTMLElement & HostPayload & { locale: string };
 
