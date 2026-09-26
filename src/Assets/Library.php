@@ -99,6 +99,28 @@ final class Library
 	}
 
 	/**
+	 * An asset as a picker hands it to the browser: what a control needs to
+	 * show and store it.
+	 *
+	 * @return array{uid: string, filename: string, url: string, thumbUrl: string, previewUrl: string, kind: string, mime: ?string, bytes: ?int, width: ?int, height: ?int}
+	 */
+	public static function item(Asset $asset): array
+	{
+		return [
+			'uid' => $asset->uid,
+			'filename' => $asset->filename,
+			'url' => $asset->path(),
+			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
+			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
+			'kind' => $asset->kind,
+			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
+			'width' => $asset->width,
+			'height' => $asset->height,
+		];
+	}
+
+	/**
 	 * Hard delete, unreferenced only. Returns null for an unknown asset, the
 	 * owners that still reference it when it is in use, and an empty list
 	 * once it is gone. The RESTRICT foreign key on `asset_references` is the

@@ -169,6 +169,10 @@ class Routes
 				$uid = '{uid:[A-Za-z0-9-_.]{1,64}}';
 				$type = '{type:[a-z][a-z0-9-]{0,63}}';
 				$panel
+					->get('/media/picker', [Panel\Media::class, 'picker'], 'media.picker')
+					->middleware($panelAuth)
+					->after($renderers->get('media'));
+				$panel
 					->post("/media/{$uid}", [Panel\Media::class, 'save'], 'media.save')
 					->middleware($panelAuth)
 					->after($renderers->get('media'));

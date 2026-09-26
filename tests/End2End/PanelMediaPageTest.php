@@ -129,6 +129,38 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertStringNotContainsString('cms-masthead', $next);
 	}
 
+	public function testThePickerHandsTilesTheirAssetAndPagesInPlace(): void
+	{
+		$image = $this->upload('e2e-picker-photo.png', 'image/png');
+		$this->upload('e2e-picker-notes.pdf', 'application/pdf', 'file');
+
+		$html = $this->html('/cp/media/picker', ['kind' => 'image', 'file' => $image]);
+
+		$this->assertStringStartsWith('<div class="cms-library" data-media-picker>', trim($html));
+		$this->assertStringNotContainsString('cms-masthead', $html);
+		$this->assertStringNotContainsString('e2e-picker-notes.pdf', $html);
+		$this->assertHtmlNodeExists('//form[@hx-get="/cp/media/picker"]/input[@name="kind"][@value="image"]', $html);
+		$document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
+		$tile = $document->querySelector('button.cms-asset-tile.active[data-pick]');
+		$this->assertNotNull($tile);
+		$item = json_decode((string) $tile->getAttribute('data-pick'), true);
+		$this->assertSame($image, $item['uid']);
+		$this->assertSame('e2e-picker-photo.png', $item['filename']);
+		$this->assertSame('image', $item['kind']);
+
+		$more = $this->html(
+			'/cp/media/picker',
+			['kind' => 'image', 'page' => '2'],
+			[
+				'HX-Request' => 'true',
+				'HX-Target' => 'a#media-more',
+			],
+		);
+
+		$this->assertStringNotContainsString('data-media-picker', $more);
+		$this->assertStringNotContainsString('data-media-tile', $more);
+	}
+
 	public function testSavingMetaKeepsTheFormShapeAndConfirms(): void
 	{
 		$uid = $this->upload('e2e-save-photo.png', 'image/png');

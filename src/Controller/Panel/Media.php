@@ -67,6 +67,28 @@ final class Media extends Panel
 	}
 
 	/**
+	 * The library as controls embed it to pick an asset: a search and the
+	 * tile grid, whose tiles carry the asset they stand for. `kind` narrows
+	 * the listing, `file` marks the current pick.
+	 */
+	public function picker(Database $db): array
+	{
+		$screen = MediaScreen::fromParams($this->panelPath() . '/media/picker', $this->request->params());
+
+		return [
+			'part' => $this->target() === 'media-more' ? 'tiles' : 'picker',
+			'picker' => true,
+			'screen' => $screen,
+			'listing' => new Library($db, $this->config)->page(
+				kinds: $screen->kinds,
+				q: $screen->q,
+				page: $screen->page,
+			),
+			'localeId' => $this->localeId(),
+		];
+	}
+
+	/**
 	 * Saves the editable meta slice from the detail form: localized alt,
 	 * title and caption, the credit line and an image's focal point.
 	 */
