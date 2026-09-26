@@ -771,6 +771,18 @@
 		display: flex;
 	}
 
+	/* The quick picker is as wide as its labels; a long one wraps. The
+	   cap sits on the choices because the menu's own max-width is set
+	   inline to the room in the viewport. */
+	& .adders > .cms-action-menu {
+		--width: max-content;
+
+		& > button {
+			max-width: 20rem;
+			overflow-wrap: anywhere;
+		}
+	}
+
 	& .adder {
 		display: flex;
 		flex: 1 1 0;
