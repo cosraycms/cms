@@ -1,9 +1,6 @@
 /.coverage
 /build
 /data/
-/panel/build/
-/panel/static/
-/panel/editor/
 /vendor/
 *.log
 *.mo
