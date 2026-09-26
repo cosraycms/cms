@@ -1,4 +1,4 @@
-import type { Extension } from '@codemirror/state';
+/** @import { Extension } from '@codemirror/state' */
 
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
@@ -32,7 +32,8 @@ const highlightStyle = HighlightStyle.define(
 	{ themeType: 'dark' },
 );
 
-export const cosrayCodeTheme: Extension = [
+/** @type {Extension} */
+export const cosrayCodeTheme = [
 	EditorView.theme({}, { dark: true }),
 	syntaxHighlighting(highlightStyle, { fallback: true }),
 ];

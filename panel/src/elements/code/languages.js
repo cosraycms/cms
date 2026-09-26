@@ -1,9 +1,10 @@
-import type { Extension } from '@codemirror/state';
+/** @import { Extension } from '@codemirror/state' */
+
 import { StreamLanguage } from '@codemirror/language';
 
 export const DEFAULT_CODE_SYNTAX = 'plaintext';
 
-export const CODE_SYNTAXES = [
+export const CODE_SYNTAXES = /** @type {const} */ ([
 	'plaintext',
 	'php',
 	'javascript',
@@ -16,12 +17,12 @@ export const CODE_SYNTAXES = [
 	'yaml',
 	'xml',
 	'bash',
-] as const;
+]);
 
-type SyntaxKey = (typeof CODE_SYNTAXES)[number];
-type LanguageLoader = () => Promise<Extension>;
+/** @typedef {(typeof CODE_SYNTAXES)[number]} SyntaxKey */
 
-const syntaxAliases: Record<string, SyntaxKey> = {
+/** @type {Record<string, SyntaxKey>} */
+const syntaxAliases = {
 	js: 'javascript',
 	ts: 'typescript',
 	md: 'markdown',
@@ -31,7 +32,8 @@ const syntaxAliases: Record<string, SyntaxKey> = {
 	text: 'plaintext',
 };
 
-const languageLoaders: Record<SyntaxKey, LanguageLoader> = {
+/** @type {Record<SyntaxKey, () => Promise<Extension>>} */
+const languageLoaders = {
 	plaintext: async () => [],
 	php: async () => {
 		const { php } = await import('@codemirror/lang-php');
@@ -90,7 +92,11 @@ const languageLoaders: Record<SyntaxKey, LanguageLoader> = {
 	},
 };
 
-export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKey {
+/**
+ * @param {string | null | undefined} syntax
+ * @returns {SyntaxKey}
+ */
+export function normalizeCodeSyntax(syntax) {
 	const normalized = (syntax ?? DEFAULT_CODE_SYNTAX).trim().toLowerCase();
 
 	if (normalized === '') {
@@ -101,17 +107,15 @@ export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKe
 		return syntaxAliases[normalized];
 	}
 
-	if ((CODE_SYNTAXES as readonly string[]).includes(normalized)) {
-		return normalized as SyntaxKey;
-	}
+	const known = CODE_SYNTAXES.find((key) => key === normalized);
 
-	return DEFAULT_CODE_SYNTAX;
+	return known ?? DEFAULT_CODE_SYNTAX;
 }
 
-export async function loadCodeLanguageExtension(
-	syntax: string | null | undefined,
-): Promise<Extension> {
-	const normalized = normalizeCodeSyntax(syntax);
-
-	return languageLoaders[normalized]();
+/**
+ * @param {string | null | undefined} syntax
+ * @returns {Promise<Extension>}
+ */
+export async function loadCodeLanguageExtension(syntax) {
+	return languageLoaders[normalizeCodeSyntax(syntax)]();
 }
