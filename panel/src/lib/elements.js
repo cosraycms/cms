@@ -1,20 +1,26 @@
-import { panelBase } from './runtime.js';
+import { assetsBase, panelBase } from './runtime.js';
 
 /** @type {Map<string, Promise<unknown>>} */
 const modules = new Map();
+
+// cosray elements already rewritten as plain modules. They load from the
+// package like every other panel file; the Svelte ones still come from the
+// Vite build.
+const PLAIN = new Set(['code']);
 
 /**
  * Resolve a control module value to a URL.
  *
  * - `cosray:{entry}` — cosray-shipped element ('cosray' is a reserved
- *   plugin id): served from the panel static assets in production, from
- *   the Vite dev server in development.
+ *   plugin id): a plain module from the package's `src/elements/`, or a
+ *   Svelte build from the panel static assets in production and from the
+ *   Vite dev server in development.
  * - `https?://...` — used as-is.
  * - anything else — `{pluginId}/{file}`, served from the plugin's
  *   asset dir under the panel vendor route.
  *
  * This module still runs inside the Vite bundle; the `import.meta.env`
- * branches go with the Svelte elements (buildless plan, Phase 3).
+ * branches go with the last Svelte element.
  *
  * @param {string} module
  * @returns {string}
@@ -24,6 +30,10 @@ export function moduleUrl(module) {
 
 	if (module.startsWith('cosray:')) {
 		const entry = module.slice('cosray:'.length);
+
+		if (PLAIN.has(entry)) {
+			return `${assetsBase()}src/elements/${entry}.js`;
+		}
 
 		if (import.meta.env.DEV) {
 			// Indirection keeps Vite's static new URL() analysis from
@@ -52,7 +62,11 @@ export function loadElement(module) {
 	let promise = modules.get(url);
 
 	if (!promise) {
-		if (!import.meta.env.DEV && module.startsWith('cosray:')) {
+		if (
+			!import.meta.env.DEV &&
+			module.startsWith('cosray:') &&
+			!PLAIN.has(module.slice('cosray:'.length))
+		) {
 			ensureCss();
 		}
 

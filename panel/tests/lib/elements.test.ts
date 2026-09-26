@@ -4,7 +4,7 @@ import { configureRuntime } from '../../src/lib/runtime';
 
 afterEach(() => {
 	vi.unstubAllEnvs();
-	configureRuntime({ panelBase: '/panel/' });
+	configureRuntime({ panelBase: '/panel/', assetsBase: '/panel/assets/dev/' });
 });
 
 describe('module resolution', () => {
@@ -18,6 +18,12 @@ describe('module resolution', () => {
 		// Vitest runs in dev mode; the URL is anchored to the module, so
 		// only the path shape is stable.
 		expect(moduleUrl('cosray:richtext').endsWith('/src/elements/richtext.ts')).toBe(true);
+	});
+
+	it('serves rewritten cosray elements as plain modules from the package', () => {
+		configureRuntime({ assetsBase: '/cp/assets/0123456789ab' });
+
+		expect(moduleUrl('cosray:code')).toBe('/cp/assets/0123456789ab/src/elements/code.js');
 	});
 
 	it('passes full URLs through untouched', () => {

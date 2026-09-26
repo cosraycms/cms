@@ -1,6 +1,6 @@
 export const DEFAULT_CODE_SYNTAX = 'plaintext';
 
-export const CODE_SYNTAXES = [
+export const CODE_SYNTAXES = /** @type {const} */ ([
 	'plaintext',
 	'php',
 	'javascript',
@@ -13,11 +13,12 @@ export const CODE_SYNTAXES = [
 	'yaml',
 	'xml',
 	'bash',
-] as const;
+]);
 
-type SyntaxKey = (typeof CODE_SYNTAXES)[number];
+/** @typedef {(typeof CODE_SYNTAXES)[number]} SyntaxKey */
 
-const syntaxAliases: Record<string, SyntaxKey> = {
+/** @type {Record<string, SyntaxKey>} */
+const syntaxAliases = {
 	js: 'javascript',
 	ts: 'typescript',
 	md: 'markdown',
@@ -31,7 +32,8 @@ const syntaxAliases: Record<string, SyntaxKey> = {
 // Prism grammar and the editing behavior (comment tokens, indentation, tag
 // closing) globally; plaintext has neither and stays unhighlighted. HTML
 // brings the grammars its style and script elements embed.
-const languageLoaders: Record<SyntaxKey, () => Promise<unknown>> = {
+/** @type {Record<SyntaxKey, () => Promise<unknown>>} */
+const languageLoaders = {
 	plaintext: async () => {},
 	php: () =>
 		Promise.all([
@@ -93,7 +95,11 @@ const languageLoaders: Record<SyntaxKey, () => Promise<unknown>> = {
 		]),
 };
 
-export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKey {
+/**
+ * @param {string | null | undefined} syntax
+ * @returns {SyntaxKey}
+ */
+export function normalizeCodeSyntax(syntax) {
 	const normalized = (syntax ?? DEFAULT_CODE_SYNTAX).trim().toLowerCase();
 
 	if (normalized === '') {
@@ -104,15 +110,18 @@ export function normalizeCodeSyntax(syntax: string | null | undefined): SyntaxKe
 		return syntaxAliases[normalized];
 	}
 
-	if ((CODE_SYNTAXES as readonly string[]).includes(normalized)) {
-		return normalized as SyntaxKey;
-	}
+	const known = CODE_SYNTAXES.find((key) => key === normalized);
 
-	return DEFAULT_CODE_SYNTAX;
+	return known ?? DEFAULT_CODE_SYNTAX;
 }
 
-/** Loads a syntax once and returns the editor language name for it. */
-export async function loadCodeLanguage(syntax: string | null | undefined): Promise<SyntaxKey> {
+/**
+ * Loads a syntax once and returns the editor language name for it.
+ *
+ * @param {string | null | undefined} syntax
+ * @returns {Promise<SyntaxKey>}
+ */
+export async function loadCodeLanguage(syntax) {
 	const key = normalizeCodeSyntax(syntax);
 	await languageLoaders[key]();
 
