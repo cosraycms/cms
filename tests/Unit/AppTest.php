@@ -169,6 +169,25 @@ final class AppTest extends TestCase
 		$this->assertTrue($this->hasSessionMiddleware($match->route()->getMiddleware()));
 	}
 
+	public function testThePanelFilesSkipTheSession(): void
+	{
+		$app = $this->app();
+		$app->boot();
+		$match = static fn(string $path) => $app
+			->router()
+			->match(
+				$app->factory()->serverRequestFactory()->createServerRequest('GET', $path),
+			)
+			->route();
+
+		$asset = $match('/cp/assets/0123456789ab/src/panel.js');
+
+		$this->assertSame('cms.panel.asset', $asset->name());
+		$this->assertFalse($this->hasSessionMiddleware($asset->getMiddleware()));
+		$this->assertFalse($this->hasSessionMiddleware($match('/cp/vendor/acme-shop/map.js')->getMiddleware()));
+		$this->assertTrue($this->hasSessionMiddleware($match('/cp/media')->getMiddleware()));
+	}
+
 	public function testCoreMethodsDelegateToInternalCoreApp(): void
 	{
 		$app = $this->app(['app.url_prefix' => '/site']);
