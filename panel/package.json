@@ -11,9 +11,11 @@
 		"dev": "vite",
 		"check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings options_missing_custom_element:ignore",
 		"format": "prettier -w .",
-		"test": "vitest run"
+		"test": "vitest run",
+		"modules": "node scripts/modules.mjs",
+		"modules:check": "node scripts/modules.mjs --check"
 	},
-	"devDependencies": {
+	"dependencies": {
 		"@celema/verba": "^0.3.0",
 		"@codemirror/commands": "^6.11.0",
 		"@codemirror/lang-css": "^6.3.1",
@@ -30,15 +32,7 @@
 		"@codemirror/state": "^6.7.1",
 		"@codemirror/view": "^6.43.9",
 		"@lezer/highlight": "^1.2.3",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@tsconfig/svelte": "^5.0.8",
-		"@types/jsdom": "^28.0.3",
-		"@types/node": "^25.9.5",
-		"@types/sortablejs": "^1.15.9",
 		"htmx.org": "4.0.0",
-		"jsdom": "^25.0.1",
-		"prettier": "^3.9.6",
-		"prettier-plugin-svelte": "^3.5.2",
 		"prosemirror-commands": "^1.7.2",
 		"prosemirror-dropcursor": "^1.8.3",
 		"prosemirror-gapcursor": "^1.4.1",
@@ -49,12 +43,31 @@
 		"prosemirror-schema-list": "^1.5.1",
 		"prosemirror-state": "^1.4.4",
 		"prosemirror-view": "^1.42.3",
-		"sortablejs": "^1.15.7",
+		"sortablejs": "^1.15.7"
+	},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^6.2.4",
+		"@tsconfig/svelte": "^5.0.8",
+		"@types/jsdom": "^28.0.3",
+		"@types/node": "^25.9.5",
+		"@types/sortablejs": "^1.15.9",
+		"es-module-lexer": "^2.3.2",
+		"jsdom": "^25.0.1",
+		"prettier": "^3.9.6",
+		"prettier-plugin-svelte": "^3.5.2",
 		"svelte": "^5.56.10",
 		"svelte-check": "^4.7.6",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.6",
 		"vitest": "^4.1.11"
+	},
+	"cosray": {
+		"classicScripts": [
+			"htmx.org/dist/htmx.js"
+		],
+		"licenses": {
+			"htmx.org": "0BSD"
+		}
 	},
 	"engines": {
 		"node": ">=22.13.0",

@@ -7,7 +7,7 @@ settings:
 importers:
 
   .:
-    devDependencies:
+    dependencies:
       '@celema/verba':
         specifier: ^0.3.0
         version: 0.3.0
@@ -56,33 +56,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
-      '@sveltejs/vite-plugin-svelte':
-        specifier: ^6.2.4
-        version: 6.2.4(svelte@5.56.10)(vite@7.3.6(@types/node@25.9.5))
-      '@tsconfig/svelte':
-        specifier: ^5.0.8
-        version: 5.0.8
-      '@types/jsdom':
-        specifier: ^28.0.3
-        version: 28.0.3
-      '@types/node':
-        specifier: ^25.9.5
-        version: 25.9.5
-      '@types/sortablejs':
-        specifier: ^1.15.9
-        version: 1.15.9
       htmx.org:
         specifier: 4.0.0
         version: 4.0.0
-      jsdom:
-        specifier: ^25.0.1
-        version: 25.0.1
-      prettier:
-        specifier: ^3.9.6
-        version: 3.9.6
-      prettier-plugin-svelte:
-        specifier: ^3.5.2
-        version: 3.5.2(prettier@3.9.6)(svelte@5.56.10)
       prosemirror-commands:
         specifier: ^1.7.2
         version: 1.7.2
@@ -116,6 +92,34 @@ importers:
       sortablejs:
         specifier: ^1.15.7
         version: 1.15.7
+    devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^6.2.4
+        version: 6.2.4(svelte@5.56.10)(vite@7.3.6(@types/node@25.9.5))
+      '@tsconfig/svelte':
+        specifier: ^5.0.8
+        version: 5.0.8
+      '@types/jsdom':
+        specifier: ^28.0.3
+        version: 28.0.3
+      '@types/node':
+        specifier: ^25.9.5
+        version: 25.9.5
+      '@types/sortablejs':
+        specifier: ^1.15.9
+        version: 1.15.9
+      es-module-lexer:
+        specifier: ^2.3.2
+        version: 2.3.2
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
+      prettier-plugin-svelte:
+        specifier: ^3.5.2
+        version: 3.5.2(prettier@3.9.6)(svelte@5.56.10)
       svelte:
         specifier: ^5.56.10
         version: 5.56.10
