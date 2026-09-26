@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('$lib/locale', () => ({
+vi.mock('../../src/lib/locale.js', () => ({
 	__: (id: string) => `translated:${id}`,
 }));
 

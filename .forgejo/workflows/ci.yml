@@ -72,10 +72,6 @@ jobs:
         working-directory: panel
         run: pnpm test
 
-      - name: Build panel assets
-        working-directory: panel
-        run: pnpm build
-
       - name: Initialize database schema
         run: php ./run db:migrations --namespace=install --apply
 

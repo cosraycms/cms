@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Request;
 use Cosray\Controller\Panel\Assets;
+use Cosray\Panel\Client;
 use Cosray\Tests\TestCase;
 
 /**
@@ -116,85 +117,18 @@ final class PanelAssetTest extends TestCase
 		}
 	}
 
-	public function testPanelContextUsesStaticUrls(): void
+	public function testPanelContextLoadsThePackageFiles(): void
 	{
-		$static = $this->createPanelAssets([
-			'panel.css' => 'body {}',
-			'panel.js' => 'console.log("panel");',
-			'htmx.js' => 'var htmx = {};',
-		]);
-		$panel = $this->panel(['panel.assets_dir' => $static]);
+		$client = new Client($this->config());
 
-		try {
-			$context = $panel->data();
+		$context = $this->panel()->data();
 
-			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
-			$this->assertContains('/cp/static/htmx.js', $context['scripts']);
-			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
-		} finally {
-			$this->removeDirectory($static);
-		}
-	}
-
-	public function testPanelContextOmitsIncompleteStaticInstall(): void
-	{
-		$static = $this->createPanelAssets([
-			'panel.css' => 'body {}',
-			'panel.js' => 'console.log("panel");',
-		]);
-		$panel = $this->panel(['panel.assets_dir' => $static]);
-
-		try {
-			$context = $panel->data();
-
-			$this->assertNotContains('/cp/static/panel.css', $context['stylesheets']);
-			$this->assertNotContains('/cp/static/htmx.js', $context['scripts']);
-			$this->assertNotContains('/cp/static/panel.js', $context['moduleScripts']);
-		} finally {
-			$this->removeDirectory($static);
-		}
-	}
-
-	public function testPanelContextUsesStaticUrlsInDevelopmentEnv(): void
-	{
-		$static = $this->createPanelAssets([
-			'panel.css' => 'body {}',
-			'panel.js' => 'console.log("panel");',
-			'htmx.js' => 'var htmx = {};',
-		]);
-		$panel = $this->panel(['app.env' => 'development', 'panel.assets_dir' => $static]);
-
-		try {
-			$context = $panel->data();
-
-			$this->assertContains('/cp/static/panel.css', $context['stylesheets']);
-			$this->assertContains('/cp/static/htmx.js', $context['scripts']);
-			$this->assertContains('/cp/static/panel.js', $context['moduleScripts']);
-			$this->assertNotContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
-		} finally {
-			$this->removeDirectory($static);
-		}
-	}
-
-	public function testPanelContextUsesViteDevServerWhenPanelDevIsEnabled(): void
-	{
-		$_SERVER['COSRAY_PANEL_DEV'] = '1';
-		$_SERVER['COSRAY_PANEL_DEV_ORIGIN'] = 'http://localhost:2001';
-		$panel = $this->panel();
-
-		try {
-			$context = $panel->data();
-
-			$this->assertNotContains('/cp/static/panel.css', $context['stylesheets']);
-			$this->assertContains(
-				'http://localhost:2001/node_modules/htmx.org/dist/htmx.min.js',
-				$context['scripts'],
-			);
-			$this->assertContains('http://localhost:2001/@vite/client', $context['moduleScripts']);
-			$this->assertContains('http://localhost:2001/src/panel.ts', $context['moduleScripts']);
-		} finally {
-			unset($_SERVER['COSRAY_PANEL_DEV'], $_SERVER['COSRAY_PANEL_DEV_ORIGIN']);
-		}
+		$this->assertContains($client->url('styles/panel.css'), $context['stylesheets']);
+		// htmx loads as a classic script: plugins rely on its global.
+		$this->assertSame([$client->url('modules/htmx.org/dist/htmx.js')], $context['scripts']);
+		$this->assertSame([$client->url('src/panel.js')], $context['moduleScripts']);
+		$this->assertContains($client->url('src/behaviors/blocks.js'), $context['modulePreloads']);
+		$this->assertContains($client->url('modules/@celema/verba/dist/index.js'), $context['modulePreloads']);
 	}
 
 	private function panel(array $config = []): \Cosray\Controller\Panel\Panel

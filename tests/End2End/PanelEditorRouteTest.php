@@ -10,6 +10,7 @@ use Cosray\Config;
 use Cosray\Field\Blocks;
 use Cosray\Field\Image;
 use Cosray\Field\Textarea;
+use Cosray\Panel\Client;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
@@ -436,7 +437,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('class="page cms-node"', $html);
 		$this->assertStringNotContainsString('Back to list', $html);
 		$this->assertStringNotContainsString('topbar-editor', $html);
-		$this->assertPanelStaticStateIsRendered($html);
+		$this->assertPanelAssetsAreRendered($html);
 		$this->assertEditorAssetStateIsRendered($html);
 	}
 
@@ -832,33 +833,6 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('class="value link"', $html);
 	}
 
-	public function testPanelEditorRouteUsesViteDevServerWhenPanelDevIsEnabled(): void
-	{
-		$_SERVER['COSRAY_PANEL_DEV'] = 'true';
-		$_SERVER['COSRAY_PANEL_DEV_ORIGIN'] = 'http://localhost:2001';
-
-		try {
-			$this->authenticateAs('editor');
-			$this->createArticle('panel-editor-dev', 'Panel Editor Dev');
-
-			$response = $this->makeRequest('GET', '/cp/node/panel-editor-dev');
-
-			$this->assertResponseOk($response);
-			$html = $this->getHtmlResponse($response);
-			$this->assertStringContainsString(
-				'src="http://localhost:2001/node_modules/htmx.org/dist/htmx.min.js"',
-				$html,
-			);
-			$this->assertStringContainsString('src="http://localhost:2001/@vite/client"', $html);
-			$this->assertStringContainsString('src="http://localhost:2001/src/panel.ts"', $html);
-			$this->assertStringNotContainsString('/cp/static/panel.js', $html);
-			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.js', $html);
-			$this->assertStringNotContainsString('/cp/assets/editor/node-editor.css', $html);
-		} finally {
-			unset($_SERVER['COSRAY_PANEL_DEV'], $_SERVER['COSRAY_PANEL_DEV_ORIGIN']);
-		}
-	}
-
 	public function testStaleCollectionOriginDoesNotPreventEditing(): void
 	{
 		$this->authenticateAs('editor');
@@ -934,24 +908,14 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringNotContainsString('Panel bundle missing', $html);
 	}
 
-	private function assertPanelStaticStateIsRendered(string $html): void
+	private function assertPanelAssetsAreRendered(string $html): void
 	{
-		if (!$this->hasPanelStatic()) {
-			return;
-		}
+		$client = new Client($this->config());
 
-		$this->assertStringContainsString('href="/cp/static/panel.css"', $html);
-		$this->assertStringContainsString('src="/cp/static/htmx.js"', $html);
-		$this->assertStringContainsString('src="/cp/static/panel.js"', $html);
-	}
-
-	private function hasPanelStatic(): bool
-	{
-		return (
-			is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.js')
-				&& is_file(dirname(__DIR__, 2) . '/public/cp/static/panel.css')
-				&& is_file(dirname(__DIR__, 2) . '/public/cp/static/htmx.js')
-		);
+		$this->assertHtmlNodeExists("//link[@rel='stylesheet'][@href='{$client->url('styles/panel.css')}']", $html);
+		$this->assertHtmlNodeExists("//script[@src='{$client->url('modules/htmx.org/dist/htmx.js')}']", $html);
+		$this->assertHtmlNodeExists("//script[@type='module'][@src='{$client->url('src/panel.js')}']", $html);
+		$this->assertHtmlNodeExists("//link[@rel='modulepreload'][@href='{$client->url('src/lib/host.js')}']", $html);
 	}
 
 	/**

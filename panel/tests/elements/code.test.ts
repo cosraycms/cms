@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { HostPayload } from '../../src/lib/host';
 import '../../src/elements/code.js';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 type CodeElement = HTMLElement & HostPayload & { locale: string };
 type Change = { value: Record<string, string>; meta: { syntax: Record<string, string> } };

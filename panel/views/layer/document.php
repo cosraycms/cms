@@ -19,6 +19,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <?php if (($importMap['imports'] ?? []) !== []): ?>
 	<script type="importmap"><?= json_encode($importMap, $jsonFlags) ?></script>
 <?php endif ?>
+<?php foreach ($modulePreloads ?? [] as $preload): ?>
+	<link rel="modulepreload" href="<?= escape((string) $preload) ?>">
+<?php endforeach ?>
 <?php foreach ($stylesheets as $stylesheet): ?>
 	<link rel="stylesheet" href="<?= escape((string) $stylesheet) ?>">
 <?php endforeach ?>
@@ -30,6 +33,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
 	<?php // Element control modules and script-built icons resolve against these
+
 	// bases. They have to be set
 
 	// before the panel module runs: a boosted navigation upgrades the custom

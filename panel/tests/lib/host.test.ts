@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
 	loadElement: vi.fn<() => Promise<unknown>>(),
 }));
 
-vi.mock('$lib/elements', () => ({ loadElement: mocks.loadElement }));
+vi.mock('../../src/lib/elements.js', () => ({ loadElement: mocks.loadElement }));
 
 import { CosrayHost, installHost } from '../../src/lib/host';
 

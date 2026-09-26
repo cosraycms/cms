@@ -133,6 +133,40 @@ final class PanelClientTest extends TestCase
 		$this->client()->importMap();
 	}
 
+	public function testPreloadsFollowTheStaticImportsOfTheEntry(): void
+	{
+		$this->write(
+			'panel/src/panel.js',
+			"/** @import { Row } from './types.js' */\n"
+				. "import { install } from './behaviors/rows.js';\n"
+				. "import './lib/boot.js';\n"
+				. "export { install };\n"
+				. "void import('./elements/editor.js');\n",
+		);
+		$this->write(
+			'panel/src/behaviors/rows.js',
+			"import {\n\tturn,\n} from '../lib/turn.js';\nimport { t } from 'verba';\nimport { gone } from 'unmapped';\n",
+		);
+		$this->write('panel/src/lib/turn.js', "export { again } from './boot.js';\n");
+		$this->write('panel/src/lib/boot.js', "import { install } from '../behaviors/rows.js';\n");
+		$this->write('panel/src/elements/editor.js', "import './heavy.js';\n");
+		$this->write('panel/modules/importmap.json', '{"imports": {"verba": "verba/index.js"}}');
+		$this->write('panel/modules/verba/index.js', "export * from './plural.js';\n");
+		$this->write('panel/modules/verba/plural.js', 'export const one = 1;');
+		$client = $this->client();
+
+		$this->assertSame(
+			array_map($client->url(...), [
+				'src/behaviors/rows.js',
+				'src/lib/boot.js',
+				'src/lib/turn.js',
+				'modules/verba/index.js',
+				'modules/verba/plural.js',
+			]),
+			$client->preloads(),
+		);
+	}
+
 	public function testSpriteTurnsEveryIconIntoASymbol(): void
 	{
 		$this->write(

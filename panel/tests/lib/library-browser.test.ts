@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { browseLibrary } from '../../src/lib/library-browser.js';
 
-vi.mock('$lib/runtime', () => ({ panelBase: () => '/cp/' }));
+vi.mock('../../src/lib/runtime.js', () => ({ panelBase: () => '/cp/' }));
 
 const ajax = vi.fn<(verb: string, path: string, context: { target: Element }) => Promise<void>>();
 

@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { HostPayload } from '../../src/lib/host';
 import '../../src/elements/reference.js';
 
-vi.mock('$lib/locale', () => ({
+vi.mock('../../src/lib/locale.js', () => ({
 	__: (id: string, params?: { count: number }) => (params ? `${id}: ${params.count}` : id),
 }));
-vi.mock('$lib/runtime', () => ({
+vi.mock('../../src/lib/runtime.js', () => ({
 	panelBase: () => '/cp/',
 	assetsBase: () => '/cp/assets/dev/',
 }));

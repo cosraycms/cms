@@ -5,7 +5,7 @@ import type { HostPayload } from '../../src/lib/host';
 import type { LocaleMap, RichtextDoc } from '../../src/types/data';
 import '../../src/elements/richtext.js';
 
-vi.mock('$lib/locale', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
 
 // The element updates synchronously; a microtask lets pending work land.
 const tick = () => Promise.resolve();

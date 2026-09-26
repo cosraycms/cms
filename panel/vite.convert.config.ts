@@ -2,10 +2,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 
-// The legacy HTML-to-richtext migration helper. Built on demand, not as
-// part of `pnpm run build`: its output is committed in the sibling
-// cosray/legacy-richtext-converter repository and must run without the
-// panel checkout or node_modules.
+// The legacy HTML-to-richtext migration helper, the one thing still
+// bundled, on demand with `pnpm run build:converter`: its output is
+// committed in the sibling cosray/legacy-richtext-converter repository and
+// must run without the panel checkout or node_modules.
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
@@ -55,13 +55,6 @@ export default defineConfig({
 	plugins: [bundleJsdom()],
 	esbuild: {
 		legalComments: 'inline',
-	},
-	resolve: {
-		alias: {
-			$lib: path.resolve(root, 'src/lib'),
-			$types: path.resolve(root, 'src/types'),
-			$components: path.resolve(root, 'src/components'),
-		},
 	},
 	ssr: {
 		noExternal: true,
