@@ -1,6 +1,6 @@
 # Cosray panel
 
-The panel combines PHP SSR views in `views/`, htmx behaviors in `src/behaviors/`, and Svelte custom elements in `src/elements/`. There is no separate SvelteKit panel to maintain.
+The panel combines PHP SSR views in `views/`, htmx behaviors in `src/behaviors/`, and custom elements in `src/elements/`, plain JavaScript modules the panel serves as they are.
 
 ## Development
 

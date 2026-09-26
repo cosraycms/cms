@@ -2,7 +2,7 @@
 
 This guide explains the current CSS approach and the constraints worth checking when changing it. Naming, component boundaries, layout, and visual choices are working conventions, not a frozen design system. Experiments may depart from them; assess the result in real screens and the live styleguide rather than treating consistency with this document as the acceptance test.
 
-The stylesheets in [panel/styles/](../panel/styles/) and Svelte component styles describe the implementation. [tokens.css](../panel/styles/tokens.css) is the token list; the styleguide renders those tokens and component states directly.
+The stylesheets in [panel/styles/](../panel/styles/) describe the implementation. [tokens.css](../panel/styles/tokens.css) is the token list; the styleguide renders those tokens and component states directly.
 
 ## Cascade layers
 
@@ -107,19 +107,19 @@ Constraints to consider when trying another layout:
 
 ## Action menus
 
-Built-in PHP and Svelte action menus use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Triggers use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep a menu beside its trigger inside the owning form; top-layer painting avoids clipping without reparenting controls out of their submission context.
+Built-in PHP and script-built action menus use `.cms-action-menu` with `popover="auto"` and `data-action-menu`. Triggers use `type="button"`, `popovertarget`, and `aria-haspopup="menu"`. Keep a menu beside its trigger inside the owning form; top-layer painting avoids clipping without reparenting controls out of their submission context.
 
 [The shared behavior](../panel/src/lib/action-menu.js) supplies expanded state, naming, keyboard movement, focus restoration, and placement. `data-align` accepts `start`, `end`, or `center`; `--width` changes the menu width. A trigger carrying `data-menu-inside` gets the menu inside its own box when there is room: centred, with the top edge at the trigger's middle so the first choice sits under a centred mark, or centred outright when the lower half is too short; a smaller trigger gets the usual placement below or above. Items can contain icons, text, and `.shortcut`; `hr` separates groups, native `disabled` or `aria-disabled="true"` marks unavailable actions, `.danger` destructive actions, and `.is-active` a selected choice.
 
 Activation closes the menu before the consumer handler runs, so opening a dialog or focusing new content is not undone by later cleanup. An item may be a submit button with a `form` attribute; its submitter name/value still reaches the server. `.cms-split-button` pairs a default action with alternatives; use a single menu trigger when there is no useful default action.
 
-These hooks describe the current shared behavior. If changing the markup, update its PHP and Svelte consumers together and verify the [keyboard behavior](panel-keyboard.md#action-menus).
+These hooks describe the current shared behavior. If changing the markup, update its PHP and JavaScript consumers together and verify the [keyboard behavior](panel-keyboard.md#action-menus).
 
 ## Shared shells and fields
 
 `.cms-modal` is a native dialog shared by server-rendered settings and bridge content. Its parts are `.modal-header`, `.modal-title`, `.modal-body`, and optional `.modal-footer`; `data-size` selects a size variant. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership, and focus, which matter independently of its appearance.
 
-`.cms-tabs` and [tabs.ts](../panel/src/behaviors/tabs.ts) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and Svelte adapters; put an accessible name on the action rather than its decorative SVG.
+`.cms-tabs` and [tabs.ts](../panel/src/behaviors/tabs.ts) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and JavaScript adapters; put an accessible name on the action rather than its decorative SVG.
 
 Field grids align neighboring controls while descriptions and errors remain associated with their own field. [Fallback previews](controls.md#content-language-and-fallback-previews) are display-only: visual experiments must preserve the distinction between a preview and the editable target value, including a usable focus path.
 

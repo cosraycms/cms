@@ -126,7 +126,7 @@ abstract class Panel
 	/**
 	 * The `panel` catalog for the active locale as the payload the panel's
 	 * verba runtime boots from. This domain holds exactly the strings the
-	 * Svelte panel uses (extracted by the JavascriptScanner), so the browser
+	 * panel scripts use (extracted by the JavascriptScanner), so the browser
 	 * never receives backend-only messages. Empty when no translator is
 	 * active (e.g. outside the request pipeline).
 	 *

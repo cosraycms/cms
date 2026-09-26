@@ -171,7 +171,7 @@ A field can select a one-off element with `Control::element('acme-picker', 'acme
 $cms->control('acme-map', 'acme-map-picker', 'map.js');
 ```
 
-Named controls resolve server-side; later registrations replace earlier ones, including built-ins. Hand-written ES modules are sufficient; Svelte is not required.
+Named controls resolve server-side; later registrations replace earlier ones, including built-ins. Hand-written ES modules are sufficient; cosray's own controls need neither a framework nor a build step.
 
 ### Module values
 

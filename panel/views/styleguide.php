@@ -221,7 +221,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 
 			<section class="section" id="sample-icons" data-section="icons">
 				<h2>Icons</h2>
-				<p class="note">Regular Bootstrap artwork shared with Svelte controls. Icons inherit text color and are decorative.</p>
+				<p class="note">Regular Bootstrap artwork shared with the element controls. Icons inherit text color and are decorative.</p>
 				<div class="sample">
 					<?php foreach (['plus', 'plus-circle', 'gear', 'three-dots-vertical', 'x-lg'] as $icon): ?>
 						<span><?= \Cosray\Panel\Icon::render($icon) ?> <?= escape($icon) ?></span>

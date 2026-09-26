@@ -58,7 +58,7 @@ $commands->add(new References($conn));
 // the standalone library runner has no application context.
 
 // i18n extraction. The `cosray` domain holds backend strings (PHP + Boiler
-// views); the `panel` domain holds the SSR/Svelte panel strings and is the one
+// views); the `panel` domain holds the panel scripts' strings and is the one
 // shipped to the browser as an inline catalog. Both scan disjoint sources, so
 // both claim the bare `__()` calls their own scanner finds. App-specific
 // schema extraction is registered from the app's commands.
