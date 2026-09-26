@@ -39,7 +39,6 @@ export default defineConfig({
 			input: {
 				richtext: path.resolve(root, 'src/elements/richtext.ts'),
 				media: path.resolve(root, 'src/elements/media.ts'),
-				reference: path.resolve(root, 'src/elements/reference.ts'),
 			},
 			output: {
 				assetFileNames: 'elements/[name][extname]',

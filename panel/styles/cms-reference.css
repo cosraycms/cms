@@ -1,0 +1,128 @@
+/* The node reference picker: a combobox over a list of picked rows, or a
+   single box that shows its node when the field takes one. */
+.cms-reference {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+
+	& .cms-reference-search,
+	& .control-wrap {
+		position: relative;
+	}
+
+	& .single-input:not([readonly]) {
+		padding-inline-end: calc(var(--cms-space-2-5) + 3.5rem);
+	}
+
+	& .single-input.has-selection::placeholder {
+		color: var(--cms-color-text);
+	}
+
+	& .single-tools {
+		position: absolute;
+		inset-block: 1px;
+		inset-inline-end: var(--cms-space-2-5);
+		display: flex;
+		align-items: center;
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.75rem;
+			height: 1.75rem;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--cms-color-text);
+			}
+		}
+	}
+}
+
+.cms-reference-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cms-reference-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.35rem 0.5rem;
+	border: 1px solid var(--cms-color-border);
+	border-radius: 0.25rem;
+	background: var(--cms-color-surface);
+}
+
+.cms-reference-title {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.cms-reference-type {
+	font-size: 0.8em;
+	opacity: 0.6;
+}
+
+.cms-reference-remove {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	font-size: 1.1em;
+	line-height: 1;
+	padding: 0 0.25rem;
+}
+
+.cms-reference-popup {
+	position: absolute;
+	z-index: 20;
+	left: 0;
+	right: 0;
+	margin-top: 0.15rem;
+	max-height: 20rem;
+	overflow-y: auto;
+	border: 1px solid var(--cms-color-border);
+	border-radius: 0.25rem;
+	background: var(--cms-color-surface);
+	box-shadow: var(--cms-shadow-md);
+}
+
+.cms-reference-results {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cms-reference-result {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	padding: 0.4rem 0.6rem;
+	border: 0;
+	background: transparent;
+	text-align: left;
+	cursor: pointer;
+
+	&.is-active,
+	&:hover {
+		background: var(--cms-color-hover);
+	}
+}
+
+.cms-reference-note {
+	padding: 0.4rem 0.6rem;
+	font-size: 0.85em;
+	color: var(--cms-color-text-muted);
+}

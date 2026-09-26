@@ -1,8 +1,7 @@
-import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { HostPayload } from '../../src/lib/host';
-import '../../src/elements/reference/ReferenceElement.svelte';
+import '../../src/elements/reference.js';
 
 vi.mock('$lib/locale', () => ({
 	__: (id: string, params?: { count: number }) => (params ? `${id}: ${params.count}` : id),
@@ -13,6 +12,9 @@ vi.mock('$lib/runtime', () => ({
 }));
 
 const fetchMock = vi.fn<typeof fetch>();
+
+// The element updates synchronously; a microtask lets pending promises land.
+const tick = () => Promise.resolve();
 
 function page(uids: string[], more = false): Response {
 	return Response.json({
