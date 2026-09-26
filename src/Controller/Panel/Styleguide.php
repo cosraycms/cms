@@ -720,7 +720,7 @@ final class Styleguide extends Panel
 			[
 				'type' => Builtin\Image::class,
 				'handle' => 'image',
-				'label' => 'Single image',
+				'label' => 'Image',
 				// Mirrors Blocks::blockTypeProperties(): one visible field, no label.
 				'labels' => false,
 				'fields' => [
