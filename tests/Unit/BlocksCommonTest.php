@@ -159,13 +159,13 @@ final class BlocksCommonTest extends RichtextOwnerTestCase
 
 	public function testCustomIconAndInterfaceTranslationReachTheCompleteDescriptor(): void
 	{
-		Verba::activate(new Translator('de', ['cosray' => self::root() . '/lang']));
+		Verba::activate(new Translator('de', ['blocks' => self::root() . '/tests/Fixtures/lang']));
 		try {
 			$props = $this->field('before')->control()->array()['props'];
 		} finally {
 			Verba::deactivate();
 		}
-		$this->assertSame('Überschrift', $props['blockTypes'][1]['label']);
+		$this->assertSame('heading (de)', $props['blockTypes'][1]['label']);
 		$this->assertSame('catalog-note', $props['blockTypes'][1]['handle']);
 		$this->assertSame(['id' => 'test:note', 'args' => ['size' => 20]], $props['blockTypes'][1]['icon']);
 		$this->assertNull($props['blockTypes'][0]['icon']);

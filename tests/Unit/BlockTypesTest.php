@@ -119,7 +119,7 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 			$handles,
 		);
 
-		Verba::activate(new Translator('de', ['cosray' => self::root() . '/lang']));
+		Verba::activate(new Translator('de', ['blocks' => self::root() . '/tests/Fixtures/lang']));
 
 		try {
 			$labels = array_column($field->control()->array()['props']['blockTypes'], 'label', 'handle');
@@ -127,8 +127,8 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 			Verba::deactivate();
 		}
 
-		$this->assertSame('Text', $labels['richtext']);
-		$this->assertSame('Überschrift', $labels['heading']);
+		$this->assertSame('richtext (de)', $labels['richtext']);
+		$this->assertSame('heading (de)', $labels['heading']);
 		$this->assertSame('Quote', $labels['quote-block']);
 	}
 

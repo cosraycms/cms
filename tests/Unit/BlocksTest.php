@@ -109,7 +109,7 @@ final class BlocksTest extends TestCase
 
 	public function testControlCarriesBlockTypesAndGrid(): void
 	{
-		Verba::activate(new Translator('de', ['cosray' => self::root() . '/lang']));
+		Verba::activate(new Translator('de', ['blocks' => self::root() . '/tests/Fixtures/lang']));
 
 		try {
 			$properties = $this->createBlocks()->properties();
@@ -126,9 +126,9 @@ final class BlocksTest extends TestCase
 		$this->assertSame(2, $control['props']['min']);
 		$this->assertSame('stack', $control['props']['responsive']);
 		$this->assertSame('richtext', $types[Builtin\RichText::class]['handle']);
-		$this->assertSame('Text', $types[Builtin\RichText::class]['label']);
+		$this->assertSame('richtext (de)', $types[Builtin\RichText::class]['label']);
 		$this->assertSame('heading', $types[Builtin\Heading::class]['handle']);
-		$this->assertSame('Überschrift', $types[Builtin\Heading::class]['label']);
+		$this->assertSame('heading (de)', $types[Builtin\Heading::class]['label']);
 		$this->assertSame(['text', 'level'], array_column($types[Builtin\Heading::class]['fields'], 'name'));
 		$this->assertSame([], $types[Builtin\Heading::class]['fieldsets']);
 		// Rich sub-fields arrive resolved to their element form.
