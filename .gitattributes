@@ -7,3 +7,12 @@
 /run export-ignore
 /docs/ export-ignore
 /tests/ export-ignore
+
+# The panel ships its browser files as they are; its dev tooling stays behind.
+/panel/.* export-ignore
+/panel/*.config.* export-ignore
+/panel/package.json export-ignore
+/panel/pnpm-*.yaml export-ignore
+/panel/scripts/ export-ignore
+/panel/tests/ export-ignore
+/panel/tsconfig.json export-ignore
