@@ -58,15 +58,31 @@ final class PanelClientTest extends TestCase
 
 		$this->assertTrue($client->immutable($version));
 		$this->assertFalse($client->immutable('0123456789ab'));
-		$this->assertFalse($this->client(debug: true)->immutable($version));
 	}
 
-	public function testAGitWorkingCopyIsAlwaysRevalidated(): void
+	public function testAGitWorkingCopyGetsARevisionOfItsFiles(): void
 	{
-		$client = $this->client();
 		$this->assertTrue(mkdir($this->root . '/.git'));
+		$before = $this->client()->version();
+		$this->write('panel/src/panel.js', 'export const edited = true;');
+		$client = $this->client();
 
-		$this->assertFalse($client->immutable($client->version()));
+		$this->assertNotSame($before, $client->version());
+		$this->assertTrue($client->immutable($client->version()));
+		$this->assertFalse($client->immutable($before));
+
+		// A second save within the same second and of the same size still counts.
+		$this->write('panel/src/panel.js', 'export const edited = null;');
+
+		$this->assertNotSame($client->version(), $this->client()->version());
+	}
+
+	public function testDebuggingRevisesWithTheFilesToo(): void
+	{
+		$before = $this->client(debug: true)->version();
+		$this->write('panel/styles/panel.css', 'body { color: red }');
+
+		$this->assertNotSame($before, $this->client(debug: true)->version());
 	}
 
 	public function testServesFilesFromThePanelDirectoriesOnly(): void

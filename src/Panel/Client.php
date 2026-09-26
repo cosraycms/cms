@@ -8,8 +8,11 @@ use Composer\InstalledVersions;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
+use FilesystemIterator;
 use JsonException;
 use OutOfBoundsException;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * The panel's browser-side files as they ship in the package: plain ES
@@ -49,11 +52,13 @@ final class Client
 	/**
 	 * The URL segment that changes with every installed Cosray revision:
 	 * the start of the commit Composer installed, or a hash of the version
-	 * for packages without a commit reference.
+	 * for packages without a commit reference. Files that change under that
+	 * commit, in a Git working copy such as a symlinked path repository or
+	 * while debugging, get a revision of their own contents instead.
 	 */
 	public function version(): string
 	{
-		return $this->version ??= self::revision();
+		return $this->version ??= $this->editable() ? $this->contents() : self::revision();
 	}
 
 	public function url(string $path = ''): string
@@ -64,18 +69,11 @@ final class Client
 	/**
 	 * Whether a response for a URL carrying `$version` may be cached forever.
 	 * Only the current revision qualifies, so a page rendered before an update
-	 * never pins new content under its old URL. A Git working copy, such as a
-	 * symlinked path repository, changes under the commit Composer recorded,
-	 * so it is revalidated like debug mode.
+	 * or an edit never pins new content under its old URL.
 	 */
 	public function immutable(string $version): bool
 	{
-		return (
-			$version === $this->version()
-				&& $version !== 'dev'
-				&& !$this->config->debug()
-				&& !file_exists(dirname($this->dir) . '/.git')
-		);
+		return $version === $this->version() && $version !== 'dev';
 	}
 
 	/**
@@ -271,6 +269,50 @@ final class Client
 		}
 
 		return $this->modules = $modules;
+	}
+
+	/** Whether the files may change without Composer installing anything. */
+	private function editable(): bool
+	{
+		return $this->config->debug() || file_exists(dirname($this->dir) . '/.git');
+	}
+
+	/**
+	 * A hash of every servable file's path, size and modification time: any
+	 * edit, addition or removal yields new URLs. Modification times count
+	 * whole seconds, so a file changed within the last two also adds its
+	 * contents; two saves in one second would otherwise share a revision.
+	 */
+	private function contents(): string
+	{
+		$files = [];
+		$recent = time() - 2;
+
+		foreach (self::DIRS as $dir) {
+			if (!is_dir($this->dir . '/' . $dir)) {
+				continue;
+			}
+
+			$paths = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
+				$this->dir . '/' . $dir,
+				FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME,
+			));
+
+			foreach ($paths as $path) {
+				$stat = stat((string) $path);
+
+				if ($stat === false) {
+					continue;
+				}
+
+				$file = "{$path}:{$stat['size']}:{$stat['mtime']}";
+				$files[] = $stat['mtime'] >= $recent ? $file . ':' . hash_file('xxh128', (string) $path) : $file;
+			}
+		}
+
+		sort($files);
+
+		return substr(sha1(implode("\n", $files)), 0, 12);
 	}
 
 	private static function revision(): string
