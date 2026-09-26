@@ -308,7 +308,7 @@ class Routes
 					->middleware($panelAuth);
 				$panel
 					->get(
-						'/assets/...slug',
+						'/assets/{version:[a-z0-9]{1,40}}/...slug',
 						[Panel\Assets::class, 'asset'],
 						'asset',
 					);

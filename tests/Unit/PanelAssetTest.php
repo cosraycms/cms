@@ -16,15 +16,26 @@ use Cosray\Tests\TestCase;
  */
 final class PanelAssetTest extends TestCase
 {
-	public function testAssetReturnsNotFoundForPathTraversal(): void
+	public function testClientReturnsNotFoundOutsideTheServedDirectories(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
 
-		$this->throws(HttpNotFound::class);
-		$panel->asset($this->request(), $this->factory(), '../composer.json');
+		foreach ([
+			'../composer.json',
+			'styles/../../composer.json',
+			'prettier.config.js',
+			'views/layer/document.php',
+		] as $slug) {
+			try {
+				$panel->asset($this->request(), $this->factory(), 'dev', $slug);
+				$this->fail("{$slug} was served");
+			} catch (HttpNotFound) {
+				$this->addToAssertionCount(1);
+			}
+		}
 	}
 
-	public function testAssetReturnsNotModifiedWhenEtagMatches(): void
+	public function testClientReturnsNotModifiedWhenEtagMatches(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
 		$file = self::root() . '/panel/styles/panel.css';
@@ -32,29 +43,57 @@ final class PanelAssetTest extends TestCase
 		$this->assertNotFalse($etag);
 		$request = new Request($this->psrRequest()->withHeader('If-None-Match', '"' . $etag . '"'));
 
-		$response = $panel->asset($request, $this->factory(), 'styles/panel.css');
+		$response = $panel->asset($request, $this->factory(), 'dev', 'styles/panel.css');
 
 		$this->assertSame(304, $response->getStatusCode());
-		$this->assertSame(['private, max-age=3600'], $response->getHeader('Cache-Control'));
+		$this->assertSame(['no-cache'], $response->getHeader('Cache-Control'));
 		$this->assertSame(['"' . $etag . '"'], $response->getHeader('ETag'));
 		$this->assertSame([], $response->getHeader('Content-Type'));
 	}
 
-	public function testAssetReturnsCssFileWithCacheHeaders(): void
+	public function testClientReturnsPackageFileRevalidatedForAnotherRevision(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
 		$file = self::root() . '/panel/styles/panel.css';
 		$etag = md5_file($file);
 		$this->assertNotFalse($etag);
 
-		$response = $panel->asset($this->request(), $this->factory(), 'styles/panel.css');
+		$response = $panel->asset($this->request(), $this->factory(), 'dev', 'styles/panel.css');
 
 		$this->assertSame(200, $response->getStatusCode());
 		$this->assertSame(['text/css'], $response->getHeader('Content-Type'));
-		$this->assertSame(['private, max-age=3600'], $response->getHeader('Cache-Control'));
+		$this->assertSame(['no-cache'], $response->getHeader('Cache-Control'));
 		$this->assertSame(['"' . $etag . '"'], $response->getHeader('ETag'));
 		$this->assertNotSame([], $response->getHeader('Last-Modified'));
 		$this->assertSame(file_get_contents($file), (string) $response->getBody());
+	}
+
+	public function testClientServesVendoredModulesAsJavascript(): void
+	{
+		$panel = new Assets($this->config(), $this->container(), $this->request());
+
+		$response = $panel->asset(
+			$this->request(),
+			$this->factory(),
+			'dev',
+			'modules/prosemirror-view/dist/index.js',
+		);
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(['text/javascript'], $response->getHeader('Content-Type'));
+	}
+
+	public function testClientServesTheIconSprite(): void
+	{
+		$panel = new Assets($this->config(), $this->container(), $this->request());
+
+		$response = $panel->asset($this->request(), $this->factory(), 'dev', 'icons.svg');
+		$sprite = (string) $response->getBody();
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(['image/svg+xml'], $response->getHeader('Content-Type'));
+		$this->assertSame(['"' . md5($sprite) . '"'], $response->getHeader('ETag'));
+		$this->assertStringContainsString('<symbol id="plus" ', $sprite);
 	}
 
 	public function testStaticAssetReturnsFileFromPanelAssetsDirectory(): void
