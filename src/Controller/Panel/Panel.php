@@ -23,6 +23,7 @@ use Cosray\Navigation;
 use Cosray\NavigationItem;
 use Cosray\NavLink;
 use Cosray\Node\Types;
+use Cosray\Panel\Client;
 use Cosray\Panel\Extras;
 use Cosray\Security\Policy;
 use Cosray\User;
@@ -40,6 +41,7 @@ abstract class Panel
 	protected const string AREA = 'content';
 
 	protected string $panelDir;
+	private ?Client $client = null;
 
 	public function __construct(
 		protected Config $config,
@@ -74,6 +76,7 @@ abstract class Panel
 			'account' => $this->account(),
 			'config' => $this->config,
 			'renderIcon' => $this->renderIcon(...),
+			'importMap' => $this->client()->importMap(),
 			'stylesheets' => $this->stylesheets($panelPath),
 			'scripts' => $this->scripts($panelPath),
 			'moduleScripts' => $this->moduleScripts($panelPath),
@@ -228,6 +231,11 @@ abstract class Panel
 		$scripts = $this->hasPanelStatic() ? ["{$panelPath}/static/panel.js"] : [];
 
 		return [...$scripts, ...$this->extras()->moduleScripts()];
+	}
+
+	protected function client(): Client
+	{
+		return $this->client ??= new Client($this->config);
 	}
 
 	private function extras(): Extras

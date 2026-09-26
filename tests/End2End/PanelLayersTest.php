@@ -53,6 +53,24 @@ final class PanelLayersTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//*[@hx-history-elt]', $html);
 	}
 
+	public function testTheDocumentMapsVendoredModulesToServedUrls(): void
+	{
+		$document = \Dom\HTMLDocument::createFromString($this->layerHtml(), LIBXML_NOERROR);
+		$script = $document->querySelector('script[type="importmap"]');
+		$this->assertNotNull($script);
+		$map = json_decode($script->textContent, true, flags: JSON_THROW_ON_ERROR);
+		$this->assertIsArray($map);
+
+		$url = $map['imports']['prosemirror-view'] ?? null;
+		$this->assertIsString($url);
+		$this->assertMatchesRegularExpression('~\A/cp/assets/[0-9a-z]+/modules/prosemirror-view/~', $url);
+
+		$response = $this->makeRequest('GET', $url);
+
+		$this->assertResponseOk($response);
+		$this->assertSame('text/javascript', $response->getHeaderLine('Content-Type'));
+	}
+
 	public function testNavigatingInsideAnAreaRendersTheContentRegionAlone(): void
 	{
 		$html = $this->layerHtml([

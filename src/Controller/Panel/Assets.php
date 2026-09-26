@@ -9,6 +9,7 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Cosray\Exception\RuntimeException;
+use Cosray\Panel\Client;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Util\Path;
 
@@ -28,9 +29,37 @@ final class Assets extends Panel
 		'map',
 	];
 
-	public function asset(Request $request, Factory $factory, string $slug): Response
+	/**
+	 * The panel's own browser files from the package. The version segment
+	 * only decides how long a response may be cached; any version serves the
+	 * installed files.
+	 */
+	public function asset(Request $request, Factory $factory, string $version, string $slug): Response
 	{
-		return $this->serve($request, $factory, $this->panelDir, $slug);
+		$client = $this->client();
+		$cacheControl = $client->immutable($version) ? 'public, max-age=31536000, immutable' : 'no-cache';
+
+		if ($slug === Client::SPRITE) {
+			$sprite = $client->sprite();
+			$etag = '"' . md5($sprite) . '"';
+
+			return (
+				$this->notModified($request, $factory, $cacheControl, $etag)
+					?? Response::create($factory)
+						->header('Cache-Control', $cacheControl)
+						->header('ETag', $etag)
+						->header('Content-Type', 'image/svg+xml')
+						->write($sprite)
+			);
+		}
+
+		$file = $client->file($slug);
+
+		if ($file === null) {
+			throw new HttpNotFound($request);
+		}
+
+		return $this->sendFile($request, $factory, $file, $cacheControl);
 	}
 
 	public function staticAsset(Request $request, Factory $factory, string $slug): Response
@@ -76,6 +105,11 @@ final class Assets extends Panel
 			throw new HttpNotFound($request);
 		}
 
+		return $this->sendFile($request, $factory, $file, $cacheControl);
+	}
+
+	private function sendFile(Request $request, Factory $factory, string $file, string $cacheControl): Response
+	{
 		$etag = md5_file($file);
 		$lastModified = filemtime($file);
 
@@ -84,17 +118,32 @@ final class Assets extends Panel
 		}
 
 		$etag = '"' . $etag . '"';
-		$response = Response::create($factory)
-			->header('Cache-Control', $cacheControl)
-			->header('ETag', $etag)
-			->header('Last-Modified', gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
-		$ifNoneMatch = array_map('trim', explode(',', $request->header('If-None-Match')));
+		$notModified = $this->notModified($request, $factory, $cacheControl, $etag);
+		$lastModified = gmdate('D, d M Y H:i:s', $lastModified) . ' GMT';
 
-		// Return 304 when the client already has this asset revision cached.
-		if (in_array('*', $ifNoneMatch, true) || in_array($etag, $ifNoneMatch, true)) {
-			return $response->status(304);
+		if ($notModified !== null) {
+			return $notModified->header('Last-Modified', $lastModified);
 		}
 
-		return $response->file($file);
+		return Response::create($factory)
+			->header('Cache-Control', $cacheControl)
+			->header('ETag', $etag)
+			->header('Last-Modified', $lastModified)
+			->file($file);
+	}
+
+	/** A 304 when the client already has this revision, null otherwise. */
+	private function notModified(Request $request, Factory $factory, string $cacheControl, string $etag): ?Response
+	{
+		$ifNoneMatch = array_map('trim', explode(',', $request->header('If-None-Match')));
+
+		if (!in_array('*', $ifNoneMatch, true) && !in_array($etag, $ifNoneMatch, true)) {
+			return null;
+		}
+
+		return Response::create($factory)
+			->header('Cache-Control', $cacheControl)
+			->header('ETag', $etag)
+			->status(304);
 	}
 }
