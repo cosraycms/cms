@@ -161,6 +161,27 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertStringNotContainsString('data-media-tile', $more);
 	}
 
+	public function testTheSearchAnswersMatchingAssetsForTheMenuPicker(): void
+	{
+		$image = $this->upload('e2e-search-photo.png', 'image/png');
+		$document = $this->upload('e2e-search-notes.pdf', 'application/pdf', 'file');
+		$this->upload('e2e-other-photo.png', 'image/png');
+
+		$all = $this->getJsonResponse($this->makeRequest('GET', '/cp/media/search', [
+			'query' => ['kind' => '', 'q' => 'e2e-search'],
+		]));
+
+		$this->assertEqualsCanonicalizing([$image, $document], array_column($all['assets'], 'uid'));
+
+		$images = $this->getJsonResponse($this->makeRequest('GET', '/cp/media/search', [
+			'query' => ['kind' => 'image', 'q' => 'e2e-search'],
+		]));
+
+		$this->assertSame([$image], array_column($images['assets'], 'uid'));
+		$this->assertSame('e2e-search-photo.png', $images['assets'][0]['filename']);
+		$this->assertSame('image', $images['assets'][0]['kind']);
+	}
+
 	public function testSavingMetaKeepsTheFormShapeAndConfirms(): void
 	{
 		$uid = $this->upload('e2e-save-photo.png', 'image/png');

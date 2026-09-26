@@ -287,6 +287,20 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		}
 	}
 
+	public function testTheAssetPickersSearchThePanelMediaSearch(): void
+	{
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu?add='));
+
+		$this->assertHtmlNodeExists(
+			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/cp/media/search?kind="]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/cp/media/search?kind=image"]',
+			$html,
+		);
+	}
+
 	public function testAddPaneForRootAndBelowAParent(): void
 	{
 		$this->createItem('add-parent', null, 1, [
