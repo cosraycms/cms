@@ -21,6 +21,12 @@ if ($part === 'tiles') {
 	return;
 }
 
+if ($part === 'picker') {
+	$this->insert('media/picker');
+
+	return;
+}
+
 $this->layout('layer/main');
 
 $screen = $this->unwrap($screen);

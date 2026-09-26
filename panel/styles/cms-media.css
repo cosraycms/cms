@@ -521,3 +521,31 @@
 		padding-inline: var(--cms-space-4);
 	}
 }
+
+/* The library embedded in a control's dialog. */
+.cms-library {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cms-space-4);
+	min-width: 0;
+}
+
+.cms-library-search {
+	display: flex;
+	gap: var(--cms-space-2);
+
+	& input {
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+}
+
+.cms-library-grid {
+	max-height: 50vh;
+	overflow-y: auto;
+}
+
+.cms-library-empty {
+	color: var(--cms-color-text-muted);
+	padding: var(--cms-space-4) 0;
+}

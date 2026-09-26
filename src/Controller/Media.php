@@ -132,28 +132,12 @@ class Media
 
 		return Response::create($this->factory)->json([
 			'ok' => true,
-			'assets' => array_map($this->libraryItem(...), $page->assets),
+			'assets' => array_map(Library::item(...), $page->assets),
 			'page' => $page->page,
 			'more' => $page->more,
 			'total' => $page->total,
 			'counts' => $page->counts,
 		]);
-	}
-
-	protected function libraryItem(Asset $asset): array
-	{
-		return [
-			'uid' => $asset->uid,
-			'filename' => $asset->filename,
-			'url' => $asset->path(),
-			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
-			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
-			'kind' => $asset->kind,
-			'mime' => $asset->mime,
-			'bytes' => $asset->bytes,
-			'width' => $asset->width,
-			'height' => $asset->height,
-		];
 	}
 
 	/**
