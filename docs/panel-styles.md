@@ -103,7 +103,7 @@ Constraints to consider when trying another layout:
 - Container queries fit components whose available width changes with surrounding rails; viewport queries fit shell-level decisions. These are useful defaults, not a restriction on additional breakpoints.
 - Shared pane tokens coordinate edges where screens meet the frame. Changing the shell may require changing their consumers together.
 
-[scroll.ts](../panel/src/behaviors/scroll.ts) preserves collection-list position across a tree swap. Account for navigation, expanded trees, and focus restoration when changing scroll ownership.
+[scroll.js](../panel/src/behaviors/scroll.js) preserves collection-list position across a tree swap. Account for navigation, expanded trees, and focus restoration when changing scroll ownership.
 
 ## Action menus
 
@@ -119,7 +119,7 @@ These hooks describe the current shared behavior. If changing the markup, update
 
 `.cms-modal` is a native dialog shared by server-rendered settings and bridge content. Its parts are `.modal-header`, `.modal-title`, `.modal-body`, and optional `.modal-footer`; `data-size` selects a size variant. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership, and focus, which matter independently of its appearance.
 
-`.cms-tabs` and [tabs.ts](../panel/src/behaviors/tabs.ts) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and JavaScript adapters; put an accessible name on the action rather than its decorative SVG.
+`.cms-tabs` and [tabs.js](../panel/src/behaviors/tabs.js) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and JavaScript adapters; put an accessible name on the action rather than its decorative SVG.
 
 Field grids align neighboring controls while descriptions and errors remain associated with their own field. [Fallback previews](controls.md#content-language-and-fallback-previews) are display-only: visual experiments must preserve the distinction between a preview and the editable target value, including a usable focus path.
 

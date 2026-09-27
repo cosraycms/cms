@@ -12,7 +12,7 @@ Avoid overriding essential browser shortcuts where possible. There is a current 
 
 ## Menu tree
 
-[menu-keys.ts](../panel/src/behaviors/menu-keys.ts) and [menu-tree.ts](../panel/src/behaviors/menu-tree.ts) implement the current tree behavior. It has one tab stop; links and actions inside a row are reached through its commands rather than adding a tab stop per control.
+[menu-keys.js](../panel/src/behaviors/menu-keys.js) and [menu-tree.js](../panel/src/behaviors/menu-tree.js) implement the current tree behavior. It has one tab stop; links and actions inside a row are reached through its commands rather than adding a tab stop per control.
 
 | Key | Action |
 | --- | --- |

@@ -141,7 +141,7 @@ Failed saves preserve the mounted form. Error-summary items carry Sire paths:
 </button>
 ```
 
-[errors.ts](../panel/src/behaviors/errors.ts) resolves paths to form controls, falling back to containing element hosts for nested values. It marks fields and reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing clears field marks; the summary remains until another save.
+[errors.js](../panel/src/behaviors/errors.js) resolves paths to form controls, falling back to containing element hosts for nested values. It marks fields and reveals hidden targets by switching locale, opening the relevant inspector/tab/dialog, or expanding an entry. Editing clears field marks; the summary remains until another save.
 
 Current styling hooks include `.cms-field[data-invalid='true']`, `.cms-field-error`, and `.has-error`. Native controls receive accessible invalid/error associations. Custom elements currently receive field-level marking rather than a standardized per-sub-value error API.
 
