@@ -61,5 +61,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		hx-get="<?= escape($next) ?>"
 		hx-target="this"
 		hx-swap="outerHTML"
-		hx-push-url="false"><?= escape(__('common:load-more')) ?></a>
+		hx-push-url="false"
+		data-media-keep-file><?= escape(__('common:load-more')) ?></a>
 <?php endif ?>

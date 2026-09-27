@@ -75,6 +75,9 @@ final class PanelMediaPageTest extends End2EndTestCase
 			$images,
 		);
 		$this->assertHtmlNodeExists('//a[@class="cms-media-reset"][@href="/cp/media"]', $images);
+		// Both take the selected file from the URL at request time (behaviors/media.js).
+		$this->assertHtmlNodeExists('//form[@class="search"][@data-media-keep-file]', $images);
+		$this->assertHtmlNodeExists('//*[@data-media-rail]/form[@data-media-keep-file]', $images);
 
 		$search = $this->html('/cp/media', ['q' => 'notes']);
 

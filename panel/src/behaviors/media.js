@@ -242,6 +242,44 @@ function change(event) {
 	}
 }
 
+/**
+ * A tile click swaps only the detail and replaces the URL, so the filters,
+ * search and paging still carry the file that was selected when the page
+ * rendered. Requests marked to keep the file take the selection from the
+ * URL instead.
+ *
+ * @param {Event} event
+ */
+function keepFile(event) {
+	const source = event.target;
+	const detail =
+		/** @type {CustomEvent<{ ctx?: { request?: { method?: string, action?: string, body?: unknown } } }>} */ (
+			event
+		).detail;
+	const request = detail?.ctx?.request;
+
+	if (
+		!(source instanceof Element) ||
+		!source.closest('[data-media-keep-file]') ||
+		request?.method !== 'GET' ||
+		!(request.body instanceof FormData) ||
+		typeof request.action !== 'string'
+	) {
+		return;
+	}
+
+	const file = new URLSearchParams(location.search).get('file') ?? '';
+	const url = new URL(request.action, document.baseURI);
+	url.searchParams.delete('file');
+	request.action = url.pathname + url.search;
+
+	if (file === '') {
+		request.body.delete('file');
+	} else {
+		request.body.set('file', file);
+	}
+}
+
 /** @returns {() => void} */
 export function install() {
 	const events = new AbortController();
@@ -255,6 +293,7 @@ export function install() {
 	}
 
 	document.addEventListener('htmx:after:swap', mark, options);
+	document.addEventListener('htmx:config:request', keepFile, options);
 
 	return () => events.abort();
 }

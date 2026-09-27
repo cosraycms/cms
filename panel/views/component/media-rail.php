@@ -20,6 +20,7 @@ $listing = $this->unwrap($listing ?? null);
 <div id="media-rail"<?= $oob ? ' hx-swap-oob="true"' : '' ?> data-media-rail>
 <?php if ($screen !== null && $listing !== null): ?>
 	<?php
+
 	$kindLabels = [
 		'image' => __('media:images'),
 		'video' => __('media:videos'),
@@ -40,7 +41,8 @@ $listing = $this->unwrap($listing ?? null);
 		hx-get="<?= escape($screen->path) ?>"
 		hx-trigger="change"
 		hx-target="#main"
-		hx-push-url="true">
+		hx-push-url="true"
+		data-media-keep-file>
 		<?php if ($screen->q !== ''): ?>
 			<input type="hidden" name="q" value="<?= escape($screen->q) ?>" />
 		<?php endif ?>
@@ -53,7 +55,8 @@ $listing = $this->unwrap($listing ?? null);
 				<a
 					class="cms-media-reset"
 					href="<?= escape($screen->url(['kind' => [], 'q' => '', 'range' => ''])) ?>"
-					hx-target="#main"><?= escape(__('common:reset')) ?></a>
+					hx-target="#main"
+					data-media-keep-file><?= escape(__('common:reset')) ?></a>
 			<?php endif ?>
 		</div>
 

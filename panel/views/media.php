@@ -67,7 +67,7 @@ unset($search['page']);
 		<div class="cms-media-workspace">
 			<section class="cms-media-pane cms-dropzone" aria-label="<?= escape(__('media:title')) ?>" data-media-drop>
 				<div class="toolbar">
-					<form class="search" method="get" action="<?= escape($screen->path) ?>">
+					<form class="search" method="get" action="<?= escape($screen->path) ?>" data-media-keep-file>
 						<?php foreach ($search as $name => $value): ?>
 							<input type="hidden" name="<?= escape($name) ?>" value="<?= escape($value) ?>" />
 						<?php endforeach ?>
@@ -81,7 +81,7 @@ unset($search['page']);
 							placeholder="<?= escape(__('media:search-filename')) ?>" />
 					</form>
 					<?php if ($screen->q !== ''): ?>
-						<a class="cms-button secondary" href="<?= escape($screen->url(['q' => ''])) ?>"><?= escape(
+						<a class="cms-button secondary" href="<?= escape($screen->url(['q' => ''])) ?>" data-media-keep-file><?= escape(
 							__('common:reset'),
 						) ?></a>
 					<?php endif ?>

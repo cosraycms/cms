@@ -16,6 +16,12 @@ function screen(detail = ''): HTMLElement {
 		<div data-media>
 			<button type="button" data-media-upload><span data-media-upload-label>Upload</span></button>
 			<input type="file" multiple hidden data-media-upload-input />
+			<form class="search" method="get" action="/cp/media" data-media-keep-file>
+				<input type="hidden" name="kind" value="image" />
+				<input type="hidden" name="file" value="a" />
+				<input type="search" name="q" value="" />
+			</form>
+			<a href="/cp/media?kind=image&amp;file=a" data-media-keep-file>Reset</a>
 			<section class="cms-dropzone" data-media-drop>
 				<div data-media-grid>
 					<a data-media-tile="a" class="cms-asset-tile active" href="?file=a"></a>
@@ -83,6 +89,51 @@ describe('media tiles', () => {
 		expect(document.querySelector('[data-media-tile="b"]')!.classList.contains('active')).toBe(
 			true,
 		);
+	});
+});
+
+describe('screen requests', () => {
+	function configure(source: Element, action: string, body: FormData) {
+		const request = { method: 'GET', action, body };
+		source.dispatchEvent(
+			new CustomEvent('htmx:config:request', { bubbles: true, detail: { ctx: { request } } }),
+		);
+
+		return request;
+	}
+
+	it('carries the file the URL holds now, not the one the page rendered with', () => {
+		screen('b');
+		history.replaceState(null, '', '/cp/media?kind=image&file=b');
+		const form = document.querySelector<HTMLFormElement>('form.search')!;
+
+		const request = configure(form, '/cp/media', new FormData(form));
+
+		expect(request.body.get('file')).toBe('b');
+		expect(request.body.get('kind')).toBe('image');
+		expect(request.action).toBe('/cp/media');
+	});
+
+	it('drops the file from a link once nothing is selected', () => {
+		screen();
+		history.replaceState(null, '', '/cp/media?kind=image');
+		const link = document.querySelector<HTMLAnchorElement>('a[data-media-keep-file]')!;
+
+		const request = configure(link, link.getAttribute('href')!, new FormData());
+
+		expect(request.body.has('file')).toBe(false);
+		expect(request.action).toBe('/cp/media?kind=image');
+	});
+
+	it('leaves a tile request alone', () => {
+		screen('b');
+		history.replaceState(null, '', '/cp/media?file=b');
+		const tile = document.querySelector<HTMLAnchorElement>('[data-media-tile="a"]')!;
+
+		const request = configure(tile, '/cp/media?file=a', new FormData());
+
+		expect(request.action).toBe('/cp/media?file=a');
+		expect(request.body.has('file')).toBe(false);
 	});
 });
 
