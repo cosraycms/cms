@@ -121,6 +121,37 @@ describe('code editing', () => {
 		expect(fallback()).toBeNull();
 	});
 
+	it('shows the fallback once the translation is cleared', async () => {
+		const { element } = await code({
+			value: { en: 'english', de: 'x' },
+			field: { name: 'snippet', translate: true },
+			locale: 'de',
+		});
+		const fallback = () => element.querySelector('.cms-code-editor-fallback');
+
+		expect(fallback()).toBeNull();
+		input(element).value = '';
+		input(element).dispatchEvent(new InputEvent('input', { inputType: 'deleteContentBackward' }));
+
+		await vi.waitFor(() => expect(fallback()?.textContent).toContain('english'));
+	});
+
+	it('lets the browser require a value when the field does', async () => {
+		const { element } = await code({
+			value: { zxx: '' },
+			field: { name: 'snippet', required: true },
+		});
+		const form = document.createElement('form');
+		document.body.append(form);
+		form.append(element);
+		await Promise.resolve();
+
+		expect(input(element).required).toBe(true);
+		expect(form.checkValidity()).toBe(false);
+		type(element, 'x');
+		expect(form.checkValidity()).toBe(true);
+	});
+
 	it('offers the field syntaxes and falls back to the first for an unknown choice', async () => {
 		const { element, changes } = await code({
 			value: { zxx: '' },

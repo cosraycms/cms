@@ -6,7 +6,6 @@
 /** @import { PrismEditor } from 'prism-code-editor' */
 /** @import { LocaleMap, Meta } from '../types/data' */
 /** @import { ControlLocales } from '../lib/control.js' */
-/** @import { ResolvedFallback } from '../lib/fallback.js' */
 
 import { createEditor } from 'prism-code-editor';
 import { defaultKeymap, editHistory, editorCommands } from 'prism-code-editor/commands';
@@ -43,8 +42,6 @@ export class CosrayCode extends HTMLElement {
 	#map = null;
 	/** @type {LocaleMap<string>} */
 	#syntax = {};
-	/** @type {ResolvedFallback<string> | null} */
-	#fallback = null;
 	#focused = false;
 	// Language loads are async; a newer mount or syntax choice wins.
 	#mounts = 0;
@@ -192,10 +189,6 @@ export class CosrayCode extends HTMLElement {
 		this.#editor = null;
 		this.#hidePreview();
 		map[active] ??= '';
-		this.#fallback =
-			this.field.translate && map[active] === ''
-				? resolveFallback(map, active, this.locales?.all ?? [])
-				: null;
 		this.#showPreview();
 		const syntax = this.#syntax[ZXX];
 		const language = await loadCodeLanguage(syntax);
@@ -227,6 +220,9 @@ export class CosrayCode extends HTMLElement {
 			matchBrackets(false),
 			highlightBracketPairs(),
 		);
+		// The host submits the value; the browser still guards a required
+		// field through the editor's own textarea, as the mirror used to.
+		this.#editor.textarea.required = this.field.required ?? false;
 
 		if (syntax !== this.#syntax[ZXX]) {
 			void this.#applySyntax();
@@ -270,12 +266,17 @@ export class CosrayCode extends HTMLElement {
 	}
 
 	// The fallback shows behind an empty, unfocused editor as a read-only
-	// rendering with its origin as a badge.
+	// rendering with its origin as a badge. It is resolved on every call:
+	// a value empties out through editing, not only at mount.
 	#showPreview() {
+		const map = this.#edits();
 		const active = editedLocale(this.field, this.#locale);
-		const fallback = this.#fallback;
+		const fallback =
+			this.field.translate && !this.#focused && (map[active] ?? '') === ''
+				? resolveFallback(map, active, this.locales?.all ?? [])
+				: null;
 
-		if (fallback === null || this.#edits()[active] !== '' || this.#focused) {
+		if (fallback === null) {
 			this.#hidePreview();
 
 			return;
