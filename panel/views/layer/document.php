@@ -32,13 +32,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 
-	<?php // Element control modules and script-built icons resolve against these
-
-	// bases. They have to be set
-
-	// before the panel module runs: a boosted navigation upgrades the custom
-	// elements in the swapped markup as they are inserted, which is before any
-	// swap handler could read the editor payload. ?>
+	<?php /* The runtime module reads these bases once, when the first panel
+	 * module loads; element controls resolve their modules and the script-built
+	 * icons against them. They are inline globals of the document because a
+	 * boosted navigation upgrades the custom elements in the swapped markup as
+	 * it is inserted, before any swap handler could pass them along. */ ?>
 	<script>window.COSRAY_BASE_PATH = <?= json_encode(
 		(string) $panelBase,
 		$jsonFlags,
