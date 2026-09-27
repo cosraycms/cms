@@ -268,8 +268,12 @@ function onChange(event) {
 
 	const form = select.closest('form');
 
+	if (!form) {
+		return;
+	}
+
 	/** @type {NodeListOf<HTMLElement>} */ (
-		form?.querySelectorAll('[data-menu-section], [data-menu-section-hide]')
+		form.querySelectorAll('[data-menu-section], [data-menu-section-hide]')
 	).forEach((section) => {
 		const show = section.dataset.menuSection;
 

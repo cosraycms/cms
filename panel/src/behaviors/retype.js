@@ -110,9 +110,13 @@ function filled(row, fresh) {
 	const base = fresh ? prefix(fresh.content) : '';
 	const defaults = /** @type {Map<string, string>} */ (new Map());
 
-	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
-		fresh?.content.querySelectorAll('input, textarea')
-	).forEach((control) => defaults.set(control.name.slice(base.length), control.value));
+	if (fresh) {
+		for (const control of /** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
+			fresh.content.querySelectorAll('input, textarea')
+		)) {
+			defaults.set(control.name.slice(base.length), control.value);
+		}
+	}
 
 	for (const control of /** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
 		row.querySelectorAll('input, textarea')

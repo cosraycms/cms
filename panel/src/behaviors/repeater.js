@@ -522,10 +522,14 @@ function fields(row) {
 		new Map()
 	);
 
+	if (!body) {
+		return result;
+	}
+
 	// Own fields only: a nested repeater's rows and the meta dialogs are
 	// not part of the summary, matching the server-side rule.
 	/** @type {NodeListOf<HTMLInputElement | HTMLTextAreaElement>} */ (
-		body?.querySelectorAll(TEXT_LIKE)
+		body.querySelectorAll(TEXT_LIKE)
 	).forEach((input) => {
 		const field = fieldOf(input);
 

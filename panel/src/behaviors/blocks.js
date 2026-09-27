@@ -1070,13 +1070,15 @@ export function mirrorSpacing(control) {
 		return;
 	}
 
-	if (!key) {
+	const owner = control.closest('[data-meta-owner]');
+
+	if (!key || !owner) {
 		return;
 	}
 
-	/** @type {NodeListOf<HTMLElement>} */ (
-		control.closest('[data-meta-owner]')?.querySelectorAll('.cms-blocks-editor')
-	).forEach((container) => applySpacing(container, CONTAINER_SPACING[key], control.value));
+	/** @type {NodeListOf<HTMLElement>} */ (owner.querySelectorAll('.cms-blocks-editor')).forEach(
+		(container) => applySpacing(container, CONTAINER_SPACING[key], control.value),
+	);
 }
 
 /**

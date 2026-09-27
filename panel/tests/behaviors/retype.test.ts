@@ -264,6 +264,19 @@ describe('changing a block’s type', () => {
 		expect(rows().map(type)).toEqual([TEXT, TEXT]);
 	});
 
+	it('retypes a block whose own type no longer has a template', () => {
+		const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+		const { rows } = editor([{ ...text('q', at(1, 1, 12), 'Quoted'), type: QUOTE }]);
+		[...document.querySelectorAll('template[data-repeater-template]')]
+			.find((candidate) => candidate.getAttribute('data-repeater-template') === QUOTE)!
+			.remove();
+
+		retype(rows()[0], TEXT);
+
+		expect(confirm).toHaveBeenCalledOnce();
+		expect(rows().map(type)).toEqual([TEXT]);
+	});
+
 	it('replaces a part within its split, which keeps its parts', () => {
 		vi.spyOn(window, 'confirm').mockReturnValue(true);
 		const { rows } = editor([
