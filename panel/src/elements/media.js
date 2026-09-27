@@ -70,9 +70,9 @@ function carriesFiles(event) {
 
 class MediaControl extends HTMLElement {
 	/** @type {LocaleMap<FileItem[]> | null | undefined} */
-	value = {};
+	#value = {};
 	/** @type {Meta | undefined} */
-	meta;
+	#meta;
 	/** @type {MediaField} */
 	field;
 	node = '';
@@ -142,6 +142,43 @@ class MediaControl extends HTMLElement {
 			this.#render();
 		} else if (this.#translate) {
 			for (const follow of [...this.#followers, ...this.#dialogs]) follow(locale);
+		}
+	}
+
+	/** @type {LocaleMap<FileItem[]> | null | undefined} */
+	get value() {
+		return this.#value;
+	}
+
+	// The host assigns the value before connecting. A later assignment
+	// replaces the edits, as the contract allows, and reports no change.
+	set value(value) {
+		this.#value = value;
+
+		if (this.#started) {
+			this.#map = structuredClone(value ?? {});
+			this.#selected = null;
+
+			if (this.#rendered) {
+				this.#render();
+			}
+		}
+	}
+
+	/** @type {Meta | undefined} */
+	get meta() {
+		return this.#meta;
+	}
+
+	set meta(meta) {
+		this.#meta = meta;
+
+		if (this.#started) {
+			this.#fieldMeta = this.#type === 'image' && meta ? structuredClone(meta) : undefined;
+
+			if (this.#rendered) {
+				this.#render();
+			}
 		}
 	}
 

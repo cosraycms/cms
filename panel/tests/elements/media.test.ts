@@ -298,6 +298,22 @@ describe('single image', () => {
 });
 
 describe('file rows', () => {
+	it('takes a value assigned after connecting as the edits without reporting', async () => {
+		const { element, changes } = await file();
+
+		element.assets = {
+			...element.assets,
+			other: { filename: 'other.pdf', url: '/media/other.pdf', kind: 'file' },
+		};
+		element.value = { zxx: [{ uid: 'other' }] };
+		await tick();
+
+		expect(
+			Array.from(element.querySelectorAll('.cms-file-row .filename')).map((n) => n.textContent),
+		).toEqual(['other.pdf']);
+		expect(changes).not.toHaveBeenCalled();
+	});
+
 	it('shows each file with its type icon or thumbnail, its link, its title and its size', async () => {
 		const { element } = await media('cosray-file', {
 			value: {
