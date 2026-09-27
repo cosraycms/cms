@@ -96,6 +96,22 @@ class Cms
 		);
 	}
 
+	/**
+	 * The script tag for the dev server's live reload, or an empty string.
+	 * `celema/server` only sets the script URL while running with
+	 * `--watch`, so layouts can include it unconditionally.
+	 */
+	public function liveReload(): string
+	{
+		$url = getenv('CELEMA_LIVE_RELOAD');
+
+		if (!is_string($url) || $url === '') {
+			return '';
+		}
+
+		return '<script src="' . htmlspecialchars($url, ENT_QUOTES) . '" defer></script>';
+	}
+
 	public function nodeFactory(): Factory
 	{
 		return $this->nodeFactory;

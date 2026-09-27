@@ -90,13 +90,13 @@ return $commands->runner();
 - `i18n()` registers synchronization and status commands for a translation domain, scanning source paths and schema labels. Call it per domain when needed.
 - `add()` accepts instances, class names, or keyed factories for commands needing custom scalar arguments.
 
-With `--watch`, both server commands reload open pages when a file matching the `watch` patterns changes. Pages opt in by including the live reload script in the site's base layout; `CELEMA_LIVE_RELOAD` is only set while the dev server watches, so the snippet renders nothing in production. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns and ports.
+With `--watch`, both server commands reload open pages when a file matching the `watch` patterns changes. Pages opt in by including the live reload script in the site's base layout, before `</body>`:
 
 ```php
-<?php if ($liveReload = getenv('CELEMA_LIVE_RELOAD')): ?>
-    <script src="<?= htmlspecialchars($liveReload) ?>" defer></script>
-<?php endif ?>
+<?= $cms->liveReload() ?>
 ```
+
+It renders nothing unless the dev server is watching, so it can stay in production layouts. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns and ports.
 
 Commands can inject `Cms`, `Context`, `Config`, `Database`, `Locales`, and `Cosray\Node\Writer`. They run with the default content locale and a Verba translator but without an HTTP request or session. Use `Context::withLocale()` for locale-specific work.
 
