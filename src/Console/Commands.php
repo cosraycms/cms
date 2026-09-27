@@ -11,7 +11,6 @@ use Celema\Quma\Commands as QumaCommands;
 use Celema\Quma\Connection;
 use Celema\Server\FrankenPhp;
 use Celema\Server\Server;
-use Celema\Server\Setup;
 use Celema\Verba\Command\StatusCommand;
 use Celema\Verba\Command\SyncCommand;
 use Celema\Verba\Tool\Domain;
@@ -105,17 +104,20 @@ final class Commands
 			return $this;
 		}
 
-		$watch ??= Setup::DEFAULT_WATCH;
-		$public = $this->app->config->path->public;
+		$args = [
+			'docroot' => $this->app->config->path->public,
+			'port' => $port,
+			'routePrefix' => $routePrefix,
+		];
+
+		// Without patterns, the server's own default applies.
+		if ($watch !== null) {
+			$args['watch'] = $watch;
+		}
 
 		$this->commands->add([
-			Server::class => static fn(): Server => new Server($public, $port, $routePrefix, $watch),
-			FrankenPhp::class => static fn(): FrankenPhp => new FrankenPhp(
-				$public,
-				$port,
-				$routePrefix,
-				$watch,
-			),
+			Server::class => static fn(): Server => new Server(...$args),
+			FrankenPhp::class => static fn(): FrankenPhp => new FrankenPhp(...$args),
 		]);
 
 		return $this;

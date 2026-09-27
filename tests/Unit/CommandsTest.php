@@ -125,6 +125,29 @@ final class CommandsTest extends TestCase
 		$this->assertInstanceOf(Server::class, $servers['server']);
 		$this->assertInstanceOf(FrankenPhp::class, $servers['frankenphp']);
 	}
+
+	public function testServerFallsBackToTheServerWatchDefaults(): void
+	{
+		$config = $this->config([
+			'db.dsn' => 'sqlite::memory:',
+			'error.enabled' => false,
+		]);
+		$app = new App($config, $this->factory(), new Router(), $this->container());
+		$app->boot();
+		$commands = new Commands($app);
+		$commands->server();
+		$names = [];
+
+		foreach ($commands->commands()->entries() as $entry) {
+			if (in_array($entry->meta->full(), ['server', 'frankenphp'], strict: true)) {
+				$this->assertIsObject($entry->command());
+				$names[] = $entry->meta->full();
+			}
+		}
+
+		sort($names);
+		$this->assertSame(['frankenphp', 'server'], $names);
+	}
 }
 
 #[Command('test:scoped')]
