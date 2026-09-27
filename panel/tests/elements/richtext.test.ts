@@ -68,6 +68,26 @@ afterEach(async () => {
 	await tick();
 });
 
+describe('source view', () => {
+	it('returns to the content through a button that never submits the form', async () => {
+		const { element } = await richtext({ en: doc('Hello'), de: null });
+		await editSource(element, '<p>Hello</p>');
+		const source = element.querySelector('textarea')!;
+		const back = Array.from(element.querySelectorAll('button')).find(
+			(button) => button.textContent?.trim() === 'richtext:show-content',
+		);
+
+		expect(source.closest('.hide')).toBeNull();
+		// jsdom runs no implicit submission, so the type is the check.
+		expect(back?.type).toBe('button');
+
+		back!.click();
+		await tick();
+
+		expect(source.closest('.hide')).not.toBeNull();
+	});
+});
+
 describe('richtext fallback previews', () => {
 	it('keeps the target empty when focusing and switching away from shared content', async () => {
 		const { element, changes } = await richtext({ zxx: doc('Shared text'), en: null, de: null });

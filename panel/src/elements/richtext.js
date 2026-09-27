@@ -852,6 +852,7 @@ export class CosrayRichtext extends HTMLElement {
 		const editing = [];
 		const back = create('div', 'richtext-extras cms-richtext-extras-source');
 		const backButton = document.createElement('button');
+		backButton.type = 'button';
 		backButton.className = 'richtext-source-btn cms-richtext-source-btn-compact';
 		const backLabel = create('span', 'cms-richtext-source-label');
 		backLabel.textContent = __('richtext:show-content');
