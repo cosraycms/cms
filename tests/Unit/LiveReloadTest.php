@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Core\Request;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Tests\TestCase;
@@ -33,6 +34,17 @@ final class LiveReloadTest extends TestCase
 		);
 	}
 
+	public function testUsesTheHostThePageWasRequestedUnder(): void
+	{
+		putenv('CELEMA_LIVE_RELOAD=http://localhost:19830/celema-live-reload.js');
+		$_SERVER['HTTP_HOST'] = '192.168.1.20:1983';
+
+		$this->assertSame(
+			'<body><script src="http://192.168.1.20:19830/celema-live-reload.js" defer></script></body>',
+			$this->render($this->request()),
+		);
+	}
+
 	public function testRendersNothingOtherwise(): void
 	{
 		putenv('CELEMA_LIVE_RELOAD');
@@ -40,10 +52,10 @@ final class LiveReloadTest extends TestCase
 		$this->assertSame('<body></body>', $this->render());
 	}
 
-	private function render(): string
+	private function render(?Request $request = null): string
 	{
 		$cms = new Cms(
-			new Context($this->db(), null, $this->config(), $this->container(), $this->factory()),
+			new Context($this->db(), $request, $this->config(), $this->container(), $this->factory()),
 			self::blockServices(),
 		);
 		$renderer = new Renderer(

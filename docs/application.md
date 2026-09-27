@@ -96,7 +96,7 @@ With `--watch`, both server commands reload open pages when a file matching the 
 <?= $cms->liveReload() ?>
 ```
 
-It renders nothing unless the dev server is watching, so it can stay in production layouts. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns and ports.
+It renders nothing unless the dev server is watching, so it can stay in production layouts. The script URL uses the host the page was requested under, so live reload also works on other devices or in virtual machines when the server listens there, for example with `--host=0.0.0.0`. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns and ports.
 
 Commands can inject `Cms`, `Context`, `Config`, `Database`, `Locales`, and `Cosray\Node\Writer`. They run with the default content locale and a Verba translator but without an HTTP request or session. Use `Context::withLocale()` for locale-specific work.
 

@@ -100,6 +100,10 @@ class Cms
 	 * The script tag for the dev server's live reload, or an empty string.
 	 * `celema/server` only sets the script URL while running with
 	 * `--watch`, so layouts can include it unconditionally.
+	 *
+	 * The URL gets the host the page was requested under, so the script
+	 * also loads on other devices, in virtual machines, and under local
+	 * domain names, as long as the dev server listens there.
 	 */
 	public function liveReload(): string
 	{
@@ -109,7 +113,31 @@ class Cms
 			return '';
 		}
 
+		$host = $this->context->request?->uri()->getHost() ?? '';
+		$url = $host === '' ? $url : self::withHost($url, $host);
+
 		return '<script src="' . htmlspecialchars($url, ENT_QUOTES) . '" defer></script>';
+	}
+
+	private static function withHost(string $url, string $host): string
+	{
+		$parts = parse_url($url);
+
+		if ($parts === false) {
+			return $url;
+		}
+
+		if (str_contains($host, ':') && !str_starts_with($host, '[')) {
+			$host = "[{$host}]";
+		}
+
+		return (
+			($parts['scheme'] ?? 'http')
+				. "://{$host}"
+				. (isset($parts['port']) ? ":{$parts['port']}" : '')
+				. ($parts['path'] ?? '')
+				. (isset($parts['query']) ? "?{$parts['query']}" : '')
+		);
 	}
 
 	public function nodeFactory(): Factory
