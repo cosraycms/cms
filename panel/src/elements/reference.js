@@ -193,6 +193,7 @@ export class CosrayReference extends HTMLElement {
 			if (!this.isConnected) {
 				this.#cancel();
 				this.#labels?.abort();
+				this.#events.abort();
 			}
 		});
 	}

@@ -408,6 +408,23 @@ describe('reference browsing', () => {
 	);
 });
 
+describe('removal', () => {
+	it('drops its document listener once removed for good', async () => {
+		const listeners = vi.spyOn(document, 'addEventListener');
+		const { element } = await picker();
+		const options = listeners.mock.calls.find(([type]) => type === 'pointerdown')?.[2];
+		const signal = typeof options === 'object' ? options.signal : undefined;
+		listeners.mockRestore();
+
+		expect(signal?.aborted).toBe(false);
+
+		element.remove();
+		await settle();
+
+		expect(signal?.aborted).toBe(true);
+	});
+});
+
 describe('single references', () => {
 	it('replaces a selected reference directly without emitting an empty intermediate value', async () => {
 		fetchMock.mockResolvedValueOnce(page(['a']));
