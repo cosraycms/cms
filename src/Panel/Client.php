@@ -17,7 +17,8 @@ use RecursiveIteratorIterator;
 /**
  * The panel's browser-side files as they ship in the package: plain ES
  * modules, stylesheets, icons and the committed third-party modules under
- * `panel/`. Nothing is built, so the package tree is served as is under a
+ * `panel/`, plus the modules other Composer packages ship, such as verba's
+ * runtime. Nothing is built, so the files are served as they are under a
  * URL that carries the installed revision, which lets browsers cache every
  * file for good until the next update.
  */
@@ -29,6 +30,9 @@ final class Client
 	private const array DIRS = ['src', 'styles', 'modules', 'icons'];
 	private const array EXTENSIONS = ['js', 'css', 'svg'];
 
+	/** The URL segment for modules that Composer packages ship. */
+	private const string COMPOSER = 'composer';
+
 	/**
 	 * A static `import … from '…'`, `import '…'` or `export … from '…'`. The
 	 * served modules are formatted, unminified source, where statements start
@@ -39,8 +43,11 @@ final class Client
 	public readonly string $dir;
 	private ?string $version = null;
 
-	/** @var array{imports: array<string, string>, scripts: list<string>}|null */
+	/** @var array{imports: array<string, string>, composer: array<string, string>, scripts: list<string>}|null */
 	private ?array $modules = null;
+
+	/** @var array<string, string>|null */
+	private ?array $composerDirs = null;
 
 	public function __construct(
 		private readonly Config $config,
@@ -50,15 +57,17 @@ final class Client
 	}
 
 	/**
-	 * The URL segment that changes with every installed Cosray revision:
-	 * the start of the commit Composer installed, or a hash of the version
-	 * for packages without a commit reference. Files that change under that
-	 * commit, in a Git working copy such as a symlinked path repository or
-	 * while debugging, get a revision of their own contents instead.
+	 * The URL segment that changes with every installed revision: the start
+	 * of the commit Composer installed for Cosray, or a hash of the version
+	 * for a package without a commit reference, hashed together with the
+	 * revisions of the packages the Composer-shipped modules come from.
+	 * Files that change under that commit, in a Git working copy such as a
+	 * symlinked path repository or while debugging, get a revision of their
+	 * own contents instead.
 	 */
 	public function version(): string
 	{
-		return $this->version ??= $this->editable() ? $this->contents() : self::revision();
+		return $this->version ??= $this->editable() ? $this->contents() : $this->revision();
 	}
 
 	public function url(string $path = ''): string
@@ -84,7 +93,7 @@ final class Client
 	{
 		$segments = explode('/', $slug);
 
-		if (count($segments) < 2 || !in_array($segments[0], self::DIRS, true)) {
+		if (count($segments) < 2 || !in_array($segments[0], [...self::DIRS, self::COMPOSER], true)) {
 			return null;
 		}
 
@@ -96,6 +105,10 @@ final class Client
 
 		if (!in_array(strtolower(pathinfo($slug, PATHINFO_EXTENSION)), self::EXTENSIONS, true)) {
 			return null;
+		}
+
+		if ($segments[0] === self::COMPOSER) {
+			return $this->composerFile(implode('/', array_slice($segments, 1)));
 		}
 
 		try {
@@ -110,19 +123,24 @@ final class Client
 	}
 
 	/**
-	 * The import map for the vendored third-party modules, resolved to
-	 * versioned URLs.
+	 * The import map for the vendored third-party modules and the modules
+	 * Composer packages ship, resolved to versioned URLs.
 	 *
 	 * @return array{imports: array<string, string>}
 	 */
 	public function importMap(): array
 	{
-		return [
-			'imports' => array_map(
-				fn(string $path): string => $this->url('modules/' . $path),
-				$this->modules()['imports'],
-			),
-		];
+		$imports = array_map(
+			fn(string $path): string => $this->url('modules/' . $path),
+			$this->modules()['imports'],
+		);
+		$this->composerDirs();
+
+		foreach ($this->modules()['composer'] as $specifier => $path) {
+			$imports[$specifier] = $this->url(self::COMPOSER . '/' . $path);
+		}
+
+		return ['imports' => $imports];
 	}
 
 	/**
@@ -156,6 +174,7 @@ final class Client
 		}
 
 		$imports = $this->modules()['imports'];
+		$composer = $this->modules()['composer'];
 		$seen = [$start => true];
 		$queue = [$start];
 		$urls = [];
@@ -171,20 +190,18 @@ final class Client
 						dirname($file) . '/' . $specifier,
 					),
 					isset($imports[$specifier]) => realpath($root . '/modules/' . $imports[$specifier]),
+					isset($composer[$specifier]) => $this->composerFile($composer[$specifier]) ?? false,
 					default => false,
 				};
+				$path = $target === false ? null : $this->served($target, $root);
 
-				if (
-					$target === false
-					|| isset($seen[$target])
-					|| !str_starts_with($target, $root . DIRECTORY_SEPARATOR)
-				) {
+				if ($target === false || $path === null || isset($seen[$target])) {
 					continue;
 				}
 
 				$seen[$target] = true;
 				$queue[] = $target;
-				$urls[] = $this->url(str_replace(DIRECTORY_SEPARATOR, '/', substr($target, strlen($root) + 1)));
+				$urls[] = $this->url($path);
 			}
 		}
 
@@ -232,7 +249,7 @@ final class Client
 		return '<svg xmlns="http://www.w3.org/2000/svg">' . implode('', $symbols) . "</svg>\n";
 	}
 
-	/** @return array{imports: array<string, string>, scripts: list<string>} */
+	/** @return array{imports: array<string, string>, composer: array<string, string>, scripts: list<string>} */
 	private function modules(): array
 	{
 		if ($this->modules !== null) {
@@ -250,12 +267,14 @@ final class Client
 			}
 		}
 
-		$modules = ['imports' => [], 'scripts' => []];
+		$modules = ['imports' => [], 'composer' => [], 'scripts' => []];
 
-		if (is_array($data) && is_array($data['imports'] ?? null)) {
-			foreach ($data['imports'] as $specifier => $path) {
-				if (is_string($specifier) && is_string($path)) {
-					$modules['imports'][$specifier] = $path;
+		foreach (['imports', 'composer'] as $key) {
+			if (is_array($data) && is_array($data[$key] ?? null)) {
+				foreach ($data[$key] as $specifier => $path) {
+					if (is_string($specifier) && is_string($path)) {
+						$modules[$key][$specifier] = $path;
+					}
 				}
 			}
 		}
@@ -269,6 +288,92 @@ final class Client
 		}
 
 		return $this->modules = $modules;
+	}
+
+	/**
+	 * The directory each module a Composer package ships is served from, as
+	 * the real path keyed by its path below the `composer` URL segment:
+	 * `celema/verba/js/src` for `celema/verba/js/src/index.js`. Only that
+	 * directory is served, never the rest of the package.
+	 *
+	 * @return array<string, string>
+	 */
+	private function composerDirs(): array
+	{
+		if ($this->composerDirs !== null) {
+			return $this->composerDirs;
+		}
+
+		$dirs = [];
+
+		foreach ($this->modules()['composer'] as $specifier => $path) {
+			$segments = explode('/', $path);
+
+			if (count($segments) < 3 || array_intersect($segments, ['', '.', '..']) !== []) {
+				throw new RuntimeException("Invalid panel module path {$path} for {$specifier}");
+			}
+
+			$package = $segments[0] . '/' . $segments[1];
+
+			try {
+				$installed = InstalledVersions::getInstallPath($package);
+			} catch (OutOfBoundsException) {
+				$installed = null;
+			}
+
+			$file = $installed === null ? false : realpath($installed . '/' . implode('/', array_slice($segments, 2)));
+
+			if ($file === false || !is_file($file)) {
+				throw new RuntimeException(
+					"The panel module {$specifier} needs {$path}, which the installed {$package} lacks; "
+						. "run `composer update {$package}`",
+				);
+			}
+
+			$dirs[dirname($path)] = dirname($file);
+		}
+
+		return $this->composerDirs = $dirs;
+	}
+
+	/** The file a path below the `composer` URL segment names, if served. */
+	private function composerFile(string $path): ?string
+	{
+		if (strtolower(pathinfo($path, PATHINFO_EXTENSION)) !== 'js') {
+			return null;
+		}
+
+		foreach ($this->composerDirs() as $prefix => $dir) {
+			if (!str_starts_with($path, $prefix . '/')) {
+				continue;
+			}
+
+			try {
+				return Path::inside($dir, substr($path, strlen($prefix) + 1), checkIsFile: true);
+			} catch (RuntimeException) {
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	/** The URL path below the revision a real file is served under, if any. */
+	private function served(string $file, string $root): ?string
+	{
+		if (str_starts_with($file, $root . DIRECTORY_SEPARATOR)) {
+			return str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen($root) + 1));
+		}
+
+		foreach ($this->composerDirs() as $prefix => $dir) {
+			if (str_starts_with($file, $dir . DIRECTORY_SEPARATOR)) {
+				$rest = str_replace(DIRECTORY_SEPARATOR, '/', substr($file, strlen($dir) + 1));
+
+				return self::COMPOSER . '/' . $prefix . '/' . $rest;
+			}
+		}
+
+		return null;
 	}
 
 	/** Whether the files may change without Composer installing anything. */
@@ -287,14 +392,18 @@ final class Client
 	{
 		$files = [];
 		$recent = time() - 2;
+		$dirs = [
+			...array_map(fn(string $dir): string => $this->dir . '/' . $dir, self::DIRS),
+			...array_values($this->composerDirs()),
+		];
 
-		foreach (self::DIRS as $dir) {
-			if (!is_dir($this->dir . '/' . $dir)) {
+		foreach ($dirs as $dir) {
+			if (!is_dir($dir)) {
 				continue;
 			}
 
 			$paths = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(
-				$this->dir . '/' . $dir,
+				$dir,
 				FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_PATHNAME,
 			));
 
@@ -315,11 +424,34 @@ final class Client
 		return substr(sha1(implode("\n", $files)), 0, 12);
 	}
 
-	private static function revision(): string
+	/** Cosray's installed revision, combined with those of the module packages. */
+	private function revision(): string
+	{
+		$revision = self::installed('cosray/cms');
+		$packages = [];
+
+		foreach (array_keys($this->composerDirs()) as $prefix) {
+			$packages[] = implode('/', array_slice(explode('/', $prefix), 0, 2));
+		}
+
+		if ($revision === 'dev' || $packages === []) {
+			return $revision;
+		}
+
+		$parts = [$revision];
+
+		foreach (array_unique($packages) as $package) {
+			$parts[] = $package . '@' . self::installed($package);
+		}
+
+		return substr(sha1(implode("\n", $parts)), 0, 12);
+	}
+
+	private static function installed(string $package): string
 	{
 		try {
-			$reference = InstalledVersions::getReference('cosray/cms');
-			$version = InstalledVersions::getPrettyVersion('cosray/cms');
+			$reference = InstalledVersions::getReference($package);
+			$version = InstalledVersions::getPrettyVersion($package);
 		} catch (OutOfBoundsException) {
 			return 'dev';
 		}

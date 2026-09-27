@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Composer\InstalledVersions;
 use Cosray\Exception\RuntimeException;
 use Cosray\Panel\Client;
 use Cosray\Tests\TestCase;
@@ -161,8 +162,10 @@ final class PanelClientTest extends TestCase
 		);
 		$this->write(
 			'panel/src/behaviors/rows.js',
-			"import {\n\tturn,\n} from '../lib/turn.js';\nimport { t } from 'verba';\nimport { gone } from 'unmapped';\n",
+			"import {\n\tturn,\n} from '../lib/turn.js';\nimport { t } from 'verba';\nimport { gone } from 'unmapped';\n"
+				. "import '../../../outside.js';\n",
 		);
+		$this->write('outside.js', 'export {};');
 		$this->write('panel/src/lib/turn.js', "export { again } from './boot.js';\n");
 		$this->write('panel/src/lib/boot.js', "import { install } from '../behaviors/rows.js';\n");
 		$this->write('panel/src/elements/editor.js', "import './heavy.js';\n");
@@ -181,6 +184,83 @@ final class PanelClientTest extends TestCase
 			]),
 			$client->preloads(),
 		);
+	}
+
+	public function testServesTheModulesComposerPackagesShip(): void
+	{
+		$this->writeComposerModules(['@celema/verba' => 'celema/verba/js/src/index.js']);
+		$client = $this->client();
+		$src = realpath((string) InstalledVersions::getInstallPath('celema/verba') . '/js/src');
+
+		$this->assertSame(
+			['imports' => ['@celema/verba' => $client->url('composer/celema/verba/js/src/index.js')]],
+			$client->importMap(),
+		);
+		$this->assertSame($src . '/translator.js', $client->file('composer/celema/verba/js/src/translator.js'));
+
+		// Only the entry's directory, only scripts.
+		foreach ([
+			'composer/celema/verba/js/package.json',
+			'composer/celema/verba/js/README.md',
+			'composer/celema/verba/js/src/missing.js',
+			'composer/celema/verba/js/src/theme.css',
+			'composer/celema/verba/src/Translator.php',
+			'composer/celema/verba/js/src/../package.json',
+			'composer/acme/other/js/src/index.js',
+			'composer/celema/verba',
+		] as $slug) {
+			$this->assertNull($client->file($slug), $slug);
+		}
+	}
+
+	public function testPreloadsFollowImportsIntoComposerModules(): void
+	{
+		$this->write('panel/src/panel.js', "import { __ } from '@celema/verba';\n");
+		$this->writeComposerModules(['@celema/verba' => 'celema/verba/js/src/index.js']);
+		$client = $this->client();
+		$preloads = $client->preloads();
+
+		$this->assertContains($client->url('composer/celema/verba/js/src/index.js'), $preloads);
+		$this->assertContains($client->url('composer/celema/verba/js/src/translator.js'), $preloads);
+	}
+
+	public function testAModuleMissingFromItsComposerPackageFailsLoudly(): void
+	{
+		$this->writeComposerModules(['@acme/gone' => 'acme/gone/js/index.js']);
+
+		$this->throws(RuntimeException::class, 'run `composer update acme/gone`');
+		$this->client()->importMap();
+	}
+
+	public function testAComposerModuleOutsideAPackageDirectoryFailsLoudly(): void
+	{
+		$this->writeComposerModules(['@acme/loose' => 'acme/../loose.js']);
+
+		$this->throws(RuntimeException::class, 'Invalid panel module path');
+		$this->client()->importMap();
+	}
+
+	public function testTheRevisionCoversComposerModules(): void
+	{
+		$without = $this->client()->version();
+		$this->writeComposerModules(['@celema/verba' => 'celema/verba/js/src/index.js']);
+
+		if ($without !== 'dev') {
+			$this->assertNotSame($without, $this->client()->version());
+		}
+
+		// In a working copy, an edit to the package's files counts too.
+		$this->assertTrue(mkdir($this->root . '/.git'));
+		$file = (string) realpath((string) InstalledVersions::getInstallPath('celema/verba') . '/js/src/index.js');
+		$mtime = (int) filemtime($file);
+		$before = $this->client()->version();
+
+		try {
+			$this->assertTrue(touch($file, $mtime - 100));
+			$this->assertNotSame($before, $this->client()->version());
+		} finally {
+			touch($file, $mtime);
+		}
 	}
 
 	public function testSpriteTurnsEveryIconIntoASymbol(): void
@@ -205,6 +285,12 @@ final class PanelClientTest extends TestCase
 	private function client(array $settings = [], bool $debug = false): Client
 	{
 		return new Client($this->config($settings, $debug), $this->root . '/panel');
+	}
+
+	/** @param array<string, string> $modules */
+	private function writeComposerModules(array $modules): void
+	{
+		$this->write('panel/modules/importmap.json', (string) json_encode(['composer' => $modules]));
 	}
 
 	private function write(string $path, string $content): void

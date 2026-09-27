@@ -84,6 +84,21 @@ final class PanelAssetTest extends TestCase
 		$this->assertSame(['text/javascript'], $response->getHeader('Content-Type'));
 	}
 
+	public function testClientServesComposerShippedModulesAsJavascript(): void
+	{
+		$panel = new Assets($this->config(), $this->container(), $this->request());
+
+		$response = $panel->asset(
+			$this->request(),
+			$this->factory(),
+			'dev',
+			'composer/celema/verba/js/src/index.js',
+		);
+
+		$this->assertSame(200, $response->getStatusCode());
+		$this->assertSame(['text/javascript'], $response->getHeader('Content-Type'));
+	}
+
 	public function testClientServesTheIconSprite(): void
 	{
 		$panel = new Assets($this->config(), $this->container(), $this->request());
@@ -108,7 +123,8 @@ final class PanelAssetTest extends TestCase
 		$this->assertSame([$client->url('modules/htmx.org/dist/htmx.js')], $context['scripts']);
 		$this->assertSame([$client->url('src/panel.js')], $context['moduleScripts']);
 		$this->assertContains($client->url('src/behaviors/blocks.js'), $context['modulePreloads']);
-		$this->assertContains($client->url('modules/@celema/verba/dist/index.js'), $context['modulePreloads']);
+		// verba's runtime comes from its Composer package, not from modules/.
+		$this->assertContains($client->url('composer/celema/verba/js/src/index.js'), $context['modulePreloads']);
 	}
 
 	public function testTheDevServerServesOnlyTheStylesheet(): void

@@ -1,6 +1,5 @@
 {
 	"imports": {
-		"@celema/verba": "@celema/verba/dist/index.js",
 		"orderedmap": "orderedmap/dist/index.js",
 		"prism-code-editor": "prism-code-editor/dist/index.js",
 		"prism-code-editor/commands": "prism-code-editor/dist/extensions/commands/index.js",
@@ -41,11 +40,13 @@
 		"sortablejs": "sortablejs/modular/sortable.esm.js",
 		"w3c-keyname": "w3c-keyname/index.js"
 	},
+	"composer": {
+		"@celema/verba": "celema/verba/js/src/index.js"
+	},
 	"scripts": [
 		"htmx.org/dist/htmx.js"
 	],
 	"packages": {
-		"@celema/verba": "0.3.0",
 		"htmx.org": "4.0.0",
 		"orderedmap": "2.1.1",
 		"prism-code-editor": "5.4.0",

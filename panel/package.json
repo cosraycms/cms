@@ -15,7 +15,6 @@
 		"modules:check": "node scripts/modules.mjs --check"
 	},
 	"dependencies": {
-		"@celema/verba": "^0.3.0",
 		"htmx.org": "4.0.0",
 		"prism-code-editor": "^5.4.0",
 		"prosemirror-commands": "^1.7.2",
@@ -42,6 +41,9 @@
 		"vitest": "^4.1.11"
 	},
 	"cosray": {
+		"composerModules": {
+			"@celema/verba": "celema/verba/js/src/index.js"
+		},
 		"classicScripts": [
 			"htmx.org/dist/htmx.js"
 		],

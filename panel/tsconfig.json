@@ -15,7 +15,11 @@
 		"module": "esnext",
 		"target": "esnext",
 		"lib": ["esnext", "DOM", "DOM.Iterable"],
-		"types": ["node"]
+		"types": ["node"],
+		// Modules a Composer package ships (package.json#cosray.composerModules).
+		"paths": {
+			"@celema/verba": ["../vendor/celema/verba/js/src/index.js"]
+		}
 	},
 	"include": [
 		"vite.config.ts",

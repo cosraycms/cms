@@ -3,12 +3,6 @@
 version = 1
 
 [[annotations]]
-path = ["@celema/verba/**"]
-precedence = "closest"
-SPDX-FileCopyrightText = "2026-present Celema developers and contributors"
-SPDX-License-Identifier = "MIT"
-
-[[annotations]]
 path = ["htmx.org/**"]
 precedence = "closest"
 SPDX-FileCopyrightText = "Big Sky Software"

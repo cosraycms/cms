@@ -11,7 +11,13 @@
 // package stylesheets styles/ imports by their path in modules/, and the
 // classic scripts listed in package.json#cosray. Every entry's package has
 // to be a runtime dependency; transitive packages come along through the
-// import graph. Plain .js files in src/ are served as they are, so their
+// import graph.
+//
+// A specifier listed in package.json#cosray.composerModules comes from a
+// Composer package instead, such as verba's runtime from celema/verba. PHP
+// serves its directory from the installed package, so nothing is copied:
+// the import map lists it under `composer`, and the check only verifies
+// that the file exists and imports nothing outside its directory. Plain .js files in src/ are served as they are, so their
 // imports also have to be ones a browser resolves: mapped packages and
 // relative paths to existing files, no aliases.
 
@@ -22,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { init, parse } from 'es-module-lexer';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const vendor = path.join(path.dirname(root), 'vendor');
 const target = path.join(root, 'modules');
 const manifest = readJson(path.join(root, 'package.json'));
 const config = manifest.cosray ?? {};
@@ -90,7 +97,18 @@ function collect() {
 		imports.set(specifier, mapped);
 	}
 
+	const composer = new Map(
+		Object.entries(config.composerModules ?? {}).map(([specifier, target]) => [
+			specifier,
+			composerModule(specifier, target),
+		]),
+	);
+
 	for (const specifier of entries()) {
+		if (composer.has(specifier)) {
+			continue;
+		}
+
 		const name = packageName(specifier);
 
 		if (!Object.hasOwn(manifest.dependencies ?? {}, name)) {
@@ -150,7 +168,52 @@ function collect() {
 		}
 	}
 
-	return { packages, files, imports, scripts };
+	return { packages, files, imports, scripts, composer };
+}
+
+/**
+ * Checks a module a Composer package ships, given as `vendor/package/…/file.js`
+ * below `vendor/`. PHP serves only the entry's directory, so every import in
+ * its graph has to be a relative file inside it.
+ */
+function composerModule(specifier, target) {
+	if (
+		!/^[a-z0-9_.-]+\/[a-z0-9_.-]+\/(?:[^/]+\/)*[^/]+\.js$/.test(target) ||
+		target.includes('..')
+	) {
+		throw new Failure(`${specifier} maps to ${target}; expected vendor/package/path/file.js`);
+	}
+
+	const entry = path.join(vendor, target);
+
+	if (!isFile(entry)) {
+		throw new Failure(
+			`${specifier} maps to ${target}, which vendor/ lacks; update the Composer package`,
+		);
+	}
+
+	const dir = path.dirname(fs.realpathSync(entry));
+	const queue = [fs.realpathSync(entry)];
+	const seen = new Set(queue);
+
+	while (queue.length > 0) {
+		const file = queue.shift();
+
+		for (const imported of moduleImports(file)) {
+			const next = isRelative(imported) ? path.resolve(path.dirname(file), imported) : null;
+
+			if (next === null || !next.startsWith(dir + path.sep) || !isFile(next)) {
+				throw new Failure(`${specifier}: ${file} imports ${imported}, outside what PHP serves`);
+			}
+
+			if (!seen.has(next)) {
+				seen.add(next);
+				queue.push(next);
+			}
+		}
+	}
+
+	return target;
 }
 
 /** Bare specifiers imported by the panel's own source. */
@@ -444,6 +507,7 @@ function write(result, dir) {
 
 	const importmap = {
 		imports: Object.fromEntries([...result.imports].sort(([a], [b]) => a.localeCompare(b))),
+		composer: Object.fromEntries([...result.composer].sort(([a], [b]) => a.localeCompare(b))),
 		scripts: [...result.scripts].sort(),
 		packages: Object.fromEntries(packages.map((owner) => [owner.name, owner.version])),
 	};
