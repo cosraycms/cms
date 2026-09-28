@@ -104,7 +104,7 @@ final class PanelDashboardTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/cp/media" and @hx-target="#frame" and contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Media files"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="2"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="3.0 KB used"]]',
+			'//a[@href="/panel/media" and @hx-target="#frame" and contains(concat(" ", normalize-space(@class), " "), " card ")][span[contains(concat(" ", normalize-space(@class), " "), " label ") and normalize-space(.)="Media files"]][strong[contains(concat(" ", normalize-space(@class), " "), " value ") and normalize-space(.)="2"]][span[contains(concat(" ", normalize-space(@class), " "), " note ") and normalize-space(.)="3.0 KB used"]]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
@@ -160,7 +160,7 @@ final class PanelDashboardTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists(
-			'//form[@id="node-editor-form"][@action="/cp/node/dashboard-link?from=dashboard"]',
+			'//form[@id="node-editor-form"][@action="/panel/node/dashboard-link?from=dashboard"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
@@ -193,24 +193,24 @@ final class PanelDashboardTest extends End2EndTestCase
 	{
 		$this->app = $this->createApp(['panel.dashboard' => false]);
 
-		$response = $this->makeRequest('GET', '/cp');
+		$response = $this->makeRequest('GET', '/panel');
 		$this->assertSame(303, $response->getStatusCode());
-		$this->assertSame('/cp/collection/test-articles', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/collection/test-articles', $response->getHeaderLine('Location'));
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles');
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles');
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 
-		$this->assertHtmlNodeMissing('//*[@id="area-nav"]/a[@href="/cp"]', $html);
+		$this->assertHtmlNodeMissing('//*[@id="area-nav"]/a[@href="/panel"]', $html);
 		$this->assertHtmlNodeExists(
-			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/cp/collection/test-articles"]',
+			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/panel/collection/test-articles"]',
 			$html,
 		);
 	}
 
 	private function html(): string
 	{
-		$response = $this->makeRequest('GET', '/cp');
+		$response = $this->makeRequest('GET', '/panel');
 		$this->assertResponseOk($response);
 
 		return $this->getHtmlResponse($response);

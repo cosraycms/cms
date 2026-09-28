@@ -12,7 +12,6 @@ use Cosray\App;
 $root = dirname(__DIR__);
 $app = App::create($root, [
     'app.name' => 'mycms',
-    'panel.path' => '/cp',
     'db.sql' => ["{$root}/db/sql"],
 ]);
 $app->config->requireEnv(['DATABASE_URL', 'APP_SECRET']);
@@ -35,7 +34,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `path.assets` | Originals below `path.public`, also their URL path; defaults to `/assets` |
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
-| `panel.path` | Panel URL path; defaults to `/cp` |
+| `panel.path` | Panel URL path; defaults to `/panel` |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 
@@ -205,7 +204,7 @@ Optionally let the web server deliver the panel files directly:
 php run panel:publish
 ```
 
-The command copies the browser files from the installed packages and generates the icon sprite at `{path.public}{panel.path}/assets/{revision}/` (by default, `public/cp/assets/{revision}/`). It includes the Composer-provided browser modules, but not PHP views, package configuration, or plugin assets. No new settings or URL changes are needed; `app.url_prefix` does not add a filesystem directory.
+The command copies the browser files from the installed packages and generates the icon sprite at `{path.public}{panel.path}/assets/{revision}/` (by default, `public/panel/assets/{revision}/`). It includes the Composer-provided browser modules, but not PHP views, package configuration, or plugin assets. No new settings or URL changes are needed; `app.url_prefix` does not add a filesystem directory.
 
 Run it after `composer install` or `composer update` in deployment, using the same configuration and package files as the web application. A complete revision is published at once. Repeating the command verifies an existing publication without overwriting it; a conflicting or incomplete directory causes an error. Older revisions and unrelated application files are left untouched. Remove obsolete revision directories separately when they are no longer needed for open browser tabs or rollbacks. Publishing is intended for production installs; during development, PHP serves edits without needing another publish step.
 

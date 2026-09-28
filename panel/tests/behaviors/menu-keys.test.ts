@@ -19,12 +19,12 @@ function press(key: string, init: KeyboardEventInit = {}): void {
 /** The kebab as the tree renders it: one form per direction. */
 function kebab(uid: string, disabled: string[]): string {
 	return `<button type="button" class="kebab" tabindex="-1" popovertarget="${uid}-actions">Actions</button><div id="${uid}-actions" popover="auto" data-action-menu>
-		<a data-menu-add="before" href="/cp/menus/main?before=${uid}"></a>
-		<a data-menu-add="after" href="/cp/menus/main?after=${uid}"></a>
-		<a data-menu-add="child" href="/cp/menus/main?add=${uid}"></a>
+		<a data-menu-add="before" href="/panel/menus/main?before=${uid}"></a>
+		<a data-menu-add="after" href="/panel/menus/main?after=${uid}"></a>
+		<a data-menu-add="child" href="/panel/menus/main?add=${uid}"></a>
 		${['up', 'down', 'in', 'out']
 			.map(
-				(direction) => `<form method="post" action="/cp/menus/main/item/${uid}/move">
+				(direction) => `<form method="post" action="/panel/menus/main/item/${uid}/move">
 					<input type="hidden" name="direction" value="${direction}" />
 					<button type="submit"${disabled.includes(direction) ? ' disabled' : ''}></button>
 				</form>`,
@@ -44,7 +44,7 @@ beforeEach(() => {
 			<li class="menu-node" role="treeitem" aria-level="1" aria-expanded="true"
 				tabindex="-1" data-uid="parent">
 				<div class="menu-card">
-					<a class="text" tabindex="-1" href="/cp/menus/main?item=parent"></a>
+					<a class="text" tabindex="-1" href="/panel/menus/main?item=parent"></a>
 					${kebab('parent', ['up', 'in', 'out'])}
 				</div>
 				<ul class="menu-children" role="group">

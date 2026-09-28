@@ -8,10 +8,10 @@ afterEach(() => {
 
 describe('module resolution', () => {
 	it('serves cosray-shipped elements as modules from the package', () => {
-		configureRuntime({ assetsBase: '/cp/assets/0123456789ab' });
+		configureRuntime({ assetsBase: '/panel/assets/0123456789ab' });
 
-		expect(moduleUrl('cosray:code')).toBe('/cp/assets/0123456789ab/src/elements/code.js');
-		expect(moduleUrl('cosray:media')).toBe('/cp/assets/0123456789ab/src/elements/media.js');
+		expect(moduleUrl('cosray:code')).toBe('/panel/assets/0123456789ab/src/elements/code.js');
+		expect(moduleUrl('cosray:media')).toBe('/panel/assets/0123456789ab/src/elements/media.js');
 	});
 
 	it('passes full URLs through untouched', () => {
@@ -24,8 +24,8 @@ describe('module resolution', () => {
 	});
 
 	it('follows a reconfigured panel base and normalizes its trailing slash', () => {
-		configureRuntime({ panelBase: '/cp' });
+		configureRuntime({ panelBase: '/panel' });
 
-		expect(moduleUrl('acme-shop/map.js')).toBe('/cp/vendor/acme-shop/map.js');
+		expect(moduleUrl('acme-shop/map.js')).toBe('/panel/vendor/acme-shop/map.js');
 	});
 });

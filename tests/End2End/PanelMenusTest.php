@@ -81,23 +81,23 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testTheMenusAreaAppearsForAdminsOnly(): void
 	{
-		$admin = $this->getHtmlResponse($this->makeRequest('GET', '/cp'));
+		$admin = $this->getHtmlResponse($this->makeRequest('GET', '/panel'));
 		$this->assertHtmlNodeExists(
-			'//a[@href="/cp/menus" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Menus"]',
+			'//a[@href="/panel/menus" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Menus"]',
 			$admin,
 		);
 
 		$this->authenticateAs('editor');
-		$editor = $this->getHtmlResponse($this->makeRequest('GET', '/cp'));
-		$this->assertHtmlNodeMissing('//a[@href="/cp/menus"]', $editor);
+		$editor = $this->getHtmlResponse($this->makeRequest('GET', '/panel'));
+		$this->assertHtmlNodeMissing('//a[@href="/panel/menus"]', $editor);
 	}
 
 	public function testEditorsAreForbidden(): void
 	{
 		$this->authenticateAs('editor');
 
-		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus'));
-		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/menus'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'sneaky', 'description' => ['en' => 'Nope']],
 		]));
 	}
@@ -107,11 +107,11 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('head', 'Header links');
 		$this->authenticateAs('admin');
 
-		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus/create'));
-		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/create', [
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/menus/create'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'extra', 'description' => ['en' => 'Extra']],
 		]));
-		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/head/delete'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/panel/menus/head/delete'));
 		$this->assertSame(['head'], $this->menuHandles());
 	}
 
@@ -120,13 +120,13 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('head', 'Header links');
 		$this->authenticateAs('admin');
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/head'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/head'));
 
 		// The handle is chrome, the description stays editable.
 		$this->assertHtmlNodeExists('//input[@id="menu-handle" and @disabled]', $html);
 		$this->assertStringContainsString('Only superusers can change the handle.', $html);
-		$this->assertStringNotContainsString('/cp/menus/head/delete', $html);
-		$this->assertStringNotContainsString('href="/cp/menus/create"', $html);
+		$this->assertStringNotContainsString('/panel/menus/head/delete', $html);
+		$this->assertStringNotContainsString('href="/panel/menus/create"', $html);
 		$this->assertStringContainsString('name="description[en]"', $html);
 	}
 
@@ -135,12 +135,12 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('head', 'Header links');
 		$this->authenticateAs('admin');
 
-		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
+		$response = $this->makeRequest('POST', '/panel/menus/head/edit', [
 			'body' => ['menu' => 'renamed', 'description' => ['en' => 'New description']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/head?notice=updated', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus/head?notice=updated', $response->getHeaderLine('Location'));
 		// The description saved, the handle did not move.
 		$this->assertSame(['head'], $this->menuHandles());
 		$this->assertSame(['en' => 'New description'], $this->storedDescription('head'));
@@ -151,15 +151,15 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('aaa-handle', 'Second by description');
 		$this->createMenu('zzz-handle', 'First by description');
 
-		$response = $this->makeRequest('GET', '/cp/menus');
+		$response = $this->makeRequest('GET', '/panel/menus');
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/zzz-handle', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus/zzz-handle', $response->getHeaderLine('Location'));
 	}
 
 	public function testDescriptionsAreStoredPerLocale(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/menus/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => [
 				'menu' => 'multi',
 				'description' => ['en' => 'Main navigation', 'de' => 'Hauptnavigation', 'fr' => 'Ignored'],
@@ -174,7 +174,7 @@ final class PanelMenusTest extends End2EndTestCase
 			$this->storedDescription('multi'),
 		);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/multi'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/multi'));
 		$this->assertStringContainsString('name="description[en]"', $html);
 		$this->assertStringContainsString('name="description[de]"', $html);
 		$this->assertStringContainsString('value="Hauptnavigation"', $html);
@@ -184,17 +184,17 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('deep', 'Deep menu');
 
-		$saved = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+		$saved = $this->makeRequest('POST', '/panel/menus/deep/edit', [
 			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '2'],
 		]);
 		$this->assertResponseStatus(303, $saved);
 		$this->assertSame(2, $this->storedMaxDepth('deep'));
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/deep'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/deep'));
 		$this->assertHtmlNodeExists('//input[@id="menu-max-depth" and @value="2"]', $html);
 
 		// An empty field is the unlimited case, not a zero.
-		$cleared = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+		$cleared = $this->makeRequest('POST', '/panel/menus/deep/edit', [
 			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => ''],
 		]);
 		$this->assertResponseStatus(303, $cleared);
@@ -205,7 +205,7 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('deep', 'Deep menu');
 
-		$response = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+		$response = $this->makeRequest('POST', '/panel/menus/deep/edit', [
 			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '99'],
 		]);
 
@@ -223,7 +223,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createItem('deep', 'menu-e2e-parent');
 		$this->createItem('deep', 'menu-e2e-child', 1, 'menu-e2e-parent');
 
-		$response = $this->makeRequest('POST', '/cp/menus/deep/edit', [
+		$response = $this->makeRequest('POST', '/panel/menus/deep/edit', [
 			'body' => ['menu' => 'deep', 'description' => ['en' => 'Deep menu'], 'maxDepth' => '1'],
 		]);
 
@@ -239,7 +239,7 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('audited', 'Audited');
 
-		$this->makeRequest('POST', '/cp/menus/audited/edit', [
+		$this->makeRequest('POST', '/panel/menus/audited/edit', [
 			'body' => ['menu' => 'audited', 'description' => ['en' => 'Audited']],
 		]);
 
@@ -262,7 +262,7 @@ final class PanelMenusTest extends End2EndTestCase
 			"INSERT INTO cms.menus (menu, description) VALUES ('nameless', '{}'::jsonb)",
 		)->run();
 
-		$response = $this->makeRequest('GET', '/cp/menus/nameless');
+		$response = $this->makeRequest('GET', '/panel/menus/nameless');
 
 		$this->assertResponseOk($response);
 		$this->assertStringContainsString(
@@ -288,7 +288,7 @@ final class PanelMenusTest extends End2EndTestCase
 			],
 		)->run();
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/main-nav'));
 
 		// The German title is there although the request is served in English,
 		// so switching the content language needs no round trip.
@@ -313,7 +313,7 @@ final class PanelMenusTest extends End2EndTestCase
 		// Named in a configured locale that is not the one being served.
 		$this->createMenu('german', 'Nur deutsch', 'de');
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/neutral'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/neutral'));
 
 		$this->assertHtmlNodeExists(
 			'//*[@id="menu-nav"]//span[normalize-space()="Neutral name"]',
@@ -329,13 +329,13 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('main-nav', 'Main navigation');
 
-		$response = $this->makeRequest('GET', '/cp/menus?notice=deleted');
+		$response = $this->makeRequest('GET', '/panel/menus?notice=deleted');
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/main-nav?notice=deleted', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus/main-nav?notice=deleted', $response->getHeaderLine('Location'));
 		$this->assertStringContainsString(
 			'Menu deleted.',
-			$this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav?notice=deleted')),
+			$this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/main-nav?notice=deleted')),
 		);
 	}
 
@@ -346,11 +346,11 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createItem('main-nav', 'menu-e2e-one', 1);
 		$this->createItem('main-nav', 'menu-e2e-two', 2);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/main-nav'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/main-nav'));
 
 		$this->assertStringContainsString('id="menu-nav"', $html);
-		$this->assertStringContainsString('href="/cp/menus/footer"', $html);
-		$this->assertStringContainsString('href="/cp/menus/create"', $html);
+		$this->assertStringContainsString('href="/panel/menus/footer"', $html);
+		$this->assertStringContainsString('href="/panel/menus/create"', $html);
 		// The rail reads as menu names; hovering spells out the truncated ones
 		// and names the handle behind them.
 		$this->assertHtmlNodeExists(
@@ -360,7 +360,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->assertStringContainsString('title="Main navigation · main-nav"', $html);
 		// The open menu is marked, and its item count rides along as the badge.
 		$this->assertHtmlNodeExists(
-			'//a[@href="/cp/menus/main-nav" and @aria-current="page"]',
+			'//a[@href="/panel/menus/main-nav" and @aria-current="page"]',
 			$html,
 		);
 		$this->assertStringContainsString('<span class="badge">2</span>', $html);
@@ -368,7 +368,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testAnEmptyAreaRendersTheEmptyStateWithoutARail(): void
 	{
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus'));
 
 		$this->assertStringContainsString('No menus yet.', $html);
 		$this->assertStringNotContainsString('id="menu-nav"', $html);
@@ -376,26 +376,26 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testTheCreateFormRenders(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/menus/create');
+		$response = $this->makeRequest('GET', '/panel/menus/create');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('action="/cp/menus/create"', $html);
+		$this->assertStringContainsString('action="/panel/menus/create"', $html);
 		// Nothing to delete yet.
 		$this->assertStringNotContainsString('/delete"', $html);
 	}
 
 	public function testCreateStoresAndOpensTheNewMenu(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/menus/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'footer', 'description' => ['en' => 'Footer links']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/footer?notice=created', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus/footer?notice=created', $response->getHeaderLine('Location'));
 		$this->assertSame(['footer'], $this->menuHandles());
 
-		$tree = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/footer?notice=created'));
+		$tree = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/footer?notice=created'));
 		$this->assertStringContainsString('Menu created.', $tree);
 	}
 
@@ -403,7 +403,7 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('taken', 'Taken');
 
-		$invalid = $this->makeRequest('POST', '/cp/menus/create', [
+		$invalid = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'Not A Handle', 'description' => ['en' => 'X']],
 		]);
 		$this->assertResponseOk($invalid);
@@ -412,7 +412,7 @@ final class PanelMenusTest extends End2EndTestCase
 			$this->getHtmlResponse($invalid),
 		);
 
-		$reserved = $this->makeRequest('POST', '/cp/menus/create', [
+		$reserved = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'create', 'description' => ['en' => 'X']],
 		]);
 		$this->assertStringContainsString(
@@ -420,7 +420,7 @@ final class PanelMenusTest extends End2EndTestCase
 			$this->getHtmlResponse($reserved),
 		);
 
-		$taken = $this->makeRequest('POST', '/cp/menus/create', [
+		$taken = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'taken', 'description' => ['en' => 'X']],
 		]);
 		$this->assertStringContainsString(
@@ -433,7 +433,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testCreateRequiresADescription(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/menus/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/create', [
 			'body' => ['menu' => 'undescribed', 'description' => ['en' => '  ']],
 		]);
 
@@ -449,22 +449,22 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('head', 'Header links');
 
-		$response = $this->makeRequest('GET', '/cp/menus/head');
+		$response = $this->makeRequest('GET', '/panel/menus/head');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/head/edit"]//input[@id="menu-handle" and @value="head" and not(@disabled)]',
+			'//form[@action="/panel/menus/head/edit"]//input[@id="menu-handle" and @value="head" and not(@disabled)]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/head/edit"]//input[@name="description[en]" and @value="Header links"]',
+			'//form[@action="/panel/menus/head/edit"]//input[@name="description[en]" and @value="Header links"]',
 			$html,
 		);
 		$this->assertStringContainsString('Renaming the handle breaks templates', $html);
 		// Delete sits in the same bar; there is no edit screen behind a button.
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/head/delete"]//button[@type="submit"]',
+			'//form[@action="/panel/menus/head/delete"]//button[@type="submit"]',
 			$html,
 		);
 	}
@@ -475,7 +475,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createItem('stocked', 'menu-e2e-stocked-one', 1);
 		$this->createItem('stocked', 'menu-e2e-stocked-two', 2);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/stocked'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/stocked'));
 
 		$this->assertStringContainsString('It contains 2 items.', $html);
 	}
@@ -484,7 +484,7 @@ final class PanelMenusTest extends End2EndTestCase
 	{
 		$this->createMenu('head', 'Header links');
 
-		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/menus/head/edit'));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/panel/menus/head/edit'));
 	}
 
 	public function testARejectedHandleComesBackOnTheTreeScreen(): void
@@ -492,7 +492,7 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('head', 'Header links');
 		$this->createMenu('taken', 'Taken');
 
-		$response = $this->makeRequest('POST', '/cp/menus/head/edit', [
+		$response = $this->makeRequest('POST', '/panel/menus/head/edit', [
 			'body' => ['menu' => 'taken', 'description' => ['en' => 'Header links']],
 		]);
 
@@ -510,12 +510,12 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('old-name', 'Old');
 		$this->createItem('old-name', 'menu-e2e-follow');
 
-		$response = $this->makeRequest('POST', '/cp/menus/old-name/edit', [
+		$response = $this->makeRequest('POST', '/panel/menus/old-name/edit', [
 			'body' => ['menu' => 'new-name', 'description' => ['en' => 'New description']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus/new-name?notice=updated', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus/new-name?notice=updated', $response->getHeaderLine('Location'));
 		$this->assertSame(['new-name'], $this->menuHandles());
 		$this->assertSame(
 			'new-name',
@@ -531,10 +531,10 @@ final class PanelMenusTest extends End2EndTestCase
 		$this->createMenu('doomed', 'Doomed');
 		$this->createItem('doomed', 'menu-e2e-doomed');
 
-		$response = $this->makeRequest('POST', '/cp/menus/doomed/delete');
+		$response = $this->makeRequest('POST', '/panel/menus/doomed/delete');
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/menus?notice=deleted', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/menus?notice=deleted', $response->getHeaderLine('Location'));
 		$this->assertSame([], $this->menuHandles());
 		$this->assertNull(
 			$this->db()->execute(
@@ -545,7 +545,7 @@ final class PanelMenusTest extends End2EndTestCase
 
 	public function testUnknownMenuAnswers404(): void
 	{
-		$this->assertResponseStatus(404, $this->makeRequest('GET', '/cp/menus/ghost'));
-		$this->assertResponseStatus(404, $this->makeRequest('POST', '/cp/menus/ghost/delete'));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/panel/menus/ghost'));
+		$this->assertResponseStatus(404, $this->makeRequest('POST', '/panel/menus/ghost/delete'));
 	}
 }

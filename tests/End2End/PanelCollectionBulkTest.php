@@ -41,7 +41,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-markup-root', title: 'Bulk Markup Root');
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -57,18 +57,18 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="unpublished"]', $html);
 		$this->assertHtmlNodeExists('//button[@type="button" and @data-bulk-open="publish"]', $html);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/publish?sort=title&dir=asc"]',
+			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/publish?sort=title&dir=asc"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/cp/collection/test-hierarchy/bulk/delete?sort=title&dir=asc"]',
+			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/delete?sort=title&dir=asc"]',
 			$html,
 		);
 	}
 
 	public function testEmptyListingRendersNoBulkControls(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -86,7 +86,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$this->assertHtmlNodeExists(
@@ -101,7 +101,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->createNode(uid: 'bulk-pub-b', title: 'Pub B', published: true);
 		$this->createNode(uid: 'bulk-pub-locked', title: 'Pub Locked', published: false, locked: true);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-pub-a', 'bulk-pub-b', 'bulk-pub-locked'],
 				'state' => 'published',
@@ -110,7 +110,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$location = $response->getHeaderLine('Location');
-		$this->assertStringStartsWith('/cp/collection/test-hierarchy', $location);
+		$this->assertStringStartsWith('/panel/collection/test-hierarchy', $location);
 		$this->assertStringContainsString(
 			'notice=' . rawurlencode('published:2,skipped-locked:1'),
 			$location,
@@ -123,7 +123,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-draft-a', title: 'Draft A', published: true);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-draft-a'],
 				'state' => 'unpublished',
@@ -155,7 +155,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-pub-tree-root'],
 				'state' => 'published',
@@ -190,7 +190,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-pub-lap-root', 'bulk-pub-lap-child'],
 				'state' => 'published',
@@ -223,7 +223,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-pub-lock-root'],
 				'state' => 'published',
@@ -252,7 +252,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-draft-tree-root'],
 				'state' => 'unpublished',
@@ -273,7 +273,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-state-a', title: 'State A');
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => [
 				'nodes' => ['bulk-state-a'],
 				'state' => 'nope',
@@ -285,18 +285,18 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 	public function testBulkRejectsMissingEmptyAndOversizedSelections(): void
 	{
-		$missing = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$missing = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => ['state' => 'published'],
 		]);
 		$this->assertResponseStatus(400, $missing);
 
-		$empty = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$empty = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => ['nodes' => [], 'state' => 'published'],
 		]);
 		$this->assertResponseStatus(400, $empty);
 
 		$uids = array_map(static fn(int $i): string => "bulk-cap-{$i}", range(1, 251));
-		$oversized = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$oversized = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'body' => ['nodes' => $uids, 'state' => 'published'],
 		]);
 		$this->assertResponseStatus(400, $oversized);
@@ -307,7 +307,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->createNode(uid: 'bulk-del-a', title: 'Del A');
 		$this->createNode(uid: 'bulk-del-b', title: 'Del B');
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-del-a', 'bulk-del-b']],
 		]);
 
@@ -330,7 +330,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-refuse-root']],
 		]);
 
@@ -358,7 +358,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-tree-root'], 'children' => '1'],
 		]);
 
@@ -389,7 +389,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		// Root and grandchild selected, subtree delete on: whichever is
 		// processed first, three nodes fall and none is counted twice.
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => [
 				'nodes' => ['bulk-overlap-root', 'bulk-overlap-grandchild'],
 				'children' => '1',
@@ -418,7 +418,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		// Without the children flag: deleting the child first leaves the
 		// parent childless, so both go in one request.
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-order-root', 'bulk-order-child']],
 		]);
 
@@ -435,7 +435,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-skip-locked', title: 'Skip Locked', locked: true);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-skip-locked', 'bulk-skip-unknown']],
 		]);
 
@@ -452,7 +452,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$foreignType = $this->createTestType('bulk-foreign-type');
 		$this->createNode(uid: 'bulk-foreign', title: 'Foreign', type: $foreignType);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-foreign']],
 		]);
 
@@ -468,7 +468,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-query-a', title: 'Query A', published: false);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/publish', [
 			'query' => ['view' => 'list', 'q' => 'Query'],
 			'body' => ['nodes' => ['bulk-query-a'], 'state' => 'published'],
 		]);
@@ -484,18 +484,18 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->createNode(uid: 'bulk-auth-a', title: 'Auth A');
 		$this->defaultAuthToken = null;
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
 			'body' => ['nodes' => ['bulk-auth-a']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertStringStartsWith('/cp/login', $response->getHeaderLine('Location'));
+		$this->assertStringStartsWith('/panel/login', $response->getHeaderLine('Location'));
 		$this->assertFalse($this->nodeDeleted('bulk-auth-a'));
 	}
 
 	public function testBulkRejectsUnknownCollection(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/collection/no-such-collection/bulk/delete', [
+		$response = $this->makeRequest('POST', '/panel/collection/no-such-collection/bulk/delete', [
 			'body' => ['nodes' => ['bulk-any']],
 		]);
 
@@ -506,14 +506,14 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-dup-markup', title: 'Dup Markup');
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('data-bulk-dialog="duplicate"', $html);
 		$this->assertStringContainsString('data-bulk-open="duplicate"', $html);
 		$this->assertStringContainsString(
-			'formaction="/cp/collection/test-hierarchy/bulk/duplicate?sort=title&amp;dir=asc"',
+			'formaction="/panel/collection/test-hierarchy/bulk/duplicate?sort=title&amp;dir=asc"',
 			$html,
 		);
 		$this->assertStringContainsString('data-bulk-children data-bulk-gate', $html);
@@ -535,7 +535,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/duplicate', [
 			'body' => ['nodes' => ['bulk-dup-source']],
 		]);
 
@@ -577,7 +577,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/duplicate', [
 			'body' => ['nodes' => ['bulk-dup-root'], 'children' => '1'],
 		]);
 
@@ -622,7 +622,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		// Grandchild's chain to the selected root runs through an unselected
 		// node; the subtree copy of the root must still cover it.
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/duplicate', [
 			'body' => [
 				'nodes' => ['bulk-dup-cov-root', 'bulk-dup-cov-grandchild'],
 				'children' => '1',
@@ -646,7 +646,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/duplicate', [
 			'body' => ['nodes' => ['bulk-dup-flat-root']],
 		]);
 
@@ -673,7 +673,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-dup-known', title: 'Dup Known');
 
-		$response = $this->makeRequest('POST', '/cp/collection/test-hierarchy/bulk/duplicate', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/duplicate', [
 			'body' => ['nodes' => ['bulk-dup-known', 'bulk-dup-unknown']],
 		]);
 
@@ -694,7 +694,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		foreach ([1, 2] as $round) {
 			$response = $this->makeRequest(
 				'POST',
-				'/cp/collection/test-routable-hierarchy/bulk/duplicate',
+				'/panel/collection/test-routable-hierarchy/bulk/duplicate',
 				['body' => ['nodes' => ['bulk-dup-route']]],
 			);
 			$this->assertResponseStatus(303, $response, "duplication round {$round}");
@@ -733,7 +733,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/collection/test-routable-hierarchy/bulk/duplicate',
+			'/panel/collection/test-routable-hierarchy/bulk/duplicate',
 			['body' => ['nodes' => ['bulk-dup-route-root'], 'children' => '1']],
 		);
 
@@ -762,7 +762,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 	{
 		$this->createNode(uid: 'bulk-notice-a', title: 'Notice A');
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => ['notice' => 'published:2,hack:9,deleted:x,skipped-locked:1'],
 		]);
 
@@ -786,7 +786,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/bulk-editor-root/delete',
+			'/panel/node/bulk-editor-root/delete',
 		);
 
 		$this->assertResponseOk($response);

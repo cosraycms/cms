@@ -17,27 +17,27 @@ final class PanelAuthTest extends End2EndTestCase
 {
 	public function testProtectedPanelRouteRedirectsGuestToLogin(): void
 	{
-		$response = $this->makeRequest('GET', '/cp');
+		$response = $this->makeRequest('GET', '/panel');
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/login?next=%2Fcp', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/login?next=%2Fpanel', $response->getHeaderLine('Location'));
 	}
 
 	public function testLoginPageRendersForGuest(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/login');
+		$response = $this->makeRequest('GET', '/panel/login');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Sign in to your account', $html);
-		$this->assertStringContainsString('action="/cp/login"', $html);
+		$this->assertStringContainsString('action="/panel/login"', $html);
 		$this->assertStringContainsString('Forgot password?', $html);
 		$this->assertStringContainsString('"code:syntax":"Syntax"', $html);
 	}
 
 	public function testLoginPageUsesNegotiatedLanguage(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/login', [
+		$response = $this->makeRequest('GET', '/panel/login', [
 			'headers' => ['Accept-Language' => 'de'],
 		]);
 
@@ -58,22 +58,22 @@ final class PanelAuthTest extends End2EndTestCase
 			'password' => password_hash('password', PASSWORD_ARGON2ID),
 		]);
 
-		$response = $this->makeRequest('POST', '/cp/login', [
+		$response = $this->makeRequest('POST', '/panel/login', [
 			'body' => [
 				'login' => $login,
 				'password' => 'password',
 				'rememberme' => false,
-				'next' => '/cp',
+				'next' => '/panel',
 			],
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel', $response->getHeaderLine('Location'));
 	}
 
 	public function testLoginWithInvalidCredentialsShowsMessage(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/login', [
+		$response = $this->makeRequest('POST', '/panel/login', [
 			'body' => [
 				'login' => 'nobody@example.com',
 				'password' => 'wrong-password',
@@ -90,19 +90,19 @@ final class PanelAuthTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$response = $this->makeRequest('GET', '/cp/login', [
+		$response = $this->makeRequest('GET', '/panel/login', [
 			'authToken' => $this->defaultAuthToken,
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel', $response->getHeaderLine('Location'));
 	}
 
 	public function testAuthenticatedPanelRendersSidebarLayout(): void
 	{
 		$this->authenticateAs('editor');
 
-		$response = $this->makeRequest('GET', '/cp', [
+		$response = $this->makeRequest('GET', '/panel', [
 			'authToken' => $this->defaultAuthToken,
 		]);
 
@@ -115,7 +115,7 @@ final class PanelAuthTest extends End2EndTestCase
 		// left out rather than rendered empty.
 		$this->assertStringNotContainsString('class="cms-sidebar"', $html);
 		$this->assertStringContainsString('class="logo"', $html);
-		$this->assertStringContainsString('action="/cp/logout"', $html);
+		$this->assertStringContainsString('action="/panel/logout"', $html);
 		// A user without a stored name is identified by their login.
 		$this->assertMatchesRegularExpression(
 			'/popovertarget="cms-account-menu"[^>]*aria-label="Account: test-auth-[^"]+@example\.com"/',
@@ -128,12 +128,12 @@ final class PanelAuthTest extends End2EndTestCase
 
 	public function testHtmxGuestRequestReturnsHxRedirectHeader(): void
 	{
-		$response = $this->makeRequest('GET', '/cp', [
+		$response = $this->makeRequest('GET', '/panel', [
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
 		$this->assertResponseStatus(401, $response);
-		$this->assertSame('/cp/login?next=%2Fcp', $response->getHeaderLine('HX-Redirect'));
+		$this->assertSame('/panel/login?next=%2Fpanel', $response->getHeaderLine('HX-Redirect'));
 	}
 
 	public function testConfiguredPanelPathApplies(): void
@@ -171,11 +171,11 @@ final class PanelAuthTest extends End2EndTestCase
 	{
 		$token = $this->createAuthenticatedUser('system');
 
-		$response = $this->makeRequest('GET', '/cp', [
+		$response = $this->makeRequest('GET', '/panel', [
 			'authToken' => $token,
 		]);
 
 		$this->assertResponseStatus(303, $response);
-		$this->assertSame('/cp/login?next=%2Fcp', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/login?next=%2Fpanel', $response->getHeaderLine('Location'));
 	}
 }

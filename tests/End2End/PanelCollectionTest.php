@@ -48,13 +48,13 @@ final class PanelCollectionTest extends End2EndTestCase
 	{
 		$this->createArticle('panel-grid-a', 'Panel Grid A');
 		$this->createArticle('panel-grid-b', 'Panel Grid B');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles');
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('class="page cms-collection"', $html);
 		$this->assertStringContainsString('<h1>Test articles</h1>', $html);
-		$this->assertStringNotContainsString('href="/cp/assets/styles/collection.css"', $html);
+		$this->assertStringNotContainsString('href="/panel/assets/styles/collection.css"', $html);
 		$this->assertStringContainsString('Panel Grid A', $html);
 		$this->assertStringContainsString('Panel Grid B', $html);
 		$this->assertStringContainsString('class="cms-list" role="table"', $html);
@@ -68,7 +68,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	public function testCollectionConstructorIsAutowired(): void
 	{
 		$this->createArticle('service-entry', 'Service Entry');
-		$response = $this->makeRequest('GET', '/cp/collection/test-service');
+		$response = $this->makeRequest('GET', '/panel/collection/test-service');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -87,7 +87,7 @@ final class PanelCollectionTest extends End2EndTestCase
 			[['sort' => 'changed'], 'sort-a'],
 			[['sort' => 'changed', 'dir' => 'asc'], 'sort-z'],
 		] as [$query, $first]) {
-			$response = $this->makeRequest('GET', '/cp/collection/test-articles', ['query' => $query]);
+			$response = $this->makeRequest('GET', '/panel/collection/test-articles', ['query' => $query]);
 			$this->assertResponseOk($response);
 			$html = $this->getHtmlResponse($response);
 			$this->assertHtmlNodeExists('//tbody/tr[1][@data-uid="' . $first . '"]', $html);
@@ -120,7 +120,7 @@ final class PanelCollectionTest extends End2EndTestCase
 			[['sort' => 'amount'], ['c', 'a', 'b']],
 			[['sort' => 'start'], ['b', 'a', 'c']],
 		] as [$query, $expected]) {
-			$response = $this->makeRequest('GET', '/cp/collection/test-sorted', ['query' => $query]);
+			$response = $this->makeRequest('GET', '/panel/collection/test-sorted', ['query' => $query]);
 			$this->assertResponseOk($response);
 			$html = $this->getHtmlResponse($response);
 			foreach ($expected as $index => $uid) {
@@ -131,7 +131,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 	public function testSeveralCreatableTypesShareOneMenuButton(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/test-mixed');
+		$response = $this->makeRequest('GET', '/panel/collection/test-mixed');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -139,7 +139,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 		foreach (['test-page', 'test-article'] as $type) {
 			$this->assertHtmlNodeExists(
-				"//*[@id=\"collection-create\"]//a[starts-with(@href, \"/cp/node/create/{$type}\")]",
+				"//*[@id=\"collection-create\"]//a[starts-with(@href, \"/panel/node/create/{$type}\")]",
 				$html,
 			);
 		}
@@ -149,7 +149,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	{
 		$this->createArticle('panel-date-de', 'Panel Date DE', '2026-01-01 10:00:00+01');
 		// Date columns follow the panel UI language, negotiated here from the browser.
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Date DE',
 				'locale' => 'de',
@@ -170,7 +170,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	{
 		$this->createArticle('panel-search-needle', 'Panel Search Needle');
 		$this->createArticle('panel-search-haystack', 'Panel Search Haystack');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'needle',
 			],
@@ -187,7 +187,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$changed = '2026-01-01 10:00:00+00';
 		$this->createArticle('panel-page-a', 'Panel Page A', $changed);
 		$this->createArticle('panel-page-b', 'Panel Page B', $changed);
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Page',
 				'limit' => '1',
@@ -204,7 +204,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	public function testPanelCollectionSortLinksPreserveQueryState(): void
 	{
 		$this->createArticle('panel-sort-a', 'Panel Sort A');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Sort',
 				'sort' => 'changed',
@@ -216,7 +216,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?q=Panel%20Sort&amp;sort=changed&amp;dir=asc&amp;limit=10"',
+			'href="/panel/collection/test-articles?q=Panel%20Sort&amp;sort=changed&amp;dir=asc&amp;limit=10"',
 			$html,
 		);
 	}
@@ -226,7 +226,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$changed = '2026-01-01 10:00:00+00';
 		$this->createArticle('panel-link-a', 'Panel Link A', $changed);
 		$this->createArticle('panel-link-b', 'Panel Link B', $changed);
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Link',
 				'sort' => 'title',
@@ -238,7 +238,7 @@ final class PanelCollectionTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?q=Panel%20Link&amp;sort=title&amp;dir=asc&amp;limit=1&amp;offset=1"',
+			'href="/panel/collection/test-articles?q=Panel%20Link&amp;sort=title&amp;dir=asc&amp;limit=1&amp;offset=1"',
 			$html,
 		);
 	}
@@ -246,7 +246,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	public function testPanelCollectionClearSearchPreservesQueryState(): void
 	{
 		$this->createArticle('panel-clear-a', 'Panel Clear A');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Clear',
 				'sort' => 'title',
@@ -259,14 +259,14 @@ final class PanelCollectionTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Clear search', $html);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-articles?sort=title&amp;dir=asc&amp;limit=10"',
+			'href="/panel/collection/test-articles?sort=title&amp;dir=asc&amp;limit=10"',
 			$html,
 		);
 	}
 
 	public function testPanelCollectionRejectsInvalidSort(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'sort' => 'nope',
 			],
@@ -277,7 +277,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 	public function testPanelCollectionRejectsInvalidDirection(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'dir' => 'sideways',
 			],
@@ -288,7 +288,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 	public function testPanelCollectionRejectsInvalidView(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'view' => 'grid',
 			],
@@ -300,7 +300,7 @@ final class PanelCollectionTest extends End2EndTestCase
 	public function testBoostedCollectionRequestRendersPartialWithoutLayoutShell(): void
 	{
 		$this->createArticle('panel-grid-boosted', 'Panel Grid Boosted');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'headers' => [
 				'HX-Request' => 'true',
 				'HX-Boosted' => 'true',
@@ -316,7 +316,7 @@ final class PanelCollectionTest extends End2EndTestCase
 
 	public function testPanelCollectionRouteReturnsNotFoundForUnknownCollection(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/collection/does-not-exist');
+		$response = $this->makeRequest('GET', '/panel/collection/does-not-exist');
 
 		$this->assertResponseStatus(404, $response);
 	}

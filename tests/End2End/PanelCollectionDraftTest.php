@@ -46,7 +46,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 		$this->createPage('listing-offline', 'Offline', published: false);
 		$this->createPage('listing-changed', 'Changed', published: true, draftTitle: 'Pending');
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/collection/test-draft-pages'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/test-draft-pages'));
 
 		$this->assertHtmlNodeExists(
 			'//tr[@data-uid="listing-changed"]//span[contains(@class, "cms-status") and contains(@class, "is-published")]',
@@ -122,7 +122,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 	/** @param list<string> $uids */
 	private function bulk(array $uids, string $state, array $extra = []): object
 	{
-		$response = $this->makeRequest('POST', '/cp/collection/test-draft-pages/bulk/publish', [
+		$response = $this->makeRequest('POST', '/panel/collection/test-draft-pages/bulk/publish', [
 			'body' => ['nodes' => $uids, 'state' => $state] + $extra,
 		]);
 		$this->assertResponseStatus(303, $response);

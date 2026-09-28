@@ -51,7 +51,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/node/create/test-hierarchy-child',
+			'/panel/node/create/test-hierarchy-child',
 			[
 				'query' => [
 					'parent' => 'panel-create-parent',
@@ -77,11 +77,11 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 	public function testRegisteredTypeCanBeCreatedWithoutCollectionOrParent(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/node/create/test-hierarchy-child');
+		$response = $this->makeRequest('GET', '/panel/node/create/test-hierarchy-child');
 
 		$this->assertResponseOk($response);
 		$this->assertHtmlNodeExists(
-			'//form[@id="node-editor-form"][@action="/cp/node/create/test-hierarchy-child"]',
+			'//form[@id="node-editor-form"][@action="/panel/node/create/test-hierarchy-child"]',
 			$this->getHtmlResponse($response),
 		);
 	}
@@ -93,16 +93,16 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			type: $this->parentTypeId,
 			title: 'Panel Create Parent',
 		);
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-parent?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc"',
+			'href="/panel/node/create/test-hierarchy-parent?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;parent=panel-create-parent"',
+			'href="/panel/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;parent=panel-create-parent"',
 			$html,
 		);
 	}
@@ -120,7 +120,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			title: 'Panel Current Child',
 			parent: $parentId,
 		);
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'parent' => 'panel-current-parent',
 			],
@@ -129,7 +129,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bparent%5D=panel-current-parent&amp;parent=panel-current-parent"',
+			'href="/panel/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bparent%5D=panel-current-parent&amp;parent=panel-current-parent"',
 			$html,
 		);
 	}
@@ -144,7 +144,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/create/test-hierarchy-child',
+			'/panel/node/create/test-hierarchy-child',
 			[
 				'query' => ['parent' => 'panel-store-parent'],
 				'body' => [
@@ -159,7 +159,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertResponseStatus(303, $response);
 		$location = $response->getHeaderLine('Location');
 		$this->assertMatchesRegularExpression(
-			'#^/cp/node/[A-Za-z0-9_-]+$#',
+			'#^/panel/node/[A-Za-z0-9_-]+$#',
 			$location,
 		);
 
@@ -182,7 +182,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 			'list' => ['parent' => 'list-parent', 'offset' => 50, 'q' => 'Find me'],
 			'parent' => 'actual-parent',
 		];
-		$response = $this->makeRequest('GET', '/cp/node/create/test-hierarchy-child', ['query' => $query]);
+		$response = $this->makeRequest('GET', '/panel/node/create/test-hierarchy-child', ['query' => $query]);
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		preg_match('/id="node-editor-form"[^>]*action="([^"]+)"/s', $html, $matches);
@@ -219,7 +219,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$editor = $this->makeRequest('GET', (string) parse_url($location, PHP_URL_PATH), ['query' => $params]);
 		$this->assertResponseOk($editor);
 		$this->assertHtmlNodeExists(
-			'//nav[@class="breadcrumb"]/a[@href="/cp/collection/test-hierarchy?q=Find%20me&offset=50&parent=list-parent"]',
+			'//nav[@class="breadcrumb"]/a[@href="/panel/collection/test-hierarchy?q=Find%20me&offset=50&parent=list-parent"]',
 			$this->getHtmlResponse($editor),
 		);
 	}
@@ -239,7 +239,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 				$method,
 				$suffix,
 			]) {
-				$response = $this->makeRequest($method, '/cp/node/create/' . $type . $suffix, [
+				$response = $this->makeRequest($method, '/panel/node/create/' . $type . $suffix, [
 					'query' => $parent === null ? [] : ['parent' => $parent],
 					'body' => ['_complete' => '1'],
 				]);
@@ -257,7 +257,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		);
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/node/create/test-hierarchy-child',
+			'/panel/node/create/test-hierarchy-child',
 			['query' => ['parent' => 'panel-create-uid-parent']],
 		);
 
@@ -283,7 +283,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		// client uploads to it, then submits it so the saved node adopts it.
 		$get = $this->makeRequest(
 			'GET',
-			'/cp/node/create/test-hierarchy-child',
+			'/panel/node/create/test-hierarchy-child',
 			['query' => ['parent' => 'panel-store-uid-parent']],
 		);
 		preg_match('/name="uid" value="([A-Za-z0-9._-]+)"/', $this->getHtmlResponse($get), $m);
@@ -292,7 +292,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/create/test-hierarchy-child',
+			'/panel/node/create/test-hierarchy-child',
 			[
 				'query' => ['parent' => 'panel-store-uid-parent'],
 				'body' => [
@@ -305,7 +305,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertStringContainsString(
-			'/cp/node/' . $uid,
+			'/panel/node/' . $uid,
 			$response->getHeaderLine('Location'),
 		);
 		$row = $this->db()->execute(
@@ -319,7 +319,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/node/create/parent-path-route-page',
+			'/panel/node/create/parent-path-route-page',
 		);
 
 		$this->assertResponseOk($response);
@@ -327,7 +327,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		// The preview posts to the blueprint-based create-paths endpoint...
 		$this->assertStringContainsString('id="generated-paths"', $html);
 		$this->assertStringContainsString(
-			'/cp/node/create/parent-path-route-page/paths',
+			'/panel/node/create/parent-path-route-page/paths',
 			$html,
 		);
 		// ...and the {title} field the route references is marked so editing
@@ -343,7 +343,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/create/parent-path-route-page/paths',
+			'/panel/node/create/parent-path-route-page/paths',
 			['body' => ['content' => ['title' => ['value' => ['en' => 'Fresh Title']]]]],
 		);
 
@@ -359,16 +359,16 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$parent = $this->createHierarchyNode('preview-parent-node', $type, 'Preview parent');
 		$this->createTestPath($parent, '/parent-path');
 
-		$response = $this->makeRequest('GET', '/cp/node/create/parent-path-route-page', [
+		$response = $this->makeRequest('GET', '/panel/node/create/parent-path-route-page', [
 			'query' => ['parent' => 'preview-parent-node'],
 		]);
 		$this->assertResponseOk($response);
 		$this->assertHtmlNodeExists(
-			'//*[@hx-post="/cp/node/create/parent-path-route-page/paths?parent=preview-parent-node"]',
+			'//*[@hx-post="/panel/node/create/parent-path-route-page/paths?parent=preview-parent-node"]',
 			$this->getHtmlResponse($response),
 		);
 
-		$response = $this->makeRequest('POST', '/cp/node/create/parent-path-route-page/paths', [
+		$response = $this->makeRequest('POST', '/panel/node/create/parent-path-route-page/paths', [
 			'query' => ['parent' => 'preview-parent-node'],
 			'body' => ['content' => ['title' => ['value' => ['en' => 'Fresh title']]]],
 		]);
@@ -382,7 +382,7 @@ final class PanelEditorCreateRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('id="node-editor-form"', $html);
 		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
+			'action="/panel/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bq%5D=Hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bopen%5D=panel-create-parent&amp;parent=panel-create-parent"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);

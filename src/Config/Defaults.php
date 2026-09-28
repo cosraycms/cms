@@ -69,7 +69,7 @@ final class Defaults
 	private static function panel(string $root): array
 	{
 		return [
-			'panel.path' => '/cp',
+			'panel.path' => '/panel',
 			// Keep the client outside the public directory so a physical
 			// directory cannot shadow the panel route in the web server.
 			'panel.theme' => [],

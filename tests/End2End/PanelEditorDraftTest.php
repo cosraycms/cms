@@ -77,7 +77,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->createPage('draft-shown', 'Live', published: true);
 		$this->save('draft-shown', ['content' => ['title' => ['value' => ['en' => 'Working']]]]);
 
-		$html = (string) $this->makeRequest('GET', '/cp/node/draft-shown')->getBody();
+		$html = (string) $this->makeRequest('GET', '/panel/node/draft-shown')->getBody();
 
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][en]"][@value="Working"]', $html);
 		$this->assertHtmlNodeExists('//*[@id="editor-changes" and not(@hidden)]', $html);
@@ -173,7 +173,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->createPage('draft-discard', 'Live', published: true);
 		$this->save('draft-discard', ['content' => ['title' => ['value' => ['en' => 'Pending']]]]);
 
-		$response = $this->makeRequest('POST', '/cp/node/draft-discard/discard', [
+		$response = $this->makeRequest('POST', '/panel/node/draft-discard/discard', [
 			'headers' => ['HX-Request' => 'true'],
 			'query' => ['from' => 'collection:test-articles', 'list' => ['q' => 'Live', 'offset' => 50]],
 		]);
@@ -181,17 +181,17 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$location = json_decode($response->getHeaderLine('HX-Location'), true);
 		$this->assertSame(
-			'/cp/node/draft-discard?from=collection%3Atest-articles&list%5Bq%5D=Live&list%5Boffset%5D=50',
+			'/panel/node/draft-discard?from=collection%3Atest-articles&list%5Bq%5D=Live&list%5Boffset%5D=50',
 			$location['path'] ?? null,
 		);
 		$this->assertSame('#main', $location['target'] ?? null);
 		$this->assertNull($this->draftRow('draft-discard'));
 		$this->assertSame('Live', $this->liveTitle('draft-discard'));
 
-		$plain = $this->makeRequest('POST', '/cp/node/draft-discard/discard');
+		$plain = $this->makeRequest('POST', '/panel/node/draft-discard/discard');
 
 		$this->assertResponseStatus(303, $plain);
-		$this->assertStringEndsWith('/cp/node/draft-discard', $plain->getHeaderLine('Location'));
+		$this->assertStringEndsWith('/panel/node/draft-discard', $plain->getHeaderLine('Location'));
 	}
 
 	public function testPreviewPointsAtTheWorkingCopy(): void
@@ -212,7 +212,7 @@ final class PanelEditorDraftTest extends End2EndTestCase
 
 	private function save(string $uid, array $body): object
 	{
-		return $this->makeRequest('POST', '/cp/node/' . $uid, [
+		return $this->makeRequest('POST', '/panel/node/' . $uid, [
 			'headers' => ['HX-Request' => 'true'],
 			'body' => $body + ['_complete' => '1'],
 		]);

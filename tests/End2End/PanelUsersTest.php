@@ -24,17 +24,17 @@ final class PanelUsersTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/users'));
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/users'));
 	}
 
 	public function testTheListShowsUsersAndTheirTypes(): void
 	{
 		$this->authenticateAs('superuser');
-		$this->save('/cp/users/create/teacher', ['email' => 'ada@example.com', 'name' => 'Ada Lovelace']);
+		$this->save('/panel/users/create/teacher', ['email' => 'ada@example.com', 'name' => 'Ada Lovelace']);
 
-		$this->assertResponseOk($this->makeRequest('GET', '/cp/users'));
+		$this->assertResponseOk($this->makeRequest('GET', '/panel/users'));
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/users', ['query' => ['q' => 'lovelace']]));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/users', ['query' => ['q' => 'lovelace']]));
 
 		$this->assertStringContainsString('Ada Lovelace', $html);
 		$this->assertStringContainsString('Teacher', $html);
@@ -45,7 +45,7 @@ final class PanelUsersTest extends End2EndTestCase
 	{
 		$this->authenticateAs('superuser');
 
-		$response = $this->save('/cp/users/create/teacher', [
+		$response = $this->save('/panel/users/create/teacher', [
 			'email' => 'ada@example.com',
 			'username' => 'ada',
 			'roles' => ['editor', 'superuser'],
@@ -62,9 +62,9 @@ final class PanelUsersTest extends End2EndTestCase
 	public function testInvalidSubmissionsAreRejectedWithTheFieldTheyConcern(): void
 	{
 		$this->authenticateAs('superuser');
-		$this->save('/cp/users/create/user', ['email' => 'taken@example.com']);
+		$this->save('/panel/users/create/user', ['email' => 'taken@example.com']);
 
-		$html = $this->getHtmlResponse($this->save('/cp/users/create/teacher', [
+		$html = $this->getHtmlResponse($this->save('/panel/users/create/teacher', [
 			'email' => 'TAKEN@example.com',
 			'username' => 'with@sign',
 			'password_repeat' => 'something else entirely',
@@ -83,7 +83,7 @@ final class PanelUsersTest extends End2EndTestCase
 	{
 		$this->authenticateAs('superuser');
 
-		$this->save('/cp/users/create/shop-customer', ['email' => 'buyer@example.com', 'roles' => ['editor']]);
+		$this->save('/panel/users/create/shop-customer', ['email' => 'buyer@example.com', 'roles' => ['editor']]);
 
 		$this->assertSame([], $this->users()->byLogin('buyer@example.com')->roles);
 	}
@@ -94,10 +94,12 @@ final class PanelUsersTest extends End2EndTestCase
 		$superuser = $this->users()->byId($this->createTestUserWith(['superuser']));
 		$editor = $this->users()->byId($this->createTestUserWith(['editor']));
 
-		$this->assertResponseStatus(403, $this->makeRequest('GET', "/cp/users/{$superuser->uid}"));
-		$this->assertResponseStatus(403, $this->save("/cp/users/{$superuser->uid}", ['email' => 'mine@example.com']));
+		$this->assertResponseStatus(403, $this->makeRequest('GET', "/panel/users/{$superuser->uid}"));
+		$this->assertResponseStatus(403, $this->save("/panel/users/{$superuser->uid}", [
+			'email' => 'mine@example.com',
+		]));
 
-		$this->save("/cp/users/{$editor->uid}", [
+		$this->save("/panel/users/{$editor->uid}", [
 			'email' => $editor->email,
 			'password' => '',
 			'password_repeat' => '',
@@ -112,7 +114,7 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->authenticateAs('superuser');
 		$self = $this->currentUser();
 
-		$this->save("/cp/users/{$self->uid}", [
+		$this->save("/panel/users/{$self->uid}", [
 			'email' => $self->email,
 			'name' => 'Renamed',
 			'password' => '',
@@ -120,7 +122,7 @@ final class PanelUsersTest extends End2EndTestCase
 			'roles' => [],
 			'active' => '0',
 		]);
-		$delete = $this->getHtmlResponse($this->makeRequest('POST', "/cp/users/{$self->uid}/delete"));
+		$delete = $this->getHtmlResponse($this->makeRequest('POST', "/panel/users/{$self->uid}/delete"));
 		$saved = $this->users()->find($self->uid);
 
 		$this->assertSame('Renamed', $saved->name);
@@ -134,7 +136,7 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->authenticateAs('superuser');
 		$editor = $this->users()->byId($this->createTestUserWith(['editor']));
 
-		$this->save("/cp/users/{$editor->uid}", [
+		$this->save("/panel/users/{$editor->uid}", [
 			'email' => $editor->email,
 			'password' => 'a brand new long password',
 			'password_repeat' => 'a brand new long password',
@@ -143,7 +145,7 @@ final class PanelUsersTest extends End2EndTestCase
 
 		$this->assertTrue(password_verify('a brand new long password', $this->users()->find($editor->uid)->password));
 
-		$this->assertResponseStatus(303, $this->makeRequest('POST', "/cp/users/{$editor->uid}/delete"));
+		$this->assertResponseStatus(303, $this->makeRequest('POST', "/panel/users/{$editor->uid}/delete"));
 		$this->assertNull($this->users()->find($editor->uid));
 	}
 
@@ -152,9 +154,9 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 		$self = $this->currentUser();
 
-		$this->assertResponseOk($this->makeRequest('GET', '/cp/profile'));
+		$this->assertResponseOk($this->makeRequest('GET', '/panel/profile'));
 
-		$html = $this->getHtmlResponse($this->save('/cp/profile', [
+		$html = $this->getHtmlResponse($this->save('/panel/profile', [
 			'email' => $self->email,
 			'name' => 'Edith Editor',
 			'password' => '',
@@ -180,12 +182,12 @@ final class PanelUsersTest extends End2EndTestCase
 			'password_repeat' => 'a brand new long password',
 		];
 
-		$refused = $this->getHtmlResponse($this->save('/cp/profile', ['current_password' => 'wrong'] + $new));
+		$refused = $this->getHtmlResponse($this->save('/panel/profile', ['current_password' => 'wrong'] + $new));
 
 		$this->assertStringContainsString('["current_password"]', $refused);
 		$this->assertTrue(password_verify('password', $this->users()->find($self->uid)->password));
 
-		$this->save('/cp/profile', ['current_password' => 'password'] + $new);
+		$this->save('/panel/profile', ['current_password' => 'password'] + $new);
 
 		$this->assertTrue(password_verify('a brand new long password', $this->users()->find($self->uid)->password));
 	}

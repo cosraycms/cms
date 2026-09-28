@@ -11,7 +11,7 @@ beforeEach(() => {
 	vi.useFakeTimers();
 	document.body.innerHTML = `
 		<form id="menu-drag" method="post" hidden
-			data-menu-drag-action="/cp/menus/main/item/__item__/move">
+			data-menu-drag-action="/panel/menus/main/item/__item__/move">
 			<input type="hidden" name="parent" value="" />
 			<input type="hidden" name="index" value="" />
 		</form>
@@ -34,7 +34,7 @@ beforeEach(() => {
 			<div id="url-section" data-menu-section="url" hidden></div>
 			<div id="target-section" data-menu-section="node url asset"></div>
 			<div id="title-section" data-menu-section-hide="children"></div>
-			<div class="control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/cp/reference/nodes?limit=8">
+			<div class="control menu-picker" data-menu-picker="nodes" data-menu-picker-url="/panel/reference/nodes?limit=8">
 				<input type="hidden" name="node" value="old-uid" data-menu-picker-value />
 				<input type="text" data-menu-picker-search value="Old title" />
 				<div data-menu-picker-results hidden></div>
@@ -63,7 +63,7 @@ describe('drag submit', () => {
 
 		submitMove(item, to, from, 1, 0);
 
-		expect(form.action).toContain('/cp/menus/main/item/child/move');
+		expect(form.action).toContain('/panel/menus/main/item/child/move');
 		expect((form.elements.namedItem('parent') as HTMLInputElement).value).toBe('');
 		expect((form.elements.namedItem('index') as HTMLInputElement).value).toBe('1');
 		expect(form.requestSubmit).toHaveBeenCalledOnce();
@@ -161,7 +161,7 @@ describe('picker', () => {
 
 		// The second keystroke replaced the first pending search.
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		expect(fetchMock.mock.calls[0][0]).toBe('/cp/reference/nodes?limit=8&q=Home');
+		expect(fetchMock.mock.calls[0][0]).toBe('/panel/reference/nodes?limit=8&q=Home');
 
 		const option = results().querySelector<HTMLElement>('[data-menu-picker-option]')!;
 		expect(results().hidden).toBe(false);

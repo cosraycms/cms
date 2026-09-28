@@ -49,7 +49,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -61,15 +61,15 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?sort=title&amp;dir=asc&amp;open=panel-hierarchy-root"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc&amp;open=panel-hierarchy-root"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?sort=title&amp;dir=asc&amp;view=list"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc&amp;view=list"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?sort=title&amp;dir=asc&amp;parent=panel-hierarchy-root"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc&amp;parent=panel-hierarchy-root"',
 			$html,
 		);
 	}
@@ -84,7 +84,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			'desc' => ['sort-child-a', 'sort-child-z'],
 		] as $direction => $children) {
 			foreach ([['open' => 'sort-root'], ['parent' => 'sort-root']] as $scope) {
-				$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+				$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 					'query' => [...$scope, 'sort' => 'title', 'dir' => $direction],
 				]);
 				$this->assertResponseOk($response);
@@ -114,7 +114,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'view' => 'list',
 				'open' => 'panel-list-root',
@@ -148,7 +148,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'open' => 'panel-tree-root',
 			],
@@ -179,7 +179,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'q' => 'Query Root',
 				'sort' => 'title',
@@ -190,7 +190,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?q=Query%20Root&amp;sort=title&amp;dir=asc&amp;open=panel-tree-query-root"',
+			'href="/panel/collection/test-hierarchy?q=Query%20Root&amp;sort=title&amp;dir=asc&amp;open=panel-tree-query-root"',
 			$html,
 		);
 	}
@@ -203,7 +203,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			title: 'Panel Tree Leaf',
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy');
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -240,7 +240,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $rootId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'open' => 'panel-tree-root-deep,panel-tree-child-deep',
 				'sort' => 'title',
@@ -286,7 +286,7 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 			parent: $childId,
 		);
 
-		$response = $this->makeRequest('GET', '/cp/collection/test-hierarchy', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-hierarchy', [
 			'query' => [
 				'parent' => 'panel-parent-filter',
 			],
@@ -300,22 +300,22 @@ final class PanelCollectionHierarchyTest extends End2EndTestCase
 		$this->assertStringNotContainsString('<span>panel-parent-filter</span>', $html);
 		$this->assertStringNotContainsString('Panel Grandchild', $html);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?sort=title&amp;dir=asc"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc"',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'href="/cp/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bparent%5D=panel-parent-filter&amp;parent=panel-parent-filter"',
+			'href="/panel/node/create/test-hierarchy-child?from=collection%3Atest-hierarchy&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Bparent%5D=panel-parent-filter&amp;parent=panel-parent-filter"',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[@id="collection-create"]//a[starts-with(@href, "/cp/node/create/test-hierarchy-child") and normalize-space() = "Hierarchy Child"]',
+			'//*[@id="collection-create"]//a[starts-with(@href, "/panel/node/create/test-hierarchy-child") and normalize-space() = "Hierarchy Child"]',
 			$html,
 		);
 		$this->assertStringContainsString('Hierarchy Parent', $html);
 		$this->assertStringContainsString('Edit parent', $html);
 		$this->assertStringContainsString('Show in tree', $html);
 		$this->assertStringContainsString(
-			'href="/cp/collection/test-hierarchy?sort=title&amp;dir=asc&amp;view=tree&amp;open=panel-parent-filter"',
+			'href="/panel/collection/test-hierarchy?sort=title&amp;dir=asc&amp;view=tree&amp;open=panel-parent-filter"',
 			$html,
 		);
 	}

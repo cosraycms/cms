@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { browseLibrary } from '../../src/lib/library-browser.js';
 
-vi.mock('../../src/lib/runtime.js', () => ({ panelBase: () => '/cp/' }));
+vi.mock('../../src/lib/runtime.js', () => ({ panelBase: () => '/panel/' }));
 
 const ajax = vi.fn<(verb: string, path: string, context: { target: Element }) => Promise<void>>();
 
@@ -35,7 +35,7 @@ describe('library browser', () => {
 
 		browseLibrary(container, { kind: 'image', selected: 'a', pick: vi.fn() });
 
-		expect(ajax).toHaveBeenCalledWith('GET', '/cp/media/picker?kind=image&file=a', {
+		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker?kind=image&file=a', {
 			target: container,
 			swap: 'innerHTML',
 		});
@@ -44,7 +44,7 @@ describe('library browser', () => {
 	it('browses the whole pool for files', () => {
 		browseLibrary(document.createElement('div'), { kind: 'file', pick: vi.fn() });
 
-		expect(ajax).toHaveBeenLastCalledWith('GET', '/cp/media/picker', expect.anything());
+		expect(ajax).toHaveBeenLastCalledWith('GET', '/panel/media/picker', expect.anything());
 	});
 
 	it('reports the picked asset and moves the mark until stopped', async () => {

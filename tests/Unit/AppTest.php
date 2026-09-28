@@ -180,12 +180,12 @@ final class AppTest extends TestCase
 			)
 			->route();
 
-		$asset = $match('/cp/assets/0123456789ab/src/panel.js');
+		$asset = $match('/panel/assets/0123456789ab/src/panel.js');
 
 		$this->assertSame('cms.panel.asset', $asset->name());
 		$this->assertFalse($this->hasSessionMiddleware($asset->getMiddleware()));
-		$this->assertFalse($this->hasSessionMiddleware($match('/cp/vendor/acme-shop/map.js')->getMiddleware()));
-		$this->assertTrue($this->hasSessionMiddleware($match('/cp/media')->getMiddleware()));
+		$this->assertFalse($this->hasSessionMiddleware($match('/panel/vendor/acme-shop/map.js')->getMiddleware()));
+		$this->assertTrue($this->hasSessionMiddleware($match('/panel/media')->getMiddleware()));
 	}
 
 	public function testCoreMethodsDelegateToInternalCoreApp(): void

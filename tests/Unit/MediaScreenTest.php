@@ -16,7 +16,7 @@ final class MediaScreenTest extends TestCase
 {
 	public function testReadsItsStateFromTheQuery(): void
 	{
-		$screen = MediaScreen::fromParams('/cp/media', [
+		$screen = MediaScreen::fromParams('/panel/media', [
 			'kind' => 'image,audio',
 			'q' => ' logo ',
 			'range' => '7d',
@@ -24,7 +24,7 @@ final class MediaScreenTest extends TestCase
 			'page' => '2',
 		]);
 
-		$this->assertSame('/cp/media', $screen->path);
+		$this->assertSame('/panel/media', $screen->path);
 		$this->assertSame(['image', 'audio'], $screen->kinds);
 		$this->assertSame('logo', $screen->q);
 		$this->assertSame('7d', $screen->range);
@@ -35,7 +35,7 @@ final class MediaScreenTest extends TestCase
 
 	public function testDefaultsAnEmptyOrForeignQuery(): void
 	{
-		$empty = MediaScreen::fromParams('/cp/media', []);
+		$empty = MediaScreen::fromParams('/panel/media', []);
 
 		$this->assertSame([], $empty->kinds);
 		$this->assertSame('', $empty->q);
@@ -44,7 +44,7 @@ final class MediaScreenTest extends TestCase
 		$this->assertSame(1, $empty->page);
 		$this->assertFalse($empty->filtered());
 
-		$foreign = MediaScreen::fromParams('/cp/media', [
+		$foreign = MediaScreen::fromParams('/panel/media', [
 			'kind' => 'nonsense,image,image',
 			'range' => '8w',
 			'file' => ' ',
@@ -62,46 +62,46 @@ final class MediaScreenTest extends TestCase
 
 	public function testTakesTheRailsCheckboxListAsKinds(): void
 	{
-		$screen = MediaScreen::fromParams('/cp/media', ['kind' => ['video', 'document', 3, 'bogus']]);
+		$screen = MediaScreen::fromParams('/panel/media', ['kind' => ['video', 'document', 3, 'bogus']]);
 
 		$this->assertSame(['video', 'document'], $screen->kinds);
 		// Every kind means no filter, so the query plan stays flat.
 		$this->assertSame(
 			[],
-			MediaScreen::fromParams('/cp/media', ['kind' => ['image', 'video', 'audio', 'document']])->kinds,
+			MediaScreen::fromParams('/panel/media', ['kind' => ['image', 'video', 'audio', 'document']])->kinds,
 		);
 	}
 
 	public function testWritesItsStateIntoTheUrlAndDropsDefaults(): void
 	{
-		$this->assertSame('/cp/media', MediaScreen::fromParams('/cp/media', [])->url());
+		$this->assertSame('/panel/media', MediaScreen::fromParams('/panel/media', [])->url());
 
-		$screen = new MediaScreen('/cp/media', ['image', 'audio'], 'logo beer', 'year', 'abc', 2);
+		$screen = new MediaScreen('/panel/media', ['image', 'audio'], 'logo beer', 'year', 'abc', 2);
 
 		// The page returns to the first unless given: a changed filter or
 		// search starts over, only the paging link passes it on.
-		$this->assertSame('/cp/media?kind=image%2Caudio&q=logo%20beer&range=year&file=abc', $screen->url());
-		$this->assertSame('/cp/media?kind=video&q=logo%20beer&range=year&file=abc', $screen->url(['kind' => [
+		$this->assertSame('/panel/media?kind=image%2Caudio&q=logo%20beer&range=year&file=abc', $screen->url());
+		$this->assertSame('/panel/media?kind=video&q=logo%20beer&range=year&file=abc', $screen->url(['kind' => [
 			'video',
 		]]));
-		$this->assertSame('/cp/media?kind=image%2Caudio&q=logo%20beer&range=year', $screen->url(['file' => null]));
-		$this->assertSame('/cp/media?kind=image%2Caudio&range=year&file=abc', $screen->url(['q' => '']));
-		$this->assertSame('/cp/media?kind=image%2Caudio&q=logo%20beer&range=year&file=abc&page=3', $screen->url([
+		$this->assertSame('/panel/media?kind=image%2Caudio&q=logo%20beer&range=year', $screen->url(['file' => null]));
+		$this->assertSame('/panel/media?kind=image%2Caudio&range=year&file=abc', $screen->url(['q' => '']));
+		$this->assertSame('/panel/media?kind=image%2Caudio&q=logo%20beer&range=year&file=abc&page=3', $screen->url([
 			'page' => 3,
 		]));
-		$this->assertSame('/cp/media', $screen->url(['kind' => [], 'q' => '', 'range' => '', 'file' => null]));
+		$this->assertSame('/panel/media', $screen->url(['kind' => [], 'q' => '', 'range' => '', 'file' => null]));
 	}
 
 	public function testAddressesAPathBelowTheScreenWithTheStateKept(): void
 	{
-		$screen = new MediaScreen('/cp/media', ['image'], '', '', 'abc');
+		$screen = new MediaScreen('/panel/media', ['image'], '', '', 'abc');
 
-		$this->assertSame('/cp/media/abc/delete?kind=image&file=abc', $screen->url(below: 'abc/delete'));
+		$this->assertSame('/panel/media/abc/delete?kind=image&file=abc', $screen->url(below: 'abc/delete'));
 	}
 
 	public function testQueryHoldsTheNonEmptyParametersForHiddenInputs(): void
 	{
-		$screen = new MediaScreen('/cp/media', ['image', 'audio'], 'logo', '', 'abc', 1);
+		$screen = new MediaScreen('/panel/media', ['image', 'audio'], 'logo', '', 'abc', 1);
 
 		$this->assertSame(['kind' => 'image,audio', 'q' => 'logo', 'file' => 'abc'], $screen->query());
 		$this->assertSame(['kind' => 'image,audio', 'file' => 'abc'], $screen->query(['q' => '']));
@@ -113,7 +113,7 @@ final class MediaScreenTest extends TestCase
 
 	public function testWithFileKeepsEverythingElse(): void
 	{
-		$screen = new MediaScreen('/cp/media', ['image'], 'logo', '30d', 'abc', 2);
+		$screen = new MediaScreen('/panel/media', ['image'], 'logo', '30d', 'abc', 2);
 		$other = $screen->withFile('def');
 		$none = $screen->withFile(null);
 
@@ -130,11 +130,11 @@ final class MediaScreenTest extends TestCase
 
 	public function testRoundTripsThroughUrlAndParams(): void
 	{
-		$screen = new MediaScreen('/cp/media', ['image', 'document'], 'beer', '30d', 'a1b2', 3);
+		$screen = new MediaScreen('/panel/media', ['image', 'document'], 'beer', '30d', 'a1b2', 3);
 		$query = (string) parse_url($screen->url(['page' => $screen->page]), PHP_URL_QUERY);
 		$params = [];
 		parse_str($query, $params);
 
-		$this->assertEquals($screen, MediaScreen::fromParams('/cp/media', $params));
+		$this->assertEquals($screen, MediaScreen::fromParams('/panel/media', $params));
 	}
 }

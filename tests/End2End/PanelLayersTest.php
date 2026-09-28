@@ -56,7 +56,7 @@ final class PanelLayersTest extends End2EndTestCase
 	public function testTheDocumentMapsVendoredModulesToServedUrls(): void
 	{
 		$html = $this->layerHtml();
-		$this->assertMatchesRegularExpression('~window\.COSRAY_ASSETS_PATH = "/cp/assets/[0-9a-z]+/";~', $html);
+		$this->assertMatchesRegularExpression('~window\.COSRAY_ASSETS_PATH = "/panel/assets/[0-9a-z]+/";~', $html);
 		$document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
 		$script = $document->querySelector('script[type="importmap"]');
 		$this->assertNotNull($script);
@@ -65,7 +65,7 @@ final class PanelLayersTest extends End2EndTestCase
 
 		$url = $map['imports']['prosemirror-view'] ?? null;
 		$this->assertIsString($url);
-		$this->assertMatchesRegularExpression('~\A/cp/assets/[0-9a-z]+/modules/prosemirror-view/~', $url);
+		$this->assertMatchesRegularExpression('~\A/panel/assets/[0-9a-z]+/modules/prosemirror-view/~', $url);
 
 		$response = $this->makeRequest('GET', $url);
 
@@ -124,7 +124,7 @@ final class PanelLayersTest extends End2EndTestCase
 
 		$this->assertHtmlNodeExists('//*[@id="collection-nav" and @hx-swap-oob="true"]', $html);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/cp/collection/test-articles" and @aria-current="page"]',
+			'//a[@href="/panel/collection/test-articles" and @aria-current="page"]',
 			$html,
 		);
 	}
@@ -202,7 +202,7 @@ final class PanelLayersTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/collection/test-articles',
+			'/panel/collection/test-articles',
 			$headers === [] ? [] : ['headers' => $headers],
 		);
 		$this->assertResponseOk($response);

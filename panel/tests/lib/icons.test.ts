@@ -8,7 +8,7 @@ afterEach(() => {
 
 describe('panel icons', () => {
 	it('renders decorative scalable artwork from the served sprite', () => {
-		configureRuntime({ assetsBase: '/cp/assets/0123456789ab' });
+		configureRuntime({ assetsBase: '/panel/assets/0123456789ab' });
 		const host = document.createElement('div');
 		host.innerHTML = icon('plus');
 		const svg = host.querySelector('svg')!;
@@ -18,7 +18,7 @@ describe('panel icons', () => {
 		expect(svg.getAttribute('fill')).toBe('currentColor');
 		expect(svg.classList.contains('cms-icon')).toBe(true);
 		expect(svg.querySelector('use')?.getAttribute('href')).toBe(
-			'/cp/assets/0123456789ab/icons.svg#plus',
+			'/panel/assets/0123456789ab/icons.svg#plus',
 		);
 	});
 

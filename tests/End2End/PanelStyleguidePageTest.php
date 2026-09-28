@@ -23,7 +23,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 	{
 		$this->app = $this->createApp(['app.debug' => true]);
 
-		$response = $this->makeRequest('GET', '/cp/styleguide');
+		$response = $this->makeRequest('GET', '/panel/styleguide');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -109,7 +109,7 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 
 	public function testStyleguideIsAbsentWithoutDebug(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/styleguide');
+		$response = $this->makeRequest('GET', '/panel/styleguide');
 
 		$this->assertSame(404, $response->getStatusCode());
 	}
@@ -118,9 +118,9 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 	{
 		$this->app = $this->createApp(['app.debug' => true]);
 
-		$response = $this->makeRequest('GET', '/cp/styleguide', ['authToken' => '']);
+		$response = $this->makeRequest('GET', '/panel/styleguide', ['authToken' => '']);
 
 		$this->assertSame(303, $response->getStatusCode());
-		$this->assertStringStartsWith('/cp/login', $response->getHeaderLine('Location'));
+		$this->assertStringStartsWith('/panel/login', $response->getHeaderLine('Location'));
 	}
 }

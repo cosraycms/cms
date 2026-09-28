@@ -12,7 +12,7 @@ const system: BridgeSystem = {
 	defaultLocale: 'en',
 	locales: [{ id: 'en', title: 'English' }],
 	customLocales: [],
-	prefix: '/cp',
+	prefix: '/panel',
 	assets: '/assets',
 	debug: false,
 	allowedFiles: { file: [], image: ['image/jpeg'], video: [] },
@@ -59,7 +59,7 @@ describe('standalone bridge', () => {
 
 		expect(fetchMock).toHaveBeenCalledOnce();
 		const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
-		expect(url).toBe('/cp/media/image');
+		expect(url).toBe('/panel/media/image');
 		expect(options).toMatchObject({
 			method: 'POST',
 			credentials: 'same-origin',

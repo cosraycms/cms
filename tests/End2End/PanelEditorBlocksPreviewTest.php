@@ -56,7 +56,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/preview-blocks/blocks/contentBlocks',
+			'/panel/node/preview-blocks/blocks/contentBlocks',
 			[
 				'body' => [
 					'content' => [
@@ -137,7 +137,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 
 		$german = $this->getHtmlResponse($this->makeRequest(
 			'POST',
-			'/cp/node/preview-locales/blocks/contentBlocks',
+			'/panel/node/preview-locales/blocks/contentBlocks',
 			['query' => ['locale' => 'de'], 'body' => ['content' => []]],
 		));
 		$this->assertStringContainsString('<html lang="de">', $german);
@@ -147,7 +147,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		// An unknown locale falls back to the default one.
 		$fallback = $this->getHtmlResponse($this->makeRequest(
 			'POST',
-			'/cp/node/preview-locales/blocks/contentBlocks',
+			'/panel/node/preview-locales/blocks/contentBlocks',
 			['query' => ['locale' => 'xx'], 'body' => ['content' => []]],
 		));
 		$this->assertStringContainsString('<html lang="en">', $fallback);
@@ -161,7 +161,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		]);
 
 		$html = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/node/preview-editor'),
+			$this->makeRequest('GET', '/panel/node/preview-editor'),
 		);
 		$this->assertHtmlNodeExists(
 			'//div[@data-field="contentBlocks"]/label//button[@data-layout-preview="contentBlocks"]',
@@ -169,7 +169,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeMissing('//div[@data-field="title"]//button[@data-layout-preview]', $html);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-layout-preview-dialog][@data-url="/cp/node/preview-editor/blocks"]'
+			'//dialog[@data-layout-preview-dialog][@data-url="/panel/node/preview-editor/blocks"]'
 				. '//iframe[@sandbox="allow-same-origin"][@data-layout-preview-frame]',
 			$html,
 		);
@@ -183,7 +183,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Plain']],
 		]);
 		$plain = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/node/preview-plain'),
+			$this->makeRequest('GET', '/panel/node/preview-plain'),
 		);
 		$this->assertHtmlNodeMissing('//dialog[@data-layout-preview-dialog]', $plain);
 	}
@@ -196,17 +196,17 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 
 		$this->assertResponseStatus(404, $this->makeRequest(
 			'POST',
-			'/cp/node/preview-refused/blocks/nope',
+			'/panel/node/preview-refused/blocks/nope',
 			['body' => ['content' => []]],
 		));
 		$this->assertResponseStatus(404, $this->makeRequest(
 			'POST',
-			'/cp/node/preview-refused/blocks/title',
+			'/panel/node/preview-refused/blocks/title',
 			['body' => ['content' => []]],
 		));
 		$this->assertResponseStatus(404, $this->makeRequest(
 			'POST',
-			'/cp/node/no-such-node/blocks/contentBlocks',
+			'/panel/node/no-such-node/blocks/contentBlocks',
 			['body' => ['content' => []]],
 		));
 	}
@@ -215,7 +215,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 	{
 		$response = $this->makeRequest(
 			'POST',
-			'/cp/node/create/test-node-with-blocks/blocks/blocks',
+			'/panel/node/create/test-node-with-blocks/blocks/blocks',
 			[
 				'body' => [
 					'content' => [
@@ -252,7 +252,7 @@ final class PanelEditorBlocksPreviewTest extends End2EndTestCase
 
 		$this->assertResponseStatus(404, $this->makeRequest(
 			'POST',
-			'/cp/node/create/test-node-with-blocks/blocks/title',
+			'/panel/node/create/test-node-with-blocks/blocks/title',
 			['body' => ['content' => []]],
 		));
 	}

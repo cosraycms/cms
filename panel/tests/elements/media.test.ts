@@ -20,7 +20,7 @@ const system: BridgeSystem = {
 		{ id: 'de', title: 'Deutsch', fallback: 'en' },
 	],
 	customLocales: [],
-	prefix: '/cp',
+	prefix: '/panel',
 	assets: '/assets',
 	debug: false,
 	allowedFiles: { file: ['pdf'], image: ['png'], video: ['mp4'] },

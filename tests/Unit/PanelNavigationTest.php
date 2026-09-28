@@ -43,7 +43,7 @@ final class PanelNavigationTest extends TestCase
 		$this->navigation = new Navigation();
 		$section = $this->navigation->section('Content & media');
 		$section->collection(NavigationCollection::class);
-		$section->section('Help')->link('Help <guide>', '/cp/help');
+		$section->section('Help')->link('Help <guide>', '/panel/help');
 	}
 
 	protected function tearDown(): void
@@ -63,8 +63,8 @@ final class PanelNavigationTest extends TestCase
 			$html = new Renderer(self::root() . '/panel/views')->render('component/collections', [
 				'collections' => $this->navigation->items(),
 				'level' => 0,
-				'panelPath' => '/cp',
-				'currentPath' => '/cp/collection/articles',
+				'panelPath' => '/panel',
+				'currentPath' => '/panel/collection/articles',
 			]);
 
 			foreach ($labels as $label) {
@@ -111,7 +111,7 @@ final class PanelNavigationTest extends TestCase
 		$data = new Editor($config, $container, $request)->create($context, $cms, 'plain-block');
 		$html = new Renderer(self::root() . '/panel/views')->render('editor', $data);
 		$this->assertHtmlNodeExists(
-			'//form[@id="node-editor-form"][@action="/cp/node/create/plain-block"]',
+			'//form[@id="node-editor-form"][@action="/panel/node/create/plain-block"]',
 			$html,
 		);
 		$this->assertFalse($db->connected());

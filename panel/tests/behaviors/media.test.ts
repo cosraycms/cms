@@ -16,12 +16,12 @@ function screen(detail = ''): HTMLElement {
 		<div data-media>
 			<button type="button" data-media-upload><span data-media-upload-label>Upload</span></button>
 			<input type="file" multiple hidden data-media-upload-input />
-			<form class="search" method="get" action="/cp/media" data-media-keep-file>
+			<form class="search" method="get" action="/panel/media" data-media-keep-file>
 				<input type="hidden" name="kind" value="image" />
 				<input type="hidden" name="file" value="a" />
 				<input type="search" name="q" value="" />
 			</form>
-			<a href="/cp/media?kind=image&amp;file=a" data-media-keep-file>Reset</a>
+			<a href="/panel/media?kind=image&amp;file=a" data-media-keep-file>Reset</a>
 			<section class="cms-dropzone" data-media-drop>
 				<div data-media-grid>
 					<a data-media-tile="a" class="cms-asset-tile active" href="?file=a"></a>
@@ -65,7 +65,7 @@ beforeEach(() => {
 	} as unknown as CosrayBridge;
 	vi.stubGlobal('htmx', { ajax });
 	ajax.mockResolvedValue();
-	history.replaceState(null, '', '/cp/media?kind=image&page=3');
+	history.replaceState(null, '', '/panel/media?kind=image&page=3');
 	uninstall = install();
 });
 
@@ -104,35 +104,35 @@ describe('screen requests', () => {
 
 	it('carries the file the URL holds now, not the one the page rendered with', () => {
 		screen('b');
-		history.replaceState(null, '', '/cp/media?kind=image&file=b');
+		history.replaceState(null, '', '/panel/media?kind=image&file=b');
 		const form = document.querySelector<HTMLFormElement>('form.search')!;
 
-		const request = configure(form, '/cp/media', new FormData(form));
+		const request = configure(form, '/panel/media', new FormData(form));
 
 		expect(request.body.get('file')).toBe('b');
 		expect(request.body.get('kind')).toBe('image');
-		expect(request.action).toBe('/cp/media');
+		expect(request.action).toBe('/panel/media');
 	});
 
 	it('drops the file from a link once nothing is selected', () => {
 		screen();
-		history.replaceState(null, '', '/cp/media?kind=image');
+		history.replaceState(null, '', '/panel/media?kind=image');
 		const link = document.querySelector<HTMLAnchorElement>('a[data-media-keep-file]')!;
 
 		const request = configure(link, link.getAttribute('href')!, new FormData());
 
 		expect(request.body.has('file')).toBe(false);
-		expect(request.action).toBe('/cp/media?kind=image');
+		expect(request.action).toBe('/panel/media?kind=image');
 	});
 
 	it('leaves a tile request alone', () => {
 		screen('b');
-		history.replaceState(null, '', '/cp/media?file=b');
+		history.replaceState(null, '', '/panel/media?file=b');
 		const tile = document.querySelector<HTMLAnchorElement>('[data-media-tile="a"]')!;
 
-		const request = configure(tile, '/cp/media?file=a', new FormData());
+		const request = configure(tile, '/panel/media?file=a', new FormData());
 
-		expect(request.action).toBe('/cp/media?file=a');
+		expect(request.action).toBe('/panel/media?file=a');
 		expect(request.body.has('file')).toBe(false);
 	});
 });
@@ -207,7 +207,7 @@ describe('uploads', () => {
 
 		expect(upload).toHaveBeenNthCalledWith(2, 'file', expect.any(File));
 		expect(toastError).toHaveBeenCalledWith('two.pdf: Too large');
-		expect(ajax).toHaveBeenCalledWith('GET', '/cp/media?kind=image&file=third', {
+		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media?kind=image&file=third', {
 			target: '#main',
 			replace: 'true',
 		});
@@ -247,7 +247,7 @@ describe('uploads', () => {
 		await vi.waitFor(() =>
 			expect(ajax).toHaveBeenCalledWith(
 				'GET',
-				'/cp/media?kind=image&file=dropped',
+				'/panel/media?kind=image&file=dropped',
 				expect.anything(),
 			),
 		);

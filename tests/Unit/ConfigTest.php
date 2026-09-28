@@ -78,7 +78,7 @@ final class ConfigTest extends TestCase
 		$this->assertSame(self::root(), $config->path->root);
 		$this->assertSame(self::root() . '/public', $config->path->public);
 		$this->assertSame('', $config->app->urlPrefix);
-		$this->assertSame('/cp', $config->panel->path);
+		$this->assertSame('/panel', $config->panel->path);
 		$this->assertNull($config->app->secret);
 		$this->assertSame('UTC', $config->app->timezone->getName());
 		$this->assertSame(60 * 60 * 24 * 30, $config->auth->rememberLifetime);

@@ -37,14 +37,14 @@ final class PanelAreasTest extends End2EndTestCase
 	{
 		$this->assertStringContainsString(
 			'class="cms-sidebar"',
-			$this->html('/cp/collection/test-articles'),
+			$this->html('/panel/collection/test-articles'),
 		);
-		$this->assertStringNotContainsString('class="cms-sidebar"', $this->html('/cp'));
+		$this->assertStringNotContainsString('class="cms-sidebar"', $this->html('/panel'));
 	}
 
 	public function testTheMediaRailIsNotAnnouncedAsNavigation(): void
 	{
-		$html = $this->html('/cp/media');
+		$html = $this->html('/panel/media');
 
 		$this->assertHtmlNodeExists('//aside[@class="cms-sidebar"]//*[@data-media-rail]', $html);
 		$this->assertHtmlNodeMissing('//aside[@class="cms-sidebar"]//nav', $html);
@@ -52,27 +52,27 @@ final class PanelAreasTest extends End2EndTestCase
 
 	public function testEachAreaMarksItselfCurrent(): void
 	{
-		$dashboard = $this->html('/cp');
-		$this->assertStringContainsString('aria-current', $this->area($dashboard, '/cp'));
-		$this->assertStringNotContainsString('aria-current', $this->area($dashboard, '/cp/media'));
+		$dashboard = $this->html('/panel');
+		$this->assertStringContainsString('aria-current', $this->area($dashboard, '/panel'));
+		$this->assertStringNotContainsString('aria-current', $this->area($dashboard, '/panel/media'));
 
-		$media = $this->html('/cp/media');
-		$this->assertStringContainsString('aria-current', $this->area($media, '/cp/media'));
-		$this->assertStringNotContainsString('aria-current', $this->area($media, '/cp'));
+		$media = $this->html('/panel/media');
+		$this->assertStringContainsString('aria-current', $this->area($media, '/panel/media'));
+		$this->assertStringNotContainsString('aria-current', $this->area($media, '/panel'));
 
 		// Content is current for the whole area, not for one collection URL:
 		// the entry points at the first collection and a second one is open.
-		$collection = $this->html('/cp/collection/test-articles');
+		$collection = $this->html('/panel/collection/test-articles');
 		$this->assertStringContainsString(
 			'aria-current',
-			$this->area($collection, '/cp/collection/test-articles'),
+			$this->area($collection, '/panel/collection/test-articles'),
 		);
-		$this->assertStringNotContainsString('aria-current', $this->area($collection, '/cp'));
+		$this->assertStringNotContainsString('aria-current', $this->area($collection, '/panel'));
 	}
 
 	public function testTheContentEntryIsLabelledAndOpensTheFirstRailEntry(): void
 	{
-		$html = $this->html('/cp');
+		$html = $this->html('/panel');
 
 		$this->assertHtmlNodeCount(
 			3,
@@ -80,7 +80,7 @@ final class PanelAreasTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/cp/collection/test-articles" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
+			'//a[@href="/panel/collection/test-articles" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
 			$html,
 		);
 
@@ -92,12 +92,12 @@ final class PanelAreasTest extends End2EndTestCase
 	/** The account menu's language choices have to mark the language the panel is showing. */
 	public function testTheLanguageSwitcherMarksTheActiveLocale(): void
 	{
-		$german = $this->html('/cp', 'de');
+		$german = $this->html('/panel', 'de');
 		$this->assertHtmlNodeExists($this->localeChoice('de', 'true'), $german);
 		$this->assertHtmlNodeExists($this->localeChoice('en', 'false'), $german);
 		$this->assertStringContainsString('<html lang="de">', $german);
 
-		$english = $this->html('/cp', 'en');
+		$english = $this->html('/panel', 'en');
 		$this->assertHtmlNodeExists($this->localeChoice('en', 'true'), $english);
 		$this->assertHtmlNodeExists($this->localeChoice('de', 'false'), $english);
 		$this->assertStringContainsString('<html lang="en">', $english);

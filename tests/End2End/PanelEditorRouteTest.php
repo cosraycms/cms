@@ -75,7 +75,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-entries');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-entries');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -145,7 +145,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			]),
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-blocks');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-blocks');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -354,7 +354,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			]),
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-splits');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-splits');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -414,7 +414,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 		$this->createArticle('panel-editor-a', 'Panel Editor A');
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-a', [
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-a', [
 			'query' => [
 				'from' => 'collection:test-articles',
 				'list' => [
@@ -457,7 +457,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'content' => [],
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-media');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-media');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -508,7 +508,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			]),
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-asset-size');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-asset-size');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -523,30 +523,30 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$collection = $this->navLink(
 			$this->getHtmlResponse(
-				$this->makeRequest('GET', '/cp/collection/test-articles'),
+				$this->makeRequest('GET', '/panel/collection/test-articles'),
 			),
-			'/cp/collection/test-articles',
+			'/panel/collection/test-articles',
 		);
 		$this->assertStringContainsString('aria-current="page"', $collection);
 
 		$node = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/node/panel-editor-current', [
+			$this->makeRequest('GET', '/panel/node/panel-editor-current', [
 				'query' => ['from' => 'collection:test-articles'],
 			]),
 		);
-		$link = $this->navLink($node, '/cp/collection/test-articles');
+		$link = $this->navLink($node, '/panel/collection/test-articles');
 
 		$this->assertStringContainsString('aria-current="page"', $link);
 		$this->assertStringNotContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/cp', 'area'),
+			$this->navLink($node, '/panel', 'area'),
 		);
 
 		// The editor belongs to content, so the masthead says so while the
 		// node is open — the rail entry alone is not the whole answer.
 		$this->assertStringContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/cp/collection/test-articles', 'area'),
+			$this->navLink($node, '/panel/collection/test-articles', 'area'),
 		);
 	}
 
@@ -561,14 +561,14 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			['HX-Request' => 'true', 'HX-Target' => 'div#frame'],
 			['HX-History-Restore-Request' => 'true'],
 		] as $headers) {
-			$response = $this->makeRequest('GET', '/cp/node/direct-node', ['headers' => $headers]);
+			$response = $this->makeRequest('GET', '/panel/node/direct-node', ['headers' => $headers]);
 			$this->assertResponseOk($response);
 			$html = $this->getHtmlResponse($response);
-			$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/cp/node/direct-node"]', $html);
-			$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/cp"][@hx-target="#frame"]', $html);
+			$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/panel/node/direct-node"]', $html);
+			$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/panel"][@hx-target="#frame"]', $html);
 			$this->assertStringNotContainsString(
 				'aria-current="page"',
-				$this->navLink($html, '/cp/collection/test-articles'),
+				$this->navLink($html, '/panel/collection/test-articles'),
 			);
 		}
 	}
@@ -591,7 +591,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-when');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-when');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -634,7 +634,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			],
 		]);
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-lines');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-lines');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -664,7 +664,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 		$response = $this->makeRequest(
 			'GET',
-			'/cp/node/panel-editor-fieldset',
+			'/panel/node/panel-editor-fieldset',
 		);
 
 		$this->assertResponseOk($response);
@@ -690,7 +690,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 				'title' => ['type' => 'text', 'value' => ['en' => 'A Page']],
 			],
 		]);
-		$response = $this->makeRequest('GET', '/cp/node/' . $uid);
+		$response = $this->makeRequest('GET', '/panel/node/' . $uid);
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -753,7 +753,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 				'title' => ['type' => 'text', 'value' => ['en' => 'A Page']],
 			],
 		]);
-		$uri = '/cp/node/' . $uid;
+		$uri = '/panel/node/' . $uid;
 
 		$this->assertHtmlNodeMissing(
 			'//aside[@data-inspector][@data-collapsed]',
@@ -779,7 +779,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 				'title' => ['type' => 'text', 'value' => ['en' => 'Titled Page']],
 			],
 		]);
-		$response = $this->makeRequest('GET', '/cp/node/' . $uid);
+		$response = $this->makeRequest('GET', '/panel/node/' . $uid);
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -797,7 +797,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 		$this->createArticle('panel-editor-boosted', 'Panel Editor Boosted');
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-boosted', [
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-boosted', [
 			'headers' => [
 				'HX-Request' => 'true',
 				'HX-Boosted' => 'true',
@@ -815,7 +815,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 		$this->createArticle('panel-editor-link', 'Panel Editor Link');
-		$response = $this->makeRequest('GET', '/cp/collection/test-articles', [
+		$response = $this->makeRequest('GET', '/panel/collection/test-articles', [
 			'query' => [
 				'q' => 'Panel Editor',
 				'sort' => 'title',
@@ -827,7 +827,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString(
-			'href="/cp/node/panel-editor-link?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Blimit%5D=10"',
+			'href="/panel/node/panel-editor-link?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		$this->assertStringContainsString('class="value link"', $html);
@@ -838,21 +838,21 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->authenticateAs('editor');
 		$this->createArticle('panel-editor-stale', 'Still editable');
 
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-stale', [
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-stale', [
 			'query' => ['from' => 'collection:removed'],
 		]);
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/cp/node/panel-editor-stale"]', $html);
-		$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/cp"]', $html);
+		$this->assertHtmlNodeExists('//form[@id="node-editor-form"][@action="/panel/node/panel-editor-stale"]', $html);
+		$this->assertHtmlNodeExists('//nav[@class="breadcrumb"]/a[@href="/panel"]', $html);
 	}
 
 	public function testEditorReturnStateRejectsUnknownCollectionSorts(): void
 	{
 		$this->authenticateAs('editor');
 		$this->createArticle('panel-editor-sort', 'Editor sort');
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-sort', [
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-sort', [
 			'query' => ['from' => 'collection:test-articles', 'list' => ['sort' => 'not-allowed']],
 		]);
 		$this->assertResponseStatus(400, $response);
@@ -860,11 +860,11 @@ final class PanelEditorRouteTest extends End2EndTestCase
 
 	public function testPanelEditorRouteRedirectsGuestToLogin(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/node/panel-editor-a');
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-a');
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame(
-			'/cp/login?next=%2Fcp%2Fnode%2Fpanel-editor-a',
+			'/panel/login?next=%2Fpanel%2Fnode%2Fpanel-editor-a',
 			$response->getHeaderLine('Location'),
 		);
 	}
@@ -877,7 +877,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('id="node-editor-form"', $html);
 		$this->assertStringContainsString('class="panes"', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/panel-editor-a?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
+			'action="/panel/node/panel-editor-a?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		$this->assertStringContainsString('name="content[title][value][en]"', $html);
@@ -894,7 +894,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('data-fallback-source', $html);
 		$this->assertHtmlNodeExists('//input[@name="content[title][value][de]" and @value=""]', $html);
 		$this->assertStringContainsString(
-			'action="/cp/node/panel-editor-a/delete?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
+			'action="/panel/node/panel-editor-a/delete?from=collection%3Atest-articles&amp;list%5Bq%5D=Panel%20Editor&amp;list%5Bsort%5D=title&amp;list%5Bdir%5D=asc&amp;list%5Boffset%5D=20&amp;list%5Blimit%5D=10"',
 			$html,
 		);
 		// Native validation cannot handle legitimately hidden controls

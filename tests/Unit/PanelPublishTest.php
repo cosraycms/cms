@@ -86,7 +86,7 @@ final class PanelPublishTest extends TestCase
 
 	public static function panelPaths(): iterable
 	{
-		yield 'default' => ['/cp'];
+		yield 'default' => ['/panel'];
 		yield 'nested' => ['/admin/panel/'];
 		yield 'root' => ['/'];
 	}
@@ -95,7 +95,7 @@ final class PanelPublishTest extends TestCase
 	{
 		$config = $this->settings();
 		$before = new Client($config, $this->root . '/panel');
-		$this->write('web/cp/application.txt', 'application content');
+		$this->write('web/panel/application.txt', 'application content');
 		$this->publish($config, $before);
 		$this->publish($config, $before);
 		$this->write('panel/src/panel.js', 'export const updated = true;');
@@ -108,8 +108,8 @@ final class PanelPublishTest extends TestCase
 			'export const updated = true;',
 			file_get_contents($config->path->public . $after->url('src/panel.js')),
 		);
-		$this->assertSame('application content', file_get_contents($this->root . '/web/cp/application.txt'));
-		$this->assertSame([], glob($this->root . '/web/cp/assets/.publish-*'));
+		$this->assertSame('application content', file_get_contents($this->root . '/web/panel/application.txt'));
+		$this->assertSame([], glob($this->root . '/web/panel/assets/.publish-*'));
 	}
 
 	public function testAnExistingRevisionIsNotOverwritten(): void
@@ -136,7 +136,7 @@ final class PanelPublishTest extends TestCase
 	{
 		$this->write('outside/keep.txt', 'keep');
 		mkdir($this->root . '/web');
-		symlink($this->root . '/outside', $this->root . '/web/cp');
+		symlink($this->root . '/outside', $this->root . '/web/panel');
 		$config = $this->settings();
 		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage('symlink');

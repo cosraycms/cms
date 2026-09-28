@@ -155,14 +155,14 @@ final class CollectionSortingTest extends TestCase
 			Column::new('Unsorted title', 'title')->sort('title')->sort(null),
 		];
 		$urls = new CollectionUrls(
-			'/cp',
+			'/panel',
 			'content',
 			new CollectionQuery(q: 'term', sort: 'title', dir: 'asc', offset: 20, limit: 10),
 		);
 		$table = CollectionTable::from($columns, [], $urls, new CollectionListMeta(), 'en', new DateTimeZone('UTC'));
-		$this->assertSame('/cp/collection/content?q=term&sort=title&dir=desc&limit=10', $table->headers[0]['url']);
+		$this->assertSame('/panel/collection/content?q=term&sort=title&dir=desc&limit=10', $table->headers[0]['url']);
 		$this->assertSame('ascending', $table->headers[0]['ariaSort']);
-		$this->assertSame('/cp/collection/content?q=term&sort=changed&dir=desc&limit=10', $table->headers[1]['url']);
+		$this->assertSame('/panel/collection/content?q=term&sort=changed&dir=desc&limit=10', $table->headers[1]['url']);
 		$this->assertNull($table->headers[1]['ariaSort']);
 		$this->assertNull($table->headers[2]['url']);
 	}

@@ -111,7 +111,7 @@ function editor(rows: Row[], types = [TEXT, QUOTE]): { rows: () => HTMLElement[]
 		defaultLocale: 'en',
 		locales: [],
 		customLocales: [],
-		prefix: '/cp',
+		prefix: '/panel',
 		assets: '',
 		debug: false,
 		allowedFiles: { file: [], image: [], video: [] },

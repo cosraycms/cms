@@ -217,7 +217,7 @@ function editor(rows: Layout[]): {
 		defaultLocale: 'en',
 		locales: [],
 		customLocales: [],
-		prefix: '/cp',
+		prefix: '/panel',
 		assets: '',
 		debug: false,
 		allowedFiles: { file: [], image: [], video: [] },

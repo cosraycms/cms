@@ -7,8 +7,8 @@ vi.mock('../../src/lib/locale.js', () => ({
 	__: (id: string, params?: { count: number }) => (params ? `${id}: ${params.count}` : id),
 }));
 vi.mock('../../src/lib/runtime.js', () => ({
-	panelBase: () => '/cp/',
-	assetsBase: () => '/cp/assets/dev/',
+	panelBase: () => '/panel/',
+	assetsBase: () => '/panel/assets/dev/',
 }));
 
 const fetchMock = vi.fn<typeof fetch>();

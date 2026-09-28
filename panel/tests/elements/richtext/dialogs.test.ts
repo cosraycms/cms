@@ -16,7 +16,7 @@ beforeEach(() => {
 		defaultLocale: 'en',
 		locales: [{ id: 'en', title: 'English' }],
 		customLocales: [],
-		prefix: '/cp',
+		prefix: '/panel',
 		assets: '/assets',
 		debug: false,
 		allowedFiles: { file: [], image: ['png'], video: [] },

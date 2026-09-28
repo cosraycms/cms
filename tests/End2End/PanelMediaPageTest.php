@@ -39,7 +39,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$image = $this->upload('e2e-page-photo.png', 'image/png');
 		$this->upload('e2e-page-notes.pdf', 'application/pdf', 'file');
 
-		$html = $this->html('/cp/media');
+		$html = $this->html('/panel/media');
 
 		$this->assertHtmlNodeExists('//div[@data-content-locale-scope][@data-content-locale="en"][@data-media]', $html);
 		$this->assertHtmlNodeExists("//a[@data-media-tile='{$image}'][contains(@href, 'file={$image}')]", $html);
@@ -55,7 +55,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertHtmlNodeExists('//div[@id="media-detail"]//*[@class="cms-media-inspector-empty"]', $html);
 		// Uploads report through the bridge the system payload installs.
 		$this->assertStringContainsString('id="cosray-system-data"', $html);
-		$this->assertStringContainsString('href="/cp/media"', $html);
+		$this->assertStringContainsString('href="/panel/media"', $html);
 		$this->assertStringNotContainsString('cosray-media-library', $html);
 	}
 
@@ -64,7 +64,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->upload('e2e-filter-photo.png', 'image/png');
 		$this->upload('e2e-filter-notes.pdf', 'application/pdf', 'file');
 
-		$images = $this->html('/cp/media', ['kind' => ['image']]);
+		$images = $this->html('/panel/media', ['kind' => ['image']]);
 
 		$this->assertStringContainsString('e2e-filter-photo.png', $images);
 		$this->assertStringNotContainsString('e2e-filter-notes.pdf', $images);
@@ -74,12 +74,12 @@ final class PanelMediaPageTest extends End2EndTestCase
 			'//form[@class="search"]/input[@type="hidden"][@name="kind"][@value="image"]',
 			$images,
 		);
-		$this->assertHtmlNodeExists('//a[@class="cms-media-reset"][@href="/cp/media"]', $images);
+		$this->assertHtmlNodeExists('//a[@class="cms-media-reset"][@href="/panel/media"]', $images);
 		// Both take the selected file from the URL at request time (behaviors/media.js).
 		$this->assertHtmlNodeExists('//form[@class="search"][@data-media-keep-file]', $images);
 		$this->assertHtmlNodeExists('//*[@data-media-rail]/form[@data-media-keep-file]', $images);
 
-		$search = $this->html('/cp/media', ['q' => 'notes']);
+		$search = $this->html('/panel/media', ['q' => 'notes']);
 
 		$this->assertStringContainsString('e2e-filter-notes.pdf', $search);
 		$this->assertStringNotContainsString('e2e-filter-photo.png', $search);
@@ -90,11 +90,15 @@ final class PanelMediaPageTest extends End2EndTestCase
 	{
 		$uid = $this->upload('e2e-detail-photo.png', 'image/png');
 
-		$html = $this->html('/cp/media', ['file' => $uid], ['HX-Request' => 'true', 'HX-Target' => 'div#media-detail']);
+		$html = $this->html(
+			'/panel/media',
+			['file' => $uid],
+			['HX-Request' => 'true', 'HX-Target' => 'div#media-detail'],
+		);
 
 		$this->assertStringStartsWith('<div id="media-detail"', trim($html));
 		$this->assertStringNotContainsString('cms-masthead', $html);
-		$this->assertHtmlNodeExists("//form[@hx-post='/cp/media/{$uid}?file={$uid}']", $html);
+		$this->assertHtmlNodeExists("//form[@hx-post='/panel/media/{$uid}?file={$uid}']", $html);
 		$this->assertHtmlNodeExists('//div[@class="variant"][@data-locale="en"]//input[@name="meta[alt][en]"]', $html);
 		$this->assertHtmlNodeExists(
 			'//div[@class="variant"][@data-locale="de"][@hidden]//input[@name="meta[alt][de]"]',
@@ -102,7 +106,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//input[@type="hidden"][@name="meta[focal][x]"]', $html);
 		$this->assertHtmlNodeExists(
-			"//dialog[@data-media-delete-dialog]//form[@action='/cp/media/{$uid}/delete?file={$uid}']",
+			"//dialog[@data-media-delete-dialog]//form[@action='/panel/media/{$uid}/delete?file={$uid}']",
 			$html,
 		);
 
@@ -112,7 +116,11 @@ final class PanelMediaPageTest extends End2EndTestCase
 			['uid' => $uid],
 		)->run();
 
-		$used = $this->html('/cp/media', ['file' => $uid], ['HX-Request' => 'true', 'HX-Target' => 'div#media-detail']);
+		$used = $this->html(
+			'/panel/media',
+			['file' => $uid],
+			['HX-Request' => 'true', 'HX-Target' => 'div#media-detail'],
+		);
 
 		$this->assertHtmlNodeExists(
 			'//section[@class="cms-detail-usage"]//span[@class="cms-detail-usage-title"][text()="e2e-detail-owner"]',
@@ -126,13 +134,13 @@ final class PanelMediaPageTest extends End2EndTestCase
 			$this->upload(sprintf('e2e-page-%02d.pdf', $i), 'application/pdf', 'file');
 		}
 
-		$first = $this->html('/cp/media', ['q' => 'e2e-page-']);
+		$first = $this->html('/panel/media', ['q' => 'e2e-page-']);
 
 		$this->assertSame(60, substr_count($first, 'data-media-tile='));
 		$this->assertHtmlNodeExists('//div[@data-media-grid]/a[@id="media-more"][contains(@href, "page=2")]', $first);
 
 		$next = $this->html(
-			'/cp/media',
+			'/panel/media',
 			['q' => 'e2e-page-', 'page' => '2'],
 			[
 				'HX-Request' => 'true',
@@ -150,12 +158,12 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$image = $this->upload('e2e-picker-photo.png', 'image/png');
 		$this->upload('e2e-picker-notes.pdf', 'application/pdf', 'file');
 
-		$html = $this->html('/cp/media/picker', ['kind' => 'image', 'file' => $image]);
+		$html = $this->html('/panel/media/picker', ['kind' => 'image', 'file' => $image]);
 
 		$this->assertStringStartsWith('<div class="cms-library" data-media-picker>', trim($html));
 		$this->assertStringNotContainsString('cms-masthead', $html);
 		$this->assertStringNotContainsString('e2e-picker-notes.pdf', $html);
-		$this->assertHtmlNodeExists('//form[@hx-get="/cp/media/picker"]/input[@name="kind"][@value="image"]', $html);
+		$this->assertHtmlNodeExists('//form[@hx-get="/panel/media/picker"]/input[@name="kind"][@value="image"]', $html);
 		$document = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
 		$tile = $document->querySelector('button.cms-asset-tile.active[data-pick]');
 		$this->assertNotNull($tile);
@@ -165,7 +173,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertSame('image', $item['kind']);
 
 		$more = $this->html(
-			'/cp/media/picker',
+			'/panel/media/picker',
 			['kind' => 'image', 'page' => '2'],
 			[
 				'HX-Request' => 'true',
@@ -183,13 +191,13 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$document = $this->upload('e2e-search-notes.pdf', 'application/pdf', 'file');
 		$this->upload('e2e-other-photo.png', 'image/png');
 
-		$all = $this->getJsonResponse($this->makeRequest('GET', '/cp/media/search', [
+		$all = $this->getJsonResponse($this->makeRequest('GET', '/panel/media/search', [
 			'query' => ['kind' => '', 'q' => 'e2e-search'],
 		]));
 
 		$this->assertEqualsCanonicalizing([$image, $document], array_column($all['assets'], 'uid'));
 
-		$images = $this->getJsonResponse($this->makeRequest('GET', '/cp/media/search', [
+		$images = $this->getJsonResponse($this->makeRequest('GET', '/panel/media/search', [
 			'query' => ['kind' => 'image', 'q' => 'e2e-search'],
 		]));
 
@@ -202,7 +210,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 	{
 		$uid = $this->upload('e2e-save-photo.png', 'image/png');
 
-		$response = $this->makeRequest('POST', "/cp/media/{$uid}", [
+		$response = $this->makeRequest('POST', "/panel/media/{$uid}", [
 			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded', 'HX-Request' => 'true'],
 			'body' => http_build_query([
 				'meta' => [
@@ -247,14 +255,14 @@ final class PanelMediaPageTest extends End2EndTestCase
 			['uid' => $used],
 		)->run();
 
-		$deleted = $this->makeRequest('POST', "/cp/media/{$gone}/delete", [
+		$deleted = $this->makeRequest('POST', "/panel/media/{$gone}/delete", [
 			'query' => ['kind' => 'image', 'file' => $gone],
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
 		$this->assertResponseOk($deleted);
 		$this->assertSame(
-			['path' => '/cp/media?kind=image', 'target' => '#main'],
+			['path' => '/panel/media?kind=image', 'target' => '#main'],
 			json_decode($deleted->getHeaderLine('HX-Location'), true),
 		);
 		$this->assertSame(
@@ -267,7 +275,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertDirectoryDoesNotExist($assetDir);
 		$this->assertDirectoryDoesNotExist($cacheDir);
 
-		$blocked = $this->makeRequest('POST', "/cp/media/{$used}/delete", [
+		$blocked = $this->makeRequest('POST', "/panel/media/{$used}/delete", [
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
@@ -281,23 +289,23 @@ final class PanelMediaPageTest extends End2EndTestCase
 			$this->db()->execute('SELECT 1 FROM cms.assets WHERE uid = :uid', ['uid' => $used])->all(),
 		);
 
-		$plain = $this->makeRequest('POST', '/cp/media/nope-no-such-uid/delete');
+		$plain = $this->makeRequest('POST', '/panel/media/nope-no-such-uid/delete');
 		$this->assertSame(404, $plain->getStatusCode());
 	}
 
 	public function testTheInspectorArrivesInItsRememberedState(): void
 	{
-		$html = $this->html('/cp/media', [], [], ['cosray_inspector' => 'collapsed']);
+		$html = $this->html('/panel/media', [], [], ['cosray_inspector' => 'collapsed']);
 
 		$this->assertHtmlNodeExists('//aside[@class="cms-inspector"][@data-collapsed]', $html);
 	}
 
 	public function testMediaPageRequiresAuthentication(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/media', ['authToken' => '']);
+		$response = $this->makeRequest('GET', '/panel/media', ['authToken' => '']);
 
 		$this->assertSame(303, $response->getStatusCode());
-		$this->assertStringStartsWith('/cp/login', $response->getHeaderLine('Location'));
+		$this->assertStringStartsWith('/panel/login', $response->getHeaderLine('Location'));
 	}
 
 	/**

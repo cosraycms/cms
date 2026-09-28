@@ -99,7 +99,7 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertTrue($json['ok']);
 		$this->assertSame('image', $json['kind']);
 
-		$images = $this->getHtmlResponse($this->makeRequest('GET', '/cp/media', ['query' => ['kind' => ['image']]]));
+		$images = $this->getHtmlResponse($this->makeRequest('GET', '/panel/media', ['query' => ['kind' => ['image']]]));
 
 		$this->assertStringContainsString('e2e-upload-logo.png', $images);
 	}

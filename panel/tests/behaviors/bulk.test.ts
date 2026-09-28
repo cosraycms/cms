@@ -271,14 +271,14 @@ describe('bulk selection', () => {
 
 	it('drops the notice param at install time', () => {
 		uninstall?.();
-		history.replaceState(null, '', '/cp/collection/x?q=foo&notice=deleted:1');
+		history.replaceState(null, '', '/panel/collection/x?q=foo&notice=deleted:1');
 		uninstall = install();
 
 		expect(window.location.search).toBe('?q=foo');
 	});
 
 	it('drops the notice param after a swap settles', async () => {
-		history.replaceState(null, '', '/cp/collection/x?notice=deleted:1');
+		history.replaceState(null, '', '/panel/collection/x?notice=deleted:1');
 		document.dispatchEvent(new Event('htmx:after:swap'));
 		await new Promise((resolve) => setTimeout(resolve, 1));
 

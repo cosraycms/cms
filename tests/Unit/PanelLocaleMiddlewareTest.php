@@ -134,7 +134,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 		$request = $this
 			->factory()
 			->serverRequestFactory()
-			->createServerRequest('GET', '/cp');
+			->createServerRequest('GET', '/panel');
 
 		new PanelLocale($this->config())->process($request, $handler);
 
@@ -147,7 +147,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 		return $this
 			->factory()
 			->serverRequestFactory()
-			->createServerRequest('GET', '/cp')
+			->createServerRequest('GET', '/panel')
 			->withAttribute('locales', new Locales());
 	}
 

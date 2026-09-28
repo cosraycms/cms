@@ -41,7 +41,7 @@ final class PanelClientTest extends TestCase
 		$client = $this->client();
 
 		$this->assertMatchesRegularExpression('/\A(?:[0-9a-f]{12}|dev)\z/', $client->version());
-		$this->assertSame("/cp/assets/{$client->version()}/src/panel.js", $client->url('src/panel.js'));
+		$this->assertSame("/panel/assets/{$client->version()}/src/panel.js", $client->url('src/panel.js'));
 		$this->assertSame(
 			"/assets/{$client->version()}/styles/panel.css",
 			$this->client(['panel.path' => '/'])->url('/styles/panel.css'),
@@ -120,7 +120,7 @@ final class PanelClientTest extends TestCase
 			'packages' => ['prosemirror-view' => '1.42.3'],
 		]));
 		$client = $this->client();
-		$base = "/cp/assets/{$client->version()}/modules/";
+		$base = "/panel/assets/{$client->version()}/modules/";
 
 		$this->assertSame(
 			[

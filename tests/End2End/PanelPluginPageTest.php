@@ -28,7 +28,7 @@ final class PanelPluginPageTest extends End2EndTestCase
 	public function testPluginPanelPageRendersInsideChrome(): void
 	{
 		$this->authenticateAs('editor');
-		$response = $this->makeRequest('GET', '/cp/test-plugin');
+		$response = $this->makeRequest('GET', '/panel/test-plugin');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -37,15 +37,15 @@ final class PanelPluginPageTest extends End2EndTestCase
 		$this->assertStringContainsString('<h1>Test Plugin Page</h1>', $html);
 		// The plugin's nav link renders in the sidebar with the section label.
 		$this->assertStringContainsString('Test Plugin', $html);
-		$this->assertStringContainsString('href="/cp/test-plugin"', $html);
+		$this->assertStringContainsString('href="/panel/test-plugin"', $html);
 		$this->assertStringContainsString('aria-current="page"', $html);
 		// Injected plugin stylesheet is linked from the chrome.
-		$this->assertStringContainsString('/cp/vendor/test-plugin/theme.css', $html);
+		$this->assertStringContainsString('/panel/vendor/test-plugin/theme.css', $html);
 	}
 
 	public function testPluginPanelPageRequiresAuthentication(): void
 	{
-		$response = $this->makeRequest('GET', '/cp/test-plugin');
+		$response = $this->makeRequest('GET', '/panel/test-plugin');
 
 		$this->assertSame(303, $response->getStatusCode());
 	}
@@ -54,17 +54,17 @@ final class PanelPluginPageTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$js = $this->makeRequest('GET', '/cp/vendor/test-plugin/controls.js');
+		$js = $this->makeRequest('GET', '/panel/vendor/test-plugin/controls.js');
 		$this->assertResponseOk($js);
 		$this->assertStringContainsString('test-money', (string) $js->getBody());
 
-		$css = $this->makeRequest('GET', '/cp/vendor/test-plugin/theme.css');
+		$css = $this->makeRequest('GET', '/panel/vendor/test-plugin/theme.css');
 		$this->assertResponseOk($css);
 
-		$missing = $this->makeRequest('GET', '/cp/vendor/unknown/controls.js');
+		$missing = $this->makeRequest('GET', '/panel/vendor/unknown/controls.js');
 		$this->assertSame(404, $missing->getStatusCode());
 
-		$escape = $this->makeRequest('GET', '/cp/vendor/test-plugin/../TestPlugin.php');
+		$escape = $this->makeRequest('GET', '/panel/vendor/test-plugin/../TestPlugin.php');
 		$this->assertSame(404, $escape->getStatusCode());
 	}
 }

@@ -54,7 +54,7 @@ final class PanelBlockCatalogTest extends End2EndTestCase
 				],
 			]),
 		]);
-		$response = $this->makeRequest('GET', '/cp/node/catalog-editor', ['headers' => [
+		$response = $this->makeRequest('GET', '/panel/node/catalog-editor', ['headers' => [
 			'Accept-Language' => $language,
 		]]);
 		$this->assertResponseOk($response);

@@ -105,7 +105,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('grandchild-a', 'child-a');
 		$this->createItem('root-b', position: 2);
 
-		$response = $this->makeRequest('GET', '/cp/menus/tree-menu');
+		$response = $this->makeRequest('GET', '/panel/menus/tree-menu');
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
@@ -114,7 +114,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertStringContainsString('Item grandchild-a', $html);
 		$this->assertStringContainsString('?item=root-a', $html);
 		$this->assertStringContainsString('?add=root-a', $html);
-		$this->assertStringContainsString('/cp/menus/tree-menu/item/root-a/move', $html);
+		$this->assertStringContainsString('/panel/menus/tree-menu/item/root-a/move', $html);
 		// The delete confirm counts the whole subtree below the item.
 		$this->assertStringContainsString(
 			'and its 2 child items',
@@ -134,7 +134,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		]);
 
 		$html = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?item=selected-item'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?item=selected-item'),
 		);
 
 		$this->assertHtmlNodeExists(
@@ -148,7 +148,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 				. '//*[@data-content-locale-control]/*[@data-content-locale-option="de"]',
 			$html,
 		);
-		$form = '//form[@action="/cp/menus/tree-menu/item/selected-item"]';
+		$form = '//form[@action="/panel/menus/tree-menu/item/selected-item"]';
 		$this->assertHtmlNodeExists(
 			"{$form}//label[@for=\"menu-item-title-en\" and @data-locale-label-for=\"menu-item-title\"]",
 			$html,
@@ -170,19 +170,19 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		// The kebab link carries the anchor into the create pane.
 		$pane = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-a'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?after=ins-a'),
 		);
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="after" and @value="ins-a"]',
+			'//form[@action="/panel/menus/tree-menu/item/create"]//input[@name="after" and @value="ins-a"]',
 			$pane,
 		);
 		// A root anchor means no parent; the drag form's own empty one aside.
 		$this->assertHtmlNodeMissing(
-			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="parent" and starts-with(@value, "ins-")]',
+			'//form[@action="/panel/menus/tree-menu/item/create"]//input[@name="parent" and starts-with(@value, "ins-")]',
 			$pane,
 		);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'Inserted'],
@@ -203,14 +203,14 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('above-b', null, 2);
 
 		$pane = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?before=above-a'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?before=above-a'),
 		);
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="before" and @value="above-a"]',
+			'//form[@action="/panel/menus/tree-menu/item/create"]//input[@name="before" and @value="above-a"]',
 			$pane,
 		);
 
-		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'First now'],
@@ -231,15 +231,15 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('ins-child', 'ins-parent', 1);
 
 		$pane = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?after=ins-child'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?after=ins-child'),
 		);
 		// The anchor's group, not the anchor itself, is the new parent.
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/tree-menu/item/create"]//input[@name="parent" and @value="ins-parent"]',
+			'//form[@action="/panel/menus/tree-menu/item/create"]//input[@name="parent" and @value="ins-parent"]',
 			$pane,
 		);
 
-		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'Sibling'],
@@ -267,7 +267,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		$this->assertResponseStatus(
 			404,
-			$this->makeRequest('GET', '/cp/menus/tree-menu?after=foreign-anchor'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?after=foreign-anchor'),
 		);
 	}
 
@@ -277,11 +277,11 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		foreach (['', '?item=busy-item', '?add=busy-item'] as $state) {
 			$html = $this->getHtmlResponse(
-				$this->makeRequest('GET', '/cp/menus/tree-menu' . $state),
+				$this->makeRequest('GET', '/panel/menus/tree-menu' . $state),
 			);
 
 			$this->assertHtmlNodeExists(
-				'//a[@href="/cp/menus/tree-menu?add=" and contains(concat(" ", normalize-space(@class), " "), " add ")]',
+				'//a[@href="/panel/menus/tree-menu?add=" and contains(concat(" ", normalize-space(@class), " "), " add ")]',
 				$html,
 			);
 		}
@@ -289,14 +289,14 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 	public function testTheAssetPickersSearchThePanelMediaSearch(): void
 	{
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu?add='));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu?add='));
 
 		$this->assertHtmlNodeExists(
-			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/cp/media/search?kind="]',
+			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/panel/media/search?kind="]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/cp/media/search?kind=image"]',
+			'//*[@data-menu-picker="assets"][@data-menu-picker-url="/panel/media/search?kind=image"]',
 			$html,
 		);
 	}
@@ -309,14 +309,14 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'path' => ['en' => '/parent'],
 		]);
 
-		$root = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu?add='));
-		$this->assertStringContainsString('action="/cp/menus/tree-menu/item/create"', $root);
+		$root = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu?add='));
+		$this->assertStringContainsString('action="/panel/menus/tree-menu/item/create"', $root);
 		// Only the drag form carries a parent input (empty); the pane's
 		// create form preselects none.
 		$this->assertStringNotContainsString('name="parent" value="add-parent"', $root);
 
 		$below = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?add=add-parent'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?add=add-parent'),
 		);
 		$this->assertStringContainsString('name="parent" value="add-parent"', $below);
 		$this->assertStringContainsString('Below &quot;The Parent&quot;', $below);
@@ -324,16 +324,16 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 	public function testCreatesUrlItemsAppended(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'url', 'title' => ['en' => 'First'], 'path' => ['en' => '/first']],
 		]);
 
 		$this->assertResponseStatus(303, $response);
 		$location = $response->getHeaderLine('Location');
-		$this->assertStringContainsString('/cp/menus/tree-menu?item=', $location);
+		$this->assertStringContainsString('/panel/menus/tree-menu?item=', $location);
 		$this->assertStringContainsString('notice=item-created', $location);
 
-		$this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'url', 'title' => ['en' => 'Second'], 'path' => ['en' => '/second']],
 		]);
 
@@ -345,7 +345,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 	public function testCreatesNodeItemAndRequiresAnExistingNode(): void
 	{
-		$rejected = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$rejected = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'node', 'node' => 'never-was'],
 		]);
 		$this->assertResponseOk($rejected);
@@ -362,7 +362,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Target']]],
 		]);
 
-		$accepted = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$accepted = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'node', 'node' => 'menu-tree-target'],
 		]);
 		$this->assertResponseStatus(303, $accepted);
@@ -378,7 +378,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('rewrite-me');
 		$this->insertAsset('menu-tree-icon');
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/rewrite-me', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/rewrite-me', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'Renamed'],
@@ -407,7 +407,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 	public function testRejectsMalformedUrls(): void
 	{
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'url', 'title' => ['en' => 'Evil'], 'path' => ['en' => 'javascript:alert(1)']],
 		]);
 
@@ -425,13 +425,13 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('move-b', position: 2);
 		$this->createItem('move-c', position: 3);
 
-		$up = $this->makeRequest('POST', '/cp/menus/tree-menu/item/move-c/move', [
+		$up = $this->makeRequest('POST', '/panel/menus/tree-menu/item/move-c/move', [
 			'body' => ['direction' => 'up'],
 		]);
 		$this->assertResponseStatus(303, $up);
 		$this->assertSame(['move-a', 'move-c', 'move-b'], $this->order());
 
-		$down = $this->makeRequest('POST', '/cp/menus/tree-menu/item/move-a/move', [
+		$down = $this->makeRequest('POST', '/panel/menus/tree-menu/item/move-a/move', [
 			'body' => ['direction' => 'down'],
 		]);
 		$this->assertResponseStatus(303, $down);
@@ -445,7 +445,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('drag-y', 'drag-parent', 2);
 		$this->createItem('drag-moved', position: 2);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/drag-moved/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/drag-moved/move', [
 			'body' => ['parent' => 'drag-parent', 'index' => 1],
 		]);
 
@@ -459,7 +459,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('cycle-parent');
 		$this->createItem('cycle-child', 'cycle-parent');
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/cycle-parent/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/cycle-parent/move', [
 			'body' => ['parent' => 'cycle-child', 'index' => 0],
 		]);
 
@@ -477,7 +477,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('ind-child', 'ind-first', 1);
 		$this->createItem('ind-second', null, 2);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/ind-second/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/ind-second/move', [
 			'body' => ['direction' => 'in'],
 		]);
 
@@ -493,7 +493,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('out-child', 'out-parent', 1);
 		$this->createItem('out-after', null, 2);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/out-child/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/out-child/move', [
 			'body' => ['direction' => 'out'],
 		]);
 
@@ -508,7 +508,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('aria-parent', null, 1);
 		$this->createItem('aria-child', 'aria-parent', 1);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 
 		$this->assertHtmlNodeExists('//*[@role="tree" and @data-menu-tree="tree-menu"]', $html);
 		$this->assertHtmlNodeExists('//li[@role="treeitem"]/*[@role="group"]', $html);
@@ -535,7 +535,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('undo-a', 'undo-parent', 1);
 		$this->createItem('undo-b', 'undo-parent', 2);
 
-		$moved = $this->makeRequest('POST', '/cp/menus/tree-menu/item/undo-b/move', [
+		$moved = $this->makeRequest('POST', '/panel/menus/tree-menu/item/undo-b/move', [
 			'body' => ['direction' => 'out'],
 		]);
 
@@ -555,7 +555,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 		$this->assertStringContainsString('“Item undo-b” moved.', $html);
 
-		$undone = $this->makeRequest('POST', '/cp/menus/tree-menu/item/undo-b/move', [
+		$undone = $this->makeRequest('POST', '/panel/menus/tree-menu/item/undo-b/move', [
 			'body' => ['parent' => 'undo-parent', 'index' => '1'],
 		]);
 
@@ -568,7 +568,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 	{
 		$this->createItem('reject-root');
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/reject-root/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/reject-root/move', [
 			'body' => ['direction' => 'out'],
 		]);
 
@@ -586,7 +586,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('edge-first', null, 1);
 		$this->createItem('edge-child', 'edge-first', 1);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 
 		// A first root item can neither move up nor indent, and has no parent
 		// to outdent from; its child can do both but not move among siblings.
@@ -607,7 +607,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('lone-root');
 
 		foreach (['in', 'out'] as $direction) {
-			$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/lone-root/move', [
+			$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/lone-root/move', [
 				'body' => ['direction' => $direction],
 			]);
 
@@ -629,7 +629,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('flat-first', null, 1);
 		$this->createItem('flat-second', null, 2);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/flat-second/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/flat-second/move', [
 			'body' => ['direction' => 'in'],
 		]);
 
@@ -645,7 +645,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 	{
 		$this->createItem('vis-item');
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/vis-item', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/vis-item', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'Seasonal'],
@@ -656,7 +656,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertResponseStatus(303, $response);
 
 		$html = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?item=vis-item'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?item=vis-item'),
 		);
 		// The tree still shows it, marked; the preview below renders the menu
 		// as the frontend would and must not.
@@ -666,11 +666,11 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeMissing('//a[@href="/seasonal"]', $html);
 		$this->assertHtmlNodeExists(
-			'//form[@action="/cp/menus/tree-menu/item/vis-item"]//input[@name="hidden" and @checked]',
+			'//form[@action="/panel/menus/tree-menu/item/vis-item"]//input[@name="hidden" and @checked]',
 			$html,
 		);
 
-		$shown = $this->makeRequest('POST', '/cp/menus/tree-menu/item/vis-item', [
+		$shown = $this->makeRequest('POST', '/panel/menus/tree-menu/item/vis-item', [
 			'body' => [
 				'type' => 'url',
 				'title' => ['en' => 'Seasonal'],
@@ -680,7 +680,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->assertResponseStatus(303, $shown);
 		$this->assertStringContainsString(
 			'href="/seasonal"',
-			$this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu')),
+			$this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu')),
 		);
 	}
 
@@ -694,7 +694,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('depth-leaf', 'depth-branch');
 
 		// The branch would land on level 2, but its leaf on level 3.
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/depth-branch/move', [
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/depth-branch/move', [
 			'body' => ['parent' => 'depth-host', 'index' => 0],
 		]);
 
@@ -713,7 +713,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		$this->createItem('doom-grandchild', 'doom-child');
 		$this->createItem('doom-other', position: 2);
 
-		$response = $this->makeRequest('POST', '/cp/menus/tree-menu/item/doom-root/delete');
+		$response = $this->makeRequest('POST', '/panel/menus/tree-menu/item/doom-root/delete');
 
 		$this->assertResponseStatus(303, $response);
 		$this->assertStringContainsString(
@@ -735,15 +735,15 @@ final class PanelMenuTreeTest extends End2EndTestCase
 
 		$this->assertResponseStatus(
 			404,
-			$this->makeRequest('GET', '/cp/menus/tree-menu?item=foreign-item'),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?item=foreign-item'),
 		);
 		$this->assertResponseStatus(
 			404,
-			$this->makeRequest('POST', '/cp/menus/tree-menu/item/foreign-item/delete'),
+			$this->makeRequest('POST', '/panel/menus/tree-menu/item/foreign-item/delete'),
 		);
 		$this->assertResponseStatus(
 			404,
-			$this->makeRequest('POST', '/cp/menus/tree-menu/item/foreign-item/move', [
+			$this->makeRequest('POST', '/panel/menus/tree-menu/item/foreign-item/move', [
 				'body' => ['direction' => 'up'],
 			]),
 		);
@@ -758,7 +758,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Products']]],
 		]);
 
-		$rejected = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$rejected = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'children', 'node' => 'never-was'],
 		]);
 		$this->assertResponseOk($rejected);
@@ -767,7 +767,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			$this->getHtmlResponse($rejected),
 		);
 
-		$accepted = $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$accepted = $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => [
 				'type' => 'children',
 				'node' => 'menu-children-root',
@@ -792,12 +792,12 @@ final class PanelMenuTreeTest extends End2EndTestCase
 		);
 
 		// The editor tree names the source node and stays unexpanded.
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 		$this->assertStringContainsString('Children of &quot;Products&quot;', $html);
 
 		// Editing prefills the configuration.
 		$pane = $this->getHtmlResponse(
-			$this->makeRequest('GET', '/cp/menus/tree-menu?item=' . $item),
+			$this->makeRequest('GET', '/panel/menus/tree-menu?item=' . $item),
 		);
 		$this->assertHtmlNodeExists('//input[@name="levels" and @value="2"]', $pane);
 		$this->assertHtmlNodeExists('//option[@value="created desc" and @selected]', $pane);
@@ -812,7 +812,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'path' => ['en' => '/legacy-path'],
 		]);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 
 		$this->assertStringContainsString('Legacy Snapshot', $html);
 		$this->assertStringContainsString('/legacy-path', $html);
@@ -826,7 +826,7 @@ final class PanelMenuTreeTest extends End2EndTestCase
 			'path' => ['en' => '/preview-me'],
 		]);
 
-		$html = $this->getHtmlResponse($this->makeRequest('GET', '/cp/menus/tree-menu'));
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/menus/tree-menu'));
 
 		$this->assertStringContainsString('<details class="preview">', $html);
 		$this->assertStringContainsString('hx-boost="false"', $html);
@@ -838,8 +838,8 @@ final class PanelMenuTreeTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 
-		$this->assertResponseStatus(403, $this->makeRequest('GET', '/cp/menus/tree-menu'));
-		$this->assertResponseStatus(403, $this->makeRequest('POST', '/cp/menus/tree-menu/item/create', [
+		$this->assertResponseStatus(403, $this->makeRequest('GET', '/panel/menus/tree-menu'));
+		$this->assertResponseStatus(403, $this->makeRequest('POST', '/panel/menus/tree-menu/item/create', [
 			'body' => ['type' => 'label', 'title' => ['en' => 'Nope']],
 		]));
 	}
