@@ -12,11 +12,11 @@ pnpm run check
 pnpm run modules:check
 ```
 
-Nothing is built. The application serves `src/`, `styles/`, `icons/` and the vendored `modules/` from the package as they are, so an edit shows on the next reload. `pnpm run modules` refreshes `modules/` and its import map after a runtime dependency in `package.json` changes; `pnpm run check` type-checks the JSDoc-typed sources with `tsc`.
+Nothing is built. The application serves `src/`, `styles/`, `icons/` and the vendored `modules/` from the package as they are, so an edit shows on the next reload. `pnpm run modules` refreshes `modules/` and its import map after a runtime dependency in `package.json` changes; `pnpm run check` type-checks the JSDoc-typed sources with `tsc`. Vitest resolves bare imports through `modules/importmap.json`, so tests run the copies the browser gets rather than `node_modules`.
 
 A module a Composer package ships, such as `@celema/verba` from `celema/verba`, is listed in `package.json#cosray.composerModules` instead of being vendored. PHP serves it from the installed package, and `tsc`, Vitest and `modules:check` read it from `../vendor`, so install the Composer dependencies before the panel checks.
 
-A prefix in `package.json#cosray.modulePrefixes`, such as `prism-code-editor/languages/`, gets a single import map entry for its directory, so lazily loaded modules like editor languages don't each add one. A browser appends nothing to a prefix mapping, so `src/` imports those modules with their extension (`prism-code-editor/languages/php.js`); `tsconfig.json` and `vitest.config.ts` map that form to `node_modules`, since the package's exports lack it.
+A prefix in `package.json#cosray.modulePrefixes`, such as `prism-code-editor/languages/`, gets a single import map entry for its directory, so lazily loaded modules like editor languages don't each add one. A browser appends nothing to a prefix mapping, so `src/` imports those modules with their extension (`prism-code-editor/languages/php.js`); `tsconfig.json` maps that form to `node_modules`, since the package's exports lack it.
 
 The panel includes the live reload script of `celema/server` like a site's layout does, so with `--watch` a panel page reloads when a file matching the application's watch patterns changes.
 
