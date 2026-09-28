@@ -69,6 +69,11 @@ final class Control
 		return new self('datetime');
 	}
 
+	public static function color(): self
+	{
+		return new self('color');
+	}
+
 	public static function hidden(): self
 	{
 		return new self('hidden');

@@ -34,6 +34,7 @@ final class FieldControlTest extends TestCase
 			Field\Radio::class => 'option',
 			Field\Option::class => 'option',
 			Field\Code::class => 'code',
+			Field\Color::class => 'color',
 			Field\RichText::class => 'richtext',
 			Field\Iframe::class => 'iframe',
 			Field\Image::class => 'image',

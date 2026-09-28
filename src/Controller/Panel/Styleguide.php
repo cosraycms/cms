@@ -208,6 +208,18 @@ final class Styleguide extends Panel
 				'width' => 50,
 			],
 			[
+				'name' => 'accent',
+				'label' => 'Accent color',
+				'control' => ['name' => 'color', 'props' => []],
+				'width' => 50,
+			],
+			[
+				'name' => 'background',
+				'label' => 'Background color',
+				'control' => ['name' => 'color', 'props' => []],
+				'width' => 50,
+			],
+			[
 				'name' => 'locked',
 				'label' => 'Locked',
 				'control' => ['name' => 'text', 'props' => []],
@@ -1313,6 +1325,8 @@ final class Styleguide extends Panel
 			'category' => ['value' => ['zxx' => 'news']],
 			'weight' => ['value' => ['zxx' => 20]],
 			'featured' => ['value' => ['zxx' => true]],
+			'accent' => ['value' => ['zxx' => '#e54231']],
+			'background' => ['value' => ['zxx' => '']],
 			'locked' => ['value' => ['zxx' => 'node-4f21c8']],
 			'invalid' => ['value' => ['zxx' => '']],
 			'overflow' => ['value' => ['zxx' => '']],

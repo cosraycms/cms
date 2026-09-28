@@ -105,7 +105,8 @@
 		min-width: 0;
 	}
 
-	& .swatch {
+	/* Scoped to the token list: color fields in the samples have a swatch too. */
+	& .token > .swatch {
 		flex-shrink: 0;
 		width: 2rem;
 		height: 2rem;

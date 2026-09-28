@@ -1039,6 +1039,62 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 	}
 
+	public function testColorValueReadsOnlyNormalizedHex(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$value = static fn(mixed $stored): \Cosray\Value\Color => new \Cosray\Field\Color(
+			'color',
+			$owner,
+			new ValueContext('color', ['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => $stored]]),
+		)->value();
+
+		$this->assertSame('#e54231', (string) $value('#E54231'));
+		$this->assertSame('#e54231', $value('#E54231')->json());
+		$this->assertSame('#aabbcc', $value('abc')->unwrap());
+		$this->assertTrue($value('#e54231')->isset());
+
+		// Anything else never reaches a style attribute.
+		$this->assertSame('', (string) $value('red; background: url(x)'));
+		$this->assertFalse($value('red; background: url(x)')->isset());
+		$this->assertSame('', $value(null)->json());
+	}
+
+	public function testColorShapeNormalizesHexAndRejectsOtherValues(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Color('color', $this->createOwner($context), new ValueContext('color', []));
+		$shape = $field->shape();
+		$stored = static fn(mixed $color): mixed => $shape->validate([
+			'type' => \Cosray\Field\Color::class,
+			'value' => ['zxx' => $color],
+		])->values()['value']['zxx'];
+
+		$this->assertSame(['zxx' => '#e54231'], $field->structure('#e54231')['value']);
+		$this->assertSame('#ffffff', $stored('#FFF'));
+		$this->assertSame('#e54231', $stored(' e54231 '));
+		$this->assertSame('', $stored(''));
+		$this->assertNull($stored(null));
+
+		foreach (['red', '#e5423', '#e54231ff', 'rgb(229 66 49)'] as $invalid) {
+			$this->assertTrue(
+				$shape->validate(['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => $invalid]])->has([
+					'value',
+					'zxx',
+				]),
+				$invalid,
+			);
+		}
+
+		$field->required();
+		$this->assertFalse(
+			$field
+				->shape()
+				->validate(['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => '']])
+				->valid(),
+		);
+	}
+
 	public function testYoutubeStructureAndMetaControlCarryTheAspectRatio(): void
 	{
 		$context = $this->createContext();

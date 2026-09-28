@@ -453,6 +453,61 @@
 	}
 }
 
+/* The native picker lies invisibly over the swatch, so clicking the swatch
+   opens it and the swatch can show "no colour", which the picker cannot. */
+.cms-color {
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-2);
+
+	& .swatch {
+		position: relative;
+		flex: none;
+		width: var(--cms-control-height);
+		height: var(--cms-control-height);
+		border: 1px solid var(--cms-color-border-control);
+		border-radius: var(--cms-radius-md);
+		outline: 1px solid transparent;
+		background-color: var(--color);
+		box-shadow: var(--cms-shadow-raised);
+
+		&[data-empty] {
+			background-color: var(--cms-color-surface);
+			background-image: linear-gradient(
+				to top right,
+				transparent calc(50% - 0.75px),
+				var(--cms-color-border-control) calc(50% - 0.75px) calc(50% + 0.75px),
+				transparent calc(50% + 0.75px)
+			);
+		}
+
+		&:has(:focus-visible) {
+			border-color: var(--cms-color-focus);
+			box-shadow: var(--cms-focus-ring);
+		}
+	}
+
+	& input[type='color'] {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		border: 0;
+		opacity: 0;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+		}
+	}
+
+	& .cms-input {
+		width: 8rem;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
 .cms-sub-label {
 	display: block;
 	margin-bottom: var(--cms-space-1);

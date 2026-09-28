@@ -11,6 +11,7 @@ use Celema\Sire\Contract\Value;
 use Celema\Sire\RuleRegistry;
 use Celema\Sire\Validation;
 use Cosray\DateTime\Codec;
+use Cosray\Value\Color;
 use Override;
 
 final class Validators
@@ -18,6 +19,7 @@ final class Validators
 	public static function registry(): RuleRegistry
 	{
 		return RuleRegistry::withDefaults()->withMany([
+			'color' => self::color(),
 			'minitems' => self::minItems(),
 			'maxitems' => self::maxItems(),
 			'rfc3339' => self::rfc3339(),
@@ -59,6 +61,21 @@ final class Validators
 				}
 
 				return Validation::from(count($value->value) <= (int) ($args[0] ?? 0));
+			}
+		};
+	}
+
+	private static function color(): Rule
+	{
+		return new class implements Rule {
+			public string $message {
+				get => __('validation:color');
+			}
+
+			#[Override]
+			public function validate(Value $value, string ...$args): ValidationContract
+			{
+				return Validation::from(Color::normalize($value->value) !== null);
 			}
 		};
 	}

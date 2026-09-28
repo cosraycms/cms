@@ -60,6 +60,7 @@ final class Index
 		$index->add(Blocks::class, 'blocks', 'grid');
 		$index->add(Checkbox::class, 'checkbox');
 		$index->add(Code::class, 'code');
+		$index->add(Color::class, 'color');
 		$index->add(Date::class, 'date');
 		$index->add(DateTime::class, 'datetime');
 		$index->add(Decimal::class, 'decimal');

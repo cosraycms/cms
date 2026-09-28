@@ -16,6 +16,7 @@ Fields persist locale maps: `zxx` is neutral; translated values use configured l
 | `option` | Option value; select or radio presentation |
 | `date`, `time` | Local date or time string |
 | `datetime` | UTC RFC 3339 instant |
+| `color` | Lowercase `#rrggbb` string |
 | `youtube` | Video ID |
 | `group` | Object of sub-control values under `zxx` |
 | `repeater` | List of item values under `zxx` |
@@ -55,6 +56,22 @@ New ordinary fields default to false, nullable ones to null; `#[DefaultValue]` o
 `Value\Boolean::unwrap()` and `json()` preserve null for nullable fields. `isset()` is false for null but true for a stored false. Ordinary fields retain their two-state read behavior, including legacy null read as false. Consumers opting into nullable values must handle `bool|null`.
 
 A required checkbox accepts false: requiring an answer is different from requiring consent. `#[Nullable, Required]` rejects null/missing values. `Nullable` and `StateLabels` currently apply only to Checkbox fields. `#[When]` still treats false and null alike as empty. See [Checkbox](../src/Field/Checkbox.php) and its tests for defaults and validation.
+
+### Color fields
+
+`Cosray\Field\Color` holds an untranslated hex color. Writes accept three or six hex digits, with or without `#`, and store them as lowercase `#rrggbb`; alpha, color names and other CSS notations fail validation. Reading returns an empty string unless the stored text is such a color, so a template can place the value in a `style` attribute or custom property:
+
+```php
+use Cosray\Field\Color;
+
+public Color $accent;
+```
+
+```php
+<section style="--accent: <?= $node->accent ?>">
+```
+
+The panel shows a swatch that opens the browser's color picker beside a hex input. The input carries the value, so the field can stay empty; a native color input alone always submits a color. See [Value\Color](../src/Value/Color.php).
 
 ### Content language and fallback previews
 

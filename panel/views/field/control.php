@@ -14,6 +14,7 @@ $views = [
 	'date' => 'field/date',
 	'time' => 'field/time',
 	'datetime' => 'field/datetime',
+	'color' => 'field/color',
 	'hidden' => 'field/hidden',
 	'textarea' => 'field/textarea',
 	'iframe' => 'field/iframe',
