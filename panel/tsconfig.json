@@ -18,7 +18,12 @@
 		"types": ["node"],
 		// Modules a Composer package ships (package.json#cosray.composerModules).
 		"paths": {
-			"@celema/verba": ["../vendor/celema/verba/js/src/index.js"]
+			"@celema/verba": ["../vendor/celema/verba/js/src/index.js"],
+			// Modules under package.json#cosray.modulePrefixes, named with .js.
+			"prism-code-editor/languages/*": ["./node_modules/prism-code-editor/dist/languages/*"],
+			"prism-code-editor/prism/languages/*": [
+				"./node_modules/prism-code-editor/dist/prism/languages/*"
+			]
 		}
 	},
 	"include": [

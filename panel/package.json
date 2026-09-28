@@ -44,6 +44,10 @@
 		"composerModules": {
 			"@celema/verba": "celema/verba/js/src/index.js"
 		},
+		"modulePrefixes": [
+			"prism-code-editor/languages/",
+			"prism-code-editor/prism/languages/"
+		],
 		"classicScripts": [
 			"htmx.org/dist/htmx.js"
 		],

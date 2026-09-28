@@ -31,67 +31,69 @@ const syntaxAliases = {
 // Each syntax key is also the editor's language name. A load registers the
 // Prism grammar and the editing behavior (comment tokens, indentation, tag
 // closing) globally; plaintext has neither and stays unhighlighted. HTML
-// brings the grammars its style and script elements embed.
+// brings the grammars its style and script elements embed. Specifiers carry
+// .js because the import map maps the language directories as a whole
+// (package.json#cosray.modulePrefixes).
 /** @type {Record<SyntaxKey, () => Promise<unknown>>} */
 const languageLoaders = {
 	plaintext: async () => {},
 	php: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/php'),
-			import('prism-code-editor/languages/php'),
+			import('prism-code-editor/prism/languages/php.js'),
+			import('prism-code-editor/languages/php.js'),
 		]),
 	javascript: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/javascript'),
-			import('prism-code-editor/languages/clike'),
+			import('prism-code-editor/prism/languages/javascript.js'),
+			import('prism-code-editor/languages/clike.js'),
 		]),
 	typescript: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/typescript'),
-			import('prism-code-editor/languages/clike'),
+			import('prism-code-editor/prism/languages/typescript.js'),
+			import('prism-code-editor/languages/clike.js'),
 		]),
 	html: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/markup'),
-			import('prism-code-editor/prism/languages/css'),
-			import('prism-code-editor/prism/languages/javascript'),
-			import('prism-code-editor/languages/html'),
+			import('prism-code-editor/prism/languages/markup.js'),
+			import('prism-code-editor/prism/languages/css.js'),
+			import('prism-code-editor/prism/languages/javascript.js'),
+			import('prism-code-editor/languages/html.js'),
 		]),
 	css: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/css'),
-			import('prism-code-editor/languages/css'),
+			import('prism-code-editor/prism/languages/css.js'),
+			import('prism-code-editor/languages/css.js'),
 		]),
 	json: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/json'),
-			import('prism-code-editor/languages/json'),
+			import('prism-code-editor/prism/languages/json.js'),
+			import('prism-code-editor/languages/json.js'),
 		]),
 	// The HTML behavior also registers markdown.
 	markdown: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/markdown'),
-			import('prism-code-editor/languages/html'),
+			import('prism-code-editor/prism/languages/markdown.js'),
+			import('prism-code-editor/languages/html.js'),
 		]),
 	sql: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/sql'),
-			import('prism-code-editor/languages/sql'),
+			import('prism-code-editor/prism/languages/sql.js'),
+			import('prism-code-editor/languages/sql.js'),
 		]),
 	yaml: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/yaml'),
-			import('prism-code-editor/languages/yaml'),
+			import('prism-code-editor/prism/languages/yaml.js'),
+			import('prism-code-editor/languages/yaml.js'),
 		]),
 	xml: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/xml'),
-			import('prism-code-editor/languages/xml'),
+			import('prism-code-editor/prism/languages/xml.js'),
+			import('prism-code-editor/languages/xml.js'),
 		]),
 	bash: () =>
 		Promise.all([
-			import('prism-code-editor/prism/languages/bash'),
-			import('prism-code-editor/languages/bash'),
+			import('prism-code-editor/prism/languages/bash.js'),
+			import('prism-code-editor/languages/bash.js'),
 		]),
 };
 

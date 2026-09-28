@@ -17,7 +17,17 @@
 // Composer package instead, such as verba's runtime from celema/verba. PHP
 // serves its directory from the installed package, so nothing is copied:
 // the import map lists it under `composer`, and the check only verifies
-// that the file exists and imports nothing outside its directory. Plain .js files in src/ are served as they are, so their
+// that the file exists and imports nothing outside its directory.
+//
+// A prefix listed in package.json#cosray.modulePrefixes, such as
+// `prism-code-editor/languages/`, gets one import map entry for its whole
+// directory instead of one per module, so a package with hundreds of
+// lazily loaded modules keeps the map small. The browser appends nothing to
+// a prefix mapping, so src/ names such a module with its extension
+// (`prism-code-editor/languages/php.js`), which the package's exports lack;
+// tsconfig.json and vitest.config.ts map these specifiers to node_modules.
+//
+// Plain .js files in src/ are served as they are, so their
 // imports also have to be ones a browser resolves: mapped packages and
 // relative paths to existing files, no aliases.
 
@@ -84,10 +94,7 @@ function collect() {
 		return owner;
 	}
 
-	function resolveBare(specifier, from) {
-		const file = resolve(specifier, from);
-		const owner = add(file);
-		const mapped = path.posix.join(owner.name, toPosix(path.relative(owner.dir, file)));
+	function map(specifier, mapped) {
 		const known = imports.get(specifier);
 
 		if (known !== undefined && known !== mapped) {
@@ -96,6 +103,34 @@ function collect() {
 
 		imports.set(specifier, mapped);
 	}
+
+	function resolveBare(specifier, from) {
+		const file = resolve(specifier, from);
+		const owner = add(file);
+		map(specifier, path.posix.join(owner.name, toPosix(path.relative(owner.dir, file))));
+	}
+
+	// Maps the prefix to the directory the module sits in, found through the
+	// package's exports for the specifier without its extension.
+	function resolvePrefixed(specifier, prefix) {
+		const rest = specifier.slice(prefix.length);
+
+		if (!rest.endsWith('.js')) {
+			throw new Failure(`${specifier} falls under ${prefix}, so it has to end in .js`);
+		}
+
+		const file = resolve(specifier.slice(0, -'.js'.length), anchor);
+		const owner = add(file);
+		const mapped = path.posix.join(owner.name, toPosix(path.relative(owner.dir, file)));
+
+		if (!mapped.endsWith('/' + rest)) {
+			throw new Failure(`${specifier} resolves to ${mapped}, which ${prefix} cannot map`);
+		}
+
+		map(prefix, mapped.slice(0, -rest.length));
+	}
+
+	const prefixes = modulePrefixes();
 
 	const composer = new Map(
 		Object.entries(config.composerModules ?? {}).map(([specifier, target]) => [
@@ -115,7 +150,19 @@ function collect() {
 			throw new Failure(`src/ imports ${specifier}, but ${name} is not in dependencies`);
 		}
 
-		resolveBare(specifier, anchor);
+		const prefix = prefixes.find((candidate) => specifier.startsWith(candidate));
+
+		if (prefix === undefined) {
+			resolveBare(specifier, anchor);
+		} else {
+			resolvePrefixed(specifier, prefix);
+		}
+	}
+
+	for (const prefix of prefixes) {
+		if (!imports.has(prefix)) {
+			throw new Failure(`modulePrefixes lists ${prefix}, but src/ imports nothing under it`);
+		}
 	}
 
 	const scripts = [];
@@ -214,6 +261,19 @@ function composerModule(specifier, target) {
 	}
 
 	return target;
+}
+
+/** Specifier prefixes mapped as a whole, longest first like an import map. */
+function modulePrefixes() {
+	const prefixes = config.modulePrefixes ?? [];
+
+	for (const prefix of prefixes) {
+		if (typeof prefix !== 'string' || !isBare(prefix) || !prefix.endsWith('/')) {
+			throw new Failure(`modulePrefixes lists ${prefix}; expected a bare specifier ending in /`);
+		}
+	}
+
+	return [...prefixes].sort((a, b) => b.length - a.length);
 }
 
 /** Bare specifiers imported by the panel's own source. */
