@@ -101,6 +101,31 @@ final class CommandsTest extends TestCase
 		$this->fail('The app must provide db:fulltext.');
 	}
 
+	public function testPanelPublishResolvesWithoutOpeningTheDatabase(): void
+	{
+		$config = $this->config([
+			'db.dsn' => 'pgsql:host=not-a-database.invalid;dbname=missing',
+			'error.enabled' => false,
+		]);
+		$app = new App($config, $this->factory(), new Router(), $this->container());
+		$commands = new Commands($app);
+
+		foreach ($commands->commands()->entries() as $entry) {
+			if ($entry->meta->full() === 'panel:publish') {
+				$this->assertInstanceOf(\Cosray\Commands\PanelPublish::class, $entry->command());
+				$this->assertFalse(
+					$app
+						->container()
+						->get(\Celema\Quma\Database::class)
+						->connected(),
+				);
+				return;
+			}
+		}
+
+		$this->fail('The app must provide panel:publish.');
+	}
+
 	public function testServerRegistersBothDevServers(): void
 	{
 		$config = $this->config([
