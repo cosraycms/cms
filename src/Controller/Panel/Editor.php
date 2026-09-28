@@ -18,6 +18,7 @@ use Cosray\Context;
 use Cosray\Exception\NoSuchField;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
+use Cosray\Node\ReservedPaths;
 use Cosray\Node\RoutePathGenerator;
 use Cosray\Node\Serializer;
 use Cosray\Node\Store;
@@ -234,7 +235,7 @@ final class Editor extends Panel
 	{
 		return new Store(
 			$context->db,
-			new PathManager(),
+			new PathManager(reserved: ReservedPaths::fromConfig($context->config)),
 			$this->types(),
 			$cms->nodeFactory()->uid(),
 			factory: $cms->nodeFactory(),

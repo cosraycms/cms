@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Core\Exception\HttpBadRequest;
 use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
@@ -284,6 +285,29 @@ final class NodeWriterTest extends IntegrationTestCase
 				->prepare(PlainPage::class, ['heading' => 'Second'])
 				->uid('writer-path-second')
 				->path('en', '/legacy/page'),
+		);
+	}
+
+	public function testPathBelowThePanelIsRejected(): void
+	{
+		$writer = $this->writer();
+		$prepared = $writer
+			->prepare(PlainPage::class, ['heading' => 'Shadowed'])
+			->uid('writer-reserved-path')
+			->path('en', '/panel/about');
+
+		try {
+			$writer->create($prepared);
+			$this->fail('Expected the reserved path to be refused');
+		} catch (HttpBadRequest) {
+			// The rendered message is covered through the panel's HTTP path.
+		}
+
+		$this->assertNull(
+			$this->db()->execute(
+				'SELECT node FROM cms.nodes WHERE uid = :uid',
+				['uid' => 'writer-reserved-path'],
+			)->first(),
 		);
 	}
 

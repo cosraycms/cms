@@ -38,6 +38,8 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 
+The panel, media and preview routes answer before any node, so node paths at or below `panel.path`, `path.assets`, `path.cache` or `/preview` are refused when saved. Routes a plugin registers are not checked. Changing one of these settings does not move existing nodes out of the way; a node already stored below the new prefix becomes unreachable.
+
 ## Views and errors
 
 Cosray bundles Boiler as the default `view` renderer, reading from `{path.root}{path.views}`. To replace it or pass renderer arguments, register it before boot:

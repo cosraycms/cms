@@ -391,6 +391,7 @@ return [
 		'node:locked' => 'This document is locked',
 		'node:new-document' => 'New document:',
 		'node:parent-not-string' => 'Parent must be a uid string',
+		'node:reserved-path' => 'The URL path :path is reserved by the system; choose another one',
 		'node:uid-immutable' => 'Node uid cannot be changed',
 		'node:unpublished' => 'Unpublished',
 		'panel:logo' => 'Panel logo',

@@ -131,6 +131,37 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		$this->assertNull($this->draftRow('draft-fold'));
 	}
 
+	public function testAReservedPathNeverReachesTheWorkingCopy(): void
+	{
+		$this->createPage('draft-reserved', 'Live', published: true);
+
+		$response = $this->save('draft-reserved', ['paths' => ['en' => '/panel/about']]);
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString(
+			'The URL path /panel/about is reserved by the system; choose another one',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertNull($this->draftRow('draft-reserved'));
+	}
+
+	public function testAReservedPathIsRefusedWhenSavedInPlace(): void
+	{
+		$this->createPage('draft-reserved-live', 'Offline', published: false);
+
+		$response = $this->save('draft-reserved-live', ['published' => '', 'paths' => ['en' => '/assets']]);
+
+		$this->assertStringContainsString(
+			'The URL path /assets is reserved by the system; choose another one',
+			$this->getHtmlResponse($response),
+		);
+		$this->assertNull(
+			$this->db()->execute(
+				"SELECT path FROM cms.url_paths WHERE path = '/assets'",
+			)->first(),
+		);
+	}
+
 	public function testAnUnpublishedNodeIsEditedInPlace(): void
 	{
 		$this->createPage('draft-unpublished', 'Live', published: false);

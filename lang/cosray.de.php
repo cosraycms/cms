@@ -391,6 +391,7 @@ return [
 		'node:locked' => 'Dieses Dokument ist gesperrt',
 		'node:new-document' => 'Neues Dokument:',
 		'node:parent-not-string' => 'Elternknoten muss eine uid-Zeichenkette sein',
+		'node:reserved-path' => 'Der URL-Pfad :path ist vom System reserviert; bitte einen anderen wählen',
 		'node:uid-immutable' => 'Die Knoten-uid kann nicht geändert werden',
 		'node:unpublished' => 'Unveröffentlicht',
 		'panel:logo' => 'Panel-Logo',

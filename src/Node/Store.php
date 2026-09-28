@@ -118,6 +118,8 @@ class Store
 		}
 
 		$data = $this->prepare($node, $data, $locales);
+		// Refused now rather than when publish() applies the paths.
+		$this->pathManager->reserved->assertFree($this->submittedPaths($data));
 		$nodeId = $this->nodeId($node);
 		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
 
