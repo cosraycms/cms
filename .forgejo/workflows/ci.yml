@@ -45,6 +45,28 @@ jobs:
         with:
           package_json_file: panel/package.json
 
+      # Both caches live on the runner (its built-in cache server). A miss
+      # only means downloading again, so neither can fail the build.
+      - name: Locate the pnpm store
+        id: pnpm-store
+        working-directory: panel
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pnpm store
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ hashFiles('panel/pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-
+
+      # Upstream checkouts of packages built from source; their commits are
+      # pinned in package.json#cosray.sources.
+      - name: Cache panel source checkouts
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: panel/.cache/sources
+          key: panel-sources-${{ hashFiles('panel/package.json') }}
+
       - name: Install panel dependencies
         working-directory: panel
         run: pnpm install --frozen-lockfile
