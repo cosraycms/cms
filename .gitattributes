@@ -16,3 +16,5 @@
 /panel/scripts/ export-ignore
 /panel/tests/ export-ignore
 /panel/tsconfig.json export-ignore
+# Declarations of packages built from source serve tsc only.
+/panel/modules/**/*.d.ts export-ignore

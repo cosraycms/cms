@@ -11,9 +11,6 @@ importers:
       htmx.org:
         specifier: 4.0.0
         version: 4.0.0
-      prism-code-editor:
-        specifier: ^5.4.0
-        version: 5.4.0
       prosemirror-commands:
         specifier: ^1.7.2
         version: 1.7.2
@@ -696,14 +693,6 @@ packages:
     resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
     engines: {node: '>=14'}
     hasBin: true
-
-  prism-code-editor@5.4.0:
-    resolution: {integrity: sha512-8y4SdQxwHa/lnxIbFf2w8N2D1OwxcskDRw774ov4XEEa1e5alqqrAZk08YXgaxisc1RuJdFbCTI+4tU3Plljqw==}
-    peerDependencies:
-      emmet: ^2.0.0
-    peerDependenciesMeta:
-      emmet:
-        optional: true
 
   prosemirror-commands@1.7.2:
     resolution: {integrity: sha512-q6Q6szxqdu9Xd6EcdKsqXghu5nQdZTpB4Q9yd04WRc7/jt763e/rT60Owh0L1GYY+T46o5rD+9lEN36dZS43tw==}
@@ -1452,8 +1441,6 @@ snapshots:
       source-map-js: 1.2.1
 
   prettier@3.9.6: {}
-
-  prism-code-editor@5.4.0: {}
 
   prosemirror-commands@1.7.2:
     dependencies:

@@ -1,0 +1,72 @@
+import { languageMap } from "../../index.js";
+import { braces } from "../../prism/utils/jsx-shared.js";
+import { re } from "../../prism/utils/shared.js";
+import { getClosestToken, getLineBefore } from "../../utils/index.js";
+import { voidTags } from "../../utils/local.js";
+const clikeIndent = /[([{][^)\]}]*$|^[^.]*\b(?:case .+?|default):\s*$/;
+const isBracketPair = /\[]|\(\)|{}/;
+const xmlOpeningTag = /<(?![\d?!#@])([^\s/=>$<%]+)(?:\s(?:\s*[^\s/"'=>]+(?:\s*=\s*(?!\s)(?:"[^"]*"|'[^']*'|[^\s"'=>]+(?=[\s>]))?|(?=[\s/>])))+)?\s*>[ \t]*$/;
+const xmlClosingTag = /^<\/(?!\d)[^\s/=>$<%]+\s*>/;
+const openBracket = /[([{][^)\]}]*$/;
+const astroOpeningTag = /* @__PURE__ */ re(/<(?:(?![\d!])([^\s%=<>/]+)(?:\s(?:\s*(?:[^\s{=<>/]+(?:\s*=\s*(?!\s)(?:"[^"]*"|'[^']*'|[^\s{=<>/"']+(?=[\s/>])|<0>)?|(?=[\s/>]))|<0>))*)?\s*)?>[ \t]*$/
+    .source, [braces]);
+const testBracketPair = ([start, end], value) => {
+    return isBracketPair.test(value[start - 1] + value[end]);
+};
+const clikeComment = {
+    line: "//",
+    block: ["/*", "*/"],
+};
+const isOpen = (match, voidTags) => !!match && !voidTags?.test(match[1]);
+const htmlAutoIndent = (tagPattern, voidTags) => [
+    ([start], value) => isOpen(value.slice(0, start).match(tagPattern), voidTags) ||
+        openBracket.test(getLineBefore(value, start)),
+    (selection, value) => testBracketPair(selection, value) ||
+        (isOpen(value.slice(0, selection[0]).match(tagPattern), voidTags) &&
+            xmlClosingTag.test(value.slice(selection[1]))),
+];
+const markupComment = {
+    block: ["<!--", "-->"],
+};
+const markupLanguage = (comment = markupComment, tagPattern = xmlOpeningTag, voidTags) => ({
+    comments: comment,
+    autoIndent: htmlAutoIndent(tagPattern, voidTags),
+    autoCloseTags: ([start, end], value, editor) => {
+        return autoCloseTags(editor, start, end, value, tagPattern, voidTags);
+    },
+});
+const autoCloseTags = (editor, start, end, value, tagPattern, voidTags) => {
+    if (start == end) {
+        let match = tagPattern.exec(value.slice(0, start) + ">");
+        let tagMatcher = editor.extensions.matchTags;
+        if (match && ((match = match[1] || ""), !voidTags?.test(match))) {
+            if (tagMatcher) {
+                let { pairs, tags } = tagMatcher;
+                for (let i = tags.length; i;) {
+                    let tag = tags[--i];
+                    if (tag[1] >= start && tag[4] && tag[5] && tag[3] == match && pairs[i] == null) {
+                        return;
+                    }
+                }
+            }
+            return `</${match}>`;
+        }
+    }
+};
+const bracketIndenting = (comments = clikeComment, indentPattern = openBracket) => ({
+    comments,
+    autoIndent: [
+        ([start], value) => indentPattern.test(getLineBefore(value, start)),
+        testBracketPair,
+    ],
+});
+const markupTemplateLang = (name, comments) => (languageMap[name] = {
+    comments,
+    autoIndent: htmlAutoIndent(xmlOpeningTag, voidTags),
+    autoCloseTags: ([start, end], value, editor) => {
+        return getClosestToken(editor, "." + name, 0, 0, start)
+            ? ""
+            : autoCloseTags(editor, start, end, value, xmlOpeningTag, voidTags);
+    },
+});
+export { clikeIndent, isBracketPair, xmlOpeningTag, xmlClosingTag, openBracket, autoCloseTags, testBracketPair, clikeComment, bracketIndenting, htmlAutoIndent, voidTags, markupTemplateLang, markupLanguage, markupComment, astroOpeningTag, };

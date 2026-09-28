@@ -19,23 +19,24 @@
 // the import map lists it under `composer`, and the check only verifies
 // that the file exists and imports nothing outside its directory.
 //
-// A prefix listed in package.json#cosray.modulePrefixes, such as
-// `prism-code-editor/languages/`, gets one import map entry for its whole
-// directory instead of one per module, so a package with hundreds of
-// lazily loaded modules keeps the map small. The browser appends nothing to
-// a prefix mapping, so src/ names such a module with its extension
-// (`prism-code-editor/languages/php.js`), which the package's exports lack;
-// tsconfig.json and vitest.config.ts map these specifiers to node_modules.
+// A package listed in package.json#cosray.sources is built from its source
+// repository instead of taken from npm: the script fetches the pinned commit
+// into .cache/sources/ and compiles each file the panel reaches on its own,
+// without bundling. modules/ then mirrors the package's source tree with
+// real names, so an update diff reads like the upstream commits. See
+// buildSource() for the details and README.md for the update procedure.
 //
 // Plain .js files in src/ are served as they are, so their
 // imports also have to be ones a browser resolves: mapped packages and
 // relative paths to existing files, no aliases.
 
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { init, parse } from 'es-module-lexer';
+import ts from 'typescript';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const vendor = path.join(path.dirname(root), 'vendor');
@@ -62,7 +63,9 @@ try {
 		check(result);
 	} else {
 		write(result, target);
-		console.log(`modules/: ${result.files.size} files from ${result.packages.size} packages`);
+		console.log(
+			`modules/: ${result.files.size + result.generated.size} files from ${result.packages.size} packages`,
+		);
 	}
 } catch (error) {
 	if (!(error instanceof Failure)) {
@@ -110,27 +113,10 @@ function collect() {
 		map(specifier, path.posix.join(owner.name, toPosix(path.relative(owner.dir, file))));
 	}
 
-	// Maps the prefix to the directory the module sits in, found through the
-	// package's exports for the specifier without its extension.
-	function resolvePrefixed(specifier, prefix) {
-		const rest = specifier.slice(prefix.length);
-
-		if (!rest.endsWith('.js')) {
-			throw new Failure(`${specifier} falls under ${prefix}, so it has to end in .js`);
-		}
-
-		const file = resolve(specifier.slice(0, -'.js'.length), anchor);
-		const owner = add(file);
-		const mapped = path.posix.join(owner.name, toPosix(path.relative(owner.dir, file)));
-
-		if (!mapped.endsWith('/' + rest)) {
-			throw new Failure(`${specifier} resolves to ${mapped}, which ${prefix} cannot map`);
-		}
-
-		map(prefix, mapped.slice(0, -rest.length));
-	}
-
-	const prefixes = modulePrefixes();
+	const sources = sourceConfigs();
+	const sourceUses = new Map(
+		[...sources.keys()].map((name) => [name, { specifiers: [], styles: [] }]),
+	);
 
 	const composer = new Map(
 		Object.entries(config.composerModules ?? {}).map(([specifier, target]) => [
@@ -146,23 +132,16 @@ function collect() {
 
 		const name = packageName(specifier);
 
+		if (sources.has(name)) {
+			sourceUses.get(name).specifiers.push(specifier);
+			continue;
+		}
+
 		if (!Object.hasOwn(manifest.dependencies ?? {}, name)) {
 			throw new Failure(`src/ imports ${specifier}, but ${name} is not in dependencies`);
 		}
 
-		const prefix = prefixes.find((candidate) => specifier.startsWith(candidate));
-
-		if (prefix === undefined) {
-			resolveBare(specifier, anchor);
-		} else {
-			resolvePrefixed(specifier, prefix);
-		}
-	}
-
-	for (const prefix of prefixes) {
-		if (!imports.has(prefix)) {
-			throw new Failure(`modulePrefixes lists ${prefix}, but src/ imports nothing under it`);
-		}
+		resolveBare(specifier, anchor);
 	}
 
 	const scripts = [];
@@ -182,6 +161,11 @@ function collect() {
 
 	for (const stylesheet of stylesheets()) {
 		const name = packageName(stylesheet);
+
+		if (sources.has(name)) {
+			sourceUses.get(name).styles.push(stylesheet.slice(name.length + 1));
+			continue;
+		}
 
 		if (!Object.hasOwn(manifest.dependencies ?? {}, name)) {
 			throw new Failure(`styles/ imports ${stylesheet}, but ${name} is not in dependencies`);
@@ -215,7 +199,33 @@ function collect() {
 		}
 	}
 
-	return { packages, files, imports, scripts, composer };
+	// Files built from source, by their path in modules/.
+	const generated = new Map();
+
+	for (const [name, spec] of sources) {
+		const uses = sourceUses.get(name);
+
+		if (uses.specifiers.length === 0 && uses.styles.length === 0) {
+			throw new Failure(`sources lists ${name}, but neither src/ nor styles/ use it`);
+		}
+
+		if (packages.has(name)) {
+			throw new Failure(`${name} is both built from source and installed as a package`);
+		}
+
+		const built = buildSource(name, spec, uses);
+		packages.set(name, built.owner);
+
+		for (const [specifier, mapped] of built.imports) {
+			map(specifier, path.posix.join(name, mapped));
+		}
+
+		for (const [file, content] of built.files) {
+			generated.set(path.posix.join(name, file), content);
+		}
+	}
+
+	return { packages, files, generated, imports, scripts, composer };
 }
 
 /**
@@ -263,17 +273,339 @@ function composerModule(specifier, target) {
 	return target;
 }
 
-/** Specifier prefixes mapped as a whole, longest first like an import map. */
-function modulePrefixes() {
-	const prefixes = config.modulePrefixes ?? [];
+/** The packages built from source, from package.json#cosray.sources. */
+function sourceConfigs() {
+	const sources = new Map();
 
-	for (const prefix of prefixes) {
-		if (typeof prefix !== 'string' || !isBare(prefix) || !prefix.endsWith('/')) {
-			throw new Failure(`modulePrefixes lists ${prefix}; expected a bare specifier ending in /`);
+	for (const [name, spec] of Object.entries(config.sources ?? {})) {
+		if (
+			!/^https:\/\//.test(spec.repository ?? '') ||
+			!/^[0-9a-f]{40}$/.test(spec.commit ?? '') ||
+			typeof spec.version !== 'string' ||
+			typeof spec.exports !== 'object'
+		) {
+			throw new Failure(
+				`sources.${name} needs an https repository, a full commit hash, a version and exports`,
+			);
+		}
+
+		if (Object.hasOwn(manifest.dependencies ?? {}, name)) {
+			throw new Failure(`${name} is both in dependencies and in sources`);
+		}
+
+		sources.set(name, spec);
+	}
+
+	return sources;
+}
+
+/**
+ * Builds a package from its source at the pinned commit: the files the
+ * panel's imports reach, TypeScript compiled file by file and JavaScript
+ * copied as it is. The upstream sources write relative imports for a
+ * bundler (`".."`, `"./shared"`); each becomes the path of the file it
+ * names, which a browser resolves.
+ *
+ * `exports` maps the specifiers src/ may use to paths below `root` in the
+ * repository: `"./commands": "src/extensions/commands/index.ts"`, or a
+ * directory for a key ending in a slash, which gets one import map entry
+ * however many of its modules the panel loads. Under such a key src/ names
+ * the module with a .js extension, since a browser appends nothing to it.
+ *
+ * Declarations come along for the types a named export reaches, so `tsc`
+ * checks our code against the code we ship. Modules under a directory get
+ * none: the panel loads them for their side effects, and src/types declares
+ * them in one go.
+ */
+function buildSource(name, spec, uses) {
+	const checkout = checkoutSource(name, spec);
+	const base = path.resolve(checkout, spec.root ?? '.');
+
+	if (base !== checkout && !inside(checkout, base)) {
+		throw new Failure(`sources.${name}.root points outside the repository`);
+	}
+
+	const imports = new Map();
+	const entries = [];
+	const typed = [];
+
+	for (const specifier of uses.specifiers) {
+		const { key, file, mapped } = sourceExport(name, spec, base, specifier);
+		imports.set(key, mapped);
+		entries.push(file);
+
+		if (!key.endsWith('/')) {
+			typed.push(file);
 		}
 	}
 
-	return [...prefixes].sort((a, b) => b.length - a.length);
+	const outDir = path.join(checkout, '.emit');
+	const program = ts.createProgram(entries, {
+		target: ts.ScriptTarget.ES2022,
+		module: ts.ModuleKind.ESNext,
+		moduleResolution: ts.ModuleResolutionKind.Bundler,
+		allowJs: true,
+		declaration: true,
+		// The upstream build checks the types; this only strips them.
+		noCheck: true,
+		newLine: ts.NewLineKind.LineFeed,
+		rootDir: base,
+		outDir,
+		lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'],
+		types: [],
+	});
+	const emitted = new Map();
+	const { diagnostics } = program.emit(undefined, (file, text) =>
+		emitted.set(toPosix(path.relative(outDir, file)), text),
+	);
+	const problems = [
+		...program.getOptionsDiagnostics(),
+		...program.getSyntacticDiagnostics(),
+		...diagnostics,
+	];
+
+	if (problems.length > 0) {
+		throw new Failure(
+			`${name} does not compile:\n  ` +
+				problems.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n  ')).join('\n  '),
+		);
+	}
+
+	// Every module's declaration by its path without extension, which is how
+	// imports name them. A hand-written one stands in for its JavaScript.
+	const declarations = new Map();
+	const sourceFiles = program
+		.getSourceFiles()
+		.filter((file) => !program.isSourceFileDefaultLibrary(file));
+
+	for (const sourceFile of sourceFiles) {
+		const file = path.resolve(sourceFile.fileName);
+
+		if (!inside(base, file)) {
+			throw new Failure(
+				`${name} reaches ${display(file)}, outside ${spec.root ?? 'the repository'}`,
+			);
+		}
+
+		const relative = toPosix(path.relative(base, file));
+		const declaration = sourceFile.isDeclarationFile
+			? relative
+			: relative.replace(/\.[jt]s$/, '.d.ts');
+		const text = sourceFile.isDeclarationFile ? sourceFile.text : emitted.get(declaration);
+
+		if (text === undefined) {
+			throw new Failure(`${name}: no declaration was emitted for ${relative}`);
+		}
+
+		declarations.set(moduleStem(relative), { file: declaration, text });
+	}
+
+	const files = new Map();
+	const typedQueue = typed.map((file) => moduleStem(toPosix(path.relative(base, file))));
+	const typedSeen = new Set(typedQueue);
+
+	while (typedQueue.length > 0) {
+		const { file, text } = declarations.get(typedQueue.shift());
+		const info = ts.preProcessFile(text, true, true);
+		files.set(file, text);
+
+		for (const { fileName } of [...info.importedFiles, ...info.referencedFiles]) {
+			const target = path.posix.join(path.posix.dirname(file), fileName);
+			const next = fileName.startsWith('.')
+				? [moduleStem(target), path.posix.join(target, 'index')].find((stem) =>
+						declarations.has(stem),
+					)
+				: undefined;
+
+			if (next === undefined) {
+				throw new Failure(`${name}: ${file} refers to ${fileName}, which has no declaration`);
+			}
+
+			if (!typedSeen.has(next)) {
+				typedSeen.add(next);
+				typedQueue.push(next);
+			}
+		}
+	}
+
+	const queue = [...entries];
+	const seen = new Set(queue);
+
+	while (queue.length > 0) {
+		const file = queue.shift();
+		const relative = toPosix(path.relative(base, file));
+		const code = file.endsWith('.ts')
+			? emitted.get(outputName(relative))
+			: fs.readFileSync(file, 'utf8');
+		const rewritten = rewriteImports(code, file, base);
+		files.set(outputName(relative), rewritten.code);
+
+		for (const next of rewritten.targets) {
+			if (!seen.has(next)) {
+				seen.add(next);
+				queue.push(next);
+			}
+		}
+	}
+
+	for (const style of uses.styles) {
+		const file = path.resolve(base, style);
+
+		if (!inside(base, file) || !isFile(file)) {
+			throw new Failure(`styles/ imports ${name}/${style}, which its source lacks`);
+		}
+
+		files.set(style, fs.readFileSync(file, 'utf8'));
+	}
+
+	const owner = {
+		name,
+		version: spec.version,
+		dir: checkout,
+		...licensing({ name, license: spec.license }, checkout),
+	};
+
+	return { owner, imports, files: new Map([...files].sort(([a], [b]) => a.localeCompare(b))) };
+}
+
+/** The source file an import of src/ names, and its import map entry. */
+function sourceExport(name, spec, base, specifier) {
+	const subpath = '.' + specifier.slice(name.length);
+	const target = spec.exports[subpath];
+
+	if (typeof target === 'string' && !subpath.endsWith('/')) {
+		const file = sourceFile(base, target);
+
+		return { key: specifier, file, mapped: outputName(toPosix(path.relative(base, file))) };
+	}
+
+	const prefix = Object.keys(spec.exports)
+		.filter((key) => key.endsWith('/') && subpath.startsWith(key))
+		.sort((a, b) => b.length - a.length)[0];
+
+	if (prefix === undefined) {
+		throw new Failure(`src/ imports ${specifier}, which sources.${name}.exports lacks`);
+	}
+
+	const rest = subpath.slice(prefix.length);
+	const dir = spec.exports[prefix];
+
+	if (!rest.endsWith('.js') || !dir.endsWith('/')) {
+		throw new Failure(`${specifier} falls under ${prefix}, so both have to name .js files`);
+	}
+
+	return { key: name + prefix.slice(1), file: sourceFile(base, dir + rest), mapped: dir };
+}
+
+function sourceFile(base, relative) {
+	const file = resolveSource(path.resolve(base, relative));
+
+	if (file === null || !inside(base, file)) {
+		throw new Failure(`${relative} is missing from the source`);
+	}
+
+	return file;
+}
+
+/** A bundler's reading of a relative import: extension optional, directories by index. */
+function resolveSource(file) {
+	const candidates = file.endsWith('.js')
+		? [file.slice(0, -3) + '.ts', file]
+		: file.endsWith('.ts')
+			? [file]
+			: [`${file}.ts`, `${file}.js`, path.join(file, 'index.ts'), path.join(file, 'index.js')];
+
+	return candidates.find(isFile) ?? null;
+}
+
+/** Spells out each relative import as the path of the compiled file it names. */
+function rewriteImports(code, file, base) {
+	const [imports] = parse(code, file);
+	const targets = [];
+	let result = '';
+	let last = 0;
+
+	for (const entry of [...imports].sort((a, b) => a.s - b.s)) {
+		// import.meta
+		if (entry.d === -2) {
+			continue;
+		}
+
+		if (entry.n === undefined || !entry.n.startsWith('.')) {
+			throw new Failure(
+				`${display(file)} imports ${entry.n ?? 'a computed module'}; only relative imports are supported`,
+			);
+		}
+
+		const next = resolveSource(path.resolve(path.dirname(file), entry.n));
+
+		if (next === null || !inside(base, next)) {
+			throw new Failure(`${display(file)} imports missing ${entry.n}`);
+		}
+
+		let specifier = toPosix(path.relative(path.dirname(file), outputName(next)));
+		specifier = specifier.startsWith('.') ? specifier : `./${specifier}`;
+		// A dynamic import's range includes the quotes.
+		const dynamic = entry.d > -1;
+		result += code.slice(last, dynamic ? entry.s + 1 : entry.s) + specifier;
+		last = dynamic ? entry.e - 1 : entry.e;
+		targets.push(next);
+	}
+
+	return { code: result + code.slice(last), targets };
+}
+
+function outputName(file) {
+	return file.replace(/\.ts$/, '.js');
+}
+
+function moduleStem(file) {
+	return file.replace(/(\.d)?\.[jt]s$/, '');
+}
+
+/**
+ * The repository at the pinned commit, fetched once into .cache/sources/.
+ * The commit hash is the integrity check: git verifies that the fetched
+ * objects hash to it. The cache sits outside node_modules because
+ * TypeScript refuses to compile files below one.
+ */
+function checkoutSource(name, spec) {
+	const dir = path.join(root, '.cache', 'sources', name);
+	const git = (...args) => {
+		try {
+			return execFileSync('git', ['-C', dir, ...args], {
+				encoding: 'utf8',
+				stdio: ['ignore', 'pipe', 'pipe'],
+			}).trim();
+		} catch (error) {
+			throw new Failure(`git ${args[0]} for ${name} failed: ${error.stderr || error.message}`);
+		}
+	};
+
+	if (!fs.existsSync(path.join(dir, '.git'))) {
+		fs.mkdirSync(dir, { recursive: true });
+		git('init', '-q');
+	}
+
+	try {
+		git('cat-file', '-e', `${spec.commit}^{commit}`);
+	} catch {
+		console.log(`modules: fetching ${name} ${spec.commit.slice(0, 12)} from ${spec.repository}`);
+		git('fetch', '-q', '--depth', '1', spec.repository, spec.commit);
+	}
+
+	git('-c', 'advice.detachedHead=false', 'checkout', '-q', '--force', spec.commit);
+	git('clean', '-q', '-f', '-d', '-x');
+
+	if (git('rev-parse', 'HEAD') !== spec.commit) {
+		throw new Failure(`${name}: the checkout is not at ${spec.commit}`);
+	}
+
+	return fs.realpathSync(dir);
+}
+
+function inside(dir, file) {
+	return file.startsWith(dir + path.sep);
 }
 
 /** Bare specifiers imported by the panel's own source. */
@@ -555,6 +887,11 @@ function write(result, dir) {
 
 	for (const [file, owner] of result.files) {
 		copy(file, path.join(dir, owner.name, path.relative(owner.dir, file)));
+	}
+
+	for (const [file, content] of result.generated) {
+		fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+		fs.writeFileSync(path.join(dir, file), content);
 	}
 
 	const packages = [...result.packages.values()].sort((a, b) => a.name.localeCompare(b.name));

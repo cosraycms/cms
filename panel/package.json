@@ -15,7 +15,6 @@
 	},
 	"dependencies": {
 		"htmx.org": "4.0.0",
-		"prism-code-editor": "^5.4.0",
 		"prosemirror-commands": "^1.7.2",
 		"prosemirror-dropcursor": "^1.8.3",
 		"prosemirror-gapcursor": "^1.4.1",
@@ -43,10 +42,23 @@
 		"composerModules": {
 			"@celema/verba": "celema/verba/js/src/index.js"
 		},
-		"modulePrefixes": [
-			"prism-code-editor/languages/",
-			"prism-code-editor/prism/languages/"
-		],
+		"sources": {
+			"prism-code-editor": {
+				"repository": "https://github.com/jonpyt/prism-code-editor.git",
+				"commit": "d87a265ca9c5fc1a54f1dc8fd2e8b1f93259a7b4",
+				"version": "5.4.0",
+				"root": "package",
+				"license": "MIT",
+				"exports": {
+					".": "src/index.ts",
+					"./commands": "src/extensions/commands/index.ts",
+					"./highlight-brackets": "src/extensions/matchBrackets/highlight.ts",
+					"./match-brackets": "src/extensions/matchBrackets/index.ts",
+					"./languages/": "src/languages/",
+					"./prism/languages/": "src/prism/languages/"
+				}
+			}
+		},
 		"classicScripts": [
 			"htmx.org/dist/htmx.js"
 		],

@@ -19,19 +19,21 @@
 		// Modules a Composer package ships (package.json#cosray.composerModules).
 		"paths": {
 			"@celema/verba": ["../vendor/celema/verba/js/src/index.js"],
-			// Modules under package.json#cosray.modulePrefixes, named with .js.
-			"prism-code-editor/languages/*": ["./node_modules/prism-code-editor/dist/languages/*"],
-			"prism-code-editor/prism/languages/*": [
-				"./node_modules/prism-code-editor/dist/prism/languages/*"
+			// Packages built from source (package.json#cosray.sources), mapped to
+			// the declarations next to the compiled modules: a mapping to a .js
+			// file would make tsc check the vendored code as our own.
+			"prism-code-editor": ["./modules/prism-code-editor/src/index.d.ts"],
+			"prism-code-editor/commands": [
+				"./modules/prism-code-editor/src/extensions/commands/index.d.ts"
+			],
+			"prism-code-editor/highlight-brackets": [
+				"./modules/prism-code-editor/src/extensions/matchBrackets/highlight.d.ts"
+			],
+			"prism-code-editor/match-brackets": [
+				"./modules/prism-code-editor/src/extensions/matchBrackets/index.d.ts"
 			]
 		}
 	},
-	"include": [
-		"vitest.config.ts",
-		"src/**/*.d.ts",
-		"src/**/*.js",
-		"src/**/*.ts",
-		"tests/**/*.ts"
-	],
+	"include": ["vitest.config.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "tests/**/*.ts"],
 	"exclude": ["node_modules/**"]
 }

@@ -33,7 +33,7 @@ const syntaxAliases = {
 // closing) globally; plaintext has neither and stays unhighlighted. HTML
 // brings the grammars its style and script elements embed. Specifiers carry
 // .js because the import map maps the language directories as a whole
-// (package.json#cosray.modulePrefixes).
+// (package.json#cosray.sources).
 /** @type {Record<SyntaxKey, () => Promise<unknown>>} */
 const languageLoaders = {
 	plaintext: async () => {},

@@ -1,0 +1,226 @@
+import { numLines, doc } from "../core.js";
+import { addListener2, getLineEnd, getLineStart } from "./local.js";
+import { escapeHtml } from "../prism/core.js";
+/**
+ * If {@link insertText} has been called, this variable stores the editor's selection
+ * before the call. This variable is set to 0 right before {@link insertText} returns.
+ * This can therefore be used inside a `beforeinput` handler to determine if
+ * {@link insertText} fired the event, and if true, get the selection before the call.
+ *
+ * Intended for internal use only.
+ */
+let prevSelection;
+/**
+ * Escapes all regex syntax characters with a backslash and returns the escaped string.
+ *
+ * The returned string is not safe inside a character class.
+ */
+const regexEscape = (str) => str.replace(/[$+?|.^*()[\]{}\\]/g, "\\$&");
+/** Returns the string between the position and the previous \n. */
+const getLineBefore = (text, position) => text.slice(getLineStart(text, position), position);
+/**
+ * Gets all lines that are at least partially between `start` and `end`.
+ * @param text Text to search in.
+ * @param start Start of the selection.
+ * @param end End of the selection. Defaults to `start`.
+ * @returns A tuple containing an array of lines, the starting position of the first line,
+ * and the ending position of the last line.
+ */
+const getLines = (text, start, end = start) => [
+    text.slice((start = getLineStart(text, start)), (end = getLineEnd(text, end))).split("\n"),
+    start,
+    end,
+];
+/**
+ * Searches a full line for a token that matches a selector and contains `position`
+ * within the specified margins. Tokens are searched in reverse document order which means
+ * children are searched before their parents.
+ * @param editor Editor you want to search in.
+ * @param selector CSS selector for the tokens you want to search for.
+ * @param marginLeft How far to the left of the token the position can be. Defaults to 0.
+ * @param marginRight How far to the right of the token the position can be. Defaults to `marginLeft`.
+ * @param position Position to search in. Defaults to `selectionStart`.
+ * @returns A span element if one's found or undefined if not.
+ * @example
+ * This will return a string token if the cursor
+ * is at least 1 character inside a string token
+ * ```javascript
+ * getClosestToken(editor, '.string', -1)
+ * ```
+ */
+const getClosestToken = (editor, selector, marginLeft = 0, marginRight = marginLeft, position = editor.getSelection()[0]) => {
+    const value = editor.value;
+    const line = editor.lines[numLines(value, 0, position)];
+    // We unfortunitely have to include elements, else we can't get empty tokens
+    const walker = doc.createTreeWalker(line, 5);
+    let node = walker.lastChild();
+    let offset = getLineEnd(value, position) + 1 - position - node.length;
+    while (-offset <= marginRight && (node = walker.previousNode())) {
+        if (node.lastChild)
+            continue;
+        offset -= node.length || 0;
+        if (offset <= marginLeft) {
+            for (; node != line; node = node.parentNode) {
+                if (node.matches?.(selector))
+                    return node;
+            }
+        }
+    }
+};
+/**
+ * Gets the current language at a position.
+ * Useful if you want to run different logic based on the language.
+ * @param editor Editor to search in.
+ * @param position Position to search in. Defaults to `selectionStart`.
+ */
+const getLanguage = (editor, position) => getClosestToken(editor, "[class*=language-]", 0, 0, position)?.className.match(/language-(\S*)/)[1] || editor.options.language;
+/**
+ * Inserts text into the editor (unless it's read-only) while keeping undo/redo history.
+ * Focuses the `textarea` if it isn't already.
+ * @param editor Target editor.
+ * @param text Text to insert.
+ * @param start Position to start the insertion. Defaults to `selectionStart`.
+ * @param end Position to end the insertion. Defaults to `start` if specified, else `selectionEnd`.
+ * @param newCursorStart New starting position for the cursor. Defaults to the end of the inserted text.
+ * @param newCursorEnd New ending position for the cursor. Defaults to `newCursorStart`.
+ */
+const insertText = (editor, text, start, end, newCursorStart, newCursorEnd) => {
+    if (editor.options.readOnly)
+        return;
+    prevSelection = editor.getSelection();
+    end ??= start;
+    let textarea = editor.textarea;
+    let value = editor.value;
+    // Bug inserting new lines at the end if the editor ends with an empty line
+    let avoidBug = isChrome && !value[end ?? prevSelection[1]] && /\n$/.test(text) && /^$|\n$/.test(value);
+    let removeListener;
+    editor.focused || textarea.focus();
+    if (start != null)
+        textarea.setSelectionRange(start, end);
+    if (newCursorStart != null) {
+        removeListener = editor.on("update", () => {
+            textarea.setSelectionRange(newCursorStart, newCursorEnd ?? newCursorStart, prevSelection[2]);
+            removeListener();
+        });
+    }
+    // Only Safari dispatches a beforeinput event
+    isWebKit || textarea.dispatchEvent(new InputEvent("beforeinput", { data: text }));
+    // Inserting escaped HTML in Chrome and Safari instead for much better performance
+    if (isChrome || isWebKit) {
+        if (avoidBug) {
+            // This means the last new line won't be inserted if there's
+            // no selection, but that's less annoying than the bug.
+            textarea.selectionEnd--;
+            text = text.slice(0, -1);
+        }
+        // New line at the end is always ignored in Safari
+        if (isWebKit)
+            text += "\n";
+        doc.execCommand(text ? "insertHTML" : "delete", false, escapeHtml(text, /</g, "&lt;"));
+        if (avoidBug)
+            textarea.selectionStart++;
+    }
+    else
+        doc.execCommand(text ? "insertText" : "delete", false, text);
+    prevSelection = 0;
+};
+/**
+ * Sets the selection for the `textarea` and synchronously runs the selectionChange listeners.
+ * If you don't want to synchronously run the listeners, use `textarea.setSelectionRange` instead.
+ * @param editor Editor you want to change the selection of.
+ * @param start New selectionStart.
+ * @param end New selectionEnd. Defaults to `start`.
+ * @param direction New direction.
+ */
+const setSelection = (editor, start, end = start, direction) => {
+    let textarea = editor.textarea;
+    // Webkit 18.3 and earlier focuses the textarea when changing the selection
+    let removeHandler = addListener2(textarea, "focus", e => {
+        let target = e.relatedTarget;
+        target ? target.focus() : textarea.blur();
+    });
+    textarea.setSelectionRange(start, end, direction);
+    removeHandler();
+    textarea.dispatchEvent(new Event("selectionchange"));
+};
+const userAgent = doc ? navigator.userAgent : "";
+/** Whether the user is on an Apple-based system. */
+const isMac = doc ? /Mac|iPhone|iP[ao]d/.test(navigator.platform) : false;
+/** Whether the browser is Chromium based. */
+const isChrome = /Chrome\//.test(userAgent);
+/** Whether the browser uses the WebKit browser engine. */
+const isWebKit = !isChrome && /AppleWebKit\//.test(userAgent);
+/**
+ * Returns a 4 bit integer where each bit represents whether
+ * each modifier is pressed in the order Shift, Meta, Ctrl, Alt.
+ *
+ * ```javascript
+ * e.shiftKey && !e.metaKey && e.ctrlKey && e.altKey
+ * // is equivalent to
+ * getModifierCode(e) == 0b1011
+ * ```
+ */
+const getModifierCode = (e) => e.altKey + e.ctrlKey * 2 + e.metaKey * 4 + e.shiftKey * 8;
+/**
+ * Adds an overlay by appending the element to the editor's overlays.
+ * Equivalent to calling `editor.lines[0].append(overlay)`.
+ * @param editor Editor or code block you want to add an overlay to.
+ * @param overlay The overlay you want to add.
+ */
+const addOverlay = (editor, overlay) => editor.lines[0].append(overlay);
+/**
+ * Gets the position of the cursor in the document. It returns a tuple with three numbers:
+ *
+ * 1. The line number of the cursor
+ * 2. The 1-based column of the cursor
+ * 3. Number of characters selected
+ *
+ * @example
+ * const [line, col, selected] = getDocumentPosition(editor)
+ */
+const getDocumentPosition = (editor) => {
+    let [start, end, dir] = editor.getSelection();
+    let pos = dir < "f" ? start : end;
+    let value = editor.value;
+    let col = 0;
+    let chars = 0;
+    let tabSize = editor.options.tabSize || 2;
+    for (const char of getLineBefore(value, pos)) {
+        col += char == "\t" ? tabSize - (col % tabSize) : 1;
+    }
+    for (const _ of value.slice(start, end))
+        chars++;
+    return [editor.activeLine, col + 1, chars];
+};
+/**
+ * Computes the offset at which the specified token begins in the editor's value.
+ * @param editor Editor or code block the token is inside.
+ * @param token Token to compute the offset for.
+ * @throws {Error} If the token isn't inside the specified editor.
+ */
+const getTokenOffset = (editor, token) => {
+    let line = token.closest(".pce-line");
+    if (editor.wrapper != line?.parentNode)
+        throw Error("Editor doesn't include this token");
+    let walker = doc.createTreeWalker(line, 4 /* NodeFilter.SHOW_TEXT */);
+    let code = editor.value ?? editor.code;
+    let lines = editor.lines;
+    let offset = 0;
+    let node;
+    let i = 0;
+    walker.currentNode = token;
+    while (((offset = code.indexOf("\n", offset) + 1), line != lines[++i]))
+        ;
+    if (!offset)
+        offset = code.length + 1;
+    while ((node = walker.nextNode()))
+        offset -= node.length;
+    return offset;
+};
+/**
+ * Gets the language used for syntax highlighting at the token's position.
+ */
+const getTokenLanguage = (token) => {
+    return /language-(\S*)/.exec(token.closest("[class*=language-]")?.className || "language-text")[1];
+};
+export { regexEscape, getLineBefore, getLines, getClosestToken, getLanguage, insertText, getModifierCode, setSelection, addOverlay, getDocumentPosition, getTokenOffset, getTokenLanguage, isMac, isChrome, isWebKit, prevSelection, };
