@@ -1237,6 +1237,7 @@ final class Styleguide extends Panel
 			'pathsUrl' => null,
 			'generatedPaths' => [],
 			'meta' => ['created' => 'Aug 11, 2026', 'editor' => 'M. Keller'],
+			'collapsed' => false,
 		];
 	}
 
