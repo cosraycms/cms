@@ -283,9 +283,15 @@ class End2EndTestCase extends IntegrationTestCase
 		// Capture output and return response without emitting
 		ob_start();
 
+		// PHPUnit lowers error_reporting while a test runs, and the app's
+		// error handler ignores what it does not report: a warning in a view
+		// would vanish here while the dev server turns it into a fatal error.
+		$reporting = error_reporting(E_ALL);
+
 		try {
 			$response = $this->app->run($psrRequest);
 		} finally {
+			error_reporting($reporting);
 			ob_end_clean();
 		}
 
