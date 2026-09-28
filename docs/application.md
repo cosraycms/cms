@@ -56,7 +56,7 @@ Error pages use a separate Boiler renderer. Project `http-error.php` and `http-s
 
 ## Console commands
 
-[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
+[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
 A project `run` script can load an `app/console.php` returning the runner:
 
@@ -197,7 +197,19 @@ The panel's browser files ship with the package as they are, so `composer instal
 
 A first visit loads the modules one by one: about 90 files for the dashboard and 130 for an editor with rich text and code, around 200 and 700 KB compressed. Make sure the web server compresses `text/javascript` and `text/css` responses (gzip, Brotli or zstd) and speaks HTTP/2; uncompressed, the same visits move several times the bytes. Later visits load nothing but the page.
 
-Letting the web server deliver these files instead of PHP is optional. A mapping has to drop the revision segment, allow only `src/`, `styles/`, `modules/` and `icons/` with the `.js`, `.css` and `.svg` extensions, serve `.js` as `text/javascript`, and send the immutable `Cache-Control` header only for the installed revision; the sprite `icons.svg` and the paths below `composer/`, which point into other packages, have to reach PHP.
+### Publishing for static delivery
+
+Optionally let the web server deliver the panel files directly:
+
+```bash
+php run panel:publish
+```
+
+The command copies the browser files from the installed packages and generates the icon sprite at `{path.public}{panel.path}/assets/{revision}/` (by default, `public/cp/assets/{revision}/`). It includes the Composer-provided browser modules, but not PHP views, package configuration, or plugin assets. No new settings or URL changes are needed; `app.url_prefix` does not add a filesystem directory.
+
+Run it after `composer install` or `composer update` in deployment, using the same configuration and package files as the web application. A complete revision is published at once. Repeating the command verifies an existing publication without overwriting it; a conflicting or incomplete directory causes an error. Older revisions and unrelated application files are left untouched. Remove obsolete revision directories separately when they are no longer needed for open browser tabs or rollbacks. Publishing is intended for production installs; during development, PHP serves edits without needing another publish step.
+
+Configure the web server to serve existing **files** directly and route other requests, including the panel's directory paths, to PHP. Disable directory listings, serve `.js` as `text/javascript`, and configure compression and `Cache-Control: public, max-age=31536000, immutable` for the published revision files. Keep the ordinary PHP fallback: it still serves unpublished revisions and plugin assets. No server configuration files are generated.
 
 `panel.theme` accepts a stylesheet URL or a list of URLs. [Panel styles](panel-styles.md) explains the cascade and current theming approach. [Panel development](../panel/README.md) covers the optional Vite dev server and the live styleguide.
 

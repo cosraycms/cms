@@ -18,12 +18,14 @@ use Celema\Verba\Tool\PhpScanner;
 use Closure;
 use Cosray\App;
 use Cosray\Commands\Fulltext;
+use Cosray\Commands\PanelPublish;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
 use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
+use Cosray\Panel\Client;
 
 /**
  * The base CLI command set of a Cosray application.
@@ -59,6 +61,10 @@ final class Commands
 		);
 		$this->commands->add([
 			Fulltext::class => fn(): Fulltext => $this->resolve(Fulltext::class),
+			PanelPublish::class => static fn(): PanelPublish => new PanelPublish(
+				$app->config,
+				new Client($app->config),
+			),
 			References::class => fn(): References => new References($this->conn()),
 			RecreateSortIndex::class => fn(): RecreateSortIndex => $this->resolve(RecreateSortIndex::class),
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),

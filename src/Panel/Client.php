@@ -123,6 +123,46 @@ final class Client
 	}
 
 	/**
+	 * Browser files keyed by their path below the revision segment. Reuse the
+	 * HTTP allowlist so publishing cannot expose package internals.
+	 *
+	 * @return iterable<string, string>
+	 */
+	public function files(): iterable
+	{
+		$dirs = [];
+
+		foreach (self::DIRS as $dir) {
+			$dirs[$dir] = $this->dir . '/' . $dir;
+		}
+
+		foreach ($this->composerDirs() as $prefix => $dir) {
+			$dirs[self::COMPOSER . '/' . $prefix] = $dir;
+		}
+
+		foreach ($dirs as $prefix => $dir) {
+			if (!is_dir($dir)) {
+				continue;
+			}
+
+			$paths = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+
+			foreach ($paths as $path) {
+				$slug =
+					$prefix
+					. '/'
+					. str_replace(DIRECTORY_SEPARATOR, '/', substr($path->getPathname(), strlen($dir) + 1));
+				$file = $this->file($slug);
+				$root = realpath($dir);
+
+				if ($file !== null && $root !== false && str_starts_with($file, $root . DIRECTORY_SEPARATOR)) {
+					yield $slug => $file;
+				}
+			}
+		}
+	}
+
+	/**
 	 * The import map for the vendored third-party modules and the modules
 	 * Composer packages ship, resolved to versioned URLs.
 	 *
