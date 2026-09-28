@@ -15,28 +15,28 @@
 	},
 	"dependencies": {
 		"htmx.org": "4.0.0",
-		"prosemirror-commands": "^1.7.2",
-		"prosemirror-dropcursor": "^1.8.3",
-		"prosemirror-gapcursor": "^1.4.1",
-		"prosemirror-history": "^1.5.0",
-		"prosemirror-inputrules": "^1.5.1",
-		"prosemirror-keymap": "^1.2.3",
-		"prosemirror-model": "^1.25.11",
-		"prosemirror-schema-list": "^1.5.1",
-		"prosemirror-state": "^1.4.4",
-		"prosemirror-view": "^1.42.3",
-		"sortablejs": "^1.15.7"
+		"prosemirror-commands": "1.7.2",
+		"prosemirror-dropcursor": "1.8.3",
+		"prosemirror-gapcursor": "1.4.1",
+		"prosemirror-history": "1.5.0",
+		"prosemirror-inputrules": "1.5.1",
+		"prosemirror-keymap": "1.2.3",
+		"prosemirror-model": "1.25.11",
+		"prosemirror-schema-list": "1.5.1",
+		"prosemirror-state": "1.4.4",
+		"prosemirror-view": "1.42.3",
+		"sortablejs": "1.15.7"
 	},
 	"devDependencies": {
-		"@types/jsdom": "^28.0.3",
-		"@types/node": "^25.9.5",
-		"@types/sortablejs": "^1.15.9",
-		"es-module-lexer": "^2.3.2",
-		"jsdom": "^25.0.1",
-		"prettier": "^3.9.6",
-		"typescript": "^5.9.3",
-		"vite": "^7.3.6",
-		"vitest": "^4.1.11"
+		"@types/jsdom": "28.0.3",
+		"@types/node": "25.9.5",
+		"@types/sortablejs": "1.15.9",
+		"es-module-lexer": "2.3.2",
+		"jsdom": "25.0.1",
+		"prettier": "3.9.6",
+		"typescript": "5.9.3",
+		"vite": "7.3.6",
+		"vitest": "4.1.11"
 	},
 	"cosray": {
 		"composerModules": {

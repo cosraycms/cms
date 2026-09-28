@@ -12,65 +12,65 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       prosemirror-commands:
-        specifier: ^1.7.2
+        specifier: 1.7.2
         version: 1.7.2
       prosemirror-dropcursor:
-        specifier: ^1.8.3
+        specifier: 1.8.3
         version: 1.8.3
       prosemirror-gapcursor:
-        specifier: ^1.4.1
+        specifier: 1.4.1
         version: 1.4.1
       prosemirror-history:
-        specifier: ^1.5.0
+        specifier: 1.5.0
         version: 1.5.0
       prosemirror-inputrules:
-        specifier: ^1.5.1
+        specifier: 1.5.1
         version: 1.5.1
       prosemirror-keymap:
-        specifier: ^1.2.3
+        specifier: 1.2.3
         version: 1.2.3
       prosemirror-model:
-        specifier: ^1.25.11
+        specifier: 1.25.11
         version: 1.25.11
       prosemirror-schema-list:
-        specifier: ^1.5.1
+        specifier: 1.5.1
         version: 1.5.1
       prosemirror-state:
-        specifier: ^1.4.4
+        specifier: 1.4.4
         version: 1.4.4
       prosemirror-view:
-        specifier: ^1.42.3
+        specifier: 1.42.3
         version: 1.42.3
       sortablejs:
-        specifier: ^1.15.7
+        specifier: 1.15.7
         version: 1.15.7
     devDependencies:
       '@types/jsdom':
-        specifier: ^28.0.3
+        specifier: 28.0.3
         version: 28.0.3
       '@types/node':
-        specifier: ^25.9.5
+        specifier: 25.9.5
         version: 25.9.5
       '@types/sortablejs':
-        specifier: ^1.15.9
+        specifier: 1.15.9
         version: 1.15.9
       es-module-lexer:
-        specifier: ^2.3.2
+        specifier: 2.3.2
         version: 2.3.2
       jsdom:
-        specifier: ^25.0.1
+        specifier: 25.0.1
         version: 25.0.1
       prettier:
-        specifier: ^3.9.6
+        specifier: 3.9.6
         version: 3.9.6
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: ^7.3.6
+        specifier: 7.3.6
         version: 7.3.6(@types/node@25.9.5)
       vitest:
-        specifier: ^4.1.11
+        specifier: 4.1.11
         version: 4.1.11(@types/node@25.9.5)(jsdom@25.0.1)(vite@7.3.6(@types/node@25.9.5))
 
 packages:

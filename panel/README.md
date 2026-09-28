@@ -34,7 +34,7 @@ A package in `package.json#cosray.sources` is built from its source repository i
 
 Update only for a reason: a bug the panel hits, a feature it needs, or a security advisory for code it ships. Packages built from source are not in `dependencies`, so `pnpm audit` does not cover them.
 
-1. Change the version in `package.json` and run `pnpm install`, or for a package built from source, set `commit` and `version` to the release (`git ls-remote --tags <repository>` lists the commits).
+1. Change the version in `package.json`, where every package is pinned exactly (`saveExact` in `pnpm-workspace.yaml` keeps it that way), and run `pnpm install`, or for a package built from source, set `commit` and `version` to the release (`git ls-remote --tags <repository>` lists the commits).
 2. Run `pnpm run modules`.
 3. Review the diff of `modules/` before committing. For a package built from source, the upstream history is at hand too: `git -C .cache/sources/<name> diff <old> <new>`, after `git -C .cache/sources/<name> fetch --depth 1 <repository> <old>` if the old commit is missing. Look for new network or storage access, `eval`, `Function` or computed imports, new HTML insertion, obfuscated or minified code, changes that no upstream commit explains, new dependencies, and license changes.
 4. Name the old and new version, the reason, and what the review found in the commit message.
