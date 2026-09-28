@@ -171,6 +171,21 @@ describe('code editing', () => {
 		});
 	});
 
+	it('names the syntaxes it offers and keeps unknown keys as configured', async () => {
+		const { element } = await code({
+			value: { zxx: '' },
+			field: { name: 'snippet', syntaxes: ['plaintext', 'csharp', 'js', 'cobol'] },
+		});
+		const options = [...element.querySelector('select')!.options];
+
+		expect(options.map((option) => [option.value, option.text])).toEqual([
+			['plaintext', 'code:plaintext'],
+			['csharp', 'C#'],
+			['js', 'JavaScript'],
+			['cobol', 'cobol'],
+		]);
+	});
+
 	it('highlights the chosen syntax', async () => {
 		const { element } = await code({
 			value: { zxx: '<?php echo 1;' },

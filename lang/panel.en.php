@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
+		'code:plaintext' => 'Plain text',
 		'code:syntax' => 'Syntax',
 		'common:apply' => 'Apply',
 		'common:cancel' => 'Cancel',

@@ -15,7 +15,12 @@ import { ZXX, ensureLocales, ensureNeutral } from '../lib/content.js';
 import { editedLocale, fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __ } from '../lib/locale.js';
-import { DEFAULT_CODE_SYNTAX, loadCodeLanguage, normalizeCodeSyntax } from './code/languages.js';
+import {
+	DEFAULT_CODE_SYNTAX,
+	codeSyntaxLabel,
+	loadCodeLanguage,
+	normalizeCodeSyntax,
+} from './code/languages.js';
 
 /**
  * @typedef {object} CodeField
@@ -165,7 +170,7 @@ export class CosrayCode extends HTMLElement {
 		select.disabled = this.field.immutable ?? false;
 
 		for (const option of options) {
-			select.append(new Option(option, option));
+			select.append(new Option(codeSyntaxLabel(option), option));
 		}
 
 		select.value = this.#syntax[ZXX];
