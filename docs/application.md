@@ -199,7 +199,7 @@ A first visit loads the modules one by one: about 90 files for the dashboard and
 
 Letting the web server deliver these files instead of PHP is optional. A mapping has to drop the revision segment, allow only `src/`, `styles/`, `modules/` and `icons/` with the `.js`, `.css` and `.svg` extensions, serve `.js` as `text/javascript`, and send the immutable `Cache-Control` header only for the installed revision; the sprite `icons.svg` and the paths below `composer/`, which point into other packages, have to reach PHP.
 
-`panel.theme` accepts a stylesheet URL or a list of URLs. [Panel styles](panel-styles.md) explains the cascade and current theming approach. [Panel development](../panel/README.md) covers the optional Vite dev server and the live styleguide.
+`panel.theme` accepts a stylesheet URL or a list of URLs. [Panel styles](panel-styles.md) explains the cascade and current theming approach. [Panel development](../panel/README.md) covers the panel's checks and the live styleguide.
 
 ## Users, roles and permissions
 

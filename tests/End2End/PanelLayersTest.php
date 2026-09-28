@@ -73,6 +73,20 @@ final class PanelLayersTest extends End2EndTestCase
 		$this->assertSame('text/javascript', $response->getHeaderLine('Content-Type'));
 	}
 
+	public function testTheDocumentLoadsTheLiveReloadScriptWhileTheDevServerWatches(): void
+	{
+		putenv('CELEMA_LIVE_RELOAD=http://localhost:19830/celema-live-reload.js');
+
+		try {
+			$html = $this->layerHtml();
+		} finally {
+			putenv('CELEMA_LIVE_RELOAD');
+		}
+
+		$this->assertHtmlNodeExists('//script[contains(@src, ":19830/celema-live-reload.js")]', $html);
+		$this->assertHtmlNodeMissing('//script[contains(@src, "celema-live-reload.js")]', $this->layerHtml());
+	}
+
 	public function testNavigatingInsideAnAreaRendersTheContentRegionAlone(): void
 	{
 		$html = $this->layerHtml([

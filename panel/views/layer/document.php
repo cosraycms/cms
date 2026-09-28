@@ -6,6 +6,7 @@ $catalog = (array) $this->unwrap(
 	$messages ?? ['locale' => (string) ($localeId ?? 'en'), 'domains' => []],
 );
 $importMap = (array) $this->unwrap($importMap ?? []);
+$liveReload = $this->unwrap($liveReload ?? null);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 ?>
@@ -49,5 +50,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <?php foreach ($moduleScripts as $script): ?>
 	<script type="module" src="<?= escape((string) $script) ?>"></script>
 <?php endforeach ?>
+<?php if (is_string($liveReload) && $liveReload !== ''): ?>
+	<script src="<?= escape($liveReload) ?>" defer></script>
+<?php endif ?>
 </body>
 </html>
