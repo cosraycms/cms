@@ -16,6 +16,10 @@ Only generated, well-formed bracket names are covered. Dots/spaces or stray brac
 
 Consumed by [FormNameContractTest](../tests/Unit/FormNameContractTest.php) and [form-names.test.ts](../panel/tests/contract/form-names.test.ts).
 
+## Code syntaxes
+
+PHP rejects a code field syntax the editor lacks, so [CodeSyntaxes](../src/Field/CodeSyntaxes.php) and [languages.js](../panel/src/elements/code/languages.js) must know the same keys and aliases. There is no fixture: [code-syntaxes.test.ts](../panel/tests/contract/code-syntaxes.test.ts) reads the PHP lists directly and compares them, so a language added on one side only fails the panel tests.
+
 ## Element form leaf
 
 [form-leaf.json](form-leaf.json) exercises the `[json]` leaf produced by [host.js](../panel/src/lib/host.js) and merged by [FormPatch](../src/Panel/FormPatch.php). Cases specify stored content, a decoded leaf (or deliberately malformed raw leaf), and the expected patch result.

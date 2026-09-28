@@ -341,8 +341,12 @@ const syntaxes = {
 
 /** @typedef {keyof typeof syntaxes} SyntaxKey */
 
+// src/Field/CodeSyntaxes.php accepts the same keys and aliases for a field's
+// syntaxes (tests/contract/code-syntaxes.test.ts).
+export const CODE_SYNTAXES = /** @type {SyntaxKey[]} */ (Object.keys(syntaxes));
+
 /** @type {Record<string, SyntaxKey>} */
-const syntaxAliases = {
+export const CODE_SYNTAX_ALIASES = {
 	js: 'javascript',
 	ts: 'typescript',
 	md: 'markdown',
@@ -365,8 +369,8 @@ const syntaxAliases = {
 function knownSyntax(syntax) {
 	const key = syntax.trim().toLowerCase();
 
-	if (Object.hasOwn(syntaxAliases, key)) {
-		return syntaxAliases[key];
+	if (Object.hasOwn(CODE_SYNTAX_ALIASES, key)) {
+		return CODE_SYNTAX_ALIASES[key];
 	}
 
 	return Object.hasOwn(syntaxes, key) ? /** @type {SyntaxKey} */ (key) : null;

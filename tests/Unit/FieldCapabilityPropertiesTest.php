@@ -419,6 +419,25 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertEquals(['php', 'javascript'], $properties['syntaxes']);
 	}
 
+	public function testSyntaxAliasesBecomeTheSyntaxTheyStandFor(): void
+	{
+		$field = new Code('snippet', $this->createOwner(), new ValueContext('snippet', []));
+
+		$properties = $this->applyAndGetProperties(new Syntax('JS', ' ', 'javascript', 'mustache'), $field);
+
+		$this->assertSame(['javascript', 'handlebars'], $properties['syntaxes']);
+		$this->assertSame('javascript', $field->getDefaultSyntax());
+	}
+
+	public function testASyntaxThePanelLacksFailsLoudly(): void
+	{
+		$field = new Code('snippet', $this->createOwner(), new ValueContext('snippet', []));
+
+		$this->throws(RuntimeException::class, 'The field "snippet" offers the syntax "cobol"');
+
+		$this->applyAndGetProperties(new Syntax('php', 'cobol'), $field);
+	}
+
 	public function testRichTextPropertiesExposeDefaultTools(): void
 	{
 		$field = $this->createRichTextField();
