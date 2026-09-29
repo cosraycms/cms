@@ -11,6 +11,9 @@ use Cosray\Contract\Columns;
 use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
+use Cosray\Finder\Order;
+use Cosray\Finder\SortField;
+use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 
@@ -88,15 +91,23 @@ final class Listing
 	): array {
 		[$sort, $dir, $order] = $this->resolveOrder($sort, $dir);
 		$nodes = $this->entries();
+		$parent = $this->meta->showChildren ? trim((string) $parent) : '';
 
 		if ($this->meta->showChildren) {
-			$parent = trim((string) $parent);
-
 			if ($parent === '') {
 				$nodes->roots();
 			} else {
 				$nodes->childrenOf($parent);
 			}
+		}
+
+		// A manually ordered level ignores the column sort: the tree shares
+		// one header row between several levels, and a column click must
+		// not re-sort some of them.
+		$scope = $this->scope($parent);
+
+		if ($scope !== null) {
+			$order = [$this->positionOrder($scope)];
 		}
 
 		$q = trim($q);
@@ -118,8 +129,52 @@ final class Listing
 			'q' => $q,
 			'sort' => $sort,
 			'dir' => $dir,
-			'nodes' => $this->rows($pageNodes),
+			'arranged' => $scope !== null,
+			// A search shows a subset, where moving next to a hit would
+			// silently jump the rows in between.
+			'nodes' => $this->rows($pageNodes, $q === '' ? $scope : null, $offset, $total),
 		];
+	}
+
+	/**
+	 * Moves an entry directly before or after a neighbour in the manual
+	 * order it belongs to: its parent's children in a hierarchy listing,
+	 * otherwise the collection's own top level. The whole group is
+	 * renumbered, members this listing doesn't show included.
+	 */
+	public function place(Positions $positions, string $uid, string $neighbour, bool $after): void
+	{
+		$scope = $this->scopeOf($uid);
+		$order = Positions::move($this->uids($this->group($scope)), $uid, $neighbour, $after);
+
+		if ($scope === '') {
+			$positions->orderEntries($this->handle(), $order);
+
+			return;
+		}
+
+		$positions->orderChildren($scope, $order);
+	}
+
+	/**
+	 * The row above or below an entry as this listing shows its group, so
+	 * a move always changes what the editor sees, even with sibling types
+	 * the collection doesn't list in between. Null at either end.
+	 */
+	public function neighbour(string $uid, bool $below): ?string
+	{
+		$scope = $this->scopeOf($uid);
+		$group = $scope === ''
+			? $this->group($scope)
+			: $this->entries()->childrenOf($scope)->order($this->positionOrder($scope));
+		$uids = $this->uids($group);
+		$index = array_search($uid, $uids, true);
+
+		if ($index === false) {
+			return null;
+		}
+
+		return $uids[$below ? $index + 1 : $index - 1] ?? null;
 	}
 
 	/** @return list<array{slug: string, name: string}> */
@@ -153,16 +208,23 @@ final class Listing
 
 	/**
 	 * @param list<Wrapper> $nodes
+	 * @param ?string $group the manual order the rows can be moved in, null when they can't
 	 */
-	private function rows(array $nodes): array
+	private function rows(array $nodes, ?string $group, int $offset, int $total): array
 	{
 		$result = [];
 		$hasChildren = $this->meta->showChildren
 			? $this->hasChildrenMap($nodes)
 			: [];
 
-		foreach ($nodes as $node) {
-			$result[] = $this->row($node, $hasChildren[$node->meta->uid] ?? false);
+		foreach (array_values($nodes) as $index => $node) {
+			$position = $offset + $index;
+			$result[] = [
+				...$this->row($node, $hasChildren[$node->meta->uid] ?? false),
+				'group' => $group,
+				'moveUp' => $group !== null && $position > 0,
+				'moveDown' => $group !== null && $position < ($total - 1),
+			];
 		}
 
 		return $result;
@@ -239,6 +301,84 @@ final class Listing
 		}
 
 		return $result;
+	}
+
+	/**
+	 * The manual order a level follows: the parent's uid when its type
+	 * declares sortable children, an empty string for the top level of a
+	 * sortable listing, null when the columns decide.
+	 */
+	private function scope(string $parent): ?string
+	{
+		if ($parent === '') {
+			return $this->meta->sortable ? '' : null;
+		}
+
+		$node = $this->parent($parent);
+
+		return $node?->meta->type->get('sortableChildren', false) === true ? $parent : null;
+	}
+
+	/** The scope an entry of this listing is moved in. */
+	private function scopeOf(string $uid): string
+	{
+		$node = iterator_to_array($this->entries()->only($uid))[0] ?? null;
+
+		if (!$node instanceof Wrapper) {
+			throw new RuntimeException("'{$uid}' is not an entry of this collection");
+		}
+
+		$parent = $node->meta->get('parent');
+		$level = $this->meta->showChildren && is_string($parent) ? $parent : '';
+
+		return $this->scope($level) ?? throw new RuntimeException("'{$uid}' is not in a manual order");
+	}
+
+	/**
+	 * Every member of a manual order in its current order: all children of
+	 * the parent, whatever this collection lists, because templates read
+	 * the whole group through children(); or the collection's top level.
+	 */
+	private function group(string $scope): Nodes
+	{
+		if ($scope !== '') {
+			return $this->cms
+				->nodes()
+				->published(null)
+				->hidden(null)
+				->childrenOf($scope)
+				->order($this->positionOrder($scope));
+		}
+
+		$nodes = $this->entries();
+
+		if ($this->meta->showChildren) {
+			$nodes->roots();
+		}
+
+		return $nodes->order($this->positionOrder($scope));
+	}
+
+	private function positionOrder(string $scope): Order
+	{
+		return new Order($scope === '' ? SortField::position($this->handle()) : SortField::position());
+	}
+
+	private function handle(): string
+	{
+		return (string) $this->schema->handle;
+	}
+
+	/** @return list<string> */
+	private function uids(Nodes $nodes): array
+	{
+		$uids = [];
+
+		foreach ($nodes as $node) {
+			$uids[] = $node->meta->uid;
+		}
+
+		return $uids;
 	}
 
 	/**

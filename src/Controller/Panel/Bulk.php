@@ -383,29 +383,7 @@ final class Bulk extends Panel
 			}
 		}
 
-		// Reflect the listing query the bulk URL carried back into the
-		// redirect, so the user lands on the view they acted in.
-		$params = [];
-
-		foreach (['q', 'sort', 'dir', 'offset', 'limit', 'parent', 'view', 'open'] as $key) {
-			$value = $this->request->param($key, '');
-
-			if (is_string($value) && trim($value) !== '') {
-				$params[$key] = trim($value);
-			}
-		}
-
-		if ($notice !== []) {
-			$params['notice'] = implode(',', $notice);
-		}
-
-		$path = $this->panelPath() . '/collection/' . rawurlencode($collection);
-		$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-
-		return Response::create($factory)->redirect(
-			$query === '' ? $path : $path . '?' . $query,
-			303,
-		);
+		return $this->listingRedirect($factory, $collection, $notice === [] ? [] : ['notice' => implode(',', $notice)]);
 	}
 
 	private function collection(string $collection): Listing

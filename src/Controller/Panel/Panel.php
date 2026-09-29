@@ -6,7 +6,9 @@ namespace Cosray\Controller\Panel;
 
 use Celema\Container\Container;
 use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
+use Celema\Core\Response;
 use Celema\Verba\Verba;
 use Celema\Wire\Creator;
 use Cosray\Cms;
@@ -146,6 +148,30 @@ abstract class Panel
 	protected function panelPath(): string
 	{
 		return $this->config->panel->path;
+	}
+
+	/**
+	 * A 303 back to a collection listing with the listing query the request
+	 * URL carried, so the editor lands on the view they acted in.
+	 *
+	 * @param array<string, string> $extra
+	 */
+	protected function listingRedirect(Factory $factory, string $collection, array $extra = []): Response
+	{
+		$params = [];
+
+		foreach (['q', 'sort', 'dir', 'offset', 'limit', 'parent', 'view', 'open'] as $key) {
+			$value = $this->request->param($key, '');
+
+			if (is_string($value) && trim($value) !== '') {
+				$params[$key] = trim($value);
+			}
+		}
+
+		$path = $this->panelPath() . '/collection/' . rawurlencode($collection);
+		$query = http_build_query([...$params, ...$extra], '', '&', PHP_QUERY_RFC3986);
+
+		return Response::create($factory)->redirect($query === '' ? $path : $path . '?' . $query, 303);
 	}
 
 	/**

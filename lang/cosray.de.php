@@ -81,6 +81,8 @@ return [
 		'collection:entry-count' => [':count Eintrag', ':count Einträge'],
 		'collection:expand-children' => 'Unterelemente von :name ausklappen',
 		'collection:list' => 'Liste',
+		'collection:move-down' => '„:name“ nach unten verschieben',
+		'collection:move-up' => '„:name“ nach oben verschieben',
 		'collection:new-entry' => 'Eintrag erstellen',
 		'collection:next' => 'Weiter',
 		'collection:page' => 'Seite :page von :pages',

@@ -365,6 +365,13 @@ class Routes
 					->after($renderers->get('blocks-preview'));
 				$panel
 					->post(
+						'/collection/{collection}/position',
+						[Panel\Collection::class, 'position'],
+						'collection.position',
+					)
+					->middleware($panelAuth);
+				$panel
+					->post(
 						'/collection/{collection}/bulk/publish',
 						[Panel\Bulk::class, 'publish'],
 						'collection.bulk.publish',

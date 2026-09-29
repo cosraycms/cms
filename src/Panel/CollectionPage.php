@@ -49,6 +49,8 @@ final class CollectionPage
 		?string $parentType = null,
 		?iterable $parentStatus = null,
 		?iterable $createBlueprints = null,
+		bool $arranged = false,
+		string $moved = '',
 	): self {
 		$query = $urls->query;
 		$nodes = self::items($nodes);
@@ -77,6 +79,8 @@ final class CollectionPage
 				meta: $meta,
 				locale: $locale,
 				timezone: $timezone,
+				arranged: $arranged,
+				moved: $moved,
 			),
 			pager: CollectionPager::from($total, count($nodes), $urls),
 			bulk: [

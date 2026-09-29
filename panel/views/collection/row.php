@@ -4,13 +4,21 @@ use function Cosray\escape;
 
 // One listing row. Shared by the collection and the styleguide so the sampler
 // shows the real thing rather than a copy that drifts.
-// Receives: row, treeMode, showChildren, hasRowActions, bulk.
+// Receives: row, treeMode, showChildren, hasRowActions, bulk, positionUrl.
+// A row in a manual order carries its group (the parent's uid, or empty
+// for the collection's top level), a grip and the move forms.
 
 $row = (array) $this->unwrap($row);
 $treeMode = (bool) $treeMode;
 $showChildren = (bool) $showChildren;
 $hasRowActions = (bool) ($hasRowActions ?? false);
 $bulk = (bool) ($bulk ?? false);
+$group = $row['group'] ?? null;
+$positionUrl = (string) ($positionUrl ?? '');
+$name = (string) ($row['cells'][0]['value'] ?? $row['uid']);
+$grip = $group === null
+	? ''
+	: '<span class="grip" data-order-grip aria-hidden="true">' . \Cosray\Panel\Icon::render('grip-vertical') . '</span>';
 ?>
 <tr
 	class="row<?= $treeMode ? ' is-tree' : '' ?>"
@@ -18,6 +26,12 @@ $bulk = (bool) ($bulk ?? false);
 	data-uid="<?= escape((string) $row['uid']) ?>"
 	data-depth="<?= (int) $row['depth'] ?>"
 	data-last="<?= $row['last'] ? 'true' : 'false' ?>"
+	<?php if ($group !== null): ?>
+		data-group="<?= escape((string) $group) ?>"
+	<?php endif ?>
+	<?php if ($row['moved'] ?? false): ?>
+		data-moved
+	<?php endif ?>
 	style="--tree-depth: <?= (int) $row['depth'] ?>">
 	<?php if ($bulk): ?>
 		<td class="cell col-select" role="cell">
@@ -61,6 +75,7 @@ $bulk = (bool) ($bulk ?? false);
 							<span class="toggle is-spacer" aria-hidden="true"></span>
 						<?php endif ?>
 					<?php endif ?>
+					<?= $grip ?>
 					<span class="dot<?= $row['published'] ? ' is-published' : '' ?>" aria-hidden="true"></span>
 					<?php if ($cell['editUrl'] !== null): ?>
 						<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
@@ -71,6 +86,7 @@ $bulk = (bool) ($bulk ?? false);
 					<?php endif ?>
 				</div>
 			<?php elseif ($cell['editUrl'] !== null): ?>
+				<?= $index === 0 ? $grip : '' ?>
 				<a class="value link" href="<?= escape((string) $cell['editUrl']) ?>">
 					<?= escape((string) $cell['value']) ?>
 				</a>
@@ -91,6 +107,23 @@ $bulk = (bool) ($bulk ?? false);
 	<?php if ($hasRowActions): ?>
 		<td class="cell col-actions" role="cell">
 			<span class="row-actions">
+				<?php if ($group !== null): ?>
+					<?php foreach (['up' => $row['moveUp'], 'down' => $row['moveDown']] as $direction => $enabled): ?>
+						<form class="move" method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
+							<input type="hidden" name="node" value="<?= escape((string) $row['uid']) ?>" />
+							<input type="hidden" name="move" value="<?= $direction ?>" />
+							<button
+								type="submit"
+								class="chip is-icon"
+								aria-label="<?= escape($direction === 'up'
+									? __('collection:move-up', ['name' => $name])
+									: __('collection:move-down', ['name' => $name])) ?>"
+								<?= $enabled ? '' : 'disabled' ?>>
+								<?= \Cosray\Panel\Icon::render($direction === 'up' ? 'chevron-up' : 'chevron-down') ?>
+							</button>
+						</form>
+					<?php endforeach ?>
+				<?php endif ?>
 				<?php if ($row['focusedChildrenUrl'] !== null): ?>
 					<a
 						class="chip"
@@ -104,7 +137,7 @@ $bulk = (bool) ($bulk ?? false);
 						href="<?= escape((string) $link['url']) ?>"
 						aria-label="<?= escape(__('collection:create-under', [
 							'type' => $link['name'],
-							'name' => (string) $row['cells'][0]['value'],
+							'name' => $name,
 						])) ?>">
 						<?= \Cosray\Panel\Icon::render('plus') ?> <?= escape((string) $link['name']) ?>
 					</a>

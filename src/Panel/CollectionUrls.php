@@ -100,6 +100,12 @@ final class CollectionUrls
 		return $this->url($path, $this->query->editorParams());
 	}
 
+	/** Reorder endpoint, carrying the listing query like `bulk()`. */
+	public function position(): string
+	{
+		return $this->url($this->path() . '/position', $this->query->editorParams());
+	}
+
 	public function create(string $type, ?string $parent = null): string
 	{
 		return new NodeUrls($this->panelPath, 'collection:' . $this->slug, $this->query)

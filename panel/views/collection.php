@@ -9,11 +9,13 @@ $this->layout('layer/main');
 // and past the sum of the floors the list scrolls sideways.
 $hasRowActions = false;
 
-foreach ($page->table->rows as $row) {
-	if ($row['focusedChildrenUrl'] !== null || count($row['childCreateLinks']) > 0) {
-		$hasRowActions = true;
+$arranged = false;
 
-		break;
+foreach ($page->table->rows as $row) {
+	$arranged = $arranged || $row['group'] !== null;
+
+	if ($row['group'] !== null || $row['focusedChildrenUrl'] !== null || count($row['childCreateLinks']) > 0) {
+		$hasRowActions = true;
 	}
 }
 
@@ -182,6 +184,16 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</div>
 		<?php endif ?>
 
+		<?php if ($arranged): ?>
+			<?php // A drop fills this and submits it, so it takes the same boosted
+			// route as the move buttons. ?>
+			<form id="collection-order" method="post" action="<?= escape($page->table->positionUrl) ?>" hidden data-order-form>
+				<input type="hidden" name="node" />
+				<input type="hidden" name="before" />
+				<input type="hidden" name="after" />
+			</form>
+		<?php endif ?>
+
 		<div class="listing">
 			<?php if (count($page->table->rows) === 0): ?>
 				<div class="empty">
@@ -242,6 +254,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 									'showChildren' => $page->table->showChildren,
 									'hasRowActions' => $hasRowActions,
 									'bulk' => $bulk,
+									'positionUrl' => $page->table->positionUrl,
 								]) ?>
 							<?php endforeach ?>
 						</tbody>

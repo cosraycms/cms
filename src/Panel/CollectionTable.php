@@ -31,6 +31,10 @@ final class CollectionTable
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
+	 *     group: ?string,
+	 *     moveUp: bool,
+	 *     moveDown: bool,
+	 *     moved: bool,
 	 * }> $rows
 	 */
 	private function __construct(
@@ -38,6 +42,7 @@ final class CollectionTable
 		public readonly bool $treeMode,
 		public readonly array $headers,
 		public readonly array $rows,
+		public readonly string $positionUrl,
 	) {}
 
 	/**
@@ -51,15 +56,18 @@ final class CollectionTable
 		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
+		bool $arranged = false,
+		string $moved = '',
 	): self {
 		$nodes = self::items($nodes);
-		$headers = self::headers($columns, $urls);
+		$headers = self::headers($columns, $urls, $arranged);
 
 		return new self(
 			showChildren: $meta->showChildren,
 			treeMode: $meta->showChildren && $urls->query->view === 'tree',
 			headers: $headers,
-			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone),
+			rows: self::rows($nodes, $headers, $urls, $meta, $locale, $timezone, $moved),
+			positionUrl: $urls->position(),
 		);
 	}
 
@@ -70,12 +78,14 @@ final class CollectionTable
 	private static function headers(
 		iterable $columns,
 		CollectionUrls $urls,
+		bool $arranged,
 	): array {
 		$headers = [];
 
 		foreach ($columns as $column) {
 			$label = $column->title;
-			$sort = $column->sort;
+			// A manually ordered top level has no column order to offer.
+			$sort = $arranged ? null : $column->sort;
 			$isSorted = $sort !== null && $sort->key === $urls->query->sort;
 			$nextDir = $sort?->direction;
 			$ariaSort = null;
@@ -117,6 +127,10 @@ final class CollectionTable
 	 *     childrenUrl: ?string,
 	 *     focusedChildrenUrl: ?string,
 	 *     childCreateLinks: list<array{slug: string, name: string, url: string}>,
+	 *     group: ?string,
+	 *     moveUp: bool,
+	 *     moveDown: bool,
+	 *     moved: bool,
 	 * }>
 	 */
 	private static function rows(
@@ -126,6 +140,7 @@ final class CollectionTable
 		CollectionListMeta $meta,
 		string $locale,
 		DateTimeZone $timezone,
+		string $moved,
 	): array {
 		$rows = [];
 
@@ -161,6 +176,10 @@ final class CollectionTable
 				'childCreateLinks' => $meta->showChildren
 					? self::childCreateLinks($childBlueprints, $urls, $uid)
 					: [],
+				'group' => is_string($node['group'] ?? null) ? $node['group'] : null,
+				'moveUp' => (bool) ($node['moveUp'] ?? false),
+				'moveDown' => (bool) ($node['moveDown'] ?? false),
+				'moved' => $moved !== '' && $uid === $moved,
 			];
 		}
 

@@ -6,7 +6,11 @@ namespace Cosray\Controller\Panel;
 
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
+use Celema\Core\Response;
 use Cosray\Collection\Listing;
+use Cosray\Exception\RuntimeException;
+use Cosray\Node\Positions;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Panel\CollectionPage;
@@ -113,6 +117,8 @@ final class Collection extends Panel
 				nodes: $nodes,
 				total: $listing['total'],
 				meta: $lister->meta,
+				arranged: $listing['arranged'],
+				moved: $this->stringParam('moved'),
 				locale: $this->localeId(),
 				timezone: $this->config->app->timezone,
 				parentTitle: $parentTitle,
@@ -123,6 +129,49 @@ final class Collection extends Panel
 				createBlueprints: $parentNode === null ? null : $lister->childBlueprints($parentNode),
 			),
 		]);
+	}
+
+	/**
+	 * Moves an entry in its manual order: `move` up or down by one row of
+	 * the listing, or `before`/`after` a neighbour, as a drop sends it.
+	 * Positions apply immediately, without a content version.
+	 *
+	 * Reordering changes the parent's children or the collection's top
+	 * level, so once node permissions are enforced, this checks `change`
+	 * on the parent or the collection's permission, not the moved node's.
+	 */
+	public function position(Factory $factory, Positions $positions, string $collection): Response
+	{
+		$lister = $this->listing($this->ref($collection));
+		$form = $this->formData();
+		$node = $this->formString($form, 'node');
+		$move = $this->formString($form, 'move');
+		$before = $this->formString($form, 'before');
+		$after = $this->formString($form, 'after');
+
+		if ($node === '' || ((int) ($move !== '') + (int) ($before !== '') + (int) ($after !== '')) !== 1) {
+			throw new HttpBadRequest($this->request);
+		}
+
+		try {
+			if ($move !== '') {
+				if (!in_array($move, ['up', 'down'], true)) {
+					throw new HttpBadRequest($this->request);
+				}
+
+				$neighbour = $lister->neighbour($node, below: $move === 'down');
+
+				if ($neighbour !== null) {
+					$lister->place($positions, $node, $neighbour, after: $move === 'down');
+				}
+			} else {
+				$lister->place($positions, $node, $before !== '' ? $before : $after, after: $after !== '');
+			}
+		} catch (RuntimeException $e) {
+			throw new HttpBadRequest($this->request, previous: $e);
+		}
+
+		return $this->listingRedirect($factory, $collection, ['moved' => $node]);
 	}
 
 	/**
@@ -326,5 +375,12 @@ final class Collection extends Panel
 		}
 
 		return trim($value);
+	}
+
+	private function formString(array $form, string $key): string
+	{
+		$value = $form[$key] ?? '';
+
+		return is_string($value) ? trim($value) : '';
 	}
 }

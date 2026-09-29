@@ -81,6 +81,8 @@ return [
 		'collection:entry-count' => [':count entry', ':count entries'],
 		'collection:expand-children' => 'Expand children of :name',
 		'collection:list' => 'List',
+		'collection:move-down' => 'Move “:name” down',
+		'collection:move-up' => 'Move “:name” up',
 		'collection:new-entry' => 'New entry',
 		'collection:next' => 'Next',
 		'collection:page' => 'Page :page of :pages',
