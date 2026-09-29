@@ -37,10 +37,7 @@ class Image
 	public function isResizable(): bool
 	{
 		return match (mime_content_type($this->file)) {
-			'image/gif' => true,
-			'image/jpeg' => true,
-			'image/png' => true,
-			'image/webp' => true,
+			'image/gif', 'image/jpeg', 'image/png', 'image/webp' => true,
 			default => false,
 		};
 	}

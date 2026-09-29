@@ -268,8 +268,8 @@ final class Users extends Panel
 			}
 		}
 
-		$roles = $stored?->roles ?? [];
-		$active = $stored?->active ?? true;
+		$roles = $stored->roles ?? [];
+		$active = $stored->active ?? true;
 
 		if ($stored === null || !$this->isSelf($stored)) {
 			$roles = $this->submittedRoles($model, $form['roles'] ?? []);

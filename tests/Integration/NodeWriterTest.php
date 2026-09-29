@@ -113,7 +113,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		$writer->create($writer->prepare(PlainBlock::class)->uid('writer-defaults'), $actor);
 		$row = $this->storedNode('writer-defaults');
 
-		$this->assertSame($actor?->id ?? Actor::system()->id, $row['creator']);
+		$this->assertSame($actor->id ?? Actor::system()->id, $row['creator']);
 		$this->assertSame($row['creator'], $row['editor']);
 		$this->assertTrue($row['created_now']);
 		$this->assertTrue($row['changed_now']);
@@ -300,8 +300,10 @@ final class NodeWriterTest extends IntegrationTestCase
 		try {
 			$writer->create($prepared);
 			$this->fail('Expected the reserved path to be refused');
-		} catch (HttpBadRequest) {
-			// The rendered message is covered through the panel's HTTP path.
+		} catch (HttpBadRequest $e) {
+			// Without a translator the message is its key; the wording is
+			// covered through the panel's HTTP path.
+			$this->assertSame('node:reserved-path', $e->payload()['message']);
 		}
 
 		$this->assertNull(

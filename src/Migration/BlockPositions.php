@@ -41,8 +41,8 @@ final class BlockPositions
 			$attribute = $definition->property->getAttributes(Columns::class)[0] ?? null;
 			$columns = $attribute?->newInstance();
 			$grids[$name] = [
-				'columns' => $columns?->columns ?? 1,
-				'min' => $columns?->min ?? 1,
+				'columns' => $columns->columns ?? 1,
+				'min' => $columns->min ?? 1,
 			];
 		}
 
