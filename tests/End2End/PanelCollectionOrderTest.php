@@ -10,6 +10,7 @@ use Cosray\Node\Positions;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Collection\TestArrangedChildrenCollection;
 use Cosray\Tests\Fixtures\Collection\TestArrangedCollection;
+use Cosray\Tests\Fixtures\Collection\TestArrangedTreeCollection;
 use Cosray\Tests\Fixtures\Collection\TestHierarchyCollection;
 use Cosray\Tests\Fixtures\Node\TestHierarchyChild;
 use Cosray\Tests\Fixtures\Node\TestHierarchyParent;
@@ -41,6 +42,7 @@ final class PanelCollectionOrderTest extends End2EndTestCase
 		$plugin->node(TestHierarchyChild::class);
 		$plugin->collection(TestArrangedChildrenCollection::class);
 		$plugin->collection(TestArrangedCollection::class);
+		$plugin->collection(TestArrangedTreeCollection::class);
 		$plugin->collection(TestHierarchyCollection::class);
 
 		return $plugin;
@@ -130,6 +132,31 @@ final class PanelCollectionOrderTest extends End2EndTestCase
 
 		$this->assertSame(['alpha', 'zulu', 'mike'], $this->group($this->rows($this->listing('test-arranged')), ''));
 		$this->assertSame(['alpha', 'mike', 'zulu'], $this->children());
+	}
+
+	public function testAnArrangedTopLevelMovesOnlyRootEntries(): void
+	{
+		$this->family();
+		$this->createNode('second', $this->parentType, 'Second');
+		$tree = fn(): array => $this->group(
+			$this->rows($this->listing('test-arranged-tree', ['open' => 'station'])),
+			'',
+		);
+
+		$this->assertSame(['second', 'station'], $tree());
+
+		$this->move('test-arranged-tree', ['node' => 'second', 'move' => 'down']);
+		$this->assertSame(['station', 'second'], $tree());
+		// The children keep their parent's order.
+		$this->assertSame(['alpha', 'mike', 'zulu'], $this->children());
+		$this->assertResponseStatus(
+			400,
+			$this->move('test-arranged-tree', ['node' => 'second', 'before' => 'zulu']),
+		);
+
+		// A flat arranged listing moves by rows too.
+		$this->move('test-arranged', ['node' => 'alpha', 'move' => 'up']);
+		$this->assertSame(['zulu', 'alpha', 'mike'], $this->group($this->rows($this->listing('test-arranged')), ''));
 	}
 
 	public function testSearchShowsTheManualOrderWithoutMoves(): void
