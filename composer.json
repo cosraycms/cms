@@ -35,7 +35,6 @@
 	},
 	"require-dev": {
 		"carthage-software/mago": "1.50.0",
-		"celema/dev": "^6.0",
 		"celema/server": "^0.1",
 		"ernst/coverlyzer": "^0.3",
 		"filp/whoops": "^2.15",
@@ -66,7 +65,7 @@
 			"@php vendor/bin/phpunit --testdox --no-coverage --colors=always"
 		],
 		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
-		"docs:lint": "npx markdownlint-cli2@0.22.1 --config vendor/celema/dev/config/markdownlint.jsonc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
+		"docs:lint": "npx markdownlint-cli2@0.22.1 README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
 		"lint": [
 			"@php vendor/bin/mago fmt --check",
 			"@php vendor/bin/mago lint"
