@@ -12,7 +12,7 @@
 		grid-auto-rows: minmax(var(--blocks-row-min), auto);
 		gap: var(--blocks-gap);
 		background: var(--cms-blocks-bg);
-		border-radius: var(--cms-radius-md);
+		border-radius: var(--cms-control-radius);
 		box-shadow: var(--cms-shadow-raised);
 
 		/* Paint before the positioned blocks so their borders cover the frame. */
@@ -26,19 +26,19 @@
 		}
 
 		& > [data-corners~='top-left'] {
-			border-top-left-radius: var(--cms-radius-md);
+			border-top-left-radius: var(--cms-control-radius);
 		}
 
 		& > [data-corners~='top-right'] {
-			border-top-right-radius: var(--cms-radius-md);
+			border-top-right-radius: var(--cms-control-radius);
 		}
 
 		& > [data-corners~='bottom-left'] {
-			border-bottom-left-radius: var(--cms-radius-md);
+			border-bottom-left-radius: var(--cms-control-radius);
 		}
 
 		& > [data-corners~='bottom-right'] {
-			border-bottom-right-radius: var(--cms-radius-md);
+			border-bottom-right-radius: var(--cms-control-radius);
 		}
 	}
 
@@ -51,13 +51,13 @@
 	   the inputs beside it, like an empty media field. */
 	&:not(:has(> .grid > *)):has(> .adders) {
 		border: 1px solid var(--cms-color-border-control);
-		border-radius: var(--cms-radius-md);
+		border-radius: var(--cms-control-radius);
 		background: var(--cms-color-surface);
 		box-shadow: var(--cms-shadow-raised);
 
 		& > .adders,
 		& > .adders > .adder {
-			border-radius: calc(var(--cms-radius-md) - 1px);
+			border-radius: calc(var(--cms-control-radius) - 1px);
 		}
 
 		& > .adders > .adder {

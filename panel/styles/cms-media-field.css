@@ -7,7 +7,7 @@
 	flex-direction: column;
 	width: 100%;
 	border: 1px solid var(--cms-color-border-control);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-control-radius);
 	background: var(--cms-color-surface);
 	box-shadow: var(--cms-shadow-raised);
 
@@ -386,7 +386,7 @@
 	& .descriptions {
 		padding: var(--cms-space-3);
 		border-top: 1px solid var(--cms-color-border);
-		border-radius: 0 0 calc(var(--cms-radius-md) - 1px) calc(var(--cms-radius-md) - 1px);
+		border-radius: 0 0 calc(var(--cms-control-radius) - 1px) calc(var(--cms-control-radius) - 1px);
 		background: var(--cms-color-surface-muted);
 	}
 
@@ -622,7 +622,7 @@
 		gap: var(--cms-space-3);
 		padding: var(--cms-space-3-5);
 		border-top: 1px solid var(--cms-color-border);
-		border-radius: 0 0 var(--cms-radius-md) var(--cms-radius-md);
+		border-radius: 0 0 var(--cms-control-radius) var(--cms-control-radius);
 		background: var(--cms-color-surface-sunken);
 	}
 

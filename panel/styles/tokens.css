@@ -363,10 +363,14 @@
 	 * Component — controls
 	 *
 	 * Text inputs, selects and buttons share one height, so a button lines up
-	 * with the field beside it.
+	 * with the field beside it. Every control frame shares one radius; parts
+	 * that fill a frame's corners derive theirs from it.
 	 */
-	--cms-control-height: 2.625rem;
+	--cms-control-height: 2.25rem;
 	--cms-control-height-sm: 2rem;
+	--cms-control-radius: var(--cms-radius-lg);
+	--cms-button-height: var(--cms-control-height);
+	--cms-button-radius: var(--cms-control-radius);
 
 	/**
 	 * Component — buttons

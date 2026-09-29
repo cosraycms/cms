@@ -1,5 +1,5 @@
 .cms-button {
-	--height: var(--cms-control-height);
+	--height: var(--cms-button-height);
 	--line-height: 1.25rem;
 	--button-bg: var(--cms-button-primary-bg);
 	--button-text: var(--cms-button-primary-text);
@@ -16,7 +16,7 @@
 	gap: var(--cms-space-2);
 	padding: calc((var(--height) - var(--line-height) - 2px) / 2) 0.875rem;
 	border: 1px solid var(--button-border);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-button-radius);
 	background-color: var(--button-bg);
 	background-image: var(--cms-gradient-raised);
 	color: var(--button-text);

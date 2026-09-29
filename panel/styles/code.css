@@ -32,7 +32,7 @@
 	inset: 0;
 	overflow: hidden;
 	border: var(--cms-border);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-control-radius);
 	background-color: var(--cms-code-bg);
 	color: var(--cms-code-muted);
 	pointer-events: none;
@@ -65,7 +65,7 @@
 	position: relative;
 	overflow: hidden;
 	border: var(--cms-border);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-control-radius);
 	background-color: var(--cms-code-bg);
 	box-shadow: var(--cms-shadow-sm);
 

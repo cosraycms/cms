@@ -5,7 +5,7 @@
 	min-width: 0;
 	padding: calc((var(--cms-control-height) - 1.5rem - 2px) / 2) var(--cms-space-2-5);
 	border: 1px solid var(--cms-color-border-control);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-control-radius);
 	background-color: var(--cms-color-surface);
 	box-shadow: var(--cms-shadow-raised);
 	color: var(--cms-color-text);
@@ -280,7 +280,7 @@
 	padding: var(--cms-space-1);
 	gap: var(--cms-space-1);
 	border: 1px solid var(--cms-color-border-control);
-	border-radius: var(--cms-radius-md);
+	border-radius: var(--cms-control-radius);
 	background: var(--cms-color-surface-sunken);
 	box-shadow: var(--cms-shadow-recessed);
 	color: var(--cms-color-text);
@@ -466,7 +466,7 @@
 		width: var(--cms-control-height);
 		height: var(--cms-control-height);
 		border: 1px solid var(--cms-color-border-control);
-		border-radius: var(--cms-radius-md);
+		border-radius: var(--cms-control-radius);
 		outline: 1px solid transparent;
 		background-color: var(--color);
 		box-shadow: var(--cms-shadow-raised);
