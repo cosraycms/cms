@@ -30,7 +30,7 @@ final class Writer
 		$this->serializer = new Serializer($types, $this->factory->uid());
 		$this->store = new Store(
 			$context->db,
-			new PathManager(reserved: ReservedPaths::fromConfig($context->config)),
+			new PathManager(ReservedPaths::fromConfig($context->config)),
 			$types,
 			$this->factory->uid(),
 			factory: $this->factory,

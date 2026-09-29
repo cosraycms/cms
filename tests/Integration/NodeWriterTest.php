@@ -12,6 +12,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Locales;
 use Cosray\Node\PathManager;
+use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
@@ -153,7 +154,7 @@ final class NodeWriterTest extends IntegrationTestCase
 		]);
 		$store = new Store(
 			$this->db(),
-			new PathManager(),
+			new PathManager(ReservedPaths::fromConfig($this->context->config)),
 			$factory->hydrator()->services()->types,
 			$factory->uid(),
 			factory: $factory,

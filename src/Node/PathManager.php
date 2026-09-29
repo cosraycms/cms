@@ -13,8 +13,8 @@ use Cosray\Uid;
 class PathManager
 {
 	public function __construct(
+		public readonly ReservedPaths $reserved,
 		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
-		public readonly ReservedPaths $reserved = new ReservedPaths(),
 	) {}
 
 	public function path(array $rawData, ?Locale $locale, Locale $requestLocale): string

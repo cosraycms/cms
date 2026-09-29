@@ -273,8 +273,8 @@ final class NodeTest extends IntegrationTestCase
 
 	public function testPagePathRequiresDefaultLocale(): void
 	{
-		$pathManager = new \Cosray\Node\PathManager();
 		$context = $this->createContext();
+		$pathManager = new \Cosray\Node\PathManager(\Cosray\Node\ReservedPaths::fromConfig($context->config));
 		$db = $this->testDb;
 		$locales = $context->locales();
 

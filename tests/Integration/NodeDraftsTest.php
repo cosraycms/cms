@@ -13,6 +13,7 @@ use Cosray\Field\Reference;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Node\PathManager;
+use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\References\Rebuild;
 use Cosray\References\Usage;
@@ -38,7 +39,7 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->cms = new Cms($this->context, $services);
 		$this->store = new Store(
 			$this->context->db,
-			new PathManager(),
+			new PathManager(ReservedPaths::fromConfig($this->context->config)),
 			$services->types,
 			$this->cms->nodeFactory()->uid(),
 			factory: $this->cms->nodeFactory(),

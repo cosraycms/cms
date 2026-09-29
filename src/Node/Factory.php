@@ -62,7 +62,7 @@ class Factory
 		$serializer = new Serializer($this->types, $this->uid, $context->assets());
 		$store = new Store(
 			$context->db,
-			new PathManager(),
+			new PathManager(ReservedPaths::fromConfig($context->config)),
 			$this->types,
 			$this->uid,
 			factory: $this,

@@ -12,6 +12,7 @@ use Cosray\Context;
 use Cosray\Field\Field;
 use Cosray\Locales;
 use Cosray\Node\PathManager;
+use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Block\TextBlock;
@@ -173,7 +174,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		$factory = $this->cms->nodeFactory();
 		$store = new Store(
 			$this->context->db,
-			new PathManager(),
+			new PathManager(ReservedPaths::fromConfig($this->context->config)),
 			$factory->hydrator()->services()->types,
 			$factory->uid(),
 			factory: $factory,

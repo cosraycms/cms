@@ -235,7 +235,7 @@ final class Editor extends Panel
 	{
 		return new Store(
 			$context->db,
-			new PathManager(reserved: ReservedPaths::fromConfig($context->config)),
+			new PathManager(ReservedPaths::fromConfig($context->config)),
 			$this->types(),
 			$cms->nodeFactory()->uid(),
 			factory: $cms->nodeFactory(),

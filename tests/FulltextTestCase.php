@@ -14,6 +14,7 @@ use Cosray\Fulltext\Builder;
 use Cosray\Fulltext\Sync;
 use Cosray\Locales;
 use Cosray\Node\PathManager;
+use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
@@ -44,7 +45,7 @@ abstract class FulltextTestCase extends IntegrationTestCase
 		$this->writer = new Writer($this->context, $this->cms, $this->services->types);
 		$this->store = new Store(
 			$this->context->db,
-			new PathManager(),
+			new PathManager(ReservedPaths::fromConfig($this->context->config)),
 			$this->services->types,
 			$this->cms->nodeFactory()->uid(),
 			factory: $this->cms->nodeFactory(),
