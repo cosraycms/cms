@@ -42,8 +42,7 @@ class Titles
 
 		echo
 			"Node titles rebuilt: {$result['nodes']} node(s), "
-				. "{$result['dynamic']} dynamic, {$result['empty']} without a title\n"
-		;
+				. "{$result['dynamic']} dynamic, {$result['empty']} without a title\n";
 
 		return 0;
 	}

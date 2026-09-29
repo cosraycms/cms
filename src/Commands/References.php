@@ -33,8 +33,7 @@ class References
 			"Reference indexes rebuilt: {$result['assets']} asset references, "
 				. "{$result['nodes']} node references from {$result['owners']} owners"
 				. ($result['skipped'] > 0 ? " ({$result['skipped']} dangling uids skipped)" : '')
-				. "\n"
-		;
+				. "\n";
 
 		return 0;
 	}
