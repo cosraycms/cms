@@ -11,7 +11,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Translate;
 
 #[Label('Hierarchy Parent')]
-#[Children(TestHierarchyParent::class, TestHierarchyChild::class)]
+#[Children([TestHierarchyParent::class, TestHierarchyChild::class])]
 class TestHierarchyParent implements Title
 {
 	#[Label('Title')]

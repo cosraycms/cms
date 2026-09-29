@@ -77,7 +77,7 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertInstanceOf(DeletableHandler::class, $registry->getHandler(new Deletable()));
 		$this->assertInstanceOf(
 			ChildrenHandler::class,
-			$registry->getHandler(new Children(PlainPage::class, PlainBlock::class)),
+			$registry->getHandler(new Children([PlainPage::class, PlainBlock::class])),
 		);
 	}
 
@@ -237,7 +237,7 @@ final class NodeSchemaRegistryTest extends TestCase
 	public function testChildrenHandlerResolve(): void
 	{
 		$handler = new ChildrenHandler();
-		$result = $handler->resolve(new Children(PlainPage::class, PlainBlock::class), PlainPage::class);
+		$result = $handler->resolve(new Children([PlainPage::class, PlainBlock::class]), PlainPage::class);
 
 		$this->assertEquals(
 			[
@@ -245,9 +245,25 @@ final class NodeSchemaRegistryTest extends TestCase
 					PlainPage::class,
 					PlainBlock::class,
 				],
+				'sortableChildren' => false,
 			],
 			$result,
 		);
+	}
+
+	public function testChildrenHandlerResolvesASingleSortableType(): void
+	{
+		$handler = new ChildrenHandler();
+		$result = $handler->resolve(new Children(PlainPage::class, sortable: true), PlainPage::class);
+
+		$this->assertSame(['children' => [PlainPage::class], 'sortableChildren' => true], $result);
+	}
+
+	public function testChildrenRejectsEmptyTypeNames(): void
+	{
+		$this->expectException(RuntimeException::class);
+
+		new Children([PlainPage::class, ' ']);
 	}
 
 	// -- Schema integration with Registry -------------------------------------
@@ -293,6 +309,7 @@ final class NodeSchemaRegistryTest extends TestCase
 		$this->assertTrue($schema->deletable);
 		// No #[Children] => []
 		$this->assertSame([], $schema->children);
+		$this->assertFalse($schema->sortableChildren);
 	}
 
 	public function testSchemaResolvesChildrenAttributeFromClass(): void

@@ -21,7 +21,7 @@ use Cosray\Tests\TestCase;
 	Badge('beta'),
 	Hidden,
 	Order(7),
-	Listing(published: false, children: true, search: ['title', 'lastName']),
+	Listing(published: false, children: true, search: ['title', 'lastName'], sortable: true),
 	Blueprints(PlainPage::class),
 	Types('test-page', PlainPage::class),
 ]
@@ -50,6 +50,7 @@ final class CollectionSchemaTest extends TestCase
 		$this->assertSame(7, $schema->order);
 		$this->assertFalse($schema->listing->showPublished);
 		$this->assertTrue($schema->listing->showChildren);
+		$this->assertTrue($schema->listing->sortable);
 		$this->assertSame(['title', 'lastName'], $schema->search);
 		$this->assertSame([PlainPage::class], $schema->blueprints);
 		$this->assertSame(['test-page', PlainPage::class], $schema->types);

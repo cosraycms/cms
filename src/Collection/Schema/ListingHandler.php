@@ -16,6 +16,7 @@ class ListingHandler extends Handler
 				showLocked: $meta->locked,
 				showHidden: $meta->hidden,
 				showChildren: $meta->children,
+				sortable: $meta->sortable,
 			),
 			'search' => $meta->search,
 		];

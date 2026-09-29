@@ -124,6 +124,7 @@ class Registry
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);
 		$this->default('deletable', static fn(string $nodeClass, array $properties): bool => true);
 		$this->default('children', static fn(string $nodeClass, array $properties): array => []);
+		$this->default('sortableChildren', static fn(string $nodeClass, array $properties): bool => false);
 	}
 
 	/**

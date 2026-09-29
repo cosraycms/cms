@@ -11,6 +11,7 @@ final class CollectionListMeta
 		public bool $showLocked = false,
 		public bool $showHidden = false,
 		public bool $showChildren = false,
+		public bool $sortable = false,
 	) {}
 
 	public function array(): array
@@ -20,6 +21,7 @@ final class CollectionListMeta
 			'showLocked' => $this->showLocked,
 			'showHidden' => $this->showHidden,
 			'showChildren' => $this->showChildren,
+			'sortable' => $this->sortable,
 		];
 	}
 }
