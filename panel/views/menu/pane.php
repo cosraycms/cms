@@ -35,6 +35,7 @@ $orders = [
 	'created' => __('menu:order-created'),
 	'created desc' => __('menu:order-created-desc'),
 	'changed desc' => __('menu:order-changed-desc'),
+	'manual' => __('menu:order-manual'),
 ];
 $section = static fn(string $names): bool => !in_array($type, explode(' ', $names), true);
 ?>

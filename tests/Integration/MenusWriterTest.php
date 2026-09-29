@@ -14,6 +14,7 @@ use Cosray\Field\Services;
 use Cosray\Finder\Menu;
 use Cosray\Locales;
 use Cosray\Menus;
+use Cosray\Node\Positions;
 use Cosray\Node\Writer;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\IntegrationTestCase;
@@ -582,6 +583,25 @@ final class MenusWriterTest extends IntegrationTestCase
 		$html = $menu->html();
 		$this->assertStringContainsString('<a href="/kids/alpha">', $html);
 		$this->assertStringNotContainsString('Draft', $html);
+	}
+
+	public function testChildrenItemFollowsTheManualOrder(): void
+	{
+		$this->writeNode('menu-arranged-root', 'Arranged Root', '/arranged');
+		$this->writeNode('menu-arranged-alpha', 'Alpha', '/arranged/alpha', parent: 'menu-arranged-root');
+		$this->writeNode('menu-arranged-beta', 'Beta', '/arranged/beta', parent: 'menu-arranged-root');
+		$this->writeNode('menu-arranged-gamma', 'Gamma', '/arranged/gamma', parent: 'menu-arranged-root');
+		new Positions($this->db())->orderChildren('menu-arranged-root', ['menu-arranged-gamma', 'menu-arranged-alpha']);
+
+		$menus = $this->menus();
+		$menus->create('writer-arranged', ['zxx' => 'Arranged']);
+		$menus->add('writer-arranged', ['type' => 'children', 'node' => 'menu-arranged-root', 'order' => 'manual']);
+
+		// Unarranged children follow the arranged ones by title.
+		$this->assertSame(
+			['children:menu-arranged-gamma', 'children:menu-arranged-alpha', 'children:menu-arranged-beta'],
+			array_keys(iterator_to_array($this->createCms()->menu('writer-arranged'))),
+		);
 	}
 
 	public function testChildrenItemDescendsTheConfiguredLevels(): void

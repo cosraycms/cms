@@ -12,6 +12,9 @@ final class OrderCompiler
 {
 	use CompilesField;
 
+	/** @var array<string, string> */
+	private array $params = [];
+
 	public function __construct(
 		private readonly array $builtins = [],
 		private readonly ?Context $context = null,
@@ -46,9 +49,24 @@ final class OrderCompiler
 		return "\n    " . implode(",\n    ", $expressions);
 	}
 
+	/**
+	 * Bound values the compiled order refers to.
+	 *
+	 * @return array<string, string>
+	 */
+	public function params(): array
+	{
+		return $this->params;
+	}
+
 	private function structured(Order $order): string
 	{
 		$field = $order->field;
+
+		if ($field->type === 'position') {
+			return $this->position($field->collection, strtoupper($order->direction));
+		}
+
 		$expression = $this->builtin($field->name);
 
 		if ($expression !== null && $field->type !== 'text') {
@@ -74,6 +92,37 @@ final class OrderCompiler
 		}
 
 		return $expression . ' ' . strtoupper($order->direction) . ' NULLS LAST';
+	}
+
+	/**
+	 * A correlated lookup rather than a join, so the finder's query stays
+	 * as it is. The title and uid follow in the same direction: unpositioned
+	 * nodes keep the order they had before anyone arranged them.
+	 */
+	private function position(?string $collection, string $direction): string
+	{
+		if ($collection === null) {
+			$scope = 'pos.parent = n.parent';
+		} else {
+			$param = 'order_collection_' . count($this->params);
+			$this->params[$param] = $collection;
+			$scope = 'pos.collection = :' . $param;
+		}
+
+		$lookup =
+			'(SELECT pos.position FROM /*:cms.prefix:*/node_positions pos WHERE '
+			. $scope
+			. ' AND pos.node = n.node)';
+		$title = $this->builtin('title');
+		$terms = [$lookup . ' ' . $direction . ' NULLS LAST'];
+
+		if ($title !== null) {
+			$terms[] = $title . ' ' . $direction;
+		}
+
+		$terms[] = 'n.uid ' . $direction;
+
+		return implode(', ', $terms);
 	}
 
 	private function scalar(string $field): string

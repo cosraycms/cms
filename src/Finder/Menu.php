@@ -12,7 +12,7 @@ use Iterator;
 class Menu implements Iterator
 {
 	/** The `order` values a `children` item may configure. */
-	public const array CHILD_ORDERS = ['title', 'created', 'created desc', 'changed desc'];
+	public const array CHILD_ORDERS = ['title', 'created', 'created desc', 'changed desc', 'manual'];
 
 	protected array $items;
 	protected int $pointer = 0;
@@ -258,8 +258,15 @@ class Menu implements Iterator
 		$locale = $this->context->locale()->id;
 		$rows = [];
 
-		// The uid tie-break keeps equal sort keys deterministic.
-		foreach ($this->cms->nodes()->childrenOf($uid)->order($order, 'id') as $node) {
+		// The uid tie-break keeps equal sort keys deterministic; the manual
+		// order brings its own, and falls back to titles for a parent whose
+		// children nobody arranged.
+		$children = $this->cms->nodes()->childrenOf($uid);
+		$children = $order === 'manual'
+			? $children->order(new Order(SortField::position()))
+			: $children->order($order, 'id');
+
+		foreach ($children as $node) {
 			$childUid = (string) $node->meta->uid;
 			$key = 'children:' . $childUid;
 

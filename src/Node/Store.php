@@ -456,6 +456,10 @@ class Store
 		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $metadata);
 		$this->persistHandle($nodeId, $handle, $editor);
 
+		if (!$create) {
+			$this->db->positions->leaveParent(['node' => $nodeId, 'parent' => $parentId])->run();
+		}
+
 		// The reference indexes ride in the save transaction: full
 		// replace per owner from the content just written.
 		$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));

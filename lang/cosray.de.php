@@ -353,6 +353,7 @@ return [
 		'menu:order-changed-desc' => 'Zuletzt geänderte zuerst',
 		'menu:order-created' => 'Älteste zuerst',
 		'menu:order-created-desc' => 'Neueste zuerst',
+		'menu:order-manual' => 'Manuelle Reihenfolge',
 		'menu:order-title' => 'Nach Titel',
 		'menu:pane-empty' => 'Wähle einen Eintrag zum Bearbeiten.',
 		'menu:picker-assets' => 'Dateien suchen …',

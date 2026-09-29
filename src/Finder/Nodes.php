@@ -24,6 +24,8 @@ final class Nodes implements Iterator
 	private string $whereFields = '';
 	private string $whereTypes = '';
 	private string $order = '';
+	/** @var array<string, string> */
+	private array $orderParams = [];
 	private ?int $limit = null;
 	private ?int $offset = null;
 	private ?string $fulltext = null;
@@ -225,6 +227,7 @@ final class Nodes implements Iterator
 			$this->context,
 		);
 		$this->order = $compiler->compile(...$order);
+		$this->orderParams = $compiler->params();
 
 		return $this;
 	}
@@ -333,6 +336,7 @@ final class Nodes implements Iterator
 
 		if ($this->order) {
 			$params['order'] = $this->order;
+			$params = [...$params, ...$this->orderParams];
 		} elseif ($this->fulltext !== null) {
 			$params['order'] = 'search_score DESC, n.uid ASC';
 		}

@@ -8,10 +8,14 @@ use Cosray\Exception\ParserException;
 use Cosray\Finder\Order;
 use Cosray\Finder\OrderCompiler;
 use Cosray\Finder\SortField;
+use Cosray\Schema\Handle;
 use Cosray\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 const OB = "\n    ";
+
+#[Handle('positioned-pages')]
+final class PositionedPages {}
 
 final class OrderCompilerTest extends TestCase
 {
@@ -50,6 +54,38 @@ final class OrderCompilerTest extends TestCase
 	{
 		$this->expectException(ParserException::class);
 		new OrderCompiler(['uid' => 'n.uid'])->compile(new Order(SortField::number('uid')));
+	}
+
+	public function testPositionsBindTheCollectionAndFallBackToTitles(): void
+	{
+		$compiler = new OrderCompiler(['title' => 't.sort']);
+		$sql = $compiler->compile(new Order(SortField::position("it's"), 'desc'));
+
+		$this->assertStringContainsString(
+			'pos.collection = :order_collection_0 AND pos.node = n.node) DESC NULLS LAST',
+			$sql,
+		);
+		$this->assertStringEndsWith(', t.sort DESC, n.uid DESC', $sql);
+		$this->assertStringNotContainsString("it's", $sql);
+		$this->assertSame(['order_collection_0' => "it's"], $compiler->params());
+	}
+
+	public function testChildPositionsFollowTheNodesParent(): void
+	{
+		$compiler = new OrderCompiler();
+		$sql = $compiler->compile(new Order(SortField::position()));
+
+		$this->assertStringContainsString('pos.parent = n.parent AND pos.node = n.node) ASC NULLS LAST', $sql);
+		$this->assertStringEndsWith(', n.uid ASC', $sql);
+		$this->assertSame([], $compiler->params());
+	}
+
+	public function testCollectionPositionsResolveCollectionClasses(): void
+	{
+		$this->assertSame('positioned-pages', SortField::position(PositionedPages::class)->collection);
+		$this->throws(ParserException::class, 'needs a collection');
+
+		SortField::position(' ');
 	}
 
 	public function testFailOnEmptyStatement(): void

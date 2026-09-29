@@ -353,6 +353,7 @@ return [
 		'menu:order-changed-desc' => 'Recently changed first',
 		'menu:order-created' => 'Oldest first',
 		'menu:order-created-desc' => 'Newest first',
+		'menu:order-manual' => 'Manual order',
 		'menu:order-title' => 'By title',
 		'menu:pane-empty' => 'Select an item to edit it.',
 		'menu:picker-assets' => 'Search files …',

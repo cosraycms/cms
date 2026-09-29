@@ -8,6 +8,8 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Finder\Nodes;
+use Cosray\Finder\Order;
+use Cosray\Finder\SortField;
 use Cosray\Locale;
 use Cosray\Title\Resolver as TitleResolver;
 use ReflectionClass;
@@ -115,6 +117,12 @@ class Wrapper
 
 		if (trim($query) !== '') {
 			$children->filter($query);
+		}
+
+		// Arranged children come in the editors' order unless the caller
+		// orders them otherwise; order() replaces this.
+		if ($this->meta->type->get('sortableChildren', false) === true) {
+			$children->order(new Order(SortField::position()));
 		}
 
 		return $children;

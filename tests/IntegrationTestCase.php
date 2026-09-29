@@ -186,6 +186,8 @@ class IntegrationTestCase extends TestCase
 			->add('delete-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
 		$container->tag(Bootstrap::NODE_TAG)
 			->add('renderable-test-page', \Cosray\Tests\Fixtures\Node\TestPage::class);
+		$container->tag(Bootstrap::NODE_TAG)
+			->add('sortable-test-parent', \Cosray\Tests\Fixtures\Node\TestSortableParent::class);
 
 		return $container;
 	}
