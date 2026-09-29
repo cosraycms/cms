@@ -16,8 +16,9 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--cms-space-1) var(--cms-space-3);
-		min-height: 2.5rem;
-		padding: var(--cms-space-1);
+		/* Centres a small button in a frame as tall as an input. */
+		min-height: calc(var(--cms-control-height) - 2px);
+		padding: calc((var(--cms-control-height) - 2px - var(--cms-control-height-sm)) / 2);
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
 	}
@@ -93,7 +94,7 @@
 	& > .none {
 		display: flex;
 		align-items: center;
-		min-height: 2.5rem;
+		min-height: calc(var(--cms-control-height) - 2px);
 		padding: var(--cms-space-1) var(--cms-space-3);
 		color: var(--cms-color-text-subtle);
 		font-size: var(--cms-font-size-sm);

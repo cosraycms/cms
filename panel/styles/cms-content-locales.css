@@ -4,6 +4,7 @@
 	gap: var(--cms-space-0-5);
 	width: 100%;
 	min-width: 0;
+	min-height: var(--cms-control-height);
 	padding: var(--cms-space-1);
 	border-radius: var(--cms-radius-full);
 	background: var(--cms-color-surface-sunken);
@@ -13,7 +14,7 @@
 		display: block;
 		flex: 1 1 0;
 		min-width: 0;
-		padding: var(--cms-space-1-5) var(--cms-space-2);
+		padding: calc((var(--cms-control-height-sm) - 1.25rem - 2px) / 2) var(--cms-space-2);
 		overflow: hidden;
 		/* Transparent, not none: choosing a language must not shift the labels. */
 		border: 1px solid transparent;
@@ -21,6 +22,7 @@
 		color: var(--cms-color-text-muted);
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
+		line-height: 1.25rem;
 		text-align: center;
 		text-overflow: ellipsis;
 		white-space: nowrap;

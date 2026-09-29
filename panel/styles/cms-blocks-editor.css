@@ -15,12 +15,16 @@
 		border-radius: var(--cms-control-radius);
 		box-shadow: var(--cms-shadow-raised);
 
-		/* Paint before the positioned blocks so their borders cover the frame. */
+		/* The field's edge, in the colour of every other control. It covers
+		   the outer borders of resting blocks, whose lighter border stays
+		   between them; a hovered or active block (z-index 3 and up) still
+		   shows its own border on the edge. */
 		&::before {
 			content: '';
 			position: absolute;
+			z-index: 2;
 			inset: 0;
-			border: 1px dashed var(--cms-blocks-border);
+			border: 1px solid var(--cms-color-border-control);
 			border-radius: inherit;
 			pointer-events: none;
 		}
