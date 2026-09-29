@@ -9,6 +9,10 @@ use Celema\Quma\Database;
 use Cosray\Bootstrap;
 use Cosray\Config;
 
+/**
+ * Bootstrap that joins the test's connection and transaction, or else opens
+ * the application database on the connection shared by all tests.
+ */
 final class TransactionalBootstrap extends Bootstrap
 {
 	public function __construct(
@@ -26,6 +30,6 @@ final class TransactionalBootstrap extends Bootstrap
 
 	protected function createDatabase(Connection $connection): Database
 	{
-		return $this->sharedDatabase ?? parent::createDatabase($connection);
+		return $this->sharedDatabase ?? new SharedDatabase($connection);
 	}
 }

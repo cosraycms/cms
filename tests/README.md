@@ -51,6 +51,8 @@ The install namespace creates the current schema and records included updates. A
 
 [FulltextConcurrencyTest](Integration/FulltextConcurrencyTest.php) is an exception: a second PHP process needs committed, uniquely named fixtures, removed in `finally`. It uses `proc_open` and observes PostgreSQL lock waits. The full-text suite also requires `unaccent` and the schema from migration `000000-000036` or a current install. See [search maintenance](../docs/fulltext.md#synchronization-and-maintenance).
 
+All database-backed tests run on one connection per process ([SharedDatabase](Fixtures/SharedDatabase.php)), because opening a connection costs more than most tests. Leave no session state behind, such as `SET` without `LOCAL` or temporary tables; a test that needs a second session opens a plain `Database` on `conn()`. Store user passwords as `passwordHash()`, a cheap Argon2id hash: the default cost takes about 170 ms per hash and per login.
+
 ## Writing tests
 
 Use the existing test nearest the behavior as an example rather than copying a generic template:

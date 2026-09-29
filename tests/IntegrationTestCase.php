@@ -13,6 +13,7 @@ use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Migration\NodeContentNormalizer;
+use Cosray\Tests\Fixtures\SharedDatabase;
 use Cosray\Uid;
 use PDO;
 use RuntimeException;
@@ -21,7 +22,8 @@ use RuntimeException;
  * Base class for integration tests that interact with the database.
  *
  * This class extends TestCase and enables transaction-based test isolation
- * by default, ensuring each test has a clean database state.
+ * by default, ensuring each test has a clean database state. db() returns
+ * the same instance throughout a test, on a connection all tests share.
  *
  * @internal
  *
@@ -58,7 +60,7 @@ class IntegrationTestCase extends TestCase
 			->migrations(self::root() . '/db/migrations')
 			->fetch(PDO::FETCH_ASSOC);
 
-		$db = new Database(self::$sharedConnection);
+		$db = new SharedDatabase(self::$sharedConnection);
 
 		// Check if migrations table exists
 		$tableExists =
@@ -100,9 +102,9 @@ class IntegrationTestCase extends TestCase
 	{
 		parent::setUp();
 
-		// Begin transaction if this test uses them
+		$this->testDb = new SharedDatabase($this->conn());
+
 		if ($this->useTransactions) {
-			$this->testDb = new Database($this->conn());
 			$this->testDb->begin();
 		}
 	}
@@ -110,7 +112,9 @@ class IntegrationTestCase extends TestCase
 	protected function tearDown(): void
 	{
 		try {
-			if ($this->useTransactions && $this->testDb !== null) {
+			// The next test gets the same connection, so never leave it inside
+			// a transaction, not even one a failed test without rollback began.
+			if ($this->testDb?->connected() && $this->testDb->getConn()->inTransaction()) {
 				$this->testDb->rollback();
 			}
 		} finally {
@@ -134,12 +138,7 @@ class IntegrationTestCase extends TestCase
 
 	public function db(): Database
 	{
-		// If using transactions, return the same database instance
-		if ($this->useTransactions && $this->testDb !== null) {
-			return $this->testDb;
-		}
-
-		return new Database($this->conn());
+		return $this->testDb ?? new Database($this->conn());
 	}
 
 	public function container(): Container
@@ -322,7 +321,7 @@ class IntegrationTestCase extends TestCase
 			'uid' => $uid,
 			'username' => $data['username'] ?? $uid,
 			'email' => $data['email'] ?? $uid . '@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 			'role' => 'editor',
 			'active' => true,
 			'data' => ['name' => 'Test User'],
@@ -341,6 +340,20 @@ class IntegrationTestCase extends TestCase
 				RETURNING usr';
 
 		return $this->db()->execute($sql, $data)->one()['usr'];
+	}
+
+	/**
+	 * Argon2id hash with the lowest cost PHP accepts. The default cost takes
+	 * about 170 ms to hash and again to verify; tests only need a hash that
+	 * verifies.
+	 */
+	protected static function passwordHash(#[\SensitiveParameter] string $password = 'password'): string
+	{
+		return password_hash($password, PASSWORD_ARGON2ID, [
+			'memory_cost' => 8,
+			'time_cost' => 1,
+			'threads' => 1,
+		]);
 	}
 
 	/**

@@ -12,11 +12,6 @@ final class FulltextConcurrencyTest extends FulltextTestCase
 {
 	protected bool $useTransactions = false;
 
-	public function db(): Database
-	{
-		return $this->testDb ??= new Database($this->conn());
-	}
-
 	public function testRebuildWaitsForALiveWriterAndCannotRestoreAnEarlierSnapshot(): void
 	{
 		$this->environment();

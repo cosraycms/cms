@@ -55,7 +55,7 @@ final class PanelAuthTest extends End2EndTestCase
 			'uid' => 'panel-login-user',
 			'username' => $login,
 			'email' => 'panel-login@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 		]);
 
 		$response = $this->makeRequest('POST', '/panel/login', [

@@ -63,7 +63,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			'uid' => 'auth-test-user',
 			'username' => 'testuser',
 			'email' => 'test@example.com',
-			'password' => password_hash('correct-password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash('correct-password'),
 		]);
 
 		$request = $this->psrRequest();
@@ -80,7 +80,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->createTestUser([
 			'uid' => 'auth-wrong-pass',
 			'email' => 'wrong@example.com',
-			'password' => password_hash('correct-password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash('correct-password'),
 		]);
 
 		$request = $this->psrRequest();
@@ -106,7 +106,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser([
 			'uid' => 'auth-remember-user',
 			'email' => 'remember@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 		]);
 
 		$request = $this->psrRequest();
@@ -128,7 +128,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser([
 			'uid' => 'auth-remember-lifetime-user',
 			'email' => 'remember-lifetime@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 		]);
 
 		$request = $this->psrRequest();
@@ -156,7 +156,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser([
 			'uid' => 'auth-no-remember-user',
 			'email' => 'no-remember@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 		]);
 		$token = 'existing-remember-token';
 		$hash = new Token(self::SECRET, $token)->hash();

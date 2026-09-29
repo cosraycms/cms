@@ -49,7 +49,6 @@ class End2EndTestCase extends IntegrationTestCase
 		$this->testConnection = $this->app->container()->get(Connection::class);
 		$this->testDb = $this->app->container()->get(Database::class);
 		$this->testDb->begin();
-		$this->useTransactions = true;
 	}
 
 	protected function tearDown(): void
@@ -91,7 +90,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$userId = $db->execute($sql, [
 			'uid' => $uid,
 			'email' => $uid . '@example.com',
-			'password' => password_hash('password', PASSWORD_ARGON2ID),
+			'password' => self::passwordHash(),
 			'role' => $role,
 			'creator' => $systemUserId,
 			'editor' => $systemUserId,
