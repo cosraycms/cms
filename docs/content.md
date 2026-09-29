@@ -27,7 +27,7 @@ final class Article
 $app->node(Article::class);
 ```
 
-`#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, defaulting to none. [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
+`#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, one class or a list, defaulting to none; `sortable: true` lets editors arrange them (see [manual order](#manual-order)). [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
 
 Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. Use `unwrap()` for raw values; string conversion uses the field's escaped or rendered output. Raw values need escaping when inserted into HTML. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
 
@@ -209,6 +209,28 @@ When updating existing collections, move `sorts()` mappings into their columns a
 
 Collections no longer extend a `Cosray\Collection` base class. When updating existing collections, remove `extends Collection`. Move the node types of a plain `entries()` query into `#[Types]` and remove the method, including its `published(null)` and `hidden(null)` calls. Implement `Entries` for any further narrowing; it receives the prepared finder instead of reading `$this->cms`. Move `blueprints()` into `#[Blueprints]` and `searchFields()` into `#[Listing(search: [...])]`. Implement `Columns` for custom columns and replace `...parent::columns()` with `...Column::defaults()`. A collection that needs services, including the CMS, takes them in its own constructor.
 
+### Manual order
+
+Editors can arrange nodes by hand. A parent type declares a manual order for its children, a collection one for its own top level:
+
+```php
+#[Children(Sensor::class, sortable: true)]
+final class Station {}
+
+#[Types(Category::class), Handle('categories'), Listing(children: true, sortable: true)]
+final class Categories {}
+```
+
+Several child types are passed as a list: `#[Children([Page::class, Family::class], sortable: true)]`.
+
+Every order is a scope of its own: the children of one parent, or the top level of one collection, meaning every entry of a flat listing and the root nodes of a `children` listing. A node can hold a place in several scopes, so a flat collection of all sensors can be arranged without disturbing any station's order. Children in a hierarchy listing always follow their parent's declaration. A parent's order covers all of its children, including types the current collection does not list.
+
+A manually ordered level lists in that order whatever column is selected, and its headers do not sort it. In the tree, the headers still sort the levels without a manual order. Rows of an arranged level have a grip for dragging and move up/down buttons; see [panel keyboard](panel-keyboard.md#collection-listings) for the keys. A search shows the manual order but offers no moves. Moves need panel access. Reordering counts as a change to the parent or to the collection's top level, not to the moved node, and is meant to be checked that way once node permissions are enforced.
+
+Positions are structure rather than content. A move takes effect immediately, creates no content version or history entry, and leaves `changed`, the editor, and working copies alone. Nodes nobody arranged follow the arranged ones in title order, so declaring an order changes nothing until the first move, and new nodes join at the end. A node that moves to another parent loses its place among its former siblings. A collection's order is stored under its handle; give a sortable collection an explicit `#[Handle]`, because renaming the handle loses the arrangement unless `node_positions.collection` is updated with it. [Positions](../src/Node/Positions.php) is the write API; the panel goes through [Listing](../src/Collection/Listing.php).
+
+The manual order needs migration `000000-000042-node-positions.sql`. `#[Children]` now takes its types as one class or a list, so `#[Children(A::class, B::class)]` becomes `#[Children([A::class, B::class])]`.
+
 ### Frontend queries
 
 Frontend queries use [Cms](../src/Cms.php) and the [Nodes](../src/Finder/Nodes.php) builder:
@@ -229,6 +251,20 @@ foreach ($latest as $node) {
 $about = $cms->node->byPath('/about');
 $children = $about->children();
 ```
+
+`$node->children()` returns a sortable parent's children in their manual order; an explicit `order()` replaces it. Other queries order by `SortField::position()` for the order among siblings, or by `SortField::position(Categories::class)` for a collection's order, given as its class or handle:
+
+```php
+use Cosray\Finder\Order;
+use Cosray\Finder\SortField;
+
+$categories = $cms->nodes()
+    ->types(Category::class)
+    ->roots()
+    ->order(new Order(SortField::position(Categories::class)));
+```
+
+A position term brings its own fallback: title in the active locale, then UID.
 
 Existing Finder string orders keep their direction and PostgreSQL null-placement behavior. For typed ordering outside the panel, pass structured terms, for example `->order(new \Cosray\Finder\Order(SortField::number('amount'), 'desc'), new \Cosray\Finder\Order('uid'))`. Structured terms put nulls last; direct Finder queries add their own tie-breaker when required.
 
@@ -282,6 +318,6 @@ See [Node\Store](../src/Node/Store.php), [Node\Drafts](../src/Node/Drafts.php), 
 
 `$cms->menu('main')` returns an iterable [Finder\Menu](../src/Finder/Menu.php); `html($class, $tag)` renders escaped nested markup. An existing empty menu renders nothing; an unknown handle raises an error.
 
-Items link to nodes (`node`), literal localized URLs (`url`), or catalog assets (`asset`); other types render as labels. Node links follow the node's current localized path and inherit its title unless overridden. The `children` type expands published, visible children dynamically, with node queries per configured item and depth. Hidden parents remove their subtree from ordinary output. Locale maps follow configured fallbacks and neutral `zxx` values.
+Items link to nodes (`node`), literal localized URLs (`url`), or catalog assets (`asset`); other types render as labels. Node links follow the node's current localized path and inherit its title unless overridden. The `children` type expands published, visible children dynamically, with node queries per configured item and depth, ordered by title, creation, last change, or the parent's manual order. Hidden parents remove their subtree from ordinary output. Locale maps follow configured fallbacks and neutral `zxx` values.
 
 [Cosray\Menus](../src/Menus.php) is the write API. It enforces same-menu parents, rejects cycles, supports subtree removal, and synchronizes reference indexes. `place()` uses an exact sibling index; `move()` uses loose sort positions. Menu depth limits constrain authoring rather than rendering. Writes accept an optional `Cosray\Actor`, defaulting to the system user. The panel area needs `edit-menus`; creating, deleting, or renaming a menu additionally needs `manage-menus`.
