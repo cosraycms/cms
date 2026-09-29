@@ -95,6 +95,33 @@ final class PanelCollectionTest extends End2EndTestCase
 		}
 	}
 
+	public function testAllContentListsEveryTypeByLatestChangeAndSearchesTitles(): void
+	{
+		$this->createArticle('all-article', 'Alpha article', '2026-01-01 00:00:00+00');
+		$pageType = $this->db()->execute("SELECT type FROM cms.types WHERE handle = 'test-page'")->one();
+		$this->createTestNode([
+			'uid' => 'all-page',
+			'type' => (int) $pageType['type'],
+			'changed' => '2026-02-01 00:00:00+00',
+			'title' => ['en' => 'Beta page'],
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Beta page']]],
+		]);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/all-content'));
+
+		$this->assertHtmlNodeExists('//tbody/tr[1][@data-uid="all-page"]', $html);
+		$this->assertHtmlNodeExists('//tbody/tr[2][@data-uid="all-article"]', $html);
+		$this->assertStringContainsString('Test Page', $html);
+		$this->assertStringContainsString('Test Article', $html);
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/collection/all-content', [
+			'query' => ['q' => 'alpha'],
+		]));
+
+		$this->assertHtmlNodeCount(1, '//tbody/tr[@data-uid]', $html);
+		$this->assertHtmlNodeExists('//tbody/tr[@data-uid="all-article"]', $html);
+	}
+
 	public function testCustomCompoundAndTypedColumnSorts(): void
 	{
 		$type = $this->createTestType('test-sortable-entry');

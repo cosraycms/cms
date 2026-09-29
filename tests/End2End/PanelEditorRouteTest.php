@@ -546,7 +546,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// node is open — the rail entry alone is not the whole answer.
 		$this->assertStringContainsString(
 			'aria-current="page"',
-			$this->navLink($node, '/panel/collection/test-articles', 'area'),
+			$this->navLink($node, '/panel/collection/all-content', 'area'),
 		);
 	}
 

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Panel\Dashboard;
 
 use Celema\Quma\Database;
+use Cosray\Collection\AllContent;
+use Cosray\Collection\Ref;
 use Cosray\Contract\DashboardCard;
 use Cosray\Navigation;
 
@@ -18,7 +20,12 @@ final readonly class Entries implements DashboardCard
 	public function card(): Card
 	{
 		$row = $this->db->dashboard->entries()->one();
-		$collections = count($this->navigation->refs());
+		// The built-in overview lists everything the others do, so it is not
+		// a collection of its own here.
+		$collections = count(array_filter(
+			$this->navigation->refs(),
+			static fn(Ref $ref): bool => $ref->class !== AllContent::class,
+		));
 
 		return new Card(
 			label: __('dashboard:entries'),

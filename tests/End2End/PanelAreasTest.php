@@ -65,7 +65,7 @@ final class PanelAreasTest extends End2EndTestCase
 		$collection = $this->html('/panel/collection/test-articles');
 		$this->assertStringContainsString(
 			'aria-current',
-			$this->area($collection, '/panel/collection/test-articles'),
+			$this->area($collection, '/panel/collection/all-content'),
 		);
 		$this->assertStringNotContainsString('aria-current', $this->area($collection, '/panel'));
 	}
@@ -80,7 +80,7 @@ final class PanelAreasTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//a[@href="/panel/collection/test-articles" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
+			'//a[@href="/panel/collection/all-content" and contains(concat(" ", normalize-space(@class), " "), " area ") and normalize-space(.)="Content"]',
 			$html,
 		);
 

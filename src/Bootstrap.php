@@ -16,6 +16,7 @@ use Celema\Quma\Delimiters;
 use Celema\Router\Route;
 use Closure;
 use Cosray\Block\Registry as BlockRegistry;
+use Cosray\Collection\AllContent;
 use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
@@ -129,6 +130,8 @@ class Bootstrap implements CorePlugin
 		$this->panelExtras = new PanelExtras();
 		$this->collectionSchemas = new CollectionSchemas(CollectionSchemaRegistry::withDefaults());
 		$this->navigation = new Navigation($this->collectionSchemas);
+		// Registered first so it leads the content rail above every section.
+		$this->navigation->collection(AllContent::class);
 		$this->dashboardCards = PanelDashboard::withDefaults();
 		$this->policy = Policy::withDefaults();
 		$this->userTypes = new UserTypes();

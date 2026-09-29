@@ -195,7 +195,7 @@ final class PanelDashboardTest extends End2EndTestCase
 
 		$response = $this->makeRequest('GET', '/panel');
 		$this->assertSame(303, $response->getStatusCode());
-		$this->assertSame('/panel/collection/test-articles', $response->getHeaderLine('Location'));
+		$this->assertSame('/panel/collection/all-content', $response->getHeaderLine('Location'));
 
 		$response = $this->makeRequest('GET', '/panel/collection/test-articles');
 		$this->assertResponseOk($response);
@@ -203,7 +203,7 @@ final class PanelDashboardTest extends End2EndTestCase
 
 		$this->assertHtmlNodeMissing('//*[@id="area-nav"]/a[@href="/panel"]', $html);
 		$this->assertHtmlNodeExists(
-			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/panel/collection/test-articles"]',
+			'//a[contains(concat(" ", normalize-space(@class), " "), " logo ") and @href="/panel/collection/all-content"]',
 			$html,
 		);
 	}
