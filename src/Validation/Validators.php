@@ -27,6 +27,29 @@ final class Validators
 		]);
 	}
 
+	/**
+	 * An `in:` rule accepting exactly the given values, which may contain
+	 * commas, colons, quotes and backslashes. Sire parses the definition
+	 * twice (the rule parser splits on `:`, the rule on `,`) and each pass
+	 * consumes one level of backslash escapes, so values are escaped twice.
+	 *
+	 * @param list<scalar> $values
+	 */
+	public static function in(array $values): string
+	{
+		$list = implode(',', array_map(
+			static fn(mixed $value): string => self::escape((string) $value, ','),
+			$values,
+		));
+
+		return 'in:' . self::escape($list, ':');
+	}
+
+	private static function escape(string $value, string $delimiter): string
+	{
+		return addcslashes($value, '\\"\'' . $delimiter);
+	}
+
 	private static function minItems(): Rule
 	{
 		return new class implements Rule, ValidatesEmpty {

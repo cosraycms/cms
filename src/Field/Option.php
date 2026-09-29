@@ -6,6 +6,7 @@ namespace Cosray\Field;
 
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
+use Cosray\Validation\Validators;
 use Cosray\Value;
 
 class Option extends Field implements Capability\Selectable
@@ -42,7 +43,7 @@ class Option extends Field implements Capability\Selectable
 		$shape = Shapes::create();
 		$this->addType($shape);
 
-		$value = $shape->add('value', $this->zxxShape('string', $this->validators));
+		$value = $shape->add('value', $this->zxxShape('string', [...$this->validators, ...$this->optionRules()]));
 
 		if (!$this->isRequired()) {
 			$value->optional()->nullable();
@@ -51,5 +52,23 @@ class Option extends Field implements Capability\Selectable
 		$this->addMeta($shape);
 
 		return $shape;
+	}
+
+	/**
+	 * Restricts the value to the declared options. A field without options
+	 * declares no domain and accepts any string.
+	 *
+	 * @return list<string>
+	 */
+	private function optionRules(): array
+	{
+		if ($this->options === []) {
+			return [];
+		}
+
+		return [Validators::in(array_map(
+			static fn(mixed $option): mixed => is_array($option) ? $option['value'] ?? '' : $option,
+			$this->options,
+		))];
 	}
 }

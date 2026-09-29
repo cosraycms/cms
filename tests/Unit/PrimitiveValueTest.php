@@ -924,6 +924,71 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertTrue($value->isset());
 	}
 
+	public function testOptionShapeAcceptsOnlyDeclaredOptions(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Option('slot', $owner, new ValueContext('slot', []));
+		$field->options([
+			['label' => 'Morning', 'value' => '10:30'],
+			['label' => 'Split', 'value' => 'a,b'],
+			['label' => 'Quoted', 'value' => "'it's'"],
+			['label' => 'Path', 'value' => 'back\\slash'],
+		]);
+		$shape = $field->shape();
+		$validate = static fn(?string $value): bool => $shape
+			->validate([
+				'type' => $field::class,
+				'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => $value],
+			])
+			->valid();
+
+		$this->assertTrue($validate('10:30'));
+		$this->assertTrue($validate('a,b'));
+		$this->assertTrue($validate("'it's'"));
+		$this->assertTrue($validate('back\\slash'));
+		$this->assertTrue($validate(null));
+		$this->assertFalse($validate('10'));
+		$this->assertFalse($validate('a'));
+		$this->assertFalse($validate('Morning'));
+	}
+
+	public function testOptionShapeChecksPlainOptionsAndRequired(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Option('size', $owner, new ValueContext('size', []));
+		$field->options(['small', 'large']);
+		$field->required();
+		$shape = $field->shape();
+		$validate = static fn(?string $value): bool => $shape
+			->validate([
+				'type' => $field::class,
+				'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => $value],
+			])
+			->valid();
+
+		$this->assertTrue($validate('large'));
+		$this->assertFalse($validate('medium'));
+		$this->assertFalse($validate(''));
+	}
+
+	public function testOptionShapeWithoutOptionsAcceptsAnyString(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Option('status', $owner, new ValueContext('status', []));
+
+		$result = $field
+			->shape()
+			->validate([
+				'type' => $field::class,
+				'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'anything'],
+			]);
+
+		$this->assertTrue($result->valid());
+	}
+
 	public function testRadioValueUsesStringValue(): void
 	{
 		$context = $this->createContext();
