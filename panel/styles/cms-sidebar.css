@@ -115,17 +115,19 @@
 		margin-top: var(--cms-space-5);
 	}
 
+	& #collection-nav > .list > .item:first-child > .section {
+		margin-top: 0;
+	}
+
 	& .title {
 		display: flex;
 		align-items: center;
 		gap: var(--cms-space-2);
 		padding: 0 0.625rem var(--cms-space-2);
 		padding-left: calc(0.625rem + var(--depth, 0) * var(--cms-space-5));
-		color: var(--cms-color-text-faint);
-		font-size: 0.625rem;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
 		font-weight: 500;
-		letter-spacing: 0.11em;
-		text-transform: uppercase;
 	}
 }
 
