@@ -303,6 +303,62 @@
 		}
 	}
 
+	/*
+	 * Rows of a manually ordered group. The grip sits inside the title cell
+	 * rather than in a column of its own, so the pinned select and title
+	 * columns keep their offsets; in the tree it follows the toggle, at the
+	 * row's own depth.
+	 */
+	& .grip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1rem;
+		height: 1.375rem;
+		flex-shrink: 0;
+		border-radius: var(--cms-radius);
+		color: var(--cms-color-text-faint);
+		cursor: grab;
+		user-select: none;
+
+		&:hover {
+			color: var(--cms-color-text-subtle);
+		}
+
+		& .cms-icon {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+
+	& .cell > .grip {
+		margin-right: var(--cms-space-2);
+	}
+
+	/* Marks where the last move put the row; outranks the child-row ground. */
+	& .row[data-moved],
+	& .row.is-tree[data-moved]:not([data-depth='0']) {
+		--row-bg: var(--cms-color-selected);
+	}
+
+	& .row.sortable-ghost {
+		--row-bg: var(--cms-color-selected);
+
+		opacity: 0.6;
+	}
+
+	& .row.sortable-drag {
+		box-shadow: var(--cms-shadow-md);
+	}
+
+	& .row.is-drag-folded {
+		display: none;
+	}
+
+	& .move {
+		display: contents;
+	}
+
 	& .col-actions {
 		justify-content: flex-end;
 		padding-left: 0;
@@ -342,10 +398,28 @@
 			color: var(--cms-color-accent-text);
 		}
 
-		&:hover,
+		&.is-icon {
+			justify-content: center;
+			width: 1.375rem;
+			padding: 0;
+			cursor: pointer;
+
+			& .cms-icon {
+				width: 0.625rem;
+				height: 0.625rem;
+			}
+		}
+
+		&:hover:not(:disabled),
 		&:focus-visible {
 			border-color: var(--cms-color-accent);
 			color: var(--cms-color-accent-text);
+		}
+
+		&:disabled {
+			color: var(--cms-color-text-faint);
+			cursor: default;
+			opacity: 0.5;
 		}
 	}
 }

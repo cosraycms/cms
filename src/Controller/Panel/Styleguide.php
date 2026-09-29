@@ -1244,7 +1244,8 @@ final class Styleguide extends Panel
 	/**
 	 * Listing rows in the shape `collection/row` expects, covering the states a
 	 * real collection rarely shows all at once: tree depth, a collapsed branch,
-	 * the last child of a branch, and each status.
+	 * the last child of a branch, each status, and a manually ordered group
+	 * whose last row was just moved.
 	 *
 	 * @return list<array<string, mixed>>
 	 */
@@ -1263,6 +1264,10 @@ final class Styleguide extends Panel
 			'childCreateLinks' => [],
 			'status' => [['kind' => 'published', 'label' => 'Published']],
 			'cells' => [],
+			'group' => null,
+			'moveUp' => false,
+			'moveDown' => false,
+			'moved' => false,
 		], $overrides);
 
 		$cells = static fn(string $title, string $type, string $changed): array => [
@@ -1286,6 +1291,8 @@ final class Styleguide extends Panel
 				'status' => [['kind' => 'unpublished', 'label' => 'Unpublished']],
 				'published' => false,
 				'cells' => $cells('Sudhaus', 'Page', 'Aug 11, 2026, 10:25 PM'),
+				'group' => 'brauerei',
+				'moveDown' => true,
 			]),
 			$row([
 				'depth' => 2,
@@ -1308,6 +1315,9 @@ final class Styleguide extends Panel
 					['kind' => 'locked', 'label' => 'Locked'],
 				],
 				'cells' => $cells('Presse', 'Page', 'Aug 11, 2026, 10:25 PM'),
+				'group' => 'brauerei',
+				'moveUp' => true,
+				'moved' => true,
 			]),
 		];
 	}

@@ -48,6 +48,30 @@ describe('collection scrolling', () => {
 		expect(list.scrollTop).toBe(420);
 	});
 
+	it('keeps the list position when a row moves', () => {
+		for (const source of ['[data-order-move]', '[data-order-form]']) {
+			document.body.innerHTML = `
+				<main id="main">
+					<div class="cms-collection">
+						<form data-order-form hidden></form>
+						<div class="scroll"><form data-order-move="up"></form></div>
+					</div>
+				</main>
+			`;
+			const main = document.getElementById('main')!;
+			document.querySelector<HTMLElement>('.cms-collection .scroll')!.scrollTop = 260;
+			const ctx = { sourceElement: document.querySelector(source) };
+
+			main.dispatchEvent(
+				new CustomEvent('htmx:before:request', { bubbles: true, detail: { ctx } }),
+			);
+			main.innerHTML = '<div class="cms-collection"><div class="scroll"></div></div>';
+			main.dispatchEvent(new CustomEvent('htmx:finally:swap', { bubbles: true, detail: { ctx } }));
+
+			expect(document.querySelector<HTMLElement>('.cms-collection .scroll')!.scrollTop).toBe(260);
+		}
+	});
+
 	it('leaves a list alone after a swap that came from anywhere else', () => {
 		document.body.innerHTML = `
 			<main id="main"><div class="cms-collection"><div class="scroll"></div></div></main>

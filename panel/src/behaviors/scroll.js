@@ -1,6 +1,6 @@
-// A tree toggle re-renders the whole collection, so the list scroller comes
-// back as a new element at the top. Remembering its position across the swap
-// keeps the row that was clicked where it was.
+// A tree toggle or a move re-renders the whole collection, so the list
+// scroller comes back as a new element at the top. Remembering its position
+// across the swap keeps the row that was acted on where it was.
 
 /**
  * @typedef {object} RequestContext
@@ -25,7 +25,11 @@ function remember(event) {
 	const ctx = context(event);
 	const source = ctx?.sourceElement;
 
-	if (!ctx || !(source instanceof Element) || !source.closest('[data-collection-toggle]')) {
+	if (
+		!ctx ||
+		!(source instanceof Element) ||
+		!source.closest('[data-collection-toggle], [data-order-move], [data-order-form]')
+	) {
 		return;
 	}
 
