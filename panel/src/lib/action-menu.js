@@ -274,8 +274,11 @@ function click(event) {
 	const menu = trigger && surface(trigger);
 	if (trigger && menu) {
 		event.preventDefault();
-		if (menu.matches(':popover-open')) closeMenu(menu);
-		else openMenu(trigger, event.detail === 0 ? 'first' : false);
+		// A menu shared by several triggers, like the ghosts of a blocks
+		// field, follows a click on another of them instead of only closing.
+		const owner = menu.matches(':popover-open') ? (active?.trigger ?? null) : undefined;
+		if (owner !== undefined) closeMenu(menu);
+		if (owner !== trigger) openMenu(trigger, event.detail === 0 ? 'first' : false);
 		return;
 	}
 

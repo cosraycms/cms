@@ -2,7 +2,9 @@
 // a ghost fills its gap with the chosen type, a split puts it beside the
 // block it splits. While a menu is armed, a choice or the catalog picked
 // from it goes to the armed callbacks, and the repeater never sees the
-// click that would have appended at the footer. Closing the menu disarms.
+// click that would have appended at the footer. Closing the menu disarms,
+// and so does opening it again: an arming belongs to one opening, and a
+// menu that moves on to another ghost is armed anew by that ghost.
 
 /** @typedef {{ picker: string } | { type: string }} Adder */
 
@@ -66,14 +68,22 @@ function onClick(event) {
 	}
 }
 
+// The toggle event is queued, so a menu reopened since is no longer
+// closed when it arrives; its arming, if any, is that opening's.
 /**
  * @param {Event} event
  */
 function onToggle(event) {
+	if (!armed || event.target !== armed.menu) {
+		return;
+	}
+
+	const state = /** @type {ToggleEvent} */ (event).newState;
+
 	if (
-		armed &&
-		event.target === armed.menu &&
-		/** @type {ToggleEvent} */ (event).newState === 'closed'
+		event.type === 'beforetoggle'
+			? state === 'open'
+			: state === 'closed' && !armed.menu.matches(':popover-open')
 	) {
 		armed = null;
 	}
@@ -82,10 +92,12 @@ function onToggle(event) {
 /** @returns {() => void} */
 export function install() {
 	document.addEventListener('click', onClick, true);
+	document.addEventListener('beforetoggle', onToggle, true);
 	document.addEventListener('toggle', onToggle, true);
 
 	return () => {
 		document.removeEventListener('click', onClick, true);
+		document.removeEventListener('beforetoggle', onToggle, true);
 		document.removeEventListener('toggle', onToggle, true);
 		armed = null;
 	};

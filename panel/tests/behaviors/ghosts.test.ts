@@ -410,6 +410,37 @@ describe('ghost insert', () => {
 		expect(menu.matches(':popover-open')).toBe(false);
 	});
 
+	it('moves its open menu to another ghost clicked, which then takes the choice', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 1, col: 1, colspan: 8 },
+				{ row: 2, col: 1, colspan: 6 },
+			],
+			{ types: [TEXT, QUOTE] },
+		);
+		const [wrong, right] = ghosts(grid);
+		const menu = open(wrong);
+
+		await paint();
+		open(right);
+		await paint();
+
+		expect(menu.matches(':popover-open')).toBe(true);
+		expect(wrong.getAttribute('aria-expanded')).toBe('false');
+		expect(right.getAttribute('aria-expanded')).toBe('true');
+
+		pick(menu, 'data-repeater-add', QUOTE);
+
+		expect(rows()).toHaveLength(3);
+		expect(layout(rows()[2])).toEqual({ colspan: '6', rowspan: '1', col: '7', row: '2' });
+
+		open(right);
+		await paint();
+		open(right);
+
+		expect(menu.matches(':popover-open')).toBe(false);
+	});
+
 	it('inserts a catalog choice at the gap without offering before or after', async () => {
 		const { grid, rows } = await editor(
 			[
@@ -438,6 +469,31 @@ describe('ghost insert', () => {
 		expect(rows()).toHaveLength(3);
 		expect(added.querySelector<HTMLInputElement>('input[name$="[type]"]')!.value).toBe(QUOTE);
 		expect(layout(added)).toEqual({ colspan: '4', rowspan: '1', col: '9', row: '1' });
+	});
+
+	it('forgets the gap when its open menu moves to the footer, which appends below everything', async () => {
+		const { grid, rows } = await editor(
+			[
+				{ row: 1, col: 1, colspan: 8 },
+				{ row: 2, col: 1, colspan: 12 },
+			],
+			{ types: [TEXT, QUOTE] },
+		);
+		const menu = open(ghosts(grid)[0]);
+		const trigger = grid.parentElement!.querySelector<HTMLButtonElement>(
+			'[data-repeater-footer] button[popovertarget]',
+		)!;
+
+		await paint();
+		vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(150, 400, 80, 30));
+		trigger.click();
+		await paint();
+
+		expect(menu.matches(':popover-open')).toBe(true);
+
+		pick(menu, 'data-repeater-add', QUOTE);
+
+		expect(layout(rows()[2])).toEqual({ colspan: '12', rowspan: '1', col: '1', row: '3' });
 	});
 
 	it('forgets the gap once its menu closed, so the footer appends below everything', async () => {
