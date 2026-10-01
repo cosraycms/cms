@@ -371,6 +371,36 @@
 		}
 	}
 
+	/* Every ghost's run of free cells, drawn like the free cells of the
+	   resize guides while one ghost is pointed at: the space there is to fill. */
+	& .ghost-slot {
+		position: absolute;
+		inset: var(--cms-space-1);
+		border: 1px dashed var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface-muted);
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 160ms ease-out;
+	}
+
+	& .grid:has(> .ghost:is(:hover, :focus-visible, [aria-expanded='true'])) > .ghost-slot {
+		opacity: 1;
+	}
+
+	& .grid:has(> .ghost:hover) > .ghost-slot {
+		transition: opacity 240ms cubic-bezier(0.2, 0, 0, 1) 80ms;
+	}
+
+	/* Over the slots, the ghost outlines its own instead of drawing a box. */
+	@media (hover: hover) {
+		& .ghost::before {
+			inset: var(--cms-space-1);
+			border-style: solid;
+			background: none;
+		}
+	}
+
 	/* Without hover there is no reveal; an invisible button must not take taps. */
 	@media (hover: none) {
 		& .ghost {
@@ -379,9 +409,9 @@
 	}
 
 	/* A gesture in progress has no gaps worth showing yet. */
-	& .grid:has(> .sortable-ghost) > .ghost,
-	&.is-resizing .ghost,
-	&.is-moving .ghost {
+	& .grid:has(> .sortable-ghost) > :is(.ghost, .ghost-slot),
+	&.is-resizing :is(.ghost, .ghost-slot),
+	&.is-moving :is(.ghost, .ghost-slot) {
 		display: none;
 	}
 

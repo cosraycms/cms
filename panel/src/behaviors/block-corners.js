@@ -16,7 +16,7 @@ function watch(grid) {
 		frame = 0;
 		const rows = Array.from(grid.children).filter(
 			/** @returns {child is HTMLElement} */ (child) =>
-				child instanceof HTMLElement && !child.hasAttribute('data-ghost'),
+				child instanceof HTMLElement && !child.matches('[data-ghost], [data-ghost-slot]'),
 		);
 
 		for (const row of observed) {

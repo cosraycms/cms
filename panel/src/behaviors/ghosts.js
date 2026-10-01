@@ -1,5 +1,7 @@
 // Ghost blocks: the empty cells of a multi-column canvas, one row at a
-// time, shown as buttons that insert a block filling them exactly. The blocks there are
+// time, shown as buttons that insert a block filling them exactly. Each
+// also gets a slot, and all of them show while one ghost is pointed at,
+// so the space there is to fill reads at a glance. The blocks there are
 // placed by position (see the placement behavior), so the free cells
 // follow from the stored positions alone; every free run becomes a
 // button placed by explicit grid lines, absolutely positioned so it
@@ -39,6 +41,16 @@ function ghosts(grid) {
 function rowsOf(grid) {
 	return Array.from(
 		/** @type {NodeListOf<HTMLElement>} */ (grid.querySelectorAll(':scope > [data-repeater-row]')),
+	);
+}
+
+/**
+ * @param {HTMLElement} grid
+ * @returns {HTMLElement[]}
+ */
+function slots(grid) {
+	return Array.from(
+		/** @type {NodeListOf<HTMLElement>} */ (grid.querySelectorAll(':scope > [data-ghost-slot]')),
 	);
 }
 
@@ -84,8 +96,20 @@ function render(grid, container, adder, fills) {
 			? FILLS.get(focused)
 			: null;
 
-	for (const ghost of ghosts(grid)) {
-		ghost.remove();
+	for (const stale of [...slots(grid), ...ghosts(grid)]) {
+		stale.remove();
+	}
+
+	// Before the ghosts, so these paint under them.
+	for (const fill of fills) {
+		const slot = document.createElement('div');
+
+		slot.className = 'ghost-slot';
+		slot.dataset.ghostSlot = '';
+		slot.setAttribute('aria-hidden', 'true');
+		slot.style.gridRow = `${fill.row} / span ${fill.rowspan}`;
+		slot.style.gridColumn = `${fill.col} / span ${fill.colspan}`;
+		grid.append(slot);
 	}
 
 	for (const fill of fills) {
@@ -197,13 +221,13 @@ function onClick(event) {
 }
 
 /**
- * Drawn over the grid, not placed on it: ghosts and resize guides.
+ * Drawn over the grid, not placed on it: ghosts, their slots and resize guides.
  *
  * @param {HTMLElement} node
  * @returns {boolean}
  */
 function overlay(node) {
-	return node.hasAttribute('data-ghost') || node.hasAttribute('data-guide');
+	return node.matches('[data-ghost], [data-ghost-slot], [data-guide]');
 }
 
 /**
