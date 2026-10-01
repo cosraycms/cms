@@ -188,6 +188,31 @@ describe('ghost rendering', () => {
 		expect(ghosts(dragged.grid)).toHaveLength(1);
 	});
 
+	it('redraws after a gesture once the field announces its change', async () => {
+		const { grid, rows } = canvas([
+			{ row: 1, col: 1, colspan: 12 },
+			{ row: 2, col: 1, colspan: 4 },
+		]);
+		const field = grid.parentElement!;
+		uninstall = install();
+		await paint();
+
+		expect(ghosts(grid).map((ghost) => ghost.style.gridColumn)).toEqual(['5 / span 8']);
+
+		field.classList.add('is-resizing');
+		position(rows[0], { row: 1, col: 1, colspan: 6 });
+		position(rows[1], { row: 2, col: 1, colspan: 2 });
+		await paint();
+		field.classList.remove('is-resizing');
+		field.dispatchEvent(new Event('change', { bubbles: true }));
+		await paint();
+
+		expect(ghosts(grid).map((ghost) => [ghost.style.gridRow, ghost.style.gridColumn])).toEqual([
+			['1 / span 1', '7 / span 6'],
+			['2 / span 1', '3 / span 10'],
+		]);
+	});
+
 	it('hands focus on when the focused gap is redrawn or vanishes', async () => {
 		const { grid, rows, adder } = canvas([
 			{ row: 1, col: 1, colspan: 8 },

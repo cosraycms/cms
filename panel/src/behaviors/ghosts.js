@@ -300,10 +300,14 @@ export function install() {
 	 * @param {Event} event
 	 */
 	function changed(event) {
-		const grid =
-			event.target instanceof Element
-				? /** @type {HTMLElement | null} */ (event.target.closest('.cms-blocks-editor > .grid'))
-				: null;
+		const target = event.target;
+		// A gesture's commit announces the change on the field itself, an
+		// edit inside a block on its control within the grid.
+		const grid = !(target instanceof Element)
+			? null
+			: target.matches('.cms-blocks-editor')
+				? /** @type {HTMLElement | null} */ (target.querySelector(':scope > .grid'))
+				: /** @type {HTMLElement | null} */ (target.closest('.cms-blocks-editor > .grid'));
 
 		if (grid) {
 			grids.get(grid)?.refresh();
