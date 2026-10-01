@@ -134,6 +134,18 @@ describe('placement model', () => {
 		expect(limits(open, 'a', 12, 1).colspan).toEqual({ low: 1, high: 8 });
 	});
 
+	it('moves the top edge into free rows above only, keeping the bottom edge', () => {
+		const boxes = grid({ a: box(1, 1, 7, 2), b: box(8, 1, 5), c: box(8, 3, 5, 3) });
+
+		expect(resize(boxes, 'c', 'top', -3, 12, 1).get('c')).toEqual(box(8, 2, 5, 4));
+		expect(resize(boxes, 'c', 'top', 5, 12, 1).get('c')).toEqual(box(8, 5, 5, 1));
+		expect(resize(boxes, 'b', 'top', -1, 12, 1).get('b')).toEqual(box(8, 1, 5));
+
+		const tallest = grid({ a: box(1, 3, 4, 6) });
+
+		expect(resize(tallest, 'a', 'top', -2, 12, 1).get('a')).toEqual(box(1, 3, 4, 6));
+	});
+
 	it('pushes the blocks below down as a block grows downwards', () => {
 		expect(plain(resize(two(), 'a', 'bottom', 1, 12, 1))).toEqual({
 			a: box(1, 1, 5, 2),
@@ -281,6 +293,34 @@ describe('placement on the canvas', () => {
 
 		expect(rows()[0]).toBe(lower);
 		expect(rows().map(spot)).toEqual(['1/1 6×1', '1/2 12×1']);
+	});
+
+	it('offers the top edge only where it moves, and raises it into free rows from the keyboard', () => {
+		const { rows } = editor([
+			{ colspan: 7, rowspan: 2, col: 1, row: 1 },
+			{ colspan: 5, col: 8, row: 1 },
+			{ colspan: 5, rowspan: 2, col: 8, row: 3 },
+		]);
+		const rises = () => rows().map((row) => row.hasAttribute('data-top-edge'));
+		const press = (row: HTMLElement, key: string) =>
+			menuItem(row, '[data-repeater-grip]').dispatchEvent(
+				new KeyboardEvent('keydown', { key, altKey: true, shiftKey: true, bubbles: true }),
+			);
+
+		expect(rises()).toEqual([true, false, true]);
+
+		press(rows()[2], 'ArrowUp');
+		press(rows()[2], 'ArrowUp');
+
+		expect(rows().map(spot)).toEqual(['1/1 7×2', '8/1 5×1', '8/2 5×3']);
+
+		press(rows()[2], 'ArrowDown');
+		press(rows()[2], 'ArrowDown');
+
+		// Of the rows it left, the one no block covers any more is taken out;
+		// the one beside the tall block stays free above it.
+		expect(rows().map(spot)).toEqual(['1/1 7×2', '8/1 5×1', '8/3 5×1']);
+		expect(rises()).toEqual([true, false, true]);
 	});
 
 	it('resizes a placed block into free cells only', () => {

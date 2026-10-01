@@ -222,7 +222,9 @@ $retype = count($blockTypes) > 1;
 	<?php endif ?>
 	<?php if ($columns > 1 && !$readonly): ?>
 		<?php foreach ([
-			// Later side handles own the overlapping bottom corners.
+			// Later side handles own the overlapping corners. The top edge
+			// shows only where it can move (data-top-edge, set by placement).
+			'top' => __('field:row'),
 			'bottom' => __('field:rowspan'),
 			'start' => __('field:column'),
 			'end' => __('field:colspan'),

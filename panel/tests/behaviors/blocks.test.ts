@@ -387,7 +387,7 @@ describe('blocks keyboard resizing', () => {
 		return found;
 	}
 
-	it('maps Alt with the arrows to the edges, Shift added for the start edge', () => {
+	it('maps Alt with the arrows to the edges, Shift added for the start and top edges', () => {
 		const key = (k: string, shift = false, alt = true): KeyboardEvent =>
 			new KeyboardEvent('keydown', { key: k, altKey: alt, shiftKey: shift });
 
@@ -397,7 +397,8 @@ describe('blocks keyboard resizing', () => {
 		expect(parseKey(key('ArrowLeft', true))).toEqual({ edge: 'start', steps: -1 });
 		expect(parseKey(key('ArrowDown'))).toEqual({ edge: 'bottom', steps: 1 });
 		expect(parseKey(key('ArrowUp'))).toEqual({ edge: 'bottom', steps: -1 });
-		expect(parseKey(key('ArrowUp', true))).toBeNull();
+		expect(parseKey(key('ArrowUp', true))).toEqual({ edge: 'top', steps: -1 });
+		expect(parseKey(key('ArrowDown', true))).toEqual({ edge: 'top', steps: 1 });
 		expect(parseKey(key('ArrowRight', false, false))).toBeNull();
 		expect(parseKey(key('Enter'))).toBeNull();
 		expect(

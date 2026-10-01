@@ -10,11 +10,13 @@
 // placement behavior). Its edges drag: a pointer gesture on a
 // [data-layout-resize] handle maps the travelled distance to whole
 // steps. The end edge grows into free cells only, up to the grid's edge,
-// the start edge moves its start column and keeps the end edge put, and
-// the bottom edge counts rows, a taller block pushing the ones below
-// down; the positions of every block the gesture moved are written along
-// with its spans. The keyboard reaches the same edges from the focused
-// grip: Alt with the arrows, Shift added for the start edge.
+// the start edge moves its start column and keeps the end edge put, the
+// bottom edge counts rows, a taller block pushing the ones below down,
+// and the top edge moves its start row into free rows above and keeps
+// the bottom edge put; it shows only where it can move. The positions
+// of every block the gesture moved are written along with its spans.
+// The keyboard reaches the same edges from the focused grip: Alt with
+// the arrows, Shift added for the start and top edges.
 //
 // While an edge drags, the guides show the block's cells and the free
 // ones around it, a label at the pointer names the value, and every
@@ -59,7 +61,7 @@ export { MAX_ROWSPAN };
 
 /** @typedef {Record<Dimension, { low: number; high: number }>} Bounds */
 
-/** @typedef {'start' | 'end' | 'bottom'} Edge */
+/** @typedef {'start' | 'end' | 'top' | 'bottom'} Edge */
 
 /** @typedef {'columns' | 'rows'} Direction */
 
@@ -177,6 +179,32 @@ export function snap(ends, offset, first, probe) {
 	return best;
 }
 
+/**
+ * The first row of a block whose top edge is dragged to `offset`: the
+ * row, up to `last`, whose start line, of `starts`, lies nearest. Only
+ * rows the grid has count; the edge rises into existing free rows only.
+ *
+ * @param {number[]} starts
+ * @param {number} offset
+ * @param {number} last
+ * @returns {number}
+ */
+export function snapStart(starts, offset, last) {
+	let best = last;
+	let nearest = Infinity;
+
+	for (let row = 1; row <= Math.min(last, starts.length); row++) {
+		const distance = Math.abs(offset - starts[row - 1]);
+
+		if (distance < nearest) {
+			nearest = distance;
+			best = row;
+		}
+	}
+
+	return best;
+}
+
 // Rows below the grid have no height yet; the pointer there counts in this.
 const PROBE = 96;
 
@@ -185,7 +213,9 @@ const PROBE = 96;
  * @returns {Edge | null}
  */
 export function parseEdge(value) {
-	return value === 'start' || value === 'end' || value === 'bottom' ? value : null;
+	return value === 'start' || value === 'end' || value === 'top' || value === 'bottom'
+		? value
+		: null;
 }
 
 /**
@@ -205,9 +235,9 @@ export function parseKey(event) {
 		case 'ArrowRight':
 			return { edge: event.shiftKey ? 'start' : 'end', steps: 1 };
 		case 'ArrowUp':
-			return event.shiftKey ? null : { edge: 'bottom', steps: -1 };
+			return { edge: event.shiftKey ? 'top' : 'bottom', steps: -1 };
 		case 'ArrowDown':
-			return event.shiftKey ? null : { edge: 'bottom', steps: 1 };
+			return { edge: event.shiftKey ? 'top' : 'bottom', steps: 1 };
 		default:
 			return null;
 	}
@@ -559,6 +589,7 @@ function same(a, b) {
  * @property {Boxes<HTMLElement> | null} boxes The canvas as the gesture found it, for a placed block.
  * @property {Map<HTMLElement, DOMRect>} rects Every block's box on screen as the gesture found it, and after its last step.
  * @property {Map<HTMLElement, DOMRect>} last
+ * @property {number[]} starts The start line of every row, in the canvas's content box, at the start.
  * @property {number[]} ends The end line of every row, in the canvas's content box, at the start.
  * @property {number} top Where the grid's tracks begin inside its border box.
  * @property {string} title The label's name for the edge.
@@ -568,12 +599,28 @@ function same(a, b) {
 let drag = null;
 
 /**
+ * @param {Edge} edge
+ * @returns {boolean}
+ */
+function vertical(edge) {
+	return edge === 'top' || edge === 'bottom';
+}
+
+/**
+ * @param {Edge} edge
+ * @returns {Dimension}
+ */
+function dimensionOf(edge) {
+	return vertical(edge) ? 'rowspan' : 'colspan';
+}
+
+/**
  * @param {PointerEvent} event
  * @param {Edge} edge
  * @returns {number}
  */
 function position(event, edge) {
-	return edge === 'bottom' ? event.clientY : event.clientX;
+	return vertical(edge) ? event.clientY : event.clientX;
 }
 
 /**
@@ -657,6 +704,7 @@ function onPointerDown(event) {
 		boxes: canvas ? snapshot(canvas) : null,
 		rects: canvas ? rectsOf(canvas) : new Map(),
 		last: canvas ? rectsOf(canvas) : new Map(),
+		starts: tracks?.rows.starts ?? [],
 		ends: tracks?.rows.ends ?? [],
 		top: tracks?.inset.top ?? 0,
 		title: handle.title,
@@ -683,13 +731,15 @@ function rectsOf(canvas) {
  * What the dragged edge sets, as the label says it.
  *
  * @param {Drag} current
- * @param {{ col: number; colspan: number; rowspan: number }} box
+ * @param {Box} box
  * @returns {string}
  */
 function value(current, box) {
 	switch (current.edge) {
 		case 'bottom':
 			return `${current.title}: ${box.rowspan}`;
+		case 'top':
+			return `${current.title}: ${box.row}`;
 		case 'end':
 			return `${current.title}: ${box.colspan}/${current.grid.columns}`;
 		default:
@@ -710,15 +760,18 @@ function guide(current, canvas, event) {
 		current.row,
 		boxes,
 		current.grid.columns,
-		current.edge === 'bottom' ? 'rows' : 'columns',
+		vertical(current.edge) ? 'rows' : 'columns',
 	);
 
 	// On the edge rather than at the pointer: rows size to their content,
-	// so the bottom edge often stays behind the pointer.
+	// so a row edge often stays behind the pointer.
 	const rect = current.row.getBoundingClientRect();
-	const x =
-		current.edge === 'bottom' ? event.clientX : rect[current.edge === 'end' ? 'right' : 'left'];
-	const y = current.edge === 'bottom' ? rect.bottom : event.clientY;
+	const x = vertical(current.edge)
+		? event.clientX
+		: rect[current.edge === 'end' ? 'right' : 'left'];
+	const y = vertical(current.edge)
+		? rect[current.edge === 'top' ? 'top' : 'bottom']
+		: event.clientY;
 
 	labelGuide(canvas, value(current, /** @type {Box} */ (boxes.get(current.row))), x, y);
 }
@@ -782,7 +835,7 @@ function onPointerMove(event) {
 	}
 
 	const travelled = position(event, drag.edge) - drag.origin;
-	const steps = drag.edge === 'bottom' ? rowSteps(drag, event) : shift(travelled, drag.pitch);
+	const steps = vertical(drag.edge) ? rowSteps(drag, event) : shift(travelled, drag.pitch);
 
 	// A part's only handle is the seam to the next part; the pair's width
 	// stays the same, so the start plus the steps is the part's new width.
@@ -813,7 +866,7 @@ function onPointerMove(event) {
 }
 
 /**
- * The rows the bottom edge moves by: to the row line nearest the pointer.
+ * The rows a row edge moves by: to the row line nearest the pointer.
  *
  * @param {Drag} current
  * @param {PointerEvent} event
@@ -828,6 +881,11 @@ function rowSteps(current, event) {
 	}
 
 	const offset = event.clientY - canvas.getBoundingClientRect().top - current.top;
+
+	if (current.edge === 'top') {
+		return snapStart(current.starts, offset, box.row + box.rowspan - 1) - box.row;
+	}
+
 	const last = snap(current.ends, offset, box.row, PROBE);
 
 	return last - box.row + 1 - box.rowspan;
@@ -860,10 +918,7 @@ function end() {
 	if (moved && boxes) {
 		commit(/** @type {HTMLElement} */ (canvas));
 	} else if (moved) {
-		/** @type {Dimension} */
-		const dimension = edge === 'bottom' ? 'rowspan' : 'colspan';
-
-		(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
+		(input(row, dimensionOf(edge)) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 	} else if (handle.matches('.resize')) {
 		// A press on an edge that changed nothing was one on the block's
 		// ground, which the edges take much of in a block of one line. A
@@ -910,11 +965,14 @@ function onKeyDown(event) {
 
 	event.preventDefault();
 
-	/** @type {Dimension} */
-	const dimension = key.edge === 'bottom' ? 'rowspan' : 'colspan';
+	const dimension = dimensionOf(key.edge);
 
+	// A part has no start or top edge: its neighbour's end comes first.
 	if (splitOf(row)) {
-		if (key.edge !== 'start' && resizePart(row, dimension, read(row)[dimension] + key.steps)) {
+		if (
+			(key.edge === 'end' || key.edge === 'bottom') &&
+			resizePart(row, dimension, read(row)[dimension] + key.steps)
+		) {
 			(input(row, dimension) ?? row).dispatchEvent(new Event('change', { bubbles: true }));
 		}
 
@@ -922,7 +980,7 @@ function onKeyDown(event) {
 	}
 
 	// A split into rows is as tall as its parts.
-	if (row.matches('.is-split') && directionOf(row) === 'rows' && key.edge === 'bottom') {
+	if (row.matches('.is-split') && directionOf(row) === 'rows' && vertical(key.edge)) {
 		return;
 	}
 

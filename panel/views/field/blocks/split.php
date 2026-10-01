@@ -98,6 +98,7 @@ $label = __('field:split-block');
 		</span>
 	</div>
 	<?php foreach ([
+		'top' => __('field:row'),
 		'bottom' => __('field:rowspan'),
 		'start' => __('field:column'),
 		'end' => __('field:colspan'),

@@ -39,7 +39,7 @@ import { changed, focusRow, renumber } from './repeater.js';
  * @typedef {Map<T, Box>} Boxes
  */
 
-/** @typedef {'start' | 'end' | 'bottom'} Edge */
+/** @typedef {'start' | 'end' | 'top' | 'bottom'} Edge */
 
 /**
  * @typedef {object} Edges
@@ -234,6 +234,33 @@ function reach(boxes, key, columns) {
 }
 
 /**
+ * The free rows right above the block across all its columns: how far
+ * its top edge can rise.
+ *
+ * @template T
+ * @param {Boxes<T>} boxes
+ * @param {T} key
+ * @returns {number}
+ */
+export function headroom(boxes, key) {
+	const box = /** @type {Box} */ (boxes.get(key));
+	let top = 1;
+
+	for (const [other, placed] of boxes) {
+		if (
+			other !== key &&
+			placed.row + placed.rowspan <= box.row &&
+			placed.col < box.col + box.colspan &&
+			box.col < placed.col + placed.colspan
+		) {
+			top = Math.max(top, placed.row + placed.rowspan);
+		}
+	}
+
+	return box.row - top;
+}
+
+/**
  * The range each span can take where the block sits.
  *
  * @template T
@@ -278,7 +305,9 @@ export function span(boxes, key, dimension, value, columns, min) {
 /**
  * One edge moved by whole steps: the end edge grows into free cells up
  * to the grid's edge, the start edge moves the start column the same way
- * and keeps the end edge where it is, the bottom edge counts rows.
+ * and keeps the end edge where it is, the bottom edge counts rows, and
+ * the top edge moves the start row into the free rows above, keeping the
+ * bottom edge where it is.
  *
  * @template T
  * @param {Boxes<T>} boxes
@@ -301,6 +330,17 @@ export function resize(boxes, key, edge, steps, columns, min) {
 	}
 
 	const result = copy(boxes);
+
+	if (edge === 'top') {
+		const end = box.row + box.rowspan;
+		const low = Math.max(box.row - headroom(boxes, key), end - MAX_ROWSPAN);
+		const row = between(box.row + steps, low, end - 1);
+
+		result.set(key, { ...box, row, rowspan: end - row });
+
+		return result;
+	}
+
 	const end = box.col + box.colspan;
 	const col = between(box.col + steps, reach(boxes, key, columns).left, end - min);
 
@@ -539,6 +579,24 @@ export function place(grid, boxes) {
 			}
 		}
 	}
+
+	markTops(grid);
+}
+
+/**
+ * Every placed block whose top edge can move, marked for its handle: up
+ * into free rows above, or down while it is taller than a row.
+ *
+ * @param {HTMLElement} grid
+ */
+export function markTops(grid) {
+	const boxes = new Map([...snapshot(grid)].filter(([row, box]) => placed(row) && box.col > 0));
+
+	for (const row of rowsOf(grid)) {
+		const box = boxes.get(row);
+
+		row.toggleAttribute('data-top-edge', !!box && (box.rowspan > 1 || headroom(boxes, row) > 0));
+	}
 }
 
 /**
@@ -569,6 +627,7 @@ export function release(row) {
 	row.style.removeProperty('--col');
 	row.style.removeProperty('--row');
 	row.removeAttribute('data-placed');
+	row.removeAttribute('data-top-edge');
 }
 
 const MOTION = { duration: 180, easing: 'cubic-bezier(0.2, 0, 0, 1)', id: 'placement' };
@@ -1287,8 +1346,14 @@ function onKeyDown(event) {
 	}
 }
 
+// Rows arrive placed from the server; their top edges are marked here.
+function scan() {
+	document.querySelectorAll(GRID).forEach((grid) => markTops(/** @type {HTMLElement} */ (grid)));
+}
+
 /** @returns {() => void} */
 export function install() {
+	document.addEventListener('htmx:after:swap', scan);
 	document.addEventListener('repeater:stamp', onStamp);
 	document.addEventListener('change', onChange);
 	document.addEventListener('click', onMove, true);
@@ -1301,7 +1366,10 @@ export function install() {
 	document.addEventListener('lostpointercapture', onLostCapture);
 	document.addEventListener('keydown', onKeyDown, true);
 
+	scan();
+
 	return () => {
+		document.removeEventListener('htmx:after:swap', scan);
 		document.removeEventListener('repeater:stamp', onStamp);
 		document.removeEventListener('change', onChange);
 		document.removeEventListener('click', onMove, true);
