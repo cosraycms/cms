@@ -152,6 +152,10 @@ describe('placement model', () => {
 		expect(gaps([box(1, 1, 11)], 12, 2)).toEqual([]);
 	});
 
+	it('merges free runs down no further than the tallest gap asked for', () => {
+		expect(gaps([box(1, 1, 7, 2)], 12, 1, 1)).toEqual([box(8, 1, 5), box(8, 2, 5)]);
+	});
+
 	it('reads track edges from a resolved template with the gap between', () => {
 		expect(tracks('100px 100px 100px', 10)).toEqual({
 			starts: [0, 110, 220],

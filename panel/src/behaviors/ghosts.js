@@ -1,5 +1,5 @@
-// Ghost blocks: the empty cells of a multi-column canvas, shown as
-// buttons that insert a block filling them exactly. The blocks there are
+// Ghost blocks: the empty cells of a multi-column canvas, one row at a
+// time, shown as buttons that insert a block filling them exactly. The blocks there are
 // placed by position (see the placement behavior), so the free cells
 // follow from the stored positions alone; every free run becomes a
 // button placed by explicit grid lines, absolutely positioned so it
@@ -52,6 +52,8 @@ function key(fills) {
 
 /**
  * The free runs of a grid whose blocks all have their position; none before.
+ * Each is one row tall: free cells beside a tall block are a line each, so
+ * a ghost never inserts a block as tall as its neighbour by chance.
  *
  * @param {HTMLElement} grid
  * @returns {Box[]}
@@ -65,7 +67,7 @@ function measure(grid) {
 
 	const { columns, min } = columnsOf(grid);
 
-	return gaps(snapshot(grid).values(), columns, min);
+	return gaps(snapshot(grid).values(), columns, min, 1);
 }
 
 /**

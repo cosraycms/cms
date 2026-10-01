@@ -151,8 +151,8 @@ describe('ghost rendering', () => {
 
 		const before = ghosts(grid);
 
-		// The free cells beside both rows are one gap two rows tall.
-		expect(before.map((ghost) => ghost.style.gridRow)).toEqual(['1 / span 2']);
+		// The free cells beside both rows are a gap on each line.
+		expect(before.map((ghost) => ghost.style.gridRow)).toEqual(['1 / span 1', '2 / span 1']);
 
 		grid.dispatchEvent(new Event('change', { bubbles: true }));
 		await paint();

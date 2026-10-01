@@ -311,14 +311,15 @@ export function resize(boxes, key, edge, steps, columns, min) {
 
 /**
  * The free runs of every row, merged down while the rows below are free
- * the same way, up to the tallest block there is.
+ * the same way, up to `tallest` rows: by default the tallest block there is.
  *
  * @param {Iterable<Box>} boxes
  * @param {number} columns
  * @param {number} min
+ * @param {number} [tallest]
  * @returns {Box[]}
  */
-export function gaps(boxes, columns, min) {
+export function gaps(boxes, columns, min, tallest = MAX_ROWSPAN) {
 	const list = [...boxes];
 	const rows = bottom(list);
 	const taken = Array.from(
@@ -361,7 +362,7 @@ export function gaps(boxes, columns, min) {
 					gap.row + gap.rowspan === row &&
 					gap.col === start &&
 					gap.colspan === colspan &&
-					gap.rowspan < MAX_ROWSPAN,
+					gap.rowspan < tallest,
 			);
 
 			if (above) {
