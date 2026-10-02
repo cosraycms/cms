@@ -84,6 +84,7 @@ final class PanelLayersTest extends End2EndTestCase
 		}
 
 		$this->assertHtmlNodeExists('//script[contains(@src, ":19830/celema-live-reload.js")]', $html);
+		$this->assertHtmlNodeExists('//meta[@name="celema-live-reload" and @content="reload"]', $html);
 		$this->assertHtmlNodeMissing('//script[contains(@src, "celema-live-reload.js")]', $this->layerHtml());
 	}
 

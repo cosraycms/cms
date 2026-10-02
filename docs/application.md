@@ -140,13 +140,13 @@ return $commands->runner();
 - `i18n()` registers synchronization and status commands for a translation domain, scanning source paths and schema labels. Call it per domain when needed.
 - `add()` accepts instances, class names, or keyed factories for commands needing custom scalar arguments.
 
-With `--watch`, both server commands reload open pages when a file matching the `watch` patterns changes. Pages opt in by including the live reload script in the site's base layout, before `</body>`:
+With `--watch`, both server commands update open pages when a file matching the `watch` patterns changes: they swap changed stylesheets in place and morph pages into a freshly rendered copy, which keeps the scroll position and form input. The panel reloads instead. Pages opt in by including the live reload script in the site's base layout, before `</body>`:
 
 ```php
 <?= $cms->liveReload() ?>
 ```
 
-It renders nothing unless the dev server is watching, so it can stay in production layouts. The script URL uses the host the page was requested under, so live reload also works on other devices or in virtual machines when the server listens there, for example with `--host=0.0.0.0`. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns and ports.
+It renders nothing unless the dev server is watching, so it can stay in production layouts. The script URL uses the host the page was requested under, so live reload also works on other devices or in virtual machines when the server listens there, for example with `--host=0.0.0.0`. The [`celema/server` README](https://codefloe.com/celema/server) covers watch patterns, ports, and how pages opt out of morphing.
 
 Commands can inject `Cms`, `Context`, `Config`, `Database`, `Locales`, and `Cosray\Node\Writer`. They run with the default content locale and a Verba translator but without an HTTP request or session. Use `Context::withLocale()` for locale-specific work.
 
