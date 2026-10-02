@@ -108,7 +108,7 @@ final class PanelNavigationTest extends TestCase
 			$html,
 		);
 		$container->add(Navigation::class, new Navigation());
-		$request->wrap($request->unwrap()->withQueryParams([]));
+		$request = new Request($request->unwrap()->withQueryParams([]));
 		$data = new Editor($config, $container, $request)->create($context, $cms, 'plain-block');
 		$html = new Renderer(self::root() . '/panel/views')->render('editor', $data);
 		$this->assertHtmlNodeExists(

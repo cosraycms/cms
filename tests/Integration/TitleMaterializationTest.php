@@ -187,7 +187,7 @@ final class TitleMaterializationTest extends IntegrationTestCase
 		assert($locales instanceof Locales, 'The psr request fixture carries the locales');
 		// Live title resolution reads the default locale off the request, which
 		// the psr request fixture does not carry.
-		$request->set('defaultLocale', $locales->getDefault());
+		$request = $request->with('defaultLocale', $locales->getDefault());
 
 		$context = new Context(
 			$this->db(),

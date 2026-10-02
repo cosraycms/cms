@@ -25,7 +25,7 @@ use Cosray\Value\ValueContext;
  */
 final class PrimitiveValueTest extends TestCase
 {
-	private function createContext(): Context
+	private function createContext(string $locale = 'en'): Context
 	{
 		$psrRequest = $this->psrRequest();
 		$locales = new \Cosray\Locales();
@@ -34,7 +34,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$psrRequest = $psrRequest
 			->withAttribute('locales', $locales)
-			->withAttribute('locale', $locales->get('en'))
+			->withAttribute('locale', $locales->get($locale))
 			->withAttribute('defaultLocale', $locales->getDefault());
 
 		$request = new \Celema\Core\Request($psrRequest);
@@ -74,14 +74,13 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTextValueFallsBackToDefaultLocale(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new TestText('title', $owner, new ValueContext('title', [
 			'value' => ['en' => 'Hello', 'de' => null],
 		]));
 		$field->translate();
 
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('Hello', $value->unwrap());
@@ -91,14 +90,13 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTextValueReturnsEmptyWhenMissing(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new TestText('title', $owner, new ValueContext('title', [
 			'value' => ['en' => null, 'de' => null],
 		]));
 		$field->translate();
 
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('', $value->unwrap());
@@ -160,7 +158,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testCodeValueFallsBackToDefaultLocaleAndKeepsSyntax(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new TestCode('snippet', $owner, new ValueContext('snippet', [
 			'value' => ['en' => '<?php echo 1;', 'de' => null],
@@ -169,7 +167,6 @@ final class PrimitiveValueTest extends TestCase
 		$field->translate();
 		$field->syntaxes(['php', 'javascript']);
 
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = $field->value();
 
 		$this->assertSame('<?php echo 1;', $value->unwrap());
@@ -318,7 +315,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedFileFallsBackToDefaultLocale(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
@@ -332,7 +329,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -342,7 +338,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedFileIsEmptyWhenMissing(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\File('attachment', $owner, new ValueContext('attachment', [
 			'files' => [
@@ -356,7 +352,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -366,7 +361,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedFilesReturnsTranslatedFileInstances(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\File('attachments', $owner, new ValueContext('attachments', [
 			'files' => [
@@ -379,7 +374,6 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -498,7 +492,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedImageFallsBackToDefaultLocale(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$this->seedAsset($context, 'heroimg123456', 'hero.jpg');
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
@@ -513,7 +507,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 		$this->assertInstanceOf(\Cosray\Value\TranslatedImage::class, $value);
@@ -528,7 +521,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testFileValueTitleFallsBackToDefaultLocale(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$this->seedAsset($context, 'qmanualpdf123', 'manual.pdf');
 		$field = new \Cosray\Field\File('document', $owner, new ValueContext('document', [
@@ -544,7 +537,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate();
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -554,7 +546,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testImageValueUsesTranslatedAltAndTitle(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
@@ -573,7 +565,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate();
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -631,7 +622,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedImageFallsBackToDefaultLocaleWithTitle(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Image('hero', $owner, new ValueContext('hero', [
 			'files' => [
@@ -655,7 +646,6 @@ final class PrimitiveValueTest extends TestCase
 		]));
 		$field->limit(1);
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -694,7 +684,7 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testTranslatedImagesReturnsTranslatedImageItems(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Image('gallery', $owner, new ValueContext('gallery', [
 			'files' => [
@@ -707,7 +697,6 @@ final class PrimitiveValueTest extends TestCase
 			],
 		]));
 		$field->translate(TranslateMode::Asymmetric);
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 
 		$value = $field->value();
 
@@ -1221,12 +1210,11 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testIframeValueFallsBackToDefaultLocale(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = new \Cosray\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => '<iframe></iframe>', 'de' => null],
 		]));
@@ -1239,12 +1227,11 @@ final class PrimitiveValueTest extends TestCase
 
 	public function testIframeValueIsEmptyWhenMissing(): void
 	{
-		$context = $this->createContext();
+		$context = $this->createContext('de');
 		$owner = $this->createOwner($context);
 		$field = new \Cosray\Field\Iframe('embed', $owner, new ValueContext('embed', []));
 		$field->translate();
 
-		$context->httpRequest()->set('locale', $context->locales()->get('de'));
 		$value = new \Cosray\Value\Iframe($owner, $field, new ValueContext('embed', [
 			'value' => ['en' => null, 'de' => null],
 		]));

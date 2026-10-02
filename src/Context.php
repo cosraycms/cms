@@ -21,6 +21,9 @@ final class Context
 	private ?Locales $runtimeLocales = null;
 	private ?Locale $runtimeLocale = null;
 
+	/** The request carrying the locale withLocale() switched to, while its callback runs. */
+	private ?Request $localeRequest = null;
+
 	/** @var array<string, Translator> */
 	private array $translators = [];
 
@@ -68,8 +71,10 @@ final class Context
 			Container::class => $this->container,
 		];
 
-		if ($this->request !== null) {
-			$base[Request::class] = $this->request;
+		$request = $this->currentRequest();
+
+		if ($request !== null) {
+			$base[Request::class] = $request;
 		}
 
 		$instance = new Creator($this->container)->create($class, predefinedTypes: $types + $base);
@@ -99,7 +104,7 @@ final class Context
 			return $this->runtimeLocales;
 		}
 
-		$locales = $this->request?->get('locales', null);
+		$locales = $this->currentRequest()?->get('locales', null);
 
 		if (!$locales instanceof Locales) {
 			throw new Exception\RuntimeException('Locales are not available in this CMS context');
@@ -114,7 +119,7 @@ final class Context
 			return $this->runtimeLocale;
 		}
 
-		$locale = $this->request?->get('locale', null);
+		$locale = $this->currentRequest()?->get('locale', null);
 
 		if (!$locale instanceof Locale) {
 			throw new Exception\RuntimeException('The current locale is not available in this CMS context');
@@ -146,32 +151,34 @@ final class Context
 
 	public function httpRequest(): Request
 	{
-		return (
-			$this->request ?? throw new Exception\RuntimeException(
-				'An HTTP request is not available in this CMS context',
-			)
+		return $this->currentRequest() ?? throw new Exception\RuntimeException(
+			'An HTTP request is not available in this CMS context',
 		);
 	}
 
 	public function origin(): string
 	{
-		return $this->request?->origin() ?? '';
+		return $this->currentRequest()?->origin() ?? '';
 	}
 
+	/**
+	 * Runs the callback in another locale. Code that reads the locale off
+	 * the request, such as templates, gets a request carrying it.
+	 */
 	public function withLocale(Locale $locale, Closure $callback): mixed
 	{
 		$runtimeLocale = $this->runtimeLocale;
-		$requestLocale = $this->request?->get('locale', null);
+		$localeRequest = $this->localeRequest;
 		$translator = Verba::translator();
 		$this->runtimeLocale = $locale;
-		$this->request?->set('locale', $locale);
+		$this->localeRequest = $this->request?->with('locale', $locale);
 		Verba::activate($this->translator());
 
 		try {
 			return $callback();
 		} finally {
 			$this->runtimeLocale = $runtimeLocale;
-			$this->request?->set('locale', $requestLocale);
+			$this->localeRequest = $localeRequest;
 
 			if ($translator !== null) {
 				Verba::activate($translator);
@@ -179,5 +186,10 @@ final class Context
 				Verba::deactivate();
 			}
 		}
+	}
+
+	private function currentRequest(): ?Request
+	{
+		return $this->localeRequest ?? $this->request;
 	}
 }
