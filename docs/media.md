@@ -10,7 +10,9 @@ Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-u
 
 ### SVG uploads
 
-SVG files are rebuilt from an allowlist before they are stored; see [Util\Svg](../src/Util/Svg.php) for the lists. Scripts, event handlers, `foreignObject`, comments, and editor metadata are removed. Links may only point into the document, except web and mail links on `<a>` and embedded PNG, JPEG, GIF, or WebP images on `<image>`. CSS may only reference document fragments and embedded images or fonts. Empty or malformed files, documents without an `svg` root in the SVG namespace, and files that declare their own DTD entities are rejected; exporting such a file again from the editor usually fixes it.
+SVG files are rebuilt from an allowlist before they are stored; see [Util\Svg](../src/Util/Svg.php) for the lists. Scripts, event handlers, `foreignObject`, comments, `<metadata>`, and editor data are removed. Links may only point into the document, except web and mail links on `<a>` and embedded PNG, JPEG, GIF, or WebP images on `<image>`. CSS may only reference document fragments and embedded images or fonts. Empty or malformed files, documents without an `svg` root in the SVG namespace, and files that declare their own DTD entities are rejected; exporting such a file again from the editor usually fixes it.
+
+Copyright and license information in removed comments or `<metadata>` is not kept, and only the sanitized file is stored. Legal comments that start with `<!--!`, the form Font Awesome and SVGO use for license notices, are kept; notices before or after the `svg` element move inside it. When a license requires attribution that the file does not carry in such a comment, provide it on the site, and keep source files outside the CMS.
 
 Embed uploaded SVGs by URL, for example with `<img>`, rather than inlining their markup. An image keeps its stylesheet to itself and loads nothing external; inlined markup shares the page's CSS, and a kept `<style>` element would apply to the whole page. [Icons](application.md#icons) are the inlined exception and are sanitized more strictly.
 

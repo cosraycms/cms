@@ -196,9 +196,11 @@ Registered scripts load once per full document and do not run again after htmx n
 
 Icon ids such as `#[Icon('bi:check')]` resolve through the icon providers in order. By default these are the site's own SVG files below `icons.local.paths`, where `bi:check` means `bi/check.svg` and an unprefixed `logo` means `logo.svg`, then the [Iconify API](https://iconify.design/) for prefixed ids. `$app->icons()` adds a provider before them or, with `replace: true`, replaces both. Iconify responses are cached below `{path.public}{path.cache}/icons/`. Pages include icon markup inline, so icons can use `currentColor`.
 
-Local files are used as they are. Iconify markup is sanitized like an [SVG upload](media.md#svg-uploads), and because inline SVG shares the page's CSS and layout, it also loses `<style>` elements, the root element's `style`, `transform`, `overflow`, and `filter`, and animations of the root element. This does not affect icons drawn with paths and `currentColor` or animated with SVG animation elements such as `<animate>` and `<animateTransform>`. Icons that are styled or animated by a stylesheet, for example `@keyframes` in a `<style>` element as some spinner sets use, lose that styling: they render static or with default fills.
+Local files are used as they are. Iconify markup is sanitized like an [SVG upload](media.md#svg-uploads), and because inline SVG shares the page's CSS and layout, it also loses all comments (legal comments included), `<style>` elements, the root element's `style`, `transform`, `overflow`, and `filter`, and animations of the root element. This does not affect icons drawn with paths and `currentColor` or animated with SVG animation elements such as `<animate>` and `<animateTransform>`. Icons that are styled or animated by a stylesheet, for example `@keyframes` in a `<style>` element as some spinner sets use, lose that styling: they render static or with default fills.
 
 Prefer static icons, and for animation choose icons that use SVG animation elements; check an animated icon where it is shown before relying on it. To use an icon that needs its stylesheet, review it and place a copy below a local icon path.
+
+Iconify responses carry no license notices. Check the license of each icon set you use; some require attribution on the site.
 
 ## Panel assets and theming
 

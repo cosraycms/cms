@@ -185,6 +185,44 @@ final class UtilSvgTest extends TestCase
 		$this->assertSame(self::OPEN . '<title>Logo</title><desc>Mark</desc>' . self::CLOSE, $svg);
 	}
 
+	public function testKeepsLegalComments(): void
+	{
+		$notice =
+			'<!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com'
+			. ' License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc. -->';
+		$svg = Svg::sanitize(
+			self::OPEN . '<!-- Generator: Editor 1.0 -->' . $notice . '<path d="M0 0"/>' . self::CLOSE,
+		);
+
+		$this->assertSame(self::OPEN . $notice . '<path d="M0 0"/>' . self::CLOSE, $svg);
+	}
+
+	public function testMovesLegalCommentsAroundTheRootInside(): void
+	{
+		$svg = Svg::sanitize(
+			'<?xml version="1.0"?><!-- Generator: Editor 1.0 --><!--! Copyright Example -->'
+				. self::OPEN
+				. '<rect/>'
+				. self::CLOSE
+				. '<!--! License: CC BY 4.0 -->',
+		);
+
+		$this->assertSame(
+			self::OPEN . '<!--! Copyright Example --><rect/><!--! License: CC BY 4.0 -->' . self::CLOSE,
+			$svg,
+		);
+	}
+
+	public function testInlineMarkupDropsComments(): void
+	{
+		$svg = Svg::sanitize(
+			'<!--! Copyright Example -->' . self::OPEN . '<!--! License --><g><!--! Note --></g>' . self::CLOSE,
+			inline: true,
+		);
+
+		$this->assertSame(self::OPEN . '<g/>' . self::CLOSE, $svg);
+	}
+
 	public function testInlineMarkupDropsStylesheets(): void
 	{
 		$svg =

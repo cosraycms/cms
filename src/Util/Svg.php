@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Cosray\Util;
 
 use Dom\Attr;
+use Dom\Comment;
 use Dom\Element;
+use Dom\Node;
 use Dom\Text;
 use Dom\XMLDocument;
+use Dom\XPath;
 use DOMException;
 use ValueError;
 
@@ -18,9 +21,9 @@ use ValueError;
  *
  * The input is parsed strictly as XML and only allowed nodes are copied
  * into a new document. Whatever is not copied explicitly (doctype,
- * processing instructions, comments, entity references, other namespaces)
- * cannot survive. The serializer escapes text, so the result is also safe
- * inside HTML.
+ * processing instructions, comments other than legal comments, entity
+ * references, other namespaces) cannot survive. The serializer escapes
+ * text, so the result is also safe inside HTML.
  *
  * @internal
  */
@@ -410,9 +413,10 @@ final class Svg
 		$document = XMLDocument::createEmpty();
 		$copy = self::copy($root, $document);
 		$document->append($copy);
+		self::moveLegalComments($source, $document, $copy);
 
 		if ($inline) {
-			self::confine($copy);
+			self::confine($document, $copy);
 		}
 
 		foreach ($document->getElementsByTagNameNS(self::SVG, '*') as $element) {
@@ -463,6 +467,12 @@ final class Svg
 				continue;
 			}
 
+			if (self::isLegalComment($child)) {
+				$target->append($document->createComment($child->data));
+
+				continue;
+			}
+
 			// Inside inline SVG, `title` and `desc` switch the HTML parser back
 			// to HTML; text only leaves nothing it could read differently.
 			if (
@@ -486,14 +496,54 @@ final class Svg
 	}
 
 	/**
+	 * Legal comments, `<!--! … -->`, carry copyright and license notices,
+	 * and licenses such as CC BY may require them to stay with the file;
+	 * Font Awesome writes its notice this way, and SVGO keeps such comments
+	 * for that reason. Removing them could breach the license, so they are
+	 * the only comments kept.
+	 *
+	 * A comment is inert in an SVG file. Inlined into HTML, one that starts
+	 * with `!` and contains no `--` cannot be closed early by the HTML
+	 * parser either. The XML parser already rejects `--` in comments; the
+	 * explicit check keeps that guarantee visible. Inline markup drops all
+	 * comments anyway, see confine().
+	 */
+	private static function isLegalComment(Node $node): bool
+	{
+		return $node instanceof Comment && str_starts_with($node->data, '!') && !str_contains($node->data, '--');
+	}
+
+	/** The copy holds only the root element, so notices around it move inside. */
+	private static function moveLegalComments(XMLDocument $source, XMLDocument $document, Element $copy): void
+	{
+		$comments = [];
+
+		foreach ($source->childNodes as $node) {
+			if ($node === $source->documentElement) {
+				$copy->prepend(...$comments);
+				$comments = [];
+			} elseif (self::isLegalComment($node)) {
+				$comments[] = $document->createComment($node->data);
+			}
+		}
+
+		$copy->append(...$comments);
+	}
+
+	/**
 	 * Inline SVG shares the page's CSS and layout: a `<style>` element
 	 * applies to the whole page, and the root could be moved, enlarged or
 	 * filtered over surrounding content. Drawing inside its own box stays.
+	 * Comments, legal ones included, have no use there and are removed.
 	 */
-	private static function confine(Element $root): void
+	private static function confine(XMLDocument $document, Element $root): void
 	{
 		foreach (self::ESCAPING as $name) {
 			$root->removeAttributeNS(null, $name);
+		}
+
+		foreach (iterator_to_array(new XPath($document)->query('//comment()')) as $comment) {
+			$comment->remove();
 		}
 
 		$id = $root->getAttributeNS(null, 'id');
