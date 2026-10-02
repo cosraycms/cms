@@ -309,6 +309,12 @@ final class Svg
 	/** Attributes whose values are neither CSS nor URLs, kept as they are. */
 	private const array PLAIN = ['attributeName', 'class', 'id', 'lang', 'role'];
 
+	/** Elements whose content is kept as text only. */
+	private const array TEXT_ONLY = ['desc', 'title'];
+
+	/** Root attributes that let an inlined drawing leave its box. */
+	private const array ESCAPING = ['filter', 'overflow', 'style', 'transform'];
+
 	/** Animating these would bypass the link and CSS checks. */
 	private const array UNANIMATABLE = ['href', 'style'];
 
@@ -383,8 +389,11 @@ final class Svg
 	 * input is rejected as a whole: empty, not well-formed XML, a root
 	 * other than `svg` in the SVG namespace, or a doctype with an internal
 	 * subset (entity declarations).
+	 *
+	 * Pass `inline: true` for markup that is placed into an HTML page
+	 * rather than served as a file or embedded with `<img>`; see confine().
 	 */
-	public static function sanitize(string $svg): ?string
+	public static function sanitize(string $svg, bool $inline = false): ?string
 	{
 		$source = self::parse($svg);
 		$root = $source?->documentElement;
@@ -401,6 +410,10 @@ final class Svg
 		$document = XMLDocument::createEmpty();
 		$copy = self::copy($root, $document);
 		$document->append($copy);
+
+		if ($inline) {
+			self::confine($copy);
+		}
 
 		foreach ($document->getElementsByTagNameNS(self::SVG, '*') as $element) {
 			if ($element->hasAttributeNS(self::XLINK, 'href')) {
@@ -450,7 +463,13 @@ final class Svg
 				continue;
 			}
 
-			if (!$child instanceof Element || !self::allowed($child)) {
+			// Inside inline SVG, `title` and `desc` switch the HTML parser back
+			// to HTML; text only leaves nothing it could read differently.
+			if (
+				!$child instanceof Element
+				|| in_array($source->localName, self::TEXT_ONLY, true)
+				|| !self::allowed($child)
+			) {
 				continue;
 			}
 
@@ -464,6 +483,39 @@ final class Svg
 		}
 
 		return $target;
+	}
+
+	/**
+	 * Inline SVG shares the page's CSS and layout: a `<style>` element
+	 * applies to the whole page, and the root could be moved, enlarged or
+	 * filtered over surrounding content. Drawing inside its own box stays.
+	 */
+	private static function confine(Element $root): void
+	{
+		foreach (self::ESCAPING as $name) {
+			$root->removeAttributeNS(null, $name);
+		}
+
+		$id = $root->getAttributeNS(null, 'id');
+
+		// The collection is live; removing while iterating it skips elements.
+		foreach (iterator_to_array($root->getElementsByTagNameNS(self::SVG, '*')) as $element) {
+			if ($element->localName === 'style' || self::animatesRoot($element, $root, $id)) {
+				$element->remove();
+			}
+		}
+	}
+
+	/** Animations target their parent, or the element their link points to. */
+	private static function animatesRoot(Element $element, Element $root, ?string $id): bool
+	{
+		if (!in_array($element->localName, self::ANIMATIONS, true)) {
+			return false;
+		}
+
+		$href = $element->getAttributeNS(null, 'href') ?? $element->getAttributeNS(self::XLINK, 'href');
+
+		return $href === null ? $element->parentNode === $root : $id !== null && $href === "#{$id}";
 	}
 
 	/** The element and its allowed attributes, without children. */

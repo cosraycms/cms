@@ -62,9 +62,10 @@ final class Iconify implements Provider
 	}
 
 	/**
-	 * Remote markup is inlined into pages, so it is sanitized like an
-	 * uploaded SVG. Cached files are sanitized again when read: they live
-	 * in the public directory and may predate sanitizing.
+	 * Remote markup is inlined into pages, so it is sanitized for inline
+	 * use, which also removes `<style>` elements. Cached files are
+	 * sanitized again when read: they live in the public directory and may
+	 * predate sanitizing.
 	 *
 	 * @param array<array-key, mixed> $args
 	 */
@@ -74,7 +75,7 @@ final class Iconify implements Provider
 
 		if ($file !== null && is_file($file)) {
 			$cached = file_get_contents($file);
-			$svg = is_string($cached) ? Svg::sanitize($cached) : null;
+			$svg = is_string($cached) ? Svg::sanitize($cached, inline: true) : null;
 
 			if ($svg !== null) {
 				return $svg;
@@ -84,7 +85,7 @@ final class Iconify implements Provider
 		$url = $this->iconUrl($prefix, $name, $args);
 		$iconify = $this->config->icons->iconify;
 		$fetched = ($this->fetch)($url, $iconify->timeout, $iconify->userAgent);
-		$svg = is_string($fetched) ? Svg::sanitize($fetched) : null;
+		$svg = is_string($fetched) ? Svg::sanitize($fetched, inline: true) : null;
 
 		if ($svg === null) {
 			return null;

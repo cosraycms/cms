@@ -291,14 +291,17 @@ final class IconsTest extends TestCase
 		}
 	}
 
-	public function testIconifyMarkupIsSanitized(): void
+	public function testIconifyMarkupIsSanitizedForInlineUse(): void
 	{
 		$publicDir = $this->publicDir();
 
 		try {
 			$icons = $this->icons(
 				$publicDir,
-				static fn(): string => '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><path d="M0 0"/></svg>',
+				static fn(): string => (
+					'<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)">'
+					. '<style>* { display: none }</style><script>alert(1)</script><path d="M0 0"/></svg>'
+				),
 			);
 			$svg = $icons->icon('bi:check');
 			$cacheFile = $publicDir . '/cache/icons/' . hash('xxh3', 'bi:check') . '.svg';

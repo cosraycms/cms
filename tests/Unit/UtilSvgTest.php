@@ -130,6 +130,21 @@ final class UtilSvgTest extends TestCase
 		yield 'import in another case' => ['<style>@IMPORT "https://example.com/x.css";</style>', ''];
 		yield 'image set' => ['<style>.a{background:image-set("https://example.com/x.png" 1x)}</style>', ''];
 		yield 'remote font' => ['<style>@font-face{font-family:f;src:url(https://example.com/f.woff2)}</style>', ''];
+		yield 'escaped url in paint' => ['<circle fill="\75\72\6c(https://example.com/ping)"/>', '<circle/>'];
+		yield 'remote url behind a local one' => [
+			'<rect style="/* url(#a) */ background-image: url(https://example.com/ping)"/>',
+			'<rect/>',
+		];
+		yield 'url in a custom property' => [
+			'<style>:root{--u:url(https://example.com/ping)}.a{background-image:var(--u)}</style>',
+			'',
+		];
+		yield 'url in relaxed nesting' => [
+			'<style>g { rect { background-image: url(https://example.com/ping); } }</style>',
+			'',
+		];
+		yield 'src function' => ["<style>.a{--u:'https://example.com/ping';background:src(var(--u))}</style>", ''];
+		yield 'image function' => ["<style>.a{background:image('https://example.com/ping', black)}</style>", ''];
 		yield 'unterminated comment' => ['<style>.a{fill:red}/* </style>', ''];
 		yield 'stylesheet in another language' => ['<style type="text/xsl">.a{}</style>', ''];
 		yield 'comments and processing instructions' => ['<!-- x --><?php echo 1 ?>', ''];
@@ -154,6 +169,56 @@ final class UtilSvgTest extends TestCase
 				. '<style>.a{}&lt;/style&gt;&lt;img src=x&gt;</style>'
 				. '<title>&lt;/title&gt;&lt;img src=x onerror=alert(1)&gt;</title>'
 				. self::CLOSE,
+			$svg,
+		);
+	}
+
+	public function testKeepsOnlyTextInTitleAndDescription(): void
+	{
+		$svg = Svg::sanitize(
+			self::OPEN
+				. '<title>Logo<a href="https://example.com/">link</a><style>.a{}</style></title>'
+				. '<desc>Mark<tspan>part</tspan></desc>'
+				. self::CLOSE,
+		);
+
+		$this->assertSame(self::OPEN . '<title>Logo</title><desc>Mark</desc>' . self::CLOSE, $svg);
+	}
+
+	public function testInlineMarkupDropsStylesheets(): void
+	{
+		$svg =
+			self::OPEN
+			. '<style>* { background-color: blue !important; transition: all 9999s ease !important; }</style>'
+			. '<rect class="a"/>'
+			. self::CLOSE;
+
+		$this->assertSame($svg, Svg::sanitize($svg));
+		$this->assertSame(self::OPEN . '<rect class="a"/>' . self::CLOSE, Svg::sanitize($svg, inline: true));
+	}
+
+	public function testInlineMarkupStaysInsideItsBox(): void
+	{
+		$svg = Svg::sanitize(
+			'<svg xmlns="http://www.w3.org/2000/svg" id="r" viewBox="0 0 24 24" style="position:fixed;inset:0"'
+				. ' overflow="visible" transform="scale(100)" filter="url(#f)">'
+				. '<animateTransform attributeName="transform" type="scale" to="100" dur="1s"/>'
+				. '<set href="#r" attributeName="opacity" to="0"/>'
+				. '<g transform="rotate(10 12 12)">'
+				. '<animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"/>'
+				. '<path id="p" style="fill:red" d="M0 0H24"/></g>'
+				. '<set href="#p" attributeName="opacity" to="0.5"/>'
+				. '</svg>',
+			inline: true,
+		);
+
+		$this->assertSame(
+			'<svg xmlns="http://www.w3.org/2000/svg" id="r" viewBox="0 0 24 24">'
+				. '<g transform="rotate(10 12 12)">'
+				. '<animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"/>'
+				. '<path id="p" style="fill:red" d="M0 0H24"/></g>'
+				. '<set href="#p" attributeName="opacity" to="0.5"/>'
+				. '</svg>',
 			$svg,
 		);
 	}
