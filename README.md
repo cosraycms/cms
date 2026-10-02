@@ -13,7 +13,7 @@ Cosray is a PHP content management framework with code-first content models, Pos
 
 ## Starting an application
 
-`Cosray\App` creates the configuration and CMS bootstrap, installs the default error handler, and registers the CMS catchall route when `run()` is called. Application-defined node and collection classes are registered before that call:
+`Cosray\App` creates the configuration and CMS bootstrap, installs the default error handler, and registers the CMS catchall route when `serve()` is called. Application-defined node and collection classes are registered before that call:
 
 ```php
 use Cosray\App;
@@ -30,10 +30,10 @@ $app->load($locales);
 $app->section('Content')->collection(\App\Cms\Collection\Pages::class);
 $app->node(\App\Cms\Node\HomePage::class);
 
-$app->run();
+return $app->serve();
 ```
 
-See [application setup](docs/application.md) for environment loading, console commands, panel installation, plugins, and users; [content models](docs/content.md) covers nodes, routes, queries, and rendering.
+`serve()` handles the current request, or many requests as a FrankenPHP worker. See [application setup](docs/application.md) for environment loading, serving requests and worker mode, console commands, panel installation, plugins, and users; [content models](docs/content.md) covers nodes, routes, queries, and rendering.
 
 ## Requirements
 

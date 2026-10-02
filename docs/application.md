@@ -55,6 +55,55 @@ $app->renderer('view', Renderer::class)->args(
 
 Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
 
+## Serving requests
+
+The front controller boots the app and serves it:
+
+```php
+// public/index.php
+$app = require dirname(__DIR__) . '/boot/app.php';
+
+return $app->serve();
+```
+
+`serve()` handles the current request under PHP-FPM, FrankenPHP's classic mode and the development server, and handles requests until the worker retires when the script runs as a [FrankenPHP worker](#worker-mode). `run()` handles exactly one request; tests and scripts use it. Every request runs in its own container scope and ends with a teardown that resets scoped services and rolls back a transaction the request left open. The lifecycle, the failure handling and the worker limits are described in [Celema core](https://codefloe.com/celema/core#request-lifecycle).
+
+Register plugins, services and routes before the first request. The container is sealed after it, and later registrations throw.
+
+### Worker mode
+
+A FrankenPHP worker boots the app once and keeps it in memory for many requests, which saves the boot and the database connection setup per request. Point the worker at the normal front controller and set the number of workers explicitly:
+
+```caddyfile
+example.org {
+	root * /srv/site/public
+	php_server {
+		worker {
+			file /srv/site/public/index.php
+			num 4
+		}
+	}
+}
+```
+
+What lives for the worker and what for one request:
+
+- Booted once: configuration, routes, middleware, schemas and registries, plugins, renderers (including error and panel renderers), dashboard cards registered as objects, and every service registered with `$app->register()`, which is shared unless declared `->scoped()` or `->transient()`.
+- Per request: controllers, `Context` and `Cms`, nodes, embedded objects, collections, block types, dashboard cards registered as class names, the session and its user, the locale and translator, and `scoped()` services.
+
+Code that outlives a request must not keep the state of one: no request, user, locale or content in properties of registered services, renderers, middleware or static properties. A shared service cannot depend on a scoped one; the container throws instead of keeping the first request's instance.
+
+Objects Cosray builds for a request can ask for request data in their constructors: nodes, embedded objects, collections, block types and dashboard cards get the `Request`, `Context`, `Config` and `Database` through [Context::create()](../src/Context.php), and controllers get them through the router. Registered services do not get the request; pass it to them as a method argument.
+
+More rules for request code:
+
+- Finish a request by returning a response. `exit()` and `die()` end the worker, which then boots again.
+- The database connection stays open between requests and is rolled back to a clean state after each one. Set `db.reuse` to `false` to disconnect after every request instead. Keep connection settings transaction-local (`SET LOCAL`) and budget the connections for the workers of all sites sharing a database server; see [Quma's notes on long-running processes](https://codefloe.com/celema/quma/src/branch/main/docs/long-running-processes.md).
+- Sessions are closed when a request ends.
+- Cosray reads environment variables at boot. FrankenPHP rebuilds `$_SERVER` for every request, so values a `.env` loader wrote into `$_SERVER` at boot are not there in requests; read them through the configuration or `$_ENV`.
+
+Content, users, permissions and media are read per request. Changes to code, templates, configuration, SQL files, translation catalogs, plugins and `.env` reach the workers when they restart, so restart FrankenPHP or its workers after a deployment.
+
 ## Console commands
 
 [Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
