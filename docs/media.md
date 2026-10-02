@@ -12,6 +12,8 @@ Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-u
 
 SVG files are rebuilt from an allowlist before they are stored; see [Util\Svg](../src/Util/Svg.php) for the lists. Scripts, event handlers, `foreignObject`, comments, and editor metadata are removed. Links may only point into the document, except web and mail links on `<a>` and embedded PNG, JPEG, GIF, or WebP images on `<image>`. CSS may only reference document fragments and embedded images or fonts. Empty or malformed files, documents without an `svg` root in the SVG namespace, and files that declare their own DTD entities are rejected; exporting such a file again from the editor usually fixes it.
 
+Embed uploaded SVGs by URL, for example with `<img>`, rather than inlining their markup. An image keeps its stylesheet to itself and loads nothing external; inlined markup shares the page's CSS, and a kept `<style>` element would apply to the whole page. [Icons](application.md#icons) are the inlined exception and are sanitized more strictly.
+
 The web server serves originals directly, so configure a restrictive policy for SVG responses there as a second line of defense. For example, in a Caddyfile:
 
 ```caddyfile

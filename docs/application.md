@@ -192,6 +192,14 @@ Registered scripts load once per full document and do not run again after htmx n
 
 `panel.dashboard => false` removes the dashboard entry and directs panel home to the first collection, or media when there is none.
 
+## Icons
+
+Icon ids such as `#[Icon('bi:check')]` resolve through the icon providers in order. By default these are the site's own SVG files below `icons.local.paths`, where `bi:check` means `bi/check.svg` and an unprefixed `logo` means `logo.svg`, then the [Iconify API](https://iconify.design/) for prefixed ids. `$app->icons()` adds a provider before them or, with `replace: true`, replaces both. Iconify responses are cached below `{path.public}{path.cache}/icons/`. Pages include icon markup inline, so icons can use `currentColor`.
+
+Local files are used as they are. Iconify markup is sanitized like an [SVG upload](media.md#svg-uploads), and because inline SVG shares the page's CSS and layout, it also loses `<style>` elements, the root element's `style`, `transform`, `overflow`, and `filter`, and animations of the root element. This does not affect icons drawn with paths and `currentColor` or animated with SVG animation elements such as `<animate>` and `<animateTransform>`. Icons that are styled or animated by a stylesheet, for example `@keyframes` in a `<style>` element as some spinner sets use, lose that styling: they render static or with default fills.
+
+Prefer static icons, and for animation choose icons that use SVG animation elements; check an animated icon where it is shown before relying on it. To use an icon that needs its stylesheet, review it and place a copy below a local icon path.
+
 ## Panel assets and theming
 
 The panel's browser files ship with the package as they are, so `composer install` or `update` is the whole installation. PHP serves `panel/src`, `panel/styles`, `panel/icons` and the vendored third-party modules in `panel/modules` under `{panel.path}/assets/{revision}/`, plus an icon sprite it builds from `panel/icons` and, below `composer/`, the modules other Composer packages ship, such as verba's translation runtime from `celema/verba`. The revision derives from the commits Composer installed for Cosray and those packages, or from a hash of the version for a package without one. In debug mode and in a Git working copy, such as a symlinked path repository, the revision is instead a hash over the files themselves, so every edit gets new URLs. Responses for the current revision may be cached for a year (`immutable`); for any other they are revalidated through an ETag.
