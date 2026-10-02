@@ -119,6 +119,38 @@ final class AssetsIngestTest extends IntegrationTestCase
 		$this->assertStringContainsString('<rect', $stored);
 	}
 
+	public function testSanitizesSvgDetectedUnderAnotherExtension(): void
+	{
+		$ingest = new Ingest(
+			$this->config([
+				'path.public' => $this->dir,
+				'upload.mimetypes.file' => ['image/svg+xml' => ['svg', 'xml']],
+			]),
+			$this->db(),
+		);
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect/></svg>';
+		$result = $ingest->ingest($svg, 'drawing.xml', 'file');
+
+		$stored = (string) file_get_contents("{$this->dir}/assets/{$result->row['key']}");
+
+		$this->assertStringNotContainsString('<script', $stored);
+		$this->assertStringContainsString('<rect', $stored);
+	}
+
+	public function testRejectsSvgThatCannotBeSanitized(): void
+	{
+		$svg = '<!DOCTYPE svg [<!ENTITY x "y">]><svg xmlns="http://www.w3.org/2000/svg"><text>&x;</text></svg>';
+
+		try {
+			$this->ingest()->ingest($svg, 'entities.svg', 'image');
+			$this->fail('Expected an IngestError');
+		} catch (IngestError $e) {
+			$this->assertSame('SVG markup rejected by the sanitizer', $e->getMessage());
+		}
+
+		$this->assertEmpty(glob("{$this->dir}/assets/*/*"));
+	}
+
 	public function testRejectsDisallowedMimeType(): void
 	{
 		$this->throws(IngestError::class, 'File type not allowed');

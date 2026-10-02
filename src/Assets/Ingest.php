@@ -11,7 +11,7 @@ use Cosray\Exception\IngestError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Storage\Storage;
 use Cosray\Uid;
-use enshrined\svgSanitize\Sanitizer;
+use Cosray\Util\Svg;
 use finfo;
 use Throwable;
 
@@ -41,10 +41,10 @@ final class Ingest
 		$filename = self::safeFilename($filename);
 		$mime = $this->validate($contents, $filename, $mediatype);
 
-		// SVGs are served inline, so a stored `<script>`/`onload` would run
-		// in the site origin. Clean the markup before it lands in the pool;
-		// hash and byte count are taken from the sanitized bytes.
-		if (strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg') {
+		// SVGs are served from the site origin, so a stored `<script>` or
+		// `onload` would run there. Clean the markup before it lands in the
+		// pool; hash and byte count are taken from the sanitized bytes.
+		if ($mime === 'image/svg+xml' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg') {
 			$clean = self::sanitizeSvgMarkup($contents);
 
 			if ($clean === null) {
@@ -167,13 +167,12 @@ final class Ingest
 	}
 
 	/**
-	 * Strip scripts, event handlers and remote references from SVG markup.
-	 * Returns null when the sanitizer rejects the markup as malformed.
+	 * Rebuild SVG markup from an allowlist: no scripts, event handlers or
+	 * remote references. Returns null when the markup is rejected: empty,
+	 * malformed, not an SVG document, or declaring its own DTD entities.
 	 */
 	public static function sanitizeSvgMarkup(string $svg): ?string
 	{
-		$clean = new Sanitizer()->sanitize($svg);
-
-		return $clean === false ? null : $clean;
+		return Svg::sanitize($svg);
 	}
 }
