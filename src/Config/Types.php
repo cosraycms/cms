@@ -59,6 +59,7 @@ namespace Cosray\Config;
  *     'db.placeholders': DbPlaceholders,
  *     'db.print': bool,
  *     'db.options': array<string, mixed>,
+ *     'db.reuse': bool,
  *
  *     'session.enabled': bool,
  *     'session.options': SessionOptions,

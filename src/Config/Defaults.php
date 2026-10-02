@@ -120,6 +120,9 @@ final class Defaults
 			],
 			'db.print' => false,
 			'db.options' => [],
+			// Keep the connection between requests of a worker, rolled back to
+			// a clean state; false disconnects after every request.
+			'db.reuse' => true,
 		];
 	}
 

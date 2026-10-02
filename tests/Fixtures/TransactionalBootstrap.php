@@ -32,4 +32,7 @@ final class TransactionalBootstrap extends Bootstrap
 	{
 		return $this->sharedDatabase ?? new SharedDatabase($connection);
 	}
+
+	/** In-process requests join the test's transaction, which the test ends. */
+	protected function releaseDatabase(): void {}
 }

@@ -48,6 +48,10 @@ final class Database
 		get => $this->config->get('db.print');
 	}
 
+	public bool $reuse {
+		get => $this->config->get('db.reuse');
+	}
+
 	/** @var array<string, mixed> */
 	public array $options {
 		get => $this->optionsCache ??= $this->config->get('db.options');

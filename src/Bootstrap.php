@@ -150,6 +150,7 @@ class Bootstrap implements CorePlugin
 
 		$this->collect();
 		$this->database();
+		$app->teardown($this->releaseDatabase(...));
 
 		$this->container->add($this->container::class, $this->container);
 		$this->container->add(self::class, $this);
@@ -495,6 +496,22 @@ class Bootstrap implements CorePlugin
 	protected function createDatabase(Connection $connection): Database
 	{
 		return new Database($connection);
+	}
+
+	/**
+	 * Runs after every request. A worker keeps the connection for its next
+	 * request, with a transaction the request left open rolled back; with
+	 * `db.reuse` off it disconnects instead.
+	 */
+	protected function releaseDatabase(): void
+	{
+		if ($this->config->db->reuse) {
+			$this->db->reset();
+
+			return;
+		}
+
+		$this->db->disconnect();
 	}
 
 	/**
