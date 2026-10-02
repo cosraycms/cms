@@ -406,6 +406,57 @@ final class IconsTest extends TestCase
 		}
 	}
 
+	public function testMissingIconIsAskedForAgainAfterTheRequest(): void
+	{
+		$publicDir = $this->publicDir();
+		$calls = 0;
+		$available = false;
+
+		try {
+			$icons = $this->icons($publicDir, static function () use (&$calls, &$available): string {
+				$calls++;
+
+				return $available ? '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1"/></svg>' : '';
+			});
+
+			$this->assertSame('', $icons->icon('bi:check'));
+			$this->assertSame('', $icons->icon('bi:check'));
+			$this->assertSame(1, $calls);
+
+			$icons->reset();
+			$available = true;
+
+			$this->assertStringStartsWith('<svg', $icons->icon('bi:check'));
+			$this->assertSame(2, $calls);
+		} finally {
+			$this->removeDir($publicDir);
+		}
+	}
+
+	public function testFoundIconsStayCachedAcrossRequests(): void
+	{
+		$publicDir = $this->publicDir();
+		$calls = 0;
+
+		try {
+			$icons = $this->icons($publicDir, static function () use (&$calls): string {
+				$calls++;
+
+				return '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1"/></svg>';
+			});
+
+			$icons->icon('bi:check');
+			$icons->reset();
+			// The Iconify disk cache would answer too; remove it to count lookups.
+			$this->removeDir($publicDir . '/cache');
+			$icons->icon('bi:check');
+
+			$this->assertSame(1, $calls);
+		} finally {
+			$this->removeDir($publicDir);
+		}
+	}
+
 	private function icons(string $publicDir, callable $fetch, array $settings = []): Icons
 	{
 		$config = $this->config(array_merge([
