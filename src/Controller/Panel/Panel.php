@@ -316,7 +316,7 @@ abstract class Panel
 	{
 		$creator = new Creator($this->container);
 		$predefined = [Request::class => $this->request];
-		$cms = $creator->create(Cms::class, predefinedTypes: $predefined);
+		$cms = $creator->resolve(Cms::class, predefinedTypes: $predefined);
 		assert($cms instanceof Cms, 'The CMS must be available');
 		$collection = is_a($ref->class, Entries::class, true) || is_a($ref->class, Columns::class, true)
 			? $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms])
