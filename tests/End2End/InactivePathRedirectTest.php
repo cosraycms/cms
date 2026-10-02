@@ -87,5 +87,12 @@ final class InactivePathRedirectTest extends End2EndTestCase
 			['node' => $nodeId],
 		)->one();
 		$this->assertSame($updatedPath, $activePathRow['path'] ?? null);
+
+		$response = $this->makeRequest('GET', $initialPath);
+
+		$this->assertResponseStatus(301, $response);
+		$this->assertResponseHeaderEquals('Location', $updatedPath, $response);
+		// The app keeps serving: the redirect is a response, not an exit.
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/test/never-existed-' . uniqid()));
 	}
 }

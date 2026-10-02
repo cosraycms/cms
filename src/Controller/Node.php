@@ -62,9 +62,10 @@ class Node
 
 				return Response::create($this->factory)->file($path);
 			} catch (RuntimeException $e) {
-				$this->redirectIfExists($context, $path);
-
-				throw new HttpNotFound($request, previous: $e);
+				return (
+					$this->redirectToActivePath($context, $path)
+						?? throw new HttpNotFound($request, previous: $e)
+				);
 			}
 		}
 
@@ -141,7 +142,11 @@ class Node
 		)->body($content);
 	}
 
-	protected function redirectIfExists(Context $context, string $path): void
+	/**
+	 * A permanent redirect from a path the node no longer uses to its active
+	 * path in the current locale or the nearest fallback locale.
+	 */
+	protected function redirectToActivePath(Context $context, string $path): ?Response
 	{
 		$db = $context->db;
 		$path = $db->paths->byPath(['path' => $path])->first();
@@ -160,12 +165,13 @@ class Node
 				$path = $pathsByLocale[$locale->id] ?? null;
 
 				if ($path) {
-					header('Location: ' . $path, true, 301);
-					exit();
+					return Response::create($this->factory)->redirect($path, 301);
 				}
 
 				$locale = $locale->fallback();
 			}
 		}
+
+		return null;
 	}
 }
