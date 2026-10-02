@@ -6,6 +6,7 @@ namespace Cosray\Icons;
 
 use Closure;
 use Cosray\Config;
+use Cosray\Util\Svg;
 
 final class Iconify implements Provider
 {
@@ -60,24 +61,32 @@ final class Iconify implements Provider
 		return ['prefix' => $prefix, 'name' => $name];
 	}
 
-	/** @param array<array-key, mixed> $args */
+	/**
+	 * Remote markup is inlined into pages, so it is sanitized like an
+	 * uploaded SVG. Cached files are sanitized again when read: they live
+	 * in the public directory and may predate sanitizing.
+	 *
+	 * @param array<array-key, mixed> $args
+	 */
 	private function loadSvg(string $id, string $prefix, string $name, array $args): ?string
 	{
 		$file = $this->cacheFile($id, $args);
 
 		if ($file !== null && is_file($file)) {
 			$cached = file_get_contents($file);
+			$svg = is_string($cached) ? Svg::sanitize($cached) : null;
 
-			if (is_string($cached) && $this->isSvg($cached)) {
-				return $cached;
+			if ($svg !== null) {
+				return $svg;
 			}
 		}
 
 		$url = $this->iconUrl($prefix, $name, $args);
 		$iconify = $this->config->icons->iconify;
-		$svg = ($this->fetch)($url, $iconify->timeout, $iconify->userAgent);
+		$fetched = ($this->fetch)($url, $iconify->timeout, $iconify->userAgent);
+		$svg = is_string($fetched) ? Svg::sanitize($fetched) : null;
 
-		if (!is_string($svg) || !$this->isSvg($svg)) {
+		if ($svg === null) {
 			return null;
 		}
 
@@ -237,10 +246,5 @@ final class Iconify implements Provider
 				unlink($temp);
 			}
 		}
-	}
-
-	private function isSvg(string $svg): bool
-	{
-		return str_starts_with(ltrim($svg), '<svg');
 	}
 }

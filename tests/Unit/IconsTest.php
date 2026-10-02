@@ -30,16 +30,19 @@ final class IconsTest extends TestCase
 					$this->assertSame(5, $timeout);
 					$this->assertSame('cosray/cms', $userAgent);
 
-					return '<svg viewBox="0 0 16 16"></svg>';
+					return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 0h16"/></svg>';
 				},
 			);
 			$svg = $icons->icon('bi:check');
 			$cacheFile = $publicDir . '/cache/icons/' . hash('xxh3', 'bi:check') . '.svg';
 
 			$this->assertSame(1, $calls);
-			$this->assertSame('<svg viewBox="0 0 16 16"></svg>', $svg);
+			$this->assertSame(
+				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M0 0h16"/></svg>',
+				$svg,
+			);
 			$this->assertFileExists($cacheFile);
-			$this->assertSame('<svg viewBox="0 0 16 16"></svg>', file_get_contents($cacheFile));
+			$this->assertSame($svg, file_get_contents($cacheFile));
 		} finally {
 			$this->removeDir($publicDir);
 		}
@@ -54,7 +57,7 @@ final class IconsTest extends TestCase
 			$cacheDir = $publicDir . '/cache/icons';
 			mkdir($cacheDir, 0o755, true);
 			$cacheFile = $cacheDir . '/' . hash('xxh3', 'bi:check') . '.svg';
-			file_put_contents($cacheFile, '<svg data-cache="1"></svg>');
+			file_put_contents($cacheFile, '<svg xmlns="http://www.w3.org/2000/svg" id="cached"/>');
 
 			$icons = $this->icons(
 				$publicDir,
@@ -67,7 +70,7 @@ final class IconsTest extends TestCase
 			$svg = $icons->icon('bi:check');
 
 			$this->assertSame(0, $calls);
-			$this->assertSame('<svg data-cache="1"></svg>', $svg);
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="cached"/>', $svg);
 		} finally {
 			$this->removeDir($publicDir);
 		}
@@ -191,14 +194,14 @@ final class IconsTest extends TestCase
 					$this->assertSame(5, $timeout);
 					$this->assertSame('cosray/cms', $userAgent);
 
-					return '<svg data-source="remote"></svg>';
+					return '<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>';
 				},
 				['icons.local.paths' => [$iconsPath]],
 			);
 			$svg = $icons->icon('bi:check');
 
 			$this->assertSame(1, $calls);
-			$this->assertStringContainsString('data-source="remote"', $svg);
+			$this->assertStringContainsString('id="remote"', $svg);
 		} finally {
 			$this->removeDir($publicDir);
 		}
@@ -221,7 +224,7 @@ final class IconsTest extends TestCase
 					$this->assertSame(5, $timeout);
 					$this->assertSame('cosray/cms', $userAgent);
 
-					return '<svg data-source="remote"></svg>';
+					return '<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>';
 				},
 			);
 			$svg = $icons->icon('bi:check', [
@@ -231,7 +234,7 @@ final class IconsTest extends TestCase
 			]);
 
 			$this->assertSame(1, $calls);
-			$this->assertSame('<svg data-source="remote"></svg>', $svg);
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>', $svg);
 		} finally {
 			$this->removeDir($publicDir);
 		}
@@ -248,15 +251,15 @@ final class IconsTest extends TestCase
 				static function (string $url) use (&$urls): string {
 					$urls[] = $url;
 
-					return '<svg data-call="' . count($urls) . '"></svg>';
+					return '<svg xmlns="http://www.w3.org/2000/svg" id="call-' . count($urls) . '"/>';
 				},
 			);
 			$red = $icons->icon('bi:check', ['color' => 'red']);
 			$blue = $icons->icon('bi:check', ['color' => 'blue']);
 			$redAgain = $icons->icon('bi:check', ['color' => 'red']);
 
-			$this->assertSame('<svg data-call="1"></svg>', $red);
-			$this->assertSame('<svg data-call="2"></svg>', $blue);
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="call-1"/>', $red);
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="call-2"/>', $blue);
 			$this->assertSame($red, $redAgain);
 			$this->assertSame(
 				[
@@ -283,6 +286,68 @@ final class IconsTest extends TestCase
 
 			$this->assertSame('', $icons->icon('bi:check'));
 			$this->assertFileDoesNotExist($cacheFile);
+		} finally {
+			$this->removeDir($publicDir);
+		}
+	}
+
+	public function testIconifyMarkupIsSanitized(): void
+	{
+		$publicDir = $this->publicDir();
+
+		try {
+			$icons = $this->icons(
+				$publicDir,
+				static fn(): string => '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script><path d="M0 0"/></svg>',
+			);
+			$svg = $icons->icon('bi:check');
+			$cacheFile = $publicDir . '/cache/icons/' . hash('xxh3', 'bi:check') . '.svg';
+
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>', $svg);
+			$this->assertSame($svg, file_get_contents($cacheFile));
+		} finally {
+			$this->removeDir($publicDir);
+		}
+	}
+
+	public function testCachedMarkupIsSanitizedWhenRead(): void
+	{
+		$publicDir = $this->publicDir();
+
+		try {
+			$cacheDir = $publicDir . '/cache/icons';
+			mkdir($cacheDir, 0o755, true);
+			file_put_contents(
+				$cacheDir . '/' . hash('xxh3', 'bi:check') . '.svg',
+				'<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><path d="M0 0"/></svg>',
+			);
+			$icons = $this->icons($publicDir, static fn(): ?string => null);
+
+			$this->assertSame(
+				'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
+				$icons->icon('bi:check'),
+			);
+		} finally {
+			$this->removeDir($publicDir);
+		}
+	}
+
+	public function testRejectedCacheEntryIsFetchedAgain(): void
+	{
+		$publicDir = $this->publicDir();
+
+		try {
+			$cacheDir = $publicDir . '/cache/icons';
+			mkdir($cacheDir, 0o755, true);
+			$cacheFile = $cacheDir . '/' . hash('xxh3', 'bi:check') . '.svg';
+			file_put_contents($cacheFile, 'not-svg');
+			$icons = $this->icons(
+				$publicDir,
+				static fn(): string => '<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>',
+			);
+
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>', $icons->icon('bi:check'));
+			$this->assertSame('<svg xmlns="http://www.w3.org/2000/svg" id="remote"/>', file_get_contents($cacheFile));
 		} finally {
 			$this->removeDir($publicDir);
 		}
@@ -328,7 +393,7 @@ final class IconsTest extends TestCase
 		try {
 			$icons = $this->icons(
 				$publicDir,
-				static fn(): string => '<svg></svg>',
+				static fn(): string => '<svg xmlns="http://www.w3.org/2000/svg"/>',
 			);
 			$icons->icon('bi:check');
 
