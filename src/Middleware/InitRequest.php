@@ -14,10 +14,7 @@ class InitRequest implements Middleware
 	public function process(Request $request, Handler $handler): Response
 	{
 		// See if it's a JSON request
-		if (
-			isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-			&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
-		) {
+		if (strtolower($request->getHeaderLine('X-Requested-With')) === 'xmlhttprequest') {
 			$request = $request->withAttribute('isXhr', true);
 		} else {
 			if ($request->hasHeader('Accept') && $request->getHeaderLine('Accept') === 'application/json') {

@@ -208,7 +208,7 @@ class Locales implements Iterator, Countable, CorePlugin
 		}
 
 		// From the locales the browser says the user accepts
-		// $locale = $this->fromBrowser();
+		// $locale = $this->fromBrowser($request);
 		// if ($locale && $this->exists($locale)) {
 		//    return $locales[$locale];
 		// }
@@ -221,12 +221,14 @@ class Locales implements Iterator, Countable, CorePlugin
 		return array_key_exists($id, $this->locales);
 	}
 
-	protected function fromBrowser(): string|false
+	protected function fromBrowser(Request $request): string|false
 	{
-		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+		$accepted = $request->getHeaderLine('Accept-Language');
+
+		if ($accepted !== '') {
 			preg_match_all(
 				'/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i',
-				$_SERVER['HTTP_ACCEPT_LANGUAGE'],
+				$accepted,
 				$matches,
 			);
 
