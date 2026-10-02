@@ -16,6 +16,7 @@ use Cosray\Collection\Listing;
 use Cosray\Collection\Ref;
 use Cosray\Collection\Schemas;
 use Cosray\Config;
+use Cosray\Context;
 use Cosray\Contract\Columns;
 use Cosray\Contract\Entries;
 use Cosray\Exception\RuntimeException;
@@ -310,16 +311,17 @@ abstract class Panel
 	/**
 	 * The panel listing of a registered collection. A collection class is
 	 * only instantiated when it implements Entries or Columns; it is then
-	 * autowired per request and shares the listing's CMS instance.
+	 * created for the request and shares the listing's CMS instance.
 	 */
 	protected function listing(Ref $ref): Listing
 	{
 		$creator = new Creator($this->container);
-		$predefined = [Request::class => $this->request];
-		$cms = $creator->resolve(Cms::class, predefinedTypes: $predefined);
+		$context = $creator->resolve(Context::class, predefinedTypes: [Request::class => $this->request]);
+		assert($context instanceof Context, 'The request context must be available');
+		$cms = $creator->resolve(Cms::class, predefinedTypes: [Context::class => $context]);
 		assert($cms instanceof Cms, 'The CMS must be available');
 		$collection = is_a($ref->class, Entries::class, true) || is_a($ref->class, Columns::class, true)
-			? $creator->create($ref->class, predefinedTypes: $predefined + [Cms::class => $cms])
+			? $context->create($ref->class, [Cms::class => $cms])
 			: null;
 		$schemas = $this->container->get(Schemas::class);
 		assert($schemas instanceof Schemas, 'The collection schemas must be available');

@@ -141,7 +141,6 @@ class Bootstrap implements CorePlugin
 	{
 		$this->factory = $app->factory();
 		$this->container = $app->container();
-		$this->blocks->useContainer($this->container);
 
 		$this->loadPlugins();
 

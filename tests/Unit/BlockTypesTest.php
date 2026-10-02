@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celema\Container\Container;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\Block as Builtin;
@@ -70,17 +69,6 @@ final class BlockTypesTest extends RichtextOwnerTestCase
 		$this->assertSame('Acme: Hi', $type->render($this->block($owner, ServiceBlock::class, [
 			'text' => ['type' => Field\Text::class, 'value' => ['zxx' => 'Hi']],
 		]), $this->context($owner)));
-	}
-
-	public function testCreateRejectsContainerServices(): void
-	{
-		$container = new Container();
-		$container->add(QuoteBlock::class, new QuoteBlock());
-		$registry = Registry::withDefaults();
-		$registry->useContainer($container);
-
-		$this->throws(RuntimeException::class, 'must not be registered as a container service');
-		$registry->create(QuoteBlock::class, $this->owner());
 	}
 
 	public function testCreateRejectsOtherClasses(): void

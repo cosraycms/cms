@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Controller\Panel;
 
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Quma\Database;
-use Celema\Wire\Creator;
 use Cosray\Bootstrap;
 use Cosray\Context;
 use Cosray\Contract\DashboardCard;
@@ -46,19 +44,13 @@ final class Index extends Panel
 	/** @return list<array{label: string, value: string, note: ?string, url: ?string}> */
 	private function cards(Context $context, Dashboard $dashboard): array
 	{
-		$creator = new Creator($this->container);
 		$cards = [];
 		$formatter = new NumberFormatter($this->localeId(), NumberFormatter::DECIMAL);
 		$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, 0);
 		$formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 		foreach ($dashboard->cards() as $definition) {
-			$provider = is_string($definition)
-				? $creator->create($definition, predefinedTypes: [
-					Context::class => $context,
-					Request::class => $this->request,
-				])
-				: $definition;
+			$provider = is_string($definition) ? $context->create($definition) : $definition;
 			assert($provider instanceof DashboardCard, 'The dashboard registry must contain card providers');
 			$card = $provider->card();
 

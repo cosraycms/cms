@@ -57,4 +57,9 @@ class FieldOwner implements Owner
 	{
 		return $this->context->paths();
 	}
+
+	public function create(string $class, array $types = []): object
+	{
+		return $this->context->create($class, $types);
+	}
 }

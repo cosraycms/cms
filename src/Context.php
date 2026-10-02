@@ -10,6 +10,7 @@ use Celema\Core\Request;
 use Celema\Quma\Database;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
+use Celema\Wire\Creator;
 use Closure;
 
 final class Context
@@ -43,6 +44,38 @@ final class Context
 		$context->runtimeLocale = $locales->getDefault();
 
 		return $context;
+	}
+
+	/**
+	 * Builds a new object for this request. Its constructor can ask for
+	 * this Context, the Request, Config, Database, the core Factory and the
+	 * request's container, plus the given types; other arguments are
+	 * autowired through the request's container. Nodes, embedded objects,
+	 * collections, block types and dashboard cards are built this way.
+	 *
+	 * @template T of object
+	 * @param class-string<T> $class
+	 * @param array<string, object> $types
+	 * @return T
+	 */
+	public function create(string $class, array $types = []): object
+	{
+		$base = [
+			self::class => $this,
+			Config::class => $this->config,
+			Database::class => $this->db,
+			Factory::class => $this->factory,
+			Container::class => $this->container,
+		];
+
+		if ($this->request !== null) {
+			$base[Request::class] = $this->request;
+		}
+
+		$instance = new Creator($this->container)->create($class, predefinedTypes: $types + $base);
+		assert($instance instanceof $class, 'The creator returns the requested class');
+
+		return $instance;
 	}
 
 	public function assets(): Assets\Repository

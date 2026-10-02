@@ -96,6 +96,7 @@ final class PanelNavigationTest extends TestCase
 		$db = $this->db();
 		$context = new Context($db, $request, $config, $container, $this->factory());
 		$cms = new Cms($context, new Services(Registry::withDefaults(), $types));
+		$container->add(Context::class, $context);
 		$container->add(Cms::class, $cms);
 		Verba::activate(new Translator('de', $this->locales->catalogs()));
 

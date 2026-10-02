@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celema\Core\Request;
+use Celema\Wire\Creator;
 use Cosray\Assets\Repository as AssetRepository;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
@@ -110,6 +111,14 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			public function paths(): UrlPaths
 			{
 				throw new RuntimeException('Not available in this test');
+			}
+
+			public function create(string $class, array $types = []): object
+			{
+				$instance = new Creator()->create($class, predefinedTypes: $types + [Config::class => $this->config]);
+				assert($instance instanceof $class, 'The creator returns the requested class');
+
+				return $instance;
 			}
 		};
 	}

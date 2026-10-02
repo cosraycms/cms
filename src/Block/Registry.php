@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Block;
 
-use Celema\Wire\Creator;
 use Closure;
-use Cosray\Config;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Owner;
-use Psr\Container\ContainerInterface as Container;
 
 /**
  * The default offer list of block types — what a Blocks field without
@@ -21,8 +18,6 @@ final class Registry
 {
 	/** @var list<class-string<Block>> */
 	private array $types = [];
-
-	private ?Container $container = null;
 
 	/** @param class-string<Block> $class */
 	public function register(string $class): void
@@ -46,16 +41,11 @@ final class Registry
 		return $this->types;
 	}
 
-	/** Block type constructors are autowired from this container. */
-	public function useContainer(Container $container): void
-	{
-		$this->container = $container;
-	}
-
 	/**
-	 * A fresh instance with autowired constructor arguments, like an
-	 * embedded class: block types are node-local helpers, never container
-	 * services, and never receive a node.
+	 * A fresh instance built for the owner's request, like an embedded
+	 * class: block types are node-local helpers, never container services,
+	 * and never receive a node. The constructor can ask for the Owner and
+	 * the types Context::create() provides.
 	 *
 	 * @param class-string<Block> $class
 	 */
@@ -63,17 +53,7 @@ final class Registry
 	{
 		self::assertBlock($class);
 
-		if ($this->container?->has($class)) {
-			throw new RuntimeException("Block type '{$class}' must not be registered as a container service.");
-		}
-
-		$instance = new Creator($this->container)->create($class, predefinedTypes: [
-			Owner::class => $owner,
-			Config::class => $owner->config(),
-		]);
-		assert($instance instanceof Block, 'The creator returns the requested class');
-
-		return $instance;
+		return $owner->create($class, [Owner::class => $owner]);
 	}
 
 	/**

@@ -5,12 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Node;
 
 use Celema\Container\Container;
-use Celema\Core\Factory\Factory as CoreFactory;
-use Celema\Core\Request;
-use Celema\Quma\Database;
 use Celema\Wire\Creator;
 use Cosray\Cms;
-use Cosray\Config;
 use Cosray\Context;
 use Cosray\Contract\Init;
 use Cosray\Exception\NoSuchField;
@@ -69,7 +65,6 @@ class Factory
 			cms: $cms,
 			context: $context,
 		);
-		$creator = new Creator($this->container);
 		$type = $this->types->typeOf($class);
 		$types = $this->types;
 
@@ -84,13 +79,8 @@ class Factory
 			},
 		);
 
-		$predefinedTypes = [
-			Context::class => $context,
+		$nodeTypes = [
 			Cms::class => $cms,
-			Config::class => $context->config,
-			Database::class => $context->db,
-			Container::class => $context->container,
-			CoreFactory::class => $context->factory,
 			self::class => $this,
 			Type::class => $type,
 			View::class => $view,
@@ -100,11 +90,7 @@ class Factory
 			Services::class => $this->services,
 		];
 
-		if ($context->request !== null) {
-			$predefinedTypes[Request::class] = $context->request;
-		}
-
-		$node = $creator->create($class, predefinedTypes: $predefinedTypes);
+		$node = $context->create($class, $nodeTypes);
 
 		$uid = $data['uid'] ?? $this->uid->generate();
 		$data['uid'] = $uid;
@@ -113,10 +99,10 @@ class Factory
 			$node,
 			$data['content'] ?? [],
 			$owner,
-			function (EmbeddedDefinition $definition) use ($class, $creator, $predefinedTypes): object {
+			function (EmbeddedDefinition $definition) use ($class, $context, $nodeTypes): object {
 				$this->assertFreshEmbedded($definition, $class);
 
-				return $creator->create($definition->type, predefinedTypes: $predefinedTypes);
+				return $context->create($definition->type, $nodeTypes);
 			},
 		);
 

@@ -34,7 +34,7 @@ final class Quote implements Block
 
 Type properties are schema declarations, not hydrated fields. Read values from the `Value\Block` argument. Plain text values escape on string conversion; richtext and media values supply their own rendered output, while Iframe deliberately emits trusted embed markup. A type is responsible for escaping any raw values it adds to its own HTML. Returning an empty string omits that block's wrapper and grid cell.
 
-Types are created once per render call per type through the autowiring creator, not as shared container services. They do not receive a hydrated containing node; [RenderContext](../src/Block/RenderContext.php) supplies the owner, field name, grid columns, arguments, locale resolution, and asset lookup.
+Types are created once per render call per type for the request being rendered, not as shared container services: constructors can ask for the field [Owner](../src/Field/Owner.php) and everything [Context::create()](../src/Context.php) provides, such as the request, `Context` or `Config`, and other arguments are autowired. They do not receive a hydrated containing node; [RenderContext](../src/Block/RenderContext.php) supplies the owner, field name, grid columns, arguments, locale resolution, and asset lookup.
 
 ### Attributes and registration
 
