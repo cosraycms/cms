@@ -8,6 +8,18 @@ Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-u
 
 [Assets\Ingest](../src/Assets/Ingest.php) catalogs bytes and a filename without an HTTP request or session. It shares upload validation, SVG sanitization, and hash deduplication with the HTTP endpoint; imports can pass an actor and initial metadata. Rejections throw `Cosray\Exception\IngestError`. Removing a field reference does not delete the asset.
 
+### SVG uploads
+
+SVG files are rebuilt from an allowlist before they are stored; see [Util\Svg](../src/Util/Svg.php) for the lists. Scripts, event handlers, `foreignObject`, comments, and editor metadata are removed. Links may only point into the document, except web and mail links on `<a>` and embedded PNG, JPEG, GIF, or WebP images on `<image>`. CSS may only reference document fragments and embedded images or fonts. Empty or malformed files, documents without an `svg` root in the SVG namespace, and files that declare their own DTD entities are rejected; exporting such a file again from the editor usually fixes it.
+
+The web server serves originals directly, so configure a restrictive policy for SVG responses there as a second line of defense. For example, in a Caddyfile:
+
+```caddyfile
+@svg path *.svg
+header @svg Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:; sandbox"
+header @svg X-Content-Type-Options nosniff
+```
+
 ### Legacy richtext imports
 
 `Cosray\LegacyRichtext\Converter`, supplied by the transitional `cosray/legacy-richtext-converter` dependency, converts legacy HTML for one-shot imports. It requires Node.js but not installed panel assets or panel npm dependencies. It is not a request-time HTML conversion API.
