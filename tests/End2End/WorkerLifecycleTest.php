@@ -10,6 +10,7 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
+use Celema\Verba\Verba;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Context;
@@ -98,6 +99,16 @@ final class WorkerLifecycleTest extends End2EndTestCase
 		$this->assertCount(2, $scopes);
 		$this->assertNotSame($scopes[0], $scopes[1]);
 		$this->assertNotSame($this->app->container(), $scopes[0]);
+	}
+
+	public function testNoTranslatorStaysActiveAfterARequest(): void
+	{
+		$before = Verba::translator();
+
+		$this->assertResponseOk($this->makeRequest('GET', '/panel/login'));
+		$this->makeRequest('GET', '/never-existed-' . uniqid());
+
+		$this->assertSame($before, Verba::translator());
 	}
 
 	private function addStateProbe(App $app): void
