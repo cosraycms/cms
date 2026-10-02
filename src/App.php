@@ -91,6 +91,18 @@ class App implements RouteAdder
 		return $this->core->run($request);
 	}
 
+	/**
+	 * The front controller's entry point: handles requests until the worker
+	 * retires when started as a FrankenPHP worker, otherwise the current
+	 * request. See Celema\Core\App::serve() for the limits.
+	 */
+	public function serve(?int $maxRequests = null, ?int $maxMemory = null): Response|false
+	{
+		$this->boot();
+
+		return $this->core->serve($maxRequests, $maxMemory);
+	}
+
 	public function config(): Config
 	{
 		return $this->config;
