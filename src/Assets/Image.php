@@ -77,51 +77,67 @@ class Image
 		bool $enlarge,
 		?int $quality,
 	): void {
-		// Concurrent first requests must never see a half-written file.
-		$tmp = $this->cacheFile . '.tmp' . getmypid();
-
-		// Gumlet keeps only the first frame, so an animated GIF is
-		// materialized as a copy of the original instead.
-		if (Util::isAnimatedGif($this->file)) {
-			if (!copy($this->file, $tmp) || !rename($tmp, $this->cacheFile)) {
-				throw new RuntimeException('Assets error: could not copy animated gif');
-			}
-
-			return;
-		}
+		// Concurrent first requests must never see a half-written file, so
+		// each one writes its own temporary file and moves it into place.
+		// Threads of one worker process share a PID, hence the random name.
+		$tmp = $this->cacheFile . '.tmp-' . bin2hex(random_bytes(6));
 
 		try {
-			$image = match ($mode) {
-				ResizeMode::Width => $this->get()->resizeToWidth($size->firstDimension, $enlarge),
-				ResizeMode::Fit => $this->get()->resizeToBestFit(
-					$size->firstDimension,
-					$size->secondDimension,
-					$enlarge,
-				),
-				ResizeMode::Crop => $this->get()->crop(
-					$size->firstDimension,
-					$size->secondDimension ?? $size->firstDimension,
-					$enlarge,
-					$size->cropMode ?? ImageResize::CROPCENTER,
-				),
-				ResizeMode::Height => $this->get()->resizeToHeight($size->firstDimension, $enlarge),
-				ResizeMode::LongSide => $this->get()->resizeToLongSide($size->firstDimension, $enlarge),
-				ResizeMode::ShortSide => $this->get()->resizeToShortSide($size->firstDimension, $enlarge),
-				ResizeMode::Resize => $this->get()->resize(
-					$size->firstDimension,
-					$size->secondDimension,
-					$enlarge,
-				),
-			};
-
-			$image->save($tmp, quality: $quality);
+			$this->writeRendition($tmp, $size, $mode, $enlarge, $quality);
 
 			if (!rename($tmp, $this->cacheFile)) {
 				throw new RuntimeException('Assets error: could not move rendition into place');
 			}
 		} catch (ImageResizeException $e) {
 			throw new RuntimeException('Assets error: ' . $e->getMessage(), $e->getCode(), previous: $e);
+		} finally {
+			if (is_file($tmp)) {
+				unlink($tmp);
+			}
 		}
+	}
+
+	protected function writeRendition(
+		string $tmp,
+		Size $size,
+		ResizeMode $mode,
+		bool $enlarge,
+		?int $quality,
+	): void {
+		// Gumlet keeps only the first frame, so an animated GIF is
+		// materialized as a copy of the original instead.
+		if (Util::isAnimatedGif($this->file)) {
+			if (!copy($this->file, $tmp)) {
+				throw new RuntimeException('Assets error: could not copy animated gif');
+			}
+
+			return;
+		}
+
+		$image = match ($mode) {
+			ResizeMode::Width => $this->get()->resizeToWidth($size->firstDimension, $enlarge),
+			ResizeMode::Fit => $this->get()->resizeToBestFit(
+				$size->firstDimension,
+				$size->secondDimension,
+				$enlarge,
+			),
+			ResizeMode::Crop => $this->get()->crop(
+				$size->firstDimension,
+				$size->secondDimension ?? $size->firstDimension,
+				$enlarge,
+				$size->cropMode ?? ImageResize::CROPCENTER,
+			),
+			ResizeMode::Height => $this->get()->resizeToHeight($size->firstDimension, $enlarge),
+			ResizeMode::LongSide => $this->get()->resizeToLongSide($size->firstDimension, $enlarge),
+			ResizeMode::ShortSide => $this->get()->resizeToShortSide($size->firstDimension, $enlarge),
+			ResizeMode::Resize => $this->get()->resize(
+				$size->firstDimension,
+				$size->secondDimension,
+				$enlarge,
+			),
+		};
+
+		$image->save($tmp, quality: $quality);
 	}
 
 	protected function getCacheFilePath(string $name): string
@@ -138,10 +154,7 @@ class Image
 		if ($relativeDir !== '/') {
 			$cacheDir .= $relativeDir;
 
-			// create cache sub directory if it does not exist
-			if (!is_dir($cacheDir)) {
-				mkdir($cacheDir, 0o755, true);
-			}
+			Path::ensureDirectory($cacheDir);
 		}
 
 		return $cacheDir . '/' . $filenameBasename . '-' . $name . '.' . $filenameExtension;

@@ -83,6 +83,43 @@ final class AssetsImageTest extends TestCase
 		$this->assertSame([40, 40], array_slice((array) getimagesize($file), 0, 2));
 	}
 
+	public function testFailedRenditionLeavesNoTemporaryFile(): void
+	{
+		$assets = new Assets(new Config($this->root));
+		$dir = $this->root . '/public/cache/ab/abcdefghijklm';
+		// A directory where the rendition should go makes moving it fail.
+		mkdir($dir . '/pic-blocked.png', 0o755, true);
+
+		try {
+			$this->withStrictErrorHandler(static function () use ($assets): void {
+				$assets
+					->image('/ab/abcdefghijklm/pic.png')
+					->resize(new Size(60), ResizeMode::Width, false, null, 'blocked');
+			});
+			$this->fail('Expected the rendition to fail');
+		} catch (ErrorException $e) {
+			// rename() warns before it fails; the strict handler throws.
+			$this->assertStringContainsString('rename', $e->getMessage());
+		}
+
+		$this->assertSame(['pic-blocked.png'], array_values(array_diff((array) scandir($dir), ['.', '..'])));
+	}
+
+	public function testCacheDirectoryIsCreatedWithStrictErrorHandler(): void
+	{
+		$assets = new Assets(new Config($this->root));
+		$this->removeDir($this->root . '/public/cache');
+		mkdir($this->root . '/public/cache');
+
+		$this->withStrictErrorHandler(static function () use ($assets): void {
+			$assets
+				->image('/ab/abcdefghijklm/pic.png')
+				->resize(new Size(60), ResizeMode::Width, false, null, 'thumb');
+		});
+
+		$this->assertFileExists($this->root . '/public/cache/ab/abcdefghijklm/pic-thumb.png');
+	}
+
 	/** Mirrors the request-time error handler of `celema/core`. */
 	private function withStrictErrorHandler(callable $callback): void
 	{

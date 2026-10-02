@@ -6,6 +6,8 @@ namespace Cosray\Icons;
 
 use Closure;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
+use Cosray\Util\Path;
 use Cosray\Util\Svg;
 
 final class Iconify implements Provider
@@ -220,7 +222,9 @@ final class Iconify implements Provider
 			. DIRECTORY_SEPARATOR
 			. 'icons';
 
-		if (!is_dir($target) && !mkdir($target, 0o755, true) && !is_dir($target)) {
+		try {
+			Path::ensureDirectory($target);
+		} catch (RuntimeException) {
 			return null;
 		}
 

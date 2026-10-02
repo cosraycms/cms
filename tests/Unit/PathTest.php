@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
 use Cosray\Util\Path;
+use ErrorException;
 
 final class PathTest extends TestCase
 {
@@ -81,5 +82,43 @@ final class PathTest extends TestCase
 		$parent = dirname(__DIR__);
 		$child = 'Unit';
 		Path::inside($parent, $child, true);
+	}
+
+	public function testEnsureDirectoryCreatesMissingParents(): void
+	{
+		$root = sys_get_temp_dir() . '/cosray-path-' . bin2hex(random_bytes(6));
+		$dir = $root . '/a/b';
+
+		try {
+			Path::ensureDirectory($dir);
+			Path::ensureDirectory($dir);
+
+			$this->assertDirectoryExists($dir);
+		} finally {
+			rmdir($dir);
+			rmdir($root . '/a');
+			rmdir($root);
+		}
+	}
+
+	/**
+	 * mkdir() warns when it fails, as it does when a concurrent request
+	 * created the directory first. The warning must not reach the request's
+	 * error handler; only a directory that still does not exist fails.
+	 */
+	public function testEnsureDirectoryReportsFailureWithoutTheWarning(): void
+	{
+		$file = (string) tempnam(sys_get_temp_dir(), 'cosray-path');
+		set_error_handler(static fn(int $level, string $message): never => throw new ErrorException($message));
+
+		try {
+			Path::ensureDirectory($file);
+			$this->fail('Expected the directory to be rejected');
+		} catch (RuntimeException $e) {
+			$this->assertStringContainsString('Could not create directory', $e->getMessage());
+		} finally {
+			restore_error_handler();
+			unlink($file);
+		}
 	}
 }
