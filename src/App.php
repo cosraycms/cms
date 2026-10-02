@@ -202,14 +202,6 @@ class App implements RouteAdder
 		return $this;
 	}
 
-	/** @param Closure(Router $router): void $creator */
-	public function routes(Closure $creator, string $cacheFile = '', bool $shouldCache = true): self
-	{
-		$this->core->routes($creator, $cacheFile, $shouldCache);
-
-		return $this;
-	}
-
 	public function addRoute(Route $route): Route
 	{
 		return $this->core->addRoute($route);
