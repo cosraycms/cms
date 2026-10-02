@@ -70,28 +70,40 @@ final class SessionTest extends TestCase
 		$this->assertGreaterThan(0, $session->lastActivity());
 	}
 
-	public function testAuthTokenCookieUsesDefaultName(): void
+	public function testAuthTokenComesFromTheDefaultCookie(): void
 	{
-		$session = new Session();
-		$session->start();
-
-		$_COOKIE['cosray_auth'] = 'token-value';
+		$session = new Session(cookies: ['cosray_auth' => 'token-value']);
 
 		$this->assertSame('token-value', $session->getAuthToken());
 	}
 
-	public function testRememberedCookieRoundTrip(): void
+	public function testAuthTokenComesFromTheNamedCookie(): void
+	{
+		$session = new Session(['use_cookies' => 0], 'test-session', cookies: [
+			'cosray_auth' => 'other-value',
+			'test-session_auth' => 'token-value',
+		]);
+
+		$this->assertSame('token-value', $session->getAuthToken());
+	}
+
+	public function testRememberedTokenIsReadableInTheSameRequest(): void
 	{
 		$session = new Session(['use_cookies' => 0], 'test-session');
 
 		$session->remember(new Token('secret', 'token-value'), time() + 3600);
-
-		$this->assertSame('token-value', $_COOKIE['test-session_auth']);
 		$this->assertSame('token-value', $session->getAuthToken());
 
 		$session->forgetRemembered();
-
-		$this->assertArrayNotHasKey('test-session_auth', $_COOKIE);
 		$this->assertNull($session->getAuthToken());
+	}
+
+	public function testReadsWithoutAnActiveSessionFindNothing(): void
+	{
+		$session = new Session(['use_cookies' => 0], 'test-session');
+
+		$this->assertNull($session->authenticatedUserId());
+		$this->assertNull($session->lastActivity());
+		$this->assertTrue($session->holds($this->user('hash')));
 	}
 }

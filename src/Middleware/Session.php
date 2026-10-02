@@ -25,6 +25,7 @@ class Session implements Middleware
 			$config->options,
 			$this->config->app->name,
 			$config->handler,
+			$request->getCookieParams(),
 		);
 
 		$session->start();
@@ -49,6 +50,15 @@ class Session implements Middleware
 
 		$request = $request->withAttribute('session', $session);
 
-		return $handler->handle($request);
+		try {
+			return $handler->handle($request);
+		} finally {
+			// Writes the session and releases its lock before the response
+			// goes out. The next request a worker handles must not find this
+			// one's session still open. A logout may have destroyed it.
+			if ($session->active()) {
+				$session->close();
+			}
+		}
 	}
 }

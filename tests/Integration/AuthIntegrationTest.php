@@ -164,16 +164,14 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() + INTERVAL '1 day')",
 			['hash' => $hash, 'usr' => $userId],
 		)->run();
-		$_COOKIE['test_session_auth'] = $token;
-
 		$request = $this->psrRequest();
-		$session = new Session(['use_cookies' => 0], 'test_session');
+		$session = new Session(['use_cookies' => 0], 'test_session', cookies: ['test_session_auth' => $token]);
 		$auth = $this->createAuth($request, $session);
 
 		$user = $auth->authenticate('no-remember@example.com', 'password', false, true);
 
 		$this->assertInstanceOf(\Cosray\User::class, $user);
-		$this->assertArrayNotHasKey('test_session_auth', $_COOKIE);
+		$this->assertNull($session->getAuthToken());
 		$exists = $this->db()->execute(
 			'SELECT EXISTS(SELECT 1 FROM cms.login_sessions WHERE hash = :hash) as exists',
 			['hash' => $hash],
@@ -193,10 +191,8 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() + INTERVAL '1 day')",
 			['hash' => $hash, 'usr' => $userId],
 		)->run();
-		$_COOKIE['test_session_auth'] = $token;
-
 		$request = $this->psrRequest();
-		$session = new Session(['use_cookies' => 0], 'test_session');
+		$session = new Session(['use_cookies' => 0], 'test_session', cookies: ['test_session_auth' => $token]);
 		$auth = $this->createAuth($request, $session, [
 			'auth.remember_lifetime' => 7200,
 		]);
@@ -206,7 +202,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$this->assertInstanceOf(\Cosray\User::class, $user);
 		$this->assertSame($userId, $user->id);
 		$this->assertSame($userId, $session->authenticatedUserId());
-		$newToken = $_COOKIE['test_session_auth'] ?? null;
+		$newToken = $session->getAuthToken();
 		$this->assertIsString($newToken);
 		$this->assertNotSame($token, $newToken);
 		$newHash = new Token(self::SECRET, $newToken)->hash();
@@ -229,16 +225,14 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			"INSERT INTO cms.login_sessions (hash, usr, expires) VALUES (:hash, :usr, now() - INTERVAL '1 day')",
 			['hash' => $hash, 'usr' => $userId],
 		)->run();
-		$_COOKIE['test_session_auth'] = $token;
-
 		$request = $this->psrRequest();
-		$session = new Session(['use_cookies' => 0], 'test_session');
+		$session = new Session(['use_cookies' => 0], 'test_session', cookies: ['test_session_auth' => $token]);
 		$auth = $this->createAuth($request, $session);
 
 		$user = $auth->user();
 
 		$this->assertNull($user);
-		$this->assertArrayNotHasKey('test_session_auth', $_COOKIE);
+		$this->assertNull($session->getAuthToken());
 		$exists = $this->db()->execute(
 			'SELECT EXISTS(SELECT 1 FROM cms.login_sessions WHERE hash = :hash) as exists',
 			['hash' => $hash],
@@ -451,6 +445,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 		$request = $this->psrRequest();
 		$session = new Session(['cache_expire' => 3600], 'test_session');
+		$session->start();
 		$session->setUser(new Users($this->db())->byId($userId));
 
 		$auth = $this->createAuth($request, $session);
@@ -466,6 +461,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$userId = $this->createTestUser(['uid' => 'stale-session-user']);
 		$users = new Users($this->db());
 		$session = new Session(['cache_expire' => 3600], 'test_session');
+		$session->start();
 		$session->setUser($users->byId($userId));
 
 		$users->setPassword($users->byId($userId), 'a different long password', Actor::system());

@@ -7,24 +7,34 @@ namespace Cosray;
 use Celema\Session\Session as BaseSession;
 use SessionHandlerInterface;
 
+/**
+ * The CMS session: the signed-in user and the remember-me cookie. Session
+ * data goes through celema/session; the remember-me cookie is read from
+ * the request's cookies, not from `$_COOKIE`.
+ */
 class Session extends BaseSession
 {
 	protected string $authCookie;
+	protected ?string $authToken;
 
+	/** @param array<array-key, mixed> $cookies The request's cookies. */
 	public function __construct(
 		array $options = [],
 		string $name = '',
 		?SessionHandlerInterface $handler = null,
+		array $cookies = [],
 	) {
 		parent::__construct($options, $name, $handler);
 
 		$this->authCookie = $name ? $name . '_auth' : 'cosray_auth';
+		$token = $cookies[$this->authCookie] ?? null;
+		$this->authToken = is_string($token) && $token !== '' ? $token : null;
 	}
 
 	public function setUser(User $user): void
 	{
-		$_SESSION['user_id'] = $user->id;
-		$_SESSION['user_stamp'] = self::stamp($user);
+		$this->set('user_id', $user->id);
+		$this->set('user_stamp', self::stamp($user));
 	}
 
 	/**
@@ -33,20 +43,23 @@ class Session extends BaseSession
 	 */
 	public function holds(User $user): bool
 	{
-		$stamp = $_SESSION['user_stamp'] ?? null;
+		$stamp = $this->read('user_stamp');
 
 		return !is_string($stamp) || hash_equals($stamp, self::stamp($user));
 	}
 
 	public function authenticatedUserId(): ?int
 	{
-		return $_SESSION['user_id'] ?? null;
+		$id = $this->read('user_id');
+
+		return is_int($id) ? $id : null;
 	}
 
 	public function remember(#[\SensitiveParameter] Token $token, int $expires): void
 	{
 		$value = $token->get();
-		$_COOKIE[$this->authCookie] = $value;
+		// Later reads in the same request see the new token.
+		$this->authToken = $value;
 
 		setcookie(
 			$this->authCookie,
@@ -57,7 +70,7 @@ class Session extends BaseSession
 
 	public function forgetRemembered(): void
 	{
-		unset($_COOKIE[$this->authCookie]);
+		$this->authToken = null;
 
 		setcookie(
 			$this->authCookie,
@@ -68,17 +81,30 @@ class Session extends BaseSession
 
 	public function getAuthToken(): ?string
 	{
-		return $_COOKIE[$this->authCookie] ?? null;
+		return $this->authToken;
 	}
 
 	public function signalActivity(): void
 	{
-		$_SESSION['last_activity'] = time();
+		$this->set('last_activity', time());
 	}
 
 	public function lastActivity(): ?int
 	{
-		return $_SESSION['last_activity'] ?? null;
+		$time = $this->read('last_activity');
+
+		return is_int($time) ? $time : null;
+	}
+
+	/**
+	 * A value of the current session, or null when the session is not
+	 * active, for example after it was destroyed by a logout.
+	 *
+	 * @param non-empty-string $key
+	 */
+	private function read(string $key): mixed
+	{
+		return $this->active() ? $this->get($key, null) : null;
 	}
 
 	private static function stamp(User $user): string

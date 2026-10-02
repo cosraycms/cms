@@ -54,6 +54,13 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function tearDown(): void
 	{
 		try {
+			// The session middleware closes the session after each request,
+			// and the CLI keeps its id for the next session_start(). Reopen it
+			// so it can be destroyed and the next test starts without it.
+			if (session_status() === PHP_SESSION_NONE && session_id() !== '') {
+				session_start();
+			}
+
 			if (session_status() === PHP_SESSION_ACTIVE) {
 				$_SESSION = [];
 				session_unset();
