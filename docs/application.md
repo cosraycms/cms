@@ -53,7 +53,13 @@ $app->renderer('view', Renderer::class)->args(
 );
 ```
 
-Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The error handler reports server errors and PHP diagnostics to the PSR-3 logger passed to `$app->logger()`; without one, records from `notice` up go to PHP's error log. Services and controllers receive that logger by declaring a `Psr\Log\LoggerInterface` constructor parameter. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
+Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
+
+## Logging
+
+Pass a PSR-3 logger to `$app->logger()` before the app handles its first request. Without one, records from `notice` up go to PHP's error log. Services and controllers receive the logger by declaring a `Psr\Log\LoggerInterface` constructor parameter.
+
+Besides server errors and PHP diagnostics, Cosray logs logins (failed ones as `warning`, naming the account only when it exists), panel logins refused for missing permission, logouts, the creation and deletion of users and changes to their roles, activation and password (`notice`), and uploads the server could not store (`error`). Client addresses are `REMOTE_ADDR`; behind a reverse proxy they are the proxy's.
 
 ## Serving requests
 
