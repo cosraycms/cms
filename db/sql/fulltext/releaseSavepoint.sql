@@ -1,1 +1,0 @@
-RELEASE SAVEPOINT cosray_fulltext_rebuild;

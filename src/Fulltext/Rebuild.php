@@ -10,6 +10,7 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Locales;
+use Cosray\Util\Transaction;
 use Throwable;
 
 final class Rebuild
@@ -45,29 +46,12 @@ final class Rebuild
 			foreach ($keys as $key) {
 				$after = (int) $key['node'];
 				$report['processed']++;
-				$ownsTransaction = !$this->db->getConn()->inTransaction();
-				if ($ownsTransaction) {
-					$this->db->begin();
-				} else {
-					$this->db->fulltext->savepoint()->run();
-				}
 
 				try {
-					$result = $this->node($after, $classes);
-					if ($ownsTransaction) {
-						$this->db->commit();
-					} else {
-						$this->db->fulltext->releaseSavepoint()->run();
-					}
+					$result = Transaction::run($this->db, fn(): array => $this->node($after, $classes));
 					$report[$result['indexed'] > 0 ? 'indexed' : 'empty']++;
 					$report['missingTitles'] += $result['missingTitles'];
 				} catch (Throwable $e) {
-					if ($ownsTransaction) {
-						$this->db->rollback();
-					} else {
-						$this->db->fulltext->rollbackSavepoint()->run();
-						$this->db->fulltext->releaseSavepoint()->run();
-					}
 					$report['failed']++;
 					if ($failure !== null) {
 						$failure($key['uid'], $e);

@@ -12,6 +12,7 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Title\Resolver as TitleResolver;
+use Cosray\Util\Transaction;
 use Throwable;
 
 /**
@@ -57,53 +58,13 @@ final class Duplicator
 	 */
 	public function duplicate(Wrapper $node, Actor $actor, bool $withChildren = false): array
 	{
-		$db = $this->context->db;
-		$ownsTransaction = !$db->getConn()->inTransaction();
-		$created = [];
-
 		try {
-			if ($ownsTransaction) {
-				$db->begin();
-			}
-
-			$parent = $node->meta->get('parent');
-			$copied = [$node->meta->uid];
-			// Only the subtree root gets the copy marker: it is the entry
-			// the user looks for in the listing afterwards.
-			$queue = [[$node, is_string($parent) && trim($parent) !== '' ? $parent : null, true]];
-
-			while ($queue !== []) {
-				[$current, $parentUid, $mark] = array_shift($queue);
-				$copyUid = $this->copy($current, $parentUid, $actor, $mark);
-				$created[] = $copyUid;
-
-				if (!$withChildren) {
-					break;
-				}
-
-				foreach ($this->childUids($current->meta->uid) as $childUid) {
-					// A parent cycle would queue forever; unseen sources only.
-					if (in_array($childUid, $copied, true)) {
-						continue;
-					}
-
-					$child = $this->cms->node->byUid($childUid, published: null);
-
-					if ($child) {
-						$copied[] = $childUid;
-						$queue[] = [$child, $copyUid, false];
-					}
-				}
-			}
-
-			if ($ownsTransaction) {
-				$db->commit();
-			}
+			$created = Transaction::run($this->context->db, fn(): array => $this->copyTree(
+				$node,
+				$actor,
+				$withChildren,
+			));
 		} catch (Throwable $e) {
-			if ($ownsTransaction) {
-				$db->rollback();
-			}
-
 			throw new RuntimeException(
 				'Error while duplicating: ' . $e->getMessage(),
 				(int) $e->getCode(),
@@ -115,6 +76,47 @@ final class Duplicator
 			'success' => true,
 			'created' => $created,
 		];
+	}
+
+	/**
+	 * Copies the node, and with children its subtree, breadth first.
+	 *
+	 * @return list<string> The uids of the copies
+	 */
+	private function copyTree(Wrapper $node, Actor $actor, bool $withChildren): array
+	{
+		$created = [];
+		$parent = $node->meta->get('parent');
+		$copied = [$node->meta->uid];
+		// Only the subtree root gets the copy marker: it is the entry
+		// the user looks for in the listing afterwards.
+		$queue = [[$node, is_string($parent) && trim($parent) !== '' ? $parent : null, true]];
+
+		while ($queue !== []) {
+			[$current, $parentUid, $mark] = array_shift($queue);
+			$copyUid = $this->copy($current, $parentUid, $actor, $mark);
+			$created[] = $copyUid;
+
+			if (!$withChildren) {
+				break;
+			}
+
+			foreach ($this->childUids($current->meta->uid) as $childUid) {
+				// A parent cycle would queue forever; unseen sources only.
+				if (in_array($childUid, $copied, true)) {
+					continue;
+				}
+
+				$child = $this->cms->node->byUid($childUid, published: null);
+
+				if ($child) {
+					$copied[] = $childUid;
+					$queue[] = [$child, $copyUid, false];
+				}
+			}
+		}
+
+		return $created;
 	}
 
 	private function copy(Wrapper $wrapper, ?string $parentUid, Actor $actor, bool $mark): string

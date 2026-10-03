@@ -18,6 +18,7 @@ use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
+use Cosray\Util\Transaction;
 use Throwable;
 
 /**
@@ -50,7 +51,7 @@ final class Bulk extends Panel
 		$changesPublished = 0;
 		$skippedLocked = 0;
 
-		$this->transaction($context, static function () use (
+		Transaction::run($context->db, static function () use (
 			$context,
 			$cms,
 			$store,
@@ -140,7 +141,7 @@ final class Bulk extends Panel
 		$skippedLocked = 0;
 		$skipped = $missing;
 
-		$this->transaction($context, function () use (
+		Transaction::run($context->db, function () use (
 			$store,
 			$actor,
 			$nodes,
@@ -199,7 +200,7 @@ final class Bulk extends Panel
 		$actor = $this->actor();
 		$duplicated = 0;
 
-		$this->transaction($context, function () use (
+		Transaction::run($context->db, function () use (
 			$cms,
 			$duplicator,
 			$actor,
@@ -265,30 +266,6 @@ final class Bulk extends Panel
 			cms: $cms,
 			context: $context,
 		);
-	}
-
-	private function transaction(Context $context, callable $work): void
-	{
-		$db = $context->db;
-		$ownsTransaction = !$db->getConn()->inTransaction();
-
-		if ($ownsTransaction) {
-			$db->begin();
-		}
-
-		try {
-			$work();
-
-			if ($ownsTransaction) {
-				$db->commit();
-			}
-		} catch (Throwable $e) {
-			if ($ownsTransaction) {
-				$db->rollback();
-			}
-
-			throw $e;
-		}
 	}
 
 	/**

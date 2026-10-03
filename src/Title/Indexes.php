@@ -7,7 +7,7 @@ namespace Cosray\Title;
 use Celema\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\Locales;
-use Throwable;
+use Cosray\Util\Transaction;
 
 /** Reconciles only the title indexes on the configured nodes table. */
 final class Indexes
@@ -20,23 +20,7 @@ final class Indexes
 	/** @return array{created: int, dropped: int, locales: list<string>} */
 	public function reconcile(): array
 	{
-		$owned = !$this->db->getConn()->inTransaction();
-		if ($owned) {
-			$this->db->begin();
-		}
-
-		try {
-			$result = $this->update();
-			if ($owned) {
-				$this->db->commit();
-			}
-			return $result;
-		} catch (Throwable $error) {
-			if ($owned) {
-				$this->db->rollback();
-			}
-			throw $error;
-		}
+		return Transaction::run($this->db, $this->update(...));
 	}
 
 	private function update(): array

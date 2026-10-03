@@ -21,6 +21,7 @@ use Cosray\References;
 use Cosray\Richtext\Normalizer;
 use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
+use Cosray\Util\Transaction;
 use Cosray\Validation\ValidatorFactory;
 use DateTimeInterface;
 use Throwable;
@@ -264,30 +265,9 @@ class Store
 
 	private function transaction(callable $work, string $failure): void
 	{
-		$ownsTransaction = !$this->db->getConn()->inTransaction();
-
 		try {
-			if ($ownsTransaction) {
-				$this->db->begin();
-			} else {
-				$this->db->nodes->savepoint()->run();
-			}
-
-			$work();
-
-			if ($ownsTransaction) {
-				$this->db->commit();
-			} else {
-				$this->db->nodes->releaseSavepoint()->run();
-			}
+			Transaction::run($this->db, $work);
 		} catch (Throwable $e) {
-			if ($ownsTransaction) {
-				$this->db->rollback();
-			} else {
-				$this->db->nodes->rollbackSavepoint()->run();
-				$this->db->nodes->releaseSavepoint()->run();
-			}
-
 			if ($e instanceof HttpError) {
 				throw $e;
 			}
