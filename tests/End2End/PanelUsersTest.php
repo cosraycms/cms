@@ -192,6 +192,37 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->assertTrue(password_verify('a brand new long password', $this->users()->find($self->uid)->password));
 	}
 
+	public function testAccountAndAccessChangesAreLogged(): void
+	{
+		$this->authenticateAs('superuser');
+		$actor = $this->currentUser()->loginName();
+
+		$this->save('/panel/users/create/user', [
+			'email' => 'ada@example.com',
+			'username' => 'ada',
+			'roles' => ['editor'],
+		]);
+		$ada = $this->users()->byLogin('ada');
+		$this->save("/panel/users/{$ada->uid}", [
+			'email' => 'ada@example.com',
+			'username' => 'ada',
+			'roles' => ['admin'],
+			'active' => '0',
+		]);
+		$this->makeRequest('POST', "/panel/users/{$ada->uid}/delete");
+
+		$this->assertSame(
+			[
+				['notice', "User ada created with roles editor by {$actor}"],
+				['notice', "Roles of ada changed from editor to admin by {$actor}"],
+				['notice', "User ada deactivated by {$actor}"],
+				['notice', "Password of ada changed by {$actor}"],
+				['notice', "User ada deleted by {$actor}"],
+			],
+			$this->logger->records,
+		);
+	}
+
 	/** @param array<string, mixed> $form */
 	private function save(string $uri, array $form): ResponseInterface
 	{

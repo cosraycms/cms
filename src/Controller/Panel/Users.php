@@ -26,6 +26,7 @@ use Cosray\User\Fields;
 use Cosray\User\Types;
 use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
+use Psr\Log\LoggerInterface as Logger;
 
 final class Users extends Panel
 {
@@ -40,6 +41,7 @@ final class Users extends Panel
 		private readonly UserStore $users,
 		private readonly Types $types,
 		private readonly Policy $policy,
+		private readonly Logger $logger,
 	) {
 		parent::__construct($config, $container, $request);
 	}
@@ -115,6 +117,11 @@ final class Users extends Panel
 		}
 
 		$user = $this->users->create($type, $values, (string) $password, $this->actor());
+		$this->logger->notice('User {login} created with roles {roles} by {actor}', [
+			'login' => $user->loginName(),
+			'roles' => self::roleList($user->roles),
+			'actor' => $this->currentUser()->loginName(),
+		]);
 
 		return Response::create($factory)->redirect($this->url('/' . $user->uid, ['notice' => 'created']), 303);
 	}
@@ -156,10 +163,15 @@ final class Users extends Panel
 		}
 
 		$this->users->update($user, $values, $this->actor());
+		$this->logAccessChanges($user, $values['roles'], $values['active']);
 
 		if ($password !== null) {
 			$this->users->setPassword($user, $password, $this->actor());
 			$this->keepOwnSession($user);
+			$this->logger->notice('Password of {login} changed by {actor}', [
+				'login' => $user->loginName(),
+				'actor' => $this->currentUser()->loginName(),
+			]);
 		}
 
 		return ['saved' => true, 'message' => __('editor:saved'), 'errors' => []];
@@ -179,6 +191,10 @@ final class Users extends Panel
 		}
 
 		$this->users->delete($user, $this->actor());
+		$this->logger->notice('User {login} deleted by {actor}', [
+			'login' => $user->loginName(),
+			'actor' => $this->currentUser()->loginName(),
+		]);
 
 		return Response::create($factory)->redirect($this->url('', ['notice' => 'deleted']), 303);
 	}
@@ -482,5 +498,40 @@ final class Users extends Panel
 	private function actor(): Actor
 	{
 		return new Actor($this->currentUser()->id);
+	}
+
+	/**
+	 * The stored user keeps only its last editor, so the log is where a
+	 * granted or revoked access stays visible.
+	 *
+	 * @param list<string> $roles
+	 */
+	private function logAccessChanges(User $user, array $roles, bool $active): void
+	{
+		$context = ['login' => $user->loginName(), 'actor' => $this->currentUser()->loginName()];
+		$before = $user->roles;
+		sort($before);
+		sort($roles);
+
+		if ($before !== $roles) {
+			$this->logger->notice('Roles of {login} changed from {before} to {after} by {actor}', [
+				...$context,
+				'before' => self::roleList($before),
+				'after' => self::roleList($roles),
+			]);
+		}
+
+		if ($active !== $user->active) {
+			$this->logger->notice(
+				$active ? 'User {login} activated by {actor}' : 'User {login} deactivated by {actor}',
+				$context,
+			);
+		}
+	}
+
+	/** @param list<string> $roles */
+	private static function roleList(array $roles): string
+	{
+		return $roles === [] ? 'none' : implode(', ', $roles);
 	}
 }
