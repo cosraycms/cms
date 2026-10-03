@@ -139,6 +139,28 @@ class TestCase extends BaseTestCase
 		$_SERVER['QUERY_STRING'] = $qs;
 	}
 
+	/**
+	 * Returns what $log wrote to PHP's error log. Redirects inside the test
+	 * because PHPUnit points the error log at its own capture file only
+	 * after setUp().
+	 */
+	protected function errorLog(callable $log): string
+	{
+		$file = (string) tempnam(sys_get_temp_dir(), 'cosray-error-log-');
+		// @mago-expect lint:no-ini-set
+		$previous = ini_set('error_log', $file);
+
+		try {
+			$log();
+
+			return (string) file_get_contents($file);
+		} finally {
+			// @mago-expect lint:no-ini-set
+			ini_set('error_log', (string) $previous);
+			unlink($file);
+		}
+	}
+
 	public function config(array $settings = [], bool $debug = false): Config
 	{
 		return new Config(self::root(), array_merge([

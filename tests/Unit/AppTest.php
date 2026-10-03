@@ -15,10 +15,12 @@ use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Middleware\Session as SessionMiddleware;
 use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
+use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\Fixtures\StaticRenderer;
 use Cosray\Tests\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 
 /**
  * @internal
@@ -91,6 +93,24 @@ final class AppTest extends TestCase
 		$this->assertInstanceOf(ResponseInterface::class, $response);
 		$this->assertStringContainsString('Internal Server Error', $output);
 		$this->assertStringNotContainsString('custom:http-server-error', $output);
+	}
+
+	public function testServicesGetALoggerWithoutARegisteredOne(): void
+	{
+		$app = $this->app()->boot();
+
+		$this->assertInstanceOf(LoggerInterface::class, $app->container()->get(LoggerInterface::class));
+	}
+
+	public function testBootKeepsTheRegisteredLogger(): void
+	{
+		$logger = new RecordingLogger();
+		$app = $this->app();
+		$app->logger($logger);
+
+		$app->boot();
+
+		$this->assertSame($logger, $app->container()->get(LoggerInterface::class));
 	}
 
 	public function testErrorHandlerUsesRegisteredLogger(): void

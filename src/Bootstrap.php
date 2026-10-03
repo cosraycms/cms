@@ -48,6 +48,7 @@ use Cosray\Security\Policy;
 use Cosray\User\Types as UserTypes;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
 use PDO;
+use Psr\Log\LoggerInterface as Logger;
 use ReflectionClass;
 
 class Bootstrap implements CorePlugin
@@ -178,6 +179,12 @@ class Bootstrap implements CorePlugin
 		// A constructed instance: the argument resolver would otherwise try
 		// to build the defaulted Uid parameter and fail on its string args.
 		$this->container->add(Menus::class, new Menus($this->db));
+
+		// Services can depend on a logger whether or not the application
+		// registers one, before or after boot; logger() replaces this entry.
+		if (!$this->container->has(Logger::class)) {
+			$this->container->add(Logger::class, ErrorLog::class);
+		}
 
 		$this->routes = new Routes(
 			$this->config,

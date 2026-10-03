@@ -53,7 +53,7 @@ $app->renderer('view', Renderer::class)->args(
 );
 ```
 
-Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The error handler reports server errors and PHP diagnostics to the PSR-3 logger passed to `$app->logger()`; without one, records from `notice` up go to PHP's error log. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
+Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The error handler reports server errors and PHP diagnostics to the PSR-3 logger passed to `$app->logger()`; without one, records from `notice` up go to PHP's error log. Services and controllers receive that logger by declaring a `Psr\Log\LoggerInterface` constructor parameter. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
 
 ## Serving requests
 
