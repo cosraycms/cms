@@ -23,9 +23,21 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
 use Cosray\Users;
 use Psr\Http\Message\UploadedFileInterface as PsrUploadedFile;
+use Psr\Log\LoggerInterface as Logger;
+use Psr\Log\LogLevel;
 
 class Media
 {
+	/** PHP's upload error codes besides the size limit, by name. */
+	private const array UPLOAD_ERRORS = [
+		UPLOAD_ERR_FORM_SIZE => 'UPLOAD_ERR_FORM_SIZE',
+		UPLOAD_ERR_PARTIAL => 'UPLOAD_ERR_PARTIAL',
+		UPLOAD_ERR_NO_FILE => 'UPLOAD_ERR_NO_FILE',
+		UPLOAD_ERR_NO_TMP_DIR => 'UPLOAD_ERR_NO_TMP_DIR',
+		UPLOAD_ERR_CANT_WRITE => 'UPLOAD_ERR_CANT_WRITE',
+		UPLOAD_ERR_EXTENSION => 'UPLOAD_ERR_EXTENSION',
+	];
+
 	protected ?Assets $assets = null;
 
 	public function __construct(
@@ -33,6 +45,7 @@ class Media
 		protected readonly Request $request,
 		protected readonly Config $config,
 		protected readonly Database $db,
+		protected readonly Logger $logger,
 	) {}
 
 	#[Permission('panel')]
@@ -64,6 +77,15 @@ class Media
 		}
 
 		if ($error !== UPLOAD_ERR_OK) {
+			// A missing or unwritable temp directory or a blocking extension
+			// fails every upload until someone fixes the server; the others
+			// are interrupted or incomplete requests.
+			$serverSide = in_array($error, [UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION], true);
+			$this->logger->log($serverSide ? LogLevel::ERROR : LogLevel::INFO, 'Upload of {file} failed: {code}', [
+				'file' => $filename,
+				'code' => self::UPLOAD_ERRORS[$error] ?? (string) $error,
+			]);
+
 			return $response->json([
 				'ok' => false,
 				'file' => $filename,

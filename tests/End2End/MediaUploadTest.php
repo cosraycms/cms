@@ -183,6 +183,19 @@ final class MediaUploadTest extends End2EndTestCase
 		$this->assertStringContainsString('Upload failed', (string) $json['error']);
 	}
 
+	public function testAServerSideUploadFailureIsLogged(): void
+	{
+		$response = $this->makeRequest('POST', '/media/image', [
+			'files' => ['file' => $this->uploadedFile('', 'e2e-upload-broken.png', 'image/png', UPLOAD_ERR_CANT_WRITE)],
+		]);
+
+		$this->assertResponseStatus(400, $response);
+		$this->assertContains(
+			['error', 'Upload of e2e-upload-broken.png failed: UPLOAD_ERR_CANT_WRITE'],
+			$this->logger->records,
+		);
+	}
+
 	public function testUploadRequiresAuthentication(): void
 	{
 		$png = base64_decode(self::PNG_BASE64, true);
@@ -198,13 +211,14 @@ final class MediaUploadTest extends End2EndTestCase
 		string $contents,
 		string $filename,
 		string $mediaType,
+		int $error = UPLOAD_ERR_OK,
 	): UploadedFileInterface {
 		$stream = $this->factory()->streamFactory()->createStream($contents);
 
 		return $this->factory()->uploadedFile(
 			$stream,
 			strlen($contents),
-			UPLOAD_ERR_OK,
+			$error,
 			$filename,
 			$mediaType,
 		);
