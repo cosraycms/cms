@@ -76,6 +76,7 @@ final class AppTest extends TestCase
 			'path.root' => self::root(),
 			'path.views' => '/missing-views',
 		]);
+		$app->logger(new RecordingLogger());
 		$app->renderer('view', StaticRenderer::class);
 		$app->get('/boom', static function (): void {
 			throw new \RuntimeException('Boom');
@@ -93,6 +94,31 @@ final class AppTest extends TestCase
 		$this->assertInstanceOf(ResponseInterface::class, $response);
 		$this->assertStringContainsString('Internal Server Error', $output);
 		$this->assertStringNotContainsString('custom:http-server-error', $output);
+	}
+
+	public function testServerErrorsReachPhpsErrorLogWithoutARegisteredLogger(): void
+	{
+		$app = $this->app([
+			'error.enabled' => true,
+			'path.root' => self::root(),
+			'path.views' => '/missing-views',
+		]);
+		$app->get('/boom', static function (): void {
+			throw new \RuntimeException('Boom');
+		});
+		$request = $app->factory()->serverRequestFactory()->createServerRequest('GET', '/boom');
+
+		$log = $this->errorLog(static function () use ($app, $request): void {
+			ob_start();
+
+			try {
+				$app->run($request);
+			} finally {
+				ob_end_clean();
+			}
+		});
+
+		$this->assertStringContainsString('RuntimeException: Boom', $log);
 	}
 
 	public function testServicesGetALoggerWithoutARegisteredOne(): void
