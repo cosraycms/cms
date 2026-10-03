@@ -160,9 +160,4 @@ class Config
 
 		return rtrim($root, '/\\') ?: DIRECTORY_SEPARATOR;
 	}
-
-	public function printAll(): void
-	{
-		error_log(print_r($this->settings, true));
-	}
 }
