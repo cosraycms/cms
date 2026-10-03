@@ -9,6 +9,13 @@ use RuntimeException;
 
 class Auth
 {
+	/**
+	 * An Argon2id hash with PHP's default cost, like stored passwords. Unknown
+	 * logins are verified against it so they take as long as a wrong password
+	 * and response times don't reveal which accounts exist.
+	 */
+	private const string UNKNOWN_ACCOUNT_HASH = '$argon2id$v=19$m=65536,t=4,p=1$LmdRei83enV3ZU80a3JCcA$nNwR27KMtv19PZECIhkY4mRM9Xp2bngKjiRHZdZ9lwM';
+
 	public function __construct(
 		protected Request $request,
 		protected Users $users,
@@ -45,6 +52,8 @@ class Auth
 		$user = $this->users->byLogin($login);
 
 		if (!$user) {
+			password_verify($password, self::UNKNOWN_ACCOUNT_HASH);
+
 			return false;
 		}
 
