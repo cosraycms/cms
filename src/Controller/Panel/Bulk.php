@@ -8,7 +8,6 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
-use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
 use Cosray\Context;
@@ -19,7 +18,6 @@ use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Util\Transaction;
-use Throwable;
 
 /**
  * Bulk operations on a collection listing selection. Every action runs in
@@ -366,17 +364,6 @@ final class Bulk extends Panel
 	private function collection(string $collection): Listing
 	{
 		return $this->listing($this->ref($collection));
-	}
-
-	private function actor(): Actor
-	{
-		try {
-			$id = $this->request->get('session')->authenticatedUserId();
-		} catch (Throwable) {
-			$id = null;
-		}
-
-		return $id ? new Actor((int) $id) : Actor::system();
 	}
 
 	private function types(): Types

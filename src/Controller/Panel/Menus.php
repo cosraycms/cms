@@ -10,7 +10,6 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Quma\Database;
-use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
@@ -22,7 +21,6 @@ use Cosray\Locales;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
 use Cosray\Title\Sort;
-use Cosray\User;
 
 /**
  * The menus area: the rail lists the menus, and per menu the item tree
@@ -1058,18 +1056,6 @@ final class Menus extends Panel
 		}
 
 		return $this->menuRows = $rows;
-	}
-
-	/**
-	 * The signed-in user as the writer of a change, system when unknown. Read
-	 * from the request's `user` attribute rather than the session, so it holds
-	 * for token-authenticated requests too — the same source `manages()` uses.
-	 */
-	private function actor(): Actor
-	{
-		$user = $this->request->get('user', null);
-
-		return $user instanceof User ? new Actor($user->id) : Actor::system();
 	}
 
 	/** The content locale of the request, `zxx` when there is none. */

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Cosray\Controller\Panel;
 
 use Celema\Container\Container;
+use Celema\Core\Exception\HttpForbidden;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Verba\Verba;
 use Celema\Wire\Creator;
+use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
 use Cosray\Collection\Ref;
@@ -368,6 +370,23 @@ abstract class Panel
 	private function menusUrl(string $panelPath): ?string
 	{
 		return $this->permits('edit-menus') ? $panelPath . '/menus' : null;
+	}
+
+	/**
+	 * The user PanelAuth attached to the request, signed in by session or by
+	 * token alike. Routes without PanelAuth have none.
+	 */
+	protected function currentUser(): User
+	{
+		$user = $this->request->get('user', null);
+
+		return $user instanceof User ? $user : throw new HttpForbidden($this->request);
+	}
+
+	/** The current user as the author of a change. */
+	protected function actor(): Actor
+	{
+		return new Actor($this->currentUser()->id);
 	}
 
 	protected function permits(string $permission): bool

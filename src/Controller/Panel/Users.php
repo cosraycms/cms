@@ -11,7 +11,6 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
 use Celema\Core\Response;
 use Celema\Sire\Issue;
-use Cosray\Actor;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Field\Services;
@@ -486,18 +485,6 @@ final class Users extends Panel
 	private function isSelf(User $user): bool
 	{
 		return $user->id === $this->currentUser()->id;
-	}
-
-	private function currentUser(): User
-	{
-		$user = $this->request->get('user', null);
-
-		return $user instanceof User ? $user : throw new HttpForbidden($this->request);
-	}
-
-	private function actor(): Actor
-	{
-		return new Actor($this->currentUser()->id);
 	}
 
 	/**

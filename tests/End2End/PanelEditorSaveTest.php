@@ -710,6 +710,31 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame(['zxx' => 'kept'], $content['title']['meta']['stashed']);
 	}
 
+	public function testSaveRecordsTheTokenAuthenticatedUserAsEditor(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-save-editor',
+			'type' => $this->articleTypeId(),
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Draft']]],
+		]);
+
+		$this->makeRequest('POST', '/panel/node/panel-save-editor', [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => ['_complete' => '1', 'content' => ['title' => ['value' => ['en' => 'Saved']]]],
+		]);
+
+		// The signed-in user, not the system fallback a session-only lookup
+		// gave token-authenticated requests.
+		$this->assertSame(
+			'editor',
+			$this->db()->execute(
+				"SELECT u.roles[1] AS role FROM cms.nodes n
+				JOIN cms.users u ON u.usr = n.editor
+				WHERE n.uid = 'panel-save-editor'",
+			)->one()['role'],
+		);
+	}
+
 	public function testPlainSaveRedirectsBackToTheEditor(): void
 	{
 		$this->createTestNode([

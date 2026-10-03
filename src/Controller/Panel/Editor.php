@@ -10,7 +10,6 @@ use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Celema\Sire\Issue;
-use Cosray\Actor;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
@@ -694,17 +693,6 @@ final class Editor extends Panel
 			'activeCollection' => $slug,
 			'links' => new NodeUrls($this->panelPath(), $from, $query),
 		];
-	}
-
-	private function actor(): Actor
-	{
-		try {
-			$id = $this->request->get('session')->authenticatedUserId();
-		} catch (Throwable) {
-			$id = null;
-		}
-
-		return $id ? new Actor((int) $id) : Actor::system();
 	}
 
 	private function types(): Types
