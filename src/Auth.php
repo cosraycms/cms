@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface as Logger;
+use Psr\Log\NullLogger;
 use RuntimeException;
 
 class Auth
@@ -21,6 +23,7 @@ class Auth
 		protected Users $users,
 		protected Config $config,
 		protected ?Session $session = null,
+		protected Logger $logger = new NullLogger(),
 	) {}
 
 	public function logout(): void
@@ -53,19 +56,32 @@ class Auth
 
 		if (!$user) {
 			password_verify($password, self::UNKNOWN_ACCOUNT_HASH);
+			// The submitted name stays out of the log: it may be a password
+			// typed into the wrong field.
+			$this->logger->warning('Login failed for an unknown account from {ip}', ['ip' => $this->clientIp()]);
 
 			return false;
 		}
 
-		if (password_verify($password, $user->password)) {
-			if ($initSession) {
-				$this->login($user, $remember);
-			}
+		if (!password_verify($password, $user->password)) {
+			$this->logger->warning('Login failed for {login} from {ip}', [
+				'login' => $user->loginName(),
+				'ip' => $this->clientIp(),
+			]);
 
-			return $user;
+			return false;
 		}
 
-		return false;
+		if ($initSession) {
+			$this->login($user, $remember);
+		}
+
+		$this->logger->info('Login succeeded for {login} from {ip}', [
+			'login' => $user->loginName(),
+			'ip' => $this->clientIp(),
+		]);
+
+		return $user;
 	}
 
 	public function authenticateByOneTimeToken(
@@ -76,12 +92,19 @@ class Auth
 		$user = $this->users->byOneTimeToken($token);
 
 		if (!$user) {
+			$this->logger->warning('One-time token login failed from {ip}', ['ip' => $this->clientIp()]);
+
 			return false;
 		}
 
 		if ($initSession) {
 			$this->login($user, false);
 		}
+
+		$this->logger->info('One-time token login succeeded for {login} from {ip}', [
+			'login' => $user->loginName(),
+			'ip' => $this->clientIp(),
+		]);
 
 		return $user;
 	}
@@ -150,6 +173,17 @@ class Auth
 		}
 
 		return null;
+	}
+
+	/**
+	 * The connecting address. Behind a reverse proxy this is the proxy's;
+	 * forwarded headers are not trusted, as anyone can send them.
+	 */
+	public function clientIp(): string
+	{
+		$ip = $this->request->getServerParams()['REMOTE_ADDR'] ?? null;
+
+		return is_string($ip) && $ip !== '' ? $ip : 'unknown';
 	}
 
 	public function getAuthToken(): string

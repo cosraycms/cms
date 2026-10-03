@@ -12,6 +12,7 @@ use Cosray\Auth as CmsAuth;
 use Cosray\Config;
 use Cosray\Security\Policy;
 use Cosray\Validation;
+use Psr\Log\LoggerInterface as Logger;
 
 final class Login extends Panel
 {
@@ -20,6 +21,7 @@ final class Login extends Panel
 		Container $container,
 		Request $request,
 		private readonly CmsAuth $auth,
+		private readonly Logger $logger,
 	) {
 		parent::__construct($config, $container, $request);
 	}
@@ -72,6 +74,10 @@ final class Login extends Panel
 
 		if (!$this->policy()->permits($user, 'panel')) {
 			$this->auth->logout();
+			$this->logger->notice('Panel login refused for {login} from {ip}: no panel permission', [
+				'login' => $user->loginName(),
+				'ip' => $this->auth->clientIp(),
+			]);
 
 			return $this->context([
 				'next' => $this->sanitizedNext($data['next'] ?? ''),
@@ -86,7 +92,15 @@ final class Login extends Panel
 
 	public function logout(Factory $factory): Response
 	{
+		$user = $this->auth->user();
 		$this->auth->logout();
+
+		if ($user !== null) {
+			$this->logger->info('Logout of {login} from {ip}', [
+				'login' => $user->loginName(),
+				'ip' => $this->auth->clientIp(),
+			]);
+		}
 
 		return $this->redirect($factory, $this->panelPath() . '/login');
 	}

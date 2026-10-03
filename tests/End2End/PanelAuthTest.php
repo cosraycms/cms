@@ -178,4 +178,37 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertResponseStatus(303, $response);
 		$this->assertSame('/panel/login?next=%2Fpanel', $response->getHeaderLine('Location'));
 	}
+
+	public function testRefusedPanelLoginIsLogged(): void
+	{
+		$this->createTestUser([
+			'uid' => 'panel-refused-user',
+			'username' => 'refused',
+			'role' => 'system',
+		]);
+
+		$this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => 'refused', 'password' => 'password', 'rememberme' => false],
+			'server' => ['REMOTE_ADDR' => '192.0.2.1'],
+		]);
+
+		$this->assertContains(
+			['notice', 'Panel login refused for refused from 192.0.2.1: no panel permission'],
+			$this->logger->records,
+		);
+	}
+
+	public function testLogoutIsLogged(): void
+	{
+		$this->createTestUser(['uid' => 'panel-logout-user', 'username' => 'leaving']);
+		$this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => 'leaving', 'password' => 'password', 'rememberme' => false],
+		]);
+
+		$this->makeRequest('POST', '/panel/logout', [
+			'server' => ['REMOTE_ADDR' => '192.0.2.1'],
+		]);
+
+		$this->assertContains(['info', 'Logout of leaving from 192.0.2.1'], $this->logger->records);
+	}
 }

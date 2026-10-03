@@ -17,6 +17,7 @@ use Cosray\Config;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Wrapper;
+use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\Fixtures\TransactionalBootstrap;
 use Cosray\View\Boiler\Error\Handler;
 use Psr\Http\Message\ResponseInterface;
@@ -41,6 +42,7 @@ class End2EndTestCase extends IntegrationTestCase
 	protected bool $useTransactions = false;
 	protected ?Connection $testConnection = null;
 	protected ?string $defaultAuthToken = null;
+	protected RecordingLogger $logger;
 
 	protected function setUp(): void
 	{
@@ -142,6 +144,8 @@ class End2EndTestCase extends IntegrationTestCase
 		));
 
 		$app = new App($factory, $router, $container);
+		$this->logger = new RecordingLogger();
+		$app->logger($this->logger);
 
 		// Configure the top-level error handler.
 		$errorHandler = $this->createErrorHandler($config, $factory);
@@ -231,7 +235,10 @@ class End2EndTestCase extends IntegrationTestCase
 	 */
 	protected function makeRequest(string $method, string $uri, array $options = []): ResponseInterface
 	{
-		$psrRequest = $this->factory()->serverRequestFactory()->createServerRequest($method, $uri);
+		$psrRequest = $this
+			->factory()
+			->serverRequestFactory()
+			->createServerRequest($method, $uri, $options['server'] ?? []);
 
 		// Add auth token (from options or default)
 		$authToken = $options['authToken'] ?? $this->defaultAuthToken;

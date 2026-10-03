@@ -41,6 +41,12 @@ class User
 		$this->expires = $data['expires'] ?? null;
 	}
 
+	/** The username, or the email for accounts without one; both log in. */
+	public function loginName(): string
+	{
+		return $this->username !== '' ? $this->username : $this->email;
+	}
+
 	/**
 	 * First and last word of the name, or of the username or the email's local
 	 * part when there is none ("m.keller" → "MK"). A single word gives its

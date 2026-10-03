@@ -7,6 +7,7 @@ namespace Cosray\Tests\Integration;
 use Cosray\Actor;
 use Cosray\Auth;
 use Cosray\Session;
+use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\Token;
 use Cosray\Users;
@@ -31,6 +32,8 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 	protected function tearDown(): void
 	{
+		unset($_SERVER['REMOTE_ADDR']);
+
 		if (session_status() === PHP_SESSION_ACTIVE) {
 			$_SESSION = [];
 			session_unset();
@@ -44,6 +47,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		PsrServerRequest $request,
 		?Session $session = null,
 		array $settings = [],
+		?RecordingLogger $logger = null,
 	): Auth {
 		$config = $this->config(array_merge([
 			'app.secret' => self::SECRET,
@@ -54,6 +58,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 			new Users($this->db()),
 			$config,
 			$session,
+			$logger ?? new RecordingLogger(),
 		);
 	}
 
@@ -99,6 +104,42 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$result = $auth->authenticate('nonexistent@example.com', 'any-password', false, false);
 
 		$this->assertFalse($result);
+	}
+
+	public function testLoginAttemptsAreLoggedWithTheClientAddress(): void
+	{
+		$this->createTestUser([
+			'uid' => 'auth-logged-user',
+			'username' => 'logged',
+			'email' => 'logged@example.com',
+			'password' => self::passwordHash('correct-password'),
+		]);
+		$_SERVER['REMOTE_ADDR'] = '192.0.2.1';
+		$logger = new RecordingLogger();
+		$auth = $this->createAuth($this->psrRequest(), logger: $logger);
+
+		$auth->authenticate('logged@example.com', 'wrong-password', false, false);
+		$auth->authenticate('logged@example.com', 'correct-password', false, false);
+
+		$this->assertSame(
+			[
+				['warning', 'Login failed for logged from 192.0.2.1'],
+				['info', 'Login succeeded for logged from 192.0.2.1'],
+			],
+			$logger->records,
+		);
+	}
+
+	public function testFailedLoginForAnUnknownAccountKeepsTheSubmittedNameOutOfTheLog(): void
+	{
+		$_SERVER['REMOTE_ADDR'] = '192.0.2.1';
+		$logger = new RecordingLogger();
+		$auth = $this->createAuth($this->psrRequest(), logger: $logger);
+
+		// A password typed into the name field must not reach the log.
+		$auth->authenticate('my-secret-password', '', false, false);
+
+		$this->assertSame([['warning', 'Login failed for an unknown account from 192.0.2.1']], $logger->records);
 	}
 
 	public function testAuthenticateWithRememberMeCreatesSession(): void
