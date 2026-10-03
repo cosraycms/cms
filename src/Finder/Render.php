@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Finder;
 
-use Celema\Core\Exception\HttpBadRequest;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
@@ -12,7 +11,6 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\View;
-use Throwable;
 
 class Render
 {
@@ -65,15 +63,7 @@ class Render
 
 	public function __toString(): string
 	{
-		try {
-			return new View($this->node, $this->cms, $this->context, $this->types)
-				->output($this->templateContext);
-		} catch (Throwable $e) {
-			if ($this->context->config->debug()) {
-				throw $e;
-			}
-
-			throw new HttpBadRequest($this->context->request, previous: $e);
-		}
+		return new View($this->node, $this->cms, $this->context, $this->types)
+			->output($this->templateContext);
 	}
 }

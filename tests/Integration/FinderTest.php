@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Core\Exception\HttpError;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Context;
@@ -12,9 +13,11 @@ use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Cosray\Renderer;
+use Cosray\Tests\Fixtures\Node\NodeWithFailingTitle;
 use Cosray\Tests\Fixtures\Node\NodeWithRenderAttribute;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
+use Throwable;
 
 final class FinderTest extends IntegrationTestCase
 {
@@ -125,28 +128,35 @@ final class FinderTest extends IntegrationTestCase
 			'type' => $typeId,
 		]);
 
-		$container = $this->container();
-		$container->tag(Bootstrap::NODE_TAG)
-			->add('node-with-render-attribute', NodeWithRenderAttribute::class);
-		$container
-			->tag(Renderer::class)
-			->add('view', BoilerRenderer::class)
-			->args(
-				dirs: self::root() . '/tests/Fixtures/templates',
-				autoescape: false,
-			);
-		$context = new Context(
-			$this->db(),
-			$this->request(),
-			$this->config(['path.views' => '/tests/Fixtures/templates']),
-			$container,
-			$this->factory(),
-		);
-		$cms = new Cms($context, Services::withDefaults());
+		$cms = $this->renderingCms('node-with-render-attribute', NodeWithRenderAttribute::class);
 
 		$html = (string) $cms->render('render-uid-target', published: null);
 
 		$this->assertSame('with render:render-handle-target:render-uid-target', trim($html));
+	}
+
+	public function testFailingRenderReachesTheErrorHandlerAsServerError(): void
+	{
+		$this->createTestNode([
+			'uid' => 'failing-render',
+			'type' => $this->createTestType('node-with-failing-title'),
+		]);
+		$cms = $this->renderingCms('node-with-failing-title', NodeWithFailingTitle::class);
+
+		try {
+			(string) $cms->render('failing-render', published: null);
+			$this->fail('The failing render must throw.');
+		} catch (Throwable $e) {
+			// A client error status would also keep it out of the error log.
+			$this->assertNotInstanceOf(HttpError::class, $e);
+			$messages = [];
+
+			for ($current = $e; $current !== null; $current = $current->getPrevious()) {
+				$messages[] = $current->getMessage();
+			}
+
+			$this->assertContains('Title failed', $messages);
+		}
 	}
 
 	public function testFinderFiltersPublishedNodes(): void
@@ -745,5 +755,28 @@ final class FinderTest extends IntegrationTestCase
 			iterator_to_array($dirty),
 		));
 		$this->assertNull(iterator_to_array($clean)[0]->meta->get('draft'));
+	}
+
+	/** @param class-string $class */
+	private function renderingCms(string $handle, string $class): Cms
+	{
+		$container = $this->container();
+		$container->tag(Bootstrap::NODE_TAG)->add($handle, $class);
+		$container
+			->tag(Renderer::class)
+			->add('view', BoilerRenderer::class)
+			->args(
+				dirs: self::root() . '/tests/Fixtures/templates',
+				autoescape: false,
+			);
+		$context = new Context(
+			$this->db(),
+			$this->request(),
+			$this->config(['path.views' => '/tests/Fixtures/templates']),
+			$container,
+			$this->factory(),
+		);
+
+		return new Cms($context, Services::withDefaults());
 	}
 }
