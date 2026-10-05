@@ -15,7 +15,6 @@ use Celema\Verba\Command\StatusCommand;
 use Celema\Verba\Command\SyncCommand;
 use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
-use Closure;
 use Cosray\App;
 use Cosray\Commands\Fulltext;
 use Cosray\Commands\PanelPublish;
@@ -72,11 +71,8 @@ final class Commands
 		]);
 	}
 
-	public function add(
-		array|object|string $commands,
-		string $description = '',
-		?Closure $command = null,
-	): self {
+	public function add(array|object|string $commands): self
+	{
 		if (is_string($commands)) {
 			$this->commands->add([$commands => fn(): object => $this->resolve($commands)]);
 
@@ -87,7 +83,7 @@ final class Commands
 			$commands = $this->withAutowiredClasses($commands);
 		}
 
-		$this->commands->add($commands, $description, $command);
+		$this->commands->add($commands);
 
 		return $this;
 	}
