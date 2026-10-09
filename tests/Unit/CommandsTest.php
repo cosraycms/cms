@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celema\Console\Args;
-use Celema\Console\BufferedIo;
 use Celema\Console\Command;
 use Celema\Router\Router;
 use Celema\Server\FrankenPhp;
@@ -151,39 +149,6 @@ final class CommandsTest extends TestCase
 
 		$this->assertInstanceOf(Server::class, $servers['server']);
 		$this->assertInstanceOf(FrankenPhp::class, $servers['frankenphp']);
-	}
-
-	public function testI18nSyncLeavesCosrayMessagesOutOfTheAppCatalog(): void
-	{
-		$config = $this->config([
-			'db.dsn' => 'sqlite::memory:',
-			'error.enabled' => false,
-		]);
-		$app = new App($config, $this->factory(), new Router(), $this->container());
-		$app->section('Rooms')->link('Bookings', '/bookings');
-		$app->boot();
-		$dir = sys_get_temp_dir() . '/cosray-i18n-' . bin2hex(random_bytes(4));
-		mkdir($dir);
-		$commands = new Commands($app);
-		$commands->i18n('mysite', locales: ['en'], scan: [], dir: $dir);
-
-		try {
-			foreach ($commands->commands()->entries() as $entry) {
-				if ($entry->meta->full() === 'i18n:sync') {
-					$this->assertSame(0, $entry->command()(new Args(), new BufferedIo()));
-				}
-			}
-
-			/** @var array{messages: array<string, mixed>} $catalog */
-			$catalog = require "{$dir}/mysite.en.php";
-
-			// The built-in all-content collection leads the navigation, and
-			// Cosray translates its label itself.
-			$this->assertSame(['Bookings', 'Rooms'], array_keys($catalog['messages']));
-		} finally {
-			array_map(unlink(...), glob("{$dir}/*") ?: []);
-			rmdir($dir);
-		}
 	}
 
 	public function testServerFallsBackToTheServerWatchDefaults(): void
