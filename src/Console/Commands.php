@@ -22,6 +22,7 @@ use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
+use Cosray\I18n\AppMessages;
 use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
 use Cosray\Panel\Client;
@@ -130,8 +131,9 @@ final class Commands
 	 *
 	 * The domain scans the given source directories (relative paths resolve
 	 * from the app root) plus the app's schema labels, and claims bare
-	 * `__()` calls as the default domain. Call once per domain for apps
-	 * with several catalogs.
+	 * `__()` calls as the default domain, except those Cosray translates and
+	 * the app does not shadow (see AppMessages). Call once per domain for
+	 * apps with several catalogs.
 	 *
 	 * @param list<string> $locales
 	 * @param list<string> $scan
@@ -154,11 +156,19 @@ final class Commands
 			$scanners[] = SchemaScanner::fromApp($this->app);
 		}
 
+		$dir = $absolute($dir);
+		$catalogs = [];
+
+		// Named like Domain::file() names them.
+		foreach ($locales as $locale) {
+			$catalogs[$locale] = "{$dir}/{$name}.{$locale}.php";
+		}
+
 		$domain = new Domain(
 			name: $name,
-			dir: $absolute($dir),
+			dir: $dir,
 			locales: $locales,
-			scanners: $scanners,
+			scanners: [new AppMessages($scanners, $catalogs)],
 			default: true,
 		);
 
