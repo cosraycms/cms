@@ -143,7 +143,7 @@ return $commands->runner();
 ```
 
 - `server()` registers the built-in PHP server and FrankenPHP when the optional `celema/server` package is installed. FrankenPHP additionally needs its executable on `PATH` and uses its embedded PHP runtime.
-- `i18n()` registers synchronization and status commands for a translation domain, scanning source paths and schema labels. Call it per domain when needed.
+- `i18n()` registers synchronization and status commands for a translation domain, scanning source paths and the app's schema labels. Cosray's own labels, such as that of the built-in all-content collection, are left to Cosray's catalogs. Call it per domain when needed.
 - `add()` accepts instances, class names, or keyed factories for commands needing custom scalar arguments.
 
 With `--watch`, both server commands update open pages when a file matching the `watch` patterns changes: they swap changed stylesheets in place and morph pages into a freshly rendered copy, which keeps the scroll position and form input. The panel reloads instead. Pages opt in by including the live reload script in the site's base layout, before `</body>`:

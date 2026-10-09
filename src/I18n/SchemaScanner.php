@@ -7,6 +7,8 @@ namespace Cosray\I18n;
 use Celema\Verba\Tool\Message;
 use Celema\Verba\Tool\Scanner;
 use Cosray\App;
+use Cosray\Collection\AllContent;
+use Cosray\Collection\Ref;
 use Cosray\Field\Definitions;
 use Cosray\NavigationItem;
 use Cosray\Schema\Badge;
@@ -43,7 +45,10 @@ final class SchemaScanner implements Scanner
 
 	/**
 	 * Build a scanner from a booted app: every registered node type plus the
-	 * navigation section, link and collection names.
+	 * navigation section, link and collection names. Cosray's built-in
+	 * collection is left out: its label is Cosray's message, which Cosray's
+	 * own catalogs translate, so the app's domain lists only what the app
+	 * declares.
 	 */
 	public static function fromApp(App $app): self
 	{
@@ -187,6 +192,10 @@ final class SchemaScanner implements Scanner
 	private static function walk(array $items, array &$labels): void
 	{
 		foreach ($items as $item) {
+			if ($item instanceof Ref && $item->class === AllContent::class) {
+				continue;
+			}
+
 			$labels[] = $item->meta->label;
 			self::walk($item->children(), $labels);
 		}

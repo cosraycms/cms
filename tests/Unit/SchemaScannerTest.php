@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Router\Router;
 use Celema\Verba\Tool\Message;
+use Cosray\App;
 use Cosray\I18n\SchemaScanner;
 use Cosray\Tests\Fixtures\Node\SchemaScanNode;
 use Cosray\Tests\Fixtures\Node\TestDocument;
@@ -76,6 +78,22 @@ final class SchemaScannerTest extends TestCase
 		$ids = $this->ids(new SchemaScanner([], ['Inhalte', 'Formulare'])->scan());
 
 		$this->assertSame(['Formulare', 'Inhalte'], $ids);
+	}
+
+	public function testAppScanLeavesOutCosraysBuiltInCollection(): void
+	{
+		$app = new App(
+			$this->config(['db.dsn' => 'sqlite::memory:', 'error.enabled' => false]),
+			$this->factory(),
+			new Router(),
+			$this->container(),
+		);
+		$app->section('Rooms')->link('Bookings', '/bookings');
+		$app->boot();
+
+		// The built-in all-content collection leads the navigation, and Cosray
+		// translates its label itself.
+		$this->assertSame(['Bookings', 'Rooms'], $this->ids(SchemaScanner::fromApp($app)->scan()));
 	}
 
 	public function testEmptyStringsAreSkipped(): void
