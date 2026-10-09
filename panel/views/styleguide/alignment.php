@@ -27,7 +27,7 @@ $alignmentFields = (array) $this->unwrap($alignmentFields);
 					</template>
 					<div class="cms-fields" data-sample="fields:alignment">
 						<?php foreach ($alignmentFields as $field): ?>
-							<?php $this->insert('field/item', [
+							<?php $this->include('field/item', [
 								'field' => $field,
 								'content' => [],
 								'locales' => $locales,

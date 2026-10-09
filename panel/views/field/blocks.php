@@ -71,7 +71,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 			$type = $rowData['type'] ?? null;
 
 			if ($type === null && is_array($rowData['blocks'] ?? null)) {
-				$this->insert('field/blocks/split', [
+				$this->include('field/blocks/split', [
 					'index' => $index,
 					'rowData' => $rowData,
 					'blockTypes' => $blockTypes,
@@ -96,7 +96,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				continue;
 			}
 
-			$this->insert('field/blocks/row', [
+			$this->include('field/blocks/row', [
 				'index' => $index,
 				'rowData' => $rowData,
 				'blockType' => $blockTypes[$type],
@@ -115,7 +115,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 	<?php else: ?>
 	<?php foreach ($blockTypes as $blockType): ?>
 		<template data-repeater-template="<?= $this->escape((string) $blockType['type']) ?>">
-			<?php $this->insert('field/blocks/row', [
+			<?php $this->include('field/blocks/row', [
 				'index' => '__i__',
 				'rowData' => null,
 				'blockType' => $blockType,
@@ -131,7 +131,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 	<?php endforeach ?>
 	<?php if ($columns > 1): ?>
 		<template data-repeater-container>
-			<?php $this->insert('field/blocks/split', [
+			<?php $this->include('field/blocks/split', [
 				'index' => '__i__',
 				'rowData' => null,
 				'blockTypes' => $blockTypes,
@@ -145,7 +145,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 		</template>
 	<?php endif ?>
 	<?php if ($more) {
-		$this->insert('field/blocks/catalog', ['choices' => $choices->all]);
+		$this->include('field/blocks/catalog', ['choices' => $choices->all]);
 	} ?>
 	<div class="adders" data-repeater-footer>
 		<?php if ($blockTypes === []): ?>
@@ -179,7 +179,7 @@ $readonly = (bool) ($field['immutable'] ?? false);
 				data-action-menu
 				data-align="center"
 			>
-				<?php $this->insert('field/blocks/picker', [
+				<?php $this->include('field/blocks/picker', [
 					'commonChoices' => $commonChoices,
 					'more' => $more,
 					'insert' => 'append',

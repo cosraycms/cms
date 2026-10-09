@@ -12,5 +12,5 @@ if (!$rail) {
 
 ?>
 <div id="collection-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
-	<?php $this->insert('component/collections', ['level' => 0]) ?>
+	<?php $this->include('component/collections', ['level' => 0]) ?>
 </div>

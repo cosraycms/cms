@@ -7,7 +7,7 @@
 
 $oob = (bool) ($oob ?? false);
 
-$this->insert(match ((string) $area) {
+$this->include(match ((string) $area) {
 	'media' => 'component/media-rail',
 	'menus' => 'component/menu-nav',
 	'system' => 'component/system-nav',

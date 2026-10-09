@@ -18,14 +18,14 @@ $max = $props['max'] ?? null;
 	data-id="<?= $this->escape($id) ?>"
 	<?= is_int($max) ? 'data-max="' . $max . '"' : '' ?>>
 	<?php foreach ($items as $index => $itemValue): ?>
-		<?php $this->insert('field/repeater/row', [
+		<?php $this->include('field/repeater/row', [
 			'index' => $index,
 			'itemValue' => $itemValue,
 			'item' => $item,
 		]) ?>
 	<?php endforeach ?>
 	<template data-repeater-template>
-		<?php $this->insert('field/repeater/row', [
+		<?php $this->include('field/repeater/row', [
 			'index' => '__i__',
 			'itemValue' => null,
 			'item' => $item,

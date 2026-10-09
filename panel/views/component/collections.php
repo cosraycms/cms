@@ -20,7 +20,7 @@ use function Cosray\escape;
 			href="<?= $link->url ?>"
 			<?= $link->active((string) $this->unwrap($currentPath)) ? 'aria-current="page"' : '' ?>>
 			<span class="label">
-				<?php $this->insert('component/collection-icon', [
+				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,
 					'default' => true,
 				]) ?>
@@ -45,7 +45,7 @@ use function Cosray\escape;
 			href="<?= $href ?>"
 			<?= $active ? 'aria-current="page"' : '' ?>>
 			<span class="label">
-				<?php $this->insert('component/collection-icon', [
+				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,
 					'default' => true,
 				]) ?>
@@ -64,10 +64,10 @@ use function Cosray\escape;
 			class="section"
 			style="--depth: <?= $level ?>">
 			<span class="title">
-				<?php $this->insert('component/collection-icon', ['iconMeta' => $iconMeta]) ?>
+				<?php $this->include('component/collection-icon', ['iconMeta' => $iconMeta]) ?>
 				<span><?= $label ?></span>
 			</span>
-			<?php $this->insert('component/collections', [
+			<?php $this->include('component/collections', [
 				'collections' => $item->children(),
 				'level' => $level + 1,
 			]) ?>

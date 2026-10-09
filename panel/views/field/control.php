@@ -28,7 +28,7 @@ $views = [
 	'blocks' => 'field/blocks',
 ];
 
-$this->insert($views[$controlName] ?? 'field/unknown', [
+$this->include($views[$controlName] ?? 'field/unknown', [
 	'field' => $field,
 	'control' => $control,
 	'id' => $id,

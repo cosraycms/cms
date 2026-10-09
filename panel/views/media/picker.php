@@ -33,7 +33,7 @@ $search = $screen->query(['q' => '']);
 		<div class="cms-library-empty"><?= escape(__('media:no-files')) ?></div>
 	<?php else: ?>
 		<div class="cms-library-grid">
-			<div class="cms-asset-grid"><?php $this->insert('media/tiles') ?></div>
+			<div class="cms-asset-grid"><?php $this->include('media/tiles') ?></div>
 		</div>
 	<?php endif ?>
 </div>

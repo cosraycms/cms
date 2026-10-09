@@ -220,7 +220,7 @@ $closeUrl = $screen->url(['file' => null]);
 	</form>
 
 	<dialog class="cms-modal" data-size="compact" data-media-delete-dialog>
-		<?php $this->insert('component/modal-header', ['title' => __('media:delete')]) ?>
+		<?php $this->include('component/modal-header', ['title' => __('media:delete')]) ?>
 		<div class="modal-body cms-confirm">
 			<p class="question"><?= escape(__('media:confirm-delete')) ?></p>
 			<p class="cms-modal-remove-message"><?= escape($asset->filename) ?></p>

@@ -25,7 +25,7 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 		<div class="line">
 			<h1><?= escape(__('menu:create-title')) ?></h1>
 		</div>
-		<?php $this->insert('component/content-locales', [
+		<?php $this->include('component/content-locales', [
 			'locales' => $locales,
 			'selected' => $defaultLocale,
 			'controlId' => 'cms-menu-locale',
@@ -62,7 +62,7 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 					<p class="help"><?= escape(__('menu:handle-help')) ?></p>
 				</div>
 
-				<?php $this->insert('menu/localized', [
+				<?php $this->include('menu/localized', [
 					'name' => 'description',
 					'label' => __('menu:description'),
 					'values' => $description,

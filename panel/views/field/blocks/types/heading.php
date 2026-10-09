@@ -19,13 +19,13 @@ $disabled = (bool) ($this->unwrap($readonly ?? null) ?? false) || ($subs['level'
 <div class="heading" data-heading>
 	<?php if (isset($subs['text'])): ?>
 		<div class="text">
-			<?php $this->insert('field/row-fields/field', ['sub' => $subs['text'], 'labels' => false]) ?>
+			<?php $this->include('field/row-fields/field', ['sub' => $subs['text'], 'labels' => false]) ?>
 		</div>
 	<?php endif ?>
 	<?php if (isset($subs['level'])): ?>
 		<div class="level">
 			<div hidden>
-				<?php $this->insert('field/row-fields/field', ['sub' => $subs['level'], 'labels' => false]) ?>
+				<?php $this->include('field/row-fields/field', ['sub' => $subs['level'], 'labels' => false]) ?>
 			</div>
 			<button
 				type="button"

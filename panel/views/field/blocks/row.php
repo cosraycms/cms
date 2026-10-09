@@ -128,7 +128,7 @@ $retype = count($blockTypes) > 1;
 					<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 				</span>
 			<?php endif ?>
-			<?php $this->insert('field/blocks/inserter', [
+			<?php $this->include('field/blocks/inserter', [
 				'commonChoices' => $commonChoices,
 				'more' => $more,
 				'id' => "{$rowId}-insert",
@@ -251,7 +251,7 @@ $retype = count($blockTypes) > 1;
 	<?php endif ?>
 	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
 		<div class="cms-fields">
-			<?php $this->insert($editor ?? 'field/row-fields', [
+			<?php $this->include($editor ?? 'field/row-fields', [
 				'type' => $blockType,
 				'ownMeta' => false,
 				'readonly' => $readonly,
@@ -264,10 +264,10 @@ $retype = count($blockTypes) > 1;
 	</div>
 	<?php if ($settings): ?>
 		<dialog class="cms-modal" data-size="compact" data-meta>
-			<?php $this->insert('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
+			<?php $this->include('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
 			<div class="modal-body cms-settings">
 			<?php if ($columns > 1) {
-				$this->insert('field/blocks/layout', [
+				$this->include('field/blocks/layout', [
 					'layout' => $layout->array(),
 					'columns' => $area->colspan ?? $columns,
 					'min' => $min,
@@ -275,7 +275,7 @@ $retype = count($blockTypes) > 1;
 				]);
 			} ?>
 			<?php if ($metaControl !== null) {
-				$this->insert('field/meta', [
+				$this->include('field/meta', [
 					'field' => $field,
 					'control' => $metaControl,
 					'meta' => $rowData['meta'] ?? null,
@@ -288,7 +288,7 @@ $retype = count($blockTypes) > 1;
 				<?php if ($labels): ?>
 					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
 				<?php endif ?>
-				<?php $this->insert('field/meta', [
+				<?php $this->include('field/meta', [
 					'field' => $sub,
 					'control' => $sub['metaControl'],
 					'meta' => $fieldsData[$subName]['meta'] ?? null,

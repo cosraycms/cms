@@ -17,7 +17,7 @@ if (is_string($value) && $value !== '') {
 	$value = Codec::input($value, $timezone) ?? $value;
 }
 
-$this->insert('field/input', [
+$this->include('field/input', [
 	'field' => $field,
 	'id' => $id,
 	'name' => $name,

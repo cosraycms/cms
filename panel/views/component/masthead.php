@@ -15,9 +15,9 @@ $label = is_array($account) && $account['name'] === null
 
 ?>
 <header class="cms-masthead">
-	<?php $this->insert('component/logo') ?>
+	<?php $this->include('component/logo') ?>
 
-	<?php $this->insert('component/area-nav') ?>
+	<?php $this->include('component/area-nav') ?>
 
 	<?php if (is_array($account)): ?>
 		<div class="account">

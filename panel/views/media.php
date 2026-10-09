@@ -10,19 +10,19 @@ use function Cosray\escape;
 $part = (string) ($part ?? 'page');
 
 if ($part === 'detail') {
-	$this->insert('media/detail');
+	$this->include('media/detail');
 
 	return;
 }
 
 if ($part === 'tiles') {
-	$this->insert('media/tiles');
+	$this->include('media/tiles');
 
 	return;
 }
 
 if ($part === 'picker') {
-	$this->insert('media/picker');
+	$this->include('media/picker');
 
 	return;
 }
@@ -92,7 +92,7 @@ unset($search['page']);
 						<div class="cms-media-empty"><?= escape(__('media:no-files')) ?></div>
 					<?php else: ?>
 						<div class="cms-asset-grid" data-media-grid>
-							<?php $this->insert('media/tiles') ?>
+							<?php $this->include('media/tiles') ?>
 						</div>
 					<?php endif ?>
 				</div>
@@ -117,7 +117,7 @@ unset($search['page']);
 						data-inspector-expand>
 						<?= Icon::render('layout-sidebar-inset-reverse') ?>
 					</button>
-					<?php $this->insert('component/content-locales', [
+					<?php $this->include('component/content-locales', [
 						'locales' => $contentLocales,
 						'selected' => $defaultLocale,
 						'controlId' => 'cms-media-locale-strip',
@@ -137,12 +137,12 @@ unset($search['page']);
 						</button>
 					</div>
 					<div class="scroll">
-						<?php $this->insert('component/content-locales', [
+						<?php $this->include('component/content-locales', [
 							'locales' => $contentLocales,
 							'selected' => $defaultLocale,
 							'controlId' => 'cms-media-locale',
 						]) ?>
-						<?php $this->insert('media/detail', (array) $this->unwrap($detail ?? [])) ?>
+						<?php $this->include('media/detail', (array) $this->unwrap($detail ?? [])) ?>
 					</div>
 				</div>
 			</aside>

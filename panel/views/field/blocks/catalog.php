@@ -7,7 +7,7 @@ $label = (string) ($field['label'] ?? $field['name'] ?? '');
 $title = __('field:add-block') . ($label !== '' ? ' — ' . $label : '');
 ?>
 <template data-block-catalog>
-	<?php $this->insert('component/modal-header', ['title' => $title]) ?>
+	<?php $this->include('component/modal-header', ['title' => $title]) ?>
 	<div class="modal-body cms-block-catalog">
 		<label class="search">
 			<?= $this->escape(__('field:search-blocks')) ?>

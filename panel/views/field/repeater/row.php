@@ -15,7 +15,7 @@ $subField = ['required' => false, 'immutable' => false];
 		) ?>" data-repeater-label>
 			<?= is_int($index) ? ($index + 1) . '.' : '' ?>
 		</label>
-		<?php $this->insert('field/control', [
+		<?php $this->include('field/control', [
 			'field' => $subField,
 			'control' => $item,
 			'id' => $itemId,

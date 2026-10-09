@@ -199,7 +199,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<?php endforeach ?>
 					</div>
 					<dialog class="cms-modal" data-size="compact" data-meta>
-						<?php $this->insert('component/modal-header', ['title' => 'Shared dialog']) ?>
+						<?php $this->include('component/modal-header', ['title' => 'Shared dialog']) ?>
 						<div class="modal-body">
 							<label for="sample-dialog-name">Name</label>
 							<input id="sample-dialog-name" class="cms-input" data-dialog-focus value="Live setting" />
@@ -210,7 +210,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 									<button type="button" disabled>Unavailable action</button>
 								</div>
 								<dialog class="cms-modal" data-size="compact" data-meta>
-									<?php $this->insert('component/modal-header', ['title' => 'Nested dialog']) ?>
+									<?php $this->include('component/modal-header', ['title' => 'Nested dialog']) ?>
 									<div class="modal-body">Escape returns to the underlying dialog.</div>
 									<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
 								</dialog>
@@ -315,12 +315,12 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 						<div class="pane-scroll">
 							<div class="inner">
 								<div class="sheet">
-									<?php $this->insert('component/content-locales', [
+									<?php $this->include('component/content-locales', [
 										'locales' => $locales,
 										'selected' => $defaultLocale,
 										'controlId' => 'styleguide-fields-locale',
 									]) ?>
-									<?php $this->insert('field/fieldset', [
+									<?php $this->include('field/fieldset', [
 										'fieldset' => $fieldset,
 										'fieldsByName' => $fieldsByName,
 										'content' => $content,
@@ -335,7 +335,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 											<?php if (isset($fieldsetMembers[$field['name'] ?? ''])) {
 												continue;
 											} ?>
-											<?php $this->insert('field/item', [
+											<?php $this->include('field/item', [
 												'field' => $field,
 												'content' => $content,
 												'locales' => $locales,
@@ -363,13 +363,13 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => 'de',
 								'controlId' => 'styleguide-fallback-locale',
 							]) ?>
 							<div class="cms-fields">
-								<?php $this->insert('field/item', [
+								<?php $this->include('field/item', [
 									'field' => $fallbackField,
 									'content' => $fallbackContent,
 									'locales' => $locales,
@@ -391,7 +391,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					own control, while row spans and conditional fields keep their grid placement.
 					Resize the viewport to check wrapping and stacked fields.
 				</p>
-				<?php $this->insert('styleguide/alignment') ?>
+				<?php $this->include('styleguide/alignment') ?>
 			</section>
 
 			<section class="section" data-section="richtext">
@@ -407,14 +407,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 								'controlId' => 'styleguide-richtext-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($richtextFields as $field): ?>
-									<?php $this->insert('field/item', [
+									<?php $this->include('field/item', [
 										'field' => $field,
 										'content' => $richtextContent,
 										'locales' => $locales,
@@ -443,14 +443,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 								'controlId' => 'styleguide-code-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($codeFields as $field): ?>
-									<?php $this->insert('field/item', [
+									<?php $this->include('field/item', [
 										'field' => $field,
 										'content' => $codeContent,
 										'locales' => $locales,
@@ -488,14 +488,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 								'controlId' => 'styleguide-media-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($mediaFields as $field): ?>
-									<?php $this->insert('field/item', [
+									<?php $this->include('field/item', [
 										'field' => $field,
 										'content' => $mediaContent,
 										'locales' => $locales,
@@ -524,14 +524,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 								'controlId' => 'styleguide-entries-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($entriesFields as $field): ?>
-									<?php $this->insert('field/item', [
+									<?php $this->include('field/item', [
 										'field' => $field,
 										'content' => $entriesContent,
 										'locales' => $locales,
@@ -561,14 +561,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
 					<div class="inner">
 						<div class="sheet">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 								'controlId' => 'styleguide-blocks-locale',
 							]) ?>
 							<div class="cms-fields">
 								<?php foreach ($blocksFields as $field): ?>
-									<?php $this->insert('field/item', [
+									<?php $this->include('field/item', [
 										'field' => $field,
 										'content' => $blocksContent,
 										'locales' => $locales,
@@ -590,7 +590,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					Rendered through <code>panel/views/node/inspector.php</code> — the status,
 					paths and advanced tabs of an existing node.
 				</p>
-				<?php $this->insert('node/inspector', (array) $this->unwrap($inspector)) ?>
+				<?php $this->include('node/inspector', (array) $this->unwrap($inspector)) ?>
 			</section>
 
 			<section class="section" data-section="page-head">
@@ -653,7 +653,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 								</thead>
 								<tbody role="rowgroup">
 									<?php foreach ($rows as $row): ?>
-										<?php $this->insert('collection/row', [
+										<?php $this->include('collection/row', [
 											'row' => $row,
 											'treeMode' => true,
 											'showChildren' => true,

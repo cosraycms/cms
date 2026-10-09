@@ -22,7 +22,7 @@ $manages = (bool) $manages;
 ?>
 <div class="menu-props">
 	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
-		<?php $this->insert('menu/localized', [
+		<?php $this->include('menu/localized', [
 			'name' => 'description',
 			'label' => __('menu:description'),
 			'values' => $description,

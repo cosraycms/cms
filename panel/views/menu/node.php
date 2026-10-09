@@ -163,7 +163,7 @@ $confirm = $descendants === 0
 		data-menu-list
 		data-parent="<?= escape($id) ?>">
 		<?php foreach ($children as $child): ?>
-			<?php $this->insert('menu/node', [
+			<?php $this->include('menu/node', [
 				'row' => $child,
 				'treeUrl' => $treeUrl,
 				'selected' => $selected,

@@ -35,7 +35,7 @@ $descriptionId = "fieldset-{$name}-description";
 			<?php if (!is_string($fieldName) || !isset($fieldsByName[$fieldName])) {
 				continue;
 			} ?>
-			<?php $this->insert('field/item', [
+			<?php $this->include('field/item', [
 				'field' => $fieldsByName[$fieldName],
 				'content' => $content,
 				'locales' => $locales,

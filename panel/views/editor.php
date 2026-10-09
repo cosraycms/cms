@@ -127,7 +127,7 @@ $action = $edit
 					aria-label="<?= escape(__('editor:save-options')) ?>">
 					<?= \Cosray\Panel\Icon::render('chevron-down') ?>
 				</button>
-				<?php $this->insert('node/save-options', ['draft' => $draft]) ?>
+				<?php $this->include('node/save-options', ['draft' => $draft]) ?>
 			</div>
 		</div>
 	</header>
@@ -162,7 +162,7 @@ $action = $edit
 						// node adopts the same uid. ?>
 						<input type="hidden" name="uid" value="<?= escape($uid) ?>" />
 					<?php endif ?>
-					<?php $this->insert('field/sheet', [
+					<?php $this->include('field/sheet', [
 						'fields' => $fields,
 						'fieldsets' => $fieldsets,
 						'content' => $content,
@@ -177,7 +177,7 @@ $action = $edit
 		</div>
 
 		<?php if ($showSettings): ?>
-			<?php $this->insert('node/inspector', [
+			<?php $this->include('node/inspector', [
 				'node' => $node,
 				'locales' => $locales,
 				'defaultLocale' => $defaultLocale,
@@ -205,7 +205,7 @@ $action = $edit
 		$fields,
 		static fn(mixed $f): bool => is_array($f) && (($f['control'] ?? [])['name'] ?? null) === 'blocks',
 	)) {
-		$this->insert('node/layout-preview', [
+		$this->include('node/layout-preview', [
 			'url' => $edit ? $links->blocks($uid) : $links->createBlocks((string) ($type['handle'] ?? ''), $parent),
 		]);
 	} ?>

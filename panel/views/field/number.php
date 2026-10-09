@@ -3,7 +3,7 @@
 $control = (array) $this->unwrap($control);
 $props = (array) ($control['props'] ?? []);
 
-$this->insert('field/input', [
+$this->include('field/input', [
 	'field' => $field,
 	'id' => $id,
 	'name' => $name,

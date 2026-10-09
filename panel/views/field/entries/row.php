@@ -94,7 +94,7 @@ $readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
 		data-repeater-body
 		<?= $open ? '' : 'hidden' ?>>
 		<div class="cms-fields">
-			<?php $this->insert('field/row-fields', [
+			<?php $this->include('field/row-fields', [
 				'type' => $entryType,
 				'fieldsData' => $fieldsData,
 				'rowName' => $rowName,

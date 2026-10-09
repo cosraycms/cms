@@ -13,14 +13,14 @@ if ($layer !== 'frame') {
 <?php if ($layer !== 'frame'): ?>
 <div id="frame" class="frame">
 <?php endif ?>
-	<?php $this->insert('component/navigation') ?>
+	<?php $this->include('component/navigation') ?>
 
 	<main id="main" class="main" hx-target:inherited="#main">
-		<?= $this->body() ?>
+		<?= $this->slot() ?>
 	</main>
 <?php if ($layer !== 'frame'): ?>
 </div>
 <?php endif ?>
 <?php if ($layer === 'frame'): ?>
-	<?php $this->insert('component/area-nav', ['oob' => true]) ?>
+	<?php $this->include('component/area-nav', ['oob' => true]) ?>
 <?php endif ?>

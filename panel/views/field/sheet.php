@@ -75,7 +75,7 @@ foreach ($fields as $field) {
 <div class="sheet">
 	<?php foreach ($sections as $section): ?>
 		<?php if (isset($section['fieldset'])): ?>
-			<?php $this->insert('field/fieldset', [
+			<?php $this->include('field/fieldset', [
 				'fieldset' => $section['fieldset'],
 				'fieldsByName' => $fieldsByName,
 				'content' => $content,
@@ -88,7 +88,7 @@ foreach ($fields as $field) {
 		<?php else: ?>
 			<div class="cms-fields">
 				<?php foreach ($section['fields'] as $field): ?>
-					<?php $this->insert('field/item', [
+					<?php $this->include('field/item', [
 						'field' => $field,
 						'content' => $content,
 						'locales' => $locales,

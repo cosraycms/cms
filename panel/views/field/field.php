@@ -109,7 +109,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						<?php // Required applies to the default locale only — the same
 
 						// rule the server-side shape validates. ?>
-						<?php $this->insert('field/control', [
+						<?php $this->include('field/control', [
 							'field' => ['required' => $locale['id'] === $defaultLocale && $required] + $field,
 							'control' => $control,
 							'id' => "{$idRoot}-{$locale['id']}",
@@ -140,7 +140,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					</div>
 				<?php endforeach ?>
 			<?php else: ?>
-				<?php $this->insert('field/control', [
+				<?php $this->include('field/control', [
 					'field' => $field,
 					'control' => $control,
 					'id' => "{$idRoot}-{$neutral}",
@@ -162,12 +162,12 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	</div>
 	<?php if (is_array($metaControl)): ?>
 		<dialog class="cms-modal" data-size="compact" data-meta>
-			<?php $this->insert('component/modal-header', [
+			<?php $this->include('component/modal-header', [
 				'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
 			]) ?>
 			<div class="modal-body cms-settings">
 			<?php // The blocks field renders its gap group with the split toggle. ?>
-			<?php $this->insert($controlName === 'blocks' ? 'field/blocks/meta' : 'field/meta', [
+			<?php $this->include($controlName === 'blocks' ? 'field/blocks/meta' : 'field/meta', [
 				'field' => $field,
 				'control' => $metaControl,
 				'meta' => $data['meta'] ?? null,

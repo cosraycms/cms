@@ -44,7 +44,7 @@ $render = function (string $key, bool $hidden) use ($subs, $subField, $id, $name
 		<label class="cms-sub-label" for="<?= escape($subId) ?>">
 			<?= escape((string) ($sub['label'] ?? $key)) ?>
 		</label>
-		<?php $this->insert('field/control', [
+		<?php $this->include('field/control', [
 			'field' => $subField,
 			'control' => (array) ($sub['control'] ?? []),
 			'id' => $subId,

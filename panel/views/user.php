@@ -93,20 +93,20 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 						<fieldset class="cms-fieldset" data-fieldset="account">
 							<legend class="legend"><?= escape(__('user:account')) ?></legend>
 							<div class="cms-fields fields">
-								<?php $this->insert('user/input', [
+								<?php $this->include('user/input', [
 									'name' => 'email',
 									'label' => __('user:email'),
 									'type' => 'email',
 									'value' => $user->email,
 									'required' => true,
 								]) ?>
-								<?php $this->insert('user/input', [
+								<?php $this->include('user/input', [
 									'name' => 'username',
 									'label' => __('user:username'),
 									'value' => $user->username,
 									'help' => __('user:username-help'),
 								]) ?>
-								<?php $this->insert('user/input', [
+								<?php $this->include('user/input', [
 									'name' => 'name',
 									'label' => __('user:name'),
 									'value' => $user->name ?? '',
@@ -131,7 +131,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 									</div>
 								<?php endif ?>
 								<?php if ($profile): ?>
-									<?php $this->insert('user/input', [
+									<?php $this->include('user/input', [
 										'name' => 'current_password',
 										'label' => __('user:current-password'),
 										'type' => 'password',
@@ -140,7 +140,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 										'width' => 100,
 									]) ?>
 								<?php endif ?>
-								<?php $this->insert('user/input', [
+								<?php $this->include('user/input', [
 									'name' => 'password',
 									'label' => $exists ? __('user:new-password') : __('user:password'),
 									'type' => 'password',
@@ -148,7 +148,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 									'autocomplete' => 'new-password',
 									'help' => $exists ? __('user:password-keep-help') : __('user:password-help'),
 								]) ?>
-								<?php $this->insert('user/input', [
+								<?php $this->include('user/input', [
 									'name' => 'password_repeat',
 									'label' => __('user:password-repeat'),
 									'type' => 'password',
@@ -160,7 +160,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					</div>
 
 					<?php if ($fields['fields'] !== []): ?>
-						<?php $this->insert('field/sheet', [
+						<?php $this->include('field/sheet', [
 							'fields' => $fields['fields'],
 							'fieldsets' => $fields['fieldsets'],
 							'content' => $fields['content'],
@@ -174,7 +174,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		</div>
 
 		<?php if (!$profile): ?>
-			<?php $this->insert('user/inspector', [
+			<?php $this->include('user/inspector', [
 				'user' => $user,
 				'roles' => $roles,
 				'locked' => $locked,

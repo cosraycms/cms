@@ -77,7 +77,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			<?php endif ?>
 		</div>
 
-		<?php $this->insert('menu/localized', [
+		<?php $this->include('menu/localized', [
 			'name' => 'title',
 			'label' => __('menu:item-title'),
 			'values' => $values['title'],
@@ -150,7 +150,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 			</div>
 		</div>
 
-		<?php $this->insert('menu/localized', [
+		<?php $this->include('menu/localized', [
 			'name' => 'path',
 			'label' => __('menu:item-path'),
 			'values' => $values['path'],

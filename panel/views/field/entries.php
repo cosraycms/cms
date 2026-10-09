@@ -61,7 +61,7 @@ $single = count($entryTypes) === 1;
 				continue;
 			}
 
-			$this->insert('field/entries/row', [
+			$this->include('field/entries/row', [
 				'index' => $index,
 				'rowData' => $rowData,
 				'entryType' => $entryTypes[$type],
@@ -72,7 +72,7 @@ $single = count($entryTypes) === 1;
 	<?php if (!$readonly): ?>
 		<?php foreach ($entryTypes as $entryType): ?>
 			<template data-repeater-template="<?= $this->escape((string) $entryType['type']) ?>">
-				<?php $this->insert('field/entries/row', [
+				<?php $this->include('field/entries/row', [
 					'index' => '__i__',
 					'rowData' => null,
 					'entryType' => $entryType,
@@ -82,7 +82,7 @@ $single = count($entryTypes) === 1;
 		<?php endforeach ?>
 		<div class="adders" data-repeater-footer>
 			<?php foreach ($entryTypes as $entryType): ?>
-				<?php $this->insert('field/entries/adder', [
+				<?php $this->include('field/entries/adder', [
 					'entryType' => $entryType,
 					'empty' => $rows === [],
 					'full' => $full,

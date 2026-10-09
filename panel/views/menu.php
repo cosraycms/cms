@@ -34,7 +34,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 			</div>
 		</div>
 		<div class="actions">
-			<?php $this->insert('component/content-locales', [
+			<?php $this->include('component/content-locales', [
 				'locales' => $locales,
 				'selected' => $defaultLocale,
 				'controlId' => 'cms-menu-locale',
@@ -44,7 +44,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 	</header>
 
 	<div class="body">
-		<?php $this->insert('menu/properties') ?>
+		<?php $this->include('menu/properties') ?>
 
 		<?php if (is_string($notice)): ?>
 			<div class="cms-notice" role="status">
@@ -96,7 +96,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 						data-menu-list
 						data-parent="">
 						<?php foreach ($tree as $row): ?>
-							<?php $this->insert('menu/node', [
+							<?php $this->include('menu/node', [
 								'row' => $row,
 								'treeUrl' => $urls['tree'],
 								'selected' => is_array($pane) ? (string) ($pane['item'] ?? '') : '',
@@ -128,7 +128,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 
 			<aside class="pane" id="menu-item-pane">
 				<?php if (is_array($pane)): ?>
-					<?php $this->insert('menu/pane', ['pane' => $pane]) ?>
+					<?php $this->include('menu/pane', ['pane' => $pane]) ?>
 				<?php else: ?>
 					<div class="pane-empty">
 						<p><?= escape(__('menu:pane-empty')) ?></p>

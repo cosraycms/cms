@@ -1,6 +1,6 @@
 <?php
 
-$this->insert('field/textarea', [
+$this->include('field/textarea', [
 	'field' => $field,
 	'control' => $control,
 	'id' => $id,

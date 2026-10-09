@@ -66,7 +66,7 @@ $publishedLabel = __('editor:published-label');
 			<?= Icon::render('layout-sidebar-inset-reverse') ?>
 		</button>
 		<?php if ($contentLocales): ?>
-			<?php $this->insert('component/content-locales', [
+			<?php $this->include('component/content-locales', [
 				'locales' => $locales,
 				'selected' => $defaultLocale,
 				'controlId' => 'cms-content-locale-strip',
@@ -130,7 +130,7 @@ $publishedLabel = __('editor:published-label');
 					<?= $first === 'status' ? '' : 'hidden' ?>>
 					<?php if ($contentLocales): ?>
 						<section class="section">
-							<?php $this->insert('component/content-locales', [
+							<?php $this->include('component/content-locales', [
 								'locales' => $locales,
 								'selected' => $defaultLocale,
 							]) ?>
@@ -153,7 +153,7 @@ $publishedLabel = __('editor:published-label');
 									value="1"
 									<?= $node['published'] ?? false ? 'checked' : '' ?> />
 							</label>
-							<?php $this->insert('node/changes-note', ['draft' => $meta['draft'] ?? null]) ?>
+							<?php $this->include('node/changes-note', ['draft' => $meta['draft'] ?? null]) ?>
 
 							<label class="toggle">
 								<span class="copy">
@@ -206,7 +206,7 @@ $publishedLabel = __('editor:published-label');
 						</dl>
 
 						<dialog class="cms-modal" data-paths-dialog>
-							<?php $this->insert('component/modal-header', ['title' => __('editor:paths')]) ?>
+							<?php $this->include('component/modal-header', ['title' => __('editor:paths')]) ?>
 							<div class="modal-body cms-settings">
 								<?php foreach ($locales as $locale): ?>
 									<div class="field">
@@ -240,7 +240,7 @@ $publishedLabel = __('editor:published-label');
 						</dialog>
 
 						<?php if (is_string($pathsUrl)): ?>
-							<?php $this->insert('editor-paths', [
+							<?php $this->include('editor-paths', [
 								'paths' => $generatedPaths,
 								'pathsUrl' => $pathsUrl,
 							]) ?>

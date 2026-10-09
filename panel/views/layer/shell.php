@@ -12,7 +12,7 @@ if ($layer !== 'shell') {
 
 ?>
 <div class="cms-shell" hx-history-elt>
-	<?php $this->insert('component/masthead') ?>
+	<?php $this->include('component/masthead') ?>
 
-	<?= $this->body() ?>
+	<?= $this->slot() ?>
 </div>

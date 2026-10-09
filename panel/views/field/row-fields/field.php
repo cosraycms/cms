@@ -20,7 +20,7 @@ $gridStyle = "grid-column: span {$width} / span {$width}";
 // against a same-named top-level field. Scoped conditions come later.
 unset($sub['when']);
 ?>
-<?php $this->insert('field/field', [
+<?php $this->include('field/field', [
 	'field' => $sub,
 	'bareLabel' => !$this->unwrap($labels ?? true),
 	'data' => $fieldsData[$subName] ?? null,

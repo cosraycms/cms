@@ -23,7 +23,7 @@ if ($rowspan > 100 || $rowspan <= 0) {
 $gridStyle = "grid-column: span {$width} / span {$width}; --rows: {$rowspan}";
 ?>
 
-<?php $this->insert('field/field', [
+<?php $this->include('field/field', [
 	'field' => $field,
 	'data' => $content[$fieldName] ?? null,
 	'locales' => $locales,

@@ -29,7 +29,7 @@ $subField = ['required' => false, 'immutable' => false];
 			<label class="cms-sub-label" id="<?= escape($subId) ?>-label" for="<?= escape($subId) ?>">
 				<?= escape((string) ($sub['label'] ?? $key)) ?>
 			</label>
-			<?php $this->insert('field/control', [
+			<?php $this->include('field/control', [
 				'field' => $subField,
 				'control' => (array) ($sub['control'] ?? []),
 				'id' => $subId,

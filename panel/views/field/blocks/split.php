@@ -131,7 +131,7 @@ $label = __('field:split-block');
 				continue;
 			}
 
-			$this->insert('field/blocks/row', [
+			$this->include('field/blocks/row', [
 				'index' => $position,
 				'rowData' => $block,
 				'blockType' => $blockTypes[$type],
@@ -142,16 +142,16 @@ $label = __('field:split-block');
 		} ?>
 	</div>
 	<dialog class="cms-modal" data-size="compact" data-meta>
-		<?php $this->insert('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
+		<?php $this->include('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
 		<div class="modal-body cms-settings">
-			<?php $this->insert('field/blocks/layout', [
+			<?php $this->include('field/blocks/layout', [
 				'layout' => $layout->array(),
 				'columns' => $columns,
 				'min' => $min,
 				'id' => "{$rowId}-layout",
 			]) ?>
 			<?php if ($metaControl !== null) {
-				$this->insert('field/meta', [
+				$this->include('field/meta', [
 					'field' => $field,
 					'control' => $metaControl,
 					'meta' => $rowData['meta'] ?? null,

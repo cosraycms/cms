@@ -60,12 +60,12 @@ foreach ($subs as $sub) {
 			<div class="cms-fields fields">
 				<?php foreach ($fieldsetsByFirst[$subName]['members'] as $member): ?>
 					<?php if (isset($subsByName[$member])): ?>
-						<?php $this->insert('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
+						<?php $this->include('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
 					<?php endif ?>
 				<?php endforeach ?>
 			</div>
 		</fieldset>
 	<?php elseif (!isset($fieldsetMembers[$subName])): ?>
-		<?php $this->insert('field/row-fields/field', ['sub' => $sub]) ?>
+		<?php $this->include('field/row-fields/field', ['sub' => $sub]) ?>
 	<?php endif ?>
 <?php endforeach ?>

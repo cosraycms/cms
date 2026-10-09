@@ -248,7 +248,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 						</thead>
 						<tbody role="rowgroup">
 							<?php foreach ($page->table->rows as $row): ?>
-								<?php $this->insert('collection/row', [
+								<?php $this->include('collection/row', [
 									'row' => $row,
 									'treeMode' => $page->table->treeMode,
 									'showChildren' => $page->table->showChildren,
@@ -296,7 +296,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 
 	<?php if ($bulk): ?>
 		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="delete">
-			<?php $this->insert('component/modal-header', ['title' => __('bulk:delete')]) ?>
+			<?php $this->include('component/modal-header', ['title' => __('bulk:delete')]) ?>
 			<div class="modal-body cms-confirm">
 			<p
 				class="question"
@@ -328,7 +328,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 		</dialog>
 
 		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="duplicate">
-			<?php $this->insert('component/modal-header', ['title' => __('bulk:duplicate')]) ?>
+			<?php $this->include('component/modal-header', ['title' => __('bulk:duplicate')]) ?>
 			<div class="modal-body cms-confirm">
 			<p
 				class="question"
@@ -360,7 +360,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 
 		<?php if ($page->bulk['showPublished']): ?>
 			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="publish">
-				<?php $this->insert('component/modal-header', ['title' => __('bulk:publish')]) ?>
+				<?php $this->include('component/modal-header', ['title' => __('bulk:publish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p
 					class="question"
@@ -394,7 +394,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			</dialog>
 
 			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="unpublished">
-				<?php $this->insert('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
+				<?php $this->include('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p
 					class="question"
