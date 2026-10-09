@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Celema\Console\Buffer;
 use Celema\Console\Command;
+use Celema\Console\Io;
+use Celema\Quma\Database;
 use Celema\Router\Router;
-use Celema\Server\FrankenPhp;
-use Celema\Server\Server;
 use Cosray\App;
 use Cosray\Cms;
+use Cosray\Commands\Fulltext;
 use Cosray\Console\Commands;
+use Cosray\Console\Runtime;
 use Cosray\Context;
 use Cosray\Locales;
 use Cosray\Tests\TestCase;
@@ -44,12 +47,12 @@ final class CommandsTest extends TestCase
 		$locales = new Locales();
 		$locales->add('en', title: 'English');
 		$app->load($locales);
-		$commands = new Commands($app);
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
 		$commands->add(ScopedCommand::class);
-		$entries = $commands->commands()->entries();
-		$entry = end($entries);
-		$command = $entry->command();
 
+		$this->assertSame(0, $commands->runner()->run(['run', 'test:scoped']), $buffer->errorOutput());
+		$command = ScopedCommand::$invoked;
 		$this->assertInstanceOf(ScopedCommand::class, $command);
 		$this->assertInstanceOf(Cms::class, $command->cms);
 		$this->assertSame($app, $command->app);
@@ -64,15 +67,15 @@ final class CommandsTest extends TestCase
 			'error.enabled' => false,
 		]);
 		$app = new App($config, $this->factory(), new Router(), $this->container());
-		$commands = new Commands($app);
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
 		$expected = new FactoryCommand('factory');
 		$commands->add([
 			FactoryCommand::class => static fn(): FactoryCommand => $expected,
 		]);
-		$entries = $commands->commands()->entries();
-		$entry = end($entries);
 
-		$this->assertSame($expected, $entry->command());
+		$this->assertSame(0, $commands->runner()->run(['run', 'test:factory']), $buffer->errorOutput());
+		$this->assertSame($expected, FactoryCommand::$invoked);
 	}
 
 	public function testFulltextResolvesInConsoleScopeWithoutOpeningTheDatabase(): void
@@ -85,48 +88,31 @@ final class CommandsTest extends TestCase
 		$locales = new Locales();
 		$locales->add('en', 'English', pgDict: 'english');
 		$app->load($locales);
-		$commands = new Commands($app);
-		foreach ($commands->commands()->entries() as $entry) {
-			if ($entry->meta->full() === 'db:fulltext') {
-				$this->assertInstanceOf(\Cosray\Commands\Fulltext::class, $entry->command());
-				$this->assertFalse(
-					$app
-						->container()
-						->get(\Celema\Quma\Database::class)
-						->connected(),
-				);
-				return;
-			}
-		}
-		$this->fail('The app must provide db:fulltext.');
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
+
+		$this->assertSame(0, $commands->runner()->run(['run', 'help', 'db:fulltext']));
+		$this->assertStringContainsString('db:fulltext', $buffer->output());
+		$this->assertInstanceOf(Fulltext::class, new Runtime($app)->get(Fulltext::class));
+		$this->assertFalse($app->container()->get(Database::class)->connected());
 	}
 
-	public function testPanelPublishResolvesWithoutOpeningTheDatabase(): void
+	public function testPanelPublishIsAvailableWithoutTheDatabase(): void
 	{
 		$config = $this->config([
 			'db.dsn' => 'pgsql:host=not-a-database.invalid;dbname=missing',
 			'error.enabled' => false,
 		]);
 		$app = new App($config, $this->factory(), new Router(), $this->container());
-		$commands = new Commands($app);
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
 
-		foreach ($commands->commands()->entries() as $entry) {
-			if ($entry->meta->full() === 'panel:publish') {
-				$this->assertInstanceOf(\Cosray\Commands\PanelPublish::class, $entry->command());
-				$this->assertFalse(
-					$app
-						->container()
-						->get(\Celema\Quma\Database::class)
-						->connected(),
-				);
-				return;
-			}
-		}
-
-		$this->fail('The app must provide panel:publish.');
+		$this->assertSame(0, $commands->runner()->run(['run', 'help', 'panel:publish']));
+		$this->assertStringContainsString('panel:publish', $buffer->output());
+		$this->assertFalse($app->container()->get(Database::class)->connected());
 	}
 
-	public function testServerRegistersBothDevServers(): void
+	public function testServerRegistersTheDevelopmentCommands(): void
 	{
 		$config = $this->config([
 			'db.dsn' => 'sqlite::memory:',
@@ -134,61 +120,51 @@ final class CommandsTest extends TestCase
 		]);
 		$app = new App($config, $this->factory(), new Router(), $this->container());
 		$app->boot();
-		$commands = new Commands($app);
+		$buffer = new Buffer();
+		$commands = new Commands($app, new Io($buffer));
 		$commands->server(port: 8080, watch: ['src/**/*.php'], routePrefix: '/prefix');
-		$entries = $commands->commands()->entries();
-		$servers = [];
+		$commands->runner()->run(['run', 'commands']);
 
-		foreach ($entries as $entry) {
-			if (!in_array($entry->meta->full(), ['server', 'frankenphp'], strict: true)) {
-				continue;
-			}
+		$names = explode("\n", $buffer->output());
 
-			$servers[$entry->meta->full()] = $entry->command();
-		}
-
-		$this->assertInstanceOf(Server::class, $servers['server']);
-		$this->assertInstanceOf(FrankenPhp::class, $servers['frankenphp']);
-	}
-
-	public function testServerFallsBackToTheServerWatchDefaults(): void
-	{
-		$config = $this->config([
-			'db.dsn' => 'sqlite::memory:',
-			'error.enabled' => false,
-		]);
-		$app = new App($config, $this->factory(), new Router(), $this->container());
-		$app->boot();
-		$commands = new Commands($app);
-		$commands->server();
-		$names = [];
-
-		foreach ($commands->commands()->entries() as $entry) {
-			if (in_array($entry->meta->full(), ['server', 'frankenphp'], strict: true)) {
-				$this->assertIsObject($entry->command());
-				$names[] = $entry->meta->full();
-			}
-		}
-
-		sort($names);
-		$this->assertSame(['frankenphp', 'server'], $names);
+		$this->assertContains('server', $names);
+		$this->assertContains('reload', $names);
+		$this->assertContains('frankenphp:install', $names);
 	}
 }
 
 #[Command('test:scoped')]
 final class ScopedCommand
 {
+	public static ?self $invoked = null;
+
 	public function __construct(
 		public readonly Context $context,
 		public readonly Cms $cms,
 		public readonly App $app,
 	) {}
+
+	public function __invoke(): int
+	{
+		self::$invoked = $this;
+
+		return 0;
+	}
 }
 
 #[Command('test:factory')]
 final class FactoryCommand
 {
+	public static ?self $invoked = null;
+
 	public function __construct(
 		public readonly string $value,
 	) {}
+
+	public function __invoke(): int
+	{
+		self::$invoked = $this;
+
+		return 0;
+	}
 }

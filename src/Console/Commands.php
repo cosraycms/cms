@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Console;
 
-use Celema\Console\Commands as BaseCommands;
+use Celema\Console\Io;
 use Celema\Console\Runner;
 use Celema\Container\Container;
 use Celema\Quma\Commands as QumaCommands;
 use Celema\Quma\Connection;
-use Celema\Server\FrankenPhp;
+use Celema\Server\FrankenInstall;
+use Celema\Server\Reload;
 use Celema\Server\Server;
 use Celema\Verba\Command\StatusCommand;
 use Celema\Verba\Command\SyncCommand;
@@ -29,10 +30,10 @@ use Cosray\Panel\Client;
 /**
  * The base CLI command set of a Cosray application.
  *
- * Boots the app and bundles the quma migration commands and Cosray's own
- * commands as lazy factories. `server()` and `i18n()` register the per-app
- * dev server and translation commands; application command class-strings
- * are lazily autowired from one request-free console scope.
+ * Boots the app and registers the quma migration commands and Cosray's own
+ * commands on a console runner. `server()` and `i18n()` register the
+ * per-app dev server and translation commands; application command
+ * class-strings are lazily autowired from one request-free console scope.
  *
  *     $commands = new Commands($app);
  *     $commands->server(port: 6913, watch: ['src/**\/*.php']);
@@ -45,62 +46,67 @@ use Cosray\Panel\Client;
  */
 final class Commands
 {
-	private readonly BaseCommands $commands;
+	private readonly Runner $runner;
 	private ?Runtime $runtime = null;
 
 	public function __construct(
 		private readonly App $app,
+		Io $io = new Io(),
 	) {
 		$app->boot();
-		$container = $app->container();
-
-		$this->commands = QumaCommands::get(
-			$this->conn(),
-			migrationFactory: new MigrationFactory($container),
+		$this->runner = new Runner(
+			QumaCommands::get($this->conn(), migrationFactory: new MigrationFactory($app->container())),
+			$io,
+			debug: $app->config->debug(),
+			resolve: $this->resolve(...),
 		);
-		$this->commands->add([
-			Fulltext::class => fn(): Fulltext => $this->resolve(Fulltext::class),
+		$this->runner->add([
+			Fulltext::class,
 			PanelPublish::class => static fn(): PanelPublish => new PanelPublish(
 				$app->config,
 				new Client($app->config),
 			),
 			References::class => fn(): References => new References($this->conn()),
-			RecreateSortIndex::class => fn(): RecreateSortIndex => $this->resolve(RecreateSortIndex::class),
+			RecreateSortIndex::class,
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
-			Titles::class => fn(): Titles => $this->resolve(Titles::class),
+			Titles::class,
 		]);
 	}
 
+	/**
+	 * Takes the registrations a console Runner takes; class-strings are
+	 * autowired in the console scope.
+	 */
 	public function add(array|object|string $commands): self
 	{
-		if (is_string($commands)) {
-			$this->commands->add([$commands => fn(): object => $this->resolve($commands)]);
-
-			return $this;
-		}
-
-		if (is_array($commands)) {
-			$commands = $this->withAutowiredClasses($commands);
-		}
-
-		$this->commands->add($commands);
+		$this->runner->add($commands);
 
 		return $this;
 	}
 
 	/**
-	 * Registers the builtin and FrankenPHP dev servers.
+	 * Registers the development server, `frankenphp:install`, and `reload`.
+	 *
+	 * The server runs the built-in PHP server or, with `server:
+	 * 'frankenphp'` or `php run server frankenphp`, FrankenPHP, pinned to
+	 * `version` if given. Companions run alongside, like asset watchers:
+	 * each name with a command line or a list of arguments. `reload` serves
+	 * live reload on the port the server uses for it by default.
 	 *
 	 * The commands are only registered when the optional celema/server
 	 * package is installed, so production installs without dev
 	 * requirements skip them.
 	 *
 	 * @param list<string>|string|null $watch
+	 * @param array<string, list<string>|string> $companions
 	 */
 	public function server(
 		int $port = 1983,
 		array|string|null $watch = null,
 		string $routePrefix = '',
+		string $server = 'builtin',
+		?string $version = null,
+		array $companions = [],
 	): self {
 		if (!class_exists(Server::class)) {
 			return $this;
@@ -110,16 +116,22 @@ final class Commands
 			'docroot' => $this->app->config->path->public,
 			'port' => $port,
 			'routePrefix' => $routePrefix,
+			'server' => $server,
+			'version' => $version,
+			'companions' => $companions,
 		];
+		$reload = ['port' => self::reloadPort($port), 'companions' => $companions];
 
 		// Without patterns, the server's own default applies.
 		if ($watch !== null) {
 			$args['watch'] = $watch;
+			$reload['watch'] = $watch;
 		}
 
-		$this->commands->add([
+		$this->runner->add([
 			Server::class => static fn(): Server => new Server(...$args),
-			FrankenPhp::class => static fn(): FrankenPhp => new FrankenPhp(...$args),
+			Reload::class => static fn(): Reload => new Reload(...$reload),
+			new FrankenInstall(),
 		]);
 
 		return $this;
@@ -162,7 +174,7 @@ final class Commands
 			default: true,
 		);
 
-		$this->commands->add([
+		$this->runner->add([
 			SyncCommand::class => static fn(): SyncCommand => new SyncCommand([$domain]),
 			StatusCommand::class => static fn(): StatusCommand => new StatusCommand([$domain]),
 		]);
@@ -170,14 +182,24 @@ final class Commands
 		return $this;
 	}
 
-	public function runner(?bool $debug = null): Runner
+	public function runner(): Runner
 	{
-		return new Runner($this->commands, debug: $debug ?? $this->app->config->debug());
+		return $this->runner;
 	}
 
-	public function commands(): BaseCommands
+	/**
+	 * The server's first choice for its live reload port, so pages keep
+	 * loading the script when switching between `server` and `reload`.
+	 */
+	private static function reloadPort(int $port): int
 	{
-		return $this->commands;
+		foreach ([$port * 10, $port + 10_000] as $candidate) {
+			if ($candidate <= 65_535) {
+				return $candidate;
+			}
+		}
+
+		return $port + 1;
 	}
 
 	private function conn(): Connection
@@ -197,22 +219,5 @@ final class Commands
 	private function resolve(string $class): object
 	{
 		return ($this->runtime ??= new Runtime($this->app))->get($class);
-	}
-
-	private function withAutowiredClasses(array $commands): array
-	{
-		$result = [];
-
-		foreach ($commands as $key => $command) {
-			if (is_int($key) && is_string($command)) {
-				$result[$command] = fn(): object => $this->resolve($command);
-
-				continue;
-			}
-
-			$result[$key] = $command;
-		}
-
-		return $result;
 	}
 }

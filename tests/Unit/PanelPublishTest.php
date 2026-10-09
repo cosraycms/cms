@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
-use Celema\Console\Args;
+use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Composer\InstalledVersions;
 use Cosray\Commands\PanelPublish;
@@ -156,7 +156,7 @@ final class PanelPublishTest extends TestCase
 
 	private function publish(Config $config, Client $client): void
 	{
-		$this->assertSame(0, (new PanelPublish($config, $client))(new Args(), new Io('php://memory')));
+		$this->assertSame(0, (new PanelPublish($config, $client))(new Io(new Buffer())));
 	}
 
 	private function settings(array $settings = []): Config

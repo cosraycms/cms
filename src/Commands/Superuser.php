@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celema\Console\Args;
 use Celema\Console\Command;
 use Celema\Console\Io;
 use Celema\Quma\Connection;
@@ -22,9 +21,9 @@ class Superuser
 		$this->db = new Database($connection);
 	}
 
-	public function __invoke(Args $args, Io $io): int
+	public function __invoke(Io $io): int
 	{
-		$io->echoln("Create a superuser\n");
+		$io->line("Create a superuser\n");
 		$email = $io->ask('Email:');
 
 		if ($email === '') {
@@ -34,7 +33,7 @@ class Superuser
 		}
 
 		$name = $io->ask('Name:');
-		$password = $io->ask('Password:', hidden: true);
+		$password = $io->secret('Password:');
 
 		if ($password === '') {
 			$io->error('A password is required. Aborting.');
@@ -42,7 +41,7 @@ class Superuser
 			return 1;
 		}
 
-		if (!hash_equals($password, $io->ask('Repeat password:', hidden: true))) {
+		if (!hash_equals($password, $io->secret('Repeat password:'))) {
 			$io->error('The passwords do not match. Aborting.');
 
 			return 1;
@@ -57,12 +56,12 @@ class Superuser
 			])->run();
 		} catch (Throwable $e) {
 			$io->error('Error occurred. Please review your data!');
-			$io->error($e->getMessage());
+			$io->error('%s', $e->getMessage());
 
 			return 1;
 		}
 
-		$io->success("Successfully created superuser: {$email}");
+		$io->success('Successfully created superuser: %s', $email);
 
 		return 0;
 	}

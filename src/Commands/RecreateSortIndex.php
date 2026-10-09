@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celema\Console\Args;
 use Celema\Console\Command;
 use Celema\Console\Io;
 use Cosray\Context;
@@ -21,12 +20,14 @@ final class RecreateSortIndex
 		private readonly Context $context,
 	) {}
 
-	public function __invoke(Args $args, Io $io): int
+	public function __invoke(Io $io): int
 	{
 		$result = new Indexes($this->context->db, $this->context->locales())->reconcile();
-		$io->echoln(
-			"Title sort indexes reconciled: {$result['created']} created, {$result['dropped']} dropped; "
-				. implode(', ', $result['locales']),
+		$io->line(
+			'Title sort indexes reconciled: %d created, %d dropped; %s',
+			$result['created'],
+			$result['dropped'],
+			implode(', ', $result['locales']),
 		);
 
 		return 0;

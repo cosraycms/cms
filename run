@@ -48,9 +48,9 @@ $conn = new Connection($dsn, __DIR__ . '/db/sql')
 		'default' => [__DIR__ . '/db/migrations/update'],
 	]);
 
-$commands = QumaCommands::get($conn, migrationFactory: new MigrationFactory($container));
-$commands->add(new RecreateDb($database, $username, $password, $host));
-$commands->add(new References($conn));
+$runner = new Runner(QumaCommands::get($conn, migrationFactory: new MigrationFactory($container)));
+$runner->add(new RecreateDb($database, $username, $password, $host));
+$runner->add(new References($conn));
 // `db:titles` and `db:recreate-sort-index` need the booted app's node types
 // and/or configured locales. Cosray\Console\Commands registers them for apps;
 // the standalone library runner has no application context.
@@ -78,10 +78,7 @@ $panelI18n = new Domain(
 	default: true,
 );
 $i18nDomains = [$cosrayI18n, $panelI18n];
-$commands->add(new SyncCommand($i18nDomains));
-$commands->add(new StatusCommand($i18nDomains));
-
-$runner = new Runner($commands);
+$runner->add([new SyncCommand($i18nDomains), new StatusCommand($i18nDomains)]);
 
 exit($runner->run());
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celema\Console\Args;
-use Celema\Console\BufferedIo;
+use Celema\Console\Buffer;
+use Celema\Console\Io;
 use Cosray\Actor;
 use Cosray\Commands\Fulltext;
 use Cosray\Exception\RuntimeException;
@@ -214,7 +214,7 @@ final class FulltextStoreTest extends FulltextTestCase
 		self::assertSame(1, $report['indexed']);
 		self::assertSame(['fts-unknown'], array_keys($errors));
 		self::assertSame('Known', $this->source('fts-known'));
-		self::assertSame(1, (new Fulltext($this->rebuild()))(new Args(), new BufferedIo()));
+		self::assertSame(1, (new Fulltext($this->rebuild()))(new Io(new Buffer())));
 	}
 }
 

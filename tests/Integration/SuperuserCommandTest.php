@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celema\Console\Args;
-use Celema\Console\BufferedIo;
+use Celema\Console\Buffer;
+use Celema\Console\Io;
 use Cosray\Commands\Superuser;
 use Cosray\Tests\IntegrationTestCase;
 
@@ -77,12 +77,12 @@ final class SuperuserCommandTest extends IntegrationTestCase
 		$this->assertStringContainsString('The passwords do not match', $io->errorOutput());
 	}
 
-	/** @return array{0: int, 1: BufferedIo} */
+	/** @return array{0: int, 1: Buffer} */
 	private function runCommand(string $input): array
 	{
-		$io = new BufferedIo($input);
-		$exit = (new Superuser($this->conn()))(new Args([]), $io);
+		$buffer = new Buffer($input);
+		$exit = (new Superuser($this->conn()))(new Io($buffer));
 
-		return [$exit, $io];
+		return [$exit, $buffer];
 	}
 }

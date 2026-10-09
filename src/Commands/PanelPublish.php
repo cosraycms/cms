@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Cosray\Commands;
 
-use Celema\Console\Args;
 use Celema\Console\Command;
 use Celema\Console\Io;
 use Cosray\Config;
@@ -22,7 +21,7 @@ final class PanelPublish
 		private readonly Client $client,
 	) {}
 
-	public function __invoke(Args $args, Io $io): int
+	public function __invoke(Io $io): int
 	{
 		$panel = trim($this->config->panel->path, '/');
 		$segments = $panel === '' ? [] : explode('/', $panel);
@@ -78,7 +77,7 @@ final class PanelPublish
 				throw new RuntimeException("Published panel revision differs at {$target}; refusing to overwrite it.");
 			}
 
-			$io->echoln("Panel assets already published to {$target}");
+			$io->line('Panel assets already published to %s', $target);
 
 			return 0;
 		}
@@ -120,7 +119,7 @@ final class PanelPublish
 			}
 		}
 
-		$io->echoln('Published ' . (count($files) + 1) . " panel assets to {$target}");
+		$io->line('Published %d panel assets to %s', count($files) + 1, $target);
 
 		return 0;
 	}

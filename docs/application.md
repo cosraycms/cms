@@ -142,11 +142,11 @@ $commands->add(\App\Command\Import::class);
 return $commands->runner();
 ```
 
-- `server()` registers the built-in PHP server and FrankenPHP when the optional `celema/server` package is installed. FrankenPHP additionally needs its executable on `PATH` and uses its embedded PHP runtime.
+- `server()` registers the development server with `frankenphp:install` and `reload` when the optional `celema/server` package is installed. `php run server` runs the built-in PHP server, `php run server frankenphp` FrankenPHP with its embedded PHP runtime; `server: 'frankenphp'` makes FrankenPHP the default, `version:` pins its release, and `companions:` start processes alongside, like asset watchers. `reload` serves live reload for an application served elsewhere.
 - `i18n()` registers synchronization and status commands for a translation domain, scanning source paths and the app's schema labels. Cosray's own labels, such as that of the built-in all-content collection, are left to Cosray's catalogs. Call it per domain when needed.
 - `add()` accepts instances, class names, or keyed factories for commands needing custom scalar arguments.
 
-With `--watch`, both server commands update open pages when a file matching the `watch` patterns changes: they swap changed stylesheets in place and morph pages into a freshly rendered copy, which keeps the scroll position and form input. The panel reloads instead. Pages opt in by including the live reload script in the site's base layout, before `</body>`:
+While watching, the server updates open pages when a file matching the `watch` patterns changes: it swaps changed stylesheets in place and morphs pages into a freshly rendered copy, which keeps the scroll position and form input. The panel reloads instead. Pages opt in by including the live reload script in the site's base layout, before `</body>`:
 
 ```php
 <?= $cms->liveReload() ?>
