@@ -25,7 +25,7 @@
 		"celema/console": "dev-main",
 		"celema/core": "^0.7",
 		"celema/quma": "dev-main",
-		"celema/session": "^0.3",
+		"celema/session": "^0.4",
 		"celema/sire": "^0.5",
 		"celema/verba": "dev-main",
 		"cosray/legacy-richtext-converter": "^1.0",
