@@ -21,7 +21,7 @@
 		"ext-dom": "*",
 		"ext-sodium": "*",
 		"ext-xml": "*",
-		"celema/boiler": "dev-main",
+		"celema/boiler": "^0.9",
 		"celema/console": "dev-main",
 		"celema/core": "^0.7",
 		"celema/quma": "dev-main",
