@@ -9,6 +9,7 @@ use Cosray\Block\Placement;
 use Cosray\Block\RenderContext;
 use Cosray\Field;
 use Cosray\Field\Owner;
+use Cosray\Markup;
 use Cosray\Schema\Responsive;
 use Cosray\Schema\TranslateMode;
 use Generator;
@@ -33,7 +34,7 @@ class Blocks extends Value implements IteratorAggregate
 
 	public function __toString(): string
 	{
-		return $this->render();
+		return (string) $this->render();
 	}
 
 	public function json(): array
@@ -172,7 +173,7 @@ class Blocks extends Value implements IteratorAggregate
 		int $words = 30,
 		string $allowedTags = '',
 		int $index = 1,
-	): string {
+	): Markup {
 		$i = 0;
 
 		foreach ($this->leaves() as $block) {
@@ -183,11 +184,11 @@ class Blocks extends Value implements IteratorAggregate
 			if (++$i === $index) {
 				$text = $block->text;
 
-				return $text instanceof RichText ? $text->excerpt($words, $allowedTags) : '';
+				return $text instanceof RichText ? $text->excerpt($words, $allowedTags) : new Markup('');
 			}
 		}
 
-		return '';
+		return new Markup('');
 	}
 
 	// Supported args:
@@ -202,7 +203,7 @@ class Blocks extends Value implements IteratorAggregate
 	//   is replaced with the block's grid share in percent.
 	//   Default '(min-width: 48rem) {pct}vw, 100vw'
 	// - thumbSize: `media.sizes` name for gallery thumbs. Default 'block-thumb'
-	public function render(mixed ...$args): string
+	public function render(mixed ...$args): Markup
 	{
 		$columns = $this->columns();
 		$ctx = new RenderContext($this->owner, $this->fieldName, $columns, $args);
@@ -235,7 +236,7 @@ class Blocks extends Value implements IteratorAggregate
 			$out .= $block->renderWith($ctx, $types);
 		}
 
-		return $out . '</' . $ctx->tag() . '>';
+		return new Markup($out . '</' . $ctx->tag() . '>');
 	}
 
 	private function spacing(string $key): ?string

@@ -39,7 +39,7 @@ final class FulltextFinderTest extends FulltextTestCase
 		);
 		self::assertInstanceOf(Search::class, $results[0]->meta->search);
 		self::assertGreaterThan($results[2]->meta->search->score, $results[0]->meta->search->score);
-		self::assertStringContainsString('<mark>Apple</mark>', $results[0]->meta->search->snippet->html());
+		self::assertStringContainsString('<mark>Apple</mark>', $results[0]->meta->search->snippet->html()->html);
 		self::assertFalse(isset($this->cms->node->byUid('fts-rank-a')->meta->search));
 		self::assertFalse(isset(iterator_to_array($this->cms->nodes()->only('fts-rank-a'))[0]->meta->search));
 		$page = $this->cms->nodes()->fulltext('apple')->limit(1)->offset(1);
@@ -189,7 +189,7 @@ final class FulltextFinderTest extends FulltextTestCase
 		);
 		self::assertSame(0, $this->cms->nodes()->fulltext('confidential')->count());
 		$result = iterator_to_array($this->cms->nodes()->fulltext('cafe'))[0];
-		$html = $result->meta->search->snippet->html();
+		$html = $result->meta->search->snippet->html()->html;
 		self::assertStringContainsString('<mark>Café</mark>', $html);
 		self::assertStringNotContainsString('<script', $html);
 		self::assertStringNotContainsString('Confidential', $html);

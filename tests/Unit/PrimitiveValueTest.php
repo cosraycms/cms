@@ -152,7 +152,7 @@ final class PrimitiveValueTest extends TestCase
 		$field->translate();
 
 		$value = $field->value();
-		$this->assertSame('Hello World …', $value->excerpt(2));
+		$this->assertSame('Hello World …', $value->excerpt(2)->html);
 		$this->assertStringContainsString('<strong>World</strong>', (string) $value);
 	}
 
@@ -423,7 +423,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
-		$tag = $value->tag('hero-image');
+		$tag = $value->tag('hero-image')->html;
 
 		$this->assertStringContainsString('class="hero-image"', $tag);
 		$this->assertStringContainsString(

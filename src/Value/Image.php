@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Value;
 
 use Cosray\Assets\SizeSpec;
+use Cosray\Markup;
 
 use function Cosray\escape;
 
@@ -14,18 +15,18 @@ class Image extends File
 
 	public function __toString(): string
 	{
-		return $this->tag();
+		return (string) $this->tag();
 	}
 
-	public function tag(?string $class = null): string
+	public function tag(?string $class = null): Markup
 	{
-		return sprintf(
+		return new Markup(sprintf(
 			'<img %ssrc="%s" alt="%s" data-path-original="%s">',
 			$class ? sprintf('class="%s" ', escape($class)) : '',
 			$this->url(),
 			escape($this->alt() ?: strip_tags($this->title())),
 			$this->asset($this->index)?->path() ?? '',
-		);
+		));
 	}
 
 	/**

@@ -7,6 +7,7 @@ namespace Cosray\Finder;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
+use Cosray\Markup;
 use Iterator;
 
 class Menu implements Iterator
@@ -85,9 +86,9 @@ class Menu implements Iterator
 		return key($this->items) !== null;
 	}
 
-	public function html(string $class = '', string $tag = 'nav'): string
+	public function html(string $class = '', string $tag = 'nav'): Markup
 	{
-		return $this->compileHtml($this, $class, $tag);
+		return new Markup($this->compileHtml($this, $class, $tag));
 	}
 
 	protected function compileHtml(

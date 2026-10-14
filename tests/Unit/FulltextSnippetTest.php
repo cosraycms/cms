@@ -15,7 +15,7 @@ final class FulltextSnippetTest extends TestCase
 		self::assertSame("<script>alert('x')</script> & Café <img onerror=\"evil()\">", $snippet->text());
 		self::assertSame(
 			'&lt;script&gt;alert(&#039;x&#039;)&lt;/script&gt; &amp; <mark>Café &lt;img onerror=&quot;evil()&quot;&gt;</mark>',
-			$snippet->html(),
+			$snippet->html()->html,
 		);
 		self::assertSame(
 			[
@@ -36,7 +36,7 @@ final class FulltextSnippetTest extends TestCase
 
 	public function testEmptyAndUnhighlightedSnippetsArePlainText(): void
 	{
-		self::assertSame('', new Snippet('')->html());
-		self::assertSame('&lt;unmatched&gt;', new Snippet('<unmatched>')->html());
+		self::assertSame('', new Snippet('')->html()->html);
+		self::assertSame('&lt;unmatched&gt;', new Snippet('<unmatched>')->html()->html);
 	}
 }

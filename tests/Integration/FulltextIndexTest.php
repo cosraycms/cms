@@ -68,7 +68,7 @@ final class FulltextIndexTest extends FulltextTestCase
 		$node = $this->index(['a' => 'Café running the']);
 		$match = $this->match($node, 'cafe');
 		self::assertNotNull($match);
-		self::assertStringContainsString('<mark>Café</mark>', new Snippet($match['headline'])->html());
+		self::assertStringContainsString('<mark>Café</mark>', new Snippet($match['headline'])->html()->html);
 		self::assertNotNull($this->match($node, 'the'));
 		self::assertNull($this->match($node, 'run'));
 	}
@@ -81,7 +81,7 @@ final class FulltextIndexTest extends FulltextTestCase
 		$node = $this->index(['a' => 'Häuser mit Gärten'], 'german');
 		$match = $this->match($node, 'haus garten', 'german');
 		self::assertNotNull($match);
-		self::assertSame('<mark>Häuser</mark> mit <mark>Gärten</mark>', new Snippet($match['headline'])->html());
+		self::assertSame('<mark>Häuser</mark> mit <mark>Gärten</mark>', new Snippet($match['headline'])->html()->html);
 	}
 
 	public function testRichtextPhrasesPreserveAdjacentMarkedRuns(): void

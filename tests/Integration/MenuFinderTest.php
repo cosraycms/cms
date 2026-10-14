@@ -138,7 +138,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$menu = new Menu($this->createContext(), 'test-menu-empty');
 
 		$this->assertSame([], iterator_to_array($menu));
-		$this->assertSame('', $menu->html('main-menu'));
+		$this->assertSame('', $menu->html('main-menu')->html);
 	}
 
 	public function testHiddenItemsTakeTheirSubtreeOutOfTheMenu(): void
@@ -152,7 +152,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$this->assertNotContains('about', array_keys(iterator_to_array($visible)));
 		// The child rode along; nothing was orphaned to the root.
 		$this->assertNotContains('about.team', array_keys(iterator_to_array($visible)));
-		$this->assertStringNotContainsString('/about', $visible->html());
+		$this->assertStringNotContainsString('/about', $visible->html()->html);
 
 		$all = new Menu($context, 'test-menu', hidden: true);
 		$items = iterator_to_array($all);
@@ -240,7 +240,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$context = $this->createContext();
 		$menu = new Menu($context, 'test-menu');
 
-		$html = $menu->html('main-menu', 'nav');
+		$html = $menu->html('main-menu', 'nav')->html;
 
 		// The HTML contains the menu structure with proper elements
 		$this->assertStringContainsString('<nav', $html);
@@ -254,7 +254,7 @@ final class MenuFinderTest extends IntegrationTestCase
 	public function testWrapperKeepsTheCallerClass(): void
 	{
 		// The wrapper class used to be clobbered by the last item's class.
-		$html = new Menu($this->createContext(), 'test-menu')->html('main-menu', 'nav');
+		$html = new Menu($this->createContext(), 'test-menu')->html('main-menu', 'nav')->html;
 
 		$this->assertStringContainsString('<nav class="main-menu">', $html);
 		$this->assertStringNotContainsString('<nav class="contact-link">', $html);
@@ -269,7 +269,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			'target' => '_blank',
 		]);
 
-		$html = new Menu($this->createContext(), 'test-menu')->html();
+		$html = new Menu($this->createContext(), 'test-menu')->html()->html;
 
 		$this->assertStringContainsString(
 			'<a href="https://example.com/partner" target="_blank" rel="noopener">',
@@ -293,7 +293,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$items = iterator_to_array($menu);
 
 		$this->assertStringEndsWith('me/menuasset1/prospekt.pdf', (string) $items['brochure']->href());
-		$this->assertStringContainsString('me/menuasset1/prospekt.pdf', $menu->html());
+		$this->assertStringContainsString('me/menuasset1/prospekt.pdf', $menu->html()->html);
 	}
 
 	public function testAssetItemWithoutResolvableAssetStaysUnlinked(): void
@@ -308,7 +308,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$items = iterator_to_array($menu);
 
 		$this->assertNull($items['lost']->href());
-		$this->assertStringContainsString('<span>Lost file</span>', $menu->html());
+		$this->assertStringContainsString('<span>Lost file</span>', $menu->html()->html);
 	}
 
 	public function testUnknownTypeRendersUnlinkedLabel(): void
@@ -322,7 +322,7 @@ final class MenuFinderTest extends IntegrationTestCase
 		$items = iterator_to_array($menu);
 
 		$this->assertNull($items['label']->href());
-		$this->assertStringContainsString('<span>Section</span>', $menu->html());
+		$this->assertStringContainsString('<span>Section</span>', $menu->html()->html);
 	}
 
 	public function testEscapesTitlesHrefsAndClasses(): void
@@ -334,7 +334,7 @@ final class MenuFinderTest extends IntegrationTestCase
 			'class' => '"><script>',
 		]);
 
-		$html = new Menu($this->createContext(), 'test-menu')->html();
+		$html = new Menu($this->createContext(), 'test-menu')->html()->html;
 
 		$this->assertStringNotContainsString('<script>', $html);
 		$this->assertStringContainsString('Evil &lt;script&gt;', $html);

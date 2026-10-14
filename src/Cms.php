@@ -84,8 +84,8 @@ class Cms
 		array $templateContext = [],
 		?bool $deleted = false,
 		?bool $published = true,
-	): Render {
-		return new Render(
+	): Markup {
+		return new Markup((string) new Render(
 			$this->context,
 			$this,
 			$this->nodeFactory,
@@ -94,7 +94,7 @@ class Cms
 			$templateContext,
 			$deleted,
 			$published,
-		);
+		));
 	}
 
 	/**
@@ -102,11 +102,13 @@ class Cms
 	 * `celema/server` only sets the script URL while running with
 	 * `--watch`, so layouts can include it unconditionally.
 	 */
-	public function liveReload(): string
+	public function liveReload(): Markup
 	{
 		$url = LiveReload::url($this->context->request);
 
-		return $url === null ? '' : '<script src="' . htmlspecialchars($url, ENT_QUOTES) . '" defer></script>';
+		return new Markup(
+			$url === null ? '' : '<script src="' . htmlspecialchars($url, ENT_QUOTES) . '" defer></script>',
+		);
 	}
 
 	public function nodeFactory(): Factory

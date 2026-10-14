@@ -580,7 +580,7 @@ final class MenusWriterTest extends IntegrationTestCase
 		$this->assertSame('/kids/alpha', $items['children:menu-kids-alpha']->path());
 		$this->assertSame(1, $items['children:menu-kids-alpha']->level());
 
-		$html = $menu->html();
+		$html = $menu->html()->html;
 		$this->assertStringContainsString('<a href="/kids/alpha">', $html);
 		$this->assertStringNotContainsString('Draft', $html);
 	}

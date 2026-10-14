@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Fulltext;
 
+use Cosray\Markup;
+
 final readonly class Snippet
 {
 	/** @var list<array{text: string, match: bool}> */
@@ -32,13 +34,13 @@ final readonly class Snippet
 		return implode('', array_column($this->segments, 'text'));
 	}
 
-	public function html(): string
+	public function html(): Markup
 	{
 		$html = '';
 		foreach ($this->segments as $segment) {
 			$text = htmlspecialchars($segment['text'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 			$html .= $segment['match'] ? '<mark>' . $text . '</mark>' : $text;
 		}
-		return $html;
+		return new Markup($html);
 	}
 }

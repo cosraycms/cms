@@ -208,9 +208,9 @@ final class BlocksValueTest extends TestCase
 				. ' data-row="1" style="--colspan: 8; --rowspan: 2; --col: 3; --row: 1">'
 				. "Hello<br />\nWorld"
 				. '</div></div>',
-			$blocks->render(),
+			$blocks->render()->html,
 		);
-		$this->assertSame($blocks->render(), (string) $blocks);
+		$this->assertSame($blocks->render()->html, (string) $blocks);
 	}
 
 	public function testRendersTheSpacingAttributesOnlyWhenSet(): void
@@ -220,7 +220,7 @@ final class BlocksValueTest extends TestCase
 			[$this->text('Hi', $full, ['padding' => ['zxx' => 'xl']])],
 			meta: ['gap' => ['zxx' => 's'], 'columnGap' => ['zxx' => 'l'], 'rowGap' => ['zxx' => 'huge']],
 		);
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString(
 			'data-responsive="stack" data-gap="s" data-column-gap="l" style="--columns: 12"',
@@ -237,7 +237,7 @@ final class BlocksValueTest extends TestCase
 			[$this->text('Hi', $full, ['padding' => ['zxx' => '']])],
 			meta: ['gap' => ['zxx' => '']],
 		);
-		$html = $plain->render();
+		$html = $plain->render()->html;
 
 		$this->assertStringNotContainsString('data-gap', $html);
 		$this->assertStringNotContainsString('data-padding', $html);
@@ -248,7 +248,7 @@ final class BlocksValueTest extends TestCase
 	public function testRenderArgs(): void
 	{
 		$html = $this->createBlocksValue([$this->text('Hi', ['colspan' => 12, 'rowspan' => 1])])
-			->render(tag: 'section', prefix: 'x', class: 'page');
+			->render(tag: 'section', prefix: 'x', class: 'page')->html;
 
 		$this->assertStringStartsWith('<section class="x-blocks page" data-columns="12"', $html);
 		$this->assertStringContainsString('<div class="x-block" data-type="text"', $html);
@@ -260,14 +260,14 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([]);
 
 		try {
-			$blocks->render(tag: 'div onclick="x"');
+			$blocks->render(tag: 'div onclick="x"')->html;
 			$this->fail('A tag with attributes must be rejected');
 		} catch (RuntimeException $e) {
 			$this->assertStringContainsString('`tag`', $e->getMessage());
 		}
 
 		$this->throws(RuntimeException::class, '`prefix`');
-		$blocks->render(prefix: '1cms');
+		$blocks->render(prefix: '1cms')->html;
 	}
 
 	public function testEscapesEveryGeneratedAttribute(): void
@@ -283,7 +283,7 @@ final class BlocksValueTest extends TestCase
 			),
 		]);
 
-		$html = $blocks->render(class: 'page" onmouseover="alert(1)');
+		$html = $blocks->render(class: 'page" onmouseover="alert(1)')->html;
 
 		$this->assertStringNotContainsString('<img', $html);
 		$this->assertStringNotContainsString('" onmouseover="', $html);
@@ -304,7 +304,7 @@ final class BlocksValueTest extends TestCase
 			),
 		]);
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('embed/abc&quot; onload=&quot;alert(1)"', $html);
 		$this->assertStringNotContainsString('" onload="', $html);
@@ -314,7 +314,7 @@ final class BlocksValueTest extends TestCase
 	{
 		$html = $this->createBlocksValue([
 			$this->text('x', ['colspan' => 30, 'rowspan' => 9, 'col' => 10, 'row' => 2]),
-		])->render();
+		])->render()->html;
 
 		$this->assertStringContainsString('data-colspan="12" data-rowspan="6" data-col="1" data-row="2"', $html);
 
@@ -324,7 +324,7 @@ final class BlocksValueTest extends TestCase
 			'col' => 4,
 			'row' => 1,
 		])], columns: 1);
-		$html = $stacked->render();
+		$html = $stacked->render()->html;
 
 		$this->assertStringContainsString('data-columns="1"', $html);
 		$this->assertStringContainsString('data-colspan="1" data-rowspan="1" data-col="1" data-row="1"', $html);
@@ -341,7 +341,7 @@ final class BlocksValueTest extends TestCase
 			[$this->text('x', ['colspan' => 6, 'rowspan' => 1, 'col' => 1, 'row' => 1])],
 			stored: 6,
 		);
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertSame(6, $blocks->columns());
 		$this->assertStringContainsString('data-columns="6"', $html);
@@ -374,7 +374,7 @@ final class BlocksValueTest extends TestCase
 
 	public function testEmptyRenderEmitsNoElement(): void
 	{
-		$html = $this->createBlocksValue([$this->image(['uid' => 'missingasset1'])])->render();
+		$html = $this->createBlocksValue([$this->image(['uid' => 'missingasset1'])])->render()->html;
 
 		$this->assertSame(
 			'<div class="cms-blocks" data-columns="12" data-responsive="stack" style="--columns: 12"></div>',
@@ -445,12 +445,12 @@ final class BlocksValueTest extends TestCase
 		$rows = ['en' => [$this->text('English')], 'de' => []];
 
 		$german = $this->createBlocksValue($rows, TranslateMode::Asymmetric, locale: 'de');
-		$this->assertStringContainsString('>English<', $german->render());
+		$this->assertStringContainsString('>English<', $german->render()->html);
 
 		$rows['de'] = [$this->text('Deutsch', uid: 'b2')];
 		$german = $this->createBlocksValue($rows, TranslateMode::Asymmetric, locale: 'de');
-		$this->assertStringContainsString('>Deutsch<', $german->render());
-		$this->assertStringNotContainsString('English', $german->render());
+		$this->assertStringContainsString('>Deutsch<', $german->render()->html);
+		$this->assertStringNotContainsString('English', $german->render()->html);
 	}
 
 	public function testSymmetricListsTranslateTheirSubFields(): void
@@ -467,11 +467,11 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertStringContainsString(
 			'>Hello<',
-			$this->createBlocksValue($rows, TranslateMode::Symmetric)->render(),
+			$this->createBlocksValue($rows, TranslateMode::Symmetric)->render()->html,
 		);
 		$this->assertStringContainsString(
 			'>Hallo<',
-			$this->createBlocksValue($rows, TranslateMode::Symmetric, locale: 'de')->render(),
+			$this->createBlocksValue($rows, TranslateMode::Symmetric, locale: 'de')->render()->html,
 		);
 	}
 
@@ -486,7 +486,7 @@ final class BlocksValueTest extends TestCase
 				. ' style="--colspan: 3; --rowspan: 1; --col: 1; --row: 1">Solo</div>',
 			(string) $block,
 		);
-		$this->assertStringStartsWith('<div class="x-block"', $block->render(prefix: 'x'));
+		$this->assertStringStartsWith('<div class="x-block"', $block->render(prefix: 'x')->html);
 	}
 
 	public function testPluginBlockRenders(): void
@@ -500,7 +500,7 @@ final class BlocksValueTest extends TestCase
 				],
 				['colspan' => 12, 'rowspan' => 1],
 			),
-		])->render();
+		])->render()->html;
 
 		$this->assertStringContainsString(
 			'data-type="quote-block"',
@@ -519,7 +519,7 @@ final class BlocksValueTest extends TestCase
 		]);
 		$this->seedAsset('blockimg12345', 'Sun & Sea.jpg');
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('class="cms-block" data-type="image" data-colspan="6"', $html);
 		$this->assertStringContainsString('<figure class="cms-figure"><img ', $html);
@@ -553,7 +553,7 @@ final class BlocksValueTest extends TestCase
 		]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
-		$html = $blocks->render(prefix: 'site');
+		$html = $blocks->render(prefix: 'site')->html;
 
 		$this->assertStringContainsString('<figure class="site-figure"><img ', $html);
 		$this->assertStringContainsString('alt="Title only"', $html);
@@ -568,7 +568,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg', meta: ['caption' => ['en' => 'From the catalog']]);
 
-		$this->assertStringContainsString('<figcaption>From the catalog</figcaption>', $blocks->render());
+		$this->assertStringContainsString('<figcaption>From the catalog</figcaption>', $blocks->render()->html);
 		$this->assertSame('From the catalog', $blocks->image()?->caption());
 	}
 
@@ -577,7 +577,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'], span: 4)]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
-		$html = $blocks->render(sizes: '(min-width: 60rem) {pct}vw, 100vw');
+		$html = $blocks->render(sizes: '(min-width: 60rem) {pct}vw, 100vw')->html;
 
 		$this->assertStringContainsString('sizes="(min-width: 60rem) 33vw, 100vw"', $html);
 	}
@@ -587,7 +587,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
-		$html = $blocks->render(imageSizes: ['block-thumb']);
+		$html = $blocks->render(imageSizes: ['block-thumb'])->html;
 
 		$this->assertStringContainsString('src="/cms/cache/bl/blockimg12345/pic-block-thumb.jpg"', $html);
 		$this->assertStringNotContainsString('srcset', $html);
@@ -600,7 +600,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
 		$this->throws(RuntimeException::class, "srcset entry 'square' must use the `width` mode");
-		$blocks->render(imageSizes: ['block', 'square']);
+		$blocks->render(imageSizes: ['block', 'square'])->html;
 	}
 
 	public function testImageBlockUnknownSizeThrows(): void
@@ -609,7 +609,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
 		$this->throws(RuntimeException::class, "Unknown media size 'nope'");
-		$blocks->render(imageSizes: ['nope']);
+		$blocks->render(imageSizes: ['nope'])->html;
 	}
 
 	public function testImageBlockEmptySizesArgThrows(): void
@@ -618,7 +618,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
 		$this->throws(RuntimeException::class, '`imageSizes` must be a non-empty list');
-		$blocks->render(imageSizes: []);
+		$blocks->render(imageSizes: [])->html;
 	}
 
 	public function testImageBlockSvgKeepsOriginalUrl(): void
@@ -626,7 +626,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'logo.svg', 'image/svg+xml');
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('src="/cms/assets/bl/blockimg12345/logo.svg"', $html);
 		$this->assertStringNotContainsString('srcset', $html);
@@ -643,7 +643,7 @@ final class BlocksValueTest extends TestCase
 		]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('data-type="images"', $html);
 		$this->assertSame(1, substr_count($html, 'cms-blocks-images-image'));
@@ -666,7 +666,7 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertStringContainsString(
 			'<div class="cms-blocks-images" data-ratio="4/3" style="--ratio: 4/3" data-crop><div',
-			$blocks->render(),
+			$blocks->render()->html,
 		);
 		$this->assertSame('4/3', $blocks->first()->images->ratio());
 		$this->assertTrue($blocks->first()->images->crop());
@@ -674,7 +674,7 @@ final class BlocksValueTest extends TestCase
 		$plain = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$this->assertStringContainsString('<div class="cms-blocks-images"><div', $plain->render());
+		$this->assertStringContainsString('<div class="cms-blocks-images"><div', $plain->render()->html);
 		$this->assertNull($plain->first()->images->ratio());
 		$this->assertFalse($plain->first()->images->crop());
 	}
@@ -684,7 +684,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$html = $blocks->render(thumbSize: 'thumb');
+		$html = $blocks->render(thumbSize: 'thumb')->html;
 
 		$this->assertStringContainsString('src="/cms/cache/ga/galleryimg123/one-thumb.jpg"', $html);
 	}
@@ -695,7 +695,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
 		$this->throws(RuntimeException::class, "Unknown media size 'nope'");
-		$blocks->render(thumbSize: 'nope');
+		$blocks->render(thumbSize: 'nope')->html;
 	}
 
 	public function testVideoBlockRendersTheAssetAndSkipsDanglingOnes(): void
@@ -713,14 +713,14 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$video('videoasset001')]);
 		$this->seedAsset('videoasset001', 'clip.mp4', 'video/mp4');
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('data-type="video"', $html);
 		$this->assertStringContainsString('<video controls><source src="', $html);
 		$this->assertStringContainsString('/cms/assets/vi/videoasset001/clip.mp4" type="video/mp4"/></video>', $html);
 		$this->assertStringNotContainsString(
 			'<div class="cms-block"',
-			$this->createBlocksValue([$video('missingasset1')])->render(),
+			$this->createBlocksValue([$video('missingasset1')])->render()->html,
 		);
 	}
 
@@ -777,10 +777,10 @@ final class BlocksValueTest extends TestCase
 			$this->richtext('Second', uid: 'b3'),
 		]);
 
-		$this->assertSame('One two three …', $blocks->excerpt(3));
-		$this->assertSame('Second', $blocks->excerpt(index: 2));
-		$this->assertSame('', $blocks->excerpt(index: 3));
-		$this->assertSame('', $this->createBlocksValue([])->excerpt());
+		$this->assertSame('One two three …', $blocks->excerpt(3)->html);
+		$this->assertSame('Second', $blocks->excerpt(index: 2)->html);
+		$this->assertSame('', $blocks->excerpt(index: 3)->html);
+		$this->assertSame('', $this->createBlocksValue([])->excerpt()->html);
 	}
 
 	public function testSplitsRenderTheirBlocksInside(): void
@@ -818,7 +818,7 @@ final class BlocksValueTest extends TestCase
 				. $split(' pair" data-split="columns', $child('Left', 3, 2) . $child('Right', 3, 2), 1)
 				. $split('" data-split="rows', $child('Top', 6, 1) . $child('Bottom', 6, 1), 7)
 				. '</div>',
-			$blocks->render(),
+			$blocks->render()->html,
 		);
 	}
 
@@ -942,8 +942,8 @@ final class BlocksValueTest extends TestCase
 				],
 			),
 		);
-		$this->assertSame('Beside the image', $blocks->excerpt());
+		$this->assertSame('Beside the image', $blocks->excerpt()->html);
 		// A block's share of the field's columns: a split's tracks are the field's.
-		$this->assertStringContainsString('sizes="(min-width: 48rem) 25vw, 100vw"', $blocks->render());
+		$this->assertStringContainsString('sizes="(min-width: 48rem) 25vw, 100vw"', $blocks->render()->html);
 	}
 }

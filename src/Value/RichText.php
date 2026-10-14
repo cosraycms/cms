@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Markup;
 use Cosray\Richtext\Envelope;
 use Cosray\Richtext\OwnerResolver;
 use Cosray\Richtext\Renderer;
@@ -54,7 +55,7 @@ class RichText extends Text
 	public function excerpt(
 		int $words = 30,
 		string $allowedTags = '',
-	): string {
-		return HtmlUtil::excerpt($this->raw(), $words, $allowedTags);
+	): Markup {
+		return new Markup(HtmlUtil::excerpt($this->raw(), $words, $allowedTags));
 	}
 }

@@ -141,7 +141,7 @@ final class BlocksPersistenceTest extends IntegrationTestCase
 		$this->assertSame(12, $blocks->columns());
 		$this->assertSame('heading', $blocks->first()?->handle());
 
-		$html = $blocks->render();
+		$html = $blocks->render()->html;
 		$this->assertStringContainsString('data-columns="12"', $html);
 		$this->assertStringContainsString('<div class="cms-block lead" data-type="heading"', $html);
 		$this->assertStringContainsString('<h3>Opening hours</h3>', $html);

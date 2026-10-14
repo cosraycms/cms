@@ -10,6 +10,7 @@ use Cosray\Block\RenderContext;
 use Cosray\Contract\Block as BlockType;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field;
+use Cosray\Markup;
 
 use function Cosray\escape;
 
@@ -79,7 +80,7 @@ class Block extends Value
 
 	public function __toString(): string
 	{
-		return $this->render();
+		return (string) $this->render();
 	}
 
 	public function uid(): ?string
@@ -166,11 +167,11 @@ class Block extends Value
 	 * This block alone, wrapper element included. Supports the same
 	 * arguments as `Blocks::render()`.
 	 */
-	public function render(mixed ...$args): string
+	public function render(mixed ...$args): Markup
 	{
 		$ctx = new RenderContext($this->owner, $this->fieldName, $this->columns, $args);
 
-		return $this->renderWith($ctx, $this->field->services()->blocks->cached($this->owner));
+		return new Markup($this->renderWith($ctx, $this->field->services()->blocks->cached($this->owner)));
 	}
 
 	/**
