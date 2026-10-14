@@ -46,9 +46,9 @@ class Entry extends Value
 		return is_string($uid) ? $uid : null;
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
-		return $this->fieldValues(static fn(Value $value): mixed => $value->unwrap());
+		return $this->fieldValues(static fn(Value $value): mixed => $value->raw());
 	}
 
 	/**

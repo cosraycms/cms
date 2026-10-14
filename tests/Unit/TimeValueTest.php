@@ -97,7 +97,7 @@ final class TimeValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertNull($value->unwrap());
+		$this->assertNull($value->raw());
 		$this->assertSame('', (string) $value);
 		$this->assertFalse($value->isset());
 	}

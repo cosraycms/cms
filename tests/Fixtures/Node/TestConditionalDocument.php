@@ -41,6 +41,6 @@ class TestConditionalDocument implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Conditional Document';
+		return $this->title?->value()->raw() ?? 'Conditional Document';
 	}
 }

@@ -49,7 +49,7 @@ class DateTime extends Value
 		return isset($this->datetime) ? true : false;
 	}
 
-	public function unwrap(): ?DateTimeImmutable
+	public function raw(): ?DateTimeImmutable
 	{
 		return $this->datetime;
 	}

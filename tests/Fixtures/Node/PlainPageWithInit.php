@@ -25,6 +25,6 @@ class PlainPageWithInit implements Init
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? '';
+		return $this->title?->value()->raw() ?? '';
 	}
 }

@@ -27,7 +27,7 @@ class ChildAwarePage implements HttpPost, Title, ViewContext
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Child Aware';
+		return $this->title?->value()->raw() ?? 'Child Aware';
 	}
 
 	/** @return array<string, mixed> */

@@ -44,7 +44,7 @@ abstract class Field implements
 	protected ?Services $services = null;
 
 	/** The stored data as-is, unaffected by When deactivation. */
-	protected array $raw = [];
+	protected array $stored = [];
 
 	final public function __construct(
 		public readonly string $name,
@@ -73,10 +73,10 @@ abstract class Field implements
 	public function init(
 		Services $services,
 		?ReflectionProperty $property = null,
-		array $raw = [],
+		array $stored = [],
 	): void {
 		$this->services = $services;
-		$this->raw = $raw;
+		$this->stored = $stored;
 
 		if ($property === null) {
 			return;
@@ -104,9 +104,9 @@ abstract class Field implements
 	 * The stored data as-is — the deliberate bypass around When
 	 * deactivation for consumers that need the dormant value.
 	 */
-	public function raw(): array
+	public function stored(): array
 	{
-		return $this->raw;
+		return $this->stored;
 	}
 
 	public function control(): Control

@@ -18,6 +18,6 @@ class TestBlock implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Block';
+		return $this->title?->value()->raw() ?? 'Test Block';
 	}
 }

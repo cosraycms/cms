@@ -169,7 +169,7 @@ final class NodeFactoryTest extends TestCase
 		$embedded = Factory::embeddedFor($node, 'baseFields');
 
 		$this->assertSame(['before', 'title', 'body', 'after'], Factory::fieldNamesFor($node));
-		$this->assertSame('Embedded title', Factory::fieldFor($node, 'title')->value()->unwrap());
+		$this->assertSame('Embedded title', Factory::fieldFor($node, 'title')->value()->raw());
 		$this->assertSame(
 			Factory::fieldFor($node, 'title'),
 			$this->factory->hydrator()->getField($node, 'title'),

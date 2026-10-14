@@ -23,6 +23,6 @@ class TestArticle implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Article';
+		return $this->title?->value()->raw() ?? 'Test Article';
 	}
 }

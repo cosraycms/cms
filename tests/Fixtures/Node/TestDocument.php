@@ -42,6 +42,6 @@ class TestDocument implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Document';
+		return $this->title?->value()->raw() ?? 'Test Document';
 	}
 }

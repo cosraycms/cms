@@ -80,7 +80,7 @@ final class FieldWhenTest extends IntegrationTestCase
 
 		$this->assertFalse($endDate->isset());
 		$this->assertSame('', (string) $endDate);
-		$this->assertSame('kept-dormant', $endDate->raw()['value']['zxx']);
+		$this->assertSame('kept-dormant', $endDate->stored()['value']['zxx']);
 	}
 
 	public function testActiveFieldPresentsItsValue(): void
@@ -130,7 +130,7 @@ final class FieldWhenTest extends IntegrationTestCase
 		$details = $this->hydrator->getField($node, 'details');
 
 		$this->assertFalse($details->isset());
-		$this->assertSame('kept-dormant', $details->raw()['value']['zxx']);
+		$this->assertSame('kept-dormant', $details->stored()['value']['zxx']);
 
 		$node = $this->embeddedDocument([
 			'extended' => ['type' => 'checkbox', 'value' => ['zxx' => true]],

@@ -143,9 +143,9 @@ class Block extends Value
 		return $this->resolve(static fn(Value $value): mixed => $value->json());
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
-		return $this->resolve(static fn(Value $value): mixed => $value->unwrap());
+		return $this->resolve(static fn(Value $value): mixed => $value->raw());
 	}
 
 	public function isset(): bool

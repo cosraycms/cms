@@ -44,11 +44,11 @@ class Blocks extends Value implements IteratorAggregate
 		];
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
 		return [
 			'columns' => $this->columns(),
-			'blocks' => array_map(static fn(Block $block): array => $block->unwrap(), $this->blocks),
+			'blocks' => array_map(static fn(Block $block): array => $block->raw(), $this->blocks),
 		];
 	}
 

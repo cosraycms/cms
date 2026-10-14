@@ -18,6 +18,6 @@ class TestHierarchyChild implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Hierarchy Child';
+		return $this->title?->value()->raw() ?? 'Hierarchy Child';
 	}
 }

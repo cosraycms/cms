@@ -14,6 +14,6 @@ final class TestAlternateTitleFields implements Embedded, Title
 
 	public function title(): string
 	{
-		return $this->alternate->value()->unwrap() ?? '';
+		return $this->alternate->value()->raw() ?? '';
 	}
 }

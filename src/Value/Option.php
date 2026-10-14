@@ -10,10 +10,10 @@ class Option extends Value
 {
 	public function __toString(): string
 	{
-		return escape($this->unwrap());
+		return escape($this->raw());
 	}
 
-	public function unwrap(): string
+	public function raw(): string
 	{
 		$value = $this->value();
 
@@ -27,6 +27,6 @@ class Option extends Value
 
 	public function isset(): bool
 	{
-		return $this->unwrap() !== '';
+		return $this->raw() !== '';
 	}
 }

@@ -39,9 +39,9 @@ class Entries extends Value implements IteratorAggregate
 		return array_map(static fn(Entry $entry): array => $entry->json(), $this->entries);
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
-		return array_map(static fn(Entry $entry): array => $entry->unwrap(), $this->entries);
+		return array_map(static fn(Entry $entry): array => $entry->raw(), $this->entries);
 	}
 
 	public function getIterator(): Generator

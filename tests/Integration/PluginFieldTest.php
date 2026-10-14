@@ -42,7 +42,7 @@ final class PluginFieldTest extends IntegrationTestCase
 
 		$field = FieldHydrator::getField($node, 'price');
 		$this->assertInstanceOf(TestMoney::class, $field);
-		$this->assertSame('9.99', $field->value()->unwrap());
+		$this->assertSame('9.99', $field->value()->raw());
 
 		$serializer = new Serializer(new Types(), $factory->uid());
 		$content = $serializer->content($node, [], ['price']);

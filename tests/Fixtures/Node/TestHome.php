@@ -18,6 +18,6 @@ class TestHome implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Home';
+		return $this->title?->value()->raw() ?? 'Test Home';
 	}
 }

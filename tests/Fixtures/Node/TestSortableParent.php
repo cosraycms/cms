@@ -20,6 +20,6 @@ class TestSortableParent implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Sortable Parent';
+		return $this->title?->value()->raw() ?? 'Sortable Parent';
 	}
 }

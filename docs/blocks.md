@@ -240,9 +240,9 @@ The editor keeps usable control spacing; Layout preview shows configured spacing
 
 ### The value API
 
-[Value\Blocks](../src/Value/Blocks.php) iterates [Value\Block](../src/Value/Block.php) rows and exposes `count()`, `first()`, `last()`, `get()`, grid settings, image helpers, and richtext excerpts. Rows expose their identity, type/handle, layout, sub-fields as values, metadata, and rendering. `unwrap()`/`json()` return `{columns, blocks: [...]}` with resolved sub-field values, not the storage envelopes above.
+[Value\Blocks](../src/Value/Blocks.php) iterates [Value\Block](../src/Value/Block.php) rows and exposes `count()`, `first()`, `last()`, `get()`, grid settings, image helpers, and richtext excerpts. Rows expose their identity, type/handle, layout, sub-fields as values, metadata, and rendering. `raw()`/`json()` return `{columns, blocks: [...]}` with resolved sub-field values, not the storage envelopes above.
 
-Iteration and `count()` stay on the top-level rows, so a split is one row there: `isSplit()` tells it apart, `split()` returns `columns` or `rows`, `blocks()` its blocks, and its `type` and `handle()` are null. `leaves()` yields every block in reading order with a split's blocks in its place; `image()`, `images()`, `hasImage()`, and `excerpt()` read through it. A split's `unwrap()`/`json()` entry carries `blocks` instead of `fields`.
+Iteration and `count()` stay on the top-level rows, so a split is one row there: `isSplit()` tells it apart, `split()` returns `columns` or `rows`, `blocks()` its blocks, and its `type` and `handle()` are null. `leaves()` yields every block in reading order with a split's blocks in its place; `image()`, `images()`, `hasImage()`, and `excerpt()` read through it. A split's `raw()`/`json()` entry carries `blocks` instead of `fields`.
 
 ### The reference stylesheet
 

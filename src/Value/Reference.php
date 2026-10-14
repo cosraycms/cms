@@ -58,7 +58,7 @@ class Reference extends Value implements Iterator
 		return count($this->uids());
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
 		return $this->uids();
 	}

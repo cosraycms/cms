@@ -106,12 +106,12 @@ class EntriesIntegrationTest extends TestCase
 		$firstItem = $entriesValue->first();
 		$this->assertNotNull($firstItem);
 		$this->assertSame(TestEntry::class, $firstItem->type);
-		$this->assertEquals('First Item', $firstItem->title->unwrap());
+		$this->assertEquals('First Item', $firstItem->title->raw());
 		$this->assertInstanceOf(\Cosray\Value\TranslatedImages::class, $firstItem->content);
 
 		$this->assertEquals(2, $entriesValue->count());
-		$this->assertEquals('First Item', $entriesValue->first()->title->unwrap());
-		$this->assertEquals('Second Item', $entriesValue->last()->title->unwrap());
+		$this->assertEquals('First Item', $entriesValue->first()->title->raw());
+		$this->assertEquals('Second Item', $entriesValue->last()->title->raw());
 	}
 
 	public function testEntriesStructure(): void

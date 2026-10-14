@@ -30,7 +30,7 @@ class Boolean extends Value
 		return (string) $this->value;
 	}
 
-	public function unwrap(): ?bool
+	public function raw(): ?bool
 	{
 		return $this->value;
 	}

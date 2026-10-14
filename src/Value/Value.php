@@ -49,7 +49,7 @@ abstract class Value
 
 	abstract public function json(): mixed;
 
-	abstract public function unwrap(): mixed;
+	abstract public function raw(): mixed;
 
 	public function styleClass(): ?string
 	{

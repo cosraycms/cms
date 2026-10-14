@@ -24,24 +24,24 @@ class Youtube extends Value
 				. $iframeStyle
 				. '" '
 				. 'src="https://www.youtube.com/embed/'
-				. escape((string) $this->unwrap())
+				. escape((string) $this->raw())
 				. '" allowfullscreen></iframe>'
 				. '</div></div>'
 		);
 	}
 
-	public function unwrap(): mixed
+	public function raw(): mixed
 	{
 		return $this->value();
 	}
 
 	public function json(): mixed
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	public function isset(): bool
 	{
-		return is_string($this->unwrap()) && $this->unwrap() !== '';
+		return is_string($this->raw()) && $this->raw() !== '';
 	}
 }

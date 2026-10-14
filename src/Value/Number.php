@@ -35,10 +35,10 @@ class Number extends Value
 
 	public function json(): ?int
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
-	public function unwrap(): ?int
+	public function raw(): ?int
 	{
 		return $this->value;
 	}

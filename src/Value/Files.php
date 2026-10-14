@@ -25,7 +25,7 @@ class Files extends Value implements Iterator
 
 	public function __toString(): string
 	{
-		return 'Files: count(' . count($this->unwrap()) . ')';
+		return 'Files: count(' . count($this->raw()) . ')';
 	}
 
 	public function rewind(): void
@@ -68,14 +68,14 @@ class Files extends Value implements Iterator
 		return new File($this->owner, $this->field, $this->context, 0);
 	}
 
-	public function unwrap(): array
+	public function raw(): array
 	{
 		return $this->files();
 	}
 
 	public function json(): mixed
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	public function isset(): bool

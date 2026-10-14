@@ -27,10 +27,10 @@ class Text extends Value
 
 	public function __toString(): string
 	{
-		return escape($this->unwrap());
+		return escape($this->raw());
 	}
 
-	public function unwrap(): string
+	public function raw(): string
 	{
 		if (isset($this->value)) {
 			return $this->value;
@@ -57,16 +57,16 @@ class Text extends Value
 		 *
 		 * @psalm-suppress PossiblyInvalidArgument
 		 */
-		return strip_tags((string) $this->unwrap(), $allowed);
+		return strip_tags((string) $this->raw(), $allowed);
 	}
 
 	public function json(): mixed
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	public function isset(): bool
 	{
-		return $this->unwrap() ?? null ? true : false;
+		return $this->raw() ?? null ? true : false;
 	}
 }

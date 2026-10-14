@@ -28,6 +28,6 @@ class PlainPage implements TitleContract
 
 	public function title(): string
 	{
-		return $this->heading?->value()->unwrap() ?? 'Untitled';
+		return $this->heading?->value()->raw() ?? 'Untitled';
 	}
 }

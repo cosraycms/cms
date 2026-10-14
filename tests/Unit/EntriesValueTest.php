@@ -108,9 +108,9 @@ final class EntriesValueTest extends TestCase
 		$this->assertInstanceOf(Entry::class, $value->first());
 		$this->assertInstanceOf(Entry::class, $value->last());
 		$this->assertSame(TestEntry::class, $value->first()?->type);
-		$this->assertSame('First Item', $value->first()?->title->unwrap());
-		$this->assertSame('Second Item', $value->last()?->title->unwrap());
-		$this->assertSame('Second Item', $value->get(1)?->title->unwrap());
+		$this->assertSame('First Item', $value->first()?->title->raw());
+		$this->assertSame('Second Item', $value->last()?->title->raw());
+		$this->assertSame('Second Item', $value->get(1)?->title->raw());
 		$this->assertNull($value->get(2));
 		$this->assertFalse($value->first()?->content->isset());
 	}
@@ -148,16 +148,16 @@ final class EntriesValueTest extends TestCase
 		$this->assertNull($value->last());
 	}
 
-	public function testEntriesValueUnwrapResolvesFieldValues(): void
+	public function testEntriesValueRawResolvesFieldValues(): void
 	{
-		$unwrapped = $this->createEntriesValue($this->entriesData())->unwrap();
+		$raw = $this->createEntriesValue($this->entriesData())->raw();
 
-		$this->assertCount(2, $unwrapped);
-		$this->assertSame('entry1', $unwrapped[0]['uid']);
-		$this->assertSame(TestEntry::class, $unwrapped[0]['type']);
-		$this->assertSame('First Item', $unwrapped[0]['fields']['title']);
-		$this->assertSame('Second Item', $unwrapped[1]['fields']['title']);
-		$this->assertSame([], $unwrapped[0]['fields']['content']);
+		$this->assertCount(2, $raw);
+		$this->assertSame('entry1', $raw[0]['uid']);
+		$this->assertSame(TestEntry::class, $raw[0]['type']);
+		$this->assertSame('First Item', $raw[0]['fields']['title']);
+		$this->assertSame('Second Item', $raw[1]['fields']['title']);
+		$this->assertSame([], $raw[0]['fields']['content']);
 	}
 
 	public function testEntriesValueJsonResolvesFieldValues(): void
@@ -170,8 +170,8 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame('Second Item', $json[1]['fields']['title']);
 	}
 
-	/** `json()` keeps a field's stored envelope where `unwrap()` resolves it. */
-	public function testEntriesValueJsonAndUnwrapDifferPerFieldType(): void
+	/** `json()` keeps a field's stored envelope where `raw()` resolves it. */
+	public function testEntriesValueJsonAndRawDifferPerFieldType(): void
 	{
 		$data = [
 			'type' => EntriesField::class,
@@ -192,7 +192,7 @@ final class EntriesValueTest extends TestCase
 		];
 		$value = $this->createEntriesValue($data, TestOptionEntry::class);
 
-		$this->assertSame('large', $value->unwrap()[0]['fields']['size']);
+		$this->assertSame('large', $value->raw()[0]['fields']['size']);
 		$this->assertSame(
 			['type' => \Cosray\Field\Option::class, 'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'large']],
 			$value->json()[0]['fields']['size'],

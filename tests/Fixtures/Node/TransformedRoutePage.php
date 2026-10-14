@@ -20,6 +20,6 @@ class TransformedRoutePage implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Transformed Route Page';
+		return $this->title?->value()->raw() ?? 'Transformed Route Page';
 	}
 }

@@ -30,7 +30,7 @@ final class Heading implements Block
 
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		$level = max(1, min(6, (int) $block->level->unwrap() ?: self::DEFAULT_LEVEL));
+		$level = max(1, min(6, (int) $block->level->raw() ?: self::DEFAULT_LEVEL));
 
 		return "<h{$level}>{$block->text}</h{$level}>";
 	}

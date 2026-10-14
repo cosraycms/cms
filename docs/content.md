@@ -29,7 +29,7 @@ $app->node(Article::class);
 
 `#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, one class or a list, defaulting to none; `sortable: true` lets editors arrange them (see [manual order](#manual-order)). [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
 
-Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. Use `unwrap()` for raw values; string conversion uses the field's escaped or rendered output. Raw values need escaping when inserted into HTML. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
+Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. Use `raw()` for raw values; string conversion uses the field's escaped or rendered output. Raw values need escaping when inserted into HTML. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
 
 ### Embedded fields
 

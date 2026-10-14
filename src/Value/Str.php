@@ -10,10 +10,10 @@ class Str extends Value
 {
 	public function __toString(): string
 	{
-		return escape($this->unwrap());
+		return escape($this->raw());
 	}
 
-	public function unwrap(): string
+	public function raw(): string
 	{
 		$value = $this->value();
 
@@ -22,11 +22,11 @@ class Str extends Value
 
 	public function json(): string
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	public function isset(): bool
 	{
-		return $this->unwrap() ? true : false;
+		return $this->raw() ? true : false;
 	}
 }

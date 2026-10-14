@@ -12,6 +12,6 @@ class Iframe extends Text
 {
 	public function __toString(): string
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 }

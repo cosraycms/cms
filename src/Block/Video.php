@@ -22,7 +22,7 @@ final class Video implements Block
 	{
 		$video = $block->video;
 
-		if ($ctx->asset((string) ($video->unwrap()['uid'] ?? '')) === null) {
+		if ($ctx->asset((string) ($video->raw()['uid'] ?? '')) === null) {
 			return '';
 		}
 

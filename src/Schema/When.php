@@ -17,7 +17,7 @@ use Attribute;
  *
  * The value of an inactive field is kept in the database — the editor
  * merely hides it and the frontend presents it as empty (read-time
- * enforcement); `Field::raw()` bypasses deliberately. Condition sources
+ * enforcement); `Field::stored()` bypasses deliberately. Condition sources
  * are limited to primitive, non-translated fields.
  */
 #[Attribute(Attribute::TARGET_PROPERTY)]

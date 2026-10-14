@@ -33,7 +33,7 @@ final class Images implements Block
 		$images = $block->images;
 		$result = '';
 
-		foreach ($images->unwrap() as $index => $item) {
+		foreach ($images->raw() as $index => $item) {
 			$asset = $ctx->asset((string) ($item['uid'] ?? ''));
 
 			if ($asset === null) {

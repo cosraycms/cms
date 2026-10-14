@@ -112,7 +112,7 @@ final class CheckboxTest extends TestCase
 		$this->assertSame($state, $result->values()['value']['zxx']);
 
 		$value = $this->field(nullable: true, data: $result->values())->value();
-		$this->assertSame($state, $value->unwrap());
+		$this->assertSame($state, $value->raw());
 		$this->assertSame($state, $value->json());
 		$this->assertSame($state !== null, $value->isset());
 		$this->assertSame((string) $state, (string) $value);

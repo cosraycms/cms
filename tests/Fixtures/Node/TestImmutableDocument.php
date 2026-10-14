@@ -38,6 +38,6 @@ class TestImmutableDocument implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Immutable Document';
+		return $this->title?->value()->raw() ?? 'Test Immutable Document';
 	}
 }

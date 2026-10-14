@@ -20,7 +20,7 @@ class ViewContextPage implements Title, ViewContext
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'View Context';
+		return $this->title?->value()->raw() ?? 'View Context';
 	}
 
 	/** @return array<string, mixed> */

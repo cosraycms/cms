@@ -35,7 +35,7 @@ final class TestBaseFields implements Embedded, Init, Title
 
 	public function title(): string
 	{
-		return $this->title->value()->unwrap() ?? '';
+		return $this->title->value()->raw() ?? '';
 	}
 
 	public function typeHandle(): string

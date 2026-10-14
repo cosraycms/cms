@@ -346,7 +346,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(6, $blocks->columns());
 		$this->assertStringContainsString('data-columns="6"', $html);
 		$this->assertStringContainsString('style="--columns: 6"', $html);
-		$this->assertSame(6, $blocks->unwrap()['columns']);
+		$this->assertSame(6, $blocks->raw()['columns']);
 		$this->assertSame(12, $this->createBlocksValue([], stored: 99)->columns());
 	}
 
@@ -393,8 +393,8 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(2, $blocks->count());
 		$this->assertSame(12, $blocks->columns());
 		$this->assertSame(['b1', 'b2'], array_map(static fn(Block $block): ?string => $block->uid(), [...$blocks]));
-		$this->assertSame('One', $blocks->first()?->text->unwrap());
-		$this->assertSame('Two', $blocks->last()?->text->unwrap());
+		$this->assertSame('One', $blocks->first()?->text->raw());
+		$this->assertSame('Two', $blocks->last()?->text->raw());
 		$this->assertSame('b2', $blocks->get(1)?->uid());
 		$this->assertNull($blocks->get(2));
 		$this->assertSame(TextBlock::class, $blocks->first()?->type);
@@ -402,14 +402,14 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame(4, $blocks->first()?->layout()->colspan);
 	}
 
-	public function testUnwrapAndJson(): void
+	public function testRawAndJson(): void
 	{
 		$blocks = $this->createBlocksValue([
 			$this->text('Hello', ['colspan' => 6, 'rowspan' => 1], ['class' => ['zxx' => 'wide']]),
 		]);
 
-		$unwrapped = $blocks->unwrap();
-		$this->assertSame(12, $unwrapped['columns']);
+		$raw = $blocks->raw();
+		$this->assertSame(12, $raw['columns']);
 		$this->assertSame(
 			[
 				'uid' => 'b1',
@@ -419,7 +419,7 @@ final class BlocksValueTest extends TestCase
 				'fields' => ['text' => 'Hello'],
 				'meta' => ['class' => ['zxx' => 'wide']],
 			],
-			$unwrapped['blocks'][0],
+			$raw['blocks'][0],
 		);
 
 		$json = json_decode(json_encode($blocks->json(), JSON_THROW_ON_ERROR), true);
@@ -853,7 +853,7 @@ final class BlocksValueTest extends TestCase
 		$this->assertNull($split?->handle());
 		$this->assertSame('columns', $split?->split());
 		$this->assertSame(['b2', 'b3'], $uids($split?->blocks() ?? []));
-		$this->assertSame('Two', $split?->blocks()[0]->text->unwrap());
+		$this->assertSame('Two', $split?->blocks()[0]->text->raw());
 		$this->assertSame([], $blocks->first()?->blocks());
 		$this->assertNull($blocks->first()?->split());
 
@@ -861,7 +861,7 @@ final class BlocksValueTest extends TestCase
 		$split?->text;
 	}
 
-	public function testSplitsUnwrapWithTheirBlocks(): void
+	public function testSplitsRawWithTheirBlocks(): void
 	{
 		$blocks = $this->createBlocksValue([
 			$this->split(
@@ -874,7 +874,7 @@ final class BlocksValueTest extends TestCase
 			),
 		]);
 
-		$split = $blocks->unwrap()['blocks'][0];
+		$split = $blocks->raw()['blocks'][0];
 
 		$this->assertSame(
 			['uid', 'type', 'handle', 'layout', 'blocks', 'meta'],

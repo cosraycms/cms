@@ -20,6 +20,6 @@ class AncestorPathRoutePage implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Ancestor Path Route Page';
+		return $this->title?->value()->raw() ?? 'Ancestor Path Route Page';
 	}
 }

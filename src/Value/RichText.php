@@ -13,7 +13,7 @@ class RichText extends Text
 {
 	public function __toString(): string
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	/**
@@ -36,7 +36,7 @@ class RichText extends Text
 	 * format envelope (unmigrated legacy HTML) render empty — the
 	 * HTML-to-JSON migration ships with the code that requires it.
 	 */
-	public function unwrap(): string
+	public function raw(): string
 	{
 		if (isset($this->value)) {
 			return $this->value;
@@ -55,6 +55,6 @@ class RichText extends Text
 		int $words = 30,
 		string $allowedTags = '',
 	): string {
-		return HtmlUtil::excerpt($this->unwrap(), $words, $allowedTags);
+		return HtmlUtil::excerpt($this->raw(), $words, $allowedTags);
 	}
 }

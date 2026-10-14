@@ -20,6 +20,6 @@ class TestPage implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Test Page';
+		return $this->title?->value()->raw() ?? 'Test Page';
 	}
 }

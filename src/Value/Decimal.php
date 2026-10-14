@@ -34,7 +34,7 @@ class Decimal extends Value
 		return (string) $this->value;
 	}
 
-	public function unwrap(): ?float
+	public function raw(): ?float
 	{
 		return $this->value;
 	}

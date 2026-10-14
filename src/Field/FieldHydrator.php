@@ -172,7 +172,7 @@ class FieldHydrator
 		// A field whose When condition is not met hydrates with empty
 		// data: it presents as empty to every consumer (read-time
 		// enforcement) while the stored value survives untouched and
-		// stays reachable through Field::raw().
+		// stays reachable through Field::stored().
 		$active = $this->isActive($property, $content);
 		$field = new $fieldType($fieldName, $owner, new ValueContext($fieldName, $active ? $data : []));
 

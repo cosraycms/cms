@@ -32,7 +32,7 @@ final class Image implements Block
 	{
 		/** @var ImageValue $image */
 		$image = $block->image;
-		$asset = $ctx->asset((string) ($image->unwrap()['uid'] ?? ''));
+		$asset = $ctx->asset((string) ($image->raw()['uid'] ?? ''));
 
 		if ($asset === null) {
 			return '';

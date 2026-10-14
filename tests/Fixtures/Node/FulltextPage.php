@@ -27,6 +27,6 @@ final class FulltextPage implements Title
 	#[Fulltext(FulltextWeight::A)]
 	public function title(): string
 	{
-		return $this->name->value()->unwrap();
+		return $this->name->value()->raw();
 	}
 }

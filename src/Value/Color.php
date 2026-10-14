@@ -13,22 +13,22 @@ class Color extends Value
 	 */
 	public function __toString(): string
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
-	public function unwrap(): string
+	public function raw(): string
 	{
 		return self::normalize($this->value()) ?? '';
 	}
 
 	public function json(): string
 	{
-		return $this->unwrap();
+		return $this->raw();
 	}
 
 	public function isset(): bool
 	{
-		return $this->unwrap() !== '';
+		return $this->raw() !== '';
 	}
 
 	/**

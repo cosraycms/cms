@@ -53,7 +53,7 @@ public Checkbox $enabled;
 
 New ordinary fields default to false, nullable ones to null; `#[DefaultValue]` overrides creation defaults. `structure()` applies a default, whereas `structure(null)` preserves explicit null on a nullable field. Blueprint and nested row values also distinguish omission from explicit null. An omitted patch leaves the value untouched; an explicit null clears it.
 
-`Value\Boolean::unwrap()` and `json()` preserve null for nullable fields. `isset()` is false for null but true for a stored false. Ordinary fields retain their two-state read behavior, including legacy null read as false. Consumers opting into nullable values must handle `bool|null`.
+`Value\Boolean::raw()` and `json()` preserve null for nullable fields. `isset()` is false for null but true for a stored false. Ordinary fields retain their two-state read behavior, including legacy null read as false. Consumers opting into nullable values must handle `bool|null`.
 
 A required checkbox accepts false: requiring an answer is different from requiring consent. `#[Nullable, Required]` rejects null/missing values. `Nullable` and `StateLabels` currently apply only to Checkbox fields. `#[When]` still treats false and null alike as empty. See [Checkbox](../src/Field/Checkbox.php) and its tests for defaults and validation.
 
@@ -240,7 +240,7 @@ public Date $endDate;
 
 `#[When]` supports truthiness, equality, membership, and explicit operators; see [Schema\When](../src/Schema/When.php) and the shared [condition fixtures](../contract/conditions.json).
 
-Inactive controls are hidden without clearing their stored values. Reads present an inactive field as empty; `Field::raw()` bypasses that behavior. Editor condition sources currently need primitive, non-translated fields, and conditions are not emitted inside typed rows. `#[Required]` still validates on the server while a field is inactive, despite browser required state being suspended. These are current limitations, not restrictions on future scoped conditions.
+Inactive controls are hidden without clearing their stored values. Reads present an inactive field as empty; `Field::stored()` bypasses that behavior. Editor condition sources currently need primitive, non-translated fields, and conditions are not emitted inside typed rows. `#[Required]` still validates on the server while a field is inactive, despite browser required state being suspended. These are current limitations, not restrictions on future scoped conditions.
 
 ## The window.Cosray bridge
 

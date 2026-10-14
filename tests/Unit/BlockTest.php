@@ -78,14 +78,14 @@ final class BlockTest extends RichtextOwnerTestCase
 		$this->assertNull($block->uid());
 		$this->assertSame(['colspan' => 12, 'rowspan' => 1], $block->layout()->array());
 		$this->assertTrue($block->isset());
-		$this->assertSame('', $block->text->unwrap());
+		$this->assertSame('', $block->text->raw());
 	}
 
 	public function testBlockToleratesMalformedFieldData(): void
 	{
 		$block = $this->block(['fields' => ['text' => 'junk']]);
 
-		$this->assertSame('', $block->text->unwrap());
+		$this->assertSame('', $block->text->raw());
 	}
 
 	public function testBlockThrowsOnUnknownField(): void

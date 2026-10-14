@@ -70,7 +70,7 @@ class File extends Value
 		return $this->asset($this->index)->mime ?? '';
 	}
 
-	public function unwrap(): ?array
+	public function raw(): ?array
 	{
 		return $this->fileItem(0);
 	}

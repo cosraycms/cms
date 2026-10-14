@@ -21,6 +21,6 @@ final class TestDateTimeDocument implements Title
 
 	public function title(): string
 	{
-		return ($this->title?->value()->unwrap() ?? 'Untitled') . ' · ' . $this->observedAt->value()->format('c');
+		return ($this->title?->value()->raw() ?? 'Untitled') . ' · ' . $this->observedAt->value()->format('c');
 	}
 }

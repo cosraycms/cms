@@ -20,6 +20,6 @@ class ParentPathRoutePage implements Title
 
 	public function title(): string
 	{
-		return $this->title?->value()->unwrap() ?? 'Parent Path Route Page';
+		return $this->title?->value()->raw() ?? 'Parent Path Route Page';
 	}
 }

@@ -83,7 +83,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('Hello', $value->unwrap());
+		$this->assertSame('Hello', $value->raw());
 		$this->assertSame('Hello', (string) $value);
 		$this->assertTrue($value->isset());
 	}
@@ -99,7 +99,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('', $value->unwrap());
+		$this->assertSame('', $value->raw());
 		$this->assertSame('', (string) $value);
 		$this->assertFalse($value->isset());
 	}
@@ -169,7 +169,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('<?php echo 1;', $value->unwrap());
+		$this->assertSame('<?php echo 1;', $value->raw());
 		$this->assertSame('php', $value->syntax());
 		$this->assertSame('&lt;?php echo 1;', (string) $value);
 		$this->assertTrue($value->isset());
@@ -186,7 +186,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('const answer = 42;', $value->unwrap());
+		$this->assertSame('const answer = 42;', $value->raw());
 		$this->assertSame('javascript', $value->syntax());
 	}
 
@@ -239,7 +239,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertSame(42, $value->unwrap());
+		$this->assertSame(42, $value->raw());
 		$this->assertTrue($value->isset());
 		$this->assertSame('42', (string) $value);
 	}
@@ -253,7 +253,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertNull($value->unwrap());
+		$this->assertNull($value->raw());
 		$this->assertFalse($value->isset());
 		$this->assertSame('', (string) $value);
 	}
@@ -265,9 +265,9 @@ final class PrimitiveValueTest extends TestCase
 		$valueContext = new ValueContext('price', ['value' => '12.5']);
 		$field = new TestNumber('price', $owner, $valueContext);
 		$value = new \Cosray\Value\Decimal($owner, $field, $valueContext);
-		$this->assertSame(12.5, $value->unwrap());
+		$this->assertSame(12.5, $value->raw());
 		$this->assertTrue($value->isset());
-		$this->assertSame('12.5', (string) $value->unwrap());
+		$this->assertSame('12.5', (string) $value->raw());
 		$this->assertSame('12.50', $value->localize(2, 'en'));
 		$this->assertStringContainsString('12.50', $value->currency('USD', 2, 'en'));
 	}
@@ -281,7 +281,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertFalse($value->unwrap());
+		$this->assertFalse($value->raw());
 		$this->assertSame('', (string) $value);
 		$this->assertTrue($value->isset());
 	}
@@ -908,7 +908,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertSame('draft', $value->unwrap());
+		$this->assertSame('draft', $value->raw());
 		$this->assertSame(['value' => 'draft'], $value->json());
 		$this->assertTrue($value->isset());
 	}
@@ -987,7 +987,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertSame('yes', $value->unwrap());
+		$this->assertSame('yes', $value->raw());
 		$this->assertSame('yes', $value->json());
 		$this->assertTrue($value->isset());
 	}
@@ -1002,7 +1002,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('<strong>Yes</strong>', $value->unwrap());
+		$this->assertSame('<strong>Yes</strong>', $value->raw());
 		$this->assertSame('<strong>Yes</strong>', $value->json());
 		$this->assertSame('&lt;strong&gt;Yes&lt;/strong&gt;', (string) $value);
 		$this->assertTrue($value->isset());
@@ -1018,7 +1018,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 
-		$this->assertSame('', $value->unwrap());
+		$this->assertSame('', $value->raw());
 		$this->assertSame('', $value->json());
 		$this->assertSame('', (string) $value);
 		$this->assertFalse($value->isset());
@@ -1105,7 +1105,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertSame('#e54231', (string) $value('#E54231'));
 		$this->assertSame('#e54231', $value('#E54231')->json());
-		$this->assertSame('#aabbcc', $value('abc')->unwrap());
+		$this->assertSame('#aabbcc', $value('abc')->raw());
 		$this->assertTrue($value('#e54231')->isset());
 
 		// Anything else never reaches a style attribute.
@@ -1219,7 +1219,7 @@ final class PrimitiveValueTest extends TestCase
 			'value' => ['en' => '<iframe></iframe>', 'de' => null],
 		]));
 
-		$this->assertSame('<iframe></iframe>', $value->unwrap());
+		$this->assertSame('<iframe></iframe>', $value->raw());
 		// Iframe values are trusted embed code and render raw.
 		$this->assertSame('<iframe></iframe>', (string) $value);
 		$this->assertTrue($value->isset());
@@ -1236,7 +1236,7 @@ final class PrimitiveValueTest extends TestCase
 			'value' => ['en' => null, 'de' => null],
 		]));
 
-		$this->assertSame('', $value->unwrap());
+		$this->assertSame('', $value->raw());
 		$this->assertSame('', (string) $value);
 		$this->assertFalse($value->isset());
 	}
@@ -1253,7 +1253,7 @@ final class PrimitiveValueTest extends TestCase
 		]));
 
 		$value = $field->value();
-		$this->assertSame('abc123', $value->unwrap());
+		$this->assertSame('abc123', $value->raw());
 		$this->assertSame('abc123', $value->json());
 		$this->assertTrue($value->isset());
 		$this->assertStringContainsString('padding-top: 56.25%', (string) $value);
