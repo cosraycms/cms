@@ -18,6 +18,7 @@ $panelLocaleChoices = (array) $this->unwrap($panelLocaleChoices);
 $deleteUrl = $this->unwrap($deleteUrl ?? null);
 $notice = $this->unwrap($notice ?? null);
 $system = (array) $this->unwrap($system);
+$panelBase = (string) $this->unwrap($panelBase);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 

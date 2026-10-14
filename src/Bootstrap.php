@@ -9,7 +9,6 @@ use Celema\Container\Entry;
 use Celema\Core\App;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Plugin as CorePlugin;
-use Celema\Core\Request;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Celema\Quma\Delimiters;
@@ -31,14 +30,6 @@ use Cosray\Icons\Local;
 use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Schema\Registry as NodeSchemas;
 use Cosray\Node\Types;
-use Cosray\Node\Wrapper;
-use Cosray\Panel\CollectionPage;
-use Cosray\Panel\CollectionPager;
-use Cosray\Panel\CollectionParent;
-use Cosray\Panel\CollectionQuery;
-use Cosray\Panel\CollectionSearch;
-use Cosray\Panel\CollectionTable;
-use Cosray\Panel\CollectionUrls;
 use Cosray\Panel\Dashboard as PanelDashboard;
 use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
@@ -575,15 +566,6 @@ class Bootstrap implements CorePlugin
 			// (e.g. the 'panel' layout) search the dirs in order.
 			dirs: ['cosray' => "{$root}/panel/views", ...$this->pluginTemplates['panel']],
 			autoescape: true,
-			trusted: [
-				CollectionPage::class,
-				CollectionPager::class,
-				CollectionParent::class,
-				CollectionQuery::class,
-				CollectionSearch::class,
-				CollectionTable::class,
-				CollectionUrls::class,
-			],
 		);
 	}
 
@@ -596,7 +578,6 @@ class Bootstrap implements CorePlugin
 		$this->renderer('view', BoilerRenderer::class)->args(
 			dirs: ['app' => $this->viewPath(), ...$this->pluginTemplates['view']],
 			autoescape: true,
-			trusted: $this->trustedViewClasses(),
 		);
 	}
 
@@ -616,18 +597,5 @@ class Bootstrap implements CorePlugin
 		$path = $this->config->path;
 
 		return rtrim($path->root, '/') . '/' . ltrim($path->views, '/');
-	}
-
-	/** @return list<class-string> */
-	protected function trustedViewClasses(): array
-	{
-		return [
-			Wrapper::class,
-			Cms::class,
-			Locales::class,
-			Locale::class,
-			Config::class,
-			Request::class,
-		];
 	}
 }

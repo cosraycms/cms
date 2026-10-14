@@ -43,6 +43,7 @@ abstract class Value
 		throw new NoSuchProperty("The field '{$this->fieldName}' doesn't have the property '{$name}'");
 	}
 
+	/** Safe HTML: Cosray's Boiler renderers print it without escaping. */
 	abstract public function __toString(): string;
 
 	abstract public function isset(): bool;

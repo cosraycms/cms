@@ -58,10 +58,7 @@ final class LiveReloadTest extends TestCase
 			new Context($this->db(), $request, $this->config(), $this->container(), $this->factory()),
 			self::blockServices(),
 		);
-		$renderer = new Renderer(
-			self::root() . '/tests/Fixtures/Boiler/templates',
-			trusted: [Cms::class],
-		);
+		$renderer = new Renderer(self::root() . '/tests/Fixtures/Boiler/templates');
 
 		return trim($renderer->render('live-reload', ['cms' => $cms]));
 	}

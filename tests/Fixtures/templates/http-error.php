@@ -8,7 +8,7 @@
 <body>
     <h1><?= $exception->title(); ?></h1>
     <?php if ($debug && $exception->getMessage()): ?>
-        <p><?= htmlspecialchars($exception->getMessage()); ?></p>
+        <p><?= $exception->getMessage() ?></p>
     <?php endif; ?>
 </body>
 </html>

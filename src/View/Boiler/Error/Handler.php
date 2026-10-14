@@ -8,13 +8,8 @@ use Celema\Core\Error\Handler as ErrorHandler;
 use Celema\Core\Error\Renderer as ErrorRenderer;
 use Celema\Core\Exception\HttpError;
 use Celema\Core\Factory\Factory;
-use Celema\Core\Request;
-use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
-use Cosray\Locale;
-use Cosray\Locales;
-use Cosray\Node\Wrapper;
 use Psr\Log\LoggerInterface as Logger;
 
 /** @psalm-api */
@@ -24,14 +19,7 @@ final class Handler
 	private string|array|null $views = null;
 
 	/** @var list<class-string> */
-	private array $trusted = [
-		Wrapper::class,
-		Cms::class,
-		Locales::class,
-		Locale::class,
-		Config::class,
-		Request::class,
-	];
+	private array $trusted = [];
 
 	public function __construct(
 		private Config $config,

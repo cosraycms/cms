@@ -53,6 +53,10 @@ $app->renderer('view', Renderer::class)->args(
 );
 ```
 
+Templates render escaped: Boiler escapes the strings and objects that reach them, including what their properties and methods return. Field values ([Value](../src/Value/Value.php)) and [Markup](../src/Markup.php) print as is, because values escape plain text in their own string conversion and methods that produce HTML, such as `$node->image->tag()`, `$node->content->render()`, or `$cms->menu('main')->html()`, return `Markup`. Every Cosray Boiler renderer trusts both, so `trusted:` lists only a site's own classes whose string conversion is safe HTML. A site method that produces HTML returns `new Markup($html)` and escapes what it inserts.
+
+A field's `raw()` returns its value unescaped. Numbers, booleans, and null come back as they are; strings, arrays, and objects come back wrapped again, so compare them with `->is()` and pass `$this->unwrap(...)` to functions that need the original. Boiler's [values documentation](https://codefloe.com/celema/boiler/src/branch/main/docs/values.md) covers comparisons, PHP functions, and JSON.
+
 Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
 
 ## Logging

@@ -40,19 +40,17 @@ final class HandlerTest extends TestCase
 
 	public function testTrustedMergesByDefault(): void
 	{
-		$handler = $this->handler();
+		$handler = $this->handler()->trusted([Config::class]);
 
 		$result = $handler->trusted([self::class]);
-		$trusted = $this->trustedClasses($handler);
 
 		$this->assertSame($handler, $result);
-		$this->assertContains(Config::class, $trusted);
-		$this->assertContains(self::class, $trusted);
+		$this->assertSame([Config::class, self::class], $this->trustedClasses($handler));
 	}
 
 	public function testTrustedCanReplace(): void
 	{
-		$handler = $this->handler();
+		$handler = $this->handler()->trusted([Config::class]);
 
 		$result = $handler->trusted([self::class], replace: true);
 

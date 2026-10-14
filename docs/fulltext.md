@@ -130,13 +130,11 @@ The snippet exposes:
 
 - `segments`: ordered arrays containing `text` and boolean `match`.
 - `text()`: plain text without highlight markers.
-- `html()`: escaped text with fixed `<mark>` tags around matches.
-
-In an escaped Boiler template, deliberately unwrap that safe HTML:
+- `html()`: escaped text with fixed `<mark>` tags around matches, as `Cosray\Markup`, which templates print as is.
 
 ```php
 <a href="<?= $node->path() ?>"><?= $node->title() ?></a>
-<p><?= $this->unwrap($node->meta->search->snippet->html()) ?></p>
+<p><?= $node->meta->search->snippet->html() ?></p>
 ```
 
 Do not output raw PostgreSQL headline text as HTML. Source control characters used as headline markers are stripped during extraction; every resulting segment is escaped before markup is added. Source spelling and accents are retained. PostgreSQL may omit HTML-like tags when constructing a headline; this is not an HTML-preservation API.

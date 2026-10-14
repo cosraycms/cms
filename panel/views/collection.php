@@ -4,6 +4,8 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
+$page = $this->unwrap($page);
+
 // Track sizing per column kind. Badges and row actions size to their content
 // because the translation decides a pill's width; the title absorbs the slack,
 // and past the sum of the floors the list scrolls sideways.
@@ -24,7 +26,7 @@ $notice = (array) $this->unwrap($notice ?? []);
 
 $columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr)';
 
-foreach (array_slice((array) $this->unwrap($page->table->headers), 1) as $header) {
+foreach (array_slice($page->table->headers, 1) as $header) {
 	$columns .= match ($header['kind'] ?? null) {
 		'date' => ' minmax(9rem, auto)',
 		'badge' => ' max-content',

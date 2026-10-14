@@ -8,8 +8,8 @@
 <body>
     <h1>500 Internal Server Error</h1>
     <?php if ($debug && $exception->getMessage()): ?>
-        <p><?= htmlspecialchars($exception->getMessage()); ?></p>
-        <pre><?= htmlspecialchars($exception->getTraceAsString()); ?></pre>
+        <p><?= $exception->getMessage() ?></p>
+        <pre><?= $exception->getTraceAsString() ?></pre>
     <?php endif; ?>
 </body>
 </html>

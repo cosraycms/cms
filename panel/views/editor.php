@@ -17,7 +17,7 @@ $generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
 $pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
 $meta = (array) ($this->unwrap($meta ?? null) ?? []);
 $system = (array) $this->unwrap($system);
-$panelBase = (string) $panelBase;
+$panelBase = (string) $this->unwrap($panelBase);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 $fields = $node['fields'] ?? [];

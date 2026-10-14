@@ -1,2 +1,3 @@
 <?= $wl ?>
-<?= $wl->paragraph((string) $content) ?>
+<?= $wl->paragraph($content) ?>
+<?= $wl->markup($content) ?>

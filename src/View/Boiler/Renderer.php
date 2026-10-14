@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Cosray\View\Boiler;
 
 use Celema\Boiler\Engine;
+use Cosray\Markup;
 use Cosray\Renderer as RendererInterface;
+use Cosray\Value\Value;
 use Override;
 
 /**
@@ -15,6 +17,9 @@ use Override;
  */
 class Renderer implements RendererInterface
 {
+	/** Cosray's classes whose string conversion is safe HTML, trusted by every Boiler renderer. */
+	public const array TRUSTED = [Value::class, Markup::class];
+
 	/**
 	 * @param DirsInput $dirs
 	 * @param list<class-string> $trusted
@@ -45,9 +50,11 @@ class Renderer implements RendererInterface
 	/** @param DirsInput $dirs */
 	protected function createEngine(string|array $dirs): Engine
 	{
+		$trusted = [...self::TRUSTED, ...$this->trusted];
+
 		return $this->autoescape
-			? Engine::create($dirs, $this->defaults, $this->trusted)
-			: Engine::unescaped($dirs, $this->defaults, $this->trusted);
+			? Engine::create($dirs, $this->defaults, $trusted)
+			: Engine::unescaped($dirs, $this->defaults, $trusted);
 	}
 
 	#[Override]

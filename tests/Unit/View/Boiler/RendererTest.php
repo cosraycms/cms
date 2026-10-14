@@ -53,7 +53,7 @@ final class RendererTest extends TestCase
 		);
 		$result = $renderer->render('whitelist', ['wl' => new Whitelisted(), 'content' => 'test']);
 
-		$this->assertSame('<h1>headline</h1><p>test</p>', $result);
+		$this->assertSame('<h1>headline</h1>&lt;p&gt;test&lt;/p&gt;<p>test</p>', $result);
 	}
 
 	public function testContentType(): void

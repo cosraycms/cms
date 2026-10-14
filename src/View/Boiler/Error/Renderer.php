@@ -7,6 +7,7 @@ namespace Cosray\View\Boiler\Error;
 use Celema\Boiler\Engine;
 use Celema\Core\Error\Renderer as RendererInterface;
 use Celema\Core\Exception\HttpError;
+use Cosray\View\Boiler\Renderer as ViewRenderer;
 use Override;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -70,9 +71,11 @@ final class Renderer implements RendererInterface
 	/** @param DirsInput $dirs */
 	private function createEngine(string|array $dirs): Engine
 	{
+		$trusted = [...ViewRenderer::TRUSTED, ...$this->trusted];
+
 		return $this->autoescape
-			? Engine::create($dirs, trusted: $this->trusted)
-			: Engine::unescaped($dirs, trusted: $this->trusted);
+			? Engine::create($dirs, trusted: $trusted)
+			: Engine::unescaped($dirs, trusted: $trusted);
 	}
 
 	private function isJsonOnlyRequest(Request $request): bool

@@ -7,16 +7,12 @@ namespace Cosray\Tests;
 use Celema\Core\App;
 use Celema\Core\Factory\Nyholm;
 use Celema\Core\Plugin as CorePlugin;
-use Celema\Core\Request;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Celema\Router\Router;
 use Cosray\Bootstrap;
-use Cosray\Cms;
 use Cosray\Config;
-use Cosray\Locale;
 use Cosray\Locales;
-use Cosray\Node\Wrapper;
 use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\Fixtures\TransactionalBootstrap;
 use Cosray\View\Boiler\Error\Handler;
@@ -206,15 +202,6 @@ class End2EndTestCase extends IntegrationTestCase
 		$logger = new NullLogger();
 		$handler = new Handler($config, $factory, $logger);
 		$handler->views('tests/Fixtures/templates');
-
-		$handler->trusted([
-			Wrapper::class,
-			Cms::class,
-			Locales::class,
-			Locale::class,
-			Config::class,
-			Request::class,
-		]);
 
 		return $handler->create();
 	}

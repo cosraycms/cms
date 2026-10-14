@@ -29,7 +29,7 @@ $app->node(Article::class);
 
 `#[Route]` makes a type routable. Its handle derives from the class name unless `#[Handle]` supplies it; the renderer defaults to that handle unless `#[Render]` overrides it. `#[Children(...)]` declares allowed direct child types, one class or a list, defaulting to none; `sortable: true` lets editors arrange them (see [manual order](#manual-order)). [Schema attributes](../src/Schema/) and [node schema construction](../src/Node/Schema.php) define the supported metadata.
 
-Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. Use `raw()` for raw values; string conversion uses the field's escaped or rendered output. Raw values need escaping when inserted into HTML. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
+Inside a node class, fields expose their value through `value()`. Templates receive a `Cosray\Node\Wrapper`, whose field properties are already `Value` objects. String conversion uses the field's escaped or rendered output, which templates print as is; `raw()` returns the raw value. See [views and errors](application.md#views-and-errors) for how templates escape. [Blocks](blocks.md), [richtext](richtext-format.md), and [media](media.md) have their own rendering behavior.
 
 ### Embedded fields
 
@@ -316,7 +316,7 @@ See [Node\Store](../src/Node/Store.php), [Node\Drafts](../src/Node/Drafts.php), 
 
 ## Menus
 
-`$cms->menu('main')` returns an iterable [Finder\Menu](../src/Finder/Menu.php); `html($class, $tag)` renders escaped nested markup. An existing empty menu renders nothing; an unknown handle raises an error.
+`$cms->menu('main')` returns an iterable [Finder\Menu](../src/Finder/Menu.php); `html($class, $tag)` returns the escaped nested markup as `Cosray\Markup`. An existing empty menu renders nothing; an unknown handle raises an error.
 
 Items link to nodes (`node`), literal localized URLs (`url`), or catalog assets (`asset`); other types render as labels. Node links follow the node's current localized path and inherit its title unless overridden. The `children` type expands published, visible children dynamically, with node queries per configured item and depth, ordered by title, creation, last change, or the parent's manual order. Hidden parents remove their subtree from ordinary output. Locale maps follow configured fallbacks and neutral `zxx` values.
 

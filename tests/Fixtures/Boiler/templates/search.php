@@ -1,1 +1,1 @@
-<?= $this->unwrap($search->snippet->html()) ?>
+<?= $search->snippet->html() ?>

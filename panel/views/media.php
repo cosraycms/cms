@@ -150,7 +150,7 @@ unset($search['page']);
 	</section>
 
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
-		['panel' => (string) $panelBase, 'system' => $system],
+		['panel' => (string) $this->unwrap($panelBase), 'system' => $system],
 		$jsonFlags,
 	) ?></script>
 </div>
