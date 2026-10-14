@@ -7,9 +7,9 @@ use function Cosray\escape;
 // neutral-locale map and submits as content[{field}][meta][{key}][zxx]
 // through the same merge patch as everything else.
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
-$meta = $this->unwrap($meta ?? null);
+$field = (array) u($field);
+$control = (array) u($control);
+$meta = u($meta ?? null);
 $meta = is_array($meta) ? $meta : [];
 $id = (string) $id;
 

@@ -9,18 +9,18 @@ use Cosray\Block\Layout;
 // from the field's templates. data-split names the direction as the
 // renderer derives it; the split behavior sets it on a new split.
 
-$field = (array) $this->unwrap($field);
-$index = $this->unwrap($index);
-$rowData = $this->unwrap($rowData ?? null);
+$field = (array) u($field);
+$index = u($index);
+$rowData = u($rowData ?? null);
 $rowData = is_array($rowData) ? $rowData : null;
-$blockTypes = (array) $this->unwrap($blockTypes);
+$blockTypes = (array) u($blockTypes);
 $columns = max(1, (int) $columns);
 $min = min($columns, max(1, (int) $min));
-$metaControl = $this->unwrap($metaControl ?? null);
+$metaControl = u($metaControl ?? null);
 $metaControl = is_array($metaControl) ? $metaControl : null;
-$readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
-$name = (string) $this->unwrap($name);
-$id = (string) $this->unwrap($id);
+$readonly = (bool) (u($readonly ?? null) ?? false);
+$name = (string) u($name);
+$id = (string) u($id);
 
 $rowName = "{$name}[{$index}]";
 $rowId = "{$id}-{$index}";

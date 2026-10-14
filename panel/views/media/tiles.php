@@ -10,8 +10,8 @@ use function Cosray\escape;
 // successor, and without htmx it simply pages. The media screen's tiles
 // open the detail; a picker's are buttons carrying their asset.
 
-$screen = $this->unwrap($screen);
-$listing = $this->unwrap($listing);
+$screen = u($screen);
+$listing = u($listing);
 $picker = (bool) ($picker ?? false);
 $locale = (string) ($localeId ?? 'en');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;

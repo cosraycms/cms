@@ -1,9 +1,9 @@
 <?php
 
-$commonChoices = (array) $this->unwrap($commonChoices);
-$more = (bool) $this->unwrap($more);
-$id = (string) $this->unwrap($id);
-$places = $this->unwrap($places ?? null);
+$commonChoices = (array) u($commonChoices);
+$more = (bool) u($more);
+$id = (string) u($id);
+$places = u($places ?? null);
 ?>
 <button type="button" class="inserter" popovertarget="<?= $this->escape($id) ?>"
 	<?= is_string($places) ? 'data-places="' . $this->escape($places) . '"' : '' ?>

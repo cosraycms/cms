@@ -7,18 +7,18 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$user = $this->unwrap($user);
+$user = u($user);
 $exists = (bool) $exists;
 $locked = (bool) $locked;
 $profile = (bool) $profile;
-$roles = (array) $this->unwrap($roles);
-$fields = (array) $this->unwrap($fields);
-$locales = (array) $this->unwrap($locales);
-$panelLocaleChoices = (array) $this->unwrap($panelLocaleChoices);
-$deleteUrl = $this->unwrap($deleteUrl ?? null);
-$notice = $this->unwrap($notice ?? null);
-$system = (array) $this->unwrap($system);
-$panelBase = (string) $this->unwrap($panelBase);
+$roles = (array) u($roles);
+$fields = (array) u($fields);
+$locales = (array) u($locales);
+$panelLocaleChoices = (array) u($panelLocaleChoices);
+$deleteUrl = u($deleteUrl ?? null);
+$notice = u($notice ?? null);
+$system = (array) u($system);
+$panelBase = (string) u($panelBase);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 ?>
 

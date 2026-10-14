@@ -7,13 +7,13 @@ use function Cosray\escape;
 // field, node, locale, locales) from the embedded payload and carries
 // every edit into the form submission as one JSON value.
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
-$data = (array) ($this->unwrap($data ?? null) ?? []);
-$locales = (array) $this->unwrap($locales);
+$field = (array) u($field);
+$control = (array) u($control);
+$data = (array) (u($data ?? null) ?? []);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
-$assets = (array) ($this->unwrap($assets ?? null) ?? []);
+$assets = (array) (u($assets ?? null) ?? []);
 $fieldName = (string) ($field['name'] ?? '');
 $nameRoot = (string) ($nameRoot ?? "content[{$fieldName}]");
 

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-$fields = (array) $this->unwrap($fields);
-$fieldsets = (array) $this->unwrap($fieldsets);
-$content = (array) $this->unwrap($content);
-$locales = (array) $this->unwrap($locales);
+$fields = (array) u($fields);
+$fieldsets = (array) u($fieldsets);
+$content = (array) u($content);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $uid = (string) $uid;
-$assets = (array) $this->unwrap($assets ?? []);
-$pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
+$assets = (array) u($assets ?? []);
+$pathSourceFields = (array) u($pathSourceFields ?? []);
 
 $fieldsByName = [];
 

@@ -5,7 +5,7 @@ use function Cosray\escape;
 // One item card plus, nested below it, the list of its children. The
 // partial recurses through `menu/node` for every child.
 
-$row = (array) $this->unwrap($row);
+$row = (array) u($row);
 $treeUrl = (string) $treeUrl;
 $selected = (string) $selected;
 $defaultLocale = (string) $defaultLocale;

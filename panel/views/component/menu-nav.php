@@ -12,10 +12,10 @@ if (!$rail) {
 	return;
 }
 
-$menus = (array) $this->unwrap($menuNav);
-$currentPath = (string) $this->unwrap($currentPath);
-$locales = (array) $this->unwrap($menuLocales);
-$defaultLocale = (string) $this->unwrap($menuDefaultLocale);
+$menus = (array) u($menuNav);
+$currentPath = (string) u($currentPath);
+$locales = (array) u($menuLocales);
+$defaultLocale = (string) u($menuDefaultLocale);
 ?>
 <div id="menu-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
 	<ul class="list">

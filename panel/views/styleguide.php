@@ -7,25 +7,25 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$tokenGroups = (array) $this->unwrap($tokenGroups);
-$fields = (array) $this->unwrap($fields);
-$fieldset = (array) $this->unwrap($fieldset);
-$content = (array) $this->unwrap($content);
-$richtextFields = (array) $this->unwrap($richtextFields);
-$richtextContent = (array) $this->unwrap($richtextContent);
-$codeFields = (array) $this->unwrap($codeFields);
-$codeContent = (array) $this->unwrap($codeContent);
-$mediaFields = (array) $this->unwrap($mediaFields);
-$mediaContent = (array) $this->unwrap($mediaContent);
-$mediaAssets = (array) $this->unwrap($mediaAssets);
-$entriesFields = (array) $this->unwrap($entriesFields);
-$entriesContent = (array) $this->unwrap($entriesContent);
-$blocksFields = (array) $this->unwrap($blocksFields);
-$blocksContent = (array) $this->unwrap($blocksContent);
-$system = $this->unwrap($system);
+$tokenGroups = (array) u($tokenGroups);
+$fields = (array) u($fields);
+$fieldset = (array) u($fieldset);
+$content = (array) u($content);
+$richtextFields = (array) u($richtextFields);
+$richtextContent = (array) u($richtextContent);
+$codeFields = (array) u($codeFields);
+$codeContent = (array) u($codeContent);
+$mediaFields = (array) u($mediaFields);
+$mediaContent = (array) u($mediaContent);
+$mediaAssets = (array) u($mediaAssets);
+$entriesFields = (array) u($entriesFields);
+$entriesContent = (array) u($entriesContent);
+$blocksFields = (array) u($blocksFields);
+$blocksContent = (array) u($blocksContent);
+$system = u($system);
 $panelBase = (string) $panelBase;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
-$locales = (array) $this->unwrap($locales);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $fallbackField = [
 	'name' => 'fallback-title',
@@ -51,13 +51,13 @@ $fieldsetMembers = array_flip(array_filter(
 ));
 
 $statuses = ['published', 'unpublished', 'changes', 'hidden', 'locked'];
-$rows = (array) $this->unwrap($rows);
+$rows = (array) u($rows);
 
 // ?section=<key> narrows the page to one section, ?theme=light|dark
 // forces a theme: one URL per question, so a check needs no scrolling
 // and no scripting.
-$section = (string) ($this->unwrap($section ?? '') ?? '');
-$theme = (string) ($this->unwrap($theme ?? '') ?? '');
+$section = (string) (u($section ?? '') ?? '');
+$theme = (string) (u($theme ?? '') ?? '');
 $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 ?>
 <?php if ($section !== ''): ?>
@@ -590,7 +590,7 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 					Rendered through <code>panel/views/node/inspector.php</code> — the status,
 					paths and advanced tabs of an existing node.
 				</p>
-				<?php $this->include('node/inspector', (array) $this->unwrap($inspector)) ?>
+				<?php $this->include('node/inspector', (array) u($inspector)) ?>
 			</section>
 
 			<section class="section" data-section="page-head">

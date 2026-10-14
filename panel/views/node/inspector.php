@@ -12,16 +12,16 @@ use function Cosray\escape;
 // Collapsed, a strip of quick controls replaces the drawer. Its published
 // switch is an unnamed copy: only the drawer's switch submits.
 
-$node = (array) $this->unwrap($node);
-$locales = (array) $this->unwrap($locales);
+$node = (array) u($node);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $routable = (bool) $routable;
 $renderable = (bool) $renderable;
-$contentLocales = (bool) ($this->unwrap($contentLocales ?? null) ?? false);
+$contentLocales = (bool) (u($contentLocales ?? null) ?? false);
 $collapsed = (bool) $collapsed;
-$pathsUrl = $this->unwrap($pathsUrl);
-$generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
-$meta = (array) ($this->unwrap($meta ?? null) ?? []);
+$pathsUrl = u($pathsUrl);
+$generatedPaths = (array) u($generatedPaths ?? []);
+$meta = (array) (u($meta ?? null) ?? []);
 $paths = is_array($node['paths'] ?? null) ? $node['paths'] : [];
 $handle = $node['handle'] ?? null;
 

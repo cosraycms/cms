@@ -2,11 +2,11 @@
 
 use function Cosray\escape;
 
-$catalog = (array) $this->unwrap(
+$catalog = (array) u(
 	$messages ?? ['locale' => (string) ($localeId ?? 'en'), 'domains' => []],
 );
-$importMap = (array) $this->unwrap($importMap ?? []);
-$liveReload = $this->unwrap($liveReload ?? null);
+$importMap = (array) u($importMap ?? []);
+$liveReload = u($liveReload ?? null);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 ?>

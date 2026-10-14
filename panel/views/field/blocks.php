@@ -16,10 +16,10 @@
 // Receives one row list in $value and its renumber base — per locale
 // for an asymmetric field, the neutral locale otherwise — in $name.
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
-$value = $this->unwrap($value ?? null);
-$data = $this->unwrap($data ?? null);
+$value = u($value ?? null);
+$data = u($data ?? null);
 $columns = \Cosray\Field\Blocks::storedColumns(
 	is_array($data) ? $data['columns'] ?? null : null,
 	max(1, (int) ($props['columns'] ?? 1)),
@@ -34,11 +34,11 @@ $spacing = static fn(string $key): string => is_array($meta[$key] ?? null)
 		? (string) $meta[$key]['zxx']
 		: '';
 
-$field = (array) $this->unwrap($field);
+$field = (array) u($field);
 $choices = new \Cosray\Panel\BlockChoices(
 	(string) ($field['name'] ?? ''),
 	$props,
-	isset($renderIcon) ? fn(array $icon): string => (string) $this->unwrap($renderIcon($icon)) : null,
+	isset($renderIcon) ? fn(array $icon): string => (string) u($renderIcon($icon)) : null,
 );
 $blockTypes = $choices->types;
 $commonChoices = $choices->common;

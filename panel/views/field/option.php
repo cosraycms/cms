@@ -2,10 +2,10 @@
 
 use function Cosray\escape;
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
+$field = (array) u($field);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
-$value = $this->unwrap($value ?? '');
+$value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $required = (bool) ($field['required'] ?? false);
 // HTML has no readonly for a select or a radio, so an immutable option

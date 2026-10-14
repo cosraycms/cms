@@ -9,9 +9,9 @@ use function Cosray\escape;
 // the toggle is unnamed and only decides which selects show. Splitting
 // copies the gap into both axes and clears it, joining copies back.
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
-$meta = $this->unwrap($meta ?? null);
+$field = (array) u($field);
+$control = (array) u($control);
+$meta = u($meta ?? null);
 $meta = is_array($meta) ? $meta : [];
 $id = (string) $id;
 $columns = max(1, (int) ($columns ?? 1));

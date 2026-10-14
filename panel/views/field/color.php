@@ -9,8 +9,8 @@ use function Cosray\escape;
 // The unnamed picker behind the swatch only writes into the text input.
 // Receives: field, id, name, value.
 
-$field = (array) $this->unwrap($field);
-$value = $this->unwrap($value ?? '');
+$field = (array) u($field);
+$value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $color = Color::normalize($value);
 $readonly = (bool) ($field['immutable'] ?? false);

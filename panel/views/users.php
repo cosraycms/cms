@@ -4,14 +4,14 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$rows = (array) $this->unwrap($rows);
-$types = (array) $this->unwrap($types);
+$rows = (array) u($rows);
+$types = (array) u($types);
 $search = (string) $search;
-$type = $this->unwrap($type ?? null);
+$type = u($type ?? null);
 $total = (int) $total;
-$previousUrl = $this->unwrap($previousUrl ?? null);
-$nextUrl = $this->unwrap($nextUrl ?? null);
-$notice = $this->unwrap($notice ?? null);
+$previousUrl = u($previousUrl ?? null);
+$nextUrl = u($nextUrl ?? null);
+$notice = u($notice ?? null);
 $listUrl = (string) $listUrl;
 ?>
 

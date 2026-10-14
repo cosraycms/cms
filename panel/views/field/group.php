@@ -6,10 +6,10 @@ use function Cosray\escape;
 // keyed by sub-control key. Receives the group's value map in $value and
 // the base input name (content[f][value][zxx]) in $name.
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
 $subs = (array) ($props['fields'] ?? []);
-$value = $this->unwrap($value ?? null);
+$value = u($value ?? null);
 $value = is_array($value) ? $value : [];
 
 // Sub-controls carry their own options/attrs; the parent field's

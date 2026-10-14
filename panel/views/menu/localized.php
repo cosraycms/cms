@@ -7,16 +7,16 @@ use function Cosray\escape;
 
 $name = (string) $name;
 $label = (string) $label;
-$values = (array) $this->unwrap($values);
-$error = $this->unwrap($error ?? null);
+$values = (array) u($values);
+$error = u($error ?? null);
 $id = (string) $id;
-$locales = (array) $this->unwrap($locales);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
-$help = $this->unwrap($help ?? null);
-$helpSection = $this->unwrap($helpSection ?? null);
+$help = u($help ?? null);
+$helpSection = u($helpSection ?? null);
 $helpHidden = (bool) ($helpHidden ?? false);
-$section = $this->unwrap($section ?? null);
-$sectionHide = $this->unwrap($sectionHide ?? null);
+$section = u($section ?? null);
+$sectionHide = u($sectionHide ?? null);
 $sectionHidden = (bool) ($sectionHidden ?? false);
 ?>
 <div

@@ -4,8 +4,8 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$cards = (array) $this->unwrap($cards ?? []);
-$recent = (array) $this->unwrap($recent ?? []);
+$cards = (array) u($cards ?? []);
+$recent = (array) u($recent ?? []);
 ?>
 
 <div class="page cms-dashboard">
@@ -19,7 +19,7 @@ $recent = (array) $this->unwrap($recent ?? []);
 				<?php foreach ($cards as $card): ?>
 					<?php
 
-					$card = (array) $this->unwrap($card);
+					$card = (array) u($card);
 					$url = $card['url'] ?? null;
 					$linked = is_string($url) && trim($url) !== '';
 					?>
@@ -50,7 +50,7 @@ $recent = (array) $this->unwrap($recent ?? []);
 			<?php else: ?>
 				<div class="rows">
 					<?php foreach ($recent as $row): ?>
-						<?php $row = (array) $this->unwrap($row) ?>
+						<?php $row = (array) u($row) ?>
 						<div class="row">
 							<span
 								class="dot <?= $row['published'] ?? false ? 'is-published' : 'is-unpublished' ?>"

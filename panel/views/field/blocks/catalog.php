@@ -1,8 +1,8 @@
 <?php
 
-$choices = (array) $this->unwrap($choices);
-$id = (string) $this->unwrap($id);
-$field = (array) $this->unwrap($field);
+$choices = (array) u($choices);
+$id = (string) u($id);
+$field = (array) u($field);
 $label = (string) ($field['label'] ?? $field['name'] ?? '');
 $title = __('field:add-block') . ($label !== '' ? ' — ' . $label : '');
 ?>

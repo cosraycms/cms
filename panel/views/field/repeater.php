@@ -4,10 +4,10 @@
 // wired up by the repeater behavior, which clones the __i__ template
 // row and renumbers names, ids and labels.
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
 $item = (array) ($props['item'] ?? []);
-$value = $this->unwrap($value ?? null);
+$value = u($value ?? null);
 $items = is_array($value) ? array_values($value) : [];
 $max = $props['max'] ?? null;
 ?>

@@ -5,7 +5,7 @@
 // group, list for repeater) and data (the full content entry, used by
 // element controls).
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $controlName = (string) ($control['name'] ?? '');
 
 $views = [

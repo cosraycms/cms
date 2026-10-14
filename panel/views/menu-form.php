@@ -6,14 +6,14 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$errors = (array) $this->unwrap($errors);
+$errors = (array) u($errors);
 $action = (string) $action;
 $backUrl = (string) $backUrl;
 $handle = (string) $handle;
-$description = (array) $this->unwrap($description);
-$locales = (array) $this->unwrap($locales);
+$description = (array) u($description);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
-$maxDepth = $this->unwrap($maxDepth);
+$maxDepth = u($maxDepth);
 $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 ?>
 

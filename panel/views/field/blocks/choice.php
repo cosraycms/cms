@@ -1,7 +1,7 @@
 <?php
 
-$choice = (array) $this->unwrap($choice);
-$insert = (string) $this->unwrap($insert);
+$choice = (array) u($choice);
+$insert = (string) u($insert);
 ?>
 <button type="button" class="choice"
 	data-repeater-add="<?= $this->escape($choice['type']) ?>"

@@ -1,10 +1,10 @@
 <?php
 
-$index = $this->unwrap($index);
-$itemValue = $this->unwrap($itemValue ?? null);
-$item = (array) $this->unwrap($item);
-$id = (string) $this->unwrap($id);
-$name = (string) $this->unwrap($name);
+$index = u($index);
+$itemValue = u($itemValue ?? null);
+$item = (array) u($item);
+$id = (string) u($id);
+$name = (string) u($name);
 $itemId = "{$id}-{$index}";
 $subField = ['required' => false, 'immutable' => false];
 ?>

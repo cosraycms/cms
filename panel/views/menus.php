@@ -8,7 +8,7 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$notice = $this->unwrap($notice ?? null);
+$notice = u($notice ?? null);
 $createUrl = (string) $menuCreateUrl;
 ?>
 

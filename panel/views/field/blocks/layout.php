@@ -7,10 +7,10 @@ use Cosray\Block\Layout;
 // these mirror them and the blocks behavior keeps both in step. Each
 // limit is the room the other dimensions leave.
 
-$layout = (array) $this->unwrap($layout);
+$layout = (array) u($layout);
 $columns = max(1, (int) $columns);
 $min = min($columns, max(1, (int) $min));
-$id = (string) $this->unwrap($id);
+$id = (string) u($id);
 $colspan = (int) ($layout['colspan'] ?? $min);
 $col = (int) ($layout['col'] ?? 0);
 

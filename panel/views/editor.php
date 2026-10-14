@@ -7,17 +7,17 @@ use function Cosray\escape;
 $this->layout('layer/main');
 
 $mode = (string) $mode;
-$backUrl = (string) $this->unwrap($backUrl);
-$backLabel = (string) $this->unwrap($backLabel);
-$links = $this->unwrap($links);
-$node = (array) $this->unwrap($node);
-$locales = (array) $this->unwrap($locales);
+$backUrl = (string) u($backUrl);
+$backLabel = (string) u($backLabel);
+$links = u($links);
+$node = (array) u($node);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
-$generatedPaths = (array) $this->unwrap($generatedPaths ?? []);
-$pathSourceFields = (array) $this->unwrap($pathSourceFields ?? []);
-$meta = (array) ($this->unwrap($meta ?? null) ?? []);
-$system = (array) $this->unwrap($system);
-$panelBase = (string) $this->unwrap($panelBase);
+$generatedPaths = (array) u($generatedPaths ?? []);
+$pathSourceFields = (array) u($pathSourceFields ?? []);
+$meta = (array) (u($meta ?? null) ?? []);
+$system = (array) u($system);
+$panelBase = (string) u($panelBase);
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 
 $fields = $node['fields'] ?? [];

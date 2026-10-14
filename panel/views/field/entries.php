@@ -8,14 +8,14 @@
 // rows open expanded. Receives the neutral-locale row list in $value and
 // the renumber base (content[f][value][zxx]) in $name.
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
-$value = $this->unwrap($value ?? null);
+$value = u($value ?? null);
 $rows = is_array($value) ? array_values($value) : [];
 $max = $props['max'] ?? null;
 // An immutable field locks its rows as well: the save path ignores the
 // whole field, so offering add, remove or move would only lose edits.
-$field = (array) $this->unwrap($field);
+$field = (array) u($field);
 $readonly = (bool) ($field['immutable'] ?? false);
 
 $entryTypes = [];

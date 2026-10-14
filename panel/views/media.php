@@ -29,10 +29,10 @@ if ($part === 'picker') {
 
 $this->layout('layer/main');
 
-$screen = $this->unwrap($screen);
-$listing = $this->unwrap($listing);
-$system = (array) $this->unwrap($system);
-$contentLocales = (array) $this->unwrap($contentLocales);
+$screen = u($screen);
+$listing = u($listing);
+$system = (array) u($system);
+$contentLocales = (array) u($contentLocales);
 $defaultLocale = (string) $defaultLocale;
 $collapsed = (bool) $inspectorCollapsed;
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
@@ -142,7 +142,7 @@ unset($search['page']);
 							'selected' => $defaultLocale,
 							'controlId' => 'cms-media-locale',
 						]) ?>
-						<?php $this->include('media/detail', (array) $this->unwrap($detail ?? [])) ?>
+						<?php $this->include('media/detail', (array) u($detail ?? [])) ?>
 					</div>
 				</div>
 			</aside>
@@ -150,7 +150,7 @@ unset($search['page']);
 	</section>
 
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
-		['panel' => (string) $this->unwrap($panelBase), 'system' => $system],
+		['panel' => (string) u($panelBase), 'system' => $system],
 		$jsonFlags,
 	) ?></script>
 </div>

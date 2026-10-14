@@ -5,8 +5,8 @@ use function Cosray\escape;
 // The library as a control embeds it: a search and the tile grid. The search
 // swaps the whole picker; a picked tile's asset goes to the embedding script.
 
-$screen = $this->unwrap($screen);
-$listing = $this->unwrap($listing);
+$screen = u($screen);
+$listing = u($listing);
 $search = $screen->query(['q' => '']);
 ?>
 <div class="cms-library" data-media-picker>

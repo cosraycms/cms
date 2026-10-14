@@ -12,7 +12,7 @@ if (!$rail) {
 	return;
 }
 
-$entries = (array) $this->unwrap($systemNav);
+$entries = (array) u($systemNav);
 ?>
 <div id="system-nav"<?= $oob ? ' hx-swap-oob="true"' : '' ?>>
 	<ul class="list">

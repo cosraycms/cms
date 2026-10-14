@@ -6,19 +6,19 @@ use function Cosray\escape;
 <?php if (count($collections) > 0): ?>
 <ul class="list level-<?= $level ?>">
 <?php foreach ($collections as $item): ?>
-	<?php $label = escape(__((string) $this->unwrap($item->meta->label))) ?>
+	<?php $label = escape(__((string) u($item->meta->label))) ?>
 	<li class="item">
-	<?php if ($this->unwrap($item) instanceof \Cosray\NavLink): ?>
+	<?php if (u($item) instanceof \Cosray\NavLink): ?>
 		<?php
 
-		$link = $this->unwrap($item);
-		$iconMeta = $this->unwrap($item->meta->icon);
+		$link = u($item);
+		$iconMeta = u($item->meta->icon);
 		?>
 		<a
 			class="link"
 			style="--depth: <?= $level ?>"
 			href="<?= $link->url ?>"
-			<?= $link->active((string) $this->unwrap($currentPath)) ? 'aria-current="page"' : '' ?>>
+			<?= $link->active((string) u($currentPath)) ? 'aria-current="page"' : '' ?>>
 			<span class="label">
 				<?php $this->include('component/collection-icon', [
 					'iconMeta' => $iconMeta,
@@ -37,7 +37,7 @@ use function Cosray\escape;
 		$active =
 			(string) $currentPath === $href
 			|| (string) ($activeCollection ?? '') === (string) $item->slug();
-		$iconMeta = $this->unwrap($item->meta->icon);
+		$iconMeta = u($item->meta->icon);
 		?>
 		<a
 			class="link"
@@ -58,7 +58,7 @@ use function Cosray\escape;
 	<?php else: ?>
 		<?php
 
-		$iconMeta = $this->unwrap($item->meta->icon);
+		$iconMeta = u($item->meta->icon);
 		?>
 		<div
 			class="section"

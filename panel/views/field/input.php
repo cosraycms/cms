@@ -5,10 +5,10 @@ use function Cosray\escape;
 // Shared native input renderer. Receives: field, id, name, value, type
 // and optional attrs (step, min, max, placeholder).
 
-$field = (array) $this->unwrap($field);
-$attrs = (array) ($this->unwrap($attrs ?? null) ?? []);
+$field = (array) u($field);
+$attrs = (array) (u($attrs ?? null) ?? []);
 $fallbackPreview ??= false;
-$value = $this->unwrap($value ?? '');
+$value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 ?>
 <input

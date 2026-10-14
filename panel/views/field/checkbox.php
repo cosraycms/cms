@@ -2,8 +2,8 @@
 
 use function Cosray\escape;
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
+$field = (array) u($field);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
 $labels = (array) ($props['labels'] ?? []);
 $labels += [
@@ -13,7 +13,7 @@ $labels += [
 ];
 $immutable = (bool) ($field['immutable'] ?? false);
 $required = !$immutable && (bool) ($field['required'] ?? false);
-$value = $this->unwrap($value ?? null);
+$value = u($value ?? null);
 ?>
 <?php if ($props['nullable'] ?? false): ?>
 	<div

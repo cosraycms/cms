@@ -1,8 +1,8 @@
 <?php
 
-$commonChoices = (array) $this->unwrap($commonChoices);
-$insert = (string) $this->unwrap($insert);
-$more = (bool) $this->unwrap($more);
+$commonChoices = (array) u($commonChoices);
+$insert = (string) u($insert);
+$more = (bool) u($more);
 ?>
 <?php foreach ($commonChoices as $choice) {
 	$this->include('field/blocks/choice', ['choice' => $choice, 'insert' => $insert]);

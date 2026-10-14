@@ -8,7 +8,7 @@ use function Cosray\escape;
 
 $oob = (bool) ($oob ?? false);
 $currentArea = (string) ($area ?? '');
-$contentUrl = $this->unwrap($contentUrl ?? null);
+$contentUrl = u($contentUrl ?? null);
 
 $areas = [];
 
@@ -25,7 +25,7 @@ if (is_string($contentUrl)) {
 	$areas[] = ['area' => 'content', 'url' => $contentUrl, 'label' => __('nav:content'), 'icon' => 'file-earmark-text'];
 }
 
-$menusUrl = $this->unwrap($menusUrl ?? null);
+$menusUrl = u($menusUrl ?? null);
 
 if (is_string($menusUrl)) {
 	$areas[] = ['area' => 'menus', 'url' => $menusUrl, 'label' => __('nav:menus'), 'icon' => 'list-nested'];
@@ -33,7 +33,7 @@ if (is_string($menusUrl)) {
 
 $areas[] = ['area' => 'media', 'url' => (string) $panelPath . '/media', 'label' => __('nav:media'), 'icon' => 'image'];
 
-$systemUrl = $this->unwrap($systemUrl ?? null);
+$systemUrl = u($systemUrl ?? null);
 
 if (is_string($systemUrl)) {
 	$areas[] = ['area' => 'system', 'url' => $systemUrl, 'label' => __('nav:system'), 'icon' => 'gear'];

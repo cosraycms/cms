@@ -2,13 +2,13 @@
 
 use function Cosray\escape;
 
-$field = (array) $this->unwrap($field);
-$value = $this->unwrap($value ?? '');
+$field = (array) u($field);
+$value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $video = preg_match('/^[A-Za-z0-9_-]{11}$/', $value) === 1 ? $value : '';
 $readonly = (bool) ($field['immutable'] ?? false);
 $placeholder = (string) ($field['placeholder'] ?? __('youtube:placeholder'));
-$data = $this->unwrap($data ?? null);
+$data = u($data ?? null);
 $meta = is_array($data) && is_array($data['meta'] ?? null) ? $data['meta'] : [];
 $side = static fn(string $key, int $default): int => is_array($meta[$key] ?? null)
 	&& is_numeric($meta[$key]['zxx'] ?? null)

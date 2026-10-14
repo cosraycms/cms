@@ -6,9 +6,9 @@ use function Cosray\escape;
 // by every successful save: its entries follow the node's working copy.
 // Receives: draft (the working copy's facts, or null), oob.
 
-$draft = $this->unwrap($draft ?? null);
+$draft = u($draft ?? null);
 $hasDraft = is_array($draft);
-$oob = (bool) ($this->unwrap($oob ?? null) ?? false);
+$oob = (bool) (u($oob ?? null) ?? false);
 ?>
 <div
 	id="editor-save-options"

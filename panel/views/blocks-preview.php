@@ -8,9 +8,9 @@ use function Cosray\escape;
 // shows the structure and the proportions, not the site's look. The
 // layout-preview behavior loads it into a frame that runs no script.
 
-$html = (string) $this->unwrap($html);
-$stylesheet = (string) $this->unwrap($stylesheet);
-$locale = (string) $this->unwrap($locale);
+$html = (string) u($html);
+$stylesheet = (string) u($stylesheet);
+$locale = (string) u($locale);
 ?>
 <!doctype html>
 <html lang="<?= escape($locale) ?>">

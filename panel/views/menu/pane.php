@@ -7,7 +7,7 @@ use function Cosray\escape;
 // menu behavior toggles them when the type select changes, and without
 // JavaScript every section simply stays visible.
 
-$pane = (array) $this->unwrap($pane);
+$pane = (array) u($pane);
 
 $mode = (string) $pane['mode'];
 $action = (string) $pane['action'];

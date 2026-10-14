@@ -8,7 +8,7 @@ use function Cosray\escape;
 // A row in a manual order carries its group (the parent's uid, or empty
 // for the collection's top level), a grip and the move forms.
 
-$row = (array) $this->unwrap($row);
+$row = (array) u($row);
 $treeMode = (bool) $treeMode;
 $showChildren = (bool) $showChildren;
 $hasRowActions = (bool) ($hasRowActions ?? false);

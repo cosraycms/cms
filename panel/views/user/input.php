@@ -9,7 +9,7 @@ $label = (string) $label;
 $type = (string) ($type ?? 'text');
 $value = (string) ($value ?? '');
 $required = (bool) ($required ?? false);
-$help = $this->unwrap($help ?? null);
+$help = u($help ?? null);
 $autocomplete = (string) ($autocomplete ?? 'off');
 $width = (int) ($width ?? 50);
 ?>

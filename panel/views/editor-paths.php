@@ -6,7 +6,7 @@ use function Cosray\escape;
 // state would generate as data for the paths behavior. The path inputs stay
 // out of the swap so a refresh cannot disturb typing.
 
-$paths = (array) $this->unwrap($paths);
+$paths = (array) u($paths);
 ?>
 <div
 	id="generated-paths"

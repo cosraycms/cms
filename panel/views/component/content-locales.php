@@ -8,11 +8,11 @@ use function Cosray\escape;
 // (false renders the bare control with an accessible name, for a header) and
 // strip (a bare vertical radiogroup of locale ids, for the collapsed inspector).
 
-$locales = (array) $this->unwrap($locales);
+$locales = (array) u($locales);
 $selected = (string) $selected;
-$controlId = (string) ($this->unwrap($controlId ?? null) ?? 'cms-content-locale');
-$strip = (bool) ($this->unwrap($strip ?? null) ?? false);
-$labelled = !$strip && (bool) ($this->unwrap($labelled ?? null) ?? true);
+$controlId = (string) (u($controlId ?? null) ?? 'cms-content-locale');
+$strip = (bool) (u($strip ?? null) ?? false);
+$labelled = !$strip && (bool) (u($labelled ?? null) ?? true);
 $labelId = $controlId . '-label';
 $title = __('editor:content-language');
 $radios = $strip || count($locales) < 4;

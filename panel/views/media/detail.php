@@ -9,12 +9,12 @@ use function Cosray\escape;
 // tile is picked, the detail closes, or its form saves or deletes. Every
 // locale's texts render; the content-locales behavior shows the active one.
 
-$screen = $this->unwrap($screen);
-$asset = $this->unwrap($asset ?? null);
-$usage = (array) $this->unwrap($usage ?? []);
-$blocked = $this->unwrap($blocked ?? null);
+$screen = u($screen);
+$asset = u($asset ?? null);
+$usage = (array) u($usage ?? []);
+$blocked = u($blocked ?? null);
 $saved = (bool) ($saved ?? false);
-$locales = (array) $this->unwrap($contentLocales);
+$locales = (array) u($contentLocales);
 $defaultLocale = (string) $defaultLocale;
 $locale = (string) ($localeId ?? 'en');
 $closeUrl = $screen->url(['file' => null]);

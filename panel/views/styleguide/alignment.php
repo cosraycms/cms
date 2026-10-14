@@ -1,6 +1,6 @@
 <?php
 
-$alignmentFields = (array) $this->unwrap($alignmentFields);
+$alignmentFields = (array) u($alignmentFields);
 ?>
 <div class="cms-node">
 	<div class="pane">

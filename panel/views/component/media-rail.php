@@ -14,8 +14,8 @@ if (!$rail) {
 	return;
 }
 
-$screen = $this->unwrap($screen ?? null);
-$listing = $this->unwrap($listing ?? null);
+$screen = u($screen ?? null);
+$listing = u($listing ?? null);
 ?>
 <div id="media-rail"<?= $oob ? ' hx-swap-oob="true"' : '' ?> data-media-rail>
 <?php if ($screen !== null && $listing !== null): ?>

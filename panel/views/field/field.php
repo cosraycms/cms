@@ -6,14 +6,14 @@ use function Cosray\escape;
 // Cross-cutting concerns live here — control views only render their
 // input. Receives: field, data, locales, defaultLocale.
 
-$field = (array) $this->unwrap($field);
-$data = (array) ($this->unwrap($data ?? null) ?? []);
-$locales = (array) $this->unwrap($locales);
+$field = (array) u($field);
+$data = (array) (u($data ?? null) ?? []);
+$locales = (array) u($locales);
 $defaultLocale = (string) $defaultLocale;
 $node = (string) ($node ?? '');
-$assets = (array) ($this->unwrap($assets ?? null) ?? []);
+$assets = (array) (u($assets ?? null) ?? []);
 $gridStyle = (string) ($gridStyle ?? '');
-$pathSource = (bool) ($this->unwrap($pathSource ?? null) ?? false);
+$pathSource = (bool) (u($pathSource ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -34,8 +34,8 @@ $value = is_array($value) ? $value : [];
 // label for screen readers only — the block's own label already names it.
 // A block also takes its sub-fields' meta groups into its settings dialog,
 // so a sub-field renders no meta button there.
-$ownMeta = (bool) ($this->unwrap($ownMeta ?? null) ?? true);
-$bareLabel = (bool) ($this->unwrap($bareLabel ?? null) ?? false);
+$ownMeta = (bool) (u($ownMeta ?? null) ?? true);
+$bareLabel = (bool) (u($bareLabel ?? null) ?? false);
 $localized = ['text', 'textarea', 'iframe', 'youtube'];
 $translate = (bool) ($field['translate'] ?? false);
 $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) === 'asymmetric';

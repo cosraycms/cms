@@ -1,6 +1,6 @@
 <?php
 
-$control = (array) $this->unwrap($control);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
 
 $this->include('field/input', [

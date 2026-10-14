@@ -2,8 +2,8 @@
 
 use function Cosray\escape;
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
+$field = (array) u($field);
+$control = (array) u($control);
 ?>
 <div class="cms-control-unknown">
 	<?= escape(__('field:unknown-control', [

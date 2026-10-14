@@ -9,8 +9,8 @@ use function Cosray\escape;
 // and submit with the account fields. Collapsed, only the strip's expand
 // button remains — below 75rem the drawer is hidden until it is pressed.
 
-$user = $this->unwrap($user);
-$roles = (array) $this->unwrap($roles);
+$user = u($user);
+$roles = (array) u($roles);
 $locked = (bool) $locked;
 $collapsed = (bool) $collapsed;
 $show = __('user:access-show');

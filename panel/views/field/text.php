@@ -1,7 +1,7 @@
 <?php
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
+$field = (array) u($field);
+$control = (array) u($control);
 $props = (array) ($control['props'] ?? []);
 
 $this->include('field/input', [

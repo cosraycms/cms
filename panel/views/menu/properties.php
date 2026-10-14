@@ -6,8 +6,8 @@ use function Cosray\escape;
 // the menu, and a rejected handle comes back to this same bar with its
 // error, so the edit screen this replaced is gone.
 
-$props = (array) $this->unwrap($props);
-$urls = (array) $this->unwrap($urls);
+$props = (array) u($props);
+$urls = (array) u($urls);
 
 $errors = (array) $props['errors'];
 $handle = (string) $props['handle'];

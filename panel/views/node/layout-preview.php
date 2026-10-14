@@ -11,7 +11,7 @@ use function Cosray\escape;
 // the presets are the common device widths, the last choice is remembered
 // per browser. Receives: url.
 
-$url = (string) $this->unwrap($url);
+$url = (string) u($url);
 // A device preset carries its height too, so on a large screen the frame
 // is the device's screen rather than a column; the desktop fills the stage.
 $presets = [

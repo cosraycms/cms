@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-$field = (array) $this->unwrap($field);
-$content = (array) $this->unwrap($content);
-$locales = (array) $this->unwrap($locales);
-$assets = (array) $this->unwrap($assets);
-$pathSourceFields = (array) $this->unwrap($pathSourceFields);
+$field = (array) u($field);
+$content = (array) u($content);
+$locales = (array) u($locales);
+$assets = (array) u($assets);
+$pathSourceFields = (array) u($pathSourceFields);
 $fieldName = (string) ($field['name'] ?? '');
 $isPathSource = in_array($fieldName, $pathSourceFields, true);
 $width = is_int($field['width'] ?? null) ? $field['width'] : 100;

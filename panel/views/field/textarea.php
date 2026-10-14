@@ -2,9 +2,9 @@
 
 use function Cosray\escape;
 
-$field = (array) $this->unwrap($field);
-$control = (array) $this->unwrap($control);
-$value = $this->unwrap($value ?? '');
+$field = (array) u($field);
+$control = (array) u($control);
+$value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $iframe = ($control['name'] ?? '') === 'iframe';
 $placeholder = $field['placeholder'] ?? null;

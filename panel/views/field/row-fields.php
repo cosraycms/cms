@@ -7,7 +7,7 @@
 // labels (whether the sub-fields show their own), locales, defaultLocale,
 // node, assets.
 
-$type = (array) $this->unwrap($type);
+$type = (array) u($type);
 
 $subs = array_values(array_filter(
 	(array) ($type['fields'] ?? []),

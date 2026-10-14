@@ -9,21 +9,21 @@ use Cosray\Block\Layout;
 // `columns` or `rows` in a split of that direction — and shown by the
 // editor styles, so a block moved in or out needs no new markup.
 
-$field = (array) $this->unwrap($field);
-$index = $this->unwrap($index);
-$rowData = $this->unwrap($rowData ?? null);
+$field = (array) u($field);
+$index = u($index);
+$rowData = u($rowData ?? null);
 $rowData = is_array($rowData) ? $rowData : null;
-$blockType = (array) $this->unwrap($blockType);
-$blockTypes = (array) $this->unwrap($blockTypes);
+$blockType = (array) u($blockType);
+$blockTypes = (array) u($blockTypes);
 $columns = max(1, (int) $columns);
 $min = min($columns, max(1, (int) $min));
-$metaControl = $this->unwrap($metaControl ?? null);
+$metaControl = u($metaControl ?? null);
 $metaControl = is_array($metaControl) ? $metaControl : null;
-$name = (string) $this->unwrap($name);
-$id = (string) $this->unwrap($id);
+$name = (string) u($name);
+$id = (string) u($id);
 
 // The split a part sits in, which bounds its layout.
-$area = $this->unwrap($area ?? null);
+$area = u($area ?? null);
 $area = $area instanceof Layout ? $area : null;
 
 $rowName = "{$name}[{$index}]";
@@ -37,7 +37,7 @@ $label = (string) ($blockType['label'] ?? __('field:block'));
 $layout = $area === null
 	? Layout::normalize($rowData['layout'] ?? null, $columns, $min)
 	: Layout::normalize($rowData['layout'] ?? null, $area->colspan, $min, $area->rowspan);
-$readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
+$readonly = (bool) (u($readonly ?? null) ?? false);
 $padding = $rowData['meta']['padding']['zxx'] ?? null;
 $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $padding : '';
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";

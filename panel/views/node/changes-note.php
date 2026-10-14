@@ -7,8 +7,8 @@ use function Cosray\escape;
 // again, out of band, by every successful save. Receives: draft (the
 // working copy's facts, or null), oob.
 
-$draft = $this->unwrap($draft ?? null);
-$oob = (bool) ($this->unwrap($oob ?? null) ?? false);
+$draft = u($draft ?? null);
+$oob = (bool) (u($oob ?? null) ?? false);
 $since = is_array($draft) ? (string) ($draft['since'] ?? '') : '';
 $editor = is_array($draft) ? (string) ($draft['editor'] ?? '') : '';
 ?>

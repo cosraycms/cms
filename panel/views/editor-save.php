@@ -10,11 +10,11 @@ use function Cosray\escape;
 
 $saved = (bool) $saved;
 $message = (string) $message;
-$errors = (array) $this->unwrap($errors);
-$published = (bool) ($this->unwrap($published ?? null) ?? false);
-$renderable = (bool) ($this->unwrap($renderable ?? null) ?? false);
-$preview = $this->unwrap($preview ?? null);
-$draft = $this->unwrap($draft ?? null);
+$errors = (array) u($errors);
+$published = (bool) (u($published ?? null) ?? false);
+$renderable = (bool) (u($renderable ?? null) ?? false);
+$preview = u($preview ?? null);
+$draft = u($draft ?? null);
 $draft = is_array($draft) ? $draft : null;
 
 // The controller reduces validation issues to message + path; anything

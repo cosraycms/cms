@@ -2,14 +2,14 @@
 
 use Cosray\Panel\EntrySummary;
 
-$index = $this->unwrap($index);
-$rowData = $this->unwrap($rowData ?? null);
+$index = u($index);
+$rowData = u($rowData ?? null);
 $rowData = is_array($rowData) ? $rowData : null;
-$entryType = (array) $this->unwrap($entryType);
-$name = (string) $this->unwrap($name);
-$id = (string) $this->unwrap($id);
-$assets = (array) ($this->unwrap($assets ?? null) ?? []);
-$defaultLocale = (string) $this->unwrap($defaultLocale);
+$entryType = (array) u($entryType);
+$name = (string) u($name);
+$id = (string) u($id);
+$assets = (array) (u($assets ?? null) ?? []);
+$defaultLocale = (string) u($defaultLocale);
 
 $rowName = "{$name}[{$index}]";
 $rowId = "{$id}-{$index}";
@@ -20,7 +20,7 @@ $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 
 // Stored rows start collapsed; a stamped row is empty and wants input.
 $open = $rowData === null;
-$readonly = (bool) ($this->unwrap($readonly ?? null) ?? false);
+$readonly = (bool) (u($readonly ?? null) ?? false);
 ?>
 <div class="entry" data-repeater-row>
 	<div class="summary">

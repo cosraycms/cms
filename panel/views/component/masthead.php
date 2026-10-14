@@ -5,8 +5,8 @@ use function Cosray\escape;
 // Cast before comparing: the template receives strings wrapped in a proxy, and
 // `===` against one is false however equal the values are.
 $localeId = (string) ($localeId ?? 'en');
-$panelLocales = (array) ($this->unwrap($panelLocales ?? null) ?? []);
-$account = $this->unwrap($account ?? null);
+$panelLocales = (array) (u($panelLocales ?? null) ?? []);
+$account = u($account ?? null);
 
 // Without a visible name the avatar alone would leave the button unnamed.
 $label = is_array($account) && $account['name'] === null

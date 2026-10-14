@@ -2,7 +2,7 @@
 
 use Cosray\Panel\Icon;
 
-$type = (array) $this->unwrap($type);
+$type = (array) u($type);
 $subs = [];
 
 foreach ((array) ($type['fields'] ?? []) as $sub) {
@@ -11,10 +11,10 @@ foreach ((array) ($type['fields'] ?? []) as $sub) {
 	}
 }
 
-$fieldsData = (array) ($this->unwrap($fieldsData ?? null) ?? []);
+$fieldsData = (array) (u($fieldsData ?? null) ?? []);
 $level = (string) ($fieldsData['level']['value']['zxx'] ?? '1');
-$levelId = (string) $this->unwrap($rowId) . '-level-zxx';
-$disabled = (bool) ($this->unwrap($readonly ?? null) ?? false) || ($subs['level']['immutable'] ?? false);
+$levelId = (string) u($rowId) . '-level-zxx';
+$disabled = (bool) (u($readonly ?? null) ?? false) || ($subs['level']['immutable'] ?? false);
 ?>
 <div class="heading" data-heading>
 	<?php if (isset($subs['text'])): ?>

@@ -1,6 +1,6 @@
 <?php
 
-$entryType = (array) $this->unwrap($entryType);
+$entryType = (array) u($entryType);
 $empty = (bool) $empty;
 $full = (bool) $full;
 $single = (bool) $single;

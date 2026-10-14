@@ -4,7 +4,7 @@ use function Cosray\escape;
 
 $this->layout('layer/main');
 
-$page = $this->unwrap($page);
+$page = u($page);
 
 // Track sizing per column kind. Badges and row actions size to their content
 // because the translation decides a pill's width; the title absorbs the slack,
@@ -22,7 +22,7 @@ foreach ($page->table->rows as $row) {
 }
 
 $bulk = count($page->table->rows) > 0;
-$notice = (array) $this->unwrap($notice ?? []);
+$notice = (array) u($notice ?? []);
 
 $columns = ($bulk ? 'var(--cms-list-select-width) ' : '') . 'minmax(12rem, 2fr)';
 

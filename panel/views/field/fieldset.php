@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use function Cosray\escape;
 
-$fieldset = (array) $this->unwrap($fieldset);
-$fieldsByName = (array) $this->unwrap($fieldsByName);
-$content = (array) $this->unwrap($content);
-$locales = (array) $this->unwrap($locales);
-$assets = (array) $this->unwrap($assets);
-$pathSourceFields = (array) $this->unwrap($pathSourceFields);
+$fieldset = (array) u($fieldset);
+$fieldsByName = (array) u($fieldsByName);
+$content = (array) u($content);
+$locales = (array) u($locales);
+$assets = (array) u($assets);
+$pathSourceFields = (array) u($pathSourceFields);
 $name = (string) ($fieldset['name'] ?? '');
 $label = $fieldset['label'] ?? null;
 $description = $fieldset['description'] ?? null;
