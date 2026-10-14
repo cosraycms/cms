@@ -141,7 +141,15 @@ abstract class Panel
 	 * never receives backend-only messages. Empty when no translator is
 	 * active (e.g. outside the request pipeline).
 	 *
-	 * @return array{locale: string, domains: list<array{domain: string, plural: string, messages: array<string, string|list<string>>}>}
+	 * @return array{
+	 *     locale: string,
+	 *     domains: list<array{
+	 *         domain: string,
+	 *         plural: string,
+	 *         messages: array<array-key, string|list<string>>,
+	 *         contexts?: array<array-key, array<array-key, string|list<string>>>,
+	 *     }>,
+	 * }
 	 */
 	protected function messages(): array
 	{
