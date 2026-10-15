@@ -272,6 +272,18 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertStringContainsString('12.50', $value->currency('USD', 2, 'en'));
 	}
 
+	public function testDecimalValueWithoutDigitsKeepsTheLocaleDefault(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$valueContext = new ValueContext('price', ['value' => '12.5']);
+		$field = new TestNumber('price', $owner, $valueContext);
+		$value = new \Cosray\Value\Decimal($owner, $field, $valueContext);
+
+		$this->assertSame('12.5', $value->localize(null, 'en'));
+		$this->assertStringContainsString('12.50', $value->currency('USD', null, 'en'));
+	}
+
 	public function testCheckboxValueDefaultsFalse(): void
 	{
 		$context = $this->createContext();

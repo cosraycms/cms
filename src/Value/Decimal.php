@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use NumberFormatter;
@@ -48,8 +49,11 @@ class Decimal extends Value
 	{
 		if ($this->value) {
 			$formatter = $this->getFormatter(NumberFormatter::DECIMAL, $digits, $locale);
+			$formatted = $formatter->format($this->value);
 
-			return $formatter->format($this->value);
+			return $formatted !== false
+				? $formatted
+				: throw new RuntimeException('Decimal formatting failed: ' . $formatter->getErrorMessage());
 		}
 
 		return '';
@@ -59,8 +63,11 @@ class Decimal extends Value
 	{
 		if ($this->value) {
 			$formatter = $this->getFormatter(NumberFormatter::CURRENCY, $digits, $locale);
+			$formatted = $formatter->formatCurrency($this->value, $currency);
 
-			return $formatter->formatCurrency($this->value, $currency);
+			return $formatted !== false
+				? $formatted
+				: throw new RuntimeException('Currency formatting failed: ' . $formatter->getErrorMessage());
 		}
 
 		return '';
@@ -71,10 +78,13 @@ class Decimal extends Value
 		return $this->value;
 	}
 
-	protected function getFormatter(int $style, int $digits, ?string $locale = null): NumberFormatter
+	protected function getFormatter(int $style, ?int $digits, ?string $locale = null): NumberFormatter
 	{
 		$formatter = new NumberFormatter($locale ?: $this->locale->id, $style);
-		$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $digits);
+
+		if ($digits !== null) {
+			$formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $digits);
+		}
 
 		return $formatter;
 	}

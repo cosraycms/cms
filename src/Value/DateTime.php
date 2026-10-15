@@ -74,8 +74,11 @@ class DateTime extends Value
 				$timeFormat,
 				$this->timezone,
 			);
+			$formatted = $formatter->format($this->datetime->getTimestamp());
 
-			return $formatter->format($this->datetime->getTimestamp());
+			return $formatted !== false
+				? $formatted
+				: throw new RuntimeException('Date formatting failed: ' . $formatter->getErrorMessage());
 		}
 
 		return '';
