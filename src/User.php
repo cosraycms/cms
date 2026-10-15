@@ -22,6 +22,7 @@ class User
 	public readonly ?string $deleted;
 	public readonly ?string $expires;
 
+	/** @param array<string, mixed> $data */
 	public function __construct(
 		protected readonly array $data,
 	) {
@@ -78,7 +79,7 @@ class User
 		return is_array($data) ? $data : [];
 	}
 
-	/** @return array<string, array> the stored values of the fields a user model declares */
+	/** @return array<string, array<mixed>> the stored values of the fields a user model declares */
 	public function content(): array
 	{
 		$content = $this->data()['content'] ?? [];
@@ -86,6 +87,7 @@ class User
 		return is_array($content) ? $content : [];
 	}
 
+	/** @return array<string, mixed> */
 	public function array(): array
 	{
 		$data = $this->data;

@@ -19,6 +19,7 @@ use function Cosray\escape;
 
 /**
  * @property-read Field\Blocks $field
+ * @implements IteratorAggregate<int, Block>
  */
 class Blocks extends Value implements IteratorAggregate
 {
@@ -37,6 +38,7 @@ class Blocks extends Value implements IteratorAggregate
 		return (string) $this->render();
 	}
 
+	/** @return array{columns: int, blocks: list<array<string, mixed>>} */
 	public function json(): array
 	{
 		return [
@@ -45,6 +47,7 @@ class Blocks extends Value implements IteratorAggregate
 		];
 	}
 
+	/** @return array{columns: int, blocks: list<array<string, mixed>>} */
 	public function raw(): array
 	{
 		return [
@@ -53,6 +56,7 @@ class Blocks extends Value implements IteratorAggregate
 		];
 	}
 
+	/** @return Generator<int, Block> */
 	public function getIterator(): Generator
 	{
 		foreach ($this->blocks as $block) {
@@ -254,6 +258,8 @@ class Blocks extends Value implements IteratorAggregate
 	/**
 	 * The stored list for the effective locale (per-locale lists, along
 	 * the fallback chain) or the shared list.
+	 *
+	 * @return array<mixed>
 	 */
 	private function list(): array
 	{
@@ -289,6 +295,7 @@ class Blocks extends Value implements IteratorAggregate
 	 * Every row has its position; one stored without gets a place below
 	 * the others.
 	 *
+	 * @param array<mixed> $list
 	 * @return list<Block>
 	 */
 	private function rows(array $list): array

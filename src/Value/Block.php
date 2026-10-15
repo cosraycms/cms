@@ -139,11 +139,13 @@ class Block extends Value
 		return is_string($value) && in_array($value, Field\Blocks::SPACING, true) ? $value : null;
 	}
 
+	/** @return array<string, mixed> */
 	public function json(): array
 	{
 		return $this->resolve(static fn(Value $value): mixed => $value->json());
 	}
 
+	/** @return array<string, mixed> */
 	public function raw(): array
 	{
 		return $this->resolve(static fn(Value $value): mixed => $value->raw());
@@ -233,7 +235,7 @@ class Block extends Value
 
 	/**
 	 * @param callable(Value): mixed $resolve
-	 * @return array{uid: ?string, type: ?string, handle: ?string, layout: array, fields?: array<string, mixed>, blocks?: list<array>, meta: array}
+	 * @return array{uid: ?string, type: ?string, handle: ?string, layout: array{colspan: int, rowspan: int, col?: int, row?: int}, fields?: array<string, mixed>, blocks?: list<array<string, mixed>>, meta: array<mixed>}
 	 */
 	private function resolve(callable $resolve): array
 	{

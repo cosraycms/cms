@@ -17,6 +17,7 @@ readonly class Tools
 	/** @var list<Tool> */
 	public array $tools;
 
+	/** @param Tool|array<mixed> ...$tools */
 	public function __construct(Tool|array ...$tools)
 	{
 		$flat = [];

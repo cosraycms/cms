@@ -20,6 +20,8 @@ class RichText extends Text
 	/**
 	 * The locale-resolved structured document, or null for empty
 	 * values.
+	 *
+	 * @return ?array<string, mixed>
 	 */
 	public function doc(): ?array
 	{

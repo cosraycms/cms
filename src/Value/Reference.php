@@ -58,6 +58,7 @@ class Reference extends Value implements Iterator
 		return count($this->uids());
 	}
 
+	/** @return list<string> */
 	public function raw(): array
 	{
 		return $this->uids();

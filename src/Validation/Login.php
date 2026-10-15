@@ -31,6 +31,7 @@ final class Login implements Validator
 			->label(__('auth:remember-me'));
 	}
 
+	/** @param array<mixed> $data */
 	#[Override]
 	public function validate(array $data): Result
 	{

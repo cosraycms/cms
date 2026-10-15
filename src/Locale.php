@@ -7,8 +7,10 @@ namespace Cosray;
 class Locale
 {
 	public readonly string $urlPrefix;
+	/** @var array<string> */
 	public readonly array $domains;
 
+	/** @param array<string>|null $domains */
 	public function __construct(
 		protected readonly Locales $locales,
 		public readonly string $id,

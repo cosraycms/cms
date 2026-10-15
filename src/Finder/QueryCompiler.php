@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Cosray\Finder;
 
 use Cosray\Context;
+use Cosray\Finder\Output\Output;
 
 final class QueryCompiler
 {
 	use CompilesField;
 
+	/** @param array<string, string> $builtins */
 	public function __construct(
 		private readonly Context $context,
 		private readonly array $builtins,
@@ -22,6 +24,7 @@ final class QueryCompiler
 		return $this->build($parser->parse($query));
 	}
 
+	/** @param list<Output> $parserOutput */
 	private function build(array $parserOutput): string
 	{
 		if (count($parserOutput) === 0) {

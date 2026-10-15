@@ -22,6 +22,11 @@ class Serializer
 		private readonly ?UrlPaths $paths = null,
 	) {}
 
+	/**
+	 * @param array<mixed> $rawData
+	 * @param list<string> $fieldNames
+	 * @return array<string, array<mixed>>
+	 */
 	public function content(object $node, array $rawData, array $fieldNames): array
 	{
 		$content = [];
@@ -36,6 +41,11 @@ class Serializer
 		return $content;
 	}
 
+	/**
+	 * @param array<mixed> $rawData
+	 * @param list<string> $fieldNames
+	 * @return array<string, mixed>
+	 */
 	public function data(object $node, array $rawData, array $fieldNames): array
 	{
 		$class = $node::class;
@@ -70,6 +80,11 @@ class Serializer
 		];
 	}
 
+	/**
+	 * @param list<string> $fieldNames
+	 * @param array<string, mixed> $values
+	 * @return array<string, mixed>
+	 */
 	public function blueprint(
 		object $node,
 		array $fieldNames,
@@ -116,6 +131,10 @@ class Serializer
 		return $result;
 	}
 
+	/**
+	 * @param list<string> $fieldNames
+	 * @return list<array<mixed>>
+	 */
 	public function fields(object $node, array $fieldNames): array
 	{
 		$fields = [];
@@ -132,7 +151,10 @@ class Serializer
 		return $fields;
 	}
 
-	/** @return list<array{name: string, label: ?string, description: ?string, width: int, fields: list<string>}> */
+	/**
+	 * @param list<string> $fieldNames
+	 * @return list<array{name: string, label: ?string, description: ?string, width: int, fields: list<string>}>
+	 */
 	public function fieldsets(object $node, array $fieldNames): array
 	{
 		return Fieldsets::serialize(
@@ -143,6 +165,11 @@ class Serializer
 		);
 	}
 
+	/**
+	 * @param array<mixed> $rawData
+	 * @param list<string> $fieldNames
+	 * @return array<string, mixed>
+	 */
 	public function read(object $node, array $rawData, array $fieldNames): array
 	{
 		$data = $this->data($node, $rawData, $fieldNames);
@@ -240,7 +267,10 @@ class Serializer
 		return $proxy->title();
 	}
 
-	/** @return list<string> */
+	/**
+	 * @param list<string> $fieldNames
+	 * @return list<string>
+	 */
 	private function orderedNames(object $node, array $fieldNames): array
 	{
 		$order = $this->types->get($node::class, 'fieldOrder');

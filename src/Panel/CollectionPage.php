@@ -34,6 +34,7 @@ final class CollectionPage
 	 * @param iterable<mixed> $blueprints
 	 * @param iterable<mixed> $nodes
 	 * @param iterable<mixed>|null $createBlueprints
+	 * @param iterable<mixed>|null $parentStatus
 	 */
 	public static function from(
 		string $name,
@@ -143,7 +144,10 @@ final class CollectionPage
 		return $links;
 	}
 
-	/** @return list<array{slug: string, name: string}> */
+	/**
+	 * @param iterable<mixed> $blueprints
+	 * @return list<array{slug: string, name: string}>
+	 */
 	private static function blueprints(iterable $blueprints): array
 	{
 		$result = [];

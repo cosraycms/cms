@@ -44,6 +44,7 @@ final class PanelRenderer implements AfterRenderer
 		return is_a($handler, Renderer::class);
 	}
 
+	/** @param array<string, mixed> $context */
 	private function response(array $context): PsrResponse
 	{
 		$html = $this->renderer->render($this->template, $context);

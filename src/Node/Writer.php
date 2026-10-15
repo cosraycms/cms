@@ -85,6 +85,8 @@ final class Writer
 	/**
 	 * Explicit paths fail loudly here: `PathManager` would silently
 	 * suffix a colliding path, which defeats preserving a legacy URL.
+	 *
+	 * @param array<string, mixed> $data
 	 */
 	private function assertUsablePaths(array $data): void
 	{

@@ -76,6 +76,8 @@ final class Commands
 	/**
 	 * Takes the registrations a console Runner takes; class-strings are
 	 * autowired in the console scope.
+	 *
+	 * @param array<mixed>|object|string $commands
 	 */
 	public function add(array|object|string $commands): self
 	{

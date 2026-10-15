@@ -170,6 +170,7 @@ final class Reference extends Panel
 		return $this->result($factory, $ordered, false);
 	}
 
+	/** @return array{uid: string, title: string, type: string, typeLabel: string} */
 	private function item(Wrapper $node): array
 	{
 		return [
@@ -273,6 +274,7 @@ final class Reference extends Panel
 		return is_string($class) && class_exists($class) ? $class : null;
 	}
 
+	/** @param list<array{uid: string, title: string, type: string, typeLabel: string}> $nodes */
 	private function result(Factory $factory, array $nodes, bool $more): Response
 	{
 		return Response::create($factory)->json([

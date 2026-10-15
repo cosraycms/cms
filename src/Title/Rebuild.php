@@ -90,6 +90,7 @@ class Rebuild
 	/**
 	 * @param class-string $class
 	 *
+	 * @param array<string, mixed> $content
 	 * @return array<string, string>
 	 */
 	private function titleMap(string $class, string $uid, array $content, int &$dynamic): array
@@ -106,6 +107,7 @@ class Rebuild
 	/**
 	 * @param class-string $class
 	 *
+	 * @param array<string, mixed> $content
 	 * @return array<string, string>
 	 */
 	private function dynamicMap(string $class, string $uid, array $content, int &$dynamic): array

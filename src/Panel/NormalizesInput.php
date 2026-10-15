@@ -15,7 +15,10 @@ trait NormalizesInput
 		return $label === '' ? null : $label;
 	}
 
-	/** @return list<mixed> */
+	/**
+	 * @param iterable<mixed> $items
+	 * @return list<mixed>
+	 */
 	private static function items(iterable $items): array
 	{
 		if ($items instanceof Traversable) {

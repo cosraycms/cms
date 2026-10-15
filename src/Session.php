@@ -17,7 +17,10 @@ class Session extends BaseSession
 	protected string $authCookie;
 	protected ?string $authToken;
 
-	/** @param array<array-key, mixed> $cookies The request's cookies. */
+	/**
+	 * @param array<string, mixed> $options
+	 * @param array<array-key, mixed> $cookies The request's cookies.
+	 */
 	public function __construct(
 		array $options = [],
 		string $name = '',

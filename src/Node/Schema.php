@@ -220,6 +220,7 @@ class Schema
 		}
 	}
 
+	/** @param ReflectionClass<object> $reflection */
 	private function validatePropertyTitles(
 		ReflectionClass $reflection,
 		Definitions $definitions,

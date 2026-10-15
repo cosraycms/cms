@@ -12,6 +12,10 @@ use DateTimeZone;
 
 final class DateTimeConverter
 {
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	public function convert(array $data, string $path = 'content'): array
 	{
 		if ($this->isDateTime($data)) {
@@ -27,6 +31,7 @@ final class DateTimeConverter
 		return $data;
 	}
 
+	/** @param array<mixed> $data */
 	private function isDateTime(array $data): bool
 	{
 		$type = $data['type'] ?? null;
@@ -39,6 +44,10 @@ final class DateTimeConverter
 		return $type === 'datetime' || $type === DateTime::class || str_ends_with($type, '\\Field\\DateTime');
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function field(array $data, string $path): array
 	{
 		$value = $data['value'] ?? null;
@@ -80,6 +89,7 @@ final class DateTimeConverter
 		);
 	}
 
+	/** @param array<mixed> $data */
 	private function timezone(array $data, string $locale, string $path): DateTimeZone
 	{
 		$value = $data['meta']['timezone'] ?? $data['timezone'] ?? null;

@@ -27,6 +27,7 @@ class Repository
 	 * Media items are exactly `{uid}` or `{uid, meta}`; arrays with more
 	 * keys (blocks, entries) are descended into instead.
 	 *
+	 * @param array<mixed> $content
 	 * @return list<string>
 	 */
 	public static function collectUids(array $content): array
@@ -98,12 +99,16 @@ class Repository
 		$this->cache[$asset->uid] = $asset;
 	}
 
-	/** @param list<string> $uids */
+	/**
+	 * @param list<string> $uids
+	 * @return list<array<mixed>>
+	 */
 	protected function fetch(array $uids): array
 	{
 		return $this->db->assets->byUids(['uids' => $uids])->all();
 	}
 
+	/** @param array<mixed> $row */
 	protected function fromRow(array $row): Asset
 	{
 		return Asset::fromRow($row, $this->config);

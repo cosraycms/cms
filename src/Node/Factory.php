@@ -26,7 +26,7 @@ class Factory
 {
 	/**
 	 * @var WeakMap<object, array{
-	 *     data: array,
+	 *     data: array<mixed>,
 	 *     fields: array<string, Field>,
 	 *     embedded: array<string, object>,
 	 *     fieldsets: list<FieldsetDefinition>
@@ -52,6 +52,9 @@ class Factory
 	 *
 	 * Uses Wire Creator for autowired construction,
 	 * then FieldHydrator for field initialization.
+	 *
+	 * @param class-string $class
+	 * @param array<mixed> $data
 	 */
 	public function create(string $class, Context $context, Cms $cms, array $data): object
 	{
@@ -146,6 +149,8 @@ class Factory
 
 	/**
 	 * Create a blueprint (empty) node for admin panel schema generation.
+	 *
+	 * @param class-string $class
 	 */
 	public function blueprint(string $class, Context $context, Cms $cms): object
 	{
@@ -154,6 +159,8 @@ class Factory
 
 	/**
 	 * Get the raw DB data associated with a node instance.
+	 *
+	 * @return array<mixed>
 	 */
 	public static function dataFor(object $node): array
 	{
@@ -201,6 +208,7 @@ class Factory
 		return self::getNodeState($node)['fieldsets'] ?? [];
 	}
 
+	/** @return array{data?: array<mixed>, fields?: array<string, Field>, embedded?: array<string, object>, fieldsets?: list<FieldsetDefinition>} */
 	private static function getNodeState(object $node): array
 	{
 		self::$nodeState ??= new WeakMap();

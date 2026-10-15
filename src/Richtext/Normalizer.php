@@ -18,6 +18,9 @@ final class Normalizer
 	 * Canonicalize every envelope-marked richtext value inside a node
 	 * content array (fields and blocks alike); empty documents become
 	 * null locale entries.
+	 *
+	 * @param array<mixed> $content
+	 * @return array<mixed>
 	 */
 	public function content(array $content): array
 	{
@@ -42,7 +45,11 @@ final class Normalizer
 		return $content;
 	}
 
-	/** Canonical form of a document; null when it is empty. */
+	/**
+	 * Canonical form of a document; null when it is empty.
+	 *
+	 * @return null|array<string, mixed>
+	 */
 	public function normalize(mixed $doc): ?array
 	{
 		if (!is_array($doc) || ($doc['type'] ?? null) !== 'doc') {
@@ -82,7 +89,10 @@ final class Normalizer
 		return $this->mergeRuns($result);
 	}
 
-	/** @return null|array<string, mixed> */
+	/**
+	 * @param array<string, mixed> $node
+	 * @return null|array<string, mixed>
+	 */
 	private function node(array $node): ?array
 	{
 		$type = $node['type'];
@@ -112,7 +122,10 @@ final class Normalizer
 		return $result;
 	}
 
-	/** @return null|array<string, mixed> */
+	/**
+	 * @param array<string, mixed> $node
+	 * @return null|array<string, mixed>
+	 */
 	private function text(array $node): ?array
 	{
 		$text = $node['text'] ?? null;
@@ -164,7 +177,11 @@ final class Normalizer
 		return array_values($result);
 	}
 
-	/** @return array<string, mixed> */
+	/**
+	 * @param array<mixed> $attrs
+	 * @param array<string, mixed> $defaults
+	 * @return array<string, mixed>
+	 */
 	private function attrs(array $attrs, array $defaults): array
 	{
 		$result = [];

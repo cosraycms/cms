@@ -9,11 +9,16 @@ use Cosray\Field\Field;
 use Generator;
 use Iterator;
 
+/** @implements Iterator<string, MenuItem> */
 class MenuItem implements Iterator
 {
+	/** @var array<string, mixed> */
 	protected readonly array $data;
+
+	/** @var array<string, array<string, mixed>> */
 	protected array $children;
 
+	/** @param array<string, mixed> $item */
 	public function __construct(
 		protected readonly Context $context,
 		protected readonly array $item,
@@ -134,6 +139,7 @@ class MenuItem implements Iterator
 		return $this->item['level'];
 	}
 
+	/** @return Generator<int, MenuItem> */
 	public function children(): Generator
 	{
 		foreach ($this->children as $child) {
@@ -141,6 +147,7 @@ class MenuItem implements Iterator
 		}
 	}
 
+	/** @param array<string, array<string, mixed>> $children */
 	public function setChildren(array $children): void
 	{
 		$this->children = $children;

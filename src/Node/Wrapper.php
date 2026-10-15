@@ -18,6 +18,7 @@ class Wrapper
 {
 	public readonly Meta $meta;
 
+	/** @param list<string> $fieldNames */
 	public function __construct(
 		private readonly object $node,
 		private readonly array $fieldNames,
@@ -176,6 +177,7 @@ class Wrapper
 		);
 	}
 
+	/** @param array<mixed> $args */
 	public function __call(string $name, array $args): mixed
 	{
 		return $this->node->{$name}(...$args);

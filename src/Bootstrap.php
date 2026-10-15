@@ -70,6 +70,7 @@ class Bootstrap implements CorePlugin
 	protected array $renderers = [];
 
 	protected readonly Navigation $navigation;
+	/** @var array<string, class-string> */
 	protected array $nodes = [];
 
 	/** @var list<class-string<IconProvider>|IconProvider> */

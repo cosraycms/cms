@@ -62,6 +62,10 @@ final class Rebuild
 		return $report;
 	}
 
+	/**
+	 * @param array<mixed> $classes
+	 * @return array{indexed: int, missingTitles: int}
+	 */
 	private function node(int $node, array $classes): array
 	{
 		// Read after acquiring the same row lock taken by a live UPDATE.

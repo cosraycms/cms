@@ -107,7 +107,7 @@ trait RowTypes
 	 * casts submitted rows against it.
 	 *
 	 * @param class-string $type
-	 * @return array{type: class-string, label: string, fields: list<array>, fieldsets: list<array>}
+	 * @return array{type: class-string, label: string, fields: list<array<string, mixed>>, fieldsets: list<array<string, mixed>>}
 	 */
 	protected function rowTypeProperties(string $type): array
 	{
@@ -132,7 +132,7 @@ trait RowTypes
 	/**
 	 * @param class-string $type
 	 * @param array<string, mixed> $value
-	 * @return array<string, array>
+	 * @return array<string, array<string, mixed>>
 	 */
 	protected function rowStructure(string $type, array $value): array
 	{

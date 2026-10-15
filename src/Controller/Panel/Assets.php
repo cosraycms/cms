@@ -73,6 +73,7 @@ final class Assets extends Panel
 		return $this->serve($request, $factory, $dir, $slug, self::PUBLIC_EXTENSIONS);
 	}
 
+	/** @param list<string> $extensions */
 	private function serve(
 		Request $request,
 		Factory $factory,

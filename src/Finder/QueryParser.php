@@ -17,6 +17,7 @@ use Cosray\Finder\Output\LeftParen;
 use Cosray\Finder\Output\NodeReference;
 use Cosray\Finder\Output\NullComparison;
 use Cosray\Finder\Output\Operator;
+use Cosray\Finder\Output\Output;
 use Cosray\Finder\Output\RightParen;
 use Cosray\Finder\Output\UrlPath;
 
@@ -31,7 +32,7 @@ final class QueryParser
 	private bool $readyForCondition = true;
 	private string $query;
 
-	/** @param list<string> $builtins */
+	/** @param array<string, string> $builtins */
 	public function __construct(
 		private readonly Context $context,
 		private readonly array $builtins = [],
@@ -40,6 +41,8 @@ final class QueryParser
 	/**
 	 * Returns an array of output tokens which can be translated to a
 	 * valid SQL WHERE expression.
+	 *
+	 * @return list<Output>
 	 */
 	public function parse(string $query): array
 	{

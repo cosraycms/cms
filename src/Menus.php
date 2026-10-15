@@ -108,6 +108,8 @@ final class Menus
 	/**
 	 * Appends an item to the menu, below `parent` or at the root, and
 	 * returns its id.
+	 *
+	 * @param array<string, mixed> $data
 	 */
 	public function add(
 		string $menu,
@@ -156,6 +158,7 @@ final class Menus
 		return $item;
 	}
 
+	/** @param array<string, mixed> $data */
 	public function updateItem(
 		string $item,
 		array $data,
@@ -237,6 +240,8 @@ final class Menus
 	 * icon and `asset` link target on the asset side, its linked node on the
 	 * node side. Mirrors what the rebuild derives from stored menu rows, so
 	 * "where is this used?" answers for menus too.
+	 *
+	 * @param array<string, mixed> $data
 	 */
 	private function syncReferences(string $item, array $data): void
 	{
@@ -319,6 +324,7 @@ final class Menus
 		return (int) $this->db->menus->itemHeight(['item' => $item])->one()['height'];
 	}
 
+	/** @return array<string, mixed> */
 	private function itemRow(string $item): array
 	{
 		$row = $this->db->menus->itemRow(['item' => $item])->first();

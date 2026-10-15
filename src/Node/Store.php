@@ -66,6 +66,7 @@ class Store
 	 * Writes the live row. A pending working copy is left alone: this is
 	 * the API path, and the editor's publish() is what supersedes a draft.
 	 *
+	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
 	 */
 	public function save(
@@ -89,6 +90,7 @@ class Store
 	/**
 	 * Writes the live row and drops the working copy it supersedes.
 	 *
+	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
 	 */
 	public function publish(object $node, array $data, Locales $locales, Actor $actor): array
@@ -110,6 +112,7 @@ class Store
 	 * Saves the working copy of a published node. Content, handle and
 	 * paths wait for publish(); `hidden` is a live switch and applies now.
 	 *
+	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
 	 */
 	public function draft(object $node, array $data, Locales $locales, Actor $actor): array
@@ -225,7 +228,10 @@ class Store
 		];
 	}
 
-	/** @return array<string, string> */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<string, string>
+	 */
 	private function submittedPaths(array $data): array
 	{
 		$paths = [];
@@ -239,6 +245,10 @@ class Store
 		return $paths;
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function prepare(object $node, array $data, Locales $locales, bool $create = false): array
 	{
 		$data = $this->normalizeSubmittedHandle($data);
@@ -291,7 +301,10 @@ class Store
 		return (int) $nodeId;
 	}
 
-	/** @return array{success: true, uid: string} */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array{success: true, uid: string}
+	 */
 	public function create(
 		object $node,
 		array $data,
@@ -400,6 +413,10 @@ class Store
 		);
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	public function validate(object $node, array $data, Locales $locales): array
 	{
 		$factory = new ValidatorFactory($node, $locales);
@@ -416,7 +433,10 @@ class Store
 		return $result->values();
 	}
 
-	/** @param array{creator?: int, created?: ?string, changed?: ?string} $metadata */
+	/**
+	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
+	 * @param array<mixed> $data
+	 */
 	private function persist(
 		object $node,
 		array $data,
@@ -456,6 +476,7 @@ class Store
 	 * The materialized title map for the content being saved. Mirrors
 	 * `Wrapper::title()`'s resolution but yields every locale.
 	 *
+	 * @param array<mixed> $data
 	 * @return array<string, string>
 	 */
 	private function materializeTitle(
@@ -477,6 +498,7 @@ class Store
 	 * Evaluate a dynamic title once per locale against the content being
 	 * saved, restoring the request locale afterwards.
 	 *
+	 * @param array<mixed> $data
 	 * @return array<string, string>
 	 */
 	private function dynamicTitle(object $node, array $data, Locales $locales): array
@@ -509,6 +531,8 @@ class Store
 	 * factory seam is wired the node is re-hydrated from that content (the
 	 * passed instance still carries the previous version); otherwise the
 	 * passed node is used and `db:titles` remains the authoritative refresh.
+	 *
+	 * @param array<mixed> $data
 	 */
 	private function titleEvalNode(object $node, array $data): object
 	{
@@ -522,7 +546,10 @@ class Store
 		return $node;
 	}
 
-	/** @param array{creator?: int, created?: ?string, changed?: ?string} $metadata */
+	/**
+	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
+	 * @param array<mixed> $data
+	 */
 	private function persistNode(
 		object $node,
 		array $data,
@@ -614,6 +641,7 @@ class Store
 		}
 	}
 
+	/** @param array<mixed> $data */
 	private function resolveParentUid(object $node, array $data): ?string
 	{
 		$parentUid = array_key_exists('parent', $data)
@@ -659,6 +687,7 @@ class Store
 		return (int) $parent['node'];
 	}
 
+	/** @param array<mixed> $data */
 	private function assertUidUnchanged(object $node, array $data): void
 	{
 		$uid = Factory::meta($node, 'uid');
@@ -672,6 +701,10 @@ class Store
 		]);
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
 	private function normalizeSubmittedHandle(array $data): array
 	{
 		if (!array_key_exists('handle', $data) || !is_string($data['handle'])) {
@@ -684,6 +717,10 @@ class Store
 		return $data;
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function completeHandle(object $node, array $data): array
 	{
 		if (!array_key_exists('handle', $data)) {
@@ -695,6 +732,7 @@ class Store
 		return $data;
 	}
 
+	/** @param array<mixed> $data */
 	private function resolveHandle(array $data): ?string
 	{
 		$handle = $data['handle'] ?? null;
@@ -721,6 +759,10 @@ class Store
 		]);
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function completeGeneratedPaths(
 		object $node,
 		array $data,
@@ -750,6 +792,7 @@ class Store
 		return $data;
 	}
 
+	/** @param array<mixed> $data */
 	private function needsGeneratedPaths(array $data): bool
 	{
 		foreach ($data['paths'] ?? [] as $path) {

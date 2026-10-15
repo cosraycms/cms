@@ -14,6 +14,7 @@ final class CollectionListMeta
 		public bool $sortable = false,
 	) {}
 
+	/** @return array<string, bool> */
 	public function array(): array
 	{
 		return [

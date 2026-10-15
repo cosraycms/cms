@@ -18,9 +18,11 @@ final class QueryLexer
 	private array $tokens = [];
 
 	private string $query;
+	/** @var list<string> */
 	private array $source;
 	private int $length;
 
+	/** @param list<string> $builtins */
 	public function __construct(
 		private readonly array $builtins = [],
 	) {}

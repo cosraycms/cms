@@ -18,6 +18,7 @@ final class NavMeta
 		public int $order = 0,
 	) {}
 
+	/** @return array<string, mixed> */
 	public function array(): array
 	{
 		return [

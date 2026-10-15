@@ -131,6 +131,7 @@ class Resolver
 	/**
 	 * Extract the localized title map from stored content for a field-based title.
 	 *
+	 * @param array<string, mixed> $content
 	 * @return array<string, string>
 	 */
 	public function fieldMap(array $content, string $field): array

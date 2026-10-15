@@ -23,6 +23,7 @@ final class Indexes
 		return Transaction::run($this->db, $this->update(...));
 	}
 
+	/** @return array{created: int, dropped: int, locales: list<string>} */
 	private function update(): array
 	{
 		$sort = new Sort($this->db);
@@ -70,6 +71,7 @@ final class Indexes
 		return ['created' => $created, 'dropped' => $dropped, 'locales' => array_column($wanted, 'locale')];
 	}
 
+	/** @return array<array<mixed>> */
 	private function existing(): array
 	{
 		return array_column($this->db->titleSort->indexes()->all(), null, 'name');

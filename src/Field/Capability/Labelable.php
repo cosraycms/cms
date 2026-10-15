@@ -6,7 +6,7 @@ namespace Cosray\Field\Capability;
 
 interface Labelable
 {
-	public function label(string $label);
+	public function label(string $label): static;
 
 	public function getLabel(): ?string;
 }

@@ -49,6 +49,9 @@ final class Users extends Panel
 	 * Every screen in the area renders the rail, so its entries ride the
 	 * shared context. The profile screen sits outside the area and turns
 	 * the rail off in its own data.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
 	 */
 	protected function context(array $data = []): array
 	{
@@ -66,6 +69,7 @@ final class Users extends Panel
 		], $data));
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('edit-users')]
 	public function index(): array
 	{
@@ -100,12 +104,14 @@ final class Users extends Panel
 		]);
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('edit-users')]
 	public function create(Context $context, string $type): array
 	{
 		return $this->form($context, $this->blank($type), false);
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('edit-users')]
 	public function store(Context $context, Factory $factory, string $type): array|Response
 	{
@@ -125,29 +131,37 @@ final class Users extends Panel
 		return Response::create($factory)->redirect($this->url('/' . $user->uid, ['notice' => 'created']), 303);
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('edit-users')]
 	public function edit(Context $context, string $uid): array
 	{
 		return $this->form($context, $this->editable($uid), true);
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('edit-users')]
 	public function update(Context $context, string $uid): array
 	{
 		return $this->save($context, $this->editable($uid), false);
 	}
 
-	/** Every panel user's own account; it needs no `edit-users`. */
+	/**
+	 * Every panel user's own account; it needs no `edit-users`.
+	 *
+	 * @return array<string, mixed>
+	 */
 	public function profile(Context $context): array
 	{
 		return $this->form($context, $this->currentUser(), true, true);
 	}
 
+	/** @return array<string, mixed> */
 	public function saveProfile(Context $context): array
 	{
 		return $this->save($context, $this->currentUser(), true);
 	}
 
+	/** @return array<string, mixed> */
 	private function save(Context $context, User $user, bool $profile): array
 	{
 		[$values, $password, $errors] = $this->submitted($this->fields($context), $user, $user);
@@ -176,6 +190,7 @@ final class Users extends Panel
 		return ['saved' => true, 'message' => __('editor:saved'), 'errors' => []];
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('edit-users')]
 	public function delete(Factory $factory, string $uid): array|Response
 	{
@@ -198,6 +213,7 @@ final class Users extends Panel
 		return Response::create($factory)->redirect($this->url('', ['notice' => 'deleted']), 303);
 	}
 
+	/** @return array<string, mixed> */
 	private function form(Context $context, User $user, bool $exists, bool $profile = false): array
 	{
 		$locales = array_map(
@@ -405,7 +421,10 @@ final class Users extends Panel
 		}
 	}
 
-	/** @return array{saved: false, message: string, errors: list<array{message: string, path: list<string|int>}>} */
+	/**
+	 * @param list<array{message: string, path: list<string|int>}> $errors
+	 * @return array{saved: false, message: string, errors: list<array{message: string, path: list<string|int>}>}
+	 */
 	private function rejected(array $errors): array
 	{
 		return ['saved' => false, 'message' => __('node:invalid-data'), 'errors' => $errors];
@@ -475,6 +494,7 @@ final class Users extends Panel
 		};
 	}
 
+	/** @param array<string, mixed> $query */
 	private function url(string $path = '', array $query = []): string
 	{
 		$url = $this->panelPath() . '/users' . $path;

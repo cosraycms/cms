@@ -43,6 +43,7 @@ final class Scanner
 	}
 
 	/**
+	 * @param array<mixed> $data
 	 * @param list<string> $assets
 	 * @param list<string> $nodes
 	 */
@@ -66,6 +67,7 @@ final class Scanner
 	}
 
 	/**
+	 * @param array<mixed> $node
 	 * @param list<string> $assets
 	 * @param list<string> $nodes
 	 */

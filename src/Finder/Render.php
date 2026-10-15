@@ -16,6 +16,7 @@ class Render
 {
 	protected object $node;
 
+	/** @param array<string, mixed> $templateContext */
 	public function __construct(
 		private readonly Context $context,
 		private readonly Cms $cms,

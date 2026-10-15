@@ -15,6 +15,7 @@ final class OrderCompiler
 	/** @var array<string, string> */
 	private array $params = [];
 
+	/** @param array<string, string|Closure(): string> $builtins */
 	public function __construct(
 		private readonly array $builtins = [],
 		private readonly ?Context $context = null,
@@ -153,6 +154,7 @@ final class OrderCompiler
 		return $value instanceof Closure ? $value() : $value;
 	}
 
+	/** @return list<string> */
 	private function localeIds(): array
 	{
 		if (!$this->context) {
@@ -164,6 +166,7 @@ final class OrderCompiler
 		return [$locale->id, ...$locale->fallbacks()];
 	}
 
+	/** @return list<array{field: string, direction: string}> */
 	private function parse(string $statement): array
 	{
 		$fields = explode(',', $statement);

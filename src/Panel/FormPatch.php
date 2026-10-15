@@ -27,12 +27,17 @@ use DateTimeZone;
  */
 final class FormPatch
 {
-	/** @param list<array> $fields field property payloads incl. control descriptors */
+	/** @param list<array<string, mixed>> $fields field property payloads incl. control descriptors */
 	public function __construct(
 		private readonly array $fields,
 		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {}
 
+	/**
+	 * @param array<string, mixed> $stored
+	 * @param array<array-key, mixed> $submitted
+	 * @return array<string, mixed>
+	 */
 	public function content(array $stored, array $submitted): array
 	{
 		foreach ($this->fields as $field) {
@@ -62,6 +67,13 @@ final class FormPatch
 		return $stored;
 	}
 
+	/**
+	 * @param array<string, mixed> $control
+	 * @param ?array<string, mixed> $metaControl
+	 * @param array<array-key, mixed> $entry
+	 * @param array<array-key, mixed> $submitted
+	 * @return ?array<array-key, mixed>
+	 */
 	private function entry(array $control, ?array $metaControl, array $entry, array $submitted): ?array
 	{
 		$json = $submitted['json'] ?? null;
@@ -135,6 +147,11 @@ final class FormPatch
 	/**
 	 * Replace the meta entries the metaControl group knows; unknown
 	 * stored meta keys survive.
+	 *
+	 * @param array<string, mixed> $metaControl
+	 * @param array<array-key, mixed> $stored
+	 * @param array<array-key, mixed> $submitted
+	 * @return array<array-key, mixed>
 	 */
 	private function meta(array $metaControl, array $stored, array $submitted): array
 	{
@@ -157,6 +174,7 @@ final class FormPatch
 		return $stored;
 	}
 
+	/** @param array<string, mixed> $control */
 	private function cast(
 		array $control,
 		mixed $raw,
@@ -235,6 +253,7 @@ final class FormPatch
 		return Codec::fromInput($value, $timezone) ?? Codec::normalize($value) ?? $value;
 	}
 
+	/** @param array<array-key, mixed> $entry */
 	private function timezone(array $entry): DateTimeZone
 	{
 		$timezone = $entry['meta']['timezone'] ?? null;
@@ -246,6 +265,12 @@ final class FormPatch
 		return Codec::timezone($timezone) ?? Codec::utc();
 	}
 
+	/**
+	 * @param array<string, mixed> $props
+	 * @param list<mixed> $rows
+	 * @param array<array-key, mixed> $stored
+	 * @return list<array<array-key, mixed>>
+	 */
 	private function entries(array $props, array $rows, array $stored): array
 	{
 		return $this->rows(
@@ -269,6 +294,11 @@ final class FormPatch
 	 * field's meta against the descriptor's meta group. Blocks are matched
 	 * by uid against every stored block, so one the editor moved into or
 	 * out of a split keeps whatever the form does not carry.
+	 *
+	 * @param array<string, mixed> $props
+	 * @param list<mixed> $rows
+	 * @param array<array-key, mixed> $stored
+	 * @return list<mixed>
 	 */
 	private function blocks(array $props, array $rows, array $stored): array
 	{
@@ -355,7 +385,13 @@ final class FormPatch
 		return $part ? new Layout($layout->colspan, $layout->rowspan)->array() : $layout->array();
 	}
 
-	/** The stored layout with the submitted dimensions over it. */
+	/**
+	 * The stored layout with the submitted dimensions over it.
+	 *
+	 * @param array<array-key, mixed> $storedRow
+	 * @param array<array-key, mixed> $row
+	 * @return array<array-key, mixed>
+	 */
 	private static function layout(array $storedRow, array $row): array
 	{
 		return [
@@ -364,6 +400,13 @@ final class FormPatch
 		];
 	}
 
+	/**
+	 * @param array<array-key, mixed> $result
+	 * @param array<array-key, mixed> $storedRow
+	 * @param array<array-key, mixed> $row
+	 * @param ?array<string, mixed> $metaControl
+	 * @return array<array-key, mixed>
+	 */
 	private function withMeta(array $result, array $storedRow, array $row, ?array $metaControl): array
 	{
 		if ($metaControl !== null && is_array($row['meta'] ?? null)) {
@@ -387,9 +430,12 @@ final class FormPatch
 	 * given, with its stored counterpart unless that one is a block; a
 	 * null from it drops the row.
 	 *
-	 * @param array<string, array> $types row type descriptors keyed by class
-	 * @param Closure(array, array, string, string, array): array $build
-	 * @param ?Closure(array, array, string): ?array $split
+	 * @param array<string, array<array-key, mixed>> $types row type descriptors keyed by class
+	 * @param array<array-key, mixed> $rows
+	 * @param array<array-key, mixed> $stored
+	 * @param Closure(array<array-key, mixed>, array<array-key, mixed>, string, string, array<array-key, mixed>): array<array-key, mixed> $build
+	 * @param ?Closure(array<array-key, mixed>, array<array-key, mixed>, string): ?array<array-key, mixed> $split
+	 * @return list<array<array-key, mixed>>
 	 */
 	private function rows(array $types, array $rows, array $stored, Closure $build, ?Closure $split = null): array
 	{
@@ -472,7 +518,7 @@ final class FormPatch
 		return $result;
 	}
 
-	/** @return array<string, array> */
+	/** @return array<string, array<array-key, mixed>> */
 	private static function rowTypes(mixed $types): array
 	{
 		$result = [];

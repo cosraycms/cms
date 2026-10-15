@@ -33,6 +33,7 @@ final class Styleguide extends Panel
 	protected const string AREA = 'styleguide';
 	private const int GALLERY_SIZE = 14;
 
+	/** @return array<string, mixed> */
 	public function index(Controls $controls): array
 	{
 		$locales = $this->container->instance(Locales::class);
@@ -240,6 +241,7 @@ final class Styleguide extends Panel
 		];
 	}
 
+	/** @return list<array<string, mixed>> */
 	private function alignmentFields(): array
 	{
 		return [

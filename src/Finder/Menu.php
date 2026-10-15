@@ -10,11 +10,13 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Markup;
 use Iterator;
 
+/** @implements Iterator<string, MenuItem> */
 class Menu implements Iterator
 {
 	/** The `order` values a `children` item may configure. */
 	public const array CHILD_ORDERS = ['title', 'created', 'created desc', 'changed desc', 'manual'];
 
+	/** @var array<string, array<string, mixed>> */
 	protected array $items;
 	protected int $pointer = 0;
 
@@ -185,6 +187,9 @@ class Menu implements Iterator
 	/**
 	 * Nests the sorted rows by their parent column. Splitting the CTE's
 	 * dotted path would duplicate items whose ids contain a dot.
+	 *
+	 * @param list<array<string, mixed>> $items
+	 * @return array<string, array<string, mixed>>
 	 */
 	protected function makeTree(array $items): array
 	{
@@ -197,6 +202,10 @@ class Menu implements Iterator
 		return $this->branch($grouped, '');
 	}
 
+	/**
+	 * @param array<array-key, array<array-key, array<string, mixed>>> $grouped
+	 * @return array<string, array<string, mixed>>
+	 */
 	private function branch(array $grouped, string $parent): array
 	{
 		$tree = [];
@@ -215,6 +224,9 @@ class Menu implements Iterator
 	 * order. The entries are synthesized as `node` rows carrying their
 	 * resolved title and path for the current locale, so rendering
 	 * treats them exactly like hand-placed node items.
+	 *
+	 * @param array<string, array<string, mixed>> $items
+	 * @return array<string, array<string, mixed>>
 	 */
 	protected function expand(array $items): array
 	{
@@ -237,7 +249,10 @@ class Menu implements Iterator
 		return $result;
 	}
 
-	/** @return array<string, array> */
+	/**
+	 * @param array<mixed> $data
+	 * @return array<string, array<string, mixed>>
+	 */
 	private function childRows(array $data, int $level): array
 	{
 		$uid = $data['node'] ?? null;
@@ -252,7 +267,7 @@ class Menu implements Iterator
 		return $this->nodeRows($uid, $level, max(1, (int) ($data['levels'] ?? 1)), $order);
 	}
 
-	/** @return array<string, array> */
+	/** @return array<string, array<string, mixed>> */
 	private function nodeRows(string $uid, int $level, int $depth, string $order): array
 	{
 		assert($this->cms !== null, 'childRows guards the finder entry point');

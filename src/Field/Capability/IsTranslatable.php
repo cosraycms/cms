@@ -48,6 +48,7 @@ trait IsTranslatable
 		return $this->translateMode === TranslateMode::Asymmetric;
 	}
 
+	/** @return array<string, mixed> */
 	protected function getTranslatableStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
@@ -62,6 +63,7 @@ trait IsTranslatable
 		];
 	}
 
+	/** @return array<string, mixed> */
 	protected function getTranslatableFileStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
@@ -72,6 +74,7 @@ trait IsTranslatable
 		];
 	}
 
+	/** @return array<mixed> */
 	protected function localeValueMap(mixed $value = null): array
 	{
 		$result = is_array($value) ? $value : [];
@@ -87,6 +90,7 @@ trait IsTranslatable
 		return $result;
 	}
 
+	/** @return array<mixed> */
 	protected function localeListMap(mixed $value = null): array
 	{
 		if (is_array($value) && !$this->isList($value)) {
@@ -102,6 +106,7 @@ trait IsTranslatable
 		return $result;
 	}
 
+	/** @param array<mixed> $value */
 	private function isList(array $value): bool
 	{
 		return array_is_list($value);

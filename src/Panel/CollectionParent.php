@@ -19,6 +19,7 @@ final class CollectionParent
 		public readonly string $treeUrl,
 	) {}
 
+	/** @param iterable<mixed> $status */
 	public static function from(
 		CollectionUrls $urls,
 		?string $title,
@@ -47,7 +48,10 @@ final class CollectionParent
 		);
 	}
 
-	/** @return list<array{kind: string, label: string}> */
+	/**
+	 * @param iterable<mixed> $status
+	 * @return list<array{kind: string, label: string}>
+	 */
 	private static function status(iterable $status): array
 	{
 		$badges = [];

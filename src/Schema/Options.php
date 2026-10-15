@@ -9,6 +9,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 readonly class Options
 {
+	/** @param list<string|array<string, mixed>> $options */
 	public function __construct(
 		public array $options,
 	) {}

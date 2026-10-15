@@ -55,6 +55,10 @@ abstract class Panel
 		$this->panelDir = __DIR__ . '/../../../panel';
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
 	protected function context(array $data = []): array
 	{
 		$panelPath = $this->panelPath();
@@ -204,6 +208,8 @@ abstract class Panel
 	/**
 	 * Submitted form data with fallbacks for request pipelines that do
 	 * not populate the parsed body (JSON and urlencoded raw bodies).
+	 *
+	 * @return array<array-key, mixed>
 	 */
 	protected function formData(): array
 	{
@@ -292,6 +298,7 @@ abstract class Panel
 		return $logo === '' ? null : $logo;
 	}
 
+	/** @return list<NavigationItem> */
 	protected function collections(): array
 	{
 		return $this->navigation()->items();

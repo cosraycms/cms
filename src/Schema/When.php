@@ -23,6 +23,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final class When
 {
+	/** @param array<string|int|float|bool|null>|null $in */
 	public function __construct(
 		public readonly string $field,
 		public readonly string|int|float|bool|null $value = null,

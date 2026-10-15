@@ -56,6 +56,7 @@ final class Renderer
 		return $html;
 	}
 
+	/** @param array<string, mixed> $node */
 	private function node(array $node): string
 	{
 		$type = $node['type'] ?? null;
@@ -84,6 +85,7 @@ final class Renderer
 		};
 	}
 
+	/** @param array<string, mixed> $node */
 	private function heading(array $node): string
 	{
 		$level = $node['attrs']['level'] ?? 1;
@@ -96,6 +98,7 @@ final class Renderer
 		);
 	}
 
+	/** @param array<string, mixed> $node */
 	private function orderedList(array $node): string
 	{
 		$start = $node['attrs']['start'] ?? 1;
@@ -104,6 +107,7 @@ final class Renderer
 		return $this->tag('ol', $attrs, $this->children($node['content'] ?? null));
 	}
 
+	/** @param array<string, mixed> $node */
 	private function horizontalRule(array $node): string
 	{
 		$class = $node['attrs']['class'] ?? null;
@@ -113,7 +117,10 @@ final class Renderer
 			: '<hr>';
 	}
 
-	/** @return array<string, string> */
+	/**
+	 * @param array<string, mixed> $node
+	 * @return array<string, string>
+	 */
 	private function blockAttrs(array $node): array
 	{
 		$attrs = [];
@@ -126,7 +133,10 @@ final class Renderer
 		return array_merge($attrs, $this->alignAttrs($node));
 	}
 
-	/** @return array<string, string> */
+	/**
+	 * @param array<string, mixed> $node
+	 * @return array<string, string>
+	 */
 	private function alignAttrs(array $node): array
 	{
 		$align = $node['attrs']['align'] ?? null;
@@ -138,6 +148,7 @@ final class Renderer
 		return [];
 	}
 
+	/** @param array<string, mixed> $node */
 	private function text(array $node): string
 	{
 		$text = $node['text'] ?? null;
@@ -169,6 +180,7 @@ final class Renderer
 		return $html;
 	}
 
+	/** @param array<string, mixed> $mark */
 	private function mark(array $mark, string $inner): string
 	{
 		return match ($mark['type']) {
@@ -185,6 +197,7 @@ final class Renderer
 		};
 	}
 
+	/** @param array<string, mixed> $mark */
 	private function styleMark(array $mark, string $inner): string
 	{
 		$class = $mark['attrs']['class'] ?? null;
@@ -196,6 +209,7 @@ final class Renderer
 		return '<span' . $this->attrString(['class' => $class]) . ">{$inner}</span>";
 	}
 
+	/** @param array<string, mixed> $mark */
 	private function link(array $mark, string $inner): string
 	{
 		$attrs = is_array($mark['attrs'] ?? null) ? $mark['attrs'] : [];
@@ -240,6 +254,7 @@ final class Renderer
 		return '<a' . $this->attrString($html) . ">{$inner}</a>";
 	}
 
+	/** @param array<string, mixed> $node */
 	private function image(array $node): string
 	{
 		$uid = $node['attrs']['uid'] ?? null;

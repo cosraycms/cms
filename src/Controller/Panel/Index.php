@@ -24,6 +24,7 @@ final class Index extends Panel
 
 	protected const string AREA = 'dashboard';
 
+	/** @return array<string, mixed> */
 	public function index(
 		Context $context,
 		Database $db,

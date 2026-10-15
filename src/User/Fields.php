@@ -52,7 +52,7 @@ final class Fields
 	 * What the panel's field views render, in the shape the node editor
 	 * hands them.
 	 *
-	 * @return array{fields: list<array>, fieldsets: list<array>, content: array<string, array>}
+	 * @return array{fields: list<array<mixed>>, fieldsets: list<array<mixed>>, content: array<string, array<mixed>>}
 	 */
 	public function form(User $user): array
 	{

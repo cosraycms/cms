@@ -11,6 +11,7 @@ use Cosray\Finder\Input\TokenType;
 
 final readonly class NullComparison extends Expression implements Output
 {
+	/** @param array<string, string> $builtins */
 	public function __construct(
 		private Token $left,
 		private Token $operator,

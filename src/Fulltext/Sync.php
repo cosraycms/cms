@@ -29,6 +29,8 @@ final class Sync
 	 * The caller must hold the node's row lock until the transaction ends.
 	 *
 	 * @param class-string $class
+	 * @param array<mixed> $content
+	 * @param array<string, mixed> $titles
 	 * @return array{indexed: int, missingTitles: int}
 	 */
 	public function replace(

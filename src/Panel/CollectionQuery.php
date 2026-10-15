@@ -21,7 +21,10 @@ final class CollectionQuery
 		public readonly string $defaultView = 'list',
 	) {}
 
-	/** @param array<string, mixed> $overrides */
+	/**
+	 * @param array<string, mixed> $overrides
+	 * @return array<string, mixed>
+	 */
 	public function listParams(array $overrides = []): array
 	{
 		return $this->params([
@@ -35,7 +38,10 @@ final class CollectionQuery
 		], $overrides);
 	}
 
-	/** @param array<string, mixed> $overrides */
+	/**
+	 * @param array<string, mixed> $overrides
+	 * @return array<string, mixed>
+	 */
 	public function editorParams(array $overrides = []): array
 	{
 		return $this->params([

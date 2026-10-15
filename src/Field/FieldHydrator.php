@@ -21,6 +21,7 @@ class FieldHydrator
 	/**
 	 * Hydrate direct fields for callers that do not provide embedded object creation.
 	 *
+	 * @param array<string, mixed> $content
 	 * @return list<string>
 	 */
 	public function hydrate(object $target, array $content, Owner $owner): array
@@ -29,6 +30,7 @@ class FieldHydrator
 	}
 
 	/**
+	 * @param array<string, mixed> $content
 	 * @param callable(EmbeddedDefinition): object $createEmbedded
 	 */
 	public function hydrateEmbedded(
@@ -41,6 +43,7 @@ class FieldHydrator
 	}
 
 	/**
+	 * @param array<string, mixed> $content
 	 * @param null|callable(EmbeddedDefinition): object $createEmbedded
 	 */
 	private function hydrateAll(
@@ -160,6 +163,7 @@ class FieldHydrator
 		return $this->services;
 	}
 
+	/** @param array<string, mixed> $content */
 	protected function initField(
 		ReflectionProperty $property,
 		string $fieldType,
@@ -181,6 +185,7 @@ class FieldHydrator
 		return $field;
 	}
 
+	/** @param array<string, mixed> $content */
 	private function isActive(ReflectionProperty $property, array $content): bool
 	{
 		foreach ($property->getAttributes(When::class) as $attr) {

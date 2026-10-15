@@ -13,7 +13,10 @@ namespace Cosray\Field;
  */
 final class Condition
 {
-	/** @param array{field: string, op: string, value: mixed} $condition */
+	/**
+	 * @param array{field: string, op: string, value: mixed} $condition
+	 * @param array<string, mixed> $content
+	 */
 	public static function active(array $condition, array $content): bool
 	{
 		$raw = $content[$condition['field']]['value'][Field::NEUTRAL_LOCALE] ?? null;

@@ -10,6 +10,7 @@ abstract class Handler
 {
 	abstract public function apply(object $meta, Field $field): void;
 
+	/** @return array<string, mixed> */
 	abstract public function properties(object $meta, Field $field): array;
 
 	/** @param class-string $capabilityClass */

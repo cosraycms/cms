@@ -17,6 +17,7 @@ use Cosray\Node\Wrapper;
 use Generator;
 use Iterator;
 
+/** @implements Iterator<int, Wrapper> */
 final class Nodes implements Iterator
 {
 	use CompilesField;
@@ -34,7 +35,9 @@ final class Nodes implements Iterator
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
 	private ?bool $published = true; // ditto
 	private ?bool $hidden = false; // ditto
+	/** @var array<string, string> */
 	private array $whereParams = [];
+	/** @var array<string, string> */
 	private readonly array $builtins;
 	private Generator $result;
 
@@ -91,6 +94,7 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	/** @param array<string> $fields */
 	public function search(string $query, array $fields): self
 	{
 		$query = trim($query);
@@ -356,6 +360,7 @@ final class Nodes implements Iterator
 			->lazy();
 	}
 
+	/** @return array<string, mixed> */
 	private function baseParams(): array
 	{
 		$conditions = implode(' AND ', array_filter(
@@ -440,6 +445,7 @@ final class Nodes implements Iterator
 		return $this->compileField($field, 'n.content', localeIds: $this->localeIds());
 	}
 
+	/** @return list<string> */
 	private function localeIds(): array
 	{
 		$ids = [];
@@ -453,6 +459,7 @@ final class Nodes implements Iterator
 		return $ids;
 	}
 
+	/** @param list<string> $types */
 	private function typesCondition(array $types): string
 	{
 		$result = [];

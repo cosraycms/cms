@@ -26,6 +26,7 @@ final class Login extends Panel
 		parent::__construct($config, $container, $request);
 	}
 
+	/** @return array<string, mixed>|Response */
 	public function login(Factory $factory): array|Response
 	{
 		if ($this->hasPanelPermission()) {
@@ -40,6 +41,7 @@ final class Login extends Panel
 		]);
 	}
 
+	/** @return array<string, mixed>|Response */
 	public function authenticate(Factory $factory): array|Response
 	{
 		$data = $this->formData();
@@ -105,6 +107,7 @@ final class Login extends Panel
 		return $this->redirect($factory, $this->panelPath() . '/login');
 	}
 
+	/** @return array<array-key, mixed> */
 	protected function formData(): array
 	{
 		$data = parent::formData();

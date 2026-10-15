@@ -22,6 +22,7 @@ class Renderer implements RendererInterface
 
 	/**
 	 * @param DirsInput $dirs
+	 * @param array<string, mixed> $defaults
 	 * @param list<class-string> $trusted
 	 */
 	public function __construct(
@@ -32,7 +33,10 @@ class Renderer implements RendererInterface
 		protected string $contentType = 'text/html',
 	) {}
 
-	/** @param non-empty-string $id */
+	/**
+	 * @param non-empty-string $id
+	 * @param array<string, mixed> $context
+	 */
 	#[Override]
 	public function render(string $id, array $context): string
 	{

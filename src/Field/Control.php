@@ -18,6 +18,7 @@ namespace Cosray\Field;
  */
 final class Control
 {
+	/** @param array<string, mixed> $props */
 	private function __construct(
 		public readonly string $name,
 		private readonly array $props = [],
@@ -203,6 +204,7 @@ final class Control
 		return new self('element', [...$this->props, 'tag' => $tag, 'module' => $module]);
 	}
 
+	/** @return array{name: string, props: array<mixed>} */
 	public function array(): array
 	{
 		return [
@@ -211,6 +213,10 @@ final class Control
 		];
 	}
 
+	/**
+	 * @param array<mixed> $values
+	 * @return array<mixed>
+	 */
 	private static function serialize(array $values): array
 	{
 		return array_map(

@@ -29,6 +29,7 @@ use ReflectionMethod;
 final class Builder
 {
 	private readonly Resolver $titles;
+	/** @var array<string, array<string, array<string, mixed>>> */
 	private array $schemas = [];
 
 	public function __construct(
@@ -38,7 +39,11 @@ final class Builder
 		$this->titles = new Resolver($types);
 	}
 
-	/** @param class-string $class */
+	/**
+	 * @param class-string $class
+	 * @param array<mixed> $content
+	 * @param array<string, mixed> $titles
+	 */
 	public function build(string $class, array $content, array $titles, Locale $locale): Document
 	{
 		$parts = [];
@@ -71,6 +76,7 @@ final class Builder
 		return $attributes === [] ? null : $attributes[0]->newInstance()->fulltextWeight;
 	}
 
+	/** @return array<string, array<string, mixed>> */
 	private function schema(string $class): array
 	{
 		if (isset($this->schemas[$class])) {
@@ -167,6 +173,10 @@ final class Builder
 		return $this->schemas[$class] = $schema;
 	}
 
+	/**
+	 * @param array<mixed> $content
+	 * @param list<array{field: string, weight: string, text: string}> $parts
+	 */
 	private function fields(
 		string $class,
 		array $content,
@@ -226,6 +236,7 @@ final class Builder
 		}
 	}
 
+	/** @param array<mixed> $map */
 	private function effective(array $map, Locale $locale): mixed
 	{
 		foreach ([$locale->id, ...$locale->fallbacks(), Field\Field::NEUTRAL_LOCALE] as $id) {
@@ -258,6 +269,7 @@ final class Builder
 		return $text . $boundary;
 	}
 
+	/** @param list<array{field: string, weight: string, text: string}> $parts */
 	private function append(array &$parts, string $field, FulltextWeight $weight, string $text): void
 	{
 		// Headline markers must never occur in original source text.

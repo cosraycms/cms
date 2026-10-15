@@ -81,6 +81,7 @@ final class Listing
 		return $this->cms->node->byUid($uid, published: null);
 	}
 
+	/** @return array<string, mixed> */
 	public function list(
 		int $offset = 0,
 		int $limit = 50,
@@ -209,6 +210,7 @@ final class Listing
 	/**
 	 * @param list<Wrapper> $nodes
 	 * @param ?string $group the manual order the rows can be moved in, null when they can't
+	 * @return list<array<string, mixed>>
 	 */
 	private function rows(array $nodes, ?string $group, int $offset, int $total): array
 	{
@@ -230,6 +232,7 @@ final class Listing
 		return $result;
 	}
 
+	/** @return array<string, mixed> */
 	private function row(Wrapper $node, bool $hasChildren): array
 	{
 		$columns = [];
@@ -405,6 +408,7 @@ final class Listing
 		return $default;
 	}
 
+	/** @return array{string, string, non-empty-list<Order>} */
 	private function resolveOrder(string $sort, string $dir): array
 	{
 		$sort = trim($sort);

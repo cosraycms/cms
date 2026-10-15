@@ -31,6 +31,7 @@ final class Ingest
 		$this->storage = new Storage($config);
 	}
 
+	/** @param array<string, mixed> $meta */
 	public function ingest(
 		string $contents,
 		string $filename,

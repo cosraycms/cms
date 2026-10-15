@@ -11,6 +11,7 @@ use Cosray\Locales;
 
 final class Configurations
 {
+	/** @var array<string, string> */
 	private array $names = [];
 
 	public function __construct(

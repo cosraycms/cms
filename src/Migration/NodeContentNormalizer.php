@@ -27,7 +27,7 @@ final class NodeContentNormalizer
 	 * output stays byte-identical to migration 017's — downstreams that
 	 * run 017 before the assets migrations depend on that.
 	 *
-	 * @param null|Closure(array<string, mixed>): ?array $mediaItem
+	 * @param null|Closure(array<string, mixed>): ?array<mixed> $mediaItem
 	 */
 	public function __construct(
 		private readonly Uid $uid,
@@ -37,7 +37,10 @@ final class NodeContentNormalizer
 		$this->index = $index ?? Field\Index::withDefaults();
 	}
 
-	/** @param array<string, mixed> $content */
+	/**
+	 * @param array<string, mixed> $content
+	 * @return array<string, array<mixed>>
+	 */
 	public function normalize(array $content): array
 	{
 		$result = [];
@@ -53,7 +56,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $data */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function field(array $data): array
 	{
 		$type = $this->fieldType($data['type'] ?? null);
@@ -90,7 +96,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $data */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function blocksField(array $data, string $type): array
 	{
 		$value = $data['value'] ?? $data['items'] ?? [];
@@ -107,7 +116,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $data */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function entriesField(array $data, string $type): array
 	{
 		$value = $data['value'] ?? [];
@@ -124,7 +136,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $data */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function mediaField(array $data, string $type, bool $picture): array
 	{
 		$value = $data['value'] ?? $data['files'] ?? [];
@@ -150,6 +165,7 @@ final class NodeContentNormalizer
 		return Field\Text::class;
 	}
 
+	/** @return array<mixed> */
 	private function valueMap(mixed $value): array
 	{
 		if (is_array($value) && $this->isLocaleMap($value)) {
@@ -159,6 +175,7 @@ final class NodeContentNormalizer
 		return [self::ZXX => $value];
 	}
 
+	/** @return array<mixed> */
 	private function blockValueMap(mixed $value): array
 	{
 		if (is_array($value) && $this->isLocaleMap($value)) {
@@ -174,6 +191,7 @@ final class NodeContentNormalizer
 		return [self::ZXX => $this->blockList($value)];
 	}
 
+	/** @return list<array<mixed>> */
 	private function blockList(mixed $items): array
 	{
 		if (!is_array($items)) {
@@ -193,7 +211,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $data */
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<mixed>
+	 */
 	private function block(array $data): array
 	{
 		$type = is_string($data['type'] ?? null) ? $data['type'] : 'text';
@@ -237,6 +258,7 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
+	/** @return array<mixed> */
 	private function mediaValueMap(mixed $value, bool $picture): array
 	{
 		if (is_array($value) && $this->isLocaleMap($value)) {
@@ -255,6 +277,7 @@ final class NodeContentNormalizer
 		return [self::ZXX => $picture ? $this->selectPicture($list) : $list];
 	}
 
+	/** @return list<array<mixed>> */
 	private function mediaList(mixed $items): array
 	{
 		if (!is_array($items)) {
@@ -278,7 +301,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $item */
+	/**
+	 * @param array<string, mixed> $item
+	 * @return ?array<mixed>
+	 */
 	private function mediaItem(array $item): ?array
 	{
 		if ($this->mediaItem !== null) {
@@ -295,6 +321,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
+	/**
+	 * @param list<array<mixed>> $items
+	 * @return list<array<mixed>>
+	 */
 	private function selectPicture(array $items): array
 	{
 		if ($items === []) {
@@ -312,6 +342,7 @@ final class NodeContentNormalizer
 		return [$items[0]];
 	}
 
+	/** @return array<mixed> */
 	private function entryValueMap(mixed $value): array
 	{
 		if (is_array($value) && $this->isLocaleMap($value)) {
@@ -327,6 +358,7 @@ final class NodeContentNormalizer
 		return [self::ZXX => $this->entryList($value)];
 	}
 
+	/** @return list<array<mixed>> */
 	private function entryList(mixed $entries): array
 	{
 		if (!is_array($entries)) {
@@ -346,7 +378,10 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
-	/** @param array<string, mixed> $entry */
+	/**
+	 * @param array<string, mixed> $entry
+	 * @return array<mixed>
+	 */
 	private function entry(array $entry): array
 	{
 		$fields = $entry['fields'] ?? $entry['value'] ?? [];
@@ -360,7 +395,11 @@ final class NodeContentNormalizer
 		];
 	}
 
-	/** @param list<string> $skip */
+	/**
+	 * @param list<string> $skip
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function fieldMeta(array $data, array $skip): array
 	{
 		$meta = [];
@@ -380,6 +419,10 @@ final class NodeContentNormalizer
 		return $meta;
 	}
 
+	/**
+	 * @param array<mixed> $meta
+	 * @return array<mixed>
+	 */
 	private function normalizeMeta(array $meta): array
 	{
 		$result = [];
@@ -391,6 +434,7 @@ final class NodeContentNormalizer
 		return $result;
 	}
 
+	/** @return array<mixed> */
 	private function normalizeMetaLeaf(mixed $value): array
 	{
 		if (is_array($value) && $this->isLocaleMap($value)) {
@@ -400,6 +444,7 @@ final class NodeContentNormalizer
 		return [self::ZXX => $value];
 	}
 
+	/** @param array<mixed> $value */
 	private function isLocaleMap(array $value): bool
 	{
 		if ($value === [] || array_is_list($value)) {

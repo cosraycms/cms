@@ -49,6 +49,7 @@ class Text extends Value
 		return '';
 	}
 
+	/** @param list<string>|string|null $allowed */
 	public function strip(array|string|null $allowed = null): string
 	{
 		/**

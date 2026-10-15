@@ -53,6 +53,7 @@ final class Sizes
 	/** @var array<string, SizeSpec> */
 	private array $specs = [];
 
+	/** @param array<mixed> $config */
 	public function __construct(array $config)
 	{
 		foreach ($config + self::BUILTIN as $name => $entry) {
@@ -147,6 +148,7 @@ final class Sizes
 		return [$value[0], $value[1]];
 	}
 
+	/** @param array<mixed> $entry */
 	private function pos(string $name, string $modeKey, array $entry): ?int
 	{
 		if (!array_key_exists('pos', $entry)) {
@@ -173,6 +175,7 @@ final class Sizes
 		return self::POSITIONS[$pos];
 	}
 
+	/** @param array<mixed> $entry */
 	private function quality(string $name, array $entry): ?int
 	{
 		if (!array_key_exists('quality', $entry)) {
@@ -188,6 +191,7 @@ final class Sizes
 		return $quality;
 	}
 
+	/** @param array<mixed> $entry */
 	private function enlarge(string $name, array $entry): bool
 	{
 		if (!array_key_exists('enlarge', $entry)) {

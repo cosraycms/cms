@@ -83,6 +83,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $node */
 	private function text(array $node, string $path): void
 	{
 		$this->keys($node, ['type', 'text', 'marks'], $path);
@@ -201,6 +202,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $node */
 	private function attrs(array $node, string $type, string $path): void
 	{
 		$attrs = $node['attrs'] ?? [];
@@ -223,6 +225,7 @@ final class Validator
 		};
 	}
 
+	/** @param array<mixed> $attrs */
 	private function paragraphAttrs(array $attrs, string $path): void
 	{
 		$this->attrKeys($attrs, ['class', 'align'], $path);
@@ -230,6 +233,7 @@ final class Validator
 		$this->alignAttr($attrs, $path);
 	}
 
+	/** @param array<mixed> $attrs */
 	private function headingAttrs(array $attrs, string $path): void
 	{
 		$this->attrKeys($attrs, ['level', 'align'], $path);
@@ -242,6 +246,7 @@ final class Validator
 		$this->alignAttr($attrs, $path);
 	}
 
+	/** @param array<mixed> $attrs */
 	private function orderedListAttrs(array $attrs, string $path): void
 	{
 		$this->attrKeys($attrs, ['start'], $path);
@@ -251,6 +256,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $attrs */
 	private function horizontalRuleAttrs(array $attrs, string $path): void
 	{
 		$this->attrKeys($attrs, ['class'], $path);
@@ -261,6 +267,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $attrs */
 	private function imageAttrs(array $attrs, string $path): void
 	{
 		$this->attrKeys($attrs, ['uid', 'meta'], $path);
@@ -290,6 +297,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $attrs */
 	private function classAttr(array $attrs, string $path): void
 	{
 		if (!array_key_exists('class', $attrs)) {
@@ -309,6 +317,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $attrs */
 	private function alignAttr(array $attrs, string $path): void
 	{
 		if (!array_key_exists('align', $attrs)) {
@@ -323,6 +332,7 @@ final class Validator
 		}
 	}
 
+	/** @param array<mixed> $node */
 	private function content(array $node, string $type, string $path): void
 	{
 		$model = Spec::CONTENT[$type];
@@ -379,6 +389,10 @@ final class Validator
 		};
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @param list<string> $allowed
+	 */
 	private function keys(array $data, array $allowed, string $path): void
 	{
 		foreach (array_keys($data) as $key) {
@@ -388,6 +402,10 @@ final class Validator
 		}
 	}
 
+	/**
+	 * @param array<mixed> $attrs
+	 * @param list<string> $allowed
+	 */
 	private function attrKeys(array $attrs, array $allowed, string $path): void
 	{
 		foreach (array_keys($attrs) as $key) {

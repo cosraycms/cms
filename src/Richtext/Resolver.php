@@ -18,6 +18,10 @@ interface Resolver
 	/** The referenced node's URL path for the current locale. */
 	public function nodePath(string $uid): ?string;
 
-	/** Resolve a locale map along the current locale fallback chain. */
+	/**
+	 * Resolve a locale map along the current locale fallback chain.
+	 *
+	 * @param array<mixed> $map
+	 */
 	public function localize(array $map): mixed;
 }

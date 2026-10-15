@@ -41,6 +41,7 @@ final class Scanner
 	/**
 	 * @param list<string> $assets
 	 * @param list<string> $nodes
+	 * @param array<mixed> $content
 	 */
 	private function fields(array $content, array &$assets, array &$nodes): void
 	{

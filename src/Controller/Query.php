@@ -12,7 +12,9 @@ interface Query
 	public ?bool $hidden { get; }
 	public ?bool $deleted { get; }
 	public ?bool $content { get; }
+	/** @var array<array-key, mixed> */
 	public array $uids { get; }
 	public string $order { get; }
+	/** @var array<array-key, mixed> */
 	public array $fields { get; }
 }

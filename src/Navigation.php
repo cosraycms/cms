@@ -59,6 +59,7 @@ final class Navigation
 		return $this->collections[$handle];
 	}
 
+	/** @return list<array<string, mixed>> */
 	public function payload(): array
 	{
 		return $this->serialize($this->items());

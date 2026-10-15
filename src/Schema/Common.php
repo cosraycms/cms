@@ -9,6 +9,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class Common
 {
+	/** @var list<string> */
 	public array $types;
 
 	public function __construct(string ...$types)

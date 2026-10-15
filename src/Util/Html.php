@@ -9,6 +9,12 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class Html
 {
+	/**
+	 * @param int $limit
+	 * @param array<string>|string $allowedtags
+	 * @param string $ellipsis
+	 * @return string
+	 */
 	public static function excerpt(
 		string $html,
 		$limit = 30,

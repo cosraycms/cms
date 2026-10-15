@@ -20,6 +20,7 @@ class Option extends Value
 		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 
+	/** @return array<string, mixed> */
 	public function json(): array
 	{
 		return $this->data;

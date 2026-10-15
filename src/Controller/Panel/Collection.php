@@ -23,6 +23,7 @@ final class Collection extends Panel
 	private const int LIMIT_DEFAULT = 50;
 	private const int LIMIT_MAX = 250;
 
+	/** @return array<string, mixed> */
 	public function collection(string $collection): array
 	{
 		$ref = $this->ref($collection);
@@ -376,6 +377,7 @@ final class Collection extends Panel
 		return trim($value);
 	}
 
+	/** @param array<array-key, mixed> $form */
 	private function formString(array $form, string $key): string
 	{
 		$value = $form[$key] ?? '';

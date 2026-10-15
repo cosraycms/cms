@@ -13,6 +13,7 @@ use Countable;
 use Iterator;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+/** @implements Iterator<string, Locale> */
 class Locales implements Iterator, Countable, CorePlugin
 {
 	/** @var array<string, Locale> */
@@ -86,6 +87,10 @@ class Locales implements Iterator, Countable, CorePlugin
 		return $ids;
 	}
 
+	/**
+	 * @param array<string>|null $domains
+	 * @return void
+	 */
 	public function add(
 		string $id,
 		string $title,
@@ -165,6 +170,7 @@ class Locales implements Iterator, Countable, CorePlugin
 		$this->negotiator = $func;
 	}
 
+	/** @param array<string, Locale> $locales */
 	protected function fromRequest(Request $request, array $locales, Locale $default): Locale
 	{
 		$uri = $request->getUri();

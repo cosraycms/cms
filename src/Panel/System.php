@@ -19,6 +19,7 @@ final class System
 		private readonly Locales $locales,
 	) {}
 
+	/** @return array<string, mixed> */
 	public function payload(): array
 	{
 		$config = $this->config;

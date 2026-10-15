@@ -71,6 +71,7 @@ class Node
 		]);
 	}
 
+	/** @param array<string, mixed> $params */
 	public function get(
 		array $params,
 	): ?Wrapper {
@@ -105,6 +106,7 @@ class Node
 		throw new HttpBadRequest($this->context->request);
 	}
 
+	/** @return list<Wrapper> */
 	public function find(
 		string $query,
 	): array {

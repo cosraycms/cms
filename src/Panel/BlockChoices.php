@@ -10,10 +10,14 @@ use Cosray\Field\Blocks;
 
 final class BlockChoices
 {
+	/** @var array<string, array<array-key, mixed>> */
 	public readonly array $types;
+	/** @var array<string, array{type: string, handle: string, label: string, icon: string}> */
 	public readonly array $all;
+	/** @var list<array{type: string, handle: string, label: string, icon: string}> */
 	public readonly array $common;
 
+	/** @param array<string, mixed> $props */
 	public function __construct(string $field, array $props, ?callable $renderIcon = null)
 	{
 		$descriptors = $props['blockTypes'] ?? [];

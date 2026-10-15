@@ -26,6 +26,7 @@ final class Media extends Panel
 {
 	protected const string AREA = 'media';
 
+	/** @return array<string, mixed> */
 	public function index(Database $db, Locales $locales): array
 	{
 		$screen = $this->screen();
@@ -89,6 +90,8 @@ final class Media extends Panel
 	 * The library as controls embed it to pick an asset: a search and the
 	 * tile grid, whose tiles carry the asset they stand for. `kind` narrows
 	 * the listing, `file` marks the current pick.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function picker(Database $db): array
 	{
@@ -110,6 +113,8 @@ final class Media extends Panel
 	/**
 	 * Saves the editable meta slice from the detail form: localized alt,
 	 * title and caption, the credit line and an image's focal point.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function save(Database $db, Locales $locales, string $uid): array
 	{
@@ -139,6 +144,8 @@ final class Media extends Panel
 	/**
 	 * Deletes an unreferenced asset and returns to the listing; an asset in
 	 * use stays, and its detail names what still uses it.
+	 *
+	 * @return array<string, mixed>|Response
 	 */
 	public function delete(Database $db, Locales $locales, Factory $factory, string $uid): array|Response
 	{

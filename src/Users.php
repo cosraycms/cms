@@ -280,6 +280,7 @@ class Users
 		new Sync($this->db)->replace('user', $uid, new Scanner()->scan($content));
 	}
 
+	/** @param array<string, mixed>|null $data */
 	protected function getUserOrNull(?array $data): ?User
 	{
 		if ($data) {

@@ -124,7 +124,12 @@ class Media
 		return $response->json($payload, 400);
 	}
 
-	/** Build the client payload for a catalog row. */
+	/**
+	 * Build the client payload for a catalog row.
+	 *
+	 * @param array<string, mixed> $row
+	 * @return array<string, mixed>
+	 */
 	protected function uploadResult(array $row): array
 	{
 		$asset = Asset::fromRow($row, $this->config);

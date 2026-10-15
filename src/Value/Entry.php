@@ -34,6 +34,7 @@ class Entry extends Value
 		);
 	}
 
+	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} */
 	public function json(): array
 	{
 		return $this->fieldValues(static fn(Value $value): mixed => $value->json());
@@ -46,6 +47,7 @@ class Entry extends Value
 		return is_string($uid) ? $uid : null;
 	}
 
+	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} */
 	public function raw(): array
 	{
 		return $this->fieldValues(static fn(Value $value): mixed => $value->raw());

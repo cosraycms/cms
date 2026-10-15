@@ -70,6 +70,7 @@ class File extends Value
 		return $this->asset($this->index)->mime ?? '';
 	}
 
+	/** @return ?array<mixed> */
 	public function raw(): ?array
 	{
 		return $this->fileItem(0);
@@ -97,6 +98,7 @@ class File extends Value
 		return $uid === '' ? null : $this->owner->assets()->get($uid);
 	}
 
+	/** @return array<mixed> */
 	protected function files(): array
 	{
 		$value = $this->data['value'] ?? [];
@@ -129,6 +131,7 @@ class File extends Value
 		return is_array($files) ? $files : [];
 	}
 
+	/** @return ?array<mixed> */
 	protected function fileItem(int $index): ?array
 	{
 		$item = $this->files()[$index] ?? null;
@@ -136,7 +139,10 @@ class File extends Value
 		return is_array($item) ? $item : null;
 	}
 
-	/** @param array<string, mixed> $map */
+	/**
+	 * @param array<string, mixed> $map
+	 * @return array<mixed>
+	 */
 	protected function effectiveFiles(array $map): array
 	{
 		$locale = $this->locale;

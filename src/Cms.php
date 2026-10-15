@@ -12,6 +12,7 @@ use Cosray\Finder\Nodes;
 use Cosray\Finder\Render;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
+use Cosray\Node\Wrapper;
 use Cosray\Util\LiveReload;
 
 /**
@@ -36,7 +37,7 @@ class Cms
 		);
 	}
 
-	public function __get($key): Nodes|Node|Menu
+	public function __get(string $key): Nodes|Node|Menu
 	{
 		return match ($key) {
 			'nodes' => new Nodes($this->context, $this, $this->nodeFactory, $this->types),
@@ -51,6 +52,10 @@ class Cms
 		return new Nodes($this->context, $this, $this->nodeFactory, $this->types)->filter($query);
 	}
 
+	/**
+	 * @param list<string> $types
+	 * @return array<int, Wrapper>
+	 */
 	public function node(
 		string $query,
 		array $types = [],
@@ -79,6 +84,7 @@ class Cms
 		return new Menu($this->context, $menu, $this);
 	}
 
+	/** @param array<string, mixed> $templateContext */
 	public function render(
 		string $id,
 		array $templateContext = [],

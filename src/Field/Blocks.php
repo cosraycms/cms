@@ -438,7 +438,7 @@ class Blocks extends Field implements
 
 	/**
 	 * @param class-string<Block> $type
-	 * @return array{type: class-string, handle: string, label: string, icon: ?array, labels: bool, fields: list<array>, fieldsets: list<array>}
+	 * @return array{type: class-string, handle: string, label: string, icon: ?array<string, mixed>, labels: bool, fields: list<array<string, mixed>>, fieldsets: list<array<string, mixed>>}
 	 */
 	protected function blockTypeProperties(string $type): array
 	{
@@ -486,7 +486,8 @@ class Blocks extends Field implements
 	 * A plain list lands in the shared or default-locale list; a locale
 	 * map is taken per locale.
 	 *
-	 * @return array<string, list<array>>
+	 * @param array<mixed> $value
+	 * @return array<string, list<array<string, mixed>>>
 	 */
 	private function structureMap(array $value, int $columns): array
 	{
@@ -510,7 +511,7 @@ class Blocks extends Field implements
 	 * Every row with its position on the grid; one without gets a place
 	 * below the others.
 	 *
-	 * @return list<array>
+	 * @return list<array<string, mixed>>
 	 */
 	private function rowStructures(mixed $rows, int $columns): array
 	{
@@ -535,6 +536,10 @@ class Blocks extends Field implements
 		return Placement::rows($result, $columns, $min);
 	}
 
+	/**
+	 * @param array<mixed> $row
+	 * @return ?array<string, mixed>
+	 */
 	private function blockStructure(array $row, Layout $layout): ?array
 	{
 		$type = $row['type'] ?? null;
@@ -562,6 +567,9 @@ class Blocks extends Field implements
 	 * A split's blocks are laid out on its area and never split again.
 	 * One left over after dropping disallowed types is no split: it takes
 	 * the split's place, as in the editor.
+	 *
+	 * @param array<mixed> $row
+	 * @return ?array<string, mixed>
 	 */
 	private function splitStructure(array $row, Layout $layout, int $min): ?array
 	{

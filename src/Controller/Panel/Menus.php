@@ -16,6 +16,7 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Finder\Menu as FinderMenu;
+use Cosray\Finder\MenuItem;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Menus as MenuWriter;
@@ -59,6 +60,9 @@ final class Menus extends Panel
 	 * Every screen in the area renders the rail, so its menus ride the
 	 * shared context. The rail replaces a listing screen: `rail` is what
 	 * the base class leaves off outside the content area.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
 	 */
 	protected function context(array $data = []): array
 	{
@@ -89,6 +93,8 @@ final class Menus extends Panel
 	/**
 	 * The area's entry point. With menus around, the rail is the listing
 	 * and this opens the first one; only an empty project stops here.
+	 *
+	 * @return array<string, mixed>|Response
 	 */
 	#[Permission('edit-menus')]
 	public function index(Factory $factory): array|Response
@@ -108,12 +114,14 @@ final class Menus extends Panel
 		return $this->context(['notice' => $this->notice()]);
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('manage-menus')]
 	public function create(Context $context): array
 	{
 		return $this->form($context, '', [], null, []);
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('manage-menus')]
 	public function store(Context $context, Factory $factory): array|Response
 	{
@@ -129,6 +137,7 @@ final class Menus extends Panel
 		return $this->redirectToMenu($factory, $handle, ['notice' => 'created']);
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('edit-menus')]
 	public function update(
 		Cms $cms,
@@ -181,12 +190,14 @@ final class Menus extends Panel
 		return $this->redirect($factory, 'deleted');
 	}
 
+	/** @return array<string, mixed> */
 	#[Permission('edit-menus')]
 	public function menu(Cms $cms, Context $context, string $menu): array
 	{
 		return $this->treeContext($cms, $context, $menu, $this->pane($cms, $context, $menu));
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('edit-menus')]
 	public function storeItem(
 		Cms $cms,
@@ -243,6 +254,7 @@ final class Menus extends Panel
 		]);
 	}
 
+	/** @return array<string, mixed>|Response */
 	#[Permission('edit-menus')]
 	public function updateItem(
 		Cms $cms,
@@ -414,6 +426,9 @@ final class Menus extends Panel
 	 * @param ?array{handle: string, description: array<string, string>, maxDepth: ?int, errors: array<string, string>} $props
 	 *   the submitted menu fields when a save came back with errors, the
 	 *   stored ones otherwise
+	 *
+	 * @param ?array<string, mixed> $pane
+	 * @return array<string, mixed>
 	 */
 	private function treeContext(
 		Cms $cms,
@@ -465,6 +480,8 @@ final class Menus extends Panel
 	/**
 	 * The pane state the URL asks for: `?item=` edits, `?add=` creates
 	 * (empty at the root, a uid below that item), otherwise no pane form.
+	 *
+	 * @return ?array<string, mixed>
 	 */
 	private function pane(Cms $cms, Context $context, string $menu): ?array
 	{
@@ -527,7 +544,12 @@ final class Menus extends Panel
 		return null;
 	}
 
-	/** @param array<string, string> $errors */
+	/**
+	 * @param array<string, mixed> $values
+	 * @param array<string, string> $errors
+	 * @param ?array{side: string, item: string} $anchor
+	 * @return array<string, mixed>
+	 */
 	private function paneContext(
 		Cms $cms,
 		Context $context,
@@ -571,6 +593,7 @@ final class Menus extends Panel
 	 * Flattens one sibling group of the menu iterator into view rows,
 	 * recursing into children.
 	 *
+	 * @param iterable<MenuItem> $items
 	 * @param list<array{id: string, title: string}> $locales
 	 *
 	 * @return list<array<string, mixed>>
@@ -628,6 +651,7 @@ final class Menus extends Panel
 	 * Builds the jsonb payload from normalized form values; validation
 	 * errors keep the offending key out of the payload.
 	 *
+	 * @param array<string, mixed> $values
 	 * @return array{0: array<string, mixed>, 1: array<string, string>}
 	 */
 	private function itemPayload(Cms $cms, Context $context, array $values): array
@@ -727,7 +751,10 @@ final class Menus extends Panel
 		return [$data, $errors];
 	}
 
-	/** @return array<string, mixed> */
+	/**
+	 * @param array<array-key, mixed> $body
+	 * @return array<string, mixed>
+	 */
 	private function valuesFromBody(Context $context, array $body): array
 	{
 		$type = trim((string) ($body['type'] ?? ''));
@@ -747,7 +774,10 @@ final class Menus extends Panel
 		];
 	}
 
-	/** @return array<string, mixed> */
+	/**
+	 * @param array<array-key, mixed> $data
+	 * @return array<string, mixed>
+	 */
 	private function valuesFromData(array $data): array
 	{
 		$map = static fn(mixed $value): array => (
@@ -870,6 +900,7 @@ final class Menus extends Panel
 	 *
 	 * @param array<string, string> $description
 	 * @param array<string, string> $errors
+	 * @return array<string, mixed>
 	 */
 	private function form(
 		Context $context,
@@ -1115,6 +1146,7 @@ final class Menus extends Panel
 		return '';
 	}
 
+	/** @return array{menu: string, description: array<string, string>, label: string, maxDepth: ?int, items: int, url: string} */
 	private function row(string $menu): array
 	{
 		foreach ($this->menuRows() as $row) {
@@ -1126,7 +1158,11 @@ final class Menus extends Panel
 		throw new HttpNotFound($this->request);
 	}
 
-	/** The item's row, 404 unless it belongs to this menu. */
+	/**
+	 * The item's row, 404 unless it belongs to this menu.
+	 *
+	 * @return array<string, mixed>
+	 */
 	private function itemRowFor(string $menu, string $item): array
 	{
 		$row = $this->db->menus->itemRow(['item' => $item])->first();

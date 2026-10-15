@@ -10,7 +10,9 @@ use Cosray\Field\Owner;
 use Cosray\Schema\TranslateMode;
 use Iterator;
 
-/** @property-read Field&Translatable $field */
+/**
+ * @property-read Field&Translatable $field
+ */
 class Files extends Value implements Iterator
 {
 	protected int $pointer = 0;
@@ -69,6 +71,7 @@ class Files extends Value implements Iterator
 		return new File($this->owner, $this->field, $this->context, 0);
 	}
 
+	/** @return array<mixed> */
 	public function raw(): array
 	{
 		return $this->files();
@@ -89,6 +92,7 @@ class Files extends Value implements Iterator
 		return count($this->files());
 	}
 
+	/** @return array<mixed> */
 	protected function files(): array
 	{
 		$value = $this->data['value'] ?? [];
@@ -121,6 +125,7 @@ class Files extends Value implements Iterator
 		return is_array($files) ? $files : [];
 	}
 
+	/** @return ?array<mixed> */
 	protected function fileItem(int $index): ?array
 	{
 		$item = $this->files()[$index] ?? null;
@@ -128,7 +133,10 @@ class Files extends Value implements Iterator
 		return is_array($item) ? $item : null;
 	}
 
-	/** @param array<string, mixed> $map */
+	/**
+	 * @param array<string, mixed> $map
+	 * @return array<mixed>
+	 */
 	protected function effectiveFiles(array $map): array
 	{
 		$locale = $this->locale;

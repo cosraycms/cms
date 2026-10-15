@@ -37,6 +37,7 @@ final class OwnerResolver implements Resolver
 		return is_string($path) ? $path : null;
 	}
 
+	/** @param array<mixed> $map */
 	public function localize(array $map): mixed
 	{
 		$locale = $this->owner->locale();

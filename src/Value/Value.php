@@ -16,6 +16,8 @@ abstract class Value
 	protected readonly Locale $locale;
 	protected readonly Locale $defaultLocale;
 	protected readonly string $fieldName;
+
+	/** @var array<string, mixed> */
 	protected readonly array $data;
 
 	public function __construct(
@@ -103,6 +105,7 @@ abstract class Value
 		return $this->effective($meta) ?? $default;
 	}
 
+	/** @param array<mixed> $map */
 	protected function effective(array $map): mixed
 	{
 		$locale = $this->locale;

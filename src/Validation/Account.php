@@ -46,6 +46,7 @@ final class Account implements Validator
 		}
 	}
 
+	/** @param array<mixed> $data */
 	#[Override]
 	public function validate(array $data): Result
 	{

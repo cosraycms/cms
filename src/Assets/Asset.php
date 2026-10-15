@@ -19,6 +19,7 @@ final class Asset
 		get => self::classify($this->mime);
 	}
 
+	/** @param array<string, mixed> $meta */
 	public function __construct(
 		public readonly string $uid,
 		public readonly string $disk,
@@ -33,6 +34,7 @@ final class Asset
 		private readonly string $cacheBase = '/cache',
 	) {}
 
+	/** @param array<mixed> $row */
 	public static function fromRow(array $row, Config $config): self
 	{
 		$meta = json_decode((string) ($row['meta'] ?? '{}'), true);
@@ -103,7 +105,11 @@ final class Asset
 		};
 	}
 
-	/** Locale map for a catalog meta key, or null when absent. */
+	/**
+	 * Locale map for a catalog meta key, or null when absent.
+	 *
+	 * @return ?array<string, mixed>
+	 */
 	public function metaMap(string $key): ?array
 	{
 		$value = $this->meta[$key] ?? null;

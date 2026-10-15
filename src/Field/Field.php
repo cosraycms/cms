@@ -43,7 +43,11 @@ abstract class Field implements
 
 	protected ?Services $services = null;
 
-	/** The stored data as-is, unaffected by When deactivation. */
+	/**
+	 * The stored data as-is, unaffected by When deactivation.
+	 *
+	 * @var array<string, mixed>
+	 */
 	protected array $stored = [];
 
 	final public function __construct(
@@ -61,6 +65,7 @@ abstract class Field implements
 
 	abstract public function value(): Value;
 
+	/** @return array<string, mixed> */
 	abstract public function structure(mixed $value = null): array;
 
 	abstract public function shape(): Shape;
@@ -70,6 +75,7 @@ abstract class Field implements
 		return $this->value()->isset();
 	}
 
+	/** @param array<string, mixed> $stored */
 	public function init(
 		Services $services,
 		?ReflectionProperty $property = null,
@@ -103,6 +109,8 @@ abstract class Field implements
 	/**
 	 * The stored data as-is — the deliberate bypass around When
 	 * deactivation for consumers that need the dormant value.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function stored(): array
 	{
@@ -124,6 +132,7 @@ abstract class Field implements
 		return null;
 	}
 
+	/** @return array<string, mixed> */
 	public function properties(): array
 	{
 		$properties = [
@@ -188,6 +197,7 @@ abstract class Field implements
 		return is_string($label) ? [...$option, 'label' => __($label)] : $option;
 	}
 
+	/** @return array<string, mixed> */
 	public function getFileStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
@@ -198,6 +208,7 @@ abstract class Field implements
 		];
 	}
 
+	/** @return array<string, mixed> */
 	public function getSimpleStructure(string $type, mixed $value = null): array
 	{
 		unset($type);
@@ -241,6 +252,7 @@ abstract class Field implements
 		return $label . ' (' . $locale->title . ')';
 	}
 
+	/** @param list<string> $validators */
 	protected function zxxShape(string|Contract\Validator $valueShape, array $validators = []): Shape
 	{
 		$shape = Shapes::create();
@@ -261,6 +273,7 @@ abstract class Field implements
 		return $value ?? $this->default;
 	}
 
+	/** @return array<mixed> */
 	protected function scalarValueMap(mixed $value = null): array
 	{
 		$value ??= $this->default;
@@ -272,6 +285,7 @@ abstract class Field implements
 		return [self::NEUTRAL_LOCALE => $value];
 	}
 
+	/** @return array<mixed> */
 	protected function listValueMap(mixed $value = null): array
 	{
 		$value ??= $this->default ?? [];

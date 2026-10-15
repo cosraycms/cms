@@ -39,6 +39,7 @@ abstract readonly class Expression
 		};
 	}
 
+	/** @param array<string, string> $builtins */
 	protected function getOperand(
 		#[\SensitiveParameter]
 		Token $token,
@@ -63,6 +64,7 @@ abstract readonly class Expression
 		};
 	}
 
+	/** @return list<string> */
 	private function localeIds(?Context $context): array
 	{
 		if (!$context) {

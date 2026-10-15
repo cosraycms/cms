@@ -56,6 +56,7 @@ final class BlockRowConverter
 	private const array ASPECT_RATIO = ['aspectRatioX', 'aspectRatioY'];
 	private const array FIELD_META = ['columns', 'minCellWidth'];
 
+	/** @var array<string, mixed> */
 	private array $report = [
 		'fields' => 0,
 		'blocks' => 0,
@@ -80,6 +81,7 @@ final class BlockRowConverter
 	 * @param array<string, mixed> $content
 	 * @param string $table Where the content came from, for the report.
 	 * @param string $row The row's key within that table, for the report.
+	 * @return array<mixed>
 	 */
 	public function convert(array $content, string $table = '', string $row = ''): array
 	{
@@ -89,11 +91,16 @@ final class BlockRowConverter
 		return $this->walk($content, '');
 	}
 
+	/** @return array<string, mixed> */
 	public function report(): array
 	{
 		return $this->report;
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function walk(array $data, string $path): array
 	{
 		if ($this->isBlocksField($data)) {
@@ -109,6 +116,7 @@ final class BlockRowConverter
 		return $data;
 	}
 
+	/** @param array<mixed> $data */
 	private function isBlocksField(array $data): bool
 	{
 		$type = $data['type'] ?? null;
@@ -124,6 +132,8 @@ final class BlockRowConverter
 	/**
 	 * A locale map of lists whose items carry `colspan`: the stored
 	 * field class no longer autoloads, the value still says blocks.
+	 *
+	 * @param array<mixed> $value
 	 */
 	private function looksLikeBlocks(array $value): bool
 	{
@@ -156,6 +166,10 @@ final class BlockRowConverter
 		return $found;
 	}
 
+	/**
+	 * @param array<mixed> $data
+	 * @return array<mixed>
+	 */
 	private function field(array $data, string $path): array
 	{
 		$this->report['fields']++;
@@ -189,6 +203,10 @@ final class BlockRowConverter
 		return $result;
 	}
 
+	/**
+	 * @param array<mixed> $value
+	 * @return array<mixed>
+	 */
 	private function valueMap(array $value, string $path): array
 	{
 		foreach ($value as $locale => $list) {
@@ -214,7 +232,10 @@ final class BlockRowConverter
 		return $value;
 	}
 
-	/** @param array<string, mixed> $block */
+	/**
+	 * @param array<string, mixed> $block
+	 * @return array<mixed>
+	 */
 	private function block(array $block, string $locale, string $path, int $index): array
 	{
 		if (isset($block['layout'], $block['fields'])) {
@@ -265,6 +286,7 @@ final class BlockRowConverter
 	 * Values below the range no schema could accept are floored; the
 	 * field's real bounds are applied by the readers and the shape.
 	 *
+	 * @param array<mixed> $block
 	 * @return array{colspan: int, rowspan: int, indent: int}
 	 */
 	private function layout(array $block): array
@@ -278,7 +300,10 @@ final class BlockRowConverter
 		];
 	}
 
-	/** @return array<string, array> */
+	/**
+	 * @param array<mixed> $block
+	 * @return array<string, array<mixed>>
+	 */
 	private function fields(string $type, array $block, string $locale): array
 	{
 		$value = $block['value'] ?? null;
@@ -303,6 +328,9 @@ final class BlockRowConverter
 	 * The envelope moves with the document. A block without one is
 	 * legacy HTML the richtext migration has not seen; it keeps its
 	 * markless value so that migration still recognizes it.
+	 *
+	 * @param array<mixed> $block
+	 * @return array<mixed>
 	 */
 	private function richtext(array $block, string $locale): array
 	{
@@ -320,6 +348,10 @@ final class BlockRowConverter
 		return $result;
 	}
 
+	/**
+	 * @param array<mixed> $block
+	 * @return array<mixed>
+	 */
 	private function youtube(array $block, string $locale): array
 	{
 		$result = [
@@ -337,11 +369,13 @@ final class BlockRowConverter
 		return $result;
 	}
 
+	/** @return array<mixed> */
 	private function scalar(string $class, mixed $value, string $locale): array
 	{
 		return ['type' => $class, 'value' => [self::ZXX => $this->pick($value, $locale)]];
 	}
 
+	/** @return array<mixed> */
 	private function media(string $class, mixed $value, string $locale, ?int $limit): array
 	{
 		$items = $this->pick($value, $locale);
@@ -385,6 +419,9 @@ final class BlockRowConverter
 	/**
 	 * Block meta minus the YouTube aspect ratio, which moved into the
 	 * field, and minus empty entries, so the report counts real uses.
+	 *
+	 * @param array<mixed> $meta
+	 * @return array<mixed>
 	 */
 	private function blockMeta(string $type, array $meta): array
 	{

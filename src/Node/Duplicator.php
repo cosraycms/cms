@@ -223,6 +223,7 @@ final class Duplicator
 		);
 	}
 
+	/** @return array<string, string> */
 	private function emptyPaths(): array
 	{
 		$paths = [];

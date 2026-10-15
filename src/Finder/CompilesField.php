@@ -74,7 +74,10 @@ trait CompilesField
 		return 'COALESCE(' . implode(', ', $expressions) . ')';
 	}
 
-	/** @param list<string> $localeIds */
+	/**
+	 * @param list<string> $localeIds
+	 * @return non-empty-list<string>
+	 */
 	protected function normalizeLocaleIds(array $localeIds): array
 	{
 		$localeIds = array_values(array_filter($localeIds, static fn(string $id): bool => $id !== ''));

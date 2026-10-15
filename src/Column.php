@@ -113,6 +113,7 @@ final class Column
 		return 'text';
 	}
 
+	/** @return array<string, mixed> */
 	public function get(Wrapper $node): array
 	{
 		return [

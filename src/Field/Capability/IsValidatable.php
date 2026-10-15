@@ -6,6 +6,7 @@ namespace Cosray\Field\Capability;
 
 trait IsValidatable
 {
+	/** @var list<string> */
 	protected array $validators = [];
 
 	public function addValidators(string ...$validators): static
@@ -15,6 +16,7 @@ trait IsValidatable
 		return $this;
 	}
 
+	/** @return list<string> */
 	public function validators(): array
 	{
 		return array_values(array_unique($this->validators));

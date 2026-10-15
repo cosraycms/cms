@@ -43,6 +43,7 @@ class IngestError extends RuntimeException
 		);
 	}
 
+	/** @param array<string> $allowed */
 	public static function wrongExtension(?string $ext, array $allowed, string $mime): self
 	{
 		$list = implode(', ', $allowed);

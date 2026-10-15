@@ -9,12 +9,15 @@ use Cosray\Field\CodeSyntaxes;
 
 trait IsSyntaxAware
 {
+	/** @var list<string> */
 	protected array $syntaxes = [CodeSyntaxes::DEFAULT];
 
 	/**
 	 * Aliases become the syntax they stand for, so the panel and stored
 	 * values only ever see the keys. A syntax the panel's editor lacks is a
 	 * schema error; it would otherwise show up as plain text.
+	 *
+	 * @param array<string> $syntaxes
 	 */
 	public function syntaxes(array $syntaxes): void
 	{
@@ -40,6 +43,7 @@ trait IsSyntaxAware
 		$this->syntaxes = $values ?: [CodeSyntaxes::DEFAULT];
 	}
 
+	/** @return list<string> */
 	public function getSyntaxes(): array
 	{
 		return $this->syntaxes;

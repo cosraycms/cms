@@ -6,6 +6,7 @@ namespace Cosray\Assets;
 
 final readonly class IngestResult
 {
+	/** @param array<mixed> $row */
 	public function __construct(
 		public array $row,
 		public bool $created,

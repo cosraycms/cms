@@ -34,6 +34,7 @@ final class RichtextDoc implements Validator
 		$this->shape->review($this->review(...));
 	}
 
+	/** @param array<mixed> $data */
 	#[Override]
 	public function validate(array $data): Result
 	{

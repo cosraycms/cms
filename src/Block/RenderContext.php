@@ -22,6 +22,7 @@ final class RenderContext
 	private readonly string $prefix;
 	private readonly string $class;
 
+	/** @param array<mixed> $args */
 	public function __construct(
 		public readonly Owner $owner,
 		public readonly string $fieldName,
@@ -54,6 +55,8 @@ final class RenderContext
 
 	/**
 	 * Resolve a locale map along the locale fallback chain.
+	 *
+	 * @param array<mixed> $map
 	 */
 	public function effective(array $map): mixed
 	{

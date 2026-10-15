@@ -11,6 +11,7 @@ use IteratorAggregate;
 
 /**
  * @property-read Field\Entries $field
+ * @implements IteratorAggregate<int, Entry>
  */
 class Entries extends Value implements IteratorAggregate
 {
@@ -34,16 +35,19 @@ class Entries extends Value implements IteratorAggregate
 		);
 	}
 
+	/** @return list<array{uid: ?string, type: string, fields: array<string, mixed>}> */
 	public function json(): array
 	{
 		return array_map(static fn(Entry $entry): array => $entry->json(), $this->entries);
 	}
 
+	/** @return list<array{uid: ?string, type: string, fields: array<string, mixed>}> */
 	public function raw(): array
 	{
 		return array_map(static fn(Entry $entry): array => $entry->raw(), $this->entries);
 	}
 
+	/** @return Generator<int, Entry> */
 	public function getIterator(): Generator
 	{
 		foreach ($this->entries as $entry) {

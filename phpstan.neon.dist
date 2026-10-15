@@ -2,7 +2,7 @@ includes:
 	- vendor/celema/quma/phpstan/extension.neon
 
 parameters:
-	level: 5
+	level: 6
 	paths:
 		- src
 	# Site developers pass config and attributes that only docblocks type; keep validating them.
@@ -14,3 +14,9 @@ parameters:
 		- Cosray\Node\Schema
 		- Cosray\Node\Type
 		- Cosray\Value\Block
+	ignoreErrors:
+		-
+			# Its subclasses narrow current() to Image and TranslatedFile; an
+			# Iterator<int, File> tag would type their iteration as File.
+			identifier: missingType.generics
+			path: src/Value/Files.php

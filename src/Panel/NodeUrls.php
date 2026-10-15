@@ -60,6 +60,7 @@ final class NodeUrls
 		return $this->panelPath . '/node/' . rawurlencode($uid);
 	}
 
+	/** @return array{from: string, list: ?array<string, mixed>} */
 	private function origin(): array
 	{
 		return [
@@ -68,6 +69,7 @@ final class NodeUrls
 		];
 	}
 
+	/** @param array<string, mixed> $params */
 	private function url(string $path, array $params): string
 	{
 		$params = array_filter($params, static fn(mixed $value): bool => $value !== null && $value !== '');

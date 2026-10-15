@@ -9,6 +9,7 @@ use ValueError;
 
 final class Prepared
 {
+	/** @param array<string, mixed> $data */
 	public function __construct(
 		public readonly object $node,
 		private array $data,
@@ -74,6 +75,7 @@ final class Prepared
 		return $this;
 	}
 
+	/** @return array<string, mixed> */
 	public function data(): array
 	{
 		return $this->data;

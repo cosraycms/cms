@@ -39,6 +39,7 @@ final class Editor extends Panel
 	private const int LIMIT_DEFAULT = 50;
 	private const int LIMIT_MAX = 250;
 
+	/** @return array<string, mixed> */
 	public function edit(Context $context, Cms $cms, string $node): array
 	{
 		$result = $cms->node->working($node);
@@ -70,6 +71,7 @@ final class Editor extends Panel
 		);
 	}
 
+	/** @return array<string, mixed> */
 	public function create(Context $context, Cms $cms, string $type): array
 	{
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
@@ -83,6 +85,7 @@ final class Editor extends Panel
 		);
 	}
 
+	/** @return Response|array<string, mixed> */
 	public function save(
 		Context $context,
 		Cms $cms,
@@ -199,6 +202,9 @@ final class Editor extends Panel
 	 * A published node that stays published takes a plain save as its
 	 * working copy. Everything else — an unpublished node, the switch
 	 * turned off, or an explicit publish — writes the live row.
+	 *
+	 * @param array<string, mixed> $data
+	 * @param array<array-key, mixed> $form
 	 */
 	private function savesAsDraft(object $node, array $data, array $form): bool
 	{
@@ -243,6 +249,7 @@ final class Editor extends Panel
 		);
 	}
 
+	/** @return Response|array<string, mixed> */
 	public function store(
 		Context $context,
 		Cms $cms,
@@ -302,6 +309,7 @@ final class Editor extends Panel
 		);
 	}
 
+	/** @return Response|array<string, mixed> */
 	public function delete(
 		Context $context,
 		Cms $cms,
@@ -350,6 +358,7 @@ final class Editor extends Panel
 		], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
 	}
 
+	/** @return array<string, mixed> */
 	public function paths(Context $context, Cms $cms, string $node): array
 	{
 		$result = $cms->node->working($node);
@@ -387,7 +396,11 @@ final class Editor extends Panel
 		];
 	}
 
-	/** Route-path preview for a not-yet-saved node, built from its blueprint. */
+	/**
+	 * Route-path preview for a not-yet-saved node, built from its blueprint.
+	 *
+	 * @return array<string, mixed>
+	 */
 	public function createPaths(Context $context, Cms $cms, string $type): array
 	{
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
@@ -418,6 +431,8 @@ final class Editor extends Panel
 	 * it, built from the submitted form on top of the working copy. Nothing
 	 * is validated or saved — readers clamp what they load and an empty
 	 * block renders nothing, so half-finished content previews as well.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function blocks(
 		Context $context,
@@ -447,7 +462,11 @@ final class Editor extends Panel
 		return $this->blocksPreview($context, $cms, $nodeObj, $data, $field);
 	}
 
-	/** The layout preview for a not-yet-saved node, built from its blueprint. */
+	/**
+	 * The layout preview for a not-yet-saved node, built from its blueprint.
+	 *
+	 * @return array<string, mixed>
+	 */
 	public function createBlocks(
 		Context $context,
 		Cms $cms,
@@ -459,6 +478,10 @@ final class Editor extends Panel
 		return $this->blocksPreview($context, $cms, $nodeObj, $data, $field);
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
 	private function blocksPreview(
 		Context $context,
 		Cms $cms,
@@ -503,6 +526,8 @@ final class Editor extends Panel
 	 * The editor form renders a sentinel input as its LAST control; a
 	 * submission without it lost its tail — typically a form-encoded POST
 	 * silently truncated by PHP's max_input_vars, or a mangled JSON body.
+	 *
+	 * @param array<array-key, mixed> $form
 	 */
 	private function complete(array $form): bool
 	{
@@ -513,6 +538,9 @@ final class Editor extends Panel
 	 * Saving an incomplete submission would silently delete the missing
 	 * fields (entries rows are replaced wholesale), so this is a hard
 	 * stop, not a validation issue.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
 	 */
 	private function refuseIncomplete(array $data): array
 	{
@@ -558,7 +586,13 @@ final class Editor extends Panel
 		));
 	}
 
-	/** Apply the submitted editor form (content patch + settings). */
+	/**
+	 * Apply the submitted editor form (content patch + settings).
+	 *
+	 * @param array<string, mixed> $data
+	 * @param array<array-key, mixed> $form
+	 * @return array<string, mixed>
+	 */
 	private function applyForm(array $data, array $form): array
 	{
 		$patch = new FormPatch($data['fields']);
@@ -571,6 +605,11 @@ final class Editor extends Panel
 		return $this->applySettings($data, $form);
 	}
 
+	/**
+	 * @param array<string, mixed> $data
+	 * @param array<array-key, mixed> $form
+	 * @return array<string, mixed>
+	 */
 	private function applySettings(array $data, array $form): array
 	{
 		if (array_key_exists('handle', $form)) {
@@ -645,6 +684,8 @@ final class Editor extends Panel
 	/**
 	 * The uid the create form pre-generated, if it is a well-formed handle;
 	 * used only in create mode so uploads and the saved node share one uid.
+	 *
+	 * @param array<array-key, mixed> $form
 	 */
 	private function submittedUid(array $form): ?string
 	{
@@ -657,6 +698,7 @@ final class Editor extends Panel
 		return null;
 	}
 
+	/** @return array{backUrl: string, backLabel: string, activeCollection: ?string, links: NodeUrls} */
 	private function origin(): array
 	{
 		$origin = [
@@ -783,6 +825,13 @@ final class Editor extends Panel
 			->referencedFields($this->types()->get($node::class, 'route'));
 	}
 
+	/**
+	 * @param array<string, mixed> $node
+	 * @param array<string, string> $generatedPaths
+	 * @param list<string> $pathSourceFields
+	 * @param array<string, mixed> $meta
+	 * @return array<string, mixed>
+	 */
 	private function editorContext(
 		string $mode,
 		array $node,
@@ -818,7 +867,8 @@ final class Editor extends Panel
 	 * The inspector's fact rows: creation date in the panel locale and the
 	 * last editor's display name. Only an existing node has either.
 	 *
-	 * @return array{created: ?string, editor: ?string}
+	 * @param array<string, mixed> $data
+	 * @return array{created: ?string, editor: ?string, draft: ?array{since: ?string, editor: ?string}}
 	 */
 	private function nodeMeta(array $data): array
 	{
@@ -881,6 +931,7 @@ final class Editor extends Panel
 		return null;
 	}
 
+	/** @param array<array-key, mixed> $params */
 	private function intParam(
 		string $key,
 		array $params,
@@ -909,7 +960,10 @@ final class Editor extends Panel
 		return $int;
 	}
 
-	/** @return list<string> */
+	/**
+	 * @param array<array-key, mixed> $params
+	 * @return list<string>
+	 */
 	private function openParam(array $params): array
 	{
 		$value = $params['open'] ?? '';
@@ -931,6 +985,7 @@ final class Editor extends Panel
 		return $open;
 	}
 
+	/** @param array<array-key, mixed> $params */
 	private function stringParam(string $key, array $params): string
 	{
 		$value = $params[$key] ?? '';

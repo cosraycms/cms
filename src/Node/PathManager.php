@@ -17,6 +17,7 @@ class PathManager
 		private readonly Uid $uid = new Uid(Uid::ALPHABET_LOWERCASE_WORD_SAFE, 13),
 	) {}
 
+	/** @param array<mixed> $rawData */
 	public function path(array $rawData, ?Locale $locale, Locale $requestLocale): string
 	{
 		$paths = $rawData['paths'];
@@ -36,6 +37,7 @@ class PathManager
 		throw new RuntimeException('No url path found');
 	}
 
+	/** @param array<mixed> $data */
 	public function persist(
 		Database $db,
 		array $data,
@@ -102,6 +104,7 @@ class PathManager
 		return $path;
 	}
 
+	/** @param array<string, mixed> $paths */
 	private function createUrlPaths(Database $db, array $paths, int $editor, int $node): void
 	{
 		$alreadyPersisted = [];
@@ -132,6 +135,10 @@ class PathManager
 		}
 	}
 
+	/**
+	 * @param array<string, mixed> $currentPaths
+	 * @param array<string, mixed> $paths
+	 */
 	private function saveUrlPaths(
 		Database $db,
 		array $currentPaths,
