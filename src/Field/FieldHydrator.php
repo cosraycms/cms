@@ -163,7 +163,10 @@ class FieldHydrator
 		return $this->services;
 	}
 
-	/** @param array<string, mixed> $content */
+	/**
+	 * @param class-string<Field> $fieldType
+	 * @param array<string, mixed> $content
+	 */
 	protected function initField(
 		ReflectionProperty $property,
 		string $fieldType,

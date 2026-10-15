@@ -116,7 +116,7 @@ final class BlockPositions
 		// A list with a position was converted, or written since: its rows
 		// without one are placed by the readers, below the others.
 		if ($placed) {
-			return $rows;
+			return array_values($rows);
 		}
 
 		$spots = Placement::flow(array_values($spans), $columns);
@@ -125,7 +125,7 @@ final class BlockPositions
 			$rows[$index]['layout'] = [...$rows[$index]['layout'], ...$spots[$position]];
 		}
 
-		return $rows;
+		return array_values($rows);
 	}
 
 	private static function part(mixed $part): mixed

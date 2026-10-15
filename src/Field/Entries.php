@@ -121,12 +121,13 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		return $shape;
 	}
 
-	/** @param class-string ...$types */
 	public function allow(string ...$types): static
 	{
 		if ($types === []) {
 			throw new RuntimeException('Entries fields require at least one allowed entry type');
 		}
+
+		$allowed = [];
 
 		foreach ($types as $type) {
 			if (!class_exists($type)) {
@@ -138,11 +139,13 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 					"Entries field '{$this->name}' entry type '{$type}' must not extend Entries",
 				);
 			}
+
+			$allowed[] = $type;
 		}
 
 		$this->allowedEntryTypes = array_values(array_unique([
 			...$this->allowedEntryTypes,
-			...$types,
+			...$allowed,
 		]));
 
 		return $this;
@@ -183,6 +186,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		return $result;
 	}
 
+	/** @phpstan-assert-if-true class-string $type */
 	public function allows(string $type): bool
 	{
 		return in_array($type, $this->allowedEntryTypes, true);

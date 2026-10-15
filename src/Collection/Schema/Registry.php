@@ -127,7 +127,7 @@ class Registry
 				'/[A-Z]([A-Z](?![a-z]))*/',
 				'-$0',
 				$className,
-			)),
+			) ?? $className),
 			'-',
 		);
 	}

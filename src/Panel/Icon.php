@@ -18,10 +18,16 @@ final class Icon
 			return '';
 		}
 
+		$svg = file_get_contents($path);
+
+		if ($svg === false) {
+			return '';
+		}
+
 		return str_replace(
 			['<svg ', 'class="bi '],
 			['<svg aria-hidden="true" focusable="false" ', 'class="cms-icon bi '],
-			file_get_contents($path),
+			$svg,
 		);
 	}
 }

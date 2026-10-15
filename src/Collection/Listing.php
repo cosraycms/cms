@@ -81,7 +81,18 @@ final class Listing
 		return $this->cms->node->byUid($uid, published: null);
 	}
 
-	/** @return array<string, mixed> */
+	/**
+	 * @return array{
+	 *     total: int,
+	 *     offset: int,
+	 *     limit: int,
+	 *     q: string,
+	 *     sort: string,
+	 *     dir: string,
+	 *     arranged: bool,
+	 *     nodes: list<array<string, mixed>>,
+	 * }
+	 */
 	public function list(
 		int $offset = 0,
 		int $limit = 50,
@@ -208,7 +219,7 @@ final class Listing
 	}
 
 	/**
-	 * @param list<Wrapper> $nodes
+	 * @param array<Wrapper> $nodes
 	 * @param ?string $group the manual order the rows can be moved in, null when they can't
 	 * @return list<array<string, mixed>>
 	 */
@@ -264,7 +275,7 @@ final class Listing
 	}
 
 	/**
-	 * @param list<Wrapper> $nodes
+	 * @param array<Wrapper> $nodes
 	 * @return array<string, bool>
 	 */
 	private function hasChildrenMap(array $nodes): array

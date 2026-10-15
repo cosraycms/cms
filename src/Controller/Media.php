@@ -256,7 +256,7 @@ class Media
 	protected function sendFile(string $fileServer, string $file): Response
 	{
 		$response = Response::create($this->factory);
-		$response->header('Content-Type', mime_content_type($file));
+		$response->header('Content-Type', mime_content_type($file) ?: 'application/octet-stream');
 
 		switch ($fileServer) {
 			case 'apache':

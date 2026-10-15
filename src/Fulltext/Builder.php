@@ -70,13 +70,17 @@ final class Builder
 
 		$provider = isset($descriptor['embedded'])
 			? Definitions::for($class)->embed($descriptor['embedded'])->type
+			?? throw new RuntimeException("Unknown embedded title provider '{$descriptor['embedded']}' in {$class}")
 			: $class;
 		$attributes = new ReflectionMethod($provider, 'title')->getAttributes(Fulltext::class);
 
 		return $attributes === [] ? null : $attributes[0]->newInstance()->fulltextWeight;
 	}
 
-	/** @return array<string, array<string, mixed>> */
+	/**
+	 * @param class-string $class
+	 * @return array<string, array<string, mixed>>
+	 */
 	private function schema(string $class): array
 	{
 		if (isset($this->schemas[$class])) {
@@ -174,6 +178,7 @@ final class Builder
 	}
 
 	/**
+	 * @param class-string $class
 	 * @param array<mixed> $content
 	 * @param list<array{field: string, weight: string, text: string}> $parts
 	 */

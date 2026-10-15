@@ -66,9 +66,9 @@ class Option extends Field implements Capability\Selectable
 			return [];
 		}
 
-		return [Validators::in(array_map(
-			static fn(mixed $option): mixed => is_array($option) ? $option['value'] ?? '' : $option,
+		return [Validators::in(array_values(array_map(
+			static fn(mixed $option): string => (string) (is_array($option) ? $option['value'] ?? '' : $option),
 			$this->options,
-		))];
+		)))];
 	}
 }

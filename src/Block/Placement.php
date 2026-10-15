@@ -82,7 +82,7 @@ final class Placement
 			$layouts[$index] = $layouts[$index]->at($spots[$position]['col'], $bottom + $spots[$position]['row']);
 		}
 
-		return $layouts;
+		return array_values($layouts);
 	}
 
 	/**

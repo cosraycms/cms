@@ -149,7 +149,7 @@ class Auth
 		if ($hash) {
 			$user = $this->users->bySession($hash);
 
-			if ($user && !(strtotime($user->expires) < time())) {
+			if ($user && $user->expires !== null && strtotime($user->expires) >= time()) {
 				$this->startSession($user);
 				$this->rememberUser($user->id);
 
@@ -200,7 +200,7 @@ class Auth
 
 	protected function remember(int $userId): RememberDetails
 	{
-		$token = new Token($this->config->app->secret);
+		$token = new Token($this->secret());
 		$expires = time() + $this->config->auth->rememberLifetime;
 
 		$remembered = $this->users->remember(
@@ -282,9 +282,14 @@ class Auth
 		$token = $this->session->getAuthToken();
 
 		if ($token) {
-			return new Token($this->config->app->secret, $token)->hash();
+			return new Token($this->secret(), $token)->hash();
 		}
 
 		return null;
+	}
+
+	private function secret(): string
+	{
+		return $this->config->app->secret ?? throw new RuntimeException('Login tokens need app.secret (APP_SECRET)');
 	}
 }

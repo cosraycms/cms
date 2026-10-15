@@ -12,7 +12,7 @@ use Cosray\Finder\CompilesField;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
 
-abstract readonly class Expression
+abstract readonly class Expression implements Output
 {
 	use CompilesField;
 

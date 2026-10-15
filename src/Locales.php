@@ -128,12 +128,12 @@ class Locales implements Iterator, Countable, CorePlugin
 
 	public function current(): Locale
 	{
-		return current($this->locales);
+		return current($this->locales) ?: throw new RuntimeException('The locales iterator is past its end');
 	}
 
 	public function key(): string
 	{
-		return key($this->locales);
+		return key($this->locales) ?? throw new RuntimeException('The locales iterator is past its end');
 	}
 
 	public function next(): void

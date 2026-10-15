@@ -9,11 +9,11 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class Allows
 {
-	/** @var list<class-string> */
+	/** @var list<string> */
 	public array $types;
 
 	public function __construct(string ...$types)
 	{
-		$this->types = $types;
+		$this->types = array_values($types);
 	}
 }

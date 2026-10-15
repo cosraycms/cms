@@ -135,9 +135,10 @@ class Blocks extends Field implements
 		return $shape;
 	}
 
-	/** @param class-string<Block> ...$types */
 	public function allow(string ...$types): static
 	{
+		$allowed = [];
+
 		foreach ($types as $type) {
 			if (!class_exists($type)) {
 				throw new RuntimeException("Blocks field '{$this->name}' allows unknown block type '{$type}'");
@@ -148,11 +149,13 @@ class Blocks extends Field implements
 					"Blocks field '{$this->name}' block type '{$type}' must implement " . Block::class,
 				);
 			}
+
+			$allowed[] = $type;
 		}
 
 		$this->allowedBlockTypes = array_values(array_unique([
 			...$this->allowedBlockTypes,
-			...$types,
+			...$allowed,
 		]));
 
 		return $this;
@@ -172,7 +175,7 @@ class Blocks extends Field implements
 			}
 		}
 
-		$this->commonTypes = $types;
+		$this->commonTypes = array_values($types);
 
 		return $this;
 	}
@@ -208,6 +211,7 @@ class Blocks extends Field implements
 		return $common;
 	}
 
+	/** @phpstan-assert-if-true class-string<Block> $type */
 	public function allows(string $type): bool
 	{
 		return in_array($type, $this->allowedBlockTypes(), true);

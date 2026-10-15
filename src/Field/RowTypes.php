@@ -20,6 +20,7 @@ use Cosray\Value\ValueContext;
  */
 trait RowTypes
 {
+	/** @phpstan-assert-if-true class-string $type */
 	abstract public function allows(string $type): bool;
 
 	/** The word for one row in messages: 'entry' or 'block'. */
@@ -35,7 +36,6 @@ trait RowTypes
 	}
 
 	/**
-	 * @param class-string $type
 	 * @param array<string, mixed> $data
 	 * @return array<string, Field>
 	 */
@@ -130,7 +130,6 @@ trait RowTypes
 	}
 
 	/**
-	 * @param class-string $type
 	 * @param array<string, mixed> $value
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -204,7 +203,6 @@ trait RowTypes
 		}
 	}
 
-	/** @param class-string $type */
 	protected function rowShape(string $type): Shape
 	{
 		$shape = Shapes::create();

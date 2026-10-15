@@ -42,7 +42,7 @@ final class Dashboard
 	/** @param class-string<DashboardCard>|DashboardCard ...$cards */
 	public function replace(string|DashboardCard ...$cards): self
 	{
-		$this->cards = $this->validated($cards);
+		$this->cards = $this->validated(array_values($cards));
 
 		return $this;
 	}

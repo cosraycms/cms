@@ -115,7 +115,7 @@ class Session extends BaseSession
 		return substr(hash('sha256', $user->password), 0, 32);
 	}
 
-	/** @return array{expires: int, path: string, domain?: string, secure: bool, httponly: bool, samesite: string, partitioned?: bool} */
+	/** @return array{expires: int, path: string, domain?: string, secure: bool, httponly: bool, samesite: 'Lax'|'Strict'|'None', partitioned?: bool} */
 	private function rememberCookieOptions(int $expires): array
 	{
 		$options = [
@@ -123,7 +123,7 @@ class Session extends BaseSession
 			'path' => (string) ($this->options['cookie_path'] ?? '/'),
 			'secure' => (bool) ($this->options['cookie_secure'] ?? true),
 			'httponly' => (bool) ($this->options['cookie_httponly'] ?? true),
-			'samesite' => (string) ($this->options['cookie_samesite'] ?? 'Lax'),
+			'samesite' => self::sameSite($this->options['cookie_samesite'] ?? 'Lax'),
 		];
 
 		$domain = (string) ($this->options['cookie_domain'] ?? '');
@@ -136,5 +136,15 @@ class Session extends BaseSession
 		}
 
 		return $options;
+	}
+
+	/** @return 'Lax'|'Strict'|'None' */
+	private static function sameSite(mixed $value): string
+	{
+		return match (strtolower(is_string($value) ? $value : '')) {
+			'strict' => 'Strict',
+			'none' => 'None',
+			default => 'Lax',
+		};
 	}
 }

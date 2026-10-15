@@ -9,7 +9,7 @@ final class ContentLocales
 {
 	private const array SWITCHABLE = ['text', 'textarea', 'iframe', 'youtube', 'element'];
 
-	/** @param list<array<string, mixed>> $fields */
+	/** @param array<mixed> $fields */
 	public static function used(array $fields, int $locales): bool
 	{
 		if ($locales < 2) {

@@ -98,7 +98,7 @@ final class Handler
 		return $renderer;
 	}
 
-	/** @return non-empty-list<string> */
+	/** @return non-empty-list<non-empty-string> */
 	private function errorViews(): array
 	{
 		$views = $this->views ?? $this->config->error->views ?? $this->projectViewPath();
@@ -111,7 +111,7 @@ final class Handler
 
 			$path = $this->resolvePath($view);
 
-			if (is_dir($path)) {
+			if ($path !== '' && is_dir($path)) {
 				$dirs[] = $path;
 			}
 		}
@@ -135,6 +135,7 @@ final class Handler
 		return rtrim($this->config->path->root, '/') . '/' . ltrim($path, '/');
 	}
 
+	/** @return non-empty-string */
 	private function builtinViewPath(): string
 	{
 		return dirname(__DIR__, 4) . '/resources/error';

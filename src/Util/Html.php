@@ -83,7 +83,7 @@ class Html
 
 		// also remove empty lines
 		return $removeEmptyLines
-			? preg_replace("/(^[\r\n]*|[\r\n]+)[\\s\t]*[\r\n]+/", PHP_EOL, $result)
+			? preg_replace("/(^[\r\n]*|[\r\n]+)[\\s\t]*[\r\n]+/", PHP_EOL, $result) ?? $result
 			: $result;
 	}
 }

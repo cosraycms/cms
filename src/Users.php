@@ -10,6 +10,17 @@ use Cosray\References\Scanner;
 use Cosray\References\Sync;
 use Cosray\User\Types;
 
+/**
+ * @psalm-type UserValues = array{
+ *     username: ?string,
+ *     email: string,
+ *     name: ?string,
+ *     roles: list<string>,
+ *     active: bool,
+ *     panelLocale: ?string,
+ *     content: array<string, mixed>,
+ * }
+ */
 class Users
 {
 	public function __construct(
@@ -85,7 +96,7 @@ class Users
 	public function list(?string $type, string $search, int $limit, int $offset): array
 	{
 		return array_map(
-			$this->getUserOrNull(...),
+			$this->user(...),
 			$this->db->users->list([...$this->filter($type, $search), 'limit' => $limit, 'offset' => $offset])->all(),
 		);
 	}
@@ -103,17 +114,7 @@ class Users
 		);
 	}
 
-	/**
-	 * @param array{
-	 *     username: ?string,
-	 *     email: string,
-	 *     name: ?string,
-	 *     roles: list<string>,
-	 *     active: bool,
-	 *     panelLocale: ?string,
-	 *     content: array<string, mixed>,
-	 * } $values
-	 */
+	/** @param UserValues $values */
 	public function create(
 		string $type,
 		array $values,
@@ -136,7 +137,7 @@ class Users
 		return $this->find($uid) ?? throw new RuntimeException("User '{$uid}' was not created");
 	}
 
-	/** @param array{username: ?string, email: string, name: ?string, roles: list<string>, active: bool, panelLocale: ?string, content: array<string, mixed>} $values */
+	/** @param UserValues $values */
 	public function update(User $user, array $values, Actor $actor): void
 	{
 		$this->db->users->update([
@@ -283,10 +284,12 @@ class Users
 	/** @param array<string, mixed>|null $data */
 	protected function getUserOrNull(?array $data): ?User
 	{
-		if ($data) {
-			return new ($this->types->class($data['type'] ?? Types::DEFAULT))($data);
-		}
+		return $data ? $this->user($data) : null;
+	}
 
-		return null;
+	/** @param array<string, mixed> $data */
+	private function user(array $data): User
+	{
+		return new ($this->types->class($data['type'] ?? Types::DEFAULT))($data);
 	}
 }

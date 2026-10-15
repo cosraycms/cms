@@ -16,13 +16,13 @@ class Number
 	 */
 	public static function parseDecimal(string $value): string
 	{
-		$value = preg_replace('/\s/', '', $value);
+		$value = preg_replace('/\s/', '', $value) ?? $value;
 
 		if (preg_match('/^[0-9.,]+$/', $value)) {
 			$value = str_replace(',', '.', $value);
 
 			// remove all dots but the last one
-			return preg_replace('/\.(?=.*\.)/', '', $value);
+			return preg_replace('/\.(?=.*\.)/', '', $value) ?? $value;
 		}
 
 		throw new Exception('This is not a valid number');

@@ -20,6 +20,7 @@ final class PanelRenderers
 		$this->renderer = $app->container()->tag(Renderer::class)->get('panel');
 	}
 
+	/** @param non-empty-string $template */
 	public function get(string $template): PanelRenderer
 	{
 		return new PanelRenderer($this->renderer, $this->factory, $template);

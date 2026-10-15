@@ -47,9 +47,7 @@ class Types
 		return $this->schemaOf($class)->get($key, $default);
 	}
 
-	/**
-	 * @param class-string $class
-	 */
+	/** @phpstan-assert-if-true class-string $class */
 	public function isNode(string $class): bool
 	{
 		return class_exists($class);

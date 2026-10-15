@@ -35,7 +35,7 @@ class Block extends Value
 	protected readonly int $columns;
 
 	/**
-	 * @param ?string $type null for a split
+	 * @param class-string<BlockType>|null $type null for a split
 	 * @param ?Layout $area the split a block sits in, which bounds its layout
 	 * @param ?int $columns the grid's column count, the field's default without one
 	 */

@@ -293,7 +293,6 @@ final class Definitions
 		$fields[$field->name] = $field;
 	}
 
-	/** @return class-string|null */
 	private static function namedType(ReflectionProperty $property): ?string
 	{
 		$type = $property->getType();
@@ -305,13 +304,13 @@ final class Definitions
 		return $type->getName();
 	}
 
-	/** @param class-string $type */
+	/** @phpstan-assert-if-true class-string<Field> $type */
 	private static function isField(string $type): bool
 	{
 		return is_subclass_of($type, Field::class);
 	}
 
-	/** @param class-string $type */
+	/** @phpstan-assert-if-true class-string<Embedded> $type */
 	private static function isEmbedded(string $type): bool
 	{
 		return is_a($type, Embedded::class, true);

@@ -70,7 +70,7 @@ class Bootstrap implements CorePlugin
 	protected array $renderers = [];
 
 	protected readonly Navigation $navigation;
-	/** @var array<string, class-string> */
+	/** @var array<non-empty-string, class-string> */
 	protected array $nodes = [];
 
 	/** @var list<class-string<IconProvider>|IconProvider> */
@@ -83,10 +83,10 @@ class Bootstrap implements CorePlugin
 	/** @var array<string, true> */
 	protected array $pluginIds = [];
 
-	/** @var list<string> */
+	/** @var list<non-empty-string> */
 	protected array $pluginMigrations = [];
 
-	/** @var list<string> */
+	/** @var list<non-empty-string> */
 	protected array $pluginSql = [];
 
 	/** @var list<Closure> */
@@ -101,7 +101,7 @@ class Bootstrap implements CorePlugin
 		'view' => [],
 	];
 
-	/** @var list<array{pattern: string, endpoint: mixed, template: string, name: string}> */
+	/** @var list<array{pattern: string, endpoint: mixed, template: non-empty-string, name: string}> */
 	protected array $panelPages = [];
 
 	public function __construct(
@@ -252,11 +252,19 @@ class Bootstrap implements CorePlugin
 
 	public function addMigrations(string $dir): void
 	{
+		if ($dir === '') {
+			throw new RuntimeException('Plugin migration directory is empty');
+		}
+
 		$this->pluginMigrations[] = $dir;
 	}
 
 	public function addSql(string $dir): void
 	{
+		if ($dir === '') {
+			throw new RuntimeException('Plugin SQL directory is empty');
+		}
+
 		$this->pluginSql[] = $dir;
 	}
 
@@ -291,6 +299,10 @@ class Bootstrap implements CorePlugin
 		string $template,
 		string $name,
 	): void {
+		if ($template === '') {
+			throw new RuntimeException("Panel page '{$name}' has no template");
+		}
+
 		$this->panelPages[] = [
 			'pattern' => $pattern,
 			'endpoint' => $endpoint,
@@ -429,9 +441,14 @@ class Bootstrap implements CorePlugin
 		return $this->collectionSchemas;
 	}
 
+	/** @param class-string $class */
 	public function node(string $class): void
 	{
 		$handle = (string) $this->types->get($class, 'handle');
+
+		if ($handle === '') {
+			throw new RuntimeException('Node has no handle: ' . $class);
+		}
 
 		if (isset($this->nodes[$handle])) {
 			throw new RuntimeException('Duplicate node handle: ' . $handle);
@@ -482,7 +499,7 @@ class Bootstrap implements CorePlugin
 		);
 
 		return new Connection(
-			$config->dsn,
+			$config->dsn ?? throw new RuntimeException('No database configured: set DATABASE_URL or db.dsn'),
 			$sql,
 		)
 			->migrations($namespacedMigrations)
@@ -522,6 +539,7 @@ class Bootstrap implements CorePlugin
 		return $this->routes->catchallRoute();
 	}
 
+	/** @param non-empty-string $id */
 	public function renderer(string $id, string $class): Entry
 	{
 		if (is_a($class, Renderer::class, true)) {

@@ -25,7 +25,7 @@ final class Column
 	) {}
 
 	public static function new(
-		string|Closure $title,
+		string $title,
 		string|Closure $field,
 	): self {
 		return new self($title, $field);

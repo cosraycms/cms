@@ -13,7 +13,13 @@ use Cosray\Locales;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 
-/** Resolves runtime and materialized titles from one shared descriptor. */
+/**
+ * Resolves runtime and materialized titles from one shared descriptor.
+ *
+ * @psalm-type TitleDescriptor = array{kind: 'field', field: string}
+ *     |array{kind: 'dynamic', embedded?: string}
+ *     |array{kind: 'none'}
+ */
 class Resolver
 {
 	public const string KIND_DYNAMIC = 'dynamic';
@@ -26,7 +32,7 @@ class Resolver
 
 	/**
 	 * @param class-string $class
-	 * @return array{kind: string, field?: string, embedded?: string}
+	 * @return TitleDescriptor
 	 */
 	public function descriptor(string $class): array
 	{
@@ -109,7 +115,7 @@ class Resolver
 	}
 
 	/**
-	 * @param null|array{kind: string, field?: string, embedded?: string} $descriptor
+	 * @param ?TitleDescriptor $descriptor
 	 */
 	public function provider(object $node, ?array $descriptor = null): ?TitleContract
 	{

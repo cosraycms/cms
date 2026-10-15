@@ -27,6 +27,7 @@ use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
 use Psr\Log\LoggerInterface as Logger;
 
+/** @psalm-import-type UserValues from \Cosray\Users */
 final class Users extends Panel
 {
 	protected const string AREA = 'system';
@@ -117,7 +118,7 @@ final class Users extends Panel
 	{
 		[$values, $password, $errors] = $this->submitted($this->fields($context), $this->blank($type), null);
 
-		if ($errors !== []) {
+		if ($values === null || $errors !== []) {
 			return $this->rejected($errors);
 		}
 
@@ -171,7 +172,7 @@ final class Users extends Panel
 			$errors[] = ['message' => __('user:error-current-password'), 'path' => ['current_password']];
 		}
 
-		if ($errors !== []) {
+		if ($values === null || $errors !== []) {
 			return $this->rejected($errors);
 		}
 
@@ -254,7 +255,7 @@ final class Users extends Panel
 	/**
 	 * The submitted account and fields, validated against the stored user.
 	 *
-	 * @return array{array<string, mixed>, ?string, list<array{message: string, path: list<string|int>}>}
+	 * @return array{?UserValues, ?string, list<array{message: string, path: list<string|int>}>}
 	 */
 	private function submitted(Fields $fields, User $model, ?User $stored): array
 	{
@@ -262,7 +263,7 @@ final class Users extends Panel
 
 		// A submission cut short by max_input_vars would drop field content.
 		if (($form['_complete'] ?? null) !== '1') {
-			return [[], null, [['message' => __('editor:incomplete-form'), 'path' => []]]];
+			return [null, null, [['message' => __('editor:incomplete-form'), 'path' => []]]];
 		}
 
 		$text = static function (string $key) use ($form): ?string {

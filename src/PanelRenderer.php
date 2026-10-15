@@ -14,6 +14,7 @@ use Traversable;
 /** @psalm-api */
 final class PanelRenderer implements AfterRenderer
 {
+	/** @param non-empty-string $template */
 	public function __construct(
 		private Renderer $renderer,
 		private Factory $factory,

@@ -28,7 +28,7 @@ class Routes
 
 	/**
 	 * @param list<Closure(App): void> $pluginRoutes
-	 * @param list<array{pattern: string, endpoint: mixed, template: string, name: string}> $panelPages
+	 * @param list<array{pattern: string, endpoint: mixed, template: non-empty-string, name: string}> $panelPages
 	 */
 	public function __construct(
 		protected Config $config,

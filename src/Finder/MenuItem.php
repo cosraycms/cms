@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Finder;
 
 use Cosray\Context;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Generator;
 use Iterator;
@@ -34,12 +35,16 @@ class MenuItem implements Iterator
 
 	public function current(): MenuItem
 	{
-		return new MenuItem($this->context, current($this->children));
+		$item = current($this->children);
+
+		return $item !== false
+			? new MenuItem($this->context, $item)
+			: throw new RuntimeException('The menu item iterator is past its end');
 	}
 
 	public function key(): string
 	{
-		return key($this->children);
+		return key($this->children) ?? throw new RuntimeException('The menu item iterator is past its end');
 	}
 
 	public function next(): void

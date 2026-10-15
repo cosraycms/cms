@@ -114,7 +114,7 @@ final class QueryParser
 			}
 
 			if ($token->type === TokenType::RightBracket) {
-				if (!$insideList) {
+				if (!$insideList || $currentListPos === null) {
 					throw new ParserException('Invalid query: not inside list');
 				}
 

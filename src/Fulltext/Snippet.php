@@ -19,7 +19,7 @@ final readonly class Snippet
 			'/([\x01\x02])/',
 			$headline,
 			flags: PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY,
-		) as $part) {
+		) ?: [] as $part) {
 			if ($part === "\x01" || $part === "\x02") {
 				$match = $part === "\x01";
 			} else {

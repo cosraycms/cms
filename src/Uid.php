@@ -63,6 +63,7 @@ final class Uid
 		return $this->generateRejection($length);
 	}
 
+	/** @param positive-int $length */
 	private function generateFast(int $length): string
 	{
 		$bytes = random_bytes($length);
@@ -73,6 +74,7 @@ final class Uid
 		return $id;
 	}
 
+	/** @param positive-int $length */
 	private function generateRejection(int $length): string
 	{
 		// Expected discard rate: 1 - threshold/256. We fetch slightly more bytes than
@@ -84,7 +86,7 @@ final class Uid
 		$needed = $length;
 
 		while ($needed > 0) {
-			$bytes = random_bytes($batchSize);
+			$bytes = random_bytes(max(1, $batchSize));
 			$len = strlen($bytes);
 
 			for ($i = 0; $i < $len && $needed > 0; $i++) {

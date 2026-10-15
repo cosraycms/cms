@@ -189,7 +189,10 @@ class App implements RouteAdder
 		return $this;
 	}
 
-	/** @param class-string<Renderer> $class */
+	/**
+	 * @param non-empty-string $id
+	 * @param class-string<Renderer> $class
+	 */
 	public function renderer(string $id, string $class): Entry
 	{
 		return $this->bootstrap->renderer($id, $class);

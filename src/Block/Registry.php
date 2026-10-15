@@ -67,6 +67,8 @@ final class Registry
 		$instances = [];
 
 		return function (string $class) use ($owner, &$instances): Block {
+			assert(is_a($class, Block::class, true), 'Blocks are rendered from block classes');
+
 			return $instances[$class] ??= $this->create($class, $owner);
 		};
 	}

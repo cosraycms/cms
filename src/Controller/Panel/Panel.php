@@ -243,7 +243,7 @@ abstract class Panel
 		/** @var string $id */
 		foreach (is_array($ids) ? $ids : [] as $id) {
 			$title = \Locale::getDisplayLanguage($id, $id);
-			$titles[$id] = $title === $id ? $id : $title;
+			$titles[$id] = $title === false ? $id : $title;
 		}
 
 		return $titles;

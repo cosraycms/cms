@@ -61,9 +61,11 @@ final class Nodes implements Iterator
 			'hidden' => 'n.hidden',
 			'parent' => 'np.uid',
 			'routable' => $this->typeFlagExpression(
+				/** @param class-string $class */
 				fn(string $class): bool => (bool) $this->types->get($class, 'routable', false),
 			),
 			'renderable' => $this->typeFlagExpression(
+				/** @param class-string $class */
 				fn(string $class): bool => (bool) $this->types->get($class, 'renderable', false),
 			),
 			'type' => 't.handle',
@@ -143,7 +145,7 @@ final class Nodes implements Iterator
 
 	public function types(string ...$types): self
 	{
-		$this->whereTypes = $this->typesCondition($types);
+		$this->whereTypes = $this->typesCondition(array_values($types));
 
 		return $this;
 	}
@@ -479,6 +481,7 @@ final class Nodes implements Iterator
 		};
 	}
 
+	/** @param callable(class-string): bool $flag */
 	private function typeFlagExpression(callable $flag): string
 	{
 		$handles = [];

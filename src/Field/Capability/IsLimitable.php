@@ -46,7 +46,7 @@ trait IsLimitable
 		return $this->getLimitMax() !== 1;
 	}
 
-	/** @return string[] */
+	/** @return list<string> */
 	private function limitValidators(): array
 	{
 		$validators = [];

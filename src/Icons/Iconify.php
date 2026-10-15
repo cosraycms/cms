@@ -167,14 +167,19 @@ final class Iconify implements Provider
 			return null;
 		}
 
-		curl_setopt_array($handle, [
+		$options = [
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_CONNECTTIMEOUT => $timeout,
 			CURLOPT_TIMEOUT => $timeout,
 			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_USERAGENT => $userAgent,
 			CURLOPT_HTTPHEADER => ['Accept: image/svg+xml,text/plain;q=0.9,*/*;q=0.1'],
-		]);
+		];
+
+		if ($userAgent !== '') {
+			$options[CURLOPT_USERAGENT] = $userAgent;
+		}
+
+		curl_setopt_array($handle, $options);
 		$body = curl_exec($handle);
 		$status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 		$error = curl_errno($handle);

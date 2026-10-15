@@ -11,7 +11,7 @@ trait IsValidatable
 
 	public function addValidators(string ...$validators): static
 	{
-		$this->validators = array_merge($this->validators, $validators);
+		$this->validators = array_merge($this->validators, array_values($validators));
 
 		return $this;
 	}

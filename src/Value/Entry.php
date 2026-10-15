@@ -16,6 +16,7 @@ class Entry extends Value
 	/** @var array<string, Field\Field> */
 	protected array $fields = [];
 
+	/** @param class-string $type */
 	public function __construct(
 		Field\Owner $owner,
 		Field\Entries $field,

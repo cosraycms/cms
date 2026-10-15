@@ -70,12 +70,16 @@ class Menu implements Iterator
 
 	public function current(): MenuItem
 	{
-		return new MenuItem($this->context, current($this->items));
+		$item = current($this->items);
+
+		return $item !== false
+			? new MenuItem($this->context, $item)
+			: throw new RuntimeException('The menu iterator is past its end');
 	}
 
 	public function key(): string
 	{
-		return key($this->items);
+		return key($this->items) ?? throw new RuntimeException('The menu iterator is past its end');
 	}
 
 	public function next(): void

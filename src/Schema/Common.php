@@ -14,6 +14,6 @@ final readonly class Common
 
 	public function __construct(string ...$types)
 	{
-		$this->types = $types;
+		$this->types = array_values($types);
 	}
 }

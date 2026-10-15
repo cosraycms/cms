@@ -358,7 +358,7 @@ final class Menus extends Panel
 			throw new RuntimeException('The first item of a group has nothing to indent into');
 		}
 
-		$parent = $siblings[$index - 1];
+		$parent = $siblings[$index - 1] ?? throw new RuntimeException('The item has no sibling to indent into');
 
 		return [$parent, count($this->siblingIds($menu, $parent))];
 	}
