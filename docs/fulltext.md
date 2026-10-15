@@ -124,7 +124,7 @@ This is not an authorization API. Never let unrestricted request parameters choo
 
 ### Safe snippets
 
-`$node->meta->search` is a readonly `Cosray\Fulltext\Search` value with a float `score` and a `Cosray\Fulltext\Snippet`. It belongs to this fetched result, not the node's content or schema. Ordinary fetches have no search value; test with `isset($node->meta->search)`.
+`$node->meta->search` is a readonly `Cosray\Fulltext\Search` value with a float `score` and a `Cosray\Fulltext\Snippet`. It belongs to this fetched result, not the node's content or schema. Ordinary fetches have `null` there; test with `isset($node->meta->search)`.
 
 The snippet exposes:
 
