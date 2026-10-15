@@ -449,6 +449,33 @@ final class NodeFactoryTest extends TestCase
 		$this->assertSame('Property Attribute Title', $row['value']);
 	}
 
+	public function testEditorAndCreatorColumnsFallBackToEmail(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'column-email-1',
+			'editor_email' => 'editor@example.com',
+			'creator_email' => 'creator@example.com',
+		]);
+		$proxy = $this->factory->proxy($node, $this->context);
+
+		$this->assertSame('editor@example.com', Column::new('Editor', 'meta.editor')->get($proxy)['value']);
+		$this->assertSame('creator@example.com', Column::new('Creator', 'meta.creator')->get($proxy)['value']);
+	}
+
+	public function testEditorColumnPrefersEscapedNameOverUsername(): void
+	{
+		$node = $this->factory->create(PlainPage::class, $this->context, $this->cms, [
+			'uid' => 'column-name-1',
+			'editor_data' => ['name' => 'Ann & Co'],
+			'editor_username' => 'ann',
+			'editor_email' => 'ann@example.com',
+		]);
+
+		$row = Column::new('Editor', 'meta.editor')->get($this->factory->proxy($node, $this->context));
+
+		$this->assertSame('Ann &amp; Co', $row['value']);
+	}
+
 	// -- WeakMap data storage -------------------------------------------------
 
 	public function testDataForReturnsRawData(): void

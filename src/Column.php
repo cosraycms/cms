@@ -154,20 +154,16 @@ final class Column
 				return basename(str_replace('\\', '/', $inner::class));
 			case 'meta.editor':
 				$editorData = (array) $node->meta->get('editor_data', []);
+				$editor =
+					$editorData['name'] ?? $node->meta->get('editor_username') ?? $node->meta->get('editor_email');
 
-				return (
-					escape(
-						$editorData['name'] ?? $node->meta->get('editor_username'),
-					) ?? $node->meta->get('editor_email')
-				);
+				return escape((string) $editor);
 			case 'meta.creator':
 				$creatorData = (array) $node->meta->get('creator_data', []);
+				$creator =
+					$creatorData['name'] ?? $node->meta->get('creator_username') ?? $node->meta->get('creator_email');
 
-				return (
-					escape(
-						$creatorData['name'] ?? $node->meta->get('creator_username'),
-					) ?? $node->meta->get('creator_email')
-				);
+				return escape((string) $creator);
 			default:
 				$fieldObj = Factory::fieldFor($inner, $field);
 				$value = $fieldObj->value();
