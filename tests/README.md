@@ -9,11 +9,12 @@ Run from the repository root:
 ```bash
 composer test
 composer lint
+composer types
 composer coverage
 composer docs:lint
 ```
 
-`composer ci` runs PHP linting, coverage, and the license check; `composer ci:full` adds documentation linting. Coverage needs Xdebug and writes HTML to `.coverage/html/index.html`.
+`composer types` runs PHPStan with [phpstan.neon.dist](../phpstan.neon.dist). `composer ci` runs PHP linting, static analysis, coverage, and the license check; `composer ci:full` adds documentation linting. Coverage needs Xdebug and writes HTML to `.coverage/html/index.html`.
 
 For a narrower run:
 
