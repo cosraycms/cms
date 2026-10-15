@@ -57,10 +57,11 @@ class Image
 			return $this;
 		}
 
-		$this->cacheFile = $this->getCacheFilePath($name);
+		$cacheFile = $this->getCacheFilePath($name);
+		$this->cacheFile = $cacheFile;
 
-		if (!is_file($this->cacheFile) || filemtime($this->file) > filemtime($this->cacheFile)) {
-			$this->createCacheFile($size, $mode, $enlarge, $quality);
+		if (!is_file($cacheFile) || filemtime($this->file) > filemtime($cacheFile)) {
+			$this->createCacheFile($cacheFile, $size, $mode, $enlarge, $quality);
 		}
 
 		return $this;
@@ -72,6 +73,7 @@ class Image
 	}
 
 	protected function createCacheFile(
+		string $cacheFile,
 		Size $size,
 		ResizeMode $mode,
 		bool $enlarge,
@@ -80,12 +82,12 @@ class Image
 		// Concurrent first requests must never see a half-written file, so
 		// each one writes its own temporary file and moves it into place.
 		// Threads of one worker process share a PID, hence the random name.
-		$tmp = $this->cacheFile . '.tmp-' . bin2hex(random_bytes(6));
+		$tmp = $cacheFile . '.tmp-' . bin2hex(random_bytes(6));
 
 		try {
 			$this->writeRendition($tmp, $size, $mode, $enlarge, $quality);
 
-			if (!rename($tmp, $this->cacheFile)) {
+			if (!rename($tmp, $cacheFile)) {
 				throw new RuntimeException('Assets error: could not move rendition into place');
 			}
 		} catch (ImageResizeException $e) {
@@ -118,7 +120,7 @@ class Image
 			ResizeMode::Width => $this->get()->resizeToWidth($size->firstDimension, $enlarge),
 			ResizeMode::Fit => $this->get()->resizeToBestFit(
 				$size->firstDimension,
-				$size->secondDimension,
+				$this->secondDimension($size, $mode),
 				$enlarge,
 			),
 			ResizeMode::Crop => $this->get()->crop(
@@ -132,7 +134,7 @@ class Image
 			ResizeMode::ShortSide => $this->get()->resizeToShortSide($size->firstDimension, $enlarge),
 			ResizeMode::Resize => $this->get()->resize(
 				$size->firstDimension,
-				$size->secondDimension,
+				$this->secondDimension($size, $mode),
 				$enlarge,
 			),
 		};
@@ -158,5 +160,14 @@ class Image
 		}
 
 		return $cacheDir . '/' . $filenameBasename . '-' . $name . '.' . $filenameExtension;
+	}
+
+	private function secondDimension(Size $size, ResizeMode $mode): int
+	{
+		return (
+			$size->secondDimension ?? throw new RuntimeException(
+				"Assets error: resize mode {$mode->name} needs two dimensions",
+			)
+		);
 	}
 }

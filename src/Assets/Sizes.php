@@ -113,7 +113,7 @@ final class Sizes
 
 		return new SizeSpec(
 			name: $name,
-			mode: self::SINGLE[$modeKey] ?? self::PAIR[$modeKey],
+			mode: self::SINGLE[$modeKey] ?? self::PAIR[$modeKey] ?? throw $this->error($name, 'unknown mode'),
 			first: $first,
 			second: $second,
 			pos: $this->pos($name, $modeKey, $entry),

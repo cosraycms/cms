@@ -42,36 +42,37 @@ class Util
 			throw new RuntimeException('File does not exist: ' . $fileName);
 		}
 
-		// Open the file
 		$fileHandle = fopen($fileName, 'rb');
 
-		if (!$fileHandle) {
+		if ($fileHandle === false) {
 			throw new RuntimeException('File could not be opened: ' . $fileName);
 		}
 
-		// Read the first few bytes of the file
-		$header = fread($fileHandle, 3);
+		try {
+			if (fread($fileHandle, 3) !== 'GIF') {
+				return false;
+			}
 
-		// Close the file handle
-		fclose($fileHandle);
-
-		// Check if the file header matches the GIF magic number
-		if ($header === 'GIF') {
-			$fileHandle = fopen($fileName, 'rb');
+			rewind($fileHandle);
 			$frameCount = 0;
 
 			while (!feof($fileHandle)) {
-				$chunk = fread($fileHandle, 1024 * 100); // read 100kb at a time
+				$chunk = fread($fileHandle, 1024 * 100);
+
+				if ($chunk === false) {
+					return false;
+				}
+
 				$frameCount += substr_count($chunk, "\x00\x21\xF9\x04");
 
 				if ($frameCount > 1) {
-					fclose($fileHandle);
-
 					return true;
 				}
 			}
-		}
 
-		return false;
+			return false;
+		} finally {
+			fclose($fileHandle);
+		}
 	}
 }

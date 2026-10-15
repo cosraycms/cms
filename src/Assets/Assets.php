@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Assets;
 
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
 
 class Assets
@@ -16,7 +17,13 @@ class Assets
 	public function __construct(
 		protected readonly Config $config,
 	) {
-		$this->publicDir = rtrim(realpath($config->path->public), '\\/');
+		$publicDir = realpath($config->path->public);
+
+		if ($publicDir === false) {
+			throw new RuntimeException('Public directory does not exist: ' . $config->path->public);
+		}
+
+		$this->publicDir = rtrim($publicDir, '\\/');
 
 		$this->assetsDir = Path::inside($this->publicDir, $config->path->assets);
 		$this->cacheDir = Path::inside($this->publicDir, $config->path->cache);
