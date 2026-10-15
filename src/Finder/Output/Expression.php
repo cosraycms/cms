@@ -7,6 +7,7 @@ namespace Cosray\Finder\Output;
 use Celema\Quma\Database;
 use Cosray\Context;
 use Cosray\Exception\ParserException;
+use Cosray\Exception\ParserOutputException;
 use Cosray\Finder\CompilesField;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
@@ -58,6 +59,7 @@ abstract readonly class Expression
 			TokenType::Number => $token->lexeme,
 			TokenType::String => $db->quote($token->lexeme),
 			TokenType::List => $token->lexeme,
+			default => throw new ParserOutputException($token, 'Invalid operand.'),
 		};
 	}
 
@@ -80,6 +82,9 @@ abstract readonly class Expression
 
 	protected function translateKeyword(string $keyword): string
 	{
-		return match ($keyword) { 'now' => 'NOW()' };
+		return match ($keyword) {
+			'now' => 'NOW()',
+			default => throw new ParserException("Unknown keyword '{$keyword}'"),
+		};
 	}
 }

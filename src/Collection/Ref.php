@@ -25,7 +25,7 @@ final class Ref implements NavigationItem
 	) {}
 
 	#[Override]
-	public function slug(): ?string
+	public function slug(): string
 	{
 		return $this->handle;
 	}

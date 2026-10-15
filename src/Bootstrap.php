@@ -46,11 +46,11 @@ class Bootstrap implements CorePlugin
 {
 	public const string NODE_TAG = 'cosray.cms.node';
 
-	protected readonly Factory $factory;
-	protected readonly Container $container;
-	protected readonly Database $db;
-	protected readonly Connection $connection;
-	protected readonly Routes $routes;
+	protected Factory $factory;
+	protected Container $container;
+	protected Database $db;
+	protected Connection $connection;
+	protected Routes $routes;
 	protected readonly Types $types;
 	protected readonly FieldSchemas $fieldSchemas;
 	protected readonly FieldServices $fieldServices;

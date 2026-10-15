@@ -79,7 +79,7 @@ class Resolver
 		if ($descriptor['kind'] === self::KIND_FIELD) {
 			$field = Factory::fieldFor($node, $descriptor['field']);
 
-			return $field instanceof Text ? $field->value()->raw() ?? '' : '';
+			return $field instanceof Text ? $field->value()->raw() : '';
 		}
 
 		return $this->provider($node, $descriptor)?->title() ?? '';

@@ -64,8 +64,7 @@ final class Local implements Provider
 			return null;
 		}
 
-		$prefix = $matches['prefix'] ?? null;
-		$prefix = is_string($prefix) && $prefix !== '' ? strtolower($prefix) : null;
+		$prefix = $matches['prefix'] !== '' ? strtolower($matches['prefix']) : null;
 
 		return ['prefix' => $prefix, 'name' => $name];
 	}

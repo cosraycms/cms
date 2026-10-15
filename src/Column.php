@@ -17,7 +17,7 @@ final class Column
 	private bool|Closure $badge = false;
 	private bool|Closure $date = false;
 	public private(set) ?Sort $sort = null;
-	private string|Closure $color = '';
+	private string $color = '';
 
 	public function __construct(
 		public readonly string $title,
@@ -123,7 +123,7 @@ final class Column
 			'italic' => is_bool($this->italic) ? $this->italic : ($this->italic)($node),
 			'badge' => is_bool($this->badge) ? $this->badge : ($this->badge)($node),
 			'date' => is_bool($this->date) ? $this->date : ($this->date)($node),
-			'color' => is_string($this->color) ? $this->color : ($this->color)($node),
+			'color' => $this->color,
 		];
 	}
 

@@ -11,6 +11,7 @@ use Cosray\Block\Images;
 use Cosray\Block\RichText;
 use Cosray\Block\Video;
 use Cosray\Block\Youtube;
+use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 use Cosray\Uid;
 
@@ -294,6 +295,7 @@ final class BlockRowConverter
 			'video' => ['video' => $this->media(Field\Video::class, $value, $locale, 1)],
 			'youtube' => ['video' => $this->youtube($block, $locale)],
 			'iframe' => ['code' => $this->scalar(Field\Iframe::class, $value, $locale)],
+			default => throw new RuntimeException("No fields for legacy block type '{$type}'"),
 		};
 	}
 

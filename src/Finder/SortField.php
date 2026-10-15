@@ -9,6 +9,7 @@ use Cosray\Exception\ParserException;
 
 final readonly class SortField
 {
+	/** @param 'text'|'numeric'|'date'|'timestamptz'|'position' $type */
 	private function __construct(
 		public string $name,
 		public string $type,

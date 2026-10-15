@@ -508,6 +508,7 @@ final class Svg
 	 * explicit check keeps that guarantee visible. Inline markup drops all
 	 * comments anyway, see confine().
 	 */
+	/** @phpstan-assert-if-true Comment $node */
 	private static function isLegalComment(Node $node): bool
 	{
 		return $node instanceof Comment && str_starts_with($node->data, '!') && !str_contains($node->data, '--');
@@ -543,7 +544,7 @@ final class Svg
 		}
 
 		foreach (iterator_to_array(new XPath($document)->query('//comment()')) as $comment) {
-			$comment->remove();
+			$comment->parentNode?->removeChild($comment);
 		}
 
 		$id = $root->getAttributeNS(null, 'id');

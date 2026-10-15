@@ -5,3 +5,12 @@ parameters:
 	level: 5
 	paths:
 		- src
+	# Site developers pass config and attributes that only docblocks type; keep validating them.
+	treatPhpDocTypesAsCertain: false
+	# Their __get() serves registry-defined schema keys, node meta, and block fields.
+	universalObjectCratesClasses:
+		- Cosray\Collection\Schema
+		- Cosray\Node\Meta
+		- Cosray\Node\Schema
+		- Cosray\Node\Type
+		- Cosray\Value\Block

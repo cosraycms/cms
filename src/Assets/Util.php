@@ -60,7 +60,7 @@ class Util
 			$fileHandle = fopen($fileName, 'rb');
 			$frameCount = 0;
 
-			while (!feof($fileHandle) && $frameCount < 2) {
+			while (!feof($fileHandle)) {
 				$chunk = fread($fileHandle, 1024 * 100); // read 100kb at a time
 				$frameCount += substr_count($chunk, "\x00\x21\xF9\x04");
 

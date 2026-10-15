@@ -10,7 +10,6 @@ final class Password
 		private readonly \Cosray\Config $config,
 	) {}
 
-	/** @var positive-float */
 	public float $entropy {
 		get => $this->config->get('password.entropy');
 	}

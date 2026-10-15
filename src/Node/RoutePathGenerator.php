@@ -316,11 +316,9 @@ final class RoutePathGenerator
 			));
 		}
 
-		$field = $matches[2] ?? null;
-
 		return [
 			'depth' => $depth,
-			'field' => is_string($field) && $field !== '' ? $field : null,
+			'field' => $matches[2] ?? null,
 			'optional' => false,
 		];
 	}
@@ -351,7 +349,7 @@ final class RoutePathGenerator
 		$prefix = $depth > 1 ? 'ancestor' : 'parent';
 		$field = $matches[2] ?? null;
 
-		if (!is_string($field) || $field === '') {
+		if ($field === null) {
 			return "[{$prefix} path]";
 		}
 

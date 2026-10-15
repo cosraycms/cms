@@ -84,6 +84,7 @@ final class OrderCompiler
 					'date' => '^[0-9]{4}-[0-9]{2}-[0-9]{2}$',
 					'timestamptz'
 						=> '^[0-9]{4}-[0-9]{2}-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](Z|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$',
+					default => throw new ParserException("Unknown sort type '{$field->type}'"),
 				};
 				$expression =
 					"CAST(CASE WHEN {$expression} ~ '{$pattern}' THEN {$expression} "

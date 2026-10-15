@@ -71,11 +71,17 @@ class Factory
 		// The node's own view has to know the node, which does not exist yet.
 		// A lazy proxy closes over the variable and materializes on first use,
 		// by which time the node is built.
+		/** @var ?object $node */
 		$node = null;
 		$view = new ReflectionClass(View::class)->newLazyProxy(
 			// By reference: an arrow function would capture the null.
 			static function () use (&$node, $cms, $context, $types): View {
-				return new View($node, $cms, $context, $types);
+				return new View(
+					$node ?? throw new RuntimeException('A node view materialized before its node existed'),
+					$cms,
+					$context,
+					$types,
+				);
 			},
 		);
 

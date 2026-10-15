@@ -92,14 +92,10 @@ final class Handler
 				throw new RuntimeException('Error renderer must implement ' . ErrorRenderer::class);
 			}
 
-			$renderer = new $renderer();
+			return new $renderer();
 		}
 
-		if ($renderer instanceof ErrorRenderer) {
-			return $renderer;
-		}
-
-		throw new RuntimeException('Error renderer must implement ' . ErrorRenderer::class);
+		return $renderer;
 	}
 
 	/** @return non-empty-list<string> */

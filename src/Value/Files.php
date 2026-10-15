@@ -10,6 +10,7 @@ use Cosray\Field\Owner;
 use Cosray\Schema\TranslateMode;
 use Iterator;
 
+/** @property-read Field&Translatable $field */
 class Files extends Value implements Iterator
 {
 	protected int $pointer = 0;

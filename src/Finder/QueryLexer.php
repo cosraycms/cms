@@ -17,14 +17,15 @@ final class QueryLexer
 	/** @var list<Token> */
 	private array $tokens = [];
 
-	private readonly string $query;
-	private readonly array $source;
-	private readonly int $length;
+	private string $query;
+	private array $source;
+	private int $length;
 
 	public function __construct(
 		private readonly array $builtins = [],
 	) {}
 
+	/** @return list<Token> */
 	public function tokens(string $query): array
 	{
 		$this->query = $query;
@@ -293,6 +294,7 @@ final class QueryLexer
 		return $this->source[$this->current + 1];
 	}
 
+	/** @phpstan-impure */
 	private function matchNext(string $expected): bool
 	{
 		if ($this->atEnd()) {

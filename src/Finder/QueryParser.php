@@ -68,6 +68,8 @@ final class QueryParser
 					// As we consume operators together with operands, it would
 					// be invalid if we would find operators anywhere else.
 					TokenGroup::Operator => $this->error($token, 'Invalid position for an operator.'),
+					// Brackets become list operands before parsing.
+					TokenGroup::LeftBracket, TokenGroup::RightBracket => $this->error($token, 'Invalid bracket.'),
 				};
 
 				if ($this->parensBalance < 0) {
@@ -79,12 +81,16 @@ final class QueryParser
 		}
 
 		if ($this->parensBalance > 0) {
-			$this->error($token, 'Parse error. Unbalanced parenthesis');
+			$this->error($this->tokens[$this->length - 1], 'Parse error. Unbalanced parenthesis');
 		}
 
 		return $result;
 	}
 
+	/**
+	 * @param list<Token> $tokens
+	 * @return list<Token>
+	 */
 	private function materializeLists(array $tokens): array
 	{
 		$insideList = false;
@@ -251,6 +257,7 @@ final class QueryParser
 	}
 
 	/**
+	 * @phpstan-impure
 	 * @throws ParserException
 	 */
 	private function getLeftParen(#[\SensitiveParameter] Token $token): LeftParen
@@ -266,6 +273,7 @@ final class QueryParser
 	}
 
 	/**
+	 * @phpstan-impure
 	 * @throws ParserException
 	 */
 	private function getRightParen(#[\SensitiveParameter] Token $token): RightParen

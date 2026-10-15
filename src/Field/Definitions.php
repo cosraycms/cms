@@ -11,9 +11,11 @@ use Cosray\Schema\Fieldset;
 use Cosray\Schema\Label;
 use Cosray\Schema\Width;
 use ReflectionClass;
+use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionType;
+use ReflectionUnionType;
 
 final class Definitions
 {
@@ -323,6 +325,10 @@ final class Definitions
 
 		if ($type instanceof ReflectionNamedType) {
 			return !$type->isBuiltin() && self::isEmbedded($type->getName());
+		}
+
+		if (!$type instanceof ReflectionUnionType && !$type instanceof ReflectionIntersectionType) {
+			return false;
 		}
 
 		foreach ($type->getTypes() as $part) {

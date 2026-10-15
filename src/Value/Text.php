@@ -67,6 +67,6 @@ class Text extends Value
 
 	public function isset(): bool
 	{
-		return $this->raw() ?? null ? true : false;
+		return (bool) $this->raw();
 	}
 }
