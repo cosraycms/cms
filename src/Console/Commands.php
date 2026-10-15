@@ -91,7 +91,8 @@ final class Commands
 	 * 'frankenphp'` or `php run server frankenphp`, FrankenPHP, pinned to
 	 * `version` if given. Companions run alongside, like asset watchers:
 	 * each name with a command line or a list of arguments. `reload` serves
-	 * live reload on the port the server uses for it by default.
+	 * live reload on the port the server uses for it by default. Without a
+	 * port or watch patterns, the server's own defaults apply.
 	 *
 	 * The commands are only registered when the optional celema/server
 	 * package is installed, so production installs without dev
@@ -101,7 +102,7 @@ final class Commands
 	 * @param array<string, list<string>|string> $companions
 	 */
 	public function server(
-		int $port = 1983,
+		?int $port = null,
 		array|string|null $watch = null,
 		string $routePrefix = '',
 		string $server = 'builtin',
@@ -114,15 +115,18 @@ final class Commands
 
 		$args = [
 			'docroot' => $this->app->config->path->public,
-			'port' => $port,
 			'routePrefix' => $routePrefix,
 			'server' => $server,
 			'version' => $version,
 			'companions' => $companions,
 		];
-		$reload = ['port' => self::reloadPort($port), 'companions' => $companions];
+		$reload = ['companions' => $companions];
 
-		// Without patterns, the server's own default applies.
+		if ($port !== null) {
+			$args['port'] = $port;
+			$reload['port'] = self::reloadPort($port);
+		}
+
 		if ($watch !== null) {
 			$args['watch'] = $watch;
 			$reload['watch'] = $watch;

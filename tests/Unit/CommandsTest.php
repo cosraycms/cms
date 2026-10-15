@@ -17,6 +17,7 @@ use Cosray\Console\Runtime;
 use Cosray\Context;
 use Cosray\Locales;
 use Cosray\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 final class CommandsTest extends TestCase
 {
@@ -112,7 +113,18 @@ final class CommandsTest extends TestCase
 		$this->assertFalse($app->container()->get(Database::class)->connected());
 	}
 
-	public function testServerRegistersTheDevelopmentCommands(): void
+	/** @return array<string, array{array<string, mixed>}> */
+	public static function serverArguments(): array
+	{
+		return [
+			'configured' => [['port' => 8080, 'watch' => ['src/**/*.php'], 'routePrefix' => '/prefix']],
+			'server defaults' => [[]],
+		];
+	}
+
+	/** @param array<string, mixed> $arguments */
+	#[DataProvider('serverArguments')]
+	public function testServerRegistersTheDevelopmentCommands(array $arguments): void
 	{
 		$config = $this->config([
 			'db.dsn' => 'sqlite::memory:',
@@ -122,7 +134,7 @@ final class CommandsTest extends TestCase
 		$app->boot();
 		$buffer = new Buffer();
 		$commands = new Commands($app, new Io($buffer));
-		$commands->server(port: 8080, watch: ['src/**/*.php'], routePrefix: '/prefix');
+		$commands->server(...$arguments);
 		$commands->runner()->run(['run', 'commands']);
 
 		$names = explode("\n", $buffer->output());

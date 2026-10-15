@@ -16,7 +16,7 @@ Nothing is built. The application serves `src/`, `styles/`, `icons/` and the ven
 
 A module a Composer package ships, such as `@celema/verba` from `celema/verba`, is listed in `package.json#cosray.composerModules` instead of being vendored. PHP serves it from the installed package, and `tsc`, Vitest and `modules:check` read it from `../vendor`, so install the Composer dependencies before the panel checks.
 
-The panel includes the live reload script of `celema/server` like a site's layout does, so with `--watch` a panel page reloads when a file matching the application's watch patterns changes.
+The panel includes the live reload script of `celema/server` like a site's layout does, so a panel page reloads when a file matching the application's watch patterns changes, unless the server runs with `--no-watch`.
 
 Native field tests render the actual PHP views before exercising browser-side behavior, so they need PHP 8.5 and the repository's Composer dependencies. No database is needed. These tests use jsdom; browser-only features such as form-associated custom elements still need real-browser verification.
 
