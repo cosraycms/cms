@@ -8,7 +8,7 @@ interface Resizable
 {
 	public function width(int $width): static;
 
-	public function getWidth(): int;
+	public function getWidth(): ?int;
 
 	public function rowspan(int $rowspan): static;
 

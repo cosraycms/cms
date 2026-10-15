@@ -16,7 +16,7 @@ trait IsResizable
 		return $this;
 	}
 
-	public function getWidth(): int
+	public function getWidth(): ?int
 	{
 		return $this->width;
 	}
