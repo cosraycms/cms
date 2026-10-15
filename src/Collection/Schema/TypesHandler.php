@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Cosray\Collection\Schema;
 
 use Cosray\Exception\RuntimeException;
+use Cosray\Schema\Types;
 
 class TypesHandler extends Handler
 {
 	public function resolve(object $meta, string $class): array
 	{
+		assert($meta instanceof Types, 'The registry maps #[Types] to this handler');
+
 		$types = array_map(trim(...), $meta->types);
 
 		if ($types === [] || in_array('', $types, true)) {

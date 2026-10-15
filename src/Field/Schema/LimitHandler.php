@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Limitable;
 use Cosray\Field\Field;
+use Cosray\Schema\Limit;
 
 class LimitHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Limit, 'The registry maps #[Limit] to this handler');
+
 		if ($field instanceof Limitable) {
 			$field->limit($meta->max, $meta->min);
 

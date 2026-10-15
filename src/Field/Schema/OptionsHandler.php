@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Selectable;
 use Cosray\Field\Field;
+use Cosray\Schema\Options;
 
 class OptionsHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Options, 'The registry maps #[Options] to this handler');
+
 		if ($field instanceof Selectable) {
 			$field->options($meta->options);
 

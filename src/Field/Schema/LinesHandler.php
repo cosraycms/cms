@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Multiline;
 use Cosray\Field\Field;
+use Cosray\Schema\Lines;
 
 class LinesHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Lines, 'The registry maps #[Lines] to this handler');
+
 		if ($field instanceof Multiline) {
 			$field->lines($meta->lines);
 

@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 use Cosray\Field\Capability\Searchable;
+use Cosray\Schema\Fulltext;
 
 class FulltextHandler extends Handler
 {
 	public function apply(object $meta, Field\Field $field): void
 	{
+		assert($meta instanceof Fulltext, 'The registry maps #[Fulltext] to this handler');
+
 		if ($field instanceof Searchable && self::supports($field::class)) {
 			$field->fulltext($meta->fulltextWeight);
 

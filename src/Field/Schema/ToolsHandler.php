@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\ToolsAware;
 use Cosray\Field\Field;
+use Cosray\Schema\Tools;
 
 class ToolsHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Tools, 'The registry maps #[Tools] to this handler');
+
 		if ($field instanceof ToolsAware) {
 			$field->tools(...$meta->tools);
 

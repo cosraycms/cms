@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\SyntaxAware;
 use Cosray\Field\Field;
+use Cosray\Schema\Syntax;
 
 class SyntaxHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Syntax, 'The registry maps #[Syntax] to this handler');
+
 		if ($field instanceof SyntaxAware) {
 			$field->syntaxes($meta->syntaxes);
 

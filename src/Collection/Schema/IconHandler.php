@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\Collection\Schema;
 
+use Cosray\Schema\Icon;
+
 class IconHandler extends Handler
 {
 	public function resolve(object $meta, string $class): array
 	{
+		assert($meta instanceof Icon, 'The registry maps #[Icon] to this handler');
+
 		$id = trim((string) $meta->id);
 
 		if ($id === '') {

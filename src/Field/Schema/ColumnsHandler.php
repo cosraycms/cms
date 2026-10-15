@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Blocks\Resizable;
 use Cosray\Field\Field;
+use Cosray\Schema\Columns;
 
 class ColumnsHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Columns, 'The registry maps #[Columns] to this handler');
+
 		if ($field instanceof Resizable) {
 			$field->columns($meta->columns, $meta->min, $meta->responsive);
 

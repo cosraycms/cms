@@ -7,11 +7,14 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Placeholdable;
 use Cosray\Field\Field;
+use Cosray\Schema\Placeholder;
 
 class PlaceholderHandler extends Handler
 {
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Placeholder, 'The registry maps #[Placeholder] to this handler');
+
 		if ($field instanceof Placeholdable) {
 			$field->placeholder($meta->placeholder);
 
