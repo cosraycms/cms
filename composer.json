@@ -24,7 +24,7 @@
 		"celema/boiler": "^0.9",
 		"celema/console": "^0.6",
 		"celema/core": "^0.9",
-		"celema/quma": "^0.7",
+		"celema/quma": "^0.8",
 		"celema/session": "^0.4",
 		"celema/sire": "^0.5",
 		"celema/verba": "^0.6",
@@ -40,6 +40,7 @@
 		"filp/whoops": "^2.15",
 		"nyholm/psr7": "^1.8",
 		"nyholm/psr7-server": "^1.1",
+		"phpstan/phpstan": "2.3.1",
 		"phpunit/phpunit": "^13.0"
 	},
 	"suggest": {
@@ -66,6 +67,7 @@
 		],
 		"docs:format": "npx prettier@3.6.2 --write --config docs/.prettierrc README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
 		"docs:lint": "npx markdownlint-cli2@0.22.1 README.md 'docs/**/*.md' contract/README.md tests/README.md panel/README.md",
+		"types": "@php vendor/bin/phpstan analyse --no-progress",
 		"lint": [
 			"@php vendor/bin/mago fmt --check",
 			"@php vendor/bin/mago lint"
