@@ -37,6 +37,9 @@ jobs:
       - name: Run PHP lint checks
         run: composer lint
 
+      - name: Run static analysis
+        run: composer types
+
       - name: Run Markdown lint checks
         run: composer docs:lint
 

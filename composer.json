@@ -84,6 +84,7 @@
 		"license:lint": "if command -v reuse >/dev/null 2>&1; then reuse lint; else echo 'Skipping REUSE lint: reuse not installed'; fi",
 		"ci": [
 			"@lint",
+			"@types",
 			"@coverage",
 			"@license:lint"
 		],
