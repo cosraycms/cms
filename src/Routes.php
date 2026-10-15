@@ -22,7 +22,7 @@ use Cosray\Security\Policy;
 class Routes
 {
 	protected string $panelPath;
-	protected InitRequest $initRequestMiddlware;
+	protected InitRequest $initRequestMiddleware;
 	protected Session $session;
 	protected bool $frontendSession;
 
@@ -41,7 +41,7 @@ class Routes
 	) {
 		$this->panelPath = $config->panel->path;
 		$this->frontendSession = $config->session->enabled;
-		$this->initRequestMiddlware = new InitRequest($config);
+		$this->initRequestMiddleware = new InitRequest();
 		$this->session = new Session($this->config, $this->users);
 	}
 
@@ -89,7 +89,7 @@ class Routes
 			'/...slug',
 			[Node::class, 'catchall'],
 			'cms.catchall',
-		)->middleware($this->initRequestMiddlware);
+		)->middleware($this->initRequestMiddleware);
 
 		if ($this->frontendSession) {
 			$catchallRoute->middleware($this->session);
