@@ -35,8 +35,7 @@ final class Styleguide extends Panel
 
 	public function index(Controls $controls): array
 	{
-		$locales = $this->container->get(Locales::class);
-		assert($locales instanceof Locales, 'The locales service must be available');
+		$locales = $this->container->instance(Locales::class);
 
 		return $this->context([
 			// Addressable state: one section, one theme, one screenshot.

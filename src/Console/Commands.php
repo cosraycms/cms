@@ -208,10 +208,7 @@ final class Commands
 
 	private function conn(): Connection
 	{
-		$conn = $this->container()->get(Connection::class);
-		assert($conn instanceof Connection, 'The database connection must be available');
-
-		return $conn;
+		return $this->container()->instance(Connection::class);
 	}
 
 	private function container(): Container

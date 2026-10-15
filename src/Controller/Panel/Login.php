@@ -121,7 +121,7 @@ final class Login extends Panel
 
 	private function policy(): Policy
 	{
-		return $this->container->get(Policy::class);
+		return $this->container->instance(Policy::class);
 	}
 
 	private function sanitizedNext(string $next = ''): string

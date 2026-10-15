@@ -361,7 +361,7 @@ final class Users extends Panel
 
 	private function fields(Context $context): Fields
 	{
-		return new Fields($this->container->get(Services::class), $context);
+		return new Fields($this->container->instance(Services::class), $context);
 	}
 
 	private function editable(string $uid): User

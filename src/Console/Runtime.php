@@ -15,7 +15,6 @@ use Cosray\Config;
 use Cosray\Context;
 use Cosray\Locales;
 use Cosray\Node\Writer;
-use UnexpectedValueException;
 
 /**
  * Lazily resolved services for one console invocation.
@@ -34,8 +33,7 @@ final class Runtime
 		$this->container->add(Context::class, self::context(...))->scoped();
 		$this->container->add(Cms::class)->scoped();
 		$this->container->add(Writer::class)->scoped();
-		$context = $this->container->get(Context::class);
-		assert($context instanceof Context, 'The console context must be available');
+		$context = $this->container->instance(Context::class);
 		$this->previousTranslator = Verba::translator();
 		Verba::activate($context->translator());
 	}
@@ -52,13 +50,7 @@ final class Runtime
 	/** @param class-string $class */
 	public function get(string $class): object
 	{
-		$command = $this->container->get($class);
-
-		if (!is_object($command)) {
-			throw new UnexpectedValueException("Console runtime must resolve {$class} to an object");
-		}
-
-		return $command;
+		return $this->container->instance($class);
 	}
 
 	private static function context(

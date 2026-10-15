@@ -295,8 +295,7 @@ final class Collection extends Panel
 
 	private function types(): Types
 	{
-		$types = $this->container->get(Types::class);
-		assert($types instanceof Types, 'The node type service must be available');
+		$types = $this->container->instance(Types::class);
 
 		return $types;
 	}

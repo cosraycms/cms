@@ -276,10 +276,7 @@ abstract class Panel
 
 	private function extras(): Extras
 	{
-		$extras = $this->container->get(Extras::class);
-		assert($extras instanceof Extras, 'The panel extras service must be available');
-
-		return $extras;
+		return $this->container->instance(Extras::class);
 	}
 
 	private function logo(): ?string
@@ -302,10 +299,7 @@ abstract class Panel
 
 	protected function navigation(): Navigation
 	{
-		$navigation = $this->container->get(Navigation::class);
-		assert($navigation instanceof Navigation, 'The navigation service must be available');
-
-		return $navigation;
+		return $this->container->instance(Navigation::class);
 	}
 
 	/** The registered collection a panel URL names; unknown handles are not found. */
@@ -333,10 +327,8 @@ abstract class Panel
 		$collection = is_a($ref->class, Entries::class, true) || is_a($ref->class, Columns::class, true)
 			? $context->create($ref->class, [Cms::class => $cms])
 			: null;
-		$schemas = $this->container->get(Schemas::class);
-		assert($schemas instanceof Schemas, 'The collection schemas must be available');
-		$types = $this->container->get(Types::class);
-		assert($types instanceof Types, 'The node type service must be available');
+		$schemas = $this->container->instance(Schemas::class);
+		$types = $this->container->instance(Types::class);
 
 		return new Listing($schemas->of($ref->class), $cms, $types, $collection);
 	}
@@ -402,7 +394,7 @@ abstract class Panel
 		$user = $this->request->get('user', null);
 
 		return $this->container
-			->get(Policy::class)
+			->instance(Policy::class)
 			->permits($user instanceof User ? $user : null, $permission);
 	}
 
@@ -438,12 +430,7 @@ abstract class Panel
 			return '';
 		}
 
-		$service = $this->container->get(IconProvider::class);
-
-		if (!$service instanceof IconProvider) {
-			return '';
-		}
-
+		$service = $this->container->instance(IconProvider::class);
 		$args = $icon['args'] ?? [];
 
 		return $service->icon(trim($id), is_array($args) ? $args : []);

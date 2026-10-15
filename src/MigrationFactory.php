@@ -11,7 +11,6 @@ use Celema\Quma\Contract\MigrationFactory as QumaMigrationFactory;
 use Celema\Quma\Database;
 use Celema\Quma\Environment;
 use Override;
-use UnexpectedValueException;
 
 final class MigrationFactory implements QumaMigrationFactory
 {
@@ -28,12 +27,6 @@ final class MigrationFactory implements QumaMigrationFactory
 		$container->add(Connection::class, $env->conn)->value();
 		$container->add(Database::class, $env->db)->value();
 
-		$migration = $container->get($class);
-
-		if (!$migration instanceof Migration) {
-			throw new UnexpectedValueException("Migration factory must create instances of {$class}");
-		}
-
-		return $migration;
+		return $container->instance($class);
 	}
 }

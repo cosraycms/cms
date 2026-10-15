@@ -64,8 +64,7 @@ final class Menus extends Panel
 	{
 		$menus = $this->menuRows();
 
-		$locales = $this->container->get(Locales::class);
-		assert($locales instanceof Locales, 'The locales service must be available');
+		$locales = $this->container->instance(Locales::class);
 
 		return parent::context(array_merge([
 			'menuNav' => $menus,

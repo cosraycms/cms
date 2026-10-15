@@ -64,7 +64,7 @@ final class Assets extends Panel
 
 	public function vendor(Request $request, Factory $factory, string $plugin, string $slug): Response
 	{
-		$dir = $this->container->get(PluginAssets::class)->dir($plugin);
+		$dir = $this->container->instance(PluginAssets::class)->dir($plugin);
 
 		if ($dir === null) {
 			throw new HttpNotFound($request);
