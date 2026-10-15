@@ -25,19 +25,6 @@ use Cosray\Util\Path;
 
 class Node
 {
-	/**
-	 * Request method to the node interface that answers it, and the method
-	 * to call. A node implementing one takes over that request completely.
-	 *
-	 * @var array<string, array{class-string, string}>
-	 */
-	private const array HANDLERS = [
-		'GET' => [HttpGet::class, 'httpGet'],
-		'POST' => [HttpPost::class, 'httpPost'],
-		'PUT' => [HttpPut::class, 'httpPut'],
-		'DELETE' => [HttpDelete::class, 'httpDelete'],
-	];
-
 	public function __construct(
 		protected readonly Factory $factory,
 		protected readonly Types $types,
@@ -51,7 +38,7 @@ class Node
 		$prefix = $config->app->urlPrefix;
 
 		if ($prefix) {
-			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path);
+			$path = preg_replace('/^' . preg_quote($prefix, '/') . '/', '', $path) ?? $path;
 		}
 
 		$node = $cms->node->byPath($path === '' ? '/' : $path);
@@ -91,11 +78,18 @@ class Node
 	{
 		$request = $context->httpRequest();
 		$method = $request->method();
-		$handler = self::HANDLERS[$method] ?? null;
 		$inner = Wrapper::unwrap($node);
+		// A node implementing the request method's interface takes over that request completely.
+		$response = match (true) {
+			$method === 'GET' && $inner instanceof HttpGet => $inner->httpGet(),
+			$method === 'POST' && $inner instanceof HttpPost => $inner->httpPost(),
+			$method === 'PUT' && $inner instanceof HttpPut => $inner->httpPut(),
+			$method === 'DELETE' && $inner instanceof HttpDelete => $inner->httpDelete(),
+			default => null,
+		};
 
-		if ($handler !== null && $inner instanceof $handler[0]) {
-			return $inner->{$handler[1]}();
+		if ($response !== null) {
+			return $response;
 		}
 
 		if ($method !== 'GET') {
