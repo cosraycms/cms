@@ -13,7 +13,6 @@ final class Panel
 		private readonly \Cosray\Config $config,
 	) {}
 
-	/** @var non-empty-string */
 	public string $path {
 		get => $this->config->get('panel.path');
 	}
@@ -23,7 +22,6 @@ final class Panel
 		get => $this->themeCache ??= self::strings($this->config->get('panel.theme'));
 	}
 
-	/** @var ?non-empty-string */
 	public ?string $logo {
 		get => $this->config->get('panel.logo');
 	}
@@ -32,7 +30,7 @@ final class Panel
 		get => $this->config->get('panel.dashboard');
 	}
 
-	/** @var ?non-empty-string Default panel UI language; NULL negotiates from the browser. */
+	/** Default panel UI language; NULL negotiates from the browser. */
 	public ?string $locale {
 		get => $this->config->get('panel.locale');
 	}

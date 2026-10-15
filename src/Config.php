@@ -13,7 +13,7 @@ use Celema\Core\Exception\ValueError;
  */
 class Config
 {
-	/** @var BuiltinConfig&array<string, mixed> */
+	/** @var array<string, mixed> */
 	private readonly array $settings;
 
 	private readonly string $root;

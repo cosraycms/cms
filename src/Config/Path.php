@@ -10,27 +10,22 @@ final class Path
 		private readonly \Cosray\Config $config,
 	) {}
 
-	/** @var non-empty-string */
 	public string $root {
 		get => $this->config->get('path.root');
 	}
 
-	/** @var non-empty-string */
 	public string $public {
 		get => $this->config->get('path.public');
 	}
 
-	/** @var non-empty-string */
 	public string $assets {
 		get => $this->config->get('path.assets');
 	}
 
-	/** @var non-empty-string */
 	public string $cache {
 		get => $this->config->get('path.cache');
 	}
 
-	/** @var non-empty-string */
 	public string $views {
 		get => $this->config->get('path.views');
 	}

@@ -24,7 +24,6 @@ final class Database
 		private readonly \Cosray\Config $config,
 	) {}
 
-	/** @var ?non-empty-string */
 	public ?string $dsn {
 		get => $this->config->get('db.dsn');
 	}

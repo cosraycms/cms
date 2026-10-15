@@ -14,7 +14,6 @@ final class App
 		private readonly \Cosray\Config $config,
 	) {}
 
-	/** @var non-empty-string */
 	public string $name {
 		get => $this->config->get('app.name');
 	}
@@ -35,7 +34,6 @@ final class App
 		get => $this->timezoneCache ??= new DateTimeZone($this->config->get('app.timezone'));
 	}
 
-	/** @var ?non-empty-string */
 	public ?string $secret {
 		get => $this->config->get('app.secret');
 	}

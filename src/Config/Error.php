@@ -26,7 +26,7 @@ final class Error
 		get => $this->config->get('error.trusted');
 	}
 
-	/** @var null|non-empty-string|list<non-empty-string> */
+	/** @var null|string|list<string> */
 	public string|array|null $views {
 		get => $this->config->get('error.views');
 	}

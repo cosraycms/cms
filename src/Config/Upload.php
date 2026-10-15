@@ -35,7 +35,6 @@ final class Upload
 		get => $this->videoCache ??= $this->config->get('upload.mimetypes.video');
 	}
 
-	/** @var positive-int */
 	public int $maxSize {
 		get => $this->config->get('upload.maxsize');
 	}
