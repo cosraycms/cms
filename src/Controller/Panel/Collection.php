@@ -296,9 +296,7 @@ final class Collection extends Panel
 
 	private function types(): Types
 	{
-		$types = $this->container->instance(Types::class);
-
-		return $types;
+		return $this->container->instance(Types::class);
 	}
 
 	/** @return list<array{slug: string, name: string}> */

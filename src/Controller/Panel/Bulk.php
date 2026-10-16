@@ -368,8 +368,6 @@ final class Bulk extends Panel
 
 	private function types(): Types
 	{
-		$types = $this->container->instance(Types::class);
-
-		return $types;
+		return $this->container->instance(Types::class);
 	}
 }
