@@ -7,7 +7,7 @@ namespace Cosray\View\Boiler\Error;
 use Celema\Core\Error\Renderer as RendererInterface;
 
 /**
- * @psalm-import-type DirsInput from \Celema\Boiler\Engine
+ * @phpstan-import-type DirsInput from \Celema\Boiler\Engine
  */
 final class RendererFactory
 {

@@ -6,7 +6,7 @@ namespace Cosray\Config;
 
 use SessionHandlerInterface;
 
-/** @psalm-import-type SessionOptions from Types */
+/** @phpstan-import-type SessionOptions from Types */
 final class Session
 {
 	/** @var SessionOptions|null */

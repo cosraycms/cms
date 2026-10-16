@@ -16,7 +16,7 @@ use Cosray\Node\Types;
 /**
  * Resolves runtime and materialized titles from one shared descriptor.
  *
- * @psalm-type TitleDescriptor = array{kind: 'field', field: string}
+ * @phpstan-type TitleDescriptor = array{kind: 'field', field: string}
  *     |array{kind: 'dynamic', embedded?: string}
  *     |array{kind: 'none'}
  */

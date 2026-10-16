@@ -15,7 +15,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * @psalm-import-type DirsInput from \Celema\Boiler\Engine
+ * @phpstan-import-type DirsInput from \Celema\Boiler\Engine
  */
 final class Renderer implements RendererInterface
 {

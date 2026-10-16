@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Config;
 
-/** @psalm-import-type MimeMap from Types */
+/** @phpstan-import-type MimeMap from Types */
 final class Upload
 {
 	/** @var MimeMap|null */

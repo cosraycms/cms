@@ -10,11 +10,7 @@ use Cosray\Renderer as RendererInterface;
 use Cosray\Value\Value;
 use Override;
 
-/**
- * @psalm-api
- *
- * @psalm-import-type DirsInput from \Celema\Boiler\Engine
- */
+/** @phpstan-import-type DirsInput from \Celema\Boiler\Engine */
 class Renderer implements RendererInterface
 {
 	/** Cosray's classes whose string conversion is safe HTML, trusted by every Boiler renderer. */

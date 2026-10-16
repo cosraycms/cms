@@ -11,7 +11,7 @@ use Cosray\References\Sync;
 use Cosray\User\Types;
 
 /**
- * @psalm-type UserValues = array{
+ * @phpstan-type UserValues = array{
  *     username: ?string,
  *     email: string,
  *     name: ?string,

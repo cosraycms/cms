@@ -8,8 +8,8 @@ use Celema\Core\Exception\OutOfBoundsException;
 use Celema\Core\Exception\ValueError;
 
 /**
- * @psalm-import-type BuiltinConfig from \Cosray\Config\Types
- * @psalm-import-type BuiltinConfigInput from \Cosray\Config\Types
+ * @phpstan-import-type BuiltinConfig from \Cosray\Config\Types
+ * @phpstan-import-type BuiltinConfigInput from \Cosray\Config\Types
  */
 class Config
 {

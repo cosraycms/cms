@@ -27,7 +27,7 @@ use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
 use Psr\Log\LoggerInterface as Logger;
 
-/** @psalm-import-type UserValues from \Cosray\Users */
+/** @phpstan-import-type UserValues from \Cosray\Users */
 final class Users extends Panel
 {
 	protected const string AREA = 'system';

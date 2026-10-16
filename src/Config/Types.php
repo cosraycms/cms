@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Config;
 
 /**
- * @psalm-type SessionOptions = array{
+ * @phpstan-type SessionOptions = array{
  *     cookie_httponly: bool,
  *     cookie_samesite: string,
  *     cookie_secure: bool,
@@ -15,10 +15,10 @@ namespace Cosray\Config;
  *     ...<string, mixed>
  * }
  *
- * @psalm-type MimeMap = array<string, non-empty-list<string>>
- * @psalm-type DbPlaceholders = array<non-empty-string, array<non-empty-string, string>>
+ * @phpstan-type MimeMap = array<string, non-empty-list<string>>
+ * @phpstan-type DbPlaceholders = array<non-empty-string, array<non-empty-string, string>>
  *
- * @psalm-type BuiltinConfig = array{
+ * @phpstan-type BuiltinConfig = array{
  *     'app.name': string,
  *     'app.debug': bool,
  *     'app.env': string,
@@ -79,7 +79,7 @@ namespace Cosray\Config;
  *     'password.algorithm': int|string|null
  * }
  *
- * @psalm-type BuiltinConfigInput = array{
+ * @phpstan-type BuiltinConfigInput = array{
  *     'app.name'?: string,
  *     'app.debug'?: bool,
  *     'app.env'?: string,

@@ -11,7 +11,6 @@ use Override;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Traversable;
 
-/** @psalm-api */
 final class PanelRenderer implements AfterRenderer
 {
 	/** @param non-empty-string $template */

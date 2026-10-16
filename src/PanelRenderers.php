@@ -7,7 +7,6 @@ namespace Cosray;
 use Celema\Core\App;
 use Celema\Core\Factory\Factory;
 
-/** @psalm-api */
 final class PanelRenderers
 {
 	private Factory $factory;

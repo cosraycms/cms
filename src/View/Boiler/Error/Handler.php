@@ -12,7 +12,6 @@ use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Psr\Log\LoggerInterface as Logger;
 
-/** @psalm-api */
 final class Handler
 {
 	/** @var string|list<string>|null */

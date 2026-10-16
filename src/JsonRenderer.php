@@ -10,7 +10,6 @@ use Celema\Router\After;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Traversable;
 
-/** @psalm-api */
 class JsonRenderer implements AfterRenderer
 {
 	public function __construct(

@@ -52,12 +52,6 @@ class Text extends Value
 	/** @param list<string>|string|null $allowed */
 	public function strip(array|string|null $allowed = null): string
 	{
-		/**
-		 * As of now (early 2023), psalm does not support the
-		 * type array as arguments to strip_tags's $allowed_tags.
-		 *
-		 * @psalm-suppress PossiblyInvalidArgument
-		 */
 		return strip_tags((string) $this->raw(), $allowed);
 	}
 
