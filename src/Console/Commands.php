@@ -90,8 +90,9 @@ final class Commands
 	 * Registers the development server, `frankenphp:install`, and `reload`.
 	 *
 	 * The server runs the built-in PHP server or, with `server:
-	 * 'frankenphp'` or `php run server frankenphp`, FrankenPHP, pinned to
-	 * `version` if given. Companions run alongside, like asset watchers:
+	 * 'frankenphp'` or `php run server frankenphp`, FrankenPHP: the release
+	 * `frankenphp` pins, like `'1.12.7'`, or the executable it names.
+	 * Companions run alongside, like asset watchers:
 	 * each name with a command line or a list of arguments. `reload` serves
 	 * live reload on the port the server uses for it by default. Without a
 	 * port or watch patterns, the server's own defaults apply.
@@ -108,7 +109,7 @@ final class Commands
 		array|string|null $watch = null,
 		string $routePrefix = '',
 		string $server = 'builtin',
-		?string $version = null,
+		?string $frankenphp = null,
 		array $companions = [],
 	): self {
 		if (!class_exists(Server::class)) {
@@ -119,7 +120,7 @@ final class Commands
 			'docroot' => $this->app->config->path->public,
 			'routePrefix' => $routePrefix,
 			'server' => $server,
-			'version' => $version,
+			'frankenphp' => $frankenphp,
 			'companions' => $companions,
 		];
 		$reload = ['companions' => $companions];
