@@ -14,7 +14,6 @@ use Celema\Core\Plugin as CorePlugin;
 use Celema\Router\AddsRoutes;
 use Celema\Router\After;
 use Celema\Router\Before;
-use Celema\Router\Group;
 use Celema\Router\Route;
 use Celema\Router\RouteAdder;
 use Celema\Router\Router;
@@ -212,11 +211,6 @@ class App implements RouteAdder
 		return $this->core->addRoute($route);
 	}
 
-	public function addGroup(Group $group): void
-	{
-		$group->register($this->core);
-	}
-
 	#[Override]
 	public function group(
 		string $patternPrefix,
@@ -240,23 +234,11 @@ class App implements RouteAdder
 		return $this;
 	}
 
-	/** @return list<Before> */
-	public function beforeHandlers(): array
-	{
-		return $this->core->beforeHandlers();
-	}
-
 	public function after(After $afterHandler): self
 	{
 		$this->core->after($afterHandler);
 
 		return $this;
-	}
-
-	/** @return list<After> */
-	public function afterHandlers(): array
-	{
-		return $this->core->afterHandlers();
 	}
 
 	/** @return list<Middleware> */
