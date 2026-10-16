@@ -8,6 +8,7 @@ use Cosray\Context;
 use Cosray\Exception\ParserOutputException;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
+use Override;
 
 final readonly class Comparison extends Expression implements Output
 {
@@ -20,6 +21,7 @@ final readonly class Comparison extends Expression implements Output
 		private array $builtins,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		switch ($this->operator->type) {

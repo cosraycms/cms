@@ -7,6 +7,7 @@ namespace Cosray\Field;
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Text as TextValue;
+use Override;
 
 class Text extends Field implements Capability\Translatable, Capability\Placeholdable, Capability\Searchable
 {
@@ -14,16 +15,19 @@ class Text extends Field implements Capability\Translatable, Capability\Placehol
 	use Capability\IsTranslatable;
 	use Capability\IsPlaceholdable;
 
+	#[Override]
 	public function value(): TextValue
 	{
 		return new TextValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		return $this->getTranslatableStructure('text', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

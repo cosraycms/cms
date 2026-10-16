@@ -7,6 +7,7 @@ namespace Cosray\Richtext;
 use Cosray\Assets\Asset;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Override;
 
 /**
  * Production resolver backed by a field owner: assets from the
@@ -19,11 +20,13 @@ final class OwnerResolver implements Resolver
 		private readonly Owner $owner,
 	) {}
 
+	#[Override]
 	public function asset(string $uid): ?Asset
 	{
 		return $uid === '' ? null : $this->owner->assets()->get($uid);
 	}
 
+	#[Override]
 	public function nodePath(string $uid): ?string
 	{
 		$map = $this->owner->paths()->map($uid);
@@ -38,6 +41,7 @@ final class OwnerResolver implements Resolver
 	}
 
 	/** @param array<mixed> $map */
+	#[Override]
 	public function localize(array $map): mixed
 	{
 		$locale = $this->owner->locale();

@@ -9,21 +9,25 @@ use Cosray\Richtext\Envelope;
 use Cosray\Validation\RichtextDoc;
 use Cosray\Validation\Shapes;
 use Cosray\Value\RichText as RichTextValue;
+use Override;
 
 class RichText extends Text implements Capability\ToolsAware
 {
 	use Capability\IsToolsAware;
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::richtext();
 	}
 
+	#[Override]
 	public function value(): RichTextValue
 	{
 		return new RichTextValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		if (is_array($value) && array_key_exists('value', $value)) {
@@ -37,6 +41,7 @@ class RichText extends Text implements Capability\ToolsAware
 		return $result;
 	}
 
+	#[Override]
 	public function properties(): array
 	{
 		$richtext = $this->owner->config()->richtext;
@@ -53,6 +58,7 @@ class RichText extends Text implements Capability\ToolsAware
 	 * envelope (format, version, per-locale documents); legacy HTML
 	 * strings are rejected. See docs/richtext-format.md.
 	 */
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

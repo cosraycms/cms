@@ -9,6 +9,7 @@ use Celema\Quma\Database;
 use Cosray\Config;
 use Cosray\Contract\DashboardCard;
 use Cosray\Panel\AssetFacts;
+use Override;
 
 final readonly class Media implements DashboardCard
 {
@@ -18,6 +19,7 @@ final readonly class Media implements DashboardCard
 		private Request $request,
 	) {}
 
+	#[Override]
 	public function card(): Card
 	{
 		$row = $this->db->dashboard->media()->one();

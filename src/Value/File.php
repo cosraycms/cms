@@ -10,6 +10,7 @@ use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use Cosray\Schema\TranslateMode;
+use Override;
 
 /**
  * @property-read Field&Translatable $field
@@ -25,6 +26,7 @@ class File extends Value
 		parent::__construct($owner, $field, $context);
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return $this->publicPath();
@@ -71,11 +73,13 @@ class File extends Value
 	}
 
 	/** @return ?array<mixed> */
+	#[Override]
 	public function raw(): ?array
 	{
 		return $this->fileItem(0);
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->data;
@@ -86,6 +90,7 @@ class File extends Value
 		return count($this->files());
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->fileItem(0) !== null;

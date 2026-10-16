@@ -8,6 +8,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 use Generator;
 use IteratorAggregate;
+use Override;
 
 /**
  * @property-read Field\Entries $field
@@ -28,6 +29,7 @@ class Entries extends Value implements IteratorAggregate
 		$this->prepareEntries();
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		throw new RuntimeException(
@@ -36,18 +38,21 @@ class Entries extends Value implements IteratorAggregate
 	}
 
 	/** @return list<array{uid: ?string, type: string, fields: array<string, mixed>}> */
+	#[Override]
 	public function json(): array
 	{
 		return array_map(static fn(Entry $entry): array => $entry->json(), $this->entries);
 	}
 
 	/** @return list<array{uid: ?string, type: string, fields: array<string, mixed>}> */
+	#[Override]
 	public function raw(): array
 	{
 		return array_map(static fn(Entry $entry): array => $entry->raw(), $this->entries);
 	}
 
 	/** @return Generator<int, Entry> */
+	#[Override]
 	public function getIterator(): Generator
 	{
 		foreach ($this->entries as $entry) {
@@ -75,6 +80,7 @@ class Entries extends Value implements IteratorAggregate
 		return $this->entries[$index] ?? null;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return count($this->entries) > 0;

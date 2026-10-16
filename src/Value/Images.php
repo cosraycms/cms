@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Override;
+
 class Images extends Files
 {
+	#[Override]
 	public function __toString(): string
 	{
 		$out = '';
@@ -17,16 +20,19 @@ class Images extends Files
 		return $out;
 	}
 
+	#[Override]
 	public function current(): Image
 	{
 		return $this->get($this->pointer);
 	}
 
+	#[Override]
 	public function get(int $index): Image
 	{
 		return new Image($this->owner, $this->field, $this->context, $index);
 	}
 
+	#[Override]
 	public function first(): Image
 	{
 		return new Image($this->owner, $this->field, $this->context, 0);

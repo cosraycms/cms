@@ -11,6 +11,7 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
 use Cosray\Value\Images as ImagesValue;
+use Override;
 
 use function Cosray\escape;
 
@@ -22,6 +23,7 @@ final class Images implements Block
 	#[Label('block:images'), Required, Translate]
 	protected Field\Image $images;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		$name = (string) ($ctx->args['thumbSize'] ?? self::THUMB);

@@ -6,9 +6,11 @@ namespace Cosray\Node\Schema;
 
 use Cosray\Exception\RuntimeException;
 use Cosray\Schema\Title;
+use Override;
 
 class TitleHandler extends Handler
 {
+	#[Override]
 	public function resolve(object $meta, string $nodeClass): array
 	{
 		assert($meta instanceof Title, 'The registry maps #[Title] to this handler');

@@ -7,24 +7,29 @@ namespace Cosray\Field;
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Str;
+use Override;
 
 class Radio extends Field
 {
+	#[Override]
 	public function control(): Control
 	{
 		return Control::option(display: 'radio');
 	}
 
+	#[Override]
 	public function value(): Str
 	{
 		return new Str($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		return $this->getSimpleStructure('radio', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

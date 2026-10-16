@@ -6,9 +6,11 @@ namespace Cosray\Collection\Schema;
 
 use Cosray\Exception\RuntimeException;
 use Cosray\Schema\Types;
+use Override;
 
 class TypesHandler extends Handler
 {
+	#[Override]
 	public function resolve(object $meta, string $class): array
 	{
 		assert($meta instanceof Types, 'The registry maps #[Types] to this handler');

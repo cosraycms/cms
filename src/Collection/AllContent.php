@@ -10,6 +10,7 @@ use Cosray\Contract\Entries;
 use Cosray\Finder\Nodes;
 use Cosray\Schema\Label;
 use Cosray\Schema\Listing;
+use Override;
 
 /**
  * The built-in collection at the top of the content rail: every node of
@@ -18,11 +19,13 @@ use Cosray\Schema\Listing;
 #[Label('collection:all'), Listing(search: ['title'])]
 final class AllContent implements Entries, Columns
 {
+	#[Override]
 	public function entries(Nodes $nodes): Nodes
 	{
 		return $nodes;
 	}
 
+	#[Override]
 	public function columns(): array
 	{
 		return [

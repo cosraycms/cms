@@ -6,9 +6,11 @@ namespace Cosray\Field\Schema;
 
 use Cosray\Field\Field;
 use Cosray\Schema\Label;
+use Override;
 
 class LabelHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Label, 'The registry maps #[Label] to this handler');
@@ -16,6 +18,7 @@ class LabelHandler extends Handler
 		$field->label($meta->label);
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return ['label' => $field->getLabel()];

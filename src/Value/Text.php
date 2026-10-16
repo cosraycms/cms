@@ -7,6 +7,7 @@ namespace Cosray\Value;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Override;
 
 use function Cosray\escape;
 
@@ -25,11 +26,13 @@ class Text extends Value
 		parent::__construct($owner, $field, $context);
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return escape($this->raw());
 	}
 
+	#[Override]
 	public function raw(): string
 	{
 		if (isset($this->value)) {
@@ -55,11 +58,13 @@ class Text extends Value
 		return strip_tags((string) $this->raw(), $allowed);
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return (bool) $this->raw();

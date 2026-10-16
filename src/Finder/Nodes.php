@@ -16,6 +16,7 @@ use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
 use Generator;
 use Iterator;
+use Override;
 
 /** @implements Iterator<int, Wrapper> */
 final class Nodes implements Iterator
@@ -284,6 +285,7 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		if (!isset($this->result)) {
@@ -292,6 +294,7 @@ final class Nodes implements Iterator
 		$this->result->rewind();
 	}
 
+	#[Override]
 	public function current(): Wrapper
 	{
 		if (!isset($this->result)) {
@@ -321,16 +324,19 @@ final class Nodes implements Iterator
 		return $this->nodeFactory->proxy($node, $this->context, $this->cms);
 	}
 
+	#[Override]
 	public function key(): int
 	{
 		return $this->result->key();
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		$this->result->next();
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return $this->result->valid();

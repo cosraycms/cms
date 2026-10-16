@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Override;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 use Stringable;
@@ -21,6 +22,7 @@ use Throwable;
 final class ErrorLog extends AbstractLogger
 {
 	/** @param array<array-key, mixed> $context */
+	#[Override]
 	public function log(mixed $level, string|Stringable $message, array $context = []): void
 	{
 		if ($level === LogLevel::DEBUG || $level === LogLevel::INFO) {

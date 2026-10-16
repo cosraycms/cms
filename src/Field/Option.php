@@ -8,11 +8,13 @@ use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Validation\Validators;
 use Cosray\Value;
+use Override;
 
 class Option extends Field implements Capability\Selectable
 {
 	use Capability\IsSelectable;
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::option();
@@ -20,11 +22,13 @@ class Option extends Field implements Capability\Selectable
 
 	protected bool $hasLabel = false;
 
+	#[Override]
 	public function value(): Value\Option
 	{
 		return new Value\Option($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function properties(): array
 	{
 		$result = parent::properties();
@@ -33,11 +37,13 @@ class Option extends Field implements Capability\Selectable
 		return $result;
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		return $this->getSimpleStructure('option', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

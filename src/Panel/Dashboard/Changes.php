@@ -6,6 +6,7 @@ namespace Cosray\Panel\Dashboard;
 
 use Celema\Quma\Database;
 use Cosray\Contract\DashboardCard;
+use Override;
 
 final readonly class Changes implements DashboardCard
 {
@@ -13,6 +14,7 @@ final readonly class Changes implements DashboardCard
 		private Database $db,
 	) {}
 
+	#[Override]
 	public function card(): Card
 	{
 		$row = $this->db->dashboard->changes()->one();

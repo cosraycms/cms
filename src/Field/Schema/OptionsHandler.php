@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Selectable;
 use Cosray\Field\Field;
 use Cosray\Schema\Options;
+use Override;
 
 class OptionsHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Options, 'The registry maps #[Options] to this handler');
@@ -24,6 +26,7 @@ class OptionsHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Selectable::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Selectable) {

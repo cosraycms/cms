@@ -6,6 +6,7 @@ namespace Cosray\Value;
 
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Override;
 
 class Number extends Value
 {
@@ -24,6 +25,7 @@ class Number extends Value
 		}
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		if ($this->value === null) {
@@ -33,16 +35,19 @@ class Number extends Value
 		return (string) $this->value;
 	}
 
+	#[Override]
 	public function json(): ?int
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function raw(): ?int
 	{
 		return $this->value;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return isset($this->value) ? true : false;

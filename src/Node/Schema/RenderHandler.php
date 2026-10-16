@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Cosray\Node\Schema;
 
 use Cosray\Schema\Render;
+use Override;
 
 class RenderHandler extends Handler
 {
+	#[Override]
 	public function resolve(object $meta, string $nodeClass): array
 	{
 		assert($meta instanceof Render, 'The registry maps #[Render] to this handler');

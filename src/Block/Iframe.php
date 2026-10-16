@@ -10,6 +10,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Value\Block as BlockValue;
+use Override;
 
 /** The one block whose output is trusted editor input: embed code, raw. */
 #[Label('block:iframe')]
@@ -18,6 +19,7 @@ final class Iframe implements Block
 	#[Label('block:iframe'), Required, Placeholder('block:iframe-placeholder')]
 	protected Field\Iframe $code;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		return (string) $block->code;

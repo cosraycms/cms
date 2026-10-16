@@ -7,6 +7,7 @@ namespace Cosray\Value;
 use Cosray\Field\Checkbox;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Override;
 
 class Boolean extends Value
 {
@@ -25,21 +26,25 @@ class Boolean extends Value
 		}
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return (string) $this->value;
 	}
 
+	#[Override]
 	public function raw(): ?bool
 	{
 		return $this->value;
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->value;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->value !== null;

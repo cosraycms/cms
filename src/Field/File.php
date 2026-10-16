@@ -10,12 +10,14 @@ use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
+use Override;
 
 class File extends Field implements Capability\Limitable, Capability\Translatable
 {
 	use Capability\IsLimitable;
 	use Capability\IsTranslatable;
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::file();
@@ -27,6 +29,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
 	}
 
+	#[Override]
 	public function value(): Value\File|Value\Files
 	{
 		if ($this->allowsMultipleItems()) {
@@ -44,6 +47,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 		return new Value\File($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		if ($this->isAsymmetricallyTranslated()) {
@@ -53,6 +57,7 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 		return $this->getFileStructure('file', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$limitValidators = $this->limitValidators();

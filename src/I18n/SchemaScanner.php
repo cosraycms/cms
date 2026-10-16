@@ -17,6 +17,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\StateLabels;
+use Override;
 use ReflectionClass;
 
 /**
@@ -61,6 +62,7 @@ final class SchemaScanner implements Scanner
 	/**
 	 * @return list<Message>
 	 */
+	#[Override]
 	public function scan(): array
 	{
 		/** @var array<string, Message> $messages */
@@ -80,6 +82,7 @@ final class SchemaScanner implements Scanner
 	/**
 	 * @return list<string>
 	 */
+	#[Override]
 	public function warnings(): array
 	{
 		return [];

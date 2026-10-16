@@ -7,6 +7,7 @@ namespace Cosray\Middleware;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Cosray\Locales;
+use Override;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -18,6 +19,7 @@ class AddLocale implements Middleware
 		protected Locales $locales,
 	) {}
 
+	#[Override]
 	public function process(Request $request, Handler $handler): Response
 	{
 		$locale = $this->locales->negotiate($request);

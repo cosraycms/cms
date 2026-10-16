@@ -25,6 +25,7 @@ use Cosray\User\Fields;
 use Cosray\User\Types;
 use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
+use Override;
 use Psr\Log\LoggerInterface as Logger;
 
 /** @phpstan-import-type UserValues from \Cosray\Users */
@@ -54,6 +55,7 @@ final class Users extends Panel
 	 * @param array<string, mixed> $data
 	 * @return array<string, mixed>
 	 */
+	#[Override]
 	protected function context(array $data = []): array
 	{
 		$url = $this->url();

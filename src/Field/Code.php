@@ -7,21 +7,25 @@ namespace Cosray\Field;
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Code as CodeValue;
+use Override;
 
 class Code extends Text implements Capability\SyntaxAware
 {
 	use Capability\IsSyntaxAware;
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::code();
 	}
 
+	#[Override]
 	public function value(): CodeValue
 	{
 		return new CodeValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		$syntax = $this->valueContext->data['meta']['syntax'][self::NEUTRAL_LOCALE] ?? $this->getDefaultSyntax();
@@ -39,6 +43,7 @@ class Code extends Text implements Capability\SyntaxAware
 		return $result;
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
@@ -82,6 +87,7 @@ class Code extends Text implements Capability\SyntaxAware
 		return $shape;
 	}
 
+	#[Override]
 	public function properties(): array
 	{
 		$result = parent::properties();

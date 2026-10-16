@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Limitable;
 use Cosray\Field\Field;
 use Cosray\Schema\Limit;
+use Override;
 
 class LimitHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Limit, 'The registry maps #[Limit] to this handler');
@@ -24,6 +26,7 @@ class LimitHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Limitable::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Limitable) {

@@ -17,6 +17,7 @@ use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Blocks as BlocksValue;
+use Override;
 
 /**
  * A list of typed rows with a grid layout. Block types are classes
@@ -53,6 +54,7 @@ class Blocks extends Field implements
 	/** @var list<class-string<Block>> */
 	protected array $commonTypes = [];
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::blocks()
@@ -68,6 +70,7 @@ class Blocks extends Field implements
 	 * The field's own settings: the gap between blocks, as one value or
 	 * split by axis. The panel renders the split as a toggle.
 	 */
+	#[Override]
 	public function metaControl(): ?Control
 	{
 		return Control::group([
@@ -111,6 +114,7 @@ class Blocks extends Field implements
 	}
 
 	/** Gap, row gap and column gap as spacing tokens; other meta keys pass through. */
+	#[Override]
 	protected function metaShape(): Shape
 	{
 		$shape = parent::metaShape();
@@ -212,6 +216,7 @@ class Blocks extends Field implements
 	}
 
 	/** @phpstan-assert-if-true class-string<Block> $type */
+	#[Override]
 	public function allows(string $type): bool
 	{
 		return in_array($type, $this->allowedBlockTypes(), true);
@@ -264,6 +269,7 @@ class Blocks extends Field implements
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
 	}
 
+	#[Override]
 	public function value(): BlocksValue
 	{
 		return new BlocksValue($this->owner, $this, $this->valueContext);
@@ -287,6 +293,7 @@ class Blocks extends Field implements
 		return min($this->min, $columns);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		$value ??= $this->valueContext->data['value'] ?? $this->default ?? [];
@@ -299,6 +306,7 @@ class Blocks extends Field implements
 		];
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();
@@ -399,12 +407,14 @@ class Blocks extends Field implements
 		}
 	}
 
+	#[Override]
 	protected function rowKind(): string
 	{
 		return 'block';
 	}
 
 	/** Nested typed repeaters are rejected, as on entry types. */
+	#[Override]
 	protected function assertRowField(string $type, Definition $definition): void
 	{
 		foreach ([Entries::class => 'entries', self::class => 'blocks'] as $class => $kind) {

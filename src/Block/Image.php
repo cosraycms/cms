@@ -16,6 +16,7 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
 use Cosray\Value\Image as ImageValue;
+use Override;
 
 use function Cosray\escape;
 
@@ -28,6 +29,7 @@ final class Image implements Block
 	#[Label('block:image'), Required, Limit(1), Translate]
 	protected Field\Image $image;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		/** @var ImageValue $image */

@@ -9,6 +9,7 @@ use Cosray\Exception\ParserOutputException;
 use Cosray\Field\Field;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
+use Override;
 
 /**
  * Filters nodes by the nodes they point at.
@@ -31,6 +32,7 @@ final readonly class NodeReference extends Expression implements Output
 		private Context $context,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		[$referenceToken, $valueToken] = $this->normalize();

@@ -13,6 +13,7 @@ use Override;
 
 final class Section implements NavigationItem
 {
+	#[Override]
 	public readonly NavMeta $meta;
 
 	/** @var list<NavigationItem> */

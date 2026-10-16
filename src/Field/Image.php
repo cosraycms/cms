@@ -8,23 +8,27 @@ use Celema\Sire\Shape;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
+use Override;
 
 class Image extends File
 {
 	/** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
 	public const array RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'];
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::image();
 	}
 
 	/** @return list<TranslateMode> */
+	#[Override]
 	protected function supportedTranslateModes(): array
 	{
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
 	}
 
+	#[Override]
 	public function value(): Value\Images|Value\Image
 	{
 		if ($this->allowsMultipleItems()) {
@@ -42,6 +46,7 @@ class Image extends File
 		return new Value\Image($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		if ($this->isAsymmetricallyTranslated()) {
@@ -56,6 +61,7 @@ class Image extends File
 	 * tiles' aspect ratio and whether they crop to it. Other meta keys
 	 * pass through as before.
 	 */
+	#[Override]
 	protected function metaShape(): Shape
 	{
 		$shape = parent::metaShape();

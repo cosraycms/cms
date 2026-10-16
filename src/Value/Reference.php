@@ -6,6 +6,7 @@ namespace Cosray\Value;
 
 use Cosray\Field\Field;
 use Iterator;
+use Override;
 
 /**
  * The stored value of a Reference field: an ordered, language-neutral
@@ -21,6 +22,7 @@ class Reference extends Value implements Iterator
 	/** @var list<string>|null */
 	private ?array $cache = null;
 
+	#[Override]
 	public function __toString(): string
 	{
 		return $this->uid() ?? '';
@@ -59,41 +61,49 @@ class Reference extends Value implements Iterator
 	}
 
 	/** @return list<string> */
+	#[Override]
 	public function raw(): array
 	{
 		return $this->uids();
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->data;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->uids() !== [];
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		$this->pointer = 0;
 	}
 
+	#[Override]
 	public function current(): string
 	{
 		return $this->uids()[$this->pointer];
 	}
 
+	#[Override]
 	public function key(): int
 	{
 		return $this->pointer;
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		$this->pointer++;
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return isset($this->uids()[$this->pointer]);

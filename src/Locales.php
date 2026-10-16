@@ -11,6 +11,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\AddLocale;
 use Countable;
 use Iterator;
+use Override;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /** @implements Iterator<string, Locale> */
@@ -25,6 +26,7 @@ class Locales implements Iterator, Countable, CorePlugin
 	protected ?string $default = null;
 	protected ?Closure $negotiator = null;
 
+	#[Override]
 	public function load(App $app): void
 	{
 		$app->middleware(new AddLocale($this));
@@ -116,31 +118,37 @@ class Locales implements Iterator, Countable, CorePlugin
 	 * Counting must not move the cursor: callers ask how many locales there
 	 * are from inside a `foreach` over the same object.
 	 */
+	#[Override]
 	public function count(): int
 	{
 		return count($this->locales);
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		reset($this->locales);
 	}
 
+	#[Override]
 	public function current(): Locale
 	{
 		return current($this->locales) ?: throw new RuntimeException('The locales iterator is past its end');
 	}
 
+	#[Override]
 	public function key(): string
 	{
 		return key($this->locales) ?? throw new RuntimeException('The locales iterator is past its end');
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		next($this->locales);
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return key($this->locales) !== null;

@@ -22,6 +22,7 @@ use Cosray\Locales;
 use Cosray\Menus as MenuWriter;
 use Cosray\Middleware\Permission;
 use Cosray\Title\Sort;
+use Override;
 
 /**
  * The menus area: the rail lists the menus, and per menu the item tree
@@ -64,6 +65,7 @@ final class Menus extends Panel
 	 * @param array<string, mixed> $data
 	 * @return array<string, mixed>
 	 */
+	#[Override]
 	protected function context(array $data = []): array
 	{
 		$menus = $this->menuRows();

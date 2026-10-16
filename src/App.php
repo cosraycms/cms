@@ -23,6 +23,7 @@ use Cosray\Icons\Provider as IconProvider;
 use Cosray\Node\Types;
 use Cosray\Panel\Dashboard;
 use Cosray\View\Boiler\Error\Handler as ErrorHandler;
+use Override;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -205,6 +206,7 @@ class App implements RouteAdder
 		return $this;
 	}
 
+	#[Override]
 	public function addRoute(Route $route): Route
 	{
 		return $this->core->addRoute($route);
@@ -215,6 +217,7 @@ class App implements RouteAdder
 		$group->register($this->core);
 	}
 
+	#[Override]
 	public function group(
 		string $patternPrefix,
 		Closure $createClosure,

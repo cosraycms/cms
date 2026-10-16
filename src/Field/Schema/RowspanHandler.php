@@ -6,9 +6,11 @@ namespace Cosray\Field\Schema;
 
 use Cosray\Field\Field;
 use Cosray\Schema\Rowspan;
+use Override;
 
 class RowspanHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Rowspan, 'The registry maps #[Rowspan] to this handler');
@@ -16,6 +18,7 @@ class RowspanHandler extends Handler
 		$field->rowspan($meta->rowspan);
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return ['rowspan' => $field->getRowspan()];

@@ -38,6 +38,7 @@ use Cosray\Plugin\Registrar;
 use Cosray\Security\Policy;
 use Cosray\User\Types as UserTypes;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
+use Override;
 use PDO;
 use Psr\Log\LoggerInterface as Logger;
 use ReflectionClass;
@@ -130,6 +131,7 @@ class Bootstrap implements CorePlugin
 		$this->userTypes = new UserTypes();
 	}
 
+	#[Override]
 	public function load(App $app): void
 	{
 		$this->factory = $app->factory();

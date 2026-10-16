@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
 use Cosray\Field\Field;
 use Cosray\Schema\Common;
+use Override;
 
 final class CommonHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		if ($field instanceof Blocks && $meta instanceof Common) {
@@ -22,6 +24,7 @@ final class CommonHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Blocks::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return [];

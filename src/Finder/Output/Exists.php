@@ -7,6 +7,7 @@ namespace Cosray\Finder\Output;
 use Cosray\Context;
 use Cosray\Exception\ParserOutputException;
 use Cosray\Finder\Input\Token;
+use Override;
 
 final readonly class Exists extends Expression implements Output
 {
@@ -16,6 +17,7 @@ final readonly class Exists extends Expression implements Output
 		private Context $context,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		if ($this->token->lexeme === '') {

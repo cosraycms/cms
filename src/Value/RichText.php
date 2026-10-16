@@ -9,9 +9,11 @@ use Cosray\Richtext\Envelope;
 use Cosray\Richtext\OwnerResolver;
 use Cosray\Richtext\Renderer;
 use Cosray\Util\Html as HtmlUtil;
+use Override;
 
 class RichText extends Text
 {
+	#[Override]
 	public function __toString(): string
 	{
 		return $this->raw();
@@ -39,6 +41,7 @@ class RichText extends Text
 	 * format envelope (unmigrated legacy HTML) render empty — the
 	 * HTML-to-JSON migration ships with the code that requires it.
 	 */
+	#[Override]
 	public function raw(): string
 	{
 		if (isset($this->value)) {

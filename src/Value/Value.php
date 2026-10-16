@@ -9,6 +9,7 @@ use Cosray\Field\Field;
 use Cosray\Field\Field as FieldBase;
 use Cosray\Field\Owner;
 use Cosray\Locale;
+use Override;
 
 abstract class Value
 {
@@ -46,6 +47,7 @@ abstract class Value
 	}
 
 	/** Safe HTML: Cosray's Boiler renderers print it without escaping. */
+	#[Override]
 	abstract public function __toString(): string;
 
 	abstract public function isset(): bool;

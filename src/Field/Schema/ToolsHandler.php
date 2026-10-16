@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\ToolsAware;
 use Cosray\Field\Field;
 use Cosray\Schema\Tools;
+use Override;
 
 class ToolsHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Tools, 'The registry maps #[Tools] to this handler');
@@ -24,6 +26,7 @@ class ToolsHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, ToolsAware::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		// The field emits the resolved list itself, so fields without the

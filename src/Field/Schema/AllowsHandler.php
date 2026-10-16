@@ -9,9 +9,11 @@ use Cosray\Field\Blocks;
 use Cosray\Field\Entries;
 use Cosray\Field\Field;
 use Cosray\Schema\Allows;
+use Override;
 
 class AllowsHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		if (($field instanceof Entries || $field instanceof Blocks) && $meta instanceof Allows) {
@@ -23,6 +25,7 @@ class AllowsHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Entries::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return [];

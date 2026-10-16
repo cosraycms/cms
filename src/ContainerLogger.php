@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray;
 
 use Celema\Container\Container;
+use Override;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface as Logger;
 use Stringable;
@@ -25,6 +26,7 @@ final class ContainerLogger extends AbstractLogger
 	) {}
 
 	/** @param array<string, mixed> $context */
+	#[Override]
 	public function log(mixed $level, string|Stringable $message, array $context = []): void
 	{
 		$logger = $this->container->has(Logger::class) ? $this->container->get(Logger::class) : null;

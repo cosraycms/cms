@@ -7,6 +7,7 @@ namespace Cosray\Finder\Output;
 use Cosray\Exception\ParserException;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
+use Override;
 
 class Operator implements Output
 {
@@ -15,6 +16,7 @@ class Operator implements Output
 		public Token $token,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		return match ($this->token->type) {

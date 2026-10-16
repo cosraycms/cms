@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Schema\Translate;
+use Override;
 
 class TranslateHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		/** @var Translate $meta */
@@ -29,6 +31,7 @@ class TranslateHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Translatable::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Translatable) {

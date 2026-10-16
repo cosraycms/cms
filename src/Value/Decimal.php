@@ -8,6 +8,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use NumberFormatter;
+use Override;
 
 class Decimal extends Value
 {
@@ -26,6 +27,7 @@ class Decimal extends Value
 		}
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		if ($this->value === null) {
@@ -35,11 +37,13 @@ class Decimal extends Value
 		return (string) $this->value;
 	}
 
+	#[Override]
 	public function raw(): ?float
 	{
 		return $this->value;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return isset($this->value) ? true : false;
@@ -73,6 +77,7 @@ class Decimal extends Value
 		return '';
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->value;

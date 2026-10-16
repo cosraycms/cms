@@ -14,6 +14,7 @@ use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Schema\Validate;
 use Cosray\Value\Block as BlockValue;
+use Override;
 
 #[Label('block:heading')]
 final class Heading implements Block
@@ -28,6 +29,7 @@ final class Heading implements Block
 	#[DefaultValue('2'), Validate('in:1,2,3,4,5,6')]
 	protected Field\Option $level;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		$level = max(1, min(6, (int) $block->level->raw() ?: self::DEFAULT_LEVEL));

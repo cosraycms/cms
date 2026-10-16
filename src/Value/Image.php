@@ -6,6 +6,7 @@ namespace Cosray\Value;
 
 use Cosray\Assets\SizeSpec;
 use Cosray\Markup;
+use Override;
 
 use function Cosray\escape;
 
@@ -13,6 +14,7 @@ class Image extends File
 {
 	protected ?SizeSpec $spec = null;
 
+	#[Override]
 	public function __toString(): string
 	{
 		return (string) $this->tag();
@@ -42,6 +44,7 @@ class Image extends File
 		return $new;
 	}
 
+	#[Override]
 	public function publicPath(): string
 	{
 		$asset = $this->asset($this->index);

@@ -9,6 +9,7 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Markup;
 use Iterator;
+use Override;
 
 /** @implements Iterator<string, MenuItem> */
 class Menu implements Iterator
@@ -63,11 +64,13 @@ class Menu implements Iterator
 		}
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		reset($this->items);
 	}
 
+	#[Override]
 	public function current(): MenuItem
 	{
 		$item = current($this->items);
@@ -77,16 +80,19 @@ class Menu implements Iterator
 			: throw new RuntimeException('The menu iterator is past its end');
 	}
 
+	#[Override]
 	public function key(): string
 	{
 		return key($this->items) ?? throw new RuntimeException('The menu iterator is past its end');
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		next($this->items);
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return key($this->items) !== null;

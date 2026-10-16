@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Override;
+
 use function Cosray\escape;
 
 class Youtube extends Value
 {
+	#[Override]
 	public function __toString(): string
 	{
 		$x = (float) ($this->meta('aspectRatioX', 16) ?: 16);
@@ -30,16 +33,19 @@ class Youtube extends Value
 		);
 	}
 
+	#[Override]
 	public function raw(): mixed
 	{
 		return $this->value();
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return is_string($this->raw()) && $this->raw() !== '';

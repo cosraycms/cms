@@ -9,6 +9,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Generator;
 use Iterator;
+use Override;
 
 /** @implements Iterator<string, MenuItem> */
 class MenuItem implements Iterator
@@ -28,11 +29,13 @@ class MenuItem implements Iterator
 		$this->children = $item['children'];
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		reset($this->children);
 	}
 
+	#[Override]
 	public function current(): MenuItem
 	{
 		$item = current($this->children);
@@ -42,16 +45,19 @@ class MenuItem implements Iterator
 			: throw new RuntimeException('The menu item iterator is past its end');
 	}
 
+	#[Override]
 	public function key(): string
 	{
 		return key($this->children) ?? throw new RuntimeException('The menu item iterator is past its end');
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		next($this->children);
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return key($this->children) !== null;

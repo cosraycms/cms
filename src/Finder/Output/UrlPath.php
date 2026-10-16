@@ -8,6 +8,7 @@ use Cosray\Context;
 use Cosray\Exception\ParserOutputException;
 use Cosray\Finder\Input\Token;
 use Cosray\Finder\Input\TokenType;
+use Override;
 
 final readonly class UrlPath extends Expression implements Output
 {
@@ -18,6 +19,7 @@ final readonly class UrlPath extends Expression implements Output
 		private Context $context,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		[$pathToken, $valueToken, $operator] = $this->normalize();

@@ -7,6 +7,7 @@ namespace Cosray\Field;
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Youtube as YoutubeValue;
+use Override;
 
 class Youtube extends Field implements Capability\Translatable, Capability\Limitable, Capability\Placeholdable
 {
@@ -17,11 +18,13 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 	/** A video id, not a URL: the value is spliced into the embed `src`. */
 	private const string ID_RULE = 'regex:/^[A-Za-z0-9_-]{1,64}$/';
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::youtube();
 	}
 
+	#[Override]
 	public function metaControl(): ?Control
 	{
 		return Control::group([
@@ -40,11 +43,13 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 		]);
 	}
 
+	#[Override]
 	public function value(): YoutubeValue
 	{
 		return new YoutubeValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		$result = $this->getTranslatableStructure('youtube', $value);
@@ -54,6 +59,7 @@ class Youtube extends Field implements Capability\Translatable, Capability\Limit
 		return $result;
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

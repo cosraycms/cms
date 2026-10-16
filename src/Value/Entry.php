@@ -7,6 +7,7 @@ namespace Cosray\Value;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field;
+use Override;
 
 /**
  * @property-read Field\Entries $field
@@ -28,6 +29,7 @@ class Entry extends Value
 		$this->initFields();
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		throw new RuntimeException(
@@ -36,6 +38,7 @@ class Entry extends Value
 	}
 
 	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} */
+	#[Override]
 	public function json(): array
 	{
 		return $this->fieldValues(static fn(Value $value): mixed => $value->json());
@@ -49,6 +52,7 @@ class Entry extends Value
 	}
 
 	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} */
+	#[Override]
 	public function raw(): array
 	{
 		return $this->fieldValues(static fn(Value $value): mixed => $value->raw());
@@ -76,11 +80,13 @@ class Entry extends Value
 		];
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return count($this->fields) > 0;
 	}
 
+	#[Override]
 	public function __get(string $name): mixed
 	{
 		if (isset($this->fields[$name])) {

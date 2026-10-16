@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Multiline;
 use Cosray\Field\Field;
 use Cosray\Schema\Lines;
+use Override;
 
 class LinesHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Lines, 'The registry maps #[Lines] to this handler');
@@ -24,6 +26,7 @@ class LinesHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Multiline::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Multiline) {

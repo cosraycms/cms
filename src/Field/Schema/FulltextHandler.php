@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field;
 use Cosray\Field\Capability\Searchable;
 use Cosray\Schema\Fulltext;
+use Override;
 
 class FulltextHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field\Field $field): void
 	{
 		assert($meta instanceof Fulltext, 'The registry maps #[Fulltext] to this handler');
@@ -44,6 +46,7 @@ class FulltextHandler extends Handler
 		);
 	}
 
+	#[Override]
 	public function properties(object $meta, Field\Field $field): array
 	{
 		return [];

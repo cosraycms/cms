@@ -8,6 +8,7 @@ use Celema\Sire\Shape;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
+use Override;
 
 /**
  * A reference to one or more other nodes, stored language-neutral as an
@@ -19,21 +20,25 @@ class Reference extends Field implements Capability\Limitable
 {
 	use Capability\IsLimitable;
 
+	#[Override]
 	public function control(): Control
 	{
 		return Control::reference();
 	}
 
+	#[Override]
 	public function value(): Value\Reference
 	{
 		return new Value\Reference($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		return $this->getFileStructure('reference', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

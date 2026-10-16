@@ -11,6 +11,7 @@ use Cosray\Contract\Block as BlockType;
 use Cosray\Exception\NoSuchProperty;
 use Cosray\Field;
 use Cosray\Markup;
+use Override;
 
 use function Cosray\escape;
 
@@ -78,6 +79,7 @@ class Block extends Value
 		}
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return (string) $this->render();
@@ -126,6 +128,7 @@ class Block extends Value
 	}
 
 	/** A block-level meta entry, such as `class` or `id`. */
+	#[Override]
 	public function meta(string $key, mixed $default = null): mixed
 	{
 		return parent::meta($key, $default);
@@ -140,22 +143,26 @@ class Block extends Value
 	}
 
 	/** @return array<string, mixed> */
+	#[Override]
 	public function json(): array
 	{
 		return $this->resolve(static fn(Value $value): mixed => $value->json());
 	}
 
 	/** @return array<string, mixed> */
+	#[Override]
 	public function raw(): array
 	{
 		return $this->resolve(static fn(Value $value): mixed => $value->raw());
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->type === null ? $this->blocks !== [] : count($this->fields) > 0;
 	}
 
+	#[Override]
 	public function __get(string $name): mixed
 	{
 		if (isset($this->fields[$name])) {

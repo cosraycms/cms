@@ -11,6 +11,7 @@ use Cosray\Schema\Limit;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
+use Override;
 
 #[Label('block:video')]
 final class Video implements Block
@@ -18,6 +19,7 @@ final class Video implements Block
 	#[Label('block:video'), Required, Limit(1), Translate]
 	protected Field\Video $video;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		$video = $block->video;

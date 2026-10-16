@@ -7,6 +7,7 @@ namespace Cosray;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Celema\Router\After;
+use Override;
 use Psr\Http\Message\ResponseInterface as PsrResponse;
 use Traversable;
 
@@ -16,6 +17,7 @@ class JsonRenderer implements AfterRenderer
 		protected Factory $factory,
 	) {}
 
+	#[Override]
 	public function handle(mixed $data): PsrResponse
 	{
 		if ($data instanceof PsrResponse) {
@@ -45,6 +47,7 @@ class JsonRenderer implements AfterRenderer
 		return $response;
 	}
 
+	#[Override]
 	public function replace(After $handler): bool
 	{
 		return is_a($handler, Renderer::class);

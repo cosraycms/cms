@@ -7,24 +7,29 @@ namespace Cosray\Field;
 use Celema\Sire\Shape;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Color as ColorValue;
+use Override;
 
 class Color extends Field
 {
+	#[Override]
 	public function control(): Control
 	{
 		return Control::color();
 	}
 
+	#[Override]
 	public function value(): ColorValue
 	{
 		return new ColorValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		return $this->getSimpleStructure('color', $value);
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

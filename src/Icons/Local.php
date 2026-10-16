@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Icons;
 
+use Override;
+
 use function Cosray\escape;
 
 final class Local implements Provider
@@ -18,6 +20,7 @@ final class Local implements Provider
 	}
 
 	/** @param array<array-key, mixed> $args */
+	#[Override]
 	public function icon(string $id, array $args = []): string
 	{
 		$parts = $this->split($id);

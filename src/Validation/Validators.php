@@ -53,6 +53,7 @@ final class Validators
 	private static function minItems(): Rule
 	{
 		return new class implements Rule, ValidatesEmpty {
+			#[Override]
 			public string $message {
 				get => __('validation:min-items');
 			}
@@ -72,6 +73,7 @@ final class Validators
 	private static function maxItems(): Rule
 	{
 		return new class implements Rule {
+			#[Override]
 			public string $message {
 				get => __('validation:max-items');
 			}
@@ -91,6 +93,7 @@ final class Validators
 	private static function color(): Rule
 	{
 		return new class implements Rule {
+			#[Override]
 			public string $message {
 				get => __('validation:color');
 			}
@@ -106,6 +109,7 @@ final class Validators
 	private static function rfc3339(): Rule
 	{
 		return new class implements Rule {
+			#[Override]
 			public string $message {
 				get => __('validation:rfc3339');
 			}
@@ -121,6 +125,7 @@ final class Validators
 	private static function timezone(): Rule
 	{
 		return new class implements Rule {
+			#[Override]
 			public string $message {
 				get => __('validation:timezone');
 			}

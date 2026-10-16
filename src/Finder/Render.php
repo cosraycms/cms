@@ -11,6 +11,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\View;
+use Override;
 
 class Render
 {
@@ -62,6 +63,7 @@ class Render
 		$this->node = $this->nodeFactory->create($class, $context, $cms, $data);
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return new View($this->node, $this->cms, $this->context, $this->types)

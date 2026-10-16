@@ -11,6 +11,7 @@ use Cosray\Field\Owner;
 use DateTimeImmutable;
 use DateTimeZone;
 use IntlDateFormatter;
+use Override;
 
 class DateTime extends Value
 {
@@ -39,16 +40,19 @@ class DateTime extends Value
 			?? throw new RuntimeException("Invalid date/time in field '{$this->fieldName}'");
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return $this->datetime === null ? '' : Codec::format($this->datetime);
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return isset($this->datetime) ? true : false;
 	}
 
+	#[Override]
 	public function raw(): ?DateTimeImmutable
 	{
 		return $this->datetime;
@@ -84,6 +88,7 @@ class DateTime extends Value
 		return '';
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->__toString();

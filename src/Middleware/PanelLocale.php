@@ -9,6 +9,7 @@ use Celema\Verba\Verba;
 use Cosray\Config;
 use Cosray\Locales;
 use Cosray\User;
+use Override;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -28,6 +29,7 @@ class PanelLocale implements Middleware
 		protected Config $config,
 	) {}
 
+	#[Override]
 	public function process(Request $request, Handler $handler): Response
 	{
 		$locales = $request->getAttribute('locales', null);

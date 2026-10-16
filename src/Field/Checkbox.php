@@ -8,12 +8,14 @@ use Celema\Sire\Shape;
 use Cosray\Schema\StateLabels;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Boolean;
+use Override;
 
 class Checkbox extends Field
 {
 	public bool $nullable = false;
 	public ?StateLabels $stateLabels = null;
 
+	#[Override]
 	public function control(): Control
 	{
 		$labels = [];
@@ -29,11 +31,13 @@ class Checkbox extends Field
 		return Control::checkbox(nullable: $this->nullable)->prop('labels', $labels);
 	}
 
+	#[Override]
 	public function value(): Boolean
 	{
 		return new Boolean($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		// A nullable field must be able to clear a configured default.
@@ -53,6 +57,7 @@ class Checkbox extends Field
 		];
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$shape = Shapes::create();

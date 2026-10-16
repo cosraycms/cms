@@ -20,6 +20,7 @@ final class Ref implements NavigationItem
 	 */
 	public function __construct(
 		public readonly string $class,
+		#[Override]
 		public readonly NavMeta $meta,
 		public readonly string $handle,
 	) {}

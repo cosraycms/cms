@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Finder\Output;
 
 use Cosray\Finder\Input\Token;
+use Override;
 
 class LeftParen implements Output
 {
@@ -13,6 +14,7 @@ class LeftParen implements Output
 		public Token $token,
 	) {}
 
+	#[Override]
 	public function get(): string
 	{
 		return '(';

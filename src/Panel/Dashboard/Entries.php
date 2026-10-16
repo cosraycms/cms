@@ -9,6 +9,7 @@ use Cosray\Collection\AllContent;
 use Cosray\Collection\Ref;
 use Cosray\Contract\DashboardCard;
 use Cosray\Navigation;
+use Override;
 
 final readonly class Entries implements DashboardCard
 {
@@ -17,6 +18,7 @@ final readonly class Entries implements DashboardCard
 		private Navigation $navigation,
 	) {}
 
+	#[Override]
 	public function card(): Card
 	{
 		$row = $this->db->dashboard->entries()->one();

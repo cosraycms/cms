@@ -13,6 +13,7 @@ use Override;
  */
 final class NavLink implements NavigationItem
 {
+	#[Override]
 	public readonly NavMeta $meta;
 
 	public function __construct(

@@ -12,6 +12,7 @@ use Cosray\Auth as CmsAuth;
 use Cosray\Config;
 use Cosray\Security\Policy;
 use Cosray\Validation;
+use Override;
 use Psr\Log\LoggerInterface as Logger;
 
 final class Login extends Panel
@@ -108,6 +109,7 @@ final class Login extends Panel
 	}
 
 	/** @return array<array-key, mixed> */
+	#[Override]
 	protected function formData(): array
 	{
 		$data = parent::formData();

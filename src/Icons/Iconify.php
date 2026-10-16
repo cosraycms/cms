@@ -9,6 +9,7 @@ use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
 use Cosray\Util\Svg;
+use Override;
 
 final class Iconify implements Provider
 {
@@ -25,6 +26,7 @@ final class Iconify implements Provider
 	}
 
 	/** @param array<array-key, mixed> $args */
+	#[Override]
 	public function icon(string $id, array $args = []): string
 	{
 		$parts = $this->split($id);

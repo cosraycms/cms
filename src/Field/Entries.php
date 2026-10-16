@@ -9,6 +9,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
 use Cosray\Value\Entries as EntriesValue;
+use Override;
 
 class Entries extends Field implements Capability\Limitable, Capability\Searchable
 {
@@ -19,6 +20,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 	/** @var list<class-string> */
 	protected array $allowedEntryTypes = [];
 
+	#[Override]
 	public function control(): Control
 	{
 		$this->requireAllowedEntryTypes();
@@ -39,6 +41,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		return $control;
 	}
 
+	#[Override]
 	public function value(): EntriesValue
 	{
 		$this->requireAllowedEntryTypes();
@@ -46,6 +49,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		return new EntriesValue($this->owner, $this, $this->valueContext);
 	}
 
+	#[Override]
 	public function structure(mixed $value = null): array
 	{
 		$this->requireAllowedEntryTypes();
@@ -87,6 +91,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		];
 	}
 
+	#[Override]
 	public function shape(): Shape
 	{
 		$this->requireAllowedEntryTypes();
@@ -178,6 +183,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 		return $this->rowFieldsFor($type, $data);
 	}
 
+	#[Override]
 	public function properties(): array
 	{
 		$result = parent::properties();
@@ -187,11 +193,13 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 	}
 
 	/** @phpstan-assert-if-true class-string $type */
+	#[Override]
 	public function allows(string $type): bool
 	{
 		return in_array($type, $this->allowedEntryTypes, true);
 	}
 
+	#[Override]
 	protected function rowKind(): string
 	{
 		return 'entry';
@@ -202,6 +210,7 @@ class Entries extends Field implements Capability\Limitable, Capability\Searchab
 	 * `[data-repeater]` base, so a repeater inside a row cannot be
 	 * renumbered yet.
 	 */
+	#[Override]
 	protected function assertRowField(string $type, Definition $definition): void
 	{
 		foreach ([self::class => 'entries', Blocks::class => 'blocks'] as $class => $kind) {

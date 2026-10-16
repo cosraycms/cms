@@ -6,9 +6,11 @@ namespace Cosray\Collection\Schema;
 
 use Cosray\CollectionListMeta;
 use Cosray\Schema\Listing;
+use Override;
 
 class ListingHandler extends Handler
 {
+	#[Override]
 	public function resolve(object $meta, string $class): array
 	{
 		assert($meta instanceof Listing, 'The registry maps #[Listing] to this handler');

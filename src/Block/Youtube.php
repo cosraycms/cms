@@ -10,6 +10,7 @@ use Cosray\Schema\Label;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Value\Block as BlockValue;
+use Override;
 
 #[Label('block:youtube')]
 final class Youtube implements Block
@@ -17,6 +18,7 @@ final class Youtube implements Block
 	#[Label('block:youtube'), Required, Placeholder('block:youtube-placeholder')]
 	protected Field\Youtube $video;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		$video = $block->video;

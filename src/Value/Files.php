@@ -9,6 +9,7 @@ use Cosray\Field\Field;
 use Cosray\Field\Owner;
 use Cosray\Schema\TranslateMode;
 use Iterator;
+use Override;
 
 /**
  * @property-read Field&Translatable $field
@@ -26,21 +27,25 @@ class Files extends Value implements Iterator
 		parent::__construct($owner, $field, $context);
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return 'Files: count(' . count($this->raw()) . ')';
 	}
 
+	#[Override]
 	public function rewind(): void
 	{
 		$this->pointer = 0;
 	}
 
+	#[Override]
 	public function current(): File
 	{
 		return $this->get($this->pointer);
 	}
 
+	#[Override]
 	public function key(): int
 	{
 		return $this->pointer;
@@ -51,11 +56,13 @@ class Files extends Value implements Iterator
 		return count($this->files());
 	}
 
+	#[Override]
 	public function next(): void
 	{
 		$this->pointer++;
 	}
 
+	#[Override]
 	public function valid(): bool
 	{
 		return $this->fileItem($this->pointer) !== null;
@@ -72,16 +79,19 @@ class Files extends Value implements Iterator
 	}
 
 	/** @return array<mixed> */
+	#[Override]
 	public function raw(): array
 	{
 		return $this->files();
 	}
 
+	#[Override]
 	public function json(): mixed
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->fileItem(0) !== null;

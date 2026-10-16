@@ -12,6 +12,7 @@ use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
+use Override;
 
 #[Label('block:richtext'), Handle('richtext')]
 final class RichText implements Block
@@ -19,6 +20,7 @@ final class RichText implements Block
 	#[Label('block:richtext'), Required, Translate, Placeholder('block:text-placeholder')]
 	protected Field\RichText $text;
 
+	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
 		return (string) $block->text;

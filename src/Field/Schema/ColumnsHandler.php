@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Blocks\Resizable;
 use Cosray\Field\Field;
 use Cosray\Schema\Columns;
+use Override;
 
 class ColumnsHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Columns, 'The registry maps #[Columns] to this handler');
@@ -24,6 +26,7 @@ class ColumnsHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Resizable::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Resizable) {

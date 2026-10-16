@@ -7,9 +7,11 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Checkbox;
 use Cosray\Field\Field;
+use Override;
 
 class NullableHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		if (!$field instanceof Checkbox) {
@@ -19,6 +21,7 @@ class NullableHandler extends Handler
 		$field->nullable = true;
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return [];

@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Checkbox;
 use Cosray\Field\Field;
 use Cosray\Schema\StateLabels;
+use Override;
 
 class StateLabelsHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		if (!$field instanceof Checkbox) {
@@ -21,6 +23,7 @@ class StateLabelsHandler extends Handler
 		$field->stateLabels = $meta;
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		return [];

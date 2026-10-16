@@ -14,6 +14,7 @@ use Cosray\Schema\Responsive;
 use Cosray\Schema\TranslateMode;
 use Generator;
 use IteratorAggregate;
+use Override;
 
 use function Cosray\escape;
 
@@ -33,12 +34,14 @@ class Blocks extends Value implements IteratorAggregate
 		$this->blocks = $this->rows($this->list());
 	}
 
+	#[Override]
 	public function __toString(): string
 	{
 		return (string) $this->render();
 	}
 
 	/** @return array{columns: int, blocks: list<array<string, mixed>>} */
+	#[Override]
 	public function json(): array
 	{
 		return [
@@ -48,6 +51,7 @@ class Blocks extends Value implements IteratorAggregate
 	}
 
 	/** @return array{columns: int, blocks: list<array<string, mixed>>} */
+	#[Override]
 	public function raw(): array
 	{
 		return [
@@ -57,6 +61,7 @@ class Blocks extends Value implements IteratorAggregate
 	}
 
 	/** @return Generator<int, Block> */
+	#[Override]
 	public function getIterator(): Generator
 	{
 		foreach ($this->blocks as $block) {
@@ -84,6 +89,7 @@ class Blocks extends Value implements IteratorAggregate
 		return $this->blocks[$index] ?? null;
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return count($this->blocks) > 0;

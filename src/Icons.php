@@ -7,6 +7,7 @@ namespace Cosray;
 use Celema\Container\Container;
 use Celema\Container\Resettable;
 use Cosray\Icons\Provider;
+use Override;
 
 /**
  * Looks up icons in the registered providers and caches the markup. The
@@ -30,6 +31,7 @@ final class Icons implements Provider, Resettable
 	) {}
 
 	/** @param array<array-key, mixed> $args */
+	#[Override]
 	public function icon(string $id, array $args = []): string
 	{
 		$id = trim($id);
@@ -64,6 +66,7 @@ final class Icons implements Provider, Resettable
 	}
 
 	/** Forgets the icons that were not found, at the end of every request. */
+	#[Override]
 	public function reset(): void
 	{
 		$this->missing = [];

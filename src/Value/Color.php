@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Override;
+
 class Color extends Value
 {
 	/**
@@ -11,21 +13,25 @@ class Color extends Value
 	 * in a style attribute or custom property where HTML escaping is not
 	 * enough; anything else stored reads as no colour.
 	 */
+	#[Override]
 	public function __toString(): string
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function raw(): string
 	{
 		return self::normalize($this->value()) ?? '';
 	}
 
+	#[Override]
 	public function json(): string
 	{
 		return $this->raw();
 	}
 
+	#[Override]
 	public function isset(): bool
 	{
 		return $this->raw() !== '';

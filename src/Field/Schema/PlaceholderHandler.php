@@ -8,9 +8,11 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Placeholdable;
 use Cosray\Field\Field;
 use Cosray\Schema\Placeholder;
+use Override;
 
 class PlaceholderHandler extends Handler
 {
+	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
 		assert($meta instanceof Placeholder, 'The registry maps #[Placeholder] to this handler');
@@ -24,6 +26,7 @@ class PlaceholderHandler extends Handler
 		throw new RuntimeException($this->capabilityErrorMessage($field, Placeholdable::class));
 	}
 
+	#[Override]
 	public function properties(object $meta, Field $field): array
 	{
 		if ($field instanceof Placeholdable) {

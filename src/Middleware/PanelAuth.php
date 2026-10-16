@@ -9,6 +9,7 @@ use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Security\Policy;
 use Cosray\Users;
+use Override;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface as Middleware;
@@ -23,6 +24,7 @@ class PanelAuth implements Middleware
 		private readonly Policy $policy,
 	) {}
 
+	#[Override]
 	public function process(Request $request, Handler $handler): Response
 	{
 		$session = $request->getAttribute('session', null);
