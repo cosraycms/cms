@@ -25,6 +25,7 @@
 		"celema/console": "^0.7",
 		"celema/core": "^0.9",
 		"celema/quma": "^0.8.1",
+		"celema/router": "^0.6",
 		"celema/session": "^0.4",
 		"celema/sire": "^0.5",
 		"celema/verba": "^0.6.1",
