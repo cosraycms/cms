@@ -8,6 +8,9 @@ parameters:
 	# Site developers pass config and attributes that only docblocks type; keep validating them.
 	treatPhpDocTypesAsCertain: false
 	checkMissingOverrideMethodAttribute: true
+	# Reports calls to other packages' @internal members, which PHPStan 2 checks only behind this bleedingEdge toggle.
+	featureToggles:
+		internalTag: true
 	# Their __get() serves registry-defined schema keys, node meta, and block fields.
 	universalObjectCratesClasses:
 		- Cosray\Collection\Schema
