@@ -121,10 +121,9 @@ final class Editor extends Panel
 		$store = $this->nodeStore($context, $cms);
 		$links = $this->origin()['links'];
 		$htmx = $this->request->hasHeader('HX-Request');
-		$toDraft = $this->savesAsDraft($nodeObj, $data, $form);
 
 		try {
-			if ($toDraft) {
+			if ($this->savesAsDraft($nodeObj, $data, $form)) {
 				$store->draft($nodeObj, $data, $context->locales(), $this->actor());
 			} else {
 				$store->publish($nodeObj, $data, $context->locales(), $this->actor());
@@ -152,14 +151,16 @@ final class Editor extends Panel
 			return Response::create($factory)->redirect($links->edit($node), 303);
 		}
 
+		$draft = $this->draftFacts($cms->node->working($node)?->meta->get('draft'));
+
 		return [
 			'saved' => true,
-			'message' => $toDraft ? __('editor:changes-saved') : __('editor:saved'),
+			'message' => $draft === null ? __('editor:saved') : __('editor:changes-saved'),
 			'errors' => [],
 			'published' => (bool) ($data['published'] ?? false),
 			'renderable' => (bool) ($data['type']['renderable'] ?? false),
 			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
-			'draft' => $this->draftFacts($cms->node->working($node)?->meta->get('draft')),
+			'draft' => $draft,
 		];
 	}
 

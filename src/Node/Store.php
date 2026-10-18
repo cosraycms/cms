@@ -111,6 +111,7 @@ class Store
 	/**
 	 * Saves the working copy of a published node. Content, handle and
 	 * paths wait for publish(); `hidden` is a live switch and applies now.
+	 * A working copy that equals the live node is dropped, not saved.
 	 *
 	 * @param array<string, mixed> $data
 	 * @return array{success: true, uid: string}
@@ -122,19 +123,21 @@ class Store
 		}
 
 		$data = $this->prepare($node, $data, $locales);
+		$paths = $this->submittedPaths($data);
 		// Refused now rather than when publish() applies the paths.
-		$this->pathManager->reserved->assertFree($this->submittedPaths($data));
+		$this->pathManager->reserved->assertFree($paths);
 		$nodeId = $this->nodeId($node);
 		$content = is_array($data['content'] ?? null) ? $data['content'] : [];
+		$handle = $this->resolveHandle($data);
 
-		$this->transaction(function () use ($node, $data, $actor, $nodeId, $content): void {
-			$this->drafts->save(
-				$nodeId,
-				$content,
-				['handle' => $data['handle'], 'paths' => $this->submittedPaths($data)],
-				$actor->id,
-			);
-			$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+		$this->transaction(function () use ($node, $data, $actor, $nodeId, $content, $handle, $paths): void {
+			if ($this->drafts->matchesLive($nodeId, $content, $handle, $paths)) {
+				$this->drafts->delete($nodeId);
+				$this->sync->remove('draft', $data['uid']);
+			} else {
+				$this->drafts->save($nodeId, $content, ['handle' => $handle, 'paths' => $paths], $actor->id);
+				$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+			}
 
 			if ($data['hidden'] !== (bool) Factory::meta($node, 'hidden')) {
 				$this->db->nodes->setHidden([

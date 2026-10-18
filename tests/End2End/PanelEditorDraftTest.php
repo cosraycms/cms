@@ -72,6 +72,37 @@ final class PanelEditorDraftTest extends End2EndTestCase
 		);
 	}
 
+	public function testASaveWithoutChangesLeavesNoWorkingCopy(): void
+	{
+		$this->createPage('draft-unchanged', 'Live', published: true);
+
+		$response = $this->save('draft-unchanged', [
+			'content' => ['title' => ['value' => ['en' => 'Live', 'de' => '']]],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertNull($this->draftRow('draft-unchanged'));
+		$this->assertHtmlNodeExists(
+			'//*[@id="editor-save-options"]//button[@name="publish"][contains(., "Save and publish")]',
+			$this->getHtmlResponse($response),
+		);
+	}
+
+	public function testSavingTheLiveStateAgainDropsTheWorkingCopy(): void
+	{
+		$this->createPage('draft-reverted', 'Live', published: true);
+		$this->save('draft-reverted', ['content' => ['title' => ['value' => ['en' => 'Changed']]]]);
+
+		$response = $this->save('draft-reverted', ['content' => ['title' => ['value' => ['en' => 'Live']]]]);
+
+		$this->assertResponseOk($response);
+		$this->assertNull($this->draftRow('draft-reverted'));
+		$this->assertSame('Live', $this->liveTitle('draft-reverted'));
+		$html = $this->getHtmlResponse($response);
+		$this->assertHtmlNodeExists('//*[@id="editor-changes" and @hidden]', $html);
+		$this->assertHtmlNodeMissing('//*[@id="editor-save-options"]//button[@form="node-editor-discard"]', $html);
+	}
+
 	public function testTheEditorShowsTheWorkingCopy(): void
 	{
 		$this->createPage('draft-shown', 'Live', published: true);

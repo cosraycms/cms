@@ -95,6 +95,72 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertSame('/drafted-path', $this->activePath('drafts-settings'));
 	}
 
+	public function testAWorkingCopyMatchingTheLiveNodeIsDropped(): void
+	{
+		$this->createPage('drafts-match', 'Live');
+		$live = $this->payload('drafts-match', 'Live') + ['handle' => 'live-handle', 'paths' => ['en' => '/live-path']];
+		$this->store->publish($this->node('drafts-match'), $live, $this->locales(), Actor::system());
+
+		$this->store->draft(
+			$this->node('drafts-match'),
+			['paths' => ['en' => '/live-path', 'de' => ' ']] + $live,
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame(0, $this->rows('drafts', 'drafts-match'));
+
+		$this->store->draft(
+			$this->node('drafts-match'),
+			['paths' => ['en' => '/moved']] + $live,
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame(1, $this->rows('drafts', 'drafts-match'));
+
+		$this->store->draft($this->node('drafts-match'), $live, $this->locales(), Actor::system());
+
+		$this->assertSame(0, $this->rows('drafts', 'drafts-match'));
+		$this->assertSame('discarded', $this->row('drafts_history', 'drafts-match')['outcome']);
+		$this->assertSame('/live-path', $this->activePath('drafts-match'));
+		$this->assertSame('live-handle', $this->handle('drafts-match'));
+	}
+
+	public function testEmptySlotsTheLiveNodeLacksMakeNoWorkingCopy(): void
+	{
+		$this->createPage('drafts-padded', 'Live');
+		$payload = $this->payload('drafts-padded', 'Live');
+		$payload['content']['title']['value']['de'] = '';
+
+		$this->store->draft($this->node('drafts-padded'), $payload, $this->locales(), Actor::system());
+
+		$this->assertSame(0, $this->rows('drafts', 'drafts-padded'));
+
+		$payload['content']['title']['value']['en'] = '';
+		$this->store->draft($this->node('drafts-padded'), $payload, $this->locales(), Actor::system());
+
+		$this->assertSame('', $this->draftTitle('drafts-padded'));
+	}
+
+	public function testAStoredNumberTheFormSendsBackAsTextIsNoChange(): void
+	{
+		$this->createTestNode([
+			'uid' => 'drafts-number',
+			'type' => $this->typeId,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['en' => 1041]]],
+		]);
+
+		$this->store->draft(
+			$this->node('drafts-number'),
+			$this->payload('drafts-number', '1041'),
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame(0, $this->rows('drafts', 'drafts-number'));
+	}
+
 	public function testDraftReferencesAreIndexedAndReplacedOnPublish(): void
 	{
 		$this->createTestNode(['uid' => 'drafts-target', 'type' => $this->typeId]);
