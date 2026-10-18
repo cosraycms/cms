@@ -54,6 +54,23 @@ final class PreviewTest extends End2EndTestCase
 		$this->assertStringContainsString('<h1>Not yet live</h1>', $this->getHtmlResponse($response));
 	}
 
+	public function testPreviewOpensForAPanelSessionWithoutFrontendSessions(): void
+	{
+		$this->createPage('preview-session', 'Seen from the panel', published: false);
+		$this->createTestUser([
+			'uid' => 'preview-session-user',
+			'username' => 'preview-session-user',
+		]);
+		$this->assertResponseStatus(303, $this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => 'preview-session-user', 'password' => 'password', 'next' => '/panel'],
+		]));
+
+		$response = $this->makeRequest('GET', '/preview/preview-session');
+
+		$this->assertResponseOk($response);
+		$this->assertStringContainsString('<h1>Seen from the panel</h1>', $this->getHtmlResponse($response));
+	}
+
 	public function testPreviewIsNotFoundForNodesWithoutATemplate(): void
 	{
 		$this->createTestNode([

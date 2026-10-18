@@ -52,8 +52,13 @@ class Routes
 			$app->post('/', [Node::class, 'catchall'], 'cms.index.post'),
 			$app->put('/', [Node::class, 'catchall'], 'cms.index.put'),
 			$app->delete('/', [Node::class, 'catchall'], 'cms.index.delete'),
-			$app->get('/preview/{uid:[A-Za-z0-9-_.]{1,64}}', [Node::class, 'preview'], 'cms.preview'),
 		];
+
+		$app->get(
+			'/preview/{uid:[A-Za-z0-9-_.]{1,64}}',
+			[Node::class, 'preview'],
+			'cms.preview',
+		)->middleware($this->session);
 
 		// Rendition fallback: the web server serves existing cache files
 		// natively; only misses reach PHP and get generated once.
