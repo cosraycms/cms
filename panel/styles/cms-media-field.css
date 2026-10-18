@@ -951,8 +951,6 @@
 	   where the browser can size a field to its content. */
 	& .cms-textarea {
 		min-height: var(--cms-control-height);
-		padding-block: calc((var(--cms-control-height) - 1.5rem - 2px) / 2);
-		line-height: 1.5rem;
 		resize: vertical;
 
 		@supports (field-sizing: content) {
