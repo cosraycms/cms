@@ -35,6 +35,22 @@ function submit(form: HTMLFormElement, submitter: HTMLElement | null): SubmitEve
 	return event;
 }
 
+function enter(target: HTMLElement | null, init: KeyboardEventInit = {}): KeyboardEvent {
+	if (!target) {
+		throw new Error('target missing');
+	}
+
+	const event = new KeyboardEvent('keydown', {
+		key: 'Enter',
+		bubbles: true,
+		cancelable: true,
+		...init,
+	});
+	target.dispatchEvent(event);
+
+	return event;
+}
+
 describe('submit guard', () => {
 	it('blocks a stray button defaulting to type=submit', () => {
 		const form = setup();
@@ -43,7 +59,7 @@ describe('submit guard', () => {
 		expect(event.defaultPrevented).toBe(true);
 	});
 
-	it('blocks a submit without a submitter (Enter-to-save)', () => {
+	it('blocks a submit without a submitter', () => {
 		const form = setup();
 		const event = submit(form, null);
 
@@ -62,6 +78,33 @@ describe('submit guard', () => {
 		const event = submit(form, document.getElementById('stray'));
 
 		expect(event.defaultPrevented).toBe(false);
+	});
+
+	it('stops Enter in a field, which would submit as the first action', () => {
+		const form = setup();
+		form.insertAdjacentHTML(
+			'beforeend',
+			'<input id="text" type="text"><input id="check" type="checkbox">',
+		);
+
+		expect(enter(document.getElementById('text')).defaultPrevented).toBe(true);
+		expect(enter(document.getElementById('check')).defaultPrevented).toBe(true);
+	});
+
+	it('leaves Enter alone where it does not submit the editor', () => {
+		const form = setup();
+		form.insertAdjacentHTML(
+			'beforeend',
+			'<textarea id="area"></textarea><input id="pick" type="file"><input id="ime" type="text">',
+		);
+		document.body.insertAdjacentHTML('beforeend', '<form><input id="other" type="text"></form>');
+
+		expect(enter(document.getElementById('area')).defaultPrevented).toBe(false);
+		expect(enter(document.getElementById('pick')).defaultPrevented).toBe(false);
+		expect(enter(document.getElementById('other')).defaultPrevented).toBe(false);
+		expect(enter(document.getElementById('ime'), { isComposing: true }).defaultPrevented).toBe(
+			false,
+		);
 	});
 
 	it('stops a blocked submit before bubble-phase handlers (htmx boost)', () => {
