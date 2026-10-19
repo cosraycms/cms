@@ -91,6 +91,14 @@ describe('submit guard', () => {
 		expect(enter(document.getElementById('check')).defaultPrevented).toBe(true);
 	});
 
+	it('stops Enter in a dialog that keeps its keys from bubbling', () => {
+		const form = setup();
+		form.insertAdjacentHTML('beforeend', '<dialog><input id="path" type="text"></dialog>');
+		form.querySelector('dialog')?.addEventListener('keydown', (event) => event.stopPropagation());
+
+		expect(enter(document.getElementById('path')).defaultPrevented).toBe(true);
+	});
+
 	it('leaves Enter alone where it does not submit the editor', () => {
 		const form = setup();
 		form.insertAdjacentHTML(

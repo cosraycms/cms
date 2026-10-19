@@ -36,7 +36,8 @@ function guard(event) {
 /**
  * Enter in a field submits through the form's default button, the first
  * explicit action in tree order, so the submit itself looks like a click
- * on that action and has to be stopped at the key.
+ * on that action and has to be stopped at the key. Captured, because
+ * dialogs inside the form keep their keys from bubbling.
  *
  * @param {KeyboardEvent} event
  */
@@ -55,10 +56,10 @@ function implicit(event) {
 /** @returns {() => void} */
 export function install() {
 	document.addEventListener('submit', guard, true);
-	document.addEventListener('keydown', implicit);
+	document.addEventListener('keydown', implicit, true);
 
 	return () => {
 		document.removeEventListener('submit', guard, true);
-		document.removeEventListener('keydown', implicit);
+		document.removeEventListener('keydown', implicit, true);
 	};
 }
