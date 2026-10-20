@@ -22,6 +22,31 @@ final class InactivePathRedirectTest extends End2EndTestCase
 
 	public function testInactivePathRedirectsToActivePath(): void
 	{
+		[$initialPath, $updatedPath] = $this->movedNode();
+
+		$response = $this->makeRequest('GET', $initialPath);
+
+		$this->assertResponseStatus(301, $response);
+		$this->assertResponseHeaderEquals('Location', $updatedPath, $response);
+		// The app keeps serving: the redirect is a response, not an exit.
+		$this->assertResponseStatus(404, $this->makeRequest('GET', '/test/never-existed-' . uniqid()));
+	}
+
+	public function testRedirectKeepsQueryString(): void
+	{
+		[$initialPath, $updatedPath] = $this->movedNode();
+
+		$response = $this->makeRequest('GET', $initialPath, [
+			'query' => ['mode' => 'year', 'year' => '2024'],
+		]);
+
+		$this->assertResponseStatus(301, $response);
+		$this->assertResponseHeaderEquals('Location', $updatedPath . '?mode=year&year=2024', $response);
+	}
+
+	/** @return array{string, string} the node's former path and its active one */
+	private function movedNode(): array
+	{
 		$this->authenticateAs('editor');
 
 		$typeHandle = 'inactive-path-page-' . uniqid();
@@ -88,11 +113,6 @@ final class InactivePathRedirectTest extends End2EndTestCase
 		)->one();
 		$this->assertSame($updatedPath, $activePathRow['path'] ?? null);
 
-		$response = $this->makeRequest('GET', $initialPath);
-
-		$this->assertResponseStatus(301, $response);
-		$this->assertResponseHeaderEquals('Location', $updatedPath, $response);
-		// The app keeps serving: the redirect is a response, not an exit.
-		$this->assertResponseStatus(404, $this->makeRequest('GET', '/test/never-existed-' . uniqid()));
+		return [$initialPath, $updatedPath];
 	}
 }

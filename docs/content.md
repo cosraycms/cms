@@ -118,7 +118,7 @@ Parent path shortcuts reuse persisted paths without slugifying them. Fields reso
 
 Field values, UID, and handle are slugified. Transformers include `lowercase`, `uppercase`, `titlecase`, `keepcase`, `dashes`, and `underscore`, with chains such as `{title|uppercase|underscore}`. Default output is lowercase with dashes. ICU folding uses the language supplying the field value, so German `Gebühren` becomes `gebuehren`. `keepcase` preserves the folded case, not arbitrary Unicode. Transformers do not apply to parent-path shortcuts; optional ancestor and optional parent-field syntax are unsupported.
 
-[RoutePathGenerator](../src/Node/RoutePathGenerator.php) serves both strict persistence and lenient panel previews. Unresolved previews show friendly placeholders; they do not guarantee a valid save. Explicit paths take precedence over generated ones, and changing a parent's path does not cascade regeneration to its children. [RoutePathGeneratorTest](../tests/Unit/RoutePathGeneratorTest.php) covers the grammar and edge cases.
+[RoutePathGenerator](../src/Node/RoutePathGenerator.php) serves both strict persistence and lenient panel previews. Unresolved previews show friendly placeholders; they do not guarantee a valid save. Explicit paths take precedence over generated ones, and changing a parent's path does not cascade regeneration to its children. A path a node no longer uses answers with a permanent redirect to its active path, query string included. [RoutePathGeneratorTest](../tests/Unit/RoutePathGeneratorTest.php) covers the grammar and edge cases.
 
 ## Collections and queries
 

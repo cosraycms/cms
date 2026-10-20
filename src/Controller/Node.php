@@ -153,13 +153,17 @@ class Node
 				array_map(static fn($p) => $p['path'], $paths),
 			);
 
+			$query = $context->httpRequest()->uri()->getQuery();
 			$locale = $context->locale();
 
 			while ($locale) {
 				$path = $pathsByLocale[$locale->id] ?? null;
 
 				if ($path) {
-					return Response::create($this->factory)->redirect($path, 301);
+					return Response::create($this->factory)->redirect(
+						$query === '' ? $path : $path . '?' . $query,
+						301,
+					);
 				}
 
 				$locale = $locale->fallback();
