@@ -66,6 +66,38 @@ final class PathTest extends TestCase
 		Path::inside(__DIR__, '../nonexistent');
 	}
 
+	public function testInsideRefusesSiblingWithSharedPrefix(): void
+	{
+		$root = sys_get_temp_dir() . '/cosray-path-' . bin2hex(random_bytes(6));
+		mkdir($root . '/assets', 0o755, true);
+		mkdir($root . '/assets-backup');
+		file_put_contents($root . '/assets-backup/secret.txt', 'secret');
+
+		try {
+			Path::inside($root . '/assets', '../assets-backup/secret.txt');
+			$this->fail('Expected the sibling directory to be refused');
+		} catch (RuntimeException $e) {
+			$this->assertSame(
+				'File or directory does not exist or is not in the expected location.',
+				$e->getMessage(),
+			);
+		} finally {
+			unlink($root . '/assets-backup/secret.txt');
+			rmdir($root . '/assets-backup');
+			rmdir($root . '/assets');
+			rmdir($root);
+		}
+	}
+
+	public function testInsideRefusesTheParentItself(): void
+	{
+		$this->throws(
+			RuntimeException::class,
+			'File or directory does not exist or is not in the expected location.',
+		);
+		Path::inside(__DIR__, '.');
+	}
+
 	public function testInsideWithCheckIsFileReturnsPathForFile(): void
 	{
 		$parent = __DIR__;

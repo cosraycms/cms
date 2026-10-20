@@ -6,8 +6,10 @@ namespace Cosray\Assets;
 
 use Celema\Quma\Database;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\References\Usage;
 use Cosray\Storage\Storage;
+use Cosray\Util\Path;
 use DateTimeImmutable;
 use PDOException;
 use RecursiveDirectoryIterator;
@@ -208,9 +210,14 @@ final class Library
 	private function purgeRenditions(string $key): void
 	{
 		$root = rtrim($this->config->path->public, '\\/') . '/' . trim($this->config->path->cache, '/');
-		$dir = $root . '/' . dirname($key);
 
-		if (!is_dir($dir) || !str_starts_with((string) realpath($dir), (string) realpath($root))) {
+		try {
+			$dir = Path::inside($root, dirname($key));
+		} catch (RuntimeException) {
+			return;
+		}
+
+		if (!is_dir($dir)) {
 			return;
 		}
 

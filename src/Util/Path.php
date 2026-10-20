@@ -16,9 +16,10 @@ class Path
 			throw new RuntimeException('Parent directory does not exist.');
 		}
 
-		$path = realpath(rtrim($parent, '\\/') . DIRECTORY_SEPARATOR . ltrim($child, '\\/'));
+		$prefix = rtrim($parent, '\\/') . DIRECTORY_SEPARATOR;
+		$path = realpath($prefix . ltrim($child, '\\/'));
 
-		if (!$path || strncmp($path, $parent, strlen($parent)) !== 0) {
+		if (!$path || !str_starts_with($path, $prefix)) {
 			throw new RuntimeException(
 				'File or directory does not exist or is not in the expected location.',
 			);
