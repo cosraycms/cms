@@ -235,13 +235,7 @@ final class Iconify implements Provider
 			return null;
 		}
 
-		$resolved = realpath($target);
-
-		if ($resolved === false || strncmp($resolved, $publicDir, strlen($publicDir)) !== 0) {
-			return null;
-		}
-
-		return $resolved;
+		return $target;
 	}
 
 	private function store(string $file, string $svg): void

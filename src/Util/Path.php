@@ -32,6 +32,27 @@ class Path
 	}
 
 	/**
+	 * Resolves a directory configured below `$parent`. Unlike `inside()`, the
+	 * directory may resolve elsewhere through a symlink, such as uploads shared
+	 * between deployed releases; only `..` segments in `$child` are refused.
+	 */
+	public static function below(string $parent, string $child): string
+	{
+		if (in_array('..', explode('/', str_replace('\\', '/', $child)), true)) {
+			throw new RuntimeException('Path leaves its parent directory: ' . $child);
+		}
+
+		$dir = rtrim($parent, '\\/') . DIRECTORY_SEPARATOR . ltrim($child, '\\/');
+		$path = realpath($dir);
+
+		if ($path === false || !is_dir($path)) {
+			throw new RuntimeException('Directory does not exist: ' . $dir);
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Creates the directory and its parents unless it exists. Concurrent
 	 * requests may create it at the same time; only a directory that still
 	 * does not exist afterwards is an error.

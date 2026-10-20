@@ -120,6 +120,24 @@ final class AssetsImageTest extends TestCase
 		$this->assertFileExists($this->root . '/public/cache/ab/abcdefghijklm/pic-thumb.png');
 	}
 
+	/** Release-based deployments link both directories in from outside the document root. */
+	public function testRenditionsFollowSymlinkedDirectories(): void
+	{
+		$shared = $this->root . '/shared';
+		mkdir($shared);
+		rename($this->root . '/public/assets', $shared . '/assets');
+		rename($this->root . '/public/cache', $shared . '/cache');
+		symlink($shared . '/assets', $this->root . '/public/assets');
+		symlink($shared . '/cache', $this->root . '/public/cache');
+		$assets = new Assets(new Config($this->root));
+
+		$assets
+			->image('/ab/abcdefghijklm/pic.png')
+			->resize(new Size(60), ResizeMode::Width, false, null, 'thumb');
+
+		$this->assertFileExists($shared . '/cache/ab/abcdefghijklm/pic-thumb.png');
+	}
+
 	/** Mirrors the request-time error handler of `celema/core`. */
 	private function withStrictErrorHandler(callable $callback): void
 	{
@@ -152,7 +170,7 @@ final class AssetsImageTest extends TestCase
 
 			$path = $dir . '/' . $entry;
 
-			is_dir($path) ? $this->removeDir($path) : unlink($path);
+			is_dir($path) && !is_link($path) ? $this->removeDir($path) : unlink($path);
 		}
 
 		rmdir($dir);

@@ -25,8 +25,8 @@ class Assets
 
 		$this->publicDir = rtrim($publicDir, '\\/');
 
-		$this->assetsDir = Path::inside($this->publicDir, $config->path->assets);
-		$this->cacheDir = Path::inside($this->publicDir, $config->path->cache);
+		$this->assetsDir = Path::below($this->publicDir, $config->path->assets);
+		$this->cacheDir = Path::below($this->publicDir, $config->path->cache);
 	}
 
 	public function image(string $path): Image

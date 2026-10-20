@@ -84,6 +84,41 @@ final class PathTest extends TestCase
 		Path::inside($parent, $child, true);
 	}
 
+	public function testBelowFollowsSymlinkOutsideParent(): void
+	{
+		$root = sys_get_temp_dir() . '/cosray-path-' . bin2hex(random_bytes(6));
+		mkdir($root . '/public', 0o755, true);
+		mkdir($root . '/shared');
+		symlink($root . '/shared', $root . '/public/assets');
+
+		try {
+			$this->assertSame(realpath($root . '/shared'), Path::below($root . '/public', '/assets'));
+		} finally {
+			unlink($root . '/public/assets');
+			rmdir($root . '/public');
+			rmdir($root . '/shared');
+			rmdir($root);
+		}
+	}
+
+	public function testBelowRefusesParentSegments(): void
+	{
+		$this->throws(RuntimeException::class, 'Path leaves its parent directory: /../Unit');
+		Path::below(__DIR__, '/../Unit');
+	}
+
+	public function testBelowThrowsOnMissingDirectory(): void
+	{
+		$this->throws(RuntimeException::class, 'Directory does not exist: ' . __DIR__ . '/missing');
+		Path::below(__DIR__, '/missing');
+	}
+
+	public function testBelowThrowsOnFile(): void
+	{
+		$this->throws(RuntimeException::class, 'Directory does not exist: ' . __DIR__ . '/PathTest.php');
+		Path::below(__DIR__, 'PathTest.php');
+	}
+
 	public function testEnsureDirectoryCreatesMissingParents(): void
 	{
 		$root = sys_get_temp_dir() . '/cosray-path-' . bin2hex(random_bytes(6));

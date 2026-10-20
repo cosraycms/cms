@@ -76,6 +76,27 @@ final class IconsTest extends TestCase
 		}
 	}
 
+	/** Release-based deployments link the cache in from outside the document root. */
+	public function testCacheFollowsSymlinkedCacheDirectory(): void
+	{
+		$root = $this->publicDir();
+		mkdir($root . '/public');
+		mkdir($root . '/shared');
+		symlink($root . '/shared', $root . '/public/cache');
+
+		try {
+			$icons = $this->icons(
+				$root . '/public',
+				static fn(): string => '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1"/></svg>',
+			);
+			$icons->icon('bi:check');
+
+			$this->assertFileExists($root . '/shared/icons/' . hash('xxh3', 'bi:check') . '.svg');
+		} finally {
+			$this->removeDir($root);
+		}
+	}
+
 	public function testUnprefixedIconWithoutLocalPathReturnsEmptyStringWithoutFetch(): void
 	{
 		$publicDir = $this->publicDir();
@@ -499,7 +520,7 @@ final class IconsTest extends TestCase
 		);
 
 		foreach ($iterator as $item) {
-			if ($item->isDir()) {
+			if ($item->isDir() && !$item->isLink()) {
 				rmdir($item->getPathname());
 				continue;
 			}

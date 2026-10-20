@@ -36,7 +36,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
 | `panel.path` | Panel URL path; defaults to `/panel` |
 
-`path.assets` and `path.cache` couple directories below the document root to media URL paths. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
+`path.assets` and `path.cache` couple directories below the document root to media URL paths. Either directory may be a symlink to one outside the document root, for example to keep uploads and renditions in a directory shared between deployed releases; the web server must then follow symlinks. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
 
 The panel, media and preview routes answer before any node, so node paths at or below `panel.path`, `path.assets`, `path.cache` or `/preview` are refused when saved. Routes a plugin registers are not checked. Changing one of these settings does not move existing nodes out of the way; a node already stored below the new prefix becomes unreachable.
 
