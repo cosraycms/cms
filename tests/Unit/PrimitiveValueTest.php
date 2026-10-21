@@ -325,6 +325,28 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertCount(2, $files);
 	}
 
+	public function testFileValueRawAndIssetDescribeItsOwnItem(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$field = new \Cosray\Field\Image('gallery', $owner, new ValueContext('gallery', [
+			'files' => [
+				['uid' => 'oneimg1234567'],
+				['uid' => 'twoimg1234567'],
+			],
+		]));
+		$value = $field->value();
+
+		$this->assertSame(['uid' => 'twoimg1234567'], $value->get(1)->raw());
+		$this->assertSame(
+			['oneimg1234567', 'twoimg1234567'],
+			array_map(static fn($image) => $image->raw()['uid'], iterator_to_array($value)),
+		);
+		$this->assertTrue($value->get(1)->isset());
+		$this->assertNull($value->get(2)->raw());
+		$this->assertFalse($value->get(2)->isset());
+	}
+
 	public function testTranslatedFileFallsBackToDefaultLocale(): void
 	{
 		$context = $this->createContext('de');

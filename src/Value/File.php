@@ -76,7 +76,7 @@ class File extends Value
 	#[Override]
 	public function raw(): ?array
 	{
-		return $this->fileItem(0);
+		return $this->fileItem($this->index);
 	}
 
 	#[Override]
@@ -93,7 +93,7 @@ class File extends Value
 	#[Override]
 	public function isset(): bool
 	{
-		return $this->fileItem(0) !== null;
+		return $this->fileItem($this->index) !== null;
 	}
 
 	protected function asset(int $index): ?Asset

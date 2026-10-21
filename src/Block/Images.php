@@ -35,14 +35,13 @@ final class Images implements Block
 		$images = $block->images;
 		$result = '';
 
-		foreach ($images->raw() as $index => $item) {
-			$asset = $ctx->asset((string) ($item['uid'] ?? ''));
+		foreach ($images as $image) {
+			$asset = $ctx->asset((string) ($image->raw()['uid'] ?? ''));
 
 			if ($asset === null) {
 				continue;
 			}
 
-			$image = $images->get($index);
 			$alt = escape($image->alt() ?: strip_tags($image->title()));
 			$path = escape($asset->path());
 			$url = $asset->resizable() ? escape($asset->sizePath($name)) : $path;
