@@ -160,8 +160,10 @@ class Node
 				$path = $pathsByLocale[$locale->id] ?? null;
 
 				if ($path) {
+					$location = $context->config->app->urlPrefix . $path;
+
 					return Response::create($this->factory)->redirect(
-						$query === '' ? $path : $path . '?' . $query,
+						$query === '' ? $location : $location . '?' . $query,
 						301,
 					);
 				}

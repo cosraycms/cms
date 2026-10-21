@@ -124,7 +124,6 @@ class End2EndTestCase extends IntegrationTestCase
 	protected function createApp(array $settings = []): App
 	{
 		$factory = new Nyholm();
-		$router = new Router();
 		$container = $this->container();
 		$config = $this->config(array_merge(
 			[
@@ -139,7 +138,7 @@ class End2EndTestCase extends IntegrationTestCase
 			$settings,
 		));
 
-		$app = new App($factory, $router, $container);
+		$app = new App($factory, new Router($config->app->urlPrefix), $container);
 		$this->logger = new RecordingLogger();
 		$app->logger($this->logger);
 

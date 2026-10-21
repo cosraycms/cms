@@ -44,6 +44,17 @@ final class InactivePathRedirectTest extends End2EndTestCase
 		$this->assertResponseHeaderEquals('Location', $updatedPath . '?mode=year&year=2024', $response);
 	}
 
+	public function testRedirectKeepsUrlPrefix(): void
+	{
+		$this->app = $this->createApp(['app.url_prefix' => '/site']);
+		[$initialPath, $updatedPath] = $this->movedNode();
+
+		$response = $this->makeRequest('GET', '/site' . $initialPath);
+
+		$this->assertResponseStatus(301, $response);
+		$this->assertResponseHeaderEquals('Location', '/site' . $updatedPath, $response);
+	}
+
 	/** @return array{string, string} the node's former path and its active one */
 	private function movedNode(): array
 	{
