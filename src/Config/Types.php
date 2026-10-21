@@ -58,7 +58,7 @@ namespace Cosray\Config;
  *     'db.migrations': string|list<string>,
  *     'db.placeholders': DbPlaceholders,
  *     'db.print': bool,
- *     'db.options': array<string, mixed>,
+ *     'db.options': array<int, mixed>,
  *     'db.reuse': bool,
  *
  *     'session.enabled': bool,
@@ -113,7 +113,7 @@ namespace Cosray\Config;
  *     'db.migrations'?: string|list<string>,
  *     'db.placeholders'?: DbPlaceholders,
  *     'db.print'?: bool,
- *     'db.options'?: array<string, mixed>,
+ *     'db.options'?: array<int, mixed>,
  *     'session.enabled'?: bool,
  *     'session.options'?: array<string, mixed>,
  *     'session.handler'?: ?\SessionHandlerInterface,

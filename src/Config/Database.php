@@ -14,7 +14,7 @@ final class Database
 	/** @var list<non-empty-string>|null */
 	private ?array $migrationsCache = null;
 
-	/** @var array<string, mixed>|null */
+	/** @var array<int, mixed>|null */
 	private ?array $optionsCache = null;
 
 	/** @var array<non-empty-string, array<non-empty-string, string>>|null */
@@ -51,7 +51,7 @@ final class Database
 		get => $this->config->get('db.reuse');
 	}
 
-	/** @var array<string, mixed> */
+	/** @var array<int, mixed> */
 	public array $options {
 		get => $this->optionsCache ??= $this->config->get('db.options');
 	}
