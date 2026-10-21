@@ -52,10 +52,7 @@ final class Library
 	): LibraryPage {
 		$page = max(1, $page);
 		$args = ['limit' => self::LIMIT + 1, 'offset' => ($page - 1) * self::LIMIT];
-		// The null seed keeps the args named and non-empty when no filter
-		// applies — Quma templates refuse empty argument lists — and
-		// isset() in the template still skips the clause.
-		$countArgs = ['q' => null];
+		$countArgs = [];
 		$kinds = self::filterKinds($kinds);
 
 		if ($kinds !== []) {

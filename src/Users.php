@@ -237,12 +237,10 @@ class Users
 		])->run();
 	}
 
-	/** @return array<string, ?string> */
+	/** @return array<string, string> */
 	private function filter(?string $type, string $search): array
 	{
-		// Quma takes an empty argument list for positional, which a template
-		// query refuses; an unset key keeps the list named.
-		$filter = ['type' => null];
+		$filter = [];
 
 		if ($type !== null) {
 			$filter['type'] = $type;
