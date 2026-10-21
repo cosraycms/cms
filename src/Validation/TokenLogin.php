@@ -19,7 +19,6 @@ final class TokenLogin implements Validator
 		$this->shape->add('token', 'string')->rules('required', 'maxlen:512')->label(__('auth:token'));
 	}
 
-	/** @param array<mixed> $data */
 	#[Override]
 	public function validate(array $data): Result
 	{
