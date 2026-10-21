@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\View\Boiler\Error;
 
-use Celema\Core\Error\Handler as ErrorHandler;
 use Celema\Core\Error\Renderer as ErrorRenderer;
 use Celema\Core\Exception\HttpError;
 use Celema\Core\Factory\Factory;
 use Cosray\Config;
+use Cosray\Exception\DatabaseUnavailable;
 use Cosray\Exception\RuntimeException;
 use Psr\Log\LoggerInterface as Logger;
+use Psr\Log\LogLevel;
 
 final class Handler
 {
@@ -55,8 +56,8 @@ final class Handler
 		$renderer = $this->customRenderer();
 
 		if ($renderer) {
-			$handler->renderer($renderer, HttpError::class);
-			$handler->renderer($renderer);
+			$httpError = $renderer;
+			$serverError = $renderer;
 		} else {
 			$rendererFactory = new RendererFactory(
 				dirs: $this->errorViews(),
@@ -67,9 +68,13 @@ final class Handler
 				],
 				trusted: $this->trustedClasses(),
 			);
-			$handler->renderer($rendererFactory->withTemplate('http-error'), HttpError::class);
-			$handler->renderer($rendererFactory->withTemplate('http-server-error'));
+			$httpError = $rendererFactory->withTemplate('http-error');
+			$serverError = $rendererFactory->withTemplate('http-server-error');
 		}
+
+		$handler->renderer($httpError, DatabaseUnavailable::class)->log(LogLevel::ALERT);
+		$handler->renderer($httpError, HttpError::class);
+		$handler->renderer($serverError);
 
 		if ($debug && $this->config->error->whoops && WhoopsHandler::available()) {
 			$handler->debugHandler(new WhoopsHandler());

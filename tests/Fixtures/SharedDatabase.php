@@ -29,7 +29,7 @@ final class SharedDatabase extends Database
 		}
 
 		$config = $this->conn->config;
-		$key = serialize([$config->dsn, $config->pdo->username, $config->pdo->effectiveOptions()]);
+		$key = serialize([$config->dsn, $config->pdo->username, $config->pdo->effectiveOptions($config->driver)]);
 
 		if (!isset(self::$connections[$key])) {
 			parent::connect();

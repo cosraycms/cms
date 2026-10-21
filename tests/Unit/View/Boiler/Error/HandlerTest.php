@@ -7,10 +7,14 @@ namespace Cosray\Tests\Unit\View\Boiler\Error;
 use Celema\Core\Error\Handler as ErrorHandler;
 use Celema\Core\Error\Renderer as ErrorRenderer;
 use Celema\Core\Exception\HttpNotFound;
+use Celema\Quma\Exception\ConnectionFailed;
 use Cosray\Config;
+use Cosray\Exception\DatabaseUnavailable;
+use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\TestCase;
 use Cosray\View\Boiler\Error\Handler;
 use Exception;
+use PDOException;
 use Psr\Http\Message\ResponseFactoryInterface as ResponseFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -147,6 +151,43 @@ final class HandlerTest extends TestCase
 		$this->assertSame('custom error', (string) $response->getBody());
 	}
 
+	public function testUnreachableDatabaseAnswersServiceUnavailable(): void
+	{
+		$logger = new RecordingLogger();
+		$request = $this->psrRequest();
+		$response = $this
+			->handler(logger: $logger)
+			->create()
+			->response($this->connectionFailed(), $request);
+
+		$this->assertSame(503, $response->getStatusCode());
+		$this->assertSame('30', $response->getHeaderLine('Retry-After'));
+		$this->assertStringContainsString('Service Unavailable', (string) $response->getBody());
+		$this->assertStringNotContainsString('timeout expired', (string) $response->getBody());
+		$this->assertSame(
+			[['alert', "Server error 503 for {$request->getMethod()} {$request->getUri()->getPath()}"]],
+			$logger->records,
+		);
+	}
+
+	public function testUnreachableDatabaseReachesCustomRendererAsServiceUnavailable(): void
+	{
+		$renderer = new HandlerRenderer();
+		$config = $this->errorConfig(['error.renderer' => $renderer]);
+		$response = $this->handler($config)->create()->response($this->connectionFailed(), $this->psrRequest());
+
+		$this->assertInstanceOf(DatabaseUnavailable::class, $renderer->rendered);
+		$this->assertInstanceOf(ConnectionFailed::class, $renderer->rendered->getPrevious());
+		$this->assertSame('30', $response->getHeaderLine('Retry-After'));
+	}
+
+	private function connectionFailed(): ConnectionFailed
+	{
+		return ConnectionFailed::from(new PDOException(
+			'SQLSTATE[08006] [7] connection to server at "db", port 5432 failed: timeout expired',
+		));
+	}
+
 	private function handler(?Config $config = null, ?Logger $logger = null): Handler
 	{
 		return new Handler(
@@ -180,12 +221,15 @@ final class HandlerTest extends TestCase
 
 final class HandlerRenderer implements ErrorRenderer
 {
+	public ?Throwable $rendered = null;
+
 	public function render(
 		Throwable $exception,
 		ResponseFactory $factory,
 		Request $request,
 		bool $debug,
 	): Response {
+		$this->rendered = $exception;
 		$response = $factory->createResponse(500);
 		$response->getBody()->write('custom error');
 

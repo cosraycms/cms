@@ -55,7 +55,15 @@ final class Renderer implements RendererInterface
 
 		if ($this->isJsonOnlyRequest($request)) {
 			$response = $response->withHeader('Content-Type', 'application/json');
-			$json = json_encode($payload);
+			$json = json_encode(
+				$payload ?? [
+					'status' => $status,
+					// Only HTTP errors carry a message meant for clients.
+					'message' => $exception instanceof HttpError
+						? $exception->getMessage()
+						: $response->getReasonPhrase(),
+				],
+			);
 			$response->getBody()->write($json === false ? '{}' : $json);
 		} else {
 			$response->getBody()->write($engine->render($this->template, array_merge($this->context, [

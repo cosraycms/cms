@@ -57,7 +57,7 @@ Templates render escaped: Boiler escapes the strings and objects that reach them
 
 A field's `raw()` returns its value unescaped. Numbers, booleans, and null come back as they are; strings, arrays, and objects come back wrapped again, so compare `u(...)` or use `->is()`, and pass `u(...)` to functions that need the original. A site's own PHP functions and classes that get values from templates unwrap them with [`Celema\Boiler\unwrap()`](https://codefloe.com/celema/boiler/src/branch/main/docs/values.md#your-own-php-code). Boiler's [common pitfalls](https://codefloe.com/celema/boiler/src/branch/main/docs/pitfalls.md) and [values documentation](https://codefloe.com/celema/boiler/src/branch/main/docs/values.md) cover comparisons, PHP functions, and JSON.
 
-Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. Set `error.enabled` to `false` when installing custom error middleware. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
+Error pages use a separate Boiler renderer. Project `http-error.php` and `http-server-error.php` templates override the built-in fallbacks. A request that finds the database unreachable gets `http-error.php` with status 503 and `Retry-After: 30` and is logged as an alert; PostgreSQL and MySQL connections give up after 5 seconds unless `db.options` sets `PDO::ATTR_TIMEOUT`. A request that accepts only JSON gets an error's payload, or `{"status": …, "message": …}` when it has none. Set `error.enabled` to `false` when installing custom error middleware. The lower-level core app and CMS bootstrap remain accessible through `$app->core()` and `$app->bootstrap()`.
 
 ## Logging
 
