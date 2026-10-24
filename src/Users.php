@@ -37,13 +37,21 @@ class Users
 		);
 	}
 
+	/** The user an unexpired API token belongs to; finding it records the token's use. */
 	public function byAuthToken(#[\SensitiveParameter] string $token): ?User
 	{
-		return $this->getUserOrNull(
+		$hash = hash('sha256', $token);
+		$user = $this->getUserOrNull(
 			$this->db->users->get([
-				'token' => hash('sha256', $token),
+				'token' => $hash,
 			])->first(),
 		);
+
+		if ($user) {
+			$this->db->users->touchToken(['token' => $hash])->run();
+		}
+
+		return $user;
 	}
 
 	public function byOneTimeToken(#[\SensitiveParameter] string $token): ?User

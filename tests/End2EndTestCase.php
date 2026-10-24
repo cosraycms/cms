@@ -102,12 +102,14 @@ class End2EndTestCase extends IntegrationTestCase
 		])->one()['usr'];
 
 		// Create auth token
-		$sql = 'INSERT INTO cms.auth_tokens (token, usr, creator, editor)
-				VALUES (:token, :usr, 1, 1)';
+		$sql = 'INSERT INTO cms.auth_tokens (token, uid, usr, name, creator, editor)
+				VALUES (:token, :uid, :usr, :name, 1, 1)';
 
 		$db->execute($sql, [
 			'token' => $tokenHash,
+			'uid' => $uid,
 			'usr' => $userId,
+			'name' => 'test',
 		])->run();
 
 		return $token;
@@ -230,7 +232,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$authToken = $options['authToken'] ?? $this->defaultAuthToken;
 
 		if ($authToken) {
-			$psrRequest = $psrRequest->withHeader('Authentication', 'Bearer ' . $authToken);
+			$psrRequest = $psrRequest->withHeader('Authorization', 'Bearer ' . $authToken);
 		}
 
 		// Add query parameters

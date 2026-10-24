@@ -296,3 +296,15 @@ $policy->permits($user, 'edit-orders');
 Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The Users area needs `edit-users`. Its write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
+
+### API tokens
+
+A user holds any number of named API tokens. A token acts as its user, so the user's roles decide what it may do; a deactivated or deleted user's tokens stop working with the account. Requests send it as `Authorization: Bearer <token>`. Only its sha256 is stored, so the token is shown once, when it is created. Tokens optionally expire, and the time of their last use is recorded to the minute.
+
+```bash
+php run token:create editor@example.com --name="Shop import" --expires=2027-01-31
+php run token:list editor@example.com
+php run token:revoke editor@example.com <uid>
+```
+
+[User\Tokens](../src/User/Tokens.php) is the PHP API. Integrations usually get a user of their own with just the roles they need. Migration `000000-000043-api-tokens.sql` turns the former single token per user into this table and keeps existing tokens; code that maintains `auth_tokens` itself must now also write a unique `uid`, and should write a `name`.

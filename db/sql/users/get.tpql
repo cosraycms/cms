@@ -54,6 +54,7 @@ WHERE
 	u.usr = :usr
 <?php elseif (isset($token)): ?>
 	at.token = :token
+	AND (at.expires IS NULL OR at.expires > now())
 <?php elseif (isset($onetimetoken)): ?>
 	ott.token = :onetimetoken
 <?php else: ?>

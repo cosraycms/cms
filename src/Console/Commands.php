@@ -17,10 +17,13 @@ use Celema\Verba\Command\SyncCommand;
 use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
+use Cosray\Commands\CreateToken;
 use Cosray\Commands\Fulltext;
+use Cosray\Commands\ListTokens;
 use Cosray\Commands\PanelPublish;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
+use Cosray\Commands\RevokeToken;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
 use Cosray\I18n\SchemaScanner;
@@ -70,6 +73,9 @@ final class Commands
 			RecreateSortIndex::class,
 			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
 			Titles::class,
+			CreateToken::class,
+			ListTokens::class,
+			RevokeToken::class,
 		]);
 	}
 

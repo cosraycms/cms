@@ -284,7 +284,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 	public function testGetAuthTokenFromBearerHeader(): void
 	{
 		$token = 'test-token-12345';
-		$request = $this->psrRequest()->withHeader('Authentication', 'Bearer ' . $token);
+		$request = $this->psrRequest()->withHeader('Authorization', 'Bearer ' . $token);
 		// Pass PSR request directly
 
 		$auth = $this->createAuth($request);
@@ -302,7 +302,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 	public function testGetAuthTokenReturnsEmptyStringWithInvalidFormat(): void
 	{
-		$request = $this->psrRequest()->withHeader('Authentication', 'InvalidFormat token123');
+		$request = $this->psrRequest()->withHeader('Authorization', 'InvalidFormat token123');
 		// Pass PSR request directly
 
 		$auth = $this->createAuth($request);
@@ -322,11 +322,11 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$tokenHash = hash('sha256', $token);
 
 		$this->db()->execute(
-			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
+			'INSERT INTO cms.auth_tokens (token, uid, usr, creator, editor) VALUES (:token, md5(:token), :usr, 1, 1)',
 			['token' => $tokenHash, 'usr' => $userId],
 		)->run();
 
-		$request = $this->psrRequest()->withHeader('Authentication', 'Bearer ' . $token);
+		$request = $this->psrRequest()->withHeader('Authorization', 'Bearer ' . $token);
 		// Pass PSR request directly
 		$auth = $this->createAuth($request);
 
@@ -343,7 +343,7 @@ final class AuthIntegrationTest extends IntegrationTestCase
 
 	public function testUserFromTokenReturnsNullWithInvalidToken(): void
 	{
-		$request = $this->psrRequest()->withHeader('Authentication', 'Bearer invalid-token');
+		$request = $this->psrRequest()->withHeader('Authorization', 'Bearer invalid-token');
 		// Pass PSR request directly
 		$auth = $this->createAuth($request);
 
@@ -404,11 +404,11 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		$authTokenHash = hash('sha256', $authToken);
 
 		$this->db()->execute(
-			'INSERT INTO cms.auth_tokens (token, usr, creator, editor) VALUES (:token, :usr, 1, 1)',
+			'INSERT INTO cms.auth_tokens (token, uid, usr, creator, editor) VALUES (:token, md5(:token), :usr, 1, 1)',
 			['token' => $authTokenHash, 'usr' => $userId],
 		)->run();
 
-		$request = $this->psrRequest()->withHeader('Authentication', 'Bearer ' . $authToken);
+		$request = $this->psrRequest()->withHeader('Authorization', 'Bearer ' . $authToken);
 		// Pass PSR request directly
 		$auth = $this->createAuth($request);
 

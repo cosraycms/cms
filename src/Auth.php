@@ -188,14 +188,9 @@ class Auth
 
 	public function getAuthToken(): string
 	{
-		$authToken = '';
-		$bearer = $this->request->getHeaderLine('Authentication');
+		$header = $this->request->getHeaderLine('Authorization');
 
-		if (preg_match('/Bearer\s(\S+)/', $bearer, $matches)) {
-			$authToken = $matches[1];
-		}
-
-		return $authToken;
+		return preg_match('/^Bearer\s+(\S+)\s*$/i', $header, $matches) === 1 ? $matches[1] : '';
 	}
 
 	protected function remember(int $userId): RememberDetails

@@ -97,6 +97,10 @@ CREATE TABLE /*:cms.prefix:*/auth_tokens (
 	changed timestamp with time zone NOT NULL DEFAULT now(),
 	creator bigint NOT NULL,
 	editor bigint NOT NULL,
+	uid text NOT NULL,
+	name text NOT NULL DEFAULT '',
+	expires timestamp with time zone,
+	used timestamp with time zone,
 	CONSTRAINT /*:cms.obj:*/pk_auth_tokens PRIMARY KEY (token),
 	CONSTRAINT /*:cms.obj:*/fk_auth_tokens_users FOREIGN KEY (usr)
 		REFERENCES /*:cms.prefix:*/users (usr),
@@ -104,11 +108,12 @@ CREATE TABLE /*:cms.prefix:*/auth_tokens (
 		REFERENCES /*:cms.prefix:*/users (usr),
 	CONSTRAINT /*:cms.obj:*/fk_auth_tokens_users_editor FOREIGN KEY (editor)
 		REFERENCES /*:cms.prefix:*/users (usr),
-	CONSTRAINT /*:cms.obj:*/uc_auth_tokens_usr UNIQUE (usr),
-	CONSTRAINT /*:cms.obj:*/ck_auth_tokens_token CHECK (char_length(token) <= 512)
+	CONSTRAINT /*:cms.obj:*/ck_auth_tokens_token CHECK (char_length(token) <= 512),
+	CONSTRAINT /*:cms.obj:*/uc_auth_tokens_uid UNIQUE (uid),
+	CONSTRAINT /*:cms.obj:*/ck_auth_tokens_uid CHECK (char_length(uid) <= 64),
+	CONSTRAINT /*:cms.obj:*/ck_auth_tokens_name CHECK (char_length(name) <= 255)
 );
-CREATE TRIGGER /*:cms.obj:*/auth_tokens_trigger_01_change BEFORE UPDATE ON /*:cms.prefix:*/auth_tokens
-	FOR EACH ROW EXECUTE FUNCTION /*:cms.prefix:*/update_changed_column();
+CREATE INDEX /*:cms.obj:*/ix_auth_tokens_usr ON /*:cms.prefix:*/auth_tokens (usr);
 
 
 CREATE TABLE /*:cms.prefix:*/one_time_tokens (
