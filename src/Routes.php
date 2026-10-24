@@ -117,6 +117,7 @@ class Routes
 
 		$responses = new Api\Responses($this->factory);
 		new Api\Routes(
+			new Api\Headers($responses, $this->config->api->origins, $this->config->api->maxAge),
 			new Api\Problems($responses, $this->logger, $this->config->debug()),
 			$this->users,
 		)->add($app, $path);

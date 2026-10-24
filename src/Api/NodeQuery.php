@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Api;
 
 use Celema\Core\Exception\HttpBadRequest;
+use Cosray\DateTime\Codec;
 use Cosray\Finder\Order;
 use Cosray\Finder\SortField;
 
@@ -60,6 +61,8 @@ final readonly class NodeQuery
 		public int $offset = 0,
 		public ?array $fields = null,
 		public bool $source = false,
+		public ?string $changedSince = null,
+		public bool $ordered = false,
 	) {}
 
 	/** @param array<array-key, mixed> $params */
@@ -160,6 +163,8 @@ final readonly class NodeQuery
 			offset: self::int($params['offset'] ?? null, 'offset', 0, 0, PHP_INT_MAX),
 			fields: self::fields($params['fields'] ?? null),
 			source: self::source($params['view'] ?? null),
+			changedSince: self::instant($params['changedSince'] ?? null),
+			ordered: isset($params['order']),
 		);
 	}
 
@@ -247,6 +252,18 @@ final readonly class NodeQuery
 		}
 
 		return $names;
+	}
+
+	private static function instant(mixed $value): ?string
+	{
+		if ($value === null) {
+			return null;
+		}
+
+		return (
+			(is_string($value) ? Codec::normalize($value) : null)
+				?? throw self::invalid('`changedSince` is an RFC 3339 time like 2026-10-24T08:00:00Z.')
+		);
 	}
 
 	private static function int(mixed $value, string $name, int $default, int $min, int $max): int

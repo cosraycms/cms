@@ -65,7 +65,7 @@ Block image ladders, responsive `sizes`, gallery ratios, and spacing are documen
 
 Editor elements should use `window.Cosray.upload(type, file)`, which supplies the session's CSRF token; see the [bridge](controls.md#the-windowcosray-bridge). The upload is `POST /media/{mediatype}`, a multipart request with the file under `file`, for image, file, or video; [Routes](../src/Routes.php) and [Controller\Media](../src/Controller/Media.php) hold its access checks and response fields.
 
-Browsing, editing and deleting catalog entries happen in the panel's media screen, whose server-rendered picker the editor controls embed; [Assets\Library](../src/Assets/Library.php) holds the listing and deletion rules. There is no JSON API for the catalog. The library's filter vocabulary splits catalog files into audio and documents. Missing catalog entries render no media; old owner-scoped asset URLs are not supported by the catalog routes.
+Browsing, editing and deleting catalog entries happen in the panel's media screen, whose server-rendered picker the editor controls embed; [Assets\Library](../src/Assets/Library.php) holds the listing and deletion rules. The [API](api.md#assets) reads, lists and uploads catalog entries. The library's filter vocabulary splits catalog files into audio and documents. Missing catalog entries render no media; old owner-scoped asset URLs are not supported by the catalog routes.
 
 ## Reference indexes
 

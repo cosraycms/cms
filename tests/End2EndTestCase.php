@@ -218,6 +218,7 @@ class End2EndTestCase extends IntegrationTestCase
 	 *   - 'query' => array - Query parameters
 	 *   - 'cookies' => array - Cookie values
 	 *   - 'files' => array - PSR-7 UploadedFileInterface instances by field name
+	 *   - 'form' => array - Parsed form fields
 	 *   - 'authToken' => string - Auth token for authentication
 	 * @return ResponseInterface PSR-7 response
 	 */
@@ -266,6 +267,11 @@ class End2EndTestCase extends IntegrationTestCase
 		// Add uploaded files
 		if (isset($options['files'])) {
 			$psrRequest = $psrRequest->withUploadedFiles($options['files']);
+		}
+
+		// Add parsed form fields, as a multipart request carries them
+		if (isset($options['form'])) {
+			$psrRequest = $psrRequest->withParsedBody($options['form']);
 		}
 
 		// Add body

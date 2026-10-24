@@ -51,44 +51,66 @@ final class Library
 		int $page = 1,
 	): LibraryPage {
 		$page = max(1, $page);
-		$args = ['limit' => self::LIMIT + 1, 'offset' => ($page - 1) * self::LIMIT];
-		$countArgs = [];
-		$kinds = self::filterKinds($kinds);
+		$offset = ($page - 1) * self::LIMIT;
+		$list = $this->list($kinds, $q, $since, self::LIMIT, $offset);
+		$counts = array_fill_keys(self::KINDS, 0);
 
-		if ($kinds !== []) {
-			$args['kinds'] = json_encode($kinds);
+		foreach ($this->db->assets->counts($this->match('', $q, $since))->all() as $row) {
+			$counts[(string) $row['kind']] = (int) $row['total'];
+		}
+
+		return new LibraryPage(
+			assets: $list['assets'],
+			page: $page,
+			more: ($offset + count($list['assets'])) < $list['total'],
+			total: $list['total'],
+			counts: $counts,
+		);
+	}
+
+	/**
+	 * A window of the catalog, newest first, with the number of matches.
+	 *
+	 * @param list<string> $kinds
+	 * @return array{assets: list<Asset>, total: int}
+	 */
+	public function list(array $kinds, string $q, ?string $since, int $limit, int $offset): array
+	{
+		$kinds = self::filterKinds($kinds);
+		$args = [
+			...$this->match($kinds === [] ? '' : (string) json_encode($kinds), $q, $since),
+			'limit' => $limit,
+			'offset' => $offset,
+		];
+		$rows = $this->db->assets->list($args)->all();
+
+		return [
+			'assets' => array_map(fn(array $row): Asset => Asset::fromRow($row, $this->config), $rows),
+			// 0 when paging past the end: the window count needs a row to ride on.
+			'total' => $rows === [] ? 0 : (int) $rows[0]['total'],
+		];
+	}
+
+	/** @return array<string, string> */
+	private function match(string $kinds, string $q, ?string $since): array
+	{
+		$args = [];
+
+		if ($kinds !== '') {
+			$args['kinds'] = $kinds;
 		}
 
 		$q = trim($q);
 
 		if ($q !== '') {
 			$args['q'] = '%' . addcslashes($q, '%_\\') . '%';
-			$countArgs['q'] = $args['q'];
 		}
 
 		if ($since !== null) {
 			$args['since'] = $since;
-			$countArgs['since'] = $since;
 		}
 
-		$rows = $this->db->assets->list($args)->all();
-		$counts = array_fill_keys(self::KINDS, 0);
-
-		foreach ($this->db->assets->counts($countArgs)->all() as $row) {
-			$counts[(string) $row['kind']] = (int) $row['total'];
-		}
-
-		return new LibraryPage(
-			assets: array_map(
-				fn(array $row): Asset => Asset::fromRow($row, $this->config),
-				array_slice($rows, 0, self::LIMIT),
-			),
-			page: $page,
-			more: count($rows) > self::LIMIT,
-			// 0 when paging past the end: the window count needs a row to ride on.
-			total: $rows === [] ? 0 : (int) $rows[0]['total'],
-			counts: $counts,
-		);
+		return $args;
 	}
 
 	/**

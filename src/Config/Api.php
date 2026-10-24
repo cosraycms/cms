@@ -15,6 +15,18 @@ final class Api
 		get => self::mount($this->config->get('api.path'));
 	}
 
+	/** @var list<string> */
+	public array $origins {
+		get => array_values(array_filter(
+			(array) $this->config->get('api.origins'),
+			static fn(mixed $origin): bool => is_string($origin) && $origin !== '',
+		));
+	}
+
+	public int $maxAge {
+		get => max(0, (int) $this->config->get('api.max_age'));
+	}
+
 	private static function mount(mixed $path): ?string
 	{
 		if (!is_string($path) || trim($path, " \t/") === '') {

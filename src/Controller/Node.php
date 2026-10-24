@@ -8,16 +8,17 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
+use Cosray\Api\Responses;
+use Cosray\Api\Serializer;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Contract\HttpDelete;
 use Cosray\Contract\HttpGet;
 use Cosray\Contract\HttpPost;
 use Cosray\Contract\HttpPut;
+use Cosray\Contract\Json;
 use Cosray\Exception\RuntimeException;
 use Cosray\Middleware\Permission;
-use Cosray\Node\Factory as NodeFactory;
-use Cosray\Node\Serializer;
 use Cosray\Node\Types;
 use Cosray\Node\View;
 use Cosray\Node\Wrapper;
@@ -97,37 +98,18 @@ class Node
 		}
 
 		if ($request->get('isXhr', false)) {
-			return $this->jsonRead($node, $context, $cms);
+			return $this->jsonRead($node, $context);
 		}
 
 		return new View($inner, $cms, $context, $this->types)->render();
 	}
 
-	private function jsonRead(object $node, Context $context, Cms $cms): Response
+	private function jsonRead(object $node, Context $context): Response
 	{
 		$inner = Wrapper::unwrap($node);
-
-		if (method_exists($inner, 'read')) {
-			$data = $inner->read();
-		} else {
-			$nodeFactory = $cms->nodeFactory();
-			$serializer = new Serializer(
-				$this->types,
-				$nodeFactory->uid(),
-				$context->assets(),
-				$context->paths(),
-			);
-			$data = $serializer->publicRead(
-				$inner,
-				NodeFactory::dataFor($inner),
-				NodeFactory::fieldNamesFor($inner),
-			);
-		}
-
-		$content = json_encode(
-			$data,
-			JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR,
-		);
+		$serializer = new Serializer($context, $this->types);
+		$data = $inner instanceof Json ? $inner->json($serializer) : $serializer->node($node);
+		$content = Responses::encode($data);
 
 		return new Response(
 			$this->factory

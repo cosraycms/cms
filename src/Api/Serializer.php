@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Api;
 
+use Cosray\Assets\Asset;
 use Cosray\Context;
 use Cosray\DateTime\Codec;
 use Cosray\Node\Factory;
@@ -40,14 +41,14 @@ final class Serializer
 		}
 
 		$paths = is_array($data['paths'] ?? null) ? $data['paths'] : [];
-		$wrapper = $node instanceof Wrapper ? $node : null;
+		$wrapper = $node instanceof Wrapper ? $node : new Wrapper($inner, Factory::fieldNamesFor($inner), $this->types);
 		$result = [
 			'uid' => (string) $data['uid'],
 			'type' => (string) ($data['type_handle'] ?? $this->types->get($inner::class, 'handle')),
 			'handle' => $data['handle'] ?? null,
 			'parent' => $data['parent'] ?? null,
 			'locale' => $this->context->localeId(),
-			'title' => $wrapper?->title() ?? '',
+			'title' => $wrapper->title(),
 			'path' => $this->path($paths),
 			'paths' => $paths === [] ? new stdClass() : $paths,
 			'published' => (bool) $data['published'],
@@ -64,6 +65,41 @@ final class Serializer
 		}
 
 		return $result;
+	}
+
+	/**
+	 * A catalog asset: its file, its texts resolved for the locale, and a URL
+	 * for every named size.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function asset(Asset $asset): array
+	{
+		$sizes = [];
+
+		foreach ($this->context->config->media->sizes->names() as $name) {
+			$sizes[$name] = $asset->resizable() ? $asset->sizePath($name) : $asset->path();
+		}
+
+		$credit = $asset->meta['credit'] ?? null;
+		$focal = $asset->meta['focal'] ?? null;
+
+		return [
+			'uid' => $asset->uid,
+			'url' => $asset->path(),
+			'filename' => $asset->filename,
+			'kind' => $asset->kind,
+			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
+			'width' => $asset->width,
+			'height' => $asset->height,
+			'alt' => $this->localized($asset->metaMap('alt')),
+			'title' => $this->localized($asset->metaMap('title')),
+			'caption' => $this->localized($asset->metaMap('caption')),
+			'credit' => is_string($credit) ? $credit : null,
+			'focal' => is_array($focal) ? $focal : null,
+			'sizes' => $sizes,
+		];
 	}
 
 	/**
@@ -130,6 +166,26 @@ final class Serializer
 		}
 
 		return null;
+	}
+
+	/** @param ?array<array-key, mixed> $map */
+	private function localized(?array $map): string
+	{
+		$locale = $this->context->locale();
+
+		while ($locale) {
+			$value = $map[$locale->id] ?? null;
+
+			if (is_string($value) && $value !== '') {
+				return $value;
+			}
+
+			$locale = $locale->fallback();
+		}
+
+		$neutral = $map['zxx'] ?? null;
+
+		return is_string($neutral) ? $neutral : '';
 	}
 
 	private static function instant(mixed $value): ?string

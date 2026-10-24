@@ -86,6 +86,10 @@ final class Defaults
 	{
 		return [
 			'api.path' => null,
+			// Origins whose browser scripts may call the API; '*' allows any.
+			'api.origins' => [],
+			// Seconds shared caches may keep anonymous reads; 0 asks them to revalidate.
+			'api.max_age' => 0,
 		];
 	}
 

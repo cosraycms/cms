@@ -9,8 +9,12 @@ The API is off until a site mounts it:
 ```php
 $app = App::create($root, [
     'api.path' => '/api',
+    'api.origins' => ['https://www.example.com'],
+    'api.max_age' => 60,
 ]);
 ```
+
+`api.origins` lists the origins whose browser scripts may call the API; `'*'` allows any. The API reads no cookies, so it never allows credentials. `api.max_age` lets shared caches keep anonymous reads for that many seconds; without it they revalidate. Responses to requests with a token are never cached.
 
 Node paths at or below `api.path` are refused when saved, like the panel's. `app.url_prefix` applies as for every route: with `/site`, the API answers below `/site/api`.
 
@@ -38,6 +42,10 @@ Responses are JSON. Errors are [problem details](https://www.rfc-editor.org/rfc/
 | `PUT /api/nodes/{uid}` | Creates the node under this uid or replaces its content |
 | `PATCH /api/nodes/{uid}` | Applies a JSON Merge Patch |
 | `DELETE /api/nodes/{uid}` | Soft-deletes the node; `?children=true` takes its descendants along |
+| `GET /api/search` | Full-text search; see [search](#search) |
+| `GET /api/route` | The node at a URL path, or where it moved; see [routing](#routing) |
+| `GET /api/menus`, `GET /api/menus/{handle}` | Menu handles, and one menu's items as the website shows them |
+| `GET /api/assets`, `GET /api/assets/{uid}`, `POST /api/assets` | The asset catalog; see [assets](#assets) |
 
 The field schema lists every field with its `name`, its `type` (the field class as a name: `RichText` reads `rich-text`), `label`, `description`, `required`, `translate` and `translateMode`, and the `options`, `limit`, `syntaxes` or `columns` it declares. Blocks and entries fields add their `rows` with each row type's fields. `default` is the value a new node starts with, in the [source view](#nodes).
 
@@ -112,6 +120,10 @@ A list contains only nodes the client may read, whatever it asks for: anonymous 
 
 `order` defaults to the title. A leading minus sorts descending; `:number`, `:date` and `:datetime` sort a content field by its type instead of as text. Builtins are `uid`, `handle`, `type`, `title`, `created`, `changed`, `published` and `hidden`; `position` follows the manual order among siblings. The uid breaks ties, so pages stay stable.
 
+### Syncing
+
+`changedSince=2026-10-24T08:00:00Z` lists the nodes changed after that time and adds `removed`: up to 1000 nodes of the readable types, with `uid`, `type` and `changed`, that changed after it but no longer pass the state filters because they were unpublished, hidden or deleted. A client keeping a copy, such as a static site build, passes the latest `changed` it has seen and drops the removed ones. Times have whole seconds, so a node changed in the same second may come again.
+
 ### Filters
 
 A filter is an object whose members must all hold. A member maps a field to a value, meaning equality, or to operators:
@@ -169,3 +181,23 @@ Replacing and patching need the type's `change` permission, deleting its `delete
 Every node response carries an `ETag` that changes with each write. Send it as `If-Match` to have a write fail with `412` when the node changed since it was read; `If-None-Match: *` makes a `PUT` create only. Lists carry no tags.
 
 An editor may hold a working copy of a published node in the panel. A `PATCH` applies to the live node and to that copy alike, so publishing it later does not undo the API's change; unpublishing folds the copy into the node, as the panel does. A `PUT` answers `409` while a working copy exists, because replacing the content would leave the copy behind.
+
+## Search
+
+`GET /api/search?q=…` runs a [full-text search](fulltext.md) in the request locale over the nodes with an active URL, ordered by relevance unless `order` names another order. It takes the listing parameters and adds `search` to each item: its `score` and a `snippet` of escaped HTML with the matches marked.
+
+## Routing
+
+`GET /api/route?path=/de/angebot` resolves a URL path the way the website does, so a headless frontend can route its own URLs: it answers `{"node": …}` with the published node at that active path, read in the path's locale unless `?locale=` names one, or `{"redirect": "/de/neu"}` when the path is one the node no longer uses. The website serves any published node with a path, whatever its type, and so does this endpoint; `404` means nothing answers there. The path is the node path, without `app.url_prefix`.
+
+Requesting a page URL itself with `Accept: application/json` answers with the same node representation, unless the node implements `Cosray\Contract\Json` to compose a payload of its own; see [rendering and HTTP hooks](content.md#rendering-and-http-hooks).
+
+## Menus
+
+`GET /api/menus/{handle}` answers with the menu's `items` as the website renders them: hidden items left out and `children` items expanded into the nodes they list. Each item has `id`, `type`, `title`, `href`, the linked `node` uid, `target`, `image`, `class` and its `children`. `GET /api/menus` lists the handles with their descriptions.
+
+## Assets
+
+`GET /api/assets/{uid}` answers with a catalog entry: `uid`, `url`, `filename`, `kind`, `mime`, `bytes`, `width`, `height`, `alt`, `title` and `caption` in the request locale, `credit`, `focal`, and `sizes`. Anyone may read it, as its file is public anyway.
+
+`GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and a `credit`. It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.

@@ -18,6 +18,7 @@ use Cosray\Api\Serializer;
 use Cosray\Api\Writer;
 use Cosray\Cms;
 use Cosray\Exception\ParserException;
+use Cosray\Finder\Order;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
 use Cosray\Security\NodeAccess;
@@ -37,6 +38,25 @@ final class Nodes
 	public function list(Request $request, Cms $cms): Response
 	{
 		return $this->listing($request, $cms, NodeQuery::fromQuery($request->params()));
+	}
+
+	/**
+	 * Full-text search over what the website lists: `q` takes the words,
+	 * every listing parameter narrows the result, and relevance orders it
+	 * unless `order` names another order.
+	 */
+	public function search(Request $request, Cms $cms): Response
+	{
+		$params = $request->params();
+		$q = $params['q'] ?? null;
+
+		if (!is_string($q) || trim($q) === '') {
+			throw new HttpBadRequest($request, payload: ['message' => '`q` names the words to search for.']);
+		}
+
+		unset($params['q']);
+
+		return $this->listing($request, $cms, NodeQuery::fromQuery($params), trim($q));
 	}
 
 	/** The listing with its parameters in a JSON body, for uid lists and filters too long for a URL. */
@@ -134,7 +154,7 @@ final class Nodes
 		return $this->responses->empty();
 	}
 
-	private function listing(Request $request, Cms $cms, NodeQuery $query): Response
+	private function listing(Request $request, Cms $cms, NodeQuery $query, ?string $fulltext = null): Response
 	{
 		$registered = $this->access->registered();
 		$unknown = array_diff($query->types, array_keys($registered));
@@ -169,17 +189,37 @@ final class Nodes
 			$nodes->childrenOf($query->parent);
 		}
 
+		if ($query->changedSince !== null) {
+			$nodes->match(['changed' => ['gt' => $query->changedSince]]);
+		}
+
+		if ($fulltext !== null) {
+			$nodes->fulltext($fulltext);
+		}
+
 		try {
 			if ($query->filter !== null) {
 				$nodes->match($query->filter, NodeQuery::BUILTINS);
 			}
 
 			$total = $nodes->count();
-			$nodes->order(...$query->order)->limit($query->limit)->offset($query->offset);
+
+			if ($fulltext === null || $query->ordered) {
+				$nodes->order(...$query->order);
+			}
+
+			$nodes->limit($query->limit)->offset($query->offset);
 			$items = [];
 
 			foreach ($nodes as $node) {
-				$items[] = $this->serializer->node($node, $query->source, $query->fields);
+				$item = $this->serializer->node($node, $query->source, $query->fields);
+				$search = $node->meta->search;
+
+				if ($search !== null) {
+					$item['search'] = ['score' => $search->score, 'snippet' => (string) $search->snippet->html()];
+				}
+
+				$items[] = $item;
 			}
 		} catch (ParserException $e) {
 			throw new HttpBadRequest($request, payload: ['message' => $e->getMessage()], previous: $e);
@@ -198,12 +238,65 @@ final class Nodes
 			);
 		}
 
-		return $this->responses->json([
-			'items' => $items,
-			'total' => $total,
-			'limit' => $query->limit,
-			'offset' => $query->offset,
-		]);
+		$result = ['items' => $items, 'total' => $total, 'limit' => $query->limit, 'offset' => $query->offset];
+
+		if ($query->changedSince !== null) {
+			$result['removed'] = $this->removed($cms, $query, [...$readable['live'], ...$readable['any']]);
+		}
+
+		return $this->responses->json($result);
+	}
+
+	/**
+	 * Nodes of the readable types that changed since the cutoff but no longer
+	 * pass the state filters, so a client syncing its copy can drop them.
+	 * Only their uid, type and change time are given.
+	 *
+	 * @param list<string> $types
+	 * @return list<array{uid: string, type: string, changed: ?string}>
+	 */
+	private function removed(Cms $cms, NodeQuery $query, array $types): array
+	{
+		$gone = [];
+
+		if ($query->published === true) {
+			$gone[] = ['published' => false];
+		}
+
+		if ($query->hidden === false) {
+			$gone[] = ['hidden' => true];
+		}
+
+		if ($query->deleted === false) {
+			$gone[] = ['deleted' => ['null' => false]];
+		}
+
+		if ($gone === []) {
+			return [];
+		}
+
+		$nodes = $cms
+			->nodes()
+			->published(null)
+			->hidden(null)
+			->deleted(null)
+			->readable([], $types)
+			->match(['changed' => ['gt' => $query->changedSince], 'or' => $gone])
+			->order(new Order('changed'), new Order('uid'))
+			->limit(NodeQuery::MAX_LIMIT);
+
+		if ($query->types !== []) {
+			$nodes->types(...$query->types);
+		}
+
+		$removed = [];
+
+		foreach ($nodes as $node) {
+			$item = $this->serializer->node($node, fields: []);
+			$removed[] = ['uid' => $item['uid'], 'type' => $item['type'], 'changed' => $item['changed']];
+		}
+
+		return $removed;
 	}
 
 	/** A node the client may read; any other answers 404, as if it did not exist. */
