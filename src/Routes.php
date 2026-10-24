@@ -246,6 +246,17 @@ class Routes
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));
 				$panel
+					->get('/profile/tokens', [Panel\Tokens::class, 'index'], 'profile.tokens')
+					->middleware($panelAuth)
+					->after($renderers->get('tokens'));
+				$panel
+					->post('/profile/tokens', [Panel\Tokens::class, 'store'], 'profile.tokens.store')
+					->middleware($panelAuth)
+					->after($renderers->get('tokens'));
+				$panel
+					->post("/profile/tokens/{$uid}/delete", [Panel\Tokens::class, 'revoke'], 'profile.tokens.revoke')
+					->middleware($panelAuth);
+				$panel
 					->post("/users/{$uid}/delete", [Panel\Users::class, 'delete'], 'users.delete')
 					->middleware($panelAuth)
 					->after($renderers->get('editor-save'));

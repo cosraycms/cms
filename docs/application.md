@@ -321,4 +321,4 @@ php run token:list editor@example.com
 php run token:revoke editor@example.com <uid>
 ```
 
-[User\Tokens](../src/User/Tokens.php) is the PHP API. Integrations usually get a user of their own with just the roles they need. Migration `000000-000043-api-tokens.sql` turns the former single token per user into this table and keeps existing tokens; code that maintains `auth_tokens` itself must now also write a unique `uid`, and should write a `name`.
+Panel users manage their own tokens on the profile page, under API tokens. [User\Tokens](../src/User/Tokens.php) is the PHP API. Integrations usually get a user of their own with just the roles they need. Migration `000000-000043-api-tokens.sql` turns the former single token per user into this table and keeps existing tokens; code that maintains `auth_tokens` itself must now also write a unique `uid`, and should write a `name`.

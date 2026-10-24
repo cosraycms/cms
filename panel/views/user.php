@@ -49,6 +49,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 
 		<div class="actions">
 			<output id="editor-status" class="status" role="status"></output>
+			<?php if ($profile): ?>
+				<a class="cms-button secondary" href="<?= escape((string) $panelPath . '/profile/tokens') ?>">
+					<?= escape(__('tokens:title')) ?>
+				</a>
+			<?php endif ?>
 			<?php if (is_string($deleteUrl)): ?>
 				<?php // Its own form: forms cannot nest. A refusal answers with the
 
