@@ -222,6 +222,69 @@ final class ApiReadTest extends End2EndTestCase
 		$this->problem($this->makeRequest('GET', '/api/types/nope'), 404);
 	}
 
+	public function testATypeDescribesTheRowsOfItsBlocksAndEntries(): void
+	{
+		$this->authenticateAs('editor');
+
+		$entries = array_column(
+			$this->json($this->makeRequest('GET', '/api/types/test-node-with-entries'))['fields'],
+			null,
+			'name',
+		);
+		$rows = array_column($entries['entries']['rows'], null, 'type');
+		$this->assertSame(['test-entry', 'test-alternate-entry'], array_keys($rows));
+		$this->assertContains('title', array_column($rows['test-entry']['fields'], 'name'));
+
+		$media = array_column(
+			$this->json($this->makeRequest('GET', '/api/types/test-media-document'))['fields'],
+			null,
+			'name',
+		);
+		$this->assertSame(12, $media['contentBlocks']['columns']);
+		$this->assertContains('text', array_column($media['contentBlocks']['rows'], 'type'));
+	}
+
+	public function testListsSelectByHandleAndParent(): void
+	{
+		$parent = $this->node('api-parent', 'test-widget', [
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Parent']],
+		]);
+		$this->db()->execute(
+			"INSERT INTO cms.node_handles (node, handle, creator, editor) VALUES (:node, 'the-parent', 1, 1)",
+			['node' => $parent],
+		)->run();
+		$this->createTestNode([
+			'uid' => 'api-child',
+			'type' => (int) $this->db()->execute(
+				"SELECT type FROM cms.types WHERE handle = 'test-widget'",
+			)->one()['type'],
+			'parent' => $parent,
+			'content' => ['title' => ['type' => Text::class, 'value' => ['zxx' => 'Child']]],
+		]);
+		$this->authenticateAs('editor');
+
+		$byHandle = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => ['handle' => 'the-parent']]));
+		$children = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => ['parent' => 'api-parent']]));
+
+		$this->assertSame(['api-parent'], array_column($byHandle['items'], 'uid'));
+		$this->assertSame('the-parent', $byHandle['items'][0]['handle']);
+		$this->assertSame(['api-child'], array_column($children['items'], 'uid'));
+		$this->assertSame('api-parent', $children['items'][0]['parent']);
+	}
+
+	public function testATypedOrderThatDoesNotFitTheValuesIsABadRequest(): void
+	{
+		$this->authenticateAs('editor');
+		$this->node('api-typed', 'test-widget', [
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Not a number']],
+		]);
+
+		$this->problem($this->makeRequest('GET', '/api/nodes', ['query' => [
+			'type' => 'test-widget',
+			'order' => 'title:number',
+		]]), 400);
+	}
+
 	public function testTheApiFollowsTheUrlPrefix(): void
 	{
 		$this->app = $this->createApp(['api.path' => '/api', 'app.url_prefix' => '/cms']);
@@ -230,6 +293,14 @@ final class ApiReadTest extends End2EndTestCase
 		$node = $this->json($this->makeRequest('GET', '/cms/api/nodes/api-prefixed'));
 
 		$this->assertSame('/prefixed', $node['path']);
+	}
+
+	protected function createBootstrap(\Cosray\Config $config): \Cosray\Bootstrap
+	{
+		$bootstrap = parent::createBootstrap($config);
+		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestNodeWithEntries::class);
+
+		return $bootstrap;
 	}
 
 	/**
