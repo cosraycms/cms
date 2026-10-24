@@ -64,7 +64,7 @@ final class Editor extends Panel
 
 		return $this->editorContext(
 			mode: 'edit',
-			node: $data,
+			node: $this->embedFields($data, $this->origin()['embed']),
 			context: $context,
 			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
@@ -76,6 +76,11 @@ final class Editor extends Panel
 	public function create(Context $context, Cms $cms, string $type): array
 	{
 		[$nodeObj, $data] = $this->blueprint($cms, $context, $type);
+		$embed = $this->origin()['embed'];
+
+		if ($embed !== null) {
+			$data = $this->embedFields($this->embedContent($data), $embed);
+		}
 
 		return $this->editorContext(
 			mode: 'create',
@@ -304,9 +309,12 @@ final class Editor extends Panel
 			];
 		}
 
-		// The redirect swaps the fresh edit form in; htmx follows it.
+		$edit = $links->edit((string) ($result['uid'] ?? $data['uid']));
+
+		// The redirect swaps the fresh edit form in; htmx follows it. An
+		// embedded editor tells its frame that the node now exists.
 		return Response::create($factory)->redirect(
-			$links->edit((string) ($result['uid'] ?? $data['uid'])),
+			$this->origin()['embed'] === null ? $edit : $edit . (str_contains($edit, '?') ? '&' : '?') . 'created=1',
 			303,
 		);
 	}
@@ -715,7 +723,15 @@ final class Editor extends Panel
 		return null;
 	}
 
-	/** @return array{backUrl: string, backLabel: string, activeCollection: ?string, links: NodeUrls} */
+	/**
+	 * @return array{
+	 *     backUrl: string,
+	 *     backLabel: string,
+	 *     activeCollection: ?string,
+	 *     links: NodeUrls,
+	 *     embed: ?array{origins: list<string>, fields: ?list<string>, lang: ?list<string>, created: bool},
+	 * }
+	 */
 	private function origin(): array
 	{
 		$origin = [
@@ -723,8 +739,21 @@ final class Editor extends Panel
 			'backLabel' => __('nav:home'),
 			'activeCollection' => null,
 			'links' => new NodeUrls($this->panelPath()),
+			'embed' => null,
 		];
 		$from = $this->request->param('from', '');
+
+		if ($from === 'embed' && $this->config->panel->embed !== []) {
+			$embed = $this->embed();
+
+			return array_replace($origin, [
+				'links' => new NodeUrls($this->panelPath(), 'embed', extra: array_filter([
+					'fields' => implode(',', $embed['fields'] ?? []),
+					'lang' => implode(',', $embed['lang'] ?? []),
+				])),
+				'embed' => $embed,
+			]);
+		}
 
 		if ($from === 'dashboard' && $this->config->panel->dashboard) {
 			return array_replace($origin, [
@@ -751,7 +780,101 @@ final class Editor extends Panel
 			'backLabel' => __($ref->meta->label),
 			'activeCollection' => $slug,
 			'links' => new NodeUrls($this->panelPath(), $from, $query),
+			'embed' => null,
 		];
+	}
+
+	/**
+	 * The embedded editor's request: the origins that may frame it, the
+	 * fields and locales it is limited to, and whether a node was just
+	 * created.
+	 *
+	 * @return array{origins: list<string>, fields: ?list<string>, lang: ?list<string>, created: bool}
+	 */
+	private function embed(): array
+	{
+		$list = function (string $name): ?array {
+			$value = $this->request->param($name, '');
+
+			if (!is_string($value) || trim($value) === '') {
+				return null;
+			}
+
+			return array_values(array_filter(
+				array_map(trim(...), explode(',', $value)),
+				static fn(string $item): bool => preg_match('/^[A-Za-z0-9_-]{1,64}$/', $item) === 1,
+			));
+		};
+
+		return [
+			'origins' => $this->config->panel->embed,
+			'fields' => $list('fields'),
+			'lang' => $list('lang'),
+			'created' => $this->request->param('created', '') === '1',
+		];
+	}
+
+	/**
+	 * Narrows an embedded editor to the fields it asked for. Fields left
+	 * out are not submitted, and the save leaves them as they are.
+	 *
+	 * @param array<string, mixed> $data
+	 * @param ?array{fields: ?list<string>} $embed
+	 * @return array<string, mixed>
+	 */
+	private function embedFields(array $data, ?array $embed): array
+	{
+		$names = $embed['fields'] ?? null;
+
+		if ($names === null) {
+			return $data;
+		}
+
+		$data['fields'] = array_values(array_filter(
+			is_array($data['fields'] ?? null) ? $data['fields'] : [],
+			static fn(mixed $field): bool => is_array($field) && in_array($field['name'] ?? null, $names, true),
+		));
+		$data['fieldsets'] = array_values(array_filter(array_map(
+			static function (mixed $fieldset) use ($names): ?array {
+				if (!is_array($fieldset)) {
+					return null;
+				}
+
+				$fieldset['fields'] = array_values(array_intersect(
+					is_array($fieldset['fields'] ?? null) ? $fieldset['fields'] : [],
+					$names,
+				));
+
+				return $fieldset['fields'] === [] ? null : $fieldset;
+			},
+			is_array($data['fieldsets'] ?? null) ? $data['fieldsets'] : [],
+		)));
+
+		return $data;
+	}
+
+	/**
+	 * Values an embedding application fills in before the editor opens: a
+	 * JSON object of fields in the API's source shape.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
+	private function embedContent(array $data): array
+	{
+		$given = json_decode((string) $this->request->param('content', ''), true);
+
+		if (!is_array($given)) {
+			return $data;
+		}
+
+		foreach ($given as $name => $value) {
+			if (is_array($value) && is_array($data['content'][$name] ?? null)) {
+				$data['content'][$name] = array_replace_recursive($data['content'][$name], $value);
+			}
+		}
+
+		return $data;
 	}
 
 	private function types(): Types
@@ -863,13 +986,24 @@ final class Editor extends Panel
 			],
 			iterator_to_array($context->locales(), false),
 		);
+		$languages = $this->origin()['embed']['lang'] ?? null;
+
+		if ($languages !== null) {
+			$narrowed = array_values(array_filter(
+				$locales,
+				static fn(array $locale): bool => in_array($locale['id'], $languages, true),
+			));
+			$locales = $narrowed === [] ? $locales : $narrowed;
+		}
 
 		return $this->context([
 			...$this->origin(),
 			'mode' => $mode,
 			'node' => $node,
 			'locales' => $locales,
-			'defaultLocale' => $context->locales()->getDefault()->id,
+			'defaultLocale' => in_array($context->locales()->getDefault()->id, array_column($locales, 'id'), true)
+				? $context->locales()->getDefault()->id
+				: $locales[0]['id'],
 			'system' => new System($this->config, $context->locales())->payload(),
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,

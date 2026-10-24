@@ -56,6 +56,21 @@
 	--cms-pane-border-end: 0;
 }
 
+/* An embedded editor fills its frame, which another application provides. */
+.cms-embed {
+	--cms-pane-radius-start: 0;
+	--cms-pane-border-start: 0;
+	--cms-pane-radius-end: 0;
+	--cms-pane-border-end: 0;
+
+	display: flex;
+	flex-direction: column;
+	height: 100dvh;
+	min-height: 0;
+	background: var(--cms-color-surface);
+	overflow: hidden;
+}
+
 .cms-masthead {
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);

@@ -57,6 +57,7 @@ WHERE
 	AND (at.expires IS NULL OR at.expires > now())
 <?php elseif (isset($onetimetoken)): ?>
 	ott.token = :onetimetoken
+	AND ott.created >= now() - interval '5 minutes'
 <?php else: ?>
 	u.uid = :uid
 <?php endif ?>

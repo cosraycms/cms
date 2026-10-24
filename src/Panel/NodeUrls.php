@@ -6,10 +6,12 @@ namespace Cosray\Panel;
 
 final class NodeUrls
 {
+	/** @param array<string, string> $extra query parameters every link carries along */
 	public function __construct(
 		private readonly string $panelPath,
 		private readonly string $from = '',
 		private readonly ?CollectionQuery $listing = null,
+		private readonly array $extra = [],
 	) {}
 
 	public function edit(string $uid): string
@@ -60,12 +62,13 @@ final class NodeUrls
 		return $this->panelPath . '/node/' . rawurlencode($uid);
 	}
 
-	/** @return array{from: string, list: ?array<string, mixed>} */
+	/** @return array<string, mixed> */
 	private function origin(): array
 	{
 		return [
 			'from' => $this->from,
 			'list' => $this->listing?->editorParams(),
+			...$this->extra,
 		];
 	}
 

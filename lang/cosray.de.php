@@ -135,6 +135,7 @@ return [
 		'dashboard:recent-changes' => [':count seit letzter Woche', ':count seit letzter Woche'],
 		'dashboard:recent-empty' => 'Es wurden noch keine Einträge bearbeitet.',
 		'dashboard:storage-used' => ':size belegt',
+		'editor:cancel' => 'Abbrechen',
 		'editor:changes' => 'Änderungen',
 		'editor:changes-by' => 'von :editor',
 		'editor:changes-discard' => 'Verwerfen',

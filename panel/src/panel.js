@@ -13,6 +13,7 @@ import { install as installChrome } from './behaviors/chrome.js';
 import { install as installCollectionOrder } from './behaviors/collection-order.js';
 import { install as installColor } from './behaviors/color.js';
 import { install as installDirty } from './behaviors/dirty.js';
+import { install as installEmbed } from './behaviors/embed.js';
 import { install as installErrors } from './behaviors/errors.js';
 import { install as installFallbacks } from './behaviors/fallbacks.js';
 import { install as installGhosts } from './behaviors/ghosts.js';
@@ -92,6 +93,7 @@ function bootEditor() {
 document.addEventListener('keydown', focusSearch);
 installActionMenus();
 installDirty();
+installEmbed();
 installContentLocales();
 installTabs();
 installInspector();

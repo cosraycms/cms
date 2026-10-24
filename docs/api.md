@@ -225,3 +225,15 @@ Webhooks tell other systems that content changed, such as a static site build or
 Events are `node.created`, `node.updated` for a live write, publishing and unpublishing included, `node.draft` when an editor's working copy is saved or dropped, and `node.deleted`; `events` takes names, `node.*` or `*`, the default. Each event is a `POST` of `{"id", "event", "at", "uid", "type"}` with `X-Cosray-Event` and `X-Cosray-Delivery` headers; with a `secret`, `X-Cosray-Signature` carries `sha256=` and the HMAC-SHA256 of the body. Read the node through the API for its new state.
 
 Deliveries go out when the request ends, in parallel, with a two-second connection and five-second total timeout; a failed delivery is logged as a warning and not retried. A hook that needs every change should therefore also sync with [`changedSince`](#syncing) now and then.
+
+## Embedded editing
+
+An application can frame the panel's editor for its own users, limited to the fields it needs. Allow its origin first; the panel answers every page with `Content-Security-Policy: frame-ancestors 'self'` and the origins listed here:
+
+```php
+'panel.embed' => ['https://admin.example.com'],
+```
+
+The application's server exchanges a panel user's API token for a link that opens a panel session once, within five minutes: `POST /api/handoff` with `{"next": "/node/{uid}?from=embed&fields=title,intro&lang=de,en"}` answers `{"token", "url", "expires"}`. The frame loads `url`, which logs the user in and follows `next`, a path inside the panel. The session cookie reaches the frame only when both applications share a site, like `admin.example.com` and `cms.example.com`, or when `session.options` sets `cookie_samesite` to `None`.
+
+With `from=embed`, the editor renders without the panel's masthead and navigation, shows only the `fields` named and the locales in `lang`, and publishes on save. `/node/create/{type}?from=embed&content={json}` opens a new node with the given source values filled in. The frame posts `{type, uid}` to the allowed origins: `cms-dirty` and `cms-pristine` as unsaved changes come and go, `cms-ok` after a save or, with `created: true`, after creating, and `cms-cancel` when the user cancels.

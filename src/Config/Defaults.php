@@ -79,6 +79,8 @@ final class Defaults
 			'panel.dashboard' => true,
 			// Default panel UI language; NULL negotiates from the browser.
 			'panel.locale' => null,
+			// Origins that may frame the panel's embedded editor.
+			'panel.embed' => [],
 		];
 	}
 

@@ -4,7 +4,9 @@ use Cosray\Panel\ContentLocales;
 
 use function Cosray\escape;
 
-$this->layout('layer/main');
+$embed = u($embed ?? null);
+$embed = is_array($embed) ? $embed : null;
+$this->layout($embed === null ? 'layer/main' : 'layer/embed');
 
 $mode = (string) $mode;
 $backUrl = (string) u($backUrl);
@@ -35,19 +37,29 @@ $draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
 $contentLocales = ContentLocales::used($fields, count($locales));
 $showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
+$showSettings = $showSettings && $embed === null;
 $action = $edit
 	? $links->edit($uid)
 	: $links->create((string) ($type['handle'] ?? ''), $parent);
 ?>
 
-<div class="page cms-node">
+<div
+	class="page cms-node"
+	<?php if ($embed !== null): ?>
+		data-embed
+		data-embed-uid="<?= escape($uid) ?>"
+		data-embed-origins='<?= json_encode($embed['origins'] ?? [], $jsonFlags) ?>'
+		<?= ($embed['created'] ?? false) ? 'data-embed-created' : '' ?>
+	<?php endif ?>>
 	<header class="head">
 		<div class="titles">
-			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
-				<span class="sep" aria-hidden="true">/</span>
-				<span><?= escape($edit ? __('editor:mode-edit') : __('editor:mode-create')) ?></span>
-			</nav>
+			<?php if ($embed === null): ?>
+				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
+					<span class="sep" aria-hidden="true">/</span>
+					<span><?= escape($edit ? __('editor:mode-edit') : __('editor:mode-create')) ?></span>
+				</nav>
+			<?php endif ?>
 			<div class="line">
 				<h1><?= $node['title'] ?? '' ?></h1>
 				<?php if ($renderable): ?>
@@ -70,6 +82,15 @@ $action = $edit
 
 		<div class="actions">
 			<output id="editor-status" class="status" role="status"></output>
+			<?php if ($embed !== null): ?>
+				<button class="cms-button secondary" type="button" data-embed-cancel>
+					<?= escape(__('editor:cancel')) ?>
+				</button>
+				<button class="cms-button primary" type="submit" form="node-editor-form" data-editor-submit>
+					<?= \Cosray\Panel\Icon::render('floppy') ?>
+					<?= escape(__('editor:save')) ?>
+				</button>
+			<?php else: ?>
 			<?php if ($edit && $deletable): ?>
 				<?php // Its own form: the editor form wraps the panes, and forms
 
@@ -129,6 +150,7 @@ $action = $edit
 				</button>
 				<?php $this->include('node/save-options', ['draft' => $draft]) ?>
 			</div>
+			<?php endif ?>
 		</div>
 	</header>
 
@@ -155,6 +177,10 @@ $action = $edit
 			<div class="pane-scroll">
 				<div class="inner">
 					<div id="editor-errors" class="errors" hidden></div>
+					<?php if ($embed !== null): ?>
+						<?php // The embedding application reads live content: its saves publish. ?>
+						<input type="hidden" name="publish" value="1" />
+					<?php endif ?>
 					<?php if (!$edit): ?>
 						<?php // A new node carries the blueprint uid so media uploaded
 

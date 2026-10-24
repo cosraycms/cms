@@ -226,8 +226,10 @@ class Users
 		])->run();
 	}
 
+	/** A token valid for five minutes and one use, to hand a user over into a panel session. */
 	public function createOneTimeToken(int $userId): string
 	{
+		$this->db->users->cleanUpOneTimeTokens()->run();
 		$token = bin2hex(random_bytes(32));
 
 		$this->db->users->saveOneTimeToken([

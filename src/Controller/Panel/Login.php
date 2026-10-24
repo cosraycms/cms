@@ -93,6 +93,30 @@ final class Login extends Panel
 		return $this->redirect($factory, $this->sanitizedNext($data['next'] ?? ''));
 	}
 
+	/**
+	 * Logs in the user a one-time token was issued for, then follows `next`
+	 * inside the panel: how an embedding application hands its user over.
+	 */
+	public function handoff(
+		Factory $factory,
+		#[\SensitiveParameter]
+		string $token,
+	): Response {
+		$user = $this->auth->authenticateByOneTimeToken($token, true);
+
+		if ($user === false) {
+			return $this->redirect($factory, $this->panelPath() . '/login');
+		}
+
+		if (!$this->policy()->permits($user, 'panel')) {
+			$this->auth->logout();
+
+			return $this->redirect($factory, $this->panelPath() . '/login');
+		}
+
+		return $this->redirect($factory, $this->sanitizedNext());
+	}
+
 	public function logout(Factory $factory): Response
 	{
 		$user = $this->auth->user();

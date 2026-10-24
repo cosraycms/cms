@@ -30,6 +30,19 @@ final class Panel
 		get => $this->config->get('panel.dashboard');
 	}
 
+	/**
+	 * Origins that may frame the panel and its embedded editor, like
+	 * `https://admin.example.com`.
+	 *
+	 * @var list<string>
+	 */
+	public array $embed {
+		get => array_values(array_filter(
+			(array) $this->config->get('panel.embed'),
+			static fn(mixed $origin): bool => is_string($origin) && preg_match('#^https?://[^/\s]+$#i', $origin) === 1,
+		));
+	}
+
 	/** Default panel UI language; NULL negotiates from the browser. */
 	public ?string $locale {
 		get => $this->config->get('panel.locale');
