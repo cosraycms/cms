@@ -65,6 +65,18 @@ final class WebhooksTest extends TestCase
 		$this->assertStringContainsString('no response', $logger->records[0][1]);
 	}
 
+	public function testAnUnreachableHookIsLoggedAsWithoutResponse(): void
+	{
+		$logger = new RecordingLogger();
+		$webhooks = new Webhooks([['url' => 'http://127.0.0.1:9/hook', 'secret' => 'x']], $logger);
+
+		$webhooks->record('node.created', ['uid' => 'new', 'type' => 'page']);
+		$webhooks->deliver();
+
+		$this->assertCount(1, $logger->records);
+		$this->assertStringContainsString('no response', $logger->records[0][1]);
+	}
+
 	public function testHooksNeedAnHttpUrl(): void
 	{
 		$this->expectException(RuntimeException::class);

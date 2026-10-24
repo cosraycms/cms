@@ -52,6 +52,19 @@ final class PanelEmbedTest extends End2EndTestCase
 		$this->assertSame('/panel/login', $response->getHeaderLine('Location'));
 	}
 
+	public function testAHandoffForAUserWithoutPanelAccessOpensNothing(): void
+	{
+		$usr = $this->createTestUser(['uid' => 'no-panel', 'role' => 'unknown-role']);
+		$token = new \Cosray\Users($this->db())->createOneTimeToken($usr);
+
+		$response = $this->makeRequest('GET', '/panel/handoff/' . $token, ['authToken' => '']);
+
+		$this->assertSame('/panel/login', $response->getHeaderLine('Location'));
+		$this->assertStringStartsWith('/panel/login', $this->makeRequest('GET', '/panel', [
+			'authToken' => '',
+		])->getHeaderLine('Location'));
+	}
+
 	public function testAHandoffNeedsTheTokenOfAPanelUser(): void
 	{
 		$this->assertSame(401, $this->handoff([])['status']);
