@@ -25,9 +25,11 @@ class Str extends Value
 	}
 
 	#[Override]
-	public function json(): string
+	public function json(): ?string
 	{
-		return $this->raw();
+		$raw = $this->raw();
+
+		return $raw === '' ? null : $raw;
 	}
 
 	#[Override]

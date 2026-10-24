@@ -36,12 +36,13 @@ final readonly class ReservedPaths
 
 	public static function fromConfig(Config $config): self
 	{
-		return new self([
+		return new self(array_values(array_filter([
 			$config->panel->path,
+			$config->api->path,
 			$config->path->assets,
 			$config->path->cache,
 			'/preview',
-		]);
+		])));
 	}
 
 	/** The reserved prefix the path falls under, if any. */

@@ -19,6 +19,7 @@ final class Defaults
 			self::auth($env),
 			self::paths($root),
 			self::panel($root),
+			self::api(),
 			self::error(),
 			self::icons(),
 			self::database(),
@@ -77,6 +78,14 @@ final class Defaults
 			'panel.dashboard' => true,
 			// Default panel UI language; NULL negotiates from the browser.
 			'panel.locale' => null,
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function api(): array
+	{
+		return [
+			'api.path' => null,
 		];
 	}
 

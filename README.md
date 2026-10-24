@@ -57,6 +57,7 @@ These links describe a source checkout. Distribution archives omit development d
 | Block types, translation, storage, frontend rendering | [Blocks](docs/blocks.md) |
 | Richtext storage and validation | [Richtext format](docs/richtext-format.md) |
 | Search selection, queries, safe snippets, deployment | [Full-text search](docs/fulltext.md) |
+| Headless delivery and integrations over JSON | [API](docs/api.md) |
 | CSS conventions and the live styleguide | [Panel styles](docs/panel-styles.md) |
 | Current shortcuts and keyboard considerations | [Panel keyboard](docs/panel-keyboard.md) |
 | PHP tests and isolated database setup | [Testing](tests/README.md) |

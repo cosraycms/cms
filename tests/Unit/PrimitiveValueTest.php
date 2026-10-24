@@ -1053,7 +1053,7 @@ final class PrimitiveValueTest extends TestCase
 		$value = $field->value();
 
 		$this->assertSame('', $value->raw());
-		$this->assertSame('', $value->json());
+		$this->assertNull($value->json());
 		$this->assertSame('', (string) $value);
 		$this->assertFalse($value->isset());
 	}

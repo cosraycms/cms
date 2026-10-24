@@ -51,6 +51,15 @@ final class ReservedPathsTest extends TestCase
 		$this->assertNull($reserved->match('/assets/logo.svg'));
 	}
 
+	public function testReservesTheApiOnlyWhenItIsMounted(): void
+	{
+		$this->assertNull(ReservedPaths::fromConfig($this->config())->match('/api/nodes'));
+		$this->assertSame(
+			'/api',
+			ReservedPaths::fromConfig($this->config(['api.path' => 'api/']))->match('/api/nodes'),
+		);
+	}
+
 	public function testRootPrefixReservesNothing(): void
 	{
 		$this->assertNull(new ReservedPaths(['/'])->match('/about'));

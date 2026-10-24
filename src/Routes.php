@@ -18,6 +18,8 @@ use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\PanelLocale;
 use Cosray\Middleware\Session;
 use Cosray\Security\Policy;
+use Psr\Log\LoggerInterface as Logger;
+use Psr\Log\NullLogger;
 
 class Routes
 {
@@ -38,6 +40,7 @@ class Routes
 		protected Users $users,
 		protected array $pluginRoutes = [],
 		protected array $panelPages = [],
+		protected Logger $logger = new NullLogger(),
 	) {
 		$this->panelPath = $config->panel->path;
 		$this->frontendSession = $config->session->enabled;
@@ -75,6 +78,7 @@ class Routes
 		)->middleware($this->session);
 
 		$this->addPanel($app);
+		$this->addApi($app);
 
 		foreach ($this->pluginRoutes as $addRoutes) {
 			$addRoutes($app);
@@ -101,6 +105,21 @@ class Routes
 		}
 
 		return $catchallRoute;
+	}
+
+	protected function addApi(App $app): void
+	{
+		$path = $this->config->api->path;
+
+		if ($path === null) {
+			return;
+		}
+
+		$responses = new Api\Responses($this->factory);
+		new Api\Routes(
+			new Api\Problems($responses, $this->logger, $this->config->debug()),
+			$this->users,
+		)->add($app, $path);
 	}
 
 	protected function addPanel(App $app): void

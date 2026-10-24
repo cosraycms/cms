@@ -309,7 +309,7 @@ final class Footer {}
 final class Product {}
 ```
 
-Actions a type leaves out keep their defaults, and a single string applies to every action. [Security\NodeAccess](../src/Security/NodeAccess.php) evaluates them. The API enforces them; the panel still only checks `panel`.
+Actions a type leaves out keep their defaults, and a single string applies to every action. [Security\NodeAccess](../src/Security/NodeAccess.php) evaluates them. The [API](api.md) enforces them; the panel still only checks `panel`.
 
 ### API tokens
 

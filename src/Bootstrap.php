@@ -188,6 +188,7 @@ class Bootstrap implements CorePlugin
 			$users,
 			$this->pluginRoutes,
 			$this->panelPages,
+			new ContainerLogger($this->container),
 		);
 		$this->routes->add($app);
 	}

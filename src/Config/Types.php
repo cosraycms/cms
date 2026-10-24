@@ -42,6 +42,8 @@ namespace Cosray\Config;
  *     'panel.dashboard': bool,
  *     'panel.locale': ?string,
  *
+ *     'api.path': ?string,
+ *
  *     'error.enabled': bool,
  *     'error.renderer': null|class-string<\Celema\Core\Error\Renderer>|\Celema\Core\Error\Renderer,
  *     'error.trusted': list<class-string>,

@@ -83,6 +83,49 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
+	/**
+	 * A structured filter, see Filter; `$builtins` limits the builtins it
+	 * may use, null allows all.
+	 *
+	 * @param array<array-key, mixed> $filter
+	 * @param ?list<string> $builtins
+	 */
+	public function match(array $filter, ?array $builtins = null): self
+	{
+		$this->addWhere(new Filter($this->context, $this->builtins, $builtins)->compile($filter));
+
+		return $this;
+	}
+
+	/**
+	 * Only what a reader may see: nodes of the `$any` types in every state,
+	 * nodes of the `$live` types when published and not deleted.
+	 *
+	 * @param list<string> $live type handles
+	 * @param list<string> $any type handles
+	 */
+	public function readable(array $live, array $any): self
+	{
+		$in = fn(array $handles): string => (
+			't.handle IN ('
+			. implode(', ', array_map(fn(string $handle): string => $this->context->db->quote($handle), $handles))
+			. ')'
+		);
+		$conditions = [];
+
+		if ($any !== []) {
+			$conditions[] = $in($any);
+		}
+
+		if ($live !== []) {
+			$conditions[] = '(' . $in($live) . ' AND n.published AND n.deleted IS NULL)';
+		}
+
+		$this->addWhere($conditions === [] ? 'FALSE' : '(' . implode(' OR ', $conditions) . ')');
+
+		return $this;
+	}
+
 	public function fulltext(string $query): self
 	{
 		$this->fulltext = $query;

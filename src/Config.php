@@ -23,6 +23,7 @@ class Config
 	private ?Config\Auth $authConfig = null;
 	private ?Config\Path $pathConfig = null;
 	private ?Config\Panel $panelConfig = null;
+	private ?Config\Api $apiConfig = null;
 	private ?Config\Error $errorConfig = null;
 	private ?Config\Icons $iconsConfig = null;
 	private ?Config\Database $dbConfig = null;
@@ -47,6 +48,10 @@ class Config
 
 	public Config\Panel $panel {
 		get => $this->panelConfig ??= new Config\Panel($this);
+	}
+
+	public Config\Api $api {
+		get => $this->apiConfig ??= new Config\Api($this);
 	}
 
 	public Config\Error $error {
