@@ -90,6 +90,7 @@ final class PanelEmbedTest extends End2EndTestCase
 		$this->assertStringContainsString('data-embed-cancel', $html);
 		$this->assertStringContainsString('name="publish" value="1"', $html);
 		$this->assertStringContainsString('content[intro]', $html);
+		$this->assertStringContainsString('data-content-locale-control', $html);
 		$this->assertStringNotContainsString('content[title]', $html);
 		$this->assertStringNotContainsString('cms-shell', $html);
 	}

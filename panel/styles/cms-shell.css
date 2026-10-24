@@ -71,6 +71,10 @@
 	overflow: hidden;
 }
 
+.cms-embed-locales {
+	margin-block-end: var(--cms-space-4);
+}
+
 .cms-masthead {
 	--hover-bg: var(--cms-color-hover);
 	--current-bg: var(--cms-button-secondary-bg);

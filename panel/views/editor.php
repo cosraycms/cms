@@ -180,6 +180,14 @@ $action = $edit
 					<?php if ($embed !== null): ?>
 						<?php // The embedding application reads live content: its saves publish. ?>
 						<input type="hidden" name="publish" value="1" />
+						<?php if ($contentLocales): ?>
+							<div class="cms-embed-locales">
+								<?php $this->include('component/content-locales', [
+									'locales' => $locales,
+									'selected' => $defaultLocale,
+								]) ?>
+							</div>
+						<?php endif ?>
 					<?php endif ?>
 					<?php if (!$edit): ?>
 						<?php // A new node carries the blueprint uid so media uploaded
