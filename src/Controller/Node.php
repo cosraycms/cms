@@ -117,7 +117,7 @@ class Node
 				$context->assets(),
 				$context->paths(),
 			);
-			$data = $serializer->read(
+			$data = $serializer->publicRead(
 				$inner,
 				NodeFactory::dataFor($inner),
 				NodeFactory::fieldNamesFor($inner),

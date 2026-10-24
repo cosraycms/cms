@@ -52,4 +52,38 @@ final class ContentNegotiationTest extends End2EndTestCase
 		$this->assertSame('Negotiated', $payload['title'] ?? null);
 		$this->assertSame('/negotiation-test', $payload['paths']['en'] ?? null);
 	}
+
+	public function testPageJsonExposesNoUserData(): void
+	{
+		$type = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-page'",
+		)->one();
+		$user = $this->createTestUser([
+			'uid' => 'negotiation-editor',
+			'username' => 'negotiation-login',
+			'email' => 'negotiation-editor@example.com',
+			'data' => ['name' => 'Negotiation Editor', 'phone' => '+49 951 0000000'],
+		]);
+		$nodeId = $this->createTestNode([
+			'uid' => 'negotiation-private',
+			'type' => (int) $type['type'],
+			'creator' => $user,
+			'editor' => $user,
+			'content' => [
+				'title' => ['type' => Text::class, 'value' => ['en' => 'Public title']],
+			],
+		]);
+		$this->createTestPath($nodeId, '/negotiation-private');
+
+		$response = $this->makeRequest('GET', '/negotiation-private', [
+			'headers' => ['Accept' => 'application/json'],
+		]);
+
+		$payload = $this->assertJsonResponse($response, 200);
+		$this->assertSame('Public title', $payload['content']['title']['value']['en'] ?? null);
+		$body = (string) $response->getBody();
+		$this->assertStringNotContainsString('negotiation-editor@example.com', $body);
+		$this->assertStringNotContainsString('negotiation-login', $body);
+		$this->assertStringNotContainsString('+49 951 0000000', $body);
+	}
 }

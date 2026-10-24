@@ -185,6 +185,33 @@ class Serializer
 	}
 
 	/**
+	 * The node as its public URL serves it as JSON. Keep this an allowlist:
+	 * user records, working copies and editor descriptors must stay out.
+	 *
+	 * @param array<mixed> $rawData
+	 * @param list<string> $fieldNames
+	 * @return array<string, mixed>
+	 */
+	public function publicRead(object $node, array $rawData, array $fieldNames): array
+	{
+		return [
+			'title' => $this->resolveTitle($node),
+			'uid' => $rawData['uid'],
+			'handle' => $rawData['handle'] ?? null,
+			'type' => $this->resolveType($node::class, $rawData['type_handle'] ?? null),
+			'parent' => $rawData['parent'] ?? null,
+			'published' => $rawData['published'],
+			'hidden' => $rawData['hidden'],
+			'created' => $rawData['created'],
+			'changed' => $rawData['changed'],
+			'paths' => $rawData['paths'],
+			'content' => $this->content($node, $rawData, $fieldNames),
+			'assets' => $this->assetMap($rawData['content'] ?? null),
+			'nodePaths' => $this->pathMap($rawData['content'] ?? null),
+		];
+	}
+
+	/**
 	 * Locale-to-path maps for every node uid the content references
 	 * (richtext `link.node`); consumers resolve internal links through
 	 * this map, mirroring the assets map.

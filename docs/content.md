@@ -296,7 +296,7 @@ A computed title depending on other nodes or external state can become stale: sa
 
 Templates receive `$node` as a wrapper, with `children()`, `path()`, `meta`, and value properties. `$cms->render('downloads')` resolves a handle first and then a UID for embedded rendering.
 
-[Cosray\Contract](../src/Contract/) contains `HttpGet`, `HttpPost`, `HttpPut`, and `HttpDelete`. Their argument-free hooks run on the node's own path before CMS defaults and take over content negotiation. Without a hook, GET renders the view or returns JSON for `Accept: application/json`; other methods answer `400`. `Cosray\Util\Form::body($request)` reads parsed, JSON, or urlencoded bodies where needed.
+[Cosray\Contract](../src/Contract/) contains `HttpGet`, `HttpPost`, `HttpPut`, and `HttpDelete`. Their argument-free hooks run on the node's own path before CMS defaults and take over content negotiation. Without a hook, GET renders the view or returns JSON for `Accept: application/json`; other methods answer `400`. The JSON carries the node's identity, state, paths and content with maps of the assets and node paths it references, but no user data, working copy or editor descriptors. `Cosray\Util\Form::body($request)` reads parsed, JSON, or urlencoded bodies where needed.
 
 An injected [Node\View](../src/Node/View.php) renders the node's own view: `render($context)` returns a response and `output($context)` a string. `ViewContext::viewContext(Wrapper $node)` supplies additional template variables for both served and embedded rendering; explicit view context wins over hook defaults.
 
