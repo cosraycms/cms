@@ -43,6 +43,7 @@ final class Defaults
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 			'app.url_prefix' => '',
 			'plugins' => [],
+			'webhooks' => [],
 		];
 	}
 

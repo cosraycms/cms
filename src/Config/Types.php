@@ -27,6 +27,7 @@ namespace Cosray\Config;
  *     'app.url_prefix': string,
  *
  *     'plugins': list<class-string<\Cosray\Plugin\Plugin>|\Cosray\Plugin\Plugin>,
+ *     'webhooks': list<array{url: string, secret?: ?string, events?: list<string>}>,
  *
  *     'auth.remember_lifetime': int,
  *

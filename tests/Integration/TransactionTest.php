@@ -27,6 +27,64 @@ final class TransactionTest extends IntegrationTestCase
 		$this->assertSame([1], $this->values($db));
 	}
 
+	public function testAfterCommitCallbacksWaitForTheOutermostRun(): void
+	{
+		$db = $this->db();
+		$calls = [];
+
+		Transaction::afterCommit($db, static function () use (&$calls): void {
+			$calls[] = 'outside';
+		});
+		Transaction::run($db, static function () use ($db, &$calls): void {
+			Transaction::run($db, static function () use ($db, &$calls): void {
+				Transaction::afterCommit($db, static function () use (&$calls): void {
+					$calls[] = 'inner';
+				});
+			});
+			$calls[] = 'outer work done';
+		});
+
+		$this->assertSame(['outside', 'outer work done', 'inner'], $calls);
+	}
+
+	public function testAfterCommitCallbacksOfUndoneWorkAreDropped(): void
+	{
+		$db = $this->db();
+		$calls = [];
+
+		Transaction::run($db, static function () use ($db, &$calls): void {
+			try {
+				Transaction::run($db, static function () use ($db, &$calls): never {
+					Transaction::afterCommit($db, static function () use (&$calls): void {
+						$calls[] = 'undone';
+					});
+
+					throw new RuntimeException('inner work failed');
+				});
+			} catch (RuntimeException) {
+				$calls[] = 'caught';
+			}
+
+			Transaction::afterCommit($db, static function () use (&$calls): void {
+				$calls[] = 'kept';
+			});
+		});
+
+		try {
+			Transaction::run($db, static function () use ($db): never {
+				Transaction::afterCommit($db, static function (): void {
+					throw new RuntimeException('Must not run');
+				});
+
+				throw new RuntimeException('outer work failed');
+			});
+		} catch (RuntimeException $e) {
+			$this->assertSame('outer work failed', $e->getMessage());
+		}
+
+		$this->assertSame(['caught', 'kept'], $calls);
+	}
+
 	public function testFailedWorkIsRolledBackAndItsExceptionRethrown(): void
 	{
 		$db = $this->session();

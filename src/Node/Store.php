@@ -23,6 +23,7 @@ use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
 use Cosray\Util\Transaction;
 use Cosray\Validation\ValidatorFactory;
+use Cosray\Webhooks;
 use DateTimeInterface;
 use Throwable;
 
@@ -83,6 +84,7 @@ class Store
 			fn() => $this->persist($node, $data, $actor->id, $locales, $create),
 			'Error while saving: ',
 		);
+		$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -104,6 +106,7 @@ class Store
 			$this->drafts->delete($nodeId, published: true);
 			$this->sync->remove('draft', $data['uid']);
 		}, 'Error while publishing: ');
+		$this->event('node.updated', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -147,6 +150,7 @@ class Store
 				])->run();
 			}
 		}, 'Error while saving the working copy: ');
+		$this->event('node.draft', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -160,6 +164,7 @@ class Store
 			$this->drafts->delete($nodeId);
 			$this->sync->remove('draft', $uid);
 		}, 'Error while discarding: ');
+		$this->event('node.draft', $node, $uid);
 	}
 
 	/**
@@ -176,6 +181,7 @@ class Store
 				'published' => false,
 				'editor' => $actor->id,
 			])->run();
+			$this->event('node.updated', $node, (string) Factory::meta($node, 'uid'));
 
 			return;
 		}
@@ -276,6 +282,23 @@ class Store
 		return $data;
 	}
 
+	/**
+	 * Records a webhook event once the write is committed. A descendant
+	 * deleted with its parent is reported with the parent's type.
+	 */
+	private function event(string $event, object $node, string $uid): void
+	{
+		$container = $this->context?->container;
+		$webhooks = $container !== null && $container->has(Webhooks::class) ? $container->get(Webhooks::class) : null;
+
+		if (!$webhooks instanceof Webhooks) {
+			return;
+		}
+
+		$type = (string) $this->types->get($node::class, 'handle');
+		Transaction::afterCommit($this->db, static fn() => $webhooks->record($event, ['uid' => $uid, 'type' => $type]));
+	}
+
 	private function transaction(callable $work, string $failure): void
 	{
 		try {
@@ -340,6 +363,7 @@ class Store
 					fn() => $this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata),
 					'Error while saving: ',
 				);
+				$this->event('node.created', $node, $prepared['uid']);
 
 				return ['success' => true, 'uid' => $prepared['uid']];
 			} catch (HttpConflict $e) {
@@ -371,6 +395,10 @@ class Store
 				])->run();
 			}
 		}, 'Error while deleting: ');
+
+		foreach ($uids as $deleted) {
+			$this->event('node.deleted', $node, $deleted);
+		}
 
 		return [
 			'success' => true,

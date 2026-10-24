@@ -201,3 +201,17 @@ Requesting a page URL itself with `Accept: application/json` answers with the sa
 `GET /api/assets/{uid}` answers with a catalog entry: `uid`, `url`, `filename`, `kind`, `mime`, `bytes`, `width`, `height`, `alt`, `title` and `caption` in the request locale, `credit`, `focal`, and `sizes`. Anyone may read it, as its file is public anyway.
 
 `GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and a `credit`. It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.
+
+## Webhooks
+
+Webhooks tell other systems that content changed, such as a static site build or a cache in front of the API. They fire for every write, through the panel, the API or PHP code, once it is committed:
+
+```php
+'webhooks' => [
+    ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
+],
+```
+
+Events are `node.created`, `node.updated` for a live write, publishing and unpublishing included, `node.draft` when an editor's working copy is saved or dropped, and `node.deleted`; `events` takes names, `node.*` or `*`, the default. Each event is a `POST` of `{"id", "event", "at", "uid", "type"}` with `X-Cosray-Event` and `X-Cosray-Delivery` headers; with a `secret`, `X-Cosray-Signature` carries `sha256=` and the HMAC-SHA256 of the body. Read the node through the API for its new state.
+
+Deliveries go out when the request ends, in parallel, with a two-second connection and five-second total timeout; a failed delivery is logged as a warning and not retried. A hook that needs every change should therefore also sync with [`changedSince`](#syncing) now and then.
