@@ -37,11 +37,14 @@ class Entry extends Value
 		);
 	}
 
-	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} */
+	/** @return array{uid: ?string, type: string, fields: array<string, mixed>} with the row type's handle */
 	#[Override]
 	public function json(): array
 	{
-		return $this->fieldValues(static fn(Value $value): mixed => $value->json());
+		return [
+			...$this->fieldValues(static fn(Value $value): mixed => $value->json()),
+			'type' => $this->field->rowHandle($this->type),
+		];
 	}
 
 	public function uid(): ?string

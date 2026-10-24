@@ -26,9 +26,9 @@ class Color extends Value
 	}
 
 	#[Override]
-	public function json(): string
+	public function json(): ?string
 	{
-		return $this->raw();
+		return $this->isset() ? $this->raw() : null;
 	}
 
 	#[Override]

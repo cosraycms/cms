@@ -943,7 +943,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 		$this->assertSame('draft', $value->raw());
-		$this->assertSame(['value' => 'draft'], $value->json());
+		$this->assertSame('draft', $value->json());
 		$this->assertTrue($value->isset());
 	}
 
@@ -1145,7 +1145,7 @@ final class PrimitiveValueTest extends TestCase
 		// Anything else never reaches a style attribute.
 		$this->assertSame('', (string) $value('red; background: url(x)'));
 		$this->assertFalse($value('red; background: url(x)')->isset());
-		$this->assertSame('', $value(null)->json());
+		$this->assertNull($value(null)->json());
 	}
 
 	public function testColorShapeNormalizesHexAndRejectsOtherValues(): void
@@ -1288,8 +1288,126 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 		$this->assertSame('abc123', $value->raw());
-		$this->assertSame('abc123', $value->json());
+		$this->assertSame(['id' => 'abc123', 'ratio' => '16/9'], $value->json());
 		$this->assertTrue($value->isset());
 		$this->assertStringContainsString('padding-top: 56.25%', (string) $value);
+	}
+
+	public function testRichTextJsonCarriesTheRenderedHtml(): void
+	{
+		$context = $this->createContext();
+		$field = new TestRichText('body', $this->createOwner($context), new ValueContext('body', [
+			'format' => 'cosray-richtext',
+			'version' => 1,
+			'value' => [
+				'en' => [
+					'type' => 'doc',
+					'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Hello']]]],
+				],
+			],
+		]));
+		$field->translate();
+
+		$this->assertSame(['html' => '<p>Hello</p>'], $field->value()->json());
+	}
+
+	public function testCodeJsonCarriesItsSyntax(): void
+	{
+		$context = $this->createContext();
+		$field = new TestCode('snippet', $this->createOwner($context), new ValueContext('snippet', [
+			'value' => ['en' => 'echo 1;'],
+			'syntax' => 'php',
+		]));
+		$field->translate();
+		$field->syntaxes(['php', 'javascript']);
+
+		$this->assertSame(['code' => 'echo 1;', 'syntax' => 'php'], $field->value()->json());
+	}
+
+	public function testImageJsonResolvesTheUrlAndEveryNamedSize(): void
+	{
+		$context = $this->createContext();
+		$this->seedAsset(
+			$context,
+			'heroimg123456',
+			'hero.jpg',
+			meta: [
+				'alt' => ['en' => 'A hero'],
+				'focal' => ['x' => 0.25, 'y' => 0.75],
+			],
+			mime: 'image/jpeg',
+		);
+		$field = new \Cosray\Field\Image('hero', $this->createOwner($context), new ValueContext('hero', [
+			'files' => [['uid' => 'heroimg123456']],
+		]));
+		$field->limit(1);
+
+		$json = $field->value()->json();
+
+		$this->assertSame('heroimg123456', $json['uid']);
+		$this->assertSame('/cms/assets/he/heroimg123456/hero.jpg', $json['url']);
+		$this->assertSame('A hero', $json['alt']);
+		$this->assertSame(['x' => 0.25, 'y' => 0.75], $json['focal']);
+		$this->assertSame('/cms/cache/he/heroimg123456/hero-thumb.jpg', $json['sizes']['thumb']);
+		$this->assertSame('/cms/cache/he/heroimg123456/hero-block-lg.jpg', $json['sizes']['block-lg']);
+	}
+
+	public function testImageJsonGivesTheOriginalForEverySizeOfAnUnresizableAsset(): void
+	{
+		$context = $this->createContext();
+		$this->seedAsset($context, 'herosvg123456', 'logo.svg', mime: 'image/svg+xml');
+		$field = new \Cosray\Field\Image('logo', $this->createOwner($context), new ValueContext('logo', [
+			'files' => [['uid' => 'herosvg123456']],
+		]));
+		$field->limit(1);
+
+		$this->assertSame(
+			['/cms/assets/he/herosvg123456/logo.svg'],
+			array_values(array_unique(
+				$field->value()->json()['sizes'],
+			)),
+		);
+	}
+
+	public function testFilesJsonSkipsFilesWhoseAssetIsGone(): void
+	{
+		$context = $this->createContext();
+		$this->seedAsset($context, 'qmanualpdf123', 'manual.pdf', mime: 'application/pdf');
+		$field = new \Cosray\Field\File('downloads', $this->createOwner($context), new ValueContext('downloads', [
+			'files' => [['uid' => 'qgonefile1234'], ['uid' => 'qmanualpdf123']],
+		]));
+
+		$json = $field->value()->json();
+
+		$this->assertCount(1, $json);
+		$this->assertSame('manual.pdf', $json[0]['filename']);
+		$this->assertSame('application/pdf', $json[0]['mime']);
+	}
+
+	public function testEmptyNonTextValuesJsonAsNull(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$empty = static fn(string $name): ValueContext => new ValueContext($name, ['value' => ['zxx' => null]]);
+		$image = new \Cosray\Field\Image('hero', $owner, $empty('hero'));
+		$image->limit(1);
+
+		$this->assertNull(new \Cosray\Field\Date('day', $owner, $empty('day'))->value()->json());
+		$this->assertNull(new \Cosray\Field\DateTime('at', $owner, $empty('at'))->value()->json());
+		$this->assertNull(new TestNumber('count', $owner, $empty('count'))->value()->json());
+		$this->assertNull(new \Cosray\Field\Option('status', $owner, $empty('status'))->value()->json());
+		$this->assertNull(new \Cosray\Field\Youtube('video', $owner, $empty('video'))->value()->json());
+		$this->assertNull($image->value()->json());
+		$this->assertSame('', new TestText('title', $owner, $empty('title'))->value()->json());
+	}
+
+	public function testReferenceJsonListsTheReferencedUids(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Reference('related', $this->createOwner($context), new ValueContext('related', [
+			'value' => ['zxx' => [['uid' => 'first'], ['uid' => 'second']]],
+		]));
+
+		$this->assertSame([['uid' => 'first'], ['uid' => 'second']], $field->value()->json());
 	}
 }

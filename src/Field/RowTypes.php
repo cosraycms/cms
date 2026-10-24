@@ -218,6 +218,13 @@ trait RowTypes
 		return $shape;
 	}
 
+	/** A row type's `#[Handle]`, otherwise derived from its class name. */
+	public function rowHandle(string $type): string
+	{
+		/** @var class-string $type */
+		return (string) $this->nodeTypes()->get($type, 'handle');
+	}
+
 	protected function nodeTypes(): Types
 	{
 		return $this->services()->types;

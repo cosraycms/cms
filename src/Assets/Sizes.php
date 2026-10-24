@@ -75,6 +75,12 @@ final class Sizes
 		return isset($this->specs[$name]);
 	}
 
+	/** @return list<string> configured names first, then the built-in ones */
+	public function names(): array
+	{
+		return array_keys($this->specs);
+	}
+
 	private function parse(string $name, mixed $entry): SizeSpec
 	{
 		if (preg_match('/^[a-z0-9]+(-[a-z0-9]+)*$/', $name) !== 1) {

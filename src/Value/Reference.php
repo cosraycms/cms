@@ -67,10 +67,11 @@ class Reference extends Value implements Iterator
 		return $this->uids();
 	}
 
+	/** @return list<array{uid: string}> */
 	#[Override]
-	public function json(): mixed
+	public function json(): array
 	{
-		return $this->data;
+		return array_map(static fn(string $uid): array => ['uid' => $uid], $this->uids());
 	}
 
 	#[Override]

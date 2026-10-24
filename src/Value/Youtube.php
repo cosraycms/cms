@@ -39,10 +39,18 @@ class Youtube extends Value
 		return $this->value();
 	}
 
+	/** @return ?array{id: string, ratio: string} */
 	#[Override]
-	public function json(): mixed
+	public function json(): ?array
 	{
-		return $this->raw();
+		if (!$this->isset()) {
+			return null;
+		}
+
+		$x = $this->meta('aspectRatioX', 16) ?: 16;
+		$y = $this->meta('aspectRatioY', 9) ?: 9;
+
+		return ['id' => (string) $this->raw(), 'ratio' => "{$x}/{$y}"];
 	}
 
 	#[Override]

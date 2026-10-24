@@ -79,10 +79,25 @@ class File extends Value
 		return $this->fileItem($this->index);
 	}
 
+	/** @return ?array<string, mixed> null without a file or when its asset is gone */
 	#[Override]
-	public function json(): mixed
+	public function json(): ?array
 	{
-		return $this->data;
+		$asset = $this->asset($this->index);
+
+		if ($asset === null) {
+			return null;
+		}
+
+		return [
+			'uid' => $asset->uid,
+			'url' => $this->publicPath(),
+			'filename' => $asset->filename,
+			'mime' => $asset->mime,
+			'bytes' => $asset->bytes,
+			'title' => $this->title(),
+			'caption' => $this->caption(),
+		];
 	}
 
 	public function count(): int

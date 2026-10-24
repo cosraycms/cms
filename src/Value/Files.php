@@ -85,10 +85,21 @@ class Files extends Value implements Iterator
 		return $this->files();
 	}
 
+	/** @return list<array<string, mixed>> the files whose assets exist */
 	#[Override]
-	public function json(): mixed
+	public function json(): array
 	{
-		return $this->raw();
+		$items = [];
+
+		for ($index = 0; $index < $this->count(); $index++) {
+			$item = $this->get($index)->json();
+
+			if ($item !== null) {
+				$items[] = $item;
+			}
+		}
+
+		return $items;
 	}
 
 	#[Override]

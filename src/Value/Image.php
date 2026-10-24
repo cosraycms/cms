@@ -60,6 +60,41 @@ class Image extends File
 		return $asset->path();
 	}
 
+	/**
+	 * Adds the image facts and a URL for every named size; an asset the
+	 * resize pipeline cannot process gives its original URL for each.
+	 *
+	 * @return ?array<string, mixed>
+	 */
+	#[Override]
+	public function json(): ?array
+	{
+		$file = parent::json();
+		$asset = $this->asset($this->index);
+
+		if ($file === null || $asset === null) {
+			return null;
+		}
+
+		$sizes = [];
+
+		foreach ($this->owner->config()->media->sizes->names() as $name) {
+			$sizes[$name] = $asset->resizable() ? $asset->sizePath($name) : $asset->path();
+		}
+
+		$focal = $asset->meta['focal'] ?? null;
+
+		return [
+			...$file,
+			'alt' => $this->alt(),
+			'link' => $this->link(),
+			'width' => $asset->width,
+			'height' => $asset->height,
+			'focal' => is_array($focal) ? $focal : null,
+			'sizes' => $sizes,
+		];
+	}
+
 	public function link(): string
 	{
 		return $this->textValue('link', $this->index);

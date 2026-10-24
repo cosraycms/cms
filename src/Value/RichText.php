@@ -57,6 +57,13 @@ class RichText extends Text
 		return $this->value = new Renderer(new OwnerResolver($this->owner))->render($doc);
 	}
 
+	/** @return array{html: string} */
+	#[Override]
+	public function json(): array
+	{
+		return ['html' => $this->raw()];
+	}
+
 	public function excerpt(
 		int $words = 30,
 		string $allowedTags = '',

@@ -260,7 +260,7 @@ class Blocks extends Field implements
 	 */
 	public function blockHandle(string $type): string
 	{
-		return (string) $this->nodeTypes()->get($type, 'handle');
+		return $this->rowHandle($type);
 	}
 
 	/** @return list<TranslateMode> */

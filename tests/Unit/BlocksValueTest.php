@@ -424,6 +424,7 @@ final class BlocksValueTest extends TestCase
 
 		$json = json_decode(json_encode($blocks->json(), JSON_THROW_ON_ERROR), true);
 		$this->assertSame('Hello', $json['blocks'][0]['fields']['text']);
+		$this->assertSame($raw['blocks'][0]['handle'], $json['blocks'][0]['type']);
 		$this->assertSame([], $this->createBlocksValue([])->json()['blocks']);
 	}
 

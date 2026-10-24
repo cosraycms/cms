@@ -142,11 +142,15 @@ class Block extends Value
 		return is_string($value) && in_array($value, Field\Blocks::SPACING, true) ? $value : null;
 	}
 
-	/** @return array<string, mixed> */
+	/** @return array<string, mixed> with the block type's handle as `type`, null for a split */
 	#[Override]
 	public function json(): array
 	{
-		return $this->resolve(static fn(Value $value): mixed => $value->json());
+		$json = $this->resolve(static fn(Value $value): mixed => $value->json());
+		$json['type'] = $json['handle'];
+		unset($json['handle']);
+
+		return $json;
 	}
 
 	/** @return array<string, mixed> */

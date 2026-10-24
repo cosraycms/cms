@@ -52,6 +52,11 @@ abstract class Value
 
 	abstract public function isset(): bool;
 
+	/**
+	 * The value as the API delivers it: resolved for the owner's locale,
+	 * plain JSON data, null when a non-text value is empty. docs/api.md
+	 * documents the shape of every built-in value.
+	 */
 	abstract public function json(): mixed;
 
 	abstract public function raw(): mixed;

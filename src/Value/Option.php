@@ -24,11 +24,10 @@ class Option extends Value
 		return is_string($value) || is_numeric($value) ? (string) $value : '';
 	}
 
-	/** @return array<string, mixed> */
 	#[Override]
-	public function json(): array
+	public function json(): ?string
 	{
-		return $this->data;
+		return $this->isset() ? $this->raw() : null;
 	}
 
 	#[Override]

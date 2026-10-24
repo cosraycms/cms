@@ -88,10 +88,11 @@ class DateTime extends Value
 		return '';
 	}
 
+	/** Dates as `YYYY-MM-DD`, times as `HH:MM`, date-times in UTC RFC 3339. */
 	#[Override]
-	public function json(): mixed
+	public function json(): ?string
 	{
-		return $this->__toString();
+		return $this->datetime === null ? null : $this->__toString();
 	}
 
 	protected function parse(string $value): ?DateTimeImmutable

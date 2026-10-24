@@ -170,8 +170,8 @@ final class EntriesValueTest extends TestCase
 		$this->assertSame('Second Item', $json[1]['fields']['title']);
 	}
 
-	/** `json()` keeps a field's stored envelope where `raw()` resolves it. */
-	public function testEntriesValueJsonAndRawDifferPerFieldType(): void
+	/** `raw()` names a row's type by class, `json()` by handle. */
+	public function testEntriesValueJsonNamesTheRowTypeByHandle(): void
 	{
 		$data = [
 			'type' => EntriesField::class,
@@ -192,11 +192,9 @@ final class EntriesValueTest extends TestCase
 		];
 		$value = $this->createEntriesValue($data, TestOptionEntry::class);
 
-		$this->assertSame('large', $value->raw()[0]['fields']['size']);
-		$this->assertSame(
-			['type' => \Cosray\Field\Option::class, 'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => 'large']],
-			$value->json()[0]['fields']['size'],
-		);
+		$this->assertSame(TestOptionEntry::class, $value->raw()[0]['type']);
+		$this->assertSame('test-option-entry', $value->json()[0]['type']);
+		$this->assertSame('large', $value->json()[0]['fields']['size']);
 	}
 
 	public function testEntryThrowsOnUnknownField(): void
