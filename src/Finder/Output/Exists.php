@@ -24,7 +24,8 @@ final readonly class Exists extends Expression implements Output
 			throw new ParserOutputException($this->token, 'Invalid field name in exists condition.');
 		}
 
-		return 'n.content @? '
+		// PDO reads a bare `?` as a positional parameter; `??` is its escape.
+		return 'n.content @?? '
 			. $this->context->db->quote(
 				'$.' . $this->fieldPath($this->token->lexeme),
 			);

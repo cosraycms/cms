@@ -177,15 +177,15 @@ final class QueryCompilerTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			"n.content @? '$.field.value.*'",
+			"n.content @?? '$.field.value.*'",
 			$compiler->compile('field'),
 		);
 		$this->assertSame(
-			"n.content @? '$.field.value.en'",
+			"n.content @?? '$.field.value.en'",
 			$compiler->compile('field.?'),
 		);
 		$this->assertSame(
-			"n.content @? '$.field.value.de'",
+			"n.content @?? '$.field.value.de'",
 			$compiler->compile('field.value.de'),
 		);
 	}

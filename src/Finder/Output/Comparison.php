@@ -56,10 +56,11 @@ final readonly class Comparison extends Expression implements Output
 	{
 		[$operator, $jsonOperator, $right, $negate] = match ($this->operator->type) {
 			TokenType::Equal => ['@@', '==', $this->getRight(), false],
-			TokenType::Regex => ['@?', '?', $this->getRegex(false), false],
-			TokenType::IRegex => ['@?', '?', $this->getRegex(true), false],
-			TokenType::NotRegex => ['@?', '?', $this->getRegex(false), true],
-			TokenType::INotRegex => ['@?', '?', $this->getRegex(true), true],
+			// PDO reads a bare `?` as a positional parameter; `??` is its escape.
+			TokenType::Regex => ['@??', '?', $this->getRegex(false), false],
+			TokenType::IRegex => ['@??', '?', $this->getRegex(true), false],
+			TokenType::NotRegex => ['@??', '?', $this->getRegex(false), true],
+			TokenType::INotRegex => ['@??', '?', $this->getRegex(true), true],
 			TokenType::In => ['@@', 'in', $this->getRight(), false],
 			TokenType::NotIn => ['@@', 'nin', $this->getRight(), false],
 			default => ['@@', $this->operator->lexeme, $this->getRight(), false],

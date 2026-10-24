@@ -21,6 +21,22 @@ final class ComplexFinderQueriesTest extends IntegrationTestCase
 		$this->loadFixtures('basic-types', 'sample-nodes');
 	}
 
+	public function testFieldExistsAndRegexConditionsRunAlongsideBoundParameters(): void
+	{
+		$type = (int) $this->db()->execute("SELECT type FROM cms.types WHERE handle = 'test-widget'")->one()['type'];
+		$this->createTestNode([
+			'uid' => 'exists-probe',
+			'type' => $type,
+			'content' => ['rank' => ['type' => \Cosray\Field\Text::class, 'value' => ['zxx' => 'abc']]],
+		]);
+
+		$this->assertCount(1, iterator_to_array($this->createCms()->nodes()->types('test-widget')->filter('rank')));
+		$this->assertCount(
+			1,
+			iterator_to_array($this->createCms()->nodes()->types('test-widget')->filter("rank ~ '^a'")),
+		);
+	}
+
 	public function testPaginationWithOffsetAndLimit(): void
 	{
 		$typeId = $this->createTestType('pagination-test');

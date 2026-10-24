@@ -120,20 +120,20 @@ final class ComparisonTest extends TestCase
 		$compiler = new QueryCompiler($this->context, []);
 
 		$this->assertSame(
-			$this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@?'),
+			$this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@??'),
 			$compiler->compile('field ~ /^test$/'),
 		);
 		$this->assertSame(
-			$this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@?'),
+			$this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@??'),
 			$compiler->compile('field ~* /^test$/'),
 		);
 
 		$this->assertSame(
-			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@?') . ')',
+			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$")', operator: '@??') . ')',
 			$compiler->compile('field !~ /^test$/'),
 		);
 		$this->assertSame(
-			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@?') . ')',
+			'NOT (' . $this->jsonPath('$ ? (@ like_regex "^test$" flag "i")', operator: '@??') . ')',
 			$compiler->compile('field !~* /^test$/'),
 		);
 	}
