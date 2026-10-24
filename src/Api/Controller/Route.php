@@ -13,6 +13,8 @@ use Cosray\Api\Serializer;
 use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Field\Services;
+use Cosray\Security\NodeAccess;
+use Cosray\User;
 use Psr\Http\Message\ResponseInterface as Response;
 
 /**
@@ -26,7 +28,7 @@ final class Route
 		private readonly Responses $responses,
 	) {}
 
-	public function route(Request $request, Context $context, Services $services): Response
+	public function route(Request $request, Context $context, Services $services, NodeAccess $access): Response
 	{
 		// Finder, values and serializer share this context, so switching
 		// its locale switches the locale the node is read in.
@@ -41,6 +43,11 @@ final class Route
 
 		$row = $context->db->paths->byPath(['path' => $path])->first();
 		$node = $row !== null && $row['inactive'] === null ? $cms->node->byPath($path) : null;
+		$user = $request->get('user', null);
+
+		if ($node !== null && !$access->serves($user instanceof User ? $user : null, $node)) {
+			throw new HttpNotFound($request, payload: ['message' => "Nothing answers at '{$path}'."]);
+		}
 
 		if ($node === null) {
 			$redirect = $row !== null ? $this->activePath($context, (int) $row['node']) : null;

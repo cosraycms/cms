@@ -72,6 +72,22 @@ final class NodeAccess
 		return $this->policy->permits($user, $this->permission($class, $action));
 	}
 
+	/**
+	 * Whether the website serves the node at its path to this user. It serves
+	 * any published node with a path, unless the type declares a read
+	 * permission of its own, which then applies as in the API.
+	 */
+	public function serves(?User $user, object $node): bool
+	{
+		$class = Wrapper::unwrap($node)::class;
+		$read = $this->permission($class, self::READ);
+
+		return (
+			$read === self::defaults((bool) $this->types->get($class, 'routable', false))[self::READ]
+				|| $this->policy->permits($user, $read)
+		);
+	}
+
 	public function reads(?User $user, object $node): bool
 	{
 		$inner = Wrapper::unwrap($node);

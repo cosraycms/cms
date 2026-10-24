@@ -92,6 +92,30 @@ final class ApiDeliveryTest extends End2EndTestCase
 		);
 	}
 
+	public function testADeclaredReadPermissionAlsoGuardsPageUrls(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.types (handle) VALUES ('test-private-page') ON CONFLICT DO NOTHING",
+		)->run();
+		$nodeId = $this->createTestNode([
+			'uid' => 'private',
+			'type' => $this->type('test-private-page'),
+			'content' => ['title' => ['type' => Text::class, 'value' => ['en' => 'Contract notes']]],
+		]);
+		$this->createTestPath($nodeId, '/private/notes');
+
+		$this->assertSame(404, $this->makeRequest('GET', '/private/notes', ['headers' => [
+			'Accept' => 'application/json',
+		]])->getStatusCode());
+		$this->problem($this->makeRequest('GET', '/api/route', ['query' => ['path' => '/private/notes']]), 404);
+		$this->problem($this->makeRequest('GET', '/api/nodes/private'), 404);
+
+		$this->authenticateAs('editor');
+		$this->assertSame('private', $this->json($this->makeRequest('GET', '/api/route', ['query' => [
+			'path' => '/private/notes',
+		]]))['node']['uid']);
+	}
+
 	public function testMenusRenderAsTheWebsiteShowsThem(): void
 	{
 		$menus = new Menus($this->db());
@@ -245,6 +269,7 @@ final class ApiDeliveryTest extends End2EndTestCase
 	{
 		$bootstrap = parent::createBootstrap($config);
 		$bootstrap->node(FulltextPage::class);
+		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestPrivatePage::class);
 
 		return $bootstrap;
 	}

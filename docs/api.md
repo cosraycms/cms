@@ -188,7 +188,7 @@ An editor may hold a working copy of a published node in the panel. A `PATCH` ap
 
 ## Routing
 
-`GET /api/route?path=/de/angebot` resolves a URL path the way the website does, so a headless frontend can route its own URLs: it answers `{"node": …}` with the published node at that active path, read in the path's locale unless `?locale=` names one, or `{"redirect": "/de/neu"}` when the path is one the node no longer uses. The website serves any published node with a path, whatever its type, and so does this endpoint; `404` means nothing answers there. The path is the node path, without `app.url_prefix`.
+`GET /api/route?path=/de/angebot` resolves a URL path the way the website does, so a headless frontend can route its own URLs: it answers `{"node": …}` with the published node at that active path, read in the path's locale unless `?locale=` names one, or `{"redirect": "/de/neu"}` when the path is one the node no longer uses. The website serves any published node with a path, whatever its type, unless the type declares a read permission of its own, and so does this endpoint; `404` means nothing answers there. The path is the node path, without `app.url_prefix`.
 
 Requesting a page URL itself with `Accept: application/json` answers with the same node representation, unless the node implements `Cosray\Contract\Json` to compose a payload of its own; see [rendering and HTTP hooks](content.md#rendering-and-http-hooks).
 

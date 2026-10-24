@@ -22,6 +22,8 @@ use Cosray\Middleware\Permission;
 use Cosray\Node\Types;
 use Cosray\Node\View;
 use Cosray\Node\Wrapper;
+use Cosray\Security\NodeAccess;
+use Cosray\User;
 use Cosray\Util\Path;
 
 class Node
@@ -31,7 +33,7 @@ class Node
 		protected readonly Types $types,
 	) {}
 
-	public function catchall(Context $context, Cms $cms): Response
+	public function catchall(Context $context, Cms $cms, NodeAccess $access): Response
 	{
 		$request = $context->httpRequest();
 		$config = $context->config;
@@ -43,6 +45,11 @@ class Node
 		}
 
 		$node = $cms->node->byPath($path === '' ? '/' : $path);
+		$user = $request->get('user', null);
+
+		if ($node !== null && !$access->serves($user instanceof User ? $user : null, $node)) {
+			throw new HttpNotFound($request);
+		}
 
 		if (!$node) {
 			try {
