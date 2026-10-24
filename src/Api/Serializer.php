@@ -67,6 +67,20 @@ final class Serializer
 	}
 
 	/**
+	 * The node's version as a strong entity tag. It changes with every write
+	 * to the node or to an editor's working copy and is the same in every
+	 * view, so a client can send it back in `If-Match`.
+	 */
+	public static function etag(object $node): string
+	{
+		$data = Factory::dataFor(Wrapper::unwrap($node));
+		$draft = is_array($data['draft'] ?? null) ? $data['draft']['changed'] ?? '' : '';
+		$version = implode('|', [$data['uid'] ?? '', $data['changed'] ?? '', $data['deleted'] ?? '', $draft]);
+
+		return '"' . substr(hash('sha256', $version), 0, 32) . '"';
+	}
+
+	/**
 	 * @param list<string> $names
 	 * @return array<string, mixed>
 	 */

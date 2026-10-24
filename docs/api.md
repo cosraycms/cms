@@ -20,7 +20,7 @@ Clients authenticate with an [API token](application.md#api-tokens) in `Authoriz
 
 Without a token, a client reads published nodes of routable types: what the website shows. With a token, it reads what its user's roles allow. A node the client may not read answers `404`, as if it did not exist.
 
-Responses are JSON. Errors are [problem details](https://www.rfc-editor.org/rfc/rfc9457) with `Content-Type: application/problem+json`, `status`, `title` and usually a `detail`; invalid content adds `errors`. `400` means a malformed request, `401` a token that does not authenticate, `404` an unknown endpoint or a node the client may not read, `503` an unreachable database, with `Retry-After`. A site's own `error.renderer` does not change them.
+Responses are JSON. Errors are [problem details](https://www.rfc-editor.org/rfc/rfc9457) with `Content-Type: application/problem+json`, `status`, `title` and usually a `detail`; invalid content adds `errors`. `400` means a malformed request, `401` a token that does not authenticate, `403` a write the token may not make, `404` an unknown endpoint or a node the client may not read, `409` a conflict such as a duplicate uid or handle, `412` a failed `If-Match`, `415` a body that is not JSON, `422` invalid content, and `503` an unreachable database, with `Retry-After`. A site's own `error.renderer` does not change them.
 
 `?locale=` selects the locale values resolve in, through its fallbacks; it defaults to the default locale, and an unknown locale answers `400`.
 
@@ -34,6 +34,10 @@ Responses are JSON. Errors are [problem details](https://www.rfc-editor.org/rfc/
 | `GET /api/nodes` | A list of nodes; see [listing nodes](#listing-nodes) |
 | `POST /api/nodes/query` | The same list, with the parameters in a JSON body |
 | `GET /api/nodes/{uid}` | One node; takes `view`, `fields` and `deleted` |
+| `POST /api/nodes` | Creates a node; see [writing nodes](#writing-nodes) |
+| `PUT /api/nodes/{uid}` | Creates the node under this uid or replaces its content |
+| `PATCH /api/nodes/{uid}` | Applies a JSON Merge Patch |
+| `DELETE /api/nodes/{uid}` | Soft-deletes the node; `?children=true` takes its descendants along |
 
 The field schema lists every field with its `name`, its `type` (the field class as a name: `RichText` reads `rich-text`), `label`, `description`, `required`, `translate` and `translateMode`, and the `options`, `limit`, `syntaxes` or `columns` it declares. Blocks and entries fields add their `rows` with each row type's fields. `default` is the value a new node starts with, in the [source view](#nodes).
 
@@ -131,3 +135,37 @@ A filter is an object whose members must all hold. A member maps a field to a va
 | `null` | Whether a builtin or field is null; true or false |
 
 `and` and `or` take lists of filters, `not` takes one. A content field compares its effective value in the request locale; `title.de` reads one locale. Builtins are `uid`, `handle`, `type`, `parent`, `published`, `hidden`, `created`, `changed`, `routable` and `renderable`; `path`, `path.<locale>`, `references` and `references.<field>` work as in the [query language](content.md#frontend-queries). Values are data and need no quoting; the filter compiles directly into Finder conditions. PHP code can use the same filters through `Finder\Nodes::match()`.
+
+## Writing nodes
+
+Writes send JSON in the source view: `content` maps fields to their stored values without the field class, and `handle`, `parent`, `published`, `hidden` and `paths` set the node's members. The derived members of a read, such as `title` or `changed`, are ignored, so a node read with `view=source` can be written back as it is. Unknown members and unknown fields are refused. Writes are attributed to the token's user and go live; the response is the written node, in the view the request's `view` names, with its `ETag`.
+
+```json
+{
+	"type": "article",
+	"published": true,
+	"paths": { "en": "/offer" },
+	"content": {
+		"title": { "value": { "en": "Our offer", "de": "Unser Angebot" } },
+		"intro": {
+			"value": {
+				"en": { "format": "cosray-richtext", "version": 1, "doc": "…" }
+			}
+		}
+	}
+}
+```
+
+`POST /api/nodes` creates a node of the named `type` and answers `201` with a `Location`; it may choose the `uid`, which answers `409` when taken. Fields it leaves out start with their defaults, paths it leaves out are generated from the type's route. Creating needs the type's `create` permission.
+
+`PUT /api/nodes/{uid}` creates the node when the uid is free, which saves a client that keys its own records by uid the round trips of reading, failing and creating. Otherwise it replaces the content: fields the body leaves out return to their defaults, while members it leaves out keep their values. Changing the type or the uid answers `409` or `400`.
+
+`PATCH /api/nodes/{uid}` takes a [JSON Merge Patch](https://www.rfc-editor.org/rfc/rfc7396) as `application/merge-patch+json` or `application/json`: objects merge, `null` removes a member, and lists replace. `{"content": {"title": {"value": {"de": "Neu"}}}}` changes only the German title, `{"paths": {"de": null}}` drops the German path so it is generated again, and `{"published": false}` takes the node offline.
+
+Replacing and patching need the type's `change` permission, deleting its `delete` permission; deleting a node with children answers `409` unless `?children=true`, which needs only the permission for the node itself. A locked node answers `409` to every write, a deleted one `404`.
+
+### Concurrent writes
+
+Every node response carries an `ETag` that changes with each write. Send it as `If-Match` to have a write fail with `412` when the node changed since it was read; `If-None-Match: *` makes a `PUT` create only. Lists carry no tags.
+
+An editor may hold a working copy of a published node in the panel. A `PATCH` applies to the live node and to that copy alike, so publishing it later does not undo the API's change; unpublishing folds the copy into the node, as the panel does. A `PUT` answers `409` while a working copy exists, because replacing the content would leave the copy behind.

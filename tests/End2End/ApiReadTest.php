@@ -181,8 +181,8 @@ final class ApiReadTest extends End2EndTestCase
 			['GET', '/api/nodes', ['query' => ['order' => 'editor']]],
 			['GET', '/api/nodes', ['query' => ['limit' => '0']]],
 			['GET', '/api/nodes', ['query' => ['view' => 'raw']]],
-			['POST', '/api/nodes/query', ['body' => '[1, 2]']],
-			['POST', '/api/nodes/query', ['body' => '{']],
+			['POST', '/api/nodes/query', ['body' => '[1, 2]', 'headers' => ['Content-Type' => 'application/json']]],
+			['POST', '/api/nodes/query', ['body' => '{', 'headers' => ['Content-Type' => 'application/json']]],
 			['POST', '/api/nodes/query', ['body' => ['filter' => ['creator' => 'x']]]],
 		];
 

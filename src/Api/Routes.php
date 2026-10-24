@@ -31,7 +31,11 @@ final class Routes
 				$api->get("/types/{$type}", [Controller\Types::class, 'type'], 'type');
 				$api->get('/nodes', [Controller\Nodes::class, 'list'], 'nodes');
 				$api->post('/nodes/query', [Controller\Nodes::class, 'query'], 'nodes.query');
+				$api->post('/nodes', [Controller\Nodes::class, 'create'], 'nodes.create');
 				$api->get("/nodes/{$uid}", [Controller\Nodes::class, 'get'], 'node');
+				$api->put("/nodes/{$uid}", [Controller\Nodes::class, 'put'], 'node.put');
+				$api->patch("/nodes/{$uid}", [Controller\Nodes::class, 'patch'], 'node.patch');
+				$api->delete("/nodes/{$uid}", [Controller\Nodes::class, 'delete'], 'node.delete');
 
 				// Last, so a path the API does not know answers as a problem
 				// instead of reaching the page catchall.
