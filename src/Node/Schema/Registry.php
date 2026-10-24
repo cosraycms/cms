@@ -15,6 +15,7 @@ use Cosray\Schema\Permission;
 use Cosray\Schema\Render;
 use Cosray\Schema\Route;
 use Cosray\Schema\Title;
+use Cosray\Security\NodeAccess;
 
 class Registry
 {
@@ -113,12 +114,9 @@ class Registry
 			'renderable',
 			static fn(string $nodeClass, array $properties): bool => $properties['routable'] ?? false,
 		);
-		$this->default('permission', static fn(string $nodeClass, array $properties): array => [
-			'read' => 'everyone',
-			'create' => 'authenticated',
-			'change' => 'authenticated',
-			'delete' => 'authenticated',
-		]);
+		$this->default('permission', static fn(string $nodeClass, array $properties): array => NodeAccess::defaults(
+			(bool) ($properties['routable'] ?? false),
+		));
 		$this->default('titleField', static fn(string $nodeClass, array $properties): ?string => null);
 		$this->default('titleEmbedded', static fn(string $nodeClass, array $properties): ?string => null);
 		$this->default('fieldOrder', static fn(string $nodeClass, array $properties): ?array => null);

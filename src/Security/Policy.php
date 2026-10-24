@@ -29,14 +29,17 @@ final class Policy
 		$policy->allow(
 			'role:superuser',
 			'panel',
+			'read-nodes',
 			'edit-nodes',
 			'edit-menus',
 			'manage-menus',
 			'edit-users',
 			'edit-settings',
 		);
-		$policy->allow('role:admin', 'panel', 'edit-nodes', 'edit-menus', 'edit-users');
-		$policy->allow('role:editor', 'panel', 'edit-nodes');
+		$policy->allow('role:admin', 'panel', 'read-nodes', 'edit-nodes', 'edit-menus', 'edit-users');
+		$policy->allow('role:editor', 'panel', 'read-nodes', 'edit-nodes');
+		// What the website shows anyone: published nodes of routable types.
+		$policy->allow(self::EVERYONE, 'read-pages');
 
 		return $policy;
 	}

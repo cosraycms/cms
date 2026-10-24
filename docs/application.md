@@ -297,6 +297,20 @@ Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->p
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
 
+### Node permissions
+
+A node type maps the actions `read`, `create`, `change` and `delete` to permissions. By default, routable types read with `read-pages`, which the default policy grants to `everyone`, and other types with `read-nodes`, which editors, admins and superusers hold; every write needs `edit-nodes`. `read` covers published, undeleted nodes, while any other state takes the type's `change` permission.
+
+```php
+#[Permission(['read' => 'read-pages'])] // a type without a route that anyone may read
+final class Footer {}
+
+#[Permission(['read' => 'read-nodes', 'change' => 'edit-catalog'])]
+final class Product {}
+```
+
+Actions a type leaves out keep their defaults, and a single string applies to every action. [Security\NodeAccess](../src/Security/NodeAccess.php) evaluates them. The API enforces them; the panel still only checks `panel`.
+
 ### API tokens
 
 A user holds any number of named API tokens. A token acts as its user, so the user's roles decide what it may do; a deactivated or deleted user's tokens stop working with the account. Requests send it as `Authorization: Bearer <token>`. Only its sha256 is stored, so the token is shown once, when it is created. Tokens optionally expire, and the time of their last use is recorded to the minute.

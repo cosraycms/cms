@@ -292,10 +292,10 @@ final class NodeSchemaRegistryTest extends TestCase
 		// No #[Permission] => default permission map
 		$this->assertEquals(
 			[
-				'read' => 'everyone',
-				'create' => 'authenticated',
-				'change' => 'authenticated',
-				'delete' => 'authenticated',
+				'read' => 'read-pages',
+				'create' => 'edit-nodes',
+				'change' => 'edit-nodes',
+				'delete' => 'edit-nodes',
 			],
 			$schema->permission,
 		);
