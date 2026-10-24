@@ -8,15 +8,18 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpForbidden;
 use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Exception\HttpUnauthorized;
 use Celema\Core\Request;
 use Cosray\Actor;
 use Cosray\Api\Exception\PreconditionFailed;
 use Cosray\Api\Exception\UnsupportedMediaType;
 use Cosray\Api\NodeQuery;
+use Cosray\Api\PreviewToken;
 use Cosray\Api\Responses;
 use Cosray\Api\Serializer;
 use Cosray\Api\Writer;
 use Cosray\Cms;
+use Cosray\Config;
 use Cosray\Exception\ParserException;
 use Cosray\Finder\Order;
 use Cosray\Node\Factory;
@@ -65,11 +68,30 @@ final class Nodes
 		return $this->listing($request, $cms, NodeQuery::fromBody($this->body($request, ['application/json'])));
 	}
 
-	public function get(Request $request, Cms $cms, string $uid): Response
+	/**
+	 * `preview` takes a token the panel issued for this node and answers
+	 * with its working copy, published or not.
+	 */
+	public function get(Request $request, Cms $cms, Config $config, string $uid): Response
 	{
 		$params = $request->params();
-		$deleted = NodeQuery::state($params['deleted'] ?? null, 'deleted', false);
-		$node = $this->readable($request, $cms, $uid, $deleted);
+		$preview = $params['preview'] ?? null;
+
+		if ($preview !== null) {
+			$tokens = PreviewToken::fromConfig($config);
+
+			if ($tokens === null || !is_string($preview) || $tokens->uid($preview) !== $uid) {
+				throw new HttpUnauthorized($request, payload: [
+					'message' => 'The preview token is invalid or expired.',
+				]);
+			}
+
+			$node = $cms->node->working($uid)
+				?? throw new HttpNotFound($request, payload: ['message' => "There is no node '{$uid}'."]);
+		} else {
+			$deleted = NodeQuery::state($params['deleted'] ?? null, 'deleted', false);
+			$node = $this->readable($request, $cms, $uid, $deleted);
+		}
 
 		return $this->responses->json($this->serializer->node(
 			$node,

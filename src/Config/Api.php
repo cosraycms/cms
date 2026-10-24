@@ -27,6 +27,13 @@ final class Api
 		get => max(0, (int) $this->config->get('api.max_age'));
 	}
 
+	/** A headless frontend's preview URL with `{uid}`, `{token}` and `{locale}` placeholders. */
+	public ?string $preview {
+		get => is_string($this->config->get('api.preview')) && $this->config->get('api.preview') !== ''
+			? $this->config->get('api.preview')
+			: null;
+	}
+
 	private static function mount(mixed $path): ?string
 	{
 		if (!is_string($path) || trim($path, " \t/") === '') {

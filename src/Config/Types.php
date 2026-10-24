@@ -46,6 +46,7 @@ namespace Cosray\Config;
  *     'api.path': ?string,
  *     'api.origins': list<string>,
  *     'api.max_age': int,
+ *     'api.preview': ?string,
  *
  *     'error.enabled': bool,
  *     'error.renderer': null|class-string<\Celema\Core\Error\Renderer>|\Celema\Core\Error\Renderer,

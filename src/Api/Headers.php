@@ -64,7 +64,7 @@ final class Headers implements Middleware
 	{
 		$read = $request->getMethod() === 'GET' && $response->getStatusCode() < 300;
 
-		if (!$read || $request->hasHeader('Authorization')) {
+		if (!$read || $request->hasHeader('Authorization') || isset($request->getQueryParams()['preview'])) {
 			return 'private, no-store';
 		}
 

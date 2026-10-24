@@ -202,6 +202,16 @@ Requesting a page URL itself with `Accept: application/json` answers with the sa
 
 `GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and a `credit`. It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.
 
+## Previews
+
+A headless frontend can show an editor's unpublished working copy. Name its preview route, and the panel's preview opens it instead of the site's own `/preview` page:
+
+```php
+'api.preview' => 'https://www.example.com/preview?uid={uid}&token={token}&locale={locale}',
+```
+
+The panel fills in the node's `uid`, the content `locale`, and a `token` that is valid for an hour and for that node only. The frontend reads the working copy with `GET /api/nodes/{uid}?preview={token}`, published or not, without an API token; responses are never cached. A forged, expired or foreign token answers `401`. Tokens are signed with `app.secret` and stored nowhere; without the secret, the panel keeps the site's own preview. The frontend has to allow the panel to frame it.
+
 ## Webhooks
 
 Webhooks tell other systems that content changed, such as a static site build or a cache in front of the API. They fire for every write, through the panel, the API or PHP code, once it is committed:

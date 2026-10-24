@@ -91,6 +91,8 @@ final class Defaults
 			'api.origins' => [],
 			// Seconds shared caches may keep anonymous reads; 0 asks them to revalidate.
 			'api.max_age' => 0,
+			// A headless frontend's preview URL with {uid}, {token} and {locale}.
+			'api.preview' => null,
 		];
 	}
 

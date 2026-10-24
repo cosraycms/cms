@@ -10,6 +10,7 @@ use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Celema\Sire\Issue;
+use Cosray\Api\PreviewToken;
 use Cosray\Bootstrap;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
@@ -643,9 +644,24 @@ final class Editor extends Panel
 	}
 
 	/** The path the preview overlay loads after a save: the node's working copy, by uid. */
+	/**
+	 * The site's own preview, or the headless frontend's when `api.preview`
+	 * names one, with a token that lets it read the working copy.
+	 */
 	private function previewPath(string $uid): string
 	{
-		return '/preview/' . rawurlencode($uid);
+		$template = $this->config->api->preview;
+		$tokens = PreviewToken::fromConfig($this->config);
+
+		if ($template === null || $tokens === null) {
+			return '/preview/' . rawurlencode($uid);
+		}
+
+		return strtr($template, [
+			'{uid}' => rawurlencode($uid),
+			'{token}' => rawurlencode($tokens->issue($uid)),
+			'{locale}' => rawurlencode($this->localeId()),
+		]);
 	}
 
 	/**
