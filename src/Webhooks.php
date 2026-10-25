@@ -11,9 +11,9 @@ use Psr\Log\LoggerInterface as Logger;
 /**
  * Tells other systems that content changed, such as a static site build or a
  * cache in front of the API. Events are recorded once their write is
- * committed and delivered when the request ends, one POST per event and
- * hook, in parallel and with short timeouts. A failed delivery is logged,
- * not retried.
+ * committed and delivered after the response was sent, one POST per event
+ * and hook, in parallel and with short timeouts. A failed delivery is
+ * logged, not retried.
  *
  *     'webhooks' => [
  *         ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
