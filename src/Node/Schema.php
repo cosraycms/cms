@@ -17,6 +17,9 @@ class Schema
 	/** @var array<string, mixed> */
 	private array $properties;
 
+	/** @var list<string> */
+	private readonly array $declared;
+
 	/**
 	 * @param class-string $nodeClass
 	 */
@@ -25,6 +28,7 @@ class Schema
 		private readonly Registry $registry,
 	) {
 		$resolved = $this->resolveAttributes();
+		$this->declared = array_keys($resolved);
 		$this->properties = $this->registry->resolveDefaults($this->nodeClass, $resolved);
 	}
 
@@ -59,6 +63,12 @@ class Schema
 	public function has(string $key): bool
 	{
 		return array_key_exists($key, $this->properties);
+	}
+
+	/** Whether the node class sets the property itself rather than leaving it to a default. */
+	public function declares(string $key): bool
+	{
+		return in_array($key, $this->declared, true);
 	}
 
 	/**

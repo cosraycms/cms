@@ -75,17 +75,14 @@ final class NodeAccess
 	/**
 	 * Whether the website serves the node at its path to this user. It serves
 	 * any published node with a path, unless the type declares a read
-	 * permission of its own, which then applies as in the API.
+	 * permission, which then applies as in the API, even when it names the
+	 * default permission.
 	 */
 	public function serves(?User $user, object $node): bool
 	{
 		$class = Wrapper::unwrap($node)::class;
-		$read = $this->permission($class, self::READ);
 
-		return (
-			$read === self::defaults((bool) $this->types->get($class, 'routable', false))[self::READ]
-				|| $this->policy->permits($user, $read)
-		);
+		return !$this->declaresRead($class) || $this->allows($user, self::READ, $class);
 	}
 
 	public function reads(?User $user, object $node): bool
@@ -136,6 +133,18 @@ final class NodeAccess
 		}
 
 		return $this->registered = $registered;
+	}
+
+	/** @param class-string $class */
+	private function declaresRead(string $class): bool
+	{
+		if (!$this->types->schemaOf($class)->declares('permission')) {
+			return false;
+		}
+
+		$declared = $this->types->get($class, 'permission');
+
+		return is_string($declared) && $declared !== '' || is_array($declared) && ($declared[self::READ] ?? '') !== '';
 	}
 
 	private static function live(object $node): bool

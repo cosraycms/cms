@@ -116,6 +116,29 @@ final class ApiDeliveryTest extends End2EndTestCase
 		]]))['node']['uid']);
 	}
 
+	public function testADeclaredDefaultReadPermissionGuardsStoredPathsToo(): void
+	{
+		$this->db()->execute(
+			"INSERT INTO cms.types (handle) VALUES ('test-internal-document') ON CONFLICT DO NOTHING",
+		)->run();
+		$nodeId = $this->createTestNode([
+			'uid' => 'internal',
+			'type' => $this->type('test-internal-document'),
+			'content' => ['title' => ['type' => Text::class, 'value' => ['en' => 'Internal memo']]],
+		]);
+		$this->createTestPath($nodeId, '/internal-memo');
+
+		$this->assertSame(404, $this->makeRequest('GET', '/internal-memo', ['headers' => [
+			'Accept' => 'application/json',
+		]])->getStatusCode());
+		$this->problem($this->makeRequest('GET', '/api/route', ['query' => ['path' => '/internal-memo']]), 404);
+
+		$this->authenticateAs('editor');
+		$this->assertSame('internal', $this->json($this->makeRequest('GET', '/api/route', ['query' => [
+			'path' => '/internal-memo',
+		]]))['node']['uid']);
+	}
+
 	public function testMenusRenderAsTheWebsiteShowsThem(): void
 	{
 		$menus = new Menus($this->db());
@@ -270,6 +293,7 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$bootstrap = parent::createBootstrap($config);
 		$bootstrap->node(FulltextPage::class);
 		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestPrivatePage::class);
+		$bootstrap->node(\Cosray\Tests\Fixtures\Node\TestInternalDocument::class);
 
 		return $bootstrap;
 	}

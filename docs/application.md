@@ -309,7 +309,7 @@ final class Footer {}
 final class Product {}
 ```
 
-Actions a type leaves out keep their defaults, and a single string applies to every action. The website serves any published node with a path, but a type that declares a read permission other than its default is served only to users who hold it, on its page URLs as in the API. [Security\NodeAccess](../src/Security/NodeAccess.php) evaluates them. The [API](api.md) enforces them; the panel still only checks `panel`.
+Actions a type leaves out keep their defaults, and a single string applies to every action. The website serves any published node with a path, but a type that declares a read permission, its default one included, is served only to users who hold it, on its page URLs as in the API. [Security\NodeAccess](../src/Security/NodeAccess.php) evaluates them. The [API](api.md) enforces them; the panel still only checks `panel`.
 
 ### API tokens
 
