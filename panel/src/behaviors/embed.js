@@ -1,8 +1,8 @@
 // An editor framed by another application (`?from=embed`) reports to its
 // frame: `cms-dirty` and `cms-pristine` as the unsaved-changes indicator
 // flips, `cms-ok` after a save or a creation, `cms-cancel` when the user
-// cancels. Messages carry the node uid and only go to the origins the site
-// allows to frame the panel.
+// cancels or presses Escape. Messages carry the node uid and only go to the
+// origins the site allows to frame the panel.
 
 const ROOT = '[data-embed]';
 const INDICATOR = 'editor-dirty';
@@ -86,17 +86,36 @@ function cancel(event) {
 	}
 }
 
+// The frame never sees key presses inside the panel. Overlays that close on
+// Escape claim it at the document or below; only an unclaimed one cancels.
+/** @param {KeyboardEvent} event */
+function escape(event) {
+	if (
+		event.key !== 'Escape' ||
+		event.defaultPrevented ||
+		event.isComposing ||
+		document.querySelector('dialog[open]') !== null ||
+		[...document.querySelectorAll('[popover]')].some((element) => element.matches(':popover-open'))
+	) {
+		return;
+	}
+
+	post('cms-cancel');
+}
+
 /** @returns {() => void} */
 export function install() {
 	const observer = new MutationObserver(watch);
 	observer.observe(document.body, { attributes: true, attributeFilter: ['hidden'], subtree: true });
 	document.addEventListener('htmx:after:swap', settle);
 	document.addEventListener('click', cancel);
+	window.addEventListener('keydown', escape);
 	announceCreation();
 
 	return () => {
 		observer.disconnect();
 		document.removeEventListener('htmx:after:swap', settle);
 		document.removeEventListener('click', cancel);
+		window.removeEventListener('keydown', escape);
 	};
 }

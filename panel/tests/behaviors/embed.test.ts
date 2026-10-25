@@ -65,6 +65,42 @@ describe('embedded editor', () => {
 		expect(types()).toEqual(['cms-ok', 'cms-cancel']);
 	});
 
+	it('cancels on Escape', () => {
+		render();
+		uninstall = install();
+		document.querySelector('[data-embed]')!.insertAdjacentHTML('beforeend', '<input name="title">');
+
+		document
+			.querySelector('input')!
+			.dispatchEvent(
+				new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+			);
+
+		expect(types()).toEqual(['cms-cancel']);
+	});
+
+	it('leaves Escape to the overlay that closes on it', () => {
+		render();
+		uninstall = install();
+		const escape = () =>
+			document.body.dispatchEvent(
+				new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+			);
+		const claim = (event: Event) => event.preventDefault();
+
+		document.addEventListener('keydown', claim);
+		escape();
+		document.removeEventListener('keydown', claim);
+		document.body.insertAdjacentHTML('beforeend', '<dialog open></dialog>');
+		escape();
+		document.querySelector('dialog')!.remove();
+		document.body.insertAdjacentHTML('beforeend', '<div popover="auto"></div>');
+		document.querySelector<HTMLElement>('[popover]')!.showPopover();
+		escape();
+
+		expect(posted).toEqual([]);
+	});
+
 	it('announces a node the embedded editor created', () => {
 		render(true);
 		uninstall = install();
