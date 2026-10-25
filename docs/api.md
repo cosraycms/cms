@@ -224,7 +224,7 @@ Webhooks tell other systems that content changed, such as a static site build or
 
 Events are `node.created`, `node.updated` for a live write, publishing and unpublishing included, `node.draft` when an editor's working copy is saved or dropped, and `node.deleted`; `events` takes names, `node.*` or `*`, the default. Each event is a `POST` of `{"id", "event", "at", "uid", "type"}` with `X-Cosray-Event` and `X-Cosray-Delivery` headers; with a `secret`, `X-Cosray-Signature` carries `sha256=` and the HMAC-SHA256 of the body. Read the node through the API for its new state.
 
-Deliveries go out in parallel after the response was sent, with a two-second connection and five-second total timeout; under PHP-FPM and FrankenPHP the client does not wait for them. A failed delivery is logged as a warning and not retried. A hook that needs every change should therefore also sync with [`changedSince`](#syncing) now and then.
+A write that site code makes inside its own transaction is reported only if that transaction commits. Deliveries go out in parallel after the response was sent, with a two-second connection and five-second total timeout; under PHP-FPM and FrankenPHP the client does not wait for them. A failed delivery is logged as a warning and not retried. A hook that needs every change should therefore also sync with [`changedSince`](#syncing) now and then.
 
 ## Embedded editing
 

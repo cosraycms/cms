@@ -29,22 +29,51 @@ final class TransactionTest extends IntegrationTestCase
 
 	public function testAfterCommitCallbacksWaitForTheOutermostRun(): void
 	{
-		$db = $this->db();
+		$db = $this->session();
 		$calls = [];
 
-		Transaction::afterCommit($db, static function () use (&$calls): void {
-			$calls[] = 'outside';
+		Transaction::afterCommit($db, static function (?string $transaction) use (&$calls): void {
+			$calls[] = ['outside', $transaction];
 		});
 		Transaction::run($db, static function () use ($db, &$calls): void {
 			Transaction::run($db, static function () use ($db, &$calls): void {
-				Transaction::afterCommit($db, static function () use (&$calls): void {
-					$calls[] = 'inner';
+				Transaction::afterCommit($db, static function (?string $transaction) use (&$calls): void {
+					$calls[] = ['inner', $transaction];
 				});
 			});
-			$calls[] = 'outer work done';
+			$calls[] = ['outer work done', null];
 		});
 
-		$this->assertSame(['outside', 'outer work done', 'inner'], $calls);
+		$this->assertSame([['outside', null], ['outer work done', null], ['inner', null]], $calls);
+	}
+
+	public function testWorkInAnotherOwnersTransactionNamesItForTheCallbacks(): void
+	{
+		$db = $this->session();
+		$ids = [];
+		$remember = static function (?string $transaction) use (&$ids): void {
+			$ids[] = $transaction;
+		};
+
+		$db->begin();
+		Transaction::run($db, static function () use ($db, $remember): void {
+			Transaction::afterCommit($db, $remember);
+		});
+		Transaction::afterCommit($db, $remember);
+		$open = Transaction::committed($db, (string) $ids[0]);
+		$db->commit();
+
+		$db->begin();
+		Transaction::run($db, static function () use ($db, $remember): void {
+			Transaction::afterCommit($db, $remember);
+		});
+		$db->rollback();
+
+		$this->assertCount(3, $ids);
+		$this->assertSame($ids[0], $ids[1]);
+		$this->assertFalse($open);
+		$this->assertTrue(Transaction::committed($db, (string) $ids[0]));
+		$this->assertFalse(Transaction::committed($db, (string) $ids[2]));
 	}
 
 	public function testAfterCommitCallbacksOfUndoneWorkAreDropped(): void

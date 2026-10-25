@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Celema\Quma\Database;
 use Closure;
 use Cosray\Exception\RuntimeException;
+use Cosray\Util\Transaction;
 use Psr\Log\LoggerInterface as Logger;
 
 /**
  * Tells other systems that content changed, such as a static site build or a
- * cache in front of the API. Events are recorded once their write is
- * committed and delivered after the response was sent, one POST per event
- * and hook, in parallel and with short timeouts. A failed delivery is
- * logged, not retried.
+ * cache in front of the API. Events are recorded once their write is done
+ * and delivered after the response was sent, one POST per event and hook,
+ * in parallel and with short timeouts. A write inside a transaction that
+ * Cosray did not open is reported only if that transaction committed. A
+ * failed delivery is logged, not retried.
  *
  *     'webhooks' => [
  *         ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
@@ -32,23 +35,25 @@ final class Webhooks
 	/** @var list<array{url: string, secret: ?string, events: list<string>}> */
 	private readonly array $hooks;
 
-	/** @var list<array{url: string, headers: array<string, string>, body: string}> */
+	/** @var list<array{url: string, headers: array<string, string>, body: string, transaction: ?string}> */
 	private array $pending = [];
 
 	/**
 	 * @param list<array{url: string, secret?: ?string, events?: list<string>}> $hooks
+	 * @param Closure(string): bool $committed tells whether the transaction with this id committed
 	 * @param ?Closure(list<array{url: string, headers: array<string, string>, body: string}>): list<?int> $send
 	 *        delivers the requests and returns each one's status, null when it failed
 	 */
 	public function __construct(
 		array $hooks,
 		private readonly Logger $logger,
+		private readonly Closure $committed,
 		private readonly ?Closure $send = null,
 	) {
 		$this->hooks = array_map(self::hook(...), $hooks);
 	}
 
-	public static function fromConfig(Config $config, Logger $logger): self
+	public static function fromConfig(Config $config, Logger $logger, Database $db): self
 	{
 		$hooks = $config->get('webhooks', []);
 
@@ -57,11 +62,14 @@ final class Webhooks
 		}
 
 		/** @var list<array{url: string, secret?: ?string, events?: list<string>}> $hooks */
-		return new self($hooks, $logger);
+		return new self($hooks, $logger, static fn(string $id): bool => Transaction::committed($db, $id));
 	}
 
-	/** @param array<string, mixed> $data */
-	public function record(string $event, array $data): void
+	/**
+	 * @param array<string, mixed> $data
+	 * @param ?string $transaction the transaction, not opened by Cosray, that the write belongs to
+	 */
+	public function record(string $event, array $data, ?string $transaction = null): void
 	{
 		$id = bin2hex(random_bytes(16));
 		$body = null;
@@ -86,13 +94,44 @@ final class Webhooks
 				$headers['X-Cosray-Signature'] = 'sha256=' . hash_hmac('sha256', $body, $hook['secret']);
 			}
 
-			$this->pending[] = ['url' => $hook['url'], 'headers' => $headers, 'body' => $body];
+			$this->pending[] = [
+				'url' => $hook['url'],
+				'headers' => $headers,
+				'body' => $body,
+				'transaction' => $transaction,
+			];
 		}
+	}
+
+	/**
+	 * Drops the events of writes whose transaction did not commit. It has to
+	 * run once the request's transactions ended, while the connection that
+	 * asks about them is still open.
+	 */
+	public function settle(): void
+	{
+		$committed = [];
+		$settled = [];
+
+		foreach ($this->pending as $request) {
+			$transaction = $request['transaction'];
+
+			if ($transaction === null || ($committed[$transaction] ??= ($this->committed)($transaction))) {
+				$settled[] = [...$request, 'transaction' => null];
+			}
+		}
+
+		$this->pending = $settled;
 	}
 
 	public function deliver(): void
 	{
-		$requests = $this->pending;
+		$this->settle();
+		$requests = array_map(static fn(array $request): array => [
+			'url' => $request['url'],
+			'headers' => $request['headers'],
+			'body' => $request['body'],
+		], $this->pending);
 		$this->pending = [];
 
 		if ($requests === []) {

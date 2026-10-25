@@ -21,6 +21,7 @@ final class WebhooksTest extends TestCase
 				['url' => 'https://drafts.example/hook', 'events' => ['node.draft']],
 			],
 			new RecordingLogger(),
+			self::committed(...),
 			static function (array $requests) use (&$sent): array {
 				$sent = $requests;
 
@@ -50,6 +51,7 @@ final class WebhooksTest extends TestCase
 		$webhooks = new Webhooks(
 			[['url' => 'https://down.example/hook']],
 			$logger,
+			self::committed(...),
 			static function (array $requests) use (&$calls): array {
 				$calls++;
 
@@ -68,7 +70,11 @@ final class WebhooksTest extends TestCase
 	public function testAnUnreachableHookIsLoggedAsWithoutResponse(): void
 	{
 		$logger = new RecordingLogger();
-		$webhooks = new Webhooks([['url' => 'http://127.0.0.1:9/hook', 'secret' => 'x']], $logger);
+		$webhooks = new Webhooks(
+			[['url' => 'http://127.0.0.1:9/hook', 'secret' => 'x']],
+			$logger,
+			self::committed(...),
+		);
 
 		$webhooks->record('node.created', ['uid' => 'new', 'type' => 'page']);
 		$webhooks->deliver();
@@ -81,13 +87,55 @@ final class WebhooksTest extends TestCase
 	{
 		$this->expectException(RuntimeException::class);
 
-		new Webhooks([['url' => 'ftp://files.example/hook']], new RecordingLogger());
+		new Webhooks([['url' => 'ftp://files.example/hook']], new RecordingLogger(), self::committed(...));
 	}
 
 	public function testTheConfigTakesAListOfHooks(): void
 	{
 		$this->expectException(RuntimeException::class);
 
-		Webhooks::fromConfig($this->config(['webhooks' => ['url' => 'https://x.example']]), new RecordingLogger());
+		Webhooks::fromConfig(
+			$this->config(['webhooks' => ['url' => 'https://x.example']]),
+			new RecordingLogger(),
+			$this->db(),
+		);
+	}
+
+	public function testEventsOfTransactionsThatDidNotCommitAreDropped(): void
+	{
+		$sent = [];
+		$asked = [];
+		$webhooks = new Webhooks(
+			[['url' => 'https://all.example/hook']],
+			new RecordingLogger(),
+			static function (string $id) use (&$asked): bool {
+				$asked[] = $id;
+
+				return $id === 'committed';
+			},
+			static function (array $requests) use (&$sent): array {
+				$sent = $requests;
+
+				return array_fill(0, count($requests), 204);
+			},
+		);
+
+		$webhooks->record('node.updated', ['uid' => 'own'], null);
+		$webhooks->record('node.updated', ['uid' => 'kept'], 'committed');
+		$webhooks->record('node.deleted', ['uid' => 'kept'], 'committed');
+		$webhooks->record('node.updated', ['uid' => 'undone'], 'rolled-back');
+		$webhooks->settle();
+		$webhooks->deliver();
+
+		$this->assertSame(
+			['own', 'kept', 'kept'],
+			array_map(static fn(array $request): string => json_decode($request['body'], true)['uid'], $sent),
+		);
+		$this->assertSame(['committed', 'rolled-back'], $asked);
+	}
+
+	private static function committed(string $id): bool
+	{
+		return true;
 	}
 }

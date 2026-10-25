@@ -297,7 +297,11 @@ class Store
 		}
 
 		$type = (string) $this->types->get($node::class, 'handle');
-		Transaction::afterCommit($this->db, static fn() => $webhooks->record($event, ['uid' => $uid, 'type' => $type]));
+		Transaction::afterCommit($this->db, static fn(?string $transaction) => $webhooks->record(
+			$event,
+			['uid' => $uid, 'type' => $type],
+			$transaction,
+		));
 	}
 
 	private function transaction(callable $work, string $failure): void

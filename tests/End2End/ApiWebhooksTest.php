@@ -60,6 +60,8 @@ final class ApiWebhooksTest extends End2EndTestCase
 		$container->add(Webhooks::class, new Webhooks(
 			[['url' => 'https://hooks.example/cosray']],
 			new RecordingLogger(),
+			// Requests join the test's transaction, which stands in for the commit.
+			static fn(string $id): bool => true,
 			function (array $requests): array {
 				$this->sent = [...$this->sent, ...$requests];
 
