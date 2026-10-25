@@ -236,6 +236,7 @@ final class ApiDeliveryTest extends End2EndTestCase
 		]]);
 		$read = $this->makeRequest('GET', '/api', ['headers' => ['Origin' => 'https://front.example']]);
 		$foreign = $this->makeRequest('GET', '/api', ['headers' => ['Origin' => 'https://evil.example']]);
+		$sameOrigin = $this->makeRequest('GET', '/api');
 
 		$this->assertSame(204, $preflight->getStatusCode());
 		$this->assertSame('https://front.example', $preflight->getHeaderLine('Access-Control-Allow-Origin'));
@@ -244,6 +245,23 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->assertSame('https://front.example', $read->getHeaderLine('Access-Control-Allow-Origin'));
 		$this->assertStringContainsString('ETag', $read->getHeaderLine('Access-Control-Expose-Headers'));
 		$this->assertFalse($foreign->hasHeader('Access-Control-Allow-Origin'));
+
+		foreach ([$preflight, $read, $foreign, $sameOrigin] as $response) {
+			$this->assertContains('Origin', array_map(trim(...), explode(',', $response->getHeaderLine('Vary'))));
+		}
+	}
+
+	public function testAnyOriginGetsTheSameAnswerWithoutVaryingOnIt(): void
+	{
+		$this->app = $this->createApp(['api.path' => '/api', 'api.origins' => ['*'], 'api.max_age' => 60]);
+
+		$sameOrigin = $this->makeRequest('GET', '/api');
+		$crossOrigin = $this->makeRequest('GET', '/api', ['headers' => ['Origin' => 'https://front.example']]);
+
+		foreach ([$sameOrigin, $crossOrigin] as $response) {
+			$this->assertSame('*', $response->getHeaderLine('Access-Control-Allow-Origin'));
+			$this->assertNotContains('Origin', array_map(trim(...), explode(',', $response->getHeaderLine('Vary'))));
+		}
 	}
 
 	public function testSharedCachesKeepOnlyAnonymousReads(): void

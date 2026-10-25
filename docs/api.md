@@ -14,7 +14,7 @@ $app = App::create($root, [
 ]);
 ```
 
-`api.origins` lists the origins whose browser scripts may call the API; `'*'` allows any. The API reads no cookies, so it never allows credentials. `api.max_age` lets shared caches keep anonymous reads for that many seconds; without it they revalidate. Responses to requests with a token are never cached.
+`api.origins` lists the origins whose browser scripts may call the API; `'*'` allows any. With listed origins every response varies on `Origin`, so a shared cache does not hand one origin's answer to another. The API reads no cookies, so it never allows credentials. `api.max_age` lets shared caches keep anonymous reads for that many seconds; without it they revalidate. Responses to requests with a token are never cached.
 
 Node paths at or below `api.path` are refused when saved, like the panel's. `app.url_prefix` applies as for every route: with `/site`, the API answers below `/site/api`.
 

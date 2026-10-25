@@ -36,14 +36,15 @@ final class Headers implements Middleware
 		if ($request->getMethod() === 'OPTIONS' && $request->hasHeader('Access-Control-Request-Method')) {
 			$response = $this->responses->empty();
 
-			return $origin === null
-				? $response
-				: $response
-					->withHeader('Access-Control-Allow-Origin', $origin)
-					->withHeader('Access-Control-Allow-Methods', self::METHODS)
-					->withHeader('Access-Control-Allow-Headers', self::ALLOWED)
-					->withHeader('Access-Control-Max-Age', '86400')
-					->withAddedHeader('Vary', 'Origin');
+			return $this->vary(
+				$origin === null
+					? $response
+					: $response
+						->withHeader('Access-Control-Allow-Origin', $origin)
+						->withHeader('Access-Control-Allow-Methods', self::METHODS)
+						->withHeader('Access-Control-Allow-Headers', self::ALLOWED)
+						->withHeader('Access-Control-Max-Age', '86400'),
+			);
 		}
 
 		$response = $handler->handle($request);
@@ -51,13 +52,24 @@ final class Headers implements Middleware
 		if ($origin !== null) {
 			$response = $response
 				->withHeader('Access-Control-Allow-Origin', $origin)
-				->withHeader('Access-Control-Expose-Headers', self::EXPOSED)
-				->withAddedHeader('Vary', 'Origin');
+				->withHeader('Access-Control-Expose-Headers', self::EXPOSED);
 		}
 
-		return $response
+		return $this
+			->vary($response)
 			->withHeader('Cache-Control', $this->cacheControl($request, $response))
 			->withAddedHeader('Vary', 'Authorization');
+	}
+
+	/**
+	 * With listed origins the CORS headers depend on the request's Origin,
+	 * also when it sends none, so a shared cache has to keep the answers apart.
+	 */
+	private function vary(Response $response): Response
+	{
+		return $this->origins === [] || in_array('*', $this->origins, true)
+			? $response
+			: $response->withAddedHeader('Vary', 'Origin');
 	}
 
 	private function cacheControl(Request $request, Response $response): string
@@ -71,16 +83,13 @@ final class Headers implements Middleware
 		return $this->maxAge > 0 ? "public, max-age={$this->maxAge}" : 'no-cache';
 	}
 
+	/** Any origin gets `*`, even a request without one, so every answer is the same. */
 	private function allowedOrigin(string $origin): ?string
 	{
-		if ($origin === '') {
-			return null;
-		}
-
 		if (in_array('*', $this->origins, true)) {
 			return '*';
 		}
 
-		return in_array($origin, $this->origins, true) ? $origin : null;
+		return $origin !== '' && in_array($origin, $this->origins, true) ? $origin : null;
 	}
 }
