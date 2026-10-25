@@ -122,7 +122,9 @@ A list contains only nodes the client may read, whatever it asks for: anonymous 
 
 ### Syncing
 
-`changedSince=2026-10-24T08:00:00Z` lists the nodes changed after that time and adds `removed`: up to 1000 nodes of the readable types, with `uid`, `type` and `changed`, that changed after it but no longer pass the state filters because they were unpublished, hidden or deleted. A client keeping a copy, such as a static site build, passes the latest `changed` it has seen and drops the removed ones. Times have whole seconds, so a node changed in the same second may come again.
+`changedSince=2026-10-24T08:00:00Z` starts a sync. The response lists what changed after that time, oldest change first: nodes that pass the state filters come as `items`, while nodes of the readable types that no longer pass them, because they were unpublished, hidden or deleted, come under `removed` with only their `uid`, `type` and `changed`, for the client to drop. `limit` counts both, and the response adds `cursor` and `more` instead of `total` and `offset`. While `more` is true, ask again right away with `cursor=` in place of `changedSince`; once it is false, keep the cursor and send it next time to get what changed since. A client keeping a copy, such as a static site build, needs nothing else.
+
+A sync takes the other listing parameters but `order` and `offset`: it runs in change order, to the microsecond, with the uid breaking ties, so nodes changed at the same moment are neither skipped nor repeated. A change is stamped when it is written, not when its transaction commits, so a long-running write can commit behind a cursor that already passed its time; a client that must not miss such a change starts a new sync from an earlier time now and then.
 
 ### Filters
 

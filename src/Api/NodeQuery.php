@@ -61,7 +61,7 @@ final readonly class NodeQuery
 		public int $offset = 0,
 		public ?array $fields = null,
 		public bool $source = false,
-		public ?string $changedSince = null,
+		public ?SyncCursor $sync = null,
 		public bool $ordered = false,
 	) {}
 
@@ -143,6 +143,8 @@ final readonly class NodeQuery
 			throw self::invalid('`parent` is a node uid.');
 		}
 
+		$sync = self::sync($params);
+
 		return new self(
 			types: self::list($params['type'] ?? null, 'type'),
 			uids: $uids,
@@ -163,7 +165,7 @@ final readonly class NodeQuery
 			offset: self::int($params['offset'] ?? null, 'offset', 0, 0, PHP_INT_MAX),
 			fields: self::fields($params['fields'] ?? null),
 			source: self::source($params['view'] ?? null),
-			changedSince: self::instant($params['changedSince'] ?? null),
+			sync: $sync,
 			ordered: isset($params['order']),
 		);
 	}
@@ -252,6 +254,33 @@ final readonly class NodeQuery
 		}
 
 		return $names;
+	}
+
+	/**
+	 * `changedSince` starts a sync, `cursor` goes on with one.
+	 *
+	 * @param array<array-key, mixed> $params
+	 */
+	private static function sync(array $params): ?SyncCursor
+	{
+		$since = self::instant($params['changedSince'] ?? null);
+		$cursor = $params['cursor'] ?? null;
+
+		if ($since !== null && $cursor !== null) {
+			throw self::invalid('Send `changedSince` to start a sync or `cursor` to go on with one, not both.');
+		}
+
+		if ($since === null && $cursor === null) {
+			return null;
+		}
+
+		if (isset($params['order']) || isset($params['offset'])) {
+			throw self::invalid(
+				'A sync runs in change order and goes on with `cursor`, so it takes no `order` or `offset`.',
+			);
+		}
+
+		return $cursor === null ? SyncCursor::since((string) $since) : SyncCursor::fromToken($cursor);
 	}
 
 	private static function instant(mixed $value): ?string

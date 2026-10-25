@@ -279,31 +279,72 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->assertSame('no-cache', $this->makeRequest('GET', '/api')->getHeaderLine('Cache-Control'));
 	}
 
-	public function testChangedSinceListsChangesAndWhatWasRemoved(): void
+	public function testASyncPagesThroughChangesAndRemovalsInChangeOrder(): void
 	{
 		$this->page('unchanged', ['en' => 'Unchanged'], '/unchanged');
 		$this->page('updated', ['en' => 'Updated'], '/updated');
 		$this->page('withdrawn', ['en' => 'Withdrawn'], '/withdrawn');
+		$this->page('later', ['en' => 'Later'], '/later');
 		// The change trigger stamps every update; set the times without it.
 		$this->db()->execute('ALTER TABLE cms.nodes DISABLE TRIGGER USER')->run();
 		$this->db()->execute("UPDATE cms.nodes SET changed = '2026-01-01T00:00:00Z' WHERE uid = 'unchanged'")->run();
-		$this->db()->execute("UPDATE cms.nodes SET changed = '2026-06-01T00:00:00Z' WHERE uid = 'updated'")->run();
 		$this->db()->execute(
-			"UPDATE cms.nodes SET changed = '2026-06-01T00:00:00Z', published = false WHERE uid = 'withdrawn'",
+			"UPDATE cms.nodes SET changed = '2026-06-01T00:00:00.250Z' WHERE uid IN ('updated', 'withdrawn')",
 		)->run();
+		$this->db()->execute("UPDATE cms.nodes SET published = false WHERE uid = 'withdrawn'")->run();
+		$this->db()->execute("UPDATE cms.nodes SET changed = '2026-06-01T00:00:00.750Z' WHERE uid = 'later'")->run();
 		$this->db()->execute('ALTER TABLE cms.nodes ENABLE TRIGGER USER')->run();
 
-		$sync = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => [
-			'type' => 'test-page',
-			'changedSince' => '2026-03-01T00:00:00Z',
-		]]));
+		$pages = [];
+		$query = ['type' => 'test-page', 'changedSince' => '2026-03-01T00:00:00Z', 'limit' => '1'];
 
-		$this->assertSame(['updated'], array_column($sync['items'], 'uid'));
+		do {
+			$page = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => $query]));
+			$pages[] = [array_column($page['items'], 'uid'), $page['removed'], $page['more']];
+			$query = ['type' => 'test-page', 'cursor' => $page['cursor'], 'limit' => '1'];
+		} while ($page['more']);
+
 		$this->assertSame(
-			[['uid' => 'withdrawn', 'type' => 'test-page', 'changed' => '2026-06-01T00:00:00Z']],
-			$sync['removed'],
+			[
+				[['updated'], [], true],
+				[[], [['uid' => 'withdrawn', 'type' => 'test-page', 'changed' => '2026-06-01T00:00:00Z']], true],
+				[['later'], [], false],
+			],
+			$pages,
 		);
-		$this->problem($this->makeRequest('GET', '/api/nodes', ['query' => ['changedSince' => 'yesterday']]), 400);
+
+		$caughtUp = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => $query]));
+		$this->assertSame([[], [], false, $query['cursor']], [
+			$caughtUp['items'],
+			$caughtUp['removed'],
+			$caughtUp['more'],
+			$caughtUp['cursor'],
+		]);
+	}
+
+	public function testASyncRefusesWhatDoesNotFitTheChangeOrder(): void
+	{
+		$since = '2026-03-01T00:00:00Z';
+		$cursor = $this->json($this->makeRequest('GET', '/api/nodes', ['query' => [
+			'changedSince' => $since,
+		]]))['cursor'];
+
+		foreach ([
+			['changedSince' => 'yesterday'],
+			['cursor' => 'not-a-cursor'],
+			['cursor' => rtrim(base64_encode('["2026-06-01T00:00:00.000000Z"]'), '=')],
+			['cursor' => rtrim(base64_encode('["yesterday", null]'), '=')],
+			['changedSince' => $since, 'cursor' => $cursor],
+			['changedSince' => $since, 'offset' => '50'],
+			['cursor' => $cursor, 'order' => 'title'],
+		] as $query) {
+			$this->problem($this->makeRequest('GET', '/api/nodes', ['query' => $query]), 400);
+		}
+
+		$this->problem($this->makeRequest('GET', '/api/search', ['query' => [
+			'q' => 'x',
+			'changedSince' => $since,
+		]]), 400);
 	}
 
 	protected function createBootstrap(Config $config): Bootstrap

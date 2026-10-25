@@ -10,6 +10,7 @@ use Celema\Core\Exception\HttpForbidden;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Exception\HttpUnauthorized;
 use Celema\Core\Request;
+use Closure;
 use Cosray\Actor;
 use Cosray\Api\Exception\PreconditionFailed;
 use Cosray\Api\Exception\UnsupportedMediaType;
@@ -17,10 +18,12 @@ use Cosray\Api\NodeQuery;
 use Cosray\Api\PreviewToken;
 use Cosray\Api\Responses;
 use Cosray\Api\Serializer;
+use Cosray\Api\SyncCursor;
 use Cosray\Api\Writer;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Exception\ParserException;
+use Cosray\Finder\Nodes as NodeFinder;
 use Cosray\Finder\Order;
 use Cosray\Node\Factory;
 use Cosray\Node\Wrapper;
@@ -184,13 +187,22 @@ final class Nodes
 
 	private function listing(Request $request, Cms $cms, NodeQuery $query, ?string $fulltext = null): Response
 	{
-		$registered = $this->access->registered();
-		$unknown = array_diff($query->types, array_keys($registered));
+		$unknown = array_diff($query->types, array_keys($this->access->registered()));
 
 		if ($unknown !== []) {
 			throw new HttpBadRequest($request, payload: [
 				'message' => 'Unknown type: ' . implode(', ', $unknown) . '.',
 			]);
+		}
+
+		if ($query->sync !== null) {
+			if ($fulltext !== null) {
+				throw new HttpBadRequest($request, payload: [
+					'message' => 'A search does not sync; list the nodes with `changedSince` instead.',
+				]);
+			}
+
+			return $this->sync($request, $cms, $query, $query->sync);
 		}
 
 		$readable = $this->access->readable(self::user($request));
@@ -201,35 +213,12 @@ final class Nodes
 			->deleted($query->deleted)
 			->readable($readable['live'], $readable['any']);
 
-		if ($query->types !== []) {
-			$nodes->types(...$query->types);
-		}
-
-		if ($query->uids !== []) {
-			$nodes->only(...$query->uids);
-		}
-
-		if ($query->handles !== []) {
-			$nodes->match(['handle' => ['in' => $query->handles]]);
-		}
-
-		if ($query->parent !== null) {
-			$nodes->childrenOf($query->parent);
-		}
-
-		if ($query->changedSince !== null) {
-			$nodes->match(['changed' => ['gt' => $query->changedSince]]);
-		}
-
 		if ($fulltext !== null) {
 			$nodes->fulltext($fulltext);
 		}
 
-		try {
-			if ($query->filter !== null) {
-				$nodes->match($query->filter, NodeQuery::BUILTINS);
-			}
-
+		[$items, $total] = $this->guarded($request, function () use ($nodes, $query, $fulltext): array {
+			$this->narrow($nodes, $query);
 			$total = $nodes->count();
 
 			if ($fulltext === null || $query->ordered) {
@@ -249,6 +238,120 @@ final class Nodes
 
 				$items[] = $item;
 			}
+
+			return [$items, $total];
+		});
+
+		return $this->responses->json([
+			'items' => $items,
+			'total' => $total,
+			'limit' => $query->limit,
+			'offset' => $query->offset,
+		]);
+	}
+
+	/**
+	 * The next changes after the cursor, in change order: nodes that pass the
+	 * state filters come as items, the others, which the client should drop,
+	 * under `removed` with only their uid, type and change time. `cursor`
+	 * goes on after the last change given, `more` tells whether others
+	 * follow right away.
+	 */
+	private function sync(Request $request, Cms $cms, NodeQuery $query, SyncCursor $cursor): Response
+	{
+		$user = self::user($request);
+		$readable = $this->access->readable($user);
+		$nodes = $cms
+			->nodes()
+			->published(null)
+			->hidden(null)
+			->deleted(null)
+			->readable([], [...$readable['live'], ...$readable['any']]);
+
+		[$items, $removed, $last, $more] = $this->guarded($request, function () use (
+			$nodes,
+			$query,
+			$cursor,
+			$user,
+		): array {
+			$this->narrow($nodes, $query);
+			$nodes
+				->match($cursor->filter())
+				->order(new Order('changed'), new Order('uid'))
+				->limit($query->limit + 1);
+			$items = [];
+			$removed = [];
+			$last = null;
+
+			foreach ($nodes as $node) {
+				if ((count($items) + count($removed)) === $query->limit) {
+					return [$items, $removed, $last, true];
+				}
+
+				$last = Wrapper::unwrap($node);
+
+				if (self::passes($last, $query) && $this->access->reads($user, $node)) {
+					$items[] = $this->serializer->node($node, $query->source, $query->fields);
+
+					continue;
+				}
+
+				$item = $this->serializer->node($node, fields: []);
+				$removed[] = ['uid' => $item['uid'], 'type' => $item['type'], 'changed' => $item['changed']];
+			}
+
+			return [$items, $removed, $last, false];
+		});
+		$next = $last === null
+			? $cursor
+			: SyncCursor::after((string) Factory::meta($last, 'changed'), (string) Factory::meta($last, 'uid'));
+
+		return $this->responses->json([
+			'items' => $items,
+			'removed' => $removed,
+			'limit' => $query->limit,
+			'cursor' => $next->token(),
+			'more' => $more,
+		]);
+	}
+
+	/** The query's conditions besides the states, which listing and sync treat apart. */
+	private function narrow(NodeFinder $nodes, NodeQuery $query): void
+	{
+		if ($query->types !== []) {
+			$nodes->types(...$query->types);
+		}
+
+		if ($query->uids !== []) {
+			$nodes->only(...$query->uids);
+		}
+
+		if ($query->handles !== []) {
+			$nodes->match(['handle' => ['in' => $query->handles]]);
+		}
+
+		if ($query->parent !== null) {
+			$nodes->childrenOf($query->parent);
+		}
+
+		if ($query->filter !== null) {
+			$nodes->match($query->filter, NodeQuery::BUILTINS);
+		}
+	}
+
+	/**
+	 * Runs the query, answering a filter or order the stored values do not
+	 * fit with 400.
+	 *
+	 * @template T
+	 *
+	 * @param Closure(): T $query
+	 * @return T
+	 */
+	private function guarded(Request $request, Closure $query): mixed
+	{
+		try {
+			return $query();
 		} catch (ParserException $e) {
 			throw new HttpBadRequest($request, payload: ['message' => $e->getMessage()], previous: $e);
 		} catch (PDOException $e) {
@@ -265,66 +368,24 @@ final class Nodes
 				previous: $e,
 			);
 		}
-
-		$result = ['items' => $items, 'total' => $total, 'limit' => $query->limit, 'offset' => $query->offset];
-
-		if ($query->changedSince !== null) {
-			$result['removed'] = $this->removed($cms, $query, [...$readable['live'], ...$readable['any']]);
-		}
-
-		return $this->responses->json($result);
 	}
 
-	/**
-	 * Nodes of the readable types that changed since the cutoff but no longer
-	 * pass the state filters, so a client syncing its copy can drop them.
-	 * Only their uid, type and change time are given.
-	 *
-	 * @param list<string> $types
-	 * @return list<array{uid: string, type: string, changed: ?string}>
-	 */
-	private function removed(Cms $cms, NodeQuery $query, array $types): array
+	/** Whether the node is in the states the query asks for. */
+	private static function passes(object $node, NodeQuery $query): bool
 	{
-		$gone = [];
+		$states = [
+			[$query->published, (bool) Factory::meta($node, 'published')],
+			[$query->hidden, (bool) Factory::meta($node, 'hidden')],
+			[$query->deleted, Factory::meta($node, 'deleted') !== null],
+		];
 
-		if ($query->published === true) {
-			$gone[] = ['published' => false];
+		foreach ($states as [$wanted, $actual]) {
+			if ($wanted !== null && $wanted !== $actual) {
+				return false;
+			}
 		}
 
-		if ($query->hidden === false) {
-			$gone[] = ['hidden' => true];
-		}
-
-		if ($query->deleted === false) {
-			$gone[] = ['deleted' => ['null' => false]];
-		}
-
-		if ($gone === []) {
-			return [];
-		}
-
-		$nodes = $cms
-			->nodes()
-			->published(null)
-			->hidden(null)
-			->deleted(null)
-			->readable([], $types)
-			->match(['changed' => ['gt' => $query->changedSince], 'or' => $gone])
-			->order(new Order('changed'), new Order('uid'))
-			->limit(NodeQuery::MAX_LIMIT);
-
-		if ($query->types !== []) {
-			$nodes->types(...$query->types);
-		}
-
-		$removed = [];
-
-		foreach ($nodes as $node) {
-			$item = $this->serializer->node($node, fields: []);
-			$removed[] = ['uid' => $item['uid'], 'type' => $item['type'], 'changed' => $item['changed']];
-		}
-
-		return $removed;
+		return true;
 	}
 
 	/** A node the client may read; any other answers 404, as if it did not exist. */
