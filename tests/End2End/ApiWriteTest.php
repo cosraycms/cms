@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Celema\Quma\Database;
 use Cosray\Field\Text;
 use Cosray\Tests\End2EndTestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -242,6 +243,30 @@ final class ApiWriteTest extends End2EndTestCase
 			$this->db()->execute(
 				"SELECT deleted FROM cms.nodes WHERE uid = 'locked-page'",
 			)->one()['deleted'],
+		);
+	}
+
+	public function testAWriteWaitsWhileAnotherSessionHoldsTheNode(): void
+	{
+		$this->authenticateAs('editor');
+		$this->page('contested', ['en' => 'Contested']);
+		$other = new Database($this->conn());
+		$other->begin();
+		$other->nodes->lock(['uid' => 'contested'])->run();
+		// Waiting would block the single-threaded test; a timeout shows it.
+		$this->db()->execute("SET LOCAL lock_timeout = '100ms'")->run();
+
+		try {
+			$response = $this->send('PATCH', '/api/nodes/contested', ['hidden' => true]);
+		} finally {
+			$other->rollback();
+		}
+
+		$this->assertGreaterThanOrEqual(500, $response->getStatusCode());
+		$this->assertFalse(
+			(bool) $this->db()->execute(
+				"SELECT hidden FROM cms.nodes WHERE uid = 'contested'",
+			)->one()['hidden'],
 		);
 	}
 

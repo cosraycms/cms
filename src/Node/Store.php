@@ -81,10 +81,10 @@ class Store
 		$this->fulltext->validate($locales);
 		$data = $this->prepare($node, $data, $locales, $create);
 
-		$this->transaction(
-			fn() => $this->persist($node, $data, $actor->id, $locales, $create),
-			'Error while saving: ',
-		);
+		$this->transaction(function () use ($node, $data, $actor, $locales, $create): void {
+			$this->lock($data['uid']);
+			$this->persist($node, $data, $actor->id, $locales, $create);
+		}, 'Error while saving: ');
 		$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -103,6 +103,7 @@ class Store
 		$nodeId = $this->nodeId($node);
 
 		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
+			$this->lock($data['uid']);
 			$this->persist($node, $data, $actor->id, $locales);
 			$this->drafts->delete($nodeId, published: true);
 			$this->sync->remove('draft', $data['uid']);
@@ -135,6 +136,8 @@ class Store
 		$handle = $this->resolveHandle($data);
 
 		$this->transaction(function () use ($node, $data, $actor, $nodeId, $content, $handle, $paths): void {
+			$this->lock($data['uid']);
+
 			if ($this->drafts->matchesLive($nodeId, $content, $handle, $paths)) {
 				$this->drafts->delete($nodeId);
 				$this->sync->remove('draft', $data['uid']);
@@ -162,6 +165,7 @@ class Store
 		$uid = (string) Factory::meta($node, 'uid');
 
 		$this->transaction(function () use ($nodeId, $uid): void {
+			$this->lock($uid);
 			$this->drafts->delete($nodeId);
 			$this->sync->remove('draft', $uid);
 		}, 'Error while discarding: ');
@@ -177,12 +181,12 @@ class Store
 		$draft = $this->drafts->get($this->nodeId($node));
 
 		if ($draft === null) {
-			$this->db->nodes->setPublished([
-				'uid' => (string) Factory::meta($node, 'uid'),
-				'published' => false,
-				'editor' => $actor->id,
-			])->run();
-			$this->event('node.updated', $node, (string) Factory::meta($node, 'uid'));
+			$uid = (string) Factory::meta($node, 'uid');
+			$this->transaction(function () use ($uid, $actor): void {
+				$this->lock($uid);
+				$this->db->nodes->setPublished(['uid' => $uid, 'published' => false, 'editor' => $actor->id])->run();
+			}, 'Error while unpublishing: ');
+			$this->event('node.updated', $node, $uid);
 
 			return;
 		}
@@ -202,6 +206,17 @@ class Store
 		$this->publish($node, $this->workingData($node, $draft, published: true), $locales, $actor);
 
 		return true;
+	}
+
+	/**
+	 * Holds the node until the transaction ends, so writers of one node take
+	 * turns. The uid lock also covers a node still to be created; the row
+	 * lock also stops writers that update the row without this store.
+	 */
+	public function lock(string $uid): void
+	{
+		$this->db->nodes->lock(['uid' => $uid])->run();
+		$this->db->nodes->lockRow(['uid' => $uid])->run();
 	}
 
 	public function holdsDrafts(object $node): bool
@@ -364,10 +379,10 @@ class Store
 
 			try {
 				$prepared = $this->prepare($node, $data, $locales, create: true);
-				$this->transaction(
-					fn() => $this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata),
-					'Error while saving: ',
-				);
+				$this->transaction(function () use ($node, $prepared, $actor, $locales, $metadata): void {
+					$this->lock($prepared['uid']);
+					$this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata);
+				}, 'Error while saving: ');
 				$this->event('node.created', $node, $prepared['uid']);
 
 				return ['success' => true, 'uid' => $prepared['uid']];
@@ -400,7 +415,9 @@ class Store
 
 		$uids = $withChildren ? $this->subtreeUids($uid) : [$uid];
 
-		$this->transaction(function () use ($uids, $actor): void {
+		$this->transaction(function () use ($uid, $uids, $actor): void {
+			$this->lock($uid);
+
 			foreach ($uids as $deleteUid) {
 				$this->db->nodes->delete([
 					'uid' => $deleteUid,

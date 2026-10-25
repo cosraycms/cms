@@ -126,8 +126,6 @@ final class Nodes
 	public function put(Request $request, Cms $cms, Writer $writer, string $uid): Response
 	{
 		$body = $this->body($request, ['application/json']);
-		$node = $cms->node->get(['uid' => $uid, 'published' => null]);
-		$this->preconditions($request, $node);
 
 		if (array_key_exists('uid', $body) && $body['uid'] !== $uid) {
 			throw new HttpBadRequest($request, payload: [
@@ -135,28 +133,37 @@ final class Nodes
 			]);
 		}
 
-		if ($node === null) {
-			$class = $this->type($request, $body['type'] ?? null);
-			$this->allow($request, NodeAccess::CREATE, $class);
-			$writer->create($class, $body, $this->actor($request), $uid);
+		$status = $writer->exclusive($uid, function () use ($request, $cms, $writer, $uid, $body): int {
+			$node = $cms->node->get(['uid' => $uid, 'published' => null]);
+			$this->preconditions($request, $node);
 
-			return $this->written($request, $cms, $uid, 201);
-		}
+			if ($node === null) {
+				$class = $this->type($request, $body['type'] ?? null);
+				$this->allow($request, NodeAccess::CREATE, $class);
+				$writer->create($class, $body, $this->actor($request), $uid);
 
-		$this->assertWritable($request, $node);
-		$writer->replace($node, $body, $this->actor($request));
+				return 201;
+			}
 
-		return $this->written($request, $cms, $uid, 200);
+			$this->assertWritable($request, $node);
+			$writer->replace($node, $body, $this->actor($request));
+
+			return 200;
+		});
+
+		return $this->written($request, $cms, $uid, $status);
 	}
 
 	/** Applies a JSON Merge Patch to the node and to an editor's working copy of it. */
 	public function patch(Request $request, Cms $cms, Writer $writer, string $uid): Response
 	{
 		$patch = $this->body($request, ['application/merge-patch+json', 'application/json']);
-		$node = $this->readable($request, $cms, $uid, false);
-		$this->preconditions($request, $node);
-		$this->assertWritable($request, $node);
-		$writer->patch($node, $patch, $this->actor($request));
+		$writer->exclusive($uid, function () use ($request, $cms, $writer, $uid, $patch): void {
+			$node = $this->readable($request, $cms, $uid, false);
+			$this->preconditions($request, $node);
+			$this->assertWritable($request, $node);
+			$writer->patch($node, $patch, $this->actor($request));
+		});
 
 		return $this->written($request, $cms, $uid, 200);
 	}
@@ -164,14 +171,13 @@ final class Nodes
 	/** Soft-deletes the node; `?children=true` takes its descendants along. */
 	public function delete(Request $request, Cms $cms, Writer $writer, string $uid): Response
 	{
-		$node = $this->readable($request, $cms, $uid, false);
-		$this->preconditions($request, $node);
-		$this->allow($request, NodeAccess::DELETE, Wrapper::unwrap($node)::class);
-		$writer->delete($node, $this->actor($request), NodeQuery::state(
-			$request->params()['children'] ?? null,
-			'children',
-			false,
-		) === true);
+		$children = NodeQuery::state($request->params()['children'] ?? null, 'children', false) === true;
+		$writer->exclusive($uid, function () use ($request, $cms, $writer, $uid, $children): void {
+			$node = $this->readable($request, $cms, $uid, false);
+			$this->preconditions($request, $node);
+			$this->allow($request, NodeAccess::DELETE, Wrapper::unwrap($node)::class);
+			$writer->delete($node, $this->actor($request), $children);
+		});
 
 		return $this->responses->empty();
 	}

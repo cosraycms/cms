@@ -7,6 +7,7 @@ namespace Cosray\Api;
 use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Sire\Issue;
+use Closure;
 use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
@@ -45,6 +46,25 @@ final class Writer
 			cms: $cms,
 			context: $context,
 		);
+	}
+
+	/**
+	 * Runs the work in a transaction that holds the node, so what the work
+	 * reads of it, such as the version an `If-Match` names, stays current
+	 * until its writes are done.
+	 *
+	 * @template T
+	 *
+	 * @param Closure(): T $work
+	 * @return T
+	 */
+	public function exclusive(string $uid, Closure $work): mixed
+	{
+		return Transaction::run($this->context->db, function () use ($uid, $work): mixed {
+			$this->store->lock($uid);
+
+			return $work();
+		});
 	}
 
 	/**
