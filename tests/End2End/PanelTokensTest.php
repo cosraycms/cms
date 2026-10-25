@@ -66,6 +66,20 @@ final class PanelTokensTest extends End2EndTestCase
 		$this->assertStringContainsString('not a date', $garbage);
 	}
 
+	public function testATokenFromBeforeNamesExistedIsListedAsUnnamed(): void
+	{
+		$this
+			->db()
+			->execute("UPDATE cms.auth_tokens SET name = '' WHERE token = :token", [
+				'token' => hash('sha256', (string) $this->defaultAuthToken),
+			])
+			->run();
+
+		$list = $this->getHtmlResponse($this->makeRequest('GET', '/panel/profile/tokens'));
+
+		$this->assertStringContainsString('Unnamed token', $list);
+	}
+
 	public function testTheProfileLinksToTheTokens(): void
 	{
 		$this->assertStringContainsString(

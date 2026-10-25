@@ -30,30 +30,34 @@ $profileUrl = (string) $profileUrl;
 	</header>
 
 	<div class="body">
-		<p class="intro"><?= escape(__('tokens:intro')) ?></p>
+		<div class="lead">
+			<p class="intro"><?= escape(__('tokens:intro')) ?></p>
 
-		<?php if (is_string($created)): ?>
-			<div class="cms-notice" role="status">
-				<p><?= escape(__('tokens:created')) ?></p>
-				<input class="cms-input" type="text" readonly value="<?= escape($created) ?>" aria-label="<?= escape(__('tokens:title')) ?>" />
-			</div>
-		<?php endif ?>
-		<?php if (is_string($error)): ?>
-			<div class="errors" role="alert"><p><?= escape($error) ?></p></div>
-		<?php endif ?>
+			<?php if (is_string($created)): ?>
+				<div class="cms-notice" role="status">
+					<p><?= escape(__('tokens:created')) ?></p>
+					<input class="cms-input" type="text" readonly value="<?= escape($created) ?>" aria-label="<?= escape(__('tokens:title')) ?>" />
+				</div>
+			<?php endif ?>
+			<?php if (is_string($error)): ?>
+				<div class="cms-notice is-error" role="alert"><p><?= escape($error) ?></p></div>
+			<?php endif ?>
+		</div>
 
 		<form class="toolbar" method="post" action="<?= escape($tokensUrl) ?>">
 			<label class="sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
 			<input
 				id="token-name"
-				class="cms-input"
+				class="cms-input name"
 				name="name"
 				required
 				maxlength="255"
 				value="<?= escape($name) ?>"
 				placeholder="<?= escape(__('tokens:name')) ?>" />
-			<label for="token-expires"><?= escape(__('tokens:expires')) ?></label>
-			<input id="token-expires" class="cms-input" name="expires" type="date" />
+			<span class="expires">
+				<label for="token-expires"><?= escape(__('tokens:expires')) ?></label>
+				<input id="token-expires" class="cms-input" name="expires" type="date" />
+			</span>
 			<button class="cms-button primary" type="submit"><?= escape(__('tokens:create')) ?></button>
 		</form>
 
@@ -72,17 +76,17 @@ $profileUrl = (string) $profileUrl;
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:created-at')) ?></span></th>
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:expires')) ?></span></th>
 								<th role="columnheader"><span class="inner"><?= escape(__('tokens:used')) ?></span></th>
-								<th role="columnheader"><span class="sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
+								<th class="col-actions" role="columnheader"><span class="sr-only"><?= escape(__('tokens:revoke')) ?></span></th>
 							</tr>
 						</thead>
 						<tbody role="rowgroup">
 							<?php foreach ($tokens as $token): ?>
 								<tr class="row" role="row">
-									<td class="cell" role="cell"><span class="value"><?= escape((string) $token['name']) ?></span></td>
-									<td class="cell" role="cell"><span class="value"><?= escape((string) $token['created']) ?></span></td>
-									<td class="cell" role="cell"><span class="value"><?= escape((string) ($token['expires'] ?? __('tokens:never'))) ?></span></td>
-									<td class="cell" role="cell"><span class="value"><?= escape((string) ($token['used'] ?? __('tokens:never'))) ?></span></td>
-									<td class="cell" role="cell">
+									<td class="cell" role="cell" data-label="<?= escape(__('tokens:name')) ?>"><span class="value"><?= escape((string) $token['name']) ?></span></td>
+									<td class="cell" role="cell" data-label="<?= escape(__('tokens:created-at')) ?>"><span class="value"><?= escape((string) $token['created']) ?></span></td>
+									<td class="cell" role="cell" data-label="<?= escape(__('tokens:expires')) ?>"><span class="value"><?= escape((string) ($token['expires'] ?? __('tokens:never'))) ?></span></td>
+									<td class="cell" role="cell" data-label="<?= escape(__('tokens:used')) ?>"><span class="value"><?= escape((string) ($token['used'] ?? __('tokens:never'))) ?></span></td>
+									<td class="cell col-actions" role="cell">
 										<form
 											method="post"
 											action="<?= escape((string) $token['revokeUrl']) ?>"

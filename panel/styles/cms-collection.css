@@ -321,3 +321,45 @@
 		}
 	}
 }
+
+.cms-tokens {
+	& .lead {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-3);
+		padding: var(--cms-space-4) var(--cms-space-6) 0;
+	}
+
+	& .intro {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .cms-notice .cms-input {
+		margin-top: var(--cms-space-2);
+	}
+
+	& .cms-notice.is-error {
+		border-color: var(--cms-color-danger-border);
+		background: var(--cms-color-danger-surface);
+		color: var(--cms-color-danger-text);
+	}
+
+	& .toolbar .name {
+		flex: 1 1 18rem;
+		max-width: 32rem;
+	}
+
+	& .toolbar .expires {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-3);
+	}
+}
+
+@media (width < 40rem), (height < 30rem) {
+	.cms-tokens .lead {
+		padding-inline: var(--cms-space-4);
+	}
+}

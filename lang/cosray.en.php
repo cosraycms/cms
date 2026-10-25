@@ -433,6 +433,7 @@ return [
 		'tokens:revoke' => 'Revoke',
 		'tokens:revoke-confirm' => 'Revoke the token ":name"? Applications using it lose access.',
 		'tokens:title' => 'API tokens',
+		'tokens:unnamed' => 'Unnamed token',
 		'tokens:used' => 'Last used',
 		'user:access' => 'Access',
 		'user:access-hide' => 'Hide access',

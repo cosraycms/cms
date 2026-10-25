@@ -439,6 +439,7 @@ return [
 		'tokens:revoke' => 'Widerrufen',
 		'tokens:revoke-confirm' => 'Token „:name“ widerrufen? Anwendungen, die es nutzen, verlieren den Zugang.',
 		'tokens:title' => 'API-Tokens',
+		'tokens:unnamed' => 'Token ohne Namen',
 		'tokens:used' => 'Zuletzt genutzt',
 		'user:access' => 'Zugang',
 		'user:access-hide' => 'Zugang ausblenden',

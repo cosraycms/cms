@@ -38,7 +38,7 @@ final class Tokens extends Panel
 	public function store(): array
 	{
 		$data = $this->formData();
-		$name = is_string($data['name'] ?? null) ? $data['name'] : '';
+		$name = is_string($data['name'] ?? null) ? trim($data['name']) : '';
 		$expires = is_string($data['expires'] ?? null) ? trim($data['expires']) : '';
 
 		try {
@@ -86,7 +86,7 @@ final class Tokens extends Panel
 			'profileUrl' => $this->panelPath() . '/profile',
 			'tokens' => array_map(fn(array $entry): array => [
 				'uid' => $entry['uid'],
-				'name' => $entry['name'],
+				'name' => $entry['name'] !== '' ? $entry['name'] : __('tokens:unnamed'),
 				'created' => $date($entry['created']),
 				'expires' => $date($entry['expires']),
 				'used' => $date($entry['used']),
