@@ -1112,6 +1112,23 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $gone);
 	}
 
+	public function testALockedNodeIsNotDeleted(): void
+	{
+		$this->createTestNode([
+			'uid' => 'panel-locked-delete',
+			'type' => $this->articleTypeId(),
+			'locked' => true,
+			'content' => ['title' => ['type' => 'text', 'value' => ['en' => 'Kept']]],
+		]);
+
+		$response = $this->makeRequest('POST', '/panel/node/panel-locked-delete/delete', [
+			'headers' => ['HX-Request' => 'true'],
+		]);
+
+		$this->assertStringContainsString('This document is locked', $this->getHtmlResponse($response));
+		$this->assertResponseOk($this->makeRequest('GET', '/panel/node/panel-locked-delete'));
+	}
+
 	public function testHtmxDeleteReturnsToHomeWithAnAreaSwap(): void
 	{
 		$this->createTestNode([

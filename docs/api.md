@@ -174,7 +174,7 @@ Writes send JSON in the source view: `content` maps fields to their stored value
 
 `PATCH /api/nodes/{uid}` takes a [JSON Merge Patch](https://www.rfc-editor.org/rfc/rfc7396) as `application/merge-patch+json` or `application/json`: objects merge, `null` removes a member, and lists replace. `{"content": {"title": {"value": {"de": "Neu"}}}}` changes only the German title, `{"paths": {"de": null}}` drops the German path so it is generated again, and `{"published": false}` takes the node offline.
 
-Replacing and patching need the type's `change` permission, deleting its `delete` permission; deleting a node with children answers `409` unless `?children=true`, which needs only the permission for the node itself. A locked node answers `409` to every write, a deleted one `404`.
+Replacing and patching need the type's `change` permission, deleting its `delete` permission; deleting a node with children answers `409` unless `?children=true`, which needs only the permission for the node itself. A locked node answers `409` to every write and to deleting, as does deleting a subtree that holds one; a deleted node answers `404`.
 
 ### Concurrent writes
 

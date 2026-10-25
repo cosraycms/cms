@@ -237,6 +237,30 @@ final class ApiWriteTest extends End2EndTestCase
 		$this->db()->execute("UPDATE cms.nodes SET locked = true WHERE uid = 'locked-page'")->run();
 
 		$this->problem($this->send('PATCH', '/api/nodes/locked-page', ['hidden' => true]), 409);
+		$this->problem($this->makeRequest('DELETE', '/api/nodes/locked-page'), 409);
+		$this->assertNull(
+			$this->db()->execute(
+				"SELECT deleted FROM cms.nodes WHERE uid = 'locked-page'",
+			)->one()['deleted'],
+		);
+	}
+
+	public function testDeletingASubtreeStopsAtALockedDescendant(): void
+	{
+		$this->authenticateAs('editor');
+		$parent = $this->page('open-parent', ['en' => 'Parent']);
+		$this->page('locked-child', ['en' => 'Child'], $parent);
+		$this->db()->execute("UPDATE cms.nodes SET locked = true WHERE uid = 'locked-child'")->run();
+
+		$this->problem($this->makeRequest('DELETE', '/api/nodes/open-parent', ['query' => [
+			'children' => 'true',
+		]]), 409);
+		$this->assertSame(
+			0,
+			(int) $this->db()->execute(
+				"SELECT count(*) AS deleted FROM cms.nodes WHERE uid IN ('open-parent', 'locked-child') AND deleted IS NOT NULL",
+			)->one()['deleted'],
+		);
 	}
 
 	/** @param array<string, string> $title */

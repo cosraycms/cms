@@ -412,6 +412,7 @@ return [
 		'node:invalid-data' => 'Unvollständige oder ungültige Daten',
 		'node:invalid-parent' => 'Ungültige Eltern-uid: :uid',
 		'node:locked' => 'Dieses Dokument ist gesperrt',
+		'node:locked-descendant' => 'Ein Eintrag darunter ist gesperrt.',
 		'node:new-document' => 'Neues Dokument:',
 		'node:parent-not-string' => 'Elternknoten muss eine uid-Zeichenkette sein',
 		'node:reserved-path' => 'Der URL-Pfad :path ist vom System reserviert; bitte einen anderen wählen',

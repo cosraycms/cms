@@ -12,6 +12,7 @@ use Cosray\Actor;
 use Cosray\Block\Registry as Blocks;
 use Cosray\Cms;
 use Cosray\Context;
+use Cosray\Exception\NodeLocked;
 use Cosray\Exception\RoutePathError;
 use Cosray\Exception\RuntimeException;
 use Cosray\Fulltext;
@@ -376,10 +377,18 @@ class Store
 		throw new RuntimeException('Could not generate a unique node uid');
 	}
 
-	/** @return array{success: true, error: false, deleted: list<string>} */
+	/**
+	 * A locked node is refused, and so is a subtree holding one.
+	 *
+	 * @return array{success: true, error: false, deleted: list<string>}
+	 */
 	public function delete(object $node, Actor $actor, bool $withChildren = false): array
 	{
 		$uid = (string) Factory::meta($node, 'uid');
+
+		if ((bool) Factory::meta($node, 'locked')) {
+			throw new NodeLocked(payload: ['message' => __('node:locked')]);
+		}
 
 		if (!$withChildren && $this->childUids($uid) !== []) {
 			throw new HttpConflict(payload: ['message' => __('node:has-children')]);
@@ -421,14 +430,18 @@ class Store
 		while ($queue !== []) {
 			$current = array_shift($queue);
 
-			foreach ($this->childUids($current) as $child) {
+			foreach ($this->children($current) as $child) {
 				// A parent cycle would loop forever; unseen uids only.
-				if (in_array($child, $uids, true)) {
+				if (in_array($child['uid'], $uids, true)) {
 					continue;
 				}
 
-				$uids[] = $child;
-				$queue[] = $child;
+				if ($child['locked']) {
+					throw new NodeLocked(payload: ['message' => __('node:locked-descendant')]);
+				}
+
+				$uids[] = $child['uid'];
+				$queue[] = $child['uid'];
 			}
 		}
 
@@ -438,8 +451,14 @@ class Store
 	/** @return list<string> */
 	private function childUids(string $uid): array
 	{
+		return array_column($this->children($uid), 'uid');
+	}
+
+	/** @return list<array{uid: string, locked: bool}> */
+	private function children(string $uid): array
+	{
 		return array_map(
-			static fn(array $row): string => (string) $row['uid'],
+			static fn(array $row): array => ['uid' => (string) $row['uid'], 'locked' => (bool) $row['locked']],
 			$this->db->nodes->childUids(['uid' => $uid])->all(),
 		);
 	}

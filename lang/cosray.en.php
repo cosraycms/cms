@@ -406,6 +406,7 @@ return [
 		'node:invalid-data' => 'Incomplete or invalid data',
 		'node:invalid-parent' => 'Invalid parent uid: :uid',
 		'node:locked' => 'This document is locked',
+		'node:locked-descendant' => 'An entry below this one is locked.',
 		'node:new-document' => 'New document:',
 		'node:parent-not-string' => 'Parent must be a uid string',
 		'node:reserved-path' => 'The URL path :path is reserved by the system; choose another one',

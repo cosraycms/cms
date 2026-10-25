@@ -447,6 +447,24 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 		$this->assertFalse($this->nodeDeleted('bulk-skip-locked'));
 	}
 
+	public function testBulkDeleteWithChildrenSkipsASubtreeHoldingALockedNode(): void
+	{
+		$rootId = $this->createNode(uid: 'bulk-guarded-root', title: 'Guarded Root');
+		$this->createNode(uid: 'bulk-guarded-child', title: 'Guarded Child', parent: $rootId, locked: true);
+
+		$response = $this->makeRequest('POST', '/panel/collection/test-hierarchy/bulk/delete', [
+			'body' => ['nodes' => ['bulk-guarded-root'], 'children' => '1'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertStringContainsString(
+			'notice=' . rawurlencode('skipped-locked:1'),
+			$response->getHeaderLine('Location'),
+		);
+		$this->assertFalse($this->nodeDeleted('bulk-guarded-root'));
+		$this->assertFalse($this->nodeDeleted('bulk-guarded-child'));
+	}
+
 	public function testBulkSkipsNodesOutsideTheCollection(): void
 	{
 		$foreignType = $this->createTestType('bulk-foreign-type');

@@ -11,6 +11,7 @@ use Celema\Core\Response;
 use Cosray\Cms;
 use Cosray\Collection\Listing;
 use Cosray\Context;
+use Cosray\Exception\NodeLocked;
 use Cosray\Node\Duplicator;
 use Cosray\Node\PathManager;
 use Cosray\Node\ReservedPaths;
@@ -172,6 +173,8 @@ final class Bulk extends Panel
 				try {
 					$result = $store->delete($nodeObj, $actor, $withChildren);
 					$deleted = [...$deleted, ...$result['deleted']];
+				} catch (NodeLocked) {
+					$skippedLocked++;
 				} catch (HttpConflict) {
 					// The guard refuses before any SQL runs, so the
 					// transaction stays healthy and the batch goes on.
