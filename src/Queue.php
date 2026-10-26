@@ -70,6 +70,25 @@ final class Queue
 		return (int) $row['id'];
 	}
 
+	/**
+	 * The payloads of a job class's jobs that have yet to succeed, in the
+	 * order they were pushed; failed jobs are left out. Tests read what the
+	 * code under test queued with it.
+	 *
+	 * @param class-string<Job> $job
+	 * @return list<array<array-key, mixed>>
+	 */
+	public function pending(string $job): array
+	{
+		/** @var list<array{payload: string}> $rows */
+		$rows = $this->db->queue->pending(['job' => $job])->all();
+
+		return array_map(
+			static fn(array $row): array => (array) json_decode($row['payload'], true, flags: JSON_THROW_ON_ERROR),
+			$rows,
+		);
+	}
+
 	/** @return list<array{id: int, queue: string, job: string, attempts: int, error: ?string, created: string, failed: string}> */
 	public function failed(): array
 	{

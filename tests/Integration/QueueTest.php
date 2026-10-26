@@ -228,6 +228,18 @@ final class QueueTest extends IntegrationTestCase
 		$this->assertSame([['queue' => 'mail']], RecordingJob::$handled);
 	}
 
+	public function testPendingJobsOfAClassCanBeReadInPushOrder(): void
+	{
+		$this->queue->push(RecordingJob::class, ['n' => 1]);
+		$failed = $this->queue->push(RecordingJob::class, ['n' => 2]);
+		$this->queue->push(FailingJob::class, ['n' => 3]);
+		$this->queue->push(RecordingJob::class, ['n' => 4], delay: 60);
+		$this->db()->execute("UPDATE cms.jobs SET state = 'failed' WHERE id = :id", ['id' => $failed])->run();
+
+		$this->assertSame([['n' => 1], ['n' => 4]], $this->queue->pending(RecordingJob::class));
+		$this->assertSame([], $this->queue->pending(RejectedJob::class));
+	}
+
 	public function testPushRefusesWhatItCannotQueue(): void
 	{
 		$this->assertRefused(fn(): int => $this->queue->push(stdClass::class), 'implements Cosray\Contract\Job');

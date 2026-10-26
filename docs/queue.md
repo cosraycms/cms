@@ -141,3 +141,7 @@ A job that failed for good stays in the database with its last error:
 - `php run queue:failed` lists them.
 - `php run queue:retry <id>` or `php run queue:retry all` queues them again with fresh attempts.
 - `php run queue:prune --days=30` deletes those that failed more than the given number of days ago.
+
+## Testing
+
+`$queue->pending(SyncOrder::class)` returns the payloads of that class's jobs that have yet to succeed, in the order they were pushed, so a test can check what the code under test queued. For mails, [`$mailer->queued()`](mail.md#testing) returns the mails themselves. Tests that make requests turn off running jobs [after responses](#after-responses), or the request runs the jobs first.

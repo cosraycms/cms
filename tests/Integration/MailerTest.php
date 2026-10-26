@@ -120,6 +120,22 @@ final class MailerTest extends IntegrationTestCase
 		$this->mailer()->via('weekly');
 	}
 
+	public function testQueuedMailsCanBeReadBeforeTheirDelivery(): void
+	{
+		$this->mailer()->send('receipt', to: 'ann@example.com', data: ['name' => 'Ann']);
+		$this->mailer()->via('newsletter')->send('receipt', to: 'bob@example.com', data: ['name' => 'Bob']);
+
+		$queued = $this->mailer()->queued();
+
+		$this->assertSame(
+			[['ann@example.com'], ['bob@example.com']],
+			array_map(static fn(Email $email): array => self::addresses($email->getTo()), $queued),
+		);
+		$this->assertSame("Thanks, Ann.\n", $queued[0]->getTextBody());
+		$this->assertFalse($queued[0]->getHeaders()->has('X-Transport'));
+		$this->assertSame('newsletter', $queued[1]->getHeaders()->getHeaderBody('X-Transport'));
+	}
+
 	public function testARedirectDeliversEveryMailToItsAddressesOnly(): void
 	{
 		$config = $this->mailConfig(['mail.redirect' => 'dev@example.com, qa@example.com']);

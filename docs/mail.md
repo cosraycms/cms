@@ -104,3 +104,19 @@ Cosray's own mails, like `cosray/password-reset` for the [password reset](applic
 ## Delivery
 
 Mails are queued under the name `mail` and run like any other job: a failed attempt runs again later, a mail that cannot be sent fails at once. Every sent mail is logged at `info` with the number of its recipients and its transport; addresses are not logged. [Failed jobs](queue.md#failed-jobs) lists the commands to inspect and retry failed mails.
+
+## Testing
+
+`$mailer->queued()` returns the mails that wait for delivery, oldest first, as Symfony `Email` objects decoded from the queue, just as the delivery job will send them; a mail for a named transport carries its name in `X-Transport`. A mail sent inside a transaction that is rolled back was never queued and does not show up.
+
+Requests run due jobs once their response is out, and so deliver their mails and remove them from the queue before a test can read them. Tests that make requests therefore turn that off with `queue.after_response => false` or `QUEUE_AFTER_RESPONSE=false`. Tests that call the code under test directly need nothing else:
+
+```php
+$this->contact->submit(['email' => 'ann@example.com', 'message' => 'Hello']);
+
+$mail = $this->mailer->queued()[0];
+$this->assertSame('ann@example.com', $mail->getTo()[0]->getAddress());
+$this->assertSame('Thanks for your message', $mail->getSubject());
+```
+
+The queue holds what was sent, not how a transport handled it: `mail.redirect` applies only on delivery, so queued mails keep their recipients. `php run mail:test` checks a transport.

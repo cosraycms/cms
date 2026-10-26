@@ -88,6 +88,27 @@ final class Mailer
 	}
 
 	/**
+	 * The mails queued and not yet delivered, whatever their transport, in
+	 * the order they were sent, as their delivery will hand them over: a mail
+	 * for a named transport carries it in `X-Transport`. Tests read what the
+	 * code under test sent with it.
+	 *
+	 * @return list<Email>
+	 */
+	public function queued(): array
+	{
+		return array_map(static function (array $payload): Email {
+			[$email, $transport] = Payload::decode($payload);
+
+			if ($transport !== null) {
+				$email->getHeaders()->addTextHeader('X-Transport', $transport);
+			}
+
+			return $email;
+		}, $this->queue->pending(Delivery::class));
+	}
+
+	/**
 	 * Queues a mail: a rendered template, or a mail built by hand or with
 	 * `compose()`. Addresses add to those the mail has; a mail without a
 	 * sender gets `mail.from`.
