@@ -30,6 +30,10 @@ return [
 		'auth:sign-in' => 'Anmelden',
 		'auth:sign-in-title' => 'Bei Ihrem Konto anmelden',
 		'auth:token' => 'Einmal-Token',
+		'auth:too-many-attempts' => [
+			'Zu viele Versuche. Bitte versuchen Sie es in :count Minute erneut.',
+			'Zu viele Versuche. Bitte versuchen Sie es in :count Minuten erneut.',
+		],
 		'block:children-overflow' => 'Die Blöcke einer Teilung müssen in ihre Fläche passen.',
 		'block:class' => 'CSS-Klasse',
 		'block:heading' => 'Überschrift',

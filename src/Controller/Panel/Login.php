@@ -11,6 +11,7 @@ use Celema\Core\Response;
 use Cosray\Auth as CmsAuth;
 use Cosray\Config;
 use Cosray\Security\Policy;
+use Cosray\Security\RateLimiter;
 use Cosray\User\PasswordResets;
 use Cosray\Validation;
 use Override;
@@ -18,6 +19,15 @@ use Psr\Log\LoggerInterface as Logger;
 
 final class Login extends Panel
 {
+	/** Seconds a window of counted sign-in failures lasts. */
+	public const int WINDOW = 900;
+
+	/** Failed sign-ins per window from one address for one login. */
+	public const int PER_LOGIN = 5;
+
+	/** Failed sign-ins per window from one address, for any login. */
+	public const int PER_ADDRESS = 30;
+
 	public function __construct(
 		Config $config,
 		Container $container,
@@ -25,6 +35,7 @@ final class Login extends Panel
 		private readonly CmsAuth $auth,
 		private readonly Logger $logger,
 		private readonly PasswordResets $resets,
+		private readonly RateLimiter $limiter,
 	) {
 		parent::__construct($config, $container, $request);
 	}
@@ -61,6 +72,28 @@ final class Login extends Panel
 		}
 
 		$values = $result->values();
+		$ip = $this->auth->clientIp();
+		$address = "sign-in:{$ip}";
+		$login = $address . ':' . mb_strtolower($values['login']);
+		// Counted before the password is checked, so concurrent guesses cannot slip past the limit.
+		$wait = $this->limiter->attempt([$address => self::PER_ADDRESS, $login => self::PER_LOGIN], self::WINDOW);
+
+		if ($wait > 0) {
+			$this->logger->warning('Login from {ip} refused: too many failed attempts', ['ip' => $ip]);
+
+			return $this->render(
+				$factory,
+				'login',
+				$this->context([
+					'next' => $this->sanitizedNext($data['next'] ?? ''),
+					'login' => (string) ($data['login'] ?? ''),
+					'rememberme' => (bool) ($data['rememberme'] ?? false),
+					'message' => $this->tooManyAttempts($wait),
+				]),
+				429,
+			)->header('Retry-After', (string) $wait);
+		}
+
 		$user = $this->auth->authenticate(
 			$values['login'],
 			$values['password'],
@@ -76,6 +109,9 @@ final class Login extends Panel
 				'message' => $this->message(__('auth:invalid-credentials')),
 			]);
 		}
+
+		$this->limiter->release($address);
+		$this->limiter->clear($login);
 
 		if (!$this->policy()->permits($user, 'panel')) {
 			$this->auth->logout();
@@ -104,11 +140,19 @@ final class Login extends Panel
 		#[\SensitiveParameter]
 		string $token,
 	): Response {
+		$address = 'sign-in:' . $this->auth->clientIp();
+
+		if ($this->limiter->attempt([$address => self::PER_ADDRESS], self::WINDOW) > 0) {
+			return $this->redirect($factory, $this->panelPath() . '/login');
+		}
+
 		$user = $this->auth->authenticateByOneTimeToken($token, true);
 
 		if ($user === false) {
 			return $this->redirect($factory, $this->panelPath() . '/login');
 		}
+
+		$this->limiter->release($address);
 
 		if (!$this->policy()->permits($user, 'panel')) {
 			$this->auth->logout();

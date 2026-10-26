@@ -30,6 +30,7 @@ use Cosray\NavLink;
 use Cosray\Node\Types;
 use Cosray\Panel\Client;
 use Cosray\Panel\Extras;
+use Cosray\Renderer;
 use Cosray\Security\Policy;
 use Cosray\User;
 use Cosray\Util\Form;
@@ -53,6 +54,25 @@ abstract class Panel
 		protected readonly Request $request,
 	) {
 		$this->panelDir = __DIR__ . '/../../../panel';
+	}
+
+	/**
+	 * Renders a panel page right away, for a status other than the 200 that
+	 * the route's renderer gives a returned context.
+	 *
+	 * @param non-empty-string $template
+	 * @param array<string, mixed> $context
+	 */
+	protected function render(Factory $factory, string $template, array $context, int $status): Response
+	{
+		$renderer = $this->container->tag(Renderer::class)->get('panel');
+
+		return Response::create($factory)->html($renderer->render($template, $context), $status);
+	}
+
+	protected function tooManyAttempts(int $seconds): string
+	{
+		return __n('auth:too-many-attempts', 'auth:too-many-attempts-plural', (int) ceil($seconds / 60));
 	}
 
 	/**

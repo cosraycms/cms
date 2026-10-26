@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\End2End;
 
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Users;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * End-to-end tests for panel authentication and login flow.
@@ -209,5 +211,73 @@ final class PanelAuthTest extends End2EndTestCase
 		]);
 
 		$this->assertContains(['info', 'Logout of leaving from 192.0.2.1'], $this->logger->records);
+	}
+
+	public function testRepeatedFailuresForALoginAreRefusedForAWhile(): void
+	{
+		$this->createTestUser(['uid' => 'panel-guessed-user', 'username' => 'guessed']);
+
+		for ($i = 0; $i < 5; $i++) {
+			$this->assertResponseOk($this->signIn('guessed', 'wrong-password'));
+		}
+
+		$refused = $this->signIn('GUESSED', 'password');
+		$this->assertResponseStatus(429, $refused);
+		$this->assertSame('900', $refused->getHeaderLine('Retry-After'));
+		$this->assertStringContainsString(
+			'Too many attempts. Please try again in 15 minutes.',
+			$this->getHtmlResponse($refused),
+		);
+		$this->assertContains(
+			['warning', 'Login from 192.0.2.7 refused: too many failed attempts'],
+			$this->logger->records,
+		);
+		$this->assertResponseStatus(303, $this->signIn('guessed', 'password', '198.51.100.1'));
+	}
+
+	public function testASuccessfulSignInClearsTheFailuresOfItsLogin(): void
+	{
+		$this->createTestUser(['uid' => 'panel-careless-user', 'username' => 'careless']);
+
+		foreach ([4, 4] as $failures) {
+			for ($i = 0; $i < $failures; $i++) {
+				$this->signIn('careless', 'wrong-password');
+			}
+
+			$this->assertResponseStatus(303, $this->signIn('careless', 'password'));
+		}
+	}
+
+	public function testManyFailuresFromOneAddressRefuseEveryLogin(): void
+	{
+		for ($user = 0; $user < 6; $user++) {
+			$this->createTestUser(['uid' => "panel-sprayed-{$user}", 'username' => "sprayed-{$user}"]);
+
+			for ($i = 0; $i < 5; $i++) {
+				$this->signIn("sprayed-{$user}", 'wrong-password');
+			}
+		}
+
+		$id = $this->createTestUser(['uid' => 'panel-sprayed-user', 'username' => 'sprayed']);
+		$this->assertResponseStatus(429, $this->signIn('sprayed', 'password'));
+
+		$token = new Users($this->db())->createOneTimeToken($id);
+		$handoff = $this->makeRequest('GET', '/panel/handoff/' . $token, [
+			'authToken' => '',
+			'server' => ['REMOTE_ADDR' => '192.0.2.7'],
+		]);
+		$this->assertSame('/panel/login', $handoff->getHeaderLine('Location'));
+	}
+
+	private function signIn(
+		string $login,
+		#[\SensitiveParameter]
+		string $password,
+		string $ip = '192.0.2.7',
+	): ResponseInterface {
+		return $this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => $login, 'password' => $password, 'rememberme' => false, 'next' => '/panel'],
+			'server' => ['REMOTE_ADDR' => $ip],
+		]);
 	}
 }

@@ -30,6 +30,10 @@ return [
 		'auth:sign-in' => 'Sign in',
 		'auth:sign-in-title' => 'Sign in to your account',
 		'auth:token' => 'One-time token',
+		'auth:too-many-attempts' => [
+			'Too many attempts. Please try again in :count minute.',
+			'Too many attempts. Please try again in :count minutes.',
+		],
 		'block:children-overflow' => 'The blocks of a split must fit into its area.',
 		'block:class' => 'CSS class',
 		'block:heading' => 'Heading',

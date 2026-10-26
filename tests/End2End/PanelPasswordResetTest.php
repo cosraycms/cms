@@ -149,6 +149,24 @@ final class PanelPasswordResetTest extends End2EndTestCase
 		$this->assertSame([['"Test User" <unlucky@example.com>']], array_column($this->mails(), 'to'));
 	}
 
+	public function testManyRequestsFromOneAddressAreRefusedForAWhile(): void
+	{
+		$this->app = $this->recordingApp([...self::SETTINGS, 'queue.after_response' => false]);
+
+		for ($i = 0; $i < 5; $i++) {
+			$this->html('POST', '/panel/password', ['login' => "someone-{$i}"]);
+		}
+
+		$refused = $this->makeRequest('POST', '/panel/password', [
+			'body' => ['login' => 'someone-else'],
+			'server' => ['REMOTE_ADDR' => '192.0.2.7'],
+		]);
+		$this->assertResponseStatus(429, $refused);
+		$this->assertSame('900', $refused->getHeaderLine('Retry-After'));
+		$this->assertStringContainsString('Too many attempts', $this->getHtmlResponse($refused));
+		$this->assertSame(5, $this->db()->execute('SELECT count(*) AS n FROM cms.jobs')->one()['n']);
+	}
+
 	public function testTheMailIsInThePanelLanguageTheUserChose(): void
 	{
 		$id = $this->createTestUser(['username' => 'german', 'data' => ['name' => 'Anna']]);

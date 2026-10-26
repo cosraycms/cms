@@ -6,9 +6,12 @@ namespace Cosray\Controller\Panel;
 
 use Celema\Container\Container;
 use Celema\Core\Exception\HttpNotFound;
+use Celema\Core\Factory\Factory;
 use Celema\Core\Request;
+use Celema\Core\Response;
 use Cosray\Auth;
 use Cosray\Config;
+use Cosray\Security\RateLimiter;
 use Cosray\User\PasswordResets;
 use Psr\Log\LoggerInterface as Logger;
 
@@ -25,6 +28,12 @@ final class PasswordReset extends Panel
 	private const int MIN_PASSWORD_LENGTH = 12;
 	private const int MAX_PASSWORD_LENGTH = 512;
 
+	/** Requests per window from one address. */
+	public const int PER_ADDRESS = 5;
+
+	/** Seconds a window of counted requests lasts. */
+	public const int WINDOW = 900;
+
 	public function __construct(
 		Config $config,
 		Container $container,
@@ -32,6 +41,7 @@ final class PasswordReset extends Panel
 		private readonly PasswordResets $resets,
 		private readonly Auth $auth,
 		private readonly Logger $logger,
+		private readonly RateLimiter $limiter,
 	) {
 		parent::__construct($config, $container, $request);
 	}
@@ -44,8 +54,8 @@ final class PasswordReset extends Panel
 		return $this->page('request');
 	}
 
-	/** @return array<string, mixed> */
-	public function send(): array
+	/** @return array<string, mixed>|Response */
+	public function send(Factory $factory): array|Response
 	{
 		$this->guard();
 		$login = $this->formData()['login'] ?? '';
@@ -55,8 +65,18 @@ final class PasswordReset extends Panel
 			return $this->page('request', ['login' => $login, 'message' => __('auth:reset-missing-login')]);
 		}
 
+		$ip = $this->auth->clientIp();
+		$wait = $this->limiter->attempt(["password-reset:{$ip}" => self::PER_ADDRESS], self::WINDOW);
+
+		if ($wait > 0) {
+			$this->logger->warning('Password reset request from {ip} refused: too many requests', ['ip' => $ip]);
+			$page = $this->page('request', ['login' => $login, 'message' => $this->tooManyAttempts($wait)]);
+
+			return $this->render($factory, 'password', $page, 429)->header('Retry-After', (string) $wait);
+		}
+
 		$locale = $this->request->get('panelLocale', null);
-		$this->resets->request($login, $this->auth->clientIp(), is_string($locale) ? $locale : null);
+		$this->resets->request($login, $ip, is_string($locale) ? $locale : null);
 
 		return $this->page('sent');
 	}

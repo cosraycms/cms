@@ -140,6 +140,16 @@ CREATE TABLE /*:cms.prefix:*/password_resets (
 	CONSTRAINT /*:cms.obj:*/ck_password_resets_token CHECK (char_length(token) <= 128)
 );
 
+-- Rate limiter counters by an HMAC of their bucket; losing them in a crash is fine.
+CREATE UNLOGGED TABLE /*:cms.prefix:*/rate_limits (
+	bucket text NOT NULL,
+	hits integer NOT NULL,
+	ends timestamp with time zone NOT NULL,
+	CONSTRAINT /*:cms.obj:*/pk_rate_limits PRIMARY KEY (bucket),
+	CONSTRAINT /*:cms.obj:*/ck_rate_limits_bucket CHECK (char_length(bucket) <= 128)
+);
+CREATE INDEX /*:cms.obj:*/ix_rate_limits_ends ON /*:cms.prefix:*/rate_limits (ends);
+
 CREATE TABLE /*:cms.prefix:*/login_sessions (
 	hash text NOT NULL,
 	usr bigint NOT NULL,

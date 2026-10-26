@@ -62,4 +62,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000043-api-tokens.sql', now()),
 	('000000-000044-jobs.sql', now()),
 	('000000-000045-jobs-notify.sql', now()),
-	('000000-000046-password-resets.sql', now());
+	('000000-000046-password-resets.sql', now()),
+	('000000-000047-rate-limits.sql', now());
