@@ -285,7 +285,7 @@ final class MailerTest extends IntegrationTestCase
 
 	private function transports(Config $config): Transports
 	{
-		return Transports::using($config, $this->logger, function (array $dsns, $dispatcher): RecordingTransport {
+		return new Transports($config, $this->logger, function (array $dsns, $dispatcher): RecordingTransport {
 			$this->transport = new RecordingTransport($dispatcher);
 			$this->transport->failure = $this->failure;
 

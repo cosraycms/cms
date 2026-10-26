@@ -25,27 +25,15 @@ final class Transports
 {
 	private ?TransportInterface $transports = null;
 
-	/** @var ?Closure(array<non-empty-string, non-empty-string>, EventDispatcher): TransportInterface */
-	private ?Closure $build = null;
-
+	/**
+	 * @param ?Closure(array<non-empty-string, non-empty-string>, EventDispatcher): TransportInterface $build
+	 *        builds the transports instead of the DSNs, for tests; the dispatcher carries the redirect
+	 */
 	public function __construct(
 		private readonly Config $config,
 		private readonly Logger $logger,
+		private readonly ?Closure $build = null,
 	) {}
-
-	/**
-	 * Transports built by the given function instead of from the DSNs, for
-	 * tests. The dispatcher it receives carries the redirect.
-	 *
-	 * @param Closure(array<non-empty-string, non-empty-string>, EventDispatcher): TransportInterface $build
-	 */
-	public static function using(Config $config, Logger $logger, Closure $build): self
-	{
-		$transports = new self($config, $logger);
-		$transports->build = $build;
-
-		return $transports;
-	}
 
 	public function has(string $name): bool
 	{

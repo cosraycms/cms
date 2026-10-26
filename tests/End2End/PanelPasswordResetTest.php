@@ -215,7 +215,7 @@ final class PanelPasswordResetTest extends End2EndTestCase
 	private function recordingApp(array $settings): App
 	{
 		$app = $this->createApp($settings);
-		$app->container()->add(Transports::class, Transports::using(
+		$app->container()->add(Transports::class, new Transports(
 			$app->container()->get(Config::class),
 			$this->logger,
 			fn(array $dsns, EventDispatcher $events) => $this->transport = new RecordingTransport($events),
