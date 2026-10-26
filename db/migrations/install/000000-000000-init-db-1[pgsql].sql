@@ -653,3 +653,16 @@ CREATE TABLE /*:cms.prefix:*/jobs (
 	CONSTRAINT /*:cms.obj:*/ck_jobs_error CHECK (char_length(error) <= 4000)
 );
 CREATE INDEX /*:cms.obj:*/ix_jobs_due ON /*:cms.prefix:*/jobs (due) WHERE state <> 'failed';
+
+-- Wakes `queue:listen` once the pushing transaction commits. One channel
+-- for every schema: a runner woken by another site's jobs waits again.
+CREATE FUNCTION /*:cms.prefix:*/notify_jobs()
+	RETURNS TRIGGER AS $$
+BEGIN
+	PERFORM pg_notify('cosray_jobs', '');
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER /*:cms.obj:*/jobs_trigger_01_notify AFTER INSERT ON /*:cms.prefix:*/jobs
+	FOR EACH STATEMENT EXECUTE FUNCTION /*:cms.prefix:*/notify_jobs();

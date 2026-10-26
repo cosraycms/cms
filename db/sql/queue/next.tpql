@@ -1,0 +1,9 @@
+SELECT
+	extract(epoch FROM min(due) - now())::float8 AS seconds
+FROM
+	/*:cms.prefix:*/jobs
+WHERE
+	state <> 'failed'
+<?php if (isset($queue)) : ?>
+	AND queue = :queue
+<?php endif ?>;

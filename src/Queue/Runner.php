@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Queue;
 
+use Celema\Container\Container;
 use Celema\Quma\Database;
 use Closure;
+use Cosray\Console\Runtime;
 use Cosray\Contract\Job;
 use Cosray\Exception\JobFailed;
 use Cosray\Exception\RuntimeException;
@@ -46,6 +48,21 @@ final class Runner
 	) {}
 
 	/**
+	 * A runner that builds jobs in a request-free scope of the container,
+	 * made on first use and dropped with the runner.
+	 */
+	public static function scoped(Database $db, Logger $logger, Container $container): self
+	{
+		$runtime = null;
+
+		return new self($db, $logger, static function (string $class) use (&$runtime, $container): object {
+			$runtime ??= new Runtime($container);
+
+			return $runtime->get($class);
+		});
+	}
+
+	/**
 	 * Runs jobs until none is due or a limit is reached. The time limit is
 	 * checked between jobs; a running job is never cut short.
 	 *
@@ -75,6 +92,15 @@ final class Runner
 		}
 
 		return $counts;
+	}
+
+	/** Seconds until the next job is due, 0 or less if one is; null without jobs. */
+	public function next(?string $queue = null): ?float
+	{
+		/** @var array{seconds: ?float} $row */
+		$row = $this->db->queue->next($queue === null ? [] : ['queue' => $queue])->one();
+
+		return $row['seconds'];
 	}
 
 	/** @return ?Claimed */

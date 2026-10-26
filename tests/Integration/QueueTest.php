@@ -206,6 +206,18 @@ final class QueueTest extends IntegrationTestCase
 		$this->assertSame([1, 2, 3], array_column(RecordingJob::$handled, 'n'));
 	}
 
+	public function testTheRunnerTellsWhenTheNextJobIsDue(): void
+	{
+		$this->assertNull($this->runner()->next());
+
+		$this->queue->push(RecordingJob::class, delay: 90, queue: 'mail');
+		$this->queue->push(RecordingJob::class, delay: 60);
+
+		$this->assertSame(60.0, $this->runner()->next());
+		$this->assertSame(90.0, $this->runner()->next('mail'));
+		$this->assertNull($this->runner()->next('imports'));
+	}
+
 	public function testARunCanBeLimitedToOneQueue(): void
 	{
 		$this->queue->push(RecordingJob::class, ['queue' => 'default']);

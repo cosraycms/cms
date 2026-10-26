@@ -20,6 +20,7 @@ use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\Fulltext;
+use Cosray\Commands\ListenQueue;
 use Cosray\Commands\ListFailedJobs;
 use Cosray\Commands\ListTokens;
 use Cosray\Commands\PanelPublish;
@@ -36,6 +37,7 @@ use Cosray\ContainerLogger;
 use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
 use Cosray\Panel\Client;
+use Cosray\Queue\Listener;
 use Cosray\Queue\Runner as JobRunner;
 
 /**
@@ -84,11 +86,11 @@ final class Commands
 			CreateToken::class,
 			ListTokens::class,
 			RevokeToken::class,
-			WorkQueue::class => fn(): WorkQueue => new WorkQueue(new JobRunner(
-				$this->container()->instance(Database::class),
-				new ContainerLogger($this->container()),
-				$this->resolve(...),
-			)),
+			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
+			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
+				$this->jobRunner(...),
+				Listener::fromConnection($this->conn()),
+			),
 			ListFailedJobs::class,
 			RetryJobs::class,
 			PruneJobs::class,
@@ -230,6 +232,15 @@ final class Commands
 		}
 
 		return $port + 1;
+	}
+
+	private function jobRunner(): JobRunner
+	{
+		return JobRunner::scoped(
+			$this->container()->instance(Database::class),
+			new ContainerLogger($this->container()),
+			$this->container(),
+		);
 	}
 
 	private function conn(): Connection

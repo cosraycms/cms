@@ -68,13 +68,17 @@ try {
 
 ## Running jobs
 
-Runners claim one job at a time, so any number can run at once, after responses and from cron alike.
+Runners claim one job at a time, so any number can run at once: after responses, from cron and as a daemon alike. Pick per host:
+
+- Without cron or a process manager, as on some shared hosting, leave it to the requests.
+- With cron, run `queue:work` every minute.
+- With systemd or supervisor, run `queue:listen`; it starts jobs within moments of their push.
 
 ### After responses
 
 After each response, the request runs due jobs: at most 10, and none started after 10 seconds. PHP-FPM and FrankenPHP have sent the response by then; the development server and setups without an early finish, like `mod_php` or CGI, keep the visitor waiting. The request's PHP worker stays busy meanwhile, and PHP's time limit still applies.
 
-Retries and delayed jobs run with the first request after they are due, so a site without visitors runs them late. Where cron runs `queue:work`, turn this off with `QUEUE_AFTER_RESPONSE=false` or the `queue.after_response` setting.
+Retries and delayed jobs run with the first request after they are due, so a site without visitors runs them late. Where cron or a daemon runs the jobs, turn this off with `QUEUE_AFTER_RESPONSE=false` or the `queue.after_response` setting.
 
 ### Cron
 
@@ -87,6 +91,48 @@ Retries and delayed jobs run with the first request after they are due, so a sit
 - `--max-time=<seconds>`: start no job after this many seconds. Keep it below the cron interval.
 - `--max-jobs=<count>`: stop after this many jobs.
 - `--queue=<name>`: run only the jobs pushed under this name.
+
+### Daemon
+
+`queue:listen` runs due jobs, then waits until a job is pushed or the next one is due, and repeats. Pushing a job notifies PostgreSQL's `cosray_jobs` channel when its transaction commits, so a pushed job starts within moments; the daemon also looks for due jobs at least once a minute. It takes `--queue` like `queue:work`, and stops after one of these limits for the process manager to start it anew:
+
+- `--max-time=<seconds>`: stop after this many seconds.
+- `--max-jobs=<count>`: stop after this many jobs.
+- `--memory=<megabytes>`: stop once the process uses this much memory, 128 by default.
+
+`SIGTERM` and `SIGINT` stop it between jobs when PHP has the `pcntl` extension; a job already running finishes first. Without `pcntl`, the signal ends the process at once, and its job runs again once its lease ends.
+
+A systemd unit, as `/etc/systemd/system/example-jobs.service`:
+
+```ini
+[Unit]
+Description=Jobs of example.org
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+WorkingDirectory=/srv/example.org
+ExecStart=/usr/bin/php run queue:listen --max-time=3600
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Or a supervisor program:
+
+```ini
+[program:example-jobs]
+command=php run queue:listen --max-time=3600
+directory=/srv/example.org
+user=www-data
+autorestart=true
+stopsignal=TERM
+stopwaitsecs=60
+```
+
+The daemon keeps the code it started with. Restart it after each deployment, like with `systemctl restart example-jobs` or `supervisorctl restart example-jobs`.
 
 ## Failed jobs
 

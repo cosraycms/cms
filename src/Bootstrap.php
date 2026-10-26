@@ -19,7 +19,6 @@ use Cosray\Collection\AllContent;
 use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
-use Cosray\Console\Runtime;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Control\Registry as Controls;
@@ -564,21 +563,12 @@ class Bootstrap implements CorePlugin
 			return;
 		}
 
-		$runtime = null;
-		$runner = new Runner(
-			$this->db,
-			new ContainerLogger($this->container),
-			function (string $class) use (&$runtime): object {
-				$runtime ??= new Runtime($this->container);
-
-				return $runtime->get($class);
-			},
-		);
-
 		try {
-			$runner->run(jobs: self::JOBS_AFTER_RESPONSE, seconds: self::SECONDS_AFTER_RESPONSE);
+			Runner::scoped($this->db, new ContainerLogger($this->container), $this->container)->run(
+				jobs: self::JOBS_AFTER_RESPONSE,
+				seconds: self::SECONDS_AFTER_RESPONSE,
+			);
 		} finally {
-			$runtime = null;
 			$this->releaseDatabase();
 		}
 	}

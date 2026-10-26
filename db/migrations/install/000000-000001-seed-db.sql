@@ -60,4 +60,5 @@ INSERT INTO migrations (migration, applied) VALUES
 	('000000-000041-text-blocks-to-richtext[pgsql].php', now()),
 	('000000-000042-node-positions.sql', now()),
 	('000000-000043-api-tokens.sql', now()),
-	('000000-000044-jobs.sql', now());
+	('000000-000044-jobs.sql', now()),
+	('000000-000045-jobs-notify.sql', now());
