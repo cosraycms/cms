@@ -44,6 +44,22 @@
 		gap: var(--cms-space-5);
 	}
 
+	& .card > * + * {
+		margin-top: var(--cms-space-5);
+	}
+
+	& .intro {
+		margin: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+	}
+
+	& .help {
+		margin: 0;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+	}
+
 	& .field {
 		display: flex;
 		flex-direction: column;

@@ -34,6 +34,7 @@ final class ConfigTest extends TestCase
 			'APP_REQUIRED',
 			'APP_SECRET',
 			'APP_TIMEZONE',
+			'APP_URL',
 			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
 			'DATABASE_URL',
@@ -200,6 +201,19 @@ final class ConfigTest extends TestCase
 		$this->setEnvironment(['QUEUE_AFTER_RESPONSE' => 'false']);
 
 		$this->assertFalse(new Config(self::root())->queue->afterResponse);
+	}
+
+	public function testTheAppUrlIsAnAbsoluteUrlWithoutTrailingSlash(): void
+	{
+		$this->assertNull(new Config(self::root())->app->url);
+
+		$this->setEnvironment(['APP_URL' => 'https://example.org/site/']);
+		$this->assertSame('https://example.org/site', new Config(self::root())->app->url);
+
+		$config = new Config(self::root(), ['app.url' => 'example.org']);
+		$this->throws(RuntimeException::class, '`app.url` takes an absolute http or https URL');
+
+		$config->app->url;
 	}
 
 	public function testMailSettingsComeFromTheEnvironmentAndTheApp(): void

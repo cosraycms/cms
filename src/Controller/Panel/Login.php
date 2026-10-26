@@ -11,6 +11,7 @@ use Celema\Core\Response;
 use Cosray\Auth as CmsAuth;
 use Cosray\Config;
 use Cosray\Security\Policy;
+use Cosray\User\PasswordResets;
 use Cosray\Validation;
 use Override;
 use Psr\Log\LoggerInterface as Logger;
@@ -23,6 +24,7 @@ final class Login extends Panel
 		Request $request,
 		private readonly CmsAuth $auth,
 		private readonly Logger $logger,
+		private readonly PasswordResets $resets,
 	) {
 		parent::__construct($config, $container, $request);
 	}
@@ -130,6 +132,16 @@ final class Login extends Panel
 		}
 
 		return $this->redirect($factory, $this->panelPath() . '/login');
+	}
+
+	/**
+	 * @param array<string, mixed> $data
+	 * @return array<string, mixed>
+	 */
+	#[Override]
+	protected function context(array $data = []): array
+	{
+		return parent::context(['passwordReset' => $this->resets->available(), ...$data]);
 	}
 
 	/** @return array<array-key, mixed> */

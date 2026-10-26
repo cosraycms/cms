@@ -45,7 +45,7 @@ class PanelLocale implements Middleware
 		}
 
 		$id = $this->negotiate($request, $available);
-		$translator = new Translator($id, $locales->catalogs(), $this->fallback($id, $available));
+		$translator = $this->translator($locales, $id);
 		$previous = Verba::translator();
 		Verba::activate($translator);
 
@@ -63,6 +63,15 @@ class PanelLocale implements Middleware
 				Verba::deactivate();
 			}
 		}
+	}
+
+	/**
+	 * A translator for one of the panel locales, with the fallbacks the
+	 * panel uses, like for a mail in the language a user chose.
+	 */
+	public function translator(Locales $locales, string $id): Translator
+	{
+		return new Translator($id, $locales->catalogs(), $this->fallback($id, $locales->panelLocales()));
 	}
 
 	/** @param non-empty-list<string> $available */
@@ -94,7 +103,7 @@ class PanelLocale implements Middleware
 	 * The locales tried per string when the negotiated one lacks a
 	 * translation: config default first, then English, then the rest.
 	 *
-	 * @param non-empty-list<string> $available
+	 * @param list<string> $available
 	 * @return list<string>
 	 */
 	protected function fallback(string $id, array $available): array

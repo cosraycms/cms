@@ -23,14 +23,17 @@ use Symfony\Component\Mime\Exception\LogicException;
  *     $mailer->send('contact', to: $recipients, data: $form, replyTo: $form['email']);
  *     $mailer->via('newsletter')->send($email);
  *
- * Templates are Boiler templates in the `mail.views` directories: the HTML
- * body, whose `<title>` is the subject, and an optional `<name>.txt` for
- * the text body, which is otherwise derived from the HTML.
+ * Templates are Boiler templates in the `mail.views` directories, then in
+ * Cosray's own: the HTML body, whose `<title>` is the subject, and an
+ * optional `<name>.txt` for the text body, otherwise derived from the HTML.
  *
  * @api
  */
 final class Mailer
 {
+	/** Cosray's own templates, after the application's, which can replace them. */
+	private const string VIEWS = __DIR__ . '/../resources/mail';
+
 	private ?string $transport = null;
 
 	public function __construct(
@@ -63,7 +66,9 @@ final class Mailer
 	public function compose(string $template, array $data = [], ?string $locale = null): Email
 	{
 		$render = function () use ($template, $data): Email {
-			$engine = Engine::create($this->config->mail->views, trusted: Renderer::TRUSTED);
+			// Boiler refuses missing directories, and a site without mails of its own has none.
+			$views = array_values(array_filter([...$this->config->mail->views, self::VIEWS], is_dir(...)));
+			$engine = Engine::create($views, trusted: Renderer::TRUSTED);
 			$html = $engine->render($template, $data);
 			$text = $engine->exists("{$template}.txt")
 				? $engine->renderUnescaped("{$template}.txt", $data)

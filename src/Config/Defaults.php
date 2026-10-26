@@ -44,6 +44,8 @@ final class Defaults
 			'app.secret' => env('APP_SECRET', null),
 			'app.timezone' => env('APP_TIMEZONE', 'UTC'),
 			'app.url_prefix' => '',
+			// The absolute URL for links in mails; never derived from a request.
+			'app.url' => env('APP_URL', null),
 			'plugins' => [],
 			'webhooks' => [],
 		];

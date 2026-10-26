@@ -141,6 +141,16 @@ final class MailerTest extends IntegrationTestCase
 		$this->assertSame('Hello', $this->mailer()->compose('greeting', locale: 'en')->getSubject());
 	}
 
+	public function testCosraysOwnTemplatesRenderWithoutAMailDirectory(): void
+	{
+		$email = $this->mailer($this->mailConfig(['path.views' => '/tests/Fixtures/no-views']))->compose(
+			'cosray/password-reset',
+			['name' => 'Ann', 'site' => 'Example', 'url' => 'https://example.org/panel/password/abc'],
+		);
+
+		$this->assertStringContainsString('https://example.org/panel/password/abc', (string) $email->getHtmlBody());
+	}
+
 	public function testSendRefusesMailsThatCouldNotBeDelivered(): void
 	{
 		$mailer = $this->mailer();

@@ -31,7 +31,6 @@ final class PanelAuthTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('Sign in to your account', $html);
 		$this->assertStringContainsString('action="/panel/login"', $html);
-		$this->assertStringContainsString('Forgot password?', $html);
 		$this->assertStringContainsString('"code:syntax":"Syntax"', $html);
 	}
 
@@ -45,7 +44,7 @@ final class PanelAuthTest extends End2EndTestCase
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<html lang="de">', $html);
 		$this->assertStringContainsString('Bei Ihrem Konto anmelden', $html);
-		$this->assertStringContainsString('Passwort vergessen?', $html);
+		$this->assertStringContainsString('Angemeldet bleiben', $html);
 	}
 
 	public function testLoginWithValidCredentialsRedirectsToPanel(): void

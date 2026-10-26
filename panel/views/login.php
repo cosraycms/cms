@@ -56,7 +56,9 @@ $this->layout('layer/document');
 					<?= escape(__('auth:remember-me')) ?>
 				</label>
 
-				<a class="forgot" href="#" hx-boost="false" onclick="event.preventDefault();"><?= escape(__('auth:forgot-password')) ?></a>
+				<?php if ($passwordReset): ?>
+					<a class="forgot" href="<?= escape($panelPath) ?>/password" hx-boost="false"><?= escape(__('auth:forgot-password')) ?></a>
+				<?php endif ?>
 			</div>
 
 			<button class="cms-button primary submit" type="submit"><?= escape(__('auth:sign-in')) ?></button>

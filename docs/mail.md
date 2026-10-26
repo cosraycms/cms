@@ -99,6 +99,8 @@ A mail template is a Boiler template that renders an HTML document. Its `<title>
 
 Values print escaped, as in page templates, and `__()` translates in the locale the mail renders in. The text body comes from `contact.txt.php` next to it, rendered without escaping, or else from the HTML: paragraphs, line breaks, lists and table rows keep their lines, and links show their address after the text. Cosray inlines no CSS; give elements `style` attributes where mail programs need them.
 
+Cosray's own mails, like `cosray/password-reset` for the [password reset](application.md#password-reset), come from templates in Cosray; a file of the same name in a `mail.views` directory replaces one.
+
 ## Delivery
 
 Mails are queued under the name `mail` and run like any other job: a failed attempt runs again later, a mail that cannot be sent fails at once. Every sent mail is logged at `info` with the number of its recipients and its transport; addresses are not logged. [Failed jobs](queue.md#failed-jobs) lists the commands to inspect and retry failed mails.

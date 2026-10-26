@@ -34,6 +34,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `path.assets` | Originals below `path.public`, also their URL path; defaults to `/assets` |
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
+| `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails; `APP_URL` in the environment. Never taken from a request's host |
 | `panel.path` | Panel URL path; defaults to `/panel` |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. Either directory may be a symlink to one outside the document root, for example to keep uploads and renditions in a directory shared between deployed releases; the web server must then follow symlinks. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
@@ -296,6 +297,12 @@ $policy->permits($user, 'edit-orders');
 Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->permits(...)`. The Users area needs `edit-users`. Its write policy prevents editors from granting access beyond their own, changing their own roles/state, or removing the last active superuser. Password changes end other sessions and remembered logins. The profile page allows self-service account changes, with the current password required for a new one.
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
+
+### Password reset
+
+With a [mail transport](mail.md) and `app.url` configured, the login page links to a form where panel users who forgot their password request a link by mail. The link works once and for an hour, a user gets at most one every five minutes, and the form answers the same whether or not the login belongs to an account. The mail is in the user's panel language, or else in that of the request. Setting the new password ends the user's other sessions and remembered logins like any password change. Requests and resets are logged as `notice`. Without mail or `app.url`, there is no link and the pages answer 404.
+
+The mail comes from the template `cosray/password-reset`. A file `cosray/password-reset.php` in the `mail.views` directory replaces it; it receives `name`, `site` and `url`.
 
 ### Node permissions
 

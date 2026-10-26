@@ -166,6 +166,18 @@ class Routes
 					->after($renderers->get('login'));
 				$panel->get('/handoff/{token:[a-f0-9]{64}}', [Panel\Login::class, 'handoff'], 'handoff');
 				$panel
+					->get('/password', [Panel\PasswordReset::class, 'form'], 'password')
+					->after($renderers->get('password'));
+				$panel
+					->post('/password', [Panel\PasswordReset::class, 'send'], 'password.send')
+					->after($renderers->get('password'));
+				$panel
+					->get('/password/{token:[a-f0-9]{64}}', [Panel\PasswordReset::class, 'choose'], 'password.choose')
+					->after($renderers->get('password'));
+				$panel
+					->post('/password/{token:[a-f0-9]{64}}', [Panel\PasswordReset::class, 'change'], 'password.change')
+					->after($renderers->get('password'));
+				$panel
 					->post('/logout', [Panel\Login::class, 'logout'], 'logout')
 					->middleware($panelAuth);
 				$panel
