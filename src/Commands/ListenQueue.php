@@ -24,7 +24,7 @@ final class ListenQueue
 
 	private bool $stop = false;
 
-	/** @param Closure(): Runner $runner makes a runner, anew for every batch of jobs */
+	/** @param Closure(): Runner $runner makes a runner, anew for every job */
 	public function __construct(
 		private readonly Closure $runner,
 		private readonly Listener $listener,
@@ -50,14 +50,9 @@ final class ListenQueue
 		try {
 			while (true) {
 				$runner = ($this->runner)();
-
-				while (!$this->stop && !self::reached($maxJobs, $ran) && array_sum($runner->run($name, jobs: 1)) > 0) {
-					$ran++;
-				}
-
 				$limit = match (true) {
 					$this->stop => 'a signal',
-					self::reached($maxJobs, $ran) => 'its job limit',
+					$maxJobs > 0 && $ran >= $maxJobs => 'its job limit',
 					$maxTime > 0 && (self::now() - $start) >= $maxTime => 'its time limit',
 					memory_get_usage(true) >= ($memory * 1024 * 1024) => 'its memory limit',
 					default => null,
@@ -67,6 +62,12 @@ final class ListenQueue
 					$io->line('Ran %d job(s), stopped by %s.', $ran, $limit);
 
 					return 0;
+				}
+
+				if (array_sum($runner->run($name, jobs: 1)) > 0) {
+					$ran++;
+
+					continue;
 				}
 
 				$next = $runner->next($name);
@@ -111,11 +112,6 @@ final class ListenQueue
 		}
 
 		pcntl_async_signals($async);
-	}
-
-	private static function reached(int $limit, int $count): bool
-	{
-		return $limit > 0 && $count >= $limit;
 	}
 
 	private static function now(): float

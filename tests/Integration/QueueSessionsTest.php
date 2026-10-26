@@ -119,6 +119,18 @@ final class QueueSessionsTest extends IntegrationTestCase
 		$this->assertGreaterThanOrEqual(0.9, (hrtime(true) - $start) / 1e9);
 	}
 
+	public function testABusyDaemonChecksItsLimitsBeforeEveryJob(): void
+	{
+		$queue = new Queue($this->db());
+		$queue->push(RecordingJob::class, ['n' => 1], queue: $this->name);
+		$queue->push(RecordingJob::class, ['n' => 2], queue: $this->name);
+
+		$output = new Buffer();
+		$this->assertSame(0, $this->daemon()(new Io($output), queue: $this->name, memory: 1));
+		$this->assertSame('Ran 0 job(s), stopped by its memory limit.', trim($output->output()));
+		$this->assertSame([], RecordingJob::$handled);
+	}
+
 	public function testASignalStopsTheDaemonBetweenJobs(): void
 	{
 		if (!function_exists('posix_kill') || !function_exists('pcntl_signal')) {
