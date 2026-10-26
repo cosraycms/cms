@@ -227,7 +227,16 @@ final class Payload
 			throw new RuntimeException("A queued mail has UTF-8 bodies, not {$charset}.");
 		}
 
-		return is_string($body) ? $body : (string) stream_get_contents($body);
+		if (is_string($body)) {
+			return $body;
+		}
+
+		// Symfony reads a seekable body from its start, wherever the stream stands.
+		if (stream_get_meta_data($body)['seekable']) {
+			rewind($body);
+		}
+
+		return (string) stream_get_contents($body);
 	}
 
 	/** @return list<array{string, string}> */

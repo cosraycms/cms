@@ -19,6 +19,27 @@ use Symfony\Component\Mime\Part\DataPart;
  */
 final class MailPayloadTest extends TestCase
 {
+	public function testBodiesFromStreamsAreReadFromTheirStart(): void
+	{
+		$text = fopen('php://memory', 'r+');
+		$html = fopen('php://memory', 'r+');
+		$this->assertIsResource($text);
+		$this->assertIsResource($html);
+		fwrite($text, 'Hello');
+		fwrite($html, '<p>Hello</p>');
+		$email = new Email()
+			->from('site@example.com')
+			->to('ann@example.com')
+			->subject('Hi')
+			->text($text)
+			->html($html);
+
+		[$queued] = Payload::decode(Payload::encode($email, null));
+
+		$this->assertSame('Hello', $queued->getTextBody());
+		$this->assertSame('<p>Hello</p>', $queued->getHtmlBody());
+	}
+
 	public function testAMailSurvivesTheQueue(): void
 	{
 		$email = new Email()
