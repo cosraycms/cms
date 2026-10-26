@@ -8,15 +8,14 @@ use Celema\Quma\Database;
 use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Transaction;
-use Psr\Log\LoggerInterface as Logger;
+use Cosray\Webhooks\Delivery;
 
 /**
  * Tells other systems that content changed, such as a static site build or a
  * cache in front of the API. Events are recorded once their write is done
- * and delivered after the response was sent, one POST per event and hook,
- * in parallel and with short timeouts. A write inside a transaction that
- * Cosray did not open is reported only if that transaction committed. A
- * failed delivery is logged, not retried.
+ * and queued when the request ends, one delivery job per event and hook,
+ * which retries a failed POST. A write inside a transaction that Cosray did
+ * not open is reported only if that transaction committed.
  *
  *     'webhooks' => [
  *         ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
@@ -41,19 +40,18 @@ final class Webhooks
 	/**
 	 * @param list<array{url: string, secret?: ?string, events?: list<string>}> $hooks
 	 * @param Closure(string): bool $committed tells whether the transaction with this id committed
-	 * @param ?Closure(list<array{url: string, headers: array<string, string>, body: string}>): list<?int> $send
-	 *        delivers the requests and returns each one's status, null when it failed
+	 * @param Closure(array{url: string, headers: array<string, string>, body: string}): void $queue
+	 *        queues the delivery of one request
 	 */
 	public function __construct(
 		array $hooks,
-		private readonly Logger $logger,
 		private readonly Closure $committed,
-		private readonly ?Closure $send = null,
+		private readonly Closure $queue,
 	) {
 		$this->hooks = array_map(self::hook(...), $hooks);
 	}
 
-	public static function fromConfig(Config $config, Logger $logger, Database $db): self
+	public static function fromConfig(Config $config, Database $db): self
 	{
 		$hooks = $config->get('webhooks', []);
 
@@ -61,8 +59,16 @@ final class Webhooks
 			throw new RuntimeException('`webhooks` takes a list of hooks.');
 		}
 
+		$queue = new Queue($db);
+
 		/** @var list<array{url: string, secret?: ?string, events?: list<string>}> $hooks */
-		return new self($hooks, $logger, static fn(string $id): bool => Transaction::committed($db, $id));
+		return new self(
+			$hooks,
+			static fn(string $id): bool => Transaction::committed($db, $id),
+			static function (array $request) use ($queue): void {
+				$queue->push(Delivery::class, $request, queue: 'webhooks');
+			},
+		);
 	}
 
 	/**
@@ -124,33 +130,19 @@ final class Webhooks
 		$this->pending = $settled;
 	}
 
+	/**
+	 * Queues the deliveries of the settled events. It needs the database
+	 * and runs after the release left the connection clean.
+	 */
 	public function deliver(): void
 	{
 		$this->settle();
-		$requests = array_map(static fn(array $request): array => [
-			'url' => $request['url'],
-			'headers' => $request['headers'],
-			'body' => $request['body'],
-		], $this->pending);
+
+		foreach ($this->pending as $request) {
+			($this->queue)(['url' => $request['url'], 'headers' => $request['headers'], 'body' => $request['body']]);
+		}
+
 		$this->pending = [];
-
-		if ($requests === []) {
-			return;
-		}
-
-		$statuses = ($this->send ?? self::curl(...))($requests);
-
-		foreach ($requests as $index => $request) {
-			$status = $statuses[$index] ?? null;
-
-			if ($status === null || $status < 200 || $status >= 300) {
-				$this->logger->warning('Webhook {event} to {url} failed with {status}', [
-					'event' => $request['headers']['X-Cosray-Event'],
-					'url' => $request['url'],
-					'status' => $status ?? 'no response',
-				]);
-			}
-		}
 	}
 
 	/** @param list<string> $patterns */
@@ -187,54 +179,5 @@ final class Webhooks
 		}
 
 		return ['url' => $url, 'secret' => $secret, 'events' => array_values(array_filter($events, is_string(...)))];
-	}
-
-	/**
-	 * @param list<array{url: string, headers: array<string, string>, body: string}> $requests
-	 * @return list<?int>
-	 */
-	private static function curl(array $requests): array
-	{
-		$multi = curl_multi_init();
-		$handles = [];
-
-		foreach ($requests as $request) {
-			$handle = curl_init($request['url']);
-			curl_setopt_array($handle, [
-				CURLOPT_POST => true,
-				CURLOPT_POSTFIELDS => $request['body'],
-				CURLOPT_HTTPHEADER => array_map(
-					static fn(string $name, string $value): string => "{$name}: {$value}",
-					array_keys($request['headers']),
-					$request['headers'],
-				),
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_CONNECTTIMEOUT => 2,
-				CURLOPT_TIMEOUT => 5,
-				CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-			]);
-			curl_multi_add_handle($multi, $handle);
-			$handles[] = $handle;
-		}
-
-		do {
-			$status = curl_multi_exec($multi, $running);
-
-			if ($running > 0) {
-				curl_multi_select($multi, 1.0);
-			}
-		} while ($running > 0 && $status === CURLM_OK);
-
-		$statuses = [];
-
-		foreach ($handles as $handle) {
-			$code = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
-			$statuses[] = $code > 0 ? $code : null;
-			curl_multi_remove_handle($multi, $handle);
-		}
-
-		curl_multi_close($multi);
-
-		return $statuses;
 	}
 }

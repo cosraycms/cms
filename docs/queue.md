@@ -1,6 +1,6 @@
 # Job queue
 
-Cosray keeps a job queue in the site's database for work that should not hold up a response or must survive a failure, like calling another service or [sending mail](mail.md). By default, requests run due jobs once their response is out, so the queue works on any host; where cron is available, `queue:work` can take over. See [Queue](../src/Queue.php), [Contract\Job](../src/Contract/Job.php) and [Queue\Runner](../src/Queue/Runner.php).
+Cosray keeps a job queue in the site's database for work that should not hold up a response or must survive a failure, like calling another service, [sending mail](mail.md) or [webhooks](api.md#webhooks). By default, requests run due jobs once their response is out, so the queue works on any host; where cron is available, `queue:work` can take over. See [Queue](../src/Queue.php), [Contract\Job](../src/Contract/Job.php) and [Queue\Runner](../src/Queue/Runner.php).
 
 ## Jobs
 

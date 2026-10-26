@@ -6,7 +6,6 @@ namespace Cosray\Tests\End2End;
 
 use Celema\Container\Container;
 use Cosray\Tests\End2EndTestCase;
-use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Webhooks;
 
 /**
@@ -57,15 +56,13 @@ final class ApiWebhooksTest extends End2EndTestCase
 	public function container(): Container
 	{
 		$container = parent::container();
+
 		$container->add(Webhooks::class, new Webhooks(
 			[['url' => 'https://hooks.example/cosray']],
-			new RecordingLogger(),
 			// Requests join the test's transaction, which stands in for the commit.
 			static fn(string $id): bool => true,
-			function (array $requests): array {
-				$this->sent = [...$this->sent, ...$requests];
-
-				return array_fill(0, count($requests), 204);
+			function (array $request): void {
+				$this->sent[] = $request;
 			},
 		));
 

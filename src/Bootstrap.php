@@ -195,11 +195,7 @@ class Bootstrap implements CorePlugin
 		}
 
 		if (!$this->container->has(Webhooks::class)) {
-			$this->container->add(Webhooks::class, Webhooks::fromConfig(
-				$this->config,
-				new ContainerLogger($this->container),
-				$this->db,
-			));
+			$this->container->add(Webhooks::class, Webhooks::fromConfig($this->config, $this->db));
 		}
 
 		$app->teardown(function (): void {
