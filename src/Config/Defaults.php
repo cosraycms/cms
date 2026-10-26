@@ -30,6 +30,7 @@ final class Defaults
 			self::uid(),
 			self::password(),
 			self::queue($env),
+			self::mail($env),
 		);
 	}
 
@@ -229,6 +230,22 @@ final class Defaults
 		return [
 			// Run due jobs after each response; turn off where cron or a daemon runs them.
 			'queue.after_response' => $env->bool('QUEUE_AFTER_RESPONSE', true),
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function mail(Env $env): array
+	{
+		$dsn = $env->string('MAILER_DSN');
+
+		return [
+			// Symfony Mailer DSNs by name, the first is the default; MAILER_DSN names `default`.
+			'mail.transports' => $dsn !== null && $dsn !== '' ? ['default' => $dsn] : [],
+			'mail.from' => $env->string('MAILER_FROM'),
+			// Addresses that get every mail instead of its recipients, comma-separated in MAILER_REDIRECT.
+			'mail.redirect' => $env->string('MAILER_REDIRECT') ?? [],
+			// Template directories; empty means `mail` in the views directory.
+			'mail.views' => [],
 		];
 	}
 }

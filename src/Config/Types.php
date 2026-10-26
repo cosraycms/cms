@@ -85,7 +85,12 @@ namespace Cosray\Config;
  *     'password.entropy': float|int,
  *     'password.algorithm': int|string|null,
  *
- *     'queue.after_response': bool
+ *     'queue.after_response': bool,
+ *
+ *     'mail.transports': array<string, string>,
+ *     'mail.from': ?string,
+ *     'mail.redirect': string|list<string>,
+ *     'mail.views': string|list<string>
  * }
  *
  * @phpstan-type BuiltinConfigInput = array{
@@ -135,7 +140,11 @@ namespace Cosray\Config;
  *     'uid.length'?: positive-int,
  *     'password.entropy'?: float|int,
  *     'password.algorithm'?: int|string|null,
- *     'queue.after_response'?: bool
+ *     'queue.after_response'?: bool,
+ *     'mail.transports'?: array<string, string>,
+ *     'mail.from'?: ?string,
+ *     'mail.redirect'?: string|list<string>,
+ *     'mail.views'?: string|list<string>
  * }
  */
 final class Types {}

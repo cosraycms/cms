@@ -32,7 +32,8 @@
 		"cosray/legacy-richtext-converter": "^1.0",
 		"gumlet/php-image-resize": "^3.0",
 		"psr/log": "^3.0",
-		"league/flysystem": "^3.35"
+		"league/flysystem": "^3.35",
+		"symfony/mailer": "^8.1"
 	},
 	"require-dev": {
 		"carthage-software/mago": "1.50.0",

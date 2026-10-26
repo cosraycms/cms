@@ -37,6 +37,9 @@ final class ConfigTest extends TestCase
 			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
 			'DATABASE_URL',
+			'MAILER_DSN',
+			'MAILER_FROM',
+			'MAILER_REDIRECT',
 			'QUEUE_AFTER_RESPONSE',
 			'SITE_SESSION_ENABLED',
 			'SESSION_COOKIE_LIFETIME',
@@ -197,6 +200,43 @@ final class ConfigTest extends TestCase
 		$this->setEnvironment(['QUEUE_AFTER_RESPONSE' => 'false']);
 
 		$this->assertFalse(new Config(self::root())->queue->afterResponse);
+	}
+
+	public function testMailSettingsComeFromTheEnvironmentAndTheApp(): void
+	{
+		$config = new Config(self::root());
+		$this->assertSame([], $config->mail->transports);
+		$this->assertNull($config->mail->from);
+		$this->assertSame([], $config->mail->redirect);
+		$this->assertSame([self::root() . '/views/mail'], $config->mail->views);
+
+		$this->setEnvironment([
+			'MAILER_DSN' => 'smtp://localhost:1025',
+			'MAILER_FROM' => 'Site <site@example.com>',
+			'MAILER_REDIRECT' => 'dev@example.com, qa@example.com',
+		]);
+		$config = new Config(self::root(), [
+			'mail.transports' => ['newsletter' => 'null://null'],
+			'mail.views' => '/srv/mail',
+		]);
+
+		// MAILER_DSN names the first transport, the default; the app adds others.
+		$this->assertSame(
+			['default' => 'smtp://localhost:1025', 'newsletter' => 'null://null'],
+			$config->mail->transports,
+		);
+		$this->assertSame('Site <site@example.com>', $config->mail->from);
+		$this->assertSame(['dev@example.com', 'qa@example.com'], $config->mail->redirect);
+		$this->assertSame(['/srv/mail'], $config->mail->views);
+	}
+
+	public function testMailTransportsAreDsnsByName(): void
+	{
+		$config = new Config(self::root(), ['mail.transports' => ['smtp://localhost']]);
+
+		$this->throws(RuntimeException::class, '`mail.transports` takes DSNs by transport name.');
+
+		$config->mail->transports;
 	}
 
 	public function testSessionOptionsCanBeChangedFromEnvironment(): void
