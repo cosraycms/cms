@@ -1,0 +1,23 @@
+UPDATE /*:cms.prefix:*/jobs SET
+	state = 'running',
+	attempts = attempts + 1,
+	due = now() + make_interval(secs => :lease)
+WHERE id = (
+	SELECT id
+	FROM /*:cms.prefix:*/jobs
+	WHERE state <> 'failed'
+		AND due <= now()
+<?php if (isset($queue)) : ?>
+		AND queue = :queue
+<?php endif ?>
+	ORDER BY due, id
+	LIMIT 1
+	FOR UPDATE SKIP LOCKED
+)
+RETURNING
+	id,
+	queue,
+	job,
+	payload::text AS payload,
+	attempts,
+	max_attempts;

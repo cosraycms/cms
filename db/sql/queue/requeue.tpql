@@ -1,0 +1,11 @@
+UPDATE /*:cms.prefix:*/jobs SET
+	state = 'pending',
+	attempts = 0,
+	due = now(),
+	error = NULL,
+	failed = NULL
+WHERE
+	state = 'failed'
+<?php if (isset($id)) : ?>
+	AND id = :id
+<?php endif ?>;
