@@ -7,25 +7,17 @@ namespace Cosray\Controller\Panel;
 use Celema\Container\Container;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Request;
-use Celema\Verba\Verba;
-use Closure;
 use Cosray\Auth;
 use Cosray\Config;
-use Cosray\Locales;
-use Cosray\Mailer;
-use Cosray\Middleware\PanelLocale;
-use Cosray\Security\Policy;
-use Cosray\User;
 use Cosray\User\PasswordResets;
-use Cosray\Users;
 use Psr\Log\LoggerInterface as Logger;
-use Symfony\Component\Mime\Address;
 
 /**
  * Lets panel users who forgot their password choose a new one through a
- * link sent by mail. Every answer to a request reads the same, so the form
- * does not tell which logins exist. Without a mail transport and `app.url`
- * the pages do not exist.
+ * link sent by mail. A request only queues the lookup and the mail, so its
+ * answer and its work are the same for every login and the form does not
+ * tell which logins exist. Without a mail transport and `app.url` the pages
+ * do not exist.
  */
 final class PasswordReset extends Panel
 {
@@ -38,7 +30,6 @@ final class PasswordReset extends Panel
 		Container $container,
 		Request $request,
 		private readonly PasswordResets $resets,
-		private readonly Users $users,
 		private readonly Auth $auth,
 		private readonly Logger $logger,
 	) {
@@ -54,7 +45,7 @@ final class PasswordReset extends Panel
 	}
 
 	/** @return array<string, mixed> */
-	public function send(Mailer $mailer): array
+	public function send(): array
 	{
 		$this->guard();
 		$login = $this->formData()['login'] ?? '';
@@ -64,24 +55,8 @@ final class PasswordReset extends Panel
 			return $this->page('request', ['login' => $login, 'message' => __('auth:reset-missing-login')]);
 		}
 
-		$user = $this->users->byLogin($login);
-		$token = $user !== null && $this->policy()->permits($user, 'panel') ? $this->resets->issue($user) : null;
-
-		if ($user !== null && $token !== null) {
-			$this->inLocaleOf($user, fn(): int => $mailer->send(
-				'cosray/password-reset',
-				to: new Address($user->email, $user->name ?? ''),
-				data: [
-					'name' => $user->name ?? $user->loginName(),
-					'site' => $this->config->app->name,
-					'url' => $this->resets->url($token),
-				],
-			));
-			$this->logger->notice('Password reset link sent to {login} for a request from {ip}', [
-				'login' => $user->loginName(),
-				'ip' => $this->auth->clientIp(),
-			]);
-		}
+		$locale = $this->request->get('panelLocale', null);
+		$this->resets->request($login, $this->auth->clientIp(), is_string($locale) ? $locale : null);
 
 		return $this->page('sent');
 	}
@@ -148,44 +123,5 @@ final class PasswordReset extends Panel
 			'message' => null,
 			...$data,
 		]);
-	}
-
-	/**
-	 * Runs the callback in the panel language the user chose, if they chose
-	 * one, and in that of the request otherwise.
-	 *
-	 * @template T
-	 * @param Closure(): T $callback
-	 * @return T
-	 */
-	private function inLocaleOf(User $user, Closure $callback): mixed
-	{
-		$locales = $this->request->get('locales', null);
-
-		if (
-			!$locales instanceof Locales
-			|| $user->panelLocale === null
-			|| !in_array($user->panelLocale, $locales->panelLocales(), true)
-		) {
-			return $callback();
-		}
-
-		$previous = Verba::translator();
-		Verba::activate(new PanelLocale($this->config)->translator($locales, $user->panelLocale));
-
-		try {
-			return $callback();
-		} finally {
-			if ($previous !== null) {
-				Verba::activate($previous);
-			} else {
-				Verba::deactivate();
-			}
-		}
-	}
-
-	private function policy(): Policy
-	{
-		return $this->container->instance(Policy::class);
 	}
 }

@@ -7,6 +7,7 @@ namespace Cosray\User;
 use Celema\Quma\Database;
 use Cosray\Actor;
 use Cosray\Config;
+use Cosray\Queue;
 use Cosray\User;
 use Cosray\Users;
 
@@ -27,12 +28,26 @@ final class PasswordResets
 		private readonly Database $db,
 		private readonly Users $users,
 		private readonly Config $config,
+		private readonly Queue $queue,
 	) {}
 
 	/** Whether links can be sent: they need a mail transport and `app.url`. */
 	public function available(): bool
 	{
 		return $this->config->mail->transports !== [] && $this->config->app->url !== null;
+	}
+
+	/**
+	 * Queues sending a link to the user with this login, if there is one;
+	 * the mail is in the user's panel language, else in the given one.
+	 */
+	public function request(string $login, string $ip, ?string $locale): void
+	{
+		$this->queue->push(
+			PasswordResetMail::class,
+			['login' => $login, 'ip' => $ip, 'locale' => $locale],
+			queue: 'mail',
+		);
 	}
 
 	/** A new link's token, or null while the user's last link is younger than the interval. */

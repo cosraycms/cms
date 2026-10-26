@@ -4,8 +4,16 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Celema\Core\App;
+use Cosray\Config;
+use Cosray\Mail\Transports;
 use Cosray\Tests\End2EndTestCase;
+use Cosray\Tests\Fixtures\Mail\RecordingTransport;
+use Cosray\User\PasswordResetMail;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 /**
  * @internal
@@ -18,16 +26,16 @@ final class PanelPasswordResetTest extends End2EndTestCase
 		'app.url' => 'https://example.org/',
 		'mail.transports' => ['default' => 'null://null'],
 		'mail.from' => 'site@example.com',
-		// The tests read the queued mails.
-		'queue.after_response' => false,
 	];
+
+	private ?RecordingTransport $transport = null;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
 
 		$this->db()->execute('DELETE FROM cms.jobs')->run();
-		$this->app = $this->createApp(self::SETTINGS);
+		$this->app = $this->recordingApp(self::SETTINGS);
 	}
 
 	public function testWithoutMailOrAppUrlThereIsNoReset(): void
@@ -106,6 +114,41 @@ final class PanelPasswordResetTest extends End2EndTestCase
 		$this->assertCount(1, $this->mails());
 	}
 
+	public function testARequestDoesTheSameWorkForEveryLogin(): void
+	{
+		$this->app = $this->recordingApp([...self::SETTINGS, 'queue.after_response' => false]);
+		$this->createTestUser(['username' => 'known']);
+
+		$this->html('POST', '/panel/password', ['login' => 'known']);
+		$this->html('POST', '/panel/password', ['login' => 'unknown']);
+
+		$jobs = $this->db()->execute('SELECT job, queue, payload::text AS payload FROM cms.jobs ORDER BY id')->all();
+		$this->assertSame([PasswordResetMail::class, PasswordResetMail::class], array_column($jobs, 'job'));
+		$this->assertSame(
+			array_keys(json_decode($jobs[0]['payload'], true)),
+			array_keys(json_decode($jobs[1]['payload'], true)),
+		);
+		$this->assertSame(0, $this->db()->execute('SELECT count(*) AS n FROM cms.password_resets')->one()['n']);
+	}
+
+	public function testAFailedMailLeavesNoLinkThatWouldHoldUpTheRetry(): void
+	{
+		// Without a sender, the mail cannot be queued.
+		$this->app = $this->recordingApp([...self::SETTINGS, 'mail.from' => null]);
+		$this->createTestUser(['username' => 'unlucky', 'email' => 'unlucky@example.com']);
+
+		$this->html('POST', '/panel/password', ['login' => 'unlucky']);
+
+		$this->assertSame(0, $this->db()->execute('SELECT count(*) AS n FROM cms.password_resets')->one()['n']);
+		$this->assertSame([], $this->mails());
+
+		$this->app = $this->recordingApp(self::SETTINGS);
+		$this->db()->execute('UPDATE cms.jobs SET due = now()')->run();
+		$this->makeRequest('GET', '/panel/login');
+
+		$this->assertSame([['"Test User" <unlucky@example.com>']], array_column($this->mails(), 'to'));
+	}
+
 	public function testTheMailIsInThePanelLanguageTheUserChose(): void
 	{
 		$id = $this->createTestUser(['username' => 'german', 'data' => ['name' => 'Anna']]);
@@ -115,6 +158,15 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 		$this->assertSame('Ein neues Passwort für cosray', $this->mails()[0]['subject']);
 		$this->assertStringContainsString('Neues Passwort wählen', (string) $this->mails()[0]['text']);
+	}
+
+	public function testWithoutAChoiceTheMailIsInTheLanguageOfTheRequest(): void
+	{
+		$this->createTestUser(['username' => 'browser', 'data' => ['name' => 'Anna']]);
+
+		$this->html('POST', '/panel/password', ['login' => 'browser'], ['Accept-Language' => 'de-DE,de;q=0.9']);
+
+		$this->assertSame('Ein neues Passwort für cosray', $this->mails()[0]['subject']);
 	}
 
 	public function testAnExpiredLinkDoesNotWork(): void
@@ -139,11 +191,30 @@ final class PanelPasswordResetTest extends End2EndTestCase
 		));
 	}
 
-	/** @param array<string, string> $form */
-	private function html(string $method, string $uri, array $form = []): string
+	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function recordingApp(array $settings): App
+	{
+		$app = $this->createApp($settings);
+		$app->container()->add(Transports::class, Transports::using(
+			$app->container()->get(Config::class),
+			$this->logger,
+			fn(array $dsns, EventDispatcher $events) => $this->transport = new RecordingTransport($events),
+		));
+
+		return $app;
+	}
+
+	/**
+	 * @param array<string, string> $form
+	 * @param array<string, string> $headers
+	 */
+	private function html(string $method, string $uri, array $form = [], array $headers = []): string
 	{
 		$response = $this->makeRequest($method, $uri, [
 			'body' => $form,
+			'headers' => $headers,
 			'server' => ['REMOTE_ADDR' => '192.0.2.7'],
 		]);
 		$this->assertResponseOk($response);
@@ -158,14 +229,28 @@ final class PanelPasswordResetTest extends End2EndTestCase
 		]);
 	}
 
-	/** @return list<array{to: list<string>, subject: string, html: ?string, text: ?string}> */
+	/**
+	 * The mails sent through the transport, by the jobs that requests run
+	 * once their response is out.
+	 *
+	 * @return list<array{to: list<string>, subject: ?string, html: ?string, text: ?string}>
+	 */
 	private function mails(): array
 	{
-		$rows = $this->db()->execute(
-			"SELECT payload::text AS payload FROM cms.jobs WHERE queue = 'mail' ORDER BY id",
-		)->all();
+		$mails = [];
 
-		return array_map(static fn(array $row): array => json_decode($row['payload'], true), $rows);
+		foreach ($this->transport->sent ?? [] as $message) {
+			$email = $message->getOriginalMessage();
+			$this->assertInstanceOf(Email::class, $email);
+			$mails[] = [
+				'to' => array_map(static fn(Address $address): string => $address->toString(), $email->getTo()),
+				'subject' => $email->getSubject(),
+				'html' => is_string($email->getHtmlBody()) ? $email->getHtmlBody() : null,
+				'text' => is_string($email->getTextBody()) ? $email->getTextBody() : null,
+			];
+		}
+
+		return $mails;
 	}
 
 	private function message(string $html): string

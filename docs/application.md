@@ -300,7 +300,7 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 ### Password reset
 
-With a [mail transport](mail.md) and `app.url` configured, the login page links to a form where panel users who forgot their password request a link by mail. The link works once and for an hour, a user gets at most one every five minutes, and the form answers the same whether or not the login belongs to an account. The mail is in the user's panel language, or else in that of the request. Setting the new password ends the user's other sessions and remembered logins like any password change. Requests and resets are logged as `notice`. Without mail or `app.url`, there is no link and the pages answer 404.
+With a [mail transport](mail.md) and `app.url` configured, the login page links to a form where panel users who forgot their password request a link by mail. The link works once and for an hour, and a user gets at most one every five minutes. The request only queues a [job](queue.md) that looks the login up and sends the mail, so the form answers the same, and does the same work, whether or not the login belongs to an account; by default, the job runs once the response is out. The mail is in the user's panel language, or else in that of the request. Setting the new password ends the user's other sessions and remembered logins like any password change. Requests and resets are logged as `notice`. Without mail or `app.url`, there is no link and the pages answer 404.
 
 The mail comes from the template `cosray/password-reset`. A file `cosray/password-reset.php` in the `mail.views` directory replaces it; it receives `name`, `site` and `url`.
 
