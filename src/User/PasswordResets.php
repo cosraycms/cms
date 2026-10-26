@@ -10,6 +10,7 @@ use Cosray\Config;
 use Cosray\Queue;
 use Cosray\User;
 use Cosray\Users;
+use Cosray\Util\Transaction;
 
 /**
  * Links that let panel users who forgot their password choose a new one.
@@ -83,21 +84,26 @@ final class PasswordResets
 	}
 
 	/**
-	 * Sets the password of the link's user, which also ends their sessions,
-	 * and uses up the link. Returns the user, or null if the link does not work.
+	 * Uses up the link and sets the password of its user, which also ends
+	 * their sessions, all or nothing. Returns the user, or null if the link
+	 * does not work; of concurrent requests with one link, only the first
+	 * gets the user.
 	 */
 	public function complete(#[\SensitiveParameter] string $token, #[\SensitiveParameter] string $password): ?User
 	{
-		$user = $this->user($token);
+		return Transaction::run($this->db, function () use ($token, $password): ?User {
+			/** @var ?array{usr: int} $row */
+			$row = $this->db->passwordResets->consume(['token' => hash('sha256', $token)])->first();
+			$user = $row === null ? null : $this->users->byId($row['usr']);
 
-		if ($user === null) {
-			return null;
-		}
+			if ($user === null || !$user->active) {
+				return null;
+			}
 
-		$this->users->setPassword($user, $password, Actor::system());
-		$this->db->passwordResets->clear(['usr' => $user->id])->run();
+			$this->users->setPassword($user, $password, Actor::system());
 
-		return $user;
+			return $user;
+		});
 	}
 
 	/** The absolute URL of a link. */
