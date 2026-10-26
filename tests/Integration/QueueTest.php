@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Console\Buffer;
+use Celema\Console\Io;
+use Cosray\Commands\ListFailedJobs;
+use Cosray\Commands\PruneJobs;
+use Cosray\Commands\RetryJobs;
+use Cosray\Commands\WorkQueue;
 use Cosray\Exception\RuntimeException;
 use Cosray\Queue;
 use Cosray\Queue\Runner;
@@ -243,6 +249,40 @@ final class QueueTest extends IntegrationTestCase
 		$this->assertSame(1, $this->queue->prune(30));
 		$this->assertNull($this->job($second));
 		$this->assertSame(0, $this->queue->retry());
+	}
+
+	public function testTheCommandsRunListRetryAndPruneJobs(): void
+	{
+		$failed = $this->queue->push(RejectedJob::class);
+		$this->queue->push(RecordingJob::class);
+
+		$work = new Buffer();
+		$this->assertSame(0, (new WorkQueue($this->runner()))(new Io($work)));
+		$this->assertStringContainsString('1 done, 0 to retry later, 1 failed.', $work->output());
+
+		$quiet = new Buffer();
+		(new WorkQueue($this->runner()))(new Io($quiet));
+		$this->assertSame('', $quiet->output());
+
+		$list = new Buffer();
+		$this->assertSame(0, (new ListFailedJobs($this->queue))(new Io($list)));
+		$this->assertStringContainsString(RejectedJob::class, $list->output());
+		$this->assertStringContainsString('No such recipient', $list->output());
+
+		$retry = new RetryJobs($this->queue);
+		$this->assertSame(1, $retry(new Io(new Buffer()), 'some'));
+		$this->assertSame(1, $retry(new Io(new Buffer()), '999999999'));
+		$requeued = new Buffer();
+		$this->assertSame(0, $retry(new Io($requeued), (string) $failed));
+		$this->assertStringContainsString('Queued 1 job(s) again.', $requeued->output());
+
+		$prune = new Buffer();
+		$this->assertSame(0, (new PruneJobs($this->queue))(new Io($prune)));
+		$this->assertStringContainsString('Deleted 0 failed job(s).', $prune->output());
+
+		$none = new Buffer();
+		(new ListFailedJobs($this->queue))(new Io($none));
+		$this->assertStringContainsString('No failed jobs.', $none->output());
 	}
 
 	/** @param ?\Closure(): float $clock */

@@ -116,7 +116,7 @@ Content, users, permissions and media are read per request. Changes to code, tem
 
 ## Console commands
 
-[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, and superuser command. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
+[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the superuser and token commands, and the [job queue](queue.md) commands. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
 A project `run` script can load an `app/console.php` returning the runner:
 

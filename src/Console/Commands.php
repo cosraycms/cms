@@ -9,6 +9,7 @@ use Celema\Console\Runner;
 use Celema\Container\Container;
 use Celema\Quma\Commands as QumaCommands;
 use Celema\Quma\Connection;
+use Celema\Quma\Database;
 use Celema\Server\FrankenInstall;
 use Celema\Server\Reload;
 use Celema\Server\Server;
@@ -19,16 +20,22 @@ use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\Fulltext;
+use Cosray\Commands\ListFailedJobs;
 use Cosray\Commands\ListTokens;
 use Cosray\Commands\PanelPublish;
+use Cosray\Commands\PruneJobs;
 use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
+use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
+use Cosray\Commands\WorkQueue;
+use Cosray\ContainerLogger;
 use Cosray\I18n\SchemaScanner;
 use Cosray\MigrationFactory;
 use Cosray\Panel\Client;
+use Cosray\Queue\Runner as JobRunner;
 
 /**
  * The base CLI command set of a Cosray application.
@@ -76,6 +83,14 @@ final class Commands
 			CreateToken::class,
 			ListTokens::class,
 			RevokeToken::class,
+			WorkQueue::class => fn(): WorkQueue => new WorkQueue(new JobRunner(
+				$this->container()->instance(Database::class),
+				new ContainerLogger($this->container()),
+				$this->resolve(...),
+			)),
+			ListFailedJobs::class,
+			RetryJobs::class,
+			PruneJobs::class,
 		]);
 	}
 
