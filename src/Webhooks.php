@@ -7,15 +7,14 @@ namespace Cosray;
 use Celema\Quma\Database;
 use Closure;
 use Cosray\Exception\RuntimeException;
-use Cosray\Util\Transaction;
 use Cosray\Webhooks\Delivery;
 
 /**
  * Tells other systems that content changed, such as a static site build or a
- * cache in front of the API. Events are recorded once their write is done
- * and queued when the request ends, one delivery job per event and hook,
- * which retries a failed POST. A write inside a transaction that Cosray did
- * not open is reported only if that transaction committed.
+ * cache in front of the API. Each event queues one delivery job per hook,
+ * which retries a failed POST. The jobs are pushed inside the write's
+ * transaction, so they exist only if the write commits, whether it happens
+ * in a request, a job or a command.
  *
  *     'webhooks' => [
  *         ['url' => 'https://build.example.com/hook', 'secret' => $secret, 'events' => ['node.*']],
@@ -34,18 +33,13 @@ final class Webhooks
 	/** @var list<array{url: string, secret: ?string, events: list<string>}> */
 	private readonly array $hooks;
 
-	/** @var list<array{url: string, headers: array<string, string>, body: string, transaction: ?string}> */
-	private array $pending = [];
-
 	/**
 	 * @param list<array{url: string, secret?: ?string, events?: list<string>}> $hooks
-	 * @param Closure(string): bool $committed tells whether the transaction with this id committed
 	 * @param Closure(array{url: string, headers: array<string, string>, body: string}): void $queue
 	 *        queues the delivery of one request
 	 */
 	public function __construct(
 		array $hooks,
-		private readonly Closure $committed,
 		private readonly Closure $queue,
 	) {
 		$this->hooks = array_map(self::hook(...), $hooks);
@@ -64,7 +58,6 @@ final class Webhooks
 		/** @var list<array{url: string, secret?: ?string, events?: list<string>}> $hooks */
 		return new self(
 			$hooks,
-			static fn(string $id): bool => Transaction::committed($db, $id),
 			static function (array $request) use ($queue): void {
 				$queue->push(Delivery::class, $request, queue: 'webhooks');
 			},
@@ -72,10 +65,11 @@ final class Webhooks
 	}
 
 	/**
+	 * Queues the deliveries of an event on the write's connection.
+	 *
 	 * @param array<string, mixed> $data
-	 * @param ?string $transaction the transaction, not opened by Cosray, that the write belongs to
 	 */
-	public function record(string $event, array $data, ?string $transaction = null): void
+	public function record(string $event, array $data): void
 	{
 		$id = bin2hex(random_bytes(16));
 		$body = null;
@@ -100,49 +94,8 @@ final class Webhooks
 				$headers['X-Cosray-Signature'] = 'sha256=' . hash_hmac('sha256', $body, $hook['secret']);
 			}
 
-			$this->pending[] = [
-				'url' => $hook['url'],
-				'headers' => $headers,
-				'body' => $body,
-				'transaction' => $transaction,
-			];
+			($this->queue)(['url' => $hook['url'], 'headers' => $headers, 'body' => $body]);
 		}
-	}
-
-	/**
-	 * Drops the events of writes whose transaction did not commit. It has to
-	 * run once the request's transactions ended, while the connection that
-	 * asks about them is still open.
-	 */
-	public function settle(): void
-	{
-		$committed = [];
-		$settled = [];
-
-		foreach ($this->pending as $request) {
-			$transaction = $request['transaction'];
-
-			if ($transaction === null || ($committed[$transaction] ??= ($this->committed)($transaction))) {
-				$settled[] = [...$request, 'transaction' => null];
-			}
-		}
-
-		$this->pending = $settled;
-	}
-
-	/**
-	 * Queues the deliveries of the settled events. It needs the database
-	 * and runs after the release left the connection clean.
-	 */
-	public function deliver(): void
-	{
-		$this->settle();
-
-		foreach ($this->pending as $request) {
-			($this->queue)(['url' => $request['url'], 'headers' => $request['headers'], 'body' => $request['body']]);
-		}
-
-		$this->pending = [];
 	}
 
 	/** @param list<string> $patterns */

@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
-use Celema\Container\Container;
+use Cosray\Console\Runtime;
+use Cosray\Node\Writer;
 use Cosray\Tests\End2EndTestCase;
-use Cosray\Webhooks;
+use Cosray\Tests\Fixtures\Node\TestDocument;
+use Cosray\Util\Transaction;
+use Cosray\Webhooks\Delivery;
+use RuntimeException;
 
 /**
  * @internal
@@ -15,19 +19,22 @@ use Cosray\Webhooks;
  */
 final class ApiWebhooksTest extends End2EndTestCase
 {
-	/** @var list<array{url: string, headers: array<string, string>, body: string}> */
-	private array $sent = [];
-
 	protected function setUp(): void
 	{
 		parent::setUp();
 
-		$this->app = $this->createApp(['api.path' => '/api']);
+		$this->db()->execute('DELETE FROM cms.jobs')->run();
+		$this->app = $this->createApp([
+			'api.path' => '/api',
+			'webhooks' => [['url' => 'https://hooks.example/cosray']],
+			// The tests read the queued deliveries.
+			'queue.after_response' => false,
+		]);
 		$this->loadFixtures('basic-types');
 		$this->authenticateAs('editor');
 	}
 
-	public function testCommittedWritesAreReportedWhenTheRequestEnds(): void
+	public function testWritesQueueTheirEvents(): void
 	{
 		$this->send('PUT', '/api/nodes/hooked', [
 			'type' => 'test-document',
@@ -36,7 +43,7 @@ final class ApiWebhooksTest extends End2EndTestCase
 		$this->send('PATCH', '/api/nodes/hooked', ['published' => true]);
 		$this->makeRequest('DELETE', '/api/nodes/hooked');
 
-		$events = array_map(static fn(array $request): array => json_decode($request['body'], true), $this->sent);
+		$events = $this->events();
 
 		$this->assertSame(['node.created', 'node.updated', 'node.deleted'], array_column($events, 'event'));
 		$this->assertSame(['hooked'], array_values(array_unique(array_column($events, 'uid'))));
@@ -50,23 +57,51 @@ final class ApiWebhooksTest extends End2EndTestCase
 			'content' => ['title' => ['value' => ['zxx' => 'no']]],
 		]);
 
-		$this->assertSame([], $this->sent);
+		$this->assertSame([], $this->events());
 	}
 
-	public function container(): Container
+	public function testWritesOutsideARequestQueueTheirEventsToo(): void
 	{
-		$container = parent::container();
+		// Built by the container, as a job or a command gets it.
+		$writer = new Runtime($this->app->container())->get(Writer::class);
 
-		$container->add(Webhooks::class, new Webhooks(
-			[['url' => 'https://hooks.example/cosray']],
-			// Requests join the test's transaction, which stands in for the commit.
-			static fn(string $id): bool => true,
-			function (array $request): void {
-				$this->sent[] = $request;
-			},
+		$writer->create($writer->prepare(TestDocument::class, ['title' => 'From a job'])->uid('from-a-job'));
+
+		$this->assertSame([['node.created', 'from-a-job']], array_map(
+			static fn(array $event): array => [$event['event'], $event['uid']],
+			$this->events(),
 		));
+	}
 
-		return $container;
+	public function testAWriteUndoneWithItsTransactionReportsNothing(): void
+	{
+		$writer = new Runtime($this->app->container())->get(Writer::class);
+
+		try {
+			Transaction::run($this->db(), static function () use ($writer): never {
+				$writer->create($writer->prepare(TestDocument::class, ['title' => 'Undone'])->uid('undone'));
+
+				throw new RuntimeException('The site changed its mind.');
+			});
+		} catch (RuntimeException $e) {
+			$this->assertSame('The site changed its mind.', $e->getMessage());
+		}
+
+		$this->assertSame([], $this->events());
+	}
+
+	/** @return list<array<string, mixed>> the bodies of the queued deliveries */
+	private function events(): array
+	{
+		$rows = $this->db()->execute(
+			'SELECT payload::text AS payload FROM cms.jobs WHERE job = :job ORDER BY id',
+			['job' => Delivery::class],
+		)->all();
+
+		return array_map(
+			static fn(array $row): array => json_decode(json_decode($row['payload'], true)['body'], true),
+			$rows,
+		);
 	}
 
 	/** @param array<string, mixed> $body */

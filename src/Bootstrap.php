@@ -149,15 +149,6 @@ class Bootstrap implements CorePlugin
 
 		$this->collect();
 		$this->database();
-		// Settling asks the database about the request's transactions, so it
-		// runs before the release ends the connection.
-		$app->teardown(function (): void {
-			$webhooks = $this->container->get(Webhooks::class);
-
-			if ($webhooks instanceof Webhooks) {
-				$webhooks->settle();
-			}
-		});
 		$app->teardown($this->releaseDatabase(...));
 
 		$this->container->add($this->container::class, $this->container);
@@ -198,13 +189,6 @@ class Bootstrap implements CorePlugin
 			$this->container->add(Webhooks::class, Webhooks::fromConfig($this->config, $this->db));
 		}
 
-		$app->teardown(function (): void {
-			$webhooks = $this->container->get(Webhooks::class);
-
-			if ($webhooks instanceof Webhooks) {
-				$webhooks->deliver();
-			}
-		});
 		$app->teardown($this->runJobs(...));
 
 		$this->routes = new Routes(

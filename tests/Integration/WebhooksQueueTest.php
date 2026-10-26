@@ -24,7 +24,6 @@ final class WebhooksQueueTest extends IntegrationTestCase
 		);
 
 		$webhooks->record('node.created', ['uid' => 'queued', 'type' => 'page']);
-		$webhooks->deliver();
 
 		$jobs = $this->db()->execute('SELECT queue, job, payload::text AS payload FROM cms.jobs')->all();
 		$this->assertCount(1, $jobs);

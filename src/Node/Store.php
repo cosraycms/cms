@@ -84,8 +84,8 @@ class Store
 		$this->transaction(function () use ($node, $data, $actor, $locales, $create): void {
 			$this->lock($data['uid']);
 			$this->persist($node, $data, $actor->id, $locales, $create);
+			$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
 		}, 'Error while saving: ');
-		$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -107,8 +107,8 @@ class Store
 			$this->persist($node, $data, $actor->id, $locales);
 			$this->drafts->delete($nodeId, published: true);
 			$this->sync->remove('draft', $data['uid']);
+			$this->event('node.updated', $node, $data['uid']);
 		}, 'Error while publishing: ');
-		$this->event('node.updated', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -153,8 +153,9 @@ class Store
 					'editor' => $actor->id,
 				])->run();
 			}
+
+			$this->event('node.draft', $node, $data['uid']);
 		}, 'Error while saving the working copy: ');
-		$this->event('node.draft', $node, $data['uid']);
 
 		return ['success' => true, 'uid' => $data['uid']];
 	}
@@ -164,12 +165,12 @@ class Store
 		$nodeId = $this->nodeId($node);
 		$uid = (string) Factory::meta($node, 'uid');
 
-		$this->transaction(function () use ($nodeId, $uid): void {
+		$this->transaction(function () use ($node, $nodeId, $uid): void {
 			$this->lock($uid);
 			$this->drafts->delete($nodeId);
 			$this->sync->remove('draft', $uid);
+			$this->event('node.draft', $node, $uid);
 		}, 'Error while discarding: ');
-		$this->event('node.draft', $node, $uid);
 	}
 
 	/**
@@ -182,11 +183,11 @@ class Store
 
 		if ($draft === null) {
 			$uid = (string) Factory::meta($node, 'uid');
-			$this->transaction(function () use ($uid, $actor): void {
+			$this->transaction(function () use ($node, $uid, $actor): void {
 				$this->lock($uid);
 				$this->db->nodes->setPublished(['uid' => $uid, 'published' => false, 'editor' => $actor->id])->run();
+				$this->event('node.updated', $node, $uid);
 			}, 'Error while unpublishing: ');
-			$this->event('node.updated', $node, $uid);
 
 			return;
 		}
@@ -299,24 +300,18 @@ class Store
 	}
 
 	/**
-	 * Records a webhook event once the write is committed. A descendant
-	 * deleted with its parent is reported with the parent's type.
+	 * Queues the webhook deliveries of a write inside its transaction, so
+	 * they commit or roll back with it. A descendant deleted with its parent
+	 * is reported with the parent's type.
 	 */
 	private function event(string $event, object $node, string $uid): void
 	{
 		$container = $this->context?->container;
 		$webhooks = $container !== null && $container->has(Webhooks::class) ? $container->get(Webhooks::class) : null;
 
-		if (!$webhooks instanceof Webhooks) {
-			return;
+		if ($webhooks instanceof Webhooks) {
+			$webhooks->record($event, ['uid' => $uid, 'type' => (string) $this->types->get($node::class, 'handle')]);
 		}
-
-		$type = (string) $this->types->get($node::class, 'handle');
-		Transaction::afterCommit($this->db, static fn(?string $transaction) => $webhooks->record(
-			$event,
-			['uid' => $uid, 'type' => $type],
-			$transaction,
-		));
 	}
 
 	private function transaction(callable $work, string $failure): void
@@ -382,8 +377,8 @@ class Store
 				$this->transaction(function () use ($node, $prepared, $actor, $locales, $metadata): void {
 					$this->lock($prepared['uid']);
 					$this->persist($node, $prepared, $actor->id, $locales, create: true, metadata: $metadata);
+					$this->event('node.created', $node, $prepared['uid']);
 				}, 'Error while saving: ');
-				$this->event('node.created', $node, $prepared['uid']);
 
 				return ['success' => true, 'uid' => $prepared['uid']];
 			} catch (HttpConflict $e) {
@@ -415,7 +410,7 @@ class Store
 
 		$uids = $withChildren ? $this->subtreeUids($uid) : [$uid];
 
-		$this->transaction(function () use ($uid, $uids, $actor): void {
+		$this->transaction(function () use ($node, $uid, $uids, $actor): void {
 			$this->lock($uid);
 
 			foreach ($uids as $deleteUid) {
@@ -423,12 +418,9 @@ class Store
 					'uid' => $deleteUid,
 					'editor' => $actor->id,
 				])->run();
+				$this->event('node.deleted', $node, $deleteUid);
 			}
 		}, 'Error while deleting: ');
-
-		foreach ($uids as $deleted) {
-			$this->event('node.deleted', $node, $deleted);
-		}
 
 		return [
 			'success' => true,
