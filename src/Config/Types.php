@@ -83,7 +83,9 @@ namespace Cosray\Config;
  *     'uid.length': positive-int,
  *
  *     'password.entropy': float|int,
- *     'password.algorithm': int|string|null
+ *     'password.algorithm': int|string|null,
+ *
+ *     'queue.after_response': bool
  * }
  *
  * @phpstan-type BuiltinConfigInput = array{
@@ -132,7 +134,8 @@ namespace Cosray\Config;
  *     'uid.alphabet'?: non-empty-string,
  *     'uid.length'?: positive-int,
  *     'password.entropy'?: float|int,
- *     'password.algorithm'?: int|string|null
+ *     'password.algorithm'?: int|string|null,
+ *     'queue.after_response'?: bool
  * }
  */
 final class Types {}

@@ -9,7 +9,6 @@ use Celema\Core\Factory\Factory;
 use Celema\Quma\Database;
 use Celema\Verba\Translator;
 use Celema\Verba\Verba;
-use Cosray\App;
 use Cosray\Cms;
 use Cosray\Config;
 use Cosray\Context;
@@ -17,7 +16,8 @@ use Cosray\Locales;
 use Cosray\Node\Writer;
 
 /**
- * Lazily resolved services for one console invocation.
+ * Services resolved lazily in a scope without a request: for one console
+ * invocation, or for a batch of queued jobs.
  *
  * @internal
  */
@@ -26,10 +26,10 @@ final class Runtime
 	private readonly Container $container;
 	private readonly ?Translator $previousTranslator;
 
-	public function __construct(App $app)
+	/** @param Container $container the booted app's container */
+	public function __construct(Container $container)
 	{
-		$app->boot();
-		$this->container = $app->container()->scope();
+		$this->container = $container->scope();
 		$this->container->add(Context::class, self::context(...))->scoped();
 		$this->container->add(Cms::class)->scoped();
 		$this->container->add(Writer::class)->scoped();

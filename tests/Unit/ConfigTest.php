@@ -37,6 +37,7 @@ final class ConfigTest extends TestCase
 			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
 			'DATABASE_URL',
+			'QUEUE_AFTER_RESPONSE',
 			'SITE_SESSION_ENABLED',
 			'SESSION_COOKIE_LIFETIME',
 			'SESSION_COOKIE_SECURE',
@@ -187,6 +188,15 @@ final class ConfigTest extends TestCase
 		$this->assertSame('test-secret', $config->app->secret);
 		$this->assertSame('Europe/Berlin', $config->app->timezone->getName());
 		$this->assertTrue($config->session->enabled);
+	}
+
+	public function testJobsRunAfterResponsesUnlessTheEnvironmentTurnsItOff(): void
+	{
+		$this->assertTrue(new Config(self::root())->queue->afterResponse);
+
+		$this->setEnvironment(['QUEUE_AFTER_RESPONSE' => 'false']);
+
+		$this->assertFalse(new Config(self::root())->queue->afterResponse);
 	}
 
 	public function testSessionOptionsCanBeChangedFromEnvironment(): void

@@ -19,6 +19,7 @@ use Cosray\Collection\AllContent;
 use Cosray\Collection\Ref as CollectionRef;
 use Cosray\Collection\Schema\Registry as CollectionSchemaRegistry;
 use Cosray\Collection\Schemas as CollectionSchemas;
+use Cosray\Console\Runtime;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Control\Registry as Controls;
@@ -35,6 +36,7 @@ use Cosray\Panel\Extras as PanelExtras;
 use Cosray\Plugin\Assets as PluginAssets;
 use Cosray\Plugin\Plugin;
 use Cosray\Plugin\Registrar;
+use Cosray\Queue\Runner;
 use Cosray\Security\Policy;
 use Cosray\User\Types as UserTypes;
 use Cosray\View\Boiler\Renderer as BoilerRenderer;
@@ -46,6 +48,10 @@ use ReflectionClass;
 class Bootstrap implements CorePlugin
 {
 	public const string NODE_TAG = 'cosray.cms.node';
+
+	// The request's worker stays busy meanwhile, and PHP's time limit still applies.
+	private const int JOBS_AFTER_RESPONSE = 10;
+	private const float SECONDS_AFTER_RESPONSE = 10.0;
 
 	protected Factory $factory;
 	protected Container $container;
@@ -204,6 +210,7 @@ class Bootstrap implements CorePlugin
 				$webhooks->deliver();
 			}
 		});
+		$app->teardown($this->runJobs(...));
 
 		$this->routes = new Routes(
 			$this->config,
@@ -546,6 +553,36 @@ class Bootstrap implements CorePlugin
 	 * request, with a transaction the request left open rolled back; with
 	 * `db.reuse` off it disconnects instead.
 	 */
+	/**
+	 * Runs a few due jobs once the response is out, so that sites without
+	 * cron or a queue daemon get their jobs done too. It runs after the
+	 * release left the connection clean and releases it again.
+	 */
+	private function runJobs(): void
+	{
+		if (!$this->config->queue->afterResponse) {
+			return;
+		}
+
+		$runtime = null;
+		$runner = new Runner(
+			$this->db,
+			new ContainerLogger($this->container),
+			function (string $class) use (&$runtime): object {
+				$runtime ??= new Runtime($this->container);
+
+				return $runtime->get($class);
+			},
+		);
+
+		try {
+			$runner->run(jobs: self::JOBS_AFTER_RESPONSE, seconds: self::SECONDS_AFTER_RESPONSE);
+		} finally {
+			$runtime = null;
+			$this->releaseDatabase();
+		}
+	}
+
 	protected function releaseDatabase(): void
 	{
 		if ($this->config->db->reuse) {

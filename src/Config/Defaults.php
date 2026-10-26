@@ -29,6 +29,7 @@ final class Defaults
 			self::upload(),
 			self::uid(),
 			self::password(),
+			self::queue($env),
 		);
 	}
 
@@ -219,6 +220,15 @@ final class Defaults
 		return [
 			'password.entropy' => Password::DEFAULT_PASSWORD_ENTROPY,
 			'password.algorithm' => null,
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function queue(Env $env): array
+	{
+		return [
+			// Run due jobs after each response; turn off where cron or a daemon runs them.
+			'queue.after_response' => $env->bool('QUEUE_AFTER_RESPONSE', true),
 		];
 	}
 }

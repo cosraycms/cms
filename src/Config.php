@@ -33,6 +33,7 @@ class Config
 	private ?Config\Upload $uploadConfig = null;
 	private ?Config\Password $passwordConfig = null;
 	private ?Config\Uid $uidConfig = null;
+	private ?Config\Queue $queueConfig = null;
 
 	public Config\App $app {
 		get => $this->appConfig ??= new Config\App($this);
@@ -88,6 +89,10 @@ class Config
 
 	public Config\Uid $uid {
 		get => $this->uidConfig ??= new Config\Uid($this);
+	}
+
+	public Config\Queue $queue {
+		get => $this->queueConfig ??= new Config\Queue($this);
 	}
 
 	/** @param BuiltinConfigInput&array<string, mixed> $settings */

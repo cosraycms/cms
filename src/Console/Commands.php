@@ -228,6 +228,6 @@ final class Commands
 	/** @param class-string $class */
 	private function resolve(string $class): object
 	{
-		return ($this->runtime ??= new Runtime($this->app))->get($class);
+		return ($this->runtime ??= new Runtime($this->app->container()))->get($class);
 	}
 }

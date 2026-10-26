@@ -94,7 +94,7 @@ final class CommandsTest extends TestCase
 
 		$this->assertSame(0, $commands->runner()->run(['run', 'help', 'db:fulltext']));
 		$this->assertStringContainsString('db:fulltext', $buffer->output());
-		$this->assertInstanceOf(Fulltext::class, new Runtime($app)->get(Fulltext::class));
+		$this->assertInstanceOf(Fulltext::class, new Runtime($app->container())->get(Fulltext::class));
 		$this->assertFalse($app->container()->get(Database::class)->connected());
 	}
 
