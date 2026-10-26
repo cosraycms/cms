@@ -1,4 +1,4 @@
-INSERT INTO /*:cms.prefix:*/password_resets (
+INSERT INTO /*:cms.prefix:*/password_resets AS r (
 	token,
 	usr,
 	expires
@@ -10,4 +10,6 @@ INSERT INTO /*:cms.prefix:*/password_resets (
 ON CONFLICT (usr) DO UPDATE SET
 	token = EXCLUDED.token,
 	created = EXCLUDED.created,
-	expires = EXCLUDED.expires;
+	expires = EXCLUDED.expires
+WHERE r.created <= now() - make_interval(secs => :interval)
+RETURNING usr;

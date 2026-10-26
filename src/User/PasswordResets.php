@@ -50,25 +50,26 @@ final class PasswordResets
 		);
 	}
 
-	/** A new link's token, or null while the user's last link is younger than the interval. */
+	/**
+	 * A new link's token, or null while the user's last link is younger than
+	 * the interval. The upsert itself checks the interval, so concurrent
+	 * requests cannot both replace a link.
+	 */
 	public function issue(User $user): ?string
 	{
-		/** @var array{recent: bool} $recent */
-		$recent = $this->db->passwordResets->recent(['usr' => $user->id, 'interval' => self::INTERVAL])->one();
-
-		if ($recent['recent']) {
-			return null;
-		}
-
 		$this->db->passwordResets->expired()->run();
 		$token = bin2hex(random_bytes(32));
-		$this->db->passwordResets->create([
-			'token' => hash('sha256', $token),
-			'usr' => $user->id,
-			'lifetime' => self::LIFETIME,
-		])->run();
+		$issued = $this->db
+			->passwordResets
+			->create([
+				'token' => hash('sha256', $token),
+				'usr' => $user->id,
+				'lifetime' => self::LIFETIME,
+				'interval' => self::INTERVAL,
+			])
+			->first();
 
-		return $token;
+		return $issued === null ? null : $token;
 	}
 
 	/** The active user a working link was issued for. */
