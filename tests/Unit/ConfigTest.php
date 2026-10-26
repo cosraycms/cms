@@ -43,6 +43,7 @@ final class ConfigTest extends TestCase
 			'MAILER_REDIRECT',
 			'QUEUE_AFTER_RESPONSE',
 			'SITE_SESSION_ENABLED',
+			'TRUSTED_PROXIES',
 			'SESSION_COOKIE_LIFETIME',
 			'SESSION_COOKIE_SECURE',
 			'SESSION_IDLE_TIMEOUT',
@@ -214,6 +215,19 @@ final class ConfigTest extends TestCase
 		$this->throws(RuntimeException::class, '`app.url` takes an absolute http or https URL');
 
 		$config->app->url;
+	}
+
+	public function testTrustedProxiesAreAddressesAndRanges(): void
+	{
+		$this->assertSame([], new Config(self::root())->app->trustedProxies);
+
+		$this->setEnvironment(['TRUSTED_PROXIES' => '127.0.0.1, 10.0.0.0/8,']);
+		$this->assertSame(['127.0.0.1', '10.0.0.0/8'], new Config(self::root())->app->trustedProxies);
+
+		$config = new Config(self::root(), ['app.trusted_proxies' => ['fd00::/8', 'proxy.example.org']]);
+		$this->throws(RuntimeException::class, '`app.trusted_proxies` has proxy.example.org');
+
+		$config->app->trustedProxies;
 	}
 
 	public function testMailSettingsComeFromTheEnvironmentAndTheApp(): void

@@ -46,6 +46,8 @@ final class Defaults
 			'app.url_prefix' => '',
 			// The absolute URL for links in mails; never derived from a request.
 			'app.url' => env('APP_URL', null),
+			// Reverse proxies whose X-Forwarded-For names the client, comma-separated in TRUSTED_PROXIES.
+			'app.trusted_proxies' => $env->string('TRUSTED_PROXIES') ?? [],
 			'plugins' => [],
 			'webhooks' => [],
 		];

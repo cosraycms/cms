@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray;
 
+use Cosray\Util\IpRange;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;
@@ -176,14 +177,32 @@ class Auth
 	}
 
 	/**
-	 * The connecting address. Behind a reverse proxy this is the proxy's;
-	 * forwarded headers are not trusted, as anyone can send them.
+	 * The connecting address, or behind the proxies of `app.trusted_proxies`
+	 * the last address in `X-Forwarded-For` that is not one of them. Without
+	 * trusted proxies the header is ignored, as anyone can send it.
 	 */
 	public function clientIp(): string
 	{
-		$ip = $this->request->getServerParams()['REMOTE_ADDR'] ?? null;
+		$client = $this->request->getServerParams()['REMOTE_ADDR'] ?? null;
 
-		return is_string($ip) && $ip !== '' ? $ip : 'unknown';
+		if (!is_string($client) || $client === '') {
+			return 'unknown';
+		}
+
+		$proxies = $this->config->app->trustedProxies;
+		$hops = array_map(trim(...), explode(',', $this->request->getHeaderLine('X-Forwarded-For')));
+
+		foreach (array_reverse($hops) as $hop) {
+			$trusted = array_any($proxies, static fn(string $proxy): bool => IpRange::contains($proxy, $client));
+
+			if (!$trusted || filter_var($hop, FILTER_VALIDATE_IP) === false) {
+				break;
+			}
+
+			$client = $hop;
+		}
+
+		return $client;
 	}
 
 	public function getAuthToken(): string

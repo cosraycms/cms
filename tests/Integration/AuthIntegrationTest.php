@@ -130,6 +130,35 @@ final class AuthIntegrationTest extends IntegrationTestCase
 		);
 	}
 
+	public function testTheClientAddressIsTheConnectingOneUnlessAProxyIsTrusted(): void
+	{
+		$_SERVER['REMOTE_ADDR'] = '10.0.0.2';
+		$request = $this->psrRequest()->withHeader('X-Forwarded-For', '203.0.113.7');
+
+		$this->assertSame('10.0.0.2', $this->createAuth($request)->clientIp());
+		$this->assertSame(
+			'10.0.0.2',
+			$this->createAuth($request, settings: ['app.trusted_proxies' => ['192.0.2.0/24']])->clientIp(),
+		);
+	}
+
+	public function testTrustedProxiesHandOnTheAddressTheyWereConnectedFrom(): void
+	{
+		$_SERVER['REMOTE_ADDR'] = '10.0.0.2';
+		$settings = ['app.trusted_proxies' => ['10.0.0.0/8']];
+		$address = fn(string $forwarded): string => $this->createAuth(
+			$this->psrRequest()->withHeader('X-Forwarded-For', $forwarded),
+			settings: $settings,
+		)->clientIp();
+
+		$this->assertSame('203.0.113.7', $address('203.0.113.7'));
+		// The client may send a forged header; only what trusted proxies appended counts.
+		$this->assertSame('203.0.113.7', $address('198.51.100.1, 203.0.113.7, 10.0.0.9'));
+		$this->assertSame('10.0.0.9', $address('not-an-address, 10.0.0.9'));
+		$this->assertSame('10.0.0.1', $address('10.0.0.1'));
+		$this->assertSame('10.0.0.2', $address(''));
+	}
+
 	public function testFailedLoginForAnUnknownAccountKeepsTheSubmittedNameOutOfTheLog(): void
 	{
 		$_SERVER['REMOTE_ADDR'] = '192.0.2.1';

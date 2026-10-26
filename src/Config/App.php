@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Config;
 
 use Cosray\Exception\RuntimeException;
+use Cosray\Util\IpRange;
 use DateTimeZone;
 
 final class App
@@ -40,6 +41,16 @@ final class App
 		get => self::url($this->config->get('app.url'));
 	}
 
+	/**
+	 * Addresses and CIDR ranges of reverse proxies whose `X-Forwarded-For`
+	 * names the client.
+	 *
+	 * @var list<non-empty-string>
+	 */
+	public array $trustedProxies {
+		get => self::proxies($this->config->get('app.trusted_proxies'));
+	}
+
 	public DateTimeZone $timezone {
 		get => $this->timezoneCache ??= new DateTimeZone($this->config->get('app.timezone'));
 	}
@@ -59,5 +70,33 @@ final class App
 		}
 
 		return rtrim($url, '/');
+	}
+
+	/** @return list<non-empty-string> */
+	private static function proxies(mixed $proxies): array
+	{
+		$proxies = is_string($proxies) ? explode(',', $proxies) : $proxies;
+
+		if (!is_array($proxies)) {
+			throw new RuntimeException('`app.trusted_proxies` takes a list of IP addresses and CIDR ranges.');
+		}
+
+		$valid = [];
+
+		foreach ($proxies as $proxy) {
+			$proxy = is_string($proxy) ? trim($proxy) : '';
+
+			if ($proxy === '') {
+				continue;
+			}
+
+			if (!IpRange::valid($proxy)) {
+				throw new RuntimeException("`app.trusted_proxies` has {$proxy}, which is no IP address or CIDR range.");
+			}
+
+			$valid[] = $proxy;
+		}
+
+		return $valid;
 	}
 }

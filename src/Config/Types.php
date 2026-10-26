@@ -26,6 +26,7 @@ namespace Cosray\Config;
  *     'app.timezone': string,
  *     'app.url_prefix': string,
  *     'app.url': ?string,
+ *     'app.trusted_proxies': string|list<string>,
  *
  *     'plugins': list<class-string<\Cosray\Plugin\Plugin>|\Cosray\Plugin\Plugin>,
  *     'webhooks': list<array{url: string, secret?: ?string, events?: list<string>}>,
@@ -102,6 +103,7 @@ namespace Cosray\Config;
  *     'app.timezone'?: string,
  *     'app.url_prefix'?: string,
  *     'app.url'?: ?string,
+ *     'app.trusted_proxies'?: string|list<string>,
  *
  *     'plugins'?: list<class-string<\Cosray\Plugin\Plugin>|\Cosray\Plugin\Plugin>,
  *     'auth.remember_lifetime'?: int,

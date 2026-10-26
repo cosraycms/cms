@@ -35,6 +35,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
 | `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails; `APP_URL` in the environment. Never taken from a request's host |
+| `app.trusted_proxies` | IP addresses and CIDR ranges of reverse proxies, like `['127.0.0.1', '10.0.0.0/8']`; `TRUSTED_PROXIES`, comma-separated, in the environment. A request from one of them takes its client address from `X-Forwarded-For` |
 | `panel.path` | Panel URL path; defaults to `/panel` |
 
 `path.assets` and `path.cache` couple directories below the document root to media URL paths. Either directory may be a symlink to one outside the document root, for example to keep uploads and renditions in a directory shared between deployed releases; the web server must then follow symlinks. With `app.url_prefix => '/site'`, an original below `$root/public/assets` has a URL starting with `/site/assets/`. The router applies the prefix to routes, but panel-generated links and login redirects do not consistently include non-empty prefixes yet.
@@ -64,7 +65,7 @@ Error pages use a separate Boiler renderer. Project `http-error.php` and `http-s
 
 Pass a PSR-3 logger to `$app->logger()` before the app handles its first request. Without one, records from `notice` up go to PHP's error log. Services and controllers receive the logger by declaring a `Psr\Log\LoggerInterface` constructor parameter.
 
-Besides server errors and PHP diagnostics, Cosray logs logins (failed ones as `warning`, naming the account only when it exists), panel logins refused for missing permission, logouts, the creation and deletion of users and changes to their roles, activation and password (`notice`), and uploads the server could not store (`error`). Client addresses are `REMOTE_ADDR`; behind a reverse proxy they are the proxy's.
+Besides server errors and PHP diagnostics, Cosray logs logins (failed ones as `warning`, naming the account only when it exists), panel logins refused for missing permission, logouts, the creation and deletion of users and changes to their roles, activation and password (`notice`), and uploads the server could not store (`error`). Client addresses are `REMOTE_ADDR`. Behind a reverse proxy, that is the proxy's address unless `app.trusted_proxies` lists it: then the client address is the last one in `X-Forwarded-For` that is not a trusted proxy. List only proxies that replace or append to that header, since clients can send it themselves.
 
 ## Serving requests
 
