@@ -28,6 +28,7 @@ use Cosray\Commands\RecreateSortIndex;
 use Cosray\Commands\References;
 use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
+use Cosray\Commands\SendTestMail;
 use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
 use Cosray\Commands\WorkQueue;
@@ -91,6 +92,7 @@ final class Commands
 			ListFailedJobs::class,
 			RetryJobs::class,
 			PruneJobs::class,
+			SendTestMail::class,
 		]);
 	}
 

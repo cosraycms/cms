@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Console\Buffer;
+use Celema\Console\Io;
 use Celema\Container\Container;
+use Cosray\Commands\SendTestMail;
 use Cosray\Config;
 use Cosray\Context;
 use Cosray\Exception\JobFailed;
@@ -199,6 +202,33 @@ final class MailerTest extends IntegrationTestCase
 		$this->throws(TransportException::class, 'Connection refused');
 
 		$delivery->handle(['transport' => null] + $payload);
+	}
+
+	public function testTheTestCommandSendsRightAway(): void
+	{
+		$config = $this->mailConfig();
+		$output = new Buffer();
+
+		$this->assertSame(0, (new SendTestMail($config, $this->transports($config)))(
+			new Io($output),
+			'admin@example.com',
+		));
+		$this->assertStringContainsString('Sent a test mail to admin@example.com.', $output->output());
+		$this->assertSame(['admin@example.com'], self::addresses($this->sent()[0]->getTo()));
+
+		$this->failure = new TransportException('Authentication failed');
+		$failed = new Buffer();
+		$this->assertSame(1, (new SendTestMail($config, $this->transports($config)))(
+			new Io($failed),
+			'admin@example.com',
+		));
+		$this->assertStringContainsString('The test mail was not sent: Authentication failed', $failed->errorOutput());
+
+		$senderless = $this->mailConfig(['mail.from' => null]);
+		$this->assertSame(1, (new SendTestMail($senderless, $this->transports($senderless)))(
+			new Io(new Buffer()),
+			'admin@example.com',
+		));
 	}
 
 	/** @param array<string, mixed> $settings */
