@@ -7,6 +7,7 @@ namespace Cosray\Tests\Integration;
 use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Cosray\Commands\Superuser;
+use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\IntegrationTestCase;
 use Cosray\User\PasswordPolicy;
 
@@ -90,7 +91,7 @@ final class SuperuserCommandTest extends IntegrationTestCase
 	private function runCommand(string $input): array
 	{
 		$buffer = new Buffer($input);
-		$passwords = new PasswordPolicy($this->config());
+		$passwords = new PasswordPolicy($this->config(), new RecordingLogger());
 		$exit = (new Superuser($this->conn(), $passwords))(new Io($buffer));
 
 		return [$exit, $buffer];

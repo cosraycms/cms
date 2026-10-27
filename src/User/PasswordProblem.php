@@ -11,6 +11,7 @@ enum PasswordProblem
 	case Long;
 	case Guessable;
 	case Personal;
+	case Breached;
 
 	public function message(): string
 	{
@@ -19,6 +20,7 @@ enum PasswordProblem
 			self::Long => __('user:error-password-long', ['max' => PasswordPolicy::MAX_LENGTH]),
 			self::Guessable => __('user:error-password-guessable'),
 			self::Personal => __('user:error-password-personal'),
+			self::Breached => __('user:error-password-breached'),
 		};
 	}
 }

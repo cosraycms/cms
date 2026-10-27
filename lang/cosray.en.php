@@ -475,6 +475,7 @@ return [
 		'user:error-delete-self' => 'You cannot delete your own account.',
 		'user:error-email-taken' => 'Another user already has this email address.',
 		'user:error-last-superuser' => 'The last active superuser must stay active and keep the role.',
+		'user:error-password-breached' => 'This password appears in known data breaches. Choose another one.',
 		'user:error-password-guessable' => 'This password is too easy to guess: sequences like 1234 or qwertz and repeated characters or parts barely count. Make it longer or less regular.',
 		'user:error-password-long' => 'This password is too long. Use at most :max characters.',
 		'user:error-password-personal' => 'This password is too close to the account\'s name, username or email address or to the site\'s name.',

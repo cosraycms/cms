@@ -93,6 +93,7 @@ class Superuser
 				=> 'The password is too easy to guess: sequences like 1234 or qwertz and repeated characters or parts barely count.',
 			PasswordProblem::Personal
 				=> 'The password is too close to the email address, the name or the site\'s name.',
+			PasswordProblem::Breached => 'The password appears in known data breaches.',
 		};
 	}
 }

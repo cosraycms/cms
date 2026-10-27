@@ -40,6 +40,7 @@ final class ConfigTest extends TestCase
 			'MAILER_DSN',
 			'MAILER_FROM',
 			'MAILER_REDIRECT',
+			'PASSWORD_BREACH_CHECK',
 			'QUEUE_AFTER_RESPONSE',
 			'SITE_SESSION_ENABLED',
 			'TRUSTED_PROXIES',
@@ -119,6 +120,7 @@ final class ConfigTest extends TestCase
 		);
 		$this->assertSame(Uid::ALPHABET_LOWERCASE_WORD_SAFE, $config->uid->alphabet);
 		$this->assertSame(13, $config->uid->length);
+		$this->assertFalse($config->password->breachCheck);
 		$this->assertFalse($config->debug());
 		$this->assertSame('', $config->env());
 	}

@@ -84,6 +84,8 @@ namespace Cosray\Config;
  *     'uid.alphabet': non-empty-string,
  *     'uid.length': positive-int,
  *
+ *     'password.breach_check': bool,
+ *
  *     'queue.after_response': bool,
  *
  *     'mail.transports': array<string, string>,
@@ -139,6 +141,7 @@ namespace Cosray\Config;
  *     'upload.maxsize'?: int,
  *     'uid.alphabet'?: non-empty-string,
  *     'uid.length'?: positive-int,
+ *     'password.breach_check'?: bool,
  *     'queue.after_response'?: bool,
  *     'mail.transports'?: array<string, string>,
  *     'mail.from'?: ?string,

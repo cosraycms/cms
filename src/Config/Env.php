@@ -11,7 +11,13 @@ use function Cosray\env;
 final class Env
 {
 	/** @var list<string> */
-	private const BOOLEAN = ['APP_DEBUG', 'SITE_SESSION_ENABLED', 'SESSION_COOKIE_SECURE', 'QUEUE_AFTER_RESPONSE'];
+	private const BOOLEAN = [
+		'APP_DEBUG',
+		'SITE_SESSION_ENABLED',
+		'SESSION_COOKIE_SECURE',
+		'QUEUE_AFTER_RESPONSE',
+		'PASSWORD_BREACH_CHECK',
+	];
 
 	/** @var list<string> */
 	private const INTEGER = [

@@ -27,6 +27,7 @@ final class Defaults
 			self::richtext(),
 			self::upload(),
 			self::uid(),
+			self::password($env),
 			self::queue($env),
 			self::mail($env),
 		);
@@ -214,6 +215,15 @@ final class Defaults
 		return [
 			'uid.alphabet' => UidGenerator::ALPHABET_LOWERCASE_WORD_SAFE,
 			'uid.length' => 13,
+		];
+	}
+
+	/** @return array<string, mixed> */
+	private static function password(Env $env): array
+	{
+		return [
+			// Off by default: it sends the start of each new password's SHA-1 to a third party.
+			'password.breach_check' => $env->bool('PASSWORD_BREACH_CHECK', false),
 		];
 	}
 

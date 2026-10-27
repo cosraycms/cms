@@ -481,6 +481,7 @@ return [
 		'user:error-delete-self' => 'Das eigene Konto lässt sich nicht löschen.',
 		'user:error-email-taken' => 'Ein anderer Benutzer hat diese E-Mail-Adresse bereits.',
 		'user:error-last-superuser' => 'Der letzte aktive Superuser muss aktiv bleiben und die Rolle behalten.',
+		'user:error-password-breached' => 'Dieses Passwort ist aus Datenlecks bekannt. Wählen Sie ein anderes.',
 		'user:error-password-guessable' => 'Dieses Passwort ist zu leicht zu erraten: Folgen wie 1234 oder qwertz und wiederholte Zeichen oder Teile zählen kaum. Wählen Sie ein längeres oder unregelmäßigeres.',
 		'user:error-password-long' => 'Dieses Passwort ist zu lang. Verwenden Sie höchstens :max Zeichen.',
 		'user:error-password-personal' => 'Dieses Passwort ähnelt zu sehr dem Namen, Benutzernamen oder der E-Mail-Adresse des Kontos oder dem Namen der Website.',

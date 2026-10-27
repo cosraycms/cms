@@ -31,6 +31,7 @@ class Config
 	private ?Config\Media $mediaConfig = null;
 	private ?Config\Richtext $richtextConfig = null;
 	private ?Config\Upload $uploadConfig = null;
+	private ?Config\Password $passwordConfig = null;
 	private ?Config\Uid $uidConfig = null;
 	private ?Config\Queue $queueConfig = null;
 	private ?Config\Mail $mailConfig = null;
@@ -81,6 +82,10 @@ class Config
 
 	public Config\Upload $upload {
 		get => $this->uploadConfig ??= new Config\Upload($this);
+	}
+
+	public Config\Password $password {
+		get => $this->passwordConfig ??= new Config\Password($this);
 	}
 
 	public Config\Uid $uid {

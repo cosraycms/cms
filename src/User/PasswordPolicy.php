@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\User;
 
+use Closure;
 use Cosray\Config;
+use Psr\Log\LoggerInterface as Logger;
 
 /**
  * Decides whether a password may be set. Runs of one character, sequences
@@ -12,6 +14,10 @@ use Cosray\Config;
  * repeated from earlier in the password each count as one character, and
  * so do parts of the account's name, login or email address and of the
  * site's name and host; at least MIN_REMAINING characters must remain.
+ *
+ * With `password.breach_check`, Have I Been Pwned's range API tells whether
+ * the password appeared in a breach. It only learns the first five
+ * characters of the password's SHA-1; without an answer the password passes.
  */
 final class PasswordPolicy
 {
@@ -23,6 +29,7 @@ final class PasswordPolicy
 
 	private const int MIN_PATTERN = 3;
 	private const int MIN_PERSONAL = 4;
+	private const string RANGE_URL = 'https://api.pwnedpasswords.com/range/';
 
 	/** Keyboard rows of the QWERTY, QWERTZ and AZERTY layouts, their columns and walks between two rows. */
 	private const array SEQUENCES = [
@@ -50,9 +57,17 @@ final class PasswordPolicy
 	/** @var ?list<string> */
 	private static ?array $sequences = null;
 
+	/** @var Closure(string): ?string */
+	private readonly Closure $fetch;
+
+	/** @param ?Closure(string): ?string $fetch answers a range request, or returns null */
 	public function __construct(
 		private readonly Config $config,
-	) {}
+		private readonly Logger $logger,
+		?Closure $fetch = null,
+	) {
+		$this->fetch = $fetch ?? $this->request(...);
+	}
 
 	/** Why the password may not be set, or null if it may; $personal are the account's name, login and email address. */
 	public function check(#[\SensitiveParameter] string $password, ?string ...$personal): ?PasswordProblem
@@ -75,6 +90,10 @@ final class PasswordPolicy
 
 		if (self::pieces($chars, $this->personal($personal)) < self::MIN_REMAINING) {
 			return PasswordProblem::Personal;
+		}
+
+		if ($this->config->password->breachCheck && $this->breached($password)) {
+			return PasswordProblem::Breached;
 		}
 
 		return null;
@@ -190,5 +209,45 @@ final class PasswordPolicy
 			array_map(static fn(mixed $value): string => mb_strtolower(trim((string) $value)), $values),
 			static fn(string $value): bool => mb_strlen($value) >= self::MIN_PERSONAL,
 		));
+	}
+
+	private function breached(#[\SensitiveParameter] string $password): bool
+	{
+		$hash = strtoupper(sha1($password));
+		$range = ($this->fetch)(self::RANGE_URL . substr($hash, 0, 5));
+
+		if ($range === null) {
+			$this->logger->warning('Password breach check skipped: {url} did not answer', ['url' => self::RANGE_URL]);
+
+			return false;
+		}
+
+		$suffix = substr($hash, 5) . ':';
+
+		foreach (explode("\n", $range) as $line) {
+			if (str_starts_with($line, $suffix)) {
+				// Padding lines have a count of 0.
+				return (int) substr(trim($line), strlen($suffix)) > 0;
+			}
+		}
+
+		return false;
+	}
+
+	private function request(string $url): ?string
+	{
+		$handle = curl_init($url);
+		curl_setopt_array($handle, [
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_CONNECTTIMEOUT => 2,
+			CURLOPT_TIMEOUT => 5,
+			CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+			CURLOPT_HTTPHEADER => ['Add-Padding: true'],
+			CURLOPT_USERAGENT => 'cosray/cms',
+		]);
+		$body = curl_exec($handle);
+		$status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+
+		return is_string($body) && $status === 200 ? $body : null;
 	}
 }
