@@ -76,13 +76,13 @@ final class MailPayloadTest extends TestCase
 		$this->assertSame('reply@example.com', $queued->getReplyTo()[0]->getAddress());
 		$this->assertSame('Grüße', $queued->getSubject());
 		$this->assertSame('Hello', $queued->getTextBody());
-		$this->assertSame('<p>Hello <img src="cid:logo.png"></p>', $queued->getHtmlBody());
+		$this->assertSame('<p>Hello <img src="cid:logo@cosray.png"></p>', $queued->getHtmlBody());
 		$this->assertSame(Email::PRIORITY_HIGH, $queued->getPriority());
 		$this->assertSame('spring', $queued->getHeaders()->getHeaderBody('X-Campaign'));
 		$this->assertSame(
 			[
 				['receipt.pdf', 'application/pdf', '%PDF-1.7', 'attachment'],
-				['logo.png', 'image/png', "\x89PNG", 'inline'],
+				['logo@cosray.png', 'image/png', "\x89PNG", 'inline'],
 			],
 			array_map(
 				static fn(DataPart $part): array => [
@@ -96,6 +96,45 @@ final class MailPayloadTest extends TestCase
 		);
 		// The embedded image is referenced by its content id once the mail is put together.
 		$this->assertStringContainsString('cid:' . $queued->getAttachments()[1]->getContentId(), $queued->toString());
+	}
+
+	public function testAnEmbeddedImageIsNamedAndReferencedByItsContentId(): void
+	{
+		$email = new Email()
+			->html(
+				'<img src="cid:logo.png"><img src=cid:a&b.png><td background="cid:a b.png">'
+					. '<img src="cid:mark@example.com"><img src="cid:sign.png">',
+			)
+			->embed('A', 'logo.png', 'image/png')
+			->embed('B', 'a&b.png', 'image/png')
+			->embed('C', 'a b.png', 'image/png')
+			->addPart(
+				new DataPart('D', 'mark.png', 'image/png')
+					->asInline()
+					->setContentId('mark@example.com'),
+			)
+			->addPart(new DataPart('E', 'sign.png', 'image/png')->setContentId('sign@example.com'))
+			->embed('F', 'unused.png', 'image/png')
+			->attach('G', 'terms.pdf', 'application/pdf');
+
+		[$queued] = Payload::decode(Payload::encode($email));
+		$parts = $queued->getAttachments();
+		$html = (string) $queued->getHtmlBody();
+
+		$this->assertSame(
+			['logo@cosray.png', 'a-b@cosray.png', 'a-b-2@cosray.png', 'mark@example.com', 'sign@example.com'],
+			array_map(static fn(DataPart $part): string => $part->getContentId(), array_slice($parts, 0, 5)),
+		);
+
+		foreach (array_slice($parts, 0, 5) as $part) {
+			$this->assertSame('inline', $part->getDisposition());
+			$this->assertSame($part->getContentId(), $part->getFilename());
+			$this->assertStringContainsString('cid:' . $part->getContentId(), $html);
+		}
+
+		$this->assertSame('unused.png', $parts[5]->getFilename());
+		$this->assertFalse($parts[5]->hasContentId());
+		$this->assertSame(['terms.pdf', 'attachment'], [$parts[6]->getFilename(), $parts[6]->getDisposition()]);
 	}
 
 	public function testOnlyWhatTheMailHasComesBack(): void

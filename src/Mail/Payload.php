@@ -58,9 +58,20 @@ final class Payload
 		'x-transport',
 	];
 
+	/** Symfony's patterns for the `cid:` references it resolves (`Email::prepareParts()`). */
+	private const array REFERENCES = [
+		'/<img\s+[^>]*src\s*=\s*(?:([\'"])cid:(.+?)\1|cid:([^>\s]+))/i',
+		'/<\w+\s+[^>]*background\s*=\s*(?:([\'"])cid:(.+?)\1|cid:([^>\s]+))/i',
+	];
+
 	/** @return Data */
 	public static function encode(Email $email, ?string $transport = null): array
 	{
+		[$html, $attachments] = self::embedded(
+			self::body($email->getHtmlBody(), $email->getHtmlCharset()),
+			self::attachments($email->getAttachments()),
+		);
+
 		return [
 			'transport' => $transport,
 			'from' => self::addresses($email->getFrom()),
@@ -72,10 +83,10 @@ final class Payload
 			'replyTo' => self::addresses($email->getReplyTo()),
 			'subject' => $email->getSubject(),
 			'text' => self::body($email->getTextBody(), $email->getTextCharset()),
-			'html' => self::body($email->getHtmlBody(), $email->getHtmlCharset()),
+			'html' => $html,
 			'priority' => $email->getHeaders()->has('X-Priority') ? $email->getPriority() : null,
 			'headers' => self::headers($email),
-			'attachments' => self::attachments($email->getAttachments()),
+			'attachments' => $attachments,
 		];
 	}
 
@@ -288,5 +299,83 @@ final class Payload
 		}
 
 		return $attachments;
+	}
+
+	/**
+	 * Makes every image the HTML references by `cid:` an inline part whose
+	 * Content-ID, file name and reference are the same. Symfony connects a
+	 * reference to its image only when it renders the whole message, as SMTP
+	 * does; API transports send the HTML as written and give the image its
+	 * Content-ID or its file name, depending on the transport.
+	 *
+	 * @param list<Attachment> $attachments
+	 * @return array{?string, list<Attachment>}
+	 */
+	private static function embedded(?string $html, array $attachments): array
+	{
+		if ($html === null) {
+			return [$html, $attachments];
+		}
+
+		$names = [];
+
+		foreach (self::REFERENCES as $pattern) {
+			preg_match_all($pattern, $html, $matches);
+			$names = [...$names, ...$matches[2], ...$matches[3]];
+		}
+
+		$names = array_unique(array_filter($names, static fn(string $name): bool => $name !== ''));
+		$taken = array_values(array_filter(array_column($attachments, 'cid')));
+		$replacements = [];
+
+		foreach ($attachments as $i => $attachment) {
+			$referenced = array_filter(
+				$names,
+				static fn(string $name): bool => (
+					!isset($replacements["cid:{$name}"])
+					&& ($name === $attachment['name'] || $name === $attachment['cid'])
+				),
+			);
+
+			if ($referenced === []) {
+				continue;
+			}
+
+			$cid = $attachment['cid'] ?? self::contentId((string) $attachment['name'], $taken);
+			$taken[] = $cid;
+
+			foreach ($referenced as $name) {
+				$replacements["cid:{$name}"] = "cid:{$cid}";
+			}
+
+			$attachments[$i] = ['name' => $cid, 'inline' => true, 'cid' => $cid] + $attachment;
+		}
+
+		// strtr() replaces the longest match first and never inside a replacement, as Symfony does.
+		return [strtr($html, $replacements), $attachments];
+	}
+
+	/**
+	 * A Content-ID made from a file name, `logo.png` becoming `logo@cosray.png`:
+	 * it is used as file name too, so the extension stays last.
+	 *
+	 * @param list<string> $taken
+	 */
+	private static function contentId(string $filename, array $taken): string
+	{
+		$extension = pathinfo($filename, PATHINFO_EXTENSION);
+		$stem = $extension === '' ? $filename : substr($filename, 0, -strlen($extension) - 1);
+		$safe = static fn(string $part): string => trim((string) preg_replace('/[^A-Za-z0-9_.-]+/', '-', $part), '.-');
+		$stem = $safe($stem);
+		$stem = $stem === '' ? 'image' : $stem;
+		$extension = $safe($extension);
+		$domain = $extension === '' ? 'cosray' : "cosray.{$extension}";
+		$cid = "{$stem}@{$domain}";
+
+		for ($n = 2; in_array($cid, $taken, true); $n++) {
+			$cid = "{$stem}-{$n}@{$domain}";
+		}
+
+		return $cid;
 	}
 }

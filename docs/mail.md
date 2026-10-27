@@ -76,6 +76,8 @@ $email = $this->mailer->compose('application', $form)
 $this->mailer->send($email, to: 'jobs@example.com');
 ```
 
+Embed images with Symfony's `embed()` or `embedFromPath()` and reference them by name in the template, as in `<img src="cid:logo.png">`. API transports send the HTML as written and find an image by its Content-ID or by its file name, depending on the transport. When the mail is queued, Cosray therefore gives each referenced image a Content-ID like `logo@cosray.png` and uses it as file name and in the reference, so the image shows with SMTP and with the MailerSend, Postmark, SendGrid and Mailgun APIs alike. Brevo's API sends no inline images.
+
 `send()` also takes a mail built with Symfony's `Email` alone. Queued mails carry addresses, subject, UTF-8 text and HTML bodies, attachments and embedded images of up to 10 MiB in all, priority and text headers; `send()` refuses mails that use anything else. Attachments are read when the mail is queued, so the file can go once `send()` returns.
 
 ## Templates
