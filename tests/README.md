@@ -26,6 +26,8 @@ vendor/bin/phpunit --no-coverage tests/Unit/RoutePathGeneratorTest.php
 vendor/bin/phpunit --no-coverage --filter Fulltext
 ```
 
+Tests run in random order, so a test that depends on another's state fails sooner or later. PHPUnit prints the order's seed at the top of each run; repeat a failing order with `--random-order-seed=<seed>`, or run in file order with `--order-by=default`.
+
 ## Isolated database setup
 
 Use an explicitly authorized test database, never an application database. Defaults are host `localhost`, database/user/password `cosray`; override them with `COSRAY_DB_HOST`, `COSRAY_DB_NAME`, `COSRAY_DB_USER`, and `COSRAY_DB_PASSWORD`. Keep credentials local and use the same connection settings for migrations and tests. PostgreSQL CLI tools can use `.pgpass`; that does not replace the PHP test connection settings.
