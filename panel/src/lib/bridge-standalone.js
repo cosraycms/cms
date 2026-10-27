@@ -3,7 +3,7 @@
 import { __ } from './locale.js';
 import { icon } from './icons.js';
 import { openDialog } from './dialogs.js';
-import { csrfToken, HEADER } from './csrf.js';
+import { csrfToken, HEADER, noticeRefusal } from './csrf.js';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
@@ -40,6 +40,7 @@ export function installBridge(system) {
 						[HEADER]: csrfToken(),
 					},
 				});
+				noticeRefusal(response);
 
 				return /** @type {UploadResult} */ (await response.json());
 			} catch {

@@ -5,6 +5,11 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Back to sign in',
+		'auth:csrf-expired' => 'This page is out of date: you signed in or out elsewhere, or your session expired. Reload the page and try again. Copy unsaved changes first, as reloading discards them.',
+		'auth:expired-back' => 'Back to the page',
+		'auth:expired-reload' => 'Reload page',
+		'auth:expired-text' => 'The form came from a page that is out of date: you signed in or out elsewhere, or your session expired. Nothing was saved. Go back and send it again.',
+		'auth:expired-title' => 'Page out of date',
 		'auth:forgot-password' => 'Forgot password?',
 		'auth:invalid-credentials' => 'Invalid username or password',
 		'auth:login-label' => 'Username or email',

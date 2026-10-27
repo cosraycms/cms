@@ -18,6 +18,7 @@ use Cosray\Middleware\PanelAuth;
 use Cosray\Middleware\PanelFraming;
 use Cosray\Middleware\PanelLocale;
 use Cosray\Middleware\Session;
+use Cosray\Middleware\VerifyCsrf;
 use Cosray\Security\Policy;
 use Psr\Log\LoggerInterface as Logger;
 use Psr\Log\NullLogger;
@@ -76,7 +77,7 @@ class Routes
 			'/media/{mediatype:(image|file|video)}',
 			[Media::class, 'upload'],
 			'cms.media.upload',
-		)->middleware($this->session);
+		)->middleware($this->session, $this->verifyCsrf());
 
 		$this->addPanel($app);
 		$this->addApi($app);
@@ -106,6 +107,11 @@ class Routes
 		}
 
 		return $catchallRoute;
+	}
+
+	protected function verifyCsrf(): VerifyCsrf
+	{
+		return new VerifyCsrf($this->config, $this->users, $this->factory, $this->logger);
 	}
 
 	protected function addApi(App $app): void
@@ -151,11 +157,13 @@ class Routes
 					$this->policy,
 				);
 				// PanelLocale runs after Session so the user attribute (and
-				// with it the stored panel language preference) is available.
+				// with it the stored panel language preference) is available,
+				// and before VerifyCsrf, whose refusal is in that language.
 				$panel->middleware(
 					new PanelFraming($this->config->panel->embed),
 					$this->session,
 					new PanelLocale($this->config),
+					$this->verifyCsrf(),
 				);
 
 				$panel
@@ -165,6 +173,9 @@ class Routes
 					->post('/login', [Panel\Login::class, 'authenticate'], 'login.authenticate')
 					->after($renderers->get('login'));
 				$panel->get('/handoff/{token:[a-f0-9]{64}}', [Panel\Login::class, 'handoff'], 'handoff');
+				$panel
+					->get('/expired', [Panel\Login::class, 'expired'], 'expired')
+					->after($renderers->get('expired'));
 				$panel
 					->get('/password', [Panel\PasswordReset::class, 'form'], 'password')
 					->after($renderers->get('password'));

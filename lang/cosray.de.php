@@ -5,6 +5,11 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Zurück zur Anmeldung',
+		'auth:csrf-expired' => 'Diese Seite ist veraltet: Sie haben sich an anderer Stelle an- oder abgemeldet, oder Ihre Sitzung ist abgelaufen. Laden Sie die Seite neu und versuchen Sie es noch einmal. Kopieren Sie ungespeicherte Änderungen vorher, denn das Neuladen verwirft sie.',
+		'auth:expired-back' => 'Zurück zur Seite',
+		'auth:expired-reload' => 'Seite neu laden',
+		'auth:expired-text' => 'Das Formular kam von einer veralteten Seite: Sie haben sich an anderer Stelle an- oder abgemeldet, oder Ihre Sitzung ist abgelaufen. Es wurde nichts gespeichert. Gehen Sie zurück und senden Sie es noch einmal.',
+		'auth:expired-title' => 'Seite veraltet',
 		'auth:forgot-password' => 'Passwort vergessen?',
 		'auth:invalid-credentials' => 'Benutzername oder Passwort ungültig',
 		'auth:login-label' => 'Benutzername oder E-Mail',

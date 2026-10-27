@@ -116,6 +116,30 @@ class End2EndTestCase extends IntegrationTestCase
 	}
 
 	/**
+	 * The CSRF token of the session the next request continues, as the page
+	 * that sends it would carry it.
+	 *
+	 * @param array<string, string> $cookies
+	 */
+	protected function csrfToken(array $cookies = []): string
+	{
+		$config = $this->app->container()->get(Config::class);
+		$session = new \Cosray\Session(
+			$config->session->options,
+			$config->app->name,
+			$config->session->handler,
+			$cookies,
+		);
+		$session->start();
+
+		try {
+			return $session->csrf->token();
+		} finally {
+			$session->close();
+		}
+	}
+
+	/**
 	 * Set the default auth token for all subsequent requests.
 	 */
 	protected function authenticateAs(string $role = 'editor'): void
@@ -220,6 +244,8 @@ class End2EndTestCase extends IntegrationTestCase
 	 *   - 'files' => array - PSR-7 UploadedFileInterface instances by field name
 	 *   - 'form' => array - Parsed form fields
 	 *   - 'authToken' => string - Auth token for authentication
+	 *   - 'csrf' => bool - Whether a request over the session sends its CSRF
+	 *     token, as the panel does; true by default
 	 * @return ResponseInterface PSR-7 response
 	 */
 	protected function makeRequest(string $method, string $uri, array $options = []): ResponseInterface
@@ -234,6 +260,8 @@ class End2EndTestCase extends IntegrationTestCase
 
 		if ($authToken) {
 			$psrRequest = $psrRequest->withHeader('Authorization', 'Bearer ' . $authToken);
+		} elseif (($options['csrf'] ?? true) && !in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
+			$psrRequest = $psrRequest->withHeader('X-CSRF-Token', $this->csrfToken($options['cookies'] ?? []));
 		}
 
 		// Add query parameters

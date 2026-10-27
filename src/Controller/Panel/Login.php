@@ -163,6 +163,17 @@ final class Login extends Panel
 		return $this->redirect($factory, $this->sanitizedNext());
 	}
 
+	/**
+	 * Explains a form refused for a missing or outdated CSRF token, as when
+	 * the page was opened before the session expired.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function expired(): array
+	{
+		return $this->context(['next' => $this->sanitizedNext()]);
+	}
+
 	public function logout(Factory $factory): Response
 	{
 		$user = $this->auth->user();

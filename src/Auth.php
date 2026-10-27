@@ -132,7 +132,9 @@ class Auth
 
 	public function user(): ?User
 	{
-		if (!$this->session) {
+		// A request with a bearer token skips the CSRF check, so its cookies
+		// must not authenticate it: it acts as the token's user or as no one.
+		if (!$this->session || $this->getAuthToken() !== '') {
 			return $this->userFromToken();
 		}
 

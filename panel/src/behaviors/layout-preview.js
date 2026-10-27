@@ -1,7 +1,7 @@
 import { openDialog } from '../lib/dialogs.js';
 import { nest } from '../lib/form-json.js';
 import { thumbnail } from './youtube.js';
-import { csrfToken, HEADER } from '../lib/csrf.js';
+import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
 
 // The layout preview of a blocks field: the field rendered through the
 // site's render path from the form as it stands, in the frame of the one
@@ -221,6 +221,7 @@ async function load(dialog, field) {
 			headers: { 'Content-Type': 'application/json', Accept: 'text/html', [HEADER]: csrfToken() },
 			body: body(form),
 		});
+		noticeRefusal(response);
 
 		if (!response.ok) {
 			fail(dialog);
