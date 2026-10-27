@@ -199,6 +199,30 @@ final class PanelAuthTest extends End2EndTestCase
 		);
 	}
 
+	public function testARefusedPanelLoginAsksAgainWithAFormThatWorks(): void
+	{
+		$this->createTestUser(['uid' => 'panel-refused-again', 'username' => 'refused-again', 'role' => 'system']);
+		$this->createTestUser(['uid' => 'panel-next-user', 'username' => 'next-user']);
+
+		$refused = $this->makeRequest('POST', '/panel/login', [
+			'body' => ['login' => 'refused-again', 'password' => 'password', 'rememberme' => false],
+		]);
+
+		$this->assertResponseOk($refused);
+		$html = $this->getHtmlResponse($refused);
+		$this->assertStringContainsString('You are not allowed to access the panel', $html);
+		$this->assertMatchesRegularExpression('/name="_token" value="([^"]+)"/', $html);
+		preg_match('/name="_token" value="([^"]+)"/', $html, $field);
+
+		$next = $this->makeRequest('POST', '/panel/login', [
+			'csrf' => false,
+			'form' => ['login' => 'next-user', 'password' => 'password', '_token' => $field[1]],
+		]);
+
+		$this->assertResponseStatus(303, $next);
+		$this->assertSame('/panel', $next->getHeaderLine('Location'));
+	}
+
 	public function testLogoutIsLogged(): void
 	{
 		$this->createTestUser(['uid' => 'panel-logout-user', 'username' => 'leaving']);

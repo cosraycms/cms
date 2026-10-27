@@ -155,7 +155,18 @@ abstract class Panel
 	{
 		$session = $this->request->get('session', null);
 
-		return $session instanceof Session ? $session->csrf->token() : '';
+		if (!$session instanceof Session) {
+			return '';
+		}
+
+		// A sign-out earlier in this request ended the session, and the token needs a new
+		// one. Without strict mode, start() alone would resume the id whose cookie is deleted.
+		if (!$session->active()) {
+			$session->start();
+			$session->regenerate();
+		}
+
+		return $session->csrf->token();
 	}
 
 	/** The id of the element an htmx request swaps, if any. */
