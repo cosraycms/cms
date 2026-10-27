@@ -25,7 +25,7 @@ SMTP needs nothing else: `smtp://user:password@smtp.example.com:587`. Symfony Ma
 
 `mail.redirect` changes where a mail goes, not the mail: its `To` and `Cc` headers stay as they are, so a redirected mail still shows whom it was meant for.
 
-`php run mail:test <address>` sends a test mail right away, past the queue, and prints the mail server's error if there is one. `--transport=<name>` picks a transport other than the default.
+`php run mail:test <address>` sends a test mail right away, past the queue, and prints the mail server's error if there is one. `--transport=<name>` picks a transport other than the default. With `mail.redirect`, the test mail goes to those addresses instead, and the command names them.
 
 ## Sending
 

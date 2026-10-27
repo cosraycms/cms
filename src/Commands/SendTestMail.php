@@ -51,7 +51,13 @@ final class SendTestMail
 			return 1;
 		}
 
-		$io->success('Sent a test mail to %s.', $to);
+		$redirect = $this->config->mail->redirect;
+
+		if ($redirect === []) {
+			$io->success('Sent a test mail to %s.', $to);
+		} else {
+			$io->success('Sent a test mail to %s, delivered to %s by mail.redirect.', $to, implode(', ', $redirect));
+		}
 
 		return 0;
 	}

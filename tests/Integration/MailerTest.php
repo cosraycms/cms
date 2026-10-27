@@ -242,6 +242,17 @@ final class MailerTest extends IntegrationTestCase
 		$this->assertStringContainsString('Sent a test mail to admin@example.com.', $output->output());
 		$this->assertSame(['admin@example.com'], self::addresses($this->sent()[0]->getTo()));
 
+		$redirected = $this->mailConfig(['mail.redirect' => 'dev@example.com, qa@example.com']);
+		$output = new Buffer();
+		$this->assertSame(0, (new SendTestMail($redirected, $this->transports($redirected)))(
+			new Io($output),
+			'admin@example.com',
+		));
+		$this->assertStringContainsString(
+			'Sent a test mail to admin@example.com, delivered to dev@example.com, qa@example.com by mail.redirect.',
+			$output->output(),
+		);
+
 		$this->failure = new TransportException('Authentication failed');
 		$failed = new Buffer();
 		$this->assertSame(1, (new SendTestMail($config, $this->transports($config)))(
