@@ -37,6 +37,8 @@ class Session implements Middleware
 		if ($lastActivity && (time() - $lastActivity) > $expires) {
 			$session->destroy();
 			$session->start();
+			// Without strict mode, start() resumes the id whose cookie destroy() deletes.
+			$session->regenerate();
 		}
 
 		$session->signalActivity();

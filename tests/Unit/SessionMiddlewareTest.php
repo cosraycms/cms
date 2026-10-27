@@ -75,6 +75,30 @@ final class SessionMiddlewareTest extends TestCase
 		$this->assertGreaterThanOrEqual($before, $handler->lastActivity);
 	}
 
+	public function testAnIdleSessionRestartsUnderANewIdWithoutStrictMode(): void
+	{
+		$config = $this->config([
+			'session.options' => ['gc_maxlifetime' => 1, 'use_cookies' => 1, 'use_strict_mode' => false],
+		]);
+
+		$session = new Session($config->session->options, $config->app->name);
+		$session->start();
+		$idle = $session->id();
+		$_SESSION['last_activity'] = time() - 10;
+		$_COOKIE[$session->name()] = $idle;
+
+		try {
+			$request = $this->factory()->serverRequestFactory()->createServerRequest('GET', '/');
+			$handler = $this->recordingHandler();
+			new SessionMiddleware($config, new Users($this->db()))->process($request, $handler);
+		} finally {
+			unset($_COOKIE[$session->name()]);
+		}
+
+		$this->assertNotSame('', $handler->id);
+		$this->assertNotSame($idle, $handler->id);
+	}
+
 	public function testSessionIsClosedWhenTheRequestEnds(): void
 	{
 		$config = $this->config(['session.options' => ['use_cookies' => 0]]);
@@ -115,6 +139,7 @@ final class SessionMiddlewareTest extends TestCase
 			public ?ServerRequestInterface $request = null;
 			public ?int $userId = null;
 			public ?int $lastActivity = null;
+			public string $id = '';
 
 			public function __construct(
 				private Factory $factory,
@@ -127,6 +152,7 @@ final class SessionMiddlewareTest extends TestCase
 				assert($session instanceof Session, 'The middleware adds the session');
 				$this->userId = $session->authenticatedUserId();
 				$this->lastActivity = $session->lastActivity();
+				$this->id = $session->id();
 
 				return $this->factory->responseFactory()->createResponse();
 			}
