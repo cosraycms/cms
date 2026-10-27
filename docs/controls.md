@@ -247,7 +247,7 @@ Inactive controls are hidden without clearing their stored values. Reads present
 The [bridge](../panel/src/lib/bridge.js) exposes versioned services to element controls:
 
 - `version`: currently `1`; check it before relying on the interface.
-- `system()`: panel locale, content locales, paths, upload settings, and related runtime metadata.
+- `system()`: panel locale, content locales, paths, upload settings, the session's `csrfToken`, and related runtime metadata. Send the token as `X-CSRF-Token` with requests other than `GET` (see [CSRF protection](application.md#csrf-protection)).
 - `upload(type, file)`: uploads to the asset pool with the session CSRF token.
 - `modal.open(render, options?)`: mounts content and returns a `close()` handle.
 - `toast.success(message)` and `toast.error(message)`.
