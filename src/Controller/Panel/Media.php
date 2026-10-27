@@ -196,6 +196,7 @@ final class Media extends Panel
 			'usage' => $row ? new Usage($db)->forAsset($uid) : [],
 			'contentLocales' => $system['locales'],
 			'defaultLocale' => $system['defaultLocale'],
+			'csrfToken' => $system['csrfToken'],
 		];
 	}
 

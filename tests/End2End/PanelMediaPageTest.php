@@ -239,6 +239,38 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertArrayNotHasKey('caption', $meta);
 	}
 
+	public function testThePlainDetailFormCanBeSavedAgain(): void
+	{
+		$uid = $this->upload('e2e-save-plain-photo.png', 'image/png');
+		$this->createTestUser(['uid' => 'media-session-user', 'username' => 'media-session']);
+		$this->makeRequest('POST', '/panel/login', [
+			'authToken' => '',
+			'body' => ['login' => 'media-session', 'password' => 'password', 'rememberme' => false],
+		]);
+		$token = $this->csrfToken();
+
+		foreach (['First pixel', 'Second pixel'] as $alt) {
+			$response = $this->makeRequest('POST', "/panel/media/{$uid}", [
+				'authToken' => '',
+				'csrf' => false,
+				'form' => ['_token' => $token, 'meta' => ['alt' => ['en' => $alt]]],
+			]);
+
+			$this->assertResponseOk($response);
+			preg_match('/name="_token" value="([^"]*)"/', $this->getHtmlResponse($response), $field);
+			$token = $field[1] ?? '';
+		}
+
+		$meta = json_decode(
+			(string) $this->db()->execute(
+				'SELECT meta FROM cms.assets WHERE uid = :uid',
+				['uid' => $uid],
+			)->one()['meta'],
+			true,
+		);
+		$this->assertSame('Second pixel', $meta['alt']['en']);
+	}
+
 	public function testDeletingReturnsToTheListingOrNamesWhatStillUsesTheFile(): void
 	{
 		$gone = $this->upload('e2e-delete-page-gone.png', 'image/png');
