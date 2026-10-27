@@ -93,9 +93,15 @@ final class PasswordReset extends Panel
 	public function change(#[\SensitiveParameter] string $token): array
 	{
 		$this->guard();
+		$user = $this->resets->user($token);
+
+		if ($user === null) {
+			return $this->page('invalid', ['token' => $token]);
+		}
+
 		$form = $this->formData();
 		$password = is_string($form['password'] ?? null) ? $form['password'] : '';
-		$problem = $this->passwords->check($password);
+		$problem = $this->passwords->check($password, $user->email, $user->username, $user->name);
 		$message = match (true) {
 			$problem !== null => $problem->message(),
 			!hash_equals($password, (string) ($form['password_repeat'] ?? '')) => __('user:error-password-repeat'),
@@ -103,9 +109,7 @@ final class PasswordReset extends Panel
 		};
 
 		if ($message !== null) {
-			$step = $this->resets->user($token) === null ? 'invalid' : 'choose';
-
-			return $this->page($step, ['token' => $token, 'message' => $message]);
+			return $this->page('choose', ['token' => $token, 'message' => $message]);
 		}
 
 		$user = $this->resets->complete($token, $password);

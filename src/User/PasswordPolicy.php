@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\User;
 
+use Cosray\Config;
+
 /**
  * Decides whether a password may be set. Runs of one character, sequences
  * along the alphabet, the digits or a keyboard row, either way, and parts
- * repeated from earlier in the password each count as one character; at
- * least MIN_REMAINING characters must remain.
+ * repeated from earlier in the password each count as one character, and
+ * so do parts of the account's name, login or email address and of the
+ * site's name and host; at least MIN_REMAINING characters must remain.
  */
 final class PasswordPolicy
 {
@@ -19,6 +22,7 @@ final class PasswordPolicy
 	public const int MIN_REMAINING = 10;
 
 	private const int MIN_PATTERN = 3;
+	private const int MIN_PERSONAL = 4;
 
 	/** Keyboard rows of the QWERTY, QWERTZ and AZERTY layouts, their columns and walks between two rows. */
 	private const array SEQUENCES = [
@@ -46,8 +50,12 @@ final class PasswordPolicy
 	/** @var ?list<string> */
 	private static ?array $sequences = null;
 
-	/** Why the password may not be set, or null if it may. */
-	public function check(#[\SensitiveParameter] string $password): ?PasswordProblem
+	public function __construct(
+		private readonly Config $config,
+	) {}
+
+	/** Why the password may not be set, or null if it may; $personal are the account's name, login and email address. */
+	public function check(#[\SensitiveParameter] string $password, ?string ...$personal): ?PasswordProblem
 	{
 		$length = mb_strlen($password);
 
@@ -65,15 +73,21 @@ final class PasswordPolicy
 			return PasswordProblem::Guessable;
 		}
 
+		if (self::pieces($chars, $this->personal($personal)) < self::MIN_REMAINING) {
+			return PasswordProblem::Personal;
+		}
+
 		return null;
 	}
 
 	/**
-	 * How many pieces the password falls into when each pattern counts as one.
+	 * How many pieces the password falls into when each pattern, and each
+	 * part of a personal value, counts as one.
 	 *
 	 * @param list<string> $chars
+	 * @param list<string> $personal
 	 */
-	private static function pieces(array $chars): int
+	private static function pieces(array $chars, array $personal = []): int
 	{
 		$pieces = 0;
 		$at = 0;
@@ -84,6 +98,7 @@ final class PasswordPolicy
 				self::run($chars, $at),
 				self::repeat($chars, $at),
 				self::within($chars, $at, self::sequences(), self::MIN_PATTERN),
+				self::within($chars, $at, $personal, self::MIN_PERSONAL),
 			);
 			$pieces++;
 		}
@@ -160,5 +175,20 @@ final class PasswordPolicy
 				self::SEQUENCES,
 			),
 		];
+	}
+
+	/**
+	 * @param array<array-key, ?string> $values
+	 * @return list<string>
+	 */
+	private function personal(array $values): array
+	{
+		$values[] = $this->config->app->name;
+		$values[] = parse_url((string) $this->config->app->url, PHP_URL_HOST);
+
+		return array_values(array_filter(
+			array_map(static fn(mixed $value): string => mb_strtolower(trim((string) $value)), $values),
+			static fn(string $value): bool => mb_strlen($value) >= self::MIN_PERSONAL,
+		));
 	}
 }

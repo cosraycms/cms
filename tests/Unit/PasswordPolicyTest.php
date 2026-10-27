@@ -54,8 +54,22 @@ final class PasswordPolicyTest extends TestCase
 		}
 	}
 
-	private function policy(): PasswordPolicy
+	public function testPartsOfTheAccountAndTheSiteCountAsOneCharacter(): void
 	{
-		return new PasswordPolicy();
+		$policy = $this->policy(['app.name' => 'Sample Site', 'app.url' => 'https://www.example.org']);
+		$account = ['erika.mustermann@example.com', 'erika', 'Erika Mustermann'];
+
+		foreach (['Mustermann2026!', 'Erika.Mustermann', 'SampleSite2026', 'www.example.org'] as $password) {
+			$this->assertSame(PasswordProblem::Personal, $policy->check($password, ...$account), $password);
+		}
+
+		$this->assertNull($policy->check('Mustermann2026!', 'jane@example.com', null, 'Jane Roe'));
+		$this->assertNull($policy->check('Erika-fährt-nach-Rom', ...$account), 'enough remains beside the name');
+	}
+
+	/** @param array<string, mixed> $settings */
+	private function policy(array $settings = []): PasswordPolicy
+	{
+		return new PasswordPolicy($this->config($settings));
 	}
 }

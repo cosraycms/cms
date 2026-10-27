@@ -84,7 +84,7 @@ final class Commands
 			RecreateSortIndex::class,
 			Superuser::class => fn(): Superuser => new Superuser(
 				$this->conn(),
-				new PasswordPolicy(),
+				new PasswordPolicy($app->config),
 			),
 			Titles::class,
 			CreateToken::class,

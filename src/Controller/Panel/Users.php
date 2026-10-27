@@ -289,7 +289,7 @@ final class Users extends Panel
 		);
 
 		if ($password !== null) {
-			$problem = $this->passwords->check($password);
+			$problem = $this->passwords->check($password, $account['email'], $account['username'], $account['name']);
 
 			if ($problem !== null) {
 				$errors[] = ['message' => $problem->message(), 'path' => ['password']];

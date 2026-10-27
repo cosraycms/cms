@@ -301,7 +301,7 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 ### Passwords
 
-The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
+The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
 
 ### Sign-in limits
 

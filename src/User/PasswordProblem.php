@@ -10,6 +10,7 @@ enum PasswordProblem
 	case Short;
 	case Long;
 	case Guessable;
+	case Personal;
 
 	public function message(): string
 	{
@@ -17,6 +18,7 @@ enum PasswordProblem
 			self::Short => __('user:error-password-short', ['min' => PasswordPolicy::MIN_LENGTH]),
 			self::Long => __('user:error-password-long', ['max' => PasswordPolicy::MAX_LENGTH]),
 			self::Guessable => __('user:error-password-guessable'),
+			self::Personal => __('user:error-password-personal'),
 		};
 	}
 }

@@ -90,7 +90,7 @@ final class SuperuserCommandTest extends IntegrationTestCase
 	private function runCommand(string $input): array
 	{
 		$buffer = new Buffer($input);
-		$passwords = new PasswordPolicy();
+		$passwords = new PasswordPolicy($this->config());
 		$exit = (new Superuser($this->conn(), $passwords))(new Io($buffer));
 
 		return [$exit, $buffer];

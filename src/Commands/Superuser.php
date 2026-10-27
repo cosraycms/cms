@@ -45,7 +45,7 @@ class Superuser
 			return 1;
 		}
 
-		$problem = $this->passwords->check($password);
+		$problem = $this->passwords->check($password, $email, $name);
 
 		if ($problem !== null) {
 			$io->error('%s Aborting.', self::message($problem));
@@ -91,6 +91,8 @@ class Superuser
 			),
 			PasswordProblem::Guessable
 				=> 'The password is too easy to guess: sequences like 1234 or qwertz and repeated characters or parts barely count.',
+			PasswordProblem::Personal
+				=> 'The password is too close to the email address, the name or the site\'s name.',
 		};
 	}
 }
