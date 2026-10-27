@@ -79,6 +79,21 @@ final class PanelUsersTest extends End2EndTestCase
 		$this->assertSame('user', $this->users()->byLogin('taken@example.com')->type);
 	}
 
+	public function testAGuessablePasswordIsRejected(): void
+	{
+		$this->authenticateAs('superuser');
+
+		$html = $this->getHtmlResponse($this->save('/panel/users/create/user', [
+			'email' => 'guessable@example.com',
+			'password' => '123456789012',
+			'password_repeat' => '123456789012',
+		]));
+
+		$this->assertStringContainsString('["password"]', $html);
+		$this->assertStringContainsString('This password is too easy to guess', $html);
+		$this->assertNull($this->users()->byLogin('guessable@example.com'));
+	}
+
 	public function testACustomerTypeTakesNoRoles(): void
 	{
 		$this->authenticateAs('superuser');

@@ -12,6 +12,7 @@ use Celema\Core\Response;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Security\RateLimiter;
+use Cosray\User\PasswordPolicy;
 use Cosray\User\PasswordResets;
 use Psr\Log\LoggerInterface as Logger;
 
@@ -25,8 +26,6 @@ use Psr\Log\LoggerInterface as Logger;
 final class PasswordReset extends Panel
 {
 	private const int MAX_LOGIN_LENGTH = 254;
-	private const int MIN_PASSWORD_LENGTH = 12;
-	private const int MAX_PASSWORD_LENGTH = 512;
 
 	/** Requests per window from one address. */
 	public const int PER_ADDRESS = 5;
@@ -39,6 +38,7 @@ final class PasswordReset extends Panel
 		Container $container,
 		Request $request,
 		private readonly PasswordResets $resets,
+		private readonly PasswordPolicy $passwords,
 		private readonly Auth $auth,
 		private readonly Logger $logger,
 		private readonly RateLimiter $limiter,
@@ -95,12 +95,9 @@ final class PasswordReset extends Panel
 		$this->guard();
 		$form = $this->formData();
 		$password = is_string($form['password'] ?? null) ? $form['password'] : '';
-		$length = mb_strlen($password);
+		$problem = $this->passwords->check($password);
 		$message = match (true) {
-			$length < self::MIN_PASSWORD_LENGTH => __('auth:reset-password-short', [
-				'min' => self::MIN_PASSWORD_LENGTH,
-			]),
-			$length > self::MAX_PASSWORD_LENGTH => __('auth:reset-password-long', ['max' => self::MAX_PASSWORD_LENGTH]),
+			$problem !== null => $problem->message(),
 			!hash_equals($password, (string) ($form['password_repeat'] ?? '')) => __('user:error-password-repeat'),
 			default => null,
 		};

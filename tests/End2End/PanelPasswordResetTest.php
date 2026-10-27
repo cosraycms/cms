@@ -84,6 +84,10 @@ final class PanelPasswordResetTest extends End2EndTestCase
 			$this->html('POST', $path, ['password' => str_repeat('a', 513), 'password_repeat' => str_repeat('a', 513)]),
 		);
 		$this->assertStringContainsString(
+			'This password is too easy to guess',
+			$this->html('POST', $path, ['password' => '123456789012', 'password_repeat' => '123456789012']),
+		);
+		$this->assertStringContainsString(
 			'The passwords do not match.',
 			$this->html('POST', $path, [
 				'password' => 'a long new password',

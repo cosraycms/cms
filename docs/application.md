@@ -299,6 +299,10 @@ Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->p
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
 
+### Passwords
+
+The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
+
 ### Sign-in limits
 
 The panel counts failed sign-ins per client address, in windows of 15 minutes that start with the first failure. After 5 failures for one login, or 30 for any logins, it refuses further sign-ins from that address with `429 Too Many Requests` and a `Retry-After` header until the window ends, even with the right password. A successful sign-in clears the count of its login and does not count for the address. A failed one-time token [handoff](api.md#embedded-editing) counts for the address too. The counters live in the unlogged `rate_limits` table under an HMAC with `app.secret`, so it holds no addresses or logins. Behind a reverse proxy, list it in [`app.trusted_proxies`](#filesystem-directories-and-url-paths), or all visitors share the proxy's address and its limit.

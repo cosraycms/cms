@@ -9,6 +9,8 @@ use Celema\Console\Io;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Cosray\Uid;
+use Cosray\User\PasswordPolicy;
+use Cosray\User\PasswordProblem;
 use Throwable;
 
 #[Command('add-superuser', 'Add a superuser')]
@@ -16,8 +18,10 @@ class Superuser
 {
 	protected Database $db;
 
-	public function __construct(Connection $connection)
-	{
+	public function __construct(
+		Connection $connection,
+		private readonly PasswordPolicy $passwords,
+	) {
 		$this->db = new Database($connection);
 	}
 
@@ -37,6 +41,14 @@ class Superuser
 
 		if ($password === '') {
 			$io->error('A password is required. Aborting.');
+
+			return 1;
+		}
+
+		$problem = $this->passwords->check($password);
+
+		if ($problem !== null) {
+			$io->error('%s Aborting.', self::message($problem));
 
 			return 1;
 		}
@@ -64,5 +76,21 @@ class Superuser
 		$io->success('Successfully created superuser: %s', $email);
 
 		return 0;
+	}
+
+	private static function message(PasswordProblem $problem): string
+	{
+		return match ($problem) {
+			PasswordProblem::Short => sprintf(
+				'The password is too short: use at least %d characters.',
+				PasswordPolicy::MIN_LENGTH,
+			),
+			PasswordProblem::Long => sprintf(
+				'The password is too long: use at most %d characters.',
+				PasswordPolicy::MAX_LENGTH,
+			),
+			PasswordProblem::Guessable
+				=> 'The password is too easy to guess: sequences like 1234 or qwertz and repeated characters or parts barely count.',
+		};
 	}
 }

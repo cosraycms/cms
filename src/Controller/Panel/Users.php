@@ -22,6 +22,7 @@ use Cosray\Session;
 use Cosray\Uid;
 use Cosray\User;
 use Cosray\User\Fields;
+use Cosray\User\PasswordPolicy;
 use Cosray\User\Types;
 use Cosray\Users as UserStore;
 use Cosray\Validation\Account;
@@ -42,6 +43,7 @@ final class Users extends Panel
 		private readonly UserStore $users,
 		private readonly Types $types,
 		private readonly Policy $policy,
+		private readonly PasswordPolicy $passwords,
 		private readonly Logger $logger,
 	) {
 		parent::__construct($config, $container, $request);
@@ -286,8 +288,16 @@ final class Users extends Panel
 				->issues(),
 		);
 
-		if ($password !== null && !hash_equals($password, (string) ($form['password_repeat'] ?? ''))) {
-			$errors[] = ['message' => __('user:error-password-repeat'), 'path' => ['password_repeat']];
+		if ($password !== null) {
+			$problem = $this->passwords->check($password);
+
+			if ($problem !== null) {
+				$errors[] = ['message' => $problem->message(), 'path' => ['password']];
+			}
+
+			if (!hash_equals($password, (string) ($form['password_repeat'] ?? ''))) {
+				$errors[] = ['message' => __('user:error-password-repeat'), 'path' => ['password_repeat']];
+			}
 		}
 
 		if ($account['email'] !== null) {

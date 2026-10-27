@@ -8,6 +8,7 @@ use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Cosray\Commands\Superuser;
 use Cosray\Tests\IntegrationTestCase;
+use Cosray\User\PasswordPolicy;
 
 /**
  * @internal
@@ -25,7 +26,7 @@ final class SuperuserCommandTest extends IntegrationTestCase
 		$email = 'su-' . uniqid() . '@example.com';
 
 		try {
-			[$exit, $io] = $this->runCommand("{$email}\nSuper User\nsecret\nsecret\n");
+			[$exit, $io] = $this->runCommand("{$email}\nSuper User\ncorrect horse battery\ncorrect horse battery\n");
 
 			$this->assertSame(0, $exit);
 			$this->assertStringContainsString(
@@ -40,7 +41,7 @@ final class SuperuserCommandTest extends IntegrationTestCase
 
 			$this->assertSame('{superuser}', $user['roles']);
 			$this->assertTrue((bool) $user['active']);
-			$this->assertTrue(password_verify('secret', (string) $user['password']));
+			$this->assertTrue(password_verify('correct horse battery', (string) $user['password']));
 			$this->assertSame(
 				['name' => 'Super User'],
 				json_decode((string) $user['data'], associative: true),
@@ -69,9 +70,17 @@ final class SuperuserCommandTest extends IntegrationTestCase
 		$this->assertStringContainsString('A password is required', $io->errorOutput());
 	}
 
+	public function testRejectAGuessablePassword(): void
+	{
+		[$exit, $io] = $this->runCommand("su@example.com\nSuper User\n123456789012\n");
+
+		$this->assertSame(1, $exit);
+		$this->assertStringContainsString('The password is too easy to guess', $io->errorOutput());
+	}
+
 	public function testRejectMismatchedPasswords(): void
 	{
-		[$exit, $io] = $this->runCommand("su@example.com\nSuper User\nsecret\nother\n");
+		[$exit, $io] = $this->runCommand("su@example.com\nSuper User\ncorrect horse battery\nother\n");
 
 		$this->assertSame(1, $exit);
 		$this->assertStringContainsString('The passwords do not match', $io->errorOutput());
@@ -81,7 +90,8 @@ final class SuperuserCommandTest extends IntegrationTestCase
 	private function runCommand(string $input): array
 	{
 		$buffer = new Buffer($input);
-		$exit = (new Superuser($this->conn()))(new Io($buffer));
+		$passwords = new PasswordPolicy();
+		$exit = (new Superuser($this->conn(), $passwords))(new Io($buffer));
 
 		return [$exit, $buffer];
 	}

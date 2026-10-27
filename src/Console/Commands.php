@@ -39,6 +39,7 @@ use Cosray\MigrationFactory;
 use Cosray\Panel\Client;
 use Cosray\Queue\Listener;
 use Cosray\Queue\Runner as JobRunner;
+use Cosray\User\PasswordPolicy;
 
 /**
  * The base CLI command set of a Cosray application.
@@ -81,7 +82,10 @@ final class Commands
 			),
 			References::class => fn(): References => new References($this->conn()),
 			RecreateSortIndex::class,
-			Superuser::class => fn(): Superuser => new Superuser($this->conn()),
+			Superuser::class => fn(): Superuser => new Superuser(
+				$this->conn(),
+				new PasswordPolicy(),
+			),
 			Titles::class,
 			CreateToken::class,
 			ListTokens::class,

@@ -34,10 +34,8 @@ final class Account implements Validator
 			->optional()
 			->nullable()
 			->label(__('user:name'));
-		$password = $this->shape
-			->add('password', 'string')
-			->rules('minlen:12', 'maxlen:512')
-			->label(__('user:password'));
+		// Its length and strength are PasswordPolicy's to judge.
+		$password = $this->shape->add('password', 'string')->label(__('user:password'));
 
 		if ($passwordRequired) {
 			$password->rules('required');
