@@ -99,6 +99,8 @@ A mail template is a Boiler template that renders an HTML document. Its `<title>
 
 Values print escaped, as in page templates, and `__()` translates in the locale the mail renders in. The text body comes from `contact.txt.php` next to it, rendered without escaping, or else from the HTML: paragraphs, line breaks, lists and table rows keep their lines, and links show their address after the text. Cosray inlines no CSS; give elements `style` attributes where mail programs need them.
 
+Links in mails must be absolute. Image and file values passed in `data` already are: their `url()` and `<img>` tags start with [`Context::origin()`](../src/Context.php), the request's scheme and host, or those of `app.url` in jobs and commands. A mail rendered in a locale with domains of its own, as in `$locales->add('en', 'English', domains: ['www.example.com'])`, links to the first of them, unless the request came in on one of them or was answered in that locale, so a mail sent with `locale: 'en'` leads to the English site. For other links, pass the `Context` in `data` and put its origin in front of the path in the template, where the mail's locale applies: `<a href="<?= $context->origin() ?><?= $node->path() ?>">`.
+
 Cosray's own mails, like `cosray/password-reset` for the [password reset](application.md#password-reset), come from templates in Cosray; a file of the same name in a `mail.views` directory replaces one.
 
 ## Delivery

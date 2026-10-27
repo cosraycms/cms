@@ -439,6 +439,21 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero', $value->alt());
 	}
 
+	public function testFileUrlsOutsideARequestStartWithTheAppUrl(): void
+	{
+		$locales = new \Cosray\Locales();
+		$locales->add('en', title: 'English');
+		$config = $this->config(['app.url' => 'https://example.org', 'app.url_prefix' => '/cms']);
+		$context = Context::console($this->db(), $config, $this->container(), $this->factory(), $locales);
+		$this->seedAsset($context, 'heroimg123456', 'hero.jpg');
+		$field = new \Cosray\Field\Image('hero', $this->createOwner($context), new ValueContext('hero', [
+			'files' => [['uid' => 'heroimg123456']],
+		]));
+		$field->limit(1);
+
+		$this->assertSame('https://example.org/cms/assets/he/heroimg123456/hero.jpg', $field->value()->url());
+	}
+
 	public function testImageTagUsesMediaUrlAndAlt(): void
 	{
 		$context = $this->createContext();

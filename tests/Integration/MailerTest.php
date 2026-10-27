@@ -157,6 +157,22 @@ final class MailerTest extends IntegrationTestCase
 		$this->assertSame('Hello', $this->mailer()->compose('greeting', locale: 'en')->getSubject());
 	}
 
+	public function testLinksLeadToTheSiteOfTheMailsLocale(): void
+	{
+		$config = $this->mailConfig(['app.url' => 'https://example.com']);
+		$context = $this->context($config);
+		$mailer = $this->mailer($config, $context);
+
+		$this->assertStringContainsString(
+			'href="https://example.com/news"',
+			(string) $mailer->compose('news', ['context' => $context])->getHtmlBody(),
+		);
+		$this->assertStringContainsString(
+			'href="https://www.example.es/news"',
+			(string) $mailer->compose('news', ['context' => $context], locale: 'es')->getHtmlBody(),
+		);
+	}
+
 	public function testCosraysOwnTemplatesRenderWithoutAMailDirectory(): void
 	{
 		$email = $this->mailer($this->mailConfig(['path.views' => '/tests/Fixtures/no-views']))->compose(
@@ -279,19 +295,21 @@ final class MailerTest extends IntegrationTestCase
 		]);
 	}
 
-	private function mailer(?Config $config = null): Mailer
+	private function mailer(?Config $config = null, ?Context $context = null): Mailer
 	{
 		$config ??= $this->mailConfig();
+
+		return new Mailer($config, new Queue($this->db()), $context ?? $this->context($config));
+	}
+
+	private function context(Config $config): Context
+	{
 		$locales = new Locales();
 		$locales->add('en', title: 'English');
-		$locales->add('es', title: 'Español', fallback: 'en');
+		$locales->add('es', title: 'Español', fallback: 'en', domains: ['www.example.es']);
 		$locales->catalog('app', self::root() . '/tests/Fixtures/lang');
 
-		return new Mailer(
-			$config,
-			new Queue($this->db()),
-			Context::console($this->db(), $config, new Container(), $this->factory(), $locales),
-		);
+		return Context::console($this->db(), $config, new Container(), $this->factory(), $locales);
 	}
 
 	private function transports(Config $config): Transports

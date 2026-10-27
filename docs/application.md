@@ -34,7 +34,7 @@ The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); 
 | `path.assets` | Originals below `path.public`, also their URL path; defaults to `/assets` |
 | `path.cache` | Renditions below `path.public`, also their URL path; defaults to `/cache` |
 | `app.url_prefix` | Application URL mount prefix; does not change filesystem locations |
-| `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails; `APP_URL` in the environment. Never taken from a request's host |
+| `app.url` | Absolute URL the application is served under, like `https://example.org`, for links in mails and for absolute URLs without a request, as in jobs and commands; `APP_URL` in the environment. Never taken from a request's host |
 | `app.trusted_proxies` | IP addresses and CIDR ranges of reverse proxies, like `['127.0.0.1', '10.0.0.0/8']`; `TRUSTED_PROXIES`, comma-separated, in the environment. A request from one of them takes its client address from `X-Forwarded-For` |
 | `panel.path` | Panel URL path; defaults to `/panel` |
 

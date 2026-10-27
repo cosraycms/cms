@@ -156,9 +156,30 @@ final class Context
 		);
 	}
 
+	/**
+	 * The scheme and host absolute URLs start with: the request's, or else
+	 * those of `app.url`. A locale with domains of its own gets its first
+	 * one in place of a host that is not among them, as only they answer its
+	 * paths, unless the request on that host was answered in the locale.
+	 */
 	public function origin(): string
 	{
-		return $this->currentRequest()?->origin() ?? '';
+		$origin = $this->request?->origin() ?: self::originOf($this->config->app->url);
+		$requested = $this->request?->get('locale', null);
+		$locale = $this->runtimeLocale ?? $requested;
+
+		if ($origin === '' || !$locale instanceof Locale || $locale->domains === []) {
+			return $origin;
+		}
+
+		$host = strtolower((string) parse_url($origin, PHP_URL_HOST));
+		$answered = $requested instanceof Locale && $requested->id === $locale->id;
+
+		if ($answered || in_array($host, $locale->domains, true)) {
+			return $origin;
+		}
+
+		return self::originOf($origin, $locale->domain());
 	}
 
 	/**
@@ -191,5 +212,22 @@ final class Context
 	private function currentRequest(): ?Request
 	{
 		return $this->localeRequest ?? $this->request;
+	}
+
+	/** The scheme, host and port of an absolute URL, with another host if one is given. */
+	private static function originOf(?string $url, ?string $host = null): string
+	{
+		if ($url === null) {
+			return '';
+		}
+
+		$port = parse_url($url, PHP_URL_PORT);
+
+		return (
+			(string) parse_url($url, PHP_URL_SCHEME)
+				. '://'
+				. ($host ?? (string) parse_url($url, PHP_URL_HOST))
+				. (is_int($port) ? ":{$port}" : '')
+		);
 	}
 }
