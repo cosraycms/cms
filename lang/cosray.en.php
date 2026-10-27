@@ -22,6 +22,8 @@ return [
 		'auth:reset-mail-intro' => 'someone, hopefully you, asked to reset the password of your account at :site.',
 		'auth:reset-mail-subject' => 'A new password for :site',
 		'auth:reset-missing-login' => 'Please enter your username or email address.',
+		'auth:reset-password-long' => 'This password is too long. Use at most :max characters.',
+		'auth:reset-password-short' => 'This password is too short. Use at least :min characters.',
 		'auth:reset-request-new' => 'Request a new link',
 		'auth:reset-save' => 'Save password',
 		'auth:reset-send' => 'Send link',

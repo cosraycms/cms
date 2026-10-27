@@ -22,6 +22,8 @@ return [
 		'auth:reset-mail-intro' => 'jemand, hoffentlich Sie, hat angefordert, das Passwort Ihres Kontos bei :site zurückzusetzen.',
 		'auth:reset-mail-subject' => 'Ein neues Passwort für :site',
 		'auth:reset-missing-login' => 'Bitte geben Sie Ihren Benutzernamen oder Ihre E-Mail-Adresse ein.',
+		'auth:reset-password-long' => 'Dieses Passwort ist zu lang. Verwenden Sie höchstens :max Zeichen.',
+		'auth:reset-password-short' => 'Dieses Passwort ist zu kurz. Verwenden Sie mindestens :min Zeichen.',
 		'auth:reset-request-new' => 'Neuen Link anfordern',
 		'auth:reset-save' => 'Passwort speichern',
 		'auth:reset-send' => 'Link senden',

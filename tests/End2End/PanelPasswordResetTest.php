@@ -76,8 +76,12 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 		$this->assertStringContainsString('action="' . $path . '"', $this->html('GET', $path));
 		$this->assertStringContainsString(
-			'At least 12 characters.',
+			'This password is too short. Use at least 12 characters.',
 			$this->html('POST', $path, ['password' => 'too short', 'password_repeat' => 'too short']),
+		);
+		$this->assertStringContainsString(
+			'This password is too long. Use at most 512 characters.',
+			$this->html('POST', $path, ['password' => str_repeat('a', 513), 'password_repeat' => str_repeat('a', 513)]),
 		);
 		$this->assertStringContainsString(
 			'The passwords do not match.',

@@ -16,7 +16,7 @@ $step = u($step);
 
 	<section class="card" aria-label="<?= escape(__('auth:reset-title')) ?>">
 		<?php if ($step === 'request'): ?>
-			<form method="post" action="<?= escape($panelPath) ?>/password" hx-boost="false">
+			<form method="post" action="<?= escape($panelPath) ?>/password" hx-boost="false" novalidate>
 				<p class="intro"><?= escape(__('auth:reset-intro')) ?></p>
 
 				<?php if ($message !== null): ?>
@@ -38,7 +38,7 @@ $step = u($step);
 				<button class="cms-button primary submit" type="submit"><?= escape(__('auth:reset-send')) ?></button>
 			</form>
 		<?php elseif ($step === 'choose'): ?>
-			<form method="post" action="<?= escape($panelPath) ?>/password/<?= escape($token) ?>" hx-boost="false">
+			<form method="post" action="<?= escape($panelPath) ?>/password/<?= escape($token) ?>" hx-boost="false" novalidate>
 				<?php if ($message !== null): ?>
 					<p class="message" role="alert"><?= escape($message) ?></p>
 				<?php endif ?>

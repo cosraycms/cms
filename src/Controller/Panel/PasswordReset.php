@@ -97,7 +97,10 @@ final class PasswordReset extends Panel
 		$password = is_string($form['password'] ?? null) ? $form['password'] : '';
 		$length = mb_strlen($password);
 		$message = match (true) {
-			$length < self::MIN_PASSWORD_LENGTH || $length > self::MAX_PASSWORD_LENGTH => __('user:password-help'),
+			$length < self::MIN_PASSWORD_LENGTH => __('auth:reset-password-short', [
+				'min' => self::MIN_PASSWORD_LENGTH,
+			]),
+			$length > self::MAX_PASSWORD_LENGTH => __('auth:reset-password-long', ['max' => self::MAX_PASSWORD_LENGTH]),
 			!hash_equals($password, (string) ($form['password_repeat'] ?? '')) => __('user:error-password-repeat'),
 			default => null,
 		};
