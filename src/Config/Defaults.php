@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Config;
 
 use Cosray\Uid as UidGenerator;
-use Cosray\Util\Password;
 
 use function Cosray\env;
 
@@ -28,7 +27,6 @@ final class Defaults
 			self::richtext(),
 			self::upload(),
 			self::uid(),
-			self::password(),
 			self::queue($env),
 			self::mail($env),
 		);
@@ -216,15 +214,6 @@ final class Defaults
 		return [
 			'uid.alphabet' => UidGenerator::ALPHABET_LOWERCASE_WORD_SAFE,
 			'uid.length' => 13,
-		];
-	}
-
-	/** @return array<string, mixed> */
-	private static function password(): array
-	{
-		return [
-			'password.entropy' => Password::DEFAULT_PASSWORD_ENTROPY,
-			'password.algorithm' => null,
 		];
 	}
 

@@ -84,9 +84,6 @@ namespace Cosray\Config;
  *     'uid.alphabet': non-empty-string,
  *     'uid.length': positive-int,
  *
- *     'password.entropy': float|int,
- *     'password.algorithm': int|string|null,
- *
  *     'queue.after_response': bool,
  *
  *     'mail.transports': array<string, string>,
@@ -142,8 +139,6 @@ namespace Cosray\Config;
  *     'upload.maxsize'?: int,
  *     'uid.alphabet'?: non-empty-string,
  *     'uid.length'?: positive-int,
- *     'password.entropy'?: float|int,
- *     'password.algorithm'?: int|string|null,
  *     'queue.after_response'?: bool,
  *     'mail.transports'?: array<string, string>,
  *     'mail.from'?: ?string,

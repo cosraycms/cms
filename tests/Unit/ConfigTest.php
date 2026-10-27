@@ -10,7 +10,6 @@ use Cosray\Exception\InvalidEnvironment;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
 use Cosray\Uid;
-use Cosray\Util\Password;
 
 /**
  * @internal
@@ -120,8 +119,6 @@ final class ConfigTest extends TestCase
 		);
 		$this->assertSame(Uid::ALPHABET_LOWERCASE_WORD_SAFE, $config->uid->alphabet);
 		$this->assertSame(13, $config->uid->length);
-		$this->assertSame(Password::DEFAULT_PASSWORD_ENTROPY, $config->password->entropy);
-		$this->assertNull($config->password->algorithm);
 		$this->assertFalse($config->debug());
 		$this->assertSame('', $config->env());
 	}
