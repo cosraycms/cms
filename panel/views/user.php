@@ -64,6 +64,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					hx-swap="none"
 					hx-confirm="<?= escape(__('user:delete-confirm')) ?>"
 					data-dirty-bypass>
+					<?php $this->include('component/csrf') ?>
 					<button class="cms-button danger" type="submit">
 						<?= \Cosray\Panel\Icon::render('trash3') ?>
 						<?= escape(__('editor:delete')) ?>
@@ -85,6 +86,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		hx-swap="none"
 		data-json-form
 		novalidate>
+		<?php $this->include('component/csrf') ?>
 		<div class="pane">
 			<div class="pane-scroll">
 				<div class="inner">

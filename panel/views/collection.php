@@ -155,7 +155,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			// and the dialogs need no shared wrapper. Submit buttons carry
 			// their endpoint as formaction; without one a submit has nowhere
 			// valid to go, which is the intended dead end. ?>
-			<form id="collection-bulk" method="post" hidden></form>
+			<form id="collection-bulk" method="post" hidden><?php $this->include('component/csrf') ?></form>
 			<div class="bulk-bar" data-bulk-bar hidden>
 				<div class="info">
 					<output
@@ -190,6 +190,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<?php // A drop fills this and submits it, so it takes the same boosted
 			// route as the move buttons. ?>
 			<form id="collection-order" method="post" action="<?= escape($page->table->positionUrl) ?>" hidden data-order-form>
+				<?php $this->include('component/csrf') ?>
 				<input type="hidden" name="node" />
 				<input type="hidden" name="before" />
 				<input type="hidden" name="after" />

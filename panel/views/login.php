@@ -15,6 +15,7 @@ $this->layout('layer/document');
 
 	<section class="card" aria-label="<?= escape(__('auth:sign-in')) ?>">
 		<form method="post" action="<?= escape($panelPath) ?>/login" hx-boost="false">
+			<?php $this->include('component/csrf') ?>
 			<input type="hidden" name="next" value="<?= escape($next) ?>" />
 
 			<?php if ($message !== null): ?>

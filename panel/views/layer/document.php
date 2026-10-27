@@ -16,6 +16,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title><?= escape(__('panel:title')) ?></title>
+	<meta name="csrf-token" content="<?= escape((string) ($csrfToken ?? '')) ?>">
 <?php if (is_string($liveReload) && $liveReload !== ''): ?>
 	<?php /* Morphing would strip the markup the element controls render
 	 * themselves, so the dev server's live reload reloads the panel. */ ?>

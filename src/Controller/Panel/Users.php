@@ -251,7 +251,7 @@ final class Users extends Panel
 			'fields' => $this->fields($context)->form($user),
 			'locales' => $locales,
 			'defaultLocale' => $context->locales()->getDefault()->id,
-			'system' => new System($this->config, $context->locales())->payload(),
+			'system' => new System($this->config, $context->locales(), $this->csrfToken())->payload(),
 			'notice' => $this->notice(),
 		]);
 	}

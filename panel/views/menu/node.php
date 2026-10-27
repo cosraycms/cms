@@ -114,6 +114,7 @@ $confirm = $descendants === 0
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
 				) ?>/move">
+					<?php $this->include('component/csrf') ?>
 					<input type="hidden" name="direction" value="up" />
 					<button type="submit"<?= $row['first'] ? ' disabled' : '' ?>><?= escape(
 						__('menu:move-up'),
@@ -122,6 +123,7 @@ $confirm = $descendants === 0
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
 				) ?>/move">
+					<?php $this->include('component/csrf') ?>
 					<input type="hidden" name="direction" value="down" />
 					<button type="submit"<?= $row['last'] ? ' disabled' : '' ?>><?= escape(
 						__('menu:move-down'),
@@ -133,6 +135,7 @@ $confirm = $descendants === 0
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
 				) ?>/move">
+					<?php $this->include('component/csrf') ?>
 					<input type="hidden" name="direction" value="in" />
 					<button type="submit"<?= $row['first'] ? ' disabled' : '' ?>><?= escape(
 						__('menu:move-in'),
@@ -141,6 +144,7 @@ $confirm = $descendants === 0
 				<form method="post" action="<?= escape($treeUrl) ?>/item/<?= escape(
 					rawurlencode($id),
 				) ?>/move">
+					<?php $this->include('component/csrf') ?>
 					<input type="hidden" name="direction" value="out" />
 					<button type="submit"<?= $nested ? '' : ' disabled' ?>><?= escape(
 						__('menu:move-out'),
@@ -150,6 +154,7 @@ $confirm = $descendants === 0
 					method="post"
 					action="<?= escape($treeUrl) ?>/item/<?= escape(rawurlencode($id)) ?>/delete"
 					hx-confirm="<?= escape($confirm) ?>">
+					<?php $this->include('component/csrf') ?>
 					<button type="submit" class="danger"><?= escape(__('menu:delete')) ?></button>
 				</form>
 		</div>

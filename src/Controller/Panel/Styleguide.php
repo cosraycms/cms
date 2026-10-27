@@ -68,7 +68,7 @@ final class Styleguide extends Panel
 			'blocksContent' => $this->blocksContent(),
 			// Media controls need the editor bridge for uploads and the
 			// library picker; the payload is the one the editor embeds.
-			'system' => new System($this->config, $locales)->payload(),
+			'system' => new System($this->config, $locales, $this->csrfToken())->payload(),
 		]);
 	}
 

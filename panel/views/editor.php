@@ -102,6 +102,7 @@ $action = $edit
 					action="<?= escape($links->delete($uid)) ?>"
 					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
+					<?php $this->include('component/csrf') ?>
 					<button class="cms-button danger" type="submit">
 						<?= \Cosray\Panel\Icon::render('trash3') ?>
 						<?= escape(__('editor:delete')) ?>
@@ -121,7 +122,7 @@ $action = $edit
 					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
 					data-dirty-bypass
-					hidden></form>
+					hidden><?php $this->include('component/csrf') ?></form>
 			<?php endif ?>
 			<?php if ($edit && $routable && $renderable): ?>
 				<button
@@ -173,6 +174,7 @@ $action = $edit
 		<?= $contentLocales ? 'data-content-locale-scope data-content-locale="' . escape($defaultLocale) . '"' : '' ?>
 		<?= $contentLocales ? "data-content-locales='" . escape(json_encode($locales, $jsonFlags)) . "'" : '' ?>
 		novalidate>
+		<?php $this->include('component/csrf') ?>
 		<div class="pane">
 			<div class="pane-scroll">
 				<div class="inner">

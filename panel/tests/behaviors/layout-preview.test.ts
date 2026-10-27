@@ -84,6 +84,7 @@ function respond(
 describe('layout preview', () => {
 	it('posts the form as JSON for the selected content language and opens the frame', async () => {
 		page();
+		document.head.innerHTML = '<meta name="csrf-token" content="token-b">';
 		const fetchMock = respond();
 
 		button().click();
@@ -94,6 +95,7 @@ describe('layout preview', () => {
 		expect(url).toBe('/panel/node/node-1/blocks/content?locale=de');
 		expect(init.method).toBe('POST');
 		expect((init.headers as Record<string, string>)['Content-Type']).toBe('application/json');
+		expect((init.headers as Record<string, string>)['X-CSRF-Token']).toBe('token-b');
 		// The file input stays out; the rest nests like the save body, with
 		// indexes as keys the way the transport sends them.
 		expect(JSON.parse(init.body as string)).toEqual({

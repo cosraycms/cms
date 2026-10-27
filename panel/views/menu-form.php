@@ -36,6 +36,7 @@ $maxDepth = $maxDepth === null ? null : (int) $maxDepth;
 	<div class="body">
 		<div class="card form-card">
 			<form method="post" action="<?= escape($action) ?>">
+				<?php $this->include('component/csrf') ?>
 				<?php if (count($errors) > 0): ?>
 					<div class="cms-notice is-error" role="alert">
 						<?php foreach ($errors as $error): ?>

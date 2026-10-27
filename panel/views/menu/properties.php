@@ -22,6 +22,7 @@ $manages = (bool) $manages;
 ?>
 <div class="menu-props">
 	<form method="post" action="<?= escape((string) $urls['edit']) ?>">
+		<?php $this->include('component/csrf') ?>
 		<?php $this->include('menu/localized', [
 			'name' => 'description',
 			'label' => __('menu:description'),
@@ -83,6 +84,7 @@ $manages = (bool) $manages;
 			method="post"
 			action="<?= escape((string) $urls['delete']) ?>"
 			hx-confirm="<?= escape((string) $props['confirm']) ?>">
+			<?php $this->include('component/csrf') ?>
 			<button type="submit" class="cms-button danger">
 				<?= \Cosray\Panel\Icon::render('trash3') ?>
 				<?= escape(__('menu:delete')) ?>

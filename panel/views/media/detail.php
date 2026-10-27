@@ -58,6 +58,7 @@ $closeUrl = $screen->url(['file' => null]);
 		hx-post="<?= escape($saveUrl) ?>"
 		hx-target="#media-detail"
 		hx-swap="outerHTML">
+		<?php $this->include('component/csrf') ?>
 		<header class="cms-detail-head">
 			<h2 title="<?= escape($asset->filename) ?>"><?= escape($asset->filename) ?></h2>
 			<a
@@ -230,6 +231,7 @@ $closeUrl = $screen->url(['file' => null]);
 				__('media:cancel-delete-file'),
 			) ?></button>
 			<form method="post" action="<?= escape($deleteUrl) ?>" hx-post="<?= escape($deleteUrl) ?>" hx-target="#media-detail" hx-swap="outerHTML">
+				<?php $this->include('component/csrf') ?>
 				<button type="submit" class="cms-button danger solid"><?= escape(__('media:confirm-delete-file')) ?></button>
 			</form>
 		</footer>

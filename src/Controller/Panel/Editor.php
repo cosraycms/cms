@@ -1004,7 +1004,7 @@ final class Editor extends Panel
 			'defaultLocale' => in_array($context->locales()->getDefault()->id, array_column($locales, 'id'), true)
 				? $context->locales()->getDefault()->id
 				: $locales[0]['id'],
-			'system' => new System($this->config, $context->locales())->payload(),
+			'system' => new System($this->config, $context->locales(), $this->csrfToken())->payload(),
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,
 			'meta' => $meta,

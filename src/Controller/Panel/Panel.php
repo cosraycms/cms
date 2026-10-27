@@ -32,6 +32,7 @@ use Cosray\Panel\Client;
 use Cosray\Panel\Extras;
 use Cosray\Renderer;
 use Cosray\Security\Policy;
+use Cosray\Session;
 use Cosray\User;
 use Cosray\Util\Form;
 use Cosray\Util\LiveReload;
@@ -112,6 +113,7 @@ abstract class Panel
 				'scripts' => $this->scripts(),
 				'moduleScripts' => $this->moduleScripts(),
 				'liveReload' => LiveReload::url($this->request),
+				'csrfToken' => $this->csrfToken(),
 				// Only a full document loads the entry; a swap reuses the modules.
 				'modulePreloads' => $layer === 'document' ? $this->client()->preloads() : [],
 				'collections' => $collections,
@@ -146,6 +148,14 @@ abstract class Panel
 		}
 
 		return $this->target() === 'frame' ? 'frame' : 'main';
+	}
+
+	/** The session's CSRF token, which unsafe panel requests must carry. */
+	protected function csrfToken(): string
+	{
+		$session = $this->request->get('session', null);
+
+		return $session instanceof Session ? $session->csrf->token() : '';
 	}
 
 	/** The id of the element an htmx request swaps, if any. */

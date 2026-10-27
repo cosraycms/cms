@@ -51,7 +51,7 @@ final class Media extends Panel
 			];
 		}
 
-		$system = new System($this->config, $locales)->payload();
+		$system = new System($this->config, $locales, $this->csrfToken())->payload();
 
 		return $this->context([
 			'part' => 'page',
@@ -187,7 +187,7 @@ final class Media extends Panel
 	{
 		$uid = $screen->file ?? '';
 		$row = $uid === '' ? null : $db->assets->byUid(['uid' => $uid])->first();
-		$system = new System($this->config, $locales)->payload();
+		$system = new System($this->config, $locales, $this->csrfToken())->payload();
 
 		return [
 			'screen' => $screen,

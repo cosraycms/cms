@@ -51,6 +51,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 				<p><?= escape($notice) ?></p>
 				<?php if (is_array($undo)): ?>
 					<form method="post" action="<?= escape((string) $undo['action']) ?>">
+						<?php $this->include('component/csrf') ?>
 						<input type="hidden" name="parent" value="<?= escape(
 							(string) $undo['parent'],
 						) ?>" />
@@ -80,6 +81,7 @@ $defaultLocale = (string) $props['defaultLocale'];
 						method="post"
 						hidden
 						data-menu-drag-action="<?= escape($urls['tree']) ?>/item/__item__/move">
+						<?php $this->include('component/csrf') ?>
 						<input type="hidden" name="parent" value="" />
 						<input type="hidden" name="index" value="" />
 					</form>

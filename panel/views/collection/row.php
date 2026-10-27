@@ -110,6 +110,7 @@ $grip = $group === null
 				<?php if ($group !== null): ?>
 					<?php foreach (['up' => $row['moveUp'], 'down' => $row['moveDown']] as $direction => $enabled): ?>
 						<form class="move" method="post" action="<?= escape($positionUrl) ?>" data-order-move="<?= $direction ?>">
+							<?php $this->include('component/csrf') ?>
 							<input type="hidden" name="node" value="<?= escape((string) $row['uid']) ?>" />
 							<input type="hidden" name="move" value="<?= $direction ?>" />
 							<button

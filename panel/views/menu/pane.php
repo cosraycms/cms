@@ -46,6 +46,7 @@ $section = static fn(string $names): bool => !in_array($type, explode(' ', $name
 	<?php endif ?>
 
 	<form method="post" action="<?= escape($action) ?>">
+		<?php $this->include('component/csrf') ?>
 		<?php if ($parent !== null): ?>
 			<input type="hidden" name="parent" value="<?= escape((string) $parent) ?>" />
 		<?php endif ?>

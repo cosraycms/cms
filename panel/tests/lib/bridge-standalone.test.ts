@@ -50,6 +50,7 @@ describe('standalone bridge', () => {
 	});
 
 	it('uploads through the panel media endpoint', async () => {
+		document.head.innerHTML = '<meta name="csrf-token" content="token-a">';
 		const result = { ok: true, uid: 'image-a', filename: 'image.jpg', url: '/media/image.jpg' };
 		const fetchMock = vi.fn().mockResolvedValue({ json: () => Promise.resolve(result) });
 		vi.stubGlobal('fetch', fetchMock);
@@ -63,7 +64,11 @@ describe('standalone bridge', () => {
 		expect(options).toMatchObject({
 			method: 'POST',
 			credentials: 'same-origin',
-			headers: { 'X-Requested-With': 'xmlhttprequest', Accept: 'application/json' },
+			headers: {
+				'X-Requested-With': 'xmlhttprequest',
+				Accept: 'application/json',
+				'X-CSRF-Token': 'token-a',
+			},
 		});
 		expect(options.body).toBeInstanceOf(FormData);
 		expect((options.body as FormData).get('file')).toBe(file);

@@ -17,6 +17,8 @@ final class System
 	public function __construct(
 		private readonly Config $config,
 		private readonly Locales $locales,
+		#[\SensitiveParameter]
+		private readonly string $csrfToken,
 	) {}
 
 	/** @return array<string, mixed> */
@@ -36,7 +38,7 @@ final class System
 		return [
 			'debug' => $config->debug(),
 			'env' => $config->env(),
-			'csrfToken' => '',
+			'csrfToken' => $this->csrfToken,
 			'locale' => $this->locales->getDefault()->id,
 			'defaultLocale' => $this->locales->getDefault()->id,
 			'locales' => $locales,

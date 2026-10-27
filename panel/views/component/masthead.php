@@ -52,6 +52,7 @@ $label = is_array($account) && $account['name'] === null
 						hx-boost="false"
 						role="group"
 						aria-label="<?= escape(__('nav:language')) ?>">
+						<?php $this->include('component/csrf') ?>
 						<span class="group-label" aria-hidden="true"><?= escape(__('nav:language')) ?></span>
 						<?php foreach ($panelLocales as $id => $title): ?>
 							<button
@@ -67,6 +68,7 @@ $label = is_array($account) && $account['name'] === null
 				<a href="<?= $panelPath ?>/profile" role="menuitem" hx-target="#frame"><?= escape(__('nav:profile')) ?></a>
 				<hr />
 				<form method="post" action="<?= $panelPath ?>/logout" hx-boost="false">
+					<?php $this->include('component/csrf') ?>
 					<button type="submit"><?= escape(__('nav:logout')) ?></button>
 				</form>
 			</div>

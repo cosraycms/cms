@@ -17,6 +17,7 @@ $step = u($step);
 	<section class="card" aria-label="<?= escape(__('auth:reset-title')) ?>">
 		<?php if ($step === 'request'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password" hx-boost="false" novalidate>
+				<?php $this->include('component/csrf') ?>
 				<p class="intro"><?= escape(__('auth:reset-intro')) ?></p>
 
 				<?php if ($message !== null): ?>
@@ -39,6 +40,7 @@ $step = u($step);
 			</form>
 		<?php elseif ($step === 'choose'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password/<?= escape($token) ?>" hx-boost="false" novalidate>
+				<?php $this->include('component/csrf') ?>
 				<?php if ($message !== null): ?>
 					<p class="message" role="alert"><?= escape($message) ?></p>
 				<?php endif ?>

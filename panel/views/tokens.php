@@ -45,6 +45,7 @@ $profileUrl = (string) $profileUrl;
 		</div>
 
 		<form class="toolbar" method="post" action="<?= escape($tokensUrl) ?>">
+			<?php $this->include('component/csrf') ?>
 			<label class="sr-only" for="token-name"><?= escape(__('tokens:name')) ?></label>
 			<input
 				id="token-name"
@@ -91,6 +92,7 @@ $profileUrl = (string) $profileUrl;
 											method="post"
 											action="<?= escape((string) $token['revokeUrl']) ?>"
 											hx-confirm="<?= escape(__('tokens:revoke-confirm', ['name' => (string) $token['name']])) ?>">
+											<?php $this->include('component/csrf') ?>
 											<button class="cms-button danger" type="submit"><?= escape(__('tokens:revoke')) ?></button>
 										</form>
 									</td>
