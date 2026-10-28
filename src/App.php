@@ -39,6 +39,9 @@ class App implements RouteAdder
 	protected readonly Bootstrap $bootstrap;
 	protected bool $booted = false;
 
+	/** @var ?Closure(Config): Bootstrap */
+	private static ?Closure $createBootstrap = null;
+
 	public function __construct(
 		public readonly Config $config,
 		Factory $factory,
@@ -46,7 +49,7 @@ class App implements RouteAdder
 		Container $container,
 	) {
 		$this->core = new CoreApp($factory, $router, $container);
-		$this->bootstrap = Testing\Bootstrap::active() ? new Testing\Bootstrap($config) : new Bootstrap($config);
+		$this->bootstrap = self::$createBootstrap !== null ? (self::$createBootstrap)($config) : new Bootstrap($config);
 		$container->add(self::class, $this);
 		$this->addErrorHandler($container, $factory);
 	}
@@ -57,6 +60,30 @@ class App implements RouteAdder
 			$this->core->errorHandler(
 				new ErrorHandler($this->config, $factory, new ContainerLogger($container))->create(),
 			);
+		}
+	}
+
+	/**
+	 * Apps created while $create runs get their bootstrap from $bootstrap,
+	 * as the test kit builds a site's app from its unchanged boot file.
+	 *
+	 * @internal
+	 *
+	 * @template T
+	 *
+	 * @param Closure(Config): Bootstrap $bootstrap
+	 * @param Closure(): T $create
+	 * @return T
+	 */
+	public static function createdWith(Closure $bootstrap, Closure $create): mixed
+	{
+		$previous = self::$createBootstrap;
+		self::$createBootstrap = $bootstrap;
+
+		try {
+			return $create();
+		} finally {
+			self::$createBootstrap = $previous;
 		}
 	}
 

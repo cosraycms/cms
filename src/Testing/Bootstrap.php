@@ -7,7 +7,9 @@ namespace Cosray\Testing;
 use Celema\Quma\Connection;
 use Celema\Quma\Database as QumaDatabase;
 use Closure;
+use Cosray\App;
 use Cosray\Bootstrap as CmsBootstrap;
+use Cosray\Config;
 use Override;
 
 /**
@@ -18,32 +20,17 @@ use Override;
  */
 final class Bootstrap extends CmsBootstrap
 {
-	private static bool $active = false;
-
-	/** Whether apps created now are built for a test. */
-	public static function active(): bool
-	{
-		return self::$active;
-	}
-
 	/**
-	 * Every app created by $build is built for a test.
+	 * Every app created by $create is built for a test.
 	 *
 	 * @template T
 	 *
-	 * @param Closure(): T $build
+	 * @param Closure(): T $create
 	 * @return T
 	 */
-	public static function within(Closure $build): mixed
+	public static function within(Closure $create): mixed
 	{
-		$active = self::$active;
-		self::$active = true;
-
-		try {
-			return $build();
-		} finally {
-			self::$active = $active;
-		}
+		return App::createdWith(static fn(Config $config): self => new self($config), $create);
 	}
 
 	#[Override]
