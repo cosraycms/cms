@@ -26,7 +26,7 @@ vendor/bin/phpunit --no-coverage tests/Unit/RoutePathGeneratorTest.php
 vendor/bin/phpunit --no-coverage --filter Fulltext
 ```
 
-Tests run in random order, so a test that depends on another's state fails sooner or later. PHPUnit prints the order's seed at the top of each run; repeat a failing order with `--random-order-seed=<seed>`, or run in file order with `--order-by=default`.
+Tests run in random order, so a test that depends on another's state fails sooner or later. PHPUnit prints the order's seed at the top of each run; repeat a failing order with `--order-by=random --random-order-seed=<seed>`, or run in file order with `--order-by=default`.
 
 ## Isolated database setup
 
