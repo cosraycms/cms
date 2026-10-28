@@ -12,6 +12,7 @@ use Celema\Verba\Translator;
 use Celema\Verba\Verba;
 use Celema\Wire\Creator;
 use Closure;
+use ReflectionClass;
 
 final class Context
 {
@@ -55,6 +56,8 @@ final class Context
 	 * request's container, plus the given types; other arguments are
 	 * autowired through the request's container. Nodes, embedded objects,
 	 * collections, block types and dashboard cards are built this way.
+	 * Without a request, as in commands, jobs and the node writer, the
+	 * Request is a stand-in that throws once it is used.
 	 *
 	 * @template T of object
 	 * @param class-string<T> $class
@@ -71,12 +74,7 @@ final class Context
 			Container::class => $this->container,
 		];
 
-		$request = $this->currentRequest();
-
-		if ($request !== null) {
-			$base[Request::class] = $request;
-		}
-
+		$base[Request::class] = $this->currentRequest() ?? self::absentRequest();
 		$instance = new Creator($this->container)->create($class, predefinedTypes: $types + $base);
 		assert($instance instanceof $class, 'The creator returns the requested class');
 
@@ -212,6 +210,16 @@ final class Context
 	private function currentRequest(): ?Request
 	{
 		return $this->localeRequest ?? $this->request;
+	}
+
+	/** Lets a node whose form handler reads the request still be written and indexed. */
+	private static function absentRequest(): Request
+	{
+		return new ReflectionClass(Request::class)->newLazyProxy(static function (): never {
+			throw new Exception\RuntimeException(
+				'There is no HTTP request here: commands, jobs and the node writer run without one.',
+			);
+		});
 	}
 
 	/** The scheme, host and port of an absolute URL, with another host if one is given. */

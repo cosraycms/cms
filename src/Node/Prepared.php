@@ -22,6 +22,14 @@ final class Prepared
 		return $this;
 	}
 
+	/** The node's own handle, as for `$cms->render('footer')`. */
+	public function handle(string $handle): self
+	{
+		$this->data['handle'] = $handle;
+
+		return $this;
+	}
+
 	public function published(bool $published = true): self
 	{
 		$this->data['published'] = $published;

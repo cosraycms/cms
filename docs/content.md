@@ -74,7 +74,7 @@ A `Reference` field stores an ordered neutral `{uid}` list. `#[Limit(max: 1)]` m
 
 ## Programmatic creation
 
-`Node\Writer` prepares and creates nodes without an HTTP request. Pass field values to `prepare()`; use the returned `Node\Prepared` to set the UID, publication state, parent, or localized paths.
+`Node\Writer` prepares and creates nodes without an HTTP request. Pass field values to `prepare()`; use the returned `Node\Prepared` to set the UID, handle, publication state, parent, or localized paths. A node whose constructor asks for the `Request`, like one handling a form, gets a stand-in that throws once it is used.
 
 ```php
 use Cosray\Actor;

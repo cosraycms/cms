@@ -15,6 +15,7 @@ use Cosray\Node\PathManager;
 use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Writer;
+use Cosray\Tests\Fixtures\Node\HttpVerbsPage;
 use Cosray\Tests\Fixtures\Node\PlainBlock;
 use Cosray\Tests\Fixtures\Node\PlainPage;
 use Cosray\Tests\IntegrationTestCase;
@@ -240,6 +241,34 @@ final class NodeWriterTest extends IntegrationTestCase
 		$this->expectException(ValueError::class);
 
 		new Actor(0);
+	}
+
+	public function testAHandleNamesTheNode(): void
+	{
+		$writer = $this->writer();
+		$writer->create(
+			$writer->prepare(PlainBlock::class, ['content' => 'Footer'])->uid('writer-handle')->handle('footer'),
+		);
+
+		$this->assertSame(
+			'footer',
+			$this->db()->execute(
+				'SELECT handle FROM cms.node_handles WHERE node = (SELECT node FROM cms.nodes WHERE uid = :uid)',
+				['uid' => 'writer-handle'],
+			)->one()['handle'],
+		);
+	}
+
+	public function testANodeThatReadsTheRequestIsWrittenWithoutOne(): void
+	{
+		$writer = $this->writer();
+		$prepared = $writer->prepare(HttpVerbsPage::class, ['title' => 'Verbs'])->uid('writer-request-page');
+
+		$writer->create($prepared);
+
+		$this->assertSame('writer-request-page', $this->storedNode('writer-request-page')['uid']);
+		$this->throws(RuntimeException::class, 'There is no HTTP request here');
+		$prepared->node->httpGet();
 	}
 
 	public function testExplicitPathIsPreserved(): void
