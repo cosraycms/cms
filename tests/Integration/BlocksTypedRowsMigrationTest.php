@@ -195,7 +195,7 @@ final class BlocksTypedRowsMigrationTest extends IntegrationTestCase
 
 	private function migrate(): void
 	{
-		$config = new Config(self::root(), ['db.dsn' => self::testDbDsn(), 'path.root' => $this->root]);
+		$config = new Config(self::root(), ['db.dsn' => self::databaseDsn(), 'path.root' => $this->root]);
 		$class = 'Quma\Migrations\M000000_000031_BlocksTypedRows\Migration';
 
 		if (!class_exists($class)) {

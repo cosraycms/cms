@@ -67,7 +67,7 @@ final class TitleSortTest extends IntegrationTestCase
 		// All DDL is confined to a new temporary table on a separate connection.
 		// Existing application/test indexes are never rebuilt by this test.
 		$db = new Database(
-			new Connection(self::testDbDsn(), self::root() . '/db/sql')
+			new Connection(self::databaseDsn(), self::root() . '/db/sql')
 				->placeholders(Delimiters::comments(), ['pgsql' => [
 					'cms.prefix' => $prefix,
 					'cms.obj' => $objectPrefix,

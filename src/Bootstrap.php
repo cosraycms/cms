@@ -528,16 +528,11 @@ class Bootstrap implements CorePlugin
 	}
 
 	/**
-	 * Runs after every request. A worker keeps the connection for its next
-	 * request, with a transaction the request left open rolled back; with
-	 * `db.reuse` off it disconnects instead.
-	 */
-	/**
 	 * Runs a few due jobs once the response is out, so that sites without
 	 * cron or a queue daemon get their jobs done too. It runs after the
 	 * release left the connection clean and releases it again.
 	 */
-	private function runJobs(): void
+	protected function runJobs(): void
 	{
 		if (!$this->config->queue->afterResponse) {
 			return;
@@ -553,6 +548,11 @@ class Bootstrap implements CorePlugin
 		}
 	}
 
+	/**
+	 * Runs after every request. A worker keeps the connection for its next
+	 * request, with a transaction the request left open rolled back; with
+	 * `db.reuse` off it disconnects instead.
+	 */
 	protected function releaseDatabase(): void
 	{
 		if ($this->config->db->reuse) {

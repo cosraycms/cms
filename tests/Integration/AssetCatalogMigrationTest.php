@@ -250,7 +250,7 @@ final class AssetCatalogMigrationTest extends IntegrationTestCase
 	private function migrate(): void
 	{
 		$config = new Config(self::root(), [
-			'db.dsn' => self::testDbDsn(),
+			'db.dsn' => self::databaseDsn(),
 			'path.root' => $this->root,
 			'path.public' => "{$this->root}/public",
 		]);

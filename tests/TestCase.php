@@ -60,7 +60,7 @@ class TestCase extends BaseTestCase
 		return dirname(__DIR__);
 	}
 
-	protected static function testDbDsn(): string
+	public static function databaseDsn(): string
 	{
 		$host = self::testDbSetting('COSRAY_DB_HOST', 'localhost');
 		$database = self::testDbSetting('COSRAY_DB_NAME', 'cosray');
@@ -200,7 +200,7 @@ class TestCase extends BaseTestCase
 
 		return new \Celema\Quma\Database(
 			new \Celema\Quma\Connection(
-				self::testDbDsn(),
+				self::databaseDsn(),
 				self::root() . '/db/sql',
 			)
 				->placeholders(Delimiters::comments(), $config->db->placeholders)

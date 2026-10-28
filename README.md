@@ -60,6 +60,7 @@ These links describe a source checkout. Distribution archives omit development d
 | Headless delivery and integrations over JSON | [API](docs/api.md) |
 | Background jobs, retries, cron | [Job queue](docs/queue.md) |
 | Mail transports, templates, delivery | [Mail](docs/mail.md) |
+| Site tests with PHPUnit | [Testing](docs/testing.md) |
 | CSS conventions and the live styleguide | [Panel styles](docs/panel-styles.md) |
 | Current shortcuts and keyboard considerations | [Panel keyboard](docs/panel-keyboard.md) |
 | PHP tests and isolated database setup | [Testing](tests/README.md) |

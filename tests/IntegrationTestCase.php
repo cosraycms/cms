@@ -53,7 +53,7 @@ class IntegrationTestCase extends TestCase
 		$config = new Config(self::root());
 
 		self::$sharedConnection = new Connection(
-			self::testDbDsn(),
+			self::databaseDsn(),
 			self::root() . '/db/sql',
 		)
 			->placeholders(Delimiters::comments(), $config->db->placeholders)
@@ -128,7 +128,7 @@ class IntegrationTestCase extends TestCase
 		$config = new Config(self::root());
 
 		return new Connection(
-			self::testDbDsn(),
+			self::databaseDsn(),
 			self::root() . '/db/sql',
 		)
 			->placeholders(Delimiters::comments(), $config->db->placeholders)

@@ -144,4 +144,4 @@ A job that failed for good stays in the database with its last error:
 
 ## Testing
 
-`$queue->pending(SyncOrder::class)` returns the payloads of that class's jobs that have yet to succeed, in the order they were pushed, so a test can check what the code under test queued. For mails, [`$mailer->queued()`](mail.md#testing) returns the mails themselves. Tests that make requests turn off running jobs [after responses](#after-responses), or the request runs the jobs first.
+`$queue->pending(SyncOrder::class)` returns the payloads of that class's jobs that have yet to succeed, in the order they were pushed, so a test can check what the code under test queued. For mails, [`$mailer->queued()`](mail.md#testing) returns the mails themselves. In [site tests](testing.md), requests run no jobs after their response, so the jobs they pushed are still pending.

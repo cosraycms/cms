@@ -113,12 +113,12 @@ Mails are queued under the name `mail` and run like any other job: a failed atte
 
 `$mailer->queued()` returns the mails that wait for delivery, oldest first, as Symfony `Email` objects decoded from the queue, just as the delivery job will send them; a mail for a named transport carries its name in `X-Transport`. A mail sent inside a transaction that is rolled back was never queued and does not show up.
 
-Requests run due jobs once their response is out, and so deliver their mails and remove them from the queue before a test can read them. Tests that make requests therefore turn that off with `queue.after_response => false` or `QUEUE_AFTER_RESPONSE=false`. Tests that call the code under test directly need nothing else:
+In [site tests](testing.md), requests leave their mails in the queue:
 
 ```php
-$this->contact->submit(['email' => 'ann@example.com', 'message' => 'Hello']);
+$this->post('/contact', ['email' => 'ann@example.com', 'message' => 'Hello']);
 
-$mail = $this->mailer->queued()[0];
+$mail = $this->service(Mailer::class)->queued()[0];
 $this->assertSame('ann@example.com', $mail->getTo()[0]->getAddress());
 $this->assertSame('Thanks for your message', $mail->getSubject());
 ```

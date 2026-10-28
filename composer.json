@@ -48,7 +48,8 @@
 	},
 	"suggest": {
 		"celema/server": "Provides the server and frankenphp dev-server commands for local development.",
-		"filp/whoops": "Enables pretty debug error pages in debug mode."
+		"filp/whoops": "Enables pretty debug error pages in debug mode.",
+		"phpunit/phpunit": "Runs site tests on Cosray\\Testing\\TestCase."
 	},
 	"autoload": {
 		"psr-4": {

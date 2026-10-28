@@ -30,7 +30,7 @@ final class FulltextConcurrencyTest extends FulltextTestCase
 				[PHP_BINARY, self::root() . '/tests/Fixtures/fulltext-rebuild.php', $uid],
 				[0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
 				$pipes,
-				env_vars: [...getenv(), 'COSRAY_FTS_DSN' => self::testDbDsn()],
+				env_vars: [...getenv(), 'COSRAY_FTS_DSN' => self::databaseDsn()],
 			);
 			self::assertIsResource($process);
 			fclose($pipes[0]);

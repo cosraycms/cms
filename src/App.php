@@ -46,7 +46,7 @@ class App implements RouteAdder
 		Container $container,
 	) {
 		$this->core = new CoreApp($factory, $router, $container);
-		$this->bootstrap = new Bootstrap($config);
+		$this->bootstrap = Testing\Bootstrap::active() ? new Testing\Bootstrap($config) : new Bootstrap($config);
 		$container->add(self::class, $this);
 		$this->addErrorHandler($container, $factory);
 	}

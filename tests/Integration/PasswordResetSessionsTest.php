@@ -84,7 +84,7 @@ final class PasswordResetSessionsTest extends IntegrationTestCase
 			[PHP_BINARY, self::root() . '/tests/Fixtures/password-reset.php', $this->name, $action, $argument],
 			[0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
 			$pipes,
-			env_vars: [...getenv(), 'COSRAY_RESET_DSN' => self::testDbDsn()],
+			env_vars: [...getenv(), 'COSRAY_RESET_DSN' => self::databaseDsn()],
 		);
 		$this->assertIsResource($process);
 		fclose($pipes[0]);

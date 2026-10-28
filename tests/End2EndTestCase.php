@@ -153,7 +153,7 @@ class End2EndTestCase extends IntegrationTestCase
 		$container = $this->container();
 		$config = $this->config(array_merge(
 			[
-				'db.dsn' => self::testDbDsn(),
+				'db.dsn' => self::databaseDsn(),
 				'path.root' => self::root(),
 				'path.public' => self::root() . '/public',
 				'path.views' => '/tests/Fixtures/templates',
