@@ -89,7 +89,7 @@ $step = u($step);
 				<a class="forgot" href="<?= escape($panelPath) ?>/login" hx-boost="false"><?= escape(__('auth:back-to-sign-in')) ?></a>
 			</div>
 		<?php endif ?>
-	</section>
 
-	<?php $this->include('component/auth-locale') ?>
+		<?php $this->include('component/auth-locale') ?>
+	</section>
 </main>

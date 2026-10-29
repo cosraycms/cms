@@ -131,11 +131,28 @@
 	& .locale {
 		flex-direction: row;
 		align-items: center;
-		gap: var(--cms-space-2);
-		margin-top: var(--cms-space-6);
+		justify-content: center;
+		gap: var(--cms-space-1);
+		padding-top: var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border);
+
+		& label {
+			--cms-icon-size: 1rem;
+
+			display: flex;
+			color: var(--cms-color-text-muted);
+		}
 
 		& .cms-select {
 			width: auto;
+			padding-inline-start: var(--cms-space-1-5);
+			color: var(--cms-color-text-muted);
+
+			&:not(:focus) {
+				border-color: transparent;
+				background-color: transparent;
+				box-shadow: none;
+			}
 		}
 	}
 }

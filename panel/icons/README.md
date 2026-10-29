@@ -25,3 +25,5 @@ Block defaults map RichText → `body-text`, Heading → `heading`, Image → `i
 The custom `heading` icon is inspired by Bootstrap's `card-heading`, without the card border and with an additional thin text line. Level-specific rich-text actions retain `type-h1`, `type-h2`, and `type-h3`.
 
 Bundled defaults use a separate `panelIcon` name when passed as data. Custom schema `icon` metadata remains `{id, args}` and resolves through the existing icon providers, including existing `bi:*` IDs. A bundled default is not a provider ID.
+
+The language select on the sign-in pages uses `translate`.
