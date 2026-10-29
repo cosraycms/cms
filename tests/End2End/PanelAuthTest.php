@@ -45,7 +45,7 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<html lang="de">', $html);
-		$this->assertStringContainsString('Bei Ihrem Konto anmelden', $html);
+		$this->assertStringContainsString('Anmeldung', $html);
 		$this->assertStringContainsString('Angemeldet bleiben', $html);
 	}
 
