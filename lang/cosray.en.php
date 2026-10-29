@@ -33,7 +33,7 @@ return [
 		'auth:reset-sent' => 'If this login belongs to an account, a link to choose a new password is on its way. It works for one hour.',
 		'auth:reset-title' => 'Reset your password',
 		'auth:sign-in' => 'Sign in',
-		'auth:sign-in-title' => 'Sign in to your account',
+		'auth:sign-in-title' => 'Sign in to your site',
 		'auth:token' => 'One-time token',
 		'auth:too-many-attempts' => [
 			'Too many attempts. Please try again in :count minute.',

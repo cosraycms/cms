@@ -31,7 +31,7 @@ final class PanelAuthTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('Sign in to your account', $html);
+		$this->assertStringContainsString('Sign in to your site', $html);
 		$this->assertStringContainsString('action="/panel/login"', $html);
 		$this->assertStringContainsString('"code:syntax":"Syntax"', $html);
 	}
@@ -45,7 +45,7 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
 		$this->assertStringContainsString('<html lang="de">', $html);
-		$this->assertStringContainsString('Anmeldung', $html);
+		$this->assertStringContainsString('Anmeldung zur Website-Verwaltung', $html);
 		$this->assertStringContainsString('Angemeldet bleiben', $html);
 	}
 
