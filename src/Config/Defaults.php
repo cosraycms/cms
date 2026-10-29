@@ -38,6 +38,7 @@ final class Defaults
 	{
 		return [
 			'app.name' => env('APP_NAME', 'cosray'),
+			'app.title' => env('APP_TITLE', null),
 			'app.debug' => $env->bool('APP_DEBUG', false),
 			'app.env' => env('APP_ENV', ''),
 			'app.secret' => env('APP_SECRET', null),

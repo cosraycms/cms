@@ -33,6 +33,7 @@ final class ConfigTest extends TestCase
 			'APP_REQUIRED',
 			'APP_SECRET',
 			'APP_TIMEZONE',
+			'APP_TITLE',
 			'APP_URL',
 			'AUTH_REMEMBER_LIFETIME',
 			'CMS_DSN',
@@ -214,6 +215,25 @@ final class ConfigTest extends TestCase
 		$this->throws(RuntimeException::class, '`app.url` takes an absolute http or https URL');
 
 		$config->app->url;
+	}
+
+	public function testTheAppTitleDefaultsToTheHostOfTheAppUrlThenTheAppName(): void
+	{
+		$this->assertSame('cosray', new Config(self::root())->app->title);
+		$this->assertSame(
+			'www.example.org',
+			new Config(self::root(), ['app.url' => 'https://www.example.org/site'])->app->title,
+		);
+		$this->assertSame(
+			'Sample Site',
+			new Config(self::root(), [
+				'app.url' => 'https://www.example.org',
+				'app.title' => ' Sample Site ',
+			])->app->title,
+		);
+
+		$this->setEnvironment(['APP_TITLE' => 'Sample Choir']);
+		$this->assertSame('Sample Choir', new Config(self::root())->app->title);
 	}
 
 	public function testTrustedProxiesAreAddressesAndRanges(): void

@@ -59,10 +59,20 @@ final class PasswordPolicyTest extends TestCase
 
 	public function testPartsOfTheAccountAndTheSiteCountAsOneCharacter(): void
 	{
-		$policy = $this->policy(['app.name' => 'Sample Site', 'app.url' => 'https://www.example.org']);
+		$policy = $this->policy([
+			'app.name' => 'Sample Site',
+			'app.title' => 'Lindenhof Choir',
+			'app.url' => 'https://www.example.org',
+		]);
 		$account = ['erika.mustermann@example.com', 'erika', 'Erika Mustermann'];
 
-		foreach (['Mustermann2026!', 'Erika.Mustermann', 'SampleSite2026', 'www.example.org'] as $password) {
+		foreach ([
+			'Mustermann2026!',
+			'Erika.Mustermann',
+			'SampleSite2026',
+			'LindenhofChoir1',
+			'www.example.org',
+		] as $password) {
 			$this->assertSame(PasswordProblem::Personal, $policy->check($password, ...$account), $password);
 		}
 

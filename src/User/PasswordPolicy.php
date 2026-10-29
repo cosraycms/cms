@@ -203,6 +203,7 @@ final class PasswordPolicy
 	private function personal(array $values): array
 	{
 		$values[] = $this->config->app->name;
+		$values[] = $this->config->app->title;
 		$values[] = parse_url((string) $this->config->app->url, PHP_URL_HOST);
 
 		return array_values(array_filter(

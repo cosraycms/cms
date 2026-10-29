@@ -41,8 +41,8 @@ final class SendTestMail
 				new Email()
 					->from($from)
 					->to($to)
-					->subject("Test mail from {$this->config->app->name}")
-					->text("This mail tests the mail setup of {$this->config->app->name}."),
+					->subject("Test mail from {$this->config->app->title}")
+					->text("This mail tests the mail setup of {$this->config->app->title}."),
 				$transport === '' ? null : $transport,
 			);
 		} catch (Throwable $e) {

@@ -20,6 +20,22 @@ final class App
 		get => $this->config->get('app.name');
 	}
 
+	/**
+	 * The site's name as people read it, in mails for example, unlike
+	 * `app.name`, which names the session cookies.
+	 */
+	public string $title {
+		get {
+			$title = $this->config->get('app.title');
+
+			if (is_string($title) && trim($title) !== '') {
+				return trim($title);
+			}
+
+			return parse_url((string) $this->url, PHP_URL_HOST) ?: $this->name;
+		}
+	}
+
 	public bool $debug {
 		get => $this->config->get('app.debug');
 	}

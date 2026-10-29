@@ -24,6 +24,8 @@ Recognized environment variables are read from `$_SERVER`, then `$_ENV`, not `ge
 
 The complete settings list lives in [Defaults.php](../src/Config/Defaults.php); conversions and validation live in [Config/](../src/Config/). `session.enabled` controls frontend session middleware. The panel has its own session handling. `app.timezone` controls panel timestamp display.
 
+`app.name` names the session cookies, so changing it signs everyone out. The site's name as people read it, in mails for example, is `app.title`, `APP_TITLE` in the environment; it defaults to the host of `app.url`, else `app.name`.
+
 ### Filesystem directories and URL paths
 
 | Setting | Meaning |
@@ -301,7 +303,7 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 ### Passwords
 
-The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
+The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name`, `app.title` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
 
 Common words with a number, like `Sommer2026!!`, pass these checks. To refuse passwords known from data breaches, set `password.breach_check` or `PASSWORD_BREACH_CHECK=true`: Cosray then asks the [Pwned Passwords API](https://haveibeenpwned.com/API/v3#PwnedPasswords) of Have I Been Pwned whether a new password appears in its breach data. When the service does not answer within five seconds, the password is accepted and a `warning` is logged.
 
@@ -323,7 +325,7 @@ The panel counts failed sign-ins per client address, in windows of 15 minutes th
 
 With a [mail transport](mail.md) and `app.url` configured, the login page links to a form where panel users who forgot their password request a link by mail. The link works once and for an hour, a user gets at most one every five minutes, and an address may ask for at most five every 15 minutes. The request only queues a [job](queue.md) that looks the login up and sends the mail, so the form answers the same, and does the same work, whether or not the login belongs to an account; by default, the job runs once the response is out. The mail is in the user's panel language, or else in that of the request. Setting the new password ends the user's other sessions and remembered logins like any password change. Requests and resets are logged as `notice`. Without mail or `app.url`, there is no link and the pages answer 404.
 
-The mail comes from the template `cosray/password-reset`. A file `cosray/password-reset.php` in the `mail.views` directory replaces it; it receives `name`, `site` and `url`.
+The mail comes from the template `cosray/password-reset`. A file `cosray/password-reset.php` in the `mail.views` directory replaces it; it receives `name`, `site` (the `app.title`) and `url`.
 
 ### Node permissions
 

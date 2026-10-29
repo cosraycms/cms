@@ -20,6 +20,7 @@ namespace Cosray\Config;
  *
  * @phpstan-type BuiltinConfig = array{
  *     'app.name': string,
+ *     'app.title': ?string,
  *     'app.debug': bool,
  *     'app.env': string,
  *     'app.secret': ?string,
@@ -96,6 +97,7 @@ namespace Cosray\Config;
  *
  * @phpstan-type BuiltinConfigInput = array{
  *     'app.name'?: string,
+ *     'app.title'?: ?string,
  *     'app.debug'?: bool,
  *     'app.env'?: string,
  *     'app.secret'?: null|string,

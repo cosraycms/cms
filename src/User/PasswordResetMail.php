@@ -99,7 +99,7 @@ final class PasswordResetMail implements Job
 				to: new Address($user->email, $user->name ?? ''),
 				data: [
 					'name' => $user->name ?? $user->loginName(),
-					'site' => $this->config->app->name,
+					'site' => $this->config->app->title,
 					'url' => $this->resets->url($token),
 				],
 			);

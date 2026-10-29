@@ -23,6 +23,7 @@ use Symfony\Component\Mime\Email;
 final class PanelPasswordResetTest extends End2EndTestCase
 {
 	private const array SETTINGS = [
+		'app.title' => 'Sample Site',
 		'app.url' => 'https://example.org/',
 		'mail.transports' => ['default' => 'null://null'],
 		'mail.from' => 'site@example.com',
@@ -65,7 +66,7 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 		$mail = $this->mails()[0];
 		$this->assertSame(['"Ann" <forgetful@example.com>'], $mail['to']);
-		$this->assertSame('A new password for cosray', $mail['subject']);
+		$this->assertSame('A new password for Sample Site', $mail['subject']);
 		$this->assertStringContainsString('Hello Ann,', (string) $mail['html']);
 		$this->assertSame(1, preg_match(
 			'#https://example\.org/panel/password/([a-f0-9]{64})#',
@@ -182,7 +183,7 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 		$this->html('POST', '/panel/password', ['login' => 'german']);
 
-		$this->assertSame('Ein neues Passwort für cosray', $this->mails()[0]['subject']);
+		$this->assertSame('Ein neues Passwort für Sample Site', $this->mails()[0]['subject']);
 		$this->assertStringContainsString('Neues Passwort wählen', (string) $this->mails()[0]['text']);
 	}
 
@@ -192,7 +193,7 @@ final class PanelPasswordResetTest extends End2EndTestCase
 
 		$this->html('POST', '/panel/password', ['login' => 'browser'], ['Accept-Language' => 'de-DE,de;q=0.9']);
 
-		$this->assertSame('Ein neues Passwort für cosray', $this->mails()[0]['subject']);
+		$this->assertSame('Ein neues Passwort für Sample Site', $this->mails()[0]['subject']);
 	}
 
 	public function testAnExpiredLinkDoesNotWork(): void
