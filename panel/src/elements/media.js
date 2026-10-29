@@ -13,7 +13,7 @@ import { cosray } from '../lib/bridge.js';
 import { ZXX, pruneItemMeta } from '../lib/content.js';
 import { fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
-import { __ } from '../lib/locale.js';
+import { __, __n } from '../lib/locale.js';
 import { alertDialog, editDialog, libraryDialog, previewDialog } from './media/dialogs.js';
 import { galleryView } from './media/gallery-view.js';
 import { metaFields } from './media/meta-fields.js';
@@ -540,10 +540,8 @@ class MediaControl extends HTMLElement {
 				max > 1
 					? `${count} / ${max}`
 					: this.#type === 'image'
-						? count === 1
-							? __('image:count-one', { count: 1 })
-							: __('image:count-many', { count })
-						: __('media:file-count', { count });
+						? __n('image:count', 'image:count-plural', count)
+						: __n('media:file-count', 'media:file-count-plural', count);
 		}
 
 		if (tally) {
@@ -797,7 +795,7 @@ class MediaControl extends HTMLElement {
 		}
 
 		if (files.length > left) {
-			alertDialog(this, __('upload:slots-left', { count: left }));
+			alertDialog(this, __n('upload:slots-left', 'upload:slots-left-plural', left));
 
 			return files.slice(0, left);
 		}

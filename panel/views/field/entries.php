@@ -36,13 +36,9 @@ $single = count($entryTypes) === 1;
 	data-name="<?= $this->escape($name) ?>"
 	data-id="<?= $this->escape($id) ?>"
 	<?= is_int($max) ? 'data-max="' . $max . '"' : '' ?>>
-	<div
-		class="tally"
-		data-repeater-count
-		data-one="<?= $this->escape(__('field:entry-count')) ?>"
-		data-many="<?= $this->escape(__('field:entry-count-plural')) ?>"><?= $this->escape(
-			__($count === 1 ? 'field:entry-count' : 'field:entry-count-plural', ['count' => $count]),
-		) ?></div>
+	<div class="tally" data-repeater-count><?= $this->escape(
+		__n('field:entry-count', 'field:entry-count-plural', $count),
+	) ?></div>
 	<div class="rows" data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {
 			if (!is_array($rowData)) {

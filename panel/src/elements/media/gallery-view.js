@@ -10,7 +10,7 @@ import Sortable from 'sortablejs';
 import { ZXX } from '../../lib/content.js';
 import { RATIOS, afterMove, afterRemove, readRatio } from '../../lib/gallery.js';
 import { assetLine, extension } from '../../lib/library.js';
-import { __ } from '../../lib/locale.js';
+import { __, __n } from '../../lib/locale.js';
 import { metaFields } from './meta-fields.js';
 import { button, contentLocales, create } from './views.js';
 
@@ -183,10 +183,7 @@ export function galleryView(options) {
 
 		if (block && options.open && !readonly) {
 			const bar = create('div', 'bar');
-			const count =
-				items.length === 1
-					? __('image:count-one', { count: 1 })
-					: __('image:count-many', { count: items.length });
+			const count = __n('image:count', 'image:count-plural', items.length);
 			bar.append(
 				create('span', 'status', options.loading ? __('upload:uploading') : count),
 				button('quiet', __('media:choose-from-library'), options.library),

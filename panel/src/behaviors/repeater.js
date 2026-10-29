@@ -32,6 +32,7 @@
 /** @import { CosrayHost } from '../lib/host.js' */
 
 import { uid } from '../lib/content.js';
+import { __n } from '../lib/locale.js';
 
 const enhanced = /** @type {WeakSet<HTMLElement>} */ (new WeakSet());
 
@@ -170,8 +171,7 @@ export function renumber(container) {
 	);
 
 	if (count) {
-		const template = rows.length === 1 ? count.dataset.one : count.dataset.many;
-		count.textContent = (template ?? '').replace(':count', String(rows.length));
+		count.textContent = __n('field:entry-count', 'field:entry-count-plural', rows.length);
 	}
 
 	const max = Number(container.dataset.max ?? '');

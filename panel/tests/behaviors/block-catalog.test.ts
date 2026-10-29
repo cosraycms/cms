@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { activate, deactivate } from '@celema/verba';
+import { afterAll, afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/block-catalog';
 import { install as installRepeater } from '../../src/behaviors/repeater';
 import { install as installBlocks } from '../../src/behaviors/blocks';
@@ -12,6 +13,7 @@ import { install as installFallbacks } from '../../src/behaviors/fallbacks';
 import { install as installMenus, openMenu } from '../../src/lib/action-menu';
 import { installBridge } from '../../src/lib/bridge-standalone';
 import { nest } from '../../src/lib/form-json';
+import { catalog } from '../catalog';
 
 vi.mock('sortablejs', () => ({ default: vi.fn() }));
 
@@ -110,6 +112,9 @@ function key(target: Element, key: string): KeyboardEvent {
 function cancel(dialog: HTMLDialogElement): void {
 	dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
 }
+
+beforeAll(() => activate(catalog()));
+afterAll(deactivate);
 
 beforeEach(() => {
 	installBridge({

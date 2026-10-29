@@ -158,11 +158,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<form id="collection-bulk" method="post" hidden><?php $this->include('component/csrf') ?></form>
 			<div class="bulk-bar" data-bulk-bar hidden>
 				<div class="info">
-					<output
-						class="count"
-						data-bulk-count
-						data-label-one="<?= escape(__('bulk:selected')) ?>"
-						data-label-many="<?= escape(__('bulk:selected-plural')) ?>"></output>
+					<output class="count" data-bulk-count></output>
 					<button type="button" class="clear" data-bulk-clear><?= escape(
 						__('bulk:clear'),
 					) ?></button>
@@ -301,11 +297,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="delete">
 			<?php $this->include('component/modal-header', ['title' => __('bulk:delete')]) ?>
 			<div class="modal-body cms-confirm">
-			<p
-				class="question"
-				data-bulk-question
-				data-label-one="<?= escape(__('bulk:confirm-delete')) ?>"
-				data-label-many="<?= escape(__('bulk:confirm-delete-plural')) ?>"></p>
+			<p class="question" data-bulk-question></p>
 			<?php // data-bulk-gate: deleting a parent without this opt-in would
 
 			// only be skipped server-side, so the confirm button stays locked
@@ -333,11 +325,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="duplicate">
 			<?php $this->include('component/modal-header', ['title' => __('bulk:duplicate')]) ?>
 			<div class="modal-body cms-confirm">
-			<p
-				class="question"
-				data-bulk-question
-				data-label-one="<?= escape(__('bulk:confirm-duplicate')) ?>"
-				data-label-many="<?= escape(__('bulk:confirm-duplicate-plural')) ?>"></p>
+			<p class="question" data-bulk-question></p>
 			<?php // No data-bulk-gate: duplicating a parent without its children
 
 			// is a legitimate copy, so the checkbox is a plain option. ?>
@@ -365,11 +353,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="publish">
 				<?php $this->include('component/modal-header', ['title' => __('bulk:publish')]) ?>
 				<div class="modal-body cms-confirm">
-				<p
-					class="question"
-					data-bulk-question
-					data-label-one="<?= escape(__('bulk:confirm-publish')) ?>"
-					data-label-many="<?= escape(__('bulk:confirm-publish-plural')) ?>"></p>
+				<p class="question" data-bulk-question></p>
 				<label class="children" data-bulk-children hidden>
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:publish-children')) ?></span>
@@ -399,11 +383,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="unpublished">
 				<?php $this->include('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
 				<div class="modal-body cms-confirm">
-				<p
-					class="question"
-					data-bulk-question
-					data-label-one="<?= escape(__('bulk:confirm-unpublish')) ?>"
-					data-label-many="<?= escape(__('bulk:confirm-unpublish-plural')) ?>"></p>
+				<p class="question" data-bulk-question></p>
 				<label class="children" data-bulk-children hidden>
 					<input type="checkbox" name="children" value="1" form="collection-bulk" />
 					<span><?= escape(__('bulk:unpublish-children')) ?></span>

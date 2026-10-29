@@ -49,7 +49,7 @@ unset($search['page']);
 		<div class="titles">
 			<div class="line">
 				<h1><?= escape(__('media:title')) ?></h1>
-				<span class="cms-count"><?= escape(__('media:file-count', ['count' => $listing->total])) ?></span>
+				<span class="cms-count"><?= escape(__n('media:file-count', 'media:file-count-plural', $listing->total)) ?></span>
 			</div>
 		</div>
 		<div class="actions">

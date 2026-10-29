@@ -4,6 +4,20 @@ declare(strict_types=1);
 
 return [
 	'messages' => [
+		'bulk:confirm-delete' => ['Den ausgewählten Eintrag löschen?', 'Die :count ausgewählten Einträge löschen?'],
+		'bulk:confirm-duplicate' => [
+			'Den ausgewählten Eintrag duplizieren?',
+			'Die :count ausgewählten Einträge duplizieren?',
+		],
+		'bulk:confirm-publish' => [
+			'Den ausgewählten Eintrag veröffentlichen?',
+			'Die :count ausgewählten Einträge veröffentlichen?',
+		],
+		'bulk:confirm-unpublish' => [
+			'Die Veröffentlichung des ausgewählten Eintrags aufheben?',
+			'Die Veröffentlichung der :count ausgewählten Einträge aufheben?',
+		],
+		'bulk:selected' => [':count Eintrag ausgewählt', ':count Einträge ausgewählt'],
 		'code:plaintext' => 'Nur Text',
 		'code:syntax' => 'Syntax',
 		'common:apply' => 'Übernehmen',
@@ -22,7 +36,10 @@ return [
 		'common:tabs' => 'Tabs',
 		'common:title' => 'Titel',
 		'editor:content-language' => 'Inhaltssprache',
+		'field:block-results' => [':count Blocktyp verfügbar', ':count Blocktypen verfügbar'],
+		'field:entry-count' => [':count Eintrag', ':count Einträge'],
 		'field:fallback-from' => 'Fallback aus :language',
+		'field:no-block-results' => 'Keine passenden Blocktypen.',
 		'field:optional' => 'optional',
 		'field:shared-content' => 'gemeinsamem Inhalt',
 		'image:add' => 'Bilder hinzufügen',
@@ -31,8 +48,7 @@ return [
 		'image:alt-text-placeholder' => 'Was ist auf dem Bild zu sehen?',
 		'image:caption' => 'Bildunterschrift',
 		'image:caption-placeholder' => 'Wird unter dem Bild angezeigt',
-		'image:count-many' => ':count Bilder',
-		'image:count-one' => ':count Bild',
+		'image:count' => [':count Bild', ':count Bilder'],
 		'image:crop' => 'Auf das Seitenverhältnis zuschneiden',
 		'image:insert' => 'Bild einfügen',
 		'image:next' => 'Nächstes Bild',
@@ -51,7 +67,7 @@ return [
 		'media:drop-to-upload' => 'Zum Hochladen ablegen',
 		'media:empty-many' => 'Keine Dateien',
 		'media:empty-one' => 'Keine Datei',
-		'media:file-count' => ':count Dateien',
+		'media:file-count' => [':count Datei', ':count Dateien'],
 		'media:file-details' => 'Datei-Details',
 		'media:files-documents' => 'Dateien/Dokumente',
 		'media:images' => 'Bilder',
@@ -113,7 +129,10 @@ return [
 		'upload:max-files' => 'In diesem Feld sind maximal :max Dateien erlaubt.',
 		'upload:or-from-library' => 'oder aus den Medien wählen:',
 		'upload:single-only' => 'In diesem Feld ist nur eine einzelne Datei erlaubt.',
-		'upload:slots-left' => 'Es können nur noch :count Datei(en) hinzugefügt werden.',
+		'upload:slots-left' => [
+			'Es kann nur noch :count Datei hinzugefügt werden.',
+			'Es können nur noch :count Dateien hinzugefügt werden.',
+		],
 		'upload:uploading' => 'Lädt hoch …',
 		'video:caption-placeholder' => 'Wird unter dem Video angezeigt',
 	],

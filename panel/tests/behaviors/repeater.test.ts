@@ -3,10 +3,12 @@
 // that view, so the entries refactor can generalize the behavior
 // without rewriting these.
 
+import { Translator, activate, deactivate } from '@celema/verba';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/repeater';
 import { install as installMenus } from '../../src/lib/action-menu';
 import { install as installContentLocales } from '../../src/behaviors/content-locales';
+import { catalog } from '../catalog';
 
 const sortable = vi.hoisted(() => vi.fn());
 
@@ -32,6 +34,7 @@ afterEach(() => {
 	document.body.innerHTML = '';
 	sortable.mockClear();
 	localStorage.clear();
+	deactivate();
 });
 
 function row(index: string, value = '', extra = ''): string {
@@ -406,8 +409,9 @@ describe('repeater behavior', () => {
 	});
 
 	it('stamps into the row list and keeps the count line in step', () => {
+		activate(catalog());
 		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
-			<div data-repeater-count data-one=":count entry" data-many=":count entries">1 entry</div>
+			<div data-repeater-count>1 entry</div>
 			<div data-repeater-list>${row('0', 'a')}</div>
 			<template data-repeater-template>${row('__i__')}</template>
 			<div data-repeater-footer>
@@ -438,6 +442,46 @@ describe('repeater behavior', () => {
 
 		expect(count?.textContent).toBe('1 entry');
 		expect(names(container)).toEqual([`${NAME}[0]`]);
+	});
+
+	it('counts rows in the plural forms of the panel language', () => {
+		activate(
+			new Translator({
+				locale: 'pl',
+				domains: [
+					{
+						domain: 'panel',
+						plural: 'pl',
+						messages: { 'field:entry-count': [':count wpis', ':count wpisy', ':count wpisów'] },
+					},
+				],
+			}),
+		);
+		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
+			<div data-repeater-count>1 wpis</div>
+			<div data-repeater-list>${row('0', 'a')}</div>
+			<template data-repeater-template>${row('__i__')}</template>
+			<div data-repeater-footer>
+				<button type="button" data-repeater-add>Add</button>
+			</div>
+		</div>`;
+
+		const container = document.querySelector<HTMLElement>('[data-repeater]');
+		const count = container?.querySelector('[data-repeater-count]');
+
+		if (!container) {
+			throw new Error('container missing');
+		}
+
+		click(container, '[data-repeater-add]');
+
+		expect(count?.textContent).toBe('2 wpisy');
+
+		click(container, '[data-repeater-add]');
+		click(container, '[data-repeater-add]');
+		click(container, '[data-repeater-add]');
+
+		expect(count?.textContent).toBe('5 wpisów');
 	});
 
 	function summaryRow(title: string, subtitle: string): string {

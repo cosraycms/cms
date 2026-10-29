@@ -1,11 +1,18 @@
 import { openDialog, closeDialog } from '../lib/dialogs.js';
+import { __n } from '../lib/locale.js';
 
 // Collection bulk selection: the checkbox column drives the action bar
-// (count, clear, action buttons) and the confirm dialogs. Server-rendered
-// strings arrive as data-label-one/-many templates with a :count
-// placeholder, so no client catalog is involved. Delegated listeners
-// only; the selection deliberately resets with every htmx swap
+// (count, clear, action buttons) and the confirm dialogs. Delegated
+// listeners only; the selection deliberately resets with every htmx swap
 // (per-page selection).
+
+/** @type {Record<string, (count: number) => string>} */
+const questions = {
+	delete: (count) => __n('bulk:confirm-delete', 'bulk:confirm-delete-plural', count),
+	duplicate: (count) => __n('bulk:confirm-duplicate', 'bulk:confirm-duplicate-plural', count),
+	publish: (count) => __n('bulk:confirm-publish', 'bulk:confirm-publish-plural', count),
+	unpublished: (count) => __n('bulk:confirm-unpublish', 'bulk:confirm-unpublish-plural', count),
+};
 
 // The bulk redirect carries its outcome summary in a `notice` query
 // param the server renders as a banner once. The param leaves the
@@ -42,16 +49,6 @@ function selected() {
 	return boxes().filter((box) => box.checked);
 }
 
-/**
- * @param {HTMLElement} target
- * @param {number} count
- */
-function fill(target, count) {
-	const template = count === 1 ? target.dataset.labelOne : target.dataset.labelMany;
-
-	target.textContent = (template ?? '').replace(':count', String(count));
-}
-
 function sync() {
 	const bar = /** @type {HTMLElement | null} */ (document.querySelector('[data-bulk-bar]'));
 
@@ -67,7 +64,7 @@ function sync() {
 	const output = /** @type {HTMLElement | null} */ (bar.querySelector('[data-bulk-count]'));
 
 	if (output) {
-		fill(output, count);
+		output.textContent = __n('bulk:selected', 'bulk:selected-plural', count);
 	}
 
 	const master = /** @type {HTMLInputElement | null} */ (
@@ -97,7 +94,7 @@ function confirmSelection(name, opener) {
 	const question = /** @type {HTMLElement | null} */ (dialog.querySelector('[data-bulk-question]'));
 
 	if (question) {
-		fill(question, picked.length);
+		question.textContent = questions[name]?.(picked.length) ?? '';
 	}
 
 	const children = /** @type {HTMLElement | null} */ (dialog.querySelector('[data-bulk-children]'));

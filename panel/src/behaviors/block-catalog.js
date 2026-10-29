@@ -1,6 +1,7 @@
 /** @import { Insertion } from './repeater.js' */
 
 import { cosray } from '../lib/bridge.js';
+import { __, __n } from '../lib/locale.js';
 import { insertion, insert } from './repeater.js';
 
 /** @typedef {'before' | 'after'} Position */
@@ -62,13 +63,10 @@ function catalog(host, anchored, choose) {
 			return !choice.hidden;
 		});
 		rove(active && visible.includes(active) ? active : visible[0]);
-		const { empty, one, count } = status.dataset;
 		status.textContent =
 			visible.length === 0
-				? /** @type {string} */ (empty)
-				: visible.length === 1
-					? /** @type {string} */ (one)
-					: /** @type {string} */ (count).replace(':count', String(visible.length));
+				? __('field:no-block-results')
+				: __n('field:block-results', 'field:block-results-plural', visible.length);
 	}
 
 	search.addEventListener('input', filter);

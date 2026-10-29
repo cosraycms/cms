@@ -1,17 +1,19 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { activate, deactivate } from '@celema/verba';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { install } from '../../src/behaviors/bulk';
 import { closeDialog } from '../../src/lib/dialogs';
+import { catalog } from '../catalog';
 
 let uninstall: (() => void) | null = null;
+
+beforeAll(() => activate(catalog()));
+afterAll(deactivate);
 
 beforeEach(() => {
 	document.body.innerHTML = `
 		<form id="collection-bulk" method="post" hidden></form>
 		<div data-bulk-bar hidden>
-			<output
-				data-bulk-count
-				data-label-one=":count entry selected"
-				data-label-many=":count entries selected"></output>
+			<output data-bulk-count></output>
 			<button type="button" data-bulk-clear>Clear</button>
 			<button type="button" data-bulk-open="delete">Delete</button>
 			<button type="button" data-bulk-open="duplicate">Duplicate</button>
@@ -37,10 +39,7 @@ beforeEach(() => {
 			</tbody>
 		</table>
 		<dialog data-bulk-dialog="delete">
-			<p
-				data-bulk-question
-				data-label-one="Delete the selected entry?"
-				data-label-many="Delete the :count selected entries?"></p>
+			<p data-bulk-question></p>
 			<label data-bulk-children data-bulk-gate hidden>
 				<input type="checkbox" name="children" form="collection-bulk" value="1" />
 			</label>
@@ -48,10 +47,7 @@ beforeEach(() => {
 			<button type="submit" form="collection-bulk" formaction="/bulk/delete" data-bulk-confirm>Delete</button>
 		</dialog>
 		<dialog data-bulk-dialog="duplicate">
-			<p
-				data-bulk-question
-				data-label-one="Duplicate the selected entry?"
-				data-label-many="Duplicate the :count selected entries?"></p>
+			<p data-bulk-question></p>
 			<label data-bulk-children hidden>
 				<input type="checkbox" name="children" form="collection-bulk" value="1" />
 			</label>
