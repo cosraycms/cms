@@ -6,14 +6,14 @@ $this->layout('layer/document');
 
 ?>
 <main id="main" class="cms-login">
-	<header class="head">
-		<?php if ($logo !== null): ?>
-			<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
-		<?php endif ?>
-		<h1><?= escape(__('auth:sign-in-title')) ?></h1>
-	</header>
+	<section class="card" aria-labelledby="auth-title">
+		<header class="head">
+			<?php if ($logo !== null): ?>
+				<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
+			<?php endif ?>
+			<h1 id="auth-title"><?= escape(__('auth:sign-in-title')) ?></h1>
+		</header>
 
-	<section class="card" aria-label="<?= escape(__('auth:sign-in')) ?>">
 		<form method="post" action="<?= escape($panelPath) ?>/login" hx-boost="false">
 			<?php $this->include('component/csrf') ?>
 			<input type="hidden" name="next" value="<?= escape($next) ?>" />

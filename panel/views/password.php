@@ -7,14 +7,14 @@ $step = u($step);
 
 ?>
 <main id="main" class="cms-login">
-	<header class="head">
-		<?php if ($logo !== null): ?>
-			<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
-		<?php endif ?>
-		<h1><?= escape($step === 'choose' ? __('auth:reset-choose') : __('auth:reset-title')) ?></h1>
-	</header>
+	<section class="card" aria-labelledby="auth-title">
+		<header class="head">
+			<?php if ($logo !== null): ?>
+				<img class="logo" src="<?= escape((string) $logo) ?>" alt="<?= escape(__('panel:logo')) ?>" />
+			<?php endif ?>
+			<h1 id="auth-title"><?= escape($step === 'choose' ? __('auth:reset-choose') : __('auth:reset-title')) ?></h1>
+		</header>
 
-	<section class="card" aria-label="<?= escape(__('auth:reset-title')) ?>">
 		<?php if ($step === 'request'): ?>
 			<form method="post" action="<?= escape($panelPath) ?>/password" hx-boost="false" novalidate>
 				<?php $this->include('component/csrf') ?>
