@@ -172,6 +172,7 @@ class Routes
 				$panel
 					->post('/login', [Panel\Login::class, 'authenticate'], 'login.authenticate')
 					->after($renderers->get('login'));
+				$panel->post('/login/locale', [Panel\Preferences::class, 'guestLocale'], 'login.locale');
 				$panel->get('/handoff/{token:[a-f0-9]{64}}', [Panel\Login::class, 'handoff'], 'handoff');
 				$panel
 					->get('/expired', [Panel\Login::class, 'expired'], 'expired')

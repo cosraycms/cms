@@ -90,4 +90,6 @@ $step = u($step);
 			</div>
 		<?php endif ?>
 	</section>
+
+	<?php $this->include('component/auth-locale') ?>
 </main>

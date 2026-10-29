@@ -134,6 +134,7 @@ return [
 		'collection:tree' => 'Baum',
 		'collection:view' => 'Sammlungsansicht',
 		'color:pick' => 'Farbe auswählen',
+		'common:apply' => 'Übernehmen',
 		'common:close' => 'Schließen',
 		'common:delete' => 'Löschen',
 		'common:filter' => 'Filter',

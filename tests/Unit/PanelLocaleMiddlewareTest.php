@@ -37,12 +37,14 @@ final class PanelLocaleMiddlewareTest extends TestCase
 	public function testUserPreferenceWins(): void
 	{
 		$handler = $this->handler();
+		$config = $this->config(['panel.locale' => 'en']);
 		$request = $this
 			->panelRequest()
 			->withAttribute('user', $this->user('de'))
+			->withCookieParams([PanelLocale::cookie($config) => 'en'])
 			->withHeader('Accept-Language', 'en');
 
-		new PanelLocale($this->config(['panel.locale' => 'en']))->process($request, $handler);
+		new PanelLocale($config)->process($request, $handler);
 
 		$this->assertSame('de', $this->translator($handler)->locale);
 		$this->assertSame('de', $handler->request?->getAttribute('panelLocale'));
@@ -58,6 +60,34 @@ final class PanelLocaleMiddlewareTest extends TestCase
 			->withHeader('Accept-Language', 'de');
 
 		new PanelLocale($this->config())->process($request, $handler);
+
+		$this->assertSame('de', $this->translator($handler)->locale);
+	}
+
+	public function testTheLanguageChosenBeforeSigningInBeatsConfigAndBrowser(): void
+	{
+		$handler = $this->handler();
+		$config = $this->config(['panel.locale' => 'en']);
+		$request = $this
+			->panelRequest()
+			->withCookieParams([PanelLocale::cookie($config) => 'de'])
+			->withHeader('Accept-Language', 'en');
+
+		new PanelLocale($config)->process($request, $handler);
+
+		$this->assertSame('de', $this->translator($handler)->locale);
+	}
+
+	public function testAnUnknownLanguageChosenBeforeSigningInFallsThrough(): void
+	{
+		$handler = $this->handler();
+		$config = $this->config();
+		$request = $this
+			->panelRequest()
+			->withCookieParams([PanelLocale::cookie($config) => 'tlh'])
+			->withHeader('Accept-Language', 'de');
+
+		new PanelLocale($config)->process($request, $handler);
 
 		$this->assertSame('de', $this->translator($handler)->locale);
 	}

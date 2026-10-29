@@ -128,6 +128,7 @@ return [
 		'collection:tree' => 'Tree',
 		'collection:view' => 'Collection view',
 		'color:pick' => 'Pick a color',
+		'common:apply' => 'Apply',
 		'common:close' => 'Close',
 		'common:delete' => 'Delete',
 		'common:filter' => 'Filter',

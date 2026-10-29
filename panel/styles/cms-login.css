@@ -127,4 +127,15 @@
 		justify-content: center;
 		width: 100%;
 	}
+
+	& .locale {
+		flex-direction: row;
+		align-items: center;
+		gap: var(--cms-space-2);
+		margin-top: var(--cms-space-6);
+
+		& .cms-select {
+			width: auto;
+		}
+	}
 }

@@ -301,6 +301,8 @@ Routes use `#[Permission(...)]` middleware; panel controllers can call `$this->p
 
 Users have an email login and optional username without `@`. A subclass of [Cosray\User](../src/User.php), registered through `$app->user()`, adds fields like a node class. `#[Roles(...)]` limits assignable roles; `#[Roles]` allows none. Fields are neutral-locale values stored under `content` in `users.data`, without working copies, and hydrate on demand through [User\Fields](../src/User/Fields.php). See [User\Types](../src/User/Types.php) and its tests for type registration and default-type replacement.
 
+The panel speaks each language for which both its catalogs, `cosray` and `panel`, ship a file. It takes the language a user saved in the profile or the account menu, then the one chosen on the sign-in pages, kept in the cookie `{app.name}_panel_locale`, then `panel.locale`, then the browser's `Accept-Language`, then English. The sign-in pages offer the choice once there is more than one language.
+
 ### Passwords
 
 The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name`, `app.title` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.

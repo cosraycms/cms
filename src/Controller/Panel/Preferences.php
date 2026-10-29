@@ -11,10 +11,13 @@ use Celema\Core\Response;
 use Cosray\Auth as CmsAuth;
 use Cosray\Config;
 use Cosray\Locales;
+use Cosray\Middleware\PanelLocale;
 use Cosray\Users;
 
 final class Preferences extends Panel
 {
+	private const int YEAR = 60 * 60 * 24 * 365;
+
 	public function __construct(
 		Config $config,
 		Container $container,
@@ -45,6 +48,18 @@ final class Preferences extends Panel
 		return $this->redirect($factory, $this->refererPath());
 	}
 
+	/**
+	 * Keeps the language chosen on the sign-in pages in a cookie, as there
+	 * is no user to store it with yet. Any other value forgets the choice.
+	 */
+	public function guestLocale(Factory $factory): Response
+	{
+		$locale = $this->formData()['locale'] ?? null;
+		$locale = is_string($locale) && in_array($locale, $this->available(), true) ? $locale : null;
+
+		return $this->redirect($factory, $this->refererPath())->header('Set-Cookie', $this->localeCookie($locale));
+	}
+
 	/** @return list<string> */
 	private function available(): array
 	{
@@ -68,6 +83,20 @@ final class Preferences extends Panel
 		}
 
 		return $this->panelPath();
+	}
+
+	private function localeCookie(?string $locale): string
+	{
+		$options = $this->config->session->options;
+
+		return implode('; ', array_filter([
+			PanelLocale::cookie($this->config) . '=' . ($locale ?? ''),
+			'Path=' . (string) ($options['cookie_path'] ?? '/'),
+			'Max-Age=' . ($locale === null ? 0 : self::YEAR),
+			'SameSite=Lax',
+			'HttpOnly',
+			$options['cookie_secure'] ?? true ? 'Secure' : '',
+		]));
 	}
 
 	private function redirect(Factory $factory, string $target): Response

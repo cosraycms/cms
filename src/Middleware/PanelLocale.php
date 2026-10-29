@@ -17,11 +17,12 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 
 /**
  * Negotiates the panel UI language independently of the content locale:
- * the user's stored preference, then config `panel.locale`, then the
- * browser's Accept-Language, then English. Activates a translator for the
- * chosen locale with the remaining panel locales as fallback chain and
- * restores the content translator afterwards. The content locale
- * attributes stay untouched, so editing and serialization are unaffected.
+ * the user's stored preference, then the language chosen on the sign-in
+ * pages, then config `panel.locale`, then the browser's Accept-Language,
+ * then English. Activates a translator for the chosen locale with the
+ * remaining panel locales as fallback chain and restores the content
+ * translator afterwards. The content locale attributes stay untouched, so
+ * editing and serialization are unaffected.
  */
 class PanelLocale implements Middleware
 {
@@ -65,6 +66,12 @@ class PanelLocale implements Middleware
 		}
 	}
 
+	/** The cookie holding the language chosen on the sign-in pages. */
+	public static function cookie(Config $config): string
+	{
+		return $config->app->name . '_panel_locale';
+	}
+
 	/**
 	 * A translator for one of the panel locales, with the fallbacks the
 	 * panel uses, like for a mail in the language a user chose.
@@ -85,6 +92,12 @@ class PanelLocale implements Middleware
 			&& in_array($user->panelLocale, $available, true)
 		) {
 			return $user->panelLocale;
+		}
+
+		$chosen = $request->getCookieParams()[self::cookie($this->config)] ?? null;
+
+		if (is_string($chosen) && in_array($chosen, $available, true)) {
+			return $chosen;
 		}
 
 		$configured = $this->config->panel->locale;

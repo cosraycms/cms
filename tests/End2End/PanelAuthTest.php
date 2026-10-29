@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\End2End;
 
+use Cosray\Middleware\PanelLocale;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Users;
 use Psr\Http\Message\ResponseInterface;
@@ -47,6 +48,30 @@ final class PanelAuthTest extends End2EndTestCase
 		$this->assertStringContainsString('<html lang="de">', $html);
 		$this->assertStringContainsString('Anmeldung zur Website-Verwaltung', $html);
 		$this->assertStringContainsString('Angemeldet bleiben', $html);
+	}
+
+	public function testGuestsChooseTheLanguageBeforeSigningIn(): void
+	{
+		$cookie = PanelLocale::cookie($this->config());
+		$response = $this->makeRequest('POST', '/panel/login/locale', [
+			'body' => ['locale' => 'de'],
+			'headers' => ['Referer' => 'http://localhost/panel/login?next=%2Fpanel%2Fmedia'],
+		]);
+
+		$this->assertResponseStatus(303, $response);
+		$this->assertSame('/panel/login?next=%2Fpanel%2Fmedia', $response->getHeaderLine('Location'));
+		$this->assertStringStartsWith("{$cookie}=de;", $response->getHeaderLine('Set-Cookie'));
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/login', [
+			'cookies' => [$cookie => 'de'],
+			'headers' => ['Accept-Language' => 'en'],
+		]));
+		$this->assertStringContainsString('<html lang="de">', $html);
+		$this->assertMatchesRegularExpression('#<option value="de"[^>]*\\bselected\\b#', $html);
+
+		$forgotten = $this->makeRequest('POST', '/panel/login/locale', ['body' => ['locale' => 'tlh']]);
+		$this->assertStringStartsWith("{$cookie}=;", $forgotten->getHeaderLine('Set-Cookie'));
+		$this->assertStringContainsString('Max-Age=0', $forgotten->getHeaderLine('Set-Cookie'));
 	}
 
 	public function testLoginWithValidCredentialsRedirectsToPanel(): void
