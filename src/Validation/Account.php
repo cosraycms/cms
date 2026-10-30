@@ -15,7 +15,7 @@ final class Account implements Validator
 
 	public function __construct(bool $passwordRequired)
 	{
-		$this->shape = new Shape();
+		$this->shape = new Shape()->messages(Validators::messages());
 		$this->shape
 			->add('email', 'string')
 			->rules('required', 'email', 'maxlen:254')

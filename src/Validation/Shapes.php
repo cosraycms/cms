@@ -23,6 +23,7 @@ final class Shapes
 	{
 		return $shape
 			->rules(Validators::registry())
+			->messages(Validators::messages())
 			->extra(Extra::Allow);
 	}
 }

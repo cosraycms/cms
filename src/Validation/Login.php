@@ -15,7 +15,7 @@ final class Login implements Validator
 
 	public function __construct()
 	{
-		$this->shape = new Shape();
+		$this->shape = new Shape()->messages(Validators::messages());
 		$this->shape
 			->add('login', 'string')
 			->rules('required', 'maxlen:254')

@@ -150,7 +150,7 @@ See [working copies](content.md#working-copies) for live/draft semantics and the
 
 ## Validation errors
 
-Failed saves preserve the mounted form. Error-summary items carry Sire paths:
+Failed saves preserve the mounted form. Messages are in the panel language: [Validators](../src/Validation/Validators.php) translates Sire's own messages, and Cosray's rules translate theirs. Error-summary items carry Sire paths:
 
 ```html
 <button type="button" data-error-path='["content","title","value","en"]'>

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Validation;
 
 use Celema\Sire\Contract\Validator;
-use Celema\Sire\Extra;
 use Celema\Sire\Result;
 use Celema\Sire\Review;
 use Celema\Sire\Shape;
@@ -28,9 +27,7 @@ final class RichtextDoc implements Validator
 	public function __construct(array $classes = [], array $styles = [])
 	{
 		$this->validator = new DocValidator($classes, $styles);
-		$this->shape = new Shape()
-			->rules(Validators::registry())
-			->extra(Extra::Allow);
+		$this->shape = Shapes::create();
 		$this->shape->review($this->review(...));
 	}
 
