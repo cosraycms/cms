@@ -271,8 +271,9 @@ abstract class Panel
 	}
 
 	/**
-	 * The selectable panel UI languages, mapped to their native names
-	 * (e.g. `['de' => 'Deutsch', 'en' => 'English']`).
+	 * The selectable panel UI languages, mapped to their capitalized native
+	 * names (e.g. `['de' => 'Deutsch', 'fr' => 'Français', 'pt_BR' =>
+	 * 'Português (Brasil)']`).
 	 *
 	 * @return array<string, string>
 	 */
@@ -283,8 +284,8 @@ abstract class Panel
 
 		/** @var string $id */
 		foreach (is_array($ids) ? $ids : [] as $id) {
-			$title = \Locale::getDisplayLanguage($id, $id);
-			$titles[$id] = $title === false ? $id : $title;
+			$title = \Locale::getDisplayName($id, $id);
+			$titles[$id] = $title === false ? $id : mb_ucfirst($title);
 		}
 
 		return $titles;
