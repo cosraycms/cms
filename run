@@ -60,10 +60,15 @@ $runner->add(new References($conn));
 // shipped to the browser as an inline catalog. Both scan disjoint sources, so
 // both claim the bare `__()` calls their own scanner finds. App-specific
 // schema extraction is registered from the app's commands.
+// A locale with a catalog for either domain gets both: sync creates the other.
+$i18nLocales = array_values(array_unique(array_map(
+	static fn(string $file): string => explode('.', basename($file, '.php'), 2)[1],
+	glob(__DIR__ . '/lang/*.*.php') ?: [],
+)));
 $cosrayI18n = new Domain(
 	name: 'cosray',
 	dir: __DIR__ . '/lang',
-	locales: ['de', 'en'],
+	locales: $i18nLocales,
 	scanners: [
 		new PhpScanner([__DIR__ . '/src', __DIR__ . '/panel/views', __DIR__ . '/resources/mail']),
 		new SchemaScanner(BlockRegistry::withDefaults()->all()),
@@ -73,7 +78,7 @@ $cosrayI18n = new Domain(
 $panelI18n = new Domain(
 	name: 'panel',
 	dir: __DIR__ . '/lang',
-	locales: ['de', 'en'],
+	locales: $i18nLocales,
 	scanners: [new JavascriptScanner([__DIR__ . '/panel/src'])],
 	default: true,
 );
