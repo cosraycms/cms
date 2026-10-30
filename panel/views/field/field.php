@@ -128,7 +128,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 								class="cms-fallback-source"
 								data-fallback-source
 								data-template="<?= escape(__('field:fallback-from', ['language' => '{language}'])) ?>"
-								data-neutral="<?= escape(__('field:shared-content')) ?>"
+								data-neutral="<?= escape(__('field:fallback-shared')) ?>"
 								hidden></span>
 						<?php elseif ($asymmetric): ?>
 							<span

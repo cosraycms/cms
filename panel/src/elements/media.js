@@ -527,7 +527,8 @@ class MediaControl extends HTMLElement {
 		choose.title = `${__('upload:allowed-extensions')} ${allowed.join(', ')}`;
 		choose.disabled = full;
 		const text = create('span');
-		text.append(__('upload:drop-here'), ' ', choose, '.');
+		const [before, after = ''] = __('upload:drop-here').split(':choose');
+		text.append(before, choose, after);
 		const hint = create('span', 'hint');
 		hint.append(svg('cloud-upload'), text);
 		bar.append(browse, hint);

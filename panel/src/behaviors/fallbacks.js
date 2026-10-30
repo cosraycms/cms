@@ -85,14 +85,14 @@ function refreshField(field) {
 		}
 
 		source.hidden = !fallback;
-		source.textContent = fallback
-			? (source.dataset.template ?? '{language}').replace(
-					'{language}',
-					fallback.locale === ZXX
-						? (source.dataset.neutral ?? localeTitle(configured, fallback.locale))
-						: localeTitle(configured, fallback.locale),
-				)
-			: '';
+		source.textContent = !fallback
+			? ''
+			: fallback.locale === ZXX && source.dataset.neutral
+				? source.dataset.neutral
+				: (source.dataset.template ?? '{language}').replace(
+						'{language}',
+						localeTitle(configured, fallback.locale),
+					);
 	}
 }
 

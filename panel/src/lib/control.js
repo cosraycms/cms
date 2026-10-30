@@ -33,10 +33,9 @@ export function editedLocale(field, locale) {
  * @returns {string}
  */
 export function fallbackLabel(fallback, locales) {
-	return __('field:fallback-from', {
-		language:
-			fallback.locale === ZXX ? __('field:shared-content') : localeTitle(locales, fallback.locale),
-	});
+	return fallback.locale === ZXX
+		? __('field:fallback-shared')
+		: __('field:fallback-from', { language: localeTitle(locales, fallback.locale) });
 }
 
 /**
