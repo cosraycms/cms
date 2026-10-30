@@ -171,7 +171,7 @@ export function renumber(container) {
 	);
 
 	if (count) {
-		count.textContent = __n('field:entry-count', 'field:entry-count-plural', rows.length);
+		count.textContent = __n('field:item-count', 'field:item-count-plural', rows.length);
 	}
 
 	const max = Number(container.dataset.max ?? '');

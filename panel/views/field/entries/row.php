@@ -15,7 +15,7 @@ $rowName = "{$name}[{$index}]";
 $rowId = "{$id}-{$index}";
 $uid = is_string($rowData['uid'] ?? null) ? $rowData['uid'] : '';
 $fieldsData = is_array($rowData['fields'] ?? null) ? $rowData['fields'] : [];
-$label = (string) ($entryType['label'] ?? __('field:entry'));
+$label = (string) ($entryType['label'] ?? __('field:item'));
 $summary = EntrySummary::of($entryType, $fieldsData, $assets, $defaultLocale);
 
 // Stored rows start collapsed; a stamped row is empty and wants input.
@@ -25,7 +25,7 @@ $readonly = (bool) (u($readonly ?? null) ?? false);
 <div class="entry" data-repeater-row>
 	<div class="summary">
 		<?php if (!$readonly): ?>
-			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-entry')) ?>">
+			<span class="grip" data-repeater-grip title="<?= $this->escape(__('field:drag-item')) ?>">
 				<?= \Cosray\Panel\Icon::render('grip-vertical') ?>
 			</span>
 		<?php endif ?>
@@ -62,7 +62,7 @@ $readonly = (bool) (u($readonly ?? null) ?? false);
 		<?php if (!$readonly): ?>
 			<button type="button" class="kebab"
 				popovertarget="<?= $this->escape("{$rowId}-actions") ?>"
-				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:entry-actions')) ?>">
+				aria-haspopup="menu" aria-label="<?= $this->escape(__('field:item-actions')) ?>">
 				<?= \Cosray\Panel\Icon::render('three-dots-vertical') ?>
 			</button>
 			<div id="<?= $this->escape("{$rowId}-actions") ?>" class="cms-action-menu"
@@ -74,7 +74,7 @@ $readonly = (bool) (u($readonly ?? null) ?? false);
 						<?= $this->escape(__('common:move-down')) ?>
 					</button>
 					<button type="button" class="danger" data-repeater-remove>
-						<?= $this->escape(__('field:remove-entry')) ?>
+						<?= $this->escape(__('field:remove-item')) ?>
 					</button>
 			</div>
 		<?php endif ?>

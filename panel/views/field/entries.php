@@ -37,7 +37,7 @@ $single = count($entryTypes) === 1;
 	data-id="<?= $this->escape($id) ?>"
 	<?= is_int($max) ? 'data-max="' . $max . '"' : '' ?>>
 	<div class="tally" data-repeater-count><?= $this->escape(
-		__n('field:entry-count', 'field:entry-count-plural', $count),
+		__n('field:item-count', 'field:item-count-plural', $count),
 	) ?></div>
 	<div class="rows" data-repeater-list>
 		<?php foreach ($rows as $index => $rowData) {
@@ -51,7 +51,7 @@ $single = count($entryTypes) === 1;
 				// Rendered without inputs: rows of types no longer allowed
 				// cannot be edited and are dropped on the next save.
 				echo '<div class="cms-control-unknown">';
-				echo $this->escape(__('field:unknown-entry-type', ['type' => (string) $type]));
+				echo $this->escape(__('field:unknown-item-type', ['type' => (string) $type]));
 				echo '</div>';
 
 				continue;

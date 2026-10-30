@@ -411,7 +411,7 @@ describe('repeater behavior', () => {
 	it('stamps into the row list and keeps the count line in step', () => {
 		activate(catalog());
 		document.body.innerHTML = `<div data-repeater data-name="${NAME}" data-id="${ID}">
-			<div data-repeater-count>1 entry</div>
+			<div data-repeater-count>1 item</div>
 			<div data-repeater-list>${row('0', 'a')}</div>
 			<template data-repeater-template>${row('__i__')}</template>
 			<div data-repeater-footer>
@@ -431,16 +431,16 @@ describe('repeater behavior', () => {
 
 		expect(list?.querySelectorAll(':scope > [data-repeater-row]')).toHaveLength(2);
 		expect(list?.lastElementChild?.querySelector('input')?.name).toBe(`${NAME}[1]`);
-		expect(count?.textContent).toBe('2 entries');
+		expect(count?.textContent).toBe('2 items');
 
 		click(container, '[data-repeater-remove]');
 		click(container, '[data-repeater-remove]');
 
-		expect(count?.textContent).toBe('0 entries');
+		expect(count?.textContent).toBe('0 items');
 
 		click(container, '[data-repeater-add]');
 
-		expect(count?.textContent).toBe('1 entry');
+		expect(count?.textContent).toBe('1 item');
 		expect(names(container)).toEqual([`${NAME}[0]`]);
 	});
 
@@ -452,7 +452,7 @@ describe('repeater behavior', () => {
 					{
 						domain: 'panel',
 						plural: 'pl',
-						messages: { 'field:entry-count': [':count wpis', ':count wpisy', ':count wpisów'] },
+						messages: { 'field:item-count': [':count wpis', ':count wpisy', ':count wpisów'] },
 					},
 				],
 			}),

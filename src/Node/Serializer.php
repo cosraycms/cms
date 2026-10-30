@@ -109,7 +109,7 @@ class Serializer
 		}
 
 		$result = [
-			'title' => __('node:new-document') . ' ' . __((string) $schema->label),
+			'title' => __('node:new-entry') . ' ' . __((string) $schema->label),
 			'fields' => $this->fields($node, $fieldNames),
 			'fieldsets' => $this->fieldsets($node, $fieldNames),
 			'uid' => $this->uid->generate(),

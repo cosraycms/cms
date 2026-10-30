@@ -1125,7 +1125,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 			'headers' => ['HX-Request' => 'true'],
 		]);
 
-		$this->assertStringContainsString('This document is locked', $this->getHtmlResponse($response));
+		$this->assertStringContainsString('This entry is locked', $this->getHtmlResponse($response));
 		$this->assertResponseOk($this->makeRequest('GET', '/panel/node/panel-locked-delete'));
 	}
 
