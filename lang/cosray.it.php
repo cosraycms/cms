@@ -299,7 +299,7 @@ return [
 		'media:search-filename' => 'Cerca nome file…',
 		'media:select-hint' => 'Selezionare un file per vederne i dettagli.',
 		'media:title' => 'Media',
-		'media:too-large' => 'Il file è troppo grande: :size MB. Il massimo consentito è :allowed MB',
+		'media:too-large' => 'Il file è troppo grande: :size MB. Il massimo consentito è :allowed MB.',
 		'media:unknown-filename' => 'Nome file sconosciuto',
 		'media:unsafe-svg' => 'Impossibile elaborare il file SVG in modo sicuro.',
 		'media:unused' => 'Questo file non è usato da nessuna parte.',

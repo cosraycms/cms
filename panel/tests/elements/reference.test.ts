@@ -5,6 +5,7 @@ import '../../src/elements/reference.js';
 
 vi.mock('../../src/lib/locale.js', () => ({
 	__: (id: string, params?: { count: number }) => (params ? `${id}: ${params.count}` : id),
+	__n: (one: string, many: string, n: number) => `${n === 1 ? one : many}: ${n}`,
 }));
 vi.mock('../../src/lib/runtime.js', () => ({
 	panelBase: () => '/panel/',

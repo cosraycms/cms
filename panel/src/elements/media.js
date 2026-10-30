@@ -835,7 +835,7 @@ class MediaControl extends HTMLElement {
 
 				if (!result.ok || !result.uid) {
 					cosray().toast.error(
-						`${__('upload:file-label')} ${result.filename ?? ''}: ${result.error ?? ''}`,
+						__('upload:file-error', { file: result.filename ?? '', error: result.error ?? '' }),
 					);
 					continue;
 				}

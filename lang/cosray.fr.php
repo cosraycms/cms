@@ -296,7 +296,7 @@ return [
 		'media:search-filename' => 'Rechercher un nom de fichier…',
 		'media:select-hint' => 'Sélectionner un fichier pour afficher ses détails.',
 		'media:title' => 'Médias',
-		'media:too-large' => 'Le fichier est trop volumineux : :size Mo. Maximum autorisé : :allowed Mo',
+		'media:too-large' => 'Le fichier est trop volumineux : :size Mo. Maximum autorisé : :allowed Mo.',
 		'media:unknown-filename' => 'Nom de fichier inconnu',
 		'media:unsafe-svg' => 'Le fichier SVG n’a pas pu être traité de manière sûre.',
 		'media:unused' => 'Ce fichier n’est utilisé nulle part.',

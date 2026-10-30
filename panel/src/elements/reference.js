@@ -8,7 +8,7 @@
 import { ZXX } from '../lib/content.js';
 import { reportChange } from '../lib/control.js';
 import { icon } from '../lib/icons.js';
-import { __ } from '../lib/locale.js';
+import { __, __n } from '../lib/locale.js';
 import { panelBase } from '../lib/runtime.js';
 
 /**
@@ -571,7 +571,8 @@ export class CosrayReference extends HTMLElement {
 	#statusText(choices) {
 		if (this.#loading) return __('common:loading');
 		if (this.#failed) return __('reference:failed');
-		if (choices.length > 0) return __('reference:result-count', { count: choices.length });
+		if (choices.length > 0)
+			return __n('reference:result-count', 'reference:result-count-plural', choices.length);
 		if (this.#more) return __('reference:loaded-selected');
 		if (this.#q.trim() !== '' && this.#results.length === 0) return __('search:no-results');
 
