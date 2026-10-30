@@ -78,6 +78,25 @@ final class TranslationCatalogTest extends TestCase
 		}
 	}
 
+	public function testTranslationsKeepTheEnglishPlaceholders(): void
+	{
+		foreach (['cosray', 'panel'] as $domain) {
+			$reference = self::catalog($domain, 'en')['messages'];
+
+			foreach (self::locales($domain) as $locale) {
+				$entries = self::catalog($domain, $locale)['messages'];
+				$changed = array_values(array_filter(
+					array_keys(array_intersect_key($reference, $entries)),
+					static fn(string $id): bool => (
+						self::placeholders($entries[$id]) !== self::placeholders($reference[$id])
+					),
+				));
+
+				$this->assertSame([], $changed, "{$domain}.{$locale} entries need the placeholders of {$domain}.en");
+			}
+		}
+	}
+
 	/** @param list<Message> $messages */
 	private function assertCatalogsCover(array $messages, string $domain): void
 	{
@@ -125,6 +144,22 @@ final class TranslationCatalogTest extends TestCase
 	{
 		/** @var array{messages: array<string, mixed>, plural?: string} */
 		return require dirname(__DIR__, 2) . "/lang/{$domain}.{$locale}.php";
+	}
+
+	/**
+	 * Verba `:name` and Sire `{name}` placeholders across all plural forms;
+	 * a singular form may leave out `:count`.
+	 *
+	 * @return list<string>
+	 */
+	private static function placeholders(mixed $entry): array
+	{
+		$text = implode("\n", array_filter((array) $entry, is_string(...)));
+		preg_match_all('/(?<![\w:\/]):[a-z][a-z0-9_]*|\{[a-z][a-z0-9_]*\}/i', $text, $matches);
+		$found = array_values(array_unique($matches[0]));
+		sort($found);
+
+		return $found;
 	}
 
 	private static function translated(mixed $value): bool
