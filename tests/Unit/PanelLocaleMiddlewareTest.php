@@ -31,7 +31,11 @@ final class PanelLocaleMiddlewareTest extends TestCase
 
 	public function testPanelLocalesListsIdsWithCosrayAndPanelCatalogs(): void
 	{
-		$this->assertSame(['de', 'en'], new Locales()->panelLocales());
+		$locales = new Locales();
+		$locales->catalog('cosray', dirname(__DIR__) . '/Fixtures/panel-locales');
+		$locales->catalog('panel', dirname(__DIR__) . '/Fixtures/panel-locales');
+
+		$this->assertSame(['de', 'en'], $locales->panelLocales());
 	}
 
 	public function testUserPreferenceWins(): void
@@ -48,7 +52,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 
 		$this->assertSame('de', $this->translator($handler)->locale);
 		$this->assertSame('de', $handler->request?->getAttribute('panelLocale'));
-		$this->assertSame(['de', 'en'], $handler->request?->getAttribute('panelLocales'));
+		$this->assertSame(new Locales()->panelLocales(), $handler->request?->getAttribute('panelLocales'));
 	}
 
 	public function testUnknownUserPreferenceFallsThrough(): void
@@ -107,7 +111,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 		$handler = $this->handler();
 		$request = $this
 			->panelRequest()
-			->withHeader('Accept-Language', 'fr-FR,fr;q=0.9,de-DE;q=0.8,en;q=0.7');
+			->withHeader('Accept-Language', 'tlh-XX,tlh;q=0.9,en;q=0.7,de-DE;q=0.8');
 
 		new PanelLocale($this->config())->process($request, $handler);
 
@@ -117,7 +121,7 @@ final class PanelLocaleMiddlewareTest extends TestCase
 	public function testUnmatchedBrowserDefaultsToEnglish(): void
 	{
 		$handler = $this->handler();
-		$request = $this->panelRequest()->withHeader('Accept-Language', 'fr,it;q=0.9');
+		$request = $this->panelRequest()->withHeader('Accept-Language', 'tlh,qya;q=0.9');
 
 		new PanelLocale($this->config())->process($request, $handler);
 
