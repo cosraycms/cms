@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Powrót do logowania',
-		'auth:csrf-expired' => 'Ta strona jest nieaktualna: w innym miejscu nastąpiło zalogowanie lub wylogowanie albo sesja wygasła. Odśwież stronę i spróbuj ponownie. Najpierw skopiuj niezapisane zmiany, bo odświeżenie strony je usunie.',
+		'auth:csrf-expired' => 'Strona była otwarta zbyt długo, dlatego ze względów bezpieczeństwa nic nie zostało zapisane. Odśwież stronę i spróbuj ponownie. Najpierw skopiuj niezapisane zmiany, bo odświeżenie strony je usunie.',
 		'auth:expired-back' => 'Powrót do strony',
 		'auth:expired-reload' => 'Odśwież stronę',
 		'auth:expired-text' => 'Strona była otwarta zbyt długo, dlatego ze względów bezpieczeństwa formularz nie został przyjęty. Wróć i spróbuj ponownie.',

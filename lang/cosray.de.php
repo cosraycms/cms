@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Zurück zur Anmeldung',
-		'auth:csrf-expired' => 'Diese Seite ist veraltet: Die Sitzung ist abgelaufen, oder die Anmeldung hat sich an anderer Stelle geändert. Bitte die Seite neu laden und es noch einmal versuchen. Ungespeicherte Änderungen vorher kopieren, denn das Neuladen verwirft sie.',
+		'auth:csrf-expired' => 'Die Seite war zu lange geöffnet, daher wurde aus Sicherheitsgründen nichts gespeichert. Bitte die Seite neu laden und es noch einmal versuchen. Ungespeicherte Änderungen vorher kopieren, denn das Neuladen verwirft sie.',
 		'auth:expired-back' => 'Zurück zur Seite',
 		'auth:expired-reload' => 'Seite neu laden',
 		'auth:expired-text' => 'Die Seite war zu lange geöffnet, daher wurde das Formular aus Sicherheitsgründen nicht übernommen. Bitte zurückgehen und es noch einmal versuchen.',

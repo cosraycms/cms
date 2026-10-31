@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Retour à la connexion',
-		'auth:csrf-expired' => 'Cette page n’est plus à jour : la session a expiré, ou une connexion ou déconnexion a eu lieu ailleurs. Rechargez la page et réessayez. Copiez d’abord les modifications non enregistrées, car le rechargement les efface.',
+		'auth:csrf-expired' => 'La page est restée ouverte trop longtemps, rien n’a donc été enregistré pour des raisons de sécurité. Rechargez la page et réessayez. Copiez d’abord les modifications non enregistrées, car le rechargement les efface.',
 		'auth:expired-back' => 'Retour à la page',
 		'auth:expired-reload' => 'Recharger la page',
 		'auth:expired-text' => 'La page est restée ouverte trop longtemps, le formulaire n’a donc pas été pris en compte pour des raisons de sécurité. Revenez en arrière et réessayez.',

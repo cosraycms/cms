@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Torna all’accesso',
-		'auth:csrf-expired' => 'Questa pagina non è più valida: la sessione è scaduta, oppure l’accesso è cambiato altrove. Ricaricare la pagina e riprovare. Prima copiare le modifiche non salvate, perché ricaricando vanno perse.',
+		'auth:csrf-expired' => 'La pagina è rimasta aperta troppo a lungo, quindi per motivi di sicurezza non è stato salvato nulla. Ricaricare la pagina e riprovare. Prima copiare le modifiche non salvate, perché ricaricando vanno perse.',
 		'auth:expired-back' => 'Torna alla pagina',
 		'auth:expired-reload' => 'Ricarica la pagina',
 		'auth:expired-text' => 'La pagina è rimasta aperta troppo a lungo, quindi per motivi di sicurezza il modulo non è stato accettato. Tornare indietro e riprovare.',
