@@ -23,6 +23,7 @@ use Cosray\Commands\Fulltext;
 use Cosray\Commands\ListenQueue;
 use Cosray\Commands\ListFailedJobs;
 use Cosray\Commands\ListTokens;
+use Cosray\Commands\ListUsers;
 use Cosray\Commands\PanelPublish;
 use Cosray\Commands\PruneJobs;
 use Cosray\Commands\RecreateSortIndex;
@@ -90,6 +91,7 @@ final class Commands
 			CreateToken::class,
 			ListTokens::class,
 			RevokeToken::class,
+			ListUsers::class,
 			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
 			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
 				$this->jobRunner(...),

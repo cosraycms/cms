@@ -303,6 +303,16 @@ Users have an email login and optional username without `@`. A subclass of [Cosr
 
 The panel speaks each language for which both its catalogs, `cosray` and `panel`, ship a file. It takes the language a user saved in the profile or the account menu, then the one chosen on the sign-in pages, kept in the cookie `{app.name}_panel_locale`, then `panel.locale`, then the browser's `Accept-Language`, then English. The sign-in pages offer the choice once there is more than one language.
 
+### User commands
+
+Users can also be managed from the console:
+
+```bash
+php run user:list --type=user --search=keller
+```
+
+`user:list` lists every user, deactivated ones included, with type, roles and state; `--type` takes a type's handle, `--search` matches email, username and name.
+
 ### Passwords
 
 The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name`, `app.title` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
