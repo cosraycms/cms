@@ -519,7 +519,7 @@
 	--cms-content-max-width: 120rem;
 	--cms-editor-max-width: 73rem;
 	--cms-row-height: 3.5rem;
-	--cms-masthead-bg: var(--cms-color-surface);
+	--cms-masthead-bg: light-dark(var(--cms-color-surface), var(--cms-color-canvas));
 	--cms-sidebar-width: 13rem;
 	--cms-inspector-width: 19rem;
 	--cms-inspector-collapsed-width: 3.5rem;
