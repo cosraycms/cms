@@ -13,8 +13,8 @@
 	& h1 {
 		margin: 0;
 		overflow: hidden;
-		font-size: var(--cms-font-size-xl);
-		font-weight: 600;
+		font-size: var(--cms-font-size-lg);
+		font-weight: 500;
 		letter-spacing: -0.03em;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -41,7 +41,7 @@
 		gap: var(--cms-space-3);
 		flex-wrap: wrap;
 		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-xl);
+		font-size: var(--cms-font-size-lg);
 		letter-spacing: -0.03em;
 		white-space: nowrap;
 
