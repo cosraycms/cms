@@ -72,10 +72,11 @@
 		margin-inline: auto;
 	}
 
-	/* A grid of blocks spreads past the capped column to the pane's width;
-	   the margin holds because every box between the two is centred. */
-	&[data-wide-blocks] .cms-field.can-widen {
-		margin-inline: calc(50% - 50cqi);
+	/* A grid of blocks spreads past the capped column to the pane's width,
+	   its label staying in the column; the margin holds because every box
+	   between the two is centred, and keeps the field's own side padding. */
+	&[data-wide-blocks] .cms-field.can-widen > .field-body {
+		margin-inline: calc(50% - 50cqi + var(--cms-space-2));
 	}
 
 	& .width-toggle {
