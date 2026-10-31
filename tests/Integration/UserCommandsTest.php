@@ -9,6 +9,7 @@ use Celema\Console\Io;
 use Cosray\Commands\CreateUser;
 use Cosray\Commands\ListUsers;
 use Cosray\Commands\PasswordPrompt;
+use Cosray\Commands\SetPassword;
 use Cosray\Security\Policy;
 use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\IntegrationTestCase;
@@ -155,6 +156,47 @@ final class UserCommandsTest extends IntegrationTestCase
 		$this->assertStringContainsString('The passwords do not match.', $mismatch->errorOutput());
 
 		$this->assertNull($this->users->byLogin('cli-weak@example.com'));
+	}
+
+	public function testSetsThePasswordOfAnyUserAndEndsTheirRememberedLogins(): void
+	{
+		$active = $this->createTestUser(['username' => 'cli-pass', 'email' => 'pass@example.com']);
+		$this->createTestUser(['username' => 'cli-off', 'email' => 'off@example.com', 'active' => false]);
+		$this->users->remember(hash('sha256', 'remembered'), $active, '2099-01-01 00:00:00');
+		$this->assertNotNull($this->users->bySession(hash('sha256', 'remembered')));
+
+		$buffer = new Buffer(self::PASSWORD . "\n" . self::PASSWORD . "\n");
+		$this->assertSame(0, $this->setPassword()(new Io($buffer), 'pass@example.com'));
+		$this->assertTrue(password_verify(self::PASSWORD, $this->users->byLogin('cli-pass')->password ?? ''));
+		$this->assertNull($this->users->bySession(hash('sha256', 'remembered')));
+		$this->assertSame([['notice', 'Password of cli-pass set from the console']], $this->logger->records);
+
+		$inactive = new Buffer(self::PASSWORD . "\n" . self::PASSWORD . "\n");
+		$this->assertSame(0, $this->setPassword()(new Io($inactive), 'cli-off'));
+		$this->assertTrue(password_verify(self::PASSWORD, $this->users->findByLogin('cli-off')->password ?? ''));
+	}
+
+	public function testRefusesAnUnknownLoginOrAWeakPassword(): void
+	{
+		$this->createTestUser(['username' => 'cli-weak-pass']);
+
+		$unknown = new Buffer();
+		$this->assertSame(1, $this->setPassword()(new Io($unknown), 'nobody'));
+		$this->assertStringContainsString('No user with the login', $unknown->errorOutput());
+
+		$weak = new Buffer("cli-weak-pass-1234\n");
+		$this->assertSame(1, $this->setPassword()(new Io($weak), 'cli-weak-pass'));
+		$this->assertStringContainsString('The password is too', $weak->errorOutput());
+		$this->assertSame([], $this->logger->records);
+	}
+
+	private function setPassword(): SetPassword
+	{
+		return new SetPassword(
+			$this->users,
+			new PasswordPrompt(new PasswordPolicy($this->config(), $this->logger)),
+			$this->logger,
+		);
 	}
 
 	private function create(): CreateUser

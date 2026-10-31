@@ -32,6 +32,7 @@ use Cosray\Commands\References;
 use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
 use Cosray\Commands\SendTestMail;
+use Cosray\Commands\SetPassword;
 use Cosray\Commands\Titles;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
@@ -88,6 +89,7 @@ final class Commands
 			RevokeToken::class,
 			ListUsers::class,
 			CreateUser::class,
+			SetPassword::class,
 			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
 			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
 				$this->jobRunner(...),

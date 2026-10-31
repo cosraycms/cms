@@ -122,6 +122,14 @@ class Users
 		);
 	}
 
+	/** Like `byLogin()`, but finds a deactivated user too. */
+	public function findByLogin(string $login): ?User
+	{
+		return $this->getUserOrNull(
+			$this->db->users->get(['login' => $login, 'inactiveAlso' => true])->first(),
+		);
+	}
+
 	/** @param UserValues $values */
 	public function create(
 		string $type,
