@@ -19,6 +19,7 @@ use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
 use Cosray\Commands\CreateToken;
+use Cosray\Commands\CreateUser;
 use Cosray\Commands\Fulltext;
 use Cosray\Commands\ListenQueue;
 use Cosray\Commands\ListFailedJobs;
@@ -31,7 +32,6 @@ use Cosray\Commands\References;
 use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
 use Cosray\Commands\SendTestMail;
-use Cosray\Commands\Superuser;
 use Cosray\Commands\Titles;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
@@ -40,7 +40,6 @@ use Cosray\MigrationFactory;
 use Cosray\Panel\Client;
 use Cosray\Queue\Listener;
 use Cosray\Queue\Runner as JobRunner;
-use Cosray\User\PasswordPolicy;
 
 /**
  * The base CLI command set of a Cosray application.
@@ -83,15 +82,12 @@ final class Commands
 			),
 			References::class => fn(): References => new References($this->conn()),
 			RecreateSortIndex::class,
-			Superuser::class => fn(): Superuser => new Superuser(
-				$this->conn(),
-				new PasswordPolicy($app->config, new ContainerLogger($this->container())),
-			),
 			Titles::class,
 			CreateToken::class,
 			ListTokens::class,
 			RevokeToken::class,
 			ListUsers::class,
+			CreateUser::class,
 			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
 			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
 				$this->jobRunner(...),

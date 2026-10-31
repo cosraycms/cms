@@ -120,7 +120,7 @@ Content, users, permissions and media are read per request. Changes to code, tem
 
 ## Console commands
 
-[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the superuser and token commands, the [job queue](queue.md) commands, and `mail:test` for the [mail](mail.md) setup. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
+[Cosray\Console\Commands](../src/Console/Commands.php) registers the migration commands, index rebuilds, panel asset publishing, the user and token commands, the [job queue](queue.md) commands, and `mail:test` for the [mail](mail.md) setup. `php run help` lists the commands actually registered by the application; app-specific commands resolve lazily.
 
 A project `run` script can load an `app/console.php` returning the runner:
 
@@ -309,13 +309,16 @@ Users can also be managed from the console:
 
 ```bash
 php run user:list --type=user --search=keller
+php run user:create --email=editor@example.com --name="Mia Keller" --role=editor
 ```
 
 `user:list` lists every user, deactivated ones included, with type, roles and state; `--type` takes a type's handle, `--search` matches email, username and name.
 
+`user:create` creates an active user, of the default type unless `--type` names another, and grants each `--role`. In a terminal it asks for the email address, the name and the roles the options leave out; the password it always asks for, twice and hidden, so it never lands in the shell history. Piped input answers the prompts in a script. The first superuser of a new site comes from `user:create --role=superuser`. Fields of a user type are left empty; fill them in the panel.
+
 ### Passwords
 
-The user form, the profile, the [password reset](#password-reset) and `add-superuser` accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name`, `app.title` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
+The user form, the profile, the [password reset](#password-reset) and the [user commands](#user-commands) accept passwords of 12 to 512 characters that are not easy to guess, as [User\PasswordPolicy](../src/User/PasswordPolicy.php) judges without a word list. Runs like `1111`, sequences along the alphabet, the digits or a keyboard row like `abcd`, `4321` or `qwertz`, and parts repeated from earlier in the password each count as one character, and so do parts of the account's name, username or email address and of `app.name`, `app.title` and the host of `app.url`; at least 10 characters must remain. So `Password1234` and `hallohallo12` fail, while a passphrase passes.
 
 Common words with a number, like `Sommer2026!!`, pass these checks. To refuse passwords known from data breaches, set `password.breach_check` or `PASSWORD_BREACH_CHECK=true`: Cosray then asks the [Pwned Passwords API](https://haveibeenpwned.com/API/v3#PwnedPasswords) of Have I Been Pwned whether a new password appears in its breach data. When the service does not answer within five seconds, the password is accepted and a `warning` is logged.
 
