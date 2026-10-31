@@ -72,11 +72,13 @@
 		margin-inline: auto;
 	}
 
-	/* A grid of blocks spreads past the capped column to the pane's width,
-	   its label staying in the column; the margin holds because every box
-	   between the two is centred, and keeps the field's own side padding. */
+	/* A grid of blocks spreads past the capped column towards the pane's
+	   width, its label staying in the column; the margin holds because every
+	   box between the two is centred, and keeps the field's own side padding. */
 	&[data-wide-blocks] .cms-field.can-widen > .field-body {
-		margin-inline: calc(50% - 50cqi + var(--cms-space-2));
+		margin-inline: calc(
+			50% - min(50cqi - var(--cms-space-2), var(--cms-editor-wide-max-width) / 2)
+		);
 	}
 
 	& .width-toggle {
