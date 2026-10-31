@@ -14,6 +14,7 @@ $node = (string) ($node ?? '');
 $assets = (array) (u($assets ?? null) ?? []);
 $gridStyle = (string) ($gridStyle ?? '');
 $pathSource = (bool) (u($pathSource ?? null) ?? false);
+$fullRow = (bool) (u($fullRow ?? null) ?? false);
 
 $control = $field['control'] ?? ['name' => '', 'props' => []];
 $controlName = (string) ($control['name'] ?? '');
@@ -42,6 +43,9 @@ $asymmetric = $controlName === 'blocks' && ($field['translateMode'] ?? null) ===
 $variants = $translate && (in_array($controlName, $localized, true) || $asymmetric);
 $fallbackPreview = $translate && in_array($controlName, $localized, true);
 $neutral = 'zxx';
+$columns = $controlName === 'blocks'
+	? \Cosray\Field\Blocks::storedColumns($data['columns'] ?? null, (int) ($control['props']['columns'] ?? 1))
+	: 0;
 
 $labelFor = $idRoot . '-' . ($variants ? $defaultLocale : $neutral);
 $description = $field['description'] ?? null;
@@ -53,7 +57,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 ?>
 
 <div
-	class="cms-field<?= $required ? ' required' : '' ?><?= $pathSource ? ' js-path-source' : '' ?>"
+	class="cms-field<?= $required ? ' required' : '' ?><?= $pathSource ? ' js-path-source' : '' ?><?= $fullRow && $columns > 1 ? ' is-wide' : '' ?>"
 	<?= $gridStyle !== '' ? 'style="' . escape($gridStyle) . '"' : '' ?>
 	data-field="<?= escape($fieldName) ?>"
 	<?= $fallbackPreview && is_scalar($value[$neutral] ?? null)
@@ -96,7 +100,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<input
 				type="hidden"
 				name="<?= escape("{$nameRoot}[columns]") ?>"
-				value="<?= \Cosray\Field\Blocks::storedColumns($data['columns'] ?? null, (int) ($control['props']['columns'] ?? 1)) ?>" />
+				value="<?= $columns ?>" />
 		<?php endif ?>
 		<div class="control">
 			<?php if ($variants): ?>

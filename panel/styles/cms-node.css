@@ -72,6 +72,12 @@
 		margin-inline: auto;
 	}
 
+	/* A grid of blocks spreads past the capped column to the pane's width;
+	   the margin holds because every box between the two is centred. */
+	& .cms-field.is-wide {
+		margin-inline: calc(50% - 50cqi);
+	}
+
 	& .sheet {
 		display: flex;
 		flex-direction: column;
