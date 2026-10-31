@@ -312,6 +312,8 @@ php run user:list --type=user --search=keller
 php run user:create --email=editor@example.com --name="Mia Keller" --role=editor
 php run user:password editor@example.com
 php run user:login-link editor@example.com --next=/node/abc
+php run user:deactivate editor@example.com
+php run user:activate editor@example.com
 ```
 
 `user:list` lists every user, deactivated ones included, with type, roles and state; `--type` takes a type's handle, `--search` matches email, username and name.
@@ -321,6 +323,8 @@ php run user:login-link editor@example.com --next=/node/abc
 `user:password` sets a new password the same way, for deactivated users too, and like any password change it ends the user's sessions and remembered logins.
 
 `user:login-link` prints a link that signs an active user with panel access in once, within five minutes, through the same [handoff](api.md#embedded-editing) an embedding application uses; `--next` names the panel page to open. It gets in without knowing or changing a password, for a locked-out administrator or a quick look as someone. The link is built from `app.url`; without it, the command warns and prints the path alone. Creating one is logged as `notice`, as are the other changes these commands make.
+
+`user:deactivate` keeps a user from signing in and ends their sessions, remembered logins and API tokens with the account, as the panel does; it refuses the last active superuser. `user:activate` lets them in again.
 
 ### Passwords
 

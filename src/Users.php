@@ -182,6 +182,15 @@ class Users
 		$this->db->users->forgetAll(['usr' => $user->id])->run();
 	}
 
+	public function setActive(User $user, bool $active, Actor $actor): void
+	{
+		$this->db->users->setActive(['usr' => $user->id, 'active' => $active, 'editor' => $actor->id])->run();
+
+		if (!$active) {
+			$this->db->users->forgetAll(['usr' => $user->id])->run();
+		}
+	}
+
 	public function delete(User $user, Actor $actor): void
 	{
 		$this->db->users->delete(['usr' => $user->id, 'editor' => $actor->id])->run();

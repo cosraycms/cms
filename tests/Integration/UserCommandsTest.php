@@ -6,7 +6,9 @@ namespace Cosray\Tests\Integration;
 
 use Celema\Console\Buffer;
 use Celema\Console\Io;
+use Cosray\Commands\ActivateUser;
 use Cosray\Commands\CreateUser;
+use Cosray\Commands\DeactivateUser;
 use Cosray\Commands\ListUsers;
 use Cosray\Commands\LoginLink;
 use Cosray\Commands\PasswordPrompt;
@@ -237,6 +239,45 @@ final class UserCommandsTest extends IntegrationTestCase
 	private function loginLink(): LoginLink
 	{
 		return new LoginLink($this->users, Policy::withDefaults(), $this->config(), $this->logger);
+	}
+
+	public function testDeactivatesAndActivatesAUser(): void
+	{
+		$id = $this->createTestUser(['username' => 'cli-toggle']);
+		$this->users->remember(hash('sha256', 'toggle'), $id, '2099-01-01 00:00:00');
+		$this->assertNotNull($this->users->bySession(hash('sha256', 'toggle')));
+
+		$off = new Buffer();
+		$this->assertSame(0, (new DeactivateUser($this->users, $this->logger))(new Io($off), 'cli-toggle'));
+		$this->assertNull($this->users->byLogin('cli-toggle'));
+		$this->assertFalse($this->users->findByLogin('cli-toggle')->active ?? true);
+
+		$again = new Buffer();
+		$this->assertSame(0, (new DeactivateUser($this->users, $this->logger))(new Io($again), 'cli-toggle'));
+		$this->assertStringContainsString('cli-toggle is already deactivated.', $again->output());
+
+		$on = new Buffer();
+		$this->assertSame(0, (new ActivateUser($this->users, $this->logger))(new Io($on), 'cli-toggle'));
+		$this->assertTrue($this->users->byLogin('cli-toggle')->active ?? false);
+		$this->assertNull($this->users->bySession(hash('sha256', 'toggle')));
+		$this->assertSame(
+			[
+				['notice', 'User cli-toggle deactivated from the console'],
+				['notice', 'User cli-toggle activated from the console'],
+			],
+			$this->logger->records,
+		);
+	}
+
+	public function testKeepsTheLastActiveSuperuser(): void
+	{
+		$this->db()->execute("UPDATE cms.users SET active = false WHERE 'superuser' = ANY(roles)")->run();
+		$this->createTestUser(['username' => 'cli-last', 'role' => 'superuser']);
+
+		$buffer = new Buffer();
+		$this->assertSame(1, (new DeactivateUser($this->users, $this->logger))(new Io($buffer), 'cli-last'));
+		$this->assertStringContainsString('cli-last is the last active superuser', $buffer->errorOutput());
+		$this->assertTrue($this->users->byLogin('cli-last')->active ?? false);
 	}
 
 	private function create(): CreateUser

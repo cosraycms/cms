@@ -18,8 +18,10 @@ use Celema\Verba\Command\SyncCommand;
 use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
+use Cosray\Commands\ActivateUser;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\CreateUser;
+use Cosray\Commands\DeactivateUser;
 use Cosray\Commands\Fulltext;
 use Cosray\Commands\ListenQueue;
 use Cosray\Commands\ListFailedJobs;
@@ -92,6 +94,8 @@ final class Commands
 			CreateUser::class,
 			SetPassword::class,
 			LoginLink::class,
+			ActivateUser::class,
+			DeactivateUser::class,
 			WorkQueue::class => fn(): WorkQueue => new WorkQueue($this->jobRunner()),
 			ListenQueue::class => fn(): ListenQueue => new ListenQueue(
 				$this->jobRunner(...),
