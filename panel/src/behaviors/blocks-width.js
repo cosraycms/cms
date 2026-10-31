@@ -1,6 +1,8 @@
+import { remember } from '../lib/panel-cookie.js';
+
 // Grid blocks fields that fill a row can spread past the editor's column to
-// the pane's width. One choice covers every such field; it lives in a cookie
-// the editor reads, so a page arrives in its state and never jumps on load.
+// the pane's width. One choice covers every such field; it lives in the panel
+// cookie the server reads, so a page arrives in its state and never jumps.
 
 const TOGGLE = '[data-blocks-width]';
 const EDITOR = '.cms-node';
@@ -27,9 +29,7 @@ function click(event) {
 
 	const wide = !editor.hasAttribute(WIDE);
 	editor.toggleAttribute(WIDE, wide);
-	document.cookie = wide
-		? 'cosray_blocks=wide; path=/; max-age=31536000; samesite=lax'
-		: 'cosray_blocks=; path=/; max-age=0; samesite=lax';
+	remember('blocks', wide ? 'wide' : null);
 	sync();
 }
 

@@ -165,6 +165,8 @@ describe('errors behavior', () => {
 		uninstall.forEach((cleanup) => cleanup());
 		vi.unstubAllGlobals();
 		document.body.innerHTML = '';
+		document.cookie = 'cosray_panel=; path=/panel; max-age=0';
+		history.replaceState(null, '', '/');
 		localStorage.clear();
 	});
 
@@ -399,6 +401,7 @@ describe('errors behavior', () => {
 	});
 
 	it('badges the tab whose hidden panel holds the issue and brings it to the front', () => {
+		history.replaceState(null, '', '/panel/node/test');
 		const unmatched = window.matchMedia;
 		vi.stubGlobal('matchMedia', (media: string) => ({
 			...unmatched(media),
@@ -420,7 +423,7 @@ describe('errors behavior', () => {
 
 		// Opened for the jump, not remembered as the editor's choice.
 		expect(inspector.hasAttribute('data-collapsed')).toBe(false);
-		expect(document.cookie).not.toContain('cosray_inspector');
+		expect(document.cookie).not.toContain('inspector=');
 		expect(panel.hidden).toBe(false);
 		expect(tab.getAttribute('aria-selected')).toBe('true');
 		expect(document.getElementById('tab-status')?.getAttribute('aria-selected')).toBe('false');

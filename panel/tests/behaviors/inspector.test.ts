@@ -51,6 +51,7 @@ function click(selector: string): void {
 }
 
 beforeEach(() => {
+	history.replaceState(null, '', '/panel/node/test');
 	editor();
 	uninstall = [install(), installDirty()];
 });
@@ -58,7 +59,8 @@ beforeEach(() => {
 afterEach(() => {
 	uninstall.forEach((cleanup) => cleanup());
 	vi.unstubAllGlobals();
-	document.cookie = 'cosray_inspector=; path=/; max-age=0';
+	document.cookie = 'cosray_panel=; path=/panel; max-age=0';
+	history.replaceState(null, '', '/');
 	document.body.innerHTML = '';
 });
 
@@ -68,13 +70,13 @@ describe('inspector', () => {
 		click('[data-inspector-collapse]');
 
 		expect(inspector().hasAttribute('data-collapsed')).toBe(true);
-		expect(document.cookie).toContain('cosray_inspector=collapsed');
+		expect(document.cookie).toContain('cosray_panel=inspector=collapsed');
 		expect(document.activeElement).toBe(document.querySelector('[data-inspector-expand]'));
 
 		click('[data-inspector-expand]');
 
 		expect(inspector().hasAttribute('data-collapsed')).toBe(false);
-		expect(document.cookie).not.toContain('cosray_inspector');
+		expect(document.cookie).not.toContain('inspector=');
 		expect(document.activeElement).toBe(document.getElementById('tab-status'));
 	});
 
@@ -98,7 +100,7 @@ describe('inspector', () => {
 		shortcut.click();
 
 		expect(inspector().hasAttribute('data-open')).toBe(true);
-		expect(document.cookie).not.toContain('cosray_inspector');
+		expect(document.cookie).not.toContain('inspector=');
 
 		document.activeElement?.dispatchEvent(
 			new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),

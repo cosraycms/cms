@@ -37,7 +37,8 @@ $draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
 $contentLocales = ContentLocales::used($fields, count($locales));
 $showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
-$wideBlocks = (bool) ($wideBlocks ?? false);
+$panelCookie = u($panelCookie);
+$wideBlocks = $panelCookie->is('blocks', 'wide');
 $showSettings = $showSettings && $embed === null;
 $action = $edit
 	? $links->edit($uid)
@@ -226,7 +227,7 @@ $action = $edit
 				'generatedPaths' => $generatedPaths,
 				'meta' => $meta,
 				'contentLocales' => $contentLocales,
-				'collapsed' => (bool) $inspectorCollapsed,
+				'collapsed' => $panelCookie->is('inspector', 'collapsed'),
 			]) ?>
 		<?php endif ?>
 

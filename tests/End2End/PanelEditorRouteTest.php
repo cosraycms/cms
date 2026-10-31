@@ -762,7 +762,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertHtmlNodeExists(
 			'//aside[@data-inspector][@data-collapsed]',
 			$this->getHtmlResponse($this->makeRequest('GET', $uri, [
-				'cookies' => ['cosray_inspector' => 'collapsed'],
+				'cookies' => ['cosray_panel' => 'inspector=collapsed'],
 			])),
 		);
 	}
@@ -781,7 +781,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$uri = '/panel/node/panel-editor-wide-blocks';
 		$narrow = $this->getHtmlResponse($this->makeRequest('GET', $uri));
 		$wide = $this->getHtmlResponse($this->makeRequest('GET', $uri, [
-			'cookies' => ['cosray_blocks' => 'wide'],
+			'cookies' => ['cosray_panel' => 'blocks=wide'],
 		]));
 
 		$this->assertHtmlNodeExists('//*[@data-field="contentBlocks"]//button[@data-blocks-width]', $narrow);

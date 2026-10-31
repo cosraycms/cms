@@ -1,8 +1,9 @@
+import { remember } from '../lib/panel-cookie.js';
 import { selectTab } from './tabs.js';
 
 // The node inspector collapses to a strip of quick controls. Beside the fields
-// the choice lives in a cookie the editor reads, so a page arrives in its
-// state and never slides on load. Narrower, the inspector starts collapsed
+// the choice lives in the panel cookie the server reads, so a page arrives in
+// its state and never slides on load. Narrower, the inspector starts collapsed
 // and data-open lasts for the page; in the shell's middle band, whose query
 // matches cms-inspector.css, it opens over the fields as a layer that Escape
 // and a press outside close. The strip's published switch is an unnamed copy: the
@@ -19,9 +20,9 @@ let opener = null;
 /**
  * @param {HTMLElement} inspector
  * @param {boolean} expanded
- * @param {boolean} [remember]
+ * @param {boolean} [keep]
  */
-function expand(inspector, expanded, remember = true) {
+function expand(inspector, expanded, keep = true) {
 	if (!matchMedia(BESIDE).matches) {
 		inspector.toggleAttribute('data-open', expanded);
 		return;
@@ -29,10 +30,8 @@ function expand(inspector, expanded, remember = true) {
 
 	inspector.toggleAttribute('data-collapsed', !expanded);
 
-	if (remember) {
-		document.cookie = expanded
-			? 'cosray_inspector=; path=/; max-age=0; samesite=lax'
-			: 'cosray_inspector=collapsed; path=/; max-age=31536000; samesite=lax';
+	if (keep) {
+		remember('inspector', expanded ? null : 'collapsed');
 	}
 }
 

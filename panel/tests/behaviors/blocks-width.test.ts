@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { install } from '../../src/behaviors/blocks-width';
 
 let uninstall: () => void = () => {};
@@ -23,9 +23,14 @@ function pressed(): Array<string | null> {
 	return toggles().map((toggle) => toggle.getAttribute('aria-pressed'));
 }
 
+beforeEach(() => {
+	history.replaceState(null, '', '/panel/node/test');
+});
+
 afterEach(() => {
 	uninstall();
-	document.cookie = 'cosray_blocks=; path=/; max-age=0';
+	document.cookie = 'cosray_panel=; path=/panel; max-age=0';
+	history.replaceState(null, '', '/');
 	document.body.innerHTML = '';
 });
 
@@ -37,13 +42,13 @@ describe('blocks width', () => {
 		toggles()[0]!.click();
 
 		expect(wide()).toBe(true);
-		expect(document.cookie).toContain('cosray_blocks=wide');
+		expect(document.cookie).toContain('cosray_panel=blocks=wide');
 		expect(pressed()).toEqual(['true', 'true']);
 
 		toggles()[1]!.click();
 
 		expect(wide()).toBe(false);
-		expect(document.cookie).not.toContain('cosray_blocks');
+		expect(document.cookie).not.toContain('blocks=');
 		expect(pressed()).toEqual(['false', 'false']);
 	});
 

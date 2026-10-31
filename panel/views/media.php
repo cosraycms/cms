@@ -34,7 +34,7 @@ $listing = u($listing);
 $system = (array) u($system);
 $contentLocales = (array) u($contentLocales);
 $defaultLocale = (string) $defaultLocale;
-$collapsed = (bool) $inspectorCollapsed;
+$collapsed = u($panelCookie)->is('inspector', 'collapsed');
 $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
 $search = $screen->query(['q' => '']);
 unset($search['page']);

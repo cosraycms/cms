@@ -327,7 +327,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 
 	public function testTheInspectorArrivesInItsRememberedState(): void
 	{
-		$html = $this->html('/panel/media', [], [], ['cosray_inspector' => 'collapsed']);
+		$html = $this->html('/panel/media', [], [], ['cosray_panel' => 'inspector=collapsed']);
 
 		$this->assertHtmlNodeExists('//aside[@class="cms-inspector"][@data-collapsed]', $html);
 	}

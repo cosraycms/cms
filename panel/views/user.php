@@ -187,7 +187,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'user' => $user,
 				'roles' => $roles,
 				'locked' => $locked,
-				'collapsed' => (bool) $inspectorCollapsed,
+				'collapsed' => u($panelCookie)->is('inspector', 'collapsed'),
 			]) ?>
 		<?php endif ?>
 

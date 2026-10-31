@@ -60,7 +60,6 @@ final class Media extends Panel
 			'detail' => $screen->file === null ? null : $this->detail($db, $locales, $screen),
 			'contentLocales' => $system['locales'],
 			'defaultLocale' => $system['defaultLocale'],
-			'inspectorCollapsed' => $this->request->cookie('cosray_inspector', '') === 'collapsed',
 			// Feeds the window.Cosray bridge, whose toasts report upload failures.
 			'system' => $system,
 			'rail' => true,

@@ -29,6 +29,7 @@ use Cosray\NavigationItem;
 use Cosray\NavLink;
 use Cosray\Node\Types;
 use Cosray\Panel\Client;
+use Cosray\Panel\Cookie;
 use Cosray\Panel\Extras;
 use Cosray\Renderer;
 use Cosray\Security\Policy;
@@ -119,9 +120,17 @@ abstract class Panel
 				'collections' => $collections,
 				'rail' => static::AREA === 'content' && $collections !== [],
 				'messages' => $this->messages(),
+				'panelCookie' => $this->panelCookie(),
 			],
 			$data,
 		);
+	}
+
+	private function panelCookie(): Cookie
+	{
+		$value = $this->request->cookie(Cookie::NAME, '');
+
+		return Cookie::parse(is_string($value) ? $value : '');
 	}
 
 	/**

@@ -1008,8 +1008,6 @@ final class Editor extends Panel
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,
 			'meta' => $meta,
-			'inspectorCollapsed' => $this->request->cookie('cosray_inspector', '') === 'collapsed',
-			'wideBlocks' => $this->request->cookie('cosray_blocks', '') === 'wide',
 		]);
 	}
 
