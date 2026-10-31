@@ -8,6 +8,7 @@ use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Cosray\Commands\CreateUser;
 use Cosray\Commands\ListUsers;
+use Cosray\Commands\LoginLink;
 use Cosray\Commands\PasswordPrompt;
 use Cosray\Commands\SetPassword;
 use Cosray\Security\Policy;
@@ -197,6 +198,45 @@ final class UserCommandsTest extends IntegrationTestCase
 			new PasswordPrompt(new PasswordPolicy($this->config(), $this->logger)),
 			$this->logger,
 		);
+	}
+
+	public function testPrintsALinkThatSignsTheUserInOnce(): void
+	{
+		$this->createTestUser(['username' => 'cli-link', 'email' => 'link@example.com']);
+		$buffer = new Buffer();
+
+		$this->assertSame(0, $this->loginLink()(new Io($buffer), 'cli-link', next: '/node/abc'));
+		$token = preg_match('#/panel/handoff/([a-f0-9]{64})\?next=%2Fpanel%2Fnode%2Fabc#', $buffer->output(), $match)
+		=== 1
+			? $match[1]
+			: '';
+
+		$this->assertSame('cli-link', $this->users->byOneTimeToken($token)?->username);
+		$this->assertNull($this->users->byOneTimeToken($token));
+		$this->assertSame([['notice', 'Sign-in link for cli-link created from the console']], $this->logger->records);
+	}
+
+	public function testRefusesUsersWithoutPanelAccessAndPathsOutsideThePanel(): void
+	{
+		$this->createTestUser(['username' => 'cli-guest', 'role' => 'guest']);
+		$this->createTestUser(['username' => 'cli-away']);
+
+		$guest = new Buffer();
+		$this->assertSame(1, $this->loginLink()(new Io($guest), 'cli-guest'));
+		$this->assertStringContainsString('cli-guest has no panel access.', $guest->errorOutput());
+
+		$away = new Buffer();
+		$this->assertSame(1, $this->loginLink()(new Io($away), 'cli-away', next: '//example.com'));
+		$this->assertStringContainsString('--next is a path inside the panel', $away->errorOutput());
+
+		$unknown = new Buffer();
+		$this->assertSame(1, $this->loginLink()(new Io($unknown), 'nobody'));
+		$this->assertSame([], $this->logger->records);
+	}
+
+	private function loginLink(): LoginLink
+	{
+		return new LoginLink($this->users, Policy::withDefaults(), $this->config(), $this->logger);
 	}
 
 	private function create(): CreateUser
