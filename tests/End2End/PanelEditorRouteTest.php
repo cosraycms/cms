@@ -767,6 +767,28 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		);
 	}
 
+	public function testGridBlocksArriveInTheWidthTheCookieRemembers(): void
+	{
+		$this->authenticateAs('editor');
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$this->createTestNode([
+			'uid' => 'panel-editor-wide-blocks',
+			'type' => $mediaType ? (int) $mediaType['type'] : $this->createTestType('test-media-document'),
+			'content' => [],
+		]);
+		$uri = '/panel/node/panel-editor-wide-blocks';
+		$narrow = $this->getHtmlResponse($this->makeRequest('GET', $uri));
+		$wide = $this->getHtmlResponse($this->makeRequest('GET', $uri, [
+			'cookies' => ['cosray_blocks' => 'wide'],
+		]));
+
+		$this->assertHtmlNodeExists('//*[@data-field="contentBlocks"]//button[@data-blocks-width]', $narrow);
+		$this->assertHtmlNodeMissing('//*[contains(@class, "cms-node")][@data-wide-blocks]', $narrow);
+		$this->assertHtmlNodeExists('//*[contains(@class, "cms-node")][@data-wide-blocks]', $wide);
+	}
+
 	public function testRouteReferencedContentFieldsAreMarkedAsPathSources(): void
 	{
 		$this->authenticateAs('editor');

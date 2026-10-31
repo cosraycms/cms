@@ -16,6 +16,8 @@ Notable mappings from the former artwork:
 
 Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content, `image` for media, `list-nested` for menus, and `people` for users.
 
+A full-row grid blocks field toggles its width with `arrows-expand-vertical` and `arrows-collapse-vertical`.
+
 The node inspector uses `layout-sidebar-inset-reverse` to collapse and expand, and its strip uses `toggles`, `link-45deg`, and `sliders` for the status, paths, and advanced tabs.
 
 The layout preview's width presets use `display`, `tablet-landscape`, `tablet`, and `phone`; its reload uses `arrow-clockwise`.

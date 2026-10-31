@@ -37,6 +37,7 @@ $draft = is_array($meta['draft'] ?? null) ? $meta['draft'] : null;
 $contentLocales = ContentLocales::used($fields, count($locales));
 $showSettings = $routable || $renderable || $contentLocales;
 $edit = $mode === 'edit';
+$wideBlocks = (bool) ($wideBlocks ?? false);
 $showSettings = $showSettings && $embed === null;
 $action = $edit
 	? $links->edit($uid)
@@ -45,6 +46,7 @@ $action = $edit
 
 <div
 	class="page cms-node"
+	<?= $wideBlocks ? 'data-wide-blocks' : '' ?>
 	<?php if ($embed !== null): ?>
 		data-embed
 		data-embed-uid="<?= escape($uid) ?>"

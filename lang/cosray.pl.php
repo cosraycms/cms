@@ -249,6 +249,7 @@ return [
 		'field:duplicate-block' => 'Duplikuj blok',
 		'field:fallback-from' => 'Zastępczo z języka :language',
 		'field:fallback-shared' => 'Zastępczo z treści wspólnej',
+		'field:full-width' => 'Pełna szerokość',
 		'field:gap' => 'Odstęp',
 		'field:gap-split' => 'Ustaw osobno odstęp między wierszami i kolumnami',
 		'field:item' => 'Element',

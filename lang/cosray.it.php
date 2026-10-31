@@ -229,6 +229,7 @@ return [
 		'field:duplicate-block' => 'Duplica blocco',
 		'field:fallback-from' => 'Ripreso da :language',
 		'field:fallback-shared' => 'Ripreso dal valore condiviso',
+		'field:full-width' => 'Larghezza piena',
 		'field:gap' => 'Spaziatura',
 		'field:gap-split' => 'Imposta separatamente la spaziatura tra righe e tra colonne',
 		'field:item' => 'Elemento',

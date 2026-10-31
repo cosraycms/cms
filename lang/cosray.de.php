@@ -229,6 +229,7 @@ return [
 		'field:duplicate-block' => 'Block duplizieren',
 		'field:fallback-from' => 'Fallback aus :language',
 		'field:fallback-shared' => 'Fallback aus gemeinsamem Inhalt',
+		'field:full-width' => 'Volle Breite',
 		'field:gap' => 'Abstand',
 		'field:gap-split' => 'Zeilen- und Spaltenabstand getrennt festlegen',
 		'field:item' => 'Element',

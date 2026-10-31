@@ -229,6 +229,7 @@ return [
 		'field:duplicate-block' => 'Blok dupliceren',
 		'field:fallback-from' => 'Valt terug op :language',
 		'field:fallback-shared' => 'Valt terug op gedeelde inhoud',
+		'field:full-width' => 'Volledige breedte',
 		'field:gap' => 'Afstand',
 		'field:gap-split' => 'Rij- en kolomafstand apart instellen',
 		'field:item' => 'Element',

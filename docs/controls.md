@@ -178,6 +178,8 @@ A block of a multi-column field splits into parts, side by side or stacked, from
 
 "Change block type", in a block's or a part's action menu when the field has more than one type, replaces the block with a fresh one of the type picked from the field's picker, opened at the menu's trigger. The new block takes the old one's position and size, or its place in the list or split, and its settings (class, ID, padding); its content does not carry over. A block holding any content asks for confirmation first: a typed value that differs from a fresh block's, or text or files in an element control. Picking the block's own type changes nothing.
 
+The editor keeps its fields in a column narrower than wide screens. A multi-column blocks field that fills its row can spread to the pane's full width: the button beside its label switches all such fields at once. The choice is remembered per browser in the `cosray_blocks` cookie, which the editor reads, so a page arrives at its width; the default is the column. The button shows only while the pane is wider than the column.
+
 Layout preview posts the current form without saving or validating, renders the selected field through its block types, and displays it with the reference stylesheet. It does not include site-specific fonts or styles. The preview iframe uses `sandbox="allow-same-origin"` without script permission; that restriction matters even though block output can contain trusted embed markup. Browser-side YouTube thumbnail replacement also contacts YouTube's image host. See [Editor](../src/Controller/Panel/Editor.php) and the panel behaviors for endpoint and preset details.
 
 ## Element controls

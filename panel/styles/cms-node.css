@@ -74,8 +74,23 @@
 
 	/* A grid of blocks spreads past the capped column to the pane's width;
 	   the margin holds because every box between the two is centred. */
-	& .cms-field.is-wide {
+	&[data-wide-blocks] .cms-field.can-widen {
 		margin-inline: calc(50% - 50cqi);
+	}
+
+	& .width-toggle {
+		display: inline-flex;
+		align-items: center;
+		padding-block: var(--cms-space-0-5);
+
+		& .cms-icon {
+			--cms-icon-size: 0.875rem;
+		}
+	}
+
+	&:not([data-wide-blocks]) .width-toggle .bi-arrows-collapse-vertical,
+	&[data-wide-blocks] .width-toggle .bi-arrows-expand-vertical {
+		display: none;
 	}
 
 	& .sheet {
@@ -193,5 +208,13 @@
 	.cms-node > .head::before,
 	.cms-node > .head::after {
 		transition: none;
+	}
+}
+
+/* The literal is --cms-editor-max-width: at or below it there is nothing to
+   widen, and container queries cannot read custom properties. */
+@container content (width <= 53rem) {
+	.cms-node .width-toggle {
+		display: none;
 	}
 }

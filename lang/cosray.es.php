@@ -226,6 +226,7 @@ return [
 		'field:duplicate-block' => 'Duplicar bloque',
 		'field:fallback-from' => 'Tomado de :language',
 		'field:fallback-shared' => 'Tomado del contenido compartido',
+		'field:full-width' => 'Ancho completo',
 		'field:gap' => 'Espaciado',
 		'field:gap-split' => 'Definir por separado el espaciado entre filas y entre columnas',
 		'field:item' => 'Elemento',
