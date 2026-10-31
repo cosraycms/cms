@@ -38,10 +38,12 @@
 	& .breadcrumb {
 		display: flex;
 		align-items: center;
-		gap: var(--cms-space-2);
+		gap: var(--cms-space-3);
+		flex-wrap: wrap;
 		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-xs);
-		font-weight: 500;
+		font-size: var(--cms-font-size-xl);
+		letter-spacing: -0.03em;
+		white-space: nowrap;
 
 		& a {
 			color: var(--cms-color-text-muted);

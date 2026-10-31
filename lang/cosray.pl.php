@@ -201,8 +201,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet poziomo',
 		'editor:layout-preview-tablet-portrait' => 'Tablet pionowo',
 		'editor:layout-preview-width' => 'Szerokość podglądu',
-		'editor:mode-create' => 'Nowy',
-		'editor:mode-edit' => 'Edycja',
 		'editor:path-fallback' => 'Używa ścieżki języka :language',
 		'editor:path-generated' => 'Generowana przy zapisie',
 		'editor:path-none' => 'Brak ścieżki',

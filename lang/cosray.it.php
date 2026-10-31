@@ -181,8 +181,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet orizzontale',
 		'editor:layout-preview-tablet-portrait' => 'Tablet verticale',
 		'editor:layout-preview-width' => 'Larghezza anteprima',
-		'editor:mode-create' => 'Nuovo',
-		'editor:mode-edit' => 'Modifica',
 		'editor:path-fallback' => 'Usa il percorso di :language',
 		'editor:path-generated' => 'Generato al salvataggio',
 		'editor:path-none' => 'Nessun percorso',

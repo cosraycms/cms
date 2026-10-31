@@ -604,12 +604,11 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 				<div class="page sample-page">
 					<header class="head">
 						<div class="titles">
-							<nav class="breadcrumb" aria-label="Breadcrumb">
-								<a href="#">Pages</a>
-								<span class="sep" aria-hidden="true">/</span>
-								<span>Edit</span>
-							</nav>
 							<div class="line">
+								<nav class="breadcrumb" aria-label="Breadcrumb">
+									<a href="#">Pages</a>
+									<span class="sep" aria-hidden="true">/</span>
+								</nav>
 								<h1>A page with a rather long title</h1>
 								<span class="cms-count">42 entries</span>
 								<span class="cms-status is-published">Published</span>

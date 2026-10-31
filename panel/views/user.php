@@ -25,16 +25,17 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <div class="page cms-node cms-user">
 	<header class="head">
 		<div class="titles">
-			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<?php if ($profile): ?>
-					<span><?= escape(__('user:profile')) ?></span>
-				<?php else: ?>
-					<a href="<?= escape((string) $listUrl) ?>"><?= escape(__('user:users')) ?></a>
-					<span class="sep" aria-hidden="true">/</span>
-					<span><?= escape((string) $typeLabel) ?></span>
-				<?php endif ?>
-			</nav>
 			<div class="line">
+				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<?php if ($profile): ?>
+						<span><?= escape(__('user:profile')) ?></span>
+					<?php else: ?>
+						<a href="<?= escape((string) $listUrl) ?>"><?= escape(__('user:users')) ?></a>
+						<span class="sep" aria-hidden="true">/</span>
+						<span><?= escape((string) $typeLabel) ?></span>
+					<?php endif ?>
+					<span class="sep" aria-hidden="true">/</span>
+				</nav>
 				<h1><?= escape((string) $title) ?></h1>
 				<?php if ($exists && !$user->active): ?>
 					<span class="cms-status is-unpublished"><?= escape(__('user:inactive')) ?></span>

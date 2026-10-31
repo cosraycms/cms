@@ -18,12 +18,11 @@ $profileUrl = (string) $profileUrl;
 <div class="page cms-collection cms-tokens">
 	<header class="head">
 		<div class="titles">
-			<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-				<a href="<?= escape($profileUrl) ?>"><?= escape(__('user:profile')) ?></a>
-				<span class="sep" aria-hidden="true">/</span>
-				<span><?= escape(__('tokens:title')) ?></span>
-			</nav>
 			<div class="line">
+				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+					<a href="<?= escape($profileUrl) ?>"><?= escape(__('user:profile')) ?></a>
+					<span class="sep" aria-hidden="true">/</span>
+				</nav>
 				<h1><?= escape(__('tokens:title')) ?></h1>
 			</div>
 		</div>

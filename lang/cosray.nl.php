@@ -181,8 +181,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet liggend',
 		'editor:layout-preview-tablet-portrait' => 'Tablet staand',
 		'editor:layout-preview-width' => 'Voorbeeldbreedte',
-		'editor:mode-create' => 'Nieuw',
-		'editor:mode-edit' => 'Bewerken',
 		'editor:path-fallback' => 'Gebruikt het pad van :language',
 		'editor:path-generated' => 'Wordt bij het opslaan gegenereerd',
 		'editor:path-none' => 'Geen pad',

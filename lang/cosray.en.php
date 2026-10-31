@@ -175,8 +175,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet landscape',
 		'editor:layout-preview-tablet-portrait' => 'Tablet portrait',
 		'editor:layout-preview-width' => 'Preview width',
-		'editor:mode-create' => 'New',
-		'editor:mode-edit' => 'Edit',
 		'editor:path-fallback' => 'Uses the :language path',
 		'editor:path-generated' => 'Generated on save',
 		'editor:path-none' => 'No path',

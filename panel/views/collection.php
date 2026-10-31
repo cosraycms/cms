@@ -40,14 +40,15 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 <div class="page cms-collection">
 	<header class="head">
 		<div class="titles">
-			<?php if ($page->parent !== null): ?>
-				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-					<a href="<?= escape($page->parent->rootUrl) ?>"><?= escape($page->name) ?></a>
-					<span class="sep" aria-hidden="true">/</span>
-					<span><?= escape($page->parent->title ?? $page->parent->uid) ?></span>
-				</nav>
-			<?php endif ?>
 			<div class="line">
+				<?php if ($page->parent !== null): ?>
+					<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+						<a href="<?= escape($page->parent->rootUrl) ?>"><?= escape($page->name) ?></a>
+						<span class="sep" aria-hidden="true">/</span>
+						<span><?= escape($page->parent->title ?? $page->parent->uid) ?></span>
+						<span class="sep" aria-hidden="true">/</span>
+					</nav>
+				<?php endif ?>
 				<h1><?= escape($page->title) ?></h1>
 				<span class="cms-count"><?= escape(__n(
 					'collection:entry-count',

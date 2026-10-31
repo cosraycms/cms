@@ -53,14 +53,13 @@ $action = $edit
 	<?php endif ?>>
 	<header class="head">
 		<div class="titles">
-			<?php if ($embed === null): ?>
-				<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
-					<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
-					<span class="sep" aria-hidden="true">/</span>
-					<span><?= escape($edit ? __('editor:mode-edit') : __('editor:mode-create')) ?></span>
-				</nav>
-			<?php endif ?>
 			<div class="line">
+				<?php if ($embed === null): ?>
+					<nav class="breadcrumb" aria-label="<?= escape(__('collection:breadcrumb')) ?>">
+						<a href="<?= escape($backUrl) ?>" hx-target="#frame"><?= escape($backLabel) ?></a>
+						<span class="sep" aria-hidden="true">/</span>
+					</nav>
+				<?php endif ?>
 				<h1><?= $node['title'] ?? '' ?></h1>
 				<?php if ($renderable): ?>
 					<span

@@ -181,8 +181,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet quer',
 		'editor:layout-preview-tablet-portrait' => 'Tablet hochkant',
 		'editor:layout-preview-width' => 'Vorschaubreite',
-		'editor:mode-create' => 'Neu',
-		'editor:mode-edit' => 'Bearbeiten',
 		'editor:path-fallback' => 'Nutzt den Pfad von :language',
 		'editor:path-generated' => 'Wird beim Speichern erzeugt',
 		'editor:path-none' => 'Kein Pfad',

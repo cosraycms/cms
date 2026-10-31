@@ -178,8 +178,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablet na horizontal',
 		'editor:layout-preview-tablet-portrait' => 'Tablet na vertical',
 		'editor:layout-preview-width' => 'Largura da pré-visualização',
-		'editor:mode-create' => 'Nova entrada',
-		'editor:mode-edit' => 'Editar',
 		'editor:path-fallback' => 'Usa o caminho em :language',
 		'editor:path-generated' => 'Gerado ao guardar',
 		'editor:path-none' => 'Sem caminho',

@@ -178,8 +178,6 @@ return [
 		'editor:layout-preview-tablet-landscape' => 'Tablette paysage',
 		'editor:layout-preview-tablet-portrait' => 'Tablette portrait',
 		'editor:layout-preview-width' => 'Largeur de l’aperçu',
-		'editor:mode-create' => 'Création',
-		'editor:mode-edit' => 'Modification',
 		'editor:path-fallback' => 'Utilise le chemin de la version :language',
 		'editor:path-generated' => 'Généré à l’enregistrement',
 		'editor:path-none' => 'Aucun chemin',
