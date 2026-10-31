@@ -6,7 +6,7 @@ return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Volver al inicio de sesión',
 		'auth:csrf-expired' => 'La página llevaba demasiado tiempo abierta, así que por motivos de seguridad no se ha guardado nada. Recarga la página e inténtalo de nuevo. Antes, copia los cambios sin guardar, porque al recargar se pierden.',
-		'auth:expired-back' => 'Volver a la página',
+		'auth:expired-back' => 'Volver',
 		'auth:expired-reload' => 'Recargar la página',
 		'auth:expired-text' => 'La página llevaba demasiado tiempo abierta, así que por motivos de seguridad no se ha procesado el formulario. Vuelve atrás e inténtalo de nuevo.',
 		'auth:expired-title' => 'Sesión caducada',

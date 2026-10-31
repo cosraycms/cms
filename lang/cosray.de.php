@@ -6,7 +6,7 @@ return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Zurück zur Anmeldung',
 		'auth:csrf-expired' => 'Die Seite war zu lange geöffnet, daher wurde aus Sicherheitsgründen nichts gespeichert. Bitte die Seite neu laden und es noch einmal versuchen. Ungespeicherte Änderungen vorher kopieren, denn das Neuladen verwirft sie.',
-		'auth:expired-back' => 'Zurück zur Seite',
+		'auth:expired-back' => 'Zurück',
 		'auth:expired-reload' => 'Seite neu laden',
 		'auth:expired-text' => 'Die Seite war zu lange geöffnet, daher wurde das Formular aus Sicherheitsgründen nicht übernommen. Bitte zurückgehen und es noch einmal versuchen.',
 		'auth:expired-title' => 'Sitzung abgelaufen',

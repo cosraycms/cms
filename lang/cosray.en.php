@@ -6,7 +6,7 @@ return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Back to sign in',
 		'auth:csrf-expired' => 'The page was open for too long, so nothing was saved for security reasons. Reload the page and try again. Copy unsaved changes first, as reloading discards them.',
-		'auth:expired-back' => 'Back to the page',
+		'auth:expired-back' => 'Back',
 		'auth:expired-reload' => 'Reload page',
 		'auth:expired-text' => 'The page was open for too long, so the form was not accepted for security reasons. Go back and try again.',
 		'auth:expired-title' => 'Session expired',

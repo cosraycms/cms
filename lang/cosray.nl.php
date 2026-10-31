@@ -6,7 +6,7 @@ return [
 	'messages' => [
 		'auth:back-to-sign-in' => 'Terug naar inloggen',
 		'auth:csrf-expired' => 'De pagina stond te lang open, daarom is er om veiligheidsredenen niets opgeslagen. Laad de pagina opnieuw en probeer het nog eens. Kopieer eerst niet-opgeslagen wijzigingen, want bij het opnieuw laden gaan ze verloren.',
-		'auth:expired-back' => 'Terug naar de pagina',
+		'auth:expired-back' => 'Terug',
 		'auth:expired-reload' => 'Pagina opnieuw laden',
 		'auth:expired-text' => 'De pagina stond te lang open, daarom is het formulier om veiligheidsredenen niet verwerkt. Ga terug en probeer het opnieuw.',
 		'auth:expired-title' => 'Sessie verlopen',
