@@ -192,7 +192,7 @@
 	 *          above it — lighter than a well, and never a read-only state
 	 * raised   a control or card lifted off the ground it sits on
 	 */
-	--cms-color-canvas: light-dark(var(--cms-color-neutral-100), var(--cms-color-neutral-950));
+	--cms-color-canvas: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-950));
 	--cms-color-surface: light-dark(var(--cms-color-white), var(--cms-color-neutral-900));
 	--cms-color-surface-sunken: light-dark(
 		var(--cms-color-neutral-200),
@@ -519,7 +519,7 @@
 	--cms-content-max-width: 120rem;
 	--cms-editor-max-width: 73rem;
 	--cms-row-height: 3.5rem;
-	--cms-masthead-bg: var(--cms-color-canvas);
+	--cms-masthead-bg: var(--cms-color-surface);
 	--cms-sidebar-width: 13rem;
 	--cms-inspector-width: 19rem;
 	--cms-inspector-collapsed-width: 3.5rem;
@@ -554,6 +554,13 @@
 
 :root[data-theme='dark'] {
 	color-scheme: dark;
+}
+
+/* Matches `--cms-content-max-width`: wider, the frame floats on the canvas. */
+@media (width > 120rem) {
+	:root {
+		--cms-masthead-bg: var(--cms-color-canvas);
+	}
 }
 
 /**
