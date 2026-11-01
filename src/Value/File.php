@@ -9,6 +9,8 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Translatable;
 use Cosray\Field\Field;
 use Cosray\Field\Owner;
+use Cosray\Markup;
+use Cosray\Richtext\Inline;
 use Cosray\Schema\TranslateMode;
 use Override;
 
@@ -37,9 +39,15 @@ class File extends Value
 		return $this->textValue('title', $this->index);
 	}
 
-	public function caption(): string
+	/** The caption's HTML, escaped by construction. */
+	public function caption(): Markup
 	{
-		return $this->textValue('caption', $this->index);
+		return new Markup(Inline::html($this->captionValue()));
+	}
+
+	public function captionText(): string
+	{
+		return Inline::text($this->captionValue());
 	}
 
 	public function url(): string
@@ -96,7 +104,7 @@ class File extends Value
 			'mime' => $asset->mime,
 			'bytes' => $asset->bytes,
 			'title' => $this->title(),
-			'caption' => $this->caption(),
+			'caption' => Inline::text($this->captionValue()) === '' ? null : ['html' => (string) $this->caption()],
 		];
 	}
 
@@ -222,6 +230,21 @@ class File extends Value
 		}
 
 		return $this->textFrom($this->asset($index)?->metaMap($key));
+	}
+
+	/** A document or a plain string, per use or else the catalog's. */
+	protected function captionValue(): mixed
+	{
+		$own = $this->fileItem($this->index)['meta']['caption'] ?? null;
+		$own = is_array($own) ? $this->effective($own) : null;
+
+		if ($this->filled($own)) {
+			return $own;
+		}
+
+		$catalog = $this->asset($this->index)?->metaMap('caption');
+
+		return $catalog === null ? null : $this->effective($catalog);
 	}
 
 	protected function textFrom(mixed $value): string

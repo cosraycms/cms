@@ -288,6 +288,7 @@ return [
 		'image:alt-text-long' => 'Tekst alternatywny',
 		'image:attribution' => 'Źródło obrazu',
 		'image:caption' => 'Podpis',
+		'image:caption-invalid' => 'Podpis może zawierać tylko tekst pogrubiony, kursywę lub przekreślenie.',
 		'image:crop-invalid' => 'Kadr nie pasuje do obrazu.',
 		'image:focus' => 'Punkt centralny',
 		'image:focus-remove' => 'Usuń punkt centralny',

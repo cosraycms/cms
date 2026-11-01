@@ -2,13 +2,14 @@
 // image card, the block figures, the fallback preview and the small menus
 // and mirrors they share.
 
-/** @import { AssetInfo, FileItem, LocaleMap, UploadType } from '../../types/data' */
+/** @import { AssetInfo, FileItem, LocaleMap, RichtextDoc, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 
 import { ZXX } from '../../lib/content.js';
 import { filled, resolveTextFallback } from '../../lib/fallback.js';
 import { icon } from '../../lib/icons.js';
 import { showPart } from '../../lib/image-geometry.js';
+import { docNodes, docText } from '../../lib/inline-doc.js';
 import { assetLine, extension, fileIcon, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 
@@ -524,10 +525,10 @@ export function imageCard({
 
 		if (loading || !info) return;
 
-		const shown = (/** @type {'alt' | 'caption'} */ name) =>
-			effectiveText(name, item, info, translate, locale, locales).trim();
-		const alt = shown('alt');
-		const caption = offered.includes('caption') ? shown('caption') : '';
+		const alt = docText(effectiveText('alt', item, info, translate, locale, locales));
+		const caption = offered.includes('caption')
+			? effectiveText('caption', item, info, translate, locale, locales)
+			: '';
 		const attribution = offered.includes('attribution') ? effectiveAttribution(item, info) : '';
 
 		if (alt) {
@@ -541,8 +542,8 @@ export function imageCard({
 			text(__('image:alt-text'), add);
 		}
 
-		if (caption) {
-			text(__('image:caption'), caption).title = caption;
+		if (docText(caption)) {
+			text(__('image:caption'), ...docNodes(caption)).title = docText(caption);
 		}
 
 		if (attribution) {
@@ -577,22 +578,26 @@ export function imageCard({
  * @param {boolean} translate
  * @param {string} contentLocale
  * @param {ControlLocales | undefined} locales
- * @returns {string}
+ * @returns {string | RichtextDoc} A caption can be a document.
  */
 export function effectiveText(name, item, info, translate, contentLocale, locales) {
 	const key = translate ? contentLocale : ZXX;
 	// A neutral value reads its catalog text in the site's default locale.
 	const catalogLocale = translate ? contentLocale : (locales?.default ?? contentLocale);
-	/** @type {LocaleMap<string> | undefined} */
-	const own = item.meta?.[name];
+	const own = /** @type {LocaleMap<string | RichtextDoc> | undefined} */ (item.meta?.[name]);
 
 	if (filled(own?.[key])) {
 		return own?.[key] ?? '';
 	}
 
 	return (
-		resolveTextFallback(own, info?.meta?.[name], key, locales?.all ?? [], catalogLocale)?.value ??
-		''
+		resolveTextFallback(
+			own,
+			/** @type {LocaleMap<string | RichtextDoc> | undefined} */ (info?.meta?.[name]),
+			key,
+			locales?.all ?? [],
+			catalogLocale,
+		)?.value ?? ''
 	);
 }
 
@@ -616,7 +621,7 @@ export function effectiveAttribution(item, info) {
  * @param {AssetInfo | undefined} options.info
  * @param {FileItem} options.item
  * @param {string} options.filename
- * @param {string} options.caption
+ * @param {string | RichtextDoc} options.caption
  * @param {string} options.attribution
  * @param {boolean} options.loading
  * @param {boolean} options.readonly
@@ -624,7 +629,7 @@ export function effectiveAttribution(item, info) {
  * @param {() => void} options.remove
  * @param {() => void} options.upload
  * @param {() => void} options.library
- * @returns {{ element: HTMLElement, setCaption: (caption: string) => void }}
+ * @returns {{ element: HTMLElement, setCaption: (caption: string | RichtextDoc) => void }}
  */
 export function figure({
 	type,
@@ -683,13 +688,14 @@ export function figure({
 	const figcaption = document.createElement('figcaption');
 	root.append(shape);
 
-	/** @param {string} text */
+	/** @param {string | RichtextDoc} text */
 	function setCaption(text) {
-		figcaption.textContent = text;
+		const written = docText(text) !== '';
+		figcaption.replaceChildren(...(written ? docNodes(text) : []));
 
-		if (attribution) figcaption.append(text ? ' ' : '', create('small', undefined, attribution));
+		if (attribution) figcaption.append(written ? ' ' : '', create('small', undefined, attribution));
 
-		if ((text || attribution) && type === 'image') shape.append(figcaption);
+		if ((written || attribution) && type === 'image') shape.append(figcaption);
 		else figcaption.remove();
 	}
 

@@ -1,7 +1,7 @@
 // The media screen's browser-side parts. The server renders the listing,
 // filters and detail; this adds what needs the pointer or the file system:
-// uploads by button or drop, the focal point, the delete confirmation, and
-// the active tile once htmx swaps in another file's detail.
+// uploads by button or drop, the focal point, the caption's editor, the delete
+// confirmation, and the active tile once htmx swaps in another file's detail.
 
 import { cosray } from '../lib/bridge.js';
 import { openDialog } from '../lib/dialogs.js';
@@ -10,6 +10,49 @@ import { __ } from '../lib/locale.js';
 const SCREEN = '[data-media]';
 
 let uploading = false;
+
+/**
+ * Gives each language's caption its editor, which writes the document into the
+ * hidden input the form submits. The editor loads only where there is a caption.
+ */
+async function mountCaptions() {
+	const inputs = Array.from(
+		document.querySelectorAll('input[data-media-caption]:not([data-mounted])'),
+	).filter((input) => input instanceof HTMLInputElement);
+
+	if (inputs.length === 0) return;
+
+	for (const input of inputs) input.dataset.mounted = '';
+
+	const { inlineEditor } = await import('../elements/richtext/inline-editor.js');
+
+	for (const input of inputs) {
+		const label = document.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+		const editor = inlineEditor({
+			value: storedCaption(input.value),
+			label: label?.textContent?.trim() ?? '',
+			change: (doc) => {
+				input.value = doc ? JSON.stringify(doc) : '';
+			},
+		});
+		label?.addEventListener('click', () => editor.field.focus());
+		input.after(editor.element);
+	}
+}
+
+/**
+ * @param {string} value A document's JSON, or a plain text from before captions had marks.
+ * @returns {import('../types/data').RichtextDoc | string}
+ */
+function storedCaption(value) {
+	try {
+		const doc = JSON.parse(value);
+
+		return doc?.type === 'doc' ? doc : value;
+	} catch {
+		return value;
+	}
+}
 
 /** Marks the tile whose detail the inspector shows. */
 function mark() {
@@ -293,6 +336,8 @@ export function install() {
 	}
 
 	document.addEventListener('htmx:after:swap', mark, options);
+	document.addEventListener('htmx:after:swap', () => void mountCaptions(), options);
+	void mountCaptions();
 	document.addEventListener('htmx:config:request', keepFile, options);
 
 	return () => events.abort();

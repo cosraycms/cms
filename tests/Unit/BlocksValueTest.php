@@ -564,13 +564,37 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
+	public function testImageBlockRendersACaptionDocument(): void
+	{
+		$doc = [
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'content' => [
+					['type' => 'text', 'text' => 'Sun & '],
+					['type' => 'text', 'text' => '<sea>', 'marks' => [['type' => 'italic']]],
+				],
+			]],
+		];
+		$blocks = $this->createBlocksValue([
+			$this->image(['uid' => 'blockimg12345', 'meta' => ['caption' => ['en' => $doc]]]),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg');
+
+		$this->assertStringContainsString(
+			'<figcaption>Sun &amp; <em>&lt;sea&gt;</em></figcaption>',
+			$blocks->render()->html,
+		);
+		$this->assertSame('Sun & <sea>', $blocks->image()?->captionText());
+	}
+
 	public function testImageBlockCaptionFallsBackToTheCatalog(): void
 	{
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg', meta: ['caption' => ['en' => 'From the catalog']]);
 
 		$this->assertStringContainsString('<figcaption>From the catalog</figcaption>', $blocks->render()->html);
-		$this->assertSame('From the catalog', $blocks->image()?->caption());
+		$this->assertSame('From the catalog', (string) $blocks->image()?->caption());
 	}
 
 	public function testImageBlockPrintsTheAttributionOverTheCatalogsAlone(): void

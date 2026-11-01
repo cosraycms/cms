@@ -265,6 +265,7 @@ return [
 		'image:alt-text-long' => 'Texto alternativo',
 		'image:attribution' => 'Créditos da imagem',
 		'image:caption' => 'Legenda',
+		'image:caption-invalid' => 'A legenda só pode conter texto a negrito, itálico ou riscado.',
 		'image:crop-invalid' => 'O recorte não se ajusta à imagem.',
 		'image:focus' => 'Foco',
 		'image:focus-remove' => 'Remover foco',

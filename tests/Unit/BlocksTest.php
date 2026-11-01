@@ -281,6 +281,24 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($valid(['crop' => ['x' => 0.1, 'y' => 0, 'w' => 0.5, 'h' => 1]]));
 		$this->assertTrue($valid(['crop' => ['x' => 0, 'y' => 0, 'w' => 1, 'h' => 1]]));
 
+		$this->assertTrue($valid(['caption' => ['zxx' => 'Plain']]));
+		$this->assertTrue($valid([
+			'caption' => [
+				'zxx' => [
+					'type' => 'doc',
+					'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'x']]]],
+				],
+			],
+		]));
+		$this->assertFalse($valid([
+			'caption' => [
+				'zxx' => [
+					'type' => 'doc',
+					'content' => [['type' => 'bulletList', 'content' => []]],
+				],
+			],
+		]));
+
 		$this->assertFalse($valid(['focal' => ['x' => 1.5, 'y' => 0]]));
 		$this->assertFalse($valid(['focal' => ['x' => 0.5]]));
 		$this->assertFalse($valid(['focal' => ['x' => 'left', 'y' => 0]]));

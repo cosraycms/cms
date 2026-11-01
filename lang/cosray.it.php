@@ -268,6 +268,7 @@ return [
 		'image:alt-text-long' => 'Testo alternativo',
 		'image:attribution' => 'Crediti immagine',
 		'image:caption' => 'Didascalia',
+		'image:caption-invalid' => 'La didascalia può contenere solo testo in grassetto, corsivo o barrato.',
 		'image:crop-invalid' => 'Il ritaglio non si adatta all’immagine.',
 		'image:focus' => 'Punto focale',
 		'image:focus-remove' => 'Rimuovi punto focale',

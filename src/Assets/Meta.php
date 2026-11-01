@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cosray\Assets;
 
+use Cosray\Richtext\Inline;
+
 /**
- * The editable slice of an asset's `meta` bag: localized text
- * (`alt`/`title`/`caption` as locale => string maps), a scalar
+ * The editable slice of an asset's `meta` bag: localized text (`alt`/`title`
+ * as locale => string maps, `caption` as locale => inline document), a scalar
  * `attribution`, and an image `focal` point `{x, y}` clamped to 0..1. Empty
  * values are dropped so the stored bag never accumulates blank keys, and
  * keys the panel does not manage are carried through untouched.
@@ -39,7 +41,9 @@ final class Meta
 		}
 
 		foreach (self::TEXT as $key) {
-			$map = self::textMap($input[$key] ?? null, $localeIds);
+			$map = $key === 'caption'
+				? self::captionMap($input[$key] ?? null, $localeIds)
+				: self::textMap($input[$key] ?? null, $localeIds);
 
 			if ($map !== []) {
 				$stored[$key] = $map;
@@ -85,6 +89,27 @@ final class Meta
 
 			if ($text !== '') {
 				$map[$locale] = $text;
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * @param list<string> $localeIds
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function captionMap(mixed $value, array $localeIds): array
+	{
+		$map = [];
+
+		foreach (is_array($value) ? $value : [] as $locale => $entry) {
+			$doc = is_string($locale) && ($localeIds === [] || in_array($locale, $localeIds, true))
+				? Inline::read($entry)
+				: null;
+
+			if ($doc !== null) {
+				$map[$locale] = $doc;
 			}
 		}
 

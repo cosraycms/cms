@@ -172,11 +172,17 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->problem($this->upload(), 403);
 		$this->authenticateAs('editor');
 
-		$created = $this->upload(['meta' => json_encode(['alt' => ['en' => 'A pixel']])]);
+		$created = $this->upload(['meta' => json_encode([
+			'alt' => ['en' => 'A pixel'],
+			'caption' => ['en' => 'One <small> pixel'],
+			'attribution' => '© Jane Doe',
+		])]);
 		$asset = $this->json($created, 201);
 		$this->assertSame('/api/assets/' . $asset['uid'], $created->getHeaderLine('Location'));
 		$this->assertSame('image', $asset['kind']);
 		$this->assertSame('A pixel', $asset['alt']);
+		$this->assertSame(['html' => 'One &lt;small&gt; pixel'], $asset['caption']);
+		$this->assertSame('© Jane Doe', $asset['attribution']);
 		$this->assertStringEndsWith('-thumb.png', $asset['sizes']['thumb']);
 		$this->assertSame($asset['uid'], $this->json($this->upload(), 200)['uid']);
 

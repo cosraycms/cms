@@ -262,6 +262,7 @@ return [
 		'image:alt-text-long' => 'Alternative text',
 		'image:attribution' => 'Attribution',
 		'image:caption' => 'Caption',
+		'image:caption-invalid' => 'The caption may only hold text in bold, italic or struck through.',
 		'image:crop-invalid' => 'The crop does not fit the image.',
 		'image:focus' => 'Focus',
 		'image:focus-remove' => 'Remove focus',

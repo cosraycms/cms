@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Cosray\Field;
 
 use Celema\Sire\Extra;
+use Celema\Sire\Review;
 use Celema\Sire\Shape;
+use Cosray\Richtext\Inline;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Prepare;
 use Cosray\Validation\Shapes;
@@ -117,6 +119,17 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 
 	protected function itemMetaShape(): Shape
 	{
-		return Shapes::create()->extra(Extra::Allow);
+		$shape = Shapes::create()->extra(Extra::Allow);
+		$shape->review(static function (Review $review): void {
+			$captions = $review->values()['caption'] ?? null;
+
+			foreach (is_array($captions) ? $captions : [] as $locale => $caption) {
+				if (!Inline::valid($caption)) {
+					$review->addError(['caption', $locale], __('image:caption-invalid'));
+				}
+			}
+		});
+
+		return $shape;
 	}
 }

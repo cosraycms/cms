@@ -33,6 +33,26 @@ final class Renderer
 		return $this->children($doc['content'] ?? null);
 	}
 
+	/** The text of a document without its paragraphs, as for a caption. */
+	public function inline(mixed $doc): string
+	{
+		$this->notices = [];
+
+		if (!is_array($doc) || ($doc['type'] ?? null) !== 'doc') {
+			return '';
+		}
+
+		$parts = [];
+
+		foreach (is_array($doc['content'] ?? null) ? $doc['content'] : [] as $block) {
+			if (is_array($block)) {
+				$parts[] = $this->children($block['content'] ?? null);
+			}
+		}
+
+		return implode(' ', $parts);
+	}
+
 	/** @return list<string> What the last render skipped or could not resolve. */
 	public function notices(): array
 	{

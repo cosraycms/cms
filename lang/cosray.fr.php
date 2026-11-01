@@ -265,6 +265,7 @@ return [
 		'image:alt-text-long' => 'Texte alternatif',
 		'image:attribution' => 'Crédit photo',
 		'image:caption' => 'Légende',
+		'image:caption-invalid' => 'La légende ne peut contenir que du texte en gras, en italique ou barré.',
 		'image:crop-invalid' => 'Le recadrage ne correspond pas à l’image.',
 		'image:focus' => 'Point focal',
 		'image:focus-remove' => 'Supprimer le point focal',

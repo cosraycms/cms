@@ -384,6 +384,10 @@
 	gap: var(--cms-space-2);
 	font-size: var(--cms-font-size-sm);
 	color: var(--cms-color-text-muted);
+
+	& [hidden] {
+		display: none;
+	}
 }
 
 .cms-meta-form {

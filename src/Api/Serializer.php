@@ -10,6 +10,7 @@ use Cosray\DateTime\Codec;
 use Cosray\Node\Factory;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
+use Cosray\Richtext\Inline;
 use DateTimeImmutable;
 use stdClass;
 
@@ -95,7 +96,7 @@ final class Serializer
 			'height' => $asset->height,
 			'alt' => $this->localized($asset->metaMap('alt')),
 			'title' => $this->localized($asset->metaMap('title')),
-			'caption' => $this->localized($asset->metaMap('caption')),
+			'caption' => $this->caption($asset->metaMap('caption')),
 			'attribution' => is_string($attribution) ? $attribution : null,
 			'focal' => is_array($focal) ? $focal : null,
 			'sizes' => $sizes,
@@ -171,12 +172,34 @@ final class Serializer
 	/** @param ?array<array-key, mixed> $map */
 	private function localized(?array $map): string
 	{
+		$value = $this->resolved($map, is_string(...));
+
+		return is_string($value) ? $value : '';
+	}
+
+	/**
+	 * @param ?array<string, mixed> $map
+	 * @return ?array{html: string}
+	 */
+	private function caption(?array $map): ?array
+	{
+		$value = $this->resolved($map, static fn(mixed $entry): bool => Inline::text($entry) !== '');
+
+		return $value === null ? null : ['html' => Inline::html($value)];
+	}
+
+	/**
+	 * @param ?array<string, mixed> $map
+	 * @param callable(mixed): bool $usable
+	 */
+	private function resolved(?array $map, callable $usable): mixed
+	{
 		$locale = $this->context->locale();
 
 		while ($locale) {
 			$value = $map[$locale->id] ?? null;
 
-			if (is_string($value) && $value !== '') {
+			if ($value !== '' && $usable($value)) {
 				return $value;
 			}
 
@@ -185,7 +208,7 @@ final class Serializer
 
 		$neutral = $map['zxx'] ?? null;
 
-		return is_string($neutral) ? $neutral : '';
+		return $usable($neutral) ? $neutral : null;
 	}
 
 	private static function instant(mixed $value): ?string

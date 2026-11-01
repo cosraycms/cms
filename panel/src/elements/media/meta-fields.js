@@ -9,7 +9,9 @@
 import { ZXX } from '../../lib/content.js';
 import { fallbackLabel } from '../../lib/control.js';
 import { resolveTextFallback } from '../../lib/fallback.js';
+import { docText } from '../../lib/inline-doc.js';
 import { __ } from '../../lib/locale.js';
+import { inlineEditor } from '../richtext/inline-editor.js';
 
 /** @typedef {'alt' | 'caption' | 'title' | 'attribution'} Key */
 
@@ -58,7 +60,7 @@ export function metaFields({
 		title: __('field:optional'),
 		attribution: __('field:optional'),
 	};
-	/** @type {Record<string, LocaleMap<string>>} */
+	/** @type {Record<string, LocaleMap<any>>} */
 	const texts = Object.fromEntries(
 		keys
 			.filter((name) => name !== 'attribution')
@@ -71,7 +73,7 @@ export function metaFields({
 	const all = locales?.all ?? [];
 	const element = document.createElement('div');
 	element.className = 'cms-media-meta';
-	/** @type {Map<Key, { input: HTMLInputElement | HTMLTextAreaElement, entry: HTMLElement, note: HTMLElement }>} */
+	/** @type {Map<Key, { set: (value: any) => void, hint: (text: string) => void, entry: HTMLElement, note: HTMLElement }>} */
 	const parts = new Map();
 
 	const key = () => (translate ? locale : ZXX);
@@ -99,13 +101,13 @@ export function metaFields({
 
 		const resolved = resolveTextFallback(
 			texts[name],
-			/** @type {LocaleMap<string> | undefined} */ (catalog?.[name]),
+			/** @type {LocaleMap<any> | undefined} */ (catalog?.[name]),
 			key(),
 			all,
 			catalogLocale(),
 		);
 
-		return resolved && { value: resolved.value, note: fallbackLabel(resolved, all) };
+		return resolved && { value: docText(resolved.value), note: fallbackLabel(resolved, all) };
 	}
 
 	/** @param {Key} name */
@@ -126,7 +128,7 @@ export function metaFields({
 
 		if (!part) return;
 
-		part.input.placeholder = placeholder(name);
+		part.hint(placeholder(name));
 		const resolved = fallback(name);
 
 		if (resolved) {
@@ -135,6 +137,86 @@ export function metaFields({
 		} else {
 			part.note.remove();
 		}
+	}
+
+	/** @param {Key} name */
+	const report = (name) => {
+		refresh(name);
+		update({ ...texts, ...(keys.includes('attribution') ? { attribution } : {}) });
+	};
+
+	/**
+	 * @param {Key} name
+	 * @param {string} id
+	 * @param {HTMLLabelElement} label
+	 */
+	function captionControl(name, id, label) {
+		const editor = inlineEditor({
+			value: own(name),
+			label: labels[name],
+			readonly,
+			change: (doc) => {
+				texts[name][key()] = doc;
+				report(name);
+			},
+			focus: () => {
+				focused = name;
+				refresh(name);
+			},
+			blur: () => {
+				focused = null;
+				refresh(name);
+			},
+		});
+		editor.field.id = id;
+		label.addEventListener('click', () => editor.field.focus());
+
+		return { node: editor.element, set: editor.set, hint: editor.placeholder };
+	}
+
+	/**
+	 * @param {Key} name
+	 * @param {string} id
+	 */
+	function textControl(name, id) {
+		/** @type {HTMLInputElement | HTMLTextAreaElement} */
+		let input;
+
+		if (name === 'alt') {
+			input = document.createElement('textarea');
+			input.className = 'cms-textarea';
+			input.rows = 1;
+		} else {
+			input = document.createElement('input');
+			input.className = 'cms-input';
+			input.type = 'text';
+			input.autocomplete = 'off';
+		}
+
+		const field = input;
+		field.id = id;
+		field.readOnly = readonly;
+		field.value = own(name);
+		field.addEventListener('focus', () => {
+			focused = name;
+			refresh(name);
+		});
+		field.addEventListener('blur', () => {
+			focused = null;
+			refresh(name);
+		});
+		field.addEventListener('input', () => {
+			if (name === 'attribution') attribution = field.value;
+			else texts[name][key()] = field.value;
+
+			report(name);
+		});
+
+		return {
+			node: field,
+			set: (/** @type {string} */ value) => (field.value = value),
+			hint: (/** @type {string} */ text) => (field.placeholder = text),
+		};
 	}
 
 	for (const name of keys) {
@@ -147,42 +229,15 @@ export function metaFields({
 		remark.className = 'remark';
 		remark.textContent = notes[name];
 		label.append(labels[name], ' ', remark);
-		/** @type {HTMLInputElement | HTMLTextAreaElement} */
-		let input;
-
-		if (name === 'alt' || name === 'caption') {
-			input = document.createElement('textarea');
-			input.className = 'cms-textarea';
-			input.rows = 1;
-		} else {
-			input = document.createElement('input');
-			input.className = 'cms-input';
-			input.type = 'text';
-			input.autocomplete = 'off';
-		}
-
-		input.id = `${id}-${name}`;
-		input.readOnly = readonly;
-		input.value = own(name);
-		input.addEventListener('focus', () => {
-			focused = name;
-			refresh(name);
-		});
-		input.addEventListener('blur', () => {
-			focused = null;
-			refresh(name);
-		});
-		input.addEventListener('input', () => {
-			if (name === 'attribution') attribution = input.value;
-			else texts[name][key()] = input.value;
-
-			update({ ...texts, ...(keys.includes('attribution') ? { attribution } : {}) });
-		});
+		const control =
+			name === 'caption'
+				? captionControl(name, `${id}-${name}`, label)
+				: textControl(name, `${id}-${name}`);
 		const note = document.createElement('span');
 		note.className = 'fallback';
-		entry.append(label, input);
+		entry.append(label, control.node);
 		element.append(entry);
-		parts.set(name, { input, entry, note });
+		parts.set(name, { set: control.set, hint: control.hint, entry, note });
 		refresh(name);
 	}
 
@@ -192,7 +247,7 @@ export function metaFields({
 			locale = next;
 
 			for (const [name, part] of parts) {
-				part.input.value = own(name);
+				part.set(own(name));
 				refresh(name);
 			}
 		},

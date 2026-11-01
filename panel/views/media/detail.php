@@ -143,12 +143,13 @@ $closeUrl = $screen->url(['file' => null]);
 						) ?></label>
 						<?php foreach ($locales as $entry): ?>
 							<?php
-							$value = (string) ($meta[$key][$entry['id']] ?? '');
+							$value = $meta[$key][$entry['id']] ?? '';
+							$value = is_array($value) ? (string) json_encode($value) : (string) $value;
 							$name = "meta[{$key}][{$entry['id']}]";
 							?>
 							<div class="variant" data-locale="<?= escape($entry['id']) ?>" <?= $entry['id'] === $defaultLocale ? '' : 'hidden' ?>>
 								<?php if ($key === 'caption'): ?>
-									<textarea class="cms-input" rows="2" id="<?= escape("{$id}-{$entry['id']}") ?>" name="<?= escape($name) ?>"><?= escape($value) ?></textarea>
+									<input type="hidden" id="<?= escape("{$id}-{$entry['id']}") ?>" name="<?= escape($name) ?>" value="<?= escape($value) ?>" data-media-caption />
 								<?php else: ?>
 									<input class="cms-input" type="text" id="<?= escape("{$id}-{$entry['id']}") ?>" name="<?= escape($name) ?>" value="<?= escape($value) ?>" />
 								<?php endif ?>

@@ -65,12 +65,13 @@ export function resolveFallback(map, locale, locales, hasValue = filled) {
  * catalog map carries, while the site resolves the catalog in the page's
  * locale.
  *
- * @param {LocaleMap<string> | undefined} override
- * @param {LocaleMap<string> | undefined} catalog
+ * @template T
+ * @param {LocaleMap<T> | undefined} override
+ * @param {LocaleMap<T> | undefined} catalog
  * @param {string} locale
  * @param {FallbackLocale[]} locales
  * @param {string} [catalogLocale]
- * @returns {ResolvedFallback<string> | null}
+ * @returns {ResolvedFallback<T> | null}
  */
 export function resolveTextFallback(override, catalog, locale, locales, catalogLocale = locale) {
 	if (filled(override?.[locale])) {
@@ -85,8 +86,8 @@ export function resolveTextFallback(override, catalog, locale, locales, catalogL
 
 	const current = catalog?.[catalogLocale];
 
-	if (filled(current)) {
-		return { value: current ?? '', locale: catalogLocale };
+	if (current !== undefined && filled(current)) {
+		return { value: current, locale: catalogLocale };
 	}
 
 	return resolveFallback(catalog, catalogLocale, locales);

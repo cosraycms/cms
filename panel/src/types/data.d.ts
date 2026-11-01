@@ -39,7 +39,7 @@ export interface Meta {
 export interface ItemMeta {
 	alt?: LocaleMap<string>;
 	title?: LocaleMap<string>;
-	caption?: LocaleMap<string>;
+	caption?: LocaleMap<RichtextDoc | string | null>;
 	attribution?: string;
 	focal?: { x: number; y: number };
 	crop?: { x: number; y: number; w: number; h: number };

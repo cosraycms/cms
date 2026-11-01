@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { BridgeSystem, UploadResult } from '../../src/lib/bridge';
 import type { HostPayload } from '../../src/lib/host';
-import type { FileItem, LocaleMap, Meta } from '../../src/types/data';
+import type { FileItem, LocaleMap, Meta, RichtextDoc } from '../../src/types/data';
 import { installBridge } from '../../src/lib/bridge-standalone';
 import '../../src/elements/media.js';
 
@@ -117,6 +117,31 @@ function drag(target: Element, name: string, types: string[], files: File[] = []
 	Object.defineProperty(event, 'dataTransfer', { value: { types, files, items: [] } });
 	target.dispatchEvent(event);
 }
+
+const captionDoc = (text: string): RichtextDoc => ({
+	type: 'doc',
+	content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+});
+
+/** Pastes over a caption: the editor's own way in, as jsdom has no typing. */
+function writeCaption(root: ParentNode, text: string, html = ''): void {
+	const field = root.querySelector<HTMLElement>('.cms-inline-editor .ProseMirror')!;
+	field.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
+	const paste = new Event('paste', { bubbles: true, cancelable: true });
+	Object.assign(paste, {
+		clipboardData: {
+			types: [],
+			getData: (type: string) => (type === 'text/plain' ? text : type === 'text/html' ? html : ''),
+		},
+	});
+	field.dispatchEvent(paste);
+}
+
+const captionHint = (root: ParentNode) =>
+	root.querySelector('.cms-inline-editor .placeholder')?.textContent;
+
+const captionShown = (root: ParentNode) =>
+	root.querySelector('.cms-inline-editor .ProseMirror')?.textContent;
 
 async function action(label: string): Promise<void> {
 	const button = Array.from(document.querySelectorAll<HTMLButtonElement>('.cms-modal button')).find(
@@ -386,7 +411,7 @@ describe('image details', () => {
 			{ caption: false },
 		);
 
-		expect(field('caption')).toBeNull();
+		expect(document.querySelector('.cms-modal [id$="-caption"]')).toBeNull();
 
 		field('alt').value = 'A kettle';
 		field('alt').dispatchEvent(new Event('input', { bubbles: true }));
@@ -440,7 +465,7 @@ describe('image details', () => {
 		const catalog = structuredClone(element.assets);
 
 		await enter(field('alt'), 'A kettle');
-		await enter(field('caption'), 'Under the image');
+		writeCaption(document, 'Under the image');
 		expect(changes).not.toHaveBeenCalled();
 		await action('common:apply');
 
@@ -451,7 +476,7 @@ describe('image details', () => {
 					meta: {
 						title: { zxx: 'Kept title' },
 						alt: { zxx: 'A kettle' },
-						caption: { zxx: 'Under the image' },
+						caption: { zxx: captionDoc('Under the image') },
 					},
 				},
 			],
@@ -480,6 +505,126 @@ describe('image details', () => {
 		await action('common:apply');
 
 		expect(changes).not.toHaveBeenCalled();
+	});
+
+	describe('caption', () => {
+		const marked = (text: string, type: string): RichtextDoc => ({
+			type: 'doc',
+			content: [{ type: 'paragraph', content: [{ type: 'text', text, marks: [{ type }] }] }],
+		});
+
+		it('keeps the three marks of a paste and nothing else', async () => {
+			const { changes } = await details();
+
+			writeCaption(
+				document,
+				'plain',
+				'<h2>Head</h2><p>one <em>two</em></p><ul><li>three</li></ul><p><a href="/x">link</a> <img src="/i.png"></p>',
+			);
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta?.caption).toEqual({
+				zxx: {
+					type: 'doc',
+					content: [
+						{
+							type: 'paragraph',
+							content: [
+								{ type: 'text', text: 'Head one ' },
+								{ type: 'text', text: 'two', marks: [{ type: 'italic' }] },
+								{ type: 'text', text: ' three link' },
+							],
+						},
+					],
+				},
+			});
+		});
+
+		it('stays on one line', async () => {
+			await details();
+			const field = document.querySelector<HTMLElement>('.cms-modal .ProseMirror')!;
+
+			writeCaption(document, 'One');
+			field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+			expect(field.querySelectorAll('p').length).toBe(1);
+		});
+
+		it('marks text from its tools', async () => {
+			const { changes } = await details();
+
+			writeCaption(document, 'Sudhaus');
+			document
+				.querySelector('.cms-modal .ProseMirror')!
+				.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
+			document
+				.querySelector<HTMLButtonElement>('.cms-inline-editor .tools button:nth-child(2)')!
+				.click();
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta?.caption).toEqual({
+				zxx: marked('Sudhaus', 'italic'),
+			});
+		});
+
+		it('drops a caption that was emptied', async () => {
+			const { changes } = await details({
+				uid: 'cover',
+				meta: { caption: { zxx: captionDoc('Old') } },
+			});
+
+			const field = document.querySelector<HTMLElement>('.cms-modal .ProseMirror')!;
+			field.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true }));
+			field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0]).toEqual({ uid: 'cover' });
+		});
+
+		it('opens a plain caption from before marks as text', async () => {
+			await details({ uid: 'cover', meta: { caption: { zxx: 'Plain & old' } } });
+
+			expect(captionShown(document)).toBe('Plain & old');
+		});
+
+		it('shows a fallback document as plain placeholder text', async () => {
+			await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover' }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true },
+				assets: {
+					cover: { ...assets.cover, meta: { caption: { en: marked('From the media', 'bold') } } },
+				},
+			});
+			document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			await tick();
+
+			expect(captionHint(document)).toBe('From the media');
+		});
+
+		it('shows its marks on the card', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { caption: { zxx: marked('Sudhaus', 'italic') } } }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true },
+				assets,
+			});
+
+			expect(element.querySelector('.cms-image-card .texts em')?.textContent).toBe('Sudhaus');
+		});
+
+		it('is read-only in a read-only field', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { caption: { zxx: 'Kept' } } }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true, immutable: true },
+				assets,
+			});
+			element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+			await tick();
+
+			expect(
+				document.querySelector('.cms-modal .ProseMirror')?.getAttribute('contenteditable'),
+			).toBe('false');
+			expect(document.querySelector('.cms-inline-editor .tools')).toBeNull();
+		});
 	});
 
 	describe('focal point', () => {
@@ -569,13 +714,12 @@ describe('image details', () => {
 			field('alt').value = 'First';
 			field('alt').dispatchEvent(new Event('input', { bubbles: true }));
 			key('ArrowRight');
-			field('caption').value = 'Last';
-			field('caption').dispatchEvent(new Event('input', { bubbles: true }));
+			writeCaption(document, 'Last');
 			await action('common:apply');
 
 			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
 				alt: { zxx: 'First' },
-				caption: { zxx: 'Last' },
+				caption: { zxx: captionDoc('Last') },
 				focal: { x: 0.51, y: 0.5 },
 			});
 		});
@@ -1466,12 +1610,9 @@ describe('per-use meta', () => {
 		});
 		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
 		await tick();
-		const caption = document.querySelector<HTMLTextAreaElement>(
-			'.cms-modal textarea[id$="-caption"]',
-		)!;
 		const mirror = document.querySelector<HTMLElement>('.cms-modal .cms-content-locales')!;
 
-		expect(caption.value).toBe('Ein Clip');
+		expect(captionShown(document)).toBe('Ein Clip');
 		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('Deutsch');
 
 		const requests: string[] = [];
@@ -1487,7 +1628,7 @@ describe('per-use meta', () => {
 		element.locale = 'en';
 		await tick();
 
-		expect(caption.value).toBe('A clip');
+		expect(captionShown(document)).toBe('A clip');
 		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('English');
 	});
 
@@ -1510,18 +1651,14 @@ describe('per-use meta', () => {
 		expect(element.querySelector('.cms-video video')?.getAttribute('src')).toBe('/media/clip.mp4');
 		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
 		await tick();
-		const caption = document.querySelector<HTMLTextAreaElement>(
-			'.cms-modal textarea[id$="-caption"]',
-		);
-
-		expect(caption).not.toBeNull();
+		expect(document.querySelector('.cms-modal [id$="-caption"]')).not.toBeNull();
 		expect(document.querySelector('.cms-modal [id$="-alt"], .cms-modal [id$="-title"]')).toBeNull();
 
-		await enter(caption!, 'A short clip');
+		writeCaption(document, 'A short clip');
 		await action('common:apply');
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({
-			zxx: [{ uid: 'clip', meta: { caption: { zxx: 'A short clip' } } }],
+			zxx: [{ uid: 'clip', meta: { caption: { zxx: captionDoc('A short clip') } } }],
 		});
 	});
 });
@@ -1555,14 +1692,11 @@ describe('block presentation', () => {
 
 		element.querySelector<HTMLButtonElement>('.cms-image-figure .edit')!.click();
 		await tick();
-		await enter(
-			document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-caption"]')!,
-			'Changed',
-		);
+		writeCaption(document, 'Changed');
 		await action('common:apply');
 
 		expect(changes).toHaveBeenCalledExactlyOnceWith({
-			zxx: [{ uid: 'cover', meta: { caption: { zxx: 'Changed' } } }],
+			zxx: [{ uid: 'cover', meta: { caption: { zxx: captionDoc('Changed') } } }],
 		});
 		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe('Changed');
 	});
@@ -1654,7 +1788,7 @@ describe('block presentation', () => {
 		expect(element.querySelector('.cms-video-figure video')?.getAttribute('src')).toBe(
 			'/media/clip.mp4',
 		);
-		expect(slot.querySelector('textarea[id$="-caption"]')).not.toBeNull();
+		expect(slot.querySelector('[id$="-caption"]')).not.toBeNull();
 		expect(slot.querySelector('[id$="-alt"], [id$="-title"]')).toBeNull();
 	});
 });

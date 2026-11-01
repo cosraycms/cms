@@ -178,7 +178,7 @@ export function editDialog({
 				],
 			);
 			/** @type {HTMLElement | null} */ (
-				form.element.querySelector('input, textarea')
+				form.element.querySelector('input, textarea, [contenteditable]')
 			)?.setAttribute('data-dialog-focus', '');
 
 			return () => {

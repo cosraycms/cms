@@ -42,7 +42,7 @@ final class Image implements Block
 			return '';
 		}
 
-		$caption = escape($image->caption());
+		$caption = (string) $image->caption();
 		$attribution = $image->attribution();
 
 		if ($attribution !== '') {

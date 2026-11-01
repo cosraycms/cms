@@ -265,6 +265,7 @@ return [
 		'image:alt-text-long' => 'Texto alternativo',
 		'image:attribution' => 'Créditos de la imagen',
 		'image:caption' => 'Leyenda',
+		'image:caption-invalid' => 'El pie de foto solo admite texto en negrita, cursiva o tachado.',
 		'image:crop-invalid' => 'El recorte no se ajusta a la imagen.',
 		'image:focus' => 'Punto focal',
 		'image:focus-remove' => 'Quitar el punto focal',

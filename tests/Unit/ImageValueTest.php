@@ -93,6 +93,29 @@ final class ImageValueTest extends TestCase
 		$this->assertStringContainsString('-thumb~c1000.2000.5000.5000~', $json['sizes']['thumb']);
 	}
 
+	public function testJsonGivesTheCaptionAsHtml(): void
+	{
+		$doc = [
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'content' => [
+					['type' => 'text', 'text' => 'Sudhaus', 'marks' => [['type' => 'italic']]],
+				],
+			]],
+		];
+
+		$this->assertSame(
+			['html' => '<em>Sudhaus</em>'],
+			$this->image(['caption' => ['zxx' => $doc]])->json()['caption'],
+		);
+		$this->assertSame(
+			['html' => 'Old &amp; plain'],
+			$this->image([], ['caption' => ['en' => 'Old & plain']])->json()['caption'],
+		);
+		$this->assertNull($this->image([])->json()['caption']);
+	}
+
 	public function testWithoutASecretTheImageStaysWhole(): void
 	{
 		$image = $this->image(['crop' => self::CROP, 'focal' => ['x' => 0.35, 'y' => 0.2]], secret: null);

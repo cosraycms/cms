@@ -268,6 +268,7 @@ return [
 		'image:alt-text-long' => 'Alternatieve tekst',
 		'image:attribution' => 'Beeldverantwoording',
 		'image:caption' => 'Bijschrift',
+		'image:caption-invalid' => 'Het bijschrift mag alleen vette, cursieve of doorgehaalde tekst bevatten.',
 		'image:crop-invalid' => 'De uitsnede past niet bij de afbeelding.',
 		'image:focus' => 'Focuspunt',
 		'image:focus-remove' => 'Focuspunt verwijderen',

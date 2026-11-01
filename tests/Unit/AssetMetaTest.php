@@ -33,7 +33,15 @@ final class AssetMetaTest extends TestCase
 			[
 				'alt' => ['de' => 'Sudhaus', 'en' => 'Brewhouse'],
 				'title' => ['de' => 'Titel'],
-				'caption' => ['de' => 'Bildunterschrift'],
+				'caption' => [
+					'de' => [
+						'type' => 'doc',
+						'content' => [[
+							'type' => 'paragraph',
+							'content' => [['type' => 'text', 'text' => 'Bildunterschrift']],
+						]],
+					],
+				],
 				'attribution' => 'Foto: M. Huber',
 				'focal' => ['x' => 0.25, 'y' => 0.75],
 			],
@@ -68,6 +76,42 @@ final class AssetMetaTest extends TestCase
 		$meta = Meta::apply($stored, ['alt' => ['de' => 'New alt']], ['de'], false);
 
 		$this->assertSame(['legacy' => 'keep me', 'alt' => ['de' => 'New alt']], $meta);
+	}
+
+	public function testTakesACaptionAsADocumentItsJsonOrPlainText(): void
+	{
+		$doc = [
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'content' => [
+					['type' => 'text', 'text' => 'Sudhaus', 'marks' => [['type' => 'italic']]],
+				],
+			]],
+		];
+		$input = ['de' => $doc, 'en' => json_encode($doc), 'fr' => '  plain   text ', 'it' => '<b>not html</b>'];
+
+		$caption = Meta::apply([], ['caption' => $input], ['de', 'en', 'fr', 'it'], true)['caption'];
+
+		$this->assertSame($doc, $caption['de']);
+		$this->assertSame($doc, $caption['en']);
+		$this->assertSame('plain text', $caption['fr']['content'][0]['content'][0]['text']);
+		$this->assertSame('<b>not html</b>', $caption['it']['content'][0]['content'][0]['text']);
+	}
+
+	public function testDropsACaptionOutsideTheVocabulary(): void
+	{
+		$link = [
+			'type' => 'doc',
+			'content' => [[
+				'type' => 'paragraph',
+				'content' => [
+					['type' => 'text', 'text' => 'x', 'marks' => [['type' => 'link', 'attrs' => ['href' => '/x']]]],
+				],
+			]],
+		];
+
+		$this->assertArrayNotHasKey('caption', Meta::apply([], ['caption' => ['de' => $link]], ['de'], true));
 	}
 
 	public function testKeepsAnImagesTitleUnlessSubmitted(): void
