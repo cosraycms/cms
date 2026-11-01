@@ -56,6 +56,8 @@ return [
 		'field:optional' => 'opcjonalne',
 		'image:add' => 'Dodaj obrazy',
 		'image:alt-text' => 'Tekst alternatywny',
+		'image:alt-text-add' => 'dodaj',
+		'image:alt-text-missing' => 'brak',
 		'image:alt-text-note' => 'dla czytników ekranu',
 		'image:alt-text-placeholder' => 'Co przedstawia obraz?',
 		'image:caption' => 'Podpis',

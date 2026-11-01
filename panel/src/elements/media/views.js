@@ -403,9 +403,24 @@ export function videoPlayer(info) {
  * @param {() => void} options.remove
  * @param {() => void} options.upload
  * @param {() => void} options.library
- * @returns {HTMLElement}
+ * @param {boolean} options.translate
+ * @param {string} options.contentLocale
+ * @param {ControlLocales | undefined} options.locales
+ * @returns {{ element: HTMLElement, setLocale: (locale: string) => void }}
  */
-export function imageCard({ item, info, loading, readonly, edit, remove, upload, library }) {
+export function imageCard({
+	item,
+	info,
+	loading,
+	readonly,
+	edit,
+	remove,
+	upload,
+	library,
+	translate,
+	contentLocale,
+	locales,
+}) {
 	const card = create('div', 'cms-image-card');
 	card.classList.toggle('is-readonly', readonly);
 	const filename = info?.filename ?? item.uid ?? '';
@@ -444,7 +459,53 @@ export function imageCard({ item, info, loading, readonly, edit, remove, upload,
 		}
 	}
 
+	const texts = create('dl', 'texts');
 	const controls = create('div', 'controls');
+
+	/**
+	 * @param {string} label
+	 * @param {...(Node | string)} content
+	 */
+	const text = (label, ...content) => {
+		const row = document.createElement('div');
+		const value = document.createElement('dd');
+		value.append(...content);
+		row.append(create('dt', undefined, `${label}:`), value);
+		texts.append(row);
+
+		return value;
+	};
+
+	/** @param {string} locale */
+	const showTexts = (locale) => {
+		texts.replaceChildren();
+
+		if (loading || !info) return;
+
+		const shown = (/** @type {'alt' | 'caption'} */ name) =>
+			effectiveText(name, item, info, translate, locale, locales).trim();
+		const alt = shown('alt');
+		const caption = shown('caption');
+
+		if (alt) {
+			text(__('image:alt-text'), alt).title = alt;
+		} else if (readonly) {
+			text(__('image:alt-text'), create('i', undefined, __('image:alt-text-missing')));
+		} else {
+			const add = button('add', __('image:alt-text-add'), () => {
+				// The link is gone once the text is there, so the dialog returns focus to the edit button.
+				/** @type {HTMLElement | null} */ (controls.querySelector('.edit'))?.focus();
+				edit();
+			});
+			text(__('image:alt-text'), create('i', undefined, __('image:alt-text-missing')), ' ', add);
+		}
+
+		if (caption) {
+			text(__('image:caption'), caption).title = caption;
+		}
+	};
+
+	showTexts(contentLocale);
 
 	if (readonly) {
 		controls.append(labelled('cms-button secondary small', __('image:details'), edit, 'eye'));
@@ -456,16 +517,16 @@ export function imageCard({ item, info, loading, readonly, edit, remove, upload,
 		);
 	}
 
-	details.append(name, factLine, controls);
+	details.append(name, factLine, texts, controls);
 	card.append(picture, details);
 
-	return card;
+	return { element: card, setLocale: showTexts };
 }
 
 /**
- * The caption of an image as the site will render it: per use, else the
- * catalog's.
+ * A text of an image as the site will render it: per use, else the catalog's.
  *
+ * @param {'alt' | 'caption'} name
  * @param {FileItem} item
  * @param {AssetInfo | undefined} info
  * @param {boolean} translate
@@ -473,19 +534,19 @@ export function imageCard({ item, info, loading, readonly, edit, remove, upload,
  * @param {ControlLocales | undefined} locales
  * @returns {string}
  */
-export function effectiveCaption(item, info, translate, contentLocale, locales) {
+export function effectiveText(name, item, info, translate, contentLocale, locales) {
 	const key = translate ? contentLocale : ZXX;
 	// A neutral value reads its catalog text in the site's default locale.
 	const catalogLocale = translate ? contentLocale : (locales?.default ?? contentLocale);
 	/** @type {LocaleMap<string> | undefined} */
-	const own = item.meta?.caption;
+	const own = item.meta?.[name];
 
 	if (filled(own?.[key])) {
 		return own?.[key] ?? '';
 	}
 
 	return (
-		resolveTextFallback(own, info?.meta?.caption, key, locales?.all ?? [], catalogLocale)?.value ??
+		resolveTextFallback(own, info?.meta?.[name], key, locales?.all ?? [], catalogLocale)?.value ??
 		''
 	);
 }

@@ -24,7 +24,7 @@ import {
 	button,
 	contentLocales,
 	create,
-	effectiveCaption,
+	effectiveText,
 	fallbackMedia,
 	figure,
 	fileRow,
@@ -557,18 +557,21 @@ class MediaControl extends HTMLElement {
 		const info = this.#asset(item.uid ?? '');
 
 		if (!block) {
-			body.append(
-				imageCard({
-					item,
-					info,
-					loading,
-					readonly,
-					edit,
-					remove: removeAll,
-					upload,
-					library,
-				}),
-			);
+			const card = imageCard({
+				item,
+				info,
+				loading,
+				readonly,
+				edit,
+				remove: removeAll,
+				upload,
+				library,
+				translate,
+				contentLocale: this.#locale,
+				locales,
+			});
+			body.append(card.element);
+			this.#followers.push(card.setLocale);
 
 			return;
 		}
@@ -578,7 +581,9 @@ class MediaControl extends HTMLElement {
 			info,
 			filename: info?.filename ?? item.uid ?? '',
 			caption:
-				type === 'image' ? effectiveCaption(item, info, translate, this.#locale, locales) : '',
+				type === 'image'
+					? effectiveText('caption', item, info, translate, this.#locale, locales)
+					: '',
 			loading,
 			readonly,
 			edit: type === 'image' ? edit : undefined,
@@ -590,7 +595,7 @@ class MediaControl extends HTMLElement {
 
 		if (type === 'image') {
 			this.#followers.push((locale) =>
-				shown.setCaption(effectiveCaption(item, info, translate, locale, locales)),
+				shown.setCaption(effectiveText('caption', item, info, translate, locale, locales)),
 			);
 
 			return;

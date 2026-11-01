@@ -36,6 +36,8 @@ return [
 		'field:optional' => 'optional',
 		'image:add' => 'Add images',
 		'image:alt-text' => 'Alt text',
+		'image:alt-text-add' => 'add',
+		'image:alt-text-missing' => 'missing',
 		'image:alt-text-note' => 'for screen readers',
 		'image:alt-text-placeholder' => 'What does the image show?',
 		'image:caption' => 'Caption',

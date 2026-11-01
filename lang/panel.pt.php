@@ -39,6 +39,8 @@ return [
 		'field:optional' => 'opcional',
 		'image:add' => 'Adicionar imagens',
 		'image:alt-text' => 'Texto alternativo',
+		'image:alt-text-add' => 'adicionar',
+		'image:alt-text-missing' => 'ausente',
 		'image:alt-text-note' => 'para leitores de ecrã',
 		'image:alt-text-placeholder' => 'O que mostra a imagem?',
 		'image:caption' => 'Legenda',

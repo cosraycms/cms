@@ -42,6 +42,8 @@ return [
 		'field:optional' => 'facultatif',
 		'image:add' => 'Ajouter des images',
 		'image:alt-text' => 'Texte alternatif',
+		'image:alt-text-add' => 'ajouter',
+		'image:alt-text-missing' => 'manquant',
 		'image:alt-text-note' => 'pour les lecteurs d’écran',
 		'image:alt-text-placeholder' => 'Que montre l’image ?',
 		'image:caption' => 'Légende',

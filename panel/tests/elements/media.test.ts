@@ -423,6 +423,82 @@ describe('image details', () => {
 		expect(changes).not.toHaveBeenCalled();
 	});
 
+	describe('card texts', () => {
+		const texts = (element: HTMLElement) =>
+			[...element.querySelectorAll('.cms-image-card .texts div')].map(
+				(row) => `${row.querySelector('dt')?.textContent} ${row.querySelector('dd')?.textContent}`,
+			);
+		const card = (item: FileItem, extra: Record<string, unknown> = {}) =>
+			media('cosray-image', {
+				value: { zxx: [item] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, ...extra },
+				assets,
+			});
+
+		it('shows the alt text and caption', async () => {
+			const { element } = await card({
+				uid: 'cover',
+				meta: { alt: { zxx: 'A kettle' }, caption: { zxx: 'In the brewhouse' } },
+			});
+
+			expect(texts(element)).toEqual([
+				'image:alt-text: A kettle',
+				'image:caption: In the brewhouse',
+			]);
+		});
+
+		it('offers to add a missing alt text and leaves out a missing caption', async () => {
+			const { element } = await card({ uid: 'cover' });
+
+			expect(texts(element)).toEqual(['image:alt-text: image:alt-text-missing image:alt-text-add']);
+		});
+
+		it('adds the alt text through the details dialog and keeps focus nearby', async () => {
+			const { element } = await card({ uid: 'cover' });
+			const add = element.querySelector<HTMLButtonElement>('.cms-image-card .add')!;
+			add.focus();
+			add.click();
+			await tick();
+
+			expect(document.activeElement).toBe(field('alt'));
+
+			await enter(field('alt'), 'A kettle');
+			await action('common:apply');
+
+			expect(texts(element)).toEqual(['image:alt-text: A kettle']);
+			expect(document.activeElement).toBe(element.querySelector('.cms-image-card .edit'));
+		});
+
+		it('reports a missing alt text without a way to add it when read-only', async () => {
+			const { element } = await card({ uid: 'cover' }, { immutable: true });
+
+			expect(texts(element)).toEqual(['image:alt-text: image:alt-text-missing']);
+		});
+
+		it('reads the catalog behind an empty text', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover' }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 } },
+				assets: { cover: { ...assets.cover, meta: { alt: { en: 'A kettle' } } } },
+			});
+
+			expect(texts(element)).toEqual(['image:alt-text: A kettle']);
+		});
+
+		it('follows the content language', async () => {
+			const { element } = await card(
+				{ uid: 'cover', meta: { alt: { de: 'Ein Kessel', en: 'A kettle' } } },
+				{ translate: true, translateMode: 'symmetric' },
+			);
+
+			expect(texts(element)).toEqual(['image:alt-text: Ein Kessel']);
+
+			element.locale = 'en';
+
+			expect(texts(element)).toEqual(['image:alt-text: A kettle']);
+		});
+	});
+
 	it('returns focus to the edit button after applying', async () => {
 		const { element } = await media('cosray-image', {
 			value: { zxx: [{ uid: 'cover' }] },
