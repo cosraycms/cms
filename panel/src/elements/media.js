@@ -1,11 +1,13 @@
 // Defines <cosray-image>, <cosray-file> and <cosray-video>: the media
 // controls. A frame with the library and upload actions holds the field's
 // files as rows, a single image as a card and several as a gallery; in a
-// block a filled field shows its image or video as content and puts the
-// per-use texts into the settings slot. Values are `{uid, meta?}` lists:
-// an asymmetric field keeps one per language, any other one under zxx.
+// block a filled field shows its image or video as content. An image's
+// per-use texts live in its details dialog, a block video's in the settings
+// slot. Values are `{uid, meta?}` lists: an asymmetric field keeps one per
+// language, any other one under zxx.
 
 /** @import { AssetInfo, AssetMap, FileItem, LocaleMap, Meta, UploadType } from '../types/data' */
+/** @import { UploadResult } from '../lib/bridge.js' */
 /** @import { ControlLocales } from '../lib/control.js' */
 
 import Sortable from 'sortablejs';
@@ -14,8 +16,9 @@ import { ZXX, pruneItemMeta } from '../lib/content.js';
 import { fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __, __n } from '../lib/locale.js';
-import { alertDialog, editDialog, libraryDialog, previewDialog } from './media/dialogs.js';
+import { alertDialog, editDialog, libraryDialog } from './media/dialogs.js';
 import { galleryView } from './media/gallery-view.js';
+import { imageDialog } from './media/image-dialog.js';
 import { metaFields } from './media/meta-fields.js';
 import {
 	button,
@@ -468,6 +471,7 @@ class MediaControl extends HTMLElement {
 					loading,
 					readonly,
 					store,
+					edit: () => this.#details(identity, 0),
 					removeAll,
 					upload,
 					library,
@@ -557,31 +561,13 @@ class MediaControl extends HTMLElement {
 	 *
 	 * @param {HTMLElement} body
 	 * @param {FileItem} item
-	 * @param {{ block: boolean, loading: boolean, readonly: boolean, store: (items: FileItem[]) => void, removeAll: () => void, upload: () => void, library: () => void }} options
+	 * @param {{ block: boolean, loading: boolean, readonly: boolean, store: (items: FileItem[]) => void, edit: () => void, removeAll: () => void, upload: () => void, library: () => void }} options
 	 */
-	#single(body, item, { block, loading, readonly, store, removeAll, upload, library }) {
+	#single(body, item, { block, loading, readonly, store, edit, removeAll, upload, library }) {
 		const type = this.#type === 'video' ? 'video' : 'image';
 		const translate = this.#translate;
 		const locales = this.locales;
 		const info = this.#asset(item.uid ?? '');
-		let current = item;
-		/** @type {((item: FileItem, locale: string) => void) | null} */
-		let caption = null;
-		const form = metaFields({
-			item,
-			kind: type,
-			translate,
-			contentLocale: this.#locale,
-			locales,
-			catalog: info?.meta,
-			update: (next) => {
-				current = next;
-				store([next]);
-				caption?.(next, this.#locale);
-			},
-			readonly,
-		});
-		this.#followers.push(form.setLocale);
 
 		if (!block) {
 			body.append(
@@ -590,12 +576,7 @@ class MediaControl extends HTMLElement {
 					info,
 					loading,
 					readonly,
-					meta: form.element,
-					preview: () => {
-						const url = info?.previewUrl ?? info?.url;
-
-						if (url) previewDialog(this, url);
-					},
+					edit,
 					remove: removeAll,
 					upload,
 					library,
@@ -613,20 +594,34 @@ class MediaControl extends HTMLElement {
 				type === 'image' ? effectiveCaption(item, info, translate, this.#locale, locales) : '',
 			loading,
 			readonly,
+			edit: type === 'image' ? edit : undefined,
 			remove: removeAll,
 			upload,
 			library,
 		});
+		body.append(shown.element);
 
 		if (type === 'image') {
-			caption = (next, locale) =>
-				shown.setCaption(effectiveCaption(next, info, translate, locale, locales));
-			this.#followers.push((locale) => caption?.(current, locale));
+			this.#followers.push((locale) =>
+				shown.setCaption(effectiveCaption(item, info, translate, locale, locales)),
+			);
+
+			return;
 		}
 
-		body.append(shown.element);
 		// A settings dialog's slot takes the per-use form when the owner
 		// offers one; it sits below the media otherwise.
+		const form = metaFields({
+			item,
+			kind: type,
+			translate,
+			contentLocale: this.#locale,
+			locales,
+			catalog: info?.meta,
+			update: (next) => store([next]),
+			readonly,
+		});
+		this.#followers.push(form.setLocale);
 		const settings = create('div', 'cms-figure-settings');
 
 		if (this.settings && translate && locales && locales.all.length > 1) {
@@ -829,29 +824,11 @@ class MediaControl extends HTMLElement {
 			const results = await Promise.all(files.map((file) => cosray().upload(type, file)));
 
 			for (const result of results) {
-				if (!result) {
-					continue;
-				}
+				const uid = this.#accept(result, (message) => cosray().toast.error(message));
 
-				if (!result.ok || !result.uid) {
-					cosray().toast.error(
-						__('upload:file-error', { file: result.filename ?? '', error: result.error ?? '' }),
-					);
-					continue;
+				if (uid) {
+					this.#add(identity, { uid });
 				}
-
-				this.#picked[result.uid] = {
-					filename: result.filename ?? '',
-					url: result.url ?? '',
-					thumbUrl: result.thumbUrl,
-					previewUrl: result.previewUrl,
-					kind: type,
-					mime: result.mime,
-					bytes: result.bytes,
-					width: result.width,
-					height: result.height,
-				};
-				this.#add(identity, { uid: result.uid });
 			}
 		} finally {
 			this.#pending.set(identity, (this.#pending.get(identity) ?? 1) - 1);
@@ -861,6 +838,39 @@ class MediaControl extends HTMLElement {
 				this.#render();
 			}
 		}
+	}
+
+	/**
+	 * Makes an uploaded asset known to the previews.
+	 *
+	 * @param {UploadResult | undefined} result
+	 * @param {(message: string) => void} report
+	 * @returns {string | null} Its uid; null for a failed upload.
+	 */
+	#accept(result, report) {
+		if (!result) {
+			return null;
+		}
+
+		if (!result.ok || !result.uid) {
+			report(__('upload:file-error', { file: result.filename ?? '', error: result.error ?? '' }));
+
+			return null;
+		}
+
+		this.#picked[result.uid] = {
+			filename: result.filename ?? '',
+			url: result.url ?? '',
+			thumbUrl: result.thumbUrl,
+			previewUrl: result.previewUrl,
+			kind: this.#type,
+			mime: result.mime,
+			bytes: result.bytes,
+			width: result.width,
+			height: result.height,
+		};
+
+		return result.uid;
 	}
 
 	/** @param {string} identity */
@@ -880,6 +890,54 @@ class MediaControl extends HTMLElement {
 			this.#notify();
 			this.#render();
 		});
+	}
+
+	/**
+	 * Opens an image's details, which follow the content language while they
+	 * are open.
+	 *
+	 * @param {string} identity
+	 * @param {number} index
+	 */
+	#details(identity, index) {
+		const items = this.#map[identity];
+
+		if (!items?.[index]) {
+			return;
+		}
+
+		const dialog = imageDialog({
+			owner: this,
+			items,
+			index,
+			asset: (uid) => this.#asset(uid),
+			picked: (item) => {
+				this.#picked[item.uid] = item;
+			},
+			upload: async (file) =>
+				this.#accept(await cosray().upload(this.#type, file), (message) =>
+					alertDialog(this, message),
+				),
+			translate: this.#translate,
+			contentLocale: this.#locale,
+			locales: this.locales,
+			readonly: this.field.immutable ?? false,
+			apply: (drafts) => {
+				const list = this.#map[identity];
+
+				for (const [at, next] of drafts) {
+					if (list?.[at]) list[at] = next;
+				}
+
+				this.#notify();
+
+				if (this.#rendered) {
+					this.#render();
+				}
+			},
+		});
+		this.#dialogs.add(dialog.setLocale);
+		void dialog.closed.then(() => this.#dialogs.delete(dialog.setLocale));
 	}
 
 	/**

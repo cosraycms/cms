@@ -295,38 +295,29 @@
 }
 
 .cms-image-card {
-	& .overview {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-3);
-		padding: var(--cms-space-3);
-	}
+	display: flex;
+	align-items: center;
+	gap: var(--cms-space-4);
+	padding: var(--cms-space-2);
 
 	& .thumb {
 		position: relative;
 		display: grid;
-		place-items: center;
-		width: 4.5rem;
-		height: 4.5rem;
 		flex-shrink: 0;
-		padding: 0;
-		border: 0;
+		place-items: center;
+		width: 11rem;
+		height: 7rem;
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface-sunken);
 		overflow: hidden;
-		cursor: zoom-in;
+		cursor: pointer;
 
 		& img {
 			position: absolute;
 			inset: 0;
 			width: 100%;
 			height: 100%;
-			object-fit: contain;
-		}
-
-		&:focus-visible {
-			outline: var(--cms-focus-outline);
-			outline-offset: var(--cms-focus-offset);
+			object-fit: cover;
 		}
 	}
 
@@ -368,31 +359,30 @@
 
 	& .controls {
 		display: flex;
-		flex-shrink: 0;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--cms-space-2);
-	}
-
-	& .discard {
-		width: var(--cms-control-height-sm);
-		padding-inline: 0;
+		margin-top: var(--cms-space-2);
 
 		& svg {
-			width: 0.75rem;
-			height: 0.75rem;
+			width: 0.875rem;
+			height: 0.875rem;
 		}
 	}
 
-	/* The frame's radius less its border, so the band fills the corners. */
-	& .descriptions {
-		padding: var(--cms-space-3);
-		border-top: 1px solid var(--cms-color-border);
-		border-radius: 0 0 calc(var(--cms-control-radius) - 1px) calc(var(--cms-control-radius) - 1px);
-		background: var(--cms-color-surface-muted);
+	& .cms-button.discard {
+		--button-text: var(--cms-color-danger);
+		--button-hover-text: var(--cms-color-danger-hover);
 	}
 
-	&.is-readonly .descriptions {
-		background: none;
+	@media (width < 40rem) {
+		flex-direction: column;
+		align-items: stretch;
+
+		& .thumb {
+			width: 100%;
+			height: 10rem;
+		}
 	}
 }
 
@@ -967,15 +957,234 @@
 	}
 }
 
-.cms-image-preview {
+/* The details dialog of an image. */
+.cms-image-head {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: var(--cms-space-3);
 
-	& img {
-		max-width: 100%;
-		max-height: calc(100dvh - 10rem);
-		object-fit: contain;
+	& .heading {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	& .filename {
+		margin: 0;
+		overflow: hidden;
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-sm);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .stepper {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+	}
+
+	& .position {
+		padding-right: var(--cms-space-2);
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .step {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 1px solid var(--cms-color-border-strong);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			position: relative;
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.prev {
+			border-right: 0;
+			border-radius: var(--cms-radius-md) 0 0 var(--cms-radius-md);
+		}
+
+		&.next {
+			border-radius: 0 var(--cms-radius-md) var(--cms-radius-md) 0;
+		}
+	}
+}
+
+.cms-modal .modal-body.cms-image-details {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	padding: 0;
+
+	& .stage {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-4);
+		min-width: 0;
+		padding: var(--cms-space-6);
+		border-inline-end: 1px solid var(--cms-color-border);
+	}
+
+	/* The checkerboard shows a transparent image's edges. */
+	& .preview {
+		display: grid;
+		place-items: center;
+		height: min(24rem, 45dvh);
+		border: 1px solid var(--cms-color-border);
+		border-radius: var(--cms-radius-lg);
+		background: repeating-conic-gradient(
+				var(--cms-color-surface-sunken) 0 25%,
+				var(--cms-color-surface) 0 50%
+			)
+			0 0 / 1.5rem 1.5rem;
+		overflow: hidden;
+
+		& img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+	}
+
+	& .plate {
+		color: var(--cms-color-text-subtle);
+		font-size: var(--cms-font-size-xs);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	& .facts {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--cms-space-2) var(--cms-space-4);
+		margin: 0;
+		font-size: var(--cms-font-size-sm);
+
+		& > div {
+			display: flex;
+			align-items: baseline;
+			gap: var(--cms-space-2);
+			min-width: 0;
+		}
+
+		& .wide {
+			grid-column: 1 / -1;
+			align-items: center;
+		}
+
+		& dt {
+			flex-shrink: 0;
+			color: var(--cms-color-text-subtle);
+		}
+
+		& dd {
+			flex: 1 1 auto;
+			min-width: 0;
+			margin: 0;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	& .address {
+		display: flex;
+		gap: var(--cms-space-1);
+
+		& input {
+			flex: 1 1 auto;
+			min-width: 0;
+			min-height: var(--cms-control-height-sm);
+			height: var(--cms-control-height-sm);
+			font-family: monospace;
+			font-size: var(--cms-font-size-xs);
+		}
+	}
+
+	& .copy {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: var(--cms-control-height-sm);
+		height: var(--cms-control-height-sm);
+		padding: 0;
+		border: 1px solid var(--cms-color-border-strong);
+		border-radius: var(--cms-radius-md);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-text-muted);
+		cursor: pointer;
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+	}
+
+	& .fields {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cms-space-5);
+		min-width: 0;
+		padding: var(--cms-space-6);
+	}
+
+	& .cms-media-meta {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--cms-space-5);
+	}
+
+	& .cms-media-meta .cms-textarea {
+		min-height: 5.5rem;
+	}
+
+	@media (width < 48rem) {
+		grid-template-columns: minmax(0, 1fr);
+
+		& .stage {
+			border-inline-end: 0;
+			border-block-end: 1px solid var(--cms-color-border);
+		}
+
+		& .preview {
+			height: min(16rem, 35dvh);
+		}
+	}
+}
+
+.cms-modal .modal-footer:has(> .replace) {
+	& > .replace {
+		margin-inline-end: auto;
+	}
+
+	& > .replace svg {
+		width: 0.625rem;
+		height: 0.625rem;
 	}
 }
 

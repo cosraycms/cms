@@ -72,25 +72,6 @@ export function alertDialog(owner, body) {
 }
 
 /**
- * @param {HTMLElement | undefined} owner
- * @param {string} url
- */
-export function previewDialog(owner, url) {
-	cosray().modal.open(
-		(host) => {
-			const box = document.createElement('div');
-			box.className = 'cms-image-preview';
-			const image = document.createElement('img');
-			image.src = url;
-			image.alt = __('common:preview');
-			box.append(image);
-			frame(host, __('common:preview'), [box]);
-		},
-		{ owner, size: 'wide' },
-	);
-}
-
-/**
  * The library to pick one asset from; a pick closes the dialog.
  *
  * @param {HTMLElement | undefined} owner

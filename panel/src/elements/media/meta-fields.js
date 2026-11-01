@@ -118,7 +118,7 @@ export function metaFields({
 		/** @type {HTMLInputElement | HTMLTextAreaElement} */
 		let input;
 
-		if (name === 'caption') {
+		if (name !== 'title') {
 			input = document.createElement('textarea');
 			input.className = 'cms-textarea';
 			input.rows = 1;

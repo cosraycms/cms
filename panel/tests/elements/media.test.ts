@@ -285,7 +285,7 @@ describe('single image', () => {
 		expect(element.querySelector('.cms-media-field.is-empty > .bar')).not.toBeNull();
 	});
 
-	it('keeps the picture and its texts on a read-only card and drops the removal', async () => {
+	it('keeps the picture on a read-only card and shows its texts read-only', async () => {
 		const { element } = await media('cosray-image', {
 			value: { zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A kettle' } } }] },
 			field: { name: 'cover', limit: { min: 0, max: 1 }, immutable: true },
@@ -294,9 +294,247 @@ describe('single image', () => {
 		const card = element.querySelector<HTMLElement>('.cms-image-card')!;
 
 		expect(card.querySelector('img')?.getAttribute('src')).toBe('/media/cover.jpg');
-		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.value).toBe('A kettle');
-		expect(card.querySelector<HTMLInputElement>('input[id$="-alt"]')?.readOnly).toBe(true);
-		expect(card.querySelector('.discard, .replace')).toBeNull();
+		expect(card.querySelector('.discard, .replace, .edit')).toBeNull();
+
+		card.querySelector<HTMLButtonElement>('.controls button')!.click();
+		await tick();
+		const alt = document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
+
+		expect(alt.value).toBe('A kettle');
+		expect(alt.readOnly).toBe(true);
+		expect(document.querySelector('.cms-modal .replace')).toBeNull();
+		expect(document.activeElement?.textContent).toBe('common:close');
+	});
+});
+
+describe('image details', () => {
+	const assets = {
+		cover: {
+			filename: 'cover.jpg',
+			url: '/media/cover.jpg',
+			previewUrl: '/media/cover-preview.jpg',
+			kind: 'image',
+			bytes: 862208,
+			width: 2400,
+			height: 1600,
+		},
+		fresh: { filename: 'fresh.png', url: '/media/fresh.png', kind: 'image' },
+	};
+
+	async function details(item: FileItem = { uid: 'cover' }, extra: Record<string, unknown> = {}) {
+		const opened = await media('cosray-image', {
+			value: { zxx: [item] },
+			field: { name: 'cover', limit: { min: 0, max: 1 }, ...extra },
+			assets,
+		});
+		opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		await tick();
+
+		return opened;
+	}
+
+	function field(name: string): HTMLTextAreaElement {
+		return document.querySelector<HTMLTextAreaElement>(`.cms-modal textarea[id$="-${name}"]`)!;
+	}
+
+	it('opens from the picture too and starts on the alt text', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+			assets,
+		});
+
+		element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+		await tick();
+
+		expect(document.activeElement).toBe(field('alt'));
+	});
+
+	it('shows the image with its facts next to the texts', async () => {
+		await details();
+		const modal = document.querySelector<HTMLElement>('.cms-modal')!;
+		const facts = Array.from(modal.querySelectorAll('.facts > div')).map((row) => [
+			row.querySelector('dt')?.textContent,
+			row.querySelector('dd')?.textContent,
+		]);
+
+		expect(modal.querySelector('.modal-header .filename')?.textContent).toBe('cover.jpg');
+		expect(modal.querySelector('.preview img')?.getAttribute('src')).toBe(
+			'/media/cover-preview.jpg',
+		);
+		expect(facts.slice(0, 3)).toEqual([
+			['media:size', '842.0 KB'],
+			['media:dimensions', '2400 × 1600 px'],
+			['media:format', 'JPG'],
+		]);
+		expect(modal.querySelector<HTMLInputElement>('.address input')?.value).toBe(
+			new URL('/media/cover.jpg', location.href).href,
+		);
+		expect(modal.querySelector('[id$="-title"]')).toBeNull();
+	});
+
+	it('applies the texts, keeps other meta and leaves the catalog alone', async () => {
+		const { element, changes } = await details({
+			uid: 'cover',
+			meta: { title: { zxx: 'Kept title' } },
+		});
+		const catalog = structuredClone(element.assets);
+
+		await enter(field('alt'), 'A kettle');
+		await enter(field('caption'), 'Under the image');
+		expect(changes).not.toHaveBeenCalled();
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [
+				{
+					uid: 'cover',
+					meta: {
+						title: { zxx: 'Kept title' },
+						alt: { zxx: 'A kettle' },
+						caption: { zxx: 'Under the image' },
+					},
+				},
+			],
+		});
+		expect(element.assets).toEqual(catalog);
+	});
+
+	it('drops an emptied text so the catalog applies again', async () => {
+		const { changes } = await details({ uid: 'cover', meta: { alt: { zxx: 'Old' } } });
+
+		await enter(field('alt'), '');
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'cover' }] });
+	});
+
+	it('discards the draft on cancel and reports nothing when applied unchanged', async () => {
+		const { element, changes } = await details();
+
+		await enter(field('alt'), 'Discarded');
+		await action('common:cancel');
+
+		element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		await tick();
+		expect(field('alt').value).toBe('');
+		await action('common:apply');
+
+		expect(changes).not.toHaveBeenCalled();
+	});
+
+	it('returns focus to the edit button after applying', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+			assets,
+		});
+		const edit = element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!;
+		edit.focus();
+		edit.click();
+		await tick();
+		await enter(field('alt'), 'A kettle');
+		await action('common:apply');
+
+		expect(document.activeElement).toBe(element.querySelector('.cms-image-card .edit'));
+	});
+
+	it('follows the content language and writes to the shown one', async () => {
+		const { element, changes } = await details(
+			{ uid: 'cover', meta: { alt: { de: 'Ein Kessel', en: 'A kettle' } } },
+			{ translate: true, translateMode: 'symmetric' },
+		);
+		const mirror = document.querySelector<HTMLElement>('.cms-modal .cms-content-locales')!;
+
+		expect(field('alt').value).toBe('Ein Kessel');
+		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('Deutsch');
+
+		element.locale = 'en';
+		await tick();
+		expect(field('alt').value).toBe('A kettle');
+		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('English');
+
+		await enter(field('alt'), 'A copper kettle');
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [{ uid: 'cover', meta: { alt: { de: 'Ein Kessel', en: 'A copper kettle' } } }],
+		});
+	});
+
+	it('shows catalog texts as placeholders', async () => {
+		await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 } },
+			assets: { cover: { ...assets.cover, meta: { alt: { en: 'From the catalog' } } } },
+		}).then(({ element }) =>
+			element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click(),
+		);
+		await tick();
+		field('alt').blur();
+
+		expect(field('alt').placeholder).toBe('From the catalog');
+	});
+
+	it('swaps in an uploaded image only once applied and without the old texts', async () => {
+		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
+			ok: true,
+			uid: 'fresh',
+			filename: 'fresh.png',
+			url: '/media/fresh.png',
+		});
+		const { element, changes } = await details({
+			uid: 'cover',
+			meta: { alt: { zxx: 'The old image' } },
+		});
+		const picker = document.querySelector<HTMLInputElement>('.cms-modal input[type="file"]')!;
+		const click = vi.spyOn(picker, 'click').mockImplementation(() => {});
+
+		document.querySelectorAll<HTMLButtonElement>('.cms-modal .cms-replace-menu button')[1].click();
+		expect(click).toHaveBeenCalledOnce();
+
+		Object.defineProperty(picker, 'files', {
+			configurable: true,
+			value: [new File(['content'], 'fresh.png', { type: 'image/png' })],
+		});
+		picker.dispatchEvent(new Event('input', { bubbles: true }));
+
+		await vi.waitFor(() => {
+			expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
+				'/media/fresh.png',
+			);
+		});
+		expect(field('alt').value).toBe('');
+		expect(changes).not.toHaveBeenCalled();
+		expect(element.querySelector('.cms-image-card .filename')?.textContent).toBe('cover.jpg');
+
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'fresh' }] });
+		expect(element.querySelector('.cms-image-card .filename')?.textContent).toBe('fresh.png');
+	});
+
+	it('keeps the image and says why when an upload fails', async () => {
+		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
+			ok: false,
+			filename: 'big.png',
+			error: 'Too big',
+		});
+		await details();
+		const picker = document.querySelector<HTMLInputElement>('.cms-modal input[type="file"]')!;
+
+		Object.defineProperty(picker, 'files', {
+			configurable: true,
+			value: [new File(['content'], 'big.png', { type: 'image/png' })],
+		});
+		picker.dispatchEvent(new Event('input', { bubbles: true }));
+
+		await vi.waitFor(() => {
+			expect(document.querySelector('.cms-dialog-message.is-error')).not.toBeNull();
+		});
+		expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
+			'/media/cover-preview.jpg',
+		);
 	});
 });
 
@@ -635,35 +873,6 @@ describe('gallery drawer', () => {
 });
 
 describe('per-use meta', () => {
-	it('offers alt text and caption for an image and keeps its stored title', async () => {
-		const { element, changes } = await media('cosray-image', {
-			value: { zxx: [{ uid: 'cover', meta: { title: { zxx: 'Kept title' } } }] },
-			field: { name: 'cover', limit: { min: 0, max: 1 } },
-			assets: { cover: { filename: 'cover.jpg', url: '/media/cover.jpg', kind: 'image' } },
-		});
-		const form = element.querySelector('.cms-media-meta')!;
-		const caption = form.querySelector<HTMLTextAreaElement>('textarea[id$="-caption"]');
-
-		expect(form.querySelector('input[id$="-alt"]')).not.toBeNull();
-		expect(caption).not.toBeNull();
-		expect(form.querySelector('[id$="-title"]')).toBeNull();
-
-		await enter(caption!, 'Under the image');
-		expect(changes).toHaveBeenLastCalledWith({
-			zxx: [
-				{
-					uid: 'cover',
-					meta: { title: { zxx: 'Kept title' }, caption: { zxx: 'Under the image' } },
-				},
-			],
-		});
-
-		await enter(caption!, '');
-		expect(changes).toHaveBeenLastCalledWith({
-			zxx: [{ uid: 'cover', meta: { title: { zxx: 'Kept title' } } }],
-		});
-	});
-
 	it('keeps the open video dialog on the language chosen meanwhile', async () => {
 		const { element } = await media('cosray-video', {
 			value: {
@@ -736,22 +945,33 @@ describe('block presentation', () => {
 		} as HostPayload);
 	}
 
-	it('renders an image as a figure with its per-use form below it', async () => {
-		const { element } = await figure(undefined, {
+	it('renders an image as a figure with its caption and edits it in the details', async () => {
+		const { element, changes } = await figure(undefined, {
 			uid: 'cover',
 			meta: { caption: { zxx: 'Under the image' } },
 		});
 
 		expect(element.querySelector('.cms-image-card')).toBeNull();
+		expect(element.querySelector('.cms-media-meta')).toBeNull();
 		expect(element.querySelector('.cms-image-figure img')?.getAttribute('src')).toBe(
 			'/media/cover.jpg',
 		);
 		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
 			'Under the image',
 		);
-		expect(
-			element.querySelector('.cms-image-figure .cms-media-meta input[id$="-alt"]'),
-		).not.toBeNull();
+
+		element.querySelector<HTMLButtonElement>('.cms-image-figure .edit')!.click();
+		await tick();
+		await enter(
+			document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-caption"]')!,
+			'Changed',
+		);
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [{ uid: 'cover', meta: { caption: { zxx: 'Changed' } } }],
+		});
+		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe('Changed');
 	});
 
 	it("shows a neutral image's catalog texts in the site's default locale", async () => {
@@ -772,9 +992,13 @@ describe('block presentation', () => {
 		expect(element.querySelector('.cms-image-figure figcaption')?.textContent).toBe(
 			'From the catalog',
 		);
-		expect(
-			element.querySelector<HTMLInputElement>('.cms-media-meta input[id$="-alt"]')?.placeholder,
-		).toBe('A kettle');
+
+		element.querySelector<HTMLButtonElement>('.cms-image-figure .edit')!.click();
+		await tick();
+		const alt = document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
+		alt.blur();
+
+		expect(alt.placeholder).toBe('A kettle');
 	});
 
 	it('keeps the form presentation for a standalone field', async () => {
@@ -788,62 +1012,25 @@ describe('block presentation', () => {
 		expect(element.querySelector('.cms-image-figure')).toBeNull();
 	});
 
-	it('mounts the per-use form into the settings slot and edits through it', async () => {
+	it('leaves the settings slot alone', async () => {
 		const slot = document.createElement('div');
 		document.body.append(slot);
-		const { element, changes } = await figure(slot);
-		const alt = slot.querySelector<HTMLInputElement>('.cms-media-meta input[id$="-alt"]');
+		await figure(slot);
 
-		expect(alt).not.toBeNull();
-		expect(element.querySelector('.cms-media-meta')).toBeNull();
-
-		await enter(alt!, 'A copper kettle');
-
-		expect(changes).toHaveBeenLastCalledWith({
-			zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A copper kettle' } } }],
-		});
+		expect(slot.childElementCount).toBe(0);
 	});
 
-	it('mirrors the content language in the settings slot of a translated image', async () => {
-		const slot = document.createElement('div');
-		document.body.append(slot);
-		const { element } = await media('cosray-image', {
-			value: { zxx: [{ uid: 'cover' }] },
-			field: { name: 'image', translate: true, limit: { min: 0, max: 1 }, presentation: 'block' },
-			assets: { cover },
-			settings: slot,
-		} as HostPayload);
-		const mirror = slot.querySelector<HTMLElement>('.cms-content-locales')!;
-		const requests: string[] = [];
-		document.addEventListener(
-			'content-locale:select',
-			(event) => requests.push((event as CustomEvent<{ locale: string }>).detail.locale),
-			{ once: true },
-		);
-
-		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('Deutsch');
-		expect(element.querySelector('.cms-content-locales')).toBeNull();
-
-		mirror.querySelectorAll('button')[0].click();
-
-		expect(requests).toEqual(['en']);
-	});
-
-	it('replaces the slot form along with the image and clears it on remove', async () => {
+	it('replaces and removes the image', async () => {
 		vi.spyOn(window.Cosray!, 'upload').mockResolvedValueOnce({
 			ok: true,
 			uid: 'fresh',
 			filename: 'fresh.png',
 			url: '/media/fresh.png',
 		});
-		const slot = document.createElement('div');
-		document.body.append(slot);
-		const { element, changes } = await figure(slot, {
+		const { element, changes } = await figure(undefined, {
 			uid: 'cover',
 			meta: { alt: { zxx: 'Old alt' } },
 		});
-
-		expect(slot.querySelector<HTMLInputElement>('input[id$="-alt"]')!.value).toBe('Old alt');
 
 		upload(element);
 		await vi.waitFor(() => {
@@ -851,23 +1038,12 @@ describe('block presentation', () => {
 				'/media/fresh.png',
 			);
 		});
-		const alt = slot.querySelector<HTMLInputElement>('input[id$="-alt"]');
+		expect(changes).toHaveBeenLastCalledWith({ zxx: [{ uid: 'fresh' }] });
 
-		expect(slot.querySelectorAll('.cms-media-meta')).toHaveLength(1);
-		expect(alt!.value).toBe('');
-
-		await enter(alt!, 'New alt');
-		expect(changes).toHaveBeenLastCalledWith({
-			zxx: [{ uid: 'fresh', meta: { alt: { zxx: 'New alt' } } }],
-		});
-
-		element
-			.querySelector<HTMLButtonElement>('.cms-image-figure .overlay > button:last-child')!
-			.click();
+		element.querySelector<HTMLButtonElement>('.cms-image-figure .discard')!.click();
 		await tick();
 
 		expect(changes).toHaveBeenLastCalledWith({ zxx: [] });
-		expect(slot.querySelector('.cms-media-meta')).toBeNull();
 		expect(element.querySelector('.cms-image-figure')).toBeNull();
 		expect(element.querySelector('.cms-media-field > .bar')).not.toBeNull();
 	});
@@ -919,7 +1095,7 @@ describe('gallery block', () => {
 		expect(slot.querySelector<HTMLSelectElement>('select')!.value).toBe('4/3');
 		expect(slot.querySelectorAll('.strip .thumb')).toHaveLength(2);
 		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('a.jpg');
-		expect(slot.querySelector('.cms-media-meta input[id$="-alt"]')).not.toBeNull();
+		expect(slot.querySelector('.cms-media-meta [id$="-alt"]')).not.toBeNull();
 	});
 
 	it('follows ratio and crop live and reports them as the field meta', async () => {
@@ -962,7 +1138,7 @@ describe('gallery block', () => {
 		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('b.jpg');
 		expect(slot.querySelector('.position')?.textContent).toBe('2 / 2');
 
-		await enter(slot.querySelector<HTMLInputElement>('input[id$="-alt"]')!, 'Second');
+		await enter(slot.querySelector<HTMLTextAreaElement>('[id$="-alt"]')!, 'Second');
 		expect(changes).toHaveBeenLastCalledWith({
 			zxx: [{ uid: 'a' }, { uid: 'b', meta: { alt: { zxx: 'Second' } } }],
 		});

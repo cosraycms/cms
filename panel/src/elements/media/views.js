@@ -65,6 +65,22 @@ export function button(className, label, onclick, iconName) {
 }
 
 /**
+ * A button with an icon and a visible label.
+ *
+ * @param {string} className
+ * @param {string} label
+ * @param {() => void} onclick
+ * @param {string} iconName
+ * @returns {HTMLButtonElement}
+ */
+function labelled(className, label, onclick, iconName) {
+	const element = button(className, '', onclick);
+	element.append(svg(iconName), ' ', label);
+
+	return element;
+}
+
+/**
  * A mirror of the screen's content-language selector for a dialog or slot
  * that holds translated texts: choosing here switches the whole screen. The
  * request travels as an event; the content-locales behavior resolves it.
@@ -139,9 +155,10 @@ export function contentLocales(locales, locale) {
  * @param {() => void} upload
  * @param {() => void} library
  * @param {boolean} [quiet] A figure's hover bar draws its own quiet trigger.
+ * @param {'start' | 'end'} [align]
  * @returns {HTMLElement[]}
  */
-export function replaceMenu(upload, library, quiet = false) {
+export function replaceMenu(upload, library, quiet = false, align = 'end') {
 	const id = `cms-replace-${++ids}`;
 	const trigger = create('button', quiet ? 'replace quiet' : 'replace cms-button secondary small');
 	trigger.setAttribute('type', 'button');
@@ -152,7 +169,7 @@ export function replaceMenu(upload, library, quiet = false) {
 	menu.id = id;
 	menu.setAttribute('popover', 'auto');
 	menu.dataset.actionMenu = '';
-	menu.dataset.align = 'end';
+	menu.dataset.align = align;
 
 	/**
 	 * @param {string} name
@@ -374,41 +391,29 @@ export function videoPlayer(info) {
 }
 
 /**
- * The single image of a form field: thumbnail with its facts, the replace
- * menu and removal, the per-use texts below.
+ * The single image of a form field: a picture that opens its details, its
+ * facts, and the actions on it.
  *
  * @param {object} options
  * @param {FileItem} options.item
  * @param {AssetInfo | undefined} options.info
  * @param {boolean} options.loading
  * @param {boolean} options.readonly
- * @param {HTMLElement} options.meta The per-use form.
- * @param {() => void} options.preview
+ * @param {() => void} options.edit
  * @param {() => void} options.remove
  * @param {() => void} options.upload
  * @param {() => void} options.library
  * @returns {HTMLElement}
  */
-export function imageCard({
-	item,
-	info,
-	loading,
-	readonly,
-	meta,
-	preview,
-	remove,
-	upload,
-	library,
-}) {
+export function imageCard({ item, info, loading, readonly, edit, remove, upload, library }) {
 	const card = create('div', 'cms-image-card');
 	card.classList.toggle('is-readonly', readonly);
 	const filename = info?.filename ?? item.uid ?? '';
 	const thumb = info?.thumbUrl ?? info?.url ?? '';
 	const facts = info ? assetLine(info).split(' · ') : [];
-	const overview = create('div', 'overview');
-	const picture = button('thumb', __('common:preview'), preview);
-	picture.title = __('common:preview');
-	picture.textContent = '';
+	// A pointer shortcut; the edit button is the way there for the keyboard.
+	const picture = create('div', 'thumb');
+	picture.addEventListener('click', edit);
 
 	if (thumb) {
 		const image = document.createElement('img');
@@ -435,21 +440,20 @@ export function imageCard({
 		}
 	}
 
-	details.append(name, factLine);
-	overview.append(picture, details);
+	const controls = create('div', 'controls');
 
-	if (!readonly) {
-		const controls = create('div', 'controls');
+	if (readonly) {
+		controls.append(labelled('cms-button secondary small', __('image:details'), edit, 'eye'));
+	} else {
 		controls.append(
-			...replaceMenu(upload, library),
-			button('discard cms-button secondary small', __('common:remove'), remove, 'x-lg'),
+			...replaceMenu(upload, library, false, 'start'),
+			labelled('edit cms-button secondary small', __('common:edit'), edit, 'pencil'),
+			labelled('discard cms-button secondary small', __('common:remove'), remove, 'x-lg'),
 		);
-		overview.append(controls);
 	}
 
-	const descriptions = create('div', 'descriptions');
-	descriptions.append(meta);
-	card.append(overview, descriptions);
+	details.append(name, factLine, controls);
+	card.append(picture, details);
 
 	return card;
 }
@@ -484,7 +488,7 @@ export function effectiveCaption(item, info, translate, contentLocale, locales) 
 
 /**
  * An image or video as a block shows it: the media at block width with a
- * hover bar to replace or remove it, and an image's caption below.
+ * hover bar of the actions on it, and an image's caption below.
  *
  * @param {object} options
  * @param {'image' | 'video'} options.type
@@ -493,6 +497,7 @@ export function effectiveCaption(item, info, translate, contentLocale, locales) 
  * @param {string} options.caption
  * @param {boolean} options.loading
  * @param {boolean} options.readonly
+ * @param {() => void} [options.edit] Opens the details, which a read-only image offers too.
  * @param {() => void} options.remove
  * @param {() => void} options.upload
  * @param {() => void} options.library
@@ -505,6 +510,7 @@ export function figure({
 	caption,
 	loading,
 	readonly,
+	edit,
 	remove,
 	upload,
 	library,
@@ -539,10 +545,15 @@ export function figure({
 	overlay.append(name);
 
 	if (!readonly) {
-		overlay.append(
-			...replaceMenu(upload, library, true),
-			button('quiet', __('common:remove'), remove),
-		);
+		overlay.append(...replaceMenu(upload, library, true));
+	}
+
+	if (edit) {
+		overlay.append(button('quiet edit', readonly ? __('image:details') : __('common:edit'), edit));
+	}
+
+	if (!readonly) {
+		overlay.append(button('quiet discard', __('common:remove'), remove));
 	}
 
 	frame.append(overlay);
