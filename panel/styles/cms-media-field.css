@@ -979,14 +979,17 @@
 
 .cms-modal .modal-body.cms-image-details {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
+	grid-template-rows: minmax(0, 1fr);
 	padding: 0;
+	overflow: hidden;
 
 	& .stage {
 		display: flex;
 		flex-direction: column;
 		gap: var(--cms-space-4);
 		min-width: 0;
+		min-height: 0;
 		padding: var(--cms-space-6);
 		border-inline-end: 1px solid var(--cms-color-border);
 	}
@@ -996,7 +999,8 @@
 		display: grid;
 		grid-template-rows: minmax(0, 1fr);
 		place-items: center;
-		height: min(24rem, 45dvh);
+		flex: 1 1 auto;
+		min-height: 0;
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
 		background: repeating-conic-gradient(
@@ -1023,9 +1027,11 @@
 
 	& .facts {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 		gap: var(--cms-space-2) var(--cms-space-4);
 		margin: 0;
+		padding-top: var(--cms-space-5);
+		border-top: 1px solid var(--cms-color-border);
 		font-size: var(--cms-font-size-sm);
 
 		& > div {
@@ -1102,6 +1108,8 @@
 		gap: var(--cms-space-5);
 		min-width: 0;
 		padding: var(--cms-space-6);
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	& .cms-media-meta {
@@ -1113,8 +1121,11 @@
 		min-height: 5.5rem;
 	}
 
-	@media (width < 48rem) {
+	@media (width < 60rem) {
 		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
+		grid-auto-rows: max-content;
+		overflow: auto;
 
 		& .stage {
 			border-inline-end: 0;
@@ -1122,11 +1133,12 @@
 		}
 
 		& .preview {
-			height: min(16rem, 35dvh);
+			flex: 0 0 auto;
+			height: 45dvh;
 		}
 
-		& .facts {
-			grid-template-columns: minmax(0, 1fr);
+		& .fields {
+			overflow-y: visible;
 		}
 	}
 }

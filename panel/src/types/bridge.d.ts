@@ -1,7 +1,7 @@
 export type ModalOptions = {
 	hideClose?: boolean;
 	label?: string;
-	size?: 'compact' | 'wide';
+	size?: 'compact' | 'wide' | 'stage';
 	owner?: HTMLElement;
 };
 

@@ -167,9 +167,9 @@ export function imageDialog({
 			const body = create('div', 'modal-body cms-image-details');
 			const stage = create('div', 'stage');
 			const preview = create('div', 'preview');
-			const list = create('dl', 'facts');
-			stage.append(preview, list);
+			stage.append(preview);
 			const fields = create('div', 'fields');
+			const list = create('dl', 'facts');
 			body.append(stage, fields);
 
 			if (translate && locales && locales.all.length > 1) {
@@ -206,7 +206,7 @@ export function imageDialog({
 					update: (next) => drafts.set(target, next),
 					readonly,
 				});
-				fields.append(form.element);
+				fields.append(form.element, list);
 
 				if (!readonly) {
 					form.element.querySelector('textarea')?.setAttribute('data-dialog-focus', '');
@@ -284,7 +284,7 @@ export function imageDialog({
 				closed.resolve(undefined);
 			};
 		},
-		{ owner, size: 'wide' },
+		{ owner, size: 'stage' },
 	);
 
 	return {

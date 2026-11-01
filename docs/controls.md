@@ -258,7 +258,7 @@ Upload results include catalog identity and preview information; persist `{uid}`
 
 ### Modal controls
 
-`modal.open()` supplies an empty host in a native dialog. Its renderer may return a cleanup function, run once on closure including navigation or owner removal. Options include `hideClose`, `label`, `size` (`compact` or `wide`), and `owner`. Supply an owner for asynchronous callers or controls whose removal is independent of the screen.
+`modal.open()` supplies an empty host in a native dialog. Its renderer may return a cleanup function, run once on closure including navigation or owner removal. Options include `hideClose`, `label`, `size` (`compact`, `wide` or `stage`, which also takes its height from the viewport), and `owner`. Supply an owner for asynchronous callers or controls whose removal is independent of the screen.
 
 Escape and a gesture starting and ending on the backdrop dismiss the dialog; `hideClose` hides only the close button. Dismissal cancels confirmations. Nested dialogs return focus to the underlying dialog; a renderer failure must not leave a modal host behind. Close before an action that focuses new content so restoration cannot override it.
 

@@ -25,6 +25,19 @@
 	&[data-size='wide'] {
 		--width: 72rem;
 	}
+	/* Sized by the viewport, not the content, so stepping through images keeps it still. */
+	&[data-size='stage'] {
+		--width: 80rem;
+		height: min(52rem, calc(100dvh - 2 * var(--cms-space-4)));
+
+		@media (width < 60rem) {
+			height: auto;
+		}
+
+		& > .element {
+			flex: 1 1 auto;
+		}
+	}
 
 	&::backdrop {
 		background: color-mix(in srgb, var(--cms-color-neutral-900) 45%, transparent);
