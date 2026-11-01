@@ -956,6 +956,7 @@
 	/* The checkerboard shows a transparent image's edges. */
 	& .preview {
 		display: grid;
+		grid-template-rows: minmax(0, 1fr);
 		place-items: center;
 		height: min(24rem, 45dvh);
 		border: 1px solid var(--cms-color-border);
