@@ -503,15 +503,13 @@ export function imageCard({
 
 		if (alt) {
 			text(__('image:alt-text'), alt).title = alt;
-		} else if (readonly) {
-			text(__('image:alt-text'), create('i', undefined, __('image:alt-text-missing')));
-		} else {
+		} else if (!readonly) {
 			const add = button('add', __('image:alt-text-add'), () => {
 				// The link is gone once the text is there, so the dialog returns focus to the edit button.
 				/** @type {HTMLElement | null} */ (controls.querySelector('.edit'))?.focus();
 				edit();
 			});
-			text(__('image:alt-text'), create('i', undefined, __('image:alt-text-missing')), ' ', add);
+			text(__('image:alt-text'), add);
 		}
 
 		if (caption) {

@@ -40,7 +40,6 @@ return [
 		'image:add' => 'Afbeeldingen toevoegen',
 		'image:alt-text' => 'Alt-tekst',
 		'image:alt-text-add' => 'toevoegen',
-		'image:alt-text-missing' => 'ontbreekt',
 		'image:alt-text-note' => 'voor schermlezers',
 		'image:alt-text-placeholder' => 'Wat staat er op de afbeelding?',
 		'image:caption' => 'Bijschrift',

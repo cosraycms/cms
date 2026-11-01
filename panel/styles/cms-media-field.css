@@ -306,7 +306,7 @@
 		position: relative;
 		display: grid;
 		flex-shrink: 0;
-		align-self: flex-start;
+		align-self: center;
 		place-items: center;
 		width: max(3rem, min(var(--thumb-max-width), calc(var(--thumb-height) * var(--thumb-ratio))));
 		max-height: var(--thumb-height);
@@ -336,6 +336,7 @@
 		display: flex;
 		flex: 1 1 auto;
 		flex-direction: column;
+		justify-content: flex-end;
 		gap: var(--cms-space-0-5);
 		min-width: 0;
 	}
@@ -362,7 +363,7 @@
 	}
 
 	& .texts {
-		margin: var(--cms-space-1) 0 0;
+		margin: var(--cms-space-2) 0 0;
 		font-size: var(--cms-font-size-xs);
 		color: var(--cms-color-text-muted);
 
@@ -371,26 +372,23 @@
 		}
 
 		& div {
-			display: flex;
-			gap: var(--cms-space-1);
+			display: -webkit-box;
+			overflow: hidden;
 			line-height: 1.5;
+			overflow-wrap: anywhere;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
 		}
 
 		& dt {
-			flex-shrink: 0;
+			display: inline;
+			margin-inline-end: var(--cms-space-1);
 			color: var(--cms-color-text-subtle);
 		}
 
 		& dd {
-			min-width: 0;
+			display: inline;
 			margin: 0;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-
-		& i {
-			color: var(--cms-color-text-subtle);
 		}
 
 		& .add {
@@ -413,8 +411,7 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--cms-space-2);
-		margin-top: auto;
-		padding-top: var(--cms-space-2);
+		margin-top: var(--cms-space-3);
 
 		& svg {
 			width: 0.875rem;
@@ -431,7 +428,10 @@
 		--thumb-height: 10rem;
 		--thumb-max-width: 100%;
 		flex-direction: column;
-		align-items: stretch;
+
+		& .thumb {
+			align-self: flex-start;
+		}
 	}
 }
 

@@ -46,7 +46,6 @@ return [
 		'image:add' => 'Bilder hinzufügen',
 		'image:alt-text' => 'Alt-Text',
 		'image:alt-text-add' => 'hinzufügen',
-		'image:alt-text-missing' => 'fehlt',
 		'image:alt-text-note' => 'für Screenreader',
 		'image:alt-text-placeholder' => 'Was ist auf dem Bild zu sehen?',
 		'image:caption' => 'Bildunterschrift',

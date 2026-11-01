@@ -46,7 +46,6 @@ return [
 		'image:add' => 'Aggiungi immagini',
 		'image:alt-text' => 'Testo alternativo',
 		'image:alt-text-add' => 'aggiungi',
-		'image:alt-text-missing' => 'mancante',
 		'image:alt-text-note' => 'per gli screen reader',
 		'image:alt-text-placeholder' => 'Che cosa mostra l’immagine?',
 		'image:caption' => 'Didascalia',

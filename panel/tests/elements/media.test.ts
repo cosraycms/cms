@@ -450,7 +450,7 @@ describe('image details', () => {
 		it('offers to add a missing alt text and leaves out a missing caption', async () => {
 			const { element } = await card({ uid: 'cover' });
 
-			expect(texts(element)).toEqual(['image:alt-text: image:alt-text-missing image:alt-text-add']);
+			expect(texts(element)).toEqual(['image:alt-text: image:alt-text-add']);
 		});
 
 		it('adds the alt text through the details dialog and keeps focus nearby', async () => {
@@ -469,10 +469,10 @@ describe('image details', () => {
 			expect(document.activeElement).toBe(element.querySelector('.cms-image-card .edit'));
 		});
 
-		it('reports a missing alt text without a way to add it when read-only', async () => {
+		it('leaves out a missing alt text when read-only', async () => {
 			const { element } = await card({ uid: 'cover' }, { immutable: true });
 
-			expect(texts(element)).toEqual(['image:alt-text: image:alt-text-missing']);
+			expect(texts(element)).toEqual([]);
 		});
 
 		it('reads the catalog behind an empty text', async () => {
