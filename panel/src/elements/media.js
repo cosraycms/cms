@@ -101,8 +101,6 @@ class MediaControl extends HTMLElement {
 	#picked = {};
 	/** @type {Map<string, number>} */
 	#pending = new Map();
-	/** @type {number | null} */
-	#selected = null;
 	#depth = 0;
 	/** @type {HTMLElement | null} */
 	#frame = null;
@@ -141,7 +139,6 @@ class MediaControl extends HTMLElement {
 		}
 
 		if (this.#identity(previous) !== this.#identity(locale)) {
-			this.#selected = null;
 			this.#render();
 		} else if (this.#translate) {
 			for (const follow of [...this.#followers, ...this.#dialogs]) follow(locale);
@@ -160,7 +157,6 @@ class MediaControl extends HTMLElement {
 
 		if (this.#started) {
 			this.#map = structuredClone(value ?? {});
-			this.#selected = null;
 
 			if (this.#rendered) {
 				this.#render();
@@ -435,23 +431,15 @@ class MediaControl extends HTMLElement {
 					items,
 					asset,
 					loading,
-					translate,
-					contentLocale: locale,
-					locales,
 					open,
 					readonly,
 					block,
 					meta: this.#fieldMeta,
-					selected: this.#selected,
-					select: (selected) => (this.#selected = selected),
-					update: (index, item) => {
-						items[index] = item;
-						store(items);
-					},
 					updateMeta: (meta) => {
 						this.#fieldMeta = meta;
 						this.#notify();
 					},
+					edit: (index) => this.#details(identity, index),
 					remove: removeAt,
 					move,
 					upload,
@@ -464,7 +452,6 @@ class MediaControl extends HTMLElement {
 				}
 
 				this.#teardown.push(gallery.destroy);
-				this.#followers.push(gallery.setLocale);
 			} else if (type === 'image' || block) {
 				this.#single(body, items[0], {
 					block,

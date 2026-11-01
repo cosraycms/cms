@@ -877,7 +877,7 @@
 	& .cms-image-card .controls,
 	& .cms-image-figure .overlay,
 	& .cms-video-figure .overlay,
-	& .cms-gallery .discard,
+	& .cms-gallery .tile-tools,
 	& .cms-media-meta,
 	& .cms-file-row :is(.tool, .replace) {
 		display: none;

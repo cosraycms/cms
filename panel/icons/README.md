@@ -12,7 +12,7 @@ Notable mappings from the former artwork:
 - Filled status symbols become `info-circle`, `shield-check`, `x-octagon`, and `exclamation-triangle`.
 - Font Awesome link/text-height artwork becomes `link-45deg` and `type`; unlink uses `slash-circle`.
 - Text style uses `fonts`, document uses `file-earmark-richtext`, and the collection fallback uses `collection`.
-- Media fields use `folder2-open` for the library and the `file-earmark-*` family — `pdf`, `word`, `excel`, `ppt`, `zip`, `music`, `play`, `text`, `image`, plain `file-earmark` as the fallback — for files without a thumbnail.
+- Media fields use `folder2-open` for the library and the `file-earmark-*` family — `pdf`, `word`, `excel`, `ppt`, `zip`, `music`, `play`, `text`, `image`, plain `file-earmark` as the fallback — for files without a thumbnail. An image's details use `copy` for its address.
 
 Masthead areas use `grid-1x2` for the dashboard, `file-earmark-text` for content, `image` for media, `list-nested` for menus, and `people` for users.
 

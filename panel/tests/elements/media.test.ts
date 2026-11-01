@@ -846,29 +846,171 @@ describe('gallery ordering', () => {
 	});
 });
 
-describe('gallery drawer', () => {
-	it('opens on a pick and keeps the stepper focused while stepping', async () => {
-		const { element } = await media('cosray-image', {
+describe('gallery details', () => {
+	const assets = {
+		a: { filename: 'a.jpg', url: '/media/a.jpg', kind: 'image' },
+		b: { filename: 'b.jpg', url: '/media/b.jpg', kind: 'image' },
+		c: { filename: 'c.jpg', url: '/media/c.jpg', kind: 'image' },
+	};
+
+	function gallery(extra: Record<string, unknown> = {}) {
+		return media('cosray-image', {
 			value: { zxx: [{ uid: 'a' }, { uid: 'b' }, { uid: 'c' }] },
-			field: { name: 'gallery' },
-			assets: {
-				a: { filename: 'a.jpg', url: '/media/a.jpg', kind: 'image' },
-				b: { filename: 'b.jpg', url: '/media/b.jpg', kind: 'image' },
-				c: { filename: 'c.jpg', url: '/media/c.jpg', kind: 'image' },
-			},
+			field: { name: 'gallery', ...extra },
+			assets,
 		});
+	}
 
-		expect(element.querySelector('.cms-gallery .drawer')).toBeNull();
+	const alt = () => document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!;
+	const shown = () => document.querySelector('.cms-modal .modal-header .filename')?.textContent;
 
-		element.querySelectorAll<HTMLButtonElement>('.tile .pick')[1].click();
-		const next = element.querySelector<HTMLButtonElement>('.drawer .step.next')!;
+	it('opens an image from its tile, by the button or the picture', async () => {
+		const { element } = await gallery();
+		const tiles = element.querySelectorAll<HTMLElement>('.tile');
+
+		tiles[1].querySelector<HTMLButtonElement>('.edit')!.click();
+		await tick();
+		expect(shown()).toBe('b.jpg');
+		await action('common:cancel');
+
+		tiles[2].querySelector<HTMLElement>('.picture')!.click();
+		await tick();
+		expect(shown()).toBe('c.jpg');
+	});
+
+	it('opens the image a drag moved', async () => {
+		const { element, changes } = await gallery();
+		const grid = element.querySelector<HTMLElement>('.tiles')!;
+		const sorter = Sortable.get(grid)!;
+		const first = grid.firstElementChild as HTMLElement;
+
+		grid.append(first);
+		sorter.option('onUpdate')!.call(sorter, { oldIndex: 0, newIndex: 2 } as SortableEvent);
+		first.querySelector<HTMLButtonElement>('.edit')!.click();
+		await tick();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [{ uid: 'b' }, { uid: 'c' }, { uid: 'a' }],
+		});
+		expect(shown()).toBe('a.jpg');
+	});
+
+	it('removes an image from its tile', async () => {
+		const { element, changes } = await gallery();
+
+		element.querySelectorAll<HTMLButtonElement>('.tile .discard')[1].click();
+		await tick();
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({ zxx: [{ uid: 'a' }, { uid: 'c' }] });
+		expect(element.querySelectorAll('.tile')).toHaveLength(2);
+	});
+
+	it('steps through the images and applies all drafts together', async () => {
+		const { element, changes } = await gallery();
+		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		await tick();
+		const next = document.querySelector<HTMLButtonElement>('.cms-modal .step.next')!;
+		const place = document.querySelector('.cms-modal .position');
+
+		expect(place?.textContent).toBe('1 / 3');
+		await enter(alt(), 'First');
+
 		next.focus();
 		next.click();
-		next.click();
-
-		expect(element.querySelector('.drawer .position')?.textContent).toBe('1 / 3');
-		expect(element.querySelector('.drawer .filename')?.textContent).toBe('a.jpg');
+		expect(shown()).toBe('b.jpg');
+		expect(place?.textContent).toBe('2 / 3');
+		expect(alt().value).toBe('');
 		expect(document.activeElement).toBe(next);
+		await enter(alt(), 'Second');
+
+		next.click();
+		next.click();
+		expect(shown()).toBe('a.jpg');
+		expect(alt().value).toBe('First');
+		expect(changes).not.toHaveBeenCalled();
+
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [
+				{ uid: 'a', meta: { alt: { zxx: 'First' } } },
+				{ uid: 'b', meta: { alt: { zxx: 'Second' } } },
+				{ uid: 'c' },
+			],
+		});
+	});
+
+	it('discards the drafts of every image on cancel', async () => {
+		const { element, changes } = await gallery();
+		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		await tick();
+
+		await enter(alt(), 'First');
+		document.querySelector<HTMLButtonElement>('.cms-modal .step.prev')!.click();
+		expect(shown()).toBe('c.jpg');
+		await enter(alt(), 'Last');
+		await action('common:cancel');
+
+		expect(changes).not.toHaveBeenCalled();
+	});
+
+	it('replaces the shown image only', async () => {
+		const { element, changes } = await gallery();
+		element.querySelectorAll<HTMLButtonElement>('.tile .edit')[1].click();
+		await tick();
+
+		document.querySelector<HTMLButtonElement>('.cms-modal .cms-replace-menu button')!.click();
+		await tick();
+		expect(ajax).toHaveBeenCalledWith('GET', '/panel/media/picker?kind=image', expect.anything());
+		const library = Array.from(document.querySelectorAll<HTMLDialogElement>('dialog')).at(-1)!;
+		const tile = document.createElement('button');
+		tile.dataset.pick = JSON.stringify({
+			uid: 'd',
+			filename: 'd.jpg',
+			url: '/media/d.jpg',
+			thumbUrl: '/media/d.jpg',
+			kind: 'image',
+		});
+		library.querySelector('.modal-body > div')!.append(tile);
+		tile.click();
+		await tick();
+
+		expect(shown()).toBe('d.jpg');
+		expect(changes).not.toHaveBeenCalled();
+
+		await action('common:apply');
+
+		expect(changes).toHaveBeenCalledExactlyOnceWith({
+			zxx: [{ uid: 'a' }, { uid: 'd' }, { uid: 'c' }],
+		});
+		expect(element.querySelectorAll('.tile')[1].getAttribute('title')).toBe('d.jpg');
+	});
+
+	it('shows the texts of a read-only gallery without the actions', async () => {
+		const { element } = await gallery({ immutable: true });
+		const tile = element.querySelector<HTMLElement>('.tile')!;
+
+		expect(tile.querySelector('.discard')).toBeNull();
+
+		tile.querySelector<HTMLButtonElement>('.edit')!.click();
+		await tick();
+
+		expect(alt().readOnly).toBe(true);
+		expect(document.querySelector('.cms-modal .replace')).toBeNull();
+		expect(document.querySelector('.cms-modal .step.next')).not.toBeNull();
+	});
+
+	it('hides the stepper of a lone image', async () => {
+		const { element } = await media('cosray-image', {
+			value: { zxx: [{ uid: 'a' }] },
+			field: { name: 'gallery' },
+			assets,
+		});
+
+		element.querySelector<HTMLButtonElement>('.tile .edit')!.click();
+		await tick();
+
+		expect(document.querySelector('.cms-modal .stepper')).toBeNull();
 	});
 });
 
@@ -1084,18 +1226,16 @@ describe('gallery block', () => {
 		} as HostPayload);
 	}
 
-	it('shows the tiles alone and keeps the drawer and the settings in the slot', async () => {
+	it('shows the tiles alone and keeps the settings in the slot', async () => {
 		const slot = document.createElement('div');
 		const { element } = await gallery(slot, { ratio: { zxx: '4/3' } });
 		const tiles = element.querySelector<HTMLElement>('.cms-gallery.is-block .tiles')!;
 
 		expect(tiles.querySelectorAll('.tile')).toHaveLength(2);
 		expect(tiles.style.getPropertyValue('--ratio')).toBe('4/3');
-		expect(element.querySelector('.drawer, .cms-media-meta')).toBeNull();
+		expect(element.querySelector('.cms-media-meta')).toBeNull();
 		expect(slot.querySelector<HTMLSelectElement>('select')!.value).toBe('4/3');
-		expect(slot.querySelectorAll('.strip .thumb')).toHaveLength(2);
-		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('a.jpg');
-		expect(slot.querySelector('.cms-media-meta [id$="-alt"]')).not.toBeNull();
+		expect(slot.querySelector('.cms-media-meta')).toBeNull();
 	});
 
 	it('follows ratio and crop live and reports them as the field meta', async () => {
@@ -1129,16 +1269,18 @@ describe('gallery block', () => {
 		expect(details).toHaveBeenLastCalledWith({ value, meta: { crop: { zxx: true } } });
 	});
 
-	it('steps through the images in the slot and edits the current one', async () => {
+	it('edits an image in the same details as any other', async () => {
 		const slot = document.createElement('div');
-		const { changes } = await gallery(slot);
+		const { element, changes } = await gallery(slot);
 
-		slot.querySelector<HTMLButtonElement>('.step.next')!.click();
+		element.querySelectorAll<HTMLButtonElement>('.tile .edit')[1].click();
 		await tick();
-		expect(slot.querySelector('.thumb.is-current')?.getAttribute('title')).toBe('b.jpg');
-		expect(slot.querySelector('.position')?.textContent).toBe('2 / 2');
+		await enter(
+			document.querySelector<HTMLTextAreaElement>('.cms-modal textarea[id$="-alt"]')!,
+			'Second',
+		);
+		await action('common:apply');
 
-		await enter(slot.querySelector<HTMLTextAreaElement>('[id$="-alt"]')!, 'Second');
 		expect(changes).toHaveBeenLastCalledWith({
 			zxx: [{ uid: 'a' }, { uid: 'b', meta: { alt: { zxx: 'Second' } } }],
 		});

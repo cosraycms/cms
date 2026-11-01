@@ -394,7 +394,7 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $single,
 				'translate' => true,
-				'description' => 'Alt text and caption are edited in place; the thumbnail opens the preview.',
+				'description' => 'The edit button and the thumbnail open the details with alt text and caption.',
 			],
 			[
 				'name' => 'coverEmpty',
@@ -408,7 +408,7 @@ final class Styleguide extends Panel
 				'label' => 'Gallery',
 				'control' => $control,
 				'limit' => $many,
-				'description' => 'Selecting a tile opens the drawer; tiles reorder by drag.',
+				'description' => 'A tile shows its edit and remove buttons on hover and opens the same details; tiles reorder by drag.',
 			],
 			[
 				'name' => 'galleryEmpty',

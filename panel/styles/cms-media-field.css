@@ -541,27 +541,18 @@
 		border-radius: var(--cms-radius-md);
 		background: var(--cms-color-surface);
 
-		&.is-selected {
-			border-color: var(--cms-color-accent);
-			box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
-		}
-
-		&:hover .discard,
-		&:focus-within .discard,
-		&.is-selected .discard {
+		&:hover .tile-tools,
+		&:focus-within .tile-tools {
 			opacity: 1;
 		}
 	}
 
-	& .pick {
+	& .picture {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 100%;
 		height: 100%;
-		padding: 0;
-		border: 0;
-		background: transparent;
 		cursor: pointer;
 
 		& img {
@@ -578,43 +569,51 @@
 		color: var(--cms-color-text-subtle);
 	}
 
-	& .discard {
+	& .tile-tools {
 		position: absolute;
-		top: var(--cms-space-1);
-		right: var(--cms-space-1);
-		display: grid;
-		place-items: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		padding: 0;
-		border: 0;
-		border-radius: var(--cms-radius);
-		background: color-mix(in srgb, var(--cms-color-surface) 90%, transparent);
-		box-shadow: var(--cms-shadow-sm);
-		color: var(--cms-color-text-muted);
+		top: var(--cms-space-1-5);
+		right: var(--cms-space-1-5);
+		display: flex;
+		gap: var(--cms-space-1);
 		opacity: 0;
 		transition: opacity 0.12s ease;
-		cursor: pointer;
 
-		&:hover {
+		@media (hover: none) {
+			opacity: 1;
+		}
+
+		& button {
+			display: grid;
+			place-items: center;
+			width: 1.5rem;
+			height: 1.5rem;
+			padding: 0;
+			border: 1px solid var(--cms-color-border);
+			border-radius: var(--cms-radius);
 			background: var(--cms-color-surface);
-			color: var(--cms-color-text);
+			box-shadow: var(--cms-shadow-sm);
+			color: var(--cms-color-text-muted);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--cms-color-text);
+				background: var(--cms-color-hover);
+			}
+
+			&:focus-visible {
+				outline: var(--cms-focus-outline);
+				outline-offset: var(--cms-focus-offset);
+			}
+
+			&.discard:hover {
+				color: var(--cms-color-danger);
+			}
 		}
 
 		& svg {
 			width: 0.75rem;
 			height: 0.75rem;
 		}
-	}
-
-	& .drawer {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-3);
-		padding: var(--cms-space-3-5);
-		border-top: 1px solid var(--cms-color-border);
-		border-radius: 0 0 var(--cms-control-radius) var(--cms-control-radius);
-		background: var(--cms-color-surface-sunken);
 	}
 
 	/*
@@ -636,13 +635,13 @@
 			aspect-ratio: var(--ratio);
 		}
 
-		& .tiles.has-ratio .pick img {
+		& .tiles.has-ratio .picture img {
 			width: 100%;
 			height: 100%;
 			object-fit: contain;
 		}
 
-		& .tiles.is-cropped .pick img {
+		& .tiles.is-cropped .picture img {
 			object-fit: cover;
 		}
 
@@ -693,21 +692,11 @@
 	}
 }
 
-/* The drawer in the settings dialog: a strip of thumbs to pick from, the
-   gallery settings above it. */
+/* The gallery settings in the block's settings dialog. */
 .cms-gallery-settings {
 	display: flex;
 	flex-direction: column;
 	gap: var(--cms-space-3);
-	padding: var(--cms-space-3);
-	border-radius: var(--cms-radius-md);
-	background: var(--cms-color-surface-sunken);
-
-	& .options {
-		display: flex;
-		flex-direction: column;
-		gap: var(--cms-space-2);
-	}
 
 	& .option {
 		display: flex;
@@ -723,137 +712,6 @@
 		align-items: center;
 		gap: var(--cms-space-2);
 		font-size: var(--cms-font-size-sm);
-	}
-
-	& .strip {
-		display: flex;
-		gap: var(--cms-space-1-5);
-		padding-block: var(--cms-space-1);
-		overflow-x: auto;
-	}
-
-	& .thumb {
-		display: grid;
-		flex: 0 0 auto;
-		place-items: center;
-		width: 3rem;
-		height: 3rem;
-		padding: 0;
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius);
-		background: var(--cms-color-surface);
-		overflow: hidden;
-		cursor: pointer;
-
-		& img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		&.is-current {
-			border-color: var(--cms-color-accent);
-			box-shadow: 0 0 0 2px var(--cms-color-accent-ring);
-		}
-	}
-
-	& .plate {
-		font-size: 0.625rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--cms-color-text-subtle);
-	}
-}
-
-/* The drawer parts, inline under the tiles or in the dialog alike. */
-:is(.cms-gallery, .cms-gallery-settings) {
-	& .drawer-head {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2-5);
-	}
-
-	& .mini {
-		width: 2rem;
-		height: 2rem;
-		flex-shrink: 0;
-		padding: var(--cms-space-0-5);
-		border: 1px solid var(--cms-color-border);
-		border-radius: var(--cms-radius);
-		background: var(--cms-color-surface);
-		object-fit: contain;
-	}
-
-	& .filename {
-		flex: 1 1 auto;
-		min-width: 0;
-		font-size: var(--cms-font-size-xs);
-		font-weight: 600;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	& .stepper {
-		display: flex;
-		flex-shrink: 0;
-		align-items: center;
-		margin-left: auto;
-	}
-
-	& .position {
-		padding-right: var(--cms-space-1-5);
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-text-faint);
-		font-variant-numeric: tabular-nums;
-	}
-
-	& .step,
-	& .dismiss {
-		display: grid;
-		place-items: center;
-		width: 1.625rem;
-		height: 1.625rem;
-		padding: 0;
-		color: var(--cms-color-text-muted);
-		cursor: pointer;
-
-		& svg {
-			width: 0.75rem;
-			height: 0.75rem;
-		}
-
-		&:hover {
-			background: var(--cms-color-hover);
-			color: var(--cms-color-text);
-		}
-	}
-
-	& .step {
-		border: 1px solid var(--cms-color-border-strong);
-		background: var(--cms-color-surface);
-
-		&.prev {
-			border-right: 0;
-			border-radius: var(--cms-radius-md) 0 0 var(--cms-radius-md);
-		}
-
-		&.next {
-			border-radius: 0 var(--cms-radius-md) var(--cms-radius-md) 0;
-		}
-	}
-
-	& .dismiss {
-		margin-left: var(--cms-space-1-5);
-		border: 0;
-		border-radius: var(--cms-radius-md);
-		background: transparent;
-	}
-
-	& .facts {
-		font-size: var(--cms-font-size-xs);
-		color: var(--cms-color-text-faint);
-		font-variant-numeric: tabular-nums;
 	}
 }
 
@@ -957,7 +815,11 @@
 	}
 }
 
-/* The details dialog of an image. */
+/* The details dialog of an image. Its header holds two lines. */
+.cms-modal:has(> .element > .cms-image-head) > .modal-close {
+	top: 1.375rem;
+}
+
 .cms-image-head {
 	display: flex;
 	align-items: center;
