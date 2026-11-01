@@ -25,3 +25,9 @@ PHP rejects a code field syntax the editor lacks, so [CodeSyntaxes](../src/Field
 [form-leaf.json](form-leaf.json) exercises the `[json]` leaf produced by [host.js](../panel/src/lib/host.js) and merged by [FormPatch](../src/Panel/FormPatch.php). Cases specify stored content, a decoded leaf (or deliberately malformed raw leaf), and the expected patch result.
 
 [PanelFormPatchTest](../tests/Unit/PanelFormPatchTest.php) covers the PHP consumer. The real host producer still needs browser-mode coverage: jsdom cannot exercise form-associated custom elements. The fixture alone is not an end-to-end guarantee.
+
+## Image geometry
+
+[image-geometry.json](image-geometry.json) gives the part of an image a crop, a focal point and a target ratio select. A rendition is cut by [Assets\Transform](../src/Assets/Transform.php) and the panel's previews by [image-geometry.js](../panel/src/lib/image-geometry.js); if they disagreed, the editor would preview another cut than the site shows.
+
+Consumed by [AssetTransformTest](../tests/Unit/AssetTransformTest.php) and [image-geometry.test.ts](../panel/tests/contract/image-geometry.test.ts).

@@ -110,8 +110,13 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 	{
 		$fileShape = Shapes::list();
 		$fileShape->add('uid', 'string')->rules('required');
-		$fileShape->add('meta', Shapes::create()->extra(Extra::Allow))->optional()->nullable();
+		$fileShape->add('meta', $this->itemMetaShape())->optional()->nullable();
 
 		return $fileShape;
+	}
+
+	protected function itemMetaShape(): Shape
+	{
+		return Shapes::create()->extra(Extra::Allow);
 	}
 }

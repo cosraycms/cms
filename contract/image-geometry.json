@@ -1,0 +1,58 @@
+[
+	{
+		"name": "a crop alone",
+		"width": 1000,
+		"height": 500,
+		"crop": { "x": 0.1, "y": 0.2, "w": 0.5, "h": 0.6 },
+		"region": { "x": 100, "y": 100, "w": 500, "h": 300 }
+	},
+	{
+		"name": "a focal point without a ratio leaves the image whole",
+		"width": 1000,
+		"height": 500,
+		"focal": { "x": 0.9, "y": 0.1 },
+		"region": { "x": 0, "y": 0, "w": 1000, "h": 500 }
+	},
+	{
+		"name": "a wide image cut square moves along the width",
+		"width": 1000,
+		"height": 500,
+		"focal": { "x": 0.25, "y": 0.5 },
+		"ratio": 1,
+		"region": { "x": 125, "y": 0, "w": 500, "h": 500 }
+	},
+	{
+		"name": "a focal point at the edge keeps the window inside",
+		"width": 1000,
+		"height": 500,
+		"focal": { "x": 1, "y": 0 },
+		"ratio": 1,
+		"region": { "x": 500, "y": 0, "w": 500, "h": 500 }
+	},
+	{
+		"name": "a tall image cut wide moves along the height",
+		"width": 500,
+		"height": 1000,
+		"focal": { "x": 0.5, "y": 0.75 },
+		"ratio": 2,
+		"region": { "x": 0, "y": 563, "w": 500, "h": 250 }
+	},
+	{
+		"name": "the focal point is read relative to the crop",
+		"width": 1000,
+		"height": 1000,
+		"crop": { "x": 0.2, "y": 0, "w": 0.5, "h": 1 },
+		"focal": { "x": 0.45, "y": 0.5 },
+		"ratio": 1,
+		"region": { "x": 200, "y": 250, "w": 500, "h": 500 }
+	},
+	{
+		"name": "a focal point outside the crop is held at its edge",
+		"width": 1000,
+		"height": 1000,
+		"crop": { "x": 0.5, "y": 0, "w": 0.5, "h": 1 },
+		"focal": { "x": 0.1, "y": 0 },
+		"ratio": 1,
+		"region": { "x": 500, "y": 0, "w": 500, "h": 500 }
+	}
+]

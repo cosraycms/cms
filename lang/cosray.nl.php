@@ -268,6 +268,7 @@ return [
 		'image:alt-text-long' => 'Alternatieve tekst',
 		'image:attribution' => 'Beeldverantwoording',
 		'image:caption' => 'Bijschrift',
+		'image:crop-invalid' => 'De uitsnede past niet bij de afbeelding.',
 		'image:focus' => 'Focuspunt',
 		'image:focus-remove' => 'Focuspunt verwijderen',
 		'image:no-focus' => 'Geen focuspunt ingesteld',

@@ -82,6 +82,12 @@ export function galleryView(options) {
 		if (source) {
 			const image = rendition(source, info?.url);
 			image.loading = 'lazy';
+			const focal = item.meta?.focal ?? info?.meta?.focal;
+
+			if (focal) {
+				image.style.objectPosition = `${focal.x * 100}% ${focal.y * 100}%`;
+			}
+
 			picture.append(image);
 		} else {
 			picture.append(create('span', 'plate', extension(filename)));

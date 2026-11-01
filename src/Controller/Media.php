@@ -15,7 +15,9 @@ use Cosray\Actor;
 use Cosray\Assets\Asset;
 use Cosray\Assets\Assets;
 use Cosray\Assets\Ingest;
+use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
+use Cosray\Assets\Transform;
 use Cosray\Auth;
 use Cosray\Config;
 use Cosray\Exception\IngestError;
@@ -181,9 +183,10 @@ class Media
 	 * Fallback for rendition URLs whose file does not exist yet: the web
 	 * server serves `{path.cache}/{shard}/{uid}/{stem}-{size}.{ext}`
 	 * natively once generated, so PHP only ever sees the first request.
-	 * Only sizes configured in `media.sizes` are generated — anything
-	 * else is a 404, which bounds what this route can write to disk. An
-	 * original that cannot be resized redirects to itself.
+	 * Only sizes configured in `media.sizes` and variants the server signed
+	 * are generated — anything else is a 404, which bounds what this route
+	 * can write to disk. An original that cannot be resized redirects to
+	 * itself.
 	 */
 	public function cache(string $slug): Response
 	{
@@ -206,7 +209,7 @@ class Media
 			throw new HttpNotFound($this->request);
 		}
 
-		$spec = $this->sizeSpec($asset->key, $file);
+		[$spec, $name, $transform] = $this->rendition($asset, $file);
 
 		try {
 			$image = $this->getAssets()->image($asset->key);
@@ -215,7 +218,7 @@ class Media
 		}
 
 		try {
-			$image->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $spec->name);
+			$image->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $name, $transform);
 		} catch (RuntimeException $e) {
 			$this->logger->warning('Rendition {file} failed, redirecting to the original: {error}', [
 				'file' => $slug,
@@ -236,22 +239,43 @@ class Media
 	}
 
 	/**
-	 * Match a requested rendition basename against the asset's key and
-	 * the configured sizes: `{stem}-{size}` with the key's extension.
+	 * Match a requested rendition basename against the asset's key and the
+	 * configured sizes: `{stem}-{size}` with the key's extension, and a
+	 * signed variant after the size for a use's crop or focal point.
+	 *
+	 * @return array{SizeSpec, string, ?Transform}
 	 */
-	protected function sizeSpec(string $key, string $file): SizeSpec
+	protected function rendition(Asset $asset, string $file): array
 	{
-		$base = basename($key);
+		$base = basename($asset->key);
 		$dot = strrpos($base, '.');
 		$stem = $dot === false || $dot === 0 ? $base : substr($base, 0, $dot);
 		$ext = $dot === false || $dot === 0 ? '' : substr($base, $dot);
+
+		if (!str_starts_with($file, "{$stem}-") || $ext !== '' && !str_ends_with($file, $ext)) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$name = substr($file, strlen($stem) + 1, strlen($file) - strlen($stem) - 1 - strlen($ext));
+		$parts = explode('~', $name);
 		$sizes = $this->config->media->sizes;
 
-		if (str_starts_with($file, "{$stem}-") && ($ext === '' || str_ends_with($file, $ext))) {
-			$name = substr($file, strlen($stem) + 1, strlen($file) - strlen($stem) - 1 - strlen($ext));
+		if (count($parts) === 1 && $name !== '' && $sizes->has($name)) {
+			return [$sizes->get($name), $name, null];
+		}
 
-			if ($name !== '' && $sizes->has($name)) {
-				return $sizes->get($name);
+		$secret = $this->config->app->secret;
+
+		if (count($parts) === 3 && $secret !== null) {
+			[$size, $token, $signature] = $parts;
+			$transform = Transform::verified($asset->uid, $size, $token, $signature, $secret);
+
+			if ($transform !== null && $size === Sizes::ORIGINAL) {
+				return [Sizes::original(), $name, $transform];
+			}
+
+			if ($transform !== null && $sizes->has($size)) {
+				return [$sizes->get($size), $name, $transform];
 			}
 		}
 

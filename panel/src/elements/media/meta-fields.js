@@ -6,7 +6,7 @@
 /** @import { FileItem, ItemMeta, LocaleMap, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 
-import { ZXX, pruneItemMeta } from '../../lib/content.js';
+import { ZXX } from '../../lib/content.js';
 import { fallbackLabel } from '../../lib/control.js';
 import { resolveTextFallback } from '../../lib/fallback.js';
 import { __ } from '../../lib/locale.js';
@@ -24,8 +24,9 @@ let ids = 0;
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
  * @property {ItemMeta | undefined} catalog The asset's catalog meta.
- * @property {(item: FileItem) => void} update Receives the item with pruned meta on every edit, so
- *     empty texts never shadow the catalog defaults.
+ * @property {(texts: ItemMeta) => void} update Receives the offered texts on every edit, for the
+ *     owner to merge with `patchItemMeta`, which prunes the empty ones so they never shadow the
+ *     catalog defaults.
  * @property {boolean} [readonly]
  */
 
@@ -175,7 +176,7 @@ export function metaFields({
 			if (name === 'attribution') attribution = input.value;
 			else texts[name][key()] = input.value;
 
-			update(pruneItemMeta({ ...item, meta: { ...item.meta, ...texts, attribution } }));
+			update({ ...texts, ...(keys.includes('attribution') ? { attribution } : {}) });
 		});
 		const note = document.createElement('span');
 		note.className = 'fallback';

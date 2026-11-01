@@ -67,17 +67,18 @@ final class Asset
 	/**
 	 * Root-relative URL of a named rendition:
 	 * `{cache}/{shard}/{uid}/{stem}-{size}.{ext}`. Served natively once
-	 * generated; misses fall through to the cache route.
+	 * generated; misses fall through to the cache route. A use's crop or
+	 * focal point adds its signed variant to the name.
 	 */
-	public function sizePath(string $size): string
+	public function sizePath(string $size, string $variant = ''): string
 	{
 		$dir = dirname($this->key);
 		$base = basename($this->key);
 		$dot = strrpos($base, '.');
 		$variant =
 			$dot === false || $dot === 0
-				? "{$base}-{$size}"
-				: substr($base, 0, $dot) . "-{$size}" . substr($base, $dot);
+				? "{$base}-{$size}{$variant}"
+				: substr($base, 0, $dot) . "-{$size}{$variant}" . substr($base, $dot);
 
 		return "{$this->cacheBase}/" . $this->encode("{$dir}/{$variant}");
 	}

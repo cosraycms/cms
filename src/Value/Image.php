@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
+use Cosray\Assets\Transform;
 use Cosray\Markup;
 use Override;
 
@@ -23,11 +25,12 @@ class Image extends File
 	public function tag(?string $class = null): Markup
 	{
 		return new Markup(sprintf(
-			'<img %ssrc="%s" alt="%s" data-path-original="%s">',
+			'<img %ssrc="%s" alt="%s" data-path-original="%s"%s>',
 			$class ? sprintf('class="%s" ', escape($class)) : '',
 			$this->url(),
 			escape($this->alt() ?: strip_tags($this->title())),
 			$this->asset($this->index)?->path() ?? '',
+			($position = $this->position()) === '' ? '' : sprintf(' style="%s"', $position),
 		));
 	}
 
@@ -53,11 +56,19 @@ class Image extends File
 			return '';
 		}
 
-		if ($this->spec !== null && $asset->resizable()) {
-			return $asset->sizePath($this->spec->name);
+		if (!$asset->resizable()) {
+			return $asset->path();
 		}
 
-		return $asset->path();
+		$secret = $this->owner->config()->app->secret;
+		$spec = $this->spec ?? Sizes::original();
+		$variant = $secret === null ? '' : $this->transform()?->variant($asset->uid, $spec, $secret) ?? '';
+
+		if ($this->spec === null && $variant === '') {
+			return $asset->path();
+		}
+
+		return $asset->sizePath($spec->name, $variant);
 	}
 
 	/**
@@ -79,19 +90,21 @@ class Image extends File
 		$sizes = [];
 
 		foreach ($this->owner->config()->media->sizes->names() as $name) {
-			$sizes[$name] = $asset->resizable() ? $asset->sizePath($name) : $asset->path();
+			$sizes[$name] = $this->size($name)->publicPath();
 		}
 
-		$focal = $asset->meta['focal'] ?? null;
+		$crop = $this->delivered() ? $this->transform()?->crop : null;
 
 		return [
 			...$file,
 			'alt' => $this->alt(),
 			'attribution' => $this->attribution(),
 			'link' => $this->link(),
-			'width' => $asset->width,
-			'height' => $asset->height,
-			'focal' => is_array($focal) ? $focal : null,
+			'width' =>
+				$crop === null || $asset->width === null ? $asset->width : (int) round($asset->width * $crop['w']),
+			'height' =>
+				$crop === null || $asset->height === null ? $asset->height : (int) round($asset->height * $crop['h']),
+			'focal' => $this->focal(),
 			'sizes' => $sizes,
 		];
 	}
@@ -118,5 +131,50 @@ class Image extends File
 		$catalog = $this->asset($this->index)?->meta['attribution'] ?? null;
 
 		return is_string($catalog) ? $catalog : '';
+	}
+
+	/**
+	 * The focal point in the image a visitor gets, as fractions: this use's,
+	 * else the catalog's.
+	 *
+	 * @return ?array{x: float, y: float}
+	 */
+	public function focal(): ?array
+	{
+		$transform = $this->transform();
+
+		return $this->delivered() ? $transform?->focalInCrop() : $transform?->focal;
+	}
+
+	/** The focal point for a style attribute of an image cut by CSS; empty without one. */
+	public function position(): string
+	{
+		$focal = $this->focal();
+
+		if ($focal === null) {
+			return '';
+		}
+
+		return sprintf('object-position: %s%% %s%%', round($focal['x'] * 100, 2), round($focal['y'] * 100, 2));
+	}
+
+	private function transform(): ?Transform
+	{
+		$meta = $this->fileItem($this->index)['meta'] ?? null;
+		$meta = is_array($meta) ? $meta : [];
+
+		return Transform::from(
+			$meta['crop'] ?? null,
+			$meta['focal'] ?? $this->asset($this->index)?->meta['focal'] ?? null,
+		);
+	}
+
+	/** Whether a crop reaches the visitor; it takes a rendition, and that a signature. */
+	private function delivered(): bool
+	{
+		return (
+			($this->asset($this->index)?->resizable() ?? false)
+				&& $this->owner->config()->app->secret !== null
+		);
 	}
 }

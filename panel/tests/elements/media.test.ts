@@ -482,6 +482,129 @@ describe('image details', () => {
 		expect(changes).not.toHaveBeenCalled();
 	});
 
+	describe('focal point', () => {
+		const status = () => document.querySelector('.cms-modal .focus-status .text')?.textContent;
+		const marker = () => document.querySelector<HTMLElement>('.cms-modal .marker')!;
+		const reset = () => document.querySelector<HTMLButtonElement>('.cms-modal .reset')!;
+		const key = (name: string, shiftKey = false) =>
+			marker().dispatchEvent(new KeyboardEvent('keydown', { key: name, shiftKey, bubbles: true }));
+		const catalog = { ...assets, cover: { ...assets.cover, meta: { focal: { x: 0.3, y: 0.4 } } } };
+
+		async function withCatalog(item: FileItem = { uid: 'cover' }) {
+			const opened = await media('cosray-image', {
+				value: { zxx: [item] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true },
+				assets: catalog,
+			});
+			opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			await tick();
+
+			return opened;
+		}
+
+		it('asks for a point while there is none', async () => {
+			await details();
+
+			expect(status()).toBe('image:focus-set');
+			expect(marker().classList.contains('is-unset')).toBe(true);
+			expect(reset().hidden).toBe(true);
+		});
+
+		it('shows the catalog point as inherited', async () => {
+			await withCatalog();
+
+			expect(status()).toBe('image:focus: 30 % / 40 % · image:from-library');
+			expect(marker().classList.contains('is-inherited')).toBe(true);
+			expect(marker().style.left).toBe('30%');
+			expect(reset().hidden).toBe(true);
+		});
+
+		it('places the point where the pointer lands', async () => {
+			const { changes } = await details();
+			const frame = document.querySelector<HTMLElement>('.cms-modal .frame')!;
+			frame.getBoundingClientRect = () =>
+				({ left: 100, top: 50, width: 200, height: 100 }) as DOMRect;
+
+			frame.dispatchEvent(
+				new MouseEvent('pointerdown', { clientX: 150, clientY: 125, button: 0, bubbles: true }),
+			);
+			expect(status()).toBe('image:focus: 25 % / 75 %');
+
+			frame.dispatchEvent(new MouseEvent('pointermove', { clientX: 200, clientY: 100 }));
+			frame.dispatchEvent(new MouseEvent('pointerup', {}));
+			frame.dispatchEvent(new MouseEvent('pointermove', { clientX: 300, clientY: 150 }));
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({ focal: { x: 0.5, y: 0.5 } });
+		});
+
+		it('moves by keys from the inherited point, and goes back to it', async () => {
+			const { changes } = await withCatalog();
+
+			key('ArrowRight');
+			key('ArrowDown', true);
+			expect(status()).toBe('image:focus: 31 % / 50 %');
+			expect(marker().getAttribute('aria-valuetext')).toBe('31 % / 50 %');
+			expect(marker().classList.contains('is-inherited')).toBe(false);
+			expect(reset().hidden).toBe(false);
+
+			reset().click();
+			expect(status()).toBe('image:focus: 30 % / 40 % · image:from-library');
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0]).toEqual({ uid: 'cover' });
+		});
+
+		it('keeps the point at the edge of the image', async () => {
+			await details({ uid: 'cover', meta: { focal: { x: 0.95, y: 0.5 } } });
+
+			key('ArrowRight', true);
+
+			expect(status()).toBe('image:focus: 100 % / 50 %');
+		});
+
+		it('merges the point with the texts, whichever comes last', async () => {
+			const { changes } = await details();
+
+			field('alt').value = 'First';
+			field('alt').dispatchEvent(new Event('input', { bubbles: true }));
+			key('ArrowRight');
+			field('caption').value = 'Last';
+			field('caption').dispatchEvent(new Event('input', { bubbles: true }));
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+				alt: { zxx: 'First' },
+				caption: { zxx: 'Last' },
+				focal: { x: 0.51, y: 0.5 },
+			});
+		});
+
+		it('only shows the point of a read-only image', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { focal: { x: 0.3, y: 0.4 } } }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, immutable: true },
+				assets,
+			});
+			element.querySelector<HTMLElement>('.cms-image-card .thumb')!.click();
+			await tick();
+
+			expect(marker().hasAttribute('role')).toBe(false);
+			expect(document.querySelector('.cms-modal .reset')).toBeNull();
+			expect(status()).toBe('image:focus: 30 % / 40 %');
+		});
+
+		it('shows the same cut in the previews as the site', async () => {
+			await details({ uid: 'cover', meta: { focal: { x: 1, y: 0 } } });
+			const square = document.querySelectorAll<HTMLElement>('.cms-modal .shot .box')[1];
+			const image = square.querySelector('img')!;
+
+			// The 2400 by 1600 image at its right edge: a third of its width lies to the left.
+			expect(image.style.width).toBe('150%');
+			expect(Number.parseFloat(image.style.left)).toBeCloseTo(-50);
+		});
+	});
+
 	describe('card texts', () => {
 		const texts = (element: HTMLElement) =>
 			[...element.querySelectorAll('.cms-image-card .texts div')].map(

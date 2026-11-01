@@ -254,6 +254,41 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($result->has(['value', Field::NEUTRAL_LOCALE, 0, 'fields', 'text', 'value', 'zxx']));
 	}
 
+	public function testImageSubFieldValidatesTheGeometryOfAUse(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Images::class);
+		$valid = static fn(array $meta): bool => $blocks
+			->shape()
+			->validate([
+				'type' => Blocks::class,
+				'value' => [
+					Field::NEUTRAL_LOCALE => [[
+						'uid' => 'b1',
+						'type' => Builtin\Images::class,
+						'layout' => ['colspan' => 12, 'rowspan' => 1, 'col' => 1, 'row' => 1],
+						'fields' => [
+							'images' => [
+								'type' => Image::class,
+								'value' => [Field::NEUTRAL_LOCALE => [['uid' => 'img', 'meta' => $meta]]],
+							],
+						],
+					]],
+				],
+			])
+			->valid();
+
+		$this->assertTrue($valid(['focal' => ['x' => 0, 'y' => 1], 'attribution' => '© Jane Doe', 'other' => 'kept']));
+		$this->assertTrue($valid(['crop' => ['x' => 0.1, 'y' => 0, 'w' => 0.5, 'h' => 1]]));
+		$this->assertTrue($valid(['crop' => ['x' => 0, 'y' => 0, 'w' => 1, 'h' => 1]]));
+
+		$this->assertFalse($valid(['focal' => ['x' => 1.5, 'y' => 0]]));
+		$this->assertFalse($valid(['focal' => ['x' => 0.5]]));
+		$this->assertFalse($valid(['focal' => ['x' => 'left', 'y' => 0]]));
+		$this->assertFalse($valid(['crop' => ['x' => 0.8, 'y' => 0, 'w' => 0.5, 'h' => 1]]));
+		$this->assertFalse($valid(['crop' => ['x' => 0, 'y' => 0, 'w' => 0.001, 'h' => 1]]));
+		$this->assertFalse($valid(['crop' => ['x' => 0, 'y' => 0]]));
+	}
+
 	public function testImageSubFieldMetaValidatesTheGallerySettings(): void
 	{
 		$blocks = $this->createBlocks()->allow(Builtin\Images::class);

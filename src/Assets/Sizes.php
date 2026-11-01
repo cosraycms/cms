@@ -17,6 +17,8 @@ use Gumlet\ImageResize;
  */
 final class Sizes
 {
+	public const string ORIGINAL = 'original';
+
 	/** Panel and block defaults; apps may override them by name. */
 	private const array BUILTIN = [
 		'thumb' => ['width' => 400],
@@ -68,6 +70,12 @@ final class Sizes
 				"Unknown media size '{$name}'. Add it to the `media.sizes` config.",
 			)
 		);
+	}
+
+	/** A cropped image requested without a size: the crop at full resolution. */
+	public static function original(): SizeSpec
+	{
+		return new SizeSpec(self::ORIGINAL, ResizeMode::Original, 1);
 	}
 
 	public function has(string $name): bool

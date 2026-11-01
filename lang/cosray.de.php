@@ -268,6 +268,7 @@ return [
 		'image:alt-text-long' => 'Alternativtext',
 		'image:attribution' => 'Bildnachweis',
 		'image:caption' => 'Bildunterschrift',
+		'image:crop-invalid' => 'Der Zuschnitt passt nicht zum Bild.',
 		'image:focus' => 'Fokus',
 		'image:focus-remove' => 'Fokus entfernen',
 		'image:no-focus' => 'Kein Bildfokus gesetzt',

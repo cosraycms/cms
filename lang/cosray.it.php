@@ -268,6 +268,7 @@ return [
 		'image:alt-text-long' => 'Testo alternativo',
 		'image:attribution' => 'Crediti immagine',
 		'image:caption' => 'Didascalia',
+		'image:crop-invalid' => 'Il ritaglio non si adatta all’immagine.',
 		'image:focus' => 'Punto focale',
 		'image:focus-remove' => 'Rimuovi punto focale',
 		'image:no-focus' => 'Nessun punto focale impostato',

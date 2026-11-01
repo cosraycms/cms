@@ -44,9 +44,11 @@ final class Images implements Block
 
 			$alt = escape($image->alt() ?: strip_tags($image->title()));
 			$path = escape($asset->path());
-			$url = $asset->resizable() ? escape($asset->sizePath($name)) : $path;
+			$url = escape($image->size($name)->publicPath());
+			$position = $image->position();
+			$style = $position === '' ? '' : " style=\"{$position}\"";
 
-			$result .= "<div class=\"{$prefix}-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"></div>";
+			$result .= "<div class=\"{$prefix}-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}></div>";
 		}
 
 		if ($result === '') {

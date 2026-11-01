@@ -595,6 +595,16 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('© <Own>', $blocks->image()?->attribution());
 	}
 
+	public function testImageBlockRendersTheFocalPoint(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->image(['uid' => 'blockimg12345', 'meta' => ['focal' => ['x' => 0.25, 'y' => 0.5]]]),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg');
+
+		$this->assertStringContainsString('style="object-position: 25% 50%"', $blocks->render()->html);
+	}
+
 	public function testImageBlockSizesTemplateArg(): void
 	{
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'], span: 4)]);

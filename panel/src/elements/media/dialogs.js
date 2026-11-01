@@ -5,6 +5,7 @@
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
 import { cosray } from '../../lib/bridge.js';
+import { patchItemMeta } from '../../lib/content.js';
 import { browseLibrary } from '../../lib/library-browser.js';
 import { __ } from '../../lib/locale.js';
 import { metaFields } from './meta-fields.js';
@@ -160,7 +161,7 @@ export function editDialog({
 				contentLocale,
 				locales,
 				catalog,
-				update: (next) => (draft = next),
+				update: (texts) => (draft = patchItemMeta(draft, texts)),
 			});
 			fields.append(form.element);
 			followers.push(form.setLocale);

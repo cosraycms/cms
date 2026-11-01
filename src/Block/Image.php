@@ -69,21 +69,23 @@ final class Image implements Block
 		}
 
 		$specs = $this->ladder($ctx);
-		$src = escape($asset->sizePath($specs[intdiv(count($specs), 2)]->name));
+		$src = escape($image->size($specs[intdiv(count($specs), 2)]->name)->publicPath());
+		$position = $image->position();
+		$style = $position === '' ? '' : " style=\"{$position}\"";
 
 		if (count($specs) === 1) {
-			return "<img src=\"{$src}\" alt=\"{$alt}\" data-path-original=\"{$path}\">";
+			return "<img src=\"{$src}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>";
 		}
 
 		$srcset = escape(implode(', ', array_map(
-			static fn(SizeSpec $spec) => $asset->sizePath($spec->name) . " {$spec->first}w",
+			static fn(SizeSpec $spec) => $image->size($spec->name)->publicPath() . " {$spec->first}w",
 			$specs,
 		)));
 		$sizes = escape($this->sizes($ctx, $block->layout()->colspan));
 
 		return (
 			"<img src=\"{$src}\" srcset=\"{$srcset}\" sizes=\"{$sizes}\""
-				. " alt=\"{$alt}\" data-path-original=\"{$path}\">"
+				. " alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>"
 		);
 	}
 

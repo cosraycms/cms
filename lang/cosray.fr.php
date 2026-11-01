@@ -265,6 +265,7 @@ return [
 		'image:alt-text-long' => 'Texte alternatif',
 		'image:attribution' => 'Crédit photo',
 		'image:caption' => 'Légende',
+		'image:crop-invalid' => 'Le recadrage ne correspond pas à l’image.',
 		'image:focus' => 'Point focal',
 		'image:focus-remove' => 'Supprimer le point focal',
 		'image:no-focus' => 'Aucun point focal défini',

@@ -12,7 +12,7 @@
 
 import Sortable from 'sortablejs';
 import { cosray } from '../lib/bridge.js';
-import { ZXX, pruneItemMeta } from '../lib/content.js';
+import { ZXX, patchItemMeta, pruneItemMeta } from '../lib/content.js';
 import { fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __, __n } from '../lib/locale.js';
@@ -648,7 +648,7 @@ class MediaControl extends HTMLElement {
 			contentLocale: this.#locale,
 			locales,
 			catalog: info?.meta,
-			update: (next) => store([next]),
+			update: (texts) => store([patchItemMeta(item, texts)]),
 			readonly,
 		});
 		this.#followers.push(form.setLocale);

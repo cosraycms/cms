@@ -1001,6 +1001,7 @@
 		place-items: center;
 		flex: 1 1 auto;
 		min-height: 0;
+		container-type: size;
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
 		background: repeating-conic-gradient(
@@ -1009,12 +1010,111 @@
 			)
 			0 0 / 1.5rem 1.5rem;
 		overflow: hidden;
+	}
+
+	/* Exactly the image's box, so a point on it is a point in the image. */
+	& .frame {
+		position: relative;
+		width: min(100cqw, 100cqh * var(--ratio));
+		aspect-ratio: var(--ratio);
+		touch-action: none;
 
 		& img {
 			display: block;
 			width: 100%;
 			height: 100%;
-			object-fit: contain;
+			user-select: none;
+		}
+	}
+
+	&:has(.marker[role='slider']) .frame {
+		cursor: crosshair;
+	}
+
+	& .marker {
+		position: absolute;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 2px solid #fff;
+		border-radius: 50%;
+		background: rgb(0 0 0 / 70%);
+		box-shadow:
+			0 0 0 1px rgb(0 0 0 / 60%),
+			var(--cms-shadow-sm);
+		transform: translate(-50%, -50%);
+		cursor: grab;
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.is-inherited {
+			background: transparent;
+		}
+
+		/* Only a keyboard user needs it before a point is set. */
+		&.is-unset:not(:focus-visible) {
+			opacity: 0;
+		}
+	}
+
+	& .focus-bar {
+		display: flex;
+		flex: 0 0 auto;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--cms-space-4);
+	}
+
+	& .focus-status {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--cms-space-1) var(--cms-space-3);
+		min-width: 0;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		font-variant-numeric: tabular-nums;
+	}
+
+	& .reset {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--cms-color-text);
+		font-size: var(--cms-font-size-sm);
+		text-decoration: underline;
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .shots {
+		display: flex;
+		flex-shrink: 0;
+		align-items: flex-end;
+		gap: var(--cms-space-3);
+	}
+
+	& .shot {
+		margin: 0;
+
+		& .box {
+			position: relative;
+			height: 4rem;
+			border-radius: var(--cms-radius);
+			background: var(--cms-color-surface-sunken);
+		}
+
+		& figcaption {
+			margin-top: var(--cms-space-1);
+			color: var(--cms-color-text-subtle);
+			font-size: var(--cms-font-size-xs);
+			font-variant-numeric: tabular-nums;
+			text-align: center;
 		}
 	}
 

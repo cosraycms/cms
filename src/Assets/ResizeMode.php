@@ -9,6 +9,7 @@ enum ResizeMode: string
 	case Crop = 'crop';
 	case Fit = 'fit';
 	case Height = 'height';
+	case Original = 'original';
 	case LongSide = 'longside';
 	case Resize = 'resize';
 	case ShortSide = 'shortside';

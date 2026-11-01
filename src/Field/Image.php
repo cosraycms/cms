@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celema\Sire\Review;
 use Celema\Sire\Shape;
+use Cosray\Assets\Transform;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
@@ -73,6 +75,38 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 			->optional()
 			->nullable();
 		$shape->add('crop', $this->neutralShape('bool'))->optional()->nullable();
+
+		return $shape;
+	}
+
+	/**
+	 * A use's attribution, focal point and crop: fractions of the image, which
+	 * a rendition's geometry and signed URL rely on.
+	 */
+	#[Override]
+	protected function itemMetaShape(): Shape
+	{
+		$shape = parent::itemMetaShape();
+		$shape->add('attribution', 'string')->optional()->nullable();
+		$shape->add('focal', $this->fractionsShape('x', 'y'))->optional()->nullable();
+		$crop = $this->fractionsShape('x', 'y', 'w', 'h');
+		$crop->review(static function (Review $review): void {
+			if (!Transform::validCrop($review->values())) {
+				$review->addError('', __('image:crop-invalid'));
+			}
+		});
+		$shape->add('crop', $crop)->optional()->nullable();
+
+		return $shape;
+	}
+
+	private function fractionsShape(string ...$keys): Shape
+	{
+		$shape = Shapes::create();
+
+		foreach ($keys as $key) {
+			$shape->add($key, 'number')->rules('required', 'min:0', 'max:1');
+		}
 
 		return $shape;
 	}

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Cosray\Assets;
 
+use Closure;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
 use Gumlet\ImageResize;
 use Gumlet\ImageResizeException;
+use Override;
 
 /**
  * Materializes renditions for the cache fallback route. Everything else
@@ -46,8 +48,8 @@ class Image
 	}
 
 	/**
-	 * Materialize the rendition carrying the given size name next to its
-	 * native URL.
+	 * Materialize the rendition carrying the given name next to its native
+	 * URL.
 	 */
 	public function resize(
 		Size $size,
@@ -55,6 +57,7 @@ class Image
 		bool $enlarge,
 		?int $quality,
 		string $name,
+		?Transform $transform = null,
 	): static {
 		if (!$this->isResizable()) {
 			return $this;
@@ -64,20 +67,51 @@ class Image
 		$this->cacheFile = $cacheFile;
 
 		if (!is_file($cacheFile) || filemtime($this->file) > filemtime($cacheFile)) {
-			$this->createCacheFile($cacheFile, $size, $mode, $enlarge, $quality);
+			$this->createCacheFile($cacheFile, $size, $mode, $enlarge, $quality, $transform);
 		}
 
 		return $this;
 	}
 
-	public function get(): ImageResize
+	/**
+	 * @param ?Closure(int, int): array{x: int, y: int, w: int, h: int} $region The part of the
+	 *     image to work on, read off the source once rotated. It stays one image, as a
+	 *     copy of the part would take as much memory again.
+	 */
+	public function get(?Closure $region = null): ImageResize
 	{
-		return new class($this->file, $this->maxPixels()) extends ImageResize {
-			public function __construct(string $file, int $maxPixels)
+		return new class($this->file, $this->maxPixels(), $region) extends ImageResize {
+			private int $offsetX = 0;
+			private int $offsetY = 0;
+
+			public function __construct(string $file, int $maxPixels, ?Closure $region)
 			{
 				$this->max_source_pixels = $maxPixels;
 
 				parent::__construct($file);
+
+				if ($region !== null) {
+					$part = $region($this->getSourceWidth(), $this->getSourceHeight());
+					$this->offsetX = $part['x'];
+					$this->offsetY = $part['y'];
+					$this->original_w = $part['w'];
+					$this->original_h = $part['h'];
+					$this->resize($part['w'], $part['h']);
+				}
+			}
+
+			#[Override]
+			public function save(
+				?string $filename,
+				?int $image_type = null,
+				?int $quality = null,
+				?int $permissions = null,
+				array|false $exact_size = false,
+			): static {
+				$this->source_x += $this->offsetX;
+				$this->source_y += $this->offsetY;
+
+				return parent::save($filename, $image_type, $quality, $permissions, $exact_size);
 			}
 		};
 	}
@@ -103,6 +137,7 @@ class Image
 		ResizeMode $mode,
 		bool $enlarge,
 		?int $quality,
+		?Transform $transform,
 	): void {
 		// Concurrent first requests must never see a half-written file, so
 		// each one writes its own temporary file and moves it into place.
@@ -110,7 +145,7 @@ class Image
 		$tmp = $cacheFile . '.tmp-' . bin2hex(random_bytes(6));
 
 		try {
-			$this->writeRendition($tmp, $size, $mode, $enlarge, $quality);
+			$this->writeRendition($tmp, $size, $mode, $enlarge, $quality, $transform);
 
 			if (!rename($tmp, $cacheFile)) {
 				throw new RuntimeException('Assets error: could not move rendition into place');
@@ -130,6 +165,7 @@ class Image
 		ResizeMode $mode,
 		bool $enlarge,
 		?int $quality,
+		?Transform $transform,
 	): void {
 		// Gumlet keeps only the first frame, so an animated GIF is
 		// materialized as a copy of the original instead.
@@ -141,23 +177,30 @@ class Image
 			return;
 		}
 
+		$second = $size->secondDimension ?? $size->firstDimension;
+		// A focal point decides the cut, which leaves only the scaling to the mode.
+		$ratio = $mode === ResizeMode::Crop && $transform?->focal !== null ? $size->firstDimension / $second : null;
+		$source = $this->get(
+			$transform === null
+				? null
+				: static fn(int $width, int $height) => $transform->region($width, $height, $ratio),
+		);
+
 		$image = match ($mode) {
-			ResizeMode::Width => $this->get()->resizeToWidth($size->firstDimension, $enlarge),
-			ResizeMode::Fit => $this->get()->resizeToBestFit(
+			ResizeMode::Original => $source,
+			ResizeMode::Width => $source->resizeToWidth($size->firstDimension, $enlarge),
+			ResizeMode::Fit => $source->resizeToBestFit(
 				$size->firstDimension,
 				$this->secondDimension($size, $mode),
 				$enlarge,
 			),
-			ResizeMode::Crop => $this->get()->crop(
-				$size->firstDimension,
-				$size->secondDimension ?? $size->firstDimension,
-				$enlarge,
-				$size->cropMode ?? ImageResize::CROPCENTER,
-			),
-			ResizeMode::Height => $this->get()->resizeToHeight($size->firstDimension, $enlarge),
-			ResizeMode::LongSide => $this->get()->resizeToLongSide($size->firstDimension, $enlarge),
-			ResizeMode::ShortSide => $this->get()->resizeToShortSide($size->firstDimension, $enlarge),
-			ResizeMode::Resize => $this->get()->resize(
+			ResizeMode::Crop => $ratio !== null
+				? $source->resize($size->firstDimension, $second, $enlarge)
+				: $source->crop($size->firstDimension, $second, $enlarge, $size->cropMode ?? ImageResize::CROPCENTER),
+			ResizeMode::Height => $source->resizeToHeight($size->firstDimension, $enlarge),
+			ResizeMode::LongSide => $source->resizeToLongSide($size->firstDimension, $enlarge),
+			ResizeMode::ShortSide => $source->resizeToShortSide($size->firstDimension, $enlarge),
+			ResizeMode::Resize => $source->resize(
 				$size->firstDimension,
 				$this->secondDimension($size, $mode),
 				$enlarge,

@@ -103,6 +103,17 @@ export function pruneItemMeta(item) {
 	return { ...item, meta };
 }
 
+/**
+ * Replaces some of an item's meta, pruning what ends up empty.
+ *
+ * @param {FileItem} item
+ * @param {ItemMeta} patch An absent or empty value removes its key.
+ * @returns {FileItem}
+ */
+export function patchItemMeta(item, patch) {
+	return pruneItemMeta({ ...item, meta: { ...item.meta, ...patch } });
+}
+
 export function uid(length = 13) {
 	const alphabet = '123456789bcdfghklmnpqrstvwxyz';
 	const threshold = Math.floor(256 / alphabet.length) * alphabet.length;

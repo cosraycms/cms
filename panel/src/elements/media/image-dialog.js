@@ -2,16 +2,18 @@
 // its per-use texts. Everything stays a draft until the dialog is applied,
 // also across the images a gallery steps through.
 
-/** @import { AssetInfo, FileItem } from '../../types/data' */
+/** @import { AssetInfo, FileItem, ItemMeta } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
 import { cosray } from '../../lib/bridge.js';
+import { patchItemMeta } from '../../lib/content.js';
 import { extension, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 import { libraryDialog } from './dialogs.js';
+import { imageStage } from './image-stage.js';
 import { metaFields } from './meta-fields.js';
-import { button, contentLocales, create, replaceMenu, svg, rendition } from './views.js';
+import { button, contentLocales, create, replaceMenu, svg } from './views.js';
 
 /**
  * @typedef {object} ImageDialogOptions
@@ -139,6 +141,15 @@ export function imageDialog({
 	/** @type {ReturnType<typeof metaFields> | null} */
 	let form = null;
 
+	/**
+	 * The picture and the form each report their own part of an image's draft.
+	 *
+	 * @param {number} target
+	 * @param {ItemMeta} patch
+	 */
+	const edit = (target, patch) =>
+		drafts.set(target, patchItemMeta(drafts.get(target) ?? items[target], patch));
+
 	const handle = cosray().modal.open(
 		(host) => {
 			const header = create('header', 'modal-header cms-image-head');
@@ -168,8 +179,6 @@ export function imageDialog({
 
 			const body = create('div', 'modal-body cms-image-details');
 			const stage = create('div', 'stage');
-			const preview = create('div', 'preview');
-			stage.append(preview);
 			const fields = create('div', 'fields');
 			const list = create('dl', 'facts');
 			body.append(stage, fields);
@@ -181,7 +190,8 @@ export function imageDialog({
 			}
 
 			function show() {
-				const item = drafts.get(at) ?? items[at];
+				const target = at;
+				const item = drafts.get(target) ?? items[target];
 				const info = asset(item.uid ?? '');
 				const source = info?.previewUrl ?? info?.url ?? '';
 				const name = info?.filename ?? item.uid ?? '';
@@ -190,14 +200,22 @@ export function imageDialog({
 				place.textContent = `${at + 1} / ${items.length}`;
 
 				if (source) {
-					preview.replaceChildren(rendition(source, info?.url));
+					const shown = imageStage({
+						item,
+						info,
+						source,
+						readonly,
+						change: (patch) => edit(target, patch),
+					});
+					stage.replaceChildren(shown.element, shown.bar);
 				} else {
-					preview.replaceChildren(create('span', 'plate', extension(name)));
+					const preview = create('div', 'preview');
+					preview.append(create('span', 'plate', extension(name)));
+					stage.replaceChildren(preview);
 				}
 
 				list.replaceChildren(...facts(info));
 				form?.element.remove();
-				const target = at;
 				form = metaFields({
 					item,
 					kind: 'image',
@@ -206,7 +224,7 @@ export function imageDialog({
 					contentLocale: locale,
 					locales,
 					catalog: info?.meta,
-					update: (next) => drafts.set(target, next),
+					update: (texts) => edit(target, texts),
 					readonly,
 				});
 				fields.append(form.element, list);

@@ -288,6 +288,7 @@ return [
 		'image:alt-text-long' => 'Tekst alternatywny',
 		'image:attribution' => 'Źródło obrazu',
 		'image:caption' => 'Podpis',
+		'image:crop-invalid' => 'Kadr nie pasuje do obrazu.',
 		'image:focus' => 'Punkt centralny',
 		'image:focus-remove' => 'Usuń punkt centralny',
 		'image:no-focus' => 'Nie ustawiono punktu centralnego',
