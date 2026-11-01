@@ -9,6 +9,7 @@ import { ZXX } from '../../lib/content.js';
 import { RATIOS, readRatio } from '../../lib/gallery.js';
 import { extension } from '../../lib/library.js';
 import { __, __n } from '../../lib/locale.js';
+import { galleryFold } from './gallery-fold.js';
 import { button, create, rendition } from './views.js';
 
 let ids = 0;
@@ -22,6 +23,8 @@ let ids = 0;
  * @property {boolean} open False once the field's limit is reached; hides the add actions.
  * @property {boolean} readonly
  * @property {boolean} block
+ * @property {boolean} expanded Whether a gallery past two rows starts unfolded.
+ * @property {(expanded: boolean) => void} expand
  * @property {Meta | undefined} meta The gallery settings, ratio and crop, kept as the field's meta.
  * @property {(meta: Meta) => void} updateMeta
  * @property {(index: number) => void} edit Opens an image's details.
@@ -55,6 +58,8 @@ export function galleryView(options) {
 	const slot = block ? create('div', 'cms-gallery-settings') : null;
 	/** @type {Sortable | null} */
 	let sorter = null;
+	/** @type {ReturnType<typeof galleryFold> | null} */
+	let fold = null;
 
 	/**
 	 * A tile's index at the moment, as a drag may have moved it.
@@ -121,6 +126,13 @@ export function galleryView(options) {
 		const viewport = create('div', 'viewport');
 		viewport.append(tiles);
 		root.append(viewport);
+		fold = galleryFold({
+			viewport,
+			tiles,
+			expanded: options.expanded,
+			changed: options.expand,
+		});
+		fold.element.setAttribute('aria-controls', (tiles.id = `${id}-tiles`));
 
 		if (block && options.open && !readonly) {
 			const bar = create('div', 'bar');
@@ -132,6 +144,8 @@ export function galleryView(options) {
 			);
 			root.append(bar);
 		}
+
+		root.append(fold.element);
 	}
 
 	if (!readonly) {
@@ -141,6 +155,7 @@ export function galleryView(options) {
 				if (event.oldIndex !== undefined && event.newIndex !== undefined) {
 					// Sortable has moved the tile already; the list follows.
 					options.move(event.oldIndex, event.newIndex);
+					fold?.refresh();
 				}
 			},
 		});
@@ -198,6 +213,7 @@ export function galleryView(options) {
 		slot,
 		destroy() {
 			sorter?.destroy();
+			fold?.destroy();
 			slot?.remove();
 		},
 	};

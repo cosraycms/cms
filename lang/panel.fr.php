@@ -55,6 +55,8 @@ return [
 		'image:previous' => 'Image précédente',
 		'image:ratio' => 'Proportions',
 		'image:ratio-auto' => 'Automatique',
+		'image:show-all' => 'Afficher les :count images',
+		'image:show-fewer' => 'Afficher moins',
 		'image:upload' => 'Téléverser une image',
 		'link:add' => 'Ajouter un lien',
 		'link:invalid-url' => 'Veuillez saisir une URL valide',

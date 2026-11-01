@@ -58,6 +58,8 @@ return [
 		'image:previous' => 'Vorheriges Bild',
 		'image:ratio' => 'Seitenverhältnis',
 		'image:ratio-auto' => 'Automatisch',
+		'image:show-all' => 'Alle :count Bilder anzeigen',
+		'image:show-fewer' => 'Weniger anzeigen',
 		'image:upload' => 'Bild hochladen',
 		'link:add' => 'Link hinzufügen',
 		'link:invalid-url' => 'Bitte eine gültige URL eingeben',

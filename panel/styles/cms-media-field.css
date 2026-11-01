@@ -565,15 +565,51 @@
 }
 
 .cms-gallery {
+	--fold-height: 2rem;
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
 
 	& .viewport {
-		max-height: 17.5rem;
 		padding: var(--cms-space-3-5);
-		overflow-y: auto;
-		overscroll-behavior: contain;
+
+		&.is-clipped {
+			overflow: hidden;
+		}
+	}
+
+	& .fold {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--cms-space-1-5);
+		height: var(--fold-height);
+		padding: 0;
+		border: 0;
+		border-top: 1px solid var(--cms-color-border);
+		background: none;
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-xs);
+		cursor: pointer;
+
+		&[hidden] {
+			display: none;
+		}
+
+		&:hover {
+			background: var(--cms-color-hover);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: calc(-1 * var(--cms-focus-offset));
+		}
+
+		& svg {
+			width: 0.75rem;
+			height: 0.75rem;
+		}
 	}
 
 	& .tiles {
@@ -675,9 +711,11 @@
 		position: relative;
 
 		& .viewport {
-			max-height: none;
 			padding: 0;
-			overflow: visible;
+		}
+
+		&:has(> .fold:not([hidden])) .bar {
+			inset-block-end: var(--fold-height);
 		}
 
 		& .tiles.has-ratio .tile {

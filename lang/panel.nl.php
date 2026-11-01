@@ -52,6 +52,8 @@ return [
 		'image:previous' => 'Vorige afbeelding',
 		'image:ratio' => 'Beeldverhouding',
 		'image:ratio-auto' => 'Automatisch',
+		'image:show-all' => 'Alle :count afbeeldingen tonen',
+		'image:show-fewer' => 'Minder tonen',
 		'image:upload' => 'Afbeelding uploaden',
 		'link:add' => 'Link toevoegen',
 		'link:invalid-url' => 'Voer een geldige URL in',

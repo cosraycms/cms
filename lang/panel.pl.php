@@ -69,6 +69,8 @@ return [
 		'image:previous' => 'Poprzedni obraz',
 		'image:ratio' => 'Proporcje',
 		'image:ratio-auto' => 'Automatycznie',
+		'image:show-all' => 'Pokaż wszystkie obrazy (:count)',
+		'image:show-fewer' => 'Pokaż mniej',
 		'image:upload' => 'Prześlij obraz',
 		'link:add' => 'Dodaj link',
 		'link:invalid-url' => 'Wprowadź prawidłowy adres URL',

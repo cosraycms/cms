@@ -49,6 +49,8 @@ return [
 		'image:previous' => 'Previous image',
 		'image:ratio' => 'Aspect ratio',
 		'image:ratio-auto' => 'Auto',
+		'image:show-all' => 'Show all :count images',
+		'image:show-fewer' => 'Show fewer',
 		'image:upload' => 'Upload image',
 		'link:add' => 'Add link',
 		'link:invalid-url' => 'Please enter a valid URL',

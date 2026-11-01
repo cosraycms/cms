@@ -114,6 +114,8 @@ class MediaControl extends HTMLElement {
 	#followers = [];
 	/** @type {Set<(locale: string) => void>} */
 	#dialogs = new Set();
+	/** @type {Set<string>} The lists whose gallery is unfolded. */
+	#expanded = new Set();
 
 	/** @param {UploadType} type */
 	constructor(type) {
@@ -261,6 +263,8 @@ class MediaControl extends HTMLElement {
 	 * @param {FileItem} item
 	 */
 	#add(identity, item) {
+		// A new image lands at the end, which a folded gallery would hide.
+		this.#expanded.add(identity);
 		this.#map[identity] = this.#max === 1 ? [item] : [...(this.#map[identity] ?? []), item];
 	}
 
@@ -434,6 +438,11 @@ class MediaControl extends HTMLElement {
 					open,
 					readonly,
 					block,
+					expanded: this.#expanded.has(identity),
+					expand: (expanded) => {
+						if (expanded) this.#expanded.add(identity);
+						else this.#expanded.delete(identity);
+					},
 					meta: this.#fieldMeta,
 					updateMeta: (meta) => {
 						this.#fieldMeta = meta;

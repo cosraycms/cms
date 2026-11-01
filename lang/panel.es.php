@@ -58,6 +58,8 @@ return [
 		'image:previous' => 'Imagen anterior',
 		'image:ratio' => 'Relación de aspecto',
 		'image:ratio-auto' => 'Automática',
+		'image:show-all' => 'Mostrar las :count imágenes',
+		'image:show-fewer' => 'Mostrar menos',
 		'image:upload' => 'Subir imagen',
 		'link:add' => 'Añadir enlace',
 		'link:invalid-url' => 'La URL no es válida',

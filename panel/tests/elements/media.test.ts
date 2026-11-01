@@ -37,6 +37,13 @@ const ajax = vi.fn().mockResolvedValue(undefined);
 beforeEach(() => {
 	installBridge(system);
 	vi.stubGlobal('htmx', { ajax });
+	vi.stubGlobal(
+		'ResizeObserver',
+		class {
+			observe() {}
+			disconnect() {}
+		},
+	);
 });
 
 afterEach(async () => {
