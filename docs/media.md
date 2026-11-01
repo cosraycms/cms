@@ -59,6 +59,8 @@ Each definition has one mode: `width`, `height`, `long-side`, `short-side` (posi
 
 Templates call `$image->size('card')`. SVGs and other non-resizable assets keep their original URL. Unknown size names, missing assets, and stale filenames do not generate arbitrary renditions. Existing files are not regenerated merely because a size definition changes; remove the affected cached renditions deliberately when deploying such a change.
 
+Resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: its URLs answer 404 and the failure is logged, while the panel shows the original instead.
+
 Block image ladders, responsive `sizes`, gallery ratios, and spacing are documented in [Blocks](blocks.md#rendering).
 
 ## HTTP integration

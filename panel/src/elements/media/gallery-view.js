@@ -9,7 +9,7 @@ import { ZXX } from '../../lib/content.js';
 import { RATIOS, readRatio } from '../../lib/gallery.js';
 import { extension } from '../../lib/library.js';
 import { __, __n } from '../../lib/locale.js';
-import { button, create } from './views.js';
+import { button, create, rendition } from './views.js';
 
 let ids = 0;
 
@@ -75,9 +75,7 @@ export function galleryView(options) {
 		picture.addEventListener('click', edit);
 
 		if (source) {
-			const image = document.createElement('img');
-			image.src = source;
-			image.alt = '';
+			const image = rendition(source, info?.url);
 			image.loading = 'lazy';
 			picture.append(image);
 		} else {

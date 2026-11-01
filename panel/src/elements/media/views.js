@@ -40,6 +40,26 @@ export function svg(name) {
 }
 
 /**
+ * An image from a rendition, or from the original when the server cannot make
+ * one, as for a photo too large for its memory.
+ *
+ * @param {string} source
+ * @param {string} [original]
+ * @returns {HTMLImageElement}
+ */
+export function rendition(source, original) {
+	const image = document.createElement('img');
+	image.src = source;
+	image.alt = '';
+
+	if (original && original !== source) {
+		image.addEventListener('error', () => (image.src = original), { once: true });
+	}
+
+	return image;
+}
+
+/**
  * @param {string} className
  * @param {string} label
  * @param {() => void} onclick
@@ -228,9 +248,7 @@ export function fileRow({
 	const iconBox = create('span', 'icon');
 
 	if (thumb) {
-		const image = document.createElement('img');
-		image.src = thumb;
-		image.alt = '';
+		const image = rendition(thumb, info?.url);
 		image.loading = 'lazy';
 		iconBox.append(image);
 	} else {
@@ -334,9 +352,7 @@ export function fallbackMedia(items, type, label, asset, translate, contentLocal
 			box.title = filename;
 
 			if (source) {
-				const image = document.createElement('img');
-				image.src = source;
-				image.alt = '';
+				const image = rendition(source, info?.url);
 				image.loading = 'lazy';
 				box.append(image);
 			} else {
@@ -435,9 +451,7 @@ export function imageCard({
 	}
 
 	if (thumb) {
-		const image = document.createElement('img');
-		image.src = thumb;
-		image.alt = '';
+		const image = rendition(thumb, info?.url);
 		picture.append(image);
 	} else {
 		picture.append(create('span', 'plate', extension(filename)));
@@ -594,9 +608,7 @@ export function figure({
 		const src = info?.previewUrl ?? info?.url ?? '';
 
 		if (src) {
-			const image = document.createElement('img');
-			image.src = src;
-			image.alt = '';
+			const image = rendition(src, info?.url);
 			frame.append(image);
 		} else {
 			frame.append(create('span', 'plate', extension(filename)));

@@ -16,6 +16,9 @@ use Gumlet\ImageResizeException;
  */
 class Image
 {
+	/** Measured peak of decoding and resizing a large JPEG, rounded up. */
+	private const int BYTES_PER_PIXEL = 5;
+
 	public readonly string $relativeFile;
 	public readonly string $file;
 	protected ?string $cacheFile = null;
@@ -69,7 +72,29 @@ class Image
 
 	public function get(): ImageResize
 	{
-		return new ImageResize($this->file);
+		return new class($this->file, $this->maxPixels()) extends ImageResize {
+			public function __construct(string $file, int $maxPixels)
+			{
+				$this->max_source_pixels = $maxPixels;
+
+				parent::__construct($file);
+			}
+		};
+	}
+
+	/**
+	 * The library's fixed default rejects ordinary camera photos. The real
+	 * bound is memory: above it the request must fail, not die in a fatal error.
+	 */
+	private function maxPixels(): int
+	{
+		$limit = ini_parse_quantity((string) ini_get('memory_limit'));
+
+		if ($limit <= 0) {
+			return 0;
+		}
+
+		return max(1, (int) (($limit - memory_get_usage(true)) / self::BYTES_PER_PIXEL));
 	}
 
 	protected function createCacheFile(

@@ -499,6 +499,15 @@ describe('image details', () => {
 		});
 	});
 
+	it('falls back to the original when the preview cannot be generated', async () => {
+		await details();
+		const image = document.querySelector<HTMLImageElement>('.cms-modal .preview img')!;
+
+		image.dispatchEvent(new Event('error'));
+
+		expect(image.getAttribute('src')).toBe(assets.cover.url);
+	});
+
 	it('returns focus to the edit button after applying', async () => {
 		const { element } = await media('cosray-image', {
 			value: { zxx: [{ uid: 'cover' }] },

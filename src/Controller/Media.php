@@ -218,6 +218,11 @@ class Media
 					$spec->name,
 				);
 		} catch (RuntimeException $e) {
+			$this->logger->warning('Rendition {file} failed: {error}', [
+				'file' => $slug,
+				'error' => $e->getMessage(),
+			]);
+
 			throw new HttpNotFound($this->request, previous: $e);
 		}
 

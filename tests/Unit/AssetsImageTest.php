@@ -8,6 +8,7 @@ use Cosray\Assets\Assets;
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Size;
 use Cosray\Config;
+use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
 use ErrorException;
 use Gumlet\ImageResize;
@@ -41,6 +42,13 @@ final class AssetsImageTest extends TestCase
 		parent::tearDown();
 	}
 
+	private function largeImage(): void
+	{
+		$image = imagecreatetruecolor(4000, 4000);
+		imagejpeg($image, $this->root . '/public/assets/ab/abcdefghijklm/large.jpg');
+		unset($image);
+	}
+
 	/**
 	 * The error handler turns every notice into an exception in production,
 	 * so a deprecation inside the resize pipeline aborts the request and
@@ -60,6 +68,37 @@ final class AssetsImageTest extends TestCase
 
 		$this->assertFileExists($file);
 		$this->assertSame([60, 30], array_slice((array) getimagesize($file), 0, 2));
+	}
+
+	public function testResizesAnImageAboveTheLibrarysDefaultLimit(): void
+	{
+		$this->largeImage();
+		$assets = new Assets(new Config($this->root));
+
+		$assets
+			->image('/ab/abcdefghijklm/large.jpg')
+			->resize(new Size(100), ResizeMode::Width, false, null, 'thumb');
+
+		$this->assertFileExists($this->root . '/public/cache/ab/abcdefghijklm/large-thumb.jpg');
+	}
+
+	public function testRefusesAnImageTooLargeForTheMemoryLimit(): void
+	{
+		$this->largeImage();
+		$assets = new Assets(new Config($this->root));
+		$limit = (string) ini_get('memory_limit');
+		// @mago-expect lint:no-ini-set
+		ini_set('memory_limit', (string) (memory_get_usage(true) + (8 * 1024 * 1024)));
+
+		try {
+			$this->expectException(RuntimeException::class);
+			$assets
+				->image('/ab/abcdefghijklm/large.jpg')
+				->resize(new Size(100), ResizeMode::Width, false, null, 'thumb');
+		} finally {
+			// @mago-expect lint:no-ini-set
+			ini_set('memory_limit', $limit);
+		}
 	}
 
 	public function testCropUsesConfiguredPosition(): void

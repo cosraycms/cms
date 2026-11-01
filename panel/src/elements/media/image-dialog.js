@@ -11,7 +11,7 @@ import { extension, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 import { libraryDialog } from './dialogs.js';
 import { metaFields } from './meta-fields.js';
-import { button, contentLocales, create, replaceMenu, svg } from './views.js';
+import { button, contentLocales, create, replaceMenu, svg, rendition } from './views.js';
 
 /**
  * @typedef {object} ImageDialogOptions
@@ -188,10 +188,7 @@ export function imageDialog({
 				place.textContent = `${at + 1} / ${items.length}`;
 
 				if (source) {
-					const image = document.createElement('img');
-					image.src = source;
-					image.alt = '';
-					preview.replaceChildren(image);
+					preview.replaceChildren(rendition(source, info?.url));
 				} else {
 					preview.replaceChildren(create('span', 'plate', extension(name)));
 				}
