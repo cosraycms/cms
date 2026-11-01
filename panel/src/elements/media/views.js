@@ -415,6 +415,10 @@ export function imageCard({ item, info, loading, readonly, edit, remove, upload,
 	const picture = create('div', 'thumb');
 	picture.addEventListener('click', edit);
 
+	if (info?.width && info.height) {
+		picture.style.setProperty('--thumb-ratio', String(info.width / info.height));
+	}
+
 	if (thumb) {
 		const image = document.createElement('img');
 		image.src = thumb;
