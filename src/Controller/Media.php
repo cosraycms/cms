@@ -181,7 +181,8 @@ class Media
 	 * server serves `{path.cache}/{shard}/{uid}/{stem}-{size}.{ext}`
 	 * natively once generated, so PHP only ever sees the first request.
 	 * Only sizes configured in `media.sizes` are generated — anything
-	 * else is a 404, which bounds what this route can write to disk.
+	 * else is a 404, which bounds what this route can write to disk. An
+	 * original that cannot be resized redirects to itself.
 	 */
 	public function cache(string $slug): Response
 	{
@@ -207,23 +208,21 @@ class Media
 		$spec = $this->sizeSpec($asset->key, $file);
 
 		try {
-			$image = $this
-				->getAssets()
-				->image($asset->key)
-				->resize(
-					$spec->size(),
-					$spec->mode,
-					$spec->enlarge,
-					$spec->quality,
-					$spec->name,
-				);
+			$image = $this->getAssets()->image($asset->key);
 		} catch (RuntimeException $e) {
-			$this->logger->warning('Rendition {file} failed: {error}', [
+			throw new HttpNotFound($this->request, previous: $e);
+		}
+
+		try {
+			$image->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $spec->name);
+		} catch (RuntimeException $e) {
+			$this->logger->warning('Rendition {file} failed, redirecting to the original: {error}', [
 				'file' => $slug,
 				'error' => $e->getMessage(),
 			]);
 
-			throw new HttpNotFound($this->request, previous: $e);
+			// Temporary, so the rendition takes over once the cause is gone.
+			return Response::create($this->factory)->redirect($asset->path());
 		}
 
 		$fileServer = $this->config->media->fileServer;

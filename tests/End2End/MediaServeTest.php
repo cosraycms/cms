@@ -136,6 +136,29 @@ final class MediaServeTest extends End2EndTestCase
 		));
 	}
 
+	public function testOriginalTooLargeForTheMemoryLimitIsRedirectedTo(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-large.png');
+		$shard = substr((string) $upload['uid'], 0, 2);
+		file_put_contents($this->publicDir . $upload['url'], $this->png(4000, 4000));
+		$limit = (string) ini_get('memory_limit');
+		// @mago-expect lint:no-ini-set
+		ini_set('memory_limit', (string) (memory_get_usage(true) + (32 * 1024 * 1024)));
+
+		try {
+			$response = $this->makeRequest(
+				'GET',
+				"/cache/{$shard}/{$upload['uid']}/e2e-serve-large-square.png",
+			);
+		} finally {
+			// @mago-expect lint:no-ini-set
+			ini_set('memory_limit', $limit);
+		}
+
+		$this->assertResponseStatus(302, $response);
+		$this->assertResponseHeaderEquals('Location', $upload['url'], $response);
+	}
+
 	private function png(int $width, int $height): string
 	{
 		$image = imagecreatetruecolor($width, $height);

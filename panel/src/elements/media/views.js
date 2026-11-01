@@ -40,8 +40,8 @@ export function svg(name) {
 }
 
 /**
- * An image from a rendition, or from the original when the server cannot make
- * one, as for a photo too large for its memory.
+ * An image from a rendition, or from the original when the rendition fails to
+ * load.
  *
  * @param {string} source
  * @param {string} [original]
