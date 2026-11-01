@@ -281,7 +281,7 @@ export function fileRow({
 	retitle(row, item, translate, contentLocale);
 
 	if (!inert) {
-		row.append(button('tool edit', __('common:edit'), () => edit?.(), 'pencil'));
+		if (edit) row.append(button('tool edit', __('common:edit'), edit, 'pencil'));
 
 		if (replace) {
 			row.append(...replaceMenu(replace.upload, replace.library));
@@ -419,6 +419,7 @@ export function videoPlayer(info) {
  * @param {() => void} options.remove
  * @param {() => void} options.upload
  * @param {() => void} options.library
+ * @param {('alt' | 'caption' | 'attribution')[]} options.offered The texts the field offers.
  * @param {boolean} options.translate
  * @param {string} options.contentLocale
  * @param {ControlLocales | undefined} options.locales
@@ -433,6 +434,7 @@ export function imageCard({
 	remove,
 	upload,
 	library,
+	offered,
 	translate,
 	contentLocale,
 	locales,
@@ -499,7 +501,8 @@ export function imageCard({
 		const shown = (/** @type {'alt' | 'caption'} */ name) =>
 			effectiveText(name, item, info, translate, locale, locales).trim();
 		const alt = shown('alt');
-		const caption = shown('caption');
+		const caption = offered.includes('caption') ? shown('caption') : '';
+		const attribution = offered.includes('attribution') ? effectiveAttribution(item, info) : '';
 
 		if (alt) {
 			text(__('image:alt-text'), alt).title = alt;
@@ -514,6 +517,10 @@ export function imageCard({
 
 		if (caption) {
 			text(__('image:caption'), caption).title = caption;
+		}
+
+		if (attribution) {
+			text(__('image:attribution'), attribution).title = attribution;
 		}
 	};
 
@@ -564,6 +571,17 @@ export function effectiveText(name, item, info, translate, contentLocale, locale
 }
 
 /**
+ * Who made an image as the site will show it: per use, else the catalog's.
+ *
+ * @param {FileItem} item
+ * @param {AssetInfo | undefined} info
+ * @returns {string}
+ */
+export function effectiveAttribution(item, info) {
+	return item.meta?.attribution || info?.meta?.attribution || '';
+}
+
+/**
  * An image or video as a block shows it: the media at block width with a
  * hover bar of the actions on it, and an image's caption below.
  *
@@ -572,6 +590,7 @@ export function effectiveText(name, item, info, translate, contentLocale, locale
  * @param {AssetInfo | undefined} options.info
  * @param {string} options.filename
  * @param {string} options.caption
+ * @param {string} options.attribution
  * @param {boolean} options.loading
  * @param {boolean} options.readonly
  * @param {() => void} [options.edit] Opens the details, which a read-only image offers too.
@@ -585,6 +604,7 @@ export function figure({
 	info,
 	filename,
 	caption,
+	attribution,
 	loading,
 	readonly,
 	edit,
@@ -640,7 +660,9 @@ export function figure({
 	function setCaption(text) {
 		figcaption.textContent = text;
 
-		if (text && type === 'image') shape.append(figcaption);
+		if (attribution) figcaption.append(text ? ' ' : '', create('small', undefined, attribution));
+
+		if ((text || attribution) && type === 'image') shape.append(figcaption);
 		else figcaption.remove();
 	}
 

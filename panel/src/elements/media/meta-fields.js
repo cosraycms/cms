@@ -1,8 +1,9 @@
-// The per-use texts of a media item: an image's alt text and caption, a
-// video's caption, a file's title. An empty text falls back to the item's
-// other languages and then to the asset's catalog, shown as placeholder.
+// The per-use texts of a media item: an image's alt text, caption and
+// attribution, a video's caption, a file's title, as far as the field offers
+// them. An empty text falls back to the item's other languages and then to the
+// asset's catalog, shown as placeholder. The attribution is one neutral string.
 
-/** @import { FileItem, LocaleMap, Meta, UploadType } from '../../types/data' */
+/** @import { FileItem, ItemMeta, LocaleMap, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 
 import { ZXX, pruneItemMeta } from '../../lib/content.js';
@@ -10,7 +11,7 @@ import { fallbackLabel } from '../../lib/control.js';
 import { resolveTextFallback } from '../../lib/fallback.js';
 import { __ } from '../../lib/locale.js';
 
-/** @typedef {'alt' | 'caption' | 'title'} Key */
+/** @typedef {'alt' | 'caption' | 'title' | 'attribution'} Key */
 
 let ids = 0;
 
@@ -18,10 +19,11 @@ let ids = 0;
  * @typedef {object} MetaFieldsOptions
  * @property {FileItem} item
  * @property {UploadType} kind
+ * @property {Key[]} texts The texts the field offers, in order.
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
- * @property {Meta | undefined} catalog The asset's catalog meta.
+ * @property {ItemMeta | undefined} catalog The asset's catalog meta.
  * @property {(item: FileItem) => void} update Receives the item with pruned meta on every edit, so
  *     empty texts never shadow the catalog defaults.
  * @property {boolean} [readonly]
@@ -34,6 +36,7 @@ let ids = 0;
 export function metaFields({
 	item,
 	kind,
+	texts: keys,
 	translate,
 	contentLocale,
 	locales,
@@ -42,20 +45,25 @@ export function metaFields({
 	readonly = false,
 }) {
 	const id = `cms-media-meta-${++ids}`;
-	/** @type {Key[]} */
-	const keys = kind === 'image' ? ['alt', 'caption'] : kind === 'video' ? ['caption'] : ['title'];
 	const labels = {
 		alt: __('image:alt-text'),
 		caption: __('image:caption'),
 		title: __('common:title'),
+		attribution: __('image:attribution'),
 	};
 	const notes = {
 		alt: __('image:alt-text-note'),
 		caption: __('field:optional'),
 		title: __('field:optional'),
+		attribution: __('field:optional'),
 	};
 	/** @type {Record<string, LocaleMap<string>>} */
-	const texts = Object.fromEntries(keys.map((name) => [name, { ...(item.meta?.[name] ?? {}) }]));
+	const texts = Object.fromEntries(
+		keys
+			.filter((name) => name !== 'attribution')
+			.map((name) => [name, { ...(item.meta?.[name] ?? {}) }]),
+	);
+	let attribution = item.meta?.attribution ?? '';
 	/** @type {Key | null} */
 	let focused = null;
 	let locale = contentLocale;
@@ -71,10 +79,32 @@ export function metaFields({
 	const catalogLocale = () => (translate ? locale : (locales?.default ?? locale));
 
 	/** @param {Key} name */
+	function own(name) {
+		return name === 'attribution' ? attribution : (texts[name][key()] ?? '');
+	}
+
+	/**
+	 * @param {Key} name
+	 * @returns {{ value: string, note: string } | null}
+	 */
 	function fallback(name) {
-		return focused === name
-			? null
-			: resolveTextFallback(texts[name], catalog?.[name], key(), all, catalogLocale());
+		if (focused === name) return null;
+
+		if (name === 'attribution') {
+			return !attribution && catalog?.attribution
+				? { value: catalog.attribution, note: __('image:from-library') }
+				: null;
+		}
+
+		const resolved = resolveTextFallback(
+			texts[name],
+			/** @type {LocaleMap<string> | undefined} */ (catalog?.[name]),
+			key(),
+			all,
+			catalogLocale(),
+		);
+
+		return resolved && { value: resolved.value, note: fallbackLabel(resolved, all) };
 	}
 
 	/** @param {Key} name */
@@ -84,6 +114,7 @@ export function metaFields({
 		if (resolved) return resolved.value;
 		if (name === 'alt') return __('image:alt-text-placeholder');
 		if (name === 'title') return __('media:title-placeholder');
+		if (name === 'attribution') return __('image:attribution-placeholder');
 
 		return kind === 'video' ? __('video:caption-placeholder') : __('image:caption-placeholder');
 	}
@@ -98,7 +129,7 @@ export function metaFields({
 		const resolved = fallback(name);
 
 		if (resolved) {
-			part.note.textContent = fallbackLabel(resolved, all);
+			part.note.textContent = resolved.note;
 			part.entry.append(part.note);
 		} else {
 			part.note.remove();
@@ -118,7 +149,7 @@ export function metaFields({
 		/** @type {HTMLInputElement | HTMLTextAreaElement} */
 		let input;
 
-		if (name !== 'title') {
+		if (name === 'alt' || name === 'caption') {
 			input = document.createElement('textarea');
 			input.className = 'cms-textarea';
 			input.rows = 1;
@@ -131,7 +162,7 @@ export function metaFields({
 
 		input.id = `${id}-${name}`;
 		input.readOnly = readonly;
-		input.value = texts[name][key()] ?? '';
+		input.value = own(name);
 		input.addEventListener('focus', () => {
 			focused = name;
 			refresh(name);
@@ -141,8 +172,10 @@ export function metaFields({
 			refresh(name);
 		});
 		input.addEventListener('input', () => {
-			texts[name][key()] = input.value;
-			update(pruneItemMeta({ ...item, meta: { ...item.meta, ...texts } }));
+			if (name === 'attribution') attribution = input.value;
+			else texts[name][key()] = input.value;
+
+			update(pruneItemMeta({ ...item, meta: { ...item.meta, ...texts, attribution } }));
 		});
 		const note = document.createElement('span');
 		note.className = 'fallback';
@@ -158,7 +191,7 @@ export function metaFields({
 			locale = next;
 
 			for (const [name, part] of parts) {
-				part.input.value = texts[name][key()] ?? '';
+				part.input.value = own(name);
 				refresh(name);
 			}
 		},

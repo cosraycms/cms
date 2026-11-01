@@ -206,6 +206,42 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertSame('image', $images['assets'][0]['kind']);
 	}
 
+	public function testAnImagesFormKeepsItsStoredTitleWithoutOfferingIt(): void
+	{
+		$uid = $this->upload('e2e-title-photo.png', 'image/png');
+		$this->db()->execute(
+			'UPDATE cms.assets SET meta = :meta WHERE uid = :uid',
+			['uid' => $uid, 'meta' => json_encode(['title' => ['en' => 'Imported']])],
+		)->run();
+
+		$response = $this->makeRequest('POST', "/panel/media/{$uid}", [
+			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded', 'HX-Request' => 'true'],
+			'body' => http_build_query(['meta' => ['alt' => ['en' => 'A pixel']]]),
+		]);
+
+		$this->assertResponseOk($response);
+		$html = $this->getHtmlResponse($response);
+		$this->assertStringNotContainsString('meta[title]', $html);
+		$meta = json_decode(
+			(string) $this->db()->execute(
+				'SELECT meta FROM cms.assets WHERE uid = :uid',
+				['uid' => $uid],
+			)->one()['meta'],
+			true,
+		);
+		$this->assertEquals(['en' => 'Imported'], $meta['title']);
+		$this->assertEquals(['en' => 'A pixel'], $meta['alt']);
+	}
+
+	public function testAFilesFormOffersTheTitle(): void
+	{
+		$uid = $this->upload('e2e-title-notes.pdf', 'application/pdf', 'file');
+
+		$response = $this->makeRequest('GET', '/panel/media', ['query' => ['file' => $uid]]);
+
+		$this->assertHtmlNodeExists('//input[@name="meta[title][en]"]', $this->getHtmlResponse($response));
+	}
+
 	public function testSavingMetaKeepsTheFormShapeAndConfirms(): void
 	{
 		$uid = $this->upload('e2e-save-photo.png', 'image/png');
@@ -216,7 +252,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 				'meta' => [
 					'alt' => ['en' => 'A single pixel', 'de' => 'Ein Pixel'],
 					'caption' => ['en' => ''],
-					'credit' => ' Studio ',
+					'attribution' => ' Studio ',
 					'focal' => ['x' => '0.25', 'y' => '0.75'],
 				],
 			]),
@@ -234,7 +270,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 			true,
 		);
 		$this->assertEquals(['en' => 'A single pixel', 'de' => 'Ein Pixel'], $meta['alt']);
-		$this->assertSame('Studio', $meta['credit']);
+		$this->assertSame('Studio', $meta['attribution']);
 		$this->assertEquals(['x' => 0.25, 'y' => 0.75], $meta['focal']);
 		$this->assertArrayNotHasKey('caption', $meta);
 	}

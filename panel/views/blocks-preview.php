@@ -117,6 +117,10 @@ video {
 	height: auto;
 }
 
+.cms-attribution {
+	font-size: 0.75rem;
+}
+
 .cms-figure figcaption {
 	margin-top: 0.5rem;
 	color: #666;

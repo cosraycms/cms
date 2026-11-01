@@ -111,7 +111,7 @@ final class Media extends Panel
 
 	/**
 	 * Saves the editable meta slice from the detail form: localized alt,
-	 * title and caption, the credit line and an image's focal point.
+	 * title and caption, the attribution and an image's focal point.
 	 *
 	 * @return array<string, mixed>
 	 */

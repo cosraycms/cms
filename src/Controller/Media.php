@@ -147,6 +147,7 @@ class Media
 			'url' => $asset->path(),
 			'thumbUrl' => $asset->resizable() ? $asset->sizePath('thumb') : $asset->path(),
 			'previewUrl' => $asset->resizable() ? $asset->sizePath('preview') : $asset->path(),
+			'meta' => $asset->meta,
 		];
 	}
 

@@ -24,6 +24,7 @@ import {
 	button,
 	contentLocales,
 	create,
+	effectiveAttribution,
 	effectiveText,
 	fallbackMedia,
 	figure,
@@ -43,6 +44,8 @@ import {
  * @property {'symmetric' | 'asymmetric'} [translateMode]
  * @property {{ min?: number, max?: number }} [limit]
  * @property {string} [presentation] `block` shows a filled field as content alone.
+ * @property {boolean} [caption] Offers a caption per use.
+ * @property {boolean} [attribution] Offers an attribution per use.
  */
 
 /**
@@ -231,6 +234,22 @@ class MediaControl extends HTMLElement {
 
 	get #max() {
 		return this.field.limit?.max ?? -1;
+	}
+
+	/** @returns {('alt' | 'caption' | 'attribution')[]} */
+	get #imageTexts() {
+		return [
+			'alt',
+			...(this.field.caption ? /** @type {const} */ (['caption']) : []),
+			...(this.field.attribution ? /** @type {const} */ (['attribution']) : []),
+		];
+	}
+
+	/** @returns {('caption' | 'title')[]} */
+	get #rowTexts() {
+		if (this.#type !== 'video') return ['title'];
+
+		return this.field.caption ? ['caption'] : [];
 	}
 
 	/**
@@ -575,6 +594,7 @@ class MediaControl extends HTMLElement {
 				remove: removeAll,
 				upload,
 				library,
+				offered: this.#imageTexts,
 				translate,
 				contentLocale: this.#locale,
 				locales,
@@ -585,14 +605,16 @@ class MediaControl extends HTMLElement {
 			return;
 		}
 
+		const captioned = type === 'image' && (this.field.caption ?? false);
 		const shown = figure({
 			type,
 			info,
 			filename: info?.filename ?? item.uid ?? '',
-			caption:
-				type === 'image'
-					? effectiveText('caption', item, info, translate, this.#locale, locales)
-					: '',
+			caption: captioned
+				? effectiveText('caption', item, info, translate, this.#locale, locales)
+				: '',
+			attribution:
+				type === 'image' && this.field.attribution ? effectiveAttribution(item, info) : '',
 			loading,
 			readonly,
 			edit: type === 'image' ? edit : undefined,
@@ -603,10 +625,16 @@ class MediaControl extends HTMLElement {
 		body.append(shown.element);
 
 		if (type === 'image') {
-			this.#followers.push((locale) =>
-				shown.setCaption(effectiveText('caption', item, info, translate, locale, locales)),
-			);
+			if (captioned) {
+				this.#followers.push((locale) =>
+					shown.setCaption(effectiveText('caption', item, info, translate, locale, locales)),
+				);
+			}
 
+			return;
+		}
+
+		if (this.#rowTexts.length === 0) {
 			return;
 		}
 
@@ -615,6 +643,7 @@ class MediaControl extends HTMLElement {
 		const form = metaFields({
 			item,
 			kind: type,
+			texts: this.#rowTexts,
 			translate,
 			contentLocale: this.#locale,
 			locales,
@@ -658,7 +687,7 @@ class MediaControl extends HTMLElement {
 					contentLocale: this.#locale,
 					loading,
 					inert: readonly,
-					edit: () => this.#edit(identity, position(row)),
+					edit: this.#rowTexts.length > 0 ? () => this.#edit(identity, position(row)) : undefined,
 					remove: () => removeAt(position(row)),
 					replace: multiple ? undefined : { upload, library },
 				});
@@ -869,6 +898,7 @@ class MediaControl extends HTMLElement {
 			bytes: result.bytes,
 			width: result.width,
 			height: result.height,
+			meta: result.meta,
 		};
 
 		return result.uid;
@@ -919,6 +949,7 @@ class MediaControl extends HTMLElement {
 				this.#accept(await cosray().upload(this.#type, file), (message) =>
 					alertDialog(this, message),
 				),
+			texts: this.#imageTexts,
 			translate: this.#translate,
 			contentLocale: this.#locale,
 			locales: this.locales,
@@ -959,6 +990,7 @@ class MediaControl extends HTMLElement {
 			owner: this,
 			item,
 			kind: this.#type === 'video' ? 'video' : 'file',
+			texts: this.#rowTexts,
 			translate: this.#translate,
 			contentLocale: this.#locale,
 			locales: this.locales,

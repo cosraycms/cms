@@ -331,7 +331,7 @@ describe('image details', () => {
 	async function details(item: FileItem = { uid: 'cover' }, extra: Record<string, unknown> = {}) {
 		const opened = await media('cosray-image', {
 			value: { zxx: [item] },
-			field: { name: 'cover', limit: { min: 0, max: 1 }, ...extra },
+			field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true, ...extra },
 			assets,
 		});
 		opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
@@ -378,6 +378,58 @@ describe('image details', () => {
 			new URL('/media/cover.jpg', location.href).href,
 		);
 		expect(modal.querySelector('[id$="-title"]')).toBeNull();
+	});
+
+	it('keeps stored texts the field does not offer', async () => {
+		const { changes } = await details(
+			{ uid: 'cover', meta: { caption: { zxx: 'Kept' }, title: { zxx: 'Old' } } },
+			{ caption: false },
+		);
+
+		expect(field('caption')).toBeNull();
+
+		field('alt').value = 'A kettle';
+		field('alt').dispatchEvent(new Event('input', { bubbles: true }));
+		await action('common:apply');
+
+		expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+			alt: { zxx: 'A kettle' },
+			caption: { zxx: 'Kept' },
+			title: { zxx: 'Old' },
+		});
+	});
+
+	it('edits the attribution as one neutral text over the catalog default', async () => {
+		const { changes } = await details({ uid: 'cover' }, { attribution: true });
+		const input = () =>
+			document.querySelector<HTMLInputElement>('.cms-modal input[id$="-attribution"]')!;
+
+		input().value = '  ';
+		input().dispatchEvent(new Event('input', { bubbles: true }));
+		await action('common:apply');
+		expect(changes.mock.lastCall?.[0].zxx[0]).toEqual({ uid: 'cover' });
+
+		document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		await tick();
+		input().value = '© Jane Doe';
+		input().dispatchEvent(new Event('input', { bubbles: true }));
+		await action('common:apply');
+
+		expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({ attribution: '© Jane Doe' });
+	});
+
+	it('shows the catalog attribution as the default', async () => {
+		await media('cosray-image', {
+			value: { zxx: [{ uid: 'cover' }] },
+			field: { name: 'cover', limit: { min: 0, max: 1 }, attribution: true },
+			assets: { cover: { ...assets.cover, meta: { attribution: '© Studio' } } },
+		});
+		document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+		await tick();
+		const input = document.querySelector<HTMLInputElement>('.cms-modal input[id$="-attribution"]')!;
+
+		expect(input.placeholder).toBe('© Studio');
+		expect(input.parentElement?.querySelector('.fallback')?.textContent).toBe('image:from-library');
 	});
 
 	it('applies the texts, keeps other meta and leaves the catalog alone', async () => {
@@ -438,9 +490,26 @@ describe('image details', () => {
 		const card = (item: FileItem, extra: Record<string, unknown> = {}) =>
 			media('cosray-image', {
 				value: { zxx: [item] },
-				field: { name: 'cover', limit: { min: 0, max: 1 }, ...extra },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, caption: true, ...extra },
 				assets,
 			});
+
+		it('shows only the texts the field offers', async () => {
+			const meta = {
+				alt: { zxx: 'A kettle' },
+				caption: { zxx: 'In the brewhouse' },
+				attribution: '© Jane Doe',
+			};
+			const plain = await card({ uid: 'cover', meta }, { caption: false });
+			const offered = await card({ uid: 'cover', meta }, { attribution: true });
+
+			expect(texts(plain.element)).toEqual(['image:alt-text: A kettle']);
+			expect(texts(offered.element)).toEqual([
+				'image:alt-text: A kettle',
+				'image:caption: In the brewhouse',
+				'image:attribution: © Jane Doe',
+			]);
+		});
 
 		it('shows the alt text and caption', async () => {
 			const { element } = await card({
@@ -1112,7 +1181,7 @@ describe('per-use meta', () => {
 			value: {
 				zxx: [{ uid: 'clip', meta: { caption: { de: 'Ein Clip', en: 'A clip' } } }],
 			},
-			field: { name: 'clip', translate: true, limit: { min: 0, max: 1 } },
+			field: { name: 'clip', translate: true, caption: true, limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
 		element.querySelector<HTMLButtonElement>('.cms-file-row .edit')!.click();
@@ -1142,10 +1211,20 @@ describe('per-use meta', () => {
 		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('English');
 	});
 
+	it('offers no edit for a video field without a caption', async () => {
+		const { element } = await media('cosray-video', {
+			value: { zxx: [{ uid: 'clip' }] },
+			field: { name: 'clip', limit: { min: 0, max: 1 } },
+			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
+		});
+
+		expect(element.querySelector('.cms-file-row .edit')).toBeNull();
+	});
+
 	it('edits the caption of a video through its modal', async () => {
 		const { element, changes } = await media('cosray-video', {
 			value: { zxx: [{ uid: 'clip' }] },
-			field: { name: 'clip', limit: { min: 0, max: 1 } },
+			field: { name: 'clip', caption: true, limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
 		expect(element.querySelector('.cms-video video')?.getAttribute('src')).toBe('/media/clip.mp4');
@@ -1173,7 +1252,7 @@ describe('block presentation', () => {
 	async function figure(settings?: HTMLElement, item: FileItem = { uid: 'cover' }) {
 		return media('cosray-image', {
 			value: { zxx: [item] },
-			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block' },
+			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block', caption: true },
 			assets: { cover },
 			...(settings ? { settings } : {}),
 		} as HostPayload);
@@ -1211,7 +1290,7 @@ describe('block presentation', () => {
 	it("shows a neutral image's catalog texts in the site's default locale", async () => {
 		const { element } = await media('cosray-image', {
 			value: { zxx: [{ uid: 'cover' }] },
-			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block' },
+			field: { name: 'image', limit: { min: 0, max: 1 }, presentation: 'block', caption: true },
 			assets: {
 				cover: {
 					...cover,
@@ -1287,7 +1366,7 @@ describe('block presentation', () => {
 		document.body.append(slot);
 		const { element } = await media('cosray-video', {
 			value: { zxx: [{ uid: 'clip' }] },
-			field: { name: 'video', limit: { min: 0, max: 1 }, presentation: 'block' },
+			field: { name: 'video', limit: { min: 0, max: 1 }, presentation: 'block', caption: true },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 			settings: slot,
 		} as HostPayload);

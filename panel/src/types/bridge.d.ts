@@ -1,3 +1,5 @@
+import type { ItemMeta } from './data';
+
 export type ModalOptions = {
 	hideClose?: boolean;
 	label?: string;
@@ -17,6 +19,7 @@ export type UploadResult = {
 	bytes?: number | null;
 	width?: number | null;
 	height?: number | null;
+	meta?: ItemMeta;
 };
 
 export type BridgeSystem = {

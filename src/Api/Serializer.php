@@ -81,7 +81,7 @@ final class Serializer
 			$sizes[$name] = $asset->resizable() ? $asset->sizePath($name) : $asset->path();
 		}
 
-		$credit = $asset->meta['credit'] ?? null;
+		$attribution = $asset->meta['attribution'] ?? null;
 		$focal = $asset->meta['focal'] ?? null;
 
 		return [
@@ -96,7 +96,7 @@ final class Serializer
 			'alt' => $this->localized($asset->metaMap('alt')),
 			'title' => $this->localized($asset->metaMap('title')),
 			'caption' => $this->localized($asset->metaMap('caption')),
-			'credit' => is_string($credit) ? $credit : null,
+			'attribution' => is_string($attribution) ? $attribution : null,
 			'focal' => is_array($focal) ? $focal : null,
 			'sizes' => $sizes,
 		];

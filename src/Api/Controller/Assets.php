@@ -77,7 +77,7 @@ final class Assets
 	/**
 	 * Takes a multipart `file`, an optional `type` (image, video or file,
 	 * otherwise read off the file) and optional `meta` JSON with `alt`,
-	 * `title` and `caption` maps and a `credit`. Identical bytes answer with
+	 * `title` and `caption` maps and an `attribution`. Identical bytes answer with
 	 * the asset already in the catalog.
 	 */
 	public function upload(Request $request, Context $context, Config $config, Database $db): Response

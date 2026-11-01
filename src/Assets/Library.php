@@ -117,7 +117,7 @@ final class Library
 	 * An asset as a picker hands it to the browser: what a control needs to
 	 * show and store it.
 	 *
-	 * @return array{uid: string, filename: string, url: string, thumbUrl: string, previewUrl: string, kind: string, mime: ?string, bytes: ?int, width: ?int, height: ?int}
+	 * @return array{uid: string, filename: string, url: string, thumbUrl: string, previewUrl: string, kind: string, mime: ?string, bytes: ?int, width: ?int, height: ?int, meta: array<string, mixed>}
 	 */
 	public static function item(Asset $asset): array
 	{
@@ -132,6 +132,7 @@ final class Library
 			'bytes' => $asset->bytes,
 			'width' => $asset->width,
 			'height' => $asset->height,
+			'meta' => $asset->meta,
 		];
 	}
 

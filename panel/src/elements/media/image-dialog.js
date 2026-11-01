@@ -22,6 +22,7 @@ import { button, contentLocales, create, replaceMenu, svg, rendition } from './v
  * @property {(item: LibraryItem) => void} picked Makes an asset from the library known to `asset`.
  * @property {(file: File) => Promise<string | null>} upload Resolves to the uid of the new asset,
  *     known to `asset`, or to null once the editor was told what went wrong.
+ * @property {('alt' | 'caption' | 'attribution')[]} texts The texts the field offers.
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
@@ -120,6 +121,7 @@ export function imageDialog({
 	asset,
 	picked,
 	upload,
+	texts,
 	translate,
 	contentLocale,
 	locales,
@@ -199,6 +201,7 @@ export function imageDialog({
 				form = metaFields({
 					item,
 					kind: 'image',
+					texts,
 					translate,
 					contentLocale: locale,
 					locales,

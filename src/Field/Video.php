@@ -8,8 +8,10 @@ use Cosray\Schema\TranslateMode;
 use Cosray\Value;
 use Override;
 
-class Video extends File
+class Video extends File implements Capability\Captionable
 {
+	use Capability\IsCaptionable;
+
 	#[Override]
 	public function control(): Control
 	{

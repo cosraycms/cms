@@ -6,8 +6,8 @@ namespace Cosray\Assets;
 
 /**
  * The editable slice of an asset's `meta` bag: localized text
- * (`alt`/`title`/`caption` as locale => string maps), a scalar `credit`
- * line, and an image `focal` point `{x, y}` clamped to 0..1. Empty
+ * (`alt`/`title`/`caption` as locale => string maps), a scalar
+ * `attribution`, and an image `focal` point `{x, y}` clamped to 0..1. Empty
  * values are dropped so the stored bag never accumulates blank keys, and
  * keys the panel does not manage are carried through untouched.
  */
@@ -19,7 +19,8 @@ final class Meta
 	/**
 	 * Merge a submitted editable patch over the stored bag. The managed
 	 * keys are cleared first, so a field the user emptied is removed
-	 * rather than left at its previous value.
+	 * rather than left at its previous value. An image's title is kept
+	 * unless submitted, as the form no longer offers it.
 	 *
 	 * @param array<string, mixed> $stored the asset's current meta
 	 * @param list<string> $localeIds locale ids accepted as text-map keys
@@ -27,11 +28,15 @@ final class Meta
 	 */
 	public static function apply(array $stored, mixed $input, array $localeIds, bool $image): array
 	{
-		foreach ([...self::TEXT, 'credit', 'focal'] as $key) {
+		$input = is_array($input) ? $input : [];
+
+		foreach ([...self::TEXT, 'attribution', 'focal'] as $key) {
+			if ($key === 'title' && $image && !array_key_exists('title', $input)) {
+				continue;
+			}
+
 			unset($stored[$key]);
 		}
-
-		$input = is_array($input) ? $input : [];
 
 		foreach (self::TEXT as $key) {
 			$map = self::textMap($input[$key] ?? null, $localeIds);
@@ -41,10 +46,10 @@ final class Meta
 			}
 		}
 
-		$credit = is_string($input['credit'] ?? null) ? trim($input['credit']) : '';
+		$attribution = is_string($input['attribution'] ?? null) ? trim($input['attribution']) : '';
 
-		if ($credit !== '') {
-			$stored['credit'] = $credit;
+		if ($attribution !== '') {
+			$stored['attribution'] = $attribution;
 		}
 
 		if ($image) {

@@ -46,10 +46,9 @@ $closeUrl = $screen->url(['file' => null]);
 		'caption' => __('image:caption'),
 	];
 
-	// Alt text describes image content; other kinds have none.
-	if (!$image) {
-		unset($texts['alt']);
-	}
+	// Alt text describes image content; other kinds have none. A file's title
+	// is its display name; an image's has no effect on the page.
+	unset($texts[$image ? 'title' : 'alt']);
 	?>
 	<form
 		class="cms-detail"
@@ -158,13 +157,13 @@ $closeUrl = $screen->url(['file' => null]);
 					</div>
 				<?php endforeach ?>
 				<div class="cms-meta-field">
-					<label for="media-meta-credit"><?= escape(__('image:credit')) ?></label>
+					<label for="media-meta-attribution"><?= escape(__('image:attribution')) ?></label>
 					<input
 						class="cms-input"
 						type="text"
-						id="media-meta-credit"
-						name="meta[credit]"
-						value="<?= escape(is_string($meta['credit'] ?? null) ? $meta['credit'] : '') ?>" />
+						id="media-meta-attribution"
+						name="meta[attribution]"
+						value="<?= escape(is_string($meta['attribution'] ?? null) ? $meta['attribution'] : '') ?>" />
 				</div>
 			</div>
 

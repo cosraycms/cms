@@ -10,8 +10,11 @@ use Cosray\Validation\Shapes;
 use Cosray\Value;
 use Override;
 
-class Image extends File
+class Image extends File implements Capability\Captionable, Capability\Attributable
 {
+	use Capability\IsCaptionable;
+	use Capability\IsAttributable;
+
 	/** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
 	public const array RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'];
 

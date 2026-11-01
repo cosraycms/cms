@@ -1,4 +1,4 @@
-/** @import { FileItem, LocaleMap, Meta } from '../types/data' */
+/** @import { FileItem, ItemMeta, LocaleMap, Meta } from '../types/data' */
 
 /** The locale id of language-neutral values. */
 export const ZXX = 'zxx';
@@ -82,12 +82,17 @@ export function pruneItemMeta(item) {
 		return item;
 	}
 
-	/** @type {Meta} */
+	/** @type {ItemMeta} */
 	const meta = {};
 
-	for (const [key, map] of Object.entries(item.meta)) {
-		if (map && Object.values(map).some((value) => value !== '' && value != null)) {
-			meta[key] = map;
+	for (const [key, value] of Object.entries(item.meta)) {
+		const filled =
+			typeof value === 'string'
+				? value.trim() !== ''
+				: value && Object.values(value).some((entry) => entry !== '' && entry != null);
+
+		if (filled) {
+			meta[key] = value;
 		}
 	}
 

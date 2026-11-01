@@ -20,10 +20,13 @@ use Cosray\Field\Schema\Registry;
 use Cosray\Field\Services;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
+use Cosray\Field\Video;
 use Cosray\Locale;
 use Cosray\Locales;
 use Cosray\Node\Types;
 use Cosray\Node\UrlPaths;
+use Cosray\Schema\Attribution;
+use Cosray\Schema\Caption;
 use Cosray\Schema\Columns;
 use Cosray\Schema\Description;
 use Cosray\Schema\Hidden;
@@ -305,6 +308,36 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->expectExceptionMessage('cannot be used with the capability');
 
 		$this->applyAndGetProperties(new Lines(8), $this->createTextField());
+	}
+
+	public function testImageFieldOffersCaptionAndAttributionOnRequest(): void
+	{
+		$plain = $this->createImageField();
+		$field = $this->createImageField();
+
+		$this->assertFalse($plain->hasCaption());
+		$this->assertFalse($plain->hasAttribution());
+		$this->assertTrue($this->applyAndGetProperties(new Caption(), $field)['caption']);
+		$this->assertTrue($this->applyAndGetProperties(new Attribution(), $field)['attribution']);
+	}
+
+	public function testCaptionOnAFieldWithoutMediaRejects(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot be used with the capability');
+
+		$this->applyAndGetProperties(new Caption(), $this->createTextField());
+	}
+
+	public function testAttributionOnAVideoFieldRejects(): void
+	{
+		$field = new Video('video', $this->createOwner(), new ValueContext('video', []));
+		$field->init(Services::withDefaults());
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot be used with the capability');
+
+		$this->applyAndGetProperties(new Attribution(), $field);
 	}
 
 	public function testWidthCapabilityReturnsWidthProperty(): void

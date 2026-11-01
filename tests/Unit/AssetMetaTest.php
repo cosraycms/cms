@@ -22,7 +22,7 @@ final class AssetMetaTest extends TestCase
 				'alt' => ['de' => ' Sudhaus ', 'en' => 'Brewhouse'],
 				'title' => ['de' => 'Titel'],
 				'caption' => ['de' => 'Bildunterschrift'],
-				'credit' => ' Foto: M. Huber ',
+				'attribution' => ' Foto: M. Huber ',
 				'focal' => ['x' => 0.25, 'y' => 0.75],
 			],
 			['de', 'en'],
@@ -34,7 +34,7 @@ final class AssetMetaTest extends TestCase
 				'alt' => ['de' => 'Sudhaus', 'en' => 'Brewhouse'],
 				'title' => ['de' => 'Titel'],
 				'caption' => ['de' => 'Bildunterschrift'],
-				'credit' => 'Foto: M. Huber',
+				'attribution' => 'Foto: M. Huber',
 				'focal' => ['x' => 0.25, 'y' => 0.75],
 			],
 			$meta,
@@ -48,7 +48,7 @@ final class AssetMetaTest extends TestCase
 			[
 				'alt' => ['de' => '  ', 'en' => 'Only English', 'xx' => 'Rejected'],
 				'title' => ['de' => ''],
-				'credit' => '   ',
+				'attribution' => '   ',
 			],
 			['de', 'en'],
 			true,
@@ -61,13 +61,22 @@ final class AssetMetaTest extends TestCase
 	{
 		$stored = [
 			'alt' => ['de' => 'Alt'],
-			'credit' => 'Old credit',
+			'attribution' => 'Old attribution',
 			'legacy' => 'keep me',
 		];
 
 		$meta = Meta::apply($stored, ['alt' => ['de' => 'New alt']], ['de'], false);
 
 		$this->assertSame(['legacy' => 'keep me', 'alt' => ['de' => 'New alt']], $meta);
+	}
+
+	public function testKeepsAnImagesTitleUnlessSubmitted(): void
+	{
+		$stored = ['title' => ['de' => 'Alter Titel']];
+
+		$this->assertSame($stored, Meta::apply($stored, [], ['de'], true));
+		$this->assertSame([], Meta::apply($stored, ['title' => ['de' => '']], ['de'], true));
+		$this->assertSame([], Meta::apply($stored, [], ['de'], false));
 	}
 
 	public function testClampsFocalAndIgnoresItForNonImages(): void

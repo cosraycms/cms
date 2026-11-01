@@ -35,9 +35,18 @@ export interface Meta {
 	[key: string]: LocaleMap<any>;
 }
 
+/** The per-use meta of a media item, and an asset's catalog defaults. */
+export interface ItemMeta {
+	alt?: LocaleMap<string>;
+	title?: LocaleMap<string>;
+	caption?: LocaleMap<string>;
+	attribution?: string;
+	[key: string]: unknown;
+}
+
 export interface FileItem {
 	uid?: string;
-	meta?: Meta;
+	meta?: ItemMeta;
 }
 
 export interface TranslatedFile extends FileItem {
@@ -56,7 +65,7 @@ export interface AssetInfo {
 	bytes?: number | null;
 	width?: number | null;
 	height?: number | null;
-	meta?: Meta;
+	meta?: ItemMeta;
 }
 
 export type AssetMap = Record<string, AssetInfo>;

@@ -573,6 +573,28 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('From the catalog', $blocks->image()?->caption());
 	}
 
+	public function testImageBlockPrintsTheAttributionOverTheCatalogsAlone(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->image(['uid' => 'blockimg12345', 'meta' => ['attribution' => '© <Own>']]),
+			$this->image(['uid' => 'blockimg67890']),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg', meta: ['attribution' => '© Catalog']);
+		$this->seedAsset('blockimg67890', 'other.jpg', meta: ['attribution' => '© Catalog']);
+
+		$html = $blocks->render(prefix: 'site')->html;
+
+		$this->assertStringContainsString(
+			'<figcaption><small class="site-attribution">© &lt;Own&gt;</small></figcaption>',
+			$html,
+		);
+		$this->assertStringContainsString(
+			'<figcaption><small class="site-attribution">© Catalog</small></figcaption>',
+			$html,
+		);
+		$this->assertSame('© <Own>', $blocks->image()?->attribution());
+	}
+
 	public function testImageBlockSizesTemplateArg(): void
 	{
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'], span: 4)]);

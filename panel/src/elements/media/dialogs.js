@@ -1,6 +1,6 @@
 // The dialogs of the media controls, opened through the window.Cosray bridge.
 
-/** @import { FileItem, Meta, UploadType } from '../../types/data' */
+/** @import { FileItem, ItemMeta, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
@@ -106,10 +106,11 @@ export function libraryDialog(owner, kind, pick) {
  * @property {HTMLElement | undefined} owner
  * @property {FileItem} item
  * @property {'file' | 'video'} kind A video edits its caption, a file its title.
+ * @property {('caption' | 'title')[]} texts
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
- * @property {Meta | undefined} catalog
+ * @property {ItemMeta | undefined} catalog
  * @property {(item: FileItem) => void} apply Receives the draft; cancelling discards it.
  */
 
@@ -124,6 +125,7 @@ export function editDialog({
 	owner,
 	item,
 	kind,
+	texts,
 	translate,
 	contentLocale,
 	locales,
@@ -153,6 +155,7 @@ export function editDialog({
 			const form = metaFields({
 				item: draft,
 				kind,
+				texts,
 				translate,
 				contentLocale,
 				locales,

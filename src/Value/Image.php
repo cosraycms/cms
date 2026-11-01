@@ -87,6 +87,7 @@ class Image extends File
 		return [
 			...$file,
 			'alt' => $this->alt(),
+			'attribution' => $this->attribution(),
 			'link' => $this->link(),
 			'width' => $asset->width,
 			'height' => $asset->height,
@@ -103,5 +104,19 @@ class Image extends File
 	public function alt(): string
 	{
 		return $this->textValue('alt', $this->index);
+	}
+
+	/** Who made the image: per use, else the catalog's. Neutral, as names do not translate. */
+	public function attribution(): string
+	{
+		$own = $this->fileItem($this->index)['meta']['attribution'] ?? null;
+
+		if (is_string($own) && $own !== '') {
+			return $own;
+		}
+
+		$catalog = $this->asset($this->index)?->meta['attribution'] ?? null;
+
+		return is_string($catalog) ? $catalog : '';
 	}
 }

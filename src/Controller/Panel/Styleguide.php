@@ -394,7 +394,9 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $single,
 				'translate' => true,
-				'description' => 'The edit button and the thumbnail open the details with alt text and caption.',
+				'caption' => true,
+				'attribution' => true,
+				'description' => 'The edit button and the thumbnail open the details; this field offers a caption and an attribution.',
 			],
 			[
 				'name' => 'coverEmpty',
@@ -408,6 +410,7 @@ final class Styleguide extends Panel
 				'label' => 'Gallery',
 				'control' => $control,
 				'limit' => $many,
+				'caption' => true,
 				'description' => 'A tile shows its edit and remove buttons on hover and opens the same details; tiles reorder by drag.',
 			],
 			[
@@ -423,6 +426,7 @@ final class Styleguide extends Panel
 				'label' => 'Cover image — read-only',
 				'control' => $control,
 				'limit' => $single,
+				'caption' => true,
 				'immutable' => true,
 			],
 			[
@@ -1064,6 +1068,7 @@ final class Styleguide extends Panel
 		$assets = ['sg-cover' => $plate(28, 'sudhaus-kupferkessel.jpg', 2400, 1600, 862208)];
 		$assets['sg-cover']['meta'] = [
 			'caption' => ['en' => 'Copper kettles in the brewhouse', 'de' => 'Kupferkessel im Sudhaus'],
+			'attribution' => '© Jane Doe',
 		];
 		$assets['sg-clip'] = [
 			'filename' => 'brauerei-rundgang.mp4',

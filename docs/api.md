@@ -92,7 +92,7 @@ The resolved view, the default, adds `fields`: every value resolved for the loca
 | Date, Time, DateTime | `YYYY-MM-DD`, `HH:MM`, or UTC RFC 3339; null when unset |
 | Youtube | `{id, ratio}`, like `16/9`, or null |
 | File, Video | `{uid, url, filename, mime, bytes, title, caption}`, or null |
-| Image | The file members plus `alt`, `link`, `width`, `height`, `focal`, and `sizes`, a URL for every [named size](media.md#urls-and-image-sizes) |
+| Image | The file members plus `alt`, `attribution`, `link`, `width`, `height`, `focal`, and `sizes`, a URL for every [named size](media.md#urls-and-image-sizes) |
 | Files, Images | A list of those objects |
 | Reference | A list of `{uid}` |
 | Entries | A list of `{uid, type, fields}`, `type` naming the row type by handle |
@@ -200,9 +200,9 @@ Requesting a page URL itself with `Accept: application/json` answers with the sa
 
 ## Assets
 
-`GET /api/assets/{uid}` answers with a catalog entry: `uid`, `url`, `filename`, `kind`, `mime`, `bytes`, `width`, `height`, `alt`, `title` and `caption` in the request locale, `credit`, `focal`, and `sizes`. Anyone may read it, as its file is public anyway.
+`GET /api/assets/{uid}` answers with a catalog entry: `uid`, `url`, `filename`, `kind`, `mime`, `bytes`, `width`, `height`, `alt`, `title` and `caption` in the request locale, `attribution`, `focal`, and `sizes`. Anyone may read it, as its file is public anyway.
 
-`GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and a `credit`. It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.
+`GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and an `attribution`. It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.
 
 ## Previews
 
