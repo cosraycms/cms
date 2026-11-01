@@ -1036,6 +1036,10 @@
 		& .preview {
 			height: min(16rem, 35dvh);
 		}
+
+		& .facts {
+			grid-template-columns: minmax(0, 1fr);
+		}
 	}
 }
 

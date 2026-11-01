@@ -262,6 +262,6 @@ Upload results include catalog identity and preview information; persist `{uid}`
 
 Escape and a gesture starting and ending on the backdrop dismiss the dialog; `hideClose` hides only the close button. Dismissal cancels confirmations. Nested dialogs return focus to the underlying dialog; a renderer failure must not leave a modal host behind. Close before an action that focuses new content so restoration cannot override it.
 
-Current internal parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`; `data-dialog-focus` selects initial focus. They are shared markup, not an additional plugin slot API. Server-rendered settings stay inside their editor form and retain live values on closure; media metadata dialogs keep their own draft and Apply/Cancel behavior.
+Current internal parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`; `data-dialog-focus` selects initial focus. They are shared markup, not an additional plugin slot API. Server-rendered settings stay inside their editor form and retain live values on closure; media metadata dialogs keep their own draft and Apply/Cancel behavior. An image's details dialog, the only place its per-use texts are edited, holds one draft per image of a gallery and applies them together, including a replaced image.
 
 [dialogs.js](../panel/src/lib/dialogs.js) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. Browser `beforeunload`, dirty-navigation, and `hx-confirm` prompts remain separate synchronous paths.
