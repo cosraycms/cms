@@ -1059,6 +1059,131 @@
 		}
 	}
 
+	& .stage-tools {
+		display: flex;
+		flex: 0 0 auto;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--cms-space-2) var(--cms-space-4);
+		min-height: var(--cms-control-height);
+
+		& .cms-content-locales {
+			flex: 0 1 18rem;
+		}
+	}
+
+	& .ratio {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+
+		&[hidden] {
+			display: none;
+		}
+
+		& select {
+			width: auto;
+		}
+	}
+
+	/* Above the marker, and clipped to the image, which the handles are not. */
+	& .shade {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
+	& .hole {
+		position: absolute;
+		box-shadow: 0 0 0 100vmax rgb(0 0 0 / 55%);
+	}
+
+	& .marker[hidden] {
+		display: none;
+	}
+
+	& .crop-box {
+		position: absolute;
+		outline: 1px solid #fff;
+		box-shadow: 0 0 0 1px rgb(0 0 0 / 50%);
+		cursor: move;
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+		}
+	}
+
+	& .handle {
+		position: absolute;
+		width: 0.875rem;
+		height: 0.875rem;
+		border: 2px solid #fff;
+		border-radius: 2px;
+		background: rgb(0 0 0 / 70%);
+		transform: translate(-50%, -50%);
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+
+		&.nw {
+			left: 0;
+			top: 0;
+			cursor: nwse-resize;
+		}
+
+		&.n {
+			left: 50%;
+			top: 0;
+			cursor: ns-resize;
+		}
+
+		&.ne {
+			left: 100%;
+			top: 0;
+			cursor: nesw-resize;
+		}
+
+		&.e {
+			left: 100%;
+			top: 50%;
+			cursor: ew-resize;
+		}
+
+		&.se {
+			left: 100%;
+			top: 100%;
+			cursor: nwse-resize;
+		}
+
+		&.s {
+			left: 50%;
+			top: 100%;
+			cursor: ns-resize;
+		}
+
+		&.sw {
+			left: 0;
+			top: 100%;
+			cursor: nesw-resize;
+		}
+
+		&.w {
+			left: 0;
+			top: 50%;
+			cursor: ew-resize;
+		}
+	}
+
 	& .focus-bar {
 		display: flex;
 		flex: 0 0 auto;
@@ -1260,4 +1385,20 @@
 
 .cms-modal-edit-image-locales {
 	margin-bottom: var(--cms-space-4);
+}
+
+/* A crop's part of an image, whatever box it is shown in. */
+.cms-crop-window {
+	position: relative;
+	width: 100%;
+	aspect-ratio: var(--crop-ratio);
+}
+
+.cms-gallery .picture {
+	container-type: size;
+
+	& .cms-crop-window {
+		width: min(100cqw, 100cqh * var(--crop-ratio));
+		border-radius: var(--cms-radius);
+	}
 }

@@ -25,6 +25,7 @@ import { button, contentLocales, create, replaceMenu, svg } from './views.js';
  * @property {(file: File) => Promise<string | null>} upload Resolves to the uid of the new asset,
  *     known to `asset`, or to null once the editor was told what went wrong.
  * @property {('alt' | 'caption' | 'attribution')[]} texts The texts the field offers.
+ * @property {boolean} cropping Whether the site can deliver a crop.
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
@@ -113,6 +114,17 @@ function facts(info) {
 }
 
 /**
+ * Whether a rendition can cut the image: not a vector, and not a GIF, whose
+ * animation only survives as a copy of the original.
+ *
+ * @param {AssetInfo | undefined} info
+ * @returns {boolean}
+ */
+function croppable(info) {
+	return ['image/jpeg', 'image/png', 'image/webp'].includes(info?.mime ?? '');
+}
+
+/**
  * @param {ImageDialogOptions} options
  * @returns {{ setLocale: (locale: string) => void, closed: Promise<void> }}
  */
@@ -124,6 +136,7 @@ export function imageDialog({
 	picked,
 	upload,
 	texts,
+	cropping,
 	translate,
 	contentLocale,
 	locales,
@@ -131,6 +144,8 @@ export function imageDialog({
 	apply,
 }) {
 	let at = index;
+	/** @type {'focus' | 'crop'} */
+	let tool = 'focus';
 	let locale = contentLocale;
 	let open = true;
 	/** @type {Map<number, FileItem>} */
@@ -205,9 +220,12 @@ export function imageDialog({
 						info,
 						source,
 						readonly,
+						cropping: cropping && !readonly && croppable(info),
+						mode: tool,
+						modeChanged: (next) => (tool = next),
 						change: (patch) => edit(target, patch),
 					});
-					stage.replaceChildren(shown.element, shown.bar);
+					stage.replaceChildren(...shown.nodes);
 				} else {
 					const preview = create('div', 'preview');
 					preview.append(create('span', 'plate', extension(name)));

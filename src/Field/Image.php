@@ -61,6 +61,13 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 		return $this->getFileStructure('image', $value);
 	}
 
+	/** Delivering a crop takes a signed URL, so a site without a secret offers none. */
+	#[Override]
+	public function properties(): array
+	{
+		return [...parent::properties(), 'cropping' => $this->owner->config()->app->secret !== null];
+	}
+
 	/**
 	 * The gallery settings the image element keeps as field meta: the
 	 * tiles' aspect ratio and whether they crop to it. Other meta keys

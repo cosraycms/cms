@@ -8,6 +8,7 @@
 import { ZXX } from '../../lib/content.js';
 import { filled, resolveTextFallback } from '../../lib/fallback.js';
 import { icon } from '../../lib/icons.js';
+import { showPart } from '../../lib/image-geometry.js';
 import { assetLine, extension, fileIcon, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 
@@ -57,6 +58,28 @@ export function rendition(source, original) {
 	}
 
 	return image;
+}
+
+/**
+ * An image as its use shows it: the crop's part of it in a box of that shape.
+ *
+ * @param {HTMLImageElement} image
+ * @param {FileItem} item
+ * @param {AssetInfo | undefined} info
+ * @returns {HTMLElement}
+ */
+export function cropped(image, item, info) {
+	const crop = item.meta?.crop;
+
+	if (!crop) return image;
+
+	const box = create('div', 'cms-crop-window');
+	const ratio = info?.width && info.height ? info.width / info.height : 1;
+	box.style.setProperty('--crop-ratio', String((crop.w * ratio) / crop.h));
+	showPart(box, image, crop);
+	box.append(image);
+
+	return box;
 }
 
 /**
@@ -449,12 +472,15 @@ export function imageCard({
 	picture.addEventListener('click', edit);
 
 	if (info?.width && info.height) {
-		picture.style.setProperty('--thumb-ratio', String(info.width / info.height));
+		const crop = item.meta?.crop ?? { w: 1, h: 1 };
+		picture.style.setProperty(
+			'--thumb-ratio',
+			String((info.width * crop.w) / (info.height * crop.h)),
+		);
 	}
 
 	if (thumb) {
-		const image = rendition(thumb, info?.url);
-		picture.append(image);
+		picture.append(cropped(rendition(thumb, info?.url), item, info));
 	} else {
 		picture.append(create('span', 'plate', extension(filename)));
 	}
@@ -588,6 +614,7 @@ export function effectiveAttribution(item, info) {
  * @param {object} options
  * @param {'image' | 'video'} options.type
  * @param {AssetInfo | undefined} options.info
+ * @param {FileItem} options.item
  * @param {string} options.filename
  * @param {string} options.caption
  * @param {string} options.attribution
@@ -602,6 +629,7 @@ export function effectiveAttribution(item, info) {
 export function figure({
 	type,
 	info,
+	item,
 	filename,
 	caption,
 	attribution,
@@ -626,8 +654,7 @@ export function figure({
 		const src = info?.previewUrl ?? info?.url ?? '';
 
 		if (src) {
-			const image = rendition(src, info?.url);
-			frame.append(image);
+			frame.append(cropped(rendition(src, info?.url), item, info));
 		} else {
 			frame.append(create('span', 'plate', extension(filename)));
 		}

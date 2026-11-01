@@ -605,6 +605,163 @@ describe('image details', () => {
 		});
 	});
 
+	describe('crop', () => {
+		const box = () => document.querySelector<HTMLElement>('.cms-modal .crop-box')!;
+		const frame = () => document.querySelector<HTMLElement>('.cms-modal .frame')!;
+		const status = () => document.querySelector('.cms-modal .focus-status .text')?.textContent;
+		const removal = () => document.querySelector<HTMLButtonElement>('.cms-modal .reset')!;
+		const jpeg = { ...assets, cover: { ...assets.cover, mime: 'image/jpeg' } };
+
+		async function cropping(item: FileItem = { uid: 'cover' }, extra: object = {}) {
+			const opened = await media('cosray-image', {
+				value: { zxx: [item] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, cropping: true, ...extra },
+				assets: jpeg,
+			});
+			opened.element.querySelector<HTMLButtonElement>('.cms-image-card .edit')?.click();
+			await tick();
+			document.querySelector<HTMLButtonElement>('.cms-modal [data-mode="crop"]')?.click();
+
+			return opened;
+		}
+
+		function drag(target: Element, from: [number, number], to: [number, number]) {
+			frame().getBoundingClientRect = () =>
+				({ left: 0, top: 0, width: 100, height: 100 }) as DOMRect;
+			target.dispatchEvent(
+				new MouseEvent('pointerdown', {
+					clientX: from[0],
+					clientY: from[1],
+					button: 0,
+					bubbles: true,
+				}),
+			);
+			frame().dispatchEvent(new MouseEvent('pointermove', { clientX: to[0], clientY: to[1] }));
+			frame().dispatchEvent(new MouseEvent('pointerup', {}));
+		}
+
+		it('offers the tool only where the site can deliver it', async () => {
+			await details();
+			expect(document.querySelector('.cms-modal [data-mode="crop"]')).toBeNull();
+			document.querySelector<HTMLButtonElement>('.cms-modal [data-dialog-close]')?.click();
+			await tick();
+
+			await media('cosray-image', {
+				value: { zxx: [{ uid: 'gif' }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, cropping: true },
+				assets: { gif: { ...assets.cover, mime: 'image/gif' } },
+			});
+			document.querySelector<HTMLButtonElement>('.cms-image-card .edit')!.click();
+			await tick();
+			expect(document.querySelector('.cms-modal [data-mode="crop"]')).toBeNull();
+		});
+
+		it('draws a crop on the image', async () => {
+			const { changes } = await cropping();
+
+			expect(status()).toBe('image:crop-hint');
+			drag(frame(), [10, 20], [60, 70]);
+			expect(status()).toBe('1200 × 800 px');
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+				crop: { x: 0.1, y: 0.2, w: 0.5, h: 0.5 },
+			});
+		});
+
+		it('takes a click for a click', async () => {
+			const { changes } = await cropping();
+
+			drag(frame(), [10, 20], [10, 20]);
+			await action('common:apply');
+
+			expect(changes).not.toHaveBeenCalled();
+		});
+
+		it('moves and resizes a crop by pointer and keys', async () => {
+			const { changes } = await cropping({
+				uid: 'cover',
+				meta: { crop: { x: 0.1, y: 0.1, w: 0.5, h: 0.5 } },
+			});
+
+			drag(box(), [30, 30], [40, 30]);
+			drag(box().querySelector('.se')!, [70, 60], [80, 70]);
+			box()
+				.querySelector('.nw')!
+				.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+			box().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+				crop: { x: 0.21, y: 0.11, w: 0.59, h: 0.6 },
+			});
+		});
+
+		it('fits the crop to a chosen shape and keeps to it', async () => {
+			const { changes } = await cropping();
+			const select = document.querySelector<HTMLSelectElement>('.cms-modal .ratio select')!;
+
+			select.value = '1/1';
+			select.dispatchEvent(new Event('change'));
+			await action('common:apply');
+
+			// Square on a 3:2 image: all of its height and two thirds of its width.
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+				crop: { x: 0.1667, y: 0, w: 0.6667, h: 1 },
+			});
+		});
+
+		it('removes the crop', async () => {
+			const { changes } = await cropping({
+				uid: 'cover',
+				meta: { crop: { x: 0, y: 0, w: 0.5, h: 0.5 } },
+			});
+
+			removal().click();
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0]).toEqual({ uid: 'cover' });
+		});
+
+		it('keeps its draft and tool while stepping through a gallery', async () => {
+			const { element, changes } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'one' }, { uid: 'two' }] },
+				field: { name: 'gallery', cropping: true },
+				assets: { one: jpeg.cover, two: jpeg.cover },
+			});
+			element.querySelector<HTMLButtonElement>('.cms-gallery .edit')!.click();
+			await tick();
+			document.querySelector<HTMLButtonElement>('.cms-modal [data-mode="crop"]')!.click();
+			drag(frame(), [0, 0], [50, 50]);
+			document.querySelector<HTMLButtonElement>('.cms-modal .step.next')!.click();
+
+			expect(status()).toBe('image:crop-hint');
+
+			document.querySelector<HTMLButtonElement>('.cms-modal .step.prev')!.click();
+
+			expect(status()).toBe('1200 × 800 px');
+
+			await action('common:apply');
+			expect(changes.mock.lastCall?.[0].zxx[0].meta?.crop).toEqual({ x: 0, y: 0, w: 0.5, h: 0.5 });
+			expect(changes.mock.lastCall?.[0].zxx[1]).toEqual({ uid: 'two' });
+		});
+
+		it('shows the crop on the card', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { crop: { x: 0.5, y: 0, w: 0.5, h: 1 } } }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 } },
+				assets,
+			});
+			const thumb = element.querySelector<HTMLElement>('.cms-image-card .thumb')!;
+			const image = thumb.querySelector<HTMLImageElement>('.cms-crop-window img')!;
+
+			// Half of a 3:2 image is 3:4.
+			expect(thumb.style.getPropertyValue('--thumb-ratio')).toBe('0.75');
+			expect(image.style.width).toBe('200%');
+			expect(image.style.left).toBe('-100%');
+		});
+	});
+
 	describe('card texts', () => {
 		const texts = (element: HTMLElement) =>
 			[...element.querySelectorAll('.cms-image-card .texts div')].map(

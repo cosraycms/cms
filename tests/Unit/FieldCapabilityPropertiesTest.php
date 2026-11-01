@@ -321,6 +321,11 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertTrue($this->applyAndGetProperties(new Attribution(), $field)['attribution']);
 	}
 
+	public function testImageFieldOffersACropOnlyWithASecret(): void
+	{
+		$this->assertFalse($this->createImageField()->properties()['cropping']);
+	}
+
 	public function testCaptionOnAFieldWithoutMediaRejects(): void
 	{
 		$this->expectException(RuntimeException::class);

@@ -396,6 +396,7 @@ final class Styleguide extends Panel
 				'translate' => true,
 				'caption' => true,
 				'attribution' => true,
+				'cropping' => true,
 				'description' => 'The edit button and the thumbnail open the details; this field offers a caption and an attribution.',
 			],
 			[
@@ -411,6 +412,7 @@ final class Styleguide extends Panel
 				'control' => $control,
 				'limit' => $many,
 				'caption' => true,
+				'cropping' => true,
 				'description' => 'A tile shows its edit and remove buttons on hover and opens the same details; tiles reorder by drag.',
 			],
 			[

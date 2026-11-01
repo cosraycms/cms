@@ -46,6 +46,7 @@ import {
  * @property {string} [presentation] `block` shows a filled field as content alone.
  * @property {boolean} [caption] Offers a caption per use.
  * @property {boolean} [attribution] Offers an attribution per use.
+ * @property {boolean} [cropping] The site can deliver a crop.
  */
 
 /**
@@ -609,6 +610,7 @@ class MediaControl extends HTMLElement {
 		const shown = figure({
 			type,
 			info,
+			item,
 			filename: info?.filename ?? item.uid ?? '',
 			caption: captioned
 				? effectiveText('caption', item, info, translate, this.#locale, locales)
@@ -950,6 +952,7 @@ class MediaControl extends HTMLElement {
 					alertDialog(this, message),
 				),
 			texts: this.#imageTexts,
+			cropping: this.field.cropping ?? false,
 			translate: this.#translate,
 			contentLocale: this.#locale,
 			locales: this.locales,

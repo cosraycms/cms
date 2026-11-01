@@ -7,10 +7,11 @@
 import Sortable from 'sortablejs';
 import { ZXX } from '../../lib/content.js';
 import { RATIOS, readRatio } from '../../lib/gallery.js';
+import { focalInCrop } from '../../lib/image-geometry.js';
 import { extension } from '../../lib/library.js';
 import { __, __n } from '../../lib/locale.js';
 import { galleryFold } from './gallery-fold.js';
-import { button, create, rendition } from './views.js';
+import { button, create, cropped, rendition } from './views.js';
 
 let ids = 0;
 
@@ -85,10 +86,11 @@ export function galleryView(options) {
 			const focal = item.meta?.focal ?? info?.meta?.focal;
 
 			if (focal) {
-				image.style.objectPosition = `${focal.x * 100}% ${focal.y * 100}%`;
+				const inside = focalInCrop(item.meta?.crop, focal) ?? focal;
+				image.style.objectPosition = `${inside.x * 100}% ${inside.y * 100}%`;
 			}
 
-			picture.append(image);
+			picture.append(cropped(image, item, info));
 		} else {
 			picture.append(create('span', 'plate', extension(filename)));
 		}
