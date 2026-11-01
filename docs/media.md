@@ -4,7 +4,7 @@ Cosray stores uploads in a shared asset catalog. Fields reference catalog items 
 
 ## Stored values and imports
 
-Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-use metadata can override catalog metadata; image `alt()`, `title()`, and `caption()` resolve those fallbacks. Serialized content includes an `assets` map for resolving UIDs into URLs and preview metadata.
+Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-use metadata can override catalog metadata, as described under [per-use texts](#per-use-texts). Serialized content includes an `assets` map for resolving UIDs into URLs and preview metadata.
 
 [Assets\Ingest](../src/Assets/Ingest.php) catalogs bytes and a filename without an HTTP request or session. It shares upload validation, SVG sanitization, and hash deduplication with the HTTP endpoint; imports can pass an actor and initial metadata. Rejections throw `Cosray\Exception\IngestError`. Removing a field reference does not delete the asset.
 
@@ -40,6 +40,61 @@ $document = new Normalizer()->normalize($documents['intro:en']);
 
 Normalize and validate converted documents before persistence when the surrounding migration does not already do so. See [richtext storage](richtext-format.md) for the envelope and migration requirements.
 
+## Per-use texts
+
+Each text has one job:
+
+| Text | Purpose | Shape |
+| --- | --- | --- |
+| Alt text | Describes an image for screen readers | Per language |
+| Caption | Shown with an image or video | Per language, a [small richtext](richtext-format.md#captions) |
+| Attribution | Names who made an image | One neutral string, as names do not translate |
+| Title | A file's display name | Per language |
+
+An editor can set each one per use, and an empty per-use text falls back to the value in the media screen, which the details dialog shows as a placeholder. Images no longer offer a title: a stored one stays, still fills in for a missing alt text, and a real alt text overrides it.
+
+A plain image field offers only the alt text. Declare the others on the field when its template prints them:
+
+```php
+use Cosray\Field\Image;
+use Cosray\Schema\Attribution;
+use Cosray\Schema\Caption;
+use Cosray\Schema\Label;
+
+#[Label('Cover'), Caption, Attribution]
+public Image $cover;
+```
+
+```php
+<?= $page->cover->size('card')->tag() ?>
+<figcaption>
+    <?= $page->cover->caption() ?>
+    <small><?= $page->cover->attribution() ?></small>
+</figcaption>
+```
+
+`#[Caption]` also applies to video fields. Without an attribute the input is hidden, nothing stored is lost, and the methods still return stored and catalog values. `caption()` returns escaped HTML as `Cosray\Markup`, which templates print as is; `captionText()` gives plain text.
+
+## Focal point and crop
+
+The details dialog sets both on the picture itself. A focal point has a default in the media screen that a use can override; a crop belongs to the use alone. Both are fractions of the image as displayed, so they hold for every size and for a rotated JPEG, and the focal point is relative to the whole image, so another crop keeps it:
+
+```json
+{
+	"uid": "...",
+	"meta": {
+		"focal": { "x": 0.31, "y": 0.2 },
+		"crop": { "x": 0.1, "y": 0.05, "w": 0.8, "h": 0.6 }
+	}
+}
+```
+
+Neither touches the original. A crop applies to every URL of the image: `$image->url()` gives the crop at full resolution, and `$image->size('card')` crops first and then sizes. A focal point decides what a size in `crop` mode keeps, overriding its `pos`. For an image cut by CSS, `$image->position()` gives the `object-position` declaration, or an empty string without a point; `tag()` and the image blocks print it. The window moves by the meaning of `object-position` in all of these, so the dialog's previews, CSS and renditions agree.
+
+SVGs have no renditions, so they get a focal point but no crop. GIFs do not offer a crop either, as an animated one only survives as a copy of its original.
+
+A crop is presentation, not redaction. The original stays public at its asset URL, and `tag()` prints that URL as `data-path-original`. To remove something from a picture, edit the file and upload it again.
+
 ## URLs and image sizes
 
 Originals live below `{path.public}{path.assets}/{uid[:2]}/{uid}/{slug}`. The slug comes from the original filename; the catalog retains that original name. Identical bytes on the same disk reuse the existing asset.
@@ -59,7 +114,9 @@ Each definition has one mode: `width`, `height`, `long-side`, `short-side` (posi
 
 Templates call `$image->size('card')`. SVGs and other non-resizable assets keep their original URL. Unknown size names, missing assets, and stale filenames do not generate arbitrary renditions. Existing files are not regenerated merely because a size definition changes; remove the affected cached renditions deliberately when deploying such a change.
 
-Resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: their URLs redirect to the original, which is heavier but still shows, and the failure is logged.
+A use's crop or focal point adds a variant to the rendition's name: `{stem}-{size}~{recipe}~{signature}{ext}`. The signature is an HMAC with `app.secret`, so only URLs the server minted generate files, and tampering answers 404. A focal point only changes the name of a size in `crop` mode, so other sizes keep sharing one file. Changing a crop or focal point leaves the old rendition behind in the asset's cache directory, where it does no harm. Without `app.secret` there are no variants: images stay whole, sizes in `crop` mode ignore the focal point, and the dialog offers no crop.
+
+Resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: their URLs redirect to the original, which is heavier but still shows, uncropped, and the failure is logged. A crop costs no extra memory, as the rendition is copied directly out of the decoded original.
 
 Block image ladders, responsive `sizes`, gallery ratios, and spacing are documented in [Blocks](blocks.md#rendering).
 

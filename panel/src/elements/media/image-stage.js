@@ -260,6 +260,7 @@ export function imageStage({ item, info, source, readonly, cropping, mode, modeC
 		if (crop) place(hole, crop);
 
 		place(box, crop ?? WHOLE);
+		box.classList.toggle('is-whole', !crop);
 
 		if (tool === 'crop') {
 			reset.hidden = !crop;

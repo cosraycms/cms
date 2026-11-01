@@ -94,3 +94,15 @@ A single choice replaces the value, closes the dropdown, and keeps input focus. 
 The content-language control uses radio-group keys when segmented and native select keys when rendered as a select. It has no panel shortcut. Validation can switch to the locale of an error. Escape in an overlay inspector closes it and restores its opener.
 
 Fallback previews are display-only, with asymmetric block previews inert rather than extra editing stops. Focus and add actions still target the selected locale's empty value. See [fallback behavior](controls.md#content-language-and-fallback-previews).
+
+## Image details
+
+The picture in [image-stage.js](../panel/src/elements/media/image-stage.js) takes the keys of whichever tool is active. Each arrow moves by 1% of the image, with Shift by 10%.
+
+| Focus on             | Arrows           |
+| -------------------- | ---------------- |
+| Focal point marker   | Move the point   |
+| Crop frame           | Move the crop    |
+| A corner of the crop | Move that corner |
+
+The marker is a tab stop before a point is set, and shows while focused. The edge handles of the crop take the pointer only, as eight more tab stops would add length rather than reach.

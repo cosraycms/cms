@@ -50,13 +50,13 @@ A field's `#[Allows(Quote::class)]` makes the type available without separate re
 | --- | --- |
 | `RichText` | Structured richtext |
 | `Heading` | Text and a heading-level option |
-| `Image` | Single image in a figure, optional caption, responsive image ladder |
+| `Image` | Single image in a figure, optional caption and attribution, responsive image ladder |
 | `Images` | Gallery with ratio/crop settings |
 | `Video` | Video player |
 | `Youtube` | Video ID and aspect-ratio metadata |
 | `Iframe` | Trusted embed code, rendered raw |
 
-Text and media fields support translation. The heading level, YouTube ID, and iframe code are neutral. Per-use image metadata falls back to the catalog; galleries expose captions to templates but do not render them in the default gallery markup.
+Text and media fields support translation. The heading level, YouTube ID, and iframe code are neutral. Per-use image metadata falls back to the catalog, and an image's crop and focal point apply to its renditions and `object-position`; see [focal point and crop](media.md#focal-point-and-crop). Only the `Image` block offers a caption and an attribution, as the others' default markup prints neither. A site's own block can declare them with [`#[Caption]` and `#[Attribution]`](media.md#per-use-texts).
 
 ### Gallery settings
 

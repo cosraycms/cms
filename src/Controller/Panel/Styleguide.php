@@ -400,6 +400,14 @@ final class Styleguide extends Panel
 				'description' => 'The edit button and the thumbnail open the details; this field offers a caption and an attribution.',
 			],
 			[
+				'name' => 'coverPlain',
+				'label' => 'Cover image — alt text only',
+				'control' => $control,
+				'limit' => $single,
+				'cropping' => true,
+				'description' => 'A plain image field offers no caption or attribution. Its focal point comes from the media screen.',
+			],
+			[
 				'name' => 'coverEmpty',
 				'label' => 'Cover image — empty, required',
 				'control' => $control,
@@ -991,6 +999,8 @@ final class Styleguide extends Panel
 		}
 
 		$gallery[2]['meta'] = ['alt' => ['zxx' => 'Bottling line at full speed']];
+		$gallery[3]['meta'] = ['focal' => ['x' => 0.75, 'y' => 0.25]];
+		$gallery[4]['meta'] = ['crop' => ['x' => 0.25, 'y' => 0.25, 'w' => 0.5, 'h' => 0.5]];
 
 		return [
 			'cover' => [
@@ -1004,6 +1014,7 @@ final class Styleguide extends Panel
 					]],
 				],
 			],
+			'coverPlain' => ['value' => ['zxx' => [['uid' => 'sg-cover']]]],
 			'coverEmpty' => ['value' => ['zxx' => []]],
 			'coverReadonly' => [
 				'value' => [
@@ -1071,6 +1082,7 @@ final class Styleguide extends Panel
 		$assets['sg-cover']['meta'] = [
 			'caption' => ['en' => 'Copper kettles in the brewhouse', 'de' => 'Kupferkessel im Sudhaus'],
 			'attribution' => '© Jane Doe',
+			'focal' => ['x' => 0.3, 'y' => 0.4],
 		];
 		$assets['sg-clip'] = [
 			'filename' => 'brauerei-rundgang.mp4',

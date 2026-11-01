@@ -1089,7 +1089,7 @@
 		}
 	}
 
-	/* Above the marker, and clipped to the image, which the handles are not. */
+	/* Clipped to the image, which the handles are not. */
 	& .shade {
 		position: absolute;
 		inset: 0;
@@ -1118,6 +1118,11 @@
 
 		&:focus-visible {
 			outline: var(--cms-focus-outline);
+		}
+
+		/* Nothing to move yet: a drag draws. */
+		&.is-whole {
+			cursor: crosshair;
 		}
 	}
 

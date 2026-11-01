@@ -89,6 +89,10 @@ Declare classes through configuration:
 
 Without declared text styles, the editor offers none and the writer rejects style marks with undeclared classes. Toolbar configuration controls feature exposure, not stored semantics; hiding a tool should preserve existing content on round-trip. See [richtext tools](controls.md#richtext-tools).
 
+## Captions
+
+A [caption](media.md#per-use-texts) is a document restricted to one paragraph of text, with only the `bold`, `italic`, and `strike` marks and no attributes. It sits in a media item's `meta` per language, without an envelope. A plain string stays valid and reads as plain text until it is next saved. [Richtext\Inline](../src/Richtext/Inline.php) holds the rules; its HTML has no surrounding `<p>`.
+
 ## Validation and rendering
 
 Writers reject unknown node/mark types, invalid attributes, and invalid nesting, including marks in code blocks. Readers tolerate unknown vocabulary: the renderer skips unknown node types, ignores unknown marks, and reports notices. Tolerance is degradation, not a guarantee that an older editor can round-trip a newer document without loss.
