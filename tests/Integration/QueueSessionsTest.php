@@ -26,6 +26,9 @@ use Cosray\Tests\IntegrationTestCase;
  */
 final class QueueSessionsTest extends IntegrationTestCase
 {
+	/** The suite's own memory, far higher under coverage, must not stop these before their limit. */
+	private const int NO_MEMORY_LIMIT = 1024 * 1024;
+
 	protected bool $useTransactions = false;
 	private string $name;
 
@@ -108,13 +111,23 @@ final class QueueSessionsTest extends IntegrationTestCase
 		$queue->push(RecordingJob::class, ['n' => 3], queue: $this->name);
 
 		$jobs = new Buffer();
-		$this->assertSame(0, $this->daemon()(new Io($jobs), queue: $this->name, maxJobs: 2));
+		$this->assertSame(0, $this->daemon()(
+			new Io($jobs),
+			queue: $this->name,
+			memory: self::NO_MEMORY_LIMIT,
+			maxJobs: 2,
+		));
 		$this->assertSame('Ran 2 job(s), stopped by its job limit.', trim($jobs->output()));
 		$this->assertSame([1, 2], array_column(RecordingJob::$handled, 'n'));
 
 		$time = new Buffer();
 		$start = hrtime(true);
-		$this->assertSame(0, $this->daemon()(new Io($time), queue: $this->name, maxTime: 1));
+		$this->assertSame(0, $this->daemon()(
+			new Io($time),
+			queue: $this->name,
+			memory: self::NO_MEMORY_LIMIT,
+			maxTime: 1,
+		));
 		$this->assertSame('Ran 1 job(s), stopped by its time limit.', trim($time->output()));
 		$this->assertGreaterThanOrEqual(0.9, (hrtime(true) - $start) / 1e9);
 	}

@@ -88,7 +88,7 @@ final class AssetsImageTest extends TestCase
 		$assets = new Assets(new Config($this->root));
 		$limit = (string) ini_get('memory_limit');
 		// @mago-expect lint:no-ini-set
-		ini_set('memory_limit', (string) (memory_get_usage(true) + (8 * 1024 * 1024)));
+		ini_set('memory_limit', (string) (memory_get_usage(true) + (32 * 1024 * 1024)));
 
 		try {
 			$this->expectException(RuntimeException::class);
