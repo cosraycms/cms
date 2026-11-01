@@ -195,12 +195,13 @@
 	--cms-color-canvas: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-950));
 	--cms-color-surface: light-dark(var(--cms-color-white), var(--cms-color-neutral-900));
 	--cms-color-surface-sunken: light-dark(
-		var(--cms-color-neutral-200),
+		var(--cms-color-neutral-100),
 		var(--cms-color-neutral-975)
 	);
 	--cms-color-surface-muted: light-dark(var(--cms-color-neutral-50), var(--cms-color-neutral-925));
 	--cms-color-surface-raised: light-dark(var(--cms-color-white), var(--cms-color-neutral-875));
 	--cms-color-rail: var(--cms-color-surface);
+	--cms-color-checker: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-975));
 
 	/**
 	 * Semantic — text
@@ -441,7 +442,7 @@
 	/**
 	 * Component — switch
 	 */
-	--cms-switch-bg: var(--cms-color-surface-sunken);
+	--cms-switch-bg: light-dark(var(--cms-color-neutral-200), var(--cms-color-neutral-975));
 
 	/**
 	 * Component — select

@@ -961,7 +961,7 @@
 		border: 1px solid var(--cms-color-border);
 		border-radius: var(--cms-radius-lg);
 		background: repeating-conic-gradient(
-				var(--cms-color-surface-sunken) 0 25%,
+				var(--cms-color-checker) 0 25%,
 				var(--cms-color-surface) 0 50%
 			)
 			0 0 / 1.5rem 1.5rem;
