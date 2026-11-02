@@ -8,7 +8,6 @@ use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Sizes;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
-use Gumlet\ImageResize;
 
 /**
  * @internal
@@ -48,7 +47,7 @@ final class SizesTest extends TestCase
 			'big' => ['width' => 3000, 'enlarge' => true],
 		]);
 
-		$this->assertSame(ImageResize::CROPTOP, $sizes->get('thumb')->pos);
+		$this->assertSame(0.0, $sizes->get('thumb')->pos);
 		$this->assertSame(75, $sizes->get('thumb')->quality);
 		$this->assertTrue($sizes->get('big')->enlarge);
 		$this->assertFalse($sizes->get('thumb')->enlarge);
@@ -59,7 +58,7 @@ final class SizesTest extends TestCase
 	{
 		$sizes = new Sizes(['card' => ['crop' => [600, 400]]]);
 
-		$this->assertSame(ImageResize::CROPCENTER, $sizes->get('card')->pos);
+		$this->assertSame(0.5, $sizes->get('card')->pos);
 	}
 
 	public function testBuiltinsAlwaysAvailableButOverridable(): void

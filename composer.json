@@ -31,7 +31,6 @@
 		"celema/verba": "^0.6.1",
 		"celema/wire": "^0.9.1",
 		"cosray/legacy-richtext-converter": "^1.0",
-		"gumlet/php-image-resize": "^3.0",
 		"psr/log": "^3.0",
 		"league/flysystem": "^3.35",
 		"symfony/mailer": "^8.1"

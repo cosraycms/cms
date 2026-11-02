@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets\Dimensions;
-use Cosray\Assets\ResizeMode;
+use Cosray\Assets\Recipe;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
@@ -283,21 +282,14 @@ class Image extends File
 			return [null, null];
 		}
 
-		$spec = $this->spec ?? Sizes::original();
-		$transform = $this->delivered() ? $this->transform() : null;
-		$framed = $spec->mode === ResizeMode::Crop && $transform?->focal !== null;
-		$part = $transform?->region(
+		$recipe = Recipe::for(
 			$asset->width,
 			$asset->height,
-			$framed ? $spec->first / ($spec->second ?? $spec->first) : null,
+			$this->spec ?? Sizes::original(),
+			$this->delivered() ? $this->transform() : null,
 		);
 
-		return Dimensions::rendition(
-			$part['w'] ?? $asset->width,
-			$part['h'] ?? $asset->height,
-			$spec,
-			$framed,
-		);
+		return [$recipe->width, $recipe->height];
 	}
 
 	private function transform(): ?Transform

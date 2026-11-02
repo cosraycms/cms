@@ -63,68 +63,41 @@ final class Dimensions
 
 			[$width, $height, $type] = [(int) $info[0], (int) $info[1], $info[2]];
 
-			return $type === IMAGETYPE_JPEG && self::sideways($source) ? [$height, $width] : [$width, $height];
+			return (
+				$type === IMAGETYPE_JPEG && in_array(self::exifOrientation($source), self::SIDEWAYS, true)
+					? [$height, $width]
+					: [$width, $height]
+			);
 		} finally {
 			restore_error_handler();
 		}
 	}
 
 	/**
-	 * The size of a rendition of a source this large, as the image library writes it.
-	 *
-	 * @param bool $framed Whether the source is already cut to the ratio of a crop size
-	 * @return array{int, int}
+	 * A JPEG's EXIF orientation, 1 to 8; 1 when it has none. Without the exif
+	 * extension every image counts as upright.
 	 */
-	public static function rendition(int $width, int $height, SizeSpec $spec, bool $framed = false): array
+	public static function orientation(string $path): int
 	{
-		$first = $spec->first;
-		$second = $spec->second ?? $first;
-		$scaled = static fn(int $target, int $from, int $to): int => (int) round($to * ($target / $from));
-		$resize = static fn(int $w, int $h): array => (
-			!$spec->enlarge && ($w > $width || $h > $height) ? [$width, $height] : [$w, $h]
-		);
-		$byWidth = static fn(): array => $resize($first, $scaled($first, $width, $height));
-		$byHeight = static fn(): array => $resize($scaled($first, $height, $width), $first);
+		set_error_handler(static fn(): bool => true);
 
-		return match ($spec->mode) {
-			ResizeMode::Original => [$width, $height],
-			ResizeMode::Width => $byWidth(),
-			ResizeMode::Height => $byHeight(),
-			ResizeMode::LongSide => $height > $width ? $byHeight() : $byWidth(),
-			ResizeMode::ShortSide => $height < $width ? $byHeight() : $byWidth(),
-			ResizeMode::Resize => $resize($first, $second),
-			ResizeMode::Fit => self::fit($width, $height, $first, $second, $spec->enlarge),
-			ResizeMode::Crop => match (true) {
-				$framed => $resize($first, $second),
-				$spec->enlarge => [$first, $second],
-				default => [min($first, $width), min($second, $height)],
-			},
-		};
-	}
-
-	/** @return array{int, int} */
-	private static function fit(int $width, int $height, int $maxWidth, int $maxHeight, bool $enlarge): array
-	{
-		if (!$enlarge && $width <= $maxWidth && $height <= $maxHeight) {
-			return [$width, $height];
+		try {
+			return self::exifOrientation($path);
+		} finally {
+			restore_error_handler();
 		}
-
-		$ratio = $height / $width;
-		$fitted = (int) round($maxWidth * $ratio);
-		[$w, $h] = $fitted > $maxHeight ? [(int) round($maxHeight / $ratio), $maxHeight] : [$maxWidth, $fitted];
-
-		return !$enlarge && ($w > $width || $h > $height) ? [$width, $height] : [$w, $h];
 	}
 
 	/** @param resource|string $source */
-	private static function sideways(mixed $source): bool
+	private static function exifOrientation(mixed $source): int
 	{
 		if (!function_exists('exif_read_data')) {
-			return false;
+			return 1;
 		}
 
 		$exif = exif_read_data($source);
+		$orientation = is_array($exif) ? $exif['Orientation'] ?? 1 : 1;
 
-		return is_array($exif) && in_array($exif['Orientation'] ?? 1, self::SIDEWAYS, true);
+		return is_int($orientation) && $orientation >= 1 && $orientation <= 8 ? $orientation : 1;
 	}
 }

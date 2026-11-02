@@ -13,8 +13,8 @@ use Celema\Core\Response;
 use Celema\Quma\Database;
 use Cosray\Actor;
 use Cosray\Assets\Asset;
-use Cosray\Assets\Assets;
 use Cosray\Assets\Ingest;
+use Cosray\Assets\Renditions;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
@@ -39,8 +39,6 @@ class Media
 		UPLOAD_ERR_CANT_WRITE => 'UPLOAD_ERR_CANT_WRITE',
 		UPLOAD_ERR_EXTENSION => 'UPLOAD_ERR_EXTENSION',
 	];
-
-	protected ?Assets $assets = null;
 
 	public function __construct(
 		protected readonly Factory $factory,
@@ -209,16 +207,17 @@ class Media
 			throw new HttpNotFound($this->request);
 		}
 
-		[$spec, $name, $transform] = $this->rendition($asset, $file);
+		[$spec, $transform] = $this->rendition($asset, $file);
 
 		try {
-			$image = $this->getAssets()->image($asset->key);
+			$renditions = new Renditions($this->config);
+			$renditions->original($asset);
 		} catch (RuntimeException $e) {
 			throw new HttpNotFound($this->request, previous: $e);
 		}
 
 		try {
-			$image->resize($spec->size(), $spec->mode, $spec->enlarge, $spec->quality, $name, $transform);
+			$path = $renditions->render($asset, $file, $spec, $transform);
 		} catch (RuntimeException $e) {
 			$this->logger->warning('Rendition {file} failed, redirecting to the original: {error}', [
 				'file' => $slug,
@@ -232,10 +231,10 @@ class Media
 		$fileServer = $this->config->media->fileServer;
 
 		if ($fileServer) {
-			return $this->sendFile($fileServer, $image->path());
+			return $this->sendFile($fileServer, $path);
 		}
 
-		return Response::create($this->factory)->file($image->path());
+		return Response::create($this->factory)->file($path);
 	}
 
 	/**
@@ -243,7 +242,7 @@ class Media
 	 * configured sizes: `{stem}-{size}` with the key's extension, and a
 	 * signed variant after the size for a use's crop or focal point.
 	 *
-	 * @return array{SizeSpec, string, ?Transform}
+	 * @return array{SizeSpec, ?Transform}
 	 */
 	protected function rendition(Asset $asset, string $file): array
 	{
@@ -261,7 +260,7 @@ class Media
 		$sizes = $this->config->media->sizes;
 
 		if (count($parts) === 1 && $name !== '' && $sizes->has($name)) {
-			return [$sizes->get($name), $name, null];
+			return [$sizes->get($name), null];
 		}
 
 		$secret = $this->config->app->secret;
@@ -271,11 +270,11 @@ class Media
 			$transform = Transform::verified($asset->uid, $size, $token, $signature, $secret);
 
 			if ($transform !== null && $size === Sizes::ORIGINAL) {
-				return [Sizes::original(), $name, $transform];
+				return [Sizes::original(), $transform];
 			}
 
 			if ($transform !== null && $sizes->has($size)) {
-				return [$sizes->get($size), $name, $transform];
+				return [$sizes->get($size), $transform];
 			}
 		}
 
@@ -313,10 +312,5 @@ class Media
 		}
 
 		return $response;
-	}
-
-	protected function getAssets(): Assets
-	{
-		return $this->assets ??= new Assets($this->config);
 	}
 }

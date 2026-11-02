@@ -12,13 +12,8 @@ final class SizeSpec
 		public readonly ResizeMode $mode,
 		public readonly int $first,
 		public readonly ?int $second = null,
-		public readonly ?int $pos = null,
+		public readonly ?float $pos = null,
 		public readonly ?int $quality = null,
 		public readonly bool $enlarge = false,
 	) {}
-
-	public function size(): Size
-	{
-		return new Size($this->first, $this->second, $this->pos);
-	}
 }

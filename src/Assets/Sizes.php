@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Assets;
 
 use Cosray\Exception\RuntimeException;
-use Gumlet\ImageResize;
 
 /**
  * The registry of named media sizes from the `media.sizes` config.
@@ -42,14 +41,15 @@ final class Sizes
 		'resize' => ResizeMode::Resize,
 	];
 
+	/** How far along the side with too much a crop sits, as a fraction of what is left over. */
 	private const array POSITIONS = [
-		'top' => ImageResize::CROPTOP,
-		'centre' => ImageResize::CROPCENTRE,
-		'center' => ImageResize::CROPCENTER,
-		'bottom' => ImageResize::CROPBOTTOM,
-		'left' => ImageResize::CROPLEFT,
-		'right' => ImageResize::CROPRIGHT,
-		'topcenter' => ImageResize::CROPTOPCENTER,
+		'top' => 0.0,
+		'centre' => 0.5,
+		'center' => 0.5,
+		'bottom' => 1.0,
+		'left' => 0.0,
+		'right' => 1.0,
+		'topcenter' => 0.25,
 	];
 
 	/** @var array<string, SizeSpec> */
@@ -163,10 +163,10 @@ final class Sizes
 	}
 
 	/** @param array<mixed> $entry */
-	private function pos(string $name, string $modeKey, array $entry): ?int
+	private function pos(string $name, string $modeKey, array $entry): ?float
 	{
 		if (!array_key_exists('pos', $entry)) {
-			return $modeKey === 'crop' ? ImageResize::CROPCENTER : null;
+			return $modeKey === 'crop' ? self::POSITIONS['center'] : null;
 		}
 
 		if ($modeKey !== 'crop') {

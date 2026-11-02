@@ -9,6 +9,7 @@ use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
 use Cosray\Tests\End2EndTestCase;
 use GdImage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
@@ -25,6 +26,7 @@ final class MediaServeTest extends End2EndTestCase
 	private const int RED = 0xFF0000;
 	private const int GREEN = 0x00FF00;
 	private const int BLUE = 0x0000FF;
+	private const int WHITE = 0xFFFFFF;
 
 	private string $publicDir;
 
@@ -37,7 +39,7 @@ final class MediaServeTest extends End2EndTestCase
 		$this->app = $this->createApp([
 			'path.public' => $this->publicDir,
 			'app.secret' => self::SECRET,
-			'media.sizes' => ['square' => ['crop' => [2, 2]], 'wide' => ['crop' => [8, 4]]],
+			'media.sizes' => ['square' => ['crop' => [2, 2]], 'wide' => ['crop' => [8, 4]], 'small' => ['width' => 16]],
 		]);
 		$this->authenticateAs('editor');
 	}
@@ -245,6 +247,148 @@ final class MediaServeTest extends End2EndTestCase
 		$this->assertResponseHeaderEquals('Location', $upload['url'], $response);
 	}
 
+	/**
+	 * The corners as a visitor sees them, top left to bottom right, of a stored
+	 * image with red, green, blue and white quarters.
+	 *
+	 * @return iterable<string, array{int, list<int>}>
+	 */
+	public static function orientations(): iterable
+	{
+		[$r, $g, $b, $w] = [self::RED, self::GREEN, self::BLUE, self::WHITE];
+
+		yield 'upright' => [1, [$r, $g, $b, $w]];
+		yield 'mirrored' => [2, [$g, $r, $w, $b]];
+		yield 'upside down' => [3, [$w, $b, $g, $r]];
+		yield 'flipped' => [4, [$b, $w, $r, $g]];
+		yield 'transposed' => [5, [$r, $b, $g, $w]];
+		yield 'turned clockwise' => [6, [$b, $r, $w, $g]];
+		yield 'transversed' => [7, [$w, $g, $b, $r]];
+		yield 'turned anticlockwise' => [8, [$g, $w, $r, $b]];
+	}
+
+	/** @param list<int> $corners */
+	#[DataProvider('orientations')]
+	public function testARenditionShowsAJpegUpright(int $orientation, array $corners): void
+	{
+		$upload = $this->upload(
+			$this->orientedJpeg($orientation),
+			"e2e-serve-upright-{$orientation}.jpg",
+			'image/jpeg',
+		);
+		$image = $this->named($upload, 'small');
+
+		$this->assertSame($orientation > 4 ? [16, 32] : [16, 8], [imagesx($image), imagesy($image)]);
+		$this->assertSame($corners, $this->corners($image));
+	}
+
+	/** @param list<int> $corners */
+	#[DataProvider('orientations')]
+	public function testACropIsReadOffAJpegAsItIsShown(int $orientation, array $corners): void
+	{
+		$upload = $this->upload($this->orientedJpeg($orientation), "e2e-serve-cut-{$orientation}.jpg", 'image/jpeg');
+
+		foreach ([[0, 0], [0.5, 0], [0, 0.5], [0.5, 0.5]] as $at => [$x, $y]) {
+			$image = $this->fetched($upload, Sizes::original(), new Transform([
+				'x' => $x,
+				'y' => $y,
+				'w' => 0.5,
+				'h' => 0.5,
+			]));
+
+			$this->assertSame($orientation > 4 ? [10, 20] : [20, 10], [imagesx($image), imagesy($image)]);
+			$this->assertSame(array_fill(0, 4, $corners[$at]), $this->corners($image));
+		}
+	}
+
+	public function testATransparentPngStaysTransparent(): void
+	{
+		$image = imagecreatetruecolor(40, 20);
+		imagealphablending($image, false);
+		imagesavealpha($image, true);
+		imagefilledrectangle($image, 0, 0, 19, 19, imagecolorallocatealpha($image, 0, 0, 0, 127));
+		imagefilledrectangle($image, 20, 0, 39, 19, self::RED);
+		ob_start();
+		imagepng($image);
+
+		$this->assertHalfTransparent($this->named(
+			$this->upload((string) ob_get_clean(), 'e2e-serve-alpha.png'),
+			'small',
+		));
+	}
+
+	public function testAPalettePngKeepsItsTransparentColor(): void
+	{
+		ob_start();
+		imagepng($this->paletted());
+
+		$this->assertHalfTransparent($this->named(
+			$this->upload((string) ob_get_clean(), 'e2e-serve-palette.png'),
+			'small',
+		));
+	}
+
+	public function testAStillGifKeepsItsTransparentColor(): void
+	{
+		ob_start();
+		imagegif($this->paletted());
+		$upload = $this->upload((string) ob_get_clean(), 'e2e-serve-still.gif', 'image/gif');
+
+		$this->assertHalfTransparent($this->named($upload, 'small'));
+	}
+
+	public function testATransparentWebpStaysTransparent(): void
+	{
+		$image = imagecreatetruecolor(40, 20);
+		imagealphablending($image, false);
+		imagesavealpha($image, true);
+		imagefilledrectangle($image, 0, 0, 19, 19, imagecolorallocatealpha($image, 0, 0, 0, 127));
+		imagefilledrectangle($image, 20, 0, 39, 19, self::RED);
+		ob_start();
+		imagewebp($image, null, 100);
+		$upload = $this->upload((string) ob_get_clean(), 'e2e-serve-alpha.webp', 'image/webp');
+
+		$this->assertHalfTransparent($this->named($upload, 'small'));
+	}
+
+	public function testAnAnimatedGifStaysACopyOfItsOriginal(): void
+	{
+		ob_start();
+		imagegif($this->paletted());
+		$gif = (string) ob_get_clean();
+		$start = (int) strpos($gif, "\x21\xF9\x04");
+		$frame = substr($gif, $start, -1);
+		$animated = substr($gif, 0, $start) . $frame . $frame . $frame . "\x3B";
+		$upload = $this->upload($animated, 'e2e-serve-moving.gif', 'image/gif');
+
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, 'small'));
+
+		$this->assertResponseOk($response);
+		$this->assertSame($animated, (string) $response->getBody());
+	}
+
+	public function testAnOriginalThatCannotBeReadIsRedirectedTo(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-broken.png');
+		file_put_contents($this->publicDir . $upload['url'], 'no image');
+
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, 'small'));
+
+		$this->assertResponseStatus(302, $response);
+		$this->assertResponseHeaderEquals('Location', $upload['url'], $response);
+	}
+
+	public function testAJpegThatBreaksOffIsRedirectedToOrRendersWhatIsThere(): void
+	{
+		$upload = $this->upload($this->orientedJpeg(1), 'e2e-serve-short.jpg', 'image/jpeg');
+		$original = $this->publicDir . $upload['url'];
+		file_put_contents($original, substr((string) file_get_contents($original), 0, 400));
+
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, 'small'));
+
+		$this->assertContains($response->getStatusCode(), [200, 302]);
+	}
+
 	/** @param array<string, mixed> $upload */
 	private function fetched(array $upload, SizeSpec $spec, Transform $transform): GdImage
 	{
@@ -263,6 +407,89 @@ final class MediaServeTest extends End2EndTestCase
 		return $image;
 	}
 
+	/** @param array<string, mixed> $upload */
+	private function named(array $upload, string $size): GdImage
+	{
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, $size));
+		$this->assertResponseOk($response);
+
+		$image = imagecreatefromstring((string) $response->getBody());
+		$this->assertInstanceOf(GdImage::class, $image);
+
+		return $image;
+	}
+
+	/** @param array<string, mixed> $upload */
+	private function namedUrl(array $upload, string $size): string
+	{
+		$uid = (string) $upload['uid'];
+		$stem = pathinfo((string) $upload['url'], PATHINFO_FILENAME);
+		$ext = pathinfo((string) $upload['url'], PATHINFO_EXTENSION);
+
+		return '/cache/' . substr($uid, 0, 2) . "/{$uid}/{$stem}-{$size}.{$ext}";
+	}
+
+	/**
+	 * The nearest of the test colors at each corner, top left to bottom right.
+	 *
+	 * @return list<int>
+	 */
+	private function corners(GdImage $image): array
+	{
+		$right = imagesx($image) - 2;
+		$bottom = imagesy($image) - 2;
+
+		return array_map(
+			fn(array $at): int => $this->nearest($image, $at[0], $at[1]),
+			[[1, 1], [$right, 1], [1, $bottom], [$right, $bottom]],
+		);
+	}
+
+	private function nearest(GdImage $image, int $x, int $y): int
+	{
+		['red' => $red, 'green' => $green, 'blue' => $blue] = imagecolorsforindex($image, imagecolorat($image, $x, $y));
+		$distance = static fn(int $color): int => (
+			abs(($color >> 16) - $red) + abs((($color >> 8) & 0xFF) - $green) + abs(($color & 0xFF) - $blue)
+		);
+		$colors = [self::RED, self::GREEN, self::BLUE, self::WHITE];
+		usort($colors, static fn(int $a, int $b): int => $distance($a) <=> $distance($b));
+
+		return $colors[0];
+	}
+
+	/** Transparent on the left, opaque on the right. */
+	private function assertHalfTransparent(GdImage $image): void
+	{
+		$right = imagesx($image) - 2;
+		$middle = (int) (imagesy($image) / 2);
+
+		$this->assertSame(127, imagecolorsforindex($image, imagecolorat($image, 1, $middle))['alpha']);
+		$this->assertSame(0, imagecolorsforindex($image, imagecolorat($image, $right, $middle))['alpha']);
+	}
+
+	/** A palette image, transparent on the left and red on the right. */
+	private function paletted(): GdImage
+	{
+		$image = imagecreate(40, 20);
+		$clear = imagecolorallocate($image, 0, 255, 0);
+		imagecolortransparent($image, $clear);
+		imagefilledrectangle($image, 20, 0, 39, 19, imagecolorallocate($image, 255, 0, 0));
+
+		return $image;
+	}
+
+	/** Red, green, blue and white quarters as stored, with the given EXIF orientation. */
+	private function orientedJpeg(int $orientation): string
+	{
+		ob_start();
+		imagejpeg(imagecreatefromstring($this->quarters(40, 20)), null, 100);
+		$jpeg = (string) ob_get_clean();
+		$tiff = "II*\0" . pack('V', 8) . pack('v', 1) . pack('vvVvv', 0x0112, 3, 1, $orientation, 0) . pack('V', 0);
+		$app1 = "Exif\0\0{$tiff}";
+
+		return substr($jpeg, 0, 2) . "\xFF\xE1" . pack('n', strlen($app1) + 2) . $app1 . substr($jpeg, 2);
+	}
+
 	private function colorAt(GdImage $image, int $x, int $y): int
 	{
 		return imagecolorat($image, $x, $y) & 0xFFFFFF;
@@ -277,7 +504,7 @@ final class MediaServeTest extends End2EndTestCase
 		imagefilledrectangle($image, 0, 0, $width, $height, self::RED);
 		imagefilledrectangle($image, $halfX, 0, $width, $height, self::GREEN);
 		imagefilledrectangle($image, 0, $halfY, $halfX - 1, $height, self::BLUE);
-		imagefilledrectangle($image, $halfX, $halfY, $width, $height, 0xFFFFFF);
+		imagefilledrectangle($image, $halfX, $halfY, $width, $height, self::WHITE);
 		ob_start();
 		imagepng($image);
 

@@ -159,7 +159,7 @@ Templates call `$image->size('card')`. SVGs and other non-resizable assets keep 
 
 A use's crop or focal point adds a variant to the rendition's name: `{stem}-{size}~{recipe}~{signature}{ext}`. The signature is an HMAC with `app.secret`, so only URLs the server minted generate files, and tampering answers 404. A focal point only changes the name of a size in `crop` mode, so other sizes keep sharing one file. Changing a crop or focal point leaves the old rendition behind in the asset's cache directory, where it does no harm. Without `app.secret` there are no variants: images stay whole, sizes in `crop` mode ignore the focal point, and the dialog offers no crop.
 
-Resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: their URLs redirect to the original, which is heavier but still shows, uncropped, and the failure is logged. A crop costs no extra memory, as the rendition is copied directly out of the decoded original.
+Resizing decodes the whole original, at about 5 bytes per pixel, so `memory_limit` bounds what can be resized: 128M takes about 25 megapixels, a 45 megapixel photo needs about 256M. A larger original gets no renditions: their URLs redirect to the original, which is heavier but still shows, uncropped, and the failure is logged. A crop costs no extra memory beyond its rendition, which is copied directly out of the decoded original.
 
 Block image ladders, responsive `sizes`, gallery ratios, and spacing are documented in [Blocks](blocks.md#rendering).
 
