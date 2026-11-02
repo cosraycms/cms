@@ -20,7 +20,7 @@
 		min-height: calc(var(--cms-control-height) - 2px);
 		padding: calc((var(--cms-control-height) - 2px - var(--cms-control-height-sm)) / 2);
 		color: var(--cms-color-text-muted);
-		font-size: var(--cms-font-size-sm);
+		font-size: var(--cms-font-size-xs);
 	}
 
 	& > .bar + .body {
