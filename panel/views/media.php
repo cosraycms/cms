@@ -77,14 +77,25 @@ unset($search['page']);
 							type="search"
 							name="q"
 							value="<?= escape($screen->q) ?>"
-							aria-label="<?= escape(__('media:search-filename')) ?>"
-							placeholder="<?= escape(__('media:search-filename')) ?>" />
+							aria-label="<?= escape(__('media:search')) ?>"
+							placeholder="<?= escape(__('media:search')) ?>" />
 					</form>
 					<?php if ($screen->q !== ''): ?>
 						<a class="cms-button secondary" href="<?= escape($screen->url(['q' => ''])) ?>" data-media-keep-file><?= escape(
 							__('common:reset'),
 						) ?></a>
 					<?php endif ?>
+				</div>
+
+				<div class="selection" data-media-selection hidden>
+					<span role="status" data-media-selection-count></span>
+					<button type="button" class="cms-button danger small" data-media-delete-selected>
+						<?= Icon::render('trash3') ?>
+						<?= escape(__('media:delete-selected')) ?>
+					</button>
+					<button type="button" class="cms-button secondary small" data-media-selection-clear>
+						<?= escape(__('media:clear-selection')) ?>
+					</button>
 				</div>
 
 				<div class="cms-media-scroll">
@@ -148,6 +159,25 @@ unset($search['page']);
 			</aside>
 		</div>
 	</section>
+
+	<dialog
+		class="cms-modal"
+		data-size="compact"
+		data-media-delete-selected-dialog
+		data-url="<?= escape($screen->path . '/delete-many') ?>">
+		<?php $this->include('component/modal-header', ['title' => __('media:delete-selected')]) ?>
+		<div class="modal-body cms-confirm">
+			<p class="question" data-media-delete-selected-question></p>
+		</div>
+		<footer class="modal-footer">
+			<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
+				__('media:cancel-delete-file'),
+			) ?></button>
+			<button type="button" class="cms-button danger solid" data-media-delete-selected-confirm><?= escape(
+				__('common:delete'),
+			) ?></button>
+		</footer>
+	</dialog>
 
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
 		['panel' => (string) u($panelBase), 'system' => $system],

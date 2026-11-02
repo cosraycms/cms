@@ -46,7 +46,10 @@ final class Assets
 		return $this->responses->json($this->serializer->asset($asset));
 	}
 
-	/** Newest first; `kind` takes image, video, audio and document, `q` matches the filename. */
+	/**
+	 * Newest first; `kind` takes image, video, audio and document, `q` matches the
+	 * filename and the catalog's texts, `status` takes unused and no-alt.
+	 */
 	public function list(Request $request, Library $library): Response
 	{
 		$this->permit($request, 'read-nodes', 'list the catalog');
@@ -54,9 +57,14 @@ final class Assets
 		$kinds = $params['kind'] ?? [];
 		$q = $params['q'] ?? '';
 		$query = NodeQuery::fromQuery(array_intersect_key($params, ['limit' => true, 'offset' => true]));
+		$status = $params['status'] ?? '';
 
 		if (!is_string($kinds) && !is_array($kinds) || !is_string($q)) {
 			throw new HttpBadRequest($request, payload: ['message' => '`kind` and `q` are strings.']);
+		}
+
+		if ($status !== '' && !in_array($status, Library::STATUSES, true)) {
+			throw new HttpBadRequest($request, payload: ['message' => '`status` is unused or no-alt.']);
 		}
 
 		$list = $library->list(
@@ -65,6 +73,7 @@ final class Assets
 			Library::since($params['since'] ?? null),
 			$query->limit,
 			$query->offset,
+			(string) $status,
 		);
 
 		return $this->responses->json([

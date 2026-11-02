@@ -22,6 +22,7 @@ final readonly class MediaScreen
 		public string $range = '',
 		public ?string $file = null,
 		public int $page = 1,
+		public string $status = '',
 	) {}
 
 	/** @param array<array-key, mixed> $params */
@@ -29,6 +30,7 @@ final readonly class MediaScreen
 	{
 		$range = is_string($params['range'] ?? null) ? $params['range'] : '';
 		$file = is_string($params['file'] ?? null) ? trim($params['file']) : '';
+		$status = is_string($params['status'] ?? null) ? $params['status'] : '';
 
 		$kinds = $params['kind'] ?? '';
 
@@ -44,17 +46,18 @@ final readonly class MediaScreen
 			range: in_array($range, Library::RANGES, true) ? $range : '',
 			file: $file !== '' ? $file : null,
 			page: max(1, (int) ($params['page'] ?? 1)),
+			status: in_array($status, Library::STATUSES, true) ? $status : '',
 		);
 	}
 
 	public function withFile(?string $file): self
 	{
-		return new self($this->path, $this->kinds, $this->q, $this->range, $file, $this->page);
+		return new self($this->path, $this->kinds, $this->q, $this->range, $file, $this->page, $this->status);
 	}
 
 	public function filtered(): bool
 	{
-		return $this->kinds !== [] || $this->q !== '' || $this->range !== '';
+		return $this->kinds !== [] || $this->q !== '' || $this->range !== '' || $this->status !== '';
 	}
 
 	/**
@@ -63,7 +66,7 @@ final readonly class MediaScreen
 	 * first unless given. `$below` addresses a path under the screen's, such
 	 * as a file's save action, with the state still in the query.
 	 *
-	 * @param array{kind?: list<string>, q?: string, range?: string, file?: ?string, page?: int} $changes
+	 * @param array{kind?: list<string>, q?: string, range?: string, status?: string, file?: ?string, page?: int} $changes
 	 */
 	public function url(array $changes = [], string $below = ''): string
 	{
@@ -76,7 +79,7 @@ final readonly class MediaScreen
 	/**
 	 * The non-empty query parameters, as hidden inputs of a GET form need them.
 	 *
-	 * @param array{kind?: list<string>, q?: string, range?: string, file?: ?string, page?: int} $changes
+	 * @param array{kind?: list<string>, q?: string, range?: string, status?: string, file?: ?string, page?: int} $changes
 	 * @return array<string, string>
 	 */
 	public function query(array $changes = []): array
@@ -85,6 +88,7 @@ final readonly class MediaScreen
 			'kind' => implode(',', $changes['kind'] ?? $this->kinds),
 			'q' => $changes['q'] ?? $this->q,
 			'range' => $changes['range'] ?? $this->range,
+			'status' => $changes['status'] ?? $this->status,
 			'file' => array_key_exists('file', $changes) ? (string) $changes['file'] : (string) $this->file,
 			'page' => (string) ($changes['page'] ?? 1),
 		];

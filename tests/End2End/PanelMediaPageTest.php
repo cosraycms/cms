@@ -307,6 +307,115 @@ final class PanelMediaPageTest extends End2EndTestCase
 		$this->assertSame('Second pixel', $meta['alt']['en']);
 	}
 
+	public function testReplacingAFileKeepsItsUidAndTexts(): void
+	{
+		$uid = $this->upload('e2e-replace-old.png', 'image/png');
+		$this->makeRequest('POST', "/panel/media/{$uid}", [
+			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded', 'HX-Request' => 'true'],
+			'body' => http_build_query(['meta' => ['alt' => ['en' => 'Stays']]]),
+		]);
+		$shard = substr($uid, 0, 2);
+		$cacheDir = "{$this->publicDir}/cache/{$shard}/{$uid}";
+		mkdir($cacheDir, 0o755, true);
+		file_put_contents("{$cacheDir}/old-rendition.png", 'rendition');
+		$oldFile = "{$this->publicDir}/assets/{$shard}/{$uid}/e2e-replace-old.png";
+		$this->assertFileExists($oldFile);
+		$image = imagecreatetruecolor(5, 3);
+		ob_start();
+		imagejpeg($image);
+		$jpeg = (string) ob_get_clean();
+
+		$json = $this->getJsonResponse($this->makeRequest('POST', "/panel/media/{$uid}/replace", [
+			'files' => ['file' => $this->uploadedFile($jpeg, 'New Photo.jpg', 'image/jpeg')],
+		]));
+
+		$this->assertTrue($json['ok']);
+		$row = $this->db()->execute('SELECT * FROM cms.assets WHERE uid = :uid', ['uid' => $uid])->one();
+		$this->assertSame('New Photo.jpg', $row['filename']);
+		$this->assertSame('image/jpeg', $row['mime']);
+		$this->assertSame([5, 3], [$row['width'], $row['height']]);
+		$this->assertSame(hash('sha256', $jpeg), $row['hash']);
+		$this->assertSame('Stays', json_decode($row['meta'], true)['alt']['en']);
+		$this->assertSame($jpeg, file_get_contents("{$this->publicDir}/assets/{$row['key']}"));
+		$this->assertFileDoesNotExist($oldFile);
+		$this->assertDirectoryDoesNotExist($cacheDir);
+	}
+
+	public function testReplacingWithTheSameNameMovesTheFileToANewAddress(): void
+	{
+		$uid = $this->upload('e2e-replace-same.png', 'image/png');
+		$before = (string) $this->db()->execute('SELECT key FROM cms.assets WHERE uid = :uid', [
+			'uid' => $uid,
+		])->one()['key'];
+		$other = imagecreatetruecolor(7, 7);
+		ob_start();
+		imagepng($other);
+		$png = (string) ob_get_clean();
+
+		$json = $this->getJsonResponse($this->makeRequest('POST', "/panel/media/{$uid}/replace", [
+			'files' => ['file' => $this->uploadedFile($png, 'e2e-replace-same.png', 'image/png')],
+		]));
+
+		$this->assertTrue($json['ok']);
+		$after = (string) $this->db()->execute('SELECT key FROM cms.assets WHERE uid = :uid', [
+			'uid' => $uid,
+		])->one()['key'];
+		$this->assertNotSame($before, $after);
+		$this->assertStringEndsWith('.png', $after);
+		$this->assertFileExists("{$this->publicDir}/assets/{$after}");
+		$this->assertFileDoesNotExist("{$this->publicDir}/assets/{$before}");
+	}
+
+	public function testAFileIsOnlyReplacedByOneOfItsKind(): void
+	{
+		$uid = $this->upload('e2e-replace-kind.png', 'image/png');
+
+		$response = $this->makeRequest('POST', "/panel/media/{$uid}/replace", [
+			'files' => ['file' => $this->uploadedFile("%PDF-1.4\n%%EOF\n", 'notes.pdf', 'application/pdf')],
+		]);
+
+		$this->assertSame(400, $response->getStatusCode());
+		$this->assertFalse($this->getJsonResponse($response)['ok']);
+		$row = $this->db()->execute('SELECT filename FROM cms.assets WHERE uid = :uid', ['uid' => $uid])->one();
+		$this->assertSame('e2e-replace-kind.png', $row['filename']);
+	}
+
+	public function testDeletingSeveralSaysHowItWent(): void
+	{
+		$gone = $this->upload('e2e-many-gone.png', 'image/png');
+		$used = $this->upload('e2e-many-used.png', 'image/png');
+		$this->db()->execute(
+			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid) VALUES ('node', 'an-owner', :uid)",
+			['uid' => $used],
+		)->run();
+
+		$json = $this->getJsonResponse($this->makeRequest('POST', '/panel/media/delete-many', [
+			'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+			'body' => http_build_query(['uids' => [$gone, $used]]),
+		]));
+
+		$this->assertSame(['ok' => true, 'deleted' => 1, 'kept' => 1], $json);
+		$this->assertNull(
+			$this->db()->execute('SELECT uid FROM cms.assets WHERE uid = :uid', ['uid' => $gone])->first(),
+		);
+	}
+
+	public function testTheListingFiltersByStatus(): void
+	{
+		$used = $this->upload('e2e-status-used.png', 'image/png');
+		$unused = $this->upload('e2e-status-unused.png', 'image/png');
+		$this->db()->execute(
+			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid) VALUES ('node', 'an-owner', :uid)",
+			['uid' => $used],
+		)->run();
+
+		$html = $this->html('/panel/media', ['status' => 'unused']);
+
+		$this->assertHtmlNodeExists("//a[@data-media-tile='{$unused}']", $html);
+		$this->assertHtmlNodeMissing("//a[@data-media-tile='{$used}']", $html);
+		$this->assertHtmlNodeExists('//input[@name="status"][@value="unused"][@checked]', $html);
+	}
+
 	public function testDeletingReturnsToTheListingOrNamesWhatStillUsesTheFile(): void
 	{
 		$gone = $this->upload('e2e-delete-page-gone.png', 'image/png');

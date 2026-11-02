@@ -99,6 +99,10 @@ $photo = static function (string $file, int $width, int $height, int $tint = 0):
 $photo("{$run}/files/landscape.jpg", 1200, 600);
 $photo("{$run}/files/portrait.jpg", 600, 1200, 10);
 
+for ($i = 1; $i <= 3; $i++) {
+	$photo("{$run}/files/screen-{$i}.jpg", 640, 480, $i * 7);
+}
+
 for ($i = 1; $i <= 12; $i++) {
 	$photo("{$run}/files/tile-{$i}.jpg", 800, 600, $i * 20);
 }

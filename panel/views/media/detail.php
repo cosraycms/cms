@@ -197,6 +197,16 @@ $closeUrl = $screen->url(['file' => null]);
 				<?= Icon::render('trash3') ?>
 				<?= escape(__('common:delete')) ?>
 			</button>
+			<button type="button" class="cms-button secondary" data-media-replace>
+				<?= Icon::render('arrow-counterclockwise') ?>
+				<?= escape(__('media:replace-file')) ?>
+			</button>
+			<input
+				type="file"
+				hidden
+				form=""
+				data-media-replace-input
+				data-url="<?= escape($screen->url(below: rawurlencode($asset->uid) . '/replace')) ?>" />
 			<div class="cms-detail-foot-right">
 				<?php if ($saved): ?>
 					<span class="cms-detail-saved" role="status"><?= escape(__('common:saved')) ?></span>

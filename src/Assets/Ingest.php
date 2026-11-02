@@ -40,22 +40,7 @@ final class Ingest
 		array $meta = [],
 	): IngestResult {
 		$filename = self::safeFilename($filename);
-		$mime = $this->validate($contents, $filename, $mediatype);
-
-		// SVGs are served from the site origin, so a stored `<script>` or
-		// `onload` would run there. Clean the markup before it lands in the
-		// pool; hash and byte count are taken from the sanitized bytes.
-		if ($mime === 'image/svg+xml' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg') {
-			$clean = self::sanitizeSvgMarkup($contents);
-
-			if ($clean === null) {
-				throw IngestError::unsafeSvg();
-			}
-
-			$contents = $clean;
-		}
-
-		$contents = Location::removed($contents, $mime);
+		[$contents, $mime] = $this->prepared($contents, $filename, $mediatype);
 		$hash = hash('sha256', $contents);
 		$existing = $this->db
 			->assets
@@ -98,6 +83,83 @@ final class Ingest
 		}
 
 		return new IngestResult($row, created: true);
+	}
+
+	/**
+	 * Puts new bytes under an asset, which keeps its uid and with it every use, and
+	 * its texts. A new name moves it, and its renditions go. The new file must be
+	 * of the same kind, as the fields using it asked for that kind.
+	 *
+	 * @param array<string, mixed> $row The asset's catalog row
+	 * @return array<string, mixed> The row as it is now
+	 * @throws IngestError
+	 */
+	public function replace(array $row, string $contents, string $filename): array
+	{
+		$kind = Asset::classify(isset($row['mime']) ? (string) $row['mime'] : null);
+		$filename = self::safeFilename($filename);
+		[$contents, $mime] = $this->prepared($contents, $filename, $kind);
+
+		if (Asset::classify($mime) !== $kind) {
+			throw IngestError::disallowedType($mime);
+		}
+
+		$uid = (string) $row['uid'];
+		$oldKey = (string) $row['key'];
+		$hash = hash('sha256', $contents);
+		$key = Storage::key($uid, $filename);
+
+		// The same name would be the same address, which caches keep answering with the old file.
+		if ($key === $oldKey) {
+			$key = (string) preg_replace('/(\.[^.\/]*)?$/', '-' . substr($hash, 0, 8) . '$1', $key, 1);
+		}
+
+		[$width, $height] = $this->imageDimensions($kind, $contents);
+		$this->storage->write($key, $contents);
+		$new = [
+			'uid' => $uid,
+			'key' => $key,
+			'filename' => $filename,
+			'mime' => $mime,
+			'bytes' => strlen($contents),
+			'width' => $width,
+			'height' => $height,
+			'hash' => $hash,
+		];
+		$this->db->assets->updateFile($new)->run();
+
+		if ($key !== $oldKey) {
+			$this->storage->delete($oldKey);
+		}
+
+		new Library($this->db, $this->config)->purgeRenditions($oldKey);
+
+		return [...$row, ...$new];
+	}
+
+	/**
+	 * What gets stored of an upload: checked, an SVG rebuilt, location data removed.
+	 *
+	 * @return array{string, string} the contents and the detected mime type
+	 */
+	private function prepared(string $contents, string $filename, string $mediatype): array
+	{
+		$mime = $this->validate($contents, $filename, $mediatype);
+
+		// SVGs are served from the site origin, so a stored `<script>` or
+		// `onload` would run there. Clean the markup before it lands in the
+		// pool; hash and byte count are taken from the sanitized bytes.
+		if ($mime === 'image/svg+xml' || strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'svg') {
+			$clean = self::sanitizeSvgMarkup($contents);
+
+			if ($clean === null) {
+				throw IngestError::unsafeSvg();
+			}
+
+			$contents = $clean;
+		}
+
+		return [Location::removed($contents, $mime), $mime];
 	}
 
 	/** @return string the detected mime type */

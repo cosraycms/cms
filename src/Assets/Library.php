@@ -28,6 +28,9 @@ final class Library
 	/** Upload date ranges the media screen offers, as URL tokens. */
 	public const array RANGES = ['7d', '30d', 'year'];
 
+	/** What the media screen and the API can narrow the catalog to. */
+	public const array STATUSES = ['unused', 'no-alt'];
+
 	public const int LIMIT = 60;
 
 	public function __construct(
@@ -37,10 +40,11 @@ final class Library
 
 	/**
 	 * One page of the catalog, newest first. `$kinds` takes filter kinds;
-	 * none, or all four, list everything. `$q` matches the filename, `$since`
-	 * cuts on the created timestamp. The counts report per-kind totals that
-	 * honor `$q` and `$since` but not `$kinds`, so a filter can show what
-	 * selecting each kind would yield.
+	 * none, or all four, list everything. `$q` matches the filename and the
+	 * catalog's texts, `$since` cuts on the created timestamp, `$status` takes
+	 * `unused`, for files nothing references, or `no-alt`, for images without
+	 * an alt text in the catalog. The counts report per-kind totals that honor
+	 * all but `$kinds`, so a filter can show what selecting each kind would yield.
 	 *
 	 * @param list<string> $kinds
 	 */
@@ -49,13 +53,14 @@ final class Library
 		string $q = '',
 		?string $since = null,
 		int $page = 1,
+		string $status = '',
 	): LibraryPage {
 		$page = max(1, $page);
 		$offset = ($page - 1) * self::LIMIT;
-		$list = $this->list($kinds, $q, $since, self::LIMIT, $offset);
+		$list = $this->list($kinds, $q, $since, self::LIMIT, $offset, $status);
 		$counts = array_fill_keys(self::KINDS, 0);
 
-		foreach ($this->db->assets->counts($this->match('', $q, $since))->all() as $row) {
+		foreach ($this->db->assets->counts($this->match('', $q, $since, $status))->all() as $row) {
 			$counts[(string) $row['kind']] = (int) $row['total'];
 		}
 
@@ -74,11 +79,17 @@ final class Library
 	 * @param list<string> $kinds
 	 * @return array{assets: list<Asset>, total: int}
 	 */
-	public function list(array $kinds, string $q, ?string $since, int $limit, int $offset): array
-	{
+	public function list(
+		array $kinds,
+		string $q,
+		?string $since,
+		int $limit,
+		int $offset,
+		string $status = '',
+	): array {
 		$kinds = self::filterKinds($kinds);
 		$args = [
-			...$this->match($kinds === [] ? '' : (string) json_encode($kinds), $q, $since),
+			...$this->match($kinds === [] ? '' : (string) json_encode($kinds), $q, $since, $status),
 			'limit' => $limit,
 			'offset' => $offset,
 		];
@@ -92,7 +103,7 @@ final class Library
 	}
 
 	/** @return array<string, string> */
-	private function match(string $kinds, string $q, ?string $since): array
+	private function match(string $kinds, string $q, ?string $since, string $status): array
 	{
 		$args = [];
 
@@ -108,6 +119,14 @@ final class Library
 
 		if ($since !== null) {
 			$args['since'] = $since;
+		}
+
+		if ($status === 'unused') {
+			$args['unused'] = '1';
+		}
+
+		if ($status === 'no-alt') {
+			$args['noalt'] = '1';
 		}
 
 		return $args;
@@ -181,6 +200,29 @@ final class Library
 	}
 
 	/**
+	 * Deletes what nothing references among the given assets and leaves the rest.
+	 *
+	 * @param list<string> $uids
+	 * @return array{deleted: int, kept: int}
+	 */
+	public function deleteMany(array $uids): array
+	{
+		$result = ['deleted' => 0, 'kept' => 0];
+
+		foreach (array_unique($uids) as $uid) {
+			$owners = $this->delete($uid);
+
+			if ($owners === []) {
+				$result['deleted']++;
+			} elseif ($owners !== null) {
+				$result['kept']++;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * The valid filter kinds among the given ones, from a list or a
 	 * comma-separated string. All four mean everything, so they come back
 	 * as none, which keeps the query plan flat.
@@ -227,7 +269,7 @@ final class Library
 	}
 
 	/** Removes the rendition cache directory `{cache}/{shard}/{uid}/`. */
-	private function purgeRenditions(string $key): void
+	public function purgeRenditions(string $key): void
 	{
 		$root = rtrim($this->config->path->public, '\\/') . '/' . trim($this->config->path->cache, '/');
 

@@ -26,6 +26,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		data-pick="<?= escape((string) json_encode(Library::item($asset), $jsonFlags)) ?>">
 	<?php else: ?>
 	<?php $url = $screen->url(['file' => $asset->uid]) ?>
+	<div class="cms-asset-cell">
 	<a
 		class="cms-asset-tile<?= $active ?>"
 		href="<?= escape($url) ?>"
@@ -50,7 +51,19 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				<span class="cms-asset-line"><?= escape($line) ?></span>
 			<?php endif ?>
 		</span>
-	<?= $picker ? '</button>' : '</a>' ?>
+	<?php if ($picker): ?>
+	</button>
+	<?php else: ?>
+	</a>
+		<label class="cms-asset-pick">
+			<input
+				type="checkbox"
+				value="<?= escape($asset->uid) ?>"
+				aria-label="<?= escape(__('media:select-file', ['name' => $asset->filename])) ?>"
+				data-media-select />
+		</label>
+	</div>
+	<?php endif ?>
 <?php endforeach ?>
 <?php if ($listing->more): ?>
 	<?php $next = $screen->url(['file' => $screen->file, 'page' => $listing->page + 1]) ?>

@@ -1,11 +1,13 @@
 // The media screen's browser-side parts. The server renders the listing,
 // filters and detail; this adds what needs the pointer or the file system:
 // uploads by button or drop, the focal point, the caption's editor, the delete
-// confirmation, and the active tile once htmx swaps in another file's detail.
+// confirmation, the selection for deleting several files, replacing a file, and
+// the active tile once htmx swaps in another file's detail.
 
 import { cosray } from '../lib/bridge.js';
+import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
 import { openDialog } from '../lib/dialogs.js';
-import { __ } from '../lib/locale.js';
+import { __, __n } from '../lib/locale.js';
 
 const SCREEN = '[data-media]';
 
@@ -140,6 +142,114 @@ async function upload(screen, files) {
 	}
 }
 
+/**
+ * @param {string} url
+ * @param {BodyInit} body
+ * @returns {Promise<Record<string, unknown>>} What the server said, `ok` false when it could not.
+ */
+async function send(url, body) {
+	try {
+		const response = await fetch(url, { method: 'POST', headers: { [HEADER]: csrfToken() }, body });
+		noticeRefusal(response);
+
+		return await response.json();
+	} catch {
+		return { ok: false };
+	}
+}
+
+/** Shows the listing again, as the server has it now. */
+async function reload() {
+	await htmx.ajax('GET', location.pathname + location.search, { target: '#main', replace: 'true' });
+}
+
+/** @param {ParentNode} screen */
+function selected(screen) {
+	return /** @type {HTMLInputElement[]} */ (
+		Array.from(screen.querySelectorAll('[data-media-select]:checked'))
+	);
+}
+
+/** @param {ParentNode} screen */
+function showSelection(screen) {
+	const count = selected(screen).length;
+	const bar = screen.querySelector('[data-media-selection]');
+
+	if (bar instanceof HTMLElement) {
+		bar.hidden = count === 0;
+		const label = bar.querySelector('[data-media-selection-count]');
+
+		if (label) {
+			label.textContent = __n('media:selected', 'media:selected-plural', count, { count });
+		}
+	}
+}
+
+/** @param {HTMLElement} screen */
+async function deleteSelected(screen) {
+	const dialog = screen.querySelector('[data-media-delete-selected-dialog]');
+
+	if (!(dialog instanceof HTMLDialogElement)) {
+		return;
+	}
+
+	const body = new FormData();
+
+	for (const input of selected(screen)) {
+		body.append('uids[]', input.value);
+	}
+
+	const result = await send(dialog.dataset.url ?? '', body);
+	dialog.close();
+
+	if (!result.ok) {
+		cosray().toast.error(__('media:delete-selected-failed'));
+
+		return;
+	}
+
+	const deleted = Number(result.deleted);
+	const kept = Number(result.kept);
+
+	if (deleted > 0) {
+		cosray().toast.success(
+			__n('media:deleted-selected', 'media:deleted-selected-plural', deleted, { count: deleted }),
+		);
+	}
+
+	if (kept > 0) {
+		cosray().toast.error(
+			__n('media:kept-selected', 'media:kept-selected-plural', kept, { count: kept }),
+		);
+	}
+
+	await reload();
+}
+
+/** @param {HTMLInputElement} input */
+async function replace(input) {
+	const [file] = input.files ?? [];
+	input.value = '';
+
+	if (!file) {
+		return;
+	}
+
+	const body = new FormData();
+	body.append('file', file);
+	const result = await send(input.dataset.url ?? '', body);
+
+	if (!result.ok) {
+		cosray().toast.error(
+			typeof result.error === 'string' ? result.error : __('media:replace-failed'),
+		);
+
+		return;
+	}
+
+	await reload();
+}
+
 /** @param {DragEvent} event */
 function hasFiles(event) {
 	return event.dataTransfer?.types.includes('Files') ?? false;
@@ -238,6 +348,54 @@ function click(event) {
 		return;
 	}
 
+	if (target.closest('[data-media-selection-clear]')) {
+		for (const input of selected(screen)) {
+			input.checked = false;
+		}
+
+		showSelection(screen);
+
+		return;
+	}
+
+	const deleting = target.closest('[data-media-delete-selected]');
+
+	if (deleting instanceof HTMLElement) {
+		const dialog = screen.querySelector('[data-media-delete-selected-dialog]');
+		const question = dialog?.querySelector('[data-media-delete-selected-question]');
+		const count = selected(screen).length;
+
+		if (dialog instanceof HTMLDialogElement && question) {
+			question.textContent = __n(
+				'media:confirm-delete-selected',
+				'media:confirm-delete-selected-plural',
+				count,
+				{
+					count,
+				},
+			);
+			openDialog(dialog, { opener: deleting, owner: deleting });
+		}
+
+		return;
+	}
+
+	if (target.closest('[data-media-delete-selected-confirm]')) {
+		void deleteSelected(screen);
+
+		return;
+	}
+
+	if (target.closest('[data-media-replace]')) {
+		const input = screen.querySelector('[data-media-replace-input]');
+
+		if (input instanceof HTMLInputElement) {
+			input.click();
+		}
+
+		return;
+	}
+
 	const preview = target.closest('[data-media-focal]');
 	const form = target.closest('form');
 
@@ -271,6 +429,22 @@ function click(event) {
 /** @param {Event} event */
 function change(event) {
 	const input = event.target;
+
+	if (input instanceof HTMLInputElement && input.matches('[data-media-select]')) {
+		const parent = input.closest(SCREEN);
+
+		if (parent) {
+			showSelection(parent);
+		}
+
+		return;
+	}
+
+	if (input instanceof HTMLInputElement && input.matches('[data-media-replace-input]')) {
+		void replace(input);
+
+		return;
+	}
 
 	if (!(input instanceof HTMLInputElement) || !input.matches('[data-media-upload-input]')) {
 		return;

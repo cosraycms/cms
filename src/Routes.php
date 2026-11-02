@@ -233,6 +233,12 @@ class Routes
 					->get('/media/search', [Panel\Media::class, 'search'], 'media.search')
 					->middleware($panelAuth);
 				$panel
+					->post('/media/delete-many', [Panel\Media::class, 'deleteMany'], 'media.delete-many')
+					->middleware($panelAuth);
+				$panel
+					->post("/media/{$uid}/replace", [Panel\Media::class, 'replace'], 'media.replace')
+					->middleware($panelAuth);
+				$panel
 					->post("/media/{$uid}", [Panel\Media::class, 'save'], 'media.save')
 					->middleware($panelAuth)
 					->after($renderers->get('media'));

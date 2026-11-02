@@ -54,7 +54,7 @@ $listing = u($listing ?? null);
 			<?php if ($screen->filtered()): ?>
 				<a
 					class="cms-media-reset"
-					href="<?= escape($screen->url(['kind' => [], 'q' => '', 'range' => ''])) ?>"
+					href="<?= escape($screen->url(['kind' => [], 'q' => '', 'range' => '', 'status' => ''])) ?>"
 					hx-target="#main"
 					data-media-keep-file><?= escape(__('common:reset')) ?></a>
 			<?php endif ?>
@@ -71,6 +71,20 @@ $listing = u($listing ?? null);
 						<?= in_array($kind, $screen->kinds, true) ? 'checked' : '' ?> />
 					<span class="cms-media-check-label"><?= escape($kindLabels[$kind]) ?></span>
 					<span class="cms-media-check-count"><?= (int) ($listing->counts[$kind] ?? 0) ?></span>
+				</label>
+			<?php endforeach ?>
+		</fieldset>
+
+		<fieldset class="cms-media-rail-group">
+			<legend class="cms-media-rail-title"><?= escape(__('media:status')) ?></legend>
+			<?php foreach ([
+				'' => __('media:status-any'),
+				'unused' => __('media:status-unused'),
+				'no-alt' => __('media:status-no-alt'),
+			] as $value => $label): ?>
+				<label class="cms-media-check">
+					<input type="radio" name="status" value="<?= escape($value) ?>" <?= $screen->status === $value ? 'checked' : '' ?> />
+					<span class="cms-media-check-label"><?= escape($label) ?></span>
 				</label>
 			<?php endforeach ?>
 		</fieldset>

@@ -9,13 +9,16 @@ use Celema\Core\Factory\Factory;
 use Celema\Core\Response;
 use Celema\Quma\Database;
 use Cosray\Assets\Asset;
+use Cosray\Assets\Ingest;
 use Cosray\Assets\Library;
 use Cosray\Assets\Meta;
+use Cosray\Exception\IngestError;
 use Cosray\Locales;
 use Cosray\Middleware\Permission;
 use Cosray\Panel\MediaScreen;
 use Cosray\Panel\System;
 use Cosray\References\Usage;
+use Psr\Http\Message\UploadedFileInterface;
 
 /**
  * The media screen: the asset catalog as a filterable grid with a detail
@@ -41,6 +44,7 @@ final class Media extends Panel
 			q: $screen->q,
 			since: Library::rangeSince($screen->range),
 			page: $screen->page,
+			status: $screen->status,
 		);
 
 		if ($this->target() === 'media-more') {
@@ -172,6 +176,50 @@ final class Media extends Panel
 		}
 
 		return Response::create($factory)->redirect($url, 303);
+	}
+
+	/**
+	 * Deletes the selected assets that nothing uses and says how that went.
+	 */
+	#[Permission('edit-nodes')]
+	public function deleteMany(Database $db, Factory $factory): Response
+	{
+		$uids = $this->formData()['uids'] ?? [];
+		$uids = is_array($uids) ? array_values(array_filter($uids, is_string(...))) : [];
+
+		return Response::create($factory)->json(['ok' => true, ...new Library($db, $this->config)->deleteMany($uids)]);
+	}
+
+	/**
+	 * Puts a new file under an asset, which keeps its uid and with it every use.
+	 */
+	#[Permission('edit-nodes')]
+	public function replace(Database $db, Factory $factory, string $uid): Response
+	{
+		$response = Response::create($factory);
+		$row = $db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$file = $this->request->unwrap()->getUploadedFiles()['file'] ?? null;
+
+		if (!$file instanceof UploadedFileInterface || $file->getError() !== UPLOAD_ERR_OK) {
+			return $response->json(['ok' => false, 'error' => __('media:upload-failed')], 400);
+		}
+
+		try {
+			new Ingest($this->config, $db)->replace(
+				$row,
+				(string) $file->getStream(),
+				(string) $file->getClientFilename(),
+			);
+		} catch (IngestError $e) {
+			return $response->json(['ok' => false, 'error' => $e->userMessage], 400);
+		}
+
+		return $response->json(['ok' => true]);
 	}
 
 	private function screen(): MediaScreen

@@ -25,8 +25,8 @@ $search = $screen->query(['q' => '']);
 			type="search"
 			name="q"
 			value="<?= escape($screen->q) ?>"
-			aria-label="<?= escape(__('media:search-filename')) ?>"
-			placeholder="<?= escape(__('media:search-filename')) ?>" />
+			aria-label="<?= escape(__('media:search')) ?>"
+			placeholder="<?= escape(__('media:search')) ?>" />
 		<button type="submit" class="cms-button secondary"><?= escape(__('common:search')) ?></button>
 	</form>
 	<?php if ($listing->assets === []): ?>

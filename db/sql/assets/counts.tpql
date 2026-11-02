@@ -1,5 +1,5 @@
 SELECT
-	-- Filter vocabulary: splits classify()'s `file` into audio/document.
+	-- Filter vocabulary: splits the `file` of classify() into audio/document.
 	-- Keep the prefixes in sync with Asset::classify() and list.tpql.
 	CASE
 		WHEN mime LIKE 'image/%' THEN 'image'
@@ -13,7 +13,24 @@ FROM
 WHERE
 	1 = 1
 <?php if (isset($q)) : ?>
-	AND filename ILIKE :q
+	AND concat_ws(
+		' ',
+		filename,
+		meta->>'attribution',
+		jsonb_path_query_array(meta, '$.alt.*')::text,
+		jsonb_path_query_array(meta, '$.title.*')::text,
+		jsonb_path_query_array(meta, '$.caption.* ? (@.type() == "string")')::text,
+		jsonb_path_query_array(meta, '$.caption.**.text')::text
+	) ILIKE :q
+<?php endif ?>
+<?php if (isset($unused)) : ?>
+	AND NOT EXISTS (
+		SELECT 1 FROM /*:cms.prefix:*/asset_references r WHERE r.asset_uid = assets.uid
+	)
+<?php endif ?>
+<?php if (isset($noalt)) : ?>
+	AND mime LIKE 'image/%'
+	AND NOT jsonb_path_exists(meta, '$.alt.* ? (@ != "")')
 <?php endif ?>
 <?php if (isset($since)) : ?>
 	AND created >= :since

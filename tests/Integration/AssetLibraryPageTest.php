@@ -46,6 +46,94 @@ final class AssetLibraryPageTest extends IntegrationTestCase
 		$this->assertSame(5, $this->page(['file'])->total);
 	}
 
+	public function testSearchMatchesTheCatalogsTexts(): void
+	{
+		$word = bin2hex(random_bytes(6));
+		$doc = [
+			'type' => 'doc',
+			'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => "doc {$word}c"]]]],
+		];
+		$alt = $this->insert('a.png', 'image/png', meta: ['alt' => ['de' => "alt {$word}a"]]);
+		$title = $this->insert('b.pdf', 'application/pdf', meta: ['title' => ['en' => "title {$word}t"]]);
+		$plain = $this->insert('c.png', 'image/png', meta: ['caption' => ['en' => "plain {$word}p"]]);
+		$rich = $this->insert('d.png', 'image/png', meta: ['caption' => ['en' => $doc]]);
+		$credit = $this->insert('e.png', 'image/png', meta: ['attribution' => "by {$word}x"]);
+
+		foreach ([
+			"{$word}a" => $alt,
+			"{$word}t" => $title,
+			"{$word}p" => $plain,
+			"{$word}c" => $rich,
+			"{$word}x" => $credit,
+		] as $q => $uid) {
+			$this->assertSame([$uid], $this->uids($this->library()->page(q: $q)), $q);
+		}
+
+		$this->assertEqualsCanonicalizing(
+			[$alt, $title, $plain, $rich, $credit],
+			$this->uids($this->library()->page(q: $word)),
+		);
+	}
+
+	public function testSearchLeavesOutWhatIsNotText(): void
+	{
+		$doc = [
+			'type' => 'doc',
+			'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Words']]]],
+		];
+		$uid = $this->insert('words.png', 'image/png', meta: [
+			'alt' => ['de' => 'Wort'],
+			'caption' => ['en' => $doc],
+			'focal' => ['x' => 0.123456, 'y' => 0.5],
+		]);
+
+		foreach (['paragraph', '0.123456', '"de"'] as $q) {
+			$this->assertNotContains($uid, $this->uids($this->library()->page(q: $q)), $q);
+		}
+	}
+
+	public function testStatusNarrowsToWhatNothingUses(): void
+	{
+		$used = $this->insert('used.png', 'image/png');
+		$unused = $this->insert('unused.png', 'image/png');
+		$this->db()->execute(
+			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid) VALUES ('node', 'an-owner', :uid)",
+			['uid' => $used],
+		)->run();
+
+		$page = $this->library()->page(q: $this->prefix, status: 'unused');
+
+		$this->assertSame([$unused], $this->uids($page));
+		$this->assertSame(1, $page->counts['image']);
+	}
+
+	public function testStatusNarrowsToImagesWithoutAltText(): void
+	{
+		$without = $this->insert('without.png', 'image/png');
+		$blank = $this->insert('blank.png', 'image/png', meta: ['alt' => ['en' => '']]);
+		$this->insert('with.png', 'image/png', meta: ['alt' => ['en' => 'Described']]);
+		$this->insert('notes.pdf', 'application/pdf');
+
+		$page = $this->library()->page(q: $this->prefix, status: 'no-alt');
+
+		$this->assertEqualsCanonicalizing([$without, $blank], $this->uids($page));
+	}
+
+	public function testDeletingSeveralLeavesWhatIsInUse(): void
+	{
+		$used = $this->insert('used.png', 'image/png');
+		$unused = $this->insert('unused.png', 'image/png');
+		$this->db()->execute(
+			"INSERT INTO cms.asset_references (owner_type, owner_uid, asset_uid) VALUES ('node', 'an-owner', :uid)",
+			['uid' => $used],
+		)->run();
+
+		$result = $this->library()->deleteMany([$used, $unused, $unused, 'nosuchasset00']);
+
+		$this->assertSame(['deleted' => 1, 'kept' => 1], $result);
+		$this->assertSame([$used], $this->uids($this->page()));
+	}
+
 	public function testSearchMatchesTheFilename(): void
 	{
 		$this->insert('harbour.png', 'image/png');
@@ -120,7 +208,7 @@ final class AssetLibraryPageTest extends IntegrationTestCase
 	 * prefix in SQL, so pinning them must not depend on what libmagic
 	 * detects for handcrafted bytes.
 	 */
-	private function insert(string $name, ?string $mime, ?string $created = null): string
+	private function insert(string $name, ?string $mime, ?string $created = null, array $meta = []): string
 	{
 		$uid = bin2hex(random_bytes(8));
 		$filename = $this->prefix . $name;
@@ -129,12 +217,13 @@ final class AssetLibraryPageTest extends IntegrationTestCase
 
 		$this->db()->execute(
 			"INSERT INTO cms.assets (uid, disk, key, filename, mime, bytes, meta, creator, created)
-			VALUES (:uid, 'local', :key, :filename, :mime, 1, '{}'::jsonb, :creator, :created)",
+			VALUES (:uid, 'local', :key, :filename, :mime, 1, :meta::jsonb, :creator, :created)",
 			[
 				'uid' => $uid,
 				'key' => substr($uid, 0, 2) . "/{$uid}/{$filename}",
 				'filename' => $filename,
 				'mime' => $mime,
+				'meta' => $meta === [] ? '{}' : json_encode($meta),
 				'creator' => (int) $system['usr'],
 				'created' => $created ?? date(DATE_ATOM),
 			],
