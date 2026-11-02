@@ -3,7 +3,7 @@
 // them. An empty text falls back to the item's other languages and then to the
 // asset's catalog, shown as placeholder. The attribution is one neutral string.
 
-/** @import { FileItem, ItemMeta, LocaleMap, UploadType } from '../../types/data' */
+/** @import { FileItem, ItemMeta, LocaleMap, RequiredItem, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 
 import { ZXX } from '../../lib/content.js';
@@ -22,6 +22,7 @@ let ids = 0;
  * @property {FileItem} item
  * @property {UploadType} kind
  * @property {Key[]} texts The texts the field offers, in order.
+ * @property {RequiredItem[]} [required] Those the field requires.
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
@@ -40,6 +41,7 @@ export function metaFields({
 	item,
 	kind,
 	texts: keys,
+	required = [],
 	translate,
 	contentLocale,
 	locales,
@@ -228,7 +230,17 @@ export function metaFields({
 		const remark = document.createElement('span');
 		remark.className = 'remark';
 		remark.textContent = notes[name];
-		label.append(labels[name], ' ', remark);
+		const demanded = name !== 'title' && required.includes(name);
+
+		if (demanded) {
+			const requirement = document.createElement('span');
+			requirement.className = 'requirement';
+			requirement.textContent = `(${__('field:required')})`;
+			label.append(labels[name], ' ', ...(name === 'alt' ? [remark, ' '] : []), requirement);
+		} else {
+			label.append(labels[name], ' ', remark);
+		}
+
 		const control =
 			name === 'caption'
 				? captionControl(name, `${id}-${name}`, label)

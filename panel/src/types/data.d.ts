@@ -35,6 +35,9 @@ export interface Meta {
 	[key: string]: LocaleMap<any>;
 }
 
+/** What a field can require of each of its media items. */
+export type RequiredItem = 'alt' | 'caption' | 'attribution' | 'link';
+
 /** Where an image links to: exactly one of `href`, `node` and `asset`. */
 export interface ImageLink {
 	href?: string;

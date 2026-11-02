@@ -7,6 +7,7 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Captionable;
 use Cosray\Field\Field;
+use Cosray\Schema\Caption;
 use Override;
 
 class CaptionHandler extends Handler
@@ -14,8 +15,14 @@ class CaptionHandler extends Handler
 	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Caption, 'The registry maps #[Caption] to this handler');
+
 		if ($field instanceof Captionable) {
 			$field->caption();
+
+			if ($meta->required) {
+				$field->requireItem('caption');
+			}
 
 			return;
 		}

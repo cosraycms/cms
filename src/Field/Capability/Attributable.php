@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field\Capability;
 
-interface Attributable
+interface Attributable extends ItemRequirable
 {
 	public function attribution(bool $attribution = true): static;
 

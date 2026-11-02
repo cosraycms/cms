@@ -8,4 +8,9 @@ use Attribute;
 
 /** Editors can name who made each of the field's images. */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-readonly class Attribution {}
+readonly class Attribution
+{
+	public function __construct(
+		public bool $required = false,
+	) {}
+}

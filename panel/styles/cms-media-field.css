@@ -654,6 +654,22 @@
 		color: var(--cms-color-text-subtle);
 	}
 
+	& .tile-missing {
+		position: absolute;
+		top: var(--cms-space-1-5);
+		left: var(--cms-space-1-5);
+		display: flex;
+		padding: var(--cms-space-1);
+		border-radius: var(--cms-radius-sm);
+		background: var(--cms-color-surface);
+		color: var(--cms-color-warning-text);
+
+		& svg {
+			width: 0.875rem;
+			height: 0.875rem;
+		}
+	}
+
 	& .tile-tools {
 		position: absolute;
 		top: var(--cms-space-1-5);
@@ -882,6 +898,12 @@
 		font-weight: 400;
 	}
 
+	& .requirement {
+		color: var(--cms-color-text-requirement);
+		font-size: var(--cms-font-size-xs);
+		font-weight: 400;
+	}
+
 	/* One line, level with the input beside it, growing with its text
 	   where the browser can size a field to its content. */
 	& .cms-textarea {
@@ -900,6 +922,12 @@
 		font-style: italic;
 		line-height: 1.45;
 	}
+}
+
+.cms-media-missing {
+	margin: var(--cms-space-1) 0 0;
+	color: var(--cms-color-warning-text);
+	font-size: var(--cms-font-size-xs);
 }
 
 /* Where an image links to. */

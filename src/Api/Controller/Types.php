@@ -26,6 +26,7 @@ final class Types
 		'label',
 		'description',
 		'required',
+		'requiredItems',
 		'translate',
 		'translateMode',
 		'options',

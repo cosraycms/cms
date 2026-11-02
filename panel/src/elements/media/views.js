@@ -2,7 +2,7 @@
 // image card, the block figures, the fallback preview and the small menus
 // and mirrors they share.
 
-/** @import { AssetInfo, FileItem, LocaleMap, RichtextDoc, UploadType } from '../../types/data' */
+/** @import { AssetInfo, FileItem, LocaleMap, RequiredItem, RichtextDoc, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 
 import { ZXX } from '../../lib/content.js';
@@ -444,7 +444,8 @@ export function videoPlayer(info) {
  * @param {() => void} options.upload
  * @param {() => void} options.library
  * @param {('alt' | 'caption' | 'attribution')[]} options.offered The texts the field offers.
- * @param {HTMLElement | null} options.link Where the image links to, when the field offers links.
+ * @param {HTMLElement | null} options.link Where the image links to, when it does.
+ * @param {RequiredItem[]} options.required What the field requires of each image.
  * @param {boolean} options.translate
  * @param {string} options.contentLocale
  * @param {ControlLocales | undefined} options.locales
@@ -461,6 +462,7 @@ export function imageCard({
 	library,
 	offered,
 	link,
+	required,
 	translate,
 	contentLocale,
 	locales,
@@ -533,27 +535,35 @@ export function imageCard({
 			: '';
 		const attribution = offered.includes('attribution') ? effectiveAttribution(item, info) : '';
 
-		if (alt) {
-			text(__('image:alt-text'), alt).title = alt;
-		} else if (!readonly) {
-			const add = button('add', __('image:alt-text-add'), () => {
+		const add = () =>
+			button('add', __('image:alt-text-add'), () => {
 				// The link is gone once the text is there, so the dialog returns focus to the edit button.
 				/** @type {HTMLElement | null} */ (controls.querySelector('.edit'))?.focus();
 				edit();
 			});
-			text(__('image:alt-text'), add);
+
+		if (alt) {
+			text(__('image:alt-text'), alt).title = alt;
+		} else if (!readonly) {
+			text(__('image:alt-text'), add());
 		}
 
 		if (docText(caption)) {
 			text(__('image:caption'), ...docNodes(caption)).title = docText(caption);
+		} else if (!readonly && required.includes('caption')) {
+			text(__('image:caption'), add());
 		}
 
 		if (attribution) {
 			text(__('image:attribution'), attribution).title = attribution;
+		} else if (!readonly && required.includes('attribution')) {
+			text(__('image:attribution'), add());
 		}
 
 		if (link) {
 			text(__('image:link'), link);
+		} else if (!readonly && required.includes('link')) {
+			text(__('image:link'), add());
 		}
 	};
 
@@ -573,6 +583,42 @@ export function imageCard({
 	card.append(picture, details);
 
 	return { element: card, setLocale: showTexts };
+}
+
+/**
+ * What an item lacks of what its field requires: the check the server makes
+ * when saving, where a translated text has to exist in the default language.
+ *
+ * @param {FileItem} item
+ * @param {AssetInfo | undefined} info
+ * @param {RequiredItem[]} required
+ * @param {ControlLocales | undefined} locales
+ * @returns {string[]} Their labels.
+ */
+export function missingItems(item, info, required, locales) {
+	const main = locales?.default ?? '';
+	/** @param {unknown} value */
+	const has = (value) => docText(/** @type {string | RichtextDoc} */ (value ?? '')).trim() !== '';
+	const labels = {
+		alt: __('image:alt-text'),
+		caption: __('image:caption'),
+		attribution: __('image:attribution'),
+		link: __('image:link'),
+	};
+
+	return required
+		.filter((name) => {
+			if (name === 'link') return !item.meta?.link;
+			if (name === 'attribution') {
+				return !has(item.meta?.attribution) && !has(info?.meta?.attribution);
+			}
+
+			const own = /** @type {LocaleMap<unknown> | undefined} */ (item.meta?.[name]);
+			const catalog = /** @type {LocaleMap<unknown> | undefined} */ (info?.meta?.[name]);
+
+			return !has(own?.[main]) && !has(own?.[ZXX]) && !has(catalog?.[main]);
+		})
+		.map((name) => labels[name]);
 }
 
 /**

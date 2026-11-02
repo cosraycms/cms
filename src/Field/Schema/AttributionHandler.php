@@ -7,6 +7,7 @@ namespace Cosray\Field\Schema;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Capability\Attributable;
 use Cosray\Field\Field;
+use Cosray\Schema\Attribution;
 use Override;
 
 class AttributionHandler extends Handler
@@ -14,8 +15,14 @@ class AttributionHandler extends Handler
 	#[Override]
 	public function apply(object $meta, Field $field): void
 	{
+		assert($meta instanceof Attribution, 'The registry maps #[Attribution] to this handler');
+
 		if ($field instanceof Attributable) {
 			$field->attribution();
+
+			if ($meta->required) {
+				$field->requireItem('attribution');
+			}
 
 			return;
 		}

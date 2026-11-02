@@ -6,7 +6,7 @@
 // slot. Values are `{uid, meta?}` lists: an asymmetric field keeps one per
 // language, any other one under zxx.
 
-/** @import { AssetInfo, AssetMap, FileItem, LocaleMap, Meta, UploadType } from '../types/data' */
+/** @import { AssetInfo, AssetMap, FileItem, LocaleMap, Meta, RequiredItem, UploadType } from '../types/data' */
 /** @import { UploadResult } from '../lib/bridge.js' */
 /** @import { ControlLocales } from '../lib/control.js' */
 
@@ -31,6 +31,7 @@ import {
 	figure,
 	fileRow,
 	imageCard,
+	missingItems,
 	svg,
 	retitle,
 	videoPlayer,
@@ -48,6 +49,7 @@ import {
  * @property {boolean} [caption] Offers a caption per use.
  * @property {boolean} [attribution] Offers an attribution per use.
  * @property {boolean} [link] Offers a link per use.
+ * @property {string[]} [requiredItems] What each item has to have.
  * @property {boolean} [cropping] The site can deliver a crop.
  */
 
@@ -246,6 +248,27 @@ class MediaControl extends HTMLElement {
 			...(this.field.caption ? /** @type {const} */ (['caption']) : []),
 			...(this.field.attribution ? /** @type {const} */ (['attribution']) : []),
 		];
+	}
+
+	/** @returns {RequiredItem[]} */
+	get #required() {
+		return /** @type {RequiredItem[]} */ (this.field.requiredItems ?? []);
+	}
+
+	/**
+	 * What an item lacks of what the field requires. An asymmetric field only
+	 * asks that of the list in the default language.
+	 *
+	 * @param {FileItem} item
+	 * @param {string} identity
+	 * @returns {string[]}
+	 */
+	#missing(item, identity) {
+		if (this.field.translateMode === 'asymmetric' && identity !== this.locales?.default) {
+			return [];
+		}
+
+		return missingItems(item, this.#asset(item.uid ?? ''), this.#required, this.locales);
 	}
 
 	/** @returns {('caption' | 'title')[]} */
@@ -470,6 +493,7 @@ class MediaControl extends HTMLElement {
 						this.#fieldMeta = meta;
 						this.#notify();
 					},
+					missing: (item) => this.#missing(item, identity),
 					edit: (index) => this.#details(identity, index),
 					remove: removeAt,
 					move,
@@ -602,6 +626,7 @@ class MediaControl extends HTMLElement {
 					this.field.link && item.meta?.link
 						? linkText(item.meta.link, (uid) => this.#asset(uid))
 						: null,
+				required: this.#required,
 				translate,
 				contentLocale: this.#locale,
 				locales,
@@ -631,6 +656,11 @@ class MediaControl extends HTMLElement {
 			library,
 		});
 		body.append(shown.element);
+		const gaps = this.#missing(item, this.#identity(this.#locale));
+
+		if (gaps.length > 0) {
+			body.append(create('p', 'cms-media-missing', `${__('image:missing')} ${gaps.join(', ')}`));
+		}
 
 		if (type === 'image') {
 			if (captioned) {
@@ -959,6 +989,7 @@ class MediaControl extends HTMLElement {
 				),
 			texts: this.#imageTexts,
 			linking: this.field.link ?? false,
+			required: this.#required,
 			cropping: this.field.cropping ?? false,
 			translate: this.#translate,
 			contentLocale: this.#locale,
@@ -1001,6 +1032,7 @@ class MediaControl extends HTMLElement {
 			item,
 			kind: this.#type === 'video' ? 'video' : 'file',
 			texts: this.#rowTexts,
+			required: this.#required,
 			translate: this.#translate,
 			contentLocale: this.#locale,
 			locales: this.locales,

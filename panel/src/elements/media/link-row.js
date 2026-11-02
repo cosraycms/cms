@@ -44,15 +44,20 @@ export function linkText(link, asset) {
  * @param {ImageLink | undefined} options.link
  * @param {(uid: string) => AssetInfo | undefined} options.asset
  * @param {(item: LibraryItem) => void} options.picked Makes an asset from the library known to `asset`.
+ * @param {boolean} options.required
  * @param {boolean} options.readonly
  * @param {(link: ImageLink | undefined) => void} options.change
  * @returns {{ element: HTMLElement, describe: (described: boolean) => void }}
  */
-export function linkRow({ owner, link, asset, picked, readonly, change }) {
+export function linkRow({ owner, link, asset, picked, required, readonly, change }) {
 	const element = create('div', 'cms-media-meta cms-image-link');
 	const entry = create('div', 'entry');
 	const caption = create('span', 'caption', `${__('image:link')} `);
-	caption.append(create('span', 'remark', __('field:optional')));
+	caption.append(
+		required
+			? create('span', 'requirement', `(${__('field:required')})`)
+			: create('span', 'remark', __('field:optional')),
+	);
 	const target = create('div', 'target');
 	const warning = create('p', 'warning', __('image:link-no-alt'));
 	entry.append(caption, target);

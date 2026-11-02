@@ -11,7 +11,7 @@ import { focalInCrop } from '../../lib/image-geometry.js';
 import { extension } from '../../lib/library.js';
 import { __, __n } from '../../lib/locale.js';
 import { galleryFold } from './gallery-fold.js';
-import { button, create, cropped, rendition } from './views.js';
+import { button, create, cropped, rendition, svg } from './views.js';
 
 let ids = 0;
 
@@ -28,6 +28,7 @@ let ids = 0;
  * @property {(expanded: boolean) => void} expand
  * @property {Meta | undefined} meta The gallery settings, ratio and crop, kept as the field's meta.
  * @property {(meta: Meta) => void} updateMeta
+ * @property {(item: FileItem) => string[]} missing What an image lacks of what the field requires.
  * @property {(index: number) => void} edit Opens an image's details.
  * @property {(index: number) => void} remove
  * @property {(from: number, to: number) => void} move
@@ -93,6 +94,18 @@ export function galleryView(options) {
 			picture.append(cropped(image, item, info));
 		} else {
 			picture.append(create('span', 'plate', extension(filename)));
+		}
+
+		const gaps = options.missing(item);
+
+		if (gaps.length > 0) {
+			const text = `${__('image:missing')} ${gaps.join(', ')}`;
+			const badge = create('span', 'tile-missing');
+			badge.setAttribute('role', 'img');
+			badge.setAttribute('aria-label', text);
+			badge.append(svg('exclamation-triangle'));
+			tile.title = `${filename}\n${text}`;
+			tile.append(badge);
 		}
 
 		const tools = create('div', 'tile-tools');

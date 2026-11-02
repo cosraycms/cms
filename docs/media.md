@@ -88,6 +88,15 @@ public Image $cover;
 
 `linked()` puts the content, by default the image's tag, inside the `<a>` with the link's `target` and `rel`, and returns it alone without a link or when the target is gone. `link()` returns only the address. An address is relative or uses `http`, `https`, `mailto` or `tel`, like a [richtext link](richtext-format.md#links), and gets the same `rel`.
 
+`#[Alt]`, `#[Caption]`, `#[Attribution]` and `#[Link]` take `required: true`, which asks the same of every image in the field:
+
+```php
+#[Label('Cover'), Required, Alt(required: true), Attribution(required: true)]
+public Image $cover;
+```
+
+Saving refuses an image without it, like a required field, also for a working copy. A field without an image passes, so `#[Required]` still decides whether there has to be one. A value from the media screen counts, except for a link, which belongs to the use. A translated text has to exist in the default language, and an asymmetric field only asks this of its list in the default language. A later edit in the media screen is not checked against the pages that rely on it. `#[Alt]` without the argument changes nothing, since every image field offers an alt text.
+
 `#[Caption]` also applies to video fields. Without an attribute the input is hidden, nothing stored is lost, and the methods still return stored and catalog values. `caption()` returns escaped HTML as `Cosray\Markup`, which templates print as is; `captionText()` gives plain text.
 
 ## Focal point and crop

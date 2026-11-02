@@ -108,6 +108,7 @@ export function libraryDialog(owner, kind, pick) {
  * @property {FileItem} item
  * @property {'file' | 'video'} kind A video edits its caption, a file its title.
  * @property {('caption' | 'title')[]} texts
+ * @property {import('../../types/data').RequiredItem[]} required
  * @property {boolean} translate
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
@@ -127,6 +128,7 @@ export function editDialog({
 	item,
 	kind,
 	texts,
+	required,
 	translate,
 	contentLocale,
 	locales,
@@ -157,6 +159,7 @@ export function editDialog({
 				item: draft,
 				kind,
 				texts,
+				required,
 				translate,
 				contentLocale,
 				locales,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field\Capability;
 
-interface Captionable
+interface Captionable extends ItemRequirable
 {
 	public function caption(bool $caption = true): static;
 

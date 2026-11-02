@@ -422,7 +422,8 @@ final class Styleguide extends Panel
 				'limit' => $many,
 				'caption' => true,
 				'cropping' => true,
-				'description' => 'A tile shows its edit and remove buttons on hover and opens the same details; tiles reorder by drag.',
+				'requiredItems' => ['alt'],
+				'description' => 'A tile shows its edit and remove buttons on hover and opens the same details; tiles reorder by drag. This field requires an alt text, so a tile without one is marked.',
 			],
 			[
 				'name' => 'galleryEmpty',

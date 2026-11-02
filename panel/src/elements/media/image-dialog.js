@@ -2,7 +2,7 @@
 // its per-use texts. Everything stays a draft until the dialog is applied,
 // also across the images a gallery steps through.
 
-/** @import { AssetInfo, FileItem, ItemMeta } from '../../types/data' */
+/** @import { AssetInfo, FileItem, ItemMeta, RequiredItem } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
@@ -28,6 +28,7 @@ import { button, contentLocales, create, effectiveText, replaceMenu, svg } from 
  *     known to `asset`, or to null once the editor was told what went wrong.
  * @property {('alt' | 'caption' | 'attribution')[]} texts The texts the field offers.
  * @property {boolean} linking Whether the field offers a link per image.
+ * @property {RequiredItem[]} required What the field requires of each image.
  * @property {boolean} cropping Whether the site can deliver a crop.
  * @property {boolean} translate
  * @property {string} contentLocale
@@ -140,6 +141,7 @@ export function imageDialog({
 	upload,
 	texts,
 	linking,
+	required,
 	cropping,
 	translate,
 	contentLocale,
@@ -247,6 +249,7 @@ export function imageDialog({
 					item,
 					kind: 'image',
 					texts,
+					required,
 					translate,
 					contentLocale: locale,
 					locales,
@@ -263,6 +266,7 @@ export function imageDialog({
 							link: item.meta?.link,
 							asset,
 							picked,
+							required: required.includes('link'),
 							readonly,
 							change: (link) => edit(target, { link }),
 						})

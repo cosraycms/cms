@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Field\Schema;
 
 use Cosray\Schema\Allows;
+use Cosray\Schema\Alt;
 use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
 use Cosray\Schema\Columns;
@@ -76,6 +77,7 @@ class Registry
 		$registry->register(Tools::class, new ToolsHandler());
 		$registry->register(When::class, new WhenHandler());
 		$registry->register(Caption::class, new CaptionHandler());
+		$registry->register(Alt::class, new AltHandler());
 		$registry->register(Attribution::class, new AttributionHandler());
 		$registry->register(Link::class, new LinkHandler());
 

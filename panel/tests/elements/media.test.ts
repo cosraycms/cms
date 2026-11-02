@@ -545,6 +545,123 @@ describe('image details', () => {
 		});
 	});
 
+	describe('required parts', () => {
+		const requirement = (name: string) =>
+			document.querySelector(`.cms-modal label[for$="-${name}"] .requirement`)?.textContent;
+
+		it('marks them in the dialog instead of calling them optional', async () => {
+			await details({ uid: 'cover' }, { requiredItems: ['alt', 'caption'], attribution: true });
+
+			expect(requirement('alt')).toBe('(field:required)');
+			expect(requirement('caption')).toBe('(field:required)');
+			expect(requirement('attribution')).toBeUndefined();
+			expect(document.querySelector('.cms-modal label[for$="-caption"] .remark')).toBeNull();
+		});
+
+		it('marks a required link', async () => {
+			await details({ uid: 'cover' }, { link: true, requiredItems: ['link'] });
+
+			expect(document.querySelector('.cms-image-link .requirement')?.textContent).toBe(
+				'(field:required)',
+			);
+		});
+
+		it('offers to add a required text on the card', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { alt: { zxx: 'A kettle' } } }] },
+				field: {
+					name: 'cover',
+					limit: { min: 0, max: 1 },
+					caption: true,
+					link: true,
+					requiredItems: ['caption', 'link'],
+				},
+				assets: { cover: { ...assets.cover, meta: {} } },
+			});
+			const rows = [...element.querySelectorAll('.cms-image-card .texts > div')].map(
+				(row) => row.textContent,
+			);
+
+			expect(rows).toEqual([
+				'image:alt-text:A kettle',
+				'image:caption:image:alt-text-add',
+				'image:link:image:alt-text-add',
+			]);
+		});
+
+		it('marks a gallery tile that lacks one', async () => {
+			const { element } = await media('cosray-image', {
+				value: {
+					zxx: [
+						{ uid: 'cover', meta: { alt: { zxx: 'A kettle' } } },
+						{ uid: 'plain' },
+						{ uid: 'shared' },
+					],
+				},
+				field: { name: 'gallery', requiredItems: ['alt'] },
+				assets: {
+					cover: { ...assets.cover, meta: {} },
+					plain: { ...assets.cover, meta: {} },
+					shared: { ...assets.cover, meta: { alt: { en: 'From the catalog' } } },
+				},
+				locales: { all: [{ id: 'en', title: 'English' }], default: 'en' },
+			} as HostPayload);
+			const tiles = [...element.querySelectorAll('.tile')];
+
+			expect(tiles.map((tile) => tile.querySelector('.tile-missing') !== null)).toEqual([
+				false,
+				true,
+				false,
+			]);
+			expect(tiles[1]?.querySelector('.tile-missing')?.getAttribute('aria-label')).toBe(
+				'image:missing image:alt-text',
+			);
+		});
+
+		it('names what a block figure lacks', async () => {
+			const { element } = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover' }] },
+				field: {
+					name: 'image',
+					limit: { min: 0, max: 1 },
+					presentation: 'block',
+					requiredItems: ['alt'],
+				},
+				assets: { cover: { ...assets.cover, meta: {} } },
+			});
+
+			expect(element.querySelector('.cms-media-missing')?.textContent).toBe(
+				'image:missing image:alt-text',
+			);
+		});
+
+		it('asks nothing of the other lists of an asymmetric field', async () => {
+			const { element } = await media(
+				'cosray-image',
+				{
+					value: { en: [{ uid: 'cover' }], de: [{ uid: 'cover' }] },
+					field: {
+						name: 'gallery',
+						translate: true,
+						translateMode: 'asymmetric',
+						requiredItems: ['alt'],
+					},
+					assets: { cover: { ...assets.cover, meta: {} } },
+					locales: {
+						all: [
+							{ id: 'en', title: 'English' },
+							{ id: 'de', title: 'Deutsch' },
+						],
+						default: 'en',
+					},
+				} as HostPayload,
+				'de',
+			);
+
+			expect(element.querySelector('.tile-missing')).toBeNull();
+		});
+	});
+
 	it('keeps stored texts the field does not offer', async () => {
 		const { changes } = await details(
 			{ uid: 'cover', meta: { caption: { zxx: 'Kept' }, title: { zxx: 'Old' } } },
