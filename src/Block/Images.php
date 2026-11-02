@@ -6,6 +6,9 @@ namespace Cosray\Block;
 
 use Cosray\Contract\Block;
 use Cosray\Field;
+use Cosray\Markup;
+use Cosray\Schema\Attribution;
+use Cosray\Schema\Caption;
 use Cosray\Schema\Label;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
@@ -20,7 +23,7 @@ final class Images implements Block
 {
 	private const string THUMB = 'block-thumb';
 
-	#[Label('block:images'), Required, Translate]
+	#[Label('block:images'), Required, Translate, Caption, Attribution]
 	protected Field\Image $images;
 
 	#[Override]
@@ -48,7 +51,13 @@ final class Images implements Block
 			$position = $image->position();
 			$style = $position === '' ? '' : " style=\"{$position}\"";
 
-			$result .= "<div class=\"{$prefix}-blocks-images-image\"><img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}></div>";
+			$tag = "<img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>";
+			// Sites lay a tile out around its image, so one without text keeps that structure.
+			$tile =
+				$image->captionText() === '' && $image->attribution() === ''
+					? $tag
+					: (string) $image->render(new Markup($tag), $prefix);
+			$result .= "<div class=\"{$prefix}-blocks-images-image\">{$tile}</div>";
 		}
 
 		if ($result === '') {

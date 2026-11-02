@@ -51,7 +51,7 @@ A field's `#[Allows(Quote::class)]` makes the type available without separate re
 | `RichText` | Structured richtext |
 | `Heading` | Text and a heading-level option |
 | `Image` | Single image in a figure, optional caption, attribution and link, responsive image ladder |
-| `Images` | Gallery with ratio/crop settings |
+| `Images` | Gallery with ratio/crop settings, optional caption and attribution per image |
 | `Video` | Video player |
 | `Youtube` | Video ID and aspect-ratio metadata |
 | `Iframe` | Trusted embed code, rendered raw |

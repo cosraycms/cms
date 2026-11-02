@@ -637,6 +637,48 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
+	public function testGalleryTileWithoutTextKeepsItsStructure(): void
+	{
+		$blocks = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
+		$this->seedAsset('galleryimg123', 'one.jpg');
+
+		$html = $blocks->render(prefix: 'site')->html;
+
+		$this->assertMatchesRegularExpression('#<div class="site-blocks-images-image"><img [^>]+></div>#', $html);
+		$this->assertStringNotContainsString('<figure', $html);
+	}
+
+	public function testGalleryTilePrintsCaptionAndAttribution(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->images([
+				['uid' => 'galleryimg123', 'meta' => ['caption' => ['zxx' => 'Own'], 'attribution' => '© <Own>']],
+				['uid' => 'galleryimg456'],
+				['uid' => 'galleryimg789'],
+			]),
+		]);
+		$this->seedAsset('galleryimg123', 'one.jpg');
+		$this->seedAsset('galleryimg456', 'two.jpg', meta: ['attribution' => '© Catalog']);
+		$this->seedAsset('galleryimg789', 'three.jpg');
+
+		$html = $blocks->render(prefix: 'site')->html;
+
+		$this->assertMatchesRegularExpression(
+			'#<div class="site-blocks-images-image"><figure class="site-figure"><img [^>]+>'
+				. '<figcaption>Own <small class="site-attribution">© &lt;Own&gt;</small></figcaption></figure></div>#',
+			$html,
+		);
+		$this->assertMatchesRegularExpression(
+			'#<figure class="site-figure"><img [^>]+two-[^>]+>'
+				. '<figcaption><small class="site-attribution">© Catalog</small></figcaption></figure></div>#',
+			$html,
+		);
+		$this->assertMatchesRegularExpression(
+			'#<div class="site-blocks-images-image"><img [^>]+three-[^>]+></div>#',
+			$html,
+		);
+	}
+
 	public function testImageBlockRendersTheFocalPoint(): void
 	{
 		$blocks = $this->createBlocksValue([
