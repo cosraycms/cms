@@ -233,6 +233,27 @@ final class RichtextValidatorTest extends TestCase
 		$this->assertContains("{$path}.marks.5: link needs exactly one of href/node/asset", $errors);
 	}
 
+	public function testALinkWithAnUnsafeSchemeIsRefused(): void
+	{
+		$errors = new Validator()->validate([
+			'type' => 'doc',
+			'content' => [
+				[
+					'type' => 'paragraph',
+					'content' => [
+						[
+							'type' => 'text',
+							'text' => 'x',
+							'marks' => [['type' => 'link', 'attrs' => ['href' => 'javascript:alert(1)']]],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertSame(['doc.content.0.content.0.marks.0: link href uses a scheme that is not allowed'], $errors);
+	}
+
 	public function testContentModels(): void
 	{
 		$validator = new Validator();

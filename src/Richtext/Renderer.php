@@ -237,6 +237,10 @@ final class Renderer
 		$rel = null;
 
 		if (is_string($attrs['href'] ?? null) && $attrs['href'] !== '') {
+			if (!Link::safe($attrs['href'])) {
+				return $this->skip('unsafe link href') . $inner;
+			}
+
 			$href = $attrs['href'];
 			$rel = $this->linkRel;
 		} elseif (is_string($attrs['node'] ?? null) && $attrs['node'] !== '') {

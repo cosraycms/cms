@@ -8,6 +8,7 @@
 import { cosray } from '../../lib/bridge.js';
 import { icon } from '../../lib/icons.js';
 import { browseLibrary } from '../../lib/library-browser.js';
+import { safeHref } from '../../lib/link-url.js';
 import { __ } from '../../lib/locale.js';
 import { panelBase } from '../../lib/runtime.js';
 
@@ -256,7 +257,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 							? pickedAsset !== ''
 								? { asset: pickedAsset }
 								: null
-							: url !== ''
+							: url !== '' && safeHref(url)
 								? { href: url }
 								: null;
 
@@ -272,7 +273,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 						? pickedNode === ''
 						: current === 'images' || current === 'files'
 							? pickedAsset === ''
-							: url === '';
+							: url === '' || !safeHref(url);
 			}
 
 			function showPanel() {

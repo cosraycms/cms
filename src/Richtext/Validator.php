@@ -178,6 +178,10 @@ final class Validator
 			}
 		}
 
+		if (is_string($attrs['href'] ?? null) && !Link::safe($attrs['href'])) {
+			$this->errors[] = "{$path}: link href uses a scheme that is not allowed";
+		}
+
 		foreach (['target', 'class'] as $key) {
 			if (array_key_exists($key, $attrs) && $attrs[$key] !== null && !is_string($attrs[$key])) {
 				$this->errors[] = "{$path}: link {$key} must be a string or null";

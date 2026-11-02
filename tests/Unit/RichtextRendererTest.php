@@ -19,6 +19,30 @@ final class RichtextRendererTest extends TestCase
 	private function resolver(): Resolver
 	{
 		return new class implements Resolver {
+			public function testAStoredLinkWithAnUnsafeSchemeBecomesPlainText(): void
+			{
+				$renderer = new Renderer($this->resolver());
+
+				$html = $renderer->render([
+					'type' => 'doc',
+					'content' => [
+						[
+							'type' => 'paragraph',
+							'content' => [
+								[
+									'type' => 'text',
+									'text' => 'klick',
+									'marks' => [['type' => 'link', 'attrs' => ['href' => 'javascript:alert(1)']]],
+								],
+							],
+						],
+					],
+				]);
+
+				$this->assertSame('<p>klick</p>', $html);
+				$this->assertSame(['unsafe link href'], $renderer->notices());
+			}
+
 			public function asset(string $uid): ?Asset
 			{
 				return match ($uid) {

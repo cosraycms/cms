@@ -70,6 +70,8 @@ A link has exactly one target kind:
 
 Node and asset references resolve at render time, so their URLs can change without rewriting prose. Optional `target` records editorial intent; `class` is optional. `rel` is not stored: the renderer applies link policy to external hrefs.
 
+An `href` is relative or uses `http`, `https`, `mailto` or `tel`; the validator refuses any other scheme, and the renderer prints such a stored link as plain text.
+
 The reference scanner reads `image.uid`, `link.node`, and `link.asset`. Adding another reference carrier requires updating scanning and serialization as well as editing/rendering.
 
 ### Text styles
