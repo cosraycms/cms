@@ -405,6 +405,102 @@ describe('image details', () => {
 		expect(modal.querySelector('[id$="-title"]')).toBeNull();
 	});
 
+	describe('link', () => {
+		const row = () => document.querySelector<HTMLElement>('.cms-modal .cms-image-link');
+		const rowButton = (label: string) =>
+			[...row()!.querySelectorAll('button')].find(
+				(entry) => entry.textContent === label || entry.title === label,
+			)!;
+
+		it('offers no link unless the field asks for it', async () => {
+			await details();
+
+			expect(row()).toBeNull();
+		});
+
+		it('stores an address with its target for this use', async () => {
+			const { changes } = await details(
+				{ uid: 'cover', meta: { alt: { zxx: 'A kettle' } } },
+				{ link: true },
+			);
+
+			rowButton('link:add').click();
+			await tick();
+			const input = document.querySelector<HTMLInputElement>(
+				'.cms-modal-link-manual-input-wrap input',
+			)!;
+			input.value = 'https://example.com';
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			document.querySelector<HTMLInputElement>('.cms-modal input[type="checkbox"]')!.click();
+			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')]
+				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'))!
+				.click();
+			await tick();
+
+			expect(row()?.querySelector('.cms-image-link-text')?.textContent).toBe('https://example.com');
+
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({
+				alt: { zxx: 'A kettle' },
+				link: { href: 'https://example.com', target: '_blank' },
+			});
+		});
+
+		it('refuses an address that can run code', async () => {
+			await details({ uid: 'cover' }, { link: true });
+
+			rowButton('link:add').click();
+			await tick();
+			const input = document.querySelector<HTMLInputElement>(
+				'.cms-modal-link-manual-input-wrap input',
+			)!;
+			input.value = 'javascript:alert(1)';
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+
+			const confirm = [...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')].find(
+				(entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'),
+			);
+
+			expect(confirm?.disabled).toBe(true);
+		});
+
+		it('removes a link', async () => {
+			const { changes } = await details(
+				{ uid: 'cover', meta: { alt: { zxx: 'A kettle' }, link: { href: '/about' } } },
+				{ link: true },
+			);
+
+			rowButton('common:remove').click();
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta).toEqual({ alt: { zxx: 'A kettle' } });
+		});
+
+		it('warns while a linked image has no alt text', async () => {
+			await details({ uid: 'cover', meta: { link: { href: '/about' } } }, { link: true });
+
+			expect(row()?.querySelector('.warning')?.textContent).toBe('image:link-no-alt');
+
+			field('alt').value = 'A kettle';
+			field('alt').dispatchEvent(new Event('input', { bubbles: true }));
+
+			expect(row()?.querySelector('.warning')).toBeNull();
+		});
+
+		it('shows where the image links to on its card', async () => {
+			const opened = await media('cosray-image', {
+				value: { zxx: [{ uid: 'cover', meta: { link: { href: '/about' } } }] },
+				field: { name: 'cover', limit: { min: 0, max: 1 }, link: true },
+				assets,
+			});
+
+			const texts = [...opened.element.querySelectorAll('.cms-image-card .texts > div')];
+
+			expect(texts.at(-1)?.textContent).toBe('image:link:/about');
+		});
+	});
+
 	it('keeps stored texts the field does not offer', async () => {
 		const { changes } = await details(
 			{ uid: 'cover', meta: { caption: { zxx: 'Kept' }, title: { zxx: 'Old' } } },

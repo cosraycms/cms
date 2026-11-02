@@ -6,8 +6,9 @@ namespace Cosray\Richtext;
 
 /**
  * Collects the complete set of reference carriers from a richtext
- * document: `image.uid`, `link.asset`, and `link.node`. Feeds the
- * reference indexes (Phase 2) and the panel's asset lookup.
+ * document: `image.uid`, `link.asset`, and `link.node`, and from a whole
+ * content array also the link of an image's use. Feeds the reference
+ * indexes and the panel's asset lookup.
  */
 final class Scanner
 {
@@ -59,6 +60,10 @@ final class Scanner
 			return;
 		}
 
+		if (is_array($data['meta']['link'] ?? null)) {
+			self::link($data['meta']['link'], $assets, $nodes);
+		}
+
 		foreach ($data as $value) {
 			if (is_array($value)) {
 				self::walkContent($value, $assets, $nodes);
@@ -86,15 +91,8 @@ final class Scanner
 				continue;
 			}
 
-			$asset = $mark['attrs']['asset'] ?? null;
-			$target = $mark['attrs']['node'] ?? null;
-
-			if (is_string($asset) && $asset !== '') {
-				$assets[] = $asset;
-			}
-
-			if (is_string($target) && $target !== '') {
-				$nodes[] = $target;
+			if (is_array($mark['attrs'] ?? null)) {
+				self::link($mark['attrs'], $assets, $nodes);
 			}
 		}
 
@@ -102,6 +100,25 @@ final class Scanner
 			if (is_array($child)) {
 				self::walk($child, $assets, $nodes);
 			}
+		}
+	}
+
+	/**
+	 * @param array<mixed> $attrs
+	 * @param list<string> $assets
+	 * @param list<string> $nodes
+	 */
+	private static function link(array $attrs, array &$assets, array &$nodes): void
+	{
+		$asset = $attrs['asset'] ?? null;
+		$target = $attrs['node'] ?? null;
+
+		if (is_string($asset) && $asset !== '') {
+			$assets[] = $asset;
+		}
+
+		if (is_string($target) && $target !== '') {
+			$nodes[] = $target;
 		}
 	}
 }

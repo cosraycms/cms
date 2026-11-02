@@ -444,6 +444,7 @@ export function videoPlayer(info) {
  * @param {() => void} options.upload
  * @param {() => void} options.library
  * @param {('alt' | 'caption' | 'attribution')[]} options.offered The texts the field offers.
+ * @param {HTMLElement | null} options.link Where the image links to, when the field offers links.
  * @param {boolean} options.translate
  * @param {string} options.contentLocale
  * @param {ControlLocales | undefined} options.locales
@@ -459,6 +460,7 @@ export function imageCard({
 	upload,
 	library,
 	offered,
+	link,
 	translate,
 	contentLocale,
 	locales,
@@ -548,6 +550,10 @@ export function imageCard({
 
 		if (attribution) {
 			text(__('image:attribution'), attribution).title = attribution;
+		}
+
+		if (link) {
+			text(__('image:link'), link);
 		}
 	};
 

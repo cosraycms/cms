@@ -8,12 +8,14 @@
 
 import { cosray } from '../../lib/bridge.js';
 import { patchItemMeta } from '../../lib/content.js';
+import { docText } from '../../lib/inline-doc.js';
 import { extension, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 import { libraryDialog } from './dialogs.js';
 import { imageStage } from './image-stage.js';
+import { linkRow } from './link-row.js';
 import { metaFields } from './meta-fields.js';
-import { button, contentLocales, create, replaceMenu, svg } from './views.js';
+import { button, contentLocales, create, effectiveText, replaceMenu, svg } from './views.js';
 
 /**
  * @typedef {object} ImageDialogOptions
@@ -25,6 +27,7 @@ import { button, contentLocales, create, replaceMenu, svg } from './views.js';
  * @property {(file: File) => Promise<string | null>} upload Resolves to the uid of the new asset,
  *     known to `asset`, or to null once the editor was told what went wrong.
  * @property {('alt' | 'caption' | 'attribution')[]} texts The texts the field offers.
+ * @property {boolean} linking Whether the field offers a link per image.
  * @property {boolean} cropping Whether the site can deliver a crop.
  * @property {boolean} translate
  * @property {string} contentLocale
@@ -136,6 +139,7 @@ export function imageDialog({
 	picked,
 	upload,
 	texts,
+	linking,
 	cropping,
 	translate,
 	contentLocale,
@@ -155,6 +159,8 @@ export function imageDialog({
 	const closed = Promise.withResolvers();
 	/** @type {ReturnType<typeof metaFields> | null} */
 	let form = null;
+	/** @type {(() => void) | null} */
+	let describeLink = null;
 
 	/**
 	 * The picture and the form each report their own part of an image's draft.
@@ -196,6 +202,8 @@ export function imageDialog({
 			const stage = create('div', 'stage');
 			const fields = create('div', 'fields');
 			const list = create('dl', 'facts');
+			/** @type {ReturnType<typeof linkRow> | null} */
+			let row = null;
 			body.append(stage, fields);
 
 			if (translate && locales && locales.all.length > 1) {
@@ -234,6 +242,7 @@ export function imageDialog({
 
 				list.replaceChildren(...facts(info));
 				form?.element.remove();
+				row?.element.remove();
 				form = metaFields({
 					item,
 					kind: 'image',
@@ -242,10 +251,39 @@ export function imageDialog({
 					contentLocale: locale,
 					locales,
 					catalog: info?.meta,
-					update: (texts) => edit(target, texts),
+					update: (texts) => {
+						edit(target, texts);
+						describeLink?.();
+					},
 					readonly,
 				});
-				fields.append(form.element, list);
+				row = linking
+					? linkRow({
+							owner,
+							link: item.meta?.link,
+							asset,
+							picked,
+							readonly,
+							change: (link) => edit(target, { link }),
+						})
+					: null;
+				describeLink = () =>
+					row?.describe(
+						Boolean(
+							docText(
+								effectiveText(
+									'alt',
+									drafts.get(target) ?? items[target],
+									info,
+									translate,
+									locale,
+									locales,
+								),
+							),
+						),
+					);
+				describeLink();
+				fields.append(form.element, ...(row ? [row.element] : []), list);
 
 				if (!readonly) {
 					form.element.querySelector('textarea')?.setAttribute('data-dialog-focus', '');
@@ -330,6 +368,7 @@ export function imageDialog({
 		setLocale(next) {
 			locale = next;
 			form?.setLocale(next);
+			describeLink?.();
 
 			for (const follow of followers) follow(next);
 		},

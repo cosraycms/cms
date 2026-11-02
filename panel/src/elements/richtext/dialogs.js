@@ -95,6 +95,29 @@ async function nodes(path, params) {
 	return data.ok ? data.nodes : [];
 }
 
+/** @type {Map<string, Promise<string>>} */
+const titles = new Map();
+
+/**
+ * A node's title, empty when it is gone or could not be asked for.
+ *
+ * @param {string} uid
+ * @returns {Promise<string>}
+ */
+export function nodeTitle(uid) {
+	let title = titles.get(uid);
+
+	if (!title) {
+		title = nodes('reference/labels', new URLSearchParams({ uids: uid })).then(
+			(found) => found[0]?.title ?? '',
+			() => '',
+		);
+		titles.set(uid, title);
+	}
+
+	return title;
+}
+
 /**
  * A node search for link targets: the current pick on top, results below
  * the search box as they arrive.
@@ -215,7 +238,8 @@ function nodeSearch(selected, pick) {
  * @param {string} options.node
  * @param {string} options.asset
  * @param {boolean} options.blank
- * @param {(target: LinkTarget, blank: boolean) => void} options.add
+ * @param {(target: LinkTarget, blank: boolean, item?: LibraryItem) => void} options.add `item` is
+ *     the file a library pick chose.
  */
 export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 	const id = `cms-link-dialog-${++ids}`;
@@ -230,6 +254,8 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 	let url = href;
 	let pickedNode = node;
 	let pickedAsset = asset;
+	/** @type {LibraryItem | undefined} */
+	let pickedItem;
 	/** @type {(() => void) | null} */
 	let stopBrowsing = null;
 
@@ -263,7 +289,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 
 				if (chosen) {
 					handle.close();
-					add(chosen, target.checked);
+					add(chosen, target.checked, chosen.asset ? pickedItem : undefined);
 				}
 			});
 
@@ -296,6 +322,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 						selected: pickedAsset || null,
 						pick: (item) => {
 							pickedAsset = item.uid;
+							pickedItem = item;
 							refresh();
 						},
 					});

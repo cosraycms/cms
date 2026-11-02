@@ -281,6 +281,15 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($valid(['crop' => ['x' => 0.1, 'y' => 0, 'w' => 0.5, 'h' => 1]]));
 		$this->assertTrue($valid(['crop' => ['x' => 0, 'y' => 0, 'w' => 1, 'h' => 1]]));
 
+		$this->assertTrue($valid(['link' => ['href' => 'https://example.com', 'target' => '_blank']]));
+		$this->assertTrue($valid(['link' => ['node' => 'n1']]));
+		$this->assertTrue($valid(['link' => ['asset' => 'a1']]));
+		$this->assertTrue($valid(['link' => null]));
+		$this->assertFalse($valid(['link' => []]));
+		$this->assertFalse($valid(['link' => ['href' => 'javascript:alert(1)']]));
+		$this->assertFalse($valid(['link' => ['href' => '/a', 'node' => 'n1']]));
+		$this->assertFalse($valid(['link' => '/a']));
+
 		$this->assertTrue($valid(['caption' => ['zxx' => 'Plain']]));
 		$this->assertTrue($valid([
 			'caption' => [
@@ -573,6 +582,15 @@ final class BlocksTest extends TestCase
 
 		$this->assertTrue($text->translate()->isTranslatable());
 		$this->assertFalse($text->translate(null)->isTranslatable());
+	}
+
+	public function testTheImageBlockOffersALink(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Image::class);
+		$image = $blocks->blockFields(Builtin\Image::class)['image'];
+
+		$this->assertInstanceOf(Image::class, $image);
+		$this->assertTrue($image->isLinkable());
 	}
 
 	public function testToolsFeedRichtextSubFieldsWithoutTheirOwn(): void

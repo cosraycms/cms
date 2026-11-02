@@ -10,10 +10,12 @@ use Cosray\Assets\SizeSpec;
 use Cosray\Contract\Block;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field;
+use Cosray\Markup;
 use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
+use Cosray\Schema\Link;
 use Cosray\Schema\Required;
 use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
@@ -28,7 +30,7 @@ final class Image implements Block
 	private const array LADDER = ['block-sm', 'block', 'block-lg'];
 	private const string SIZES = '(min-width: 48rem) {pct}vw, 100vw';
 
-	#[Label('block:image'), Required, Limit(1), Translate, Caption, Attribution]
+	#[Label('block:image'), Required, Limit(1), Translate, Caption, Attribution, Link]
 	protected Field\Image $image;
 
 	#[Override]
@@ -53,7 +55,7 @@ final class Image implements Block
 
 		return (
 			"<figure class=\"{$ctx->prefix()}-figure\">"
-				. $this->img($image, $asset, $block, $ctx)
+				. $image->linked(new Markup($this->img($image, $asset, $block, $ctx)))
 				. $figcaption
 				. '</figure>'
 		);

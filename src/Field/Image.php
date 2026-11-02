@@ -7,15 +7,17 @@ namespace Cosray\Field;
 use Celema\Sire\Review;
 use Celema\Sire\Shape;
 use Cosray\Assets\Transform;
+use Cosray\Richtext\Link;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
 use Override;
 
-class Image extends File implements Capability\Captionable, Capability\Attributable
+class Image extends File implements Capability\Captionable, Capability\Attributable, Capability\Linkable
 {
 	use Capability\IsCaptionable;
 	use Capability\IsAttributable;
+	use Capability\IsLinkable;
 
 	/** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
 	public const array RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'];
@@ -87,14 +89,15 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 	}
 
 	/**
-	 * A use's attribution, focal point and crop: fractions of the image, which
-	 * a rendition's geometry and signed URL rely on.
+	 * A use's attribution, link, focal point and crop: fractions of the image,
+	 * which a rendition's geometry and signed URL rely on.
 	 */
 	#[Override]
 	protected function itemMetaShape(): Shape
 	{
 		$shape = parent::itemMetaShape();
 		$shape->add('attribution', 'string')->optional()->nullable();
+		$shape->add('link', $this->linkShape())->optional()->nullable();
 		$shape->add('focal', $this->fractionsShape('x', 'y'))->optional()->nullable();
 		$crop = $this->fractionsShape('x', 'y', 'w', 'h');
 		$crop->review(static function (Review $review): void {
@@ -103,6 +106,23 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 			}
 		});
 		$shape->add('crop', $crop)->optional()->nullable();
+
+		return $shape;
+	}
+
+	private function linkShape(): Shape
+	{
+		$shape = Shapes::create();
+
+		foreach (['href', 'node', 'asset', 'target'] as $key) {
+			$shape->add($key, 'string')->optional()->nullable();
+		}
+
+		$shape->review(static function (Review $review): void {
+			if (!Link::valid($review->values())) {
+				$review->addError('', __('image:link-invalid'));
+			}
+		});
 
 		return $shape;
 	}

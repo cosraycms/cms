@@ -9,8 +9,8 @@ use Cosray\Richtext;
 
 /**
  * Collects every asset and node uid referenced by stored node content:
- * media field items (`{uid}`), Reference field targets, and the richtext
- * carriers (`image.uid`, `link.asset`, `link.node`). The rows of Blocks
+ * media field items (`{uid}`) with an image's link, Reference field targets,
+ * and the richtext carriers (`image.uid`, `link.asset`, `link.node`). The rows of Blocks
  * and Entries fields are recursed into. Feeds the reference indexes.
  */
 final class Scanner

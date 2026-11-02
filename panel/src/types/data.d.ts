@@ -35,12 +35,21 @@ export interface Meta {
 	[key: string]: LocaleMap<any>;
 }
 
+/** Where an image links to: exactly one of `href`, `node` and `asset`. */
+export interface ImageLink {
+	href?: string;
+	node?: string;
+	asset?: string;
+	target?: string;
+}
+
 /** The per-use meta of a media item, and an asset's catalog defaults. */
 export interface ItemMeta {
 	alt?: LocaleMap<string>;
 	title?: LocaleMap<string>;
 	caption?: LocaleMap<RichtextDoc | string | null>;
 	attribution?: string;
+	link?: ImageLink;
 	focal?: { x: number; y: number };
 	crop?: { x: number; y: number; w: number; h: number };
 	[key: string]: unknown;

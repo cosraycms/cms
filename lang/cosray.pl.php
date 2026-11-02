@@ -292,6 +292,7 @@ return [
 		'image:crop-invalid' => 'Kadr nie pasuje do obrazu.',
 		'image:focus' => 'Punkt centralny',
 		'image:focus-remove' => 'Usuń punkt centralny',
+		'image:link-invalid' => 'Link wymaga dokładnie jednego celu z bezpiecznym adresem.',
 		'image:no-focus' => 'Nie ustawiono punktu centralnego',
 		'image:original' => 'Oryginał',
 		'image:set-focus-hint' => 'Kliknij, aby ustawić punkt centralny obrazu',

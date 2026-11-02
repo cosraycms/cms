@@ -21,6 +21,25 @@ use Cosray\Tests\TestCase;
  */
 final class ReferenceScannerTest extends TestCase
 {
+	public function testCollectsAnImagesLink(): void
+	{
+		$refs = new Scanner()->scan([
+			'hero' => [
+				'type' => Image::class,
+				'value' => [
+					'zxx' => [
+						['uid' => 'img-a', 'meta' => ['link' => ['node' => 'node-a']]],
+						['uid' => 'img-b', 'meta' => ['link' => ['asset' => 'doc-b', 'target' => '_blank']]],
+						['uid' => 'img-c', 'meta' => ['link' => ['href' => 'https://example.com']]],
+					],
+				],
+			],
+		]);
+
+		$this->assertSame(['doc-b', 'img-a', 'img-b', 'img-c'], $refs['assets']);
+		$this->assertSame(['node-a'], $refs['nodes']);
+	}
+
 	public function testCollectsEveryCarrierKind(): void
 	{
 		$refs = new Scanner()->scan([

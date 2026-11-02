@@ -62,6 +62,8 @@ return [
 		'image:focus-set' => 'Klik op de afbeelding om het focuspunt in te stellen',
 		'image:from-library' => 'Uit de mediabibliotheek',
 		'image:insert' => 'Afbeelding invoegen',
+		'image:link' => 'Link',
+		'image:link-no-alt' => 'Zonder alt-tekst heeft deze link geen naam voor schermlezers.',
 		'image:next' => 'Volgende afbeelding',
 		'image:no-focus' => 'Geen focuspunt ingesteld',
 		'image:previous' => 'Vorige afbeelding',

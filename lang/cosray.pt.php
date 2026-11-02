@@ -269,6 +269,7 @@ return [
 		'image:crop-invalid' => 'O recorte não se ajusta à imagem.',
 		'image:focus' => 'Foco',
 		'image:focus-remove' => 'Remover foco',
+		'image:link-invalid' => 'A ligação precisa de exatamente um destino com um endereço seguro.',
 		'image:no-focus' => 'Sem foco de imagem definido',
 		'image:original' => 'Original',
 		'image:set-focus-hint' => 'Clique para definir o foco da imagem',

@@ -34,6 +34,7 @@ use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
 use Cosray\Schema\Lines;
+use Cosray\Schema\Link;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
@@ -319,6 +320,25 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertFalse($plain->hasAttribution());
 		$this->assertTrue($this->applyAndGetProperties(new Caption(), $field)['caption']);
 		$this->assertTrue($this->applyAndGetProperties(new Attribution(), $field)['attribution']);
+	}
+
+	public function testImageFieldOffersALinkOnRequest(): void
+	{
+		$field = $this->createImageField();
+
+		$this->assertFalse($this->createImageField()->isLinkable());
+		$this->assertTrue($this->applyAndGetProperties(new Link(), $field)['link']);
+	}
+
+	public function testLinkOnAVideoFieldRejects(): void
+	{
+		$field = new Video('video', $this->createOwner(), new ValueContext('video', []));
+		$field->init(Services::withDefaults());
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('cannot be used with the capability');
+
+		$this->applyAndGetProperties(new Link(), $field);
 	}
 
 	public function testImageFieldOffersACropOnlyWithASecret(): void

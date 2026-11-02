@@ -79,6 +79,8 @@ return [
 		'image:focus-set' => 'Kliknij obraz, aby ustawić punkt centralny',
 		'image:from-library' => 'Z biblioteki mediów',
 		'image:insert' => 'Wstaw obraz',
+		'image:link' => 'Link',
+		'image:link-no-alt' => 'Bez tekstu alternatywnego ten link nie ma nazwy dla czytników ekranu.',
 		'image:next' => 'Następny obraz',
 		'image:no-focus' => 'Nie ustawiono punktu centralnego',
 		'image:previous' => 'Poprzedni obraz',

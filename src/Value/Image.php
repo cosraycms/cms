@@ -8,6 +8,8 @@ use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
 use Cosray\Markup;
+use Cosray\Richtext\Link;
+use Cosray\Richtext\OwnerResolver;
 use Override;
 
 use function Cosray\escape;
@@ -99,7 +101,7 @@ class Image extends File
 			...$file,
 			'alt' => $this->alt(),
 			'attribution' => $this->attribution(),
-			'link' => $this->link(),
+			'link' => $this->anchor(),
 			'width' =>
 				$crop === null || $asset->width === null ? $asset->width : (int) round($asset->width * $crop['w']),
 			'height' =>
@@ -109,9 +111,29 @@ class Image extends File
 		];
 	}
 
+	/** The address this use links to; empty without a link or when its target is gone. */
 	public function link(): string
 	{
-		return $this->textValue('link', $this->index);
+		return $this->anchor()['href'] ?? '';
+	}
+
+	/** The content, by default the image's tag, inside this use's link, or alone without one. */
+	public function linked(?Markup $content = null): Markup
+	{
+		$content ??= $this->tag();
+		$anchor = $this->anchor();
+
+		if ($anchor === null) {
+			return $content;
+		}
+
+		$attributes = '';
+
+		foreach ($anchor as $name => $value) {
+			$attributes .= sprintf(' %s="%s"', $name, escape($value));
+		}
+
+		return new Markup("<a{$attributes}>{$content}</a>");
 	}
 
 	public function alt(): string
@@ -156,6 +178,21 @@ class Image extends File
 		}
 
 		return sprintf('object-position: %s%% %s%%', round($focal['x'] * 100, 2), round($focal['y'] * 100, 2));
+	}
+
+	/** @return ?array{href: string, target?: string, rel?: string} */
+	private function anchor(): ?array
+	{
+		$link = $this->fileItem($this->index)['meta']['link'] ?? null;
+
+		if (!is_array($link)) {
+			return null;
+		}
+
+		$stored = array_intersect_key($link, array_flip(['href', 'node', 'asset', 'target']));
+
+		/** @var ?array{href: string, target?: string, rel?: string} */
+		return Link::attributes($stored, new OwnerResolver($this->owner));
 	}
 
 	private function transform(): ?Transform

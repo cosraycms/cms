@@ -19,7 +19,7 @@ final class Renderer
 	public function __construct(
 		private readonly Resolver $resolver,
 		private readonly string $imageSize = 'block',
-		private readonly string $linkRel = 'noopener noreferrer nofollow',
+		private readonly string $linkRel = Link::REL,
 	) {}
 
 	public function render(mixed $doc): string
@@ -233,46 +233,12 @@ final class Renderer
 	private function link(array $mark, string $inner): string
 	{
 		$attrs = is_array($mark['attrs'] ?? null) ? $mark['attrs'] : [];
-		$href = null;
-		$rel = null;
+		$html = Link::attributes($attrs, $this->resolver, $this->linkRel);
 
-		if (is_string($attrs['href'] ?? null) && $attrs['href'] !== '') {
-			if (!Link::safe($attrs['href'])) {
-				return $this->skip('unsafe link href') . $inner;
-			}
+		if ($html === null) {
+			$problem = Link::problem($attrs);
 
-			$href = $attrs['href'];
-			$rel = $this->linkRel;
-		} elseif (is_string($attrs['node'] ?? null) && $attrs['node'] !== '') {
-			$href = $this->resolver->nodePath($attrs['node']);
-
-			if ($href === null) {
-				return $this->skip("unresolvable node link '{$attrs['node']}'") . $inner;
-			}
-		} elseif (is_string($attrs['asset'] ?? null) && $attrs['asset'] !== '') {
-			$asset = $this->resolver->asset($attrs['asset']);
-
-			if ($asset === null) {
-				return $this->skip("unresolvable asset link '{$attrs['asset']}'") . $inner;
-			}
-
-			$href = $asset->path();
-		} else {
-			return $inner;
-		}
-
-		$html = ['href' => $href];
-
-		if (is_string($attrs['target'] ?? null) && $attrs['target'] !== '') {
-			$html['target'] = $attrs['target'];
-		}
-
-		if (is_string($attrs['class'] ?? null) && $attrs['class'] !== '') {
-			$html['class'] = $attrs['class'];
-		}
-
-		if ($rel !== null) {
-			$html['rel'] = $rel;
+			return ($problem === '' ? '' : $this->skip($problem)) . $inner;
 		}
 
 		return '<a' . $this->attrString($html) . ">{$inner}</a>";

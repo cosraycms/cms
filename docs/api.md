@@ -92,7 +92,7 @@ The resolved view, the default, adds `fields`: every value resolved for the loca
 | Date, Time, DateTime | `YYYY-MM-DD`, `HH:MM`, or UTC RFC 3339; null when unset |
 | Youtube | `{id, ratio}`, like `16/9`, or null |
 | File, Video | `{uid, url, filename, mime, bytes, title, caption}`, or null; `caption` is `{html}` or null |
-| Image | The file members plus `alt`, `attribution`, `link`, `width`, `height`, `focal`, and `sizes`, a URL for every [named size](media.md#urls-and-image-sizes). A [crop](media.md#focal-point-and-crop) applies to the URLs and dimensions, and `focal` is relative to the cropped image |
+| Image | The file members plus `alt`, `attribution`, `link` as `{href, target?, rel?}` or null, `width`, `height`, `focal`, and `sizes`, a URL for every [named size](media.md#urls-and-image-sizes). A [crop](media.md#focal-point-and-crop) applies to the URLs and dimensions, and `focal` is relative to the cropped image |
 | Files, Images | A list of those objects |
 | Reference | A list of `{uid}` |
 | Entries | A list of `{uid, type, fields}`, `type` naming the row type by handle |

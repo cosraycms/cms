@@ -73,6 +73,21 @@ public Image $cover;
 </figcaption>
 ```
 
+`#[Link]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
+
+```php
+#[Label('Cover'), Link]
+public Image $cover;
+```
+
+```php
+<?= $page->cover->size('card')->linked() ?>
+<?= $page->cover->linked($page->cover->tag('cover')) ?>
+<?= $page->cover->link() ?>
+```
+
+`linked()` puts the content, by default the image's tag, inside the `<a>` with the link's `target` and `rel`, and returns it alone without a link or when the target is gone. `link()` returns only the address. An address is relative or uses `http`, `https`, `mailto` or `tel`, like a [richtext link](richtext-format.md#links), and carries the same `rel`.
+
 `#[Caption]` also applies to video fields. Without an attribute the input is hidden, nothing stored is lost, and the methods still return stored and catalog values. `caption()` returns escaped HTML as `Cosray\Markup`, which templates print as is; `captionText()` gives plain text.
 
 ## Focal point and crop
@@ -133,7 +148,7 @@ Two derived tables track ownership:
 - `asset_references`: owner type/UID to asset UID, with a restrictive foreign key protecting asset deletion.
 - `node_references`: owner type/UID to target node UID.
 
-[References\Scanner](../src/References/Scanner.php) walks media, reference fields, typed rows, and richtext carriers (`image.uid`, `link.asset`, `link.node`). Live node writes, working copies, and menu writes synchronize their references. Node backlinks are informational, not a general deletion guard; parent/child deletion has separate rules.
+[References\Scanner](../src/References/Scanner.php) walks media, reference fields, typed rows, an image's link, and richtext carriers (`image.uid`, `link.asset`, `link.node`). Live node writes, working copies, and menu writes synchronize their references. Node backlinks are informational, not a general deletion guard; parent/child deletion has separate rules.
 
 Use the app's `php run db:references` after direct imports or migrations that bypass normal writers. It rebuilds the derived indexes, not the content. Inspect [References/](../src/References/) for the owner types covered by the current rebuild before adding another content owner.
 

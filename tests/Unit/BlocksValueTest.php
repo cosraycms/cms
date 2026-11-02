@@ -619,6 +619,24 @@ final class BlocksValueTest extends TestCase
 		$this->assertSame('© <Own>', $blocks->image()?->attribution());
 	}
 
+	public function testImageBlockLinksThePictureAndNotItsCaption(): void
+	{
+		$blocks = $this->createBlocksValue([
+			$this->image([
+				'uid' => 'blockimg12345',
+				'meta' => ['caption' => ['zxx' => 'Words'], 'link' => ['href' => '/about']],
+			]),
+		]);
+		$this->seedAsset('blockimg12345', 'pic.jpg');
+
+		$html = $blocks->render()->html;
+
+		$this->assertMatchesRegularExpression(
+			'#<figure[^>]*><a href="/about" rel="noopener noreferrer nofollow"><img [^>]+></a><figcaption>Words</figcaption></figure>#',
+			$html,
+		);
+	}
+
 	public function testImageBlockRendersTheFocalPoint(): void
 	{
 		$blocks = $this->createBlocksValue([

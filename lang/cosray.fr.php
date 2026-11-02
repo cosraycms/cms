@@ -269,6 +269,7 @@ return [
 		'image:crop-invalid' => 'Le recadrage ne correspond pas à l’image.',
 		'image:focus' => 'Point focal',
 		'image:focus-remove' => 'Supprimer le point focal',
+		'image:link-invalid' => 'Le lien doit avoir exactement une cible avec une adresse sûre.',
 		'image:no-focus' => 'Aucun point focal défini',
 		'image:original' => 'Original',
 		'image:set-focus-hint' => 'Cliquer pour définir le point focal',

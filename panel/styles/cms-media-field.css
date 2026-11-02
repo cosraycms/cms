@@ -902,6 +902,31 @@
 	}
 }
 
+/* Where an image links to. */
+.cms-image-link {
+	& .target {
+		display: flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		min-width: 0;
+	}
+
+	& .cms-image-link-text {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		font-size: var(--cms-font-size-sm);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	& .warning {
+		margin: 0;
+		color: var(--cms-color-warning-text);
+		font-size: var(--cms-font-size-xs);
+	}
+}
+
 /* The details dialog of an image. Its header holds two lines. */
 .cms-modal:has(> .element > .cms-image-head) > .modal-close {
 	top: 1.375rem;

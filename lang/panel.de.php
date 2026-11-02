@@ -68,6 +68,8 @@ return [
 		'image:focus-set' => 'Ins Bild klicken, um den Fokuspunkt zu setzen',
 		'image:from-library' => 'Aus den Medien',
 		'image:insert' => 'Bild einfügen',
+		'image:link' => 'Link',
+		'image:link-no-alt' => 'Ohne Alt-Text hat dieser Link keinen Namen für Screenreader.',
 		'image:next' => 'Nächstes Bild',
 		'image:no-focus' => 'Kein Fokuspunkt gesetzt',
 		'image:previous' => 'Vorheriges Bild',

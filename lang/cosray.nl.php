@@ -272,6 +272,7 @@ return [
 		'image:crop-invalid' => 'De uitsnede past niet bij de afbeelding.',
 		'image:focus' => 'Focuspunt',
 		'image:focus-remove' => 'Focuspunt verwijderen',
+		'image:link-invalid' => 'De link heeft precies één doel met een veilig adres nodig.',
 		'image:no-focus' => 'Geen focuspunt ingesteld',
 		'image:original' => 'Origineel',
 		'image:set-focus-hint' => 'Klik om het focuspunt in te stellen',

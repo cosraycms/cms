@@ -19,6 +19,7 @@ import { __, __n } from '../lib/locale.js';
 import { alertDialog, editDialog, libraryDialog } from './media/dialogs.js';
 import { galleryView } from './media/gallery-view.js';
 import { imageDialog } from './media/image-dialog.js';
+import { linkText } from './media/link-row.js';
 import { metaFields } from './media/meta-fields.js';
 import {
 	button,
@@ -46,6 +47,7 @@ import {
  * @property {string} [presentation] `block` shows a filled field as content alone.
  * @property {boolean} [caption] Offers a caption per use.
  * @property {boolean} [attribution] Offers an attribution per use.
+ * @property {boolean} [link] Offers a link per use.
  * @property {boolean} [cropping] The site can deliver a crop.
  */
 
@@ -596,6 +598,10 @@ class MediaControl extends HTMLElement {
 				upload,
 				library,
 				offered: this.#imageTexts,
+				link:
+					this.field.link && item.meta?.link
+						? linkText(item.meta.link, (uid) => this.#asset(uid))
+						: null,
 				translate,
 				contentLocale: this.#locale,
 				locales,
@@ -952,6 +958,7 @@ class MediaControl extends HTMLElement {
 					alertDialog(this, message),
 				),
 			texts: this.#imageTexts,
+			linking: this.field.link ?? false,
 			cropping: this.field.cropping ?? false,
 			translate: this.#translate,
 			contentLocale: this.#locale,

@@ -266,6 +266,7 @@ return [
 		'image:crop-invalid' => 'The crop does not fit the image.',
 		'image:focus' => 'Focus',
 		'image:focus-remove' => 'Remove focus',
+		'image:link-invalid' => 'The link needs exactly one target with a safe address.',
 		'image:no-focus' => 'No image focus set',
 		'image:original' => 'Original',
 		'image:set-focus-hint' => 'Click to set the image focus',

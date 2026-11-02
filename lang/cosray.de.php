@@ -272,6 +272,7 @@ return [
 		'image:crop-invalid' => 'Der Zuschnitt passt nicht zum Bild.',
 		'image:focus' => 'Fokus',
 		'image:focus-remove' => 'Fokus entfernen',
+		'image:link-invalid' => 'Der Link braucht genau ein Ziel mit einer sicheren Adresse.',
 		'image:no-focus' => 'Kein Bildfokus gesetzt',
 		'image:original' => 'Original',
 		'image:set-focus-hint' => 'Klicken, um den Bildfokus zu setzen',

@@ -396,8 +396,9 @@ final class Styleguide extends Panel
 				'translate' => true,
 				'caption' => true,
 				'attribution' => true,
+				'link' => true,
 				'cropping' => true,
-				'description' => 'The edit button and the thumbnail open the details; this field offers a caption and an attribution.',
+				'description' => 'The edit button and the thumbnail open the details; this field offers a caption, an attribution and a link.',
 			],
 			[
 				'name' => 'coverPlain',

@@ -68,6 +68,8 @@ return [
 		'image:focus-set' => 'Haz clic en la imagen para fijar el punto focal',
 		'image:from-library' => 'De la biblioteca de medios',
 		'image:insert' => 'Insertar imagen',
+		'image:link' => 'Enlace',
+		'image:link-no-alt' => 'Sin texto alternativo, este enlace no tiene nombre para los lectores de pantalla.',
 		'image:next' => 'Imagen siguiente',
 		'image:no-focus' => 'Sin punto focal',
 		'image:previous' => 'Imagen anterior',

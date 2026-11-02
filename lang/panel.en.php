@@ -59,6 +59,8 @@ return [
 		'image:focus-set' => 'Click the image to set the focal point',
 		'image:from-library' => 'From the media library',
 		'image:insert' => 'Insert image',
+		'image:link' => 'Link',
+		'image:link-no-alt' => 'Without alt text, this link has no name for screen readers.',
 		'image:next' => 'Next image',
 		'image:no-focus' => 'No focal point set',
 		'image:previous' => 'Previous image',

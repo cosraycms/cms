@@ -272,6 +272,7 @@ return [
 		'image:crop-invalid' => 'Il ritaglio non si adatta all’immagine.',
 		'image:focus' => 'Punto focale',
 		'image:focus-remove' => 'Rimuovi punto focale',
+		'image:link-invalid' => 'Il link richiede esattamente una destinazione con un indirizzo sicuro.',
 		'image:no-focus' => 'Nessun punto focale impostato',
 		'image:original' => 'Originale',
 		'image:set-focus-hint' => 'Fare clic per impostare il punto focale dell’immagine',

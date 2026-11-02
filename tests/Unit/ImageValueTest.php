@@ -116,6 +116,71 @@ final class ImageValueTest extends TestCase
 		$this->assertNull($this->image([])->json()['caption']);
 	}
 
+	public function testAnImageWithoutALinkStaysAlone(): void
+	{
+		$image = $this->image([]);
+
+		$this->assertSame('', $image->link());
+		$this->assertSame((string) $image->tag(), (string) $image->linked());
+		$this->assertNull($image->json()['link']);
+	}
+
+	public function testAnAddressCarriesTheLinkPolicy(): void
+	{
+		$image = $this->image(['link' => ['href' => 'https://example.com/?a=1&b=2', 'target' => '_blank']]);
+
+		$this->assertSame('https://example.com/?a=1&b=2', $image->link());
+		$this->assertSame(
+			'<a href="https://example.com/?a=1&amp;b=2" target="_blank" rel="noopener noreferrer nofollow">'
+				. $image->tag()
+				. '</a>',
+			(string) $image->linked(),
+		);
+		$this->assertSame(
+			[
+				'href' => 'https://example.com/?a=1&b=2',
+				'target' => '_blank',
+				'rel' => 'noopener noreferrer nofollow',
+			],
+			$image->json()['link'],
+		);
+	}
+
+	public function testALinkedFileUsesItsPath(): void
+	{
+		$image = $this->image(['link' => ['asset' => self::UID]]);
+
+		$this->assertSame('/assets/im/' . self::UID . '/pic.jpg', $image->link());
+		$this->assertSame(
+			'<a href="/assets/im/' . self::UID . '/pic.jpg"><b>x</b></a>',
+			(string) $image->linked(new \Cosray\Markup('<b>x</b>')),
+		);
+	}
+
+	public function testALinkThatCannotBeFollowedLeavesTheImageAlone(): void
+	{
+		foreach ([
+			['href' => 'javascript:alert(1)'],
+			['asset' => 'gone000000001'],
+			'/a-string-from-before',
+		] as $link) {
+			$image = $this->image(['link' => $link]);
+
+			$this->assertSame('', $image->link());
+			$this->assertSame((string) $image->tag(), (string) $image->linked());
+		}
+	}
+
+	public function testALinkOnlyPrintsItsOwnAttributes(): void
+	{
+		$image = $this->image(['link' => ['href' => '/about', 'class' => 'stored', 'onclick' => 'x']]);
+
+		$this->assertStringStartsWith(
+			'<a href="/about" rel="noopener noreferrer nofollow">',
+			(string) $image->linked(),
+		);
+	}
+
 	public function testWithoutASecretTheImageStaysWhole(): void
 	{
 		$image = $this->image(['crop' => self::CROP, 'focal' => ['x' => 0.35, 'y' => 0.2]], secret: null);
