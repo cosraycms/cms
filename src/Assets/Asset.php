@@ -94,6 +94,32 @@ final class Asset
 	}
 
 	/**
+	 * What a rendition's name says, whether it is one of this asset or not: the
+	 * size, the fingerprint and for a variant its recipe and signature; null for
+	 * another name.
+	 *
+	 * @return ?list<string>
+	 */
+	public function renditionParts(string $file): ?array
+	{
+		$stem = pathinfo($this->key, PATHINFO_FILENAME);
+
+		if (!str_starts_with($file, "{$stem}-")) {
+			return null;
+		}
+
+		$parts = explode('~', substr($file, strlen($stem) + 1));
+
+		if (count($parts) !== 2 && count($parts) !== 4) {
+			return null;
+		}
+
+		$last = (string) array_pop($parts);
+
+		return [...$parts, explode('.', $last, 2)[0]];
+	}
+
+	/**
 	 * What a size turns this asset into, null for its own format. A GIF stays one,
 	 * as the catalog cannot tell an animated one, which stays a copy of its original.
 	 */

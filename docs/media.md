@@ -177,6 +177,13 @@ With GD, resizing decodes the whole original, at about 5 bytes per pixel, so `me
 
 Block image ladders, responsive `sizes`, gallery ratios, and spacing are documented in [Blocks](blocks.md#rendering).
 
+## Commands
+
+- `php run media:report` lists files missing from the disk or from the catalog, and counts unused files, images without an alt text, and renditions no URL leads to. With GD it also lists images too large to resize; `--memory=256M` names the web server's limit, as the command's own is often another.
+- `php run media:warm` generates the renditions of every image, or those of `--size=card`, so no visitor waits for them. It takes a process with enough memory, so it also gets renditions the web server's limit refuses. A use's crop or focal point still generates its file on the first request.
+- `php run media:clean` counts renditions no URL leads to anymore, of changed sizes and replaced or deleted files, and `--apply` removes them; `--all` takes every rendition. A crop a use no longer has counts as current.
+- `php run media:strip-location` is described under [location data](#location-data).
+
 ## HTTP integration
 
 Editor elements should use `window.Cosray.upload(type, file)`, which supplies the session's CSRF token; see the [bridge](controls.md#the-windowcosray-bridge). The upload is `POST /media/{mediatype}`, a multipart request with the file under `file`, for image, file, or video; [Routes](../src/Routes.php) and [Controller\Media](../src/Controller/Media.php) hold its access checks and response fields.

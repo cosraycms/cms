@@ -248,15 +248,12 @@ class Media
 	 */
 	protected function rendition(Asset $asset, string $file): array
 	{
-		$stem = pathinfo($asset->key, PATHINFO_FILENAME);
+		$parts = $asset->renditionParts($file);
 
-		if (!str_starts_with($file, "{$stem}-")) {
+		if ($parts === null) {
 			throw new HttpNotFound($this->request);
 		}
 
-		$parts = explode('~', substr($file, strlen($stem) + 1));
-		$last = array_key_last($parts);
-		$parts[$last] = explode('.', $parts[$last], 2)[0];
 		$size = $parts[0];
 		$sizes = $this->config->media->sizes;
 		$secret = $this->config->app->secret;

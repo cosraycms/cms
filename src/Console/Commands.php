@@ -19,6 +19,7 @@ use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
 use Cosray\Commands\ActivateUser;
+use Cosray\Commands\CleanMedia;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\CreateUser;
 use Cosray\Commands\DeactivateUser;
@@ -28,6 +29,7 @@ use Cosray\Commands\ListFailedJobs;
 use Cosray\Commands\ListTokens;
 use Cosray\Commands\ListUsers;
 use Cosray\Commands\LoginLink;
+use Cosray\Commands\MediaReport;
 use Cosray\Commands\PanelPublish;
 use Cosray\Commands\PruneJobs;
 use Cosray\Commands\RecreateSortIndex;
@@ -38,6 +40,7 @@ use Cosray\Commands\SendTestMail;
 use Cosray\Commands\SetPassword;
 use Cosray\Commands\StripLocation;
 use Cosray\Commands\Titles;
+use Cosray\Commands\WarmMedia;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
 use Cosray\I18n\SchemaScanner;
@@ -87,6 +90,9 @@ final class Commands
 			),
 			References::class => fn(): References => new References($this->conn()),
 			StripLocation::class => fn(): StripLocation => new StripLocation($app->config, new Database($this->conn())),
+			MediaReport::class => fn(): MediaReport => new MediaReport($app->config, new Database($this->conn())),
+			CleanMedia::class => fn(): CleanMedia => new CleanMedia($app->config, new Database($this->conn())),
+			WarmMedia::class => fn(): WarmMedia => new WarmMedia($app->config, new Database($this->conn())),
 			RecreateSortIndex::class,
 			Titles::class,
 			CreateToken::class,
