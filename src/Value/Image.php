@@ -57,7 +57,6 @@ class Image extends File
 					'width' => $width,
 					'height' => $height,
 					'alt' => $this->alt() ?: strip_tags($this->title()),
-					'data-path-original' => $asset->path(),
 					'style' => $position === '' ? null : $position,
 				],
 				$attributes,

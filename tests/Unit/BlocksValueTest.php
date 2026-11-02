@@ -538,10 +538,6 @@ final class BlocksValueTest extends TestCase
 		);
 		$this->assertStringContainsString('sizes="(min-width: 48rem) 50vw, 100vw"', $html);
 		$this->assertStringContainsString('alt="A &quot;quoted&quot; alt"', $html);
-		$this->assertStringContainsString(
-			'data-path-original="/cms/assets/bl/blockimg12345/sun-sea.jpg"',
-			$html,
-		);
 	}
 
 	public function testImageBlockRendersTheCaption(): void

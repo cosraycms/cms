@@ -480,10 +480,6 @@ final class PrimitiveValueTest extends TestCase
 			$tag,
 		);
 		$this->assertStringContainsString('alt="Hero"', $tag);
-		$this->assertStringContainsString(
-			'data-path-original="/cms/assets/he/heroimg123456/hero.jpg"',
-			$tag,
-		);
 	}
 
 	public function testImageValueSizeUsesConfiguredRendition(): void

@@ -8,6 +8,10 @@ Image, file, and video values contain locale maps of `{uid, meta?}` lists. Per-u
 
 [Assets\Ingest](../src/Assets/Ingest.php) catalogs bytes and a filename without an HTTP request or session. It shares upload validation, SVG sanitization, and hash deduplication with the HTTP endpoint; imports can pass an actor and initial metadata. Rejections throw `Cosray\Exception\IngestError`. Removing a field reference does not delete the asset.
 
+### Location data
+
+Originals are public, and a phone writes where a photo was taken into it unasked. Ingest removes the GPS block of EXIF and the GPS properties of XMP from JPEG, PNG, WebP and AVIF files; the rest of their metadata stays. Place names in text fields stay too, and so does XMP in a compressed PNG chunk. [Assets\Location](../src/Assets/Location.php) does this. `php run media:strip-location` lists the stored files that still hold location data, and with `--apply` it removes it, which cannot be undone without a backup.
+
 ### SVG uploads
 
 SVG files are rebuilt from an allowlist before they are stored; see [Util\Svg](../src/Util/Svg.php) for the lists. Scripts, event handlers, `foreignObject`, comments, `<metadata>`, and editor data are removed. Links may only point into the document, except web and mail links on `<a>` and embedded PNG, JPEG, GIF, or WebP images on `<image>`. CSS may only reference document fragments and embedded images or fonts. Empty or malformed files, documents without an `svg` root in the SVG namespace, and files that declare their own DTD entities are rejected; exporting such a file again from the editor usually fixes it.
@@ -136,7 +140,7 @@ Neither touches the original. A crop applies to every URL of the image: `$image-
 
 SVGs have no renditions, so they get a focal point but no crop. GIFs do not offer a crop either, as an animated one only survives as a copy of its original.
 
-A crop is presentation, not redaction. The original stays public at its asset URL, and `img()` prints that URL as `data-path-original`. To remove something from a picture, edit the file and upload it again.
+A crop is presentation, not redaction. The original stays public at its asset URL, which a template can pass on with `img(...['data-original' => $image->publicPath()])` for a lightbox. To remove something from a picture, edit the file and upload it again.
 
 ## URLs and image sizes
 

@@ -223,9 +223,7 @@ final class ImageValueTest extends TestCase
 		$this->assertSame(
 			'<img src="/assets/im/'
 				. self::UID
-				. '/pic.jpg" width="1000" height="500" alt="" data-path-original="/assets/im/'
-				. self::UID
-				. '/pic.jpg">',
+				. '/pic.jpg" width="1000" height="500" alt="">',
 			(string) $this->image([])->img(),
 		);
 		$this->assertStringContainsString(
@@ -364,14 +362,10 @@ final class ImageValueTest extends TestCase
 			'<div class="cms-image-gallery">'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" width="480" height="240" alt="A &lt;kettle&gt;" data-path-original="/assets/im/'
-				. self::UID
-				. '/pic.jpg"><figcaption>Words</figcaption></figure>'
+				. '/pic-block-thumb.jpg" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption>Words</figcaption></figure>'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" width="480" height="240" alt="" data-path-original="/assets/im/'
-				. self::UID
-				. '/pic.jpg"></figure></div>',
+				. '/pic-block-thumb.jpg" width="480" height="240" alt=""></figure></div>',
 			self::withoutFingerprints((string) $gallery->gallery()),
 		);
 	}

@@ -36,6 +36,7 @@ use Cosray\Commands\RetryJobs;
 use Cosray\Commands\RevokeToken;
 use Cosray\Commands\SendTestMail;
 use Cosray\Commands\SetPassword;
+use Cosray\Commands\StripLocation;
 use Cosray\Commands\Titles;
 use Cosray\Commands\WorkQueue;
 use Cosray\ContainerLogger;
@@ -85,6 +86,7 @@ final class Commands
 				new Client($app->config),
 			),
 			References::class => fn(): References => new References($this->conn()),
+			StripLocation::class => fn(): StripLocation => new StripLocation($app->config, new Database($this->conn())),
 			RecreateSortIndex::class,
 			Titles::class,
 			CreateToken::class,

@@ -55,6 +55,7 @@ final class Ingest
 			$contents = $clean;
 		}
 
+		$contents = Location::removed($contents, $mime);
 		$hash = hash('sha256', $contents);
 		$existing = $this->db
 			->assets

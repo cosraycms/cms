@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
-use Celema\Console\Io;
 use Cosray\Actor;
 use Cosray\Assets\Ingest;
-use Cosray\Commands\AssetDimensions;
 use Cosray\Config;
 use Cosray\Exception\IngestError;
 use Cosray\Exception\RuntimeException;
@@ -44,6 +42,16 @@ final class AssetsIngestTest extends IntegrationTestCase
 	private function ingestConfig(): Config
 	{
 		return $this->config(['path.public' => $this->dir]);
+	}
+
+	private function locatedJpeg(): string
+	{
+		ob_start();
+		imagejpeg(imagecreatetruecolor(4, 2));
+		$jpeg = (string) ob_get_clean();
+		$xmp = '<rdf:Description exif:GPSLatitude="49,53.1N"/>';
+
+		return substr($jpeg, 0, 2) . "\xFF\xE1" . pack('n', strlen($xmp) + 2) . $xmp . substr($jpeg, 2);
 	}
 
 	private function pngBytes(): string
@@ -106,6 +114,19 @@ final class AssetsIngestTest extends IntegrationTestCase
 		)->one();
 
 		$this->assertSame(1, (int) $count['n']);
+	}
+
+	public function testAPhotoLosesItsLocationBeforeItIsStored(): void
+	{
+		$photo = $this->locatedJpeg();
+		$this->assertStringContainsString('49,53.1N', $photo);
+
+		$result = $this->ingest()->ingest($photo, 'photo.jpg', 'image');
+		$stored = (string) file_get_contents("{$this->dir}/assets/{$result->row['key']}");
+
+		$this->assertStringNotContainsString('49,53.1N', $stored);
+		$this->assertSame(hash('sha256', $stored), $result->row['hash']);
+		$this->assertTrue($this->ingest()->ingest($photo, 'again.jpg', 'image')->created === false);
 	}
 
 	public function testStoresInitialMetaAndActor(): void
