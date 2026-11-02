@@ -27,6 +27,14 @@ final class MediaServeTest extends End2EndTestCase
 	private const int GREEN = 0x00FF00;
 	private const int BLUE = 0x0000FF;
 	private const int WHITE = 0xFFFFFF;
+	private const array SIZES = [
+		'square' => ['crop' => [2, 2]],
+		'wide' => ['crop' => [8, 4]],
+		'small' => ['width' => 16],
+		'as-webp' => ['width' => 16, 'format' => 'webp'],
+		'as-jpeg' => ['width' => 16, 'format' => 'jpeg'],
+		'as-avif' => ['width' => 16, 'format' => 'avif'],
+	];
 
 	private string $publicDir;
 
@@ -39,7 +47,7 @@ final class MediaServeTest extends End2EndTestCase
 		$this->app = $this->createApp([
 			'path.public' => $this->publicDir,
 			'app.secret' => self::SECRET,
-			'media.sizes' => ['square' => ['crop' => [2, 2]], 'wide' => ['crop' => [8, 4]], 'small' => ['width' => 16]],
+			'media.sizes' => self::SIZES,
 		]);
 		$this->authenticateAs('editor');
 	}
@@ -72,8 +80,7 @@ final class MediaServeTest extends End2EndTestCase
 	public function testCacheMissGeneratesConfiguredRendition(): void
 	{
 		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
-		$shard = substr((string) $upload['uid'], 0, 2);
-		$url = "/cache/{$shard}/{$upload['uid']}/e2e-serve-pic-square.png";
+		$url = $this->namedUrl($upload, 'square');
 
 		$response = $this->makeRequest('GET', $url);
 
@@ -152,17 +159,93 @@ final class MediaServeTest extends End2EndTestCase
 			->variant($uid, Sizes::original(), self::SECRET);
 		[, $token] = explode('~', $variant);
 
+		$original = Sizes::original()->fingerprint();
 		$forged = [
-			"e2e-serve-forged-original~{$token}~0000000000000000.png",
-			"e2e-serve-forged-original~{$token}.png",
-			"e2e-serve-forged-unknown{$variant}.png",
-			'e2e-serve-forged-original.png',
+			"e2e-serve-forged-original~{$original}~{$token}~0000000000000000.png",
+			"e2e-serve-forged-original~{$original}~{$token}.png",
+			"e2e-serve-forged-unknown~{$original}{$variant}.png",
+			"e2e-serve-forged-original~00000000{$variant}.png",
+			"e2e-serve-forged-original~{$original}.png",
 		];
 
 		foreach ($forged as $file) {
 			$this->assertResponseStatus(404, $this->makeRequest('GET', "{$dir}/{$file}"));
 			$this->assertFileDoesNotExist("{$this->publicDir}{$dir}/{$file}");
 		}
+	}
+
+	public function testANameOfAnotherDefinitionIsAMiss(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-older.png');
+		$current = $this->namedUrl($upload, 'small');
+		$older = str_replace(new Sizes(self::SIZES)->get('small')->fingerprint(), '00000000', $current);
+		$withoutOne = self::withoutFingerprints($current);
+
+		$this->assertResponseStatus(404, $this->makeRequest('GET', $older));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', $withoutOne));
+		$this->assertResponseOk($this->makeRequest('GET', $current));
+	}
+
+	public function testASizeCanTurnAnImageIntoWebp(): void
+	{
+		$upload = $this->upload($this->quarters(), 'e2e-serve-to-webp.png');
+		$url = $this->namedUrl($upload, 'as-webp', 'webp');
+
+		$response = $this->makeRequest('GET', $url);
+
+		$this->assertResponseOk($response);
+		$this->assertSame(IMAGETYPE_WEBP, getimagesizefromstring((string) $response->getBody())[2]);
+		$this->assertSame('image/webp', $response->getHeaderLine('Content-Type'));
+		$this->assertFileExists($this->publicDir . $url);
+	}
+
+	public function testATransparentImageTurnedIntoJpegSitsOnWhite(): void
+	{
+		$image = imagecreatetruecolor(40, 20);
+		imagealphablending($image, false);
+		imagesavealpha($image, true);
+		imagefilledrectangle($image, 0, 0, 39, 19, imagecolorallocatealpha($image, 0, 0, 0, 127));
+		ob_start();
+		imagepng($image);
+		$upload = $this->upload((string) ob_get_clean(), 'e2e-serve-to-jpeg.png');
+
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, 'as-jpeg', 'jpg'));
+
+		$this->assertResponseOk($response);
+		$this->assertSame(IMAGETYPE_JPEG, getimagesizefromstring((string) $response->getBody())[2]);
+		$this->assertSame(self::WHITE, $this->nearest(imagecreatefromstring((string) $response->getBody()), 8, 4));
+	}
+
+	public function testAGifStaysAGifWhateverTheSizeAsksFor(): void
+	{
+		ob_start();
+		imagegif($this->paletted());
+		$upload = $this->upload((string) ob_get_clean(), 'e2e-serve-gif-stays.gif', 'image/gif');
+
+		$response = $this->makeRequest('GET', $this->namedUrl($upload, 'as-webp', 'gif'));
+
+		$this->assertResponseOk($response);
+		$this->assertSame(IMAGETYPE_GIF, getimagesizefromstring((string) $response->getBody())[2]);
+	}
+
+	public function testAvifIsReadAndWritten(): void
+	{
+		if (!function_exists('imageavif') || !(imagetypes() & IMG_AVIF)) {
+			$this->markTestSkipped('This build of GD has no AVIF.');
+		}
+
+		ob_start();
+		imageavif(imagecreatefromstring($this->quarters(40, 20)), null, 90);
+		$upload = $this->upload((string) ob_get_clean(), 'e2e-serve-avif.avif', 'image/avif');
+
+		$image = $this->named($upload, 'small');
+		$this->assertSame([16, 8], [imagesx($image), imagesy($image)]);
+		$this->assertSame([self::RED, self::GREEN, self::BLUE, self::WHITE], $this->corners($image));
+
+		$png = $this->upload($this->quarters(40, 20), 'e2e-serve-to-avif.png');
+		$response = $this->makeRequest('GET', $this->namedUrl($png, 'as-avif', 'avif'));
+		$this->assertResponseOk($response);
+		$this->assertSame(IMAGETYPE_AVIF, getimagesizefromstring((string) $response->getBody())[2]);
 	}
 
 	public function testBuiltinSizesAreAlwaysAvailable(): void
@@ -179,19 +262,16 @@ final class MediaServeTest extends End2EndTestCase
 
 		$this->assertResponseStatus(404, $this->makeRequest(
 			'GET',
-			"/cache/{$shard}/{$upload['uid']}/e2e-serve-pic-w9999.png",
+			"/cache/{$shard}/{$upload['uid']}/e2e-serve-pic-w9999~00000000.png",
 		));
 	}
 
 	public function testStaleFilenameIs404(): void
 	{
 		$upload = $this->upload($this->png(4, 4), 'e2e-serve-pic.png');
-		$shard = substr((string) $upload['uid'], 0, 2);
+		$url = str_replace('e2e-serve-pic-', 'renamed-', $this->namedUrl($upload, 'square'));
 
-		$this->assertResponseStatus(404, $this->makeRequest(
-			'GET',
-			"/cache/{$shard}/{$upload['uid']}/renamed-square.png",
-		));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', $url));
 	}
 
 	public function testUnknownUidIs404(): void
@@ -215,29 +295,21 @@ final class MediaServeTest extends End2EndTestCase
 	public function testMissingPoolFileIs404(): void
 	{
 		$upload = $this->upload($this->png(4, 4), 'e2e-serve-gone.png');
-		$shard = substr((string) $upload['uid'], 0, 2);
 		unlink($this->publicDir . $upload['url']);
 
-		$this->assertResponseStatus(404, $this->makeRequest(
-			'GET',
-			"/cache/{$shard}/{$upload['uid']}/e2e-serve-gone-square.png",
-		));
+		$this->assertResponseStatus(404, $this->makeRequest('GET', $this->namedUrl($upload, 'square')));
 	}
 
 	public function testOriginalTooLargeForTheMemoryLimitIsRedirectedTo(): void
 	{
 		$upload = $this->upload($this->png(4, 4), 'e2e-serve-large.png');
-		$shard = substr((string) $upload['uid'], 0, 2);
 		file_put_contents($this->publicDir . $upload['url'], $this->png(4000, 4000));
 		$limit = (string) ini_get('memory_limit');
 		// @mago-expect lint:no-ini-set
 		ini_set('memory_limit', (string) (memory_get_usage(true) + (32 * 1024 * 1024)));
 
 		try {
-			$response = $this->makeRequest(
-				'GET',
-				"/cache/{$shard}/{$upload['uid']}/e2e-serve-large-square.png",
-			);
+			$response = $this->makeRequest('GET', $this->namedUrl($upload, 'square'));
 		} finally {
 			// @mago-expect lint:no-ini-set
 			ini_set('memory_limit', $limit);
@@ -396,7 +468,7 @@ final class MediaServeTest extends End2EndTestCase
 		$stem = pathinfo((string) $upload['url'], PATHINFO_FILENAME);
 		$ext = pathinfo((string) $upload['url'], PATHINFO_EXTENSION);
 		$variant = $transform->variant($uid, $spec, self::SECRET);
-		$url = '/cache/' . substr($uid, 0, 2) . "/{$uid}/{$stem}-{$spec->name}{$variant}.{$ext}";
+		$url = '/cache/' . substr($uid, 0, 2) . "/{$uid}/{$stem}-{$spec->name}~{$spec->fingerprint()}{$variant}.{$ext}";
 		$response = $this->makeRequest('GET', $url);
 		$this->assertResponseOk($response);
 		$this->assertFileExists($this->publicDir . $url);
@@ -420,13 +492,15 @@ final class MediaServeTest extends End2EndTestCase
 	}
 
 	/** @param array<string, mixed> $upload */
-	private function namedUrl(array $upload, string $size): string
+	private function namedUrl(array $upload, string $size, ?string $ext = null): string
 	{
 		$uid = (string) $upload['uid'];
 		$stem = pathinfo((string) $upload['url'], PATHINFO_FILENAME);
-		$ext = pathinfo((string) $upload['url'], PATHINFO_EXTENSION);
+		$ext ??= pathinfo((string) $upload['url'], PATHINFO_EXTENSION);
 
-		return '/cache/' . substr($uid, 0, 2) . "/{$uid}/{$stem}-{$size}.{$ext}";
+		$spec = new Sizes(self::SIZES)->get($size);
+
+		return '/cache/' . substr($uid, 0, 2) . "/{$uid}/{$stem}-{$size}~{$spec->fingerprint()}.{$ext}";
 	}
 
 	/**

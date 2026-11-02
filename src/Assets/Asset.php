@@ -9,7 +9,7 @@ use Cosray\Config;
 /** A row from the asset catalog. */
 final class Asset
 {
-	private const array RESIZABLE = ['image/gif', 'image/jpeg', 'image/png', 'image/webp'];
+	private const array RESIZABLE = ['image/avif', 'image/gif', 'image/jpeg', 'image/png', 'image/webp'];
 
 	/**
 	 * Coarse classification for pickers and tiles. `list.tpql` filters on
@@ -32,6 +32,7 @@ final class Asset
 		public readonly array $meta = [],
 		private readonly string $assetsBase = '/assets',
 		private readonly string $cacheBase = '/cache',
+		private readonly Sizes $sizes = new Sizes([]),
 	) {}
 
 	/** @param array<mixed> $row */
@@ -52,6 +53,7 @@ final class Asset
 			meta: is_array($meta) ? $meta : [],
 			assetsBase: $prefix . '/' . trim($config->path->assets, '/'),
 			cacheBase: $prefix . '/' . trim($config->path->cache, '/'),
+			sizes: $config->media->sizes,
 		);
 	}
 
@@ -65,22 +67,39 @@ final class Asset
 	}
 
 	/**
-	 * Root-relative URL of a named rendition:
-	 * `{cache}/{shard}/{uid}/{stem}-{size}.{ext}`. Served natively once
-	 * generated; misses fall through to the cache route. A use's crop or
-	 * focal point adds its signed variant to the name.
+	 * Root-relative URL of a named rendition. Served natively once generated;
+	 * misses fall through to the cache route.
 	 */
 	public function sizePath(string $size, string $variant = ''): string
 	{
-		$dir = dirname($this->key);
+		return $this->renditionPath($this->sizes->get($size), $variant);
+	}
+
+	/** The same for a size at hand. A use's crop or focal point adds its signed variant. */
+	public function renditionPath(SizeSpec $spec, string $variant = ''): string
+	{
+		return "{$this->cacheBase}/" . $this->encode(dirname($this->key) . '/' . $this->renditionFile($spec, $variant));
+	}
+
+	/** A rendition's name: `{stem}-{size}~{fingerprint}{variant}.{ext}`. */
+	public function renditionFile(SizeSpec $spec, string $variant = ''): string
+	{
 		$base = basename($this->key);
 		$dot = strrpos($base, '.');
-		$variant =
-			$dot === false || $dot === 0
-				? "{$base}-{$size}{$variant}"
-				: substr($base, 0, $dot) . "-{$size}{$variant}" . substr($base, $dot);
+		[$stem, $ext] = $dot === false || $dot === 0 ? [$base, ''] : [substr($base, 0, $dot), substr($base, $dot)];
+		$format = $this->format($spec);
+		$ext = $format === null ? $ext : ".{$format->extension()}";
 
-		return "{$this->cacheBase}/" . $this->encode("{$dir}/{$variant}");
+		return "{$stem}-{$spec->name}~{$spec->fingerprint()}{$variant}{$ext}";
+	}
+
+	/**
+	 * What a size turns this asset into, null for its own format. A GIF stays one,
+	 * as the catalog cannot tell an animated one, which stays a copy of its original.
+	 */
+	public function format(SizeSpec $spec): ?Format
+	{
+		return $this->mime === 'image/gif' ? null : $spec->format;
 	}
 
 	/** Whether the resize pipeline can process this asset. */

@@ -116,7 +116,7 @@ final class Sizes
 		$modeKey = (string) array_key_first($modes);
 		$unknown = array_diff(
 			array_keys($entry),
-			[$modeKey, 'pos', 'quality', 'enlarge'],
+			[$modeKey, 'pos', 'quality', 'enlarge', 'format'],
 		);
 
 		if ($unknown !== []) {
@@ -133,6 +133,7 @@ final class Sizes
 			pos: $this->pos($name, $modeKey, $entry),
 			quality: $this->quality($name, $entry),
 			enlarge: $this->enlarge($name, $entry),
+			format: $this->format($name, $entry),
 		);
 	}
 
@@ -217,6 +218,28 @@ final class Sizes
 		}
 
 		return $entry['enlarge'];
+	}
+
+	/** @param array<mixed> $entry */
+	private function format(string $name, array $entry): ?Format
+	{
+		if (!array_key_exists('format', $entry)) {
+			return null;
+		}
+
+		$format = $entry['format'];
+
+		return (
+			(is_string($format) ? Format::tryFrom($format) : null)
+				?? throw $this->error(
+					$name,
+					'`format` must be one of '
+						. implode(
+							', ',
+							array_column(Format::cases(), 'value'),
+						),
+				)
+		);
 	}
 
 	private function error(string $name, string $message): RuntimeException

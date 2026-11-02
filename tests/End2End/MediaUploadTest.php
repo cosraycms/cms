@@ -55,8 +55,14 @@ final class MediaUploadTest extends End2EndTestCase
 
 		$shard = substr($uid, 0, 2);
 		$this->assertSame("/assets/{$shard}/{$uid}/e2e-upload-pic.png", $json['url']);
-		$this->assertSame("/cache/{$shard}/{$uid}/e2e-upload-pic-thumb.png", $json['thumbUrl']);
-		$this->assertSame("/cache/{$shard}/{$uid}/e2e-upload-pic-preview.png", $json['previewUrl']);
+		$this->assertSame(
+			"/cache/{$shard}/{$uid}/e2e-upload-pic-thumb.png",
+			self::withoutFingerprints($json['thumbUrl']),
+		);
+		$this->assertSame(
+			"/cache/{$shard}/{$uid}/e2e-upload-pic-preview.png",
+			self::withoutFingerprints($json['previewUrl']),
+		);
 
 		// The URL is the file's path below public/ — the native serving contract.
 		$stored = $this->publicDir . $json['url'];

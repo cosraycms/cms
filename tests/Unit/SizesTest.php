@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Cosray\Assets\Format;
 use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Sizes;
 use Cosray\Exception\RuntimeException;
@@ -52,6 +53,40 @@ final class SizesTest extends TestCase
 		$this->assertTrue($sizes->get('big')->enlarge);
 		$this->assertFalse($sizes->get('thumb')->enlarge);
 		$this->assertNull($sizes->get('big')->quality);
+	}
+
+	public function testAFormatIsOneOfTheKnownOnes(): void
+	{
+		$sizes = new Sizes(['small' => ['width' => 400, 'format' => 'webp'], 'plain' => ['width' => 400]]);
+
+		$this->assertSame(Format::Webp, $sizes->get('small')->format);
+		$this->assertNull($sizes->get('plain')->format);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('`format` must be one of jpeg, png, webp, avif');
+
+		new Sizes(['small' => ['width' => 400, 'format' => 'bmp']]);
+	}
+
+	public function testAChangedDefinitionHasAnotherFingerprint(): void
+	{
+		$fingerprint = static fn(array $entry): string => new Sizes(['card' => $entry])->get('card')->fingerprint();
+		$base = $fingerprint(['crop' => [600, 400]]);
+
+		$this->assertSame($base, $fingerprint(['crop' => [600, 400]]));
+		$this->assertMatchesRegularExpression('/^[0-9a-f]{8}$/', $base);
+
+		foreach ([
+			['crop' => [601, 400]],
+			['crop' => [600, 401]],
+			['fit' => [600, 400]],
+			['crop' => [600, 400], 'pos' => 'top'],
+			['crop' => [600, 400], 'quality' => 80],
+			['crop' => [600, 400], 'enlarge' => true],
+			['crop' => [600, 400], 'format' => 'webp'],
+		] as $changed) {
+			$this->assertNotSame($base, $fingerprint($changed), (string) json_encode($changed));
+		}
 	}
 
 	public function testCropDefaultsToCenter(): void

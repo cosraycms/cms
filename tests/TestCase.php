@@ -29,6 +29,12 @@ use ValueError;
  */
 class TestCase extends BaseTestCase
 {
+	/** Rendition URLs without what only says which definition of a size made them. */
+	protected static function withoutFingerprints(string $html): string
+	{
+		return (string) preg_replace('/~[0-9a-f]{8}(?=[~.])/', '', $html);
+	}
+
 	protected function setUp(): void
 	{
 		parent::setUp();

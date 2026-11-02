@@ -125,7 +125,7 @@ function facts(info) {
  * @returns {boolean}
  */
 function croppable(info) {
-	return ['image/jpeg', 'image/png', 'image/webp'].includes(info?.mime ?? '');
+	return ['image/avif', 'image/jpeg', 'image/png', 'image/webp'].includes(info?.mime ?? '');
 }
 
 /**

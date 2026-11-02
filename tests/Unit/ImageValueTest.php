@@ -38,7 +38,10 @@ final class ImageValueTest extends TestCase
 		$image = $this->image([]);
 
 		$this->assertSame('/assets/im/' . self::UID . '/pic.jpg', $image->publicPath());
-		$this->assertSame('/cache/im/' . self::UID . '/pic-square.jpg', $image->size('square')->publicPath());
+		$this->assertSame(
+			'/cache/im/' . self::UID . '/pic-square.jpg',
+			self::withoutFingerprints($image->size('square')->publicPath()),
+		);
 		$this->assertNull($image->focal());
 		$this->assertSame('', $image->position());
 		$this->assertStringNotContainsString('style=', (string) $image->img());
@@ -50,11 +53,11 @@ final class ImageValueTest extends TestCase
 
 		$this->assertMatchesRegularExpression(
 			'#^/cache/im/' . self::UID . '/pic-original~c1000\.2000\.5000\.5000~[0-9a-f]{16}\.jpg$#',
-			$image->publicPath(),
+			self::withoutFingerprints($image->publicPath()),
 		);
 		$this->assertMatchesRegularExpression(
 			'#/pic-thumb~c1000\.2000\.5000\.5000~[0-9a-f]{16}\.jpg$#',
-			$image->size('thumb')->publicPath(),
+			self::withoutFingerprints($image->size('thumb')->publicPath()),
 		);
 	}
 
@@ -63,10 +66,13 @@ final class ImageValueTest extends TestCase
 		$image = $this->image(['focal' => ['x' => 0.3, 'y' => 0.4]]);
 
 		$this->assertSame('/assets/im/' . self::UID . '/pic.jpg', $image->publicPath());
-		$this->assertSame('/cache/im/' . self::UID . '/pic-thumb.jpg', $image->size('thumb')->publicPath());
+		$this->assertSame(
+			'/cache/im/' . self::UID . '/pic-thumb.jpg',
+			self::withoutFingerprints($image->size('thumb')->publicPath()),
+		);
 		$this->assertMatchesRegularExpression(
 			'#/pic-square~f3000\.4000~[0-9a-f]{16}\.jpg$#',
-			$image->size('square')->publicPath(),
+			self::withoutFingerprints($image->size('square')->publicPath()),
 		);
 	}
 
@@ -97,8 +103,14 @@ final class ImageValueTest extends TestCase
 		$this->assertSame(500, $json['width']);
 		$this->assertSame(250, $json['height']);
 		$this->assertStringContainsString('-original~', $json['url']);
-		$this->assertStringContainsString('-square~c1000.2000.5000.5000_f3500.2000~', $json['sizes']['square']);
-		$this->assertStringContainsString('-thumb~c1000.2000.5000.5000~', $json['sizes']['thumb']);
+		$this->assertStringContainsString(
+			'-square~c1000.2000.5000.5000_f3500.2000~',
+			self::withoutFingerprints($json['sizes']['square']),
+		);
+		$this->assertStringContainsString(
+			'-thumb~c1000.2000.5000.5000~',
+			self::withoutFingerprints($json['sizes']['thumb']),
+		);
 	}
 
 	public function testJsonGivesTheCaptionAsHtml(): void
@@ -218,7 +230,7 @@ final class ImageValueTest extends TestCase
 		);
 		$this->assertStringContainsString(
 			'/pic-thumb.jpg" width="400" height="200" alt=""',
-			(string) $this->image([])->size('thumb')->img(),
+			self::withoutFingerprints((string) $this->image([])->size('thumb')->img()),
 		);
 		$this->assertStringContainsString(
 			'width="300" height="300"',
@@ -326,7 +338,7 @@ final class ImageValueTest extends TestCase
 
 	public function testASizeKeepsItsFigure(): void
 	{
-		$figure = (string) $this->image(self::FILLED)->size('thumb')->figure();
+		$figure = self::withoutFingerprints((string) $this->image(self::FILLED)->size('thumb')->figure());
 
 		$this->assertStringContainsString('/cache/im/' . self::UID . '/pic-thumb.jpg', $figure);
 		$this->assertStringStartsWith('<figure>', $figure);
@@ -360,13 +372,17 @@ final class ImageValueTest extends TestCase
 				. '/pic-block-thumb.jpg" width="480" height="240" alt="" data-path-original="/assets/im/'
 				. self::UID
 				. '/pic.jpg"></figure></div>',
-			(string) $gallery->gallery(),
+			self::withoutFingerprints((string) $gallery->gallery()),
 		);
 	}
 
 	public function testAGalleryOffersALargerSizeAndAPrefix(): void
 	{
-		$html = (string) $this->gallery([['uid' => self::UID]])->gallery('thumb', 'square', 'site');
+		$html = self::withoutFingerprints((string) $this->gallery([['uid' => self::UID]])->gallery(
+			'thumb',
+			'square',
+			'site',
+		));
 
 		$this->assertStringStartsWith(
 			'<div class="site-image-gallery"><figure class="site-image-gallery-item">',
@@ -407,7 +423,10 @@ final class ImageValueTest extends TestCase
 		$image = $this->image(['crop' => self::CROP, 'focal' => ['x' => 0.35, 'y' => 0.2]], secret: null);
 
 		$this->assertSame('/assets/im/' . self::UID . '/pic.jpg', $image->publicPath());
-		$this->assertSame('/cache/im/' . self::UID . '/pic-square.jpg', $image->size('square')->publicPath());
+		$this->assertSame(
+			'/cache/im/' . self::UID . '/pic-square.jpg',
+			self::withoutFingerprints($image->size('square')->publicPath()),
+		);
 		$this->assertSame(1000, $image->json()['width']);
 		$this->assertSame(['x' => 0.35, 'y' => 0.2], $image->focal());
 	}
@@ -416,7 +435,10 @@ final class ImageValueTest extends TestCase
 	{
 		$image = $this->image(['crop' => self::CROP, 'focal' => ['x' => 0.35, 'y' => 0.2]], mime: 'image/svg+xml');
 
-		$this->assertSame('/assets/im/' . self::UID . '/pic.jpg', $image->size('square')->publicPath());
+		$this->assertSame(
+			'/assets/im/' . self::UID . '/pic.jpg',
+			self::withoutFingerprints($image->size('square')->publicPath()),
+		);
 		$this->assertSame(['x' => 0.35, 'y' => 0.2], $image->focal());
 	}
 

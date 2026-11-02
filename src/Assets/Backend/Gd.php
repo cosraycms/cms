@@ -6,6 +6,7 @@ namespace Cosray\Assets\Backend;
 
 use Closure;
 use Cosray\Assets\Dimensions;
+use Cosray\Assets\Format;
 use Cosray\Assets\Recipe;
 use Cosray\Exception\RuntimeException;
 use GdImage;
@@ -48,11 +49,18 @@ final class Gd implements Backend
 		$this->afford(($width * $height) + ($recipe->width * $recipe->height * ($sideways ? 2 : 1)));
 
 		$image = $this->decode($source, $type);
-		$keyed = $type === IMAGETYPE_GIF && imagecolortransparent($image) >= 0;
+		$output = match ($recipe->format) {
+			Format::Jpeg => IMAGETYPE_JPEG,
+			Format::Png => IMAGETYPE_PNG,
+			Format::Webp => IMAGETYPE_WEBP,
+			Format::Avif => IMAGETYPE_AVIF,
+			null => $type,
+		};
+		$keyed = $output === IMAGETYPE_GIF && imagecolortransparent($image) >= 0;
 		$canvas = $this->canvas(
 			$sideways ? $recipe->height : $recipe->width,
 			$sideways ? $recipe->width : $recipe->height,
-			$type,
+			$output,
 		);
 		[$x, $y, $w, $h] = $this->stored($recipe, $orientation, $width, $height);
 		imagecopyresampled($canvas, $image, 0, 0, $x, $y, imagesx($canvas), imagesy($canvas), $w, $h);
@@ -64,7 +72,7 @@ final class Gd implements Backend
 			$this->keyTransparency($upright);
 		}
 
-		$this->encode($upright, $target, $type, $recipe->quality);
+		$this->encode($upright, $target, $output, $recipe->quality);
 	}
 
 	/** Above what is left of the memory limit, a request must fail, not die in a fatal error. */
@@ -178,7 +186,7 @@ final class Gd implements Backend
 	{
 		imageinterlace($image, $type === IMAGETYPE_JPEG);
 
-		$written = match ($type) {
+		$written = self::quietly(static fn(): bool => match ($type) {
 			IMAGETYPE_JPEG => imagejpeg($image, $target, $quality ?? self::JPEG_QUALITY),
 			IMAGETYPE_PNG => imagepng($image, $target, self::PNG_COMPRESSION),
 			IMAGETYPE_GIF => imagegif($image, $target),
@@ -186,7 +194,7 @@ final class Gd implements Backend
 			IMAGETYPE_AVIF => function_exists('imageavif')
 				&& imageavif($image, $target, $quality ?? self::AVIF_QUALITY),
 			default => false,
-		};
+		});
 
 		if (!$written) {
 			throw new RuntimeException('Assets error: could not write the rendition');

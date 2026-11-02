@@ -238,47 +238,54 @@ class Media
 	}
 
 	/**
-	 * Match a requested rendition basename against the asset's key and the
-	 * configured sizes: `{stem}-{size}` with the key's extension, and a
-	 * signed variant after the size for a use's crop or focal point.
+	 * Match a requested rendition basename against the configured sizes:
+	 * a size and its fingerprint, and a signed variant for a use's crop or
+	 * focal point. Only the name the asset would give it counts, which leaves
+	 * no other way to the same file and no way to one of an older definition.
 	 *
 	 * @return array{SizeSpec, ?Transform}
 	 */
 	protected function rendition(Asset $asset, string $file): array
 	{
-		$base = basename($asset->key);
-		$dot = strrpos($base, '.');
-		$stem = $dot === false || $dot === 0 ? $base : substr($base, 0, $dot);
-		$ext = $dot === false || $dot === 0 ? '' : substr($base, $dot);
+		$stem = pathinfo($asset->key, PATHINFO_FILENAME);
 
-		if (!str_starts_with($file, "{$stem}-") || $ext !== '' && !str_ends_with($file, $ext)) {
+		if (!str_starts_with($file, "{$stem}-")) {
 			throw new HttpNotFound($this->request);
 		}
 
-		$name = substr($file, strlen($stem) + 1, strlen($file) - strlen($stem) - 1 - strlen($ext));
-		$parts = explode('~', $name);
+		$parts = explode('~', substr($file, strlen($stem) + 1));
+		$last = array_key_last($parts);
+		$parts[$last] = explode('.', $parts[$last], 2)[0];
+		$size = $parts[0];
 		$sizes = $this->config->media->sizes;
-
-		if (count($parts) === 1 && $name !== '' && $sizes->has($name)) {
-			return [$sizes->get($name), null];
-		}
-
 		$secret = $this->config->app->secret;
+		$spec = null;
+		$variant = '';
+		$transform = null;
 
-		if (count($parts) === 3 && $secret !== null) {
-			[$size, $token, $signature] = $parts;
+		if (count($parts) === 2 && $sizes->has($size)) {
+			$spec = $sizes->get($size);
+		}
+
+		if (count($parts) === 4 && $secret !== null) {
+			[, , $token, $signature] = $parts;
 			$transform = Transform::verified($asset->uid, $size, $token, $signature, $secret);
+			$variant = "~{$token}~{$signature}";
 
-			if ($transform !== null && $size === Sizes::ORIGINAL) {
-				return [Sizes::original(), $transform];
-			}
-
-			if ($transform !== null && $sizes->has($size)) {
-				return [$sizes->get($size), $transform];
+			if ($transform !== null) {
+				$spec = match (true) {
+					$size === Sizes::ORIGINAL => Sizes::original(),
+					$sizes->has($size) => $sizes->get($size),
+					default => null,
+				};
 			}
 		}
 
-		throw new HttpNotFound($this->request);
+		if ($spec === null || $asset->renditionFile($spec, $variant) !== $file) {
+			throw new HttpNotFound($this->request);
+		}
+
+		return [$spec, $transform];
 	}
 
 	protected function sendFile(string $fileServer, string $file): Response

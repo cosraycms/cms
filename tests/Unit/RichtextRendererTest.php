@@ -235,7 +235,7 @@ final class RichtextRendererTest extends TestCase
 				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Ein Foto">'
 				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Anders" title="Titel">'
 				. '</p>',
-			$html,
+			self::withoutFingerprints($html),
 		);
 	}
 

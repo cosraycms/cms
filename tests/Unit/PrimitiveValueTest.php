@@ -501,7 +501,7 @@ final class PrimitiveValueTest extends TestCase
 
 		$this->assertSame(
 			'/cms/cache/he/heroimg123456/hero-thumb.jpg',
-			$value->size('thumb')->publicPath(),
+			self::withoutFingerprints($value->size('thumb')->publicPath()),
 		);
 		// The unsized value keeps pointing at the original.
 		$this->assertSame('/cms/assets/he/heroimg123456/hero.jpg', $value->publicPath());
@@ -1363,8 +1363,14 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('/cms/assets/he/heroimg123456/hero.jpg', $json['url']);
 		$this->assertSame('A hero', $json['alt']);
 		$this->assertSame(['x' => 0.25, 'y' => 0.75], $json['focal']);
-		$this->assertSame('/cms/cache/he/heroimg123456/hero-thumb.jpg', $json['sizes']['thumb']);
-		$this->assertSame('/cms/cache/he/heroimg123456/hero-block-lg.jpg', $json['sizes']['block-lg']);
+		$this->assertSame(
+			'/cms/cache/he/heroimg123456/hero-thumb.jpg',
+			self::withoutFingerprints($json['sizes']['thumb']),
+		);
+		$this->assertSame(
+			'/cms/cache/he/heroimg123456/hero-block-lg.jpg',
+			self::withoutFingerprints($json['sizes']['block-lg']),
+		);
 	}
 
 	public function testImageJsonGivesTheOriginalForEverySizeOfAnUnresizableAsset(): void

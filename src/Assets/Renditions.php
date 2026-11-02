@@ -61,7 +61,7 @@ final class Renditions
 		$tmp = "{$target}.tmp-" . bin2hex(random_bytes(6));
 
 		try {
-			$this->write($original, $tmp, $spec, $transform);
+			$this->write($original, $tmp, $spec, $transform, $asset->format($spec));
 
 			if (!rename($tmp, $target)) {
 				throw new RuntimeException('Assets error: could not move rendition into place');
@@ -75,8 +75,13 @@ final class Renditions
 		return $target;
 	}
 
-	private function write(string $original, string $tmp, SizeSpec $spec, ?Transform $transform): void
-	{
+	private function write(
+		string $original,
+		string $tmp,
+		SizeSpec $spec,
+		?Transform $transform,
+		?Format $format,
+	): void {
 		// A backend keeps only the first frame, so an animated GIF is
 		// materialized as a copy of the original instead.
 		if (Util::isAnimatedGif($original)) {
@@ -90,6 +95,6 @@ final class Renditions
 		[$width, $height] = Dimensions::ofFile($original)
 			?? throw new RuntimeException('Assets error: not a readable image');
 
-		$this->backend->render($original, $tmp, Recipe::for($width, $height, $spec, $transform));
+		$this->backend->render($original, $tmp, Recipe::for($width, $height, $spec, $transform, $format));
 	}
 }

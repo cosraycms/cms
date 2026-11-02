@@ -17,7 +17,7 @@ interface Backend
 {
 	/**
 	 * @param string $source A readable image file
-	 * @param string $target The file to write, in the format of the source
+	 * @param string $target The file to write, in the recipe's format or else that of the source
 	 * @throws RuntimeException When the image cannot be read, written or afforded
 	 */
 	public function render(string $source, string $target, Recipe $recipe): void;

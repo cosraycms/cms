@@ -24,11 +24,20 @@ final readonly class Recipe
 		public int $width,
 		public int $height,
 		public ?int $quality = null,
+		public ?Format $format = null,
 	) {}
 
-	/** @param int $width The size of the source as displayed, after any EXIF rotation. */
-	public static function for(int $width, int $height, SizeSpec $spec, ?Transform $transform = null): self
-	{
+	/**
+	 * @param int $width The size of the source as displayed, after any EXIF rotation.
+	 * @param ?Format $format What to write, null for the format of the source.
+	 */
+	public static function for(
+		int $width,
+		int $height,
+		SizeSpec $spec,
+		?Transform $transform = null,
+		?Format $format = null,
+	): self {
 		$framed = $spec->mode === ResizeMode::Crop && $transform?->focal !== null;
 		$part = $transform?->region($width, $height, $framed ? $spec->first / ($spec->second ?? $spec->first) : null)
 			?? ['x' => 0, 'y' => 0, 'w' => $width, 'h' => $height];
@@ -46,6 +55,7 @@ final readonly class Recipe
 			$targetWidth,
 			$targetHeight,
 			$spec->quality,
+			$format,
 		);
 	}
 

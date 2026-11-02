@@ -135,7 +135,7 @@ class Image extends File
 			return $asset->path();
 		}
 
-		return $asset->sizePath($spec->name, $variant);
+		return $asset->renditionPath($spec, $variant);
 	}
 
 	/**

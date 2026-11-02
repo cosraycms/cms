@@ -84,8 +84,14 @@ final class AssetLibraryPageTest extends IntegrationTestCase
 
 		$dir = substr($image, 0, 2) . "/{$image}";
 		$this->assertSame("/assets/{$dir}/{$this->prefix}pic.png", $items[$image]['url']);
-		$this->assertSame("/cache/{$dir}/{$this->prefix}pic-thumb.png", $items[$image]['thumbUrl']);
-		$this->assertSame("/cache/{$dir}/{$this->prefix}pic-preview.png", $items[$image]['previewUrl']);
+		$this->assertSame(
+			"/cache/{$dir}/{$this->prefix}pic-thumb.png",
+			self::withoutFingerprints($items[$image]['thumbUrl']),
+		);
+		$this->assertSame(
+			"/cache/{$dir}/{$this->prefix}pic-preview.png",
+			self::withoutFingerprints($items[$image]['previewUrl']),
+		);
 		$this->assertSame('image', $items[$image]['kind']);
 		// Files without renditions show their own URL.
 		$this->assertSame($items[$document]['url'], $items[$document]['thumbUrl']);

@@ -520,7 +520,7 @@ final class BlocksValueTest extends TestCase
 		]);
 		$this->seedAsset('blockimg12345', 'Sun & Sea.jpg');
 
-		$html = $blocks->render()->html;
+		$html = self::withoutFingerprints($blocks->render()->html);
 
 		$this->assertStringContainsString('class="cms-block" data-type="image" data-colspan="6"', $html);
 		$this->assertStringContainsString('<figure class="cms-figure"><img ', $html);
@@ -675,7 +675,7 @@ final class BlocksValueTest extends TestCase
 
 		$this->assertStringContainsString(
 			'data-url-large="/cms/cache/ga/galleryimg123/one-block-lg.jpg"',
-			$blocks->render(largeSize: 'block-lg')->html,
+			self::withoutFingerprints($blocks->render(largeSize: 'block-lg')->html),
 		);
 	}
 
@@ -704,7 +704,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->image(['uid' => 'blockimg12345'])]);
 		$this->seedAsset('blockimg12345', 'pic.jpg');
 
-		$html = $blocks->render(imageSizes: ['block-thumb'])->html;
+		$html = self::withoutFingerprints($blocks->render(imageSizes: ['block-thumb'])->html);
 
 		$this->assertStringContainsString('src="/cms/cache/bl/blockimg12345/pic-block-thumb.jpg"', $html);
 		$this->assertStringNotContainsString('srcset', $html);
@@ -760,7 +760,7 @@ final class BlocksValueTest extends TestCase
 		]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$html = $blocks->render()->html;
+		$html = self::withoutFingerprints($blocks->render()->html);
 
 		$this->assertStringContainsString('data-type="images"', $html);
 		$this->assertSame(1, substr_count($html, 'cms-image-gallery-item'));
@@ -801,7 +801,7 @@ final class BlocksValueTest extends TestCase
 		$blocks = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$html = $blocks->render(thumbSize: 'thumb')->html;
+		$html = self::withoutFingerprints($blocks->render(thumbSize: 'thumb')->html);
 
 		$this->assertStringContainsString('src="/cms/cache/ga/galleryimg123/one-thumb.jpg"', $html);
 	}

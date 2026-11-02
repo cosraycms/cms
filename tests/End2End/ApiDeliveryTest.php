@@ -183,7 +183,7 @@ final class ApiDeliveryTest extends End2EndTestCase
 		$this->assertSame('A pixel', $asset['alt']);
 		$this->assertSame(['html' => 'One &lt;small&gt; pixel'], $asset['caption']);
 		$this->assertSame('© Jane Doe', $asset['attribution']);
-		$this->assertStringEndsWith('-thumb.png', $asset['sizes']['thumb']);
+		$this->assertStringEndsWith('-thumb.png', self::withoutFingerprints($asset['sizes']['thumb']));
 		$this->assertSame($asset['uid'], $this->json($this->upload(), 200)['uid']);
 
 		$list = $this->json($this->makeRequest('GET', '/api/assets', ['query' => ['kind' => 'image', 'q' => 'pixel']]));
