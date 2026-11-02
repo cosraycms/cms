@@ -82,34 +82,6 @@ final class AssetsIngestTest extends IntegrationTestCase
 		$this->assertSame([20, 30], $this->stored($result->uid()));
 	}
 
-	public function testTheCommandCorrectsOlderRotatedPhotos(): void
-	{
-		$turned = $this
-			->ingest()
-			->ingest(AssetDimensionsTest::jpeg(30, 20, 6), 'phone.jpg', 'image')
-			->uid();
-		$upright = $this
-			->ingest()
-			->ingest(AssetDimensionsTest::jpeg(31, 21, 1), 'camera.jpg', 'image')
-			->uid();
-		$gone = $this->ingest()->ingest(AssetDimensionsTest::jpeg(32, 22, 6), 'gone.jpg', 'image');
-		unlink("{$this->dir}/assets/{$gone->row['key']}");
-		$this->db()->execute(
-			'UPDATE cms.assets SET width = 30, height = 20 WHERE uid = :uid',
-			['uid' => $turned],
-		)->run();
-
-		ob_start();
-		$code = (new AssetDimensions($this->db(), $this->ingestConfig()))(new Io());
-		$output = (string) ob_get_clean();
-
-		$this->assertSame(0, $code);
-		$this->assertStringContainsString('1 of', $output);
-		$this->assertStringContainsString('1 files missing', $output);
-		$this->assertSame([20, 30], $this->stored($turned));
-		$this->assertSame([31, 21], $this->stored($upright));
-	}
-
 	/** @return array{mixed, mixed} */
 	private function stored(string $uid): array
 	{

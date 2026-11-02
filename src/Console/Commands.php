@@ -19,7 +19,6 @@ use Celema\Verba\Tool\Domain;
 use Celema\Verba\Tool\PhpScanner;
 use Cosray\App;
 use Cosray\Commands\ActivateUser;
-use Cosray\Commands\AssetDimensions;
 use Cosray\Commands\CreateToken;
 use Cosray\Commands\CreateUser;
 use Cosray\Commands\DeactivateUser;
@@ -86,10 +85,6 @@ final class Commands
 				new Client($app->config),
 			),
 			References::class => fn(): References => new References($this->conn()),
-			AssetDimensions::class => fn(): AssetDimensions => new AssetDimensions(
-				new Database($this->conn()),
-				$app->config,
-			),
 			RecreateSortIndex::class,
 			Titles::class,
 			CreateToken::class,

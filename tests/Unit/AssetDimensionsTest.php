@@ -94,6 +94,23 @@ final class AssetDimensionsTest extends TestCase
 		$this->assertSame($expected, Dimensions::of(self::jpeg(30, 20, $orientation)));
 	}
 
+	#[DataProvider('orientations')]
+	public function testAFileReadsTheSameAsItsBytes(int $orientation, array $expected): void
+	{
+		$path = "{$this->root}/photo.jpg";
+		file_put_contents($path, self::jpeg(30, 20, $orientation));
+
+		$this->assertSame($expected, Dimensions::ofFile($path));
+	}
+
+	public function testAFileThatIsNoImageHasNoSize(): void
+	{
+		$path = "{$this->root}/note.jpg";
+		file_put_contents($path, 'no image');
+
+		$this->assertNull(Dimensions::ofFile($path));
+	}
+
 	public function testARotatedPhotosSizeMatchesItsRendition(): void
 	{
 		$key = 'ab/abcdefghijklm/turned.jpg';

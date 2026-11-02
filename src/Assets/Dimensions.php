@@ -18,21 +18,52 @@ final class Dimensions
 	 */
 	public static function of(string $contents): ?array
 	{
+		$stream = fopen('php://memory', 'r+');
+
+		if ($stream === false) {
+			return null;
+		}
+
+		fwrite($stream, $contents);
+		rewind($stream);
+
+		try {
+			return self::read(static fn(): array|false => getimagesizefromstring($contents), $stream);
+		} finally {
+			fclose($stream);
+		}
+	}
+
+	/**
+	 * The same for a file, reading only its headers.
+	 *
+	 * @return ?array{int, int}
+	 */
+	public static function ofFile(string $path): ?array
+	{
+		return self::read(static fn(): array|false => getimagesize($path), $path);
+	}
+
+	/**
+	 * @param callable(): (array<array-key, mixed>|false) $size
+	 * @param resource|string $source
+	 * @return ?array{int, int}
+	 */
+	private static function read(callable $size, mixed $source): ?array
+	{
 		// Both functions warn on undecodable input; that is an expected outcome.
 		set_error_handler(static fn(): bool => true);
 
 		try {
-			$info = getimagesizefromstring($contents);
+			$info = $size();
 
 			if ($info === false) {
 				return null;
 			}
 
-			return (
-				$info[2] === IMAGETYPE_JPEG && self::sideways($contents)
-					? [$info[1], $info[0]]
-					: [$info[0], $info[1]]
-			);
+			[$width, $height, $type] = [(int) $info[0], (int) $info[1], $info[2]];
+
+			return $type === IMAGETYPE_JPEG && self::sideways($source) ? [$height, $width] : [$width, $height];
 		} finally {
 			restore_error_handler();
 		}
@@ -85,22 +116,14 @@ final class Dimensions
 		return !$enlarge && ($w > $width || $h > $height) ? [$width, $height] : [$w, $h];
 	}
 
-	private static function sideways(string $contents): bool
+	/** @param resource|string $source */
+	private static function sideways(mixed $source): bool
 	{
 		if (!function_exists('exif_read_data')) {
 			return false;
 		}
 
-		$stream = fopen('php://memory', 'r+');
-
-		if ($stream === false) {
-			return false;
-		}
-
-		fwrite($stream, $contents);
-		rewind($stream);
-		$exif = exif_read_data($stream);
-		fclose($stream);
+		$exif = exif_read_data($source);
 
 		return is_array($exif) && in_array($exif['Orientation'] ?? 1, self::SIDEWAYS, true);
 	}
