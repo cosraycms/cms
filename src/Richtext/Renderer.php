@@ -269,9 +269,14 @@ final class Renderer
 			$alt = $catalog === null ? null : $this->resolver->localize($catalog);
 		}
 
+		[$width, $height] = $asset->resizable()
+			? $asset->dimensions($asset->spec($this->imageSize))
+			: $asset->dimensions();
 		$attrs = [
 			'src' => $src,
 			'alt' => is_string($alt) ? $alt : '',
+			...($width === null ? [] : ['width' => (string) $width, 'height' => (string) $height]),
+			'loading' => 'lazy',
 		];
 
 		if (is_string($title) && $title !== '') {

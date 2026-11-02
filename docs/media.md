@@ -74,6 +74,10 @@ An attribute decides what editors can fill in, not the markup. A template prints
 ```php
 <?= $page->cover ?>                          // <img>, the same as img()
 <?= $page->cover->size('card')->img('photo', loading: 'lazy') ?>
+<?= $page->cover->size('block')->img(
+	srcset: $page->cover->srcset('block-sm', 'block', 'block-lg'),
+	sizes: '100vw',
+) ?>
 <?= $page->cover->linked() ?>                // <a><img></a> with a link, <img> without
 <?= $page->cover->figure() ?>                // <figure> with link, caption and attribution
 <?= $page->photos ?>                         // an <img> per image
@@ -95,7 +99,7 @@ An attribute decides what editors can fill in, not the markup. A template prints
 </div>
 ```
 
-`gallery(size: 'thumb', large: 'large', prefix: 'site')` picks the [named sizes](#urls-and-image-sizes) and starts the classes with `site`; `data-url-large` is only there with `large`, for a lightbox. For your own grid, loop over the images: `foreach ($page->photos as $photo)` and print `$photo->size('thumb')->figure()`.
+`gallery(size: 'thumb', large: 'large', prefix: 'site')` picks the [named sizes](#urls-and-image-sizes) and starts the classes with `site`; `data-url-large` is only there with `large`, for a lightbox. Further named arguments go to each `<img>`. Its images load lazily unless you pass `loading: null` or another value, while `img()` and the image block leave that to you, as a lazy hero image delays the page's main picture. For your own grid, loop over the images: `foreach ($page->photos as $photo)` and print `$photo->size('thumb')->figure()`.
 
 `#[Link]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
 

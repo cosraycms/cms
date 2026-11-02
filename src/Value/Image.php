@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
-use Cosray\Assets\Recipe;
+use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
@@ -98,6 +98,37 @@ class Image extends File
 				. ($text === '' ? '' : "<figcaption>{$text}</figcaption>")
 				. '</figure>',
 		);
+	}
+
+	/**
+	 * The `srcset` of named sizes, by the width of each file, for `img(srcset: ...)`.
+	 * Sizes that come out the same drop out, as a small image is not enlarged. It
+	 * is null where there is nothing to choose from: an SVG, or an image of one width.
+	 */
+	public function srcset(string ...$sizes): ?string
+	{
+		$asset = $this->asset($this->index);
+
+		if ($asset === null || !$asset->resizable() || $asset->mime === 'image/gif') {
+			return null;
+		}
+
+		$entries = [];
+
+		foreach ($sizes as $size) {
+			$sized = $this->size($size);
+			// A row from before dimensions were stored only knows what the size asks for.
+			$width =
+				$sized->dimensions()[0] ?? ($sized->spec?->mode === ResizeMode::Width ? $sized->spec->first : null);
+
+			if ($width !== null && !isset($entries[$width])) {
+				$entries[$width] = $sized->publicPath() . " {$width}w";
+			}
+		}
+
+		ksort($entries);
+
+		return count($entries) > 1 ? implode(', ', $entries) : null;
 	}
 
 	/**
@@ -260,35 +291,18 @@ class Image extends File
 	}
 
 	/**
-	 * The size of the file `publicPath()` leads to, nulls when it is unknown: an
-	 * animated GIF stays a copy of its original, which the catalog cannot tell.
+	 * The size of the file `publicPath()` leads to.
 	 *
 	 * @return array{?int, ?int}
 	 */
 	private function dimensions(): array
 	{
-		$asset = $this->asset($this->index);
-
-		if ($asset === null || $asset->width === null || $asset->height === null) {
-			return [null, null];
-		}
-
-		if (!$asset->resizable()) {
-			return [$asset->width, $asset->height];
-		}
-
-		if ($asset->mime === 'image/gif') {
-			return [null, null];
-		}
-
-		$recipe = Recipe::for(
-			$asset->width,
-			$asset->height,
-			$this->spec ?? Sizes::original(),
-			$this->delivered() ? $this->transform() : null,
+		return (
+			$this->asset($this->index)?->dimensions(
+				$this->spec,
+				$this->delivered() ? $this->transform() : null,
+			) ?? [null, null]
 		);
-
-		return [$recipe->width, $recipe->height];
 	}
 
 	private function transform(): ?Transform

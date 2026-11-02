@@ -102,6 +102,37 @@ final class Asset
 		return $this->mime === 'image/gif' ? null : $spec->format;
 	}
 
+	public function spec(string $size): SizeSpec
+	{
+		return $this->sizes->get($size);
+	}
+
+	/**
+	 * The size of the file at a size, the original without one; nulls when it is
+	 * unknown, as an animated GIF stays a copy of its original and the catalog
+	 * cannot tell one.
+	 *
+	 * @return array{?int, ?int}
+	 */
+	public function dimensions(?SizeSpec $spec = null, ?Transform $transform = null): array
+	{
+		if ($this->width === null || $this->height === null) {
+			return [null, null];
+		}
+
+		if (!$this->resizable()) {
+			return [$this->width, $this->height];
+		}
+
+		if ($this->mime === 'image/gif') {
+			return [null, null];
+		}
+
+		$recipe = Recipe::for($this->width, $this->height, $spec ?? Sizes::original(), $transform);
+
+		return [$recipe->width, $recipe->height];
+	}
+
 	/** Whether the resize pipeline can process this asset. */
 	public function resizable(): bool
 	{

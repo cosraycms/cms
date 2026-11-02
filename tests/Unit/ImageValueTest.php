@@ -362,10 +362,10 @@ final class ImageValueTest extends TestCase
 			'<div class="cms-image-gallery">'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption>Words</figcaption></figure>'
+				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt="A &lt;kettle&gt;"><figcaption>Words</figcaption></figure>'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" width="480" height="240" alt=""></figure></div>',
+				. '/pic-block-thumb.jpg" loading="lazy" width="480" height="240" alt=""></figure></div>',
 			self::withoutFingerprints((string) $gallery->gallery()),
 		);
 	}
@@ -384,6 +384,53 @@ final class ImageValueTest extends TestCase
 		);
 		$this->assertStringContainsString('/pic-thumb.jpg"', $html);
 		$this->assertStringContainsString('data-url-large="/cache/im/' . self::UID . '/pic-square.jpg"', $html);
+	}
+
+	public function testAGalleryPassesAttributesOnAndLoadsLazilyByDefault(): void
+	{
+		$gallery = $this->gallery([['uid' => self::UID]]);
+
+		$this->assertStringContainsString('loading="lazy"', (string) $gallery->gallery());
+		$this->assertStringNotContainsString('loading=', (string) $gallery->gallery(loading: null));
+		$html = (string) $gallery->gallery(loading: 'eager', decoding: 'async');
+		$this->assertStringContainsString('loading="eager"', $html);
+		$this->assertStringContainsString('decoding="async"', $html);
+	}
+
+	public function testASrcsetNamesEachFileByItsWidth(): void
+	{
+		$srcset = self::withoutFingerprints((string) $this->image([])->srcset('thumb', 'square'));
+
+		$this->assertSame(
+			'/cache/im/' . self::UID . '/pic-square.jpg 300w, /cache/im/' . self::UID . '/pic-thumb.jpg 400w',
+			$srcset,
+		);
+	}
+
+	public function testASrcsetFollowsACrop(): void
+	{
+		$srcset = (string) $this->image(['crop' => self::CROP])->srcset('thumb', 'square');
+
+		$this->assertMatchesRegularExpression('/~c1000\.2000\.5000\.5000~[0-9a-f]{16}\.jpg 400w/', $srcset);
+	}
+
+	public function testASrcsetHasNothingToOfferForOneWidth(): void
+	{
+		$this->assertNull($this->image([])->srcset('thumb'));
+		$this->assertNull($this->image([])->srcset('thumb', 'thumb'));
+	}
+
+	public function testAnSvgAndAGifHaveNoSrcset(): void
+	{
+		$this->assertNull($this->image([], mime: 'image/svg+xml')->srcset('thumb', 'square'));
+		$this->assertNull($this->image([], mime: 'image/gif')->srcset('thumb', 'square'));
+	}
+
+	public function testALeftOutSrcsetPrintsNothing(): void
+	{
+		$image = $this->image([]);
+
+		$this->assertStringNotContainsString('srcset', (string) $image->img(srcset: $image->srcset('thumb')));
 	}
 
 	public function testAGalleryCarriesItsSettings(): void

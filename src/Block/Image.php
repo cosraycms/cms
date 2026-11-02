@@ -59,10 +59,7 @@ final class Image implements Block
 		}
 
 		return $middle->img(
-			srcset: implode(', ', array_map(
-				static fn(SizeSpec $spec) => $image->size($spec->name)->publicPath() . " {$spec->first}w",
-				$specs,
-			)),
+			srcset: $image->srcset(...array_map(static fn(SizeSpec $spec): string => $spec->name, $specs)),
 			sizes: $this->sizes($ctx, $block->layout()->colspan),
 		);
 	}

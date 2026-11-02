@@ -46,8 +46,12 @@ class Images extends Files
 	 * field's ratio and crop settings. `$large` adds another rendition's URL as
 	 * `data-url-large`, for a lightbox. Empty when no image can be shown.
 	 */
-	public function gallery(string $size = 'block-thumb', ?string $large = null, string $prefix = 'cms'): Markup
-	{
+	public function gallery(
+		string $size = 'block-thumb',
+		?string $large = null,
+		string $prefix = 'cms',
+		string|int|null ...$attributes,
+	): Markup {
 		$sizes = $this->owner->config()->media->sizes;
 		// A typo should fail the render rather than emit URLs that lead nowhere.
 		$sizes->get($size);
@@ -61,7 +65,10 @@ class Images extends Files
 		foreach ($this as $image) {
 			$sized = $image->size($size);
 			$extra = $large === null ? [] : ['data-url-large' => $image->size($large)->publicPath()];
-			$items .= $sized->figure($sized->img(...$extra), "{$prefix}-image-gallery-item");
+			$items .= $sized->figure(
+				$sized->img(null, ...['loading' => 'lazy', ...$extra, ...$attributes]),
+				"{$prefix}-image-gallery-item",
+			);
 		}
 
 		if ($items === '') {

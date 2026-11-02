@@ -232,8 +232,8 @@ final class RichtextRendererTest extends TestCase
 
 		$this->assertSame(
 			'<p>'
-				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Ein Foto">'
-				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Anders" title="Titel">'
+				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Ein Foto" loading="lazy">'
+				. '<img src="/cache/ab/img1/photo-block.jpg" alt="Anders" loading="lazy" title="Titel">'
 				. '</p>',
 			self::withoutFingerprints($html),
 		);
