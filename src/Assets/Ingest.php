@@ -141,17 +141,7 @@ final class Ingest
 			return [null, null];
 		}
 
-		// getimagesizefromstring warns on undecodable input (e.g. SVG bytes);
-		// unreadable dimensions are an expected outcome here, not an error.
-		set_error_handler(static fn(): bool => true);
-
-		try {
-			$info = getimagesizefromstring($contents);
-		} finally {
-			restore_error_handler();
-		}
-
-		return $info === false ? [null, null] : [$info[0], $info[1]];
+		return Dimensions::of($contents) ?? [null, null];
 	}
 
 	/**

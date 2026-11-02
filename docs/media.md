@@ -176,6 +176,8 @@ Two derived tables track ownership:
 
 [References\Scanner](../src/References/Scanner.php) walks media, reference fields, typed rows, an image's link, and richtext carriers (`image.uid`, `link.asset`, `link.node`). Live node writes, working copies, and menu writes synchronize their references. Node backlinks are informational, not a general deletion guard; parent/child deletion has separate rules.
 
+Use the app's `php run db:asset-dimensions` once on a catalog with JPEGs from before their rotation counted: it corrects the stored `width` and `height` of photos a camera saved on their side.
+
 Use the app's `php run db:references` after direct imports or migrations that bypass normal writers. It rebuilds the derived indexes, not the content. Inspect [References/](../src/References/) for the owner types covered by the current rebuild before adding another content owner.
 
 ## Migrating pre-catalog content
