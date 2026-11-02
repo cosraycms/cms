@@ -44,21 +44,7 @@ final class Image implements Block
 			return '';
 		}
 
-		$caption = (string) $image->caption();
-		$attribution = $image->attribution();
-
-		if ($attribution !== '') {
-			$caption .= " <small class=\"{$ctx->prefix()}-attribution\">" . escape($attribution) . '</small>';
-		}
-
-		$figcaption = $caption === '' ? '' : '<figcaption>' . trim($caption) . '</figcaption>';
-
-		return (
-			"<figure class=\"{$ctx->prefix()}-figure\">"
-				. $image->linked(new Markup($this->img($image, $asset, $block, $ctx)))
-				. $figcaption
-				. '</figure>'
-		);
+		return (string) $image->render(new Markup($this->img($image, $asset, $block, $ctx)), $ctx->prefix());
 	}
 
 	private function img(ImageValue $image, Asset $asset, BlockValue $block, RenderContext $ctx): string

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Unit;
 
+use Closure;
 use Cosray\Assets\Asset;
 use Cosray\Context;
 use Cosray\Field\Field;
 use Cosray\Field\Image as ImageField;
 use Cosray\Field\Services;
+use Cosray\Markup;
 use Cosray\Node\FieldOwner;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Image;
@@ -24,6 +26,11 @@ final class ImageValueTest extends TestCase
 {
 	private const string UID = 'img0000000001';
 	private const array CROP = ['x' => 0.1, 'y' => 0.2, 'w' => 0.5, 'h' => 0.5];
+	private const array FILLED = [
+		'caption' => ['zxx' => 'Words'],
+		'attribution' => '© <Jane>',
+		'link' => ['href' => '/about'],
+	];
 
 	public function testAPlainImageKeepsItsUrls(): void
 	{
@@ -188,6 +195,117 @@ final class ImageValueTest extends TestCase
 		);
 	}
 
+	public function testPrintingAPlainFieldGivesTheTag(): void
+	{
+		$image = $this->image(self::FILLED);
+
+		$this->assertSame((string) $image->tag(), (string) $image);
+	}
+
+	public function testALinkFieldPrintsTheImageInItsLink(): void
+	{
+		$image = $this->image(['link' => ['href' => '/about']], configure: static function (ImageField $field): void {
+			$field->linkable();
+		});
+
+		$this->assertSame('<a href="/about" rel="noopener">' . $image->tag() . '</a>', (string) $image);
+
+		$unlinked = $this->image([], configure: static function (ImageField $field): void {
+			$field->linkable();
+		});
+
+		$this->assertSame((string) $unlinked->tag(), (string) $unlinked);
+	}
+
+	public function testACaptionFieldPrintsAFigure(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->caption();
+		});
+
+		$this->assertSame('<figure>' . $image->tag() . '<figcaption>Words</figcaption></figure>', (string) $image);
+	}
+
+	public function testAnAttributionFieldPrintsAFigureAndEscapesTheName(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->attribution();
+		});
+
+		$this->assertSame(
+			'<figure>' . $image->tag() . '<figcaption><small>© &lt;Jane&gt;</small></figcaption></figure>',
+			(string) $image,
+		);
+	}
+
+	public function testAllTogether(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->caption()->attribution()->linkable();
+		});
+
+		$this->assertSame(
+			'<figure><a href="/about" rel="noopener">'
+				. $image->tag()
+				. '</a><figcaption>Words <small>© &lt;Jane&gt;</small></figcaption></figure>',
+			(string) $image,
+		);
+	}
+
+	public function testTheFigureStaysWithoutText(): void
+	{
+		$image = $this->image([], configure: static function (ImageField $field): void {
+			$field->caption();
+		});
+
+		$this->assertSame('<figure>' . $image->tag() . '</figure>', (string) $image);
+	}
+
+	public function testTheTagStaysPlainForOwnMarkup(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->caption()->attribution()->linkable();
+		});
+
+		$this->assertStringStartsWith('<img ', (string) $image->tag());
+	}
+
+	public function testRenderTakesAnImageAndAPrefix(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->attribution();
+		});
+
+		$this->assertSame(
+			'<figure class="site-figure"><img src="/x.jpg" alt="">'
+				. '<figcaption><small class="site-attribution">© &lt;Jane&gt;</small></figcaption></figure>',
+			(string) $image->render(new Markup('<img src="/x.jpg" alt="">'), 'site'),
+		);
+	}
+
+	public function testASizeKeepsTheFigure(): void
+	{
+		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
+			$field->caption();
+		});
+
+		$this->assertStringContainsString('/cache/im/' . self::UID . '/pic-thumb.jpg', (string) $image->size('thumb'));
+		$this->assertStringStartsWith('<figure>', (string) $image->size('thumb'));
+	}
+
+	public function testAGoneFilePrintsNothing(): void
+	{
+		$image = $this->image(
+			uid: 'gone000000001',
+			meta: self::FILLED,
+			configure: static function (ImageField $field): void {
+				$field->caption();
+			},
+		);
+
+		$this->assertSame('', (string) $image);
+	}
+
 	public function testWithoutASecretTheImageStaysWhole(): void
 	{
 		$image = $this->image(['crop' => self::CROP, 'focal' => ['x' => 0.35, 'y' => 0.2]], secret: null);
@@ -216,6 +334,8 @@ final class ImageValueTest extends TestCase
 		#[SensitiveParameter]
 		?string $secret = 'test-secret',
 		string $mime = 'image/jpeg',
+		?Closure $configure = null,
+		string $uid = self::UID,
 	): Image {
 		$psrRequest = $this->psrRequest();
 		$locales = new \Cosray\Locales();
@@ -241,10 +361,14 @@ final class ImageValueTest extends TestCase
 			height: 500,
 			meta: $catalog,
 		));
-		$data = ['value' => [Field::NEUTRAL_LOCALE => [['uid' => self::UID, 'meta' => $meta]]]];
+		$data = ['value' => [Field::NEUTRAL_LOCALE => [['uid' => $uid, 'meta' => $meta]]]];
 		$field = new ImageField('image', new FieldOwner($context, 'test-node'), new ValueContext('image', $data));
 		$field->init(Services::withDefaults());
 		$field->limit(1);
+
+		if ($configure !== null) {
+			$configure($field);
+		}
 
 		return $field->value();
 	}

@@ -66,12 +66,25 @@ public Image $cover;
 ```
 
 ```php
-<?= $page->cover->size('card')->tag() ?>
-<figcaption>
-    <?= $page->cover->caption() ?>
-    <small><?= $page->cover->attribution() ?></small>
-</figcaption>
+<?= $page->cover ?>
+<?= $page->cover->size('card') ?>
 ```
+
+Printing the image follows what the field declares. With `#[Caption]` or `#[Attribution]` it prints a `<figure>`, with a `<figcaption>` when there is text and the attribution in a `<small>`; the figure does not depend on the text, so pages keep the same structure. With `#[Link]` it puts the image inside the link. Without any of them it prints the `<img>`, and an image field with several images prints each in turn.
+
+For your own markup, ask for the parts. `tag()` is always the plain `<img>`:
+
+```php
+<figure class="cover">
+    <?= $page->cover->size('card')->tag('photo') ?>
+    <figcaption>
+        <?= $page->cover->caption() ?>
+        <small><?= $page->cover->attribution() ?></small>
+    </figcaption>
+</figure>
+```
+
+`render()` gives the same output as printing the image, and takes your own image and a class prefix: `$page->cover->render($page->cover->tag('photo'), 'site')` gives the classes `site-figure` and `site-attribution`.
 
 `#[Link]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
 
@@ -81,7 +94,6 @@ public Image $cover;
 ```
 
 ```php
-<?= $page->cover->size('card')->linked() ?>
 <?= $page->cover->linked($page->cover->tag('cover')) ?>
 <?= $page->cover->link() ?>
 ```
