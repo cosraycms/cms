@@ -13,6 +13,7 @@ use Cosray\Actor;
 use Cosray\Api\NodeQuery;
 use Cosray\Api\Responses;
 use Cosray\Api\Serializer;
+use Cosray\Assets\Asset;
 use Cosray\Assets\Ingest;
 use Cosray\Assets\Library;
 use Cosray\Assets\Meta;
@@ -127,6 +128,56 @@ final class Assets
 		return $this->responses->json($this->serializer->asset($asset), $result->created ? 201 : 200, [
 			'Location' => rtrim($request->uri()->getPath(), '/') . "/{$uid}",
 		]);
+	}
+
+	/**
+	 * Changes the texts and focal point named in a JSON body; what it leaves out
+	 * stays. `alt`, `title` and `caption` are maps by locale, and null clears a value.
+	 */
+	public function patch(Request $request, Context $context, Config $config, Database $db, string $uid): Response
+	{
+		$this->permit($request, 'edit-nodes', 'change assets');
+		$row = $db->assets->byUid(['uid' => $uid])->first();
+
+		if (!$row) {
+			throw new HttpNotFound($request, payload: ['message' => "There is no asset '{$uid}'."]);
+		}
+
+		$body = json_decode((string) $request->unwrap()->getBody(), true);
+
+		if (!is_array($body) || array_is_list($body) && $body !== []) {
+			throw new HttpBadRequest($request, payload: ['message' => 'Send a JSON object.']);
+		}
+
+		$asset = Asset::fromRow($row, $config);
+		$meta = Meta::apply(
+			$asset->meta,
+			[...$asset->meta, ...$body],
+			array_keys(iterator_to_array($context->locales())),
+			$asset->kind === 'image',
+		);
+		$db->assets->updateMeta(['uid' => $uid, 'meta' => json_encode($meta)])->run();
+
+		return $this->responses->json($this->serializer->asset(
+			Asset::fromRow($db->assets->byUid(['uid' => $uid])->one(), $config),
+		));
+	}
+
+	/** Deletes an asset nothing uses; one in use answers 409 and names what uses it. */
+	public function delete(Request $request, Library $library, string $uid): Response
+	{
+		$this->permit($request, 'edit-nodes', 'delete assets');
+		$owners = $library->delete($uid);
+
+		if ($owners === null) {
+			throw new HttpNotFound($request, payload: ['message' => "There is no asset '{$uid}'."]);
+		}
+
+		if ($owners !== []) {
+			return $this->responses->problem(409, 'The asset is still in use.', ['usedBy' => $owners]);
+		}
+
+		return $this->responses->empty();
 	}
 
 	private function type(Config $config, string $contents): string

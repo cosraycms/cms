@@ -44,6 +44,8 @@ final class Routes
 				$api->get('/assets', [Controller\Assets::class, 'list'], 'assets');
 				$api->post('/assets', [Controller\Assets::class, 'upload'], 'assets.upload');
 				$api->get("/assets/{$uid}", [Controller\Assets::class, 'get'], 'asset');
+				$api->patch("/assets/{$uid}", [Controller\Assets::class, 'patch'], 'asset.patch');
+				$api->delete("/assets/{$uid}", [Controller\Assets::class, 'delete'], 'asset.delete');
 				$api->post('/handoff', [Controller\Handoff::class, 'create'], 'handoff');
 
 				// Last, so a path the API does not know answers as a problem

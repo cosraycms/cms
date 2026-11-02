@@ -204,6 +204,8 @@ Requesting a page URL itself with `Accept: application/json` answers with the sa
 
 `GET /api/assets` lists the catalog, newest first, and takes `kind` (image, video, audio, document), `q` matching the filename, `since`, `limit` and `offset`; it needs `read-nodes`. `POST /api/assets` uploads the multipart field `file`, needs `edit-nodes`, and takes an optional `type` (image, video or file, read off the file otherwise) and `meta`, JSON with `alt`, `title` and `caption` maps and an `attribution`; a caption is plain text or a [caption document](richtext-format.md#captions). It answers `201` with the new entry, `200` with the existing one when the catalog already holds the same bytes, and `422` when the file is refused.
 
+`PATCH /api/assets/{uid}` changes the texts and focal point named in a JSON body and leaves the rest: `alt`, `title` and `caption` as maps by locale, `attribution`, and `focal` as `{x, y}`; null clears one. `DELETE /api/assets/{uid}` deletes an asset nothing uses and answers 204; one in use answers 409 with what uses it in `usedBy`. Both need `edit-nodes`.
+
 ## Previews
 
 A headless frontend can show an editor's unpublished working copy. Name its preview route, and the panel's preview opens it instead of the site's own `/preview` page:

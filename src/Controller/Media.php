@@ -48,7 +48,7 @@ class Media
 		protected readonly Logger $logger,
 	) {}
 
-	#[Permission('panel')]
+	#[Permission('edit-nodes')]
 	public function upload(string $mediatype): Response
 	{
 		$response = Response::create($this->factory);

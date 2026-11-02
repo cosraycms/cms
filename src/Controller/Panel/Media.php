@@ -12,6 +12,7 @@ use Cosray\Assets\Asset;
 use Cosray\Assets\Library;
 use Cosray\Assets\Meta;
 use Cosray\Locales;
+use Cosray\Middleware\Permission;
 use Cosray\Panel\MediaScreen;
 use Cosray\Panel\System;
 use Cosray\References\Usage;
@@ -115,6 +116,7 @@ final class Media extends Panel
 	 *
 	 * @return array<string, mixed>
 	 */
+	#[Permission('edit-nodes')]
 	public function save(Database $db, Locales $locales, string $uid): array
 	{
 		$row = $db->assets->byUid(['uid' => $uid])->first();
@@ -146,6 +148,7 @@ final class Media extends Panel
 	 *
 	 * @return array<string, mixed>|Response
 	 */
+	#[Permission('edit-nodes')]
 	public function delete(Database $db, Locales $locales, Factory $factory, string $uid): array|Response
 	{
 		$screen = $this->screen()->withFile($uid);
