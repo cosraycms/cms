@@ -55,9 +55,14 @@ final class Sizes
 	/** @var array<string, SizeSpec> */
 	private array $specs = [];
 
-	/** @param array<mixed> $config */
-	public function __construct(array $config)
-	{
+	/**
+	 * @param array<mixed> $config
+	 * @param string $backend What renders the sizes, which a rendition's name depends on.
+	 */
+	public function __construct(
+		array $config,
+		private readonly string $backend = 'gd',
+	) {
 		foreach ($config + self::BUILTIN as $name => $entry) {
 			$this->specs[$name] = $this->parse((string) $name, $entry);
 		}
@@ -134,6 +139,7 @@ final class Sizes
 			quality: $this->quality($name, $entry),
 			enlarge: $this->enlarge($name, $entry),
 			format: $this->format($name, $entry),
+			backend: $this->backend,
 		);
 	}
 

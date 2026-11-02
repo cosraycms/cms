@@ -89,6 +89,16 @@ final class SizesTest extends TestCase
 		}
 	}
 
+	public function testAnotherBackendHasAnotherFingerprint(): void
+	{
+		$sizes = ['card' => ['crop' => [600, 400]]];
+
+		$this->assertNotSame(
+			new Sizes($sizes, 'gd')->get('card')->fingerprint(),
+			new Sizes($sizes, 'imagick')->get('card')->fingerprint(),
+		);
+	}
+
 	public function testCropDefaultsToCenter(): void
 	{
 		$sizes = new Sizes(['card' => ['crop' => [600, 400]]]);

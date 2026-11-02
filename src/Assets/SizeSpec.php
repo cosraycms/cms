@@ -19,6 +19,7 @@ final class SizeSpec
 		public readonly ?int $quality = null,
 		public readonly bool $enlarge = false,
 		public readonly ?Format $format = null,
+		public readonly string $backend = 'gd',
 	) {}
 
 	/**
@@ -37,6 +38,7 @@ final class SizeSpec
 				$this->quality,
 				(int) $this->enlarge,
 				$this->format?->value,
+				$this->backend,
 			])),
 			0,
 			8,

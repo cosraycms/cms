@@ -6,6 +6,7 @@ namespace Cosray\Assets;
 
 use Cosray\Assets\Backend\Backend;
 use Cosray\Assets\Backend\Gd;
+use Cosray\Assets\Backend\Imagick;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Util\Path;
@@ -19,10 +20,15 @@ final class Renditions
 	private readonly string $assetsDir;
 	private readonly string $cacheDir;
 
-	public function __construct(
-		Config $config,
-		private readonly Backend $backend = new Gd(),
-	) {
+	private readonly Backend $backend;
+
+	public function __construct(Config $config)
+	{
+		$this->backend = match ($config->media->backend) {
+			'gd' => new Gd(),
+			'imagick' => new Imagick(),
+			default => throw new RuntimeException('`media.backend` must be `gd` or `imagick`.'),
+		};
 		$publicDir = realpath($config->path->public);
 
 		if ($publicDir === false) {

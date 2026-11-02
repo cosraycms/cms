@@ -119,6 +119,29 @@ final class RenditionsTest extends TestCase
 		}
 	}
 
+	public function testRefusesAnUnknownBackend(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('`media.backend` must be `gd` or `imagick`.');
+
+		new Renditions(new Config($this->root, settings: ['media.backend' => 'vips']));
+	}
+
+	public function testRendersWithTheConfiguredBackend(): void
+	{
+		if (!extension_loaded('imagick')) {
+			$this->markTestSkipped('The extension is missing.');
+		}
+
+		$path = new Renditions(new Config($this->root, settings: ['media.backend' => 'imagick']))->render(
+			$this->asset(),
+			'pic-thumb.png',
+			new SizeSpec('thumb', ResizeMode::Width, 60),
+		);
+
+		$this->assertSame([60, 30], array_slice((array) getimagesize($path), 0, 2));
+	}
+
 	public function testRefusesAFileThatIsNoImage(): void
 	{
 		file_put_contents("{$this->root}/public/assets/" . self::DIR . '/note.png', 'no image');

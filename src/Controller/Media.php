@@ -209,8 +209,9 @@ class Media
 
 		[$spec, $transform] = $this->rendition($asset, $file);
 
+		$renditions = new Renditions($this->config);
+
 		try {
-			$renditions = new Renditions($this->config);
 			$renditions->original($asset);
 		} catch (RuntimeException $e) {
 			throw new HttpNotFound($this->request, previous: $e);

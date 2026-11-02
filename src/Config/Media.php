@@ -19,7 +19,12 @@ final class Media
 		get => $this->config->get('media.fileserver');
 	}
 
+	/** What renders images: `gd`, or `imagick` where the extension is there. */
+	public string $backend {
+		get => (string) $this->config->get('media.backend');
+	}
+
 	public Sizes $sizes {
-		get => $this->sizesRegistry ??= new Sizes((array) $this->config->get('media.sizes'));
+		get => $this->sizesRegistry ??= new Sizes((array) $this->config->get('media.sizes'), $this->backend);
 	}
 }

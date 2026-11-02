@@ -60,7 +60,7 @@ final class JpegProfile
 			fclose($handle);
 		}
 
-		return self::isSrgb($segments) ? '' : $segments;
+		return self::isSrgb(substr($segments, 0, 65536)) ? '' : $segments;
 	}
 
 	/** Puts segments into a JPEG file behind its start and a JFIF header, as the format asks. */
@@ -81,8 +81,8 @@ final class JpegProfile
 	}
 
 	/** A profile names itself in its description, in UTF-16 from version 4 on. */
-	private static function isSrgb(string $segments): bool
+	public static function isSrgb(string $profile): bool
 	{
-		return str_contains(str_replace("\0", '', substr($segments, 0, 65536)), 'sRGB');
+		return str_contains(str_replace("\0", '', $profile), 'sRGB');
 	}
 }

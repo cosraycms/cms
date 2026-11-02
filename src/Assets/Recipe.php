@@ -60,6 +60,28 @@ final readonly class Recipe
 	}
 
 	/**
+	 * The part of the source as the file stores it, for an EXIF orientation and
+	 * the file's own size.
+	 *
+	 * @return array{int, int, int, int} x, y, width and height
+	 */
+	public function stored(int $orientation, int $width, int $height): array
+	{
+		[$x, $y, $w, $h] = [$this->x, $this->y, $this->w, $this->h];
+
+		return match ($orientation) {
+			2 => [$width - $x - $w, $y, $w, $h],
+			3 => [$width - $x - $w, $height - $y - $h, $w, $h],
+			4 => [$x, $height - $y - $h, $w, $h],
+			5 => [$y, $x, $h, $w],
+			6 => [$y, $height - $x - $w, $h, $w],
+			7 => [$width - $y - $h, $height - $x - $w, $h, $w],
+			8 => [$width - $y - $h, $x, $h, $w],
+			default => [$x, $y, $w, $h],
+		};
+	}
+
+	/**
 	 * @param bool $framed Whether the source is already cut to the ratio of a crop size
 	 * @return array{int, int}
 	 */

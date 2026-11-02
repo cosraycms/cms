@@ -64,7 +64,7 @@ final class Gd implements Backend
 			$sideways ? $recipe->width : $recipe->height,
 			$output,
 		);
-		[$x, $y, $w, $h] = $this->stored($recipe, $orientation, $width, $height);
+		[$x, $y, $w, $h] = $recipe->stored($orientation, $width, $height);
 		imagecopyresampled($canvas, $image, 0, 0, $x, $y, imagesx($canvas), imagesy($canvas), $w, $h);
 		unset($image);
 
@@ -122,27 +122,6 @@ final class Gd implements Backend
 		imagefill($canvas, 0, 0, (int) imagecolorallocatealpha($canvas, 0, 0, 0, 127));
 
 		return $canvas;
-	}
-
-	/**
-	 * The recipe's part of the image as the file stores it.
-	 *
-	 * @return array{int, int, int, int}
-	 */
-	private function stored(Recipe $recipe, int $orientation, int $width, int $height): array
-	{
-		['x' => $x, 'y' => $y, 'w' => $w, 'h' => $h] = (array) $recipe;
-
-		return match ($orientation) {
-			2 => [$width - $x - $w, $y, $w, $h],
-			3 => [$width - $x - $w, $height - $y - $h, $w, $h],
-			4 => [$x, $height - $y - $h, $w, $h],
-			5 => [$y, $x, $h, $w],
-			6 => [$y, $height - $x - $w, $h, $w],
-			7 => [$width - $y - $h, $height - $x - $w, $h, $w],
-			8 => [$width - $y - $h, $x, $h, $w],
-			default => [$x, $y, $w, $h],
-		};
 	}
 
 	/** Turning the small result instead of the whole image saves a second copy of the photo. */

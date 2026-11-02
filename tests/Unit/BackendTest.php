@@ -6,6 +6,7 @@ namespace Cosray\Tests\Unit;
 
 use Cosray\Assets\Backend\Backend;
 use Cosray\Assets\Backend\Gd;
+use Cosray\Assets\Backend\Imagick;
 use Cosray\Assets\Format;
 use Cosray\Assets\JpegProfile;
 use Cosray\Assets\Recipe;
@@ -67,6 +68,10 @@ final class BackendTest extends TestCase
 	public static function backends(): iterable
 	{
 		yield 'gd' => [new Gd()];
+
+		if (extension_loaded('imagick')) {
+			yield 'imagick' => [new Imagick()];
+		}
 	}
 
 	/** @return iterable<string, array{Backend, int}> */
@@ -129,6 +134,26 @@ final class BackendTest extends TestCase
 		$this->assertSame(array_fill(0, 4, self::GREEN), $this->corners($image));
 	}
 
+	/** A JPEG may be decoded smaller than it is, which a part has to hold up against. */
+	#[DataProvider('backends')]
+	public function testAPartOfALargeJpegIsFoundWhenScaledFarDown(Backend $backend): void
+	{
+		$large = imagescale($this->quarters(), 2000, 1000, IMG_NEAREST_NEIGHBOUR);
+		$source = "{$this->dir}/source-large.jpg";
+		imagejpeg($large, $source, 95);
+
+		foreach ([[0, 0, self::RED], [1000, 0, self::GREEN], [0, 500, self::BLUE], [1000, 500, self::WHITE]] as [
+			$x,
+			$y,
+			$color,
+		]) {
+			$image = $this->rendered($backend, $source, new Recipe($x, $y, 1000, 500, 20, 10));
+
+			$this->assertSame([20, 10], [imagesx($image), imagesy($image)]);
+			$this->assertSame(array_fill(0, 4, $color), $this->corners($image));
+		}
+	}
+
 	#[DataProvider('backends')]
 	public function testAnImageCanBeEnlarged(Backend $backend): void
 	{
@@ -167,7 +192,7 @@ final class BackendTest extends TestCase
 	#[DataProvider('formats')]
 	public function testWritesTheFormatOfTheRecipe(Backend $backend, Format $format, int $type, int $gdType): void
 	{
-		$this->skipUnlessGdSupports($backend, $gdType);
+		$this->skipUnlessSupported($backend, $format, $gdType);
 
 		$target = "{$this->dir}/written";
 		$backend->render($this->png(), $target, new Recipe(0, 0, 40, 20, 20, 10, format: $format));
@@ -249,6 +274,30 @@ final class BackendTest extends TestCase
 		$this->assertSame(self::SHOWN[1], $this->corners($this->opened($target)));
 	}
 
+	/** @return iterable<string, array{Format}> */
+	public static function profileFormats(): iterable
+	{
+		yield 'jpeg' => [Format::Jpeg];
+		yield 'webp' => [Format::Webp];
+		yield 'avif' => [Format::Avif];
+	}
+
+	#[DataProvider('profileFormats')]
+	public function testImagickKeepsTheColourProfileInEveryFormat(Format $format): void
+	{
+		if (!extension_loaded('imagick') || \Imagick::queryFormats(strtoupper($format->value)) === []) {
+			$this->markTestSkipped('This build lacks the format.');
+		}
+
+		$profile = str_repeat('Adobe RGB (1998) ', 40);
+		$target = "{$this->dir}/colour";
+
+		new Imagick()->render($this->profiled($profile), $target, new Recipe(0, 0, 40, 20, 20, 10, format: $format));
+
+		$read = new \Imagick($target);
+		$this->assertStringContainsString($profile, (string) ($read->getImageProfiles('icc', true)['icc'] ?? ''));
+	}
+
 	#[DataProvider('backends')]
 	public function testAnSrgbJpegNeedsNoProfile(Backend $backend): void
 	{
@@ -298,10 +347,14 @@ final class BackendTest extends TestCase
 		}
 	}
 
-	private function skipUnlessGdSupports(Backend $backend, int $type): void
+	private function skipUnlessSupported(Backend $backend, Format $format, int $gdType): void
 	{
-		if ($backend instanceof Gd && !(imagetypes() & $type)) {
-			$this->markTestSkipped('This build of GD lacks the format.');
+		$supported = $backend instanceof Gd
+			? (imagetypes() & $gdType) !== 0
+			: \Imagick::queryFormats(strtoupper($format->value)) !== [];
+
+		if (!$supported) {
+			$this->markTestSkipped('This build lacks the format.');
 		}
 	}
 

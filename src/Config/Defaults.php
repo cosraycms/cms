@@ -171,6 +171,7 @@ final class Defaults
 	private static function media(): array
 	{
 		return [
+			'media.backend' => 'gd',
 			'media.fileserver' => null,
 			'media.sizes' => [],
 		];

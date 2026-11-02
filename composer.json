@@ -46,6 +46,7 @@
 		"phpunit/phpunit": "^13.0"
 	},
 	"suggest": {
+		"ext-imagick": "Renders images for `media.backend`: correct colours in WebP and AVIF, less memory for large photos.",
 		"celema/server": "Provides the server and frankenphp dev-server commands for local development.",
 		"filp/whoops": "Enables pretty debug error pages in debug mode.",
 		"phpunit/phpunit": "Runs site tests on Cosray\\Testing\\TestCase."
