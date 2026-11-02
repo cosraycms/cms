@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Celema\Sire\Issue;
+use Celema\Verba\Translator;
+use Celema\Verba\Verba;
 use Cosray\Assets\Asset;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
@@ -93,6 +95,29 @@ final class MediaRequiredItemsTest extends TestCase
 		$this->assertCount(1, $issues);
 		$this->assertSame(['value', 'zxx', 1, 'meta', 'alt'], $issues[0]['path']);
 		$this->assertSame('media:item-missing-at', $issues[0]['message']);
+	}
+
+	public function testTheMessagesNameTheField(): void
+	{
+		$single = $this->field()->requireItem('caption');
+		$single->label('Cover');
+		$gallery = $this->field(limit: false)->requireItem('alt');
+		$gallery->label('Gallery');
+
+		Verba::activate(new Translator('de', ['cosray' => self::root() . '/lang']));
+
+		try {
+			$this->assertSame(
+				'Cover: Bildunterschrift fehlt.',
+				$this->issues($single, $this->single(self::BARE))[0]['message'],
+			);
+			$this->assertSame(
+				'Gallery, Datei 1: Alternativtext fehlt.',
+				$this->issues($gallery, $this->single(self::BARE))[0]['message'],
+			);
+		} finally {
+			Verba::deactivate();
+		}
 	}
 
 	public function testAnEmptyFieldNeedsNothing(): void

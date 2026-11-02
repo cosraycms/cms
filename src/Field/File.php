@@ -147,12 +147,12 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 					continue;
 				}
 
-				$label = __(self::ITEM_LABELS[$key] ?? $key);
+				$params = ['field' => $this->valueLabel(), 'label' => __(self::ITEM_LABELS[$key] ?? $key)];
 				$review->addError(
 					[$index, 'meta', $key],
 					$multiple
-						? __('media:item-missing-at', ['position' => (int) $index + 1, 'label' => $label])
-						: __('media:item-missing', ['label' => $label]),
+						? __('media:item-missing-at', [...$params, 'position' => (int) $index + 1])
+						: __('media:item-missing', $params),
 				);
 			}
 		}
