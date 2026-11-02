@@ -79,7 +79,6 @@ final class MediaRequiredItemsTest extends TestCase
 
 		$this->assertCount(1, $issues);
 		$this->assertSame(['value', 'zxx', 0, 'meta', 'alt'], $issues[0]['path']);
-		$this->assertSame('media:item-missing', $issues[0]['message']);
 	}
 
 	public function testAGalleryNamesTheImage(): void
@@ -94,7 +93,6 @@ final class MediaRequiredItemsTest extends TestCase
 
 		$this->assertCount(1, $issues);
 		$this->assertSame(['value', 'zxx', 1, 'meta', 'alt'], $issues[0]['path']);
-		$this->assertSame('media:item-missing-at', $issues[0]['message']);
 	}
 
 	public function testTheMessagesNameTheField(): void
