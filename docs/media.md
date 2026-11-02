@@ -65,26 +65,31 @@ use Cosray\Schema\Label;
 public Image $cover;
 ```
 
-```php
-<?= $page->cover ?>
-<?= $page->cover->size('card') ?>
-```
-
-Printing the image follows what the field declares. With `#[Caption]` or `#[Attribution]` it prints a `<figure>`, with a `<figcaption>` when there is text and the attribution in a `<small>`; the figure does not depend on the text, so pages keep the same structure. With `#[Link]` it puts the image inside the link. Without any of them it prints the `<img>`, and an image field with several images prints each in turn.
-
-For your own markup, ask for the parts. `tag()` is always the plain `<img>`:
+An attribute decides what editors can fill in, not the markup. A template prints what it asks for:
 
 ```php
-<figure class="cover">
-    <?= $page->cover->size('card')->tag('photo') ?>
-    <figcaption>
-        <?= $page->cover->caption() ?>
-        <small><?= $page->cover->attribution() ?></small>
-    </figcaption>
-</figure>
+<?= $page->cover ?>                          // <img>
+<?= $page->cover->size('card')->tag('photo') ?>
+<?= $page->cover->linked() ?>                // <a><img></a> with a link, <img> without
+<?= $page->cover->figure() ?>                // <figure> with link, caption and attribution
+<?= $page->photos ?>                         // an <img> per image
+<?= $page->photos->gallery() ?>              // a wrapper with a <figure> per image
 ```
 
-`render()` gives the same output as printing the image, and takes your own image and a class prefix: `$page->cover->render($page->cover->tag('photo'), 'site')` gives the classes `site-figure` and `site-attribution`.
+`figure()` prints what `linked()`, `caption()` and `attribution()` return, whichever attributes the field declares, so values from the media screen count. Without text it still prints the `<figure>`, so pages keep the same structure. The attribution sits in a `<small>`. Pass your own image or a class with `$page->cover->figure($page->cover->tag('photo'), 'cover')`.
+
+`gallery()` prints this, with the ratio and crop an editor chose for the gallery:
+
+```html
+<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>
+    <figure class="cms-image-gallery-item">
+        <img src="/cache/…/pic-block-thumb.jpg" data-url-large="/cache/…/pic-large.jpg" alt="…">
+        <figcaption>Words <small>© Jane Doe</small></figcaption>
+    </figure>
+</div>
+```
+
+`gallery(size: 'thumb', large: 'large', prefix: 'site')` picks the [named sizes](#urls-and-image-sizes) and starts the classes with `site`; `data-url-large` is only there with `large`, for a lightbox. For your own grid, loop over the images: `foreach ($page->photos as $photo)` and print `$photo->size('thumb')->figure()`.
 
 `#[Link]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
 

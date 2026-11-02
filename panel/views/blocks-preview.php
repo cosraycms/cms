@@ -110,24 +110,30 @@ iframe {
 }
 
 .cms-figure img,
-.cms-blocks-images img,
+.cms-image-gallery img,
 video {
 	display: block;
 	width: 100%;
 	height: auto;
 }
 
-.cms-attribution {
+.cms-figure small,
+.cms-image-gallery small {
 	font-size: 0.75rem;
 }
 
-.cms-figure figcaption {
+.cms-figure figcaption,
+.cms-image-gallery figcaption {
 	margin-top: 0.5rem;
 	color: #666;
 	font-size: 0.875rem;
 }
 
-.cms-blocks-images {
+.cms-image-gallery-item {
+	margin: 0;
+}
+
+.cms-image-gallery {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 	gap: 1rem;

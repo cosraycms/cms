@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Markup;
 use Override;
+
+use function Cosray\escape;
 
 class Images extends Files
 {
@@ -36,6 +39,46 @@ class Images extends Files
 	public function first(): Image
 	{
 		return new Image($this->owner, $this->field, $this->context, 0);
+	}
+
+	/**
+	 * The images as a gallery: a figure per image in a wrapper that carries the
+	 * field's ratio and crop settings. `$large` adds another rendition's URL as
+	 * `data-url-large`, for a lightbox. Empty when no image can be shown.
+	 */
+	public function gallery(string $size = 'block-thumb', ?string $large = null, string $prefix = 'cms'): Markup
+	{
+		$sizes = $this->owner->config()->media->sizes;
+		// A typo should fail the render rather than emit URLs that lead nowhere.
+		$sizes->get($size);
+
+		if ($large !== null) {
+			$sizes->get($large);
+		}
+
+		$items = '';
+
+		foreach ($this as $image) {
+			$items .= $image->size($size)->galleryItem($large, "{$prefix}-image-gallery-item");
+		}
+
+		if ($items === '') {
+			return new Markup('');
+		}
+
+		$attributes = sprintf('class="%s-image-gallery"', escape($prefix));
+		$ratio = $this->ratio();
+
+		if ($ratio !== null) {
+			$ratio = escape($ratio);
+			$attributes .= " data-ratio=\"{$ratio}\" style=\"--ratio: {$ratio}\"";
+		}
+
+		if ($this->crop()) {
+			$attributes .= ' data-crop';
+		}
+
+		return new Markup("<div {$attributes}>{$items}</div>");
 	}
 
 	/** The gallery tiles' aspect ratio, such as `4/3`; `null` keeps each image's own. */

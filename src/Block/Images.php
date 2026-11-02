@@ -6,7 +6,6 @@ namespace Cosray\Block;
 
 use Cosray\Contract\Block;
 use Cosray\Field;
-use Cosray\Markup;
 use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
 use Cosray\Schema\Label;
@@ -15,8 +14,6 @@ use Cosray\Schema\Translate;
 use Cosray\Value\Block as BlockValue;
 use Cosray\Value\Images as ImagesValue;
 use Override;
-
-use function Cosray\escape;
 
 #[Label('block:images')]
 final class Images implements Block
@@ -29,59 +26,14 @@ final class Images implements Block
 	#[Override]
 	public function render(BlockValue $block, RenderContext $ctx): string
 	{
-		$name = (string) ($ctx->args['thumbSize'] ?? self::THUMB);
-		// Validate the name up front — a typo should fail the render,
-		// not silently emit URLs the fallback route will 404.
-		$ctx->owner->config()->media->sizes->get($name);
-		$prefix = $ctx->prefix();
 		/** @var ImagesValue $images */
 		$images = $block->images;
-		$result = '';
+		$large = $ctx->args['largeSize'] ?? null;
 
-		foreach ($images as $image) {
-			$asset = $ctx->asset((string) ($image->raw()['uid'] ?? ''));
-
-			if ($asset === null) {
-				continue;
-			}
-
-			$alt = escape($image->alt() ?: strip_tags($image->title()));
-			$path = escape($asset->path());
-			$url = escape($image->size($name)->publicPath());
-			$position = $image->position();
-			$style = $position === '' ? '' : " style=\"{$position}\"";
-
-			$tag = "<img src=\"{$url}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>";
-			// Sites lay a tile out around its image, so one without text keeps that structure.
-			$tile =
-				$image->captionText() === '' && $image->attribution() === ''
-					? $tag
-					: (string) $image->render(new Markup($tag), $prefix);
-			$result .= "<div class=\"{$prefix}-blocks-images-image\">{$tile}</div>";
-		}
-
-		if ($result === '') {
-			return '';
-		}
-
-		return "<div class=\"{$prefix}-blocks-images\"{$this->settings($images)}>{$result}</div>";
-	}
-
-	/** The gallery settings as attributes: the ratio as data and custom property, the crop as a flag. */
-	private function settings(ImagesValue $images): string
-	{
-		$attributes = '';
-		$ratio = $images->ratio();
-
-		if ($ratio !== null) {
-			$ratio = escape($ratio);
-			$attributes .= " data-ratio=\"{$ratio}\" style=\"--ratio: {$ratio}\"";
-		}
-
-		if ($images->crop()) {
-			$attributes .= ' data-crop';
-		}
-
-		return $attributes;
+		return (string) $images->gallery(
+			(string) ($ctx->args['thumbSize'] ?? self::THUMB),
+			is_string($large) ? $large : null,
+			$ctx->prefix(),
+		);
 	}
 }

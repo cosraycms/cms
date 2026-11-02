@@ -14,6 +14,7 @@ use Cosray\Markup;
 use Cosray\Node\FieldOwner;
 use Cosray\Tests\TestCase;
 use Cosray\Value\Image;
+use Cosray\Value\Images;
 use Cosray\Value\ValueContext;
 use SensitiveParameter;
 
@@ -195,115 +196,131 @@ final class ImageValueTest extends TestCase
 		);
 	}
 
-	public function testPrintingAPlainFieldGivesTheTag(): void
-	{
-		$image = $this->image(self::FILLED);
-
-		$this->assertSame((string) $image->tag(), (string) $image);
-	}
-
-	public function testALinkFieldPrintsTheImageInItsLink(): void
-	{
-		$image = $this->image(['link' => ['href' => '/about']], configure: static function (ImageField $field): void {
-			$field->linkable();
-		});
-
-		$this->assertSame('<a href="/about" rel="noopener">' . $image->tag() . '</a>', (string) $image);
-
-		$unlinked = $this->image([], configure: static function (ImageField $field): void {
-			$field->linkable();
-		});
-
-		$this->assertSame((string) $unlinked->tag(), (string) $unlinked);
-	}
-
-	public function testACaptionFieldPrintsAFigure(): void
-	{
-		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
-			$field->caption();
-		});
-
-		$this->assertSame('<figure>' . $image->tag() . '<figcaption>Words</figcaption></figure>', (string) $image);
-	}
-
-	public function testAnAttributionFieldPrintsAFigureAndEscapesTheName(): void
-	{
-		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
-			$field->attribution();
-		});
-
-		$this->assertSame(
-			'<figure>' . $image->tag() . '<figcaption><small>© &lt;Jane&gt;</small></figcaption></figure>',
-			(string) $image,
-		);
-	}
-
-	public function testAllTogether(): void
+	public function testPrintingGivesTheTagWhateverTheFieldDeclares(): void
 	{
 		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
 			$field->caption()->attribution()->linkable();
 		});
+
+		$this->assertStringStartsWith('<img ', (string) $image);
+		$this->assertSame((string) $image->tag(), (string) $image);
+	}
+
+	public function testAFigureHoldsTheLinkCaptionAndAttribution(): void
+	{
+		$image = $this->image(self::FILLED);
 
 		$this->assertSame(
 			'<figure><a href="/about" rel="noopener">'
 				. $image->tag()
 				. '</a><figcaption>Words <small>© &lt;Jane&gt;</small></figcaption></figure>',
-			(string) $image,
+			(string) $image->figure(),
 		);
 	}
 
-	public function testTheFigureStaysWithoutText(): void
+	public function testAFigureStaysWithoutText(): void
 	{
-		$image = $this->image([], configure: static function (ImageField $field): void {
-			$field->caption();
-		});
+		$image = $this->image([]);
 
-		$this->assertSame('<figure>' . $image->tag() . '</figure>', (string) $image);
+		$this->assertSame('<figure>' . $image->tag() . '</figure>', (string) $image->figure());
 	}
 
-	public function testTheTagStaysPlainForOwnMarkup(): void
+	public function testAFigureUsesTheCatalogsTexts(): void
 	{
-		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
-			$field->caption()->attribution()->linkable();
-		});
+		$image = $this->image([], ['attribution' => '© Catalog']);
 
-		$this->assertStringStartsWith('<img ', (string) $image->tag());
+		$this->assertStringContainsString(
+			'<figcaption><small>© Catalog</small></figcaption>',
+			(string) $image->figure(),
+		);
 	}
 
-	public function testRenderTakesAnImageAndAPrefix(): void
+	public function testAFigureTakesAnImageAndAClass(): void
 	{
-		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
-			$field->attribution();
-		});
+		$image = $this->image([]);
 
 		$this->assertSame(
-			'<figure class="site-figure"><img src="/x.jpg" alt="">'
-				. '<figcaption><small class="site-attribution">© &lt;Jane&gt;</small></figcaption></figure>',
-			(string) $image->render(new Markup('<img src="/x.jpg" alt="">'), 'site'),
+			'<figure class="a&quot;b"><img src="/x.jpg" alt=""></figure>',
+			(string) $image->figure(new Markup('<img src="/x.jpg" alt="">'), 'a"b'),
 		);
 	}
 
-	public function testASizeKeepsTheFigure(): void
+	public function testASizeKeepsItsFigure(): void
 	{
-		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
-			$field->caption();
-		});
+		$figure = (string) $this->image(self::FILLED)->size('thumb')->figure();
 
-		$this->assertStringContainsString('/cache/im/' . self::UID . '/pic-thumb.jpg', (string) $image->size('thumb'));
-		$this->assertStringStartsWith('<figure>', (string) $image->size('thumb'));
+		$this->assertStringContainsString('/cache/im/' . self::UID . '/pic-thumb.jpg', $figure);
+		$this->assertStringStartsWith('<figure>', $figure);
 	}
 
 	public function testAGoneFilePrintsNothing(): void
 	{
-		$image = $this->image(
-			uid: 'gone000000001',
-			meta: self::FILLED,
-			configure: static function (ImageField $field): void {
-				$field->caption();
-			},
-		);
+		$image = $this->image(uid: 'gone000000001', meta: self::FILLED);
 
 		$this->assertSame('', (string) $image);
+		$this->assertSame('', (string) $image->figure());
+	}
+
+	public function testAGalleryWrapsAFigurePerImage(): void
+	{
+		$gallery = $this->gallery([
+			['uid' => self::UID, 'meta' => ['alt' => ['zxx' => 'A <kettle>'], 'caption' => ['zxx' => 'Words']]],
+			['uid' => self::UID],
+			['uid' => 'gone000000001'],
+		]);
+
+		$this->assertSame(
+			'<div class="cms-image-gallery">'
+				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
+				. self::UID
+				. '/pic-block-thumb.jpg" alt="A &lt;kettle&gt;" data-path-original="/assets/im/'
+				. self::UID
+				. '/pic.jpg"><figcaption>Words</figcaption></figure>'
+				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
+				. self::UID
+				. '/pic-block-thumb.jpg" alt="" data-path-original="/assets/im/'
+				. self::UID
+				. '/pic.jpg"></figure></div>',
+			(string) $gallery->gallery(),
+		);
+	}
+
+	public function testAGalleryOffersALargerSizeAndAPrefix(): void
+	{
+		$html = (string) $this->gallery([['uid' => self::UID]])->gallery('thumb', 'square', 'site');
+
+		$this->assertStringStartsWith(
+			'<div class="site-image-gallery"><figure class="site-image-gallery-item">',
+			$html,
+		);
+		$this->assertStringContainsString('/pic-thumb.jpg"', $html);
+		$this->assertStringContainsString('data-url-large="/cache/im/' . self::UID . '/pic-square.jpg"', $html);
+	}
+
+	public function testAGalleryCarriesItsSettings(): void
+	{
+		$html = (string) $this->gallery([['uid' => self::UID]], [
+			'ratio' => ['zxx' => '4/3'],
+			'crop' => ['zxx' => true],
+		])->gallery();
+
+		$this->assertStringStartsWith(
+			'<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>',
+			$html,
+		);
+	}
+
+	public function testAGalleryWithoutImagesIsEmpty(): void
+	{
+		$this->assertSame('', (string) $this->gallery([['uid' => 'gone000000001']])->gallery());
+	}
+
+	public function testAGalleryRefusesAnUnknownSize(): void
+	{
+		$gallery = $this->gallery([]);
+
+		$this->expectException(\Cosray\Exception\RuntimeException::class);
+		$gallery->gallery('no-such-size');
 	}
 
 	public function testWithoutASecretTheImageStaysWhole(): void
@@ -328,6 +345,18 @@ final class ImageValueTest extends TestCase
 	 * @param array<string, mixed> $meta
 	 * @param array<string, mixed> $catalog
 	 */
+	/**
+	 * @param list<array<string, mixed>> $items
+	 * @param array<string, mixed> $meta
+	 */
+	private function gallery(array $items, array $meta = []): Images
+	{
+		$value = $this->image([], items: $items, fieldMeta: $meta);
+		$this->assertInstanceOf(Images::class, $value);
+
+		return $value;
+	}
+
 	private function image(
 		array $meta,
 		array $catalog = [],
@@ -336,7 +365,9 @@ final class ImageValueTest extends TestCase
 		string $mime = 'image/jpeg',
 		?Closure $configure = null,
 		string $uid = self::UID,
-	): Image {
+		?array $items = null,
+		array $fieldMeta = [],
+	): Image|Images {
 		$psrRequest = $this->psrRequest();
 		$locales = new \Cosray\Locales();
 		$locales->add('en', title: 'English', domains: ['www.example.com']);
@@ -361,10 +392,16 @@ final class ImageValueTest extends TestCase
 			height: 500,
 			meta: $catalog,
 		));
-		$data = ['value' => [Field::NEUTRAL_LOCALE => [['uid' => $uid, 'meta' => $meta]]]];
+		$data = [
+			'value' => [Field::NEUTRAL_LOCALE => $items ?? [['uid' => $uid, 'meta' => $meta]]],
+			'meta' => $fieldMeta,
+		];
 		$field = new ImageField('image', new FieldOwner($context, 'test-node'), new ValueContext('image', $data));
 		$field->init(Services::withDefaults());
-		$field->limit(1);
+
+		if ($items === null) {
+			$field->limit(1);
+		}
 
 		if ($configure !== null) {
 			$configure($field);

@@ -609,11 +609,11 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render(prefix: 'site')->html;
 
 		$this->assertStringContainsString(
-			'<figcaption><small class="site-attribution">© &lt;Own&gt;</small></figcaption>',
+			'<figcaption><small>© &lt;Own&gt;</small></figcaption>',
 			$html,
 		);
 		$this->assertStringContainsString(
-			'<figcaption><small class="site-attribution">© Catalog</small></figcaption>',
+			'<figcaption><small>© Catalog</small></figcaption>',
 			$html,
 		);
 		$this->assertSame('© <Own>', $blocks->image()?->attribution());
@@ -637,18 +637,7 @@ final class BlocksValueTest extends TestCase
 		);
 	}
 
-	public function testGalleryTileWithoutTextKeepsItsStructure(): void
-	{
-		$blocks = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
-		$this->seedAsset('galleryimg123', 'one.jpg');
-
-		$html = $blocks->render(prefix: 'site')->html;
-
-		$this->assertMatchesRegularExpression('#<div class="site-blocks-images-image"><img [^>]+></div>#', $html);
-		$this->assertStringNotContainsString('<figure', $html);
-	}
-
-	public function testGalleryTilePrintsCaptionAndAttribution(): void
+	public function testGalleryBlockPrintsAFigurePerImageWithItsTexts(): void
 	{
 		$blocks = $this->createBlocksValue([
 			$this->images([
@@ -664,18 +653,29 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render(prefix: 'site')->html;
 
 		$this->assertMatchesRegularExpression(
-			'#<div class="site-blocks-images-image"><figure class="site-figure"><img [^>]+>'
-				. '<figcaption>Own <small class="site-attribution">© &lt;Own&gt;</small></figcaption></figure></div>#',
+			'#<figure class="site-image-gallery-item"><img [^>]+>'
+				. '<figcaption>Own <small>© &lt;Own&gt;</small></figcaption></figure>#',
 			$html,
 		);
 		$this->assertMatchesRegularExpression(
-			'#<figure class="site-figure"><img [^>]+two-[^>]+>'
-				. '<figcaption><small class="site-attribution">© Catalog</small></figcaption></figure></div>#',
+			'#<figure class="site-image-gallery-item"><img [^>]+two-[^>]+>'
+				. '<figcaption><small>© Catalog</small></figcaption></figure>#',
 			$html,
 		);
 		$this->assertMatchesRegularExpression(
-			'#<div class="site-blocks-images-image"><img [^>]+three-[^>]+></div>#',
+			'#<figure class="site-image-gallery-item"><img [^>]+three-[^>]+></figure>#',
 			$html,
+		);
+	}
+
+	public function testGalleryBlockOffersALargerSize(): void
+	{
+		$blocks = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
+		$this->seedAsset('galleryimg123', 'one.jpg');
+
+		$this->assertStringContainsString(
+			'data-url-large="/cms/cache/ga/galleryimg123/one-block-lg.jpg"',
+			$blocks->render(largeSize: 'block-lg')->html,
 		);
 	}
 
@@ -763,7 +763,7 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('data-type="images"', $html);
-		$this->assertSame(1, substr_count($html, 'cms-blocks-images-image'));
+		$this->assertSame(1, substr_count($html, 'cms-image-gallery-item'));
 		$this->assertStringContainsString(
 			'src="/cms/cache/ga/galleryimg123/one-block-thumb.jpg"',
 			$html,
@@ -782,7 +782,7 @@ final class BlocksValueTest extends TestCase
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
 		$this->assertStringContainsString(
-			'<div class="cms-blocks-images" data-ratio="4/3" style="--ratio: 4/3" data-crop><div',
+			'<div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop><figure',
 			$blocks->render()->html,
 		);
 		$this->assertSame('4/3', $blocks->first()->images->ratio());
@@ -791,7 +791,7 @@ final class BlocksValueTest extends TestCase
 		$plain = $this->createBlocksValue([$this->images([['uid' => 'galleryimg123']])]);
 		$this->seedAsset('galleryimg123', 'one.jpg');
 
-		$this->assertStringContainsString('<div class="cms-blocks-images"><div', $plain->render()->html);
+		$this->assertStringContainsString('<div class="cms-image-gallery"><figure', $plain->render()->html);
 		$this->assertNull($plain->first()->images->ratio());
 		$this->assertFalse($plain->first()->images->crop());
 	}

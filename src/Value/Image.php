@@ -7,9 +7,6 @@ namespace Cosray\Value;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
-use Cosray\Field\Capability\Attributable;
-use Cosray\Field\Capability\Captionable;
-use Cosray\Field\Capability\Linkable;
 use Cosray\Markup;
 use Cosray\Richtext\Link;
 use Cosray\Richtext\OwnerResolver;
@@ -24,48 +21,7 @@ class Image extends File
 	#[Override]
 	public function __toString(): string
 	{
-		return (string) $this->render();
-	}
-
-	/**
-	 * The image with what its field declares: inside its link with `#[Link]`,
-	 * in a figure with `#[Caption]` or `#[Attribution]`. The figure depends on
-	 * the declaration and not on the text, so pages keep the same structure.
-	 *
-	 * @param ?Markup $image Instead of the plain tag, like one with a `srcset`
-	 * @param string $prefix Starts the class names, none without one
-	 */
-	public function render(?Markup $image = null, string $prefix = ''): Markup
-	{
-		if ($this->asset($this->index) === null) {
-			return new Markup('');
-		}
-
-		$image ??= $this->tag();
-		$field = $this->field;
-		$linked = $field instanceof Linkable && $field->isLinkable() ? $this->linked($image) : $image;
-		$caption = $field instanceof Captionable && $field->hasCaption();
-		$attribution = $field instanceof Attributable && $field->hasAttribution();
-
-		if (!$caption && !$attribution) {
-			return $linked;
-		}
-
-		$text = $caption ? (string) $this->caption() : '';
-		$credit = $attribution ? $this->attribution() : '';
-
-		if ($credit !== '') {
-			$class = $prefix === '' ? '' : " class=\"{$prefix}-attribution\"";
-			$text = trim($text . " <small{$class}>" . escape($credit) . '</small>');
-		}
-
-		return new Markup(
-			'<figure'
-				. ($prefix === '' ? '' : " class=\"{$prefix}-figure\"")
-				. ">{$linked}"
-				. ($text === '' ? '' : "<figcaption>{$text}</figcaption>")
-				. '</figure>',
-		);
+		return $this->asset($this->index) === null ? '' : (string) $this->tag();
 	}
 
 	public function tag(?string $class = null): Markup
@@ -78,6 +34,65 @@ class Image extends File
 			$this->asset($this->index)?->path() ?? '',
 			($position = $this->position()) === '' ? '' : sprintf(' style="%s"', $position),
 		));
+	}
+
+	/**
+	 * The image in a `<figure>`, inside its link when it has one, with its
+	 * caption and attribution when it has them. The figure stays without them,
+	 * so pages keep the same structure.
+	 *
+	 * @param ?Markup $image Instead of the plain tag, like one with a `srcset`
+	 */
+	public function figure(?Markup $image = null, ?string $class = null): Markup
+	{
+		if ($this->asset($this->index) === null) {
+			return new Markup('');
+		}
+
+		$text = (string) $this->caption();
+		$attribution = $this->attribution();
+
+		if ($attribution !== '') {
+			$text = trim($text . ' <small>' . escape($attribution) . '</small>');
+		}
+
+		return new Markup(
+			'<figure'
+				. ($class === null || $class === '' ? '' : sprintf(' class="%s"', escape($class)))
+				. '>'
+				. $this->linked($image ?? $this->tag())
+				. ($text === '' ? '' : "<figcaption>{$text}</figcaption>")
+				. '</figure>',
+		);
+	}
+
+	/**
+	 * A figure of a gallery: its image uses root-relative URLs and offers a larger
+	 * rendition to a lightbox.
+	 *
+	 * @internal
+	 */
+	public function galleryItem(?string $large, string $class): Markup
+	{
+		$asset = $this->asset($this->index);
+
+		if ($asset === null) {
+			return new Markup('');
+		}
+
+		$position = $this->position();
+
+		return $this->figure(
+			new Markup(sprintf(
+				'<img src="%s"%s alt="%s" data-path-original="%s"%s>',
+				escape($this->publicPath()),
+				$large === null ? '' : sprintf(' data-url-large="%s"', escape($this->size($large)->publicPath())),
+				escape($this->alt() ?: strip_tags($this->title())),
+				escape($asset->path()),
+				$position === '' ? '' : sprintf(' style="%s"', $position),
+			)),
+			$class,
+		);
 	}
 
 	/**

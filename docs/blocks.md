@@ -51,7 +51,7 @@ A field's `#[Allows(Quote::class)]` makes the type available without separate re
 | `RichText` | Structured richtext |
 | `Heading` | Text and a heading-level option |
 | `Image` | Single image in a figure, optional caption, attribution and link, responsive image ladder |
-| `Images` | Gallery with ratio/crop settings, optional caption and attribution per image |
+| `Images` | [Gallery](media.md) with ratio/crop settings, optional caption and attribution per image |
 | `Video` | Video player |
 | `Youtube` | Video ID and aspect-ratio metadata |
 | `Iframe` | Trusted embed code, rendered raw |
@@ -235,6 +235,7 @@ The editor keeps usable control spacing; Layout preview shows configured spacing
 | `imageSizes` | Named rendition ladder, default `block-sm`, `block`, `block-lg` |
 | `sizes` | Image sizes template; `{pct}` is the block's share of the field's columns, inside a split too, default `(min-width: 48rem) {pct}vw, 100vw` |
 | `thumbSize` | Gallery rendition, default `block-thumb` |
+| `largeSize` | Gallery rendition for `data-url-large`, for a lightbox; none by default |
 
 `tag` and `prefix` accept plain names matching `/^[a-z][a-z0-9-]*$/i`. An image ladder with several sizes requires width-mode sizes; one size can use any mode and emits a plain `src`. Missing assets produce no media block; non-resizable assets keep their original URL.
 

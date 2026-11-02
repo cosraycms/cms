@@ -44,7 +44,7 @@ final class Image implements Block
 			return '';
 		}
 
-		return (string) $image->render(new Markup($this->img($image, $asset, $block, $ctx)), $ctx->prefix());
+		return (string) $image->figure(new Markup($this->img($image, $asset, $block, $ctx)), "{$ctx->prefix()}-figure");
 	}
 
 	private function img(ImageValue $image, Asset $asset, BlockValue $block, RenderContext $ctx): string
