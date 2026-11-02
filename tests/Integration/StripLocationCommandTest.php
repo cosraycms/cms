@@ -7,7 +7,6 @@ namespace Cosray\Tests\Integration;
 use Celema\Console\Buffer;
 use Celema\Console\Io;
 use Cosray\Commands\StripLocation;
-use Cosray\Config;
 use Cosray\Tests\IntegrationTestCase;
 use Override;
 

@@ -63,10 +63,11 @@ final class RenditionCache
 
 		$size = $parts[0];
 		$sizes = $this->config->media->sizes;
-		$spec =
-			$size === Sizes::ORIGINAL && count($parts) === 4
-				? Sizes::original()
-				: ($sizes->has($size) ? $sizes->get($size) : null);
+		$spec = match (true) {
+			$size === Sizes::ORIGINAL && count($parts) === 4 => Sizes::original(),
+			$sizes->has($size) => $sizes->get($size),
+			default => null,
+		};
 
 		return $spec === null || $spec->fingerprint() !== $parts[1];
 	}

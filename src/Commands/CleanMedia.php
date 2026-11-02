@@ -52,7 +52,7 @@ final class CleanMedia
 			}
 		}
 
-		$size = number_format($bytes / 1048576, 1);
+		$size = number_format($bytes / 1_048_576, 1);
 		$io->line($apply ? 'Removed %d rendition(s), %s MB.' : '%d rendition(s) to remove, %s MB.', $files, $size);
 
 		if (!$apply && $files > 0) {

@@ -127,7 +127,7 @@ final class MediaReport
 		);
 		$io->line(
 			'Too large to resize with a memory limit of %s: %d',
-			number_format($limit / 1048576) . ' MB',
+			number_format($limit / 1_048_576) . ' MB',
 			count($large),
 		);
 
@@ -156,7 +156,7 @@ final class MediaReport
 		$io->line(
 			'Renditions: %d, %s MB, of which no URL leads to %d',
 			$files,
-			number_format($bytes / 1048576, 1),
+			number_format($bytes / 1_048_576, 1),
 			$stale,
 		);
 	}

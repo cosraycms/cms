@@ -88,9 +88,8 @@ final class Location
 			$data = $block === null ? $data : self::blankBlock($data, $start, $start + $block, $little);
 			$tail = $directory + 2 + ($count * 12) + 4 - ($entry + 12);
 			$data = substr_replace($data, substr($data, $entry + 12, $tail) . str_repeat("\0", 12), $entry, $tail + 12);
-			$data = substr_replace($data, pack($little ? 'v' : 'n', $count - 1), $directory, 2);
 
-			return $data;
+			return substr_replace($data, pack($little ? 'v' : 'n', $count - 1), $directory, 2);
 		}
 
 		return $data;
@@ -127,7 +126,12 @@ final class Location
 			return null;
 		}
 
-		$format = $bytes === 2 ? ($little ? 'v' : 'n') : ($little ? 'V' : 'N');
+		$format = match (true) {
+			$bytes === 2 && $little => 'v',
+			$bytes === 2 => 'n',
+			$little => 'V',
+			default => 'N',
+		};
 		$value = unpack($format, substr($data, $at, $bytes));
 
 		return $value === false ? null : (int) $value[1];

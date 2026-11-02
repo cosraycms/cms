@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Cosray\Assets\Backend;
 
 use Cosray\Assets\Dimensions;
-use Cosray\Assets\Format;
 use Cosray\Assets\JpegProfile;
 use Cosray\Assets\Recipe;
 use Cosray\Exception\RuntimeException;
