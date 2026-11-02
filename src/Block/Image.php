@@ -22,8 +22,6 @@ use Cosray\Value\Block as BlockValue;
 use Cosray\Value\Image as ImageValue;
 use Override;
 
-use function Cosray\escape;
-
 #[Label('block:image')]
 final class Image implements Block
 {
@@ -44,36 +42,28 @@ final class Image implements Block
 			return '';
 		}
 
-		return (string) $image->figure(new Markup($this->img($image, $asset, $block, $ctx)), "{$ctx->prefix()}-figure");
+		return (string) $image->figure($this->img($image, $asset, $block, $ctx), "{$ctx->prefix()}-figure");
 	}
 
-	private function img(ImageValue $image, Asset $asset, BlockValue $block, RenderContext $ctx): string
+	private function img(ImageValue $image, Asset $asset, BlockValue $block, RenderContext $ctx): Markup
 	{
-		$alt = escape($image->alt() ?: strip_tags($image->title()));
-		$path = escape($asset->path());
-
 		if (!$asset->resizable()) {
-			return "<img src=\"{$path}\" alt=\"{$alt}\" data-path-original=\"{$path}\">";
+			return $image->img();
 		}
 
 		$specs = $this->ladder($ctx);
-		$src = escape($image->size($specs[intdiv(count($specs), 2)]->name)->publicPath());
-		$position = $image->position();
-		$style = $position === '' ? '' : " style=\"{$position}\"";
+		$middle = $image->size($specs[intdiv(count($specs), 2)]->name);
 
 		if (count($specs) === 1) {
-			return "<img src=\"{$src}\" alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>";
+			return $middle->img();
 		}
 
-		$srcset = escape(implode(', ', array_map(
-			static fn(SizeSpec $spec) => $image->size($spec->name)->publicPath() . " {$spec->first}w",
-			$specs,
-		)));
-		$sizes = escape($this->sizes($ctx, $block->layout()->colspan));
-
-		return (
-			"<img src=\"{$src}\" srcset=\"{$srcset}\" sizes=\"{$sizes}\""
-				. " alt=\"{$alt}\" data-path-original=\"{$path}\"{$style}>"
+		return $middle->img(
+			srcset: implode(', ', array_map(
+				static fn(SizeSpec $spec) => $image->size($spec->name)->publicPath() . " {$spec->first}w",
+				$specs,
+			)),
+			sizes: $this->sizes($ctx, $block->layout()->colspan),
 		);
 	}
 

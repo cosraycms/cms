@@ -41,7 +41,7 @@ final class ImageValueTest extends TestCase
 		$this->assertSame('/cache/im/' . self::UID . '/pic-square.jpg', $image->size('square')->publicPath());
 		$this->assertNull($image->focal());
 		$this->assertSame('', $image->position());
-		$this->assertStringNotContainsString('style=', (string) $image->tag());
+		$this->assertStringNotContainsString('style=', (string) $image->img());
 	}
 
 	public function testACropIsSignedIntoEveryUrl(): void
@@ -87,7 +87,7 @@ final class ImageValueTest extends TestCase
 
 		$this->assertEqualsWithDelta(0.5, $image->focal()['x'], 0.0001);
 		$this->assertSame('object-position: 50% 0%', $image->position());
-		$this->assertStringContainsString('style="object-position: 50% 0%"', (string) $image->tag());
+		$this->assertStringContainsString('style="object-position: 50% 0%"', (string) $image->img());
 	}
 
 	public function testJsonDescribesTheCroppedImage(): void
@@ -129,7 +129,7 @@ final class ImageValueTest extends TestCase
 		$image = $this->image([]);
 
 		$this->assertSame('', $image->link());
-		$this->assertSame((string) $image->tag(), (string) $image->linked());
+		$this->assertSame((string) $image->img(), (string) $image->linked());
 		$this->assertNull($image->json()['link']);
 	}
 
@@ -140,7 +140,7 @@ final class ImageValueTest extends TestCase
 		$this->assertSame('https://example.com/?a=1&b=2', $image->link());
 		$this->assertSame(
 			'<a href="https://example.com/?a=1&amp;b=2" target="_blank" rel="noopener">'
-				. $image->tag()
+				. $image->img()
 				. '</a>',
 			(string) $image->linked(),
 		);
@@ -182,7 +182,7 @@ final class ImageValueTest extends TestCase
 			$image = $this->image(['link' => $link]);
 
 			$this->assertSame('', $image->link());
-			$this->assertSame((string) $image->tag(), (string) $image->linked());
+			$this->assertSame((string) $image->img(), (string) $image->linked());
 		}
 	}
 
@@ -196,14 +196,93 @@ final class ImageValueTest extends TestCase
 		);
 	}
 
-	public function testPrintingGivesTheTagWhateverTheFieldDeclares(): void
+	public function testPrintingGivesTheImgWhateverTheFieldDeclares(): void
 	{
 		$image = $this->image(self::FILLED, configure: static function (ImageField $field): void {
 			$field->caption()->attribution()->linkable();
 		});
 
 		$this->assertStringStartsWith('<img ', (string) $image);
-		$this->assertSame((string) $image->tag(), (string) $image);
+		$this->assertSame((string) $image->img(), (string) $image);
+	}
+
+	public function testAnImgUsesRootRelativeUrlsAndTheRenditionsSize(): void
+	{
+		$this->assertSame(
+			'<img src="/assets/im/'
+				. self::UID
+				. '/pic.jpg" width="1000" height="500" alt="" data-path-original="/assets/im/'
+				. self::UID
+				. '/pic.jpg">',
+			(string) $this->image([])->img(),
+		);
+		$this->assertStringContainsString(
+			'/pic-thumb.jpg" width="400" height="200" alt=""',
+			(string) $this->image([])->size('thumb')->img(),
+		);
+		$this->assertStringContainsString(
+			'width="300" height="300"',
+			(string) $this->image([])->size('square')->img(),
+		);
+	}
+
+	public function testAnImgFollowsItsCrop(): void
+	{
+		$this->assertStringContainsString(
+			'width="500" height="250"',
+			(string) $this->image(['crop' => self::CROP])->img(),
+		);
+		$this->assertStringContainsString(
+			'width="400" height="200"',
+			(string) $this->image(['crop' => self::CROP])->size('thumb')->img(),
+		);
+		$this->assertStringContainsString(
+			'width="1000" height="500"',
+			(string) $this->image(['crop' => self::CROP], secret: null)->img(),
+		);
+	}
+
+	public function testAnImgTakesFurtherAttributes(): void
+	{
+		$img = (string) $this->image(['focal' => ['x' => 0.3, 'y' => 0.4]])->img(
+			'a"b',
+			...['data-zoom' => '<2>'],
+			loading: 'lazy',
+			width: null,
+			height: 7,
+			style: 'color: red',
+			alt: 'Mine',
+		);
+
+		$this->assertStringStartsWith('<img class="a&quot;b" src="', $img);
+		$this->assertStringContainsString(' loading="lazy"', $img);
+		$this->assertStringContainsString(' data-zoom="&lt;2&gt;"', $img);
+		$this->assertStringContainsString(' alt="Mine"', $img);
+		$this->assertStringContainsString(' height="7"', $img);
+		$this->assertStringNotContainsString(' width=', $img);
+		$this->assertStringContainsString(' style="object-position: 30% 40%; color: red"', $img);
+	}
+
+	public function testAnImgEscapesItsValues(): void
+	{
+		$img = (string) $this->image(['alt' => ['zxx' => '"><script>']])->img();
+
+		$this->assertStringContainsString(' alt="&quot;&gt;&lt;script&gt;"', $img);
+	}
+
+	public function testAnSvgKeepsItsOwnPath(): void
+	{
+		$img = (string) $this->image([], mime: 'image/svg+xml')->size('thumb')->img();
+
+		$this->assertStringContainsString('src="/assets/im/' . self::UID . '/pic.jpg"', $img);
+		$this->assertStringContainsString('width="1000" height="500"', $img);
+	}
+
+	public function testAGifLeavesItsSizeOut(): void
+	{
+		$img = (string) $this->image([], mime: 'image/gif')->size('thumb')->img();
+
+		$this->assertStringNotContainsString(' width=', $img);
 	}
 
 	public function testAFigureHoldsTheLinkCaptionAndAttribution(): void
@@ -212,7 +291,7 @@ final class ImageValueTest extends TestCase
 
 		$this->assertSame(
 			'<figure><a href="/about" rel="noopener">'
-				. $image->tag()
+				. $image->img()
 				. '</a><figcaption>Words <small>© &lt;Jane&gt;</small></figcaption></figure>',
 			(string) $image->figure(),
 		);
@@ -222,7 +301,7 @@ final class ImageValueTest extends TestCase
 	{
 		$image = $this->image([]);
 
-		$this->assertSame('<figure>' . $image->tag() . '</figure>', (string) $image->figure());
+		$this->assertSame('<figure>' . $image->img() . '</figure>', (string) $image->figure());
 	}
 
 	public function testAFigureUsesTheCatalogsTexts(): void
@@ -273,12 +352,12 @@ final class ImageValueTest extends TestCase
 			'<div class="cms-image-gallery">'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" alt="A &lt;kettle&gt;" data-path-original="/assets/im/'
+				. '/pic-block-thumb.jpg" width="480" height="240" alt="A &lt;kettle&gt;" data-path-original="/assets/im/'
 				. self::UID
 				. '/pic.jpg"><figcaption>Words</figcaption></figure>'
 				. '<figure class="cms-image-gallery-item"><img src="/cache/im/'
 				. self::UID
-				. '/pic-block-thumb.jpg" alt="" data-path-original="/assets/im/'
+				. '/pic-block-thumb.jpg" width="480" height="240" alt="" data-path-original="/assets/im/'
 				. self::UID
 				. '/pic.jpg"></figure></div>',
 			(string) $gallery->gallery(),

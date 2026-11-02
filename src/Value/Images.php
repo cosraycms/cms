@@ -59,7 +59,9 @@ class Images extends Files
 		$items = '';
 
 		foreach ($this as $image) {
-			$items .= $image->size($size)->galleryItem($large, "{$prefix}-image-gallery-item");
+			$sized = $image->size($size);
+			$extra = $large === null ? [] : ['data-url-large' => $image->size($large)->publicPath()];
+			$items .= $sized->figure($sized->img(...$extra), "{$prefix}-image-gallery-item");
 		}
 
 		if ($items === '') {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Assets\Dimensions;
+use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
@@ -21,19 +23,53 @@ class Image extends File
 	#[Override]
 	public function __toString(): string
 	{
-		return $this->asset($this->index) === null ? '' : (string) $this->tag();
+		return (string) $this->img();
 	}
 
-	public function tag(?string $class = null): Markup
+	/**
+	 * The `<img>`, empty when its file is gone. It carries the rendition's size,
+	 * so the browser can keep the space. Further named arguments become
+	 * attributes and can replace those, like `img(loading: 'lazy')`; null leaves
+	 * one out. Spread an array for names with a dash.
+	 */
+	public function img(?string $class = null, string|int|null ...$attributes): Markup
 	{
-		return new Markup(sprintf(
-			'<img %ssrc="%s" alt="%s" data-path-original="%s"%s>',
-			$class ? sprintf('class="%s" ', escape($class)) : '',
-			$this->url(),
-			escape($this->alt() ?: strip_tags($this->title())),
-			$this->asset($this->index)?->path() ?? '',
-			($position = $this->position()) === '' ? '' : sprintf(' style="%s"', $position),
-		));
+		$asset = $this->asset($this->index);
+
+		if ($asset === null) {
+			return new Markup('');
+		}
+
+		[$width, $height] = $this->dimensions();
+		$position = $this->position();
+
+		if ($position !== '' && is_string($attributes['style'] ?? null)) {
+			$attributes['style'] = "{$position}; {$attributes['style']}";
+		}
+
+		$html = '';
+
+		foreach ([
+			'class' => $class === '' ? null : $class,
+			'src' => $this->publicPath(),
+			...$attributes,
+			...array_diff_key(
+				[
+					'width' => $width,
+					'height' => $height,
+					'alt' => $this->alt() ?: strip_tags($this->title()),
+					'data-path-original' => $asset->path(),
+					'style' => $position === '' ? null : $position,
+				],
+				$attributes,
+			),
+		] as $name => $value) {
+			if ($value !== null) {
+				$html .= sprintf(' %s="%s"', escape((string) $name), escape((string) $value));
+			}
+		}
+
+		return new Markup("<img{$html}>");
 	}
 
 	/**
@@ -41,7 +77,7 @@ class Image extends File
 	 * caption and attribution when it has them. The figure stays without them,
 	 * so pages keep the same structure.
 	 *
-	 * @param ?Markup $image Instead of the plain tag, like one with a `srcset`
+	 * @param ?Markup $image Instead of the plain `img()`
 	 */
 	public function figure(?Markup $image = null, ?string $class = null): Markup
 	{
@@ -60,38 +96,9 @@ class Image extends File
 			'<figure'
 				. ($class === null || $class === '' ? '' : sprintf(' class="%s"', escape($class)))
 				. '>'
-				. $this->linked($image ?? $this->tag())
+				. $this->linked($image ?? $this->img())
 				. ($text === '' ? '' : "<figcaption>{$text}</figcaption>")
 				. '</figure>',
-		);
-	}
-
-	/**
-	 * A figure of a gallery: its image uses root-relative URLs and offers a larger
-	 * rendition to a lightbox.
-	 *
-	 * @internal
-	 */
-	public function galleryItem(?string $large, string $class): Markup
-	{
-		$asset = $this->asset($this->index);
-
-		if ($asset === null) {
-			return new Markup('');
-		}
-
-		$position = $this->position();
-
-		return $this->figure(
-			new Markup(sprintf(
-				'<img src="%s"%s alt="%s" data-path-original="%s"%s>',
-				escape($this->publicPath()),
-				$large === null ? '' : sprintf(' data-url-large="%s"', escape($this->size($large)->publicPath())),
-				escape($this->alt() ?: strip_tags($this->title())),
-				escape($asset->path()),
-				$position === '' ? '' : sprintf(' style="%s"', $position),
-			)),
-			$class,
 		);
 	}
 
@@ -176,10 +183,10 @@ class Image extends File
 		return $this->anchor()['href'] ?? '';
 	}
 
-	/** The content, by default the image's tag, inside this use's link, or alone without one. */
+	/** The content, by default the `img()`, inside this use's link, or alone without one. */
 	public function linked(?Markup $content = null): Markup
 	{
-		$content ??= $this->tag();
+		$content ??= $this->img();
 		$anchor = $this->anchor();
 
 		if ($anchor === null) {
@@ -252,6 +259,45 @@ class Image extends File
 
 		/** @var ?array{href: string, target?: string, rel?: string} */
 		return Link::attributes($stored, new OwnerResolver($this->owner));
+	}
+
+	/**
+	 * The size of the file `publicPath()` leads to, nulls when it is unknown: an
+	 * animated GIF stays a copy of its original, which the catalog cannot tell.
+	 *
+	 * @return array{?int, ?int}
+	 */
+	private function dimensions(): array
+	{
+		$asset = $this->asset($this->index);
+
+		if ($asset === null || $asset->width === null || $asset->height === null) {
+			return [null, null];
+		}
+
+		if (!$asset->resizable()) {
+			return [$asset->width, $asset->height];
+		}
+
+		if ($asset->mime === 'image/gif') {
+			return [null, null];
+		}
+
+		$spec = $this->spec ?? Sizes::original();
+		$transform = $this->delivered() ? $this->transform() : null;
+		$framed = $spec->mode === ResizeMode::Crop && $transform?->focal !== null;
+		$part = $transform?->region(
+			$asset->width,
+			$asset->height,
+			$framed ? $spec->first / ($spec->second ?? $spec->first) : null,
+		);
+
+		return Dimensions::rendition(
+			$part['w'] ?? $asset->width,
+			$part['h'] ?? $asset->height,
+			$spec,
+			$framed,
+		);
 	}
 
 	private function transform(): ?Transform

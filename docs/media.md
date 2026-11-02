@@ -68,22 +68,24 @@ public Image $cover;
 An attribute decides what editors can fill in, not the markup. A template prints what it asks for:
 
 ```php
-<?= $page->cover ?>                          // <img>
-<?= $page->cover->size('card')->tag('photo') ?>
+<?= $page->cover ?>                          // <img>, the same as img()
+<?= $page->cover->size('card')->img('photo', loading: 'lazy') ?>
 <?= $page->cover->linked() ?>                // <a><img></a> with a link, <img> without
 <?= $page->cover->figure() ?>                // <figure> with link, caption and attribution
 <?= $page->photos ?>                         // an <img> per image
 <?= $page->photos->gallery() ?>              // a wrapper with a <figure> per image
 ```
 
-`figure()` prints what `linked()`, `caption()` and `attribution()` return, whichever attributes the field declares, so values from the media screen count. Without text it still prints the `<figure>`, so pages keep the same structure. The attribution sits in a `<small>`. Pass your own image or a class with `$page->cover->figure($page->cover->tag('photo'), 'cover')`.
+`figure()` prints what `linked()`, `caption()` and `attribution()` return, whichever attributes the field declares, so values from the media screen count. Without text it still prints the `<figure>`, so pages keep the same structure. The attribution sits in a `<small>`. Pass your own image or a class with `$page->cover->figure($page->cover->img('photo'), 'cover')`.
+
+`img()` prints root-relative URLs and the `width` and `height` of the rendition, so the browser keeps the space while the image loads; `url()` gives an absolute URL. Further named arguments become attributes and can replace those: `img(loading: 'lazy')`, `img(width: null)` or `img(...['data-zoom' => '2'])`. It needs `height: auto` from a stylesheet wherever CSS changes an image's width, as it does for any image with these attributes.
 
 `gallery()` prints this, with the ratio and crop an editor chose for the gallery:
 
 ```html
 <div class="cms-image-gallery" data-ratio="4/3" style="--ratio: 4/3" data-crop>
     <figure class="cms-image-gallery-item">
-        <img src="/cache/…/pic-block-thumb.jpg" data-url-large="/cache/…/pic-large.jpg" alt="…">
+        <img src="/cache/…/pic-block-thumb.jpg" data-url-large="/cache/…/pic-large.jpg" width="480" height="320" alt="…">
         <figcaption>Words <small>© Jane Doe</small></figcaption>
     </figure>
 </div>
@@ -99,7 +101,7 @@ public Image $cover;
 ```
 
 ```php
-<?= $page->cover->linked($page->cover->tag('cover')) ?>
+<?= $page->cover->linked($page->cover->img('cover')) ?>
 <?= $page->cover->link() ?>
 ```
 
@@ -134,7 +136,7 @@ Neither touches the original. A crop applies to every URL of the image: `$image-
 
 SVGs have no renditions, so they get a focal point but no crop. GIFs do not offer a crop either, as an animated one only survives as a copy of its original.
 
-A crop is presentation, not redaction. The original stays public at its asset URL, and `tag()` prints that URL as `data-path-original`. To remove something from a picture, edit the file and upload it again.
+A crop is presentation, not redaction. The original stays public at its asset URL, and `img()` prints that URL as `data-path-original`. To remove something from a picture, edit the file and upload it again.
 
 ## URLs and image sizes
 

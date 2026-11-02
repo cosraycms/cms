@@ -472,11 +472,11 @@ final class PrimitiveValueTest extends TestCase
 
 		$value = $field->value();
 		$this->assertInstanceOf(\Cosray\Value\Image::class, $value);
-		$tag = $value->tag('hero-image')->html;
+		$tag = $value->img('hero-image')->html;
 
 		$this->assertStringContainsString('class="hero-image"', $tag);
 		$this->assertStringContainsString(
-			'src="http://www.example.com/cms/assets/he/heroimg123456/hero.jpg"',
+			'src="/cms/assets/he/heroimg123456/hero.jpg"',
 			$tag,
 		);
 		$this->assertStringContainsString('alt="Hero"', $tag);
