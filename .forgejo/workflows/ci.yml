@@ -92,6 +92,14 @@ jobs:
       - name: Apply system update migrations
         run: php ./run db:migrations --apply
 
+      # Not required yet: the runner's browser setup has not been tried.
+      - name: Run browser tests
+        continue-on-error: true
+        working-directory: panel
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm run test:browser
+
       - name: Run tests with coverage
         # Composer's own process timeout is disabled for this script, so the
         # bound that catches a hung test lives here.

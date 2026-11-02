@@ -1,6 +1,6 @@
 # Testing Cosray
 
-The PHP suite uses PHPUnit with unit, PostgreSQL integration, and in-process HTTP tests. Browser-side panel behavior has a separate [Vitest suite](../panel/README.md). See [phpunit.xml.dist](../phpunit.xml.dist), [composer.json](../composer.json), and the [CI workflow](../.forgejo/workflows/ci.yml) for current configuration.
+The PHP suite uses PHPUnit with unit, PostgreSQL integration, and in-process HTTP tests. Browser-side panel behavior has a separate [Vitest suite and Playwright tests](../panel/README.md). See [phpunit.xml.dist](../phpunit.xml.dist), [composer.json](../composer.json), and the [CI workflow](../.forgejo/workflows/ci.yml) for current configuration.
 
 ## Commands
 

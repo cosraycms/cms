@@ -10,7 +10,10 @@ Node.js and pnpm versions are declared in [package.json](package.json). From thi
 pnpm test
 pnpm run check
 pnpm run modules:check
+pnpm run test:browser
 ```
+
+`test:browser` runs [e2e/](e2e/) with Playwright in a real browser, for what jsdom cannot see, such as layout, dragging and the way to a served file. It starts [a small app](../tests/Browser/) with a database of its own, `cosray_browser`, which it drops and creates on every run, so the role of `COSRAY_DB_USER` needs `CREATEDB`. Run `pnpm exec playwright install chromium` once, or point `COSRAY_E2E_CHROMIUM` at an installed browser.
 
 Nothing is built. The application serves `src/`, `styles/`, `icons/` and the vendored `modules/` from the package as they are, so an edit shows on the next reload. `pnpm run modules` refreshes `modules/` and its import map after a runtime dependency in `package.json` changes; `pnpm run check` type-checks the JSDoc-typed sources with `tsc`. Vitest resolves bare imports through `modules/importmap.json`, so tests run the copies the browser gets rather than `node_modules`.
 

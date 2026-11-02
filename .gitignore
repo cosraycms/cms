@@ -12,3 +12,6 @@ node_modules
 phpunit.xml
 psalm.xml
 /panel/.cache/
+/tests/Browser/.run/
+/panel/test-results/
+/panel/playwright-report/

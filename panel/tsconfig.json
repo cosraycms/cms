@@ -34,6 +34,14 @@
 			]
 		}
 	},
-	"include": ["vitest.config.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.ts", "tests/**/*.ts"],
+	"include": [
+		"vitest.config.ts",
+		"src/**/*.d.ts",
+		"src/**/*.js",
+		"src/**/*.ts",
+		"tests/**/*.ts",
+		"e2e/**/*.ts",
+		"playwright.config.ts"
+	],
 	"exclude": ["node_modules/**"]
 }

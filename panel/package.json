@@ -10,6 +10,7 @@
 		"check": "tsc -p tsconfig.json",
 		"format": "prettier -w .",
 		"test": "vitest run",
+		"test:browser": "playwright test",
 		"modules": "node scripts/modules.mjs",
 		"modules:check": "node scripts/modules.mjs --check"
 	},
@@ -28,6 +29,7 @@
 		"sortablejs": "1.15.7"
 	},
 	"devDependencies": {
+		"@playwright/test": "1.64.1",
 		"@types/jsdom": "28.0.3",
 		"@types/node": "25.9.5",
 		"@types/sortablejs": "1.15.9",
