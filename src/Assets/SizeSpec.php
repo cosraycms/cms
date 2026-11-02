@@ -8,7 +8,7 @@ namespace Cosray\Assets;
 final class SizeSpec
 {
 	/** Raise it to regenerate every rendition after changing how they are made. */
-	private const int PIPELINE = 1;
+	private const int PIPELINE = 2;
 
 	public function __construct(
 		public readonly string $name,

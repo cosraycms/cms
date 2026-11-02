@@ -7,6 +7,7 @@ namespace Cosray\Assets\Backend;
 use Closure;
 use Cosray\Assets\Dimensions;
 use Cosray\Assets\Format;
+use Cosray\Assets\JpegProfile;
 use Cosray\Assets\Recipe;
 use Cosray\Exception\RuntimeException;
 use GdImage;
@@ -14,7 +15,8 @@ use Override;
 
 /**
  * Renders with PHP's GD, which is available everywhere and decodes the whole
- * image into memory.
+ * image into memory. It has no colour management: WebP and AVIF of a wide-gamut
+ * photo come out muted.
  *
  * @internal
  */
@@ -73,6 +75,11 @@ final class Gd implements Backend
 		}
 
 		$this->encode($upright, $target, $output, $recipe->quality);
+
+		// GD drops the profile, and only JPEG holds the same numbers afterwards.
+		if ($type === IMAGETYPE_JPEG && $output === IMAGETYPE_JPEG) {
+			JpegProfile::insert($target, JpegProfile::read($source));
+		}
 	}
 
 	/** Above what is left of the memory limit, a request must fail, not die in a fatal error. */

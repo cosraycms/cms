@@ -7,6 +7,7 @@ namespace Cosray\Tests\Unit;
 use Cosray\Assets\Backend\Backend;
 use Cosray\Assets\Backend\Gd;
 use Cosray\Assets\Format;
+use Cosray\Assets\JpegProfile;
 use Cosray\Assets\Recipe;
 use Cosray\Exception\RuntimeException;
 use Cosray\Tests\TestCase;
@@ -237,6 +238,28 @@ final class BackendTest extends TestCase
 	}
 
 	#[DataProvider('backends')]
+	public function testAJpegKeepsItsColourProfile(Backend $backend): void
+	{
+		$profile = str_repeat('Adobe RGB (1998) ', 40);
+		$target = "{$this->dir}/colour";
+
+		$backend->render($this->profiled($profile), $target, new Recipe(0, 0, 40, 20, 20, 10));
+
+		$this->assertStringContainsString($profile, JpegProfile::read($target));
+		$this->assertSame(self::SHOWN[1], $this->corners($this->opened($target)));
+	}
+
+	#[DataProvider('backends')]
+	public function testAnSrgbJpegNeedsNoProfile(Backend $backend): void
+	{
+		$target = "{$this->dir}/plain";
+
+		$backend->render($this->profiled('sRGB IEC61966-2.1'), $target, new Recipe(0, 0, 40, 20, 20, 10));
+
+		$this->assertSame('', JpegProfile::read($target));
+	}
+
+	#[DataProvider('backends')]
 	public function testFailsPlainlyOnWhatItCannotRead(Backend $backend): void
 	{
 		$source = "{$this->dir}/note.png";
@@ -382,6 +405,22 @@ final class BackendTest extends TestCase
 		file_put_contents(
 			$file,
 			substr($jpeg, 0, 2) . "\xFF\xE1" . pack('n', strlen($exif) + 2) . $exif . substr($jpeg, 2),
+		);
+
+		return $file;
+	}
+
+	/** The quarters as a JPEG with a colour profile of the given bytes. */
+	private function profiled(string $profile): string
+	{
+		$file = "{$this->dir}/source-profiled.jpg";
+		ob_start();
+		imagejpeg($this->quarters(), null, 100);
+		$jpeg = (string) ob_get_clean();
+		$icc = "ICC_PROFILE\0\x01\x01{$profile}";
+		file_put_contents(
+			$file,
+			substr($jpeg, 0, 2) . "\xFF\xE2" . pack('n', strlen($icc) + 2) . $icc . substr($jpeg, 2),
 		);
 
 		return $file;
