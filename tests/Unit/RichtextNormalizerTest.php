@@ -80,7 +80,12 @@ final class RichtextNormalizerTest extends TestCase
 							'marks' => [
 								[
 									'type' => 'link',
-									'attrs' => ['target' => null, 'href' => 'https://x.de', 'class' => null],
+									'attrs' => [
+										'target' => null,
+										'href' => 'https://x.de',
+										'class' => null,
+										'rel' => null,
+									],
 								],
 								['type' => 'bold', 'attrs' => []],
 							],

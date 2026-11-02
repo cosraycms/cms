@@ -9,7 +9,7 @@ import {
 	isFilledDoc,
 	pmToDoc,
 } from '../../../src/elements/richtext/format.js';
-import { schema } from '../../../src/elements/richtext/schema.js';
+import { schema, serializer } from '../../../src/elements/richtext/schema.js';
 
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -124,6 +124,37 @@ describe('richtext format', () => {
 				},
 			],
 		});
+	});
+
+	it("keeps a link's chosen rel but takes none over from pasted HTML", () => {
+		const stored: RichtextDoc = {
+			type: 'doc',
+			content: [
+				{
+					type: 'paragraph',
+					content: [
+						{
+							type: 'text',
+							text: 'Paid',
+							marks: [{ type: 'link', attrs: { href: '/a', rel: 'sponsored' } }],
+						},
+					],
+				},
+			],
+		};
+
+		const link = [{ type: 'link', attrs: { href: '/a', rel: 'sponsored' } }];
+
+		expect(pmToDoc(docToPm(stored)).content?.[0]?.content?.[0]?.marks).toEqual(link);
+
+		const copied = document.createElement('div');
+		copied.append(serializer.serializeFragment(docToPm(stored).content));
+		const marks = (html: string) => htmlToDoc(html)?.content?.[0]?.content?.[0]?.marks;
+
+		expect(marks(copied.innerHTML)).toEqual(link);
+		expect(marks('<p><a href="/a" rel="nofollow">Elsewhere</a></p>')).toEqual([
+			{ type: 'link', attrs: { href: '/a' } },
+		]);
 	});
 
 	it('represents empty legacy HTML as no stored document', () => {

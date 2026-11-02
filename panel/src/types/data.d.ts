@@ -41,6 +41,7 @@ export interface ImageLink {
 	node?: string;
 	asset?: string;
 	target?: string;
+	rel?: string;
 }
 
 /** The per-use meta of a media item, and an asset's catalog defaults. */

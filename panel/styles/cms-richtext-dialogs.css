@@ -34,6 +34,20 @@
 	line-height: 1.5rem;
 }
 
+.cms-modal-link-advanced {
+	margin-top: var(--cms-space-4);
+
+	& > summary {
+		color: var(--cms-color-text-muted);
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+	}
+
+	& > .cms-modal-link-target-row {
+		margin-top: var(--cms-space-2);
+	}
+}
+
 .cms-modal-image-body {
 	display: flex;
 	flex-direction: column;

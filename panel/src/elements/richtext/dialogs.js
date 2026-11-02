@@ -8,15 +8,15 @@
 import { cosray } from '../../lib/bridge.js';
 import { icon } from '../../lib/icons.js';
 import { browseLibrary } from '../../lib/library-browser.js';
-import { safeHref } from '../../lib/link-url.js';
+import { RELS, safeHref } from '../../lib/link-url.js';
 import { __ } from '../../lib/locale.js';
 import { panelBase } from '../../lib/runtime.js';
 
 /**
  * Exactly one of href, node and asset carries the target, matching the
- * richtext `link` mark's attributes.
+ * richtext `link` mark's attributes; only an href takes a `rel`.
  *
- * @typedef {{ href?: string, node?: string, asset?: string }} LinkTarget
+ * @typedef {{ href?: string, node?: string, asset?: string, rel?: string }} LinkTarget
  */
 
 /**
@@ -228,6 +228,26 @@ function nodeSearch(selected, pick) {
 }
 
 /**
+ * @param {HTMLInputElement} input
+ * @param {string} text
+ * @returns {HTMLElement}
+ */
+function checkboxRow(input, text) {
+	const label = document.createElement('label');
+	label.htmlFor = input.id;
+	label.className = 'cms-checkbox-label';
+	label.textContent = text;
+	const inputWrap = create('div', 'cms-modal-link-target-input-wrap');
+	inputWrap.append(input);
+	const labelWrap = create('div', 'cms-modal-link-target-label-wrap');
+	labelWrap.append(label);
+	const row = create('div', 'cms-modal-link-target-row');
+	row.append(inputWrap, labelWrap);
+
+	return row;
+}
+
+/**
  * Asks for a link target: a typed URL, a node, or an asset. Editing a link
  * opens on the tab matching its kind; an asset link on the files tab, which
  * browses every kind.
@@ -238,10 +258,11 @@ function nodeSearch(selected, pick) {
  * @param {string} options.node
  * @param {string} options.asset
  * @param {boolean} options.blank
+ * @param {string} options.rel What the editor chose to add to an address's `rel`.
  * @param {(target: LinkTarget, blank: boolean, item?: LibraryItem) => void} options.add `item` is
  *     the file a library pick chose.
  */
-export function openLinkDialog({ owner, href, node, asset, blank, add }) {
+export function openLinkDialog({ owner, href, node, asset, blank, rel, add }) {
 	const id = `cms-link-dialog-${++ids}`;
 	/** @type {{ id: 'manually' | 'page' | 'images' | 'files', icon: string, label: string }[]} */
 	const tabs = [
@@ -272,6 +293,36 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 			target.id = `${id}-target`;
 			target.className = 'cms-checkbox';
 			target.checked = blank;
+			const stored = rel.split(/\s+/);
+			/** @type {Record<string, string>} */
+			const relLabels = {
+				nofollow: __('link:rel-nofollow'),
+				sponsored: __('link:rel-sponsored'),
+				noreferrer: __('link:rel-noreferrer'),
+			};
+			const rels = RELS.map((name) => {
+				const input = document.createElement('input');
+				input.type = 'checkbox';
+				input.className = 'cms-checkbox';
+				input.id = `${id}-rel-${name}`;
+				input.value = name;
+				input.checked = stored.includes(name);
+				return input;
+			});
+			const advanced = document.createElement('details');
+			advanced.className = 'cms-modal-link-advanced';
+			advanced.open = rels.some((input) => input.checked);
+			advanced.append(create('summary', undefined, __('link:advanced')));
+
+			for (const input of rels) {
+				advanced.append(checkboxRow(input, relLabels[input.value]));
+			}
+
+			const chosenRel = () =>
+				rels
+					.filter((input) => input.checked)
+					.map((input) => input.value)
+					.join(' ');
 			const confirm = button(__('link:add'), 'primary', () => {
 				/** @type {LinkTarget | null} */
 				const chosen =
@@ -284,7 +335,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 								? { asset: pickedAsset }
 								: null
 							: url !== '' && safeHref(url)
-								? { href: url }
+								? { href: url, ...(chosenRel() ? { rel: chosenRel() } : {}) }
 								: null;
 
 				if (chosen) {
@@ -306,6 +357,7 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 				stopBrowsing?.();
 				stopBrowsing = null;
 				panel.setAttribute('aria-labelledby', `${id}-tab-${current}`);
+				advanced.hidden = current !== 'manually';
 
 				if (current === 'page') {
 					panel.replaceChildren(
@@ -395,23 +447,13 @@ export function openLinkDialog({ owner, href, node, asset, blank, add }) {
 
 			const bodyWrap = create('div', 'cms-modal-link-body');
 			bodyWrap.append(tablist, panel);
-			const label = document.createElement('label');
-			label.htmlFor = target.id;
-			label.className = 'cms-checkbox-label';
-			label.textContent = __('link:open-new-window');
-			const targetInput = create('div', 'cms-modal-link-target-input-wrap');
-			targetInput.append(target);
-			const targetLabel = create('div', 'cms-modal-link-target-label-wrap');
-			targetLabel.append(label);
-			const targetRow = create('div', 'cms-modal-link-target-row');
-			targetRow.append(targetInput, targetLabel);
 			const targetWrap = create('div', 'cms-modal-link-target-wrap');
-			targetWrap.append(targetRow);
+			targetWrap.append(checkboxRow(target, __('link:open-new-window')));
 
 			frame(
 				host,
 				__('richtext:add-link'),
-				[bodyWrap, targetWrap],
+				[bodyWrap, targetWrap, advanced],
 				[button(__('common:cancel'), 'secondary', () => handle.close()), confirm],
 			);
 			showPanel();

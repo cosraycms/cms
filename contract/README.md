@@ -20,6 +20,8 @@ Consumed by [FormNameContractTest](../tests/Unit/FormNameContractTest.php) and [
 
 [link-urls.json](link-urls.json) lists addresses a link may and may not point at: relative ones and `http`, `https`, `mailto` and `tel`.
 
+[link-rels.json](link-rels.json) lists what an editor can add to a link's `rel`.
+
 Consumed by [RichtextLinkTest](../tests/Unit/RichtextLinkTest.php) and [link-urls.test.ts](../panel/tests/contract/link-urls.test.ts).
 
 ## Code syntaxes

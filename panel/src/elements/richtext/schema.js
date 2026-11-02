@@ -269,14 +269,16 @@ const marks = {
 	},
 
 	link: {
-		// Exactly one of href/node/asset carries the target; `rel` is a
-		// render-time policy of the server renderer and never stored.
+		// Exactly one of href/node/asset carries the target. `rel` holds only what
+		// the editor chose: the server adds `noopener`, and a pasted link's own
+		// `rel` is not taken over, which is why it travels as `data-rel`.
 		attrs: {
 			href: { default: null },
 			node: { default: null },
 			asset: { default: null },
 			target: { default: null },
 			class: { default: null },
+			rel: { default: null },
 		},
 		inclusive: false,
 		parseDOM: [
@@ -307,12 +309,13 @@ const marks = {
 						href: el.getAttribute('href'),
 						target: el.getAttribute('target') || null,
 						class: el.getAttribute('class') || null,
+						rel: el.getAttribute('data-rel') || null,
 					};
 				},
 			},
 		],
 		toDOM(mark) {
-			const { href, node, asset, target, class: cls } = mark.attrs;
+			const { href, node, asset, target, class: cls, rel } = mark.attrs;
 			/** @type {Record<string, string>} */
 			const attrs = {};
 			if (node) {
@@ -326,6 +329,7 @@ const marks = {
 			}
 			if (target) attrs.target = target;
 			if (cls) attrs.class = cls;
+			if (rel) attrs['data-rel'] = rel;
 			return ['a', attrs, 0];
 		},
 	},

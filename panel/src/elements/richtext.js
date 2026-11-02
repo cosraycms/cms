@@ -515,6 +515,7 @@ export class CosrayRichtext extends HTMLElement {
 				node: typeof attrs?.node === 'string' ? attrs.node : '',
 				asset: typeof attrs?.asset === 'string' ? attrs.asset : '',
 				blank: (attrs?.target ?? '') === '_blank',
+				rel: typeof attrs?.rel === 'string' ? attrs.rel : '',
 				add: (target, blank) => {
 					const href = target.href ?? '';
 					const node = target.node ?? '';
@@ -529,6 +530,7 @@ export class CosrayRichtext extends HTMLElement {
 							asset: asset || null,
 							target: blank ? '_blank' : '',
 							class: undefined,
+							rel: target.rel || null,
 						}),
 					);
 				},

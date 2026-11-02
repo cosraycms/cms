@@ -86,7 +86,7 @@ public Image $cover;
 <?= $page->cover->link() ?>
 ```
 
-`linked()` puts the content, by default the image's tag, inside the `<a>` with the link's `target` and `rel`, and returns it alone without a link or when the target is gone. `link()` returns only the address. An address is relative or uses `http`, `https`, `mailto` or `tel`, like a [richtext link](richtext-format.md#links), and gets the same `rel="noopener"`.
+`linked()` puts the content, by default the image's tag, inside the `<a>` with the link's `target` and `rel`, and returns it alone without a link or when the target is gone. `link()` returns only the address. An address is relative or uses `http`, `https`, `mailto` or `tel`, like a [richtext link](richtext-format.md#links), and gets the same `rel`.
 
 `#[Caption]` also applies to video fields. Without an attribute the input is hidden, nothing stored is lost, and the methods still return stored and catalog values. `caption()` returns escaped HTML as `Cosray\Markup`, which templates print as is; `captionText()` gives plain text.
 

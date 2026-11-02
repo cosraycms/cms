@@ -254,6 +254,31 @@ final class RichtextValidatorTest extends TestCase
 		$this->assertSame(['doc.content.0.content.0.marks.0: link href uses a scheme that is not allowed'], $errors);
 	}
 
+	public function testALinkOnlyTakesTheOfferedRelValues(): void
+	{
+		$errors = static fn(mixed $rel): array => new Validator()->validate([
+			'type' => 'doc',
+			'content' => [
+				[
+					'type' => 'paragraph',
+					'content' => [
+						[
+							'type' => 'text',
+							'text' => 'x',
+							'marks' => [['type' => 'link', 'attrs' => ['href' => '/a', 'rel' => $rel]]],
+						],
+					],
+				],
+			],
+		]);
+
+		$this->assertSame([], $errors('nofollow sponsored'));
+		$this->assertSame(
+			['doc.content.0.content.0.marks.0: link rel holds a value that is not allowed'],
+			$errors('me'),
+		);
+	}
+
 	public function testContentModels(): void
 	{
 		$validator = new Validator();

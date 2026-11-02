@@ -146,6 +146,13 @@ final class ImageValueTest extends TestCase
 		);
 	}
 
+	public function testAnAddressCarriesTheRelTheEditorAdded(): void
+	{
+		$image = $this->image(['link' => ['href' => '/about', 'rel' => 'nofollow']]);
+
+		$this->assertSame(['href' => '/about', 'rel' => 'noopener nofollow'], $image->json()['link']);
+	}
+
 	public function testALinkedFileUsesItsPath(): void
 	{
 		$image = $this->image(['link' => ['asset' => self::UID]]);

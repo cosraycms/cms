@@ -72,6 +72,7 @@ export function linkRow({ owner, link, asset, picked, readonly, change }) {
 			node: current?.node ?? '',
 			asset: current?.asset ?? '',
 			blank: current?.target === '_blank',
+			rel: current?.rel ?? '',
 			add: (chosen, blank, item) => {
 				if (item) picked(item);
 

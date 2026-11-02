@@ -8,6 +8,10 @@ namespace Cosray\Richtext;
 final class Link
 {
 	public const string REL = 'noopener';
+
+	/** What an editor can add to the `rel` of an address. */
+	public const array RELS = ['nofollow', 'sponsored', 'noreferrer'];
+
 	private const array SCHEMES = ['http', 'https', 'mailto', 'tel'];
 
 	/** Whether an address is relative or uses a scheme that cannot run code in the page. */
@@ -31,7 +35,16 @@ final class Link
 			static fn(mixed $target): bool => $target !== null && $target !== '',
 		);
 
-		return count($targets) === 1 && (!is_string($attrs['href'] ?? null) || self::safe($attrs['href']));
+		return (
+			count($targets) === 1
+				&& (!is_string($attrs['href'] ?? null) || self::safe($attrs['href']))
+				&& self::validRel($attrs['rel'] ?? null)
+		);
+	}
+
+	public static function validRel(mixed $rel): bool
+	{
+		return $rel === null || is_string($rel) && array_diff(self::tokens($rel), self::RELS) === [];
 	}
 
 	/**
@@ -58,7 +71,8 @@ final class Link
 
 		// Links within the site carry no policy.
 		if (is_string($attrs['href'] ?? null) && $attrs['href'] !== '') {
-			$html['rel'] = $rel;
+			$chosen = is_string($attrs['rel'] ?? null) ? self::tokens($attrs['rel']) : [];
+			$html['rel'] = implode(' ', [$rel, ...array_intersect(self::RELS, $chosen)]);
 		}
 
 		return $html;
@@ -84,6 +98,12 @@ final class Link
 		}
 
 		return '';
+	}
+
+	/** @return list<string> */
+	private static function tokens(string $rel): array
+	{
+		return preg_split('/\s+/', $rel, flags: PREG_SPLIT_NO_EMPTY) ?: [];
 	}
 
 	/** @param array<mixed> $attrs */

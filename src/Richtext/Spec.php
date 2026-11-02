@@ -28,7 +28,7 @@ final class Spec
 
 	/** Mark attribute defaults, same omission rule as node defaults. */
 	public const array MARK_DEFAULTS = [
-		'link' => ['target' => null, 'class' => null],
+		'link' => ['target' => null, 'class' => null, 'rel' => null],
 	];
 
 	/** Content models of the non-leaf nodes. */

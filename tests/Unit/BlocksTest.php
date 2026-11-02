@@ -285,6 +285,8 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($valid(['link' => ['node' => 'n1']]));
 		$this->assertTrue($valid(['link' => ['asset' => 'a1']]));
 		$this->assertTrue($valid(['link' => null]));
+		$this->assertTrue($valid(['link' => ['href' => '/a', 'rel' => 'sponsored nofollow']]));
+		$this->assertFalse($valid(['link' => ['href' => '/a', 'rel' => 'me']]));
 		$this->assertFalse($valid(['link' => []]));
 		$this->assertFalse($valid(['link' => ['href' => 'javascript:alert(1)']]));
 		$this->assertFalse($valid(['link' => ['href' => '/a', 'node' => 'n1']]));

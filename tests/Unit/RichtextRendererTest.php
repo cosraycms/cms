@@ -19,6 +19,27 @@ final class RichtextRendererTest extends TestCase
 	private function resolver(): Resolver
 	{
 		return new class implements Resolver {
+			public function testALinkPrintsTheRelTheEditorAdded(): void
+			{
+				$html = new Renderer($this->resolver())->render([
+					'type' => 'doc',
+					'content' => [
+						[
+							'type' => 'paragraph',
+							'content' => [
+								[
+									'type' => 'text',
+									'text' => 'x',
+									'marks' => [['type' => 'link', 'attrs' => ['href' => '/a', 'rel' => 'sponsored']]],
+								],
+							],
+						],
+					],
+				]);
+
+				$this->assertSame('<p><a href="/a" rel="noopener sponsored">x</a></p>', $html);
+			}
+
 			public function testAStoredLinkWithAnUnsafeSchemeBecomesPlainText(): void
 			{
 				$renderer = new Renderer($this->resolver());

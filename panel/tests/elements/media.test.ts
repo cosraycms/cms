@@ -447,6 +447,50 @@ describe('image details', () => {
 			});
 		});
 
+		it('keeps the rel values an editor adds to an address', async () => {
+			const { changes } = await details(
+				{
+					uid: 'cover',
+					meta: { alt: { zxx: 'A kettle' }, link: { href: '/a', rel: 'sponsored' } },
+				},
+				{ link: true },
+			);
+
+			rowButton('common:edit').click();
+			await tick();
+			const advanced = document.querySelector<HTMLDetailsElement>('.cms-modal-link-advanced')!;
+
+			expect(advanced.open).toBe(true);
+			expect(advanced.hidden).toBe(false);
+
+			advanced.querySelector<HTMLInputElement>('input[value="nofollow"]')!.click();
+			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')]
+				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'))!
+				.click();
+			await tick();
+			await action('common:apply');
+
+			expect(changes.mock.lastCall?.[0].zxx[0].meta?.link).toEqual({
+				href: '/a',
+				rel: 'nofollow sponsored',
+			});
+		});
+
+		it('collapses the advanced options and offers them for addresses only', async () => {
+			await details({ uid: 'cover' }, { link: true });
+
+			rowButton('link:add').click();
+			await tick();
+			const advanced = document.querySelector<HTMLDetailsElement>('.cms-modal-link-advanced')!;
+
+			expect(advanced.open).toBe(false);
+			expect(advanced.querySelectorAll('input:checked')).toHaveLength(0);
+
+			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal .tab')][1]!.click();
+
+			expect(advanced.hidden).toBe(true);
+		});
+
 		it('refuses an address that can run code', async () => {
 			await details({ uid: 'cover' }, { link: true });
 

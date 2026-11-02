@@ -68,7 +68,7 @@ A link has exactly one target kind:
 { "type": "link", "attrs": { "asset": "asset-uid" } }
 ```
 
-Node and asset references resolve at render time, so their URLs can change without rewriting prose. Optional `target` records editorial intent; `class` is optional. `rel` is not stored: the renderer adds `noopener` to external hrefs.
+Node and asset references resolve at render time, so their URLs can change without rewriting prose. Optional `target` records editorial intent; `class` is optional. The renderer adds `noopener` to the `rel` of an `href`. A stored `rel` holds only what the editor added to it, any of `nofollow`, `sponsored` and `noreferrer`, separated by spaces; it has no effect on node and asset links.
 
 An `href` is relative or uses `http`, `https`, `mailto` or `tel`; the validator refuses any other scheme, and the renderer prints such a stored link as plain text.
 

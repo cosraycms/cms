@@ -158,7 +158,7 @@ final class Validator
 			return;
 		}
 
-		$this->attrKeys($attrs, ['href', 'node', 'asset', 'target', 'class'], $path);
+		$this->attrKeys($attrs, ['href', 'node', 'asset', 'target', 'class', 'rel'], $path);
 		$targets = array_filter(
 			[
 				$attrs['href'] ?? null,
@@ -180,6 +180,10 @@ final class Validator
 
 		if (is_string($attrs['href'] ?? null) && !Link::safe($attrs['href'])) {
 			$this->errors[] = "{$path}: link href uses a scheme that is not allowed";
+		}
+
+		if (!Link::validRel($attrs['rel'] ?? null)) {
+			$this->errors[] = "{$path}: link rel holds a value that is not allowed";
 		}
 
 		foreach (['target', 'class'] as $key) {

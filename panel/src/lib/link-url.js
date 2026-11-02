@@ -3,6 +3,9 @@
 
 const SCHEMES = ['http', 'https', 'mailto', 'tel'];
 
+/** What an editor can add to the `rel` of an address, also in contract/link-rels.json. */
+export const RELS = ['nofollow', 'sponsored', 'noreferrer'];
+
 /**
  * Whether an address is relative or uses a scheme that cannot run code in the page.
  *

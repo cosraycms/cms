@@ -114,7 +114,7 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 	{
 		$shape = Shapes::create();
 
-		foreach (['href', 'node', 'asset', 'target'] as $key) {
+		foreach (['href', 'node', 'asset', 'target', 'rel'] as $key) {
 			$shape->add($key, 'string')->optional()->nullable();
 		}
 

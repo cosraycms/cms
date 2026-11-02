@@ -189,7 +189,7 @@ class Image extends File
 			return null;
 		}
 
-		$stored = array_intersect_key($link, array_flip(['href', 'node', 'asset', 'target']));
+		$stored = array_intersect_key($link, array_flip(['href', 'node', 'asset', 'target', 'rel']));
 
 		/** @var ?array{href: string, target?: string, rel?: string} */
 		return Link::attributes($stored, new OwnerResolver($this->owner));
