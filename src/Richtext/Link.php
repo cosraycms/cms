@@ -7,7 +7,7 @@ namespace Cosray\Richtext;
 /** A stored link, in a richtext mark or on an image: exactly one of `href`, `node` and `asset`. */
 final class Link
 {
-	public const string REL = 'noopener noreferrer nofollow';
+	public const string REL = 'noopener';
 	private const array SCHEMES = ['http', 'https', 'mailto', 'tel'];
 
 	/** Whether an address is relative or uses a scheme that cannot run code in the page. */

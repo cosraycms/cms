@@ -179,7 +179,7 @@ final class RichtextRendererTest extends TestCase
 
 		$this->assertSame(
 			'<p>'
-				. '<a href="https://x.de?a=1&amp;b=2" target="_blank" rel="noopener noreferrer nofollow"><strong>extern</strong></a>'
+				. '<a href="https://x.de?a=1&amp;b=2" target="_blank" rel="noopener"><strong>extern</strong></a>'
 				. '<a href="/de/ueber-uns" class="button">intern</a>'
 				. '<a href="/assets/cd/doc1/paper.pdf">Datei</a>'
 				. '<span class="cms-text-xl"><em>groß</em></span>'

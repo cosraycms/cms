@@ -632,7 +632,7 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render()->html;
 
 		$this->assertMatchesRegularExpression(
-			'#<figure[^>]*><a href="/about" rel="noopener noreferrer nofollow"><img [^>]+></a><figcaption>Words</figcaption></figure>#',
+			'#<figure[^>]*><a href="/about" rel="noopener"><img [^>]+></a><figcaption>Words</figcaption></figure>#',
 			$html,
 		);
 	}

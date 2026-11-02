@@ -131,7 +131,7 @@ final class ImageValueTest extends TestCase
 
 		$this->assertSame('https://example.com/?a=1&b=2', $image->link());
 		$this->assertSame(
-			'<a href="https://example.com/?a=1&amp;b=2" target="_blank" rel="noopener noreferrer nofollow">'
+			'<a href="https://example.com/?a=1&amp;b=2" target="_blank" rel="noopener">'
 				. $image->tag()
 				. '</a>',
 			(string) $image->linked(),
@@ -140,7 +140,7 @@ final class ImageValueTest extends TestCase
 			[
 				'href' => 'https://example.com/?a=1&b=2',
 				'target' => '_blank',
-				'rel' => 'noopener noreferrer nofollow',
+				'rel' => 'noopener',
 			],
 			$image->json()['link'],
 		);
@@ -176,7 +176,7 @@ final class ImageValueTest extends TestCase
 		$image = $this->image(['link' => ['href' => '/about', 'class' => 'stored', 'onclick' => 'x']]);
 
 		$this->assertStringStartsWith(
-			'<a href="/about" rel="noopener noreferrer nofollow">',
+			'<a href="/about" rel="noopener">',
 			(string) $image->linked(),
 		);
 	}
