@@ -14,6 +14,8 @@ use Cosray\Richtext\Inline;
 use Cosray\Schema\TranslateMode;
 use Override;
 
+use function Cosray\escape;
+
 /**
  * @property-read Field&Translatable $field
  */
@@ -117,6 +119,27 @@ class File extends Value
 	public function isset(): bool
 	{
 		return $this->fileItem($this->index) !== null;
+	}
+
+	/**
+	 * Attributes as they stand in a tag, escaped. Null and false leave one out,
+	 * and true prints a name alone.
+	 *
+	 * @param array<array-key, string|int|bool|null> $attributes
+	 */
+	protected function printed(array $attributes): string
+	{
+		$html = '';
+
+		foreach ($attributes as $name => $value) {
+			if ($value === true) {
+				$html .= ' ' . escape((string) $name);
+			} elseif ($value !== null && $value !== false) {
+				$html .= sprintf(' %s="%s"', escape((string) $name), escape((string) $value));
+			}
+		}
+
+		return $html;
 	}
 
 	protected function asset(int $index): ?Asset

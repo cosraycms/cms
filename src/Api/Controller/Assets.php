@@ -22,7 +22,6 @@ use Cosray\Context;
 use Cosray\Exception\IngestError;
 use Cosray\Security\Policy;
 use Cosray\User;
-use finfo;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -99,10 +98,9 @@ final class Assets
 			throw new HttpBadRequest($request, payload: ['message' => 'Send the file as the multipart field `file`.']);
 		}
 
-		$contents = (string) $file->getStream();
 		$fields = $request->unwrap()->getParsedBody();
 		$fields = is_array($fields) ? $fields : [];
-		$type = $fields['type'] ?? $this->type($config, $contents);
+		$type = $fields['type'] ?? $this->type($config, Ingest::uploadMime($file));
 
 		if (!in_array($type, ['image', 'video', 'file'], true)) {
 			throw new HttpBadRequest($request, payload: ['message' => '`type` is image, video or file.']);
@@ -112,9 +110,8 @@ final class Assets
 		$localeIds = array_keys(iterator_to_array($context->locales()));
 
 		try {
-			$result = new Ingest($config, $db)->ingest(
-				$contents,
-				(string) $file->getClientFilename(),
+			$result = new Ingest($config, $db)->ingestUpload(
+				$file,
 				$type,
 				$user === null ? Actor::system() : new Actor($user->id),
 				Meta::apply([], is_array($meta) ? $meta : [], $localeIds, $type === 'image'),
@@ -189,10 +186,8 @@ final class Assets
 		return $this->responses->empty();
 	}
 
-	private function type(Config $config, string $contents): string
+	private function type(Config $config, string $mime): string
 	{
-		$mime = (string) new finfo(FILEINFO_MIME_TYPE)->buffer($contents);
-
 		return match (true) {
 			isset($config->upload->image[$mime]) => 'image',
 			isset($config->upload->video[$mime]) => 'video',

@@ -513,14 +513,20 @@ class MediaControl extends HTMLElement {
 					loading,
 					readonly,
 					store,
-					edit: () => this.#details(identity, 0),
+					edit: () => (type === 'video' ? this.#edit(identity, 0) : this.#details(identity, 0)),
 					removeAll,
 					upload,
 					library,
 				});
 			} else {
 				if (type === 'video') {
-					body.append(videoPlayer(asset(items[0].uid ?? '')));
+					const poster = items[0].meta?.poster;
+					body.append(
+						videoPlayer(
+							asset(items[0].uid ?? ''),
+							typeof poster === 'string' ? asset(poster) : undefined,
+						),
+					);
 				}
 
 				body.append(
@@ -650,7 +656,7 @@ class MediaControl extends HTMLElement {
 				type === 'image' && this.field.attribution ? effectiveAttribution(item, info) : '',
 			loading,
 			readonly,
-			edit: type === 'image' ? edit : undefined,
+			edit,
 			remove: removeAll,
 			upload,
 			library,
@@ -725,7 +731,10 @@ class MediaControl extends HTMLElement {
 					contentLocale: this.#locale,
 					loading,
 					inert: readonly,
-					edit: this.#rowTexts.length > 0 ? () => this.#edit(identity, position(row)) : undefined,
+					edit:
+						this.#type === 'video' || this.#rowTexts.length > 0
+							? () => this.#edit(identity, position(row))
+							: undefined,
 					remove: () => removeAt(position(row)),
 					replace: multiple ? undefined : { upload, library },
 				});
@@ -1037,6 +1046,10 @@ class MediaControl extends HTMLElement {
 			contentLocale: this.#locale,
 			locales: this.locales,
 			catalog: this.#asset(item.uid ?? '')?.meta,
+			asset: (uid) => this.#asset(uid),
+			picked: (picked) => {
+				this.#picked[picked.uid] = picked;
+			},
 			apply: (next) => {
 				const list = this.#map[identity];
 

@@ -1,6 +1,6 @@
 // The dialogs of the media controls, opened through the window.Cosray bridge.
 
-/** @import { FileItem, ItemMeta, UploadType } from '../../types/data' */
+/** @import { AssetInfo, FileItem, ItemMeta, UploadType } from '../../types/data' */
 /** @import { ControlLocales } from '../../lib/control.js' */
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
@@ -9,6 +9,7 @@ import { patchItemMeta } from '../../lib/content.js';
 import { browseLibrary } from '../../lib/library-browser.js';
 import { __ } from '../../lib/locale.js';
 import { metaFields } from './meta-fields.js';
+import { posterRow } from './poster-row.js';
 import { contentLocales } from './views.js';
 
 /**
@@ -113,6 +114,8 @@ export function libraryDialog(owner, kind, pick) {
  * @property {string} contentLocale
  * @property {ControlLocales | undefined} locales
  * @property {ItemMeta | undefined} catalog
+ * @property {(uid: string) => AssetInfo | undefined} asset
+ * @property {(item: LibraryItem) => void} picked Makes an asset from the library known to `asset`.
  * @property {(item: FileItem) => void} apply Receives the draft; cancelling discards it.
  */
 
@@ -133,6 +136,8 @@ export function editDialog({
 	contentLocale,
 	locales,
 	catalog,
+	asset,
+	picked,
 	apply,
 }) {
 	/** @type {FileItem} */
@@ -168,9 +173,22 @@ export function editDialog({
 			});
 			fields.append(form.element);
 			followers.push(form.setLocale);
+
+			if (kind === 'video') {
+				fields.append(
+					posterRow({
+						poster: typeof draft.meta?.poster === 'string' ? draft.meta.poster : undefined,
+						asset,
+						picked,
+						browse: (pick) => libraryDialog(owner ?? host, 'image', pick),
+						change: (poster) => (draft = patchItemMeta(draft, { poster })),
+					}),
+				);
+			}
+
 			frame(
 				host,
-				kind === 'video' ? __('image:caption') : __('media:file-details'),
+				kind === 'video' ? __('media:video-details') : __('media:file-details'),
 				[fields],
 				[
 					button(__('common:cancel'), 'secondary', () => handle.close()),

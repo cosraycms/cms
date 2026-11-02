@@ -416,15 +416,17 @@ export function fallbackMedia(items, type, label, asset, translate, contentLocal
 
 /**
  * @param {AssetInfo | undefined} info
+ * @param {AssetInfo | undefined} [poster]
  * @returns {HTMLElement}
  */
-export function videoPlayer(info) {
+export function videoPlayer(info, poster) {
 	const box = create('div', 'cms-video');
 	const video = document.createElement('video');
 	video.controls = true;
 	video.preload = 'metadata';
 	video.className = 'cms-video-player';
 	video.src = info?.url ?? '';
+	video.poster = poster?.previewUrl ?? poster?.url ?? '';
 	box.append(video);
 
 	return box;

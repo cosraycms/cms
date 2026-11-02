@@ -112,6 +112,7 @@ return [
 		'media:size' => 'Größe',
 		'media:title-placeholder' => 'Wird statt des Dateinamens angezeigt',
 		'media:url' => 'URL',
+		'media:video-details' => 'Videodetails',
 		'node:page' => 'Seite',
 		'node:search' => 'Einträge suchen …',
 		'node:search-page' => 'Seite suchen …',
@@ -174,5 +175,7 @@ return [
 		],
 		'upload:uploading' => 'Lädt hoch …',
 		'video:caption-placeholder' => 'Wird unter dem Video angezeigt',
+		'video:poster' => 'Vorschaubild',
+		'video:poster-add' => 'Bild auswählen',
 	],
 ];

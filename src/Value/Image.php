@@ -46,9 +46,7 @@ class Image extends File
 			$attributes['style'] = "{$position}; {$attributes['style']}";
 		}
 
-		$html = '';
-
-		foreach ([
+		$html = $this->printed([
 			'class' => $class === '' ? null : $class,
 			'src' => $this->publicPath(),
 			...$attributes,
@@ -61,11 +59,7 @@ class Image extends File
 				],
 				$attributes,
 			),
-		] as $name => $value) {
-			if ($value !== null) {
-				$html .= sprintf(' %s="%s"', escape((string) $name), escape((string) $value));
-			}
-		}
+		]);
 
 		return new Markup("<img{$html}>");
 	}

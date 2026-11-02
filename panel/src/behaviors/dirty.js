@@ -51,8 +51,9 @@ function guard(event) {
 	const source =
 		detail?.ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
-	// A request marked data-dirty-bypass drops the unsaved edits on purpose
-	// (discarding the working copy) and confirms on its own.
+	// A request marked data-dirty-bypass does not leave the editor, like the
+	// media library in a dialog, or drops the unsaved edits on purpose, like
+	// discarding the working copy, and confirms on its own.
 	if (source instanceof Element && source.closest(`${FORM}, [data-dirty-bypass]`)) {
 		return;
 	}

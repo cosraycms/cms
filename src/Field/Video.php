@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
+use Celema\Sire\Shape;
 use Cosray\Schema\TranslateMode;
 use Cosray\Value;
 use Override;
@@ -23,6 +24,15 @@ class Video extends File implements Capability\Captionable
 	protected function supportedTranslateModes(): array
 	{
 		return [TranslateMode::Symmetric, TranslateMode::Asymmetric];
+	}
+
+	#[Override]
+	protected function itemMetaShape(): Shape
+	{
+		$shape = parent::itemMetaShape();
+		$shape->add('poster', 'string')->optional()->nullable();
+
+		return $shape;
 	}
 
 	#[Override]

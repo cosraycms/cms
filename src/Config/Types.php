@@ -75,12 +75,14 @@ namespace Cosray\Config;
  *     'session.options': SessionOptions,
  *     'session.handler': ?\SessionHandlerInterface,
  *
+ *     'media.backend': string,
  *     'media.fileserver': null|'apache'|'nginx',
  *
  *     'upload.mimetypes.file': MimeMap,
  *     'upload.mimetypes.image': MimeMap,
  *     'upload.mimetypes.video': MimeMap,
  *     'upload.maxsize': int,
+ *     'upload.maxsize.video': int,
  *
  *     'uid.alphabet': non-empty-string,
  *     'uid.length': positive-int,
@@ -136,11 +138,13 @@ namespace Cosray\Config;
  *     'session.enabled'?: bool,
  *     'session.options'?: array<string, mixed>,
  *     'session.handler'?: ?\SessionHandlerInterface,
+ *     'media.backend'?: string,
  *     'media.fileserver'?: null|'apache'|'nginx',
  *     'upload.mimetypes.file'?: MimeMap,
  *     'upload.mimetypes.image'?: MimeMap,
  *     'upload.mimetypes.video'?: MimeMap,
  *     'upload.maxsize'?: int,
+ *     'upload.maxsize.video'?: int,
  *     'uid.alphabet'?: non-empty-string,
  *     'uid.length'?: positive-int,
  *     'password.breach_check'?: bool,

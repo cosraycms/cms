@@ -109,6 +109,7 @@ return [
 		'media:size' => 'Taille',
 		'media:title-placeholder' => 'Affiché à la place du nom de fichier',
 		'media:url' => 'URL',
+		'media:video-details' => 'Détails de la vidéo',
 		'node:page' => 'Page',
 		'node:search' => 'Rechercher des entrées…',
 		'node:search-page' => 'Rechercher une page…',
@@ -171,5 +172,7 @@ return [
 		],
 		'upload:uploading' => 'Téléversement…',
 		'video:caption-placeholder' => 'Affichée sous la vidéo',
+		'video:poster' => 'Affiche',
+		'video:poster-add' => 'Choisir une image',
 	],
 ];

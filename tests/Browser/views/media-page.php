@@ -6,4 +6,5 @@
 		<?= $node->cover->size('wide')->figure() ?>
 	<?php endif ?>
 	<?= $node->gallery?->gallery('thumb') ?>
+	<?= $node->clip ?>
 </main>

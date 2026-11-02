@@ -106,6 +106,7 @@ return [
 		'media:size' => 'Tamanho',
 		'media:title-placeholder' => 'Mostrado em vez do nome do ficheiro',
 		'media:url' => 'URL',
+		'media:video-details' => 'Detalhes do vídeo',
 		'node:page' => 'Página',
 		'node:search' => 'Pesquisar entradas…',
 		'node:search-page' => 'Pesquisar página…',
@@ -168,5 +169,7 @@ return [
 		],
 		'upload:uploading' => 'A carregar…',
 		'video:caption-placeholder' => 'Mostrada abaixo do vídeo',
+		'video:poster' => 'Cartaz',
+		'video:poster-add' => 'Escolher uma imagem',
 	],
 ];

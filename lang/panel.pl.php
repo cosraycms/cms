@@ -123,6 +123,7 @@ return [
 		'media:size' => 'Rozmiar',
 		'media:title-placeholder' => 'Wyświetlany zamiast nazwy pliku',
 		'media:url' => 'URL',
+		'media:video-details' => 'Szczegóły wideo',
 		'node:page' => 'Strona',
 		'node:search' => 'Szukaj wpisów…',
 		'node:search-page' => 'Szukaj strony…',
@@ -186,5 +187,7 @@ return [
 		],
 		'upload:uploading' => 'Przesyłanie…',
 		'video:caption-placeholder' => 'Wyświetlany pod filmem',
+		'video:poster' => 'Plakat',
+		'video:poster-add' => 'Wybierz obraz',
 	],
 ];

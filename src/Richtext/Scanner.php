@@ -64,6 +64,10 @@ final class Scanner
 			self::link($data['meta']['link'], $assets, $nodes);
 		}
 
+		if (is_string($data['meta']['poster'] ?? null) && $data['meta']['poster'] !== '') {
+			$assets[] = $data['meta']['poster'];
+		}
+
 		foreach ($data as $value) {
 			if (is_array($value)) {
 				self::walkContent($value, $assets, $nodes);

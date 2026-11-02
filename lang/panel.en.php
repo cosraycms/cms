@@ -103,6 +103,7 @@ return [
 		'media:size' => 'Size',
 		'media:title-placeholder' => 'Shown instead of the file name',
 		'media:url' => 'URL',
+		'media:video-details' => 'Video details',
 		'node:page' => 'Page',
 		'node:search' => 'Search entries …',
 		'node:search-page' => 'Search page …',
@@ -162,5 +163,7 @@ return [
 		'upload:slots-left' => ['Only :count more file can be added.', 'Only :count more files can be added.'],
 		'upload:uploading' => 'Uploading …',
 		'video:caption-placeholder' => 'Shown below the video',
+		'video:poster' => 'Poster',
+		'video:poster-add' => 'Choose a picture',
 	],
 ];

@@ -829,8 +829,8 @@ final class BlocksValueTest extends TestCase
 		$html = $blocks->render()->html;
 
 		$this->assertStringContainsString('data-type="video"', $html);
-		$this->assertStringContainsString('<video controls><source src="', $html);
-		$this->assertStringContainsString('/cms/assets/vi/videoasset001/clip.mp4" type="video/mp4"/></video>', $html);
+		$this->assertStringContainsString('<video controls preload="metadata"><source src="', $html);
+		$this->assertStringContainsString('/cms/assets/vi/videoasset001/clip.mp4" type="video/mp4"></video>', $html);
 		$this->assertStringNotContainsString(
 			'<div class="cms-block"',
 			$this->createBlocksValue([$video('missingasset1')])->render()->html,

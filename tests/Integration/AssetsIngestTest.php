@@ -129,6 +129,72 @@ final class AssetsIngestTest extends IntegrationTestCase
 		$this->assertTrue($this->ingest()->ingest($photo, 'again.jpg', 'image')->created === false);
 	}
 
+	public function testAVideoLimitOfItsOwn(): void
+	{
+		$config = $this->config([
+			'path.public' => $this->dir,
+			'upload.maxsize' => 10,
+			'upload.maxsize.video' => 1000,
+		]);
+		$ingest = new Ingest($config, $this->db());
+		$mp4 = "\0\0\0\x18ftypmp42\0\0\0\0mp42isom" . str_repeat("\0", 80);
+
+		$this->assertTrue($ingest->ingest($mp4, 'clip.mp4', 'video')->created);
+
+		$this->expectException(IngestError::class);
+		$ingest->ingest($this->pngBytes(), 'pic.png', 'image');
+	}
+
+	public function testALargeUploadDoesNotGoThroughMemory(): void
+	{
+		$path = "{$this->dir}/large-upload.mp4";
+		$bytes = 64 * 1024 * 1024;
+		file_put_contents($path, "\0\0\0\x18ftypmp42\0\0\0\0mp42isom");
+		$handle = fopen($path, 'ab');
+		ftruncate($handle, $bytes);
+		fclose($handle);
+		$factory = new \Nyholm\Psr7\Factory\Psr17Factory();
+		$upload = $factory->createUploadedFile(
+			$factory->createStreamFromFile($path),
+			$bytes,
+			UPLOAD_ERR_OK,
+			'Large.mp4',
+			'video/mp4',
+		);
+
+		memory_reset_peak_usage();
+		$before = memory_get_usage();
+		$result = $this->ingest()->ingestUpload($upload, 'video');
+		$used = memory_get_peak_usage() - $before;
+
+		$this->assertLessThan($bytes / 2, $used, (string) $used);
+		$this->assertSame($bytes, filesize("{$this->dir}/assets/{$result->row['key']}"));
+		$this->assertSame($bytes, $result->row['bytes']);
+		$this->assertSame(hash_file('sha256', $path), $result->row['hash']);
+		$this->assertTrue($this->ingest()->ingestUpload($upload, 'video')->created === false);
+	}
+
+	public function testAnImageUploadFromAFileStillLosesItsLocation(): void
+	{
+		$path = "{$this->dir}/located.jpg";
+		file_put_contents($path, $this->locatedJpeg());
+		$factory = new \Nyholm\Psr7\Factory\Psr17Factory();
+		$upload = $factory->createUploadedFile(
+			$factory->createStreamFromFile($path),
+			(int) filesize($path),
+			UPLOAD_ERR_OK,
+			'Located.jpg',
+			'image/jpeg',
+		);
+
+		$result = $this->ingest()->ingestUpload($upload, 'image');
+
+		$this->assertStringNotContainsString(
+			'49,53.1N',
+			(string) file_get_contents("{$this->dir}/assets/{$result->row['key']}"),
+		);
+	}
+
 	public function testStoresInitialMetaAndActor(): void
 	{
 		$result = $this->ingest()->ingest(

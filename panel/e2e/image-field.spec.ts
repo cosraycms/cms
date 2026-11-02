@@ -92,6 +92,21 @@ test('texts set per use reach the page', async ({ page }) => {
 	await expect(page.locator('main figure img')).toHaveAttribute('alt', 'Four quarters');
 });
 
+test('the media library opens over unsaved edits without asking to leave', async ({ page }) => {
+	let asked = false;
+	page.on('dialog', async (prompt) => {
+		asked = true;
+		await prompt.dismiss();
+	});
+	await openNode(page, 'texts');
+	await page.getByLabel('Title').fill('Changed');
+	await field(page, GALLERY).getByRole('button', { name: 'Choose from media' }).click();
+
+	await expect(page.locator('dialog[open]').last().locator('[data-pick]').first()).toBeVisible();
+	expect(asked).toBe(false);
+	await page.locator('dialog[open]').last().getByRole('button', { name: 'Cancel' }).click();
+});
+
 test('a missing required text blocks saving and says where', async ({ page }) => {
 	await openNode(page, 'strict');
 	await upload(field(page, STRICT), 'landscape.jpg');

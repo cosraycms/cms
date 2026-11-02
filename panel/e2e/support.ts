@@ -7,6 +7,7 @@ const files = fileURLToPath(new URL('../../tests/Browser/.run/files/', import.me
 export const COVER = 0;
 export const GALLERY = 1;
 export const STRICT = 2;
+export const CLIP = 3;
 
 export function file(name: string): string {
 	return path.join(files, name);

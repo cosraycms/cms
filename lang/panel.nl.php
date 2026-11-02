@@ -106,6 +106,7 @@ return [
 		'media:size' => 'Grootte',
 		'media:title-placeholder' => 'Wordt getoond in plaats van de bestandsnaam',
 		'media:url' => 'URL',
+		'media:video-details' => 'Videodetails',
 		'node:page' => 'Pagina',
 		'node:search' => 'Items zoeken…',
 		'node:search-page' => 'Pagina zoeken…',
@@ -168,5 +169,7 @@ return [
 		],
 		'upload:uploading' => 'Uploaden…',
 		'video:caption-placeholder' => 'Wordt onder de video getoond',
+		'video:poster' => 'Poster',
+		'video:poster-add' => 'Afbeelding kiezen',
 	],
 ];

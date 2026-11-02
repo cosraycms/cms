@@ -54,6 +54,12 @@ class Storage
 		$this->filesystem->write($key, $contents);
 	}
 
+	/** @param resource $stream */
+	public function writeStream(string $key, mixed $stream): void
+	{
+		$this->filesystem->writeStream($key, $stream);
+	}
+
 	public function read(string $key): string
 	{
 		return $this->filesystem->read($key);

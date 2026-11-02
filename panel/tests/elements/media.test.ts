@@ -1889,14 +1889,14 @@ describe('per-use meta', () => {
 		expect(mirror.querySelector('[aria-pressed="true"]')?.textContent?.trim()).toBe('English');
 	});
 
-	it('offers no edit for a video field without a caption', async () => {
+	it('offers a video field without a caption its details, for the poster', async () => {
 		const { element } = await media('cosray-video', {
 			value: { zxx: [{ uid: 'clip' }] },
 			field: { name: 'clip', limit: { min: 0, max: 1 } },
 			assets: { clip: { filename: 'clip.mp4', url: '/media/clip.mp4', kind: 'video' } },
 		});
 
-		expect(element.querySelector('.cms-file-row .edit')).toBeNull();
+		expect(element.querySelector('.cms-file-row .edit')).not.toBeNull();
 	});
 
 	it('edits the caption of a video through its modal', async () => {

@@ -931,6 +931,27 @@
 }
 
 /* Where an image links to. */
+.cms-video-poster {
+	& .target {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--cms-space-2);
+	}
+
+	& img {
+		width: 4rem;
+		height: 2.5rem;
+		border-radius: var(--cms-radius-sm);
+		object-fit: cover;
+	}
+
+	& .name {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+}
+
 .cms-image-link {
 	& .target {
 		display: flex;

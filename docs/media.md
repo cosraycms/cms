@@ -126,6 +126,12 @@ Saving refuses an image without it, like a required field, also for a working co
 
 `#[Caption]` also applies to video fields. Without an attribute the input is hidden, nothing stored is lost, and the methods still return stored and catalog values. `caption()` returns escaped HTML as `Cosray\Markup`, which templates print as is; `captionText()` gives plain text.
 
+## Video
+
+`<?= $page->clip ?>` prints a player, the same as `$page->clip->video()`. It takes a class and attributes like `img()`, such as `video('clip', autoplay: true, controls: false)`. A poster chosen per use shows until the video plays, and `poster()` gives its address.
+
+Uploads of videos have a limit of their own, `upload.maxsize.video`, 256 MiB by default, next to `upload.maxsize` for everything else. PHP's `upload_max_filesize` and `post_max_size` have to allow as much. Only images and SVGs are read into memory, as they get changed on the way in.
+
 ## Focal point and crop
 
 The details dialog sets both on the picture itself. A focal point has a default in the media screen that a use can override; a crop belongs to the use alone. Both are fractions of the image as displayed, so they hold for every size and for a rotated JPEG, and the focal point is relative to the whole image, so another crop keeps it:

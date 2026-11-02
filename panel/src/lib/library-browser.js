@@ -51,6 +51,8 @@ export function browseLibrary(container, { kind = null, selected = null, pick })
 		pick(JSON.parse(tile.dataset.pick ?? '{}'));
 	}
 
+	// Loading the library leaves the editor where it is, unsaved edits and all.
+	container.dataset.dirtyBypass = '';
 	container.addEventListener('click', click);
 	void htmx.ajax('GET', `${panelBase()}media/picker${query === '' ? '' : `?${query}`}`, {
 		target: container,

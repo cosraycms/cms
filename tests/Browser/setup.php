@@ -70,7 +70,7 @@ $db->prepare(
 )->execute(['password' => password_hash('browser-tests-password', PASSWORD_ARGON2ID)]);
 $type = (int) $db->query("INSERT INTO cms.types (handle) VALUES ('media-page') RETURNING type")->fetchColumn();
 
-foreach (['focal', 'crop', 'texts', 'strict', 'gallery'] as $name) {
+foreach (['focal', 'crop', 'texts', 'strict', 'gallery', 'video'] as $name) {
 	$node = $db->prepare(
 		'INSERT INTO cms.nodes (uid, published, hidden, locked, type, creator, editor, content, title)
 		VALUES (:uid, true, false, false, :type, 1, 1, :content, :title) RETURNING node',
@@ -96,6 +96,8 @@ $photo = static function (string $file, int $width, int $height, int $tint = 0):
 	imagefilledrectangle($image, $halfX, $halfY, $width, $height, 0xFFFFFF);
 	imagejpeg($image, $file, 90);
 };
+file_put_contents("{$run}/files/clip.mp4", "\0\0\0\x18ftypmp42\0\0\0\0mp42isom" . str_repeat("\0", 200));
+$photo("{$run}/files/still.jpg", 640, 360, 40);
 $photo("{$run}/files/landscape.jpg", 1200, 600);
 $photo("{$run}/files/portrait.jpg", 600, 1200, 10);
 

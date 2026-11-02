@@ -38,4 +38,10 @@ final class Upload
 	public int $maxSize {
 		get => $this->config->get('upload.maxsize');
 	}
+
+	/** The limit for a kind of file: image, file or video. */
+	public function maxSizeFor(string $kind): int
+	{
+		return $kind === 'video' ? $this->config->get('upload.maxsize.video') : $this->maxSize;
+	}
 }

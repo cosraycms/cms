@@ -21,6 +21,18 @@ use Cosray\Tests\TestCase;
  */
 final class ReferenceScannerTest extends TestCase
 {
+	public function testAVideosPosterIsAReference(): void
+	{
+		$found = \Cosray\Richtext\Scanner::scanContent([
+			'clip' => [
+				'type' => 'video',
+				'value' => ['zxx' => [['uid' => 'videoasset001', 'meta' => ['poster' => 'posterimage01']]]],
+			],
+		]);
+
+		$this->assertContains('posterimage01', $found['assets']);
+	}
+
 	public function testCollectsAnImagesLink(): void
 	{
 		$refs = new Scanner()->scan([

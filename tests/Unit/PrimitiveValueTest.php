@@ -698,33 +698,73 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertSame('Hero Image', $value->title());
 	}
 
-	public function testVideoValueRendersSourceTag(): void
+	/** @param array<string, mixed> $meta */
+	private function videoValue(Context $context, array $meta = []): \Cosray\Value\Video
 	{
-		$context = $this->createContext();
-		$owner = $this->createOwner($context);
-		$valueContext = new ValueContext('clip', [
-			'files' => [
-				['uid' => 'vclipmp412345', 'title' => 'Clip'],
-			],
-		]);
-		$field = new \Cosray\Field\Video('clip', $owner, $valueContext);
+		$this->seedAsset($context, 'videoasset001', 'clip.mp4', mime: 'video/mp4');
+		$field = new \Cosray\Field\Video('clip', $this->createOwner($context), new ValueContext('clip', [
+			'files' => [['uid' => 'videoasset001', 'meta' => $meta]],
+		]));
+		$field->limit(1);
+		$value = $field->value();
+		$this->assertInstanceOf(\Cosray\Value\Video::class, $value);
 
-		$value = new class($owner, $field, $valueContext) extends \Cosray\Value\Video {
-			public function url(bool $bust = false): string
-			{
-				return 'http://www.example.com/assets/clip.mp4';
-			}
+		return $value;
+	}
 
-			public function mimeType(): string
-			{
-				return 'video/mp4';
-			}
-		};
+	public function testAVideoPrintsItsPlayer(): void
+	{
+		$value = $this->videoValue($this->createContext());
 
 		$this->assertSame(
-			'<video controls><source src="http://www.example.com/assets/clip.mp4" type="video/mp4"/></video>',
+			'<video controls preload="metadata"><source src="/cms/assets/vi/videoasset001/clip.mp4" type="video/mp4"></video>',
 			(string) $value,
 		);
+		$this->assertSame((string) $value, (string) $value->video());
+	}
+
+	public function testAVideoTakesAClassAndAttributes(): void
+	{
+		$html = (string) $this->videoValue($this->createContext())->video(
+			'clip',
+			controls: false,
+			autoplay: true,
+			preload: null,
+			title: 'A "quoted" title',
+		);
+
+		$this->assertStringStartsWith('<video class="clip" autoplay title="A &quot;quoted&quot; title"><source', $html);
+	}
+
+	public function testAVideoShowsItsPoster(): void
+	{
+		$context = $this->createContext();
+		$this->seedAsset($context, 'posterimage01', 'still.jpg', mime: 'image/jpeg');
+		$value = $this->videoValue($context, ['poster' => 'posterimage01']);
+
+		$this->assertStringContainsString('/cms/cache/po/posterimage01/still-preview~', $value->poster());
+		$this->assertStringContainsString(' poster="/cms/cache/po/posterimage01/still-preview~', (string) $value);
+		$this->assertSame($value->poster(), $value->json()['poster']);
+	}
+
+	public function testAPosterThatIsGoneLeavesThePlayer(): void
+	{
+		$value = $this->videoValue($this->createContext(), ['poster' => 'nosuchasset00']);
+
+		$this->assertSame('', $value->poster());
+		$this->assertStringNotContainsString('poster=', (string) $value);
+		$this->assertNull($value->json()['poster']);
+	}
+
+	public function testAVideoWhoseFileIsGonePrintsNothing(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Video('clip', $this->createOwner($context), new ValueContext('clip', [
+			'files' => [['uid' => 'nosuchasset00']],
+		]));
+		$field->limit(1);
+
+		$this->assertSame('', (string) $field->value());
 	}
 
 	public function testTranslatedImagesReturnsTranslatedImageItems(): void

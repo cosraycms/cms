@@ -66,9 +66,8 @@ class Media
 		}
 
 		$error = $file->getError();
-		$contents = $error === UPLOAD_ERR_OK ? (string) $file->getStream() : '';
-		$fileSize = $file->getSize() ?? strlen($contents);
-		$maxSize = $this->config->upload->maxSize;
+		$fileSize = (int) $file->getSize();
+		$maxSize = $this->config->upload->maxSizeFor($mediatype);
 
 		// PHP truncates oversized uploads before the stream reaches us, so
 		// this limit check must run on the transport size, not the bytes.
@@ -95,9 +94,8 @@ class Media
 		}
 
 		try {
-			$result = new Ingest($this->config, $this->db)->ingest(
-				$contents,
-				$filename,
+			$result = new Ingest($this->config, $this->db)->ingestUpload(
+				$file,
 				$mediatype,
 				new Actor($this->userId()),
 			);

@@ -7,6 +7,7 @@ namespace Cosray\Tests\Browser\Node;
 use Cosray\Contract\Title;
 use Cosray\Field\Image;
 use Cosray\Field\Text;
+use Cosray\Field\Video;
 use Cosray\Schema\Alt;
 use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
@@ -30,6 +31,9 @@ class MediaPage implements Title
 
 	#[Label('Strict'), Limit(1), Alt(required: true)]
 	protected Image $strict;
+
+	#[Label('Clip'), Limit(1)]
+	protected Video $clip;
 
 	public function title(): string
 	{

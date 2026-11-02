@@ -208,6 +208,7 @@ final class Defaults
 				'video/webm' => ['webm'],
 			],
 			'upload.maxsize' => 10 * 1024 * 1024,
+			'upload.maxsize.video' => 256 * 1024 * 1024,
 		];
 	}
 

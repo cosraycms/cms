@@ -210,11 +210,7 @@ final class Media extends Panel
 		}
 
 		try {
-			new Ingest($this->config, $db)->replace(
-				$row,
-				(string) $file->getStream(),
-				(string) $file->getClientFilename(),
-			);
+			new Ingest($this->config, $db)->replace($row, $file);
 		} catch (IngestError $e) {
 			return $response->json(['ok' => false, 'error' => $e->userMessage], 400);
 		}
