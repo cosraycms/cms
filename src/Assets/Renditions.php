@@ -17,8 +17,9 @@ use Cosray\Util\Path;
  */
 final class Renditions
 {
-	private readonly string $assetsDir;
-	private readonly string $cacheDir;
+	private readonly string $publicDir;
+	private readonly string $assetsPath;
+	private readonly string $cachePath;
 
 	private readonly Backend $backend;
 
@@ -35,14 +36,19 @@ final class Renditions
 			throw new RuntimeException('Public directory does not exist: ' . $config->path->public);
 		}
 
-		$this->assetsDir = Path::below($publicDir, $config->path->assets);
-		$this->cacheDir = Path::below($publicDir, $config->path->cache);
+		$this->publicDir = $publicDir;
+		$this->assetsPath = $config->path->assets;
+		$this->cachePath = $config->path->cache;
 	}
 
 	/** The asset's file; it throws when there is none. */
 	public function original(Asset $asset): string
 	{
-		return Path::inside($this->assetsDir, $asset->key, checkIsFile: true);
+		return Path::inside(
+			Path::below($this->publicDir, $this->assetsPath),
+			$asset->key,
+			checkIsFile: true,
+		);
 	}
 
 	/**
@@ -54,7 +60,8 @@ final class Renditions
 	public function render(Asset $asset, string $file, SizeSpec $spec, ?Transform $transform = null): string
 	{
 		$original = $this->original($asset);
-		$target = "{$this->cacheDir}/" . dirname($asset->key) . "/{$file}";
+		$cacheDir = Path::below($this->publicDir, $this->cachePath, create: true);
+		$target = "{$cacheDir}/" . dirname($asset->key) . "/{$file}";
 
 		if (is_file($target) && filemtime($original) <= filemtime($target)) {
 			return $target;

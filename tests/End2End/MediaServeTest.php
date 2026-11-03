@@ -300,6 +300,25 @@ final class MediaServeTest extends End2EndTestCase
 		$this->assertResponseStatus(404, $this->makeRequest('GET', $this->namedUrl($upload, 'square')));
 	}
 
+	public function testMissingAssetsDirectoryIs404(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-no-assets.png');
+		$url = $this->namedUrl($upload, 'square');
+		$this->removeDir("{$this->publicDir}/assets");
+
+		$this->assertResponseStatus(404, $this->makeRequest('GET', $url));
+	}
+
+	public function testMissingCacheDirectoryIsCreatedForARendition(): void
+	{
+		$upload = $this->upload($this->png(4, 4), 'e2e-serve-no-cache.png');
+		$url = $this->namedUrl($upload, 'square');
+		$this->removeDir("{$this->publicDir}/cache");
+
+		$this->assertResponseStatus(200, $this->makeRequest('GET', $url));
+		$this->assertFileExists($this->publicDir . $url);
+	}
+
 	public function testOriginalTooLargeForTheMemoryLimitIsRedirectedTo(): void
 	{
 		$upload = $this->upload($this->png(4, 4), 'e2e-serve-large.png');

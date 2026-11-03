@@ -133,6 +133,34 @@ final class PathTest extends TestCase
 		}
 	}
 
+	public function testBelowCreatesTheDirectoryOnRequest(): void
+	{
+		$root = sys_get_temp_dir() . '/cosray-below-' . bin2hex(random_bytes(6));
+		mkdir($root);
+
+		try {
+			$this->assertSame(realpath($root) . '/cache', Path::below($root, '/cache', create: true));
+		} finally {
+			rmdir("{$root}/cache");
+			rmdir($root);
+		}
+	}
+
+	public function testBelowRefusesParentSegmentsBeforeCreatingAnything(): void
+	{
+		$root = sys_get_temp_dir() . '/cosray-below-' . bin2hex(random_bytes(6));
+		mkdir($root);
+
+		try {
+			Path::below($root, '../cosray-below-outside', create: true);
+			$this->fail('The path should have been refused.');
+		} catch (RuntimeException) {
+			$this->assertDirectoryDoesNotExist(dirname($root) . '/cosray-below-outside');
+		} finally {
+			rmdir($root);
+		}
+	}
+
 	public function testBelowRefusesParentSegments(): void
 	{
 		$this->throws(RuntimeException::class, 'Path leaves its parent directory: /../Unit');

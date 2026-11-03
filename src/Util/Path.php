@@ -37,13 +37,18 @@ class Path
 	 * directory may resolve elsewhere through a symlink, such as uploads shared
 	 * between deployed releases; only `..` segments in `$child` are refused.
 	 */
-	public static function below(string $parent, string $child): string
+	public static function below(string $parent, string $child, bool $create = false): string
 	{
 		if (in_array('..', explode('/', str_replace('\\', '/', $child)), true)) {
 			throw new RuntimeException('Path leaves its parent directory: ' . $child);
 		}
 
 		$dir = rtrim($parent, '\\/') . DIRECTORY_SEPARATOR . ltrim($child, '\\/');
+
+		if ($create) {
+			self::ensureDirectory($dir);
+		}
+
 		$path = realpath($dir);
 
 		if ($path === false || !is_dir($path)) {
