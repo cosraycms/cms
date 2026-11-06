@@ -69,7 +69,7 @@ final class Drafts
 
 	/**
 	 * Whether a working copy would leave the live node as it is: the same
-	 * content, handle and active URL paths, compared by self::essence().
+	 * content, handle and active URL paths, compared by Essence::of().
 	 *
 	 * @param array<string, mixed> $content
 	 * @param array<string, string> $paths
@@ -82,49 +82,9 @@ final class Drafts
 
 		return (
 			$live['handle'] === $handle
-				&& self::essence($livePaths) === self::essence(array_map(trim(...), $paths))
-				&& self::essence($liveContent) === self::essence($content)
+				&& Essence::of($livePaths) === Essence::of(array_map(trim(...), $paths))
+				&& Essence::of($liveContent) === Essence::of($content)
 		);
-	}
-
-	/**
-	 * Content as far as an editor can tell it apart. The form submits
-	 * every slot it shows, numbers as text, so empty values and fields
-	 * holding nothing but empty values count as absent, and 1041, 1041.0
-	 * and '1041' are the same; key order does not count either.
-	 */
-	private static function essence(mixed $value): mixed
-	{
-		if (is_int($value) || is_float($value)) {
-			return (string) $value;
-		}
-
-		if ($value === '') {
-			return null;
-		}
-
-		if (!is_array($value)) {
-			return $value;
-		}
-
-		if (array_is_list($value)) {
-			return $value === [] ? null : array_map(self::essence(...), $value);
-		}
-
-		$essence = array_filter(
-			array_map(self::essence(...), $value),
-			static fn(mixed $item): bool => $item !== null,
-		);
-
-		$field = array_key_exists('type', $value) && array_key_exists('value', $value);
-
-		if ($field && !isset($essence['value']) && !isset($essence['meta'])) {
-			return null;
-		}
-
-		ksort($essence);
-
-		return $essence === [] ? null : $essence;
 	}
 
 	/**
