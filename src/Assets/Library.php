@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Cosray\Assets;
 
 use Celema\Quma\Database;
+use Celema\Quma\Exception\ForeignKeyViolation;
 use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\References\Usage;
 use Cosray\Storage\Storage;
 use Cosray\Util\Path;
 use DateTimeImmutable;
-use PDOException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -180,15 +180,12 @@ final class Library
 		}
 
 		try {
-			$this->db->assets->delete(['uid' => $uid])->run();
-		} catch (PDOException $e) {
-			// RESTRICT violations report SQLSTATE 23001; plain FK
-			// violations 23503.
-			if (in_array((string) $e->getCode(), ['23001', '23503'], true)) {
-				return $usage->forAsset($uid);
-			}
-
-			throw $e;
+			// Inside a caller's transaction, a violation must not abort it before the usage query below.
+			$this->db->transaction(function () use ($uid): void {
+				$this->db->assets->delete(['uid' => $uid])->run();
+			});
+		} catch (ForeignKeyViolation) {
+			return $usage->forAsset($uid);
 		}
 
 		if ($row['disk'] === 'local') {

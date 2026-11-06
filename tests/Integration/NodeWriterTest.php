@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Tests\Integration;
 
 use Celema\Core\Exception\HttpBadRequest;
+use Celema\Core\Exception\HttpConflict;
 use Cosray\Actor;
 use Cosray\Cms;
 use Cosray\Context;
@@ -257,6 +258,26 @@ final class NodeWriterTest extends IntegrationTestCase
 				['uid' => 'writer-handle'],
 			)->one()['handle'],
 		);
+	}
+
+	public function testAHandleInUseIsAConflict(): void
+	{
+		$writer = $this->writer();
+		$writer->create(
+			$writer->prepare(PlainBlock::class, ['content' => 'Footer'])->uid('writer-handle-first')->handle('footer'),
+		);
+
+		try {
+			$writer->create(
+				$writer
+					->prepare(PlainBlock::class, ['content' => 'Footer'])
+					->uid('writer-handle-second')
+					->handle('footer'),
+			);
+			$this->fail('A handle in use must be a conflict');
+		} catch (HttpConflict $e) {
+			$this->assertSame(['message' => __('node:duplicate-handle', ['handle' => 'footer'])], $e->payload());
+		}
 	}
 
 	public function testANodeThatReadsTheRequestIsWrittenWithoutOne(): void

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Cosray\Tests\Integration;
 
+use Celema\Quma\Exception\ForeignKeyViolation;
+use Celema\Quma\Execution;
+use Cosray\Assets\Library;
 use Cosray\References\Rebuild;
 use Cosray\References\Sync;
 use Cosray\References\Usage;
+use Cosray\Tests\Fixtures\SharedDatabase;
 use Cosray\Tests\IntegrationTestCase;
-use PDOException;
 
 /**
  * @internal
@@ -79,15 +82,30 @@ final class ReferencesTest extends IntegrationTestCase
 			'nodes' => [],
 		]);
 
-		try {
-			$this->db()->assets->delete(['uid' => 'refint-locked'])->run();
-			$this->fail('Expected a foreign key violation');
-		} catch (PDOException $e) {
-			// Depending on the Postgres version a RESTRICT block reports either
-			// restrict_violation (23001) or foreign_key_violation (23503); the
-			// delete guard accepts both, so the test does too.
-			$this->assertContains((string) $e->getCode(), ['23001', '23503']);
-		}
+		$this->expectException(ForeignKeyViolation::class);
+
+		$this->db()->assets->delete(['uid' => 'refint-locked'])->run();
+	}
+
+	public function testAnAssetReferencedWhileItIsDeletedIsKept(): void
+	{
+		$this->insertAsset('refint-race');
+		$db = $this->db();
+		$raced = false;
+		// References the asset right after the library found it unused.
+		$conn = $this->conn()->onExecute(static function (Execution $execution) use ($db, &$raced): void {
+			if ($raced || !str_ends_with((string) $execution->script, '/references/assetUsage.sql')) {
+				return;
+			}
+
+			$raced = true;
+			new Sync($db)->replace('node', 'refint-race-owner', ['assets' => ['refint-race'], 'nodes' => []]);
+		});
+
+		$owners = new Library(new SharedDatabase($conn), $this->config())->delete('refint-race');
+
+		$this->assertSame(['refint-race-owner'], array_column($owners ?? [], 'ownerUid'));
+		$this->assertNotNull($db->assets->byUid(['uid' => 'refint-race'])->first());
 	}
 
 	public function testUsageEnrichesOwnersForDisplay(): void

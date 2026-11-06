@@ -10,6 +10,7 @@ use Celema\Core\Exception\HttpForbidden;
 use Celema\Core\Exception\HttpNotFound;
 use Celema\Core\Exception\HttpUnauthorized;
 use Celema\Core\Request;
+use Celema\Quma\Exception\DataError;
 use Closure;
 use Cosray\Actor;
 use Cosray\Api\Exception\PreconditionFailed;
@@ -30,7 +31,6 @@ use Cosray\Node\Wrapper;
 use Cosray\Security\NodeAccess;
 use Cosray\User;
 use JsonException;
-use PDOException;
 use Psr\Http\Message\ResponseInterface as Response;
 
 final class Nodes
@@ -354,12 +354,8 @@ final class Nodes
 			return $query();
 		} catch (ParserException $e) {
 			throw new HttpBadRequest($request, payload: ['message' => $e->getMessage()], previous: $e);
-		} catch (PDOException $e) {
-			// Class 22, data exceptions: a typed order or filter met values of another type.
-			if (!str_starts_with((string) $e->getCode(), '22')) {
-				throw $e;
-			}
-
+		} catch (DataError $e) {
+			// A typed order or filter met values of another type.
 			throw new HttpBadRequest(
 				$request,
 				payload: [

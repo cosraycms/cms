@@ -179,6 +179,7 @@ final class ApiReadTest extends End2EndTestCase
 			['GET', '/api/nodes', ['query' => ['filter' => 'not json']]],
 			['GET', '/api/nodes', ['query' => ['type' => 'nope']]],
 			['GET', '/api/nodes', ['query' => ['order' => 'editor']]],
+			['GET', '/api/nodes', ['query' => ['order' => 'title:number']]],
 			['GET', '/api/nodes', ['query' => ['limit' => '0']]],
 			['GET', '/api/nodes', ['query' => ['view' => 'raw']]],
 			['POST', '/api/nodes/query', ['body' => '[1, 2]', 'headers' => ['Content-Type' => 'application/json']]],
@@ -276,13 +277,15 @@ final class ApiReadTest extends End2EndTestCase
 	{
 		$this->authenticateAs('editor');
 		$this->node('api-typed', 'test-widget', [
-			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Not a number']],
+			'title' => ['type' => Text::class, 'value' => ['zxx' => 'Typed']],
+			'size' => ['type' => Text::class, 'value' => ['zxx' => 'Not a number']],
 		]);
 
-		$this->problem($this->makeRequest('GET', '/api/nodes', ['query' => [
+		$problem = $this->problem($this->makeRequest('GET', '/api/nodes', ['query' => [
 			'type' => 'test-widget',
-			'order' => 'title:number',
+			'order' => 'size:number',
 		]]), 400);
+		$this->assertSame('The filter or order does not fit the stored values.', $problem['detail']);
 	}
 
 	public function testTheApiFollowsTheUrlPrefix(): void

@@ -8,6 +8,7 @@ use Celema\Core\Exception\HttpBadRequest;
 use Celema\Core\Exception\HttpConflict;
 use Celema\Core\Exception\HttpError;
 use Celema\Quma\Database;
+use Celema\Quma\Exception\UniqueViolation;
 use Cosray\Actor;
 use Cosray\Block\Registry as Blocks;
 use Cosray\Cms;
@@ -692,14 +693,10 @@ class Store
 				'handle' => $handle,
 				'editor' => $editor,
 			])->run();
-		} catch (Throwable $e) {
-			if ((string) $e->getCode() === '23505') {
-				throw new HttpConflict(payload: [
-					'message' => __('node:duplicate-handle', ['handle' => $handle]),
-				]);
-			}
-
-			throw $e;
+		} catch (UniqueViolation) {
+			throw new HttpConflict(payload: [
+				'message' => __('node:duplicate-handle', ['handle' => $handle]),
+			]);
 		}
 	}
 
