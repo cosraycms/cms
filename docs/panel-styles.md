@@ -115,9 +115,17 @@ Activation closes the menu before the consumer handler runs, so opening a dialog
 
 These hooks describe the current shared behavior. If changing the markup, update its PHP and JavaScript consumers together and verify the [keyboard behavior](panel-keyboard.md#action-menus).
 
-## Shared shells and fields
+## Dialogs
 
-`.cms-modal` is a native dialog shared by server-rendered settings and bridge content. Its parts are `.modal-header`, `.modal-title`, `.modal-body`, and optional `.modal-footer`; `data-size` selects a size variant. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership, and focus, which matter independently of its appearance.
+Every panel dialog is a `.cms-modal`, a native dialog with `.modal-header`, `.modal-title`, `.modal-body` and an optional `.modal-footer`; `data-size` selects `compact`, `wide` or `stage`. [Modal lifecycle](controls.md#modal-controls) documents cancellation, cleanup, ownership and focus. There are three ways to one, by what it holds:
+
+- A question before an action on a form or link: `hx-confirm` with the question, plus `data-confirm-action` for the button's label and `data-confirm-tone="danger"` when the action destroys something; `data-confirm-title` titles the dialog when the action alone does not. A global handler asks it in a panel dialog before htmx sends the request.
+- A question or notice from a script: `confirm()` and `alert()` of [modal.js](../panel/src/lib/modal.js), which resolve with the answer. `question(element, message)` reads the same `data-confirm-*` attributes, so a script-driven action is annotated like an `hx-confirm` one. `frame()` and `button()` build the parts of other script-built dialogs, which `openModal()` mounts.
+- Content rendered on the server, such as settings or a gated bulk action: the [dialog component](../panel/views/component/dialog.php) with a `title`, an optional `size`, and a `name` that becomes `data-dialog`; its slot holds the body and footer. A button with `data-dialog-open` naming it opens the nearest dialog of that name, the first an ancestor holds as a direct child, so a block's settings button reaches its own dialog and not the field's around it.
+
+A footer puts Cancel (`secondary`) first and the action last: `primary`, or `danger solid` when it destroys something. Label the action with what it does, such as Delete or Discard changes, never OK or Yes. A destructive question starts on Cancel, any other on its action; Escape, the backdrop and the close button always cancel.
+
+## Shared shells and fields
 
 `.cms-tabs` and [tabs.js](../panel/src/behaviors/tabs.js) provide tab selection with labelled panels and roving focus. Built-in icons come from [panel/icons/](../panel/icons/README.md) through PHP and JavaScript adapters; put an accessible name on the action rather than its decorative SVG.
 
