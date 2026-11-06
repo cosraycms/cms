@@ -5,6 +5,7 @@
 /** @import { BridgeSystem } from './lib/bridge.js' */
 
 import { install as installActionMenus } from './lib/action-menu.js';
+import { install as installAutosave } from './behaviors/autosave.js';
 import { install as installAutosubmit } from './behaviors/autosubmit.js';
 import { install as installBlockCatalog } from './behaviors/block-catalog.js';
 import { install as installBlockCorners } from './behaviors/block-corners.js';
@@ -98,6 +99,7 @@ document.addEventListener('keydown', focusSearch);
 installActionMenus();
 installAutosubmit();
 installDirty();
+installAutosave();
 installEmbed();
 installContentLocales();
 installTabs();

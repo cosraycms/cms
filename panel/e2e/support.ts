@@ -25,6 +25,14 @@ export async function openNode(page: Page, name: string): Promise<void> {
 	await signIn(page);
 	await page.goto(`/panel/node/browser${name}`);
 	await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+
+	// Tests share nodes, and edits a test leaves unsaved come back as an autosave.
+	if ((await page.locator('#editor-autosave[data-restore-url]').count()) > 0) {
+		await page
+			.getByRole('dialog', { name: 'Unsaved changes' })
+			.getByRole('button', { name: 'Not now' })
+			.click();
+	}
 }
 
 export function field(page: Page, index: number): Locator {
@@ -45,7 +53,10 @@ export async function openDetails(target: Locator, page: Page): Promise<Locator>
 
 export async function save(page: Page): Promise<void> {
 	const saved = page.waitForResponse(
-		(response) => response.request().method() === 'POST' && response.url().includes('/panel/node/'),
+		(response) =>
+			response.request().method() === 'POST' &&
+			response.url().includes('/panel/node/') &&
+			!response.url().endsWith('/autosave'),
 	);
 	await page.getByRole('button', { name: 'Save', exact: true }).click();
 	await saved;
@@ -54,7 +65,10 @@ export async function save(page: Page): Promise<void> {
 export async function publish(page: Page): Promise<void> {
 	await page.getByRole('button', { name: 'More save options' }).click();
 	const saved = page.waitForResponse(
-		(response) => response.request().method() === 'POST' && response.url().includes('/panel/node/'),
+		(response) =>
+			response.request().method() === 'POST' &&
+			response.url().includes('/panel/node/') &&
+			!response.url().endsWith('/autosave'),
 	);
 	await page.locator('#editor-save-options button[name=publish]').click();
 	await saved;

@@ -76,6 +76,15 @@ describe('dirty guard', () => {
 		);
 	});
 
+	it('says that the edits are kept where the editor autosaves them', () => {
+		document.body.insertAdjacentHTML('beforeend', '<div id="editor-autosave" hidden></div>');
+		edit();
+
+		expect(request(document.getElementById('outside'))).toBe(
+			'There are unsaved changes. They are kept and offered back when this entry is opened again. Leave the editor?',
+		);
+	});
+
 	it('never questions requests originating inside the form', () => {
 		edit();
 

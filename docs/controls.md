@@ -148,6 +148,12 @@ This is an internal boundary, not a plugin action-slot API. Changes to it need c
 
 See [working copies](content.md#working-copies) for live/draft semantics and the Store API. The editor saves, previews, publishes, and discards through those transitions; publication and visibility are not interchangeable with ordinary content fields.
 
+## Autosave
+
+While an existing node is edited, [autosave.js](../panel/src/behaviors/autosave.js) sends the form to `POST /node/{uid}/autosave` two seconds after the last edit, and at least every 15 seconds while editing goes on, and once more when the page goes. The server keeps the edits as the user's row in `autosaves`, in the shapes of a working copy but neither validated nor live, so an autosave writes no history, rebuilds no index and fires no webhook; edits that leave the node as stored drop the row. Saving and discarding drop it too, and starting a new autosave prunes rows untouched for 14 days. Content migrations rewrite `autosaves` like `drafts`.
+
+When the user opens a node they hold an autosave for, the editor asks whether to restore it, and says so when the node was saved since the edits began. Restoring renders the editor from the autosave through `?restore=1`, marked unsaved; Not now keeps the autosave until the next save. The browser's own prompt on leaving the page only shows while edits are not autosaved yet; leaving the editor inside the panel still asks, because an autosave is not a save. New nodes and embedded editors keep no autosave.
+
 ## Validation errors
 
 Failed saves preserve the mounted form. Messages are in the panel language: [Validators](../src/Validation/Validators.php) translates Sire's own messages, and Cosray's rules translate theirs. Error-summary items carry Sire paths:
@@ -264,4 +270,4 @@ Escape and a gesture starting and ending on the backdrop dismiss the dialog; `hi
 
 Current internal parts are `.modal-header`, `.modal-title`, `.modal-body`, and `.modal-footer`; `data-dialog-focus` selects initial focus. They are shared markup, not an additional plugin slot API. Server-rendered settings stay inside their editor form and retain live values on closure; media metadata dialogs keep their own draft and Apply/Cancel behavior. An image's details dialog, the only place its per-use texts, focal point and crop are edited, holds one draft per image of a gallery and applies them together, including a replaced image.
 
-[dialogs.js](../panel/src/lib/dialogs.js) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. The panel's own questions, `hx-confirm` and the unsaved-changes guard included, use the same dialogs; see [Dialogs](panel-styles.md#dialogs). Only `beforeunload`, for closing or reloading the tab and leaving the panel, still shows the browser's own prompt, which a page cannot replace.
+[dialogs.js](../panel/src/lib/dialogs.js) and the [action-menu behavior](panel-styles.md#action-menus) coordinate focus and ownership. The panel's own questions, `hx-confirm` and the unsaved-changes guard included, use the same dialogs; see [Dialogs](panel-styles.md#dialogs). Only `beforeunload`, for closing or reloading the tab and leaving the panel, still shows the browser's own prompt, which a page cannot replace; with [autosave](#autosave), only while edits are not kept yet.

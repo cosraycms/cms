@@ -6,6 +6,7 @@
 /** @import { Context } from './dialogs.js' */
 
 import { __ } from '../lib/locale.js';
+import { autosaved } from './autosave.js';
 import { ask } from './dialogs.js';
 
 const FORM = '#node-editor-form';
@@ -69,7 +70,9 @@ function guard(event) {
 
 	ask(ctx, {
 		title: __('editor:unsaved'),
-		message: __('editor:leave-confirm'),
+		message: __(
+			document.getElementById('editor-autosave') ? 'editor:leave-kept' : 'editor:leave-confirm',
+		),
 		action: __('editor:leave'),
 		tone: 'danger',
 	});
@@ -79,7 +82,8 @@ function guard(event) {
  * @param {BeforeUnloadEvent} event
  */
 function unload(event) {
-	if (!isDirty()) {
+	// Edits the server holds as an autosave come back when the editor opens again.
+	if (!isDirty() || autosaved()) {
 		return;
 	}
 
@@ -87,9 +91,23 @@ function unload(event) {
 	event.returnValue = '';
 }
 
+// An editor restored from an autosave shows edits nobody saved yet.
+function restored() {
+	const state = document.querySelector('#editor-autosave[data-restored]');
+	const form = document.querySelector(FORM);
+
+	if (state && form instanceof HTMLFormElement) {
+		state.removeAttribute('data-restored');
+		dirtyForm = form;
+		indicate(true);
+	}
+}
+
 // The save response swaps the status chip out-of-band; a successful
 // save marks it data-saved so the guard can stand down.
 function settle() {
+	restored();
+
 	const status = document.getElementById('editor-status');
 
 	if (status?.dataset.saved === 'true') {
@@ -107,6 +125,7 @@ export function install() {
 	document.addEventListener('htmx:config:request', guard);
 	document.addEventListener('htmx:after:swap', settle);
 	window.addEventListener('beforeunload', unload);
+	restored();
 
 	return () => {
 		document.removeEventListener('input', mark);

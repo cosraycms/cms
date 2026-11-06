@@ -6,12 +6,14 @@ import { __ } from './locale.js';
 
 /**
  * A question for confirm(). The action labels the confirming button with a
- * verb; it titles the dialog too when there is no title.
+ * verb; it titles the dialog too when there is no title. `cancel` labels
+ * the other button when Cancel does not fit.
  *
  * @typedef {object} Question
  * @property {string} message
  * @property {string} [title]
  * @property {string} [action]
+ * @property {string} [cancel]
  * @property {'primary' | 'danger'} [tone]
  * @property {HTMLElement} [owner]
  */
@@ -128,13 +130,13 @@ export function frame(host, title, body, footer) {
  * @param {Question} question
  * @returns {Promise<boolean>}
  */
-export function confirm({ message, title, action, tone = 'primary', owner }) {
+export function confirm({ message, title, action, cancel: dismiss, tone = 'primary', owner }) {
 	return new Promise((resolve) => {
 		let confirmed = false;
 		const label = action ?? __('common:ok');
 		const handle = openModal(
 			(host) => {
-				const cancel = button(__('common:cancel'), 'secondary', () => handle.close());
+				const cancel = button(dismiss ?? __('common:cancel'), 'secondary', () => handle.close());
 				const ok = button(label, tone === 'danger' ? 'danger solid' : 'primary', () => {
 					confirmed = true;
 					handle.close();
