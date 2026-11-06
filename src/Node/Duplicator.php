@@ -12,7 +12,6 @@ use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Field;
 use Cosray\Title\Resolver as TitleResolver;
-use Cosray\Util\Transaction;
 use Throwable;
 
 /**
@@ -59,11 +58,13 @@ final class Duplicator
 	public function duplicate(Wrapper $node, Actor $actor, bool $withChildren = false): array
 	{
 		try {
-			$created = Transaction::run($this->context->db, fn(): array => $this->copyTree(
-				$node,
-				$actor,
-				$withChildren,
-			));
+			$created = $this->context->db->transaction(
+				fn(): array => $this->copyTree(
+					$node,
+					$actor,
+					$withChildren,
+				),
+			);
 		} catch (Throwable $e) {
 			throw new RuntimeException(
 				'Error while duplicating: ' . $e->getMessage(),

@@ -22,7 +22,6 @@ use Cosray\References;
 use Cosray\Richtext\Normalizer;
 use Cosray\Title\Resolver as TitleResolver;
 use Cosray\Uid;
-use Cosray\Util\Transaction;
 use Cosray\Validation\ValidatorFactory;
 use Cosray\Webhooks;
 use DateTimeInterface;
@@ -317,7 +316,7 @@ class Store
 	private function transaction(callable $work, string $failure): void
 	{
 		try {
-			Transaction::run($this->db, $work);
+			$this->db->transaction($work);
 		} catch (Throwable $e) {
 			if ($e instanceof HttpError) {
 				throw $e;

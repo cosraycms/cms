@@ -8,7 +8,6 @@ use Cosray\Console\Runtime;
 use Cosray\Node\Writer;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Node\TestDocument;
-use Cosray\Util\Transaction;
 use Cosray\Webhooks\Delivery;
 use RuntimeException;
 
@@ -78,7 +77,7 @@ final class ApiWebhooksTest extends End2EndTestCase
 		$writer = new Runtime($this->app->container())->get(Writer::class);
 
 		try {
-			Transaction::run($this->db(), static function () use ($writer): never {
+			$this->db()->transaction(static function () use ($writer): never {
 				$writer->create($writer->prepare(TestDocument::class, ['title' => 'Undone'])->uid('undone'));
 
 				throw new RuntimeException('The site changed its mind.');

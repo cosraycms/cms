@@ -10,7 +10,6 @@ use Cosray\Bootstrap;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Services;
 use Cosray\Locales;
-use Cosray\Util\Transaction;
 use Throwable;
 
 final class Rebuild
@@ -48,7 +47,7 @@ final class Rebuild
 				$report['processed']++;
 
 				try {
-					$result = Transaction::run($this->db, fn(): array => $this->node($after, $classes));
+					$result = $this->db->transaction(fn(): array => $this->node($after, $classes));
 					$report[$result['indexed'] > 0 ? 'indexed' : 'empty']++;
 					$report['missingTitles'] += $result['missingTitles'];
 				} catch (Throwable $e) {

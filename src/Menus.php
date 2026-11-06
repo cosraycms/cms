@@ -7,7 +7,6 @@ namespace Cosray;
 use Celema\Quma\Database;
 use Cosray\Exception\RuntimeException;
 use Cosray\References\Sync;
-use Cosray\Util\Transaction;
 
 /**
  * Write API for menus and their item trees. Reading and rendering stay
@@ -214,7 +213,7 @@ final class Menus
 		$siblings = array_values(array_diff($siblings, [$item]));
 		array_splice($siblings, max(0, min($index, count($siblings))), 0, [$item]);
 
-		Transaction::run($this->db, function () use ($siblings, $parent): void {
+		$this->db->transaction(function () use ($siblings, $parent): void {
 			foreach ($siblings as $offset => $sibling) {
 				$this->db->menus->moveItem([
 					'item' => $sibling,

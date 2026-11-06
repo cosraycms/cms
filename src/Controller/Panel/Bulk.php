@@ -18,7 +18,6 @@ use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
-use Cosray\Util\Transaction;
 
 /**
  * Bulk operations on a collection listing selection. Every action runs in
@@ -50,7 +49,7 @@ final class Bulk extends Panel
 		$changesPublished = 0;
 		$skippedLocked = 0;
 
-		Transaction::run($context->db, static function () use (
+		$context->db->transaction(static function () use (
 			$context,
 			$cms,
 			$store,
@@ -140,7 +139,7 @@ final class Bulk extends Panel
 		$skippedLocked = 0;
 		$skipped = $missing;
 
-		Transaction::run($context->db, function () use (
+		$context->db->transaction(function () use (
 			$store,
 			$actor,
 			$nodes,
@@ -201,7 +200,7 @@ final class Bulk extends Panel
 		$actor = $this->actor();
 		$duplicated = 0;
 
-		Transaction::run($context->db, function () use (
+		$context->db->transaction(function () use (
 			$cms,
 			$duplicator,
 			$actor,

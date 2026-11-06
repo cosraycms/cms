@@ -10,7 +10,6 @@ use Cosray\Config;
 use Cosray\Queue;
 use Cosray\User;
 use Cosray\Users;
-use Cosray\Util\Transaction;
 
 /**
  * Links that let panel users who forgot their password choose a new one.
@@ -91,7 +90,7 @@ final class PasswordResets
 	 */
 	public function complete(#[\SensitiveParameter] string $token, #[\SensitiveParameter] string $password): ?User
 	{
-		return Transaction::run($this->db, function () use ($token, $password): ?User {
+		return $this->db->transaction(function () use ($token, $password): ?User {
 			/** @var ?array{usr: int} $row */
 			$row = $this->db->passwordResets->consume(['token' => hash('sha256', $token)])->first();
 			$user = $row === null ? null : $this->users->byId($row['usr']);

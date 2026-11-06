@@ -15,7 +15,6 @@ use Cosray\Middleware\PanelLocale;
 use Cosray\Security\Policy;
 use Cosray\User;
 use Cosray\Users;
-use Cosray\Util\Transaction;
 use Override;
 use Psr\Log\LoggerInterface as Logger;
 use Symfony\Component\Mime\Address;
@@ -58,7 +57,7 @@ final class PasswordResetMail implements Job
 		}
 
 		// A mail that cannot be queued takes its link along, so the retry is not refused as too soon.
-		$sent = Transaction::run($this->db, function () use ($user, $locale): bool {
+		$sent = $this->db->transaction(function () use ($user, $locale): bool {
 			$token = $this->resets->issue($user);
 
 			if ($token === null) {

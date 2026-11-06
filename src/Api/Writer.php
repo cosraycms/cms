@@ -17,7 +17,6 @@ use Cosray\Node\ReservedPaths;
 use Cosray\Node\Store;
 use Cosray\Node\Types;
 use Cosray\Node\Wrapper;
-use Cosray\Util\Transaction;
 
 /**
  * Turns API request bodies into node writes. A body uses the source view:
@@ -60,7 +59,7 @@ final class Writer
 	 */
 	public function exclusive(string $uid, Closure $work): mixed
 	{
-		return Transaction::run($this->context->db, function () use ($uid, $work): mixed {
+		return $this->context->db->transaction(function () use ($uid, $work): mixed {
 			$this->store->lock($uid);
 
 			return $work();
@@ -133,7 +132,7 @@ final class Writer
 		$working = Factory::meta($inner, 'draft') !== null ? $this->cms->node->working($uid) : null;
 		$locales = $this->context->locales();
 
-		Transaction::run($this->context->db, function () use ($inner, $patch, $actor, $working, $uid, $locales): void {
+		$this->context->db->transaction(function () use ($inner, $patch, $actor, $working, $uid, $locales): void {
 			$live = $this->patched($inner, $patch);
 
 			if ($working === null) {

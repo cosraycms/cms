@@ -18,7 +18,6 @@ use Cosray\Tests\Fixtures\Queue\RecordingJob;
 use Cosray\Tests\Fixtures\Queue\RejectedJob;
 use Cosray\Tests\Fixtures\RecordingLogger;
 use Cosray\Tests\IntegrationTestCase;
-use Cosray\Util\Transaction;
 use stdClass;
 
 /**
@@ -54,7 +53,7 @@ final class QueueTest extends IntegrationTestCase
 	public function testAJobPushedInWorkThatIsUndoneIsNeverQueued(): void
 	{
 		try {
-			Transaction::run($this->db(), function (): void {
+			$this->db()->transaction(function (): void {
 				$this->queue->push(RecordingJob::class);
 
 				throw new RuntimeException('The submission was invalid');
