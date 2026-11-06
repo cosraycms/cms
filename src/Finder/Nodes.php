@@ -451,7 +451,7 @@ final class Nodes implements Iterator
 		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active.
 		if ($this->activeUrl ?? $this->fulltext !== null) {
 			$params['active_url'] = true;
-			$params['url_locales'] = json_encode($this->localeIds(), JSON_THROW_ON_ERROR);
+			$params['url_locales'] = $this->localeIds();
 			$params['routable'] = $this->builtins['routable'];
 		}
 

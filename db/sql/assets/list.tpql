@@ -28,7 +28,7 @@ WHERE
 			WHEN mime LIKE 'audio/%' THEN 'audio'
 			ELSE 'document'
 		END
-	) IN (SELECT jsonb_array_elements_text(:kinds::jsonb))
+	) IN :kinds
 <?php endif ?>
 <?php if (isset($q)) : ?>
 	AND concat_ws(

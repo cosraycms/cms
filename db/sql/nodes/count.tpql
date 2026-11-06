@@ -27,7 +27,7 @@ WHERE
 		SELECT FROM /*:cms.prefix:*/url_paths public_path
 		WHERE public_path.node = n.node AND public_path.inactive IS NULL
 			AND public_path.path <> ''
-			AND public_path.locale IN (SELECT jsonb_array_elements_text(:url_locales::jsonb))
+			AND public_path.locale IN :url_locales
 	)
 <?php endif ?>
 <?php if (isset($deleted)) : ?>

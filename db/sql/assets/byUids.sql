@@ -15,4 +15,4 @@ SELECT
 FROM
 	/*:cms.prefix:*/assets
 WHERE
-	uid IN (SELECT jsonb_array_elements_text(:uids::jsonb));
+	uid IN :uids;

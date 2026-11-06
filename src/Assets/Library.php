@@ -60,7 +60,7 @@ final class Library
 		$list = $this->list($kinds, $q, $since, self::LIMIT, $offset, $status);
 		$counts = array_fill_keys(self::KINDS, 0);
 
-		foreach ($this->db->assets->counts($this->match('', $q, $since, $status))->all() as $row) {
+		foreach ($this->db->assets->counts($this->match([], $q, $since, $status))->all() as $row) {
 			$counts[(string) $row['kind']] = (int) $row['total'];
 		}
 
@@ -89,7 +89,7 @@ final class Library
 	): array {
 		$kinds = self::filterKinds($kinds);
 		$args = [
-			...$this->match($kinds === [] ? '' : (string) json_encode($kinds), $q, $since, $status),
+			...$this->match($kinds, $q, $since, $status),
 			'limit' => $limit,
 			'offset' => $offset,
 		];
@@ -102,12 +102,15 @@ final class Library
 		];
 	}
 
-	/** @return array<string, string> */
-	private function match(string $kinds, string $q, ?string $since, string $status): array
+	/**
+	 * @param list<string> $kinds
+	 * @return array<string, string|list<string>>
+	 */
+	private function match(array $kinds, string $q, ?string $since, string $status): array
 	{
 		$args = [];
 
-		if ($kinds !== '') {
+		if ($kinds !== []) {
 			$args['kinds'] = $kinds;
 		}
 

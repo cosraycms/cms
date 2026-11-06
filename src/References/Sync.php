@@ -27,14 +27,14 @@ final class Sync
 		if ($refs['assets'] !== []) {
 			$this->db->references->insertAssets([
 				...$owner,
-				'uids' => json_encode($refs['assets']),
+				'uids' => $refs['assets'],
 			])->run();
 		}
 
 		if ($refs['nodes'] !== []) {
 			$this->db->references->insertNodes([
 				...$owner,
-				'uids' => json_encode($refs['nodes']),
+				'uids' => $refs['nodes'],
 			])->run();
 		}
 	}

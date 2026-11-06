@@ -12,5 +12,5 @@ SELECT
 FROM
 	/*:cms.prefix:*/nodes n
 WHERE
-	n.uid IN (SELECT jsonb_array_elements_text(:uids::jsonb))
+	n.uid IN :uids
 ON CONFLICT DO NOTHING;
