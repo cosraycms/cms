@@ -215,7 +215,7 @@ describe('cosray host', () => {
 		row.setAttribute('data-meta-owner', '');
 		row.innerHTML =
 			'<div data-meta-owner><div class="body"></div></div>' +
-			'<dialog data-meta>' +
+			'<dialog data-dialog="meta">' +
 			'<div data-settings-slot="cover"></div><div data-settings-slot="image"></div>' +
 			'</dialog>';
 		document.body.append(row);
@@ -231,7 +231,7 @@ describe('cosray host', () => {
 	it('leaves settings unset when no owner offers a slot', async () => {
 		const wrapper = document.createElement('div');
 		wrapper.setAttribute('data-meta-owner', '');
-		wrapper.innerHTML = '<dialog data-meta></dialog>';
+		wrapper.innerHTML = '<dialog data-dialog="meta"></dialog>';
 		document.body.append(wrapper);
 		const element = host({ value: {}, field: { name: 'image' } }, {}, wrapper);
 

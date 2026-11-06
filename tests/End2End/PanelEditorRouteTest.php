@@ -193,18 +193,21 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			'//select[@name="' . $en . '[0][meta][padding][zxx]"]/option[@value="m"][@selected]',
 			$html,
 		);
-		$this->assertHtmlNodeExists('//div[@data-field="contentBlocks"]/label//button[@data-meta-open]', $html);
 		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-meta]'
+			'//div[@data-field="contentBlocks"]/label//button[@data-dialog-open="meta"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]'
 				. '//select[@name="content[contentBlocks][meta][gap][zxx]"]/option[@value="s"][@selected]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-meta]//input[@type="checkbox"][@data-gap-split][not(@checked)]',
+			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]//input[@type="checkbox"][@data-gap-split][not(@checked)]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//div[@data-field="contentBlocks"]/dialog[@data-meta]//div[@data-gap-separate][@hidden]'
+			'//div[@data-field="contentBlocks"]/dialog[@data-dialog="meta"]//div[@data-gap-separate][@hidden]'
 				. '/select[@name="content[contentBlocks][meta][rowGap][zxx]"]',
 			$html,
 		);
@@ -224,7 +227,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeMissing(
-			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]//div[contains(@class, "cms-field")]//*[@data-meta-open]',
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]//div[contains(@class, "cms-field")]//*[@data-dialog-open="meta"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
@@ -233,7 +236,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]/div/dialog[@data-meta]'
+			'//template[@data-repeater-template="Cosray\\Block\\Youtube"]/div/dialog[@data-dialog="meta"]'
 				. '//input[@name="'
 				. $en
 				. '[__i__][fields][video][meta][aspectRatioX][zxx]"]',
@@ -242,7 +245,7 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		// An element sub-field gets a slot in the block's dialog for the
 		// controls it keeps out of the content.
 		$this->assertHtmlNodeExists(
-			'//template[@data-repeater-template="Cosray\\Block\\RichText"]/div/dialog[@data-meta]'
+			'//template[@data-repeater-template="Cosray\\Block\\RichText"]/div/dialog[@data-dialog="meta"]'
 				. '//*[@data-settings-slot="text"]',
 			$html,
 		);
@@ -612,8 +615,8 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertStringContainsString('type="time"', $html);
 
 		// The styled fixture field exposes meta editing through a dialog.
-		$this->assertStringContainsString('data-meta-open', $html);
-		$this->assertHtmlNodeExists('//dialog[@data-meta]', $html);
+		$this->assertStringContainsString('data-dialog-open="meta"', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-dialog="meta"]', $html);
 		$this->assertStringContainsString('name="content[styled][meta][cssClass][zxx]"', $html);
 		$this->assertStringContainsString('name="content[styled][meta][tone][zxx]"', $html);
 	}

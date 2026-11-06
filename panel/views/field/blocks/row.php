@@ -138,7 +138,7 @@ $retype = count($blockTypes) > 1;
 				<button
 					type="button"
 					class="gear"
-					data-meta-open
+					data-dialog-open="meta"
 					aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 					title="<?= $this->escape(__('field:block-settings')) ?>">
 					<?= \Cosray\Panel\Icon::render('pencil') ?>
@@ -267,8 +267,7 @@ $retype = count($blockTypes) > 1;
 		</div>
 	</div>
 	<?php if ($settings): ?>
-		<dialog class="cms-modal" data-size="compact" data-meta>
-			<?php $this->include('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
+		<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
 			<div class="modal-body cms-settings">
 			<?php if ($columns > 1) {
 				$this->include('field/blocks/layout', [
@@ -308,6 +307,6 @@ $retype = count($blockTypes) > 1;
 				<div class="cms-settings-slot" data-settings-slot="<?= $this->escape($subName) ?>"></div>
 			<?php endforeach ?>
 			</div>
-		</dialog>
+		<?php $this->end() ?>
 	<?php endif ?>
 </div>

@@ -220,7 +220,6 @@ return [
 		'field:block-settings' => 'Blokinstellingen',
 		'field:change-type' => 'Bloktype wijzigen',
 		'field:change-type-confirm' => 'Bloktype wijzigen? De inhoud van het blok wordt verwijderd.',
-		'field:close' => 'Sluiten',
 		'field:colspan' => 'Breedte',
 		'field:column' => 'Kolom',
 		'field:column-gap' => 'Kolomafstand',

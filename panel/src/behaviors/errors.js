@@ -1,3 +1,4 @@
+import { nearestDialog } from '../lib/dialogs.js';
 import { selectContentLocale } from './content-locales.js';
 import { revealInspector } from './inspector.js';
 import { revealTab } from './tabs.js';
@@ -113,7 +114,7 @@ function resolve(form, path) {
  * @returns {Element}
  */
 function wrapper(control) {
-	const owner = control.closest('dialog[data-meta]')?.closest('[data-meta-owner]');
+	const owner = control.closest('dialog[data-dialog="meta"]')?.closest('[data-meta-owner]');
 
 	return owner ?? control.closest('.cms-field') ?? control.parentElement ?? control;
 }
@@ -306,8 +307,8 @@ function mark(control, message, locale) {
 	}
 
 	// An issue inside the meta dialog is invisible until opened.
-	if (control.closest('dialog[data-meta]')) {
-		field.querySelector('[data-meta-open]')?.classList.add('has-error');
+	if (control.closest('dialog[data-dialog="meta"]')) {
+		field.querySelector('[data-dialog-open="meta"]')?.classList.add('has-error');
 	}
 
 	const form = field.closest('form');
@@ -408,18 +409,17 @@ function activate(event) {
 		}
 	}
 
-	const dialog = control.closest('dialog[data-meta]');
+	const dialog = control.closest('dialog[data-dialog]');
 
 	if (dialog instanceof HTMLDialogElement && !dialog.open) {
-		/** @type {HTMLElement | null} */ (field.querySelector('[data-meta-open]'))?.click();
-	}
+		const triggers = dialog.parentElement?.querySelectorAll('[data-dialog-open]') ?? [];
+		const trigger = [...triggers].find(
+			(element) =>
+				element instanceof HTMLElement &&
+				nearestDialog(element, element.dataset.dialogOpen ?? '') === dialog,
+		);
 
-	const paths = control.closest('dialog[data-paths-dialog]');
-
-	if (paths instanceof HTMLDialogElement && !paths.open) {
-		/** @type {HTMLElement | null} */ (
-			paths.closest('[data-paths]')?.querySelector('[data-paths-open]')
-		)?.click();
+		/** @type {HTMLElement | undefined} */ (trigger)?.click();
 	}
 
 	if (field instanceof HTMLElement) {

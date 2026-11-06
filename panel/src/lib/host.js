@@ -163,7 +163,9 @@ export class CosrayHost extends HTMLElement {
 			owner;
 			owner = owner.parentElement?.closest('[data-meta-owner]') ?? null
 		) {
-			const slots = owner.querySelectorAll(':scope > dialog[data-meta] [data-settings-slot]');
+			const slots = owner.querySelectorAll(
+				':scope > dialog[data-dialog="meta"] [data-settings-slot]',
+			);
 
 			for (const slot of slots) {
 				if (slot instanceof HTMLElement && slot.dataset.settingsSlot === name) {

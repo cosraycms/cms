@@ -183,14 +183,14 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 
 			<section class="section" data-section="dialogs">
 				<h2>Dialogs and action menus</h2>
-				<p class="note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus. These samples never submit.</p>
+				<p class="note">The shared PHP/TypeScript shell, including menu-to-dialog focus and nested menus, and the two questions confirm() and alert() ask. These samples never submit.</p>
 				<form data-meta-owner onsubmit="event.preventDefault()">
 					<div class="sample">
 						<?php foreach (['start', 'center', 'end'] as $align): ?>
 							<button type="button" class="cms-button secondary"
 								popovertarget="sample-actions-<?= $align ?>" aria-haspopup="menu">Actions (<?= $align ?>)</button>
 							<div id="sample-actions-<?= $align ?>" class="cms-action-menu" popover="auto" data-action-menu data-align="<?= $align ?>">
-								<button type="button" data-meta-open><?= \Cosray\Panel\Icon::render('gear') ?> Open dialog</button>
+								<button type="button" data-dialog-open="meta"><?= \Cosray\Panel\Icon::render('gear') ?> Open dialog</button>
 								<a href="#sample-icons">Icon examples</a>
 								<hr />
 								<button type="button" disabled>Unavailable action</button>
@@ -198,27 +198,42 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 							</div>
 						<?php endforeach ?>
 					</div>
-					<dialog class="cms-modal" data-size="compact" data-meta>
-						<?php $this->include('component/modal-header', ['title' => 'Shared dialog']) ?>
+					<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => 'Shared dialog']) ?>
 						<div class="modal-body">
 							<label for="sample-dialog-name">Name</label>
 							<input id="sample-dialog-name" class="cms-input" data-dialog-focus value="Live setting" />
 							<div data-meta-owner>
 								<button type="button" class="cms-button secondary" popovertarget="sample-nested-actions" aria-haspopup="menu">Nested actions</button>
 								<div id="sample-nested-actions" class="cms-action-menu" popover="auto" data-action-menu>
-									<button type="button" data-meta-open>Open nested dialog</button>
+									<button type="button" data-dialog-open="meta">Open nested dialog</button>
 									<button type="button" disabled>Unavailable action</button>
 								</div>
-								<dialog class="cms-modal" data-size="compact" data-meta>
-									<?php $this->include('component/modal-header', ['title' => 'Nested dialog']) ?>
+								<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => 'Nested dialog']) ?>
 									<div class="modal-body">Escape returns to the underlying dialog.</div>
 									<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
-								</dialog>
+								<?php $this->end() ?>
 							</div>
 						</div>
 						<div class="modal-footer"><button type="button" class="cms-button secondary" data-dialog-close>Close</button></div>
-					</dialog>
+					<?php $this->end() ?>
 				</form>
+				<div class="sample" data-sample="questions">
+					<button type="button" class="cms-button danger" data-dialog-open="sample-confirm">Destructive question</button>
+					<button type="button" class="cms-button secondary" data-dialog-open="sample-alert">Notice</button>
+					<?php $this->component('component/dialog', ['name' => 'sample-confirm', 'size' => 'compact', 'title' => 'Delete file']) ?>
+						<div class="modal-body cms-confirm"><p class="question">Delete the file "report.pdf"?</p></div>
+						<footer class="modal-footer">
+							<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus>Cancel</button>
+							<button type="button" class="cms-button danger solid" data-dialog-close>Delete file</button>
+						</footer>
+					<?php $this->end() ?>
+					<?php $this->component('component/dialog', ['name' => 'sample-alert', 'size' => 'compact', 'title' => 'Error']) ?>
+						<div class="modal-body"><p>Only one file can be added here.</p></div>
+						<footer class="modal-footer">
+							<button type="button" class="cms-button primary" data-dialog-close data-dialog-focus>OK</button>
+						</footer>
+					<?php $this->end() ?>
+				</div>
 			</section>
 
 			<section class="section" id="sample-icons" data-section="icons">

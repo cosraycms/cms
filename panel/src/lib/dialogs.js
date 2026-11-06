@@ -31,6 +31,26 @@ function usable(element) {
 	);
 }
 
+/**
+ * The dialog of that `data-dialog` name an ancestor holds as a direct
+ * child, the nearest one first.
+ *
+ * @param {Element} from
+ * @param {string} name
+ * @returns {HTMLDialogElement | null}
+ */
+export function nearestDialog(from, name) {
+	for (let at = from.parentElement; at; at = at.parentElement) {
+		for (const child of at.children) {
+			if (child instanceof HTMLDialogElement && child.dataset.dialog === name) {
+				return child;
+			}
+		}
+	}
+
+	return null;
+}
+
 /** @param {HTMLDialogElement} dialog */
 export function closeDialog(dialog) {
 	const active = dialogs.get(dialog);

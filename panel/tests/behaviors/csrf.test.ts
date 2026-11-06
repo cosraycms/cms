@@ -17,7 +17,7 @@ function configure(request: Request): Request {
 }
 
 function dialog(): HTMLDialogElement {
-	return document.querySelector<HTMLDialogElement>('dialog[data-csrf-expired]')!;
+	return document.querySelector<HTMLDialogElement>('dialog[data-dialog="csrf-expired"]')!;
 }
 
 describe('csrf behavior', () => {
@@ -25,7 +25,7 @@ describe('csrf behavior', () => {
 
 	beforeEach(() => {
 		document.head.innerHTML = '<meta name="csrf-token" content="token-a">';
-		document.body.innerHTML = `<dialog data-csrf-expired>
+		document.body.innerHTML = `<dialog data-dialog="csrf-expired">
 			<p>Out of date</p>
 			<button type="button" data-dialog-close>Close</button>
 			<button type="button" data-csrf-reload>Reload</button>

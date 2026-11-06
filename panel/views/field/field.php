@@ -84,7 +84,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 			<?php endif ?>
 		</div>
 		<?php if (is_array($metaControl)): ?>
-			<button type="button" class="meta-button" data-meta-open>
+			<button type="button" class="meta-button" data-dialog-open="meta">
 				<?= escape(__('field:meta')) ?>
 			</button>
 		<?php endif ?>
@@ -179,10 +179,11 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 		<?php endif ?>
 	</div>
 	<?php if (is_array($metaControl)): ?>
-		<dialog class="cms-modal" data-size="compact" data-meta>
-			<?php $this->include('component/modal-header', [
-				'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
-			]) ?>
+		<?php $this->component('component/dialog', [
+			'name' => 'meta',
+			'size' => 'compact',
+			'title' => ($field['label'] ?? $fieldName) . ' — ' . __('field:meta'),
+		]) ?>
 			<div class="modal-body cms-settings">
 			<?php // The blocks field renders its gap group with the split toggle. ?>
 			<?php $this->include($controlName === 'blocks' ? 'field/blocks/meta' : 'field/meta', [
@@ -194,6 +195,6 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 				'columns' => (int) (($control['props'] ?? [])['columns'] ?? 1),
 			]) ?>
 			</div>
-		</dialog>
+		<?php $this->end() ?>
 	<?php endif ?>
 </div>

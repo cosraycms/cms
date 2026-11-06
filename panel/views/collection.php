@@ -295,8 +295,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 	</div>
 
 	<?php if ($bulk): ?>
-		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="delete">
-			<?php $this->include('component/modal-header', ['title' => __('bulk:delete')]) ?>
+		<?php $this->component('component/dialog', ['name' => 'bulk-delete', 'size' => 'compact', 'title' => __('bulk:delete')]) ?>
 			<div class="modal-body cms-confirm">
 			<p class="question" data-bulk-question></p>
 			<?php // data-bulk-gate: deleting a parent without this opt-in would
@@ -321,10 +320,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?= escape(__('bulk:delete')) ?>
 				</button>
 			</footer>
-		</dialog>
+		<?php $this->end() ?>
 
-		<dialog class="cms-modal" data-size="compact" data-bulk-dialog="duplicate">
-			<?php $this->include('component/modal-header', ['title' => __('bulk:duplicate')]) ?>
+		<?php $this->component('component/dialog', ['name' => 'bulk-duplicate', 'size' => 'compact', 'title' => __('bulk:duplicate')]) ?>
 			<div class="modal-body cms-confirm">
 			<p class="question" data-bulk-question></p>
 			<?php // No data-bulk-gate: duplicating a parent without its children
@@ -348,11 +346,10 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 					<?= escape(__('bulk:duplicate')) ?>
 				</button>
 			</footer>
-		</dialog>
+		<?php $this->end() ?>
 
 		<?php if ($page->bulk['showPublished']): ?>
-			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="publish">
-				<?php $this->include('component/modal-header', ['title' => __('bulk:publish')]) ?>
+			<?php $this->component('component/dialog', ['name' => 'bulk-publish', 'size' => 'compact', 'title' => __('bulk:publish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p class="question" data-bulk-question></p>
 				<label class="children" data-bulk-children hidden>
@@ -379,10 +376,9 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 						<?= escape(__('bulk:publish')) ?>
 					</button>
 				</footer>
-			</dialog>
+			<?php $this->end() ?>
 
-			<dialog class="cms-modal" data-size="compact" data-bulk-dialog="unpublished">
-				<?php $this->include('component/modal-header', ['title' => __('bulk:unpublish')]) ?>
+			<?php $this->component('component/dialog', ['name' => 'bulk-unpublished', 'size' => 'compact', 'title' => __('bulk:unpublish')]) ?>
 				<div class="modal-body cms-confirm">
 				<p class="question" data-bulk-question></p>
 				<label class="children" data-bulk-children hidden>
@@ -405,7 +401,7 @@ $columns .= ' max-content' . ($hasRowActions ? ' max-content' : '');
 						<?= escape(__('bulk:unpublish')) ?>
 					</button>
 				</footer>
-			</dialog>
+			<?php $this->end() ?>
 		<?php endif ?>
 	<?php endif ?>
 </div>

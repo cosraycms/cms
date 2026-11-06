@@ -26,7 +26,7 @@ function attach(event) {
 }
 
 function expired() {
-	const dialog = document.querySelector('dialog[data-csrf-expired]');
+	const dialog = document.querySelector('dialog[data-dialog="csrf-expired"]');
 
 	if (dialog instanceof HTMLDialogElement) {
 		openDialog(dialog);

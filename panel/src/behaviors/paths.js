@@ -1,6 +1,5 @@
 /** @import { FallbackLocale } from '../lib/fallback.js' */
 
-import { openDialog } from '../lib/dialogs.js';
 import { localeTitle, resolveFallback } from '../lib/fallback.js';
 
 const SECTION = '[data-paths]';
@@ -178,18 +177,6 @@ function click(event) {
 	const target = event.target;
 
 	if (!(target instanceof Element)) {
-		return;
-	}
-
-	const open = /** @type {HTMLElement | null} */ (target.closest('[data-paths-open]'));
-
-	if (open) {
-		const dialog = open.closest(SECTION)?.querySelector(':scope > dialog[data-paths-dialog]');
-
-		if (dialog instanceof HTMLDialogElement) {
-			openDialog(dialog, { opener: open });
-		}
-
 		return;
 	}
 

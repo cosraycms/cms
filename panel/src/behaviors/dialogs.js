@@ -1,7 +1,11 @@
-// Asks the questions of hx-confirm in a panel dialog.
+// Opens server-rendered dialogs and asks the questions of hx-confirm in a
+// panel dialog. A `data-dialog-open` trigger opens the nearest dialog of
+// that name, the first one an ancestor holds as a direct child, so a
+// block's settings button never reaches the dialog of the field around it.
 
 /** @import { Question } from '../lib/modal.js' */
 
+import { nearestDialog, openDialog } from '../lib/dialogs.js';
 import { confirm, question } from '../lib/modal.js';
 
 /**
@@ -33,6 +37,28 @@ export function ask(ctx, asked) {
 }
 
 /**
+ * @param {MouseEvent} event
+ */
+function click(event) {
+	const trigger =
+		event.target instanceof Element ? event.target.closest('[data-dialog-open]') : null;
+
+	if (!(trigger instanceof HTMLElement)) {
+		return;
+	}
+
+	const dialog = nearestDialog(trigger, trigger.dataset.dialogOpen ?? '');
+
+	if (dialog) {
+		// A trigger inside a closed action menu cannot take focus back.
+		openDialog(dialog, {
+			opener: trigger.checkVisibility({ visibilityProperty: true }) ? trigger : undefined,
+			owner: trigger,
+		});
+	}
+}
+
+/**
  * @param {Event} event
  */
 function confirmRequest(event) {
@@ -58,7 +84,11 @@ function confirmRequest(event) {
 
 /** @returns {() => void} */
 export function install() {
+	document.addEventListener('click', click);
 	document.addEventListener('htmx:confirm', confirmRequest);
 
-	return () => document.removeEventListener('htmx:confirm', confirmRequest);
+	return () => {
+		document.removeEventListener('click', click);
+		document.removeEventListener('htmx:confirm', confirmRequest);
+	};
 }

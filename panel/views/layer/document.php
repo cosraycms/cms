@@ -37,18 +37,17 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 <body hx-boost:inherited="true">
 	<?= $this->slot() ?>
 
-	<dialog class="cms-modal" data-size="compact" data-csrf-expired>
-		<?php $this->include('component/modal-header', ['title' => __('auth:expired-title')]) ?>
+	<?php $this->component('component/dialog', ['name' => 'csrf-expired', 'size' => 'compact', 'title' => __('auth:expired-title')]) ?>
 		<div class="modal-body">
 			<p><?= escape(__('auth:csrf-expired')) ?></p>
 		</div>
 		<footer class="modal-footer">
-			<button type="button" class="cms-button secondary" data-dialog-close><?= escape(__('field:close')) ?></button>
-			<button type="button" class="cms-button primary solid" data-csrf-reload data-dialog-focus><?= escape(
+			<button type="button" class="cms-button secondary" data-dialog-close><?= escape(__('common:close')) ?></button>
+			<button type="button" class="cms-button primary" data-csrf-reload data-dialog-focus><?= escape(
 				__('auth:expired-reload'),
 			) ?></button>
 		</footer>
-	</dialog>
+	<?php $this->end() ?>
 
 	<script id="verba-catalog" type="application/json"><?= json_encode($catalog, $jsonFlags) ?></script>
 

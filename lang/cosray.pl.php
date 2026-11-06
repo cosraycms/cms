@@ -240,7 +240,6 @@ return [
 		'field:block-settings' => 'Ustawienia bloku',
 		'field:change-type' => 'Zmień typ bloku',
 		'field:change-type-confirm' => 'Zmienić typ bloku? Jego zawartość zostanie usunięta.',
-		'field:close' => 'Zamknij',
 		'field:colspan' => 'Szerokość',
 		'field:column' => 'Kolumna',
 		'field:column-gap' => 'Odstęp między kolumnami',

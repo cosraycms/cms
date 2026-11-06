@@ -217,7 +217,6 @@ return [
 		'field:block-settings' => 'Definições do bloco',
 		'field:change-type' => 'Alterar tipo de bloco',
 		'field:change-type-confirm' => 'Alterar o tipo de bloco? O respetivo conteúdo será removido.',
-		'field:close' => 'Fechar',
 		'field:colspan' => 'Largura',
 		'field:column' => 'Coluna',
 		'field:column-gap' => 'Espaçamento entre colunas',

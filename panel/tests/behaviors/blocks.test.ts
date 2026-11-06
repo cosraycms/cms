@@ -82,7 +82,7 @@ function editor(
 				<input type="hidden" name="${NAME}[0][uid]" value="b1">
 				${hidden(0, layout)}
 				<div class="chrome"><span class="grip" data-repeater-grip tabindex="0"></span></div>
-				<dialog data-meta>
+				<dialog data-dialog="meta">
 					<div class="layout">
 						${number('colspan', layout.colspan, bounds.min, wall - layout.col)}
 						${number('rowspan', layout.rowspan, 1, MAX_ROWSPAN)}
@@ -510,7 +510,7 @@ describe('blocks gap settings', () => {
 		</div>`;
 
 		document.body.innerHTML = `<div class="cms-field" data-meta-owner data-field="body">
-			<dialog data-meta>
+			<dialog data-dialog="meta">
 				<div class="fields" data-gap-scope>
 					${select('gap', gap)}
 					<label class="field split">
@@ -586,11 +586,11 @@ describe('blocks spacing mirror', () => {
 				<div data-repeater-list>
 					<div class="block" data-repeater-row data-meta-owner>
 						<input type="hidden" name="${NAME}[0][layout][colspan]" value="6" data-layout="colspan">
-						<dialog data-meta>${select(`${NAME}[0][meta][padding][zxx]`, '')}</dialog>
+						<dialog data-dialog="meta">${select(`${NAME}[0][meta][padding][zxx]`, '')}</dialog>
 					</div>
 				</div>
 			</div>
-			<dialog data-meta>
+			<dialog data-dialog="meta">
 				${select('content[body][meta][gap][zxx]', '')}
 				${select('content[body][meta][rowGap][zxx]', '')}
 				${select('content[body][meta][columnGap][zxx]', '')}

@@ -220,7 +220,6 @@ return [
 		'field:block-settings' => 'Impostazioni blocco',
 		'field:change-type' => 'Cambia tipo di blocco',
 		'field:change-type-confirm' => 'Cambiare il tipo di blocco? Il blocco verrà svuotato.',
-		'field:close' => 'Chiudi',
 		'field:colspan' => 'Larghezza',
 		'field:column' => 'Colonna',
 		'field:column-gap' => 'Spaziatura tra colonne',

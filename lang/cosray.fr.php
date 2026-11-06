@@ -217,7 +217,6 @@ return [
 		'field:block-settings' => 'Paramètres du bloc',
 		'field:change-type' => 'Changer le type de bloc',
 		'field:change-type-confirm' => 'Changer le type de bloc ? Son contenu sera supprimé.',
-		'field:close' => 'Fermer',
 		'field:colspan' => 'Largeur',
 		'field:column' => 'Colonne',
 		'field:column-gap' => 'Espacement des colonnes',

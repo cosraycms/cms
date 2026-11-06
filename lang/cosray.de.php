@@ -220,7 +220,6 @@ return [
 		'field:block-settings' => 'Blockeinstellungen',
 		'field:change-type' => 'Blocktyp ändern',
 		'field:change-type-confirm' => 'Blocktyp ändern? Der Inhalt des Blocks wird entfernt.',
-		'field:close' => 'Schließen',
 		'field:colspan' => 'Breite',
 		'field:column' => 'Spalte',
 		'field:column-gap' => 'Spaltenabstand',

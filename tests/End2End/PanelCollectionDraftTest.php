@@ -62,7 +62,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="publish"]//label[@data-bulk-option]/input[@name="changes"]',
+			'//dialog[@data-dialog="bulk-publish"]//label[@data-bulk-option]/input[@name="changes"]',
 			$html,
 		);
 	}

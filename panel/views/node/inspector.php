@@ -188,7 +188,7 @@ $publishedLabel = __('editor:published-label');
 						data-note-none="<?= escape(__('editor:path-none')) ?>">
 						<div class="bar">
 							<h2 class="heading"><?= escape(__('editor:paths')) ?></h2>
-							<button type="button" class="cms-button secondary small" data-paths-open>
+							<button type="button" class="cms-button secondary small" data-dialog-open="paths">
 								<?= escape(__('editor:paths-edit')) ?>
 							</button>
 						</div>
@@ -205,8 +205,7 @@ $publishedLabel = __('editor:published-label');
 							<?php endforeach ?>
 						</dl>
 
-						<dialog class="cms-modal" data-paths-dialog>
-							<?php $this->include('component/modal-header', ['title' => __('editor:paths')]) ?>
+						<?php $this->component('component/dialog', ['name' => 'paths', 'title' => __('editor:paths')]) ?>
 							<div class="modal-body cms-settings">
 								<?php foreach ($locales as $locale): ?>
 									<div class="field">
@@ -237,7 +236,7 @@ $publishedLabel = __('editor:published-label');
 									<?= escape(__('editor:paths-done')) ?>
 								</button>
 							</footer>
-						</dialog>
+						<?php $this->end() ?>
 
 						<?php if (is_string($pathsUrl)): ?>
 							<?php $this->include('editor-paths', [

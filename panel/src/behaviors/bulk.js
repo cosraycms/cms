@@ -83,7 +83,7 @@ function sync() {
  */
 function confirmSelection(name, opener) {
 	const dialog = /** @type {HTMLDialogElement | null} */ (
-		document.querySelector(`dialog[data-bulk-dialog="${name}"]`)
+		document.querySelector(`dialog[data-dialog="bulk-${name}"]`)
 	);
 	const picked = selected();
 

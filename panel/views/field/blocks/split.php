@@ -73,7 +73,7 @@ $label = __('field:split-block');
 			<button
 				type="button"
 				class="gear"
-				data-meta-open
+				data-dialog-open="meta"
 				aria-label="<?= $this->escape(__('field:block-settings')) ?>"
 				title="<?= $this->escape(__('field:block-settings')) ?>">
 				<?= \Cosray\Panel\Icon::render('pencil') ?>
@@ -141,8 +141,7 @@ $label = __('field:split-block');
 			]);
 		} ?>
 	</div>
-	<dialog class="cms-modal" data-size="compact" data-meta>
-		<?php $this->include('component/modal-header', ['title' => $label . ' — ' . __('field:block-settings')]) ?>
+	<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
 		<div class="modal-body cms-settings">
 			<?php $this->include('field/blocks/layout', [
 				'layout' => $layout->array(),
@@ -160,5 +159,5 @@ $label = __('field:split-block');
 				]);
 			} ?>
 		</div>
-	</dialog>
+	<?php $this->end() ?>
 </div>

@@ -38,7 +38,7 @@ beforeEach(() => {
 				</tr>
 			</tbody>
 		</table>
-		<dialog data-bulk-dialog="delete">
+		<dialog data-dialog="bulk-delete">
 			<p data-bulk-question></p>
 			<label data-bulk-children data-bulk-gate hidden>
 				<input type="checkbox" name="children" form="collection-bulk" value="1" />
@@ -46,7 +46,7 @@ beforeEach(() => {
 			<button type="button" data-dialog-close data-dialog-focus>Cancel</button>
 			<button type="submit" form="collection-bulk" formaction="/bulk/delete" data-bulk-confirm>Delete</button>
 		</dialog>
-		<dialog data-bulk-dialog="duplicate">
+		<dialog data-dialog="bulk-duplicate">
 			<p data-bulk-question></p>
 			<label data-bulk-children hidden>
 				<input type="checkbox" name="children" form="collection-bulk" value="1" />
@@ -150,7 +150,7 @@ describe('bulk selection', () => {
 		box('c').click();
 		query('[data-bulk-open]').click();
 
-		const dialog = query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]');
+		const dialog = query<HTMLDialogElement>('dialog[data-dialog="bulk-delete"]');
 
 		expect(dialog.open).toBe(true);
 		expect(query('[data-bulk-question]').textContent).toBe('Delete the 2 selected entries?');
@@ -163,7 +163,7 @@ describe('bulk selection', () => {
 	it('does not open the dialog without a selection', () => {
 		query('[data-bulk-open]').click();
 
-		expect(query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]').open).toBe(false);
+		expect(query<HTMLDialogElement>('dialog[data-dialog="bulk-delete"]').open).toBe(false);
 	});
 
 	it('offers the children option only when a selected row has children', () => {
@@ -208,7 +208,7 @@ describe('bulk selection', () => {
 		box('a').click();
 		query('[data-bulk-open="duplicate"]').click();
 
-		const dialog = query<HTMLDialogElement>('dialog[data-bulk-dialog="duplicate"]');
+		const dialog = query<HTMLDialogElement>('dialog[data-dialog="bulk-duplicate"]');
 		const children = dialog.querySelector<HTMLElement>('[data-bulk-children]');
 		const confirm = dialog.querySelector<HTMLButtonElement>('[data-bulk-confirm]');
 		const checkbox = dialog.querySelector<HTMLInputElement>('[data-bulk-children] input');
@@ -238,7 +238,7 @@ describe('bulk selection', () => {
 		box('b').click();
 		const opener = query<HTMLButtonElement>('[data-bulk-open="delete"]');
 		opener.click();
-		const dialog = query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]');
+		const dialog = query<HTMLDialogElement>('dialog[data-dialog="bulk-delete"]');
 		expect(document.activeElement).toBe(dialog.querySelector('[data-dialog-focus]'));
 		if (path === 'button') query('[data-dialog-close]').click();
 		else dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
@@ -255,7 +255,7 @@ describe('bulk selection', () => {
 			expect(event.submitter?.getAttribute('formaction')).toBe('/bulk/delete');
 			expect(new FormData(form).getAll('nodes[]')).toEqual(['a']);
 			expect(new FormData(form).get('children')).toBe('1');
-			expect(query<HTMLDialogElement>('dialog[data-bulk-dialog="delete"]').open).toBe(false);
+			expect(query<HTMLDialogElement>('dialog[data-dialog="bulk-delete"]').open).toBe(false);
 		});
 		form.addEventListener('submit', submit);
 		box('a').click();

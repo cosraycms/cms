@@ -1,11 +1,6 @@
-import { openDialog } from '../lib/dialogs.js';
-
-// Editor chrome: the preview overlay's close button and the meta
-// dialogs. The overlay anchor is only emptied, never removed —
-// out-of-band swaps need the id to stay in the document. A meta button
-// opens the dialog of its nearest owner (the field wrapper, or a block
-// row inside a blocks field), so a row's gear never reaches the dialog
-// of the field around it.
+// Editor chrome: the preview overlay's close button. The overlay anchor
+// is only emptied, never removed — out-of-band swaps need the id to stay
+// in the document.
 
 /**
  * @param {Event} event
@@ -27,25 +22,6 @@ function onClick(event) {
 			overlay.replaceChildren();
 			overlay.removeAttribute('class');
 		}
-
-		return;
-	}
-
-	const metaOpen = /** @type {HTMLElement | null} */ (target.closest('[data-meta-open]'));
-
-	if (metaOpen) {
-		const dialog = metaOpen
-			.closest('[data-meta-owner]')
-			?.querySelector(':scope > dialog[data-meta]');
-
-		if (dialog instanceof HTMLDialogElement) {
-			openDialog(dialog, {
-				opener: metaOpen.checkVisibility({ visibilityProperty: true }) ? metaOpen : undefined,
-				owner: metaOpen,
-			});
-		}
-
-		return;
 	}
 }
 

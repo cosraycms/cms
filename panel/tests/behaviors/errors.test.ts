@@ -24,10 +24,10 @@ function editor(): void {
 			</div>
 			<div class="cms-field" data-field="styled">
 				<label class="label"><div>Styled</div>
-					<button type="button" class="meta-button" data-meta-open>Meta</button>
+					<button type="button" class="meta-button" data-dialog-open="meta">Meta</button>
 				</label>
 				<div class="control"><input name="content[styled][value][zxx]" type="text" /></div>
-				<dialog data-meta>
+				<dialog data-dialog="meta">
 					<input name="content[styled][meta][cssClass][zxx]" type="text" />
 				</dialog>
 			</div>
@@ -67,7 +67,7 @@ function editor(): void {
 				<div class="control">
 					<div data-repeater>
 						<div class="block" data-repeater-row data-meta-owner data-field="block">
-							<button type="button" class="gear" data-meta-open>Settings</button>
+							<button type="button" class="gear" data-dialog-open="meta">Settings</button>
 							<div class="body">
 								<div class="cms-field" data-field="video">
 									<div class="control">
@@ -75,7 +75,7 @@ function editor(): void {
 									</div>
 								</div>
 							</div>
-							<dialog data-meta>
+							<dialog data-dialog="meta">
 								<input name="content[blocks][value][zxx][0][meta][class][zxx]" type="text" />
 								<input
 									name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]"
@@ -93,8 +93,8 @@ function editor(): void {
 				</div>
 				<div id="panel-status" role="tabpanel">
 					<section data-paths>
-						<button type="button" data-paths-open>Edit</button>
-						<dialog data-paths-dialog>
+						<button type="button" data-dialog-open="paths">Edit</button>
+						<dialog data-dialog="paths">
 							<div class="field"><input name="paths[en]" data-path-locale="en" type="text" /></div>
 						</dialog>
 					</section>
@@ -268,9 +268,9 @@ describe('errors behavior', () => {
 			{ path: ['content', 'styled', 'meta', 'cssClass', 'zxx'], message: 'Class is invalid' },
 		]);
 
-		expect(field('styled').querySelector('[data-meta-open]')?.classList.contains('has-error')).toBe(
-			true,
-		);
+		expect(
+			field('styled').querySelector('[data-dialog-open="meta"]')?.classList.contains('has-error'),
+		).toBe(true);
 		expect(field('styled').getAttribute('data-invalid')).toBe('true');
 	});
 
@@ -385,7 +385,7 @@ describe('errors behavior', () => {
 	it('opens the meta dialog on summary click', () => {
 		let opened = 0;
 		const listener = (event: Event): void => {
-			if (event.target instanceof Element && event.target.closest('[data-meta-open]')) {
+			if (event.target instanceof Element && event.target.closest('[data-dialog-open="meta"]')) {
 				opened++;
 			}
 		};
@@ -438,7 +438,7 @@ describe('errors behavior', () => {
 	it('opens the paths dialog on summary click', () => {
 		let opened = 0;
 		const listener = (event: Event): void => {
-			if (event.target instanceof Element && event.target.closest('[data-paths-open]')) {
+			if (event.target instanceof Element && event.target.closest('[data-dialog-open="paths"]')) {
 				opened++;
 			}
 		};

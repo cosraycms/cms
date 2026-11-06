@@ -52,16 +52,16 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 			'//input[@type="checkbox" and @data-bulk-check and @name="nodes[]" and @value="bulk-markup-root" and @form="collection-bulk"]',
 			$html,
 		);
-		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="delete"]', $html);
-		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="publish"]', $html);
-		$this->assertHtmlNodeExists('//dialog[@data-bulk-dialog="unpublished"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-dialog="bulk-delete"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-dialog="bulk-publish"]', $html);
+		$this->assertHtmlNodeExists('//dialog[@data-dialog="bulk-unpublished"]', $html);
 		$this->assertHtmlNodeExists('//button[@type="button" and @data-bulk-open="publish"]', $html);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/publish?sort=title&dir=asc"]',
+			'//dialog[@data-dialog="bulk-publish"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/publish?sort=title&dir=asc"]',
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//dialog[@data-bulk-dialog="delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/delete?sort=title&dir=asc"]',
+			'//dialog[@data-dialog="bulk-delete"]//button[@data-bulk-confirm and @form="collection-bulk" and @formaction="/panel/collection/test-hierarchy/bulk/delete?sort=title&dir=asc"]',
 			$html,
 		);
 	}
@@ -528,7 +528,7 @@ final class PanelCollectionBulkTest extends End2EndTestCase
 
 		$this->assertResponseOk($response);
 		$html = $this->getHtmlResponse($response);
-		$this->assertStringContainsString('data-bulk-dialog="duplicate"', $html);
+		$this->assertStringContainsString('data-dialog="bulk-duplicate"', $html);
 		$this->assertStringContainsString('data-bulk-open="duplicate"', $html);
 		$this->assertStringContainsString(
 			'formaction="/panel/collection/test-hierarchy/bulk/duplicate?sort=title&amp;dir=asc"',

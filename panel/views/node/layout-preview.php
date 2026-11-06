@@ -62,7 +62,7 @@ $presets = [
 			title="<?= escape(__('editor:layout-preview-reload')) ?>">
 			<?= Icon::render('arrow-clockwise') ?>
 		</button>
-		<button type="button" class="modal-close" data-dialog-close aria-label="<?= escape(__('field:close')) ?>">
+		<button type="button" class="modal-close" data-dialog-close aria-label="<?= escape(__('common:close')) ?>">
 			<?= Icon::render('x-lg') ?>
 		</button>
 	</header>

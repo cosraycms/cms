@@ -19,7 +19,7 @@ function mount(values: Record<string, string>, generated: Record<string, string>
 				data-note-fallback="Uses the {language} path"
 				data-note-generated="Generated on save"
 				data-note-none="No path">
-				<button type="button" data-paths-open>Edit</button>
+				<button type="button" data-dialog-open="paths">Edit</button>
 				<dl>
 					${LOCALES.map(
 						(locale) => `
@@ -29,7 +29,7 @@ function mount(values: Record<string, string>, generated: Record<string, string>
 							</div>`,
 					).join('')}
 				</dl>
-				<dialog data-paths-dialog>
+				<dialog data-dialog="paths">
 					${LOCALES.map(
 						(locale) => `
 							<div class="field">
@@ -129,13 +129,5 @@ describe('paths behavior', () => {
 		document.dispatchEvent(new CustomEvent('htmx:after:swap'));
 
 		expect(suggestion('de')).toBe('/aktuelles/neu');
-	});
-
-	it('opens the dialog from the rail', () => {
-		mount({ de: '/aktuelles/titel' }, {});
-
-		document.querySelector<HTMLElement>('[data-paths-open]')!.click();
-
-		expect(document.querySelector<HTMLDialogElement>('dialog[data-paths-dialog]')!.open).toBe(true);
 	});
 });
