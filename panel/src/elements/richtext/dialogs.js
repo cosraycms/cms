@@ -10,6 +10,7 @@ import { icon } from '../../lib/icons.js';
 import { browseLibrary } from '../../lib/library-browser.js';
 import { RELS, safeHref } from '../../lib/link-url.js';
 import { __ } from '../../lib/locale.js';
+import { button, frame } from '../../lib/modal.js';
 import { panelBase } from '../../lib/runtime.js';
 
 /**
@@ -42,42 +43,6 @@ function create(tag, className, text) {
 	if (text !== undefined) element.textContent = text;
 
 	return element;
-}
-
-/**
- * @param {string} label
- * @param {'primary' | 'secondary'} variant
- * @param {() => void} onclick
- * @returns {HTMLButtonElement}
- */
-function button(label, variant, onclick) {
-	const element = document.createElement('button');
-	element.type = 'button';
-	element.className = `cms-button ${variant}`;
-	element.textContent = label;
-	element.addEventListener('click', onclick);
-
-	return element;
-}
-
-/**
- * The frame every dialog shares: a titled header, the body, a footer.
- *
- * @param {HTMLElement} host
- * @param {string} title
- * @param {HTMLElement[]} body
- * @param {HTMLElement[]} footer
- */
-function frame(host, title, body, footer) {
-	const header = create('header', 'modal-header');
-	const heading = create('h2', 'modal-title', title);
-	heading.dataset.dialogTitle = '';
-	header.append(heading);
-	const main = create('div', 'modal-body');
-	main.append(...body);
-	const foot = create('footer', 'modal-footer');
-	foot.append(...footer);
-	host.append(header, main, foot);
 }
 
 /**

@@ -1372,7 +1372,9 @@ describe('image details', () => {
 		picker.dispatchEvent(new Event('input', { bubbles: true }));
 
 		await vi.waitFor(() => {
-			expect(document.querySelector('.cms-dialog-message.is-error')).not.toBeNull();
+			const alert = [...document.querySelectorAll('dialog[open]')].at(-1);
+			expect(alert?.querySelector('.modal-title')?.textContent).toBe('common:error');
+			expect(alert?.querySelector('.modal-body')?.textContent).toBe('upload:file-error');
 		});
 		expect(document.querySelector('.cms-modal .preview img')?.getAttribute('src')).toBe(
 			'/media/cover-preview.jpg',

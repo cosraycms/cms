@@ -16,7 +16,8 @@ import { ZXX, patchItemMeta, pruneItemMeta } from '../lib/content.js';
 import { fallbackLabel, reportChange } from '../lib/control.js';
 import { resolveFallback } from '../lib/fallback.js';
 import { __, __n } from '../lib/locale.js';
-import { alertDialog, editDialog, libraryDialog } from './media/dialogs.js';
+import { alert } from '../lib/modal.js';
+import { editDialog, libraryDialog } from './media/dialogs.js';
 import { galleryView } from './media/gallery-view.js';
 import { imageDialog } from './media/image-dialog.js';
 import { linkText } from './media/link-row.js';
@@ -36,6 +37,14 @@ import {
 	retitle,
 	videoPlayer,
 } from './media/views.js';
+
+/**
+ * @param {HTMLElement} owner
+ * @param {string} message
+ */
+function error(owner, message) {
+	void alert({ title: __('common:error'), message, owner });
+}
 
 /**
  * @typedef {object} MediaField
@@ -833,7 +842,7 @@ class MediaControl extends HTMLElement {
 						.filter((file) => file !== null);
 
 			if (!multiple && files.length > 1) {
-				alertDialog(this, __('upload:single-only'));
+				error(this, __('upload:single-only'));
 
 				return;
 			}
@@ -862,13 +871,13 @@ class MediaControl extends HTMLElement {
 		const left = Math.max(max - (this.#map[identity]?.length ?? 0), 0);
 
 		if (left === 0) {
-			alertDialog(this, __('upload:max-files', { max }));
+			error(this, __('upload:max-files', { max }));
 
 			return [];
 		}
 
 		if (files.length > left) {
-			alertDialog(this, __n('upload:slots-left', 'upload:slots-left-plural', left));
+			error(this, __n('upload:slots-left', 'upload:slots-left-plural', left));
 
 			return files.slice(0, left);
 		}
@@ -958,7 +967,7 @@ class MediaControl extends HTMLElement {
 
 			// A single field replaces its file; a full one takes no more.
 			if (max > 1 && (this.#map[identity]?.length ?? 0) >= max) {
-				alertDialog(this, __('upload:max-files', { max }));
+				error(this, __('upload:max-files', { max }));
 
 				return;
 			}
@@ -993,9 +1002,7 @@ class MediaControl extends HTMLElement {
 				this.#picked[item.uid] = item;
 			},
 			upload: async (file) =>
-				this.#accept(await cosray().upload(this.#type, file), (message) =>
-					alertDialog(this, message),
-				),
+				this.#accept(await cosray().upload(this.#type, file), (message) => error(this, message)),
 			texts: this.#imageTexts,
 			linking: this.field.link ?? false,
 			required: this.#required,

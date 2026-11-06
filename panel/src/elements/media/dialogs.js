@@ -8,70 +8,10 @@ import { cosray } from '../../lib/bridge.js';
 import { patchItemMeta } from '../../lib/content.js';
 import { browseLibrary } from '../../lib/library-browser.js';
 import { __ } from '../../lib/locale.js';
+import { button, frame } from '../../lib/modal.js';
 import { metaFields } from './meta-fields.js';
 import { posterRow } from './poster-row.js';
 import { contentLocales } from './views.js';
-
-/**
- * @param {string} label
- * @param {'primary' | 'secondary'} variant
- * @param {() => void} onclick
- * @returns {HTMLButtonElement}
- */
-function button(label, variant, onclick) {
-	const element = document.createElement('button');
-	element.type = 'button';
-	element.className = `cms-button ${variant}`;
-	element.textContent = label;
-	element.addEventListener('click', onclick);
-
-	return element;
-}
-
-/**
- * @param {HTMLElement} host
- * @param {string} title
- * @param {Node[]} body
- * @param {HTMLElement[]} [footer]
- */
-function frame(host, title, body, footer) {
-	const header = document.createElement('header');
-	header.className = 'modal-header';
-	const heading = document.createElement('h2');
-	heading.className = 'modal-title';
-	heading.dataset.dialogTitle = '';
-	heading.textContent = title;
-	header.append(heading);
-	const main = document.createElement('div');
-	main.className = 'modal-body';
-	main.append(...body);
-	host.append(header, main);
-
-	if (footer) {
-		const foot = document.createElement('footer');
-		foot.className = 'modal-footer';
-		foot.append(...footer);
-		host.append(foot);
-	}
-}
-
-/**
- * @param {HTMLElement | undefined} owner
- * @param {string} body
- */
-export function alertDialog(owner, body) {
-	const handle = cosray().modal.open(
-		(host) => {
-			const message = document.createElement('p');
-			message.className = 'cms-dialog-message is-error';
-			message.textContent = body;
-			const ok = button(__('common:ok'), 'secondary', () => handle.close());
-			ok.dataset.dialogFocus = '';
-			frame(host, __('common:error'), [message], [ok]);
-		},
-		{ owner, size: 'compact' },
-	);
-}
 
 /**
  * The library to pick one asset from; a pick closes the dialog.

@@ -1,9 +1,8 @@
-/** @import { BridgeSystem, CosrayBridge, ModalOptions, UploadResult } from '../types/bridge' */
+/** @import { BridgeSystem, CosrayBridge, UploadResult } from '../types/bridge' */
 
 import { __ } from './locale.js';
-import { icon } from './icons.js';
-import { openDialog } from './dialogs.js';
 import { csrfToken, HEADER, noticeRefusal } from './csrf.js';
+import { openModal } from './modal.js';
 
 /**
  * Installs window.Cosray without the editor island: the system payload
@@ -63,56 +62,6 @@ export function installBridge(system) {
 	};
 
 	window.Cosray = bridge;
-}
-
-/**
- * @param {(host: HTMLElement) => (() => void) | void} render
- * @param {ModalOptions} [options]
- * @returns {{ close(): void }}
- */
-function openModal(render, options = {}) {
-	const active = document.activeElement;
-	const opener = active instanceof HTMLElement && active !== document.body ? active : null;
-	const dialog = document.createElement('dialog');
-	dialog.className = 'cms-modal';
-	if (options.label !== undefined) dialog.setAttribute('aria-label', options.label);
-	if (options.size) dialog.dataset.size = options.size;
-
-	if (!options.hideClose) {
-		const button = document.createElement('button');
-		button.type = 'button';
-		button.className = 'modal-close';
-		button.dataset.dialogClose = '';
-		button.setAttribute('aria-label', __('common:close'));
-		button.innerHTML = icon('x-lg');
-		dialog.append(button);
-	}
-
-	const host = document.createElement('div');
-	host.className = 'element';
-	dialog.append(host);
-	document.body.append(dialog);
-	/** @type {(() => void) | void} */
-	let cleanup;
-
-	try {
-		cleanup = render(host);
-	} catch (error) {
-		dialog.remove();
-		throw error;
-	}
-
-	return openDialog(dialog, {
-		opener,
-		owner: options.owner ?? opener ?? document.getElementById('cosray-system-data') ?? undefined,
-		onClose: () => {
-			try {
-				cleanup?.();
-			} finally {
-				dialog.remove();
-			}
-		},
-	});
 }
 
 const TIMEOUTS = { success: 3000, error: 30000 };
