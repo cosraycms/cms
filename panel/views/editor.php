@@ -103,7 +103,9 @@ $action = $edit
 					method="post"
 					action="<?= escape($links->delete($uid)) ?>"
 					hx-swap="none"
-					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>">
+					hx-confirm="<?= escape(__('editor:delete-confirm')) ?>"
+					data-confirm-action="<?= escape(__('editor:delete')) ?>"
+					data-confirm-tone="danger">
 					<?php $this->include('component/csrf') ?>
 					<button class="cms-button danger" type="submit">
 						<?= \Cosray\Panel\Icon::render('trash3') ?>
@@ -123,6 +125,8 @@ $action = $edit
 					action="<?= escape($links->discard($uid)) ?>"
 					hx-swap="none"
 					hx-confirm="<?= escape(__('editor:discard-confirm')) ?>"
+					data-confirm-action="<?= escape(__('editor:discard-changes')) ?>"
+					data-confirm-tone="danger"
 					data-dirty-bypass
 					hidden><?php $this->include('component/csrf') ?></form>
 			<?php endif ?>

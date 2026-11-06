@@ -90,7 +90,9 @@ $profileUrl = (string) $profileUrl;
 										<form
 											method="post"
 											action="<?= escape((string) $token['revokeUrl']) ?>"
-											hx-confirm="<?= escape(__('tokens:revoke-confirm', ['name' => (string) $token['name']])) ?>">
+											hx-confirm="<?= escape(__('tokens:revoke-confirm', ['name' => (string) $token['name']])) ?>"
+											data-confirm-action="<?= escape(__('tokens:revoke')) ?>"
+											data-confirm-tone="danger">
 											<?php $this->include('component/csrf') ?>
 											<button class="cms-button danger" type="submit"><?= escape(__('tokens:revoke')) ?></button>
 										</form>

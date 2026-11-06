@@ -153,7 +153,9 @@ $confirm = $descendants === 0
 				<form
 					method="post"
 					action="<?= escape($treeUrl) ?>/item/<?= escape(rawurlencode($id)) ?>/delete"
-					hx-confirm="<?= escape($confirm) ?>">
+					hx-confirm="<?= escape($confirm) ?>"
+					data-confirm-action="<?= escape(__('menu:delete')) ?>"
+					data-confirm-tone="danger">
 					<?php $this->include('component/csrf') ?>
 					<button type="submit" class="danger"><?= escape(__('menu:delete')) ?></button>
 				</form>

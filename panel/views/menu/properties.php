@@ -83,7 +83,9 @@ $manages = (bool) $manages;
 		<form
 			method="post"
 			action="<?= escape((string) $urls['delete']) ?>"
-			hx-confirm="<?= escape((string) $props['confirm']) ?>">
+			hx-confirm="<?= escape((string) $props['confirm']) ?>"
+			data-confirm-action="<?= escape(__('menu:delete')) ?>"
+			data-confirm-tone="danger">
 			<?php $this->include('component/csrf') ?>
 			<button type="submit" class="cms-button danger">
 				<?= \Cosray\Panel\Icon::render('trash3') ?>

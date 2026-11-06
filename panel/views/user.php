@@ -64,6 +64,8 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 					action="<?= escape($deleteUrl) ?>"
 					hx-swap="none"
 					hx-confirm="<?= escape(__('user:delete-confirm')) ?>"
+					data-confirm-action="<?= escape(__('editor:delete')) ?>"
+					data-confirm-tone="danger"
 					data-dirty-bypass>
 					<?php $this->include('component/csrf') ?>
 					<button class="cms-button danger" type="submit">
