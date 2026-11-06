@@ -51,6 +51,14 @@ final class Database
 		get => $this->config->get('db.reuse');
 	}
 
+	public ?float $slow {
+		get {
+			$seconds = $this->config->get('db.slow');
+
+			return $seconds === null ? null : (float) $seconds;
+		}
+	}
+
 	/** @var array<int, mixed> */
 	public array $options {
 		get => $this->optionsCache ??= $this->config->get('db.options');

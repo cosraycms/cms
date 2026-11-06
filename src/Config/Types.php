@@ -70,6 +70,7 @@ namespace Cosray\Config;
  *     'db.print': bool,
  *     'db.options': array<int, mixed>,
  *     'db.reuse': bool,
+ *     'db.slow': null|int|float,
  *
  *     'session.enabled': bool,
  *     'session.options': SessionOptions,
@@ -135,6 +136,7 @@ namespace Cosray\Config;
  *     'db.placeholders'?: DbPlaceholders,
  *     'db.print'?: bool,
  *     'db.options'?: array<int, mixed>,
+ *     'db.slow'?: null|int|float,
  *     'session.enabled'?: bool,
  *     'session.options'?: array<string, mixed>,
  *     'session.handler'?: ?\SessionHandlerInterface,

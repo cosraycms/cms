@@ -147,6 +147,7 @@ final class Defaults
 			// Keep the connection between requests of a worker, rolled back to
 			// a clean state; false disconnects after every request.
 			'db.reuse' => true,
+			'db.slow' => null,
 		];
 	}
 

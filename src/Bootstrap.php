@@ -12,6 +12,7 @@ use Celema\Core\Plugin as CorePlugin;
 use Celema\Quma\Connection;
 use Celema\Quma\Database;
 use Celema\Quma\Delimiters;
+use Celema\Quma\Execution;
 use Celema\Router\Route;
 use Closure;
 use Cosray\Block\Registry as BlockRegistry;
@@ -512,7 +513,7 @@ class Bootstrap implements CorePlugin
 			[$root . '/db/migrations/update'],
 		);
 
-		return new Connection(
+		$connection = new Connection(
 			$config->dsn ?? throw new RuntimeException('No database configured: set DATABASE_URL or db.dsn'),
 			$sql,
 		)
@@ -520,6 +521,28 @@ class Bootstrap implements CorePlugin
 			->fetch(PDO::FETCH_ASSOC)
 			->options($config->options)
 			->placeholders(Delimiters::comments(), $config->placeholders);
+
+		if ($config->slow !== null) {
+			$connection->onExecute(self::slowStatements($config->slow, new ContainerLogger($this->container)));
+		}
+
+		return $connection;
+	}
+
+	/** @return Closure(Execution): void */
+	private static function slowStatements(float $seconds, Logger $logger): Closure
+	{
+		return static function (Execution $execution) use ($seconds, $logger): void {
+			if ($execution->duration < $seconds) {
+				return;
+			}
+
+			$logger->warning('Slow database statement took {duration} s: {statement}', [
+				'duration' => round($execution->duration, 3),
+				'statement' => $execution->script ?? $execution->sql,
+				'rows' => $execution->rowCount,
+			]);
+		};
 	}
 
 	protected function createDatabase(Connection $connection): Database

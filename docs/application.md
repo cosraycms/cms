@@ -69,6 +69,8 @@ Pass a PSR-3 logger to `$app->logger()` before the app handles its first request
 
 Besides server errors and PHP diagnostics, Cosray logs logins (failed ones as `warning`, naming the account only when it exists), panel logins refused for missing permission, sign-ins and reset requests refused as too many (`warning`), logouts, the creation and deletion of users and changes to their roles, activation and password (`notice`), and uploads the server could not store (`error`). Client addresses are `REMOTE_ADDR`. Behind a reverse proxy, that is the proxy's address unless `app.trusted_proxies` lists it: then the client address is the last one in `X-Forwarded-For` that is not a trusted proxy. List only proxies that replace or append to that header, since clients can send it themselves.
 
+To find slow queries, set `db.slow` to a number of seconds, such as `0.5`. Every database statement that takes at least that long is then logged as a `warning` with its duration and SQL file, or its SQL when it has none. Bound values are not logged. The default, `null`, logs no statements.
+
 ## Serving requests
 
 The front controller boots the app and serves it:
