@@ -16,6 +16,8 @@ use Cosray\Cms;
 use Cosray\Collection\Listing;
 use Cosray\Context;
 use Cosray\Exception\NoSuchField;
+use Cosray\Node\Autosaves;
+use Cosray\Node\Essence;
 use Cosray\Node\Factory as NodeFactory;
 use Cosray\Node\PathManager;
 use Cosray\Node\ReservedPaths;
@@ -35,6 +37,14 @@ use DateTimeImmutable;
 use IntlDateFormatter;
 use Throwable;
 
+/**
+ * @phpstan-type AutosaveState array{
+ *     url: string,
+ *     base: string,
+ *     restored: bool,
+ *     pending: ?array{url: string, time: string, stale: bool},
+ * }
+ */
 final class Editor extends Panel
 {
 	private const int LIMIT_DEFAULT = 50;
@@ -61,6 +71,12 @@ final class Editor extends Panel
 			NodeFactory::dataFor($nodeObj),
 			NodeFactory::fieldNamesFor($nodeObj),
 		);
+		$autosave = null;
+
+		// An embedding application has its own idea of unsaved edits.
+		if ($this->origin()['embed'] === null && !(bool) ($data['locked'] ?? false)) {
+			[$data, $autosave] = $this->autosaveState($context, $serializer, $nodeObj, $node, $data);
+		}
 
 		return $this->editorContext(
 			mode: 'edit',
@@ -69,7 +85,58 @@ final class Editor extends Panel
 			generatedPaths: $this->generatedPaths($context, $nodeObj, $data),
 			pathSourceFields: $this->pathSourceFields($context, $nodeObj),
 			meta: $this->nodeMeta($data),
+			autosave: $autosave,
 		);
+	}
+
+	/**
+	 * Keeps the editor's unsaved edits as the user's autosave, or drops the
+	 * autosave when the edits leave the node as it is stored.
+	 */
+	public function autosave(Context $context, Cms $cms, Factory $factory, string $node): Response
+	{
+		$result = $cms->node->working($node);
+
+		if (!$result) {
+			throw new HttpNotFound($this->request);
+		}
+
+		$nodeObj = Wrapper::unwrap($result);
+		$data = $this->serializer($context, $cms)->read(
+			$nodeObj,
+			NodeFactory::dataFor($nodeObj),
+			NodeFactory::fieldNamesFor($nodeObj),
+		);
+		$form = $this->formData();
+		$response = Response::create($factory);
+
+		// A truncated form would keep less than the editor shows.
+		if (!$this->complete($form) || (bool) ($data['locked'] ?? false)) {
+			return $response->json(['ok' => false])->status(422);
+		}
+
+		$edited = $this->applyForm($data, $form);
+		$autosaves = new Autosaves($context->db);
+		$nodeId = $this->nodeId($nodeObj);
+		$settings = $this->autosaveSettings($edited);
+
+		if (
+			Essence::same($edited['content'], $data['content'])
+			&& Essence::same($settings, $this->autosaveSettings($data))
+		) {
+			$autosaves->delete($nodeId, $this->actor()->id);
+		} else {
+			$base = $form['_base'] ?? null;
+			$autosaves->save(
+				$nodeId,
+				$this->actor()->id,
+				is_string($base) && $this->timestamp($base) !== null ? $base : $this->workingChanged($data),
+				$edited['content'],
+				$settings,
+			);
+		}
+
+		return $response->json(['ok' => true]);
 	}
 
 	/** @return array<string, mixed> */
@@ -153,11 +220,14 @@ final class Editor extends Panel
 			];
 		}
 
+		new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
+
 		if (!$htmx) {
 			return Response::create($factory)->redirect($links->edit($node), 303);
 		}
 
-		$draft = $this->draftFacts($cms->node->working($node)?->meta->get('draft'));
+		$saved = $cms->node->working($node);
+		$draft = $this->draftFacts($saved?->meta->get('draft'));
 
 		return [
 			'saved' => true,
@@ -167,6 +237,15 @@ final class Editor extends Panel
 			'renderable' => (bool) ($data['type']['renderable'] ?? false),
 			'preview' => ($form['preview'] ?? null) === '1' ? $this->previewPath($node) : null,
 			'draft' => $draft,
+			'autosave' =>
+				$saved === null || $this->origin()['embed'] !== null
+					? null
+					: [
+						'url' => $links->autosave($node),
+						'base' => $this->workingChanged(NodeFactory::dataFor(Wrapper::unwrap($saved))),
+						'restored' => false,
+						'pending' => null,
+					],
 		];
 	}
 
@@ -183,7 +262,9 @@ final class Editor extends Panel
 		}
 
 		$links = $this->origin()['links'];
-		$this->nodeStore($context, $cms)->discard(Wrapper::unwrap($result));
+		$nodeObj = Wrapper::unwrap($result);
+		$this->nodeStore($context, $cms)->discard($nodeObj);
+		new Autosaves($context->db)->delete($this->nodeId($nodeObj), $this->actor()->id);
 		$response = Response::create($factory);
 
 		if (!$this->request->hasHeader('HX-Request')) {
@@ -968,6 +1049,7 @@ final class Editor extends Panel
 	 * @param array<string, string> $generatedPaths
 	 * @param list<string> $pathSourceFields
 	 * @param array<string, mixed> $meta
+	 * @param ?AutosaveState $autosave
 	 * @return array<string, mixed>
 	 */
 	private function editorContext(
@@ -977,6 +1059,7 @@ final class Editor extends Panel
 		array $generatedPaths = [],
 		array $pathSourceFields = [],
 		array $meta = [],
+		?array $autosave = null,
 	): array {
 		$locales = array_map(
 			static fn($locale) => [
@@ -1008,6 +1091,7 @@ final class Editor extends Panel
 			'generatedPaths' => $generatedPaths,
 			'pathSourceFields' => $pathSourceFields,
 			'meta' => $meta,
+			'autosave' => $autosave,
 		]);
 	}
 
@@ -1027,7 +1111,132 @@ final class Editor extends Panel
 		];
 	}
 
-	private function displayDate(mixed $value): ?string
+	/**
+	 * The editor's autosave state, and for `?restore=1` the data with the
+	 * user's autosave in place of the stored content and settings.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array{array<string, mixed>, AutosaveState}
+	 */
+	private function autosaveState(
+		Context $context,
+		Serializer $serializer,
+		object $node,
+		string $uid,
+		array $data,
+	): array {
+		$links = $this->origin()['links'];
+		$base = $this->workingChanged($data);
+		$state = ['url' => $links->autosave($uid), 'base' => $base, 'restored' => false, 'pending' => null];
+		$saved = new Autosaves($context->db)->get($this->nodeId($node), $this->actor()->id);
+
+		if ($saved === null) {
+			return [$data, $state];
+		}
+
+		if ($this->request->param('restore', '') === '1') {
+			$data['content'] = $saved['content'];
+			$settings = $saved['settings'];
+
+			if (array_key_exists('handle', $settings)) {
+				$data['handle'] = is_string($settings['handle']) ? $settings['handle'] : null;
+			}
+
+			if (is_array($settings['paths'] ?? null)) {
+				$data['paths'] = $settings['paths'];
+			}
+
+			foreach (['published', 'hidden'] as $flag) {
+				if (array_key_exists($flag, $settings)) {
+					$data[$flag] = (bool) $settings[$flag];
+				}
+			}
+
+			$data['assets'] = $serializer->assetMap($data['content']);
+			$data['nodePaths'] = $serializer->pathMap($data['content']);
+			$state['restored'] = true;
+
+			return [$data, $state];
+		}
+
+		$edit = $links->edit($uid);
+		$current = $this->timestamp($base);
+		$started = $this->timestamp($saved['base']);
+		$state['pending'] = [
+			'url' => $edit . (str_contains($edit, '?') ? '&' : '?') . 'restore=1',
+			'time' => $this->displayDate($saved['changed'], IntlDateFormatter::SHORT) ?? '',
+			'stale' => $current !== null && $started !== null && $current > $started,
+		];
+
+		return [$data, $state];
+	}
+
+	/**
+	 * What an autosave keeps besides the content.
+	 *
+	 * @param array<string, mixed> $data
+	 * @return array{handle: ?string, paths: array<array-key, mixed>, published: bool, hidden: bool}
+	 */
+	private function autosaveSettings(array $data): array
+	{
+		$handle = $data['handle'] ?? null;
+
+		return [
+			'handle' => is_string($handle) ? $handle : null,
+			'paths' => array_map(
+				static fn(mixed $path): mixed => is_string($path) ? trim($path) : $path,
+				is_array($data['paths'] ?? null) ? $data['paths'] : [],
+			),
+			'published' => (bool) ($data['published'] ?? false),
+			'hidden' => (bool) ($data['hidden'] ?? false),
+		];
+	}
+
+	/**
+	 * When the state the editor shows was stored: its working copy's
+	 * `changed`, or the node's without one.
+	 *
+	 * @param array<array-key, mixed> $data
+	 */
+	private function workingChanged(array $data): string
+	{
+		$draft = $data['draft'] ?? null;
+		$changed = is_array($draft) ? $draft['changed'] ?? null : $data['changed'] ?? null;
+
+		return is_string($changed) ? $changed : '';
+	}
+
+	private function timestamp(string $value): ?DateTimeImmutable
+	{
+		if (trim($value) === '') {
+			return null;
+		}
+
+		try {
+			return new DateTimeImmutable($value);
+		} catch (Throwable) {
+			return null;
+		}
+	}
+
+	private function nodeId(object $node): int
+	{
+		$id = NodeFactory::meta($node, 'node');
+
+		return is_int($id) || is_string($id) ? (int) $id : 0;
+	}
+
+	private function serializer(Context $context, Cms $cms): Serializer
+	{
+		return new Serializer(
+			$this->types(),
+			$cms->nodeFactory()->uid(),
+			$context->assets(),
+			$context->paths(),
+		);
+	}
+
+	private function displayDate(mixed $value, int $time = IntlDateFormatter::NONE): ?string
 	{
 		if (!is_string($value) || trim($value) === '') {
 			return null;
@@ -1044,7 +1253,7 @@ final class Editor extends Panel
 		$formatter = new IntlDateFormatter(
 			$this->localeId(),
 			IntlDateFormatter::MEDIUM,
-			IntlDateFormatter::NONE,
+			$time,
 			$timezone,
 		);
 		$formatted = $formatter->format($date->getTimestamp());

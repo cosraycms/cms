@@ -84,6 +84,9 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AM
 	<?php $this->include('node/save-options', ['draft' => $draft, 'oob' => true]) ?>
 	<?php $this->include('node/changes-note', ['draft' => $draft, 'oob' => true]) ?>
 <?php endif ?>
+<?php if ($saved && is_array(u($autosave ?? null))): ?>
+	<?php $this->include('node/autosave', ['autosave' => $autosave, 'oob' => true]) ?>
+<?php endif ?>
 <?php if ($saved && is_string($preview) && $preview !== ''): ?>
 	<div id="editor-preview" class="preview" hx-swap-oob="true">
 		<button type="button" class="close" data-overlay-close>

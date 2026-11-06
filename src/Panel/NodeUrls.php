@@ -29,6 +29,11 @@ final class NodeUrls
 		return $this->url($this->path($uid) . '/discard', $this->origin());
 	}
 
+	public function autosave(string $uid): string
+	{
+		return $this->url($this->path($uid) . '/autosave', $this->origin());
+	}
+
 	public function paths(string $uid): string
 	{
 		return $this->path($uid) . '/paths';

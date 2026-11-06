@@ -243,6 +243,9 @@ $action = $edit
 	</form>
 
 	<div id="editor-preview" hidden></div>
+	<?php if (is_array(u($autosave ?? null))): ?>
+		<?php $this->include('node/autosave', ['autosave' => $autosave]) ?>
+	<?php endif ?>
 	<?php if (array_any(
 		$fields,
 		static fn(mixed $f): bool => is_array($f) && (($f['control'] ?? [])['name'] ?? null) === 'blocks',
