@@ -1,3 +1,4 @@
+-- Returns no row when the node already has this handle.
 INSERT INTO /*:cms.prefix:*/node_handles (
 	node,
 	handle,
@@ -15,5 +16,6 @@ ON CONFLICT (node) DO UPDATE SET
 	editor = :editor
 WHERE
 	/*:cms.prefix:*/node_handles.node = :node
+	AND /*:cms.prefix:*/node_handles.handle IS DISTINCT FROM :handle
 
 RETURNING node;

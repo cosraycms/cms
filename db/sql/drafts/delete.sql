@@ -1,4 +1,6 @@
 DELETE FROM
 	/*:cms.prefix:*/drafts
 WHERE
-	node = :node;
+	node = :node
+
+RETURNING node;

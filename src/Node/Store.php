@@ -83,8 +83,10 @@ class Store
 
 		$this->transaction(function () use ($node, $data, $actor, $locales, $create): void {
 			$this->lock($data['uid']);
-			$this->persist($node, $data, $actor->id, $locales, $create);
-			$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
+
+			if ($this->persist($node, $data, $actor->id, $locales, $create)) {
+				$this->event($create ? 'node.created' : 'node.updated', $node, $data['uid']);
+			}
 		}, 'Error while saving: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -104,10 +106,16 @@ class Store
 
 		$this->transaction(function () use ($node, $data, $locales, $actor, $nodeId): void {
 			$this->lock($data['uid']);
-			$this->persist($node, $data, $actor->id, $locales);
-			$this->drafts->delete($nodeId, published: true);
-			$this->sync->remove('draft', $data['uid']);
-			$this->event('node.updated', $node, $data['uid']);
+			$changed = $this->persist($node, $data, $actor->id, $locales);
+
+			if ($this->drafts->delete($nodeId, published: true)) {
+				$this->sync->remove('draft', $data['uid']);
+				$changed = true;
+			}
+
+			if ($changed) {
+				$this->event('node.updated', $node, $data['uid']);
+			}
 		}, 'Error while publishing: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -139,11 +147,22 @@ class Store
 			$this->lock($data['uid']);
 
 			if ($this->drafts->matchesLive($nodeId, $content, $handle, $paths)) {
-				$this->drafts->delete($nodeId);
-				$this->sync->remove('draft', $data['uid']);
+				$changed = $this->drafts->delete($nodeId);
+
+				if ($changed) {
+					$this->sync->remove('draft', $data['uid']);
+				}
 			} else {
-				$this->drafts->save($nodeId, $content, ['handle' => $handle, 'paths' => $paths], $actor->id);
-				$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+				$changed = $this->drafts->save(
+					$nodeId,
+					$content,
+					['handle' => $handle, 'paths' => $paths],
+					$actor->id,
+				);
+
+				if ($changed) {
+					$this->sync->replace('draft', $data['uid'], $this->scanner->scan($content));
+				}
 			}
 
 			if ($data['hidden'] !== (bool) Factory::meta($node, 'hidden')) {
@@ -152,9 +171,12 @@ class Store
 					'hidden' => $data['hidden'],
 					'editor' => $actor->id,
 				])->run();
+				$changed = true;
 			}
 
-			$this->event('node.draft', $node, $data['uid']);
+			if ($changed) {
+				$this->event('node.draft', $node, $data['uid']);
+			}
 		}, 'Error while saving the working copy: ');
 
 		return ['success' => true, 'uid' => $data['uid']];
@@ -167,9 +189,11 @@ class Store
 
 		$this->transaction(function () use ($node, $nodeId, $uid): void {
 			$this->lock($uid);
-			$this->drafts->delete($nodeId);
-			$this->sync->remove('draft', $uid);
-			$this->event('node.draft', $node, $uid);
+
+			if ($this->drafts->delete($nodeId)) {
+				$this->sync->remove('draft', $uid);
+				$this->event('node.draft', $node, $uid);
+			}
 		}, 'Error while discarding: ');
 	}
 
@@ -497,6 +521,9 @@ class Store
 	}
 
 	/**
+	 * Writes what differs from the stored node and says whether anything
+	 * did: the row, the handle or a URL path.
+	 *
 	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
 	 * @param array<mixed> $data
 	 */
@@ -507,7 +534,7 @@ class Store
 		Locales $locales,
 		bool $create = false,
 		array $metadata = [],
-	): void {
+	): bool {
 		$parentUid = $this->resolveParentUid($node, $data);
 		$parentId = $this->resolveParentId($parentUid);
 		$handle = $this->resolveHandle($data);
@@ -516,8 +543,8 @@ class Store
 		// (a single change/history record instead of two).
 		$data['title'] = $this->materializeTitle($node, $data, $locales);
 
-		$nodeId = $this->persistNode($node, $data, $editor, $parentId, $create, $metadata);
-		$this->persistHandle($nodeId, $handle, $editor);
+		[$nodeId, $rowChanged] = $this->persistNode($node, $data, $editor, $parentId, $create, $metadata);
+		$handleChanged = $this->persistHandle($nodeId, $handle, $editor);
 
 		if (!$create) {
 			$this->db->positions->leaveParent(['node' => $nodeId, 'parent' => $parentId])->run();
@@ -525,14 +552,32 @@ class Store
 
 		// The reference indexes ride in the save transaction: full
 		// replace per owner from the content just written.
-		$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));
-		$this->fulltext->replace($nodeId, $data['uid'], $node::class, $data['content'] ?? [], $data['title'], $locales);
+		if ($rowChanged) {
+			$this->sync->replace('node', $data['uid'], $this->scanner->scan($data['content'] ?? []));
+			$this->fulltext->replace(
+				$nodeId,
+				$data['uid'],
+				$node::class,
+				$data['content'] ?? [],
+				$data['title'],
+				$locales,
+			);
+		}
+
+		$pathsChanged = false;
 
 		if ((bool) $this->types->get($node::class, 'routable', false)) {
 			$this->ensureRouteHandle($node, $handle);
 			$data = $this->completeGeneratedPaths($node, $data, $locales, $parentId);
-			$this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
+			$pathsChanged = $this->pathManager->persist($this->db, $data, $editor, $nodeId, $locales);
 		}
+
+		// `changed` dates the whole node, which API clients sync by.
+		if (!$rowChanged && ($handleChanged || $pathsChanged)) {
+			$this->db->nodes->touch(['node' => $nodeId, 'editor' => $editor])->run();
+		}
+
+		return $rowChanged || $handleChanged || $pathsChanged;
 	}
 
 	/**
@@ -610,8 +655,11 @@ class Store
 	}
 
 	/**
+	 * The node id, and whether the row changed.
+	 *
 	 * @param array{creator?: int, created?: ?string, changed?: ?string} $metadata
 	 * @param array<mixed> $data
+	 * @return array{int, bool}
 	 */
 	private function persistNode(
 		object $node,
@@ -620,7 +668,7 @@ class Store
 		?int $parent,
 		bool $create,
 		array $metadata,
-	): int {
+	): array {
 		$class = $node::class;
 		$handle = (string) $this->types->get($class, 'handle');
 		$this->ensureTypeExists($handle);
@@ -637,16 +685,22 @@ class Store
 		];
 
 		if (!$create) {
-			return (int) $this->db->nodes->save([
-				'node' => $this->nodeId($node),
-				'parent' => $params['parent'],
-				'hidden' => $params['hidden'],
-				'published' => $params['published'],
-				'locked' => $params['locked'],
-				'content' => $params['content'],
-				'title' => $params['title'],
-				'editor' => $params['editor'],
-			])->one()['node'];
+			$nodeId = $this->nodeId($node);
+			$saved = $this->db
+				->nodes
+				->save([
+					'node' => $nodeId,
+					'parent' => $params['parent'],
+					'hidden' => $params['hidden'],
+					'published' => $params['published'],
+					'locked' => $params['locked'],
+					'content' => $params['content'],
+					'title' => $params['title'],
+					'editor' => $params['editor'],
+				])
+				->first();
+
+			return [$nodeId, $saved !== null];
 		}
 
 		$result = $this->db
@@ -665,15 +719,14 @@ class Store
 			]);
 		}
 
-		return (int) $result['node'];
+		return [(int) $result['node'], true];
 	}
 
-	private function persistHandle(int $nodeId, ?string $handle, int $editor): void
+	/** Whether the handle changed. */
+	private function persistHandle(int $nodeId, ?string $handle, int $editor): bool
 	{
 		if ($handle === null) {
-			$this->db->nodes->deleteHandle(['node' => $nodeId])->run();
-
-			return;
+			return $this->db->nodes->deleteHandle(['node' => $nodeId])->first() !== null;
 		}
 
 		$collision = $this->db
@@ -688,11 +741,14 @@ class Store
 		}
 
 		try {
-			$this->db->nodes->saveHandle([
-				'node' => $nodeId,
-				'handle' => $handle,
-				'editor' => $editor,
-			])->run();
+			return $this->db
+				->nodes
+				->saveHandle([
+					'node' => $nodeId,
+					'handle' => $handle,
+					'editor' => $editor,
+				])
+				->first() !== null;
 		} catch (UniqueViolation) {
 			throw new HttpConflict(payload: [
 				'message' => __('node:duplicate-handle', ['handle' => $handle]),

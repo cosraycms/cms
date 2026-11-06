@@ -37,14 +37,18 @@ class PathManager
 		throw new RuntimeException('No url path found');
 	}
 
-	/** @param array<mixed> $data */
+	/**
+	 * Writes the node's URL paths and says whether any changed.
+	 *
+	 * @param array<mixed> $data
+	 */
 	public function persist(
 		Database $db,
 		array $data,
 		int $editor,
 		int $nodeId,
 		Locales $locales,
-	): void {
+	): bool {
 		$noPathsGiven = true;
 
 		foreach ($data['paths'] ?? [] as $path) {
@@ -81,16 +85,16 @@ class PathManager
 				$baseStructure[$locale->id] = '';
 			}
 
-			$this->saveUrlPaths(
+			return $this->saveUrlPaths(
 				$db,
 				array_merge($baseStructure, $currentPaths),
 				$data['paths'],
 				$editor,
 				$nodeId,
 			);
-		} else {
-			$this->createUrlPaths($db, $data['paths'], $editor, $nodeId);
 		}
+
+		return $this->createUrlPaths($db, $data['paths'], $editor, $nodeId);
 	}
 
 	private function prepareUrlPath(Database $db, string $path): string
@@ -105,7 +109,7 @@ class PathManager
 	}
 
 	/** @param array<string, mixed> $paths */
-	private function createUrlPaths(Database $db, array $paths, int $editor, int $node): void
+	private function createUrlPaths(Database $db, array $paths, int $editor, int $node): bool
 	{
 		$alreadyPersisted = [];
 
@@ -133,6 +137,8 @@ class PathManager
 
 			$alreadyPersisted[] = $path;
 		}
+
+		return $alreadyPersisted !== [];
 	}
 
 	/**
@@ -145,8 +151,9 @@ class PathManager
 		array $paths,
 		int $editor,
 		int $node,
-	): void {
+	): bool {
 		$alreadyPersisted = [];
+		$changed = false;
 
 		foreach ($currentPaths as $locale => $currentPath) {
 			$newPath = trim($paths[$locale] ?? '');
@@ -166,6 +173,7 @@ class PathManager
 						'locale' => $locale,
 						'editor' => $editor,
 					])->run();
+					$changed = true;
 				}
 
 				if (in_array($newPath, $alreadyPersisted, true)) {
@@ -184,15 +192,17 @@ class PathManager
 				])->run();
 
 				$alreadyPersisted[] = $newPath;
-			} else {
-				if ($currentPath) {
-					$db->nodes->deactivatePath([
-						'path' => $currentPath,
-						'locale' => $locale,
-						'editor' => $editor,
-					])->run();
-				}
+				$changed = true;
+			} elseif ($currentPath) {
+				$db->nodes->deactivatePath([
+					'path' => $currentPath,
+					'locale' => $locale,
+					'editor' => $editor,
+				])->run();
+				$changed = true;
 			}
 		}
+
+		return $changed;
 	}
 }

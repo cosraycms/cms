@@ -357,6 +357,64 @@ final class NodeDraftsTest extends IntegrationTestCase
 		$this->assertSame(['draft'], $this->referenceOwners('drafts-rebuild-target'));
 	}
 
+	public function testASaveThatChangesNothingWritesNothing(): void
+	{
+		$this->createPage('unchanged-live', 'Live');
+		$payload = $this->payload('unchanged-live', 'Saved') + ['paths' => ['en' => '/unchanged-live']];
+		$this->store->publish($this->node('unchanged-live'), $payload, $this->locales(), Actor::system());
+		$saved = $this->row('nodes', 'unchanged-live');
+		$history = $this->rows('nodes_history', 'unchanged-live');
+
+		$this->store->publish($this->node('unchanged-live'), $payload, $this->locales(), Actor::system());
+
+		$this->assertSame($saved['changed'], $this->row('nodes', 'unchanged-live')['changed']);
+		$this->assertSame($history, $this->rows('nodes_history', 'unchanged-live'));
+	}
+
+	public function testAWorkingCopySavedAgainUnchangedWritesNoHistory(): void
+	{
+		$this->createPage('unchanged-draft', 'Live');
+		$payload = $this->payload('unchanged-draft', 'Drafted');
+		$this->store->draft($this->node('unchanged-draft'), $payload, $this->locales(), Actor::system());
+		$changed = $this->row('drafts', 'unchanged-draft')['changed'];
+
+		$this->store->draft($this->node('unchanged-draft'), $payload, $this->locales(), Actor::system());
+
+		$this->assertSame($changed, $this->row('drafts', 'unchanged-draft')['changed']);
+		$this->assertSame(0, $this->rows('drafts_history', 'unchanged-draft'));
+	}
+
+	public function testAChangeOfOnlyTheHandleOrAPathDatesTheNode(): void
+	{
+		$this->createPage('unchanged-row', 'Live');
+		$payload = $this->payload('unchanged-row', 'Saved') + ['paths' => ['en' => '/unchanged-row']];
+		$this->store->publish($this->node('unchanged-row'), $payload, $this->locales(), Actor::system());
+		$history = $this->rows('nodes_history', 'unchanged-row');
+		$changed = $this->row('nodes', 'unchanged-row')['changed'];
+
+		$this->store->publish(
+			$this->node('unchanged-row'),
+			['handle' => 'named-row'] + $payload,
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame('named-row', $this->handle('unchanged-row'));
+		$this->assertNotSame($changed, $changed = $this->row('nodes', 'unchanged-row')['changed']);
+		$this->assertSame($history + 1, $this->rows('nodes_history', 'unchanged-row'));
+
+		$this->store->publish(
+			$this->node('unchanged-row'),
+			['handle' => 'named-row', 'paths' => ['en' => '/moved-row']] + $payload,
+			$this->locales(),
+			Actor::system(),
+		);
+
+		$this->assertSame('/moved-row', $this->activePath('unchanged-row'));
+		$this->assertNotSame($changed, $this->row('nodes', 'unchanged-row')['changed']);
+		$this->assertSame($history + 2, $this->rows('nodes_history', 'unchanged-row'));
+	}
+
 	private function createPage(string $uid, string $title, bool $published = true): void
 	{
 		$this->createTestNode([

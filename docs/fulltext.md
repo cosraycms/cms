@@ -145,7 +145,7 @@ The placement under `meta->search` is a working API to assess through real templ
 
 ## Synchronization and maintenance
 
-Normal writes through `Node\Store` replace all locale documents inside the content transaction. Indexing failure rolls back the write and index together, including inside an outer transaction. No worker or asynchronous queue is involved.
+Normal writes through `Node\Store` replace all locale documents inside the content transaction; a save that leaves the node row unchanged keeps them. Indexing failure rolls back the write and index together, including inside an outer transaction. No worker or asynchronous queue is involved.
 
 | Change | Index behavior |
 | --- | --- |

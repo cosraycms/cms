@@ -48,17 +48,23 @@ final class Drafts
 	}
 
 	/**
+	 * Whether the working copy changed: saving the state it already holds
+	 * writes nothing.
+	 *
 	 * @param array<string, mixed> $content
 	 * @param array{handle?: ?string, paths?: array<string, string>} $settings
 	 */
-	public function save(int $node, array $content, array $settings, int $editor): void
+	public function save(int $node, array $content, array $settings, int $editor): bool
 	{
-		$this->db->drafts->upsert([
-			'node' => $node,
-			'content' => json_encode($content),
-			'settings' => json_encode((object) $settings),
-			'editor' => $editor,
-		])->run();
+		return $this->db
+			->drafts
+			->upsert([
+				'node' => $node,
+				'content' => json_encode($content),
+				'settings' => json_encode((object) $settings),
+				'editor' => $editor,
+			])
+			->first() !== null;
 	}
 
 	/**
@@ -122,16 +128,18 @@ final class Drafts
 	}
 
 	/**
-	 * Deletes the working copy; its history keeps the last state and, when
-	 * the caller says the content went live, records it as published rather
-	 * than discarded. Must run inside the caller's transaction: the reason
-	 * travels as a transaction-local setting the history trigger reads.
+	 * Deletes the working copy, if there is one, and says whether there was;
+	 * its history keeps the last state and, when the caller says the content
+	 * went live, records it as published rather than discarded. Must run
+	 * inside the caller's transaction: the reason travels as a
+	 * transaction-local setting the history trigger reads.
 	 */
-	public function delete(int $node, bool $published = false): void
+	public function delete(int $node, bool $published = false): bool
 	{
 		// Set either way: an earlier delete in the same transaction may have
 		// left `published` behind.
 		$this->db->drafts->outcome(['outcome' => $published ? 'published' : 'discarded'])->run();
-		$this->db->drafts->delete(['node' => $node])->run();
+
+		return $this->db->drafts->delete(['node' => $node])->first() !== null;
 	}
 }

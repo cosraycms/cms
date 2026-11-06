@@ -49,6 +49,18 @@ final class ApiWebhooksTest extends End2EndTestCase
 		$this->assertSame('test-document', $events[0]['type']);
 	}
 
+	public function testAWriteThatChangesNothingReportsNothing(): void
+	{
+		$this->send('PUT', '/api/nodes/unchanged', [
+			'type' => 'test-document',
+			'content' => ['title' => ['value' => ['zxx' => 'Unchanged']]],
+		]);
+		$this->send('PATCH', '/api/nodes/unchanged', ['published' => true]);
+		$this->send('PATCH', '/api/nodes/unchanged', ['published' => true]);
+
+		$this->assertSame(['node.created', 'node.updated'], array_column($this->events(), 'event'));
+	}
+
 	public function testARejectedWriteReportsNothing(): void
 	{
 		$this->send('PUT', '/api/nodes/rejected', [
