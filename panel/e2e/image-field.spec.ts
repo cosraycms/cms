@@ -93,18 +93,31 @@ test('texts set per use reach the page', async ({ page }) => {
 });
 
 test('the media library opens over unsaved edits without asking to leave', async ({ page }) => {
-	let asked = false;
-	page.on('dialog', async (prompt) => {
-		asked = true;
-		await prompt.dismiss();
-	});
 	await openNode(page, 'texts');
 	await page.getByLabel('Title').fill('Changed');
 	await field(page, GALLERY).getByRole('button', { name: 'Choose from media' }).click();
 
 	await expect(page.locator('dialog[open]').last().locator('[data-pick]').first()).toBeVisible();
-	expect(asked).toBe(false);
+	await expect(page.getByRole('dialog', { name: 'Unsaved changes' })).toHaveCount(0);
 	await page.locator('dialog[open]').last().getByRole('button', { name: 'Cancel' }).click();
+});
+
+test('leaving the editor with unsaved edits asks in a panel dialog', async ({ page }) => {
+	await openNode(page, 'texts');
+	const editor = page.url();
+	await page.getByLabel('Title').fill('Changed');
+	await page.getByRole('link', { name: 'Media' }).first().click();
+
+	const question = page.getByRole('dialog', { name: 'Unsaved changes' });
+	await expect(question).toBeVisible();
+	await question.getByRole('button', { name: 'Cancel' }).click();
+	await expect(question).toHaveCount(0);
+	expect(page.url()).toBe(editor);
+	await expect(page.getByLabel('Title')).toHaveValue('Changed');
+
+	await page.getByRole('link', { name: 'Media' }).first().click();
+	await question.getByRole('button', { name: 'Leave without saving' }).click();
+	await expect(page).toHaveURL(/\/panel\/media/);
 });
 
 test('a missing required text blocks saving and says where', async ({ page }) => {

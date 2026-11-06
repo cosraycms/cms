@@ -44,6 +44,9 @@ return [
 		'common:tabs' => 'Karty',
 		'common:title' => 'Tytuł',
 		'editor:content-language' => 'Język treści',
+		'editor:leave' => 'Wyjdź bez zapisywania',
+		'editor:leave-confirm' => 'Są niezapisane zmiany. Mimo to opuścić edytor?',
+		'editor:unsaved' => 'Niezapisane zmiany',
 		'field:block-results' => [
 			'Dostępny :count typ bloku',
 			'Dostępne :count typy bloków',

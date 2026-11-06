@@ -3,6 +3,11 @@
 // longer in the document, so stale state cannot leak into the next
 // page — the failure mode the island version suffered from.
 
+/** @import { Context } from './dialogs.js' */
+
+import { __ } from '../lib/locale.js';
+import { ask } from './dialogs.js';
+
 const FORM = '#node-editor-form';
 const INDICATOR = 'editor-dirty';
 
@@ -41,26 +46,33 @@ function mark(event) {
  * @param {Event} event
  */
 function guard(event) {
-	if (!isDirty()) {
+	const ctx = /** @type {CustomEvent<{ ctx?: Context }>} */ (event).detail?.ctx;
+
+	if (!ctx || !isDirty()) {
 		return;
 	}
 
 	// htmx dispatches the event on the request's source element; requests
 	// originating inside the form (save, route-path preview) must pass.
-	const detail = /** @type {CustomEvent<{ ctx?: { sourceElement?: Element } }>} */ (event).detail;
-	const source =
-		detail?.ctx?.sourceElement ?? (event.target instanceof Element ? event.target : null);
+	const source = ctx.sourceElement ?? (event.target instanceof Element ? event.target : null);
 
 	// A request marked data-dirty-bypass does not leave the editor, like the
 	// media library in a dialog, or drops the unsaved edits on purpose, like
-	// discarding the working copy, and confirms on its own.
-	if (source instanceof Element && source.closest(`${FORM}, [data-dirty-bypass]`)) {
+	// discarding the working copy, and confirms on its own. A request with a
+	// question of its own keeps it, so it is not asked away.
+	if (
+		(source instanceof Element && source.closest(`${FORM}, [data-dirty-bypass]`)) ||
+		ctx.confirm
+	) {
 		return;
 	}
 
-	if (!window.confirm('There are unsaved changes. Leave this editor?')) {
-		event.preventDefault();
-	}
+	ask(ctx, {
+		title: __('editor:unsaved'),
+		message: __('editor:leave-confirm'),
+		action: __('editor:leave'),
+		tone: 'danger',
+	});
 }
 
 /**
@@ -92,7 +104,7 @@ export function install() {
 	document.addEventListener('input', mark);
 	document.addEventListener('change', mark);
 	document.addEventListener('cosray-change', mark);
-	document.addEventListener('htmx:before:request', guard);
+	document.addEventListener('htmx:config:request', guard);
 	document.addEventListener('htmx:after:swap', settle);
 	window.addEventListener('beforeunload', unload);
 
@@ -100,7 +112,7 @@ export function install() {
 		document.removeEventListener('input', mark);
 		document.removeEventListener('change', mark);
 		document.removeEventListener('cosray-change', mark);
-		document.removeEventListener('htmx:before:request', guard);
+		document.removeEventListener('htmx:config:request', guard);
 		document.removeEventListener('htmx:after:swap', settle);
 		window.removeEventListener('beforeunload', unload);
 	};

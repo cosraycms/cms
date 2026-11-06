@@ -1,5 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { activate } from '@celema/verba';
 import { install } from '../../src/behaviors/dirty';
+import { catalog } from '../catalog';
+
+beforeAll(() => activate(catalog()));
 
 let uninstall: (() => void) | null = null;
 
@@ -31,15 +35,16 @@ function edit(): void {
 		?.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function request(source: Element | null): CustomEvent {
-	const event = new CustomEvent('htmx:before:request', {
-		bubbles: true,
-		cancelable: true,
-		detail: { ctx: { sourceElement: source ?? undefined } },
-	});
-	(source ?? document).dispatchEvent(event);
+type Context = { confirm?: string | null; sourceElement?: Element };
 
-	return event;
+/** The question a request configured from the source would ask, if any. */
+function request(source: Element | null, confirm: string | null = null): string | null {
+	const ctx: Context = { confirm, sourceElement: source ?? undefined };
+	(source ?? document).dispatchEvent(
+		new CustomEvent('htmx:config:request', { bubbles: true, cancelable: true, detail: { ctx } }),
+	);
+
+	return ctx.confirm ?? null;
 }
 
 function indicator(): HTMLElement | null {
@@ -63,45 +68,25 @@ describe('dirty guard', () => {
 		expect(indicator()?.hidden).toBe(true);
 	});
 
-	it('blocks navigation away when the user declines', () => {
-		const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
-
+	it('asks before a request leaves the editor with unsaved edits', () => {
 		edit();
-		const event = request(document.getElementById('outside'));
 
-		expect(confirm).toHaveBeenCalledOnce();
-		expect(event.defaultPrevented).toBe(true);
-	});
-
-	it('allows navigation away when the user confirms', () => {
-		vi.spyOn(window, 'confirm').mockReturnValue(true);
-
-		edit();
-		const event = request(document.getElementById('outside'));
-
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(document.getElementById('outside'))).toBe(
+			'There are unsaved changes. Leave this editor anyway?',
+		);
 	});
 
 	it('never questions requests originating inside the form', () => {
-		const confirm = vi.spyOn(window, 'confirm');
-
 		edit();
-		const event = request(document.querySelector('#node-editor-form input'));
 
-		expect(confirm).not.toHaveBeenCalled();
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(document.querySelector('#node-editor-form input'))).toBeNull();
 	});
 
 	it('does not guard while pristine', () => {
-		const confirm = vi.spyOn(window, 'confirm');
-		const event = request(document.getElementById('outside'));
-
-		expect(confirm).not.toHaveBeenCalled();
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(document.getElementById('outside'))).toBeNull();
 	});
 
 	it('stands down after a successful save', () => {
-		const confirm = vi.spyOn(window, 'confirm');
 		const status = document.getElementById('editor-status');
 
 		edit();
@@ -110,36 +95,31 @@ describe('dirty guard', () => {
 
 		expect(indicator()?.hidden).toBe(true);
 		expect(status?.hasAttribute('data-saved')).toBe(false);
-
-		const event = request(document.getElementById('outside'));
-
-		expect(confirm).not.toHaveBeenCalled();
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(document.getElementById('outside'))).toBeNull();
 	});
 
 	it('forgets dirty state anchored to a swapped-out form', () => {
-		const confirm = vi.spyOn(window, 'confirm');
-
 		edit();
 		document.getElementById('node-editor-form')?.remove();
-		const event = request(document.getElementById('outside'));
 
-		expect(confirm).not.toHaveBeenCalled();
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(document.getElementById('outside'))).toBeNull();
 	});
 
 	it('lets a request marked data-dirty-bypass through without asking', () => {
-		const confirm = vi.spyOn(window, 'confirm');
 		const discard = document.createElement('form');
 		discard.id = 'node-editor-discard';
 		discard.setAttribute('data-dirty-bypass', '');
 		document.body.append(discard);
 
 		edit();
-		const event = request(discard);
 
-		expect(confirm).not.toHaveBeenCalled();
-		expect(event.defaultPrevented).toBe(false);
+		expect(request(discard)).toBeNull();
+	});
+
+	it('keeps the question a request asks of its own', () => {
+		edit();
+
+		expect(request(document.getElementById('outside'), 'Delete this?')).toBe('Delete this?');
 	});
 
 	it('prevents unload while dirty', () => {
