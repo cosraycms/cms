@@ -1,13 +1,13 @@
 // The media screen's browser-side parts. The server renders the listing,
 // filters and detail; this adds what needs the pointer or the file system:
-// uploads by button or drop, the focal point, the caption's editor, the delete
-// confirmation, the selection for deleting several files, replacing a file, and
-// the active tile once htmx swaps in another file's detail.
+// uploads by button or drop, the focal point, the caption's editor, the
+// selection for deleting several files, replacing a file, and the active tile
+// once htmx swaps in another file's detail.
 
 import { cosray } from '../lib/bridge.js';
 import { csrfToken, HEADER, noticeRefusal } from '../lib/csrf.js';
-import { openDialog } from '../lib/dialogs.js';
 import { __, __n } from '../lib/locale.js';
+import { confirm, question } from '../lib/modal.js';
 
 const SCREEN = '[data-media]';
 
@@ -185,11 +185,22 @@ function showSelection(screen) {
 	}
 }
 
-/** @param {HTMLElement} screen */
-async function deleteSelected(screen) {
-	const dialog = screen.querySelector('[data-media-delete-selected-dialog]');
+/**
+ * @param {HTMLElement} screen
+ * @param {HTMLElement} button
+ */
+async function deleteSelected(screen, button) {
+	const count = selected(screen).length;
+	const message = __n(
+		'media:confirm-delete-selected',
+		'media:confirm-delete-selected-plural',
+		count,
+		{
+			count,
+		},
+	);
 
-	if (!(dialog instanceof HTMLDialogElement)) {
+	if (!(await confirm(question(button, message)))) {
 		return;
 	}
 
@@ -199,8 +210,7 @@ async function deleteSelected(screen) {
 		body.append('uids[]', input.value);
 	}
 
-	const result = await send(dialog.dataset.url ?? '', body);
-	dialog.close();
+	const result = await send(button.dataset.url ?? '', body);
 
 	if (!result.ok) {
 		cosray().toast.error(__('media:delete-selected-failed'));
@@ -361,27 +371,7 @@ function click(event) {
 	const deleting = target.closest('[data-media-delete-selected]');
 
 	if (deleting instanceof HTMLElement) {
-		const dialog = screen.querySelector('[data-media-delete-selected-dialog]');
-		const question = dialog?.querySelector('[data-media-delete-selected-question]');
-		const count = selected(screen).length;
-
-		if (dialog instanceof HTMLDialogElement && question) {
-			question.textContent = __n(
-				'media:confirm-delete-selected',
-				'media:confirm-delete-selected-plural',
-				count,
-				{
-					count,
-				},
-			);
-			openDialog(dialog, { opener: deleting, owner: deleting });
-		}
-
-		return;
-	}
-
-	if (target.closest('[data-media-delete-selected-confirm]')) {
-		void deleteSelected(screen);
+		void deleteSelected(screen, deleting);
 
 		return;
 	}
@@ -413,16 +403,6 @@ function click(event) {
 	if (target.closest('[data-media-focal-clear]') && form) {
 		setFocal(form, null);
 		return;
-	}
-
-	const remove = target.closest('[data-media-delete]');
-
-	if (remove instanceof HTMLElement) {
-		const dialog = remove.closest('#media-detail')?.querySelector('[data-media-delete-dialog]');
-
-		if (dialog instanceof HTMLDialogElement) {
-			openDialog(dialog, { opener: remove, owner: remove });
-		}
 	}
 }
 

@@ -89,7 +89,14 @@ unset($search['page']);
 
 				<div class="selection" data-media-selection hidden>
 					<span role="status" data-media-selection-count></span>
-					<button type="button" class="cms-button danger small" data-media-delete-selected>
+					<button
+						type="button"
+						class="cms-button danger small"
+						data-media-delete-selected
+						data-url="<?= escape($screen->path . '/delete-many') ?>"
+						data-confirm-title="<?= escape(__('media:delete-selected')) ?>"
+						data-confirm-action="<?= escape(__('common:delete')) ?>"
+						data-confirm-tone="danger">
 						<?= Icon::render('trash3') ?>
 						<?= escape(__('media:delete-selected')) ?>
 					</button>
@@ -159,25 +166,6 @@ unset($search['page']);
 			</aside>
 		</div>
 	</section>
-
-	<dialog
-		class="cms-modal"
-		data-size="compact"
-		data-media-delete-selected-dialog
-		data-url="<?= escape($screen->path . '/delete-many') ?>">
-		<?php $this->include('component/modal-header', ['title' => __('media:delete-selected')]) ?>
-		<div class="modal-body cms-confirm">
-			<p class="question" data-media-delete-selected-question></p>
-		</div>
-		<footer class="modal-footer">
-			<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
-				__('media:cancel-delete-file'),
-			) ?></button>
-			<button type="button" class="cms-button danger solid" data-media-delete-selected-confirm><?= escape(
-				__('common:delete'),
-			) ?></button>
-		</footer>
-	</dialog>
 
 	<script id="cosray-system-data" type="application/json"><?= json_encode(
 		['panel' => (string) u($panelBase), 'system' => $system],

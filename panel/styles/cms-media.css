@@ -518,11 +518,6 @@
 	}
 }
 
-.cms-modal-remove-message {
-	margin-top: var(--cms-space-6);
-	font-weight: 500;
-}
-
 @media (max-width: 72rem) {
 	.cms-detail,
 	.cms-detail-body {

@@ -106,7 +106,7 @@ final class PanelMediaPageTest extends End2EndTestCase
 		);
 		$this->assertHtmlNodeExists('//input[@type="hidden"][@name="meta[focal][x]"]', $html);
 		$this->assertHtmlNodeExists(
-			"//dialog[@data-media-delete-dialog]//form[@action='/panel/media/{$uid}/delete?file={$uid}']",
+			"//form[@id='media-detail-delete' and @hx-confirm and @action='/panel/media/{$uid}/delete?file={$uid}']",
 			$html,
 		);
 

@@ -193,7 +193,7 @@ $closeUrl = $screen->url(['file' => null]);
 		</div>
 
 		<footer class="cms-detail-foot">
-			<button type="button" class="cms-button danger" data-media-delete>
+			<button type="submit" class="cms-button danger" form="media-detail-delete">
 				<?= Icon::render('trash3') ?>
 				<?= escape(__('common:delete')) ?>
 			</button>
@@ -230,21 +230,17 @@ $closeUrl = $screen->url(['file' => null]);
 		<?php endif ?>
 	</form>
 
-	<dialog class="cms-modal" data-size="compact" data-media-delete-dialog>
-		<?php $this->include('component/modal-header', ['title' => __('media:delete')]) ?>
-		<div class="modal-body cms-confirm">
-			<p class="question"><?= escape(__('media:confirm-delete')) ?></p>
-			<p class="cms-modal-remove-message"><?= escape($asset->filename) ?></p>
-		</div>
-		<footer class="modal-footer">
-			<button type="button" class="cms-button secondary" data-dialog-close data-dialog-focus><?= escape(
-				__('media:cancel-delete-file'),
-			) ?></button>
-			<form method="post" action="<?= escape($deleteUrl) ?>" hx-post="<?= escape($deleteUrl) ?>" hx-target="#media-detail" hx-swap="outerHTML">
-				<?php $this->include('component/csrf') ?>
-				<button type="submit" class="cms-button danger solid"><?= escape(__('media:confirm-delete-file')) ?></button>
-			</form>
-		</footer>
-	</dialog>
+	<?php // Its own form: forms cannot nest. ?>
+	<form
+		id="media-detail-delete"
+		method="post"
+		action="<?= escape($deleteUrl) ?>"
+		hx-post="<?= escape($deleteUrl) ?>"
+		hx-target="#media-detail"
+		hx-swap="outerHTML"
+		hx-confirm="<?= escape(__('media:confirm-delete', ['name' => $asset->filename])) ?>"
+		data-confirm-action="<?= escape(__('media:delete')) ?>"
+		data-confirm-tone="danger"
+		hidden><?php $this->include('component/csrf') ?></form>
 <?php endif ?>
 </div>

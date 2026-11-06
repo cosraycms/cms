@@ -101,7 +101,7 @@ $photo("{$run}/files/still.jpg", 640, 360, 40);
 $photo("{$run}/files/landscape.jpg", 1200, 600);
 $photo("{$run}/files/portrait.jpg", 600, 1200, 10);
 
-for ($i = 1; $i <= 3; $i++) {
+for ($i = 1; $i <= 4; $i++) {
 	$photo("{$run}/files/screen-{$i}.jpg", 640, 480, $i * 7);
 }
 

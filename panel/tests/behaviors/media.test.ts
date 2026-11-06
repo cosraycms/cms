@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CosrayBridge, UploadResult } from '../../src/types/bridge';
 import { install } from '../../src/behaviors/media.js';
 
-vi.mock('../../src/lib/locale.js', () => ({ __: (id: string) => id }));
+vi.mock('../../src/lib/locale.js', () => ({
+	__: (id: string) => id,
+	__n: (one: string, many: string, count: number) => (count === 1 ? one : many),
+}));
 
 let uninstall: () => void;
 const ajax =
@@ -36,9 +39,7 @@ function screen(detail = ''): HTMLElement {
 					<span hidden data-media-focal-marker></span>
 					<input type="hidden" data-media-focal-x />
 					<input type="hidden" data-media-focal-y />
-					<button type="button" data-media-delete>Delete</button>
 				</form>
-				<dialog data-media-delete-dialog><button type="button" data-dialog-close>Cancel</button></dialog>
 			</div>
 		</div>`;
 
@@ -170,15 +171,38 @@ describe('focal point', () => {
 	});
 });
 
-describe('delete', () => {
-	it('asks in the detail dialog first', () => {
-		screen('a');
-
-		document.querySelector<HTMLElement>('[data-media-delete]')!.click();
-
-		expect(document.querySelector<HTMLDialogElement>('[data-media-delete-dialog]')!.open).toBe(
-			true,
+describe('deleting the selection', () => {
+	it('asks first and posts the selected files only when confirmed', async () => {
+		const root = screen();
+		root.insertAdjacentHTML(
+			'beforeend',
+			`<input type="checkbox" data-media-select value="a" checked>
+			<input type="checkbox" data-media-select value="b" checked>
+			<button type="button" data-media-delete-selected data-url="/panel/media/delete-many"
+				data-confirm-action="Delete" data-confirm-tone="danger">Delete selected</button>`,
 		);
+		const post = vi.fn().mockResolvedValue({
+			status: 200,
+			json: () => Promise.resolve({ ok: true, deleted: 2, kept: 0 }),
+		});
+		vi.stubGlobal('fetch', post);
+		const button = root.querySelector<HTMLElement>('[data-media-delete-selected]')!;
+
+		button.click();
+		const question = document.querySelector('dialog[open] .question');
+		expect(question?.textContent).toBe('media:confirm-delete-selected-plural');
+		document.querySelector<HTMLElement>('dialog[open] .modal-footer .secondary')!.click();
+		await new Promise((resolve) => setTimeout(resolve));
+		expect(post).not.toHaveBeenCalled();
+
+		button.click();
+		document.querySelector<HTMLElement>('dialog[open] .modal-footer .danger')!.click();
+
+		await vi.waitFor(() => expect(ajax).toHaveBeenCalled());
+		expect(post).toHaveBeenCalledOnce();
+		const [url, init] = post.mock.calls[0] as [string, RequestInit];
+		expect(url).toBe('/panel/media/delete-many');
+		expect((init.body as FormData).getAll('uids[]')).toEqual(['a', 'b']);
 	});
 });
 

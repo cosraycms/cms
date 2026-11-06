@@ -34,9 +34,9 @@ test('searches texts, narrows to unused files and deletes a selection', async ({
 	await expect(page.locator('[data-media-selection-count]')).toHaveText('2 selected');
 
 	await page.locator('[data-media-delete-selected]').click();
-	const dialog = page.locator('[data-media-delete-selected-dialog]');
+	const dialog = page.getByRole('dialog', { name: 'Delete selected' });
 	await expect(dialog.getByText('Delete the 2 selected files?')).toBeVisible();
-	await dialog.locator('[data-media-delete-selected-confirm]').click();
+	await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
 
 	await expect(page.locator('.cms-asset-cell').filter({ hasText: /screen-[12]\.jpg/ })).toHaveCount(
 		0,
@@ -58,4 +58,25 @@ test('replacing a file keeps its uid and shows the new picture', async ({ page }
 	await expect(detail.locator('.cms-detail-head h2')).toHaveText('portrait.jpg');
 	await expect(detail).toHaveAttribute('data-media-detail', String(uid));
 	await expect(detail.getByText('600 × 1200 px')).toBeVisible();
+});
+
+test('deleting a file asks in a panel dialog first', async ({ page }) => {
+	await signIn(page);
+	await page.goto('/panel/media');
+	await page.locator('[data-media-upload-input]').setInputFiles(file('screen-4.jpg'));
+	const detail = page.locator('#media-detail');
+	await expect(detail.locator('.cms-detail-head h2')).toHaveText('screen-4.jpg');
+	const tile = page.locator('[data-media-tile]').filter({ hasText: 'screen-4.jpg' });
+
+	await detail.getByRole('button', { name: 'Delete' }).click();
+	const question = page.getByRole('dialog', { name: 'Delete file' });
+	await expect(question.getByText('Delete the file "screen-4.jpg"?')).toBeVisible();
+	await expect(question.getByRole('button', { name: 'Cancel' })).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect(question).toHaveCount(0);
+	await expect(tile).toBeVisible();
+
+	await detail.getByRole('button', { name: 'Delete' }).click();
+	await question.getByRole('button', { name: 'Delete file' }).click();
+	await expect(tile).toHaveCount(0);
 });
