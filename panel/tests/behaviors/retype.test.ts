@@ -186,9 +186,20 @@ function retype(row: HTMLElement, to: string): void {
 		.click();
 }
 
+/** The question the change asks, while it is open. */
+function question(): HTMLDialogElement | null {
+	return document.querySelector<HTMLDialogElement>('dialog.cms-modal[open]');
+}
+
+async function answer(yes: boolean): Promise<void> {
+	question()!
+		.querySelector<HTMLElement>(`.modal-footer ${yes ? '.danger' : '.secondary'}`)!
+		.click();
+	await new Promise((resolve) => setTimeout(resolve));
+}
+
 describe('changing a block’s type', () => {
 	it('puts a fresh block of the picked type in an empty block’s cells, with its settings', () => {
-		const confirm = vi.spyOn(window, 'confirm');
 		const { rows } = editor([
 			text('a', at(1, 1, 6), '', { class: { zxx: 'wide' }, padding: { zxx: 'l' } }),
 			text('b', at(7, 1, 6)),
@@ -198,7 +209,7 @@ describe('changing a block’s type', () => {
 
 		const [fresh, other] = rows();
 
-		expect(confirm).not.toHaveBeenCalled();
+		expect(question()).toBeNull();
 		expect(rows()).toHaveLength(2);
 		expect(type(fresh)).toBe(QUOTE);
 		expect(uid(fresh)).toMatch(/^[a-z0-9]{13}$/);
@@ -213,18 +224,20 @@ describe('changing a block’s type', () => {
 		expect(own(fresh, '[uid]').name).toBe('content[body][value][zxx][0][uid]');
 	});
 
-	it('asks before a block’s content goes, and keeps the block when declined', () => {
-		const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+	it('asks before a block’s content goes, and keeps the block when declined', async () => {
 		const { rows } = editor([text('a', at(1, 1, 12))]);
 
 		retype(rows()[0], QUOTE);
 
-		expect(confirm).toHaveBeenCalledWith('Change the block type? Its content will be removed.');
+		expect(question()?.querySelector('.question')?.textContent).toBe(
+			'Change the block type? Its content will be removed.',
+		);
+		await answer(false);
 		expect(rows().map(uid)).toEqual(['a']);
 		expect(content(rows()[0])).toBe('a');
 
-		confirm.mockReturnValue(true);
 		retype(rows()[0], QUOTE);
+		await answer(true);
 
 		expect(rows()).toHaveLength(1);
 		expect(type(rows()[0])).toBe(QUOTE);
@@ -232,8 +245,7 @@ describe('changing a block’s type', () => {
 		expect(layout(rows()[0])).toEqual(at(1, 1, 12));
 	});
 
-	it('asks for a rich text with words in it, not for an empty one', () => {
-		const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+	it('asks for a rich text with words in it, not for an empty one', async () => {
 		const doc = (...words: string[]) => ({
 			type: 'doc',
 			content: [
@@ -256,29 +268,27 @@ describe('changing a block’s type', () => {
 
 		retype(rows()[0], TEXT);
 
-		expect(confirm).not.toHaveBeenCalled();
+		expect(question()).toBeNull();
 
 		retype(rows()[1], TEXT);
+		await answer(true);
 
-		expect(confirm).toHaveBeenCalledOnce();
 		expect(rows().map(type)).toEqual([TEXT, TEXT]);
 	});
 
-	it('retypes a block whose own type no longer has a template', () => {
-		const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+	it('retypes a block whose own type no longer has a template', async () => {
 		const { rows } = editor([{ ...text('q', at(1, 1, 12), 'Quoted'), type: QUOTE }]);
 		[...document.querySelectorAll('template[data-repeater-template]')]
 			.find((candidate) => candidate.getAttribute('data-repeater-template') === QUOTE)!
 			.remove();
 
 		retype(rows()[0], TEXT);
+		await answer(true);
 
-		expect(confirm).toHaveBeenCalledOnce();
 		expect(rows().map(type)).toEqual([TEXT]);
 	});
 
-	it('replaces a part within its split, which keeps its parts', () => {
-		vi.spyOn(window, 'confirm').mockReturnValue(true);
+	it('replaces a part within its split, which keeps its parts', async () => {
 		const { rows } = editor([
 			split(
 				's1',
@@ -290,6 +300,7 @@ describe('changing a block’s type', () => {
 		const [container] = rows();
 
 		retype(parts(container)[0], QUOTE);
+		await answer(true);
 
 		const [fresh, kept] = parts(container);
 
@@ -302,12 +313,11 @@ describe('changing a block’s type', () => {
 	});
 
 	it('leaves a block picked as its own type as it is', () => {
-		const confirm = vi.spyOn(window, 'confirm');
 		const { rows } = editor([text('a', at(1, 1, 6))]);
 
 		retype(rows()[0], TEXT);
 
-		expect(confirm).not.toHaveBeenCalled();
+		expect(question()).toBeNull();
 		expect(rows().map(uid)).toEqual(['a']);
 	});
 

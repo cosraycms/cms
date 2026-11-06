@@ -172,6 +172,8 @@ $retype = count($blockTypes) > 1;
 							type="button"
 							data-retype
 							data-retype-confirm="<?= $this->escape(__('field:change-type-confirm')) ?>"
+							data-confirm-action="<?= $this->escape(__('field:change-type')) ?>"
+							data-confirm-tone="danger"
 							data-places="block columns rows">
 							<?= $this->escape(__('field:change-type')) ?>
 						</button>
@@ -208,7 +210,9 @@ $retype = count($blockTypes) > 1;
 						<button
 							type="button"
 							data-retype
-							data-retype-confirm="<?= $this->escape(__('field:change-type-confirm')) ?>">
+							data-retype-confirm="<?= $this->escape(__('field:change-type-confirm')) ?>"
+							data-confirm-action="<?= $this->escape(__('field:change-type')) ?>"
+							data-confirm-tone="danger">
 							<?= $this->escape(__('field:change-type')) ?>
 						</button>
 					<?php endif ?>

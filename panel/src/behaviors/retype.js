@@ -5,8 +5,10 @@
 // content does not carry over; a block that has any asks first.
 
 /** @import { CosrayHost, HostPayload } from '../lib/host.js' */
+/** @import { Question } from '../lib/modal.js' */
 
 import { openMenu } from '../lib/action-menu.js';
+import { confirm, question } from '../lib/modal.js';
 
 import { open as openCatalog } from './block-catalog.js';
 import { adder, arm } from './pick.js';
@@ -144,18 +146,27 @@ function filled(row, fresh) {
  * @param {HTMLElement} row
  * @param {HTMLElement} field
  * @param {string | null} type
- * @param {string} question
+ * @param {Question} asked
  */
-function retype(row, field, type, question) {
-	const context = row.parentElement && insertion(row.parentElement);
+async function retype(row, field, type, asked) {
+	let context = row.parentElement && insertion(row.parentElement);
 	const current = typeOf(row);
 
 	if (!context || type === current) {
 		return;
 	}
 
-	if (filled(row, template(field, current)) && !window.confirm(question)) {
-		return;
+	if (filled(row, template(field, current))) {
+		if (!(await confirm(asked))) {
+			return;
+		}
+
+		// The block may have moved or gone while the question was open.
+		context = row.isConnected && row.parentElement ? insertion(row.parentElement) : null;
+
+		if (!context) {
+			return;
+		}
 	}
 
 	let stamped = false;
@@ -186,10 +197,10 @@ function retype(row, field, type, question) {
  * The field's picker at the block's kebab; its choice replaces the block.
  *
  * @param {HTMLElement} row
- * @param {string} question
+ * @param {Question} asked
  * @param {boolean} keyboard
  */
-function choose(row, question, keyboard) {
+function choose(row, asked, keyboard) {
 	const field = /** @type {HTMLElement | null} */ (row.closest('.cms-blocks-editor'));
 	const how = field && adder(field);
 	const base = field && insertion(field);
@@ -205,7 +216,7 @@ function choose(row, question, keyboard) {
 	/**
 	 * @param {string | null} type
 	 */
-	const change = (type) => retype(row, field, type, question);
+	const change = (type) => void retype(row, field, type, asked);
 
 	openMenu(kebab, keyboard ? 'first' : false, kebab, menu);
 	arm(menu, change, () => openCatalog({ ...base, at: { row, where: 'after' } }, true, change));
@@ -222,7 +233,8 @@ function onClick(event) {
 	const row = /** @type {HTMLElement | null} */ (entry?.closest('[data-repeater-row]'));
 
 	if (entry && row) {
-		choose(row, entry.getAttribute('data-retype-confirm') ?? '', event.detail === 0);
+		const asked = question(entry, entry.getAttribute('data-retype-confirm') ?? '');
+		choose(row, { ...asked, owner: row }, event.detail === 0);
 	}
 }
 
