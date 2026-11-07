@@ -242,6 +242,59 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(1, $this->cms->nodes()->search('app', ['name'])->count());
 	}
 
+	public function testPartialWordsMatchInsideLongerWordsAfterWholeWordMatches(): void
+	{
+		$this->page('fts-partial-whole', 'Ball games');
+		$this->page('fts-partial-inside', 'Football', 'Weekend matches');
+		$this->page('fts-partial-accent', 'Ballétschool');
+		$this->page('fts-partial-none', 'Tennis');
+		self::assertSame(['fts-partial-whole'], $this->uids($this->cms->nodes()->fulltext('ball')));
+		$finder = $this->cms->nodes()->fulltext('ball', partial: true);
+		self::assertSame(3, $finder->count());
+		$results = iterator_to_array($finder);
+		self::assertSame('fts-partial-whole', $results[0]->meta->uid);
+		self::assertGreaterThan($results[1]->meta->search->score, $results[0]->meta->search->score);
+		self::assertEqualsCanonicalizing(
+			['fts-partial-inside', 'fts-partial-accent'],
+			[$results[1]->meta->uid, $results[2]->meta->uid],
+		);
+		self::assertSame(
+			['fts-partial-inside'],
+			$this->uids($this->cms->nodes()->fulltext('Foot match', partial: true)),
+		);
+		self::assertSame(['fts-partial-accent'], $this->uids($this->cms->nodes()->fulltext('etsch', partial: true)));
+	}
+
+	#[DataProvider('partialQueries')]
+	public function testPartialMatchingKeepsWebsearchIntent(string $query, array $expected): void
+	{
+		$this->page('fts-partial-a', 'Football', 'Weekend');
+		$this->page('fts-partial-b', 'Baseball', 'Weekday');
+		$this->page('fts-partial-c', 'Ballroom 100%', 'Dancing');
+		$finder = $this->cms->nodes()->fulltext($query, partial: true)->order('uid');
+		self::assertSame(
+			array_map(static fn(string $id): string => 'fts-partial-' . $id, $expected),
+			$this->uids($finder),
+		);
+		self::assertSame(count($expected), $finder->count());
+	}
+
+	public static function partialQueries(): array
+	{
+		return [
+			'every word is required' => ['ball week', ['a', 'b']],
+			'negation excludes partial matches' => ['ball -end', ['b', 'c']],
+			'or narrows rather than widens' => ['foot OR room', []],
+			'short words only match whole' => ['ba', []],
+			'phrases match exactly' => ['"ball"', []],
+			'like wildcards are literal' => ['%', []],
+			'percent signs are text' => ['100%', ['c']],
+			'only negated words' => ['-ball', ['a', 'b', 'c']],
+			'eight words still match partially' => [str_repeat('ball ', 8), ['a', 'b', 'c']],
+			'more words fall back to whole words' => [str_repeat('ball ', 9), []],
+		];
+	}
+
 	public function testFulltextRemainsAnOrdinaryFieldNameInTheFinderDsl(): void
 	{
 		$this->createTestNode([

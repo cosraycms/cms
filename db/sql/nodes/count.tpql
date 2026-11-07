@@ -19,7 +19,24 @@ FROM
 WHERE
 	1 = 1
 <?php if (isset($fulltext)) : ?>
-	AND ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
+	AND (
+		ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
+<?php if (isset($fulltext_words)) : ?>
+		OR (TRUE
+<?php foreach ($fulltext_words as $i => $word) : ?>
+			AND <?= $word['negated'] ? 'NOT ' : '' ?>(
+<?php if (!$word['negated']) : ?>
+				numnode(plainto_tsquery(:search_config::regconfig, :fulltext_word_<?= $i ?>)) = 0 OR
+<?php endif ?>
+				ft.document @@ plainto_tsquery(:search_config::regconfig, :fulltext_word_<?= $i ?>)
+<?php if ($word['inside']) : ?>
+				OR /*:cms.prefix:*/fulltext_fold(ft.source) LIKE /*:cms.prefix:*/fulltext_fold(:fulltext_pattern_<?= $i ?>)
+<?php endif ?>
+			)
+<?php endforeach ?>
+		)
+<?php endif ?>
+	)
 <?php endif ?>
 <?php if (isset($active_url) && $active_url) : ?>
 	AND (<?= $routable ?>)

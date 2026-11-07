@@ -9,6 +9,7 @@ use Cosray\Cms;
 use Cosray\Context;
 use Cosray\Exception\RuntimeException;
 use Cosray\Fulltext\Configurations;
+use Cosray\Fulltext\Partial;
 use Cosray\Fulltext\Search;
 use Cosray\Fulltext\Snippet;
 use Cosray\Node\Factory;
@@ -31,6 +32,7 @@ final class Nodes implements Iterator
 	private ?int $limit = null;
 	private ?int $offset = null;
 	private ?string $fulltext = null;
+	private bool $partial = false;
 	private ?bool $activeUrl = null;
 	private readonly Configurations $configurations;
 	private ?bool $deleted = false; // defaults to false, if all nodes are needed set $deleted to null
@@ -126,9 +128,11 @@ final class Nodes implements Iterator
 		return $this;
 	}
 
-	public function fulltext(string $query): self
+	/** With `$partial`, a word also matches inside longer words, such as `ball` in `football`. */
+	public function fulltext(string $query, bool $partial = false): self
 	{
 		$this->fulltext = $query;
+		$this->partial = $partial;
 
 		return $this;
 	}
@@ -446,6 +450,7 @@ final class Nodes implements Iterator
 			$params['fulltext'] = $this->fulltext;
 			$params['search_locale'] = $this->context->localeId();
 			$params['search_config'] = $this->configurations->for($this->context->locale());
+			$params = [...$params, ...$this->partialParams($this->fulltext)];
 		}
 
 		// An explicit activeUrl() wins; otherwise the gate is on while fulltext() is active.
@@ -453,6 +458,28 @@ final class Nodes implements Iterator
 			$params['active_url'] = true;
 			$params['url_locales'] = $this->localeIds();
 			$params['routable'] = $this->builtins['routable'];
+		}
+
+		return $params;
+	}
+
+	/** @return array<string, mixed> */
+	private function partialParams(string $query): array
+	{
+		$words = $this->partial ? Partial::words($query) : null;
+
+		if ($words === null) {
+			return [];
+		}
+
+		$params = ['fulltext_words' => $words];
+
+		foreach ($words as $i => $word) {
+			$params["fulltext_word_{$i}"] = $word['word'];
+
+			if ($word['inside']) {
+				$params["fulltext_pattern_{$i}"] = $word['pattern'];
+			}
 		}
 
 		return $params;

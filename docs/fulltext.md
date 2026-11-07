@@ -100,7 +100,19 @@ Input is bound directly to PostgreSQL's `websearch_to_tsquery`, not interpolated
 | `red -blue`   | Red without blue                                             |
 | `-blue`       | Documents not matching blue; potentially broad and expensive |
 
-Empty, punctuation-only and stopword-only queries return no results. With `simple`, words such as `the` are not stopwords. Negative-only and broadly negated expressions retain PostgreSQL semantics; they can scan much of the index and should be considered when an application sets rate limits. Prefix matching and typo tolerance are not included. `fulltext` remains an ordinary content-field name in the Finder DSL.
+Empty, punctuation-only and stopword-only queries return no results. With `simple`, words such as `the` are not stopwords. Negative-only and broadly negated expressions retain PostgreSQL semantics; they can scan much of the index and should be considered when an application sets rate limits. Typo tolerance is not included. `fulltext` remains an ordinary content-field name in the Finder DSL.
+
+### Partial words
+
+A word normally matches whole words and their inflections only: `ball` does not find `football`. Pass `partial: true` to also match words inside longer ones, such as parts of compounds:
+
+```php
+$results = $cms->nodes()->fulltext($query, partial: true);
+```
+
+A document then also matches when every word of the query occurs in its selected text, either as a full-text match or as part of a longer word, case- and accent-insensitively. Words prefixed with `-` exclude documents containing them in either way. Words shorter than three characters, and stopwords, keep whole-word matching. The additional matches are a conjunction of the query's words: `OR` does not widen them. Queries with quoted phrases, without a required word, or with more than eight words get no partial matching.
+
+Partial-only matches have a score of `0`, so they follow all whole-word matches in relevance order. Their snippets highlight only whole-word matches. A trigram index on the folded snippet source serves these lookups.
 
 Ranking uses `ts_rank_cd`, PostgreSQL's default A–D weights (`1.0`, `0.4`, `0.2`, `0.1`), and normalization `0`. Results default to descending relevance, then ascending node UID for ties. An explicit `order()` overrides relevance ordering. The score is relative to this query, not a percentage or comparable across unrelated searches.
 
@@ -170,7 +182,7 @@ Computed titles may depend on other nodes, external state or time. There is no d
 ### Deployment order
 
 1. Coordinate a maintenance window: stop old writers and keep searches disabled while schema, selection or analysis policies differ. Row locking does not make concurrent workers with different policies safe.
-2. Deploy the code and explicit schema opt-ins. Apply `php run db:migrations --apply` from the application; migration `000000-000036` adds `source`, configurations and vector construction. Fresh installs include them already. The migration role must be able to create these objects and use the installed `unaccent` extension.
+2. Deploy the code and explicit schema opt-ins. Apply `php run db:migrations --apply` from the application; migration `000000-000036` adds `source`, configurations and vector construction, and `000000-000051` the trigram index for partial words. Fresh installs include them already. The migration role must be able to create these objects and use the installed `unaccent` extension. `000000-000051` creates the `pg_trgm` extension when missing, which PostgreSQL ships with its standard modules and allows database owners to create.
 3. Inspect any existing full-text rows rather than assuming the old stub populated nothing. Vectors cannot reconstruct source prose: a rebuild is required even if old vectors exist.
 4. Run `php run db:titles` when title materialization needs refreshing, then `php run db:fulltext`. Resolve reported failures and rerun before exposing search.
 5. Resume normal writes and public search only after the complete rebuild succeeds. During an ordinary rebuild, completed and pending nodes can coexist; plan policy changes accordingly.
@@ -179,4 +191,4 @@ Cosray does not truncate selected documents to make indexing succeed. PostgreSQL
 
 ## Current limits
 
-Panel FTS, working-copy search, panel-only fields with a separate vector/source, class-level defaults, prefix/autocomplete, typo tolerance, attachment extraction, and ranking customization are not implemented. These are possible directions, not permanent exclusions. Public extraction and storage do not enforce panel permissions; extensions need their own authorization assessment.
+Panel FTS, working-copy search, panel-only fields with a separate vector/source, class-level defaults, autocomplete, highlighting of partial-word matches, typo tolerance, attachment extraction, and ranking customization are not implemented. These are possible directions, not permanent exclusions. Public extraction and storage do not enforce panel permissions; extensions need their own authorization assessment.

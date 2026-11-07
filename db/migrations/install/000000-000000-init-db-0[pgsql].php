@@ -20,6 +20,7 @@ final class Migration implements Contract\Migration
 			CREATE EXTENSION btree_gist;
 			CREATE EXTENSION btree_gin;
 			CREATE EXTENSION unaccent;
+			CREATE EXTENSION pg_trgm;
 			SQL)->run();
 
 		$schema = $this->schema($env);
