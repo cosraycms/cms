@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Tests\Unit;
 
 use Cosray\Assets\Asset;
+use Cosray\References\Resolver;
 use Cosray\Richtext\Renderer;
-use Cosray\Richtext\Resolver;
 use Cosray\Tests\TestCase;
 
 /**

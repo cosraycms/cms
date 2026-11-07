@@ -8,7 +8,7 @@ use Attribute;
 
 /** Editors can link each of the field's images to a page, a file or an address. */
 #[Attribute(Attribute::TARGET_PROPERTY)]
-readonly class Link
+readonly class Linkable
 {
 	public function __construct(
 		public bool $required = false,

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Cosray\Richtext;
 
+use Cosray\LinkTarget;
+use Cosray\References\Resolver;
+
 use function Cosray\escape;
 
 /**
@@ -19,7 +22,7 @@ final class Renderer
 	public function __construct(
 		private readonly Resolver $resolver,
 		private readonly string $imageSize = 'block',
-		private readonly string $linkRel = Link::REL,
+		private readonly string $linkRel = LinkTarget::REL,
 	) {}
 
 	public function render(mixed $doc): string
@@ -233,15 +236,15 @@ final class Renderer
 	private function link(array $mark, string $inner): string
 	{
 		$attrs = is_array($mark['attrs'] ?? null) ? $mark['attrs'] : [];
-		$html = Link::attributes($attrs, $this->resolver, $this->linkRel);
+		$html = LinkTarget::attributes($attrs, $this->resolver, $this->linkRel);
 
 		if ($html === null) {
-			$problem = Link::problem($attrs);
+			$problem = LinkTarget::problem($attrs);
 
 			return ($problem === '' ? '' : $this->skip($problem)) . $inner;
 		}
 
-		return '<a' . $this->attrString($html) . ">{$inner}</a>";
+		return LinkTarget::anchor($html, $inner);
 	}
 
 	/** @param array<string, mixed> $node */

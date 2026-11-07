@@ -1,4 +1,4 @@
-// What a link may point at; src/Richtext/Link.php holds the same rule and
+// What a link may point at; src/LinkTarget.php holds the same rule and
 // contract/link-urls.json keeps the two in step.
 
 const SCHEMES = ['http', 'https', 'mailto', 'tel'];

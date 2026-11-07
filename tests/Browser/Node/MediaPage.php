@@ -13,7 +13,7 @@ use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
-use Cosray\Schema\Link;
+use Cosray\Schema\Linkable;
 use Cosray\Schema\Render;
 use Cosray\Schema\Route;
 
@@ -23,7 +23,7 @@ class MediaPage implements Title
 	#[Label('Title')]
 	protected Text $title;
 
-	#[Label('Cover'), Limit(1), Caption, Attribution, Link]
+	#[Label('Cover'), Limit(1), Caption, Attribution, Linkable]
 	protected Image $cover;
 
 	#[Label('Gallery')]

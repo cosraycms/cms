@@ -19,7 +19,7 @@ use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Schema\Limit;
 use Cosray\Schema\Lines;
-use Cosray\Schema\Link;
+use Cosray\Schema\Linkable;
 use Cosray\Schema\Nullable;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
@@ -79,7 +79,7 @@ class Registry
 		$registry->register(Caption::class, new CaptionHandler());
 		$registry->register(Alt::class, new AltHandler());
 		$registry->register(Attribution::class, new AttributionHandler());
-		$registry->register(Link::class, new LinkHandler());
+		$registry->register(Linkable::class, new LinkableHandler());
 
 		return $registry;
 	}

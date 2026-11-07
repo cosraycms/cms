@@ -2,11 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Richtext;
+namespace Cosray;
 
-/** A stored link, in a richtext mark or on an image: exactly one of `href`, `node` and `asset`. */
-final class Link
+use Celema\Sire\Review;
+use Celema\Sire\Shape;
+use Cosray\References\Resolver;
+use Cosray\Validation\Shapes;
+
+/**
+ * A stored link, in a richtext mark, on an image or in a Link field:
+ * exactly one of `href`, `node` and `asset`, with an optional `target`
+ * and `rel`.
+ */
+final class LinkTarget
 {
+	/** The keys a stored link may carry besides a richtext mark's `class`. */
+	public const array KEYS = ['href', 'node', 'asset', 'target', 'rel'];
+
 	public const string REL = 'noopener';
 
 	/** What an editor can add to the `rel` of an address. */
@@ -45,6 +57,40 @@ final class Link
 	public static function validRel(mixed $rel): bool
 	{
 		return $rel === null || is_string($rel) && array_diff(self::tokens($rel), self::RELS) === [];
+	}
+
+	/** The validation shape of one stored link. */
+	public static function shape(): Shape
+	{
+		$shape = Shapes::create();
+
+		foreach (self::KEYS as $key) {
+			$shape->add($key, 'string')->optional()->nullable();
+		}
+
+		$shape->review(static function (Review $review): void {
+			if (!self::valid($review->values())) {
+				$review->addError('', __('link:invalid'));
+			}
+		});
+
+		return $shape;
+	}
+
+	/**
+	 * An `<a>` with the given attributes around content that is already HTML.
+	 *
+	 * @param array<string, string> $attributes
+	 */
+	public static function anchor(array $attributes, string $content): string
+	{
+		$html = '';
+
+		foreach ($attributes as $name => $value) {
+			$html .= sprintf(' %s="%s"', $name, escape($value));
+		}
+
+		return "<a{$html}>{$content}</a>";
 	}
 
 	/**

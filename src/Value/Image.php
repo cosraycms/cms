@@ -8,9 +8,9 @@ use Cosray\Assets\ResizeMode;
 use Cosray\Assets\Sizes;
 use Cosray\Assets\SizeSpec;
 use Cosray\Assets\Transform;
+use Cosray\LinkTarget;
 use Cosray\Markup;
-use Cosray\Richtext\Link;
-use Cosray\Richtext\OwnerResolver;
+use Cosray\References\OwnerResolver;
 use Override;
 
 use function Cosray\escape;
@@ -216,13 +216,7 @@ class Image extends File
 			return $content;
 		}
 
-		$attributes = '';
-
-		foreach ($anchor as $name => $value) {
-			$attributes .= sprintf(' %s="%s"', $name, escape($value));
-		}
-
-		return new Markup("<a{$attributes}>{$content}</a>");
+		return new Markup(LinkTarget::anchor($anchor, (string) $content));
 	}
 
 	public function alt(): string
@@ -278,10 +272,10 @@ class Image extends File
 			return null;
 		}
 
-		$stored = array_intersect_key($link, array_flip(['href', 'node', 'asset', 'target', 'rel']));
+		$stored = array_intersect_key($link, array_flip(LinkTarget::KEYS));
 
 		/** @var ?array{href: string, target?: string, rel?: string} */
-		return Link::attributes($stored, new OwnerResolver($this->owner));
+		return LinkTarget::attributes($stored, new OwnerResolver($this->owner));
 	}
 
 	/**

@@ -7,7 +7,7 @@ namespace Cosray\Field;
 use Celema\Sire\Review;
 use Celema\Sire\Shape;
 use Cosray\Assets\Transform;
-use Cosray\Richtext\Link;
+use Cosray\LinkTarget;
 use Cosray\Schema\TranslateMode;
 use Cosray\Validation\Shapes;
 use Cosray\Value;
@@ -97,7 +97,7 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 	{
 		$shape = parent::itemMetaShape();
 		$shape->add('attribution', 'string')->optional()->nullable();
-		$shape->add('link', $this->linkShape())->optional()->nullable();
+		$shape->add('link', LinkTarget::shape())->optional()->nullable();
 		$shape->add('focal', $this->fractionsShape('x', 'y'))->optional()->nullable();
 		$crop = $this->fractionsShape('x', 'y', 'w', 'h');
 		$crop->review(static function (Review $review): void {
@@ -106,23 +106,6 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 			}
 		});
 		$shape->add('crop', $crop)->optional()->nullable();
-
-		return $shape;
-	}
-
-	private function linkShape(): Shape
-	{
-		$shape = Shapes::create();
-
-		foreach (['href', 'node', 'asset', 'target', 'rel'] as $key) {
-			$shape->add($key, 'string')->optional()->nullable();
-		}
-
-		$shape->review(static function (Review $review): void {
-			if (!Link::valid($review->values())) {
-				$review->addError('', __('image:link-invalid'));
-			}
-		});
 
 		return $shape;
 	}

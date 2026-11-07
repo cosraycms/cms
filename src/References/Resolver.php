@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Cosray\Richtext;
+namespace Cosray\References;
 
 use Cosray\Assets\Asset;
 

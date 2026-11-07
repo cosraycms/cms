@@ -9,8 +9,8 @@ use Cosray\Block\Image;
 use Cosray\Block\RichText;
 use Cosray\Field;
 use Cosray\Migration\TextBlocks;
+use Cosray\References\Resolver;
 use Cosray\Richtext\Renderer;
-use Cosray\Richtext\Resolver;
 use Cosray\Richtext\Validator;
 use Cosray\Tests\TestCase;
 

@@ -101,10 +101,10 @@ An attribute decides what editors can fill in, not the markup. A template prints
 
 `gallery(size: 'thumb', large: 'large', prefix: 'site')` picks the [named sizes](#urls-and-image-sizes) and starts the classes with `site`; `data-url-large` is only there with `large`, for a lightbox. Further named arguments go to each `<img>`. Its images load lazily unless you pass `loading: null` or another value, while `img()` and the image block leave that to you, as a lazy hero image delays the page's main picture. For your own grid, loop over the images: `foreach ($page->photos as $photo)` and print `$photo->size('thumb')->figure()`.
 
-`#[Link]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
+`#[Linkable]` lets an editor link each of a field's images to an address, a page or a file. A link belongs to the use, like a crop, and is one per use rather than per language; a page link follows the visitor's language.
 
 ```php
-#[Label('Cover'), Link]
+#[Label('Cover'), Linkable]
 public Image $cover;
 ```
 
@@ -115,7 +115,7 @@ public Image $cover;
 
 `linked()` puts the content, by default the image's tag, inside the `<a>` with the link's `target` and `rel`, and returns it alone without a link or when the target is gone. `link()` returns only the address. An address is relative or uses `http`, `https`, `mailto` or `tel`, like a [richtext link](richtext-format.md#links), and gets the same `rel`.
 
-`#[Alt]`, `#[Caption]`, `#[Attribution]` and `#[Link]` take `required: true`, which asks the same of every image in the field:
+`#[Alt]`, `#[Caption]`, `#[Attribution]` and `#[Linkable]` take `required: true`, which asks the same of every image in the field:
 
 ```php
 #[Label('Cover'), Required, Alt(required: true), Attribution(required: true)]

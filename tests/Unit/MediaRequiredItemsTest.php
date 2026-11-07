@@ -16,14 +16,14 @@ use Cosray\Field\Image as ImageField;
 use Cosray\Field\Schema\AltHandler;
 use Cosray\Field\Schema\AttributionHandler;
 use Cosray\Field\Schema\CaptionHandler;
-use Cosray\Field\Schema\LinkHandler;
+use Cosray\Field\Schema\LinkableHandler;
 use Cosray\Field\Services;
 use Cosray\Field\Video;
 use Cosray\Node\FieldOwner;
 use Cosray\Schema\Alt;
 use Cosray\Schema\Attribution;
 use Cosray\Schema\Caption;
-use Cosray\Schema\Link;
+use Cosray\Schema\Linkable;
 use Cosray\Schema\TranslateMode;
 use Cosray\Tests\TestCase;
 use Cosray\Value\ValueContext;
@@ -44,7 +44,7 @@ final class MediaRequiredItemsTest extends TestCase
 		new AltHandler()->apply(new Alt(required: true), $field);
 		new CaptionHandler()->apply(new Caption(required: true), $field);
 		new AttributionHandler()->apply(new Attribution(), $field);
-		new LinkHandler()->apply(new Link(required: true), $field);
+		new LinkableHandler()->apply(new Linkable(required: true), $field);
 
 		$this->assertSame(['alt', 'caption', 'link'], $field->requiredItems());
 		$this->assertTrue($field->hasAttribution());

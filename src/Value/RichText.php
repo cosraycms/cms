@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Cosray\Value;
 
 use Cosray\Markup;
+use Cosray\References\OwnerResolver;
 use Cosray\Richtext\Envelope;
-use Cosray\Richtext\OwnerResolver;
 use Cosray\Richtext\Renderer;
 use Cosray\Util\Html as HtmlUtil;
 use Override;

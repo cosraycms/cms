@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cosray\Richtext;
 
+use Cosray\LinkTarget;
+
 /**
  * Writer-strict validation of richtext documents: saves and
  * migrations must produce only spec vocabulary. Readers stay
@@ -178,11 +180,11 @@ final class Validator
 			}
 		}
 
-		if (is_string($attrs['href'] ?? null) && !Link::safe($attrs['href'])) {
+		if (is_string($attrs['href'] ?? null) && !LinkTarget::safe($attrs['href'])) {
 			$this->errors[] = "{$path}: link href uses a scheme that is not allowed";
 		}
 
-		if (!Link::validRel($attrs['rel'] ?? null)) {
+		if (!LinkTarget::validRel($attrs['rel'] ?? null)) {
 			$this->errors[] = "{$path}: link rel holds a value that is not allowed";
 		}
 

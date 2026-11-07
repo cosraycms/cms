@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cosray\Richtext;
 
 use Cosray\Assets\Asset;
+use Cosray\References\Resolver;
 use Override;
 
 /**
