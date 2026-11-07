@@ -265,13 +265,18 @@ final class FulltextFinderTest extends FulltextTestCase
 			static fn($node): float => round($node->meta->search->score, 2),
 			$results,
 		));
+		self::assertStringContainsString('<mark>Football</mark>', $results[1]->meta->search->snippet->html()->html);
+		self::assertStringContainsString('<mark>Footballs</mark>', $results[4]->meta->search->snippet->html()->html);
+		self::assertStringContainsString('<mark>ball</mark>', $results[3]->meta->search->snippet->html()->html);
 		self::assertSame(['fts-partial-d'], $this->uids($this->cms->nodes()->fulltext('Foot match', partial: true)));
 	}
 
 	public function testPartialWordsIgnoreCaseAndAccents(): void
 	{
 		$this->page('fts-partial-accent', 'Ballétschool');
-		self::assertSame(['fts-partial-accent'], $this->uids($this->cms->nodes()->fulltext('ETSCH', partial: true)));
+		$results = iterator_to_array($this->cms->nodes()->fulltext('ETSCH', partial: true));
+		self::assertSame(['fts-partial-accent'], array_map(static fn($node): string => $node->meta->uid, $results));
+		self::assertStringContainsString('<mark>Ballétschool</mark>', $results[0]->meta->search->snippet->html()->html);
 	}
 
 	#[DataProvider('partialQueries')]

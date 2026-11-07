@@ -476,7 +476,7 @@ final class Nodes implements Iterator
 			'fulltext_words' => $words,
 			'fulltext_partial_score' => Partial::SCORE,
 			'fulltext_title_score' => Partial::TITLE_SCORE,
-			'fulltext_title_words' => array_keys(array_filter(
+			'fulltext_inside_words' => array_keys(array_filter(
 				$words,
 				static fn(array $word): bool => $word['inside'] && !$word['negated'],
 			)),
