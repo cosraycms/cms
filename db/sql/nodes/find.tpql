@@ -18,15 +18,15 @@ SELECT
 	n.title,
 <?php if (isset($fulltext)) : ?>
 <?php if (isset($fulltext_words)) : ?>
-	CASE WHEN ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
-		THEN ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext))
-		ELSE <?= $fulltext_partial_score ?> + <?= $fulltext_title_score ?> * (0
+	GREATEST(
+		ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)),
+		<?= $fulltext_partial_score ?> + <?= $fulltext_title_score ?> * (0
 <?php foreach ($fulltext_title_words as $i) : ?>
 			+ (/*:cms.prefix:*/fulltext_fold((SELECT string_agg(value, ' ') FROM jsonb_each_text(n.title)))
 				LIKE /*:cms.prefix:*/fulltext_fold(:fulltext_pattern_<?= $i ?>))::int
 <?php endforeach ?>
 		)::float / <?= max(1, count($fulltext_title_words)) ?>
-	END AS search_score,
+	) AS search_score,
 <?php else: ?>
 	ts_rank_cd(ft.document, websearch_to_tsquery(:search_config::regconfig, :fulltext)) AS search_score,
 <?php endif ?>

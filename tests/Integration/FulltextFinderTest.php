@@ -249,15 +249,19 @@ final class FulltextFinderTest extends FulltextTestCase
 		$this->page('fts-partial-c', 'Sports', 'A ball');
 		$this->page('fts-partial-d', 'Weekend', 'Footballs and matches');
 		$this->page('fts-partial-e', 'Tennis');
-		self::assertSame(['fts-partial-a', 'fts-partial-c'], $this->uids($this->cms->nodes()->fulltext('ball')));
+		$this->page('fts-partial-f', 'Footballs', 'A ball');
+		self::assertSame(
+			['fts-partial-a', 'fts-partial-c', 'fts-partial-f'],
+			$this->uids($this->cms->nodes()->fulltext('ball')->order('uid')),
+		);
 		$finder = $this->cms->nodes()->fulltext('ball', partial: true);
-		self::assertSame(4, $finder->count());
+		self::assertSame(5, $finder->count());
 		$results = iterator_to_array($finder);
 		self::assertSame(
-			['fts-partial-a', 'fts-partial-b', 'fts-partial-c', 'fts-partial-d'],
+			['fts-partial-a', 'fts-partial-b', 'fts-partial-f', 'fts-partial-c', 'fts-partial-d'],
 			array_map(static fn($node): string => $node->meta->uid, $results),
 		);
-		self::assertSame([1.0, 0.5, 0.1, 0.05], array_map(
+		self::assertSame([1.0, 0.5, 0.5, 0.1, 0.05], array_map(
 			static fn($node): float => round($node->meta->search->score, 2),
 			$results,
 		));

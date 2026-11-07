@@ -112,7 +112,7 @@ $results = $cms->nodes()->fulltext($query, partial: true);
 
 A document then also matches when every word of the query occurs in its selected text, either as a full-text match or as part of a longer word, case- and accent-insensitively. Words prefixed with `-` exclude documents containing them in either way. Words shorter than three characters, and stopwords, keep whole-word matching. The additional matches are a conjunction of the query's words: `OR` does not widen them. Queries with quoted phrases, without a required word, or with more than eight words get no partial matching.
 
-Partial-only matches score `0.05`, plus up to `0.45` by the share of their words found in the node's title: a word inside a longer title word ranks above a single whole-word match in body text, but below a whole-word title match. Their snippets highlight only whole-word matches. A trigram index on the folded snippet source serves these lookups.
+With partial matching, a match scores at least `0.05`, plus up to `0.45` by the share of its words found in the node's title, even inside longer title words. Such a title ranks above a single whole-word match in body text, but below a whole-word title match. Snippets highlight only whole-word matches. A trigram index on the folded snippet source serves the lookups inside words.
 
 Ranking uses `ts_rank_cd`, PostgreSQL's default A–D weights (`1.0`, `0.4`, `0.2`, `0.1`), and normalization `0`. Results default to descending relevance, then ascending node UID for ties. An explicit `order()` overrides relevance ordering. The score is relative to this query, not a percentage or comparable across unrelated searches.
 
