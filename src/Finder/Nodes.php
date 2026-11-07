@@ -472,7 +472,15 @@ final class Nodes implements Iterator
 			return [];
 		}
 
-		$params = ['fulltext_words' => $words];
+		$params = [
+			'fulltext_words' => $words,
+			'fulltext_partial_score' => Partial::SCORE,
+			'fulltext_title_score' => Partial::TITLE_SCORE,
+			'fulltext_title_words' => array_keys(array_filter(
+				$words,
+				static fn(array $word): bool => $word['inside'] && !$word['negated'],
+			)),
+		];
 
 		foreach ($words as $i => $word) {
 			$params["fulltext_word_{$i}"] = $word['word'];

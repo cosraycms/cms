@@ -242,27 +242,32 @@ final class FulltextFinderTest extends FulltextTestCase
 		self::assertSame(1, $this->cms->nodes()->search('app', ['name'])->count());
 	}
 
-	public function testPartialWordsMatchInsideLongerWordsAfterWholeWordMatches(): void
+	public function testPartialWordsMatchInsideLongerWordsAndRankBelowWholeWords(): void
 	{
-		$this->page('fts-partial-whole', 'Ball games');
-		$this->page('fts-partial-inside', 'Football', 'Weekend matches');
-		$this->page('fts-partial-accent', 'Ballétschool');
-		$this->page('fts-partial-none', 'Tennis');
-		self::assertSame(['fts-partial-whole'], $this->uids($this->cms->nodes()->fulltext('ball')));
+		$this->page('fts-partial-a', 'Ball games');
+		$this->page('fts-partial-b', 'Football');
+		$this->page('fts-partial-c', 'Sports', 'A ball');
+		$this->page('fts-partial-d', 'Weekend', 'Footballs and matches');
+		$this->page('fts-partial-e', 'Tennis');
+		self::assertSame(['fts-partial-a', 'fts-partial-c'], $this->uids($this->cms->nodes()->fulltext('ball')));
 		$finder = $this->cms->nodes()->fulltext('ball', partial: true);
-		self::assertSame(3, $finder->count());
+		self::assertSame(4, $finder->count());
 		$results = iterator_to_array($finder);
-		self::assertSame('fts-partial-whole', $results[0]->meta->uid);
-		self::assertGreaterThan($results[1]->meta->search->score, $results[0]->meta->search->score);
-		self::assertEqualsCanonicalizing(
-			['fts-partial-inside', 'fts-partial-accent'],
-			[$results[1]->meta->uid, $results[2]->meta->uid],
-		);
 		self::assertSame(
-			['fts-partial-inside'],
-			$this->uids($this->cms->nodes()->fulltext('Foot match', partial: true)),
+			['fts-partial-a', 'fts-partial-b', 'fts-partial-c', 'fts-partial-d'],
+			array_map(static fn($node): string => $node->meta->uid, $results),
 		);
-		self::assertSame(['fts-partial-accent'], $this->uids($this->cms->nodes()->fulltext('etsch', partial: true)));
+		self::assertSame([1.0, 0.5, 0.1, 0.05], array_map(
+			static fn($node): float => round($node->meta->search->score, 2),
+			$results,
+		));
+		self::assertSame(['fts-partial-d'], $this->uids($this->cms->nodes()->fulltext('Foot match', partial: true)));
+	}
+
+	public function testPartialWordsIgnoreCaseAndAccents(): void
+	{
+		$this->page('fts-partial-accent', 'Ballétschool');
+		self::assertSame(['fts-partial-accent'], $this->uids($this->cms->nodes()->fulltext('ETSCH', partial: true)));
 	}
 
 	#[DataProvider('partialQueries')]

@@ -20,6 +20,15 @@ final class Partial
 	private const MAX_WORDS = 8;
 
 	/**
+	 * The score of a match found only inside longer words, below a single
+	 * whole-word match in body text (`0.1`) …
+	 */
+	public const SCORE = 0.05;
+
+	/** … plus up to this much as its words appear in the title, below a whole-word title match (`1.0`). */
+	public const TITLE_SCORE = 0.45;
+
+	/**
 	 * @return ?list<array{word: string, pattern: string, negated: bool, inside: bool}>
 	 *         Null when partial matching does not apply to the query.
 	 */
