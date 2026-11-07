@@ -47,6 +47,7 @@ final class Registry
 		$registry->register('file', 'cosray-file', 'cosray:media');
 		$registry->register('video', 'cosray-video', 'cosray:media');
 		$registry->register('reference', 'cosray-reference', 'cosray:reference');
+		$registry->register('link', 'cosray-link', 'cosray:link');
 
 		return $registry;
 	}

@@ -68,6 +68,7 @@ final class Index
 		$index->add(File::class, 'file');
 		$index->add(Iframe::class, 'iframe');
 		$index->add(Image::class, 'image', 'picture');
+		$index->add(Link::class, 'link');
 		$index->add(Number::class, 'number');
 		$index->add(Option::class, 'option');
 		$index->add(Radio::class, 'radio');

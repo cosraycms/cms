@@ -130,6 +130,11 @@ final class Control
 		return new self('reference');
 	}
 
+	public static function link(): self
+	{
+		return new self('link');
+	}
+
 	/** @param list<array{key: string, label?: string, control: self}> $fields */
 	public static function group(array $fields): self
 	{
