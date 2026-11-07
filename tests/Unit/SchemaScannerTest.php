@@ -8,9 +8,13 @@ use Celema\Router\Router;
 use Celema\Verba\Tool\Message;
 use Cosray\App;
 use Cosray\I18n\SchemaScanner;
+use Cosray\Plugin\Plugin;
+use Cosray\Plugin\Registrar;
+use Cosray\Tests\Fixtures\Block\NoteBlock;
 use Cosray\Tests\Fixtures\Node\SchemaScanNode;
 use Cosray\Tests\Fixtures\Node\TestDocument;
 use Cosray\Tests\Fixtures\Node\TestEmbeddedDocument;
+use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
 use Cosray\Tests\TestCase;
 
 final class SchemaScannerTest extends TestCase
@@ -94,6 +98,39 @@ final class SchemaScannerTest extends TestCase
 		// The built-in all-content collection leads the navigation, and Cosray
 		// translates its label itself.
 		$this->assertSame(['Bookings', 'Rooms'], $this->ids(SchemaScanner::fromApp($app)->scan()));
+	}
+
+	public function testAllowedBlockTypesAreScannedButNotCosraysOwn(): void
+	{
+		$ids = $this->ids(new SchemaScanner([TestNodeWithBlocks::class])->scan());
+
+		$this->assertContains('Quote', $ids);
+		$this->assertContains('Source', $ids);
+		$this->assertNotContains('block:heading', $ids);
+	}
+
+	public function testAppScanIncludesRegisteredBlockTypes(): void
+	{
+		$app = new App(
+			$this->config(['db.dsn' => 'sqlite::memory:', 'error.enabled' => false]),
+			$this->factory(),
+			new Router(),
+			$this->container(),
+		);
+		$app->plugin(new class implements Plugin {
+			public function id(): string
+			{
+				return 'test-notes';
+			}
+
+			public function register(Registrar $cms): void
+			{
+				$cms->blockType(NoteBlock::class);
+			}
+		});
+		$app->boot();
+
+		$this->assertSame(['Aside', 'Body', 'Cover', 'Note'], $this->ids(SchemaScanner::fromApp($app)->scan()));
 	}
 
 	public function testEmptyStringsAreSkipped(): void

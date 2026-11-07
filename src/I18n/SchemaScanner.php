@@ -11,6 +11,7 @@ use Cosray\Collection\AllContent;
 use Cosray\Collection\Ref;
 use Cosray\Field\Definitions;
 use Cosray\NavigationItem;
+use Cosray\Schema\Allows;
 use Cosray\Schema\Badge;
 use Cosray\Schema\Description;
 use Cosray\Schema\Label;
@@ -45,8 +46,8 @@ final class SchemaScanner implements Scanner
 	) {}
 
 	/**
-	 * Build a scanner from a booted app: every registered node type plus the
-	 * navigation section, link and collection names. Cosray's built-in
+	 * Build a scanner from a booted app: every registered node and block type
+	 * plus the navigation section, link and collection names. Cosray's built-in
 	 * collection is left out: its label is Cosray's message, which Cosray's
 	 * own catalogs translate, so the app's domain lists only what the app
 	 * declares.
@@ -56,7 +57,12 @@ final class SchemaScanner implements Scanner
 		$labels = [];
 		self::walk($app->navigation()->items(), $labels);
 
-		return new self($app->bootstrap()->nodeClasses(), array_values(array_unique($labels)));
+		$bootstrap = $app->bootstrap();
+
+		return new self(
+			[...$bootstrap->nodeClasses(), ...$bootstrap->blockClasses()],
+			array_values(array_unique($labels)),
+		);
 	}
 
 	/**
@@ -72,8 +78,10 @@ final class SchemaScanner implements Scanner
 			$this->add($messages, $label, 'navigation');
 		}
 
+		$seen = [];
+
 		foreach ($this->classes as $class) {
-			$this->fromClass($class, $messages);
+			$this->fromClass($class, $messages, $seen);
 		}
 
 		return array_values($messages);
@@ -89,12 +97,22 @@ final class SchemaScanner implements Scanner
 	}
 
 	/**
+	 * A class's strings, and those of the row and block types its fields
+	 * allow. Cosray's own classes are left to Cosray's catalogs.
+	 *
 	 * @param class-string $class
 	 * @param array<string, Message> $messages
+	 * @param array<string, true> $seen
 	 */
-	private function fromClass(string $class, array &$messages): void
+	private function fromClass(string $class, array &$messages, array &$seen): void
 	{
 		$reflection = new ReflectionClass($class);
+
+		if (isset($seen[$class]) || str_starts_with((string) $reflection->getFileName(), dirname(__DIR__) . '/')) {
+			return;
+		}
+
+		$seen[$class] = true;
 
 		foreach ($reflection->getAttributes(Label::class) as $attribute) {
 			$this->add($messages, $attribute->newInstance()->label, $class);
@@ -104,7 +122,7 @@ final class SchemaScanner implements Scanner
 			$this->add($messages, $attribute->newInstance()->badge, $class);
 		}
 
-		$this->fromProperties($reflection, $messages);
+		$this->fromProperties($reflection, $messages, $seen);
 
 		foreach (Definitions::for($class)->embedded() as $embedded) {
 			$embeddedReflection = new ReflectionClass($embedded->type);
@@ -113,15 +131,16 @@ final class SchemaScanner implements Scanner
 				$this->add($messages, $attribute->newInstance()->label, $embedded->type);
 			}
 
-			$this->fromProperties($embeddedReflection, $messages);
+			$this->fromProperties($embeddedReflection, $messages, $seen);
 		}
 	}
 
 	/**
 	 * @param ReflectionClass<object> $reflection
 	 * @param array<string, Message> $messages
+	 * @param array<string, true> $seen
 	 */
-	private function fromProperties(ReflectionClass $reflection, array &$messages): void
+	private function fromProperties(ReflectionClass $reflection, array &$messages, array &$seen): void
 	{
 		foreach ($reflection->getProperties() as $property) {
 			$where = $reflection->getName() . '::$' . $property->getName();
@@ -149,6 +168,14 @@ final class SchemaScanner implements Scanner
 			foreach ($property->getAttributes(Options::class) as $attribute) {
 				foreach ($this->optionLabels($attribute->newInstance()->options) as $label) {
 					$this->add($messages, $label, $where);
+				}
+			}
+
+			foreach ($property->getAttributes(Allows::class) as $attribute) {
+				foreach ($attribute->newInstance()->types as $type) {
+					if (class_exists($type)) {
+						$this->fromClass($type, $messages, $seen);
+					}
 				}
 			}
 		}

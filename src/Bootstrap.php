@@ -482,6 +482,16 @@ class Bootstrap implements CorePlugin
 		return array_values($this->nodes);
 	}
 
+	/**
+	 * Every block type offered by default, Cosray's own included.
+	 *
+	 * @return list<class-string<Block>>
+	 */
+	public function blockClasses(): array
+	{
+		return $this->blocks->all();
+	}
+
 	/** @return list<string> */
 	protected function localIconPaths(): array
 	{
