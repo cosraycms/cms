@@ -306,6 +306,8 @@ final class FulltextFinderTest extends FulltextTestCase
 			'fullwidth percent is text' => ['b％d', []],
 			'fullwidth low line is text' => ['Weekd＿y', []],
 			'only negated words' => ['-ball', ['a', 'b', 'c']],
+			'only stopwords' => ['the', []],
+			'stopwords beside a word are ignored' => ['the ball', ['a', 'b', 'c']],
 			'eight words still match partially' => [str_repeat('ball ', 8), ['a', 'b', 'c']],
 			'more words fall back to whole words' => [str_repeat('ball ', 9), []],
 		];

@@ -23,7 +23,8 @@ WHERE
 		ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
 <?php if (isset($fulltext_words)) : ?>
 <?php // LIKE patterns are escaped after the fold, which maps fullwidth ％ and ＿ to % and _. ?>
-		OR (TRUE
+<?php // Column-free guards fold to constants because PDO inlines the values and the functions are immutable; otherwise they would block both indexes. ?>
+		OR (numnode(websearch_to_tsquery(:search_config::regconfig, :fulltext)) > 0
 <?php foreach ($fulltext_words as $i => $word) : ?>
 			AND <?= $word['negated'] ? 'NOT ' : '' ?>(
 <?php if (!$word['negated']) : ?>
