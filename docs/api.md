@@ -95,6 +95,7 @@ The resolved view, the default, adds `fields`: every value resolved for the loca
 | Image | The file members plus `alt`, `attribution`, `link` as `{href, target?, rel?}` or null, `width`, `height`, `focal`, and `sizes`, a URL for every [named size](media.md#urls-and-image-sizes). A [crop](media.md#focal-point-and-crop) applies to the URLs and dimensions, and `focal` is relative to the cropped image |
 | Files, Images | A list of those objects |
 | Reference | A list of `{uid}` |
+| Link | `{href, target?, rel?}`, like an image's link, or null without a target or when it is gone |
 | Entries | A list of `{uid, type, fields}`, `type` naming the row type by handle |
 | Blocks | `{columns, blocks}`; each block has `uid`, `type`, `layout`, `fields` and `meta`, a split `blocks` instead of `fields` |
 

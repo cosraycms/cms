@@ -212,7 +212,7 @@ $app->plugin(ShopPlugin::class);
 
 The `plugins` config key also accepts plugin registrations. Classes registered by name are constructed without arguments; register a pre-built instance when construction needs arguments. IDs currently allow lowercase letters, digits, and dashes and require a dash, keeping plugin config namespaces separate from built-in settings.
 
-Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. Within registration, `$cms->option('currency', 'EUR')` reads that key with a default; elsewhere, use `Config`. Custom field classes extend `Cosray\Field\Field`; `Registrar::field()` string aliases are for legacy imports, not required when node properties use the field class directly.
+Settings use flat namespaced keys, such as `'acme-shop.currency' => 'USD'`. Within registration, `$cms->option('currency', 'EUR')` reads that key with a default; elsewhere, use `Config`. Custom field classes extend `Cosray\Field\Field`, as [writing a field type](content.md#writing-a-field-type) describes; `Registrar::field()` string aliases are for legacy imports, not required when node properties use the field class directly.
 
 Plugin migrations share the `default` namespace. Timestamped filenames avoid collisions; use Quma's `/*:cms.prefix:*/` placeholder for configured table prefixes and bound parameters for runtime data.
 

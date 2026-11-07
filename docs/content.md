@@ -72,6 +72,43 @@ An `Entries` field uses `#[Allows(Row::class, ...)]` to choose node-style row sc
 
 A `Reference` field stores an ordered neutral `{uid}` list. `#[Limit(max: 1)]` makes it single; `#[Pick(...)]` constrains eligible types, content predicates through `where`, and publication/visibility through `published` and `hidden`. Defaults include any publication state and hidden nodes, but not soft-deleted nodes. Read `uids()` or `uid()` and resolve through `$cms->node->byUid($uid)`. Eligibility is derived server-side from the field schema, not from client-supplied filters. See [Reference](../src/Field/Reference.php) and [Pick](../src/Schema/Pick.php).
 
+### Links
+
+A `Link` field stores one target: an address, a page or a file, with an optional new tab and `rel`. It is the link a [richtext link](richtext-format.md#links) or an [image's link](media.md) stores, so it is validated, resolved and indexed the same way. It holds no text; a block that needs a label declares a `Text` next to it.
+
+```php
+use Cosray\Field\Link;
+use Cosray\Field\Text;
+
+#[Label('Button')]
+final class Button implements Block
+{
+    #[Label('Label'), Required, Translate]
+    protected Text $label;
+
+    #[Label('Target'), Required]
+    protected Link $target;
+
+    public function render(BlockValue $block, RenderContext $ctx): string
+    {
+        return (string) $block->target->a($block->label, class: 'button');
+    }
+}
+```
+
+A link is neutral by default, as a page link follows the visitor's language; `#[Translate]` gives each language its own target, falling back like text. `a()` wraps content in the `<a>` and returns it alone when there is no target or it is gone; a string is escaped, a value or `Markup` printed as it is. `url()` returns the address or an empty string, `attributes()` the `<a>` attributes, `node()` the linked page's uid and `asset()` the linked file. See [Field\Link](../src/Field/Link.php) and [Value\Link](../src/Value/Link.php).
+
+### Writing a field type
+
+A field type extends [Field](../src/Field/Field.php), implements `structure()`, `shape()` and `value()`, and usually overrides `control()`:
+
+- `structure()` returns the stored data for a new value: `type`, the class name, and `value`, a locale map with `zxx` for a neutral field. `getSimpleStructure()`, `getFileStructure()` and, with `Capability\IsTranslatable`, `getTranslatableStructure()` build the usual maps.
+- `shape()` validates submitted data. `addType()`, `zxxShape()` and `addMeta()` add the common parts; `isRequired()` reflects `#[Required]`.
+- `value()` returns a [Value](../src/Value/Value.php) subclass. Its string conversion is the HTML templates print, so it escapes; `json()` is the [API representation](api.md#resolved-values) and `raw()` the stored value.
+- `control()` names the editor, by default a text input. `Control::element('acme-place', 'acme-maps/place.js')` loads a plugin's own [element control](controls.md#element-controls).
+
+When the stored data points to files or pages, the static `references()` returns their uids. They feed the [reference indexes](media.md#reference-indexes), which keep a used file from being deleted, and asset preloading; the editor's control receives those files' catalog data. `#[Translate]` needs `Capability\Translatable`; other attributes need the capability their handler checks for. [Field\Link](../src/Field/Link.php) and [Field\Color](../src/Field/Color.php) are small examples.
+
 ## Programmatic creation
 
 `Node\Writer` prepares and creates nodes without an HTTP request. Pass field values to `prepare()`; use the returned `Node\Prepared` to set the UID, handle, publication state, parent, or localized paths. A node whose constructor asks for the `Request`, like one handling a form, gets a stand-in that throws once it is used.

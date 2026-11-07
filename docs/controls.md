@@ -20,11 +20,12 @@ Fields persist locale maps: `zxx` is neutral; translated values use configured l
 | `youtube` | Video ID |
 | `group` | Object of sub-control values under `zxx` |
 | `repeater` | List of item values under `zxx` |
+| `link` | `{href \| node \| asset, target?, rel?}` or null |
 | `entries` | List of `{uid, type, fields}` under `zxx` |
 | `blocks` | List of typed rows with layout; see [Blocks](blocks.md#stored-shape) |
 | `element` | Whatever the field defines |
 
-Named built-ins resolve to the `cosray-code`, `cosray-richtext`, `cosray-image`, `cosray-file`, `cosray-video`, and `cosray-reference` elements. Code values are strings with syntax in field meta; `#[Syntax]` lists the syntaxes a code field offers, the first being the default, and [CodeSyntaxes](../src/Field/CodeSyntaxes.php) names the ones the editor supports: aliases such as `js` become their key, and any other name fails when the field is built. richtext uses the [structured format](richtext-format.md); media values are `{uid, meta?}` lists; references are ordered neutral `{uid}` lists. [Media](media.md) explains catalog lookup and metadata fallback.
+Named built-ins resolve to the `cosray-code`, `cosray-richtext`, `cosray-image`, `cosray-file`, `cosray-video`, `cosray-reference`, and `cosray-link` elements. Code values are strings with syntax in field meta; `#[Syntax]` lists the syntaxes a code field offers, the first being the default, and [CodeSyntaxes](../src/Field/CodeSyntaxes.php) names the ones the editor supports: aliases such as `js` become their key, and any other name fails when the field is built. richtext uses the [structured format](richtext-format.md); media values are `{uid, meta?}` lists; references are ordered neutral `{uid}` lists. [Media](media.md) explains catalog lookup and metadata fallback.
 
 `DateTime` writes normalize offsets to UTC whole seconds. The panel converts between that instant and `datetime-local` input using `meta.timezone`, defaulting to UTC. `Date` and `Time` do not carry offsets. The YouTube control accepts a URL or video ID through **Add video** or Enter, then shows a player from `youtube-nocookie.com` without autoplay. **Replace video** immediately clears the current selection and returns to the empty input. Adding another video uses the same **Add video** or Enter action as a fresh field. Only the selected ID is submitted, never a pasted URL or an unconfirmed draft. Loading the player contacts YouTube; the privacy-enhanced origin does not eliminate third-party requests.
 
@@ -96,6 +97,10 @@ public RichText $body;
 Inside a block, resolution is the block type property's own `#[Tools]`, then the blocks field's `#[Tools]`, then `Tool::INLINE`. Project toolbar settings do not override that block default. The current block editor uses a selection bubble rather than the standalone toolbar, so document-level commands may have no button there.
 
 [Tool](../src/Schema/Tool.php) defines the vocabulary and presets. Paragraph-class and text-style choices come from `richtext.classes` and `richtext.styles`, independently of the tool set. Hiding a tool does not remove its stored content semantics.
+
+### Link fields
+
+The link control shows where a link points, a page by its title and a file by its name, with buttons to add, change or remove it. Adding and changing open the link dialog richtext and images use, with tabs for an address, a page, images and files, a new-tab option and the `rel` additions. A translated link edits the selected content language and shows the target an empty language falls back to. See [Field\Link](../src/Field/Link.php).
 
 ## Entries
 
