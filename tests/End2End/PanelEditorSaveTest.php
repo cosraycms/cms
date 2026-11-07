@@ -8,6 +8,7 @@ use Cosray\Block as Builtin;
 use Cosray\Bootstrap;
 use Cosray\Config;
 use Cosray\Field\Blocks;
+use Cosray\Field\Link;
 use Cosray\Field\Text;
 use Cosray\Field\Textarea;
 use Cosray\Tests\End2EndTestCase;
@@ -20,12 +21,16 @@ use Cosray\Tests\Fixtures\Node\TestConditionalDocument;
 use Cosray\Tests\Fixtures\Node\TestDateTimeDocument;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\Fixtures\Node\TestImmutableDocument;
+use Cosray\Tests\Fixtures\Node\TestLinkDocument;
 use Cosray\Tests\Fixtures\Node\TestNodeWithBlocks;
 use Cosray\Tests\Fixtures\Node\TestNodeWithEntries;
+use Psr\Http\Message\ResponseInterface;
 
 final class PanelEditorSaveTest extends End2EndTestCase
 {
 	private ?int $articleTypeId = null;
+
+	private ?int $linkTypeId = null;
 
 	protected function setUp(): void
 	{
@@ -43,6 +48,7 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$plugin->node(TestNodeWithEntries::class);
 		$plugin->node(TestNodeWithBlocks::class);
 		$plugin->node(TestImmutableDocument::class);
+		$plugin->node(TestLinkDocument::class);
 		$plugin->node(NodeWithRenderAttribute::class);
 
 		return $plugin;
@@ -141,6 +147,82 @@ final class PanelEditorSaveTest extends End2EndTestCase
 		$this->assertSame('Still editable', $content['title']['value']['zxx']);
 		$this->assertSame('REF-1', $content['reference']['value']['zxx']);
 		$this->assertSame(true, $content['featured']['value']['zxx']);
+	}
+
+	public function testLinksRoundTripThroughTheirControls(): void
+	{
+		$this->createLinkNode('panel-save-links');
+		$this->createLinkNode('panel-link-target');
+		$this->db()->execute(
+			"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+			VALUES ('linkfieldpdf1', 'local', 'li/linkfieldpdf1/de.pdf', 'de.pdf', 1)",
+		)->run();
+
+		$html = $this->getHtmlResponse($this->makeRequest('GET', '/panel/node/panel-save-links'));
+		$this->assertHtmlNodeExists('//cosray-host[@name="content[target][json]"][@tag="cosray-link"]', $html);
+
+		$response = $this->save('panel-save-links', [
+			'target' => ['json' => json_encode(['value' => ['zxx' => ['node' => 'panel-link-target']]])],
+			'download' => ['json' => json_encode([
+				'value' => [
+					'en' => ['href' => 'https://example.com/en.pdf', 'target' => '_blank'],
+					'de' => ['asset' => 'linkfieldpdf1'],
+				],
+			])],
+		]);
+
+		$this->assertResponseOk($response);
+		$this->assertHtmlNodeMissing(
+			'//*[@id="editor-status" and contains(concat(" ", normalize-space(@class), " "), " is-error ")]',
+			$this->getHtmlResponse($response),
+		);
+		$content = $this->nodeContent('panel-save-links');
+		$this->assertSame(['zxx' => ['node' => 'panel-link-target']], $content['target']['value']);
+		$this->assertSame(['asset' => 'linkfieldpdf1'], $content['download']['value']['de']);
+		$this->assertSame(
+			['panel-link-target'],
+			array_column(
+				$this->db()->execute(
+					"SELECT target_uid FROM cms.node_references WHERE owner_uid = 'panel-save-links'",
+				)->all(),
+				'target_uid',
+			),
+		);
+		$this->assertSame(
+			['linkfieldpdf1'],
+			array_column(
+				$this->db()->execute(
+					"SELECT asset_uid FROM cms.asset_references WHERE owner_uid = 'panel-save-links'",
+				)->all(),
+				'asset_uid',
+			),
+		);
+	}
+
+	public function testALinkNeedsExactlyOneSafeTarget(): void
+	{
+		$this->createLinkNode('panel-save-links-invalid');
+
+		foreach ([
+			['zxx' => ['href' => 'javascript:alert(1)']],
+			['zxx' => ['href' => '/a', 'node' => 'panel-link-target']],
+			['zxx' => null],
+		] as $value) {
+			$response = $this->save('panel-save-links-invalid', [
+				'target' => ['json' => json_encode(['value' => $value])],
+			]);
+
+			$this->assertResponseOk($response);
+			$this->assertStringContainsString(
+				'data-error-path=\'["content","target","value","zxx"',
+				$this->getHtmlResponse($response),
+			);
+		}
+
+		$this->assertSame(
+			['zxx' => ['href' => '/start']],
+			$this->nodeContent('panel-save-links-invalid')['target']['value'],
+		);
 	}
 
 	public function testDateTimeRoundTripsThroughThePanelAndDynamicTitle(): void
@@ -1187,6 +1269,32 @@ final class PanelEditorSaveTest extends End2EndTestCase
 				'source' => ['type' => Text::class, 'value' => ['zxx' => 'Someone']],
 			],
 		];
+	}
+
+	private function createLinkNode(string $uid): void
+	{
+		$this->createTestNode([
+			'uid' => $uid,
+			'type' => $this->linkTypeId ??= $this->createTestType('test-link-document'),
+			'published' => true,
+			'content' => json_encode([
+				'title' => ['type' => Text::class, 'value' => ['zxx' => 'Links']],
+				'target' => ['type' => Link::class, 'value' => ['zxx' => ['href' => '/start']]],
+				'download' => ['type' => Link::class, 'value' => ['en' => null, 'de' => null]],
+			]),
+		]);
+	}
+
+	/** @param array<string, mixed> $content */
+	private function save(string $uid, array $content): ResponseInterface
+	{
+		return $this->makeRequest('POST', "/panel/node/{$uid}", [
+			'headers' => ['HX-Request' => 'true'],
+			'body' => [
+				'_complete' => '1',
+				'content' => ['title' => ['value' => ['zxx' => 'Links']], ...$content],
+			],
+		]);
 	}
 
 	private function nodeContent(string $uid): array

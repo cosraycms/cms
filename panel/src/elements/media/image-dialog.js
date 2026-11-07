@@ -13,7 +13,7 @@ import { extension, humanSize } from '../../lib/library.js';
 import { __ } from '../../lib/locale.js';
 import { libraryDialog } from './dialogs.js';
 import { imageStage } from './image-stage.js';
-import { linkRow } from './link-row.js';
+import { linkRow } from '../link/row.js';
 import { metaFields } from './meta-fields.js';
 import { button, contentLocales, create, effectiveText, replaceMenu, svg } from './views.js';
 
@@ -266,11 +266,14 @@ export function imageDialog({
 							link: item.meta?.link,
 							asset,
 							picked,
+							caption: __('image:link'),
 							required: required.includes('link'),
+							warning: __('image:link-no-alt'),
 							readonly,
 							change: (link) => edit(target, { link }),
 						})
 					: null;
+				row?.element.classList.add('cms-media-meta');
 				describeLink = () =>
 					row?.describe(
 						Boolean(

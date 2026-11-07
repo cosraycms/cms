@@ -15,6 +15,8 @@ $richtextFields = (array) u($richtextFields);
 $richtextContent = (array) u($richtextContent);
 $codeFields = (array) u($codeFields);
 $codeContent = (array) u($codeContent);
+$linkFields = (array) u($linkFields);
+$linkContent = (array) u($linkContent);
 $mediaFields = (array) u($mediaFields);
 $mediaContent = (array) u($mediaContent);
 $mediaAssets = (array) u($mediaAssets);
@@ -472,6 +474,42 @@ $theme = in_array($theme, ['light', 'dark'], true) ? $theme : '';
 										'defaultLocale' => $defaultLocale,
 										'uid' => 'styleguide',
 										'assets' => [],
+										'pathSourceFields' => [],
+									]) ?>
+								<?php endforeach ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" data-section="links">
+				<h2>Links</h2>
+				<p class="note">
+					Link fields: empty and required, a file opening in a new tab, a translated link whose
+					empty German value shows the English one, and the read-only state.
+				</p>
+				<div
+					class="cms-node"
+					data-content-locale-scope
+					data-content-locale="<?= escape($defaultLocale) ?>"
+					data-content-locales='<?= escape(json_encode($locales, $jsonFlags)) ?>'>
+					<div class="inner">
+						<div class="sheet">
+							<?php $this->include('component/content-locales', [
+								'locales' => $locales,
+								'selected' => $defaultLocale,
+								'controlId' => 'styleguide-link-locale',
+							]) ?>
+							<div class="cms-fields">
+								<?php foreach ($linkFields as $field): ?>
+									<?php $this->include('field/item', [
+										'field' => $field,
+										'content' => $linkContent,
+										'locales' => $locales,
+										'defaultLocale' => $defaultLocale,
+										'uid' => 'styleguide',
+										'assets' => $mediaAssets,
 										'pathSourceFields' => [],
 									]) ?>
 								<?php endforeach ?>

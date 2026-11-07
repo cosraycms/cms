@@ -930,7 +930,7 @@
 	font-size: var(--cms-font-size-xs);
 }
 
-/* Where an image links to. */
+/* A video's poster image. */
 .cms-video-poster {
 	& .target {
 		display: flex;
@@ -949,30 +949,6 @@
 	& .name {
 		min-width: 0;
 		overflow-wrap: anywhere;
-	}
-}
-
-.cms-image-link {
-	& .target {
-		display: flex;
-		align-items: center;
-		gap: var(--cms-space-2);
-		min-width: 0;
-	}
-
-	& .cms-image-link-text {
-		flex: 1 1 auto;
-		min-width: 0;
-		overflow: hidden;
-		font-size: var(--cms-font-size-sm);
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	& .warning {
-		margin: 0;
-		color: var(--cms-color-warning-text);
-		font-size: var(--cms-font-size-xs);
 	}
 }
 

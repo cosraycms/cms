@@ -406,7 +406,7 @@ describe('image details', () => {
 	});
 
 	describe('link', () => {
-		const row = () => document.querySelector<HTMLElement>('.cms-modal .cms-image-link');
+		const row = () => document.querySelector<HTMLElement>('.cms-modal .cms-link-row');
 		const rowButton = (label: string) =>
 			[...row()!.querySelectorAll('button')].find(
 				(entry) => entry.textContent === label || entry.title === label,
@@ -433,11 +433,11 @@ describe('image details', () => {
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			document.querySelector<HTMLInputElement>('.cms-modal input[type="checkbox"]')!.click();
 			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')]
-				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'))!
+				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-link-row'))!
 				.click();
 			await tick();
 
-			expect(row()?.querySelector('.cms-image-link-text')?.textContent).toBe('https://example.com');
+			expect(row()?.querySelector('.cms-link-text')?.textContent).toBe('https://example.com');
 
 			await action('common:apply');
 
@@ -465,7 +465,7 @@ describe('image details', () => {
 
 			advanced.querySelector<HTMLInputElement>('input[value="nofollow"]')!.click();
 			[...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')]
-				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'))!
+				.find((entry) => entry.textContent === 'link:add' && !entry.closest('.cms-link-row'))!
 				.click();
 			await tick();
 			await action('common:apply');
@@ -503,7 +503,7 @@ describe('image details', () => {
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 
 			const confirm = [...document.querySelectorAll<HTMLButtonElement>('.cms-modal button')].find(
-				(entry) => entry.textContent === 'link:add' && !entry.closest('.cms-image-link'),
+				(entry) => entry.textContent === 'link:add' && !entry.closest('.cms-link-row'),
 			);
 
 			expect(confirm?.disabled).toBe(true);
@@ -561,7 +561,7 @@ describe('image details', () => {
 		it('marks a required link', async () => {
 			await details({ uid: 'cover' }, { link: true, requiredItems: ['link'] });
 
-			expect(document.querySelector('.cms-image-link .requirement')?.textContent).toBe(
+			expect(document.querySelector('.cms-link-row .requirement')?.textContent).toBe(
 				'(field:required)',
 			);
 		});

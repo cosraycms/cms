@@ -22,7 +22,7 @@ $tag = (string) ($props['tag'] ?? '');
 $module = (string) ($props['module'] ?? '');
 
 // Only the assets this entry references; previews resolve uids from it.
-$uids = new \Cosray\References\Scanner()->field($data)['assets'];
+$uids = new \Cosray\References\Scanner()->field(['type' => $field['type'] ?? null, ...$data])['assets'];
 
 $payload = [
 	'value' => $data['value'] ?? null,

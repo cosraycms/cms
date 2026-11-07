@@ -38,8 +38,8 @@ export interface Meta {
 /** What a field can require of each of its media items. */
 export type RequiredItem = 'alt' | 'caption' | 'attribution' | 'link';
 
-/** Where an image links to: exactly one of `href`, `node` and `asset`. */
-export interface ImageLink {
+/** A stored link, on an image or in a Link field: exactly one of `href`, `node` and `asset`. */
+export interface StoredLink {
 	href?: string;
 	node?: string;
 	asset?: string;
@@ -53,7 +53,7 @@ export interface ItemMeta {
 	title?: LocaleMap<string>;
 	caption?: LocaleMap<RichtextDoc | string | null>;
 	attribution?: string;
-	link?: ImageLink;
+	link?: StoredLink;
 	focal?: { x: number; y: number };
 	crop?: { x: number; y: number; w: number; h: number };
 	[key: string]: unknown;

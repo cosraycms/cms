@@ -1,22 +1,22 @@
-// An image's link for this use: where it points, and the link dialog to change
-// it. The target is one of the richtext link's: an address, a page or a file.
+// A stored link: where it points, and the link dialog to change it. The
+// target is one of the richtext link's: an address, a page or a file.
 
-/** @import { AssetInfo, ImageLink } from '../../types/data' */
+/** @import { AssetInfo, StoredLink } from '../../types/data' */
 /** @import { LibraryItem } from '../../lib/library-browser.js' */
 
 import { __ } from '../../lib/locale.js';
+import { button, create } from '../media/views.js';
 import { nodeTitle, openLinkDialog } from '../richtext/dialogs.js';
-import { button, create } from './views.js';
 
 /**
  * Where a link points, in words; a page's title arrives later.
  *
- * @param {ImageLink} link
+ * @param {StoredLink} link
  * @param {(uid: string) => AssetInfo | undefined} asset
  * @returns {HTMLElement}
  */
 export function linkText(link, asset) {
-	const text = create('span', 'cms-image-link-text');
+	const text = create('span', 'cms-link-text');
 
 	/** @param {string} value */
 	const show = (value) => {
@@ -41,33 +41,50 @@ export function linkText(link, asset) {
 /**
  * @param {object} options
  * @param {HTMLElement} options.owner
- * @param {ImageLink | undefined} options.link
+ * @param {StoredLink | undefined} options.link
  * @param {(uid: string) => AssetInfo | undefined} options.asset
  * @param {(item: LibraryItem) => void} options.picked Makes an asset from the library known to `asset`.
- * @param {boolean} options.required
  * @param {boolean} options.readonly
- * @param {(link: ImageLink | undefined) => void} options.change
+ * @param {(link: StoredLink | undefined) => void} options.change
+ * @param {string} [options.caption] A heading of its own, where the row is not a field's whole control.
+ * @param {boolean} [options.required] Marks the caption as required rather than optional.
+ * @param {string} [options.warning] Shown while `describe(false)` says the link lacks a description.
  * @returns {{ element: HTMLElement, describe: (described: boolean) => void }}
  */
-export function linkRow({ owner, link, asset, picked, required, readonly, change }) {
-	const element = create('div', 'cms-media-meta cms-image-link');
+export function linkRow({
+	owner,
+	link,
+	asset,
+	picked,
+	readonly,
+	change,
+	caption,
+	required,
+	warning,
+}) {
+	const element = create('div', 'cms-link-row');
 	const entry = create('div', 'entry');
-	const caption = create('span', 'caption', `${__('image:link')} `);
-	caption.append(
-		required
-			? create('span', 'requirement', `(${__('field:required')})`)
-			: create('span', 'remark', __('field:optional')),
-	);
 	const target = create('div', 'target');
-	const warning = create('p', 'warning', __('image:link-no-alt'));
-	entry.append(caption, target);
+	const notice = create('p', 'warning', warning ?? '');
+
+	if (caption !== undefined) {
+		const heading = create('span', 'caption', `${caption} `);
+		heading.append(
+			required
+				? create('span', 'requirement', `(${__('field:required')})`)
+				: create('span', 'remark', __('field:optional')),
+		);
+		entry.append(heading);
+	}
+
+	entry.append(target);
 	element.append(entry);
 	let current = link;
 	let described = true;
 
 	const warn = () => {
-		if (current && !described) entry.append(warning);
-		else warning.remove();
+		if (warning && current && !described) entry.append(notice);
+		else notice.remove();
 	};
 
 	const open = () =>
@@ -85,7 +102,7 @@ export function linkRow({ owner, link, asset, picked, required, readonly, change
 			},
 		});
 
-	/** @param {ImageLink | undefined} next */
+	/** @param {StoredLink | undefined} next */
 	const set = (next) => {
 		current = next;
 		change(next);
@@ -115,7 +132,7 @@ export function linkRow({ owner, link, asset, picked, required, readonly, change
 	}
 
 	show();
-	element.hidden = readonly && !current;
+	element.hidden = readonly && !current && caption !== undefined;
 
 	return {
 		element,

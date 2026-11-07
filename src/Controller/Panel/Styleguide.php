@@ -8,8 +8,10 @@ use Cosray\Block as Builtin;
 use Cosray\Field\Blocks;
 use Cosray\Field\Control;
 use Cosray\Field\Control\Registry as Controls;
+use Cosray\Field\File;
 use Cosray\Field\Iframe;
 use Cosray\Field\Image;
+use Cosray\Field\Link;
 use Cosray\Field\Option;
 use Cosray\Field\RichText;
 use Cosray\Field\Text;
@@ -59,6 +61,8 @@ final class Styleguide extends Panel
 			'richtextContent' => $this->richtextContent(),
 			'codeFields' => $this->codeFields($controls),
 			'codeContent' => $this->codeContent(),
+			'linkFields' => $this->linkFields($controls),
+			'linkContent' => $this->linkContent(),
 			'mediaFields' => $this->mediaFields($controls),
 			'mediaContent' => $this->mediaContent(),
 			'mediaAssets' => $this->mediaAssets(),
@@ -391,6 +395,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'cover',
 				'label' => 'Cover image',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $single,
 				'translate' => true,
@@ -403,6 +408,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'coverPlain',
 				'label' => 'Cover image — alt text only',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $single,
 				'cropping' => true,
@@ -411,6 +417,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'coverEmpty',
 				'label' => 'Cover image — empty, required',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $single,
 				'required' => true,
@@ -418,6 +425,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'gallery',
 				'label' => 'Gallery',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $many,
 				'caption' => true,
@@ -428,6 +436,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'galleryEmpty',
 				'label' => 'Gallery — empty',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $many,
 			],
@@ -436,6 +445,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'coverReadonly',
 				'label' => 'Cover image — read-only',
+				'type' => Image::class,
 				'control' => $control,
 				'limit' => $single,
 				'caption' => true,
@@ -444,6 +454,7 @@ final class Styleguide extends Panel
 			[
 				'name' => 'downloads',
 				'label' => 'Downloads',
+				'type' => File::class,
 				'control' => $file,
 				'limit' => ['min' => 0, 'max' => 5],
 				'description' => 'Rows reorder by drag; the pencil edits the title.',
@@ -451,18 +462,21 @@ final class Styleguide extends Panel
 			[
 				'name' => 'brochure',
 				'label' => 'Brochure',
+				'type' => File::class,
 				'control' => $file,
 				'limit' => $single,
 			],
 			[
 				'name' => 'brochureEmpty',
 				'label' => 'Brochure — empty',
+				'type' => File::class,
 				'control' => $file,
 				'limit' => $single,
 			],
 			[
 				'name' => 'downloadsReadonly',
 				'label' => 'Downloads — read-only',
+				'type' => File::class,
 				'control' => $file,
 				'limit' => $many,
 				'immutable' => true,
@@ -470,12 +484,14 @@ final class Styleguide extends Panel
 			[
 				'name' => 'clip',
 				'label' => 'Clip',
+				'type' => Video::class,
 				'control' => $video,
 				'limit' => $single,
 			],
 			[
 				'name' => 'clipEmpty',
 				'label' => 'Clip — empty',
+				'type' => Video::class,
 				'control' => $video,
 				'limit' => $single,
 			],
@@ -1227,6 +1243,50 @@ final class Styleguide extends Panel
 			'codeEmbed' => ['value' => ['zxx' => $embed], 'meta' => ['syntax' => ['zxx' => 'html']]],
 			'codeConfig' => ['value' => ['en' => $config, 'de' => ''], 'meta' => ['syntax' => ['zxx' => 'yaml']]],
 			'codeReadonly' => ['value' => ['zxx' => $json], 'meta' => ['syntax' => ['zxx' => 'json']]],
+		];
+	}
+
+	/** @return list<array<string, mixed>> */
+	private function linkFields(Controls $controls): array
+	{
+		$control = Control::link()->resolve($controls)->array();
+		$type = Link::class;
+
+		return [
+			[
+				'name' => 'linkEmpty',
+				'label' => 'Link — empty',
+				'type' => $type,
+				'control' => $control,
+				'required' => true,
+			],
+			['name' => 'linkFile', 'label' => 'Link — a file', 'type' => $type, 'control' => $control],
+			[
+				'name' => 'linkTranslated',
+				'label' => 'Link — translated',
+				'type' => $type,
+				'control' => $control,
+				'translate' => true,
+				'description' => 'The German link is empty and shows the English one it falls back to.',
+			],
+			[
+				'name' => 'linkReadonly',
+				'label' => 'Link — read-only',
+				'type' => $type,
+				'control' => $control,
+				'immutable' => true,
+			],
+		];
+	}
+
+	/** @return array<string, array<string, mixed>> */
+	private function linkContent(): array
+	{
+		return [
+			'linkEmpty' => ['value' => ['zxx' => null]],
+			'linkFile' => ['value' => ['zxx' => ['asset' => 'sg-brochure', 'target' => '_blank']]],
+			'linkTranslated' => ['value' => ['en' => ['href' => 'https://example.com/en/'], 'de' => null]],
+			'linkReadonly' => ['value' => ['zxx' => ['href' => 'https://example.com/opening-hours']]],
 		];
 	}
 

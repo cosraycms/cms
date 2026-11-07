@@ -20,7 +20,7 @@ import { alert } from '../lib/modal.js';
 import { editDialog, libraryDialog } from './media/dialogs.js';
 import { galleryView } from './media/gallery-view.js';
 import { imageDialog } from './media/image-dialog.js';
-import { linkText } from './media/link-row.js';
+import { linkText } from './link/row.js';
 import { metaFields } from './media/meta-fields.js';
 import {
 	button,
