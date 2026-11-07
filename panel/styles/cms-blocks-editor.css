@@ -679,6 +679,16 @@
 		padding-inline: 0;
 	}
 
+	/* Padding is the grid's column gutter (see .cms-fields); the margin keeps
+	   the outer columns flush with the card. Must follow the rule above. */
+	& .cms-fields {
+		margin-inline: calc(-1 * var(--cms-space-2));
+
+		& > * {
+			padding-inline: var(--cms-space-2);
+		}
+	}
+
 	& .cms-youtube .player {
 		justify-self: center;
 	}
