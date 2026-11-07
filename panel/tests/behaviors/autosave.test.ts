@@ -128,6 +128,43 @@ describe('autosave', () => {
 		expect((post.mock.calls[0][1] as RequestInit).keepalive).toBe(true);
 	});
 
+	it('sends pending edits when the tab is hidden', () => {
+		start();
+		edit();
+		const visibility = vi.spyOn(document, 'visibilityState', 'get');
+
+		visibility.mockReturnValue('visible');
+		document.dispatchEvent(new Event('visibilitychange'));
+		expect(post).not.toHaveBeenCalled();
+
+		visibility.mockReturnValue('hidden');
+		document.dispatchEvent(new Event('visibilitychange'));
+		visibility.mockRestore();
+
+		expect(post).toHaveBeenCalledOnce();
+		expect((post.mock.calls[0][1] as RequestInit).keepalive).toBe(true);
+	});
+
+	it('sends edits too large to outlive the page as an ordinary request', () => {
+		start();
+		edit('x'.repeat(70000));
+		window.dispatchEvent(new Event('pagehide'));
+
+		expect(post).toHaveBeenCalledOnce();
+		expect((post.mock.calls[0][1] as RequestInit).keepalive).toBe(false);
+	});
+
+	it('tries again when sending as the page goes fails', async () => {
+		post.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+		start();
+		edit();
+		window.dispatchEvent(new Event('pagehide'));
+		await vi.advanceTimersByTimeAsync(15000);
+
+		expect(post).toHaveBeenCalledTimes(2);
+		expect(unloadPrevented()).toBe(false);
+	});
+
 	it('keeps nothing for an editor without autosave state', async () => {
 		editor();
 		document.getElementById('editor-autosave')!.remove();

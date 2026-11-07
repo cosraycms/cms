@@ -14,6 +14,8 @@ const FORM = '#node-editor-form';
 const STATE = 'editor-autosave';
 const PAUSE = 2000;
 const LONGEST = 15000;
+// Browsers refuse a keepalive request whose body exceeds 64 KiB.
+const KEEPALIVE_BYTES = 60000;
 
 // Counters of the form they belong to, so a swapped-in editor starts over.
 /** @type {HTMLFormElement | null} */
@@ -108,17 +110,18 @@ async function send(keepalive = false) {
 		const entries = /** @type {[string, string][]} */ (
 			[...new FormData(target)].filter(([, value]) => typeof value === 'string')
 		);
+		const body = JSON.stringify({ ...nest(entries), _base: element.dataset.base ?? '' });
 		const response = await fetch(element.dataset.url ?? '', {
 			method: 'POST',
 			credentials: 'same-origin',
-			keepalive,
+			keepalive: keepalive && new TextEncoder().encode(body).length <= KEEPALIVE_BYTES,
 			headers: {
 				'Content-Type': 'application/json',
 				Accept: 'application/json',
 				'X-Requested-With': 'xmlhttprequest',
 				[HEADER]: csrfToken(),
 			},
-			body: JSON.stringify({ ...nest(entries), _base: element.dataset.base ?? '' }),
+			body,
 		});
 		noticeRefusal(response);
 
@@ -131,7 +134,7 @@ async function send(keepalive = false) {
 		sending = false;
 	}
 
-	if (!keepalive && form === target && edits !== kept) {
+	if (form === target && edits !== kept) {
 		longest ??= setTimeout(() => void send(), LONGEST);
 	}
 }
@@ -159,7 +162,16 @@ function leave(event) {
 	}
 }
 
-function pagehide() {
+/**
+ * A hidden tab may be discarded without a pagehide, as on mobile.
+ *
+ * @param {Event} event
+ */
+function hide(event) {
+	if (event.type === 'visibilitychange' && document.visibilityState !== 'hidden') {
+		return;
+	}
+
 	if (form && edits !== kept) {
 		void send(true);
 	}
@@ -224,7 +236,8 @@ export function install() {
 	document.addEventListener('submit', submit, true);
 	document.addEventListener('htmx:before:request', leave);
 	document.addEventListener('htmx:after:swap', settle);
-	window.addEventListener('pagehide', pagehide);
+	document.addEventListener('visibilitychange', hide);
+	window.addEventListener('pagehide', hide);
 	void offer();
 
 	return () => {
@@ -237,6 +250,7 @@ export function install() {
 		document.removeEventListener('submit', submit, true);
 		document.removeEventListener('htmx:before:request', leave);
 		document.removeEventListener('htmx:after:swap', settle);
-		window.removeEventListener('pagehide', pagehide);
+		document.removeEventListener('visibilitychange', hide);
+		window.removeEventListener('pagehide', hide);
 	};
 }
