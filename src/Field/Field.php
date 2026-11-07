@@ -119,6 +119,20 @@ abstract class Field implements
 		return $this->stored;
 	}
 
+	/**
+	 * The assets and nodes stored data of this type points to. They feed
+	 * the reference indexes, asset preloading and the editor's previews.
+	 *
+	 * @param array<mixed> $field The field's stored data: `type`, `value`, `meta` and so on.
+	 * @return array{assets: list<string>, nodes: list<string>}
+	 */
+	public static function references(array $field): array
+	{
+		unset($field);
+
+		return ['assets' => [], 'nodes' => []];
+	}
+
 	public function control(): Control
 	{
 		return Control::text();
@@ -285,6 +299,47 @@ abstract class Field implements
 		}
 
 		return [self::NEUTRAL_LOCALE => $value];
+	}
+
+	/**
+	 * The items of every locale's list in a stored list value, such as
+	 * the `{uid, meta?}` items of a media or Reference field.
+	 *
+	 * @param array<mixed> $field
+	 * @return list<array<mixed>>
+	 */
+	protected static function storedItems(array $field): array
+	{
+		$items = [];
+
+		foreach (is_array($field['value'] ?? null) ? $field['value'] : [] as $list) {
+			foreach (is_array($list) ? $list : [] as $item) {
+				if (is_array($item)) {
+					$items[] = $item;
+				}
+			}
+		}
+
+		return $items;
+	}
+
+	/**
+	 * The non-empty `uid` strings of stored items.
+	 *
+	 * @param list<array<mixed>> $items
+	 * @return list<string>
+	 */
+	protected static function itemUids(array $items): array
+	{
+		$uids = [];
+
+		foreach ($items as $item) {
+			if (is_string($item['uid'] ?? null) && $item['uid'] !== '') {
+				$uids[] = $item['uid'];
+			}
+		}
+
+		return $uids;
 	}
 
 	/** @return array<mixed> */

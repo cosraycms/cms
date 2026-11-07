@@ -5,24 +5,27 @@ declare(strict_types=1);
 namespace Cosray\References;
 
 use Cosray\Field;
-use Cosray\Richtext;
 
 /**
- * Collects every asset and node uid referenced by stored node content:
- * media field items (`{uid}`) with an image's link, Reference field targets,
- * and the richtext carriers (`image.uid`, `link.asset`, `link.node`). The rows of Blocks
- * and Entries fields are recursed into. Feeds the reference indexes.
+ * Collects every asset and node uid referenced by stored content. Each
+ * field type names its own through `Field::references()`; the rows of
+ * Blocks and Entries fields are recursed into.
  */
 final class Scanner
 {
+	private static ?Field\Index $defaults = null;
+
 	private readonly Field\Index $index;
 
 	public function __construct(?Field\Index $index = null)
 	{
-		$this->index = $index ?? Field\Index::withDefaults();
+		$this->index = $index ?? (self::$defaults ??= Field\Index::withDefaults());
 	}
 
-	/** @return array{assets: list<string>, nodes: list<string>} */
+	/**
+	 * @param mixed $content A map of field names to stored field data.
+	 * @return array{assets: list<string>, nodes: list<string>}
+	 */
 	public function scan(mixed $content): array
 	{
 		$assets = [];
@@ -30,12 +33,19 @@ final class Scanner
 
 		if (is_array($content)) {
 			$this->fields($content, $assets, $nodes);
-			$richtext = Richtext\Scanner::scanContent($content);
-			$assets = [...$assets, ...$richtext['assets']];
-			$nodes = [...$nodes, ...$richtext['nodes']];
 		}
 
 		return ['assets' => $this->unique($assets), 'nodes' => $this->unique($nodes)];
+	}
+
+	/**
+	 * The references of one field's stored data.
+	 *
+	 * @return array{assets: list<string>, nodes: list<string>}
+	 */
+	public function field(mixed $field): array
+	{
+		return $this->scan([$field]);
 	}
 
 	/**
@@ -58,11 +68,13 @@ final class Scanner
 
 			if (is_a($type, Field\Blocks::class, true) || is_a($type, Field\Entries::class, true)) {
 				$this->rows($field['value'] ?? null, $assets, $nodes);
-			} elseif (is_a($type, Field\Reference::class, true)) {
-				$this->collect($field['value'] ?? null, $nodes);
-			} elseif (is_a($type, Field\File::class, true)) {
-				$this->collect($field['value'] ?? null, $assets);
+
+				continue;
 			}
+
+			$found = $type::references($field);
+			$assets = [...$assets, ...$found['assets']];
+			$nodes = [...$nodes, ...$found['nodes']];
 		}
 	}
 
@@ -98,30 +110,6 @@ final class Scanner
 
 			if (is_array($row['blocks'] ?? null)) {
 				$this->list($row['blocks'], $assets, $nodes);
-			}
-		}
-	}
-
-	/**
-	 * Collect uids from a locale-keyed map of `{uid}` lists into $out.
-	 *
-	 * @param list<string> $out
-	 */
-	private function collect(mixed $value, array &$out): void
-	{
-		foreach (is_array($value) ? $value : [] as $items) {
-			$this->items($items, $out);
-		}
-	}
-
-	/** @param list<string> $out */
-	private function items(mixed $items, array &$out): void
-	{
-		foreach (is_array($items) ? $items : [] as $item) {
-			$uid = is_array($item) ? $item['uid'] ?? null : null;
-
-			if (is_string($uid) && $uid !== '') {
-				$out[] = $uid;
 			}
 		}
 	}

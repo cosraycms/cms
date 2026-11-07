@@ -203,7 +203,7 @@ Two derived tables track ownership:
 - `asset_references`: owner type/UID to asset UID, with a restrictive foreign key protecting asset deletion.
 - `node_references`: owner type/UID to target node UID.
 
-[References\Scanner](../src/References/Scanner.php) walks media, reference fields, typed rows, an image's link, and richtext carriers (`image.uid`, `link.asset`, `link.node`). Live node writes, working copies, and menu writes synchronize their references. Node backlinks are informational, not a general deletion guard; parent/child deletion has separate rules.
+[References\Scanner](../src/References/Scanner.php) asks each field type for its references through `Field::references()` and recurses into the rows of Blocks and Entries fields. Media fields name their files, an image's link and a video's poster; Reference fields their nodes; richtext its carriers (`image.uid`, `link.asset`, `link.node`). The same list preloads assets and gives the editor's controls the files they show. Live node writes, working copies, and menu writes synchronize their references. Node backlinks are informational, not a general deletion guard; parent/child deletion has separate rules.
 
 Use the app's `php run db:references` after direct imports or migrations that bypass normal writers. It rebuilds the derived indexes, not the content. Inspect [References/](../src/References/) for the owner types covered by the current rebuild before adding another content owner.
 

@@ -19,6 +19,24 @@ class Image extends File implements Capability\Captionable, Capability\Attributa
 	use Capability\IsAttributable;
 	use Capability\IsLinkable;
 
+	#[Override]
+	public static function references(array $field): array
+	{
+		$references = parent::references($field);
+
+		foreach (self::storedItems($field) as $item) {
+			$link = $item['meta']['link'] ?? null;
+
+			if (is_array($link)) {
+				$linked = LinkTarget::references($link);
+				$references['assets'] = [...$references['assets'], ...$linked['assets']];
+				$references['nodes'] = [...$references['nodes'], ...$linked['nodes']];
+			}
+		}
+
+		return $references;
+	}
+
 	/** The tile aspect ratios a gallery may choose; `auto` keeps each image's own. */
 	public const array RATIOS = ['auto', '1/1', '4/3', '3/2', '16/9', '3/4', '2/3'];
 

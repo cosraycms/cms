@@ -33,6 +33,12 @@ class File extends Field implements Capability\Limitable, Capability\Translatabl
 		return Control::file();
 	}
 
+	#[Override]
+	public static function references(array $field): array
+	{
+		return ['assets' => self::itemUids(self::storedItems($field)), 'nodes' => []];
+	}
+
 	/** @return list<TranslateMode> */
 	protected function supportedTranslateModes(): array
 	{

@@ -59,6 +59,23 @@ final class LinkTarget
 		return $rel === null || is_string($rel) && array_diff(self::tokens($rel), self::RELS) === [];
 	}
 
+	/**
+	 * The asset or node a stored link points to.
+	 *
+	 * @param array<mixed> $attrs
+	 * @return array{assets: list<string>, nodes: list<string>}
+	 */
+	public static function references(array $attrs): array
+	{
+		$asset = $attrs['asset'] ?? null;
+		$node = $attrs['node'] ?? null;
+
+		return [
+			'assets' => is_string($asset) && $asset !== '' ? [$asset] : [],
+			'nodes' => is_string($node) && $node !== '' ? [$node] : [],
+		];
+	}
+
 	/** The validation shape of one stored link. */
 	public static function shape(): Shape
 	{

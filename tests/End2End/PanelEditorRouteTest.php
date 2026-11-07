@@ -444,6 +444,49 @@ final class PanelEditorRouteTest extends End2EndTestCase
 		$this->assertEditorAssetStateIsRendered($html);
 	}
 
+	public function testAnElementControlGetsTheFilesItsContentLinksTo(): void
+	{
+		$this->authenticateAs('editor');
+		$mediaType = $this->db()->execute(
+			"SELECT type FROM cms.types WHERE handle = 'test-media-document'",
+		)->first();
+		$mediaTypeId = $mediaType
+			? (int) $mediaType['type']
+			: $this->createTestType('test-media-document');
+
+		foreach (['imgpayload01', 'docpayload01'] as $uid) {
+			$this->db()->execute(
+				"INSERT INTO cms.assets (uid, disk, key, filename, creator)
+				VALUES (:uid, 'local', :key, :filename, 1)",
+				['uid' => $uid, 'key' => "ab/{$uid}/{$uid}.pdf", 'filename' => "{$uid}.pdf"],
+			)->run();
+		}
+
+		$this->createTestNode([
+			'uid' => 'panel-editor-linked',
+			'type' => $mediaTypeId,
+			'published' => true,
+			'content' => json_encode([
+				'gallery' => [
+					'type' => Image::class,
+					'value' => ['en' => [['uid' => 'imgpayload01', 'meta' => ['link' => ['asset' => 'docpayload01']]]]],
+				],
+			]),
+		]);
+
+		$response = $this->makeRequest('GET', '/panel/node/panel-editor-linked');
+
+		$this->assertResponseOk($response);
+		$matched = preg_match(
+			'#<cosray-host\s+name="content\[gallery\]\[json\]".*?<script type="application/json">(.*?)</script>#s',
+			$this->getHtmlResponse($response),
+			$match,
+		);
+		$this->assertSame(1, $matched);
+		$payload = json_decode($match[1], true, flags: JSON_THROW_ON_ERROR);
+		$this->assertSame('docpayload01.pdf', $payload['assets']['docpayload01']['filename'] ?? null);
+	}
+
 	public function testElementControlsRenderThroughTheFormHost(): void
 	{
 		$this->authenticateAs('editor');

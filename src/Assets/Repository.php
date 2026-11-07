@@ -22,41 +22,6 @@ class Repository
 		protected readonly Config $config,
 	) {}
 
-	/**
-	 * Collect asset uids referenced by media items in a content array.
-	 * Media items are exactly `{uid}` or `{uid, meta}`; arrays with more
-	 * keys (blocks, entries) are descended into instead.
-	 *
-	 * @param array<mixed> $content
-	 * @return list<string>
-	 */
-	public static function collectUids(array $content): array
-	{
-		$uids = [];
-		$walk = static function (array $data) use (&$walk, &$uids): void {
-			if (
-				is_string($data['uid'] ?? null)
-				&& $data['uid'] !== ''
-				&& array_diff(array_keys($data), ['uid', 'meta']) === []
-			) {
-				$uids[$data['uid']] = true;
-
-				return;
-			}
-
-			foreach ($data as $value) {
-				if (!is_array($value)) {
-					continue;
-				}
-
-				$walk($value);
-			}
-		};
-		$walk($content);
-
-		return array_keys($uids);
-	}
-
 	/** @param list<string> $uids */
 	public function preload(array $uids): void
 	{

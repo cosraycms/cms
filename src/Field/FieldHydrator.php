@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cosray\Field;
 
-use Cosray\Assets\Repository;
 use Cosray\Contract\Init;
 use Cosray\Exception\NoSuchField;
 use Cosray\Exception\RuntimeException;
+use Cosray\References\Scanner;
 use Cosray\Schema\When;
 use Cosray\Value\ValueContext;
 use ReflectionProperty;
@@ -52,7 +52,7 @@ class FieldHydrator
 		Owner $owner,
 		?callable $createEmbedded = null,
 	): Hydration {
-		$uids = Repository::collectUids($content);
+		$uids = new Scanner()->scan($content)['assets'];
 
 		if ($uids !== []) {
 			$owner->assets()->preload($uids);

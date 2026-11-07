@@ -9,7 +9,7 @@ use Cosray\Exception\RuntimeException;
 use Cosray\Field\Definitions;
 use Cosray\Field\Fieldsets;
 use Cosray\Locales;
-use Cosray\Richtext\Scanner;
+use Cosray\References\Scanner;
 use Cosray\Uid;
 use ReflectionMethod;
 
@@ -199,7 +199,7 @@ class Serializer
 
 		$map = [];
 
-		foreach (Scanner::scanContent($content)['nodes'] as $uid) {
+		foreach (new Scanner()->scan($content)['nodes'] as $uid) {
 			$paths = $this->paths->map($uid);
 
 			if ($paths !== []) {
@@ -223,10 +223,7 @@ class Serializer
 			return [];
 		}
 
-		$uids = array_values(array_unique(array_merge(
-			Repository::collectUids($content),
-			Scanner::scanContent($content)['assets'],
-		)));
+		$uids = new Scanner()->scan($content)['assets'];
 		$this->assets->preload($uids);
 		$map = [];
 

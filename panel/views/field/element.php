@@ -22,7 +22,7 @@ $tag = (string) ($props['tag'] ?? '');
 $module = (string) ($props['module'] ?? '');
 
 // Only the assets this entry references; previews resolve uids from it.
-$uids = \Cosray\Assets\Repository::collectUids($data);
+$uids = new \Cosray\References\Scanner()->field($data)['assets'];
 
 $payload = [
 	'value' => $data['value'] ?? null,

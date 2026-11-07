@@ -27,6 +27,12 @@ class Reference extends Field implements Capability\Limitable
 	}
 
 	#[Override]
+	public static function references(array $field): array
+	{
+		return ['assets' => [], 'nodes' => self::itemUids(self::storedItems($field))];
+	}
+
+	#[Override]
 	public function value(): Value\Reference
 	{
 		return new Value\Reference($this->owner, $this, $this->valueContext);

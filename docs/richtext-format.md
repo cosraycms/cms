@@ -72,7 +72,7 @@ Node and asset references resolve at render time, so their URLs can change witho
 
 An `href` is relative or uses `http`, `https`, `mailto` or `tel`; the validator refuses any other scheme, and the renderer prints such a stored link as plain text.
 
-The reference scanner reads `image.uid`, `link.node`, and `link.asset`, and the same target on an [image's link](media.md). Adding another reference carrier requires updating scanning and serialization as well as editing/rendering.
+The [reference scanner](media.md#reference-indexes) reads `image.uid`, `link.node`, and `link.asset` through the richtext field's `references()`. Adding another reference carrier to the document means extending [Richtext\Scanner](../src/Richtext/Scanner.php) as well as editing and rendering.
 
 ### Text styles
 

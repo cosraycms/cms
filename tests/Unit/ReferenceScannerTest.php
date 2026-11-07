@@ -12,6 +12,7 @@ use Cosray\Field\Reference;
 use Cosray\Field\RichText;
 use Cosray\References\Scanner;
 use Cosray\Tests\Fixtures\Block\TextBlock;
+use Cosray\Tests\Fixtures\Field\TestPlace;
 use Cosray\Tests\TestCase;
 
 /**
@@ -23,7 +24,7 @@ final class ReferenceScannerTest extends TestCase
 {
 	public function testAVideosPosterIsAReference(): void
 	{
-		$found = \Cosray\Richtext\Scanner::scanContent([
+		$found = new Scanner()->scan([
 			'clip' => [
 				'type' => 'video',
 				'value' => ['zxx' => [['uid' => 'videoasset001', 'meta' => ['poster' => 'posterimage01']]]],
@@ -31,6 +32,25 @@ final class ReferenceScannerTest extends TestCase
 		]);
 
 		$this->assertContains('posterimage01', $found['assets']);
+	}
+
+	public function testAFieldTypeDeclaresItsOwnReferences(): void
+	{
+		$refs = new Scanner()->scan([
+			'place' => ['type' => TestPlace::class, 'value' => ['zxx' => 'node-place']],
+			'blocks' => [
+				'type' => Blocks::class,
+				'value' => [
+					'zxx' => [
+						$this->block(TextBlock::class, [
+							'text' => ['type' => TestPlace::class, 'value' => ['zxx' => 'node-in-block']],
+						]),
+					],
+				],
+			],
+		]);
+
+		$this->assertSame(['node-in-block', 'node-place'], $refs['nodes']);
 	}
 
 	public function testCollectsAnImagesLink(): void

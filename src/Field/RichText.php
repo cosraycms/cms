@@ -6,6 +6,7 @@ namespace Cosray\Field;
 
 use Celema\Sire\Shape;
 use Cosray\Richtext\Envelope;
+use Cosray\Richtext\Scanner;
 use Cosray\Validation\RichtextDoc;
 use Cosray\Validation\Shapes;
 use Cosray\Value\RichText as RichTextValue;
@@ -19,6 +20,20 @@ class RichText extends Text implements Capability\ToolsAware
 	public function control(): Control
 	{
 		return Control::richtext();
+	}
+
+	#[Override]
+	public static function references(array $field): array
+	{
+		$references = ['assets' => [], 'nodes' => []];
+
+		foreach (is_array($field['value'] ?? null) ? $field['value'] : [] as $doc) {
+			$found = Scanner::scan($doc);
+			$references['assets'] = [...$references['assets'], ...$found['assets']];
+			$references['nodes'] = [...$references['nodes'], ...$found['nodes']];
+		}
+
+		return $references;
 	}
 
 	#[Override]

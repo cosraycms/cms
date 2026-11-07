@@ -14,6 +14,22 @@ class Video extends File implements Capability\Captionable
 	use Capability\IsCaptionable;
 
 	#[Override]
+	public static function references(array $field): array
+	{
+		$references = parent::references($field);
+
+		foreach (self::storedItems($field) as $item) {
+			$poster = $item['meta']['poster'] ?? null;
+
+			if (is_string($poster) && $poster !== '') {
+				$references['assets'][] = $poster;
+			}
+		}
+
+		return $references;
+	}
+
+	#[Override]
 	public function control(): Control
 	{
 		return Control::video();

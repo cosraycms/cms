@@ -9,7 +9,6 @@ use Cosray\Field\Services;
 use Cosray\Migration\NodeContentNormalizer;
 use Cosray\Richtext\Envelope;
 use Cosray\Richtext\Normalizer;
-use Cosray\Richtext\Scanner;
 use Cosray\Tests\RichtextOwnerTestCase;
 use Cosray\Uid;
 use Cosray\Value\ValueContext;
@@ -189,68 +188,6 @@ final class RichtextFieldTest extends RichtextOwnerTestCase
 		$this->assertSame(
 			self::doc('Block'),
 			$result['grid']['value']['zxx'][0]['value']['en'],
-		);
-	}
-
-	public function testScanContentCollectsFieldAndBlockReferences(): void
-	{
-		$doc = [
-			'type' => 'doc',
-			'content' => [
-				[
-					'type' => 'paragraph',
-					'content' => [
-						['type' => 'image', 'attrs' => ['uid' => 'img1']],
-						[
-							'type' => 'text',
-							'text' => 'x',
-							'marks' => [['type' => 'link', 'attrs' => ['node' => 'n1']]],
-						],
-					],
-				],
-			],
-		];
-		$content = [
-			'body' => [
-				'type' => RichText::class,
-				'format' => Envelope::FORMAT,
-				'version' => 1,
-				'value' => ['en' => $doc],
-			],
-			'grid' => [
-				'type' => 'Cosray\Field\Blocks',
-				'value' => [
-					'zxx' => [
-						[
-							'type' => 'richtext',
-							'format' => Envelope::FORMAT,
-							'version' => 1,
-							'value' => [
-								'en' => [
-									'type' => 'doc',
-									'content' => [
-										[
-											'type' => 'paragraph',
-											'content' => [
-												[
-													'type' => 'text',
-													'text' => 'y',
-													'marks' => [['type' => 'link', 'attrs' => ['asset' => 'doc1']]],
-												],
-											],
-										],
-									],
-								],
-							],
-						],
-					],
-				],
-			],
-		];
-
-		$this->assertSame(
-			['assets' => ['img1', 'doc1'], 'nodes' => ['n1']],
-			Scanner::scanContent($content),
 		);
 	}
 
