@@ -22,6 +22,7 @@ WHERE
 	AND (
 		ft.document @@ websearch_to_tsquery(:search_config::regconfig, :fulltext)
 <?php if (isset($fulltext_words)) : ?>
+<?php // LIKE patterns are escaped after the fold, which maps fullwidth ％ and ＿ to % and _. ?>
 		OR (TRUE
 <?php foreach ($fulltext_words as $i => $word) : ?>
 			AND <?= $word['negated'] ? 'NOT ' : '' ?>(
@@ -30,7 +31,7 @@ WHERE
 <?php endif ?>
 				ft.document @@ plainto_tsquery(:search_config::regconfig, :fulltext_word_<?= $i ?>)
 <?php if ($word['inside']) : ?>
-				OR /*:cms.prefix:*/fulltext_fold(ft.source) LIKE /*:cms.prefix:*/fulltext_fold(:fulltext_pattern_<?= $i ?>)
+				OR /*:cms.prefix:*/fulltext_fold(ft.source) LIKE '%' || regexp_replace(/*:cms.prefix:*/fulltext_fold(:fulltext_word_<?= $i ?>), '([\\%_])', '\\\1', 'g') || '%'
 <?php endif ?>
 			)
 <?php endforeach ?>

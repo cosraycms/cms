@@ -484,10 +484,6 @@ final class Nodes implements Iterator
 
 		foreach ($words as $i => $word) {
 			$params["fulltext_word_{$i}"] = $word['word'];
-
-			if ($word['inside']) {
-				$params["fulltext_pattern_{$i}"] = $word['pattern'];
-			}
 		}
 
 		return $params;

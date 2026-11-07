@@ -26,7 +26,7 @@ final class Partial
 	public const TITLE_SCORE = 0.45;
 
 	/**
-	 * @return ?list<array{word: string, pattern: string, negated: bool, inside: bool}>
+	 * @return ?list<array{word: string, negated: bool, inside: bool}>
 	 *         Null when partial matching does not apply to the query.
 	 */
 	public static function words(string $query): ?array
@@ -51,7 +51,6 @@ final class Partial
 
 			$words[] = [
 				'word' => $word,
-				'pattern' => '%' . addcslashes($word, '\\%_') . '%',
 				'negated' => $negated,
 				'inside' => mb_strlen($word) >= self::MIN_LENGTH,
 			];
