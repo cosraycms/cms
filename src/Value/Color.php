@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cosray\Value;
 
+use Cosray\Field\Capability\Selectable;
 use Override;
 
 class Color extends Value
@@ -35,6 +36,24 @@ class Color extends Value
 	public function isset(): bool
 	{
 		return $this->raw() !== '';
+	}
+
+	/** The colour's name in the field's palette, translated; empty for an unnamed colour. */
+	public function label(): string
+	{
+		$color = $this->raw();
+
+		if ($color === '' || !$this->field instanceof Selectable) {
+			return '';
+		}
+
+		foreach ($this->field->getOptions() as $option) {
+			if (is_array($option) && $option['value'] === $color && is_string($option['label'])) {
+				return __($option['label']);
+			}
+		}
+
+		return '';
 	}
 
 	/**

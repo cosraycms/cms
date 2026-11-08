@@ -87,7 +87,11 @@ use Cosray\Schema\Options;
 public Color $accent;
 ```
 
-Names are translated like other option labels and show as the swatch's accessible name and tooltip. Palette colors must be hex colors and are normalized like stored values. The field stores the chosen hex, not the name, and still accepts any other color, so changing the palette leaves stored content unchanged.
+Names are translated like other option labels and show as the swatch's accessible name and tooltip. Palette colors must be hex colors and are normalized like stored values. The field stores the chosen hex, not the name, and still accepts any other color, so changing the palette leaves stored content unchanged. `label()` returns the name of the stored color, or an empty string when the palette does not name it:
+
+```php
+<span class="badge" style="--accent: <?= $node->accent ?>"><?= $node->accent->label() ?></span>
+```
 
 ### Content language and fallback previews
 

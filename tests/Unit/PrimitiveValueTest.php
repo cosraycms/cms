@@ -1199,6 +1199,27 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertNull($value(null)->json());
 	}
 
+	public function testColorValueNamesPaletteColors(): void
+	{
+		$context = $this->createContext();
+		$owner = $this->createOwner($context);
+		$value = static function (mixed $stored) use ($owner): \Cosray\Value\Color {
+			$field = new \Cosray\Field\Color(
+				'color',
+				$owner,
+				new ValueContext('color', ['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => $stored]]),
+			);
+			$field->options(['#e30613' => 'Brand red', '#1d1d1b']);
+
+			return $field->value();
+		};
+
+		$this->assertSame('Brand red', $value('#E30613')->label());
+		$this->assertSame('', $value('#1d1d1b')->label());
+		$this->assertSame('', $value('#123456')->label());
+		$this->assertSame('', $value(null)->label());
+	}
+
 	public function testColorShapeNormalizesHexAndRejectsOtherValues(): void
 	{
 		$context = $this->createContext();
