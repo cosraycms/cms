@@ -452,7 +452,7 @@ class Blocks extends Field implements
 
 	/**
 	 * @param class-string<Block> $type
-	 * @return array{type: class-string, handle: string, label: string, icon: ?array<string, mixed>, labels: bool, fields: list<array<string, mixed>>, fieldsets: list<array<string, mixed>>}
+	 * @return array{type: class-string, handle: string, label: string, icon: ?array<string, mixed>, editor: ?string, labels: bool, fields: list<array<string, mixed>>, fieldsets: list<array<string, mixed>>}
 	 */
 	protected function blockTypeProperties(string $type): array
 	{
@@ -467,6 +467,7 @@ class Blocks extends Field implements
 			'handle' => $this->blockHandle($type),
 			'label' => $properties['label'],
 			'icon' => $this->nodeTypes()->get($type, 'icon'),
+			'editor' => $this->editorOf($type),
 			// A block with one field on the canvas says what that field is;
 			// the label below the block's own would only repeat it. #[Labels]
 			// keeps it. The settings dialog always shows its labels.
@@ -476,6 +477,14 @@ class Blocks extends Field implements
 			'fields' => array_map(self::inBlock(...), $properties['fields']),
 			'fieldsets' => $properties['fieldsets'],
 		];
+	}
+
+	/** @param class-string<Block> $type */
+	private function editorOf(string $type): ?string
+	{
+		$editor = $this->nodeTypes()->get($type, 'editor');
+
+		return is_string($editor) ? $editor : null;
 	}
 
 	/**

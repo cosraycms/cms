@@ -228,6 +228,8 @@ $cms->css("{$panel}/vendor/acme-shop/shop.css");
 $cms->js("{$panel}/vendor/acme-shop/shop.js");
 ```
 
+Plugin panel templates can also draw a block type on the editor canvas, see [editor views](blocks.md#editor-views).
+
 Panel controllers extend [Panel](../src/Controller/Panel/Panel.php) and return `$this->context([...])`. Their templates call `$this->layout('layer/main')` and render only their fragment, without another `id="main"`. The [layer templates](../panel/views/layer/) wrap it for the requested swap:
 
 - `main`: content inside an area.

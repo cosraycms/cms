@@ -238,6 +238,15 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($types[SpacerBlock::class]['labels']);
 	}
 
+	public function testABlockTypeNamesItsEditorView(): void
+	{
+		$blocks = $this->createBlocks()->allow(Builtin\Heading::class, TextBlock::class);
+		$editors = array_column($blocks->control()->array()['props']['blockTypes'], 'editor', 'type');
+
+		$this->assertSame('field/blocks/types/heading', $editors[Builtin\Heading::class]);
+		$this->assertNull($editors[TextBlock::class]);
+	}
+
 	public function testBlockSubFieldsCarryTheBlockPresentation(): void
 	{
 		$blocks = $this->createBlocks()->allow(QuoteBlock::class);

@@ -61,6 +61,29 @@ final class Button implements Block
 
 The dialog lists these fields above the layout and spacing settings, with their labels, required markers, and `#[Width]`. Only fields left on the canvas count towards a single-field block, so this button's label shows as bare text. A block whose fields all sit in the dialog shows its name on the canvas, which opens the dialog. A read-only block still opens it to show the values. The attribute changes neither storage nor validation, and has no effect outside a block type.
 
+### Editor views
+
+By default the canvas shows a block's fields as a form. `#[Editor]` names a panel template that draws the block instead, so the canvas can look like the published block, as the built-in Heading does. A plugin registers its templates with `Registrar::templates()` and addresses them as `{pluginId}:name`:
+
+```php
+#[Label('Button'), Editor('acme-button:editor')]
+final class Button implements Block { /* … */ }
+
+// In the plugin's register():
+$cms->templates(__DIR__ . '/panel');
+$cms->assets(__DIR__ . '/panel/assets');
+$cms->css("{$cms->config->panel->path}/vendor/acme-button/button.css");
+```
+
+```php
+<?php // panel/editor.php ?>
+<div class="acme-button">
+    <?php $this->include('field/row-fields/field', ['sub' => $subs['label'], 'labels' => false]) ?>
+</div>
+```
+
+The template gets `subs`, the block's canvas fields by name (fields with `#[Settings]` and `#[Hidden]` left out), along with `type`, `fieldsData`, `rowName`, `rowId`, and `readonly`. Each field goes through `field/row-fields/field`, so its form name, value, and errors stay standard. The template must include every field in `subs`, inside `<div hidden>` for one it does not show: a field missing from the form keeps its stored value on save, but a duplicated block would lose it. A block with an editor view shows no field labels. Panel styles cannot use the site's stylesheet; a plugin approximates the look with its own CSS. An app without a plugin has no panel template namespace yet.
+
 A field's `#[Allows(Quote::class)]` makes the type available without separate registration. `Registrar::blockType(Quote::class)` adds it to the default offer list used by fields without `#[Allows]`. Blocks and Entries cannot currently nest typed repeaters. Embedded declarations and fieldsets are supported as static field schemas.
 
 ## Built-in block types

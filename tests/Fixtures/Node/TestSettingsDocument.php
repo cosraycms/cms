@@ -12,6 +12,7 @@ use Cosray\Schema\Immutable;
 use Cosray\Schema\Label;
 use Cosray\Tests\Fixtures\Block\ActionBlock;
 use Cosray\Tests\Fixtures\Block\SpacerBlock;
+use Cosray\Tests\Fixtures\Plugin\TestCallout;
 
 #[Label('Test Settings Document')]
 class TestSettingsDocument implements Title
@@ -19,7 +20,7 @@ class TestSettingsDocument implements Title
 	#[Label('Title')]
 	public Text $title;
 
-	#[Label('Blocks'), Allows(ActionBlock::class, SpacerBlock::class)]
+	#[Label('Blocks'), Allows(ActionBlock::class, SpacerBlock::class, TestCallout::class)]
 	public Blocks $blocks;
 
 	#[Label('Fixed'), Allows(ActionBlock::class), Immutable]

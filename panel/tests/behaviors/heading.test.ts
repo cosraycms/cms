@@ -26,6 +26,7 @@ function markup(level = '3', immutable = false): string {
 							{
 								type: TYPE,
 								label: 'Heading',
+								editor: 'field/blocks/types/heading',
 								fields: [
 									{
 										name: 'text',

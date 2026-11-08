@@ -10,8 +10,9 @@ use Cosray\Field\Blocks;
 use Cosray\Tests\End2EndTestCase;
 use Cosray\Tests\Fixtures\Block\ActionBlock;
 use Cosray\Tests\Fixtures\Block\SpacerBlock;
-use Cosray\Tests\Fixtures\Collection\TestArticlesCollection;
 use Cosray\Tests\Fixtures\Node\TestSettingsDocument;
+use Cosray\Tests\Fixtures\Plugin\TestCallout;
+use Cosray\Tests\Fixtures\Plugin\TestPlugin;
 
 final class PanelBlockSettingsTest extends End2EndTestCase
 {
@@ -20,7 +21,7 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 	protected function createBootstrap(Config $config): Bootstrap
 	{
 		$bootstrap = parent::createBootstrap($config);
-		$bootstrap->section('Content')->collection(TestArticlesCollection::class);
+		$bootstrap->plugin(TestPlugin::class);
 		$bootstrap->node(TestSettingsDocument::class);
 
 		return $bootstrap;
@@ -105,6 +106,40 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 		$this->assertHtmlNodeExists(
 			$block
 				. '/dialog[@data-dialog="meta"]//select[@name="content[fixed][value][zxx][0][fields][style][value][zxx]"][@disabled]',
+			$html,
+		);
+	}
+
+	public function testAPluginDrawsItsBlockWithItsOwnTemplate(): void
+	{
+		$html = $this->editor('settings-callout', [
+			'uid' => 'callout',
+			'type' => TestCallout::class,
+			'fields' => [
+				'text' => ['value' => ['zxx' => 'Mind the gap']],
+				'tone' => ['value' => ['zxx' => 'loud']],
+			],
+		]);
+		$block = '//div[@data-repeater-row][input[@value="callout"]]';
+
+		// The view shows the text through the standard sub-field markup, so the
+		// block is bare like Heading; the tone stays in the dialog.
+		$this->assertHtmlNodeExists($block . '[contains(@class, "is-bare")]', $html);
+		$this->assertHtmlNodeExists(
+			$block
+				. '/div[@class="body"]//div[@class="test-callout"]'
+				. '//input[@name="'
+				. self::ROW
+				. '[fields][text][value][zxx]"][@value="Mind the gap"]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			$block . '/dialog[@data-dialog="meta"]//select[@name="' . self::ROW . '[fields][tone][value][zxx]"]',
+			$html,
+		);
+		// A stamped block gets the same view.
+		$this->assertHtmlNodeExists(
+			'//template[@data-repeater-template="' . TestCallout::class . '"]//div[@class="test-callout"]',
 			$html,
 		);
 	}

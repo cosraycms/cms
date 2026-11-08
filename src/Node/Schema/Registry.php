@@ -6,6 +6,7 @@ namespace Cosray\Node\Schema;
 
 use Cosray\Schema\Children;
 use Cosray\Schema\Deletable;
+use Cosray\Schema\Editor;
 use Cosray\Schema\FieldOrder;
 use Cosray\Schema\Handle;
 use Cosray\Schema\Icon;
@@ -89,6 +90,7 @@ class Registry
 		$registry->register(Deletable::class, new DeletableHandler());
 		$registry->register(Labels::class, new LabelsHandler());
 		$registry->register(Children::class, new ChildrenHandler());
+		$registry->register(Editor::class, new EditorHandler());
 
 		return $registry;
 	}

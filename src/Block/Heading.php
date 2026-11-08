@@ -7,6 +7,7 @@ namespace Cosray\Block;
 use Cosray\Contract\Block;
 use Cosray\Field;
 use Cosray\Schema\DefaultValue;
+use Cosray\Schema\Editor;
 use Cosray\Schema\Label;
 use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
@@ -16,7 +17,7 @@ use Cosray\Schema\Validate;
 use Cosray\Value\Block as BlockValue;
 use Override;
 
-#[Label('block:heading')]
+#[Label('block:heading'), Editor('field/blocks/types/heading')]
 final class Heading implements Block
 {
 	public const int DEFAULT_LEVEL = 2;

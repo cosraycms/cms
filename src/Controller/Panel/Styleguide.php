@@ -691,6 +691,7 @@ final class Styleguide extends Panel
 				'type' => Builtin\Heading::class,
 				'handle' => 'heading',
 				'label' => 'Heading',
+				'editor' => 'field/blocks/types/heading',
 				// Two visible fields, so the labels stay.
 				'labels' => true,
 				'fields' => [

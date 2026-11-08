@@ -2,15 +2,7 @@
 
 use Cosray\Panel\Icon;
 
-$type = (array) u($type);
-$subs = [];
-
-foreach ((array) ($type['fields'] ?? []) as $sub) {
-	if (is_array($sub) && is_string($sub['name'] ?? null) && !($sub['hidden'] ?? false)) {
-		$subs[$sub['name']] = $sub;
-	}
-}
-
+$subs = (array) u($subs);
 $fieldsData = (array) (u($fieldsData ?? null) ?? []);
 $level = (string) ($fieldsData['level']['value']['zxx'] ?? '1');
 $levelId = (string) u($rowId) . '-level-zxx';

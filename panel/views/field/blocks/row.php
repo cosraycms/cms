@@ -1,6 +1,5 @@
 <?php
 
-use Cosray\Block\Heading;
 use Cosray\Block\Layout;
 
 // One block, on the field's grid or as a part of a split: the same
@@ -43,12 +42,9 @@ $padding = in_array($padding, \Cosray\Field\Blocks::SPACING, true) ? (string) $p
 $style = "--colspan: {$layout->colspan}; --rowspan: {$layout->rowspan}";
 $style .= $layout->placed() ? "; --col: {$layout->col}; --row: {$layout->row}" : '';
 $labels = (bool) ($blockType['labels'] ?? true);
-// A built-in type with an editor view of its own renders as content
+// A type with an editor view of its own (#[Editor]) renders as content
 // whatever its field count; the generic form keeps its labels.
-$editor = match ($blockType['type'] ?? null) {
-	Heading::class => 'field/blocks/types/heading',
-	default => null,
-};
+$editor = is_string($blockType['editor'] ?? null) ? $blockType['editor'] : null;
 $bare = !$labels || $editor !== null;
 // Visible sub-fields marked #[Settings] are edited in the block's dialog,
 // the others on the canvas.
