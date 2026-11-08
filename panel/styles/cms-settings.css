@@ -16,6 +16,13 @@
 		font-weight: 600;
 	}
 
+	/* Sets a block's own fields off from its layout and spacing. */
+	& .rule {
+		margin-block: var(--cms-space-5);
+		border: 0;
+		border-top: 1px solid var(--cms-color-border-soft);
+	}
+
 	/* A choice left at the site's default reads as a placeholder. */
 	& .cms-select:has(option[value='']:checked) {
 		color: var(--cms-color-text-subtle);

@@ -80,6 +80,11 @@ function editor(): void {
 								<input
 									name="content[blocks][value][zxx][0][fields][video][meta][aspectRatioX][zxx]"
 									type="number" />
+								<div class="cms-field" data-field="style">
+									<div class="control">
+										<select name="content[blocks][value][zxx][0][fields][style][value][zxx]"></select>
+									</div>
+								</div>
 							</dialog>
 						</div>
 					</div>
@@ -297,6 +302,31 @@ describe('errors behavior', () => {
 		expect(field('block').getAttribute('data-invalid')).toBe('true');
 		expect(field('blocks').getAttribute('data-invalid')).toBeNull();
 		expect(field('video').getAttribute('data-invalid')).toBeNull();
+	});
+
+	it('badges the gear and opens the dialog for a block field edited in its settings', () => {
+		const dialog = field('block').querySelector('dialog')!;
+		let opened = 0;
+		const listener = (event: Event): void => {
+			if (event.target instanceof Element && event.target.closest('.gear')) {
+				opened++;
+			}
+		};
+		document.addEventListener('click', listener);
+
+		const box = respond([
+			{
+				path: ['content', 'blocks', 'value', 'zxx', 0, 'fields', 'style', 'value', 'zxx'],
+				message: 'Style is invalid',
+			},
+		]);
+
+		expect(field('block').querySelector('.gear')?.classList.contains('has-error')).toBe(true);
+		expect(dialog.querySelector('select')?.getAttribute('aria-invalid')).toBe('true');
+
+		box.querySelector('button')?.click();
+		document.removeEventListener('click', listener);
+		expect(opened).toBe(1);
 	});
 
 	it('marks sub-fields inside entries rows', () => {

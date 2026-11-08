@@ -50,6 +50,20 @@ $editor = match ($blockType['type'] ?? null) {
 	default => null,
 };
 $bare = !$labels || $editor !== null;
+// Visible sub-fields marked #[Settings] are edited in the block's dialog,
+// the others on the canvas.
+$canvas = [];
+$settingsSubs = [];
+
+foreach ((array) ($blockType['fields'] ?? []) as $sub) {
+	if (is_array($sub) && is_string($sub['name'] ?? null) && !($sub['hidden'] ?? false)) {
+		if ($sub['settings'] ?? false) {
+			$settingsSubs[$sub['name']] = $sub;
+		} else {
+			$canvas[$sub['name']] = $sub;
+		}
+	}
+}
 // Sub-fields with a meta group of their own edit it in the block's dialog.
 $subMetas = array_values(array_filter(
 	(array) ($blockType['fields'] ?? []),
@@ -70,7 +84,7 @@ $slots = array_values(array_filter(
 		&& !($sub['hidden'] ?? false)
 	),
 ));
-$settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots !== [];
+$settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots !== [] || $settingsSubs !== [];
 // Another type to change to replaces the block with a fresh one of it.
 $retype = count($blockTypes) > 1;
 ?>
@@ -110,7 +124,20 @@ $retype = count($blockTypes) > 1;
 		name="<?= $this->escape("{$rowName}[layout][row]") ?>"
 		value="<?= $layout->row ?>"
 		data-layout="row" />
-	<?php if (!$readonly): ?>
+	<?php if ($readonly && $settingsSubs !== []): ?>
+	<div class="chrome">
+		<span class="tools">
+			<button
+				type="button"
+				class="gear"
+				data-dialog-open="meta"
+				aria-label="<?= $this->escape(__('field:block-settings')) ?>"
+				title="<?= $this->escape(__('field:block-settings')) ?>">
+				<?= \Cosray\Panel\Icon::render('pencil') ?>
+			</button>
+		</span>
+	</div>
+	<?php elseif (!$readonly): ?>
 	<div class="chrome">
 		<span class="tools">
 			<?php if ($columns > 1): ?>
@@ -255,21 +282,50 @@ $retype = count($blockTypes) > 1;
 	<?php endif ?>
 	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
 		<div class="cms-fields">
-			<?php $this->include($editor ?? 'field/row-fields', [
-				'type' => $blockType,
-				'ownMeta' => false,
-				'readonly' => $readonly,
-				'labels' => $labels,
-				'fieldsData' => $fieldsData,
-				'rowName' => $rowName,
-				'rowId' => $rowId,
-			]) ?>
+			<?php if ($canvas === [] && $editor === null): ?>
+				<?php // Every field sits in the dialog: the card names the block and opens it. ?>
+				<button
+					type="button"
+					class="summary"
+					data-dialog-open="meta"
+					title="<?= $this->escape(__('field:block-settings')) ?>">
+					<?= \Cosray\Panel\Icon::render('pencil') ?>
+					<span><?= $this->escape($label) ?></span>
+				</button>
+			<?php else: ?>
+				<?php $this->include($editor ?? 'field/row-fields', [
+					'type' => $blockType,
+					'subs' => $canvas,
+					'ownMeta' => false,
+					'readonly' => $readonly,
+					'labels' => $labels,
+					'fieldsData' => $fieldsData,
+					'rowName' => $rowName,
+					'rowId' => $rowId,
+				]) ?>
+			<?php endif ?>
 		</div>
 	</div>
 	<?php if ($settings): ?>
 		<?php $this->component('component/dialog', ['name' => 'meta', 'size' => 'compact', 'title' => $label . ' — ' . __('field:block-settings')]) ?>
 			<div class="modal-body cms-settings">
-			<?php if ($columns > 1) {
+			<?php if ($settingsSubs !== []): ?>
+				<div class="cms-fields fields">
+					<?php $this->include('field/row-fields', [
+						'type' => $blockType,
+						'subs' => $settingsSubs,
+						'readonly' => $readonly,
+						'labels' => true,
+						'fieldsData' => $fieldsData,
+						'rowName' => $rowName,
+						'rowId' => $rowId,
+					]) ?>
+				</div>
+				<?php if (!$readonly && ($columns > 1 || $metaControl !== null || $subMetas !== [] || $slots !== [])): ?>
+					<hr class="rule" />
+				<?php endif ?>
+			<?php endif ?>
+			<?php if (!$readonly && $columns > 1) {
 				$this->include('field/blocks/layout', [
 					'layout' => $layout->array(),
 					'columns' => $area->colspan ?? $columns,
@@ -277,7 +333,7 @@ $retype = count($blockTypes) > 1;
 					'id' => "{$rowId}-layout",
 				]);
 			} ?>
-			<?php if ($metaControl !== null) {
+			<?php if (!$readonly && $metaControl !== null) {
 				$this->include('field/meta', [
 					'field' => $field,
 					'control' => $metaControl,
@@ -286,7 +342,7 @@ $retype = count($blockTypes) > 1;
 					'nameRoot' => $rowName,
 				]);
 			} ?>
-			<?php foreach ($subMetas as $sub): ?>
+			<?php foreach ($readonly ? [] : $subMetas as $sub): ?>
 				<?php $subName = (string) ($sub['name'] ?? ''); ?>
 				<?php if ($labels): ?>
 					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>
@@ -299,7 +355,7 @@ $retype = count($blockTypes) > 1;
 					'nameRoot' => "{$rowName}[fields][{$subName}]",
 				]) ?>
 			<?php endforeach ?>
-			<?php foreach ($slots as $sub): ?>
+			<?php foreach ($readonly ? [] : $slots as $sub): ?>
 				<?php $subName = (string) ($sub['name'] ?? ''); ?>
 				<?php if ($labels): ?>
 					<div class="cms-sub-label section"><?= $this->escape((string) ($sub['label'] ?? $subName)) ?></div>

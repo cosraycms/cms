@@ -457,9 +457,9 @@ class Blocks extends Field implements
 	protected function blockTypeProperties(string $type): array
 	{
 		$properties = $this->rowTypeProperties($type);
-		$visible = array_filter(
+		$canvas = array_filter(
 			$properties['fields'],
-			static fn(array $field): bool => !($field['hidden'] ?? false),
+			static fn(array $field): bool => !($field['hidden'] ?? false) && !($field['settings'] ?? false),
 		);
 
 		return [
@@ -467,10 +467,11 @@ class Blocks extends Field implements
 			'handle' => $this->blockHandle($type),
 			'label' => $properties['label'],
 			'icon' => $this->nodeTypes()->get($type, 'icon'),
-			// A block with one field says what that field is; the label
-			// below the block's own would only repeat it. #[Labels] keeps it.
+			// A block with one field on the canvas says what that field is;
+			// the label below the block's own would only repeat it. #[Labels]
+			// keeps it. The settings dialog always shows its labels.
 			'labels' =>
-				count($visible) !== 1
+				count($canvas) !== 1
 					|| (bool) $this->nodeTypes()->get($type, 'labels', false),
 			'fields' => array_map(self::inBlock(...), $properties['fields']),
 			'fieldsets' => $properties['fieldsets'],
@@ -478,20 +479,24 @@ class Blocks extends Field implements
 	}
 
 	/**
-	 * A block marks none of its fields as required and tells each of them
-	 * that it renders inside a block. Reaching for a block is what makes its
-	 * content mandatory, so the mark tells the editor nothing it does not
+	 * A block marks none of its canvas fields as required and tells each of
+	 * them that it renders inside a block. Reaching for a block is what makes
+	 * its content mandatory, so the mark tells the editor nothing it does not
 	 * already see; only the panel's view of the field loses it — the shape
 	 * still validates, built from the field itself. The presentation lets an
-	 * element control render as content instead of as a form control.
+	 * element control render as content instead of as a form control. A
+	 * field in the settings dialog stays a marked form control, as it is out
+	 * of sight until the dialog opens.
 	 *
 	 * @param array<string, mixed> $field
 	 * @return array<string, mixed>
 	 */
 	private static function inBlock(array $field): array
 	{
-		unset($field['required']);
-		$field['presentation'] = 'block';
+		if (!($field['settings'] ?? false)) {
+			unset($field['required']);
+			$field['presentation'] = 'block';
+		}
 
 		return $field;
 	}

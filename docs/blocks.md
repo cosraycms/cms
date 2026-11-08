@@ -40,6 +40,27 @@ Types are created once per render call per type for the request being rendered, 
 
 `#[Label]`, `#[Handle]`, `#[Icon]`, and `#[FieldOrder]` configure type metadata. `#[Labels]` restores visible field labels for a single-field block; the current editor otherwise hides that redundant label visually, retaining its accessible name. Required fields still validate even where the editor omits their required markers. These are presentation choices, not different storage rules.
 
+### Settings fields
+
+`#[Settings]` on a sub-field moves it from the canvas into the block's settings dialog, so the canvas shows the content and the dialog the details:
+
+```php
+#[Label('Button')]
+final class Button implements Block
+{
+    #[Label('Label'), Required, Translate]
+    protected Text $label;
+
+    #[Label('Target'), Required, Settings]
+    protected Link $target;
+
+    #[Label('Style'), Settings, Width(50), Options(['filled', 'outlined'])]
+    protected Option $style;
+}
+```
+
+The dialog lists these fields above the layout and spacing settings, with their labels, required markers, and `#[Width]`. Only fields left on the canvas count towards a single-field block, so this button's label shows as bare text. A block whose fields all sit in the dialog shows its name on the canvas, which opens the dialog. A read-only block still opens it to show the values. The attribute changes neither storage nor validation, and has no effect outside a block type.
+
 A field's `#[Allows(Quote::class)]` makes the type available without separate registration. `Registrar::blockType(Quote::class)` adds it to the default offer list used by fields without `#[Allows]`. Blocks and Entries cannot currently nest typed repeaters. Embedded declarations and fieldsets are supported as static field schemas.
 
 ## Built-in block types

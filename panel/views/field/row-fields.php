@@ -5,14 +5,22 @@
 // the row type's fieldsets. Shared by the entries and blocks views.
 // Receives: type (the row type descriptor), fieldsData, rowName, rowId,
 // labels (whether the sub-fields show their own), locales, defaultLocale,
-// node, assets.
+// node, assets, and optionally subs (the sub-fields to show, for a block
+// that edits some in its dialog). A fieldset shows the members it is given.
 
 $type = (array) u($type);
+$given = u($subs ?? null);
 
 $subs = array_values(array_filter(
-	(array) ($type['fields'] ?? []),
+	is_array($given) ? $given : (array) ($type['fields'] ?? []),
 	static fn(mixed $sub): bool => is_array($sub) && !($sub['hidden'] ?? false),
 ));
+
+$subsByName = [];
+
+foreach ($subs as $sub) {
+	$subsByName[(string) ($sub['name'] ?? '')] = $sub;
+}
 
 $fieldsetsByFirst = [];
 $fieldsetMembers = [];
@@ -20,7 +28,7 @@ $fieldsetMembers = [];
 foreach ((array) ($type['fieldsets'] ?? []) as $fieldset) {
 	$members = array_values(array_filter(
 		(array) ($fieldset['fields'] ?? []),
-		static fn(mixed $member): bool => is_string($member),
+		static fn(mixed $member): bool => is_string($member) && isset($subsByName[$member]),
 	));
 
 	if ($members === []) {
@@ -32,12 +40,6 @@ foreach ((array) ($type['fieldsets'] ?? []) as $fieldset) {
 	foreach ($members as $member) {
 		$fieldsetMembers[$member] = true;
 	}
-}
-
-$subsByName = [];
-
-foreach ($subs as $sub) {
-	$subsByName[(string) ($sub['name'] ?? '')] = $sub;
 }
 ?>
 <?php foreach ($subs as $sub): ?>
@@ -59,9 +61,7 @@ foreach ($subs as $sub) {
 			<?php endif ?>
 			<div class="cms-fields fields">
 				<?php foreach ($fieldsetsByFirst[$subName]['members'] as $member): ?>
-					<?php if (isset($subsByName[$member])): ?>
-						<?php $this->include('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
-					<?php endif ?>
+					<?php $this->include('field/row-fields/field', ['sub' => $subsByName[$member]]) ?>
 				<?php endforeach ?>
 			</div>
 		</fieldset>

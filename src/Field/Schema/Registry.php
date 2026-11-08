@@ -25,6 +25,7 @@ use Cosray\Schema\Options;
 use Cosray\Schema\Placeholder;
 use Cosray\Schema\Required;
 use Cosray\Schema\Rowspan;
+use Cosray\Schema\Settings;
 use Cosray\Schema\StateLabels;
 use Cosray\Schema\Syntax;
 use Cosray\Schema\Tools;
@@ -80,6 +81,7 @@ class Registry
 		$registry->register(Alt::class, new AltHandler());
 		$registry->register(Attribution::class, new AttributionHandler());
 		$registry->register(Linkable::class, new LinkableHandler());
+		$registry->register(Settings::class, new SettingsHandler());
 
 		return $registry;
 	}

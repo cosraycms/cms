@@ -24,11 +24,13 @@ use Cosray\Schema\Columns;
 use Cosray\Schema\Responsive;
 use Cosray\Schema\Tool;
 use Cosray\Schema\TranslateMode;
+use Cosray\Tests\Fixtures\Block\ActionBlock;
 use Cosray\Tests\Fixtures\Block\LabelledBlock;
 use Cosray\Tests\Fixtures\Block\NestedBlocksBlock;
 use Cosray\Tests\Fixtures\Block\NestedEntriesBlock;
 use Cosray\Tests\Fixtures\Block\NoteBlock;
 use Cosray\Tests\Fixtures\Block\QuoteBlock;
+use Cosray\Tests\Fixtures\Block\SpacerBlock;
 use Cosray\Tests\Fixtures\Block\TextBlock;
 use Cosray\Tests\Fixtures\Node\TestEntry;
 use Cosray\Tests\TestCase;
@@ -216,6 +218,24 @@ final class BlocksTest extends TestCase
 		$this->assertTrue($types[QuoteBlock::class]);
 		// One field, but the type asked for the label back.
 		$this->assertTrue($types[LabelledBlock::class]);
+	}
+
+	public function testSettingsFieldsStayFormControlsAndLeaveTheCanvasCount(): void
+	{
+		$blocks = $this->createBlocks()->allow(ActionBlock::class, SpacerBlock::class);
+		$types = array_column($blocks->control()->array()['props']['blockTypes'], null, 'type');
+		$fields = array_column($types[ActionBlock::class]['fields'], null, 'name');
+
+		// The caption is the one field on the canvas, so it drops its label.
+		$this->assertFalse($types[ActionBlock::class]['labels']);
+		$this->assertSame('block', $fields['caption']['presentation']);
+		$this->assertArrayNotHasKey('settings', $fields['caption']);
+		// Out of sight until the dialog opens, a settings field keeps its
+		// required mark and renders as a form control.
+		$this->assertTrue($fields['target']['settings']);
+		$this->assertTrue($fields['target']['required']);
+		$this->assertArrayNotHasKey('presentation', $fields['target']);
+		$this->assertTrue($types[SpacerBlock::class]['labels']);
 	}
 
 	public function testBlockSubFieldsCarryTheBlockPresentation(): void

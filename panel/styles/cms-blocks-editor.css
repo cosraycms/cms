@@ -675,6 +675,31 @@
 		padding: var(--cms-space-4);
 	}
 
+	/* A block that edits every field in its dialog: its name opens it. */
+	& .body .summary {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--cms-space-2);
+		padding: var(--cms-space-1) var(--cms-space-2);
+		border: 0;
+		border-radius: var(--cms-radius-sm);
+		background: none;
+		color: var(--cms-color-text-muted);
+		font: inherit;
+		font-size: var(--cms-font-size-sm);
+		cursor: pointer;
+
+		&:hover {
+			background: var(--cms-color-surface-sunken);
+			color: var(--cms-color-text);
+		}
+
+		&:focus-visible {
+			outline: var(--cms-focus-outline);
+			outline-offset: var(--cms-focus-offset);
+		}
+	}
+
 	& .cms-field {
 		padding-inline: 0;
 	}
