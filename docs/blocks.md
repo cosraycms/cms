@@ -82,7 +82,23 @@ $cms->css("{$cms->config->panel->path}/vendor/acme-button/button.css");
 </div>
 ```
 
-The template gets `subs`, the block's canvas fields by name (fields with `#[Settings]` and `#[Hidden]` left out), along with `type`, `fieldsData`, `rowName`, `rowId`, and `readonly`. Each field goes through `field/row-fields/field`, so its form name, value, and errors stay standard. The template must include every field in `subs`, inside `<div hidden>` for one it does not show: a field missing from the form keeps its stored value on save, but a duplicated block would lose it. A block with an editor view shows no field labels. Panel styles cannot use the site's stylesheet; a plugin approximates the look with its own CSS. An app without a plugin has no panel template namespace yet.
+The template gets `subs`, the block's canvas fields by name (fields with `#[Settings]` and `#[Hidden]` left out), along with `type`, `fieldsData`, `rowName`, `rowId`, and `readonly`. Each field goes through `field/row-fields/field`, so its form name, value, and errors stay standard. The template must include every field in `subs`, inside `<div hidden>` for one it does not show: a field missing from the form keeps its stored value on save, but a duplicated block would lose it. A block with an editor view shows no field labels. Panel styles cannot use the site's stylesheet; a plugin approximates the look with its own CSS.
+
+The view's CSS can follow the block's settings without a script. The block's body carries each untranslated Option, Color, Checkbox, Number, and Text value as `data-value-{field}` and as the custom property `--value-{field}`, with the field name in kebab case, and the panel keeps them current while the editor types or picks:
+
+```css
+.acme-button input {
+	border-radius: 999px;
+	background: var(--value-colour, navy);
+	color: white;
+}
+[data-value-style="outlined"] .acme-button input {
+	background: none;
+	color: var(--value-colour, navy);
+}
+```
+
+An empty value leaves the custom property unset, so `var()` falls back. A checkbox reads `true` or `false`. An app without a plugin has no panel template namespace yet.
 
 A field's `#[Allows(Quote::class)]` makes the type available without separate registration. `Registrar::blockType(Quote::class)` adds it to the default offer list used by fields without `#[Allows]`. Blocks and Entries cannot currently nest typed repeaters. Embedded declarations and fieldsets are supported as static field schemas.
 

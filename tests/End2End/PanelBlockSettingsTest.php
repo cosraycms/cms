@@ -137,6 +137,13 @@ final class PanelBlockSettingsTest extends End2EndTestCase
 			$block . '/dialog[@data-dialog="meta"]//select[@name="' . self::ROW . '[fields][tone][value][zxx]"]',
 			$html,
 		);
+		// The view's CSS can follow the neutral values, kept current by the panel.
+		$this->assertHtmlNodeExists(
+			$block
+				. '/div[@class="body"][@data-block-values="text tone"][@data-value-tone="loud"]'
+				. '[contains(@style, "--value-tone: loud")]',
+			$html,
+		);
 		// A stamped block gets the same view.
 		$this->assertHtmlNodeExists(
 			'//template[@data-repeater-template="' . TestCallout::class . '"]//div[@class="test-callout"]',

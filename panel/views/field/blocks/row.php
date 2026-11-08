@@ -80,6 +80,41 @@ $slots = array_values(array_filter(
 		&& !($sub['hidden'] ?? false)
 	),
 ));
+// An editor view follows the block's scalar neutral values without a script
+// of its own: the body carries each as data-value-{sub} and --value-{sub},
+// and the block-values behavior keeps them current.
+$reflected = [];
+$bodyAttributes = '';
+$bodyStyle = [];
+
+if ($editor !== null) {
+	foreach ([...$canvas, ...$settingsSubs] as $subName => $sub) {
+		$control = $sub['control']['name'] ?? null;
+
+		if (
+			!in_array($control, ['option', 'color', 'checkbox', 'number', 'text'], true)
+			|| ($sub['translate'] ?? false)
+		) {
+			continue;
+		}
+
+		$stored = $fieldsData[$subName]['value']['zxx'] ?? null;
+		$value = match (true) {
+			is_bool($stored) => $stored ? 'true' : 'false',
+			is_int($stored), is_float($stored), is_string($stored) => (string) $stored,
+			default => $control === 'checkbox' ? 'false' : '',
+		};
+		$key = strtolower((string) preg_replace('/(?<!^)[A-Z]/', '-$0', $subName));
+		$reflected[] = $subName;
+		$bodyAttributes .= ' data-value-' . $key . '="' . $this->escape($value) . '"';
+
+		// A value that could end the declaration stays out of the style.
+		if ($value !== '' && preg_match('/[;{}<>"\'\\\\]/', $value) !== 1) {
+			$bodyStyle[] = "--value-{$key}: {$value}";
+		}
+	}
+}
+
 $settings = $metaControl !== null || $columns > 1 || $subMetas !== [] || $slots !== [] || $settingsSubs !== [];
 // Another type to change to replaces the block with a fresh one of it.
 $retype = count($blockTypes) > 1;
@@ -276,7 +311,14 @@ $retype = count($blockTypes) > 1;
 		</span>
 		<span class="seam" data-places="rows" aria-hidden="true"></span>
 	<?php endif ?>
-	<div class="body" id="<?= $this->escape("{$rowId}-form") ?>">
+	<div
+		class="body"
+		id="<?= $this->escape("{$rowId}-form") ?>"
+		<?php if ($reflected !== []): ?>
+			data-block-values="<?= $this->escape(implode(' ', $reflected)) ?>"
+			<?= $bodyAttributes ?>
+			<?= $bodyStyle !== [] ? 'style="' . $this->escape(implode('; ', $bodyStyle)) . '"' : '' ?>
+		<?php endif ?>>
 		<div class="cms-fields">
 			<?php if ($canvas === [] && $editor === null): ?>
 				<?php // Every field sits in the dialog: the card names the block and opens it. ?>
