@@ -58,6 +58,20 @@ New ordinary fields default to false, nullable ones to null; `#[DefaultValue]` o
 
 A required checkbox accepts false: requiring an answer is different from requiring consent. `#[Nullable, Required]` rejects null/missing values. `Nullable` and `StateLabels` currently apply only to Checkbox fields. `#[When]` still treats false and null alike as empty. See [Checkbox](../src/Field/Checkbox.php) and its tests for defaults and validation.
 
+### Option fields
+
+`Cosray\Field\Option` stores one of the values `#[Options]` declares, shown as a select. List the values, or key labels by value; labels are translated, plain values show as they are:
+
+```php
+use Cosray\Field\Option;
+use Cosray\Schema\Options;
+
+#[Options(['small' => 'Small', 'large' => 'Large'])]
+public Option $size;
+```
+
+A list such as `['small', 'large']` uses each value as its label. Keys count as values only when the array is not a list, so keyed numeric values must not start at `0` in sequence; give those as `['value' => '0', 'label' => 'None']` entries instead.
+
 ### Color fields
 
 `Cosray\Field\Color` holds an untranslated hex color. Writes accept three or six hex digits, with or without `#`, and store them as lowercase `#rrggbb`; alpha, color names and other CSS notations fail validation. Reading returns an empty string unless the stored text is such a color, so a template can place the value in a `style` attribute or custom property:
@@ -74,7 +88,7 @@ public Color $accent;
 
 The panel shows a swatch that opens the browser's color picker beside a hex input. The input carries the value, so the field can stay empty; a native color input alone always submits a color. See [Value\Color](../src/Value/Color.php).
 
-`#[Options]` adds a palette of predefined colors beside the free input. Key the hex colors by name, or list them without names:
+`#[Options]` adds a palette of predefined colors beside the free input. As with [option fields](#option-fields), key the names by hex color or list the colors without names:
 
 ```php
 use Cosray\Field\Color;

@@ -1027,6 +1027,20 @@ final class PrimitiveValueTest extends TestCase
 		$this->assertFalse($validate('Morning'));
 	}
 
+	public function testOptionShapeAcceptsKeyedOptionValues(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Option('size', $this->createOwner($context), new ValueContext('size', []));
+		$field->options(['small' => 'Small', 'large' => 'Large']);
+		$shape = $field->shape();
+		$validate = static fn(string $value): bool => $shape
+			->validate(['type' => $field::class, 'value' => [\Cosray\Field\Field::NEUTRAL_LOCALE => $value]])
+			->valid();
+
+		$this->assertTrue($validate('small'));
+		$this->assertFalse($validate('Small'));
+	}
+
 	public function testOptionShapeChecksPlainOptionsAndRequired(): void
 	{
 		$context = $this->createContext();
@@ -1209,13 +1223,13 @@ final class PrimitiveValueTest extends TestCase
 				$owner,
 				new ValueContext('color', ['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => $stored]]),
 			);
-			$field->options(['#e30613' => 'Brand red', '#1d1d1b']);
+			$field->options(['#e30613', ['value' => '#1d1d1b', 'label' => 'Anthracite']]);
 
 			return $field->value();
 		};
 
-		$this->assertSame('Brand red', $value('#E30613')->label());
-		$this->assertSame('', $value('#1d1d1b')->label());
+		$this->assertSame('Anthracite', $value('#1D1D1B')->label());
+		$this->assertSame('', $value('#e30613')->label());
 		$this->assertSame('', $value('#123456')->label());
 		$this->assertSame('', $value(null)->label());
 	}

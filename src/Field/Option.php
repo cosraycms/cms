@@ -20,21 +20,10 @@ class Option extends Field implements Capability\Selectable
 		return Control::option();
 	}
 
-	protected bool $hasLabel = false;
-
 	#[Override]
 	public function value(): Value\Option
 	{
 		return new Value\Option($this->owner, $this, $this->valueContext);
-	}
-
-	#[Override]
-	public function properties(): array
-	{
-		$result = parent::properties();
-		$result['hasLabel'] = $this->hasLabel;
-
-		return $result;
 	}
 
 	#[Override]

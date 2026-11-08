@@ -30,12 +30,11 @@ class Color extends Field implements Capability\Selectable
 	#[Override]
 	public function options(array $options): void
 	{
+		$keyed = !array_is_list($options);
 		$this->options = [];
 
 		foreach ($options as $key => $option) {
-			$this->options[] = is_string($key) && is_string($option)
-				? ['value' => self::paletteColor($key), 'label' => $option]
-				: self::paletteOption($option);
+			$this->options[] = self::paletteOption($keyed ? ['value' => (string) $key, 'label' => $option] : $option);
 		}
 	}
 

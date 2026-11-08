@@ -409,10 +409,50 @@ final class FieldCapabilityPropertiesTest extends TestCase
 		$this->assertEquals($options, $properties['options']);
 	}
 
+	public function testOptionsMayKeyLabelsByValue(): void
+	{
+		$properties = $this->applyAndGetProperties(
+			new Options(['small' => 'Small', 'large' => 'Large']),
+			$this->createOptionField(),
+		);
+		$numeric = $this->applyAndGetProperties(new Options([1 => 'One', 2 => 'Two']), $this->createOptionField());
+
+		$this->assertSame(
+			[
+				['value' => 'small', 'label' => 'Small'],
+				['value' => 'large', 'label' => 'Large'],
+			],
+			$properties['options'],
+		);
+		$this->assertSame(
+			[
+				['value' => '1', 'label' => 'One'],
+				['value' => '2', 'label' => 'Two'],
+			],
+			$numeric['options'],
+		);
+	}
+
+	public function testKeyedOptionsNeedStringLabels(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("Option 'small' needs a string label");
+
+		$this->createOptionField()->options(['small' => ['label' => 'Small']]);
+	}
+
+	public function testOptionFieldWithoutOptionsAcceptsAnEmptyList(): void
+	{
+		$field = $this->createOptionField();
+		$field->options([]);
+
+		$this->assertSame([], $field->getOptions());
+	}
+
 	public function testColorOptionsAreNormalizedPaletteColors(): void
 	{
 		$named = $this->applyAndGetProperties(
-			new Options(['#E30613' => 'Brand red', 'fff' => 'Paper']),
+			new Options(['#E30613' => 'Brand red', 'fff' => 'Paper', '123456' => 'Digits']),
 			$this->createColorField(),
 		);
 		$listed = $this->applyAndGetProperties(
@@ -424,6 +464,7 @@ final class FieldCapabilityPropertiesTest extends TestCase
 			[
 				['value' => '#e30613', 'label' => 'Brand red'],
 				['value' => '#ffffff', 'label' => 'Paper'],
+				['value' => '#123456', 'label' => 'Digits'],
 			],
 			$named['options'],
 		);
