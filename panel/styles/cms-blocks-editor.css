@@ -678,6 +678,8 @@
 	/* A block that edits every field in its dialog: its name opens it. */
 	& .body .summary {
 		display: inline-flex;
+		grid-column: 1 / -1;
+		justify-self: start;
 		align-items: center;
 		gap: var(--cms-space-2);
 		padding: var(--cms-space-1) var(--cms-space-2);

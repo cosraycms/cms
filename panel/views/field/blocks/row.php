@@ -69,8 +69,9 @@ $subMetas = array_values(array_filter(
 		&& !($sub['hidden'] ?? false)
 	),
 ));
-// An element sub-field gets a slot in the dialog for the controls it keeps
-// out of the content; the host hands the slot to the element.
+// An element sub-field on the canvas gets a slot in the dialog for the
+// controls it keeps out of the content; the host hands the slot to the
+// element. One in the dialog already shows them all.
 $slots = array_values(array_filter(
 	(array) ($blockType['fields'] ?? []),
 	static fn(mixed $sub): bool => (
@@ -78,6 +79,7 @@ $slots = array_values(array_filter(
 		&& is_array($sub['control'] ?? null)
 		&& ($sub['control']['name'] ?? null) === 'element'
 		&& !($sub['hidden'] ?? false)
+		&& !($sub['settings'] ?? false)
 	),
 ));
 // An editor view follows the block's scalar neutral values without a script

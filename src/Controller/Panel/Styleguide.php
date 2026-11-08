@@ -855,6 +855,64 @@ final class Styleguide extends Panel
 					->array(),
 			],
 			[
+				'name' => 'settingsBlocks',
+				'label' => 'Settings fields — details in the block dialog',
+				'description' => 'The button keeps its label on the canvas and its target and style in the dialog; the spacer has nothing else to show.',
+				'control' => Control::blocks()
+					->prop('blockTypes', [
+						[
+							'type' => 'Styleguide\\Button',
+							'handle' => 'button',
+							'label' => 'Button',
+							// Mirrors Blocks::blockTypeProperties(): one field on the canvas, no label.
+							'labels' => false,
+							'fields' => [
+								[
+									'name' => 'label',
+									'label' => 'Label',
+									'type' => Text::class,
+									'control' => ['name' => 'text', 'props' => []],
+									'presentation' => 'block',
+								],
+								[
+									'name' => 'target',
+									'label' => 'Target',
+									'type' => Link::class,
+									'control' => Control::link()->resolve($controls)->array(),
+									'required' => true,
+									'settings' => true,
+								],
+								[
+									'name' => 'style',
+									'label' => 'Style',
+									'type' => Option::class,
+									'control' => ['name' => 'option', 'props' => []],
+									'options' => ['filled', 'outlined'],
+									'settings' => true,
+									'width' => 50,
+								],
+							],
+							'fieldsets' => [],
+						],
+						[
+							'type' => 'Styleguide\\Spacer',
+							'handle' => 'spacer',
+							'label' => 'Spacer',
+							'labels' => true,
+							'fields' => [[
+								'name' => 'height',
+								'label' => 'Height',
+								'type' => Option::class,
+								'control' => ['name' => 'option', 'props' => []],
+								'options' => ['s', 'm', 'l'],
+								'settings' => true,
+							]],
+							'fieldsets' => [],
+						],
+					])
+					->array(),
+			],
+			[
 				'name' => 'noBlocks',
 				'label' => 'No allowed types — insertion unavailable',
 				'control' => Control::blocks()->prop('blockTypes', [])->array(),
@@ -963,6 +1021,29 @@ final class Styleguide extends Panel
 						$images('sg-story-5', $layout(1), array_map(self::galleryUid(...), range(1, 6)), ['ratio' => [
 							'zxx' => '3/2',
 						]]),
+					],
+				],
+			],
+			'settingsBlocks' => [
+				'value' => [
+					'zxx' => [
+						[
+							'uid' => 'sg-settings-1',
+							'type' => 'Styleguide\\Button',
+							'fields' => [
+								'label' => ['type' => Text::class, 'value' => ['zxx' => 'Download the plan']],
+								'target' => [
+									'type' => Link::class,
+									'value' => ['zxx' => ['href' => 'https://example.org/plan.pdf']],
+								],
+								'style' => ['type' => Option::class, 'value' => ['zxx' => 'outlined']],
+							],
+						],
+						[
+							'uid' => 'sg-settings-2',
+							'type' => 'Styleguide\\Spacer',
+							'fields' => ['height' => ['type' => Option::class, 'value' => ['zxx' => 'm']]],
+						],
 					],
 				],
 			],

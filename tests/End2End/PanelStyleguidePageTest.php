@@ -62,10 +62,16 @@ final class PanelStyleguidePageTest extends End2EndTestCase
 				. '/label[@class="label"]',
 			$html,
 		);
-		// No block marks a field as required: reaching for the block is what
-		// makes its content mandatory. Top-level fields still do.
+		// No block marks a field on its canvas as required: reaching for the
+		// block is what makes its content mandatory. Top-level fields still do,
+		// and so does a field out of sight in the block's settings dialog.
 		$this->assertHtmlNodeMissing(
 			'//div[contains(concat(" ", normalize-space(@class), " "), " block ")][@data-repeater-row]'
+				. '/div[@class="body"]//div[contains(concat(" ", normalize-space(@class), " "), " required ")]',
+			$html,
+		);
+		$this->assertHtmlNodeExists(
+			'//div[@data-repeater-row]/dialog[@data-dialog="meta"]'
 				. '//div[contains(concat(" ", normalize-space(@class), " "), " required ")]',
 			$html,
 		);
