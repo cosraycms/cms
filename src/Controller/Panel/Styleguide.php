@@ -215,6 +215,12 @@ final class Styleguide extends Panel
 				'name' => 'accent',
 				'label' => 'Accent color',
 				'control' => ['name' => 'color', 'props' => []],
+				'options' => [
+					['value' => '#e54231', 'label' => 'Signal red'],
+					['value' => '#2f6fdb', 'label' => 'Ocean blue'],
+					['value' => '#2e9e5b', 'label' => 'Meadow green'],
+					'#1d1d1b',
+				],
 				'width' => 50,
 			],
 			[

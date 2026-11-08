@@ -117,6 +117,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Tree',
 		'collection:view' => 'Collection view',
+		'color:palette' => 'Color palette',
 		'color:pick' => 'Pick a color',
 		'common:apply' => 'Apply',
 		'common:close' => 'Close',

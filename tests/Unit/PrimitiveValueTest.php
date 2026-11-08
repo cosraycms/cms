@@ -1234,6 +1234,20 @@ final class PrimitiveValueTest extends TestCase
 		);
 	}
 
+	public function testColorPaletteLeavesFreeInputValid(): void
+	{
+		$context = $this->createContext();
+		$field = new \Cosray\Field\Color('color', $this->createOwner($context), new ValueContext('color', []));
+		$field->options(['#e30613' => 'Brand red']);
+
+		$this->assertTrue(
+			$field
+				->shape()
+				->validate(['type' => \Cosray\Field\Color::class, 'value' => ['zxx' => '#123456']])
+				->valid(),
+		);
+	}
+
 	public function testYoutubeStructureAndMetaControlCarryTheAspectRatio(): void
 	{
 		$context = $this->createContext();

@@ -11,6 +11,7 @@ use Cosray\Config;
 use Cosray\Exception\RuntimeException;
 use Cosray\Field\Blocks;
 use Cosray\Field\Code;
+use Cosray\Field\Color;
 use Cosray\Field\FieldHydrator;
 use Cosray\Field\Image;
 use Cosray\Field\Option;
@@ -162,6 +163,14 @@ final class FieldCapabilityPropertiesTest extends TestCase
 	private function createOptionField(string $name = 'option'): Option
 	{
 		$field = new Option($name, $this->createOwner(), new ValueContext($name, []));
+		$field->init(Services::withDefaults());
+
+		return $field;
+	}
+
+	private function createColorField(string $name = 'color'): Color
+	{
+		$field = new Color($name, $this->createOwner(), new ValueContext($name, []));
 		$field->init(Services::withDefaults());
 
 		return $field;
@@ -398,6 +407,49 @@ final class FieldCapabilityPropertiesTest extends TestCase
 
 		$this->assertArrayHasKey('options', $properties);
 		$this->assertEquals($options, $properties['options']);
+	}
+
+	public function testColorOptionsAreNormalizedPaletteColors(): void
+	{
+		$named = $this->applyAndGetProperties(
+			new Options(['#E30613' => 'Brand red', 'fff' => 'Paper']),
+			$this->createColorField(),
+		);
+		$listed = $this->applyAndGetProperties(
+			new Options(['#1D1D1B', ['value' => 'abc', 'label' => 'Grey']]),
+			$this->createColorField(),
+		);
+
+		$this->assertSame(
+			[
+				['value' => '#e30613', 'label' => 'Brand red'],
+				['value' => '#ffffff', 'label' => 'Paper'],
+			],
+			$named['options'],
+		);
+		$this->assertSame(['#1d1d1b', ['value' => '#aabbcc', 'label' => 'Grey']], $listed['options']);
+	}
+
+	public function testColorOptionsRejectOtherColorNotations(): void
+	{
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage("Color options must be hex colors, got string 'red'");
+
+		$this->createColorField()->options(['red']);
+	}
+
+	public function testColorOptionsCanBeAddedOneByOne(): void
+	{
+		$field = $this->createColorField();
+		$field->add('#E30613');
+		$field->add(['value' => '#000', 'label' => 'Black']);
+
+		$this->assertSame(['#e30613', ['value' => '#000000', 'label' => 'Black']], $field->getOptions());
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('A labelled color option needs a string label');
+
+		$field->add(['value' => '#fff']);
 	}
 
 	public function testTranslateCapabilityReturnsTranslateProperty(): void

@@ -120,6 +120,7 @@ return [
 		'collection:status' => 'Estado',
 		'collection:tree' => 'Árbol',
 		'collection:view' => 'Vista de la colección',
+		'color:palette' => 'Paleta de colores',
 		'color:pick' => 'Elegir un color',
 		'common:apply' => 'Aplicar',
 		'common:close' => 'Cerrar',

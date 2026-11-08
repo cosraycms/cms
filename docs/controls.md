@@ -74,6 +74,21 @@ public Color $accent;
 
 The panel shows a swatch that opens the browser's color picker beside a hex input. The input carries the value, so the field can stay empty; a native color input alone always submits a color. See [Value\Color](../src/Value/Color.php).
 
+`#[Options]` adds a palette of predefined colors beside the free input. Key the hex colors by name, or list them without names:
+
+```php
+use Cosray\Field\Color;
+use Cosray\Schema\Options;
+
+#[Options([
+	'#e30613' => 'Brand red',
+	'#1d1d1b' => 'Anthracite',
+])]
+public Color $accent;
+```
+
+Names are translated like other option labels and show as the swatch's accessible name and tooltip. Palette colors must be hex colors and are normalized like stored values. The field stores the chosen hex, not the name, and still accepts any other color, so changing the palette leaves stored content unchanged.
+
 ### Content language and fallback previews
 
 One content-language selection switches translated fields across the screen, including nested entries and blocks. It is editor state, not stored content: changing it does not mark the form dirty. The browser remembers the choice. Dialogs can mirror it by dispatching a bubbling `content-locale:select` event with `detail.locale`.

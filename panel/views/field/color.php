@@ -6,7 +6,8 @@ use function Cosray\escape;
 
 // Hex colour. The named text input carries the value, so the field can be
 // empty and a colour can be pasted; a native colour input cannot be empty.
-// The unnamed picker behind the swatch only writes into the text input.
+// The unnamed picker behind the swatch and the palette buttons only
+// write into the text input.
 // Receives: field, id, name, value.
 
 $field = (array) u($field);
@@ -14,6 +15,14 @@ $value = u($value ?? '');
 $value = is_scalar($value) ? (string) $value : '';
 $color = Color::normalize($value);
 $readonly = (bool) ($field['immutable'] ?? false);
+$palette = array_map(
+	static fn($option) => (
+		is_array($option)
+			? ['value' => (string) $option['value'], 'label' => (string) $option['label']]
+			: ['value' => (string) $option, 'label' => null]
+	),
+	(array) ($field['options'] ?? []),
+);
 ?>
 <div class="cms-color" data-color>
 	<span class="swatch" <?= $color === null ? 'data-empty' : 'style="--color: ' . $color . '"' ?>>
@@ -35,4 +44,20 @@ $readonly = (bool) ($field['immutable'] ?? false);
 		spellcheck="false"
 		<?= $field['required'] ?? false ? 'required' : '' ?>
 		<?= $readonly ? 'readonly' : '' ?> />
+	<?php if ($palette !== []): ?>
+		<div class="palette" role="group" aria-label="<?= escape(__('color:palette')) ?>">
+			<?php foreach ($palette as $option): ?>
+				<?php $title = $option['label'] === null ? $option['value'] : "{$option['label']} ({$option['value']})"; ?>
+				<button
+					type="button"
+					class="swatch"
+					style="--color: <?= escape($option['value']) ?>"
+					data-color-option="<?= escape($option['value']) ?>"
+					aria-label="<?= escape($title) ?>"
+					aria-pressed="<?= $option['value'] === $color ? 'true' : 'false' ?>"
+					title="<?= escape($title) ?>"
+					<?= $readonly ? 'disabled' : '' ?>></button>
+			<?php endforeach ?>
+		</div>
+	<?php endif ?>
 </div>

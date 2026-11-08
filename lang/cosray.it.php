@@ -123,6 +123,7 @@ return [
 		'collection:status' => 'Stato',
 		'collection:tree' => 'Albero',
 		'collection:view' => 'Vista della raccolta',
+		'color:palette' => 'Tavolozza dei colori',
 		'color:pick' => 'Scegli un colore',
 		'common:apply' => 'Applica',
 		'common:close' => 'Chiudi',

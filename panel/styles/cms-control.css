@@ -456,6 +456,7 @@
    opens it and the swatch can show "no colour", which the picker cannot. */
 .cms-color {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--cms-space-2);
 
@@ -504,6 +505,33 @@
 	& .cms-input {
 		width: 8rem;
 		font-variant-numeric: tabular-nums;
+	}
+
+	& .palette {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--cms-space-1);
+
+		& .swatch {
+			width: var(--cms-control-height-sm);
+			height: var(--cms-control-height-sm);
+			padding: 0;
+			cursor: pointer;
+
+			&[aria-pressed='true'] {
+				outline: 2px solid var(--cms-color-text);
+				outline-offset: 2px;
+			}
+
+			&:focus-visible {
+				border-color: var(--cms-color-focus);
+				box-shadow: var(--cms-focus-ring);
+			}
+
+			&:disabled {
+				cursor: default;
+			}
+		}
 	}
 }
 

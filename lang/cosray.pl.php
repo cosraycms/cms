@@ -139,6 +139,7 @@ return [
 		'collection:status' => 'Status',
 		'collection:tree' => 'Drzewo',
 		'collection:view' => 'Widok kolekcji',
+		'color:palette' => 'Paleta kolorów',
 		'color:pick' => 'Wybierz kolor',
 		'common:apply' => 'Zastosuj',
 		'common:close' => 'Zamknij',

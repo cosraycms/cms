@@ -46,6 +46,10 @@ function picker(): HTMLInputElement {
 	return document.querySelector<HTMLInputElement>('[data-color-picker]')!;
 }
 
+function palette(): HTMLButtonElement[] {
+	return [...document.querySelectorAll<HTMLButtonElement>('[data-color-option]')];
+}
+
 function swatch(): HTMLElement {
 	return picker().parentElement!;
 }
@@ -123,6 +127,51 @@ describe('color field', () => {
 
 		expect(picker().disabled).toBe(true);
 		expect(text().readOnly).toBe(true);
+	});
+
+	it('offers palette colors by name and marks the current one', () => {
+		control('#e30613', {
+			options: [{ value: '#e30613', label: 'Brand red' }, '#1d1d1b'],
+		});
+
+		const [red, dark] = palette();
+
+		expect(red.getAttribute('aria-label')).toBe('Brand red (#e30613)');
+		expect(dark.getAttribute('aria-label')).toBe('#1d1d1b');
+		expect(red.getAttribute('aria-pressed')).toBe('true');
+		expect(dark.getAttribute('aria-pressed')).toBe('false');
+		expect(red.closest('[role="group"]')?.getAttribute('aria-label')).toBe('Color palette');
+	});
+
+	it('writes a palette color into the named input', () => {
+		control('', { options: ['#e30613', '#1d1d1b'] });
+
+		palette()[1].click();
+
+		expect(text().value).toBe('#1d1d1b');
+		expect(swatch().style.getPropertyValue('--color')).toBe('#1d1d1b');
+		expect(palette().map((option) => option.getAttribute('aria-pressed'))).toEqual([
+			'false',
+			'true',
+		]);
+		expect(document.getElementById('editor-dirty')?.hidden).toBe(false);
+	});
+
+	it('keeps free input beside the palette', () => {
+		control('#e30613', { options: ['#e30613'] });
+
+		fire(text(), 'input', '#123456');
+
+		expect(palette()[0].getAttribute('aria-pressed')).toBe('false');
+	});
+
+	it('locks the palette on an immutable field', () => {
+		control('#e30613', { options: ['#1d1d1b'], immutable: true });
+
+		palette()[0].click();
+
+		expect(palette()[0].disabled).toBe(true);
+		expect(text().value).toBe('#e30613');
 	});
 
 	it('renders a stamped copy from its copied value', () => {

@@ -1,7 +1,7 @@
 // Colour fields: the hex text input alone carries the value. The native
-// picker behind the swatch writes into it; typing moves the swatch once
-// the text is a colour, and leaving the input spells it the way the
-// server stores it.
+// picker behind the swatch and the palette buttons write into it; typing
+// moves the swatch once the text is a colour, and leaving the input
+// spells it the way the server stores it.
 
 const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -43,6 +43,24 @@ function render(box) {
 		swatch.style.setProperty('--color', color);
 		picker.value = color;
 	}
+
+	box.querySelectorAll('[data-color-option]').forEach((option) => {
+		option.setAttribute('aria-pressed', String(option.getAttribute('data-color-option') === color));
+	});
+}
+
+/**
+ * Writes a colour into the named input and announces it there, which
+ * dirty tracking, conditions and error clearing watch.
+ *
+ * @param {Element} box
+ * @param {string} color
+ * @param {string[]} types
+ */
+function write(box, color, types) {
+	const value = text(box);
+	value.value = color;
+	types.forEach((type) => value.dispatchEvent(new Event(type, { bubbles: true })));
 }
 
 /**
@@ -56,11 +74,7 @@ function onInput(event) {
 	if (!box) return;
 
 	if (control.matches('[data-color-picker]')) {
-		// Re-announced on the named input, which dirty tracking, conditions
-		// and error clearing watch.
-		const value = text(box);
-		value.value = control.value;
-		value.dispatchEvent(new Event(event.type, { bubbles: true }));
+		write(box, control.value, [event.type]);
 	} else if (control.matches('[data-color-value]')) {
 		const color = normalize(control.value);
 
@@ -70,6 +84,18 @@ function onInput(event) {
 
 		render(box);
 	}
+}
+
+/**
+ * @param {Event} event
+ */
+function onClick(event) {
+	const option =
+		event.target instanceof Element ? event.target.closest('[data-color-option]') : null;
+	const box = option?.closest('[data-color]');
+	if (!option || !box || /** @type {HTMLButtonElement} */ (option).disabled) return;
+
+	write(box, option.getAttribute('data-color-option') ?? '', ['input', 'change']);
 }
 
 /**
@@ -87,11 +113,13 @@ function stamp(event) {
 export function install() {
 	document.addEventListener('input', onInput);
 	document.addEventListener('change', onInput);
+	document.addEventListener('click', onClick);
 	document.addEventListener('repeater:stamp', stamp);
 
 	return () => {
 		document.removeEventListener('input', onInput);
 		document.removeEventListener('change', onInput);
+		document.removeEventListener('click', onClick);
 		document.removeEventListener('repeater:stamp', stamp);
 	};
 }
