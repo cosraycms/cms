@@ -675,6 +675,11 @@
 		padding: var(--cms-space-4);
 	}
 
+	/* An editor view of its own inside the hundred-column field grid. */
+	& .body > .cms-fields > .view {
+		grid-column: 1 / -1;
+	}
+
 	/* A block that edits every field in its dialog: its name opens it. */
 	& .body .summary {
 		display: inline-flex;
@@ -765,8 +770,6 @@
 		}
 
 		& .heading {
-			/* A view of its own inside the hundred-column field grid. */
-			grid-column: 1 / -1;
 			display: flex;
 			gap: var(--cms-space-3);
 			align-items: center;

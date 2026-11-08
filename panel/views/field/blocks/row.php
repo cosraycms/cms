@@ -332,8 +332,22 @@ $retype = count($blockTypes) > 1;
 					<?= \Cosray\Panel\Icon::render('pencil') ?>
 					<span><?= $this->escape($label) ?></span>
 				</button>
+			<?php elseif ($editor !== null): ?>
+				<?php // Spans the field grid, so a view lays out its fields as it likes. ?>
+				<div class="view">
+					<?php $this->include($editor, [
+						'type' => $blockType,
+						'subs' => $canvas,
+						'ownMeta' => false,
+						'readonly' => $readonly,
+						'labels' => $labels,
+						'fieldsData' => $fieldsData,
+						'rowName' => $rowName,
+						'rowId' => $rowId,
+					]) ?>
+				</div>
 			<?php else: ?>
-				<?php $this->include($editor ?? 'field/row-fields', [
+				<?php $this->include('field/row-fields', [
 					'type' => $blockType,
 					'subs' => $canvas,
 					'ownMeta' => false,
