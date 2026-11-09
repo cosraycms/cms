@@ -29,7 +29,8 @@
 	}
 
 	&.is-changes,
-	&.is-hidden {
+	&.is-hidden,
+	&.is-unsaved {
 		border-color: color-mix(in oklch, var(--cms-color-warning), transparent 70%);
 		background: var(--cms-color-warning-surface);
 		color: var(--cms-color-warning-text);

@@ -7,16 +7,6 @@
 	flex: 1 1 auto;
 	min-height: 0;
 
-	& .dirty {
-		color: var(--cms-color-warning);
-		font-size: var(--cms-font-size-lg);
-		line-height: 1;
-
-		&[hidden] {
-			display: none;
-		}
-	}
-
 	& .status {
 		font-size: var(--cms-font-size-sm);
 		font-weight: 500;

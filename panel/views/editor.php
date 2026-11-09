@@ -76,11 +76,9 @@ $restored = is_array($autosave) && is_array($autosave['restored'] ?? null) ? $au
 						<?= escape(__('editor:changes')) ?>
 					</span>
 				<?php endif ?>
-				<span
-					id="editor-dirty"
-					class="dirty"
-					title="<?= escape(__('editor:unsaved-changes')) ?>"
-					hidden>●</span>
+				<span id="editor-dirty" class="cms-status is-unsaved" hidden>
+					<?= escape(__('editor:unsaved-changes')) ?>
+				</span>
 			</div>
 		</div>
 

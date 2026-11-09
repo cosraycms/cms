@@ -215,7 +215,7 @@ return [
 		'editor:tab-status' => 'Status',
 		'editor:type' => 'Typ',
 		'editor:unpublished' => 'unveröffentlicht',
-		'editor:unsaved-changes' => 'Nicht gespeicherte Änderungen',
+		'editor:unsaved-changes' => 'Ungespeicherte Änderungen',
 		'field:add' => 'Hinzufügen',
 		'field:add-block' => 'Block hinzufügen',
 		'field:add-block-here' => 'Block hier einfügen',
