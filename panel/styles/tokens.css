@@ -413,13 +413,14 @@
 
 	/*
 	 * A delete button only opens a confirmation, so it wears the secondary
-	 * face with danger text. The confirmation's own button is the solid one.
+	 * face and turns red on hover only: at rest, red marks errors. The
+	 * confirmation's own button is the solid one.
 	 */
 	--cms-button-danger-bg: var(--cms-button-secondary-bg);
-	--cms-button-danger-text: var(--cms-color-danger-text);
+	--cms-button-danger-text: var(--cms-button-secondary-text);
 	--cms-button-danger-border: var(--cms-button-secondary-border);
 	--cms-button-danger-hover-bg: var(--cms-color-danger-surface);
-	--cms-button-danger-hover-text: var(--cms-button-danger-text);
+	--cms-button-danger-hover-text: var(--cms-color-danger-text);
 	--cms-button-danger-hover-border: var(--cms-color-danger-border);
 	--cms-button-danger-ring: var(--cms-color-danger);
 	--cms-button-danger-shadow: var(--cms-shadow-raised);

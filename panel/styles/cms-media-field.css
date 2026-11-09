@@ -420,8 +420,7 @@
 	}
 
 	& .cms-button.discard {
-		--button-text: var(--cms-color-danger);
-		--button-hover-text: var(--cms-color-danger-hover);
+		--button-hover-text: var(--cms-color-danger-text);
 	}
 
 	@media (width < 40rem) {
