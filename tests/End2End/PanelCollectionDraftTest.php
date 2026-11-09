@@ -53,7 +53,7 @@ final class PanelCollectionDraftTest extends End2EndTestCase
 			$html,
 		);
 		$this->assertHtmlNodeExists(
-			'//tr[@data-uid="listing-changed"]//span[contains(@class, "cms-status") and contains(@class, "is-changes")][normalize-space(.)="Changes"]',
+			'//tr[@data-uid="listing-changed"]//span[contains(@class, "cms-status") and contains(@class, "is-changes")][normalize-space(.)="Unpublished changes"]',
 			$html,
 		);
 		$this->assertHtmlNodeMissing('//tr[@data-uid="listing-clean"]//span[contains(@class, "is-changes")]', $html);
